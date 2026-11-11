@@ -20,8 +20,8 @@ def cell(font):
     return _cell[font]
 
 # Sport and Eco Pro still use the first geometry (measured off the 6WB photos); Comfort has been fitted to the G20
-# (see shared/visible.js): bigger dials, the rev dial centred on BMW's black box so the box hides only the hub, and BMW's
-# own gear letter (always drawn, bottom right) sits in a gear box we draw under it.
+# (see shared/visible.js): bigger dials, the rev dial centred on BMW's black box so the box hides only the hub. We draw no
+# gear letter, as in the bimmer-lab themes.
 OLD = dict(R=290, SP=(496, 360), RV=(1424, 360), MINI_R=90, FU=(103, 473), OT=(1817, 473))
 G20 = dict(R=335, SP=(412, 380), RV=(1508, 380), MINI_R=70, FU=(80, 628), OT=(1840, 628))
 globals().update(OLD)
@@ -32,7 +32,6 @@ RPM_MAX = 7500
 RPM_SWEEP = RPM_PER * RPM_MAX / 1000.0
 RPM_OFF = 20.5                # degrees before 0 where the needle parks (OFF)
 SIGN_DY = 0.36              # the road signs under the speed dial's hub, this many R below its centre
-GEARBOX = (1410, 686, 170, 58)  # centre x, y, w, h: under BMW's gear letter (x 1392-1428, y 664-706)
 
 def text(id, cx, cy, w, t, font, color="fg", align="center", conn=0, **kw):
     """A text box w wide, centred on (cx, cy) (align left / right: cx is that edge)."""
@@ -127,8 +126,6 @@ def comfort():
         text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "1/min x 1000", "wb_cap", conn=2),
         text("ready", RV[0] - 0.63 * R, RV[1] + 0.25 * R, 110, "READY", "wb_capb", conn=2),
         text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "OFF", "wb_cap", "dim", conn=2),
-        {"id": "gearbox", "type": "wbgear", "class": "content", "z": 3, "x": GEARBOX[0] - GEARBOX[2] // 2, "y": GEARBOX[1] - GEARBOX[3] // 2,
-         "w": GEARBOX[2], "h": GEARBOX[3], "conn": 2, "toggle": "!baked"},
         # the range at the speed dial's foot
         dict(icon("range_icon", "fuel", SP[0] - 70, SP[1] + 0.60 * R, 1, "fg"), toggle="!baked"),
         text("range_in", SP[0] + 12, SP[1] + 0.60 * R, 130, "{{range}} km", "wb_cap", conn=1, toggle="!baked"),
@@ -178,7 +175,6 @@ def glowing(mode):
         W += [label("spd0", SP, SPD_START, 0.81 * R, "0", "wb_spd", 1), label("spd13", SP, SPD_START + SPD_SWEEP, 0.81 * R, "260", "wb_spd", 1)]
         W += [label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.81 * R, str(i), "wb_rpm", 2, w=50) for i in range(1, 8)]
         W += [text("speed", SP[0], SP[1] + 0.02 * R, 260, "{{speed}}", "wb_big", conn=1),
-              text("gear_big", RV[0], RV[1] + 0.02 * R, 200, "{{gearnum}}", "wb_big", conn=2, hotWhen="now"),
               text("rpm_cap", RV[0], RV[1] - 0.34 * R, 200, "1/min x 1000", "wb_cap", conn=2)]
     else:
         for i in range(14):
@@ -191,8 +187,7 @@ def glowing(mode):
               icon("range_icon", "fuel", SP[0] - 70, SP[1] + 0.72 * R, 1, "fg"),
               text("range_in", SP[0] + 12, SP[1] + 0.72 * R, 130, "{{range}} km", "wb_cap", conn=1)]
     W += [text("speed_unit", SP[0], SP[1] - 0.34 * R, 100, "km/h", "wb_cap", conn=1),
-          text("mode", RV[0], RV[1] + 0.42 * R, 240, "{{mode}}", "wb_capb", "accent" if sport else "fg", conn=2),
-          text("gear", RV[0], RV[1] + 0.60 * R, 120, "{{gear}}", "wb_gear", conn=2)]
+          text("mode", RV[0], RV[1] + 0.42 * R, 240, "{{mode}}", "wb_capb", "accent" if sport else "fg", conn=2)]
     for i, (head, tok, x) in enumerate([("Time", "{{time}}", 729), ("Range", "{{range}} km", 868), ("Temp", "{{ambient}} °C", 1054)]):
         W += [text("row_h%d" % i, x, 652, 150, head, "wb_cap", "dim", align="left"),
               text("row_v%d" % i, x, 688, 160, tok, "wb_val", align="left")]

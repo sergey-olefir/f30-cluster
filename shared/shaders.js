@@ -1448,29 +1448,6 @@ void main() {
 }
 `;
 
-const WBGEAR = `// The 6WB-style gear box for a cluster-render "effect" layer (GLSL ES 1.00): a dark trapezoid, narrower at the top,
-// a light top edge, thin side lines and a bottom edge that bows slightly. BMW's own gear letter is drawn over it on
-// the car (and by the bench's car view). v_uv (0,0) is the top-left.
-precision mediump float;
-varying vec2 v_uv;
-uniform vec2 u_size;
-
-void main() {
-    vec2 p = v_uv * u_size;
-    float t = p.y / u_size.y;
-    float cx = u_size.x * 0.5, ax = abs(p.x - cx);
-    float hw = mix(0.40, 0.50, t) * u_size.x - 0.5;
-    float u = ax / hw;
-    float bl = u_size.y - 2.0 - 6.0 * (1.0 - u * u);                 // the bottom edge, bowed up at the sides
-    float aa = clamp(hw - ax + 0.5, 0.0, 1.0) * clamp(bl - p.y + 1.0, 0.0, 1.0) * clamp(p.y + 0.5, 0.0, 1.0);
-    vec3 col = mix(vec3(0.105, 0.112, 0.128), vec3(0.030, 0.033, 0.040), t);
-    col = mix(col, vec3(0.64, 0.68, 0.74), clamp(2.0 - p.y, 0.0, 1.0));                    // top edge
-    col = mix(col, vec3(0.30, 0.32, 0.37), clamp(1.8 - (hw - ax), 0.0, 1.0) * 0.8);        // side lines
-    col = mix(col, vec3(0.52, 0.56, 0.62), clamp(1.6 - abs(p.y - bl), 0.0, 1.0));          // bottom edge
-    gl_FragColor = vec4(col, aa);
-}
-`;
-
 const WBSIGN = `// The 6WB-style road signs in one cluster-render "effect" layer (GLSL ES 1.00), under the speed dial's hub: the
 // speed limit sign (its figure is a text widget on top) on the left and the no-overtaking sign on the right.
 // u_show.x / u_show.y turn each on. Baked (u_tex 1: hud/scene sign_limit / sign_nopass, our own drawings, at
@@ -1813,4 +1790,4 @@ void main() {
 }
 `;
 
-module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: WBDIAL, wbback: WBBACK, wbgear: WBGEAR, wbsign: WBSIGN, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES };
+module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: WBDIAL, wbback: WBBACK, wbsign: WBSIGN, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES };

@@ -338,21 +338,6 @@
       "conn": 1
     },
     {
-      "id": "gear_big",
-      "type": "text",
-      "z": 5,
-      "x": 1324,
-      "y": 321,
-      "w": 200,
-      "h": 90,
-      "text": "{{gearnum}}",
-      "font": "wb_big",
-      "color": "fg",
-      "align": "center",
-      "conn": 2,
-      "hotWhen": "now"
-    },
-    {
       "id": "rpm_cap",
       "type": "text",
       "z": 5,
@@ -391,20 +376,6 @@
       "text": "{{mode}}",
       "font": "wb_capb",
       "color": "accent",
-      "align": "center",
-      "conn": 2
-    },
-    {
-      "id": "gear",
-      "type": "text",
-      "z": 5,
-      "x": 1364,
-      "y": 516,
-      "w": 120,
-      "h": 36,
-      "text": "{{gear}}",
-      "font": "wb_gear",
-      "color": "fg",
       "align": "center",
       "conn": 2
     },
