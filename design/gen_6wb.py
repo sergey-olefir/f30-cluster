@@ -72,29 +72,47 @@ def dial(id, c, style, r=None, **kw):
     d.update(kw)
     return d
 
-def minis():
+def minis(baked=False):
     """The two side gauges: fuel (0 low on the right, clockwise round the bottom to 1/1 upper left) and its mirror,
     the oil temperature (cold low on the left, anticlockwise to hot upper right)."""
     return [
         dial("fuel", FU, "mini", r=MINI_R, ringW=5, measure="signal", signal="fuel", scale={"max": 1, "ticks": 4}, minor=2,
-             start=135, sweep=185, redTo=0.10, needle="fg"),
+             start=135, sweep=185, redTo=0.10, needle="fg",
+             **({"base": base("fuel", FU, MINI_R, 8, 556, 144)} if baked else {})),
         dial("oilt", OT, "mini", r=MINI_R, ringW=5, measure="signal", signal="oil", min=50, scale={"max": 150, "ticks": 4},
-             minor=2, start=135, sweep=185, flip=True, coldTo=0.10, redFrom=0.90, needle="fg"),
-        icon("fuel_icon", "fuel", FU[0] + 0.40 * MINI_R, FU[1] - 0.42 * MINI_R, 1, "fg"),
+             minor=2, start=135, sweep=185, flip=True, coldTo=0.10, redFrom=0.90, needle="fg",
+             **({"base": base("oil", OT, MINI_R, 1768, 556, 144)} if baked else {})),
+        dict(icon("fuel_icon", "fuel", FU[0] + 0.40 * MINI_R, FU[1] - 0.42 * MINI_R, 1, "fg"), **({"toggle": "!baked"} if baked else {})),
         text("fuel_full", FU[0] - 0.42 * MINI_R, FU[1] - 0.26 * MINI_R, 30, "1/1", "wb_mini", conn=1),
         text("fuel_zero", FU[0] + 0.42 * MINI_R, FU[1] + 0.40 * MINI_R, 14, "0", "wb_mini", conn=1),
-        icon("oil_icon", "oilcan", OT[0] - 0.40 * MINI_R, OT[1] - 0.42 * MINI_R, 2, "fg", w=30),
+        dict(icon("oil_icon", "oilcan", OT[0] - 0.40 * MINI_R, OT[1] - 0.42 * MINI_R, 2, "fg", w=30), **({"toggle": "!baked"} if baked else {})),
     ]
+
+def base(tex, c, r, ox, oy, w, kind=1):
+    """A baked texture under a dial: its box (ox, oy, w square) is given in the P9 stack's panel px; the layer's box is c +- r."""
+    return {"tex": tex, "x": ox - (c[0] - r), "y": oy - (c[1] - r), "w": w, "h": w, "kind": kind}
+
+def arc_fill(tex, c, x, y, w, h, a_from, a_to, of, mx, color):
+    """A bottom arc's live fill (BAKE C6): its segment coverage at panel px (x, y, w, h), lit from a_from to a_to
+    (degrees cw from 12) as `of` goes 0..mx."""
+    return {"tex": tex, "x": x - (c[0] - R), "y": y - (c[1] - R), "w": w, "h": h, "from": a_from, "to": a_to, "of": of, "max": mx,
+            "color": color}
 
 def comfort():
     W = [
         {"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
-         "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "comfort", "color": "accent"},
-        dial("speedo", SP, "comfort", ringW=10, measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
+         "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "comfort", "color": "accent",
+         "tex": {"window": {"tex": "window", "x": 640, "y": 76, "w": 640, "h": 572},
+                 "horizon": {"tex": "horizon", "x": 748, "y": 452, "w": 424, "h": 10},
+                 "line": {"tex": "bar", "x": 668, "y": 602, "w": 584, "h": 79}},
+         "gain": [0.24, 604]},
+        dial("speedo", SP, "comfort", ringW=10, base=base("speedo", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
+             fill=arc_fill("range_seg", SP, 239, 614, 346, 68, 216.0, 144.0, "fuel", 1, [222, 220, 216]), measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
              start=SPD_START, sweep=SPD_SWEEP),
-        dial("tacho", RV, "comfort", ringW=10, measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
+        dial("tacho", RV, "comfort", ringW=10, base=base("tacho", RV, R, RV[0] - R, RV[1] - R, 2 * R, 3),
+             fill=arc_fill("ed_seg", RV, 1338, 612, 346, 70, 196.5, 143.3, "cons", 20, [214, 128, 136]), measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
              start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF),
-    ] + minis()
+    ] + minis(baked=True)
     # the scale numbers: the box ends at 0.78 R, inside the ticks' inner ends (0.82 R)
     for i in range(14):
         n = 20 * i
@@ -107,19 +125,35 @@ def comfort():
         text("ready", RV[0] - 0.63 * R, RV[1] + 0.25 * R, 110, "READY", "wb_capb", conn=2),
         text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "OFF", "wb_cap", "dim", conn=2),
         {"id": "gearbox", "type": "wbgear", "class": "content", "z": 3, "x": GEARBOX[0] - GEARBOX[2] // 2, "y": GEARBOX[1] - GEARBOX[3] // 2,
-         "w": GEARBOX[2], "h": GEARBOX[3], "conn": 2},
+         "w": GEARBOX[2], "h": GEARBOX[3], "conn": 2, "toggle": "!baked"},
         # the range at the speed dial's foot
-        icon("range_icon", "fuel", SP[0] - 70, SP[1] + 0.60 * R, 1, "fg"),
-        text("range_in", SP[0] + 12, SP[1] + 0.60 * R, 130, "{{range}} km", "wb_cap", conn=1),
+        dict(icon("range_icon", "fuel", SP[0] - 70, SP[1] + 0.60 * R, 1, "fg"), toggle="!baked"),
+        text("range_in", SP[0] + 12, SP[1] + 0.60 * R, 130, "{{range}} km", "wb_cap", conn=1, toggle="!baked"),
     ]
     # the road signs under the speed dial's hub: the limit (its figure is text on the sign) and no overtaking
     sy = SP[1] + SIGN_DY * R
-    W.append({"id": "signs", "type": "wbsign", "class": "content", "z": 3, "x": SP[0] - 100, "y": int(sy) - 42, "w": 200, "h": 84, "conn": 1})
-    W.append(text("limit", SP[0] - 48, sy, 60, "{{limit}}", "wb_spd", "ink", conn=2))
+    W.append({"id": "signs", "type": "wbsign", "class": "content", "z": 3, "x": 305, "y": 460, "w": 214, "h": 93, "conn": 1,
+              "tex": {"limit": {"tex": "sign_limit", "x": 2, "y": 2, "w": 88, "h": 89},
+                      "nopass": {"tex": "sign_nopass", "x": 124, "y": 2, "w": 88, "h": 89}}})
+    # the limit's figure: a 2-digit box 37 x 30 centred 351, 505 (BAKE C7)
+    W.append(text("limit", 351, 506, 60, "{{limit}}", "wb_val", "ink", conn=2))
     # the row at the middle window's foot
+    # baked: one line, the range after the bar's pump pictogram (x 892-953, y 642-681); else headed columns
+    for i, (tok, x) in enumerate([("{{time}}", 800), ("{{ambient}} °C", 1010)]):
+        W.append(text("row_b%d" % i, x, 662, 150, tok, "wb_val", align="left", toggle="baked"))
+    # the range under the road signs (its pictogram is baked into the speed dial), the instant consumption under the rev dial
+    # ref 12: the range arc reads "0" at its left end, "km" at its right end and the range in the middle above it;
+    # the EfficientDynamics arc the same way with the instant consumption (0 at 196.5 deg, 20 l/100 km at 143.3 deg)
+    for id_, c, a0, a1, lab0, lab1, tok, conn in (("range", SP, 216.0, 144.0, "0", "km", "{{range}}", 1),
+                                                  ("cons", RV, 196.5, 143.3, "0", "l/100 km", "{{cons}}", 2)):
+        W.append(text(id_ + "_v", c[0], c[1] + 0.765 * R, 110, tok, "wb_spd", conn=conn, toggle="baked"))
+        x0, y0 = at(c, a0, 0.775 * R)
+        x1, y1 = at(c, a1, 0.775 * R)
+        W.append(text(id_ + "_a0", x0, y0, 40, lab0, "wb_cap", "dim", conn=conn, toggle="baked"))
+        W.append(text(id_ + "_a1", x1, y1, 100, lab1, "wb_cap", "dim", conn=conn, toggle="baked"))
     for i, (head, tok, x) in enumerate([("Time", "{{time}}", 742), ("Range", "{{range}} km", 890), ("Temp", "{{ambient}} °C", 1048)]):
-        W += [text("row_h%d" % i, x, 612, 150, head, "wb_cap", "dim", align="left"),
-              text("row_v%d" % i, x, 650, 160, tok, "wb_val", align="left")]
+        W += [text("row_h%d" % i, x, 612, 150, head, "wb_cap", "dim", align="left", toggle="!baked"),
+              text("row_v%d" % i, x, 650, 160, tok, "wb_val", align="left", toggle="!baked")]
     return W
 
 def glowing(mode):

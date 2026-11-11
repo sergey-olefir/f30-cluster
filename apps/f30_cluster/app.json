@@ -2,7 +2,7 @@
   "id": "f30_cluster",
   "title": "F30 Cluster",
   "description": "Instrument cluster themes after the F-series 6WB look: Comfort, Sport and Eco Pro, following the drive mode",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "vendor": "custom",
   "loggingId": "OAF3",
   "iconGlyph": "F30",
@@ -131,6 +131,12 @@
     {
       "key": "byMode",
       "label": "Change with SPORT / COMFORT / ECO PRO",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "baked",
+      "label": "Baked 6WB textures (off: all shaders)",
       "type": "bool",
       "default": true
     },

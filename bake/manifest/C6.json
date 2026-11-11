@@ -1,0 +1,632 @@
+{
+ "cluster": "C6",
+ "package": "P4",
+ "mode": "comfort",
+ "R": 335,
+ "generator": "cd bake/src && UV_CACHE_DIR=../work/.uvcache uv run -q --no-project --with opencv-python-headless --with numpy --with pillow python -m C6.build --all   (refs/fit once before: -m C5.refs; --with scipy -m C5.fit)",
+ "layers": [
+  {
+   "id": "infobar.body",
+   "cluster": "C6",
+   "z": 0.5,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 640,
+   "y": 606,
+   "w": 640,
+   "h": 86,
+   "scale": 0.5,
+   "file": "C6/infobar.body.albedo@0.5x.png",
+   "bytes_by_8wh": 110080,
+   "stack_below": [
+    "window.base"
+   ],
+   "stack_above": [
+    "infobar.line"
+   ],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "03_three-modes_photo_bimmerstop.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 90,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.7975,
+    "dE2000_mean": 2.517,
+    "edge_px_err": null,
+    "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+    "roi": [
+     "box:700:612:520:76"
+    ],
+    "sheet": "bake/work/C5/qc_infobar.body__17_physical-cluster_full.ours.C5.png",
+    "luma_bias": -2.64
+   },
+   "params": {
+    "front_y": 608.8,
+    "bar_rgb": [
+     2.1,
+     2.0,
+     26.9
+    ],
+    "bar_fade0": 672.0,
+    "bar_fade1": 690.0,
+    "line_rgb": [
+     223.0,
+     229.0,
+     233.0
+    ],
+    "line_w": 2.2,
+    "line_glow": 0.75,
+    "line_glow_d": 0.0,
+    "line_glow_s": 1.7,
+    "line_x0": 80.0,
+    "line_x1": 300.0,
+    "line_floor": 0.55
+   }
+  },
+  {
+   "id": "infobar.line",
+   "cluster": "C6",
+   "z": 1.5,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 668,
+   "y": 602,
+   "w": 584,
+   "h": 12,
+   "scale": 1.0,
+   "file": "C6/infobar.line.albedo.png",
+   "bytes_by_8wh": 56064,
+   "stack_below": [
+    "infobar.body"
+   ],
+   "stack_above": [],
+   "sources": [
+    "17_physical-cluster_full.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 90,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.8137,
+    "dE2000_mean": 8.134,
+    "edge_px_err": 1.406,
+    "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+    "roi": [
+     "box:760:598:400:16"
+    ],
+    "sheet": "bake/work/C5/qc_infobar.line__17_physical-cluster_full.ours.C5.png",
+    "luma_bias": -8.11
+   },
+   "params": {
+    "front_y": 608.8,
+    "bar_rgb": [
+     2.1,
+     2.0,
+     26.9
+    ],
+    "bar_fade0": 672.0,
+    "bar_fade1": 690.0,
+    "line_rgb": [
+     223.0,
+     229.0,
+     233.0
+    ],
+    "line_w": 2.2,
+    "line_glow": 0.75,
+    "line_glow_d": 0.0,
+    "line_glow_s": 1.7,
+    "line_x0": 80.0,
+    "line_x1": 300.0,
+    "line_floor": 0.55
+   }
+  },
+  {
+   "id": "speedo.range-arc.track",
+   "cluster": "C6",
+   "z": 5.5,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 230,
+   "y": 603,
+   "w": 364,
+   "h": 82,
+   "scale": 1.0,
+   "file": "C6/range-arc.track.albedo.png",
+   "bytes_by_8wh": 238784,
+   "stack_below": [],
+   "stack_above": [
+    "speedo.range-arc.segments"
+   ],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png",
+    "12_speedo_signs_overspeed-wedge.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 90,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.263,
+    "dE2000_mean": 22.92,
+    "edge_px_err": 2.266,
+    "ref": "bake/work/rect/17_physical-cluster_full.comfort.C1",
+    "roi": [
+     "ring:0.82:0.915",
+     "angle 142.0:76.0"
+    ],
+    "sheet": "bake/work/C6/qc_range-arc.full__17_physical-cluster_full.comfort.C1.png",
+    "luma_bias": 17.67,
+    "all": {
+     "range-arc.full.17": {
+      "ssim": 0.263,
+      "dE2000_mean": 22.92,
+      "edge_px_err": 2.266,
+      "ref": "bake/work/rect/17_physical-cluster_full.comfort.C1",
+      "roi": [
+       "ring:0.82:0.915",
+       "angle 142.0:76.0"
+      ],
+      "sheet": "bake/work/C6/qc_range-arc.full__17_physical-cluster_full.comfort.C1.png",
+      "luma_bias": 17.67
+     },
+     "range-arc.full.07": {
+      "ssim": 0.5284,
+      "dE2000_mean": 14.876,
+      "edge_px_err": 1.151,
+      "ref": "bake/work/rect/07_physical-cluster_all-lamps-lit.comfort.C1",
+      "roi": [
+       "ring:0.82:0.915",
+       "angle 142.0:76.0"
+      ],
+      "sheet": "bake/work/C6/qc_range-arc.full__07_physical-cluster_all-lamps-lit.comfort.C1.png",
+      "luma_bias": 2.59
+     }
+    }
+   },
+   "params": {
+    "dial": "C1",
+    "frame": "dial (R units, cw12 deg), concentric",
+    "a0": 144.0,
+    "a1": 216.0,
+    "segments": 41,
+    "pitch_deg": 1.8,
+    "majors": {
+     "0": "major",
+     "20": "major",
+     "40": "major",
+     "10": "mid",
+     "30": "mid"
+    },
+    "zones": [
+     [
+      0,
+      40,
+      "white"
+     ]
+    ],
+    "colours": {
+     "major": [
+      232,
+      232,
+      234
+     ],
+     "mid": [
+      215,
+      214,
+      216
+     ],
+     "white": {
+      "unlit": [
+       58,
+       58,
+       62
+      ],
+      "lit": [
+       222,
+       220,
+       216
+      ]
+     }
+    },
+    "seg": {
+     "minor": {
+      "r0": 0.855,
+      "r1": 0.897,
+      "w": 5.4
+     },
+     "mid": {
+      "r0": 0.85,
+      "r1": 0.9,
+      "w": 5.6
+     },
+     "major": {
+      "r0": 0.834,
+      "r1": 0.905,
+      "w": 5.6
+     }
+    },
+    "notes": "fill is dynamic: light minor segments with the zone's 'lit' colour up to the fill angle using the segments mask (alpha = coverage); fit = full-fill preview (track + all minors lit) vs the photo"
+   }
+  },
+  {
+   "id": "speedo.range-arc.segments",
+   "cluster": "C6",
+   "z": 5.6,
+   "kind": "mask",
+   "class": "baked",
+   "frame": "panel",
+   "x": 239,
+   "y": 614,
+   "w": 346,
+   "h": 68,
+   "scale": 1.0,
+   "file": "C6/range-arc.segments.mask.png",
+   "bytes_by_8wh": 188224,
+   "stack_below": [
+    "speedo.range-arc.track"
+   ],
+   "stack_above": [],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png",
+    "12_speedo_signs_overspeed-wedge.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 90,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.263,
+    "dE2000_mean": 22.92,
+    "edge_px_err": 2.266,
+    "ref": "bake/work/rect/17_physical-cluster_full.comfort.C1",
+    "roi": [
+     "ring:0.82:0.915",
+     "angle 142.0:76.0"
+    ],
+    "sheet": "bake/work/C6/qc_range-arc.full__17_physical-cluster_full.comfort.C1.png",
+    "luma_bias": 17.67
+   },
+   "params": {
+    "use": "coverage of the minor segments for the dynamic fill layer"
+   }
+  },
+  {
+   "id": "speedo.range-arc.fill",
+   "cluster": "C6",
+   "z": 5.7,
+   "kind": "albedo",
+   "class": "dynamic",
+   "frame": "dial",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png",
+    "12_speedo_signs_overspeed-wedge.png"
+   ],
+   "evidence": "weak",
+   "params": {
+    "drive": "fuel range (km)",
+    "lit_colours": {
+     "white": [
+      222,
+      220,
+      216
+     ]
+    },
+    "unlit_evidence": "weak: 17 / 07 show every segment lit; the unlit colour is our choice (12 shows dim segments in its orange variant)"
+   }
+  },
+  {
+   "id": "tacho.ed-arc.track",
+   "cluster": "C6",
+   "z": 5.5,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1338,
+   "y": 600,
+   "w": 355,
+   "h": 83,
+   "scale": 1.0,
+   "file": "C6/ed-arc.track.albedo.png",
+   "bytes_by_8wh": 235720,
+   "stack_below": [],
+   "stack_above": [
+    "tacho.ed-arc.segments"
+   ],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 90,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.221,
+    "dE2000_mean": 19.61,
+    "edge_px_err": 1.831,
+    "ref": "bake/work/rect/17_physical-cluster_full.comfort.C2",
+    "roi": [
+     "ring:0.82:0.915",
+     "angle 141.3:74.29999999999998"
+    ],
+    "sheet": "bake/work/C6/qc_ed-arc.full__17_physical-cluster_full.comfort.C2.png",
+    "luma_bias": -0.48,
+    "all": {
+     "ed-arc.full.17": {
+      "ssim": 0.221,
+      "dE2000_mean": 19.61,
+      "edge_px_err": 1.831,
+      "ref": "bake/work/rect/17_physical-cluster_full.comfort.C2",
+      "roi": [
+       "ring:0.82:0.915",
+       "angle 141.3:74.29999999999998"
+      ],
+      "sheet": "bake/work/C6/qc_ed-arc.full__17_physical-cluster_full.comfort.C2.png",
+      "luma_bias": -0.48
+     }
+    }
+   },
+   "params": {
+    "dial": "C2",
+    "frame": "dial (R units, cw12 deg), concentric",
+    "a0": 143.3,
+    "a1": 213.6,
+    "segments": 38,
+    "pitch_deg": 1.9,
+    "majors": {
+     "0": "major",
+     "14": "major",
+     "28": "major",
+     "7": "mid",
+     "21": "mid"
+    },
+    "zones": [
+     [
+      0,
+      28,
+      "red"
+     ],
+     [
+      29,
+      37,
+      "blue"
+     ]
+    ],
+    "colours": {
+     "major": [
+      232,
+      232,
+      234
+     ],
+     "mid": [
+      214,
+      210,
+      212
+     ],
+     "red": {
+      "unlit": [
+       96,
+       62,
+       68
+      ],
+      "lit": [
+       214,
+       128,
+       136
+      ]
+     },
+     "blue": {
+      "unlit": [
+       66,
+       76,
+       104
+      ],
+      "lit": [
+       150,
+       172,
+       228
+      ]
+     }
+    },
+    "seg": {
+     "minor": {
+      "r0": 0.855,
+      "r1": 0.897,
+      "w": 5.4
+     },
+     "mid": {
+      "r0": 0.85,
+      "r1": 0.9,
+      "w": 5.6
+     },
+     "major": {
+      "r0": 0.834,
+      "r1": 0.905,
+      "w": 5.6
+     }
+    },
+    "notes": "fill is dynamic: light minor segments with the zone's 'lit' colour up to the fill angle using the segments mask (alpha = coverage); fit = full-fill preview (track + all minors lit) vs the photo"
+   }
+  },
+  {
+   "id": "tacho.ed-arc.segments",
+   "cluster": "C6",
+   "z": 5.6,
+   "kind": "mask",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1338,
+   "y": 612,
+   "w": 346,
+   "h": 70,
+   "scale": 1.0,
+   "file": "C6/ed-arc.segments.mask.png",
+   "bytes_by_8wh": 193760,
+   "stack_below": [
+    "tacho.ed-arc.track"
+   ],
+   "stack_above": [],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 90,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.221,
+    "dE2000_mean": 19.61,
+    "edge_px_err": 1.831,
+    "ref": "bake/work/rect/17_physical-cluster_full.comfort.C2",
+    "roi": [
+     "ring:0.82:0.915",
+     "angle 141.3:74.29999999999998"
+    ],
+    "sheet": "bake/work/C6/qc_ed-arc.full__17_physical-cluster_full.comfort.C2.png",
+    "luma_bias": -0.48
+   },
+   "params": {
+    "use": "coverage of the minor segments for the dynamic fill layer"
+   }
+  },
+  {
+   "id": "tacho.ed-arc.fill",
+   "cluster": "C6",
+   "z": 5.7,
+   "kind": "albedo",
+   "class": "dynamic",
+   "frame": "dial",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "params": {
+    "drive": "consumption l/100km (0..20, blue part = recuperation)",
+    "lit_colours": {
+     "red": [
+      214,
+      128,
+      136
+     ],
+     "blue": [
+      150,
+      172,
+      228
+     ]
+    },
+    "unlit_evidence": "weak: 17 / 07 show every segment lit; the unlit colour is our choice (12 shows dim segments in its orange variant)"
+   }
+  }
+ ],
+ "composition": {
+  "images": [
+   {
+    "file": "C6/infobar.body.albedo@0.5x.png",
+    "from_ids": [
+     "infobar.body"
+    ],
+    "x": 640,
+    "y": 606,
+    "w": 640,
+    "h": 86,
+    "scale": 0.5,
+    "bytes_by_8wh": 110080
+   },
+   {
+    "file": "C6/infobar.line.albedo.png",
+    "from_ids": [
+     "infobar.line"
+    ],
+    "x": 668,
+    "y": 602,
+    "w": 584,
+    "h": 12,
+    "scale": 1.0,
+    "bytes_by_8wh": 56064
+   },
+   {
+    "file": "C6/range-arc.track.albedo.png",
+    "from_ids": [
+     "speedo.range-arc.track"
+    ],
+    "x": 230,
+    "y": 603,
+    "w": 364,
+    "h": 82,
+    "scale": 1.0,
+    "bytes_by_8wh": 238784
+   },
+   {
+    "file": "C6/range-arc.segments.mask.png",
+    "from_ids": [
+     "speedo.range-arc.segments"
+    ],
+    "x": 239,
+    "y": 614,
+    "w": 346,
+    "h": 68,
+    "scale": 1.0,
+    "bytes_by_8wh": 188224
+   },
+   {
+    "file": "C6/ed-arc.track.albedo.png",
+    "from_ids": [
+     "tacho.ed-arc.track"
+    ],
+    "x": 1338,
+    "y": 600,
+    "w": 355,
+    "h": 83,
+    "scale": 1.0,
+    "bytes_by_8wh": 235720
+   },
+   {
+    "file": "C6/ed-arc.segments.mask.png",
+    "from_ids": [
+     "tacho.ed-arc.segments"
+    ],
+    "x": 1338,
+    "y": 612,
+    "w": 346,
+    "h": 70,
+    "scale": 1.0,
+    "bytes_by_8wh": 193760
+   }
+  ],
+  "layer_count": 6,
+  "bytes_by_8wh_total": 1022632
+ },
+ "open_questions": [
+  "BMW's gear letter (x 1392-1428, y 664-706) covers the ED arc around its '0' major (196.5 deg -> x ~1412-1430, y ~650-672): the 0 tick and 1-2 blue segments are hidden on the G20. Shift the ED arc or accept.",
+  "Arc centres: in 17 both arcs look shifted ~0.03-0.05 R toward the window (parallax / rectification at the dial bottoms); 07 C1 is concentric within 0.011 R. Drawn concentric.",
+  "Range arc: 17 has long ticks at the ends + 180 and brighter quarter ticks; 07 has long quarter ticks. 17 used.",
+  "Unlit segment colours are not visible in 17 / 07 (all lit): weak.",
+  "The range arc's 0-250 numerals, 'km', 'l/100km', 'EfficientDynamics', the battery icon and the bar's texts / fuel pump / warning triangle are live text or C7 icons: not baked.",
+  "Merge proposal: the two arcs' track + segments could be one RGBA data texture each (R = minor coverage, G = major coverage, B = zone) sampled by the fill shader, halving their memory."
+ ]
+}

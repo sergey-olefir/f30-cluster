@@ -1,0 +1,317 @@
+{
+ "cluster": "C5",
+ "package": "P4",
+ "mode": "comfort",
+ "R": 335,
+ "generator": "cd bake/src && UV_CACHE_DIR=../work/.uvcache uv run -q --no-project --with opencv-python-headless --with numpy --with pillow python -m C6.build --all   (refs/fit once before: -m C5.refs; --with scipy -m C5.fit)",
+ "layers": [
+  {
+   "id": "window.base",
+   "cluster": "C5",
+   "z": 0,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 658,
+   "y": 76,
+   "w": 604,
+   "h": 536,
+   "scale": 0.5,
+   "file": "C5/window.base.albedo@0.5x.png",
+   "bytes_by_8wh": 647488,
+   "stack_below": [],
+   "stack_above": [
+    "window.horizon"
+   ],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "04_comfort_whole-cluster_mph.png",
+    "07_physical-cluster_all-lamps-lit.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 90,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.9005,
+    "dE2000_mean": 2.434,
+    "edge_px_err": 4.734,
+    "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+    "roi": [
+     "box:680:66:560:626"
+    ],
+    "sheet": "bake/work/C5/qc_stack__17_physical-cluster_full.ours.C5.png",
+    "luma_bias": -1.6,
+    "parts": {
+     "window.bg": {
+      "ssim": 0.9985,
+      "dE2000_mean": 1.056,
+      "edge_px_err": null,
+      "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+      "roi": [
+       "box:780:100:360:290"
+      ],
+      "sheet": "bake/work/C5/qc_window.bg__17_physical-cluster_full.ours.C5.png",
+      "luma_bias": 0.34
+     },
+     "window.top": {
+      "ssim": 0.6405,
+      "dE2000_mean": 4.937,
+      "edge_px_err": null,
+      "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+      "roi": [
+       "box:800:66:320:40"
+      ],
+      "sheet": "bake/work/C5/qc_window.top__17_physical-cluster_full.ours.C5.png",
+      "luma_bias": -13.24
+     },
+     "window.sky": {
+      "ssim": 0.966,
+      "dE2000_mean": 2.563,
+      "edge_px_err": null,
+      "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+      "roi": [
+       "box:780:400:360:56"
+      ],
+      "sheet": "bake/work/C5/qc_window.sky__17_physical-cluster_full.ours.C5.png",
+      "luma_bias": -1.2
+     },
+     "window.floor": {
+      "ssim": 0.8376,
+      "dE2000_mean": 3.16,
+      "edge_px_err": null,
+      "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+      "roi": [
+       "box:740:462:440:144"
+      ],
+      "sheet": "bake/work/C5/qc_window.floor__17_physical-cluster_full.ours.C5.png",
+      "luma_bias": 0.1
+     }
+    }
+   },
+   "params": {
+    "top_y": 79.0,
+    "top_half_w": 240.0,
+    "corner_r": 10.0,
+    "dial_clip_R": 1.04,
+    "dial_clip_soft": 3.0,
+    "rim_a": 0.06,
+    "rim_d": 3.0,
+    "rim_s": 1.6,
+    "sky_y0": 394.692,
+    "horizon_y": 458.0,
+    "sky_pow": 1.355,
+    "sky_amp": 117.226,
+    "horizon_w": 2.5,
+    "horizon_L": 48.0,
+    "lip_a": 12.0,
+    "lip_d": 1.5,
+    "lip_s": 1.0,
+    "front_y": 608.8,
+    "fb0": 60.912768,
+    "fb1": 15.047717,
+    "fb2": 24.057432,
+    "fb3": -18.187806,
+    "fbh0": 1590.575068,
+    "fbh1": -1483.463688,
+    "fbq": 0.393318,
+    "bar_n": 5,
+    "bar_yv": 184.309794,
+    "bar_u0": 0.003478,
+    "bar_du": 0.00023,
+    "bar_a0": 2.89664,
+    "bar_a1": 200.45464,
+    "bar_a2": -93.841769,
+    "bar_s0": 1.5,
+    "bar_s1": 13.994067,
+    "bar_h0": 60.0,
+    "bar_h1": 143.07895,
+    "bar_hp": 3.0,
+    "wall_y0": 496.303584,
+    "wall_in": 36.755972,
+    "wall_x0": 160.650197,
+    "wall_x1": 1.184126,
+    "wall_x2": 8.5e-05,
+    "wall_a": 79.741126,
+    "wall_ag": 0.369925,
+    "wall_s0": 22.0,
+    "wall_s1": 20.191634,
+    "wall_y1": 596.573649,
+    "wall_tail": 21.460852,
+    "bg_keys_y": [
+     79.0,
+     84.0,
+     100.0,
+     200.0,
+     300.0,
+     396.0,
+     470.0
+    ],
+    "bg_keys_rgb": [
+     [
+      54.9,
+      53.8,
+      59.9
+     ],
+     [
+      55.9,
+      55.8,
+      69.7
+     ],
+     [
+      52.7,
+      55.4,
+      66.1
+     ],
+     [
+      49.4,
+      53.3,
+      64.5
+     ],
+     [
+      46.4,
+      48.9,
+      61.3
+     ],
+     [
+      41.6,
+      44.5,
+      62.2
+     ],
+     [
+      41.6,
+      44.5,
+      62.2
+     ]
+    ],
+    "bar_rgb": [
+     2.1,
+     2.0,
+     26.9
+    ],
+    "bar_fade0": 672.0,
+    "bar_fade1": 690.0,
+    "line_rgb": [
+     223.0,
+     229.0,
+     233.0
+    ],
+    "line_w": 2.2,
+    "line_glow": 0.75,
+    "line_glow_d": 0.0,
+    "line_glow_s": 1.7,
+    "line_x0": 80.0,
+    "line_x1": 300.0,
+    "line_floor": 0.55,
+    "horizon_tint": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "palette_rgb_of_luma": [
+     [
+      0.01622,
+      0.75559,
+      0.06703
+     ],
+     [
+      0.00744,
+      0.96228,
+      0.07415
+     ],
+     [
+      -0.12149,
+      2.09333,
+      -0.93193
+     ]
+    ],
+    "notes": "panel px, X = x - 960 (mirror-symmetric). Window outline: top y=top_y, top edge |X|<=top_half_w (our box 720..1200), 45 deg chamfers continuing until they pass under the dials, clipped outside r = dial_clip_R*R of both dials. Light model: the window is emissive (no key light)."
+   }
+  },
+  {
+   "id": "window.horizon",
+   "cluster": "C5",
+   "z": 1,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 748,
+   "y": 452,
+   "w": 424,
+   "h": 10,
+   "scale": 1.0,
+   "file": "C5/window.horizon.albedo.png",
+   "bytes_by_8wh": 33920,
+   "stack_below": [
+    "window.base"
+   ],
+   "stack_above": [],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "04_comfort_whole-cluster_mph.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 90,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.8163,
+    "dE2000_mean": 4.909,
+    "edge_px_err": 1.818,
+    "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+    "roi": [
+     "box:780:446:360:22"
+    ],
+    "sheet": "bake/work/C5/qc_window.horizon__17_physical-cluster_full.ours.C5.png",
+    "luma_bias": 1.02
+   },
+   "params": {
+    "horizon_y": 458.0,
+    "horizon_w": 2.5,
+    "horizon_L": 48.0,
+    "lip_a": 12.0,
+    "lip_d": 1.5,
+    "lip_s": 1.0
+   }
+  }
+ ],
+ "composition": {
+  "images": [
+   {
+    "file": "C5/window.base.albedo@0.5x.png",
+    "from_ids": [
+     "window.base"
+    ],
+    "x": 658,
+    "y": 76,
+    "w": 302,
+    "h": 268,
+    "scale": 0.5,
+    "bytes_by_8wh": 647488
+   },
+   {
+    "file": "C5/window.horizon.albedo.png",
+    "from_ids": [
+     "window.horizon"
+    ],
+    "x": 748,
+    "y": 452,
+    "w": 424,
+    "h": 10,
+    "scale": 1.0,
+    "bytes_by_8wh": 33920
+   }
+  ],
+  "layer_count": 2,
+  "bytes_by_8wh_total": 681408
+ },
+ "open_questions": [
+  "Window top corners: our box (top edge x 720..1200) is kept; the 45 deg chamfers then continue OUTSIDE the box (to x ~657 / 1263 at y ~150) until they pass under the dials, as in 04 (no vertical side visible). The 6WB itself puts the chamfer start 0.84 R from the dial centre, which would be x 694 / 1226 with our spacing.",
+  "Levels: fitted to 17 (window bg luma ~55 top -> 45 at the horizon). P0 flags 17 as hazy on the dial faces, but its bottom bar reads luma 2-3 next to the bright floor, so the window levels look real; 04 / 07 are darker (bg ~25-30). Compare with the face level P1/P2 chose; window.base can be scaled as one image.",
+  "17 top edge sits at y 76 (04: 79); the box's 79 is used.",
+  "The floor's side walls continue a little below the front line into the bar's top corners in 17 (x ~690-720 / 1200-1230, y 610-640); not drawn (weak, partly glare-masked)."
+ ],
+ "notes": "References stretched into our frame by C5.refs (x about 960 by k = our half gap / 6WB half gap: 17 1.123, 04 1.158, 07 1.074; y unchanged). Bits: 8 dials, 4 telltales, 16 bar text."
+}

@@ -1,0 +1,1098 @@
+{
+ "cluster": "C8",
+ "package": "P7",
+ "mode": "eco",
+ "R": 335,
+ "generator": "cd bake/src && $PY C8-eco/fit.py && $PY C8-eco/build.py",
+ "notes": "Eco Pro parts only, on top of the Comfort dial stack (C1 / C2 of P1 / P2). All files: 6 images, 1733384 B by w*h*8. Proposed composition: the fill is drawn by the band shader from the fill parameters (same profile model as the track), so tacho.eco-fill.albedo is a fallback, not loaded. Merge further when P9 composes: speedo.eco-glow + speedo.eco-arc could share one @0.5x image only if the box (r 0.42 .. 1.06) is accepted; they are kept apart (two small boxes beat one big one).",
+ "layers": [
+  {
+   "id": "tacho.eco-glow",
+   "cluster": "C8",
+   "z": 11.5,
+   "kind": "glow",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1166,
+   "y": 198,
+   "w": 86,
+   "h": 388,
+   "scale": 0.5,
+   "file": "C8-eco/tacho.eco-glow.glow@0.5x.png",
+   "bytes_by_8wh": 66736,
+   "stack_below": [
+    "tacho.bezel"
+   ],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.833,
+    "dE2000_mean": 7.783,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.eco.C2",
+    "roi": [
+     "ring:0.975:1.005",
+     "angle 242.5:50"
+    ],
+    "sheet": "bake/work/C8-eco/qc_tacho.eco-glow__03_three-modes_photo_bimmerstop.eco.C2.png"
+   },
+   "params": {
+    "what": "the Eco blue on the bezel ridge on the window side (lower left of the rev dial): a TINT of the shared bezel layer, alpha-over a pale blue, so the Comfort bezel is not re-baked",
+    "model": "rgba = (colour, alpha * exp(-da^2 / 2 sd_deg^2) * exp(-(r - r0)^2 / 2 sd_r^2))",
+    "centre_deg": 267.5,
+    "sd_deg": 11.4,
+    "r0": 0.99,
+    "sd_r": 0.0075,
+    "colour": [
+     0.733,
+     0.796,
+     1.0
+    ],
+    "alpha": 0.297,
+    "solved_from": "03 C2 at 267.5 deg: Eco ridge [0.6552, 0.6833, 0.7452] vs Comfort ridge [0.6222, 0.6359, 0.6378] (same car, same angle)",
+    "fit_without_tint": {
+     "ssim": 0.869,
+     "dE2000_mean": 8.746
+    },
+    "cross_check_01": "01 puts it at 249.4 deg, sd 9.7; 01 and 02 show a much stronger, wider blue (02: the whole bezel and a halo outside). Strength is a parameter: alpha 0.30 (03) up to ~0.8 (01 / 02, weak)",
+    "z_note": "directly above the bezel gloss (P1/P2 z 11)"
+   }
+  },
+  {
+   "id": "speedo.eco-glow",
+   "cluster": "C8",
+   "z": 11.5,
+   "kind": "glow",
+   "class": "baked",
+   "frame": "panel",
+   "x": 690,
+   "y": 222,
+   "w": 64,
+   "h": 330,
+   "scale": 0.5,
+   "file": "C8-eco/speedo.eco-glow.glow@0.5x.png",
+   "bytes_by_8wh": 42240,
+   "stack_below": [
+    "speedo.bezel"
+   ],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.554,
+    "dE2000_mean": 12.378,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.eco.C1",
+    "roi": [
+     "ring:0.975:1.005",
+     "angle 66.2:50"
+    ],
+    "sheet": "bake/work/C8-eco/qc_speedo.eco-glow__03_three-modes_photo_bimmerstop.eco.C1.png"
+   },
+   "params": {
+    "what": "the Eco blue on the bezel ridge on the window side (right of the speed dial): a TINT of the shared bezel layer, alpha-over a pale blue, so the Comfort bezel is not re-baked",
+    "model": "rgba = (colour, alpha * exp(-da^2 / 2 sd_deg^2) * exp(-(r - r0)^2 / 2 sd_r^2))",
+    "centre_deg": 91.2,
+    "sd_deg": 9.5,
+    "r0": 0.99,
+    "sd_r": 0.0075,
+    "colour": [
+     0.733,
+     0.796,
+     1.0
+    ],
+    "alpha": 0.297,
+    "solved_from": "03 C2 at 267.5 deg: Eco ridge [0.6552, 0.6833, 0.7452] vs Comfort ridge [0.6222, 0.6359, 0.6378] (same car, same angle)",
+    "fit_without_tint": {
+     "ssim": 0.235,
+     "dE2000_mean": 16.241
+    },
+    "cross_check_01": "01 puts it at 102.4 deg, sd 8.7; 01 and 02 show a much stronger, wider blue (02: the whole bezel and a halo outside). Strength is a parameter: alpha 0.30 (03) up to ~0.8 (01 / 02, weak)",
+    "z_note": "directly above the bezel gloss (P1/P2 z 11)"
+   }
+  },
+  {
+   "id": "tacho.eco-ring",
+   "cluster": "C8",
+   "z": 5.05,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "dial",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png"
+   ],
+   "evidence": "weak",
+   "params": {
+    "what": "a thin dim track ring that closes the CHARGE/POWER band round the bottom",
+    "r": 0.83,
+    "fwhm": 0.02,
+    "rgb_over_black": [
+     0.0858,
+     0.088,
+     0.0793
+    ],
+    "span_deg": [
+     129.5,
+     320.25
+    ],
+    "profile": "gaussian across r"
+   },
+   "fit": {
+    "ssim": 0.733,
+    "dE2000_mean": 5.293,
+    "edge_px_err": null,
+    "ref": "bake/work/C8-eco/rect/03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03",
+    "roi": [
+     "ring:0.83:0.89",
+     "angle 139.5:170.75"
+    ],
+    "sheet": "bake/work/C8-eco/qc_tacho.eco-ring__03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03.png"
+   }
+  },
+  {
+   "id": "tacho.eco-track",
+   "cluster": "C8",
+   "z": 5.1,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1304,
+   "y": 64,
+   "w": 520,
+   "h": 518,
+   "scale": 0.5,
+   "file": "C8-eco/tacho.eco-track.albedo@0.5x.png",
+   "bytes_by_8wh": 538720,
+   "stack_below": [
+    "tacho.face"
+   ],
+   "stack_above": [
+    "tacho.eco-fill"
+   ],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.93,
+    "dE2000_mean": 3.005,
+    "edge_px_err": 1.594,
+    "ref": "bake/work/C8-eco/rect/03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03",
+    "roi": [
+     "ring:0.80:0.95",
+     "angle 91.5:36.0"
+    ],
+    "sheet": "bake/work/C8-eco/qc_tacho.eco-track__03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03.png"
+   },
+   "params": {
+    "edge": 0.823,
+    "edge_w": 0.02,
+    "peak_r": 0.833,
+    "P_rgb": [
+     0.8625,
+     0.8818,
+     0.8722
+    ],
+    "tau_rgb": [
+     0.0367,
+     0.0388,
+     0.041
+    ],
+    "k_rgb": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "fade": [
+     0.91,
+     0.945
+    ],
+    "rms_8bit": 8.09,
+    "baseline_rgb": [
+     0.03009999915957451,
+     0.027499999850988388,
+     0.029999999329447746
+    ],
+    "span_deg": [
+     -39.75,
+     129.5
+    ],
+    "model": "I_c = P_c*smoothstep(edge-w/2, edge+w/2, r)*exp(-((r-peak_r)+/tau_c)^k_c)*(1-smoothstep(fade0, fade1, r)); rgba = (I/max(I), max(I)); square ends",
+    "recentred_by_R": [
+     -0.0143,
+     0.012
+    ],
+    "radii_from": "03 (primary, circle rms 0.42 px), 01 (edge 0.7955, 0.01 R inside); 02 not used: its band is not concentric in our frame (circle fit rms 6 px, centre off by 0.2 R)",
+    "cross_check_01": "see bake/work/C8-eco/fit_log.json band.track.01"
+   }
+  },
+  {
+   "id": "tacho.eco-fill",
+   "cluster": "C8",
+   "z": 5.2,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1304,
+   "y": 64,
+   "w": 520,
+   "h": 518,
+   "scale": 0.5,
+   "file": "C8-eco/tacho.eco-fill.albedo@0.5x.png",
+   "bytes_by_8wh": 538720,
+   "stack_below": [
+    "tacho.eco-track"
+   ],
+   "stack_above": [
+    "tacho.eco-marks"
+   ],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.777,
+    "dE2000_mean": 7.718,
+    "edge_px_err": 2.045,
+    "ref": "bake/work/C8-eco/rect/03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03",
+    "roi": [
+     "ring:0.80:0.95",
+     "angle 332.25:115.25"
+    ],
+    "sheet": "bake/work/C8-eco/qc_tacho.eco-fill__03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03.png"
+   },
+   "params": {
+    "edge": 0.8215,
+    "edge_w": 0.02,
+    "peak_r": 0.8315,
+    "P_rgb": [
+     0.7951,
+     0.8064,
+     0.878
+    ],
+    "tau_rgb": [
+     0.0513,
+     0.0573,
+     0.064
+    ],
+    "k_rgb": [
+     2.0,
+     3.0,
+     3.0
+    ],
+    "fade": [
+     0.91,
+     0.945
+    ],
+    "rms_8bit": 7.92,
+    "baseline_rgb": [
+     0.03720000013709068,
+     0.05220000073313713,
+     0.07519999891519547
+    ],
+    "span_deg": [
+     -39.75,
+     129.5
+    ],
+    "clip": "dynamic: the shader shows this layer only between clip_deg[0] and clip_deg[1] (cw12)",
+    "clip_deg_in_refs": [
+     -29.75,
+     89.5
+    ],
+    "clip_note": "03 and 01 both show the blue fill from -31.75 to 89.5 deg and grey outside; 02 shows white from -48 to ~100 deg: which signal drives the bounds is not in the evidence",
+    "model": "I_c = P_c*smoothstep(edge-w/2, edge+w/2, r)*exp(-((r-peak_r)+/tau_c)^k_c)*(1-smoothstep(fade0, fade1, r)); rgba = (I/max(I), max(I)); square ends",
+    "recentred_by_R": [
+     -0.0143,
+     0.012
+    ]
+   }
+  },
+  {
+   "id": "tacho.eco-fill-clip",
+   "cluster": "C8",
+   "z": 5.21,
+   "kind": "mask",
+   "class": "dynamic",
+   "frame": "dial",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "weak",
+   "params": {
+    "what": "the angular clip of tacho.eco-fill (the fill is dynamic, the layer is static)",
+    "default_deg": [
+     -29.75,
+     89.5
+    ],
+    "range_deg": [
+     -39.75,
+     129.5
+    ],
+    "edge_aa_deg": 0.25,
+    "glsl": "float rel = mod(a - clip0 + 720.0, 360.0); show = rel <= clip1 - clip0"
+   }
+  },
+  {
+   "id": "tacho.eco-marks",
+   "cluster": "C8",
+   "z": 5.3,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "dial",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "params": {
+    "what": "white radial marks: band ends, fill-zone bounds, the CHARGE|POWER split, the OFF park mark",
+    "marks": [
+     {
+      "deg": -39.75,
+      "r0": 0.823,
+      "r1": 0.907,
+      "hw": 0.006,
+      "rgb": [
+       0.8,
+       0.81,
+       0.82
+      ]
+     },
+     {
+      "deg": -29.75,
+      "r0": 0.823,
+      "r1": 0.907,
+      "hw": 0.006,
+      "rgb": [
+       0.8,
+       0.81,
+       0.82
+      ]
+     },
+     {
+      "deg": 0.0,
+      "r0": 0.823,
+      "r1": 0.907,
+      "hw": 0.003,
+      "rgb": [
+       0.8,
+       0.81,
+       0.82
+      ],
+      "a": 0.85
+     },
+     {
+      "deg": 89.5,
+      "r0": 0.823,
+      "r1": 0.907,
+      "hw": 0.006,
+      "rgb": [
+       0.8,
+       0.81,
+       0.82
+      ]
+     },
+     {
+      "deg": 129.5,
+      "r0": 0.823,
+      "r1": 0.907,
+      "hw": 0.006,
+      "rgb": [
+       0.8,
+       0.81,
+       0.82
+      ]
+     },
+     {
+      "deg": -130.5,
+      "r0": 0.815,
+      "r1": 0.905,
+      "hw": 0.006,
+      "rgb": [
+       0.72,
+       0.72,
+       0.72
+      ]
+     }
+    ],
+    "units": "deg cw12, r0/r1/hw (half width) in R; rgb 0..1; 'a' = opacity",
+    "split_note": "the 0 deg split is hidden by the needle in 03; width and length from 02 (weak)",
+    "measured_deg_03": {
+     "end_lo": -39.75,
+     "zone_lo": -29.75,
+     "zone_hi": 89.5,
+     "end_hi": 129.5,
+     "off": -130.5
+    },
+    "measured_deg_01": {
+     "end_lo": -40.5,
+     "zone_lo": -35.5,
+     "zone_hi": 89.0,
+     "end_hi": 129.75,
+     "off": -128.75
+    }
+   },
+   "fit": {
+    "ssim": 0.677,
+    "dE2000_mean": 6.005,
+    "edge_px_err": 1.727,
+    "ref": "bake/work/C8-eco/rect/03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03",
+    "roi": [
+     "ring:0.80:0.93",
+     "angle 125.5:8"
+    ],
+    "sheet": "bake/work/C8-eco/qc_tacho.eco-mark-end_hi__03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03.png"
+   }
+  },
+  {
+   "id": "tacho.eco-hairlines",
+   "cluster": "C8",
+   "z": 5.31,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "dial",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "params": {
+    "what": "dark radial graduation lines across the band's inner half; BAKED into tacho.eco-track / tacho.eco-fill (numbers kept here so a shader can redraw them)",
+    "pitch_deg": 5.0,
+    "phase_deg": 0.0,
+    "sd_deg": 0.35,
+    "depth": 0.1,
+    "r_full": 0.845,
+    "r_zero": 0.875,
+    "measured": "03 (rectified): 5.0 deg pitch, autocorrelation 0.77-0.78 at r 0.85 in both zones, dark at multiples of 5 deg (phase -0.3 deg), about 10 % darker at r 0.84, gone by r 0.875; the band's marks sit on the same 5 deg grid. 02 shows much finer hairlines (~1 deg) on the grey zone: render variant, not used."
+   }
+  },
+  {
+   "id": "tacho.ed-arc",
+   "cluster": "C8",
+   "z": 6.1,
+   "kind": "glow",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1368,
+   "y": 162,
+   "w": 358,
+   "h": 358,
+   "scale": 0.5,
+   "file": "C8-eco/tacho.ed-arc.glow@0.5x.png",
+   "bytes_by_8wh": 256328,
+   "stack_below": [
+    "tacho.face"
+   ],
+   "stack_above": [
+    "tacho.hub"
+   ],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.797,
+    "dE2000_mean": 5.741,
+    "edge_px_err": 1.769,
+    "ref": "bake/work/C8-eco/rect/03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-ed-03",
+    "roi": [
+     "ring:0.46:0.62",
+     "angle 320.25:169.25"
+    ],
+    "sheet": "bake/work/C8-eco/qc_tacho.ed-arc__03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-ed-03.png"
+   },
+   "params": {
+    "edge": 0.4985,
+    "edge_w": 0.02,
+    "peak_r": 0.5085,
+    "P_rgb": [
+     0.496,
+     0.6291,
+     0.7239
+    ],
+    "tau_rgb": [
+     0.0128,
+     0.0168,
+     0.0278
+    ],
+    "k_rgb": [
+     1.0,
+     1.0,
+     1.5
+    ],
+    "fade": [
+     0.6,
+     0.64
+    ],
+    "rms_8bit": 2.42,
+    "baseline_rgb": [
+     0.08429999649524689,
+     0.08309999853372574,
+     0.08640000224113464
+    ],
+    "span_deg": [
+     -39.75,
+     129.5
+    ],
+    "span_deg_measured_rectified_03": [
+     -38.75,
+     159.75
+    ],
+    "model": "I_c = P_c*smoothstep(edge-w/2, edge+w/2, r)*exp(-((r-peak_r)+/tau_c)^k_c)*(1-smoothstep(fade0, fade1, r)); rgba = (I/max(I), max(I)); square ends",
+    "recentred_by_R": [
+     -0.0332,
+     0.0106
+    ],
+    "radii_from": "03 peak r 0.504 (circle rms 0.50 px), 01 0.5095 (rms 0.62 px), 02 0.505 (rms 3.8 px, not concentric). This is the inner-disc edge (P0: ~0.49) lit blue.",
+    "span_note": "drawn over the band's end-mark angles: 03 before rectification read -41.0 .. 129.5 deg; the threshold read on the rectified crop (upper end 159.75) catches the ticks below the arc and is not used",
+    "ticks": "faint radial ticks on its outer side in 02 / 03 (weak): see tacho.ed-ticks",
+    "resolution": "@0.5x: see fit; a 1x variant scored {\"ssim\": 0.798, \"dE2000_mean\": 5.793, \"edge_px_err\": 1.746}"
+   }
+  },
+  {
+   "id": "tacho.ed-ticks",
+   "cluster": "C8",
+   "z": 6.11,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "dial",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "02_three-modes_clean-render.png",
+    "03_three-modes_photo_bimmerstop.png"
+   ],
+   "evidence": "weak",
+   "params": {
+    "what": "faint radial ticks just outside the EfficientDynamics arc, on its right half",
+    "r0": 0.515,
+    "r1": 0.56,
+    "span_deg": [
+     40,
+     125
+    ],
+    "pitch_deg": 3.2,
+    "hw": 0.0015,
+    "rgb": [
+     0.35,
+     0.5,
+     0.8
+    ],
+    "opacity": 0.35,
+    "note": "pitch assumed equal to the rev minor pitch; not measurable"
+   }
+  },
+  {
+   "id": "speedo.eco-arc",
+   "cluster": "C8",
+   "z": 6.1,
+   "kind": "glow",
+   "class": "baked",
+   "frame": "panel",
+   "x": 202,
+   "y": 170,
+   "w": 420,
+   "h": 346,
+   "scale": 0.5,
+   "file": "C8-eco/speedo.eco-arc.glow@0.5x.png",
+   "bytes_by_8wh": 290640,
+   "stack_below": [
+    "speedo.inner-disc"
+   ],
+   "stack_above": [
+    "speedo.hub"
+   ],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.94,
+    "dE2000_mean": 3.363,
+    "edge_px_err": 0.38,
+    "ref": "bake/work/C8-eco/rect/03_three-modes_photo_bimmerstop.eco.C1.rc-speedo-arc-03",
+    "roi": [
+     "ring:0.44:0.62",
+     "angle 235.0:120.0"
+    ],
+    "sheet": "bake/work/C8-eco/qc_speedo.eco-arc__03_three-modes_photo_bimmerstop.eco.C1.rc-speedo-arc-03.png"
+   },
+   "params": {
+    "edge": 0.489,
+    "edge_w": 0.025,
+    "peak_r": 0.5015,
+    "P_rgb": [
+     0.4593,
+     0.6183,
+     0.8504
+    ],
+    "tau_rgb": [
+     0.0121,
+     0.0143,
+     0.0188
+    ],
+    "k_rgb": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "fade": [
+     0.58,
+     0.62
+    ],
+    "rms_8bit": 3.56,
+    "baseline_rgb": [
+     0.03920000046491623,
+     0.05000000074505806,
+     0.058400001376867294
+    ],
+    "L_along_235_355": [
+     148.0,
+     141.9,
+     142.7,
+     143.5,
+     148.9,
+     144.5
+    ],
+    "end_deg": null,
+    "model": "I_c = P_c*smoothstep(edge-w/2, edge+w/2, r)*exp(-((r-peak_r)+/tau_c)^k_c)*(1-smoothstep(fade0, fade1, r)); rgba = (I/max(I), max(I)); square ends",
+    "span_deg": [
+     230.0,
+     490.0
+    ],
+    "recentred_by_R": [
+     0.0159,
+     0.0112
+    ],
+    "radii_from": "03 peak r 0.495 (circle rms 0.41 px), 01 0.4915; the Comfort disc edge in 03 sits at 0.488 R (grey). 02 puts it at ~0.43 R (its proportions differ)"
+   }
+  },
+  {
+   "id": "speedo.eco-arc-clip",
+   "cluster": "C8",
+   "z": 6.11,
+   "kind": "mask",
+   "class": "dynamic",
+   "frame": "dial",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png"
+   ],
+   "evidence": "ok",
+   "params": {
+    "what": "the Eco speed arc is lit from 0 km/h up to the Eco Pro speed (a setting): clip the layer at it",
+    "from_deg": 230.0,
+    "to_deg_default": 360.0,
+    "default_kmh": 130.0,
+    "deg_per_kmh": 1.0,
+    "measured_end_deg": {
+     "03": "about 5 (fades out 355..10)",
+     "01": 10.0
+    },
+    "beyond": "past the end the disc edge is dark in 03 / 01 (02 shows blue radial ticks there instead: render variant)"
+   },
+   "fit": {
+    "ssim": 0.663,
+    "dE2000_mean": 1.802,
+    "edge_px_err": null,
+    "ref": "bake/work/C8-eco/rect/03_three-modes_photo_bimmerstop.eco.C1.rc-speedo-arc-03",
+    "roi": [
+     "ring:0.44:0.62",
+     "angle 365.0:120.0"
+    ],
+    "sheet": "bake/work/C8-eco/qc_speedo.eco-arc-beyond__03_three-modes_photo_bimmerstop.eco.C1.rc-speedo-arc-03.png"
+   }
+  },
+  {
+   "id": "eco.tint-shared",
+   "cluster": "C8",
+   "z": 0.5,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "dial",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png"
+   ],
+   "evidence": "ok",
+   "params": {
+    "what": "Eco Pro colours of the SHARED Comfort layers, as parameters (no re-bake). Same photo (03), same rings, Eco vs Comfort; 0..1 sRGB code values after P0's exposure step",
+    "measured_03": {
+     "face_C2": {
+      "eco": [
+       0.024,
+       0.0275,
+       0.0353
+      ],
+      "comfort": [
+       0.0708,
+       0.0713,
+       0.0784
+      ]
+     },
+     "face_C1": {
+      "eco": [
+       0.0078,
+       0.0118,
+       0.0275
+      ],
+      "comfort": [
+       0.033,
+       0.0449,
+       0.0549
+      ]
+     },
+     "groove_rim_C1": {
+      "eco": [
+       0.4644,
+       0.5217,
+       0.6223
+      ],
+      "comfort": [
+       0.3598,
+       0.3715,
+       0.3827
+      ]
+     },
+     "inner_disc_edge_C1": {
+      "eco": [
+       0.5059,
+       0.6476,
+       0.8509
+      ],
+      "comfort": [
+       0.125,
+       0.1286,
+       0.1406
+      ]
+     },
+     "hub_ring_C2": {
+      "eco": [
+       0.103,
+       0.1148,
+       0.1697
+      ],
+      "comfort": [
+       0.4858,
+       0.2561,
+       0.2694
+      ]
+     },
+     "hub_ring_C1": {
+      "eco": [
+       0.2961,
+       0.3445,
+       0.4873
+      ],
+      "comfort": [
+       0.3549,
+       0.1841,
+       0.1995
+      ]
+     },
+     "bezel_C2": {
+      "eco": [
+       0.5433,
+       0.5186,
+       0.4944
+      ],
+      "comfort": [
+       0.4385,
+       0.4461,
+       0.4566
+      ]
+     },
+     "bezel_C1": {
+      "eco": [
+       0.8381,
+       0.8243,
+       0.8025
+      ],
+      "comfort": [
+       0.9277,
+       0.913,
+       0.9068
+      ]
+     },
+     "ticks_C1": {
+      "eco": [
+       0.377,
+       0.375,
+       0.3914
+      ],
+      "comfort": [
+       0.617,
+       0.6153,
+       0.6234
+      ]
+     }
+    },
+    "proposed": {
+     "face_gain_rgb": [
+      0.55,
+      0.6,
+      0.8
+     ],
+     "groove_rim_rgb": [
+      0.4644,
+      0.5217,
+      0.6223
+     ],
+     "inner_disc_edge": "replaced by speedo.eco-arc / tacho.ed-arc (lit blue); the grey Comfort edge stays under them",
+     "hub_ring_rgb": [
+      0.2961,
+      0.3445,
+      0.4873
+     ],
+     "needle": "white / pale blue blade (03: L ~230 core, blue fringe); the red tube of Comfort is not used",
+     "ticks_gain": 0.61,
+     "speed_numerals": "0..40 white, 60.. blue-grey (03: about 0.45, 0.58, 0.70)",
+     "bezel": "unchanged (03: eco 0.54 / comfort 0.44 at C2 and 0.84 / 0.93 at C1, i.e. reflection noise, no tint)"
+    },
+    "notes": "face levels: Eco face is darker AND bluer than Comfort in the same photo (C2 0.024,0.028,0.035 vs 0.071,0.071,0.078). The rev dial has no tick scale in Eco (the band replaces it)."
+   }
+  },
+  {
+   "id": "tacho.text-charge",
+   "cluster": "C8",
+   "z": 7.0,
+   "kind": "albedo",
+   "class": "dynamic",
+   "frame": "panel",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png"
+   ],
+   "evidence": "ok",
+   "params": {
+    "text": "CHARGE",
+    "type": "live text, set on an arc (glyphs upright to the radius, baseline toward the centre)",
+    "baseline_r": 0.745,
+    "cap_top_r": 0.792,
+    "cap_height_R": 0.047,
+    "from_deg": -29.5,
+    "to_deg": -9.8,
+    "dial": "C2",
+    "measured": "03: r 0.752-0.795, -29.2..-9.8; 01: -29.8..-3.1",
+    "colour": "white, about 0.9"
+   },
+   "x": 1376,
+   "y": 118,
+   "w": 90,
+   "h": 46
+  },
+  {
+   "id": "tacho.text-power",
+   "cluster": "C8",
+   "z": 7.0,
+   "kind": "albedo",
+   "class": "dynamic",
+   "frame": "panel",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png"
+   ],
+   "evidence": "ok",
+   "params": {
+    "text": "POWER",
+    "type": "live text, set on an arc (glyphs upright to the radius, baseline toward the centre)",
+    "baseline_r": 0.741,
+    "cap_top_r": 0.792,
+    "cap_height_R": 0.051,
+    "from_deg": 6.1,
+    "to_deg": 24.0,
+    "dial": "C2",
+    "measured": "03: r 0.741-0.794, 6.1..23.7; 01: 4.3..22.1",
+    "colour": "white, about 0.9"
+   },
+   "x": 1534,
+   "y": 116,
+   "w": 82,
+   "h": 38
+  },
+  {
+   "id": "tacho.text-effdyn",
+   "cluster": "C8",
+   "z": 7.0,
+   "kind": "albedo",
+   "class": "dynamic",
+   "frame": "panel",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "01_three-modes_small.png"
+   ],
+   "evidence": "ok",
+   "params": {
+    "text": "EfficientDynamics",
+    "type": "live text, set on an arc (glyphs upright to the radius, baseline toward the centre)",
+    "baseline_r": 0.4,
+    "cap_top_r": 0.476,
+    "cap_height_R": 0.076,
+    "from_deg": -31.0,
+    "to_deg": 74.0,
+    "dial": "C2",
+    "measured": "01: r 0.401-0.484, -31.2..74.0; 03 the same but cut by the needle",
+    "colour": "pale blue-grey (03: about 0.55, 0.62, 0.75)"
+   },
+   "x": 1424,
+   "y": 220,
+   "w": 238,
+   "h": 124
+  }
+ ],
+ "composition": {
+  "images": [
+   {
+    "file": "C8-eco/tacho.eco-static.albedo@0.5x.png",
+    "from_ids": [
+     "tacho.eco-track",
+     "tacho.ed-arc"
+    ],
+    "x": 1304,
+    "y": 64,
+    "w": 520,
+    "h": 518,
+    "scale": 0.5,
+    "bytes_by_8wh": 538720
+   },
+   {
+    "file": "C8-eco/tacho.eco-glow.glow@0.5x.png",
+    "from_ids": [
+     "tacho.eco-glow"
+    ],
+    "x": 1166,
+    "y": 198,
+    "w": 86,
+    "h": 388,
+    "scale": 0.5,
+    "bytes_by_8wh": 66736
+   },
+   {
+    "file": "C8-eco/speedo.eco-glow.glow@0.5x.png",
+    "from_ids": [
+     "speedo.eco-glow"
+    ],
+    "x": 690,
+    "y": 222,
+    "w": 64,
+    "h": 330,
+    "scale": 0.5,
+    "bytes_by_8wh": 42240
+   },
+   {
+    "file": "C8-eco/speedo.eco-arc.glow@0.5x.png",
+    "from_ids": [
+     "speedo.eco-arc"
+    ],
+    "x": 202,
+    "y": 170,
+    "w": 420,
+    "h": 346,
+    "scale": 0.5,
+    "bytes_by_8wh": 290640
+   }
+  ],
+  "layer_count": 4,
+  "bytes_by_8wh_total": 938336,
+  "merged_fit": {
+   "ssim": 0.759,
+   "dE2000_mean": 6.074,
+   "edge_px_err": 2.924,
+   "ref": "bake/work/C8-eco/rect/03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03",
+   "roi": [
+    "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-eco/roi_stack_tacho.png"
+   ],
+   "sheet": "bake/work/C8-eco/qc_stack-tacho-merged__03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03.png"
+  },
+  "note": "tacho.eco-fill is drawn by the effect shader from its params over the static image (or, as a fallback, by sampling tacho.eco-fill.albedo@0.5x: +1 image, +538720 B). The glows sit above P1/P2's bezel, so they cannot merge into the face-level image."
+ },
+ "open_questions": [
+  "Which signal drives the CHARGE/POWER fill bounds (03 / 01: blue -31.75..89.5 deg, grey outside; 02: white -48..~100)? Treat as dynamic clip until known.",
+  "Eco speed arc end: tied to the Eco Pro speed setting (130 km/h assumed -> 0 deg on our 1 deg/kmh scale); verify on the car.",
+  "Curved live text (CHARGE, POWER, EfficientDynamics follow the arc): can the text widget draw on an arc, or should these be pre-rotated per glyph?",
+  "02's Eco dial is not concentric with its bezel in our frame (render perspective); all radii come from 03 (+01).",
+  "The face features in 03 / 01 sit 0.012-0.048 R off the bezel centre (parallax of the recessed face); QC used re-centred crops (bake/work/C8-eco/rect/*.rc-*).",
+  "The hairlines and the ED ticks are weak (pitch not measurable)."
+ ]
+}

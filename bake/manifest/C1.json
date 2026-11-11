@@ -1,0 +1,892 @@
+{
+ "cluster": "C1",
+ "package": "P1",
+ "mode": "comfort",
+ "R": 335.0,
+ "generator": "cd bake/src && uv run -q --no-project --with opencv-python-headless --with numpy --with pillow python -m C1.build",
+ "layers": [
+  {
+   "id": "speedo.face",
+   "cluster": "C1",
+   "z": 1,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 76,
+   "y": 44,
+   "w": 672,
+   "h": 672,
+   "scale": 0.5,
+   "file": "C1/speedo.face.albedo@0.5x.png",
+   "bytes_by_8wh": 903168,
+   "stack_below": [],
+   "stack_above": [
+    "speedo.face-shadow",
+    "speedo.floor-shade"
+   ],
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "04_comfort_whole-cluster_mph.png",
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.7708,
+    "dE2000_mean": 2.64,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.52:0.77",
+     "box:70:38:684:428",
+     "mirrored onto C2"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.face.in-stack__05_comfort_tach-closeup.comfort.C2.png"
+   },
+   "params": {
+    "face": {
+     "rgb": [
+      7,
+      10,
+      17
+     ],
+     "lift_rgb": [
+      1,
+      1,
+      2
+     ]
+    },
+    "disc_fill": {
+     "r": 0.487,
+     "fill_rgb": [
+      6,
+      9,
+      16
+     ],
+     "fill_edge_rgb": [
+      10,
+      13,
+      22
+     ],
+     "fill_from": 0.3
+    },
+    "below_floor": {
+     "below_rgb": [
+      5,
+      7,
+      13
+     ],
+     "below_r0": 0.36,
+     "below_r1": 0.62
+    },
+    "floor_dy": 0.245,
+    "outer_r": 1.0
+   }
+  },
+  {
+   "id": "speedo.face-shadow",
+   "cluster": "C1",
+   "z": 2,
+   "kind": "shadow",
+   "class": "baked",
+   "frame": "panel",
+   "x": 76,
+   "y": 44,
+   "w": 672,
+   "h": 672,
+   "scale": 0.5,
+   "file": "C1/speedo.face-shadow.shadow@0.5x.png",
+   "bytes_by_8wh": 903168,
+   "stack_below": [
+    "speedo.face"
+   ],
+   "stack_above": [
+    "speedo.floor-shade",
+    "speedo.tick-groove"
+   ],
+   "sources": [
+    "13_ticks_closeup.png",
+    "05_comfort_tach-closeup.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.4377,
+    "dE2000_mean": 6.372,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.93:0.985",
+     "mirrored onto C2"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.face-shadow.in-stack__05_comfort_tach-closeup.comfort.C2.png"
+   },
+   "params": {
+    "r_wall": 0.962,
+    "scale": 0.018,
+    "a": 0.65,
+    "disc_scale": 0.025,
+    "disc_a": 0.22
+   }
+  },
+  {
+   "id": "speedo.floor-shade",
+   "cluster": "C1",
+   "z": 2.5,
+   "kind": "shadow",
+   "class": "baked",
+   "frame": "panel",
+   "x": 162,
+   "y": 462,
+   "w": 500,
+   "h": 184,
+   "scale": 0.5,
+   "file": "C1/speedo.floor-shade.shadow@0.5x.png",
+   "bytes_by_8wh": 184000,
+   "stack_below": [
+    "speedo.face",
+    "speedo.face-shadow"
+   ],
+   "stack_above": [
+    "speedo.tick-groove",
+    "speedo.tick-groove-rim"
+   ],
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "17_physical-cluster_full.png",
+    "04_comfort_whole-cluster_mph.png"
+   ],
+   "evidence": "weak",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.609,
+    "dE2000_mean": 2.884,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.50:0.78",
+     "box:70:470:684:250",
+     "mirrored onto C2"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.floor-shade.in-stack__05_comfort_tach-closeup.comfort.C2.png"
+   },
+   "params": {
+    "dy": 0.245,
+    "ramp": 0.035,
+    "r_out": 0.7,
+    "r_feather": 0.1,
+    "a": 0.45
+   }
+  },
+  {
+   "id": "speedo.tick-groove",
+   "cluster": "C1",
+   "z": 3,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 78,
+   "y": 46,
+   "w": 668,
+   "h": 668,
+   "scale": 0.5,
+   "file": "C1/speedo.tick-groove.albedo@0.5x.png",
+   "bytes_by_8wh": 892448,
+   "stack_below": [
+    "speedo.face-shadow",
+    "speedo.floor-shade"
+   ],
+   "stack_above": [
+    "speedo.tick-groove-rim",
+    "speedo.ticks"
+   ],
+   "sources": [
+    "13_ticks_closeup.png",
+    "05_comfort_tach-closeup.png",
+    "03_three-modes_photo_bimmerstop.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.3051,
+    "dE2000_mean": 9.623,
+    "edge_px_err": 2.948,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.comfort.C1",
+    "roi": [
+     "ring:0.80:0.985"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.tick-groove.in-stack__03_three-modes_photo_bimmerstop.comfort.C1.png"
+   },
+   "params": {
+    "r_in": 0.807,
+    "rim_w": 0.012,
+    "rim_rgb": [
+     27,
+     31,
+     37
+    ],
+    "spill_to": 0.85,
+    "spill_rgb": [
+     20,
+     24,
+     30
+    ],
+    "floor_rgb": [
+     1,
+     2,
+     7
+    ],
+    "wall_r0": 0.964,
+    "wall_r1": 0.984,
+    "wall_rgb": [
+     9,
+     10,
+     13
+    ]
+   }
+  },
+  {
+   "id": "speedo.tick-groove-rim",
+   "cluster": "C1",
+   "z": 3.1,
+   "kind": "highlight",
+   "class": "procedural",
+   "frame": "panel",
+   "x": 138,
+   "y": 106,
+   "w": 548,
+   "h": 548,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [
+    "speedo.floor-shade",
+    "speedo.tick-groove"
+   ],
+   "stack_above": [
+    "speedo.ticks",
+    "speedo.inner-disc"
+   ],
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "03_three-modes_photo_bimmerstop.png",
+    "04_comfort_whole-cluster_mph.png",
+    "13_ticks_closeup.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.5518,
+    "dE2000_mean": 5.258,
+    "edge_px_err": 4.118,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.comfort.C1",
+    "roi": [
+     "ring:0.79:0.83"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.tick-groove-rim.in-stack__03_three-modes_photo_bimmerstop.comfort.C1.png"
+   },
+   "params": {
+    "r": 0.807,
+    "w": 0.012,
+    "rgb": [
+     27,
+     31,
+     37
+    ],
+    "light": {
+     "key_dir_deg": 115.0,
+     "key": 1.0,
+     "rim_mod": 0.35
+    },
+    "preview_1x": "bake/work/C1/proc/speedo.tick-groove-rim.highlight.png"
+   }
+  },
+  {
+   "id": "speedo.ticks",
+   "cluster": "C1",
+   "z": 5,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "panel",
+   "x": 108,
+   "y": 76,
+   "w": 608,
+   "h": 502,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [
+    "speedo.tick-groove",
+    "speedo.tick-groove-rim"
+   ],
+   "stack_above": [
+    "speedo.inner-disc",
+    "speedo.inner-ring"
+   ],
+   "sources": [
+    "13_ticks_closeup.png",
+    "12_speedo_signs_overspeed-wedge.png",
+    "03_three-modes_photo_bimmerstop.png",
+    "05_comfort_tach-closeup.png",
+    "17_physical-cluster_full.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.3069,
+    "dE2000_mean": 12.241,
+    "edge_px_err": 3.752,
+    "ref": "bake/work/rect/12_speedo_signs_overspeed-wedge.comfort.C1",
+    "roi": [
+     "ring:0.81:0.95"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.ticks.in-stack__12_speedo_signs_overspeed-wedge.comfort.C1.png"
+   },
+   "params": {
+    "scale": {
+     "start": 230.0,
+     "deg_per_kmh": 1.0,
+     "vmax": 260,
+     "minor_kmh": 2,
+     "mid_kmh": 10,
+     "major_kmh": 20
+    },
+    "ticks": {
+     "major": {
+      "r_in": 0.82,
+      "r_out": 0.902,
+      "w_in": 0.0085,
+      "w_out": 0.0112,
+      "rgb": [
+       236,
+       238,
+       240
+      ],
+      "a": 1.0
+     },
+     "mid": {
+      "r_in": 0.856,
+      "r_out": 0.902,
+      "w_in": 0.006,
+      "w_out": 0.007,
+      "rgb": [
+       236,
+       238,
+       240
+      ],
+      "a": 1.0
+     },
+     "minor": {
+      "r_in": 0.862,
+      "r_out": 0.902,
+      "w_in": 0.0028,
+      "w_out": 0.0032,
+      "rgb": [
+       150,
+       152,
+       156
+      ],
+      "a": 1.0
+     }
+    },
+    "fringe": {
+     "rgb": [
+      120,
+      215,
+      255
+     ],
+     "from_t": 0.7,
+     "mix_major": 0.4,
+     "mix_mid": 0.25,
+     "mix_minor": 0.0
+    },
+    "angle_cw12": "start + kmh * deg_per_kmh, kmh = 0, 2, .. 260; major kmh % 20 == 0, mid kmh % 10 == 0",
+    "preview_1x": "bake/work/C1/proc/speedo.ticks.albedo.png"
+   }
+  },
+  {
+   "id": "speedo.inner-disc",
+   "cluster": "C1",
+   "z": 6,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "panel",
+   "x": 246,
+   "y": 214,
+   "w": 332,
+   "h": 250,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [
+    "speedo.tick-groove-rim",
+    "speedo.ticks"
+   ],
+   "stack_above": [
+    "speedo.inner-ring",
+    "speedo.floor"
+   ],
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "04_comfort_whole-cluster_mph.png",
+    "03_three-modes_photo_bimmerstop.png",
+    "17_physical-cluster_full.png",
+    "14_inner-rings_closeup.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.7306,
+    "dE2000_mean": 3.077,
+    "edge_px_err": 2.73,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.44:0.53",
+     "box:70:38:684:420",
+     "mirrored onto C2"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.inner-disc.in-stack__05_comfort_tach-closeup.comfort.C2.png"
+   },
+   "params": {
+    "r": 0.487,
+    "edge_w": 0.012,
+    "edge_rgb": [
+     26,
+     30,
+     37
+    ],
+    "open_at_bottom": "drawn only where v < floor dy (0.245 R): the arc ends at cw12 +-120.2 deg",
+    "light": {
+     "key_dir_deg": 115.0,
+     "key": 1.0,
+     "rim_mod": 0.35
+    },
+    "preview_1x": "bake/work/C1/proc/speedo.inner-disc.albedo.png"
+   }
+  },
+  {
+   "id": "speedo.inner-ring",
+   "cluster": "C1",
+   "z": 7,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "panel",
+   "x": 298,
+   "y": 266,
+   "w": 228,
+   "h": 198,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [
+    "speedo.ticks",
+    "speedo.inner-disc"
+   ],
+   "stack_above": [
+    "speedo.floor",
+    "speedo.soft-glow"
+   ],
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "04_comfort_whole-cluster_mph.png",
+    "03_three-modes_photo_bimmerstop.png",
+    "14_inner-rings_closeup.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.7683,
+    "dE2000_mean": 1.738,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.30:0.37",
+     "box:70:38:684:420",
+     "mirrored onto C2"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.inner-ring.in-stack__05_comfort_tach-closeup.comfort.C2.png"
+   },
+   "params": {
+    "r": 0.33,
+    "w": 0.008,
+    "rgb": [
+     17,
+     21,
+     28
+    ],
+    "halo_scale": 0.008,
+    "halo_a": 0.12,
+    "open_at_bottom": "ends at cw12 +-137.9 deg (v = 0.245 R)",
+    "light": {
+     "key_dir_deg": 115.0,
+     "key": 1.0,
+     "rim_mod": 0.35
+    },
+    "preview_1x": "bake/work/C1/proc/speedo.inner-ring.albedo.png"
+   }
+  },
+  {
+   "id": "speedo.floor",
+   "cluster": "C1",
+   "z": 8,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "panel",
+   "x": 268,
+   "y": 458,
+   "w": 288,
+   "h": 6,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [
+    "speedo.inner-disc",
+    "speedo.inner-ring"
+   ],
+   "stack_above": [
+    "speedo.soft-glow",
+    "speedo.hub-well"
+   ],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "05_comfort_tach-closeup.png",
+    "03_three-modes_photo_bimmerstop.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.8471,
+    "dE2000_mean": 1.879,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.15:0.47",
+     "box:300:440:224:80",
+     "mirrored onto C2"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.floor.in-stack__05_comfort_tach-closeup.comfort.C2.png"
+   },
+   "params": {
+    "dy": 0.245,
+    "lip_rgb": [
+     40,
+     44,
+     52
+    ],
+    "lip_w": 0.006,
+    "half_length_u": 0.421,
+    "preview_1x": "bake/work/C1/proc/speedo.floor.albedo.png"
+   }
+  },
+  {
+   "id": "speedo.soft-glow",
+   "cluster": "C1",
+   "z": 8.5,
+   "kind": "glow",
+   "class": "baked",
+   "frame": "panel",
+   "x": 90,
+   "y": 60,
+   "w": 644,
+   "h": 530,
+   "scale": 0.5,
+   "file": "C1/speedo.soft-glow.glow@0.5x.png",
+   "bytes_by_8wh": 682640,
+   "stack_below": [
+    "speedo.inner-ring",
+    "speedo.floor"
+   ],
+   "stack_above": [
+    "speedo.hub-well",
+    "speedo.bezel"
+   ],
+   "sources": [
+    "13_ticks_closeup.png",
+    "17_physical-cluster_full.png",
+    "05_comfort_tach-closeup.png",
+    "04_comfort_whole-cluster_mph.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.2445,
+    "dE2000_mean": 10.007,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.comfort.C1",
+    "roi": [
+     "ring:0.86:0.96"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.soft-glow.in-stack__03_three-modes_photo_bimmerstop.comfort.C1.png"
+   },
+   "params": {
+    "tick_spot": {
+     "r": 0.918,
+     "sigma_r": 0.012,
+     "sigma_t": 0.016,
+     "rgb": [
+      205,
+      215,
+      230
+     ],
+     "a_major": 0.42,
+     "a_mid": 0.3
+    },
+    "tick_halo": {
+     "scale": 0.006,
+     "a": 0.1
+    },
+    "disc_halo": {
+     "halo_scale": 0.01,
+     "halo_rgb": [
+      26,
+      30,
+      38
+     ],
+     "halo_a": 0.3
+    },
+    "ring_halo": {
+     "halo_scale": 0.008,
+     "halo_a": 0.12
+    },
+    "floor_glow": {
+     "glow_rgb": [
+      30,
+      36,
+      48
+     ],
+     "glow_a": 0.17,
+     "glow_pow": 1.8
+    }
+   }
+  },
+  {
+   "id": "speedo.hub-well",
+   "cluster": "C1",
+   "z": 9,
+   "kind": "shadow",
+   "class": "baked",
+   "frame": "panel",
+   "x": 326,
+   "y": 294,
+   "w": 172,
+   "h": 172,
+   "scale": 0.5,
+   "file": "C1/speedo.hub-well.shadow@0.5x.png",
+   "bytes_by_8wh": 59168,
+   "stack_below": [
+    "speedo.floor",
+    "speedo.soft-glow"
+   ],
+   "stack_above": [
+    "speedo.bezel"
+   ],
+   "sources": [
+    "15_hub-needle_closeup.png",
+    "05_comfort_tach-closeup.png"
+   ],
+   "evidence": "weak",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.923,
+    "dE2000_mean": 1.952,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.15:0.30",
+     "box:70:38:684:400",
+     "mirrored onto C2"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.hub-well.in-stack__05_comfort_tach-closeup.comfort.C2.png"
+   },
+   "params": {
+    "r_core": 0.135,
+    "r_out": 0.26,
+    "a": 0.3,
+    "hub_ring": {
+     "r": 0.133,
+     "note": "drawn by the dynamic hub layer (red, glow state); not baked here"
+    }
+   }
+  },
+  {
+   "id": "speedo.bezel",
+   "cluster": "C1",
+   "z": 11,
+   "kind": "highlight",
+   "class": "procedural",
+   "frame": "panel",
+   "x": 72,
+   "y": 40,
+   "w": 680,
+   "h": 680,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [
+    "speedo.soft-glow",
+    "speedo.hub-well"
+   ],
+   "stack_above": [],
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "04_comfort_whole-cluster_mph.png",
+    "03_three-modes_photo_bimmerstop.png",
+    "13_ticks_closeup.png",
+    "17_physical-cluster_full.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 115.0,
+    "key": 1.0
+   },
+   "fit": {
+    "ssim": 0.4435,
+    "dE2000_mean": 8.336,
+    "edge_px_err": 2.741,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.94:1.02",
+     "mirrored onto C2"
+    ],
+    "sheet": "bake/work/C1/qc_speedo.bezel.in-stack__05_comfort_tach-closeup.comfort.C2.png"
+   },
+   "params": {
+    "r": 0.9915,
+    "sigma": 0.0058,
+    "inner_dark": [
+     0.978,
+     0.986
+    ],
+    "rgb": [
+     214,
+     216,
+     222
+    ],
+    "base": 0.26,
+    "lobes": [
+     [
+      8.0,
+      22.0,
+      0.42
+     ],
+     [
+      232.0,
+      32.0,
+      0.72
+     ],
+     [
+      300.0,
+      40.0,
+      0.1
+     ]
+    ],
+    "outer_fade": 1.012,
+    "inner_rim": {
+     "r": 0.968,
+     "sigma": 0.0035,
+     "rgb": [
+      150,
+      155,
+      165
+     ],
+     "a": 0.35,
+     "centre": 200.0,
+     "span_sigma": 55.0
+    },
+    "preview_1x": "bake/work/C1/proc/speedo.bezel.highlight.png"
+   }
+  }
+ ],
+ "composition": {
+  "images": [
+   {
+    "file": "C1/speedo.base.albedo@0.5x.png",
+    "from_ids": [
+     "speedo.face",
+     "speedo.face-shadow",
+     "speedo.floor-shade",
+     "speedo.tick-groove",
+     "speedo.hub-well"
+    ],
+    "x": 76,
+    "y": 44,
+    "w": 672,
+    "h": 672,
+    "scale": 0.5,
+    "bytes_by_8wh": 903168
+   },
+   {
+    "file": "C1/speedo.soft-glow.glow@0.5x.png",
+    "from_ids": [
+     "speedo.soft-glow"
+    ],
+    "x": 90,
+    "y": 60,
+    "w": 644,
+    "h": 530,
+    "scale": 0.5,
+    "bytes_by_8wh": 682640
+   },
+   {
+    "file": "(effect layer: WBDIAL-style shader, no image)",
+    "from_ids": [
+     "speedo.tick-groove-rim",
+     "speedo.ticks",
+     "speedo.inner-disc",
+     "speedo.inner-ring",
+     "speedo.floor",
+     "speedo.bezel"
+    ],
+    "w": 0,
+    "h": 0,
+    "bytes_by_8wh": 0
+   }
+  ],
+  "layer_count": 3,
+  "bytes_by_8wh_total": 1585808
+ },
+ "open_questions": [
+  "Light: the bezel ridge in the photos is brightest at the top (cw12 ~8) and the lower outer side (cw12 ~232), and the lobes mirror between the two dials (05 vs 04/03), so they are drawn, not glass reflections; the groove rim points to a key from the top / upper left (math 84-127). Adopted: key 115 deg math for rims and tubes, two-lobed bezel gloss. The brief's 'upper left key + low right second light' is NOT what the photos show for the bezel.",
+  "Floor-shade (z 2.5) is weak: 05 shows the darkening below the horizon, 04 and 03 do not; kept at alpha 0.45.",
+  "Hub well: no visible vignette in 05/15 beyond the red hub glow (dynamic); kept weak (alpha 0.30).",
+  "Ticks are measured partly on the rev dial (13, 05, mirrored); the speedo's own widths in 12 / 03 are blur-limited.",
+  "17 has veiling glare (face L 50-72): its dE is not a fit target; levels follow 05 / 04 / 03.",
+  "02 (clean render) puts the disc at 0.568 R and floor at 0.134 R: not followed (photos agree on 0.487 / 0.245)."
+ ],
+ "notes": "Soft layers are shipped separately (for relighting) but proposed merged into 2 images: base albedo (face, groove, shadows multiplied in) and one glow. Crisp layers (groove rim, ticks, disc edge, inner ring, floor lip, bezel) are procedural: params in R units here and in bake/src/C1/params.py; 1x previews in bake/work/C1/proc/. Shipped-files total if not merged: 3624592 B."
+}

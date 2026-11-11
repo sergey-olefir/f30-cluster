@@ -1,0 +1,1332 @@
+{
+ "cluster": "C8",
+ "package": "P6",
+ "mode": "sport",
+ "R": 335,
+ "generator": "cd bake/src && ./C8-sport/py.sh C8-sport/build.py",
+ "notes": "Sport-only layers on top of the Comfort dial stack (P1 / P2). Manifest file C8-sport.json; the schema's cluster pattern has no sub-mode, so entries say C8. Shared-layer changes for Sport are params (sport_shared_layers), not re-bakes. QC refs: 03 sport (primary, good alignment), 01 / 02 (cross-check). z: band 5.2 / hairlines 5.3 inside each dial stack (above face / floor-shade, below the inner disc); bridge 0.5 and wings 0.6 in the background, below the dials (both are clipped at r = 1 R anyway).",
+ "sport_shared_layers": {
+  "<dial>.face": {
+   "opacity": 1.0,
+   "tint": null,
+   "evidence": "ok",
+   "why": "03 sport face 0.30-0.45 R (8,9,11) vs comfort (2,3,5) + haze: unchanged"
+  },
+  "<dial>.face-shadow": {
+   "opacity": 1.0,
+   "tint": null,
+   "evidence": "weak"
+  },
+  "<dial>.floor-shade": {
+   "opacity": 1.0,
+   "tint": null,
+   "evidence": "weak",
+   "why": "02 sport keeps the darker floor; 03 band continues below the horizon unchanged"
+  },
+  "<dial>.tick-groove": {
+   "opacity": 0.0,
+   "evidence": "ok",
+   "why": "03 sport 0.87-0.97 R is black (1-12) where comfort shows the groove rims / ticks"
+  },
+  "<dial>.ticks": {
+   "opacity": 0.0,
+   "evidence": "ok",
+   "why": "no ticks in 03 / 01 sport; 02 draws red segments in its outer strip (render, disagrees)"
+  },
+  "<dial>.inner-disc": {
+   "opacity": 0.0,
+   "evidence": "ok",
+   "why": "03 comfort lit edge at 0.49 R (21 vs 5 around) is absent in sport (11-13, smooth); the band starts there"
+  },
+  "<dial>.inner-ring": {
+   "opacity": 0.0,
+   "evidence": "weak",
+   "why": "no 0.33 R ring in 03 / 01 sport"
+  },
+  "<dial>.floor": {
+   "opacity": 1.0,
+   "evidence": "weak",
+   "why": "02 sport shows the floor edge; 03 too blurred"
+  },
+  "<dial>.hub-well": {
+   "opacity": 1.0,
+   "evidence": "weak"
+  },
+  "<dial>.hub-ring": {
+   "opacity": 0.0,
+   "evidence": "ok",
+   "why": "03 comfort red ring at 0.13 R (19,10,14); sport flat (7-8). 01/02 sport: a red glow at < 0.2 R instead (not delivered)"
+  },
+  "<dial>.bezel": {
+   "opacity": 1.0,
+   "tint": null,
+   "evidence": "ok",
+   "why": "03 sport ridge 0.99 R neutral grey (50 / 64), same as comfort; 01 sport darker (weak), 02 red (render)"
+  },
+  "<dial>.red-zone": {
+   "note": "dynamic: in 03 the band from the shift point is x2.2 brighter (157 vs 70 at 0.76-0.84 R)"
+  },
+  "<dial>.lit-fill": {
+   "note": "dynamic: in 03 the band from OFF to the needle is x2.9 brighter (160 vs 55); existing WBDIAL 'lit' term"
+  }
+ },
+ "layers": [
+  {
+   "id": "speedo.sport-band",
+   "cluster": "C8",
+   "z": 5.2,
+   "kind": "glow",
+   "class": "baked",
+   "frame": "panel",
+   "x": 124,
+   "y": 92,
+   "w": 576,
+   "h": 576,
+   "scale": 0.5,
+   "file": "C8-sport/speedo.sport-band.glow@0.5x.png",
+   "bytes_by_8wh": 663552,
+   "stack_below": [
+    "speedo.face",
+    "speedo.floor-shade"
+   ],
+   "stack_above": [
+    "speedo.sport-hairlines"
+   ],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png",
+    "01_three-modes_small.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.7009,
+    "dE2000_mean": 3.625,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.C1",
+    "roi": [
+     "ring:0.45:0.88",
+     "angle 230:260"
+    ],
+    "sheet": "bake/work/C8-sport/qc_speedo.sport-band.03__03_three-modes_photo_bimmerstop.sport.C1.png"
+   },
+   "params": {
+    "r_units": {
+     "r_in": 0.47,
+     "a0": 0.02,
+     "a1": 0.52,
+     "r1": 0.765,
+     "rim0": 0.74,
+     "rim1": 0.8,
+     "r_out": 0.85
+    },
+    "sweep_cw12": {
+     "start": 230.0,
+     "span": 260.0
+    },
+    "color": [
+     236,
+     35,
+     35
+    ],
+    "opacity_by_ref": {
+     "03": 0.3,
+     "01": 0.48,
+     "02": 0.92,
+     "default": 0.48
+    },
+    "level_formula": "fin(r) * mix(ramp(r), 1, smoothstep(rim0, rim1, r)), crisp at r_out; ramp = a0 + (a1-a0)*clamp((r-r_in)/(r1-r_in)); fin = clamp((r-r_in)/0.012+0.5)",
+    "radii_source": "03 (photo, C1 sector 280..60 + C2 unlit sectors), PSF sigma 0.012 R; 02 puts the same ramp+rim structure at 0.63-0.99 R (its own proportions); 01 ~0.47-0.88 (weak)",
+    "fit_other_refs": {
+     "01": {
+      "ssim": 0.5418,
+      "dE2000_mean": 14.455,
+      "edge_px_err": null,
+      "ref": "bake/work/rect/01_three-modes_small.sport.C1",
+      "roi": [
+       "ring:0.45:0.88",
+       "angle 230:260"
+      ],
+      "sheet": "bake/work/C8-sport/qc_speedo.sport-band.01__01_three-modes_small.sport.C1.png"
+     },
+     "02": {
+      "ssim": 0.4922,
+      "dE2000_mean": 16.837,
+      "edge_px_err": null,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.C1",
+      "roi": [
+       "ring:0.45:0.88",
+       "angle 230:260"
+      ],
+      "sheet": "bake/work/C8-sport/qc_speedo.sport-band.02__02_three-modes_clean-render.sport.C1.png"
+     }
+    },
+    "fit_stack_standin_face": {
+     "03": {
+      "ssim": 0.8548,
+      "dE2000_mean": 3.508,
+      "edge_px_err": null,
+      "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.C1",
+      "roi": [
+       "ring:0.45:0.88",
+       "angle 230:260"
+      ],
+      "sheet": "bake/work/C8-sport/qc_speedo.sport-stack.03__03_three-modes_photo_bimmerstop.sport.C1.png"
+     },
+     "01": {
+      "ssim": 0.6291,
+      "dE2000_mean": 14.134,
+      "edge_px_err": 8.871,
+      "ref": "bake/work/rect/01_three-modes_small.sport.C1",
+      "roi": [
+       "ring:0.45:0.88",
+       "angle 230:260"
+      ],
+      "sheet": "bake/work/C8-sport/qc_speedo.sport-stack.01__01_three-modes_small.sport.C1.png"
+     },
+     "02": {
+      "ssim": 0.4182,
+      "dE2000_mean": 17.164,
+      "edge_px_err": 7.965,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.C1",
+      "roi": [
+       "ring:0.45:0.88",
+       "angle 230:260"
+      ],
+      "sheet": "bake/work/C8-sport/qc_speedo.sport-stack.02__02_three-modes_clean-render.sport.C1.png"
+     }
+    },
+    "dynamic_parts": "lit fill OFF->needle x2.9 and red zone from the shift point x2.2 (03): shader, not baked"
+   }
+  },
+  {
+   "id": "speedo.sport-hairlines",
+   "cluster": "C8",
+   "z": 5.3,
+   "kind": "shadow",
+   "class": "procedural",
+   "frame": "dial",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [
+    "speedo.sport-band"
+   ],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "params": {
+    "width_px_at_R335": 2.0,
+    "darkness": 0.7,
+    "r0": 0.47,
+    "r1": 0.85,
+    "minor_pitch_note": "02 also shows minor hairlines (every minor step, ~0.2 dark); 03 and 01 do not: off",
+    "angles_cw12": [
+     250.0,
+     270.0,
+     290.0,
+     310.0,
+     330.0,
+     350.0,
+     370.0,
+     390.0,
+     410.0,
+     430.0,
+     450.0,
+     470.0
+    ],
+    "width_R": 0.00597,
+    "qc_raster": "bake/work/C8-sport/speedo.sport-hairlines.shadow.qc-only.png",
+    "fit_stack": {
+     "ssim": 0.9121,
+     "dE2000_mean": 2.477,
+     "edge_px_err": null,
+     "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.C1",
+     "roi": [
+      "ring:0.55:0.80",
+      "angle 300:120"
+     ],
+     "sheet": "bake/work/C8-sport/qc_speedo.sport-hairlines.03__03_three-modes_photo_bimmerstop.sport.C1.png"
+    }
+   }
+  },
+  {
+   "id": "tacho.sport-band",
+   "cluster": "C8",
+   "z": 5.2,
+   "kind": "glow",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1220,
+   "y": 92,
+   "w": 576,
+   "h": 576,
+   "scale": 0.5,
+   "file": "C8-sport/tacho.sport-band.glow@0.5x.png",
+   "bytes_by_8wh": 663552,
+   "stack_below": [
+    "tacho.face",
+    "tacho.floor-shade"
+   ],
+   "stack_above": [
+    "tacho.sport-hairlines"
+   ],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png",
+    "01_three-modes_small.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.5981,
+    "dE2000_mean": 4.727,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.C2",
+    "roi": [
+     "ring:0.45:0.88",
+     "angle 280:190"
+    ],
+    "sheet": "bake/work/C8-sport/qc_tacho.sport-band.03__03_three-modes_photo_bimmerstop.sport.C2.png"
+   },
+   "params": {
+    "r_units": {
+     "r_in": 0.47,
+     "a0": 0.02,
+     "a1": 0.52,
+     "r1": 0.765,
+     "rim0": 0.74,
+     "rim1": 0.8,
+     "r_out": 0.85
+    },
+    "sweep_cw12": {
+     "start": 230.0,
+     "span": 261.25
+    },
+    "color": [
+     236,
+     35,
+     35
+    ],
+    "opacity_by_ref": {
+     "03": 0.3,
+     "01": 0.48,
+     "02": 0.92,
+     "default": 0.48
+    },
+    "level_formula": "fin(r) * mix(ramp(r), 1, smoothstep(rim0, rim1, r)), crisp at r_out; ramp = a0 + (a1-a0)*clamp((r-r_in)/(r1-r_in)); fin = clamp((r-r_in)/0.012+0.5)",
+    "radii_source": "03 (photo, C1 sector 280..60 + C2 unlit sectors), PSF sigma 0.012 R; 02 puts the same ramp+rim structure at 0.63-0.99 R (its own proportions); 01 ~0.47-0.88 (weak)",
+    "fit_other_refs": {
+     "01": {
+      "ssim": 0.4648,
+      "dE2000_mean": 15.586,
+      "edge_px_err": null,
+      "ref": "bake/work/rect/01_three-modes_small.sport.C2",
+      "roi": [
+       "ring:0.45:0.88",
+       "angle 280:190"
+      ],
+      "sheet": "bake/work/C8-sport/qc_tacho.sport-band.01__01_three-modes_small.sport.C2.png"
+     },
+     "02": {
+      "ssim": 0.411,
+      "dE2000_mean": 18.205,
+      "edge_px_err": null,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.C2",
+      "roi": [
+       "ring:0.45:0.88",
+       "angle 280:190"
+      ],
+      "sheet": "bake/work/C8-sport/qc_tacho.sport-band.02__02_three-modes_clean-render.sport.C2.png"
+     }
+    },
+    "fit_stack_standin_face": {
+     "03": {
+      "ssim": 0.8414,
+      "dE2000_mean": 3.927,
+      "edge_px_err": null,
+      "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.C2",
+      "roi": [
+       "ring:0.45:0.88",
+       "angle 280:190"
+      ],
+      "sheet": "bake/work/C8-sport/qc_tacho.sport-stack.03__03_three-modes_photo_bimmerstop.sport.C2.png"
+     },
+     "01": {
+      "ssim": 0.6529,
+      "dE2000_mean": 14.781,
+      "edge_px_err": 8.229,
+      "ref": "bake/work/rect/01_three-modes_small.sport.C2",
+      "roi": [
+       "ring:0.45:0.88",
+       "angle 280:190"
+      ],
+      "sheet": "bake/work/C8-sport/qc_tacho.sport-stack.01__01_three-modes_small.sport.C2.png"
+     },
+     "02": {
+      "ssim": 0.3358,
+      "dE2000_mean": 18.634,
+      "edge_px_err": 7.254,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.C2",
+      "roi": [
+       "ring:0.45:0.88",
+       "angle 280:190"
+      ],
+      "sheet": "bake/work/C8-sport/qc_tacho.sport-stack.02__02_three-modes_clean-render.sport.C2.png"
+     }
+    },
+    "dynamic_parts": "lit fill OFF->needle x2.9 and red zone from the shift point x2.2 (03): shader, not baked"
+   }
+  },
+  {
+   "id": "tacho.sport-hairlines",
+   "cluster": "C8",
+   "z": 5.3,
+   "kind": "shadow",
+   "class": "procedural",
+   "frame": "dial",
+   "file": null,
+   "bytes_by_8wh": 0,
+   "stack_below": [
+    "tacho.sport-band"
+   ],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "weak",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "params": {
+    "width_px_at_R335": 2.0,
+    "darkness": 0.7,
+    "r0": 0.47,
+    "r1": 0.85,
+    "minor_pitch_note": "02 also shows minor hairlines (every minor step, ~0.2 dark); 03 and 01 do not: off",
+    "angles_cw12": [
+     250.5,
+     282.6,
+     314.7,
+     346.8,
+     378.9,
+     411.0,
+     443.1,
+     475.20000000000005
+    ],
+    "width_R": 0.00597,
+    "qc_raster": "bake/work/C8-sport/tacho.sport-hairlines.shadow.qc-only.png"
+   }
+  },
+  {
+   "id": "sport.bridge",
+   "cluster": "C8",
+   "z": 0.5,
+   "kind": "glow",
+   "class": "baked",
+   "frame": "panel",
+   "x": 700,
+   "y": 192,
+   "w": 520,
+   "h": 390,
+   "scale": 0.5,
+   "file": "C8-sport/sport.bridge.glow@0.5x.png",
+   "bytes_by_8wh": 405600,
+   "stack_below": [],
+   "stack_above": [
+    "sport.wing-l-upper",
+    "sport.wing-l-lower",
+    "sport.wing-r-upper",
+    "sport.wing-r-lower"
+   ],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png",
+    "01_three-modes_small.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.6969,
+    "dE2000_mean": 3.261,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+    "roi": [
+     "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_bridge_03.png"
+    ],
+    "sheet": "bake/work/C8-sport/qc_sport.bridge.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+   },
+   "params": {
+    "r_units": {
+     "v_c": 0.11,
+     "sigma": 0.092,
+     "collar_amp": 0.17,
+     "collar_len": 0.05,
+     "collar_v": 0.45,
+     "collar_v_soft": 0.08,
+     "clip_r": 1.0
+    },
+    "color": [
+     236,
+     35,
+     35
+    ],
+    "opacity_by_ref": {
+     "03": 0.28,
+     "01": 0.8,
+     "02": 0.75,
+     "default": 0.48
+    },
+    "formula": "alpha = [exp(-(v-v_c)^2/(2 sigma^2)) + collar_amp*exp(-(r_near-1)/collar_len)*win(|v|<collar_v)] * (cx_l < x < cx_r) * clamp((r_near - 1) R + 0.5); v = (y - cy)/R, r_near in R of the nearer dial",
+    "refit_to_our_panel": "x-uniform between the bezels, so it spans whatever gap the panel has (6WB 1.09 R, ours 1.27 R); vertical profile and the collar are in R units of the dials",
+    "fit_other_refs": {
+     "02": {
+      "ssim": 0.4627,
+      "dE2000_mean": 19.134,
+      "edge_px_err": null,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_bridge_02.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.bridge.02__02_three-modes_clean-render.sport.PANEL.png"
+     },
+     "01": {
+      "ssim": 0.6304,
+      "dE2000_mean": 8.747,
+      "edge_px_err": null,
+      "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_bridge_01.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.bridge.01__01_three-modes_small.sport.PANEL.png"
+     }
+    },
+    "ref_disagreement": "v_c: 03 +0.12, 01 +0.10, 02 -0.05 R; sigma 0.089 / 0.095 / 0.072 R"
+   }
+  },
+  {
+   "id": "sport.wing-l-upper",
+   "cluster": "C8",
+   "z": 0.6,
+   "kind": "highlight",
+   "class": "baked",
+   "frame": "panel",
+   "x": 679,
+   "y": 162,
+   "w": 117,
+   "h": 88,
+   "scale": 1.0,
+   "file": "C8-sport/sport.wing-l-upper.highlight.png",
+   "bytes_by_8wh": 82368,
+   "stack_below": [
+    "sport.bridge"
+   ],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.3369,
+    "dE2000_mean": 10.944,
+    "edge_px_err": 2.095,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+    "roi": [
+     "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+    ],
+    "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+   },
+   "params": {
+    "v0": 0.0,
+    "vt": 0.457,
+    "s": 0.25,
+    "m": 1.3,
+    "uc": 0.88,
+    "b": 0.02,
+    "u_tip": 1.13,
+    "width": [
+     [
+      0.76,
+      7.0
+     ],
+     [
+      0.84,
+      11.0
+     ],
+     [
+      0.88,
+      10.0
+     ],
+     [
+      0.92,
+      5.0
+     ],
+     [
+      0.98,
+      3.4
+     ],
+     [
+      1.06,
+      2.4
+     ],
+     [
+      1.13,
+      1.2
+     ]
+    ],
+    "level": [
+     [
+      0.76,
+      0.8
+     ],
+     [
+      0.84,
+      1.0
+     ],
+     [
+      0.9,
+      1.0
+     ],
+     [
+      0.96,
+      0.8
+     ],
+     [
+      1.02,
+      0.62
+     ],
+     [
+      1.08,
+      0.4
+     ],
+     [
+      1.13,
+      0.0
+     ]
+    ],
+    "root_u": 0.8352,
+    "frame": "dial frame of C1, u = +(x - cx)/R toward the middle, |v| = -(y - cy)/R",
+    "centreline": "|v| = vt - s(u-1) + m/2 (sqrt((u-uc)^2 + b^2) - (u-uc)); starts at the bezel (r=1), width/level tables along u (width px at R 335)",
+    "refit_to_our_panel": "anchored to its dial (R units): the tip stays 1.13 R from the dial centre, so the gap between the tips grows from 0.83 R (6WB, spacing 3.09 R) to 1.01 R (ours)",
+    "fit_wings_all_refs": {
+     "03": {
+      "ssim": 0.3369,
+      "dE2000_mean": 10.944,
+      "edge_px_err": 2.095,
+      "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+     },
+     "02": {
+      "ssim": 0.1467,
+      "dE2000_mean": 22.061,
+      "edge_px_err": 5.334,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.02__02_three-modes_clean-render.sport.PANEL.png"
+     },
+     "01": {
+      "ssim": 0.0586,
+      "dE2000_mean": 23.568,
+      "edge_px_err": 6.781,
+      "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.01__01_three-modes_small.sport.PANEL.png"
+     }
+    },
+    "fit_mid_stack": {
+     "03": {
+      "ssim": 0.3683,
+      "dE2000_mean": 10.852,
+      "edge_px_err": 2.097,
+      "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+     },
+     "02": {
+      "ssim": 0.1981,
+      "dE2000_mean": 21.988,
+      "edge_px_err": 5.333,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.02__02_three-modes_clean-render.sport.PANEL.png"
+     },
+     "01": {
+      "ssim": 0.0983,
+      "dE2000_mean": 23.375,
+      "edge_px_err": 6.785,
+      "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.01__01_three-modes_small.sport.PANEL.png"
+     }
+    },
+    "ref_disagreement": "02 puts the upper wing at |v| 0.60-0.80, the lower at 0.24-0.40 (asymmetric, its own proportions); 03 is symmetric about the centre line (+0.0025 R)"
+   }
+  },
+  {
+   "id": "sport.wing-l-lower",
+   "cluster": "C8",
+   "z": 0.6,
+   "kind": "highlight",
+   "class": "baked",
+   "frame": "panel",
+   "x": 679,
+   "y": 510,
+   "w": 117,
+   "h": 88,
+   "scale": 1.0,
+   "file": "C8-sport/sport.wing-l-lower.highlight.png",
+   "bytes_by_8wh": 82368,
+   "stack_below": [
+    "sport.bridge"
+   ],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.3369,
+    "dE2000_mean": 10.944,
+    "edge_px_err": 2.095,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+    "roi": [
+     "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+    ],
+    "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+   },
+   "params": {
+    "v0": 0.0,
+    "vt": 0.457,
+    "s": 0.25,
+    "m": 1.3,
+    "uc": 0.88,
+    "b": 0.02,
+    "u_tip": 1.13,
+    "width": [
+     [
+      0.76,
+      7.0
+     ],
+     [
+      0.84,
+      11.0
+     ],
+     [
+      0.88,
+      10.0
+     ],
+     [
+      0.92,
+      5.0
+     ],
+     [
+      0.98,
+      3.4
+     ],
+     [
+      1.06,
+      2.4
+     ],
+     [
+      1.13,
+      1.2
+     ]
+    ],
+    "level": [
+     [
+      0.76,
+      0.8
+     ],
+     [
+      0.84,
+      1.0
+     ],
+     [
+      0.9,
+      1.0
+     ],
+     [
+      0.96,
+      0.8
+     ],
+     [
+      1.02,
+      0.62
+     ],
+     [
+      1.08,
+      0.4
+     ],
+     [
+      1.13,
+      0.0
+     ]
+    ],
+    "root_u": 0.8352,
+    "frame": "dial frame of C1, u = +(x - cx)/R toward the middle, |v| = +(y - cy)/R",
+    "centreline": "|v| = vt - s(u-1) + m/2 (sqrt((u-uc)^2 + b^2) - (u-uc)); starts at the bezel (r=1), width/level tables along u (width px at R 335)",
+    "refit_to_our_panel": "anchored to its dial (R units): the tip stays 1.13 R from the dial centre, so the gap between the tips grows from 0.83 R (6WB, spacing 3.09 R) to 1.01 R (ours)",
+    "fit_wings_all_refs": {
+     "03": {
+      "ssim": 0.3369,
+      "dE2000_mean": 10.944,
+      "edge_px_err": 2.095,
+      "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+     },
+     "02": {
+      "ssim": 0.1467,
+      "dE2000_mean": 22.061,
+      "edge_px_err": 5.334,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.02__02_three-modes_clean-render.sport.PANEL.png"
+     },
+     "01": {
+      "ssim": 0.0586,
+      "dE2000_mean": 23.568,
+      "edge_px_err": 6.781,
+      "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.01__01_three-modes_small.sport.PANEL.png"
+     }
+    },
+    "fit_mid_stack": {
+     "03": {
+      "ssim": 0.3683,
+      "dE2000_mean": 10.852,
+      "edge_px_err": 2.097,
+      "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+     },
+     "02": {
+      "ssim": 0.1981,
+      "dE2000_mean": 21.988,
+      "edge_px_err": 5.333,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.02__02_three-modes_clean-render.sport.PANEL.png"
+     },
+     "01": {
+      "ssim": 0.0983,
+      "dE2000_mean": 23.375,
+      "edge_px_err": 6.785,
+      "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.01__01_three-modes_small.sport.PANEL.png"
+     }
+    },
+    "ref_disagreement": "02 puts the upper wing at |v| 0.60-0.80, the lower at 0.24-0.40 (asymmetric, its own proportions); 03 is symmetric about the centre line (+0.0025 R)"
+   }
+  },
+  {
+   "id": "sport.wing-r-upper",
+   "cluster": "C8",
+   "z": 0.6,
+   "kind": "highlight",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1124,
+   "y": 162,
+   "w": 117,
+   "h": 88,
+   "scale": 1.0,
+   "file": "C8-sport/sport.wing-r-upper.highlight.png",
+   "bytes_by_8wh": 82368,
+   "stack_below": [
+    "sport.bridge"
+   ],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.3369,
+    "dE2000_mean": 10.944,
+    "edge_px_err": 2.095,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+    "roi": [
+     "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+    ],
+    "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+   },
+   "params": {
+    "v0": 0.0,
+    "vt": 0.457,
+    "s": 0.25,
+    "m": 1.3,
+    "uc": 0.88,
+    "b": 0.02,
+    "u_tip": 1.13,
+    "width": [
+     [
+      0.76,
+      7.0
+     ],
+     [
+      0.84,
+      11.0
+     ],
+     [
+      0.88,
+      10.0
+     ],
+     [
+      0.92,
+      5.0
+     ],
+     [
+      0.98,
+      3.4
+     ],
+     [
+      1.06,
+      2.4
+     ],
+     [
+      1.13,
+      1.2
+     ]
+    ],
+    "level": [
+     [
+      0.76,
+      0.8
+     ],
+     [
+      0.84,
+      1.0
+     ],
+     [
+      0.9,
+      1.0
+     ],
+     [
+      0.96,
+      0.8
+     ],
+     [
+      1.02,
+      0.62
+     ],
+     [
+      1.08,
+      0.4
+     ],
+     [
+      1.13,
+      0.0
+     ]
+    ],
+    "root_u": 0.8352,
+    "frame": "dial frame of C2, u = -(x - cx)/R toward the middle, |v| = -(y - cy)/R",
+    "centreline": "|v| = vt - s(u-1) + m/2 (sqrt((u-uc)^2 + b^2) - (u-uc)); starts at the bezel (r=1), width/level tables along u (width px at R 335)",
+    "refit_to_our_panel": "anchored to its dial (R units): the tip stays 1.13 R from the dial centre, so the gap between the tips grows from 0.83 R (6WB, spacing 3.09 R) to 1.01 R (ours)",
+    "fit_wings_all_refs": {
+     "03": {
+      "ssim": 0.3369,
+      "dE2000_mean": 10.944,
+      "edge_px_err": 2.095,
+      "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+     },
+     "02": {
+      "ssim": 0.1467,
+      "dE2000_mean": 22.061,
+      "edge_px_err": 5.334,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.02__02_three-modes_clean-render.sport.PANEL.png"
+     },
+     "01": {
+      "ssim": 0.0586,
+      "dE2000_mean": 23.568,
+      "edge_px_err": 6.781,
+      "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.01__01_three-modes_small.sport.PANEL.png"
+     }
+    },
+    "fit_mid_stack": {
+     "03": {
+      "ssim": 0.3683,
+      "dE2000_mean": 10.852,
+      "edge_px_err": 2.097,
+      "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+     },
+     "02": {
+      "ssim": 0.1981,
+      "dE2000_mean": 21.988,
+      "edge_px_err": 5.333,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.02__02_three-modes_clean-render.sport.PANEL.png"
+     },
+     "01": {
+      "ssim": 0.0983,
+      "dE2000_mean": 23.375,
+      "edge_px_err": 6.785,
+      "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.01__01_three-modes_small.sport.PANEL.png"
+     }
+    },
+    "ref_disagreement": "02 puts the upper wing at |v| 0.60-0.80, the lower at 0.24-0.40 (asymmetric, its own proportions); 03 is symmetric about the centre line (+0.0025 R)"
+   }
+  },
+  {
+   "id": "sport.wing-r-lower",
+   "cluster": "C8",
+   "z": 0.6,
+   "kind": "highlight",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1124,
+   "y": 510,
+   "w": 117,
+   "h": 88,
+   "scale": 1.0,
+   "file": "C8-sport/sport.wing-r-lower.highlight.png",
+   "bytes_by_8wh": 82368,
+   "stack_below": [
+    "sport.bridge"
+   ],
+   "stack_above": [],
+   "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0.0
+   },
+   "fit": {
+    "ssim": 0.3369,
+    "dE2000_mean": 10.944,
+    "edge_px_err": 2.095,
+    "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+    "roi": [
+     "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+    ],
+    "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+   },
+   "params": {
+    "v0": 0.0,
+    "vt": 0.457,
+    "s": 0.25,
+    "m": 1.3,
+    "uc": 0.88,
+    "b": 0.02,
+    "u_tip": 1.13,
+    "width": [
+     [
+      0.76,
+      7.0
+     ],
+     [
+      0.84,
+      11.0
+     ],
+     [
+      0.88,
+      10.0
+     ],
+     [
+      0.92,
+      5.0
+     ],
+     [
+      0.98,
+      3.4
+     ],
+     [
+      1.06,
+      2.4
+     ],
+     [
+      1.13,
+      1.2
+     ]
+    ],
+    "level": [
+     [
+      0.76,
+      0.8
+     ],
+     [
+      0.84,
+      1.0
+     ],
+     [
+      0.9,
+      1.0
+     ],
+     [
+      0.96,
+      0.8
+     ],
+     [
+      1.02,
+      0.62
+     ],
+     [
+      1.08,
+      0.4
+     ],
+     [
+      1.13,
+      0.0
+     ]
+    ],
+    "root_u": 0.8352,
+    "frame": "dial frame of C2, u = -(x - cx)/R toward the middle, |v| = +(y - cy)/R",
+    "centreline": "|v| = vt - s(u-1) + m/2 (sqrt((u-uc)^2 + b^2) - (u-uc)); starts at the bezel (r=1), width/level tables along u (width px at R 335)",
+    "refit_to_our_panel": "anchored to its dial (R units): the tip stays 1.13 R from the dial centre, so the gap between the tips grows from 0.83 R (6WB, spacing 3.09 R) to 1.01 R (ours)",
+    "fit_wings_all_refs": {
+     "03": {
+      "ssim": 0.3369,
+      "dE2000_mean": 10.944,
+      "edge_px_err": 2.095,
+      "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+     },
+     "02": {
+      "ssim": 0.1467,
+      "dE2000_mean": 22.061,
+      "edge_px_err": 5.334,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.02__02_three-modes_clean-render.sport.PANEL.png"
+     },
+     "01": {
+      "ssim": 0.0586,
+      "dE2000_mean": 23.568,
+      "edge_px_err": 6.781,
+      "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.wings.01__01_three-modes_small.sport.PANEL.png"
+     }
+    },
+    "fit_mid_stack": {
+     "03": {
+      "ssim": 0.3683,
+      "dE2000_mean": 10.852,
+      "edge_px_err": 2.097,
+      "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
+     },
+     "02": {
+      "ssim": 0.1981,
+      "dE2000_mean": 21.988,
+      "edge_px_err": 5.333,
+      "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.02__02_three-modes_clean-render.sport.PANEL.png"
+     },
+     "01": {
+      "ssim": 0.0983,
+      "dE2000_mean": 23.375,
+      "edge_px_err": 6.785,
+      "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
+      "roi": [
+       "mask:/Users/solefir/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+      ],
+      "sheet": "bake/work/C8-sport/qc_sport.mid-stack.01__01_three-modes_small.sport.PANEL.png"
+     }
+    },
+    "ref_disagreement": "02 puts the upper wing at |v| 0.60-0.80, the lower at 0.24-0.40 (asymmetric, its own proportions); 03 is symmetric about the centre line (+0.0025 R)"
+   }
+  }
+ ],
+ "composition": {
+  "images": [
+   {
+    "file": "C8-sport/speedo.sport-band.glow@0.5x.png",
+    "from_ids": [
+     "speedo.sport-band"
+    ],
+    "x": 124,
+    "y": 92,
+    "w": 576,
+    "h": 576,
+    "scale": 0.5,
+    "bytes_by_8wh": 663552
+   },
+   {
+    "file": "C8-sport/tacho.sport-band.glow@0.5x.png",
+    "from_ids": [
+     "tacho.sport-band"
+    ],
+    "x": 1220,
+    "y": 92,
+    "w": 576,
+    "h": 576,
+    "scale": 0.5,
+    "bytes_by_8wh": 663552
+   },
+   {
+    "file": "C8-sport/sport.bridge.glow@0.5x.png",
+    "from_ids": [
+     "sport.bridge"
+    ],
+    "x": 700,
+    "y": 192,
+    "w": 520,
+    "h": 390,
+    "scale": 0.5,
+    "bytes_by_8wh": 405600
+   },
+   {
+    "file": "C8-sport/sport.wing-l-upper.highlight.png",
+    "from_ids": [
+     "sport.wing-l-upper"
+    ],
+    "x": 679,
+    "y": 162,
+    "w": 117,
+    "h": 88,
+    "scale": 1.0,
+    "bytes_by_8wh": 82368
+   },
+   {
+    "file": "C8-sport/sport.wing-l-lower.highlight.png",
+    "from_ids": [
+     "sport.wing-l-lower"
+    ],
+    "x": 679,
+    "y": 510,
+    "w": 117,
+    "h": 88,
+    "scale": 1.0,
+    "bytes_by_8wh": 82368
+   },
+   {
+    "file": "C8-sport/sport.wing-r-upper.highlight.png",
+    "from_ids": [
+     "sport.wing-r-upper"
+    ],
+    "x": 1124,
+    "y": 162,
+    "w": 117,
+    "h": 88,
+    "scale": 1.0,
+    "bytes_by_8wh": 82368
+   },
+   {
+    "file": "C8-sport/sport.wing-r-lower.highlight.png",
+    "from_ids": [
+     "sport.wing-r-lower"
+    ],
+    "x": 1124,
+    "y": 510,
+    "w": 117,
+    "h": 88,
+    "scale": 1.0,
+    "bytes_by_8wh": 82368
+   }
+  ],
+  "layer_count": 7,
+  "bytes_by_8wh_total": 2062176,
+  "proposal": {
+   "as_shipped": "7 images, 7 layers, 1.97 MiB",
+   "recommended": "3 layers: speedo band, tacho band, bridge (images); hairlines and wings stay procedural in WBDIAL / WBBACK (params here), which are layers the theme already has. Memory 1.65 MiB.",
+   "alternative_wings_baked": "draw one wing image 4x with sx/sy = -1 mirroring (all four are exact mirror images): +4 layers, +82368 bytes; or the 4 files as shipped."
+  }
+ },
+ "open_questions": [
+  "Level: the three refs disagree by 3x (band peak alpha 0.30 / 0.48 / 0.92 for 03 / 01 / 02). Files are baked at peak alpha 1; pick the layer opacity (default 0.48 = 01).",
+  "Hue: photos give G/R 0.11-0.18 (camera), 02 and the theme accent are purer red; default (236,35,35).",
+  "Ticks in Sport: 03 / 01 show none, 02 shows red tick segments. We hide the Comfort ticks (opacity 0).",
+  "A red glow at the hub (< 0.2 R) shows in 01 / 02 sport, not in 03; not delivered (P1/P2 hub or a Sport extra?).",
+  "Tacho hairline pitch (1000 rpm) is not visible in 03 (numerals, lit fill): weak.",
+  "The P1/P2 Comfort stack was not available at build time: the 'stack' QC uses a flat stand-in face of 03's measured face colour. P9 should re-run QC with the real stack and the sport_shared_layers opacities."
+ ]
+}

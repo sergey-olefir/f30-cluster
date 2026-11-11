@@ -23,7 +23,7 @@ const HOOD = [
 /** BMW draws a solid black area over our panel here, in the middle of the rev dial (on the X3 it was taken for the gear
  *  slot; on the G20 it is just a black rectangle that appears with a custom theme, with nothing in it): [x0, y0, x1, y1]. The left and top
  *  edges are measured; the right and bottom ones are good to about 15 px. (X3: 1406, 342, 1597, 419.) */
-const BLACK_BOX = [1420, 320, 1597, 440];
+const BLACK_BOX = [1420, 320, 1611, 440];
 /** BMW's seat-belt warning light is drawn over us here: [x0, y0, x1, y1]. (X3: 587, 663, 626, 700.) */
 const BELT = [587, 665, 626, 720];
 /** BMW's own gear letter (P, R, N, D, S, M), drawn over us at the foot of the rev dial, always: [x0, y0, x1, y1]. */

@@ -1,0 +1,59 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "bake/manifest/schema.json",
+ "title": "Bake manifest of one cluster (brief section 7)",
+ "description": "One file per cluster: bake/manifest/<cluster>.json (e.g. C1.json). Geometry in panel px of the COMFORT G20 layout (R 335 dials) unless 'frame' says otherwise. Validate with: python bake/src/validate_manifest.py bake/manifest/C1.json",
+ "type": "object",
+ "required": ["cluster", "package", "mode", "layers"],
+ "properties": {
+  "cluster": {"type": "string", "pattern": "^C(10|[1-9])$"},
+  "package": {"type": "string", "pattern": "^P[0-9]$"},
+  "mode": {"enum": ["comfort", "sport", "eco", "all"]},
+  "R": {"type": "number", "description": "dial radius (px) the files were rendered for; dial clusters only"},
+  "generator": {"type": "string", "description": "the one command that regenerates every file of this manifest"},
+  "layers": {"type": "array", "items": {"$ref": "#/$defs/entry"}},
+  "composition": {
+   "type": "object",
+   "description": "the proposed merge of this cluster's layers into the images the theme would load",
+   "properties": {
+    "images": {"type": "array", "items": {"type": "object", "required": ["file", "from_ids", "w", "h", "bytes_by_8wh"],
+     "properties": {"file": {"type": "string"}, "from_ids": {"type": "array", "items": {"type": "string"}},
+                    "x": {"type": "integer"}, "y": {"type": "integer"}, "w": {"type": "integer"}, "h": {"type": "integer"},
+                    "scale": {"type": "number"}, "bytes_by_8wh": {"type": "integer"}}}},
+    "layer_count": {"type": "integer", "minimum": 0},
+    "bytes_by_8wh_total": {"type": "integer", "minimum": 0}
+   }
+  },
+  "open_questions": {"type": "array", "items": {"type": "string"}},
+  "notes": {"type": "string"}
+ },
+ "$defs": {
+  "entry": {
+   "type": "object",
+   "required": ["id", "cluster", "z", "kind", "class", "frame", "evidence", "sources"],
+   "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)+$", "description": "<dial or group>.<element>, e.g. speedo.tick-groove"},
+    "cluster": {"type": "string", "pattern": "^C(10|[1-9])$"},
+    "z": {"type": "number", "description": "stack position (bottom = small); section 6.2 numbering for dials, fractions allowed (5.1, 5.2)"},
+    "kind": {"enum": ["albedo", "shadow", "highlight", "glow", "mask"]},
+    "class": {"enum": ["baked", "procedural", "dynamic"]},
+    "frame": {"enum": ["panel", "dial"], "description": "panel: x, y, w, h in panel px; dial: in R units of the cluster's dial (procedural entries only)"},
+    "x": {"type": "number"}, "y": {"type": "number"}, "w": {"type": "number"}, "h": {"type": "number"},
+    "scale": {"enum": [1.0, 0.5, 0.25], "description": "file px per panel px (0.5 = an @0.5x file covering w x h panel px)"},
+    "file": {"type": ["string", "null"], "description": "relative to apps/f30_cluster/hud/baked/; null for procedural / dynamic entries"},
+    "bytes_by_8wh": {"type": "integer", "minimum": 0, "description": "file width * file height * 8 (0 when no file)"},
+    "stack_below": {"type": "array", "items": {"type": "string"}, "description": "ids this layer sits ABOVE (they are below it)"},
+    "stack_above": {"type": "array", "items": {"type": "string"}, "description": "ids this layer sits BELOW (they are above it)"},
+    "sources": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "evidence": {"enum": ["strong", "ok", "weak"]},
+    "light": {"type": "object", "properties": {"dir_deg": {"type": "number", "description": "math degrees: 0 right, 90 up, 135 upper left"},
+                                               "key": {"type": "number"}}},
+    "fit": {"type": "object", "properties": {"ssim": {"type": ["number", "null"]}, "dE2000_mean": {"type": ["number", "null"]},
+                                             "edge_px_err": {"type": ["number", "null"]}, "ref": {"type": "string"},
+                                             "roi": {"type": ["string", "array"]}, "sheet": {"type": "string"}},
+            "description": "copy of qc.py's 'fit' (+ its ref / roi / sheet)"},
+    "params": {"type": "object", "description": "numeric parameters that reproduce the element procedurally, in R units / cw12 degrees"}
+   }
+  }
+ }
+}

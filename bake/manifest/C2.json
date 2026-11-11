@@ -1,0 +1,1204 @@
+{
+ "cluster": "C2",
+ "package": "P2",
+ "mode": "comfort",
+ "R": 335,
+ "generator": "cd bake/src && $PY -m C2.build",
+ "layers": [
+  {
+   "id": "tacho.face",
+   "cluster": "C2",
+   "z": 1,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "04_comfort_whole-cluster_mph.png",
+    "03_three-modes_photo_bimmerstop.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 125,
+    "key": 1.0
+   },
+   "x": 1181,
+   "y": 53,
+   "w": 654,
+   "h": 654,
+   "scale": 0.5,
+   "file": "C2/tacho.face.albedo@0.5x.png",
+   "bytes_by_8wh": 855432,
+   "params": {
+    "r_out": 0.975,
+    "base": [
+     0.007843,
+     0.023529,
+     0.05098
+    ],
+    "lit_add": [
+     0.019608,
+     0.019608,
+     0.023529
+    ],
+    "lit_dir_cw12": 300.0,
+    "lit_pow": 2.0,
+    "horizon_add": [
+     0.035294,
+     0.039216,
+     0.047059
+    ],
+    "horizon_v": 0.25,
+    "horizon_h": 0.13,
+    "horizon_u_fall": 0.55,
+    "_fit_other_refs": [
+     {
+      "ref": "04_comfort_whole-cluster_mph.comfort.C2",
+      "ssim": 0.96,
+      "dE2000_mean": 1.573,
+      "edge_px_err": null
+     }
+    ]
+   },
+   "stack_below": [],
+   "stack_above": [
+    "tacho.face-shadow"
+   ],
+   "fit": {
+    "ssim": 0.7869,
+    "dE2000_mean": 1.008,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.52:0.78",
+     "angle 20:140"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.face__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.face-shadow",
+   "cluster": "C2",
+   "z": 2,
+   "kind": "shadow",
+   "class": "baked",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "13_ticks_closeup.png"
+   ],
+   "evidence": "ok",
+   "x": 1181,
+   "y": 53,
+   "w": 654,
+   "h": 654,
+   "scale": 0.5,
+   "file": "C2/tacho.face-shadow.shadow@0.5x.png",
+   "bytes_by_8wh": 855432,
+   "params": {
+    "r0": 0.845,
+    "r1": 0.955,
+    "a_max": 0.6,
+    "r_fade_out": 0.965,
+    "_fit_other_refs": [
+     {
+      "ref": "13_ticks_closeup.comfort.C2@4x",
+      "ssim": 0.6747,
+      "dE2000_mean": 7.097,
+      "edge_px_err": null
+     }
+    ]
+   },
+   "stack_below": [
+    "tacho.face"
+   ],
+   "stack_above": [
+    "tacho.floor-shade"
+   ],
+   "fit": {
+    "ssim": 0.5578,
+    "dE2000_mean": 5.104,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.86:0.952",
+     "angle 340:130"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.face-shadow__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.floor-shade",
+   "cluster": "C2",
+   "z": 2.5,
+   "kind": "shadow",
+   "class": "baked",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "17_physical-cluster_full.png"
+   ],
+   "evidence": "ok",
+   "x": 1257,
+   "y": 461,
+   "w": 502,
+   "h": 184,
+   "scale": 0.5,
+   "file": "C2/tacho.floor-shade.shadow@0.5x.png",
+   "bytes_by_8wh": 184736,
+   "params": {
+    "v_line": 0.25,
+    "edge_soft": 0.006,
+    "a_line": 0.45,
+    "a_deep": 0.88,
+    "v_deep": 0.45,
+    "r_out": 0.79,
+    "r_soft": 0.03
+   },
+   "stack_below": [
+    "tacho.face-shadow"
+   ],
+   "stack_above": [
+    "tacho.tick-groove"
+   ],
+   "fit": {
+    "ssim": 0.8256,
+    "dE2000_mean": 2.25,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.50:0.78",
+     "angle 95:75"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.floor-shade__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.tick-groove",
+   "cluster": "C2",
+   "z": 3,
+   "kind": "highlight",
+   "class": "procedural",
+   "frame": "panel",
+   "sources": [
+    "13_ticks_closeup.png",
+    "05_comfort_tach-closeup.png",
+    "04_comfort_whole-cluster_mph.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 125,
+    "key": 1.0
+   },
+   "x": 1195,
+   "y": 67,
+   "w": 626,
+   "h": 626,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "params": {
+    "r_lip": 0.8195,
+    "lip_rise": 0.004,
+    "lip_decay": 0.022,
+    "lip_L": {
+     "base": 5.0,
+     "a_narrow": 12.0,
+     "k_narrow": 8.0,
+     "a_wide": 48.0,
+     "k_wide": 1.0,
+     "dir_cw12": 318.0
+    },
+    "r_outer_rim": 0.925,
+    "outer_rim_L": 3.0,
+    "outer_rim_w": 0.006,
+    "gap_r": [
+     0.952,
+     0.961
+    ],
+    "color": [
+     0.86,
+     0.9,
+     1.0
+    ],
+    "_fit_other_refs": [
+     {
+      "ref": "13_ticks_closeup.comfort.C2@4x",
+      "ssim": 0.8548,
+      "dE2000_mean": 3.636,
+      "edge_px_err": null
+     }
+    ]
+   },
+   "stack_below": [
+    "tacho.floor-shade"
+   ],
+   "stack_above": [
+    "tacho.red-zone"
+   ],
+   "fit": {
+    "ssim": 0.4033,
+    "dE2000_mean": 8.888,
+    "edge_px_err": 5.902,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.795:0.86",
+     "angle 300:200"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.tick-groove__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.red-zone",
+   "cluster": "C2",
+   "z": 4,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "17_physical-cluster_full.png"
+   ],
+   "evidence": "ok",
+   "x": 1729,
+   "y": 504,
+   "w": 56,
+   "h": 74,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "params": {
+    "start_rpm": 7000,
+    "end_rpm": 7500,
+    "band_r": [
+     0.896,
+     0.914
+    ],
+    "band_rgb": [
+     0.909804,
+     0.078431,
+     0.062745
+    ],
+    "fill_r": [
+     0.866,
+     0.896
+    ],
+    "fill_R": [
+     0.098039,
+     0.294118
+    ],
+    "pad_deg": 0.55,
+    "gap_deg": 0.55,
+    "gap_rpm": [
+     7200
+    ],
+    "minors_hidden": true
+   },
+   "stack_below": [
+    "tacho.tick-groove"
+   ],
+   "stack_above": [
+    "tacho.ticks"
+   ],
+   "fit": {
+    "ssim": 0.555,
+    "dE2000_mean": 13.348,
+    "edge_px_err": 1.559,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.85:0.925",
+     "angle 112:22"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.red-zone__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.ticks",
+   "cluster": "C2",
+   "z": 5,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "panel",
+   "sources": [
+    "13_ticks_closeup.png",
+    "05_comfort_tach-closeup.png",
+    "17_physical-cluster_full.png",
+    "04_comfort_whole-cluster_mph.png"
+   ],
+   "evidence": "strong",
+   "x": 1205,
+   "y": 77,
+   "w": 606,
+   "h": 503,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "params": {
+    "r_out": 0.903,
+    "major": {
+     "r_in": 0.8165,
+     "hw_in": 0.0057,
+     "hw_out": 0.0063,
+     "level": 1.0
+    },
+    "half": {
+     "r_in": 0.853,
+     "hw_in": 0.0058,
+     "hw_out": 0.0062,
+     "level": 1.0
+    },
+    "minor": {
+     "r_in": 0.866,
+     "hw_in": 0.0033,
+     "hw_out": 0.0033,
+     "level": 0.6
+    },
+    "tip_round": 0.0,
+    "fringe": {
+     "rgb": [
+      0.25,
+      0.55,
+      0.75
+     ],
+     "r0": 0.897,
+     "r1": 0.909,
+     "k": 0.35
+    },
+    "color": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "scale": {
+     "rpm0_cw12": 250.5,
+     "deg_per_1000": 32.05,
+     "minor_rpm": 100,
+     "half_rpm": 500,
+     "major_rpm": 1000,
+     "max_rpm": 7500
+    },
+    "_fit_other_refs": [
+     {
+      "ref": "13_ticks_closeup.comfort.C2@4x",
+      "ssim": 0.71,
+      "dE2000_mean": 7.565,
+      "edge_px_err": 1.637
+     },
+     {
+      "ref": "17_physical-cluster_full.comfort.C2",
+      "ssim": 0.1375,
+      "dE2000_mean": 24.901,
+      "edge_px_err": 4.91
+     },
+     {
+      "ref": "04_comfort_whole-cluster_mph.comfort.C2",
+      "ssim": 0.4209,
+      "dE2000_mean": 8.986,
+      "edge_px_err": 3.517
+     }
+    ]
+   },
+   "stack_below": [
+    "tacho.red-zone"
+   ],
+   "stack_above": [
+    "tacho.tick-spots"
+   ],
+   "fit": {
+    "ssim": 0.4391,
+    "dE2000_mean": 9.178,
+    "edge_px_err": 3.83,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.80:0.92"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.ticks__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.tick-spots",
+   "cluster": "C2",
+   "z": 5.1,
+   "kind": "glow",
+   "class": "baked",
+   "frame": "panel",
+   "sources": [
+    "13_ticks_closeup.png"
+   ],
+   "evidence": "ok",
+   "x": 1189,
+   "y": 61,
+   "w": 636,
+   "h": 532,
+   "scale": 0.5,
+   "file": "C2/tacho.tick-spots.glow@0.5x.png",
+   "bytes_by_8wh": 676704,
+   "params": {
+    "dr": 0.014,
+    "s_along": 0.011,
+    "s_across": 0.0095,
+    "level_major": 0.42,
+    "level_half": 0.36,
+    "level_minor": 0.03,
+    "rgb": [
+     0.85,
+     0.88,
+     0.95
+    ],
+    "_fit_other_refs": [
+     {
+      "ref": "05_comfort_tach-closeup.comfort.C2",
+      "ssim": 0.515,
+      "dE2000_mean": 3.715,
+      "edge_px_err": null
+     }
+    ]
+   },
+   "stack_below": [
+    "tacho.ticks"
+   ],
+   "stack_above": [
+    "tacho.off-arc"
+   ],
+   "fit": {
+    "ssim": 0.7892,
+    "dE2000_mean": 2.368,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/13_ticks_closeup.comfort.C2@4x",
+    "roi": [
+     "ring:0.905:0.95"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.tick-spots__13_ticks_closeup.comfort.C2@4x.png"
+   }
+  },
+  {
+   "id": "tacho.off-arc",
+   "cluster": "C2",
+   "z": 5.7,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "17_physical-cluster_full.png",
+    "04_comfort_whole-cluster_mph.png",
+    "03_three-modes_photo_bimmerstop.png"
+   ],
+   "evidence": "ok",
+   "x": 1245,
+   "y": 472,
+   "w": 45,
+   "h": 92,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "params": {
+    "arc_r": 0.8265,
+    "arc_from_cw12": 232.7,
+    "hw_at_ready": 0.0042,
+    "hw_at_off": 0.0032,
+    "level_at_ready": 1.0,
+    "level_at_off": 0.8,
+    "mark_cw12": 233.0,
+    "mark_r": [
+     0.82,
+     0.905
+    ],
+    "mark_hw": 0.0058,
+    "needle_park_cw12": 230.0,
+    "_fit_other_refs": [
+     {
+      "ref": "17_physical-cluster_full.comfort.C2",
+      "ssim": 0.1413,
+      "dE2000_mean": 24.931,
+      "edge_px_err": 5.296
+     }
+    ]
+   },
+   "stack_below": [
+    "tacho.tick-spots"
+   ],
+   "stack_above": [
+    "tacho.inner-disc"
+   ],
+   "fit": {
+    "ssim": 0.4394,
+    "dE2000_mean": 12.166,
+    "edge_px_err": 1.321,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.80:0.92",
+     "angle 226:26"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.off-arc__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.inner-disc",
+   "cluster": "C2",
+   "z": 6,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "04_comfort_whole-cluster_mph.png",
+    "17_physical-cluster_full.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 125,
+    "key": 1.0
+   },
+   "x": 1345,
+   "y": 217,
+   "w": 326,
+   "h": 246,
+   "scale": 0.5,
+   "file": "C2/tacho.inner-disc.albedo@0.5x.png",
+   "bytes_by_8wh": 160392,
+   "params": {
+    "r_edge": 0.484,
+    "fill_add": [
+     0.003922,
+     0.007843,
+     0.011765
+    ],
+    "ramp_r": [
+     0.4,
+     0.476
+    ],
+    "ramp_add": [
+     0.027451,
+     0.035294,
+     0.039216
+    ],
+    "rim_hw": 0.0042,
+    "rim_rgb": [
+     0.17,
+     0.2,
+     0.25
+    ],
+    "rim_lit": [
+     0.65,
+     1.0
+    ],
+    "halo_add": [
+     0.015686,
+     0.019608,
+     0.023529
+    ],
+    "halo_decay": 0.018,
+    "_fit_other_refs": [
+     {
+      "ref": "04_comfort_whole-cluster_mph.comfort.C2",
+      "ssim": 0.837,
+      "dE2000_mean": 3.08,
+      "edge_px_err": null
+     }
+    ]
+   },
+   "stack_below": [
+    "tacho.off-arc"
+   ],
+   "stack_above": [
+    "tacho.inner-disc-rim"
+   ],
+   "fit": {
+    "ssim": 0.8794,
+    "dE2000_mean": 1.76,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.36:0.47",
+     "angle 300:200"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.inner-disc__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.inner-disc-rim",
+   "cluster": "C2",
+   "z": 6.1,
+   "kind": "highlight",
+   "class": "procedural",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "04_comfort_whole-cluster_mph.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 125,
+    "key": 1.0
+   },
+   "x": 1329,
+   "y": 201,
+   "w": 358,
+   "h": 265,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "params": {
+    "r_edge": 0.484,
+    "fill_add": [
+     0.003922,
+     0.007843,
+     0.011765
+    ],
+    "ramp_r": [
+     0.4,
+     0.476
+    ],
+    "ramp_add": [
+     0.027451,
+     0.035294,
+     0.039216
+    ],
+    "rim_hw": 0.0042,
+    "rim_rgb": [
+     0.17,
+     0.2,
+     0.25
+    ],
+    "rim_lit": [
+     0.65,
+     1.0
+    ],
+    "halo_add": [
+     0.015686,
+     0.019608,
+     0.023529
+    ],
+    "halo_decay": 0.018,
+    "_fit_other_refs": [
+     {
+      "ref": "04_comfort_whole-cluster_mph.comfort.C2",
+      "ssim": 0.6479,
+      "dE2000_mean": 3.618,
+      "edge_px_err": 5.707
+     }
+    ]
+   },
+   "stack_below": [
+    "tacho.inner-disc"
+   ],
+   "stack_above": [
+    "tacho.inner-ring"
+   ],
+   "fit": {
+    "ssim": 0.7246,
+    "dE2000_mean": 2.516,
+    "edge_px_err": 2.669,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.45:0.52",
+     "angle 300:200"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.inner-disc-rim__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.inner-ring",
+   "cluster": "C2",
+   "z": 7,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png"
+   ],
+   "evidence": "weak",
+   "light": {
+    "dir_deg": 125,
+    "key": 1.0
+   },
+   "x": 1396,
+   "y": 268,
+   "w": 224,
+   "h": 197,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "params": {
+    "r": 0.33,
+    "hw": 0.0035,
+    "rgb": [
+     0.08,
+     0.1,
+     0.13
+    ],
+    "lit": [
+     0.6,
+     1.0
+    ]
+   },
+   "stack_below": [
+    "tacho.inner-disc-rim"
+   ],
+   "stack_above": [
+    "tacho.floor"
+   ],
+   "fit": {
+    "ssim": 0.8482,
+    "dE2000_mean": 1.277,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.30:0.36",
+     "angle 300:200"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.inner-ring__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.floor",
+   "cluster": "C2",
+   "z": 8,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "17_physical-cluster_full.png"
+   ],
+   "evidence": "ok",
+   "x": 1367,
+   "y": 463,
+   "w": 282,
+   "h": 82,
+   "scale": 0.5,
+   "file": "C2/tacho.floor.albedo@0.5x.png",
+   "bytes_by_8wh": 46248,
+   "params": {
+    "v_line": 0.25,
+    "edge_hw": 0.0022,
+    "edge_rgb": [
+     0.2,
+     0.22,
+     0.26
+    ],
+    "below_top": [
+     0.011765,
+     0.019608,
+     0.035294
+    ],
+    "below_bot": [
+     0.001961,
+     0.003922,
+     0.007843
+    ],
+    "v_bot": 0.45
+   },
+   "stack_below": [
+    "tacho.inner-ring"
+   ],
+   "stack_above": [
+    "tacho.floor-edge"
+   ],
+   "fit": {
+    "ssim": 0.9239,
+    "dE2000_mean": 1.754,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.15:0.47",
+     "box:1508:450:200:120"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.floor__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.floor-edge",
+   "cluster": "C2",
+   "z": 8.1,
+   "kind": "highlight",
+   "class": "procedural",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png"
+   ],
+   "evidence": "weak",
+   "x": 1368,
+   "y": 463,
+   "w": 280,
+   "h": 2,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "params": {
+    "v_line": 0.25,
+    "edge_hw": 0.0022,
+    "edge_rgb": [
+     0.2,
+     0.22,
+     0.26
+    ],
+    "below_top": [
+     0.011765,
+     0.019608,
+     0.035294
+    ],
+    "below_bot": [
+     0.001961,
+     0.003922,
+     0.007843
+    ],
+    "v_bot": 0.45
+   },
+   "stack_below": [
+    "tacho.floor"
+   ],
+   "stack_above": [
+    "tacho.p-box"
+   ],
+   "fit": {
+    "ssim": 0.7965,
+    "dE2000_mean": 2.608,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "box:1520:440:140:30"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.floor-edge__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.p-box",
+   "cluster": "C2",
+   "z": 8.5,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png"
+   ],
+   "evidence": "ok",
+   "x": 1400,
+   "y": 551,
+   "w": 216,
+   "h": 71,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "params": {
+    "top_v": 0.515,
+    "top_hw": 0.145,
+    "corner_r": 0.035,
+    "bot_r": 0.683,
+    "bot_half_deg": 27.5,
+    "side_end_u": 0.3,
+    "fill_top": [
+     0.047059,
+     0.05098,
+     0.062745
+    ],
+    "fill_bot": [
+     0.019608,
+     0.023529,
+     0.031373
+    ],
+    "top_rim": {
+     "hw": 0.0022,
+     "peak": 0.9,
+     "u0": 0.025,
+     "s": 0.075,
+     "floor": 0.12
+    },
+    "side_rim": {
+     "hw": 0.0018,
+     "level": 0.12
+    },
+    "bot_rim": {
+     "hw": 0.0035,
+     "peak": 1.0,
+     "flat_deg": 15.0,
+     "fade_deg": 12.0,
+     "floor": 0.1,
+     "glow": 0.1,
+     "glow_decay": 0.01
+    },
+    "rim_rgb": [
+     0.93,
+     0.96,
+     1.0
+    ]
+   },
+   "stack_below": [
+    "tacho.floor-edge"
+   ],
+   "stack_above": [
+    "tacho.hub-well"
+   ],
+   "fit": {
+    "ssim": 0.6304,
+    "dE2000_mean": 4.323,
+    "edge_px_err": 1.951,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "box:1395:540:230:80"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.p-box__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.hub-well",
+   "cluster": "C2",
+   "z": 9,
+   "kind": "shadow",
+   "class": "baked",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "04_comfort_whole-cluster_mph.png"
+   ],
+   "evidence": "weak",
+   "x": 1411,
+   "y": 283,
+   "w": 194,
+   "h": 194,
+   "scale": 0.5,
+   "file": "C2/tacho.hub-well.shadow@0.5x.png",
+   "bytes_by_8wh": 75272,
+   "params": {
+    "well_r": [
+     0.14,
+     0.3
+    ],
+    "well_a": 0.25,
+    "ring_r": 0.128,
+    "ring_hw": 0.0045,
+    "ring_rgb": [
+     0.88,
+     0.12,
+     0.08
+    ],
+    "ring_glow": 0.25,
+    "ring_glow_decay": 0.02
+   },
+   "stack_below": [
+    "tacho.p-box"
+   ],
+   "stack_above": [
+    "tacho.hub-ring"
+   ],
+   "fit": {
+    "ssim": 0.9248,
+    "dE2000_mean": 1.688,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.14:0.32",
+     "angle 300:200"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.hub-well__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.hub-ring",
+   "cluster": "C2",
+   "z": 9.1,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "panel",
+   "sources": [
+    "05_comfort_tach-closeup.png",
+    "15_hub-needle_closeup.png"
+   ],
+   "evidence": "ok",
+   "x": 1445,
+   "y": 317,
+   "w": 126,
+   "h": 126,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "params": {
+    "well_r": [
+     0.14,
+     0.3
+    ],
+    "well_a": 0.25,
+    "ring_r": 0.128,
+    "ring_hw": 0.0045,
+    "ring_rgb": [
+     0.88,
+     0.12,
+     0.08
+    ],
+    "ring_glow": 0.25,
+    "ring_glow_decay": 0.02
+   },
+   "stack_below": [
+    "tacho.hub-well"
+   ],
+   "stack_above": [
+    "tacho.bezel"
+   ],
+   "fit": {
+    "ssim": 0.467,
+    "dE2000_mean": 15.354,
+    "edge_px_err": 2.855,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.10:0.16"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.hub-ring__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  },
+  {
+   "id": "tacho.bezel",
+   "cluster": "C2",
+   "z": 11,
+   "kind": "highlight",
+   "class": "procedural",
+   "frame": "panel",
+   "sources": [
+    "13_ticks_closeup.png",
+    "05_comfort_tach-closeup.png",
+    "04_comfort_whole-cluster_mph.png",
+    "06_comfort_wide_with-wheel.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 110,
+    "key": 1.0,
+    "note": "two-lobed gloss: 340 cw12 (math 110) narrow, 148 cw12 (math 302) broad"
+   },
+   "x": 1167,
+   "y": 39,
+   "w": 682,
+   "h": 681,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "params": {
+    "ridge_r": 0.991,
+    "s_in": 0.0048,
+    "s_out": 0.011,
+    "band": [
+     0.959,
+     0.972,
+     0.978,
+     0.983
+    ],
+    "band_level": 0.155,
+    "rgb": [
+     0.96,
+     0.975,
+     1.0
+    ],
+    "gloss": {
+     "b": 8.0,
+     "a1": 155.0,
+     "t1": 340.0,
+     "k1": 8.0,
+     "a2": 228.0,
+     "t2": 148.0,
+     "k2": 1.0,
+     "a3": 150.0,
+     "t3": 272.0,
+     "k3": 4.0
+    },
+    "_fit_other_refs": [
+     {
+      "ref": "13_ticks_closeup.comfort.C2@4x",
+      "ssim": 0.8488,
+      "dE2000_mean": 3.965,
+      "edge_px_err": 0.679
+     },
+     {
+      "ref": "04_comfort_whole-cluster_mph.comfort.C2",
+      "ssim": 0.4737,
+      "dE2000_mean": 8.26,
+      "edge_px_err": 1.986
+     },
+     {
+      "ref": "17_physical-cluster_full.comfort.C2",
+      "ssim": 0.2942,
+      "dE2000_mean": 13.708,
+      "edge_px_err": 2.025
+     }
+    ]
+   },
+   "stack_below": [
+    "tacho.hub-ring"
+   ],
+   "stack_above": [],
+   "fit": {
+    "ssim": 0.6747,
+    "dE2000_mean": 7.151,
+    "edge_px_err": 1.203,
+    "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+    "roi": [
+     "ring:0.95:1.02",
+     "angle 330:180"
+    ],
+    "sheet": "bake/work/C2/qc_tacho.bezel__05_comfort_tach-closeup.comfort.C2.png"
+   }
+  }
+ ],
+ "composition": {
+  "images": [
+   {
+    "file": "C2/tacho.static.albedo@0.5x.png",
+    "from_ids": [
+     "tacho.face",
+     "tacho.face-shadow",
+     "tacho.floor-shade",
+     "tacho.tick-spots",
+     "tacho.inner-disc",
+     "tacho.floor",
+     "tacho.hub-well"
+    ],
+    "x": 1181,
+    "y": 53,
+    "w": 654,
+    "h": 654,
+    "scale": 0.5,
+    "bytes_by_8wh": 855432
+   },
+   {
+    "file": "(effect shader, no image)",
+    "from_ids": [
+     "tacho.tick-groove",
+     "tacho.red-zone",
+     "tacho.ticks",
+     "tacho.off-arc",
+     "tacho.inner-disc-rim",
+     "tacho.inner-ring",
+     "tacho.floor-edge",
+     "tacho.p-box",
+     "tacho.hub-ring",
+     "tacho.bezel"
+    ],
+    "w": 0,
+    "h": 0,
+    "bytes_by_8wh": 0
+   }
+  ],
+  "layer_count": 2,
+  "bytes_by_8wh_total": 855432,
+  "option_A_relightable": {
+   "images": [
+    "tacho.albedo@0.5x (face + inner-disc + floor)",
+    "tacho.shade@0.5x (face-shadow + floor-shade + hub-well)",
+    "tacho.light@0.5x (tick-spots)"
+   ],
+   "layer_count": 4,
+   "bytes_by_8wh_total": 2566296,
+   "note": "the separate files shipped in C2/ are exactly these inputs; merge per kind at integration"
+  },
+  "note": "Option B is what tacho.static.albedo@0.5x.png is (all baked layers pre-composited, straight alpha). Everything crisp (ticks, groove lip, red zone, OFF arc + mark, disc rim, inner ring, floor edge, P box, hub ring, bezel) stays in the dial's effect shader with the params in this manifest. The red zone, hub ring state and the needle are dynamic."
+ },
+ "open_questions": [
+  "Light direction (P1/P9): the photos show the drawn gloss as a TWO-LOBED pattern along one axis, brightest at ~340 cw12 (math ~110, narrow) and ~148 cw12 (math ~302, broad), dimmest at ~40 cw12; the groove's inner lip is lit only from the upper left (peak ~335 cw12, monotone fade to the lower right) in 05, 04 and 03. Read: key light upper-left at math ~110 (not 135), and the lower-right bezel lobe is that light's highlight on the tube's far flank (or a deliberate second light). The highlight position ACROSS the tube is below the resolution of 05/04/03 (< 0.002 R), so it cannot be used.",
+  "OFF arc radius: 05 puts it at 0.826 R (the inner end of the 0 rpm tick); 17 / 04 / 03 at 0.845-0.88 R in their frames, which carry a ~0.025 R off-centre of the tick ring toward the lower left. Chosen 0.826 (05, sharpest).",
+  "OFF mark: visible only in 17 (at 233 cw12, r 0.82-0.905 after the frame correction); in 05 / 04 / 03 the needle is parked at ~230 and no separate mark shows at 233. Kept at 233 (weak).",
+  "Red zone: 05 shows a bright band at the ticks' outer ends (0.896-0.914) over a dim fill (0.866-0.896) and one dark gap (7.2k); 17 shows the red over the INNER part (0.825-0.875). Different software or glare; chose 05.",
+  "Tick cool fringe: the cyan at the ticks' outer ends in 13 / 05 matches lateral chromatic aberration (the numerals show the same blue on their outer edges and warm on the inner). Kept faint (k 0.35); could be 0.",
+  "Tick ring vs bezel: in 04 / 03 / 05 the tick ring sits ~0.025 R off the bezel centre toward ~235 cw12. Parallax (bezel in front of the TFT?) or photo geometry; drawn concentric here.",
+  "Inner ring (0.33 R) and floor-edge line: weak evidence (05 only, +4..6 L)."
+ ],
+ "notes": "All geometry in R units / cw12 degrees (params). Levels: sRGB / 255 of the exposure-normalised refs (white 235). Procedural entries: render previews in bake/work/C2/proc/ (not shipped). The rpm scale: 0 rpm at 250.5 cw12, 32.05 deg per 1000 rpm (theme 32.1 within error). The l/100km arc at the bottom is P4 (C6)."
+}

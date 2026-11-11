@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="61" height="39" viewBox="0 0 61 39">
+  <title>Range: arrow + fuel pump (bottom info bar)</title>
+  <defs>
+  <mask id="cut1" maskUnits="userSpaceOnUse" x="0" y="0" width="61" height="39"><rect width="61" height="39" fill="#fff"/><rect x="35.16" y="6.53" width="10.08" height="7.17" rx="0.9" fill="#000"/></mask>
+  </defs>
+  <g mask="url(#cut1)">
+  <polyline points="5.52,19.51 16.12,19.51" fill="none" stroke-width="5.67" stroke-linecap="round" stroke-linejoin="round" stroke="#ececec"/>
+  <polygon points="14.55,11.95 25.68,19.51 14.55,27.07" fill="#ececec"/>
+  <rect x="31.35" y="2.5" width="19.26" height="33.6" rx="2.91" fill="#ececec"/>
+  <rect x="29.56" y="32.52" width="22.85" height="3.58" rx="0.9" fill="#ececec"/>
+  </g>
+  <polyline points="49.27,7.88 56.89,12.8 56.89,27.14 54.65,29.83 52.41,27.14 52.41,20.42" fill="none" stroke-width="3.36" stroke-linecap="round" stroke-linejoin="round" stroke="#ececec"/>
+</svg>

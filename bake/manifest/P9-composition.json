@@ -1,0 +1,252 @@
+{
+ "package": "P9",
+ "note": "proposed scene per mode; not wired into the theme. See docs/BAKE-REPORT.md.",
+ "previews": {
+  "comfort": "bake/work/P9/preview_comfort.png",
+  "sport": "bake/work/P9/preview_sport.png",
+  "eco": "bake/work/P9/preview_eco.png"
+ },
+ "stacks": {
+  "comfort": "bake/work/P9/stack_comfort.json",
+  "sport": "bake/work/P9/stack_sport.json",
+  "eco": "bake/work/P9/stack_eco.json"
+ },
+ "budget": {
+  "rows": {
+   "comfort": [
+    {
+     "file": "C1/speedo.base.albedo@0.5x.png",
+     "bytes_by_8wh": 903168,
+     "replaces": "speedo WBDIAL: face gradient, groove, floor shade, hub well"
+    },
+    {
+     "file": "C1/speedo.soft-glow.glow@0.5x.png",
+     "bytes_by_8wh": 682640,
+     "replaces": "speedo WBDIAL: tick / ring glow terms"
+    },
+    {
+     "file": "C2/tacho.static.albedo@0.5x.png",
+     "bytes_by_8wh": 855432,
+     "replaces": "tacho WBDIAL: face, shadows, inner disc, floor, tick spots"
+    },
+    {
+     "file": "C3/fuel.static.merged.png",
+     "bytes_by_8wh": 165888,
+     "replaces": "fuel WBDIAL mini style face/bezel/ticks + fuel_icon widget (P5 pump re-merged)"
+    },
+    {
+     "file": "C4/oil.static.merged.png",
+     "bytes_by_8wh": 165888,
+     "replaces": "oilt WBDIAL mini style + oil_icon widget (own sheet: -1 layer)"
+    },
+    {
+     "file": "C5/window.base.albedo@0.5x.png",
+     "bytes_by_8wh": 647488,
+     "replaces": "WBBACK window"
+    },
+    {
+     "file": "C5/window.horizon.albedo.png",
+     "bytes_by_8wh": 33920,
+     "replaces": "WBBACK horizon"
+    },
+    {
+     "file": "C6/infobar.body.albedo@0.5x.png",
+     "bytes_by_8wh": 110080,
+     "replaces": "WBBACK bottom bar"
+    },
+    {
+     "file": "C6/infobar.line.albedo.png",
+     "bytes_by_8wh": 56064,
+     "replaces": "WBBACK bottom bar edge"
+    },
+    {
+     "file": "C6/range-arc.track.albedo.png",
+     "bytes_by_8wh": 238784,
+     "replaces": "new: range arc (sampled by the speedo shader, fill dynamic)"
+    },
+    {
+     "file": "C6/range-arc.segments.mask.png",
+     "bytes_by_8wh": 188224,
+     "replaces": "new: range arc segment mask"
+    },
+    {
+     "file": "C6/ed-arc.track.albedo.png",
+     "bytes_by_8wh": 235720,
+     "replaces": "new: ED arc"
+    },
+    {
+     "file": "C6/ed-arc.segments.mask.png",
+     "bytes_by_8wh": 193760,
+     "replaces": "new: ED arc segment mask"
+    },
+    {
+     "file": "C7/edyn.battery.albedo.png",
+     "bytes_by_8wh": 18800,
+     "replaces": "new: battery icon on the ED arc"
+    },
+    {
+     "file": "C7/bar.range.albedo.png",
+     "bytes_by_8wh": 19032,
+     "replaces": "range_icon widget (sheet member)"
+    }
+   ],
+   "sport_extra": [
+    {
+     "file": "C8-sport/speedo.sport-band.glow@0.5x.png",
+     "bytes_by_8wh": 663552,
+     "replaces": "WBDIAL sport style band"
+    },
+    {
+     "file": "C8-sport/tacho.sport-band.glow@0.5x.png",
+     "bytes_by_8wh": 663552,
+     "replaces": "WBDIAL sport style band"
+    },
+    {
+     "file": "C8-sport/sport.bridge.glow@0.5x.png",
+     "bytes_by_8wh": 405600,
+     "replaces": "WBBACK sport bridge"
+    }
+   ],
+   "eco_extra": [
+    {
+     "file": "C8-eco/tacho.eco-static.albedo@0.5x.png",
+     "bytes_by_8wh": 538720,
+     "replaces": "WBDIAL eff style CHARGE/POWER band + ED arc"
+    },
+    {
+     "file": "C8-eco/tacho.eco-glow.glow@0.5x.png",
+     "bytes_by_8wh": 66736,
+     "replaces": "new: bezel tint"
+    },
+    {
+     "file": "C8-eco/speedo.eco-glow.glow@0.5x.png",
+     "bytes_by_8wh": 42240,
+     "replaces": "new: bezel tint"
+    },
+    {
+     "file": "C8-eco/speedo.eco-arc.glow@0.5x.png",
+     "bytes_by_8wh": 290640,
+     "replaces": "WBDIAL eco style inner arc"
+    }
+   ]
+  },
+  "totals": {
+   "comfort": 4514888,
+   "sport_extra": 1732704,
+   "eco_extra": 938336
+  },
+  "per_mode_baked": {
+   "comfort": 4514888,
+   "sport": 6247592,
+   "eco": 5453224
+  },
+  "per_mode_baked_mib": {
+   "comfort": 4.306,
+   "sport": 5.958,
+   "eco": 5.201
+  },
+  "per_mode_with_current_theme_mib": {
+   "comfort": 7.364,
+   "sport": 9.073,
+   "eco": 8.046
+  },
+  "all_modes_preloaded_baked_mib": 6.853,
+  "all_modes_preloaded_plus_comfort_theme_mib": 9.911,
+  "C10_as_bitmap_bytes": 2764800,
+  "C10_at_quarter_bytes": 691200,
+  "sport_specific_bases_bytes": 1758600,
+  "worst_case_sport_with_C10_bitmap_and_own_bases_mib": 10.272,
+  "budget": {
+   "mode_mib": 8,
+   "total_mib": 16,
+   "per_connection": 8,
+   "layers_total": 32
+  },
+  "layers": {
+   "current_comfort": 21,
+   "current_per_connection": [
+    8,
+    6,
+    7
+   ],
+   "asset_route": {
+    "comfort": 20,
+    "per_connection": [
+     8,
+     6,
+     6
+    ],
+    "note": "every baked file is an RGBA8 asset sampled by the existing WBDIAL / WBBACK / WBSIGN effect layers (0 new layers); oil_icon's own sheet goes (-1)"
+   },
+   "image_route": {
+    "new_layers": {
+     "C10": 0,
+     "C1 base + glow": 2,
+     "C2 static": 1,
+     "C3 merged": 1,
+     "C4 merged": 1,
+     "C5 window + horizon strip": 2,
+     "C6 two arc effect layers": 2,
+     "C7": 0,
+     "Sport bands + bridge": 3,
+     "Eco static + 3 glows/arc": 4
+    },
+    "comfort": 29,
+    "sport": 25,
+    "eco": 28
+   }
+  }
+ },
+ "window_gain": 0.239,
+ "sport_opacity_default": {
+  "band_opacity": 0.48,
+  "bridge_opacity": 0.48,
+  "shared_opacity": {
+   "face": 1.0,
+   "face-shadow": 1.0,
+   "floor-shade": 1.0,
+   "tick-groove": 0.0,
+   "ticks": 0.0,
+   "inner-disc": 0.0,
+   "inner-ring": 0.0,
+   "floor": 1.0,
+   "hub-well": 1.0,
+   "hub-ring": 0.0,
+   "bezel": 1.0
+  }
+ },
+ "eco_tints": {
+  "tints": {
+   "face": [
+    0.55,
+    0.6,
+    0.8
+   ],
+   "ticks": [
+    0.61,
+    0.61,
+    0.61
+   ],
+   "groove_rim": [
+    1.291,
+    1.404,
+    1.626
+   ],
+   "hub_ring": [
+    0.834,
+    1.871,
+    2.443
+   ],
+   "hub_ring_rgb": [
+    0.296,
+    0.344,
+    0.487
+   ]
+  },
+  "fill_span_deg": [
+   -29.75,
+   89.5
+  ],
+  "eco_kmh": 130.0
+ }
+}

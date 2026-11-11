@@ -8,3 +8,7 @@ preview/
 __pycache__/
 # agent worktrees and local tool state
 .claude/
+
+# third-party reference photos (not ours to publish), and work-in-progress bake output
+reference/
+bake/work/
