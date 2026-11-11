@@ -24,9 +24,9 @@ mgu.run({
         hud.start();
         new Page(ctx, hud, {
             title: ctx.spec.title, what: 'cluster',
-            look: { name: 'Themes', style: 'hero', tags: { wb_comfort: 'white dials', wb_sport: 'red glow', wb_eco: 'blue glow', f30: 'basic' } },
+            look: { name: 'Themes', style: 'hero', tags: { wb_comfort: 'white dials', wb_comfort_map: 'white dials, BMW map', wb_sport: 'red glow', wb_eco: 'blue glow', f30: 'basic' } },
             tabs: ['look', 'settings'],
-            settings: ['units', 'clock', 'timeZone', 'tankLitres', 'redline', 'shiftBefore', 'nightDim', 'badge', 'badgeBMW', 'demo'],
+            settings: ['stockMap', 'baked', 'units', 'clock', 'timeZone', 'tankLitres', 'redline', 'shiftBefore', 'nightDim', 'badge', 'badgeBMW', 'demo'],
         }).start();
         process.on('exit', () => { try { hud.stop(); } catch (e) { /* exiting anyway */ } });
     },

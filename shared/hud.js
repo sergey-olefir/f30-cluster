@@ -1793,6 +1793,8 @@ class HudApp {
             c.uniform(ref, 'u_dr', w.dr);
             c.uniform(ref, 'u_style', [WB_STYLE[w.style] || 0]);
             c.uniform(ref, 'u_sign', [0, 0, 0]);       // "sign": [x, y, r]: the speed limit sign's disc, shown by _update while a limit is known
+            c.uniform(ref, 'u_hole', this._hole(w));     // "hole" / "holeWhen": BMW's map window left see-through
+            c.uniform(ref, 'u_holeR', [this._holeRadius(w)]);
             c.uniform(ref, 'u_hasTex', [0]);
             if (w.tex && this.setting('baked') !== false) {   // baked textures: "tex": { window, horizon, line: { tex, x, y, w, h } }, "gain": [window level, y above which it applies]
                 [['window', 'u_t0', 'u_r0'], ['horizon', 'u_t1', 'u_r1'], ['line', 'u_t2', 'u_r2']].forEach(([k, smp, rect]) => {
