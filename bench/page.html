@@ -235,11 +235,11 @@
       ctx.lineTo(VW, hoodY(VW));
       ctx.strokeStyle = '#ff8c1a'; ctx.lineWidth = 1.5; ctx.stroke();
       labelBox('hood (hidden above the line)', 150, 60, '#ff8c1a');   // inside the masked corner (hoodY(150) is 111)
-      // BMW's gear box: solid black, as the car paints it over us
+      // BMW's black area: solid black, as the car paints it over us
       const [bx0, by0, bx1, by1] = geo.BLACK_BOX;
       ctx.fillStyle = '#000'; ctx.fillRect(bx0, by0, bx1 - bx0, by1 - by0);
       ctx.strokeStyle = '#ff8c1a'; ctx.lineWidth = 1; ctx.strokeRect(bx0 + .5, by0 + .5, bx1 - bx0 - 1, by1 - by0 - 1);
-      labelBox('BMW gear box', bx0 + 2, by0 + 2, '#ff8c1a');
+      labelBox('BMW black area', bx0 + 2, by0 + 2, '#ff8c1a');
       // the seat-belt warning light
       const [sx0, sy0, sx1, sy1] = geo.BELT;
       ctx.fillStyle = 'rgba(232,55,44,.55)'; ctx.fillRect(sx0, sy0, sx1 - sx0, sy1 - sy0);
@@ -372,7 +372,7 @@
     const firstConn = scene.length ? Math.min.apply(null, scene.map((l) => l.conn)) : 1;   // the app's own connection reads as 1
     document.getElementById('layers').innerHTML = scene.map((l) => {
       const warns = l.warnings || [];
-      const flag = warns.length ? '<td class="flag" title="' + esc(warns.join('\n')) + '">' + (warns.some((w) => /hood/.test(w)) ? 'hood ' : '') + (warns.some((w) => /gear box/.test(w)) ? 'box ' : '') + (warns.some((w) => /belt/.test(w)) ? 'belt ' : '') + (warns.some((w) => /HUD window/.test(w)) ? 'window' : '') + '</td>' : '<td></td>';
+      const flag = warns.length ? '<td class="flag" title="' + esc(warns.join('\n')) + '">' + (warns.some((w) => /hood/.test(w)) ? 'hood ' : '') + (warns.some((w) => /black area/.test(w)) ? 'box ' : '') + (warns.some((w) => /belt/.test(w)) ? 'belt ' : '') + (warns.some((w) => /HUD window/.test(w)) ? 'window' : '') + '</td>' : '<td></td>';
       const cls = l.state === 'waiting' ? ' class="waiting" title="' + esc(l.reason || 'waiting') + '"' : '';
       const what = l.kind === 'asset' ? 'asset ' + l.format : l.kind, where = l.kind === 'asset' ? l.w + 'x' + l.h + ' (not drawn)' : l.x + ',' + l.y + ' ' + l.w + 'x' + l.h;
       return '<tr' + cls + '><td>' + (l.conn - firstConn + 1) + ':' + l.ref + (l.state === 'waiting' ? ' (waiting)' : '') + '</td><td>' + what + '</td><td>' + (l.kind === 'asset' ? '' : l.class + ' / ' + l.z) + '</td><td>' + where + '</td>' + flag + '</tr>';

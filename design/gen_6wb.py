@@ -98,9 +98,9 @@ def comfort():
     # the scale numbers: the box ends at 0.78 R, inside the ticks' inner ends (0.82 R)
     for i in range(14):
         n = 20 * i
-        W.append(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 20.6, 1))
+        W.append(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1))
     for i in range(1, 8):
-        W.append(ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 31.2, 2, w=50))
+        W.append(ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 24.5, 2, w=40))
     W += [
         text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "km/h", "wb_cap", conn=1),
         text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "1/min x 1000", "wb_cap", conn=2),

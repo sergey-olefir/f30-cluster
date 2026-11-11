@@ -20,7 +20,8 @@ const HOOD = [
     [1000, 14], [1100, 13], [1200, 15], [1300, 20], [1400, 28], [1500, 33], [1600, 48], [1700, 88], [1800, 139],
     [1900, 205], [1920, 225],
 ];
-/** BMW draws a solid black box over our panel here, in the middle of the rev dial: [x0, y0, x1, y1]. The left and top
+/** BMW draws a solid black area over our panel here, in the middle of the rev dial (on the X3 it was taken for the gear
+ *  slot; on the G20 it is just a black rectangle that appears with a custom theme, with nothing in it): [x0, y0, x1, y1]. The left and top
  *  edges are measured; the right and bottom ones are good to about 15 px. (X3: 1406, 342, 1597, 419.) */
 const BLACK_BOX = [1420, 320, 1597, 440];
 /** BMW's seat-belt warning light is drawn over us here: [x0, y0, x1, y1]. (X3: 587, 663, 626, 700.) */
@@ -83,7 +84,7 @@ function check(widgets, target) {
                 out.push(id + ': ' + worst.what + ' ' + worst.d + ' px under the hood');
             }
             if (overlaps(w, BLACK_BOX)) {
-                out.push(id + ': overlaps BMW\'s gear box x' + BLACK_BOX[0] + '-' + BLACK_BOX[2] + ' y' + BLACK_BOX[1] + '-' + BLACK_BOX[3]);
+                out.push(id + ': overlaps BMW\'s black area x' + BLACK_BOX[0] + '-' + BLACK_BOX[2] + ' y' + BLACK_BOX[1] + '-' + BLACK_BOX[3]);
             }
             if (overlaps(w, GEAR_P)) {
                 out.push(id + ': overlaps BMW\'s own gear letter x' + GEAR_P[0] + '-' + GEAR_P[2] + ' y' + GEAR_P[1] + '-' + GEAR_P[3]);

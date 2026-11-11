@@ -1104,13 +1104,16 @@ void main() {
             if (pd > fl) col = vec3(0.016, 0.019, 0.026) + vec3(0.020, 0.022, 0.028) * clamp((pd - fl) / (0.25 * R), 0.0, 1.0);
             col = mix(col, vec3(0.20, 0.22, 0.26), clamp(1.2 - abs(pd - fl), 0.0, 1.0) * 0.8);       // the floor's edge
             if (pd < fl) {
-                col = mix(col, vec3(0.12, 0.13, 0.155) * (0.5 + 0.9 * lit), ringAt(d, r2, 1.4));
-                col *= 1.0 - 0.25 * exp(-abs(d - r2) / (0.02 * R)) * (1.0 - lit);
+                col = mix(col, vec3(0.20, 0.22, 0.27) * (0.5 + 0.9 * lit), ringAt(d, r2, 2.0));
+                col += vec3(0.07, 0.08, 0.10) * exp(-abs(d - r2) / (0.009 * R)) * (0.25 + 0.75 * lit);
+                col *= 1.0 - 0.32 * exp(-max(d - r2, 0.0) / (0.024 * R)) * (0.4 + 0.6 * (1.0 - lit)) * step(r2, d);
             }
         } else {
             col *= 1.0 - 0.42 * exp(-(d - r1) / (0.03 * R)) * (0.45 + 0.55 * (1.0 - lit));
         }
-        col = mix(col, vec3(0.30, 0.33, 0.39) * (0.30 + 0.90 * lit), ringAt(d, r1, 1.6) * 0.9);
+        col = mix(col, vec3(0.30, 0.33, 0.39) * (0.30 + 0.90 * lit), ringAt(d, r1, 2.2) * 0.95);
+        col += vec3(0.16, 0.18, 0.22) * exp(-abs(d - r1) / (0.010 * R)) * (0.25 + 0.75 * lit);          // the tube's glow
+        col += vec3(0.07, 0.08, 0.10) * ringAt(d, r1 - 0.013 * R, 1.4) * lit;                           // a lit inner edge
         float to = 0.905 * R;                                         // the ticks' outer end
         // the red zone: a band at the ticks and a soft fill inside it
         if (inSweep && u_redFrom <= 1.0 && frac >= u_redFrom && d > 0.74 * R && d < to) {
@@ -1121,14 +1124,30 @@ void main() {
         if (u_over.x >= 0.0 && inSweep && frac >= u_over.x && frac <= u_over.y && d > 0.64 * R && d < 0.905 * R) {
             col = mix(col, u_red * 0.85, 0.8 * smoothstep(0.64 * R, 0.80 * R, d));
         }
+        // the tick track: a groove, darker than the face, between two lit rims
+        {
+            float gin = 0.80 * R, gout = 0.915 * R;
+            float gv = smoothstep(gin - 1.0, gin + 2.0, d) * smoothstep(gout + 1.0, gout - 2.0, d);
+            col *= 1.0 - 0.38 * gv;
+            col += vec3(0.060, 0.066, 0.080) * ringAt(d, gin, 1.3) * (0.3 + 0.9 * lit);
+            col += vec3(0.050, 0.055, 0.068) * ringAt(d, gout, 1.3) * (0.3 + 0.9 * lit);
+        }
         if (onTick) {
             float ti = major ? 0.82 * R : (midT ? 0.85 * R : 0.872 * R);
-            float wid = major ? 0.0088 * R : (midT ? 0.0050 * R : 0.0030 * R);
+            float w0 = major ? 0.0075 * R : (midT ? 0.0040 * R : 0.0024 * R);      // half width at the inner end
+            float w1 = major ? 0.0135 * R : (midT ? 0.0062 * R : 0.0034 * R);      // and at the outer end: a wedge
+            vec2 tperp = vec2(tdir.y, -tdir.x);
+            float along = dot(p, tdir), across = abs(dot(p, tperp));
+            float t = clamp((along - ti) / (to - ti), 0.0, 1.0);
+            float hw = mix(w0, w1, t);
+            float cov = clamp(hw + 0.5 - across, 0.0, 1.0) * clamp(along - ti + 0.5, 0.0, 1.0) * clamp(to - along + 0.5, 0.0, 1.0);
             vec3 tc = major || midT ? u_tick : u_tick * 0.62;
-            float dd = seg(p, tdir * ti, tdir * to) - wid;
-            float tk = clamp(0.5 - dd, 0.0, 1.0);
-            col += tc * 0.20 * exp(-max(dd, 0.0) / 2.6) * (1.0 - tk);          // a soft glow round the tick
-            col = mix(col, tc, tk);
+            tc = mix(tc, vec3(0.55, 0.85, 1.0), smoothstep(0.62, 1.0, t) * (major ? 0.7 : 0.3));   // a cool fringe at the outer end
+            // a soft glow, and for the long ones a blurred light spot just past the outer end
+            float dd = max(across - hw, 0.0);
+            col += tc * 0.20 * exp(-dd / 2.6) * (1.0 - cov) * step(ti - 2.0, along) * step(along, to + 2.0);
+            if (major) col += vec3(0.11, 0.12, 0.14) * exp(-dot(p - tdir * (to + 0.014 * R), p - tdir * (to + 0.014 * R)) / (0.022 * R * 0.022 * R));
+            col = mix(col, tc, cov);
         }
         if (u_pre > 0.0) {                                            // the arc back to OFF and its mark
             float back = mod(u_start - a + 4.0 * PI, 2.0 * PI);
@@ -1255,6 +1274,9 @@ void main() {
             float lum = clamp(0.22 + 0.78 * h1 * h1 + 0.30 * pow(h2, 6.0), 0.0, 1.0);
             vec3 ring = mix(u_ring2, u_ring, lum) * (0.50 + 0.50 * prof);
             col = mix(col, ring, clamp(prof * 3.0, 0.0, 1.0));
+            float lt = 0.5 + 0.5 * dot(p / max(d, 0.001), vec2(-0.6, 0.8));
+            col += u_ring * 0.30 * ringAt(d, R - 1.2, 1.2) * (0.3 + 0.9 * lt);           // a thin bright rim on the outside
+            col *= 1.0 - 0.30 * smoothstep(rb0 + 0.25 * u_ringW, rb0 + 0.02 * u_ringW, d); // and a darker band just inside the gloss
         }
     }
     gl_FragColor = vec4(min(col, vec3(1.0)), edge);

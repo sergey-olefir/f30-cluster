@@ -96,13 +96,13 @@ CLUSTER_FONTS = [
 # F30 Cluster's 6WB-style themes: Arimo (SIL OFL, tools/fonts-src/Arimo-OFL.txt), a Helvetica-shaped face as the
 # 6WB's own print is. The other fonts in apps/f30_cluster/hud/fonts are copies of Cluster Themes' (Barlow).
 F30_FONTS = [
-    ('wb_spd', 'Arimo[wght].ttf', 37, DIGITS, 0, 'Bold'),                          # the speed scale's numbers
-    ('wb_rpm', 'Arimo[wght].ttf', 56, DIGITS, 0, 'Bold'),                          # the rev scale's numbers
-    ('wb_cap', 'Arimo[wght].ttf', 27, LOWER + UPPER + DIGITS + '/ .:+-°', 0, 'Regular'),   # km/h, 1/min x 1000, Time, OFF
-    ('wb_capb', 'Arimo[wght].ttf', 27, UPPER + DIGITS + '/ ', 0, 'Bold'),          # READY, 1/1
+    ('wb_spd', 'Arimo[wght].ttf', 30, DIGITS, 0, 'Bold'),                          # the speed scale's numbers
+    ('wb_rpm', 'Arimo[wght].ttf', 44, DIGITS, 0, 'Bold'),                          # the rev scale's numbers
+    ('wb_cap', 'Arimo[wght].ttf', 22, LOWER + UPPER + DIGITS + '/ .:+-°', 0, 'Regular'),   # km/h, 1/min x 1000, Time, OFF
+    ('wb_capb', 'Arimo[wght].ttf', 22, UPPER + DIGITS + '/ ', 0, 'Bold'),          # READY, 1/1
     ('wb_gear', 'Arimo[wght].ttf', 46, DIGITS + 'PRNDSM-', 0, 'Bold'),             # the gear in its box
-    ('wb_val', 'Arimo[wght].ttf', 44, DIGITS + ':+-.° kmC', 0, 'Bold'),            # the bottom row's values
-    ('wb_mini', 'Arimo[wght].ttf', 17, DIGITS + '/', 0, 'Bold'),                       # the small gauges' 1/1 and 0
+    ('wb_val', 'Arimo[wght].ttf', 36, DIGITS + ':+-.° kmC', 0, 'Bold'),            # the bottom row's values
+    ('wb_mini', 'Arimo[wght].ttf', 14, DIGITS + '/', 0, 'Bold'),                       # the small gauges' 1/1 and 0
     ('wb_big', 'Arimo[wght].ttf', 120, DIGITS + 'PRNDSM-', 0, 'Bold'),             # Sport: the speed and the gear in the discs
 ]
 FONTS = {'idrive_hud_widgets': HUD_FONTS, 'cluster_themes': CLUSTER_FONTS, 'f30_cluster': F30_FONTS}
