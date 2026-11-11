@@ -1099,21 +1099,21 @@ void main() {
         // the inner discs: convex, lighter on the lit side, with a soft shadow outside the edge
         if (d < r1) {
             float g = clamp(0.5 + pd / (2.0 * r1), 0.0, 1.0);          // 0 at the top .. 1 at the bottom
-            col = vec3(0.046, 0.053, 0.070) + vec3(0.016, 0.018, 0.024) * (1.0 - g);
-            col += vec3(0.030, 0.034, 0.044) * lit * smoothstep(0.35 * r1, r1, d);
+            col = vec3(0.038, 0.042, 0.052) + vec3(0.012, 0.013, 0.017) * (1.0 - g);
+            col += vec3(0.018, 0.020, 0.026) * lit * smoothstep(0.35 * r1, r1, d);
             if (pd > fl) col = vec3(0.016, 0.019, 0.026) + vec3(0.020, 0.022, 0.028) * clamp((pd - fl) / (0.25 * R), 0.0, 1.0);
             col = mix(col, vec3(0.20, 0.22, 0.26), clamp(1.2 - abs(pd - fl), 0.0, 1.0) * 0.8);       // the floor's edge
             if (pd < fl) {
-                col = mix(col, vec3(0.20, 0.22, 0.27) * (0.5 + 0.9 * lit), ringAt(d, r2, 2.0));
-                col += vec3(0.07, 0.08, 0.10) * exp(-abs(d - r2) / (0.009 * R)) * (0.25 + 0.75 * lit);
+                col = mix(col, vec3(0.15, 0.16, 0.20) * (0.5 + 0.8 * lit), ringAt(d, r2, 1.8));
+                col += vec3(0.035, 0.040, 0.050) * exp(-abs(d - r2) / (0.009 * R)) * (0.25 + 0.75 * lit);
                 col *= 1.0 - 0.32 * exp(-max(d - r2, 0.0) / (0.024 * R)) * (0.4 + 0.6 * (1.0 - lit)) * step(r2, d);
             }
         } else {
             col *= 1.0 - 0.42 * exp(-(d - r1) / (0.03 * R)) * (0.45 + 0.55 * (1.0 - lit));
         }
-        col = mix(col, vec3(0.30, 0.33, 0.39) * (0.30 + 0.90 * lit), ringAt(d, r1, 2.2) * 0.95);
-        col += vec3(0.16, 0.18, 0.22) * exp(-abs(d - r1) / (0.010 * R)) * (0.25 + 0.75 * lit);          // the tube's glow
-        col += vec3(0.07, 0.08, 0.10) * ringAt(d, r1 - 0.013 * R, 1.4) * lit;                           // a lit inner edge
+        col = mix(col, vec3(0.24, 0.26, 0.31) * (0.30 + 0.80 * lit), ringAt(d, r1, 2.0) * 0.9);
+        col += vec3(0.07, 0.08, 0.10) * exp(-abs(d - r1) / (0.010 * R)) * (0.25 + 0.75 * lit);          // the tube's glow
+        col += vec3(0.035, 0.040, 0.050) * ringAt(d, r1 - 0.013 * R, 1.4) * lit;                           // a lit inner edge
         float to = 0.905 * R;                                         // the ticks' outer end
         // the red zone: a band at the ticks and a soft fill inside it
         if (inSweep && u_redFrom <= 1.0 && frac >= u_redFrom && d > 0.74 * R && d < to) {
@@ -1142,10 +1142,10 @@ void main() {
             float hw = mix(w0, w1, t);
             float cov = clamp(hw + 0.5 - across, 0.0, 1.0) * clamp(along - ti + 0.5, 0.0, 1.0) * clamp(to - along + 0.5, 0.0, 1.0);
             vec3 tc = major || midT ? u_tick : u_tick * 0.62;
-            tc = mix(tc, vec3(0.55, 0.85, 1.0), smoothstep(0.62, 1.0, t) * (major ? 0.7 : 0.3));   // a cool fringe at the outer end
+            tc = mix(tc, vec3(0.55, 0.85, 1.0), smoothstep(0.62, 1.0, t) * (major ? 0.5 : 0.2));   // a cool fringe at the outer end
             // a soft glow, and for the long ones a blurred light spot just past the outer end
             float dd = max(across - hw, 0.0);
-            col += tc * 0.20 * exp(-dd / 2.6) * (1.0 - cov) * step(ti - 2.0, along) * step(along, to + 2.0);
+            col += tc * 0.13 * exp(-dd / 2.6) * (1.0 - cov) * step(ti - 2.0, along) * step(along, to + 2.0);
             if (major) col += vec3(0.11, 0.12, 0.14) * exp(-dot(p - tdir * (to + 0.014 * R), p - tdir * (to + 0.014 * R)) / (0.022 * R * 0.022 * R));
             col = mix(col, tc, cov);
         }
@@ -1156,32 +1156,37 @@ void main() {
             vec2 od = vec2(sin(oa), cos(oa));
             col = mix(col, u_tick, clamp(0.5 - (seg(p, od * 0.862 * R, od * to) - 0.0042 * R), 0.0, 1.0));
         }
-        // the hub: a dark well, a glowing red ring with a dark red fill
+        // the hub: a dark well, a thin red ring, a dark middle with two red fans leaking in from the ring
         float hr = 0.135 * R;
         col *= 1.0 - 0.5 * smoothstep(hr * 2.4, hr * 1.2, d);
-        if (d < hr) col = mix(vec3(0.15, 0.012, 0.010), vec3(0.030, 0.0, 0.0), d / hr) + vec3(0.07, 0.0, 0.0) * lit;
-        col += u_needle * 0.55 * exp(-abs(d - hr) / (0.022 * R));
-        col = mix(col, u_needle * (0.72 + 0.5 * lit), ringAt(d, hr, 0.017 * R));
+        if (d < hr) {
+            float fan = pow(0.5 + 0.5 * cos(2.0 * (a - 0.78)), 3.0) * smoothstep(0.35 * hr, hr, d);
+            col = vec3(0.020, 0.010, 0.012) + vec3(0.36, 0.035, 0.025) * fan * 0.8;
+        }
+        col += u_needle * 0.30 * exp(-abs(d - hr) / (0.020 * R));
+        col = mix(col, u_needle * (0.62 + 0.40 * lit), ringAt(d, hr, 0.014 * R));
         // the needle: first its shadow on the face, moved down and right, soft
-        float L = 0.925 * R, T = -0.20 * R;
+        float L = 0.925 * R, T = -0.22 * R;
+        float W0 = 0.032 * R, W1 = 0.011 * R, WT = 0.022 * R;       // half width at the hub, at the tip, at the tail's end
         vec2 ps = p - vec2(0.012 * R, -0.020 * R);
         vec2 qs = vec2(dot(ps, vec2(nd.y, -nd.x)), dot(ps, nd));
         if (qs.y > T && qs.y < L) {
-            float hws = qs.y < 0.0 ? 0.024 * R : mix(0.024 * R, 0.0085 * R, qs.y / L);
+            float hws = qs.y < 0.0 ? mix(W0, WT, qs.y / T) : mix(W0, W1, qs.y / L);
             col *= 1.0 - 0.7 * smoothstep(hws + 0.018 * R, hws - 0.002 * R, abs(qs.x));
         }
-        // then the blade: red, a white stripe along it, darker on the shadow side, a white tip, a red glow
+        // then the blade, a tube: dark red edges, a red-orange body, a white core, a white cap on the tail, a faint glow
         if (q.y > T && q.y < L) {
-            float hw = q.y < 0.0 ? 0.024 * R : mix(0.024 * R, 0.0085 * R, q.y / L);
+            float hw = q.y < 0.0 ? mix(W0, WT, q.y / T) : mix(W0, W1, q.y / L);
             float ax = abs(q.x);
-            float gl = clamp(1.0 - ax / (0.060 * R), 0.0, 1.0);
-            col += u_needle * 0.30 * gl * gl;
-            vec3 body = u_needle * (0.76 + 0.36 * smoothstep(hw, 0.0, ax));
-            body *= 1.0 - 0.30 * smoothstep(0.1 * hw, hw, q.x);
-            float st = abs(q.x + 0.30 * hw);
-            body = mix(body, vec3(1.0, 0.93, 0.90), smoothstep(0.28 * hw, 0.06 * hw, st) * 0.95);
+            float nx = q.x / hw;                                      // -1 .. 1 across the blade
+            float gl = clamp(1.0 - ax / (0.050 * R), 0.0, 1.0);
+            col += u_needle * 0.16 * gl * gl;
+            vec3 body = mix(vec3(0.45, 0.05, 0.04), u_needle * vec3(1.0, 0.62, 0.50), smoothstep(1.0, 0.35, abs(nx + 0.12)));
+            body *= 1.0 - 0.22 * smoothstep(0.0, 1.0, nx);            // the far side a little darker
+            body = mix(body, vec3(1.0, 0.96, 0.94), smoothstep(0.34, 0.12, abs(nx + 0.12)));     // the white core
+            body = mix(body, vec3(1.0), smoothstep(T + 0.05 * R, T + 0.012 * R, q.y) * 0.95);     // the tail's cap
             body = mix(body, vec3(1.0), smoothstep(0.90 * L, L, q.y) * 0.9);
-            col = mix(col, body, clamp(hw + 0.5 - ax, 0.0, 1.0));
+            col = mix(col, body, clamp(hw + 0.5 - ax, 0.0, 1.0) * clamp(q.y - T + 0.5, 0.0, 1.0));
         }
     } else if (u_style < 1.5) {
         // ---- Sport
