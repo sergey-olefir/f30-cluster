@@ -1,0 +1,871 @@
+{
+ "cluster": "C3",
+ "package": "P3",
+ "mode": "comfort",
+ "R": 70.0,
+ "generator": "cd bake/src && $PY -m C3.build && $PY -m C3.qc_run",
+ "layers": [
+  {
+   "id": "fuel.face",
+   "cluster": "C3",
+   "z": 1,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 8,
+   "y": 556,
+   "w": 144,
+   "h": 144,
+   "scale": 0.5,
+   "file": "C3/fuel.face.albedo@0.5x.png",
+   "bytes_by_8wh": 41472,
+   "sources": [
+    "04_comfort_whole-cluster_mph.png",
+    "07_physical-cluster_all-lamps-lit.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 235.0,
+    "key": 1.0
+   },
+   "params": {
+    "frame_note": "R units, fuel convention (C4 = mirror u -> -u)",
+    "R_px": 70.0,
+    "centre_panel": [
+     80.0,
+     628.0
+    ],
+    "r_out": 0.955,
+    "rgb": [
+     0.012,
+     0.016,
+     0.024
+    ],
+    "note": "flat near-black face, slightly blue"
+   },
+   "stack_below": [],
+   "stack_above": [
+    "fuel.zones"
+   ],
+   "fit": {
+    "ssim": 0.7702,
+    "dE2000_mean": 1.513,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C3",
+    "roi": "bake/work/C3/roi_face__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "sheet": "bake/work/C3/qc_fuel.face__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "alone": {
+     "ssim": 0.7282,
+     "dE2000_mean": 1.411,
+     "edge_px_err": null
+    },
+    "by_ref": {
+     "17_physical-cluster_full.comfort.C3@2x": {
+      "ssim": 0.1623,
+      "dE2000_mean": 16.068,
+      "edge_px_err": null
+     },
+     "04_comfort_whole-cluster_mph.comfort.C3": {
+      "ssim": 0.7702,
+      "dE2000_mean": 1.513,
+      "edge_px_err": null
+     },
+     "07_physical-cluster_all-lamps-lit.comfort.C3": {
+      "ssim": 0.5815,
+      "dE2000_mean": 2.759,
+      "edge_px_err": null
+     }
+    }
+   }
+  },
+  {
+   "id": "fuel.bezel",
+   "cluster": "C3",
+   "z": 11,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 8,
+   "y": 556,
+   "w": 134,
+   "h": 144,
+   "scale": 1.0,
+   "file": "C3/fuel.bezel.albedo.png",
+   "bytes_by_8wh": 154368,
+   "sources": [
+    "17_physical-cluster_full.png",
+    "04_comfort_whole-cluster_mph.png",
+    "07_physical-cluster_all-lamps-lit.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 235.0,
+    "key": 1.0
+   },
+   "params": {
+    "frame_note": "R units, fuel convention (C4 = mirror u -> -u)",
+    "R_px": 70.0,
+    "centre_panel": [
+     80.0,
+     628.0
+    ],
+    "r_peak": 0.977,
+    "sigma": 0.0197,
+    "rim_r": 0.91,
+    "rim_sigma": 0.014,
+    "rim_gain": 0.18,
+    "gap_from": 27.0,
+    "gap_to": 121.0,
+    "gap_soft_deg": 3.0,
+    "rgb": [
+     0.8,
+     0.81,
+     0.83
+    ],
+    "base_gain": 0.24,
+    "hl_peak_cw12": 224.5,
+    "hl_width_deg": 41.2,
+    "hl_gain": 0.57,
+    "light_note": "hl_peak_cw12 in the fuel convention: C3 220 (lower left), C4 140 (lower right)",
+    "note": "thin tube ring at 0.972 R + dim inner rim at 0.91 R, open on the main-dial side"
+   },
+   "stack_below": [
+    "fuel.inner-arc"
+   ],
+   "stack_above": [
+    "fuel.bezel-highlight"
+   ],
+   "fit": {
+    "ssim": 0.7315,
+    "dE2000_mean": 4.541,
+    "edge_px_err": 0.819,
+    "ref": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C3",
+    "roi": "bake/work/C3/roi_bezel__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "sheet": "bake/work/C3/qc_fuel.bezel__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "alone": {
+     "ssim": 0.6116,
+     "dE2000_mean": 5.934,
+     "edge_px_err": 0.739
+    },
+    "by_ref": {
+     "17_physical-cluster_full.comfort.C3@2x": {
+      "ssim": 0.4207,
+      "dE2000_mean": 19.954,
+      "edge_px_err": 0.745
+     },
+     "04_comfort_whole-cluster_mph.comfort.C3": {
+      "ssim": 0.7315,
+      "dE2000_mean": 4.541,
+      "edge_px_err": 0.819
+     },
+     "07_physical-cluster_all-lamps-lit.comfort.C3": {
+      "ssim": 0.1704,
+      "dE2000_mean": 9.159,
+      "edge_px_err": 3.803
+     }
+    }
+   }
+  },
+  {
+   "id": "fuel.bezel-highlight",
+   "cluster": "C3",
+   "z": 11.1,
+   "kind": "highlight",
+   "class": "baked",
+   "frame": "panel",
+   "x": 8,
+   "y": 579,
+   "w": 122,
+   "h": 121,
+   "scale": 1.0,
+   "file": "C3/fuel.bezel.highlight.png",
+   "bytes_by_8wh": 118096,
+   "sources": [
+    "04_comfort_whole-cluster_mph.png",
+    "17_physical-cluster_full.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 235.0,
+    "key": 1.0
+   },
+   "params": {
+    "frame_note": "R units, fuel convention (C4 = mirror u -> -u)",
+    "R_px": 70.0,
+    "centre_panel": [
+     80.0,
+     628.0
+    ],
+    "r_peak": 0.977,
+    "sigma": 0.0197,
+    "rim_r": 0.91,
+    "rim_sigma": 0.014,
+    "rim_gain": 0.18,
+    "gap_from": 27.0,
+    "gap_to": 121.0,
+    "gap_soft_deg": 3.0,
+    "rgb": [
+     0.8,
+     0.81,
+     0.83
+    ],
+    "base_gain": 0.24,
+    "hl_peak_cw12": 224.5,
+    "hl_width_deg": 41.2,
+    "hl_gain": 0.57,
+    "light_note": "hl_peak_cw12 in the fuel convention: C3 220 (lower left), C4 140 (lower right)",
+    "note": "angular light on the tube"
+   },
+   "stack_below": [
+    "fuel.bezel"
+   ],
+   "stack_above": [],
+   "fit": {
+    "ssim": 0.7315,
+    "dE2000_mean": 4.541,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C3",
+    "roi": "bake/work/C3/roi_bezel-highlight__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "sheet": "bake/work/C3/qc_fuel.bezel-highlight__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "alone": {
+     "ssim": 0.4182,
+     "dE2000_mean": 5.438,
+     "edge_px_err": null
+    },
+    "by_ref": {
+     "17_physical-cluster_full.comfort.C3@2x": {
+      "ssim": 0.4207,
+      "dE2000_mean": 19.954,
+      "edge_px_err": null
+     },
+     "04_comfort_whole-cluster_mph.comfort.C3": {
+      "ssim": 0.7315,
+      "dE2000_mean": 4.541,
+      "edge_px_err": null
+     },
+     "07_physical-cluster_all-lamps-lit.comfort.C3": {
+      "ssim": 0.1704,
+      "dE2000_mean": 9.159,
+      "edge_px_err": null
+     }
+    }
+   }
+  },
+  {
+   "id": "fuel.inner-arc",
+   "cluster": "C3",
+   "z": 6,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 40,
+   "y": 587,
+   "w": 54,
+   "h": 84,
+   "scale": 1.0,
+   "file": "C3/fuel.inner-arc.albedo.png",
+   "bytes_by_8wh": 36288,
+   "sources": [
+    "17_physical-cluster_full.png",
+    "04_comfort_whole-cluster_mph.png",
+    "07_physical-cluster_all-lamps-lit.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 235.0,
+    "key": 1.0
+   },
+   "params": {
+    "frame_note": "R units, fuel convention (C4 = mirror u -> -u)",
+    "R_px": 70.0,
+    "centre_panel": [
+     80.0,
+     628.0
+    ],
+    "r": 0.591,
+    "w": 0.03,
+    "rgb": [
+     0.5,
+     0.51,
+     0.53
+    ],
+    "fade_in": [
+     161.2,
+     171.4
+    ],
+    "fade_out": [
+     336.0,
+     348.0
+    ],
+    "scale_centre_offset": [
+     0.0458,
+     0.0
+    ],
+    "fade_note": "fade angles are measured about the BEZEL centre",
+    "note": "thin grey arc, eccentric (scale frame), fades in at the low end"
+   },
+   "stack_below": [
+    "fuel.pictogram"
+   ],
+   "stack_above": [
+    "fuel.bezel"
+   ],
+   "fit": {
+    "ssim": 0.3006,
+    "dE2000_mean": 11.273,
+    "edge_px_err": 0.577,
+    "ref": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C3",
+    "roi": "bake/work/C3/roi_inner-arc__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "sheet": "bake/work/C3/qc_fuel.inner-arc__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "alone": {
+     "ssim": 0.2708,
+     "dE2000_mean": 11.374,
+     "edge_px_err": 0.59
+    },
+    "by_ref": {
+     "17_physical-cluster_full.comfort.C3@2x": {
+      "ssim": 0.4824,
+      "dE2000_mean": 20.474,
+      "edge_px_err": 0.356
+     },
+     "04_comfort_whole-cluster_mph.comfort.C3": {
+      "ssim": 0.3006,
+      "dE2000_mean": 11.273,
+      "edge_px_err": 0.577
+     },
+     "07_physical-cluster_all-lamps-lit.comfort.C3": {
+      "ssim": 0.5873,
+      "dE2000_mean": 16.777,
+      "edge_px_err": 0.444
+     }
+    }
+   }
+  },
+  {
+   "id": "fuel.zones",
+   "cluster": "C3",
+   "z": 4,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 84,
+   "y": 669,
+   "w": 23,
+   "h": 15,
+   "scale": 1.0,
+   "file": "C3/fuel.zones.albedo.png",
+   "bytes_by_8wh": 2760,
+   "sources": [
+    "04_comfort_whole-cluster_mph.png",
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 235.0,
+    "key": 1.0
+   },
+   "params": {
+    "frame_note": "R units, fuel convention (C4 = mirror u -> -u)",
+    "R_px": 70.0,
+    "centre_panel": [
+     80.0,
+     628.0
+    ],
+    "bar_r": [
+     0.708,
+     0.798
+    ],
+    "end_r": [
+     0.658,
+     0.8
+    ],
+    "end_w": 0.03,
+    "gap_deg": 2.5,
+    "low_to": 0.1174,
+    "high_from": 0.8882,
+    "end_over_deg": 1.0,
+    "red": [
+     0.86,
+     0.24,
+     0.21
+    ],
+    "blue": [
+     0.18,
+     0.6,
+     0.93
+    ],
+    "scale": {
+     "dx": 0.0458,
+     "dy": 0.0,
+     "a0": 157.05,
+     "pitch": 9.132,
+     "n": 20,
+     "major_every": 5
+    },
+    "zones": [
+     {
+      "from_frac": 0.0,
+      "to_frac": 0.1174,
+      "color": "red",
+      "from_cw12": 157.05,
+      "to_cw12": 178.49
+     }
+    ],
+    "dynamic_note": "static: fuel reserve, oil cold and hot bands are fixed scale marks; the theme's u_redTo / u_coldTo / u_redFrom can drive the same geometry procedurally",
+    "note": "static end zones: end tick + bar"
+   },
+   "stack_below": [
+    "fuel.face"
+   ],
+   "stack_above": [
+    "fuel.ticks"
+   ],
+   "fit": {
+    "ssim": 0.4414,
+    "dE2000_mean": 10.544,
+    "edge_px_err": 1.07,
+    "ref": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C3",
+    "roi": "bake/work/C3/roi_zones__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "sheet": "bake/work/C3/qc_fuel.zones__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "alone": {
+     "ssim": 0.3412,
+     "dE2000_mean": 10.715,
+     "edge_px_err": 1.319
+    },
+    "by_ref": {
+     "17_physical-cluster_full.comfort.C3@2x": {
+      "ssim": 0.2937,
+      "dE2000_mean": 16.838,
+      "edge_px_err": 0.965
+     },
+     "04_comfort_whole-cluster_mph.comfort.C3": {
+      "ssim": 0.4414,
+      "dE2000_mean": 10.544,
+      "edge_px_err": 1.07
+     },
+     "07_physical-cluster_all-lamps-lit.comfort.C3": {
+      "ssim": 0.4194,
+      "dE2000_mean": 14.945,
+      "edge_px_err": 0.918
+     }
+    }
+   }
+  },
+  {
+   "id": "fuel.ticks",
+   "cluster": "C3",
+   "z": 5,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 29,
+   "y": 580,
+   "w": 51,
+   "h": 102,
+   "scale": 1.0,
+   "file": "C3/fuel.ticks.albedo.png",
+   "bytes_by_8wh": 41616,
+   "sources": [
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png",
+    "04_comfort_whole-cluster_mph.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 235.0,
+    "key": 1.0
+   },
+   "params": {
+    "frame_note": "R units, fuel convention (C4 = mirror u -> -u)",
+    "R_px": 70.0,
+    "centre_panel": [
+     80.0,
+     628.0
+    ],
+    "major_r": [
+     0.635,
+     0.807
+    ],
+    "major_w": 0.0416,
+    "minor_r": [
+     0.714,
+     0.773
+    ],
+    "minor_w": 0.023,
+    "rgb": [
+     0.93,
+     0.93,
+     0.93
+    ],
+    "minor_gain": 0.83,
+    "scale": {
+     "dx": 0.0458,
+     "dy": 0.0,
+     "a0": 157.05,
+     "pitch": 9.132,
+     "n": 20,
+     "major_every": 5
+    },
+    "ticks_cw12": [
+     [
+      3,
+      184.45,
+      "minor"
+     ],
+     [
+      4,
+      193.58,
+      "minor"
+     ],
+     [
+      5,
+      202.71,
+      "major"
+     ],
+     [
+      6,
+      211.84,
+      "minor"
+     ],
+     [
+      7,
+      220.97,
+      "minor"
+     ],
+     [
+      8,
+      230.11,
+      "minor"
+     ],
+     [
+      9,
+      239.24,
+      "minor"
+     ],
+     [
+      10,
+      248.37,
+      "major"
+     ],
+     [
+      11,
+      257.5,
+      "minor"
+     ],
+     [
+      12,
+      266.63,
+      "minor"
+     ],
+     [
+      13,
+      275.77,
+      "minor"
+     ],
+     [
+      14,
+      284.9,
+      "minor"
+     ],
+     [
+      15,
+      294.03,
+      "major"
+     ],
+     [
+      16,
+      303.16,
+      "minor"
+     ],
+     [
+      17,
+      312.29,
+      "minor"
+     ],
+     [
+      18,
+      321.43,
+      "minor"
+     ],
+     [
+      19,
+      330.56,
+      "minor"
+     ]
+    ],
+    "note": "majors every 5, minors between"
+   },
+   "stack_below": [
+    "fuel.zones"
+   ],
+   "stack_above": [
+    "fuel.pictogram"
+   ],
+   "fit": {
+    "ssim": 0.4513,
+    "dE2000_mean": 5.723,
+    "edge_px_err": 0.601,
+    "ref": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C3",
+    "roi": "bake/work/C3/roi_ticks__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "sheet": "bake/work/C3/qc_fuel.ticks__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "alone": {
+     "ssim": 0.31,
+     "dE2000_mean": 5.956,
+     "edge_px_err": 1.372
+    },
+    "by_ref": {
+     "17_physical-cluster_full.comfort.C3@2x": {
+      "ssim": 0.2492,
+      "dE2000_mean": 17.574,
+      "edge_px_err": 0.741
+     },
+     "04_comfort_whole-cluster_mph.comfort.C3": {
+      "ssim": 0.4513,
+      "dE2000_mean": 5.723,
+      "edge_px_err": 0.601
+     },
+     "07_physical-cluster_all-lamps-lit.comfort.C3": {
+      "ssim": 0.3234,
+      "dE2000_mean": 14.115,
+      "edge_px_err": 0.88
+     }
+    }
+   }
+  },
+  {
+   "id": "fuel.pictogram",
+   "cluster": "C3",
+   "z": 5.5,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 88,
+   "y": 572,
+   "w": 19,
+   "h": 15,
+   "scale": 1.0,
+   "file": "C3/fuel.pictogram.albedo.png",
+   "bytes_by_8wh": 2280,
+   "sources": [
+    "04_comfort_whole-cluster_mph.png",
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png"
+   ],
+   "evidence": "weak",
+   "light": {
+    "dir_deg": 235.0,
+    "key": 1.0
+   },
+   "params": {
+    "frame_note": "R units, fuel convention (C4 = mirror u -> -u)",
+    "R_px": 70.0,
+    "centre_panel": [
+     80.0,
+     628.0
+    ],
+    "icon": "fuel pump + filler-side arrow",
+    "bbox_uv": [
+     0.12,
+     -0.79,
+     0.372,
+     -0.59
+    ],
+    "polygons_uv": [
+     [
+      [
+       0.135,
+       -0.79
+      ],
+      [
+       0.255,
+       -0.79
+      ],
+      [
+       0.255,
+       -0.615
+      ],
+      [
+       0.135,
+       -0.615
+      ]
+     ],
+     [
+      [
+       0.12,
+       -0.615
+      ],
+      [
+       0.27,
+       -0.615
+      ],
+      [
+       0.27,
+       -0.59
+      ],
+      [
+       0.12,
+       -0.59
+      ]
+     ],
+     [
+      [
+       0.255,
+       -0.765
+      ],
+      [
+       0.3,
+       -0.725
+      ],
+      [
+       0.3,
+       -0.64
+      ],
+      [
+       0.285,
+       -0.625
+      ],
+      [
+       0.27,
+       -0.64
+      ],
+      [
+       0.28,
+       -0.65
+      ],
+      [
+       0.28,
+       -0.717
+      ],
+      [
+       0.255,
+       -0.74
+      ]
+     ],
+     [
+      [
+       0.322,
+       -0.728
+      ],
+      [
+       0.322,
+       -0.652
+      ],
+      [
+       0.372,
+       -0.69
+      ]
+     ]
+    ],
+    "holes_uv": [
+     [
+      [
+       0.155,
+       -0.768
+      ],
+      [
+       0.235,
+       -0.768
+      ],
+      [
+       0.235,
+       -0.7
+      ],
+      [
+       0.155,
+       -0.7
+      ]
+     ]
+    ],
+    "owner_note": "in-gauge placement and a simple rendering; the standalone icon set is P5's (C7)",
+    "note": "generic redrawn pictogram, ~12-22 px: only the bbox and rough massing are measured"
+   },
+   "stack_below": [
+    "fuel.ticks"
+   ],
+   "stack_above": [
+    "fuel.inner-arc"
+   ],
+   "fit": {
+    "ssim": 0.5157,
+    "dE2000_mean": 11.528,
+    "edge_px_err": 0.879,
+    "ref": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C3",
+    "roi": "bake/work/C3/roi_pictogram__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "sheet": "bake/work/C3/qc_fuel.pictogram__04_comfort_whole-cluster_mph.comfort.C3.png",
+    "alone": {
+     "ssim": 0.4646,
+     "dE2000_mean": 11.681,
+     "edge_px_err": 0.879
+    },
+    "by_ref": {
+     "17_physical-cluster_full.comfort.C3@2x": {
+      "ssim": 0.0813,
+      "dE2000_mean": 37.685,
+      "edge_px_err": 1.512
+     },
+     "04_comfort_whole-cluster_mph.comfort.C3": {
+      "ssim": 0.5157,
+      "dE2000_mean": 11.528,
+      "edge_px_err": 0.879
+     },
+     "07_physical-cluster_all-lamps-lit.comfort.C3": {
+      "ssim": 0.1789,
+      "dE2000_mean": 35.888,
+      "edge_px_err": 1.868
+     }
+    }
+   }
+  }
+ ],
+ "composition": {
+  "images": [
+   {
+    "file": "C3/fuel.static.merged.png",
+    "from_ids": [
+     "fuel.face",
+     "fuel.zones",
+     "fuel.ticks",
+     "fuel.pictogram",
+     "fuel.inner-arc",
+     "fuel.bezel",
+     "fuel.bezel-highlight"
+    ],
+    "x": 8,
+    "y": 556,
+    "w": 144,
+    "h": 144,
+    "scale": 1.0,
+    "bytes_by_8wh": 165888
+   }
+  ],
+  "layer_count": 1,
+  "bytes_by_8wh_total": 165888
+ },
+ "open_questions": [
+  "Needle pivot: at the bezel centre or at the scale centre (+0.046 R toward the main dial)? The evidence (04 hub ring) is ambiguous; the needle owner should pivot at the scale centre if the needle tip must hit the ticks.",
+  "The bezel is open on the main-dial side (27..121 cw12 on C3, mirrored on C4) because in the 6WB the big dial's bezel passes there. In the G20 layout the minis do not touch the main dials (9 px gap). Keep the gap (faithful) or close the ring?",
+  "The top end of the fuel scale shows two bars ('11' / '1/1') in 04 / 17 / 02: treated as live text '1/1', no tick baked at 1/1. If it is a double tick, add two majors at 340 / 349 cw12 (weak).",
+  "Theme numbers differ from the measurement: theme start 135 / sweep 185 about the bezel centre, redTo / coldTo 0.10, redFrom 0.90; measured 157.05 / 182.6 about the scale centre, 0.117 / 0.888.",
+  "Pictograms are generic re-drawings at ~12-22 px (P5 owns the icon set). The oil icon in 04 / 17 looks like an oil can with a level/temperature mark (':' and a line); ours is a plain can (weak).",
+  "Bezel light: brightest low on the outer side (C3 224 cw12, C4 136 cw12, i.e. away from the cluster centre) in 04; 17 is flatter and 07 dim. Not consistent with a single upper-left key light."
+ ],
+ "notes": "P3 mini gauges, COMFORT. Geometry in the fuel convention, C4 = mirror. The ticks, inner arc and zones are concentric about a point 0.046 R toward the main dial from the bezel centre (all three photos, both gauges). Scale (about that point): 0 at 157.05 cw12, 20 steps of 9.132 deg (sweep 182.6), majors every 5. Text ('0', '1/1') and the needle are live / dynamic and not baked. The per-element files are the relightable split; the scene would load only <gauge>.static.merged.png (1 layer per gauge). Report: bake/report/C3.md.",
+ "fit_composed": {
+  "17_physical-cluster_full.comfort.C3@2x": {
+   "ssim": 0.2314,
+   "dE2000_mean": 18.145,
+   "edge_px_err": 0.864
+  },
+  "04_comfort_whole-cluster_mph.comfort.C3": {
+   "ssim": 0.7066,
+   "dE2000_mean": 3.761,
+   "edge_px_err": 0.769
+  },
+  "07_physical-cluster_all-lamps-lit.comfort.C3": {
+   "ssim": 0.4368,
+   "dE2000_mean": 8.057,
+   "edge_px_err": 2.574
+  }
+ }
+}

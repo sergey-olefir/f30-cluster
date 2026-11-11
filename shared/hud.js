@@ -203,6 +203,7 @@ const { THEMES, M_STRIPE, LIGHTS, VERDICT, color } = require('./hud_themes');
 const ShiftScore = require('./shift_score');
 const sun = require('./sun');
 const textRaster = require('./hud_text');
+const data = require('./hud_data');
 const { paintIcon } = require('./icons');
 const shaders = require('./shaders');
 const calibration = require('./calibration');
@@ -654,6 +655,26 @@ class HudApp {
                 },
             });
         }
+        // Instant fuel consumption (the 6WB Comfort theme's EfficientDynamics arc and {{cons}}), the same way: app.json
+        // config.cons names the field once the car's catalogue has been looked at: { iface, field, path: [..], factor (1),
+        // unit: "l100" | "lh" (litres per hour: divided by the speed), invalid: [..] }. None: "--" on the car.
+        const cs = this.config.cons;
+        this.consL = null; this.consAt = 0; this.consRaw = undefined;
+        if (cs && cs.iface && cs.field) {
+            extra[cs.iface] = Object.assign(extra[cs.iface] || {}, {
+                [cs.field]: (v) => {
+                    let raw = v;
+                    (cs.path || []).forEach((k) => { raw = raw === null || raw === undefined ? raw : raw[k]; });
+                    const t = String(JSON.stringify(raw)).slice(0, 80);
+                    if (t !== this.consRaw) { this.consRaw = t; this.log.info('consumption raw: ' + t); }
+                    if (typeof raw !== 'number' || !isFinite(raw) || (cs.invalid || []).indexOf(raw) >= 0) { this.consL = null; return; }
+                    let l = raw * (isNum(cs.factor) ? cs.factor : 1);
+                    if (cs.unit === 'lh') { const sp = this.car && this.car.data().speed; l = isNum(sp) && sp > 3 ? l / sp * 100 : null; }
+                    this.consL = isNum(l) && l >= 0 && l < 100 ? l : null;
+                    this.consAt = Date.now();
+                },
+            });
+        }
         this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque'], extra);
         this.car.setRedline(this.setting('redline'));
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
@@ -834,6 +855,28 @@ class HudApp {
         this.atlases.set(key, a);
         this.log.info('glyph atlas "' + fontName + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + chars.length + ' glyphs in ' +
             cellW + 'x' + cellH + ' cells, ' + w + 'x' + h + ' R8 asset, ' + mib(a.bytes) + ' of pixel memory');
+        return a;
+    }
+
+    /**
+     * A baked scene texture (hud/scene/<name>.json, tools/bake_scene.py): an RGBA8 asset on a connection, made once and
+     * kept like a glyph atlas. A shader samples it with bind(); nothing is drawn by the asset itself.
+     */
+    _scene(name, ci) {
+        const key = ci + ':scene:' + name;
+        if (this.sceneUsed) this.sceneUsed.add(key);
+        if (this.atlases.has(key)) return this.atlases.get(key);
+        const j = data.json('scene/' + name + '.json');
+        if (!j || !j.rgba) throw new Error('scene texture "' + name + '" is missing from hud/scene');
+        const buf = Buffer.from(j.rgba, 'base64');
+        if (buf.length !== j.w * j.h * 4) throw new Error('scene texture "' + name + '": size does not match');
+        const c = this._clientAt(ci);
+        const ref = c.asset({ target: this.target, format: 'rgba8', w: j.w, h: j.h, sampling: 'bilinear' });
+        if (!ref) throw new Error('scene texture "' + name + '": asset refused (' + j.w + 'x' + j.h + ')');
+        c.pixels(ref, null, buf);
+        const a = { ref, c, ci, w: j.w, h: j.h, bytes: j.w * j.h * 8 };
+        this.atlases.set(key, a);
+        this.log.info('scene texture "' + name + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + j.w + 'x' + j.h + ' RGBA8 asset, ' + mib(a.bytes) + ' of pixel memory');
         return a;
     }
 
@@ -1195,6 +1238,7 @@ class HudApp {
         if (name === 'rpm' && isNum(this.rpmF)) return this.rpmF;
         if (name === 'hvSoc') return isNum(this.hvSoc) && Date.now() - this.hvSocAt < HV_STALE_MS ? this.hvSoc : this.car.data().demo ? 64 : null;
         if (name === 'nopass') return this.nopassOn ? 1 : this.car.data().demo ? 1 : null;
+        if (name === 'cons') return isNum(this.consL) && Date.now() - this.consAt < 5000 ? this.consL : this.car.data().demo ? 7.4 : null;
         if (name === 'limit') return isNum(this.limitKmh) ? this.limitKmh : this.car.data().demo ? 90 : null;
         if (name === 'fuel' || name === 'range' || name === 'ambient') {
             // the kit's demo drive has none of these: made-up but steady values while it runs
@@ -1287,6 +1331,7 @@ class HudApp {
             case 'u:dist': return us ? 'MI' : 'KM';
             case 'avgSpeed': { const v = this._avgSpeed(); return fix(isNum(v) ? (us ? v * 0.621371 : v) : v, 0); }
             case 'limit': { const v = this._raw('limit'); return isNum(v) ? String(us ? Math.round(v * 0.621371 / 5) * 5 : Math.round(v)) : ''; }
+            case 'cons': { const v = this._raw('cons'); return isNum(v) ? (us ? (v > 0.5 ? 235.215 / v : 0).toFixed(0) : v.toFixed(1)) : '--'; }
             case 'range': { const v = this._raw('range'); return fix(isNum(v) ? (us ? v * 0.621371 : v) : v, 0); }
             case 'ambient': {
                 const v = this._raw('ambient');
@@ -1406,6 +1451,7 @@ class HudApp {
         this.widgets.clear();
         this.sheets = [];
         this.pixelBytes = 0;
+        this.sceneUsed = new Set();      // the scene textures this layout samples; the others are dropped once it is built
         this.layerStates.clear();
         this.refused = null;
         clearTimeout(this.statusAskT); this.statusAskT = null;
@@ -1463,6 +1509,11 @@ class HudApp {
             }
         });
         if (this._offset().x || this._offset().y || this._scale() !== 1) this._place();
+        this.atlases.forEach((a, key) => {        // another mode's scene textures: give their pixel memory back
+            if (key.indexOf(':scene:') < 0 || this.sceneUsed.has(key)) return;
+            this._guard('drop ' + key, () => a.c.drop(a.ref));
+            this.atlases.delete(key);
+        });
         const atlasBytes = this._atlasBytes();
         px += atlasBytes;
         this.pixelBytes = px;
@@ -1705,10 +1756,34 @@ class HudApp {
                 c.uniform(ref, 'u_pre', [(w.off || 0) * Math.PI / 180]);     // "off": degrees before the start where the needle parks (OFF)
                 c.uniform(ref, 'u_box', [w.box ? 1 : 0]);
                 c.uniform(ref, 'u_flip', [w.flip ? 1 : 0]);
+                c.uniform(ref, 'u_hasBase', [0]);
+                if (w.base && this.setting('baked') !== false) {   // a baked base texture: "base": { tex, x, y, w, h (its box in the layer's px), kind 1 | 2 }
+                    const a = this._scene(w.base.tex, x.ci);
+                    c.bind(ref, 'u_base', a.ref);
+                    c.uniform(ref, 'u_baseR', [w.base.x, w.base.y, w.base.w, w.base.h]);
+                    c.uniform(ref, 'u_hasBase', [w.base.kind || 1]);
+                }
+                c.uniform(ref, 'u_decoR', [0, 0, 0, 0]);
+                c.uniform(ref, 'u_fill', [0, 0]);
+                if (w.fill && this.setting('baked') !== false) {   // the bottom arc's live fill: "fill": { tex (segment coverage), x, y, w, h,
+                    const f = w.fill;                               //   from, to (degrees cw from 12 at 0 and at max), of ('fuel' | 'cons'), max, color }
+                    c.bind(ref, 'u_deco', this._scene(f.tex, x.ci).ref);
+                    c.uniform(ref, 'u_decoR', [f.x, f.y, f.w, f.h]);
+                    c.uniform(ref, 'u_fillC', f.color.map((v) => v / 255));
+                }
             }
         } else if (w.type === 'wbsign') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_show', [0, 0]);       // shown by _update: the limit sign while a limit is known, the no-passing sign while it applies
+            c.uniform(ref, 'u_tex', [0]);
+            if (w.tex && this.setting('baked') !== false) {   // baked signs: "tex": { limit, nopass: { tex, x, y, w, h } }
+                [['limit', 'u_s0', 'u_r0'], ['nopass', 'u_s1', 'u_r1']].forEach(([k, smp, rect]) => {
+                    const t = w.tex[k];
+                    c.bind(ref, smp, this._scene(t.tex, x.ci).ref);
+                    c.uniform(ref, rect, [t.x, t.y, t.w, t.h]);
+                });
+                c.uniform(ref, 'u_tex', [1]);
+            }
         } else if (w.type === 'wbgear') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
         } else if (w.type === 'wbback') {
@@ -1718,6 +1793,16 @@ class HudApp {
             c.uniform(ref, 'u_dr', w.dr);
             c.uniform(ref, 'u_style', [WB_STYLE[w.style] || 0]);
             c.uniform(ref, 'u_sign', [0, 0, 0]);       // "sign": [x, y, r]: the speed limit sign's disc, shown by _update while a limit is known
+            c.uniform(ref, 'u_hasTex', [0]);
+            if (w.tex && this.setting('baked') !== false) {   // baked textures: "tex": { window, horizon, line: { tex, x, y, w, h } }, "gain": [window level, y above which it applies]
+                [['window', 'u_t0', 'u_r0'], ['horizon', 'u_t1', 'u_r1'], ['line', 'u_t2', 'u_r2']].forEach(([k, smp, rect]) => {
+                    const t = w.tex[k];
+                    c.bind(ref, smp, this._scene(t.tex, x.ci).ref);
+                    c.uniform(ref, rect, [t.x, t.y, t.w, t.h]);
+                });
+                c.uniform(ref, 'u_win', w.gain || [1, 0]);
+                c.uniform(ref, 'u_hasTex', [1]);
+            }
         } else if (w.type === 'gmeter') {
             const L = color(t, w.line || 'dim');
             c.uniform(ref, 'u_size', [w.w, w.h]);
@@ -2090,6 +2175,16 @@ class HudApp {
                 if (isNum(lim) && isNum(raw)) {
                     if (us && !w.kmh) lim *= 0.621371;
                     if (raw > lim + 1) over = [Math.round(Math.min(1, Math.max(0, (lim - mn) / (D.max - mn))) * 1000) / 1000, q];
+                }
+            }
+            if (w.fill && w.look === 'wb' && this.setting('baked') !== false) {
+                const f = w.fill, fv = this._raw(f.of);
+                const k = isNum(fv) ? Math.max(0, Math.min(1, fv / (f.max || 1))) : 0;
+                const fk = Math.round(k * 200);
+                if (force || fk !== x.lastFill) {
+                    x.lastFill = fk;
+                    const r = Math.PI / 180, a0 = f.from * r, a1 = (f.from + (f.to - f.from) * k) * r;
+                    x.c.uniform(x.ref, 'u_fill', k > 0 ? [a0, a1] : [0, 0]);
                 }
             }
             const key = q + '|' + hot + '|' + over.join(',');

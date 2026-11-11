@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="33" height="32" viewBox="0 0 33 32">
+  <title>Check-control warning triangle (bottom info bar)</title>
+  <defs>
+  <mask id="cut1" maskUnits="userSpaceOnUse" x="0" y="0" width="33" height="32"><rect width="33" height="32" fill="#fff"/><polygon points="15.41,11.53 17.93,11.53 17.41,20.77 15.94,20.77" fill="#000"/></mask>
+  <mask id="cut2" maskUnits="userSpaceOnUse" x="0" y="0" width="33" height="32"><rect width="33" height="32" fill="#fff"/><circle cx="16.67" cy="23.92" r="1.47" fill="#000"/></mask>
+  </defs>
+  <g mask="url(#cut2)">
+  <g mask="url(#cut1)">
+  <polyline points="16.67,4.6 28.75,27.49 4.6,27.49 16.67,4.6" fill="none" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" stroke="#e24046"/>
+  <polygon points="16.67,4.6 28.75,27.49 4.6,27.49" fill="#e24046"/>
+  </g>
+  </g>
+</svg>

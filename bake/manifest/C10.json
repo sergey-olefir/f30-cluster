@@ -1,0 +1,142 @@
+{
+ "cluster": "C10",
+ "package": "P8",
+ "mode": "comfort",
+ "R": 335,
+ "generator": "cd bake/src && $PY -m C10.build",
+ "layers": [
+  {
+   "id": "panel.background",
+   "cluster": "C10",
+   "z": 0,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 0,
+   "y": 0,
+   "w": 1920,
+   "h": 720,
+   "scale": 0.5,
+   "file": "C10/panel.background.albedo@0.5x.png",
+   "bytes_by_8wh": 2764800,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "02_three-modes_clean-render.png",
+    "04_comfort_whole-cluster_mph.png",
+    "17_physical-cluster_full.png",
+    "03_three-modes_photo_bimmerstop.png"
+   ],
+   "evidence": "ok",
+   "fit": {
+    "ssim": 0.869,
+    "dE2000_mean": 0.864,
+    "edge_px_err": null,
+    "ref": "bake/work/rect/02_three-modes_clean-render.comfort.PANEL",
+    "roi": "mask:bake/work/C10/bgmask_02.png (outside 1.04 R of the big dials, 1.10 R of the minis, the window, y 40-560, bright objects)",
+    "sheet": "bake/work/C10/qc_panel.background__02_three-modes_clean-render.comfort.PANEL.png"
+   },
+   "params": {
+    "notes": "Opaque, the bottom of the whole scene. colour = base + halo * h(r); r = distance to the nearer big dial centre in R units; h = 1 for r <= r0, exp(-(r - r0) / w) beyond. Values are sRGB 0-255 (dithered). No vertical gradient and no vignette are measurable on the drawn background; the halo is seen in 02 only (weak), 04 is flat.",
+    "base_rgb_255": [
+     0.0,
+     0.5,
+     1.5
+    ],
+    "halo_rgb_255": [
+     1.0,
+     1.0,
+     2.0
+    ],
+    "halo_r0_R": 1.04,
+    "halo_w_R": 0.0856,
+    "base_rgb_per_ref": {
+     "02": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "04": [
+      0.0,
+      1.0,
+      3.0
+     ]
+    },
+    "qc_all": {
+     "02": {
+      "shipped": {
+       "ssim": 0.869,
+       "dE2000_mean": 0.864,
+       "luma_bias": -0.33
+      },
+      "ref_geometry": {
+       "ssim": 0.8857,
+       "dE2000_mean": 0.786,
+       "luma_bias": -0.48
+      }
+     },
+     "04": {
+      "shipped": {
+       "ssim": 0.8691,
+       "dE2000_mean": 0.767,
+       "luma_bias": -1.23
+      },
+      "ref_geometry": {
+       "ssim": 0.8499,
+       "dE2000_mean": 0.739,
+       "luma_bias": -1.39
+      }
+     },
+     "17": {
+      "shipped": {
+       "ssim": 0.0417,
+       "dE2000_mean": 12.242,
+       "luma_bias": -44.59
+      },
+      "ref_geometry": {
+       "ssim": 0.037,
+       "dE2000_mean": 12.242,
+       "luma_bias": -44.7
+      }
+     },
+     "03": {
+      "shipped": {
+       "ssim": 0.5661,
+       "dE2000_mean": 1.488,
+       "luma_bias": -5.44
+      },
+      "ref_geometry": {
+       "ssim": 0.535,
+       "dE2000_mean": 1.476,
+       "luma_bias": -5.57
+      }
+     }
+    },
+    "alternatives": "procedural: 2 colours + 2 numbers in WBBACK (0 bytes, 0 extra layers); @0.25x file 480x180 = 691200 bytes"
+   }
+  }
+ ],
+ "composition": {
+  "images": [
+   {
+    "file": "C10/panel.background.albedo@0.5x.png",
+    "from_ids": [
+     "panel.background"
+    ],
+    "x": 0,
+    "y": 0,
+    "w": 960,
+    "h": 360,
+    "scale": 0.5,
+    "bytes_by_8wh": 2764800
+   }
+  ],
+  "layer_count": 1,
+  "bytes_by_8wh_total": 2764800
+ },
+ "open_questions": [
+  "The fitted background is almost black (base rgb ~0,0.5,1.5 + a 1,1,2 halo). 2.64 MiB (w*h*8) for it is poor value: recommend folding the 4 numbers into the existing WBBACK effect (0 bytes, no new layer) or, if it must be an image, the @0.25x variant (0.66 MiB). P9 decides.",
+  "17 (veiling glare, L ~45) and 03 (daylight on the housing) are not fitted: their lift is the glass / housing, documented in C9."
+ ],
+ "notes": "Fit report: bake/report/C10.md (in bake/report/C9.md). QC sheets: bake/work/C10/qc_panel.background*.png."
+}

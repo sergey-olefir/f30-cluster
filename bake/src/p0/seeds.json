@@ -1,0 +1,732 @@
+{
+ "_doc": "Hand-placed seeds (photo px) for the P0 dial fits: [cx, cy, r_bezel]. 'ranges': cw12 angle spans (deg) of the bezel ridge to use (skip where it is hidden or cut). 'feature': lum (bezel ridge) | red (hub ring) | lum_inner (an inner ring). 'section': a mode panel of a multi-panel image, with its photo box [x0,y0,x1,y1]. Masks: photo-space polygons / rects / needle angles, applied after rectification. Every value here was read off the images by eye, then refined by fit.py.",
+ "images": {
+  "17_physical-cluster_full.png": {
+   "sections": {
+    "comfort": {
+     "box": [
+      0,
+      0,
+      2452,
+      1110
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        697,
+        571,
+        322
+       ]
+      },
+      "C2": {
+       "seed": [
+        1703,
+        569,
+        318
+       ]
+      },
+      "C3": {
+       "seed": [
+        245,
+        690,
+        118
+       ]
+      },
+      "C4": {
+       "seed": [
+        2140,
+        690,
+        118
+       ]
+      }
+     }
+    }
+   },
+   "glare": [
+    [
+     [
+      0,
+      0
+     ],
+     [
+      2452,
+      0
+     ],
+     [
+      2452,
+      240
+     ],
+     [
+      0,
+      240
+     ]
+    ]
+   ],
+   "occlusion": []
+  },
+  "04_comfort_whole-cluster_mph.png": {
+   "sections": {
+    "comfort": {
+     "box": [
+      0,
+      0,
+      1000,
+      750
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        291,
+        412,
+        134
+       ]
+      },
+      "C2": {
+       "seed": [
+        722,
+        412,
+        133
+       ]
+      },
+      "C3": {
+       "seed": [
+        112,
+        465,
+        50
+       ]
+      },
+      "C4": {
+       "seed": [
+        905,
+        465,
+        50
+       ]
+      }
+     }
+    }
+   },
+   "watermark": [
+    [
+     [
+      0,
+      660
+     ],
+     [
+      240,
+      660
+     ],
+     [
+      240,
+      750
+     ],
+     [
+      0,
+      750
+     ]
+    ]
+   ]
+  },
+  "05_comfort_tach-closeup.png": {
+   "sections": {
+    "comfort": {
+     "box": [
+      0,
+      0,
+      1000,
+      750
+     ],
+     "dials": {
+      "C2": {
+       "seed": [
+        522,
+        412,
+        368
+       ]
+      }
+     }
+    }
+   },
+   "watermark": [
+    [
+     [
+      0,
+      660
+     ],
+     [
+      240,
+      660
+     ],
+     [
+      240,
+      750
+     ],
+     [
+      0,
+      750
+     ]
+    ]
+   ]
+  },
+  "06_comfort_wide_with-wheel.png": {
+   "sections": {
+    "comfort": {
+     "box": [
+      0,
+      0,
+      1000,
+      750
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        404,
+        287,
+        73
+       ]
+      },
+      "C2": {
+       "seed": [
+        634,
+        288,
+        72
+       ]
+      }
+     }
+    }
+   },
+   "watermark": [
+    [
+     [
+      0,
+      660
+     ],
+     [
+      240,
+      660
+     ],
+     [
+      240,
+      750
+     ],
+     [
+      0,
+      750
+     ]
+    ]
+   ],
+   "skipped": {
+    "C3": "mini bezel ~27 px, only a partial lit arc: no usable fit",
+    "C4": "same"
+   }
+  },
+  "07_physical-cluster_all-lamps-lit.png": {
+   "sections": {
+    "comfort": {
+     "box": [
+      0,
+      0,
+      1456,
+      824
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        454,
+        440,
+        171
+       ]
+      },
+      "C2": {
+       "seed": [
+        985,
+        438,
+        166
+       ]
+      },
+      "C3": {
+       "seed": [
+        210,
+        500,
+        60
+       ]
+      },
+      "C4": {
+       "seed": [
+        1240,
+        500,
+        60
+       ]
+      }
+     }
+    }
+   }
+  },
+  "12_speedo_signs_overspeed-wedge.png": {
+   "sections": {
+    "comfort": {
+     "box": [
+      0,
+      0,
+      374,
+      344
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        179,
+        174,
+        151
+       ]
+      }
+     }
+    }
+   }
+  },
+  "02_three-modes_clean-render.png": {
+   "sections": {
+    "comfort": {
+     "box": [
+      0,
+      0,
+      1254,
+      410
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        360,
+        228,
+        172
+       ]
+      },
+      "C2": {
+       "seed": [
+        888,
+        225,
+        172
+       ]
+      },
+      "C3": {
+       "seed": [
+        128,
+        275,
+        57
+       ]
+      },
+      "C4": {
+       "seed": [
+        1125,
+        275,
+        57
+       ]
+      }
+     }
+    },
+    "sport": {
+     "box": [
+      0,
+      410,
+      1254,
+      830
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        360,
+        640,
+        172
+       ]
+      },
+      "C2": {
+       "seed": [
+        888,
+        640,
+        172
+       ]
+      },
+      "C3": {
+       "seed": [
+        128,
+        685,
+        57
+       ]
+      },
+      "C4": {
+       "seed": [
+        1125,
+        685,
+        57
+       ]
+      }
+     }
+    },
+    "eco": {
+     "box": [
+      0,
+      830,
+      1254,
+      1254
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        360,
+        1060,
+        172
+       ]
+      },
+      "C2": {
+       "seed": [
+        888,
+        1060,
+        172
+       ]
+      },
+      "C3": {
+       "seed": [
+        128,
+        1100,
+        57
+       ]
+      },
+      "C4": {
+       "seed": [
+        1125,
+        1100,
+        57
+       ]
+      }
+     }
+    }
+   }
+  },
+  "03_three-modes_photo_bimmerstop.png": {
+   "sections": {
+    "eco": {
+     "box": [
+      0,
+      0,
+      950,
+      400
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        258,
+        205,
+        125
+       ]
+      },
+      "C2": {
+       "seed": [
+        650,
+        205,
+        122
+       ]
+      },
+      "C3": {
+       "seed": [
+        93,
+        265,
+        45
+       ]
+      },
+      "C4": {
+       "seed": [
+        815,
+        262,
+        45
+       ]
+      }
+     }
+    },
+    "comfort": {
+     "box": [
+      0,
+      400,
+      950,
+      800
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        250,
+        597,
+        132
+       ]
+      },
+      "C2": {
+       "seed": [
+        668,
+        600,
+        130
+       ]
+      },
+      "C3": {
+       "seed": [
+        72,
+        642,
+        45
+       ]
+      }
+     }
+    },
+    "sport": {
+     "box": [
+      0,
+      800,
+      950,
+      1200
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        258,
+        1000,
+        128
+       ]
+      },
+      "C2": {
+       "seed": [
+        665,
+        1003,
+        126
+       ]
+      },
+      "C3": {
+       "seed": [
+        86,
+        1040,
+        45
+       ]
+      },
+      "C4": {
+       "seed": [
+        835,
+        1040,
+        45
+       ]
+      }
+     }
+    }
+   },
+   "watermark": [
+    [
+     [
+      415,
+      420
+     ],
+     [
+      535,
+      420
+     ],
+     [
+      535,
+      460
+     ],
+     [
+      415,
+      460
+     ]
+    ],
+    [
+     [
+      15,
+      580
+     ],
+     [
+      70,
+      580
+     ],
+     [
+      70,
+      635
+     ],
+     [
+      15,
+      635
+     ]
+    ],
+    [
+     [
+      410,
+      1160
+     ],
+     [
+      540,
+      1160
+     ],
+     [
+      540,
+      1185
+     ],
+     [
+      410,
+      1185
+     ]
+    ]
+   ]
+  },
+  "01_three-modes_small.png": {
+   "sections": {
+    "eco": {
+     "box": [
+      0,
+      0,
+      447,
+      149
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        140,
+        78,
+        58
+       ]
+      },
+      "C2": {
+       "seed": [
+        318,
+        78,
+        58
+       ]
+      }
+     }
+    },
+    "sport": {
+     "box": [
+      0,
+      149,
+      447,
+      298
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        140,
+        222,
+        58
+       ]
+      },
+      "C2": {
+       "seed": [
+        318,
+        222,
+        58
+       ]
+      }
+     }
+    },
+    "comfort": {
+     "box": [
+      0,
+      298,
+      447,
+      447
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        140,
+        370,
+        58
+       ]
+      },
+      "C2": {
+       "seed": [
+        318,
+        370,
+        58
+       ]
+      }
+     }
+    }
+   }
+  },
+  "13_ticks_closeup.png": {
+   "sections": {
+    "comfort": {
+     "box": [
+      0,
+      0,
+      768,
+      926
+     ],
+     "dials": {
+      "C2": {
+       "seed": [
+        -1100,
+        470,
+        1660
+       ],
+       "ranges": [
+        [
+         60,
+         120
+        ]
+       ],
+       "partial": true,
+       "tick_pitch_deg": 3.2,
+       "major_tick_at_cw12": 82.4,
+       "tick_ring_R": 0.875
+      }
+     }
+    }
+   }
+  },
+  "14_inner-rings_closeup.png": {
+   "sections": {
+    "comfort": {
+     "box": [
+      0,
+      0,
+      264,
+      232
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        330,
+        230,
+        190
+       ],
+       "feature": "lum_inner",
+       "maps_to_R": 0.51,
+       "ranges": [
+        [
+         225,
+         340
+        ]
+       ],
+       "partial": true
+      }
+     }
+    }
+   }
+  },
+  "15_hub-needle_closeup.png": {
+   "sections": {
+    "comfort": {
+     "box": [
+      0,
+      0,
+      892,
+      666
+     ],
+     "dials": {
+      "C1": {
+       "seed": [
+        350,
+        245,
+        220
+       ],
+       "feature": "red",
+       "maps_to_R": 0.135,
+       "partial": true
+      }
+     }
+    }
+   }
+  }
+ }
+}

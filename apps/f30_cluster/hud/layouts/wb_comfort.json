@@ -25,7 +25,34 @@
         335
       ],
       "style": "comfort",
-      "color": "accent"
+      "color": "accent",
+      "tex": {
+        "window": {
+          "tex": "window",
+          "x": 640,
+          "y": 76,
+          "w": 640,
+          "h": 572
+        },
+        "horizon": {
+          "tex": "horizon",
+          "x": 748,
+          "y": 452,
+          "w": 424,
+          "h": 10
+        },
+        "line": {
+          "tex": "bar",
+          "x": 668,
+          "y": 602,
+          "w": 584,
+          "h": 79
+        }
+      },
+      "gain": [
+        0.24,
+        604
+      ]
     },
     {
       "id": "speedo",
@@ -45,6 +72,30 @@
       "tick": "fg",
       "glow": "accent",
       "ringW": 10,
+      "base": {
+        "tex": "speedo",
+        "x": 0,
+        "y": 0,
+        "w": 670,
+        "h": 670,
+        "kind": 3
+      },
+      "fill": {
+        "tex": "range_seg",
+        "x": 162,
+        "y": 569,
+        "w": 346,
+        "h": 68,
+        "from": 216.0,
+        "to": 144.0,
+        "of": "fuel",
+        "max": 1,
+        "color": [
+          222,
+          220,
+          216
+        ]
+      },
       "measure": "speed",
       "kmh": true,
       "scale": {
@@ -73,6 +124,30 @@
       "tick": "fg",
       "glow": "accent",
       "ringW": 10,
+      "base": {
+        "tex": "tacho",
+        "x": 0,
+        "y": 0,
+        "w": 670,
+        "h": 670,
+        "kind": 3
+      },
+      "fill": {
+        "tex": "ed_seg",
+        "x": 165,
+        "y": 567,
+        "w": 346,
+        "h": 70,
+        "from": 196.5,
+        "to": 143.3,
+        "of": "cons",
+        "max": 20,
+        "color": [
+          214,
+          128,
+          136
+        ]
+      },
       "measure": "rpm",
       "scale": {
         "max": 7500,
@@ -110,7 +185,15 @@
       "minor": 2,
       "start": 135,
       "sweep": 185,
-      "redTo": 0.1
+      "redTo": 0.1,
+      "base": {
+        "tex": "fuel",
+        "x": -2,
+        "y": -2,
+        "w": 144,
+        "h": 144,
+        "kind": 1
+      }
     },
     {
       "id": "oilt",
@@ -142,7 +225,15 @@
       "sweep": 185,
       "flip": true,
       "coldTo": 0.1,
-      "redFrom": 0.9
+      "redFrom": 0.9,
+      "base": {
+        "tex": "oil",
+        "x": -2,
+        "y": -2,
+        "w": 144,
+        "h": 144,
+        "kind": 1
+      }
     },
     {
       "id": "fuel_icon",
@@ -154,7 +245,8 @@
       "w": 22,
       "h": 26,
       "color": "fg",
-      "conn": 1
+      "conn": 1,
+      "toggle": "!baked"
     },
     {
       "id": "fuel_full",
@@ -194,7 +286,8 @@
       "w": 30,
       "h": 26,
       "color": "fg",
-      "conn": 2
+      "conn": 2,
+      "toggle": "!baked"
     },
     {
       "id": "spd0",
@@ -555,7 +648,8 @@
       "y": 657,
       "w": 170,
       "h": 58,
-      "conn": 2
+      "conn": 2,
+      "toggle": "!baked"
     },
     {
       "id": "range_icon",
@@ -567,7 +661,8 @@
       "w": 22,
       "h": 26,
       "color": "fg",
-      "conn": 1
+      "conn": 1,
+      "toggle": "!baked"
     },
     {
       "id": "range_in",
@@ -581,32 +676,167 @@
       "font": "wb_cap",
       "color": "fg",
       "align": "center",
-      "conn": 1
+      "conn": 1,
+      "toggle": "!baked"
     },
     {
       "id": "signs",
       "type": "wbsign",
       "class": "content",
       "z": 3,
-      "x": 312,
-      "y": 458,
-      "w": 200,
-      "h": 84,
-      "conn": 1
+      "x": 305,
+      "y": 460,
+      "w": 214,
+      "h": 93,
+      "conn": 1,
+      "tex": {
+        "limit": {
+          "tex": "sign_limit",
+          "x": 2,
+          "y": 2,
+          "w": 88,
+          "h": 89
+        },
+        "nopass": {
+          "tex": "sign_nopass",
+          "x": 124,
+          "y": 2,
+          "w": 88,
+          "h": 89
+        }
+      }
     },
     {
       "id": "limit",
       "type": "text",
       "z": 5,
-      "x": 334,
-      "y": 489,
+      "x": 321,
+      "y": 490,
       "w": 60,
-      "h": 24,
+      "h": 32,
       "text": "{{limit}}",
-      "font": "wb_spd",
+      "font": "wb_val",
       "color": "ink",
       "align": "center",
       "conn": 2
+    },
+    {
+      "id": "row_b0",
+      "type": "text",
+      "z": 5,
+      "x": 800,
+      "y": 646,
+      "w": 150,
+      "h": 32,
+      "text": "{{time}}",
+      "font": "wb_val",
+      "color": "fg",
+      "align": "left",
+      "toggle": "baked"
+    },
+    {
+      "id": "row_b1",
+      "type": "text",
+      "z": 5,
+      "x": 1010,
+      "y": 646,
+      "w": 150,
+      "h": 32,
+      "text": "{{ambient}} °C",
+      "font": "wb_val",
+      "color": "fg",
+      "align": "left",
+      "toggle": "baked"
+    },
+    {
+      "id": "range_v",
+      "type": "text",
+      "z": 5,
+      "x": 357,
+      "y": 624,
+      "w": 110,
+      "h": 24,
+      "text": "{{range}}",
+      "font": "wb_spd",
+      "color": "fg",
+      "align": "center",
+      "conn": 1,
+      "toggle": "baked"
+    },
+    {
+      "id": "range_a0",
+      "type": "text",
+      "z": 5,
+      "x": 239,
+      "y": 577,
+      "w": 40,
+      "h": 26,
+      "text": "0",
+      "font": "wb_cap",
+      "color": "dim",
+      "align": "center",
+      "conn": 1,
+      "toggle": "baked"
+    },
+    {
+      "id": "range_a1",
+      "type": "text",
+      "z": 5,
+      "x": 515,
+      "y": 577,
+      "w": 100,
+      "h": 26,
+      "text": "km",
+      "font": "wb_cap",
+      "color": "dim",
+      "align": "center",
+      "conn": 1,
+      "toggle": "baked"
+    },
+    {
+      "id": "cons_v",
+      "type": "text",
+      "z": 5,
+      "x": 1453,
+      "y": 624,
+      "w": 110,
+      "h": 24,
+      "text": "{{cons}}",
+      "font": "wb_spd",
+      "color": "fg",
+      "align": "center",
+      "conn": 2,
+      "toggle": "baked"
+    },
+    {
+      "id": "cons_a0",
+      "type": "text",
+      "z": 5,
+      "x": 1414,
+      "y": 616,
+      "w": 40,
+      "h": 26,
+      "text": "0",
+      "font": "wb_cap",
+      "color": "dim",
+      "align": "center",
+      "conn": 2,
+      "toggle": "baked"
+    },
+    {
+      "id": "cons_a1",
+      "type": "text",
+      "z": 5,
+      "x": 1613,
+      "y": 575,
+      "w": 100,
+      "h": 26,
+      "text": "l/100 km",
+      "font": "wb_cap",
+      "color": "dim",
+      "align": "center",
+      "conn": 2,
+      "toggle": "baked"
     },
     {
       "id": "row_h0",
@@ -619,7 +849,8 @@
       "text": "Time",
       "font": "wb_cap",
       "color": "dim",
-      "align": "left"
+      "align": "left",
+      "toggle": "!baked"
     },
     {
       "id": "row_v0",
@@ -628,11 +859,12 @@
       "x": 742,
       "y": 634,
       "w": 160,
-      "h": 31,
+      "h": 32,
       "text": "{{time}}",
       "font": "wb_val",
       "color": "fg",
-      "align": "left"
+      "align": "left",
+      "toggle": "!baked"
     },
     {
       "id": "row_h1",
@@ -645,7 +877,8 @@
       "text": "Range",
       "font": "wb_cap",
       "color": "dim",
-      "align": "left"
+      "align": "left",
+      "toggle": "!baked"
     },
     {
       "id": "row_v1",
@@ -654,11 +887,12 @@
       "x": 890,
       "y": 634,
       "w": 160,
-      "h": 31,
+      "h": 32,
       "text": "{{range}} km",
       "font": "wb_val",
       "color": "fg",
-      "align": "left"
+      "align": "left",
+      "toggle": "!baked"
     },
     {
       "id": "row_h2",
@@ -671,7 +905,8 @@
       "text": "Temp",
       "font": "wb_cap",
       "color": "dim",
-      "align": "left"
+      "align": "left",
+      "toggle": "!baked"
     },
     {
       "id": "row_v2",
@@ -680,11 +915,12 @@
       "x": 1048,
       "y": 634,
       "w": 160,
-      "h": 31,
+      "h": 32,
       "text": "{{ambient}} °C",
       "font": "wb_val",
       "color": "fg",
-      "align": "left"
+      "align": "left",
+      "toggle": "!baked"
     }
   ]
 }

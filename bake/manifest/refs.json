@@ -1,0 +1,5410 @@
+{
+ "_doc": "P0 alignment of every reference to our panel frame (brief section 5). Produced by bake/src/p0/{align,g20,build_refs}.py. Per image -> sections (mode panels) -> dials: fitted photo ellipse, A_photo_to_panel (2x3, photo px -> panel px), residual (rms of the bezel ridge points about the ellipse, in PANEL px), quality, light, needle angle; per section: roll, exposure fit, outputs (rect crop bases).",
+ "panel": {
+  "w": 1920,
+  "h": 720,
+  "dials": {
+   "C1": {
+    "name": "speedo",
+    "c": [
+     412.0,
+     380.0
+    ],
+    "R": 335.0
+   },
+   "C2": {
+    "name": "tacho",
+    "c": [
+     1508.0,
+     380.0
+    ],
+    "R": 335.0
+   },
+   "C3": {
+    "name": "fuel",
+    "c": [
+     80.0,
+     628.0
+    ],
+    "R": 70.0
+   },
+   "C4": {
+    "name": "oil",
+    "c": [
+     1840.0,
+     628.0
+    ],
+    "R": 70.0
+   }
+  },
+  "window": {
+   "x0": 720,
+   "x1": 1200,
+   "y0": 79,
+   "y1": 688
+  },
+  "old_geometry": {
+   "C1": {
+    "c": [
+     496.0,
+     360.0
+    ],
+    "R": 290.0
+   },
+   "C2": {
+    "c": [
+     1424.0,
+     360.0
+    ],
+    "R": 290.0
+   },
+   "C3": {
+    "c": [
+     103.0,
+     473.0
+    ],
+    "R": 90.0
+   },
+   "C4": {
+    "c": [
+     1817.0,
+     473.0
+    ],
+    "R": 90.0
+   }
+  }
+ },
+ "mapping_rule": "dial-to-dial: the photo dial's bezel OUTER edge (half-max outside the bright ridge) -> our R; the bezel ridge therefore lands at ridge_radius_in_R (~0.99 R). Camera roll from the line through both dial centres (else the inner-disc floor edge, else 0). Perspective handled per dial by the ellipse->circle affine; the window (C5) / PANEL uses the mean of both dials' affines centred on the dial-pair midpoint.",
+ "quality_rule": "good: rms <= 1.5 panel px, inliers in >= 7 of 8 octants, >= 150 rays; ok: rms <= 2.5, >= 5 octants, >= 40 rays; poor: otherwise; partial: close-up fitted on an arc / an inner feature (scale rests on an assumption, see visual_check).",
+ "naming": {
+  "pattern": "bake/work/rect/<image stem>.<mode>.<cluster>[@<k>x].<suffix>",
+  "image stem": "reference file name without extension (e.g. 17_physical-cluster_full); 'ours_bench' for reference/ours/ref_comfort_bench_1920x720.png",
+  "mode": "comfort | sport | eco (6WB mode panel of the image) | g20 (photos of the G20 panel, already in panel frame)",
+  "cluster": "C1 speedo, C2 tacho, C3 fuel mini, C4 oil mini (box = centre +- 1.08 R, clipped to the panel); C5 window (box x 680-1240, y 39-708); PANEL full 1920x720. C6 (bottom arcs) lives inside the C1/C2 crops, the info bar inside C5.",
+  "suffixes": {
+   ".png": "RGB, rectified into panel px at 1x and exposure-normalised (see the section's exposure); pixels outside the photo are 0",
+   ".raw.png": "same geometry, NOT exposure-normalised (6WB images only)",
+   ".mask.png": "L8: 255 = usable, 0 = any mask bit set",
+   ".maskbits.png": "L8 bit field: 1 outside the photo, 2 glare, 4 watermark / UI chrome, 8 occlusion (needle + its shadow corridor, wheel), 16 live text (numerals, captions; approximate)",
+   ".json": "sidecar: image, mode, cluster, box [x, y, w, h] in panel px, A_photo_to_panel (2x3) or H_panel_to_photo (3x3), exposure, quality",
+   "@<k>x": "close-ups only (13, 15, 17 C3): k x supersampled crop of the photo footprint; pixel (i, j) = panel (box.x + (i+0.5)/k, box.y + (j+0.5)/k)"
+  },
+  "frame": "Every crop pixel (i, j) is panel (box.x + i + 0.5, box.y + j + 0.5). Dial frame: (u, v) R units = ((x - cx)/R, (y - cy)/R), y down; angles cw12 = degrees clockwise from 12 o'clock."
+ },
+ "masks": {
+  "glare": "auto: saturated blobs thicker than 2.5% of the dial radius (+ hand polygons in seeds.json)",
+  "watermark": "hand polygons in seeds.json (KIES logo in 04/05/06, BIMMERSTOP, the '<' button and carousel dots in 03)",
+  "occlusion": "needle corridor: from -0.42 R (tail) to 1.0 R, 0.12 R wide, at needle_cw12_deg (auto: red-ness ray for Comfort, overrides.json for Sport/Eco)",
+  "text": "auto: small bright top-hat blobs centred in 0.18-0.80 R (numerals, captions, READY/OFF, P) - approximate; bottom-arc labels are included, arc ticks beyond 0.80 R are not"
+ },
+ "measurements": {
+  "rpm_minor_tick_pitch_deg": {
+   "05": 3.2,
+   "17": 3.2,
+   "theme": 3.21,
+   "note": "median spacing of minor ticks at 0.875 R"
+  },
+  "rpm_major_ticks_cw12_05": {
+   "1k": 280.6,
+   "2k": 312.9,
+   "3k": 344.8,
+   "4k": 17.8,
+   "5k": 50.8,
+   "6k": 82.4,
+   "7k": 114.0,
+   "theme": "RPM_START 250.5 + 32.1 k -> 282.6 .. 115.2: 6WB (05) sits ~1.3 deg earlier (roll uncertainty ~1 deg)"
+  },
+  "floor_edge_dy_R": "inner-disc floor edge below the centre: 17 C1 0.242, 17 C2 0.245, 05 0.257, 07 0.221/0.260, 03 0.254 (theme 0.26)"
+ },
+ "images": {
+  "17_physical-cluster_full.png": {
+   "file": "reference/6wb/17_physical-cluster_full.png",
+   "size": [
+    2452,
+    1110
+   ],
+   "sections": {
+    "comfort": {
+     "roll_deg": -0.07,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        697,
+        571,
+        322
+       ],
+       "photo_centre": [
+        692.66,
+        570.66
+       ],
+       "photo_ridge_axes": [
+        322.74,
+        323.61
+       ],
+       "ellipse_ratio": 0.9973,
+       "outer_edge_ratio": 1.0101,
+       "outer_edge_ratio_used": 1.0101,
+       "outer_edge_rays": 267,
+       "ridge_radius_in_R": 0.99,
+       "panel_px_per_photo_px": 1.0262,
+       "A_photo_to_panel": [
+        [
+         1.025292,
+         -0.000232,
+         -298.049048
+        ],
+        [
+         0.002258,
+         1.027174,
+         -207.727803
+        ]
+       ],
+       "residual_rms_panel_px": 0.637,
+       "residual_max_panel_px": 1.968,
+       "inlier_rays": 267,
+       "rays": 344,
+       "light": {
+        "dir_deg_math": 302.4,
+        "rel_amplitude": 0.271,
+        "mean": 186.6,
+        "angular_coverage_deg": 267
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 225.0,
+       "floor_check": {
+        "residual_tilt_deg": -0.5,
+        "dy_R": 0.2418
+       }
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        1703,
+        569,
+        318
+       ],
+       "photo_centre": [
+        1704.36,
+        569.43
+       ],
+       "photo_ridge_axes": [
+        314.5,
+        319.36
+       ],
+       "ellipse_ratio": 0.9848,
+       "outer_edge_ratio": 1.0111,
+       "outer_edge_ratio_used": 1.0111,
+       "outer_edge_rays": 289,
+       "ridge_radius_in_R": 0.9891,
+       "panel_px_per_photo_px": 1.0455,
+       "A_photo_to_panel": [
+        [
+         1.048984,
+         0.005965,
+         -283.243578
+        ],
+        [
+         0.008503,
+         1.042065,
+         -227.873409
+        ]
+       ],
+       "residual_rms_panel_px": 0.594,
+       "residual_max_panel_px": 1.934,
+       "inlier_rays": 289,
+       "rays": 343,
+       "light": {
+        "dir_deg_math": 218.8,
+        "rel_amplitude": 0.204,
+        "mean": 156.1,
+        "angular_coverage_deg": 289
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 251.0,
+       "floor_check": {
+        "residual_tilt_deg": 0.6,
+        "dy_R": 0.2358
+       }
+      },
+      "C3": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        245,
+        690,
+        118
+       ],
+       "photo_centre": [
+        247.48,
+        694.04
+       ],
+       "photo_ridge_axes": [
+        116.06,
+        119.65
+       ],
+       "ellipse_ratio": 0.97,
+       "outer_edge_ratio": 1.0294,
+       "outer_edge_ratio_used": 1.0294,
+       "outer_edge_rays": 263,
+       "ridge_radius_in_R": 0.9714,
+       "panel_px_per_photo_px": 0.5771,
+       "A_photo_to_panel": [
+        [
+         0.568319,
+         -0.000791,
+         -60.098017
+        ],
+        [
+         0.00061,
+         0.585923,
+         221.193033
+        ]
+       ],
+       "residual_rms_panel_px": 0.141,
+       "residual_max_panel_px": 0.44,
+       "inlier_rays": 263,
+       "rays": 273,
+       "light": {
+        "dir_deg_math": 287.5,
+        "rel_amplitude": 0.125,
+        "mean": 174.6,
+        "angular_coverage_deg": 263
+       },
+       "quality": "good",
+       "partial": false,
+       "floor_check": {
+        "residual_tilt_deg": 2.3,
+        "dy_R": 0.1286
+       }
+      },
+      "C4": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        2140,
+        690,
+        118
+       ],
+       "photo_centre": [
+        2134.53,
+        687.67
+       ],
+       "photo_ridge_axes": [
+        112.07,
+        113.53
+       ],
+       "ellipse_ratio": 0.9871,
+       "outer_edge_ratio": 1.0287,
+       "outer_edge_ratio_used": 1.0287,
+       "outer_edge_rays": 254,
+       "ridge_radius_in_R": 0.9721,
+       "panel_px_per_photo_px": 0.6033,
+       "A_photo_to_panel": [
+        [
+         0.604601,
+         0.00297,
+         547.420481
+        ],
+        [
+         0.004434,
+         0.602016,
+         204.545297
+        ]
+       ],
+       "residual_rms_panel_px": 0.211,
+       "residual_max_panel_px": 0.465,
+       "inlier_rays": 254,
+       "rays": 283,
+       "light": {
+        "dir_deg_math": 267.2,
+        "rel_amplitude": 0.086,
+        "mean": 138.1,
+        "angular_coverage_deg": 254
+       },
+       "quality": "good",
+       "partial": false,
+       "floor_check": {
+        "residual_tilt_deg": -2.0,
+        "dy_R": 0.1429
+       }
+      }
+     },
+     "box": [
+      0,
+      0,
+      2452,
+      1110
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        1.037138,
+        0.002866,
+        -284.655856
+       ],
+       [
+        0.005381,
+        1.03462,
+        -216.225822
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 435 / 1485 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        435.4,
+        377.9
+       ],
+       [
+        1484.6,
+        382.1
+       ]
+      ],
+      "dial_spacing_in_R": 3.1322
+     },
+     "exposure": {
+      "black": 2.0,
+      "white": 251.7,
+      "white_target": 235.0,
+      "gain": 0.9411,
+      "offset": -1.882,
+      "wb_gain_rgb": [
+       1.0125,
+       0.9972,
+       0.992
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/17_physical-cluster_full.comfort.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.8771
+      },
+      "C2": {
+       "base": "bake/work/rect/17_physical-cluster_full.comfort.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.8943
+      },
+      "C3": {
+       "base": "bake/work/rect/17_physical-cluster_full.comfort.C3",
+       "box": [
+        4,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 0.9947,
+       "supersampled": {
+        "base": "bake/work/rect/17_physical-cluster_full.comfort.C3@2x",
+        "box": [
+         4,
+         552,
+         152,
+         152
+        ],
+        "scale": 2
+       }
+      },
+      "C4": {
+       "base": "bake/work/rect/17_physical-cluster_full.comfort.C4",
+       "box": [
+        1764,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C5": {
+       "base": "bake/work/rect/17_physical-cluster_full.comfort.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 0.9891
+      },
+      "PANEL": {
+       "base": "bake/work/rect/17_physical-cluster_full.comfort.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 0.9401
+      }
+     },
+     "visual_check": "all four bezels sit on the fitted ellipses; C3/C4 rings partly hidden by the big dials but well fitted",
+     "apparent_light": {
+      "dir_deg_math": 267.8,
+      "per_dial": [
+       302.4,
+       218.8
+      ],
+      "max_deviation_deg": 49.0,
+      "confidence": "weak",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    }
+   }
+  },
+  "04_comfort_whole-cluster_mph.png": {
+   "file": "reference/6wb/04_comfort_whole-cluster_mph.png",
+   "size": [
+    1000,
+    750
+   ],
+   "sections": {
+    "comfort": {
+     "roll_deg": -0.059,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        291,
+        412,
+        134
+       ],
+       "photo_centre": [
+        292.44,
+        414.71
+       ],
+       "photo_ridge_axes": [
+        135.66,
+        139.62
+       ],
+       "ellipse_ratio": 0.9716,
+       "outer_edge_ratio": 1.0091,
+       "outer_edge_ratio_used": 1.0091,
+       "outer_edge_rays": 264,
+       "ridge_radius_in_R": 0.991,
+       "panel_px_per_photo_px": 2.4123,
+       "A_photo_to_panel": [
+        [
+         2.446391,
+         -0.010206,
+         -299.199297
+        ],
+        [
+         -0.005258,
+         2.378718,
+         -604.933093
+        ]
+       ],
+       "residual_rms_panel_px": 0.462,
+       "residual_max_panel_px": 1.604,
+       "inlier_rays": 264,
+       "rays": 280,
+       "light": {
+        "dir_deg_math": 310.2,
+        "rel_amplitude": 0.256,
+        "mean": 157.0,
+        "angular_coverage_deg": 264
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 229.0,
+       "floor_check": {
+        "residual_tilt_deg": 1.0,
+        "dy_R": 0.1522
+       }
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        722,
+        412,
+        133
+       ],
+       "photo_centre": [
+        718.49,
+        414.27
+       ],
+       "photo_ridge_axes": [
+        136.74,
+        140.42
+       ],
+       "ellipse_ratio": 0.9738,
+       "outer_edge_ratio": 1.0091,
+       "outer_edge_ratio_used": 1.0091,
+       "outer_edge_rays": 262,
+       "ridge_radius_in_R": 0.991,
+       "panel_px_per_photo_px": 2.3959,
+       "A_photo_to_panel": [
+        [
+         2.425583,
+         0.009589,
+         -238.725422
+        ],
+        [
+         0.014503,
+         2.366584,
+         -610.825173
+        ]
+       ],
+       "residual_rms_panel_px": 0.518,
+       "residual_max_panel_px": 1.9,
+       "inlier_rays": 262,
+       "rays": 278,
+       "light": {
+        "dir_deg_math": 228.6,
+        "rel_amplitude": 0.259,
+        "mean": 150.8,
+        "angular_coverage_deg": 262
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 233.0,
+       "floor_check": {
+        "residual_tilt_deg": 3.3,
+        "dy_R": 0.1493
+       }
+      },
+      "C3": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        112,
+        465,
+        50
+       ],
+       "photo_centre": [
+        108.21,
+        466.89
+       ],
+       "photo_ridge_axes": [
+        48.87,
+        49.51
+       ],
+       "ellipse_ratio": 0.9869,
+       "outer_edge_ratio": 1.0254,
+       "outer_edge_ratio_used": 1.0254,
+       "outer_edge_rays": 129,
+       "ridge_radius_in_R": 0.9752,
+       "panel_px_per_photo_px": 1.3878,
+       "A_photo_to_panel": [
+        [
+         1.392141,
+         -0.009466,
+         -66.229244
+        ],
+        [
+         -0.00662,
+         1.383547,
+         -17.24533
+        ]
+       ],
+       "residual_rms_panel_px": 0.344,
+       "residual_max_panel_px": 0.687,
+       "inlier_rays": 129,
+       "rays": 129,
+       "light": {
+        "dir_deg_math": 265.2,
+        "rel_amplitude": 0.398,
+        "mean": 94.3,
+        "angular_coverage_deg": 129
+       },
+       "quality": "ok",
+       "partial": false,
+       "floor_check": {
+        "residual_tilt_deg": 3.1,
+        "dy_R": 0.1429
+       }
+      },
+      "C4": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        905,
+        465,
+        50
+       ],
+       "photo_centre": [
+        904.87,
+        466.15
+       ],
+       "photo_ridge_axes": [
+        49.52,
+        50.52
+       ],
+       "ellipse_ratio": 0.9801,
+       "outer_edge_ratio": 1.0254,
+       "outer_edge_ratio_used": 1.0254,
+       "outer_edge_rays": 234,
+       "ridge_radius_in_R": 0.9753,
+       "panel_px_per_photo_px": 1.3648,
+       "A_photo_to_panel": [
+        [
+         1.361677,
+         0.011925,
+         602.300698
+        ],
+        [
+         0.014724,
+         1.368126,
+         -23.07209
+        ]
+       ],
+       "residual_rms_panel_px": 0.387,
+       "residual_max_panel_px": 1.044,
+       "inlier_rays": 234,
+       "rays": 239,
+       "light": {
+        "dir_deg_math": 316.9,
+        "rel_amplitude": 0.438,
+        "mean": 67.2,
+        "angular_coverage_deg": 234
+       },
+       "quality": "good",
+       "partial": false,
+       "floor_check": {
+        "residual_tilt_deg": -5.0,
+        "dy_R": 0.1571
+       }
+      }
+     },
+     "box": [
+      0,
+      0,
+      1000,
+      750
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        2.435987,
+        -0.000308,
+        -271.180874
+       ],
+       [
+        0.004623,
+        2.372651,
+        -605.773001
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 441 / 1479 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        441.1,
+        379.5
+       ],
+       [
+        1478.9,
+        380.5
+       ]
+      ],
+      "dial_spacing_in_R": 3.098
+     },
+     "exposure": {
+      "black": 7.29,
+      "white": 255.0,
+      "white_target": 235.0,
+      "gain": 0.9487,
+      "offset": -6.916,
+      "wb_gain_rgb": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9248
+      },
+      "C2": {
+       "base": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9334
+      },
+      "C3": {
+       "base": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C3",
+       "box": [
+        4,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C4": {
+       "base": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C4",
+       "box": [
+        1764,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C5": {
+       "base": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 1.0
+      },
+      "PANEL": {
+       "base": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 1.0
+      }
+     },
+     "visual_check": "C1/C2 ellipses (ratio ~0.965, mild perspective) on the bezels all round; minis ok",
+     "apparent_light": {
+      "dir_deg_math": 269.1,
+      "per_dial": [
+       310.2,
+       228.6
+      ],
+      "max_deviation_deg": 41.1,
+      "confidence": "ok",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    }
+   }
+  },
+  "05_comfort_tach-closeup.png": {
+   "file": "reference/6wb/05_comfort_tach-closeup.png",
+   "size": [
+    1000,
+    750
+   ],
+   "sections": {
+    "comfort": {
+     "roll_deg": 1.1,
+     "roll_source": "inner-disc floor edge made horizontal (single dial; edge at 0.254 R below centre)",
+     "dials": {
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        522,
+        412,
+        368
+       ],
+       "photo_centre": [
+        514.22,
+        419.58
+       ],
+       "photo_ridge_axes": [
+        377.92,
+        381.99
+       ],
+       "ellipse_ratio": 0.9894,
+       "outer_edge_ratio": 1.0073,
+       "outer_edge_ratio_used": 1.0073,
+       "outer_edge_rays": 184,
+       "ridge_radius_in_R": 0.9928,
+       "panel_px_per_photo_px": 0.8753,
+       "A_photo_to_panel": [
+        [
+         0.879117,
+         0.019341,
+         1047.825552
+        ],
+        [
+         -0.014267,
+         0.871239,
+         21.786137
+        ]
+       ],
+       "residual_rms_panel_px": 0.686,
+       "residual_max_panel_px": 1.886,
+       "inlier_rays": 190,
+       "rays": 219,
+       "light": {
+        "dir_deg_math": 12.5,
+        "rel_amplitude": 0.172,
+        "mean": 160.0,
+        "angular_coverage_deg": 190
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 229.5,
+       "floor_check": {
+        "residual_tilt_deg": -0.4,
+        "dy_R": 0.2537
+       }
+      }
+     },
+     "box": [
+      0,
+      0,
+      1000,
+      750
+     ],
+     "exposure": {
+      "black": 12.94,
+      "white": 254.99,
+      "white_target": 235.0,
+      "gain": 0.9709,
+      "offset": -12.559,
+      "wb_gain_rgb": [
+       1.0,
+       1.0,
+       1.0006
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C2": {
+       "base": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.8397
+      }
+     },
+     "visual_check": "bezel fitted all round except the cut bottom; roll from the inner-disc floor edge",
+     "apparent_light": {
+      "dir_deg_math": 12.5,
+      "per_dial": [
+       12.5
+      ],
+      "max_deviation_deg": 0.0,
+      "confidence": "weak",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    }
+   }
+  },
+  "06_comfort_wide_with-wheel.png": {
+   "file": "reference/6wb/06_comfort_wide_with-wheel.png",
+   "size": [
+    1000,
+    750
+   ],
+   "sections": {
+    "comfort": {
+     "roll_deg": 1.128,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        404,
+        287,
+        73
+       ],
+       "photo_centre": [
+        404.84,
+        284.94
+       ],
+       "photo_ridge_axes": [
+        73.58,
+        75.04
+       ],
+       "ellipse_ratio": 0.9806,
+       "outer_edge_ratio": 1.0102,
+       "outer_edge_ratio_used": 1.0102,
+       "outer_edge_rays": 244,
+       "ridge_radius_in_R": 0.9899,
+       "panel_px_per_photo_px": 4.4629,
+       "A_photo_to_panel": [
+        [
+         4.447466,
+         0.046715,
+         -1401.820996
+        ],
+        [
+         -0.128987,
+         4.476964,
+         -843.45936
+        ]
+       ],
+       "residual_rms_panel_px": 0.845,
+       "residual_max_panel_px": 2.834,
+       "inlier_rays": 244,
+       "rays": 249,
+       "light": {
+        "dir_deg_math": 256.1,
+        "rel_amplitude": 0.376,
+        "mean": 138.0,
+        "angular_coverage_deg": 244
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 227.0,
+       "floor_check": {
+        "residual_tilt_deg": 1.1,
+        "dy_R": 0.1672
+       }
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        634,
+        288,
+        72
+       ],
+       "photo_centre": [
+        632.36,
+        289.42
+       ],
+       "photo_ridge_axes": [
+        72.78,
+        73.97
+       ],
+       "ellipse_ratio": 0.9839,
+       "outer_edge_ratio": 1.0103,
+       "outer_edge_ratio_used": 1.0103,
+       "outer_edge_rays": 243,
+       "ridge_radius_in_R": 0.9898,
+       "panel_px_per_photo_px": 4.5195,
+       "A_photo_to_panel": [
+        [
+         4.520071,
+         0.125621,
+         -1386.674957
+        ],
+        [
+         -0.052308,
+         4.517448,
+         -894.37203
+        ]
+       ],
+       "residual_rms_panel_px": 1.128,
+       "residual_max_panel_px": 3.565,
+       "inlier_rays": 243,
+       "rays": 253,
+       "light": {
+        "dir_deg_math": 268.1,
+        "rel_amplitude": 0.337,
+        "mean": 143.6,
+        "angular_coverage_deg": 243
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 230.5,
+       "floor_check": {
+        "residual_tilt_deg": 3.1,
+        "dy_R": 0.1642
+       }
+      }
+     },
+     "box": [
+      0,
+      0,
+      1000,
+      750
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        4.483769,
+        0.086168,
+        -1390.029811
+       ],
+       [
+        -0.090647,
+        4.497206,
+        -864.508814
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 450 / 1470 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        449.7,
+        380.2
+       ],
+       [
+        1470.3,
+        379.8
+       ]
+      ],
+      "dial_spacing_in_R": 3.0464
+     },
+     "exposure": {
+      "black": 0.29,
+      "white": 255.0,
+      "white_target": 235.0,
+      "gain": 0.9226,
+      "offset": -0.266,
+      "wb_gain_rgb": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/06_comfort_wide_with-wheel.comfort.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9209
+      },
+      "C2": {
+       "base": "bake/work/rect/06_comfort_wide_with-wheel.comfort.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9328
+      },
+      "C5": {
+       "base": "bake/work/rect/06_comfort_wide_with-wheel.comfort.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 1.0
+      },
+      "PANEL": {
+       "base": "bake/work/rect/06_comfort_wide_with-wheel.comfort.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 1.0
+      }
+     },
+     "visual_check": null,
+     "apparent_light": {
+      "dir_deg_math": 261.8,
+      "per_dial": [
+       256.1,
+       268.1
+      ],
+      "max_deviation_deg": 6.3,
+      "confidence": "ok",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    }
+   },
+   "skipped": {
+    "C3": "mini bezel ~27 px, only a partial lit arc: no usable fit",
+    "C4": "same"
+   }
+  },
+  "07_physical-cluster_all-lamps-lit.png": {
+   "file": "reference/6wb/07_physical-cluster_all-lamps-lit.png",
+   "size": [
+    1456,
+    824
+   ],
+   "sections": {
+    "comfort": {
+     "roll_deg": -0.558,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        454,
+        440,
+        171
+       ],
+       "photo_centre": [
+        453.62,
+        441.93
+       ],
+       "photo_ridge_axes": [
+        165.24,
+        168.6
+       ],
+       "ellipse_ratio": 0.9801,
+       "outer_edge_ratio": 1.0133,
+       "outer_edge_ratio_used": 1.0133,
+       "outer_edge_rays": 125,
+       "ridge_radius_in_R": 0.9869,
+       "panel_px_per_photo_px": 1.9807,
+       "A_photo_to_panel": [
+        [
+         1.993673,
+         -0.004126,
+         -490.537517
+        ],
+        [
+         0.03446,
+         1.967739,
+         -505.231211
+        ]
+       ],
+       "residual_rms_panel_px": 0.904,
+       "residual_max_panel_px": 1.963,
+       "inlier_rays": 125,
+       "rays": 209,
+       "light": {
+        "dir_deg_math": 48.1,
+        "rel_amplitude": 0.645,
+        "mean": 118.3,
+        "angular_coverage_deg": 125
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 229.0,
+       "floor_check": {
+        "residual_tilt_deg": 0.6,
+        "dy_R": 0.2179
+       }
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        985,
+        438,
+        166
+       ],
+       "photo_centre": [
+        981.12,
+        436.79
+       ],
+       "photo_ridge_axes": [
+        158.5,
+        161.57
+       ],
+       "ellipse_ratio": 0.981,
+       "outer_edge_ratio": 1.0124,
+       "outer_edge_ratio_used": 1.0124,
+       "outer_edge_rays": 91,
+       "ridge_radius_in_R": 0.9878,
+       "panel_px_per_photo_px": 2.0678,
+       "A_photo_to_panel": [
+        [
+         2.050406,
+         -0.029663,
+         -490.745329
+        ],
+        [
+         0.010619,
+         2.085173,
+         -541.202181
+        ]
+       ],
+       "residual_rms_panel_px": 0.582,
+       "residual_max_panel_px": 1.917,
+       "inlier_rays": 91,
+       "rays": 123,
+       "light": {
+        "dir_deg_math": 125.0,
+        "rel_amplitude": 0.564,
+        "mean": 135.9,
+        "angular_coverage_deg": 91
+       },
+       "quality": "poor",
+       "partial": false,
+       "needle_cw12_deg": 256.0,
+       "floor_check": {
+        "residual_tilt_deg": 0.6,
+        "dy_R": 0.2597
+       }
+      },
+      "C3": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        210,
+        500,
+        60
+       ],
+       "photo_centre": [
+        208.34,
+        502.19
+       ],
+       "photo_ridge_axes": [
+        62.16,
+        63.14
+       ],
+       "ellipse_ratio": 0.9845,
+       "outer_edge_ratio": 1.0317,
+       "outer_edge_ratio_used": 1.0317,
+       "outer_edge_rays": 141,
+       "ridge_radius_in_R": 0.9692,
+       "panel_px_per_photo_px": 1.083,
+       "A_photo_to_panel": [
+        [
+         1.074572,
+         -0.010784,
+         -138.460752
+        ],
+        [
+         0.010314,
+         1.091485,
+         77.717635
+        ]
+       ],
+       "residual_rms_panel_px": 0.372,
+       "residual_max_panel_px": 0.816,
+       "inlier_rays": 141,
+       "rays": 150,
+       "light": {
+        "dir_deg_math": 316.9,
+        "rel_amplitude": 0.467,
+        "mean": 14.8,
+        "angular_coverage_deg": 141
+       },
+       "quality": "ok",
+       "partial": false,
+       "floor_check": {
+        "residual_tilt_deg": 2.8,
+        "dy_R": 0.1429
+       }
+      },
+      "C4": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        1240,
+        500,
+        60
+       ],
+       "photo_centre": [
+        1243.1,
+        499.22
+       ],
+       "photo_ridge_axes": [
+        60.2,
+        60.91
+       ],
+       "ellipse_ratio": 0.9882,
+       "outer_edge_ratio": 1.0288,
+       "outer_edge_ratio_used": 1.0288,
+       "outer_edge_rays": 40,
+       "ridge_radius_in_R": 0.972,
+       "panel_px_per_photo_px": 1.1236,
+       "A_photo_to_panel": [
+        [
+         1.117717,
+         -0.01411,
+         457.615771
+        ],
+        [
+         0.007778,
+         1.129443,
+         54.490237
+        ]
+       ],
+       "residual_rms_panel_px": 0.447,
+       "residual_max_panel_px": 0.873,
+       "inlier_rays": 40,
+       "rays": 44,
+       "light": {
+        "dir_deg_math": 175.7,
+        "rel_amplitude": 0.842,
+        "mean": 52.3,
+        "angular_coverage_deg": 40
+       },
+       "quality": "ok",
+       "partial": false,
+       "floor_check": {
+        "residual_tilt_deg": 3.1,
+        "dy_R": 0.2571
+       }
+      }
+     },
+     "box": [
+      0,
+      0,
+      1456,
+      824
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        2.022039,
+        -0.016895,
+        -483.126787
+       ],
+       [
+        0.022539,
+        2.026456,
+        -526.511572
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 427 / 1493 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        426.6,
+        379.3
+       ],
+       [
+        1493.4,
+        380.7
+       ]
+      ],
+      "dial_spacing_in_R": 3.1843
+     },
+     "exposure": {
+      "black": 0.0,
+      "white": 254.7,
+      "white_target": 235.0,
+      "gain": 0.9227,
+      "offset": -0.0,
+      "wb_gain_rgb": [
+       1.0037,
+       0.9989,
+       1.0002
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/07_physical-cluster_all-lamps-lit.comfort.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9269
+      },
+      "C2": {
+       "base": "bake/work/rect/07_physical-cluster_all-lamps-lit.comfort.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9264
+      },
+      "C3": {
+       "base": "bake/work/rect/07_physical-cluster_all-lamps-lit.comfort.C3",
+       "box": [
+        4,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C4": {
+       "base": "bake/work/rect/07_physical-cluster_all-lamps-lit.comfort.C4",
+       "box": [
+        1764,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C5": {
+       "base": "bake/work/rect/07_physical-cluster_all-lamps-lit.comfort.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 1.0
+      },
+      "PANEL": {
+       "base": "bake/work/rect/07_physical-cluster_all-lamps-lit.comfort.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 0.9994
+      }
+     },
+     "visual_check": "C1/C2 on the bezel; bezel ridge weak at the bottom (lit housing); C2 auto-rated poor only for ray count, visually ok",
+     "apparent_light": {
+      "dir_deg_math": 83.5,
+      "per_dial": [
+       48.1,
+       125.0
+      ],
+      "max_deviation_deg": 41.5,
+      "confidence": "ok",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    }
+   }
+  },
+  "12_speedo_signs_overspeed-wedge.png": {
+   "file": "reference/6wb/12_speedo_signs_overspeed-wedge.png",
+   "size": [
+    374,
+    344
+   ],
+   "sections": {
+    "comfort": {
+     "roll_deg": -1.7,
+     "roll_source": "inner-disc floor edge made horizontal (single dial; edge at 0.409 R below centre)",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        179,
+        174,
+        151
+       ],
+       "photo_centre": [
+        187.19,
+        171.46
+       ],
+       "photo_ridge_axes": [
+        160.45,
+        160.83
+       ],
+       "ellipse_ratio": 0.9976,
+       "outer_edge_ratio": 1.0156,
+       "outer_edge_ratio_used": 1.0156,
+       "outer_edge_rays": 306,
+       "ridge_radius_in_R": 0.9846,
+       "panel_px_per_photo_px": 2.0534,
+       "A_photo_to_panel": [
+        [
+         2.054815,
+         -0.061653,
+         37.923718
+        ],
+        [
+         0.06018,
+         2.050166,
+         17.204025
+        ]
+       ],
+       "residual_rms_panel_px": 0.415,
+       "residual_max_panel_px": 1.312,
+       "inlier_rays": 360,
+       "rays": 360,
+       "light": {
+        "dir_deg_math": 111.4,
+        "rel_amplitude": 0.002,
+        "mean": 243.0,
+        "angular_coverage_deg": 360
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 313.5,
+       "floor_check": {
+        "residual_tilt_deg": -0.6,
+        "dy_R": 0.406
+       }
+      }
+     },
+     "box": [
+      0,
+      0,
+      374,
+      344
+     ],
+     "exposure": {
+      "black": 0.0,
+      "white": 252.04,
+      "white_target": 235.0,
+      "gain": 0.9324,
+      "offset": -0.0,
+      "wb_gain_rgb": [
+       1.0001,
+       0.9999,
+       1.0002
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/12_speedo_signs_overspeed-wedge.comfort.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.889
+      }
+     },
+     "visual_check": "clean full bezel circle",
+     "apparent_light": {
+      "dir_deg_math": 111.4,
+      "per_dial": [
+       111.4
+      ],
+      "max_deviation_deg": 0.0,
+      "confidence": "weak",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    }
+   }
+  },
+  "02_three-modes_clean-render.png": {
+   "file": "reference/6wb/02_three-modes_clean-render.png",
+   "size": [
+    1254,
+    1254
+   ],
+   "sections": {
+    "comfort": {
+     "roll_deg": -1.167,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        360,
+        228,
+        172
+       ],
+       "photo_centre": [
+        366.8,
+        235.46
+       ],
+       "photo_ridge_axes": [
+        171.37,
+        173.97
+       ],
+       "ellipse_ratio": 0.9851,
+       "outer_edge_ratio": 1.0058,
+       "outer_edge_ratio_used": 1.0058,
+       "outer_edge_rays": 104,
+       "ridge_radius_in_R": 0.9943,
+       "panel_px_per_photo_px": 1.9291,
+       "A_photo_to_panel": [
+        [
+         1.942742,
+         -0.042986,
+         -290.485715
+        ],
+        [
+         0.035617,
+         1.914698,
+         -83.893119
+        ]
+       ],
+       "residual_rms_panel_px": 0.849,
+       "residual_max_panel_px": 1.984,
+       "inlier_rays": 104,
+       "rays": 213,
+       "light": {
+        "dir_deg_math": 89.7,
+        "rel_amplitude": 0.841,
+        "mean": 88.0,
+        "angular_coverage_deg": 104
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 244.5,
+       "floor_check": {
+        "residual_tilt_deg": 1.6,
+        "dy_R": 0.1343
+       }
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        888,
+        225,
+        172
+       ],
+       "photo_centre": [
+        889.28,
+        224.81
+       ],
+       "photo_ridge_axes": [
+        161.87,
+        162.84
+       ],
+       "ellipse_ratio": 0.994,
+       "outer_edge_ratio": 1.0062,
+       "outer_edge_ratio_used": 1.0062,
+       "outer_edge_rays": 115,
+       "ridge_radius_in_R": 0.9939,
+       "panel_px_per_photo_px": 2.0508,
+       "A_photo_to_panel": [
+        [
+         2.051291,
+         -0.047835,
+         -305.414044
+        ],
+        [
+         0.035725,
+         2.049387,
+         -112.49231
+        ]
+       ],
+       "residual_rms_panel_px": 1.019,
+       "residual_max_panel_px": 1.948,
+       "inlier_rays": 115,
+       "rays": 183,
+       "light": {
+        "dir_deg_math": 158.3,
+        "rel_amplitude": 1.13,
+        "mean": 59.5,
+        "angular_coverage_deg": 115
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 234.5,
+       "floor_check": null
+      },
+      "C3": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        128,
+        275,
+        57
+       ],
+       "photo_centre": [
+        124.45,
+        277.01
+       ],
+       "photo_ridge_axes": [
+        60.03,
+        60.45
+       ],
+       "ellipse_ratio": 0.9931,
+       "outer_edge_ratio": 1.0125,
+       "outer_edge_ratio_used": 1.0125,
+       "outer_edge_rays": 132,
+       "ridge_radius_in_R": 0.9877,
+       "panel_px_per_photo_px": 1.1477,
+       "A_photo_to_panel": [
+        [
+         1.146866,
+         -0.027325,
+         -55.15889
+        ],
+        [
+         0.01944,
+         1.148148,
+         307.533074
+        ]
+       ],
+       "residual_rms_panel_px": 0.385,
+       "residual_max_panel_px": 0.868,
+       "inlier_rays": 132,
+       "rays": 144,
+       "light": {
+        "dir_deg_math": 127.4,
+        "rel_amplitude": 1.092,
+        "mean": 5.7,
+        "angular_coverage_deg": 132
+       },
+       "quality": "ok",
+       "partial": false,
+       "floor_check": {
+        "residual_tilt_deg": 5.0,
+        "dy_R": 0.1286
+       }
+      },
+      "C4": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        1125,
+        275,
+        57
+       ],
+       "photo_centre": [
+        1126.24,
+        273.61
+       ],
+       "photo_ridge_axes": [
+        56.38,
+        56.6
+       ],
+       "ellipse_ratio": 0.9961,
+       "outer_edge_ratio": 1.0176,
+       "outer_edge_ratio_used": 1.0176,
+       "outer_edge_rays": 100,
+       "ridge_radius_in_R": 0.9827,
+       "panel_px_per_photo_px": 1.2177,
+       "A_photo_to_panel": [
+        [
+         1.21605,
+         -0.026699,
+         477.743297
+        ],
+        [
+         0.022918,
+         1.218933,
+         268.681576
+        ]
+       ],
+       "residual_rms_panel_px": 0.418,
+       "residual_max_panel_px": 0.892,
+       "inlier_rays": 100,
+       "rays": 106,
+       "light": {
+        "dir_deg_math": 285.5,
+        "rel_amplitude": 1.028,
+        "mean": 18.0,
+        "angular_coverage_deg": 100
+       },
+       "quality": "ok",
+       "partial": false,
+       "floor_check": {
+        "residual_tilt_deg": -2.8,
+        "dy_R": 0.2857
+       }
+      }
+     },
+     "box": [
+      0,
+      0,
+      1254,
+      410
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        1.997017,
+        -0.04541,
+        -283.758462
+       ],
+       [
+        0.035671,
+        1.982042,
+        -98.537186
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 438 / 1482 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        438.1,
+        381.2
+       ],
+       [
+        1481.9,
+        378.8
+       ]
+      ],
+      "dial_spacing_in_R": 3.116
+     },
+     "exposure": {
+      "black": 0.0,
+      "white": 255.0,
+      "white_target": 235.0,
+      "gain": 0.9216,
+      "offset": -0.0,
+      "wb_gain_rgb": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/02_three-modes_clean-render.comfort.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9052
+      },
+      "C2": {
+       "base": "bake/work/rect/02_three-modes_clean-render.comfort.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9202
+      },
+      "C3": {
+       "base": "bake/work/rect/02_three-modes_clean-render.comfort.C3",
+       "box": [
+        4,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C4": {
+       "base": "bake/work/rect/02_three-modes_clean-render.comfort.C4",
+       "box": [
+        1764,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C5": {
+       "base": "bake/work/rect/02_three-modes_clean-render.comfort.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 0.9643
+      },
+      "PANEL": {
+       "base": "bake/work/rect/02_three-modes_clean-render.comfort.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 0.979
+      }
+     },
+     "visual_check": "on the bezels; roll -1.2 deg from the dial-centre line (render may be slightly rotated; floor check below)",
+     "apparent_light": {
+      "dir_deg_math": 129.7,
+      "per_dial": [
+       89.7,
+       158.3
+      ],
+      "max_deviation_deg": 40.0,
+      "confidence": "ok",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    },
+    "sport": {
+     "roll_deg": -0.048,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        360,
+        640,
+        172
+       ],
+       "photo_centre": [
+        362.69,
+        646.11
+       ],
+       "photo_ridge_axes": [
+        167.19,
+        168.12
+       ],
+       "ellipse_ratio": 0.9945,
+       "outer_edge_ratio": 1.0075,
+       "outer_edge_ratio_used": 1.0075,
+       "outer_edge_rays": 56,
+       "ridge_radius_in_R": 0.9926,
+       "panel_px_per_photo_px": 1.9833,
+       "A_photo_to_panel": [
+        [
+         1.988682,
+         -0.000398,
+         -309.012453
+        ],
+        [
+         0.002903,
+         1.977969,
+         -899.038483
+        ]
+       ],
+       "residual_rms_panel_px": 1.081,
+       "residual_max_panel_px": 1.955,
+       "inlier_rays": 56,
+       "rays": 188,
+       "light": {
+        "dir_deg_math": 331.8,
+        "rel_amplitude": 0.197,
+        "mean": 38.0,
+        "angular_coverage_deg": 56
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 230
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        888,
+        640,
+        172
+       ],
+       "photo_centre": [
+        884.28,
+        645.68
+       ],
+       "photo_ridge_axes": [
+        167.95,
+        168.94
+       ],
+       "ellipse_ratio": 0.9941,
+       "outer_edge_ratio": 1.0074,
+       "outer_edge_ratio_used": 1.0074,
+       "outer_edge_rays": 54,
+       "ridge_radius_in_R": 0.9926,
+       "panel_px_per_photo_px": 1.9741,
+       "A_photo_to_panel": [
+        [
+         1.979017,
+         -0.004835,
+         -238.881618
+        ],
+        [
+         -0.001549,
+         1.969212,
+         -890.102718
+        ]
+       ],
+       "residual_rms_panel_px": 1.149,
+       "residual_max_panel_px": 1.982,
+       "inlier_rays": 54,
+       "rays": 191,
+       "light": {
+        "dir_deg_math": 194.8,
+        "rel_amplitude": 0.235,
+        "mean": 40.1,
+        "angular_coverage_deg": 54
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 229
+      },
+      "C3": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        128,
+        685,
+        57
+       ],
+       "photo_centre": [
+        131.36,
+        676.37
+       ],
+       "photo_ridge_axes": [
+        64.98,
+        65.45
+       ],
+       "ellipse_ratio": 0.9928,
+       "outer_edge_ratio": 1.0152,
+       "outer_edge_ratio_used": 1.0152,
+       "outer_edge_rays": 189,
+       "ridge_radius_in_R": 0.985,
+       "panel_px_per_photo_px": 1.0572,
+       "A_photo_to_panel": [
+        [
+         1.058382,
+         0.002756,
+         -60.896074
+        ],
+        [
+         0.004515,
+         1.056117,
+         -86.918745
+        ]
+       ],
+       "residual_rms_panel_px": 0.251,
+       "residual_max_panel_px": 0.841,
+       "inlier_rays": 189,
+       "rays": 198,
+       "light": {
+        "dir_deg_math": 266.2,
+        "rel_amplitude": 1.154,
+        "mean": 9.7,
+        "angular_coverage_deg": 189
+       },
+       "quality": "good",
+       "partial": false
+      },
+      "C4": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        1125,
+        685,
+        57
+       ],
+       "photo_centre": [
+        1119.35,
+        680.79
+       ],
+       "photo_ridge_axes": [
+        61.7,
+        62.15
+       ],
+       "ellipse_ratio": 0.9928,
+       "outer_edge_ratio": 1.016,
+       "outer_edge_ratio_used": 1.016,
+       "outer_edge_rays": 191,
+       "ridge_radius_in_R": 0.9843,
+       "panel_px_per_photo_px": 1.1126,
+       "A_photo_to_panel": [
+        [
+         1.108817,
+         -0.002276,
+         600.398871
+        ],
+        [
+         -0.000424,
+         1.116377,
+         -131.53889
+        ]
+       ],
+       "residual_rms_panel_px": 0.384,
+       "residual_max_panel_px": 0.868,
+       "inlier_rays": 191,
+       "rays": 199,
+       "light": {
+        "dir_deg_math": 229.4,
+        "rel_amplitude": 1.11,
+        "mean": 32.9,
+        "angular_coverage_deg": 191
+       },
+       "quality": "good",
+       "partial": false
+      }
+     },
+     "box": [
+      0,
+      410,
+      1254,
+      830
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        1.983849,
+        -0.002617,
+        -275.206748
+       ],
+       [
+        0.000677,
+        1.97359,
+        -895.150258
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 443 / 1477 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        442.6,
+        380.3
+       ],
+       [
+        1477.4,
+        379.7
+       ]
+      ],
+      "dial_spacing_in_R": 3.0888
+     },
+     "exposure": {
+      "black": 0.0,
+      "white": 255.0,
+      "white_target": 235.0,
+      "gain": 0.9216,
+      "offset": -0.0,
+      "wb_gain_rgb": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/02_three-modes_clean-render.sport.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9547
+      },
+      "C2": {
+       "base": "bake/work/rect/02_three-modes_clean-render.sport.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9213
+      },
+      "C3": {
+       "base": "bake/work/rect/02_three-modes_clean-render.sport.C3",
+       "box": [
+        4,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C4": {
+       "base": "bake/work/rect/02_three-modes_clean-render.sport.C4",
+       "box": [
+        1764,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C5": {
+       "base": "bake/work/rect/02_three-modes_clean-render.sport.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 0.965
+      },
+      "PANEL": {
+       "base": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 0.9847
+      }
+     },
+     "visual_check": null,
+     "apparent_light": {
+      "dir_deg_math": 250.7,
+      "per_dial": [
+       331.8,
+       194.8
+      ],
+      "max_deviation_deg": 81.1,
+      "confidence": "weak",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    },
+    "eco": {
+     "roll_deg": 0.556,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        360,
+        1060,
+        172
+       ],
+       "photo_centre": [
+        346.81,
+        1055.17
+       ],
+       "photo_ridge_axes": [
+        174.61,
+        177.4
+       ],
+       "ellipse_ratio": 0.9843,
+       "outer_edge_ratio": 1.0057,
+       "outer_edge_ratio_used": 1.0057,
+       "outer_edge_rays": 63,
+       "ridge_radius_in_R": 0.9943,
+       "panel_px_per_photo_px": 1.8926,
+       "A_photo_to_panel": [
+        [
+         1.893614,
+         0.03331,
+         -279.874809
+        ],
+        [
+         -0.003403,
+         1.891619,
+         -1614.795124
+        ]
+       ],
+       "residual_rms_panel_px": 1.107,
+       "residual_max_panel_px": 1.985,
+       "inlier_rays": 63,
+       "rays": 172,
+       "light": {
+        "dir_deg_math": 338.7,
+        "rel_amplitude": 1.254,
+        "mean": 46.1,
+        "angular_coverage_deg": 63
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 230
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        888,
+        1060,
+        172
+       ],
+       "photo_centre": [
+        883.53,
+        1060.37
+       ],
+       "photo_ridge_axes": [
+        167.89,
+        170.42
+       ],
+       "ellipse_ratio": 0.9852,
+       "outer_edge_ratio": 1.0293,
+       "outer_edge_ratio_used": 1.0293,
+       "outer_edge_rays": 109,
+       "ridge_radius_in_R": 0.9716,
+       "panel_px_per_photo_px": 1.9242,
+       "A_photo_to_panel": [
+        [
+         1.934398,
+         0.028789,
+         -231.629118
+        ],
+        [
+         -0.008537,
+         1.913944,
+         -1641.953109
+        ]
+       ],
+       "residual_rms_panel_px": 1.022,
+       "residual_max_panel_px": 1.896,
+       "inlier_rays": 109,
+       "rays": 230,
+       "light": {
+        "dir_deg_math": 91.3,
+        "rel_amplitude": 0.791,
+        "mean": 132.1,
+        "angular_coverage_deg": 109
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 230
+      },
+      "C3": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        128,
+        1100,
+        57
+       ],
+       "photo_centre": [
+        131.61,
+        1102.6
+       ],
+       "photo_ridge_axes": [
+        57.23,
+        57.42
+       ],
+       "ellipse_ratio": 0.9968,
+       "outer_edge_ratio": 1.0131,
+       "outer_edge_ratio_used": 1.0131,
+       "outer_edge_rays": 73,
+       "ridge_radius_in_R": 0.987,
+       "panel_px_per_photo_px": 1.2053,
+       "A_photo_to_panel": [
+        [
+         1.207147,
+         0.011701,
+         -91.774848
+        ],
+        [
+         -0.011678,
+         1.203306,
+         -697.223396
+        ]
+       ],
+       "residual_rms_panel_px": 0.387,
+       "residual_max_panel_px": 0.835,
+       "inlier_rays": 73,
+       "rays": 73,
+       "light": {
+        "dir_deg_math": 64.9,
+        "rel_amplitude": 1.257,
+        "mean": 18.6,
+        "angular_coverage_deg": 73
+       },
+       "quality": "ok",
+       "partial": false
+      },
+      "C4": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        1125,
+        1100,
+        57
+       ],
+       "photo_centre": [
+        1124.34,
+        1100.56
+       ],
+       "photo_ridge_axes": [
+        59.79,
+        60.82
+       ],
+       "ellipse_ratio": 0.9832,
+       "outer_edge_ratio": 1.0166,
+       "outer_edge_ratio_used": 1.0166,
+       "outer_edge_rays": 134,
+       "ridge_radius_in_R": 0.9837,
+       "panel_px_per_photo_px": 1.1418,
+       "A_photo_to_panel": [
+        [
+         1.132181,
+         0.010199,
+         555.82145
+        ],
+        [
+         -0.01195,
+         1.151484,
+         -625.836618
+        ]
+       ],
+       "residual_rms_panel_px": 0.322,
+       "residual_max_panel_px": 0.913,
+       "inlier_rays": 134,
+       "rays": 142,
+       "light": {
+        "dir_deg_math": 211.9,
+        "rel_amplitude": 4.515,
+        "mean": 9.9,
+        "angular_coverage_deg": 134
+       },
+       "quality": "ok",
+       "partial": false
+      }
+     },
+     "box": [
+      0,
+      830,
+      1254,
+      1254
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        1.914006,
+        0.031049,
+        -250.285371
+       ],
+       [
+        -0.00597,
+        1.902782,
+        -1629.033945
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 446 / 1474 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        446.3,
+        376.6
+       ],
+       [
+        1473.7,
+        383.4
+       ]
+      ],
+      "dial_spacing_in_R": 3.0671
+     },
+     "exposure": {
+      "black": 0.0,
+      "white": 255.0,
+      "white_target": 235.0,
+      "gain": 0.9216,
+      "offset": -0.0,
+      "wb_gain_rgb": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/02_three-modes_clean-render.eco.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9283
+      },
+      "C2": {
+       "base": "bake/work/rect/02_three-modes_clean-render.eco.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9082
+      },
+      "C3": {
+       "base": "bake/work/rect/02_three-modes_clean-render.eco.C3",
+       "box": [
+        4,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C4": {
+       "base": "bake/work/rect/02_three-modes_clean-render.eco.C4",
+       "box": [
+        1764,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C5": {
+       "base": "bake/work/rect/02_three-modes_clean-render.eco.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 0.9503
+      },
+      "PANEL": {
+       "base": "bake/work/rect/02_three-modes_clean-render.eco.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 0.9731
+      }
+     },
+     "visual_check": null,
+     "apparent_light": {
+      "dir_deg_math": 16.2,
+      "per_dial": [
+       338.7,
+       91.3
+      ],
+      "max_deviation_deg": 75.1,
+      "confidence": "weak",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    }
+   }
+  },
+  "03_three-modes_photo_bimmerstop.png": {
+   "file": "reference/6wb/03_three-modes_photo_bimmerstop.png",
+   "size": [
+    950,
+    1200
+   ],
+   "sections": {
+    "eco": {
+     "roll_deg": -0.248,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        258,
+        205,
+        125
+       ],
+       "photo_centre": [
+        257.86,
+        216.75
+       ],
+       "photo_ridge_axes": [
+        122.33,
+        124.29
+       ],
+       "ellipse_ratio": 0.9842,
+       "outer_edge_ratio": 1.0101,
+       "outer_edge_ratio_used": 1.0101,
+       "outer_edge_rays": 228,
+       "ridge_radius_in_R": 0.99,
+       "panel_px_per_photo_px": 2.6897,
+       "A_photo_to_panel": [
+        [
+         2.711047,
+         -0.013803,
+         -284.08714
+        ],
+        [
+         0.009496,
+         2.668438,
+         -200.846023
+        ]
+       ],
+       "residual_rms_panel_px": 0.777,
+       "residual_max_panel_px": 2.129,
+       "inlier_rays": 228,
+       "rays": 257,
+       "light": {
+        "dir_deg_math": 215.7,
+        "rel_amplitude": 0.149,
+        "mean": 88.1,
+        "angular_coverage_deg": 228
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 230
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        650,
+        205,
+        122
+       ],
+       "photo_centre": [
+        647.43,
+        215.07
+       ],
+       "photo_ridge_axes": [
+        120.77,
+        122.78
+       ],
+       "ellipse_ratio": 0.9837,
+       "outer_edge_ratio": 1.0103,
+       "outer_edge_ratio_used": 1.0103,
+       "outer_edge_rays": 292,
+       "ridge_radius_in_R": 0.9898,
+       "panel_px_per_photo_px": 2.7231,
+       "A_photo_to_panel": [
+        [
+         2.745571,
+         -0.011182,
+         -267.153236
+        ],
+        [
+         0.012407,
+         2.700757,
+         -208.878411
+        ]
+       ],
+       "residual_rms_panel_px": 0.637,
+       "residual_max_panel_px": 2.174,
+       "inlier_rays": 292,
+       "rays": 324,
+       "light": {
+        "dir_deg_math": 293.3,
+        "rel_amplitude": 0.278,
+        "mean": 108.9,
+        "angular_coverage_deg": 292
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 0
+      },
+      "C3": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        93,
+        265,
+        45
+       ],
+       "photo_centre": [
+        90.12,
+        263.59
+       ],
+       "photo_ridge_axes": [
+        44.36,
+        44.75
+       ],
+       "ellipse_ratio": 0.9913,
+       "outer_edge_ratio": 1.028,
+       "outer_edge_ratio_used": 1.028,
+       "outer_edge_rays": 94,
+       "ridge_radius_in_R": 0.9728,
+       "panel_px_per_photo_px": 1.5284,
+       "A_photo_to_panel": [
+        [
+         1.534885,
+         -0.008183,
+         -56.170527
+        ],
+        [
+         0.005057,
+         1.521951,
+         226.366196
+        ]
+       ],
+       "residual_rms_panel_px": 0.285,
+       "residual_max_panel_px": 0.871,
+       "inlier_rays": 94,
+       "rays": 94,
+       "light": {
+        "dir_deg_math": 252.2,
+        "rel_amplitude": 0.23,
+        "mean": 51.7,
+        "angular_coverage_deg": 94
+       },
+       "quality": "poor",
+       "partial": false
+      },
+      "C4": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        815,
+        262,
+        45
+       ],
+       "photo_centre": [
+        811.59,
+        258.72
+       ],
+       "photo_ridge_axes": [
+        42.86,
+        43.61
+       ],
+       "ellipse_ratio": 0.9828,
+       "outer_edge_ratio": 1.0291,
+       "outer_edge_ratio_used": 1.0291,
+       "outer_edge_rays": 131,
+       "ridge_radius_in_R": 0.9717,
+       "panel_px_per_photo_px": 1.5733,
+       "A_photo_to_panel": [
+        [
+         1.574062,
+         0.006831,
+         560.740631
+        ],
+        [
+         0.020459,
+         1.572536,
+         204.551292
+        ]
+       ],
+       "residual_rms_panel_px": 0.192,
+       "residual_max_panel_px": 0.739,
+       "inlier_rays": 131,
+       "rays": 131,
+       "light": {
+        "dir_deg_math": 295.6,
+        "rel_amplitude": 0.689,
+        "mean": 138.5,
+        "angular_coverage_deg": 131
+       },
+       "quality": "ok",
+       "partial": false
+      }
+     },
+     "box": [
+      0,
+      0,
+      950,
+      400
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        2.728309,
+        -0.012492,
+        -272.258929
+       ],
+       [
+        0.010952,
+        2.684598,
+        -204.592379
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 429 / 1491 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        428.6,
+        380.1
+       ],
+       [
+        1491.4,
+        379.9
+       ]
+      ],
+      "dial_spacing_in_R": 3.1728
+     },
+     "exposure": {
+      "black": 9.14,
+      "white": 227.89,
+      "white_target": 235.0,
+      "gain": 1.0743,
+      "offset": -9.824,
+      "wb_gain_rgb": [
+       1.0207,
+       0.9959,
+       0.9812
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.eco.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.93
+      },
+      "C2": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.eco.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9518
+      },
+      "C3": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.eco.C3",
+       "box": [
+        4,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C4": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.eco.C4",
+       "box": [
+        1764,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C5": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.eco.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 1.0
+      },
+      "PANEL": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.eco.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 0.9981
+      }
+     },
+     "visual_check": null,
+     "apparent_light": {
+      "dir_deg_math": 268.2,
+      "per_dial": [
+       215.7,
+       293.3
+      ],
+      "max_deviation_deg": 52.5,
+      "confidence": "weak",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    },
+    "comfort": {
+     "roll_deg": 0.949,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        250,
+        597,
+        132
+       ],
+       "photo_centre": [
+        252.12,
+        594.55
+       ],
+       "photo_ridge_axes": [
+        131.96,
+        134.51
+       ],
+       "ellipse_ratio": 0.9811,
+       "outer_edge_ratio": 1.0132,
+       "outer_edge_ratio_used": 1.0132,
+       "outer_edge_rays": 258,
+       "ridge_radius_in_R": 0.987,
+       "panel_px_per_photo_px": 2.4818,
+       "A_photo_to_panel": [
+        [
+         2.459424,
+         0.032603,
+         -227.45731
+        ],
+        [
+         -0.049607,
+         2.503667,
+         -1096.060462
+        ]
+       ],
+       "residual_rms_panel_px": 0.631,
+       "residual_max_panel_px": 1.891,
+       "inlier_rays": 258,
+       "rays": 273,
+       "light": {
+        "dir_deg_math": 269.1,
+        "rel_amplitude": 0.99,
+        "mean": 115.3,
+        "angular_coverage_deg": 258
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 230.0,
+       "floor_check": {
+        "residual_tilt_deg": -0.7,
+        "dy_R": 0.2537
+       }
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        668,
+        600,
+        130
+       ],
+       "photo_centre": [
+        665.51,
+        601.4
+       ],
+       "photo_ridge_axes": [
+        128.83,
+        130.9
+       ],
+       "ellipse_ratio": 0.9842,
+       "outer_edge_ratio": 1.0097,
+       "outer_edge_ratio_used": 1.0097,
+       "outer_edge_rays": 276,
+       "ridge_radius_in_R": 0.9904,
+       "panel_px_per_photo_px": 2.555,
+       "A_photo_to_panel": [
+        [
+         2.574155,
+         0.048512,
+         -234.300652
+        ],
+        [
+         -0.036124,
+         2.535311,
+         -1120.701354
+        ]
+       ],
+       "residual_rms_panel_px": 0.603,
+       "residual_max_panel_px": 2.025,
+       "inlier_rays": 276,
+       "rays": 320,
+       "light": {
+        "dir_deg_math": 265.5,
+        "rel_amplitude": 0.532,
+        "mean": 119.1,
+        "angular_coverage_deg": 276
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 234.0,
+       "floor_check": {
+        "residual_tilt_deg": 0.5,
+        "dy_R": 0.2537
+       }
+      },
+      "C3": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        72,
+        642,
+        45
+       ],
+       "photo_centre": [
+        70.51,
+        641.43
+       ],
+       "photo_ridge_axes": [
+        46.65,
+        46.77
+       ],
+       "ellipse_ratio": 0.9975,
+       "outer_edge_ratio": 1.032,
+       "outer_edge_ratio_used": 1.032,
+       "outer_edge_rays": 83,
+       "ridge_radius_in_R": 0.969,
+       "panel_px_per_photo_px": 1.452,
+       "A_photo_to_panel": [
+        [
+         1.453135,
+         0.02528,
+         -38.67628
+        ],
+        [
+         -0.022818,
+         1.450546,
+         -300.81744
+        ]
+       ],
+       "residual_rms_panel_px": 0.31,
+       "residual_max_panel_px": 0.915,
+       "inlier_rays": 83,
+       "rays": 83,
+       "light": {
+        "dir_deg_math": 245.7,
+        "rel_amplitude": 0.537,
+        "mean": 99.9,
+        "angular_coverage_deg": 83
+       },
+       "quality": "ok",
+       "partial": false,
+       "floor_check": {
+        "residual_tilt_deg": -5.0,
+        "dy_R": 0.1571
+       }
+      }
+     },
+     "box": [
+      0,
+      400,
+      950,
+      800
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        2.516789,
+        0.040558,
+        -218.994633
+       ],
+       [
+        -0.042865,
+        2.519489,
+        -1106.933242
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 440 / 1480 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        439.7,
+        380.2
+       ],
+       [
+        1480.3,
+        379.8
+       ]
+      ],
+      "dial_spacing_in_R": 3.1065
+     },
+     "exposure": {
+      "black": 6.5,
+      "white": 250.15,
+      "white_target": 235.0,
+      "gain": 0.9645,
+      "offset": -6.272,
+      "wb_gain_rgb": [
+       1.0134,
+       0.9964,
+       0.9973
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.comfort.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.8942
+      },
+      "C2": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.comfort.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9343
+      },
+      "C3": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.comfort.C3",
+       "box": [
+        4,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 0.7755
+      },
+      "C5": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.comfort.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 1.0
+      },
+      "PANEL": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.comfort.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 0.9926
+      }
+     },
+     "visual_check": null,
+     "apparent_light": {
+      "dir_deg_math": 267.8,
+      "per_dial": [
+       269.1,
+       265.5
+      ],
+      "max_deviation_deg": 2.3,
+      "confidence": "ok",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    },
+    "sport": {
+     "roll_deg": 1.513,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        258,
+        1000,
+        128
+       ],
+       "photo_centre": [
+        261.89,
+        996.42
+       ],
+       "photo_ridge_axes": [
+        127.74,
+        128.74
+       ],
+       "ellipse_ratio": 0.9922,
+       "outer_edge_ratio": 1.0098,
+       "outer_edge_ratio_used": 1.0098,
+       "outer_edge_rays": 252,
+       "ridge_radius_in_R": 0.9903,
+       "panel_px_per_photo_px": 2.587,
+       "A_photo_to_panel": [
+        [
+         2.576359,
+         0.065973,
+         -328.458826
+        ],
+        [
+         -0.070686,
+         2.595954,
+         -2188.142402
+        ]
+       ],
+       "residual_rms_panel_px": 0.633,
+       "residual_max_panel_px": 1.942,
+       "inlier_rays": 252,
+       "rays": 287,
+       "light": {
+        "dir_deg_math": 229.9,
+        "rel_amplitude": 0.211,
+        "mean": 88.8,
+        "angular_coverage_deg": 252
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 230
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        665,
+        1003,
+        126
+       ],
+       "photo_centre": [
+        660.12,
+        1006.94
+       ],
+       "photo_ridge_axes": [
+        126.59,
+        127.03
+       ],
+       "ellipse_ratio": 0.9966,
+       "outer_edge_ratio": 1.0098,
+       "outer_edge_ratio_used": 1.0098,
+       "outer_edge_rays": 279,
+       "ridge_radius_in_R": 0.9903,
+       "panel_px_per_photo_px": 2.616,
+       "A_photo_to_panel": [
+        [
+         2.615594,
+         0.073582,
+         -292.693291
+        ],
+        [
+         -0.064607,
+         2.61463,
+         -2210.124703
+        ]
+       ],
+       "residual_rms_panel_px": 0.535,
+       "residual_max_panel_px": 2.023,
+       "inlier_rays": 279,
+       "rays": 304,
+       "light": {
+        "dir_deg_math": 247.7,
+        "rel_amplitude": 0.303,
+        "mean": 121.3,
+        "angular_coverage_deg": 279
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 282.6
+      },
+      "C3": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        86,
+        1040,
+        45
+       ],
+       "photo_centre": [
+        85.38,
+        1039.39
+       ],
+       "photo_ridge_axes": [
+        45.71,
+        46.47
+       ],
+       "ellipse_ratio": 0.9835,
+       "outer_edge_ratio": 1.0272,
+       "outer_edge_ratio_used": 1.0272,
+       "outer_edge_rays": 126,
+       "ridge_radius_in_R": 0.9735,
+       "panel_px_per_photo_px": 1.4786,
+       "A_photo_to_panel": [
+        [
+         1.46587,
+         0.038186,
+         -84.84129
+        ],
+        [
+         -0.039924,
+         1.490457,
+         -917.764277
+        ]
+       ],
+       "residual_rms_panel_px": 0.301,
+       "residual_max_panel_px": 1.107,
+       "inlier_rays": 126,
+       "rays": 126,
+       "light": {
+        "dir_deg_math": 250.4,
+        "rel_amplitude": 0.262,
+        "mean": 54.4,
+        "angular_coverage_deg": 126
+       },
+       "quality": "ok",
+       "partial": false
+      },
+      "C4": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        835,
+        1040,
+        45
+       ],
+       "photo_centre": [
+        834.61,
+        1041.56
+       ],
+       "photo_ridge_axes": [
+        44.15,
+        44.15
+       ],
+       "ellipse_ratio": 1.0,
+       "outer_edge_ratio": 1.0226,
+       "outer_edge_ratio_used": 1.0226,
+       "outer_edge_rays": 14,
+       "ridge_radius_in_R": 0.9779,
+       "panel_px_per_photo_px": 1.5504,
+       "A_photo_to_panel": [
+        [
+         1.549826,
+         0.040948,
+         503.855305
+        ],
+        [
+         -0.040948,
+         1.549826,
+         -952.061111
+        ]
+       ],
+       "residual_rms_panel_px": 0.456,
+       "residual_max_panel_px": 0.715,
+       "inlier_rays": 14,
+       "rays": 14,
+       "light": null,
+       "quality": "poor",
+       "partial": false
+      }
+     },
+     "box": [
+      0,
+      800,
+      950,
+      1200
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        2.595976,
+        0.069778,
+        -306.649945
+       ],
+       [
+        -0.067647,
+        2.605292,
+        -2198.47925
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 443 / 1477 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        442.7,
+        379.8
+       ],
+       [
+        1477.3,
+        380.2
+       ]
+      ],
+      "dial_spacing_in_R": 3.0881
+     },
+     "exposure": {
+      "black": 9.0,
+      "white": 245.47,
+      "white_target": 235.0,
+      "gain": 0.9938,
+      "offset": -8.944,
+      "wb_gain_rgb": [
+       1.0096,
+       0.9969,
+       1.0023
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9468
+      },
+      "C2": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9278
+      },
+      "C3": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.C3",
+       "box": [
+        4,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C4": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.C4",
+       "box": [
+        1764,
+        552,
+        152,
+        152
+       ],
+       "valid_fraction": 1.0
+      },
+      "C5": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 1.0
+      },
+      "PANEL": {
+       "base": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 0.9982
+      }
+     },
+     "visual_check": null,
+     "apparent_light": {
+      "dir_deg_math": 240.4,
+      "per_dial": [
+       229.9,
+       247.7
+      ],
+      "max_deviation_deg": 10.5,
+      "confidence": "ok",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    }
+   }
+  },
+  "01_three-modes_small.png": {
+   "file": "reference/6wb/01_three-modes_small.png",
+   "size": [
+    447,
+    447
+   ],
+   "sections": {
+    "eco": {
+     "roll_deg": 0.428,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        140,
+        78,
+        58
+       ],
+       "photo_centre": [
+        139.42,
+        77.18
+       ],
+       "photo_ridge_axes": [
+        56.0,
+        56.46
+       ],
+       "ellipse_ratio": 0.9919,
+       "outer_edge_ratio": 1.0178,
+       "outer_edge_ratio_used": 1.0178,
+       "outer_edge_rays": 194,
+       "ridge_radius_in_R": 0.9825,
+       "panel_px_per_photo_px": 5.8531,
+       "A_photo_to_panel": [
+        [
+         5.875753,
+         0.050611,
+         -411.123124
+        ],
+        [
+         -0.036915,
+         5.830307,
+         -64.859094
+        ]
+       ],
+       "residual_rms_panel_px": 1.357,
+       "residual_max_panel_px": 3.817,
+       "inlier_rays": 194,
+       "rays": 195,
+       "light": {
+        "dir_deg_math": 345.5,
+        "rel_amplitude": 0.903,
+        "mean": 42.7,
+        "angular_coverage_deg": 194
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 230
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        318,
+        78,
+        58
+       ],
+       "photo_centre": [
+        319.4,
+        78.53
+       ],
+       "photo_ridge_axes": [
+        56.44,
+        56.9
+       ],
+       "ellipse_ratio": 0.9919,
+       "outer_edge_ratio": 1.0133,
+       "outer_edge_ratio_used": 1.0133,
+       "outer_edge_rays": 227,
+       "ridge_radius_in_R": 0.9869,
+       "panel_px_per_photo_px": 5.8342,
+       "A_photo_to_panel": [
+        [
+         5.810434,
+         0.04416,
+         -351.337955
+        ],
+        [
+         -0.043083,
+         5.857797,
+         -66.249792
+        ]
+       ],
+       "residual_rms_panel_px": 1.31,
+       "residual_max_panel_px": 3.739,
+       "inlier_rays": 227,
+       "rays": 230,
+       "light": {
+        "dir_deg_math": 256.2,
+        "rel_amplitude": 0.841,
+        "mean": 79.9,
+        "angular_coverage_deg": 227
+       },
+       "quality": "good",
+       "partial": false,
+       "needle_cw12_deg": 230
+      }
+     },
+     "box": [
+      0,
+      0,
+      447,
+      149
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        5.843093,
+        0.047386,
+        -384.171723
+       ],
+       [
+        -0.039999,
+        5.844052,
+        -65.822715
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 434 / 1486 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        434.1,
+        379.7
+       ],
+       [
+        1485.9,
+        380.3
+       ]
+      ],
+      "dial_spacing_in_R": 3.1394
+     },
+     "exposure": {
+      "black": 7.14,
+      "white": 232.71,
+      "white_target": 235.0,
+      "gain": 1.0418,
+      "offset": -7.443,
+      "wb_gain_rgb": [
+       1.1371,
+       0.9713,
+       0.9408
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/01_three-modes_small.eco.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9389
+      },
+      "C2": {
+       "base": "bake/work/rect/01_three-modes_small.eco.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9496
+      },
+      "C5": {
+       "base": "bake/work/rect/01_three-modes_small.eco.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 1.0
+      },
+      "PANEL": {
+       "base": "bake/work/rect/01_three-modes_small.eco.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 1.0
+      }
+     },
+     "visual_check": null,
+     "apparent_light": {
+      "dir_deg_math": 302.9,
+      "per_dial": [
+       345.5,
+       256.2
+      ],
+      "max_deviation_deg": 46.7,
+      "confidence": "weak",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    },
+    "sport": {
+     "roll_deg": -0.622,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        140,
+        222,
+        58
+       ],
+       "photo_centre": [
+        141.03,
+        221.71
+       ],
+       "photo_ridge_axes": [
+        55.92,
+        56.17
+       ],
+       "ellipse_ratio": 0.9956,
+       "outer_edge_ratio": 1.0223,
+       "outer_edge_ratio_used": 1.0223,
+       "outer_edge_rays": 56,
+       "ridge_radius_in_R": 0.9782,
+       "panel_px_per_photo_px": 5.8472,
+       "A_photo_to_panel": [
+        [
+         5.834643,
+         -0.059538,
+         -397.648729
+        ],
+        [
+         0.067466,
+         5.85902,
+         -928.491477
+        ]
+       ],
+       "residual_rms_panel_px": 2.3,
+       "residual_max_panel_px": 4.594,
+       "inlier_rays": 56,
+       "rays": 56,
+       "light": {
+        "dir_deg_math": 10.1,
+        "rel_amplitude": 1.265,
+        "mean": 27.4,
+        "angular_coverage_deg": 56
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 230
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        318,
+        222,
+        58
+       ],
+       "photo_centre": [
+        315.85,
+        219.81
+       ],
+       "photo_ridge_axes": [
+        57.58,
+        57.93
+       ],
+       "ellipse_ratio": 0.9941,
+       "outer_edge_ratio": 1.0132,
+       "outer_edge_ratio_used": 1.0132,
+       "outer_edge_rays": 59,
+       "ridge_radius_in_R": 0.987,
+       "panel_px_per_photo_px": 5.725,
+       "A_photo_to_panel": [
+        [
+         5.718464,
+         -0.078013,
+         -281.051665
+        ],
+        [
+         0.046339,
+         5.730951,
+         -894.337769
+        ]
+       ],
+       "residual_rms_panel_px": 2.001,
+       "residual_max_panel_px": 4.049,
+       "inlier_rays": 59,
+       "rays": 61,
+       "light": {
+        "dir_deg_math": 213.8,
+        "rel_amplitude": 0.025,
+        "mean": 61.5,
+        "angular_coverage_deg": 59
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 230
+      }
+     },
+     "box": [
+      0,
+      149,
+      447,
+      298
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        5.776553,
+        -0.068775,
+        -344.419217
+       ],
+       [
+        0.056903,
+        5.794986,
+        -912.277236
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 455 / 1465 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        455.0,
+        380.5
+       ],
+       [
+        1465.0,
+        379.5
+       ]
+      ],
+      "dial_spacing_in_R": 3.015
+     },
+     "exposure": {
+      "black": 5.57,
+      "white": 243.26,
+      "white_target": 235.0,
+      "gain": 0.9887,
+      "offset": -5.511,
+      "wb_gain_rgb": [
+       0.983,
+       1.0064,
+       0.9876
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/01_three-modes_small.sport.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9522
+      },
+      "C2": {
+       "base": "bake/work/rect/01_three-modes_small.sport.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9394
+      },
+      "C5": {
+       "base": "bake/work/rect/01_three-modes_small.sport.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 1.0
+      },
+      "PANEL": {
+       "base": "bake/work/rect/01_three-modes_small.sport.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 1.0
+      }
+     },
+     "visual_check": null,
+     "apparent_light": {
+      "dir_deg_math": 9.6,
+      "per_dial": [
+       10.1,
+       213.8
+      ],
+      "max_deviation_deg": 155.8,
+      "confidence": "weak",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    },
+    "comfort": {
+     "roll_deg": 1.42,
+     "roll_source": "line through the C1 and C2 centres",
+     "dials": {
+      "C1": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        140,
+        370,
+        58
+       ],
+       "photo_centre": [
+        149.43,
+        365.24
+       ],
+       "photo_ridge_axes": [
+        48.8,
+        49.05
+       ],
+       "ellipse_ratio": 0.9949,
+       "outer_edge_ratio": 1.0257,
+       "outer_edge_ratio_used": 1.0257,
+       "outer_edge_rays": 71,
+       "ridge_radius_in_R": 0.975,
+       "panel_px_per_photo_px": 6.6755,
+       "A_photo_to_panel": [
+        [
+         6.688032,
+         0.15666,
+         -644.589847
+        ],
+        [
+         -0.17426,
+         6.658824,
+         -2026.005949
+        ]
+       ],
+       "residual_rms_panel_px": 1.239,
+       "residual_max_panel_px": 4.796,
+       "inlier_rays": 71,
+       "rays": 71,
+       "light": {
+        "dir_deg_math": 56.2,
+        "rel_amplitude": 2.303,
+        "mean": 59.8,
+        "angular_coverage_deg": 71
+       },
+       "quality": "poor",
+       "partial": false,
+       "needle_cw12_deg": 232.5,
+       "floor_check": {
+        "residual_tilt_deg": -2.0,
+        "dy_R": 0.2866
+       }
+      },
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        318,
+        370,
+        58
+       ],
+       "photo_centre": [
+        317.75,
+        369.41
+       ],
+       "photo_ridge_axes": [
+        55.64,
+        55.9
+       ],
+       "ellipse_ratio": 0.9953,
+       "outer_edge_ratio": 1.0202,
+       "outer_edge_ratio_used": 1.0202,
+       "outer_edge_rays": 78,
+       "ridge_radius_in_R": 0.9802,
+       "panel_px_per_photo_px": 5.8883,
+       "A_photo_to_panel": [
+        [
+         5.874113,
+         0.139939,
+         -410.168493
+        ],
+        [
+         -0.151958,
+         5.898826,
+         -1750.799377
+        ]
+       ],
+       "residual_rms_panel_px": 2.261,
+       "residual_max_panel_px": 4.704,
+       "inlier_rays": 78,
+       "rays": 80,
+       "light": {
+        "dir_deg_math": 302.2,
+        "rel_amplitude": 0.56,
+        "mean": 74.8,
+        "angular_coverage_deg": 78
+       },
+       "quality": "ok",
+       "partial": false,
+       "needle_cw12_deg": 226.0,
+       "floor_check": {
+        "residual_tilt_deg": -1.6,
+        "dy_R": 0.2328
+       }
+      }
+     },
+     "box": [
+      0,
+      298,
+      447,
+      447
+     ],
+     "window_transform": {
+      "A_photo_to_panel": [
+       [
+        6.281072,
+        0.148299,
+        -561.646099
+       ],
+       [
+        -0.163109,
+        6.278825,
+        -1888.257135
+       ]
+      ],
+      "note": "6WB layout scaled by the mean dial scale and centred on the dial-pair midpoint -> panel (960, 380). The 6WB dials land at x 431 / 1489 (ours: 412 / 1508), so the 6WB window is NOT our window: use it for shapes/profiles in R units, not for absolute x.",
+      "dial_centres_in_panel": [
+       [
+        431.1,
+        380.6
+       ],
+       [
+        1488.9,
+        379.4
+       ]
+      ],
+      "dial_spacing_in_R": 3.1577
+     },
+     "exposure": {
+      "black": 3.93,
+      "white": 225.07,
+      "white_target": 235.0,
+      "gain": 1.0627,
+      "offset": -4.178,
+      "wb_gain_rgb": [
+       1.0149,
+       0.9991,
+       0.9667
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked"
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/01_three-modes_small.comfort.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9485
+      },
+      "C2": {
+       "base": "bake/work/rect/01_three-modes_small.comfort.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.9332
+      },
+      "C5": {
+       "base": "bake/work/rect/01_three-modes_small.comfort.C5",
+       "box": [
+        680,
+        39,
+        560,
+        669
+       ],
+       "valid_fraction": 1.0
+      },
+      "PANEL": {
+       "base": "bake/work/rect/01_three-modes_small.comfort.PANEL",
+       "box": [
+        0,
+        0,
+        1920,
+        720
+       ],
+       "valid_fraction": 1.0
+      }
+     },
+     "visual_check": null,
+     "apparent_light": {
+      "dir_deg_math": 40.1,
+      "per_dial": [
+       56.2,
+       302.2
+      ],
+      "max_deviation_deg": 97.9,
+      "confidence": "weak",
+      "method": "first harmonic of the bezel ridge brightness vs angle (math deg: 0 right, 90 up, 135 upper left)",
+      "caveat": "the bezel gloss is drawn by the display, but photo glare and the lit housing also modulate it; treat as evidence, not truth"
+     }
+    }
+   }
+  },
+  "13_ticks_closeup.png": {
+   "file": "reference/6wb/13_ticks_closeup.png",
+   "size": [
+    768,
+    926
+   ],
+   "sections": {
+    "comfort": {
+     "roll_deg": 1.741,
+     "roll_source": "rotated so the major tick (6000 rpm) lands at 82.4 cw12, where 05/17 put it; radius from the minor-tick pitch 3.20 deg (iterations [2.65, 3.8, 3.15, 3.1, 3.15, 3.3])",
+     "dials": {
+      "C2": {
+       "feature": "bezel ridge (brightest ring); outer half-max edge mapped to R",
+       "seed": [
+        -1100,
+        470,
+        1660
+       ],
+       "photo_centre": [
+        -955.42,
+        615.89
+       ],
+       "photo_ridge_axes": [
+        1527.26,
+        1527.26
+       ],
+       "ellipse_ratio": 1.0,
+       "outer_edge_ratio": 1.0091,
+       "outer_edge_ratio_used": 1.0091,
+       "outer_edge_rays": 32,
+       "ridge_radius_in_R": 0.991,
+       "panel_px_per_photo_px": 0.2174,
+       "A_photo_to_panel": [
+        [
+         0.217271,
+         0.006603,
+         1711.519395
+        ],
+        [
+         -0.006603,
+         0.217271,
+         239.876282
+        ]
+       ],
+       "residual_rms_panel_px": 0.315,
+       "residual_max_panel_px": 0.64,
+       "inlier_rays": 33,
+       "rays": 33,
+       "light": {
+        "dir_deg_math": 3.3,
+        "rel_amplitude": 14098279131.208,
+        "mean": -10233.7,
+        "angular_coverage_deg": 33
+       },
+       "quality": "partial",
+       "partial": true
+      }
+     },
+     "box": [
+      0,
+      0,
+      768,
+      926
+     ],
+     "exposure": {
+      "black": 12.86,
+      "white": 254.87,
+      "white_target": 235.0,
+      "gain": 0.9711,
+      "offset": -12.491,
+      "wb_gain_rgb": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked",
+      "note": "partial close-up: anchors from the whole crop (black = 5th pct, white = top 0.5%), no white balance (the brightest pixels are not neutral here). Levels are only roughly comparable with the full-dial images: use close-ups for shapes and profiles, take levels from 05 / 03 / 02."
+     },
+     "outputs": {
+      "C2": {
+       "base": "bake/work/rect/13_ticks_closeup.comfort.C2",
+       "box": [
+        1146,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.0614,
+       "supersampled": {
+        "base": "bake/work/rect/13_ticks_closeup.comfort.C2@4x",
+        "box": [
+         1712,
+         235,
+         158,
+         206
+        ],
+        "scale": 4
+       }
+      }
+     },
+     "visual_check": "33 deg arc only; radius set from the minor-tick pitch (3.2 deg, measured on 05 and 17), roll from the 6000 rpm tick"
+    }
+   }
+  },
+  "14_inner-rings_closeup.png": {
+   "file": "reference/6wb/14_inner-rings_closeup.png",
+   "size": [
+    264,
+    232
+   ],
+   "sections": {
+    "comfort": {
+     "roll_deg": 0.0,
+     "roll_source": "assumed 0 (single dial: camera assumed level; refine with ECC)",
+     "dials": {
+      "C1": {
+       "feature": "inner ring mapped to 0.51 R",
+       "seed": [
+        330,
+        230,
+        190
+       ],
+       "photo_centre": [
+        292.91,
+        203.13
+       ],
+       "photo_ridge_axes": [
+        163.06,
+        163.06
+       ],
+       "ellipse_ratio": 1.0,
+       "outer_edge_ratio": null,
+       "outer_edge_ratio_used": 1.0,
+       "outer_edge_rays": 0,
+       "ridge_radius_in_R": 0.51,
+       "panel_px_per_photo_px": 1.0478,
+       "A_photo_to_panel": [
+        [
+         1.047795,
+         0.0,
+         105.08623
+        ],
+        [
+         0.0,
+         1.047795,
+         167.162786
+        ]
+       ],
+       "residual_rms_panel_px": 0.255,
+       "residual_max_panel_px": 0.775,
+       "inlier_rays": 79,
+       "rays": 79,
+       "light": null,
+       "quality": "partial",
+       "partial": true
+      }
+     },
+     "box": [
+      0,
+      0,
+      264,
+      232
+     ],
+     "exposure": {
+      "black": 72.08,
+      "white": 251.97,
+      "white_target": 235.0,
+      "gain": 1.3064,
+      "offset": -94.172,
+      "wb_gain_rgb": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked",
+      "note": "partial close-up: anchors from the whole crop (black = 5th pct, white = top 0.5%), no white balance (the brightest pixels are not neutral here). Levels are only roughly comparable with the full-dial images: use close-ups for shapes and profiles, take levels from 05 / 03 / 02."
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/14_inner-rings_closeup.comfort.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.1324
+      }
+     },
+     "visual_check": "the 0.51 R disc edge arc only: scale assumes that edge is at 0.51 R (theme value, matches 17 within ~2%); roll unknown (0)"
+    }
+   }
+  },
+  "15_hub-needle_closeup.png": {
+   "file": "reference/6wb/15_hub-needle_closeup.png",
+   "size": [
+    892,
+    666
+   ],
+   "sections": {
+    "comfort": {
+     "roll_deg": 0.0,
+     "roll_source": "assumed 0 (single dial: camera assumed level; refine with ECC)",
+     "dials": {
+      "C1": {
+       "feature": "hub ring (red) mapped to 0.135 R",
+       "seed": [
+        350,
+        245,
+        220
+       ],
+       "photo_centre": [
+        349.74,
+        247.22
+       ],
+       "photo_ridge_axes": [
+        218.34,
+        218.34
+       ],
+       "ellipse_ratio": 1.0,
+       "outer_edge_ratio": null,
+       "outer_edge_ratio_used": 1.0,
+       "outer_edge_rays": 0,
+       "ridge_radius_in_R": 0.135,
+       "panel_px_per_photo_px": 0.2071,
+       "A_photo_to_panel": [
+        [
+         0.207128,
+         0.0,
+         339.559771
+        ],
+        [
+         0.0,
+         0.207128,
+         328.794129
+        ]
+       ],
+       "residual_rms_panel_px": 0.152,
+       "residual_max_panel_px": 0.268,
+       "inlier_rays": 130,
+       "rays": 321,
+       "light": null,
+       "quality": "partial",
+       "partial": true
+      }
+     },
+     "box": [
+      0,
+      0,
+      892,
+      666
+     ],
+     "exposure": {
+      "black": 17.0,
+      "white": 180.33,
+      "white_target": 235.0,
+      "gain": 1.4388,
+      "offset": -24.458,
+      "wb_gain_rgb": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "gamma": 1.0,
+      "gamma_note": "not fitted (no shared mid-grey anchor); applied in sRGB code values",
+      "formula": "out_c = clip((in_c - black) * gain * wb_gain_c, 0, 255)",
+      "anchors": "black: 5th pct of luminance in the ring 1.0-1.08 R outside the bezels; white: mean of the top 0.5% luminance inside 0.95 R (numerals, tick cores), needle masked",
+      "note": "partial close-up: anchors from the whole crop (black = 5th pct, white = top 0.5%), no white balance (the brightest pixels are not neutral here). Levels are only roughly comparable with the full-dial images: use close-ups for shapes and profiles, take levels from 05 / 03 / 02."
+     },
+     "outputs": {
+      "C1": {
+       "base": "bake/work/rect/15_hub-needle_closeup.comfort.C1",
+       "box": [
+        50,
+        18,
+        724,
+        702
+       ],
+       "valid_fraction": 0.0486,
+       "supersampled": {
+        "base": "bake/work/rect/15_hub-needle_closeup.comfort.C1@4x",
+        "box": [
+         340,
+         329,
+         185,
+         138
+        ],
+        "scale": 4
+       }
+      }
+     },
+     "visual_check": "hub ring circle only: scale assumes the ring at 0.135 R (theme value); rotation meaningless for a ring"
+    }
+   }
+  },
+  "10_grid_over-stock.jpg": {
+   "file": "reference/g20/10_grid_over-stock.jpg",
+   "size": [
+    2048,
+    1536
+   ],
+   "H_source": "10_grid_homography_panel-to-photo.json (108 grid crossings, residual mean 3.54 / max 13.3 photo px; re-derived by tools/ref/grid_homography_p.py)",
+   "H_panel_to_photo": [
+    [
+     1.02307882,
+     -0.01966578,
+     115.34913182
+    ],
+    [
+     0.01782192,
+     0.98653842,
+     490.34855171
+    ],
+    [
+     2.503e-05,
+     -2.197e-05,
+     1.0
+    ]
+   ],
+   "outputs": {
+    "PANEL": {
+     "base": "bake/work/rect/10_grid_over-stock.g20.PANEL",
+     "box": [
+      0,
+      0,
+      1920,
+      720
+     ]
+    },
+    "C1": {
+     "base": "bake/work/rect/10_grid_over-stock.g20.C1",
+     "box": [
+      50,
+      18,
+      724,
+      702
+     ]
+    },
+    "C2": {
+     "base": "bake/work/rect/10_grid_over-stock.g20.C2",
+     "box": [
+      1146,
+      18,
+      724,
+      702
+     ]
+    },
+    "C3": {
+     "base": "bake/work/rect/10_grid_over-stock.g20.C3",
+     "box": [
+      4,
+      552,
+      152,
+      152
+     ]
+    },
+    "C4": {
+     "base": "bake/work/rect/10_grid_over-stock.g20.C4",
+     "box": [
+      1764,
+      552,
+      152,
+      152
+     ]
+    },
+    "C5": {
+     "base": "bake/work/rect/10_grid_over-stock.g20.C5",
+     "box": [
+      680,
+      39,
+      560,
+      669
+     ]
+    }
+   }
+  },
+  "11_our-theme_on-car.jpg": {
+   "file": "reference/g20/11_our-theme_on-car.jpg",
+   "size": [
+    2048,
+    1536
+   ],
+   "H_source": "Hm (photo 10) corrected by a 4-point homography: our hubs and mini gauges found in the Hm-rectified photo -> their OLD-geometry panel positions",
+   "measured_in_Hm_rect": {
+    "hubs_xyr": [
+     [
+      512.5,
+      280.5,
+      39.8
+     ],
+     [
+      1362.5,
+      290.5,
+      39.3
+     ]
+    ],
+    "minis_xyr": [
+     [
+      145.2,
+      378.7,
+      79.9
+     ],
+     [
+      1734.0,
+      399.2,
+      80.8
+     ]
+    ]
+   },
+   "check": {
+    "bmw_black_box_top_left_expected": [
+     1420,
+     320
+    ],
+    "bmw_black_box_top_left_got": [
+     1422.7,
+     321.3
+    ],
+    "error_px": 2.98
+   },
+   "warning": "Photo 11 shows our theme in the OLD geometry (R 290, hubs (496,360)/(1424,360)) and a different camera pose from photo 10; 4 points define H exactly, so its only check is BMW's black-box corner (error above). Per-dial crops below map OLD -> G20 dial frame.",
+   "H_panel_to_photo": [
+    [
+     0.88701323,
+     -0.14866848,
+     223.79725239
+    ],
+    [
+     0.01820276,
+     0.77459981,
+     459.03710637
+    ],
+    [
+     1.191e-05,
+     -0.00012179,
+     1.00662272
+    ]
+   ],
+   "outputs": {
+    "PANEL": {
+     "base": "bake/work/rect/11_our-theme_on-car.g20.PANEL",
+     "box": [
+      0,
+      0,
+      1920,
+      720
+     ]
+    },
+    "C1": {
+     "base": "bake/work/rect/11_our-theme_on-car.g20.C1",
+     "box": [
+      50,
+      18,
+      724,
+      702
+     ]
+    },
+    "C2": {
+     "base": "bake/work/rect/11_our-theme_on-car.g20.C2",
+     "box": [
+      1146,
+      18,
+      724,
+      702
+     ]
+    },
+    "C3": {
+     "base": "bake/work/rect/11_our-theme_on-car.g20.C3",
+     "box": [
+      4,
+      552,
+      152,
+      152
+     ]
+    },
+    "C4": {
+     "base": "bake/work/rect/11_our-theme_on-car.g20.C4",
+     "box": [
+      1764,
+      552,
+      152,
+      152
+     ]
+    },
+    "C5": {
+     "base": "bake/work/rect/11_our-theme_on-car.g20.C5",
+     "box": [
+      680,
+      39,
+      560,
+      669
+     ]
+    }
+   }
+  },
+  "08_stock_night_warnings-map.jpg": {
+   "file": "reference/g20/08_stock_night_warnings-map.jpg",
+   "size": [
+    2048,
+    1536
+   ],
+   "H_source": "SIFT photo10 -> this photo (66 inliers, reprojection rms 1.06 px) chained with Hm; checked by eye (stock dial outlines coincide with photo 10's)",
+   "sift": {
+    "good": 276,
+    "inliers": 66,
+    "reproj_rms_px": 1.0610219240188599
+   },
+   "H_panel_to_photo": [
+    [
+     -0.00844871,
+     -0.65821893,
+     447.87459995
+    ],
+    [
+     -0.00999218,
+     -0.7713464,
+     524.95449576
+    ],
+    [
+     -1.103e-05,
+     -0.00085637,
+     0.58270701
+    ]
+   ],
+   "outputs": {
+    "PANEL": {
+     "base": "bake/work/rect/08_stock_night_warnings-map.g20.PANEL",
+     "box": [
+      0,
+      0,
+      1920,
+      720
+     ]
+    },
+    "C1": {
+     "base": "bake/work/rect/08_stock_night_warnings-map.g20.C1",
+     "box": [
+      50,
+      18,
+      724,
+      702
+     ]
+    },
+    "C2": {
+     "base": "bake/work/rect/08_stock_night_warnings-map.g20.C2",
+     "box": [
+      1146,
+      18,
+      724,
+      702
+     ]
+    },
+    "C3": {
+     "base": "bake/work/rect/08_stock_night_warnings-map.g20.C3",
+     "box": [
+      4,
+      552,
+      152,
+      152
+     ]
+    },
+    "C4": {
+     "base": "bake/work/rect/08_stock_night_warnings-map.g20.C4",
+     "box": [
+      1764,
+      552,
+      152,
+      152
+     ]
+    },
+    "C5": {
+     "base": "bake/work/rect/08_stock_night_warnings-map.g20.C5",
+     "box": [
+      680,
+      39,
+      560,
+      669
+     ]
+    }
+   }
+  },
+  "09_stock_map_day.jpg": {
+   "file": "reference/g20/09_stock_map_day.jpg",
+   "size": [
+    2048,
+    1536
+   ],
+   "H_source": "SIFT photo10 -> this photo (63 inliers, reprojection rms 1.08 px) chained with Hm; checked by eye (stock dial outlines coincide with photo 10's)",
+   "sift": {
+    "good": 328,
+    "inliers": 63,
+    "reproj_rms_px": 1.0812207460403442
+   },
+   "H_panel_to_photo": [
+    [
+     0.91969368,
+     -0.0333373,
+     217.01073099
+    ],
+    [
+     0.02291945,
+     0.89025711,
+     410.64928257
+    ],
+    [
+     1.478e-05,
+     -2.182e-05,
+     0.99882026
+    ]
+   ],
+   "outputs": {
+    "PANEL": {
+     "base": "bake/work/rect/09_stock_map_day.g20.PANEL",
+     "box": [
+      0,
+      0,
+      1920,
+      720
+     ]
+    },
+    "C1": {
+     "base": "bake/work/rect/09_stock_map_day.g20.C1",
+     "box": [
+      50,
+      18,
+      724,
+      702
+     ]
+    },
+    "C2": {
+     "base": "bake/work/rect/09_stock_map_day.g20.C2",
+     "box": [
+      1146,
+      18,
+      724,
+      702
+     ]
+    },
+    "C3": {
+     "base": "bake/work/rect/09_stock_map_day.g20.C3",
+     "box": [
+      4,
+      552,
+      152,
+      152
+     ]
+    },
+    "C4": {
+     "base": "bake/work/rect/09_stock_map_day.g20.C4",
+     "box": [
+      1764,
+      552,
+      152,
+      152
+     ]
+    },
+    "C5": {
+     "base": "bake/work/rect/09_stock_map_day.g20.C5",
+     "box": [
+      680,
+      39,
+      560,
+      669
+     ]
+    }
+   }
+  },
+  "ref_comfort_bench_1920x720.png": {
+   "file": "reference/ours/ref_comfort_bench_1920x720.png",
+   "size": [
+    1920,
+    720
+   ],
+   "note": "Rendered with the OLD geometry (design/gen_6wb.py OLD), not the current G20 one: per-dial similarity to the G20 frame.",
+   "outputs": {
+    "C1": {
+     "base": "bake/work/rect/ours_bench.comfort.C1",
+     "box": [
+      50,
+      18,
+      724,
+      702
+     ]
+    },
+    "C2": {
+     "base": "bake/work/rect/ours_bench.comfort.C2",
+     "box": [
+      1146,
+      18,
+      724,
+      702
+     ]
+    },
+    "C3": {
+     "base": "bake/work/rect/ours_bench.comfort.C3",
+     "box": [
+      4,
+      552,
+      152,
+      152
+     ]
+    },
+    "C4": {
+     "base": "bake/work/rect/ours_bench.comfort.C4",
+     "box": [
+      1764,
+      552,
+      152,
+      152
+     ]
+    }
+   },
+   "dials": {
+    "C1": {
+     "A_photo_to_panel": [
+      [
+       1.155172,
+       0.0,
+       -160.965517
+      ],
+      [
+       0.0,
+       1.155172,
+       -35.862069
+      ]
+     ],
+     "residual_rms_panel_px": 0.0,
+     "quality": "exact (known geometry)"
+    },
+    "C2": {
+     "A_photo_to_panel": [
+      [
+       1.155172,
+       0.0,
+       -136.965517
+      ],
+      [
+       0.0,
+       1.155172,
+       -35.862069
+      ]
+     ],
+     "residual_rms_panel_px": 0.0,
+     "quality": "exact (known geometry)"
+    },
+    "C3": {
+     "A_photo_to_panel": [
+      [
+       0.777778,
+       0.0,
+       -0.111111
+      ],
+      [
+       0.0,
+       0.777778,
+       260.111111
+      ]
+     ],
+     "residual_rms_panel_px": 0.0,
+     "quality": "exact (known geometry)"
+    },
+    "C4": {
+     "A_photo_to_panel": [
+      [
+       0.777778,
+       0.0,
+       426.777778
+      ],
+      [
+       0.0,
+       0.777778,
+       260.111111
+      ]
+     ],
+     "residual_rms_panel_px": 0.0,
+     "quality": "exact (known geometry)"
+    }
+   }
+  }
+ },
+ "summary_table": {
+  "columns": [
+   "image",
+   "mode",
+   "cluster",
+   "quality",
+   "rms_panel_px",
+   "inlier_rays",
+   "ellipse_ratio",
+   "panel_px_per_photo_px",
+   "roll_deg"
+  ],
+  "rows": [
+   [
+    "17_physical-cluster_full.png",
+    "comfort",
+    "C1",
+    "good",
+    0.637,
+    267,
+    0.9973,
+    1.0262,
+    -0.07
+   ],
+   [
+    "17_physical-cluster_full.png",
+    "comfort",
+    "C2",
+    "good",
+    0.594,
+    289,
+    0.9848,
+    1.0455,
+    -0.07
+   ],
+   [
+    "17_physical-cluster_full.png",
+    "comfort",
+    "C3",
+    "good",
+    0.141,
+    263,
+    0.97,
+    0.5771,
+    -0.07
+   ],
+   [
+    "17_physical-cluster_full.png",
+    "comfort",
+    "C4",
+    "good",
+    0.211,
+    254,
+    0.9871,
+    0.6033,
+    -0.07
+   ],
+   [
+    "04_comfort_whole-cluster_mph.png",
+    "comfort",
+    "C1",
+    "ok",
+    0.462,
+    264,
+    0.9716,
+    2.4123,
+    -0.059
+   ],
+   [
+    "04_comfort_whole-cluster_mph.png",
+    "comfort",
+    "C2",
+    "ok",
+    0.518,
+    262,
+    0.9738,
+    2.3959,
+    -0.059
+   ],
+   [
+    "04_comfort_whole-cluster_mph.png",
+    "comfort",
+    "C3",
+    "ok",
+    0.344,
+    129,
+    0.9869,
+    1.3878,
+    -0.059
+   ],
+   [
+    "04_comfort_whole-cluster_mph.png",
+    "comfort",
+    "C4",
+    "good",
+    0.387,
+    234,
+    0.9801,
+    1.3648,
+    -0.059
+   ],
+   [
+    "05_comfort_tach-closeup.png",
+    "comfort",
+    "C2",
+    "ok",
+    0.686,
+    190,
+    0.9894,
+    0.8753,
+    1.1
+   ],
+   [
+    "06_comfort_wide_with-wheel.png",
+    "comfort",
+    "C1",
+    "good",
+    0.845,
+    244,
+    0.9806,
+    4.4629,
+    1.128
+   ],
+   [
+    "06_comfort_wide_with-wheel.png",
+    "comfort",
+    "C2",
+    "good",
+    1.128,
+    243,
+    0.9839,
+    4.5195,
+    1.128
+   ],
+   [
+    "07_physical-cluster_all-lamps-lit.png",
+    "comfort",
+    "C1",
+    "ok",
+    0.904,
+    125,
+    0.9801,
+    1.9807,
+    -0.558
+   ],
+   [
+    "07_physical-cluster_all-lamps-lit.png",
+    "comfort",
+    "C2",
+    "poor",
+    0.582,
+    91,
+    0.981,
+    2.0678,
+    -0.558
+   ],
+   [
+    "07_physical-cluster_all-lamps-lit.png",
+    "comfort",
+    "C3",
+    "ok",
+    0.372,
+    141,
+    0.9845,
+    1.083,
+    -0.558
+   ],
+   [
+    "07_physical-cluster_all-lamps-lit.png",
+    "comfort",
+    "C4",
+    "ok",
+    0.447,
+    40,
+    0.9882,
+    1.1236,
+    -0.558
+   ],
+   [
+    "12_speedo_signs_overspeed-wedge.png",
+    "comfort",
+    "C1",
+    "good",
+    0.415,
+    360,
+    0.9976,
+    2.0534,
+    -1.7
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "comfort",
+    "C1",
+    "ok",
+    0.849,
+    104,
+    0.9851,
+    1.9291,
+    -1.167
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "comfort",
+    "C2",
+    "ok",
+    1.019,
+    115,
+    0.994,
+    2.0508,
+    -1.167
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "comfort",
+    "C3",
+    "ok",
+    0.385,
+    132,
+    0.9931,
+    1.1477,
+    -1.167
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "comfort",
+    "C4",
+    "ok",
+    0.418,
+    100,
+    0.9961,
+    1.2177,
+    -1.167
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "sport",
+    "C1",
+    "ok",
+    1.081,
+    56,
+    0.9945,
+    1.9833,
+    -0.048
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "sport",
+    "C2",
+    "ok",
+    1.149,
+    54,
+    0.9941,
+    1.9741,
+    -0.048
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "sport",
+    "C3",
+    "good",
+    0.251,
+    189,
+    0.9928,
+    1.0572,
+    -0.048
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "sport",
+    "C4",
+    "good",
+    0.384,
+    191,
+    0.9928,
+    1.1126,
+    -0.048
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "eco",
+    "C1",
+    "ok",
+    1.107,
+    63,
+    0.9843,
+    1.8926,
+    0.556
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "eco",
+    "C2",
+    "ok",
+    1.022,
+    109,
+    0.9852,
+    1.9242,
+    0.556
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "eco",
+    "C3",
+    "ok",
+    0.387,
+    73,
+    0.9968,
+    1.2053,
+    0.556
+   ],
+   [
+    "02_three-modes_clean-render.png",
+    "eco",
+    "C4",
+    "ok",
+    0.322,
+    134,
+    0.9832,
+    1.1418,
+    0.556
+   ],
+   [
+    "03_three-modes_photo_bimmerstop.png",
+    "eco",
+    "C1",
+    "good",
+    0.777,
+    228,
+    0.9842,
+    2.6897,
+    -0.248
+   ],
+   [
+    "03_three-modes_photo_bimmerstop.png",
+    "eco",
+    "C2",
+    "good",
+    0.637,
+    292,
+    0.9837,
+    2.7231,
+    -0.248
+   ],
+   [
+    "03_three-modes_photo_bimmerstop.png",
+    "eco",
+    "C3",
+    "poor",
+    0.285,
+    94,
+    0.9913,
+    1.5284,
+    -0.248
+   ],
+   [
+    "03_three-modes_photo_bimmerstop.png",
+    "eco",
+    "C4",
+    "ok",
+    0.192,
+    131,
+    0.9828,
+    1.5733,
+    -0.248
+   ],
+   [
+    "03_three-modes_photo_bimmerstop.png",
+    "comfort",
+    "C1",
+    "ok",
+    0.631,
+    258,
+    0.9811,
+    2.4818,
+    0.949
+   ],
+   [
+    "03_three-modes_photo_bimmerstop.png",
+    "comfort",
+    "C2",
+    "good",
+    0.603,
+    276,
+    0.9842,
+    2.555,
+    0.949
+   ],
+   [
+    "03_three-modes_photo_bimmerstop.png",
+    "comfort",
+    "C3",
+    "ok",
+    0.31,
+    83,
+    0.9975,
+    1.452,
+    0.949
+   ],
+   [
+    "03_three-modes_photo_bimmerstop.png",
+    "sport",
+    "C1",
+    "good",
+    0.633,
+    252,
+    0.9922,
+    2.587,
+    1.513
+   ],
+   [
+    "03_three-modes_photo_bimmerstop.png",
+    "sport",
+    "C2",
+    "good",
+    0.535,
+    279,
+    0.9966,
+    2.616,
+    1.513
+   ],
+   [
+    "03_three-modes_photo_bimmerstop.png",
+    "sport",
+    "C3",
+    "ok",
+    0.301,
+    126,
+    0.9835,
+    1.4786,
+    1.513
+   ],
+   [
+    "03_three-modes_photo_bimmerstop.png",
+    "sport",
+    "C4",
+    "poor",
+    0.456,
+    14,
+    1.0,
+    1.5504,
+    1.513
+   ],
+   [
+    "01_three-modes_small.png",
+    "eco",
+    "C1",
+    "good",
+    1.357,
+    194,
+    0.9919,
+    5.8531,
+    0.428
+   ],
+   [
+    "01_three-modes_small.png",
+    "eco",
+    "C2",
+    "good",
+    1.31,
+    227,
+    0.9919,
+    5.8342,
+    0.428
+   ],
+   [
+    "01_three-modes_small.png",
+    "sport",
+    "C1",
+    "ok",
+    2.3,
+    56,
+    0.9956,
+    5.8472,
+    -0.622
+   ],
+   [
+    "01_three-modes_small.png",
+    "sport",
+    "C2",
+    "ok",
+    2.001,
+    59,
+    0.9941,
+    5.725,
+    -0.622
+   ],
+   [
+    "01_three-modes_small.png",
+    "comfort",
+    "C1",
+    "poor",
+    1.239,
+    71,
+    0.9949,
+    6.6755,
+    1.42
+   ],
+   [
+    "01_three-modes_small.png",
+    "comfort",
+    "C2",
+    "ok",
+    2.261,
+    78,
+    0.9953,
+    5.8883,
+    1.42
+   ],
+   [
+    "13_ticks_closeup.png",
+    "comfort",
+    "C2",
+    "partial",
+    0.315,
+    33,
+    1.0,
+    0.2174,
+    1.741
+   ],
+   [
+    "14_inner-rings_closeup.png",
+    "comfort",
+    "C1",
+    "partial",
+    0.255,
+    79,
+    1.0,
+    1.0478,
+    0.0
+   ],
+   [
+    "15_hub-needle_closeup.png",
+    "comfort",
+    "C1",
+    "partial",
+    0.152,
+    130,
+    1.0,
+    0.2071,
+    0.0
+   ]
+  ]
+ }
+}

@@ -1,0 +1,1296 @@
+{
+ "cluster": "C9",
+ "package": "P8",
+ "mode": "all",
+ "generator": "cd bake/src && $PY -m C9.build",
+ "notes": "Documentation only; nothing shipped (every file is null). Report: docs/BAKE-C9-overlays.md, bake/report/C9.md. Annotated maps: bake/work/C9/overlays_annotated.png (over photo 10, scratch) and overlays_schematic.png.",
+ "layers": [
+  {
+   "id": "housing.bezel-crescent",
+   "cluster": "C9",
+   "z": 11.5,
+   "kind": "highlight",
+   "class": "dynamic",
+   "frame": "dial",
+   "x": -1.0,
+   "y": -1.0,
+   "w": 2.0,
+   "h": 2.0,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png",
+    "04_comfort_whole-cluster_mph.png",
+    "03_three-modes_photo_bimmerstop.png",
+    "06_comfort_wide_with-wheel.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0.0,
+    "key": 0.0
+   },
+   "params": {
+    "notes": "DOCUMENTATION ONLY, NOT SHIPPED. A brighter arc on the bezel ridge (r 0.985-0.99 R, FWHM ~0.985-1.0 R = 4-6 px at R 335). Its angle is different in every photo (17/07: on the window side, C1 74-90 cw12, C2 272; 04/03: lower left 202-220 / C2 142; 06: 28 / 132; 02 render: C1 338 / C2 272) and the two dials of one photo mirror each other: a specular reflection of the room in the glass, not a drawn feature. If a static gloss is wanted, take it from the C1/C2 bezel layer (z 11), not from here.",
+    "ridge_r_R": [
+     0.985,
+     0.99
+    ],
+    "per_ref": {
+     "17.C1": {
+      "peak_cw12": 90.0,
+      "span_deg": 58.0,
+      "ridge_L_base_p10": 124.7,
+      "ridge_L_max": 230.2,
+      "ridge_r_R": 0.99,
+      "fwhm_R_at_peak": [
+       0.9275,
+       1.0,
+       0.9925
+      ],
+      "quality": "good"
+     },
+     "17.C2": {
+      "peak_cw12": 272.0,
+      "span_deg": 38.0,
+      "ridge_L_base_p10": 112.5,
+      "ridge_L_max": 232.3,
+      "ridge_r_R": 0.99,
+      "fwhm_R_at_peak": [
+       0.9775,
+       0.9975,
+       0.9875
+      ],
+      "quality": "good"
+     },
+     "07.C1": {
+      "peak_cw12": 74.0,
+      "span_deg": 86.0,
+      "ridge_L_base_p10": 41.1,
+      "ridge_L_max": 232.2,
+      "ridge_r_R": 0.97,
+      "fwhm_R_at_peak": [
+       0.92,
+       1.0025,
+       0.99
+      ],
+      "quality": "ok"
+     },
+     "07.C2": {
+      "peak_cw12": 272.0,
+      "span_deg": 50.0,
+      "ridge_L_base_p10": 84.4,
+      "ridge_L_max": 229.8,
+      "ridge_r_R": 0.9475,
+      "fwhm_R_at_peak": [
+       0.92,
+       1.0,
+       0.9875
+      ],
+      "quality": "poor"
+     },
+     "04.C1": {
+      "peak_cw12": 220.0,
+      "span_deg": 20.0,
+      "ridge_L_base_p10": 47.8,
+      "ridge_L_max": 232.3,
+      "ridge_r_R": 0.99,
+      "fwhm_R_at_peak": [
+       0.985,
+       0.9975,
+       0.9925
+      ],
+      "quality": "ok"
+     },
+     "04.C2": {
+      "peak_cw12": 142.0,
+      "span_deg": 58.0,
+      "ridge_L_base_p10": 43.9,
+      "ridge_L_max": 234.3,
+      "ridge_r_R": 0.99,
+      "fwhm_R_at_peak": [
+       0.9875,
+       1.0,
+       0.9925
+      ],
+      "quality": "ok"
+     },
+     "03.C1": {
+      "peak_cw12": 214.0,
+      "span_deg": 22.0,
+      "ridge_L_base_p10": 6.2,
+      "ridge_L_max": 236.4,
+      "ridge_r_R": 0.985,
+      "fwhm_R_at_peak": [
+       0.96,
+       1.0025,
+       0.99
+      ],
+      "quality": "ok"
+     },
+     "03.C2": {
+      "peak_cw12": 202.0,
+      "span_deg": 26.0,
+      "ridge_L_base_p10": 45.6,
+      "ridge_L_max": 198.7,
+      "ridge_r_R": 0.99,
+      "fwhm_R_at_peak": [
+       0.9875,
+       1.005,
+       0.995
+      ],
+      "quality": "good"
+     },
+     "06.C1": {
+      "peak_cw12": 28.0,
+      "span_deg": 34.0,
+      "ridge_L_base_p10": 48.0,
+      "ridge_L_max": 234.9,
+      "ridge_r_R": 0.9875,
+      "fwhm_R_at_peak": [
+       0.97,
+       0.985,
+       0.9775
+      ],
+      "quality": "good"
+     },
+     "06.C2": {
+      "peak_cw12": 132.0,
+      "span_deg": 62.0,
+      "ridge_L_base_p10": 42.4,
+      "ridge_L_max": 234.6,
+      "ridge_r_R": 0.9875,
+      "fwhm_R_at_peak": [
+       0.985,
+       1.0025,
+       0.9925
+      ],
+      "quality": "good"
+     },
+     "02.C1": {
+      "peak_cw12": 338.0,
+      "span_deg": 150.0,
+      "ridge_L_base_p10": 12.9,
+      "ridge_L_max": 219.3,
+      "ridge_r_R": 0.985,
+      "fwhm_R_at_peak": [
+       0.92,
+       0.9975,
+       0.9925
+      ],
+      "quality": "ok"
+     },
+     "02.C2": {
+      "peak_cw12": 272.0,
+      "span_deg": 68.0,
+      "ridge_L_base_p10": 28.5,
+      "ridge_L_max": 234.3,
+      "ridge_r_R": 0.9875,
+      "fwhm_R_at_peak": [
+       0.975,
+       0.9975,
+       0.99
+      ],
+      "quality": "ok"
+     }
+    }
+   }
+  },
+  {
+   "id": "housing.glass-reflection",
+   "cluster": "C9",
+   "z": 12,
+   "kind": "highlight",
+   "class": "dynamic",
+   "frame": "panel",
+   "x": 0,
+   "y": 0,
+   "w": 1920,
+   "h": 720,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png",
+    "03_three-modes_photo_bimmerstop.png",
+    "04_comfort_whole-cluster_mph.png"
+   ],
+   "evidence": "weak",
+   "params": {
+    "notes": "DOCUMENTATION ONLY, NOT SHIPPED. Veiling glare and room reflections in the cover glass, outside the dials (luma, normalised PANEL crops, each photo's own dial circles masked): 17 lifts the whole surround to a warm grey L 45-47 (p95 83-87; rgb ~32,30,27 in its darker half), 03 lifts the sides and bottom to L 27-36 (daylight on the housing), 04 has a top-band p95 of 19 (the hood above), 06 L 8-11 everywhere, 07 and 02 stay at 0-2. No shape repeats across photos; it depends on the room and the camera, so it is not baked.",
+    "zones_L": {
+     "17": {
+      "top_band_y0-60": {
+       "L_p05": 39.0,
+       "L_median": 45.0,
+       "L_p95": 68.0,
+       "px": 100794
+      },
+      "upper_corners_y60-300": {
+       "L_p05": 42.0,
+       "L_median": 47.0,
+       "L_p95": 87.0,
+       "px": 83337
+      },
+      "between_dial_and_mini_y300-560": {
+       "L_p05": 43.0,
+       "L_median": 47.0,
+       "L_p95": 83.0,
+       "px": 15054
+      },
+      "bottom_y560-720": {
+       "L_p05": 0.0,
+       "L_median": 17.0,
+       "L_p95": 78.0,
+       "px": 67608
+      },
+      "dark_half_mean_rgb": [
+       32.0,
+       29.7,
+       27.4
+      ]
+     },
+     "07": {
+      "top_band_y0-60": {
+       "L_p05": 1.0,
+       "L_median": 2.0,
+       "L_p95": 11.0,
+       "px": 98893
+      },
+      "upper_corners_y60-300": {
+       "L_p05": 1.0,
+       "L_median": 1.0,
+       "L_p95": 10.0,
+       "px": 79205
+      },
+      "between_dial_and_mini_y300-560": {
+       "L_p05": 0.0,
+       "L_median": 1.0,
+       "L_p95": 14.0,
+       "px": 28345
+      },
+      "bottom_y560-720": {
+       "L_p05": 1.0,
+       "L_median": 1.0,
+       "L_p95": 48.0,
+       "px": 73442
+      },
+      "dark_half_mean_rgb": [
+       0.1,
+       0.0,
+       0.2
+      ]
+     },
+     "04": {
+      "top_band_y0-60": {
+       "L_p05": 0.0,
+       "L_median": 4.0,
+       "L_p95": 19.0,
+       "px": 100918
+      },
+      "upper_corners_y60-300": {
+       "L_p05": 0.0,
+       "L_median": 2.0,
+       "L_p95": 22.0,
+       "px": 89121
+      },
+      "between_dial_and_mini_y300-560": {
+       "L_p05": 1.0,
+       "L_median": 2.0,
+       "L_p95": 6.0,
+       "px": 15425
+      },
+      "bottom_y560-720": {
+       "L_p05": 2.0,
+       "L_median": 3.0,
+       "L_p95": 49.0,
+       "px": 68824
+      },
+      "dark_half_mean_rgb": [
+       0.3,
+       1.2,
+       2.7
+      ]
+     },
+     "03": {
+      "top_band_y0-60": {
+       "L_p05": 0.0,
+       "L_median": 3.0,
+       "L_p95": 25.0,
+       "px": 100745
+      },
+      "upper_corners_y60-300": {
+       "L_p05": 0.0,
+       "L_median": 4.0,
+       "L_p95": 22.0,
+       "px": 85837
+      },
+      "between_dial_and_mini_y300-560": {
+       "L_p05": 3.0,
+       "L_median": 27.0,
+       "L_p95": 43.0,
+       "px": 33775
+      },
+      "bottom_y560-720": {
+       "L_p05": 16.0,
+       "L_median": 36.0,
+       "L_p95": 89.0,
+       "px": 74607
+      },
+      "dark_half_mean_rgb": [
+       2.0,
+       2.8,
+       2.5
+      ]
+     },
+     "06": {
+      "top_band_y0-60": {
+       "L_p05": 6.0,
+       "L_median": 10.0,
+       "L_p95": 25.0,
+       "px": 100882
+      },
+      "upper_corners_y60-300": {
+       "L_p05": 6.0,
+       "L_median": 8.0,
+       "L_p95": 30.0,
+       "px": 92173
+      },
+      "between_dial_and_mini_y300-560": {
+       "L_p05": 3.0,
+       "L_median": 10.0,
+       "L_p95": 132.0,
+       "px": 55328
+      },
+      "bottom_y560-720": {
+       "L_p05": 6.0,
+       "L_median": 11.0,
+       "L_p95": 63.0,
+       "px": 83755
+      },
+      "dark_half_mean_rgb": [
+       5.8,
+       7.6,
+       8.8
+      ]
+     },
+     "02": {
+      "top_band_y0-60": {
+       "L_p05": 0.0,
+       "L_median": 0.0,
+       "L_p95": 5.0,
+       "px": 98232
+      },
+      "upper_corners_y60-300": {
+       "L_p05": 0.0,
+       "L_median": 0.0,
+       "L_p95": 9.0,
+       "px": 84605
+      },
+      "between_dial_and_mini_y300-560": {
+       "L_p05": 0.0,
+       "L_median": 0.0,
+       "L_p95": 10.0,
+       "px": 19694
+      },
+      "bottom_y560-720": {
+       "L_p05": 0.0,
+       "L_median": 1.0,
+       "L_p95": 13.0,
+       "px": 78096
+      },
+      "dark_half_mean_rgb": null
+     }
+    }
+   }
+  },
+  {
+   "id": "housing.black-surround",
+   "cluster": "C9",
+   "z": 0.1,
+   "kind": "albedo",
+   "class": "procedural",
+   "frame": "panel",
+   "x": 0,
+   "y": 0,
+   "w": 1920,
+   "h": 720,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "02_three-modes_clean-render.png",
+    "04_comfort_whole-cluster_mph.png",
+    "03_three-modes_photo_bimmerstop.png",
+    "17_physical-cluster_full.png"
+   ],
+   "evidence": "ok",
+   "params": {
+    "notes": "The drawn surround outside the dials is black: far-field median rgb 0,0,0 (02), 0,1-2,3 (04), 3-5 (03, flare). It IS the C10 base colour (bake/manifest/C10.json); the physical housing beyond the TFT (glossy black plastic, L 45-90 in the lit-room photos 17/07) is outside our 1920x720 panel and is not drawn. On the G20 the hood (shared/visible.js HOOD) hides the top instead.",
+    "rgb_255": "see C10 base_rgb_255"
+   }
+  },
+  {
+   "id": "bmw.black-area",
+   "cluster": "C9",
+   "z": 100,
+   "kind": "mask",
+   "class": "dynamic",
+   "frame": "panel",
+   "x": 1419.5,
+   "y": 320.8,
+   "w": 191.3,
+   "h": 117.1,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "10_grid_over-stock.jpg",
+    "11_our-theme_on-car.jpg"
+   ],
+   "evidence": "strong",
+   "params": {
+    "notes": "BMW's opaque black rectangle over the rev dial whenever a custom theme runs (empty; it sits where the stock theme draws its big gear letter, 08/09 x 1491-1546 y 324-400). Drawn ABOVE our layers (it cuts our grid lines in 10).",
+    "measured": {
+     "photo10": {
+      "raw_rect_px": [
+       1418.2,
+       324.2,
+       1609.5,
+       441.3
+      ],
+      "grid_correction_dx_dy": [
+       1.34,
+       -3.33
+      ],
+      "x0y0x1y1": [
+       1419.5,
+       320.8,
+       1610.8,
+       437.9
+      ],
+      "samples": {
+       "left": [
+        1417.7,
+        1418.6
+       ],
+       "top": [
+        323.9,
+        324.0,
+        324.5,
+        324.3
+       ],
+       "right": [
+        1609.8,
+        1609.2
+       ],
+       "bottom": [
+        441.0,
+        440.8,
+        441.6,
+        441.7
+       ]
+      },
+      "grid_lines_seen_at": {
+       "x": {
+        "1450": 1447.78,
+        "1500": 1497.96,
+        "1550": 1548.45,
+        "1600": 1600.46
+       },
+       "y": {
+        "350": 352.73,
+        "400": 402.57,
+        "300": 304.59,
+        "450": 453.44
+       }
+      },
+      "method": "half-max crossings of the green/grey grid lines (drawn by our app) where BMW's box cuts them; corrected by the local offset of the same lines"
+     },
+     "photo11": {
+      "left": 1421.0,
+      "top": 320.0,
+      "note": "right and bottom edges have no contrast in 11 (our dark face both sides); 11 is a 4-point fix (P0), ~3 px at this corner"
+     },
+     "adopted": [
+      1419.5,
+      320.8,
+      1610.8,
+      437.9
+     ]
+    },
+    "visible_js": [
+     1420.0,
+     320.0,
+     1597.0,
+     440.0
+    ],
+    "delta_px_x0y0x1y1": [
+     -0.5,
+     0.8,
+     13.8,
+     -2.1
+    ],
+    "R_units": {
+     "dial": "C2",
+     "u0u1": [
+      -0.264,
+      0.307
+     ],
+     "v0v1": [
+      -0.177,
+      0.173
+     ],
+     "centre_r_R": 0.021,
+     "centre_cw12": 84.8
+    }
+   }
+  },
+  {
+   "id": "bmw.gear-letter",
+   "cluster": "C9",
+   "z": 101,
+   "kind": "mask",
+   "class": "dynamic",
+   "frame": "panel",
+   "x": 1398.4,
+   "y": 667.2,
+   "w": 23.0,
+   "h": 33.0,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "10_grid_over-stock.jpg",
+    "11_our-theme_on-car.jpg"
+   ],
+   "evidence": "strong",
+   "params": {
+    "notes": "BMW's own gear letter in the bottom row at the foot of the rev dial, always drawn over a custom theme (10, 11). Measured glyph box of 'P' (white, ~33 px tall). R/N/D/S/M are wider: keep a margin (visible.js has ~6 px).",
+    "measured": {
+     "photo10_raw": [
+      1396,
+      667,
+      1419,
+      700
+     ],
+     "photo10_grid_correction": [
+      2.38,
+      0.16
+     ],
+     "photo10": [
+      1398.4,
+      667.2,
+      1421.4,
+      700.2
+     ],
+     "photo11": [
+      1389,
+      659,
+      1414,
+      691
+     ],
+     "adopted": [
+      1398.4,
+      667.2,
+      1421.4,
+      700.2
+     ],
+     "glyph": "P (drawn white, ~33 px cap height); other gears (R, N, D, S, M) are wider than P: keep the visible.js margin",
+     "stock_position_08_09": [
+      1496,
+      324,
+      1544,
+      399
+     ],
+     "stock_position_09": [
+      1491,
+      325,
+      1546,
+      400
+     ]
+    },
+    "visible_js": [
+     1392.0,
+     664.0,
+     1428.0,
+     706.0
+    ],
+    "delta_px_x0y0x1y1": [
+     6.4,
+     3.2,
+     -6.6,
+     -5.8
+    ],
+    "R_units": {
+     "dial": "C2",
+     "u0u1": [
+      -0.327,
+      -0.259
+     ],
+     "v0v1": [
+      0.857,
+      0.956
+     ],
+     "centre_r_R": 0.953,
+     "centre_cw12": 197.9
+    }
+   }
+  },
+  {
+   "id": "bmw.belt-lamp",
+   "cluster": "C9",
+   "z": 102,
+   "kind": "mask",
+   "class": "dynamic",
+   "frame": "panel",
+   "x": 589.7,
+   "y": 664.9,
+   "w": 34.0,
+   "h": 49.0,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "08_stock_night_warnings-map.jpg",
+    "09_stock_map_day.jpg",
+    "10_grid_over-stock.jpg",
+    "11_our-theme_on-car.jpg"
+   ],
+   "evidence": "strong",
+   "params": {
+    "notes": "Driver's seat-belt telltale (red), drawn over our theme (11) and over our grid (10).",
+    "measured": {
+     "photo08_all_red_lamps_bottom_row": [
+      [
+       503,
+       676,
+       579,
+       714
+      ],
+      [
+       593,
+       662,
+       628,
+       713
+      ],
+      [
+       636,
+       662,
+       656,
+       688
+      ],
+      [
+       637,
+       662,
+       682,
+       713
+      ]
+     ],
+     "photo10_raw": [
+      [
+       593,
+       663,
+       627,
+       712
+      ]
+     ],
+     "photo10_grid_correction": [
+      -3.34,
+      1.95
+     ],
+     "photo10": [
+      [
+       589.7,
+       664.9,
+       623.7,
+       713.9
+      ]
+     ],
+     "photo11": [
+      [
+       609,
+       658,
+       643,
+       706
+      ]
+     ],
+     "adopted": [
+      589.7,
+      664.9,
+      623.7,
+      713.9
+     ]
+    },
+    "visible_js": [
+     587.0,
+     665.0,
+     626.0,
+     720.0
+    ],
+    "delta_px_x0y0x1y1": [
+     2.7,
+     -0.1,
+     -2.3,
+     -6.1
+    ],
+    "R_units": {
+     "dial": "C1",
+     "u0u1": [
+      0.53,
+      0.632
+     ],
+     "v0v1": [
+      0.85,
+      0.997
+     ],
+     "centre_r_R": 1.091,
+     "centre_cw12": 147.8
+    }
+   }
+  },
+  {
+   "id": "bmw.telltales-left",
+   "cluster": "C9",
+   "z": 103,
+   "kind": "mask",
+   "class": "dynamic",
+   "frame": "panel",
+   "x": 8,
+   "y": 214,
+   "w": 75,
+   "h": 216,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "08_stock_night_warnings-map.jpg",
+    "09_stock_map_day.jpg"
+   ],
+   "evidence": "weak",
+   "params": {
+    "notes": "Stock left lamp column (08, night with warnings): brake (red), tyre pressure, ABS, DSC (amber). Position strong (08 rect 1.8 px); whether BMW draws them over a CUSTOM theme is not observed (weak). The green light lamps further left are physical LEDs outside the panel.",
+    "lamps": [
+     {
+      "x0y0x1y1": [
+       20,
+       214,
+       83,
+       256
+      ],
+      "hue_deg": 10,
+      "colour": "red",
+      "area_px": 1869,
+      "R_units": {
+       "dial": "C1",
+       "u0u1": [
+        -1.17,
+        -0.982
+       ],
+       "v0v1": [
+        -0.496,
+        -0.37
+       ],
+       "centre_r_R": 1.16,
+       "centre_cw12": 291.9
+      },
+      "min_gap_to_bezel_px": 16.6
+     },
+     {
+      "x0y0x1y1": [
+       18,
+       269,
+       75,
+       315
+      ],
+      "hue_deg": 32,
+      "colour": "amber",
+      "area_px": 1127,
+      "R_units": {
+       "dial": "C1",
+       "u0u1": [
+        -1.176,
+        -1.006
+       ],
+       "v0v1": [
+        -0.331,
+        -0.194
+       ],
+       "centre_r_R": 1.122,
+       "centre_cw12": 283.5
+      },
+      "min_gap_to_bezel_px": 8.2
+     },
+     {
+      "x0y0x1y1": [
+       8,
+       328,
+       70,
+       370
+      ],
+      "hue_deg": 34,
+      "colour": "amber",
+      "area_px": 1792,
+      "R_units": {
+       "dial": "C1",
+       "u0u1": [
+        -1.206,
+        -1.021
+       ],
+       "v0v1": [
+        -0.155,
+        -0.03
+       ],
+       "centre_r_R": 1.117,
+       "centre_cw12": 274.8
+      },
+      "min_gap_to_bezel_px": 7.1
+     },
+     {
+      "x0y0x1y1": [
+       13,
+       382,
+       60,
+       430
+      ],
+      "hue_deg": 34,
+      "colour": "amber",
+      "area_px": 1432,
+      "R_units": {
+       "dial": "C1",
+       "u0u1": [
+        -1.191,
+        -1.051
+       ],
+       "v0v1": [
+        0.006,
+        0.149
+       ],
+       "centre_r_R": 1.124,
+       "centre_cw12": 266.0
+      },
+      "min_gap_to_bezel_px": 17.0
+     }
+    ]
+   }
+  },
+  {
+   "id": "bmw.telltales-right",
+   "cluster": "C9",
+   "z": 104,
+   "kind": "mask",
+   "class": "dynamic",
+   "frame": "panel",
+   "x": 1780,
+   "y": 184,
+   "w": 132,
+   "h": 137,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "08_stock_night_warnings-map.jpg",
+    "09_stock_map_day.jpg",
+    "10_grid_over-stock.jpg"
+   ],
+   "evidence": "weak",
+   "params": {
+    "notes": "Stock right column: AUTO H (green text), parking brake (P) (green in 09, amber in 08), steering warning (amber). AUTO H overlaps our rev-dial bezel by ~14 px if it is drawn over a custom theme (not observed: weak).",
+    "lamps": [
+     {
+      "x0y0x1y1": [
+       1780,
+       184,
+       1851,
+       209
+      ],
+      "hue_deg": 104,
+      "colour": "green",
+      "area_px": 1306,
+      "R_units": {
+       "dial": "C2",
+       "u0u1": [
+        0.812,
+        1.024
+       ],
+       "v0v1": [
+        -0.585,
+        -0.51
+       ],
+       "centre_r_R": 1.069,
+       "centre_cw12": 59.2
+      },
+      "min_gap_to_bezel_px": -13.7
+     },
+     {
+      "x0y0x1y1": [
+       1857,
+       186,
+       1876,
+       209
+      ],
+      "hue_deg": 102,
+      "colour": "green",
+      "area_px": 291,
+      "R_units": {
+       "dial": "C2",
+       "u0u1": [
+        1.042,
+        1.099
+       ],
+       "v0v1": [
+        -0.579,
+        -0.51
+       ],
+       "centre_r_R": 1.201,
+       "centre_cw12": 63.0
+      },
+      "min_gap_to_bezel_px": 53.6
+     },
+     {
+      "x0y0x1y1": [
+       1843,
+       222,
+       1906,
+       265
+      ],
+      "hue_deg": 18,
+      "colour": "amber",
+      "area_px": 1983,
+      "R_units": {
+       "dial": "C2",
+       "u0u1": [
+        1.0,
+        1.188
+       ],
+       "v0v1": [
+        -0.472,
+        -0.343
+       ],
+       "centre_r_R": 1.167,
+       "centre_cw12": 69.6
+      },
+      "min_gap_to_bezel_px": 19.2
+     },
+     {
+      "x0y0x1y1": [
+       1852,
+       270,
+       1912,
+       321
+      ],
+      "hue_deg": 14,
+      "colour": "amber",
+      "area_px": 1772,
+      "R_units": {
+       "dial": "C2",
+       "u0u1": [
+        1.027,
+        1.206
+       ],
+       "v0v1": [
+        -0.328,
+        -0.176
+       ],
+       "centre_r_R": 1.145,
+       "centre_cw12": 77.3
+      },
+      "min_gap_to_bezel_px": 14.0
+     }
+    ],
+    "lamps_09": [
+     {
+      "x0y0x1y1": [
+       1781,
+       183,
+       1853,
+       209
+      ],
+      "hue_deg": 102,
+      "colour": "green",
+      "area_px": 1528
+     },
+     {
+      "x0y0x1y1": [
+       1858,
+       184,
+       1878,
+       209
+      ],
+      "hue_deg": 104,
+      "colour": "green",
+      "area_px": 397
+     },
+     {
+      "x0y0x1y1": [
+       1844,
+       220,
+       1909,
+       264
+      ],
+      "hue_deg": 100,
+      "colour": "green",
+      "area_px": 2170
+     }
+    ]
+   }
+  },
+  {
+   "id": "bmw.telltales-bottom",
+   "cluster": "C9",
+   "z": 105,
+   "kind": "mask",
+   "class": "dynamic",
+   "frame": "panel",
+   "x": 503,
+   "y": 662,
+   "w": 179,
+   "h": 52,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "08_stock_night_warnings-map.jpg",
+    "10_grid_over-stock.jpg",
+    "11_our-theme_on-car.jpg"
+   ],
+   "evidence": "ok",
+   "params": {
+    "notes": "Stock bottom-row lamp group (08): rear-seat belts x 503-579, driver belt 593-628, passenger belt + airbag 636-682. Only the driver belt is observed over our theme (11); the others probably behave the same (same BMW layer): ok.",
+    "lamps": [
+     [
+      503,
+      676,
+      579,
+      714
+     ],
+     [
+      593,
+      662,
+      628,
+      713
+     ],
+     [
+      636,
+      662,
+      656,
+      688
+     ],
+     [
+      637,
+      662,
+      682,
+      713
+     ]
+    ]
+   }
+  },
+  {
+   "id": "bmw.bottom-row",
+   "cluster": "C9",
+   "z": 106,
+   "kind": "mask",
+   "class": "dynamic",
+   "frame": "panel",
+   "x": 131,
+   "y": 644,
+   "w": 1533,
+   "h": 62,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "08_stock_night_warnings-map.jpg",
+    "09_stock_map_day.jpg",
+    "11_our-theme_on-car.jpg"
+   ],
+   "evidence": "ok",
+   "params": {
+    "notes": "Stock bottom row text (range, clock, street / check-control, outside temperature). NOT drawn over a custom theme (11 shows only our own text there; in 10 our grid lines run over the temperature, i.e. it is under us). Only the gear letter and the lamps of this row come through.",
+    "groups_08": [
+     [
+      133,
+      665,
+      303,
+      699
+     ],
+     [
+      346,
+      664,
+      452,
+      698
+     ],
+     [
+      738,
+      644,
+      755,
+      679
+     ],
+     [
+      832,
+      661,
+      1107,
+      689
+     ],
+     [
+      1539,
+      667,
+      1664,
+      701
+     ]
+    ],
+    "groups_09": [
+     [
+      131,
+      665,
+      304,
+      699
+     ],
+     [
+      348,
+      664,
+      454,
+      698
+     ],
+     [
+      797,
+      666,
+      1124,
+      706
+     ],
+     [
+      1536,
+      668,
+      1664,
+      702
+     ]
+    ]
+   }
+  },
+  {
+   "id": "bmw.check-control",
+   "cluster": "C9",
+   "z": 107,
+   "kind": "mask",
+   "class": "dynamic",
+   "frame": "panel",
+   "x": 715,
+   "y": 601,
+   "w": 525,
+   "h": 89,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "08_stock_night_warnings-map.jpg"
+   ],
+   "evidence": "weak",
+   "params": {
+    "notes": "Stock check-control message panel (08: 'ready to drive: press the brake'). Whether it pops up over a custom theme is not observed in 10/11: weak. Keep it in mind for the window bottom (C5/C6) area."
+   }
+  },
+  {
+   "id": "bmw.map",
+   "cluster": "C9",
+   "z": 108,
+   "kind": "mask",
+   "class": "dynamic",
+   "frame": "panel",
+   "x": 592,
+   "y": 161,
+   "w": 711,
+   "h": 451,
+   "scale": 1.0,
+   "file": null,
+   "bytes_by_8wh": 0,
+   "sources": [
+    "08_stock_night_warnings-map.jpg",
+    "09_stock_map_day.jpg"
+   ],
+   "evidence": "ok",
+   "params": {
+    "notes": "Stock navigation map between the dials (08 night, 09 day): convex hull of the map lines. Not drawn over a custom theme (11, 10 shows it UNDER our transparent grid). Listed so the window (C5) is not taken for map space.",
+    "hull": [
+     [
+      1303,
+      250
+     ],
+     [
+      1281,
+      514
+     ],
+     [
+      1254,
+      580
+     ],
+     [
+      1203,
+      612
+     ],
+     [
+      718,
+      612
+     ],
+     [
+      612,
+      526
+     ],
+     [
+      592,
+      475
+     ],
+     [
+      592,
+      474
+     ],
+     [
+      602,
+      426
+     ],
+     [
+      680,
+      206
+     ],
+     [
+      845,
+      162
+     ],
+     [
+      885,
+      161
+     ],
+     [
+      974,
+      161
+     ],
+     [
+      1170,
+      162
+     ],
+     [
+      1172,
+      163
+     ],
+     [
+      1303,
+      246
+     ]
+    ]
+   }
+  }
+ ],
+ "composition": {
+  "images": [],
+  "layer_count": 0,
+  "bytes_by_8wh_total": 0
+ },
+ "open_questions": [
+  "shared/visible.js BLACK_BOX right edge is 1597; measured 1610.8 (+13.8 px). Proposal for the owner of shared/: [1420, 320, 1611, 440] (not edited: forbidden path).",
+  "Are the stock telltales (left column, right column incl. AUTO H, rear belts / airbag) drawn over a custom theme? Only the driver belt is observed (11). A photo of a custom theme with warnings lit would settle it.",
+  "Does the check-control panel (08: x 715-1240, y 601-690) appear over a custom theme?",
+  "P0's 08 rectification is degenerate (PANEL crop is a smear); C9 re-derived it from the 09 rect (482 SIFT inliers, 1.8 panel px)."
+ ]
+}

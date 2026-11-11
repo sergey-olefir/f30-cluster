@@ -1,0 +1,724 @@
+{
+ "cluster": "C7",
+ "package": "P5",
+ "mode": "all",
+ "R": 335,
+ "generator": "cd bake/src && $PY -m C7.build",
+ "layers": [
+  {
+   "id": "sign.speed-limit",
+   "cluster": "C7",
+   "z": 3.0,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 307,
+   "y": 462,
+   "w": 88,
+   "h": 89,
+   "scale": 1.0,
+   "file": "C7/sign.speed-limit.albedo.png",
+   "bytes_by_8wh": 62656,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "12_speedo_signs_overspeed-wedge.png"
+   ],
+   "evidence": "strong",
+   "light": {
+    "dir_deg": 0,
+    "key": 0
+   },
+   "fit": {
+    "ssim": 0.8041,
+    "dE2000_mean": 3.591,
+    "edge_px_err": 0.638,
+    "ref": "bake/work/rect/12_speedo_signs_overspeed-wedge.comfort.C1",
+    "roi": "mask:bake/work/C7/roi_sign_limit.png",
+    "sheet": "bake/work/C7/qc_sign.limit__12_speedo_signs_overspeed-wedge.comfort.C1.png"
+   },
+   "params": {
+    "centre_panel": [
+     350.92,
+     506.52
+    ],
+    "centre_dial_C1_R": [
+     -0.1823,
+     0.3777
+    ],
+    "r_out_R": 0.1248,
+    "r_in_R": 0.1012,
+    "r_out_px": 41.8,
+    "r_in_px": 33.9,
+    "field_over_out": 0.811,
+    "ring_rgb": [
+     217,
+     42,
+     14
+    ],
+    "field_rgb": [
+     238,
+     238,
+     238
+    ],
+    "photo_centre_panel": [
+     347.96,
+     504.73
+    ],
+    "ink_bbox_panel": [
+     309.12,
+     464.72,
+     83.6,
+     83.6
+    ],
+    "ink_bbox_dial_C1_R": {
+     "cluster": "C1",
+     "R_px": 335.0,
+     "u0": -0.3071,
+     "v0": 0.2529,
+     "u1": -0.0576,
+     "v1": 0.5024
+    },
+    "visibility": "dynamic (data-driven): only the artwork is baked",
+    "fit_note": "QC'd at the photo's measured centre; shipped tile is at the proposed level, symmetric centre",
+    "text_box_panel_2digits": [
+     332.42,
+     490.32,
+     37.0,
+     30.0
+    ],
+    "text_box_panel_3digits": [
+     323.92,
+     490.32,
+     54.0,
+     30.0
+    ],
+    "text_box_dial_C1_R_2digits": {
+     "cluster": "C1",
+     "R_px": 335.0,
+     "u0": -0.2376,
+     "v0": 0.3293,
+     "u1": -0.1271,
+     "v1": 0.4189
+    },
+    "text_box_dial_C1_R_3digits": {
+     "cluster": "C1",
+     "R_px": 335.0,
+     "u0": -0.2629,
+     "v0": 0.3293,
+     "u1": -0.1017,
+     "v1": 0.4189
+    },
+    "text": {
+     "cap_height_px": 30.0,
+     "cap_height_R": 0.0896,
+     "colour": [
+      0,
+      0,
+      0
+     ],
+     "centre_offset_px": [
+      0.0,
+      -1.2
+     ],
+     "font": "live text (Arimo Bold in the theme), not baked"
+    }
+   }
+  },
+  {
+   "id": "sign.no-overtaking",
+   "cluster": "C7",
+   "z": 3.1,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 429,
+   "y": 462,
+   "w": 88,
+   "h": 89,
+   "scale": 1.0,
+   "file": "C7/sign.no-overtaking.albedo.png",
+   "bytes_by_8wh": 62656,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "12_speedo_signs_overspeed-wedge.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0
+   },
+   "fit": {
+    "ssim": 0.7644,
+    "dE2000_mean": 5.561,
+    "edge_px_err": 0.63,
+    "ref": "bake/work/rect/12_speedo_signs_overspeed-wedge.comfort.C1",
+    "roi": "mask:bake/work/C7/roi_sign_noov.png",
+    "sheet": "bake/work/C7/qc_sign.noov__12_speedo_signs_overspeed-wedge.comfort.C1.png"
+   },
+   "params": {
+    "centre_panel": [
+     473.08,
+     506.52
+    ],
+    "centre_dial_C1_R": [
+     0.1823,
+     0.3777
+    ],
+    "r_out_R": 0.1248,
+    "r_in_R": 0.1012,
+    "r_out_px": 41.8,
+    "r_in_px": 33.9,
+    "field_over_out": 0.811,
+    "ring_rgb": [
+     217,
+     42,
+     14
+    ],
+    "field_rgb": [
+     238,
+     238,
+     238
+    ],
+    "photo_centre_panel": [
+     470.12,
+     508.31
+    ],
+    "ink_bbox_panel": [
+     431.28,
+     464.72,
+     83.6,
+     83.6
+    ],
+    "ink_bbox_dial_C1_R": {
+     "cluster": "C1",
+     "R_px": 335.0,
+     "u0": 0.0576,
+     "v0": 0.2529,
+     "u1": 0.3071,
+     "v1": 0.5024
+    },
+    "visibility": "dynamic (data-driven): only the artwork is baked",
+    "fit_note": "QC'd at the photo's measured centre; shipped tile is at the proposed level, symmetric centre",
+    "cars": {
+     "size_px": [
+      25.0,
+      19.5
+     ],
+     "centre_dx_px": [
+      -15.5,
+      15.5
+     ],
+     "left_rgb": [
+      214,
+      50,
+      41
+     ],
+     "right_rgb": [
+      22,
+      22,
+      24
+     ],
+     "photo_dx_px": [
+      -16.1,
+      14.9
+     ]
+    }
+   }
+  },
+  {
+   "id": "mini.fuel-pump",
+   "cluster": "C7",
+   "z": 5.6,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 85,
+   "y": 567,
+   "w": 27,
+   "h": 22,
+   "scale": 1.0,
+   "file": "C7/mini.fuel-pump.albedo.png",
+   "bytes_by_8wh": 4752,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "04_comfort_whole-cluster_mph.png",
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0
+   },
+   "params": {
+    "ink_bbox_panel": [
+     87.61,
+     569.5,
+     21.85,
+     17.25
+    ],
+    "ink_bbox_dial_C3_R": {
+     "cluster": "C3",
+     "R_px": 70.0,
+     "u0": 0.1087,
+     "v0": -0.8357,
+     "u1": 0.4209,
+     "v1": -0.5893
+    },
+    "fit_search": {
+     "ncc": 0.7992,
+     "dx": -0.5,
+     "dy": -2.5,
+     "scale": 1.15,
+     "rot": 0.0,
+     "x": 88.53,
+     "y": 569.5
+    }
+   },
+   "fit": {
+    "ssim": 0.3548,
+    "dE2000_mean": 9.068,
+    "edge_px_err": 2.398,
+    "ref": "bake/work/rect/17_physical-cluster_full.comfort.C3",
+    "roi": "box:82:564:33:28",
+    "sheet": "bake/work/C7/qc_mini.fuel-pump+face__17_physical-cluster_full.comfort.C3.png",
+    "qc_background_rgb": [
+     73.0,
+     73.0,
+     71.0
+    ]
+   }
+  },
+  {
+   "id": "mini.oil-can",
+   "cluster": "C7",
+   "z": 5.6,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1814,
+   "y": 570,
+   "w": 29,
+   "h": 19,
+   "scale": 1.0,
+   "file": "C7/mini.oil-can.albedo.png",
+   "bytes_by_8wh": 4408,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "04_comfort_whole-cluster_mph.png",
+    "07_physical-cluster_all-lamps-lit.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0
+   },
+   "params": {
+    "ink_bbox_panel": [
+     1816.89,
+     572.98,
+     23.15,
+     14.0
+    ],
+    "ink_bbox_dial_C4_R": {
+     "cluster": "C4",
+     "R_px": 70.0,
+     "u0": -0.3301,
+     "v0": -0.786,
+     "u1": 0.0006,
+     "v1": -0.586
+    },
+    "fit_search": {
+     "ncc": 0.6642,
+     "dx": 1.0,
+     "dy": 0.0,
+     "scale": 1.0,
+     "rot": 0.0,
+     "x": 1816.99,
+     "y": 572.98
+    }
+   },
+   "fit": {
+    "ssim": 0.4832,
+    "dE2000_mean": 8.817,
+    "edge_px_err": 1.339,
+    "ref": "bake/work/rect/04_comfort_whole-cluster_mph.comfort.C4",
+    "roi": "box:1811:567:35:25",
+    "sheet": "bake/work/C7/qc_mini.oil-can+face__04_comfort_whole-cluster_mph.comfort.C4.png",
+    "qc_background_rgb": [
+     0.0,
+     1.0,
+     3.0
+    ]
+   }
+  },
+  {
+   "id": "mini.coolant",
+   "cluster": "C7",
+   "z": 5.7,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1811,
+   "y": 565,
+   "w": 32,
+   "h": 28,
+   "scale": 1.0,
+   "file": "C7/mini.coolant.albedo.png",
+   "bytes_by_8wh": 7168,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "02_three-modes_clean-render.png"
+   ],
+   "evidence": "weak",
+   "light": {
+    "dir_deg": 0,
+    "key": 0
+   },
+   "params": {
+    "ink_bbox_panel": [
+     1813.58,
+     567.97,
+     26.9,
+     22.45
+    ],
+    "ink_bbox_dial_C4_R": {
+     "cluster": "C4",
+     "R_px": 70.0,
+     "u0": -0.3774,
+     "v0": -0.8576,
+     "u1": 0.0069,
+     "v1": -0.5369
+    },
+    "fit_search": {
+     "ncc": 0.6614,
+     "dx": -0.5,
+     "dy": -2.0,
+     "scale": 1.0,
+     "rot": 0.0,
+     "x": 1813.53,
+     "y": 567.97
+    }
+   },
+   "fit": {
+    "ssim": 0.4381,
+    "dE2000_mean": 12.332,
+    "edge_px_err": 1.047,
+    "ref": "bake/work/rect/02_three-modes_clean-render.comfort.C4",
+    "roi": "box:1808:562:38:34",
+    "sheet": "bake/work/C7/qc_mini.coolant+face__02_three-modes_clean-render.comfort.C4.png",
+    "qc_background_rgb": [
+     1.0,
+     2.0,
+     6.0
+    ]
+   }
+  },
+  {
+   "id": "edyn.battery",
+   "cluster": "C7",
+   "z": 5.6,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 1295,
+   "y": 585,
+   "w": 50,
+   "h": 47,
+   "scale": 1.0,
+   "file": "C7/edyn.battery.albedo.png",
+   "bytes_by_8wh": 18800,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "17_physical-cluster_full.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0
+   },
+   "params": {
+    "ink_bbox_panel": [
+     1297.89,
+     587.0,
+     45.11,
+     42.79
+    ],
+    "ink_bbox_dial_C2_R": {
+     "cluster": "C2",
+     "R_px": 335.0,
+     "u0": -0.6272,
+     "v0": 0.6179,
+     "u1": -0.4925,
+     "v1": 0.7456
+    },
+    "fit_search": {
+     "ncc": 0.7597,
+     "dx": 1.0,
+     "dy": -1.5,
+     "scale": 1.05,
+     "rot": 36.3,
+     "x": 1321.5,
+     "y": 607.3
+    },
+    "centre_dial_C2": {
+     "r_R": 0.8822,
+     "cw12_deg": 219.39
+    },
+    "rotation_note": "upright artwork rotated cw by fit_search.rot deg: its top faces the dial centre (tangent to the arc)"
+   },
+   "fit": {
+    "ssim": 0.4542,
+    "dE2000_mean": 13.027,
+    "edge_px_err": 1.475,
+    "ref": "bake/work/rect/17_physical-cluster_full.comfort.C2",
+    "roi": "box:1292:582:56:53",
+    "sheet": "bake/work/C7/qc_edyn.battery+face__17_physical-cluster_full.comfort.C2.png",
+    "qc_background_rgb": [
+     18.0,
+     26.0,
+     53.0
+    ]
+   }
+  },
+  {
+   "id": "bar.range",
+   "cluster": "C7",
+   "z": 5.6,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 892,
+   "y": 642,
+   "w": 61,
+   "h": 39,
+   "scale": 1.0,
+   "file": "C7/bar.range.albedo.png",
+   "bytes_by_8wh": 19032,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0
+   },
+   "params": {
+    "ink_bbox_panel": [
+     894.68,
+     644.5,
+     55.88,
+     33.6
+    ],
+    "ink_bbox_window_frame_px": [
+     174.68,
+     565.5,
+     55.88,
+     33.6
+    ],
+    "placement_note": "measured in the 17 PANEL crop (window transform); the 6WB dial spacing differs from ours, so the x position in the bar is P4's call - the size and shape are the fit",
+    "fit_search": {
+     "ncc": 0.8103,
+     "dx": -1.0,
+     "dy": -0.5,
+     "scale": 1.05,
+     "rot": 0.0,
+     "x": 895.0,
+     "y": 644.5
+    }
+   },
+   "fit": {
+    "ssim": 0.4639,
+    "dE2000_mean": 13.022,
+    "edge_px_err": 1.736,
+    "ref": "bake/work/rect/17_physical-cluster_full.comfort.PANEL",
+    "roi": "box:889:639:67:45",
+    "sheet": "bake/work/C7/qc_bar.range+face__17_physical-cluster_full.comfort.PANEL.png",
+    "qc_background_rgb": [
+     12.0,
+     11.0,
+     30.0
+    ]
+   }
+  },
+  {
+   "id": "bar.warning",
+   "cluster": "C7",
+   "z": 5.7,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 675,
+   "y": 647,
+   "w": 33,
+   "h": 32,
+   "scale": 1.0,
+   "file": "C7/bar.warning.albedo.png",
+   "bytes_by_8wh": 8448,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "17_physical-cluster_full.png",
+    "07_physical-cluster_all-lamps-lit.png"
+   ],
+   "evidence": "ok",
+   "light": {
+    "dir_deg": 0,
+    "key": 0
+   },
+   "params": {
+    "ink_bbox_panel": [
+     677.5,
+     649.5,
+     28.35,
+     27.09
+    ],
+    "ink_bbox_window_frame_px": [
+     -42.5,
+     570.5,
+     28.35,
+     27.09
+    ],
+    "placement_note": "measured in the 17 PANEL crop (window transform); the 6WB dial spacing differs from ours, so the x position in the bar is P4's call - the size and shape are the fit",
+    "fit_search": {
+     "ncc": 0.8021,
+     "dx": -3.5,
+     "dy": -2.5,
+     "scale": 1.05,
+     "rot": 0.0,
+     "x": 677.5,
+     "y": 649.5
+    },
+    "visibility": "dynamic (check-control state); artwork only"
+   },
+   "fit": {
+    "ssim": 0.4298,
+    "dE2000_mean": 13.33,
+    "edge_px_err": 1.684,
+    "ref": "bake/work/rect/17_physical-cluster_full.comfort.PANEL",
+    "roi": "box:672:644:39:38",
+    "sheet": "bake/work/C7/qc_bar.warning+face__17_physical-cluster_full.comfort.PANEL.png",
+    "qc_background_rgb": [
+     26.0,
+     5.0,
+     17.0
+    ]
+   }
+  },
+  {
+   "id": "bar.warning-amber",
+   "cluster": "C7",
+   "z": 5.71,
+   "kind": "albedo",
+   "class": "baked",
+   "frame": "panel",
+   "x": 675,
+   "y": 647,
+   "w": 33,
+   "h": 32,
+   "scale": 1.0,
+   "file": "C7/bar.warning-amber.albedo.png",
+   "bytes_by_8wh": 8448,
+   "stack_below": [],
+   "stack_above": [],
+   "sources": [
+    "07_physical-cluster_all-lamps-lit.png"
+   ],
+   "evidence": "weak",
+   "light": {
+    "dir_deg": 0,
+    "key": 0
+   },
+   "params": {
+    "ink_bbox_panel": [
+     677.5,
+     649.5,
+     28.35,
+     27.09
+    ],
+    "ink_bbox_window_frame_px": [
+     -42.5,
+     570.5,
+     28.35,
+     27.09
+    ],
+    "placement_note": "measured in the 17 PANEL crop (window transform); the 6WB dial spacing differs from ours, so the x position in the bar is P4's call - the size and shape are the fit",
+    "visibility": "dynamic (check-control state); artwork only"
+   },
+   "fit": {
+    "ssim": 0.3567,
+    "dE2000_mean": 16.182,
+    "edge_px_err": 2.516,
+    "ref": "bake/work/rect/07_physical-cluster_all-lamps-lit.comfort.PANEL",
+    "roi": "box:657:654:39:38",
+    "sheet": "bake/work/C7/qc_bar.warning-amber+face__07_physical-cluster_all-lamps-lit.comfort.PANEL.png",
+    "qc_background_rgb": [
+     39.0,
+     26.0,
+     20.0
+    ],
+    "fit_search_07": {
+     "ncc": 0.8011,
+     "dx": -4.0,
+     "dy": -4.0,
+     "scale": 1.05,
+     "rot": 0.0,
+     "x": 662.0,
+     "y": 659.0
+    }
+   }
+  }
+ ],
+ "composition": {
+  "images": [
+   {
+    "file": "C7/sign.speed-limit.albedo.png",
+    "from_ids": [
+     "sign.speed-limit"
+    ],
+    "x": 307,
+    "y": 462,
+    "w": 88,
+    "h": 89,
+    "scale": 1.0,
+    "bytes_by_8wh": 62656
+   },
+   {
+    "file": "C7/sign.no-overtaking.albedo.png",
+    "from_ids": [
+     "sign.no-overtaking"
+    ],
+    "x": 429,
+    "y": 462,
+    "w": 88,
+    "h": 89,
+    "scale": 1.0,
+    "bytes_by_8wh": 62656
+   }
+  ],
+  "layer_count": 2,
+  "bytes_by_8wh_total": 125312,
+  "notes": "Signs: 2 own image layers (independent visibility), or 0 extra layers if WBSIGN stays the one procedural effect layer with the new numbers (recommended: same look, one layer, 0 bytes). Pictograms: no own layers - merge mini.fuel-pump into the C3 mini albedo (P3), mini.oil-can (or mini.coolant) into C4, edyn.battery into the C6 EfficientDynamics arc image, bar.range into the bottom-bar image (P4). bar.warning is check-control state: draw it only if the theme shows its own check-control (BMW already draws telltales on the G20). All C7 files together: 196368 bytes."
+ },
+ "open_questions": [
+  "Signs: ship at the photo's centres (dx -3 px, the pair tilted 1.7 deg, as 12 shows after P0's roll fix) or level and symmetric about the hub (proposed, used for the files)? P0 levelled 12 on the floor edge; the signs then tilt by exactly the applied roll (-1.7 deg), so the roll fix may be wrong for this photo.",
+  "Signs: keep WBSIGN procedural with the new numbers (1 layer, 0 bytes) or use the two PNGs (2 layers)? Recommended: WBSIGN with r 41.8 px (0.1248 R), field 0.811, centres +-61.08 px (+-0.1823 R), 0.3777 R below the hub, and the car shape from icons.car().",
+  "Speed-limit figure: cap height 30 px (0.0896 R), 2 digits 37 px wide; 3-digit limits (100-130) need a condensed font or ~0.85 size to fit the 54 px box.",
+  "Mini pictograms overlap P3's scope (C3/C4 pictograms as vectors): the lead should keep one set. Ours are fitted to 17 (fuel) and 04 (oil); 17 is bloomed, so its pump fits 15% larger than 04's.",
+  "C4 shows oil temperature in every photo except the 02 render (coolant). Which does the theme need? Both are delivered.",
+  "02 C3 shows a reserve pictogram at the bottom right and 02 C4 a blue 'cold' wave; 17/04 show the text '0' there instead. Not drawn (02 only, weak).",
+  "bar.warning: BMW's own check-control/telltales already show on the G20; draw ours only if the theme has its own check-control row.",
+  "Seat belt: drawn (bake/work/C7/unshipped/) but not shipped, because BMW draws its belt lamp over our panel (x 587-626, y 665-720)."
+ ],
+ "notes": "Generic shapes fitted to the photos' proportions; no BMW artwork traced, no fonts. SVG twins in C7/svg/."
+}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="27" height="22" viewBox="0 0 27 22">
+  <title>Fuel pump with the filler-side triangle (fuel mini gauge)</title>
+  <defs>
+  <mask id="cut1" maskUnits="userSpaceOnUse" x="0" y="0" width="27" height="22"><rect width="27" height="22" fill="#fff"/><rect x="5.48" y="4.57" width="5.17" height="3.68" rx="0.46" fill="#000"/></mask>
+  </defs>
+  <g mask="url(#cut1)">
+  <rect x="3.53" y="2.5" width="9.89" height="17.25" rx="1.49" fill="#ececec"/>
+  <rect x="2.61" y="17.91" width="11.73" height="1.84" rx="0.46" fill="#ececec"/>
+  </g>
+  <polyline points="12.73,5.26 16.64,7.79 16.64,15.15 15.49,16.53 14.34,15.15 14.34,11.7" fill="none" stroke-width="1.72" stroke-linecap="round" stroke-linejoin="round" stroke="#ececec"/>
+  <polygon points="19.86,7.1 24.46,10.55 19.86,14" fill="#ececec"/>
+</svg>

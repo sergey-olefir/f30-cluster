@@ -1,0 +1,6 @@
+{
+ "_doc": "Per image stem / mode overrides read by align.py: needle_<cluster> = needle angle (cw12 deg) where the auto detector (red-ness / brightness ray) fails (Sport, Eco Pro); roll (deg) if the two-dial line is not usable.",
+ "01_three-modes_small": {"eco": {"needle_C1": 230, "needle_C2": 230}, "sport": {"needle_C1": 230, "needle_C2": 230}},
+ "02_three-modes_clean-render": {"eco": {"needle_C1": 230, "needle_C2": 230}, "sport": {"needle_C1": 230, "needle_C2": 229}},
+ "03_three-modes_photo_bimmerstop": {"eco": {"needle_C1": 230, "needle_C2": 0}, "sport": {"needle_C1": 230, "needle_C2": 282.6}}
+}
