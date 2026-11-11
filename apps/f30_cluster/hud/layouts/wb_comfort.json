@@ -52,7 +52,16 @@
       "gain": [
         0.24,
         604
-      ]
+      ],
+      "hole": [
+        668,
+        140,
+        584,
+        462
+      ],
+      "holeWhen": "stockMap",
+      "holeInset": 0,
+      "holeRadius": 22
     },
     {
       "id": "speedo",

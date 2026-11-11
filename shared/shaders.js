@@ -1345,6 +1345,8 @@ uniform vec4 u_r1;
 uniform vec4 u_r2;
 uniform vec2 u_win;       // the baked window's level (a gain), applied above this y (the bar below keeps its own)
 uniform float u_hasTex;
+uniform vec4 u_hole;      // a see-through window for BMW's own map under us: x, y, w, h (w 0: none)
+uniform float u_holeR;    // its corner radius
 
 const float PI = 3.14159265359;
 
@@ -1434,7 +1436,15 @@ void main() {
         vec3 sc = ds < u_sign.z * 0.79 ? vec3(0.95, 0.95, 0.94) : vec3(0.84, 0.05, 0.07);
         col = mix(col, sc, clamp(u_sign.z + 0.5 - ds, 0.0, 1.0));
     }
-    gl_FragColor = vec4(min(col, vec3(1.0)), 1.0);
+    float alpha = 1.0;
+    if (u_hole.z > 0.0) {
+        // BMW's map shows through: a rounded box, a soft 1.5 px edge, a thin lit rim round it
+        vec2 hc = u_hole.xy + u_hole.zw * 0.5, hq = abs(p - hc) - (u_hole.zw * 0.5 - vec2(u_holeR));
+        float sd = length(max(hq, 0.0)) + min(max(hq.x, hq.y), 0.0) - u_holeR;
+        alpha = smoothstep(-1.5, 0.5, sd);
+        col = mix(col, vec3(0.22, 0.26, 0.33), clamp(1.6 - abs(sd - 1.0), 0.0, 1.0) * 0.8);
+    }
+    gl_FragColor = vec4(min(col, vec3(1.0)), alpha);
 }
 `;
 

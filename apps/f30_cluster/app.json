@@ -107,6 +107,10 @@
           "6WB Comfort"
         ],
         [
+          "wb_comfort_map",
+          "6WB Comfort + BMW map"
+        ],
+        [
           "wb_sport",
           "6WB Sport"
         ],
@@ -141,6 +145,12 @@
       "default": true
     },
     {
+      "key": "stockMap",
+      "label": "BMW's map in the middle (Comfort)",
+      "type": "bool",
+      "default": false
+    },
+    {
       "key": "inComfort",
       "label": "In Comfort",
       "type": "choice",
@@ -153,6 +163,10 @@
         [
           "wb_comfort",
           "6WB Comfort"
+        ],
+        [
+          "wb_comfort_map",
+          "6WB Comfort + BMW map"
         ],
         [
           "wb_sport",
@@ -183,6 +197,10 @@
           "6WB Comfort"
         ],
         [
+          "wb_comfort_map",
+          "6WB Comfort + BMW map"
+        ],
+        [
           "wb_sport",
           "6WB Sport"
         ],
@@ -209,6 +227,10 @@
         [
           "wb_comfort",
           "6WB Comfort"
+        ],
+        [
+          "wb_comfort_map",
+          "6WB Comfort + BMW map"
         ],
         [
           "wb_sport",
