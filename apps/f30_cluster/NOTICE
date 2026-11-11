@@ -1,0 +1,12 @@
+F30 Cluster is built from these parts; their licences stay with them.
+
+- bimmer-lab/apps (MIT): the drawing engine in shared/, the bench, the layout format, the font baking tools and
+  the fonts copied into hud/fonts (Barlow, Michroma, Orbitron: SIL Open Font License; see the NOTICE of
+  bimmer-lab's cluster_themes app).
+- cauliflowermossgrape/idrive7-apps (MIT): the MGU App Kit in kit/.
+- robertnisipeanu/idrive-apps: cluster-render, the service and the client protocol the engine draws through
+  (client MPL-2.0, service GPL-3.0). Not included here; installed from its Store source.
+- Arimo (SIL Open Font License 1.1, tools/fonts-src/Arimo-OFL.txt): the 6WB-style layouts' type.
+
+The 6WB-style gauges, backdrop and layouts are original drawings made after photographs; they use no BMW artwork,
+fonts or code. "BMW" and "6WB" name the car and its display and imply no endorsement.
