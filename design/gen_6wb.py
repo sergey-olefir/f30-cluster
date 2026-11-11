@@ -31,7 +31,7 @@ RPM_START, RPM_PER = 250.5, 32.1          # degrees; per 1000 rpm
 RPM_MAX = 7500
 RPM_SWEEP = RPM_PER * RPM_MAX / 1000.0
 RPM_OFF = 20.5                # degrees before 0 where the needle parks (OFF)
-SIGN = (960, 185, 62)         # the speed limit sign: centre x, y and radius, in the middle window
+SIGN_DY = 0.36              # the road signs under the speed dial's hub, this many R below its centre
 GEARBOX = (1410, 686, 170, 58)  # centre x, y, w, h: under BMW's gear letter (x 1392-1428, y 664-706)
 
 def text(id, cx, cy, w, t, font, color="fg", align="center", conn=0, **kw):
@@ -89,8 +89,7 @@ def minis():
 def comfort():
     W = [
         {"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
-         "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "comfort", "color": "accent",
-         "sign": list(SIGN)},
+         "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "comfort", "color": "accent"},
         dial("speedo", SP, "comfort", ringW=10, measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
              start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "comfort", ringW=10, measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
@@ -113,8 +112,10 @@ def comfort():
         icon("range_icon", "fuel", SP[0] - 70, SP[1] + 0.60 * R, 1, "fg"),
         text("range_in", SP[0] + 12, SP[1] + 0.60 * R, 130, "{{range}} km", "wb_cap", conn=1),
     ]
-    # the speed limit: the figure on the backdrop's sign (both hide when the car gives no limit)
-    W.append(text("limit", SIGN[0], SIGN[1], 96, "{{limit}}", "wb_gear", "ink", conn=2))   # conn 2: the first connection is at 7 of its 8 layers
+    # the road signs under the speed dial's hub: the limit (its figure is text on the sign) and no overtaking
+    sy = SP[1] + SIGN_DY * R
+    W.append({"id": "signs", "type": "wbsign", "class": "content", "z": 3, "x": SP[0] - 100, "y": int(sy) - 42, "w": 200, "h": 84, "conn": 1})
+    W.append(text("limit", SP[0] - 48, sy, 60, "{{limit}}", "wb_spd", "ink", conn=2))
     # the row at the middle window's foot
     for i, (head, tok, x) in enumerate([("Time", "{{time}}", 742), ("Range", "{{range}} km", 890), ("Temp", "{{ambient}} °C", 1048)]):
         W += [text("row_h%d" % i, x, 612, 150, head, "wb_cap", "dim", align="left"),

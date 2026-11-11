@@ -1024,6 +1024,7 @@ uniform float u_minor;
 uniform float u_redFrom;
 uniform float u_redTo;
 uniform float u_coldTo;
+uniform vec2 u_over;      // the red over-speed band: from, to (fractions of the sweep); from < 0: none
 uniform float u_pre;
 uniform float u_box;
 uniform float u_flip;
@@ -1089,21 +1090,45 @@ void main() {
     if (u_style < 0.5) {
         // ---- Comfort
         float r1 = 0.51 * R, r2 = 0.36 * R, fl = 0.26 * R;
+        float rbz = R - u_ringW;
+        vec2 nn = p / max(d, 0.001);
+        float lit = 0.5 + 0.5 * dot(nn, vec2(-0.6, 0.8));              // 1 on the side facing the light (upper left)
+        // the face: a faint lift toward the middle, and the shadow the bezel casts inside it
+        col = u_face + vec3(0.026, 0.030, 0.040) + vec3(0.020, 0.022, 0.030) * lit * (1.0 - d / R);
+        if (d < rbz) col *= 1.0 - 0.7 * exp(-(rbz - d) / (0.032 * R));
+        // the inner discs: convex, lighter on the lit side, with a soft shadow outside the edge
         if (d < r1) {
-            float g = clamp(0.5 + pd / (2.0 * r1), 0.0, 1.0);        // 0 at the top .. 1 at the bottom
-            col = vec3(0.024, 0.028, 0.036) + vec3(0.034, 0.038, 0.046) * g;
-            if (pd > fl) col = vec3(0.008, 0.010, 0.014) + vec3(0.022, 0.024, 0.030) * clamp((pd - fl) / (0.25 * R), 0.0, 1.0);
+            float g = clamp(0.5 + pd / (2.0 * r1), 0.0, 1.0);          // 0 at the top .. 1 at the bottom
+            col = vec3(0.046, 0.053, 0.070) + vec3(0.016, 0.018, 0.024) * (1.0 - g);
+            col += vec3(0.030, 0.034, 0.044) * lit * smoothstep(0.35 * r1, r1, d);
+            if (pd > fl) col = vec3(0.016, 0.019, 0.026) + vec3(0.020, 0.022, 0.028) * clamp((pd - fl) / (0.25 * R), 0.0, 1.0);
             col = mix(col, vec3(0.20, 0.22, 0.26), clamp(1.2 - abs(pd - fl), 0.0, 1.0) * 0.8);       // the floor's edge
-            if (pd < fl) col = mix(col, vec3(0.12, 0.13, 0.155), ringAt(d, r2, 1.4));
+            if (pd < fl) {
+                col = mix(col, vec3(0.12, 0.13, 0.155) * (0.5 + 0.9 * lit), ringAt(d, r2, 1.4));
+                col *= 1.0 - 0.25 * exp(-abs(d - r2) / (0.02 * R)) * (1.0 - lit);
+            }
+        } else {
+            col *= 1.0 - 0.42 * exp(-(d - r1) / (0.03 * R)) * (0.45 + 0.55 * (1.0 - lit));
         }
-        col = mix(col, vec3(0.21, 0.23, 0.27), ringAt(d, r1, 1.6));
+        col = mix(col, vec3(0.30, 0.33, 0.39) * (0.30 + 0.90 * lit), ringAt(d, r1, 1.6) * 0.9);
         float to = 0.905 * R;                                         // the ticks' outer end
+        // the red zone: a band at the ticks and a soft fill inside it
+        if (inSweep && u_redFrom <= 1.0 && frac >= u_redFrom && d > 0.74 * R && d < to) {
+            col = mix(col, u_red * 0.9, 0.6 * smoothstep(0.74 * R, 0.88 * R, d));
+        }
         if (inSweep && u_redFrom <= 1.0 && frac >= u_redFrom && d > 0.862 * R && d < to) col = u_red;
+        // over the limit: a red wedge from the limit to the needle, inside the ticks
+        if (u_over.x >= 0.0 && inSweep && frac >= u_over.x && frac <= u_over.y && d > 0.64 * R && d < 0.905 * R) {
+            col = mix(col, u_red * 0.85, 0.8 * smoothstep(0.64 * R, 0.80 * R, d));
+        }
         if (onTick) {
             float ti = major ? 0.82 * R : (midT ? 0.85 * R : 0.872 * R);
             float wid = major ? 0.0088 * R : (midT ? 0.0050 * R : 0.0030 * R);
             vec3 tc = major || midT ? u_tick : u_tick * 0.62;
-            col = mix(col, tc, clamp(0.5 - (seg(p, tdir * ti, tdir * to) - wid), 0.0, 1.0));
+            float dd = seg(p, tdir * ti, tdir * to) - wid;
+            float tk = clamp(0.5 - dd, 0.0, 1.0);
+            col += tc * 0.20 * exp(-max(dd, 0.0) / 2.6) * (1.0 - tk);          // a soft glow round the tick
+            col = mix(col, tc, tk);
         }
         if (u_pre > 0.0) {                                            // the arc back to OFF and its mark
             float back = mod(u_start - a + 4.0 * PI, 2.0 * PI);
@@ -1112,28 +1137,32 @@ void main() {
             vec2 od = vec2(sin(oa), cos(oa));
             col = mix(col, u_tick, clamp(0.5 - (seg(p, od * 0.862 * R, od * to) - 0.0042 * R), 0.0, 1.0));
         }
-        if (u_box > 0.5) {                                            // the gear's box: flat on top, the dial's curve below
-            float yt = 0.535 * R + max(0.0, abs(p.x) - 0.16 * R) * 0.9;
-            float dT = pd - yt, dA = 0.70 * R - d;
-            float inb = clamp(min(dT, dA), 0.0, 1.0);
-            vec3 bx = mix(vec3(0.090, 0.096, 0.108), vec3(0.030, 0.033, 0.040), clamp(dT / (0.16 * R), 0.0, 1.0));
-            bx = mix(bx, vec3(0.62, 0.66, 0.72), clamp(1.7 - dT, 0.0, 1.0));
-            bx = mix(bx, vec3(0.30, 0.32, 0.37), clamp(1.5 - dA, 0.0, 1.0));
-            col = mix(col, bx, inb);
-        }
-        float hr = 0.135 * R;                                         // the hub: a glowing red ring
-        if (d < hr) col = mix(vec3(0.11, 0.010, 0.008), vec3(0.035, 0.0, 0.0), d / hr);
-        col += u_needle * 0.50 * exp(-abs(d - hr) / (0.020 * R));
-        col = mix(col, u_needle, ringAt(d, hr, 0.015 * R));
+        // the hub: a dark well, a glowing red ring with a dark red fill
+        float hr = 0.135 * R;
+        col *= 1.0 - 0.5 * smoothstep(hr * 2.4, hr * 1.2, d);
+        if (d < hr) col = mix(vec3(0.15, 0.012, 0.010), vec3(0.030, 0.0, 0.0), d / hr) + vec3(0.07, 0.0, 0.0) * lit;
+        col += u_needle * 0.55 * exp(-abs(d - hr) / (0.022 * R));
+        col = mix(col, u_needle * (0.72 + 0.5 * lit), ringAt(d, hr, 0.017 * R));
+        // the needle: first its shadow on the face, moved down and right, soft
         float L = 0.925 * R, T = -0.20 * R;
+        vec2 ps = p - vec2(0.012 * R, -0.020 * R);
+        vec2 qs = vec2(dot(ps, vec2(nd.y, -nd.x)), dot(ps, nd));
+        if (qs.y > T && qs.y < L) {
+            float hws = qs.y < 0.0 ? 0.024 * R : mix(0.024 * R, 0.0085 * R, qs.y / L);
+            col *= 1.0 - 0.7 * smoothstep(hws + 0.018 * R, hws - 0.002 * R, abs(qs.x));
+        }
+        // then the blade: red, a white stripe along it, darker on the shadow side, a white tip, a red glow
         if (q.y > T && q.y < L) {
-            float hw = q.y < 0.0 ? 0.017 * R : mix(0.017 * R, 0.0062 * R, q.y / L);
+            float hw = q.y < 0.0 ? 0.024 * R : mix(0.024 * R, 0.0085 * R, q.y / L);
             float ax = abs(q.x);
-            float gl = clamp(1.0 - ax / (0.055 * R), 0.0, 1.0);
-            col += u_needle * 0.34 * gl * gl;
-            vec3 nc = mix(vec3(1.0, 0.87, 0.82), u_needle, smoothstep(hw * 0.22, hw * 0.62, ax));
-            if (q.y > 0.875 * R) nc = vec3(1.0);
-            col = mix(col, nc, clamp(hw + 0.5 - ax, 0.0, 1.0));
+            float gl = clamp(1.0 - ax / (0.060 * R), 0.0, 1.0);
+            col += u_needle * 0.30 * gl * gl;
+            vec3 body = u_needle * (0.76 + 0.36 * smoothstep(hw, 0.0, ax));
+            body *= 1.0 - 0.30 * smoothstep(0.1 * hw, hw, q.x);
+            float st = abs(q.x + 0.30 * hw);
+            body = mix(body, vec3(1.0, 0.93, 0.90), smoothstep(0.28 * hw, 0.06 * hw, st) * 0.95);
+            body = mix(body, vec3(1.0), smoothstep(0.90 * L, L, q.y) * 0.9);
+            col = mix(col, body, clamp(hw + 0.5 - ax, 0.0, 1.0));
         }
     } else if (u_style < 1.5) {
         // ---- Sport
@@ -1344,6 +1373,49 @@ void main() {
     col = mix(col, vec3(0.30, 0.32, 0.37), clamp(1.8 - (hw - ax), 0.0, 1.0) * 0.8);        // side lines
     col = mix(col, vec3(0.52, 0.56, 0.62), clamp(1.6 - abs(p.y - bl), 0.0, 1.0));          // bottom edge
     gl_FragColor = vec4(col, aa);
+}
+`;
+
+const WBSIGN = `// The 6WB-style road signs in one cluster-render "effect" layer (GLSL ES 1.00), under the speed dial's hub: the
+// speed limit sign (white field, red ring; its figure is a text widget on top) on the left and the no-overtaking sign
+// (two cars, the left one red) on the right. u_show.x / u_show.y turn each on. Our own drawing, not BMW's.
+precision mediump float;
+varying vec2 v_uv;
+uniform vec2 u_size;
+uniform vec2 u_show;
+
+const vec3 RED = vec3(0.84, 0.05, 0.07);
+
+float disc(vec2 p, vec2 c, float r) { return clamp(r + 0.5 - length(p - c), 0.0, 1.0); }
+float rbox(vec2 p, vec2 c, vec2 h, float r) {
+    vec2 q = abs(p - c) - (h - vec2(r));
+    return clamp(0.5 - (length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r), 0.0, 1.0);
+}
+
+void main() {
+    vec2 p = v_uv * u_size;
+    float R = 38.0;
+    vec2 c1 = vec2(u_size.x * 0.5 - 48.0, u_size.y * 0.5);
+    vec2 c2 = vec2(u_size.x * 0.5 + 48.0, u_size.y * 0.5);
+    vec4 col = vec4(0.0);
+    if (u_show.x > 0.5) {
+        float a = disc(p, c1, R);
+        col = vec4(length(p - c1) < R * 0.79 ? vec3(0.95) : RED, a);
+    }
+    if (u_show.y > 0.5) {
+        float a = disc(p, c2, R);
+        vec2 q = p - c2;
+        vec3 s = length(q) < R * 0.79 ? vec3(0.95) : RED;
+        // the cars: a body and a cabin each, the right one in front
+        float l = max(rbox(q, vec2(-8.0, 3.0), vec2(11.0, 6.5), 3.0), rbox(q, vec2(-8.0, -5.0), vec2(7.0, 5.0), 3.0));
+        float r = max(rbox(q, vec2(8.0, 3.0), vec2(11.0, 6.5), 3.0), rbox(q, vec2(8.0, -5.0), vec2(7.0, 5.0), 3.0));
+        float field = clamp(R * 0.79 - length(q) + 0.5, 0.0, 1.0);
+        s = mix(s, vec3(0.80, 0.08, 0.10), l * field);
+        s = mix(s, vec3(0.06, 0.06, 0.07), r * field);
+        s = mix(s, vec3(0.95), rbox(q, vec2(8.0, -3.0), vec2(4.0, 1.4), 0.8) * r * field);       // a window on the front car
+        col = vec4(mix(col.rgb, s, a), max(col.a, a));
+    }
+    gl_FragColor = col;
 }
 `;
 
@@ -1628,4 +1700,4 @@ void main() {
 }
 `;
 
-module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: WBDIAL, wbback: WBBACK, wbgear: WBGEAR, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES };
+module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: WBDIAL, wbback: WBBACK, wbgear: WBGEAR, wbsign: WBSIGN, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES };

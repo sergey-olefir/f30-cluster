@@ -25,12 +25,7 @@
         335
       ],
       "style": "comfort",
-      "color": "accent",
-      "sign": [
-        960,
-        185,
-        62
-      ]
+      "color": "accent"
     },
     {
       "id": "speedo",
@@ -589,15 +584,26 @@
       "conn": 1
     },
     {
+      "id": "signs",
+      "type": "wbsign",
+      "class": "content",
+      "z": 3,
+      "x": 312,
+      "y": 458,
+      "w": 200,
+      "h": 84,
+      "conn": 1
+    },
+    {
       "id": "limit",
       "type": "text",
       "z": 5,
-      "x": 912,
-      "y": 167,
-      "w": 96,
-      "h": 36,
+      "x": 334,
+      "y": 486,
+      "w": 60,
+      "h": 30,
       "text": "{{limit}}",
-      "font": "wb_gear",
+      "font": "wb_spd",
       "color": "ink",
       "align": "center",
       "conn": 2

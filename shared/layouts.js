@@ -38,6 +38,7 @@ const TYPES = {
     dial: ['measure'],
     wbback: ['dl', 'dr'],
     wbgear: [],
+    wbsign: [],
     meter: ['signal', 'min', 'max'],
     gmeter: [],
     tiles: ['tiles'],

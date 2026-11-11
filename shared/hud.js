@@ -639,6 +639,21 @@ class HudApp {
                 },
             });
         }
+        // No-overtaking sign (the 6WB themes' second sign), the same way: app.json config.nopass names the field once the car's
+        // catalogue has been looked at: { iface, field, path: [..], on: [raw values that mean "no passing"] }. None: hidden on the car.
+        const np = this.config.nopass;
+        this.nopassOn = false; this.nopassRaw = undefined;
+        if (np && np.iface && np.field) {
+            extra[np.iface] = Object.assign(extra[np.iface] || {}, {
+                [np.field]: (v) => {
+                    let raw = v;
+                    (np.path || []).forEach((k) => { raw = raw === null || raw === undefined ? raw : raw[k]; });
+                    const t = String(JSON.stringify(raw)).slice(0, 80);
+                    if (t !== this.nopassRaw) { this.nopassRaw = t; this.log.info('no-passing raw: ' + t); }
+                    this.nopassOn = (np.on || [1, true]).indexOf(raw) >= 0;
+                },
+            });
+        }
         this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque'], extra);
         this.car.setRedline(this.setting('redline'));
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
@@ -1179,6 +1194,7 @@ class HudApp {
         }
         if (name === 'rpm' && isNum(this.rpmF)) return this.rpmF;
         if (name === 'hvSoc') return isNum(this.hvSoc) && Date.now() - this.hvSocAt < HV_STALE_MS ? this.hvSoc : this.car.data().demo ? 64 : null;
+        if (name === 'nopass') return this.nopassOn ? 1 : this.car.data().demo ? 1 : null;
         if (name === 'limit') return isNum(this.limitKmh) ? this.limitKmh : this.car.data().demo ? 90 : null;
         if (name === 'fuel' || name === 'range' || name === 'ambient') {
             // the kit's demo drive has none of these: made-up but steady values while it runs
@@ -1685,10 +1701,14 @@ class HudApp {
                 c.uniform(ref, 'u_style', [WB_STYLE[w.style] || 0]);
                 c.uniform(ref, 'u_redTo', [isNum(w.redTo) ? w.redTo : -1]);
                 c.uniform(ref, 'u_coldTo', [isNum(w.coldTo) ? w.coldTo : -1]);
+                c.uniform(ref, 'u_over', [-1, -1]);     // the speed dial's red band, set by _update (limit .. speed, as fractions of the sweep)
                 c.uniform(ref, 'u_pre', [(w.off || 0) * Math.PI / 180]);     // "off": degrees before the start where the needle parks (OFF)
                 c.uniform(ref, 'u_box', [w.box ? 1 : 0]);
                 c.uniform(ref, 'u_flip', [w.flip ? 1 : 0]);
             }
+        } else if (w.type === 'wbsign') {
+            c.uniform(ref, 'u_size', [w.w, w.h]);
+            c.uniform(ref, 'u_show', [0, 0]);       // shown by _update: the limit sign while a limit is known, the no-passing sign while it applies
         } else if (w.type === 'wbgear') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
         } else if (w.type === 'wbback') {
@@ -2043,6 +2063,12 @@ class HudApp {
             x.last = key;
             x.c.uniform(x.ref, 'u_value', [q]);
             if (w.peak) x.c.uniform(x.ref, 'u_peak', [pk > q ? pk : -1]);
+        } else if (w.type === 'wbsign') {
+            const a = isNum(this._raw('limit')) ? 1 : 0, b = this._raw('nopass') ? 1 : 0;
+            const key = a + '|' + b;
+            if (!force && key === x.last) return;
+            x.last = key;
+            x.c.uniform(x.ref, 'u_show', [a, b]);
         } else if (w.type === 'wbback') {
             const on = w.sign && isNum(this._raw('limit')) ? 1 : 0;
             if (!force && on === x.last) return;
@@ -2058,11 +2084,20 @@ class HudApp {
             if (w.off && w.measure === 'rpm' && !(isNum(raw) && raw >= 150)) v = -w.off / (w.sweep === undefined ? 270 : w.sweep);
             const q = Math.round(v * 1000) / 1000;
             const hot = w.measure === 'rpm' && this._shift().now ? 1 : 0;
-            const key = q + '|' + hot;
+            let over = [-1, -1];
+            if (w.look === 'wb' && w.measure === 'speed') {
+                let lim = this._raw('limit');
+                if (isNum(lim) && isNum(raw)) {
+                    if (us && !w.kmh) lim *= 0.621371;
+                    if (raw > lim + 1) over = [Math.round(Math.min(1, Math.max(0, (lim - mn) / (D.max - mn))) * 1000) / 1000, q];
+                }
+            }
+            const key = q + '|' + hot + '|' + over.join(',');
             if (!force && key === x.last) return;
             x.last = key;
             x.c.uniform(x.ref, 'u_value', [q]);
             x.c.uniform(x.ref, 'u_hot', [hot]);
+            if (w.look === 'wb') x.c.uniform(x.ref, 'u_over', over);
         } else if (w.type === 'sdash') {
             const us = this.setting('units') === 'us';
             const sp = this._raw('speed'), rpm = this._raw('rpm'), fuel = this._raw('fuel'), oil = this._raw('oil');
