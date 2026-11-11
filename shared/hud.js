@@ -1784,8 +1784,6 @@ class HudApp {
                 });
                 c.uniform(ref, 'u_tex', [1]);
             }
-        } else if (w.type === 'wbgear') {
-            c.uniform(ref, 'u_size', [w.w, w.h]);
         } else if (w.type === 'wbback') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_color', rgb(color(t, w.color || 'accent')));

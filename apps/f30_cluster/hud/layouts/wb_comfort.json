@@ -649,18 +649,6 @@
       "conn": 2
     },
     {
-      "id": "gearbox",
-      "type": "wbgear",
-      "class": "content",
-      "z": 3,
-      "x": 1325,
-      "y": 657,
-      "w": 170,
-      "h": 58,
-      "conn": 2,
-      "toggle": "!baked"
-    },
-    {
       "id": "range_icon",
       "type": "icon",
       "icon": "fuel",

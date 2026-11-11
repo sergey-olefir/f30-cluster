@@ -491,20 +491,6 @@
       "conn": 2
     },
     {
-      "id": "gear",
-      "type": "text",
-      "z": 5,
-      "x": 1364,
-      "y": 516,
-      "w": 120,
-      "h": 36,
-      "text": "{{gear}}",
-      "font": "wb_gear",
-      "color": "fg",
-      "align": "center",
-      "conn": 2
-    },
-    {
       "id": "row_h0",
       "type": "text",
       "z": 5,
