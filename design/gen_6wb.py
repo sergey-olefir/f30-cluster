@@ -19,19 +19,20 @@ def cell(font):
         _cell[font] = json.load(open(os.path.join(FONTS, font + '.json')))['cellHeight']
     return _cell[font]
 
-R = 290
-SP = (496, 360)               # speed dial centre
-RV = (1424, 360)              # rev dial centre
+# Sport and Eco Pro still use the first geometry (measured off the 6WB photos); Comfort has been fitted to the G20
+# (see shared/visible.js): bigger dials, the rev dial centred on BMW's black box so the box hides only the hub, and BMW's
+# own gear letter (always drawn, bottom right) sits in a gear box we draw under it.
+OLD = dict(R=290, SP=(496, 360), RV=(1424, 360), MINI_R=90, FU=(103, 473), OT=(1817, 473))
+G20 = dict(R=335, SP=(412, 380), RV=(1508, 380), MINI_R=70, FU=(80, 628), OT=(1840, 628))
+globals().update(OLD)
 MID = 960
 SPD_START, SPD_SWEEP = 230, 260
 RPM_START, RPM_PER = 250.5, 32.1          # degrees; per 1000 rpm
 RPM_MAX = 7500
 RPM_SWEEP = RPM_PER * RPM_MAX / 1000.0
 RPM_OFF = 20.5                # degrees before 0 where the needle parks (OFF)
-MINI_R = 90
-SIGN = (960, 214, 62)         # the speed limit sign: centre x, y and radius, in the middle window
-FU = (103, 473)               # fuel gauge centre
-OT = (1817, 473)              # oil temperature gauge centre
+SIGN = (960, 185, 62)         # the speed limit sign: centre x, y and radius, in the middle window
+GEARBOX = (1410, 686, 170, 58)  # centre x, y, w, h: under BMW's gear letter (x 1392-1428, y 664-706)
 
 def text(id, cx, cy, w, t, font, color="fg", align="center", conn=0, **kw):
     """A text box w wide, centred on (cx, cy) (align left / right: cx is that edge)."""
@@ -51,11 +52,20 @@ def label(id, c, deg, r, t, font, conn, w=90, color="fg"):
     x, y = at(c, deg, r)
     return text(id, x, y, w, t, font, color, conn=conn)
 
+
+def ring_label(id, c, deg, rmax, t, font, adv, conn, w=90, color="fg"):
+    """A scale number whose box (len(t) glyphs of advance `adv`, the font's cell high) ends at radius rmax, so it never
+    reaches the ticks: its centre sits rmax minus the box's half extent along the radius."""
+    a = math.radians(deg)
+    ext = abs(math.sin(a)) * adv * len(t) / 2.0 + abs(math.cos(a)) * cell(font) / 2.0
+    return label(id, c, deg, rmax - ext - 3, t, font, conn, w=w, color=color)
+
 def icon(id, name, cx, cy, conn, color="dim", w=22, h=26):
     return {"id": id, "type": "icon", "icon": name, "z": 5, "x": int(round(cx - w / 2.0)), "y": int(round(cy - h / 2.0)),
             "w": w, "h": h, "color": color, "conn": conn}
 
-def dial(id, c, style, r=R, **kw):
+def dial(id, c, style, r=None, **kw):
+    r = R if r is None else r      # R is read now: the geometry changes per mode
     d = {"id": id, "type": "dial", "class": "content", "z": 1, "x": c[0] - r, "y": c[1] - r, "w": 2 * r, "h": 2 * r,
          "look": "wb", "style": style, "ring": "chrome", "ring2": "chrome2", "needle": "needle", "face": "face",
          "tick": "fg", "glow": "accent"}
@@ -71,8 +81,8 @@ def minis():
         dial("oilt", OT, "mini", r=MINI_R, ringW=5, measure="signal", signal="oil", min=50, scale={"max": 150, "ticks": 4},
              minor=2, start=135, sweep=185, flip=True, coldTo=0.10, redFrom=0.90, needle="fg"),
         icon("fuel_icon", "fuel", FU[0] + 0.40 * MINI_R, FU[1] - 0.42 * MINI_R, 1, "fg"),
-        text("fuel_full", FU[0] - 0.30 * MINI_R, FU[1] - 0.36 * MINI_R, 44, "1/1", "wb_capb", conn=1),
-        text("fuel_zero", FU[0] + 0.30 * MINI_R, FU[1] + 0.34 * MINI_R, 30, "0", "wb_capb", conn=1),
+        text("fuel_full", FU[0] - 0.42 * MINI_R, FU[1] - 0.26 * MINI_R, 30, "1/1", "wb_mini", conn=1),
+        text("fuel_zero", FU[0] + 0.42 * MINI_R, FU[1] + 0.40 * MINI_R, 14, "0", "wb_mini", conn=1),
         icon("oil_icon", "oilcan", OT[0] - 0.40 * MINI_R, OT[1] - 0.42 * MINI_R, 2, "fg", w=30),
     ]
 
@@ -84,20 +94,21 @@ def comfort():
         dial("speedo", SP, "comfort", ringW=10, measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
              start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "comfort", ringW=10, measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
-             start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF, box=True),
+             start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF),
     ] + minis()
-    # the speed scale's numbers: three-figure ones a little further in, clear of the ticks
+    # the scale numbers: the box ends at 0.78 R, inside the ticks' inner ends (0.82 R)
     for i in range(14):
         n = 20 * i
-        W.append(label("spd%d" % i, SP, SPD_START + n, (0.70 if n >= 100 else 0.74) * R, str(n), "wb_spd", 1))
+        W.append(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 20.6, 1))
     for i in range(1, 8):
-        W.append(label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.72 * R, str(i), "wb_rpm", 2, w=50))
+        W.append(ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 31.2, 2, w=50))
     W += [
         text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "km/h", "wb_cap", conn=1),
         text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "1/min x 1000", "wb_cap", conn=2),
         text("ready", RV[0] - 0.63 * R, RV[1] + 0.25 * R, 110, "READY", "wb_capb", conn=2),
         text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "OFF", "wb_cap", "dim", conn=2),
-        text("gear", RV[0], RV[1] + 0.612 * R, 120, "{{gear}}", "wb_gear", conn=2, hotWhen="now"),
+        {"id": "gearbox", "type": "wbgear", "class": "content", "z": 3, "x": GEARBOX[0] - GEARBOX[2] // 2, "y": GEARBOX[1] - GEARBOX[3] // 2,
+         "w": GEARBOX[2], "h": GEARBOX[3], "conn": 2},
         # the range at the speed dial's foot
         icon("range_icon", "fuel", SP[0] - 70, SP[1] + 0.60 * R, 1, "fg"),
         text("range_in", SP[0] + 12, SP[1] + 0.60 * R, 130, "{{range}} km", "wb_cap", conn=1),
@@ -105,9 +116,9 @@ def comfort():
     # the speed limit: the figure on the backdrop's sign (both hide when the car gives no limit)
     W.append(text("limit", SIGN[0], SIGN[1], 96, "{{limit}}", "wb_gear", "ink", conn=2))   # conn 2: the first connection is at 7 of its 8 layers
     # the row at the middle window's foot
-    for i, (head, tok, x) in enumerate([("Time", "{{time}}", 729), ("Range", "{{range}} km", 868), ("Temp", "{{ambient}} °C", 1054)]):
-        W += [text("row_h%d" % i, x, 562, 150, head, "wb_cap", "dim", align="left"),
-              text("row_v%d" % i, x, 598, 160, tok, "wb_val", align="left")]
+    for i, (head, tok, x) in enumerate([("Time", "{{time}}", 742), ("Range", "{{range}} km", 890), ("Temp", "{{ambient}} °C", 1048)]):
+        W += [text("row_h%d" % i, x, 612, 150, head, "wb_cap", "dim", align="left"),
+              text("row_v%d" % i, x, 650, 160, tok, "wb_val", align="left")]
     return W
 
 def glowing(mode):
@@ -151,6 +162,7 @@ def glowing(mode):
 
 out = sys.argv[1]
 for mode, title in (("comfort", "6WB Comfort"), ("sport", "6WB Sport"), ("eco", "6WB Eco Pro")):
+    globals().update(G20 if mode == "comfort" else OLD)
     lay = {"schemaVersion": 2, "name": title, "packWaste": 8, "theme": "wb_" + mode,
            "_about": "6WB-style cluster (%s), generated by design/gen_6wb.py: edit that and regenerate." % title,
            "widgets": comfort() if mode == "comfort" else glowing(mode)}

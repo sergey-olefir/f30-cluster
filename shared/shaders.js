@@ -1260,8 +1260,8 @@ void main() {
     float cy = u_dl.y, R = u_dl.z;
     vec3 col = vec3(0.0);
     if (u_style < 0.5) {
-        float xl = u_dl.x + 0.70 * R, xr = u_dr.x - 0.70 * R;
-        float yt = cy - 0.95 * R, yb = cy + 0.95 * R;
+        float xl = u_dl.x + 0.92 * R, xr = u_dr.x - 0.92 * R;     // under the dials' bezels a little, so no gap shows
+        float yt = cy - 0.90 * R, yb = cy + 0.92 * R;
         float hwd = (xr - xl) * 0.5, ax = abs(p.x - mid);
         float ch = 0.13 * R;                                                      // the top corners' chamfer
         float dx = hwd - ax, dyt = p.y - yt, dyb = yb - p.y;
@@ -1321,6 +1321,29 @@ void main() {
         col = mix(col, sc, clamp(u_sign.z + 0.5 - ds, 0.0, 1.0));
     }
     gl_FragColor = vec4(min(col, vec3(1.0)), 1.0);
+}
+`;
+
+const WBGEAR = `// The 6WB-style gear box for a cluster-render "effect" layer (GLSL ES 1.00): a dark trapezoid, narrower at the top,
+// a light top edge, thin side lines and a bottom edge that bows slightly. BMW's own gear letter is drawn over it on
+// the car (and by the bench's car view). v_uv (0,0) is the top-left.
+precision mediump float;
+varying vec2 v_uv;
+uniform vec2 u_size;
+
+void main() {
+    vec2 p = v_uv * u_size;
+    float t = p.y / u_size.y;
+    float cx = u_size.x * 0.5, ax = abs(p.x - cx);
+    float hw = mix(0.40, 0.50, t) * u_size.x - 0.5;
+    float u = ax / hw;
+    float bl = u_size.y - 2.0 - 6.0 * (1.0 - u * u);                 // the bottom edge, bowed up at the sides
+    float aa = clamp(hw - ax + 0.5, 0.0, 1.0) * clamp(bl - p.y + 1.0, 0.0, 1.0) * clamp(p.y + 0.5, 0.0, 1.0);
+    vec3 col = mix(vec3(0.105, 0.112, 0.128), vec3(0.030, 0.033, 0.040), t);
+    col = mix(col, vec3(0.64, 0.68, 0.74), clamp(2.0 - p.y, 0.0, 1.0));                    // top edge
+    col = mix(col, vec3(0.30, 0.32, 0.37), clamp(1.8 - (hw - ax), 0.0, 1.0) * 0.8);        // side lines
+    col = mix(col, vec3(0.52, 0.56, 0.62), clamp(1.6 - abs(p.y - bl), 0.0, 1.0));          // bottom edge
+    gl_FragColor = vec4(col, aa);
 }
 `;
 
@@ -1605,4 +1628,4 @@ void main() {
 }
 `;
 
-module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: WBDIAL, wbback: WBBACK, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES };
+module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: WBDIAL, wbback: WBBACK, wbgear: WBGEAR, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES };

@@ -8,18 +8,25 @@
  * Plain Node 8 (the car's 8.16.2): no optional chaining, no ??, no dependencies.
  */
 
-/** Cluster (1920x720): the first visible y along each vertical line [x, y]; the hood hides
- *  everything above it. Linear between points; x 1920 is taken as y 240. Bottom and sides
- *  are fully visible. */
+/** Cluster (1920x720), a G20 3 Series with Live Cockpit Professional, measured from a grid photo (Nov 11 2026, a
+ *  homography fitted to 108 grid crossings, residual 3.5 px; the black box and the P from a photo of our own theme
+ *  aligned to the bench render with SIFT). The first visible y along each vertical line [x, y]; the hood hides
+ *  everything above it. Linear between points. Bottom and sides are fully visible; the green light lamps at the
+ *  left lie outside the panel.
+ *  The X3 M40i it first came from (bimmer-lab, Nov 5 2026) had a much deeper hood at the corners:
+ *  [0,273] [100,138] [200,85] [300,57] [400,36] [500,21] ... [1600,67] [1700,84] [1800,128] [1900,196] [1920,240]. */
 const HOOD = [
-    [0, 273], [100, 138], [200, 85], [300, 57], [400, 36], [500, 21], [600, 18], [700, 12], [800, 3], [900, 2],
-    [1000, 1], [1100, 2], [1200, 5], [1300, 10], [1400, 19], [1500, 37], [1600, 67], [1700, 84], [1800, 128], [1900, 196],
-    [1920, 240],
+    [0, 200], [100, 145], [200, 94], [300, 52], [400, 33], [500, 24], [600, 19], [700, 13], [800, 12], [900, 13],
+    [1000, 14], [1100, 13], [1200, 15], [1300, 20], [1400, 28], [1500, 33], [1600, 48], [1700, 88], [1800, 139],
+    [1900, 205], [1920, 225],
 ];
-/** BMW draws a solid black box over our panel here (its gear slot): [x0, y0, x1, y1]. */
-const BLACK_BOX = [1406, 342, 1597, 419];
-/** BMW's seat-belt warning light is drawn over us here: [x0, y0, x1, y1]. */
-const BELT = [587, 663, 626, 700];
+/** BMW draws a solid black box over our panel here, in the middle of the rev dial: [x0, y0, x1, y1]. The left and top
+ *  edges are measured; the right and bottom ones are good to about 15 px. (X3: 1406, 342, 1597, 419.) */
+const BLACK_BOX = [1420, 320, 1597, 440];
+/** BMW's seat-belt warning light is drawn over us here: [x0, y0, x1, y1]. (X3: 587, 663, 626, 700.) */
+const BELT = [587, 665, 626, 720];
+/** BMW's own gear letter (P, R, N, D, S, M), drawn over us at the foot of the rev dial, always: [x0, y0, x1, y1]. */
+const GEAR_P = [1392, 664, 1428, 706];
 /** The part of the 800x480 HUD target seen through the windshield: BMW's own height-adjust frame (car photo Nov 7,
  *  measured Nov 9 2026) spans x 117..681, y ~85..395. The Nov 5 grid photo's right edge (x 600) was the phone's angle. */
 const HUD_WINDOW = { x: 120, y: 100, w: 560, h: 280 };
@@ -78,6 +85,9 @@ function check(widgets, target) {
             if (overlaps(w, BLACK_BOX)) {
                 out.push(id + ': overlaps BMW\'s gear box x' + BLACK_BOX[0] + '-' + BLACK_BOX[2] + ' y' + BLACK_BOX[1] + '-' + BLACK_BOX[3]);
             }
+            if (overlaps(w, GEAR_P)) {
+                out.push(id + ': overlaps BMW\'s own gear letter x' + GEAR_P[0] + '-' + GEAR_P[2] + ' y' + GEAR_P[1] + '-' + GEAR_P[3]);
+            }
             if (overlaps(w, BELT)) {
                 out.push(id + ': overlaps BMW\'s seat-belt light x' + BELT[0] + '-' + BELT[2] + ' y' + BELT[1] + '-' + BELT[3]);
             }
@@ -97,4 +107,4 @@ function check(widgets, target) {
     return out;
 }
 
-module.exports = { HOOD, BLACK_BOX, BELT, HUD_WINDOW, HUD_BMW, hoodY, check };
+module.exports = { HOOD, BLACK_BOX, BELT, GEAR_P, HUD_WINDOW, HUD_BMW, hoodY, check };

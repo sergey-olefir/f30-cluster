@@ -245,6 +245,14 @@
       ctx.fillStyle = 'rgba(232,55,44,.55)'; ctx.fillRect(sx0, sy0, sx1 - sx0, sy1 - sy0);
       ctx.strokeStyle = '#ff8c1a'; ctx.strokeRect(sx0 + .5, sy0 + .5, sx1 - sx0 - 1, sy1 - sy0 - 1);
       labelBox('belt light', sx0 - 10, sy0 - 18, '#ff8c1a');
+      // BMW's own gear letter, over us at the foot of the rev dial (always drawn, P here)
+      if (geo.GEAR_P) {
+        const [gx0, gy0, gx1, gy1] = geo.GEAR_P;
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 44px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('P', (gx0 + gx1) / 2, gy1 - 2); ctx.textAlign = 'left';
+        ctx.strokeStyle = '#ff8c1a'; ctx.strokeRect(gx0 + .5, gy0 + .5, gx1 - gx0 - 1, gy1 - gy0 - 1);
+        labelBox('BMW gear', gx0 - 24, gy0 - 18, '#ff8c1a');
+      }
     } else if (view === 'hud') {
       // only the window is visible through the windshield; mask the rest
       const w = geo.HUD_WINDOW;

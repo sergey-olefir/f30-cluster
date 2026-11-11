@@ -37,6 +37,7 @@ const TYPES = {
     atext: ['text', 'font'],
     dial: ['measure'],
     wbback: ['dl', 'dr'],
+    wbgear: [],
     meter: ['signal', 'min', 'max'],
     gmeter: [],
     tiles: ['tiles'],

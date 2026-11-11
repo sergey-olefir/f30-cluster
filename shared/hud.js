@@ -1689,6 +1689,8 @@ class HudApp {
                 c.uniform(ref, 'u_box', [w.box ? 1 : 0]);
                 c.uniform(ref, 'u_flip', [w.flip ? 1 : 0]);
             }
+        } else if (w.type === 'wbgear') {
+            c.uniform(ref, 'u_size', [w.w, w.h]);
         } else if (w.type === 'wbback') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_color', rgb(color(t, w.color || 'accent')));
