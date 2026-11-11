@@ -1183,9 +1183,9 @@ void main() {
             col += u_needle * 0.16 * gl * gl;
             vec3 body = mix(vec3(0.45, 0.05, 0.04), u_needle * vec3(1.0, 0.62, 0.50), smoothstep(1.0, 0.35, abs(nx + 0.12)));
             body *= 1.0 - 0.22 * smoothstep(0.0, 1.0, nx);            // the far side a little darker
-            body = mix(body, vec3(1.0, 0.96, 0.94), smoothstep(0.34, 0.12, abs(nx + 0.12)));     // the white core
-            body = mix(body, vec3(1.0), smoothstep(T + 0.05 * R, T + 0.012 * R, q.y) * 0.95);     // the tail's cap
-            body = mix(body, vec3(1.0), smoothstep(0.90 * L, L, q.y) * 0.9);
+            body = mix(body, vec3(0.98, 0.90, 0.88), smoothstep(0.34, 0.12, abs(nx + 0.12)) * 0.85);   // the light core
+            body = mix(body, vec3(0.92, 0.66, 0.60), smoothstep(T + 0.030 * R, T + 0.008 * R, q.y) * 0.55);   // the tail's cap, a warm light, not white
+            body = mix(body, vec3(1.0), smoothstep(0.92 * L, L, q.y) * 0.8);
             col = mix(col, body, clamp(hw + 0.5 - ax, 0.0, 1.0) * clamp(q.y - T + 0.5, 0.0, 1.0));
         }
     } else if (u_style < 1.5) {
