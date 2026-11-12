@@ -65,6 +65,7 @@
     <div class="bar">
       <label class="chk"><input type="checkbox" id="outlines" checked> layer outlines</label>
       <label class="chk"><input type="checkbox" id="road"> <span id="backdropName">backdrop</span></label>
+      <label class="chk" title="A car photo rectified to panel px (bake/work/overlay/rect, local only) in place of the backdrop: what shows round a see-through theme. 08 stock at start-up, 09 stock by day, 10 grid, 11-13 our themes, 14 BMW's layout with a theme connected (our 0.7.2 texts in it)."><select id="photo"><option value="">photo: off</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option></select></label>
       <label class="chk" title="What the driver sees: the hood hides the top corners of the cluster and BMW draws its gear box and belt light over us; on the HUD only a window is visible through the windshield. Measured from car photos, Nov 5 2026 (shared/visible.js)."><input type="checkbox" id="carview" checked> car view</label>
       <span id="fps"></span>
     </div>
@@ -314,13 +315,24 @@
   if (/[?&]only=1/.test(location.search)) document.body.classList.add('only');
   if (/[?&]backdrop=1/.test(location.search)) document.getElementById('road').checked = true;
   if (/[?&]car=0/.test(location.search)) document.getElementById('carview').checked = false;
+  // ?photo=08..14: a rectified car photo under the theme (local only, see the select's title)
+  let photoImg = null;
+  function setPhoto(n) {
+    photoImg = null; dirty = true;
+    if (!n) return;
+    const im = new Image(); im.onload = () => { dirty = true; }; im.onerror = () => { addLog({ level: 'warn', text: 'bench: no rectified photo ' + n + ' (run tools/overlay/rectify.py)' }); };
+    im.src = '/photo/' + n + '.png'; photoImg = im;
+  }
+  document.getElementById('photo').addEventListener('change', (e) => setPhoto(e.target.value));
+  { const m = /[?&]photo=(\d\d)/.exec(location.search); if (m) { document.getElementById('photo').value = m[1]; setPhoto(m[1]); } }
   let frames = 0, lastFpsT = performance.now();
   function frame(t) {
     const animated = scene.some((l) => l.kind === 'effect' && l.time);
     if (dirty || animated) {
       dirty = false;
       ctx.clearRect(0, 0, VW, VH);
-      if (document.getElementById('road').checked) (view === 'panel' ? drawStockCluster : drawRoad)();
+      if (view === 'panel' && photoImg && photoImg.complete && photoImg.naturalWidth) ctx.drawImage(photoImg, 0, 0, VW, VH);
+      else if (document.getElementById('road').checked) (view === 'panel' ? drawStockCluster : drawRoad)();
       // a layer over the layer cap (state waiting) is never drawn, as on the car
       const hud = scene.filter((l) => l.target === view && l.visible && l.state !== 'waiting' && l.kind !== 'asset')
         .sort((a, b) => (CLASS_ORDER[a.class] - CLASS_ORDER[b.class]) || (a.z - b.z));
