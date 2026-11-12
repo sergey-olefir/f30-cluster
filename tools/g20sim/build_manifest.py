@@ -41,7 +41,10 @@ def main():
             en.setdefault("package", part.get("package"))
             if en.get("id") in SKIP or "%s.%s" % (en.get("id"), en.get("look")) in SKIP:
                 en["skip"] = "drawn by another package (tools/g20sim/build_manifest.py SKIP)"
-            base_id = en.get("id")
+            base_id = en.get("id", "")
+            for suffix in (".night", ".day"):
+                if base_id.endswith(suffix):
+                    base_id = base_id[: -len(suffix)]
             if base_id in Z_OVERRIDE:
                 en["z_package"] = en.get("z")
                 en["z"] = Z_OVERRIDE[base_id]

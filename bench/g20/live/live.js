@@ -1160,13 +1160,13 @@
  },
  "glow": {
   "gain": {
-   "v": 1.0,
+   "v": 0.6,
    "ev": "weak",
    "src": [
     "08",
     "09"
    ],
-   "note": "overall multiplier: the lead calibrates it against package B's static faces"
+   "note": "overall multiplier, calibrated by the lead (E) on the assembled simulation over package B's static faces (tools/g20sim/calib_glow.py, least squares in the pointer zones): 08 speedo 0.47, tacho 0.58; 09 speedo 0.63, tacho 0.73; 0.6 = their mean (D's own fit, against a stand-in face, was 1.0)"
   },
   "composite": {
    "v": "lighter",

@@ -90,7 +90,7 @@
     <section id="g20box" style="display:none">
       <h2>G20 (stock cluster, bench only)</h2>
       <div id="g20"></div>
-      <div class="note">BMW's own cluster under the theme when "stock cluster backdrop" is on: our drawing fitted to car photos (docs/G20SIM-REPORT.md). Lamps are bench controls, not signals. URL: ?g20=startup|driving&amp;day=1&amp;g20limit=50&amp;g20cc=ready&amp;g20gear=P&amp;g20time=16:43.</div>
+      <div class="note">BMW's own cluster under the theme when "stock cluster backdrop" is on: our drawing fitted to car photos (docs/G20SIM-REPORT.md). Lamps are bench controls, not signals. URL: ?g20=startup|driving&amp;day=1&amp;g20limit=50&amp;g20cc=ready&amp;g20gear=P&amp;g20time=16:43&amp;g20lamps=id,id&amp;g20street=...</div>
     </section>
     <section>
       <h2>Layers</h2>
@@ -383,6 +383,7 @@
       if (lim) g20.limit = lim === 'none' ? null : Number(lim);
       if (cc) g20.ccMessage = cc === 'none' ? null : cc;
       if (gear) g20.gearLetter = gear;
+      if (g20q.get('g20lamps') !== null) { g20.preset = 'custom'; g20.lamps = {}; g20q.get('g20lamps').split(',').filter(Boolean).forEach((id) => { g20.lamps[id] = true; }); }
       g20.ok = true; g20Controls(); dirty = true;
       addLog({ level: 'info', text: 'bench: G20 simulation loaded (bench/g20)' });
     }).catch((e) => addLog({ level: 'warn', text: 'bench: G20 simulation failed, the rough backdrop stays: ' + (e && e.message || e) }));
