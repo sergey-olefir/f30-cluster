@@ -175,7 +175,9 @@
         // a sampler reads the asset bound to it (the 'bind' op); its pixels came as an image, R in .r
         const key = l.binds && l.binds[info.name], c = key && images.get(key);
         const u = gl.getUniformLocation(e.prog, info.name);
-        if (!c || !u) { if (!c) noteUniform(l, info.name, 'no asset bound'); continue; }
+        // the car's renderer (RAMSES) does not draw a mesh with a texture input left unset: neither does the bench
+        if (!c) { noteUniform(l, info.name, 'no asset bound: the layer is not drawn (as on the car)'); return null; }
+        if (!u) continue;
         gl.activeTexture(gl.TEXTURE0 + unit);
         gl.bindTexture(gl.TEXTURE_2D, textureOf(key, c));
         gl.uniform1i(u, unit++);
