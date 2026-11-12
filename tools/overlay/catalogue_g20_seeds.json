@@ -73,7 +73,7 @@
    "measured_by": "E: per-stroke half-max of max(RGB) on rect 08 (its over-exposed '!' has little chroma)",
    "states": {"08": [true, "red", "red-orange, hue ~12 deg like the brake lamp (C9 called it amber); lit after start-up"], "09": [false, null, "unlit"], "10": [false, null, "unlit; grid label '1800/300' covers its lower edge"], "11": [null, null, "not seen; our face there"], "12": [null, null, "not seen; our background (the (P) above it is drawn over us)"], "13": [null, null, "not seen"], "14": [false, null, "stock visible, unlit"]},
    "schematic": {"kind": "steering"},
-   "notes": "Safety: not in brief section 3's list; proposed critical because a steering-system fault is a must-see warning (F to review). Hint for F: lit only in 08 -> unknown; its neighbour (P) is over, so over is plausible but not observed."
+   "notes": "Hint for F: lit only in 08 -> unknown; its neighbour (P) is over, so over is plausible but not observed."
   },
   {
    "id": "bottom.range", "group": "bottom-row", "name": "Range with pump icon ('467 km')", "safety": "info",
@@ -153,7 +153,7 @@
    "measured_by": "E: half-max of min(RGB) on rect 08 (frame + 'i' + text; the panel's dark fill may run on to the panel's bottom edge)",
    "states": {"08": [true, "white", "'Ready to drive: press the brake.' (Ukrainian)"], "09": [false, null, "no message"], "10": [false, null, "no message"], "11": [null, null, "not seen"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [false, null, "no message; the street line shows"]},
    "schematic": {"kind": "panel"},
-   "notes": "Safety: proposed info, but check-control messages can carry critical warnings (F to review). Hint for F: only seen in 08 -> unknown (whether it pops up over a custom theme was never photographed)."
+   "notes": "Hint for F: only seen in 08 -> unknown (whether it pops up over a custom theme was never photographed)."
   },
   {
    "id": "assist.info_tacho", "group": "assist-message", "name": "'i' marker under the map, right (above the tacho's bottom line)", "safety": "info",

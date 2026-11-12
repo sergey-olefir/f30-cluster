@@ -689,6 +689,11 @@ def main():
         'excluded': seeds['excluded'],
         'elements': els,
     }
+    # package F's relations (tools/overlay/relations_g20.json), so re-running the catalogue keeps them
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import relations_g20
+    if os.path.exists(relations_g20.REL):
+        relations_g20.apply(doc)
     with open(OUT_JSON, 'w') as f:
         json.dump(doc, f, indent=1, ensure_ascii=False)
         f.write('\n')

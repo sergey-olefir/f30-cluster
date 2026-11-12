@@ -34,7 +34,7 @@
    "theme_version": null,
    "rms_px": 1.205,
    "usable_for_geometry": true,
-   "note": "Our transparent calibration grid (labels, L1-L16, grey ramps, ATLAS text) over the stock theme; BMW's black box and bottom-row P are drawn. Grid labels hide some spots."
+   "note": "Our transparent calibration grid (labels, L1-L16, grey ramps, ATLAS text) over the stock theme; BMW's black box and bottom-row P are drawn. Grid labels hide some spots. | F: our pixels: photo 10 runs our transparent grid layout (grid.json): opaque only on the grid lines, the yellow labels, the L1-L16 / ATLAS text and the two swatch rows (250-1350 x 440-600)"
   },
   "11": {
    "file": "reference/g20/11_our-theme_on-car.jpg",
@@ -43,7 +43,7 @@
    "theme_version": null,
    "rms_px": 0.161,
    "usable_for_geometry": true,
-   "note": "Our early opaque theme (old geometry, before bc2fc0d's G20 fit; exact build unknown). B's fit points only reach y 562, below that the rect is extrapolated."
+   "note": "Our early opaque theme (old geometry, before bc2fc0d's G20 fit; exact build unknown). B's fit points only reach y 562, below that the rect is extrapolated. | F: our pixels: early build (eefecfd-era layout, old geometry): its 'bg' wbback widget is a full-panel opaque backdrop at z 0 (shared/shaders.js WBBACK: 'opaque black over BMW's own gauges'); no stock content shows anywhere in 11 except BMW's over items"
   },
   "12": {
    "file": "reference/g20/12_our-theme_night_2026-11-11.jpg",
@@ -52,7 +52,7 @@
    "theme_version": "cb28ce7",
    "rms_px": 0.815,
    "usable_for_geometry": true,
-   "note": "Our opaque theme at night (B used the cb28ce7 bench render for alignment); BMW's red (P), belt, P and black box drawn over us."
+   "note": "Our opaque theme at night (B used the cb28ce7 bench render for alignment); BMW's red (P), belt, P and black box drawn over us. | F: our pixels: build cb28ce7: opaque full-panel background (C10 baked layer + WBBACK); our window was drawn, so the stockMap hole was off"
   },
   "13": {
    "file": "reference/g20/13_our-theme_baked_on-car_2026-11-11.jpg",
@@ -61,7 +61,7 @@
    "theme_version": "cb28ce7",
    "rms_px": 1.445,
    "usable_for_geometry": false,
-   "note": "Our baked theme on the car, same session as 12 (B used cb28ce7); very coarse: visual checks only. B: one photo px is 5.7 panel px: too coarse for 3 px geometry; use the rect for visual relation checks only"
+   "note": "Our baked theme on the car, same session as 12 (B used cb28ce7); very coarse: visual checks only. B: one photo px is 5.7 panel px: too coarse for 3 px geometry; use the rect for visual relation checks only | F: our pixels: build cb28ce7, same session as 12: opaque full-panel background, window drawn (hole off)"
   },
   "14": {
    "file": "reference/g20/14_stock-under-unbound-theme_2026-11-12.jpg",
@@ -70,7 +70,7 @@
    "theme_version": "0.7.2",
    "rms_px": 0.814,
    "usable_for_geometry": true,
-   "note": "Our 0.7.2 connected but only our text layers drew (unbound-sampler bug, fixed in 0.7.3): the stock theme is visible beneath our text. Coarse: centres good, edges blur over ~5 px."
+   "note": "Our 0.7.2 connected but only our text layers drew (unbound-sampler bug, fixed in 0.7.3): the stock theme is visible beneath our text. Coarse: centres good, edges blur over ~5 px. | F: our pixels: 0.7.2 with only our text layers drawn (unbound-sampler bug): our pixels are opaque only under our own glyphs"
   }
  },
  "excluded": [
@@ -217,10 +217,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "unlit; the grid label '0/200' covers the upper-left corner"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our face is there (opaque?)"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our blue background there"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our background there"
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "stock visible beneath, unlit"
+    }
+   ],
    "schematic": "design/overlay/schematic/tt.brake.svg",
    "measured_by": "E: per-stroke half-max of chroma on rect 08",
-   "notes": "Left telltale column. Hint for F: only lit in 08 (stock); never lit with a custom theme up, so 11-13 cannot say over/under; 14 shows the spot uncovered but unlit -> unknown; needs a photo with the lamp lit over an opaque theme (e.g. brake-fluid test / start-up self-test)."
+   "notes": "Left telltale column. | F: unknown (none): Lit only in 08 (stock); unlit at a visible spot in 10/14; 11-13 cannot tell hidden from off."
   },
   {
    "id": "tt.tpms",
@@ -331,10 +367,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "unlit"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our face there"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "stock visible, unlit"
+    }
+   ],
    "schematic": "design/overlay/schematic/tt.tpms.svg",
    "measured_by": "E: per-stroke half-max of chroma on rect 08",
-   "notes": "Hint for F: as tt.brake (lit only in 08) -> unknown."
+   "notes": "F: unknown (none): Lit only in 08; unlit in 10/14; 11-13 inconclusive."
   },
   {
    "id": "tt.abs",
@@ -461,10 +533,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "unlit; grid label '0/300' above it"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our face there"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "stock visible, unlit"
+    }
+   ],
    "schematic": "design/overlay/schematic/tt.abs.svg",
    "measured_by": "E: per-stroke half-max of chroma on rect 08",
-   "notes": "Hint for F: lit only in 08 -> unknown."
+   "notes": "F: unknown (none): Lit only in 08; unlit in 10/14; 11-13 inconclusive."
   },
   {
    "id": "tt.dsc",
@@ -567,10 +675,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "upper half visible and unlit; grid label '0/400' covers the lower half"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our face there"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "stock visible, unlit"
+    }
+   ],
    "schematic": "design/overlay/schematic/tt.dsc.svg",
    "measured_by": "E: per-stroke half-max of chroma on rect 08",
-   "notes": "Hint for F: lit only in 08 -> unknown."
+   "notes": "F: unknown (none): Lit only in 08; unlit in 10/14; 11-13 inconclusive."
   },
   {
    "id": "tt.auto_h",
@@ -682,10 +826,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "drawn under/with our transparent grid; the x 1800 grid line crosses it but green-on-green shows no order"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; Auto Hold state at the time unknown"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen although the (P) lamp next to it is drawn over us; Auto Hold probably off (no green P either)"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; as 12"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "drawn with our 0.7.2 connected (our text only drew)"
+    }
+   ],
    "schematic": "design/overlay/schematic/tt.auto_h.svg",
    "measured_by": "E: per-stroke half-max of G-max(R,B) on rect 08 (both words as one element); same ROI on 09 and 14 in the metrics",
-   "notes": "Overlaps the stock tacho bezel by ~14 px (C9). Hint for F: seen lit in 10 and 14 with a theme connected -> not gone; whether it is over or under our opaque pixels is not shown (12/13 have it off) -> under-or-over, needs a photo with Auto Hold on over an opaque theme. Listed under telltale (a lamp-like text indicator)."
+   "notes": "Overlaps the stock tacho bezel by ~14 px (C9). | F: unknown (none): Drawn with a theme connected (10, 14), so not gone; 10 cannot show the z-order (green on our green grid line) and in 12/13 Auto Hold was evidently off (red (P), no green P)."
   },
   {
    "id": "tt.parking_brake",
@@ -810,12 +990,47 @@
      "note": "green (P), our 0.7.2 connected"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "over",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen: parking brake presumably released and Auto Hold off"
+    },
+    {
+     "photo": "12",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "red (P) drawn ON TOP of our opaque blue background"
+    },
+    {
+     "photo": "13",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "red (P) drawn on top of our baked background"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "green (P), our 0.7.2 connected"
+    }
+   ],
    "schematic": "design/overlay/schematic/tt.parking_brake.svg",
    "measured_by": "E: per-stroke half-max of chroma on rect 08; same ROI on 09, 10, 12, 13, 14 in the metrics (centres within 3.5 px)",
-   "notes": "Same spot and glyph in every colour. B: centre x 1865-1870, y 238-239 in 08, 09, 12, 14 alike. Hint for F: seen in 12 and 13 over our opaque pixels -> over (strong if F confirms opacity at 1833-1899 x 215-261)."
+   "notes": "Same spot and glyph in every colour. B: centre x 1865-1870, y 238-239 in 08, 09, 12, 14 alike. | F: over (strong): Red (P) seen on top of our opaque background in 12 and 13."
   },
   {
    "id": "tt.steering",
@@ -938,10 +1153,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "unlit; grid label '1800/300' covers its lower edge"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our face there"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our background (the (P) above it is drawn over us)"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "stock visible, unlit"
+    }
+   ],
    "schematic": "design/overlay/schematic/tt.steering.svg",
    "measured_by": "E: per-stroke half-max of max(RGB) on rect 08 (its over-exposed '!' has little chroma)",
-   "notes": "Safety: not in brief section 3's list; proposed critical because a steering-system fault is a must-see warning (F to review). Hint for F: lit only in 08 -> unknown; its neighbour (P) is over, so over is plausible but not observed."
+   "notes": "F: unknown (none): Lit only in 08; unlit in 10/14; 11-13 inconclusive. Safety review (F): kept critical although section 3's list does not name it: in 08 it is red-orange like the brake lamp, a steering-system fault is a stop/drive-carefully warning, and UN R79 requires a steering failure warning to be visible."
   },
   {
    "id": "bottom.range",
@@ -1041,12 +1292,48 @@
      "note": "456 km, our 0.7.2 connected"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "476 km, under our grid"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen; our face there"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "456 km, our 0.7.2 connected"
+    }
+   ],
    "schematic": "design/overlay/schematic/bottom.range.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08 (pump icon + digits + 'km')",
-   "notes": "Width varies with the digits (3 digits here). Hint for F: seen in 10 and 14, not in 11-13 -> under."
+   "notes": "Width varies with the digits (3 digits here). | F: under (strong): Seen in 10 (our green x 200 grid line runs over the '4') and 14; hidden in 11-13 where we are opaque; always shown."
   },
   {
    "id": "bottom.clock",
@@ -1150,12 +1437,48 @@
      "note": "10:15 (BMW's); 08:16 in the centre is ours"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "16:28"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen; only our clock (14:29, centre) shows"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen; our clock 20:29 is elsewhere"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "10:15 (BMW's); 08:16 in the centre is ours"
+    }
+   ],
    "schematic": "design/overlay/schematic/bottom.clock.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08",
-   "notes": "Hint for F: seen in 10 and 14, not in 11-13 -> under."
+   "notes": "F: under (strong): Seen in 10 and 14; hidden in 11-13 where we are opaque; always shown."
   },
   {
    "id": "bottom.belt_rear",
@@ -1254,10 +1577,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "unlit"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "stock visible, unlit"
+    }
+   ],
    "schematic": "design/overlay/schematic/bottom.belt_rear.svg",
    "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
-   "notes": "Hint for F: lit only in 08 -> unknown; the driver belt next to it is over, so over is plausible."
+   "notes": "F: unknown (none): Lit only in 08 (start-up check); unlit in 10/14; 11-13 inconclusive. Its neighbour the driver belt is over, so over is plausible but not observed."
   },
   {
    "id": "bottom.belt_driver",
@@ -1361,12 +1720,47 @@
      "colour": "red"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "over",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "drawn over our green grid lines x 600 and y 700 (they stop at its edge)"
+    },
+    {
+     "photo": "11",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "over our opaque face"
+    },
+    {
+     "photo": "12",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "over our background (over-exposed, yellow core)"
+    },
+    {
+     "photo": "13",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "over our background (blurred)"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true
+    }
+   ],
    "schematic": "design/overlay/schematic/bottom.belt_driver.svg",
    "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08; same ROI on 10, 11, 12, 14 in the metrics (centres within 2 px)",
-   "notes": "B check: belt centre 08/09/12/14 within ~2 px of each other. Hint for F: seen in 11, 12, 13 over our opaque pixels -> over (strong; C9 too)."
+   "notes": "B check: belt centre 08/09/12/14 within ~2 px of each other. | F: over (strong): Seen on top of our opaque background in 11, 12, 13; in 10 it interrupts our grid lines (x 600, y 700)."
   },
   {
    "id": "bottom.airbag",
@@ -1473,10 +1867,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "unlit; label '600/700' and the y 700 grid line touch its lower edge"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "stock visible, unlit"
+    }
+   ],
    "schematic": "design/overlay/schematic/bottom.airbag.svg",
    "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
-   "notes": "C9 split it in two boxes (the disc 636-656 x 662-688 and the whole 637-682 x 662-713); one lamp here. Hint for F: lit only in 08 -> unknown."
+   "notes": "C9 split it in two boxes (the disc 636-656 x 662-688 and the whole 637-682 x 662-713); one lamp here. | F: unknown (none): Lit only in 08 (start-up check); unlit in 10/14; 11-13 inconclusive."
   },
   {
    "id": "bottom.cc_info",
@@ -1575,10 +2005,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "no message; grid label '700/600' above"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": null,
+     "our_pixels_opaque_there": true,
+     "lit_expected": false,
+     "note": "our '08:16' glyphs cover the spot"
+    }
+   ],
    "schematic": "design/overlay/schematic/bottom.cc_info.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08",
-   "notes": "Comes with assist.cc_panel. Hint for F: only seen in 08 -> unknown."
+   "notes": "Comes with assist.cc_panel. | F: unknown (none): Shown only with a check-control message (08); no message in 10/14; in 14 our clock covers the spot."
   },
   {
    "id": "bottom.street",
@@ -1677,12 +2143,48 @@
      "note": "Pasichna vulytsia, below our Time/Range/Temp text"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "Lviv, under our grid"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen; a street name is shown whenever no message occupies the line (plausibly here too)"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen; our '20:29' and '+5 °C' are nearby"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "Pasichna vulytsia, below our Time/Range/Temp text"
+    }
+   ],
    "schematic": "design/overlay/schematic/bottom.street.svg",
    "measured_by": "E: half-max of min(RGB) on rect 09 (08 shows the check-control message there instead); width depends on the text: 10 'Lviv' ~910-1010, 14 ~820-1105",
-   "notes": "Centred near x 960; variable width. Hint for F: seen in 10 and 14, not in 11-13 -> under."
+   "notes": "Centred near x 960; variable width. | F: under (strong): Seen in 10 (our x 950/1000 grid lines run over 'Lviv') and 14; hidden in 11-13 where we are opaque."
   },
   {
    "id": "bottom.temperature",
@@ -1790,12 +2292,48 @@
      "note": "+4.0 °C (BMW's); our '+4 °C' is in the centre"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "+5.5 °C, our grid lines run over it"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen; our +6 °C is elsewhere"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "+4.0 °C (BMW's); our '+4 °C' is in the centre"
+    }
+   ],
    "schematic": "design/overlay/schematic/bottom.temperature.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08",
-   "notes": "Hint for F: seen in 10 (under our grid lines) and 14, not 11-13 -> under (C9 too)."
+   "notes": "F: under (strong): Seen in 10 (our x 1600 grid line runs over it) and 14; hidden in 11-13 where we are opaque."
   },
   {
    "id": "assist.speed_limit",
@@ -1931,18 +2469,54 @@
      "note": "30"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "our yellow label '500/600' and the x 500 grid line are drawn over the sign"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen (a limit sign was shown in 08, 09, 10 and 14; plausibly here too)"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "30"
+    }
+   ],
    "schematic": "design/overlay/schematic/assist.speed_limit.svg",
    "measured_by": "E: half-max of R-max(G,B) on rect 08 (the red ring's outer edge)",
-   "notes": "Drawn over the speedo's bottom line. Hint for F: seen in 10 and 14, not in 11-13 -> under."
+   "notes": "Drawn over the speedo's bottom line. | F: under (strong): Seen in 10 with our yellow '500/600' label drawn over it, and in 14; hidden in 11-13."
   },
   {
    "id": "assist.cc_panel",
    "group": "assist-message",
    "name": "Check-control panel (curved frame, 'i', two-line message)",
-   "safety": "info",
+   "safety": "critical",
    "bbox": [
     712.0,
     601.0,
@@ -2055,10 +2629,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "no message"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "no message; the street line shows"
+    }
+   ],
    "schematic": "design/overlay/schematic/assist.cc_panel.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08 (frame + 'i' + text; the panel's dark fill may run on to the panel's bottom edge)",
-   "notes": "Safety: proposed info, but check-control messages can carry critical warnings (F to review). Hint for F: only seen in 08 -> unknown (whether it pops up over a custom theme was never photographed)."
+   "notes": "F: unknown (none): Only seen in 08 (stock); never photographed with a check-control message while our theme was up. Safety review (F): raised to critical. The panel is the channel for check-control warnings, including the oil-pressure and coolant warnings that section 3 lists and that have no lamp among the catalogued telltales; a plan must not hide it without a redraw."
   },
   {
    "id": "assist.info_tacho",
@@ -2151,10 +2761,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": null,
+     "our_pixels_opaque_there": false,
+     "lit_expected": null,
+     "note": "grid label '1200/600' covers the spot"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "spot visible, empty"
+    }
+   ],
    "schematic": "design/overlay/schematic/assist.info_tacho.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08",
-   "notes": "Meaning not known (a pending check-control or info marker; appears with the 08 message). Hint for F: only seen in 08 -> unknown."
+   "notes": "Meaning not known (a pending check-control or info marker; appears with the 08 message). | F: unknown (none): Only seen in 08 (with a pending message); absent in 14; 11-13 inconclusive."
   },
   {
    "id": "assist.mode_label_centre",
@@ -2246,12 +2892,62 @@
      "note": "spot visible (map roads, our '1'); the label is in the bottom row instead"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "gone",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "08",
+     "seen": true,
+     "our_pixels_opaque_there": null,
+     "lit_expected": true,
+     "note": "stock theme, Comfort: label here"
+    },
+    {
+     "photo": "09",
+     "seen": true,
+     "our_pixels_opaque_there": null,
+     "lit_expected": true,
+     "note": "stock theme, Comfort: label here"
+    },
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "spot visible between our grid lines and labels: no label; COMFORT PLUS is in the bottom row"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "spot uncovered (map roads, our '1' just above it): no label; COMFORT PLUS is in the bottom row"
+    }
+   ],
    "schematic": "design/overlay/schematic/assist.mode_label_centre.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08",
-   "notes": "Hint for F: absent at this spot in 10 and 14 while assist.mode_label (bottom row) is shown -> gone (BMW moves it to the bottom row while a custom theme is connected)."
+   "notes": "F: gone (strong): In 10 and 14 (theme connected, Comfort, same as 08/09) its spot is uncovered and empty; BMW shows the label in the bottom row instead."
   },
   {
    "id": "assist.mode_label",
@@ -2352,12 +3048,47 @@
      "colour": "white"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen (the P next to it is drawn over us)"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen (the P next to it is drawn over us)"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true
+    }
+   ],
    "schematic": "design/overlay/schematic/assist.mode_label.svg",
    "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it; 14 is coarse, edges +-2-3 px); cross-check 10",
-   "notes": "Hint for F: seen in 10 and 14; in 11-13 the P beside it is drawn over us but this label is not -> under (if our pixels are opaque there)."
+   "notes": "F: under (strong): Shown in the bottom row with a theme connected (10: our x 1300 grid line runs over 'COMFORT'; 14); hidden in 11-13 although the P next to it is drawn over us."
   },
   {
    "id": "assist.gear_centre",
@@ -2463,12 +3194,62 @@
      "note": "under BMW's black box; the letter shows in the bottom row instead"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "gone",
+   "evidence": "weak",
+   "relation_basis": [
+    {
+     "photo": "08",
+     "seen": true,
+     "our_pixels_opaque_there": null,
+     "lit_expected": true,
+     "note": "stock: P here"
+    },
+    {
+     "photo": "09",
+     "seen": true,
+     "our_pixels_opaque_there": null,
+     "lit_expected": true,
+     "note": "stock: D here"
+    },
+    {
+     "photo": "10",
+     "seen": null,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "spot under BMW's black box"
+    },
+    {
+     "photo": "11",
+     "seen": null,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "spot under BMW's black box"
+    },
+    {
+     "photo": "12",
+     "seen": null,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "spot under BMW's black box"
+    },
+    {
+     "photo": "13",
+     "seen": null,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "spot under BMW's black box"
+    },
+    {
+     "photo": "14",
+     "seen": null,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "spot under BMW's black box; the gear shows in the bottom row"
+    }
+   ],
    "schematic": "design/overlay/schematic/assist.gear_centre.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08 ('P'; 'D' in 09 is wider)",
-   "notes": "The black box sits exactly here. Hint for F: with a theme connected BMW shows the gear in the bottom row (assist.gear) -> this one is gone (the spot itself is hidden by the black box)."
+   "notes": "The black box sits exactly here. | F: gone (weak): Inference: with a theme connected BMW shows the gear in the bottom row (10-14) and its black box (over) sits on this spot, so the centre letter is never visible; the spot itself is not uncovered in any photo. For a design the difference does not matter: the spot is under BMW's black box whenever a theme is up."
   },
   {
    "id": "assist.gear",
@@ -2577,12 +3358,48 @@
      "note": "P"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "over",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "the green x 1400 grid line stops at the P (drawn over our grid)"
+    },
+    {
+     "photo": "11",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "P over our opaque face"
+    },
+    {
+     "photo": "12",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "P over our background"
+    },
+    {
+     "photo": "13",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "P"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "P"
+    }
+   ],
    "schematic": "design/overlay/schematic/assist.gear.svg",
    "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it). Checks: 12 [1397,666,1425,704] (same centre, glyph bloomed at night), 11 [1395,666,1420,700] (extrapolated fit below y 562), 13 coarse; 10 not measurable this way (grid lines)",
-   "notes": "Other gears (R, N, D, S, M) are wider than P: keep C9's/visible.js margin. Hint for F: over (strong; 11, 12, 13)."
+   "notes": "Other gears (R, N, D, S, M) are wider than P: keep C9's/visible.js margin. | F: over (strong): P seen on top of our opaque background in 11, 12, 13; in 10 it interrupts our x 1400 grid line."
   },
   {
    "id": "assist.digital_speed",
@@ -2706,12 +3523,48 @@
      "note": "0 km/h"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "0 km/h"
+    }
+   ],
    "schematic": "design/overlay/schematic/assist.digital_speed.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08 (one digit; more digits grow it to the left)",
-   "notes": "Hint for F: seen in 10 and 14, not 11-13 -> under."
+   "notes": "F: under (strong): Seen in 10 (our x 500 grid line runs over the '0') and 14; hidden in 11-13 where we are opaque."
   },
   {
    "id": "assist.rpm_label",
@@ -2808,12 +3661,47 @@
      "colour": "white"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "'x1000' partly under grid label '1400/600'"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true
+    }
+   ],
    "schematic": "design/overlay/schematic/assist.rpm_label.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08",
-   "notes": "Hint for F: seen in 10 and 14 -> under."
+   "notes": "F: under (strong): Seen in 10 (our '1400/600' label drawn over 'x1000') and 14; hidden in 11-13."
   },
   {
    "id": "assist.off",
@@ -2920,10 +3808,46 @@
    ],
    "relation": "unknown",
    "evidence": "none",
-   "relation_basis": [],
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "'0' shown instead"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; the 'OFF' at ~1295,535 in 12-14 is OURS"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": false,
+     "note": "'0' shown instead"
+    }
+   ],
    "schematic": "design/overlay/schematic/assist.off.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08",
-   "notes": "BMW's OFF replaces the tacho scale's '0'. Hint for F: only seen with the engine off in 08 -> unknown."
+   "notes": "BMW's OFF replaces the tacho scale's '0'. | F: unknown (none): Shown only with the engine off (08); 10 and 14 show the tacho's '0' instead (engine on); engine state in 11-13 unknown."
   },
   {
    "id": "assist.cold",
@@ -3024,12 +3948,47 @@
      "colour": "white"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "medium",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "our grey/green grid lines are drawn across the letters"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen; our mini there"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true
+    }
+   ],
    "schematic": "design/overlay/schematic/assist.cold.svg",
    "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it; coarse, +-2-3 px); 10 shows it at the same place",
-   "notes": "Hint for F: seen in 10 and 14 -> under or over; not in 11-13 (engine state unknown) -> under, weak."
+   "notes": "F: under (medium): In 10 our grid lines (x 1850, x 1900, y 650) run over 'COLD'; seen in 14; 11-13 inconclusive (oil temperature then unknown)."
   },
   {
    "id": "map.region",
@@ -3147,12 +4106,48 @@
      "note": "with a lighter map background in its left part"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "roads under our grid lines; our opaque swatch rows hide its lower part"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen; our opaque window"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen; our window"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen; our window"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "with a lighter map background in its left part"
+    }
+   ],
    "schematic": "design/overlay/schematic/map.region.svg",
    "measured_by": "E: white top-hat road pixels (components >= 45 px long) in rects 08, 09 and 14, minus every non-map element and (in 14) our own numerals and labels; convex hull together with C9's 08/09 hull",
-   "notes": "A lower bound: where roads were drawn. Our theme already has a see-through map hole (w.bg holeWhen stockMap). Hint for F: seen in 10 and 14 -> under (C9 too)."
+   "notes": "A lower bound: where roads were drawn. Our theme already has a see-through map hole (w.bg holeWhen stockMap). | F: under (strong): Seen in 10 (under our grid; hidden under our swatches) and 14; hidden in 11-13 behind our opaque window (hole off)."
   },
   {
    "id": "map.position_arrow",
@@ -3245,12 +4240,48 @@
      "note": "same spot (+-3 px)"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "covered by our opaque swatch row (250-1350 x 440-600)"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen; our window"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "same spot (+-3 px)"
+    }
+   ],
    "schematic": "design/overlay/schematic/map.position_arrow.svg",
    "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
-   "notes": "No route arrow, turn hint, north arrow or route line was active in any photo. Hint for F: seen in 14 -> under (with the map)."
+   "notes": "No route arrow, turn hint, north arrow or route line was active in any photo. | F: under (strong): Seen in 14; in 10 hidden under our opaque swatch row; hidden in 11-13."
   },
   {
    "id": "structure.speedo",
@@ -3388,12 +4419,48 @@
      "note": "under our text"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "our dial there"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "our dial there"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "our dial there"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "under our text"
+    }
+   ],
    "schematic": "design/overlay/schematic/structure.speedo.svg",
    "measured_by": "E: convex hull of the light pixels (bezel line, ticks, numerals, centre text) on rect 08; ghost only",
-   "notes": "Context only. Hint for F: drawn in 10 and 14 -> under."
+   "notes": "Context only. | F: under (strong): Drawn in 10 (beneath our grid lines and swatches) and 14; hidden in 11-13."
   },
   {
    "id": "structure.speedo_needle",
@@ -3469,12 +4536,45 @@
      "note": "at 0"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "visible below y 600; hidden under our opaque swatch rows (440-600)"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "at 0"
+    }
+   ],
    "schematic": "design/overlay/schematic/structure.speedo_needle.svg",
    "measured_by": "E: half-max of the top-hat (11 px) of chroma on rect 08, robust straight-line fit (the thin needle over its glow)",
-   "notes": "Moves with speed; at rest here. Hint for F: drawn in 10 and 14 -> under."
+   "notes": "Moves with speed; at rest here. | F: under (strong): In 10 visible below y 600 and hidden by our opaque swatch above it; seen in 14; hidden in 11-13."
   },
   {
    "id": "structure.speedo_info_line",
@@ -3551,12 +4651,44 @@
      "colour": "white"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "medium",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": null,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "under our y 400 grid line and its labels"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true
+    }
+   ],
    "schematic": "design/overlay/schematic/structure.speedo_info_line.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08",
-   "notes": "Hint for F: seen in 14 -> under."
+   "notes": "F: under (medium): Seen in 14 only (10 covers it with labels); hidden in 11-13."
   },
   {
    "id": "structure.tacho",
@@ -3686,12 +4818,48 @@
      "note": "under our text and the black box"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "our dial there"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "our dial there"
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "our dial there"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "under our text and the black box"
+    }
+   ],
    "schematic": "design/overlay/schematic/structure.tacho.svg",
    "measured_by": "E: convex hull of the light pixels (bezel line, ticks, numerals) on rect 08; ghost only",
-   "notes": "Context only. Hint for F: drawn in 10 and 14 -> under."
+   "notes": "Context only. | F: under (strong): Drawn in 10 (beneath our grid) and 14; hidden in 11-13."
   },
   {
    "id": "structure.tacho_needle",
@@ -3767,12 +4935,45 @@
      "note": "idle"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "seen at idle (~0.8), not at its 08 rest position"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "seen at idle"
+    }
+   ],
    "schematic": "design/overlay/schematic/structure.tacho_needle.svg",
    "measured_by": "E: half-max of the top-hat (11 px) of chroma on rect 08, robust straight-line fit (the thin needle over its glow)",
-   "notes": "Moves with rpm. Hint for F: drawn in 10 and 14 -> under."
+   "notes": "Moves with rpm. | F: under (strong): Seen in 10 and 14 (at idle, so not at the 08 position); hidden in 11-13."
   },
   {
    "id": "structure.tacho_info_line",
@@ -3845,12 +5046,59 @@
      "note": "left part (x 1306-1419) visible and empty; right part under the black box"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "gone",
+   "evidence": "medium",
+   "relation_basis": [
+    {
+     "photo": "08",
+     "seen": true,
+     "our_pixels_opaque_there": null,
+     "lit_expected": true,
+     "note": "stock"
+    },
+    {
+     "photo": "09",
+     "seen": true,
+     "our_pixels_opaque_there": null,
+     "lit_expected": true,
+     "note": "stock"
+    },
+    {
+     "photo": "10",
+     "seen": null,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "under our y 400 grid line and labels '1300/400', '14..'"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "14",
+     "seen": false,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "left part uncovered and empty; right part under BMW's black box"
+    }
+   ],
    "schematic": "design/overlay/schematic/structure.tacho_info_line.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08",
-   "notes": "Hint for F: not drawn in 14 where its left part is uncovered, while the speedo's line is -> gone with the centre mode label and gear letter (BMW's custom-theme layout drops the tacho-centre block)."
+   "notes": "F: gone (medium): In 14 its left part (x 1306-1419) is uncovered and empty while the speedo's line is drawn; the right part is under the black box; 10 covers it with labels. Goes with the centre mode label and gear letter (BMW's custom-theme layout drops the tacho-centre block)."
   },
   {
    "id": "structure.rev_band",
@@ -3943,12 +5191,43 @@
      "colour": "red"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true
+    }
+   ],
    "schematic": "design/overlay/schematic/structure.rev_band.svg",
    "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
-   "notes": "Hint for F: seen in 10 and 14 -> under."
+   "notes": "F: under (strong): Seen in 10 and 14; hidden in 11-13."
   },
   {
    "id": "structure.fuel_mini",
@@ -4052,12 +5331,46 @@
      "note": "under our text"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "our fuel mini there"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "under our text"
+    }
+   ],
    "schematic": "design/overlay/schematic/structure.fuel_mini.svg",
    "measured_by": "E: convex hull of the bright pixels on rect 08 (outline, red marks, numerals, pump icon), minus the speedo bezel next to it",
-   "notes": "Safety: info (fuel level; low-fuel warning is a separate lamp not seen). Hint for F: seen in 10 and 14 -> under."
+   "notes": "Safety: info (fuel level; low-fuel warning is a separate lamp not seen). | F: under (strong): Seen in 10 (beneath our grid) and 14; hidden in 11-13 under our own mini/background."
   },
   {
    "id": "structure.oil_mini",
@@ -4173,12 +5486,46 @@
      "note": "with COLD"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "under",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "our oil mini there"
+    },
+    {
+     "photo": "12",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "13",
+     "seen": false,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "with COLD"
+    }
+   ],
    "schematic": "design/overlay/schematic/structure.oil_mini.svg",
    "measured_by": "E: convex hull of the bright pixels on rect 08, minus the tacho bezel next to it",
-   "notes": "Hint for F: seen in 10 and 14 -> under."
+   "notes": "F: under (strong): Seen in 10 (beneath our grid) and 14; hidden in 11-13."
   },
   {
    "id": "overlay.black_box",
@@ -4258,12 +5605,48 @@
      "note": "over the stock tacho centre (hides the centre gear letter)"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
-   "relation_basis": [],
+   "relation": "over",
+   "evidence": "strong",
+   "relation_basis": [
+    {
+     "photo": "10",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "cuts our grid lines (C9 measured its edges there)"
+    },
+    {
+     "photo": "11",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "over our face"
+    },
+    {
+     "photo": "12",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "over our face"
+    },
+    {
+     "photo": "13",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "over our face"
+    },
+    {
+     "photo": "14",
+     "seen": true,
+     "our_pixels_opaque_there": false,
+     "lit_expected": true,
+     "note": "over the stock tacho centre (hides the centre gear letter)"
+    }
+   ],
    "schematic": "design/overlay/schematic/overlay.black_box.svg",
    "measured_by": "E: median half-max edge of the dark rectangle on rect 12 (our blue face around it gives contrast on all four sides); 14, 10, 11, 13 in the metrics",
-   "notes": "Hint for F: over (strong; 10-14)."
+   "notes": "F: over (strong): Drawn on top of our opaque face in 11, 12, 13 (and cuts our grid in 10); only while a theme is connected."
   }
  ]
 }
