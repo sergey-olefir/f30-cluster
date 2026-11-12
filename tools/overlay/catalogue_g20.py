@@ -694,6 +694,9 @@ def main():
     import relations_g20
     if os.path.exists(relations_g20.REL):
         relations_g20.apply(doc)
+    # the G20 parts' links and the elements only the parts have (tools/overlay/link_parts.py), so they survive too
+    import link_parts
+    link_parts.apply(doc)
     with open(OUT_JSON, 'w') as f:
         json.dump(doc, f, indent=1, ensure_ascii=False)
         f.write('\n')
