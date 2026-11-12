@@ -14,7 +14,11 @@ const TEST_COLOURS = [[0.014, 0.027, 0.05], [0.055, 0.105, 0.155], [0.1, 0.1, 0.
 
 const SWATCH = `// Calibration swatch for a cluster-render "effect" layer (GLSL ES 1.00): u_n grey steps 0..1 across
 // the top half, four dark test colours across the bottom half. v_uv (0,0) is the top-left.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform float u_n;
