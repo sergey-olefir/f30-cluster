@@ -24,7 +24,7 @@ WT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.
 sys.path.insert(0, os.path.join(WT, 'bake', 'src'))
 import qc  # noqa: E402
 
-RECT = '/Users/solefir/projects/f30-cluster/bake/work/overlay/rect/'
+RECT = os.path.join(os.environ.get('F30_MAIN', os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..'))), 'bake', 'work', 'overlay', 'rect') + '/'
 C = os.path.join(WT, 'bake', 'work', 'g20sim', 'C')
 OUT = os.path.join(C, 'qc')
 

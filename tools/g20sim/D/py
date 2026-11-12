@@ -1,3 +1,4 @@
 #!/bin/sh
 # Run Python with the bake's dependencies (opencv, numpy, pillow, scipy).
-UV_CACHE_DIR=/Users/solefir/projects/f30-cluster/bake/work/.uvcache exec uv run -q --no-project --with opencv-python-headless --with numpy --with pillow --with scipy python "$@"
+ROOT=$(cd "$(dirname "$0")/../../.." && pwd)
+UV_CACHE_DIR=${UV_CACHE_DIR:-${F30_MAIN:-$ROOT}/bake/work/.uvcache} exec uv run -q --no-project --with opencv-python-headless --with numpy --with pillow --with scipy python "$@"

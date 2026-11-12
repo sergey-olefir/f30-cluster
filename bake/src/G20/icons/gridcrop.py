@@ -9,7 +9,7 @@ import sys
 import cv2
 import numpy as np
 
-RECT = '/Users/solefir/projects/f30-cluster/bake/work/overlay/rect/'
+RECT = os.path.join(os.environ.get('F30_MAIN', os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..'))), 'bake', 'work', 'overlay', 'rect') + '/'
 OUT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'work', 'g20sim', 'C'))
 
 name, p = sys.argv[1], sys.argv[2]

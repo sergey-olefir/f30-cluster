@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 WT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..'))
 FONT = os.path.join(WT, 'bench', 'g20', 'fonts', 'Roboto-wdth-wght.subset.ttf')
-RECT = '/Users/solefir/projects/f30-cluster/bake/work/overlay/rect/'
+RECT = os.path.join(os.environ.get('F30_MAIN', os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..'))), 'bake', 'work', 'overlay', 'rect') + '/'
 OUT = os.path.join(WT, 'bake', 'work', 'g20sim', 'C', 'text_fit.json')
 IMS = {p: cv2.imread(RECT + p + '.png').astype(np.float32)[..., ::-1] for p in ('08', '09', '14')}
 

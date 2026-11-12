@@ -3,7 +3,7 @@
 #   shot.sh png  OUT.png  URL      screenshot 1920x720
 #   shot.sh dom  OUT.html URL      DOM after the scripts ran (the harness writes its JSON into <pre id=out>)
 # Needs the harness server:  python3 -m http.server 8093 --bind 127.0.0.1 --directory <worktree>
-WT=/Users/solefir/projects/f30-cluster/.claude/worktrees/agent-abde5d7d15416f564
+WT=$(cd "$(dirname "$0")/../../.." && pwd)
 UD=$WT/bake/work/g20sim/D/chrome
 CH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 kind=$1; out=$2; url=$3; budget=${4:-20000}

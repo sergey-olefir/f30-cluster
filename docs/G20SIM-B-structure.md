@@ -18,7 +18,7 @@ The static parts of BMW's stock G20 Comfort dials and the panel around them, for
 **Regenerate.** Run from the worktree root:
 
 ```sh
-UV_CACHE_DIR=/Users/solefir/projects/f30-cluster/bake/work/.uvcache uv run -q --no-project \
+UV_CACHE_DIR=bake/work/.uvcache uv run -q --no-project \
   --with opencv-python-headless --with numpy --with pillow --with scipy \
   python bake/src/G20/structure/build.py --measure     # ~77 s: measure + render + QC
 #                                         (no flag: render from params/ + QC, ~45 s; --no-qc: render only, ~25 s)

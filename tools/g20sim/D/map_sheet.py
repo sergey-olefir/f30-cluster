@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 WT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 S = os.path.join(WT, 'bake', 'work', 'g20sim', 'D')
-R = '/Users/solefir/projects/f30-cluster/bake/work/overlay/rect/'
+R = os.path.join(os.environ.get('F30_MAIN', WT), 'bake', 'work', 'overlay', 'rect') + '/'
 x0, y0, x1, y1 = 540, 140, 1410, 625
 tiles = [('rect 08 (night)', R + '08.png'), ('ours, night', S + '/harness/map_night.png'),
          ('rect 09 (day)', R + '09.png'), ('ours, day', S + '/harness/map_day.png'),

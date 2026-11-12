@@ -12,7 +12,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))          # the worktree root
-MAIN = '/Users/solefir/projects/f30-cluster'
+MAIN = os.environ.get('F30_MAIN', WT)        # the checkout holding the git-ignored evidence (reference/, bake/work/); set F30_MAIN from a worktree
 RECT = os.path.join(MAIN, 'bake', 'work', 'overlay', 'rect')
 SCRATCH = os.path.join(WT, 'bake', 'work', 'g20sim', 'D')
 G20 = os.path.join(WT, 'design', 'overlay', 'g20_comfort.json')

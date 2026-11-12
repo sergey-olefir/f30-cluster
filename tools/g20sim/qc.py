@@ -2,7 +2,7 @@
 states of photos 08, 09 and 14 (tools/g20sim/qc_shots.sh qc) against the rectified photos, per element group:
 SSIM on luminance and mean CIEDE2000 (bake/src/qc.py metrics), with review sheets in bake/work/g20sim/E/qc/.
 
-  UV_CACHE_DIR=/Users/solefir/projects/f30-cluster/bake/work/.uvcache uv run -q --no-project \
+  UV_CACHE_DIR=bake/work/.uvcache uv run -q --no-project \
       --with opencv-python-headless --with numpy --with pillow --with scipy python tools/g20sim/qc.py
 
 ROIs and masks reuse package B's (bake/src/G20/structure/qc_struct.py): the structure ROIs, the glare boxes, our

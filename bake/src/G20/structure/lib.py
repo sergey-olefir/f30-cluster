@@ -13,7 +13,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WT = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))           # the worktree root
-MAIN = "/Users/solefir/projects/f30-cluster"                               # main checkout (git-ignored evidence)
+MAIN = os.environ.get('F30_MAIN', WT)        # the checkout holding the git-ignored evidence (reference/, bake/work/); set F30_MAIN from a worktree
 RECT = os.path.join(MAIN, "bake", "work", "overlay", "rect")
 OUT = os.path.join(WT, "bench", "g20", "structure")                        # shipped PNGs + manifest.part.json
 SCRATCH = os.path.join(WT, "bake", "work", "g20sim", "B")

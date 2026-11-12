@@ -1,5 +1,6 @@
 """Package C helper: print an ASCII map of an icon on a rect ('#' > hi, '+' > lo) with panel x/y labels, for
 reading geometry. python ascii.py PHOTO X0 Y0 X1 Y1 CHANNEL [LO HI] [YSTEP]; CHANNEL in r g b min max red green amber"""
+import os
 import sys
 
 import cv2
@@ -10,7 +11,7 @@ x0, y0, x1, y1 = map(int, sys.argv[2:6])
 ch = sys.argv[6]
 lo, hi = (float(sys.argv[7]), float(sys.argv[8])) if len(sys.argv) > 8 else (None, None)
 ys = int(sys.argv[9]) if len(sys.argv) > 9 else 1
-im = cv2.imread('/Users/solefir/projects/f30-cluster/bake/work/overlay/rect/%s.png' % p)[..., ::-1].astype(np.float32)
+im = cv2.imread(os.path.join(os.environ.get('F30_MAIN', os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..'))), 'bake', 'work', 'overlay', 'rect', '%s.png' % p))[..., ::-1].astype(np.float32)
 r, g, b = im[..., 0], im[..., 1], im[..., 2]
 v = {'r': r, 'g': g, 'b': b, 'min': im.min(2), 'max': im.max(2), 'red': r - np.maximum(g, b),
      'green': g - np.maximum(r, b), 'amber': np.minimum(r, g) - b}[ch][y0:y1, x0:x1]

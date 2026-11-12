@@ -4,10 +4,11 @@ lamp's channel (colour). Prints one line per part; used to fill the style table 
 Run: UV_CACHE_DIR=bake/work/.uvcache uv run -q --no-project --with opencv-python-headless --with numpy \
      python bake/src/G20/icons/measure_parts.py
 """
+import os
 import cv2
 import numpy as np
 
-RECT = '/Users/solefir/projects/f30-cluster/bake/work/overlay/rect/'
+RECT = os.path.join(os.environ.get('F30_MAIN', os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..'))), 'bake', 'work', 'overlay', 'rect') + '/'
 IMS = {p: cv2.imread(RECT + p + '.png').astype(np.float32)[..., ::-1] for p in ('08', '09', '14')}
 
 # (name, photo, search box x0 y0 x1 y1, channel: 'min' | 'max' | 'red' | 'green')
