@@ -81,6 +81,20 @@ def main():
         for l in sorted([l for l in STACK if pick(l)], key=lambda l: l['z']):
             put(c, l['id'], *box)
         save(name, c)
+    # "6WB Dials + G20" (docs/OVERLAY-PLAN-DIALS.md): the dials alone, without the bottom arcs and the battery (the G20
+    # shows its own range there)
+    for name, box, cl in (('speedo_d', (77, 45), 'C1'), ('tacho_d', (1173, 45), 'C2')):
+        c = np.zeros((670, 670, 4), np.float32)
+        for l in sorted([l for l in STACK if l['cluster'] == cl], key=lambda l: l['z']):
+            put(c, l['id'], *box)
+        save(name, c)
+    # its collar (tools/overlay/plan_dials.py): where our background stays black over the stock G20 dials that stick
+    # out past ours; quarter size, coverage in alpha
+    g = np.asarray(Image.open(os.path.join(ROOT, 'design', 'overlay', 'collar.dials.png')).convert('L'), dtype=np.float32) / 255.0
+    g = g.reshape(180, 4, 480, 4).mean((1, 3))
+    c = np.zeros((180, 480, 4), np.float32)
+    c[..., 3] = g
+    save('collar', c)
     # the middle window and the bar below it, half size, one texture: x 640..1280, y 76..648
     c = np.zeros((572, 640, 4), np.float32)
     put(c, 'window.base', 640, 76)

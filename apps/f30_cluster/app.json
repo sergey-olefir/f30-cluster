@@ -2,7 +2,7 @@
   "id": "f30_cluster",
   "title": "F30 Cluster",
   "description": "Instrument cluster themes after the F-series 6WB look: Comfort, Sport and Eco Pro, following the drive mode",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "vendor": "custom",
   "loggingId": "OAF3",
   "iconGlyph": "F30",
@@ -111,6 +111,10 @@
           "6WB Comfort + BMW map"
         ],
         [
+          "wb_dials",
+          "6WB Dials + G20"
+        ],
+        [
           "wb_sport",
           "6WB Sport"
         ],
@@ -169,6 +173,10 @@
           "6WB Comfort + BMW map"
         ],
         [
+          "wb_dials",
+          "6WB Dials + G20"
+        ],
+        [
           "wb_sport",
           "6WB Sport"
         ],
@@ -201,6 +209,10 @@
           "6WB Comfort + BMW map"
         ],
         [
+          "wb_dials",
+          "6WB Dials + G20"
+        ],
+        [
           "wb_sport",
           "6WB Sport"
         ],
@@ -231,6 +243,10 @@
         [
           "wb_comfort_map",
           "6WB Comfort + BMW map"
+        ],
+        [
+          "wb_dials",
+          "6WB Dials + G20"
         ],
         [
           "wb_sport",

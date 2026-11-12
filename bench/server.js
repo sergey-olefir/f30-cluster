@@ -107,7 +107,7 @@ function sceneMeta() {
 }
 function helloMsg() {
     return { t: 'hello', targets: TARGETS, view: appView(), app: APP_ID, cap: layerCap, pixelCap: PIXEL_BYTES,
-        geometry: { HOOD: visible.HOOD, BLACK_BOX: visible.BLACK_BOX, BELT: visible.BELT, HUD_WINDOW: visible.HUD_WINDOW, HUD_BMW: visible.HUD_BMW } };
+        geometry: { HOOD: visible.HOOD, BLACK_BOX: visible.BLACK_BOX, BELT: visible.BELT, PARK_LAMP: visible.PARK_LAMP, HUD_WINDOW: visible.HUD_WINDOW, HUD_BMW: visible.HUD_BMW } };
 }
 let sceneTimer = null;
 function sceneChanged() {

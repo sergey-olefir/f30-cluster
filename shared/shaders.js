@@ -1036,6 +1036,9 @@ uniform vec4 u_baseR;      // its box in the layer's px: x, y, w, h
 uniform sampler2D u_deco;  // the bottom arc's segment coverage (alpha), lit live up to the fill angle
 uniform vec4 u_decoR;      // its box in the layer's px (w 0: none)
 uniform vec3 u_fillC;      // the lit segments' colour
+uniform vec4 u_cut;        // the open bottom (the G20's bottom row shows below it): cut y (layer px from the top; 0: none),
+                           // fade (px above it over which the dial fades out), window shape (0 none, 1 round, 2 box)
+uniform vec4 u_cutW;       // the window (BMW's own sign or lamp shows through), layer px: round cx, cy, r; box x0, y0, x1, y1
 #define u_size u_geo.xy
 #define u_ringW u_geo.z
 #define u_flip u_geo.w
@@ -1327,6 +1330,16 @@ void main() {
             col *= 1.0 - 0.30 * smoothstep(rb0 + 0.25 * u_ringW, rb0 + 0.02 * u_ringW, d); // and a darker band just inside the gloss
         }
     }
+    if (u_cut.x > 0.0) {
+        // the open bottom: the dial fades out toward the cut, and a window shows BMW's own sign or lamp
+        vec2 lp = v_uv * u_size;                                                  // layer px, +y down
+        edge *= 1.0 - smoothstep(u_cut.x - u_cut.y, u_cut.x, lp.y);
+        if (u_cut.z > 0.5 && u_cut.z < 1.5) edge *= clamp(length(lp - u_cutW.xy) - u_cutW.z + 0.5, 0.0, 1.0);
+        else if (u_cut.z > 1.5) {
+            vec2 wq = max(u_cutW.xy - lp, lp - u_cutW.zw);
+            edge *= clamp(max(wq.x, wq.y) + 0.5, 0.0, 1.0);
+        }
+    }
     gl_FragColor = vec4(min(col, vec3(1.0)), edge);
 }
 `;
@@ -1354,7 +1367,8 @@ uniform vec4 u_r0;        // each one's box, target px: x, y, w, h
 uniform vec4 u_r1;
 uniform vec4 u_r2;
 uniform vec2 u_win;       // the baked window's level (a gain), applied above this y (the bar below keeps its own)
-uniform float u_hasTex;
+uniform float u_hasTex;   // 1: the baked window, horizon and bar; 2: a collar only (u_t0's alpha over u_r0): black there,
+                          // see-through elsewhere, so BMW's own cluster shows round our dials
 uniform vec4 u_hole;      // a see-through window for BMW's own map under us: x, y, w, h (w 0: none)
 uniform float u_holeR;    // its corner radius
 
@@ -1368,6 +1382,12 @@ void main() {
     float mid = (u_dl.x + u_dr.x) * 0.5;
     float cy = u_dl.y, R = u_dl.z;
     vec3 col = vec3(0.0);
+    if (u_hasTex > 1.5) {
+        vec2 u0 = (p - u_r0.xy) / u_r0.zw;
+        float a = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? texture2D(u_t0, u0).a : 0.0;
+        gl_FragColor = vec4(0.0, 0.0, 0.0, smoothstep(0.35, 0.65, a));
+        return;
+    }
     if (u_style < 0.5 && u_hasTex > 0.5) {
         // the background: black (BAKE C10's near-black blue and halo were the references' LCD black, not drawn)
         vec2 u0 = (p - u_r0.xy) / u_r0.zw, u1 = (p - u_r1.xy) / u_r1.zw, u2 = (p - u_r2.xy) / u_r2.zw;

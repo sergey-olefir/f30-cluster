@@ -2,7 +2,7 @@
 """Generates the three 6WB-style layouts (our own drawing, traced by eye off photos of BMW's F-series
 multifunctional display; no BMW artwork is used):
     python3 design/gen_6wb.py apps/f30_cluster/hud/layouts
-Writes wb_comfort.json, wb_comfort_map.json, wb_sport.json, wb_eco.json. Edit this file, not the JSON.
+Writes wb_comfort.json, wb_comfort_map.json, wb_dials.json, wb_sport.json, wb_eco.json. Edit this file, not the JSON.
 
 Proportions are measured off the photos, in dial radii (R): the two dial centres are 3.2 R apart, the display is
 6.6 R wide and the dials stand at mid height; a small gauge sits 1.355 R outside each dial, 0.39 R below centre,
@@ -158,6 +158,47 @@ def comfort():
               text("row_v%d" % i, x, 650, 160, tok, "wb_val", align="left", toggle="!baked")]
     return W
 
+CUT_Y, CUT_FADE = 656, 26      # the big dials' open bottom (docs/OVERLAY-PLAN-DIALS.md): BMW's bottom row starts at y 659
+MINI_DY = -20                  # the minis move up so BMW's range ("467 km") clears the fuel mini
+
+def dials():
+    """6WB Dials + G20 (docs/OVERLAY-PLAN-DIALS.md): our four dials only; the G20 draws everything else round them.
+    Our background is see-through except a collar over the stock dials' parts that stick out past ours; both big
+    dials fade out toward y 656 so BMW's bottom row shows, with a round window for BMW's speed-limit sign and a small
+    one for its check-control "i"."""
+    global FU, OT
+    FU, OT = (FU[0], FU[1] + MINI_DY), (OT[0], OT[1] + MINI_DY)
+    W = [
+        {"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
+         "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "comfort", "color": "accent",
+         "collar": {"tex": "collar", "x": 0, "y": 0, "w": 1920, "h": 720}},
+        dial("speedo", SP, "comfort", ringW=10, base=base("speedo_d", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
+             cut={"y": CUT_Y, "fade": CUT_FADE, "round": [539, 622, 46]},
+             measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10, start=SPD_START, sweep=SPD_SWEEP),
+        dial("tacho", RV, "comfort", ringW=10, base=base("tacho_d", RV, R, RV[0] - R, RV[1] - R, 2 * R, 3),
+             cut={"y": CUT_Y, "fade": CUT_FADE, "box": [1250, 585, 1276, 633]},
+             measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
+             start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF),
+    ]
+    M = minis(baked=True)
+    for w in M:                      # the minis' baked faces sit 20 px higher too (base() is relative to the layer)
+        if w["type"] == "dial":
+            w["base"]["y"] += MINI_DY
+    W += M
+    for i in range(14):
+        n = 20 * i
+        W.append(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1))
+    for i in range(1, 8):
+        W.append(ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 24.5, 2, w=40))
+    W += [
+        text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "km/h", "wb_cap", conn=1),
+        text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "1/min x 1000", "wb_cap", conn=2),
+        text("ready", RV[0] - 0.63 * R, RV[1] + 0.25 * R, 110, "READY", "wb_capb", conn=2),
+        text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "OFF", "wb_cap", "dim", conn=2),
+    ]
+    FU, OT = (FU[0], FU[1] - MINI_DY), (OT[0], OT[1] - MINI_DY)
+    return W
+
 def glowing(mode):
     """Sport and Eco Pro: the earlier pass, on the same geometry."""
     sport = mode == "sport"
@@ -204,9 +245,10 @@ def with_map(W):
     return W
 
 for name, mode, title in (("comfort", "comfort", "6WB Comfort"), ("comfort_map", "comfort", "6WB Comfort + BMW map"),
+                          ("dials", "comfort", "6WB Dials + G20"),
                           ("sport", "sport", "6WB Sport"), ("eco", "eco", "6WB Eco Pro")):
     globals().update(G20 if mode == "comfort" else OLD)
-    W = comfort() if mode == "comfort" else glowing(mode)
+    W = dials() if name == "dials" else comfort() if mode == "comfort" else glowing(mode)
     if name == "comfort_map":
         W = with_map(W)
     lay = {"schemaVersion": 2, "name": title, "packWaste": 8, "theme": "wb_" + mode,
