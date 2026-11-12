@@ -1,0 +1,1189 @@
+{
+ "kind": "plan",
+ "schema_version": 1,
+ "version": 1,
+ "mode": "comfort",
+ "based_on": {
+  "g20": {
+   "file": "design/overlay/g20_comfort.json",
+   "sha256": "sha256:58adb1e3e2150bf1f61382a90aac5a95a74eea6e22d5d9acafb29c6c92c79d03"
+  },
+  "wb": {
+   "file": "design/overlay/wb_comfort.json",
+   "sha256": "sha256:f1a952dfb704c758714da54d312dcfdb877166577cfa09e4f89f82285ba611aa"
+  }
+ },
+ "settings": {
+  "stockMap": false
+ },
+ "g20": {
+  "tt.brake": {
+   "decision": "reveal"
+  },
+  "tt.tpms": {
+   "decision": "reveal"
+  },
+  "tt.abs": {
+   "decision": "reveal"
+  },
+  "tt.dsc": {
+   "decision": "reveal"
+  },
+  "tt.auto_h": {
+   "decision": "reveal",
+   "notes": "about 6 % (the left edge of the A) stays under our tacho bezel"
+  },
+  "tt.parking_brake": {
+   "decision": "keep-clear"
+  },
+  "tt.steering": {
+   "decision": "reveal"
+  },
+  "bottom.range": {
+   "decision": "reveal",
+   "notes": "below the speedo cut; the fuel mini moves up 20 px"
+  },
+  "bottom.clock": {
+   "decision": "reveal",
+   "notes": "below the speedo cut (y >= 656)"
+  },
+  "bottom.belt_rear": {
+   "decision": "reveal",
+   "notes": "below the speedo cut (y >= 656)"
+  },
+  "bottom.belt_driver": {
+   "decision": "keep-clear"
+  },
+  "bottom.airbag": {
+   "decision": "reveal"
+  },
+  "bottom.cc_info": {
+   "decision": "reveal"
+  },
+  "bottom.street": {
+   "decision": "reveal"
+  },
+  "bottom.temperature": {
+   "decision": "reveal",
+   "notes": "below the tacho cut (y >= 656)"
+  },
+  "assist.speed_limit": {
+   "decision": "reveal",
+   "notes": "round window in our speedo (the empty sector of the scale)"
+  },
+  "assist.cc_panel": {
+   "decision": "reveal"
+  },
+  "assist.info_tacho": {
+   "decision": "reveal",
+   "notes": "small window in our tacho rim"
+  },
+  "assist.mode_label_centre": {
+   "decision": "drop",
+   "notes": "BMW does not draw it with a custom theme; the bottom-row COMFORT PLUS shows instead"
+  },
+  "assist.mode_label": {
+   "decision": "reveal",
+   "notes": "below the tacho cut (y >= 656)"
+  },
+  "assist.gear_centre": {
+   "decision": "drop",
+   "notes": "BMW does not draw it; the bottom-row gear (over) shows instead"
+  },
+  "assist.gear": {
+   "decision": "keep-clear"
+  },
+  "assist.digital_speed": {
+   "decision": "cover",
+   "notes": "under our speedo hub; our needle shows the speed"
+  },
+  "assist.rpm_label": {
+   "decision": "cover",
+   "notes": "under our tacho; cosmetic"
+  },
+  "assist.off": {
+   "decision": "cover",
+   "notes": "under our tacho; our own READY/OFF stays. A window here would show the stock tacho needle at rest"
+  },
+  "assist.cold": {
+   "decision": "cover",
+   "notes": "under our oil-temperature mini, which shows the same"
+  },
+  "map.region": {
+   "decision": "reveal",
+   "notes": "reveal between the dials only (edited hole = the gap); the parts under our dials stay hidden"
+  },
+  "map.position_arrow": {
+   "decision": "reveal"
+  },
+  "structure.speedo": {
+   "decision": "cover",
+   "notes": "stock dial graphics: hidden by our dials, and past their edge by the collar (collar.dials.png)"
+  },
+  "structure.speedo_needle": {
+   "decision": "cover",
+   "notes": "stock dial graphics: hidden by our dials, and past their edge by the collar (collar.dials.png)"
+  },
+  "structure.speedo_info_line": {
+   "decision": "cover",
+   "notes": "stock dial graphics: hidden by our dials, and past their edge by the collar (collar.dials.png)"
+  },
+  "structure.tacho": {
+   "decision": "cover",
+   "notes": "stock dial graphics: hidden by our dials, and past their edge by the collar (collar.dials.png)"
+  },
+  "structure.tacho_needle": {
+   "decision": "cover",
+   "notes": "stock dial graphics: hidden by our dials, and past their edge by the collar (collar.dials.png)"
+  },
+  "structure.tacho_info_line": {
+   "decision": "drop",
+   "notes": "BMW does not draw it; cosmetic"
+  },
+  "structure.rev_band": {
+   "decision": "cover",
+   "notes": "stock dial graphics: hidden by our dials, and past their edge by the collar (collar.dials.png)"
+  },
+  "structure.fuel_mini": {
+   "decision": "cover",
+   "notes": "stock dial graphics: hidden by our dials, and past their edge by the collar (collar.dials.png)"
+  },
+  "structure.oil_mini": {
+   "decision": "cover",
+   "notes": "stock dial graphics: hidden by our dials, and past their edge by the collar (collar.dials.png)"
+  },
+  "overlay.black_box": {
+   "decision": "keep-clear"
+  }
+ },
+ "wb": {
+  "C10.panel.background": {
+   "hidden": true
+  },
+  "C5.window.base": {
+   "hidden": true
+  },
+  "C6.infobar.body": {
+   "hidden": true
+  },
+  "C5.window.horizon": {
+   "hidden": true
+  },
+  "C6.infobar.line": {
+   "hidden": true
+  },
+  "C7.sign.speed-limit": {
+   "hidden": true
+  },
+  "C7.sign.no-overtaking": {
+   "hidden": true
+  },
+  "C6.speedo.range-arc.track": {
+   "hidden": true
+  },
+  "C6.tacho.ed-arc.track": {
+   "hidden": true
+  },
+  "C7.edyn.battery": {
+   "hidden": true
+  },
+  "C7.bar.range": {
+   "hidden": true
+  },
+  "w.bg": {
+   "hidden": true
+  },
+  "w.range_icon": {
+   "hidden": true
+  },
+  "w.range_in": {
+   "hidden": true
+  },
+  "w.signs": {
+   "hidden": true
+  },
+  "w.limit": {
+   "hidden": true
+  },
+  "w.row_b0": {
+   "hidden": true
+  },
+  "w.row_b1": {
+   "hidden": true
+  },
+  "w.range_v": {
+   "hidden": true
+  },
+  "w.range_a0": {
+   "hidden": true
+  },
+  "w.range_a1": {
+   "hidden": true
+  },
+  "w.cons_v": {
+   "hidden": true
+  },
+  "w.cons_a0": {
+   "hidden": true
+  },
+  "w.cons_a1": {
+   "hidden": true
+  },
+  "w.row_h0": {
+   "hidden": true
+  },
+  "w.row_v0": {
+   "hidden": true
+  },
+  "w.row_h1": {
+   "hidden": true
+  },
+  "w.row_v1": {
+   "hidden": true
+  },
+  "w.row_h2": {
+   "hidden": true
+  },
+  "w.row_v2": {
+   "hidden": true
+  }
+ },
+ "anchors": {
+  "mini.fuel": {
+   "dy": -20
+  },
+  "mini.oil": {
+   "dy": -20
+  }
+ },
+ "holes": [
+  {
+   "id": "hole.tt.brake",
+   "for": [
+    "tt.brake"
+   ],
+   "rect": [
+    21,
+    210,
+    89,
+    259
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.tt.tpms",
+   "for": [
+    "tt.tpms"
+   ],
+   "rect": [
+    20,
+    263,
+    81,
+    318
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.tt.abs",
+   "for": [
+    "tt.abs"
+   ],
+   "rect": [
+    10,
+    323,
+    77,
+    373
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.tt.dsc",
+   "for": [
+    "tt.dsc"
+   ],
+   "rect": [
+    15,
+    377,
+    67,
+    433
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.tt.auto_h",
+   "for": [
+    "tt.auto_h"
+   ],
+   "rect": [
+    1773,
+    175,
+    1874,
+    209
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.tt.steering",
+   "for": [
+    "tt.steering"
+   ],
+   "rect": [
+    1843,
+    261,
+    1909,
+    319
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.bottom.range",
+   "for": [
+    "bottom.range"
+   ],
+   "rect": [
+    132,
+    662,
+    307,
+    703
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.bottom.clock",
+   "for": [
+    "bottom.clock"
+   ],
+   "rect": [
+    340,
+    662,
+    455,
+    704
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.bottom.belt_rear",
+   "for": [
+    "bottom.belt_rear"
+   ],
+   "rect": [
+    499,
+    675,
+    580,
+    719
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.bottom.airbag",
+   "for": [
+    "bottom.airbag"
+   ],
+   "rect": [
+    631,
+    661,
+    683,
+    719
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.bottom.cc_info",
+   "for": [
+    "bottom.cc_info"
+   ],
+   "rect": [
+    732,
+    633,
+    757,
+    686
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.bottom.street",
+   "for": [
+    "bottom.street"
+   ],
+   "rect": [
+    791,
+    665,
+    1130,
+    713
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.bottom.temperature",
+   "for": [
+    "bottom.temperature"
+   ],
+   "rect": [
+    1536,
+    662,
+    1667,
+    705
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.assist.speed_limit",
+   "for": [
+    "assist.speed_limit"
+   ],
+   "rect": [
+    494,
+    577,
+    584,
+    667
+   ],
+   "margin": 4,
+   "radius": 45,
+   "edited": true
+  },
+  {
+   "id": "hole.assist.cc_panel",
+   "for": [
+    "assist.cc_panel"
+   ],
+   "rect": [
+    708,
+    597,
+    1244,
+    695
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.assist.info_tacho",
+   "for": [
+    "assist.info_tacho"
+   ],
+   "rect": [
+    1252,
+    587,
+    1274,
+    631
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.assist.mode_label",
+   "for": [
+    "assist.mode_label"
+   ],
+   "rect": [
+    1222,
+    655,
+    1363,
+    715
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.map.region",
+   "for": [
+    "map.region"
+   ],
+   "rect": [
+    748,
+    155,
+    1172,
+    612
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": true
+  },
+  {
+   "id": "hole.map.position_arrow",
+   "for": [
+    "map.position_arrow"
+   ],
+   "rect": [
+    935,
+    492,
+    995,
+    536
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  }
+ ],
+ "keep_clear": [
+  {
+   "id": "kc.tt.parking_brake",
+   "for": [
+    "tt.parking_brake"
+   ],
+   "rect": [
+    1838,
+    217,
+    1900,
+    260
+   ],
+   "poly": [
+    [
+     1900,
+     234
+    ],
+    [
+     1899,
+     247
+    ],
+    [
+     1897,
+     253
+    ],
+    [
+     1894,
+     258
+    ],
+    [
+     1890,
+     260
+    ],
+    [
+     1847,
+     259
+    ],
+    [
+     1843,
+     256
+    ],
+    [
+     1838,
+     242
+    ],
+    [
+     1839,
+     229
+    ],
+    [
+     1843,
+     221
+    ],
+    [
+     1847,
+     218
+    ],
+    [
+     1867,
+     217
+    ],
+    [
+     1890,
+     218
+    ],
+    [
+     1893,
+     219
+    ],
+    [
+     1896,
+     222
+    ]
+   ]
+  },
+  {
+   "id": "kc.bottom.belt_driver",
+   "for": [
+    "bottom.belt_driver"
+   ],
+   "rect": [
+    593,
+    666,
+    624,
+    715
+   ],
+   "poly": [
+    [
+     614,
+     715
+    ],
+    [
+     603,
+     715
+    ],
+    [
+     593,
+     704
+    ],
+    [
+     593,
+     700
+    ],
+    [
+     603,
+     669
+    ],
+    [
+     606,
+     666
+    ],
+    [
+     612,
+     666
+    ],
+    [
+     623,
+     676
+    ],
+    [
+     624,
+     704
+    ],
+    [
+     616,
+     714
+    ]
+   ]
+  },
+  {
+   "id": "kc.assist.gear",
+   "for": [
+    "assist.gear"
+   ],
+   "rect": [
+    1398,
+    668,
+    1424,
+    703
+   ],
+   "poly": [
+    [
+     1419,
+     670
+    ],
+    [
+     1424,
+     677
+    ],
+    [
+     1424,
+     682
+    ],
+    [
+     1422,
+     687
+    ],
+    [
+     1405,
+     703
+    ],
+    [
+     1401,
+     702
+    ],
+    [
+     1399,
+     700
+    ],
+    [
+     1398,
+     673
+    ],
+    [
+     1399,
+     669
+    ],
+    [
+     1400,
+     668
+    ],
+    [
+     1414,
+     668
+    ]
+   ]
+  },
+  {
+   "id": "kc.overlay.black_box",
+   "for": [
+    "overlay.black_box"
+   ],
+   "rect": [
+    1421.9,
+    320.4,
+    1612.1,
+    439.6
+   ],
+   "poly": [
+    [
+     1421.9,
+     320.4
+    ],
+    [
+     1612.1,
+     320.4
+    ],
+    [
+     1612.1,
+     439.6
+    ],
+    [
+     1421.9,
+     439.6
+    ]
+   ]
+  }
+ ],
+ "conflicts": [
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "assist.gear",
+   "wb": "C2.tacho.static",
+   "overlap_px": 551,
+   "overlap_pct": 81.03,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "assist.gear",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 161,
+   "overlap_pct": 23.68,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "assist.gear",
+   "wb": "w.tacho",
+   "overlap_px": 636,
+   "overlap_pct": 93.53,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "overlay.black_box",
+   "wb": "C2.tacho.static",
+   "overlap_px": 22800,
+   "overlap_pct": 100,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "overlay.black_box",
+   "wb": "C2.tacho.inner-ring",
+   "overlap_px": 142,
+   "overlap_pct": 0.62,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "overlay.black_box",
+   "wb": "C2.tacho.hub-ring",
+   "overlap_px": 1036,
+   "overlap_pct": 4.54,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "overlay.black_box",
+   "wb": "w.tacho",
+   "overlap_px": 22800,
+   "overlap_pct": 100,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "tt.auto_h",
+   "wb": "C2.tacho.static",
+   "overlap_px": 164,
+   "overlap_pct": 7.31,
+   "message": "the reveal hole would cut our content (164 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "tt.auto_h",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 150,
+   "overlap_pct": 6.69,
+   "message": "the reveal hole would cut our content (150 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "tt.auto_h",
+   "wb": "w.tacho",
+   "overlap_px": 375,
+   "overlap_pct": 16.73,
+   "message": "the reveal hole would cut our content (375 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.range",
+   "wb": "C1.speedo.base",
+   "overlap_px": 1446,
+   "overlap_pct": 30.1,
+   "message": "the reveal hole would cut our content (1446 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.range",
+   "wb": "C1.speedo.bezel",
+   "overlap_px": 545,
+   "overlap_pct": 11.34,
+   "message": "the reveal hole would cut our content (545 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.range",
+   "wb": "w.speedo",
+   "overlap_px": 1449,
+   "overlap_pct": 30.16,
+   "message": "the reveal hole would cut our content (1449 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.clock",
+   "wb": "C1.speedo.base",
+   "overlap_px": 4818,
+   "overlap_pct": 140.51,
+   "message": "the reveal hole would cut our content (4818 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.clock",
+   "wb": "C1.speedo.bezel",
+   "overlap_px": 195,
+   "overlap_pct": 5.69,
+   "message": "the reveal hole would cut our content (195 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.clock",
+   "wb": "w.speedo",
+   "overlap_px": 4818,
+   "overlap_pct": 140.51,
+   "message": "the reveal hole would cut our content (4818 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.belt_rear",
+   "wb": "C1.speedo.base",
+   "overlap_px": 1071,
+   "overlap_pct": 44.11,
+   "message": "the reveal hole would cut our content (1071 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.belt_rear",
+   "wb": "C1.speedo.bezel",
+   "overlap_px": 418,
+   "overlap_pct": 17.22,
+   "message": "the reveal hole would cut our content (418 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.belt_rear",
+   "wb": "w.speedo",
+   "overlap_px": 1073,
+   "overlap_pct": 44.19,
+   "message": "the reveal hole would cut our content (1073 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.temperature",
+   "wb": "C2.tacho.static",
+   "overlap_px": 3879,
+   "overlap_pct": 106.1,
+   "message": "the reveal hole would cut our content (3879 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.temperature",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 1033,
+   "overlap_pct": 28.25,
+   "message": "the reveal hole would cut our content (1033 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.temperature",
+   "wb": "w.tacho",
+   "overlap_px": 4529,
+   "overlap_pct": 123.88,
+   "message": "the reveal hole would cut our content (4529 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "assist.speed_limit",
+   "wb": "C1.speedo.base",
+   "overlap_px": 6376,
+   "overlap_pct": 118.16,
+   "message": "the reveal hole would cut our content (6376 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "assist.speed_limit",
+   "wb": "C1.speedo.tick-groove-rim",
+   "overlap_px": 417,
+   "overlap_pct": 7.73,
+   "message": "the reveal hole would cut our content (417 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "assist.speed_limit",
+   "wb": "w.speedo",
+   "overlap_px": 6376,
+   "overlap_pct": 118.16,
+   "message": "the reveal hole would cut our content (6376 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "assist.info_tacho",
+   "wb": "C2.tacho.static",
+   "overlap_px": 235,
+   "overlap_pct": 54.02,
+   "message": "the reveal hole would cut our content (235 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "assist.info_tacho",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 198,
+   "overlap_pct": 45.52,
+   "message": "the reveal hole would cut our content (198 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "assist.info_tacho",
+   "wb": "w.tacho",
+   "overlap_px": 438,
+   "overlap_pct": 100.69,
+   "message": "the reveal hole would cut our content (438 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "assist.mode_label",
+   "wb": "C2.tacho.static",
+   "overlap_px": 332,
+   "overlap_pct": 5.82,
+   "message": "the reveal hole would cut our content (332 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "assist.mode_label",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 282,
+   "overlap_pct": 4.94,
+   "message": "the reveal hole would cut our content (282 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "assist.mode_label",
+   "wb": "w.tacho",
+   "overlap_px": 618,
+   "overlap_pct": 10.83,
+   "message": "the reveal hole would cut our content (618 px of the hole)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.off",
+   "wb": "C2.tacho.static",
+   "overlap_px": 1140,
+   "overlap_pct": 100,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.off",
+   "wb": "C2.tacho.p-box",
+   "overlap_px": 1140,
+   "overlap_pct": 100,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.off",
+   "wb": "w.tacho",
+   "overlap_px": 1140,
+   "overlap_pct": 100,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.digital_speed",
+   "wb": "C1.speedo.base",
+   "overlap_px": 6719,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.digital_speed",
+   "wb": "C1.speedo.inner-disc",
+   "overlap_px": 160,
+   "overlap_pct": 2.38,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.digital_speed",
+   "wb": "C1.speedo.inner-ring",
+   "overlap_px": 252,
+   "overlap_pct": 3.75,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.digital_speed",
+   "wb": "w.speedo",
+   "overlap_px": 6719,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.digital_speed",
+   "wb": "w.spd11",
+   "overlap_px": 74,
+   "overlap_pct": 1.1,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.rpm_label",
+   "wb": "C2.tacho.static",
+   "overlap_px": 4090,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.rpm_label",
+   "wb": "C2.tacho.p-box",
+   "overlap_px": 2409,
+   "overlap_pct": 58.9,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.rpm_label",
+   "wb": "w.tacho",
+   "overlap_px": 4090,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.cold",
+   "wb": "C4.oil.face",
+   "overlap_px": 1121,
+   "overlap_pct": 89.04,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.cold",
+   "wb": "C4.oil.ticks",
+   "overlap_px": 64,
+   "overlap_pct": 5.08,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.cold",
+   "wb": "C4.oil.inner-arc",
+   "overlap_px": 72,
+   "overlap_pct": 5.72,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.cold",
+   "wb": "C4.oil.bezel-highlight",
+   "overlap_px": 54,
+   "overlap_pct": 4.29,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.cold",
+   "wb": "w.oilt",
+   "overlap_px": 1156,
+   "overlap_pct": 91.82,
+   "message": "under element covered by us (decision cover)"
+  }
+ ]
+}

@@ -2,11 +2,14 @@
 """Run the overlay constructor headless: check the sample conflicts, write the default plan, take screenshots.
 
     python3 tools/overlay/headless.py [--no-shots]
+    python3 tools/overlay/headless.py --plan design/overlay/<name>.json [--no-shots]
 
 - serves the repo root on a free local port (python3 -m http.server);
 - loads ?data=sample&export=default and compares its conflicts with design/overlay/sample/expected_conflicts.json;
 - loads ?data=real&export=default and writes design/overlay/plan.default.json;
 - screenshots go to bake/work/overlay/shots/ (git-ignored; they may show photo underlays).
+With --plan: only loads that plan (?plan=...&export=plan), writes it back with its conflicts recomputed, and takes
+docs/overlay/constructor_plan_<name>.png.
 
 Chrome runs with its own profile (bake/work/overlay/chrome-headless) and only that instance is killed.
 macOS has no `timeout`: every Chrome run is polled and killed after a deadline.
@@ -68,14 +71,43 @@ def key(c):
     return (c['severity'], c['rule'], c['g20'], c['wb'])
 
 
+def one_plan(base, rel, shots):
+    plan = dump_plan(base, 'plan=%s&export=plan' % rel)
+    with open(os.path.join(ROOT, rel), 'w') as f:
+        json.dump(plan, f, indent=1, ensure_ascii=False)
+        f.write('\n')
+    n = {}
+    for c in plan['conflicts']:
+        n[(c['severity'], c['rule'])] = n.get((c['severity'], c['rule']), 0) + 1
+    print('plan: wrote %s, %d conflicts: %s' % (rel, len(plan['conflicts']), ', '.join('%s %s %d' % (k[0], k[1], v) for k, v in sorted(n.items()))))
+    if shots:
+        name = os.path.splitext(os.path.basename(rel))[0].replace('plan.', '')
+        os.makedirs(SHOTS, exist_ok=True)
+        for tag, q in [('', '&labels=1&tab=conflicts'), ('_canvas', '&shot=1&labels=1')]:
+            out = os.path.join(SHOTS, 'plan_%s%s.png' % (name, tag))
+            if os.path.exists(out):
+                os.remove(out)
+            chrome(['--window-size=' + ('1920,720' if tag else '1920,1080'), '--screenshot=' + out, base + '?plan=%s&photo=none%s' % (rel, q)])
+            print('shot', os.path.relpath(out, ROOT), 'ok' if os.path.exists(out) else 'MISSING')
+            if os.path.exists(out):
+                shutil.copy(out, os.path.join(ROOT, 'docs/overlay', 'constructor_plan_%s%s.png' % (name, tag)))
+    return True
+
+
 def main():
     shots = '--no-shots' not in sys.argv
+    plan_rel = sys.argv[sys.argv.index('--plan') + 1] if '--plan' in sys.argv else None
+    if plan_rel and not re.match(r'^design/overlay/[A-Za-z0-9_.-]+\.json$', plan_rel):
+        raise SystemExit('--plan takes design/overlay/<name>.json')
     port = free_port()
     srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(port), '--bind', '127.0.0.1'], cwd=ROOT,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(1)
     base = 'http://127.0.0.1:%d/tools/overlay/constructor/' % port
     try:
+        if plan_rel:
+            ok = one_plan(base, plan_rel, shots)
+            return 0
         sample = dump_plan(base, 'data=sample&export=default')
         exp = json.load(open(os.path.join(ROOT, 'design/overlay/sample/expected_conflicts.json')))
         got, want = set(map(key, sample['conflicts'])), set(map(key, exp))

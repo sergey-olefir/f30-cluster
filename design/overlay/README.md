@@ -13,6 +13,7 @@ UV_CACHE_DIR=bake/work/.uvcache uv run -q --no-project --with jsonschema --with 
 | `g20_comfort.json` | `g20-elements` | Every element the stock G20 Comfort cluster draws, with its relation to a custom theme | catalogue + relations (packages E, F) |
 | `wb_comfort.json` | `wb-elements` | Every layer and live widget of our 6WB Comfort, with masks | `tools/overlay/export_wb.py` |
 | `plan.json` / `plan.default.json` | `plan` | Decisions per G20 element, moves of our elements, the derived holes and keep-clear boxes, the conflicts at save time | the constructor |
+| `plan.dials.json` + `collar.dials.png` | `plan` + grey mask | "Dials only": our four dials stay, the G20 draws the rest. The collar (255 = our background stays opaque) is outside the plan schema. See `docs/OVERLAY-PLAN-DIALS.md` | `tools/overlay/plan_dials.py`, then `headless.py --plan` |
 | `constraints.json` | `constraints` | Platform limits, the hood line, what BMW draws over any theme | by hand, from `shared/visible.js` and measurements |
 | `masks/<id>.png` | — | 1× alpha of our own layers, exactly the element's bbox | `export_wb.py` |
 | `schematic/<id>.svg` | — | Our own simple redraw of a G20 element (no BMW artwork) | package E |

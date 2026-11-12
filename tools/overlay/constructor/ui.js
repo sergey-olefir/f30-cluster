@@ -1108,7 +1108,18 @@
     OC.buildTree(A.photoIds);
     if (Q.get('photo') === 'none') for (const id of A.photoIds) { const n = OC.nodeOf['photo:' + id]; if (n) n.show = false; }
     OC.newPlan();
-    if (!EXPORT && Q.get('fresh') !== '1') restoreAutosave();
+    // ?plan=design/overlay/<name>.json: start from that plan (instead of the autosave)
+    const planPath = /^design\/overlay\/[A-Za-z0-9_.-]+\.json$/.test(Q.get('plan') || '') ? Q.get('plan') : null;
+    if (Q.get('plan') && !planPath) banner('error', 'Ignored <code>?plan=</code>: only <code>design/overlay/&lt;name&gt;.json</code> is allowed.');
+    if (planPath) {
+      const raw = await OC.fetchRaw(planPath);
+      let r = { errs: [raw.why || 'unreadable'], warns: [] };
+      if (raw.ok) {
+        try { r = OC.applyPlanFile(JSON.parse(new TextDecoder().decode(raw.buf))); } catch (e) { r = { errs: ['not valid JSON (' + e.message + ')'], warns: [] }; }
+      }
+      if (r.errs.length) { banner('error', 'Could not load <b>' + esc(planPath) + '</b> as a plan:', r.errs); UI.planErrs = r.errs; }
+      else banner(r.warns.length ? 'warn' : 'info', 'Loaded <b>' + esc(planPath) + '</b>, plan version ' + S.plan.version + '.', r.warns);
+    } else if (!EXPORT && Q.get('fresh') !== '1') restoreAutosave();
     if (Q.get('stockMap') != null) S.settings.stockMap = Q.get('stockMap') === '1';
     $('#c-stockmap').checked = S.settings.stockMap;
     OC.syncHoles();
@@ -1139,9 +1150,23 @@
       document.title = 'plan-error';
       return;
     }
-    if (EXPORT !== 'default' && EXPORT !== 'safe') {
-      out.textContent = JSON.stringify({ error: ['unknown export ' + EXPORT + ' (only "default" or "safe")'] });
+    if (EXPORT !== 'default' && EXPORT !== 'safe' && EXPORT !== 'plan') {
+      out.textContent = JSON.stringify({ error: ['unknown export ' + EXPORT + ' (only "default", "safe" or "plan")'] });
       document.title = 'plan-error';
+      return;
+    }
+    if (EXPORT === 'plan') {
+      // "plan": the plan given by ?plan=, with its conflicts recomputed
+      if (!Q.get('plan') || UI.planErrs) {
+        out.textContent = JSON.stringify({ error: UI.planErrs || ['export=plan needs ?plan=design/overlay/<name>.json'] });
+        document.title = 'plan-error';
+        return;
+      }
+      OC.syncHoles();
+      const conflicts = OC.computeConflicts();
+      UI.conflicts = conflicts;
+      out.textContent = JSON.stringify(OC.buildPlanFile(conflicts, { version: S.plan.version || 1, noTime: true }), null, 2);
+      document.title = 'plan-ready';
       return;
     }
     OC.newPlan();
