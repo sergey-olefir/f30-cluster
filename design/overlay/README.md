@@ -47,9 +47,11 @@ Groups: `telltale` (lamps), `bottom-row` (range, clock, temperature, belt/airbag
 
 **Default decisions** (what `plan.default.json` uses): `over` → `keep-clear`; `critical` and `under` → `reveal`; `critical` and `gone` → `redraw`; everything else → `cover`.
 
-**Shapes.** A G20 element's shape is its `poly` if present, otherwise its `bbox`. One of our elements' shape is its mask (a pixel counts when alpha ≥ 64/255) if present, otherwise its bbox, after the plan's transforms (anchor, then element). Hidden elements and `kind: "hole"` elements have no shape. A background's shape has the plan's holes (and its own `hole` when the stockMap setting is on) cut out. Overlap is counted in whole panel pixels; `overlap_pct` is the overlap as a % of the G20 element's area.
+`settings.stockMap` records the "BMW's map in the middle" setting the conflicts were computed with.
 
-**Rules** (one conflict per G20/6WB pair and rule):
+**Shapes.** A G20 element's shape is its `poly` if present, otherwise its `bbox`. One of our elements' shape is its mask (a pixel counts when alpha ≥ 64/255) if present, otherwise its bbox, after the plan's transforms (anchor, then element). Hidden elements and `kind: "hole"` elements have no shape. Every background element (`kind: "background"`) has all the plan's holes cut out, and also every background's own `hole` (the WBBACK map hole) when `settings.stockMap` is on; a hole rect is rounded outward to whole px. Overlap is counted in whole panel pixels: a pixel counts when its centre (x + 0.5, y + 0.5) is inside both shapes; `overlap_pct` is the overlap as a % of the G20 element's area.
+
+**Rules** (one conflict per G20/6WB pair and rule; `structure` elements are context only and raise none; the constructor's show/hide, lock and opacity are view-only — only the plan's `hidden` removes a shape):
 
 | Severity | `rule` | When |
 |---|---|---|
@@ -59,6 +61,7 @@ Groups: `telltale` (lamps), `bottom-row` (range, clock, temperature, belt/airbag
 | warning | `hole-cuts-content` | a `reveal` hole overlaps one of our non-background elements (the hole would have to cut that content too) |
 | warning | `redraw-not-placed` | decision `redraw` with no `redraw_at` (`wb` is null) |
 | info | `under-covered` | a non-critical `under` element overlaps our element and its decision is not `reveal` |
+| info | `unknown-covered` | a non-critical `unknown` element overlaps our element and its decision is not `reveal` (it may be `under`) |
 
 ## 4. Worked example: one telltale per relation
 
