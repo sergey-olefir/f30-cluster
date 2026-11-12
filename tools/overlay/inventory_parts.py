@@ -139,12 +139,15 @@ def bake_g20_recipe():
 
 
 def collar_recipe():
+    """-> (sim layers it is baked from, its mask file). The collar took its colour from the simulation's night
+    background until polish B made it pure black (then it reads collar.dials.png alone)."""
     src = open(rp('tools/bake_scene.py')).read()
-    need = ["'design', 'overlay', 'collar.dials.png'", "'bench', 'g20', 'structure', 'bg.night.png'", "save('collar', c)"]
+    need = ["'design', 'overlay', 'collar.dials.png'", "save('collar', c)"]
     for s in need:
         if s not in src:
             raise SystemExit('tools/bake_scene.py: the collar recipe changed (%s not found)' % s)
-    return ['structure.bg.night'], 'design/overlay/collar.dials.png'
+    tinted = "'bench', 'g20', 'structure', 'bg.night.png'" in src
+    return (['structure.bg.night'] if tinted else []), 'design/overlay/collar.dials.png'
 
 
 def housing_leds():
@@ -300,11 +303,12 @@ def app_records(cat):
         r['used_by'] = sorted({'layout:' + u[0] for u in users})
         if name == 'collar':
             r['baked_from'] = collar_from
-            r['baked_from_files'] = [collar_mask, SIM + '/structure/bg.night.png']
-            r['sources'] = ['08']
+            r['baked_from_files'] = [collar_mask] + ([SIM + '/structure/bg.night.png'] if collar_from else [])
+            r['sources'] = ['08'] if collar_from else []
             r['notes'] = ("6WB Dials + G20: where our background stays opaque over the stock dials that stick out past ours; "
-                          "alpha from design/overlay/collar.dials.png (grown 4 px, blurred 4 px, quarter size), colour from the "
-                          "simulation's night background (tools/bake_scene.py). Spans several elements: see 'covers'.")
+                          "alpha from design/overlay/collar.dials.png (tools/bake_scene.py), colour %s. Spans several "
+                          "elements: see 'covers'." % ("from the simulation's night background" if collar_from
+                                                       else "pure black"))
         else:
             ids = recipe.get(key, (None, []))[1]
             if not ids:

@@ -481,7 +481,7 @@
    "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 16 major + 45 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 17.1x3.1, minor 8.8x1.2 px).",
    "w": 634,
    "h": 625,
-   "bytes": 36154
+   "bytes": 36135
   },
   {
    "id": "structure.speedo.frame.night",
@@ -506,7 +506,7 @@
    "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 16 major + 45 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 17.1x3.1, minor 8.8x1.2 px).",
    "w": 634,
    "h": 625,
-   "bytes": 36322
+   "bytes": 36321
   },
   {
    "id": "structure.tacho.frame.day",
@@ -531,7 +531,7 @@
    "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 15 major + 49 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 16.0x3.7, minor 8.3x2.0 px).",
    "w": 635,
    "h": 626,
-   "bytes": 38206
+   "bytes": 38208
   },
   {
    "id": "structure.tacho.frame.night",
@@ -556,7 +556,7 @@
    "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 15 major + 49 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 16.0x3.7, minor 8.3x2.0 px).",
    "w": 632,
    "h": 623,
-   "bytes": 37236
+   "bytes": 37232
   },
   {
    "id": "structure.speedo.bottom_end.day",
@@ -583,7 +583,7 @@
    "cond": "no_cc_message",
    "w": 67,
    "h": 46,
-   "bytes": 1415
+   "bytes": 1369
   },
   {
    "id": "structure.speedo.bottom_end.night",
@@ -610,7 +610,7 @@
    "cond": "no_cc_message",
    "w": 67,
    "h": 46,
-   "bytes": 1414
+   "bytes": 1369
   },
   {
    "id": "structure.tacho.bottom_end.day",
@@ -635,9 +635,9 @@
    ],
    "notes": "Curved end of the bottom frame line next to the check-control area (traced on 09). Seen in 09 and 14 (no check-control message); in 08 the check-control panel sits there and the end is not visible: draw it only while ccMessage is null.",
    "cond": "no_cc_message",
-   "w": 70,
+   "w": 69,
    "h": 45,
-   "bytes": 1545
+   "bytes": 1547
   },
   {
    "id": "structure.tacho.bottom_end.night",
@@ -662,9 +662,9 @@
    ],
    "notes": "Curved end of the bottom frame line next to the check-control area (traced on 09). Seen in 09 and 14 (no check-control message); in 08 the check-control panel sits there and the end is not visible: draw it only while ccMessage is null.",
    "cond": "no_cc_message",
-   "w": 70,
+   "w": 69,
    "h": 45,
-   "bytes": 1543
+   "bytes": 1550
   },
   {
    "id": "structure.rev_band.day",
@@ -1143,5 +1143,5 @@
    "bytes": 1180
   }
  ],
- "total_bytes": 1290120
+ "total_bytes": 1290016
 }
