@@ -1627,13 +1627,14 @@ class HudApp {
 
     /** A widget: on its own layer (sheet null: an effect, or an image widget with "own": true), or a member of a sheet. */
     _create(w, sheet) {
-        let ref, c;
+        let ref, c, fs = null;
         if (sheet) { ref = sheet.ref; c = sheet.c; }
         else {
             c = this._clientAt(this._connOf(w));
             const base = { target: this.target, klass: w.class || 'content', z: w.z || 0, x: w.x, y: w.y, w: w.w, h: w.h };
             if (IMAGE_TYPES[w.type]) ref = c.image(Object.assign({ iw: w.w, ih: w.h }, base));
-            else ref = c.effect(Object.assign({ fs: w.type === 'swatch' ? calibration.SWATCH : (w.type === 'dial' && w.look === 'wb' ? shaders.wbdial : shaders[w.type]) }, base));
+            else fs = w.type === 'swatch' ? calibration.SWATCH : (w.type === 'dial' && w.look === 'wb' ? shaders.wbdial : shaders[w.type]);
+            if (fs) ref = c.effect(Object.assign({ fs }, base));
             if (!ref) { this.log.warn('widget "' + w.id + '": layer refused'); return; }
             this.placed.push({ c, ref, x: w.x, y: w.y, w: w.w, h: w.h });
         }
@@ -1953,7 +1954,35 @@ class HudApp {
             c.uniform(ref, 'u_c3', rgb(color(t, zc[2] || zc[1] || zc[0])));
             c.uniform(ref, 'u_at', w.at || [0.6, 0.85]);
         }
+        if (fs) this._bindBlanks(x, fs);
         this._update(x, Date.now(), true);
+    }
+
+    /**
+     * Every sampler2D the shader declares gets an asset: the car's renderer (RAMSES) does not draw a mesh whose
+     * appearance has a texture input left unset, so a sampler this widget does not use (baked off, a mini with no arc
+     * fill) samples a 1x1 transparent asset instead. The bench draws such a layer only with every sampler bound too.
+     */
+    _bindBlanks(x, fs) {
+        const re = /uniform\s+sampler2D\s+(\w+)\s*;/g, l = x.c.layers && x.c.layers.get(x.ref);
+        let m;
+        while ((m = re.exec(fs))) {
+            if (l && l.binds && l.binds['0:' + m[1]]) continue;
+            x.c.bind(x.ref, m[1], this._blank(x.ci).ref);
+        }
+    }
+
+    /** A 1x1 transparent RGBA8 asset on a connection, for samplers with nothing to sample (_bindBlanks). */
+    _blank(ci) {
+        const key = ci + ':blank';
+        if (this.atlases.has(key)) return this.atlases.get(key);
+        const c = this._clientAt(ci);
+        const ref = c.asset({ target: this.target, format: 'rgba8', w: 1, h: 1, sampling: 'nearest' });
+        if (!ref) throw new Error('blank asset refused');
+        c.pixels(ref, null, Buffer.alloc(4, 0));
+        const a = { ref, c, ci, w: 1, h: 1, bytes: 8 };
+        this.atlases.set(key, a);
+        return a;
     }
 
     /** A tiles widget's tiles in use: [{ x, y, w, h, slot, bar }], the ones with a valid rect, toggles on, TILE_MAX at most. */
