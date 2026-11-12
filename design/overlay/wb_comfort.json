@@ -128,6 +128,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "baked-merged layer, z -1.0; placed extent [0, 0, 1920, 720] (file 960x360 px at scale 0.5, drawn at 2x); not packed into any scene texture by tools/bake_scene.py, so the car does not draw this image (WBBACK draws the panel background itself); bbox trimmed to alpha > 0"
   },
   {
@@ -150,6 +151,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked-merged layer, z 0.0; placed extent [658, 76, 1262, 612] (file 302x268 px at scale 0.5, drawn at 2x); on the car: packed into scene texture \"window\" (tools/bake_scene.py), drawn by live widget \"bg\" (w.bg); mask clipped to what that widget draws (rect [640,76 640x572]); bbox trimmed to alpha > 0"
   },
   {
@@ -172,6 +174,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 0.5; placed extent [640, 606, 1280, 692] (file 320x43 px at scale 0.5, drawn at 2x); on the car: packed into scene texture \"window\" (tools/bake_scene.py), drawn by live widget \"bg\" (w.bg); mask clipped to what that widget draws (rect [640,76 640x572]); 23040 px of the layer (alpha >= 64) fall outside and are not drawn; unclipped bbox [640, 607, 1280, 691]; bbox trimmed to alpha > 0; anchor by position (the anchor box holding the bbox centre, or within 40 px of it)"
   },
   {
@@ -194,6 +197,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 1.0; placed extent [748, 452, 1172, 462] (file 424x10 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"horizon\" (tools/bake_scene.py), drawn by live widget \"bg\" (w.bg); mask clipped to what that widget draws (rect [748,452 424x10]); bbox trimmed to alpha > 0"
   },
   {
@@ -216,6 +220,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked-merged layer, z 1.0; placed extent [76, 44, 748, 716] (file 336x336 px at scale 0.5, drawn at 2x); on the car: packed into scene texture \"speedo\" (tools/bake_scene.py), drawn by live widget \"speedo\" (w.speedo); mask clipped to what that widget draws (disc R 334 about (412,380)); 4491 px of the layer (alpha >= 64) fall outside and are not drawn; unclipped bbox [76, 44, 748, 716]; bbox trimmed to alpha > 0"
   },
   {
@@ -238,6 +243,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked-merged layer, z 1.0; placed extent [1181, 53, 1835, 707] (file 327x327 px at scale 0.5, drawn at 2x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -260,6 +266,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 1.0; placed extent [8, 556, 152, 700] (file 72x72 px at scale 0.5, drawn at 2x); on the car: packed into scene texture \"fuel\" (tools/bake_scene.py), drawn by live widget \"fuel\" (w.fuel); mask clipped to what that widget draws (disc R 69 about (80,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -282,6 +289,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 1.0; placed extent [1768, 556, 1912, 700] (file 72x72 px at scale 0.5, drawn at 2x); on the car: packed into scene texture \"oil\" (tools/bake_scene.py), drawn by live widget \"oilt\" (w.oilt); mask clipped to what that widget draws (disc R 69 about (1840,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -304,6 +312,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 1.5; placed extent [668, 602, 1252, 614] (file 584x12 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"bar\" (tools/bake_scene.py), drawn by live widget \"bg\" (w.bg); mask clipped to what that widget draws (rect [668,602 584x79]); bbox trimmed to alpha > 0; anchor by position (the anchor box holding the bbox centre, or within 40 px of it)"
   },
   {
@@ -326,6 +335,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 3.0; placed extent [1159, 31, 1857, 720] (file 698x689 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -348,6 +358,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 3.0; placed extent [307, 462, 395, 551] (file 88x89 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"sign_limit\" (tools/bake_scene.py), drawn by live widget \"signs\" (w.signs); mask clipped to what that widget draws (rect [307,462 88x89]); bbox trimmed to alpha > 0; anchor by position (the anchor box holding the bbox centre, or within 40 px of it)"
   },
   {
@@ -370,6 +381,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 3.1; placed extent [138, 106, 686, 654] (file 548x548 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"speedo\" (tools/bake_scene.py), drawn by live widget \"speedo\" (w.speedo); mask clipped to what that widget draws (disc R 334 about (412,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -392,6 +404,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 3.1; placed extent [429, 462, 517, 551] (file 88x89 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"sign_nopass\" (tools/bake_scene.py), drawn by live widget \"signs\" (w.signs); mask clipped to what that widget draws (rect [429,462 88x89]); bbox trimmed to alpha > 0; anchor by position (the anchor box holding the bbox centre, or within 40 px of it)"
   },
   {
@@ -414,6 +427,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 4.0; placed extent [1159, 31, 1857, 720] (file 698x689 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -436,6 +450,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 4.0; placed extent [84, 669, 107, 684] (file 23x15 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"fuel\" (tools/bake_scene.py), drawn by live widget \"fuel\" (w.fuel); mask clipped to what that widget draws (disc R 69 about (80,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -458,6 +473,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 4.0; placed extent [1813, 574, 1874, 684] (file 61x110 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"oil\" (tools/bake_scene.py), drawn by live widget \"oilt\" (w.oilt); mask clipped to what that widget draws (disc R 69 about (1840,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -480,6 +496,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 5.0; placed extent [108, 76, 716, 578] (file 608x502 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"speedo\" (tools/bake_scene.py), drawn by live widget \"speedo\" (w.speedo); mask clipped to what that widget draws (disc R 334 about (412,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -502,6 +519,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 5.0; placed extent [1159, 31, 1857, 720] (file 698x689 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -524,6 +542,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 5.0; placed extent [29, 580, 80, 682] (file 51x102 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"fuel\" (tools/bake_scene.py), drawn by live widget \"fuel\" (w.fuel); mask clipped to what that widget draws (disc R 69 about (80,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -546,6 +565,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 5.0; placed extent [1840, 591, 1891, 682] (file 51x91 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"oil\" (tools/bake_scene.py), drawn by live widget \"oilt\" (w.oilt); mask clipped to what that widget draws (disc R 69 about (1840,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -568,6 +588,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 5.5; placed extent [230, 603, 594, 685] (file 364x82 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"speedo\" (tools/bake_scene.py), drawn by live widget \"speedo\" (w.speedo); mask clipped to what that widget draws (disc R 334 about (412,380)); bbox trimmed to alpha > 0; anchor by position (the anchor box holding the bbox centre, or within 40 px of it)"
   },
   {
@@ -590,6 +611,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 5.5; placed extent [1338, 600, 1693, 683] (file 355x83 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0; anchor by position (the anchor box holding the bbox centre, or within 40 px of it)"
   },
   {
@@ -612,6 +634,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 5.5; placed extent [85, 567, 112, 589] (file 27x22 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"fuel\" (tools/bake_scene.py), drawn by live widget \"fuel\" (w.fuel); mask clipped to what that widget draws (disc R 69 about (80,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -634,6 +657,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 5.5; placed extent [1814, 570, 1843, 589] (file 29x19 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"oil\" (tools/bake_scene.py), drawn by live widget \"oilt\" (w.oilt); mask clipped to what that widget draws (disc R 69 about (1840,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -656,6 +680,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 5.6; placed extent [1295, 585, 1345, 632] (file 50x47 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0; anchor by position (the anchor box holding the bbox centre, or within 40 px of it)"
   },
   {
@@ -678,6 +703,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "baked layer, z 5.6; placed extent [892, 642, 953, 681] (file 61x39 px at scale 1.0, drawn at 1x); not packed into any scene texture by tools/bake_scene.py, so the car does not draw this image (kept for reference); bbox trimmed to alpha > 0; anchor by position (the anchor box holding the bbox centre, or within 40 px of it)"
   },
   {
@@ -700,6 +726,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 5.7; placed extent [1159, 31, 1857, 720] (file 698x689 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -722,6 +749,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 6.0; placed extent [246, 214, 578, 464] (file 332x250 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"speedo\" (tools/bake_scene.py), drawn by live widget \"speedo\" (w.speedo); mask clipped to what that widget draws (disc R 334 about (412,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -744,6 +772,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 6.0; placed extent [40, 587, 94, 671] (file 54x84 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"fuel\" (tools/bake_scene.py), drawn by live widget \"fuel\" (w.fuel); mask clipped to what that widget draws (disc R 69 about (80,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -766,6 +795,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 6.0; placed extent [1826, 587, 1880, 671] (file 54x84 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"oil\" (tools/bake_scene.py), drawn by live widget \"oilt\" (w.oilt); mask clipped to what that widget draws (disc R 69 about (1840,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -788,6 +818,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 6.1; placed extent [1159, 31, 1857, 720] (file 698x689 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -810,6 +841,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 7.0; placed extent [298, 266, 526, 464] (file 228x198 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"speedo\" (tools/bake_scene.py), drawn by live widget \"speedo\" (w.speedo); mask clipped to what that widget draws (disc R 334 about (412,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -832,6 +864,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 7.0; placed extent [1159, 31, 1857, 720] (file 698x689 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -854,6 +887,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 8.0; placed extent [268, 458, 556, 464] (file 288x6 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"speedo\" (tools/bake_scene.py), drawn by live widget \"speedo\" (w.speedo); mask clipped to what that widget draws (disc R 334 about (412,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -876,6 +910,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 8.1; placed extent [1159, 31, 1857, 720] (file 698x689 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -898,6 +933,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 8.5; placed extent [90, 60, 734, 590] (file 322x265 px at scale 0.5, drawn at 2x); on the car: packed into scene texture \"speedo\" (tools/bake_scene.py), drawn by live widget \"speedo\" (w.speedo); mask clipped to what that widget draws (disc R 334 about (412,380)); bbox trimmed to alpha > 0; a glow: thin alpha, mostly below the 64/255 mask threshold"
   },
   {
@@ -920,6 +956,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 8.5; placed extent [1159, 31, 1857, 720] (file 698x689 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -942,6 +979,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 9.1; placed extent [1159, 31, 1857, 720] (file 698x689 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); bbox trimmed to alpha > 0"
   },
   {
@@ -964,6 +1002,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 11.0; placed extent [72, 40, 752, 720] (file 680x680 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"speedo\" (tools/bake_scene.py), drawn by live widget \"speedo\" (w.speedo); mask clipped to what that widget draws (disc R 334 about (412,380)); 2764 px of the layer (alpha >= 64) fall outside and are not drawn; unclipped bbox [72, 40, 752, 720]; bbox trimmed to alpha > 0"
   },
   {
@@ -986,6 +1025,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "shader-standin layer, z 11.0; placed extent [1159, 31, 1857, 720] (file 698x689 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"tacho\" (tools/bake_scene.py), drawn by live widget \"tacho\" (w.tacho); mask clipped to what that widget draws (disc R 334 about (1508,380)); 3399 px of the layer (alpha >= 64) fall outside and are not drawn; unclipped bbox [1166, 38, 1851, 720]; bbox trimmed to alpha > 0"
   },
   {
@@ -1008,6 +1048,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 11.0; placed extent [8, 556, 142, 700] (file 134x144 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"fuel\" (tools/bake_scene.py), drawn by live widget \"fuel\" (w.fuel); mask clipped to what that widget draws (disc R 69 about (80,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -1030,6 +1071,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 11.0; placed extent [1778, 556, 1912, 700] (file 134x144 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"oil\" (tools/bake_scene.py), drawn by live widget \"oilt\" (w.oilt); mask clipped to what that widget draws (disc R 69 about (1840,628)); bbox trimmed to alpha > 0"
   },
   {
@@ -1052,6 +1094,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 11.1; placed extent [8, 579, 130, 700] (file 122x121 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"fuel\" (tools/bake_scene.py), drawn by live widget \"fuel\" (w.fuel); mask clipped to what that widget draws (disc R 69 about (80,628)); 83 px of the layer (alpha >= 64) fall outside and are not drawn; unclipped bbox [8, 579, 130, 700]; bbox trimmed to alpha > 0"
   },
   {
@@ -1074,6 +1117,7 @@
    "widget": null,
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked layer, z 11.1; placed extent [1790, 579, 1912, 700] (file 122x121 px at scale 1.0, drawn at 1x); on the car: packed into scene texture \"oil\" (tools/bake_scene.py), drawn by live widget \"oilt\" (w.oilt); mask clipped to what that widget draws (disc R 69 about (1840,628)); 83 px of the layer (alpha >= 64) fall outside and are not drawn; unclipped bbox [1790, 579, 1912, 700]; bbox trimmed to alpha > 0"
   },
   {
@@ -1105,6 +1149,7 @@
     "radius": 22,
     "when": "stockMap"
    },
+   "drawn_on_car": true,
    "notes": "WBBACK: the panel background, the window (tex.window [640,76 640x572]), the horizon and the bar line (the C5/C6 window and bar layers); see-through hole [668, 140, 1252, 602] r 22 only when the \"stockMap\" setting is on (off by default); bbox: no per-widget bench render"
   },
   {
@@ -1127,6 +1172,7 @@
    "widget": "speedo",
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "draws baked base texture \"speedo\" at [0,0 670x670] in its box (the static dial: the C-layers of this anchor) plus the live needle and hub; live bottom-arc fill \"range_seg\" at [162,569 346x68] in the box (of fuel); mask: the wbdial shader's alpha, a disc R 334 about (412,380) (shared/shaders.js: gl_FragColor alpha = edge); needles, hub and labels draw inside it"
   },
   {
@@ -1149,6 +1195,7 @@
    "widget": "tacho",
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "draws baked base texture \"tacho\" at [0,0 670x670] in its box (the static dial: the C-layers of this anchor) plus the live needle and hub; live bottom-arc fill \"ed_seg\" at [165,567 346x70] in the box (of cons); mask: the wbdial shader's alpha, a disc R 334 about (1508,380) (shared/shaders.js: gl_FragColor alpha = edge); needles, hub and labels draw inside it"
   },
   {
@@ -1171,6 +1218,7 @@
    "widget": "fuel",
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "draws baked base texture \"fuel\" at [-2,-2 144x144] in its box (the static dial: the C-layers of this anchor) plus the live needle and hub; mask: the wbdial shader's alpha, a disc R 69 about (80,628) (shared/shaders.js: gl_FragColor alpha = edge); needles, hub and labels draw inside it"
   },
   {
@@ -1193,6 +1241,7 @@
    "widget": "oilt",
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "draws baked base texture \"oil\" at [-2,-2 144x144] in its box (the static dial: the C-layers of this anchor) plus the live needle and hub; mask: the wbdial shader's alpha, a disc R 69 about (1840,628) (shared/shaders.js: gl_FragColor alpha = edge); needles, hub and labels draw inside it"
   },
   {
@@ -1215,6 +1264,7 @@
    "widget": "fuel_icon",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "toggle \"!baked\": hidden with the default settings (baked on); bbox: no per-widget bench render"
   },
   {
@@ -1237,6 +1287,7 @@
    "widget": "fuel_full",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"1/1\", font wb_mini; bbox: no per-widget bench render"
   },
   {
@@ -1259,6 +1310,7 @@
    "widget": "fuel_zero",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"0\", font wb_mini; bbox: no per-widget bench render"
   },
   {
@@ -1281,6 +1333,7 @@
    "widget": "oil_icon",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "toggle \"!baked\": hidden with the default settings (baked on); bbox: no per-widget bench render"
   },
   {
@@ -1303,6 +1356,7 @@
    "widget": "spd0",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"0\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1325,6 +1379,7 @@
    "widget": "spd1",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"20\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1347,6 +1402,7 @@
    "widget": "spd2",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"40\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1369,6 +1425,7 @@
    "widget": "spd3",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"60\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1391,6 +1448,7 @@
    "widget": "spd4",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"80\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1413,6 +1471,7 @@
    "widget": "spd5",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"100\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1435,6 +1494,7 @@
    "widget": "spd6",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"120\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1457,6 +1517,7 @@
    "widget": "spd7",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"140\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1479,6 +1540,7 @@
    "widget": "spd8",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"160\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1501,6 +1563,7 @@
    "widget": "spd9",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"180\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1523,6 +1586,7 @@
    "widget": "spd10",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"200\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1545,6 +1609,7 @@
    "widget": "spd11",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"220\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1567,6 +1632,7 @@
    "widget": "spd12",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"240\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1589,6 +1655,7 @@
    "widget": "spd13",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"260\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -1611,6 +1678,7 @@
    "widget": "rpm1",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"1\", font wb_rpm; bbox: no per-widget bench render"
   },
   {
@@ -1633,6 +1701,7 @@
    "widget": "rpm2",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"2\", font wb_rpm; bbox: no per-widget bench render"
   },
   {
@@ -1655,6 +1724,7 @@
    "widget": "rpm3",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"3\", font wb_rpm; bbox: no per-widget bench render"
   },
   {
@@ -1677,6 +1747,7 @@
    "widget": "rpm4",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"4\", font wb_rpm; bbox: no per-widget bench render"
   },
   {
@@ -1699,6 +1770,7 @@
    "widget": "rpm5",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"5\", font wb_rpm; bbox: no per-widget bench render"
   },
   {
@@ -1721,6 +1793,7 @@
    "widget": "rpm6",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"6\", font wb_rpm; bbox: no per-widget bench render"
   },
   {
@@ -1743,6 +1816,7 @@
    "widget": "rpm7",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"7\", font wb_rpm; bbox: no per-widget bench render"
   },
   {
@@ -1765,6 +1839,7 @@
    "widget": "speed_unit",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"km/h\", font wb_cap; bbox: no per-widget bench render"
   },
   {
@@ -1787,6 +1862,7 @@
    "widget": "rpm_cap",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"1/min x 1000\", font wb_cap; bbox: no per-widget bench render"
   },
   {
@@ -1809,6 +1885,7 @@
    "widget": "ready",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"READY\", font wb_capb; bbox: no per-widget bench render"
   },
   {
@@ -1831,6 +1908,7 @@
    "widget": "off",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"OFF\", font wb_cap; bbox: no per-widget bench render"
   },
   {
@@ -1853,6 +1931,7 @@
    "widget": "range_icon",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "toggle \"!baked\": hidden with the default settings (baked on); bbox: no per-widget bench render"
   },
   {
@@ -1875,6 +1954,7 @@
    "widget": "range_in",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "toggle \"!baked\": hidden with the default settings (baked on); text \"{{range}} km\", font wb_cap; bbox: no per-widget bench render"
   },
   {
@@ -1897,6 +1977,7 @@
    "widget": "signs",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "baked signs, shown only while the car reports them: limit [2,2 88x89], nopass [124,2 88x89]; bbox: no per-widget bench render"
   },
   {
@@ -1919,6 +2000,7 @@
    "widget": "limit",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "text \"{{limit}}\", font wb_val; bbox: no per-widget bench render"
   },
   {
@@ -1941,6 +2023,7 @@
    "widget": "row_b0",
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "toggle \"baked\": shown with the default settings (baked on); text \"{{time}}\", font wb_val; bbox: no per-widget bench render"
   },
   {
@@ -1963,6 +2046,7 @@
    "widget": "row_b1",
    "conn": null,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "toggle \"baked\": shown with the default settings (baked on); text \"{{ambient}} °C\", font wb_val; bbox: no per-widget bench render"
   },
   {
@@ -1985,6 +2069,7 @@
    "widget": "range_v",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "toggle \"baked\": shown with the default settings (baked on); text \"{{range}}\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -2007,6 +2092,7 @@
    "widget": "range_a0",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "toggle \"baked\": shown with the default settings (baked on); text \"0\", font wb_cap; bbox: no per-widget bench render"
   },
   {
@@ -2029,6 +2115,7 @@
    "widget": "range_a1",
    "conn": 1,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "toggle \"baked\": shown with the default settings (baked on); text \"km\", font wb_cap; bbox: no per-widget bench render"
   },
   {
@@ -2051,6 +2138,7 @@
    "widget": "cons_v",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "toggle \"baked\": shown with the default settings (baked on); text \"{{cons}}\", font wb_spd; bbox: no per-widget bench render"
   },
   {
@@ -2073,6 +2161,7 @@
    "widget": "cons_a0",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "toggle \"baked\": shown with the default settings (baked on); text \"0\", font wb_cap; bbox: no per-widget bench render"
   },
   {
@@ -2095,6 +2184,7 @@
    "widget": "cons_a1",
    "conn": 2,
    "hole": null,
+   "drawn_on_car": true,
    "notes": "toggle \"baked\": shown with the default settings (baked on); text \"l/100 km\", font wb_cap; bbox: no per-widget bench render"
   },
   {
@@ -2117,6 +2207,7 @@
    "widget": "row_h0",
    "conn": null,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "toggle \"!baked\": hidden with the default settings (baked on); text \"Time\", font wb_cap; bbox: no per-widget bench render"
   },
   {
@@ -2139,6 +2230,7 @@
    "widget": "row_v0",
    "conn": null,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "toggle \"!baked\": hidden with the default settings (baked on); text \"{{time}}\", font wb_val; bbox: no per-widget bench render"
   },
   {
@@ -2161,6 +2253,7 @@
    "widget": "row_h1",
    "conn": null,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "toggle \"!baked\": hidden with the default settings (baked on); text \"Range\", font wb_cap; bbox: no per-widget bench render"
   },
   {
@@ -2183,6 +2276,7 @@
    "widget": "row_v1",
    "conn": null,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "toggle \"!baked\": hidden with the default settings (baked on); text \"{{range}} km\", font wb_val; bbox: no per-widget bench render"
   },
   {
@@ -2205,6 +2299,7 @@
    "widget": "row_h2",
    "conn": null,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "toggle \"!baked\": hidden with the default settings (baked on); text \"Temp\", font wb_cap; bbox: no per-widget bench render"
   },
   {
@@ -2227,6 +2322,7 @@
    "widget": "row_v2",
    "conn": null,
    "hole": null,
+   "drawn_on_car": false,
    "notes": "toggle \"!baked\": hidden with the default settings (baked on); text \"{{ambient}} °C\", font wb_val; bbox: no per-widget bench render"
   }
  ]

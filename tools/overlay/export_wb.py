@@ -259,6 +259,7 @@ def baked_elements(stack, layout, anchors, comp):
         notes = ['%s layer, z %s; placed extent %s (file %gx%g px at scale %s, drawn at %gx)'
                  % (l.get('src', 'baked'), l['z'], ext, a.shape[1] * l['scale'], a.shape[0] * l['scale'],
                     l['scale'], 1.0 / l['scale'])]
+        on_car = True
         if wid:
             cov, desc = drawn_region(tex, wid, wd)
             clipped = to8(full * cov)
@@ -270,6 +271,7 @@ def baked_elements(stack, layout, anchors, comp):
                 desc, '; %d px of the layer (alpha >= %d) fall outside and are not drawn; unclipped bbox %s'
                 % (lost, THR, raw_box) if lost else ''))
         else:
+            on_car = False
             bbox, crop = trim(to8(full))
             notes.append('not packed into any scene texture by tools/bake_scene.py, so the car does not draw this '
                          'image (%s)' % ('WBBACK draws the panel background itself' if k == 'background'
@@ -291,7 +293,7 @@ def baked_elements(stack, layout, anchors, comp):
             'id': eid, 'source': 'baked', 'cluster': l['cluster'], 'z': num(l['z']), 'bbox': bbox, 'mask': rel,
             'opaque': l['id'] in OPAQUE, 'kind': k, 'movable': l['id'] != 'panel.background', 'anchor': anchor,
             'file': os.path.relpath(path, ROOT), 'widget': None, 'conn': None, 'hole': None,
-            'notes': '; '.join(notes)})
+            'drawn_on_car': on_car, 'notes': '; '.join(notes)})
     return els
 
 
@@ -368,7 +370,8 @@ def live_elements(layout, anchors, comp):
         els.append({
             'id': eid, 'source': 'live', 'cluster': None, 'z': num(w['z'] + 100), 'bbox': box, 'mask': mask,
             'opaque': typ in ('wbback', 'dial'), 'kind': k, 'movable': typ != 'wbback', 'anchor': anchor,
-            'file': None, 'widget': wid, 'conn': w.get('conn'), 'hole': hole, 'notes': '; '.join(notes)})
+            'file': None, 'widget': wid, 'conn': w.get('conn'), 'hole': hole,
+            'drawn_on_car': w.get('toggle') != '!baked', 'notes': '; '.join(notes)})
     return els
 
 

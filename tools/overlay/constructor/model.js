@@ -191,7 +191,7 @@
 
   // Our element's shape after the plan's transforms: {box (pixel box), test(i, j), key} or null (no shape).
   OC.wbShape = function (e) {
-    if (e.kind === 'hole' || OC.wbHidden(e)) return null;
+    if (e.kind === 'hole' || OC.wbHidden(e) || e.drawn_on_car === false) return null;
     const T = OC.xf(e);
     const b = e.bbox;
     const box = pixBox(OC.xbox(e, T));
