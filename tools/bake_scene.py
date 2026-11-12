@@ -88,12 +88,16 @@ def main():
         for l in sorted([l for l in STACK if l['cluster'] == cl], key=lambda l: l['z']):
             put(c, l['id'], *box)
         save(name, c)
-    # its collar (tools/overlay/plan_dials.py): where our background stays black over the stock G20 dials that stick
-    # out past ours; quarter size, coverage in alpha
-    g = np.asarray(Image.open(os.path.join(ROOT, 'design', 'overlay', 'collar.dials.png')).convert('L'), dtype=np.float32) / 255.0
-    g = g.reshape(180, 4, 480, 4).mean((1, 3))
-    c = np.zeros((180, 480, 4), np.float32)
-    c[..., 3] = g
+    # its collar (tools/overlay/plan_dials.py): where our background covers the stock G20 dials that stick out past
+    # ours, quarter size. Not black: the G20's own background there (the bench simulation's night background, our own
+    # drawing, bench/g20/structure/bg.night.png at half size), so it hides the stock scales without showing itself;
+    # soft edges (grown 4 px, then a 4 px blur at full size, so the blur uncovers nothing)
+    from PIL import ImageFilter
+    g = Image.open(os.path.join(ROOT, 'design', 'overlay', 'collar.dials.png')).convert('L').filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.GaussianBlur(4))
+    g = np.asarray(g, dtype=np.float32).reshape(180, 4, 480, 4).mean((1, 3)) / 255.0
+    bg = np.asarray(Image.open(os.path.join(ROOT, 'bench', 'g20', 'structure', 'bg.night.png')).convert('RGB')
+                    .resize((480, 180), Image.BILINEAR), dtype=np.float32) / 255.0
+    c = np.concatenate([bg, g[..., None]], -1)
     save('collar', c)
     # the middle window and the bar below it, half size, one texture: x 640..1280, y 76..648
     c = np.zeros((572, 640, 4), np.float32)
