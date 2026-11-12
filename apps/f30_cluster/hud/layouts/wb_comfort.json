@@ -54,14 +54,32 @@
         604
       ],
       "hole": [
-        668,
-        140,
-        584,
-        462
+        592,
+        158,
+        736,
+        442
       ],
       "holeWhen": "stockMap",
       "holeInset": 0,
-      "holeRadius": 22
+      "holeRadius": 22,
+      "window": [
+        592,
+        158,
+        736,
+        442
+      ],
+      "fade": [
+        150,
+        40,
+        56,
+        60
+      ],
+      "foot": "hair",
+      "footLine": [
+        607,
+        650,
+        1270
+      ]
     },
     {
       "id": "speedo",

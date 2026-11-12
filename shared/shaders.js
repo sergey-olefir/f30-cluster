@@ -1450,8 +1450,18 @@ uniform float u_hasTex;   // 1: the baked window, horizon and bar; 2: a collar o
                           // colour, coverage in alpha), see-through elsewhere, so BMW's own cluster shows round our dials
 uniform vec4 u_hole;      // a see-through window for BMW's own map under us: x, y, w, h (w 0: none)
 uniform float u_holeR;    // its corner radius
+// Comfort's middle window (package A, docs/POLISH-A-REPORT.md): no hard box. u_wbox is the window, x, y, w, h (w 0:
+// none, the old hard hole); u_fade its soft edges in px: top, sides, bottom, and the shade off the dials' rims. The map
+// (u_hole on) fades into black toward them as the stock G20's map veil does; the baked floor fades at the sides and rims.
+uniform vec4 u_wbox;
+uniform vec4 u_fade;
+uniform vec4 u_foot;      // the line at the window's foot: style (0 the baked glass line u_t2, 1 hairline, 2 chrome,
+                          // 3 none), y, x0, x1
 
 const float PI = 3.14159265359;
+
+// the stock map veil's curve (docs/G20SIM-D-live.md, the map): 0 at the edge, 1 at t >= 1, steep at first
+float veil(float t) { float u = 1.0 - clamp(t, 0.0, 1.0); return 1.0 - u * u; }
 
 void main() {
     vec2 p = v_uv * u_size;                                                       // px, +y down
@@ -1468,18 +1478,28 @@ void main() {
         gl_FragColor = vec4(t.rgb, clamp(t.a * 1.15, 0.0, 1.0));       // the G20's own background colour, soft edges
         return;
     }
+    // the soft window (u_wbox): its sides and the dials' rims shade it, its top and bottom fade the map
+    float shade = 1.0, vis = 1.0;
+    if (u_wbox.z > 0.0) {
+        float ex = min(p.x - u_wbox.x, u_wbox.x + u_wbox.z - p.x);
+        shade = veil(ex / u_fade.y) * smoothstep(0.0, u_fade.w, min(dl, dr));
+        vis = shade * veil((p.y - u_wbox.y) / u_fade.x) * veil((u_wbox.y + u_wbox.w - p.y) / u_fade.z);
+    }
+    bool see = u_hole.z > 0.0 && u_wbox.z > 0.0;   // the map shows: the window and its floor are not drawn
     if (u_style < 0.5 && u_hasTex > 0.5) {
         // the background: black (BAKE C10's near-black blue and halo were the references' LCD black, not drawn)
         vec2 u0 = (p - u_r0.xy) / u_r0.zw, u1 = (p - u_r1.xy) / u_r1.zw, u2 = (p - u_r2.xy) / u_r2.zw;
-        if (u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0) {
+        if (!see && u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0) {
             vec4 t = texture2D(u_t0, u0);
             col = mix(col, t.rgb * (p.y < u_win.y ? u_win.x : 1.0), t.a);
         }
-        if (u1.x >= 0.0 && u1.y >= 0.0 && u1.x <= 1.0 && u1.y <= 1.0) {
+        if (!see && u1.x >= 0.0 && u1.y >= 0.0 && u1.x <= 1.0 && u1.y <= 1.0) {
             vec4 t = texture2D(u_t1, u1);
             col = mix(col, t.rgb * u_win.x, t.a);
         }
-        if (u2.x >= 0.0 && u2.y >= 0.0 && u2.x <= 1.0 && u2.y <= 1.0) {
+        // only darkens: the empty window stays pure black. With no foot line (3) the floor fades out above the foot too
+        col *= shade * (u_foot.x > 2.5 && u_wbox.z > 0.0 ? veil((u_wbox.y + u_wbox.w - p.y) / u_fade.z) : 1.0);
+        if (u_foot.x < 0.5 && u2.x >= 0.0 && u2.y >= 0.0 && u2.x <= 1.0 && u2.y <= 1.0) {
             vec4 t = texture2D(u_t2, u2);
             col = mix(col, t.rgb * u_win.x, t.a);
         }
@@ -1507,8 +1527,11 @@ void main() {
             }
             w += vec3(0.30, 0.37, 0.42) * clamp(1.3 - abs(p.y - yh), 0.0, 1.0) * smoothstep(0.36 * R, 0.22 * R, ax);
             col = w * clamp(ins, 0.0, 1.0);
-            col = mix(col, vec3(0.22, 0.26, 0.33), clamp(1.7 - top, 0.0, 1.0));                   // the lit rim
-            col = mix(col, vec3(0.10, 0.12, 0.16), clamp(1.4 - min(dx, dyb), 0.0, 1.0) * clamp(top - 1.0, 0.0, 1.0));
+            if (u_wbox.z > 0.0) col *= shade;                          // the soft window: no rims, shaded sides
+            else {
+                col = mix(col, vec3(0.22, 0.26, 0.33), clamp(1.7 - top, 0.0, 1.0));               // the lit rim
+                col = mix(col, vec3(0.10, 0.12, 0.16), clamp(1.4 - min(dx, dyb), 0.0, 1.0) * clamp(top - 1.0, 0.0, 1.0));
+            }
         }
     } else {
         float y0 = cy + 0.47 * R, y1 = cy + 0.94 * R;                                 // horizon, base
@@ -1544,12 +1567,39 @@ void main() {
         col = mix(col, sc, clamp(u_sign.z + 0.5 - ds, 0.0, 1.0));
     }
     float alpha = 1.0;
-    if (u_hole.z > 0.0) {
+    if (see) {
+        // BMW's map shows through the soft window: black over it (the window is not drawn), more of it toward the
+        // edges and the dials' rims
+        alpha = 1.0 - vis;
+        if (p.y < u_wbox.y + u_wbox.w) col = vec3(0.0);           // the glass line below it stays
+    } else if (u_hole.z > 0.0) {
         // BMW's map shows through: a rounded box, a soft 1.5 px edge, a thin lit rim round it
         vec2 hc = u_hole.xy + u_hole.zw * 0.5, hq = abs(p - hc) - (u_hole.zw * 0.5 - vec2(u_holeR));
         float sd = length(max(hq, 0.0)) + min(max(hq.x, hq.y), 0.0) - u_holeR;
         alpha = smoothstep(-1.5, 0.5, sd);
         col = mix(col, vec3(0.22, 0.26, 0.33), clamp(1.6 - abs(sd - 1.0), 0.0, 1.0) * 0.8);
+    }
+    if (u_foot.x > 0.5 && u_foot.x < 2.5 && abs(p.y - u_foot.y) < 12.0) {
+        // the line at the window's foot, drawn over the map's fade: 1 a hairline fading out at both ends (the 6WB's
+        // own info bar line), 2 a chrome rod with round caps, shaded as our dial bezels
+        float t = (p.x - u_foot.z) / (u_foot.w - u_foot.z), dy = p.y - u_foot.y;
+        vec4 L = vec4(0.0);
+        if (u_foot.x < 1.5) {
+            float env = smoothstep(0.0, 0.30, t) * (1.0 - smoothstep(0.70, 1.0, t));
+            float core = clamp(1.4 - abs(dy), 0.0, 1.0), halo = exp(-abs(dy) / 2.4);
+            L = vec4(0.80, 0.85, 0.92, env * max(0.95 * core, 0.26 * halo));
+        } else {
+            // the bezels' profile (a bright lip on top, a dark groove, a dimmer lower ridge), sampled off our dials
+            float hh = 4.0, len = u_foot.w - u_foot.z;
+            float ax = max(abs(p.x - (u_foot.z + u_foot.w) * 0.5) - (len * 0.5 - hh), 0.0);
+            float cov = clamp(hh + 0.5 - length(vec2(min(ax, 16.0), dy) / 16.0) * 16.0, 0.0, 1.0);   // fp16-safe
+            float lum = 0.06 + 0.72 * exp(-(dy + 1.8) * (dy + 1.8) / 1.4) + 0.40 * exp(-(dy - 2.2) * (dy - 2.2) / 1.0);
+            float spec = 0.70 + 0.30 * exp(-(t - 0.5) * (t - 0.5) / 0.06);         // brightest in the middle
+            L = vec4(vec3(0.97, 0.98, 1.0) * lum * spec, cov);
+        }
+        float a2 = L.a + alpha * (1.0 - L.a);
+        col = (L.rgb * L.a + col * alpha * (1.0 - L.a)) / max(a2, 1e-4);
+        alpha = a2;
     }
     gl_FragColor = vec4(min(col, vec3(1.0)), alpha);
 }
