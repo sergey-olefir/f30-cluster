@@ -28,13 +28,38 @@
     for (const [k, l] of [['conflict', 'Selected conflict'], ['holes', 'Holes (reveal)'], ['keepclear', 'Keep-clear boxes (over)'], ['redraw', 'Redraw spots']]) idx['ov:' + k] = node(l, 'ov', k, ov);
     const panel = node('Panel', 'group', 'panel', T, { open: false });
     for (const [k, l, show] of [['hood', 'Hood mask', true], ['visible', 'Visible area', true], ['BLACK_BOX', 'BLACK_BOX', true], ['BELT', 'BELT', true], ['GEAR', 'GEAR', true], ['grid', 'Calibration grid', false]]) idx['panel:' + k] = node(l, 'panel', k, panel, { show });
+    // the app's own G20 textures (view only: they raise no conflicts; the 6WB side stays wb_comfort.json)
+    const P = OC.P;
+    const appRecs = P && P.ok ? P.recs.filter((r) => r.source === 'app-scene') : [];
+    if (appRecs.length) {
+      const ours = (OC.oursRoot = node('Ours: G20 parts in the app', 'group', 'ours', T, { open: false, show: false, title: 'apps/f30_cluster/hud/scene: the app\'s own G20 textures at their layout boxes (view only)' }));
+      const byLayout = {};
+      for (const r of appRecs) {
+        const lays = r.used_by.filter((u) => u.startsWith('layout:')).map((u) => u.slice(7));
+        const lk = lays[0] || '(no layout)';
+        if (!byLayout[lk]) byLayout[lk] = node('layout ' + lk, 'group', 'layout:' + lk, ours, { open: true });
+        idx['part:' + r.id] = node(r.id.replace(/^app\./, ''), 'apptex', r.id, byLayout[lk], { title: r.file });
+      }
+    } else OC.oursRoot = null;
     const g20 = (OC.g20Root = node('G20 stock', 'group', 'g20', T, { open: true }));
     const groups = {};
+    const simRecs = P && P.ok ? P.recs.filter((r) => r.source === 'sim') : [];
+    const byEl = {};
+    for (const r of simRecs) (byEl[r.element] = byEl[r.element] || []).push(r);
     for (const g of S.data.g20) {
       const gk = g.group || '(no group)';
       // the stock dials are context only: a faint outline ghost by default
       if (!groups[gk]) groups[gk] = node(gk, 'g20group', gk, g20, gk === 'structure' ? { opacity: 0.45, mode: 'outline' } : null);
-      idx['g20:' + g.id] = node(g.id, 'g20', g.id, groups[gk], { title: g.name || '' });
+      const mine = (byEl[g.id] || []).slice().sort((a, b) => b.z - a.z || P.index[b.id] - P.index[a.id]);
+      const en = (idx['g20:' + g.id] = node(g.id, 'g20', g.id, groups[gk], Object.assign({ title: g.name || '' }, mine.length ? { children: [] } : null)));
+      for (const r of mine) idx['part:' + r.id] = node(r.id.replace(/^structure\./, ''), 'part', r.id, en, { title: r.id + ': ' + (r.file || (r.procedural && r.procedural.module + ' ' + (r.procedural.draw || '')) || '') });
+      delete byEl[g.id];
+    }
+    // parts whose element is not in the catalogue (the font; anything unresolved)
+    const rest = Object.keys(byEl);
+    if (rest.length) {
+      const nn = node('(no catalogue element)', 'g20group', '(none)', g20, { title: 'parts with no element in g20_comfort.json: see g20_parts.json report.unresolved' });
+      for (const k of rest) for (const r of byEl[k]) idx['part:' + r.id] = node(r.id, 'part', r.id, nn, { title: r.file || '' });
     }
     const wb = (OC.wbRoot = node('6WB', 'group', 'wb', T, { open: true, opacity: 0.6 }));
     const anchorIds = Object.keys(S.data.anchors);
@@ -85,7 +110,7 @@
   OC.effVisible = function (n) {
     for (let a = n; a; a = a.parent) if (!a.show) return false;
     if (!n.avail) return false;
-    if (anySolo && (n.type === 'g20' || n.type === 'wb' || n.type === 'photo') && !soloed(n)) return false;
+    if (anySolo && (n.type === 'g20' || n.type === 'wb' || n.type === 'photo' || n.type === 'part' || n.type === 'apptex') && !soloed(n)) return false;
     return true;
   };
   OC.effOpacity = function (n) { let o = 1; for (let a = n; a; a = a.parent) o *= a.opacity; return o; };
@@ -94,25 +119,39 @@
 
   // Draw order, bottom first. The tree is top-first. 6WB leaves follow their (plan) z.
   // 'over' G20 elements always end above every 6WB leaf (BMW draws them on top of any custom theme).
+  // G20 parts draw in the simulation's order (z, then manifest order), all below the element nodes (outlines, schematics).
   OC.drawOrder = function () {
     const out = [];
+    const P = OC.P;
     const walk = (n) => {
-      if (!n.children) return out.push(n);
+      if (!n.children) { if (n.type !== 'part') out.push(n); return; }
       if (n === OC.wbRoot) {
         const ls = OC.leaves(n).sort((a, b) => OC.wbZ(S.wbById[a.ref]) - OC.wbZ(S.wbById[b.ref]) || S.wbIndex[a.ref] - S.wbIndex[b.ref]);
         for (const l of ls) out.push(l);
+        return;
+      }
+      if (n === OC.g20Root) {
+        const ps = OC.leaves(n).filter((l) => l.type === 'part').sort((a, b) => {
+          const ra = P.byId[a.ref], rb = P.byId[b.ref];
+          return (ra.z == null ? -1 : ra.z) - (rb.z == null ? -1 : rb.z) || P.index[a.ref] - P.index[b.ref];
+        });
+        for (const l of ps) out.push(l);
+      }
+      if (n.type === 'g20') {   // an element with parts: the element itself (its parts are drawn above, by z)
+        out.push(n);
         return;
       }
       for (let i = n.children.length - 1; i >= 0; i--) walk(n.children[i]);
     };
     walk(OC.tree);
     let last = -1;
-    out.forEach((l, i) => { if (l.type === 'wb') last = i; });
+    out.forEach((l, i) => { if (l.type === 'wb' || l.type === 'apptex') last = i; });
     if (last < 0) return out;
     const lifted = [];
     const keep = [];
+    const isOver = (l) => (l.type === 'g20' && S.g20ById[l.ref].relation === 'over') || (l.type === 'part' && P.byId[l.ref].layer === 'over');
     out.forEach((l, i) => {
-      if (i < last && l.type === 'g20' && S.g20ById[l.ref].relation === 'over') lifted.push(l);
+      if (i < last && isOver(l)) lifted.push(l);
       else keep.push(l);
     });
     const at = keep.indexOf(out[last]) + 1;
@@ -258,11 +297,83 @@
     return p && p.img ? p.img : null;
   }
 
+  // ---------------- G20 parts ----------------
+  // A part draws its real texture in 'texture' mode (and with 'diff' / 'photo' against the underlay); in 'fill' and
+  // 'outline' it leaves the drawing to its element (schematic / outline), so the plan views stay as they were.
+  OC.partNodeState = function (n) {
+    const r = OC.P.byId[n.ref];
+    const a = OC.partActive(r);
+    if (!a.on) return { r, active: false, why: a.why };
+    const v = OC.partBitmap(r);
+    return { r, active: true, v, fallback: v.fallback || null };
+  };
+  function blit(ctx, v, op, composite) {
+    panelXf(ctx);
+    ctx.save();
+    ctx.globalAlpha = op * (v.opacity == null ? 1 : v.opacity);
+    ctx.globalCompositeOperation = composite || v.composite || 'source-over';
+    const sm = ctx.imageSmoothingEnabled;
+    if (v.smooth) ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(v.img, v.box[0], v.box[1], v.box[2] - v.box[0], v.box[3] - v.box[1]);
+    ctx.imageSmoothingEnabled = sm;
+    ctx.restore();
+  }
+  function maskedPhoto(ctx, v, op) {
+    const ph = cropPhoto();
+    if (!ph) return;
+    const b = v.box;
+    const w = Math.max(1, Math.round(b[2] - b[0]));
+    const h = Math.max(1, Math.round(b[3] - b[1]));
+    const tmp = OC._ptmp || (OC._ptmp = document.createElement('canvas'));
+    tmp.width = w;
+    tmp.height = h;
+    const t = tmp.getContext('2d');
+    t.drawImage(ph, (b[0] / W) * ph.naturalWidth, (b[1] / H) * ph.naturalHeight, ((b[2] - b[0]) / W) * ph.naturalWidth, ((b[3] - b[1]) / H) * ph.naturalHeight, 0, 0, w, h);
+    t.globalCompositeOperation = 'destination-in';
+    t.drawImage(v.img, 0, 0, w, h);
+    blit(ctx, { img: tmp, box: b, opacity: 1 }, op, 'source-over');
+  }
+  function drawPart(ctx, n, mode, op) {
+    if (mode !== 'texture' && mode !== 'diff' && mode !== 'photo') return;
+    const st = OC.partNodeState(n);
+    if (!st.active || (st.v && st.v.empty)) return;
+    if (st.fallback) {
+      // cannot be drawn alone: the element's schematic stands in (the tree marks the node)
+      const g = S.g20ById[st.r.element];
+      if (g) drawG20(ctx, g, 'fill', op * 0.8);
+      return;
+    }
+    if (mode === 'diff') blit(ctx, st.v, op, 'difference');
+    else if (mode === 'photo') maskedPhoto(ctx, st.v, op);
+    else blit(ctx, st.v, op);
+    if (OC.ui.labels && mode === 'texture') label(ctx, st.r.id, sx(st.v.box[0]), sy(st.v.box[3]) + 13, '#f8c');
+  }
+  function drawAppTex(ctx, n, mode, op) {
+    const r = OC.P.byId[n.ref];
+    if (r.render === 'data') return;
+    const v = OC.partBitmap(r);
+    if (v.empty) return;
+    if (v.fallback) {
+      if (r.placement) { panelXf(ctx); ctx.setLineDash([4 / V.s, 4 / V.s]); ctx.strokeStyle = 'rgba(255,120,200,' + op + ')'; ctx.lineWidth = 1.5 / V.s; ctx.strokeRect(r.placement[0], r.placement[1], r.placement[2] - r.placement[0], r.placement[3] - r.placement[1]); ctx.setLineDash([]); }
+      return;
+    }
+    if (mode === 'outline') {
+      panelXf(ctx);
+      ctx.strokeStyle = 'rgba(255,120,200,' + op + ')';
+      ctx.lineWidth = 1.5 / V.s;
+      ctx.strokeRect(v.box[0], v.box[1], v.box[2] - v.box[0], v.box[3] - v.box[1]);
+    } else if (mode === 'diff') blit(ctx, v, op, 'difference');
+    else if (mode === 'photo') maskedPhoto(ctx, v, op);
+    else blit(ctx, v, op);
+    if (OC.ui.labels) label(ctx, r.id, sx(r.bbox ? r.bbox[0] : v.box[0]), sy(r.bbox ? r.bbox[1] : v.box[1]) - 1, '#f8c');
+  }
+
   function drawG20(ctx, g, mode, op) {
     const col = OC.g20Rgb(g);
     const dark = col[0] + col[1] + col[2] < 60;
     const stroke = dark ? [200, 200, 200] : col;
     panelXf(ctx);
+    if (mode === 'label') { const b = g.bbox; label(ctx, g.id, sx(b[0]), sy(b[1]) - 1, rgba(stroke, 1)); return; }
     g20Path(ctx, g);
     const sch = S.schematics[g.id];
     if (mode === 'photo' && cropPhoto()) {
@@ -517,7 +628,13 @@
           ctx.globalAlpha = 1;
         } else if (n.type === 'panel') drawPanelItem(ctx, n.ref, op);
         else if (n.type === 'ov') drawOv(ctx, n.ref, op);
-        else if (n.type === 'g20') drawG20(ctx, S.g20ById[n.ref], OC.effMode(n), op);
+        else if (n.type === 'g20') {
+          const m = OC.effMode(n);
+          // texture: an element with parts is drawn by its parts; one without any falls back to its schematic
+          if (m === 'texture') { if (!(n.children && n.children.length)) drawG20(ctx, S.g20ById[n.ref], 'fill', op); else if (OC.ui.labels) drawG20(ctx, S.g20ById[n.ref], 'label', op); }
+          else drawG20(ctx, S.g20ById[n.ref], m, op);
+        } else if (n.type === 'part') drawPart(ctx, n, OC.effMode(n), op);
+        else if (n.type === 'apptex') drawAppTex(ctx, n, OC.effMode(n), op);
         else if (n.type === 'wb') drawWb(ctx, S.wbById[n.ref], OC.effMode(n), op);
       }
     }
