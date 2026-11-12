@@ -1421,7 +1421,8 @@ void main() {
         }
         float cutWin = u_cut.z > 0.5 ? smoothstep(-0.5, u_cut.w + 0.5, cutSd) : 1.0;   // 0 in the window .. 1 past its soft edge
         if (u_cut.z > 2.5) {
-            float cutA = max(cutK, 1.0 - cutWin);                                 // the closed disc: opaque
+            // the closed disc: opaque out to 2 px past the window's soft edge (the collar's band starts at r + 2)
+            float cutA = max(cutK, 1.0 - smoothstep(u_cut.w + 1.5, u_cut.w + 3.0, cutSd));
             col *= cutK / max(cutA, 0.001);
             cutK = cutA;
         } else {
