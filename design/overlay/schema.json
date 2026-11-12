@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "f30-cluster/design/overlay/schema.json",
   "title": "Overlay map: stock G20 cluster vs our 6WB theme (panel target)",
-  "description": "One schema for the four files in design/overlay/. Each file has a top-level 'kind' that selects its definition. All coordinates are panel px: 1920x720, x right, y down (as in shared/visible.js). See design/overlay/README.md.",
+  "description": "One schema for the files in design/overlay/ (elements, plans, constraints, G20 parts). Each file has a top-level 'kind' that selects its definition. All coordinates are panel px: 1920x720, x right, y down (as in shared/visible.js). See design/overlay/README.md.",
   "oneOf": [
     {
       "$ref": "#/$defs/g20File"
@@ -15,6 +15,9 @@
     },
     {
       "$ref": "#/$defs/constraintsFile"
+    },
+    {
+      "$ref": "#/$defs/partsFile"
     }
   ],
   "$defs": {
@@ -351,6 +354,13 @@
         },
         "notes": {
           "type": "string"
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "Ids of the G20 parts (design/overlay/g20_parts.json) whose 'element' is this element: our own drawings of it that already exist. Filled by tools/overlay/link_parts.py, never by hand. Empty: we would still have to draw it."
         }
       },
       "additionalProperties": false
@@ -1028,6 +1038,394 @@
         },
         "bmw_over": {
           "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "partRecord": {
+      "type": "object",
+      "description": "One G20 part: a layer or a procedural item of the bench simulation (bench/g20/manifest.json), or one of the app's own G20 scene textures (apps/f30_cluster/hud/scene/g20_*.json, collar.json). Referenced in place: no pixels in this file.",
+      "required": [
+        "id",
+        "element",
+        "source",
+        "file",
+        "procedural",
+        "render",
+        "kind",
+        "bbox",
+        "size",
+        "layer",
+        "state",
+        "look",
+        "z",
+        "evidence",
+        "sources",
+        "used_by",
+        "notes"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id",
+          "description": "The manifest id for simulation parts; 'app.<texture>' for app textures; 'sim.black_box' for the black area g20sim.js draws itself."
+        },
+        "element": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The catalogue element it draws (g20_comfort.json id), or null (font, data, a texture spanning several elements: see report.unresolved)."
+        },
+        "source": {
+          "enum": [
+            "sim",
+            "app-scene"
+          ]
+        },
+        "package": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Simulation package: B (static rasters), C (icons and texts), D (live), E (g20sim.js itself); null for app textures."
+        },
+        "file": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Repo-relative file: a PNG, a font, or an app scene JSON. null for procedural parts."
+        },
+        "procedural": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "module",
+                "id"
+              ],
+              "properties": {
+                "module": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "draw": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "The module and entry point that draws it."
+        },
+        "render": {
+          "enum": [
+            "raster",
+            "procedural",
+            "live",
+            "app-texture",
+            "font",
+            "data"
+          ],
+          "description": "raster: a B PNG; procedural: C (or E) vector drawing; live: D, depends on the values; app-texture: decoded from the scene JSON; font, data: not pictures."
+        },
+        "kind": {
+          "type": "string",
+          "description": "The manifest's kind (albedo, glow, font, icon) or data."
+        },
+        "bbox": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/bbox"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Panel px [x0, y0, x1, y1]: a raster or app texture: its alpha > 0 extent at its placement; C: the manifest box; D: measured from a render (measured.bbox). null for font and data."
+        },
+        "placement": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/bbox"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Where the image is drawn (the whole image rect, panel px)."
+        },
+        "size": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "[w, h] of the image in its own px (a scaled layer is drawn at size x scale)."
+        },
+        "scale": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "alpha_px": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Panel px with alpha > 0."
+        },
+        "layer": {
+          "enum": [
+            "under",
+            "over",
+            "theme"
+          ],
+          "description": "Simulation: under or over a custom theme. 'theme': an app texture, drawn as our theme."
+        },
+        "state": {
+          "enum": [
+            "any",
+            "stock",
+            "connected"
+          ],
+          "description": "When the simulation draws it: always, only in the stock layout, or only with a theme connected. App textures: connected (they are our theme)."
+        },
+        "look": {
+          "enum": [
+            "any",
+            "day",
+            "night"
+          ]
+        },
+        "z": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Simulation draw order (bottom first); null for app textures."
+        },
+        "lamp": {
+          "type": "string",
+          "description": "The lamp id that lights it (a lit look only: unlit draws nothing)."
+        },
+        "cond": {
+          "type": "string",
+          "description": "Extra condition: engine_on, engine_off, no_cc_message, cc_message, limit_set, cold_engine_running."
+        },
+        "cond_source": {
+          "type": "string"
+        },
+        "skip": {
+          "type": "string",
+          "description": "The simulation does not draw this entry (why)."
+        },
+        "clip": {
+          "type": "object",
+          "description": "The simulation clips it live (minis fill at the needle line)."
+        },
+        "composite": {
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number"
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Photos it is fitted to (as the manifest states)."
+        },
+        "used_by": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(bench-sim|layout:[A-Za-z0-9_]+)$"
+          }
+        },
+        "baked_into": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "App textures baked from this part."
+        },
+        "baked_from": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "description": "Parts this app texture is baked from."
+        },
+        "baked_from_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "covers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "element",
+              "px",
+              "pct"
+            ],
+            "properties": {
+              "element": {
+                "$ref": "#/$defs/id"
+              },
+              "px": {
+                "type": "integer"
+              },
+              "pct": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "App textures: catalogue elements under their alpha >= 128 (at least 10 px), with the share of the element's area."
+        },
+        "covers_note": {
+          "type": "string"
+        },
+        "vs_catalogue": {
+          "type": "object",
+          "properties": {
+            "element_bbox": {
+              "$ref": "#/$defs/bbox"
+            },
+            "d_edges": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "inside_pct": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "description": "This part's bbox minus its element's bbox (x0, y0, x1, y1) and the share of its pixels inside the element's shape."
+        },
+        "measured": {
+          "type": "object",
+          "properties": {
+            "bbox": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/bbox"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "px": {
+              "type": "integer"
+            },
+            "state": {
+              "type": "object"
+            },
+            "fallback": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Procedural parts: drawn alone by the constructor probe (?probe=parts) in headless Chrome."
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "partsFile": {
+      "type": "object",
+      "required": [
+        "kind",
+        "schema_version",
+        "panel",
+        "sources",
+        "parts",
+        "report"
+      ],
+      "properties": {
+        "$comment": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "g20-parts"
+        },
+        "schema_version": {
+          "const": 1
+        },
+        "panel": {
+          "$ref": "#/$defs/panelSize"
+        },
+        "sources": {
+          "type": "object"
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/partRecord"
+          }
+        },
+        "report": {
+          "type": "object",
+          "required": [
+            "counts",
+            "unresolved",
+            "elements_without_parts",
+            "new_elements",
+            "suspicious_links",
+            "relation_disagreements",
+            "bbox_disagreements",
+            "housing_leds",
+            "per_element"
+          ],
+          "description": "Cross-checks between the parts and the catalogue (tools/overlay/inventory_parts.py). Findings only: nothing here changes the catalogue.",
+          "properties": {
+            "unresolved": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "part",
+                  "element",
+                  "reason"
+                ]
+              }
+            }
+          }
         }
       },
       "additionalProperties": false
