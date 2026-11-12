@@ -886,7 +886,7 @@ class HudApp {
         widgets.forEach((w) => {
             const ci = this._connOf(w), add = (t) => { if (t && t.tex) out.add(ci + ':scene:' + t.tex); };
             if (w.type === 'dial' && w.look === 'wb' && baked) { add(w.base); add(w.fill); }
-            else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); }
+            else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); add({ tex: w.fill }); }
             else if (w.type === 'wbsign' && w.tex && baked) { add(w.tex.limit); add(w.tex.nopass); }
             else if (w.type === 'wbback') {
                 if (w.collar) add(w.collar);
@@ -1816,6 +1816,7 @@ class HudApp {
             c.uniform(ref, 'u_box', [w.x, w.y, w.w, w.h]);
             c.bind(ref, 'u_base', this._scene(w.base, x.ci).ref);
             c.bind(ref, 'u_lut', this._scene(w.lut, x.ci).ref);
+            if (w.fill) c.bind(ref, 'u_fill', this._scene(w.fill, x.ci).ref);     // minis: the level's fill and the area
             c.uniform(ref, 'u_g', [w.rows[0], w.rows[1], w.mini ? 1 : 0, w.band ? 1 : 0]);
             c.uniform(ref, 'u_val', [0, 0, 0, 0]);
             c.uniform(ref, 'u_C', w.centre || [0, 0]);

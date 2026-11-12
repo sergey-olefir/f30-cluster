@@ -1922,6 +1922,7 @@ uniform vec4 u_rim;        // the rim's colour and alpha
 uniform vec4 u_glow;       // the glow's colour (already scaled) and sigma px (0: none)
 uniform vec4 u_band;       // the band's first and last angle (image atan2, radians), its width px; 0
 uniform vec3 u_bandC;
+uniform sampler2D u_fill;  // minis: the level's fill (RGB over black) and the mini's area (A); u_base then holds its lines
 
 float dec(vec4 c) { return (c.r * 65280.0 + c.g * 255.0) / 16.0; }
 vec2 at(float e, float i) {
@@ -1944,6 +1945,16 @@ void main() {
     vec2 pa = (p - tail) / 64.0, ba = (tip - tail) / 64.0;
     float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
     float dist = length(pa - ba * h) * 64.0;
+    if (u_g.z > 0.5) {
+        // a mini: black over its area, the fill from 0 up to the needle (the side of the needle's line where the 0
+        // end lies), then its lines
+        vec4 fl = texture2D(u_fill, v_uv);
+        vec2 z0 = (lutP(u_g.x, 0.0) - tail) / 64.0;
+        float side = sign(ba.x * pa.y - ba.y * pa.x) * sign(ba.x * z0.y - ba.y * z0.x);
+        col = fl.rgb * step(0.0, side) * step(0.004, f);
+        col = mix(col, bs.rgb, bs.a);
+        alpha = max(fl.a, bs.a);
+    }
     if (u_g.w > 0.5) {
         // the rev band: inside the ticks, from 0 to the pointer
         vec2 q = p - u_C;

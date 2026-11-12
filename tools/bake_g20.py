@@ -45,8 +45,10 @@ def layer(id_):
     return e, np.asarray(im, dtype=np.float32) / 255.0
 
 
-def composite(box, ids, face=None, holes=()):
-    """Layers (bench manifest ids, night) over black in box (x0, y0, x1, y1): opaque over the gauge, see-through outside."""
+def composite(box, ids, face=None, holes=(), area=None):
+    """Layers (bench manifest ids, night) over black in box (x0, y0, x1, y1): opaque over the gauge, see-through outside.
+    The gauge's area is what `area`'s layers (default: all) and the face cover, holes filled: not the glow, which spills
+    past the frame onto the minis."""
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
     rgb = np.zeros((h, w, 3), np.float32)
@@ -67,12 +69,13 @@ def composite(box, ids, face=None, holes=()):
         else:
             d[...] = s[..., :3] * al + d * (1 - al)
         c = cover[dy0:dy0 + ch, dx0:dx0 + cw]
-        c[...] = np.maximum(c, s[..., 3])
+        if area is None or id_ in area:
+            c[...] = np.maximum(c, s[..., 3])
     # the gauge's area: everything drawn plus the face, with its holes filled (flood from the box's edge)
     m = Image.fromarray(((cover > 0.03) * 255).astype(np.uint8))
     if face:
         ImageDraw.Draw(m).polygon([(px - x0, py - y0) for px, py in face], fill=255)
-    m = m.filter(ImageFilterMax(5))
+    m = m.filter(ImageFilterMax(3))                # closes 1 px gaps in the frame line, adds 1 px
     inv = Image.eval(m, lambda v: 255 - v)
     pad = Image.new('L', (w + 2, h + 2), 255)
     pad.paste(inv, (1, 1))
@@ -92,6 +95,37 @@ def composite(box, ids, face=None, holes=()):
             alpha *= np.clip(out + 0.5, 0, 1)
     rgba = np.concatenate([np.clip(rgb, 0, 1), alpha[..., None]], -1)
     return rgba
+
+
+def placed(box, id_):
+    """A layer in box's frame, straight RGBA (zero outside it)."""
+    x0, y0, x1, y1 = box
+    out = np.zeros((y1 - y0, x1 - x0, 4), np.float32)
+    e, a = layer(id_)
+    ox, oy = e['x'] - x0, e['y'] - y0
+    sx0, sy0, dx0, dy0 = max(0, -ox), max(0, -oy), max(0, ox), max(0, oy)
+    cw, ch = min(a.shape[1] - sx0, out.shape[1] - dx0), min(a.shape[0] - sy0, out.shape[0] - dy0)
+    out[dy0:dy0 + ch, dx0:dx0 + cw] = a[sy0:sy0 + ch, sx0:sx0 + cw]
+    return out
+
+
+def mini_tex(box, line_id, fill_id):
+    """A mini's two textures: its lines (straight alpha), and its fill as RGB over black with the mini's whole area in
+    alpha (the shader shows the fill from 0 up to the needle, black above it). The fill's hard inner edge (the bench
+    simulation's open point 3) is softened: the photos fade there."""
+    from PIL import ImageFilter
+    lines, fill = placed(box, line_id), placed(box, fill_id)
+    fa = np.asarray(Image.fromarray((fill[..., 3] * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(6)), np.float32) / 255.0
+    fa = np.minimum(fa * 1.25, fill[..., 3] > 0.02)
+    m = Image.fromarray((((lines[..., 3] > 0.03) | (fill[..., 3] > 0.03)) * 255).astype(np.uint8)).filter(ImageFilterMax(3))
+    inv = Image.eval(m, lambda v: 255 - v)
+    pad = Image.new('L', (m.width + 2, m.height + 2), 255)
+    pad.paste(inv, (1, 1))
+    ImageDraw.floodfill(pad, (0, 0), 128)
+    area = (np.asarray(pad)[1:-1, 1:-1] != 128).astype(np.float32)
+    area = np.asarray(Image.fromarray((area * 255).astype(np.uint8)).filter(ImageFilterBlur()), np.float32) / 255.0
+    f = np.concatenate([fill[..., :3] * fa[..., None], area[..., None]], -1)
+    return lines, f
 
 
 def ImageFilterMax(n):
@@ -216,15 +250,21 @@ def main():
     info = ('box', (1250, 585, 1276, 633))         # its check-control "i" left of the tacho
     boxes = {
         'speedo': ((76, 30, 760, 656), ['speedo.glow', 'speedo.wing', 'speedo.frame', 'speedo.bottom_end', 'speedo_info_line',
-                                        'speedo_numerals', 'speedo_scale_label'], face['speedo'], [sign]),
+                                        'speedo_numerals', 'speedo_scale_label'], face['speedo'], [sign],
+                   ['speedo.frame', 'speedo.bottom_end']),
         'tacho': ((1158, 33, 1842, 656), ['tacho.glow', 'tacho.wing', 'tacho.frame', 'tacho.bottom_end', 'rev_band',
-                                          'tacho_numerals', 'tacho_zero'], face['tacho'], [info]),
-        'fuel': ((6, 428, 204, 654), ['fuel_mini.fill', 'fuel_mini'], None, []),
-        'oil': ((1718, 432, 1913, 654), ['oil_mini.fill', 'oil_mini'], None, []),
+                                          'tacho_numerals', 'tacho_zero'], face['tacho'], [info],
+                  ['tacho.frame', 'tacho.bottom_end', 'rev_band']),
     }
     geo = {}
-    for name, (box, ids, fc, holes) in boxes.items():
-        save(name, composite(box, ids, fc, holes))
+    for name, (box, ids, fc, holes, area) in boxes.items():
+        save(name, composite(box, ids, fc, holes, area))
+        geo[name] = {'box': list(box)}
+    # the minis: the lines (straight alpha) and, apart, the level's fill, lit live from 0 up to the needle
+    for name, box in (('fuel', (6, 428, 204, 654)), ('oil', (1718, 432, 1913, 654))):
+        lines, fill = mini_tex(box, name + '_mini', name + '_mini.fill')
+        save(name, lines)
+        save(name + '_fill', fill)
         geo[name] = {'box': list(box)}
     a, psi0, psi1 = lut()
     save('lut', a.astype(np.float32) / 255.0, 'nearest')

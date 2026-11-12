@@ -113,7 +113,7 @@
       "id": "fuel",
       "type": "g20dial",
       "class": "content",
-      "z": 1,
+      "z": 2,
       "x": 6,
       "y": 428,
       "w": 198,
@@ -125,6 +125,7 @@
         5
       ],
       "conn": 0,
+      "fill": "g20_fuel_fill",
       "signal": "fuel",
       "min": 0,
       "max": 1,
@@ -150,7 +151,7 @@
       "id": "oil",
       "type": "g20dial",
       "class": "content",
-      "z": 1,
+      "z": 2,
       "x": 1718,
       "y": 432,
       "w": 195,
@@ -162,6 +163,7 @@
         7
       ],
       "conn": 1,
+      "fill": "g20_oil_fill",
       "signal": "oil",
       "min": 70,
       "max": 150,
