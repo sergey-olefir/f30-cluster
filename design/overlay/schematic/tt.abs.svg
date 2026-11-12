@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 59 42" width="59" height="42">
+  <title>ABS (amber, 'ABS' in a circle with brackets) (generic schematic, our own drawing)</title>
+  <circle cx="29.5" cy="21.0" r="13.0" fill="none" stroke="#f2a312" stroke-width="2.9"/>
+  <path d="M 11.9 9.3 Q 7.4 21.0 11.9 32.7" fill="none" stroke="#f2a312" stroke-width="2.9" stroke-linecap="round"/>
+  <path d="M 47.1 9.3 Q 51.6 21.0 47.1 32.7" fill="none" stroke="#f2a312" stroke-width="2.9" stroke-linecap="round"/>
+  <text x="29.5" y="21.0" font-family="Arial, Helvetica, sans-serif" font-size="8.1" font-weight="bold" fill="#f2a312" text-anchor="middle" dominant-baseline="central">ABS</text>
+</svg>

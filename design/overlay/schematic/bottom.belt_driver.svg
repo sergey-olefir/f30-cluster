@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 31 49" width="31" height="49">
+  <title>Driver seat belt (red, seated figure with belt) (generic schematic, our own drawing)</title>
+  <circle cx="15.5" cy="6.9" r="3.7" fill="#e23b2e"/>
+  <path d="M 15.5 13.7 L 15.5 32.3 L 24.2 32.3 L 24.2 46.5" fill="none" stroke="#e23b2e" stroke-width="2.2" stroke-linejoin="round"/>
+  <line x1="7.8" y1="29.4" x2="23.2" y2="14.7" stroke="#e23b2e" stroke-width="1.7"/>
+</svg>

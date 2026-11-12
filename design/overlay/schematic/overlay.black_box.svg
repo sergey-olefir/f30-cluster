@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190.2 119.2" width="190.2" height="119.2">
+  <title>Black area (drawn only while a custom theme is connected) (generic schematic, our own drawing)</title>
+  <rect x="0" y="0" width="190.2" height="119.2" fill="#000000"/>
+  <text x="95.1" y="59.6" font-family="Arial, Helvetica, sans-serif" font-size="17.9" font-weight="normal" fill="#555555" text-anchor="middle" dominant-baseline="central">black area</text>
+</svg>

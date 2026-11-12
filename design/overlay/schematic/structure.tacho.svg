@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 632 616" width="632" height="616">
+  <title>Stock tachometer outline (bezel, scale, numerals) (generic schematic, our own drawing)</title>
+  <polygon points="465.0,596.0 442.0,609.0 408.0,616.0 32.0,614.0 0.0,36.0 10.0,0.0 227.0,18.0 325.0,33.0 373.0,45.0 397.0,54.0 443.0,80.0 505.0,125.0 556.0,170.0 632.0,299.0 629.0,335.0 609.0,389.0 496.0,566.0" fill="none" fill-opacity="0.25" stroke="#f2f2f2" stroke-width="2"/>
+  <text x="316.0" y="308.0" font-family="Arial, Helvetica, sans-serif" font-size="28.0" font-weight="normal" fill="#f2f2f2" text-anchor="middle" dominant-baseline="central">tacho</text>
+</svg>

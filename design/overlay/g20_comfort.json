@@ -1,11 +1,4269 @@
 {
-  "$comment": "The stock G20 Comfort elements on the panel target. Written by package E (catalogue) and F (relations). See README.md.",
-  "kind": "g20-elements",
-  "schema_version": 1,
-  "mode": "comfort",
-  "target": "panel",
-  "panel": { "w": 1920, "h": 720 },
-  "photos": {},
-  "excluded": [],
-  "elements": []
+ "$comment": "The stock G20 Comfort elements on the panel target. Geometry, colour, per-photo states, safety proposal and schematic by package E (tools/overlay/catalogue_g20.py from tools/overlay/catalogue_g20_seeds.json, measured on the package-B rects); relation, evidence and relation_basis are filled by package F. See README.md.",
+ "kind": "g20-elements",
+ "schema_version": 1,
+ "mode": "comfort",
+ "target": "panel",
+ "panel": {
+  "w": 1920,
+  "h": 720
+ },
+ "photos": {
+  "08": {
+   "file": "reference/g20/08_stock_night_warnings-map.jpg",
+   "rect": "bake/work/overlay/rect/08.png",
+   "shows": "stock",
+   "theme_version": null,
+   "rms_px": 1.112,
+   "usable_for_geometry": true,
+   "note": "Stock theme at night just after start-up: the most lamps lit, the check-control 'ready to drive' panel, map, 50 sign. Master inventory for E."
+  },
+  "09": {
+   "file": "reference/g20/09_stock_map_day.jpg",
+   "rect": "bake/work/overlay/rect/09.png",
+   "shows": "stock",
+   "theme_version": null,
+   "rms_px": 1.015,
+   "usable_for_geometry": true,
+   "note": "Stock theme by day, driving (gear D), map with a roundabout; no warnings lit."
+  },
+  "10": {
+   "file": "reference/g20/10_grid_over-stock.jpg",
+   "rect": "bake/work/overlay/rect/10.png",
+   "shows": "stock+grid",
+   "theme_version": null,
+   "rms_px": 1.205,
+   "usable_for_geometry": true,
+   "note": "Our transparent calibration grid (labels, L1-L16, grey ramps, ATLAS text) over the stock theme; BMW's black box and bottom-row P are drawn. Grid labels hide some spots."
+  },
+  "11": {
+   "file": "reference/g20/11_our-theme_on-car.jpg",
+   "rect": "bake/work/overlay/rect/11.png",
+   "shows": "ours",
+   "theme_version": null,
+   "rms_px": 0.161,
+   "usable_for_geometry": true,
+   "note": "Our early opaque theme (old geometry, before bc2fc0d's G20 fit; exact build unknown). B's fit points only reach y 562, below that the rect is extrapolated."
+  },
+  "12": {
+   "file": "reference/g20/12_our-theme_night_2026-11-11.jpg",
+   "rect": "bake/work/overlay/rect/12.png",
+   "shows": "ours",
+   "theme_version": "cb28ce7",
+   "rms_px": 0.815,
+   "usable_for_geometry": true,
+   "note": "Our opaque theme at night (B used the cb28ce7 bench render for alignment); BMW's red (P), belt, P and black box drawn over us."
+  },
+  "13": {
+   "file": "reference/g20/13_our-theme_baked_on-car_2026-11-11.jpg",
+   "rect": "bake/work/overlay/rect/13.png",
+   "shows": "ours",
+   "theme_version": "cb28ce7",
+   "rms_px": 1.445,
+   "usable_for_geometry": false,
+   "note": "Our baked theme on the car, same session as 12 (B used cb28ce7); very coarse: visual checks only. B: one photo px is 5.7 panel px: too coarse for 3 px geometry; use the rect for visual relation checks only"
+  },
+  "14": {
+   "file": "reference/g20/14_stock-under-unbound-theme_2026-11-12.jpg",
+   "rect": "bake/work/overlay/rect/14.png",
+   "shows": "ours-partial",
+   "theme_version": "0.7.2",
+   "rms_px": 0.814,
+   "usable_for_geometry": true,
+   "note": "Our 0.7.2 connected but only our text layers drew (unbound-sampler bug, fixed in 0.7.3): the stock theme is visible beneath our text. Coarse: centres good, edges blur over ~5 px."
+  }
+ },
+ "excluded": [
+  {
+   "what": "Low-beam headlight lamp (green) and side/parking-light lamp (green), left of the panel",
+   "reason": "Physical LED telltales in the housing, not on the TFT: photo 08's model maps them to panel x ~ -90, y ~ 555 and 602 (outside 1920x720). No theme can draw over or hide them."
+  },
+  {
+   "what": "Check-engine lamp (amber) and DSC OFF lamp (amber), right of the panel",
+   "reason": "Physical LED telltales in the housing: photo 08's model maps them to panel x ~ 2000-2008, y ~ 550 and 614 (outside the panel)."
+  },
+  {
+   "what": "Individual speedo/tacho numerals, ticks, the red gradient band inside the bezels, the dark dial wings and the orange needle glow",
+   "reason": "Part of the stock dials; catalogued only as ghost outlines (structure.speedo, structure.tacho, needles, rev band, minis) because they are context, not indicators."
+  },
+  {
+   "what": "Individual map roads, the roundabout (09) and the lighter map background seen in 14",
+   "reason": "Covered by the single map.region polygon (hull of all road pixels in 08, 09, 14 plus C9's hull)."
+  },
+  {
+   "what": "READY, OFF (centre-right, ~1290-1340 x 450-545), the clocks 08:16 / 20:29 / 14:29, the Time/Range/Temp block, our numerals, our '1/min x 1000', our range '456 km' near the speedo, our minis, needles, map window and the l/100 km mini in photos 11-14",
+   "reason": "Our own widgets (6WB theme), not G20 elements; they are in design/overlay/wb_comfort.json."
+  },
+  {
+   "what": "The calibration grid in 10: green lines, yellow coordinate labels, L1-L16, 'ATLAS 14:29 950', the grey ramps",
+   "reason": "Our test layout (grid.json), drawn transparent over the stock theme for photo 10."
+  },
+  {
+   "what": "Glass reflections, the hood shadow and the housing outside the TFT",
+   "reason": "Not drawn by the cluster (see docs/BAKE-C9-overlays.md section 1)."
+  }
+ ],
+ "elements": [
+  {
+   "id": "tt.brake",
+   "group": "telltale",
+   "name": "Brake warning (red, '!' in a circle with brackets)",
+   "safety": "critical",
+   "bbox": [
+    25.0,
+    214.0,
+    85.0,
+    255.0
+   ],
+   "poly": [
+    [
+     85,
+     241
+    ],
+    [
+     81,
+     251
+    ],
+    [
+     77,
+     254
+    ],
+    [
+     61,
+     255
+    ],
+    [
+     33,
+     254
+    ],
+    [
+     28,
+     247
+    ],
+    [
+     25,
+     233
+    ],
+    [
+     28,
+     221
+    ],
+    [
+     33,
+     214
+    ],
+    [
+     77,
+     214
+    ],
+    [
+     80,
+     216
+    ],
+    [
+     84,
+     224
+    ],
+    [
+     85,
+     228
+    ]
+   ],
+   "colour": {
+    "name": "red",
+    "rgb": [
+     243,
+     100,
+     81
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "red",
+     "note": "lit after start-up"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "spot visible, unlit"
+    },
+    {
+     "photo": "10",
+     "lit": false,
+     "note": "unlit; the grid label '0/200' covers the upper-left corner"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our face is there (opaque?)"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen; our blue background there"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen; our background there"
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "stock visible beneath, unlit"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/tt.brake.svg",
+   "measured_by": "E: per-stroke half-max of chroma on rect 08",
+   "notes": "Left telltale column. Hint for F: only lit in 08 (stock); never lit with a custom theme up, so 11-13 cannot say over/under; 14 shows the spot uncovered but unlit -> unknown; needs a photo with the lamp lit over an opaque theme (e.g. brake-fluid test / start-up self-test)."
+  },
+  {
+   "id": "tt.tpms",
+   "group": "telltale",
+   "name": "Tyre pressure (amber, tyre section with '!')",
+   "safety": "critical",
+   "bbox": [
+    24.0,
+    267.0,
+    77.0,
+    314.0
+   ],
+   "poly": [
+    [
+     68,
+     314
+    ],
+    [
+     33,
+     314
+    ],
+    [
+     31,
+     312
+    ],
+    [
+     24,
+     296
+    ],
+    [
+     24,
+     284
+    ],
+    [
+     29,
+     269
+    ],
+    [
+     31,
+     267
+    ],
+    [
+     70,
+     267
+    ],
+    [
+     72,
+     269
+    ],
+    [
+     77,
+     283
+    ],
+    [
+     77,
+     298
+    ],
+    [
+     70,
+     312
+    ]
+   ],
+   "colour": {
+    "name": "amber",
+    "rgb": [
+     250,
+     185,
+     105
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "amber",
+     "note": "lit after start-up (self-test)"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "unlit"
+    },
+    {
+     "photo": "10",
+     "lit": false,
+     "note": "unlit"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our face there"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "stock visible, unlit"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/tt.tpms.svg",
+   "measured_by": "E: per-stroke half-max of chroma on rect 08",
+   "notes": "Hint for F: as tt.brake (lit only in 08) -> unknown."
+  },
+  {
+   "id": "tt.abs",
+   "group": "telltale",
+   "name": "ABS (amber, 'ABS' in a circle with brackets)",
+   "safety": "critical",
+   "bbox": [
+    14.0,
+    327.0,
+    73.0,
+    369.0
+   ],
+   "poly": [
+    [
+     72,
+     356
+    ],
+    [
+     68,
+     365
+    ],
+    [
+     65,
+     368
+    ],
+    [
+     45,
+     369
+    ],
+    [
+     22,
+     368
+    ],
+    [
+     18,
+     365
+    ],
+    [
+     15,
+     360
+    ],
+    [
+     14,
+     356
+    ],
+    [
+     14,
+     339
+    ],
+    [
+     16,
+     334
+    ],
+    [
+     21,
+     328
+    ],
+    [
+     43,
+     327
+    ],
+    [
+     65,
+     328
+    ],
+    [
+     68,
+     331
+    ],
+    [
+     72,
+     339
+    ],
+    [
+     73,
+     347
+    ]
+   ],
+   "colour": {
+    "name": "amber",
+    "rgb": [
+     243,
+     172,
+     83
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "amber",
+     "note": "lit after start-up (self-test)"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "unlit"
+    },
+    {
+     "photo": "10",
+     "lit": false,
+     "note": "unlit; grid label '0/300' above it"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our face there"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "stock visible, unlit"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/tt.abs.svg",
+   "measured_by": "E: per-stroke half-max of chroma on rect 08",
+   "notes": "Hint for F: lit only in 08 -> unknown."
+  },
+  {
+   "id": "tt.dsc",
+   "group": "telltale",
+   "name": "DSC (amber, car with skid lines)",
+   "safety": "critical",
+   "bbox": [
+    19.0,
+    381.0,
+    63.0,
+    429.0
+   ],
+   "poly": [
+    [
+     53,
+     429
+    ],
+    [
+     24,
+     429
+    ],
+    [
+     19,
+     426
+    ],
+    [
+     20,
+     395
+    ],
+    [
+     26,
+     384
+    ],
+    [
+     30,
+     381
+    ],
+    [
+     52,
+     381
+    ],
+    [
+     56,
+     385
+    ],
+    [
+     61,
+     394
+    ],
+    [
+     63,
+     417
+    ]
+   ],
+   "colour": {
+    "name": "amber",
+    "rgb": [
+     248,
+     183,
+     93
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "amber",
+     "note": "lit after start-up (self-test)"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "unlit"
+    },
+    {
+     "photo": "10",
+     "lit": false,
+     "note": "upper half visible and unlit; grid label '0/400' covers the lower half"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our face there"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "stock visible, unlit"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/tt.dsc.svg",
+   "measured_by": "E: per-stroke half-max of chroma on rect 08",
+   "notes": "Hint for F: lit only in 08 -> unknown."
+  },
+  {
+   "id": "tt.auto_h",
+   "group": "telltale",
+   "name": "AUTO H (green text)",
+   "safety": "info",
+   "bbox": [
+    1777.0,
+    179.0,
+    1870.0,
+    205.0
+   ],
+   "poly": [
+    [
+     1870,
+     182
+    ],
+    [
+     1870,
+     201
+    ],
+    [
+     1869,
+     203
+    ],
+    [
+     1839,
+     205
+    ],
+    [
+     1801,
+     205
+    ],
+    [
+     1778,
+     203
+    ],
+    [
+     1777,
+     202
+    ],
+    [
+     1778,
+     194
+    ],
+    [
+     1781,
+     184
+    ],
+    [
+     1784,
+     180
+    ],
+    [
+     1841,
+     179
+    ],
+    [
+     1869,
+     181
+    ]
+   ],
+   "colour": {
+    "name": "green",
+    "rgb": [
+     122,
+     211,
+     78
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "green"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "green"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "green",
+     "note": "under our transparent grid, the grid line x 1800 crosses it"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; Auto Hold state at the time unknown"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen although the (P) lamp next to it is drawn over us; Auto Hold probably off (no green P either)"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen; as 12"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "green",
+     "note": "drawn with our 0.7.2 connected (our text only drew)"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/tt.auto_h.svg",
+   "measured_by": "E: per-stroke half-max of G-max(R,B) on rect 08 (both words as one element); same ROI on 09 and 14 in the metrics",
+   "notes": "Overlaps the stock tacho bezel by ~14 px (C9). Hint for F: seen lit in 10 and 14 with a theme connected -> not gone; whether it is over or under our opaque pixels is not shown (12/13 have it off) -> under-or-over, needs a photo with Auto Hold on over an opaque theme. Listed under telltale (a lamp-like text indicator)."
+  },
+  {
+   "id": "tt.parking_brake",
+   "group": "telltale",
+   "name": "Parking brake '(P)' (red when set; green with Auto Hold)",
+   "safety": "critical",
+   "bbox": [
+    1838.0,
+    217.0,
+    1900.0,
+    260.0
+   ],
+   "poly": [
+    [
+     1900,
+     234
+    ],
+    [
+     1899,
+     247
+    ],
+    [
+     1897,
+     253
+    ],
+    [
+     1894,
+     258
+    ],
+    [
+     1890,
+     260
+    ],
+    [
+     1847,
+     259
+    ],
+    [
+     1843,
+     256
+    ],
+    [
+     1838,
+     242
+    ],
+    [
+     1839,
+     229
+    ],
+    [
+     1843,
+     221
+    ],
+    [
+     1847,
+     218
+    ],
+    [
+     1867,
+     217
+    ],
+    [
+     1890,
+     218
+    ],
+    [
+     1893,
+     219
+    ],
+    [
+     1896,
+     222
+    ]
+   ],
+   "colour": {
+    "name": "red",
+    "rgb": [
+     243,
+     113,
+     86
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "red",
+     "note": "red-orange, hue ~10 deg like the red brake lamp (the amber lamps measure ~34 deg); C9 called it amber"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "green",
+     "note": "green (P) next to green AUTO H"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "green"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; state unknown"
+    },
+    {
+     "photo": "12",
+     "lit": true,
+     "colour": "red",
+     "note": "red (P) drawn ON TOP of our opaque blue background"
+    },
+    {
+     "photo": "13",
+     "lit": true,
+     "colour": "red",
+     "note": "red (P) drawn on top of our baked background"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "green",
+     "note": "green (P), our 0.7.2 connected"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/tt.parking_brake.svg",
+   "measured_by": "E: per-stroke half-max of chroma on rect 08; same ROI on 09, 10, 12, 13, 14 in the metrics (centres within 3.5 px)",
+   "notes": "Same spot and glyph in every colour. B: centre x 1865-1870, y 238-239 in 08, 09, 12, 14 alike. Hint for F: seen in 12 and 13 over our opaque pixels -> over (strong if F confirms opacity at 1833-1899 x 215-261)."
+  },
+  {
+   "id": "tt.steering",
+   "group": "telltale",
+   "name": "Steering system (steering wheel with '!'; red in 08)",
+   "safety": "critical",
+   "bbox": [
+    1847.0,
+    265.0,
+    1905.0,
+    315.0
+   ],
+   "poly": [
+    [
+     1904,
+     266
+    ],
+    [
+     1905,
+     270
+    ],
+    [
+     1905,
+     295
+    ],
+    [
+     1884,
+     311
+    ],
+    [
+     1876,
+     315
+    ],
+    [
+     1865,
+     315
+    ],
+    [
+     1856,
+     311
+    ],
+    [
+     1852,
+     307
+    ],
+    [
+     1848,
+     299
+    ],
+    [
+     1847,
+     290
+    ],
+    [
+     1850,
+     281
+    ],
+    [
+     1857,
+     273
+    ],
+    [
+     1864,
+     270
+    ],
+    [
+     1898,
+     265
+    ],
+    [
+     1903,
+     265
+    ]
+   ],
+   "colour": {
+    "name": "red",
+    "rgb": [
+     249,
+     122,
+     93
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "red",
+     "note": "red-orange, hue ~12 deg like the brake lamp (C9 called it amber); lit after start-up"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "unlit"
+    },
+    {
+     "photo": "10",
+     "lit": false,
+     "note": "unlit; grid label '1800/300' covers its lower edge"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our face there"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen; our background (the (P) above it is drawn over us)"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "stock visible, unlit"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/tt.steering.svg",
+   "measured_by": "E: per-stroke half-max of max(RGB) on rect 08 (its over-exposed '!' has little chroma)",
+   "notes": "Safety: not in brief section 3's list; proposed critical because a steering-system fault is a must-see warning (F to review). Hint for F: lit only in 08 -> unknown; its neighbour (P) is over, so over is plausible but not observed."
+  },
+  {
+   "id": "bottom.range",
+   "group": "bottom-row",
+   "name": "Range with pump icon ('467 km')",
+   "safety": "info",
+   "bbox": [
+    136.0,
+    666.0,
+    303.0,
+    699.0
+   ],
+   "poly": [
+    [
+     303,
+     698
+    ],
+    [
+     301,
+     699
+    ],
+    [
+     150,
+     698
+    ],
+    [
+     136,
+     688
+    ],
+    [
+     136,
+     682
+    ],
+    [
+     151,
+     667
+    ],
+    [
+     253,
+     666
+    ],
+    [
+     300,
+     680
+    ],
+    [
+     303,
+     683
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     248,
+     239,
+     242
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white",
+     "note": "467 km"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white",
+     "note": "473 km"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "white",
+     "note": "476 km, under our grid"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our face there"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen; our background"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white",
+     "note": "456 km, our 0.7.2 connected"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/bottom.range.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08 (pump icon + digits + 'km')",
+   "notes": "Width varies with the digits (3 digits here). Hint for F: seen in 10 and 14, not in 11-13 -> under."
+  },
+  {
+   "id": "bottom.clock",
+   "group": "bottom-row",
+   "name": "Clock ('16:43')",
+   "safety": "info",
+   "bbox": [
+    344.0,
+    666.0,
+    451.0,
+    700.0
+   ],
+   "poly": [
+    [
+     451,
+     692
+    ],
+    [
+     450,
+     695
+    ],
+    [
+     447,
+     698
+    ],
+    [
+     442,
+     700
+    ],
+    [
+     353,
+     700
+    ],
+    [
+     344,
+     675
+    ],
+    [
+     346,
+     672
+    ],
+    [
+     355,
+     666
+    ],
+    [
+     445,
+     666
+    ],
+    [
+     450,
+     671
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     255,
+     249,
+     252
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white",
+     "note": "16:43"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white",
+     "note": "16:36"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "white",
+     "note": "16:28"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; only our clock (14:29, centre) shows"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen; our clock 20:29 is elsewhere"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white",
+     "note": "10:15 (BMW's); 08:16 in the centre is ours"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/bottom.clock.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "notes": "Hint for F: seen in 10 and 14, not in 11-13 -> under."
+  },
+  {
+   "id": "bottom.belt_rear",
+   "group": "bottom-row",
+   "name": "Rear seat belts (red, three seated figures)",
+   "safety": "critical",
+   "bbox": [
+    503.0,
+    679.0,
+    576.0,
+    715.0
+   ],
+   "poly": [
+    [
+     575,
+     687
+    ],
+    [
+     576,
+     707
+    ],
+    [
+     569,
+     715
+    ],
+    [
+     509,
+     715
+    ],
+    [
+     503,
+     708
+    ],
+    [
+     503,
+     704
+    ],
+    [
+     510,
+     681
+    ],
+    [
+     513,
+     679
+    ],
+    [
+     566,
+     679
+    ]
+   ],
+   "colour": {
+    "name": "red",
+    "rgb": [
+     232,
+     68,
+     82
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "red",
+     "note": "lit after start-up"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "unlit"
+    },
+    {
+     "photo": "10",
+     "lit": false,
+     "note": "unlit"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "stock visible, unlit"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/bottom.belt_rear.svg",
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
+   "notes": "Hint for F: lit only in 08 -> unknown; the driver belt next to it is over, so over is plausible."
+  },
+  {
+   "id": "bottom.belt_driver",
+   "group": "bottom-row",
+   "name": "Driver seat belt (red, seated figure with belt)",
+   "safety": "critical",
+   "bbox": [
+    593.0,
+    666.0,
+    624.0,
+    715.0
+   ],
+   "poly": [
+    [
+     614,
+     715
+    ],
+    [
+     603,
+     715
+    ],
+    [
+     593,
+     704
+    ],
+    [
+     593,
+     700
+    ],
+    [
+     603,
+     669
+    ],
+    [
+     606,
+     666
+    ],
+    [
+     612,
+     666
+    ],
+    [
+     623,
+     676
+    ],
+    [
+     624,
+     704
+    ],
+    [
+     616,
+     714
+    ]
+   ],
+   "colour": {
+    "name": "red",
+    "rgb": [
+     236,
+     64,
+     81
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "red"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "driving, belted"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "red",
+     "note": "cuts our grid lines"
+    },
+    {
+     "photo": "11",
+     "lit": true,
+     "colour": "red",
+     "note": "over our opaque face"
+    },
+    {
+     "photo": "12",
+     "lit": true,
+     "colour": "red",
+     "note": "over our background (over-exposed, yellow core)"
+    },
+    {
+     "photo": "13",
+     "lit": true,
+     "colour": "red",
+     "note": "over our background (blurred)"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "red"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/bottom.belt_driver.svg",
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08; same ROI on 10, 11, 12, 14 in the metrics (centres within 2 px)",
+   "notes": "B check: belt centre 08/09/12/14 within ~2 px of each other. Hint for F: seen in 11, 12, 13 over our opaque pixels -> over (strong; C9 too)."
+  },
+  {
+   "id": "bottom.airbag",
+   "group": "bottom-row",
+   "name": "Airbag (red, seated figure with an airbag disc)",
+   "safety": "critical",
+   "bbox": [
+    635.0,
+    665.0,
+    679.0,
+    715.0
+   ],
+   "poly": [
+    [
+     678,
+     672
+    ],
+    [
+     679,
+     676
+    ],
+    [
+     673,
+     710
+    ],
+    [
+     672,
+     711
+    ],
+    [
+     638,
+     715
+    ],
+    [
+     637,
+     714
+    ],
+    [
+     635,
+     673
+    ],
+    [
+     637,
+     669
+    ],
+    [
+     639,
+     667
+    ],
+    [
+     667,
+     665
+    ],
+    [
+     670,
+     666
+    ]
+   ],
+   "colour": {
+    "name": "red",
+    "rgb": [
+     238,
+     50,
+     71
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "red",
+     "note": "lit after start-up (self-test)"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "unlit"
+    },
+    {
+     "photo": "10",
+     "lit": false,
+     "note": "unlit; label '600/700' and the y 700 grid line touch its lower edge"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "stock visible, unlit"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/bottom.airbag.svg",
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
+   "notes": "C9 split it in two boxes (the disc 636-656 x 662-688 and the whole 637-682 x 662-713); one lamp here. Hint for F: lit only in 08 -> unknown."
+  },
+  {
+   "id": "bottom.cc_info",
+   "group": "bottom-row",
+   "name": "Check-control 'i' (left of the message)",
+   "safety": "info",
+   "bbox": [
+    736.0,
+    637.0,
+    753.0,
+    682.0
+   ],
+   "poly": [
+    [
+     752,
+     682
+    ],
+    [
+     738,
+     682
+    ],
+    [
+     736,
+     680
+    ],
+    [
+     736,
+     655
+    ],
+    [
+     738,
+     641
+    ],
+    [
+     741,
+     637
+    ],
+    [
+     747,
+     637
+    ],
+    [
+     750,
+     640
+    ],
+    [
+     753,
+     681
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     255,
+     248,
+     252
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white",
+     "note": "part of the check-control panel"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "no message"
+    },
+    {
+     "photo": "10",
+     "lit": false,
+     "note": "no message; grid label '700/600' above"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": null,
+     "note": "our clock '08:16' covers the spot"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/bottom.cc_info.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "notes": "Comes with assist.cc_panel. Hint for F: only seen in 08 -> unknown."
+  },
+  {
+   "id": "bottom.street",
+   "group": "bottom-row",
+   "name": "Street name / message line",
+   "safety": "info",
+   "bbox": [
+    795.0,
+    669.0,
+    1126.0,
+    709.0
+   ],
+   "poly": [
+    [
+     1126,
+     699
+    ],
+    [
+     1125,
+     701
+    ],
+    [
+     1106,
+     707
+    ],
+    [
+     1023,
+     709
+    ],
+    [
+     825,
+     709
+    ],
+    [
+     795,
+     699
+    ],
+    [
+     801,
+     669
+    ],
+    [
+     1124,
+     677
+    ],
+    [
+     1125,
+     678
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     255,
+     242,
+     251
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": false,
+     "note": "the check-control message occupies the line"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white",
+     "note": "Luhanska vulytsia"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "white",
+     "note": "Lviv, under our grid"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our face"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white",
+     "note": "Pasichna vulytsia, below our Time/Range/Temp text"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/bottom.street.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 09 (08 shows the check-control message there instead); width depends on the text: 10 'Lviv' ~910-1010, 14 ~820-1105",
+   "notes": "Centred near x 960; variable width. Hint for F: seen in 10 and 14, not in 11-13 -> under."
+  },
+  {
+   "id": "bottom.temperature",
+   "group": "bottom-row",
+   "name": "Outside temperature ('+3.5 °C')",
+   "safety": "info",
+   "bbox": [
+    1540.0,
+    666.0,
+    1663.0,
+    701.0
+   ],
+   "poly": [
+    [
+     1663,
+     697
+    ],
+    [
+     1658,
+     700
+    ],
+    [
+     1577,
+     701
+    ],
+    [
+     1550,
+     694
+    ],
+    [
+     1540,
+     684
+    ],
+    [
+     1540,
+     682
+    ],
+    [
+     1550,
+     672
+    ],
+    [
+     1575,
+     666
+    ],
+    [
+     1620,
+     666
+    ],
+    [
+     1661,
+     675
+    ],
+    [
+     1663,
+     677
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     254,
+     248,
+     245
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white",
+     "note": "+3.5 °C"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white",
+     "note": "+4.0 °C"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "white",
+     "note": "+5.5 °C, our grid lines run over it"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our +6 °C is elsewhere"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white",
+     "note": "+4.0 °C (BMW's); our '+4 °C' is in the centre"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/bottom.temperature.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "notes": "Hint for F: seen in 10 (under our grid lines) and 14, not 11-13 -> under (C9 too)."
+  },
+  {
+   "id": "assist.speed_limit",
+   "group": "assist-message",
+   "name": "Speed-limit sign (red ring, white disc)",
+   "safety": "info",
+   "bbox": [
+    498.0,
+    581.0,
+    580.0,
+    663.0
+   ],
+   "poly": [
+    [
+     580,
+     630
+    ],
+    [
+     574,
+     646
+    ],
+    [
+     564,
+     655
+    ],
+    [
+     549,
+     662
+    ],
+    [
+     534,
+     663
+    ],
+    [
+     525,
+     661
+    ],
+    [
+     517,
+     657
+    ],
+    [
+     505,
+     647
+    ],
+    [
+     498,
+     630
+    ],
+    [
+     498,
+     614
+    ],
+    [
+     504,
+     598
+    ],
+    [
+     516,
+     587
+    ],
+    [
+     530,
+     581
+    ],
+    [
+     550,
+     581
+    ],
+    [
+     563,
+     587
+    ],
+    [
+     570,
+     593
+    ],
+    [
+     576,
+     601
+    ],
+    [
+     580,
+     613
+    ]
+   ],
+   "colour": {
+    "name": "red",
+    "rgb": [
+     233,
+     37,
+     62
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "multi",
+     "note": "50"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "multi",
+     "note": "50"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "multi",
+     "note": "20, partly under the grid label '500/600'"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our face"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen; our background (our own sign widget not shown)"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "multi",
+     "note": "30"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/assist.speed_limit.svg",
+   "measured_by": "E: half-max of R-max(G,B) on rect 08 (the red ring's outer edge)",
+   "notes": "Drawn over the speedo's bottom line. Hint for F: seen in 10 and 14, not in 11-13 -> under."
+  },
+  {
+   "id": "assist.cc_panel",
+   "group": "assist-message",
+   "name": "Check-control panel (curved frame, 'i', two-line message)",
+   "safety": "info",
+   "bbox": [
+    712.0,
+    601.0,
+    1240.0,
+    691.0
+   ],
+   "poly": [
+    [
+     1240,
+     650
+    ],
+    [
+     1107,
+     691
+    ],
+    [
+     832,
+     691
+    ],
+    [
+     738,
+     682
+    ],
+    [
+     736,
+     680
+    ],
+    [
+     712,
+     615
+    ],
+    [
+     716,
+     611
+    ],
+    [
+     733,
+     604
+    ],
+    [
+     744,
+     602
+    ],
+    [
+     934,
+     601
+    ],
+    [
+     1177,
+     602
+    ],
+    [
+     1194,
+     606
+    ],
+    [
+     1208,
+     613
+    ],
+    [
+     1240,
+     643
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     255,
+     251,
+     253
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white",
+     "note": "'Ready to drive: press the brake.' (Ukrainian)"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "no message"
+    },
+    {
+     "photo": "10",
+     "lit": false,
+     "note": "no message"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "no message; the street line shows"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/assist.cc_panel.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08 (frame + 'i' + text; the panel's dark fill may run on to the panel's bottom edge)",
+   "notes": "Safety: proposed info, but check-control messages can carry critical warnings (F to review). Hint for F: only seen in 08 -> unknown (whether it pops up over a custom theme was never photographed)."
+  },
+  {
+   "id": "assist.info_tacho",
+   "group": "assist-message",
+   "name": "'i' marker under the map, right (above the tacho's bottom line)",
+   "safety": "info",
+   "bbox": [
+    1256.0,
+    591.0,
+    1270.0,
+    627.0
+   ],
+   "poly": [
+    [
+     1270,
+     627
+    ],
+    [
+     1258,
+     627
+    ],
+    [
+     1256,
+     625
+    ],
+    [
+     1256,
+     605
+    ],
+    [
+     1258,
+     594
+    ],
+    [
+     1261,
+     591
+    ],
+    [
+     1266,
+     592
+    ],
+    [
+     1268,
+     595
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     255,
+     249,
+     252
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "09",
+     "lit": false
+    },
+    {
+     "photo": "10",
+     "lit": null,
+     "note": "grid label '1200/600' covers the spot"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "spot visible, empty"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/assist.info_tacho.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "notes": "Meaning not known (a pending check-control or info marker; appears with the 08 message). Hint for F: only seen in 08 -> unknown."
+  },
+  {
+   "id": "assist.mode_label_centre",
+   "group": "assist-message",
+   "name": "Mode label 'COMFORT PLUS', stock position (left of the gear letter)",
+   "safety": "info",
+   "bbox": [
+    1223.0,
+    344.0,
+    1355.0,
+    394.0
+   ],
+   "poly": [
+    [
+     1355,
+     345
+    ],
+    [
+     1348,
+     367
+    ],
+    [
+     1285,
+     394
+    ],
+    [
+     1224,
+     394
+    ],
+    [
+     1223,
+     350
+    ],
+    [
+     1225,
+     346
+    ],
+    [
+     1228,
+     344
+    ],
+    [
+     1354,
+     344
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     219,
+     198,
+     203
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "10",
+     "lit": false,
+     "note": "spot visible under the grid; the label is in the bottom row instead"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "spot visible (map roads, our '1'); the label is in the bottom row instead"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/assist.mode_label_centre.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "notes": "Hint for F: absent at this spot in 10 and 14 while assist.mode_label (bottom row) is shown -> gone (BMW moves it to the bottom row while a custom theme is connected)."
+  },
+  {
+   "id": "assist.mode_label",
+   "group": "assist-message",
+   "name": "Mode label 'COMFORT PLUS', custom-theme position (bottom row)",
+   "safety": "info",
+   "bbox": [
+    1226.0,
+    659.0,
+    1359.0,
+    711.0
+   ],
+   "poly": [
+    [
+     1359,
+     661
+    ],
+    [
+     1354,
+     682
+    ],
+    [
+     1289,
+     711
+    ],
+    [
+     1230,
+     711
+    ],
+    [
+     1227,
+     708
+    ],
+    [
+     1226,
+     670
+    ],
+    [
+     1227,
+     664
+    ],
+    [
+     1233,
+     659
+    ],
+    [
+     1316,
+     659
+    ],
+    [
+     1358,
+     660
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     216,
+     201,
+     208
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": false,
+     "note": "not in the bottom row: shown in the tacho centre instead"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "as 08"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "white",
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen (the P next to it is drawn over us)"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen (the P next to it is drawn over us)"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/assist.mode_label.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it; 14 is coarse, edges +-2-3 px); cross-check 10",
+   "notes": "Hint for F: seen in 10 and 14; in 11-13 the P beside it is drawn over us but this label is not -> under (if our pixels are opaque there)."
+  },
+  {
+   "id": "assist.gear_centre",
+   "group": "assist-message",
+   "name": "Gear letter, stock position (tacho centre, 'P' / 'D')",
+   "safety": "info",
+   "bbox": [
+    1496.0,
+    320.0,
+    1543.0,
+    395.0
+   ],
+   "poly": [
+    [
+     1535,
+     323
+    ],
+    [
+     1540,
+     328
+    ],
+    [
+     1543,
+     334
+    ],
+    [
+     1543,
+     352
+    ],
+    [
+     1540,
+     359
+    ],
+    [
+     1512,
+     395
+    ],
+    [
+     1497,
+     395
+    ],
+    [
+     1496,
+     394
+    ],
+    [
+     1496,
+     321
+    ],
+    [
+     1497,
+     320
+    ],
+    [
+     1527,
+     320
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     255,
+     248,
+     248
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white",
+     "note": "P"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white",
+     "note": "D"
+    },
+    {
+     "photo": "10",
+     "lit": null,
+     "note": "under BMW's black box"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "under BMW's black box"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "under BMW's black box"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "under BMW's black box"
+    },
+    {
+     "photo": "14",
+     "lit": null,
+     "note": "under BMW's black box; the letter shows in the bottom row instead"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/assist.gear_centre.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08 ('P'; 'D' in 09 is wider)",
+   "notes": "The black box sits exactly here. Hint for F: with a theme connected BMW shows the gear in the bottom row (assist.gear) -> this one is gone (the spot itself is hidden by the black box)."
+  },
+  {
+   "id": "assist.gear",
+   "group": "assist-message",
+   "name": "Gear letter, custom-theme position (bottom row, 'P')",
+   "safety": "info",
+   "bbox": [
+    1398.0,
+    668.0,
+    1424.0,
+    703.0
+   ],
+   "poly": [
+    [
+     1419,
+     670
+    ],
+    [
+     1424,
+     677
+    ],
+    [
+     1424,
+     682
+    ],
+    [
+     1422,
+     687
+    ],
+    [
+     1405,
+     703
+    ],
+    [
+     1401,
+     702
+    ],
+    [
+     1399,
+     700
+    ],
+    [
+     1398,
+     673
+    ],
+    [
+     1399,
+     669
+    ],
+    [
+     1400,
+     668
+    ],
+    [
+     1414,
+     668
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     250,
+     249,
+     252
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": false,
+     "note": "not in the bottom row: shown in the tacho centre"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "as 08"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "white",
+     "note": "P, cuts our grid"
+    },
+    {
+     "photo": "11",
+     "lit": true,
+     "colour": "white",
+     "note": "P over our opaque face"
+    },
+    {
+     "photo": "12",
+     "lit": true,
+     "colour": "white",
+     "note": "P over our background"
+    },
+    {
+     "photo": "13",
+     "lit": true,
+     "colour": "white",
+     "note": "P"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white",
+     "note": "P"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/assist.gear.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it). Checks: 12 [1397,666,1425,704] (same centre, glyph bloomed at night), 11 [1395,666,1420,700] (extrapolated fit below y 562), 13 coarse; 10 not measurable this way (grid lines)",
+   "notes": "Other gears (R, N, D, S, M) are wider than P: keep C9's/visible.js margin. Hint for F: over (strong; 11, 12, 13)."
+  },
+  {
+   "id": "assist.digital_speed",
+   "group": "assist-message",
+   "name": "Digital speed '0 km/h' (speedo centre)",
+   "safety": "info",
+   "bbox": [
+    477.0,
+    320.0,
+    605.0,
+    397.0
+   ],
+   "poly": [
+    [
+     605,
+     394
+    ],
+    [
+     497,
+     397
+    ],
+    [
+     488,
+     394
+    ],
+    [
+     482,
+     388
+    ],
+    [
+     479,
+     381
+    ],
+    [
+     477,
+     372
+    ],
+    [
+     477,
+     344
+    ],
+    [
+     479,
+     335
+    ],
+    [
+     483,
+     327
+    ],
+    [
+     487,
+     323
+    ],
+    [
+     495,
+     320
+    ],
+    [
+     508,
+     320
+    ],
+    [
+     515,
+     323
+    ],
+    [
+     596,
+     372
+    ],
+    [
+     605,
+     379
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     255,
+     248,
+     252
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white",
+     "note": "0 km/h"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white",
+     "note": "0 km/h"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "white",
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white",
+     "note": "0 km/h"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/assist.digital_speed.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08 (one digit; more digits grow it to the left)",
+   "notes": "Hint for F: seen in 10 and 14, not 11-13 -> under."
+  },
+  {
+   "id": "assist.rpm_label",
+   "group": "assist-message",
+   "name": "Tacho unit label '1/min x1000'",
+   "safety": "cosmetic",
+   "bbox": [
+    1425.0,
+    573.0,
+    1506.0,
+    626.0
+   ],
+   "poly": [
+    [
+     1502,
+     626
+    ],
+    [
+     1427,
+     626
+    ],
+    [
+     1425,
+     625
+    ],
+    [
+     1426,
+     578
+    ],
+    [
+     1433,
+     573
+    ],
+    [
+     1485,
+     574
+    ],
+    [
+     1503,
+     580
+    ],
+    [
+     1505,
+     583
+    ],
+    [
+     1506,
+     621
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     241,
+     216,
+     221
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "white",
+     "note": "'x1000' partly under grid label '1400/600'"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/assist.rpm_label.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "notes": "Hint for F: seen in 10 and 14 -> under."
+  },
+  {
+   "id": "assist.off",
+   "group": "assist-message",
+   "name": "'OFF' at the tacho's 0 (engine off)",
+   "safety": "info",
+   "bbox": [
+    1516.0,
+    580.0,
+    1568.0,
+    604.0
+   ],
+   "poly": [
+    [
+     1568,
+     584
+    ],
+    [
+     1567,
+     594
+    ],
+    [
+     1562,
+     602
+    ],
+    [
+     1559,
+     604
+    ],
+    [
+     1522,
+     604
+    ],
+    [
+     1518,
+     601
+    ],
+    [
+     1516,
+     596
+    ],
+    [
+     1516,
+     587
+    ],
+    [
+     1518,
+     583
+    ],
+    [
+     1522,
+     580
+    ],
+    [
+     1566,
+     581
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     255,
+     248,
+     243
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white",
+     "note": "engine off (ready-to-drive message)"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "engine on: '0' shown instead"
+    },
+    {
+     "photo": "10",
+     "lit": false,
+     "note": "'0' shown instead"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen; the 'OFF' at ~1295,535 in 12-14 is OURS"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "'0' shown instead"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/assist.off.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "notes": "BMW's OFF replaces the tacho scale's '0'. Hint for F: only seen with the engine off in 08 -> unknown."
+  },
+  {
+   "id": "assist.cold",
+   "group": "assist-message",
+   "name": "'COLD' under the oil-temperature mini",
+   "safety": "info",
+   "bbox": [
+    1843.0,
+    635.0,
+    1903.0,
+    658.0
+   ],
+   "poly": [
+    [
+     1903,
+     650
+    ],
+    [
+     1900,
+     655
+    ],
+    [
+     1895,
+     657
+    ],
+    [
+     1849,
+     658
+    ],
+    [
+     1845,
+     656
+    ],
+    [
+     1843,
+     653
+    ],
+    [
+     1843,
+     641
+    ],
+    [
+     1848,
+     636
+    ],
+    [
+     1897,
+     635
+    ],
+    [
+     1903,
+     641
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     231,
+     223,
+     226
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": false,
+     "note": "not shown (engine off)"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "not shown (engine warm?)"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "white",
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our mini there"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/assist.cold.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it; coarse, +-2-3 px); 10 shows it at the same place",
+   "notes": "Hint for F: seen in 10 and 14 -> under or over; not in 11-13 (engine state unknown) -> under, weak."
+  },
+  {
+   "id": "map.region",
+   "group": "map-nav",
+   "name": "Navigation map (hull of drawn roads)",
+   "safety": "info",
+   "bbox": [
+    555.0,
+    155.0,
+    1395.0,
+    612.0
+   ],
+   "poly": [
+    [
+     1395.0,
+     425.0
+    ],
+    [
+     1388.0,
+     455.0
+    ],
+    [
+     1281.0,
+     589.0
+    ],
+    [
+     1203.0,
+     612.0
+    ],
+    [
+     718.0,
+     612.0
+    ],
+    [
+     614.0,
+     579.0
+    ],
+    [
+     591.0,
+     562.0
+    ],
+    [
+     555.0,
+     480.0
+    ],
+    [
+     611.0,
+     266.0
+    ],
+    [
+     642.0,
+     207.0
+    ],
+    [
+     842.0,
+     155.0
+    ],
+    [
+     1197.0,
+     155.0
+    ],
+    [
+     1306.0,
+     219.0
+    ],
+    [
+     1322.0,
+     232.0
+    ],
+    [
+     1358.0,
+     280.0
+    ]
+   ],
+   "colour": {
+    "name": "multi"
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "multi"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "multi",
+     "note": "by day"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "multi",
+     "note": "under our grid; partly hidden by our grey ramps"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our opaque window"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen; our window"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen; our window"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "multi",
+     "note": "with a lighter map background in its left part"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/map.region.svg",
+   "measured_by": "E: white top-hat road pixels (components >= 45 px long) in rects 08, 09 and 14, minus every non-map element and (in 14) our own numerals and labels; convex hull together with C9's 08/09 hull",
+   "notes": "A lower bound: where roads were drawn. Our theme already has a see-through map hole (w.bg holeWhen stockMap). Hint for F: seen in 10 and 14 -> under (C9 too)."
+  },
+  {
+   "id": "map.position_arrow",
+   "group": "map-nav",
+   "name": "Car position arrow (red triangle)",
+   "safety": "info",
+   "bbox": [
+    939.0,
+    496.0,
+    991.0,
+    532.0
+   ],
+   "poly": [
+    [
+     991,
+     531
+    ],
+    [
+     990,
+     532
+    ],
+    [
+     940,
+     532
+    ],
+    [
+     939,
+     529
+    ],
+    [
+     963,
+     497
+    ],
+    [
+     967,
+     496
+    ],
+    [
+     981,
+     513
+    ],
+    [
+     990,
+     526
+    ]
+   ],
+   "colour": {
+    "name": "red",
+    "rgb": [
+     240,
+     73,
+     66
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "red"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "red"
+    },
+    {
+     "photo": "10",
+     "lit": null,
+     "note": "under our grey ramps"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "not seen; our window"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "not seen"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "red",
+     "note": "same spot (+-3 px)"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/map.position_arrow.svg",
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
+   "notes": "No route arrow, turn hint, north arrow or route line was active in any photo. Hint for F: seen in 14 -> under (with the map)."
+  },
+  {
+   "id": "structure.speedo",
+   "group": "structure",
+   "name": "Stock speedometer outline (bezel, scale, numerals)",
+   "safety": "cosmetic",
+   "bbox": [
+    82.0,
+    36.0,
+    704.0,
+    652.0
+   ],
+   "poly": [
+    [
+     704,
+     36
+    ],
+    [
+     688,
+     648
+    ],
+    [
+     601,
+     651
+    ],
+    [
+     314,
+     652
+    ],
+    [
+     284,
+     648
+    ],
+    [
+     250,
+     631
+    ],
+    [
+     216,
+     598
+    ],
+    [
+     105,
+     424
+    ],
+    [
+     91,
+     389
+    ],
+    [
+     82,
+     351
+    ],
+    [
+     83,
+     319
+    ],
+    [
+     97,
+     281
+    ],
+    [
+     119,
+     248
+    ],
+    [
+     162,
+     202
+    ],
+    [
+     211,
+     160
+    ],
+    [
+     296,
+     101
+    ],
+    [
+     334,
+     84
+    ],
+    [
+     382,
+     71
+    ],
+    [
+     458,
+     58
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     252,
+     233,
+     236
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "white",
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "our dial there"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "our dial there"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "our dial there"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white",
+     "note": "under our text"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/structure.speedo.svg",
+   "measured_by": "E: convex hull of the light pixels (bezel line, ticks, numerals, centre text) on rect 08; ghost only",
+   "notes": "Context only. Hint for F: drawn in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.speedo_needle",
+   "group": "structure",
+   "name": "Stock speedo needle (at rest)",
+   "safety": "cosmetic",
+   "bbox": [
+    370.0,
+    468.0,
+    424.0,
+    645.0
+   ],
+   "poly": [
+    [
+     370.1,
+     643.4
+    ],
+    [
+     417.7,
+     468.0
+    ],
+    [
+     423.5,
+     469.5
+    ],
+    [
+     375.9,
+     644.9
+    ]
+   ],
+   "colour": {
+    "name": "red",
+    "rgb": [
+     252,
+     137,
+     107
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "red",
+     "note": "at 0"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "red",
+     "note": "at 0"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "red"
+    },
+    {
+     "photo": "11",
+     "lit": null
+    },
+    {
+     "photo": "12",
+     "lit": null
+    },
+    {
+     "photo": "13",
+     "lit": null
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "red",
+     "note": "at 0"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/structure.speedo_needle.svg",
+   "measured_by": "E: half-max of the top-hat (11 px) of chroma on rect 08, robust straight-line fit (the thin needle over its glow)",
+   "notes": "Moves with speed; at rest here. Hint for F: drawn in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.speedo_info_line",
+   "group": "structure",
+   "name": "Line under the digital speed",
+   "safety": "cosmetic",
+   "bbox": [
+    370.0,
+    412.0,
+    613.0,
+    417.0
+   ],
+   "poly": [
+    [
+     613,
+     416
+    ],
+    [
+     375,
+     417
+    ],
+    [
+     370,
+     413
+    ],
+    [
+     610,
+     412
+    ],
+    [
+     613,
+     414
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     228,
+     204,
+     207
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "10",
+     "lit": null,
+     "note": "under grid line y 400 and its labels"
+    },
+    {
+     "photo": "11",
+     "lit": null
+    },
+    {
+     "photo": "12",
+     "lit": null
+    },
+    {
+     "photo": "13",
+     "lit": null
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/structure.speedo_info_line.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "notes": "Hint for F: seen in 14 -> under."
+  },
+  {
+   "id": "structure.tacho",
+   "group": "structure",
+   "name": "Stock tachometer outline (bezel, scale, numerals)",
+   "safety": "cosmetic",
+   "bbox": [
+    1204.0,
+    36.0,
+    1836.0,
+    652.0
+   ],
+   "poly": [
+    [
+     1669,
+     632
+    ],
+    [
+     1646,
+     645
+    ],
+    [
+     1612,
+     652
+    ],
+    [
+     1236,
+     650
+    ],
+    [
+     1204,
+     72
+    ],
+    [
+     1214,
+     36
+    ],
+    [
+     1431,
+     54
+    ],
+    [
+     1529,
+     69
+    ],
+    [
+     1577,
+     81
+    ],
+    [
+     1601,
+     90
+    ],
+    [
+     1647,
+     116
+    ],
+    [
+     1709,
+     161
+    ],
+    [
+     1760,
+     206
+    ],
+    [
+     1836,
+     335
+    ],
+    [
+     1833,
+     371
+    ],
+    [
+     1813,
+     425
+    ],
+    [
+     1700,
+     602
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     251,
+     234,
+     232
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "white",
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "our dial there"
+    },
+    {
+     "photo": "12",
+     "lit": null,
+     "note": "our dial there"
+    },
+    {
+     "photo": "13",
+     "lit": null,
+     "note": "our dial there"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "white",
+     "note": "under our text and the black box"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/structure.tacho.svg",
+   "measured_by": "E: convex hull of the light pixels (bezel line, ticks, numerals) on rect 08; ghost only",
+   "notes": "Context only. Hint for F: drawn in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.tacho_needle",
+   "group": "structure",
+   "name": "Stock tacho needle (engine off / idle)",
+   "safety": "cosmetic",
+   "bbox": [
+    1497.0,
+    470.0,
+    1552.0,
+    647.0
+   ],
+   "poly": [
+    [
+     1503.8,
+     470.8
+    ],
+    [
+     1551.9,
+     645.4
+    ],
+    [
+     1545.8,
+     647.0
+    ],
+    [
+     1497.7,
+     472.5
+    ]
+   ],
+   "colour": {
+    "name": "red",
+    "rgb": [
+     254,
+     138,
+     107
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "red",
+     "note": "at 0 (engine off)"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "red",
+     "note": "idle, ~0.8"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "red"
+    },
+    {
+     "photo": "11",
+     "lit": null
+    },
+    {
+     "photo": "12",
+     "lit": null
+    },
+    {
+     "photo": "13",
+     "lit": null
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "red",
+     "note": "idle"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/structure.tacho_needle.svg",
+   "measured_by": "E: half-max of the top-hat (11 px) of chroma on rect 08, robust straight-line fit (the thin needle over its glow)",
+   "notes": "Moves with rpm. Hint for F: drawn in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.tacho_info_line",
+   "group": "structure",
+   "name": "Line under the mode label and gear letter",
+   "safety": "cosmetic",
+   "bbox": [
+    1306.0,
+    412.0,
+    1550.0,
+    417.0
+   ],
+   "poly": [
+    [
+     1550,
+     413
+    ],
+    [
+     1546,
+     417
+    ],
+    [
+     1306,
+     416
+    ],
+    [
+     1310,
+     412
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     230,
+     206,
+     210
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "white"
+    },
+    {
+     "photo": "10",
+     "lit": null,
+     "note": "under grid line y 400 and the black box"
+    },
+    {
+     "photo": "11",
+     "lit": null
+    },
+    {
+     "photo": "12",
+     "lit": null
+    },
+    {
+     "photo": "13",
+     "lit": null
+    },
+    {
+     "photo": "14",
+     "lit": false,
+     "note": "left part (x 1306-1419) visible and empty; right part under the black box"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/structure.tacho_info_line.svg",
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "notes": "Hint for F: not drawn in 14 where its left part is uncovered, while the speedo's line is -> gone with the centre mode label and gear letter (BMW's custom-theme layout drops the tacho-centre block)."
+  },
+  {
+   "id": "structure.rev_band",
+   "group": "structure",
+   "name": "Red rev band (6-7k, top of the tacho)",
+   "safety": "cosmetic",
+   "bbox": [
+    1221.0,
+    47.0,
+    1397.0,
+    68.0
+   ],
+   "poly": [
+    [
+     1397,
+     68
+    ],
+    [
+     1342,
+     68
+    ],
+    [
+     1228,
+     58
+    ],
+    [
+     1222,
+     56
+    ],
+    [
+     1221,
+     49
+    ],
+    [
+     1223,
+     47
+    ],
+    [
+     1250,
+     48
+    ],
+    [
+     1391,
+     61
+    ],
+    [
+     1397,
+     63
+    ]
+   ],
+   "colour": {
+    "name": "red",
+    "rgb": [
+     240,
+     47,
+     68
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "red"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "red"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "red"
+    },
+    {
+     "photo": "11",
+     "lit": null
+    },
+    {
+     "photo": "12",
+     "lit": null
+    },
+    {
+     "photo": "13",
+     "lit": null
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "red"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/structure.rev_band.svg",
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
+   "notes": "Hint for F: seen in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.fuel_mini",
+   "group": "structure",
+   "name": "Stock fuel mini (1, 1/2, 0, pump icon)",
+   "safety": "info",
+   "bbox": [
+    7.0,
+    432.0,
+    215.0,
+    651.0
+   ],
+   "poly": [
+    [
+     186,
+     638
+    ],
+    [
+     159,
+     651
+    ],
+    [
+     130,
+     651
+    ],
+    [
+     18,
+     631
+    ],
+    [
+     7,
+     490
+    ],
+    [
+     11,
+     473
+    ],
+    [
+     31,
+     441
+    ],
+    [
+     73,
+     432
+    ],
+    [
+     140,
+     470
+    ],
+    [
+     215,
+     583
+    ],
+    [
+     215,
+     595
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     232,
+     200,
+     206
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "multi"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "multi"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "multi",
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "our fuel mini there"
+    },
+    {
+     "photo": "12",
+     "lit": null
+    },
+    {
+     "photo": "13",
+     "lit": null
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "multi",
+     "note": "under our text"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/structure.fuel_mini.svg",
+   "measured_by": "E: convex hull of the bright pixels on rect 08 (outline, red marks, numerals, pump icon), minus the speedo bezel next to it",
+   "notes": "Safety: info (fuel level; low-fuel warning is a separate lamp not seen). Hint for F: seen in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.oil_mini",
+   "group": "structure",
+   "name": "Stock oil/coolant-temperature mini (scale, needle, car icon)",
+   "safety": "info",
+   "bbox": [
+    1706.0,
+    428.0,
+    1911.0,
+    651.0
+   ],
+   "poly": [
+    [
+     1889,
+     443
+    ],
+    [
+     1907,
+     473
+    ],
+    [
+     1911,
+     495
+    ],
+    [
+     1902,
+     626
+    ],
+    [
+     1795,
+     651
+    ],
+    [
+     1762,
+     651
+    ],
+    [
+     1734,
+     638
+    ],
+    [
+     1706,
+     594
+    ],
+    [
+     1706,
+     582
+    ],
+    [
+     1725,
+     538
+    ],
+    [
+     1760,
+     473
+    ],
+    [
+     1801,
+     428
+    ],
+    [
+     1812,
+     428
+    ],
+    [
+     1885,
+     440
+    ]
+   ],
+   "colour": {
+    "name": "white",
+    "rgb": [
+     232,
+     201,
+     203
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": true,
+     "colour": "multi"
+    },
+    {
+     "photo": "09",
+     "lit": true,
+     "colour": "multi"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "multi",
+     "note": "under our grid"
+    },
+    {
+     "photo": "11",
+     "lit": null,
+     "note": "our oil mini there"
+    },
+    {
+     "photo": "12",
+     "lit": null
+    },
+    {
+     "photo": "13",
+     "lit": null
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "multi",
+     "note": "with COLD"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/structure.oil_mini.svg",
+   "measured_by": "E: convex hull of the bright pixels on rect 08, minus the tacho bezel next to it",
+   "notes": "Hint for F: seen in 10 and 14 -> under."
+  },
+  {
+   "id": "overlay.black_box",
+   "group": "overlay",
+   "name": "Black area (drawn only while a custom theme is connected)",
+   "safety": "cosmetic",
+   "bbox": [
+    1421.9,
+    320.4,
+    1612.1,
+    439.6
+   ],
+   "poly": [
+    [
+     1421.9,
+     320.4
+    ],
+    [
+     1612.1,
+     320.4
+    ],
+    [
+     1612.1,
+     439.6
+    ],
+    [
+     1421.9,
+     439.6
+    ]
+   ],
+   "colour": {
+    "name": "black",
+    "rgb": [
+     0,
+     0,
+     0
+    ]
+   },
+   "states": [
+    {
+     "photo": "08",
+     "lit": false,
+     "note": "stock theme only"
+    },
+    {
+     "photo": "09",
+     "lit": false,
+     "note": "stock theme only"
+    },
+    {
+     "photo": "10",
+     "lit": true,
+     "colour": "black"
+    },
+    {
+     "photo": "11",
+     "lit": true,
+     "colour": "black",
+     "note": "over our face"
+    },
+    {
+     "photo": "12",
+     "lit": true,
+     "colour": "black",
+     "note": "over our face"
+    },
+    {
+     "photo": "13",
+     "lit": true,
+     "colour": "black",
+     "note": "over our face"
+    },
+    {
+     "photo": "14",
+     "lit": true,
+     "colour": "black",
+     "note": "over the stock tacho centre (hides the centre gear letter)"
+    }
+   ],
+   "relation": "unknown",
+   "evidence": "none",
+   "relation_basis": [],
+   "schematic": "design/overlay/schematic/overlay.black_box.svg",
+   "measured_by": "E: median half-max edge of the dark rectangle on rect 12 (our blue face around it gives contrast on all four sides); 14, 10, 11, 13 in the metrics",
+   "notes": "Hint for F: over (strong; 10-14)."
+  }
+ ]
 }

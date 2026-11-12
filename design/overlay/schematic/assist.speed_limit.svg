@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 82 82" width="82" height="82">
+  <title>Speed-limit sign (red ring, white disc) (generic schematic, our own drawing)</title>
+  <circle cx="41.0" cy="41.0" r="36.1" fill="#ffffff" stroke="#e23b2e" stroke-width="8.2"/>
+  <text x="41.0" y="41.0" font-family="Arial, Helvetica, sans-serif" font-size="32.8" font-weight="bold" fill="#222222" text-anchor="middle" dominant-baseline="central">50</text>
+</svg>

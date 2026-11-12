@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 528 90" width="528" height="90">
+  <title>Check-control panel (curved frame, 'i', two-line message) (generic schematic, our own drawing)</title>
+  <rect x="2.0" y="2.0" width="524.0" height="86.0" rx="22.5" fill="#1b1b1b" stroke="#cfcfcf" stroke-width="2"/>
+  <text x="37.0" y="49.5" font-family="Arial, Helvetica, sans-serif" font-size="40.5" font-weight="bold" fill="#f2f2f2" text-anchor="middle" dominant-baseline="central">i</text>
+  <rect x="105.6" y="30.2" width="316.8" height="8.0" rx="2" fill="#cfcfcf"/>
+  <rect x="105.6" y="60.8" width="316.8" height="8.0" rx="2" fill="#cfcfcf"/>
+</svg>

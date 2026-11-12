@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 50" width="44" height="50">
+  <title>Airbag (red, seated figure with an airbag disc) (generic schematic, our own drawing)</title>
+  <circle cx="13.2" cy="17.5" r="8.8" fill="#e23b2e"/>
+  <circle cx="33.0" cy="7.0" r="5.3" fill="#e23b2e"/>
+  <path d="M 33.0 14.0 L 33.0 33.0 L 45.3 33.0 L 45.3 47.5" fill="none" stroke="#e23b2e" stroke-width="3.1" stroke-linejoin="round"/>
+</svg>

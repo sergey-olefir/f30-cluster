@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 81 53" width="81" height="53">
+  <title>Tacho unit label '1/min x1000' (generic schematic, our own drawing)</title>
+  <text x="0.0" y="13.2" font-family="Arial, Helvetica, sans-serif" font-size="22.5" font-weight="normal" fill="#f2f2f2" text-anchor="start" dominant-baseline="central">1/min</text>
+  <text x="0.0" y="39.8" font-family="Arial, Helvetica, sans-serif" font-size="22.5" font-weight="normal" fill="#f2f2f2" text-anchor="start" dominant-baseline="central">x1000</text>
+</svg>

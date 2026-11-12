@@ -1,0 +1,335 @@
+{
+ "$comment": "Hand-tuned seeds for tools/overlay/catalogue_g20.py (package E). measure: the rect, ROI and signal the geometry comes from. states: {photo: [lit, colour, note]} read by eye on the rects (lit null = the spot is covered or unreadable; not lit is NOT evidence that BMW does not draw it). notes carry relation hints for package F; relation/evidence/basis stay unknown/none/[] here.",
+ "photos": {
+  "08": {"shows": "stock", "theme_version": null, "note": "Stock theme at night just after start-up: the most lamps lit, the check-control 'ready to drive' panel, map, 50 sign. Master inventory for E."},
+  "09": {"shows": "stock", "theme_version": null, "note": "Stock theme by day, driving (gear D), map with a roundabout; no warnings lit."},
+  "10": {"shows": "stock+grid", "theme_version": null, "note": "Our transparent calibration grid (labels, L1-L16, grey ramps, ATLAS text) over the stock theme; BMW's black box and bottom-row P are drawn. Grid labels hide some spots."},
+  "11": {"shows": "ours", "theme_version": null, "note": "Our early opaque theme (old geometry, before bc2fc0d's G20 fit; exact build unknown). B's fit points only reach y 562, below that the rect is extrapolated."},
+  "12": {"shows": "ours", "theme_version": "cb28ce7", "note": "Our opaque theme at night (B used the cb28ce7 bench render for alignment); BMW's red (P), belt, P and black box drawn over us."},
+  "13": {"shows": "ours", "theme_version": "cb28ce7", "note": "Our baked theme on the car, same session as 12 (B used cb28ce7); very coarse: visual checks only."},
+  "14": {"shows": "ours-partial", "theme_version": "0.7.2", "note": "Our 0.7.2 connected but only our text layers drew (unbound-sampler bug, fixed in 0.7.3): the stock theme is visible beneath our text. Coarse: centres good, edges blur over ~5 px."}
+ },
+ "excluded": [
+  {"what": "Low-beam headlight lamp (green) and side/parking-light lamp (green), left of the panel", "reason": "Physical LED telltales in the housing, not on the TFT: photo 08's model maps them to panel x ~ -90, y ~ 555 and 602 (outside 1920x720). No theme can draw over or hide them."},
+  {"what": "Check-engine lamp (amber) and DSC OFF lamp (amber), right of the panel", "reason": "Physical LED telltales in the housing: photo 08's model maps them to panel x ~ 2000-2008, y ~ 550 and 614 (outside the panel)."},
+  {"what": "Individual speedo/tacho numerals, ticks, the red gradient band inside the bezels, the dark dial wings and the orange needle glow", "reason": "Part of the stock dials; catalogued only as ghost outlines (structure.speedo, structure.tacho, needles, rev band, minis) because they are context, not indicators."},
+  {"what": "Individual map roads, the roundabout (09) and the lighter map background seen in 14", "reason": "Covered by the single map.region polygon (hull of all road pixels in 08, 09, 14 plus C9's hull)."},
+  {"what": "READY, OFF (centre-right, ~1290-1340 x 450-545), the clocks 08:16 / 20:29 / 14:29, the Time/Range/Temp block, our numerals, our '1/min x 1000', our range '456 km' near the speedo, our minis, needles, map window and the l/100 km mini in photos 11-14", "reason": "Our own widgets (6WB theme), not G20 elements; they are in design/overlay/wb_comfort.json."},
+  {"what": "The calibration grid in 10: green lines, yellow coordinate labels, L1-L16, 'ATLAS 14:29 950', the grey ramps", "reason": "Our test layout (grid.json), drawn transparent over the stock theme for photo 10."},
+  {"what": "Glass reflections, the hood shadow and the housing outside the TFT", "reason": "Not drawn by the cluster (see docs/BAKE-C9-overlays.md section 1)."}
+ ],
+ "elements": [
+  {
+   "id": "tt.brake", "group": "telltale", "name": "Brake warning (red, '!' in a circle with brackets)", "safety": "critical",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [8, 205, 95, 263], "signal": "chroma", "frac": 0.2, "local": true},
+   "measured_by": "E: per-stroke half-max of chroma on rect 08",
+   "states": {"08": [true, "red", "lit after start-up"], "09": [false, null, "spot visible, unlit"], "10": [false, null, "unlit; the grid label '0/200' covers the upper-left corner"], "11": [null, null, "not seen; our face is there (opaque?)"], "12": [null, null, "not seen; our blue background there"], "13": [null, null, "not seen; our background there"], "14": [false, null, "stock visible beneath, unlit"]},
+   "schematic": {"kind": "ring", "label": "!", "brackets": true},
+   "notes": "Left telltale column. Hint for F: only lit in 08 (stock); never lit with a custom theme up, so 11-13 cannot say over/under; 14 shows the spot uncovered but unlit -> unknown; needs a photo with the lamp lit over an opaque theme (e.g. brake-fluid test / start-up self-test)."
+  },
+  {
+   "id": "tt.tpms", "group": "telltale", "name": "Tyre pressure (amber, tyre section with '!')", "safety": "critical",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [8, 263, 92, 322], "signal": "chroma", "frac": 0.2, "local": true},
+   "measured_by": "E: per-stroke half-max of chroma on rect 08",
+   "states": {"08": [true, "amber", "lit after start-up (self-test)"], "09": [false, null, "unlit"], "10": [false, null, "unlit"], "11": [null, null, "not seen; our face there"], "12": [null, null, "not seen; our background"], "13": [null, null, "not seen; our background"], "14": [false, null, "stock visible, unlit"]},
+   "schematic": {"kind": "tyre"},
+   "notes": "Hint for F: as tt.brake (lit only in 08) -> unknown."
+  },
+  {
+   "id": "tt.abs", "group": "telltale", "name": "ABS (amber, 'ABS' in a circle with brackets)", "safety": "critical",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [0, 322, 88, 377], "signal": "chroma", "frac": 0.2, "local": true},
+   "measured_by": "E: per-stroke half-max of chroma on rect 08",
+   "states": {"08": [true, "amber", "lit after start-up (self-test)"], "09": [false, null, "unlit"], "10": [false, null, "unlit; grid label '0/300' above it"], "11": [null, null, "not seen; our face there"], "12": [null, null, "not seen; our background"], "13": [null, null, "not seen; our background"], "14": [false, null, "stock visible, unlit"]},
+   "schematic": {"kind": "ring", "label": "ABS", "brackets": true},
+   "notes": "Hint for F: lit only in 08 -> unknown."
+  },
+  {
+   "id": "tt.dsc", "group": "telltale", "name": "DSC (amber, car with skid lines)", "safety": "critical",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [4, 377, 78, 440], "signal": "chroma", "frac": 0.2, "local": true},
+   "measured_by": "E: per-stroke half-max of chroma on rect 08",
+   "states": {"08": [true, "amber", "lit after start-up (self-test)"], "09": [false, null, "unlit"], "10": [false, null, "upper half visible and unlit; grid label '0/400' covers the lower half"], "11": [null, null, "not seen; our face there"], "12": [null, null, "not seen; our background"], "13": [null, null, "not seen; our background"], "14": [false, null, "stock visible, unlit"]},
+   "schematic": {"kind": "car_skid"},
+   "notes": "Hint for F: lit only in 08 -> unknown."
+  },
+  {
+   "id": "tt.auto_h", "group": "telltale", "name": "AUTO H (green text)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1768, 172, 1886, 214], "signal": "green", "frac": 0.2, "local": true, "check_photos": ["09", "14"]},
+   "measured_by": "E: per-stroke half-max of G-max(R,B) on rect 08 (both words as one element); same ROI on 09 and 14 in the metrics",
+   "states": {"08": [true, "green", ""], "09": [true, "green", ""], "10": [true, "green", "under our transparent grid, the grid line x 1800 crosses it"], "11": [null, null, "not seen; Auto Hold state at the time unknown"], "12": [null, null, "not seen although the (P) lamp next to it is drawn over us; Auto Hold probably off (no green P either)"], "13": [null, null, "not seen; as 12"], "14": [true, "green", "drawn with our 0.7.2 connected (our text only drew)"]},
+   "schematic": {"kind": "text", "label": "AUTO H"},
+   "notes": "Overlaps the stock tacho bezel by ~14 px (C9). Hint for F: seen lit in 10 and 14 with a theme connected -> not gone; whether it is over or under our opaque pixels is not shown (12/13 have it off) -> under-or-over, needs a photo with Auto Hold on over an opaque theme. Listed under telltale (a lamp-like text indicator)."
+  },
+  {
+   "id": "tt.parking_brake", "group": "telltale", "name": "Parking brake '(P)' (red when set; green with Auto Hold)", "safety": "critical",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1830, 213, 1916, 263], "signal": "chroma", "frac": 0.2, "local": true, "check_photos": ["09", "10", "12", "13", "14"]},
+   "measured_by": "E: per-stroke half-max of chroma on rect 08; same ROI on 09, 10, 12, 13, 14 in the metrics (centres within 3.5 px)",
+   "states": {"08": [true, "red", "red-orange, hue ~10 deg like the red brake lamp (the amber lamps measure ~34 deg); C9 called it amber"], "09": [true, "green", "green (P) next to green AUTO H"], "10": [true, "green", ""], "11": [null, null, "not seen; state unknown"], "12": [true, "red", "red (P) drawn ON TOP of our opaque blue background"], "13": [true, "red", "red (P) drawn on top of our baked background"], "14": [true, "green", "green (P), our 0.7.2 connected"]},
+   "schematic": {"kind": "ring", "label": "P", "brackets": true},
+   "notes": "Same spot and glyph in every colour. B: centre x 1865-1870, y 238-239 in 08, 09, 12, 14 alike. Hint for F: seen in 12 and 13 over our opaque pixels -> over (strong if F confirms opacity at 1833-1899 x 215-261)."
+  },
+  {
+   "id": "tt.steering", "group": "telltale", "name": "Steering system (steering wheel with '!'; red in 08)", "safety": "critical",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1840, 263, 1918, 330], "signal": "v", "frac": 0.2, "local": true},
+   "measured_by": "E: per-stroke half-max of max(RGB) on rect 08 (its over-exposed '!' has little chroma)",
+   "states": {"08": [true, "red", "red-orange, hue ~12 deg like the brake lamp (C9 called it amber); lit after start-up"], "09": [false, null, "unlit"], "10": [false, null, "unlit; grid label '1800/300' covers its lower edge"], "11": [null, null, "not seen; our face there"], "12": [null, null, "not seen; our background (the (P) above it is drawn over us)"], "13": [null, null, "not seen"], "14": [false, null, "stock visible, unlit"]},
+   "schematic": {"kind": "steering"},
+   "notes": "Safety: not in brief section 3's list; proposed critical because a steering-system fault is a must-see warning (F to review). Hint for F: lit only in 08 -> unknown; its neighbour (P) is over, so over is plausible but not observed."
+  },
+  {
+   "id": "bottom.range", "group": "bottom-row", "name": "Range with pump icon ('467 km')", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [128, 657, 312, 708], "signal": "white", "check_photos": ["09", "14"]},
+   "measured_by": "E: half-max of min(RGB) on rect 08 (pump icon + digits + 'km')",
+   "states": {"08": [true, "white", "467 km"], "09": [true, "white", "473 km"], "10": [true, "white", "476 km, under our grid"], "11": [null, null, "not seen; our face there"], "12": [null, null, "not seen; our background"], "13": [null, null, "not seen"], "14": [true, "white", "456 km, our 0.7.2 connected"]},
+   "schematic": {"kind": "text", "label": "467 km", "anchor": "end"},
+   "notes": "Width varies with the digits (3 digits here). Hint for F: seen in 10 and 14, not in 11-13 -> under."
+  },
+  {
+   "id": "bottom.clock", "group": "bottom-row", "name": "Clock ('16:43')", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [336, 657, 460, 708], "signal": "white", "check_photos": ["09", "14"]},
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "states": {"08": [true, "white", "16:43"], "09": [true, "white", "16:36"], "10": [true, "white", "16:28"], "11": [null, null, "not seen; only our clock (14:29, centre) shows"], "12": [null, null, "not seen; our clock 20:29 is elsewhere"], "13": [null, null, "not seen"], "14": [true, "white", "10:15 (BMW's); 08:16 in the centre is ours"]},
+   "schematic": {"kind": "text", "label": "16:43"},
+   "notes": "Hint for F: seen in 10 and 14, not in 11-13 -> under."
+  },
+  {
+   "id": "bottom.belt_rear", "group": "bottom-row", "name": "Rear seat belts (red, three seated figures)", "safety": "critical",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [494, 668, 586, 718], "signal": "red", "frac": 0.2, "local": true},
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
+   "states": {"08": [true, "red", "lit after start-up"], "09": [false, null, "unlit"], "10": [false, null, "unlit"], "11": [null, null, "not seen"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [false, null, "stock visible, unlit"]},
+   "schematic": {"kind": "seats", "n": 3},
+   "notes": "Hint for F: lit only in 08 -> unknown; the driver belt next to it is over, so over is plausible."
+  },
+  {
+   "id": "bottom.belt_driver", "group": "bottom-row", "name": "Driver seat belt (red, seated figure with belt)", "safety": "critical",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [586, 655, 631, 718], "signal": "red", "frac": 0.2, "local": true, "check_photos": ["10", "11", "12", "14"]},
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08; same ROI on 10, 11, 12, 14 in the metrics (centres within 2 px)",
+   "states": {"08": [true, "red", ""], "09": [false, null, "driving, belted"], "10": [true, "red", "cuts our grid lines"], "11": [true, "red", "over our opaque face"], "12": [true, "red", "over our background (over-exposed, yellow core)"], "13": [true, "red", "over our background (blurred)"], "14": [true, "red", ""]},
+   "schematic": {"kind": "seats", "n": 1},
+   "notes": "B check: belt centre 08/09/12/14 within ~2 px of each other. Hint for F: seen in 11, 12, 13 over our opaque pixels -> over (strong; C9 too)."
+  },
+  {
+   "id": "bottom.airbag", "group": "bottom-row", "name": "Airbag (red, seated figure with an airbag disc)", "safety": "critical",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [630, 655, 690, 718], "signal": "red", "frac": 0.2, "local": true},
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
+   "states": {"08": [true, "red", "lit after start-up (self-test)"], "09": [false, null, "unlit"], "10": [false, null, "unlit; label '600/700' and the y 700 grid line touch its lower edge"], "11": [null, null, "not seen"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [false, null, "stock visible, unlit"]},
+   "schematic": {"kind": "seats", "n": 1, "airbag": true, "belt": false},
+   "notes": "C9 split it in two boxes (the disc 636-656 x 662-688 and the whole 637-682 x 662-713); one lamp here. Hint for F: lit only in 08 -> unknown."
+  },
+  {
+   "id": "bottom.cc_info", "group": "bottom-row", "name": "Check-control 'i' (left of the message)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [728, 630, 764, 692], "signal": "white"},
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "states": {"08": [true, "white", "part of the check-control panel"], "09": [false, null, "no message"], "10": [false, null, "no message; grid label '700/600' above"], "11": [null, null, "not seen"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [null, null, "our clock '08:16' covers the spot"]},
+   "schematic": {"kind": "text", "label": "i", "weight": "bold"},
+   "notes": "Comes with assist.cc_panel. Hint for F: only seen in 08 -> unknown."
+  },
+  {
+   "id": "bottom.street", "group": "bottom-row", "name": "Street name / message line", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "09", "roi": [780, 656, 1142, 716], "signal": "white"},
+   "measured_by": "E: half-max of min(RGB) on rect 09 (08 shows the check-control message there instead); width depends on the text: 10 'Lviv' ~910-1010, 14 ~820-1105",
+   "states": {"08": [false, null, "the check-control message occupies the line"], "09": [true, "white", "Luhanska vulytsia"], "10": [true, "white", "Lviv, under our grid"], "11": [null, null, "not seen; our face"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [true, "white", "Pasichna vulytsia, below our Time/Range/Temp text"]},
+   "schematic": {"kind": "text", "label": "Street name", "weight": "normal"},
+   "notes": "Centred near x 960; variable width. Hint for F: seen in 10 and 14, not in 11-13 -> under."
+  },
+  {
+   "id": "bottom.temperature", "group": "bottom-row", "name": "Outside temperature ('+3.5 °C')", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1530, 659, 1674, 709], "signal": "white", "check_photos": ["09", "14"]},
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "states": {"08": [true, "white", "+3.5 °C"], "09": [true, "white", "+4.0 °C"], "10": [true, "white", "+5.5 °C, our grid lines run over it"], "11": [null, null, "not seen; our +6 °C is elsewhere"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [true, "white", "+4.0 °C (BMW's); our '+4 °C' is in the centre"]},
+   "schematic": {"kind": "text", "label": "+3.5 °C", "anchor": "end"},
+   "notes": "Hint for F: seen in 10 (under our grid lines) and 14, not 11-13 -> under (C9 too)."
+  },
+  {
+   "id": "assist.speed_limit", "group": "assist-message", "name": "Speed-limit sign (red ring, white disc)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [490, 578, 590, 670], "signal": "red", "keep": "largest", "check_photos": ["09", "14"]},
+   "measured_by": "E: half-max of R-max(G,B) on rect 08 (the red ring's outer edge)",
+   "states": {"08": [true, "multi", "50"], "09": [true, "multi", "50"], "10": [true, "multi", "20, partly under the grid label '500/600'"], "11": [null, null, "not seen; our face"], "12": [null, null, "not seen; our background (our own sign widget not shown)"], "13": [null, null, "not seen"], "14": [true, "multi", "30"]},
+   "schematic": {"kind": "sign", "label": "50"},
+   "notes": "Drawn over the speedo's bottom line. Hint for F: seen in 10 and 14, not in 11-13 -> under."
+  },
+  {
+   "id": "assist.cc_panel", "group": "assist-message", "name": "Check-control panel (curved frame, 'i', two-line message)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [699, 597, 1240, 705], "signal": "white", "frac": 0.2, "local": true, "exclude": [[699, 640, 712, 705], [1226, 636, 1238, 705]]},
+   "measured_by": "E: half-max of min(RGB) on rect 08 (frame + 'i' + text; the panel's dark fill may run on to the panel's bottom edge)",
+   "states": {"08": [true, "white", "'Ready to drive: press the brake.' (Ukrainian)"], "09": [false, null, "no message"], "10": [false, null, "no message"], "11": [null, null, "not seen"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [false, null, "no message; the street line shows"]},
+   "schematic": {"kind": "panel"},
+   "notes": "Safety: proposed info, but check-control messages can carry critical warnings (F to review). Hint for F: only seen in 08 -> unknown (whether it pops up over a custom theme was never photographed)."
+  },
+  {
+   "id": "assist.info_tacho", "group": "assist-message", "name": "'i' marker under the map, right (above the tacho's bottom line)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1247, 586, 1282, 634], "signal": "white"},
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "states": {"08": [true, "white", ""], "09": [false, null, ""], "10": [null, null, "grid label '1200/600' covers the spot"], "11": [null, null, "not seen"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [false, null, "spot visible, empty"]},
+   "schematic": {"kind": "text", "label": "i"},
+   "notes": "Meaning not known (a pending check-control or info marker; appears with the 08 message). Hint for F: only seen in 08 -> unknown."
+  },
+  {
+   "id": "assist.mode_label_centre", "group": "assist-message", "name": "Mode label 'COMFORT PLUS', stock position (left of the gear letter)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1214, 340, 1364, 397], "signal": "white", "amin": 6, "remove_vlines": 36},
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "states": {"08": [true, "white", ""], "09": [true, "white", ""], "10": [false, null, "spot visible under the grid; the label is in the bottom row instead"], "11": [null, null, "not seen"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [false, null, "spot visible (map roads, our '1'); the label is in the bottom row instead"]},
+   "schematic": {"kind": "text", "label": "COMFORT\nPLUS", "anchor": "start"},
+   "notes": "Hint for F: absent at this spot in 10 and 14 while assist.mode_label (bottom row) is shown -> gone (BMW moves it to the bottom row while a custom theme is connected)."
+  },
+  {
+   "id": "assist.mode_label", "group": "assist-message", "name": "Mode label 'COMFORT PLUS', custom-theme position (bottom row)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "14", "roi": [1216, 654, 1366, 718], "signal": "white", "amin": 6, "check_photos": ["10"]},
+   "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it; 14 is coarse, edges +-2-3 px); cross-check 10",
+   "states": {"08": [false, null, "not in the bottom row: shown in the tacho centre instead"], "09": [false, null, "as 08"], "10": [true, "white", "under our grid"], "11": [null, null, "not seen (the P next to it is drawn over us)"], "12": [null, null, "not seen (the P next to it is drawn over us)"], "13": [null, null, "not seen"], "14": [true, "white", ""]},
+   "schematic": {"kind": "text", "label": "COMFORT\nPLUS", "anchor": "start"},
+   "notes": "Hint for F: seen in 10 and 14; in 11-13 the P beside it is drawn over us but this label is not -> under (if our pixels are opaque there)."
+  },
+  {
+   "id": "assist.gear_centre", "group": "assist-message", "name": "Gear letter, stock position (tacho centre, 'P' / 'D')", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1482, 314, 1560, 406], "signal": "white"},
+   "measured_by": "E: half-max of min(RGB) on rect 08 ('P'; 'D' in 09 is wider)",
+   "states": {"08": [true, "white", "P"], "09": [true, "white", "D"], "10": [null, null, "under BMW's black box"], "11": [null, null, "under BMW's black box"], "12": [null, null, "under BMW's black box"], "13": [null, null, "under BMW's black box"], "14": [null, null, "under BMW's black box; the letter shows in the bottom row instead"]},
+   "schematic": {"kind": "text", "label": "P"},
+   "notes": "The black box sits exactly here. Hint for F: with a theme connected BMW shows the gear in the bottom row (assist.gear) -> this one is gone (the spot itself is hidden by the black box)."
+  },
+  {
+   "id": "assist.gear", "group": "assist-message", "name": "Gear letter, custom-theme position (bottom row, 'P')", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "14", "roi": [1388, 656, 1434, 712], "signal": "white", "keep": "largest", "check_photos": ["11", "12", "13"]},
+   "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it). Checks: 12 [1397,666,1425,704] (same centre, glyph bloomed at night), 11 [1395,666,1420,700] (extrapolated fit below y 562), 13 coarse; 10 not measurable this way (grid lines)",
+   "states": {"08": [false, null, "not in the bottom row: shown in the tacho centre"], "09": [false, null, "as 08"], "10": [true, "white", "P, cuts our grid"], "11": [true, "white", "P over our opaque face"], "12": [true, "white", "P over our background"], "13": [true, "white", "P"], "14": [true, "white", "P"]},
+   "schematic": {"kind": "text", "label": "P"},
+   "notes": "Other gears (R, N, D, S, M) are wider than P: keep C9's/visible.js margin. Hint for F: over (strong; 11, 12, 13)."
+  },
+  {
+   "id": "assist.digital_speed", "group": "assist-message", "name": "Digital speed '0 km/h' (speedo centre)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [465, 314, 612, 403], "signal": "white", "check_photos": ["09", "14"]},
+   "measured_by": "E: half-max of min(RGB) on rect 08 (one digit; more digits grow it to the left)",
+   "states": {"08": [true, "white", "0 km/h"], "09": [true, "white", "0 km/h"], "10": [true, "white", "under our grid"], "11": [null, null, "not seen"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [true, "white", "0 km/h"]},
+   "schematic": {"kind": "text", "label": "0 km/h", "anchor": "end"},
+   "notes": "Hint for F: seen in 10 and 14, not 11-13 -> under."
+  },
+  {
+   "id": "assist.rpm_label", "group": "assist-message", "name": "Tacho unit label '1/min x1000'", "safety": "cosmetic",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1418, 568, 1510, 631], "signal": "white", "check_photos": ["09", "14"]},
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "states": {"08": [true, "white", ""], "09": [true, "white", ""], "10": [true, "white", "'x1000' partly under grid label '1400/600'"], "11": [null, null, "not seen"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [true, "white", ""]},
+   "schematic": {"kind": "text", "label": "1/min\nx1000", "anchor": "start", "weight": "normal"},
+   "notes": "Hint for F: seen in 10 and 14 -> under."
+  },
+  {
+   "id": "assist.off", "group": "assist-message", "name": "'OFF' at the tacho's 0 (engine off)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1512, 575, 1574, 609], "signal": "white"},
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "states": {"08": [true, "white", "engine off (ready-to-drive message)"], "09": [false, null, "engine on: '0' shown instead"], "10": [false, null, "'0' shown instead"], "11": [null, null, "not seen"], "12": [null, null, "not seen; the 'OFF' at ~1295,535 in 12-14 is OURS"], "13": [null, null, "not seen"], "14": [false, null, "'0' shown instead"]},
+   "schematic": {"kind": "text", "label": "OFF"},
+   "notes": "BMW's OFF replaces the tacho scale's '0'. Hint for F: only seen with the engine off in 08 -> unknown."
+  },
+  {
+   "id": "assist.cold", "group": "assist-message", "name": "'COLD' under the oil-temperature mini", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "14", "roi": [1836, 633, 1914, 667], "signal": "white"},
+   "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it; coarse, +-2-3 px); 10 shows it at the same place",
+   "states": {"08": [false, null, "not shown (engine off)"], "09": [false, null, "not shown (engine warm?)"], "10": [true, "white", "under our grid"], "11": [null, null, "not seen; our mini there"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [true, "white", ""]},
+   "schematic": {"kind": "text", "label": "COLD"},
+   "notes": "Hint for F: seen in 10 and 14 -> under or over; not in 11-13 (engine state unknown) -> under, weak."
+  },
+  {
+   "id": "map.region", "group": "map-nav", "name": "Navigation map (hull of drawn roads)", "safety": "info", "colour": "multi",
+   "measure": {"method": "map", "photos": ["08", "09", "14"],
+               "roi_poly": [[470, 120], [1450, 120], [1450, 598], [470, 598]],
+               "tophat_thr": 40, "amin": 25, "min_len": 45,
+               "exclude": [[360, 300, 700, 425], [1210, 330, 1565, 425], [1400, 300, 1640, 460], [490, 575, 600, 670], [690, 588, 1250, 720], [1410, 560, 1600, 640]],
+               "exclude_14": [[1250, 440, 1350, 480], [1280, 520, 1350, 550], [1430, 225, 1590, 262], [495, 150, 570, 195], [555, 212, 628, 252], [595, 282, 668, 322], [608, 360, 680, 400], [597, 440, 668, 478], [555, 510, 628, 552], [1250, 300, 1290, 350], [1320, 190, 1360, 240]]},
+   "measured_by": "E: white top-hat road pixels (components >= 45 px long) in rects 08, 09 and 14, minus every non-map element and (in 14) our own numerals and labels; convex hull together with C9's 08/09 hull",
+   "states": {"08": [true, "multi", ""], "09": [true, "multi", "by day"], "10": [true, "multi", "under our grid; partly hidden by our grey ramps"], "11": [null, null, "not seen; our opaque window"], "12": [null, null, "not seen; our window"], "13": [null, null, "not seen; our window"], "14": [true, "multi", "with a lighter map background in its left part"]},
+   "schematic": {"kind": "poly", "fill": "#6b7b8c", "fill_opacity": 0.35, "label": "MAP"},
+   "notes": "A lower bound: where roads were drawn. Our theme already has a see-through map hole (w.bg holeWhen stockMap). Hint for F: seen in 10 and 14 -> under (C9 too)."
+  },
+  {
+   "id": "map.position_arrow", "group": "map-nav", "name": "Car position arrow (red triangle)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [924, 486, 1002, 540], "signal": "red", "keep": "largest", "check_photos": ["09", "14"]},
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
+   "states": {"08": [true, "red", ""], "09": [true, "red", ""], "10": [null, null, "under our grey ramps"], "11": [null, null, "not seen; our window"], "12": [null, null, "not seen"], "13": [null, null, "not seen"], "14": [true, "red", "same spot (+-3 px)"]},
+   "schematic": {"kind": "arrow"},
+   "notes": "No route arrow, turn hint, north arrow or route line was active in any photo. Hint for F: seen in 14 -> under (with the map)."
+  },
+  {
+   "id": "structure.speedo", "group": "structure", "name": "Stock speedometer outline (bezel, scale, numerals)", "safety": "cosmetic",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [74, 28, 706, 660], "signal": "white", "frac": 0.5, "amin": 20, "eps": 2.0,
+               "exclude": [[0, 425, 215, 660], [490, 575, 600, 670], [540, 150, 706, 600], [690, 590, 706, 660]]},
+   "measured_by": "E: convex hull of the light pixels (bezel line, ticks, numerals, centre text) on rect 08; ghost only",
+   "states": {"08": [true, "white", ""], "09": [true, "white", ""], "10": [true, "white", "under our grid"], "11": [null, null, "our dial there"], "12": [null, null, "our dial there"], "13": [null, null, "our dial there"], "14": [true, "white", "under our text"]},
+   "schematic": {"kind": "poly", "label": "speedo"},
+   "notes": "Context only. Hint for F: drawn in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.speedo_needle", "group": "structure", "name": "Stock speedo needle (at rest)", "safety": "cosmetic",
+   "measure": {"method": "needle", "photo": "08", "roi": [360, 455, 432, 650], "signal": "chroma", "tophat": 11},
+   "measured_by": "E: half-max of the top-hat (11 px) of chroma on rect 08, robust straight-line fit (the thin needle over its glow)",
+   "states": {"08": [true, "red", "at 0"], "09": [true, "red", "at 0"], "10": [true, "red", ""], "11": [null, null, ""], "12": [null, null, ""], "13": [null, null, ""], "14": [true, "red", "at 0"]},
+   "schematic": {"kind": "needle", "from": [0.1, 0.98], "to": [0.9, 0.02], "width": 5},
+   "notes": "Moves with speed; at rest here. Hint for F: drawn in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.speedo_info_line", "group": "structure", "name": "Line under the digital speed", "safety": "cosmetic",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [364, 402, 702, 422], "signal": "white", "keep": "largest", "eps": 1.0},
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "states": {"08": [true, "white", ""], "09": [true, "white", ""], "10": [null, null, "under grid line y 400 and its labels"], "11": [null, null, ""], "12": [null, null, ""], "13": [null, null, ""], "14": [true, "white", ""]},
+   "schematic": {"kind": "line"},
+   "notes": "Hint for F: seen in 14 -> under."
+  },
+  {
+   "id": "structure.tacho", "group": "structure", "name": "Stock tachometer outline (bezel, scale, numerals)", "safety": "cosmetic",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1198, 28, 1846, 660], "signal": "white", "frac": 0.5, "amin": 20, "eps": 2.0,
+               "exclude": [[1760, 170, 1920, 335], [1700, 425, 1920, 660], [1198, 120, 1320, 640], [1198, 640, 1236, 660], [1210, 330, 1365, 405], [1410, 560, 1580, 635]]},
+   "measured_by": "E: convex hull of the light pixels (bezel line, ticks, numerals) on rect 08; ghost only",
+   "states": {"08": [true, "white", ""], "09": [true, "white", ""], "10": [true, "white", "under our grid"], "11": [null, null, "our dial there"], "12": [null, null, "our dial there"], "13": [null, null, "our dial there"], "14": [true, "white", "under our text and the black box"]},
+   "schematic": {"kind": "poly", "label": "tacho"},
+   "notes": "Context only. Hint for F: drawn in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.tacho_needle", "group": "structure", "name": "Stock tacho needle (engine off / idle)", "safety": "cosmetic",
+   "measure": {"method": "needle", "photo": "08", "roi": [1492, 455, 1562, 650], "signal": "chroma", "tophat": 11},
+   "measured_by": "E: half-max of the top-hat (11 px) of chroma on rect 08, robust straight-line fit (the thin needle over its glow)",
+   "states": {"08": [true, "red", "at 0 (engine off)"], "09": [true, "red", "idle, ~0.8"], "10": [true, "red", ""], "11": [null, null, ""], "12": [null, null, ""], "13": [null, null, ""], "14": [true, "red", "idle"]},
+   "schematic": {"kind": "needle", "from": [0.9, 0.98], "to": [0.1, 0.02], "width": 5},
+   "notes": "Moves with rpm. Hint for F: drawn in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.tacho_info_line", "group": "structure", "name": "Line under the mode label and gear letter", "safety": "cosmetic",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1216, 402, 1558, 422], "signal": "white", "keep": "largest", "eps": 1.0},
+   "measured_by": "E: half-max of min(RGB) on rect 08",
+   "states": {"08": [true, "white", ""], "09": [true, "white", ""], "10": [null, null, "under grid line y 400 and the black box"], "11": [null, null, ""], "12": [null, null, ""], "13": [null, null, ""], "14": [false, null, "left part (x 1306-1419) visible and empty; right part under the black box"]},
+   "schematic": {"kind": "line"},
+   "notes": "Hint for F: not drawn in 14 where its left part is uncovered, while the speedo's line is -> gone with the centre mode label and gear letter (BMW's custom-theme layout drops the tacho-centre block)."
+  },
+  {
+   "id": "structure.rev_band", "group": "structure", "name": "Red rev band (6-7k, top of the tacho)", "safety": "cosmetic",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1205, 32, 1412, 68], "signal": "red", "frac": 0.5, "eps": 1.0},
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
+   "states": {"08": [true, "red", ""], "09": [true, "red", ""], "10": [true, "red", ""], "11": [null, null, ""], "12": [null, null, ""], "13": [null, null, ""], "14": [true, "red", ""]},
+   "schematic": {"kind": "bars", "n": 4},
+   "notes": "Hint for F: seen in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.fuel_mini", "group": "structure", "name": "Stock fuel mini (1, 1/2, 0, pump icon)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [4, 428, 215, 660], "signal": "v", "frac": 0.45, "amin": 15, "eps": 1.5,
+               "exclude": [[90, 425, 215, 470], [140, 470, 215, 520], [180, 520, 215, 560]]},
+   "measured_by": "E: convex hull of the bright pixels on rect 08 (outline, red marks, numerals, pump icon), minus the speedo bezel next to it",
+   "states": {"08": [true, "multi", ""], "09": [true, "multi", ""], "10": [true, "multi", "under our grid"], "11": [null, null, "our fuel mini there"], "12": [null, null, ""], "13": [null, null, ""], "14": [true, "multi", "under our text"]},
+   "schematic": {"kind": "poly", "label": "fuel"},
+   "notes": "Safety: info (fuel level; low-fuel warning is a separate lamp not seen). Hint for F: seen in 10 and 14 -> under."
+  },
+  {
+   "id": "structure.oil_mini", "group": "structure", "name": "Stock oil/coolant-temperature mini (scale, needle, car icon)", "safety": "info",
+   "measure": {"method": "halfmax", "photo": "08", "roi": [1706, 428, 1916, 660], "signal": "v", "frac": 0.45, "amin": 15, "eps": 1.5,
+               "exclude": [[1700, 425, 1790, 470], [1700, 470, 1760, 520], [1700, 520, 1725, 560]]},
+   "measured_by": "E: convex hull of the bright pixels on rect 08, minus the tacho bezel next to it",
+   "states": {"08": [true, "multi", ""], "09": [true, "multi", ""], "10": [true, "multi", "under our grid"], "11": [null, null, "our oil mini there"], "12": [null, null, ""], "13": [null, null, ""], "14": [true, "multi", "with COLD"]},
+   "schematic": {"kind": "poly", "label": "oil"},
+   "notes": "Hint for F: seen in 10 and 14 -> under."
+  },
+  {
+   "id": "overlay.black_box", "group": "overlay", "name": "Black area (drawn only while a custom theme is connected)", "safety": "cosmetic", "colour": "black", "rgb": [0, 0, 0],
+   "measure": {"method": "black_box", "photos": ["12", "14", "10", "11", "13"], "roi": [1392, 292, 1640, 468]},
+   "measured_by": "E: median half-max edge of the dark rectangle on rect 12 (our blue face around it gives contrast on all four sides); 14, 10, 11, 13 in the metrics",
+   "states": {"08": [false, null, "stock theme only"], "09": [false, null, "stock theme only"], "10": [true, "black", ""], "11": [true, "black", "over our face"], "12": [true, "black", "over our face"], "13": [true, "black", "over our face"], "14": [true, "black", "over the stock tacho centre (hides the centre gear letter)"]},
+   "schematic": {"kind": "rect", "label": "black area"},
+   "notes": "Hint for F: over (strong; 10-14)."
+  }
+ ]
+}

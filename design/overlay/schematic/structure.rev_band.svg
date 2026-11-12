@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 176 21" width="176" height="21">
+  <title>Red rev band (6-7k, top of the tacho) (generic schematic, our own drawing)</title>
+  <rect x="1.0" y="4.2" width="42.0" height="12.6" fill="#e23b2e"/>
+  <rect x="45.0" y="4.2" width="42.0" height="12.6" fill="#e23b2e"/>
+  <rect x="89.0" y="4.2" width="42.0" height="12.6" fill="#e23b2e"/>
+  <rect x="133.0" y="4.2" width="42.0" height="12.6" fill="#e23b2e"/>
+</svg>

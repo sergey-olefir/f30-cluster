@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 62 43" width="62" height="43">
+  <title>Parking brake '(P)' (red when set; green with Auto Hold) (generic schematic, our own drawing)</title>
+  <circle cx="31.0" cy="21.5" r="13.3" fill="none" stroke="#e23b2e" stroke-width="3.0"/>
+  <path d="M 13.0 9.5 Q 8.3 21.5 13.0 33.5" fill="none" stroke="#e23b2e" stroke-width="3.0" stroke-linecap="round"/>
+  <path d="M 49.0 9.5 Q 53.7 21.5 49.0 33.5" fill="none" stroke="#e23b2e" stroke-width="3.0" stroke-linecap="round"/>
+  <text x="31.0" y="21.5" font-family="Arial, Helvetica, sans-serif" font-size="14.7" font-weight="bold" fill="#e23b2e" text-anchor="middle" dominant-baseline="central">P</text>
+</svg>
