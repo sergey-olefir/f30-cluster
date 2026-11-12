@@ -1,0 +1,11 @@
+{
+  "$comment": "Our 6WB Comfort elements on the panel target. Written by tools/overlay/export_wb.py (package C). See README.md.",
+  "kind": "wb-elements",
+  "schema_version": 1,
+  "mode": "comfort",
+  "target": "panel",
+  "panel": { "w": 1920, "h": 720 },
+  "sources": [],
+  "anchors": [],
+  "elements": []
+}

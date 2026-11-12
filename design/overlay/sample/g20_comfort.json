@@ -1,0 +1,82 @@
+{
+  "$comment": "HAND-MADE SAMPLE (package A) so the constructor can be built before the real catalogue exists. Geometry from bake/work/C9/overlays.json. Relations here follow C9's text and are illustrative; the real file is design/overlay/g20_comfort.json.",
+  "kind": "g20-elements",
+  "schema_version": 1,
+  "mode": "comfort",
+  "target": "panel",
+  "panel": { "w": 1920, "h": 720 },
+  "sample": true,
+  "photos": {
+    "08": { "file": "reference/g20/08_stock_night_warnings-map.jpg", "rect": "bake/work/overlay/rect/08.png", "shows": "stock", "theme_version": null, "rms_px": 1.8, "usable_for_geometry": true, "note": "stock, just after start-up, most lamps lit" },
+    "10": { "file": "reference/g20/10_grid_over-stock.jpg", "rect": "bake/work/overlay/rect/10.png", "shows": "stock+grid", "theme_version": null, "rms_px": 3.5, "usable_for_geometry": true },
+    "11": { "file": "reference/g20/11_our-theme_on-car.jpg", "rect": "bake/work/overlay/rect/11.png", "shows": "ours", "theme_version": null, "rms_px": null, "usable_for_geometry": false, "note": "4-point fix, up to ~15 px off at the bottom (C9)" }
+  },
+  "elements": [
+    {
+      "id": "tt.brake", "group": "telltale", "name": "Brake (red)", "safety": "critical",
+      "bbox": [20, 214, 83, 256], "poly": null, "colour": { "name": "red" },
+      "states": [{ "photo": "08", "lit": true, "colour": "red" }],
+      "relation": "unknown", "evidence": "none",
+      "relation_basis": [{ "photo": "11", "seen": false, "our_pixels_opaque_there": true, "lit_expected": null, "note": "lamp state at the time of 11 not known" }],
+      "schematic": null, "measured_by": "C9 overlays.json telltales.08_left[0]", "notes": "sample"
+    },
+    {
+      "id": "tt.abs", "group": "telltale", "name": "ABS (amber)", "safety": "critical",
+      "bbox": [8, 328, 70, 370], "poly": null, "colour": { "name": "amber" },
+      "states": [{ "photo": "08", "lit": true, "colour": "amber" }],
+      "relation": "unknown", "evidence": "none", "relation_basis": [],
+      "schematic": null, "measured_by": "C9 overlays.json telltales.08_left[2]", "notes": "sample"
+    },
+    {
+      "id": "bottom.belt_driver", "group": "bottom-row", "name": "Driver seat belt (red)", "safety": "critical",
+      "bbox": [589.7, 664.9, 623.7, 713.9], "poly": null, "colour": { "name": "red" },
+      "states": [{ "photo": "08", "lit": true, "colour": "red" }, { "photo": "10", "lit": true, "colour": "red" }, { "photo": "11", "lit": true, "colour": "red" }],
+      "relation": "over", "evidence": "strong",
+      "relation_basis": [
+        { "photo": "10", "seen": true, "our_pixels_opaque_there": false, "lit_expected": true, "note": "cuts our grid lines" },
+        { "photo": "11", "seen": true, "our_pixels_opaque_there": true, "lit_expected": true, "note": "drawn on top of our opaque face" }
+      ],
+      "schematic": null, "measured_by": "C9 overlays.json belt_lamp.adopted", "notes": "sample"
+    },
+    {
+      "id": "overlay.black_box", "group": "overlay", "name": "Black area (custom theme only)", "safety": "cosmetic",
+      "bbox": [1419.5, 320.8, 1610.8, 437.9], "poly": null, "colour": { "name": "black", "rgb": [0, 0, 0] },
+      "states": [{ "photo": "10", "lit": true }, { "photo": "11", "lit": true }],
+      "relation": "over", "evidence": "strong",
+      "relation_basis": [
+        { "photo": "10", "seen": true, "our_pixels_opaque_there": false, "lit_expected": true },
+        { "photo": "11", "seen": true, "our_pixels_opaque_there": true, "lit_expected": true }
+      ],
+      "schematic": null, "measured_by": "C9 overlays.json black_box.adopted", "notes": "sample"
+    },
+    {
+      "id": "assist.gear", "group": "assist-message", "name": "Gear letter P (custom-theme position)", "safety": "info",
+      "bbox": [1398.4, 667.2, 1421.4, 700.2], "poly": null, "colour": { "name": "white" },
+      "states": [{ "photo": "10", "lit": true, "colour": "white" }, { "photo": "11", "lit": true, "colour": "white" }],
+      "relation": "over", "evidence": "strong",
+      "relation_basis": [{ "photo": "11", "seen": true, "our_pixels_opaque_there": true, "lit_expected": true }],
+      "schematic": null, "measured_by": "C9 overlays.json gear_letter.adopted", "notes": "sample"
+    },
+    {
+      "id": "bottom.temperature", "group": "bottom-row", "name": "Outside temperature", "safety": "info",
+      "bbox": [1539, 667, 1664, 701], "poly": null, "colour": { "name": "white" },
+      "states": [{ "photo": "08", "lit": true }, { "photo": "10", "lit": true }],
+      "relation": "under", "evidence": "medium",
+      "relation_basis": [{ "photo": "10", "seen": true, "our_pixels_opaque_there": false, "lit_expected": true, "note": "our grid lines run over it" }],
+      "schematic": null, "measured_by": "C9 overlays.json bottom_row.08[4]", "notes": "sample"
+    },
+    {
+      "id": "map.region", "group": "map-nav", "name": "Navigation map", "safety": "info",
+      "bbox": [592, 161, 1303, 612],
+      "poly": [[1303, 250], [1281, 514], [1254, 580], [1203, 612], [718, 612], [612, 526], [592, 475], [602, 426], [680, 206], [845, 162], [1170, 162], [1303, 246]],
+      "colour": { "name": "multi" },
+      "states": [{ "photo": "08", "lit": true }, { "photo": "10", "lit": true }],
+      "relation": "under", "evidence": "strong",
+      "relation_basis": [
+        { "photo": "10", "seen": true, "our_pixels_opaque_there": false, "lit_expected": true, "note": "under our transparent grid" },
+        { "photo": "11", "seen": false, "our_pixels_opaque_there": true, "lit_expected": null, "note": "hidden by our opaque window" }
+      ],
+      "schematic": null, "measured_by": "C9 overlays.json map.hull_08_09", "notes": "sample"
+    }
+  ]
+}

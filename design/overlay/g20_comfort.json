@@ -1,0 +1,11 @@
+{
+  "$comment": "The stock G20 Comfort elements on the panel target. Written by package E (catalogue) and F (relations). See README.md.",
+  "kind": "g20-elements",
+  "schema_version": 1,
+  "mode": "comfort",
+  "target": "panel",
+  "panel": { "w": 1920, "h": 720 },
+  "photos": {},
+  "excluded": [],
+  "elements": []
+}

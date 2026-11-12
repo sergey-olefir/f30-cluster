@@ -1,0 +1,23 @@
+{
+  "$comment": "HAND-MADE SAMPLE (package A). Boxes only, no masks. The real file is design/overlay/wb_comfort.json, written by tools/overlay/export_wb.py.",
+  "kind": "wb-elements",
+  "schema_version": 1,
+  "mode": "comfort",
+  "target": "panel",
+  "panel": { "w": 1920, "h": 720 },
+  "sample": true,
+  "sources": [{ "file": "bake/work/P9/stack_comfort.json" }, { "file": "apps/f30_cluster/hud/layouts/wb_comfort.json" }],
+  "anchors": [
+    { "id": "speedo", "centre": [412, 380], "R": 335, "bbox": [77, 45, 747, 715] },
+    { "id": "tacho", "centre": [1508, 380], "R": 335, "bbox": [1173, 45, 1843, 715] },
+    { "id": "window", "centre": [960, 362], "R": null, "bbox": [640, 76, 1280, 648] }
+  ],
+  "elements": [
+    { "id": "C10.panel.background", "source": "baked", "cluster": "C10", "z": -1, "bbox": [0, 0, 1920, 720], "mask": null, "opaque": true, "kind": "background", "movable": false, "anchor": null, "file": "C10/panel.background.albedo@0.5x.png", "widget": null, "conn": null, "hole": null, "notes": "sample" },
+    { "id": "w.bg", "source": "live", "cluster": null, "z": 100, "bbox": [0, 0, 1920, 720], "mask": null, "opaque": true, "kind": "background", "movable": false, "anchor": null, "file": null, "widget": "bg", "conn": null, "hole": { "rect": [668, 140, 1252, 602], "radius": 22, "when": "stockMap" }, "notes": "sample: WBBACK, with the stock-map hole" },
+    { "id": "C1.speedo.base", "source": "baked", "cluster": "C1", "z": 1, "bbox": [76, 44, 748, 716], "mask": null, "opaque": true, "kind": "dial", "movable": true, "anchor": "speedo", "file": "C1/speedo.base.albedo@0.5x.png", "widget": null, "conn": null, "hole": null, "notes": "sample" },
+    { "id": "C2.tacho.static", "source": "baked", "cluster": "C2", "z": 1, "bbox": [1181, 53, 1835, 707], "mask": null, "opaque": true, "kind": "dial", "movable": true, "anchor": "tacho", "file": "C2/tacho.static.albedo@0.5x.png", "widget": null, "conn": null, "hole": null, "notes": "sample" },
+    { "id": "w.range_v", "source": "live", "cluster": null, "z": 105, "bbox": [357, 624, 467, 648], "mask": null, "opaque": false, "kind": "text", "movable": true, "anchor": "speedo", "file": null, "widget": "range_v", "conn": 1, "hole": null, "notes": "sample" },
+    { "id": "w.cons_a1", "source": "live", "cluster": null, "z": 105, "bbox": [1613, 575, 1713, 601], "mask": null, "opaque": false, "kind": "text", "movable": true, "anchor": "tacho", "file": null, "widget": "cons_a1", "conn": 2, "hole": null, "notes": "sample" }
+  ]
+}
