@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overlay constructor</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="top">
+  <span class="brand">Overlay constructor</span><span id="dataset" class="ds">…</span>
+  <span class="grp"><button id="b-fit" title="Fit (F)">Fit</button><button id="b-11" title="1:1 (1)">1:1</button><button id="b-zout" title="Zoom out (−)">−</button><span id="zoom">—</span><button id="b-zin" title="Zoom in (+)">+</button></span>
+  <span class="grp" id="pick" title="What a click on the canvas picks"><span class="lbl">pick</span><button data-p="wb" class="on" title="6WB elements (W)">6WB</button><button data-p="anchor" title="anchors: whole dials (A)">anchor</button><button data-p="g20" title="G20 elements (G, or Alt-click)">G20</button></span>
+  <span class="grp"><label title="Snap moves to grid steps"><input type="checkbox" id="c-snapgrid" checked> grid</label><input type="number" id="n-grid" value="10" min="1" step="1" title="grid step, px"><label title="Snap to edges and centres of other elements"><input type="checkbox" id="c-snapedge" checked> edges</label></span>
+  <span class="grp"><label title="Element labels (L)"><input type="checkbox" id="c-labels"> labels</label><label title="The background's own see-through map hole (WBBACK holeWhen: stockMap)"><input type="checkbox" id="c-stockmap"> stockMap</label><label title="Photo used by the 'photo' and 'diff' modes">underlay <select id="s-crop"></select></label></span>
+  <span class="grp"><button id="b-undo" disabled title="Undo (Ctrl/⌘+Z)">Undo</button><button id="b-redo" disabled title="Redo (Shift+Ctrl/⌘+Z)">Redo</button></span>
+  <span class="grp right"><button id="b-save" class="primary" title="Download plan.json (Ctrl/⌘+S)">Save plan</button><button id="b-load" title="Load a plan.json">Load plan</button></span>
+</header>
+<div id="banners"></div>
+<main id="main">
+  <aside id="left"><div class="ph">Layers <span class="muted">eye · solo · lock · mode · opacity · z</span></div><div id="tree"></div></aside>
+  <section id="stage"><canvas id="cv"></canvas><div id="loading">Loading data…</div></section>
+  <aside id="right">
+    <nav id="tabs"><button data-t="inspector" class="on">Inspector</button><button data-t="decisions">Decisions</button><button data-t="conflicts">Conflicts</button><button data-t="holes">Holes</button><button data-t="plan">Plan</button></nav>
+    <div id="tab-inspector" class="tab on"></div>
+    <div id="tab-decisions" class="tab"></div>
+    <div id="tab-conflicts" class="tab"></div>
+    <div id="tab-holes" class="tab"></div>
+    <div id="tab-plan" class="tab"></div>
+  </aside>
+</main>
+<footer id="status"><span id="readout">move the cursor over the panel</span><span id="counts"></span></footer>
+<input type="file" id="planfile" accept=".json,application/json" hidden>
+<pre id="plan-dump" hidden></pre>
+<pre id="console-log" hidden></pre>
+<script src="data.js"></script>
+<script src="model.js"></script>
+<script src="view.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>

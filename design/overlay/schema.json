@@ -4,10 +4,18 @@
   "title": "Overlay map: stock G20 cluster vs our 6WB theme (panel target)",
   "description": "One schema for the four files in design/overlay/. Each file has a top-level 'kind' that selects its definition. All coordinates are panel px: 1920x720, x right, y down (as in shared/visible.js). See design/overlay/README.md.",
   "oneOf": [
-    { "$ref": "#/$defs/g20File" },
-    { "$ref": "#/$defs/wbFile" },
-    { "$ref": "#/$defs/planFile" },
-    { "$ref": "#/$defs/constraintsFile" }
+    {
+      "$ref": "#/$defs/g20File"
+    },
+    {
+      "$ref": "#/$defs/wbFile"
+    },
+    {
+      "$ref": "#/$defs/planFile"
+    },
+    {
+      "$ref": "#/$defs/constraintsFile"
+    }
   ],
   "$defs": {
     "id": {
@@ -15,303 +23,1008 @@
       "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$",
       "description": "Stable element id. G20 ids are dotted by group (tt.abs, bottom.clock, map.region, assist.gear, ...); 6WB ids are 'C<n>.<layer>' for baked layers and 'w.<widget>' for live widgets."
     },
-    "num": { "type": "number" },
+    "num": {
+      "type": "number"
+    },
     "point": {
-      "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2,
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2,
       "description": "[x, y] in panel px."
     },
     "bbox": {
-      "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4,
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4,
       "description": "[x0, y0, x1, y1] in panel px, x1 > x0, y1 > y0 (exclusive right/bottom edge)."
     },
     "poly": {
-      "type": "array", "items": { "$ref": "#/$defs/point" }, "minItems": 3,
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/point"
+      },
+      "minItems": 3,
       "description": "Closed polygon (last point joins the first), panel px."
     },
     "rgb": {
-      "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 255 }, "minItems": 3, "maxItems": 3
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 255
+      },
+      "minItems": 3,
+      "maxItems": 3
     },
     "photoId": {
-      "type": "string", "pattern": "^[0-9]{2}$",
+      "type": "string",
+      "pattern": "^[0-9]{2}$",
       "description": "Reference photo number in reference/g20/ (08..14 now, 15+ from the photo protocol)."
     },
     "sha": {
-      "type": "string", "pattern": "^sha256:[0-9a-f]{64}$"
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
     },
     "colourName": {
       "type": "string",
-      "enum": ["red", "amber", "green", "blue", "white", "grey", "cyan", "black", "multi", "unknown"]
+      "enum": [
+        "red",
+        "amber",
+        "green",
+        "blue",
+        "white",
+        "grey",
+        "cyan",
+        "black",
+        "multi",
+        "unknown"
+      ]
     },
     "relation": {
-      "type": "string", "enum": ["over", "under", "gone", "unknown"],
+      "type": "string",
+      "enum": [
+        "over",
+        "under",
+        "gone",
+        "unknown"
+      ],
       "description": "over: BMW draws it on top of any custom theme (keep clear). under: still drawn with a custom theme, beneath it (cover, reveal or redraw). gone: only drawn by the stock theme (drop or redraw). unknown: not settled by the photos."
     },
-    "evidence": { "type": "string", "enum": ["strong", "medium", "weak", "none"] },
+    "evidence": {
+      "type": "string",
+      "enum": [
+        "strong",
+        "medium",
+        "weak",
+        "none"
+      ]
+    },
     "safety": {
-      "type": "string", "enum": ["critical", "info", "cosmetic"],
+      "type": "string",
+      "enum": [
+        "critical",
+        "info",
+        "cosmetic"
+      ],
       "description": "critical: a warning the driver must see (brake, ABS, DSC, airbag, seat belts, tyre pressure, engine/check, oil, coolant, turn signals, high beam, parking brake)."
     },
     "decision": {
-      "type": "string", "enum": ["keep-clear", "reveal", "cover", "redraw", "drop"],
+      "type": "string",
+      "enum": [
+        "keep-clear",
+        "reveal",
+        "cover",
+        "redraw",
+        "drop"
+      ],
       "description": "keep-clear (forced for 'over'); reveal (a see-through hole in our theme); cover (our content hides it); redraw (we draw our own version); drop (nobody draws it; only for non-critical)."
     },
     "source": {
       "type": "object",
-      "required": ["file"],
+      "required": [
+        "file"
+      ],
       "properties": {
-        "file": { "type": "string" },
-        "line": { "type": "integer" },
-        "note": { "type": "string" }
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer"
+        },
+        "note": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
-
     "photo": {
       "type": "object",
-      "required": ["file", "shows"],
+      "required": [
+        "file",
+        "shows"
+      ],
       "properties": {
-        "file": { "type": "string", "description": "Path from the repo root (git-ignored, never shipped)." },
-        "rect": { "type": ["string", "null"], "description": "Rectified 1920x720 version (bake/work/overlay/rect/<id>.png), or null." },
-        "shows": { "type": "string", "enum": ["stock", "stock+grid", "ours", "ours-partial"],
-          "description": "stock: stock theme only. stock+grid: our transparent grid over stock. ours: our opaque theme. ours-partial: our theme connected but only some layers drew." },
-        "theme_version": { "type": ["string", "null"], "description": "Our app version / commit shown in the photo, when known." },
-        "rms_px": { "type": ["number", "null"] },
-        "usable_for_geometry": { "type": "boolean" },
-        "note": { "type": "string" }
+        "file": {
+          "type": "string",
+          "description": "Path from the repo root (git-ignored, never shipped)."
+        },
+        "rect": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Rectified 1920x720 version (bake/work/overlay/rect/<id>.png), or null."
+        },
+        "shows": {
+          "type": "string",
+          "enum": [
+            "stock",
+            "stock+grid",
+            "ours",
+            "ours-partial"
+          ],
+          "description": "stock: stock theme only. stock+grid: our transparent grid over stock. ours: our opaque theme. ours-partial: our theme connected but only some layers drew."
+        },
+        "theme_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Our app version / commit shown in the photo, when known."
+        },
+        "rms_px": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "usable_for_geometry": {
+          "type": "boolean"
+        },
+        "note": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "state": {
       "type": "object",
-      "required": ["photo", "lit"],
+      "required": [
+        "photo",
+        "lit"
+      ],
       "properties": {
-        "photo": { "$ref": "#/$defs/photoId" },
-        "lit": { "type": ["boolean", "null"], "description": "true: drawn / lit in that photo; false: not lit; null: the spot is not readable (covered, out of frame, glare)." },
-        "colour": { "$ref": "#/$defs/colourName" },
-        "note": { "type": "string" }
+        "photo": {
+          "$ref": "#/$defs/photoId"
+        },
+        "lit": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "true: drawn / lit in that photo; false: not lit; null: the spot is not readable (covered, out of frame, glare)."
+        },
+        "colour": {
+          "$ref": "#/$defs/colourName"
+        },
+        "note": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "basis": {
       "type": "object",
-      "required": ["photo", "seen"],
+      "required": [
+        "photo",
+        "seen"
+      ],
       "properties": {
-        "photo": { "$ref": "#/$defs/photoId" },
-        "seen": { "type": ["boolean", "null"], "description": "Is the element visible at its spot in this photo? null: unreadable." },
-        "our_pixels_opaque_there": { "type": ["boolean", "null"], "description": "Was our theme opaque at that spot in this photo (from our layout / bench render of the version in the photo)? null: no theme or unknown." },
-        "lit_expected": { "type": ["boolean", "null"], "description": "Was the lamp plausibly in its lit state at that moment? null: unknown." },
-        "note": { "type": "string" }
+        "photo": {
+          "$ref": "#/$defs/photoId"
+        },
+        "seen": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Is the element visible at its spot in this photo? null: unreadable."
+        },
+        "our_pixels_opaque_there": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Was our theme opaque at that spot in this photo (from our layout / bench render of the version in the photo)? null: no theme or unknown."
+        },
+        "lit_expected": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Was the lamp plausibly in its lit state at that moment? null: unknown."
+        },
+        "note": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "g20Element": {
       "type": "object",
-      "required": ["id", "group", "name", "safety", "bbox", "colour", "states", "relation", "evidence", "relation_basis"],
+      "required": [
+        "id",
+        "group",
+        "name",
+        "safety",
+        "bbox",
+        "colour",
+        "states",
+        "relation",
+        "evidence",
+        "relation_basis"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
         "group": {
           "type": "string",
-          "enum": ["telltale", "bottom-row", "map-nav", "assist-message", "structure", "overlay"],
+          "enum": [
+            "telltale",
+            "bottom-row",
+            "map-nav",
+            "assist-message",
+            "structure",
+            "overlay"
+          ],
           "description": "telltale: warning/indicator lamps. bottom-row: range, clock, temperature, belt/airbag group, check-control 'i' and message line. map-nav: map region, route arrow, north/route marks. assist-message: speed-limit sign, check-control panel, 'i' markers, ACC/lane assist, mode label, gear letter, digital speed, other non-lamp items. structure: the stock dials (outline, scale, needles) as a context ghost only. overlay: things BMW draws only while a custom theme is up (the black area)."
         },
-        "name": { "type": "string" },
-        "safety": { "$ref": "#/$defs/safety" },
-        "bbox": { "$ref": "#/$defs/bbox" },
-        "poly": { "oneOf": [{ "$ref": "#/$defs/poly" }, { "type": "null" }] },
+        "name": {
+          "type": "string"
+        },
+        "safety": {
+          "$ref": "#/$defs/safety"
+        },
+        "bbox": {
+          "$ref": "#/$defs/bbox"
+        },
+        "poly": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/poly"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "colour": {
-          "type": "object", "required": ["name"],
-          "properties": { "name": { "$ref": "#/$defs/colourName" }, "rgb": { "$ref": "#/$defs/rgb" } },
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "$ref": "#/$defs/colourName"
+            },
+            "rgb": {
+              "$ref": "#/$defs/rgb"
+            }
+          },
           "additionalProperties": false
         },
-        "states": { "type": "array", "items": { "$ref": "#/$defs/state" } },
-        "relation": { "$ref": "#/$defs/relation" },
-        "evidence": { "$ref": "#/$defs/evidence" },
-        "relation_basis": { "type": "array", "items": { "$ref": "#/$defs/basis" } },
-        "schematic": { "type": ["string", "null"], "description": "Our own generic SVG redraw (design/overlay/schematic/<id>.svg), or null." },
-        "measured_by": { "type": "string", "description": "Where the geometry comes from (e.g. 'C9 overlays.json', 'E segmentation of rect 08')." },
-        "notes": { "type": "string" }
+        "states": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/state"
+          }
+        },
+        "relation": {
+          "$ref": "#/$defs/relation"
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        },
+        "relation_basis": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/basis"
+          }
+        },
+        "schematic": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Our own generic SVG redraw (design/overlay/schematic/<id>.svg), or null."
+        },
+        "measured_by": {
+          "type": "string",
+          "description": "Where the geometry comes from (e.g. 'C9 overlays.json', 'E segmentation of rect 08')."
+        },
+        "notes": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "g20File": {
       "type": "object",
-      "required": ["kind", "schema_version", "mode", "target", "panel", "photos", "elements"],
+      "required": [
+        "kind",
+        "schema_version",
+        "mode",
+        "target",
+        "panel",
+        "photos",
+        "elements"
+      ],
       "properties": {
-        "$comment": { "type": "string" },
-        "kind": { "const": "g20-elements" },
-        "schema_version": { "const": 1 },
-        "mode": { "type": "string", "enum": ["comfort", "sport", "eco"] },
-        "target": { "const": "panel" },
-        "panel": { "$ref": "#/$defs/panelSize" },
-        "sample": { "type": "boolean", "description": "true for hand-made sample data (design/overlay/sample/)." },
-        "photos": { "type": "object", "propertyNames": { "$ref": "#/$defs/photoId" }, "additionalProperties": { "$ref": "#/$defs/photo" } },
-        "excluded": {
-          "type": "array", "description": "Things seen in the photos that are deliberately not catalogued, with the reason.",
-          "items": { "type": "object", "required": ["what", "reason"], "properties": { "what": { "type": "string" }, "bbox": { "$ref": "#/$defs/bbox" }, "reason": { "type": "string" } }, "additionalProperties": false }
+        "$comment": {
+          "type": "string"
         },
-        "elements": { "type": "array", "items": { "$ref": "#/$defs/g20Element" } }
+        "kind": {
+          "const": "g20-elements"
+        },
+        "schema_version": {
+          "const": 1
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "comfort",
+            "sport",
+            "eco"
+          ]
+        },
+        "target": {
+          "const": "panel"
+        },
+        "panel": {
+          "$ref": "#/$defs/panelSize"
+        },
+        "sample": {
+          "type": "boolean",
+          "description": "true for hand-made sample data (design/overlay/sample/)."
+        },
+        "photos": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/photoId"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/photo"
+          }
+        },
+        "excluded": {
+          "type": "array",
+          "description": "Things seen in the photos that are deliberately not catalogued, with the reason.",
+          "items": {
+            "type": "object",
+            "required": [
+              "what",
+              "reason"
+            ],
+            "properties": {
+              "what": {
+                "type": "string"
+              },
+              "bbox": {
+                "$ref": "#/$defs/bbox"
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/g20Element"
+          }
+        }
       },
       "additionalProperties": false
     },
-
     "anchor": {
       "type": "object",
-      "required": ["id", "centre"],
+      "required": [
+        "id",
+        "centre"
+      ],
       "properties": {
-        "id": { "type": "string", "enum": ["speedo", "tacho", "mini.fuel", "mini.oil", "window"] },
-        "centre": { "$ref": "#/$defs/point" },
-        "R": { "type": ["number", "null"], "description": "Radius in panel px for dials (the R unit), null for the window." },
-        "bbox": { "$ref": "#/$defs/bbox" },
-        "notes": { "type": "string" }
+        "id": {
+          "type": "string",
+          "enum": [
+            "speedo",
+            "tacho",
+            "mini.fuel",
+            "mini.oil",
+            "window"
+          ]
+        },
+        "centre": {
+          "$ref": "#/$defs/point"
+        },
+        "R": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Radius in panel px for dials (the R unit), null for the window."
+        },
+        "bbox": {
+          "$ref": "#/$defs/bbox"
+        },
+        "notes": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "wbElement": {
       "type": "object",
-      "required": ["id", "source", "cluster", "z", "bbox", "kind", "movable", "anchor"],
+      "required": [
+        "id",
+        "source",
+        "cluster",
+        "z",
+        "bbox",
+        "kind",
+        "movable",
+        "anchor"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "source": { "type": "string", "enum": ["baked", "live"] },
-        "cluster": { "type": ["string", "null"], "pattern": "^C[0-9]+$", "description": "Bake cluster C1..C10 (docs/BAKE-REPORT.md); null for live widgets without one." },
-        "z": { "type": "number", "description": "Draw order within our theme (higher on top). Baked layers use stack_comfort.json z; live widgets use layout z + 100 so they sit above the baked scene, as on the car." },
-        "bbox": { "$ref": "#/$defs/bbox" },
-        "mask": { "type": ["string", "null"], "description": "1x alpha mask PNG covering exactly bbox (design/overlay/masks/<id>.png), or null to use bbox." },
-        "opaque": { "type": "boolean", "description": "true if the element hides what is beneath it (background, faces); false for thin/glowing content. Conflicts use the mask either way." },
-        "kind": { "type": "string", "enum": ["dial", "text", "icon", "background", "needle", "sign", "arc", "hole"] },
-        "movable": { "type": "boolean" },
-        "anchor": { "type": ["string", "null"], "enum": ["speedo", "tacho", "mini.fuel", "mini.oil", "window", null] },
-        "file": { "type": ["string", "null"], "description": "Baked image (for reference), or null." },
-        "widget": { "type": ["string", "null"], "description": "Live widget id in the layout, or null." },
-        "conn": { "type": ["integer", "null"] },
-        "hole": { "oneOf": [{ "type": "null" }, { "type": "object", "required": ["rect"], "properties": { "rect": { "$ref": "#/$defs/bbox" }, "radius": { "type": "number" }, "when": { "type": "string" } }, "additionalProperties": false }],
-          "description": "For the background: an existing see-through hole (e.g. the map hole, holeWhen)." },
-        "notes": { "type": "string" }
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "baked",
+            "live"
+          ]
+        },
+        "cluster": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^C[0-9]+$",
+          "description": "Bake cluster C1..C10 (docs/BAKE-REPORT.md); null for live widgets without one."
+        },
+        "z": {
+          "type": "number",
+          "description": "Draw order within our theme (higher on top). Baked layers use stack_comfort.json z; live widgets use layout z + 100 so they sit above the baked scene, as on the car."
+        },
+        "bbox": {
+          "$ref": "#/$defs/bbox"
+        },
+        "mask": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "1x alpha mask PNG covering exactly bbox (design/overlay/masks/<id>.png), or null to use bbox."
+        },
+        "opaque": {
+          "type": "boolean",
+          "description": "true if the element hides what is beneath it (background, faces); false for thin/glowing content. Conflicts use the mask either way."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "dial",
+            "text",
+            "icon",
+            "background",
+            "needle",
+            "sign",
+            "arc",
+            "hole"
+          ]
+        },
+        "movable": {
+          "type": "boolean"
+        },
+        "anchor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "speedo",
+            "tacho",
+            "mini.fuel",
+            "mini.oil",
+            "window",
+            null
+          ]
+        },
+        "file": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Baked image (for reference), or null."
+        },
+        "widget": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Live widget id in the layout, or null."
+        },
+        "conn": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "hole": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "rect"
+              ],
+              "properties": {
+                "rect": {
+                  "$ref": "#/$defs/bbox"
+                },
+                "radius": {
+                  "type": "number"
+                },
+                "when": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "For the background: an existing see-through hole (e.g. the map hole, holeWhen)."
+        },
+        "notes": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "wbFile": {
       "type": "object",
-      "required": ["kind", "schema_version", "mode", "target", "panel", "anchors", "elements"],
+      "required": [
+        "kind",
+        "schema_version",
+        "mode",
+        "target",
+        "panel",
+        "anchors",
+        "elements"
+      ],
       "properties": {
-        "$comment": { "type": "string" },
-        "kind": { "const": "wb-elements" },
-        "schema_version": { "const": 1 },
-        "mode": { "type": "string", "enum": ["comfort", "sport", "eco"] },
-        "target": { "const": "panel" },
-        "panel": { "$ref": "#/$defs/panelSize" },
-        "sample": { "type": "boolean" },
-        "sources": { "type": "array", "items": { "$ref": "#/$defs/source" } },
-        "anchors": { "type": "array", "items": { "$ref": "#/$defs/anchor" } },
-        "elements": { "type": "array", "items": { "$ref": "#/$defs/wbElement" } }
+        "$comment": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "wb-elements"
+        },
+        "schema_version": {
+          "const": 1
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "comfort",
+            "sport",
+            "eco"
+          ]
+        },
+        "target": {
+          "const": "panel"
+        },
+        "panel": {
+          "$ref": "#/$defs/panelSize"
+        },
+        "sample": {
+          "type": "boolean"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "anchors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/anchor"
+          }
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/wbElement"
+          }
+        }
       },
       "additionalProperties": false
     },
-
     "conflict": {
       "type": "object",
-      "required": ["severity", "rule", "g20", "overlap_px"],
+      "required": [
+        "severity",
+        "rule",
+        "g20",
+        "overlap_px"
+      ],
       "properties": {
-        "severity": { "type": "string", "enum": ["error", "warning", "info"] },
-        "rule": { "type": "string", "enum": ["content-under-over", "critical-covered", "hole-cuts-content", "under-covered", "gone-critical-not-redrawn", "redraw-not-placed"],
-          "description": "content-under-over (error): our content overlaps an 'over' element. critical-covered (error): a critical element is covered and its decision is not reveal/redraw. hole-cuts-content (warning): a reveal hole cuts through our non-background content. under-covered (info): an 'under' element is covered by us. gone-critical-not-redrawn (error): a critical 'gone' element is not redrawn. redraw-not-placed (warning): decision redraw without a position." },
-        "g20": { "type": "string" },
-        "wb": { "type": ["string", "null"] },
-        "overlap_px": { "type": "number", "description": "Overlapping area in panel px^2." },
-        "overlap_pct": { "type": ["number", "null"], "description": "overlap_px as a % of the G20 element's own area." },
-        "message": { "type": "string" }
+        "severity": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "info"
+          ]
+        },
+        "rule": {
+          "type": "string",
+          "enum": [
+            "content-under-over",
+            "critical-covered",
+            "hole-cuts-content",
+            "under-covered",
+            "unknown-covered",
+            "gone-critical-not-redrawn",
+            "redraw-not-placed"
+          ],
+          "description": "content-under-over (error): our content overlaps an 'over' element. critical-covered (error): a critical element is covered and its decision is not reveal/redraw. hole-cuts-content (warning): a reveal hole cuts through our non-background content. unknown-covered (info): a non-critical unknown element is covered by us (it may be under). under-covered (info): an 'under' element is covered by us. gone-critical-not-redrawn (error): a critical 'gone' element is not redrawn. redraw-not-placed (warning): decision redraw without a position."
+        },
+        "g20": {
+          "type": "string"
+        },
+        "wb": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "overlap_px": {
+          "type": "number",
+          "description": "Overlapping area in panel px^2."
+        },
+        "overlap_pct": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "overlap_px as a % of the G20 element's own area."
+        },
+        "message": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "planG20": {
       "type": "object",
-      "required": ["decision"],
+      "required": [
+        "decision"
+      ],
       "properties": {
-        "decision": { "$ref": "#/$defs/decision" },
-        "notes": { "type": "string" },
-        "redraw_at": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/bbox" }], "description": "For decision 'redraw': where we draw our version." }
+        "decision": {
+          "$ref": "#/$defs/decision"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "redraw_at": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/bbox"
+            }
+          ],
+          "description": "For decision 'redraw': where we draw our version."
+        }
       },
       "additionalProperties": false
     },
     "planWb": {
       "type": "object",
       "properties": {
-        "dx": { "type": "number" }, "dy": { "type": "number" },
-        "scale": { "type": "number", "exclusiveMinimum": 0, "description": "About the anchor centre (or the element centre without an anchor)." },
-        "hidden": { "type": "boolean" },
-        "z": { "type": "number" },
-        "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+        "dx": {
+          "type": "number"
+        },
+        "dy": {
+          "type": "number"
+        },
+        "scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "About the anchor centre (or the element centre without an anchor)."
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "z": {
+          "type": "number"
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
       },
       "additionalProperties": false
     },
     "hole": {
       "type": "object",
-      "required": ["id", "for", "rect"],
+      "required": [
+        "id",
+        "for",
+        "rect"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "for": { "type": "array", "items": { "type": "string" }, "description": "G20 element ids this hole reveals." },
-        "rect": { "$ref": "#/$defs/bbox" },
-        "margin": { "type": "number" },
-        "radius": { "type": "number" },
-        "edited": { "type": "boolean", "description": "true if the owner adjusted it by hand (not re-derived from bbox+margin)." }
+        "id": {
+          "type": "string"
+        },
+        "for": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "G20 element ids this hole reveals."
+        },
+        "rect": {
+          "$ref": "#/$defs/bbox"
+        },
+        "margin": {
+          "type": "number"
+        },
+        "radius": {
+          "type": "number"
+        },
+        "edited": {
+          "type": "boolean",
+          "description": "true if the owner adjusted it by hand (not re-derived from bbox+margin)."
+        }
       },
       "additionalProperties": false
     },
     "keepClear": {
       "type": "object",
-      "required": ["id", "for", "rect"],
+      "required": [
+        "id",
+        "for",
+        "rect"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "for": { "type": "array", "items": { "type": "string" } },
-        "rect": { "$ref": "#/$defs/bbox" },
-        "poly": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/poly" }] }
+        "id": {
+          "type": "string"
+        },
+        "for": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rect": {
+          "$ref": "#/$defs/bbox"
+        },
+        "poly": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/poly"
+            }
+          ]
+        }
       },
       "additionalProperties": false
     },
     "planFile": {
       "type": "object",
-      "required": ["kind", "schema_version", "version", "based_on", "g20", "wb", "anchors", "holes", "keep_clear", "conflicts"],
+      "required": [
+        "kind",
+        "schema_version",
+        "version",
+        "based_on",
+        "g20",
+        "wb",
+        "anchors",
+        "holes",
+        "keep_clear",
+        "conflicts"
+      ],
       "properties": {
-        "$comment": { "type": "string" },
-        "kind": { "const": "plan" },
-        "schema_version": { "const": 1 },
-        "version": { "type": "integer", "minimum": 1, "description": "Increments on every save." },
-        "mode": { "type": "string", "enum": ["comfort", "sport", "eco"] },
-        "saved_at": { "type": "string" },
+        "$comment": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "plan"
+        },
+        "schema_version": {
+          "const": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Increments on every save."
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "comfort",
+            "sport",
+            "eco"
+          ]
+        },
+        "saved_at": {
+          "type": "string"
+        },
         "based_on": {
-          "type": "object", "required": ["g20", "wb"],
+          "type": "object",
+          "required": [
+            "g20",
+            "wb"
+          ],
           "properties": {
-            "g20": { "type": "object", "required": ["file", "sha256"], "properties": { "file": { "type": "string" }, "sha256": { "$ref": "#/$defs/sha" } }, "additionalProperties": false },
-            "wb": { "type": "object", "required": ["file", "sha256"], "properties": { "file": { "type": "string" }, "sha256": { "$ref": "#/$defs/sha" } }, "additionalProperties": false }
+            "g20": {
+              "type": "object",
+              "required": [
+                "file",
+                "sha256"
+              ],
+              "properties": {
+                "file": {
+                  "type": "string"
+                },
+                "sha256": {
+                  "$ref": "#/$defs/sha"
+                }
+              },
+              "additionalProperties": false
+            },
+            "wb": {
+              "type": "object",
+              "required": [
+                "file",
+                "sha256"
+              ],
+              "properties": {
+                "file": {
+                  "type": "string"
+                },
+                "sha256": {
+                  "$ref": "#/$defs/sha"
+                }
+              },
+              "additionalProperties": false
+            }
           },
           "additionalProperties": false
         },
-        "g20": { "type": "object", "additionalProperties": { "$ref": "#/$defs/planG20" }, "description": "Per G20 element id." },
-        "wb": { "type": "object", "additionalProperties": { "$ref": "#/$defs/planWb" }, "description": "Per 6WB element id: changes against the element file (absent = unchanged)." },
-        "anchors": { "type": "object", "additionalProperties": { "$ref": "#/$defs/planWb" }, "description": "Per anchor id: moves/scales every member." },
-        "holes": { "type": "array", "items": { "$ref": "#/$defs/hole" } },
-        "keep_clear": { "type": "array", "items": { "$ref": "#/$defs/keepClear" } },
-        "conflicts": { "type": "array", "items": { "$ref": "#/$defs/conflict" }, "description": "The conflict list at save time (derived; informative)." }
+        "settings": {
+          "type": "object",
+          "description": "Theme settings the conflicts depend on.",
+          "properties": {
+            "stockMap": {
+              "type": "boolean",
+              "description": "The 'BMW map in the middle' setting: when true, every background element also gets its own hole (w.bg hole, holeWhen stockMap)."
+            }
+          },
+          "additionalProperties": false
+        },
+        "g20": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/planG20"
+          },
+          "description": "Per G20 element id."
+        },
+        "wb": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/planWb"
+          },
+          "description": "Per 6WB element id: changes against the element file (absent = unchanged)."
+        },
+        "anchors": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/planWb"
+          },
+          "description": "Per anchor id: moves/scales every member."
+        },
+        "holes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/hole"
+          }
+        },
+        "keep_clear": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/keepClear"
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/conflict"
+          },
+          "description": "The conflict list at save time (derived; informative)."
+        }
       },
       "additionalProperties": false
     },
-
     "panelSize": {
-      "type": "object", "required": ["w", "h"],
-      "properties": { "w": { "const": 1920 }, "h": { "const": 720 } },
+      "type": "object",
+      "required": [
+        "w",
+        "h"
+      ],
+      "properties": {
+        "w": {
+          "const": 1920
+        },
+        "h": {
+          "const": 720
+        }
+      },
       "additionalProperties": false
     },
     "constraintsFile": {
       "type": "object",
-      "required": ["kind", "schema_version", "panel", "platform", "visibility", "bmw_over"],
+      "required": [
+        "kind",
+        "schema_version",
+        "panel",
+        "platform",
+        "visibility",
+        "bmw_over"
+      ],
       "properties": {
-        "$comment": { "type": "string" },
-        "kind": { "const": "constraints" },
-        "schema_version": { "const": 1 },
-        "panel": { "$ref": "#/$defs/panelSize" },
-        "geometry": { "type": "object" },
-        "platform": { "type": "object" },
-        "visibility": { "type": "object" },
-        "bmw_over": { "type": "object" }
+        "$comment": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "constraints"
+        },
+        "schema_version": {
+          "const": 1
+        },
+        "panel": {
+          "$ref": "#/$defs/panelSize"
+        },
+        "geometry": {
+          "type": "object"
+        },
+        "platform": {
+          "type": "object"
+        },
+        "visibility": {
+          "type": "object"
+        },
+        "bmw_over": {
+          "type": "object"
+        }
       },
       "additionalProperties": false
     }
