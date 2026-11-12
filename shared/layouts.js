@@ -38,6 +38,7 @@ const TYPES = {
     dial: ['measure'],
     wbback: ['dl', 'dr'],
     wbsign: [],
+    g20dial: ['base', 'lut', 'rows', 'bar', 'barC'],
     meter: ['signal', 'min', 'max'],
     gmeter: [],
     tiles: ['tiles'],

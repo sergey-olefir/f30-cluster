@@ -24,7 +24,7 @@ mgu.run({
         hud.start();
         new Page(ctx, hud, {
             title: ctx.spec.title, what: 'cluster',
-            look: { name: 'Themes', style: 'hero', tags: { wb_comfort: 'white dials', wb_comfort_map: 'white dials, BMW map', wb_dials: 'white dials, G20 round them', wb_sport: 'red glow', wb_eco: 'blue glow', f30: 'basic' } },
+            look: { name: 'Themes', style: 'hero', tags: { wb_comfort: 'white dials', wb_comfort_map: 'white dials, BMW map', wb_dials: 'white dials, G20 round them', g20_comfort: 'stock G20 look', wb_sport: 'red glow', wb_eco: 'blue glow', f30: 'basic' } },
             tabs: ['look', 'settings'],
             settings: ['stockMap', 'baked', 'units', 'clock', 'timeZone', 'tankLitres', 'redline', 'shiftBefore', 'nightDim', 'badge', 'badgeBMW', 'demo'],
         }).start();

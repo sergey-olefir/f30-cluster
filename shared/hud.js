@@ -871,7 +871,7 @@ class HudApp {
         const buf = Buffer.from(j.rgba, 'base64');
         if (buf.length !== j.w * j.h * 4) throw new Error('scene texture "' + name + '": size does not match');
         const c = this._clientAt(ci);
-        const ref = c.asset({ target: this.target, format: 'rgba8', w: j.w, h: j.h, sampling: 'bilinear' });
+        const ref = c.asset({ target: this.target, format: 'rgba8', w: j.w, h: j.h, sampling: j.sampling === 'nearest' ? 'nearest' : 'bilinear' });
         if (!ref) throw new Error('scene texture "' + name + '": asset refused (' + j.w + 'x' + j.h + ')');
         c.pixels(ref, null, buf);
         const a = { ref, c, ci, w: j.w, h: j.h, bytes: j.w * j.h * 8 };
@@ -886,6 +886,7 @@ class HudApp {
         widgets.forEach((w) => {
             const ci = this._connOf(w), add = (t) => { if (t && t.tex) out.add(ci + ':scene:' + t.tex); };
             if (w.type === 'dial' && w.look === 'wb' && baked) { add(w.base); add(w.fill); }
+            else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); }
             else if (w.type === 'wbsign' && w.tex && baked) { add(w.tex.limit); add(w.tex.nopass); }
             else if (w.type === 'wbback') {
                 if (w.collar) add(w.collar);
@@ -1809,6 +1810,22 @@ class HudApp {
             c.uniform(ref, 'u_red', rgb(t.hot));
             c.uniform(ref, 'u_face', rgb(color(t, w.face || 'bg')));
             c.uniform(ref, 'u_hot', [0]);
+        } else if (w.type === 'g20dial') {
+            // a G20-style gauge (design/gen_g20.py, tools/bake_g20.py): the baked static gauge, the pointer from a LUT
+            const rgb255 = (a) => a.map((v) => v / 255);
+            c.uniform(ref, 'u_box', [w.x, w.y, w.w, w.h]);
+            c.bind(ref, 'u_base', this._scene(w.base, x.ci).ref);
+            c.bind(ref, 'u_lut', this._scene(w.lut, x.ci).ref);
+            c.uniform(ref, 'u_g', [w.rows[0], w.rows[1], w.mini ? 1 : 0, w.band ? 1 : 0]);
+            c.uniform(ref, 'u_val', [0, 0, 0, 0]);
+            c.uniform(ref, 'u_C', w.centre || [0, 0]);
+            c.uniform(ref, 'u_bar', w.bar);
+            c.uniform(ref, 'u_barC', rgb255(w.barC));
+            c.uniform(ref, 'u_tipC', rgb255(w.tipC || w.barC));
+            c.uniform(ref, 'u_rim', w.rim ? rgb255(w.rim.slice(0, 3)).concat([w.rim[3]]) : [0, 0, 0, 0]);
+            c.uniform(ref, 'u_glow', w.glow ? rgb255(w.glow.slice(0, 3)).concat([w.glow[3]]) : [0, 0, 0, 0]);
+            c.uniform(ref, 'u_band', w.band ? [w.band[0], w.band[1], w.band[2], 0] : [0, 1, 0, 0]);
+            c.uniform(ref, 'u_bandC', rgb255(w.bandC || [0, 0, 0]));
         } else if (w.type === 'wbsign') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_show', [0, 0]);       // shown by _update: the limit sign while a limit is known, the no-passing sign while it applies
@@ -2228,6 +2245,13 @@ class HudApp {
             if (!force && on === x.last) return;
             x.last = on;
             x.c.uniform(x.ref, 'u_sign', on ? w.sign : [0, 0, 0]);
+        } else if (w.type === 'g20dial') {
+            const raw = this._raw(w.measure === 'rpm' ? 'rpm' : w.measure === 'speed' ? 'speed' : w.signal);
+            const mn = isNum(w.min) ? w.min : 0, mx = isNum(w.max) ? w.max : 1;
+            const q = isNum(raw) ? Math.round(Math.min(1, Math.max(0, (raw - mn) / (mx - mn))) * 2000) / 2000 : 0;
+            if (!force && q === x.last) return;
+            x.last = q;
+            x.c.uniform(x.ref, 'u_val', [q, 0, 0, 0]);
         } else if (w.type === 'dial') {
             const D = this._dialScale(w), us = this.setting('units') === 'us';
             let raw = this._raw(w.measure === 'rpm' ? 'rpm' : w.measure === 'speed' ? 'speed' : w.signal);
