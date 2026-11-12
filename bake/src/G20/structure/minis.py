@@ -295,7 +295,13 @@ def layers(look):
     """-> list of (manifest entry, rgba, dither) for both minis."""
     from build import entry
     J = lib.read_json(lib.os.path.join(lib.PARAMS, "minis.json"))
-    T = np.load(lib.os.path.join(lib.PARAMS, "minifill_%s.npy" % look))
+    import clean_soft as clean
+    # the fill table, cleaned (polish C): median + Gaussian along the frame (the block a single mini's lighting and
+    # the oil needle left in it), and the photo's black level taken out (clean.lift): what was dark blue-grey in the
+    # photo (between the frame and the inner line, and past the fill's fade) becomes see-through, not opaque blue
+    from fit_soft import eval_bg
+    T = clean.smooth_along(np.load(lib.os.path.join(lib.PARAMS, "minifill_%s.npy" % look)))
+    bgc = np.load(lib.os.path.join(lib.PARAMS, "soft_%s.npz" % look))["bg_coefs"]    # the photo's black, per px
     axis = J["axis"]
     up, lo = np.array(J["frame_up"]), np.array(J["frame_lo"])
     P = full_path(up, lo)
@@ -311,9 +317,14 @@ def layers(look):
         # ---- fill (full sweep): inside the frame's inner side, out to where the table fades
         col = np.clip(lib.table_eval(T, s_edges, FILL_D, s, np.clip(d, -2, 130)), 0, 1)
         lum = col.mean(-1)
-        a = np.clip((d - 2.0) / 1.5, 0, 1) * np.clip((s - 4) / 4, 0, 1) * np.clip((S[-1] - 2 - s) / 4, 0, 1)
+        # the fill starts at its inner border line (INNER_OFF): between it and the outer frame the photos show the
+        # panel's black (the old start at d = 2 painted the photo's blue-grey there)
+        a = np.clip((d - (INNER_OFF - 1.0)) / 1.5, 0, 1) * np.clip((s - 4) / 4, 0, 1) * np.clip((S[-1] - 2 - s) / 4, 0, 1)
         # along the frame only (not past its ends: the path's end segments clamp s)
         a *= (dist < 135)
+        # the photo's black -> see-through; the far rows (d > 75: the big dial's frame halo and glow beside the
+        # mini) are not the fill's
+        a *= clean.lift(col, eval_bg(bgc, X, Y).mean(-1), 0.08) * np.clip((100 - d) / 25, 0, 1)
         # dark scale lines on the fill (multiply-like: darken the fill colour)
         for ln in J["dark_lines"][mini]:
             pa, pb = np.array(ln["a"]), np.array(ln["b"])
@@ -344,7 +355,8 @@ def layers(look):
         out.append((entry("structure.%s_mini.fill.%s" % (mini, look), "structure.%s_mini" % mini,
                           "%s_mini.fill.%s.png" % (mini, look), x, y, 26, "albedo", look,
                           evidence="medium" if mini == "fuel" else "weak",
-                          notes=("Level fill (grey gradient + dark scale lines), FULL SWEEP: clip it to the side of "
+                          notes=("Level fill (grey gradient + dark scale lines), from its inner border line in; where the "
+                                 "photo showed the panel's black it is see-through (polish C). FULL SWEEP: clip it to the side of "
                                  "the %s needle towards the scale's empty end (bottom). Fuel: seen whole (needle near "
                                  "full in 08/09/14). Oil: only its part below the needle is seen; the rest is the "
                                  "fuel fill's mirror image (symmetric fit)." % mini),
