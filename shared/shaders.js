@@ -1093,7 +1093,9 @@ uniform sampler2D u_deco;  // the bottom arc's segment coverage (alpha), lit liv
 uniform vec4 u_decoR;      // its box in the layer's px (w 0: none)
 uniform vec3 u_fillC;      // the lit segments' colour
 uniform vec4 u_cut;        // the open bottom (the G20's bottom row shows below it): cut y (layer px from the top; 0: none),
-                           // fade (px above it over which the dial fades out), window shape (0 none, 1 round, 2 box)
+                           // fade (px above it over which the dial fades out), window shape (0 none, 1 round, 2 box,
+                           // 3 round closed: the disc stays opaque, the dial fading into black, over BMW's sign), the
+                           // window's soft edge (px past its shape until the dial is whole)
 uniform vec4 u_cutW;       // the window (BMW's own sign or lamp shows through), layer px: round cx, cy, r; box x0, y0, x1, y1
 #define u_size u_geo.xy
 #define u_ringW u_geo.z
@@ -1406,14 +1408,27 @@ void main() {
         }
     }
     if (u_cut.x > 0.0) {
-        // the open bottom: the dial fades out toward the cut, and a window shows BMW's own sign or lamp
+        // the open bottom: the dial fades out toward the cut (into the collar's black band under it), and a soft window
+        // shows BMW's own sign or lamp; closed (3), the round one stays opaque and black where the dial has faded
         vec2 lp = v_uv * u_size;                                                  // layer px, +y down
-        edge *= 1.0 - smoothstep(u_cut.x - u_cut.y, u_cut.x, lp.y);
-        if (u_cut.z > 0.5 && u_cut.z < 1.5) edge *= clamp(length(lp - u_cutW.xy) - u_cutW.z + 0.5, 0.0, 1.0);
-        else if (u_cut.z > 1.5) {
+        float cutK = 1.0 - smoothstep(u_cut.x - u_cut.y, u_cut.x, lp.y);        // the dial's own coverage
+        float cutSd = 0.0;                                                        // px outside the window's shape
+        if ((u_cut.z > 0.5 && u_cut.z < 1.5) || u_cut.z > 2.5) {
+            cutSd = length((lp - u_cutW.xy) / 64.0) * 64.0 - u_cutW.z;            // scaled: fp16-safe
+        } else if (u_cut.z > 1.5) {
             vec2 wq = max(u_cutW.xy - lp, lp - u_cutW.zw);
-            edge *= clamp(max(wq.x, wq.y) + 0.5, 0.0, 1.0);
+            cutSd = length(max(wq, 0.0) / 64.0) * 64.0 + min(max(wq.x, wq.y), 0.0);
         }
+        float cutWin = u_cut.z > 0.5 ? smoothstep(-0.5, u_cut.w + 0.5, cutSd) : 1.0;   // 0 in the window .. 1 past its soft edge
+        if (u_cut.z > 2.5) {
+            // the closed disc: opaque out to 2 px past the window's soft edge (the collar's band starts at r + 2)
+            float cutA = max(cutK, 1.0 - smoothstep(u_cut.w + 1.5, u_cut.w + 3.0, cutSd));
+            col *= cutK / max(cutA, 0.001);
+            cutK = cutA;
+        } else {
+            cutK *= cutWin;
+        }
+        edge *= cutK;
     }
     gl_FragColor = vec4(min(col, vec3(1.0)), edge);
 }
@@ -1446,8 +1461,8 @@ uniform vec4 u_r0;        // each one's box, target px: x, y, w, h
 uniform vec4 u_r1;
 uniform vec4 u_r2;
 uniform vec2 u_win;       // the baked window's level (a gain), applied above this y (the bar below keeps its own)
-uniform float u_hasTex;   // 1: the baked window, horizon and bar; 2: a collar only (u_t0 over u_r0: the G20's background
-                          // colour, coverage in alpha), see-through elsewhere, so BMW's own cluster shows round our dials
+uniform float u_hasTex;   // 1: the baked window, horizon and bar; 2: a collar only (u_t0 over u_r0: black, coverage in
+                          // alpha), see-through elsewhere, so BMW's own cluster shows round our dials
 uniform vec4 u_hole;      // a see-through window for BMW's own map under us: x, y, w, h (w 0: none)
 uniform float u_holeR;    // its corner radius
 // Comfort's middle window (package A, docs/POLISH-A-REPORT.md): no hard box. u_wbox is the window, x, y, w, h (w 0:
@@ -1473,9 +1488,10 @@ void main() {
     float cy = u_dl.y, R = u_dl.z;
     vec3 col = vec3(0.0);
     if (u_hasTex > 1.5) {
+        // the collar: pure black (empty space is black), its coverage soft and baked (tools/overlay/plan_dials.py)
         vec2 u0 = (p - u_r0.xy) / u_r0.zw;
-        vec4 t = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? texture2D(u_t0, u0) : vec4(0.0);
-        gl_FragColor = vec4(t.rgb, clamp(t.a * 1.15, 0.0, 1.0));       // the G20's own background colour, soft edges
+        float a = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? texture2D(u_t0, u0).a : 0.0;
+        gl_FragColor = vec4(0.0, 0.0, 0.0, a);
         return;
     }
     // the soft window (u_wbox): its sides and the dials' rims shade it, its top and bottom fade the map

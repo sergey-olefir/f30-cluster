@@ -3,7 +3,12 @@
 The aim is to keep our four 6WB dials (speedo, tacho, fuel and oil temperature) and let the stock G20 cluster draw everything else.
 
 - Scope: Comfort, the `panel` target. This builds on the overlay map (`docs/OVERLAY-REPORT.md`, `design/overlay/`).
-- Status: **proposal**. Nothing in the theme has changed yet. Every change listed in §4 touches `shared/`, the layout generator or the bake, so each one needs the owner's go.
+- Status: built as the layout "6WB Dials + G20" (`wb_dials`). The sections below are the original proposal.
+- **Update (polish B, 2026-11-12, `docs/POLISH-B-REPORT.md`):**
+  - The collar is pure black and soft. `plan_dials.py` now writes `collar.dials.png` as the final soft coverage: the collar over the stock dials (grown 6 px, blurred σ 4), a band under our dials' faded bottoms (y 626–656), a shade at our dials' inner edges toward the map, and a black patch over the bottom-row COMFORT PLUS. Every G20 item we show, and 3 px round it, stays clear.
+  - The speed-limit sign is ours (`redraw`): the `wbsign` under the speed hub, as in 6WB Comfort. BMW's sign shows through the round window only while we have no limit. Today `app.json` `config.limit` is null, so on the car the window stays open.
+  - The windows (sign, check-control "i") have soft edges.
+  - The stock bottom line stays visible from BMW's frame corners (the hooks) to our dials' edges and runs on under them.
 
 ![Scheme](overlay/dials_scheme.png)
 

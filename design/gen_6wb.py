@@ -171,12 +171,17 @@ def comfort():
 
 CUT_Y, CUT_FADE = 656, 26      # the big dials' open bottom (docs/OVERLAY-PLAN-DIALS.md): BMW's bottom row starts at y 659
 MINI_DY = -20                  # the minis move up so BMW's range ("467 km") clears the fuel mini
+# BMW's speed-limit sign (centre 539, 622, r 41) and check-control "i" ([1256, 591, 1270, 627]): the soft windows
+# that show them through our dials (tools/overlay/plan_dials.py keeps the collar off both)
+SIGN_WIN, I_WIN, WIN_SOFT = [539, 622, 44], [1254, 589, 1272, 629], 4
 
 def dials():
-    """6WB Dials + G20 (docs/OVERLAY-PLAN-DIALS.md): our four dials only; the G20 draws everything else round them.
-    Our background is see-through except a collar over the stock dials' parts that stick out past ours; both big
-    dials fade out toward y 656 so BMW's bottom row shows, with a round window for BMW's speed-limit sign and a small
-    one for its check-control "i"."""
+    """6WB Dials + G20 (docs/OVERLAY-PLAN-DIALS.md): our four dials and road signs; the G20 draws everything else round
+    them. Our background is see-through except a black collar (the stock dials' parts that stick out past ours, a band
+    under our dials' faded bottoms, a soft shade at their inner edges); both big dials fade out toward y 656 so BMW's
+    bottom row shows. Our signs sit under the speed hub as in 6WB Comfort and close the round window over BMW's sign;
+    while we have no limit (app.json config.limit unset) the window opens and BMW's shows. A small soft window shows
+    BMW's check-control "i"."""
     global FU, OT
     FU, OT = (FU[0], FU[1] + MINI_DY), (OT[0], OT[1] + MINI_DY)
     W = [
@@ -184,12 +189,17 @@ def dials():
          "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "comfort", "color": "accent",
          "collar": {"tex": "collar", "x": 0, "y": 0, "w": 1920, "h": 720}},
         dial("speedo", SP, "comfort", ringW=10, base=base("speedo_d", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
-             cut={"y": CUT_Y, "fade": CUT_FADE, "round": [539, 622, 46]},
+             cut={"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": WIN_SOFT, "cover": "limit"},
              measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10, start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "comfort", ringW=10, base=base("tacho_d", RV, R, RV[0] - R, RV[1] - R, 2 * R, 3),
-             cut={"y": CUT_Y, "fade": CUT_FADE, "box": [1250, 585, 1276, 633]},
+             cut={"y": CUT_Y, "fade": CUT_FADE, "box": I_WIN, "soft": WIN_SOFT},
              measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
              start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF),
+        # the road signs under the speed hub, the same widgets as 6WB Comfort's (comfort(); BAKE C7)
+        {"id": "signs", "type": "wbsign", "class": "content", "z": 3, "x": 305, "y": 460, "w": 214, "h": 93, "conn": 1,
+         "tex": {"limit": {"tex": "sign_limit", "x": 2, "y": 2, "w": 88, "h": 89},
+                 "nopass": {"tex": "sign_nopass", "x": 124, "y": 2, "w": 88, "h": 89}}},
+        text("limit", 351, 506, 60, "{{limit}}", "wb_val", "ink", conn=2),
     ]
     M = minis(baked=True)
     for w in M:                      # the minis' baked faces sit 20 px higher too (base() is relative to the layer)
