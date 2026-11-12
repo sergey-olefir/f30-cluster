@@ -14,6 +14,7 @@
   <span class="grp" id="pick" title="What a click on the canvas picks"><span class="lbl">pick</span><button data-p="wb" class="on" title="6WB elements (W)">6WB</button><button data-p="anchor" title="anchors: whole dials (A)">anchor</button><button data-p="g20" title="G20 elements (G, or Alt-click)">G20</button></span>
   <span class="grp"><label title="Snap moves to grid steps"><input type="checkbox" id="c-snapgrid" checked> grid</label><input type="number" id="n-grid" value="10" min="1" step="1" title="grid step, px"><label title="Snap to edges and centres of other elements"><input type="checkbox" id="c-snapedge" checked> edges</label></span>
   <span class="grp"><label title="Element labels (L)"><input type="checkbox" id="c-labels"> labels</label><label title="The background's own see-through map hole (WBBACK holeWhen: stockMap)"><input type="checkbox" id="c-stockmap"> stockMap</label><label title="Photo used by the 'photo' and 'diff' modes">underlay <select id="s-crop"></select></label></span>
+  <span class="grp" id="g20ctl" title="The G20 parts (design/overlay/g20_parts.json): render the real textures, and the simulation's look, theme state and lamps"><span class="lbl">G20</span><select id="s-g20mode" title="G20 stock: schematic (fill / outline) or the real textures"><option value="">schematic</option><option value="texture">texture</option></select><select id="s-look" title="look"><option value="night">night</option><option value="day">day</option></select><select id="s-conn" title="theme: connected (BMW's alternate layout, 14) or the stock layout (08/09)"><option value="1">theme connected</option><option value="0">stock layout</option></select><select id="s-lamps" title="which lamps are lit: start-up check (08), driving (none) or all (every part, one by one)"><option value="startup">lamps: start-up</option><option value="driving">lamps: driving</option><option value="all">lamps: all</option></select></span>
   <span class="grp"><button id="b-undo" disabled title="Undo (Ctrl/⌘+Z)">Undo</button><button id="b-redo" disabled title="Redo (Shift+Ctrl/⌘+Z)">Redo</button></span>
   <span class="grp right"><button id="b-save" class="primary" title="Download plan.json (Ctrl/⌘+S)">Save plan</button><button id="b-load" title="Load a plan.json">Load plan</button></span>
 </header>
@@ -36,6 +37,7 @@
 <pre id="console-log" hidden></pre>
 <script src="data.js"></script>
 <script src="model.js"></script>
+<script src="parts.js"></script>
 <script src="view.js"></script>
 <script src="ui.js"></script>
 </body>

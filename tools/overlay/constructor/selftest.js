@@ -174,6 +174,83 @@
     OC.nodeOf['panel:grid'].show = false;
     if (g0) I.undo();
     ok(true, 'render modes fill/outline/photo/diff, labels, grid and a reveal hole draw without exceptions');
+    // G20 parts (real data with design/overlay/g20_parts.json): the tree matches the file, every part node draws as a
+    // texture or is marked as a fallback with its reason, in every look / theme / lamp preset
+    const P = OC.P;
+    if (P && P.ok) {
+      const pn = [];
+      const walk = (n) => { if (n.type === 'part' || n.type === 'apptex') pn.push(n); (n.children || []).forEach(walk); };
+      walk(OC.tree);
+      const ids = new Set(pn.map((n) => n.ref));
+      ok(pn.length === P.recs.length && ids.size === P.recs.length, 'tree has one node per part: ' + pn.length + ' nodes, ' + P.recs.length + ' records in g20_parts.json');
+      const sim = P.recs.filter((r) => r.source === 'sim').length;
+      const app = P.recs.filter((r) => r.source === 'app-scene').length;
+      ok(pn.filter((n) => n.type === 'part').length === sim && pn.filter((n) => n.type === 'apptex').length === app, 'G20 stock has ' + sim + ' part nodes, Ours has ' + app + ' (as the file)');
+      const c = P.doc.report && P.doc.report.counts;
+      ok(c && pn.filter((n) => n.type === 'part' && P.byId[n.ref].id !== 'sim.black_box').length === c.manifest_entries, 'every manifest entry is a node (' + (c && c.manifest_entries) + ')');
+      const under = pn.filter((n) => n.type === 'part' && P.byId[n.ref].element && S.g20ById[P.byId[n.ref].element]);
+      ok(under.every((n) => n.parent && n.parent.type === 'g20' && n.parent.ref === P.byId[n.ref].element), 'each part sits under its element (' + under.length + ')');
+      // every part drawn alone with everything forced on ('all', both looks, both states)
+      let drawn = 0;
+      const fb = {};
+      const marked = [];
+      for (const n of pn) {
+        const r = P.byId[n.ref];
+        if (r.render === 'font' || r.render === 'data') { if (I.partTags(n).inactive) marked.push(r.id); else fb[r.id] = 'font/data not marked'; continue; }
+        const G = { look: r.look === 'day' ? 'day' : 'night', conn: r.state !== 'stock', lamps: 'all' };
+        const a = OC.partActive(r, G);
+        if (!a.on) { fb[r.id] = 'inactive in its own state: ' + a.why; continue; }
+        const v = OC.partBitmap(r, G);
+        if (v && v.img && v.px > 0) drawn++;
+        else fb[r.id] = (v && (v.fallback || v.empty)) || 'no image';
+      }
+      out.push('parts drawn as textures: ' + drawn + '; not pictures (marked): ' + marked.join(', ') + '; fallbacks: ' + (Object.keys(fb).map((k) => k + ' (' + fb[k] + ')').join(', ') || 'none'));
+      ok(drawn + marked.length + Object.keys(fb).length === P.recs.length && Object.values(fb).every((w) => typeof w === 'string' && w.length > 3), 'every part node resolves to a drawable source or a marked fallback with its reason');
+      // the global controls: every combination renders in texture mode without an exception
+      I.setG20Texture(true);
+      for (const look of ['night', 'day']) for (const conn of [true, false]) for (const lamps of ['startup', 'driving', 'all']) { I.setPartsG({ look, conn, lamps }); I.frame(); }
+      I.setPartsG({ look: 'night', conn: true, lamps: 'startup' });
+      for (const m of ['diff', 'photo', 'outline', 'fill', 'texture']) { OC.g20Root.mode = m; if (OC.oursRoot) { OC.oursRoot.show = true; OC.oursRoot.mode = m; } I.frame(); }
+      if (OC.oursRoot) { OC.oursRoot.show = false; OC.oursRoot.mode = null; }
+      ok(true, 'parts and app textures draw in diff / photo / outline / fill / texture without exceptions');
+      // a fallback node is marked in the tree ('!' tag) with its reason
+      const fbn = pn.find((n) => { const r = P.byId[n.ref]; if (n.type !== 'part' || r.render === 'font') return false; const st = OC.partNodeState(n); return st.active && st.fallback; });
+      ok(!fbn || /class="pt fb"/.test(I.partTags(fbn).html), 'a fallback part shows the "!" tag' + (fbn ? ' (' + fbn.ref + ')' : ' (none in this state)'));
+      // a missing source: the simulation and one raster image gone -> marked fallbacks with the reason, the page still draws
+      const simWas = P.sim;
+      const rr = P.recs.find((r) => r.render === 'raster' && OC.partActive(r).on);
+      const imgWas = P.img[rr.id];
+      P.sim = { ok: false, why: 'test: bench/g20 simulation not available' };
+      P.img[rr.id] = null;
+      P.imgWhy[rr.id] = 'test: ' + rr.file + ' missing';
+      P.cache.clear();
+      I.setG20Texture(true);
+      I.frame();
+      const tp = pn.find((n) => n.ref === 'c.bottom.clock');
+      const tr2 = pn.find((n) => n.ref === rr.id);
+      ok(/class="pt fb"/.test(I.partTags(tp).html) && /test: bench\/g20/.test(I.partTags(tp).title) && /class="pt fb"/.test(I.partTags(tr2).html) && /missing/.test(I.partTags(tr2).title), 'missing simulation / image: the nodes are marked "!" with the reason, and texture mode still draws');
+      P.sim = simWas;
+      P.img[rr.id] = imgWas;
+      delete P.imgWhy[rr.id];
+      P.cache.clear();
+      I.setG20Texture(false);
+      // the Ours root: view only, not in the conflicts
+      const n0c = C().length;
+      if (OC.oursRoot) { OC.oursRoot.show = true; I.frame(); }
+      ok(C().length === n0c, 'showing Ours changes no conflict (' + n0c + ')');
+      if (OC.oursRoot) OC.oursRoot.show = false;
+      // selection: a part selects its element; an app texture lists what it covers
+      const pr = P.recs.find((r) => r.source === 'sim' && r.render === 'raster');
+      I.select({ part: pr.id });
+      I.frame();
+      ok(OC.ui.sel.part === pr.id && OC.ui.sel.g20 === pr.element && /data-part=/.test(document.getElementById('tab-inspector').innerHTML), 'selecting a part shows its inspector and selects its element');
+      const ap = P.recs.find((r) => r.id === 'app.g20_speedo');
+      if (ap) { I.select({ part: ap.id }); I.frame(); ok(/baked from/.test(document.getElementById('tab-inspector').innerHTML) && /<img/.test(document.getElementById('tab-inspector').innerHTML), 'app texture inspector: baked from, thumbnail'); }
+      I.select({});
+      I.setG20Texture(false);
+      I.frame();
+      ok(C().length === n0c, 'texture mode and parts leave the conflicts unchanged');
+    } else out.push('G20 parts not loaded (' + (P ? P.why : 'no parts.js') + '): part checks skipped');
     // timing: cold pass, then a live drag of the speedo anchor
     const aid = Object.keys(S.data.anchors)[0];
     if (aid) {

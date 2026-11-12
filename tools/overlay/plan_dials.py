@@ -37,6 +37,13 @@ MAP_WIN = [748, 155, 1172, 612]                                 # the gap betwee
 # collar additions past the catalogue hulls: the stock '260' label reaches x 727 (bright pixels on rect 08 and 09);
 # structure.speedo's hull stops at x 704
 EXTRA_COLLAR = [[700, 66, 732, 110]]
+# context elements that are not stock dial graphics: they never go into the collar. panel.background (added from the
+# G20 parts, tools/overlay/parts_elements.json) is the stock background under everything; our see-through background
+# shows it by design, and the collar itself takes its colour (tools/bake_scene.py).
+NOT_IN_COLLAR = {
+    'panel.background': 'context only: the stock background under everything; outside the collar our see-through '
+                        'background shows it, and the collar takes its colour (tools/bake_scene.py)',
+}
 
 # our elements that stay: the four dials and what they draw (scales, numerals, needles, READY/OFF)
 KEEP_PREFIX = ('C1.', 'C2.', 'C3.', 'C4.', 'w.spd', 'w.rpm')
@@ -128,7 +135,7 @@ def main():
         o = {'decision': d}
         n = DROP.get(g['id']) or COVER.get(g['id']) or NOTES.get(g['id'])
         if g['group'] == 'structure' and d == 'cover':
-            n = 'stock dial graphics: hidden by our dials, and past their edge by the collar (collar.dials.png)'
+            n = NOT_IN_COLLAR.get(g['id']) or 'stock dial graphics: hidden by our dials, and past their edge by the collar (collar.dials.png)'
         if n:
             o['notes'] = n
         pg[g['id']] = o
@@ -188,6 +195,8 @@ def main():
     S = {g['id']: raster(g) for g in g20['elements']}
     stock = np.zeros((H, W), bool)       # what BMW draws under us that we hide: the stock dials and the 'cover' items
     for g in g20['elements']:
+        if g['id'] in NOT_IN_COLLAR:
+            continue
         if g['relation'] == 'under' and pg[g['id']]['decision'] == 'cover' or g['id'] in COVER:
             stock |= S[g['id']]
     for r in EXTRA_COLLAR:

@@ -66,7 +66,97 @@ def check_g20(doc, errs, warns):
             errs.append('%s: schematic %s missing' % (i, sch))
         if sch and not sch.startswith('design/overlay/'):
             errs.append('%s: schematic must live in design/overlay/' % i)
+    # the 'parts' links (tools/overlay/link_parts.py) must match design/overlay/g20_parts.json, both ways
+    pp = os.path.join(DIR, 'g20_parts.json')
+    if not doc.get('sample') and any('parts' in e for e in doc['elements']):
+        if not os.path.exists(pp):
+            errs.append("elements have 'parts' but %s is missing" % rel(pp))
+        else:
+            recs = {r['id']: r for r in json.load(open(pp)).get('parts', [])}
+            for e in doc['elements']:
+                if 'parts' not in e:
+                    errs.append("%s: no 'parts' list (run tools/overlay/link_parts.py)" % e['id'])
+                    continue
+                for p in e['parts']:
+                    if p not in recs:
+                        errs.append('%s: part %s not in g20_parts.json' % (e['id'], p))
+                    elif recs[p]['element'] != e['id']:
+                        errs.append('%s: part %s belongs to %s' % (e['id'], p, recs[p]['element']))
+                want = [r for r, v in recs.items() if v['element'] == e['id']]
+                if sorted(want) != sorted(e['parts']):
+                    errs.append('%s: parts %s, g20_parts.json says %s' % (e['id'], e['parts'], want))
     return seen
+
+
+def check_parts(doc, errs, warns):
+    """kind g20-parts (tools/overlay/inventory_parts.py): ids, files, links, coverage of the manifest and the scene."""
+    recs = doc['parts']
+    ids = [r['id'] for r in recs]
+    R = {r['id']: r for r in recs}
+    for i in sorted({i for i in ids if ids.count(i) > 1}):
+        errs.append('duplicate part id %s' % i)
+    cat = json.load(open(os.path.join(DIR, 'g20_comfort.json')))
+    E = {e['id'] for e in cat['elements']}
+    unresolved = {u['part'] for u in doc['report'].get('unresolved', [])}
+    for r in recs:
+        i = r['id']
+        el = r['element']
+        if (el is None or el not in E) and i not in unresolved:
+            errs.append('%s: element %r is not in g20_comfort.json and not listed in report.unresolved' % (i, el))
+        if el is not None and el in E and i in unresolved:
+            warns.append('%s: listed as unresolved but %s is in the catalogue' % (i, el))
+        if r['file'] and not os.path.exists(os.path.join(ROOT, r['file'])):
+            errs.append('%s: file %s missing' % (i, r['file']))
+        if r['procedural'] and not os.path.exists(os.path.join(ROOT, r['procedural']['module'])):
+            errs.append('%s: module %s missing' % (i, r['procedural']['module']))
+        if r['render'] in ('font', 'data'):
+            if r['bbox'] is not None:
+                errs.append('%s: %s has a bbox' % (i, r['render']))
+        elif r['bbox'] is None:
+            (warns if r['render'] == 'live' else errs).append('%s: no bbox%s' % (i, ' (not measured: run inventory_parts.py with Chrome)' if r['render'] == 'live' else ''))
+        else:
+            check_bbox(i, r['bbox'], errs)
+        if r['render'] == 'raster' and not r['file'].endswith('.png'):
+            errs.append('%s: a raster part must be a PNG' % i)
+        if r['render'] in ('procedural', 'live') and not r['procedural']:
+            errs.append('%s: %s part without "procedural"' % (i, r['render']))
+        m = r.get('measured')
+        if r['render'] in ('procedural', 'live') and not m:
+            warns.append('%s: not measured (run inventory_parts.py with Chrome)' % i)
+        if m and m.get('fallback'):
+            warns.append('%s: cannot be drawn alone: %s' % (i, m['fallback']))
+        for b in r.get('baked_from', []):
+            if b not in R:
+                errs.append('%s: baked_from %s is not a part' % (i, b))
+            elif i not in R[b].get('baked_into', []):
+                errs.append('%s: baked_from %s, but %s does not list it in baked_into' % (i, b, b))
+        for b in r.get('baked_into', []):
+            if b not in R or i not in R[b].get('baked_from', []):
+                errs.append('%s: baked_into %s without the matching baked_from' % (i, b))
+        for c in r.get('covers', []):
+            if c['element'] not in E:
+                errs.append('%s: covers %s, not in the catalogue' % (i, c['element']))
+        if r['source'] == 'sim' and r['file'] and not r['file'].startswith('bench/g20/'):
+            errs.append('%s: a simulation file outside bench/g20/' % i)
+    # every manifest entry and every app G20 / collar scene texture has a record
+    man = os.path.join(ROOT, 'bench', 'g20', 'manifest.json')
+    if os.path.exists(man):
+        for e in json.load(open(man))['entries']:
+            if e['id'] not in R:
+                errs.append('manifest entry %s has no part record' % e['id'])
+            elif R[e['id']]['element'] != e['element']:
+                errs.append('%s: element %s, the manifest says %s' % (e['id'], R[e['id']]['element'], e['element']))
+    else:
+        warns.append('bench/g20/manifest.json missing: manifest coverage not checked')
+    sd = os.path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'scene')
+    if os.path.isdir(sd):
+        for f in sorted(os.listdir(sd)):
+            if f.endswith('.json') and (f.startswith('g20_') or f == 'collar.json') and 'app.' + f[:-5] not in R:
+                errs.append('scene texture %s has no part record' % f)
+    else:
+        warns.append('the app scene folder is missing: scene coverage not checked')
+    for i in doc['report'].get('elements_without_parts', []):
+        warns.append('catalogue element %s has no part: we would still have to draw it' % i)
 
 
 def check_wb(doc, errs, warns):
@@ -152,7 +242,8 @@ def main(argv):
             print('skip %s (no "kind")' % rel(path))
             continue
         kind = doc.get('kind')
-        sub = {'g20-elements': 'g20File', 'wb-elements': 'wbFile', 'plan': 'planFile', 'constraints': 'constraintsFile'}.get(kind)
+        sub = {'g20-elements': 'g20File', 'wb-elements': 'wbFile', 'plan': 'planFile', 'constraints': 'constraintsFile',
+               'g20-parts': 'partsFile'}.get(kind)
         if not sub:
             errs.append('unknown kind %r' % kind)
         else:
@@ -166,10 +257,14 @@ def main(argv):
                     check_wb(doc, errs, warns)
                 elif kind == 'plan':
                     check_plan(doc, path, errs, warns)
+                elif kind == 'g20-parts':
+                    check_parts(doc, errs, warns)
         assert v  # the top-level oneOf is for editors; per-kind validation above gives clearer messages
         n = len(doc.get('elements', [])) if isinstance(doc.get('elements'), list) else ''
+        if kind == 'g20-parts' and isinstance(doc.get('parts'), list):
+            n = '%d parts' % len(doc['parts'])
         status = 'FAIL' if errs else 'ok  '
-        print('%s %s (%s%s)' % (status, rel(path), kind, ', %s elements' % n if n != '' else ''))
+        print('%s %s (%s%s)' % (status, rel(path), kind, (', %s elements' % n if isinstance(n, int) else ', ' + n) if n != '' else ''))
         for e in errs:
             print('   error:', e)
         for w in warns[:40]:
