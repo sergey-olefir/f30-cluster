@@ -200,34 +200,6 @@
       ]
     },
     {
-      "id": "speed",
-      "type": "text",
-      "z": 5,
-      "x": 290,
-      "y": 318,
-      "w": 240,
-      "h": 81,
-      "text": "{{speed}}",
-      "font": "g20_spd",
-      "color": "fg",
-      "align": "right",
-      "conn": 2
-    },
-    {
-      "id": "speed_unit",
-      "type": "text",
-      "z": 5,
-      "x": 539,
-      "y": 370,
-      "w": 80,
-      "h": 27,
-      "text": "km/h",
-      "font": "g20_unit",
-      "color": "fg",
-      "align": "left",
-      "conn": 2
-    },
-    {
       "id": "rpm1",
       "type": "text",
       "z": 5,
