@@ -1898,4 +1898,82 @@ void main() {
 }
 `;
 
-module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: WBDIAL, wbback: WBBACK, wbsign: WBSIGN, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES };
+const G20DIAL = `// A G20-style gauge for a cluster-render "effect" layer (GLSL ES 1.00): the stock G20 Comfort look, our own drawing
+// (tools/bake_g20.py, from the bench simulation, docs/G20SIM-REPORT.md). The static gauge is the baked u_base (it fills
+// the layer); live on top: the pointer (a bar from tail to tip, both read for the value from u_lut's entries), its soft
+// red-orange glow, and on the rev dial the pink band from 0 to the pointer (u_lut entry 8: per angle about u_C, the
+// value there and the band's radius). Minis: a tapered needle, no glow, no band.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying vec2 v_uv;
+uniform vec4 u_box;        // the layer: panel x, y, w, h
+uniform sampler2D u_base;  // the static gauge, RGBA straight alpha, the layer's size
+uniform sampler2D u_lut;   // 256 x 18, nearest: entry e in rows 2e (x) and 2e + 1 (y), panel px x 16 in R and G
+uniform vec4 u_g;          // tip entry, tail entry, kind (0 big dial, 1 mini), the band (1: on)
+uniform vec4 u_val;        // the value 0..1; 0; 0; 0
+uniform vec2 u_C;          // the rays' centre, panel px
+uniform vec4 u_bar;        // width at the tail, at the tip; rim offset, rim width (0: none)
+uniform vec3 u_barC;       // the bar's colour
+uniform vec3 u_tipC;       // the tip's colour (minis)
+uniform vec4 u_rim;        // the rim's colour and alpha
+uniform vec4 u_glow;       // the glow's colour (already scaled) and sigma px (0: none)
+uniform vec4 u_band;       // the band's first and last angle (image atan2, radians), its width px; 0
+uniform vec3 u_bandC;
+
+float dec(vec4 c) { return (c.r * 65280.0 + c.g * 255.0) / 16.0; }
+vec2 at(float e, float i) {
+    float u = (i + 0.5) / 256.0;
+    return vec2(dec(texture2D(u_lut, vec2(u, (2.0 * e + 0.5) / 18.0))), dec(texture2D(u_lut, vec2(u, (2.0 * e + 1.5) / 18.0))));
+}
+vec2 lutP(float row, float f) {
+    float x = clamp(f, 0.0, 1.0) * 255.0, i = floor(x);
+    return mix(at(row, i), at(row, min(i + 1.0, 255.0)), x - i);
+}
+
+void main() {
+    vec2 p = u_box.xy + v_uv * u_box.zw;                                       // panel px
+    vec4 bs = texture2D(u_base, v_uv);
+    vec3 col = bs.rgb;
+    float alpha = bs.a;
+    float f = u_val.x;
+    vec2 tip = lutP(u_g.x, f), tail = lutP(u_g.y, f);
+    // the bar: distance to the segment and how far along it (in 1/64 px units first: fp16-safe)
+    vec2 pa = (p - tail) / 64.0, ba = (tip - tail) / 64.0;
+    float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
+    float dist = length(pa - ba * h) * 64.0;
+    if (u_g.w > 0.5) {
+        // the rev band: inside the ticks, from 0 to the pointer
+        vec2 q = p - u_C;
+        float psi = atan(q.y, q.x);
+        float j = (psi - u_band.x) / (u_band.y - u_band.x);
+        if (j >= 0.0 && j <= 1.0) {
+            float x = j * 255.0, i = floor(x);
+            vec2 b = mix(at(8.0, i), at(8.0, min(i + 1.0, 255.0)), x - i);
+            float vAt = b.x / 4095.0, rB = b.y;
+            float d = length(q / 64.0) * 64.0;
+            float cov = clamp(u_band.z * 0.5 + 0.5 - abs(d - rB), 0.0, 1.0) * clamp((f - vAt) * 400.0, 0.0, 1.0);
+            col = mix(col, u_bandC, cov);
+        }
+    }
+    if (u_glow.w > 0.0) {
+        float g = exp(-dist * dist / (2.0 * u_glow.w * u_glow.w));
+        col += u_glow.rgb * g * alpha;
+    }
+    float hw = mix(u_bar.x, u_bar.y, h) * 0.5;
+    if (u_bar.w > 0.0) {
+        // a dark rim along both sides of the bar
+        float rd = abs(dist - u_bar.z);
+        col = mix(col, u_rim.rgb, u_rim.a * clamp(u_bar.w * 0.5 + 0.5 - rd, 0.0, 1.0) * step(hw, dist));
+    }
+    float cov = clamp(hw + 0.5 - dist, 0.0, 1.0);
+    vec3 bar = u_g.z > 0.5 ? mix(u_barC, u_tipC, smoothstep(0.6, 1.0, h)) : u_barC;
+    col = mix(col, bar, cov);
+    alpha = max(alpha, cov);
+    gl_FragColor = vec4(min(col, vec3(1.0)), alpha);
+}
+`;
+
+module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: WBDIAL, wbback: WBBACK, wbsign: WBSIGN, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, g20dial: G20DIAL };
