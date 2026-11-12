@@ -1,23 +1,103 @@
 [
-  {"severity": "error", "rule": "content-under-over", "g20": "bottom.belt_driver", "wb": "C10.panel.background", "overlap_px": 1666},
-  {"severity": "error", "rule": "content-under-over", "g20": "bottom.belt_driver", "wb": "w.bg", "overlap_px": 1666},
-  {"severity": "error", "rule": "content-under-over", "g20": "bottom.belt_driver", "wb": "C1.speedo.base", "overlap_px": 1666},
-  {"severity": "error", "rule": "content-under-over", "g20": "overlay.black_box", "wb": "C10.panel.background", "overlap_px": 22464},
-  {"severity": "error", "rule": "content-under-over", "g20": "overlay.black_box", "wb": "w.bg", "overlap_px": 22464},
-  {"severity": "error", "rule": "content-under-over", "g20": "overlay.black_box", "wb": "C2.tacho.static", "overlap_px": 22464},
-  {"severity": "error", "rule": "content-under-over", "g20": "assist.gear", "wb": "C10.panel.background", "overlap_px": 759},
-  {"severity": "error", "rule": "content-under-over", "g20": "assist.gear", "wb": "w.bg", "overlap_px": 759},
-  {"severity": "error", "rule": "content-under-over", "g20": "assist.gear", "wb": "C2.tacho.static", "overlap_px": 759},
-  {"severity": "error", "rule": "critical-covered", "g20": "tt.brake", "wb": "C10.panel.background", "overlap_px": 2646},
-  {"severity": "error", "rule": "critical-covered", "g20": "tt.brake", "wb": "w.bg", "overlap_px": 2646},
-  {"severity": "error", "rule": "critical-covered", "g20": "tt.brake", "wb": "C1.speedo.base", "overlap_px": 294},
-  {"severity": "error", "rule": "critical-covered", "g20": "tt.abs", "wb": "C10.panel.background", "overlap_px": 2604},
-  {"severity": "error", "rule": "critical-covered", "g20": "tt.abs", "wb": "w.bg", "overlap_px": 2604},
-  {"severity": "info", "rule": "under-covered", "g20": "bottom.temperature", "wb": "C10.panel.background", "overlap_px": 4250},
-  {"severity": "info", "rule": "under-covered", "g20": "bottom.temperature", "wb": "w.bg", "overlap_px": 4250},
-  {"severity": "info", "rule": "under-covered", "g20": "bottom.temperature", "wb": "C2.tacho.static", "overlap_px": 4250},
-  {"severity": "info", "rule": "under-covered", "g20": "map.region", "wb": "C10.panel.background"},
-  {"severity": "info", "rule": "under-covered", "g20": "map.region", "wb": "w.bg"},
-  {"severity": "info", "rule": "under-covered", "g20": "map.region", "wb": "C1.speedo.base"},
-  {"severity": "info", "rule": "under-covered", "g20": "map.region", "wb": "C2.tacho.static"}
+  {
+    "severity": "error",
+    "rule": "content-under-over",
+    "g20": "bottom.belt_driver",
+    "wb": "C1.speedo.base",
+    "overlap_px": 1666
+  },
+  {
+    "severity": "error",
+    "rule": "content-under-over",
+    "g20": "overlay.black_box",
+    "wb": "C2.tacho.static",
+    "overlap_px": 22464
+  },
+  {
+    "severity": "error",
+    "rule": "content-under-over",
+    "g20": "assist.gear",
+    "wb": "C2.tacho.static",
+    "overlap_px": 759
+  },
+  {
+    "severity": "error",
+    "rule": "critical-covered",
+    "g20": "tt.brake",
+    "wb": "C10.panel.background",
+    "overlap_px": 2646
+  },
+  {
+    "severity": "error",
+    "rule": "critical-covered",
+    "g20": "tt.brake",
+    "wb": "w.bg",
+    "overlap_px": 2646
+  },
+  {
+    "severity": "error",
+    "rule": "critical-covered",
+    "g20": "tt.brake",
+    "wb": "C1.speedo.base",
+    "overlap_px": 294
+  },
+  {
+    "severity": "error",
+    "rule": "critical-covered",
+    "g20": "tt.abs",
+    "wb": "C10.panel.background",
+    "overlap_px": 2604
+  },
+  {
+    "severity": "error",
+    "rule": "critical-covered",
+    "g20": "tt.abs",
+    "wb": "w.bg",
+    "overlap_px": 2604
+  },
+  {
+    "severity": "info",
+    "rule": "under-covered",
+    "g20": "bottom.temperature",
+    "wb": "C10.panel.background",
+    "overlap_px": 4250
+  },
+  {
+    "severity": "info",
+    "rule": "under-covered",
+    "g20": "bottom.temperature",
+    "wb": "w.bg",
+    "overlap_px": 4250
+  },
+  {
+    "severity": "info",
+    "rule": "under-covered",
+    "g20": "bottom.temperature",
+    "wb": "C2.tacho.static",
+    "overlap_px": 4250
+  },
+  {
+    "severity": "info",
+    "rule": "under-covered",
+    "g20": "map.region",
+    "wb": "C10.panel.background"
+  },
+  {
+    "severity": "info",
+    "rule": "under-covered",
+    "g20": "map.region",
+    "wb": "w.bg"
+  },
+  {
+    "severity": "info",
+    "rule": "under-covered",
+    "g20": "map.region",
+    "wb": "C1.speedo.base"
+  },
+  {
+    "severity": "info",
+    "rule": "under-covered",
+    "g20": "map.region",
+    "wb": "C2.tacho.static"
+  }
 ]

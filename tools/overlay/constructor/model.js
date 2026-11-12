@@ -311,6 +311,7 @@
         const r = OC.g20Raster(g);
         for (const { e, sh } of shapes) {
           if (!boxHit(r, sh.box)) continue;
+          if (rule[1] === 'content-under-over' && e.kind === 'background') continue; // a plain background under BMW's item hides nothing
           const ov = overlap('g:' + g.id, r, sh);
           if (ov.n > 0) push(rule[0], rule[1], g, e, ov, rule[2]);
         }
