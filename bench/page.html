@@ -86,6 +86,12 @@
       <div id="sliders"></div>
       <div class="note" id="sigNote">Demo drive is the kit's simulator (sim.js). It has no boost signal, so boost reads "--" here, as on a car that does not fill that field.</div>
     </section>
+    <!-- G20SIM: controls of the stock G20 simulation drawn as the panel backdrop (bench/g20/, bench only) -->
+    <section id="g20box" style="display:none">
+      <h2>G20 (stock cluster, bench only)</h2>
+      <div id="g20"></div>
+      <div class="note">BMW's own cluster under the theme when "stock cluster backdrop" is on: our drawing fitted to car photos (docs/G20SIM-REPORT.md). Lamps are bench controls, not signals. URL: ?g20=startup|driving&amp;day=1&amp;g20limit=50&amp;g20cc=ready&amp;g20gear=P&amp;g20time=16:43.</div>
+    </section>
     <section>
       <h2>Layers</h2>
       <table><thead><tr><th>conn:ref</th><th>kind</th><th>class/z</th><th>rect</th><th>car</th></tr></thead><tbody id="layers"></tbody></table>
@@ -238,6 +244,7 @@
       ctx.lineTo(VW, hoodY(VW));
       ctx.strokeStyle = '#ff8c1a'; ctx.lineWidth = 1.5; ctx.stroke();
       labelBox('hood (hidden above the line)', 150, 60, '#ff8c1a');   // inside the masked corner (hoodY(150) is 111)
+      if (g20.active) return;   // G20SIM: the simulation draws BMW's black area, belt light and (P) as the car does
       // BMW's black area: solid black, as the car paints it over us
       const [bx0, by0, bx1, by1] = geo.BLACK_BOX;
       ctx.fillStyle = '#000'; ctx.fillRect(bx0, by0, bx1 - bx0, by1 - by0);
@@ -325,13 +332,73 @@
   }
   document.getElementById('photo').addEventListener('change', (e) => setPhoto(e.target.value));
   { const m = /[?&]photo=(\d\d)/.exec(location.search); if (m) { document.getElementById('photo').value = m[1]; setPhoto(m[1]); } }
+  /* ---------- G20SIM: BMW's stock G20 cluster as the panel backdrop (bench/g20/g20sim.js; bench only) ----------
+   * Under the app's layers G20Sim.drawUnder, over them G20Sim.drawOver (what BMW draws over a theme). The theme
+   * counts as connected while the app runs and has a layer on the panel (a layout "off" draws none). */
+  const g20q = new URLSearchParams(location.search);
+  const g20 = { ok: false, active: false, s: null, appRunning: false, drive: 'comfort', preset: 'driving', lamps: {},
+    limit: null, ccMessage: null, gearLetter: 'D', day: g20q.get('day') === '1', time: g20q.get('g20time'),
+    street: g20q.get('g20street') || 'Соборна вулиця' };
+  function g20State(t) {
+    let time = new Date();
+    const m = /^(\d\d?):(\d\d)$/.exec(g20.time || '');
+    if (m) time.setHours(Number(m[1]), Number(m[2]), 0, 0);
+    const conn = g20q.get('g20conn');   // 0/1 forces the state (QC only)
+    return { themeConnected: conn ? conn === '1' : g20.appRunning && scene.some((l) => l.target === 'panel' && l.kind !== 'asset' && l.visible && l.state !== 'waiting'),
+      values: lastValues, drive: g20.drive, lamps: g20.lamps, limit: g20.limit, ccMessage: g20.ccMessage,
+      gearLetter: g20.gearLetter, time, day: g20.day, street: g20.street, t };
+  }
+  function g20Preset(name) {
+    g20.preset = name;
+    const p = G20Sim.presets[name];
+    if (p) { g20.lamps = Object.assign({}, p.lamps); ['ccMessage', 'limit', 'gearLetter'].forEach((k) => { if (k in p) g20[k] = p[k]; }); }
+  }
+  function g20Controls() {
+    const opt = (v, t, cur) => '<option value="' + v + '"' + (String(cur) === String(v) ? ' selected' : '') + '>' + t + '</option>';
+    const sel = (id, label, opts) => '<div class="srow"><span>' + label + '</span><select id="' + id + '">' + opts + '</select></div>';
+    let h = sel('g20preset', 'lamps', [['startup', 'start-up check'], ['driving', 'driving'], ['custom', 'custom']].map(([v, t]) => opt(v, t, g20.preset)).join(''));
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin:4px 0 8px">' + G20Sim.lamps.map((l) =>
+      '<label class="chk" title="' + esc(l.id + (l.onPanel === false ? ': a physical LED outside the panel, not drawn' : '')) + '"' + (l.onPanel === false ? ' style="opacity:.45"' : '') + '><input type="checkbox" data-g20lamp="' + esc(l.id) + '"' + (g20.lamps[l.id] ? ' checked' : '') + (l.onPanel === false ? ' disabled' : '') + '> ' + esc(l.name.replace(/\s*\(.*$/, '')) + '</label>').join('') + '</div>';
+    h += sel('g20limit', 'speed limit', opt('', 'none', g20.limit === null ? '' : 'x') + [30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130].map((v) => opt(v, v, g20.limit)).join(''));
+    h += sel('g20cc', 'check-control', opt('', 'none', g20.ccMessage || '') + opt('ready', 'ready to drive (08)', g20.ccMessage));
+    h += sel('g20gear', 'gear letter', ['P', 'R', 'N', 'D', 'S'].map((v) => opt(v, v, g20.gearLetter)).join(''));
+    h += '<label class="chk"><input type="checkbox" id="g20day"' + (g20.day ? ' checked' : '') + '> day look (09); off = night (08)</label>';
+    const box = document.getElementById('g20');
+    box.innerHTML = h;
+    document.getElementById('g20box').style.display = '';
+    const redo = () => { g20Controls(); dirty = true; };
+    document.getElementById('g20preset').onchange = (e) => { if (e.target.value !== 'custom') g20Preset(e.target.value); else g20.preset = 'custom'; redo(); };
+    box.querySelectorAll('[data-g20lamp]').forEach((c) => { c.onchange = () => { g20.lamps[c.dataset.g20lamp] = c.checked; g20.preset = 'custom'; redo(); }; });
+    document.getElementById('g20limit').onchange = (e) => { g20.limit = e.target.value === '' ? null : Number(e.target.value); dirty = true; };
+    document.getElementById('g20cc').onchange = (e) => { g20.ccMessage = e.target.value || null; dirty = true; };
+    document.getElementById('g20gear').onchange = (e) => { g20.gearLetter = e.target.value; dirty = true; };
+    document.getElementById('g20day').onchange = (e) => { g20.day = e.target.checked; dirty = true; };
+  }
+  {
+    const sc = document.createElement('script');
+    sc.src = '/g20/g20sim.js';
+    sc.onload = () => window.G20Sim.init('/g20/').then(() => {
+      g20Preset(g20q.get('g20') === 'startup' ? 'startup' : 'driving');
+      const lim = g20q.get('g20limit'), cc = g20q.get('g20cc'), gear = g20q.get('g20gear');
+      if (lim) g20.limit = lim === 'none' ? null : Number(lim);
+      if (cc) g20.ccMessage = cc === 'none' ? null : cc;
+      if (gear) g20.gearLetter = gear;
+      g20.ok = true; g20Controls(); dirty = true;
+      addLog({ level: 'info', text: 'bench: G20 simulation loaded (bench/g20)' });
+    }).catch((e) => addLog({ level: 'warn', text: 'bench: G20 simulation failed, the rough backdrop stays: ' + (e && e.message || e) }));
+    sc.onerror = () => addLog({ level: 'warn', text: 'bench: no /g20/g20sim.js, the rough backdrop stays' });
+    document.head.appendChild(sc);
+  }
+  /* ---------- end G20SIM ---------- */
   let frames = 0, lastFpsT = performance.now();
   function frame(t) {
     const animated = scene.some((l) => l.kind === 'effect' && l.time);
-    if (dirty || animated) {
+    g20.active = g20.ok && view === 'panel' && !(photoImg && photoImg.complete && photoImg.naturalWidth) && document.getElementById('road').checked;   // G20SIM
+    if (dirty || animated || (g20.active && G20Sim.wantsFrame(g20State(t)))) {
       dirty = false;
       ctx.clearRect(0, 0, VW, VH);
       if (view === 'panel' && photoImg && photoImg.complete && photoImg.naturalWidth) ctx.drawImage(photoImg, 0, 0, VW, VH);
+      else if (g20.active) { g20.s = g20State(t); G20Sim.drawUnder(ctx, g20.s); }   // G20SIM: in place of drawStockCluster
       else if (document.getElementById('road').checked) (view === 'panel' ? drawStockCluster : drawRoad)();
       // a layer over the layer cap (state waiting) is never drawn, as on the car
       const hud = scene.filter((l) => l.target === view && l.visible && l.state !== 'waiting' && l.kind !== 'asset')
@@ -351,6 +418,7 @@
         if (sx !== 1 || sy !== 1 || rot) ctx.restore();
         ctx.globalAlpha = 1;
       });
+      if (g20.active) G20Sim.drawOver(ctx, g20.s);   // G20SIM: what BMW draws over a theme ((P), belt, gear, black area)
       if (document.getElementById('outlines').checked) {
         ctx.font = '11px ui-monospace, Menlo, monospace';
         hud.forEach((l) => {
@@ -424,7 +492,12 @@
   let dbgN = 0, dbgLast = '', dbgReads = 0, dbgBuf = 0, dbgErr = '', dbgPx = 0, pixelCap = 16 * 1048576;
   function onMessage(m) {
     dbgN++; dbgLast = m.t + ':' + (m.key || '') + ':' + (m.w === undefined ? 'whole' : 'rect'); dirty = true;
-    if (m.t === 'log') addLog(m);
+    if (m.t === 'log') {
+      addLog(m);
+      // G20SIM: the drive mode reaches the page only as the server's log line (POST /drive)
+      const dm = /bench: drive mode (\S+)/.exec(m.text || '');
+      if (dm) g20.drive = { 1: 'sport', 2: 'sport', 7: 'eco' }[dm[1]] || 'comfort';
+    }
     else if (m.t === 'hello') {
       geo = m.geometry || geo;
       pixelCap = m.pixelCap === undefined ? pixelCap : m.pixelCap;
@@ -457,6 +530,7 @@
     } else if (m.t === 'app') {
       const a = document.getElementById('appState');
       a.textContent = 'app: ' + m.state; a.className = 'pill ' + (m.state === 'running' ? 'ok' : 'bad');
+      g20.appRunning = m.state === 'running';   // G20SIM
     } else if (m.t === 'values') {
       lastValues = m.values;
       if (m.mode !== mode) setMode(m.mode, true);
