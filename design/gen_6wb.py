@@ -32,6 +32,14 @@ RPM_MAX = 7500
 RPM_SWEEP = RPM_PER * RPM_MAX / 1000.0
 RPM_OFF = 20.5                # degrees before 0 where the needle parks (OFF)
 SIGN_DY = 0.36              # the road signs under the speed dial's hub, this many R below its centre
+# Comfort's middle window (package A): the box between the dials, symmetric about x 960 (BMW's map: x 592-1303,
+# y 161-612; the dials cover its sides), its soft edges in px (top, sides, foot, off the dials' rims), and the line at
+# its foot: "hair" (a hairline fading out at both ends, as the 6WB's info bar line), "chrome" (a rod shaded as our
+# bezels), "none" (the map / floor just fades to black) or "glass" (the earlier baked line)
+WINDOW = [592, 158, 736, 442]
+FADE = [150, 40, 56, 60]
+FOOT = "hair"
+FOOT_LINE = [607, 650, 1270]
 
 def text(id, cx, cy, w, t, font, color="fg", align="center", conn=0, **kw):
     """A text box w wide, centred on (cx, cy) (align left / right: cx is that edge)."""
@@ -107,9 +115,12 @@ def comfort():
          # P10 (docs/BAKE-P10-levels.md): the window's level is now in the baked texture (re-fitted across 04/03/07/06,
          # above each photo's own LCD floor), so the P9 stop-gap gain 0.24 would dim it a second time
          "gain": [1.0, 604],
-         # BMW's own map window (BAKE C9: drawn under a custom theme, roads seen inside x 592-1303, y 161-612), cut
-         # see-through inside our window while the "stockMap" setting is on
-         "hole": [668, 140, 584, 462], "holeWhen": "stockMap", "holeInset": 0, "holeRadius": 22},
+         # BMW's own map window (BAKE C9: drawn under a custom theme, roads seen inside x 592-1303, y 161-612), seen
+         # through our window while the "stockMap" setting is on
+         "hole": WINDOW, "holeWhen": "stockMap", "holeInset": 0, "holeRadius": 22,
+         # the soft window (docs/POLISH-A-REPORT.md): no box edge anywhere. The map fades into black toward the top,
+         # sides and foot (the stock map veil's curve) and under the dials' rims; the floor fades at the sides and rims
+         "window": WINDOW, "fade": FADE, "foot": FOOT, "footLine": FOOT_LINE},
         dial("speedo", SP, "comfort", ringW=10, base=base("speedo", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
              fill=arc_fill("range_seg", SP, 239, 614, 346, 68, 216.0, 144.0, "fuel", 1, [210, 209, 205]), measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
              start=SPD_START, sweep=SPD_SWEEP),

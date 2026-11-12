@@ -230,6 +230,8 @@ const TYRE_CORNERS = ['FL', 'FR', 'RL', 'RR'];
 // the Roadster's speed dial: 0..160 mph or 0..240 km/h in 8 steps (labels {{dial:speed:<i>}})
 // the 6WB-style dials' looks (shaders.js wbdial u_style)
 const WB_STYLE = { comfort: 0, sport: 1, eco: 2, mini: 3, eff: 4 };
+// the 6WB Comfort window's foot line (wbback "foot", shaders.js wbback u_foot): glass is the baked "line" texture
+const WB_FOOT = { glass: 0, hair: 1, chrome: 2, none: 3 };
 const DIAL_SPEED = { us: { max: 160, ticks: 8 }, metric: { max: 240, ticks: 8 } };
 // the HUD's place (the page's Position tab): settings that move / scale the layers already there, no rebuild
 const PLACE_KEYS = ['hudX', 'hudY', 'hudScale'];
@@ -890,7 +892,7 @@ class HudApp {
             else if (w.type === 'wbsign' && w.tex && baked) { add(w.tex.limit); add(w.tex.nopass); }
             else if (w.type === 'wbback') {
                 if (w.collar) add(w.collar);
-                else if (w.tex && baked) { add(w.tex.window); add(w.tex.horizon); add(w.tex.line); }
+                else if (w.tex && baked) { const u = this._wbUses(w); if (u.window) { add(w.tex.window); add(w.tex.horizon); } if (u.line) add(w.tex.line); }
             }
         });
         return out;
@@ -1856,14 +1858,23 @@ class HudApp {
                 c.uniform(ref, 'u_r0', [w.collar.x, w.collar.y, w.collar.w, w.collar.h]);
                 c.uniform(ref, 'u_hasTex', [2]);
             } else if (w.tex && this.setting('baked') !== false) {   // baked textures: "tex": { window, horizon, line: { tex, x, y, w, h } }, "gain": [window level, y above which it applies]
+                const u = this._wbUses(w);       // only what is drawn: the window while the map is off, the line for "glass"
                 [['window', 'u_t0', 'u_r0'], ['horizon', 'u_t1', 'u_r1'], ['line', 'u_t2', 'u_r2']].forEach(([k, smp, rect]) => {
                     const t = w.tex[k];
+                    if (!(k === 'line' ? u.line : u.window)) return;     // _bindBlanks gives the sampler a blank
                     c.bind(ref, smp, this._scene(t.tex, x.ci).ref);
                     c.uniform(ref, rect, [t.x, t.y, t.w, t.h]);
                 });
                 c.uniform(ref, 'u_win', w.gain || [1, 0]);
                 c.uniform(ref, 'u_hasTex', [1]);
             }
+            // the soft window (package A): "window" [x, y, w, h], "fade" [top, sides, bottom, rims] px, "foot" glass |
+            // hair | chrome | none at "footLine" [y, x0, x1]; without "window", the old hard hole
+            const wb = this._wbUses(w);
+            c.uniform(ref, 'u_wbox', wb.box ? w.window.map((v, i) => v - (i === 0 ? w.x : i === 1 ? w.y : 0)) : [0, 0, 0, 0]);
+            c.uniform(ref, 'u_fade', Array.isArray(w.fade) && w.fade.length === 4 ? w.fade : [110, 40, 36, 44]);
+            const fl = Array.isArray(w.footLine) ? w.footLine : [0, 0, 1];
+            c.uniform(ref, 'u_foot', [wb.foot, fl[0] - w.y, fl[1] - w.x, fl[2] - w.x]);
         } else if (w.type === 'gmeter') {
             const L = color(t, w.line || 'dim');
             c.uniform(ref, 'u_size', [w.w, w.h]);
@@ -2054,6 +2065,14 @@ class HudApp {
     }
 
     _holeRadius(w) { return isNum(w.holeRadius) ? w.holeRadius : 28; }
+
+    /** A wbback's soft window and foot line (package A): which baked textures it samples, its foot style (WB_FOOT) and
+     *  whether it has a "window" box. While the map shows through a soft window, the window and horizon are not drawn. */
+    _wbUses(w) {
+        const box = Array.isArray(w.window) && w.window.length === 4;
+        const foot = WB_FOOT.hasOwnProperty(w.foot) ? WB_FOOT[w.foot] : 0;
+        return { box, foot, window: !(box && this._hole(w)[2] > 0), line: foot === 0 };
+    }
 
     _tick() {
         const now = Date.now();
