@@ -469,6 +469,18 @@ const web = http.createServer(async (req, res) => {
         res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
         return fs.createReadStream(f).pipe(res);
     }
+    // G20SIM: GET /g20/<file>: the bench-only simulation of BMW's stock G20 cluster (bench/g20/, our own drawings;
+    // docs/G20SIM-REPORT.md). Static files inside that folder only: no "..", no dot files.
+    if (req.method === 'GET' && url.indexOf('/g20/') === 0) {
+        let rel = '';
+        try { rel = decodeURIComponent(url.slice(5)); } catch (e) { /* malformed: 404 below */ }
+        const dir = path.join(__dirname, 'g20');
+        const f = path.join(dir, rel);
+        if (!rel || rel.split('/').some((p) => !p || p[0] === '.') || f.indexOf(dir + path.sep) !== 0 || !fs.existsSync(f) || !fs.statSync(f).isFile()) { res.writeHead(404); return res.end(); }
+        const type = { '.js': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ttf': 'font/ttf', '.woff2': 'font/woff2', '.txt': 'text/plain' }[path.extname(f)] || 'application/octet-stream';
+        res.writeHead(200, { 'content-type': type, 'cache-control': 'no-store' });
+        return fs.createReadStream(f).pipe(res);
+    }
     if (req.method === 'GET' && url === '/px') {
         const q = {};
         (req.url.split('?')[1] || '').split('&').forEach((kv) => { const i = kv.indexOf('='); if (i > 0) q[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); });
