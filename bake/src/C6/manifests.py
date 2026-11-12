@@ -5,6 +5,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 GEN = ("cd bake/src && UV_CACHE_DIR=../work/.uvcache uv run -q --no-project --with opencv-python-headless "
        "--with numpy --with pillow python -m C6.build --all   (refs/fit once before: -m C5.refs; --with scipy -m C5.fit)")
+S03 = "03_three-modes_photo_bimmerstop.png"
 S17, S04, S07, S02, S12 = ("17_physical-cluster_full.png", "04_comfort_whole-cluster_mph.png",
                            "07_physical-cluster_all-lamps-lit.png", "02_three-modes_clean-render.png",
                            "12_speedo_signs_overspeed-wedge.png")
@@ -20,17 +21,20 @@ def entry(id_, cl, z, kind, klass, L, sources, evidence, fit, params, below=(), 
 
 def write(c5, c6, q):
     P = json.load(open(os.path.join(ROOT, "bake", "src", "C5", "params.json")))
-    win_params = {k: P[k] for k in P if k not in ("palette",)}
-    win_params["palette_rgb_of_luma"] = P["palette"]
+    win_params = {k: P[k] for k in P if not k.startswith("hue_")}
+    win_params["hue_linear_rgb"] = {k[4:]: P[k] for k in P if k.startswith("hue_")}
     win_params["notes"] = ("panel px, X = x - 960 (mirror-symmetric). Window outline: top y=top_y, top edge |X|<=top_half_w "
                            "(our box 720..1200), 45 deg chamfers continuing until they pass under the dials, clipped "
-                           "outside r = dial_clip_R*R of both dials. Light model: the window is emissive (no key light).")
+                           "outside r = dial_clip_R*R of both dials. Light model: the window is emissive (no key light). FINAL panel values "
+                           "(black = 0 where unlit; P10.apply leaves C5 / C6 alone): sum of glow + rows + walls in linear light, "
+                           "each with its hue, fitted by C5.fit to 04 (0.6) + 03 (0.4) in panel values (C5.target).")
     L5 = [
-        entry("window.base", "C5", 0, "albedo", "baked", c5["window.base"], [S17, S04, S07], "ok",
-              q["stack17"] | {"parts": {k: q[k] for k in ("window.bg", "window.top", "window.sky", "window.floor")}},
+        entry("window.base", "C5", 0, "albedo", "baked", c5["window.base"], [S04, S03, S02, S17], "ok",
+              q["stack.04"] | {"parts": {k: q[k] for k in q if k.split(".")[0] in ("sky", "glow", "floor", "stack")}},
               win_params, above=["window.horizon"]),
-        entry("window.horizon", "C5", 1, "albedo", "baked", c5["window.horizon"], [S17, S04], "strong",
-              q["window.horizon"], {k: P[k] for k in ("horizon_y", "horizon_w", "horizon_L", "lip_a", "lip_d", "lip_s")},
+        entry("window.horizon", "C5", 1, "albedo", "baked", c5["window.horizon"], [S04, S03, S02], "strong",
+              q["horizon.04"] | {"all": {k: q[k] for k in q if k.startswith("horizon")}},
+              {k: P[k] for k in ("horizon_y", "horizon_w", "glow_y0", "glow_p", "glow_a", "lip_a", "lip_d", "lip_s", "hue_glow")},
               below=["window.base"]),
     ]
     comp5 = {"images": [{"file": c5["window.base"]["file"], "from_ids": ["window.base"], "x": c5["window.base"]["x"],
@@ -46,25 +50,28 @@ def write(c5, c6, q):
           "composition": comp5,
           "open_questions": [
               "Window top corners: our box (top edge x 720..1200) is kept; the 45 deg chamfers then continue OUTSIDE the box "
-              "(to x ~657 / 1263 at y ~150) until they pass under the dials, as in 04 (no vertical side visible). The 6WB "
-              "itself puts the chamfer start 0.84 R from the dial centre, which would be x 694 / 1226 with our spacing.",
-              "Levels: fitted to 17 (window bg luma ~55 top -> 45 at the horizon). P0 flags 17 as hazy on the dial faces, "
-              "but its bottom bar reads luma 2-3 next to the bright floor, so the window levels look real; 04 / 07 are "
-              "darker (bg ~25-30). Compare with the face level P1/P2 chose; window.base can be scaled as one image.",
-              "17 top edge sits at y 76 (04: 79); the box's 79 is used.",
-              "The floor's side walls continue a little below the front line into the bar's top corners in 17 (x ~690-720 / "
-              "1200-1230, y 610-640); not drawn (weak, partly glare-masked).",
+              "until they pass under the dials. With the panel black the outline itself is invisible (nothing lit there).",
+              "Hue: the photos (04 / 03 / 06, relative to their white numerals) give a cyan-grey floor (linear R:G:B ~0.74 : 1.06 "
+              ": 1.16); the 02 render is clearly bluer (~0.4 : 1 : 2.6). The photos were used.",
+              "04 and 06 carry a grey haze over the lower middle reaching into the bar: their local floor is let grow from the "
+              "sky plateau to the bar's level (C5.target). 03 / 02 have the bar black.",
+              "17 / 07 (hazed, over-exposed) were used for shapes only: they agree on 5 rows and the front line's position.",
           ],
-          "notes": "References stretched into our frame by C5.refs (x about 960 by k = our half gap / 6WB half gap: 17 1.123, "
-                   "04 1.158, 07 1.074; y unchanged). Bits: 8 dials, 4 telltales, 16 bar text."}
+          "notes": "Targets by C5.target: x stretched about 960 by k = our half gap / 6WB half gap (04 1.158, 03 1.149, "
+                   "02 1.139); y mapped so the glow's bottom edge -> 458 and the front line -> 608.8 (04 463.3 / 615.4, 03 "
+                   "464.5 / 616.6); converted to light above each photo's local floor relative to its white numerals, "
+                   "numerals -> fg (244, 246, 250). Bits: 8 dials, 16 bar text / car."}
     # C6
-    bar_p = {k: P[k] for k in ("front_y", "bar_rgb", "bar_fade0", "bar_fade1", "line_rgb", "line_w", "line_glow",
-                               "line_glow_d", "line_glow_s", "line_x0", "line_x1", "line_floor")}
+    from C5 import model as _m
+    bar_p = {k: P[k] for k in ("front_y", "bar_fade0", "bar_fade1", "line_a", "line_s", "line_h", "line_hp", "line_floor",
+                               "hue_line")}
+    bar_p["body_rgb"] = [0, 0, 0]
+    bar_p["line_peak_rgb"] = [round(float(v) * 255, 1) for v in _m.line_peak_rgb(P)]
     from C6.build import ARCS, SEG
     L6 = [
-        entry("infobar.body", "C6", 0.5, "albedo", "baked", c6["infobar.body"], [S17, S03 := "03_three-modes_photo_bimmerstop.png"],
-              "ok", q["infobar.body"], bar_p, below=["window.base"], above=["infobar.line"]),
-        entry("infobar.line", "C6", 1.5, "albedo", "baked", c6["infobar.line"], [S17], "strong", q["infobar.line"], bar_p,
+        entry("infobar.body", "C6", 0.5, "albedo", "baked", c6["infobar.body"], [S03, S02],
+              "strong", q["body.03"], bar_p, below=["window.base"], above=["infobar.line"]),
+        entry("infobar.line", "C6", 1.5, "albedo", "baked", c6["infobar.line"], [S03, S02, S17], "strong", q["line.03"], bar_p,
               below=["infobar.body"]),
     ]
     for name, A in ARCS.items():

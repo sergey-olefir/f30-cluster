@@ -1015,20 +1015,15 @@ const WBDIAL = `// 6WB-style round gauges for a cluster-render "effect" layer (G
 // v_uv (0,0) is the top-left; the dial fills the smaller side of the layer.
 precision mediump float;
 varying vec2 v_uv;
-uniform vec2 u_size;
-uniform float u_value;
-uniform float u_start;
-uniform float u_sweep;
-uniform float u_ticks;
-uniform float u_minor;
-uniform float u_redFrom;
-uniform float u_redTo;
-uniform float u_coldTo;
-uniform vec2 u_over;      // the red over-speed band: from, to (fractions of the sweep); from < 0: none
-uniform float u_pre;
-uniform float u_box;
-uniform float u_flip;
-uniform float u_ringW;
+// The parameters come packed in vec4s (cluster-render holds up to 32 uniforms a layer, and some GPUs fewer vectors);
+// the #defines below give them their old names.
+uniform vec4 u_geo;       // layer w, h; bezel width px; flip (1: mirrored)
+uniform vec4 u_scale;     // start, sweep (radians cw from 12); major steps; minor steps per major
+uniform vec4 u_zone;      // red from, red below, blue below (fractions of the sweep); OFF arc (radians before the start)
+uniform vec4 u_mode;      // style; hub (of R); glow strength; gear box (1)
+uniform vec4 u_dyn;       // value (0..1 of the sweep); over-speed band from, to; shift red (1)
+uniform vec4 u_fill;      // the bottom arc's fill from, to (radians cw from 12, 0..2 pi); baked base kind (0 none; 1 face, shadows,
+                          // groove, hub well; 2 the inner disc and floor too; 3 everything static)
 uniform vec3 u_ring;
 uniform vec3 u_ring2;
 uniform vec3 u_tick;
@@ -1036,17 +1031,30 @@ uniform vec3 u_needle;
 uniform vec3 u_red;
 uniform vec3 u_face;
 uniform vec3 u_glow;
-uniform float u_glowK;
-uniform float u_hub;
-uniform float u_style;
-uniform float u_hot;
 uniform sampler2D u_base;  // a baked base texture (hud/scene), RGBA straight alpha
 uniform vec4 u_baseR;      // its box in the layer's px: x, y, w, h
 uniform sampler2D u_deco;  // the bottom arc's segment coverage (alpha), lit live up to the fill angle
 uniform vec4 u_decoR;      // its box in the layer's px (w 0: none)
-uniform vec2 u_fill;       // the fill from .. to, radians clockwise from 12 (0..2 pi)
 uniform vec3 u_fillC;      // the lit segments' colour
-uniform float u_hasBase;   // 0 none; 1 face, shadows, groove, hub well baked; 2 the inner disc and floor too; 3 everything static
+#define u_size u_geo.xy
+#define u_ringW u_geo.z
+#define u_flip u_geo.w
+#define u_start u_scale.x
+#define u_sweep u_scale.y
+#define u_ticks u_scale.z
+#define u_minor u_scale.w
+#define u_redFrom u_zone.x
+#define u_redTo u_zone.y
+#define u_coldTo u_zone.z
+#define u_pre u_zone.w
+#define u_style u_mode.x
+#define u_hub u_mode.y
+#define u_glowK u_mode.z
+#define u_box u_mode.w
+#define u_value u_dyn.x
+#define u_over u_dyn.yz
+#define u_hot u_dyn.w
+#define u_hasBase u_fill.z
 
 const float PI = 3.14159265359;
 
@@ -1113,8 +1121,9 @@ void main() {
                 col = mix(col, u_red * 0.85, 0.75 * smoothstep(0.64 * R, 0.80 * R, d));
             }
         } else {
-            // the face: a faint lift toward the middle, and the shadow the bezel casts inside it
-            col = u_face + vec3(0.026, 0.030, 0.040) + vec3(0.020, 0.022, 0.030) * lit * (1.0 - d / R);
+            // the face: black (the references' lifted dark is their LCD's black level and the camera, not drawn), a faint
+            // light toward the middle on the lit side, and the shadow the bezel casts inside it
+            col = u_face + vec3(0.020, 0.022, 0.030) * lit * (1.0 - d / R);
             if (d < rbz) col *= 1.0 - 0.7 * exp(-(rbz - d) / (0.032 * R));
             if (u_hasBase > 0.5) col = mix(u_face, bs.rgb, bs.a);                // baked: face, its shadow, groove, hub well
             // the inner discs: convex, lighter on the lit side, with a soft shadow outside the edge
@@ -1122,9 +1131,10 @@ void main() {
                 // the inner disc and its floor are baked
             } else if (d < r1) {
                 float g = clamp(0.5 + pd / (2.0 * r1), 0.0, 1.0);          // 0 at the top .. 1 at the bottom
-                col = vec3(0.038, 0.042, 0.052) + vec3(0.012, 0.013, 0.017) * (1.0 - g);
+                // (the dark fills are the old ones less the face's old lift, 0.026/0.030/0.040: that was LCD black)
+                col = vec3(0.012) + vec3(0.012, 0.013, 0.017) * (1.0 - g);
                 col += vec3(0.018, 0.020, 0.026) * lit * smoothstep(0.35 * r1, r1, d);
-                if (pd > fl) col = vec3(0.016, 0.019, 0.026) + vec3(0.020, 0.022, 0.028) * clamp((pd - fl) / (0.25 * R), 0.0, 1.0);
+                if (pd > fl) col = vec3(0.020, 0.022, 0.028) * clamp((pd - fl) / (0.25 * R), 0.0, 1.0);
                 col = mix(col, vec3(0.20, 0.22, 0.26), clamp(1.2 - abs(pd - fl), 0.0, 1.0) * 0.8);       // the floor's edge
                 if (pd < fl) {
                     col = mix(col, vec3(0.15, 0.16, 0.20) * (0.5 + 0.8 * lit), ringAt(d, r2, 1.8));
@@ -1193,7 +1203,7 @@ void main() {
         if (u_hasBase < 0.5) col *= 1.0 - 0.5 * smoothstep(hr * 2.4, hr * 1.2, d);
         if (d < hr) {
             float fan = pow(0.5 + 0.5 * cos(2.0 * (a - 0.78)), 3.0) * smoothstep(0.35 * hr, hr, d);
-            col = vec3(0.020, 0.010, 0.012) + vec3(0.36, 0.035, 0.025) * fan * 0.8;
+            col = vec3(0.36, 0.035, 0.025) * fan * 0.8;
         }
         col += u_needle * 0.30 * exp(-abs(d - hr) / (0.020 * R));
         col = mix(col, u_needle * (0.62 + 0.40 * lit), ringAt(d, hr, 0.014 * R));
@@ -1225,7 +1235,7 @@ void main() {
         float rb = u_hub * R, ro = R - 4.0;
         float band = clamp((d - rb) / (ro - rb), 0.0, 1.0);
         if (d < rb) {
-            col = vec3(0.012) + glow * 0.16 * smoothstep(rb - 70.0, rb, d) * open;
+            col = glow * 0.16 * smoothstep(rb - 70.0, rb, d) * open;
         } else {
             vec3 base = glow * (0.42 + 0.58 * pow(band, 1.3));
             float lit = frac <= val && past < 0.0 ? 1.0 : 0.0;
@@ -1278,7 +1288,7 @@ void main() {
             col = mix(col, u_tick, clamp(0.5 - (seg(p, tdir * ti, tdir * to) - wid), 0.0, 1.0));
         }
         float hr = 0.125 * R;
-        if (d < hr) col = vec3(0.05, 0.055, 0.065);
+        if (d < hr) col = vec3(0.024, 0.025, 0.025);                             // the cap (old fill less LCD black)
         col = mix(col, u_tick * 0.6, ringAt(d, hr, 1.6));
         float L = 0.66 * R, T = -0.17 * R;
         if (q.y > T && q.y < L) {
@@ -1323,7 +1333,7 @@ void main() {
 
 const WBBACK = `// The 6WB-style themes' backdrop in one cluster-render "effect" layer (GLSL ES 1.00): opaque black over BMW's own
 // gauges, and between the two dials (u_dl, u_dr: centre x, centre y, radius, target px):
-//   u_style 0 (Comfort): the middle window, a dark blue-grey panel with chamfered top corners and a lit rim, and in
+//   u_style 0 (Comfort): the middle window, a black panel with chamfered top corners and a lit rim, and in
 //     it a floor of light bars that narrows toward its horizon;
 //   1 (Sport), 2 (Eco Pro): a "shelf" (a horizon line, a floor fading downward in u_color, a base line); Sport adds
 //     a glowing bridge between the dials and two wing lines off their upper inner sides.
@@ -1359,9 +1369,7 @@ void main() {
     float cy = u_dl.y, R = u_dl.z;
     vec3 col = vec3(0.0);
     if (u_style < 0.5 && u_hasTex > 0.5) {
-        // the background (BAKE C10): a near-black blue, a faint halo round the dials
-        float rr = min(length(p - u_dl.xy), length(p - u_dr.xy)) / R;
-        col = vec3(0.0, 0.5, 1.5) / 255.0 + vec3(1.0, 1.0, 2.0) / 255.0 * (rr <= 1.04 ? 1.0 : exp(-(rr - 1.04) / 0.0856));
+        // the background: black (BAKE C10's near-black blue and halo were the references' LCD black, not drawn)
         vec2 u0 = (p - u_r0.xy) / u_r0.zw, u1 = (p - u_r1.xy) / u_r1.zw, u2 = (p - u_r2.xy) / u_r2.zw;
         if (u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0) {
             vec4 t = texture2D(u_t0, u0);
@@ -1386,8 +1394,7 @@ void main() {
         float ins = min(min(dx, dyb), top);
         if (ins > 0.0) {
             float t = (p.y - yt) / (yb - yt);
-            vec3 w = mix(vec3(0.020, 0.027, 0.042), vec3(0.042, 0.055, 0.082), smoothstep(0.0, 0.55, t));
-            w = mix(w, vec3(0.012, 0.015, 0.022), smoothstep(0.62, 1.0, t));
+            vec3 w = vec3(0.0);                                       // the panel itself is black (LCD black in the photos)
             // the floor: light bars, thin and close at the horizon, wide at the front
             float yh = cy + 0.20 * R, yf = cy + 0.62 * R;
             float s = (p.y - yh) / (yf - yh);
@@ -1409,7 +1416,7 @@ void main() {
         float t = clamp((p.y - y0) / (y1 - y0), 0.0, 1.0);
         float hw0 = (u_dr.x - u_dl.x) * 0.5, hwd = hw0 * mix(1.0, 0.62, t);
         float inFloor = p.y >= y0 && p.y <= y1 && abs(p.x - mid) < hwd ? 1.0 : 0.0;
-        col += (u_color * 0.34 + vec3(0.03)) * (1.0 - t) * (1.0 - t) * inFloor * out2;
+        col += u_color * 0.34 * (1.0 - t) * (1.0 - t) * inFloor * out2;
         col += (u_color * 0.6 + vec3(0.12)) * clamp(1.2 - abs(p.y - y0), 0.0, 1.0) * out2 * 0.8;                 // horizon
         col += vec3(0.42) * clamp(1.3 - abs(p.y - y1), 0.0, 1.0) * (abs(p.x - mid) < hw0 * 0.62 ? 1.0 : 0.0);   // base line
         // the floor's slanted sides

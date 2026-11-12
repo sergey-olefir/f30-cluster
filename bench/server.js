@@ -313,6 +313,10 @@ const renderServer = net.createServer((sock) => {
                     if (!WIDTH[m.type]) return refuse('uniform', m.ref, 'unknown uniform type "' + m.type + '"');
                     if (v.length > 1024 || v.length % WIDTH[m.type]) return refuse('uniform', m.ref, 'uniform ' + m.name + ': ' + v.length + ' numbers is not whole ' + m.type + 's (or over 1024)');
                 } else if (v.length > 4) return refuse('uniform', m.ref, 'uniform ' + m.name + ': ' + v.length + ' numbers without a type (max 4)');
+                // cluster-render holds up to 32 uniforms a layer (a quad or part); the car refuses the 33rd name
+                if (!l.uniforms[m.name] && Object.keys(l.uniforms).length + Object.keys(l.binds || {}).length >= 32) {
+                    return refuse('uniform', m.ref, 'uniform ' + m.name + ': over 32 uniforms on the layer (samplers count)');
+                }
                 l.uniforms[m.name] = { v, type: m.type || null };
                 sceneChanged();
                 return;

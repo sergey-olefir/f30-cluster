@@ -26,46 +26,49 @@
     "infobar.line"
    ],
    "sources": [
-    "17_physical-cluster_full.png",
-    "03_three-modes_photo_bimmerstop.png"
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png"
    ],
-   "evidence": "ok",
+   "evidence": "strong",
    "light": {
     "dir_deg": 90,
     "key": 1.0
    },
    "fit": {
-    "ssim": 0.7975,
-    "dE2000_mean": 2.517,
+    "ssim": 0.2869,
+    "dE2000_mean": 2.377,
     "edge_px_err": null,
-    "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+    "ref": "bake/work/C5/ref/03_three-modes_photo_bimmerstop.panel.C5",
     "roi": [
-     "box:700:612:520:76"
+     "box:700:614:520:30"
     ],
-    "sheet": "bake/work/C5/qc_infobar.body__17_physical-cluster_full.ours.C5.png",
-    "luma_bias": -2.64
+    "sheet": "bake/work/C5/qc_body__03_three-modes_photo_bimmerstop.panel.C5.png",
+    "luma_bias": -9.73
    },
    "params": {
     "front_y": 608.8,
-    "bar_rgb": [
-     2.1,
-     2.0,
-     26.9
-    ],
     "bar_fade0": 672.0,
     "bar_fade1": 690.0,
-    "line_rgb": [
-     223.0,
-     229.0,
-     233.0
+    "line_a": 0.413816,
+    "line_s": 1.651194,
+    "line_h": 136.571431,
+    "line_hp": 2.929359,
+    "line_floor": 0.031467,
+    "hue_line": [
+     0.9272,
+     1.0143,
+     1.0729
     ],
-    "line_w": 2.2,
-    "line_glow": 0.75,
-    "line_glow_d": 0.0,
-    "line_glow_s": 1.7,
-    "line_x0": 80.0,
-    "line_x1": 300.0,
-    "line_floor": 0.55
+    "body_rgb": [
+     0,
+     0,
+     0
+    ],
+    "line_peak_rgb": [
+     166.5,
+     173.3,
+     177.8
+    ]
    }
   },
   {
@@ -87,6 +90,8 @@
    ],
    "stack_above": [],
    "sources": [
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png",
     "17_physical-cluster_full.png"
    ],
    "evidence": "strong",
@@ -95,37 +100,40 @@
     "key": 1.0
    },
    "fit": {
-    "ssim": 0.8137,
-    "dE2000_mean": 8.134,
-    "edge_px_err": 1.406,
-    "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+    "ssim": 0.8481,
+    "dE2000_mean": 6.943,
+    "edge_px_err": 0.494,
+    "ref": "bake/work/C5/ref/03_three-modes_photo_bimmerstop.panel.C5",
     "roi": [
-     "box:760:598:400:16"
+     "box:760:603:400:12"
     ],
-    "sheet": "bake/work/C5/qc_infobar.line__17_physical-cluster_full.ours.C5.png",
-    "luma_bias": -8.11
+    "sheet": "bake/work/C5/qc_line__03_three-modes_photo_bimmerstop.panel.C5.png",
+    "luma_bias": 8.42
    },
    "params": {
     "front_y": 608.8,
-    "bar_rgb": [
-     2.1,
-     2.0,
-     26.9
-    ],
     "bar_fade0": 672.0,
     "bar_fade1": 690.0,
-    "line_rgb": [
-     223.0,
-     229.0,
-     233.0
+    "line_a": 0.413816,
+    "line_s": 1.651194,
+    "line_h": 136.571431,
+    "line_hp": 2.929359,
+    "line_floor": 0.031467,
+    "hue_line": [
+     0.9272,
+     1.0143,
+     1.0729
     ],
-    "line_w": 2.2,
-    "line_glow": 0.75,
-    "line_glow_d": 0.0,
-    "line_glow_s": 1.7,
-    "line_x0": 80.0,
-    "line_x1": 300.0,
-    "line_floor": 0.55
+    "body_rgb": [
+     0,
+     0,
+     0
+    ],
+    "line_peak_rgb": [
+     166.5,
+     173.3,
+     177.8
+    ]
    }
   },
   {
@@ -157,40 +165,40 @@
     "key": 1.0
    },
    "fit": {
-    "ssim": 0.263,
-    "dE2000_mean": 22.92,
-    "edge_px_err": 2.266,
+    "ssim": 0.2673,
+    "dE2000_mean": 22.071,
+    "edge_px_err": 2.269,
     "ref": "bake/work/rect/17_physical-cluster_full.comfort.C1",
     "roi": [
      "ring:0.82:0.915",
      "angle 142.0:76.0"
     ],
     "sheet": "bake/work/C6/qc_range-arc.full__17_physical-cluster_full.comfort.C1.png",
-    "luma_bias": 17.67,
+    "luma_bias": 14.81,
     "all": {
      "range-arc.full.17": {
-      "ssim": 0.263,
-      "dE2000_mean": 22.92,
-      "edge_px_err": 2.266,
+      "ssim": 0.2673,
+      "dE2000_mean": 22.071,
+      "edge_px_err": 2.269,
       "ref": "bake/work/rect/17_physical-cluster_full.comfort.C1",
       "roi": [
        "ring:0.82:0.915",
        "angle 142.0:76.0"
       ],
       "sheet": "bake/work/C6/qc_range-arc.full__17_physical-cluster_full.comfort.C1.png",
-      "luma_bias": 17.67
+      "luma_bias": 14.81
      },
      "range-arc.full.07": {
-      "ssim": 0.5284,
-      "dE2000_mean": 14.876,
-      "edge_px_err": 1.151,
+      "ssim": 0.5375,
+      "dE2000_mean": 14.347,
+      "edge_px_err": 1.15,
       "ref": "bake/work/rect/07_physical-cluster_all-lamps-lit.comfort.C1",
       "roi": [
        "ring:0.82:0.915",
        "angle 142.0:76.0"
       ],
       "sheet": "bake/work/C6/qc_range-arc.full__07_physical-cluster_all-lamps-lit.comfort.C1.png",
-      "luma_bias": 2.59
+      "luma_bias": -0.28
      }
     }
    },
@@ -217,25 +225,25 @@
     ],
     "colours": {
      "major": [
-      232,
-      232,
-      234
+      229.9,
+      229.9,
+      231.9
      ],
      "mid": [
-      215,
-      214,
-      216
+      198.5,
+      197.6,
+      199.4
      ],
      "white": {
       "unlit": [
-       58,
-       58,
-       62
+       16.1,
+       16.1,
+       17.7
       ],
       "lit": [
-       222,
-       220,
-       216
+       210.5,
+       208.6,
+       204.8
       ]
      }
     },
@@ -288,16 +296,16 @@
     "key": 1.0
    },
    "fit": {
-    "ssim": 0.263,
-    "dE2000_mean": 22.92,
-    "edge_px_err": 2.266,
+    "ssim": 0.2673,
+    "dE2000_mean": 22.071,
+    "edge_px_err": 2.269,
     "ref": "bake/work/rect/17_physical-cluster_full.comfort.C1",
     "roi": [
      "ring:0.82:0.915",
      "angle 142.0:76.0"
     ],
     "sheet": "bake/work/C6/qc_range-arc.full__17_physical-cluster_full.comfort.C1.png",
-    "luma_bias": 17.67
+    "luma_bias": 14.81
    },
    "params": {
     "use": "coverage of the minor segments for the dynamic fill layer"
@@ -322,9 +330,9 @@
     "drive": "fuel range (km)",
     "lit_colours": {
      "white": [
-      222,
-      220,
-      216
+      210.5,
+      208.6,
+      204.8
      ]
     },
     "unlit_evidence": "weak: 17 / 07 show every segment lit; the unlit colour is our choice (12 shows dim segments in its orange variant)"
@@ -359,8 +367,8 @@
     "key": 1.0
    },
    "fit": {
-    "ssim": 0.221,
-    "dE2000_mean": 19.61,
+    "ssim": 0.2327,
+    "dE2000_mean": 17.011,
     "edge_px_err": 1.831,
     "ref": "bake/work/rect/17_physical-cluster_full.comfort.C2",
     "roi": [
@@ -368,11 +376,11 @@
      "angle 141.3:74.29999999999998"
     ],
     "sheet": "bake/work/C6/qc_ed-arc.full__17_physical-cluster_full.comfort.C2.png",
-    "luma_bias": -0.48,
+    "luma_bias": -15.8,
     "all": {
      "ed-arc.full.17": {
-      "ssim": 0.221,
-      "dE2000_mean": 19.61,
+      "ssim": 0.2327,
+      "dE2000_mean": 17.011,
       "edge_px_err": 1.831,
       "ref": "bake/work/rect/17_physical-cluster_full.comfort.C2",
       "roi": [
@@ -380,7 +388,7 @@
        "angle 141.3:74.29999999999998"
       ],
       "sheet": "bake/work/C6/qc_ed-arc.full__17_physical-cluster_full.comfort.C2.png",
-      "luma_bias": -0.48
+      "luma_bias": -15.8
      }
     }
    },
@@ -412,37 +420,37 @@
     ],
     "colours": {
      "major": [
-      232,
-      232,
-      234
+      229.9,
+      229.9,
+      231.9
      ],
      "mid": [
-      214,
-      210,
-      212
+      194.2,
+      190.5,
+      192.4
      ],
      "red": {
       "unlit": [
-       96,
-       62,
-       68
+       38.8,
+       22.5,
+       25.4
       ],
       "lit": [
-       214,
-       128,
-       136
+       114.5,
+       66.0,
+       70.5
       ]
      },
      "blue": {
       "unlit": [
-       66,
-       76,
-       104
+       25.6,
+       30.6,
+       44.5
       ],
       "lit": [
-       150,
-       172,
-       228
+       84.0,
+       97.1,
+       130.5
       ]
      }
     },
@@ -495,8 +503,8 @@
     "key": 1.0
    },
    "fit": {
-    "ssim": 0.221,
-    "dE2000_mean": 19.61,
+    "ssim": 0.2327,
+    "dE2000_mean": 17.011,
     "edge_px_err": 1.831,
     "ref": "bake/work/rect/17_physical-cluster_full.comfort.C2",
     "roi": [
@@ -504,7 +512,7 @@
      "angle 141.3:74.29999999999998"
     ],
     "sheet": "bake/work/C6/qc_ed-arc.full__17_physical-cluster_full.comfort.C2.png",
-    "luma_bias": -0.48
+    "luma_bias": -15.8
    },
    "params": {
     "use": "coverage of the minor segments for the dynamic fill layer"
@@ -529,14 +537,14 @@
     "drive": "consumption l/100km (0..20, blue part = recuperation)",
     "lit_colours": {
      "red": [
-      214,
-      128,
-      136
+      114.5,
+      66.0,
+      70.5
      ],
      "blue": [
-      150,
-      172,
-      228
+      84.0,
+      97.1,
+      130.5
      ]
     },
     "unlit_evidence": "weak: 17 / 07 show every segment lit; the unlit colour is our choice (12 shows dim segments in its orange variant)"

@@ -3,7 +3,8 @@
     cd bake/src && $PY -m C6.build            # C6 only
     cd bake/src && $PY -m C6.build --all      # C5.build + C6.build + QC + manifests (the one regenerate command)
 
-Bar: body (dark navy, @0.5x) and the lit top line (= the floor's front edge, 1x), from C5/params.json.
+Bar: body (black, @0.5x) and the lit top line (= the floor's front edge, 1x), from C5/params.json, in final panel
+values (P10.apply leaves C5 / C6 alone: identity curve). Fixed boxes: C5.build.FIXED.
 Arcs (in the dial frame of C1 / C2, cw12 degrees, R units, concentric with the dial, z 5.5):
   range arc under the speedo  : 41 segments, 144.0 .. 216.0 deg; long majors at the ends and 180, medium at the
                                 quarters. Track = majors white + minors in the UNLIT colour; mask = minor coverage
@@ -30,19 +31,23 @@ SEG = {   # radii (R) and widths (px) of the segments, measured on 17 C1 / C2 an
     "mid": {"r0": 0.850, "r1": 0.900, "w": 5.6},
     "major": {"r0": 0.834, "r1": 0.905, "w": 5.6},
 }
+# Arc colours are FINAL panel values: P4's colours (range major 232/232/234, mid 215/214/216, unlit 58/58/62, lit
+# 222/220/216; ED mid 214/210/212, red 96/62/68 / 214/128/136, blue 66/76/104 / 150/172/228) put once through P10's
+# old C5/C6 'window-fit' curve (P10.levels.window_fit), which P10.apply used to apply to these files. P10's C5/C6
+# curve is now the identity, so the mapped values live here and the shipped arcs are unchanged by the C5 redo.
 ARCS = {
     "range-arc": {"dial": "C1", "a0": 144.0, "a1": 216.0, "n": 40,
                   "majors": {0: "major", 20: "major", 40: "major", 10: "mid", 30: "mid"},
                   "zones": [[0, 40, "white"]],
-                  "colours": {"major": [232, 232, 234], "mid": [215, 214, 216],
-                              "white": {"unlit": [58, 58, 62], "lit": [222, 220, 216]}}},
+                  "colours": {"major": [229.9, 229.9, 231.9], "mid": [198.5, 197.6, 199.4],
+                              "white": {"unlit": [16.1, 16.1, 17.7], "lit": [210.5, 208.6, 204.8]}}},
     "ed-arc": {"dial": "C2", "a0": 143.3, "a1": 213.6, "n": 37,
                # index 0 = 20 l/100km (143.3), index 28 = 0 (196.5), 29..37 the blue part left of 0
                "majors": {0: "major", 14: "major", 28: "major", 7: "mid", 21: "mid"},
                "zones": [[0, 28, "red"], [29, 37, "blue"]],
-               "colours": {"major": [232, 232, 234], "mid": [214, 210, 212],
-                           "red": {"unlit": [96, 62, 68], "lit": [214, 128, 136]},
-                           "blue": {"unlit": [66, 76, 104], "lit": [150, 172, 228]}}},
+               "colours": {"major": [229.9, 229.9, 231.9], "mid": [194.2, 190.5, 192.4],
+                           "red": {"unlit": [38.8, 22.5, 25.4], "lit": [114.5, 66.0, 70.5]},
+                           "blue": {"unlit": [25.6, 30.6, 44.5], "lit": [84.0, 97.1, 130.5]}}},
 }
 
 
@@ -96,8 +101,8 @@ def write(rel, img, box, scale):
 def main():
     P = c5build.params()
     out = {}
-    out["infobar.body"] = write("C6/infobar.body.albedo@0.5x.png", model.bar_body([640, 600, 640, 96], 0.5, P), [640, 600, 640, 96], 0.5)
-    out["infobar.line"] = write("C6/infobar.line.albedo.png", model.bar_line([640, 598, 640, 16], 1.0, P), [640, 598, 640, 16], 1.0)
+    out["infobar.body"] = c5build.render("infobar.body.albedo", model.bar_body, None, 0.5, P, "C6")
+    out["infobar.line"] = c5build.render("infobar.line.albedo", model.bar_line, None, 1.0, P, "C6")
     for name, A in ARCS.items():
         tr, mk, box = arc_layers(name, A)
         out[f"{name}.track"] = write(f"C6/{name}.track.albedo.png", tr, box, 1.0)

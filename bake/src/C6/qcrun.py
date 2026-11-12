@@ -9,9 +9,11 @@ from C6 import build as c6  # noqa: E402
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 WORK = os.path.join(ROOT, "bake", "work")
 BAKED = os.path.join(ROOT, "apps", "f30_cluster", "hud", "baked")
-REF17 = os.path.join(WORK, "C5", "ref", "17_physical-cluster_full.ours.C5")
-REF04 = os.path.join(WORK, "C5", "ref", "04_comfort_whole-cluster_mph.ours.C5")
-REF07 = os.path.join(WORK, "C5", "ref", "07_physical-cluster_all-lamps-lit.ours.C5")
+# the window's targets: 04 / 03 / 02 in FINAL panel values (C5.target: light above each photo's local floor, numerals
+# at the theme's text white, y mapped to our horizon / front line). 17 and 07 are hazed: arcs only.
+REF04 = os.path.join(WORK, "C5", "ref", "04_comfort_whole-cluster_mph.panel.C5")
+REF03 = os.path.join(WORK, "C5", "ref", "03_three-modes_photo_bimmerstop.panel.C5")
+REF02 = os.path.join(WORK, "C5", "ref", "02_three-modes_clean-render.panel.C5")
 RECT = os.path.join(WORK, "rect")
 
 
@@ -47,18 +49,21 @@ def main():
     body, line = c6l["infobar.body"], c6l["infobar.line"]
     Q = {}
     run = lambda ref, lays, cl, name, rois, edges=True, bits=31: qc.run(ref, lays, cl, name, rois, None, bits, edges)
-    Q["window.base"] = run(REF17, [L(base)], "C5", "window.base", ["box:780:90:360:450"], False)
-    Q["window.bg"] = run(REF17, [L(base)], "C5", "window.bg", ["box:780:100:360:290"], False)
-    Q["window.top"] = run(REF17, [L(base)], "C5", "window.top", ["box:800:66:320:40"], True)
-    Q["window.sky"] = run(REF17, [L(base), L(hor)], "C5", "window.sky", ["box:780:400:360:56"], False)
-    Q["window.floor"] = run(REF17, [L(base), L(hor)], "C5", "window.floor", ["box:740:462:440:144"], False)
-    Q["window.horizon"] = run(REF17, [L(base), L(hor)], "C5", "window.horizon", ["box:780:446:360:22"], True)
+    from C5 import target
+    for st in target.STEMS[:3]:
+        target.build(st, write=True)
     stack = [L(base), L(hor), L(body), L(line)]
-    Q["infobar.line"] = run(REF17, stack, "C5", "infobar.line", ["box:760:598:400:16"], True)
-    Q["infobar.body"] = run(REF17, stack, "C5", "infobar.body", ["box:700:612:520:76"], False)
-    Q["stack17"] = run(REF17, stack, "C5", "stack", ["box:680:66:560:626"], True)
-    Q["stack04"] = run(REF04, stack, "C5", "stack", ["box:680:66:560:626"], True)
-    Q["stack07"] = run(REF07, stack, "C5", "stack", ["box:680:66:560:626"], True)
+    parts = {"sky": ("box:780:120:360:260", False), "glow": ("box:760:410:400:47", False),
+             "horizon": ("box:780:446:360:22", True), "floor": ("box:740:462:440:144", False),
+             "line": ("box:760:603:400:12", True), "body": ("box:700:614:520:30", False),
+             "stack": ("box:680:66:560:626", True)}
+    for tag, ref in (("04", REF04), ("03", REF03)):
+        for part, (roi, e) in parts.items():
+            if tag == "04" and part in ("line", "body"):
+                continue                     # 04 has no bar content (no front line); its bar carries haze
+            Q[f"{part}.{tag}"] = run(ref, stack, "C5", f"{part}", [roi], e)
+    for part in ("sky", "glow"):             # 02: its car-scene floor has its own (shorter) layout; sky + glow only
+        Q[f"{part}.02"] = run(REF02, stack, "C5", f"{part}", [parts[part][0]], False)
     # arcs: the track alone (unlit, vs nothing lit = no ref) and a full-fill preview (track + lit minors) vs 17 / 07
     for name, A in c6.ARCS.items():
         cl = A["dial"]
