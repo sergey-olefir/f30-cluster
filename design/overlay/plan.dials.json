@@ -68,23 +68,29 @@
    "notes": "below the tacho cut (y >= 656)"
   },
   "assist.speed_limit": {
-   "decision": "reveal",
-   "notes": "round window in our speedo (the empty sector of the scale)"
+   "decision": "redraw",
+   "notes": "ours: the wbsign under the speed hub (baked C7 sign_limit, its figure a text), as in 6WB Comfort; BMW's is covered while ours shows. While ours has no data (app.json config.limit unset, today on the car) a round window shows BMW's instead",
+   "redraw_at": [
+    309,
+    464,
+    393,
+    549
+   ]
   },
   "assist.cc_panel": {
    "decision": "reveal"
   },
   "assist.info_tacho": {
    "decision": "reveal",
-   "notes": "small window in our tacho rim"
+   "notes": "small soft window in our tacho rim; the collar keeps clear of it"
   },
   "assist.mode_label_centre": {
    "decision": "drop",
    "notes": "BMW does not draw it with a custom theme; the bottom-row COMFORT PLUS shows instead"
   },
   "assist.mode_label": {
-   "decision": "reveal",
-   "notes": "below the tacho cut (y >= 656)"
+   "decision": "cover",
+   "notes": "the bottom-row COMFORT PLUS: under a black patch in the collar (PATCHES; the lead's call after package D, 2026-11-12), at least 3 px clear of the check-control outline"
   },
   "assist.gear_centre": {
    "decision": "drop",
@@ -111,7 +117,7 @@
   },
   "map.region": {
    "decision": "reveal",
-   "notes": "reveal between the dials only (edited hole = the gap); the parts under our dials stay hidden"
+   "notes": "reveal between the dials only (edited hole = the gap); the parts under our dials stay hidden; it darkens toward our dials (the collar's shade)"
   },
   "map.position_arrow": {
    "decision": "reveal"
@@ -176,22 +182,10 @@
   "C6.infobar.line": {
    "hidden": true
   },
-  "C7.sign.speed-limit": {
-   "hidden": true
-  },
-  "C7.sign.no-overtaking": {
-   "hidden": true
-  },
   "C6.speedo.range-arc.track": {
    "hidden": true
   },
   "C6.tacho.ed-arc.track": {
-   "hidden": true
-  },
-  "C7.edyn.battery": {
-   "hidden": true
-  },
-  "C7.bar.range": {
    "hidden": true
   },
   "w.bg": {
@@ -201,12 +195,6 @@
    "hidden": true
   },
   "w.range_in": {
-   "hidden": true
-  },
-  "w.signs": {
-   "hidden": true
-  },
-  "w.limit": {
    "hidden": true
   },
   "w.row_b0": {
@@ -457,21 +445,6 @@
    "edited": false
   },
   {
-   "id": "hole.assist.speed_limit",
-   "for": [
-    "assist.speed_limit"
-   ],
-   "rect": [
-    494,
-    577,
-    584,
-    667
-   ],
-   "margin": 4,
-   "radius": 45,
-   "edited": true
-  },
-  {
    "id": "hole.assist.cc_panel",
    "for": [
     "assist.cc_panel"
@@ -496,21 +469,6 @@
     587,
     1274,
     631
-   ],
-   "margin": 4,
-   "radius": 4,
-   "edited": false
-  },
-  {
-   "id": "hole.assist.mode_label",
-   "for": [
-    "assist.mode_label"
-   ],
-   "rect": [
-    1222,
-    655,
-    1363,
-    715
    ],
    "margin": 4,
    "radius": 4,
@@ -967,33 +925,6 @@
   {
    "severity": "warning",
    "rule": "hole-cuts-content",
-   "g20": "assist.speed_limit",
-   "wb": "C1.speedo.base",
-   "overlap_px": 6376,
-   "overlap_pct": 118.16,
-   "message": "the reveal hole would cut our content (6376 px of the hole)"
-  },
-  {
-   "severity": "warning",
-   "rule": "hole-cuts-content",
-   "g20": "assist.speed_limit",
-   "wb": "C1.speedo.tick-groove-rim",
-   "overlap_px": 417,
-   "overlap_pct": 7.73,
-   "message": "the reveal hole would cut our content (417 px of the hole)"
-  },
-  {
-   "severity": "warning",
-   "rule": "hole-cuts-content",
-   "g20": "assist.speed_limit",
-   "wb": "w.speedo",
-   "overlap_px": 6376,
-   "overlap_pct": 118.16,
-   "message": "the reveal hole would cut our content (6376 px of the hole)"
-  },
-  {
-   "severity": "warning",
-   "rule": "hole-cuts-content",
    "g20": "assist.info_tacho",
    "wb": "C2.tacho.static",
    "overlap_px": 235,
@@ -1017,33 +948,6 @@
    "overlap_px": 438,
    "overlap_pct": 100.69,
    "message": "the reveal hole would cut our content (438 px of the hole)"
-  },
-  {
-   "severity": "warning",
-   "rule": "hole-cuts-content",
-   "g20": "assist.mode_label",
-   "wb": "C2.tacho.static",
-   "overlap_px": 332,
-   "overlap_pct": 5.82,
-   "message": "the reveal hole would cut our content (332 px of the hole)"
-  },
-  {
-   "severity": "warning",
-   "rule": "hole-cuts-content",
-   "g20": "assist.mode_label",
-   "wb": "C2.tacho.bezel",
-   "overlap_px": 282,
-   "overlap_pct": 4.94,
-   "message": "the reveal hole would cut our content (282 px of the hole)"
-  },
-  {
-   "severity": "warning",
-   "rule": "hole-cuts-content",
-   "g20": "assist.mode_label",
-   "wb": "w.tacho",
-   "overlap_px": 618,
-   "overlap_pct": 10.83,
-   "message": "the reveal hole would cut our content (618 px of the hole)"
   },
   {
    "severity": "info",
@@ -1071,6 +975,60 @@
    "overlap_px": 1140,
    "overlap_pct": 100,
    "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.speed_limit",
+   "wb": "C1.speedo.base",
+   "overlap_px": 5396,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision redraw)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.speed_limit",
+   "wb": "C1.speedo.tick-groove-rim",
+   "overlap_px": 386,
+   "overlap_pct": 7.15,
+   "message": "under element covered by us (decision redraw)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.speed_limit",
+   "wb": "w.speedo",
+   "overlap_px": 5396,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision redraw)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.mode_label",
+   "wb": "C2.tacho.static",
+   "overlap_px": 121,
+   "overlap_pct": 2.12,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.mode_label",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 154,
+   "overlap_pct": 2.7,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.mode_label",
+   "wb": "w.tacho",
+   "overlap_px": 311,
+   "overlap_pct": 5.45,
+   "message": "under element covered by us (decision cover)"
   },
   {
    "severity": "info",

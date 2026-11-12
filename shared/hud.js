@@ -904,6 +904,12 @@ class HudApp {
         return n;
     }
 
+    /** A 6WB dial's u_cut ("cut", WBDIAL): cut y in the layer, fade, window shape (mode), its soft edge. */
+    _cutVec(w, mode) {
+        const cut = w.cut;
+        return cut ? [cut.y - w.y, cut.fade || 0, mode, cut.soft || 0] : [0, 0, 0, 0];
+    }
+
     /** The glyph codes of a text in an atlas widget's cells, aligned; -1 is an empty cell. */
     _atlasCodes(x, s) {
         const a = x.atlas, n = x.cells, text = String(s).slice(0, n);
@@ -1786,10 +1792,12 @@ class HudApp {
                 c.uniform(ref, 'u_decoR', [f.x, f.y, f.w, f.h]);
                 c.uniform(ref, 'u_fillC', f.color.map((v) => v / 255));
             }
-            // "cut": { y, fade (panel px), round: [cx, cy, r] | box: [x0, y0, x1, y1] (panel px) }: the dial's open bottom
-            // and a window, so BMW's own bottom row, sign or lamp shows (6WB Dials + G20)
+            // "cut": { y, fade (panel px), round: [cx, cy, r] | box: [x0, y0, x1, y1] (panel px), soft (px), cover }: the
+            // dial's open bottom and a soft window, so BMW's own bottom row, sign or lamp shows (6WB Dials + G20);
+            // "cover": "limit": the round window closes over BMW's sign while our own sign shows (_update)
             const cut = w.cut, cw = cut && (cut.round || cut.box);
-            c.uniform(ref, 'u_cut', cut ? [cut.y - w.y, cut.fade || 0, cut.round ? 1 : cut.box ? 2 : 0, 0] : [0, 0, 0, 0]);
+            x.cutMode = -1;
+            c.uniform(ref, 'u_cut', this._cutVec(w, cut && cut.round ? 1 : cut && cut.box ? 2 : 0));
             c.uniform(ref, 'u_cutW', !cw ? [0, 0, 0, 0] : cut.round ? [cw[0] - w.x, cw[1] - w.y, cw[2], 0]
                 : [cw[0] - w.x, cw[1] - w.y, cw[2] - w.x, cw[3] - w.y]);
             x.wbDyn = [0, -1, -1, 0];
@@ -2306,6 +2314,11 @@ class HudApp {
             if (w.look === 'wb' && x.wbFill && fillA) {
                 x.wbFill = [fillA[0], fillA[1], x.wbKind, 0];
                 x.c.uniform(x.ref, 'u_fill', x.wbFill);
+            }
+            if (w.look === 'wb' && w.cut && w.cut.round && w.cut.cover === 'limit') {
+                // the round window over BMW's sign: closed (3) while our own sign shows, open (1) while we have no limit
+                const m = isNum(this._raw('limit')) ? 3 : 1;
+                if (force || m !== x.cutMode) { x.cutMode = m; x.c.uniform(x.ref, 'u_cut', this._cutVec(w, m)); }
             }
             const key = q + '|' + hot + '|' + over.join(',');
             if (!force && key === x.last) return;
