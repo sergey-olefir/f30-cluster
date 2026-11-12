@@ -1,0 +1,66 @@
+{
+  "$comment": "Platform and car facts a design for the G20 panel must respect. Copied from shared/visible.js, docs/BAKE-C9-overlays.md and the project's measured limits; each block names its source. Panel px, 1920x720, y down.",
+  "kind": "constraints",
+  "schema_version": 1,
+  "panel": { "w": 1920, "h": 720 },
+  "geometry": {
+    "source": "docs/BAKE-C9-overlays.md; apps/f30_cluster/hud/layouts/wb_comfort.json (bg.dl / bg.dr)",
+    "R": 335,
+    "speedo_centre": [412, 380],
+    "tacho_centre": [1508, 380],
+    "angles": "cw12: degrees clockwise from 12 o'clock",
+    "R_units": "u = (x - cx) / R, v = (y - cy) / R from the nearer dial centre"
+  },
+  "platform": {
+    "source": "project measurements on the car and the bench (docs/BAKE-REPORT.md, docs/BAKE-P10-levels.md, commit 7c076df)",
+    "layers": { "max_per_connection": 8, "max_connections": 4 },
+    "pixel_memory": {
+      "budget_bytes": 16777216,
+      "scope": "service-wide, shared with other apps",
+      "cost_per_image": "w * h * 8 bytes"
+    },
+    "assets": { "max_per_client": 16, "max_total": 32 },
+    "shaders": {
+      "max_uniforms_per_effect_layer": 32,
+      "every_sampler_bound": true,
+      "note": "Every sampler2D a shader declares must have an asset bound, or the car's renderer (RAMSES) silently does not draw the layer (the bench used to draw it anyway). shared/hud.js binds a 1x1 transparent asset to unused samplers."
+    }
+  },
+  "visibility": {
+    "source": { "file": "shared/visible.js", "note": "HOOD measured from photo 10 (homography, 108 grid crossings, residual 3.5 px), Nov 11 2026" },
+    "hood": {
+      "description": "First visible y along each vertical line [x, y]; the hood hides everything above it. Linear between points. Bottom and sides are fully visible.",
+      "polyline": [
+        [0, 200], [100, 145], [200, 94], [300, 52], [400, 33], [500, 24], [600, 19], [700, 13], [800, 12], [900, 13],
+        [1000, 14], [1100, 13], [1200, 15], [1300, 20], [1400, 28], [1500, 33], [1600, 48], [1700, 88], [1800, 139],
+        [1900, 205], [1920, 225]
+      ]
+    },
+    "visible_area": {
+      "description": "The part of the panel the driver sees: below the hood polyline, down to the bottom edge.",
+      "poly": [
+        [0, 200], [100, 145], [200, 94], [300, 52], [400, 33], [500, 24], [600, 19], [700, 13], [800, 12], [900, 13],
+        [1000, 14], [1100, 13], [1200, 15], [1300, 20], [1400, 28], [1500, 33], [1600, 48], [1700, 88], [1800, 139],
+        [1900, 205], [1920, 225], [1920, 720], [0, 720]
+      ]
+    }
+  },
+  "bmw_over": {
+    "description": "What BMW draws on top of any custom theme on the panel (observed). A design keeps these areas free of anything important; nothing hides them.",
+    "BLACK_BOX": {
+      "rect": [1420, 320, 1611, 440],
+      "source": { "file": "shared/visible.js", "note": "BLACK_BOX; C9 measured 1419.5, 320.8, 1610.8, 437.9 from photos 10 and 11" },
+      "what": "A solid black rectangle in the middle of the rev dial, only while a custom theme is connected; the stock theme draws its big gear letter there."
+    },
+    "BELT": {
+      "rect": [587, 665, 626, 720],
+      "source": { "file": "shared/visible.js", "note": "BELT; C9 measured 589.7, 664.9, 623.7, 713.9 from photos 10 and 11" },
+      "what": "The driver's seat-belt warning lamp (red), drawn over us when lit."
+    },
+    "GEAR": {
+      "rect": [1392, 664, 1428, 706],
+      "source": { "file": "docs/BAKE-C9-overlays.md", "note": "C9 measured the 'P' at 1398.4, 667.2, 1421.4, 700.2 (photo 10); the rect keeps ~6 px margin because R, N, D, S, M are wider. visible.js no longer carries it (commit cb28ce7 dropped our gear letters and the marker)." },
+      "what": "BMW's gear letter (white), drawn over us below the rev dial."
+    }
+  }
+}
