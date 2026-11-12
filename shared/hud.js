@@ -880,6 +880,21 @@ class HudApp {
         return a;
     }
 
+    /** The scene textures (keys as in this.atlases) the widgets will sample: the same choices _create makes. */
+    _sceneNeeds(widgets) {
+        const out = new Set(), baked = this.setting('baked') !== false;
+        widgets.forEach((w) => {
+            const ci = this._connOf(w), add = (t) => { if (t && t.tex) out.add(ci + ':scene:' + t.tex); };
+            if (w.type === 'dial' && w.look === 'wb' && baked) { add(w.base); add(w.fill); }
+            else if (w.type === 'wbsign' && w.tex && baked) { add(w.tex.limit); add(w.tex.nopass); }
+            else if (w.type === 'wbback') {
+                if (w.collar) add(w.collar);
+                else if (w.tex && baked) { add(w.tex.window); add(w.tex.horizon); add(w.tex.line); }
+            }
+        });
+        return out;
+    }
+
     _atlasBytes() {
         let n = 0;
         this.atlases.forEach((a) => { n += a.bytes; });
@@ -1500,6 +1515,14 @@ class HudApp {
             waste = waste * 2 > 64 ? Infinity : waste * 2;
             plan = this._plan(shown, maxPx, waste);
         }
+        // the scene textures this layout does not use go before its own are made: the old and the new set together can
+        // pass the service's 16 MiB ("the service's pixel memory is full", seen on the car when switching to baked)
+        const needs = this._sceneNeeds(shown);
+        this.atlases.forEach((a, key) => {
+            if (key.indexOf(':scene:') < 0 || needs.has(key)) return;
+            this._guard('drop ' + key, () => a.c.drop(a.ref));
+            this.atlases.delete(key);
+        });
         let effects = 0, own = 0, sheets = 0, bytes = 0, px = 0;
         plan.forEach((e) => {
             if (e.kind === 'sheet') { sheets++; bytes += e.w * e.h * 4; px += e.w * e.h * 8; this._guard('sheet ' + e.members[0].id, () => this._createSheet(e)); }
@@ -1760,6 +1783,12 @@ class HudApp {
                 c.uniform(ref, 'u_decoR', [f.x, f.y, f.w, f.h]);
                 c.uniform(ref, 'u_fillC', f.color.map((v) => v / 255));
             }
+            // "cut": { y, fade (panel px), round: [cx, cy, r] | box: [x0, y0, x1, y1] (panel px) }: the dial's open bottom
+            // and a window, so BMW's own bottom row, sign or lamp shows (6WB Dials + G20)
+            const cut = w.cut, cw = cut && (cut.round || cut.box);
+            c.uniform(ref, 'u_cut', cut ? [cut.y - w.y, cut.fade || 0, cut.round ? 1 : cut.box ? 2 : 0, 0] : [0, 0, 0, 0]);
+            c.uniform(ref, 'u_cutW', !cw ? [0, 0, 0, 0] : cut.round ? [cw[0] - w.x, cw[1] - w.y, cw[2], 0]
+                : [cw[0] - w.x, cw[1] - w.y, cw[2] - w.x, cw[3] - w.y]);
             x.wbDyn = [0, -1, -1, 0];
             x.wbFill = [0, 0, x.wbKind, 0];
             c.uniform(ref, 'u_dyn', x.wbDyn);
@@ -1802,7 +1831,11 @@ class HudApp {
             c.uniform(ref, 'u_hole', this._hole(w));     // "hole" / "holeWhen": BMW's map window left see-through
             c.uniform(ref, 'u_holeR', [this._holeRadius(w)]);
             c.uniform(ref, 'u_hasTex', [0]);
-            if (w.tex && this.setting('baked') !== false) {   // baked textures: "tex": { window, horizon, line: { tex, x, y, w, h } }, "gain": [window level, y above which it applies]
+            if (w.collar) {                 // "collar": { tex, x, y, w, h }: black only there, see-through elsewhere (not a baked look: always on)
+                c.bind(ref, 'u_t0', this._scene(w.collar.tex, x.ci).ref);
+                c.uniform(ref, 'u_r0', [w.collar.x, w.collar.y, w.collar.w, w.collar.h]);
+                c.uniform(ref, 'u_hasTex', [2]);
+            } else if (w.tex && this.setting('baked') !== false) {   // baked textures: "tex": { window, horizon, line: { tex, x, y, w, h } }, "gain": [window level, y above which it applies]
                 [['window', 'u_t0', 'u_r0'], ['horizon', 'u_t1', 'u_r1'], ['line', 'u_t2', 'u_r2']].forEach(([k, smp, rect]) => {
                     const t = w.tex[k];
                     c.bind(ref, smp, this._scene(t.tex, x.ci).ref);

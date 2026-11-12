@@ -26,6 +26,9 @@ const HOOD = [
 const BLACK_BOX = [1420, 320, 1611, 440];
 /** BMW's seat-belt warning light is drawn over us here: [x0, y0, x1, y1]. (X3: 587, 663, 626, 700.) */
 const BELT = [587, 665, 626, 720];
+/** BMW's parking-brake lamp, the red (P) in the right column, is drawn over us too (seen over our opaque theme in the
+ *  car photos of Nov 11 2026; docs/OVERLAY-REPORT.md): [x0, y0, x1, y1]. */
+const PARK_LAMP = [1838, 217, 1900, 260];
 /** The part of the 800x480 HUD target seen through the windshield: BMW's own height-adjust frame (car photo Nov 7,
  *  measured Nov 9 2026) spans x 117..681, y ~85..395. The Nov 5 grid photo's right edge (x 600) was the phone's angle. */
 const HUD_WINDOW = { x: 120, y: 100, w: 560, h: 280 };
@@ -87,6 +90,9 @@ function check(widgets, target) {
             if (overlaps(w, BELT)) {
                 out.push(id + ': overlaps BMW\'s seat-belt light x' + BELT[0] + '-' + BELT[2] + ' y' + BELT[1] + '-' + BELT[3]);
             }
+            if (overlaps(w, PARK_LAMP)) {
+                out.push(id + ': overlaps BMW\'s parking-brake lamp x' + PARK_LAMP[0] + '-' + PARK_LAMP[2] + ' y' + PARK_LAMP[1] + '-' + PARK_LAMP[3]);
+            }
         } else if (target === 'hud') {
             const win = HUD_WINDOW;
             const d = Math.max(
@@ -103,4 +109,4 @@ function check(widgets, target) {
     return out;
 }
 
-module.exports = { HOOD, BLACK_BOX, BELT, HUD_WINDOW, HUD_BMW, hoodY, check };
+module.exports = { HOOD, BLACK_BOX, BELT, PARK_LAMP, HUD_WINDOW, HUD_BMW, hoodY, check };
