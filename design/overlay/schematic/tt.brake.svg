@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 41" width="60" height="41">
+  <title>Brake warning (red, '!' in a circle with brackets) (generic schematic, our own drawing)</title>
+  <circle cx="30.0" cy="20.5" r="12.7" fill="none" stroke="#e23b2e" stroke-width="2.9"/>
+  <path d="M 12.8 9.1 Q 8.4 20.5 12.8 31.9" fill="none" stroke="#e23b2e" stroke-width="2.9" stroke-linecap="round"/>
+  <path d="M 47.2 9.1 Q 51.6 20.5 47.2 31.9" fill="none" stroke="#e23b2e" stroke-width="2.9" stroke-linecap="round"/>
+  <text x="30.0" y="20.5" font-family="Arial, Helvetica, sans-serif" font-size="14.0" font-weight="bold" fill="#e23b2e" text-anchor="middle" dominant-baseline="central">!</text>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 457" width="840" height="457">
+  <title>Navigation map (hull of drawn roads) (generic schematic, our own drawing)</title>
+  <polygon points="840.0,270.0 833.0,300.0 726.0,434.0 648.0,457.0 163.0,457.0 59.0,424.0 36.0,407.0 0.0,325.0 56.0,111.0 87.0,52.0 287.0,0.0 642.0,0.0 751.0,64.0 767.0,77.0 803.0,125.0" fill="#6b7b8c" fill-opacity="0.35" stroke="#6b7b8c" stroke-width="2"/>
+  <text x="420.0" y="228.5" font-family="Arial, Helvetica, sans-serif" font-size="28.0" font-weight="normal" fill="#bdbdbd" text-anchor="middle" dominant-baseline="central">MAP</text>
+</svg>
