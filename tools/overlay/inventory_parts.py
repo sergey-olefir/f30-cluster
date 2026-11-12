@@ -67,9 +67,9 @@ def load(p):
     return json.load(open(rp(p)))
 
 
-def alpha_extent(a, scale=1, ox=0, oy=0):
-    """a: alpha (h, w) uint8. Returns ([x0, y0, x1, y1] in panel px, exclusive) of alpha > 0, and the count."""
-    ys, xs = np.nonzero(a > 0)
+def alpha_extent(a, scale=1, ox=0, oy=0, thr=1):
+    """a: alpha (h, w) uint8. Returns ([x0, y0, x1, y1] in panel px, exclusive) of alpha >= thr, and the count."""
+    ys, xs = np.nonzero(a >= thr)
     if not len(xs):
         return None, 0
     return [int(ox + xs.min() * scale), int(oy + ys.min() * scale), int(ox + (xs.max() + 1) * scale),
@@ -208,7 +208,8 @@ def sim_records(man, cat):
             bb, n = alpha_extent(a, sc, e['x'], e['y'])
             if (im.width, im.height) != (e.get('w', im.width), e.get('h', im.height)):
                 raise SystemExit('%s: PNG is %dx%d, manifest says %sx%s' % (e['id'], im.width, im.height, e.get('w'), e.get('h')))
-            r.update(bbox=bb, placement=[e['x'], e['y'], e['x'] + im.width * sc, e['y'] + im.height * sc],
+            r.update(bbox=bb, core=alpha_extent(a, sc, e['x'], e['y'], 128)[0],
+                     placement=[e['x'], e['y'], e['x'] + im.width * sc, e['y'] + im.height * sc],
                      size=[im.width, im.height], scale=sc, alpha_px=n)
             alpha[e['id']] = (a, sc, e['x'], e['y'])
         elif r['render'] == 'procedural':
@@ -285,7 +286,8 @@ def app_records(cat):
                 issues.append('%s: placed %s, not a uniform scale of %dx%d' % (name, box, w, h))
             sc = int(round(sc))
             bb, n = alpha_extent(a, sc, box[0], box[1]) if box else (None, 0)
-            r.update(bbox=bb, placement=box, size=[w, h], scale=sc, alpha_px=n)
+            r.update(bbox=bb, core=alpha_extent(a, sc, box[0], box[1], 128)[0] if box else None,
+                     placement=box, size=[w, h], scale=sc, alpha_px=n)
             if box:
                 alpha[r['id']] = (a, sc, box[0], box[1])
             gb = geo.get(key, {}).get('box') if isinstance(geo.get(key), dict) else None
@@ -395,11 +397,15 @@ def cross_checks(recs, alpha, cat, man):
             u = [min(r['bbox'][0] for r in ps), min(r['bbox'][1] for r in ps), max(r['bbox'][2] for r in ps), max(r['bbox'][3] for r in ps)]
             eb = e['bbox']
             d = [round(u[0] - eb[0], 1), round(u[1] - eb[1], 1), round(u[2] - eb[2], 1), round(u[3] - eb[3], 1)]
+            cs = [r['core'] for r in ps if r.get('core')]
+            cu = [min(c[0] for c in cs), min(c[1] for c in cs), max(c[2] for c in cs), max(c[3] for c in cs)] if cs else None
+            dc = [round(cu[0] - eb[0], 1), round(cu[1] - eb[1], 1), round(cu[2] - eb[2], 1), round(cu[3] - eb[3], 1)] if cu else None
             if max(abs(v) for v in d) > SLACK:
                 big = max(range(4), key=lambda i: abs(d[i]))
                 who = [r['id'] for r in ps if (r['bbox'][big] == u[big])]
                 bbd.append({'element': el, 'look': look, 'parts_union': u, 'element_bbox': eb, 'd_edges': d,
-                            'max_px': max(abs(v) for v in d), 'edge': ['x0', 'y0', 'x1', 'y1'][big], 'set_by': who})
+                            'max_px': max(abs(v) for v in d), 'edge': ['x0', 'y0', 'x1', 'y1'][big], 'set_by': who,
+                            'core_union': cu, 'd_edges_core': dc})
     rep['bbox_disagreements'] = bbd
     # relation / state: the part's layer and state against the element's relation
     rd = []
@@ -573,9 +579,11 @@ def build(prev, probe):
         if p is None and prevR.get(r['id'], {}).get('measured'):
             p = prevR[r['id']]['measured']
         if p:
-            r['measured'] = {k: p[k] for k in ('bbox', 'px', 'state') if k in p}
+            r['measured'] = {k: p[k] for k in ('bbox', 'core', 'px', 'state') if k in p}
             if p.get('fallback'):
                 r['measured']['fallback'] = p['fallback']
+            if p.get('core'):
+                r['core'] = p['core']
             if r['render'] == 'live':
                 r['bbox'] = p.get('bbox')
                 r['placement'] = p.get('bbox')
@@ -626,13 +634,16 @@ def build(prev, probe):
 
 def markdown(doc):
     pe = doc['report']['per_element']
+    R = {r['id']: r for r in doc['parts']}
     short = lambda xs: ', '.join('`%s`' % x for x in xs) if xs else '–'
     rows = ['| Element | Rel. | Raster (B) | Procedural (C) | Live (D) | App texture | Day / night | Missing: still to draw or settle |',
             '|---|---|---|---|---|---|---|---|']
     for i, v in pe.items():
-        ras = sorted({re.sub(r'\.(day|night)$', '', x) for x in v['raster']})
+        ras = sorted({re.sub(r'\.(day|night)$', '', x) + (' (skip)' if R[x].get('skip') else '') for x in v['raster']})
         dn = ('day' if v['day'] else '–') + ' / ' + ('night' if v['night'] else '–')
-        app = v['app'] + ['(covered by %s)' % c for c in v['app_covers']]
+        # app textures over it: only those that hide at least 5 % of it (the full list is in the file)
+        cov = [c for c in v['app_covers'] if any(x['element'] == i and x['pct'] >= 5 for x in R[c].get('covers', []))]
+        app = ['`%s`' % a.replace('app.', '') for a in v['app']] + ['under `%s`' % c.replace('app.', '') for c in cov]
         rows.append('| `%s`%s | %s | %s | %s | %s | %s | %s | %s |' % (
             i, ' (new)' if v['new'] else '', v['relation'], short(ras).replace('`structure.', '`'),
             short(v['procedural']).replace('`c.', '`'), short(v['live']).replace('`live.', '`'),
