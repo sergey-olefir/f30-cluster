@@ -596,6 +596,10 @@
           ],
           "description": "For the background: an existing see-through hole (e.g. the map hole, holeWhen)."
         },
+        "drawn_on_car": {
+          "type": "boolean",
+          "description": "false if the car does not draw it with the default settings: a baked layer not packed into any scene texture (kept for reference), or a live widget toggled off by default. Such elements raise no conflicts. Absent = true."
+        },
         "notes": {
           "type": "string"
         }
