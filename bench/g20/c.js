@@ -26,8 +26,8 @@
       red: [244, 106, 88], amber: [250, 184, 100], green: [126, 216, 80], parkGreen: [126, 238, 64],
       belt: [234, 66, 82], airbag: [238, 55, 74],
       signRed: [233, 37, 62], signWhite: [254, 241, 246], signText: [52, 42, 47],
-      ccFrame: [248, 220, 223], ccText: [255, 251, 254], ccBase: [9, 12, 22],
-      ccFill: [[606, [88, 72, 82]], [630, [70, 56, 66]], [655, [46, 39, 49]], [680, [24, 21, 31]], [700, [15, 15, 25]], [720, [10, 12, 21]]]
+      ccFrame: [248, 220, 223], ccText: [255, 251, 254], ccBase: [0, 0, 0],
+      ccFill: [[606, [88, 72, 82]], [630, [70, 56, 66]], [655, [46, 39, 49]], [680, [9, 8, 12]], [700, [1, 1, 2]], [720, [0, 0, 0]]]
     },
     day: {
       white: [255, 250, 252], unit: [244, 220, 227], label: [228, 202, 206], rpm: [240, 215, 220],
@@ -35,10 +35,14 @@
       red: [244, 106, 88], amber: [250, 184, 100], green: [128, 226, 82], parkGreen: [126, 243, 62],
       belt: [234, 66, 82], airbag: [238, 55, 74],
       signRed: [233, 37, 62], signWhite: [254, 244, 248], signText: [52, 42, 47],
-      ccFrame: [248, 220, 223], ccText: [255, 251, 254], ccBase: [14, 19, 23],
-      ccFill: [[606, [88, 72, 82]], [630, [70, 56, 66]], [655, [46, 39, 49]], [680, [26, 26, 32]], [700, [17, 21, 25]], [720, [14, 19, 23]]]
+      ccFrame: [248, 220, 223], ccText: [255, 251, 254], ccBase: [0, 0, 0],
+      ccFill: [[606, [88, 72, 82]], [630, [70, 56, 66]], [655, [46, 39, 49]], [680, [8, 8, 10]], [700, [0, 0, 0]], [720, [0, 0, 0]]]
     }
   };
+  // Empty space is pure black (polish C, the owner's colour rule): ccBase was the photos' lit-up black ([9, 12, 22]
+  // night, [14, 19, 23] day), and the panel fill's last stops faded into it. The fill's stops are now the measured
+  // ones times smoothstep(L(base), L(base) + 0.1, L(stop)) (bake/src/G20/structure/clean_soft.py lift), so its
+  // top keeps its colour and its foot reaches black.
 
   // Soft halo of a lit lamp on the LCD. Measured: 2-3 px outside the ink the lamps are +6..+10 levels brighter than
   // the white texts at the same distance (which only show the camera's blur), so the halo is faint.
