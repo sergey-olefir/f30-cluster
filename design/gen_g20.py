@@ -48,9 +48,9 @@ W = [
     # the minis over the big dials (their boxes overlap)
     gauge("fuel", "fuel", [4, 5], 0, z=2, fill="g20_fuel_fill", signal="fuel", min=0, max=1, **small),
     gauge("oil", "oil", [6, 7], 1, z=2, fill="g20_oil_fill", signal="oil", min=G['oilRange'][0], max=G['oilRange'][1], **small),
-    # the digital speed and its unit (the bench simulation's boxes, bench/g20/c.js T.speed, T.speedUnit)
-    text("speed", 530, 396, 240, "{{speed}}", "g20_spd", "right", 2, size=105),
-    text("speed_unit", 539, 393, 80, "km/h", "g20_unit", "left", 2, size=27),
+    # no digital speed of ours: BMW still draws its own there under a theme (design/overlay assist.digital_speed: under,
+    # strong) and the baked speedo leaves that spot see-through, so a copy of ours only doubled it. The rpm labels stay
+    # ours: the baked tacho covers BMW's.
     text("rpm1", 1424, 596.5, 110, "1/min", "g20_lab", "left", 2, size=34),
     text("rpm2", 1424, 625.8, 110, "x1000", "g20_lab", "left", 2, size=34),
 ]
