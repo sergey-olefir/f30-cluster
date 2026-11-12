@@ -15,7 +15,11 @@ const SHIFTBAR = `// Segmented shift bar for a cluster-render "effect" layer (GL
 //   u_flash   1 = at the redline: every lit segment shows the high colour
 // Output is straight alpha. Whether cluster-render blends effect layers as
 // straight or premultiplied alpha is not confirmed yet: check the edges on the car.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform float u_value;
 uniform vec2 u_size;
@@ -64,7 +68,11 @@ const ARC = `// Thin open arc gauge for a cluster-render "effect" layer (GLSL ES
 //   u_track  unlit arc (rgba, straight alpha)
 //   u_width  stroke width in px
 // Output is straight alpha (same open question as the shift bar shader above).
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform float u_value;
 uniform vec2 u_size;
@@ -121,7 +129,11 @@ const REVBAR = `// G20 Live Cockpit style rev bar for a cluster-render "effect" 
 //   u_max, u_value, u_shift, u_red, u_peak   rpm
 //   u_from, u_to, u_hot   rgb 0..1;  u_track, u_tick, u_fg   rgba (straight alpha)
 //   u_shiftNow   1 = at or past the shift point
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform float u_top;
@@ -218,7 +230,11 @@ const LIGHTS = `// Shift lights for a cluster-render "effect" layer (GLSL ES 1.0
 // The last u_tail lights are blue instead (the GT3 dash look; 0 = none). u_round 1 = round lights.
 //   u_size px, u_n count, u_lit count (0..u_n), u_tail count, u_strobe 0/1, u_green/u_yellow/u_red/u_blue rgb,
 //   u_off (alpha when off)
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform float u_n;
@@ -261,7 +277,11 @@ void main() {
 const FILL = `// Solid fill for a cluster-render "effect" layer (GLSL ES 1.00): u_color everywhere, except a
 // see-through rounded hole u_hole (x, y, w, h px from the layer's top left; w = 0: no hole), radius u_holeR.
 // On the cluster, an opaque fill hides BMW's own gauges under it; the hole lets the map window show.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform vec4 u_color;
@@ -284,7 +304,11 @@ void main() {
 const BOX = `// Framed box for a cluster-render "effect" layer (GLSL ES 1.00), the race-dash readout box: a rounded
 // frame u_border px wide in u_line, filled u_fill, with a header strip u_headH px tall in u_head across the
 // top (0 = none). Colours rgba, straight alpha. u_size, u_border, u_headH, u_radius in px.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform vec4 u_fill;
@@ -317,7 +341,11 @@ const BOXES = `// The GT3 race dash's frame in one cluster-render "effect" layer
 //   u_n            boxes in use (the rest are skipped). Boxes must not overlap each other or the hole.
 // Colours rgba, straight alpha. The loop bound is constant and the arrays are indexed by the loop counter only,
 // as GLSL ES 1.00 requires.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform vec4 u_bg;
@@ -366,7 +394,11 @@ void main() {
 
 const GRID = `// Calibration grid for a cluster-render "effect" layer (GLSL ES 1.00): a line every u_step px, a brighter
 // one every u_major steps, a frame round the edge. v_uv (0,0) is the top-left.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform float u_step;
@@ -387,7 +419,11 @@ void main() {
 
 const SEGBAR = `// Segmented level bar for a cluster-render "effect" layer (GLSL ES 1.00): u_segs segments, the first
 // u_lit of them lit (brightening left to right), each slanted u_slant px. v_uv (0,0) is the top-left.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform float u_segs;
@@ -420,7 +456,11 @@ const MDASH = `// The M theme's whole backdrop in one cluster-render "effect" la
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 #endif
 varying vec2 v_uv;
 uniform vec2 u_size;
@@ -650,7 +690,11 @@ const MTACH = `// The M theme's rev bar (GLSL ES 1.00), after the M8's: a bowed 
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 #endif
 varying vec2 v_uv;
 uniform vec2 u_size;
@@ -729,7 +773,11 @@ const SDASH = `// The Sport theme in one cluster-render "effect" layer (GLSL ES 
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 #endif
 varying vec2 v_uv;
 uniform vec2 u_size;
@@ -916,7 +964,11 @@ const DIAL = `// A classic round gauge for a cluster-render "effect" layer (GLSL
 // with a short tail and a centre cap. The numbers are text widgets round it. u_value 0..1 of the sweep.
 // u_hot 1: the ring turns the shift red (at the shift point). v_uv (0,0) is the top-left; the dial fills the
 // smaller side of the layer.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform float u_value;
@@ -1013,7 +1065,11 @@ const WBDIAL = `// 6WB-style round gauges for a cluster-render "effect" layer (G
 //     arc, a white needle from the centre.
 // u_start / u_sweep in radians, clockwise from 12 o'clock; u_value 0..1 of the sweep; u_hot 1: the shift red.
 // v_uv (0,0) is the top-left; the dial fills the smaller side of the layer.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 // The parameters come packed in vec4s (cluster-render holds up to 32 uniforms a layer, and some GPUs fewer vectors);
 // the #defines below give them their old names.
@@ -1078,7 +1134,7 @@ void main() {
     vec2 p = vec2(v_uv.x - 0.5, 0.5 - v_uv.y) * u_size;   // px from the centre, +y up
     if (u_flip > 0.5) p.x = -p.x;
     float R = min(u_size.x, u_size.y) * 0.5 - 1.0;
-    float d = length(p);
+    float d = length(p / R) * R;          // not length(p): in fp16 (mediump on the car) x*x + y*y overflows past ~256 px
     if (d > R + 0.5) { gl_FragColor = vec4(0.0); return; }
     float edge = clamp(R + 0.5 - d, 0.0, 1.0);
     float a = atan(p.x, p.y);
@@ -1352,7 +1408,11 @@ const WBBACK = `// The 6WB-style themes' backdrop in one cluster-render "effect"
 //     a glowing bridge between the dials and two wing lines off their upper inner sides.
 // u_sign: a round speed limit sign (white field, red ring); its figure is a text widget on top.
 // v_uv (0,0) is the top-left.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform vec3 u_color;
@@ -1376,7 +1436,8 @@ const float PI = 3.14159265359;
 
 void main() {
     vec2 p = v_uv * u_size;                                                       // px, +y down
-    float dl = length(p - u_dl.xy) - u_dl.z, dr = length(p - u_dr.xy) - u_dr.z;   // px outside each dial
+    // px outside each dial (scaled before length(): fp16 squares overflow past ~256 px)
+    float dl = (length((p - u_dl.xy) / u_dl.z) - 1.0) * u_dl.z, dr = (length((p - u_dr.xy) / u_dr.z) - 1.0) * u_dr.z;
     float between = p.x > u_dl.x && p.x < u_dr.x ? 1.0 : 0.0;
     float out2 = clamp(min(dl, dr) - 4.0, 0.0, 1.0) * between;
     float mid = (u_dl.x + u_dr.x) * 0.5;
@@ -1479,7 +1540,11 @@ const WBSIGN = `// The 6WB-style road signs in one cluster-render "effect" layer
 // speed limit sign (its figure is a text widget on top) on the left and the no-overtaking sign on the right.
 // u_show.x / u_show.y turn each on. Baked (u_tex 1: hud/scene sign_limit / sign_nopass, our own drawings, at
 // u_r0 / u_r1 in the layer's px), else drawn here. Not BMW's artwork.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform vec2 u_show;
@@ -1541,7 +1606,11 @@ const METER = `// A segmented bar meter for a cluster-render "effect" layer (GLS
 // u_c1 below u_at.x of the bar, u_c2 up to u_at.y, u_c3 from there (the retro green / amber / red, or warm-up blue /
 // white / red); unlit ones u_track. u_peak 0..1 lights the segment it falls in u_peakC (below 0: none). u_gap px
 // between segments. v_uv (0,0) is the top-left.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform float u_value;
@@ -1584,7 +1653,11 @@ const GMETER = `// A G-meter for a cluster-render "effect" layer (GLSL ES 1.00):
 //   u_env[i]    four envelope radii in g, sector k centred on k * 7.5 degrees counter-clockwise from + x
 // The loops have constant bounds and the arrays are indexed by the loop counter only, as GLSL ES 1.00 requires.
 // The dial fills the smaller side of the layer. v_uv (0,0) is the top-left.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform vec2 u_g;
@@ -1702,7 +1775,11 @@ const REVARC = `// A segmented rev arc for a cluster-render "effect" layer (GLSL
 // to u_r round u_center (layer px, y down), from u_start sweeping u_sweep (radians, clockwise from 12 o'clock), in
 // u_segs segments, the first u_value of it lit: u_low below u_midAt, u_mid up to u_highAt, u_high past it;
 // unlit u_track. u_flash 1: everything lit flashes white (at the redline). v_uv (0,0) is the top-left.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform vec2 u_center;
@@ -1756,7 +1833,11 @@ const TILES = `// The Dyno theme's tiles in one cluster-render "effect" layer (G
 //   u_n         tiles in use. u_geo: corner radius, border px, accent strip px, bar height px.
 // Colours rgba (fills) or rgb, straight alpha. The loop bound is constant and the arrays are indexed by the loop
 // counter only, as GLSL ES 1.00 requires. v_uv (0,0) is the top-left.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
+#else
 precision mediump float;
+#endif
 varying vec2 v_uv;
 uniform vec2 u_size;
 uniform vec4 u_bg;
