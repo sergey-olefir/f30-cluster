@@ -3,18 +3,24 @@
  "look": "night",
  "bg_valid_px": 317174,
  "bg_resid_rms": 2.7151671291044983,
- "glow_speedo_from_other_dial": 0.0,
- "glow_speedo_filled": 0.3967895362663496,
- "glow_tacho_from_other_dial": 0.0,
- "glow_tacho_filled": 0.3985731272294887,
- "wing_speedo_from_other_dial": 0.0,
- "wing_speedo_filled": 0.3596816976127321,
- "wing_tacho_from_other_dial": 0.042652519893899205,
- "wing_tacho_filled": 0.4273740053050398,
- "wingE_speedo_from_other_dial": 0.0,
- "wingE_speedo_filled": 0.44382352941176473,
- "wingE_tacho_from_other_dial": 0.16705882352941176,
- "wingE_tacho_filled": 0.5444117647058824,
+ "wing_seen": 0.29188328912466843,
+ "wingE_seen": 0.528235294117647,
+ "glow_speedo": {
+  "hue": [
+   1.0,
+   0.209,
+   0.169
+  ],
+  "kept": 0.35231866825208086
+ },
+ "glow_tacho": {
+  "hue": [
+   1.0,
+   0.161,
+   0.099
+  ],
+  "kept": 0.3468489892984542
+ },
  "veil": [
   0.5940723200625719,
   606.5514302832029,
