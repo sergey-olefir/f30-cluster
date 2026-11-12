@@ -1,6 +1,6 @@
 # Overlay report: stock G20 cluster vs our 6WB Comfort (panel)
 
-Scope: Comfort only, the `panel` target, the current `wb_comfort` layout. Brief: `docs/AGENT-BRIEF-overlay-constructor.md`. Data: `design/overlay/` (start with its `README.md`). Constructor: `python3 -m http.server` from the repo root, then open `http://localhost:8000/tools/overlay/constructor/`.
+Scope: Comfort only, the `panel` target, the current `wb_comfort` layout. Section 7 adds the G20 parts: which G20 elements we already have as our own textures. Brief: `docs/AGENT-BRIEF-overlay-constructor.md`. Data: `design/overlay/` (start with its `README.md`). Constructor: `python3 -m http.server` from the repo root, then open `http://localhost:8000/tools/overlay/constructor/`.
 
 ## 1. The answer in one table
 
@@ -171,3 +171,120 @@ These are the constructor on the real data, default plan, without photo underlay
 ![Decisions](overlay/constructor_decisions.png)
 
 ![Canvas with labels](overlay/constructor_canvas_labels.png)
+
+## 7. G20 parts: what we already have as our own drawings
+
+Since this report was first written the G20 has been taken apart into real parts: the bench simulation (`bench/g20/`, `docs/G20SIM-REPORT.md`) and the app's own G20 textures (`apps/f30_cluster/hud/scene/g20_*.json`, `collar.json`). `design/overlay/g20_parts.json` lists them, one record per part, and every catalogue element now has a `parts` list (`design/overlay/README.md` section 6). Brief: `docs/AGENT-BRIEF-overlay-parts.md`; work report: `docs/OVERLAY-PARTS-REPORT.md`.
+
+**The answer: every one of the 39 catalogue elements already exists as our own drawing, in the day and the night look.** Nothing has to be drawn from scratch. What is left is evidence: parts fitted to one photo, or with a weak model, and variants nobody photographed (the last column, and point 9 below).
+
+89 parts:
+
+| Kind | Count | Drawn in the constructor |
+|---|---|---|
+| B raster layers (`bench/g20/structure/*.png`, 21 layers × day and night) | 42 | as textures, at their placement |
+| C procedural items (`bench/g20/c.js`): telltales, bottom row, sign, check-control panel, texts | 28 | alone, through `G20C.drawUnder` / `drawOver` |
+| The black area (`g20sim.js` draws it itself; not a manifest entry) | 1 | alone, through `G20Sim.drawOver` |
+| D live items (`bench/g20/live/live.js`): map, arrow, pointers, glows, rev band, mini needles | 9 | alone, through `G20Live.drawMap` and its `_debug.draw*` |
+| The font (`c.font`) | 1 | not a picture |
+| App textures: `g20_speedo`, `g20_tacho`, `g20_fuel` (+ fill), `g20_oil` (+ fill), `collar` | 7 | decoded from the scene JSON, at their layout boxes |
+| `g20_lut` | 1 | data, not a picture |
+
+87 parts draw as textures; the font and the LUT are marked "not a picture"; **no part falls back** to its schematic. B's two tacho "0" rasters are skipped by the simulation (C draws the "0" live) and show only with lamps "all".
+
+### 7.1 Element by element
+
+Raster names drop the `.day` / `.night` suffix (both exist for each). "App texture": the app's own texture of that element, or "under X": an app texture that hides at least 5 % of it (`covers` in the file has every overlap of 10 px or more). The app's textures are all night looks; the app draws the pointers, glows, rev band and mini needles live from `g20_lut`, and the digital speed and "1/min x1000" as text (`design/gen_g20.py`). Everything else in the G20 Comfort layout is BMW's own, through see-through areas.
+
+| Element | Rel. | Raster (B) | Procedural (C) | Live (D) | App texture | Day / night | Missing: still to draw or settle |
+|---|---|---|---|---|---|---|---|
+| `tt.brake` | unknown | – | `tt.brake` | – | – | day / night | nothing |
+| `tt.tpms` | unknown | – | `tt.tpms` | – | – | day / night | nothing |
+| `tt.abs` | unknown | – | `tt.abs` | – | – | day / night | nothing |
+| `tt.dsc` | unknown | – | `tt.dsc` | – | – | day / night | nothing |
+| `tt.auto_h` | unknown | – | `tt.auto_h` | – | – | day / night | nothing |
+| `tt.parking_brake` | over | – | `tt.parking_brake`, `tt.parking_brake.hold` | – | – | day / night | nothing |
+| `tt.steering` | unknown | – | `tt.steering` | – | – | day / night | nothing |
+| `bottom.range` | under | – | `bottom.range` | – | – | day / night | nothing |
+| `bottom.clock` | under | – | `bottom.clock` | – | – | day / night | nothing |
+| `bottom.belt_rear` | unknown | – | `bottom.belt_rear` | – | – | day / night | nothing |
+| `bottom.belt_driver` | over | – | `bottom.belt_driver` | – | – | day / night | nothing |
+| `bottom.airbag` | unknown | – | `bottom.airbag` | – | – | day / night | nothing |
+| `bottom.cc_info` | unknown | – | `bottom.cc_info` | – | – | day / night | nothing |
+| `bottom.street` | under | – | `bottom.street` | – | – | day / night | nothing |
+| `bottom.temperature` | under | – | `bottom.temperature` | – | – | day / night | nothing |
+| `assist.speed_limit` | under | – | `assist.speed_limit` | – | – | day / night | nothing |
+| `assist.cc_panel` | unknown | – | `assist.cc_panel` | – | – | day / night | nothing |
+| `assist.info_tacho` | unknown | – | `assist.info_tacho` | – | under `collar` | day / night | evidence none: c.assist.info_tacho |
+| `assist.mode_label_centre` | gone | – | `assist.mode_label_centre` | – | – | day / night | stock layout only |
+| `assist.mode_label` | under | – | `assist.mode_label` | – | – | day / night | theme connected only |
+| `assist.gear_centre` | gone | – | `assist.gear_centre` | – | under `g20_tacho` | day / night | stock layout only |
+| `assist.gear` | over | – | `assist.gear` | – | – | day / night | theme connected only |
+| `assist.digital_speed` | under | – | `assist.digital_speed` | – | – | day / night | nothing |
+| `assist.rpm_label` | under | – | `assist.rpm_label` | – | under `g20_tacho` | day / night | nothing |
+| `assist.off` | unknown | – | `assist.off`, `assist.tacho_zero` | – | under `g20_tacho` | day / night | evidence weak: c.assist.off |
+| `assist.cold` | under | – | `assist.cold` | – | under `collar` | day / night | evidence weak: c.assist.cold |
+| `map.region` | under | `map_veil` | – | `map` | – | day / night | evidence weak: structure.map_veil.day, structure.map_veil.night |
+| `map.position_arrow` | under | – | – | `map.arrow` | – | day / night | nothing |
+| `structure.speedo` | under | `speedo.bottom_end`, `speedo.frame`, `speedo.glow`, `speedo.wing`, `speedo_numerals`, `speedo_scale_label` | – | – | `g20_speedo`, under `collar` | day / night | nothing |
+| `structure.speedo_needle` | under | – | – | `glow.speedo`, `pointer.speedo` | under `g20_speedo` | day / night | evidence weak: live.glow.speedo, live.pointer.speedo |
+| `structure.speedo_info_line` | under | `speedo_info_line` | – | – | under `g20_speedo` | day / night | nothing |
+| `structure.tacho` | under | `tacho.bottom_end`, `tacho.frame`, `tacho.glow`, `tacho.wing`, `tacho_numerals`, `tacho_zero (skip)` | – | – | `g20_tacho`, under `collar` | day / night | nothing |
+| `structure.tacho_needle` | under | – | – | `glow.tacho`, `band.tacho`, `pointer.tacho` | under `g20_tacho` | day / night | evidence weak: live.pointer.tacho |
+| `structure.tacho_info_line` | gone | `tacho_info_line` | – | – | under `g20_tacho` | day / night | stock layout only |
+| `structure.rev_band` | under | `rev_band` | – | – | under `collar`, under `g20_tacho` | day / night | nothing |
+| `structure.fuel_mini` | under | `fuel_mini`, `fuel_mini.fill` | – | `mini.fuel` | `g20_fuel`, `g20_fuel_fill`, under `collar`, under `g20_speedo` | day / night | evidence weak: live.mini.fuel |
+| `structure.oil_mini` | under | `oil_mini`, `oil_mini.fill` | – | `mini.oil` | `g20_oil`, `g20_oil_fill`, under `collar`, under `g20_tacho` | day / night | evidence weak: structure.oil_mini.fill.day, structure.oil_mini.fill.night, live.mini.oil |
+| `overlay.black_box` | over | – | `sim.black_box` | – | under `g20_tacho` | day / night | theme connected only |
+| `panel.background` (new) | under | `bg` | – | – | under `collar`, under `g20_speedo`, under `g20_tacho` | day / night | nothing |
+
+Never photographed, so drawn from a model or not at all (`docs/G20SIM-REPORT.md` section 7.6): the SPORT / ECO PRO labels, a three-digit sign, minus temperatures, a one-digit hour, other check-control messages, what lights `assist.info_tacho`, the gear letters R / N / S, a cold engine in the stock layout. The stock pointers were only seen at rest.
+
+### 7.2 Cross-checks (simulation against catalogue)
+
+Findings only: no existing element's relation, evidence, bbox or poly was changed. Proposed corrections are marked as such.
+
+1. **A suspicious link: the tacho "0".** C's `c.assist.tacho_zero` (the tacho scale's "0", drawn when the engine runs) is linked to `assist.off`; B's raster `structure.tacho_zero.day/.night` (skipped by the simulation) at the same spot (97.7 % overlap) is linked to `structure.tacho`. The "0" and OFF swap at one spot, but the "0" is a scale numeral, not the OFF text: with it, `assist.off`'s parts reach 8 px above and 11 px below the catalogue box `[1516, 580, 1568, 604]`. *Proposal:* link both "0"s to `structure.tacho` (or give the "0" its own element), and keep `assist.off` for OFF.
+2. **Unresolved parts** (no single element): `c.font` (the font), `app.g20_lut` (data), `app.collar` (it spans the rev band, both minis, both dials, `assist.cold`, `assist.info_tacho` and the background).
+3. **One new element:** `panel.background` (group `structure`, so context only and no conflicts): B's opaque background, which the simulation draws in every state. Relation `under`, evidence `medium`, on one basis row: photo 14, around our text-only theme (B's background scores SSIM 0.812 there, `docs/G20SIM-REPORT.md` section 5). Photos 10–13 were not assessed for it. Not added: the numerals and scale labels (the simulation links them to `structure.speedo` / `structure.tacho`, and the catalogue's `excluded` already counts them in those outlines), and the map veil (linked to `map.region`, which covers "the lighter map background seen in 14").
+4. **Relation and state: no conflict.** Every `over` element has only `over` parts (`tt.parking_brake` red and green, `bottom.belt_driver`, `assist.gear`, the black area), every `gone` element only stock-layout parts (`assist.mode_label_centre`, `assist.gear_centre`, `structure.tacho_info_line`), and the connected-only parts belong to `assist.mode_label` (under), `assist.gear` and `overlay.black_box` (over). **13 assumptions:** the simulation draws 12 elements the catalogue lists as `unknown` under a connected theme: `tt.brake`, `tt.tpms`, `tt.abs`, `tt.dsc`, `tt.auto_h`, `tt.steering`, `bottom.belt_rear`, `bottom.airbag`, `bottom.cc_info`, `assist.cc_panel`, `assist.info_tacho` and `assist.off` (with the "0"). That is the simulation's modelling choice, not evidence; the photo protocol (section 3) still settles them.
+5. **Boxes** (parts' union against the catalogue box, px as x0, y0, x1, y1; the glows are left out: they spread by design; "core" is alpha ≥ 128):
+   - `structure.speedo` x1 +56 (core +54) and `structure.tacho` x0 −46 (core −44): the bottom-line end hooks (`*.bottom_end`, drawn only without a check-control message) lie outside the hulls, which were measured on 08, where the panel covered them.
+   - `structure.speedo_info_line` x1 +85 (core +82) and `structure.tacho_info_line` x0 −85 (core −83): each info line is two segments (`docs/G20SIM-REPORT.md` section 5); the catalogue has one.
+   - `structure.fuel_mini` x1 −11 (core −13) and `structure.oil_mini` x0 +12 (core +15): the catalogue hulls include the needles; B's frames follow the white line.
+   - `structure.rev_band` y1 +7 (core +5): the band's bottom is lower than the hull, as B reports.
+   - `structure.speedo_needle`: the pointer's alpha > 0 box is +51 px wide (its faint shadow); its core is within 5 px. `structure.tacho_needle`: core x1 +91, from the live rev band `live.band.tacho` (linked to the needle), which runs from 0 to the pointer (measured at idle, x 1554–1643); the catalogue's needle hull holds only the bar.
+   - Parts mostly outside their element's shape: the four bottom-end hooks (0 %), the info lines (33–37 %), `structure.map_veil.night` (48 %: a box over the map, against the hull of the roads), the "0" (50 %).
+6. **App against simulation:** the app bakes statically what the simulation draws on a condition: B's tacho "0" (skipped by the simulation, which swaps "0" and OFF live) and the bottom-end hooks (hidden in the simulation while a check-control message shows); the minis' fills are clipped live at the needle in the simulation and lit by the shader from 0 up to the needle in the app.
+7. **What the app's textures cover** (alpha ≥ 128): `g20_tacho` hides `assist.off` (100 %) and `assist.rpm_label` (98 %; the app redraws "1/min x1000" as text, but not OFF: it shows the baked "0"), `assist.gear_centre` (56 %, gone anyway) and 56 % of `overlay.black_box` (BMW draws that on top). `g20_speedo` hides 18 px of `bottom.cc_info` and 1.6 % of `assist.cc_panel`. **The collar** (quarter size, so its edges are good to about 2 px) hides 21 % of `assist.info_tacho`, for which `docs/OVERLAY-PLAN-DIALS.md` opened a small window in our tacho rim: `tools/bake_scene.py` grows the collar by 4 px and blurs it, into the 3 px clearance `plan_dials.py` keeps around revealed elements. It also touches `tt.dsc` (10 px) and `assist.speed_limit` (29 px). Check the "i" on the bench (open point).
+8. **The four housing LEDs** (low beam, side lights, check engine, DSC OFF; `c.js` LAMPS with `onPanel: false`, the catalogue's `excluded`) are outside the panel: no part, never drawn.
+
+### 7.3 The plans, regenerated
+
+`plan.default.json` and `plan.safe.json` (`tools/overlay/headless.py`) and `plan.dials.json` (`tools/overlay/plan_dials.py`, then `headless.py --plan`) were regenerated against the linked catalogue. `tools/overlay/plan_diff.py` compares them with `main`:
+
+| Plan | Changed | Decisions | Conflicts |
+|---|---|---|---|
+| `plan.default.json` | `based_on.g20` | unchanged; `panel.background` added: cover | 114 → 114, identical |
+| `plan.safe.json` | `based_on.g20` | unchanged; `panel.background` added: cover | 99 → 99, identical |
+| `plan.dials.json` | `based_on.g20` | unchanged; `panel.background` added: cover, with a note | 47 → 47, identical |
+
+**The new element brings no conflict:** it is in the `structure` group, which is context only. `plan_dials.py` keeps it out of the collar (`NOT_IN_COLLAR`): as an `under` element covered by our dials it would otherwise have made the whole panel collar. `collar.dials.png` and `docs/overlay/dials_scheme.png` are byte-identical.
+
+### 7.4 Screenshots
+
+Our own drawings only (no photo underlay). The constructor in texture mode, theme connected, start-up lamps, at night and by day:
+
+![Texture mode, night, connected](overlay/parts_night_connected.png)
+
+![Texture mode, day, connected](overlay/parts_day_connected.png)
+
+The tree on the telltales and the speedo's parts, one part selected (inspector with its thumbnail, cross-links and its element below it):
+
+![The tree and a part](overlay/parts_tree.png)
+
+"Ours: G20 parts in the app": the `g20_comfort` textures with `g20_speedo` selected (the elements it covers dashed), and the `wb_dials` collar alone:
+
+![Ours, g20_comfort](overlay/parts_ours.png)
+
+![Ours, the collar](overlay/parts_ours_collar.png)
