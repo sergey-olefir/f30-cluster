@@ -66,8 +66,10 @@
         "round": [
           539,
           622,
-          46
-        ]
+          44
+        ],
+        "soft": 4,
+        "cover": "limit"
       },
       "measure": "speed",
       "kmh": true,
@@ -109,11 +111,12 @@
         "y": 656,
         "fade": 26,
         "box": [
-          1250,
-          585,
-          1276,
-          633
-        ]
+          1254,
+          589,
+          1272,
+          629
+        ],
+        "soft": 4
       },
       "measure": "rpm",
       "scale": {
@@ -124,6 +127,47 @@
       "start": 250.5,
       "sweep": 240.75,
       "off": 20.5
+    },
+    {
+      "id": "signs",
+      "type": "wbsign",
+      "class": "content",
+      "z": 3,
+      "x": 305,
+      "y": 460,
+      "w": 214,
+      "h": 93,
+      "conn": 1,
+      "tex": {
+        "limit": {
+          "tex": "sign_limit",
+          "x": 2,
+          "y": 2,
+          "w": 88,
+          "h": 89
+        },
+        "nopass": {
+          "tex": "sign_nopass",
+          "x": 124,
+          "y": 2,
+          "w": 88,
+          "h": 89
+        }
+      }
+    },
+    {
+      "id": "limit",
+      "type": "text",
+      "z": 5,
+      "x": 321,
+      "y": 490,
+      "w": 60,
+      "h": 32,
+      "text": "{{limit}}",
+      "font": "wb_val",
+      "color": "ink",
+      "align": "center",
+      "conn": 2
     },
     {
       "id": "fuel",
