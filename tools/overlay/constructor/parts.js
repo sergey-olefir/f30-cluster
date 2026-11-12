@@ -179,11 +179,18 @@
     if (w <= 0 || h <= 0) return null;
     const d = x.getImageData(r[0], r[1], w, h).data;
     let x0 = w, y0 = h, x1 = -1, y1 = -1, n = 0;
+    let c0 = w, d0 = h, c1 = -1, d1 = -1;          // the core: alpha >= 128 (or, additive, max channel >= 128)
     for (let j = 0; j < h; j++) {
       for (let i = 0; i < w; i++) {
         const o = 4 * (j * w + i);
         const on = additive ? d[o] + d[o + 1] + d[o + 2] > 0 : d[o + 3] > 0;
         if (!on) continue;
+        if (additive ? Math.max(d[o], d[o + 1], d[o + 2]) >= 128 : d[o + 3] >= 128) {
+          if (i < c0) c0 = i;
+          if (i > c1) c1 = i;
+          if (j < d0) d0 = j;
+          if (j > d1) d1 = j;
+        }
         n++;
         if (i < x0) x0 = i;
         if (i > x1) x1 = i;
@@ -197,7 +204,7 @@
     c.width = box[2] - box[0];
     c.height = box[3] - box[1];
     c.getContext('2d').drawImage(scratch, box[0], box[1], c.width, c.height, 0, 0, c.width, c.height);
-    return { img: c, box, px: n };
+    return { img: c, box, px: n, core: c1 >= 0 ? [r[0] + c0, r[1] + d0, r[0] + c1 + 1, r[1] + d1 + 1] : null };
   }
   const V = (x) => (x && typeof x === 'object' && 'v' in x && 'ev' in x ? x.v : x);
   function polyBox(poly) {
@@ -312,7 +319,7 @@
       const st = partState(r, lampG);
       const o = { state: { look: lampG.look, connected: lampG.conn, preset: lampG.lamps, rpm: st.values.rpm, oil: st.values.oil, ccMessage: st.ccMessage, limit: st.limit, lamps: Object.keys(st.lamps) } };
       if (v.fallback || v.empty) o.fallback = v.fallback || v.empty;
-      else { o.bbox = v.box; o.px = v.px; }
+      else { o.bbox = v.box; o.px = v.px; o.core = v.core; }
       out[r.id] = o;
     }
     P.forceCond = false;

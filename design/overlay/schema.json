@@ -1185,6 +1185,17 @@
             "null"
           ]
         },
+        "core": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/bbox"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Panel px extent of alpha >= 128 (additive parts: a channel >= 128): the part without its soft halo or shadow."
+        },
         "alpha_px": {
           "type": [
             "integer",
@@ -1347,6 +1358,17 @@
                   "type": "null"
                 }
               ]
+            },
+            "core": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/bbox"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The extent of alpha >= 128 (additive parts: a channel >= 128): without soft shadows and halos."
             },
             "px": {
               "type": "integer"
