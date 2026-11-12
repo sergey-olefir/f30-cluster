@@ -33,6 +33,15 @@ def font_file():
             return p, j.get("family", "?"), "FONT.json (package C)"
     except Exception:
         pass
+    # FONT.json lives in the git-ignored bake/work and may be gone: the font the fit was made with is recorded in
+    # params/numerals.json (rendering with another font would change every numeral's shape)
+    try:
+        j = lib.read_json(lib.os.path.join(lib.PARAMS, "numerals.json"))
+        p = lib.os.path.join(lib.WT, j["font_file"])
+        if lib.os.path.exists(p):
+            return p, j.get("family", "?"), j.get("font_source", "params/numerals.json")
+    except Exception:
+        pass
     return lib.FONT_FALLBACK, "Arimo", "fallback (FONT.json absent)"
 
 

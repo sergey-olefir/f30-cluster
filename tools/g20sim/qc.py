@@ -27,7 +27,7 @@ import fit_soft as fs  # noqa: E402
 import qc_struct as QS  # noqa: E402
 import qc as Q        # noqa: E402  (bake/src/qc.py)
 
-E = os.path.join(WT, "bake", "work", "g20sim", "E")
+E = os.environ.get("G20SIM_OUT") or os.path.join(WT, "bake", "work", "g20sim", "E")   # the shots (qc_shots.sh)
 OUT = os.path.join(E, "qc")
 
 # what each photo shows of package C's elements (lit lamps, texts present in that state)
@@ -82,6 +82,7 @@ def main():
     geo = model.geometry()
     R = QS.rois(geo)
     table = {}
+    black = {}
     for photo, look, shot in SHOTS:
         ref = lib.load_rect(photo)
         ours = load(os.path.join(E, shot))
@@ -108,6 +109,11 @@ def main():
         r = measure(ref, ours, bg, "B background", tag)
         if r:
             rows["B background"] = r
+        # the colour rule (polish C): the empty space must be pure black in OUR render, whatever the photo shows
+        # (the photo's lit-up black and haze are what the rule drops, so the SSIM / dE above get worse by design)
+        lv = ours[bg].max(-1) * 255
+        black[tag] = {"px": int(bg.sum()), "max": round(float(lv.max()), 1),
+                      "p99.9": round(float(np.percentile(lv, 99.9)), 1), "over_2": int((lv > 2.5).sum())}
         # D: the pointer zones (glow + bar, as B's fit masked them) and the map
         zone, corridor = fs.zone_mask(photo, ref)
         r = measure(ref, ours, (zone | corridor) & ~bad & ~cel, "D pointer zones", tag)
@@ -141,7 +147,10 @@ def main():
         cv2.imwrite(os.path.join(OUT, "ab_%s.png" % tag),
                     (np.vstack([ref, ours, np.clip(np.abs(ref - ours) * 2, 0, 1)]) * 255).astype(np.uint8)[..., ::-1])
     with open(os.path.join(OUT, "qc_table.json"), "w") as fh:
-        json.dump(table, fh, indent=1, ensure_ascii=False)
+        json.dump(dict(table, empty_space_ours=black), fh, indent=1, ensure_ascii=False)
+    print("Empty space in our render (B background mask; levels 0-255, max channel):")
+    for t, b in black.items():
+        print("  %s: max %.1f, 99.9th pct %.1f, px over 2 levels %d of %d" % (t, b["max"], b["p99.9"], b["over_2"], b["px"]))
     names = []
     for rows in table.values():
         for k in rows:

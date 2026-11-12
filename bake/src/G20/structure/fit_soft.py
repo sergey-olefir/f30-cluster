@@ -6,14 +6,17 @@
 Absolute code values of the photo are the target (no exposure normalisation). Masked from every fit: crisp
 content (top-hat of luminance: ticks, numerals, lines, roads, text), every non-structure element's bbox from
 g20_comfort.json, the needles and the pointer-glow zones (distance < ZONE_R px to the needle, y > ZONE_Y),
-glare areas listed in GLARE. Masked bins of the (s, d) tables are filled from their neighbours along the curve,
-so the static model continues under the pointer glow.
+glare areas listed in GLARE. The raw (s, d) tables are then cleaned (clean_soft.py: outlier bins, the pointers'
+glow on the faces, the camera's haze in the glow) and filled in 2-D, so the static model continues under the
+pointer glow. The background is still fitted (the glow is measured against it, the minis' fill uses it as the
+photo's black level), but it is rendered pure black (render_soft.bg_layer).
 """
 import sys
 
 import cv2
 import numpy as np
 
+import clean_soft as clean
 import lib
 import model
 
@@ -238,25 +241,21 @@ def fit(photo, look):
         raw["wing", d] = lib.table_fit(img, D.sB, -D.dB, sE_B, model.WING_D, wdom & ~ex & ~zn, raw_only=True)
         edom = (D.distE < 16.5) & (D.dE > -4.5) & (D.distB > 3)
         raw["wingE", d] = lib.table_fit(img, D.sE, D.dE, sE_E, model.WINGE_D, edom & ~ex & ~zn, raw_only=True)
-    # the dials are mirror images and their tables share the speedo-space curves: a face bin the tacho never shows
-    # (its apex under the gear letter) is taken from the speedo, scaled by the per-channel median ratio of the bins
-    # both see. (The other way round, and for the glow, it made the fit worse: the glow differs at the top.)
-    smooth = {"glow": 1.5, "wing": 2.0, "wingE": 2.0}
-    for kind in ("glow", "wing", "wingE"):
-        A, B = raw[kind, "speedo"], raw[kind, "tacho"]
-        both = ~np.isnan(A[..., 0]) & ~np.isnan(B[..., 0])
-        for d, own, other in (("speedo", A, B), ("tacho", B, A)):
-            T = own.copy()
-            take = np.isnan(T[..., 0]) & ~np.isnan(other[..., 0])
-            if not (kind in ("wing", "wingE") and d == "tacho"):
-                take[:] = False     # tried both ways: only the tacho faces (apex under the gear letter) gain
-            if both.sum() > 20:
-                g = np.median(own[both] + 1e-3, 0) / np.median(other[both] + 1e-3, 0)
-                T[take] = other[take] * g
-            report["%s_%s_from_other_dial" % (kind, d)] = float(take.mean())
-            Tf, filled = lib.table_fill(T, smooth[kind])
-            out["%s_%s" % (kind, d)] = np.clip(Tf, 0, 1)
-            report["%s_%s_filled" % (kind, d)] = float(filled.mean())
+    # Cleaning (clean_soft.py, polish package C): outlier bins rejected, the pointers' glow region continued from
+    # above, the glow's neutral haze dropped, 2-D fill. The dials are mirror images: the faces (wing, bevel) take one
+    # table for both, the mean of the two where both are seen; the glows stay per dial (they differ at the top).
+    band, E, _ = model.curves(geo)
+    yB = clean.curve_y(band, model.s_edges(band))
+    yE = clean.curve_y(E, model.s_edges(E))
+    for kind, ys in (("wing", yB), ("wingE", yE)):
+        T, seen = clean.face([raw[kind, "speedo"], raw[kind, "tacho"]], ys)
+        for d in ("speedo", "tacho"):
+            out["%s_%s" % (kind, d)] = T
+        report["%s_seen" % kind] = seen
+    for d in ("speedo", "tacho"):
+        T, info = clean.glow(raw["glow", d], yB, model.GLOW_D)
+        out["glow_%s" % d] = T
+        report["glow_%s" % d] = info
     # ---- map veil: attenuation of the map's roads at the left/right ends of map.region (road contrast)
     out["veil"] = fit_veil(im, crisp)
     report["veil"] = out["veil"].tolist()

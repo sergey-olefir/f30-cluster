@@ -85,10 +85,40 @@ def ticks_alpha(C, dial, X, Y):
     return a, {"major": [Lmaj, Wmaj], "minor": [Lmin, Wmin], "n": [int(major.sum()), int((~major).sum())]}
 
 
+# The slanted gap between the bottom frame line and the curved end next to the check-control area (polish C, from
+# package B's seam list): 09 and 14 show a dark gap ~2.5 px wide, its centre line through (695.8, 646) leaning
+# 0.6 px right per px down on the speedo (the tacho: mirrored, measured 1223.5 at y 646); the hook sits ~2 px higher.
+GAP = {"p": (695.8, 646.0), "dxdy": 0.6, "half": 1.5}
+
+
+def bottom_gap(geo, dial, X, Y, keep):
+    """Alpha factor at the bottom line's gap by its hook: keep = 'line' keeps the frame line's side (towards the
+    dial), 'hook' the curved end's side; each is cut at its edge of the gap. 1 away from the gap."""
+    Xs = 2 * geo["mirror_axis_x"] - X if dial == "tacho" else X
+    px, py = GAP["p"]
+    n = np.array([1.0, -GAP["dxdy"]]) / np.hypot(1.0, GAP["dxdy"])      # normal of the gap's centre line
+    sd = (Xs - px) * n[0] + (Y - py) * n[1]                             # > 0 on the hook's side (speedo space)
+    if keep == "line":
+        sd = -sd
+    near = (np.abs(Y - py) < 14) & (np.abs(Xs - px) < 14)
+    k = 1.0 / (np.sqrt(2) * SIGMA_CAM)
+    cut = 0.5 * (1 + erf((sd - GAP["half"]) * k))
+    return np.where(near, cut, 1.0).astype(np.float32)
+
+
+def hook_path(P, run=5.0, ext=8.0):
+    """The traced curved end, its first few px (the photo's rounded tip, where the trace bends) replaced by a
+    straight run back along the tangent, so that the gap's slanted cut makes the end, as on the car."""
+    P = np.asarray(P, float)
+    i = int(np.argmax(np.abs(P[:, 0] - P[0, 0]) >= run))
+    t = lib.unit(P[min(i + 4, len(P) - 1)] - P[i])
+    return np.vstack([P[i] - ext * t, P[i:]])
+
+
 def frame_layer(geo, C, dial, look):
     x0, y0, x1, y1 = model.BOX[dial]
     X, Y = canvas(x0, y0, x1, y1)
-    a = frame_alpha(geo, C, dial, look, X, Y)
+    a = frame_alpha(geo, C, dial, look, X, Y) * bottom_gap(geo, dial, X, Y, "line")
     t, info = ticks_alpha(C, dial, X, Y)
     a = np.maximum(a, t)
     col = C["frame_profile"][look]["colour"]
@@ -130,12 +160,12 @@ def info_line_layer(C, dial, look):
 
 # ----------------------------------------------------------------------------------------------- curved ends
 def curved_end_layer(geo, C, dial, look, width=6.2):
-    P = np.array(C["curved_ends"][dial], float)
+    P = hook_path(C["curved_ends"][dial])
     x0, y0 = int(P[:, 0].min()) - 8, int(P[:, 1].min()) - 8
     x1, y1 = int(P[:, 0].max()) + 9, int(P[:, 1].max()) + 9
     X, Y = canvas(x0, y0, x1, y1)
     s, d, dist = lib.curve_coords(P, X, Y)
-    a = box_profile(dist, width, SIGMA_CAM)
+    a = box_profile(dist, width, SIGMA_CAM) * bottom_gap(geo, dial, X, Y, "hook")
     col = C["frame_profile"][look]["colour"]
     return crop(rgba(col, a), x0, y0)
 

@@ -12,6 +12,7 @@ import argparse
 import os
 import sys
 import time
+import zlib
 
 import numpy as np
 
@@ -51,13 +52,14 @@ def build_layers(look):
     bg = rs.bg_layer(P, scale=2)
     out.append((entry("structure.bg.%s" % look, "panel.background", "bg.%s.png" % look, 0, 0, 0, "albedo", look,
                       scale=2, evidence="strong",
-                      notes="Opaque panel background: a smooth node-grid surface (40 px nodes, membrane-regularised) "
-                            "fitted to the photo's background pixels outside every element; half resolution."),
+                      notes="Opaque panel background: pure black (the owner's colour rule, polish C). The photo's "
+                            "blue-grey there (still fitted, as a node grid, to measure the soft layers against) is "
+                            "the LCD's lit-up black, the cabin light and the camera's haze; half resolution."),
                 bg, True))
     v, vx, vy = rs.veil_layer(P, scale=2)
     out.append((entry("structure.map_veil.%s" % look, "map.region", "map_veil.%s.png" % look, vx, vy, 20, "albedo",
                       look, scale=2, evidence="weak",
-                      notes="Semi-transparent dark veil over map.region where the dial faces overlap the map (left "
+                      notes="Semi-transparent black veil over map.region where the dial faces overlap the map (left "
                             "and right ends). Alpha = 1 - road contrast(x) / plateau, fitted as two logistic ramps "
                             "%s. Only the roads' attenuation is in it; the map's own darker background fade at its "
                             "ends is NOT (D's map). Drop or tune it when calibrating with D's map."
@@ -69,14 +71,20 @@ def build_layers(look):
                           gx, gy, 22, "glow", look, composite="lighter", evidence="strong",
                           notes="Red-orange band glow between the band line and the frame, added over the background: "
                                 "a profile table RGB(s along the band, distance from it) fitted to the photo minus "
-                                "the background. Pointer-glow zone (distance < 100 px to the needle, y > 415) "
-                                "masked and continued from the neighbours along the band (weak there)."), g, True))
+                                "the background, cleaned (clean_soft.py): outlier bins dropped, only the glow's own "
+                                "red-orange kept (the camera's neutral haze removed), faded out past the band's ends. "
+                                "Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued "
+                                "from the neighbours along the band (weak there)."),
+                    g, True))
         w, wx, wy = R.crop(*ly["wing"])
         out.append((entry("structure.%s.wing.%s" % (dial, look), "structure.%s" % dial, "%s.wing.%s.png" % (dial, look),
                           wx, wy, 24, "albedo", look, evidence="strong",
                           notes="Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. "
-                                "Colour tables RGB(s, depth) along the band and along E. The lower part (y > 415) is "
-                                "under the pointer glow in every photo: continued from above (weak)."), w, True))
+                                "Colour tables RGB(s, depth) along the band and along E, one for both dials (their "
+                                "mean: one side's cabin light averages out), outlier bins (the numerals' dark halos) "
+                                "dropped, blurred inside the face (no creases). The lower part (y > 415) is under the "
+                                "pointer glow in every photo: continued from above (weak). Day: the night face times "
+                                "one gain (the day photos show the sky's reflection mid-face)."), w, True))
         f, fx, fy, info = R.frame_layer(geo, C, dial, look)
         out.append((entry("structure.%s.frame.%s" % (dial, look), "structure.%s" % dial, "%s.frame.%s.png" % (dial, look),
                           fx, fy, 30, "albedo", look, evidence="strong",
@@ -159,7 +167,8 @@ def write_all(layers_by_look):
     for look, layers in layers_by_look.items():
         for e, img, dither in layers:
             p = os.path.join(lib.WT, "bench", "g20", e["file"])
-            imageio.write_png(p, img, dither=dither, seed=hash(e["id"]) & 0xffff)
+            # a stable seed (str hash() is salted per process: the dither, and the PNGs, changed on every build)
+            imageio.write_png(p, img, dither=dither, seed=zlib.crc32(e["id"].encode()) & 0xffff)
             e["w"], e["h"] = int(img.shape[1]), int(img.shape[0])
             e["bytes"] = os.path.getsize(p)
             total += e["bytes"]

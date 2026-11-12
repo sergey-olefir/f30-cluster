@@ -90,7 +90,7 @@
    "used_by": [
     "bench-sim"
    ],
-   "notes": "Opaque panel background: a smooth node-grid surface (40 px nodes, membrane-regularised) fitted to the photo's background pixels outside every element; half resolution.",
+   "notes": "Opaque panel background: pure black (the owner's colour rule, polish C). The photo's blue-grey there (still fitted, as a node grid, to measure the soft layers against) is the LCD's lit-up black, the cabin light and the camera's haze; half resolution.",
    "vs_catalogue": {
     "element_bbox": [
      0.0,
@@ -152,7 +152,7 @@
     "bench-sim",
     "layout:wb_dials"
    ],
-   "notes": "Opaque panel background: a smooth node-grid surface (40 px nodes, membrane-regularised) fitted to the photo's background pixels outside every element; half resolution.",
+   "notes": "Opaque panel background: pure black (the owner's colour rule, polish C). The photo's blue-grey there (still fitted, as a node grid, to measure the soft layers against) is the LCD's lit-up black, the cabin light and the camera's haze; half resolution.",
    "baked_into": [
     "app.collar"
    ],
@@ -387,7 +387,7 @@
     228
    ],
    "scale": 2,
-   "alpha_px": 372960,
+   "alpha_px": 373064,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -399,7 +399,7 @@
    "used_by": [
     "bench-sim"
    ],
-   "notes": "Semi-transparent dark veil over map.region where the dial faces overlap the map (left and right ends). Alpha = 1 - road contrast(x) / plateau, fitted as two logistic ramps [1.0, 598.13, 53.46, 1.0, 1320.77, 53.46]. Only the roads' attenuation is in it; the map's own darker background fade at its ends is NOT (D's map). Drop or tune it when calibrating with D's map.",
+   "notes": "Semi-transparent black veil over map.region where the dial faces overlap the map (left and right ends). Alpha = 1 - road contrast(x) / plateau, fitted as two logistic ramps [1.0, 598.13, 53.46, 1.0, 1320.77, 53.46]. Only the roads' attenuation is in it; the map's own darker background fade at its ends is NOT (D's map). Drop or tune it when calibrating with D's map.",
    "vs_catalogue": {
     "element_bbox": [
      555.0,
@@ -448,7 +448,7 @@
     228
    ],
    "scale": 2,
-   "alpha_px": 78268,
+   "alpha_px": 78292,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -460,7 +460,7 @@
    "used_by": [
     "bench-sim"
    ],
-   "notes": "Semi-transparent dark veil over map.region where the dial faces overlap the map (left and right ends). Alpha = 1 - road contrast(x) / plateau, fitted as two logistic ramps [0.59, 606.55, 3.23, 0.59, 1312.35, 3.23]. Only the roads' attenuation is in it; the map's own darker background fade at its ends is NOT (D's map). Drop or tune it when calibrating with D's map.",
+   "notes": "Semi-transparent black veil over map.region where the dial faces overlap the map (left and right ends). Alpha = 1 - road contrast(x) / plateau, fitted as two logistic ramps [0.59, 606.55, 3.23, 0.59, 1312.35, 3.23]. Only the roads' attenuation is in it; the map's own darker background fade at its ends is NOT (D's map). Drop or tune it when calibrating with D's map.",
    "vs_catalogue": {
     "element_bbox": [
      555.0,
@@ -490,26 +490,26 @@
     87,
     37,
     704,
-    648
+    647
    ],
    "core": [
     148,
-    97,
-    693,
-    611
+    100,
+    539,
+    610
    ],
    "placement": [
     87,
     37,
     704,
-    648
+    647
    ],
    "size": [
     617,
-    611
+    610
    ],
    "scale": 1,
-   "alpha_px": 70546,
+   "alpha_px": 68164,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -522,7 +522,7 @@
    "used_by": [
     "bench-sim"
    ],
-   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
+   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background, cleaned (clean_soft.py): outlier bins dropped, only the glow's own red-orange kept (the camera's neutral haze removed), faded out past the band's ends. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
    "vs_catalogue": {
     "element_bbox": [
      82.0,
@@ -534,7 +534,7 @@
      5.0,
      1.0,
      0.0,
-     -4.0
+     -5.0
     ],
     "inside_pct": 99.7
    }
@@ -555,10 +555,10 @@
     649
    ],
    "core": [
-    148,
-    97,
-    695,
-    611
+    147,
+    103,
+    517,
+    610
    ],
    "placement": [
     87,
@@ -571,7 +571,7 @@
     612
    ],
    "scale": 1,
-   "alpha_px": 74519,
+   "alpha_px": 72428,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -585,7 +585,7 @@
     "bench-sim",
     "layout:g20_comfort"
    ],
-   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
+   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background, cleaned (clean_soft.py): outlier bins dropped, only the glow's own red-orange kept (the camera's neutral haze removed), faded out past the band's ends. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
    "baked_into": [
     "app.g20_speedo"
    ],
@@ -615,29 +615,29 @@
    "render": "raster",
    "kind": "glow",
    "bbox": [
-    1214,
-    39,
-    1827,
-    646
+    1215,
+    38,
+    1829,
+    642
    ],
    "core": [
-    1215,
+    1216,
     48,
-    1774,
-    610
-   ],
-   "placement": [
-    1214,
-    39,
-    1827,
-    646
-   ],
-   "size": [
-    613,
+    1775,
     607
    ],
+   "placement": [
+    1215,
+    38,
+    1829,
+    642
+   ],
+   "size": [
+    614,
+    604
+   ],
    "scale": 1,
-   "alpha_px": 63467,
+   "alpha_px": 66034,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -650,7 +650,7 @@
    "used_by": [
     "bench-sim"
    ],
-   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
+   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background, cleaned (clean_soft.py): outlier bins dropped, only the glow's own red-orange kept (the camera's neutral haze removed), faded out past the band's ends. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
    "vs_catalogue": {
     "element_bbox": [
      1204.0,
@@ -659,12 +659,12 @@
      652.0
     ],
     "d_edges": [
-     10.0,
-     3.0,
-     -9.0,
-     -6.0
+     11.0,
+     2.0,
+     -7.0,
+     -10.0
     ],
-    "inside_pct": 99.3
+    "inside_pct": 98.9
    }
   },
   {
@@ -677,29 +677,29 @@
    "render": "raster",
    "kind": "glow",
    "bbox": [
-    1214,
-    41,
+    1215,
+    48,
     1824,
-    649
+    637
    ],
    "core": [
-    1215,
-    54,
-    1771,
-    610
+    1414,
+    105,
+    1773,
+    607
    ],
    "placement": [
-    1214,
-    41,
+    1215,
+    48,
     1824,
-    649
+    637
    ],
    "size": [
-    610,
-    608
+    609,
+    589
    ],
    "scale": 1,
-   "alpha_px": 60575,
+   "alpha_px": 61352,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -713,7 +713,7 @@
     "bench-sim",
     "layout:g20_comfort"
    ],
-   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
+   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background, cleaned (clean_soft.py): outlier bins dropped, only the glow's own red-orange kept (the camera's neutral haze removed), faded out past the band's ends. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
    "baked_into": [
     "app.g20_tacho"
    ],
@@ -725,12 +725,12 @@
      652.0
     ],
     "d_edges": [
-     10.0,
-     5.0,
+     11.0,
+     12.0,
      -12.0,
-     -3.0
+     -15.0
     ],
-    "inside_pct": 99.6
+    "inside_pct": 99.7
    }
   },
   {
@@ -777,7 +777,7 @@
    "used_by": [
     "bench-sim"
    ],
-   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E. The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak).",
+   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E, one for both dials (their mean: one side's cabin light averages out), outlier bins (the numerals' dark halos) dropped, blurred inside the face (no creases). The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak). Day: the night face times one gain (the day photos show the sky's reflection mid-face).",
    "vs_catalogue": {
     "element_bbox": [
      82.0,
@@ -839,7 +839,7 @@
     "bench-sim",
     "layout:g20_comfort"
    ],
-   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E. The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak).",
+   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E, one for both dials (their mean: one side's cabin light averages out), outlier bins (the numerals' dark halos) dropped, blurred inside the face (no creases). The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak). Day: the night face times one gain (the day photos show the sky's reflection mid-face).",
    "baked_into": [
     "app.g20_speedo"
    ],
@@ -876,7 +876,7 @@
    ],
    "core": [
     1242,
-    94,
+    92,
     1768,
     605
    ],
@@ -903,7 +903,7 @@
    "used_by": [
     "bench-sim"
    ],
-   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E. The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak).",
+   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E, one for both dials (their mean: one side's cabin light averages out), outlier bins (the numerals' dark halos) dropped, blurred inside the face (no creases). The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak). Day: the night face times one gain (the day photos show the sky's reflection mid-face).",
    "vs_catalogue": {
     "element_bbox": [
      1204.0,
@@ -937,7 +937,7 @@
    ],
    "core": [
     1242,
-    93,
+    94,
     1768,
     605
    ],
@@ -965,7 +965,7 @@
     "bench-sim",
     "layout:g20_comfort"
    ],
-   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E. The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak).",
+   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E, one for both dials (their mean: one side's cabin light averages out), outlier bins (the numerals' dark halos) dropped, blurred inside the face (no creases). The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak). Day: the night face times one gain (the day photos show the sky's reflection mid-face).",
    "baked_into": [
     "app.g20_tacho"
    ],
@@ -995,29 +995,29 @@
    "render": "raster",
    "kind": "albedo",
    "bbox": [
-    14,
-    435,
+    20,
+    440,
     197,
-    646
+    639
    ],
    "core": [
-    15,
-    437,
+    22,
+    443,
     195,
-    645
+    637
    ],
    "placement": [
-    14,
-    435,
+    20,
+    440,
     197,
-    646
+    639
    ],
    "size": [
-    183,
-    211
+    177,
+    199
    ],
    "scale": 1,
-   "alpha_px": 20452,
+   "alpha_px": 16337,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -1033,7 +1033,7 @@
    "used_by": [
     "bench-sim"
    ],
-   "notes": "Level fill (grey gradient + dark scale lines), FULL SWEEP: clip it to the side of the fuel needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
+   "notes": "Level fill (grey gradient + dark scale lines), from its inner border line in; where the photo showed the panel's black it is see-through (polish C). FULL SWEEP: clip it to the side of the fuel needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
    "vs_catalogue": {
     "element_bbox": [
      7.0,
@@ -1042,10 +1042,10 @@
      651.0
     ],
     "d_edges": [
-     7.0,
-     3.0,
+     13.0,
+     8.0,
      -18.0,
-     -5.0
+     -12.0
     ],
     "inside_pct": 100.0
    }
@@ -1060,29 +1060,29 @@
    "render": "raster",
    "kind": "albedo",
    "bbox": [
-    14,
-    435,
+    20,
+    440,
     197,
-    646
+    639
    ],
    "core": [
-    15,
-    437,
+    22,
+    443,
     195,
-    645
+    637
    ],
    "placement": [
-    14,
-    435,
+    20,
+    440,
     197,
-    646
+    639
    ],
    "size": [
-    183,
-    211
+    177,
+    199
    ],
    "scale": 1,
-   "alpha_px": 20452,
+   "alpha_px": 17067,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -1099,7 +1099,7 @@
     "bench-sim",
     "layout:g20_comfort"
    ],
-   "notes": "Level fill (grey gradient + dark scale lines), FULL SWEEP: clip it to the side of the fuel needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
+   "notes": "Level fill (grey gradient + dark scale lines), from its inner border line in; where the photo showed the panel's black it is see-through (polish C). FULL SWEEP: clip it to the side of the fuel needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
    "baked_into": [
     "app.g20_fuel_fill"
    ],
@@ -1111,10 +1111,10 @@
      651.0
     ],
     "d_edges": [
-     7.0,
-     3.0,
+     13.0,
+     8.0,
      -18.0,
-     -5.0
+     -12.0
     ],
     "inside_pct": 100.0
    }
@@ -1129,29 +1129,29 @@
    "render": "raster",
    "kind": "albedo",
    "bbox": [
-    1723,
-    435,
-    1905,
-    646
+    1725,
+    445,
+    1898,
+    639
    ],
    "core": [
-    1726,
-    437,
-    1904,
-    645
+    1727,
+    447,
+    1896,
+    637
    ],
    "placement": [
-    1723,
-    435,
-    1905,
-    646
+    1725,
+    445,
+    1898,
+    639
    ],
    "size": [
-    182,
-    211
+    173,
+    194
    ],
    "scale": 1,
-   "alpha_px": 20354,
+   "alpha_px": 17554,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -1167,7 +1167,7 @@
    "used_by": [
     "bench-sim"
    ],
-   "notes": "Level fill (grey gradient + dark scale lines), FULL SWEEP: clip it to the side of the oil needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
+   "notes": "Level fill (grey gradient + dark scale lines), from its inner border line in; where the photo showed the panel's black it is see-through (polish C). FULL SWEEP: clip it to the side of the oil needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
    "vs_catalogue": {
     "element_bbox": [
      1706.0,
@@ -1176,12 +1176,12 @@
      651.0
     ],
     "d_edges": [
+     19.0,
      17.0,
-     7.0,
-     -6.0,
-     -5.0
+     -13.0,
+     -12.0
     ],
-    "inside_pct": 99.9
+    "inside_pct": 100.0
    }
   },
   {
@@ -1194,29 +1194,29 @@
    "render": "raster",
    "kind": "albedo",
    "bbox": [
-    1723,
-    435,
-    1905,
-    646
+    1725,
+    445,
+    1898,
+    639
    ],
    "core": [
-    1726,
-    437,
-    1904,
-    645
+    1727,
+    447,
+    1896,
+    637
    ],
    "placement": [
-    1723,
-    435,
-    1905,
-    646
+    1725,
+    445,
+    1898,
+    639
    ],
    "size": [
-    182,
-    211
+    173,
+    194
    ],
    "scale": 1,
-   "alpha_px": 20358,
+   "alpha_px": 17558,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -1233,7 +1233,7 @@
     "bench-sim",
     "layout:g20_comfort"
    ],
-   "notes": "Level fill (grey gradient + dark scale lines), FULL SWEEP: clip it to the side of the oil needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
+   "notes": "Level fill (grey gradient + dark scale lines), from its inner border line in; where the photo showed the panel's black it is see-through (polish C). FULL SWEEP: clip it to the side of the oil needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
    "baked_into": [
     "app.g20_oil_fill"
    ],
@@ -1245,12 +1245,12 @@
      651.0
     ],
     "d_edges": [
+     19.0,
      17.0,
-     7.0,
-     -6.0,
-     -5.0
+     -13.0,
+     -12.0
     ],
-    "inside_pct": 99.9
+    "inside_pct": 100.0
    }
   },
   {
@@ -1285,7 +1285,7 @@
     625
    ],
    "scale": 1,
-   "alpha_px": 30303,
+   "alpha_px": 30244,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -1311,7 +1311,7 @@
      8.0,
      2.0
     ],
-    "inside_pct": 74.4
+    "inside_pct": 74.5
    }
   },
   {
@@ -1346,7 +1346,7 @@
     625
    ],
    "scale": 1,
-   "alpha_px": 30995,
+   "alpha_px": 30947,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -1376,7 +1376,7 @@
      6.0,
      3.0
     ],
-    "inside_pct": 70.5
+    "inside_pct": 70.6
    }
   },
   {
@@ -1411,7 +1411,7 @@
     626
    ],
    "scale": 1,
-   "alpha_px": 31286,
+   "alpha_px": 31276,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -1472,7 +1472,7 @@
     623
    ],
    "scale": 1,
-   "alpha_px": 29406,
+   "alpha_px": 29388,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -1521,7 +1521,7 @@
     651
    ],
    "core": [
-    695,
+    696,
     607,
     758,
     648
@@ -1537,7 +1537,7 @@
     46
    ],
    "scale": 1,
-   "alpha_px": 941,
+   "alpha_px": 927,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -1585,7 +1585,7 @@
     651
    ],
    "core": [
-    695,
+    696,
     607,
     758,
     648
@@ -1601,7 +1601,7 @@
     46
    ],
    "scale": 1,
-   "alpha_px": 941,
+   "alpha_px": 927,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -1649,27 +1649,27 @@
    "bbox": [
     1158,
     607,
-    1228,
+    1227,
     652
    ],
    "core": [
     1160,
     609,
-    1226,
+    1223,
     650
    ],
    "placement": [
     1158,
     607,
-    1228,
+    1227,
     652
    ],
    "size": [
-    70,
+    69,
     45
    ],
    "scale": 1,
-   "alpha_px": 947,
+   "alpha_px": 919,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -1695,7 +1695,7 @@
     "d_edges": [
      -46.0,
      571.0,
-     -608.0,
+     -609.0,
      0.0
     ],
     "inside_pct": 0.0
@@ -1713,27 +1713,27 @@
    "bbox": [
     1158,
     607,
-    1228,
+    1227,
     652
    ],
    "core": [
     1160,
     609,
-    1226,
+    1223,
     650
    ],
    "placement": [
     1158,
     607,
-    1228,
+    1227,
     652
    ],
    "size": [
-    70,
+    69,
     45
    ],
    "scale": 1,
-   "alpha_px": 947,
+   "alpha_px": 919,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -1763,7 +1763,7 @@
     "d_edges": [
      -46.0,
      571.0,
-     -608.0,
+     -609.0,
      0.0
     ],
     "inside_pct": 0.0
@@ -6300,7 +6300,7 @@
    "sources": [
     "08"
    ],
-   "notes": "6WB Dials + G20: where our background stays opaque over the stock dials that stick out past ours; alpha from design/overlay/collar.dials.png (grown 4 px, blurred 4 px, quarter size), colour from the simulation's night background (tools/bake_scene.py). Spans several elements: see 'covers'.",
+   "notes": "6WB Dials + G20: where our background stays opaque over the stock dials that stick out past ours; alpha from design/overlay/collar.dials.png (tools/bake_scene.py), colour from the simulation's night background. Spans several elements: see 'covers'.",
    "covers": [
     {
      "element": "structure.rev_band",
@@ -6456,7 +6456,7 @@
     226
    ],
    "scale": 1,
-   "alpha_px": 26527,
+   "alpha_px": 25130,
    "layer": "theme",
    "state": "connected",
    "look": "night",
@@ -6473,13 +6473,13 @@
    "covers": [
     {
      "element": "structure.fuel_mini",
-     "px": 24614,
-     "pct": 74.0
+     "px": 22809,
+     "pct": 68.6
     },
     {
      "element": "panel.background",
-     "px": 25575,
-     "pct": 1.9
+     "px": 23770,
+     "pct": 1.7
     }
    ]
   },
@@ -6608,7 +6608,7 @@
     222
    ],
    "scale": 1,
-   "alpha_px": 26295,
+   "alpha_px": 25882,
    "layer": "theme",
    "state": "connected",
    "look": "night",
@@ -6625,12 +6625,12 @@
    "covers": [
     {
      "element": "structure.oil_mini",
-     "px": 24515,
-     "pct": 69.6
+     "px": 23889,
+     "pct": 67.8
     },
     {
      "element": "panel.background",
-     "px": 25455,
+     "px": 24825,
      "pct": 1.8
     }
    ]
@@ -6667,7 +6667,7 @@
     626
    ],
    "scale": 1,
-   "alpha_px": 199640,
+   "alpha_px": 199633,
    "layer": "theme",
    "state": "connected",
    "look": "night",
@@ -6705,7 +6705,7 @@
     },
     {
      "element": "panel.background",
-     "px": 196449,
+     "px": 196444,
      "pct": 14.2
     },
     {
@@ -6762,7 +6762,7 @@
     623
    ],
    "scale": 1,
-   "alpha_px": 199490,
+   "alpha_px": 199495,
    "layer": "theme",
    "state": "connected",
    "look": "night",
@@ -6825,7 +6825,7 @@
     },
     {
      "element": "panel.background",
-     "px": 196203,
+     "px": 196206,
      "pct": 14.2
     },
     {
@@ -6835,7 +6835,7 @@
     },
     {
      "element": "assist.cc_panel",
-     "px": 1201,
+     "px": 1204,
      "pct": 2.9
     },
     {
@@ -6906,7 +6906,7 @@
     "part_bbox": [
      1158,
      607,
-     1228,
+     1227,
      652
     ],
     "element_bbox": [
@@ -6923,7 +6923,7 @@
     "part_bbox": [
      1158,
      607,
-     1228,
+     1227,
      652
     ],
     "element_bbox": [

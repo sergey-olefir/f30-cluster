@@ -4,8 +4,8 @@
 #   rm -rf dist bench/.data && node bench/server.js f30_cluster
 #   tools/g20sim/qc_shots.sh [qc|owner|all]
 cd "$(dirname "$0")/../.." || exit 1
-B=http://localhost:8078
-OUT=bake/work/g20sim/E
+B=http://localhost:${BENCH_PORT:-8078}
+OUT=${G20SIM_OUT:-bake/work/g20sim/E}
 SHOT=tools/g20sim/shot.sh
 mkdir -p "$OUT" docs/g20sim
 post() { curl -s -X POST "$B/$1" -d "$2"; }
