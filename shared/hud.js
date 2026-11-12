@@ -1729,6 +1729,40 @@ class HudApp {
             c.uniform(ref, 'u_highAt', [(red - 500) / max]);
             c.uniform(ref, 'u_track', rgba(t.track));
             c.uniform(ref, 'u_flash', [0]);
+        } else if (w.type === 'dial' && w.look === 'wb') {
+            // the 6WB-style dials (shaders.js wbdial): "style" comfort | sport | eco | mini | eff. Packed in vec4s: a
+            // cluster-render layer holds up to 32 uniforms (_wbDyn sends the live ones, u_dyn and u_fill)
+            const D = this._dialScale(w), r = Math.PI / 180;
+            const baked = this.setting('baked') !== false;
+            c.uniform(ref, 'u_geo', [w.w, w.h, w.ringW || 14, w.flip ? 1 : 0]);
+            c.uniform(ref, 'u_scale', [(w.start === undefined ? 225 : w.start) * r, (w.sweep === undefined ? 270 : w.sweep) * r, D.ticks, w.minor || 4]);
+            c.uniform(ref, 'u_zone', [w.measure === 'rpm' ? this._redMarks(D.max)[0] : (isNum(w.redFrom) ? w.redFrom : 2),
+                isNum(w.redTo) ? w.redTo : -1, isNum(w.coldTo) ? w.coldTo : -1, (w.off || 0) * r]);     // "off": degrees before the start where the needle parks (OFF)
+            c.uniform(ref, 'u_mode', [WB_STYLE[w.style] || 0, isNum(w.hub) ? w.hub : 0.42, isNum(w.glowK) ? w.glowK : 1, w.box ? 1 : 0]);
+            c.uniform(ref, 'u_ring', rgb(color(t, w.ring || 'line')));
+            c.uniform(ref, 'u_ring2', rgb(color(t, w.ring2 || 'dim')));
+            c.uniform(ref, 'u_tick', rgb(color(t, w.tick || 'fg')));
+            c.uniform(ref, 'u_needle', rgb(color(t, w.needle || 'hot')));
+            c.uniform(ref, 'u_red', rgb(t.hot));
+            c.uniform(ref, 'u_face', rgb(color(t, w.face || 'bg')));
+            c.uniform(ref, 'u_glow', rgb(color(t, w.glow || 'accent')));
+            x.wbKind = 0;
+            if (w.base && baked) {      // a baked base texture: "base": { tex, x, y, w, h (its box in the layer's px), kind 1 | 2 | 3 }
+                c.bind(ref, 'u_base', this._scene(w.base.tex, x.ci).ref);
+                c.uniform(ref, 'u_baseR', [w.base.x, w.base.y, w.base.w, w.base.h]);
+                x.wbKind = w.base.kind || 1;
+            }
+            c.uniform(ref, 'u_decoR', [0, 0, 0, 0]);
+            if (w.fill && baked) {      // the bottom arc's live fill: "fill": { tex (segment coverage), x, y, w, h,
+                const f = w.fill;       //   from, to (degrees cw from 12 at 0 and at max), of ('fuel' | 'cons'), max, color }
+                c.bind(ref, 'u_deco', this._scene(f.tex, x.ci).ref);
+                c.uniform(ref, 'u_decoR', [f.x, f.y, f.w, f.h]);
+                c.uniform(ref, 'u_fillC', f.color.map((v) => v / 255));
+            }
+            x.wbDyn = [0, -1, -1, 0];
+            x.wbFill = [0, 0, x.wbKind, 0];
+            c.uniform(ref, 'u_dyn', x.wbDyn);
+            c.uniform(ref, 'u_fill', x.wbFill);
         } else if (w.type === 'dial') {
             const D = this._dialScale(w);
             c.uniform(ref, 'u_size', [w.w, w.h]);
@@ -1745,33 +1779,6 @@ class HudApp {
             c.uniform(ref, 'u_red', rgb(t.hot));
             c.uniform(ref, 'u_face', rgb(color(t, w.face || 'bg')));
             c.uniform(ref, 'u_hot', [0]);
-            if (w.look === 'wb') {      // the 6WB-style dials (shaders.js wbdial): "style" comfort | sport | eco | mini | eff
-                c.uniform(ref, 'u_glow', rgb(color(t, w.glow || 'accent')));
-                c.uniform(ref, 'u_glowK', [isNum(w.glowK) ? w.glowK : 1]);
-                c.uniform(ref, 'u_hub', [isNum(w.hub) ? w.hub : 0.42]);
-                c.uniform(ref, 'u_style', [WB_STYLE[w.style] || 0]);
-                c.uniform(ref, 'u_redTo', [isNum(w.redTo) ? w.redTo : -1]);
-                c.uniform(ref, 'u_coldTo', [isNum(w.coldTo) ? w.coldTo : -1]);
-                c.uniform(ref, 'u_over', [-1, -1]);     // the speed dial's red band, set by _update (limit .. speed, as fractions of the sweep)
-                c.uniform(ref, 'u_pre', [(w.off || 0) * Math.PI / 180]);     // "off": degrees before the start where the needle parks (OFF)
-                c.uniform(ref, 'u_box', [w.box ? 1 : 0]);
-                c.uniform(ref, 'u_flip', [w.flip ? 1 : 0]);
-                c.uniform(ref, 'u_hasBase', [0]);
-                if (w.base && this.setting('baked') !== false) {   // a baked base texture: "base": { tex, x, y, w, h (its box in the layer's px), kind 1 | 2 }
-                    const a = this._scene(w.base.tex, x.ci);
-                    c.bind(ref, 'u_base', a.ref);
-                    c.uniform(ref, 'u_baseR', [w.base.x, w.base.y, w.base.w, w.base.h]);
-                    c.uniform(ref, 'u_hasBase', [w.base.kind || 1]);
-                }
-                c.uniform(ref, 'u_decoR', [0, 0, 0, 0]);
-                c.uniform(ref, 'u_fill', [0, 0]);
-                if (w.fill && this.setting('baked') !== false) {   // the bottom arc's live fill: "fill": { tex (segment coverage), x, y, w, h,
-                    const f = w.fill;                               //   from, to (degrees cw from 12 at 0 and at max), of ('fuel' | 'cons'), max, color }
-                    c.bind(ref, 'u_deco', this._scene(f.tex, x.ci).ref);
-                    c.uniform(ref, 'u_decoR', [f.x, f.y, f.w, f.h]);
-                    c.uniform(ref, 'u_fillC', f.color.map((v) => v / 255));
-                }
-            }
         } else if (w.type === 'wbsign') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_show', [0, 0]);       // shown by _update: the limit sign while a limit is known, the no-passing sign while it applies
@@ -2177,22 +2184,31 @@ class HudApp {
                     if (raw > lim + 1) over = [Math.round(Math.min(1, Math.max(0, (lim - mn) / (D.max - mn))) * 1000) / 1000, q];
                 }
             }
+            let fillA = null;
             if (w.fill && w.look === 'wb' && this.setting('baked') !== false) {
                 const f = w.fill, fv = this._raw(f.of);
                 const k = isNum(fv) ? Math.max(0, Math.min(1, fv / (f.max || 1))) : 0;
                 const fk = Math.round(k * 200);
                 if (force || fk !== x.lastFill) {
                     x.lastFill = fk;
-                    const r = Math.PI / 180, a0 = f.from * r, a1 = (f.from + (f.to - f.from) * k) * r;
-                    x.c.uniform(x.ref, 'u_fill', k > 0 ? [a0, a1] : [0, 0]);
+                    const r = Math.PI / 180;
+                    fillA = k > 0 ? [f.from * r, (f.from + (f.to - f.from) * k) * r] : [0, 0];
                 }
+            }
+            if (w.look === 'wb' && x.wbFill && fillA) {
+                x.wbFill = [fillA[0], fillA[1], x.wbKind, 0];
+                x.c.uniform(x.ref, 'u_fill', x.wbFill);
             }
             const key = q + '|' + hot + '|' + over.join(',');
             if (!force && key === x.last) return;
             x.last = key;
-            x.c.uniform(x.ref, 'u_value', [q]);
-            x.c.uniform(x.ref, 'u_hot', [hot]);
-            if (w.look === 'wb') x.c.uniform(x.ref, 'u_over', over);
+            if (w.look === 'wb') {
+                x.wbDyn = [q, over[0], over[1], hot];
+                x.c.uniform(x.ref, 'u_dyn', x.wbDyn);
+            } else {
+                x.c.uniform(x.ref, 'u_value', [q]);
+                x.c.uniform(x.ref, 'u_hot', [hot]);
+            }
         } else if (w.type === 'sdash') {
             const us = this.setting('units') === 'us';
             const sp = this._raw('speed'), rpm = this._raw('rpm'), fuel = this._raw('fuel'), oil = this._raw('oil');

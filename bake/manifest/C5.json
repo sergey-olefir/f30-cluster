@@ -24,9 +24,10 @@
     "window.horizon"
    ],
    "sources": [
-    "17_physical-cluster_full.png",
     "04_comfort_whole-cluster_mph.png",
-    "07_physical-cluster_all-lamps-lit.png"
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png",
+    "17_physical-cluster_full.png"
    ],
    "evidence": "ok",
    "light": {
@@ -34,59 +35,125 @@
     "key": 1.0
    },
    "fit": {
-    "ssim": 0.9005,
-    "dE2000_mean": 2.434,
-    "edge_px_err": 4.734,
-    "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+    "ssim": 0.5044,
+    "dE2000_mean": 4.287,
+    "edge_px_err": 4.22,
+    "ref": "bake/work/C5/ref/04_comfort_whole-cluster_mph.panel.C5",
     "roi": [
      "box:680:66:560:626"
     ],
-    "sheet": "bake/work/C5/qc_stack__17_physical-cluster_full.ours.C5.png",
-    "luma_bias": -1.6,
+    "sheet": "bake/work/C5/qc_stack__04_comfort_whole-cluster_mph.panel.C5.png",
+    "luma_bias": -10.11,
     "parts": {
-     "window.bg": {
-      "ssim": 0.9985,
-      "dE2000_mean": 1.056,
+     "sky.04": {
+      "ssim": 0.4452,
+      "dE2000_mean": 2.877,
       "edge_px_err": null,
-      "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+      "ref": "bake/work/C5/ref/04_comfort_whole-cluster_mph.panel.C5",
       "roi": [
-       "box:780:100:360:290"
+       "box:780:120:360:260"
       ],
-      "sheet": "bake/work/C5/qc_window.bg__17_physical-cluster_full.ours.C5.png",
-      "luma_bias": 0.34
+      "sheet": "bake/work/C5/qc_sky__04_comfort_whole-cluster_mph.panel.C5.png",
+      "luma_bias": -9.41
      },
-     "window.top": {
-      "ssim": 0.6405,
-      "dE2000_mean": 4.937,
+     "glow.04": {
+      "ssim": 0.9123,
+      "dE2000_mean": 2.168,
       "edge_px_err": null,
-      "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+      "ref": "bake/work/C5/ref/04_comfort_whole-cluster_mph.panel.C5",
       "roi": [
-       "box:800:66:320:40"
+       "box:760:410:400:47"
       ],
-      "sheet": "bake/work/C5/qc_window.top__17_physical-cluster_full.ours.C5.png",
-      "luma_bias": -13.24
+      "sheet": "bake/work/C5/qc_glow__04_comfort_whole-cluster_mph.panel.C5.png",
+      "luma_bias": 0.01
      },
-     "window.sky": {
-      "ssim": 0.966,
-      "dE2000_mean": 2.563,
+     "floor.04": {
+      "ssim": 0.7864,
+      "dE2000_mean": 3.967,
       "edge_px_err": null,
-      "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
-      "roi": [
-       "box:780:400:360:56"
-      ],
-      "sheet": "bake/work/C5/qc_window.sky__17_physical-cluster_full.ours.C5.png",
-      "luma_bias": -1.2
-     },
-     "window.floor": {
-      "ssim": 0.8376,
-      "dE2000_mean": 3.16,
-      "edge_px_err": null,
-      "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+      "ref": "bake/work/C5/ref/04_comfort_whole-cluster_mph.panel.C5",
       "roi": [
        "box:740:462:440:144"
       ],
-      "sheet": "bake/work/C5/qc_window.floor__17_physical-cluster_full.ours.C5.png",
-      "luma_bias": 0.1
+      "sheet": "bake/work/C5/qc_floor__04_comfort_whole-cluster_mph.panel.C5.png",
+      "luma_bias": -2.54
+     },
+     "stack.04": {
+      "ssim": 0.5044,
+      "dE2000_mean": 4.287,
+      "edge_px_err": 4.22,
+      "ref": "bake/work/C5/ref/04_comfort_whole-cluster_mph.panel.C5",
+      "roi": [
+       "box:680:66:560:626"
+      ],
+      "sheet": "bake/work/C5/qc_stack__04_comfort_whole-cluster_mph.panel.C5.png",
+      "luma_bias": -10.11
+     },
+     "sky.03": {
+      "ssim": 0.9717,
+      "dE2000_mean": 0.071,
+      "edge_px_err": null,
+      "ref": "bake/work/C5/ref/03_three-modes_photo_bimmerstop.panel.C5",
+      "roi": [
+       "box:780:120:360:260"
+      ],
+      "sheet": "bake/work/C5/qc_sky__03_three-modes_photo_bimmerstop.panel.C5.png",
+      "luma_bias": -0.18
+     },
+     "glow.03": {
+      "ssim": 0.9323,
+      "dE2000_mean": 2.159,
+      "edge_px_err": null,
+      "ref": "bake/work/C5/ref/03_three-modes_photo_bimmerstop.panel.C5",
+      "roi": [
+       "box:760:410:400:47"
+      ],
+      "sheet": "bake/work/C5/qc_glow__03_three-modes_photo_bimmerstop.panel.C5.png",
+      "luma_bias": 1.19
+     },
+     "floor.03": {
+      "ssim": 0.7721,
+      "dE2000_mean": 4.631,
+      "edge_px_err": null,
+      "ref": "bake/work/C5/ref/03_three-modes_photo_bimmerstop.panel.C5",
+      "roi": [
+       "box:740:462:440:144"
+      ],
+      "sheet": "bake/work/C5/qc_floor__03_three-modes_photo_bimmerstop.panel.C5.png",
+      "luma_bias": 1.18
+     },
+     "stack.03": {
+      "ssim": 0.8815,
+      "dE2000_mean": 1.643,
+      "edge_px_err": 2.918,
+      "ref": "bake/work/C5/ref/03_three-modes_photo_bimmerstop.panel.C5",
+      "roi": [
+       "box:680:66:560:626"
+      ],
+      "sheet": "bake/work/C5/qc_stack__03_three-modes_photo_bimmerstop.panel.C5.png",
+      "luma_bias": -0.03
+     },
+     "sky.02": {
+      "ssim": 0.9485,
+      "dE2000_mean": 0.577,
+      "edge_px_err": null,
+      "ref": "bake/work/C5/ref/02_three-modes_clean-render.panel.C5",
+      "roi": [
+       "box:780:120:360:260"
+      ],
+      "sheet": "bake/work/C5/qc_sky__02_three-modes_clean-render.panel.C5.png",
+      "luma_bias": -0.39
+     },
+     "glow.02": {
+      "ssim": 0.4585,
+      "dE2000_mean": 11.42,
+      "edge_px_err": null,
+      "ref": "bake/work/C5/ref/02_three-modes_clean-render.panel.C5",
+      "roi": [
+       "box:760:410:400:47"
+      ],
+      "sheet": "bake/work/C5/qc_glow__02_three-modes_clean-render.panel.C5.png",
+      "luma_bias": -1.04
      }
     }
    },
@@ -96,137 +163,72 @@
     "corner_r": 10.0,
     "dial_clip_R": 1.04,
     "dial_clip_soft": 3.0,
-    "rim_a": 0.06,
-    "rim_d": 3.0,
-    "rim_s": 1.6,
-    "sky_y0": 394.692,
     "horizon_y": 458.0,
-    "sky_pow": 1.355,
-    "sky_amp": 117.226,
     "horizon_w": 2.5,
-    "horizon_L": 48.0,
-    "lip_a": 12.0,
-    "lip_d": 1.5,
-    "lip_s": 1.0,
+    "glow_y0": 380.732172,
+    "glow_p": 3.325084,
+    "glow_a": 0.030509,
+    "lip_a": 0.0,
+    "lip_d": 4.999995,
+    "lip_s": 0.5,
     "front_y": 608.8,
-    "fb0": 60.912768,
-    "fb1": 15.047717,
-    "fb2": 24.057432,
-    "fb3": -18.187806,
-    "fbh0": 1590.575068,
-    "fbh1": -1483.463688,
-    "fbq": 0.393318,
-    "bar_n": 5,
-    "bar_yv": 184.309794,
-    "bar_u0": 0.003478,
-    "bar_du": 0.00023,
-    "bar_a0": 2.89664,
-    "bar_a1": 200.45464,
-    "bar_a2": -93.841769,
-    "bar_s0": 1.5,
-    "bar_s1": 13.994067,
-    "bar_h0": 60.0,
-    "bar_h1": 143.07895,
-    "bar_hp": 3.0,
-    "wall_y0": 496.303584,
-    "wall_in": 36.755972,
-    "wall_x0": 160.650197,
-    "wall_x1": 1.184126,
-    "wall_x2": 8.5e-05,
-    "wall_a": 79.741126,
-    "wall_ag": 0.369925,
-    "wall_s0": 22.0,
-    "wall_s1": 20.191634,
-    "wall_y1": 596.573649,
-    "wall_tail": 21.460852,
-    "bg_keys_y": [
-     79.0,
-     84.0,
-     100.0,
-     200.0,
-     300.0,
-     396.0,
-     470.0
-    ],
-    "bg_keys_rgb": [
-     [
-      54.9,
-      53.8,
-      59.9
-     ],
-     [
-      55.9,
-      55.8,
-      69.7
-     ],
-     [
-      52.7,
-      55.4,
-      66.1
-     ],
-     [
-      49.4,
-      53.3,
-      64.5
-     ],
-     [
-      46.4,
-      48.9,
-      61.3
-     ],
-     [
-      41.6,
-      44.5,
-      62.2
-     ],
-     [
-      41.6,
-      44.5,
-      62.2
-     ]
-    ],
-    "bar_rgb": [
-     2.1,
-     2.0,
-     26.9
-    ],
+    "row_n": 5,
+    "row_yv": 253.143769,
+    "row_u0": 0.004519,
+    "row_du": 0.000344,
+    "row_amp0": 0.004093,
+    "row_amp1": 0.016416,
+    "row_amp2": 0.05249,
+    "row_amp3": 0.188013,
+    "row_amp4": 0.287576,
+    "row_rise": 2.518817,
+    "row_edge_d": 0.5,
+    "row_body": 0.718888,
+    "row_body_d": 0.613041,
+    "row_gap": 0.386948,
+    "row_gap_s": 0.5,
+    "row_h0": 61.197869,
+    "row_h1": 106.856995,
+    "row_hp": 1.891406,
+    "wall_y0": 500.601165,
+    "wall_in": 58.742149,
+    "wall_out": 27.314508,
+    "wall_x0": 170.199181,
+    "wall_x1": 1.225652,
+    "wall_a": 0.014594,
+    "wall_ag": 15.539389,
+    "wall_s0": 18.968046,
+    "wall_s1": 7.532624,
+    "line_a": 0.413816,
+    "line_s": 1.651194,
+    "line_h": 136.571431,
+    "line_hp": 2.929359,
+    "line_floor": 0.031467,
     "bar_fade0": 672.0,
     "bar_fade1": 690.0,
-    "line_rgb": [
-     223.0,
-     229.0,
-     233.0
-    ],
-    "line_w": 2.2,
-    "line_glow": 0.75,
-    "line_glow_d": 0.0,
-    "line_glow_s": 1.7,
-    "line_x0": 80.0,
-    "line_x1": 300.0,
-    "line_floor": 0.55,
-    "horizon_tint": [
-     1.0,
-     1.0,
-     1.0
-    ],
-    "palette_rgb_of_luma": [
-     [
-      0.01622,
-      0.75559,
-      0.06703
+    "hue_linear_rgb": {
+     "glow": [
+      0.794,
+      1.0416,
+      1.1942
      ],
-     [
-      0.00744,
-      0.96228,
-      0.07415
+     "rows": [
+      0.7445,
+      1.0601,
+      1.1571
      ],
-     [
-      -0.12149,
-      2.09333,
-      -0.93193
+     "walls": [
+      0.7177,
+      1.0686,
+      1.1517
+     ],
+     "line": [
+      0.9272,
+      1.0143,
+      1.0729
      ]
-    ],
-    "notes": "panel px, X = x - 960 (mirror-symmetric). Window outline: top y=top_y, top edge |X|<=top_half_w (our box 720..1200), 45 deg chamfers continuing until they pass under the dials, clipped outside r = dial_clip_R*R of both dials. Light model: the window is emissive (no key light)."
+    },
+    "notes": "panel px, X = x - 960 (mirror-symmetric). Window outline: top y=top_y, top edge |X|<=top_half_w (our box 720..1200), 45 deg chamfers continuing until they pass under the dials, clipped outside r = dial_clip_R*R of both dials. Light model: the window is emissive (no key light). FINAL panel values (black = 0 where unlit; P10.apply leaves C5 / C6 alone): sum of glow + rows + walls in linear light, each with its hue, fitted by C5.fit to 04 (0.6) + 03 (0.4) in panel values (C5.target)."
    }
   },
   {
@@ -248,8 +250,9 @@
    ],
    "stack_above": [],
    "sources": [
-    "17_physical-cluster_full.png",
-    "04_comfort_whole-cluster_mph.png"
+    "04_comfort_whole-cluster_mph.png",
+    "03_three-modes_photo_bimmerstop.png",
+    "02_three-modes_clean-render.png"
    ],
    "evidence": "strong",
    "light": {
@@ -257,23 +260,54 @@
     "key": 1.0
    },
    "fit": {
-    "ssim": 0.8163,
-    "dE2000_mean": 4.909,
-    "edge_px_err": 1.818,
-    "ref": "bake/work/C5/ref/17_physical-cluster_full.ours.C5",
+    "ssim": 0.8048,
+    "dE2000_mean": 1.843,
+    "edge_px_err": 1.039,
+    "ref": "bake/work/C5/ref/04_comfort_whole-cluster_mph.panel.C5",
     "roi": [
      "box:780:446:360:22"
     ],
-    "sheet": "bake/work/C5/qc_window.horizon__17_physical-cluster_full.ours.C5.png",
-    "luma_bias": 1.02
+    "sheet": "bake/work/C5/qc_horizon__04_comfort_whole-cluster_mph.panel.C5.png",
+    "luma_bias": -2.41,
+    "all": {
+     "horizon.04": {
+      "ssim": 0.8048,
+      "dE2000_mean": 1.843,
+      "edge_px_err": 1.039,
+      "ref": "bake/work/C5/ref/04_comfort_whole-cluster_mph.panel.C5",
+      "roi": [
+       "box:780:446:360:22"
+      ],
+      "sheet": "bake/work/C5/qc_horizon__04_comfort_whole-cluster_mph.panel.C5.png",
+      "luma_bias": -2.41
+     },
+     "horizon.03": {
+      "ssim": 0.5958,
+      "dE2000_mean": 2.972,
+      "edge_px_err": null,
+      "ref": "bake/work/C5/ref/03_three-modes_photo_bimmerstop.panel.C5",
+      "roi": [
+       "box:780:446:360:22"
+      ],
+      "sheet": "bake/work/C5/qc_horizon__03_three-modes_photo_bimmerstop.panel.C5.png",
+      "luma_bias": -2.23
+     }
+    }
    },
    "params": {
     "horizon_y": 458.0,
     "horizon_w": 2.5,
-    "horizon_L": 48.0,
-    "lip_a": 12.0,
-    "lip_d": 1.5,
-    "lip_s": 1.0
+    "glow_y0": 380.732172,
+    "glow_p": 3.325084,
+    "glow_a": 0.030509,
+    "lip_a": 0.0,
+    "lip_d": 4.999995,
+    "lip_s": 0.5,
+    "hue_glow": [
+     0.794,
+     1.0416,
+     1.1942
+    ]
    }
   }
  ],
@@ -308,10 +342,10 @@
   "bytes_by_8wh_total": 681408
  },
  "open_questions": [
-  "Window top corners: our box (top edge x 720..1200) is kept; the 45 deg chamfers then continue OUTSIDE the box (to x ~657 / 1263 at y ~150) until they pass under the dials, as in 04 (no vertical side visible). The 6WB itself puts the chamfer start 0.84 R from the dial centre, which would be x 694 / 1226 with our spacing.",
-  "Levels: fitted to 17 (window bg luma ~55 top -> 45 at the horizon). P0 flags 17 as hazy on the dial faces, but its bottom bar reads luma 2-3 next to the bright floor, so the window levels look real; 04 / 07 are darker (bg ~25-30). Compare with the face level P1/P2 chose; window.base can be scaled as one image.",
-  "17 top edge sits at y 76 (04: 79); the box's 79 is used.",
-  "The floor's side walls continue a little below the front line into the bar's top corners in 17 (x ~690-720 / 1200-1230, y 610-640); not drawn (weak, partly glare-masked)."
+  "Window top corners: our box (top edge x 720..1200) is kept; the 45 deg chamfers then continue OUTSIDE the box until they pass under the dials. With the panel black the outline itself is invisible (nothing lit there).",
+  "Hue: the photos (04 / 03 / 06, relative to their white numerals) give a cyan-grey floor (linear R:G:B ~0.74 : 1.06 : 1.16); the 02 render is clearly bluer (~0.4 : 1 : 2.6). The photos were used.",
+  "04 and 06 carry a grey haze over the lower middle reaching into the bar: their local floor is let grow from the sky plateau to the bar's level (C5.target). 03 / 02 have the bar black.",
+  "17 / 07 (hazed, over-exposed) were used for shapes only: they agree on 5 rows and the front line's position."
  ],
- "notes": "References stretched into our frame by C5.refs (x about 960 by k = our half gap / 6WB half gap: 17 1.123, 04 1.158, 07 1.074; y unchanged). Bits: 8 dials, 4 telltales, 16 bar text."
+ "notes": "Targets by C5.target: x stretched about 960 by k = our half gap / 6WB half gap (04 1.158, 03 1.149, 02 1.139); y mapped so the glow's bottom edge -> 458 and the front line -> 608.8 (04 463.3 / 615.4, 03 464.5 / 616.6); converted to light above each photo's local floor relative to its white numerals, numerals -> fg (244, 246, 250). Bits: 8 dials, 16 bar text / car."
 }

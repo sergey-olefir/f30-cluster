@@ -34,9 +34,19 @@ def tight(img, box, scale, pad=1):
     return crop, [bx + x0, by + y0, x1 - x0, y1 - y0]
 
 
+# Fixed panel boxes (x, y, w, h): tools/bake_scene.py packs the layers by the positions in bake/work/P9/
+# stack_comfort.json, so the files keep exactly these boxes (no tight crop).
+FIXED = {"window.base.albedo": [658, 76, 604, 536], "window.horizon.albedo": [748, 452, 424, 10],
+         "infobar.body.albedo": [640, 606, 640, 86], "infobar.line.albedo": [668, 602, 584, 12]}
+
+
 def render(name, fn, box, scale, P, cluster="C5"):
-    img = fn(box, scale, P)
-    img, pbox = tight(img, box, scale)
+    if name in FIXED:
+        box = FIXED[name]
+        img, pbox = fn(box, scale, P), box
+    else:
+        img = fn(box, scale, P)
+        img, pbox = tight(img, box, scale)
     suffix = "@0.5x" if scale == 0.5 else ""
     rel = f"{cluster}/{name}{suffix}.png"
     imageio.write_png(os.path.join(BAKED, rel), img)

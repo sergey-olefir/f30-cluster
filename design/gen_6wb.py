@@ -104,15 +104,17 @@ def comfort():
          "tex": {"window": {"tex": "window", "x": 640, "y": 76, "w": 640, "h": 572},
                  "horizon": {"tex": "horizon", "x": 748, "y": 452, "w": 424, "h": 10},
                  "line": {"tex": "bar", "x": 668, "y": 602, "w": 584, "h": 79}},
-         "gain": [0.24, 604],
+         # P10 (docs/BAKE-P10-levels.md): the window's level is now in the baked texture (re-fitted across 04/03/07/06,
+         # above each photo's own LCD floor), so the P9 stop-gap gain 0.24 would dim it a second time
+         "gain": [1.0, 604],
          # BMW's own map window (BAKE C9: drawn under a custom theme, roads seen inside x 592-1303, y 161-612), cut
          # see-through inside our window while the "stockMap" setting is on
          "hole": [668, 140, 584, 462], "holeWhen": "stockMap", "holeInset": 0, "holeRadius": 22},
         dial("speedo", SP, "comfort", ringW=10, base=base("speedo", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
-             fill=arc_fill("range_seg", SP, 239, 614, 346, 68, 216.0, 144.0, "fuel", 1, [222, 220, 216]), measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
+             fill=arc_fill("range_seg", SP, 239, 614, 346, 68, 216.0, 144.0, "fuel", 1, [210, 209, 205]), measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
              start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "comfort", ringW=10, base=base("tacho", RV, R, RV[0] - R, RV[1] - R, 2 * R, 3),
-             fill=arc_fill("ed_seg", RV, 1338, 612, 346, 70, 196.5, 143.3, "cons", 20, [214, 128, 136]), measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
+             fill=arc_fill("ed_seg", RV, 1338, 612, 346, 70, 196.5, 143.3, "cons", 20, [114, 66, 70]), measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
              start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF),
     ] + minis(baked=True)
     # the scale numbers: the box ends at 0.78 R, inside the ticks' inner ends (0.82 R)
