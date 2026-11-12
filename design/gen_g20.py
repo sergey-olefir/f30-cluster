@@ -43,8 +43,9 @@ W = [
     gauge("speedo", "speedo", [0, 1], 0, measure="speed", min=0, max=260, centre=G['speedoC'], **big),
     gauge("tacho", "tacho", [2, 3], 1, measure="rpm", min=0, max=7000, centre=G['tachoC'],
           band=G['band']['psi'] + [G['band']['width']], bandC=G['band']['rgb'], **big),
-    gauge("fuel", "fuel", [4, 5], 0, signal="fuel", min=0, max=1, **small),
-    gauge("oil", "oil", [6, 7], 1, signal="oil", min=G['oilRange'][0], max=G['oilRange'][1], **small),
+    # the minis over the big dials (their boxes overlap)
+    gauge("fuel", "fuel", [4, 5], 0, z=2, fill="g20_fuel_fill", signal="fuel", min=0, max=1, **small),
+    gauge("oil", "oil", [6, 7], 1, z=2, fill="g20_oil_fill", signal="oil", min=G['oilRange'][0], max=G['oilRange'][1], **small),
     # the digital speed and its unit (the bench simulation's boxes, bench/g20/c.js T.speed, T.speedUnit)
     text("speed", 530, 396, 240, "{{speed}}", "g20_spd", "right", 2, size=105),
     text("speed_unit", 539, 393, 80, "km/h", "g20_unit", "left", 2, size=27),

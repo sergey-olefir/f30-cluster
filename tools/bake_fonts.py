@@ -104,10 +104,10 @@ F30_FONTS = [
     ('wb_val', 'Arimo[wght].ttf', 36, DIGITS + ':+-.° kmCl/', 0, 'Bold'),            # the bottom row's values
     ('wb_mini', 'Arimo[wght].ttf', 14, DIGITS + '/', 0, 'Bold'),                       # the small gauges' 1/1 and 0
     ('wb_big', 'Arimo[wght].ttf', 120, DIGITS + 'PRNDSM-', 0, 'Bold'),             # Sport: the speed and the gear in the discs
-    # G20 Comfort: Roboto (SIL OFL, tools/fonts-src/Roboto-OFL.txt), the bench simulation's face (docs/G20SIM-REPORT.md)
-    ('g20_spd', 'Roboto-wdth-wght.subset.ttf', 105, DIGITS, 0, 'Bold'),             # the digital speed
-    ('g20_unit', 'Roboto-wdth-wght.subset.ttf', 27, 'km/h', 0, 'SemiBold'),          # its km/h
-    ('g20_lab', 'Roboto-wdth-wght.subset.ttf', 34, '1/minx0', 0, 'SemiBold'),        # 1/min x1000
+    # G20 Comfort: Roboto (SIL OFL, tools/fonts-src/Roboto-OFL.txt) semi-condensed, the bench simulation's face (docs/G20SIM-REPORT.md)
+    ('g20_spd', 'Roboto-wdth-wght.subset.ttf', 105, DIGITS, 0, [700, 87.5]),             # the digital speed
+    ('g20_unit', 'Roboto-wdth-wght.subset.ttf', 27, 'km/h', 0, [600, 87.5]),          # its km/h
+    ('g20_lab', 'Roboto-wdth-wght.subset.ttf', 34, '1/minx0', 0, [600, 87.5]),        # 1/min x1000
 ]
 FONTS = {'idrive_hud_widgets': HUD_FONTS, 'cluster_themes': CLUSTER_FONTS, 'f30_cluster': F30_FONTS}
 PAD = 2
@@ -121,7 +121,8 @@ def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''
     tuck: characters added to a font after layouts were built on its cell height (° on value / y_val, Nov 7 2026):
     they don't count towards the cell, and one that rises above it is drawn lower so its top meets the cell's."""
     font = ImageFont.truetype(os.path.join(SRC, file), size)
-    if weight: font.set_variation_by_name(weight)
+    if isinstance(weight, (list, tuple)): font.set_variation_by_axes(list(weight))     # [wght, wdth] of a variable font
+    elif weight: font.set_variation_by_name(weight)
     subs = subs or {}
     glyph = lambda c: subs.get(c, c)
     ink = [c for c in chars if c != ' ']
