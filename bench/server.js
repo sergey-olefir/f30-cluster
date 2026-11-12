@@ -460,6 +460,15 @@ const web = http.createServer(async (req, res) => {
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
         return fs.createReadStream(path.join(__dirname, 'page.html')).pipe(res);
     }
+    // GET /photo/<NN>.png: a car photo rectified to panel px (tools/overlay/rectify.py), as a static backdrop under the
+    // theme. Local only: bake/work/ is git-ignored and holds third-party pixels, never shipped
+    const ph = /^\/photo\/(\d\d)\.png$/.exec(url);
+    if (req.method === 'GET' && ph) {
+        const f = path.join(__dirname, '..', 'bake', 'work', 'overlay', 'rect', ph[1] + '.png');
+        if (!fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+        res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
+        return fs.createReadStream(f).pipe(res);
+    }
     if (req.method === 'GET' && url === '/px') {
         const q = {};
         (req.url.split('?')[1] || '').split('&').forEach((kv) => { const i = kv.indexOf('='); if (i > 0) q[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); });
