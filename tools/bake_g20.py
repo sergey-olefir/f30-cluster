@@ -272,7 +272,7 @@ def main():
     geo.update({
         'speedoC': V(P['speedo']['centre']), 'tachoC': V(P['tacho']['centre']),
         'band': {'psi': [psi0, psi1], 'width': V(P['tacho']['band'])['width'], 'rgb': V(P['tacho']['band'])['rgb']},
-        'bar': {'width': V(B['width']), 'rgb': V(B['rgb'])['night'], 'rim': V(B['rim'])},
+        'bar': {'width': V(B['width']), 'rgb': V(B['rgb'])['night'], 'rim': V(B['rim']), 'shadow': V(B['shadow'])},
         'glow': {'rgb': [c * V(G['gain']) for c in V(G['rgb'])['night']], 'sigma': V(G['sigma_hi'])},
         'needle': V(P['fuel']['needle']), 'oilRange': V(P['oil']['range_c']),
     })
