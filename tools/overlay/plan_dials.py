@@ -38,6 +38,7 @@ MINI_DY = -20
 SP, RV, R = (412, 380), (1508, 380), 335                         # the big dials (gen_6wb G20 geometry)
 # BMW's sign (centre 539, 622, r 41): the round window that shows it while ours has no data (gen_6wb: cut.round)
 SIGN_WIN = {'rect': [495, 578, 583, 666], 'radius': 44}
+SIGN_CLEAR = {'rect': [493, 576, 585, 668], 'radius': 46}      # no collar in it (the speedo's closed disc covers to r 50)
 SIGNS_BOX = [305, 460, 519, 553]                                # our wbsign widget (gen_6wb), under the speed hub
 MAP_WIN = [748, 155, 1172, 612]                                 # the gap between the dials (no dial pixels)
 # collar additions past the catalogue hulls: the stock '260' label reaches x 727 (bright pixels on rect 08 and 09);
@@ -226,6 +227,7 @@ def main():
     win_i = rr_mask([int(b[0]) - 2, int(b[1]) - 2, int(np.ceil(b[2])) + 2, int(np.ceil(b[3])) + 2], 2)
     U &= ~win_i
     win_sign = rr_mask(SIGN_WIN['rect'], SIGN_WIN['radius'])
+    sign_clear = rr_mask(SIGN_CLEAR['rect'], SIGN_CLEAR['radius'])
 
     show = [g for g in g20['elements'] if pg[g['id']]['decision'] in ('reveal', 'keep-clear') and g['group'] != 'structure']
     S = {g['id']: raster(g) for g in g20['elements']}
@@ -244,8 +246,8 @@ def main():
     for g in show:
         if g['id'] != 'map.region':
             shown |= S[g['id']]
-    shown |= S['assist.speed_limit'] | win_sign
-    clear = dilate(shown, 3)
+    clear = dilate(shown, 3) | sign_clear     # BMW's sign: r 46 (5 px round it) and no more, so the band meets the
+                                              # speedo's closed disc (opaque to r 50) with no gap
     core = dilate(stock & ~U, 3) & ~U & ~clear
     # soft: grown GROW px, then blurred, so the full black still covers every stock pixel it hid before
     soft = np.clip(blur(dilate(core, GROW).astype(np.float32), SOFT) / 0.95, 0.0, 1.0)
@@ -268,7 +270,7 @@ def main():
     for r in PATCHES.values():
         patch[max(r[1] - 5, 0):r[3] + 5, max(r[0] - 5, 0):r[2] + 5] = 1.0
     patch = blur(patch, 1.0)
-    ko = np.clip(blur(clear.astype(np.float32), 1.5) * 2.0, 0.0, 1.0)
+    ko = np.maximum(np.clip(blur(dilate(shown, 3).astype(np.float32), 1.5) * 2.0, 0.0, 1.0), sign_clear)
     alpha = np.maximum(np.maximum(np.maximum(soft, band), shade), patch) * (1.0 - ko)
     Image.fromarray(np.round(alpha * 255).astype('uint8')).save(rel('design/overlay/collar.dials.png'), optimize=True)
     collar = alpha >= 0.5
