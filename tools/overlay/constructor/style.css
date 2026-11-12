@@ -38,7 +38,7 @@ a { color: #7fb8ff; }
 .banner ul { margin: 4px 0; padding-left: 18px; max-height: 160px; overflow: auto; font: 11px ui-monospace, Menlo, monospace; }
 
 #main { flex: 1; display: flex; min-height: 0; }
-#left { width: 440px; flex: none; display: flex; flex-direction: column; background: var(--panel); border-right: 1px solid var(--line); }
+#left { width: 380px; flex: none; display: flex; flex-direction: column; background: var(--panel); border-right: 1px solid var(--line); }
 #right { width: 470px; flex: none; display: flex; flex-direction: column; background: var(--panel); border-left: 1px solid var(--line); }
 #stage { flex: 1; position: relative; min-width: 0; }
 #cv { display: block; position: absolute; inset: 0; cursor: crosshair; }

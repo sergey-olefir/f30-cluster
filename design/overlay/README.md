@@ -14,6 +14,7 @@ UV_CACHE_DIR=bake/work/.uvcache uv run -q --no-project --with jsonschema --with 
 | `wb_comfort.json` | `wb-elements` | Every layer and live widget of our 6WB Comfort, with masks | `tools/overlay/export_wb.py` |
 | `plan.json` / `plan.default.json` | `plan` | Decisions per G20 element, moves of our elements, the derived holes and keep-clear boxes, the conflicts at save time | the constructor |
 | `plan.dials.json` + `collar.dials.png` | `plan` + grey mask | "Dials only": our four dials stay, the G20 draws the rest. The collar (255 = our background stays opaque) is outside the plan schema. See `docs/OVERLAY-PLAN-DIALS.md` | `tools/overlay/plan_dials.py`, then `headless.py --plan` |
+| `g20_parts.json` | `g20-parts` | The G20 parts we already have as our own drawings (the bench simulation `bench/g20/`, the app's `g20_*` and `collar` scene textures), one record per part, linked to `g20_comfort.json`, plus the cross-checks (section 6) | `tools/overlay/inventory_parts.py` |
 | `constraints.json` | `constraints` | Platform limits, the hood line, what BMW draws over any theme | by hand, from `shared/visible.js` and measurements |
 | `masks/<id>.png` | — | 1× alpha of our own layers, exactly the element's bbox | `export_wb.py` |
 | `schematic/<id>.svg` | — | Our own simple redraw of a G20 element (no BMW artwork) | package E |
@@ -76,3 +77,29 @@ From `g20_comfort.json` and `plan.default.json` (current 6WB Comfort layout, def
 ## 5. Platform facts
 
 See `constraints.json`: at most 8 layers per connection and 4 connections; 16 MiB pixel memory service-wide (w·h·8 per image, shared with other apps); at most 16 assets per client and 32 in total; at most 32 uniforms per effect layer, and every `sampler2D` must have an asset bound or the car does not draw the layer; BMW draws the black area, the gear letter and the driver's belt lamp over us; the hood hides the panel above the `hood` polyline.
+
+## 6. The G20 parts (`g20_parts.json`)
+
+What a design agent can read here: **"this G20 element already exists as our own texture, at X"**. Every element in `g20_comfort.json` has a `parts` list (filled by `tools/overlay/link_parts.py`, never by hand); each id there is a record in `g20_parts.json`. An empty list would mean we still have to draw it; today none is empty.
+
+A record (schema `partRecord`):
+
+- `id`: the bench manifest id (`structure.speedo.frame.night`, `c.tt.abs`, `live.pointer.tacho`), `sim.black_box` (the black area `g20sim.js` draws itself), or `app.<texture>` (`app.g20_speedo`, `app.collar`).
+- `element`: the catalogue element it draws, or `null` (the font, the LUT, the collar: listed in `report.unresolved`).
+- `source`: `sim` (bench simulation) or `app-scene` (the app's own texture). `render`: `raster` (B's PNG), `procedural` (C's vector drawing, `procedural.module` + `draw`), `live` (D: depends on the values), `app-texture` (decoded from the scene JSON), `font`, `data`.
+- `file`: where it is, referenced in place (nothing is copied here). `placement` is where the image is drawn, `bbox` its alpha > 0 extent in panel px, `core` its alpha ≥ 128 extent (without halos and shadows). The live parts have no box in the manifest: the constructor draws each alone in headless Chrome (`?probe=parts`) and `measured` records where and in what state.
+- `layer` (`under` / `over` a custom theme; `theme` for the app's textures), `state` (`any` / `stock` / `connected`), `look` (`any` / `day` / `night`), `z`, `lamp`, `cond`: when the simulation draws it, as in `docs/G20SIM-REPORT.md` section 2.
+- `evidence`, `sources`: as the manifest states them (photos the part is fitted to).
+- `used_by`: `bench-sim`, `layout:g20_comfort`, `layout:wb_dials`. `baked_into` / `baked_from`: which app texture a part went into (parsed from `tools/bake_g20.py` and `tools/bake_scene.py`). `covers` (app textures): the elements under their alpha ≥ 128, with px and % of the element.
+- `vs_catalogue`: the part's box minus its element's box, and the share of its pixels inside the element's shape.
+
+`report` holds the cross-checks: `per_element` (raster / procedural / live / app parts, day and night present, what is missing or weak), `elements_without_parts`, `unresolved`, `new_elements` (`panel.background`, from `tools/overlay/parts_elements.json`), `suspicious_links`, `relation_disagreements` (the part's layer and state against the element's relation; `assumption` where the catalogue says `unknown` and the simulation draws it under a theme), `bbox_disagreements`, `part_mostly_outside_its_element`, `app_vs_sim`, and `housing_leds` (the four physical LEDs: never drawn). The findings are in `docs/OVERLAY-REPORT.md` section 7. None of them changes the catalogue.
+
+Regenerate (needs Chrome for the live parts' boxes; `--no-measure` keeps the previous ones):
+
+```sh
+UV_CACHE_DIR=$F30_MAIN/bake/work/.uvcache uv run -q --no-project --with numpy --with pillow --with jsonschema \
+    python -I tools/overlay/inventory_parts.py [--markdown]
+```
+
+In the constructor, each element's parts are its child nodes, and the render mode `texture` draws them (top bar: G20 texture, night / day, theme connected / stock, lamps start-up / driving / all). The root "Ours: G20 parts in the app" shows the app's textures at their layout boxes; it is view only and raises no conflict.

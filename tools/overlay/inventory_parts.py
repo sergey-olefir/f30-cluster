@@ -381,7 +381,9 @@ def cross_checks(recs, alpha, cat, man):
         b, eb = r['bbox'], E[el]['bbox']
         d = [round(b[0] - eb[0], 1), round(b[1] - eb[1], 1), round(b[2] - eb[2], 1), round(b[3] - eb[3], 1)]
         r['vs_catalogue'] = {'element_bbox': eb, 'd_edges': d, 'inside_pct': round(100.0 * ins / n, 1) if n else None}
-        if n and 100.0 * ins / n < 50:
+        # live parts are boxes here (no pixel mask in Python): a diagonal pointer would score low for no reason, so
+        # they are compared by their extents in bbox_disagreements only
+        if n and 100.0 * ins / n < 50 and r['render'] != 'live':
             outside.append({'part': r['id'], 'element': el, 'inside_pct': round(100.0 * ins / n, 1),
                             'part_bbox': b, 'element_bbox': eb})
     rep['part_mostly_outside_its_element'] = outside
