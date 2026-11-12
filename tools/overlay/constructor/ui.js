@@ -18,7 +18,7 @@
   const UI = (OC.ui = {
     labels: Q.get('labels') === '1', cropPhoto: null, shot: Q.get('shot') === '1', mouse: null,
     pick: 'wb', snapGrid: true, gridStep: 10, snapEdges: true,
-    sel: { g20: null, wb: null, anchor: null }, selConflict: null, conflicts: [], guides: null, handles: [],
+    sel: { g20: null, wb: null, anchor: null, part: null }, selConflict: null, conflicts: [], guides: null, handles: [],
     tab: Q.get('tab') || 'inspector', filt: { relation: '', safety: '', decision: '', group: '', q: '' }, sevShow: { error: true, warning: true, info: true },
   });
   OC.photos = {};
@@ -166,18 +166,20 @@
 
   // ---------------- selection & edit target ----------------
   function select(o, keepConflict) {
-    UI.sel = { g20: o.g20 || null, wb: o.wb || null, anchor: o.anchor || null };
+    // a part selects its element too (the element's inspector, relation and decision stay below the part's)
+    const pr = o.part && OC.P.byId[o.part];
+    UI.sel = { g20: o.g20 || (pr && pr.source === 'sim' && S.g20ById[pr.element] ? pr.element : null), wb: o.wb || null, anchor: o.anchor || null, part: pr ? o.part : null };
     if (!keepConflict) UI.selConflict = null;
     revealInTree();
     panelsDirty = true;
     needTree = true;
-    if (o.g20 || o.wb || o.anchor) setTab('inspector');
+    if (o.g20 || o.wb || o.anchor || o.part) setTab('inspector');
     requestRender();
   }
   OC.select = select;
   // open the tree branches of the selected items so their rows are visible
   function revealInTree() {
-    for (const k of [UI.sel.g20 && 'g20:' + UI.sel.g20, UI.sel.wb && 'wb:' + UI.sel.wb, UI.sel.anchor && 'anchor:' + UI.sel.anchor]) {
+    for (const k of [UI.sel.g20 && 'g20:' + UI.sel.g20, UI.sel.wb && 'wb:' + UI.sel.wb, UI.sel.anchor && 'anchor:' + UI.sel.anchor, UI.sel.part && 'part:' + UI.sel.part]) {
       const n = k && OC.nodeOf[k];
       if (n) for (let a = n.parent; a; a = a.parent) a.open = true;
     }
@@ -224,6 +226,21 @@
       ctx.strokeStyle = '#00e5ff';
       ctx.lineWidth = 2.5 / V.s;
       ctx.strokeRect(b[0] - 3 / V.s, b[1] - 3 / V.s, b[2] - b[0] + 6 / V.s, b[3] - b[1] + 6 / V.s);
+      // the app textures that cover it (dashed pink)
+      if (OC.P.ok && !UI.sel.part) for (const r of OC.P.recs) if (r.covers && r.placement && r.covers.some((c) => c.element === UI.sel.g20)) dashBox(ctx, r.placement, '#ff78c8');
+    }
+    const pr = UI.sel.part && OC.P.byId[UI.sel.part];
+    if (pr) {
+      const v = OC.partBitmap(pr);
+      const b = (v && v.box) || pr.bbox || pr.placement;
+      if (b) {
+        OC.panelXf(ctx);
+        ctx.strokeStyle = '#ff40ff';
+        ctx.lineWidth = 2 / V.s;
+        ctx.strokeRect(b[0] - 2 / V.s, b[1] - 2 / V.s, b[2] - b[0] + 4 / V.s, b[3] - b[1] + 4 / V.s);
+      }
+      // an app texture: every G20 element it covers (dashed cyan)
+      for (const c of pr.covers || []) { const g = S.g20ById[c.element]; if (g) dashBox(ctx, g.bbox, '#00e5ff'); }
     }
     const t = target();
     if (t) {
@@ -259,6 +276,15 @@
       ctx.stroke();
     }
   };
+
+  function dashBox(ctx, b, col) {
+    OC.panelXf(ctx);
+    ctx.setLineDash([6 / V.s, 4 / V.s]);
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 1.5 / V.s;
+    ctx.strokeRect(b[0], b[1], b[2] - b[0], b[3] - b[1]);
+    ctx.setLineDash([]);
+  }
 
   // ---------------- hit testing ----------------
   function hitWb(px, py) {
@@ -491,23 +517,97 @@
     document.querySelectorAll('#pick button').forEach((b) => b.classList.toggle('on', b.dataset.p === p));
   }
 
+  // ---------------- G20 parts: tags, state, inspector ----------------
+  const RENDER_TAG = { raster: 'B', procedural: 'C', live: 'D', 'app-texture': 'app', font: 'font', data: 'data' };
+  // small tags for a part row: source/package, look, state, layer; '!' a fallback (with the reason); greyed when the
+  // global look / theme / lamps leave it undrawn
+  function partTags(n) {
+    const r = OC.P.byId[n.ref];
+    if (!r) return { html: '', inactive: true, title: 'not in g20_parts.json' };
+    const t = [];
+    const pk = r.source === 'app-scene' ? 'app' : r.package === 'E' ? 'E' : RENDER_TAG[r.render] || '?';
+    if (r.render !== 'font' && r.render !== 'data') t.push('<span class="pt src-' + esc(pk) + '" title="' + esc(r.source + ', ' + r.render + (r.package ? ', package ' + r.package : '')) + '">' + esc(pk) + '</span>');
+    if (r.source === 'sim') {
+      t.push('<span class="pt" title="look ' + r.look + '">' + (r.look === 'any' ? '·' : r.look === 'day' ? 'D' : 'N') + '</span>');
+      t.push('<span class="pt" title="state ' + r.state + '">' + (r.state === 'any' ? '·' : r.state === 'stock' ? 'stk' : 'con') + '</span>');
+      t.push('<span class="pt' + (r.layer === 'over' ? ' over' : '') + '" title="layer ' + r.layer + '">' + (r.layer === 'over' ? 'O' : 'U') + '</span>');
+      if (r.lamp) t.push('<span class="pt" title="lamp ' + esc(r.lamp) + '">L</span>');
+    }
+    let inactive = false;
+    let title = '';
+    if (r.render === 'font' || r.render === 'data') {
+      t.push('<span class="pt fb" title="not a picture">' + esc(r.render) + '</span>');
+      return { html: t.join(''), inactive: true, title: 'not drawn: ' + (r.render === 'font' ? 'the font C draws its texts with' : 'data, not a picture') };
+    }
+    const st = n.type === 'apptex' ? { active: true, v: OC.partBitmap(r) } : OC.partNodeState(n);
+    if (!st.active) { inactive = true; title = 'not drawn now: ' + st.why; }
+    else if (st.v && st.v.empty) { t.push('<span class="pt" title="' + esc(st.v.empty) + '">∅</span>'); title = st.v.empty; }
+    else if (st.v && st.v.fallback) { t.push('<span class="pt fb" title="' + esc('fallback to the schematic: ' + st.v.fallback) + '">!</span>'); title = 'fallback: ' + st.v.fallback; }
+    return { html: t.join(''), inactive, title };
+  }
+  function partInspector(r) {
+    const P = OC.P;
+    const link = (id) => (P.byId[id] ? '<a href="#" data-a="sel-part" data-id="' + esc(id) + '">' + esc(id) + '</a>' : esc(id));
+    const glink = (id) => (S.g20ById[id] ? '<a href="#" data-a="sel-g20" data-id="' + esc(id) + '">' + esc(id) + '</a>' : esc(id));
+    const n = OC.nodeOf['part:' + r.id];
+    const st = r.source === 'app-scene' ? { active: true, v: OC.partBitmap(r) } : n ? OC.partNodeState(n) : { active: false, why: 'no tree node' };
+    const v = st.v;
+    const th = st.active && v && v.img ? OC.partThumb(r, 420, 160) : null;
+    const proc = r.procedural ? esc(r.procedural.module) + ' · ' + esc(r.procedural.draw || r.procedural.id) : '—';
+    const m = r.measured;
+    const rows = [
+      ['element', r.element ? glink(r.element) : '<i>none</i> (see report.unresolved)'],
+      ['source', esc(r.source) + (r.package ? ' · package ' + esc(r.package) : '') + ' · ' + esc(r.render) + ' · kind ' + esc(r.kind)],
+      ['file', r.file ? '<code>' + esc(r.file) + '</code>' : '—'],
+      ['procedural', proc],
+      ['size', r.size ? r.size.join(' × ') + (r.scale && r.scale !== 1 ? ' (drawn ×' + r.scale + ')' : '') : '—'],
+      ['placement', fbox(r.placement)],
+      ['bbox', fbox(r.bbox) + (r.alpha_px ? ', ' + r.alpha_px + ' px' : '')],
+    ];
+    if (m) rows.push(['measured', m.fallback ? '<span class="crit">' + esc(m.fallback) + '</span>' : fbox(m.bbox) + ', ' + m.px + ' px (' + esc(Object.entries(m.state || {}).filter(([, x]) => x !== null && !(Array.isArray(x) && !x.length)).map(([k, x]) => k + ' ' + x).join(', ')) + ')']);
+    rows.push(['layer · state · look', esc(r.layer) + ' · ' + esc(r.state) + ' · ' + esc(r.look) + (r.z != null ? ' · z ' + r.z : '')]);
+    if (r.lamp) rows.push(['lamp', esc(r.lamp)]);
+    if (r.cond) rows.push(['condition', esc(r.cond) + (r.cond_source ? ' <span class="muted">(' + esc(r.cond_source) + ')</span>' : '')]);
+    if (r.skip) rows.push(['skip', esc(r.skip)]);
+    if (r.clip) rows.push(['clip', 'live at the needle line (' + esc(r.clip.by) + '); drawn here unclipped']);
+    rows.push(['now', st.active ? (v && v.empty ? '<span class="muted">' + esc(v.empty) + '</span>' : v && v.fallback ? '<span class="crit">fallback: ' + esc(v.fallback) + '</span>' : 'drawn' + (v && v.box ? ' at ' + fbox(v.box) + ', ' + v.px + ' px' : '')) : '<span class="muted">not drawn: ' + esc(st.why) + '</span>']);
+    rows.push(['evidence', esc(r.evidence) + (r.sources && r.sources.length ? ' · photos ' + esc(r.sources.join(', ')) : '')]);
+    rows.push(['used by', r.used_by.length ? esc(r.used_by.join(', ')) : '<i>nothing</i>']);
+    if (r.baked_into && r.baked_into.length) rows.push(['baked into', r.baked_into.map(link).join(', ')]);
+    if (r.baked_from && r.baked_from.length) rows.push(['baked from', r.baked_from.map(link).join(', ') + (r.baked_from_files ? '<br>' + r.baked_from_files.map((f) => '<code>' + esc(f) + '</code>').join(', ') : '')]);
+    if (r.covers && r.covers.length) rows.push(['covers', r.covers.map((c) => glink(c.element) + ' ' + c.pct + ' %').join(', ') + (r.covers_note ? '<br><span class="muted">' + esc(r.covers_note) + '</span>' : '')]);
+    if (r.vs_catalogue) rows.push(['vs catalogue', 'edges ' + esc(r.vs_catalogue.d_edges.join(', ')) + ' px, ' + (r.vs_catalogue.inside_pct == null ? '?' : r.vs_catalogue.inside_pct) + ' % inside the element']);
+    if (r.notes) rows.push(['notes', esc(r.notes)]);
+    return '<section class="insp" data-part="' + esc(r.id) + '"><h3><span class="tag p">part</span> ' + esc(r.id) + '</h3>' +
+      (th ? '<div class="thumb"><img alt="" src="' + th + '"></div>' : '') +
+      '<dl class="kv">' + rows.map(([k, x]) => '<dt>' + k + '</dt><dd>' + x + '</dd>').join('') + '</dl></section>';
+  }
+
   // ---------------- layer tree DOM ----------------
   function renderTree() {
     needTree = false;
     const root = $('#tree');
     const st = root.scrollTop;
     const rows = [];
-    const sel = new Set([UI.sel.g20 && 'g20:' + UI.sel.g20, UI.sel.wb && 'wb:' + UI.sel.wb, UI.sel.anchor && 'anchor:' + UI.sel.anchor].filter(Boolean));
+    const sel = new Set([UI.sel.g20 && 'g20:' + UI.sel.g20, UI.sel.wb && 'wb:' + UI.sel.wb, UI.sel.anchor && 'anchor:' + UI.sel.anchor, UI.sel.part && 'part:' + UI.sel.part].filter(Boolean));
     const counts = conflictCounts();
     const walk = (n, depth) => {
       for (let i = 0; i < n.children.length; i++) {
         const c = n.children[i];
         const isGroup = !!c.children;
-        const id = c.type === 'g20' ? 'g20:' + c.ref : c.type === 'wb' ? 'wb:' + c.ref : c.type === 'anchor' && c.ref ? 'anchor:' + c.ref : '';
+        const id = c.type === 'g20' ? 'g20:' + c.ref : c.type === 'wb' ? 'wb:' + c.ref : c.type === 'anchor' && c.ref ? 'anchor:' + c.ref : c.type === 'part' || c.type === 'apptex' ? 'part:' + c.ref : '';
         const g = c.type === 'g20' ? S.g20ById[c.ref] : null;
         const e = c.type === 'wb' ? S.wbById[c.ref] : null;
-        const modeable = c.type === 'g20' || c.type === 'wb' || c.type === 'g20group' || c.type === 'anchor' || c.type === 'cluster' || c === OC.g20Root || c === OC.wbRoot;
+        const modeable = c.type === 'g20' || c.type === 'wb' || c.type === 'g20group' || c.type === 'anchor' || c.type === 'cluster' || c === OC.g20Root || c === OC.wbRoot || c.type === 'part' || c.type === 'apptex' || c === OC.oursRoot;
         let badge = '';
+        let inactive = false;
+        let rowTitle = c.title || '';
+        if (c.type === 'part' || c.type === 'apptex') {
+          const t = partTags(c);
+          badge = t.html;
+          inactive = t.inactive;
+          if (t.title) rowTitle = t.title + (rowTitle ? ' · ' + rowTitle : '');
+        }
         if (g) {
           const k = counts.g20[g.id];
           badge = '<span class="rel rel-' + g.relation + '" title="relation ' + g.relation + '">' + g.relation[0].toUpperCase() + '</span>' + (g.safety === 'critical' ? '<span class="crit" title="critical">!</span>' : '') + (g.relation === 'over' ? '<span class="overlock" title="over: always drawn above 6WB">' + OC.lockIconSvg + '</span>' : '') + (k ? '<span class="cc ' + k.top + '">' + k.n + '</span>' : '');
@@ -517,13 +617,13 @@
           badge = (OC.wbHidden(e) ? '<span class="hid" title="hidden in the plan">h</span>' : '') + (k ? '<span class="cc ' + k.top + '">' + k.n + '</span>' : '');
         }
         const cnt = isGroup ? '<span class="n">' + OC.leaves(c).length + '</span>' : '';
-        rows.push('<div class="row' + (sel.has(id) ? ' sel' : '') + (c.avail ? '' : ' na') + (OC.effVisible(c) || isGroup ? '' : ' off') + '" data-k="' + c.key + '" style="padding-left:' + (4 + depth * 12) + 'px" title="' + esc(c.title || '') + '">' +
+        rows.push('<div class="row' + (sel.has(id) ? ' sel' : '') + (c.avail ? '' : ' na') + ((OC.effVisible(c) || isGroup) && !inactive ? '' : ' off') + '" data-k="' + c.key + '" style="padding-left:' + (4 + depth * 12) + 'px" title="' + esc(rowTitle) + '">' +
           '<span class="caret">' + (isGroup ? (c.open ? '▾' : '▸') : '') + '</span>' +
           '<input type="checkbox" class="eye" ' + (c.show ? 'checked' : '') + (c.avail ? '' : ' disabled') + ' title="show / hide">' +
           '<button class="solo' + (c.solo ? ' on' : '') + '" title="solo">S</button>' +
           '<button class="lk' + (c.lock ? ' on' : '') + '" title="lock (no picking or dragging)">' + OC.lockIconSvg + '</button>' +
           '<span class="name">' + esc(c.label) + (c.avail ? '' : ' <i>(not available)</i>') + '</span>' + badge + cnt +
-          '<span class="ctl">' + (modeable ? '<select class="mode" title="render mode">' + ['', 'fill', 'outline', 'photo', 'diff'].map((m) => '<option value="' + m + '"' + ((c.mode || '') === m ? ' selected' : '') + '>' + (m || '·') + '</option>').join('') + '</select>' : '') +
+          '<span class="ctl">' + (modeable ? '<select class="mode" title="render mode">' + ['', 'fill', 'outline', 'photo', 'diff', 'texture'].map((m) => '<option value="' + m + '"' + ((c.mode || '') === m ? ' selected' : '') + '>' + (m || '·') + '</option>').join('') + '</select>' : '') +
           '<input type="range" class="op" min="0" max="1" step="0.05" value="' + c.opacity + '" title="opacity ' + c.opacity + '">' +
           '<button class="up" title="z up">▲</button><button class="dn" title="z down">▼</button></span></div>');
         if (isGroup && c.open) walk(c, depth + 1);
@@ -553,6 +653,7 @@
       else if (t.classList.contains('op') || t.classList.contains('mode')) return;
       else {
         if (n.type === 'g20') select({ g20: n.ref });
+        else if (n.type === 'part' || n.type === 'apptex') select({ part: n.ref });
         else if (n.type === 'wb') select({ wb: n.ref });
         else if (n.type === 'anchor' && n.ref) select({ anchor: n.ref });
         else if (n.children) { n.open = !n.open; needTree = true; }
@@ -565,6 +666,7 @@
       if (!row || ev.target.closest('.ctl')) return;
       const n = nodeByKey(row.dataset.k);
       if (n.type === 'g20') zoomTo(S.g20ById[n.ref].bbox);
+      else if (n.type === 'part' || n.type === 'apptex') { const r = OC.P.byId[n.ref]; const v = OC.partBitmap(r); const b = (v && v.box) || r.bbox || r.placement; if (b) zoomTo(b); }
       else if (n.type === 'wb') zoomTo(OC.xbox(S.wbById[n.ref]));
       else if (n.type === 'anchor' && n.ref) zoomTo(targetBox({ type: 'anchor', id: n.ref }));
     });
@@ -625,7 +727,7 @@
   }
   function clickConflict(c) {
     UI.selConflict = c;
-    UI.sel = { g20: c.g20, wb: c.wb, anchor: null };
+    UI.sel = { g20: c.g20, wb: c.wb, anchor: null, part: null };
     revealInTree();
     needTree = true;
     let b = S.g20ById[c.g20].bbox;
@@ -672,6 +774,7 @@
     const el = $('#tab-inspector');
     if (document.activeElement && el.contains(document.activeElement) && drag == null && document.activeElement.tagName === 'TEXTAREA') return;
     let h = '';
+    if (UI.sel.part && OC.P.byId[UI.sel.part]) h += partInspector(OC.P.byId[UI.sel.part]);
     if (UI.sel.g20 && S.g20ById[UI.sel.g20]) h += g20Inspector(S.g20ById[UI.sel.g20]);
     if (UI.sel.anchor) h += wbInspector({ type: 'anchor', id: UI.sel.anchor });
     else if (UI.sel.wb && S.wbById[UI.sel.wb]) h += wbInspector({ type: 'wb', id: UI.sel.wb });
@@ -693,7 +796,7 @@
     return '<section class="insp" data-g20="' + esc(g.id) + '"><h3><span class="tag g">G20</span> ' + esc(g.id) + '</h3><p class="name">' + esc(g.name) + '</p>' +
       '<dl class="kv"><dt>group</dt><dd>' + esc(g.group) + '</dd><dt>relation</dt><dd><span class="rel rel-' + g.relation + '">' + g.relation + '</span>' + (over ? ' ' + OC.lockIconSvg + ' drawn above any theme' : '') + '</dd><dt>evidence</dt><dd>' + esc(g.evidence) + '</dd><dt>safety</dt><dd' + (g.safety === 'critical' ? ' class="crit"' : '') + '>' + esc(g.safety) + '</dd>' +
       '<dt>bbox</dt><dd>' + fbox(g.bbox) + '</dd><dt>shape</dt><dd>' + (g.poly ? 'poly, ' + g.poly.length + ' points' : 'bbox') + ', ' + ar + ' px</dd><dt>colour</dt><dd><span class="sw" style="background:' + OC.rgba(OC.g20Rgb(g), 1) + '"></span>' + esc(g.colour && g.colour.name) + '</dd>' +
-      '<dt>schematic</dt><dd>' + esc(g.schematic || '—') + (g.schematic && !S.schematics[g.id] ? ' <i>(not loaded)</i>' : '') + '</dd><dt>measured by</dt><dd>' + esc(g.measured_by || '—') + '</dd>' + (g.notes ? '<dt>notes</dt><dd>' + esc(g.notes) + '</dd>' : '') + '</dl>' +
+      '<dt>schematic</dt><dd>' + esc(g.schematic || '—') + (g.schematic && !S.schematics[g.id] ? ' <i>(not loaded)</i>' : '') + '</dd><dt>measured by</dt><dd>' + esc(g.measured_by || '—') + '</dd>' + (g.notes ? '<dt>notes</dt><dd>' + esc(g.notes) + '</dd>' : '') + '</dl>' + g20PartsBlock(g) +
       '<h4>Relation basis</h4>' + (basis ? '<table class="mini"><tr><th>photo</th><th>seen</th><th>ours opaque</th><th>lit exp.</th><th>note</th></tr>' + basis + '</table>' : '<p class="muted">none</p>') +
       '<h4>States</h4>' + (states ? '<table class="mini"><tr><th>photo</th><th>lit</th><th>colour</th><th>note</th></tr>' + states + '</table>' : '<p class="muted">none</p>') +
       '<h4>Decision</h4><div class="form"><label>decision <select data-g="decision"' + (over ? ' disabled' : '') + '>' + opts + '</select></label>' + (over ? '<span class="muted"> forced: over</span>' : '') +
@@ -702,6 +805,18 @@
       (p.decision === 'redraw' ? '<div class="blk">redraw_at ' + [0, 1, 2, 3].map((i) => num('ra' + i, p.redraw_at ? p.redraw_at[i] : '', 1, ' data-g="ra"')).join('') + ' <button data-a="ra-bbox">= bbox</button> <button data-a="ra-clear">clear</button></div>' : '') +
       (hole ? '<div class="blk">hole ' + fbox(hole.rect) + ' margin ' + hole.margin + ' radius ' + hole.radius + (hole.edited ? ' (edited)' : '') + ' <button data-a="goto-holes">edit</button></div>' : '') +
       '</div><h4>Conflicts (' + mine.length + ')</h4>' + conflictRows(mine, true) + '</section>';
+  }
+  // the element's own parts (have it / must draw it) and the app textures over it
+  function g20PartsBlock(g) {
+    const P = OC.P;
+    if (!P.ok) return '';
+    const mine = P.recs.filter((r) => r.element === g.id);
+    const cov = P.recs.filter((r) => r.covers && r.covers.some((c) => c.element === g.id) && r.element !== g.id);
+    const pe = (P.doc.report && P.doc.report.per_element && P.doc.report.per_element[g.id]) || null;
+    const li = (r) => '<li><a href="#" data-a="sel-part" data-id="' + esc(r.id) + '">' + esc(r.id) + '</a> <span class="muted">' + esc(r.render + (r.look !== 'any' ? ', ' + r.look : '') + (r.state !== 'any' ? ', ' + r.state : '')) + '</span></li>';
+    return '<h4>G20 parts (' + mine.length + ')</h4>' + (mine.length ? '<ul class="parts">' + mine.map(li).join('') + '</ul>' : '<p class="crit">no part: we would still have to draw it</p>') +
+      (pe && pe.missing.length ? '<p class="muted">missing: ' + esc(pe.missing.join('; ')) + '</p>' : '') +
+      (cov.length ? '<p>covered in the app by ' + cov.map((r) => '<a href="#" data-a="sel-part" data-id="' + esc(r.id) + '">' + esc(r.id) + '</a> ' + r.covers.find((c) => c.element === g.id).pct + ' %').join(', ') + '</p>' : '');
   }
   const tri = (v) => (v === true ? 'yes' : v === false ? 'no' : v == null ? '?' : esc(v));
   function wbInspector(t) {
@@ -772,6 +887,8 @@
       if (!a) return;
       ev.preventDefault();
       const sec = t.closest('.insp');
+      if (a === 'sel-part') { select({ part: t.dataset.id }); return; }
+      if (a === 'sel-g20') { select({ g20: t.dataset.id }); return; }
       if (a === 'sel-anchor') { select({ anchor: S.wbById[sec.dataset.id].anchor }); return; }
       if (a === 'goto-holes') { setTab('holes'); return; }
       if (a === 'reset-move') {
@@ -829,7 +946,7 @@
     el.addEventListener('click', (ev) => {
       const tr = ev.target.closest('tr[data-id]');
       if (!tr || ev.target.tagName === 'SELECT' || ev.target.tagName === 'OPTION') return;
-      UI.sel = { g20: tr.dataset.id, wb: null, anchor: null };
+      UI.sel = { g20: tr.dataset.id, wb: null, anchor: null, part: null };
       UI.selConflict = null;
       revealInTree();
       zoomTo(S.g20ById[tr.dataset.id].bbox, 120);
@@ -893,7 +1010,7 @@
       const box = ev.target.closest('.hole');
       const g = S.g20ById[box.dataset.g];
       const h = S.plan.holes[g.id];
-      if (a === 'zoom') { UI.sel = { g20: g.id, wb: null, anchor: null }; zoomTo(h.rect, 120); needTree = true; panelsDirty = true; }
+      if (a === 'zoom') { UI.sel = { g20: g.id, wb: null, anchor: null, part: null }; zoomTo(h.rect, 120); needTree = true; panelsDirty = true; }
       if (a === 'reset') { pushUndo(); h.edited = false; h.rect = OC.deriveHoleRect(g, h.margin); changed(true); }
     });
   }
@@ -1031,7 +1148,44 @@
     $('#s-crop').onchange = (e) => { UI.cropPhoto = e.target.value || null; requestRender(); };
     document.querySelectorAll('#tabs button').forEach((b) => (b.onclick = () => setTab(b.dataset.t)));
     $('#c-labels').checked = UI.labels;
+    // G20 parts: render, look, theme, lamps (docs/G20SIM-REPORT.md section 2)
+    $('#s-g20mode').onchange = (e) => { setG20Texture(e.target.value === 'texture'); };
+    $('#s-look').onchange = (e) => setPartsG({ look: e.target.value });
+    $('#s-conn').onchange = (e) => setPartsG({ conn: e.target.value === '1' });
+    $('#s-lamps').onchange = (e) => setPartsG({ lamps: e.target.value });
   }
+  function setPartsG(o) {
+    Object.assign(OC.P.G, o);
+    OC.clearPartCache();
+    syncPartsControls();
+    needTree = true;
+    panelsDirty = true;
+    requestRender();
+  }
+  function syncPartsControls() {
+    const G = OC.P.G;
+    $('#s-look').value = G.look;
+    $('#s-conn').value = G.conn ? '1' : '0';
+    $('#s-lamps').value = G.lamps;
+    $('#s-g20mode').value = OC.g20Root && OC.g20Root.mode === 'texture' ? 'texture' : '';
+    for (const id of ['#s-look', '#s-conn', '#s-lamps', '#s-g20mode']) $(id).disabled = !OC.P.ok;
+  }
+  // texture mode for the whole G20 stock branch: the groups' own defaults (the faint structure ghost) step aside
+  function setG20Texture(on) {
+    const R = OC.g20Root;
+    if (!R) return;
+    R.mode = on ? 'texture' : null;
+    for (const g of R.children) {
+      if (g.type !== 'g20group') continue;
+      if (!g._def) g._def = { mode: g.mode, opacity: g.opacity };
+      g.mode = on ? null : g._def.mode;
+      g.opacity = on ? 1 : g._def.opacity;
+    }
+    syncPartsControls();
+    needTree = true;
+    requestRender();
+  }
+  OC.setG20Texture = setG20Texture;
 
   // ---------------- loading ----------------
   async function loadAssets(D) {
@@ -1101,12 +1255,41 @@
     if (DATASET === 'sample') banner('info', 'Showing the hand-made <b>sample</b> data (<code>design/overlay/sample/</code>). <a href="?data=real">Real data</a>');
     const A = await loadAssets(D);
     if (A.warns.length) { UI.loadMsgs.push(...A.warns); banner('warn', A.warns.length + ' mask/schematic file(s) missing; bboxes are used instead.', A.warns); }
+    // the G20 parts (real data only; not needed to export a plan)
+    if (DATASET === 'real' && !EXPORT) {
+      const G = OC.P.G;
+      if (Q.get('look') === 'day' || Q.get('look') === 'night') G.look = Q.get('look');
+      if (Q.get('conn') === '0' || Q.get('conn') === '1') G.conn = Q.get('conn') === '1';
+      if (['startup', 'driving', 'all'].includes(Q.get('lamps'))) G.lamps = Q.get('lamps');
+      const PR = await OC.loadParts();
+      if (PR.warns.length) { UI.loadMsgs.push(...PR.warns); banner(OC.P.ok ? 'warn' : 'info', OC.P.ok ? 'G20 parts loaded with ' + PR.warns.length + ' problem(s); the parts concerned are marked and fall back to the schematic.' : 'G20 parts not shown: ' + esc(OC.P.why), PR.warns); }
+    } else if (DATASET !== 'real') OC.P.why = 'the G20 parts belong to the real data';
     const avail = A.photoIds.filter((id) => OC.photos[id].img);
     UI.cropPhoto = avail.includes('08') ? '08' : avail[0] || null;
     $('#s-crop').innerHTML = avail.length ? avail.map((id) => '<option' + (id === UI.cropPhoto ? ' selected' : '') + '>' + id + '</option>').join('') : '<option value="">none</option>';
     $('#s-crop').disabled = !avail.length;
     OC.buildTree(A.photoIds);
     if (Q.get('photo') === 'none') for (const id of A.photoIds) { const n = OC.nodeOf['photo:' + id]; if (n) n.show = false; }
+    syncPartsControls();
+    if (OC.P.ok) {
+      if (Q.get('g20mode') === 'texture') setG20Texture(true);
+      if (Q.get('ours') === '1' && OC.oursRoot) { OC.oursRoot.show = true; OC.oursRoot.open = true; }
+      // ?hide=layout:wb_dials,g20:map.region: hide those tree nodes
+      for (const k of (Q.get('hide') || '').split(',').filter(Boolean)) {
+        const n = OC.nodeOf[k] || (k.startsWith('layout:') && OC.oursRoot ? OC.oursRoot.children.find((c) => c.ref === k) : null);
+        if (n) { const off = (m) => { m.show = false; if (m.children) m.children.forEach(off); }; off(n); }
+      }
+      // ?open=g20:structure.speedo,group:telltale,ours: open those tree branches
+      for (const k of (Q.get('open') || '').split(',').filter(Boolean)) {
+        let n = OC.nodeOf[k];
+        if (!n && k.startsWith('group:')) n = (OC.g20Root.children || []).find((c) => c.ref === k.slice(6));
+        if (!n && k === 'ours') n = OC.oursRoot;
+        if (!n && k.startsWith('layout:') && OC.oursRoot) n = OC.oursRoot.children.find((c) => c.ref === k);
+        if (!n) continue;
+        for (let a = n; a; a = a.parent) a.open = true;
+        if (k.startsWith('group:') || k === 'ours') { const all = (m) => { if (m.children) { m.open = true; m.children.forEach(all); } }; all(n); }
+      }
+    }
     OC.newPlan();
     // ?plan=design/overlay/<name>.json: start from that plan (instead of the autosave)
     const planPath = /^design\/overlay\/[A-Za-z0-9_.-]+\.json$/.test(Q.get('plan') || '') ? Q.get('plan') : null;
@@ -1126,7 +1309,7 @@
     $('#loading').remove();
     const wantTab = UI.tab;
     const sel = Q.get('sel');
-    if (sel) select(S.g20ById[sel] ? { g20: sel } : S.wbById[sel] ? { wb: sel } : D.anchors[sel] ? { anchor: sel } : {});
+    if (sel) select(S.g20ById[sel] ? { g20: sel } : S.wbById[sel] ? { wb: sel } : D.anchors[sel] ? { anchor: sel } : OC.P.byId[sel] ? { part: sel } : {});
     const vw = (Q.get('view') || '').split(',').map(Number);
     if (vw.length === 4 && vw.every(isFinite) && vw[2] > vw[0] && vw[3] > vw[1]) { UI.viewBox = vw; zoomTo(vw, 10); }
     else fit();
@@ -1134,6 +1317,14 @@
     needTree = true;
     changed(true);
     if (EXPORT) exportDefault(fatal);
+    if (Q.get('probe') === 'parts') {
+      const pre = document.createElement('pre');
+      pre.id = 'probe-dump';
+      pre.hidden = true;
+      pre.textContent = OC.P.ok ? JSON.stringify(OC.probeParts()) : JSON.stringify({});
+      document.body.appendChild(pre);
+      document.title = 'probe-done';
+    }
     if (Q.get('selftest')) {
       const sc = document.createElement('script');
       sc.src = 'selftest.js';
@@ -1141,7 +1332,7 @@
     }
   }
   OC.hist = hist;
-  OC.internals = { undo, redo, select, target, tplan, targetBox, fit, setTab, setStockMap, savePlan, frame: () => frame(), get conflicts() { return UI.conflicts; } };
+  OC.internals = { undo, redo, select, target, tplan, targetBox, fit, setTab, setStockMap, savePlan, setPartsG, setG20Texture, renderTree, partTags, frame: () => frame(), get conflicts() { return UI.conflicts; } };
 
   function exportDefault(fatal) {
     const out = $('#plan-dump');
