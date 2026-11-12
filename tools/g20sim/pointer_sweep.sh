@@ -3,7 +3,7 @@
 # For each (speed, rpm): wb_dials over the simulation's gauges only (?g20dbg=gauges: pointers, glow, rev band,
 # mini needles over black) and wb_dials over black (backdrop off). tools/g20sim/pointer_sweep.py diffs them.
 cd "$(dirname "$0")/../.." || exit 1
-B=http://localhost:8078; OUT=bake/work/g20sim/E/sweep; SHOT=tools/g20sim/shot.sh
+B=http://localhost:${BENCH_PORT:-8078}; OUT=${G20SIM_OUT:-bake/work/g20sim/E}/sweep; SHOT=tools/g20sim/shot.sh
 mkdir -p $OUT
 curl -s -X POST $B/drive -d '{"value":4}'; curl -s -X POST $B/setting -d '{"key":"inComfort","value":"wb_dials"}'; sleep 6
 # pairs speed:rpm; override with SWEEP="0:0 10:750" tools/g20sim/pointer_sweep.sh
