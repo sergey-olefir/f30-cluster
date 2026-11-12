@@ -1427,8 +1427,8 @@ uniform vec4 u_r0;        // each one's box, target px: x, y, w, h
 uniform vec4 u_r1;
 uniform vec4 u_r2;
 uniform vec2 u_win;       // the baked window's level (a gain), applied above this y (the bar below keeps its own)
-uniform float u_hasTex;   // 1: the baked window, horizon and bar; 2: a collar only (u_t0's alpha over u_r0): black there,
-                          // see-through elsewhere, so BMW's own cluster shows round our dials
+uniform float u_hasTex;   // 1: the baked window, horizon and bar; 2: a collar only (u_t0 over u_r0: the G20's background
+                          // colour, coverage in alpha), see-through elsewhere, so BMW's own cluster shows round our dials
 uniform vec4 u_hole;      // a see-through window for BMW's own map under us: x, y, w, h (w 0: none)
 uniform float u_holeR;    // its corner radius
 
@@ -1445,8 +1445,8 @@ void main() {
     vec3 col = vec3(0.0);
     if (u_hasTex > 1.5) {
         vec2 u0 = (p - u_r0.xy) / u_r0.zw;
-        float a = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? texture2D(u_t0, u0).a : 0.0;
-        gl_FragColor = vec4(0.0, 0.0, 0.0, smoothstep(0.35, 0.65, a));
+        vec4 t = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? texture2D(u_t0, u0) : vec4(0.0);
+        gl_FragColor = vec4(t.rgb, clamp(t.a * 1.15, 0.0, 1.0));       // the G20's own background colour, soft edges
         return;
     }
     if (u_style < 0.5 && u_hasTex > 0.5) {
