@@ -229,7 +229,7 @@ def main():
                         '0.52-0.62 at 14, 0.72-0.75 at 20, 0.87-0.92 at 30, ~1 at 40'),
         },
         'glow': {
-            'gain': P(1.0, 'weak', ['08', '09'], 'overall multiplier: the lead calibrates it against package B\'s static faces'),
+            'gain': P(0.6, 'weak', ['08', '09'], 'overall multiplier, calibrated by the lead (E) on the assembled simulation over package B\'s static faces (tools/g20sim/calib_glow.py, least squares in the pointer zones): 08 speedo 0.47, tacho 0.58; 09 speedo 0.63, tacho 0.73; 0.6 = their mean (D\'s own fit, against a stand-in face, was 1.0)'),
             'composite': P('lighter', 'medium', ['08', '09'], 'additive: the fit is linear in the glow (o09 = a*o08 + b + glow terms)'),
             'rgb': P({'night': r1(fg['colour_night'], 1), 'day': r1(fg['colour_day'], 1)}, 'medium', ['08', '09'],
                      'added colour at full strength. Fitted jointly on 08 (bar at 0) and 09 (idle) with a per-channel exposure '
