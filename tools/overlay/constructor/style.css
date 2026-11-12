@@ -119,3 +119,15 @@ ul.msgs { font: 11px ui-monospace, Menlo, monospace; }
 #status { display: flex; justify-content: space-between; gap: 20px; padding: 3px 8px; background: var(--panel); border-top: 1px solid var(--line); font: 11px ui-monospace, Menlo, monospace; white-space: nowrap; overflow: hidden; }
 
 body.shot #top, body.shot #left, body.shot #right, body.shot #status, body.shot #banners { display: none; }
+
+/* G20 parts */
+.pt { font-size: 9px; padding: 0 3px; border-radius: 2px; background: #2a2e35; color: #aab3bf; margin-left: 1px; }
+.pt.src-B { background: #2d4a3a; color: #b5e8c5; } .pt.src-C { background: #3a2d4a; color: #d8c5f0; } .pt.src-D { background: #4a3a2d; color: #f0d8c0; }
+.pt.src-E { background: #444; color: #ddd; } .pt.src-app { background: #5a2a48; color: #ffd0ee; } .pt.src-data, .pt.src-font { background: #333; color: #999; }
+.pt.over { background: #7a1f1f; color: #ffd0d0; }
+.pt.fb { background: var(--warn); color: #000; font-weight: 700; }
+.tag.p { background: #6b2d5a; }
+.thumb { margin: 4px 0 6px; background: #000; border: 1px solid var(--line); text-align: center; }
+.thumb img { max-width: 100%; display: block; margin: 0 auto; image-rendering: auto; }
+ul.parts { padding-left: 16px; margin: 4px 0; font: 11px ui-monospace, Menlo, monospace; }
+#top select { max-width: 150px; }

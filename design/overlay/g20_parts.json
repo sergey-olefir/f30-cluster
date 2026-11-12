@@ -1,0 +1,8804 @@
+{
+ "$comment": "The G20 parts we already have as our own drawings (the bench simulation bench/g20/ and the app's G20 scene textures), one record per part, linked to design/overlay/g20_comfort.json. Written by tools/overlay/inventory_parts.py; do not edit. No pixels here: the files are referenced in place. See README.md section 6.",
+ "kind": "g20-parts",
+ "schema_version": 1,
+ "panel": {
+  "w": 1920,
+  "h": 720
+ },
+ "sources": {
+  "manifest": "bench/g20/manifest.json",
+  "catalogue": "design/overlay/g20_comfort.json",
+  "scene": "apps/f30_cluster/hud/scene/",
+  "layouts": "apps/f30_cluster/hud/layouts/",
+  "bake": [
+   "tools/bake_g20.py",
+   "tools/bake_scene.py"
+  ],
+  "geo": "design/g20_geo.json"
+ },
+ "parts": [
+  {
+   "id": "c.font",
+   "element": null,
+   "source": "sim",
+   "package": "C",
+   "file": "bench/g20/fonts/Roboto-wdth-wght.subset.ttf",
+   "procedural": null,
+   "render": "font",
+   "kind": "font",
+   "bbox": null,
+   "placement": null,
+   "size": null,
+   "scale": null,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 0,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Roboto (SIL OFL 1.1, fonts/Roboto-OFL.txt), variable wdth 75-100 / wght 100-900, subset Latin+Cyrillic; loaded by G20C.init(base) as 'G20Roboto'"
+  },
+  {
+   "id": "structure.bg.day",
+   "element": "panel.background",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/bg.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    0,
+    0,
+    1920,
+    720
+   ],
+   "core": [
+    0,
+    0,
+    1920,
+    720
+   ],
+   "placement": [
+    0,
+    0,
+    1920,
+    720
+   ],
+   "size": [
+    960,
+    360
+   ],
+   "scale": 2,
+   "alpha_px": 1382400,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 0,
+   "evidence": "strong",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Opaque panel background: a smooth node-grid surface (40 px nodes, membrane-regularised) fitted to the photo's background pixels outside every element; half resolution.",
+   "vs_catalogue": {
+    "element_bbox": [
+     0.0,
+     0.0,
+     1920.0,
+     720.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "structure.bg.night",
+   "element": "panel.background",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/bg.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    0,
+    0,
+    1920,
+    720
+   ],
+   "core": [
+    0,
+    0,
+    1920,
+    720
+   ],
+   "placement": [
+    0,
+    0,
+    1920,
+    720
+   ],
+   "size": [
+    960,
+    360
+   ],
+   "scale": 2,
+   "alpha_px": 1382400,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 0,
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:wb_dials"
+   ],
+   "notes": "Opaque panel background: a smooth node-grid surface (40 px nodes, membrane-regularised) fitted to the photo's background pixels outside every element; half resolution.",
+   "baked_into": [
+    "app.collar"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     0.0,
+     0.0,
+     1920.0,
+     720.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "live.map",
+   "element": "map.region",
+   "source": "sim",
+   "package": "D",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/live/live.js",
+    "id": "live.map",
+    "draw": "G20Live.drawMap"
+   },
+   "render": "live",
+   "kind": "albedo",
+   "bbox": [
+    555,
+    155,
+    1395,
+    612
+   ],
+   "placement": [
+    555,
+    155,
+    1395,
+    612
+   ],
+   "size": [
+    840,
+    457
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 10,
+   "evidence": "medium",
+   "sources": [
+    "08",
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Our own seeded street layout (never BMW's data) inside map.region with the measured edge fade; background, road colours and widths per look from 08 (night) and 09 (day). Streets drift down at speed (m/s) * px_per_m (weak: 1 px/m). Drawn under B's semi-transparent dial faces.",
+   "measured": {
+    "bbox": [
+     555,
+     155,
+     1395,
+     612
+    ],
+    "core": [
+     590,
+     190,
+     1360,
+     577
+    ],
+    "px": 330912,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    590,
+    190,
+    1360,
+    577
+   ],
+   "alpha_px": 330912,
+   "vs_catalogue": {
+    "element_bbox": [
+     555.0,
+     155.0,
+     1395.0,
+     612.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 86.2
+   }
+  },
+  {
+   "id": "live.map.arrow",
+   "element": "map.position_arrow",
+   "source": "sim",
+   "package": "D",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/live/live.js",
+    "id": "live.map.arrow",
+    "draw": "G20Live.drawMap"
+   },
+   "render": "live",
+   "kind": "icon",
+   "bbox": [
+    939,
+    496,
+    991,
+    531
+   ],
+   "placement": [
+    939,
+    496,
+    991,
+    531
+   ],
+   "size": [
+    52,
+    35
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 10,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Red chevron at map.position_arrow (fixed; the streets move).",
+   "measured": {
+    "bbox": [
+     939,
+     496,
+     991,
+     531
+    ],
+    "core": [
+     939,
+     496,
+     991,
+     531
+    ],
+    "px": 796,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    939,
+    496,
+    991,
+    531
+   ],
+   "alpha_px": 796,
+   "vs_catalogue": {
+    "element_bbox": [
+     939.0,
+     496.0,
+     991.0,
+     532.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "inside_pct": 57.7
+   }
+  },
+  {
+   "id": "structure.map_veil.day",
+   "element": "map.region",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/map_veil.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    555,
+    155,
+    1395,
+    611
+   ],
+   "core": [
+    555,
+    155,
+    1395,
+    611
+   ],
+   "placement": [
+    555,
+    155,
+    1395,
+    611
+   ],
+   "size": [
+    420,
+    228
+   ],
+   "scale": 2,
+   "alpha_px": 372960,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 20,
+   "evidence": "weak",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Semi-transparent dark veil over map.region where the dial faces overlap the map (left and right ends). Alpha = 1 - road contrast(x) / plateau, fitted as two logistic ramps [1.0, 598.13, 53.46, 1.0, 1320.77, 53.46]. Only the roads' attenuation is in it; the map's own darker background fade at its ends is NOT (D's map). Drop or tune it when calibrating with D's map.",
+   "vs_catalogue": {
+    "element_bbox": [
+     555.0,
+     155.0,
+     1395.0,
+     612.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "inside_pct": 85.9
+   }
+  },
+  {
+   "id": "structure.map_veil.night",
+   "element": "map.region",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/map_veil.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    555,
+    155,
+    1395,
+    611
+   ],
+   "core": [
+    555,
+    155,
+    1395,
+    611
+   ],
+   "placement": [
+    555,
+    155,
+    1395,
+    611
+   ],
+   "size": [
+    420,
+    228
+   ],
+   "scale": 2,
+   "alpha_px": 78268,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 20,
+   "evidence": "weak",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Semi-transparent dark veil over map.region where the dial faces overlap the map (left and right ends). Alpha = 1 - road contrast(x) / plateau, fitted as two logistic ramps [0.59, 606.55, 3.23, 0.59, 1312.35, 3.23]. Only the roads' attenuation is in it; the map's own darker background fade at its ends is NOT (D's map). Drop or tune it when calibrating with D's map.",
+   "vs_catalogue": {
+    "element_bbox": [
+     555.0,
+     155.0,
+     1395.0,
+     612.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "inside_pct": 47.8
+   }
+  },
+  {
+   "id": "structure.speedo.glow.day",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.glow.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "glow",
+   "bbox": [
+    87,
+    37,
+    704,
+    648
+   ],
+   "core": [
+    148,
+    97,
+    693,
+    611
+   ],
+   "placement": [
+    87,
+    37,
+    704,
+    648
+   ],
+   "size": [
+    617,
+    611
+   ],
+   "scale": 1,
+   "alpha_px": 70546,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 22,
+   "composite": "lighter",
+   "evidence": "strong",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     5.0,
+     1.0,
+     0.0,
+     -4.0
+    ],
+    "inside_pct": 99.7
+   }
+  },
+  {
+   "id": "structure.speedo.glow.night",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.glow.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "glow",
+   "bbox": [
+    87,
+    37,
+    704,
+    649
+   ],
+   "core": [
+    148,
+    97,
+    695,
+    611
+   ],
+   "placement": [
+    87,
+    37,
+    704,
+    649
+   ],
+   "size": [
+    617,
+    612
+   ],
+   "scale": 1,
+   "alpha_px": 74519,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 22,
+   "composite": "lighter",
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
+   "baked_into": [
+    "app.g20_speedo"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     5.0,
+     1.0,
+     0.0,
+     -3.0
+    ],
+    "inside_pct": 99.7
+   }
+  },
+  {
+   "id": "structure.tacho.glow.day",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.glow.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "glow",
+   "bbox": [
+    1214,
+    39,
+    1827,
+    646
+   ],
+   "core": [
+    1215,
+    48,
+    1774,
+    610
+   ],
+   "placement": [
+    1214,
+    39,
+    1827,
+    646
+   ],
+   "size": [
+    613,
+    607
+   ],
+   "scale": 1,
+   "alpha_px": 63467,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 22,
+   "composite": "lighter",
+   "evidence": "strong",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     10.0,
+     3.0,
+     -9.0,
+     -6.0
+    ],
+    "inside_pct": 99.3
+   }
+  },
+  {
+   "id": "structure.tacho.glow.night",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.glow.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "glow",
+   "bbox": [
+    1214,
+    41,
+    1824,
+    649
+   ],
+   "core": [
+    1215,
+    54,
+    1771,
+    610
+   ],
+   "placement": [
+    1214,
+    41,
+    1824,
+    649
+   ],
+   "size": [
+    610,
+    608
+   ],
+   "scale": 1,
+   "alpha_px": 60575,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 22,
+   "composite": "lighter",
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
+   "baked_into": [
+    "app.g20_tacho"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     10.0,
+     5.0,
+     -12.0,
+     -3.0
+    ],
+    "inside_pct": 99.6
+   }
+  },
+  {
+   "id": "structure.speedo.wing.day",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.wing.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    151,
+    91,
+    677,
+    606
+   ],
+   "core": [
+    151,
+    94,
+    677,
+    605
+   ],
+   "placement": [
+    151,
+    91,
+    677,
+    606
+   ],
+   "size": [
+    526,
+    515
+   ],
+   "scale": 1,
+   "alpha_px": 118720,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 24,
+   "evidence": "strong",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E. The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak).",
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     69.0,
+     55.0,
+     -27.0,
+     -46.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "structure.speedo.wing.night",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.wing.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    151,
+    91,
+    677,
+    606
+   ],
+   "core": [
+    151,
+    94,
+    677,
+    605
+   ],
+   "placement": [
+    151,
+    91,
+    677,
+    606
+   ],
+   "size": [
+    526,
+    515
+   ],
+   "scale": 1,
+   "alpha_px": 118720,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 24,
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E. The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak).",
+   "baked_into": [
+    "app.g20_speedo"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     69.0,
+     55.0,
+     -27.0,
+     -46.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "structure.tacho.wing.day",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.wing.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1242,
+    91,
+    1768,
+    606
+   ],
+   "core": [
+    1242,
+    94,
+    1768,
+    605
+   ],
+   "placement": [
+    1242,
+    91,
+    1768,
+    606
+   ],
+   "size": [
+    526,
+    515
+   ],
+   "scale": 1,
+   "alpha_px": 118711,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 24,
+   "evidence": "strong",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E. The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak).",
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     38.0,
+     55.0,
+     -68.0,
+     -46.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "structure.tacho.wing.night",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.wing.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1242,
+    91,
+    1768,
+    606
+   ],
+   "core": [
+    1242,
+    93,
+    1768,
+    605
+   ],
+   "placement": [
+    1242,
+    91,
+    1768,
+    606
+   ],
+   "size": [
+    526,
+    515
+   ],
+   "scale": 1,
+   "alpha_px": 118711,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 24,
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E. The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak).",
+   "baked_into": [
+    "app.g20_tacho"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     38.0,
+     55.0,
+     -68.0,
+     -46.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "structure.fuel_mini.fill.day",
+   "element": "structure.fuel_mini",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/fuel_mini.fill.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    14,
+    435,
+    197,
+    646
+   ],
+   "core": [
+    15,
+    437,
+    195,
+    645
+   ],
+   "placement": [
+    14,
+    435,
+    197,
+    646
+   ],
+   "size": [
+    183,
+    211
+   ],
+   "scale": 1,
+   "alpha_px": 20452,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 26,
+   "clip": {
+    "by": "fuel_needle",
+    "keep": "empty_end_side"
+   },
+   "evidence": "medium",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Level fill (grey gradient + dark scale lines), FULL SWEEP: clip it to the side of the fuel needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
+   "vs_catalogue": {
+    "element_bbox": [
+     7.0,
+     432.0,
+     215.0,
+     651.0
+    ],
+    "d_edges": [
+     7.0,
+     3.0,
+     -18.0,
+     -5.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "structure.fuel_mini.fill.night",
+   "element": "structure.fuel_mini",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/fuel_mini.fill.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    14,
+    435,
+    197,
+    646
+   ],
+   "core": [
+    15,
+    437,
+    195,
+    645
+   ],
+   "placement": [
+    14,
+    435,
+    197,
+    646
+   ],
+   "size": [
+    183,
+    211
+   ],
+   "scale": 1,
+   "alpha_px": 20452,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 26,
+   "clip": {
+    "by": "fuel_needle",
+    "keep": "empty_end_side"
+   },
+   "evidence": "medium",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Level fill (grey gradient + dark scale lines), FULL SWEEP: clip it to the side of the fuel needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
+   "baked_into": [
+    "app.g20_fuel_fill"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     7.0,
+     432.0,
+     215.0,
+     651.0
+    ],
+    "d_edges": [
+     7.0,
+     3.0,
+     -18.0,
+     -5.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "structure.oil_mini.fill.day",
+   "element": "structure.oil_mini",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/oil_mini.fill.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1723,
+    435,
+    1905,
+    646
+   ],
+   "core": [
+    1726,
+    437,
+    1904,
+    645
+   ],
+   "placement": [
+    1723,
+    435,
+    1905,
+    646
+   ],
+   "size": [
+    182,
+    211
+   ],
+   "scale": 1,
+   "alpha_px": 20354,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 26,
+   "clip": {
+    "by": "oil_needle",
+    "keep": "empty_end_side"
+   },
+   "evidence": "weak",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Level fill (grey gradient + dark scale lines), FULL SWEEP: clip it to the side of the oil needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
+   "vs_catalogue": {
+    "element_bbox": [
+     1706.0,
+     428.0,
+     1911.0,
+     651.0
+    ],
+    "d_edges": [
+     17.0,
+     7.0,
+     -6.0,
+     -5.0
+    ],
+    "inside_pct": 99.9
+   }
+  },
+  {
+   "id": "structure.oil_mini.fill.night",
+   "element": "structure.oil_mini",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/oil_mini.fill.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1723,
+    435,
+    1905,
+    646
+   ],
+   "core": [
+    1726,
+    437,
+    1904,
+    645
+   ],
+   "placement": [
+    1723,
+    435,
+    1905,
+    646
+   ],
+   "size": [
+    182,
+    211
+   ],
+   "scale": 1,
+   "alpha_px": 20358,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 26,
+   "clip": {
+    "by": "oil_needle",
+    "keep": "empty_end_side"
+   },
+   "evidence": "weak",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Level fill (grey gradient + dark scale lines), FULL SWEEP: clip it to the side of the oil needle towards the scale's empty end (bottom). Fuel: seen whole (needle near full in 08/09/14). Oil: only its part below the needle is seen; the rest is the fuel fill's mirror image (symmetric fit).",
+   "baked_into": [
+    "app.g20_oil_fill"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1706.0,
+     428.0,
+     1911.0,
+     651.0
+    ],
+    "d_edges": [
+     17.0,
+     7.0,
+     -6.0,
+     -5.0
+    ],
+    "inside_pct": 99.9
+   }
+  },
+  {
+   "id": "structure.speedo.frame.day",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.frame.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    78,
+    29,
+    712,
+    654
+   ],
+   "core": [
+    82,
+    34,
+    706,
+    652
+   ],
+   "placement": [
+    78,
+    29,
+    712,
+    654
+   ],
+   "size": [
+    634,
+    625
+   ],
+   "scale": 1,
+   "alpha_px": 30303,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 30,
+   "evidence": "strong",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 16 major + 45 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 17.1x3.1, minor 8.8x1.2 px).",
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     -4.0,
+     -7.0,
+     8.0,
+     2.0
+    ],
+    "inside_pct": 74.4
+   }
+  },
+  {
+   "id": "structure.speedo.frame.night",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.frame.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    76,
+    30,
+    710,
+    655
+   ],
+   "core": [
+    82,
+    35,
+    706,
+    653
+   ],
+   "placement": [
+    76,
+    30,
+    710,
+    655
+   ],
+   "size": [
+    634,
+    625
+   ],
+   "scale": 1,
+   "alpha_px": 30995,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 30,
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 16 major + 45 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 17.1x3.1, minor 8.8x1.2 px).",
+   "baked_into": [
+    "app.g20_speedo"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     -6.0,
+     -6.0,
+     6.0,
+     3.0
+    ],
+    "inside_pct": 70.5
+   }
+  },
+  {
+   "id": "structure.tacho.frame.day",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.frame.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1207,
+    29,
+    1842,
+    655
+   ],
+   "core": [
+    1211,
+    34,
+    1837,
+    652
+   ],
+   "placement": [
+    1207,
+    29,
+    1842,
+    655
+   ],
+   "size": [
+    635,
+    626
+   ],
+   "scale": 1,
+   "alpha_px": 31286,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 30,
+   "evidence": "strong",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 15 major + 49 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 16.0x3.7, minor 8.3x2.0 px).",
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     3.0,
+     -7.0,
+     6.0,
+     3.0
+    ],
+    "inside_pct": 67.9
+   }
+  },
+  {
+   "id": "structure.tacho.frame.night",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.frame.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1210,
+    33,
+    1842,
+    656
+   ],
+   "core": [
+    1212,
+    35,
+    1836,
+    652
+   ],
+   "placement": [
+    1210,
+    33,
+    1842,
+    656
+   ],
+   "size": [
+    632,
+    623
+   ],
+   "scale": 1,
+   "alpha_px": 29406,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 30,
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 15 major + 49 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 16.0x3.7, minor 8.3x2.0 px).",
+   "baked_into": [
+    "app.g20_tacho"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     6.0,
+     -3.0,
+     6.0,
+     4.0
+    ],
+    "inside_pct": 67.5
+   }
+  },
+  {
+   "id": "structure.speedo.bottom_end.day",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.bottom_end.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    693,
+    605,
+    760,
+    651
+   ],
+   "core": [
+    695,
+    607,
+    758,
+    648
+   ],
+   "placement": [
+    693,
+    605,
+    760,
+    651
+   ],
+   "size": [
+    67,
+    46
+   ],
+   "scale": 1,
+   "alpha_px": 941,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 31,
+   "cond": "no_cc_message",
+   "cond_source": "manifest",
+   "evidence": "medium",
+   "sources": [
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Curved end of the bottom frame line next to the check-control area (traced on 09). Seen in 09 and 14 (no check-control message); in 08 the check-control panel sits there and the end is not visible: draw it only while ccMessage is null.",
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     611.0,
+     569.0,
+     56.0,
+     -1.0
+    ],
+    "inside_pct": 0.0
+   }
+  },
+  {
+   "id": "structure.speedo.bottom_end.night",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.bottom_end.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    693,
+    605,
+    760,
+    651
+   ],
+   "core": [
+    695,
+    607,
+    758,
+    648
+   ],
+   "placement": [
+    693,
+    605,
+    760,
+    651
+   ],
+   "size": [
+    67,
+    46
+   ],
+   "scale": 1,
+   "alpha_px": 941,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 31,
+   "cond": "no_cc_message",
+   "cond_source": "manifest",
+   "evidence": "medium",
+   "sources": [
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Curved end of the bottom frame line next to the check-control area (traced on 09). Seen in 09 and 14 (no check-control message); in 08 the check-control panel sits there and the end is not visible: draw it only while ccMessage is null.",
+   "baked_into": [
+    "app.g20_speedo"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     611.0,
+     569.0,
+     56.0,
+     -1.0
+    ],
+    "inside_pct": 0.0
+   }
+  },
+  {
+   "id": "structure.tacho.bottom_end.day",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.bottom_end.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1158,
+    607,
+    1228,
+    652
+   ],
+   "core": [
+    1160,
+    609,
+    1226,
+    650
+   ],
+   "placement": [
+    1158,
+    607,
+    1228,
+    652
+   ],
+   "size": [
+    70,
+    45
+   ],
+   "scale": 1,
+   "alpha_px": 947,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 31,
+   "cond": "no_cc_message",
+   "cond_source": "manifest",
+   "evidence": "medium",
+   "sources": [
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Curved end of the bottom frame line next to the check-control area (traced on 09). Seen in 09 and 14 (no check-control message); in 08 the check-control panel sits there and the end is not visible: draw it only while ccMessage is null.",
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     -46.0,
+     571.0,
+     -608.0,
+     0.0
+    ],
+    "inside_pct": 0.0
+   }
+  },
+  {
+   "id": "structure.tacho.bottom_end.night",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.bottom_end.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1158,
+    607,
+    1228,
+    652
+   ],
+   "core": [
+    1160,
+    609,
+    1226,
+    650
+   ],
+   "placement": [
+    1158,
+    607,
+    1228,
+    652
+   ],
+   "size": [
+    70,
+    45
+   ],
+   "scale": 1,
+   "alpha_px": 947,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 31,
+   "cond": "no_cc_message",
+   "cond_source": "manifest",
+   "evidence": "medium",
+   "sources": [
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Curved end of the bottom frame line next to the check-control area (traced on 09). Seen in 09 and 14 (no check-control message); in 08 the check-control panel sits there and the end is not visible: draw it only while ccMessage is null.",
+   "baked_into": [
+    "app.g20_tacho"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     -46.0,
+     571.0,
+     -608.0,
+     0.0
+    ],
+    "inside_pct": 0.0
+   }
+  },
+  {
+   "id": "structure.rev_band.day",
+   "element": "structure.rev_band",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/rev_band.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1220,
+    42,
+    1399,
+    75
+   ],
+   "core": [
+    1222,
+    44,
+    1397,
+    72
+   ],
+   "placement": [
+    1216,
+    37,
+    1403,
+    79
+   ],
+   "size": [
+    187,
+    42
+   ],
+   "scale": 1,
+   "alpha_px": 3032,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 32,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Four red segments under the tacho frame between 6 and 7 (edges fitted per column, separators from the red profile's minima).",
+   "vs_catalogue": {
+    "element_bbox": [
+     1221.0,
+     47.0,
+     1397.0,
+     68.0
+    ],
+    "d_edges": [
+     -1.0,
+     -5.0,
+     2.0,
+     7.0
+    ],
+    "inside_pct": 62.9
+   }
+  },
+  {
+   "id": "structure.rev_band.night",
+   "element": "structure.rev_band",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/rev_band.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1220,
+    43,
+    1399,
+    75
+   ],
+   "core": [
+    1222,
+    46,
+    1397,
+    73
+   ],
+   "placement": [
+    1216,
+    39,
+    1403,
+    79
+   ],
+   "size": [
+    187,
+    40
+   ],
+   "scale": 1,
+   "alpha_px": 2837,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 32,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Four red segments under the tacho frame between 6 and 7 (edges fitted per column, separators from the red profile's minima).",
+   "baked_into": [
+    "app.g20_tacho"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1221.0,
+     47.0,
+     1397.0,
+     68.0
+    ],
+    "d_edges": [
+     -1.0,
+     -4.0,
+     2.0,
+     7.0
+    ],
+    "inside_pct": 67.3
+   }
+  },
+  {
+   "id": "structure.speedo_info_line.day",
+   "element": "structure.speedo_info_line",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.info_line.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    366,
+    410,
+    696,
+    419
+   ],
+   "core": [
+    370,
+    412,
+    694,
+    416
+   ],
+   "placement": [
+    362,
+    406,
+    700,
+    423
+   ],
+   "size": [
+    338,
+    17
+   ],
+   "scale": 1,
+   "alpha_px": 2947,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 33,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Two parallelogram segments (slanted cut ends) measured on 08/09; the second segment (x 616-694) is outside g20_comfort.json's bbox (re-measurement).",
+   "vs_catalogue": {
+    "element_bbox": [
+     370.0,
+     412.0,
+     613.0,
+     417.0
+    ],
+    "d_edges": [
+     -4.0,
+     -2.0,
+     83.0,
+     2.0
+    ],
+    "inside_pct": 32.8
+   }
+  },
+  {
+   "id": "structure.speedo_info_line.night",
+   "element": "structure.speedo_info_line",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.info_line.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    367,
+    410,
+    698,
+    418
+   ],
+   "core": [
+    370,
+    412,
+    695,
+    416
+   ],
+   "placement": [
+    363,
+    405,
+    701,
+    422
+   ],
+   "size": [
+    338,
+    17
+   ],
+   "scale": 1,
+   "alpha_px": 2628,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 33,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Two parallelogram segments (slanted cut ends) measured on 08/09; the second segment (x 616-694) is outside g20_comfort.json's bbox (re-measurement).",
+   "baked_into": [
+    "app.g20_speedo"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     370.0,
+     412.0,
+     613.0,
+     417.0
+    ],
+    "d_edges": [
+     -3.0,
+     -2.0,
+     85.0,
+     1.0
+    ],
+    "inside_pct": 36.8
+   }
+  },
+  {
+   "id": "structure.tacho_info_line.day",
+   "element": "structure.tacho_info_line",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.info_line.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1222,
+    410,
+    1552,
+    419
+   ],
+   "core": [
+    1224,
+    412,
+    1549,
+    416
+   ],
+   "placement": [
+    1217,
+    406,
+    1557,
+    422
+   ],
+   "size": [
+    340,
+    16
+   ],
+   "scale": 1,
+   "alpha_px": 2950,
+   "layer": "under",
+   "state": "stock",
+   "look": "day",
+   "z": 33,
+   "evidence": "medium",
+   "sources": [
+    "08",
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Two parallelogram segments (slanted cut ends) measured on 08/09; the second segment (x 1224-1302) is outside g20_comfort.json's bbox (re-measurement). Gone while a theme is connected (14).",
+   "vs_catalogue": {
+    "element_bbox": [
+     1306.0,
+     412.0,
+     1550.0,
+     417.0
+    ],
+    "d_edges": [
+     -84.0,
+     -2.0,
+     2.0,
+     2.0
+    ],
+    "inside_pct": 32.9
+   }
+  },
+  {
+   "id": "structure.tacho_info_line.night",
+   "element": "structure.tacho_info_line",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.info_line.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1221,
+    409,
+    1551,
+    418
+   ],
+   "core": [
+    1223,
+    412,
+    1548,
+    415
+   ],
+   "placement": [
+    1217,
+    405,
+    1555,
+    422
+   ],
+   "size": [
+    338,
+    17
+   ],
+   "scale": 1,
+   "alpha_px": 2956,
+   "layer": "under",
+   "state": "stock",
+   "look": "night",
+   "z": 33,
+   "evidence": "medium",
+   "sources": [
+    "08",
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Two parallelogram segments (slanted cut ends) measured on 08/09; the second segment (x 1224-1302) is outside g20_comfort.json's bbox (re-measurement). Gone while a theme is connected (14).",
+   "vs_catalogue": {
+    "element_bbox": [
+     1306.0,
+     412.0,
+     1550.0,
+     417.0
+    ],
+    "d_edges": [
+     -85.0,
+     -3.0,
+     1.0,
+     1.0
+    ],
+    "inside_pct": 32.8
+   }
+  },
+  {
+   "id": "structure.fuel_mini.day",
+   "element": "structure.fuel_mini",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/fuel_mini.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    6,
+    428,
+    204,
+    654
+   ],
+   "core": [
+    8,
+    429,
+    202,
+    652
+   ],
+   "placement": [
+    6,
+    428,
+    204,
+    654
+   ],
+   "size": [
+    198,
+    226
+   ],
+   "scale": 1,
+   "alpha_px": 7157,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 34,
+   "evidence": "strong",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Frame with its zones (white + red reserve), numerals 1 / 1/2 / 0 and the pump icon. Our own vector icon fitted to the ink box (medium: a simplified drawing).",
+   "vs_catalogue": {
+    "element_bbox": [
+     7.0,
+     432.0,
+     215.0,
+     651.0
+    ],
+    "d_edges": [
+     -1.0,
+     -4.0,
+     -11.0,
+     3.0
+    ],
+    "inside_pct": 87.5
+   }
+  },
+  {
+   "id": "structure.fuel_mini.night",
+   "element": "structure.fuel_mini",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/fuel_mini.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    6,
+    428,
+    204,
+    654
+   ],
+   "core": [
+    8,
+    429,
+    202,
+    652
+   ],
+   "placement": [
+    6,
+    428,
+    204,
+    654
+   ],
+   "size": [
+    198,
+    226
+   ],
+   "scale": 1,
+   "alpha_px": 7138,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 34,
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Frame with its zones (white + red reserve), numerals 1 / 1/2 / 0 and the pump icon. Our own vector icon fitted to the ink box (medium: a simplified drawing).",
+   "baked_into": [
+    "app.g20_fuel"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     7.0,
+     432.0,
+     215.0,
+     651.0
+    ],
+    "d_edges": [
+     -1.0,
+     -4.0,
+     -11.0,
+     3.0
+    ],
+    "inside_pct": 87.6
+   }
+  },
+  {
+   "id": "structure.oil_mini.day",
+   "element": "structure.oil_mini",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/oil_mini.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1719,
+    432,
+    1913,
+    654
+   ],
+   "core": [
+    1721,
+    434,
+    1911,
+    652
+   ],
+   "placement": [
+    1719,
+    432,
+    1913,
+    654
+   ],
+   "size": [
+    194,
+    222
+   ],
+   "scale": 1,
+   "alpha_px": 5993,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 34,
+   "evidence": "strong",
+   "sources": [
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Frame with its zones (red top, white, blue bottom), the car/thermometer icon. Our own vector icon fitted to the ink box (medium: a simplified drawing).",
+   "vs_catalogue": {
+    "element_bbox": [
+     1706.0,
+     428.0,
+     1911.0,
+     651.0
+    ],
+    "d_edges": [
+     13.0,
+     4.0,
+     2.0,
+     3.0
+    ],
+    "inside_pct": 85.9
+   }
+  },
+  {
+   "id": "structure.oil_mini.night",
+   "element": "structure.oil_mini",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/oil_mini.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "albedo",
+   "bbox": [
+    1718,
+    432,
+    1913,
+    654
+   ],
+   "core": [
+    1721,
+    434,
+    1911,
+    652
+   ],
+   "placement": [
+    1718,
+    432,
+    1913,
+    654
+   ],
+   "size": [
+    195,
+    222
+   ],
+   "scale": 1,
+   "alpha_px": 5974,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 34,
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Frame with its zones (red top, white, blue bottom), the car/thermometer icon. Our own vector icon fitted to the ink box (medium: a simplified drawing).",
+   "baked_into": [
+    "app.g20_oil"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1706.0,
+     428.0,
+     1911.0,
+     651.0
+    ],
+    "d_edges": [
+     12.0,
+     4.0,
+     2.0,
+     3.0
+    ],
+    "inside_pct": 85.9
+   }
+  },
+  {
+   "id": "structure.speedo_numerals.day",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.numerals.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "font",
+   "bbox": [
+    129,
+    71,
+    729,
+    579
+   ],
+   "core": [
+    131,
+    73,
+    727,
+    577
+   ],
+   "placement": [
+    129,
+    71,
+    729,
+    579
+   ],
+   "size": [
+    600,
+    508
+   ],
+   "scale": 1,
+   "alpha_px": 11965,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 40,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Numerals '20 40 60 100 140 200 260' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.57-0.75.",
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     47.0,
+     35.0,
+     25.0,
+     -73.0
+    ],
+    "inside_pct": 93.9
+   }
+  },
+  {
+   "id": "structure.speedo_numerals.night",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.numerals.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "font",
+   "bbox": [
+    129,
+    71,
+    729,
+    579
+   ],
+   "core": [
+    131,
+    73,
+    727,
+    577
+   ],
+   "placement": [
+    129,
+    71,
+    729,
+    579
+   ],
+   "size": [
+    600,
+    508
+   ],
+   "scale": 1,
+   "alpha_px": 11965,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 40,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Numerals '20 40 60 100 140 200 260' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.57-0.75.",
+   "baked_into": [
+    "app.g20_speedo"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     47.0,
+     35.0,
+     25.0,
+     -73.0
+    ],
+    "inside_pct": 93.9
+   }
+  },
+  {
+   "id": "structure.tacho_numerals.day",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.numerals.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "font",
+   "bbox": [
+    1202,
+    66,
+    1799,
+    588
+   ],
+   "core": [
+    1204,
+    68,
+    1796,
+    586
+   ],
+   "placement": [
+    1202,
+    66,
+    1799,
+    588
+   ],
+   "size": [
+    597,
+    522
+   ],
+   "scale": 1,
+   "alpha_px": 5542,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 40,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Numerals '1 2 3 4 5 6 7' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.71-0.81.",
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     -2.0,
+     30.0,
+     -37.0,
+     -64.0
+    ],
+    "inside_pct": 99.6
+   }
+  },
+  {
+   "id": "structure.tacho_numerals.night",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.numerals.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "font",
+   "bbox": [
+    1202,
+    66,
+    1799,
+    588
+   ],
+   "core": [
+    1204,
+    68,
+    1796,
+    586
+   ],
+   "placement": [
+    1202,
+    66,
+    1799,
+    588
+   ],
+   "size": [
+    597,
+    522
+   ],
+   "scale": 1,
+   "alpha_px": 5542,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 40,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Numerals '1 2 3 4 5 6 7' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.71-0.81.",
+   "baked_into": [
+    "app.g20_tacho"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     -2.0,
+     30.0,
+     -37.0,
+     -64.0
+    ],
+    "inside_pct": 99.6
+   }
+  },
+  {
+   "id": "structure.tacho_zero.day",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.zero.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "font",
+   "bbox": [
+    1520,
+    571,
+    1549,
+    614
+   ],
+   "core": [
+    1522,
+    573,
+    1546,
+    612
+   ],
+   "placement": [
+    1520,
+    571,
+    1549,
+    614
+   ],
+   "size": [
+    29,
+    43
+   ],
+   "scale": 1,
+   "alpha_px": 967,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 40,
+   "cond": "engine_on",
+   "cond_source": "manifest",
+   "skip": "drawn by another package (tools/g20sim/build_manifest.py SKIP)",
+   "evidence": "strong",
+   "sources": [
+    "09",
+    "14"
+   ],
+   "used_by": [],
+   "notes": "Numerals '0' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.70-0.70. Shown only while the engine runs (09/14 show '0'; 08, engine off, shows C's 'OFF' there).",
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     316.0,
+     535.0,
+     -287.0,
+     -38.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "structure.tacho_zero.night",
+   "element": "structure.tacho",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/tacho.zero.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "font",
+   "bbox": [
+    1520,
+    571,
+    1549,
+    614
+   ],
+   "core": [
+    1522,
+    573,
+    1546,
+    612
+   ],
+   "placement": [
+    1520,
+    571,
+    1549,
+    614
+   ],
+   "size": [
+    29,
+    43
+   ],
+   "scale": 1,
+   "alpha_px": 967,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 40,
+   "cond": "engine_on",
+   "cond_source": "manifest",
+   "skip": "drawn by another package (tools/g20sim/build_manifest.py SKIP)",
+   "evidence": "strong",
+   "sources": [
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "layout:g20_comfort"
+   ],
+   "notes": "Numerals '0' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.70-0.70. Shown only while the engine runs (09/14 show '0'; 08, engine off, shows C's 'OFF' there).",
+   "baked_into": [
+    "app.g20_tacho"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     316.0,
+     535.0,
+     -287.0,
+     -38.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "live.glow.speedo",
+   "element": "structure.speedo_needle",
+   "source": "sim",
+   "package": "D",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/live/live.js",
+    "id": "live.glow.speedo",
+    "draw": "G20Live.drawGauges"
+   },
+   "render": "live",
+   "kind": "glow",
+   "bbox": [
+    126,
+    426,
+    497,
+    650
+   ],
+   "placement": [
+    126,
+    426,
+    497,
+    650
+   ],
+   "size": [
+    371,
+    224
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 50,
+   "composite": "lighter",
+   "evidence": "weak",
+   "sources": [
+    "08",
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Mirror of the tacho glow model; the speedo was only seen at 0 km/h. gain is for the lead to calibrate against B's faces (B's faces must not contain the pointer glow).",
+   "measured": {
+    "bbox": [
+     126,
+     426,
+     497,
+     650
+    ],
+    "core": null,
+    "px": 61629,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "alpha_px": 61629,
+   "vs_catalogue": {
+    "element_bbox": [
+     370.0,
+     468.0,
+     424.0,
+     645.0
+    ],
+    "d_edges": [
+     -244.0,
+     -42.0,
+     73.0,
+     5.0
+    ],
+    "inside_pct": 1.4
+   }
+  },
+  {
+   "id": "live.glow.tacho",
+   "element": "structure.tacho_needle",
+   "source": "sim",
+   "package": "D",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/live/live.js",
+    "id": "live.glow.tacho",
+    "draw": "G20Live.drawGauges"
+   },
+   "render": "live",
+   "kind": "glow",
+   "bbox": [
+    1424,
+    425,
+    1791,
+    651
+   ],
+   "placement": [
+    1424,
+    425,
+    1791,
+    651
+   ],
+   "size": [
+    367,
+    226
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 50,
+   "composite": "lighter",
+   "evidence": "medium",
+   "sources": [
+    "08",
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Fitted on the 08 (0) vs 09 (idle) difference with a per-channel exposure map; medium for 0..~1.7 x1000 (where both glows were seen), weak above.",
+   "measured": {
+    "bbox": [
+     1424,
+     425,
+     1791,
+     651
+    ],
+    "core": null,
+    "px": 61476,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "alpha_px": 61476,
+   "vs_catalogue": {
+    "element_bbox": [
+     1497.0,
+     470.0,
+     1552.0,
+     647.0
+    ],
+    "d_edges": [
+     -73.0,
+     -45.0,
+     239.0,
+     4.0
+    ],
+    "inside_pct": 1.6
+   }
+  },
+  {
+   "id": "live.band.tacho",
+   "element": "structure.tacho_needle",
+   "source": "sim",
+   "package": "D",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/live/live.js",
+    "id": "live.band.tacho",
+    "draw": "G20Live.drawGauges"
+   },
+   "render": "live",
+   "kind": "albedo",
+   "bbox": [
+    1554,
+    604,
+    1643,
+    625
+   ],
+   "placement": [
+    1554,
+    604,
+    1643,
+    625
+   ],
+   "size": [
+    89,
+    21
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 51,
+   "evidence": "medium",
+   "sources": [
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Pink rev band inside the ticks from 0 to the pointer (seen at idle only; beyond 0.7 x1000 extrapolated along the ring: weak). No speedo band: never seen (speed 0 in every photo).",
+   "measured": {
+    "bbox": [
+     1554,
+     604,
+     1643,
+     625
+    ],
+    "core": [
+     1554,
+     605,
+     1643,
+     625
+    ],
+    "px": 662,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "driving",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": null,
+     "lamps": []
+    }
+   },
+   "core": [
+    1554,
+    605,
+    1643,
+    625
+   ],
+   "alpha_px": 662,
+   "baked_into": [
+    "app.g20_lut"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1497.0,
+     470.0,
+     1552.0,
+     647.0
+    ],
+    "d_edges": [
+     57.0,
+     134.0,
+     91.0,
+     -22.0
+    ],
+    "inside_pct": 0.0
+   }
+  },
+  {
+   "id": "live.pointer.speedo",
+   "element": "structure.speedo_needle",
+   "source": "sim",
+   "package": "D",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/live/live.js",
+    "id": "live.pointer.speedo",
+    "draw": "G20Live.drawGauges"
+   },
+   "render": "live",
+   "kind": "albedo",
+   "bbox": [
+    365,
+    458,
+    475,
+    659
+   ],
+   "placement": [
+    365,
+    458,
+    475,
+    659
+   ],
+   "size": [
+    110,
+    201
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 52,
+   "evidence": "weak",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Position along the scale: strong (every tick measured, hits within 0.85 px). Travel in motion (orientation, length): weak, never photographed moving; at 0 km/h it matches 08/09/14 within 1-2 px.",
+   "measured": {
+    "bbox": [
+     365,
+     458,
+     475,
+     659
+    ],
+    "core": [
+     370,
+     464,
+     429,
+     642
+    ],
+    "px": 12919,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    370,
+    464,
+    429,
+    642
+   ],
+   "alpha_px": 12919,
+   "baked_into": [
+    "app.g20_lut"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     370.0,
+     468.0,
+     424.0,
+     645.0
+    ],
+    "d_edges": [
+     -5.0,
+     -10.0,
+     51.0,
+     14.0
+    ],
+    "inside_pct": 5.4
+   }
+  },
+  {
+   "id": "live.pointer.tacho",
+   "element": "structure.tacho_needle",
+   "source": "sim",
+   "package": "D",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/live/live.js",
+    "id": "live.pointer.tacho",
+    "draw": "G20Live.drawGauges"
+   },
+   "render": "live",
+   "kind": "albedo",
+   "bbox": [
+    1443,
+    458,
+    1554,
+    664
+   ],
+   "placement": [
+    1443,
+    458,
+    1554,
+    664
+   ],
+   "size": [
+    111,
+    206
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 52,
+   "evidence": "weak",
+   "sources": [
+    "08",
+    "09",
+    "14",
+    "10"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Rays from one virtual centre (fits 0 and idle to 0.3 deg). Theme connected (14): a SHORT bar (109 px vs 187.5 stock). Travel beyond idle: weak.",
+   "measured": {
+    "bbox": [
+     1443,
+     458,
+     1554,
+     664
+    ],
+    "core": [
+     1490,
+     465,
+     1550,
+     646
+    ],
+    "px": 13201,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1490,
+    465,
+    1550,
+    646
+   ],
+   "alpha_px": 13201,
+   "baked_into": [
+    "app.g20_lut"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1497.0,
+     470.0,
+     1552.0,
+     647.0
+    ],
+    "d_edges": [
+     -54.0,
+     -12.0,
+     2.0,
+     17.0
+    ],
+    "inside_pct": 5.8
+   }
+  },
+  {
+   "id": "live.mini.fuel",
+   "element": "structure.fuel_mini",
+   "source": "sim",
+   "package": "D",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/live/live.js",
+    "id": "live.mini.fuel",
+    "draw": "G20Live.drawGauges"
+   },
+   "render": "live",
+   "kind": "albedo",
+   "bbox": [
+    23,
+    476,
+    102,
+    493
+   ],
+   "placement": [
+    23,
+    476,
+    102,
+    493
+   ],
+   "size": [
+    79,
+    17
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 55,
+   "evidence": "weak",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Lit fill below the needle (moves with the value) and the tapered red needle. Seen only near f 0.84-0.87; the 0 and 1 ends of the ring are weak. Needles at the photos' levels within 1.3 px.",
+   "measured": {
+    "bbox": [
+     23,
+     476,
+     102,
+     493
+    ],
+    "core": [
+     23,
+     476,
+     102,
+     492
+    ],
+    "px": 625,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    23,
+    476,
+    102,
+    492
+   ],
+   "alpha_px": 625,
+   "baked_into": [
+    "app.g20_lut"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     7.0,
+     432.0,
+     215.0,
+     651.0
+    ],
+    "d_edges": [
+     16.0,
+     44.0,
+     -113.0,
+     -158.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "live.mini.oil",
+   "element": "structure.oil_mini",
+   "source": "sim",
+   "package": "D",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/live/live.js",
+    "id": "live.mini.oil",
+    "draw": "G20Live.drawGauges"
+   },
+   "render": "live",
+   "kind": "albedo",
+   "bbox": [
+    1786,
+    551,
+    1869,
+    579
+   ],
+   "placement": [
+    1786,
+    551,
+    1869,
+    579
+   ],
+   "size": [
+    83,
+    28
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 55,
+   "evidence": "weak",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Mirror of the fuel mini. Seen at the notch (08/09, warm) and the cold end (14, COLD): within 1.9 px. The temperature range 70..150 degC is a guess (no numerals on the scale).",
+   "measured": {
+    "bbox": [
+     1786,
+     551,
+     1869,
+     579
+    ],
+    "core": [
+     1786,
+     551,
+     1868,
+     579
+    ],
+    "px": 662,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1786,
+    551,
+    1868,
+    579
+   ],
+   "alpha_px": 662,
+   "baked_into": [
+    "app.g20_lut"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1706.0,
+     428.0,
+     1911.0,
+     651.0
+    ],
+    "d_edges": [
+     80.0,
+     123.0,
+     -42.0,
+     -72.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "structure.speedo_scale_label.day",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.scale.label.day.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "font",
+   "bbox": [
+    366,
+    567,
+    477,
+    616
+   ],
+   "core": [
+    369,
+    570,
+    475,
+    613
+   ],
+   "placement": [
+    366,
+    567,
+    477,
+    616
+   ],
+   "size": [
+    111,
+    49
+   ],
+   "scale": 1,
+   "alpha_px": 2688,
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "z": 58,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Numerals '0 km/h' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.60-0.88. The speedo's scale label '0 km/h' at the scale start.",
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     284.0,
+     531.0,
+     -227.0,
+     -36.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "structure.speedo_scale_label.night",
+   "element": "structure.speedo",
+   "source": "sim",
+   "package": "B",
+   "file": "bench/g20/structure/speedo.scale.label.night.png",
+   "procedural": null,
+   "render": "raster",
+   "kind": "font",
+   "bbox": [
+    366,
+    567,
+    477,
+    616
+   ],
+   "core": [
+    369,
+    570,
+    475,
+    613
+   ],
+   "placement": [
+    366,
+    567,
+    477,
+    616
+   ],
+   "size": [
+    111,
+    49
+   ],
+   "scale": 1,
+   "alpha_px": 2688,
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "z": 58,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim",
+    "layout:g20_comfort"
+   ],
+   "notes": "Numerals '0 km/h' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.60-0.88. The speedo's scale label '0 km/h' at the scale start.",
+   "baked_into": [
+    "app.g20_speedo"
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     284.0,
+     531.0,
+     -227.0,
+     -36.0
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "c.bottom.airbag",
+   "element": "bottom.airbag",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.bottom.airbag",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    635,
+    665,
+    679,
+    715
+   ],
+   "placement": [
+    635,
+    665,
+    679,
+    715
+   ],
+   "size": [
+    44,
+    50
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 60,
+   "lamp": "bottom.airbag",
+   "evidence": "medium",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "lit look from 08 only; pictogram redrawn approximately (QC SSIM low, see report)",
+   "measured": {
+    "bbox": [
+     630,
+     659,
+     685,
+     720
+    ],
+    "core": [
+     636,
+     664,
+     682,
+     715
+    ],
+    "px": 2573,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "bottom.airbag"
+     ]
+    }
+   },
+   "core": [
+    636,
+    664,
+    682,
+    715
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     635.0,
+     665.0,
+     679.0,
+     715.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 86.7
+   }
+  },
+  {
+   "id": "c.bottom.belt_rear",
+   "element": "bottom.belt_rear",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.bottom.belt_rear",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    503,
+    679,
+    576,
+    715
+   ],
+   "placement": [
+    503,
+    679,
+    576,
+    715
+   ],
+   "size": [
+    73,
+    36
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 60,
+   "lamp": "bottom.belt_rear",
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "lit look from 08 only",
+   "measured": {
+    "bbox": [
+     497,
+     673,
+     582,
+     720
+    ],
+    "core": [
+     501,
+     678,
+     577,
+     714
+    ],
+    "px": 3380,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "bottom.belt_rear"
+     ]
+    }
+   },
+   "core": [
+    501,
+    678,
+    577,
+    714
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     503.0,
+     679.0,
+     576.0,
+     715.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 93.2
+   }
+  },
+  {
+   "id": "c.tt.abs",
+   "element": "tt.abs",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.tt.abs",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    14,
+    327,
+    73,
+    369
+   ],
+   "placement": [
+    14,
+    327,
+    73,
+    369
+   ],
+   "size": [
+    59,
+    42
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 60,
+   "lamp": "tt.abs",
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "lit look from 08 only; unlit = nothing drawn",
+   "measured": {
+    "bbox": [
+     8,
+     321,
+     79,
+     373
+    ],
+    "core": [
+     14,
+     326,
+     72,
+     368
+    ],
+    "px": 3178,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "tt.abs"
+     ]
+    }
+   },
+   "core": [
+    14,
+    326,
+    72,
+    368
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     14.0,
+     327.0,
+     73.0,
+     369.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 91.6
+   }
+  },
+  {
+   "id": "c.tt.auto_h",
+   "element": "tt.auto_h",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.tt.auto_h",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    1777,
+    179,
+    1870,
+    205
+   ],
+   "placement": [
+    1777,
+    179,
+    1870,
+    205
+   ],
+   "size": [
+    93,
+    26
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 60,
+   "lamp": "tt.auto_h",
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "text in the free font (condensed, 800)",
+   "measured": {
+    "bbox": [
+     1771,
+     173,
+     1875,
+     210
+    ],
+    "core": [
+     1777,
+     179,
+     1869,
+     204
+    ],
+    "px": 3572,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "tt.auto_h"
+     ]
+    }
+   },
+   "core": [
+    1777,
+    179,
+    1869,
+    204
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1777.0,
+     179.0,
+     1870.0,
+     205.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 92.1
+   }
+  },
+  {
+   "id": "c.tt.brake",
+   "element": "tt.brake",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.tt.brake",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    25,
+    214,
+    85,
+    255
+   ],
+   "placement": [
+    25,
+    214,
+    85,
+    255
+   ],
+   "size": [
+    60,
+    41
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 60,
+   "lamp": "tt.brake",
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "lit look from 08 only; unlit = nothing drawn (09, 14)",
+   "measured": {
+    "bbox": [
+     19,
+     208,
+     91,
+     261
+    ],
+    "core": [
+     25,
+     213,
+     86,
+     254
+    ],
+    "px": 3425,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "tt.brake"
+     ]
+    }
+   },
+   "core": [
+    25,
+    213,
+    86,
+    254
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     25.0,
+     214.0,
+     85.0,
+     255.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 92.3
+   }
+  },
+  {
+   "id": "c.tt.dsc",
+   "element": "tt.dsc",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.tt.dsc",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    19,
+    381,
+    63,
+    429
+   ],
+   "placement": [
+    19,
+    381,
+    63,
+    429
+   ],
+   "size": [
+    44,
+    48
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 60,
+   "lamp": "tt.dsc",
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "lit look from 08 only; unlit = nothing drawn",
+   "measured": {
+    "bbox": [
+     13,
+     375,
+     67,
+     434
+    ],
+    "core": [
+     17,
+     380,
+     62,
+     428
+    ],
+    "px": 2810,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "tt.dsc"
+     ]
+    }
+   },
+   "core": [
+    17,
+    380,
+    62,
+    428
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     19.0,
+     381.0,
+     63.0,
+     429.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 89.8
+   }
+  },
+  {
+   "id": "c.tt.steering",
+   "element": "tt.steering",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.tt.steering",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    1847,
+    265,
+    1905,
+    315
+   ],
+   "placement": [
+    1847,
+    265,
+    1905,
+    315
+   ],
+   "size": [
+    58,
+    50
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 60,
+   "lamp": "tt.steering",
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "lit look from 08 only",
+   "measured": {
+    "bbox": [
+     1841,
+     259,
+     1910,
+     321
+    ],
+    "core": [
+     1847,
+     265,
+     1904,
+     315
+    ],
+    "px": 3241,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "tt.steering"
+     ]
+    }
+   },
+   "core": [
+    1847,
+    265,
+    1904,
+    315
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1847.0,
+     265.0,
+     1905.0,
+     315.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 77.9
+   }
+  },
+  {
+   "id": "c.tt.tpms",
+   "element": "tt.tpms",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.tt.tpms",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    24,
+    267,
+    77,
+    314
+   ],
+   "placement": [
+    24,
+    267,
+    77,
+    314
+   ],
+   "size": [
+    53,
+    47
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 60,
+   "lamp": "tt.tpms",
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "lit look from 08 only; unlit = nothing drawn",
+   "measured": {
+    "bbox": [
+     18,
+     261,
+     83,
+     320
+    ],
+    "core": [
+     24,
+     266,
+     77,
+     314
+    ],
+    "px": 3109,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "tt.tpms"
+     ]
+    }
+   },
+   "core": [
+    24,
+    266,
+    77,
+    314
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     24.0,
+     267.0,
+     77.0,
+     314.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 91.7
+   }
+  },
+  {
+   "id": "c.assist.cold",
+   "element": "assist.cold",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.cold",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    1843,
+    635,
+    1903,
+    658
+   ],
+   "placement": [
+    1843,
+    635,
+    1903,
+    658
+   ],
+   "size": [
+    60,
+    23
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 70,
+   "cond": "cold_engine_running",
+   "cond_source": "c.js: COLD when oil < 40 degC and rpm >= 200",
+   "evidence": "weak",
+   "sources": [
+    "10",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "shown when oil < 40 degC and the engine runs: the rule is ours (weak)",
+   "measured": {
+    "bbox": [
+     1843,
+     634,
+     1904,
+     659
+    ],
+    "core": [
+     1843,
+     635,
+     1903,
+     658
+    ],
+    "px": 924,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 750,
+     "oil": 30,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1843,
+    635,
+    1903,
+    658
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1843.0,
+     635.0,
+     1903.0,
+     658.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 92.2
+   }
+  },
+  {
+   "id": "c.assist.digital_speed",
+   "element": "assist.digital_speed",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.digital_speed",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    477,
+    320,
+    605,
+    397
+   ],
+   "placement": [
+    477,
+    320,
+    605,
+    397
+   ],
+   "size": [
+    128,
+    77
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 70,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "only '0' photographed; more digits grow to the left of a fixed right edge (weak)",
+   "measured": {
+    "bbox": [
+     476,
+     319,
+     606,
+     398
+    ],
+    "core": [
+     476,
+     319,
+     605,
+     397
+    ],
+    "px": 3431,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    476,
+    319,
+    605,
+    397
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     477.0,
+     320.0,
+     605.0,
+     397.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 68.8
+   }
+  },
+  {
+   "id": "c.assist.gear_centre",
+   "element": "assist.gear_centre",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.gear_centre",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    1496,
+    320,
+    1543,
+    395
+   ],
+   "placement": [
+    1496,
+    320,
+    1543,
+    395
+   ],
+   "size": [
+    47,
+    75
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "stock",
+   "look": "any",
+   "z": 70,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "P, D seen; R N S widths weak",
+   "measured": {
+    "bbox": [
+     1495,
+     319,
+     1544,
+     395
+    ],
+    "core": [
+     1496,
+     319,
+     1544,
+     395
+    ],
+    "px": 2245,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1496,
+    319,
+    1544,
+    395
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1496.0,
+     320.0,
+     1543.0,
+     395.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 82.0
+   }
+  },
+  {
+   "id": "c.assist.mode_label_centre",
+   "element": "assist.mode_label_centre",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.mode_label_centre",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    1223,
+    344,
+    1355,
+    394
+   ],
+   "placement": [
+    1223,
+    344,
+    1355,
+    394
+   ],
+   "size": [
+    132,
+    50
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "stock",
+   "look": "any",
+   "z": 70,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "COMFORT PLUS; SPORT / ECO PRO texts and layout: none",
+   "measured": {
+    "bbox": [
+     1223,
+     343,
+     1358,
+     396
+    ],
+    "core": [
+     1224,
+     344,
+     1358,
+     395
+    ],
+    "px": 3086,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1224,
+    344,
+    1358,
+    395
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1223.0,
+     344.0,
+     1355.0,
+     394.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 83.8
+   }
+  },
+  {
+   "id": "c.assist.off",
+   "element": "assist.off",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.off",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    1516,
+    580,
+    1568,
+    604
+   ],
+   "placement": [
+    1516,
+    580,
+    1568,
+    604
+   ],
+   "size": [
+    52,
+    24
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 70,
+   "cond": "engine_off",
+   "cond_source": "c.js: OFF when rpm < 200 or null",
+   "evidence": "weak",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "OFF when rpm < 200 or null (08 only); else the tacho scale 0 (09, 14) which C draws too",
+   "measured": {
+    "bbox": [
+     1515,
+     579,
+     1569,
+     605
+    ],
+    "core": [
+     1516,
+     580,
+     1569,
+     604
+    ],
+    "px": 817,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1516,
+    580,
+    1569,
+    604
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1516.0,
+     580.0,
+     1568.0,
+     604.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 91.2
+   }
+  },
+  {
+   "id": "c.assist.rpm_label",
+   "element": "assist.rpm_label",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.rpm_label",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    1425,
+    573,
+    1506,
+    626
+   ],
+   "placement": [
+    1425,
+    573,
+    1506,
+    626
+   ],
+   "size": [
+    81,
+    53
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 70,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "",
+   "measured": {
+    "bbox": [
+     1424,
+     571,
+     1507,
+     627
+    ],
+    "core": [
+     1424,
+     571,
+     1507,
+     626
+    ],
+    "px": 2273,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1424,
+    571,
+    1507,
+    626
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1425.0,
+     573.0,
+     1506.0,
+     626.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 95.2
+   }
+  },
+  {
+   "id": "c.assist.tacho_zero",
+   "element": "assist.off",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.tacho_zero",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    1513,
+    572,
+    1553,
+    615
+   ],
+   "placement": [
+    1513,
+    572,
+    1553,
+    615
+   ],
+   "size": [
+    40,
+    43
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 70,
+   "cond": "engine_on",
+   "cond_source": "c.js: the tacho scale's '0' when rpm >= 200",
+   "evidence": "medium",
+   "sources": [
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "the tacho scale's '0' (engine on); replaced by OFF; B must not draw it",
+   "measured": {
+    "bbox": [
+     1520,
+     573,
+     1550,
+     615
+    ],
+    "core": [
+     1520,
+     574,
+     1549,
+     615
+    ],
+    "px": 785,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1520,
+    574,
+    1549,
+    615
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1516.0,
+     580.0,
+     1568.0,
+     604.0
+    ],
+    "d_edges": [
+     -3.0,
+     -8.0,
+     -15.0,
+     11.0
+    ],
+    "inside_pct": 49.7
+   }
+  },
+  {
+   "id": "c.assist.speed_limit",
+   "element": "assist.speed_limit",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.speed_limit",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    498,
+    581,
+    580,
+    663
+   ],
+   "placement": [
+    498,
+    581,
+    580,
+    663
+   ],
+   "size": [
+    82,
+    82
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 72,
+   "cond": "limit_set",
+   "cond_source": "c.js: drawSign when s.limit > 0",
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "50, 30 seen; three-digit set (100-130) none",
+   "measured": {
+    "bbox": [
+     498,
+     580,
+     581,
+     663
+    ],
+    "core": [
+     498,
+     581,
+     580,
+     663
+    ],
+    "px": 5415,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    498,
+    581,
+    580,
+    663
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     498.0,
+     581.0,
+     580.0,
+     663.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 81.3
+   }
+  },
+  {
+   "id": "c.bottom.clock",
+   "element": "bottom.clock",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.bottom.clock",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    344,
+    666,
+    451,
+    700
+   ],
+   "placement": [
+    344,
+    666,
+    451,
+    700
+   ],
+   "size": [
+    107,
+    34
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 75,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "centred at x 397 (one-digit hours never seen: weak)",
+   "measured": {
+    "bbox": [
+     344,
+     665,
+     451,
+     701
+    ],
+    "core": [
+     344,
+     665,
+     451,
+     701
+    ],
+    "px": 1974,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    344,
+    665,
+    451,
+    701
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     344.0,
+     666.0,
+     451.0,
+     700.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 94.9
+   }
+  },
+  {
+   "id": "c.bottom.range",
+   "element": "bottom.range",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.bottom.range",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    136,
+    666,
+    303,
+    699
+   ],
+   "placement": [
+    136,
+    666,
+    303,
+    699
+   ],
+   "size": [
+    167,
+    33
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 75,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "pump icon + number left-aligned at x 182.7 + km",
+   "measured": {
+    "bbox": [
+     136,
+     665,
+     305,
+     701
+    ],
+    "core": [
+     136,
+     666,
+     305,
+     701
+    ],
+    "px": 2713,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    136,
+    666,
+    305,
+    701
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     136.0,
+     666.0,
+     303.0,
+     699.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 87.3
+   }
+  },
+  {
+   "id": "c.bottom.street",
+   "element": "bottom.street",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.bottom.street",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    795,
+    669,
+    1126,
+    709
+   ],
+   "placement": [
+    795,
+    669,
+    1126,
+    709
+   ],
+   "size": [
+    331,
+    40
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 75,
+   "cond": "no_cc_message",
+   "cond_source": "c.js: the street when there is no check-control message",
+   "evidence": "strong",
+   "sources": [
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "centred at x 961; hidden while the check-control panel shows (08); long names are squeezed to 520 px (none)",
+   "measured": {
+    "bbox": [
+     813,
+     666,
+     1109,
+     710
+    ],
+    "core": [
+     813,
+     666,
+     1108,
+     710
+    ],
+    "px": 4591,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    813,
+    666,
+    1108,
+    710
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     795.0,
+     669.0,
+     1126.0,
+     709.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 86.3
+   }
+  },
+  {
+   "id": "c.bottom.temperature",
+   "element": "bottom.temperature",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.bottom.temperature",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    1540,
+    666,
+    1663,
+    701
+   ],
+   "placement": [
+    1540,
+    666,
+    1663,
+    701
+   ],
+   "size": [
+    123,
+    35
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 75,
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "09",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "number right-aligned at x 1624 + degree + C; minus sign never seen (none)",
+   "measured": {
+    "bbox": [
+     1538,
+     665,
+     1665,
+     701
+    ],
+    "core": [
+     1539,
+     665,
+     1664,
+     701
+    ],
+    "px": 1824,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1539,
+    665,
+    1664,
+    701
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1540.0,
+     666.0,
+     1663.0,
+     701.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 85.6
+   }
+  },
+  {
+   "id": "c.assist.cc_panel",
+   "element": "assist.cc_panel",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.cc_panel",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    712,
+    601,
+    1240,
+    691
+   ],
+   "placement": [
+    712,
+    601,
+    1240,
+    691
+   ],
+   "size": [
+    528,
+    90
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 80,
+   "cond": "cc_message",
+   "cond_source": "c.js: drawCcPanel when s.ccMessage",
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "geometry from 08; covers the stock bottom line's ends 695..1224 (opaque base); other messages none",
+   "measured": {
+    "bbox": [
+     709,
+     602,
+     1224,
+     694
+    ],
+    "core": [
+     709,
+     602,
+     1224,
+     694
+    ],
+    "px": 46715,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    709,
+    602,
+    1224,
+    694
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     712.0,
+     601.0,
+     1240.0,
+     691.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 88.0
+   }
+  },
+  {
+   "id": "c.assist.info_tacho",
+   "element": "assist.info_tacho",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.info_tacho",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    1256,
+    591,
+    1270,
+    627
+   ],
+   "placement": [
+    1256,
+    591,
+    1270,
+    627
+   ],
+   "size": [
+    14,
+    36
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 81,
+   "lamp": "assist.info_tacho",
+   "evidence": "none",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "trigger unknown: a bench lamp, lit in the startup preset as in 08",
+   "measured": {
+    "bbox": [
+     1256,
+     590,
+     1271,
+     627
+    ],
+    "core": [
+     1256,
+     591,
+     1271,
+     627
+    ],
+    "px": 288,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "assist.info_tacho"
+     ]
+    }
+   },
+   "core": [
+    1256,
+    591,
+    1271,
+    627
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1256.0,
+     591.0,
+     1270.0,
+     627.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 90.3
+   }
+  },
+  {
+   "id": "c.bottom.cc_info",
+   "element": "bottom.cc_info",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.bottom.cc_info",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    736,
+    637,
+    753,
+    682
+   ],
+   "placement": [
+    736,
+    637,
+    753,
+    682
+   ],
+   "size": [
+    17,
+    45
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "any",
+   "look": "any",
+   "z": 81,
+   "cond": "cc_message",
+   "cond_source": "c.js: the 'i' is drawn by drawCcPanel",
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "drawn with the panel",
+   "measured": {
+    "bbox": [
+     733,
+     634,
+     756,
+     685
+    ],
+    "core": [
+     733,
+     634,
+     756,
+     685
+    ],
+    "px": 1173,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    733,
+    634,
+    756,
+    685
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     736.0,
+     637.0,
+     753.0,
+     682.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 90.6
+   }
+  },
+  {
+   "id": "c.assist.mode_label",
+   "element": "assist.mode_label",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.mode_label",
+    "draw": "G20C.drawUnder"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    1226,
+    659,
+    1359,
+    711
+   ],
+   "placement": [
+    1226,
+    659,
+    1359,
+    711
+   ],
+   "size": [
+    133,
+    52
+   ],
+   "scale": 1,
+   "layer": "under",
+   "state": "connected",
+   "look": "any",
+   "z": 82,
+   "evidence": "strong",
+   "sources": [
+    "10",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "",
+   "measured": {
+    "bbox": [
+     1223,
+     656,
+     1357,
+     714
+    ],
+    "core": [
+     1223,
+     656,
+     1357,
+     714
+    ],
+    "px": 3180,
+    "state": {
+     "look": "night",
+     "connected": true,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1223,
+    656,
+    1357,
+    714
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1226.0,
+     659.0,
+     1359.0,
+     711.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 83.3
+   }
+  },
+  {
+   "id": "c.bottom.belt_driver",
+   "element": "bottom.belt_driver",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.bottom.belt_driver",
+    "draw": "G20C.drawOver"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    593,
+    666,
+    624,
+    715
+   ],
+   "placement": [
+    593,
+    666,
+    624,
+    715
+   ],
+   "size": [
+    31,
+    49
+   ],
+   "scale": 1,
+   "layer": "over",
+   "state": "any",
+   "look": "any",
+   "z": 200,
+   "lamp": "bottom.belt_driver",
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "10",
+    "11",
+    "12",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "",
+   "measured": {
+    "bbox": [
+     587,
+     660,
+     630,
+     720
+    ],
+    "core": [
+     592,
+     665,
+     625,
+     714
+    ],
+    "px": 1859,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "bottom.belt_driver"
+     ]
+    }
+   },
+   "core": [
+    592,
+    665,
+    625,
+    714
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     593.0,
+     666.0,
+     624.0,
+     715.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 77.6
+   }
+  },
+  {
+   "id": "c.tt.parking_brake",
+   "element": "tt.parking_brake",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.tt.parking_brake",
+    "draw": "G20C.drawOver"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    1838,
+    217,
+    1900,
+    260
+   ],
+   "placement": [
+    1838,
+    217,
+    1900,
+    260
+   ],
+   "size": [
+    62,
+    43
+   ],
+   "scale": 1,
+   "layer": "over",
+   "state": "any",
+   "look": "any",
+   "z": 200,
+   "lamp": "tt.parking_brake",
+   "evidence": "strong",
+   "sources": [
+    "08",
+    "12",
+    "13"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "red (P)",
+   "measured": {
+    "bbox": [
+     1832,
+     211,
+     1905,
+     265
+    ],
+    "core": [
+     1838,
+     216,
+     1899,
+     259
+    ],
+    "px": 3516,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "tt.parking_brake"
+     ]
+    }
+   },
+   "core": [
+    1838,
+    216,
+    1899,
+    259
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1838.0,
+     217.0,
+     1900.0,
+     260.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 90.5
+   }
+  },
+  {
+   "id": "c.tt.parking_brake.hold",
+   "element": "tt.parking_brake",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.tt.parking_brake.hold",
+    "draw": "G20C.drawOver"
+   },
+   "render": "procedural",
+   "kind": "icon",
+   "bbox": [
+    1838,
+    217,
+    1900,
+    260
+   ],
+   "placement": [
+    1838,
+    217,
+    1900,
+    260
+   ],
+   "size": [
+    62,
+    43
+   ],
+   "scale": 1,
+   "layer": "over",
+   "state": "any",
+   "look": "any",
+   "z": 200,
+   "lamp": "tt.parking_brake.hold",
+   "evidence": "strong",
+   "sources": [
+    "09",
+    "10",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "green (P) with Auto Hold",
+   "measured": {
+    "bbox": [
+     1832,
+     211,
+     1905,
+     265
+    ],
+    "core": [
+     1838,
+     216,
+     1899,
+     259
+    ],
+    "px": 3516,
+    "state": {
+     "look": "night",
+     "connected": false,
+     "preset": "all",
+     "rpm": 750,
+     "oil": 110,
+     "ccMessage": null,
+     "limit": 50,
+     "lamps": [
+      "tt.parking_brake.hold"
+     ]
+    }
+   },
+   "core": [
+    1838,
+    216,
+    1899,
+    259
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1838.0,
+     217.0,
+     1900.0,
+     260.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 90.5
+   }
+  },
+  {
+   "id": "c.assist.gear",
+   "element": "assist.gear",
+   "source": "sim",
+   "package": "C",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/c.js",
+    "id": "c.assist.gear",
+    "draw": "G20C.drawOver"
+   },
+   "render": "procedural",
+   "kind": "font",
+   "bbox": [
+    1398,
+    668,
+    1424,
+    703
+   ],
+   "placement": [
+    1398,
+    668,
+    1424,
+    703
+   ],
+   "size": [
+    26,
+    35
+   ],
+   "scale": 1,
+   "layer": "over",
+   "state": "connected",
+   "look": "any",
+   "z": 201,
+   "evidence": "strong",
+   "sources": [
+    "10",
+    "11",
+    "12",
+    "13",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "P seen; R N D S widths weak",
+   "measured": {
+    "bbox": [
+     1397,
+     667,
+     1425,
+     703
+    ],
+    "core": [
+     1398,
+     667,
+     1425,
+     703
+    ],
+    "px": 666,
+    "state": {
+     "look": "night",
+     "connected": true,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1398,
+    667,
+    1425,
+    703
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1398.0,
+     668.0,
+     1424.0,
+     703.0
+    ],
+    "d_edges": [
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "inside_pct": 78.2
+   }
+  },
+  {
+   "id": "sim.black_box",
+   "element": "overlay.black_box",
+   "source": "sim",
+   "package": "E",
+   "file": null,
+   "procedural": {
+    "module": "bench/g20/g20sim.js",
+    "id": "blackBox",
+    "draw": "G20Sim.drawOver"
+   },
+   "render": "procedural",
+   "kind": "albedo",
+   "bbox": [
+    1421,
+    320,
+    1613,
+    440
+   ],
+   "placement": [
+    1421,
+    320,
+    1613,
+    440
+   ],
+   "size": [
+    192,
+    120
+   ],
+   "scale": 1,
+   "layer": "over",
+   "state": "connected",
+   "look": "any",
+   "z": 202,
+   "evidence": "strong",
+   "sources": [
+    "10",
+    "11",
+    "12",
+    "13",
+    "14"
+   ],
+   "used_by": [
+    "bench-sim"
+   ],
+   "notes": "Not a manifest entry: g20sim.js drawOver fills the catalogue polygon (manifest 'outline') black, only with a theme connected, after C's over elements (z given here as 202 for that order).",
+   "measured": {
+    "bbox": [
+     1421,
+     320,
+     1613,
+     440
+    ],
+    "core": [
+     1422,
+     320,
+     1612,
+     440
+    ],
+    "px": 23040,
+    "state": {
+     "look": "night",
+     "connected": true,
+     "preset": "startup",
+     "rpm": 0,
+     "oil": 110,
+     "ccMessage": "ready",
+     "limit": 50,
+     "lamps": []
+    }
+   },
+   "core": [
+    1422,
+    320,
+    1612,
+    440
+   ],
+   "vs_catalogue": {
+    "element_bbox": [
+     1421.9,
+     320.4,
+     1612.1,
+     439.6
+    ],
+    "d_edges": [
+     -0.9,
+     -0.4,
+     0.9,
+     0.4
+    ],
+    "inside_pct": 100.0
+   }
+  },
+  {
+   "id": "app.collar",
+   "element": null,
+   "source": "app-scene",
+   "package": null,
+   "file": "apps/f30_cluster/hud/scene/collar.json",
+   "procedural": null,
+   "render": "app-texture",
+   "kind": "albedo",
+   "bbox": [
+    0,
+    20,
+    1920,
+    676
+   ],
+   "core": [
+    0,
+    28,
+    1920,
+    664
+   ],
+   "placement": [
+    0,
+    0,
+    1920,
+    720
+   ],
+   "size": [
+    480,
+    180
+   ],
+   "scale": 4,
+   "alpha_px": 121472,
+   "layer": "theme",
+   "state": "connected",
+   "look": "night",
+   "z": null,
+   "evidence": "medium",
+   "used_by": [
+    "layout:wb_dials"
+   ],
+   "baked_from": [
+    "structure.bg.night"
+   ],
+   "baked_from_files": [
+    "design/overlay/collar.dials.png",
+    "bench/g20/structure/bg.night.png"
+   ],
+   "sources": [
+    "08"
+   ],
+   "notes": "6WB Dials + G20: where our background stays opaque over the stock dials that stick out past ours; alpha from design/overlay/collar.dials.png (grown 4 px, blurred 4 px, quarter size), colour from the simulation's night background (tools/bake_scene.py). Spans several elements: see 'covers'.",
+   "covers": [
+    {
+     "element": "structure.rev_band",
+     "px": 1931,
+     "pct": 100.0
+    },
+    {
+     "element": "structure.fuel_mini",
+     "px": 13600,
+     "pct": 40.9
+    },
+    {
+     "element": "structure.oil_mini",
+     "px": 13521,
+     "pct": 38.4
+    },
+    {
+     "element": "assist.cold",
+     "px": 273,
+     "pct": 21.3
+    },
+    {
+     "element": "assist.info_tacho",
+     "px": 100,
+     "pct": 21.1
+    },
+    {
+     "element": "structure.tacho",
+     "px": 18824,
+     "pct": 6.0
+    },
+    {
+     "element": "structure.speedo",
+     "px": 18615,
+     "pct": 5.9
+    },
+    {
+     "element": "panel.background",
+     "px": 78909,
+     "pct": 5.7
+    },
+    {
+     "element": "tt.dsc",
+     "px": 10,
+     "pct": 0.5
+    },
+    {
+     "element": "assist.speed_limit",
+     "px": 29,
+     "pct": 0.5
+    },
+    {
+     "element": "assist.cc_panel",
+     "px": 34,
+     "pct": 0.1
+    },
+    {
+     "element": "map.region",
+     "px": 115,
+     "pct": 0.0
+    }
+   ],
+   "covers_note": "alpha >= 128 of a 1/4-size texture upscaled bilinear; edges are good to about 2 px"
+  },
+  {
+   "id": "app.g20_fuel",
+   "element": "structure.fuel_mini",
+   "source": "app-scene",
+   "package": null,
+   "file": "apps/f30_cluster/hud/scene/g20_fuel.json",
+   "procedural": null,
+   "render": "app-texture",
+   "kind": "albedo",
+   "bbox": [
+    6,
+    428,
+    204,
+    654
+   ],
+   "core": [
+    8,
+    429,
+    202,
+    652
+   ],
+   "placement": [
+    6,
+    428,
+    204,
+    654
+   ],
+   "size": [
+    198,
+    226
+   ],
+   "scale": 1,
+   "alpha_px": 7138,
+   "layer": "theme",
+   "state": "connected",
+   "look": "night",
+   "z": null,
+   "evidence": "strong",
+   "used_by": [
+    "layout:g20_comfort"
+   ],
+   "baked_from": [
+    "structure.fuel_mini.night"
+   ],
+   "sources": [],
+   "notes": "The fuel mini's lines (straight alpha); the needle is live (g20_lut rows 4, 5).",
+   "covers": [
+    {
+     "element": "structure.fuel_mini",
+     "px": 3500,
+     "pct": 10.5
+    },
+    {
+     "element": "panel.background",
+     "px": 3735,
+     "pct": 0.3
+    }
+   ]
+  },
+  {
+   "id": "app.g20_fuel_fill",
+   "element": "structure.fuel_mini",
+   "source": "app-scene",
+   "package": null,
+   "file": "apps/f30_cluster/hud/scene/g20_fuel_fill.json",
+   "procedural": null,
+   "render": "app-texture",
+   "kind": "albedo",
+   "bbox": [
+    6,
+    428,
+    204,
+    654
+   ],
+   "core": [
+    6,
+    428,
+    204,
+    654
+   ],
+   "placement": [
+    6,
+    428,
+    204,
+    654
+   ],
+   "size": [
+    198,
+    226
+   ],
+   "scale": 1,
+   "alpha_px": 26527,
+   "layer": "theme",
+   "state": "connected",
+   "look": "night",
+   "z": null,
+   "evidence": "strong",
+   "used_by": [
+    "layout:g20_comfort"
+   ],
+   "baked_from": [
+    "structure.fuel_mini.fill.night"
+   ],
+   "sources": [],
+   "notes": "The fuel mini's fill over black, its area in alpha; lit from 0 up to the needle by the shader.",
+   "covers": [
+    {
+     "element": "structure.fuel_mini",
+     "px": 24614,
+     "pct": 74.0
+    },
+    {
+     "element": "panel.background",
+     "px": 25575,
+     "pct": 1.9
+    }
+   ]
+  },
+  {
+   "id": "app.g20_lut",
+   "element": null,
+   "source": "app-scene",
+   "package": null,
+   "file": "apps/f30_cluster/hud/scene/g20_lut.json",
+   "procedural": null,
+   "render": "data",
+   "kind": "data",
+   "bbox": null,
+   "placement": null,
+   "size": [
+    256,
+    18
+   ],
+   "scale": null,
+   "layer": "theme",
+   "state": "connected",
+   "look": "any",
+   "z": null,
+   "evidence": "strong",
+   "used_by": [
+    "layout:g20_comfort"
+   ],
+   "baked_from": [
+    "live.pointer.speedo",
+    "live.pointer.tacho",
+    "live.mini.fuel",
+    "live.mini.oil",
+    "live.band.tacho"
+   ],
+   "sources": [],
+   "notes": "Data, not a picture: 256 x 18 RGBA8, sampled nearest. Pointer and needle tip/tail per value (rows 0-15) and the rev band per angle (rows 16, 17), from bench/g20/live/live.js PARAMS."
+  },
+  {
+   "id": "app.g20_oil",
+   "element": "structure.oil_mini",
+   "source": "app-scene",
+   "package": null,
+   "file": "apps/f30_cluster/hud/scene/g20_oil.json",
+   "procedural": null,
+   "render": "app-texture",
+   "kind": "albedo",
+   "bbox": [
+    1718,
+    432,
+    1913,
+    654
+   ],
+   "core": [
+    1721,
+    434,
+    1911,
+    652
+   ],
+   "placement": [
+    1718,
+    432,
+    1913,
+    654
+   ],
+   "size": [
+    195,
+    222
+   ],
+   "scale": 1,
+   "alpha_px": 5974,
+   "layer": "theme",
+   "state": "connected",
+   "look": "night",
+   "z": null,
+   "evidence": "strong",
+   "used_by": [
+    "layout:g20_comfort"
+   ],
+   "baked_from": [
+    "structure.oil_mini.night"
+   ],
+   "sources": [],
+   "notes": "The oil mini's lines (straight alpha); the needle is live (g20_lut rows 6, 7).",
+   "covers": [
+    {
+     "element": "structure.oil_mini",
+     "px": 2993,
+     "pct": 8.5
+    },
+    {
+     "element": "panel.background",
+     "px": 3212,
+     "pct": 0.2
+    }
+   ]
+  },
+  {
+   "id": "app.g20_oil_fill",
+   "element": "structure.oil_mini",
+   "source": "app-scene",
+   "package": null,
+   "file": "apps/f30_cluster/hud/scene/g20_oil_fill.json",
+   "procedural": null,
+   "render": "app-texture",
+   "kind": "albedo",
+   "bbox": [
+    1718,
+    432,
+    1913,
+    654
+   ],
+   "core": [
+    1718,
+    432,
+    1913,
+    654
+   ],
+   "placement": [
+    1718,
+    432,
+    1913,
+    654
+   ],
+   "size": [
+    195,
+    222
+   ],
+   "scale": 1,
+   "alpha_px": 26295,
+   "layer": "theme",
+   "state": "connected",
+   "look": "night",
+   "z": null,
+   "evidence": "strong",
+   "used_by": [
+    "layout:g20_comfort"
+   ],
+   "baked_from": [
+    "structure.oil_mini.fill.night"
+   ],
+   "sources": [],
+   "notes": "The oil mini's fill over black, its area in alpha; lit from 0 up to the needle by the shader.",
+   "covers": [
+    {
+     "element": "structure.oil_mini",
+     "px": 24515,
+     "pct": 69.6
+    },
+    {
+     "element": "panel.background",
+     "px": 25455,
+     "pct": 1.8
+    }
+   ]
+  },
+  {
+   "id": "app.g20_speedo",
+   "element": "structure.speedo",
+   "source": "app-scene",
+   "package": null,
+   "file": "apps/f30_cluster/hud/scene/g20_speedo.json",
+   "procedural": null,
+   "render": "app-texture",
+   "kind": "albedo",
+   "bbox": [
+    76,
+    31,
+    760,
+    656
+   ],
+   "core": [
+    77,
+    32,
+    760,
+    655
+   ],
+   "placement": [
+    76,
+    30,
+    760,
+    656
+   ],
+   "size": [
+    684,
+    626
+   ],
+   "scale": 1,
+   "alpha_px": 199640,
+   "layer": "theme",
+   "state": "connected",
+   "look": "night",
+   "z": null,
+   "evidence": "strong",
+   "used_by": [
+    "layout:g20_comfort"
+   ],
+   "baked_from": [
+    "structure.speedo.glow.night",
+    "structure.speedo.wing.night",
+    "structure.speedo.frame.night",
+    "structure.speedo.bottom_end.night",
+    "structure.speedo_info_line.night",
+    "structure.speedo_numerals.night",
+    "structure.speedo_scale_label.night"
+   ],
+   "sources": [],
+   "notes": "The stock speedo's static night look, opaque over the whole gauge so BMW's own pointer never shows; holes over BMW's speed-limit sign. The pointer, glow and rev band are drawn live by the g20dial widget from g20_lut.",
+   "covers": [
+    {
+     "element": "structure.speedo_needle",
+     "px": 1187,
+     "pct": 100.0
+    },
+    {
+     "element": "structure.speedo",
+     "px": 187886,
+     "pct": 59.9
+    },
+    {
+     "element": "structure.speedo_info_line",
+     "px": 229,
+     "pct": 23.7
+    },
+    {
+     "element": "panel.background",
+     "px": 196449,
+     "pct": 14.2
+    },
+    {
+     "element": "structure.fuel_mini",
+     "px": 2613,
+     "pct": 7.9
+    },
+    {
+     "element": "bottom.cc_info",
+     "px": 18,
+     "pct": 2.5
+    },
+    {
+     "element": "assist.cc_panel",
+     "px": 653,
+     "pct": 1.6
+    },
+    {
+     "element": "map.region",
+     "px": 87,
+     "pct": 0.0
+    }
+   ]
+  },
+  {
+   "id": "app.g20_tacho",
+   "element": "structure.tacho",
+   "source": "app-scene",
+   "package": null,
+   "file": "apps/f30_cluster/hud/scene/g20_tacho.json",
+   "procedural": null,
+   "render": "app-texture",
+   "kind": "albedo",
+   "bbox": [
+    1158,
+    33,
+    1842,
+    656
+   ],
+   "core": [
+    1158,
+    33,
+    1841,
+    656
+   ],
+   "placement": [
+    1158,
+    33,
+    1842,
+    656
+   ],
+   "size": [
+    684,
+    623
+   ],
+   "scale": 1,
+   "alpha_px": 199490,
+   "layer": "theme",
+   "state": "connected",
+   "look": "night",
+   "z": null,
+   "evidence": "strong",
+   "used_by": [
+    "layout:g20_comfort"
+   ],
+   "baked_from": [
+    "structure.tacho.glow.night",
+    "structure.tacho.wing.night",
+    "structure.tacho.frame.night",
+    "structure.tacho.bottom_end.night",
+    "structure.rev_band.night",
+    "structure.tacho_numerals.night",
+    "structure.tacho_zero.night"
+   ],
+   "sources": [],
+   "notes": "The stock tacho's static night look, opaque over the whole gauge; a hole over the check-control 'i'. Bakes B's tacho '0' statically (the simulation skips it and swaps '0'/OFF live).",
+   "covers": [
+    {
+     "element": "assist.off",
+     "px": 1181,
+     "pct": 100.0
+    },
+    {
+     "element": "structure.tacho_needle",
+     "px": 1324,
+     "pct": 100.0
+    },
+    {
+     "element": "structure.rev_band",
+     "px": 1931,
+     "pct": 100.0
+    },
+    {
+     "element": "assist.rpm_label",
+     "px": 4113,
+     "pct": 98.3
+    },
+    {
+     "element": "structure.tacho",
+     "px": 186791,
+     "pct": 59.4
+    },
+    {
+     "element": "overlay.black_box",
+     "px": 12962,
+     "pct": 56.3
+    },
+    {
+     "element": "assist.gear_centre",
+     "px": 1640,
+     "pct": 56.0
+    },
+    {
+     "element": "structure.tacho_info_line",
+     "px": 231,
+     "pct": 23.8
+    },
+    {
+     "element": "panel.background",
+     "px": 196203,
+     "pct": 14.2
+    },
+    {
+     "element": "structure.oil_mini",
+     "px": 4470,
+     "pct": 12.7
+    },
+    {
+     "element": "assist.cc_panel",
+     "px": 1201,
+     "pct": 2.9
+    },
+    {
+     "element": "map.region",
+     "px": 70,
+     "pct": 0.0
+    }
+   ]
+  }
+ ],
+ "report": {
+  "part_mostly_outside_its_element": [
+   {
+    "part": "structure.map_veil.night",
+    "element": "map.region",
+    "inside_pct": 47.8,
+    "part_bbox": [
+     555,
+     155,
+     1395,
+     611
+    ],
+    "element_bbox": [
+     555.0,
+     155.0,
+     1395.0,
+     612.0
+    ]
+   },
+   {
+    "part": "structure.speedo.bottom_end.day",
+    "element": "structure.speedo",
+    "inside_pct": 0.0,
+    "part_bbox": [
+     693,
+     605,
+     760,
+     651
+    ],
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ]
+   },
+   {
+    "part": "structure.speedo.bottom_end.night",
+    "element": "structure.speedo",
+    "inside_pct": 0.0,
+    "part_bbox": [
+     693,
+     605,
+     760,
+     651
+    ],
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ]
+   },
+   {
+    "part": "structure.tacho.bottom_end.day",
+    "element": "structure.tacho",
+    "inside_pct": 0.0,
+    "part_bbox": [
+     1158,
+     607,
+     1228,
+     652
+    ],
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ]
+   },
+   {
+    "part": "structure.tacho.bottom_end.night",
+    "element": "structure.tacho",
+    "inside_pct": 0.0,
+    "part_bbox": [
+     1158,
+     607,
+     1228,
+     652
+    ],
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ]
+   },
+   {
+    "part": "structure.speedo_info_line.day",
+    "element": "structure.speedo_info_line",
+    "inside_pct": 32.8,
+    "part_bbox": [
+     366,
+     410,
+     696,
+     419
+    ],
+    "element_bbox": [
+     370.0,
+     412.0,
+     613.0,
+     417.0
+    ]
+   },
+   {
+    "part": "structure.speedo_info_line.night",
+    "element": "structure.speedo_info_line",
+    "inside_pct": 36.8,
+    "part_bbox": [
+     367,
+     410,
+     698,
+     418
+    ],
+    "element_bbox": [
+     370.0,
+     412.0,
+     613.0,
+     417.0
+    ]
+   },
+   {
+    "part": "structure.tacho_info_line.day",
+    "element": "structure.tacho_info_line",
+    "inside_pct": 32.9,
+    "part_bbox": [
+     1222,
+     410,
+     1552,
+     419
+    ],
+    "element_bbox": [
+     1306.0,
+     412.0,
+     1550.0,
+     417.0
+    ]
+   },
+   {
+    "part": "structure.tacho_info_line.night",
+    "element": "structure.tacho_info_line",
+    "inside_pct": 32.8,
+    "part_bbox": [
+     1221,
+     409,
+     1551,
+     418
+    ],
+    "element_bbox": [
+     1306.0,
+     412.0,
+     1550.0,
+     417.0
+    ]
+   },
+   {
+    "part": "c.assist.tacho_zero",
+    "element": "assist.off",
+    "inside_pct": 49.7,
+    "part_bbox": [
+     1513,
+     572,
+     1553,
+     615
+    ],
+    "element_bbox": [
+     1516.0,
+     580.0,
+     1568.0,
+     604.0
+    ]
+   }
+  ],
+  "bbox_disagreements": [
+   {
+    "element": "assist.off",
+    "look": "night",
+    "parts_union": [
+     1513,
+     572,
+     1568,
+     615
+    ],
+    "element_bbox": [
+     1516.0,
+     580.0,
+     1568.0,
+     604.0
+    ],
+    "d_edges": [
+     -3.0,
+     -8.0,
+     0.0,
+     11.0
+    ],
+    "max_px": 11.0,
+    "edge": "y1",
+    "set_by": [
+     "c.assist.tacho_zero"
+    ],
+    "core_union": [
+     1516,
+     574,
+     1569,
+     615
+    ],
+    "d_edges_core": [
+     0.0,
+     -6.0,
+     1.0,
+     11.0
+    ]
+   },
+   {
+    "element": "assist.off",
+    "look": "day",
+    "parts_union": [
+     1513,
+     572,
+     1568,
+     615
+    ],
+    "element_bbox": [
+     1516.0,
+     580.0,
+     1568.0,
+     604.0
+    ],
+    "d_edges": [
+     -3.0,
+     -8.0,
+     0.0,
+     11.0
+    ],
+    "max_px": 11.0,
+    "edge": "y1",
+    "set_by": [
+     "c.assist.tacho_zero"
+    ],
+    "core_union": [
+     1516,
+     574,
+     1569,
+     615
+    ],
+    "d_edges_core": [
+     0.0,
+     -6.0,
+     1.0,
+     11.0
+    ]
+   },
+   {
+    "element": "structure.speedo",
+    "look": "night",
+    "parts_union": [
+     76,
+     30,
+     760,
+     655
+    ],
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     -6.0,
+     -6.0,
+     56.0,
+     3.0
+    ],
+    "max_px": 56.0,
+    "edge": "x1",
+    "set_by": [
+     "structure.speedo.bottom_end.night"
+    ],
+    "core_union": [
+     82,
+     35,
+     758,
+     653
+    ],
+    "d_edges_core": [
+     0.0,
+     -1.0,
+     54.0,
+     1.0
+    ]
+   },
+   {
+    "element": "structure.speedo",
+    "look": "day",
+    "parts_union": [
+     78,
+     29,
+     760,
+     654
+    ],
+    "element_bbox": [
+     82.0,
+     36.0,
+     704.0,
+     652.0
+    ],
+    "d_edges": [
+     -4.0,
+     -7.0,
+     56.0,
+     2.0
+    ],
+    "max_px": 56.0,
+    "edge": "x1",
+    "set_by": [
+     "structure.speedo.bottom_end.day"
+    ],
+    "core_union": [
+     82,
+     34,
+     758,
+     652
+    ],
+    "d_edges_core": [
+     0.0,
+     -2.0,
+     54.0,
+     0.0
+    ]
+   },
+   {
+    "element": "structure.speedo_needle",
+    "look": "night",
+    "parts_union": [
+     365,
+     458,
+     475,
+     659
+    ],
+    "element_bbox": [
+     370.0,
+     468.0,
+     424.0,
+     645.0
+    ],
+    "d_edges": [
+     -5.0,
+     -10.0,
+     51.0,
+     14.0
+    ],
+    "max_px": 51.0,
+    "edge": "x1",
+    "set_by": [
+     "live.pointer.speedo"
+    ],
+    "core_union": [
+     370,
+     464,
+     429,
+     642
+    ],
+    "d_edges_core": [
+     0.0,
+     -4.0,
+     5.0,
+     -3.0
+    ]
+   },
+   {
+    "element": "structure.speedo_needle",
+    "look": "day",
+    "parts_union": [
+     365,
+     458,
+     475,
+     659
+    ],
+    "element_bbox": [
+     370.0,
+     468.0,
+     424.0,
+     645.0
+    ],
+    "d_edges": [
+     -5.0,
+     -10.0,
+     51.0,
+     14.0
+    ],
+    "max_px": 51.0,
+    "edge": "x1",
+    "set_by": [
+     "live.pointer.speedo"
+    ],
+    "core_union": [
+     370,
+     464,
+     429,
+     642
+    ],
+    "d_edges_core": [
+     0.0,
+     -4.0,
+     5.0,
+     -3.0
+    ]
+   },
+   {
+    "element": "structure.speedo_info_line",
+    "look": "night",
+    "parts_union": [
+     367,
+     410,
+     698,
+     418
+    ],
+    "element_bbox": [
+     370.0,
+     412.0,
+     613.0,
+     417.0
+    ],
+    "d_edges": [
+     -3.0,
+     -2.0,
+     85.0,
+     1.0
+    ],
+    "max_px": 85.0,
+    "edge": "x1",
+    "set_by": [
+     "structure.speedo_info_line.night"
+    ],
+    "core_union": [
+     370,
+     412,
+     695,
+     416
+    ],
+    "d_edges_core": [
+     0.0,
+     0.0,
+     82.0,
+     -1.0
+    ]
+   },
+   {
+    "element": "structure.speedo_info_line",
+    "look": "day",
+    "parts_union": [
+     366,
+     410,
+     696,
+     419
+    ],
+    "element_bbox": [
+     370.0,
+     412.0,
+     613.0,
+     417.0
+    ],
+    "d_edges": [
+     -4.0,
+     -2.0,
+     83.0,
+     2.0
+    ],
+    "max_px": 83.0,
+    "edge": "x1",
+    "set_by": [
+     "structure.speedo_info_line.day"
+    ],
+    "core_union": [
+     370,
+     412,
+     694,
+     416
+    ],
+    "d_edges_core": [
+     0.0,
+     0.0,
+     81.0,
+     -1.0
+    ]
+   },
+   {
+    "element": "structure.tacho",
+    "look": "night",
+    "parts_union": [
+     1158,
+     33,
+     1842,
+     656
+    ],
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     -46.0,
+     -3.0,
+     6.0,
+     4.0
+    ],
+    "max_px": 46.0,
+    "edge": "x0",
+    "set_by": [
+     "structure.tacho.bottom_end.night"
+    ],
+    "core_union": [
+     1160,
+     35,
+     1836,
+     652
+    ],
+    "d_edges_core": [
+     -44.0,
+     -1.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "element": "structure.tacho",
+    "look": "day",
+    "parts_union": [
+     1158,
+     29,
+     1842,
+     655
+    ],
+    "element_bbox": [
+     1204.0,
+     36.0,
+     1836.0,
+     652.0
+    ],
+    "d_edges": [
+     -46.0,
+     -7.0,
+     6.0,
+     3.0
+    ],
+    "max_px": 46.0,
+    "edge": "x0",
+    "set_by": [
+     "structure.tacho.bottom_end.day"
+    ],
+    "core_union": [
+     1160,
+     34,
+     1837,
+     652
+    ],
+    "d_edges_core": [
+     -44.0,
+     -2.0,
+     1.0,
+     0.0
+    ]
+   },
+   {
+    "element": "structure.tacho_needle",
+    "look": "night",
+    "parts_union": [
+     1443,
+     458,
+     1643,
+     664
+    ],
+    "element_bbox": [
+     1497.0,
+     470.0,
+     1552.0,
+     647.0
+    ],
+    "d_edges": [
+     -54.0,
+     -12.0,
+     91.0,
+     17.0
+    ],
+    "max_px": 91.0,
+    "edge": "x1",
+    "set_by": [
+     "live.band.tacho"
+    ],
+    "core_union": [
+     1490,
+     465,
+     1643,
+     646
+    ],
+    "d_edges_core": [
+     -7.0,
+     -5.0,
+     91.0,
+     -1.0
+    ]
+   },
+   {
+    "element": "structure.tacho_needle",
+    "look": "day",
+    "parts_union": [
+     1443,
+     458,
+     1643,
+     664
+    ],
+    "element_bbox": [
+     1497.0,
+     470.0,
+     1552.0,
+     647.0
+    ],
+    "d_edges": [
+     -54.0,
+     -12.0,
+     91.0,
+     17.0
+    ],
+    "max_px": 91.0,
+    "edge": "x1",
+    "set_by": [
+     "live.band.tacho"
+    ],
+    "core_union": [
+     1490,
+     465,
+     1643,
+     646
+    ],
+    "d_edges_core": [
+     -7.0,
+     -5.0,
+     91.0,
+     -1.0
+    ]
+   },
+   {
+    "element": "structure.tacho_info_line",
+    "look": "night",
+    "parts_union": [
+     1221,
+     409,
+     1551,
+     418
+    ],
+    "element_bbox": [
+     1306.0,
+     412.0,
+     1550.0,
+     417.0
+    ],
+    "d_edges": [
+     -85.0,
+     -3.0,
+     1.0,
+     1.0
+    ],
+    "max_px": 85.0,
+    "edge": "x0",
+    "set_by": [
+     "structure.tacho_info_line.night"
+    ],
+    "core_union": [
+     1223,
+     412,
+     1548,
+     415
+    ],
+    "d_edges_core": [
+     -83.0,
+     0.0,
+     -2.0,
+     -2.0
+    ]
+   },
+   {
+    "element": "structure.tacho_info_line",
+    "look": "day",
+    "parts_union": [
+     1222,
+     410,
+     1552,
+     419
+    ],
+    "element_bbox": [
+     1306.0,
+     412.0,
+     1550.0,
+     417.0
+    ],
+    "d_edges": [
+     -84.0,
+     -2.0,
+     2.0,
+     2.0
+    ],
+    "max_px": 84.0,
+    "edge": "x0",
+    "set_by": [
+     "structure.tacho_info_line.day"
+    ],
+    "core_union": [
+     1224,
+     412,
+     1549,
+     416
+    ],
+    "d_edges_core": [
+     -82.0,
+     0.0,
+     -1.0,
+     -1.0
+    ]
+   },
+   {
+    "element": "structure.rev_band",
+    "look": "night",
+    "parts_union": [
+     1220,
+     43,
+     1399,
+     75
+    ],
+    "element_bbox": [
+     1221.0,
+     47.0,
+     1397.0,
+     68.0
+    ],
+    "d_edges": [
+     -1.0,
+     -4.0,
+     2.0,
+     7.0
+    ],
+    "max_px": 7.0,
+    "edge": "y1",
+    "set_by": [
+     "structure.rev_band.night"
+    ],
+    "core_union": [
+     1222,
+     46,
+     1397,
+     73
+    ],
+    "d_edges_core": [
+     1.0,
+     -1.0,
+     0.0,
+     5.0
+    ]
+   },
+   {
+    "element": "structure.rev_band",
+    "look": "day",
+    "parts_union": [
+     1220,
+     42,
+     1399,
+     75
+    ],
+    "element_bbox": [
+     1221.0,
+     47.0,
+     1397.0,
+     68.0
+    ],
+    "d_edges": [
+     -1.0,
+     -5.0,
+     2.0,
+     7.0
+    ],
+    "max_px": 7.0,
+    "edge": "y1",
+    "set_by": [
+     "structure.rev_band.day"
+    ],
+    "core_union": [
+     1222,
+     44,
+     1397,
+     72
+    ],
+    "d_edges_core": [
+     1.0,
+     -3.0,
+     0.0,
+     4.0
+    ]
+   },
+   {
+    "element": "structure.fuel_mini",
+    "look": "night",
+    "parts_union": [
+     6,
+     428,
+     204,
+     654
+    ],
+    "element_bbox": [
+     7.0,
+     432.0,
+     215.0,
+     651.0
+    ],
+    "d_edges": [
+     -1.0,
+     -4.0,
+     -11.0,
+     3.0
+    ],
+    "max_px": 11.0,
+    "edge": "x1",
+    "set_by": [
+     "structure.fuel_mini.night"
+    ],
+    "core_union": [
+     8,
+     429,
+     202,
+     652
+    ],
+    "d_edges_core": [
+     1.0,
+     -3.0,
+     -13.0,
+     1.0
+    ]
+   },
+   {
+    "element": "structure.fuel_mini",
+    "look": "day",
+    "parts_union": [
+     6,
+     428,
+     204,
+     654
+    ],
+    "element_bbox": [
+     7.0,
+     432.0,
+     215.0,
+     651.0
+    ],
+    "d_edges": [
+     -1.0,
+     -4.0,
+     -11.0,
+     3.0
+    ],
+    "max_px": 11.0,
+    "edge": "x1",
+    "set_by": [
+     "structure.fuel_mini.day"
+    ],
+    "core_union": [
+     8,
+     429,
+     202,
+     652
+    ],
+    "d_edges_core": [
+     1.0,
+     -3.0,
+     -13.0,
+     1.0
+    ]
+   },
+   {
+    "element": "structure.oil_mini",
+    "look": "night",
+    "parts_union": [
+     1718,
+     432,
+     1913,
+     654
+    ],
+    "element_bbox": [
+     1706.0,
+     428.0,
+     1911.0,
+     651.0
+    ],
+    "d_edges": [
+     12.0,
+     4.0,
+     2.0,
+     3.0
+    ],
+    "max_px": 12.0,
+    "edge": "x0",
+    "set_by": [
+     "structure.oil_mini.night"
+    ],
+    "core_union": [
+     1721,
+     434,
+     1911,
+     652
+    ],
+    "d_edges_core": [
+     15.0,
+     6.0,
+     0.0,
+     1.0
+    ]
+   },
+   {
+    "element": "structure.oil_mini",
+    "look": "day",
+    "parts_union": [
+     1719,
+     432,
+     1913,
+     654
+    ],
+    "element_bbox": [
+     1706.0,
+     428.0,
+     1911.0,
+     651.0
+    ],
+    "d_edges": [
+     13.0,
+     4.0,
+     2.0,
+     3.0
+    ],
+    "max_px": 13.0,
+    "edge": "x0",
+    "set_by": [
+     "structure.oil_mini.day"
+    ],
+    "core_union": [
+     1721,
+     434,
+     1911,
+     652
+    ],
+    "d_edges_core": [
+     15.0,
+     6.0,
+     0.0,
+     1.0
+    ]
+   }
+  ],
+  "relation_disagreements": [
+   {
+    "part": "c.bottom.airbag",
+    "element": "bottom.airbag",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.bottom.belt_rear",
+    "element": "bottom.belt_rear",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.tt.abs",
+    "element": "tt.abs",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.tt.auto_h",
+    "element": "tt.auto_h",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.tt.brake",
+    "element": "tt.brake",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.tt.dsc",
+    "element": "tt.dsc",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.tt.steering",
+    "element": "tt.steering",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.tt.tpms",
+    "element": "tt.tpms",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.assist.off",
+    "element": "assist.off",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.assist.tacho_zero",
+    "element": "assist.off",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.assist.cc_panel",
+    "element": "assist.cc_panel",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.assist.info_tacho",
+    "element": "assist.info_tacho",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   },
+   {
+    "part": "c.bottom.cc_info",
+    "element": "bottom.cc_info",
+    "part_layer": "under",
+    "part_state": "any",
+    "relation": "unknown",
+    "evidence": "none",
+    "kind": "assumption",
+    "why": "the simulation draws it under a connected theme (state any); the catalogue says unknown (evidence none)"
+   }
+  ],
+  "suspicious_links": [
+   {
+    "parts": [
+     "structure.tacho_zero.day",
+     "c.assist.tacho_zero"
+    ],
+    "elements": [
+     "structure.tacho",
+     "assist.off"
+    ],
+    "overlap_of_smaller_pct": 97.7,
+    "why": "same spot, different elements"
+   },
+   {
+    "parts": [
+     "structure.tacho_zero.night",
+     "c.assist.tacho_zero"
+    ],
+    "elements": [
+     "structure.tacho",
+     "assist.off"
+    ],
+    "overlap_of_smaller_pct": 97.7,
+    "why": "same spot, different elements"
+   }
+  ],
+  "unresolved": [
+   {
+    "part": "c.font",
+    "element": null,
+    "reason": "the font (data, used by C)"
+   },
+   {
+    "part": "app.collar",
+    "element": null,
+    "reason": "spans several elements (see covers)"
+   },
+   {
+    "part": "app.g20_lut",
+    "element": null,
+    "reason": "data, not a picture (pointer geometry)"
+   }
+  ],
+  "housing_leds": [
+   {
+    "id": "housing.low_beam",
+    "name": "Low beam (green LED in the housing, not on the panel)",
+    "colour": "green",
+    "on_panel": false,
+    "drawn": false,
+    "source": "bench/g20/c.js LAMPS"
+   },
+   {
+    "id": "housing.side_light",
+    "name": "Side lights (green LED in the housing, not on the panel)",
+    "colour": "green",
+    "on_panel": false,
+    "drawn": false,
+    "source": "bench/g20/c.js LAMPS"
+   },
+   {
+    "id": "housing.check_engine",
+    "name": "Check engine (amber LED in the housing, not on the panel)",
+    "colour": "amber",
+    "on_panel": false,
+    "drawn": false,
+    "source": "bench/g20/c.js LAMPS"
+   },
+   {
+    "id": "housing.dsc_off",
+    "name": "DSC OFF (amber LED in the housing, not on the panel)",
+    "colour": "amber",
+    "on_panel": false,
+    "drawn": false,
+    "source": "bench/g20/c.js LAMPS"
+   }
+  ],
+  "housing_leds_catalogue": [
+   {
+    "what": "Low-beam headlight lamp (green) and side/parking-light lamp (green), left of the panel",
+    "reason": "Physical LED telltales in the housing, not on the TFT: photo 08's model maps them to panel x ~ -90, y ~ 555 and 602 (outside 1920x720). No theme can draw over or hide them."
+   },
+   {
+    "what": "Check-engine lamp (amber) and DSC OFF lamp (amber), right of the panel",
+    "reason": "Physical LED telltales in the housing: photo 08's model maps them to panel x ~ 2000-2008, y ~ 550 and 614 (outside the panel)."
+   }
+  ],
+  "app_vs_sim": [
+   {
+    "app": "app.g20_fuel_fill",
+    "part": "structure.fuel_mini.fill.night",
+    "why": "the simulation clips it at the needle line (fuel_needle); the app's shader lights the fill from 0 up to the needle"
+   },
+   {
+    "app": "app.g20_oil_fill",
+    "part": "structure.oil_mini.fill.night",
+    "why": "the simulation clips it at the needle line (oil_needle); the app's shader lights the fill from 0 up to the needle"
+   },
+   {
+    "app": "app.g20_speedo",
+    "part": "structure.speedo.bottom_end.night",
+    "why": "the simulation draws it only when no_cc_message; the app bakes it in statically"
+   },
+   {
+    "app": "app.g20_tacho",
+    "part": "structure.tacho.bottom_end.night",
+    "why": "the simulation draws it only when no_cc_message; the app bakes it in statically"
+   },
+   {
+    "app": "app.g20_tacho",
+    "part": "structure.tacho_zero.night",
+    "why": "the simulation skips this layer (drawn by another package (tools/g20sim/build_manifest.py SKIP)); the app bakes it in"
+   },
+   {
+    "app": "app.g20_tacho",
+    "part": "structure.tacho_zero.night",
+    "why": "the simulation draws it only when engine_on; the app bakes it in statically"
+   }
+  ],
+  "new_elements": [
+   "panel.background"
+  ],
+  "layout_issues": [],
+  "elements_without_parts": [],
+  "per_element": {
+   "tt.brake": {
+    "relation": "unknown",
+    "group": "telltale",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.tt.brake"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "tt.tpms": {
+    "relation": "unknown",
+    "group": "telltale",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.tt.tpms"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "tt.abs": {
+    "relation": "unknown",
+    "group": "telltale",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.tt.abs"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "tt.dsc": {
+    "relation": "unknown",
+    "group": "telltale",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.tt.dsc"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.collar"
+    ],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "tt.auto_h": {
+    "relation": "unknown",
+    "group": "telltale",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.tt.auto_h"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "tt.parking_brake": {
+    "relation": "over",
+    "group": "telltale",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.tt.parking_brake",
+     "c.tt.parking_brake.hold"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "tt.steering": {
+    "relation": "unknown",
+    "group": "telltale",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.tt.steering"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "bottom.range": {
+    "relation": "under",
+    "group": "bottom-row",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.bottom.range"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "bottom.clock": {
+    "relation": "under",
+    "group": "bottom-row",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.bottom.clock"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "bottom.belt_rear": {
+    "relation": "unknown",
+    "group": "bottom-row",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.bottom.belt_rear"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "bottom.belt_driver": {
+    "relation": "over",
+    "group": "bottom-row",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.bottom.belt_driver"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "bottom.airbag": {
+    "relation": "unknown",
+    "group": "bottom-row",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.bottom.airbag"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "bottom.cc_info": {
+    "relation": "unknown",
+    "group": "bottom-row",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.bottom.cc_info"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.g20_speedo"
+    ],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "bottom.street": {
+    "relation": "under",
+    "group": "bottom-row",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.bottom.street"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "bottom.temperature": {
+    "relation": "under",
+    "group": "bottom-row",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.bottom.temperature"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "assist.speed_limit": {
+    "relation": "under",
+    "group": "assist-message",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.assist.speed_limit"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.collar"
+    ],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "assist.cc_panel": {
+    "relation": "unknown",
+    "group": "assist-message",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.assist.cc_panel"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.collar",
+     "app.g20_speedo",
+     "app.g20_tacho"
+    ],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "assist.info_tacho": {
+    "relation": "unknown",
+    "group": "assist-message",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.assist.info_tacho"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.collar"
+    ],
+    "day": true,
+    "night": true,
+    "missing": [
+     "evidence none: c.assist.info_tacho"
+    ]
+   },
+   "assist.mode_label_centre": {
+    "relation": "gone",
+    "group": "assist-message",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.assist.mode_label_centre"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": [
+     "stock layout only"
+    ]
+   },
+   "assist.mode_label": {
+    "relation": "under",
+    "group": "assist-message",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.assist.mode_label"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": [
+     "theme connected only"
+    ]
+   },
+   "assist.gear_centre": {
+    "relation": "gone",
+    "group": "assist-message",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.assist.gear_centre"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.g20_tacho"
+    ],
+    "day": true,
+    "night": true,
+    "missing": [
+     "stock layout only"
+    ]
+   },
+   "assist.gear": {
+    "relation": "over",
+    "group": "assist-message",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.assist.gear"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": [
+     "theme connected only"
+    ]
+   },
+   "assist.digital_speed": {
+    "relation": "under",
+    "group": "assist-message",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.assist.digital_speed"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "assist.rpm_label": {
+    "relation": "under",
+    "group": "assist-message",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.assist.rpm_label"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.g20_tacho"
+    ],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "assist.off": {
+    "relation": "unknown",
+    "group": "assist-message",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.assist.off",
+     "c.assist.tacho_zero"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.g20_tacho"
+    ],
+    "day": true,
+    "night": true,
+    "missing": [
+     "evidence weak: c.assist.off"
+    ]
+   },
+   "assist.cold": {
+    "relation": "under",
+    "group": "assist-message",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "c.assist.cold"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.collar"
+    ],
+    "day": true,
+    "night": true,
+    "missing": [
+     "evidence weak: c.assist.cold"
+    ]
+   },
+   "map.region": {
+    "relation": "under",
+    "group": "map-nav",
+    "new": false,
+    "raster": [
+     "structure.map_veil.day",
+     "structure.map_veil.night"
+    ],
+    "procedural": [],
+    "live": [
+     "live.map"
+    ],
+    "app": [],
+    "app_covers": [
+     "app.collar",
+     "app.g20_speedo",
+     "app.g20_tacho"
+    ],
+    "day": true,
+    "night": true,
+    "missing": [
+     "evidence weak: structure.map_veil.day, structure.map_veil.night"
+    ]
+   },
+   "map.position_arrow": {
+    "relation": "under",
+    "group": "map-nav",
+    "new": false,
+    "raster": [],
+    "procedural": [],
+    "live": [
+     "live.map.arrow"
+    ],
+    "app": [],
+    "app_covers": [],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "structure.speedo": {
+    "relation": "under",
+    "group": "structure",
+    "new": false,
+    "raster": [
+     "structure.speedo.glow.day",
+     "structure.speedo.glow.night",
+     "structure.speedo.wing.day",
+     "structure.speedo.wing.night",
+     "structure.speedo.frame.day",
+     "structure.speedo.frame.night",
+     "structure.speedo.bottom_end.day",
+     "structure.speedo.bottom_end.night",
+     "structure.speedo_numerals.day",
+     "structure.speedo_numerals.night",
+     "structure.speedo_scale_label.day",
+     "structure.speedo_scale_label.night"
+    ],
+    "procedural": [],
+    "live": [],
+    "app": [
+     "app.g20_speedo"
+    ],
+    "app_covers": [
+     "app.collar"
+    ],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "structure.speedo_needle": {
+    "relation": "under",
+    "group": "structure",
+    "new": false,
+    "raster": [],
+    "procedural": [],
+    "live": [
+     "live.glow.speedo",
+     "live.pointer.speedo"
+    ],
+    "app": [],
+    "app_covers": [
+     "app.g20_speedo"
+    ],
+    "day": true,
+    "night": true,
+    "missing": [
+     "evidence weak: live.glow.speedo, live.pointer.speedo"
+    ]
+   },
+   "structure.speedo_info_line": {
+    "relation": "under",
+    "group": "structure",
+    "new": false,
+    "raster": [
+     "structure.speedo_info_line.day",
+     "structure.speedo_info_line.night"
+    ],
+    "procedural": [],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.g20_speedo"
+    ],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "structure.tacho": {
+    "relation": "under",
+    "group": "structure",
+    "new": false,
+    "raster": [
+     "structure.tacho.glow.day",
+     "structure.tacho.glow.night",
+     "structure.tacho.wing.day",
+     "structure.tacho.wing.night",
+     "structure.tacho.frame.day",
+     "structure.tacho.frame.night",
+     "structure.tacho.bottom_end.day",
+     "structure.tacho.bottom_end.night",
+     "structure.tacho_numerals.day",
+     "structure.tacho_numerals.night",
+     "structure.tacho_zero.day",
+     "structure.tacho_zero.night"
+    ],
+    "procedural": [],
+    "live": [],
+    "app": [
+     "app.g20_tacho"
+    ],
+    "app_covers": [
+     "app.collar"
+    ],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "structure.tacho_needle": {
+    "relation": "under",
+    "group": "structure",
+    "new": false,
+    "raster": [],
+    "procedural": [],
+    "live": [
+     "live.glow.tacho",
+     "live.band.tacho",
+     "live.pointer.tacho"
+    ],
+    "app": [],
+    "app_covers": [
+     "app.g20_tacho"
+    ],
+    "day": true,
+    "night": true,
+    "missing": [
+     "evidence weak: live.pointer.tacho"
+    ]
+   },
+   "structure.tacho_info_line": {
+    "relation": "gone",
+    "group": "structure",
+    "new": false,
+    "raster": [
+     "structure.tacho_info_line.day",
+     "structure.tacho_info_line.night"
+    ],
+    "procedural": [],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.g20_tacho"
+    ],
+    "day": true,
+    "night": true,
+    "missing": [
+     "stock layout only"
+    ]
+   },
+   "structure.rev_band": {
+    "relation": "under",
+    "group": "structure",
+    "new": false,
+    "raster": [
+     "structure.rev_band.day",
+     "structure.rev_band.night"
+    ],
+    "procedural": [],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.collar",
+     "app.g20_tacho"
+    ],
+    "day": true,
+    "night": true,
+    "missing": []
+   },
+   "structure.fuel_mini": {
+    "relation": "under",
+    "group": "structure",
+    "new": false,
+    "raster": [
+     "structure.fuel_mini.fill.day",
+     "structure.fuel_mini.fill.night",
+     "structure.fuel_mini.day",
+     "structure.fuel_mini.night"
+    ],
+    "procedural": [],
+    "live": [
+     "live.mini.fuel"
+    ],
+    "app": [
+     "app.g20_fuel",
+     "app.g20_fuel_fill"
+    ],
+    "app_covers": [
+     "app.collar",
+     "app.g20_speedo"
+    ],
+    "day": true,
+    "night": true,
+    "missing": [
+     "evidence weak: live.mini.fuel"
+    ]
+   },
+   "structure.oil_mini": {
+    "relation": "under",
+    "group": "structure",
+    "new": false,
+    "raster": [
+     "structure.oil_mini.fill.day",
+     "structure.oil_mini.fill.night",
+     "structure.oil_mini.day",
+     "structure.oil_mini.night"
+    ],
+    "procedural": [],
+    "live": [
+     "live.mini.oil"
+    ],
+    "app": [
+     "app.g20_oil",
+     "app.g20_oil_fill"
+    ],
+    "app_covers": [
+     "app.collar",
+     "app.g20_tacho"
+    ],
+    "day": true,
+    "night": true,
+    "missing": [
+     "evidence weak: structure.oil_mini.fill.day, structure.oil_mini.fill.night, live.mini.oil"
+    ]
+   },
+   "overlay.black_box": {
+    "relation": "over",
+    "group": "overlay",
+    "new": false,
+    "raster": [],
+    "procedural": [
+     "sim.black_box"
+    ],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.g20_tacho"
+    ],
+    "day": true,
+    "night": true,
+    "missing": [
+     "theme connected only"
+    ]
+   },
+   "panel.background": {
+    "relation": "under",
+    "group": "structure",
+    "new": true,
+    "raster": [
+     "structure.bg.day",
+     "structure.bg.night"
+    ],
+    "procedural": [],
+    "live": [],
+    "app": [],
+    "app_covers": [
+     "app.collar",
+     "app.g20_fuel",
+     "app.g20_fuel_fill",
+     "app.g20_oil",
+     "app.g20_oil_fill",
+     "app.g20_speedo",
+     "app.g20_tacho"
+    ],
+    "day": true,
+    "night": true,
+    "missing": []
+   }
+  },
+  "counts": {
+   "parts": 89,
+   "manifest_entries": 80,
+   "sim_records_from_manifest": 80,
+   "sim_extra": [
+    "sim.black_box"
+   ],
+   "app_scene": 8,
+   "by_render": {
+    "font": 1,
+    "raster": 42,
+    "live": 9,
+    "procedural": 29,
+    "app-texture": 7,
+    "data": 1
+   },
+   "measured": 38,
+   "not_drawable_alone": []
+  }
+ }
+}

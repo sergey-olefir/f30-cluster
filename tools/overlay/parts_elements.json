@@ -1,0 +1,26 @@
+{
+ "$comment": "Catalogue elements that the G20 parts (design/overlay/g20_parts.json) have and design/overlay/g20_comfort.json lacked. tools/overlay/link_parts.py adds each one to the catalogue (after the existing 38, which it never changes) and fills every element's 'parts' list. The judgement here is by hand, like tools/overlay/relations_g20.json; 'bbox' is not given: it is the union of the element's parts (their alpha extent), computed by the script. Basis and states quote the sources the simulation gives (bench/g20/manifest.json 'sources', docs/G20SIM-REPORT.md section 5). Considered and NOT added: the numerals and the scale labels (the simulation links them to structure.speedo / structure.tacho, and the catalogue's 'excluded' already counts them in those ghost outlines), the map veil (linked to map.region, which already covers the 'lighter map background seen in 14').",
+ "elements": [
+  {
+   "id": "panel.background",
+   "group": "structure",
+   "name": "Stock panel background (the dark surface behind every G20 element)",
+   "safety": "cosmetic",
+   "poly": null,
+   "colour": {"name": "black"},
+   "states": [
+    {"photo": "08", "lit": true, "colour": "black", "note": "bench/g20 structure.bg.night is fitted to it (manifest sources)"},
+    {"photo": "09", "lit": true, "colour": "black", "note": "bench/g20 structure.bg.day is fitted to it (manifest sources)"},
+    {"photo": "14", "lit": true, "colour": "black", "note": "theme connected: B's background scores SSIM 0.812 / dE 7.3 here with the day look (docs/G20SIM-REPORT.md section 5)"}
+   ],
+   "relation": "under",
+   "evidence": "medium",
+   "relation_basis": [
+    {"photo": "14", "seen": true, "our_pixels_opaque_there": false, "lit_expected": true, "note": "around our text-only theme; docs/G20SIM-REPORT.md section 5 (B background 0.812 / 7.3, day look)"}
+   ],
+   "schematic": null,
+   "measured_by": "bench/g20 manifest (package B): structure.bg.night / .day placement, alpha extent; linked by tools/overlay/link_parts.py",
+   "notes": "Context only. Added from the G20 parts: the simulation draws it in every state (manifest state 'any'). The relation rests on one theme-connected photo (14, our pixels transparent there); 10-13 were not assessed for the background. The 6WB Dials + G20 collar takes its colour (tools/bake_scene.py)."
+  }
+ ]
+}

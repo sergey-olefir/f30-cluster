@@ -3,6 +3,8 @@
 
     python3 tools/overlay/headless.py [--no-shots]
     python3 tools/overlay/headless.py --plan design/overlay/<name>.json [--no-shots]
+    python3 tools/overlay/headless.py --selftest          # selftest.js on the sample and the real data
+    python3 tools/overlay/headless.py --parts-shots       # the G20 parts screenshots -> docs/overlay/parts_*.png
 
 - serves the repo root on a free local port (python3 -m http.server);
 - loads ?data=sample&export=default and compares its conflicts with design/overlay/sample/expected_conflicts.json;
@@ -94,6 +96,44 @@ def one_plan(base, rel, shots):
     return True
 
 
+def selftest(base):
+    """selftest.js (?selftest=1) on the sample and the real data; prints its lines, True when both pass."""
+    ok = True
+    for q in ('data=sample&fresh=1&selftest=1', 'data=real&fresh=1&photo=none&selftest=1'):
+        tmp = os.path.join(ROOT, 'bake/work/overlay/_selftest.html')
+        chrome(['--window-size=1920,1080', '--dump-dom', base + '?' + q], tmp, deadline=150)
+        s = open(tmp).read()
+        m = re.search(r'<pre id="selftest"[^>]*>(.*?)</pre>', s, re.S)
+        text = html.unescape(m.group(1)) if m else 'NO SELFTEST OUTPUT'
+        print('== selftest ?' + q)
+        print(text)
+        ok = ok and m is not None and text.rstrip().endswith('ALL PASS')
+    return ok
+
+
+# The G20 parts (docs/OVERLAY-PARTS-REPORT.md): our own drawings only (photo=none), so they may be committed.
+PARTS_SHOTS = [
+    ('parts_night_connected', 'g20mode=texture&look=night&conn=1&lamps=startup'),
+    ('parts_day_connected', 'g20mode=texture&look=day&conn=1&lamps=startup'),
+    ('parts_tree', 'g20mode=texture&look=night&conn=1&lamps=startup&open=g20:structure.speedo,group:telltale&sel=structure.speedo.frame.night'),
+    ('parts_ours', 'g20mode=texture&look=night&conn=1&lamps=startup&ours=1&open=ours&hide=layout:wb_dials&sel=app.g20_speedo'),
+    ('parts_ours_collar', 'g20mode=texture&look=night&conn=1&lamps=startup&ours=1&open=ours&hide=layout:g20_comfort&sel=app.collar'),
+]
+
+
+def parts_shots(base):
+    os.makedirs(SHOTS, exist_ok=True)
+    os.makedirs(os.path.join(ROOT, 'docs/overlay'), exist_ok=True)
+    for name, q in PARTS_SHOTS:
+        out = os.path.join(SHOTS, name + '.png')
+        if os.path.exists(out):
+            os.remove(out)
+        chrome(['--window-size=1920,1080', '--screenshot=' + out, base + '?data=real&fresh=1&photo=none&' + q])
+        print('shot', os.path.relpath(out, ROOT), 'ok' if os.path.exists(out) else 'MISSING')
+        if os.path.exists(out):
+            shutil.copy(out, os.path.join(ROOT, 'docs/overlay', name + '.png'))
+
+
 def main():
     shots = '--no-shots' not in sys.argv
     plan_rel = sys.argv[sys.argv.index('--plan') + 1] if '--plan' in sys.argv else None
@@ -105,6 +145,11 @@ def main():
     time.sleep(1)
     base = 'http://127.0.0.1:%d/tools/overlay/constructor/' % port
     try:
+        if '--selftest' in sys.argv:
+            return 0 if selftest(base) else 1
+        if '--parts-shots' in sys.argv:
+            parts_shots(base)
+            return 0
         if plan_rel:
             ok = one_plan(base, plan_rel, shots)
             return 0

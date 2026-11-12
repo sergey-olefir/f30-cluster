@@ -6,7 +6,7 @@
  "based_on": {
   "g20": {
    "file": "design/overlay/g20_comfort.json",
-   "sha256": "sha256:58adb1e3e2150bf1f61382a90aac5a95a74eea6e22d5d9acafb29c6c92c79d03"
+   "sha256": "sha256:01454632828c39680689391b05e2a8580eedff29e5ea0d4cbfb94c5e23bc5f48"
   },
   "wb": {
    "file": "design/overlay/wb_comfort.json",
@@ -130,6 +130,9 @@
   },
   "overlay.black_box": {
    "decision": "keep-clear"
+  },
+  "panel.background": {
+   "decision": "cover"
   }
  },
  "wb": {},
