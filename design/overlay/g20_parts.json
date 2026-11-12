@@ -1285,7 +1285,7 @@
     625
    ],
    "scale": 1,
-   "alpha_px": 30303,
+   "alpha_px": 30244,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -1311,7 +1311,7 @@
      8.0,
      2.0
     ],
-    "inside_pct": 74.4
+    "inside_pct": 74.5
    }
   },
   {
@@ -1346,7 +1346,7 @@
     625
    ],
    "scale": 1,
-   "alpha_px": 30995,
+   "alpha_px": 30947,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -1376,7 +1376,7 @@
      6.0,
      3.0
     ],
-    "inside_pct": 70.5
+    "inside_pct": 70.6
    }
   },
   {
@@ -1411,7 +1411,7 @@
     626
    ],
    "scale": 1,
-   "alpha_px": 31286,
+   "alpha_px": 31276,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -1472,7 +1472,7 @@
     623
    ],
    "scale": 1,
-   "alpha_px": 29406,
+   "alpha_px": 29388,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -1521,7 +1521,7 @@
     651
    ],
    "core": [
-    695,
+    696,
     607,
     758,
     648
@@ -1537,7 +1537,7 @@
     46
    ],
    "scale": 1,
-   "alpha_px": 941,
+   "alpha_px": 927,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -1585,7 +1585,7 @@
     651
    ],
    "core": [
-    695,
+    696,
     607,
     758,
     648
@@ -1601,7 +1601,7 @@
     46
    ],
    "scale": 1,
-   "alpha_px": 941,
+   "alpha_px": 927,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -1649,27 +1649,27 @@
    "bbox": [
     1158,
     607,
-    1228,
+    1227,
     652
    ],
    "core": [
     1160,
     609,
-    1226,
+    1223,
     650
    ],
    "placement": [
     1158,
     607,
-    1228,
+    1227,
     652
    ],
    "size": [
-    70,
+    69,
     45
    ],
    "scale": 1,
-   "alpha_px": 947,
+   "alpha_px": 919,
    "layer": "under",
    "state": "any",
    "look": "day",
@@ -1695,7 +1695,7 @@
     "d_edges": [
      -46.0,
      571.0,
-     -608.0,
+     -609.0,
      0.0
     ],
     "inside_pct": 0.0
@@ -1713,27 +1713,27 @@
    "bbox": [
     1158,
     607,
-    1228,
+    1227,
     652
    ],
    "core": [
     1160,
     609,
-    1226,
+    1223,
     650
    ],
    "placement": [
     1158,
     607,
-    1228,
+    1227,
     652
    ],
    "size": [
-    70,
+    69,
     45
    ],
    "scale": 1,
-   "alpha_px": 947,
+   "alpha_px": 919,
    "layer": "under",
    "state": "any",
    "look": "night",
@@ -1763,7 +1763,7 @@
     "d_edges": [
      -46.0,
      571.0,
-     -608.0,
+     -609.0,
      0.0
     ],
     "inside_pct": 0.0
@@ -6300,7 +6300,7 @@
    "sources": [
     "08"
    ],
-   "notes": "6WB Dials + G20: where our background stays opaque over the stock dials that stick out past ours; alpha from design/overlay/collar.dials.png (grown 4 px, blurred 4 px, quarter size), colour from the simulation's night background (tools/bake_scene.py). Spans several elements: see 'covers'.",
+   "notes": "6WB Dials + G20: where our background stays opaque over the stock dials that stick out past ours; alpha from design/overlay/collar.dials.png (tools/bake_scene.py), colour from the simulation's night background. Spans several elements: see 'covers'.",
    "covers": [
     {
      "element": "structure.rev_band",
@@ -6667,7 +6667,7 @@
     626
    ],
    "scale": 1,
-   "alpha_px": 199640,
+   "alpha_px": 199633,
    "layer": "theme",
    "state": "connected",
    "look": "night",
@@ -6705,7 +6705,7 @@
     },
     {
      "element": "panel.background",
-     "px": 196449,
+     "px": 196444,
      "pct": 14.2
     },
     {
@@ -6762,7 +6762,7 @@
     623
    ],
    "scale": 1,
-   "alpha_px": 199490,
+   "alpha_px": 199495,
    "layer": "theme",
    "state": "connected",
    "look": "night",
@@ -6825,7 +6825,7 @@
     },
     {
      "element": "panel.background",
-     "px": 196203,
+     "px": 196206,
      "pct": 14.2
     },
     {
@@ -6835,7 +6835,7 @@
     },
     {
      "element": "assist.cc_panel",
-     "px": 1201,
+     "px": 1204,
      "pct": 2.9
     },
     {
@@ -6906,7 +6906,7 @@
     "part_bbox": [
      1158,
      607,
-     1228,
+     1227,
      652
     ],
     "element_bbox": [
@@ -6923,7 +6923,7 @@
     "part_bbox": [
      1158,
      607,
-     1228,
+     1227,
      652
     ],
     "element_bbox": [

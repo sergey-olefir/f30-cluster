@@ -14,8 +14,9 @@ Every change is in a generator; the PNGs, the manifest and the app textures are 
 | `speedo.wing.*`, `tacho.wing.*` | orange stripes in the lower third (the stock pointers' glow, in every photo); dark teal spots round the numerals (the phone's sharpening halos); diagonal creases from the band's corners; a teal-white patch mid-face in the day look (the sky on the glass, 09 and 14) | one cleaned table for both dials (their mean: the left/right cabin light averages out); the lower third continued from above; spots rejected; blurred inside the face (8 px); day face = night face × 1.20 (the measured brightness ratio) | `clean_soft.face`, `render_soft.dial_layers`, `render_soft.load_soft` |
 | `fuel_mini.fill.*`, `oil_mini.fill.*` | an opaque blue-grey band between the outer frame and the inner line; opaque dark blocks inside the fill that hid the big dials' glow beside the minis | the fill starts at its inner line; where the photo showed the panel's black (its fitted background, per pixel) the fill is see-through; median + Gaussian along the frame | `minis.layers`, `clean_soft.lift`, `clean_soft.smooth_along` |
 | `c.js` check-control panel | base `[9,12,22]` / day `[14,19,23]`; the fill's last stops faded into it | base black; the fill's top keeps its colour and its foot reaches black | `COL.*.ccBase`, `ccFill` |
+| `*.frame.*`, `*.bottom_end.*` (the bottom line at the hooks; package B's item 11) | the line ran on into the hook with a bump where the two round ends overlapped | the slanted gap that 09, 14 and 16 show at each hook's foot. It is about 3 px wide, leaning 0.6 px right per px down on the speedo (mirrored on the tacho), measured on 09. The hook's traced rounded tip is replaced by a straight run, so the gap's cut makes the end. Bottom-line QC on 08: 0.615 / 8.60 → 0.616 / 8.40 | `render.bottom_gap`, `render.hook_path` (`part_bottom_line_hooks.png`) |
 
-Kept as they were (content, no photo artifact found): the frames and ticks, the numerals, the rev band, the info lines, the curved bottom ends, the minis' frames and icons, D's pointers, glow and map (its dark-grey ground is the map's own drawing, fading to black at its edges), C's telltales and texts.
+Kept as they were (content, no photo artifact found): the rest of the frames and ticks, the numerals, the rev band, the info lines, the minis' frames and icons, D's pointers, glow and map (its dark-grey ground is the map's own drawing, fading to black at its edges), C's telltales and texts.
 
 Two generator bugs fixed on the way, both of which changed shipped PNGs on every build:
 - **Numerals font.** `numerals.py` looked for the font in the git-ignored `bake/work/g20sim/FONT.json`. That file is gone, so a rebuild silently used Arimo instead of Roboto, and every numeral changed shape. It now falls back to the font recorded in `params/numerals.json`.
@@ -66,7 +67,10 @@ The rest of the table is in `bake/work/polish-c/E/qc/qc_table.json` (local). The
     - in the two top corners, x 480–710 and x 1200–1420, y 40–170.
   - It goes away once B's collar is pure black (B's brief item 2). **Merge B's collar together with this branch.**
 - **The small grey dash right of the message panel** (about x 1224–1240, y 640). It is the start of the stock tacho's bottom frame line, right of the check-control base. It is real on the car (08 and 16 show the line) and the simulation draws it on purpose. Category (c): B's call.
-- Package B's own list of category (b) items had not arrived when this was written; see the final message.
+- **Package B's category (b) list** (`docs/POLISH-B-REPORT.md` §2 and §4):
+  - item 10, the navy background: done (§1);
+  - item 11, the gap at the hooks: done (§1);
+  - the `inventory_parts.py` stop once B's collar no longer reads `bg.night.png`: `collar_recipe()` now accepts both recipes, and records a black collar as baked from `collar.dials.png` alone.
 
 ## 4. App: "G20 Comfort"
 
