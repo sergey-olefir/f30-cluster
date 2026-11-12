@@ -55,7 +55,7 @@ Groups: `telltale` (lamps), `bottom-row` (range, clock, temperature, belt/airbag
 
 | Severity | `rule` | When |
 |---|---|---|
-| error | `content-under-over` | an `over` element overlaps any of our elements |
+| error | `content-under-over` | an `over` element overlaps any of our non-background elements (a plain background under it hides nothing) |
 | error | `critical-covered` | a `critical` element whose relation is `under` or `unknown` overlaps our element and its decision is neither `reveal` nor `redraw` |
 | error | `gone-critical-not-redrawn` | a `critical` `gone` element whose decision is not `redraw` (`wb` is null) |
 | warning | `hole-cuts-content` | a `reveal` hole overlaps one of our non-background elements (the hole would have to cut that content too) |
@@ -65,7 +65,12 @@ Groups: `telltale` (lamps), `bottom-row` (range, clock, temperature, belt/airbag
 
 ## 4. Worked example: one telltale per relation
 
-*(Filled in from the real catalogue by package G.)*
+From `g20_comfort.json` and `plan.default.json` (current 6WB Comfort layout, default decisions):
+
+- **`over` — `tt.parking_brake`**, the red (P), bbox `[1838, 217, 1900, 260]`. Basis: seen on top of our opaque background in 12 and 13 (`seen: true, our_pixels_opaque_there: true`), and in 10 and 14. Decision is forced to `keep-clear`; the plan lists it under `keep_clear`. Today only our plain background is there, which hides nothing, so there is no conflict. A design must not put a needle tip, a number or a mini there.
+- **`under` — `bottom.temperature`**, `[1540, 666, 1663, 701]`. Basis: seen in 10 (our grid line runs over it) and 14 (our text only), hidden in 11–13 where we are opaque. Default decision `cover` (it is `info`), so the conflict is `info under-covered` against `w.bg` and the tacho layers. To keep BMW's temperature instead, set `reveal`: the plan gets a hole `[1536, 662, 1667, 705]` and the background is cut there.
+- **`gone` — `assist.mode_label_centre`**, the big "COMFORT PLUS" left of the tacho hub, `[1223, 344, 1355, 394]`. With a custom theme connected BMW moves the label to the bottom row (`assist.mode_label`, `under`); in 10 and 14 this spot is uncovered and empty. Covering it does nothing; to have it there, `redraw` it at a `redraw_at` box of your choice.
+- **`unknown` — `tt.abs`**, `[14, 327, 73, 369]`, critical. Lit only in 08 (stock); in 10 and 14 it is off, and in 11–13 a hidden lamp and an unlit one look the same. Default decision `cover`, so the default plan has the error `critical-covered` against `w.bg`. Until photo 16 of the protocol settles it, the safe choice is `reveal` (`plan.safe.json` does that for every critical unknown): if BMW still draws it beneath us, it shows through the hole; if it turns out `gone`, switch to `redraw`.
 
 ## 5. Platform facts
 

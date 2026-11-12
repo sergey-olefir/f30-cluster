@@ -1,0 +1,1370 @@
+{
+ "kind": "plan",
+ "schema_version": 1,
+ "version": 1,
+ "mode": "comfort",
+ "based_on": {
+  "g20": {
+   "file": "design/overlay/g20_comfort.json",
+   "sha256": "sha256:58adb1e3e2150bf1f61382a90aac5a95a74eea6e22d5d9acafb29c6c92c79d03"
+  },
+  "wb": {
+   "file": "design/overlay/wb_comfort.json",
+   "sha256": "sha256:f1a952dfb704c758714da54d312dcfdb877166577cfa09e4f89f82285ba611aa"
+  }
+ },
+ "settings": {
+  "stockMap": false
+ },
+ "g20": {
+  "tt.brake": {
+   "decision": "reveal"
+  },
+  "tt.tpms": {
+   "decision": "reveal"
+  },
+  "tt.abs": {
+   "decision": "reveal"
+  },
+  "tt.dsc": {
+   "decision": "reveal"
+  },
+  "tt.auto_h": {
+   "decision": "cover"
+  },
+  "tt.parking_brake": {
+   "decision": "keep-clear"
+  },
+  "tt.steering": {
+   "decision": "reveal"
+  },
+  "bottom.range": {
+   "decision": "cover"
+  },
+  "bottom.clock": {
+   "decision": "cover"
+  },
+  "bottom.belt_rear": {
+   "decision": "reveal"
+  },
+  "bottom.belt_driver": {
+   "decision": "keep-clear"
+  },
+  "bottom.airbag": {
+   "decision": "reveal"
+  },
+  "bottom.cc_info": {
+   "decision": "cover"
+  },
+  "bottom.street": {
+   "decision": "cover"
+  },
+  "bottom.temperature": {
+   "decision": "cover"
+  },
+  "assist.speed_limit": {
+   "decision": "cover"
+  },
+  "assist.cc_panel": {
+   "decision": "reveal"
+  },
+  "assist.info_tacho": {
+   "decision": "cover"
+  },
+  "assist.mode_label_centre": {
+   "decision": "cover"
+  },
+  "assist.mode_label": {
+   "decision": "cover"
+  },
+  "assist.gear_centre": {
+   "decision": "cover"
+  },
+  "assist.gear": {
+   "decision": "keep-clear"
+  },
+  "assist.digital_speed": {
+   "decision": "cover"
+  },
+  "assist.rpm_label": {
+   "decision": "cover"
+  },
+  "assist.off": {
+   "decision": "cover"
+  },
+  "assist.cold": {
+   "decision": "cover"
+  },
+  "map.region": {
+   "decision": "cover"
+  },
+  "map.position_arrow": {
+   "decision": "cover"
+  },
+  "structure.speedo": {
+   "decision": "cover"
+  },
+  "structure.speedo_needle": {
+   "decision": "cover"
+  },
+  "structure.speedo_info_line": {
+   "decision": "cover"
+  },
+  "structure.tacho": {
+   "decision": "cover"
+  },
+  "structure.tacho_needle": {
+   "decision": "cover"
+  },
+  "structure.tacho_info_line": {
+   "decision": "cover"
+  },
+  "structure.rev_band": {
+   "decision": "cover"
+  },
+  "structure.fuel_mini": {
+   "decision": "cover"
+  },
+  "structure.oil_mini": {
+   "decision": "cover"
+  },
+  "overlay.black_box": {
+   "decision": "keep-clear"
+  }
+ },
+ "wb": {},
+ "anchors": {},
+ "holes": [
+  {
+   "id": "hole.tt.brake",
+   "for": [
+    "tt.brake"
+   ],
+   "rect": [
+    21,
+    210,
+    89,
+    259
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.tt.tpms",
+   "for": [
+    "tt.tpms"
+   ],
+   "rect": [
+    20,
+    263,
+    81,
+    318
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.tt.abs",
+   "for": [
+    "tt.abs"
+   ],
+   "rect": [
+    10,
+    323,
+    77,
+    373
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.tt.dsc",
+   "for": [
+    "tt.dsc"
+   ],
+   "rect": [
+    15,
+    377,
+    67,
+    433
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.tt.steering",
+   "for": [
+    "tt.steering"
+   ],
+   "rect": [
+    1843,
+    261,
+    1909,
+    319
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.bottom.belt_rear",
+   "for": [
+    "bottom.belt_rear"
+   ],
+   "rect": [
+    499,
+    675,
+    580,
+    719
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.bottom.airbag",
+   "for": [
+    "bottom.airbag"
+   ],
+   "rect": [
+    631,
+    661,
+    683,
+    719
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  },
+  {
+   "id": "hole.assist.cc_panel",
+   "for": [
+    "assist.cc_panel"
+   ],
+   "rect": [
+    708,
+    597,
+    1244,
+    695
+   ],
+   "margin": 4,
+   "radius": 4,
+   "edited": false
+  }
+ ],
+ "keep_clear": [
+  {
+   "id": "kc.tt.parking_brake",
+   "for": [
+    "tt.parking_brake"
+   ],
+   "rect": [
+    1838,
+    217,
+    1900,
+    260
+   ],
+   "poly": [
+    [
+     1900,
+     234
+    ],
+    [
+     1899,
+     247
+    ],
+    [
+     1897,
+     253
+    ],
+    [
+     1894,
+     258
+    ],
+    [
+     1890,
+     260
+    ],
+    [
+     1847,
+     259
+    ],
+    [
+     1843,
+     256
+    ],
+    [
+     1838,
+     242
+    ],
+    [
+     1839,
+     229
+    ],
+    [
+     1843,
+     221
+    ],
+    [
+     1847,
+     218
+    ],
+    [
+     1867,
+     217
+    ],
+    [
+     1890,
+     218
+    ],
+    [
+     1893,
+     219
+    ],
+    [
+     1896,
+     222
+    ]
+   ]
+  },
+  {
+   "id": "kc.bottom.belt_driver",
+   "for": [
+    "bottom.belt_driver"
+   ],
+   "rect": [
+    593,
+    666,
+    624,
+    715
+   ],
+   "poly": [
+    [
+     614,
+     715
+    ],
+    [
+     603,
+     715
+    ],
+    [
+     593,
+     704
+    ],
+    [
+     593,
+     700
+    ],
+    [
+     603,
+     669
+    ],
+    [
+     606,
+     666
+    ],
+    [
+     612,
+     666
+    ],
+    [
+     623,
+     676
+    ],
+    [
+     624,
+     704
+    ],
+    [
+     616,
+     714
+    ]
+   ]
+  },
+  {
+   "id": "kc.assist.gear",
+   "for": [
+    "assist.gear"
+   ],
+   "rect": [
+    1398,
+    668,
+    1424,
+    703
+   ],
+   "poly": [
+    [
+     1419,
+     670
+    ],
+    [
+     1424,
+     677
+    ],
+    [
+     1424,
+     682
+    ],
+    [
+     1422,
+     687
+    ],
+    [
+     1405,
+     703
+    ],
+    [
+     1401,
+     702
+    ],
+    [
+     1399,
+     700
+    ],
+    [
+     1398,
+     673
+    ],
+    [
+     1399,
+     669
+    ],
+    [
+     1400,
+     668
+    ],
+    [
+     1414,
+     668
+    ]
+   ]
+  },
+  {
+   "id": "kc.overlay.black_box",
+   "for": [
+    "overlay.black_box"
+   ],
+   "rect": [
+    1421.9,
+    320.4,
+    1612.1,
+    439.6
+   ],
+   "poly": [
+    [
+     1421.9,
+     320.4
+    ],
+    [
+     1612.1,
+     320.4
+    ],
+    [
+     1612.1,
+     439.6
+    ],
+    [
+     1421.9,
+     439.6
+    ]
+   ]
+  }
+ ],
+ "conflicts": [
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "assist.gear",
+   "wb": "C2.tacho.static",
+   "overlap_px": 551,
+   "overlap_pct": 81.03,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "assist.gear",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 161,
+   "overlap_pct": 23.68,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "assist.gear",
+   "wb": "w.tacho",
+   "overlap_px": 636,
+   "overlap_pct": 93.53,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "overlay.black_box",
+   "wb": "C2.tacho.static",
+   "overlap_px": 22800,
+   "overlap_pct": 100,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "overlay.black_box",
+   "wb": "C2.tacho.inner-ring",
+   "overlap_px": 142,
+   "overlap_pct": 0.62,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "overlay.black_box",
+   "wb": "C2.tacho.hub-ring",
+   "overlap_px": 1036,
+   "overlap_pct": 4.54,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "error",
+   "rule": "content-under-over",
+   "g20": "overlay.black_box",
+   "wb": "w.tacho",
+   "overlap_px": 22800,
+   "overlap_pct": 100,
+   "message": "our content under an over element (BMW draws it on top)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.belt_rear",
+   "wb": "C1.speedo.base",
+   "overlap_px": 1071,
+   "overlap_pct": 44.11,
+   "message": "the reveal hole would cut our content (1071 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.belt_rear",
+   "wb": "C1.speedo.bezel",
+   "overlap_px": 418,
+   "overlap_pct": 17.22,
+   "message": "the reveal hole would cut our content (418 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "bottom.belt_rear",
+   "wb": "w.speedo",
+   "overlap_px": 1073,
+   "overlap_pct": 44.19,
+   "message": "the reveal hole would cut our content (1073 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "assist.cc_panel",
+   "wb": "w.row_b0",
+   "overlap_px": 4800,
+   "overlap_pct": 11.46,
+   "message": "the reveal hole would cut our content (4800 px of the hole)"
+  },
+  {
+   "severity": "warning",
+   "rule": "hole-cuts-content",
+   "g20": "assist.cc_panel",
+   "wb": "w.row_b1",
+   "overlap_px": 4800,
+   "overlap_pct": 11.46,
+   "message": "the reveal hole would cut our content (4800 px of the hole)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "tt.auto_h",
+   "wb": "C2.tacho.static",
+   "overlap_px": 32,
+   "overlap_pct": 1.43,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "tt.auto_h",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 53,
+   "overlap_pct": 2.36,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "tt.auto_h",
+   "wb": "w.bg",
+   "overlap_px": 2242,
+   "overlap_pct": 100,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "tt.auto_h",
+   "wb": "w.tacho",
+   "overlap_px": 140,
+   "overlap_pct": 6.24,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.info_tacho",
+   "wb": "C6.infobar.body",
+   "overlap_px": 27,
+   "overlap_pct": 6.21,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.info_tacho",
+   "wb": "C2.tacho.static",
+   "overlap_px": 60,
+   "overlap_pct": 13.79,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.info_tacho",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 67,
+   "overlap_pct": 15.4,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.info_tacho",
+   "wb": "w.bg",
+   "overlap_px": 435,
+   "overlap_pct": 100,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.info_tacho",
+   "wb": "w.tacho",
+   "overlap_px": 167,
+   "overlap_pct": 38.39,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.off",
+   "wb": "C2.tacho.static",
+   "overlap_px": 1140,
+   "overlap_pct": 100,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.off",
+   "wb": "C2.tacho.p-box",
+   "overlap_px": 1140,
+   "overlap_pct": 100,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.off",
+   "wb": "w.bg",
+   "overlap_px": 1140,
+   "overlap_pct": 100,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "unknown-covered",
+   "g20": "assist.off",
+   "wb": "w.tacho",
+   "overlap_px": 1140,
+   "overlap_pct": 100,
+   "message": "unknown element covered by us; it may be under (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.range",
+   "wb": "C1.speedo.base",
+   "overlap_px": 665,
+   "overlap_pct": 13.84,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.range",
+   "wb": "C1.speedo.bezel",
+   "overlap_px": 435,
+   "overlap_pct": 9.05,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.range",
+   "wb": "w.bg",
+   "overlap_px": 4804,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.range",
+   "wb": "w.speedo",
+   "overlap_px": 668,
+   "overlap_pct": 13.91,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.clock",
+   "wb": "C1.speedo.base",
+   "overlap_px": 3429,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.clock",
+   "wb": "C6.speedo.range-arc.track",
+   "overlap_px": 854,
+   "overlap_pct": 24.91,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.clock",
+   "wb": "C1.speedo.bezel",
+   "overlap_px": 13,
+   "overlap_pct": 0.38,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.clock",
+   "wb": "w.bg",
+   "overlap_px": 3429,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.clock",
+   "wb": "w.speedo",
+   "overlap_px": 3429,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.street",
+   "wb": "w.bg",
+   "overlap_px": 4301,
+   "overlap_pct": 37.4,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.street",
+   "wb": "w.row_b0",
+   "overlap_px": 1075,
+   "overlap_pct": 9.35,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.street",
+   "wb": "w.row_b1",
+   "overlap_px": 274,
+   "overlap_pct": 2.38,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.temperature",
+   "wb": "C2.tacho.static",
+   "overlap_px": 2541,
+   "overlap_pct": 69.5,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.temperature",
+   "wb": "C6.tacho.ed-arc.track",
+   "overlap_px": 191,
+   "overlap_pct": 5.22,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.temperature",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 722,
+   "overlap_pct": 19.75,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.temperature",
+   "wb": "w.bg",
+   "overlap_px": 3656,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "bottom.temperature",
+   "wb": "w.tacho",
+   "overlap_px": 3013,
+   "overlap_pct": 82.41,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.speed_limit",
+   "wb": "C1.speedo.base",
+   "overlap_px": 5396,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.speed_limit",
+   "wb": "C1.speedo.tick-groove-rim",
+   "overlap_px": 386,
+   "overlap_pct": 7.15,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.speed_limit",
+   "wb": "C6.speedo.range-arc.track",
+   "overlap_px": 720,
+   "overlap_pct": 13.34,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.speed_limit",
+   "wb": "w.bg",
+   "overlap_px": 5396,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.speed_limit",
+   "wb": "w.speedo",
+   "overlap_px": 5396,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.speed_limit",
+   "wb": "w.range_a1",
+   "overlap_px": 1097,
+   "overlap_pct": 20.33,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.mode_label",
+   "wb": "C2.tacho.static",
+   "overlap_px": 121,
+   "overlap_pct": 2.12,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.mode_label",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 154,
+   "overlap_pct": 2.7,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.mode_label",
+   "wb": "w.bg",
+   "overlap_px": 5088,
+   "overlap_pct": 89.2,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.mode_label",
+   "wb": "w.tacho",
+   "overlap_px": 311,
+   "overlap_pct": 5.45,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.digital_speed",
+   "wb": "C1.speedo.base",
+   "overlap_px": 6719,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.digital_speed",
+   "wb": "C1.speedo.inner-disc",
+   "overlap_px": 160,
+   "overlap_pct": 2.38,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.digital_speed",
+   "wb": "C1.speedo.inner-ring",
+   "overlap_px": 252,
+   "overlap_pct": 3.75,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.digital_speed",
+   "wb": "w.bg",
+   "overlap_px": 6719,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.digital_speed",
+   "wb": "w.speedo",
+   "overlap_px": 6719,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.digital_speed",
+   "wb": "w.spd11",
+   "overlap_px": 74,
+   "overlap_pct": 1.1,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.rpm_label",
+   "wb": "C2.tacho.static",
+   "overlap_px": 4090,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.rpm_label",
+   "wb": "C2.tacho.p-box",
+   "overlap_px": 2409,
+   "overlap_pct": 58.9,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.rpm_label",
+   "wb": "w.bg",
+   "overlap_px": 4090,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.rpm_label",
+   "wb": "w.tacho",
+   "overlap_px": 4090,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.rpm_label",
+   "wb": "w.cons_v",
+   "overlap_px": 99,
+   "overlap_pct": 2.42,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.rpm_label",
+   "wb": "w.cons_a0",
+   "overlap_px": 289,
+   "overlap_pct": 7.07,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.cold",
+   "wb": "C4.oil.face",
+   "overlap_px": 1259,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.cold",
+   "wb": "C4.oil.ticks",
+   "overlap_px": 64,
+   "overlap_pct": 5.08,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.cold",
+   "wb": "C4.oil.inner-arc",
+   "overlap_px": 68,
+   "overlap_pct": 5.4,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.cold",
+   "wb": "w.bg",
+   "overlap_px": 1259,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "assist.cold",
+   "wb": "w.oilt",
+   "overlap_px": 1259,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C5.window.base",
+   "overlap_px": 196338,
+   "overlap_pct": 59.37,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C5.window.horizon",
+   "overlap_px": 3758,
+   "overlap_pct": 1.14,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C1.speedo.base",
+   "overlap_px": 52671,
+   "overlap_pct": 15.93,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C2.tacho.static",
+   "overlap_px": 59300,
+   "overlap_pct": 17.93,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C2.tacho.tick-groove",
+   "overlap_px": 6,
+   "overlap_pct": 0,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C1.speedo.tick-groove-rim",
+   "overlap_px": 1753,
+   "overlap_pct": 0.53,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C1.speedo.ticks",
+   "overlap_px": 2206,
+   "overlap_pct": 0.67,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C2.tacho.ticks",
+   "overlap_px": 923,
+   "overlap_pct": 0.28,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C2.tacho.off-arc",
+   "overlap_px": 371,
+   "overlap_pct": 0.11,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C1.speedo.inner-disc",
+   "overlap_px": 57,
+   "overlap_pct": 0.02,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C2.tacho.inner-disc-rim",
+   "overlap_px": 561,
+   "overlap_pct": 0.17,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C2.tacho.floor-edge",
+   "overlap_px": 23,
+   "overlap_pct": 0.01,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C1.speedo.soft-glow",
+   "overlap_px": 364,
+   "overlap_pct": 0.11,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C1.speedo.bezel",
+   "overlap_px": 2437,
+   "overlap_pct": 0.74,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "C2.tacho.bezel",
+   "overlap_px": 3862,
+   "overlap_pct": 1.17,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.bg",
+   "overlap_px": 322938,
+   "overlap_pct": 97.65,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.speedo",
+   "overlap_px": 52687,
+   "overlap_pct": 15.93,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.tacho",
+   "overlap_px": 62160,
+   "overlap_pct": 18.8,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.spd9",
+   "overlap_px": 114,
+   "overlap_pct": 0.03,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.spd10",
+   "overlap_px": 1732,
+   "overlap_pct": 0.52,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.spd11",
+   "overlap_px": 2160,
+   "overlap_pct": 0.65,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.spd12",
+   "overlap_px": 2160,
+   "overlap_pct": 0.65,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.spd13",
+   "overlap_px": 1380,
+   "overlap_pct": 0.42,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.rpm1",
+   "overlap_px": 1400,
+   "overlap_pct": 0.42,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.rpm2",
+   "overlap_px": 1,
+   "overlap_pct": 0,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.ready",
+   "overlap_px": 2750,
+   "overlap_pct": 0.83,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.off",
+   "overlap_px": 1128,
+   "overlap_pct": 0.34,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.region",
+   "wb": "w.range_a1",
+   "overlap_px": 5,
+   "overlap_pct": 0,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.position_arrow",
+   "wb": "C5.window.base",
+   "overlap_px": 1096,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  },
+  {
+   "severity": "info",
+   "rule": "under-covered",
+   "g20": "map.position_arrow",
+   "wb": "w.bg",
+   "overlap_px": 1096,
+   "overlap_pct": 100,
+   "message": "under element covered by us (decision cover)"
+  }
+ ]
+}

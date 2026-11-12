@@ -1139,12 +1139,15 @@
       document.title = 'plan-error';
       return;
     }
-    if (EXPORT !== 'default') {
-      out.textContent = JSON.stringify({ error: ['unknown export ' + EXPORT + ' (only "default")'] });
+    if (EXPORT !== 'default' && EXPORT !== 'safe') {
+      out.textContent = JSON.stringify({ error: ['unknown export ' + EXPORT + ' (only "default" or "safe")'] });
       document.title = 'plan-error';
       return;
     }
     OC.newPlan();
+    // "safe": the default plan, but a critical element whose relation is unknown is revealed (it may be under)
+    if (EXPORT === 'safe') for (const g of S.data.g20) if (g.safety === 'critical' && g.relation === 'unknown') S.plan.g20[g.id].decision = 'reveal';
+    OC.syncHoles();
     const conflicts = OC.computeConflicts();
     UI.conflicts = conflicts;
     const plan = OC.buildPlanFile(conflicts, { version: 1, noTime: true });

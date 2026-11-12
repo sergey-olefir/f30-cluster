@@ -119,7 +119,7 @@
       const after = find('under-covered', 'map.region', 'w.bg');
       out.push('map.region vs w.bg: ' + before + ' px, with stockMap ' + (after ? after.overlap_px : 0) + ' px');
       ok(after && after.overlap_px < before, 'stockMap cuts the background\'s own hole');
-      ok(find('under-covered', 'map.region', 'C10.panel.background').overlap_px === before, 'the baked background keeps covering (only w.bg carries the hole)');
+      ok(find('under-covered', 'map.region', 'C10.panel.background').overlap_px === after.overlap_px, 'the stockMap hole is cut from every background (README §3)');
       I.setStockMap(false);
       ok(C().length === n0, 'back to the default conflict list (' + C().length + ')');
 
