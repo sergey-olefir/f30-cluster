@@ -1267,27 +1267,34 @@ void main() {
         col += u_needle * 0.30 * exp(-abs(d - hr) / (0.020 * R));
         col = mix(col, u_needle * (0.62 + 0.40 * lit), ringAt(d, hr, 0.014 * R));
         // the needle: first its shadow on the face, moved down and right, soft
+        // ref 05 / 15: a long blade that tapers from the hub (~0.048 R wide) to a fine tip (~0.013 R), its tail a little
+        // narrower than at the hub; the tip rounded off over its own half width
         float L = 0.925 * R, T = -0.22 * R;
-        float W0 = 0.030 * R, W1 = 0.020 * R, WT = 0.024 * R;     // ref 15: the blade ~0.17 of the hub ring's diameter, little taper       // half width at the hub, at the tip, at the tail's end
+        float W0 = 0.024 * R, W1 = 0.0065 * R, WT = 0.021 * R;  // half width at the hub, at the tip, at the tail's end
         vec2 ps = p - vec2(0.012 * R, -0.020 * R);
         vec2 qs = vec2(dot(ps, vec2(nd.y, -nd.x)), dot(ps, nd));
         if (qs.y > T && qs.y < L) {
             float hws = qs.y < 0.0 ? mix(W0, WT, qs.y / T) : mix(W0, W1, qs.y / L);
             col *= 1.0 - 0.7 * smoothstep(hws + 0.018 * R, hws - 0.002 * R, abs(qs.x));
         }
-        // then the blade, a tube: dark red edges, a red-orange body, a white core, a white cap on the tail, a faint glow
-        if (q.y > T && q.y < L) {
+        // then the blade, a tube: red edges, a dark seam on the lit side, a broad white core, a warm cap on the tail, a
+        // white tip, and a soft red halo that follows the taper
+        if (q.y > T - 1.0 && q.y < L + 1.0) {
             float hw = q.y < 0.0 ? mix(W0, WT, q.y / T) : mix(W0, W1, q.y / L);
+            float yt = q.y - (L - W1);                                // the rounded tip
+            if (yt > 0.0) hw = sqrt(max(W1 * W1 - yt * yt, 0.0));
             float ax = abs(q.x);
-            float nx = q.x / hw;                                      // -1 .. 1 across the blade
-            float gl = clamp(1.0 - ax / (0.050 * R), 0.0, 1.0);
-            col += u_needle * 0.16 * gl * gl;
-            vec3 body = mix(vec3(0.45, 0.05, 0.04), u_needle * vec3(1.0, 0.62, 0.50), smoothstep(1.0, 0.35, abs(nx + 0.12)));
+            float nx = q.x / max(hw, 0.5);                            // -1 .. 1 across the blade
+            float ends = clamp(q.y - T + 0.5, 0.0, 1.0) * clamp(L + 0.5 - q.y, 0.0, 1.0);
+            col += u_needle * 0.22 * exp(-max(ax - hw, 0.0) / (0.016 * R)) * ends * smoothstep(L, 0.85 * L, q.y);
+            vec3 body = mix(vec3(0.50, 0.05, 0.04), u_needle * vec3(1.0, 0.62, 0.50), smoothstep(1.0, 0.45, abs(nx + 0.10)));
             body *= 1.0 - 0.22 * smoothstep(0.0, 1.0, nx);            // the far side a little darker
-            body = mix(body, vec3(1.0, 0.95, 0.93), smoothstep(0.42, 0.18, abs(nx + 0.10)) * 0.95);   // the light core (ref 15: a third of the width)
+            float wide = smoothstep(2.5, 5.0, hw);                    // the seam only where the blade is wide enough
+            body *= 1.0 - 0.45 * wide * exp(-pow((nx + 0.62) / 0.11, 2.0));
+            body = mix(body, vec3(1.0, 0.95, 0.93), smoothstep(0.50, 0.24, abs(nx + 0.06)) * 0.95);   // the light core (ref 05: ~0.4 of the width)
             body = mix(body, vec3(0.92, 0.66, 0.60), smoothstep(T + 0.030 * R, T + 0.008 * R, q.y) * 0.55);   // the tail's cap, a warm light, not white
-            body = mix(body, vec3(1.0), smoothstep(0.92 * L, L, q.y) * 0.8);
-            col = mix(col, body, clamp(hw + 0.5 - ax, 0.0, 1.0) * clamp(q.y - T + 0.5, 0.0, 1.0));
+            body = mix(body, vec3(1.0), smoothstep(0.955 * L, L, q.y) * 0.85);
+            col = mix(col, body, clamp(hw + 0.5 - ax, 0.0, 1.0) * ends);
         }
     } else if (u_style < 1.5) {
         // ---- Sport
@@ -1349,10 +1356,22 @@ void main() {
         float hr = 0.125 * R;
         if (d < hr) col = vec3(0.024, 0.025, 0.025);                             // the cap (old fill less LCD black)
         col = mix(col, u_tick * 0.6, ringAt(d, hr, 1.6));
-        float L = 0.66 * R, T = -0.17 * R;
-        if (q.y > T && q.y < L) {
-            float hw = q.y < 0.0 ? 0.034 * R : mix(0.034 * R, 0.013 * R, q.y / L);
-            col = mix(col, u_needle, clamp(hw + 0.5 - abs(q.x), 0.0, 1.0));
+        // the needle (ref 04: short, light, tapering to a rounded tip), a soft shadow down and right, the edges shaded
+        float L = 0.66 * R, T = -0.17 * R, W0 = 0.036 * R, W1 = 0.010 * R;
+        vec2 ps = p - vec2(0.020 * R, -0.030 * R);
+        vec2 qs = vec2(dot(ps, vec2(nd.y, -nd.x)), dot(ps, nd));
+        if (qs.y > T && qs.y < L) {
+            float hws = qs.y < 0.0 ? W0 : mix(W0, W1, qs.y / L);
+            col *= 1.0 - 0.6 * smoothstep(hws + 0.05 * R, hws, abs(qs.x));
+        }
+        if (q.y > T - 1.0 && q.y < L + 1.0) {
+            float hw = q.y < 0.0 ? W0 : mix(W0, W1, q.y / L);
+            float yt = q.y - (L - W1);
+            if (yt > 0.0) hw = sqrt(max(W1 * W1 - yt * yt, 0.0));
+            float nx = q.x / max(hw, 0.5);
+            vec3 body = u_needle * (1.0 - 0.38 * smoothstep(0.35, 1.0, abs(nx + 0.15)));
+            body = mix(body, vec3(1.0), smoothstep(0.30, 0.0, abs(nx + 0.15)) * 0.35);
+            col = mix(col, body, clamp(hw + 0.5 - abs(q.x), 0.0, 1.0) * clamp(q.y - T + 0.5, 0.0, 1.0) * clamp(L + 0.5 - q.y, 0.0, 1.0));
         }
     } else {
         // ---- Eco Pro's efficiency dial
@@ -1918,8 +1937,10 @@ uniform vec2 u_C;          // the rays' centre, panel px
 uniform vec4 u_bar;        // width at the tail, at the tip; rim offset, rim width (0: none)
 uniform vec3 u_barC;       // the bar's colour
 uniform vec3 u_tipC;       // the tip's colour (minis)
-uniform vec4 u_rim;        // the rim's colour and alpha
-uniform vec4 u_glow;       // the glow's colour (already scaled) and sigma px (0: none)
+uniform vec4 u_rim;        // the rim's colour and alpha (on the low-value side)
+uniform float u_rimHi;     // the fainter rim's alpha on the high-value side, at the bar's edge
+uniform vec4 u_sh;         // the soft shadow beside the bar on the low-value side: alpha, d0, lambda, dmax px (alpha 0: none)
+uniform vec4 u_glow;      // the glow's colour (already scaled) and sigma px (0: none)
 uniform vec4 u_band;       // the band's first and last angle (image atan2, radians), its width px; 0
 uniform vec3 u_bandC;
 uniform sampler2D u_fill;  // minis: the level's fill (RGB over black) and the mini's area (A); u_base then holds its lines
@@ -1974,10 +1995,25 @@ void main() {
         col += u_glow.rgb * g * alpha;
     }
     float hw = mix(u_bar.x, u_bar.y, h) * 0.5;
-    if (u_bar.w > 0.0) {
-        // a dark rim along both sides of the bar
-        float rd = abs(dist - u_bar.z);
-        col = mix(col, u_rim.rgb, u_rim.a * clamp(u_bar.w * 0.5 + 0.5 - rd, 0.0, 1.0) * step(hw, dist));
+    // which side of the bar is the low-value one: where the tip lies at a slightly lower value (bench/g20 live.js drawBar)
+    vec2 tLo = lutP(u_g.x, max(f - 0.01, 0.0)), tHi = lutP(u_g.x, min(f + 0.01, 1.0));
+    vec2 lo = (tLo - tHi) / 64.0;
+    float sgnLo = sign(ba.x * lo.y - ba.y * lo.x);
+    float bl = max(length(ba), 1e-4);
+    float sd = (ba.x * pa.y - ba.y * pa.x) / bl * 64.0 * sgnLo;            // px across the axis, + toward lower values
+    if (u_g.z < 0.5) {
+        float hu = dot(pa, ba) / max(dot(ba, ba), 1e-6);                     // along, unclamped (0 tail, 1 tip)
+        float along = smoothstep(-0.015, 0.02, hu) * smoothstep(1.015, 0.98, hu);
+        if (u_sh.x > 0.0 && sd > 0.0 && sd < u_sh.w) {
+            float a = sd <= u_sh.y ? u_sh.x : u_sh.x * exp(-(sd - u_sh.y) / u_sh.z);
+            col *= 1.0 - a * along * smoothstep(u_sh.w, u_sh.w * 0.7, sd);
+        }
+        if (u_bar.w > 0.0) {
+            // thin dark lines along the core: at the rim offset on the low side, fainter just past the edge on the high side
+            float rl = clamp(u_bar.w * 0.5 + 0.5 - abs(sd - u_bar.z), 0.0, 1.0) * u_rim.a;
+            float rh = clamp(u_bar.w * 0.5 + 0.5 - abs(-sd - (hw + u_bar.w * 0.5 + 0.5)), 0.0, 1.0) * u_rimHi;
+            col = mix(col, u_rim.rgb, max(rl, rh) * step(hw, dist) * along);
+        }
     }
     float cov = clamp(hw + 0.5 - dist, 0.0, 1.0);
     vec3 bar = u_g.z > 0.5 ? mix(u_barC, u_tipC, smoothstep(0.6, 1.0, h)) : u_barC;

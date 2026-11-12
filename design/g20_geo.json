@@ -68,6 +68,13 @@
    "width": 2.5,
    "offset": 5.5,
    "hi_alpha": 0.3
+  },
+  "shadow": {
+   "alpha": 0.62,
+   "d0": 8,
+   "lambda": 14,
+   "dmax": 56,
+   "blur": 3
   }
  },
  "glow": {

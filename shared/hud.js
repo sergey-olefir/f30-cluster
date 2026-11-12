@@ -1824,6 +1824,8 @@ class HudApp {
             c.uniform(ref, 'u_barC', rgb255(w.barC));
             c.uniform(ref, 'u_tipC', rgb255(w.tipC || w.barC));
             c.uniform(ref, 'u_rim', w.rim ? rgb255(w.rim.slice(0, 3)).concat([w.rim[3]]) : [0, 0, 0, 0]);
+            c.uniform(ref, 'u_rimHi', [w.rimHi || 0]);
+            c.uniform(ref, 'u_sh', w.shadow || [0, 1, 1, 1]);     // alpha, d0, lambda, dmax (px)
             c.uniform(ref, 'u_glow', w.glow ? rgb255(w.glow.slice(0, 3)).concat([w.glow[3]]) : [0, 0, 0, 0]);
             c.uniform(ref, 'u_band', w.band ? [w.band[0], w.band[1], w.band[2], 0] : [0, 1, 0, 0]);
             c.uniform(ref, 'u_bandC', rgb255(w.bandC || [0, 0, 0]));

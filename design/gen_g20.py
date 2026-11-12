@@ -36,8 +36,10 @@ def gauge(id, name, rows, conn, **kw):
 
 
 B, GL, N = G['bar'], G['glow'], G['needle']
+SH = B['shadow']
 big = dict(bar=[B['width'], B['width'], B['rim']['offset'], B['rim']['width']], barC=B['rgb'],
-           rim=B['rim']['rgb'] + [B['rim']['alpha']], glow=GL['rgb'] + [GL['sigma']])
+           rim=B['rim']['rgb'] + [B['rim']['alpha']], rimHi=B['rim']['hi_alpha'],
+           shadow=[SH['alpha'], SH['d0'], SH['lambda'], SH['dmax']], glow=GL['rgb'] + [GL['sigma']])
 small = dict(mini=True, bar=[N['w0'], N['w1'], 0, 0], barC=N['rgb'], tipC=N['tip_rgb'])
 W = [
     gauge("speedo", "speedo", [0, 1], 0, measure="speed", min=0, max=260, centre=G['speedoC'], **big),
