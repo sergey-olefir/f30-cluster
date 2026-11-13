@@ -84,13 +84,19 @@ FLOOR = dict(
     below_top=(3 / 255, 5 / 255, 9 / 255), below_bot=(0.5 / 255, 1 / 255, 2 / 255), v_bot=0.45,
 )
 # ---------------------------------------------------------------------------------------------------- z 8.5 P box
+# car4 L (docs/CAR4-L-REPORT.md): the top re-measured on 05 (and 02): a flat shelf (half-width 0.130 R at v 0.515) with
+# straight shoulders at 42 degrees down to the bottom arc, which they meet at |u| ~0.26 R, inside the arc's ends (its
+# span is unchanged, so the arc runs on ~0.05 R past them as on 05). Was: a 0.145 R top with 0.035 R corners and
+# 32-degree sides to the arc's very ends (0.300 R), which read as a dome. The shelf line's bump is wider (05: 58 px
+# between its half-peak points; with the 0.12 floor that is 1.856 s -> s 0.093, was 0.075), its peak is as before (0.9
+# of the arc), the shoulders a little brighter (05: 0.14 of the arc across a row; the steeper line is thinner across)
 PBOX = dict(
-    top_v=0.515, top_hw=0.145, corner_r=0.035,
+    top_v=0.515, top_hw=0.130, corner_r=0.012,
     bot_r=0.683, bot_half_deg=27.5,     # bottom edge: an arc CONCENTRIC with the dial (05: r 0.680-0.688)
-    side_end_u=0.300,                   # sides run from the top corners down-out to the bottom arc's ends
+    shoulder_deg=42.0,                  # the shoulders: from the shelf's ends down-out at this angle to the bottom arc
     fill_top=(12 / 255, 13 / 255, 16 / 255), fill_bot=(5 / 255, 6 / 255, 8 / 255),
-    top_rim=dict(hw=0.0022, peak=0.90, u0=0.025, s=0.075, floor=0.12),
-    side_rim=dict(hw=0.0018, level=0.12),
+    top_rim=dict(hw=0.0022, peak=0.90, u0=0.015, s=0.093, floor=0.12),
+    side_rim=dict(hw=0.0018, level=0.15),
     bot_rim=dict(hw=0.0035, peak=1.0, flat_deg=15.0, fade_deg=12.0, floor=0.10, glow=0.10, glow_decay=0.010),
     rim_rgb=(0.93, 0.96, 1.0),
 )

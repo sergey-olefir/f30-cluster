@@ -883,11 +883,11 @@
    "bytes_by_8wh": 0,
    "params": {
     "top_v": 0.515,
-    "top_hw": 0.145,
-    "corner_r": 0.035,
+    "top_hw": 0.13,
+    "corner_r": 0.012,
     "bot_r": 0.683,
     "bot_half_deg": 27.5,
-    "side_end_u": 0.3,
+    "shoulder_deg": 42.0,
     "fill_top": [
      0.047059,
      0.05098,
@@ -901,13 +901,13 @@
     "top_rim": {
      "hw": 0.0022,
      "peak": 0.9,
-     "u0": 0.025,
-     "s": 0.075,
+     "u0": 0.015,
+     "s": 0.093,
      "floor": 0.12
     },
     "side_rim": {
      "hw": 0.0018,
-     "level": 0.12
+     "level": 0.15
     },
     "bot_rim": {
      "hw": 0.0035,
@@ -931,14 +931,14 @@
     "tacho.hub-well"
    ],
    "fit": {
-    "ssim": 0.6304,
-    "dE2000_mean": 4.323,
-    "edge_px_err": 1.951,
+    "ssim": null,
+    "dE2000_mean": null,
+    "edge_px_err": null,
     "ref": "bake/work/rect/05_comfort_tach-closeup.comfort.C2",
     "roi": [
-     "box:1395:540:230:80"
+     "box:1380:496:260:134"
     ],
-    "sheet": "bake/work/C2/qc_tacho.p-box__05_comfort_tach-closeup.comfort.C2.png"
+    "note": "car4 L: re-shaped to the shelf + shoulders measured on 05 (docs/CAR4-L-REPORT.md); geometry, not ssim: shelf half-width 0.128 R (05 0.130), shoulders 41.9 deg (05 40.7-42.0), junction 0.260 R (05 0.265), shelf line peak 0.90 of the arc (05 0.91), half-peak width 58 px (05 58)"
    }
   },
   {
