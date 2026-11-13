@@ -337,6 +337,32 @@ function driveModeOf(raw) {
     return null;
 }
 
+// ---- package E: one raw speed-limit value (app.json config.limit, _setupVehicleData) as a sign state ----------------
+// { state: 'none' | 'limit' | 'end', kmh }. 'none': no limit known (no sign); 'end': the end-of-limit sign (the
+// derestriction sign: "end" values, or a "map" entry "end"); 'limit': kmh within min..max. Never throws.
+function limitOf(lim, raw, unitRaw) {
+    const none = { state: 'none', kmh: null };
+    const list = (a) => (Array.isArray(a) ? a : []);
+    if (raw === undefined || raw === null || !lim) return none;
+    if (lim.map && typeof lim.map === 'object' && Object.prototype.hasOwnProperty.call(lim.map, String(raw))) {
+        const m = lim.map[String(raw)];
+        if (m === 'end') return { state: 'end', kmh: null };
+        if (typeof m !== 'number' || !isFinite(m)) return none;
+        raw = m;                                    // a mapped value is km/h already
+        lim = { min: lim.min, max: lim.max };
+    } else {
+        if (list(lim.end).indexOf(raw) >= 0) return { state: 'end', kmh: null };
+        if (list(lim.invalid).indexOf(raw) >= 0) return none;
+    }
+    if (typeof raw === 'string' && /^\s*\d+(\.\d+)?\s*$/.test(raw)) raw = Number(raw);
+    if (typeof raw !== 'number' || !isFinite(raw)) return none;
+    const mph = lim.unit === 'mph' || (lim.unitPath && list(lim.mph).indexOf(unitRaw) >= 0);
+    const kmh = raw * (typeof lim.factor === 'number' && isFinite(lim.factor) ? lim.factor : 1) * (mph ? 1.609344 : 1);
+    const lo = typeof lim.min === 'number' ? lim.min : 5, hi = typeof lim.max === 'number' ? lim.max : 250;
+    return kmh >= lo && kmh <= hi ? { state: 'limit', kmh } : none;
+}
+// ---- end package E --------------------------------------------------------------------------------------------------
+
 function rgb(c) { return [c[0] / 255, c[1] / 255, c[2] / 255]; }
 
 /**
@@ -621,42 +647,50 @@ class HudApp {
                 },
             },
         };
+        // ---- package E: the speed-limit and no-overtaking signals (docs/POLISH-E-REPORT.md) ----------------------------
         // The speed limit the car knows (its sign camera / map data), for {{limit}} and the 6WB themes' sign. Which
-        // field carries it isn't known yet (none of the kit's apps reads one), so app.json config.limit names it once
-        // the car's catalogue (someip-interfaces.json) has been looked at: { iface, field, path: ["a", "b"] (into the
-        // field's value; [] or none: the value itself), factor (1), unit: "kmh" | "mph", invalid: [raw values that
-        // mean none], min (5), max (250) }. The interface must also be listed in app.json "signals" (flag "s", or
-        // "rs" when it has a getter). Without config.limit nothing is subscribed and the sign stays hidden on the car.
+        // field carries it isn't known yet (no public MGU app reads one; scripts/find_limit_signal.sh lists the car's
+        // candidates), so app.json config.limit names it once the car's catalogue (someip-interfaces.json) has been
+        // looked at: { iface, field, path: ["a", "b"] (into the field's value; [] or none: the value itself), factor (1),
+        // unit: "kmh" | "mph", unitPath: [..] + mph: [raw unit values that mean mph] (when the field carries its own
+        // unit), invalid: [raw values that mean "no limit known"], end: [raw values that mean "end of limit" /
+        // unlimited], map: { "<raw>": km/h | "end" | null } (an enum field: wins over the rest), min (5), max (250) }.
+        // The interface must also be listed in app.json "signals" (flag "s", or "rs" when it has a getter).
+        // Without config.limit nothing is subscribed and the sign stays hidden on the car.
+        // The state: limitState 'none' (nothing known: no sign), 'limit' (limitKmh), 'end' (the end-of-limit sign).
         const lim = this.config.limit;
-        this.limitKmh = null; this.limitRaw = undefined;
+        this.limitKmh = null; this.limitState = 'none'; this.limitRaw = undefined;
+        const dig = (v, path) => { let r = v; (path || []).forEach((k) => { r = r === null || r === undefined ? r : r[k]; }); return r; };
         if (lim && lim.iface && lim.field) {
             extra[lim.iface] = Object.assign(extra[lim.iface] || {}, {
                 [lim.field]: (v) => {
-                    let raw = v;
-                    (lim.path || []).forEach((k) => { raw = raw === null || raw === undefined ? raw : raw[k]; });
-                    const t = String(JSON.stringify(raw)).slice(0, 80);
-                    if (t !== this.limitRaw) { this.limitRaw = t; this.log.info('speed limit raw: ' + t); }   // to calibrate on the car
-                    const bad = typeof raw !== 'number' || !isFinite(raw) || (lim.invalid || []).indexOf(raw) >= 0;
-                    const kmh = bad ? null : raw * (isNum(lim.factor) ? lim.factor : 1) * (lim.unit === 'mph' ? 1.609344 : 1);
-                    this.limitKmh = isNum(kmh) && kmh >= (isNum(lim.min) ? lim.min : 5) && kmh <= (isNum(lim.max) ? lim.max : 250) ? kmh : null;
+                    const raw = dig(v, lim.path), unitRaw = lim.unitPath ? dig(v, lim.unitPath) : undefined;
+                    const t = String(JSON.stringify(raw)).slice(0, 80) + (lim.unitPath ? ' unit ' + String(JSON.stringify(unitRaw)).slice(0, 30) : '');
+                    const s = limitOf(lim, raw, unitRaw);
+                    this.limitState = s.state; this.limitKmh = s.kmh;
+                    if (t !== this.limitRaw) {      // to calibrate on the car: every new raw value once, with what it became
+                        this.limitRaw = t;
+                        this.log.info('speed limit raw: ' + t + ' -> ' + (s.state === 'limit' ? Math.round(s.kmh) + ' km/h' : s.state));
+                    }
                 },
             });
         }
         // No-overtaking sign (the 6WB themes' second sign), the same way: app.json config.nopass names the field once the car's
-        // catalogue has been looked at: { iface, field, path: [..], on: [raw values that mean "no passing"] }. None: hidden on the car.
+        // catalogue has been looked at: { iface, field, path: [..], on: [raw values that mean "no passing"] (default [1, true]) }.
+        // Any other value (the end-of-no-overtaking sign included) hides it. None: hidden on the car.
         const np = this.config.nopass;
         this.nopassOn = false; this.nopassRaw = undefined;
         if (np && np.iface && np.field) {
             extra[np.iface] = Object.assign(extra[np.iface] || {}, {
                 [np.field]: (v) => {
-                    let raw = v;
-                    (np.path || []).forEach((k) => { raw = raw === null || raw === undefined ? raw : raw[k]; });
+                    const raw = dig(v, np.path);
                     const t = String(JSON.stringify(raw)).slice(0, 80);
-                    if (t !== this.nopassRaw) { this.nopassRaw = t; this.log.info('no-passing raw: ' + t); }
-                    this.nopassOn = (np.on || [1, true]).indexOf(raw) >= 0;
+                    this.nopassOn = (Array.isArray(np.on) ? np.on : [1, true]).indexOf(raw) >= 0;
+                    if (t !== this.nopassRaw) { this.nopassRaw = t; this.log.info('no-passing raw: ' + t + ' -> ' + (this.nopassOn ? 'on' : 'off')); }
                 },
             });
         }
+        // ---- end package E ------------------------------------------------------------------------------------------
         // Instant fuel consumption (the 6WB Comfort theme's EfficientDynamics arc and {{cons}}), the same way: app.json
         // config.cons names the field once the car's catalogue has been looked at: { iface, field, path: [..], factor (1),
         // unit: "l100" | "lh" (litres per hour: divided by the speed), invalid: [..] }. None: "--" on the car.
@@ -902,6 +936,12 @@ class HudApp {
         let n = 0;
         this.atlases.forEach((a) => { n += a.bytes; });
         return n;
+    }
+
+    /** package E: true when app.json names the car's speed-limit or no-overtaking field (config.limit / config.nopass). */
+    _signWired() {
+        const ok = (s) => !!(s && s.iface && s.field);
+        return ok(this.config.limit) || ok(this.config.nopass);
     }
 
     /** A 6WB dial's u_cut ("cut", WBDIAL): cut y in the layer, fade, window shape (mode), its soft edge. */
@@ -1261,9 +1301,11 @@ class HudApp {
         }
         if (name === 'rpm' && isNum(this.rpmF)) return this.rpmF;
         if (name === 'hvSoc') return isNum(this.hvSoc) && Date.now() - this.hvSocAt < HV_STALE_MS ? this.hvSoc : this.car.data().demo ? 64 : null;
+        // package E: the signs. limitEnd: 1 while the car shows the end of a limit (the derestriction sign)
         if (name === 'nopass') return this.nopassOn ? 1 : this.car.data().demo ? 1 : null;
+        if (name === 'limitEnd') return this.limitState === 'end' ? 1 : null;
         if (name === 'cons') return isNum(this.consL) && Date.now() - this.consAt < 5000 ? this.consL : this.car.data().demo ? 7.4 : null;
-        if (name === 'limit') return isNum(this.limitKmh) ? this.limitKmh : this.car.data().demo ? 90 : null;
+        if (name === 'limit') return isNum(this.limitKmh) ? this.limitKmh : this.limitState === 'none' && this.car.data().demo ? 90 : null;
         if (name === 'fuel' || name === 'range' || name === 'ambient') {
             // the kit's demo drive has none of these: made-up but steady values while it runs
             const demo = this.car.data().demo;
@@ -1794,7 +1836,8 @@ class HudApp {
             }
             // "cut": { y, fade (panel px), round: [cx, cy, r] | box: [x0, y0, x1, y1] (panel px), soft (px), cover }: the
             // dial's open bottom and a soft window, so BMW's own bottom row, sign or lamp shows (6WB Dials + G20);
-            // "cover": "limit": the round window closes over BMW's sign while our own sign shows (_update)
+            // "cover": "limit": the round window closes over BMW's sign while our own sign shows (_update; package E:
+            // always closed once app.json config.limit / config.nopass is wired)
             const cut = w.cut, cw = cut && (cut.round || cut.box);
             x.cutMode = -1;
             c.uniform(ref, 'u_cut', this._cutVec(w, cut && cut.round ? 1 : cut && cut.box ? 2 : 0));
@@ -2265,13 +2308,14 @@ class HudApp {
             x.c.uniform(x.ref, 'u_value', [q]);
             if (w.peak) x.c.uniform(x.ref, 'u_peak', [pk > q ? pk : -1]);
         } else if (w.type === 'wbsign') {
-            const a = isNum(this._raw('limit')) ? 1 : 0, b = this._raw('nopass') ? 1 : 0;
+            // package E: u_show.x 1 the limit sign, 2 the end-of-limit sign (WBSIGN), 0 none; .y the no-overtaking sign
+            const a = isNum(this._raw('limit')) ? 1 : this._raw('limitEnd') ? 2 : 0, b = this._raw('nopass') ? 1 : 0;
             const key = a + '|' + b;
             if (!force && key === x.last) return;
             x.last = key;
             x.c.uniform(x.ref, 'u_show', [a, b]);
         } else if (w.type === 'wbback') {
-            const on = w.sign && isNum(this._raw('limit')) ? 1 : 0;
+            const on = w.sign && (isNum(this._raw('limit')) || this._raw('limitEnd')) ? 1 : 0;   // package E: the end sign too
             if (!force && on === x.last) return;
             x.last = on;
             x.c.uniform(x.ref, 'u_sign', on ? w.sign : [0, 0, 0]);
@@ -2316,8 +2360,11 @@ class HudApp {
                 x.c.uniform(x.ref, 'u_fill', x.wbFill);
             }
             if (w.look === 'wb' && w.cut && w.cut.round && w.cut.cover === 'limit') {
-                // the round window over BMW's sign: closed (3) while our own sign shows, open (1) while we have no limit
-                const m = isNum(this._raw('limit')) ? 3 : 1;
+                // package E: the round window over BMW's sign. Closed (3) whenever app.json names the car's limit field
+                // (config.limit / config.nopass wired): our sign is the only one, and while the car has sent nothing yet
+                // the spot stays black. Not wired: closed while our sign shows (the demo drive), open (1) otherwise, so
+                // BMW's own sign shows until the field is known.
+                const m = this._signWired() || isNum(this._raw('limit')) || this._raw('limitEnd') ? 3 : 1;
                 if (force || m !== x.cutMode) { x.cutMode = m; x.c.uniform(x.ref, 'u_cut', this._cutVec(w, m)); }
             }
             const key = q + '|' + hot + '|' + over.join(',');

@@ -1623,7 +1623,7 @@ void main() {
 
 const WBSIGN = `// The 6WB-style road signs in one cluster-render "effect" layer (GLSL ES 1.00), under the speed dial's hub: the
 // speed limit sign (its figure is a text widget on top) on the left and the no-overtaking sign on the right.
-// u_show.x / u_show.y turn each on. Baked (u_tex 1: hud/scene sign_limit / sign_nopass, our own drawings, at
+// u_show.x / u_show.y turn each on (u_show.x 2: the end-of-limit sign instead, drawn here; package E). Baked (u_tex 1: hud/scene sign_limit / sign_nopass, our own drawings, at
 // u_r0 / u_r1 in the layer's px), else drawn here. Not BMW's artwork.
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
@@ -1650,12 +1650,25 @@ vec4 tex(sampler2D t, vec4 r, vec2 p) {
     vec2 u = (p - r.xy) / r.zw;
     return u.x >= 0.0 && u.y >= 0.0 && u.x <= 1.0 && u.y <= 1.0 ? texture2D(t, u) : vec4(0.0);
 }
+// package E: the end-of-limit sign (u_show.x 2): a white disc, a thin grey ring and five diagonal stripes from
+// upper right to lower left, in our signs' white. q: px from the centre, R: the disc's radius. No texture of its own.
+vec4 endSign(vec2 q, float R) {
+    float d = length(q / R) * R;
+    float a = clamp(R + 0.5 - d, 0.0, 1.0);
+    vec3 s = mix(vec3(0.93), vec3(0.42), clamp(d - (R - 3.0) + 0.5, 0.0, 1.0));
+    float t = (q.x + q.y) * 0.70711, per = R * 0.13;
+    float k = floor(t / per + 0.5);
+    float line = abs(k) <= 2.0 ? clamp(per * 0.24 - abs(t - k * per) + 0.5, 0.0, 1.0) : 0.0;
+    s = mix(s, vec3(0.08), line * clamp(R * 0.86 - d + 0.5, 0.0, 1.0));
+    return vec4(s, a);
+}
 
 void main() {
     vec2 p = v_uv * u_size;
     vec4 col = vec4(0.0);
     if (u_tex > 0.5) {
-        if (u_show.x > 0.5) col = tex(u_s0, u_r0, p);
+        if (u_show.x > 1.5) col = endSign(p - (u_r0.xy + u_r0.zw * 0.5), min(u_r0.z, u_r0.w) * 0.5 - 1.0);
+        else if (u_show.x > 0.5) col = tex(u_s0, u_r0, p);
         if (u_show.y > 0.5) {
             vec4 b = tex(u_s1, u_r1, p);
             col = vec4(mix(col.rgb, b.rgb, b.a), max(col.a, b.a));
@@ -1666,7 +1679,8 @@ void main() {
     float R = 38.0;
     vec2 c1 = vec2(u_size.x * 0.5 - 48.0, u_size.y * 0.5);
     vec2 c2 = vec2(u_size.x * 0.5 + 48.0, u_size.y * 0.5);
-    if (u_show.x > 0.5) {
+    if (u_show.x > 1.5) col = endSign(p - c1, R);
+    else if (u_show.x > 0.5) {
         float a = disc(p, c1, R);
         col = vec4(length(p - c1) < R * 0.79 ? vec3(0.95) : RED, a);
     }

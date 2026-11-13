@@ -78,6 +78,44 @@ function press(key, value) {
     comp.emit('action', { row });
 }
 
+// ---- package E: the speed-limit and no-overtaking signs in manual mode -------------------------------------------------
+// Manual values: limit (km/h; 'end' or below 0: the end-of-limit sign; 0, null or none: no limit known), nopass
+// (true / 1: the no-overtaking sign). They go in as the raw value of the field app.json config.limit / config.nopass
+// names (factor, unit, path, invalid / end / map / on undone). While app.json names no field (the car then shows BMW's
+// own sign), the bench stands in one, bench.SpeedLimit, so these can still be set; BENCH_LIMIT=off runs as the car does.
+const appCfg = spec.config || (spec.config = {});
+const named = (s) => !!(s && s.iface && s.field);
+if (process.env.BENCH_LIMIT !== 'off') {
+    if (!named(appCfg.limit)) appCfg.limit = { iface: 'bench.SpeedLimit', field: 'limit', path: ['value'], invalid: [0], end: [255] };
+    if (!named(appCfg.nopass)) appCfg.nopass = { iface: 'bench.SpeedLimit', field: 'nopass', path: ['value'], on: [1] };
+    if (appCfg.limit.iface === 'bench.SpeedLimit') log.info('bench: app.json config.limit names no field (the car shows BMW\'s sign); the bench stands in bench.SpeedLimit so manual signals set our sign (BENCH_LIMIT=off: as the car)');
+}
+/** `path` into a fresh object holding `v` at its end ([] or none: v itself). */
+const nest = (path, v) => (path || []).slice().reverse().reduce((acc, k) => ({ [k]: acc }), v);
+/** The raw value config.limit would turn into this manual limit. */
+function rawLimit(L, v) {
+    const end = v === 'end' || (typeof v === 'number' && v < 0);
+    const none = !end && !(typeof v === 'number' && v > 0);
+    if (L.map) {
+        const keys = Object.keys(L.map), want = end ? 'end' : none ? null : v;
+        const k = keys.find((key) => L.map[key] === want) || (none ? keys.find((key) => L.map[key] === null) : null);
+        const n = k !== undefined && k !== null && /^-?\d+(\.\d+)?$/.test(k) ? Number(k) : k;
+        if (k !== undefined && k !== null) return n;
+    }
+    if (end) return (L.end || [])[0] !== undefined ? L.end[0] : null;
+    if (none) return (L.invalid || [])[0] !== undefined ? L.invalid[0] : null;
+    return Math.round(v / (L.unit === 'mph' ? 1.609344 : 1) / (typeof L.factor === 'number' && L.factor ? L.factor : 1));
+}
+function feedSigns(v) {
+    const L = appCfg.limit, N = appCfg.nopass;
+    if (named(L) && 'limit' in v) hu.feed(L.iface, L.field, nest(L.path, rawLimit(L, v.limit)));
+    if (named(N) && 'nopass' in v) {
+        const on = v.nopass === true || v.nopass === 1;
+        hu.feed(N.iface, N.field, nest(N.path, on ? (N.on || [1])[0] : 0));
+    }
+}
+// ---- end package E -----------------------------------------------------------------------------------------------------
+
 // manual signals as raw SOME/IP values (a copy of kit/runtime/car.js SCALE; FES boost from hud.js)
 const SCALE = { rpm: [0.25, 0], speed: [0.015625, 0], accel: [0.002, -65], temp: [1, -48], torque: [0.5, -1023.5], boost: [0.01, 0] };
 const raw = (k, v) => Math.round((v - SCALE[k][1]) / SCALE[k][0]);
@@ -105,6 +143,7 @@ setInterval(() => {
     const tp = Math.round(num('tyreP', 2.3) * 10), tt = Math.round(num('tyreT', 24) + 40);
     hu.feed('de.bmw.infotainment.vehicle.TPMS', 'statusTyrePressure', { actualValuePressureTyreFLH: tp, actualValuePressureTyreFRH: tp, actualValuePressureTyreRLH: tp + 2, actualValuePressureTyreRRH: tp + 2 });
     hu.feed('de.bmw.infotainment.vehicle.TPMS', 'statusTyreTemperature', { actualValueTemperatureTyreFLH: tt, actualValueTemperatureTyreFRH: tt, actualValueTemperatureTyreRLH: tt + 3, actualValueTemperatureTyreRRH: tt + 3 });
+    feedSigns(manual);      // package E
 }, 50);
 
 // what the app actually sees, so the page shows demo values too
@@ -114,6 +153,7 @@ setInterval(() => {
     ['rpm', 'speed', 'oil', 'coolant', 'gear', 'gLong', 'gLat', 'torque'].forEach((n) => { out[n] = d[n] === undefined ? null : d[n]; });
     out.boost = hud._boost();
     out.fuelL = hud.fuelL; out.range = hud.rangeKm; out.ambient = hud.ambient;
+    out.limit = hud._raw('limitEnd') ? -10 : hud._raw('limit') || 0; out.nopass = hud._raw('nopass') ? 1 : 0;   // package E
     send({ t: 'values', mode, values: out });
 }, 250);
 
