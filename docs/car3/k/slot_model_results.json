@@ -1,0 +1,364 @@
+{
+ "off": {
+  "requests": 1,
+  "releases": 0,
+  "unwanted_gaps_ms": [
+   [
+    6224,
+    16
+   ],
+   [
+    11230,
+    19
+   ],
+   [
+    16225,
+    3
+   ],
+   [
+    21224,
+    9
+   ],
+   [
+    26321,
+    6
+   ],
+   [
+    31328,
+    5
+   ],
+   [
+    36347,
+    5
+   ],
+   [
+    41359,
+    5
+   ]
+  ],
+  "slot_states": [
+   [
+    478,
+    "acquiring"
+   ],
+   [
+    788,
+    "shown"
+   ]
+  ],
+  "marks": [
+   [
+    224,
+    "drive comfort"
+   ],
+   [
+    6222,
+    "inComfort wb_dials"
+   ],
+   [
+    11223,
+    "inComfort wb_comfort_map"
+   ],
+   [
+    16222,
+    "inComfort g20_comfort"
+   ],
+   [
+    21223,
+    "inComfort wb_comfort"
+   ],
+   [
+    26223,
+    "drive sport"
+   ],
+   [
+    31222,
+    "drive comfort"
+   ],
+   [
+    36224,
+    "drive eco"
+   ],
+   [
+    41223,
+    "drive comfort"
+   ]
+  ]
+ },
+ "keep": {
+  "requests": 1,
+  "releases": 0,
+  "unwanted_gaps_ms": [
+   [
+    433,
+    0
+   ]
+  ],
+  "slot_states": [
+   [
+    467,
+    "acquiring"
+   ],
+   [
+    782,
+    "shown"
+   ]
+  ],
+  "marks": [
+   [
+    211,
+    "drive comfort"
+   ],
+   [
+    6211,
+    "inComfort wb_dials"
+   ],
+   [
+    11209,
+    "inComfort wb_comfort_map"
+   ],
+   [
+    16209,
+    "inComfort g20_comfort"
+   ],
+   [
+    21211,
+    "inComfort wb_comfort"
+   ],
+   [
+    26211,
+    "drive sport"
+   ],
+   [
+    31211,
+    "drive comfort"
+   ],
+   [
+    36209,
+    "drive eco"
+   ],
+   [
+    41209,
+    "drive comfort"
+   ]
+  ]
+ },
+ "reseat": {
+  "requests": 9,
+  "releases": 8,
+  "unwanted_gaps_ms": [
+   [
+    672,
+    9
+   ],
+   [
+    6210,
+    4051
+   ],
+   [
+    11209,
+    4067
+   ],
+   [
+    16214,
+    4034
+   ],
+   [
+    21210,
+    4038
+   ],
+   [
+    26308,
+    4044
+   ],
+   [
+    31319,
+    4050
+   ],
+   [
+    36334,
+    4043
+   ],
+   [
+    41349,
+    3809
+   ]
+  ],
+  "slot_states": [
+   [
+    462,
+    "acquiring"
+   ],
+   [
+    771,
+    "shown"
+   ],
+   [
+    6258,
+    "lingering"
+   ],
+   [
+    9271,
+    "idle"
+   ],
+   [
+    10308,
+    "acquiring"
+   ],
+   [
+    10618,
+    "shown"
+   ],
+   [
+    11240,
+    "lingering"
+   ],
+   [
+    14251,
+    "idle"
+   ],
+   [
+    15291,
+    "acquiring"
+   ],
+   [
+    15607,
+    "shown"
+   ],
+   [
+    16236,
+    "lingering"
+   ],
+   [
+    19263,
+    "idle"
+   ],
+   [
+    20254,
+    "acquiring"
+   ],
+   [
+    20563,
+    "shown"
+   ],
+   [
+    21242,
+    "lingering"
+   ],
+   [
+    24250,
+    "idle"
+   ],
+   [
+    25290,
+    "acquiring"
+   ],
+   [
+    25608,
+    "shown"
+   ],
+   [
+    26352,
+    "lingering"
+   ],
+   [
+    29379,
+    "idle"
+   ],
+   [
+    30361,
+    "acquiring"
+   ],
+   [
+    30671,
+    "shown"
+   ],
+   [
+    31343,
+    "lingering"
+   ],
+   [
+    34376,
+    "idle"
+   ],
+   [
+    35417,
+    "acquiring"
+   ],
+   [
+    35728,
+    "shown"
+   ],
+   [
+    36353,
+    "lingering"
+   ],
+   [
+    39359,
+    "idle"
+   ],
+   [
+    40382,
+    "acquiring"
+   ],
+   [
+    40699,
+    "shown"
+   ],
+   [
+    41381,
+    "lingering"
+   ],
+   [
+    44427,
+    "idle"
+   ],
+   [
+    45168,
+    "acquiring"
+   ],
+   [
+    45481,
+    "shown"
+   ]
+  ],
+  "marks": [
+   [
+    207,
+    "drive comfort"
+   ],
+   [
+    6207,
+    "inComfort wb_dials"
+   ],
+   [
+    11207,
+    "inComfort wb_comfort_map"
+   ],
+   [
+    16206,
+    "inComfort g20_comfort"
+   ],
+   [
+    21208,
+    "inComfort wb_comfort"
+   ],
+   [
+    26207,
+    "drive sport"
+   ],
+   [
+    31209,
+    "drive comfort"
+   ],
+   [
+    36208,
+    "drive eco"
+   ],
+   [
+    41208,
+    "drive comfort"
+   ]
+  ]
+ }
+}
