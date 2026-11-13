@@ -8,8 +8,14 @@ Writes
   design/overlay/plan.dials.json     plan (schema planFile); conflicts left empty for headless.py --plan to fill in
   design/overlay/collar.dials.png    1920x720 grey: the collar's coverage, 0..255 (soft): where our black background
                                      stays (the 'collar' that hides the stock G20 dial graphics sticking out past our
-                                     dials, the band under the dials' faded bottoms, the shade at their inner edges);
-                                     0 = see-through. tools/bake_scene.py packs it black, quarter size.
+                                     dials, the band under the dials' faded bottoms; the shade at their inner edges
+                                     is WBBACK's now, package F); 0 = see-through. tools/bake_scene.py packs it black,
+                                     quarter size.
+  design/overlay/cover.dials.png     1920x720 grey, 0 / 255 (package F): black at full size over BMW's bottom lines,
+                                     hooks and grey dash, clear of the check-control frame, text and "i" by 3 px
+                                     (bottom_cover; needs the rectified photos 08 and 09). tools/bake_scene.py packs
+                                     COVER_BOX of it, full size.
+  docs/polish/f/hooks_keepout.png    the proof of that (masks only, no photo pixels)
   docs/overlay/dials_scheme.png      the scheme (our data and the G20 catalogue only; no photo pixels)
   bake/work/overlay/shots/dials_scheme_photo08.png   the same over rectified photo 08 (local only; git-ignored)
 and prints the per-element table used in docs/OVERLAY-PLAN-DIALS.md.
@@ -44,14 +50,30 @@ MAP_WIN = [748, 155, 1172, 612]                                 # the gap betwee
 # collar additions past the catalogue hulls: the stock '260' label reaches x 727 (bright pixels on rect 08 and 09);
 # structure.speedo's hull stops at x 704
 EXTRA_COLLAR = [[700, 66, 732, 110]]
-# never collar: the stock bottom line between our dial and BMW's frame corner (the hook) at each side of the middle,
-# so it runs on under our dial instead of stopping short (the stray dash right of the message panel; photo 16). The
-# hulls only hold empty face there (rect 14, bench g20=startup|driving).
-LINE_OPEN = [[596, 560, 712, 656], [1210, 560, 1330, 656]]
-# the collar's look (polish B): soft edges, the shade at our dials' inner edges, the band under their faded bottoms
+# (package F: polish B's LINE_OPEN, which kept the collar off the stock bottom line between our dials and BMW's hooks,
+# is gone: the owner wants that line, the hooks and the grey dash away. See COVER_BOX below.)
+# the collar's look (polish B): soft edges, the band under their faded bottoms
 GROW, SOFT = 6, 4.0          # px the collar grows past the stock graphics, then a Gaussian of this sigma (px)
+# The shade at our dials' inner edges is no longer baked here (package F): WBBACK draws it (u_shade) at the strength the
+# "dialShade" setting picks (shared/hud.js WB_SHADE; "normal" = polish B's 0.80 at the rim, falling off over 20 px).
+# These are its numbers, for the scheme and the report; design/gen_6wb.py passes the same y span and keep-out box.
 SHADE_K, SHADE_L = 0.80, 20.0  # the shade beside our dials toward the middle: strength at the rim, falloff (px)
 SHADE_Y = (575.0, 605.0)     # ... fading out over these y, above the message panel and the check-control 'i'
+SHADE_KO = [1253, 588, 1273, 630]   # ... and none on BMW's right "i" (assist.info_tacho grown 3 px)
+
+# ---- package F: the full-size cover (design/overlay/cover.dials.png; docs/POLISH-F-REPORT.md) ----
+# Black over BMW's stock bottom lines between our dials, their curved end hooks and the grey dash, at full size (the
+# collar is quarter size, too soft next to the check-control frame). Measured on the rectified photos (bake/work, not
+# in git): 09 (no message) gives the lines and hooks, 08 (a message shown) the pixels BMW's message frame, its text
+# and its left "i" use. The cover is the line / hook pixels grown COVER_GROW px, minus those frame / text / "i"
+# pixels (with their anti-aliased edge, FRAME_AA px) grown a COVER_MARGIN px margin, minus every other G20 item we
+# show (catalogue polygons grown 3 px). The check-control panel's catalogue polygon is not used for this: it is a hull
+# round the whole panel and holds the hooks; the frame, text and "i" pixels are its exact shape.
+COVER_BOX = [588, 598, 1324, 662]   # x0, y0, x1, y1: the texture's box (design/gen_6wb.py COVER, tools/bake_scene.py)
+COVER_REGIONS = [[590, 598, 766, 658], [1148, 598, 1322, 658]]   # where the lines and hooks are looked for
+PANEL_BOX = [696, 596, 1224, 696]   # where photo 08's frame, text and "i" are looked for (the straight lines are not)
+LINE_LUMA, FRAME_LUMA = 60, 100     # luma thresholds: line / hook pixels on 09, frame / text / "i" cores on 08
+COVER_GROW, FRAME_AA, COVER_MARGIN = 2, 2, 3
 # context elements that are not stock dial graphics: they never go into the collar. panel.background (added from the
 # G20 parts, tools/overlay/parts_elements.json) is the stock background under everything; our see-through background
 # shows it by design, and the collar itself takes its colour (tools/bake_scene.py).
@@ -239,8 +261,6 @@ def main():
             stock |= S[g['id']]
     for r in EXTRA_COLLAR:
         stock[r[1]:r[3], r[0]:r[2]] = True
-    for r in LINE_OPEN:
-        stock[r[1]:r[3], r[0]:r[2]] = False
     # keep-out: every G20 item we show (and BMW's sign, for its window) gets no collar, shade or band, nor 3 px round it
     shown = np.zeros((H, W), bool)
     for g in show:
@@ -259,11 +279,15 @@ def main():
     outd = np.minimum(out_sp, out_rv)
     band = ((outd <= 1.0) & (yy >= CUT_Y - CUT_FADE - 4) & (yy < CUT_Y)).astype(np.float32)
     band = blur(band, 1.5)
-    # the shade: our dials' inner edges darken the G20's middle toward them, as the stock map's veil does at its edges
+    # the shade: our dials' inner edges darken the G20's middle toward them, as the stock map's veil does at its edges.
+    # Package F: drawn by WBBACK now ("dialShade"), not baked; computed here at "normal" for the scheme and the table
     inner = ((xx > SP[0]) & (xx < RV[0])).astype(np.float32)
     vy = 1.0 - np.clip((yy - SHADE_Y[0]) / (SHADE_Y[1] - SHADE_Y[0]), 0.0, 1.0)
     rim = np.clip((outd + 3.0) / 3.0, 0.0, 1.0)                                # from just inside our rim outward
     shade = SHADE_K * np.exp(-np.maximum(outd, 0.0) / SHADE_L) * inner * vy * rim
+    sk = np.zeros((H, W), bool)
+    sk[SHADE_KO[1]:SHADE_KO[3], SHADE_KO[0]:SHADE_KO[2]] = True
+    shade[sk] = 0.0
     # the patches: the rect grown 5 px, a 1 px blur, so its edge still covers the item fully after the bake's quarter
     # size (the keep-out still holds it 3 px off the check-control outline)
     patch = np.zeros((H, W), np.float32)
@@ -271,8 +295,11 @@ def main():
         patch[max(r[1] - 5, 0):r[3] + 5, max(r[0] - 5, 0):r[2] + 5] = 1.0
     patch = blur(patch, 1.0)
     ko = np.maximum(np.clip(blur(dilate(shown, 3).astype(np.float32), 1.5) * 2.0, 0.0, 1.0), sign_clear)
-    alpha = np.maximum(np.maximum(np.maximum(soft, band), shade), patch) * (1.0 - ko)
-    Image.fromarray(np.round(alpha * 255).astype('uint8')).save(rel('design/overlay/collar.dials.png'), optimize=True)
+    baked = np.maximum(np.maximum(soft, band), patch) * (1.0 - ko)        # the collar texture: no shade (package F)
+    Image.fromarray(np.round(baked * 255).astype('uint8')).save(rel('design/overlay/collar.dials.png'), optimize=True)
+    # package F: the full-size cover of the bottom lines, hooks and dash
+    cov = bottom_cover(S, show, sign_clear)
+    alpha = np.maximum(np.maximum(baked, shade * (1.0 - ko)), cov)       # what the car draws (dialShade "normal")
     collar = alpha >= 0.5
     left = stock & ~U & ~collar
 
@@ -299,6 +326,120 @@ def main():
         os.makedirs(rel('bake/work/overlay/shots'), exist_ok=True)
         scheme(U, alpha, G, pg, show, ph, rel('bake/work/overlay/shots/dials_scheme_photo08.png'))
     return 0
+
+
+def luma(path):
+    a = np.asarray(Image.open(path).convert('RGB')).astype(np.float32)
+    return 0.299 * a[..., 0] + 0.587 * a[..., 1] + 0.114 * a[..., 2]
+
+
+def boxm(b):
+    m = np.zeros((H, W), bool)
+    m[b[1]:b[3], b[0]:b[2]] = True
+    return m
+
+
+def bottom_cover(S, show, sign_clear):
+    """Package F: design/overlay/cover.dials.png (0 / 255 at full size), BMW's bottom lines, hooks and grey dash under
+    black, never on the message frame, its text or its left "i" (photo 08) nor within COVER_MARGIN px of them, nor on
+    any other G20 item we show. Needs the rectified photos 08 and 09 (bake/work, tools/overlay/rectify.py); without
+    them the committed file is kept. Also writes the proof: docs/polish/f/hooks_keepout.png (masks only, no photo
+    pixels) and bake/work/polish-f/hooks_keepout_photo.png (over photos 08 and 09, local)."""
+    out = rel('design/overlay/cover.dials.png')
+    p8, p9 = rel('bake/work/overlay/rect/08.png'), rel('bake/work/overlay/rect/09.png')
+    if not (os.path.exists(p8) and os.path.exists(p9)):
+        print('cover: rectified photos 08 / 09 missing, keeping %s as it is' % out)
+        return np.asarray(Image.open(out).convert('L'), np.float32) / 255.0
+    L8, L9 = luma(p8), luma(p9)
+    reg = np.zeros((H, W), bool)
+    for b in COVER_REGIONS:
+        reg |= boxm(b)
+    lines = (L9 > LINE_LUMA) & reg                          # the lines, hooks and dash with no message (09)
+    core = (L8 > FRAME_LUMA) & boxm(PANEL_BOX)              # the frame, text and "i" with a message (08)
+    frame = dilate(core, FRAME_AA)                          # ... with their anti-aliased edge
+    keep = dilate(core, FRAME_AA + COVER_MARGIN)            # ... and the margin
+    other = np.zeros((H, W), bool)                          # every other G20 item we show, as the collar's keep-out
+    for g in show:
+        if g['id'] not in ('map.region', 'assist.cc_panel', 'bottom.cc_info'):
+            other |= S[g['id']]
+    other = dilate(other, 3) | sign_clear
+    cover = dilate(lines, COVER_GROW) & ~keep & ~other
+    outside = cover & ~boxm(COVER_BOX)
+    if outside.any():
+        raise SystemExit('cover: %d px outside COVER_BOX' % outside.sum())
+    Image.fromarray((cover * 255).astype('uint8')).save(out, optimize=True)
+    left = lines & ~cover
+    shared = lines & frame
+    ys, xs = np.nonzero(left)
+    print('cover: %d line / hook / dash px (photo 09); %d covered, %d left (x %s, y %s); %d of them lie on the frame, '
+          'text or "i" pixels (photo 08), the rest within %d px of them' % (
+              lines.sum(), (lines & cover).sum(), left.sum(), '%d-%d' % (xs.min(), xs.max()) if len(xs) else '-',
+              '%d-%d' % (ys.min(), ys.max()) if len(ys) else '-', shared.sum(), COVER_MARGIN))
+    print('cover: frame / text / "i" px under the cover: %d (min distance from the cover %.1f px); photo 08 luma under '
+          'the cover inside the panel: mean %.1f, max %.1f (the background outside it: %.1f)' % (
+              (cover & frame).sum(), min_dist(cover, frame), L8[cover & boxm(PANEL_BOX)].mean(),
+              L8[cover & boxm(PANEL_BOX)].max(), L8[boxm([600, 600, 690, 636])].mean()))
+    proof(lines, frame, keep, cover, left, L8, L9)
+    return cover.astype(np.float32)
+
+
+def min_dist(a, b):
+    """The smallest distance (px, between pixel centres) from any pixel of a to any pixel of b."""
+    ya, xa = np.nonzero(a)
+    yb, xb = np.nonzero(b)
+    if not len(xa) or not len(xb):
+        return float('inf')
+    best = float('inf')
+    for i in range(0, len(xa), 512):
+        d = np.hypot(xa[i:i + 512, None] - xb[None, :], ya[i:i + 512, None] - yb[None, :])
+        best = min(best, float(d.min()))
+    return best
+
+
+def proof(lines, frame, keep, cover, left, L8, L9):
+    """The hook / frame overlay, both sides, 6x: (masks) and (over photos 08 and 09, local only)."""
+    crops = [(584, 596, 800, 690), (1136, 596, 1330, 690)]
+    S_ = 6
+
+    def paint(base):
+        a = base.copy()
+        a[keep & ~frame] = a[keep & ~frame] * 0.35 + np.array([255, 150, 0]) * 0.65      # the 3 px margin
+        a[frame] = a[frame] * 0.25 + np.array([235, 40, 40]) * 0.75                      # frame, text, "i" (08)
+        a[cover] = a[cover] * 0.30 + np.array([30, 110, 255]) * 0.70                     # our black cover
+        a[left] = np.array([255, 235, 0])                                                 # hook px left uncovered
+        return a
+
+    def sheet(rows, out, labels):
+        ims = []
+        for a in rows:
+            im = Image.fromarray(a.clip(0, 255).astype('uint8'))
+            parts = [im.crop(c).resize(((c[2] - c[0]) * S_, (c[3] - c[1]) * S_), Image.NEAREST) for c in crops]
+            w = sum(p.width for p in parts) + 12
+            row = Image.new('RGB', (w, parts[0].height), (40, 40, 48))
+            x = 0
+            for p in parts:
+                row.paste(p, (x, 0))
+                x += p.width + 12
+            ims.append(row)
+        f = font(16)
+        o = Image.new('RGB', (ims[0].width, sum(i.height + 30 for i in ims)), (24, 24, 30))
+        d = ImageDraw.Draw(o)
+        y = 0
+        for im, lab in zip(ims, labels):
+            d.text((8, y + 6), lab, fill=(230, 230, 230), font=f)
+            o.paste(im, (0, y + 30))
+            y += im.height + 30
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        o.save(out, optimize=True)
+
+    key = ('red: BMW\'s frame, text and "i" (photo 08, message shown); orange: 3 px margin; blue: our black cover; '
+           'yellow: hook px left uncovered')
+    m = np.zeros((H, W, 3), np.float32)
+    m[lines] = (200, 200, 200)                                                            # line / hook px (09)
+    sheet([paint(m)], rel('docs/polish/f/hooks_keepout.png'),
+          ['grey: BMW\'s lines and hooks (photo 09, no message). ' + key])
+    sheet([paint(np.repeat(L9[..., None], 3, -1) * 0.8), paint(np.repeat(L8[..., None], 3, -1) * 0.8)],
+          rel('bake/work/polish-f/hooks_keepout_photo.png'), ['photo 09 (no message). ' + key, 'photo 08 (message). ' + key])
 
 
 COL = {'reveal': (70, 220, 120), 'keep-clear': (255, 160, 40), 'cover': (150, 150, 160), 'drop': (230, 70, 70),

@@ -35,7 +35,8 @@ SIGN_DY = 0.36              # the road signs under the speed dial's hub, this ma
 # Comfort's middle window (package A): the box between the dials, symmetric about x 960 (BMW's map: x 592-1303,
 # y 161-612; the dials cover its sides), its soft edges in px (top, sides, foot, off the dials' rims), and the line at
 # its foot: "hair" (a hairline fading out at both ends, as the 6WB's info bar line), "chrome" (a rod shaded as our
-# bezels), "none" (the map / floor just fades to black) or "glass" (the earlier baked line)
+# bezels), "none" (the map / floor just fades to black) or "glass" (the earlier baked line). FOOT is the default only:
+# the "wbFoot" setting picks it on the car (shared/hud.js _wbFoot; package F)
 WINDOW = [592, 158, 736, 442]
 FADE = [150, 40, 56, 60]
 FOOT = "hair"
@@ -174,6 +175,43 @@ MINI_DY = -20                  # the minis move up so BMW's range ("467 km") cle
 # BMW's speed-limit sign (centre 539, 622, r 41) and check-control "i" ([1256, 591, 1270, 627]): the soft windows
 # that show them through our dials (tools/overlay/plan_dials.py keeps the collar off both)
 SIGN_WIN, I_WIN, WIN_SOFT = [539, 622, 44], [1254, 589, 1272, 629], 4
+# --- package F (docs/POLISH-F-REPORT.md): 6WB Dials + G20's bottom row ---
+# the full-size cover over BMW's bottom lines, hooks and grey dash (tools/overlay/plan_dials.py COVER_BOX, packed by
+# tools/bake_scene.py as scene "cover"): x, y, w, h
+COVER = [588, 598, 736, 64]
+# the shade at our dials' inner edges ("dialShade"; WBBACK u_shade): it fades out over these y, and stays off BMW's
+# right "i" (plan_dials SHADE_Y, SHADE_KO)
+SHADE = {"y": [575, 605], "ko": [1253, 588, 1273, 630]}
+# BMW's bottom-row items we may draw ourselves at their stock places (D rows 11-13; catalogue bboxes grown 4 px): the
+# black patch under ours ("patches", WBBACK u_pat), shown while the item is ours ("own:<item>": ownRange / ownClock /
+# ownTemp). Our text's baseline sits on BMW's (y 697), BMW's size: values in wb_row (Arimo Bold 44, caps ~32 px as
+# BMW's), units in wb_val (Arimo Bold 36). The pump is on connection 0, so the range's box may run under it (a sheet
+# holds no overlapping members) and a 4-digit range still fits
+OWN = {"range": [132, 662, 307, 703], "clock": [340, 662, 455, 704], "temp": [1536, 662, 1667, 705]}
+ROW_BASE = 697
+# our drive-mode label above the gear tray (D row 15) and the gear in the tray (D row 17), on the tacho
+MODE_C, TRAY_C = (1508, 527), (1508, 583)
+
+def base_at(font, baseline):
+    """The centre y of a text box of `font` whose glyphs sit on `baseline`."""
+    f = json.load(open(os.path.join(FONTS, font + '.json')))
+    return baseline - f['baseline'] + f['cellHeight'] / 2.0
+
+def own_row():
+    """Our range (with the pump), clock and outside temperature at BMW's places, each shown while it is ours."""
+    vy, uy = base_at("wb_row", ROW_BASE), base_at("wb_val", ROW_BASE)
+    return [
+        dict(icon("own_range_icon", "fuel", 150, 682, 0, "fg", w=30, h=34), toggle="own:range"),
+        text("own_range", 249, vy, 110, "{{range}}", "wb_row", align="right", conn=1, toggle="own:range"),
+        text("own_range_u", 253, uy, 54, "{{u:distLc}}", "wb_val", align="left", conn=1, toggle="own:range"),
+        text("own_clock", 397, vy, 124, "{{time}}", "wb_row", conn=1, toggle="own:clock"),
+        text("own_temp", 1615, vy, 110, "{{ambient1}}", "wb_row", align="right", conn=2, toggle="own:temp"),
+        text("own_temp_u", 1619, uy, 46, "{{u:temp}}", "wb_val", align="left", conn=2, toggle="own:temp"),
+        text("mode", MODE_C[0], MODE_C[1], 240, "{{mode}}", "wb_capb", conn=2, toggle="modeLabel"),
+        text("gear", TRAY_C[0], TRAY_C[1], 120, "{{gear}}", "wb_gear", conn=2, toggle="gearTray=gear"),
+        text("gear_l", TRAY_C[0], TRAY_C[1], 120, "{{stage}}", "wb_gear", conn=2, toggle="gearTray=letter"),
+    ]
+# --- end package F ---
 
 def dials():
     """6WB Dials + G20 (docs/OVERLAY-PLAN-DIALS.md): our four dials and road signs; the G20 draws everything else round
@@ -181,13 +219,19 @@ def dials():
     under our dials' faded bottoms, a soft shade at their inner edges); both big dials fade out toward y 656 so BMW's
     bottom row shows. Our signs sit under the speed hub as in 6WB Comfort and close the round window over BMW's sign;
     while we have no limit (app.json config.limit unset) the window opens and BMW's shows. A small soft window shows
-    BMW's check-control "i"."""
+    BMW's check-control "i". Package F: BMW's stock bottom lines, their hooks and the grey dash are under black (the
+    cover); the range, clock and outside temperature are ours or BMW's by setting (ownRange / ownClock / ownTemp), ours
+    drawn at BMW's places over black patches; our drive-mode label ("modeLabel") and the gear in our tray ("gearTray")
+    are on the tacho (this layout only: the others draw no gear)."""
     global FU, OT
     FU, OT = (FU[0], FU[1] + MINI_DY), (OT[0], OT[1] + MINI_DY)
     W = [
         {"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
          "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "comfort", "color": "accent",
-         "collar": {"tex": "collar", "x": 0, "y": 0, "w": 1920, "h": 720}},
+         "collar": {"tex": "collar", "x": 0, "y": 0, "w": 1920, "h": 720},
+         # package F: BMW's bottom lines, hooks and dash under black; the shade's setting; patches under our row items
+         "cover": {"tex": "cover", "x": COVER[0], "y": COVER[1], "w": COVER[2], "h": COVER[3]}, "shade": SHADE,
+         "patches": [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")]},
         dial("speedo", SP, "comfort", ringW=10, base=base("speedo_d", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
              cut={"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": WIN_SOFT, "cover": "limit"},
              measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10, start=SPD_START, sweep=SPD_SWEEP),
@@ -217,6 +261,7 @@ def dials():
         text("ready", RV[0] - 0.63 * R, RV[1] + 0.25 * R, 110, "READY", "wb_capb", conn=2),
         text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "OFF", "wb_cap", "dim", conn=2),
     ]
+    W += own_row()                   # package F: the bottom row's items ours, the mode label, the gear in the tray
     FU, OT = (FU[0], FU[1] - MINI_DY), (OT[0], OT[1] - MINI_DY)
     return W
 

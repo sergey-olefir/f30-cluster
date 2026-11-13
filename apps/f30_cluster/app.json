@@ -159,6 +159,132 @@
       "default": false
     },
     {
+      "key": "wbFoot",
+      "label": "6WB window: line at its foot",
+      "type": "choice",
+      "default": "hair",
+      "options": [
+        [
+          "hair",
+          "Hairline"
+        ],
+        [
+          "chrome",
+          "Chrome rod"
+        ],
+        [
+          "none",
+          "None"
+        ],
+        [
+          "glass",
+          "Glass bar"
+        ]
+      ]
+    },
+    {
+      "key": "dialShade",
+      "label": "Dials + G20: shade at the dials' inner edges",
+      "type": "choice",
+      "default": "normal",
+      "options": [
+        [
+          "off",
+          "Off"
+        ],
+        [
+          "weak",
+          "Weak"
+        ],
+        [
+          "normal",
+          "Normal"
+        ],
+        [
+          "strong",
+          "Strong"
+        ]
+      ]
+    },
+    {
+      "key": "ownRange",
+      "label": "Dials + G20: range",
+      "type": "choice",
+      "default": "ours",
+      "options": [
+        [
+          "bmw",
+          "BMW's"
+        ],
+        [
+          "ours",
+          "Ours (6WB style)"
+        ]
+      ]
+    },
+    {
+      "key": "ownClock",
+      "label": "Dials + G20: clock",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Ours once the time zone is set, else BMW's"
+        ],
+        [
+          "bmw",
+          "BMW's"
+        ],
+        [
+          "ours",
+          "Ours (6WB style)"
+        ]
+      ]
+    },
+    {
+      "key": "ownTemp",
+      "label": "Dials + G20: outside temperature",
+      "type": "choice",
+      "default": "ours",
+      "options": [
+        [
+          "bmw",
+          "BMW's"
+        ],
+        [
+          "ours",
+          "Ours (6WB style)"
+        ]
+      ]
+    },
+    {
+      "key": "modeLabel",
+      "label": "Dials + G20: drive mode above the gear",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "gearTray",
+      "label": "Dials + G20: gear in the tray",
+      "type": "choice",
+      "default": "gear",
+      "options": [
+        [
+          "gear",
+          "Gear and number (D4)"
+        ],
+        [
+          "letter",
+          "Letter only (D)"
+        ],
+        [
+          "empty",
+          "Empty"
+        ]
+      ]
+    },
+    {
       "key": "inComfort",
       "label": "In Comfort",
       "type": "choice",
