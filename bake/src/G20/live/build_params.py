@@ -239,6 +239,9 @@ def main():
             'sigma_lo': P(fg['shape']['s_lo'], 'medium', ['08', '09'], 'same on the lower-value side'),
             'q0': P(fg['shape']['q0'], 'medium', ['08', '09'], 'full strength from the tick ring inward to this depth (px along the ray)'),
             'q1': P(fg['shape']['q1'], 'medium', ['08', '09'], 'smoothstep fall to 0 at this depth'),
+            'q_in': P(34, 'medium', ['39', '40'], 'car3 J: no glow outside this depth (px inside the tick ring), full 10 px '
+                      'further in: on 39/40 the tick zone between the band and the ticks stays dark by the pointer (the '
+                      'old fit lit it from the ring)'),
             'res': P(0.5, 'none', [], 'render scale of the glow buffer (0.5 = half resolution, upscaled bilinear)'),
             'face': P({'speedo': s_face, 'tacho': t_face}, 'medium', ['08', '09'],
                       'clip polygon: the tick ring pushed 7 px out to the bezel, then the dial face\'s inner edge (the map side), '
@@ -262,9 +265,12 @@ def main():
             'dir': P({'f': mini_tab['f'], 'v': mini_tab['dir']}, 'medium', ['08', '09', '14'],
                      'needle direction by f (deg, image atan2 of the inward direction, fuel side; the oil mini mirrors it). The '
                      'needles are not rays from one point within 2-3 deg, so the measured directions are interpolated'),
-            'needle': P({'w0': 10.0, 'w1': 4.5, 'rgb': [255, 112, 98], 'tip_rgb': [190, 78, 74]}, 'medium', ['08', '09', '14'],
-                        'tapered red bar: width at the frame end / at the tip (4x crops), core colour (median of 6 needles), the '
-                        'tip dims'),
+            # car3 J: refitted on 39 / 40
+            'needle': P({'w0': 9.0, 'w1': 5.5, 'rgb': [245, 92, 80], 'tip_rgb': [185, 70, 62]}, 'strong',
+                        ['08', '09', '14', '39', '40'],
+                        'tapered red bar: width at the frame end / at the tip, core colour, the tip dims. car3 J: refitted '
+                        'on the close-up 40 (5 photo px per panel px; half-max 9 px at the frame end, 7.5 px a quarter from '
+                        'the tip) and 39 (core 244-248, 90-94, 80-82); was 10 / 4.5, [255, 112, 98]'),
             'fill': P({'enabled': True, 'rgb': [205, 175, 180], 'alpha': 1.0, 'd0': 8, 'sigma': 36, 'depth': 95}, 'medium', ['08', '09', '14'],
                       'the lit fill below the needle (toward f = 0): colour, alpha at the frame, then gaussian fall with depth '
                       'along the ray (08 fuel: 1.0 at 8 px, 0.56 at 35, 0.21 at 55, 0.05 at 75). Gone above the needle and in 14\'s '

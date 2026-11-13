@@ -9,10 +9,15 @@ design/gen_g20.py needs (also written to design/g20_geo.json).
                                              black, opaque over the whole gauge so BMW's own pointer under it never
                                              shows; see-through elsewhere, and over BMW's speed-limit sign and its
                                              check-control "i" (they show through)
-  g20_lut                                    256 x 18 RGBA8, sampled nearest: entries 0-7 (two rows each, x and y)
+  g20_lut                                    256 x 20 RGBA8, sampled nearest: entries 0-7 (two rows each, x and y)
                                              the pointers' and needles' tip and tail (panel px x 16 in R, G) for the value 0..1 in 256
                                              steps (speedo, tacho, fuel, oil); entry 8 the rev band: per angle bin about
-                                             the tacho's centre, the value there (16 bit) and the band's radius
+                                             the tacho's centre, the value there (16 bit) and the band's radius;
+                                             entry 9 (car3 J) the tick ring's radius per image angle about each
+                                             dial's centre, over -pi..pi (speedo in its first row, tacho in its second)
+
+car3 J (2026-11-13, docs/CAR3-J-REPORT.md): the tacho bakes the stock layout's line under the mode label and covers
+BMW's own bottom-row mode label (the centre one is ours now); the pointer glow is the simulation's angular wedge.
 """
 import base64, json, math, os
 import numpy as np
@@ -86,7 +91,12 @@ def composite(box, ids, face=None, holes=(), area=None):
     alpha = np.asarray(Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilterBlur()), np.float32) / 255.0
     for kind, g in holes:                      # BMW's own items under us that must show: cut out
         yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
-        if kind == 'round':
+        if kind == 'patch':                    # car3 J: the reverse, an opaque black box over a BMW item we redraw
+            bx0, by0, bx1, by1 = g[0] - x0, g[1] - y0, g[2] - x0, g[3] - y0
+            inn = np.clip(np.minimum(np.minimum(xx - bx0, bx1 - xx), np.minimum(yy - by0, by1 - yy)) + 0.5, 0, 1)
+            rgb *= (1 - inn)[..., None]
+            alpha = np.maximum(alpha, inn)
+        elif kind == 'round':
             cx, cy, r = g[0] - x0, g[1] - y0, g[2]
             alpha *= np.clip(np.hypot(xx - cx, yy - cy) - r + 0.5, 0, 1)
         else:
@@ -109,7 +119,7 @@ def placed(box, id_):
     return out
 
 
-def mini_tex(box, line_id, fill_id):
+def mini_tex(box, line_id, fill_id, which=None):
     """A mini's two textures: its lines (straight alpha), and its fill as RGB over black with the mini's whole area in
     alpha (the shader shows the fill from 0 up to the needle, black above it). The fill's hard inner edge (the bench
     simulation's open point 3) is softened: the photos fade there."""
@@ -118,6 +128,14 @@ def mini_tex(box, line_id, fill_id):
     fa = np.asarray(Image.fromarray((fill[..., 3] * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(6)), np.float32) / 255.0
     fa = np.minimum(fa * 1.25, fill[..., 3] > 0.02)
     m = Image.fromarray((((lines[..., 3] > 0.03) | (fill[..., 3] > 0.03)) * 255).astype(np.uint8)).filter(ImageFilterMax(3))
+    if which:
+        # car3 J: the area also takes in every place BMW's own needle can be (its inner end reached past the fill's
+        # edge, so with our needle at another level, as when the tank sizes differ, a red stub of BMW's showed)
+        dr = ImageDraw.Draw(m)
+        for k in range(201):
+            tp, tl = mini(which, k / 200.0)
+            dr.line([(tp[0] - box[0], tp[1] - box[1]), (tl[0] - box[0], tl[1] - box[1])], fill=255,
+                    width=int(round(V(P['fuel']['needle'])['w0'])) + 6)
     inv = Image.eval(m, lambda v: 255 - v)
     pad = Image.new('L', (m.width + 2, m.height + 2), 255)
     pad.paste(inv, (1, 1))
@@ -207,7 +225,7 @@ def lut():
     N = 256
     # one number per texel, in R (high byte) and G (low byte), B 0, A 255: a texture loader may premultiply by alpha,
     # so no data rides in it. Entry e has two rows: 2e (x, or the first number) and 2e + 1 (y, or the second)
-    a = np.zeros((18, N, 4), np.uint8)
+    a = np.zeros((20, N, 4), np.uint8)
     a[..., 3] = 255
     def put(e, k, u, v):
         a[2 * e, k, :2] = enc(u, 16)
@@ -240,7 +258,51 @@ def lut():
         v = lerp(sc['values'][j], sc['values'][j + 1], t) / 7.0
         r = lerp(rad[j], rad[j + 1], t)
         put(8, k, v * 4095.0, r)
+    # car3 J: entry 9, the tick ring's radius about each dial's centre per image angle (-pi..pi in 256 bins), for the
+    # glow's depth window and the numerals' light (the simulation's ringTable; past the scale's ends: the end's)
+    for row, key in ((0, 'speedo'), (1, 'tacho')):
+        for k, r in enumerate(ring_radius(key, N)):
+            a[18 + row, k, :2] = enc(r, 16)
     return a, psi0, psi1
+
+
+def ring_radius(key, n=256):
+    D = P[key]
+    sc, C = V(D['scale']), V(D['centre'])
+    th = np.unwrap([math.atan2(p[1] - C[1], p[0] - C[0]) for p in sc['pts']])
+    rs = np.array([math.hypot(p[0] - C[0], p[1] - C[1]) for p in sc['pts']])
+    if th[-1] < th[0]:
+        th, rs = th[::-1], rs[::-1]
+    out = []
+    for k in range(n):
+        t = -math.pi + 2 * math.pi * (k + 0.5) / n
+        # the bin's angle in the scale's unwrapped range (or the nearer end)
+        cands = [t + 2 * math.pi * j for j in (-1, 0, 1)]
+        inside = [c for c in cands if th[0] <= c <= th[-1]]
+        if inside:
+            out.append(float(np.interp(inside[0], th, rs)))
+        else:
+            d0 = min(abs(c - th[0]) for c in cands)
+            d1 = min(abs(c - th[-1]) for c in cands)
+            out.append(float(rs[0] if d0 < d1 else rs[-1]))
+    return out
+
+
+def numeral_depths():
+    """car3 J: px inside the tick ring of every dial numeral's ink-box corners (bake/src/G20 params/numerals.json)."""
+    N = json.load(open(os.path.join(ROOT, 'bake', 'src', 'G20', 'structure', 'params', 'numerals.json')))
+    rings = {k: ring_radius(k) for k in ('speedo', 'tacho')}
+    out = []
+    for it in N['items']:
+        if it['text'] == 'km/h':
+            continue
+        C = V(P[it['dial']]['centre'])
+        x0, y0, x1, y1 = it['ink_box']
+        for x, y in ((x0, y0), (x1, y0), (x0, y1), (x1, y1), ((x0 + x1) / 2, (y0 + y1) / 2)):
+            t = math.atan2(y - C[1], x - C[0])
+            k = min(255, max(0, int((t + math.pi) / (2 * math.pi) * 256)))
+            out.append(rings[it['dial']][k] - math.hypot(x - C[0], y - C[1]))
+    return out
 
 
 def main():
@@ -248,13 +310,18 @@ def main():
     face = V(P['glow']['face'])
     sign = ('round', (539, 622, 46))               # BMW's speed-limit sign (design/overlay, wb_dials' window)
     info = ('box', (1250, 585, 1276, 633))         # its check-control "i" left of the tacho
+    # car3 J: BMW's bottom-row mode label (design/overlay assist.mode_label, under; drawn while a theme is connected)
+    # covered: ours sits in the tacho's centre as in the stock layout. Clear of the check-control panel's slanted
+    # right edge (x 1240 -> 1107, y 650 -> 691) and of the gear letter (x 1398).
+    mode_patch = ('patch', (1224, 657, 1364, 714))
     boxes = {
         'speedo': ((76, 30, 760, 656), ['speedo.glow', 'speedo.wing', 'speedo.frame', 'speedo.bottom_end', 'speedo_info_line',
                                         'speedo_numerals', 'speedo_scale_label'], face['speedo'], [sign],
                    ['speedo.frame', 'speedo.bottom_end']),
-        'tacho': ((1158, 33, 1842, 656), ['tacho.glow', 'tacho.wing', 'tacho.frame', 'tacho.bottom_end', 'rev_band',
-                                          'tacho_numerals', 'tacho_zero'], face['tacho'], [info],
-                  ['tacho.frame', 'tacho.bottom_end', 'rev_band']),
+        # car3 J: + the line under the mode label and gear (the stock layout's; BMW drops it while a theme is on)
+        'tacho': ((1158, 33, 1842, 714), ['tacho.glow', 'tacho.wing', 'tacho.frame', 'tacho.bottom_end', 'rev_band',
+                                          'tacho_info_line', 'tacho_numerals', 'tacho_zero'], face['tacho'],
+                  [info, mode_patch], ['tacho.frame', 'tacho.bottom_end', 'rev_band', 'tacho_info_line']),
     }
     geo = {}
     for name, (box, ids, fc, holes, area) in boxes.items():
@@ -262,18 +329,34 @@ def main():
         geo[name] = {'box': list(box)}
     # the minis: the lines (straight alpha) and, apart, the level's fill, lit live from 0 up to the needle
     for name, box in (('fuel', (6, 428, 204, 654)), ('oil', (1718, 432, 1913, 654))):
-        lines, fill = mini_tex(box, name + '_mini', name + '_mini.fill')
+        lines, fill = mini_tex(box, name + "_mini", name + "_mini.fill", name)
         save(name, lines)
         save(name + '_fill', fill)
         geo[name] = {'box': list(box)}
     a, psi0, psi1 = lut()
     save('lut', a.astype(np.float32) / 255.0, 'nearest')
     B, G = P['bar'], P['glow']
+    # car3 J: where the dial numerals lie inside the tick ring (px), for G20DIAL's numeral light
+    nq = numeral_depths()
+    print('numerals inside the tick ring: %.1f .. %.1f px' % (min(nq), max(nq)))
     geo.update({
         'speedoC': V(P['speedo']['centre']), 'tachoC': V(P['tacho']['centre']),
         'band': {'psi': [psi0, psi1], 'width': V(P['tacho']['band'])['width'], 'rgb': V(P['tacho']['band'])['rgb']},
         'bar': {'width': V(B['width']), 'rgb': V(B['rgb'])['night'], 'rim': V(B['rim']), 'shadow': V(B['shadow'])},
-        'glow': {'rgb': [c * V(G['gain']) for c in V(G['rgb'])['night']], 'sigma': V(G['sigma_hi'])},
+        # car3 J: the simulation's glow (live.js drawGlow): an angular wedge about the dial's centre, sigma in degrees
+        # on the higher / lower value side, full from the tick ring in to q0 px, a smoothstep to 0 at q1 (the port
+        # before took sigma_hi as px round the bar: a thin smear)
+        'glow': {'rgb': [c * V(G['gain']) for c in V(G['rgb'])['night']], 'sigma': V(G['sigma_hi']),
+                 'sigmaLo': V(G['sigma_lo']), 'q': [V(G['q0']), V(G['q1'])], 'qIn': V(G['q_in'])},
+        # car3 J: the band line by the pointer lit pink-white (39); sigma on the higher / lower value side (deg) and
+        # strength. Weak: one pointer position per dial was photographed
+        'bandLight': [28.0, 15.0, 0.85],
+        # car3 J: the numeral by the pointer is lit to white (39: the speedo's 0 at 238, the tacho's 1 at 217 with
+        # the pointer 7 deg from it, its 0 at 177 21 deg away; the others 162-179): gain over the grey, the angular
+        # sigma (deg), and the depth band (px inside the tick ring) where numerals lie: from 19 px, clear of the
+        # ticks' inner ends (the grey minor ticks would pass for numerals); the top numerals' outer corners (260 and 7,
+        # from 7 px) are left out
+        'numLight': {'gain': round(1 / 0.68 - 1, 3), 'sigma': 8.0, 'q': [19.0, round(max(nq) + 3, 1)]},
         'needle': V(P['fuel']['needle']), 'oilRange': V(P['oil']['range_c']),
     })
     json.dump(geo, open(GEO, 'w'), indent=1)

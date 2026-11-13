@@ -1586,6 +1586,14 @@ class HudApp {
                 const base = this.driveMode === 'sport' ? 'SPORT' : this.driveMode === 'eco' ? 'ECO PRO' : 'COMFORT';
                 return base + (this.driveVariant === 'plus' ? ' PLUS' : this.driveVariant === 'individual' ? ' INDIVIDUAL' : '');
             }
+            // car3 J: G20 Comfort's mode label in the tacho's centre, two lines as BMW prints it ("COMFORT" / "PLUS",
+            // photos 08, 09, 39); plain Comfort shows none (photo 41: no label in BMW's row while our theme ran)
+            case 'g20mode1': case 'g20mode2': {
+                if (!this.driveMode || (this.driveMode === 'comfort' && !this.driveVariant)) return '';
+                const base = this.driveMode === 'sport' ? 'SPORT' : this.driveMode === 'eco' ? 'ECO PRO' : 'COMFORT';
+                const v = this.driveVariant === 'plus' ? 'PLUS' : this.driveVariant === 'individual' ? 'INDIVIDUAL' : '';
+                return tok === 'g20mode1' ? base : v;
+            }
             case 'gear': {
                 const d = this.car.data();
                 if (d.stage === 'P' || d.stage === 'R' || d.stage === 'N') return d.stage;
@@ -2023,6 +2031,9 @@ class HudApp {
             c.uniform(ref, 'u_rimHi', [w.rimHi || 0]);
             c.uniform(ref, 'u_sh', w.shadow || [0, 1, 1, 1]);     // alpha, d0, lambda, dmax (px)
             c.uniform(ref, 'u_glow', w.glow ? rgb255(w.glow.slice(0, 3)).concat([w.glow[3]]) : [0, 0, 0, 0]);
+            c.uniform(ref, 'u_glow2', w.glow2 || [1, 0, 1, -10]); // car3 J: sigma low side (deg), depth q0, q1, outer start (px)
+            c.uniform(ref, 'u_nl', w.numLight || [0, 1, 0, 0]);   // car3 J: the numerals' light: gain, sigma (deg), depth band
+            c.uniform(ref, 'u_bl', w.bandLight || [1, 1, 0, 0]);  // car3 J: the band line's light: sigma hi, lo (deg), strength
             c.uniform(ref, 'u_band', w.band ? [w.band[0], w.band[1], w.band[2], 0] : [0, 1, 0, 0]);
             c.uniform(ref, 'u_bandC', rgb255(w.bandC || [0, 0, 0]));
         } else if (w.type === 'wbsign') {
