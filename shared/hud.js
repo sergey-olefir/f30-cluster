@@ -2639,4 +2639,87 @@ function dimTheme(theme, k) {
 function pad2(n) { return n < 10 ? '0' + n : String(n); }
 function mib(bytes) { return (bytes / 1048576).toFixed(1) + ' MiB'; }
 
+// ---- car3 K: how a switch treats the panel's slot (docs/CAR3-K-REPORT.md) -------------------------------------------
+// OFF unless <data dir>/car3k.json says { "slot": "keep" } or { "slot": "reseat" } (read at every rebuild, so it can be
+// set and cleared on the car without a reinstall; delete the file to go back). Without the file nothing here runs and
+// the app behaves exactly as before.
+// Why: BMW's black box over the tacho hub (overlay.black_box) was absent when the theme was already on at start-up and
+// present later in the same drive. cluster-render puts every layer of every client into one scene in slot 0x203 and asks
+// the KOMBI for that slot while any layer wants it, releasing it panel_linger_ms (3 s) after none does. A rebuild drops
+// all our layers and makes the new ones a few ms later (the bench: 0-25 ms), so a switch normally keeps the slot; what
+// the KOMBI does with a fresh mapping is not known. The two modes are the two car tests:
+//   keep    a tiny transparent effect layer on its own connection (index KEEP_CONN), made before the first drop and
+//           kept across rebuilds, so our app never lets cluster-render release and re-ask the slot during a switch
+//           (dropped while the layout is "off" or unusable, so BMW's own cluster and the HUD get the slot as today).
+//   reseat  a switch to another layout (picked, or by drive mode) is built the way start-up builds it: every layer is
+//           dropped, the slot is left to be released (target idle, at least RESEAT_MIN_MS, at most RESEAT_MAX_MS), and
+//           only then is the new layout made, so the KOMBI maps our scene afresh. BMW's own cluster shows meanwhile.
+const CAR3K_FILE = 'car3k.json';
+const CAR3K_KEEP_CONN = 3;                 // the fourth connection (<app id>_4): no layout uses it, so the keeper takes no layout's slot
+const CAR3K_RESEAT_MIN_MS = 3800;          // cluster-render's panel_linger_ms (3000) plus a margin
+const CAR3K_RESEAT_MAX_MS = 7000;          // give up waiting for 'idle' (a target event may not reach a client with no layer)
+const CAR3K_KEEP_FS = 'precision mediump float;\nvarying vec2 v_uv;\nvoid main() { gl_FragColor = vec4(0.0) * v_uv.x; }\n';
+{
+    const inner = HudApp.prototype._rebuildInner;
+    const modeOf = (app) => {
+        let m = null;
+        try { m = JSON.parse(fs.readFileSync(path.join(app.ctx.dataDir || '.', CAR3K_FILE), 'utf8')).slot; } catch (e) { /* no file: off */ }
+        m = m === 'keep' || m === 'reseat' ? m : null;
+        if (m !== app.car3kMode) { app.car3kMode = m; app.log.info('car3 K: slot mode ' + (m || 'off (as before)')); }
+        return m;
+    };
+    const keep = (app, on) => {
+        const k = app.car3kKeeper;
+        if (!on) {
+            if (k) { app._guard('car3 K keeper drop', () => k.c.drop(k.ref)); app.car3kKeeper = null; app.log.info('car3 K: keeper dropped'); }
+            return;
+        }
+        if (k) return;
+        const c = app._clientAt(CAR3K_KEEP_CONN);
+        const ref = c.effect({ target: app.target, klass: 'ambient', z: -1000, x: 0, y: 0, w: 1, h: 1, prewarm: 1, fs: CAR3K_KEEP_FS });
+        if (!ref) { app.log.warn('car3 K: keeper layer refused'); return; }
+        app.car3kKeeper = { c, ref };
+        app.log.info('car3 K: keeper layer made on connection ' + (CAR3K_KEEP_CONN + 1) + ' (keeps the panel wanted across rebuilds)');
+    };
+    HudApp.prototype._rebuildInner = function () {
+        const mode = modeOf(this), fresh = this.car3kFresh === true;
+        this.car3kFresh = false;
+        if (!this.client.ready) return inner.call(this);
+        const next = this._layoutName(), drawn = (n) => !!n && n !== 'off';
+        if (mode !== 'keep' && this.car3kKeeper) keep(this, false);
+        if (this.car3kReseatT) {                  // waiting for the slot's release: the timer builds what is asked for then
+            if (mode === 'reseat') return undefined;
+            clearTimeout(this.car3kReseatT); this.car3kReseatT = null;
+        }
+        if (mode === 'keep') {
+            let usable = drawn(next);
+            if (usable) { try { this.layouts.load(next); } catch (e) { usable = false; } }
+            if (usable) keep(this, true);
+            const r = inner.call(this);
+            if (!usable) keep(this, false);
+            return r;
+        }
+        const ts = this.targetState;
+        if (mode === 'reseat' && !fresh && drawn(this.activeName) && drawn(next) && next !== this.activeName &&
+            (!ts || ts.state === 'shown' || ts.state === 'lingering')) {      // !ts: no target event yet (the bench sends none)
+            const from = this.activeName, t0 = Date.now();
+            this._layerRefs().forEach((r) => this._guard('car3 K drop', () => r.c.drop(r.ref)));
+            this.placed = []; this.widgets.clear(); this.sheets = []; this.layerStates.clear();
+            this.log.info('car3 K: reseat "' + from + '" -> "' + next + '": all layers dropped, waiting for the slot to be released');
+            const wait = () => {
+                const s = this.targetState && this.targetState.state, dt = Date.now() - t0;
+                if (dt < CAR3K_RESEAT_MIN_MS || (dt < CAR3K_RESEAT_MAX_MS && s !== 'idle')) { this.car3kReseatT = setTimeout(wait, 250); return; }
+                this.car3kReseatT = null;
+                this.log.info('car3 K: reseat: building after ' + dt + ' ms (target ' + (s || 'unknown') + ')');
+                this.car3kFresh = true;          // this one builds, whatever the (possibly stale) target state says
+                this._rebuild();
+            };
+            this.car3kReseatT = setTimeout(wait, 250);
+            return undefined;
+        }
+        return inner.call(this);
+    };
+}
+// ---- end car3 K ----------------------------------------------------------------------------------------------------
+
 module.exports = HudApp;
