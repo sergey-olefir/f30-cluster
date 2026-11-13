@@ -2,7 +2,7 @@
   "id": "f30_cluster",
   "title": "F30 Cluster",
   "description": "Instrument cluster themes after the F-series 6WB look: Comfort, Sport and Eco Pro, following the drive mode",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "vendor": "custom",
   "loggingId": "OAF3",
   "iconGlyph": "F30",
