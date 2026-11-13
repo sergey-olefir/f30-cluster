@@ -7,6 +7,22 @@ from fit_soft import eval_bg
 
 
 WING_BLUR = 8.0      # px: the wing face's smoothing (polish C)
+# car3 J: the band glow's reach outward (toward the ticks), against the 08/09 fit: on the close-up 40 the glow falls to
+# 0.39 / 0.14 / 0.05 of the band line's peak at 6 / 12 / 18 px out, where 08/09 (and the old layer) gave 0.62 / 0.36 /
+# 0.15. 08/09 were taken from afar (0.86 photo px per panel px), so the lens's halo spread twice as far in panel px.
+# The table is read at GLOW_CORE + (d - GLOW_CORE) * GLOW_K past the line's core.
+GLOW_CORE, GLOW_K = 2.0, 1.9
+# car3 J: the band and its glow fade along the top toward the scale's end (260 / 7): on 39 the band's red is about
+# 0.8 of the sides' at 160 km/h, 0.55 at 190, at the noise floor past 210 (08/09: overexposed, it looked even).
+# (s / band length from the top end, gain)
+GLOW_ALONG = [(0.0, 0.3), (0.12, 0.3), (0.20, 0.55), (0.25, 0.8), (0.30, 1.0), (1.0, 1.0)]
+# car3 J: the wing faces' brightness over the photo-fitted tables: on 39 (the frame unclipped) the faces stand 10-37
+# levels above the panel's black against the frame's 219, a ratio of 0.05-0.17, where the tables (08/09, taken from
+# afar: the lens's veiling glare lifts dark areas beside bright lines) drew 0.15-0.27; the tacho side, with the least
+# cabin light on it in 39, is 0.3-0.4 of ours, the speedo side 0.55-0.9
+FACE_GAIN = 0.6
+# car3 J: the band line's peak sat 2 px (sides) to 5 px (bottom) outside 39's: the profile is moved in by this (px)
+GLOW_SHIFT = [(0.0, 2.0), (0.68, 2.0), (0.78, 4.5), (1.0, 4.5)]
 
 
 def _load(look):
@@ -82,9 +98,14 @@ def dial_layers(P, geo, dial, D=None):
     sE_B, sE_E = model.s_edges(D.band), model.s_edges(D.E)
     x0, y0 = D.box[0], D.box[1]
     # glow: inside the frame, outside the wing
-    g = lib.table_eval(P["glow_%s" % dial], sE_B, model.GLOW_D, D.sB, D.dB)
+    ks = np.array(GLOW_SHIFT)                                                                # car3 J: moved in
+    dS = D.dB + np.interp(D.sB / lib.arclen(D.band)[-1], ks[:, 0], ks[:, 1])
+    dG = np.where(dS > GLOW_CORE, GLOW_CORE + (dS - GLOW_CORE) * GLOW_K, dS)                # car3 J: narrower
+    g = lib.table_eval(P["glow_%s" % dial], sE_B, model.GLOW_D, D.sB, dG)
     fade = np.clip((72 - D.dB) / 6.0, 0, 1) * np.clip((D.dB + 3) / 1.0, 0, 1)
     fade = fade * end_fade(D.band, D.sB, D.Xs, D.Y)
+    k = np.array(GLOW_ALONG)                                                                 # car3 J
+    fade = fade * np.interp(D.sB / lib.arclen(D.band)[-1], k[:, 0], k[:, 1])
     g = np.clip(g, 0, 1) * (D.inside * fade)[..., None]
     a = g.max(-1)
     rgb = np.where(a[..., None] > 1e-4, g / np.maximum(a[..., None], 1e-4), 0)
@@ -101,6 +122,6 @@ def dial_layers(P, geo, dial, D=None):
     we =lib.table_eval(P["wingE_%s" % dial], sE_E, model.WINGE_D, D.sE, D.dE)
     t0, t1 = model.E_BLEND
     wE = np.clip((t1 - D.distE) / (t1 - t0), 0, 1)[..., None]
-    col = np.clip(wE * we + (1 - wE) * wb, 0, 1)
+    col = np.clip(wE * we + (1 - wE) * wb, 0, 1) * FACE_GAIN                                 # car3 J: FACE_GAIN
     wing = np.concatenate([col, D.wing[..., None]], -1).astype(np.float32)
     return {"glow": (glow, x0, y0), "wing": (wing, x0, y0)}, D
