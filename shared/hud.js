@@ -147,7 +147,8 @@
  * Any widget: "toggle": "<bool setting>" hides it when that setting is off, "!<setting>" when it is on,
  * "<choice setting>=<value>" shows it only while that choice is picked (also with "!");
  * "own:range" / "own:clock" / "own:temp" while that item of BMW's bottom row is ours (settings ownRange / ownClock /
- * ownTemp, 6WB Dials + G20; package F); token {{ambient1}}: the outside temperature as BMW shows it, "+3.5" (°C, 0.5 steps);
+ * ownTemp, 6WB Dials + G20; package F); "cc:none" only while the car says no check-control message shows (car3 G:
+ * this.ccShown === false; off while that is unknown); token {{ambient1}}: the outside temperature as BMW shows it, "+3.5" (°C, 0.5 steps);
  * "mapUp" (toggle or holeWhen) is not a saved setting: on while the Waze map shows inside the theme (waze.js; the
  * "mapInTheme" setting); the map is a content z 0 layer, so a frame meant to sit over it is content z 1 or more.
  * "themes": [...] shows it only in those themes. Text "color2": a second role, the colour at the bottom
@@ -1084,7 +1085,9 @@ class HudApp {
         const conns = this._connCount();
         const layers = ', ' + this._layerCount(this._layerRefs().length) + (conns > 1 ? ' on ' + conns + ' connections' : '')
             + (this.pixelBytes ? ', ' + mib(this.pixelBytes) + ' of 16 MiB pixels' : '');
-        if (this.layoutTheme) return this.label + ' on' + mode + ': ' + name + ' theme' + layers + demo + drawn;
+        // car3 G: in 6WB Dials + G20, whose bottom-row items are ours (a photo of the Settings tab shows it)
+        const row = this.ownRow ? '; row: ' + ['range', 'clock', 'temp'].map((i) => i + ' ' + (this._own(i) ? 'ours' : "BMW's")).join(', ') : '';
+        if (this.layoutTheme) return this.label + ' on' + mode + ': ' + name + ' theme' + layers + demo + drawn + row;
         const theme = THEMES[this.themeName] ? THEMES[this.themeName].name : this.themeName;
         const auto = this.setting('hudTheme') === 'auto' ? ' (Auto)' : '';
         return this.label + ' on' + mode + ': ' + name + ' layout, ' + theme + ' theme' + auto + layers + demo + drawn;
@@ -1614,6 +1617,9 @@ class HudApp {
             (counts.length > 1 ? ' on ' + counts.length + ' connections (' + counts.join(' + ') + ')' : '') + ', sheet limit ' +
             (maxPx === Infinity ? 'unlimited' : maxPx + ' px') + ', whole-sheet writes ' + bytes + ' bytes, pixel memory ' + mib(px) + ' of 16 MiB' +
             (atlasBytes ? ' (' + this.atlases.size + ' glyph atlas' + (this.atlases.size > 1 ? 'es' : '') + ' ' + mib(atlasBytes) + ')' : ''));
+        // car3 G: 6WB Dials + G20's own row, and why (on the car BMW's row showed although "ours" is the default)
+        this.ownRow = shown.some((w) => w.type === 'wbback' && Array.isArray(w.patches));
+        if (this.ownRow) this.log.info('layout "' + layout.name + '": ' + this._ownNote());
         counts.forEach((k, ci) => {
             if (k > LAYER_BUDGET) this.log.warn('layout "' + layout.name + '" needs ' + k + ' layers on connection ' + (ci + 1) + ', cluster-render draws at most ' + LAYER_BUDGET + ' per connection');
         });
@@ -1714,6 +1720,9 @@ class HudApp {
         const k = not ? t.slice(1) : t, eq = k.indexOf('=');
         // package F: "own:range|clock|temp" is on while that bottom-row item is ours (_own: ownRange / ownClock / ownTemp)
         if (k.indexOf('own:') === 0) return not ? !this._own(k.slice(4)) : this._own(k.slice(4));
+        // car3 G: "cc:none" is on only while the car says no check-control message shows (this.ccShown === false);
+        // while that is not known (no signal wired yet: package I) it is off
+        if (k.indexOf('cc:') === 0) { const on = k === 'cc:none' && this.ccShown === false; return not ? !on : on; }
         const on = eq > 0 ? String(this.setting(k.slice(0, eq))) === k.slice(eq + 1) : this.setting(k) !== false;
         return not ? !on : on;
     }
@@ -1937,7 +1946,7 @@ class HudApp {
                 c.uniform(ref, 'u_shade', this._wbShade(w));
                 const ko = w.shade && Array.isArray(w.shade.ko) ? w.shade.ko : [0, 0, 0, 0];
                 c.uniform(ref, 'u_shadeKo', [ko[0] - w.x, ko[1] - w.y, ko[2] - w.x, ko[3] - w.y]);
-                c.uniform(ref, 'u_pat', this._wbPatches(w), { type: 'vec4' });
+                this._wbPatchesSend(x);         // car3 G: u_pat0..3, plain vec4s
             } else if (w.tex && this.setting('baked') !== false) {   // baked textures: "tex": { window, horizon, line: { tex, x, y, w, h } }, "gain": [window level, y above which it applies]
                 const u = this._wbUses(w);       // only what is drawn: the window while the map is off, the line for "glass"
                 [['window', 'u_t0', 'u_r0'], ['horizon', 'u_t1', 'u_r1'], ['line', 'u_t2', 'u_r2']].forEach(([k, smp, rect]) => {
@@ -2185,14 +2194,36 @@ class HudApp {
     }
 
     /** WBBACK's black patches over BMW's bottom-row items we draw ourselves ("patches": [{ rect: [x0, y0, x1, y1] panel
-     *  px, when: a toggle }]), as u_pat (4 x vec4, layer px; x1 <= x0: none). */
+     *  px, when: a toggle }]), as four vec4s (layer px; x1 <= x0: none). */
     _wbPatches(w) {
         const out = [];
         (Array.isArray(w.patches) ? w.patches : []).forEach((p) => {
-            if (out.length < 16 && Array.isArray(p.rect) && (!p.when || this._toggleOn(p.when))) out.push(p.rect[0] - w.x, p.rect[1] - w.y, p.rect[2] - w.x, p.rect[3] - w.y);
+            if (out.length < 4 && Array.isArray(p.rect) && (!p.when || this._toggleOn(p.when))) out.push([p.rect[0] - w.x, p.rect[1] - w.y, p.rect[2] - w.x, p.rect[3] - w.y]);
         });
-        while (out.length < 16) out.push(0, 0, 0, 0);
+        while (out.length < 4) out.push([0, 0, 0, 0]);
         return out;
+    }
+
+    /** car3 G: u_pat0..3 (plain vec4s: docs/CAR3-G-REPORT.md), sent when they change (a "cc:" patch follows the
+     *  check-control message state on every update). */
+    _wbPatchesSend(x) {
+        const pats = this._wbPatches(x.w), key = JSON.stringify(pats);
+        if (key === x.patKey) return;
+        x.patKey = key;
+        pats.forEach((v, i) => x.c.uniform(x.ref, 'u_pat' + i, v));
+    }
+
+    /** car3 G: what 6WB Dials + G20's own row draws now and why, for the log and the status line (docs/CAR3-G-REPORT.md:
+     *  on the car BMW's row showed although "ours" is the default). */
+    _ownNote() {
+        const raw = (k) => { const v = this.ctx.settings.get(k); return v === undefined ? 'unset' : JSON.stringify(v); };
+        const tz = this.ctx.settings.item('timeZone') ? this.setting('timeZone') : TZ_AUTO;
+        const tzSet = (isNum(tz) && tz !== TZ_AUTO) || isNum(this.config.utcOffsetMinutes);
+        const one = (item, key) => item + ' ' + (this._own(item) ? 'ours' : "BMW's") + ' (' + key + ' ' + raw(key) +
+            (item === 'clock' && this.setting(key) === 'auto' ? (tzSet ? ', time zone set' : ', no time zone') : '') + ')';
+        return 'own row: ' + one('range', 'ownRange') + ', ' + one('clock', 'ownClock') + ', ' + one('temp', 'ownTemp') +
+            '; mode label ' + (this.setting('modeLabel') === false ? 'off' : this.driveMode ? 'on' : 'on, empty: no drive mode from the car') +
+            ' (modeLabel ' + raw('modeLabel') + ')';
     }
 
     /** "dialShade" and "wbFoot" while a layout shows: only the uniforms change. False when a rebuild is needed (the foot
@@ -2405,6 +2436,7 @@ class HudApp {
             x.last = key;
             x.c.uniform(x.ref, 'u_show', [a, b]);
         } else if (w.type === 'wbback') {
+            if (w.collar && Array.isArray(w.patches)) this._wbPatchesSend(x);     // car3 G: a "cc:" patch follows the message state
             const on = w.sign && (isNum(this._raw('limit')) || this._raw('limitEnd')) ? 1 : 0;   // package E: the end sign too
             if (!force && on === x.last) return;
             x.last = on;

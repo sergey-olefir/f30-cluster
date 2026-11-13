@@ -187,6 +187,7 @@
       "label": "Dials + G20: shade at the dials' inner edges",
       "type": "choice",
       "default": "normal",
+      "reset": 1,
       "options": [
         [
           "off",
@@ -211,6 +212,7 @@
       "label": "Dials + G20: range",
       "type": "choice",
       "default": "ours",
+      "reset": 1,
       "options": [
         [
           "bmw",
@@ -227,6 +229,7 @@
       "label": "Dials + G20: clock",
       "type": "choice",
       "default": "auto",
+      "reset": 1,
       "options": [
         [
           "auto",
@@ -247,6 +250,7 @@
       "label": "Dials + G20: outside temperature",
       "type": "choice",
       "default": "ours",
+      "reset": 1,
       "options": [
         [
           "bmw",
@@ -262,13 +266,15 @@
       "key": "modeLabel",
       "label": "Dials + G20: drive mode above the gear",
       "type": "bool",
-      "default": true
+      "default": true,
+      "reset": 1
     },
     {
       "key": "gearTray",
       "label": "Dials + G20: gear in the tray",
       "type": "choice",
       "default": "gear",
+      "reset": 1,
       "options": [
         [
           "gear",
