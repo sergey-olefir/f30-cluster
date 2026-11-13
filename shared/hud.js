@@ -146,6 +146,8 @@
  *             "accent" for all of them; the labels are text widgets on top. Sent as array uniforms (vec4 x 12).
  * Any widget: "toggle": "<bool setting>" hides it when that setting is off, "!<setting>" when it is on,
  * "<choice setting>=<value>" shows it only while that choice is picked (also with "!");
+ * "own:range" / "own:clock" / "own:temp" while that item of BMW's bottom row is ours (settings ownRange / ownClock /
+ * ownTemp, 6WB Dials + G20; package F); token {{ambient1}}: the outside temperature as BMW shows it, "+3.5" (°C, 0.5 steps);
  * "mapUp" (toggle or holeWhen) is not a saved setting: on while the Waze map shows inside the theme (waze.js; the
  * "mapInTheme" setting); the map is a content z 0 layer, so a frame meant to sit over it is content z 1 or more.
  * "themes": [...] shows it only in those themes. Text "color2": a second role, the colour at the bottom
@@ -232,6 +234,13 @@ const TYRE_CORNERS = ['FL', 'FR', 'RL', 'RR'];
 const WB_STYLE = { comfort: 0, sport: 1, eco: 2, mini: 3, eff: 4 };
 // the 6WB Comfort window's foot line (wbback "foot", shaders.js wbback u_foot): glass is the baked "line" texture
 const WB_FOOT = { glass: 0, hair: 1, chrome: 2, none: 3 };
+// --- package F (docs/POLISH-F-REPORT.md): settings of the 6WB layouts ---
+// "dialShade" (6WB Dials + G20): the shade at our dials' inner edges over BMW's map, drawn by WBBACK's collar path
+// (u_shade): strength at our rim, falloff px. "normal" is polish B's baked 0.8 / 20 px
+const WB_SHADE = { off: [0, 20], weak: [0.5, 12], normal: [0.8, 20], strong: [0.95, 34] };
+// settings that only change a uniform of a layer already there (_wbLive); "wbFoot" to or from "glass" rebuilds (texture)
+const WB_LIVE_KEYS = ['dialShade', 'wbFoot'];
+// --- end package F ---
 const DIAL_SPEED = { us: { max: 160, ticks: 8 }, metric: { max: 240, ticks: 8 } };
 // the HUD's place (the page's Position tab): settings that move / scale the layers already there, no rebuild
 const PLACE_KEYS = ['hudX', 'hudY', 'hudScale'];
@@ -470,6 +479,7 @@ class HudApp {
             if (['hudLayout', 'inComfort', 'inSport', 'inEco', 'byMode'].indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
             if (PLACE_KEYS.indexOf(key) >= 0) this._guard('place', () => this._place());
             else if (LIVE_KEYS.indexOf(key) >= 0) this.widgets.forEach((x) => { x.last = null; });
+            else if (WB_LIVE_KEYS.indexOf(key) >= 0 && this._wbLive()) { /* package F: the uniforms are sent, no rebuild */ }
             else if (key !== 'demo') this._rebuild(); else this._status();
         });
     }
@@ -925,7 +935,7 @@ class HudApp {
             else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); add({ tex: w.fill }); }
             else if (w.type === 'wbsign' && w.tex && baked) { add(w.tex.limit); add(w.tex.nopass); }
             else if (w.type === 'wbback') {
-                if (w.collar) add(w.collar);
+                if (w.collar) { add(w.collar); add(w.cover); }       // package F: "cover", BMW's bottom lines and hooks
                 else if (w.tex && baked) { const u = this._wbUses(w); if (u.window) { add(w.tex.window); add(w.tex.horizon); } if (u.line) add(w.tex.line); }
             }
         });
@@ -1414,6 +1424,13 @@ class HudApp {
             }
             case 'hvSoc': { const v = this._raw('hvSoc'); return isNum(v) ? String(Math.round(v)) : '--'; }
             case 'fuelPct': { const v = this._raw('fuel'); return isNum(v) ? String(Math.round(v * 100)) : '--'; }
+            case 'ambient1': {       // package F: as BMW's bottom row shows it, "+3.5" (the car sends 0.5 °C steps); °F whole
+                const v = this._raw('ambient');
+                if (!isNum(v)) return '--';
+                if (us) { const n = Math.round(v * 9 / 5 + 32); return (n > 0 ? '+' : '') + n; }
+                const h = Math.round(v * 2) / 2;
+                return (h > 0 ? '+' : '') + (h === 0 ? 0 : h).toFixed(1);
+            }
             case 'ambientN': { const v = this._raw('ambient'); return isNum(v) ? String(Math.round(us ? v * 9 / 5 + 32 : v)) : '--'; }
             case 'torque': { const v = this._raw('torque'); return fix(isNum(v) ? (us ? v * 0.737562 : v) : v, 0); }
             case 'torquePct': case 'powerPct': { const v = this._raw(tok); return isNum(v) ? String(Math.min(100, Math.round(v))) : '--'; }
@@ -1695,6 +1712,8 @@ class HudApp {
     _toggleOn(t) {
         const not = t.charAt(0) === '!';
         const k = not ? t.slice(1) : t, eq = k.indexOf('=');
+        // package F: "own:range|clock|temp" is on while that bottom-row item is ours (_own: ownRange / ownClock / ownTemp)
+        if (k.indexOf('own:') === 0) return not ? !this._own(k.slice(4)) : this._own(k.slice(4));
         const on = eq > 0 ? String(this.setting(k.slice(0, eq))) === k.slice(eq + 1) : this.setting(k) !== false;
         return not ? !on : on;
     }
@@ -1908,6 +1927,17 @@ class HudApp {
                 c.bind(ref, 'u_t0', this._scene(w.collar.tex, x.ci).ref);
                 c.uniform(ref, 'u_r0', [w.collar.x, w.collar.y, w.collar.w, w.collar.h]);
                 c.uniform(ref, 'u_hasTex', [2]);
+                // package F: "cover": { tex, x, y, w, h }: more black at full size (BMW's bottom lines, hooks and dash;
+                // tools/overlay/plan_dials.py), "shade": { y: [y0, y1], ko: [x0, y0, x1, y1] } the shade at our dials'
+                // inner edges ("dialShade"), "patches" black over the bottom-row items we draw ourselves (ownRange ...)
+                if (w.cover) {
+                    c.bind(ref, 'u_t1', this._scene(w.cover.tex, x.ci).ref);
+                    c.uniform(ref, 'u_r1', [w.cover.x, w.cover.y, w.cover.w, w.cover.h]);
+                }
+                c.uniform(ref, 'u_shade', this._wbShade(w));
+                const ko = w.shade && Array.isArray(w.shade.ko) ? w.shade.ko : [0, 0, 0, 0];
+                c.uniform(ref, 'u_shadeKo', [ko[0] - w.x, ko[1] - w.y, ko[2] - w.x, ko[3] - w.y]);
+                c.uniform(ref, 'u_pat', this._wbPatches(w), { type: 'vec4' });
             } else if (w.tex && this.setting('baked') !== false) {   // baked textures: "tex": { window, horizon, line: { tex, x, y, w, h } }, "gain": [window level, y above which it applies]
                 const u = this._wbUses(w);       // only what is drawn: the window while the map is off, the line for "glass"
                 [['window', 'u_t0', 'u_r0'], ['horizon', 'u_t1', 'u_r1'], ['line', 'u_t2', 'u_r2']].forEach(([k, smp, rect]) => {
@@ -1926,6 +1956,7 @@ class HudApp {
             c.uniform(ref, 'u_fade', Array.isArray(w.fade) && w.fade.length === 4 ? w.fade : [110, 40, 36, 44]);
             const fl = Array.isArray(w.footLine) ? w.footLine : [0, 0, 1];
             c.uniform(ref, 'u_foot', [wb.foot, fl[0] - w.y, fl[1] - w.x, fl[2] - w.x]);
+            x.wbFootNow = wb.foot;          // package F: the foot drawn now ("wbFoot" changes it live, _wbLive)
         } else if (w.type === 'gmeter') {
             const L = color(t, w.line || 'dim');
             c.uniform(ref, 'u_size', [w.w, w.h]);
@@ -2121,9 +2152,68 @@ class HudApp {
      *  whether it has a "window" box. While the map shows through a soft window, the window and horizon are not drawn. */
     _wbUses(w) {
         const box = Array.isArray(w.window) && w.window.length === 4;
-        const foot = WB_FOOT.hasOwnProperty(w.foot) ? WB_FOOT[w.foot] : 0;
+        const foot = WB_FOOT.hasOwnProperty(this._wbFoot(w)) ? WB_FOOT[this._wbFoot(w)] : 0;
         return { box, foot, window: !(box && this._hole(w)[2] > 0), line: foot === 0 };
     }
+
+    /* --- package F (docs/POLISH-F-REPORT.md): the 6WB layouts' settings --- */
+
+    /** The foot line style of a wbback with a soft window: the "wbFoot" setting, else the layout's own "foot". */
+    _wbFoot(w) {
+        if (!(Array.isArray(w.window) && w.window.length === 4)) return w.foot;
+        const v = this.ctx.settings.item('wbFoot') ? this.setting('wbFoot') : null;
+        return WB_FOOT.hasOwnProperty(v) ? v : w.foot;
+    }
+
+    /** "dialShade" as WBBACK's u_shade: strength, falloff px, and the y span it fades out over (the layout's "shade.y"). */
+    _wbShade(w) {
+        const s = WB_SHADE[this.ctx.settings.item('dialShade') ? this.setting('dialShade') : 'normal'] || WB_SHADE.normal;
+        const y = w.shade && Array.isArray(w.shade.y) ? w.shade.y : [0, 1];
+        return [w.shade ? s[0] : 0, s[1], y[0] - w.y, y[1] - w.y];
+    }
+
+    /** Whether an item of BMW's bottom row ("range", "clock", "temp") is ours in "6WB Dials + G20" (ownRange / ownClock /
+     *  ownTemp). The clock's "auto": ours once a time zone is set (the "timeZone" setting or config.utcOffsetMinutes),
+     *  since the head unit runs on UTC and only BMW's own clock is right without one. */
+    _own(item) {
+        const key = { range: 'ownRange', clock: 'ownClock', temp: 'ownTemp' }[item];
+        if (!key || !this.ctx.settings.item(key)) return false;
+        const v = this.setting(key);
+        if (v !== 'auto') return v === 'ours';
+        const tz = this.ctx.settings.item('timeZone') ? this.setting('timeZone') : TZ_AUTO;
+        return (isNum(tz) && tz !== TZ_AUTO) || isNum(this.config.utcOffsetMinutes);
+    }
+
+    /** WBBACK's black patches over BMW's bottom-row items we draw ourselves ("patches": [{ rect: [x0, y0, x1, y1] panel
+     *  px, when: a toggle }]), as u_pat (4 x vec4, layer px; x1 <= x0: none). */
+    _wbPatches(w) {
+        const out = [];
+        (Array.isArray(w.patches) ? w.patches : []).forEach((p) => {
+            if (out.length < 16 && Array.isArray(p.rect) && (!p.when || this._toggleOn(p.when))) out.push(p.rect[0] - w.x, p.rect[1] - w.y, p.rect[2] - w.x, p.rect[3] - w.y);
+        });
+        while (out.length < 16) out.push(0, 0, 0, 0);
+        return out;
+    }
+
+    /** "dialShade" and "wbFoot" while a layout shows: only the uniforms change. False when a rebuild is needed (the foot
+     *  line goes to or from "glass", which samples a texture; or no wbback is up). */
+    _wbLive() {
+        try {
+            let done = false, need = false;
+            this.widgets.forEach((x) => {
+                if (need || !x.w || x.w.type !== 'wbback' || !x.ref) return;
+                const w = x.w;
+                if (w.collar) { x.c.uniform(x.ref, 'u_shade', this._wbShade(w)); done = true; return; }
+                const foot = this._wbUses(w).foot;
+                if ((foot === 0) !== (x.wbFootNow === 0)) { need = true; return; }
+                const fl = Array.isArray(w.footLine) ? w.footLine : [0, 0, 1];
+                x.c.uniform(x.ref, 'u_foot', [foot, fl[0] - w.y, fl[1] - w.x, fl[2] - w.x]);
+                x.wbFootNow = foot; done = true;
+            });
+            return done && !need;
+        } catch (e) { this.log.error('hud wb live: ' + (e && e.stack || e)); return false; }
+    }
+    /* --- end package F --- */
 
     _tick() {
         const now = Date.now();
