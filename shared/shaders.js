@@ -1472,8 +1472,24 @@ uniform vec4 u_wbox;
 uniform vec4 u_fade;
 uniform vec4 u_foot;      // the line at the window's foot: style (0 the baked glass line u_t2, 1 hairline, 2 chrome,
                           // 3 none), y, x0, x1
+// --- package F (docs/POLISH-F-REPORT.md), the collar path (u_hasTex 2, 6WB Dials + G20) only ---
+// u_t1 over u_r1 (w 0: none): more black at full size, coverage in alpha (BMW's bottom lines, hooks and grey dash,
+// kept 3 px off the check-control frame, text and "i"; tools/overlay/plan_dials.py). u_shade: the shade at our dials'
+// inner edges over BMW's map ("dialShade"): strength at the rim (0: none), falloff px, the y span it fades out over;
+// none inside u_shadeKo (x0, y0, x1, y1: BMW's right "i"). u_pat: up to 4 black patches (x0, y0, x1, y1; x1 <= x0:
+// none) over the bottom-row items we draw ourselves (ownRange / ownClock / ownTemp)
+uniform vec4 u_shade;
+uniform vec4 u_shadeKo;
+uniform vec4 u_pat[4];
+// --- end package F ---
 
 const float PI = 3.14159265359;
+
+// package F: px outside the box b (x0, y0, x1, y1), rounded by r; < 0 inside. fp16-safe: length() of a clamped vector
+float boxOut(vec2 p, vec4 b, float r) {
+    vec2 q = max(b.xy - p, p - b.zw) + r;
+    return length(clamp(q, 0.0, 64.0)) + min(max(q.x, q.y), 0.0) - r;
+}
 
 // the stock map veil's curve (docs/G20SIM-D-live.md, the map): 0 at the edge, 1 at t >= 1, steep at first
 float veil(float t) { float u = 1.0 - clamp(t, 0.0, 1.0); return 1.0 - u * u; }
@@ -1491,6 +1507,23 @@ void main() {
         // the collar: pure black (empty space is black), its coverage soft and baked (tools/overlay/plan_dials.py)
         vec2 u0 = (p - u_r0.xy) / u_r0.zw;
         float a = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? texture2D(u_t0, u0).a : 0.0;
+        // --- package F: the full-size cover, the shade at our dials' inner edges, the bottom-row patches ---
+        if (u_r1.z > 0.0) {
+            vec2 u1 = (p - u_r1.xy) / u_r1.zw;
+            if (u1.x >= 0.0 && u1.y >= 0.0 && u1.x <= 1.0 && u1.y <= 1.0) a = max(a, texture2D(u_t1, u1).a);
+        }
+        if (u_shade.x > 0.0 && between > 0.5) {
+            float o = min(dl, dr);                                   // px outside the nearer dial (scaled lengths above)
+            float vy = 1.0 - clamp((p.y - u_shade.z) / max(u_shade.w - u_shade.z, 1.0), 0.0, 1.0);
+            float sh = u_shade.x * exp(-max(o, 0.0) / u_shade.y) * vy * clamp((o + 3.0) / 3.0, 0.0, 1.0);
+            if (u_shadeKo.z > u_shadeKo.x) sh *= smoothstep(0.0, 2.0, boxOut(p, u_shadeKo, 0.0));
+            a = max(a, sh);
+        }
+        for (int i = 0; i < 4; i++) {
+            vec4 b = u_pat[i];
+            if (b.z > b.x) a = max(a, 1.0 - smoothstep(0.0, 2.0, boxOut(p, b, 6.0)));
+        }
+        // --- end package F ---
         gl_FragColor = vec4(0.0, 0.0, 0.0, a);
         return;
     }
