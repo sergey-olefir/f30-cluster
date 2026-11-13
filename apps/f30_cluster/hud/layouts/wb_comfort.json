@@ -79,6 +79,18 @@
         607,
         650,
         1270
+      ],
+      "mapWindow": [
+        750,
+        180,
+        420,
+        384
+      ],
+      "mapFade": [
+        120,
+        80,
+        80,
+        24
       ]
     },
     {
@@ -747,7 +759,7 @@
       "font": "wb_val",
       "color": "fg",
       "align": "left",
-      "toggle": "baked"
+      "toggle": "baked&own:clock"
     },
     {
       "id": "row_b1",
@@ -755,13 +767,27 @@
       "z": 5,
       "x": 1010,
       "y": 646,
-      "w": 150,
+      "w": 170,
       "h": 32,
-      "text": "{{ambient}} °C",
+      "text": "{{ambient1}} {{u:temp}}",
       "font": "wb_val",
       "color": "fg",
       "align": "left",
-      "toggle": "baked"
+      "toggle": "baked&own:clock"
+    },
+    {
+      "id": "row_b2",
+      "type": "text",
+      "z": 5,
+      "x": 860,
+      "y": 646,
+      "w": 200,
+      "h": 32,
+      "text": "{{ambient1}} {{u:temp}}",
+      "font": "wb_val",
+      "color": "fg",
+      "align": "center",
+      "toggle": "baked&!own:clock"
     },
     {
       "id": "range_v",
@@ -865,7 +891,7 @@
       "font": "wb_cap",
       "color": "dim",
       "align": "left",
-      "toggle": "!baked"
+      "toggle": "!baked&own:clock"
     },
     {
       "id": "row_v0",
@@ -879,7 +905,7 @@
       "font": "wb_val",
       "color": "fg",
       "align": "left",
-      "toggle": "!baked"
+      "toggle": "!baked&own:clock"
     },
     {
       "id": "row_h1",
@@ -929,9 +955,9 @@
       "z": 5,
       "x": 1048,
       "y": 634,
-      "w": 160,
+      "w": 170,
       "h": 32,
-      "text": "{{ambient}} °C",
+      "text": "{{ambient1}} {{u:temp}}",
       "font": "wb_val",
       "color": "fg",
       "align": "left",
