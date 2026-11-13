@@ -1,0 +1,82 @@
+{
+ "runApp": "<absolute path of bench/run-app.js>",
+ "steps": [
+  {
+   "wait": 0,
+   "label": "drive comfort",
+   "msg": {
+    "t": "drive",
+    "value": 4
+   }
+  },
+  {
+   "wait": 6000,
+   "label": "inComfort wb_dials",
+   "msg": {
+    "t": "set",
+    "key": "inComfort",
+    "value": "wb_dials"
+   }
+  },
+  {
+   "wait": 5000,
+   "label": "inComfort wb_comfort_map",
+   "msg": {
+    "t": "set",
+    "key": "inComfort",
+    "value": "wb_comfort_map"
+   }
+  },
+  {
+   "wait": 5000,
+   "label": "inComfort g20_comfort",
+   "msg": {
+    "t": "set",
+    "key": "inComfort",
+    "value": "g20_comfort"
+   }
+  },
+  {
+   "wait": 5000,
+   "label": "inComfort wb_comfort",
+   "msg": {
+    "t": "set",
+    "key": "inComfort",
+    "value": "wb_comfort"
+   }
+  },
+  {
+   "wait": 5000,
+   "label": "drive sport",
+   "msg": {
+    "t": "drive",
+    "value": 1
+   }
+  },
+  {
+   "wait": 5000,
+   "label": "drive comfort",
+   "msg": {
+    "t": "drive",
+    "value": 4
+   }
+  },
+  {
+   "wait": 5000,
+   "label": "drive eco",
+   "msg": {
+    "t": "drive",
+    "value": 7
+   }
+  },
+  {
+   "wait": 5000,
+   "label": "drive comfort",
+   "msg": {
+    "t": "drive",
+    "value": 4
+   }
+  }
+ ],
+ "tail": 5000
+}
