@@ -194,6 +194,20 @@ MINI_DY = -20                  # the minis move up so BMW's range ("467 km") cle
 # BMW's speed-limit sign (centre 539, 622, r 41) and check-control "i" ([1256, 591, 1270, 627]): the soft windows
 # that show them through our dials (tools/overlay/plan_dials.py keeps the collar off both)
 SIGN_WIN, I_WIN, WIN_SOFT = [539, 622, 44], [1254, 589, 1272, 629], 4
+# car3 G (docs/CAR3-G-REPORT.md): BMW's sign measured on the car photos 34, 37, 41, 42, 43 (registered to panel px from
+# our own drawing): centre (537.3, 621.3), red ring out to r 41.5 (42.2 with its soft edge). The window is now tight on
+# it (clear to r 42.5, 1 px soft), and WBDIAL draws a black ring 8 px wide round it, so BMW's bottom line no longer
+# shows beside the sign (photo 37's "line stubs")
+SIGN_WIN, SIGN_SOFT = [537.5, 621.5, 42.5], 1
+# BMW's map between our dials, as the car draws it (photos 41, 42: the map's own veil ends at about x 704 and 1212, its
+# top at y 158): WBBACK's collar path fades it to black at its sides (48 px) and top (80 px) (u_wbox, u_fade: top,
+# sides, foot), and the black fades out over the 30 px above y 596, 5 px above the check-control panel (y 601)
+MAP_WIN, MAP_FADE = [708, 156, 490, 440], [80, 48, 30, 0]
+# BMW's left hook stub "/" (x 731-744, y 631-644 on photos 34 and 41), which F kept: it lies where the check-control
+# message's symbol draws ("i", the heated wheel, the open door: photos 08, 42, 43). Black over it only while the car
+# says no message shows ("cc:none"; package I's signal); while that is not known it stays
+HOOK_STUB = [729, 629, 746, 646]
+# --- end car3 G ---
 # --- package F (docs/POLISH-F-REPORT.md): 6WB Dials + G20's bottom row ---
 # the full-size cover over BMW's bottom lines, hooks and grey dash (tools/overlay/plan_dials.py COVER_BOX, packed by
 # tools/bake_scene.py as scene "cover"): x, y, w, h
@@ -270,9 +284,11 @@ def dials():
          "collar": {"tex": "collar", "x": 0, "y": 0, "w": 1920, "h": 720},
          # package F: BMW's bottom lines, hooks and dash under black; the shade's setting; patches under our row items
          "cover": {"tex": "cover", "x": COVER[0], "y": COVER[1], "w": COVER[2], "h": COVER[3]}, "shade": SHADE,
-         "patches": [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")]},
+         "patches": [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")]
+                    + [{"rect": HOOK_STUB, "when": "cc:none"}],          # car3 G
+         "window": MAP_WIN, "fade": MAP_FADE},                              # car3 G: the map's soft edges
         dial("speedo", SP, "comfort", ringW=10, base=base("speedo_d", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
-             cut={"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": WIN_SOFT, "cover": "limit"},
+             cut={"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": SIGN_SOFT, "cover": "limit"},
              measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10, start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "comfort", ringW=10, base=base("tacho_d", RV, R, RV[0] - R, RV[1] - R, 2 * R, 3),
              cut={"y": CUT_Y, "fade": CUT_FADE, "box": I_WIN, "soft": WIN_SOFT},

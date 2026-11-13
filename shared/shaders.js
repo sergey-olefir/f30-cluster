@@ -1420,9 +1420,27 @@ void main() {
             cutSd = length(max(wq, 0.0) / 64.0) * 64.0 + min(max(wq.x, wq.y), 0.0);
         }
         float cutWin = u_cut.z > 0.5 ? smoothstep(-0.5, u_cut.w + 0.5, cutSd) : 1.0;   // 0 in the window .. 1 past its soft edge
+        // car3 G (docs/CAR3-G-REPORT.md): the box window (BMW's check-control "i" / warning symbol in our tacho rim)
+        // ends our bezel there: below the window's top, on its side of the dial, the bezel ring is black, so no stub of
+        // it is left under the window (photos 36 and 41: "a white arc piece below OFF")
+        if (u_cut.z > 1.5 && u_cut.z < 2.5) {
+            float below = smoothstep(u_cutW.y - 2.0, u_cutW.y + 2.0, lp.y) * (lp.x < u_size.x * 0.5 ? 1.0 : 0.0);
+            col *= 1.0 - below * smoothstep(R - u_ringW - 3.0, R - u_ringW - 1.0, d);
+        }
+        // car3 G: the open round window (BMW's sign) is tight on the sign's own disc and has a black ring round it out
+        // to 8 px past its soft edge, so BMW's bottom line does not show beside the sign (photo 37: "line stubs")
+        if (u_cut.z > 0.5 && u_cut.z < 1.5) {
+            float ring = smoothstep(u_cut.w, u_cut.w + 1.0, cutSd) * (1.0 - smoothstep(u_cut.w + 8.0, u_cut.w + 10.0, cutSd));
+            float ringA = max(cutK * cutWin, ring);
+            col *= cutK * cutWin / max(ringA, 0.001);
+            cutK = ringA;
+            cutWin = 1.0;
+        }
+        // --- end car3 G ---
         if (u_cut.z > 2.5) {
-            // the closed disc: opaque out to 2 px past the window's soft edge (the collar's band starts at r + 2)
-            float cutA = max(cutK, 1.0 - smoothstep(u_cut.w + 1.5, u_cut.w + 3.0, cutSd));
+            // the closed disc: opaque out to 8 px past the window's soft edge, as the open window's black ring (car3 G:
+            // the window is tight on the sign now, and the collar keeps off r 46 round it)
+            float cutA = max(cutK, 1.0 - smoothstep(u_cut.w + 8.0, u_cut.w + 10.0, cutSd));
             col *= cutK / max(cutA, 0.001);
             cutK = cutA;
         } else {
@@ -1476,11 +1494,15 @@ uniform vec4 u_foot;      // the line at the window's foot: style (0 the baked g
 // u_t1 over u_r1 (w 0: none): more black at full size, coverage in alpha (BMW's bottom lines, hooks and grey dash,
 // kept 3 px off the check-control frame, text and "i"; tools/overlay/plan_dials.py). u_shade: the shade at our dials'
 // inner edges over BMW's map ("dialShade"): strength at the rim (0: none), falloff px, the y span it fades out over;
-// none inside u_shadeKo (x0, y0, x1, y1: BMW's right "i"). u_pat: up to 4 black patches (x0, y0, x1, y1; x1 <= x0:
-// none) over the bottom-row items we draw ourselves (ownRange / ownClock / ownTemp)
+// none inside u_shadeKo (x0, y0, x1, y1: BMW's right "i"). u_pat0..3: up to 4 black patches (x0, y0, x1, y1; x1 <= x0:
+// none) over the bottom-row items we draw ourselves (ownRange / ownClock / ownTemp) and BMW's left hook stub
+// car3 G: four plain vec4s, not one vec4[4] array (docs/CAR3-G-REPORT.md: no array uniform on the car's WBBACK)
 uniform vec4 u_shade;
 uniform vec4 u_shadeKo;
-uniform vec4 u_pat[4];
+uniform vec4 u_pat0;
+uniform vec4 u_pat1;
+uniform vec4 u_pat2;
+uniform vec4 u_pat3;
 // --- end package F ---
 
 const float PI = 3.14159265359;
@@ -1519,11 +1541,25 @@ void main() {
             if (u_shadeKo.z > u_shadeKo.x) sh *= smoothstep(0.0, 2.0, boxOut(p, u_shadeKo, 0.0));
             a = max(a, sh);
         }
-        for (int i = 0; i < 4; i++) {
-            vec4 b = u_pat[i];
-            if (b.z > b.x) a = max(a, 1.0 - smoothstep(0.0, 2.0, boxOut(p, b, 6.0)));
-        }
+        if (u_pat0.z > u_pat0.x) a = max(a, 1.0 - smoothstep(0.0, 2.0, boxOut(p, u_pat0, 6.0)));
+        if (u_pat1.z > u_pat1.x) a = max(a, 1.0 - smoothstep(0.0, 2.0, boxOut(p, u_pat1, 6.0)));
+        if (u_pat2.z > u_pat2.x) a = max(a, 1.0 - smoothstep(0.0, 2.0, boxOut(p, u_pat2, 6.0)));
+        if (u_pat3.z > u_pat3.x) a = max(a, 1.0 - smoothstep(0.0, 2.0, boxOut(p, u_pat3, 6.0)));
         // --- end package F ---
+        // car3 G: BMW's map between our dials gets soft edges (docs/CAR3-G-REPORT.md): black beside and above the
+        // window u_wbox (x, y, w, h, measured on the car photos 41 and 42), fading to clear over u_fade.y px at its
+        // sides and u_fade.x px at its top, as package A's 6WB window does. Only between our dials and outside them
+        // (the dials cover the rest), never on the check-control panel (it fades out over the u_fade.z px above the
+        // window's foot, which is the panel's top less a margin) nor on BMW's right "i" (u_shadeKo)
+        if (u_wbox.z > 0.0 && between > 0.5) {
+            float ex = min(p.x - u_wbox.x, u_wbox.x + u_wbox.z - p.x), yb = u_wbox.y + u_wbox.w;
+            float vis = veil(ex / max(u_fade.y, 1.0)) * veil((p.y - u_wbox.y) / max(u_fade.x, 1.0));
+            float mv = (1.0 - vis) * clamp((min(dl, dr) + 2.0) / 3.0, 0.0, 1.0);
+            mv *= 1.0 - smoothstep(yb - max(u_fade.z, 1.0), yb, p.y);
+            if (u_shadeKo.z > u_shadeKo.x) mv *= smoothstep(0.0, 2.0, boxOut(p, u_shadeKo, 0.0));
+            a = max(a, mv);
+        }
+        // --- end car3 G ---
         gl_FragColor = vec4(0.0, 0.0, 0.0, a);
         return;
     }
