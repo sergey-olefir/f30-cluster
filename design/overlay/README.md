@@ -14,6 +14,7 @@ UV_CACHE_DIR=bake/work/.uvcache uv run -q --no-project --with jsonschema --with 
 | `wb_comfort.json` | `wb-elements` | Every layer and live widget of our 6WB Comfort, with masks | `tools/overlay/export_wb.py` |
 | `plan.json` / `plan.default.json` | `plan` | Decisions per G20 element, moves of our elements, the derived holes and keep-clear boxes, the conflicts at save time | the constructor |
 | `plan.dials.json` + `collar.dials.png` | `plan` + grey mask | "Dials only": our four dials stay, the G20 draws the rest. The collar (255 = our background stays opaque) is outside the plan schema. See `docs/OVERLAY-PLAN-DIALS.md` | `tools/overlay/plan_dials.py`, then `headless.py --plan` |
+| `cover.dials.png` | grey mask, 0 / 255 | "Dials only", package F: black at full size over BMW's bottom lines, hooks and grey dash, 3 px clear of the check-control frame, text and "i" (`docs/POLISH-F-REPORT.md`) | `tools/overlay/plan_dials.py` (needs the rectified photos 08 and 09) |
 | `g20_parts.json` | `g20-parts` | The G20 parts we already have as our own drawings (the bench simulation `bench/g20/`, the app's `g20_*` and `collar` scene textures), one record per part, linked to `g20_comfort.json`, plus the cross-checks (section 6) | `tools/overlay/inventory_parts.py` |
 | `constraints.json` | `constraints` | Platform limits, the hood line, what BMW draws over any theme | by hand, from `shared/visible.js` and measurements |
 | `masks/<id>.png` | — | 1× alpha of our own layers, exactly the element's bbox | `export_wb.py` |

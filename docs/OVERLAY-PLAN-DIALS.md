@@ -9,6 +9,10 @@ The aim is to keep our four 6WB dials (speedo, tacho, fuel and oil temperature) 
   - The speed-limit sign is ours (`redraw`): the `wbsign` under the speed hub, as in 6WB Comfort. BMW's sign shows through the round window only while we have no limit. Today `app.json` `config.limit` is null, so on the car the window stays open.
   - The windows (sign, check-control "i") have soft edges.
   - The stock bottom line stays visible from BMW's frame corners (the hooks) to our dials' edges and runs on under them.
+- **Update (polish F, 2026-11-13, `docs/POLISH-F-REPORT.md`):**
+  - The stock bottom lines, their curved end hooks and the grey dash are under black: `plan_dials.py` writes `cover.dials.png` (full size, from photos 09 and 08), packed as the scene texture `cover`. It keeps 3 px clear of the check-control frame, its text and its left "i". Where the left hook crosses the "i"'s dot, a 92 px stub of it stays.
+  - The shade at our dials' inner edges is drawn by WBBACK at the strength the `dialShade` setting picks. It is no longer in the collar.
+  - The range, the clock and the outside temperature are BMW's or ours by setting (`ownRange`, `ownClock`, `ownTemp`). Ours are drawn at BMW's places over black patches. Our drive-mode label (`modeLabel`) and the gear in our tray (`gearTray`) are on the tacho.
 
 ![Scheme](overlay/dials_scheme.png)
 
