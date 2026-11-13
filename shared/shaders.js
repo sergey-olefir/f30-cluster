@@ -2035,6 +2035,10 @@ const G20DIAL = `// A G20-style gauge for a cluster-render "effect" layer (GLSL 
 // the layer); live on top: the pointer (a bar from tail to tip, both read for the value from u_lut's entries), its soft
 // red-orange glow, and on the rev dial the pink band from 0 to the pointer (u_lut entry 8: per angle about u_C, the
 // value there and the band's radius). Minis: a tapered needle, no glow, no band.
+// car3 J (photos 39 / 40, docs/CAR3-J-REPORT.md): the glow is the simulation's angular wedge about u_C (sigma in
+// degrees by side, a depth window inside the tick ring: u_lut entry 9, the ring's radius per angle); the grey dial
+// numerals by the pointer are lit to white and drawn over the bar; the minis' needle is thick at the frame and fades
+// at its inner end.
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
@@ -2043,7 +2047,7 @@ precision mediump float;
 varying vec2 v_uv;
 uniform vec4 u_box;        // the layer: panel x, y, w, h
 uniform sampler2D u_base;  // the static gauge, RGBA straight alpha, the layer's size
-uniform sampler2D u_lut;   // 256 x 18, nearest: entry e in rows 2e (x) and 2e + 1 (y), panel px x 16 in R and G
+uniform sampler2D u_lut;   // 256 x 20, nearest: entry e in rows 2e (x) and 2e + 1 (y), panel px x 16 in R and G
 uniform vec4 u_g;          // tip entry, tail entry, kind (0 big dial, 1 mini), the band (1: on)
 uniform vec4 u_val;        // the value 0..1; 0; 0; 0
 uniform vec2 u_C;          // the rays' centre, panel px
@@ -2053,7 +2057,11 @@ uniform vec3 u_tipC;       // the tip's colour (minis)
 uniform vec4 u_rim;        // the rim's colour and alpha (on the low-value side)
 uniform float u_rimHi;     // the fainter rim's alpha on the high-value side, at the bar's edge
 uniform vec4 u_sh;         // the soft shadow beside the bar on the low-value side: alpha, d0, lambda, dmax px (alpha 0: none)
-uniform vec4 u_glow;      // the glow's colour (already scaled) and sigma px (0: none)
+uniform vec4 u_glow;       // the glow's colour (already scaled) and its sigma on the higher-value side, degrees (0: none)
+uniform vec4 u_glow2;      // car3 J: the glow's sigma on the lower-value side (deg), its depth window q0, q1 and its
+                           // outer start (px inside the tick ring: none outside it, full 10 px further in)
+uniform vec4 u_nl;         // car3 J: the numerals' light: gain, sigma (deg), the depth band (px inside the tick ring) they lie in
+uniform vec4 u_bl;         // car3 J: the band line's light by the pointer: sigma higher / lower side (deg), strength; 0
 uniform vec4 u_band;       // the band's first and last angle (image atan2, radians), its width px; 0
 uniform vec3 u_bandC;
 uniform sampler2D u_fill;  // minis: the level's fill (RGB over black) and the mini's area (A); u_base then holds its lines
@@ -2061,12 +2069,14 @@ uniform sampler2D u_fill;  // minis: the level's fill (RGB over black) and the m
 float dec(vec4 c) { return (c.r * 65280.0 + c.g * 255.0) / 16.0; }
 vec2 at(float e, float i) {
     float u = (i + 0.5) / 256.0;
-    return vec2(dec(texture2D(u_lut, vec2(u, (2.0 * e + 0.5) / 18.0))), dec(texture2D(u_lut, vec2(u, (2.0 * e + 1.5) / 18.0))));
+    return vec2(dec(texture2D(u_lut, vec2(u, (2.0 * e + 0.5) / 20.0))), dec(texture2D(u_lut, vec2(u, (2.0 * e + 1.5) / 20.0))));
 }
 vec2 lutP(float row, float f) {
     float x = clamp(f, 0.0, 1.0) * 255.0, i = floor(x);
     return mix(at(row, i), at(row, min(i + 1.0, 255.0)), x - i);
 }
+float wrapA(float a) { return mod(a + 3.14159265, 6.2831853) - 3.14159265; }
+float angOf(vec2 v) { return atan(v.y, v.x); }
 
 void main() {
     vec2 p = u_box.xy + v_uv * u_box.zw;                                       // panel px
@@ -2079,6 +2089,8 @@ void main() {
     vec2 pa = (p - tail) / 64.0, ba = (tip - tail) / 64.0;
     float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
     float dist = length(pa - ba * h) * 64.0;
+    vec2 tLo = lutP(u_g.x, max(f - 0.01, 0.0)), tHi = lutP(u_g.x, min(f + 0.01, 1.0));
+    float numM = 0.0;
     if (u_g.z > 0.5) {
         // a mini: black over its area, the fill from 0 up to the needle (the side of the needle's line where the 0
         // end lies), then its lines
@@ -2088,28 +2100,50 @@ void main() {
         col = fl.rgb * step(0.0, side) * step(0.004, f);
         col = mix(col, bs.rgb, bs.a);
         alpha = max(fl.a, bs.a);
-    }
-    if (u_g.w > 0.5) {
-        // the rev band: inside the ticks, from 0 to the pointer
+    } else {
+        // car3 J: the angle from the pointer about u_C (degrees, + toward higher values) and the depth inside the
+        // tick ring (u_lut entry 9: the ring's radius per image angle, speedo in x, tacho in y)
         vec2 q = p - u_C;
-        float psi = atan(q.y, q.x);
-        float j = (psi - u_band.x) / (u_band.y - u_band.x);
-        if (j >= 0.0 && j <= 1.0) {
-            float x = j * 255.0, i = floor(x);
-            vec2 b = mix(at(8.0, i), at(8.0, min(i + 1.0, 255.0)), x - i);
-            float vAt = b.x / 4095.0, rB = b.y;
-            float d = length(q / 64.0) * 64.0;
-            float cov = clamp(u_band.z * 0.5 + 0.5 - abs(d - rB), 0.0, 1.0) * clamp((f - vAt) * 400.0, 0.0, 1.0);
-            col = mix(col, u_bandC, cov);
+        float th = angOf(q);
+        float sH = sign(wrapA(angOf(tHi - u_C) - angOf(tLo - u_C)));
+        float phi = wrapA(th - angOf(tip - u_C)) * 57.29578 * sH;
+        float xr = (th + 3.14159265) / 6.2831853 * 256.0 - 0.5, ir = floor(xr);
+        vec2 rr = mix(at(9.0, mod(ir, 256.0)), at(9.0, mod(ir + 1.0, 256.0)), xr - ir);
+        float qd = (u_g.w > 0.5 ? rr.y : rr.x) - length(q / 64.0) * 64.0;
+        // car3 J: the grey numerals (and km/h) by the pointer are lit to white, and lie over it (39, 40)
+        float L = dot(bs.rgb, vec3(0.3333)), sat = max(bs.r, max(bs.g, bs.b)) - min(bs.r, min(bs.g, bs.b));
+        numM = smoothstep(0.30, 0.42, L) * (1.0 - smoothstep(0.78, 0.86, L)) * (1.0 - smoothstep(0.10, 0.18, sat))
+             * step(u_nl.z, qd) * step(qd, u_nl.w) * bs.a;
+        col *= 1.0 + u_nl.x * numM * exp(-phi * phi / (2.0 * u_nl.y * u_nl.y + 1e-3));
+        // car3 J: the red band line by the pointer is lit pink-white (39: 225-251, 134-175, 120-149 there, against
+        // 120-141, 56-83, 56-79 away from it)
+        float bandM = smoothstep(0.30, 0.42, bs.r - max(bs.g, bs.b)) * smoothstep(0.45, 0.6, bs.r)
+                    * step(15.0, qd) * step(qd, 80.0) * bs.a;
+        float sb = phi > 0.0 ? u_bl.x : u_bl.y;
+        col = mix(col, vec3(0.97, 0.67, 0.56), bandM * u_bl.z * exp(-phi * phi / (2.0 * sb * sb + 1e-3)));
+        if (u_g.w > 0.5) {
+            // the rev band: inside the ticks, from 0 to the pointer
+            float j = (th - u_band.x) / (u_band.y - u_band.x);
+            if (j >= 0.0 && j <= 1.0) {
+                float x = j * 255.0, i = floor(x);
+                vec2 b = mix(at(8.0, i), at(8.0, min(i + 1.0, 255.0)), x - i);
+                float vAt = b.x / 4095.0, rB = b.y;
+                float d = length(q / 64.0) * 64.0;
+                float cov = clamp(u_band.z * 0.5 + 0.5 - abs(d - rB), 0.0, 1.0) * clamp((f - vAt) * 400.0, 0.0, 1.0);
+                col = mix(col, u_bandC, cov);
+            }
         }
-    }
-    if (u_glow.w > 0.0) {
-        float g = exp(-dist * dist / (2.0 * u_glow.w * u_glow.w));
-        col += u_glow.rgb * g * alpha;
+        if (u_glow.w > 0.0) {
+            // car3 J: the simulation's glow (bench/g20/live drawGlow): a gaussian in angle (sigma by side), full from
+            // the band in to q0, a smoothstep to 0 at q1; none over the ticks (39, 40: dark between the band and them)
+            float sg = phi > 0.0 ? u_glow.w : u_glow2.x;
+            float tq = clamp((qd - u_glow2.y) / max(u_glow2.z - u_glow2.y, 1.0), 0.0, 1.0);
+            float wq = (1.0 - tq * tq * (3.0 - 2.0 * tq)) * smoothstep(u_glow2.w, u_glow2.w + 10.0, qd);
+            col += u_glow.rgb * exp(-phi * phi / (2.0 * sg * sg)) * wq * alpha;
+        }
     }
     float hw = mix(u_bar.x, u_bar.y, h) * 0.5;
     // which side of the bar is the low-value one: where the tip lies at a slightly lower value (bench/g20 live.js drawBar)
-    vec2 tLo = lutP(u_g.x, max(f - 0.01, 0.0)), tHi = lutP(u_g.x, min(f + 0.01, 1.0));
     vec2 lo = (tLo - tHi) / 64.0;
     float sgnLo = sign(ba.x * lo.y - ba.y * lo.x);
     float bl = max(length(ba), 1e-4);
@@ -2128,8 +2162,11 @@ void main() {
             col = mix(col, u_rim.rgb, max(rl, rh) * step(hw, dist) * along);
         }
     }
-    float cov = clamp(hw + 0.5 - dist, 0.0, 1.0);
-    vec3 bar = u_g.z > 0.5 ? mix(u_barC, u_tipC, smoothstep(0.6, 1.0, h)) : u_barC;
+    float cov = clamp(hw + 0.5 - dist, 0.0, 1.0) * (1.0 - numM);
+    // minis (car3 J, 40): the frame end's colour, dimming to u_tipC and fading out toward the inner end (h 0)
+    float inner = smoothstep(0.0, 0.3, h);
+    vec3 bar = u_g.z > 0.5 ? mix(u_tipC, u_barC, inner) : u_barC;
+    if (u_g.z > 0.5) cov *= inner;
     col = mix(col, bar, cov);
     alpha = max(alpha, cov);
     gl_FragColor = vec4(min(col, vec3(1.0)), alpha);
