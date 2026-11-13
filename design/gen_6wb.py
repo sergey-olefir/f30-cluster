@@ -187,7 +187,11 @@ SHADE = {"y": [575, 605], "ko": [1253, 588, 1273, 630]}
 # ownTemp). Our text's baseline sits on BMW's (y 697), BMW's size: values in wb_row (Arimo Bold 44, caps ~32 px as
 # BMW's), units in wb_val (Arimo Bold 36). The pump is on connection 0, so the range's box may run under it (a sheet
 # holds no overlapping members) and a 4-digit range still fits
-OWN = {"range": [132, 662, 307, 703], "clock": [340, 662, 455, 704], "temp": [1536, 662, 1667, 705]}
+# The boxes are sized for BMW's widest text, not the photo's: its temperature is right-aligned (x ~1624), so "-22.5"
+# or "+22.0" starts ~30 px left of the photo's "+3.5" and the patch runs to 1498; its range is left-aligned after the
+# pump, so a 4-digit range ends ~25 px right of "467 km" (patch to 334, short of the clock's). The clock is centred
+# (x ~397), and "23:59" fits the 115 px box.
+OWN = {"range": [132, 662, 334, 703], "clock": [340, 662, 455, 704], "temp": [1498, 662, 1667, 705]}
 ROW_BASE = 697
 # our drive-mode label above the gear tray (D row 15) and the gear in the tray (D row 17), on the tacho
 MODE_C, TRAY_C = (1508, 527), (1508, 583)
