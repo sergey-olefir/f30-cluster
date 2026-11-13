@@ -2,6 +2,7 @@
 """Packs the baked 6WB layers (apps/f30_cluster/hud/baked/, made by bake/src) into the RGBA scene textures the
 cluster themes sample as cluster-render assets: apps/f30_cluster/hud/scene/<name>.json = {w, h, rgba: base64}.
     cd bake/src && ./P9/py.sh ../../tools/bake_scene.py        (needs numpy, pillow)
+    cd bake/src && ./P9/py.sh ../../tools/bake_scene.py tacho tacho_d     (only those scene textures)
 Straight (not premultiplied) alpha. Our own drawings; no photo pixels."""
 import base64, json, os, sys
 import numpy as np
@@ -12,6 +13,23 @@ BAKED = os.path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'baked')
 OUT = os.path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'scene')
 STACK = json.load(open(os.path.join(ROOT, 'bake', 'work', 'P9', 'stack_comfort.json')))
 BY_ID = {l['id']: l for l in STACK}
+ONLY = set(sys.argv[1:])          # scene texture names to write (none given: all of them)
+
+
+def live(id_):
+    """The procedural elements drawn here from their package's code, not read from bake/work (a git-ignored render that
+    may be older than the code). car4 L: the tacho's gear tray (bake/src/C2 params.PBOX, draw.pbox), one drawing for
+    every layout's tacho texture ("tacho", "tacho_d")."""
+    if id_ == 'tacho.p-box':
+        sys.path.insert(0, os.path.join(ROOT, 'bake', 'src'))
+        from common import geom
+        from C2 import draw
+        x0, y0, w, h = geom.crop_box('C2')
+        l = BY_ID[id_]
+        if (l['x'], l['y']) != (x0, y0):
+            raise SystemExit('%s: the stack puts it at %r, C2 draws its box at %r' % (id_, (l['x'], l['y']), (x0, y0)))
+        return draw.pbox(draw.Canvas(x0, y0, w, h, 1)).astype(np.float32)
+    return None
 
 
 def load(rel):
@@ -51,11 +69,15 @@ def over(canvas, img, x, y, opacity=1.0):
 
 def put(canvas, id_, ox, oy, opacity=1.0):
     l = BY_ID[id_]
-    a = up(load(l['file']), 1.0 / l['scale'] if l['scale'] < 1 else 1.0)
+    a = live(id_)
+    if a is None:
+        a = up(load(l['file']), 1.0 / l['scale'] if l['scale'] < 1 else 1.0)
     over(canvas, a, l['x'] - ox, l['y'] - oy, opacity * l.get('opacity', 1.0))
 
 
 def save(name, a):
+    if ONLY and name not in ONLY:
+        return
     a = np.clip(np.round(a * 255.0), 0, 255).astype(np.uint8)
     h, w = a.shape[:2]
     os.makedirs(OUT, exist_ok=True)
