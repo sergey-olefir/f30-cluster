@@ -66,6 +66,7 @@
       <label class="chk"><input type="checkbox" id="outlines" checked> layer outlines</label>
       <label class="chk"><input type="checkbox" id="road"> <span id="backdropName">backdrop</span></label>
       <label class="chk" title="A car photo rectified to panel px (bake/work/overlay/rect, local only) in place of the backdrop: what shows round a see-through theme. 08 stock at start-up, 09 stock by day, 10 grid, 11-13 our themes, 14 BMW's layout with a theme connected (our 0.7.2 texts in it)."><select id="photo"><option value="">photo: off</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option></select></label>
+      <label class="chk" title="A solid colour under our layers in place of every backdrop (photo, G20 simulation, road): whatever shows in that colour is see-through in our theme, a tint of it is part see-through. BMW's own over-drawing is left out too. URL: ?matte=green|magenta|white"><select id="matte"><option value="">matte: off</option><option value="#00ff00">matte: green</option><option value="#ff00ff">matte: magenta</option><option value="#ffffff">matte: white</option></select></label>
       <label class="chk" title="What the driver sees: the hood hides the top corners of the cluster and BMW draws its gear box and belt light over us; on the HUD only a window is visible through the windshield. Measured from car photos, Nov 5 2026 (shared/visible.js)."><input type="checkbox" id="carview" checked> car view</label>
       <span id="fps"></span>
     </div>
@@ -395,13 +396,19 @@
   }
   /* ---------- end G20SIM ---------- */
   let frames = 0, lastFpsT = performance.now();
+  // ?matte=green|magenta|white (or the "matte" select): a solid colour in place of every backdrop, to see what is see-through
+  const MATTE = { green: '#00ff00', magenta: '#ff00ff', white: '#ffffff' };
+  { const m = /[?&]matte=(\w+)/.exec(location.search); if (m && MATTE[m[1]]) document.getElementById('matte').value = MATTE[m[1]]; }
+  document.getElementById('matte').addEventListener('change', () => { dirty = true; });
   function frame(t) {
     const animated = scene.some((l) => l.kind === 'effect' && l.time);
-    g20.active = g20.ok && view === 'panel' && !(photoImg && photoImg.complete && photoImg.naturalWidth) && document.getElementById('road').checked;   // G20SIM
+    const matte = document.getElementById('matte').value;
+    g20.active = !matte && g20.ok && view === 'panel' && !(photoImg && photoImg.complete && photoImg.naturalWidth) && document.getElementById('road').checked;   // G20SIM
     if (dirty || animated || (g20.active && G20Sim.wantsFrame(g20State(t)))) {
       dirty = false;
       ctx.clearRect(0, 0, VW, VH);
-      if (view === 'panel' && photoImg && photoImg.complete && photoImg.naturalWidth) ctx.drawImage(photoImg, 0, 0, VW, VH);
+      if (matte) { ctx.fillStyle = matte; ctx.fillRect(0, 0, VW, VH); }
+      else if (view === 'panel' && photoImg && photoImg.complete && photoImg.naturalWidth) ctx.drawImage(photoImg, 0, 0, VW, VH);
       else if (g20.active) { g20.s = g20State(t); G20Sim.drawUnder(ctx, g20.s); }   // G20SIM: in place of drawStockCluster
       else if (document.getElementById('road').checked) (view === 'panel' ? drawStockCluster : drawRoad)();
       // a layer over the layer cap (state waiting) is never drawn, as on the car
