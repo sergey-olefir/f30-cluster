@@ -112,9 +112,9 @@ class Layouts {
             if (w.class && CLASSES.indexOf(w.class) < 0) bad(at + ' has unknown class "' + w.class + '"');
             if (w.exclusive) bad(at + ' sets exclusive, which would hide everything under it (the CarPlay / Android Auto map too)');
             if (w.conn !== undefined && !(Number.isInteger(w.conn) && w.conn >= 0 && w.conn <= 3)) bad(at + ' "conn" must be 0..3 (the connection to cluster-render)');
-            // "own:<item>" (package F): on while that item of BMW's bottom row is ours (hud.js _own)
-            // car3 H: "a&b" (hud.js _toggleOn): every part is a toggle of its own
-            if (w.toggle !== undefined && !String(w.toggle).split('&').every((p) => /^!?(own:[a-z]+|[a-zA-Z0-9_]+(=[a-zA-Z0-9_]+)?)$/.test(p))) bad(at + ' has a bad toggle "' + w.toggle + '"');
+            // "own:<item>" (package F): on while that item of BMW's bottom row is ours (hud.js _own); "cc:none" (car3 G):
+            // on while the car says no check-control message shows; car3 H: "a&b" (hud.js _toggleOn): every part is a toggle of its own
+            if (w.toggle !== undefined && !String(w.toggle).split('&').every((p) => /^!?(own:[a-z]+|cc:[a-z]+|[a-zA-Z0-9_]+(=[a-zA-Z0-9_]+)?)$/.test(p))) bad(at + ' has a bad toggle "' + w.toggle + '"');
             if (w.hole !== undefined && !(Array.isArray(w.hole) && w.hole.length === 4 && w.hole.every((n) => typeof n === 'number'))) bad(at + ' "hole" must be [x, y, w, h]');
             TYPES[w.type].forEach((k) => { if (w[k] === undefined) bad(at + ' (' + w.type + ') needs "' + k + '"'); });
         });
