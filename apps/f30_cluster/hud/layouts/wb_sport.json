@@ -456,6 +456,17 @@
       "font": "wb_val",
       "color": "fg",
       "align": "left"
+    },
+    {
+      "id": "msa",
+      "type": "wbmsa",
+      "class": "content",
+      "z": 5,
+      "x": 678,
+      "y": 648,
+      "w": 44,
+      "h": 44,
+      "conn": 1
     }
   ]
 }
