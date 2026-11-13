@@ -13,7 +13,10 @@
 With --plan: only loads that plan (?plan=...&export=plan), writes it back with its conflicts recomputed, and takes
 docs/overlay/constructor_plan_<name>.png.
 
-Chrome runs with its own profile (bake/work/overlay/chrome-headless) and only that instance is killed.
+Chrome runs with its own profile and only that instance is killed: the process whose command line holds this
+profile's exact --user-data-dir. The profile is $OVERLAY_CHROME_PROFILE if set, else
+bake/work/overlay/chrome-headless-<checkout> (bake/work is shared between worktrees through a symlink, so each checkout
+gets its own). Never a broad `pkill -f chrome-headless`: other agents run headless Chrome at the same time.
 macOS has no `timeout`: every Chrome run is polled and killed after a deadline.
 """
 import html
@@ -28,7 +31,8 @@ import time
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-PROFILE = os.path.join(ROOT, 'bake/work/overlay/chrome-headless')
+PROFILE = os.environ.get('OVERLAY_CHROME_PROFILE') or os.path.join(
+    ROOT, 'bake/work/overlay/chrome-headless-' + re.sub(r'[^A-Za-z0-9_-]', '_', os.path.basename(ROOT)))
 SHOTS = os.path.join(ROOT, 'bake/work/overlay/shots')
 FLAGS = ['--headless=new', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--virtual-time-budget=30000',
          '--user-data-dir=' + PROFILE, '--hide-scrollbars']
@@ -51,7 +55,8 @@ def chrome(args, out_path=None, deadline=90):
         time.sleep(1)
     if p.poll() is None:
         p.kill()
-    subprocess.run(['pkill', '-f', 'chrome-headless'], stderr=subprocess.DEVNULL)
+    # only this run's Chrome (its helpers carry the same --user-data-dir), matched literally (pkill takes a regex)
+    subprocess.run(['pkill', '-f', '--', '--user-data-dir=' + re.escape(PROFILE) + '( |$)'], stderr=subprocess.DEVNULL)
     if out_path:
         out.close()
 
