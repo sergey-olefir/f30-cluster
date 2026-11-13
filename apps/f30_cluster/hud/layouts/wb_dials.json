@@ -32,7 +32,55 @@
         "y": 0,
         "w": 1920,
         "h": 720
-      }
+      },
+      "cover": {
+        "tex": "cover",
+        "x": 588,
+        "y": 598,
+        "w": 736,
+        "h": 64
+      },
+      "shade": {
+        "y": [
+          575,
+          605
+        ],
+        "ko": [
+          1253,
+          588,
+          1273,
+          630
+        ]
+      },
+      "patches": [
+        {
+          "rect": [
+            132,
+            662,
+            307,
+            703
+          ],
+          "when": "own:range"
+        },
+        {
+          "rect": [
+            340,
+            662,
+            455,
+            704
+          ],
+          "when": "own:clock"
+        },
+        {
+          "rect": [
+            1536,
+            662,
+            1667,
+            705
+          ],
+          "when": "own:temp"
+        }
+      ]
     },
     {
       "id": "speedo",
@@ -649,6 +697,139 @@
       "color": "dim",
       "align": "center",
       "conn": 2
+    },
+    {
+      "id": "own_range_icon",
+      "type": "icon",
+      "icon": "fuel",
+      "z": 5,
+      "x": 135,
+      "y": 665,
+      "w": 30,
+      "h": 34,
+      "color": "fg",
+      "conn": 0,
+      "toggle": "own:range"
+    },
+    {
+      "id": "own_range",
+      "type": "text",
+      "z": 5,
+      "x": 139,
+      "y": 664,
+      "w": 110,
+      "h": 35,
+      "text": "{{range}}",
+      "font": "wb_row",
+      "color": "fg",
+      "align": "right",
+      "conn": 1,
+      "toggle": "own:range"
+    },
+    {
+      "id": "own_range_u",
+      "type": "text",
+      "z": 5,
+      "x": 253,
+      "y": 668,
+      "w": 54,
+      "h": 32,
+      "text": "{{u:distLc}}",
+      "font": "wb_val",
+      "color": "fg",
+      "align": "left",
+      "conn": 1,
+      "toggle": "own:range"
+    },
+    {
+      "id": "own_clock",
+      "type": "text",
+      "z": 5,
+      "x": 335,
+      "y": 664,
+      "w": 124,
+      "h": 35,
+      "text": "{{time}}",
+      "font": "wb_row",
+      "color": "fg",
+      "align": "center",
+      "conn": 1,
+      "toggle": "own:clock"
+    },
+    {
+      "id": "own_temp",
+      "type": "text",
+      "z": 5,
+      "x": 1505,
+      "y": 664,
+      "w": 110,
+      "h": 35,
+      "text": "{{ambient1}}",
+      "font": "wb_row",
+      "color": "fg",
+      "align": "right",
+      "conn": 2,
+      "toggle": "own:temp"
+    },
+    {
+      "id": "own_temp_u",
+      "type": "text",
+      "z": 5,
+      "x": 1619,
+      "y": 668,
+      "w": 46,
+      "h": 32,
+      "text": "{{u:temp}}",
+      "font": "wb_val",
+      "color": "fg",
+      "align": "left",
+      "conn": 2,
+      "toggle": "own:temp"
+    },
+    {
+      "id": "mode",
+      "type": "text",
+      "z": 5,
+      "x": 1388,
+      "y": 514,
+      "w": 240,
+      "h": 25,
+      "text": "{{mode}}",
+      "font": "wb_capb",
+      "color": "fg",
+      "align": "center",
+      "conn": 2,
+      "toggle": "modeLabel"
+    },
+    {
+      "id": "gear",
+      "type": "text",
+      "z": 5,
+      "x": 1448,
+      "y": 565,
+      "w": 120,
+      "h": 36,
+      "text": "{{gear}}",
+      "font": "wb_gear",
+      "color": "fg",
+      "align": "center",
+      "conn": 2,
+      "toggle": "gearTray=gear"
+    },
+    {
+      "id": "gear_l",
+      "type": "text",
+      "z": 5,
+      "x": 1448,
+      "y": 565,
+      "w": 120,
+      "h": 36,
+      "text": "{{stage}}",
+      "font": "wb_gear",
+      "color": "fg",
+      "align": "center",
+      "conn": 2,
+      "toggle": "gearTray=letter"
     }
   ]
 }

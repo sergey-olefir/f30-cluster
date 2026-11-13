@@ -103,6 +103,7 @@ F30_FONTS = [
     ('wb_gear', 'Arimo[wght].ttf', 46, DIGITS + 'PRNDSM-', 0, 'Bold'),             # the gear in its box
     ('wb_val', 'Arimo[wght].ttf', 36, DIGITS + ':+-.° kmCl/', 0, 'Bold'),            # the bottom row's values
     ('wb_mini', 'Arimo[wght].ttf', 14, DIGITS + '/', 0, 'Bold'),                       # the small gauges' 1/1 and 0
+    ('wb_row', 'Arimo[wght].ttf', 44, DIGITS + ':+-.', 0, 'Bold'),                 # 6WB Dials + G20: our range, clock, temperature at BMW's places, its size (package F)
     ('wb_big', 'Arimo[wght].ttf', 120, DIGITS + 'PRNDSM-', 0, 'Bold'),             # Sport: the speed and the gear in the discs
     # G20 Comfort: Roboto (SIL OFL, tools/fonts-src/Roboto-OFL.txt) semi-condensed, the bench simulation's face (docs/G20SIM-REPORT.md)
     ('g20_spd', 'Roboto-wdth-wght.subset.ttf', 105, DIGITS, 0, [700, 87.5]),             # the digital speed

@@ -96,6 +96,14 @@ def main():
     g = np.asarray(g, dtype=np.float32).reshape(180, 4, 480, 4).mean((1, 3)) / 255.0
     c = np.concatenate([np.zeros((180, 480, 3), np.float32), g[..., None]], -1)
     save('collar', c)
+    # package F: the full-size cover (plan_dials.py bottom_cover): black over BMW's bottom lines, hooks and grey dash,
+    # 3 px clear of the check-control frame, text and "i". Only its box (plan_dials COVER_BOX = gen_6wb COVER), 1:1
+    x0, y0, x1, y1 = 588, 598, 1324, 662
+    g = np.asarray(Image.open(os.path.join(ROOT, 'design', 'overlay', 'cover.dials.png')).convert('L'), dtype=np.float32) / 255.0
+    if g[:y0].any() or g[y1:].any() or g[:, :x0].any() or g[:, x1:].any():
+        raise SystemExit('cover.dials.png has coverage outside its box %r' % ([x0, y0, x1, y1],))
+    g = g[y0:y1, x0:x1]
+    save('cover', np.concatenate([np.zeros(g.shape + (3,), np.float32), g[..., None]], -1))
     # the middle window and the bar below it, half size, one texture: x 640..1280, y 76..648
     c = np.zeros((572, 640, 4), np.float32)
     put(c, 'window.base', 640, 76)
