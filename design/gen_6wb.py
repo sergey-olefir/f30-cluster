@@ -20,8 +20,13 @@ def cell(font):
     return _cell[font]
 
 # Sport and Eco Pro still use the first geometry (measured off the 6WB photos); Comfort has been fitted to the G20
-# (see shared/visible.js): bigger dials, the rev dial centred on BMW's black box so the box hides only the hub. We draw no
-# gear letter, as in the bimmer-lab themes.
+# (see shared/visible.js): bigger dials, the rev dial centred on BMW's black box so the box hides only the hub.
+# car4 L (docs/CAR4-L-REPORT.md): every layout with the tacho's gear tray (6WB Comfort, Comfort + BMW map, Dials + G20)
+# draws our gear in it and our drive mode above it, the same widgets and settings (tray_row(): "gearTray", "modeLabel").
+# Before, only Dials + G20 did; Comfort drew no gear letter, as in the bimmer-lab themes, so as not to double BMW's
+# own letter in the bottom row (BMW draws that over any theme: docs/BAKE-C9-overlays.md). The owner chose ours anyway
+# (2026-11-13): the 6WB always shows the gear in the tray. Sport and Eco Pro have no tray (their own look) and print the
+# mode themselves.
 OLD = dict(R=290, SP=(496, 360), RV=(1424, 360), MINI_R=90, FU=(103, 473), OT=(1817, 473))
 G20 = dict(R=335, SP=(412, 380), RV=(1508, 380), MINI_R=70, FU=(80, 628), OT=(1840, 628))
 globals().update(OLD)
@@ -186,6 +191,7 @@ def comfort():
         tg = "!baked&own:clock" if i == 0 else "!baked"
         W += [text("row_h%d" % i, x, 612, 150, head, "wb_cap", "dim", align="left", toggle=tg),
               text("row_v%d" % i, x, 650, 170 if i == 2 else 160, tok, "wb_val", align="left", toggle=tg)]
+    W += tray_row()                  # car4 L: the mode label and our gear in the tray, as in 6WB Dials + G20
     W.append(msa_sign(RV[0] + MSA_AT[0] * R, RV[1] + MSA_AT[1] * R))      # car3 I
     return W
 
@@ -226,7 +232,8 @@ SHADE = {"y": [575, 605], "ko": [1253, 588, 1273, 630]}
 # (x ~397), and "23:59" fits the 115 px box.
 OWN = {"range": [132, 662, 334, 703], "clock": [340, 662, 455, 704], "temp": [1498, 662, 1667, 705]}
 ROW_BASE = 697
-# our drive-mode label above the gear tray (D row 15) and the gear in the tray (D row 17), on the tacho
+# our drive-mode label above the gear tray (D row 15) and the gear in the tray (D row 17), on the tacho (G20 geometry:
+# the same place in every layout with the tray; its shape is baked: bake/src/C2 params.PBOX)
 MODE_C, TRAY_C = (1508, 527), (1508, 583)
 
 def base_at(font, baseline):
@@ -244,11 +251,17 @@ def own_row():
         text("own_clock", 397, vy, 124, "{{time}}", "wb_row", conn=1, toggle="own:clock"),
         text("own_temp", 1615, vy, 110, "{{ambient1}}", "wb_row", align="right", conn=2, toggle="own:temp"),
         text("own_temp_u", 1619, uy, 46, "{{u:temp}}", "wb_val", align="left", conn=2, toggle="own:temp"),
+    ]
+# --- end package F ---
+
+def tray_row():
+    """car4 L: our drive mode above the tacho's gear tray ("modeLabel") and our gear in it ("gearTray": "D4" / "D" /
+    empty), the same in every layout that has the tray."""
+    return [
         text("mode", MODE_C[0], MODE_C[1], 240, "{{mode}}", "wb_capb", conn=2, toggle="modeLabel"),
         text("gear", TRAY_C[0], TRAY_C[1], 120, "{{gear}}", "wb_gear", conn=2, toggle="gearTray=gear"),
         text("gear_l", TRAY_C[0], TRAY_C[1], 120, "{{stage}}", "wb_gear", conn=2, toggle="gearTray=letter"),
     ]
-# --- end package F ---
 
 # --- car3 I (docs/CAR3-I-REPORT.md): the auto start/stop sign ---
 # The F30 says "engine stopped by MSA" with its rev needle at READY (hud.js does that) and shows the MSA symbol (an A in a
@@ -275,7 +288,7 @@ def dials():
     BMW's check-control "i". Package F: BMW's stock bottom lines, their hooks and the grey dash are under black (the
     cover); the range, clock and outside temperature are ours or BMW's by setting (ownRange / ownClock / ownTemp), ours
     drawn at BMW's places over black patches; our drive-mode label ("modeLabel") and the gear in our tray ("gearTray")
-    are on the tacho (this layout only: the others draw no gear)."""
+    are on the tacho, as in 6WB Comfort (tray_row())."""
     global FU, OT
     FU, OT = (FU[0], FU[1] + MINI_DY), (OT[0], OT[1] + MINI_DY)
     W = [
@@ -316,7 +329,8 @@ def dials():
         text("ready", RV[0] - 0.63 * R, RV[1] + 0.25 * R, 110, "READY", "wb_capb", conn=2),
         text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "OFF", "wb_cap", "dim", conn=2),
     ]
-    W += own_row()                   # package F: the bottom row's items ours, the mode label, the gear in the tray
+    W += own_row()                   # package F: the bottom row's items ours
+    W += tray_row()                  # the mode label, the gear in the tray (car4 L: shared with 6WB Comfort)
     W.append(msa_sign(RV[0] + MSA_AT[0] * R, RV[1] + MSA_AT[1] * R))      # car3 I
     FU, OT = (FU[0], FU[1] - MINI_DY), (OT[0], OT[1] - MINI_DY)
     return W

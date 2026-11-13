@@ -364,13 +364,12 @@ def floor_edge(cv, ss=4):
 def pbox_geom(u, v):
     """signed-ish inside test and edge distances for the P box (R units)."""
     B = P.PBOX
-    # the sides: lines from (+-top_hw, top_v) to (+-side_end_u, y on the bottom arc)
-    yb = math.sqrt(B["bot_r"] ** 2 - B["side_end_u"] ** 2)
+    # the shoulders: lines from (+-top_hw, top_v) down-out at shoulder_deg below the horizontal, to the bottom arc
     ax = np.abs(u)
     p0 = np.array([B["top_hw"], B["top_v"]])
-    p1 = np.array([B["side_end_u"], yb])
-    d = p1 - p0
-    n = np.array([d[1], -d[0]]) / np.hypot(*d)                     # outward normal (to +u side)
+    t = math.radians(B["shoulder_deg"])
+    d = np.array([math.cos(t), math.sin(t)])                       # down-out along the shoulder (v is down)
+    n = np.array([d[1], -d[0]])                                     # outward normal (to +u side)
     side = (ax - p0[0]) * n[0] + (v - p0[1]) * n[1]                 # > 0 outside the side
     top = B["top_v"] - v                                            # > 0 above the top
     bot = np.hypot(u, v) - B["bot_r"]                               # > 0 below the bottom arc
