@@ -41,6 +41,17 @@ WINDOW = [592, 158, 736, 442]
 FADE = [150, 40, 56, 60]
 FOOT = "hair"
 FOOT_LINE = [607, 650, 1270]
+# car3 H (docs/CAR3-H-REPORT.md): while BMW's map shows, the soft window is BMW's map as the car draws it with a theme
+# on, not the stock G20's: photo 41 (nothing of ours over the middle) puts it at x ~700-1216, y ~135-595 (10 %; 50 %
+# at x 724-1192, y 162-575; 75 % at x 754-1173, y 187-564), symmetric about x ~958, its own edge a 30-50 px fall-off.
+# Under WINDOW (x 592-1328, y 158-600) that edge showed, as a box with corners (photo 38). Our black is now full at
+# MAP_WINDOW's edge, near BMW's 75 % line, so BMW's edge is all under black (where BMW's map is under 30 % we pass
+# nothing, under 60 % at most 7 %), and the map comes in over MAP_FADE px (top, sides, foot, off the dials' rims), the
+# corners round (WBBACK: the fade bands meet on arcs).
+# BMW's map is at 90 % only inside x 794-1150, y 208-458 anyway, so the map seen at full is the same size as before.
+# The floor (map off) keeps WINDOW and FADE
+MAP_WINDOW = [750, 180, 420, 384]
+MAP_FADE = [120, 80, 80, 24]
 
 def text(id, cx, cy, w, t, font, color="fg", align="center", conn=0, **kw):
     """A text box w wide, centred on (cx, cy) (align left / right: cx is that edge)."""
@@ -121,7 +132,8 @@ def comfort():
          "hole": WINDOW, "holeWhen": "stockMap", "holeInset": 0, "holeRadius": 22,
          # the soft window (docs/POLISH-A-REPORT.md): no box edge anywhere. The map fades into black toward the top,
          # sides and foot (the stock map veil's curve) and under the dials' rims; the floor fades at the sides and rims
-         "window": WINDOW, "fade": FADE, "foot": FOOT, "footLine": FOOT_LINE},
+         "window": WINDOW, "fade": FADE, "foot": FOOT, "footLine": FOOT_LINE,
+         "mapWindow": MAP_WINDOW, "mapFade": MAP_FADE},             # car3 H: the window while BMW's map shows
         dial("speedo", SP, "comfort", ringW=10, base=base("speedo", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
              fill=arc_fill("range_seg", SP, 239, 614, 346, 68, 216.0, 144.0, "fuel", 1, [210, 209, 205]), measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
              start=SPD_START, sweep=SPD_SWEEP),
@@ -153,8 +165,12 @@ def comfort():
     W.append(text("limit", 351, 506, 60, "{{limit}}", "wb_val", "ink", conn=2))
     # the row at the middle window's foot
     # baked: one line, the range after the bar's pump pictogram (x 892-953, y 642-681); else headed columns
-    for i, (tok, x) in enumerate([("{{time}}", 800), ("{{ambient}} °C", 1010)]):
-        W.append(text("row_b%d" % i, x, 662, 150, tok, "wb_val", align="left", toggle="baked"))
+    # car3 H: the clock only while it is right, as 6WB Dials' "ownClock" (auto: once a time zone is set; the head unit
+    # runs on UTC). BMW's own clock sits under our speed dial's range arc, so no window opens over it: without our
+    # clock the temperature stands alone in the middle. The temperature in BMW's 0.5 degree steps ({{ambient1}})
+    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="baked&own:clock"),
+          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="baked&own:clock"),
+          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="baked&!own:clock")]
     # the range under the road signs (its pictogram is baked into the speed dial), the instant consumption under the rev dial
     # ref 12: the range arc reads "0" at its left end, "km" at its right end and the range in the middle above it;
     # the EfficientDynamics arc the same way with the instant consumption (0 at 196.5 deg, 20 l/100 km at 143.3 deg)
@@ -165,9 +181,11 @@ def comfort():
         x1, y1 = at(c, a1, 0.775 * R)
         W.append(text(id_ + "_a0", x0, y0, 40, lab0, "wb_cap", "dim", conn=conn, toggle="baked"))
         W.append(text(id_ + "_a1", x1, y1, 100, lab1, "wb_cap", "dim", conn=conn, toggle="baked"))
-    for i, (head, tok, x) in enumerate([("Time", "{{time}}", 742), ("Range", "{{range}} km", 890), ("Temp", "{{ambient}} °C", 1048)]):
-        W += [text("row_h%d" % i, x, 612, 150, head, "wb_cap", "dim", align="left", toggle="!baked"),
-              text("row_v%d" % i, x, 650, 160, tok, "wb_val", align="left", toggle="!baked")]
+    for i, (head, tok, x) in enumerate([("Time", "{{time}}", 742), ("Range", "{{range}} km", 890),
+                                        ("Temp", "{{ambient1}} {{u:temp}}", 1048)]):     # car3 H: clock as above, 0.5 degrees
+        tg = "!baked&own:clock" if i == 0 else "!baked"
+        W += [text("row_h%d" % i, x, 612, 150, head, "wb_cap", "dim", align="left", toggle=tg),
+              text("row_v%d" % i, x, 650, 170 if i == 2 else 160, tok, "wb_val", align="left", toggle=tg)]
     return W
 
 CUT_Y, CUT_FADE = 656, 26      # the big dials' open bottom (docs/OVERLAY-PLAN-DIALS.md): BMW's bottom row starts at y 659
