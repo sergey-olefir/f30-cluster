@@ -107,56 +107,6 @@
    "element": "structure.speedo",
    "file": "structure/speedo.glow.day.png",
    "x": 87,
-   "y": 37,
-   "scale": 1,
-   "z": 22,
-   "kind": "glow",
-   "layer": "under",
-   "state": "any",
-   "look": "day",
-   "lamp": null,
-   "lit": null,
-   "composite": "lighter",
-   "opacity": 1.0,
-   "evidence": "strong",
-   "sources": [
-    "09"
-   ],
-   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background, cleaned (clean_soft.py): outlier bins dropped, only the glow's own red-orange kept (the camera's neutral haze removed), faded out past the band's ends. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
-   "w": 617,
-   "h": 610,
-   "bytes": 85939
-  },
-  {
-   "id": "structure.speedo.glow.night",
-   "element": "structure.speedo",
-   "file": "structure/speedo.glow.night.png",
-   "x": 87,
-   "y": 37,
-   "scale": 1,
-   "z": 22,
-   "kind": "glow",
-   "layer": "under",
-   "state": "any",
-   "look": "night",
-   "lamp": null,
-   "lit": null,
-   "composite": "lighter",
-   "opacity": 1.0,
-   "evidence": "strong",
-   "sources": [
-    "08"
-   ],
-   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background, cleaned (clean_soft.py): outlier bins dropped, only the glow's own red-orange kept (the camera's neutral haze removed), faded out past the band's ends. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
-   "w": 617,
-   "h": 612,
-   "bytes": 67282
-  },
-  {
-   "id": "structure.tacho.glow.day",
-   "element": "structure.tacho",
-   "file": "structure/tacho.glow.day.png",
-   "x": 1215,
    "y": 38,
    "scale": 1,
    "z": 22,
@@ -173,16 +123,16 @@
     "09"
    ],
    "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background, cleaned (clean_soft.py): outlier bins dropped, only the glow's own red-orange kept (the camera's neutral haze removed), faded out past the band's ends. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
-   "w": 614,
-   "h": 604,
-   "bytes": 86405
+   "w": 616,
+   "h": 611,
+   "bytes": 79925
   },
   {
-   "id": "structure.tacho.glow.night",
-   "element": "structure.tacho",
-   "file": "structure/tacho.glow.night.png",
-   "x": 1215,
-   "y": 48,
+   "id": "structure.speedo.glow.night",
+   "element": "structure.speedo",
+   "file": "structure/speedo.glow.night.png",
+   "x": 87,
+   "y": 38,
    "scale": 1,
    "z": 22,
    "kind": "glow",
@@ -198,9 +148,59 @@
     "08"
    ],
    "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background, cleaned (clean_soft.py): outlier bins dropped, only the glow's own red-orange kept (the camera's neutral haze removed), faded out past the band's ends. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
-   "w": 609,
-   "h": 589,
-   "bytes": 86776
+   "w": 616,
+   "h": 611,
+   "bytes": 61538
+  },
+  {
+   "id": "structure.tacho.glow.day",
+   "element": "structure.tacho",
+   "file": "structure/tacho.glow.day.png",
+   "x": 1215,
+   "y": 67,
+   "scale": 1,
+   "z": 22,
+   "kind": "glow",
+   "layer": "under",
+   "state": "any",
+   "look": "day",
+   "lamp": null,
+   "lit": null,
+   "composite": "lighter",
+   "opacity": 1.0,
+   "evidence": "strong",
+   "sources": [
+    "09"
+   ],
+   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background, cleaned (clean_soft.py): outlier bins dropped, only the glow's own red-orange kept (the camera's neutral haze removed), faded out past the band's ends. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
+   "w": 584,
+   "h": 555,
+   "bytes": 59875
+  },
+  {
+   "id": "structure.tacho.glow.night",
+   "element": "structure.tacho",
+   "file": "structure/tacho.glow.night.png",
+   "x": 1215,
+   "y": 74,
+   "scale": 1,
+   "z": 22,
+   "kind": "glow",
+   "layer": "under",
+   "state": "any",
+   "look": "night",
+   "lamp": null,
+   "lit": null,
+   "composite": "lighter",
+   "opacity": 1.0,
+   "evidence": "strong",
+   "sources": [
+    "08"
+   ],
+   "notes": "Red-orange band glow between the band line and the frame, added over the background: a profile table RGB(s along the band, distance from it) fitted to the photo minus the background, cleaned (clean_soft.py): outlier bins dropped, only the glow's own red-orange kept (the camera's neutral haze removed), faded out past the band's ends. Pointer-glow zone (distance < 100 px to the needle, y > 415) masked and continued from the neighbours along the band (weak there).",
+   "w": 581,
+   "h": 542,
+   "bytes": 57515
   },
   {
    "id": "structure.speedo.wing.day",
@@ -225,7 +225,7 @@
    "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E, one for both dials (their mean: one side's cabin light averages out), outlier bins (the numerals' dark halos) dropped, blurred inside the face (no creases). The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak). Day: the night face times one gain (the day photos show the sky's reflection mid-face).",
    "w": 526,
    "h": 515,
-   "bytes": 130850
+   "bytes": 121909
   },
   {
    "id": "structure.speedo.wing.night",
@@ -250,7 +250,7 @@
    "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E, one for both dials (their mean: one side's cabin light averages out), outlier bins (the numerals' dark halos) dropped, blurred inside the face (no creases). The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak). Day: the night face times one gain (the day photos show the sky's reflection mid-face).",
    "w": 526,
    "h": 515,
-   "bytes": 126722
+   "bytes": 118662
   },
   {
    "id": "structure.tacho.wing.day",
@@ -275,7 +275,7 @@
    "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E, one for both dials (their mean: one side's cabin light averages out), outlier bins (the numerals' dark halos) dropped, blurred inside the face (no creases). The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak). Day: the night face times one gain (the day photos show the sky's reflection mid-face).",
    "w": 526,
    "h": 515,
-   "bytes": 129276
+   "bytes": 119062
   },
   {
    "id": "structure.tacho.wing.night",
@@ -300,14 +300,14 @@
    "notes": "Opaque grey 'wing' face between the band line and the inner edge E, with E's bevel. Colour tables RGB(s, depth) along the band and along E, one for both dials (their mean: one side's cabin light averages out), outlier bins (the numerals' dark halos) dropped, blurred inside the face (no creases). The lower part (y > 415) is under the pointer glow in every photo: continued from above (weak). Day: the night face times one gain (the day photos show the sky's reflection mid-face).",
    "w": 526,
    "h": 515,
-   "bytes": 125066
+   "bytes": 116150
   },
   {
    "id": "structure.fuel_mini.fill.day",
    "element": "structure.fuel_mini",
    "file": "structure/fuel_mini.fill.day.png",
-   "x": 20,
-   "y": 440,
+   "x": 21,
+   "y": 441,
    "scale": 1,
    "z": 26,
    "kind": "albedo",
@@ -337,16 +337,16 @@
      ]
     ]
    },
-   "w": 177,
-   "h": 199,
-   "bytes": 39905
+   "w": 175,
+   "h": 197,
+   "bytes": 39180
   },
   {
    "id": "structure.fuel_mini.fill.night",
    "element": "structure.fuel_mini",
    "file": "structure/fuel_mini.fill.night.png",
-   "x": 20,
-   "y": 440,
+   "x": 21,
+   "y": 441,
    "scale": 1,
    "z": 26,
    "kind": "albedo",
@@ -376,15 +376,15 @@
      ]
     ]
    },
-   "w": 177,
-   "h": 199,
-   "bytes": 37750
+   "w": 175,
+   "h": 197,
+   "bytes": 36503
   },
   {
    "id": "structure.oil_mini.fill.day",
    "element": "structure.oil_mini",
    "file": "structure/oil_mini.fill.day.png",
-   "x": 1725,
+   "x": 1726,
    "y": 445,
    "scale": 1,
    "z": 26,
@@ -415,15 +415,15 @@
      ]
     ]
    },
-   "w": 173,
-   "h": 194,
-   "bytes": 38339
+   "w": 171,
+   "h": 193,
+   "bytes": 37376
   },
   {
    "id": "structure.oil_mini.fill.night",
    "element": "structure.oil_mini",
    "file": "structure/oil_mini.fill.night.png",
-   "x": 1725,
+   "x": 1726,
    "y": 445,
    "scale": 1,
    "z": 26,
@@ -454,46 +454,46 @@
      ]
     ]
    },
-   "w": 173,
-   "h": 194,
-   "bytes": 36379
+   "w": 171,
+   "h": 193,
+   "bytes": 35278
   },
   {
    "id": "structure.speedo.frame.day",
    "element": "structure.speedo",
    "file": "structure/speedo.frame.day.png",
-   "x": 78,
-   "y": 29,
-   "scale": 1,
-   "z": 30,
-   "kind": "albedo",
-   "layer": "under",
-   "state": "any",
-   "look": "day",
-   "lamp": null,
-   "lit": null,
-   "composite": "source-over",
-   "opacity": 1.0,
-   "evidence": "strong",
-   "sources": [
-    "09"
-   ],
-   "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 16 major + 45 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 17.1x3.1, minor 8.8x1.2 px).",
-   "w": 634,
-   "h": 625,
-   "bytes": 36135
-  },
-  {
-   "id": "structure.speedo.frame.night",
-   "element": "structure.speedo",
-   "file": "structure/speedo.frame.night.png",
-   "x": 76,
+   "x": 80,
    "y": 30,
    "scale": 1,
    "z": 30,
    "kind": "albedo",
    "layer": "under",
    "state": "any",
+   "look": "day",
+   "lamp": null,
+   "lit": null,
+   "composite": "source-over",
+   "opacity": 1.0,
+   "evidence": "strong",
+   "sources": [
+    "09"
+   ],
+   "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 16 major + 45 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 17.1x3.1, minor 8.8x1.2 px).",
+   "w": 630,
+   "h": 624,
+   "bytes": 49874
+  },
+  {
+   "id": "structure.speedo.frame.night",
+   "element": "structure.speedo",
+   "file": "structure/speedo.frame.night.png",
+   "x": 78,
+   "y": 32,
+   "scale": 1,
+   "z": 30,
+   "kind": "albedo",
+   "layer": "under",
+   "state": "any",
    "look": "night",
    "lamp": null,
    "lit": null,
@@ -504,16 +504,16 @@
     "08"
    ],
    "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 16 major + 45 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 17.1x3.1, minor 8.8x1.2 px).",
-   "w": 634,
-   "h": 625,
-   "bytes": 36321
+   "w": 631,
+   "h": 622,
+   "bytes": 50871
   },
   {
    "id": "structure.tacho.frame.day",
    "element": "structure.tacho",
    "file": "structure/tacho.frame.day.png",
-   "x": 1207,
-   "y": 29,
+   "x": 1208,
+   "y": 31,
    "scale": 1,
    "z": 30,
    "kind": "albedo",
@@ -529,16 +529,16 @@
     "09"
    ],
    "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 15 major + 49 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 16.0x3.7, minor 8.3x2.0 px).",
-   "w": 635,
-   "h": 626,
-   "bytes": 38208
+   "w": 632,
+   "h": 623,
+   "bytes": 51498
   },
   {
    "id": "structure.tacho.frame.night",
    "element": "structure.tacho",
    "file": "structure/tacho.frame.night.png",
-   "x": 1210,
-   "y": 33,
+   "x": 1211,
+   "y": 34,
    "scale": 1,
    "z": 30,
    "kind": "albedo",
@@ -554,16 +554,16 @@
     "08"
    ],
    "notes": "White scale frame (measured cross-profile, incl. its soft outer halo), the bottom frame line, the end hooks and 15 major + 49 minor ticks (capsules from intensity moments of each tick on 08 and 09; class sizes major 16.0x3.7, minor 8.3x2.0 px).",
-   "w": 632,
-   "h": 623,
-   "bytes": 37232
+   "w": 629,
+   "h": 621,
+   "bytes": 50352
   },
   {
    "id": "structure.speedo.bottom_end.day",
    "element": "structure.speedo",
    "file": "structure/speedo.bottom_end.day.png",
-   "x": 693,
-   "y": 605,
+   "x": 694,
+   "y": 606,
    "scale": 1,
    "z": 31,
    "kind": "albedo",
@@ -581,16 +581,16 @@
    ],
    "notes": "Curved end of the bottom frame line next to the check-control area (traced on 09). Seen in 09 and 14 (no check-control message); in 08 the check-control panel sits there and the end is not visible: draw it only while ccMessage is null.",
    "cond": "no_cc_message",
-   "w": 67,
-   "h": 46,
-   "bytes": 1369
+   "w": 65,
+   "h": 43,
+   "bytes": 1087
   },
   {
    "id": "structure.speedo.bottom_end.night",
    "element": "structure.speedo",
    "file": "structure/speedo.bottom_end.night.png",
-   "x": 693,
-   "y": 605,
+   "x": 694,
+   "y": 606,
    "scale": 1,
    "z": 31,
    "kind": "albedo",
@@ -608,16 +608,16 @@
    ],
    "notes": "Curved end of the bottom frame line next to the check-control area (traced on 09). Seen in 09 and 14 (no check-control message); in 08 the check-control panel sits there and the end is not visible: draw it only while ccMessage is null.",
    "cond": "no_cc_message",
-   "w": 67,
-   "h": 46,
-   "bytes": 1369
+   "w": 65,
+   "h": 43,
+   "bytes": 1087
   },
   {
    "id": "structure.tacho.bottom_end.day",
    "element": "structure.tacho",
    "file": "structure/tacho.bottom_end.day.png",
-   "x": 1158,
-   "y": 607,
+   "x": 1159,
+   "y": 608,
    "scale": 1,
    "z": 31,
    "kind": "albedo",
@@ -635,16 +635,16 @@
    ],
    "notes": "Curved end of the bottom frame line next to the check-control area (traced on 09). Seen in 09 and 14 (no check-control message); in 08 the check-control panel sits there and the end is not visible: draw it only while ccMessage is null.",
    "cond": "no_cc_message",
-   "w": 69,
-   "h": 45,
-   "bytes": 1547
+   "w": 66,
+   "h": 43,
+   "bytes": 1233
   },
   {
    "id": "structure.tacho.bottom_end.night",
    "element": "structure.tacho",
    "file": "structure/tacho.bottom_end.night.png",
-   "x": 1158,
-   "y": 607,
+   "x": 1159,
+   "y": 608,
    "scale": 1,
    "z": 31,
    "kind": "albedo",
@@ -662,9 +662,9 @@
    ],
    "notes": "Curved end of the bottom frame line next to the check-control area (traced on 09). Seen in 09 and 14 (no check-control message); in 08 the check-control panel sits there and the end is not visible: draw it only while ccMessage is null.",
    "cond": "no_cc_message",
-   "w": 69,
-   "h": 45,
-   "bytes": 1550
+   "w": 66,
+   "h": 43,
+   "bytes": 1233
   },
   {
    "id": "structure.rev_band.day",
@@ -691,7 +691,7 @@
    "notes": "Four red segments under the tacho frame between 6 and 7 (edges fitted per column, separators from the red profile's minima).",
    "w": 187,
    "h": 42,
-   "bytes": 2741
+   "bytes": 2135
   },
   {
    "id": "structure.rev_band.night",
@@ -718,7 +718,7 @@
    "notes": "Four red segments under the tacho frame between 6 and 7 (edges fitted per column, separators from the red profile's minima).",
    "w": 187,
    "h": 40,
-   "bytes": 2758
+   "bytes": 2068
   },
   {
    "id": "structure.speedo_info_line.day",
@@ -745,7 +745,7 @@
    "notes": "Two parallelogram segments (slanted cut ends) measured on 08/09; the second segment (x 616-694) is outside g20_comfort.json's bbox (re-measurement).",
    "w": 338,
    "h": 17,
-   "bytes": 550
+   "bytes": 458
   },
   {
    "id": "structure.speedo_info_line.night",
@@ -772,7 +772,7 @@
    "notes": "Two parallelogram segments (slanted cut ends) measured on 08/09; the second segment (x 616-694) is outside g20_comfort.json's bbox (re-measurement).",
    "w": 338,
    "h": 17,
-   "bytes": 516
+   "bytes": 412
   },
   {
    "id": "structure.tacho_info_line.day",
@@ -798,7 +798,7 @@
    "notes": "Two parallelogram segments (slanted cut ends) measured on 08/09; the second segment (x 1224-1302) is outside g20_comfort.json's bbox (re-measurement). Gone while a theme is connected (14).",
    "w": 340,
    "h": 16,
-   "bytes": 540
+   "bytes": 440
   },
   {
    "id": "structure.tacho_info_line.night",
@@ -824,14 +824,14 @@
    "notes": "Two parallelogram segments (slanted cut ends) measured on 08/09; the second segment (x 1224-1302) is outside g20_comfort.json's bbox (re-measurement). Gone while a theme is connected (14).",
    "w": 338,
    "h": 17,
-   "bytes": 497
+   "bytes": 417
   },
   {
    "id": "structure.fuel_mini.day",
    "element": "structure.fuel_mini",
    "file": "structure/fuel_mini.day.png",
    "x": 6,
-   "y": 428,
+   "y": 432,
    "scale": 1,
    "z": 34,
    "kind": "albedo",
@@ -847,16 +847,16 @@
     "09"
    ],
    "notes": "Frame with its zones (white + red reserve), numerals 1 / 1/2 / 0 and the pump icon. Our own vector icon fitted to the ink box (medium: a simplified drawing).",
-   "w": 198,
-   "h": 226,
-   "bytes": 10191
+   "w": 196,
+   "h": 220,
+   "bytes": 8444
   },
   {
    "id": "structure.fuel_mini.night",
    "element": "structure.fuel_mini",
    "file": "structure/fuel_mini.night.png",
    "x": 6,
-   "y": 428,
+   "y": 432,
    "scale": 1,
    "z": 34,
    "kind": "albedo",
@@ -872,16 +872,16 @@
     "08"
    ],
    "notes": "Frame with its zones (white + red reserve), numerals 1 / 1/2 / 0 and the pump icon. Our own vector icon fitted to the ink box (medium: a simplified drawing).",
-   "w": 198,
-   "h": 226,
-   "bytes": 10213
+   "w": 196,
+   "h": 220,
+   "bytes": 8470
   },
   {
    "id": "structure.oil_mini.day",
    "element": "structure.oil_mini",
    "file": "structure/oil_mini.day.png",
-   "x": 1719,
-   "y": 432,
+   "x": 1721,
+   "y": 438,
    "scale": 1,
    "z": 34,
    "kind": "albedo",
@@ -897,16 +897,16 @@
     "09"
    ],
    "notes": "Frame with its zones (red top, white, blue bottom), the car/thermometer icon. Our own vector icon fitted to the ink box (medium: a simplified drawing).",
-   "w": 194,
-   "h": 222,
-   "bytes": 9126
+   "w": 191,
+   "h": 214,
+   "bytes": 7471
   },
   {
    "id": "structure.oil_mini.night",
    "element": "structure.oil_mini",
    "file": "structure/oil_mini.night.png",
-   "x": 1718,
-   "y": 432,
+   "x": 1720,
+   "y": 438,
    "scale": 1,
    "z": 34,
    "kind": "albedo",
@@ -922,16 +922,16 @@
     "08"
    ],
    "notes": "Frame with its zones (red top, white, blue bottom), the car/thermometer icon. Our own vector icon fitted to the ink box (medium: a simplified drawing).",
-   "w": 195,
-   "h": 222,
-   "bytes": 9201
+   "w": 192,
+   "h": 214,
+   "bytes": 7597
   },
   {
    "id": "structure.speedo_numerals.day",
    "element": "structure.speedo",
    "file": "structure/speedo.numerals.day.png",
    "x": 129,
-   "y": 71,
+   "y": 72,
    "scale": 1,
    "z": 40,
    "kind": "font",
@@ -950,15 +950,15 @@
    ],
    "notes": "Numerals '20 40 60 100 140 200 260' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.57-0.75.",
    "w": 600,
-   "h": 508,
-   "bytes": 18864
+   "h": 506,
+   "bytes": 16284
   },
   {
    "id": "structure.speedo_numerals.night",
    "element": "structure.speedo",
    "file": "structure/speedo.numerals.night.png",
    "x": 129,
-   "y": 71,
+   "y": 72,
    "scale": 1,
    "z": 40,
    "kind": "font",
@@ -977,15 +977,15 @@
    ],
    "notes": "Numerals '20 40 60 100 140 200 260' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.57-0.75.",
    "w": 600,
-   "h": 508,
-   "bytes": 18865
+   "h": 506,
+   "bytes": 16287
   },
   {
    "id": "structure.speedo_scale_label.day",
    "element": "structure.speedo",
    "file": "structure/speedo.scale.label.day.png",
-   "x": 366,
-   "y": 567,
+   "x": 367,
+   "y": 568,
    "scale": 1,
    "z": 40,
    "kind": "font",
@@ -1003,16 +1003,16 @@
     "14"
    ],
    "notes": "Numerals '0 km/h' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.60-0.88. The speedo's scale label '0 km/h' at the scale start.",
-   "w": 111,
-   "h": 49,
-   "bytes": 3051
+   "w": 109,
+   "h": 47,
+   "bytes": 2616
   },
   {
    "id": "structure.speedo_scale_label.night",
    "element": "structure.speedo",
    "file": "structure/speedo.scale.label.night.png",
-   "x": 366,
-   "y": 567,
+   "x": 367,
+   "y": 568,
    "scale": 1,
    "z": 40,
    "kind": "font",
@@ -1030,16 +1030,16 @@
     "14"
    ],
    "notes": "Numerals '0 km/h' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.60-0.88. The speedo's scale label '0 km/h' at the scale start.",
-   "w": 111,
-   "h": 49,
-   "bytes": 3056
+   "w": 109,
+   "h": 47,
+   "bytes": 2616
   },
   {
    "id": "structure.tacho_numerals.day",
    "element": "structure.tacho",
    "file": "structure/tacho.numerals.day.png",
    "x": 1202,
-   "y": 66,
+   "y": 67,
    "scale": 1,
    "z": 40,
    "kind": "font",
@@ -1057,16 +1057,16 @@
     "14"
    ],
    "notes": "Numerals '1 2 3 4 5 6 7' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.71-0.81.",
-   "w": 597,
-   "h": 522,
-   "bytes": 10569
+   "w": 595,
+   "h": 520,
+   "bytes": 8721
   },
   {
    "id": "structure.tacho_numerals.night",
    "element": "structure.tacho",
    "file": "structure/tacho.numerals.night.png",
    "x": 1202,
-   "y": 66,
+   "y": 67,
    "scale": 1,
    "z": 40,
    "kind": "font",
@@ -1084,16 +1084,16 @@
     "14"
    ],
    "notes": "Numerals '1 2 3 4 5 6 7' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.71-0.81.",
-   "w": 597,
-   "h": 522,
-   "bytes": 10571
+   "w": 595,
+   "h": 520,
+   "bytes": 8719
   },
   {
    "id": "structure.tacho_zero.day",
    "element": "structure.tacho",
    "file": "structure/tacho.zero.day.png",
    "x": 1520,
-   "y": 571,
+   "y": 572,
    "scale": 1,
    "z": 40,
    "kind": "font",
@@ -1111,16 +1111,16 @@
    ],
    "notes": "Numerals '0' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.70-0.70. Shown only while the engine runs (09/14 show '0'; 08, engine off, shows C's 'OFF' there).",
    "cond": "engine_on",
-   "w": 29,
-   "h": 43,
-   "bytes": 1180
+   "w": 28,
+   "h": 41,
+   "bytes": 1060
   },
   {
    "id": "structure.tacho_zero.night",
    "element": "structure.tacho",
    "file": "structure/tacho.zero.night.png",
    "x": 1520,
-   "y": 571,
+   "y": 572,
    "scale": 1,
    "z": 40,
    "kind": "font",
@@ -1138,10 +1138,10 @@
    ],
    "notes": "Numerals '0' in Roboto (package C's FONT.json) wght 550, stretched to each measured ink box (width fitted per numeral), ink-box IoU 0.70-0.70. Shown only while the engine runs (09/14 show '0'; 08, engine off, shows C's 'OFF' there).",
    "cond": "engine_on",
-   "w": 29,
-   "h": 43,
-   "bytes": 1180
+   "w": 28,
+   "h": 41,
+   "bytes": 1061
   }
  ],
- "total_bytes": 1290016
+ "total_bytes": 1217411
 }
