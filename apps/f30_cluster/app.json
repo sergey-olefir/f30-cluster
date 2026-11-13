@@ -264,14 +264,14 @@
     },
     {
       "key": "modeLabel",
-      "label": "Dials + G20: drive mode above the gear",
+      "label": "6WB: drive mode above the gear",
       "type": "bool",
       "default": true,
       "reset": 1
     },
     {
       "key": "gearTray",
-      "label": "Dials + G20: gear in the tray",
+      "label": "6WB: gear in the tray",
       "type": "choice",
       "default": "gear",
       "reset": 1,
