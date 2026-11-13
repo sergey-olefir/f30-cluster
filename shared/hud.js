@@ -148,6 +148,7 @@
  * "<choice setting>=<value>" shows it only while that choice is picked (also with "!");
  * "own:range" / "own:clock" / "own:temp" while that item of BMW's bottom row is ours (settings ownRange / ownClock /
  * ownTemp, 6WB Dials + G20; package F); token {{ambient1}}: the outside temperature as BMW shows it, "+3.5" (°C, 0.5 steps);
+ * car3 H: "a&b" (any of the above, joined by "&") while every part is on;
  * "mapUp" (toggle or holeWhen) is not a saved setting: on while the Waze map shows inside the theme (waze.js; the
  * "mapInTheme" setting); the map is a content z 0 layer, so a frame meant to sit over it is content z 1 or more.
  * "themes": [...] shows it only in those themes. Text "color2": a second role, the colour at the bottom
@@ -1710,6 +1711,8 @@ class HudApp {
 
     /** "key" is on while that bool setting is on; "!key" while it is off. */
     _toggleOn(t) {
+        // car3 H: "a&b" is on while every part is (6WB Comfort's row: "baked&own:clock", "baked&!own:clock")
+        if (t.indexOf('&') > 0) return t.split('&').every((p) => this._toggleOn(p));
         const not = t.charAt(0) === '!';
         const k = not ? t.slice(1) : t, eq = k.indexOf('=');
         // package F: "own:range|clock|temp" is on while that bottom-row item is ours (_own: ownRange / ownClock / ownTemp)
@@ -1952,8 +1955,14 @@ class HudApp {
             // the soft window (package A): "window" [x, y, w, h], "fade" [top, sides, bottom, rims] px, "foot" glass |
             // hair | chrome | none at "footLine" [y, x0, x1]; without "window", the old hard hole
             const wb = this._wbUses(w);
-            c.uniform(ref, 'u_wbox', wb.box ? w.window.map((v, i) => v - (i === 0 ? w.x : i === 1 ? w.y : 0)) : [0, 0, 0, 0]);
-            c.uniform(ref, 'u_fade', Array.isArray(w.fade) && w.fade.length === 4 ? w.fade : [110, 40, 36, 44]);
+            // car3 H: while BMW's map shows (wb.window false), "mapWindow" / "mapFade" when given: BMW's map as the car
+            // draws it with a theme on, smaller than the stock one (docs/CAR3-H-REPORT.md)
+            const mapOn = wb.box && !wb.window, ok4 = (a) => Array.isArray(a) && a.length === 4;
+            const win = mapOn && ok4(w.mapWindow) ? w.mapWindow : w.window;
+            const fade = mapOn && ok4(w.mapFade) ? w.mapFade : w.fade;
+            c.uniform(ref, 'u_wbox', wb.box ? win.map((v, i) => v - (i === 0 ? w.x : i === 1 ? w.y : 0)) : [0, 0, 0, 0]);
+            c.uniform(ref, 'u_fade', ok4(fade) ? fade : [110, 40, 36, 44]);
+            // --- end car3 H ---
             const fl = Array.isArray(w.footLine) ? w.footLine : [0, 0, 1];
             c.uniform(ref, 'u_foot', [wb.foot, fl[0] - w.y, fl[1] - w.x, fl[2] - w.x]);
             x.wbFootNow = wb.foot;          // package F: the foot drawn now ("wbFoot" changes it live, _wbLive)

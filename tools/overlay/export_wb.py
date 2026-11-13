@@ -324,8 +324,10 @@ def live_elements(layout, anchors, comp):
         anchor = None if typ == 'wbback' else (WIDGET_ANCHOR.get(wid) or anchor_by_position(box, anchors))
         notes, mask, hole = [], None, None
         tog = w.get('toggle')
+        # car3 H: "a&b" toggles; "!baked" and "own:clock" (no time zone set by default) are off with the defaults
+        hidden = bool(tog) and any(t in ('!baked', 'own:clock') for t in tog.split('&'))
         if tog:
-            notes.append('toggle "%s": %s (baked on)' % (tog, HIDDEN_NOTE if tog == '!baked'
+            notes.append('toggle "%s": %s (baked on)' % (tog, HIDDEN_NOTE if hidden
                                                          else 'shown with the default settings'))
         if 'text' in w:
             notes.append('text "%s", font %s' % (w['text'], w.get('font')))
@@ -371,7 +373,7 @@ def live_elements(layout, anchors, comp):
             'id': eid, 'source': 'live', 'cluster': None, 'z': num(w['z'] + 100), 'bbox': box, 'mask': mask,
             'opaque': typ in ('wbback', 'dial'), 'kind': k, 'movable': typ != 'wbback', 'anchor': anchor,
             'file': None, 'widget': wid, 'conn': w.get('conn'), 'hole': hole,
-            'drawn_on_car': w.get('toggle') != '!baked', 'notes': '; '.join(notes)})
+            'drawn_on_car': not hidden, 'notes': '; '.join(notes)})
     return els
 
 
