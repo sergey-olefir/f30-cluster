@@ -830,6 +830,17 @@
       "align": "center",
       "conn": 2,
       "toggle": "gearTray=letter"
+    },
+    {
+      "id": "msa",
+      "type": "wbmsa",
+      "class": "content",
+      "z": 5,
+      "x": 1373,
+      "y": 498,
+      "w": 44,
+      "h": 44,
+      "conn": 0
     }
   ]
 }

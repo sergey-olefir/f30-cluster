@@ -1660,7 +1660,8 @@ void main() {
 
 const WBSIGN = `// The 6WB-style road signs in one cluster-render "effect" layer (GLSL ES 1.00), under the speed dial's hub: the
 // speed limit sign (its figure is a text widget on top) on the left and the no-overtaking sign on the right.
-// u_show.x / u_show.y turn each on (u_show.x 2: the end-of-limit sign instead, drawn here; package E). Baked (u_tex 1: hud/scene sign_limit / sign_nopass, our own drawings, at
+// u_show.x / u_show.y turn each on (u_show.x 2: the end-of-limit sign instead, drawn here; package E; u_show.x 3: the
+// empty sign "---", no limit known; car3 I). Baked (u_tex 1: hud/scene sign_limit / sign_nopass, our own drawings, at
 // u_r0 / u_r1 in the layer's px), else drawn here. Not BMW's artwork.
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)
@@ -1699,12 +1700,25 @@ vec4 endSign(vec2 q, float R) {
     s = mix(s, vec3(0.08), line * clamp(R * 0.86 - d + 0.5, 0.0, 1.0));
     return vec4(s, a);
 }
+// car3 I: the empty sign (u_show.x 3), as BMW shows "no limit known": the limit sign's ring and disc with three short
+// dark dashes across its middle in place of the figure (photos g20/40, ours/41: the dashes span 0.4 of the sign, each
+// 0.105 of it long). q: px from the centre, R: the sign's outer radius. Coverage of the dashes.
+float dashes(vec2 q, float R) {
+    float c = 0.0;
+    for (int i = -1; i <= 1; i++) c = max(c, rbox(q, vec2(float(i) * 0.295 * R, 0.0), vec2(0.105 * R, 0.042 * R), 0.03 * R));
+    return c;
+}
 
 void main() {
     vec2 p = v_uv * u_size;
     vec4 col = vec4(0.0);
     if (u_tex > 0.5) {
-        if (u_show.x > 1.5) col = endSign(p - (u_r0.xy + u_r0.zw * 0.5), min(u_r0.z, u_r0.w) * 0.5 - 1.0);
+        if (u_show.x > 2.5) {            // car3 I: "---" on the baked limit sign (its figure is empty)
+            vec2 q = p - (u_r0.xy + u_r0.zw * 0.5);
+            col = tex(u_s0, u_r0, p);
+            col.rgb = mix(col.rgb, vec3(0.12), dashes(q, min(u_r0.z, u_r0.w) * 0.5 - 1.0) * col.a);
+        }
+        else if (u_show.x > 1.5) col = endSign(p - (u_r0.xy + u_r0.zw * 0.5), min(u_r0.z, u_r0.w) * 0.5 - 1.0);
         else if (u_show.x > 0.5) col = tex(u_s0, u_r0, p);
         if (u_show.y > 0.5) {
             vec4 b = tex(u_s1, u_r1, p);
@@ -1716,10 +1730,11 @@ void main() {
     float R = 38.0;
     vec2 c1 = vec2(u_size.x * 0.5 - 48.0, u_size.y * 0.5);
     vec2 c2 = vec2(u_size.x * 0.5 + 48.0, u_size.y * 0.5);
-    if (u_show.x > 1.5) col = endSign(p - c1, R);
+    if (u_show.x > 1.5 && u_show.x < 2.5) col = endSign(p - c1, R);
     else if (u_show.x > 0.5) {
         float a = disc(p, c1, R);
         col = vec4(length(p - c1) < R * 0.79 ? vec3(0.95) : RED, a);
+        if (u_show.x > 2.5) col.rgb = mix(col.rgb, vec3(0.12), dashes(p - c1, R));    // car3 I: "---"
     }
     if (u_show.y > 0.5) {
         float a = disc(p, c2, R);
@@ -1736,6 +1751,63 @@ void main() {
     gl_FragColor = col;
 }
 `;
+
+// ---- car3 I: the auto start/stop (MSA) sign --------------------------------------------------------------------------
+const WBMSA = `// The 6WB themes' auto start/stop sign in one small cluster-render "effect" layer (GLSL ES 1.00): a capital A inside a
+// circular arrow (open at the bottom, its head at the lower left), as BMW's MSA symbol; our own drawing, not BMW's artwork.
+// u_msa.x: 0 or 1 hidden (none known / active: the F30 shows nothing while MSA waits), 2 off (deactivated by the button:
+// crossed out, u_fg), 3 engine stopped by MSA (u_on, BMW's green; the rev needle rests at READY meanwhile), 4 unavailable
+// (the stop conditions are not met: crossed out, u_dim). The layer is square; the symbol fills 0.9 of it.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU
+#else
+precision mediump float;
+#endif
+varying vec2 v_uv;
+uniform vec2 u_size;
+uniform vec4 u_msa;
+uniform vec4 u_fg;
+uniform vec4 u_dim;
+uniform vec4 u_on;
+
+float seg(vec2 p, vec2 a, vec2 b) {
+    vec2 pa = p - a, ba = b - a;
+    return length(pa - ba * clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0));
+}
+float ink(float d, float w) { return clamp(w - d + 0.5, 0.0, 1.0); }
+
+void main() {
+    float st = floor(u_msa.x + 0.5);
+    if (st < 1.5 || st > 4.5) { gl_FragColor = vec4(0.0); return; }
+    float S = min(u_size.x, u_size.y) * 0.5;
+    vec2 q = (v_uv * u_size - u_size * 0.5) / S;      // -1..1, y down
+    float px = 1.0 / S, w = 0.065;                     // half a stroke, in S
+    // the circular arrow: radius 0.78, open from 140 to 220 degrees (clockwise from the top, i.e. round the bottom)
+    float r = length(q), ang = degrees(atan(q.x, -q.y));
+    if (ang < 0.0) ang += 360.0;
+    float arc = (ang < 140.0 || ang > 220.0) ? ink(abs(r - 0.78) / px, w / px) : 0.0;
+    // its head at the gap's left end, pointing along the arc into the gap (down and right)
+    vec2 tip = vec2(sin(radians(204.0)), -cos(radians(204.0))) * 0.78;
+    vec2 dir = -normalize(vec2(-tip.y, tip.x));        // the anticlockwise tangent at the tip
+    vec2 nrm = vec2(-dir.y, dir.x);
+    vec2 b = tip - dir * 0.34;
+    float head = min(seg(q, tip, b + nrm * 0.25), seg(q, tip, b - nrm * 0.25));
+    arc = max(arc, ink(head / px, w / px));
+    // the letter A: two legs from the apex and a bar
+    float a = min(min(seg(q, vec2(0.0, -0.46), vec2(-0.30, 0.40)), seg(q, vec2(0.0, -0.46), vec2(0.30, 0.40))),
+                  seg(q, vec2(-0.17, 0.05), vec2(0.17, 0.05)));
+    float c = max(arc, ink(a / px, (w + 0.01) / px));
+    vec3 col = st > 2.5 && st < 3.5 ? u_on.rgb : st > 3.5 ? u_dim.rgb : u_fg.rgb;
+    if (st > 3.5 || st < 2.5) {
+        // crossed out: a stroke from the lower left to the upper right, with a black gap either side
+        float d = seg(q, vec2(-0.86, 0.86), vec2(0.86, -0.86));
+        c *= 1.0 - ink(d / px, (w + 0.10) / px);
+        c = max(c, ink(d / px, w / px));
+    }
+    gl_FragColor = vec4(col * c, c);
+}
+`;
+// ---- end car3 I ------------------------------------------------------------------------------------------------------
 
 const METER = `// A segmented bar meter for a cluster-render "effect" layer (GLSL ES 1.00): u_segs segments along the layer's
 // width (or its height when u_vertical is 1, filling upward), the first u_value of the way lit. A lit segment takes
@@ -2140,4 +2212,4 @@ void main() {
 }
 `;
 
-module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: WBDIAL, wbback: WBBACK, wbsign: WBSIGN, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, g20dial: G20DIAL };
+module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: WBDIAL, wbback: WBBACK, wbsign: WBSIGN, wbmsa: WBMSA /* car3 I */, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, g20dial: G20DIAL };
