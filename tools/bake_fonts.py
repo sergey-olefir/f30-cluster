@@ -109,6 +109,10 @@ F30_FONTS = [
     ('g20_spd', 'Roboto-wdth-wght.subset.ttf', 105, DIGITS, 0, [700, 87.5]),             # the digital speed
     ('g20_unit', 'Roboto-wdth-wght.subset.ttf', 27, 'km/h', 0, [600, 87.5]),          # its km/h
     ('g20_lab', 'Roboto-wdth-wght.subset.ttf', 34, '1/minx0', 0, [600, 87.5]),        # 1/min x1000
+    # car3 J: the mode label ("COMFORT" / "PLUS") and the gear letter in the tacho's centre, as the stock layout
+    # (photo 39: cap 22 px, COMFORT 142 px wide, strokes 3.8 px; the D 75 px tall, 53 wide, strokes 13.8)
+    ('g20_mode', 'Roboto-wdth-wght.subset.ttf', 31.5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ ', 0, [500, 94]),
+    ('g20_gear', 'Roboto-wdth-wght.subset.ttf', 105, 'PRNDSM-', 0, [650, 87.5]),
 ]
 FONTS = {'idrive_hud_widgets': HUD_FONTS, 'cluster_themes': CLUSTER_FONTS, 'f30_cluster': F30_FONTS}
 PAD = 2
