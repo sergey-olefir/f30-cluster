@@ -1532,7 +1532,11 @@ void main() {
     if (u_wbox.z > 0.0) {
         float ex = min(p.x - u_wbox.x, u_wbox.x + u_wbox.z - p.x);
         shade = veil(ex / u_fade.y) * smoothstep(0.0, u_fade.w, min(dl, dr));
-        vis = shade * veil((p.y - u_wbox.y) / u_fade.x) * veil((u_wbox.y + u_wbox.w - p.y) / u_fade.z);
+        // car3 H: the map's fade rounds its corners (the edges' fade bands meet on circular arcs in fade units, not as
+        // a product, which keeps square corners), so it reads as a vignette, not a box. Lengths of values <= 1.42: fp16-safe
+        vec2 q = vec2(1.0 - clamp(ex / u_fade.y, 0.0, 1.0),
+                      1.0 - clamp(min((p.y - u_wbox.y) / u_fade.x, (u_wbox.y + u_wbox.w - p.y) / u_fade.z), 0.0, 1.0));
+        vis = veil(1.0 - length(q)) * smoothstep(0.0, u_fade.w, min(dl, dr)) * (ex > 0.0 ? 1.0 : 0.0);
     }
     bool see = u_hole.z > 0.0 && u_wbox.z > 0.0;   // the map shows: the window and its floor are not drawn
     if (u_style < 0.5 && u_hasTex > 0.5) {
