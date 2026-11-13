@@ -186,6 +186,7 @@ def comfort():
         tg = "!baked&own:clock" if i == 0 else "!baked"
         W += [text("row_h%d" % i, x, 612, 150, head, "wb_cap", "dim", align="left", toggle=tg),
               text("row_v%d" % i, x, 650, 170 if i == 2 else 160, tok, "wb_val", align="left", toggle=tg)]
+    W.append(msa_sign(RV[0] + MSA_AT[0] * R, RV[1] + MSA_AT[1] * R))      # car3 I
     return W
 
 CUT_Y, CUT_FADE = 656, 26      # the big dials' open bottom (docs/OVERLAY-PLAN-DIALS.md): BMW's bottom row starts at y 659
@@ -234,6 +235,22 @@ def own_row():
         text("gear_l", TRAY_C[0], TRAY_C[1], 120, "{{stage}}", "wb_gear", conn=2, toggle="gearTray=letter"),
     ]
 # --- end package F ---
+
+# --- car3 I (docs/CAR3-I-REPORT.md): the auto start/stop sign ---
+# The F30 says "engine stopped by MSA" with its rev needle at READY (hud.js does that) and shows the MSA symbol (an A in a
+# circular arrow) when it matters; ours is one small effect layer (shaders.js WBMSA): hidden while MSA is armed or the
+# car sends nothing (app.json config.msa unset), green while MSA has stopped the engine, crossed out when switched off
+# (white) or unavailable (grey). In the G20-geometry tacho it sits between READY / OFF and the gear tray, clear of the
+# needle at OFF and READY; Sport and Eco Pro (no READY mark) put it at the left end of the info row.
+MSA_SIZE = 44
+
+def msa_sign(cx, cy, conn=0):
+    """Our MSA sign, MSA_SIZE square, centred on (cx, cy)."""
+    s = MSA_SIZE
+    return {"id": "msa", "type": "wbmsa", "class": "content", "z": 5, "x": int(round(cx - s / 2.0)),
+            "y": int(round(cy - s / 2.0)), "w": s, "h": s, "conn": conn}
+MSA_AT = (-0.337, 0.418)     # in the tacho, in R from its centre
+# --- end car3 I ---
 
 def dials():
     """6WB Dials + G20 (docs/OVERLAY-PLAN-DIALS.md): our four dials and road signs; the G20 draws everything else round
@@ -284,6 +301,7 @@ def dials():
         text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "OFF", "wb_cap", "dim", conn=2),
     ]
     W += own_row()                   # package F: the bottom row's items ours, the mode label, the gear in the tray
+    W.append(msa_sign(RV[0] + MSA_AT[0] * R, RV[1] + MSA_AT[1] * R))      # car3 I
     FU, OT = (FU[0], FU[1] - MINI_DY), (OT[0], OT[1] - MINI_DY)
     return W
 
@@ -322,6 +340,7 @@ def glowing(mode):
     for i, (head, tok, x) in enumerate([("Time", "{{time}}", 729), ("Range", "{{range}} km", 868), ("Temp", "{{ambient}} °C", 1054)]):
         W += [text("row_h%d" % i, x, 652, 150, head, "wb_cap", "dim", align="left"),
               text("row_v%d" % i, x, 688, 160, tok, "wb_val", align="left")]
+    W.append(msa_sign(700, 670, conn=1))     # car3 I: left of the info row (connection 0 is full here)
     return W
 
 out = sys.argv[1]

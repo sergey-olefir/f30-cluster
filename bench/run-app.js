@@ -86,7 +86,7 @@ function press(key, value) {
 const appCfg = spec.config || (spec.config = {});
 const named = (s) => !!(s && s.iface && s.field);
 if (process.env.BENCH_LIMIT !== 'off') {
-    if (!named(appCfg.limit)) appCfg.limit = { iface: 'bench.SpeedLimit', field: 'limit', path: ['value'], invalid: [0], end: [255] };
+    if (!named(appCfg.limit)) appCfg.limit = { iface: 'bench.SpeedLimit', field: 'limit', path: ['value'], invalid: [0], end: [255], unknown: [254] };
     if (!named(appCfg.nopass)) appCfg.nopass = { iface: 'bench.SpeedLimit', field: 'nopass', path: ['value'], on: [1] };
     if (appCfg.limit.iface === 'bench.SpeedLimit') log.info('bench: app.json config.limit names no field (the car shows BMW\'s sign); the bench stands in bench.SpeedLimit so manual signals set our sign (BENCH_LIMIT=off: as the car)');
 }
@@ -94,14 +94,17 @@ if (process.env.BENCH_LIMIT !== 'off') {
 const nest = (path, v) => (path || []).slice().reverse().reduce((acc, k) => ({ [k]: acc }), v);
 /** The raw value config.limit would turn into this manual limit. */
 function rawLimit(L, v) {
-    const end = v === 'end' || (typeof v === 'number' && v < 0);
-    const none = !end && !(typeof v === 'number' && v > 0);
+    // car3 I: 'unknown' or -20 and below: BMW's empty sign "---" (no limit known)
+    const unknown = v === 'unknown' || (typeof v === 'number' && v <= -20);
+    const end = !unknown && (v === 'end' || (typeof v === 'number' && v < 0));
+    const none = !end && !unknown && !(typeof v === 'number' && v > 0);
     if (L.map) {
-        const keys = Object.keys(L.map), want = end ? 'end' : none ? null : v;
+        const keys = Object.keys(L.map), want = unknown ? 'unknown' : end ? 'end' : none ? null : v;
         const k = keys.find((key) => L.map[key] === want) || (none ? keys.find((key) => L.map[key] === null) : null);
         const n = k !== undefined && k !== null && /^-?\d+(\.\d+)?$/.test(k) ? Number(k) : k;
         if (k !== undefined && k !== null) return n;
     }
+    if (unknown) return (L.unknown || [])[0] !== undefined ? L.unknown[0] : null;
     if (end) return (L.end || [])[0] !== undefined ? L.end[0] : null;
     if (none) return (L.invalid || [])[0] !== undefined ? L.invalid[0] : null;
     return Math.round(v / (L.unit === 'mph' ? 1.609344 : 1) / (typeof L.factor === 'number' && L.factor ? L.factor : 1));
@@ -113,8 +116,36 @@ function feedSigns(v) {
         const on = v.nopass === true || v.nopass === 1;
         hu.feed(N.iface, N.field, nest(N.path, on ? (N.on || [1])[0] : 0));
     }
+    feedCar3(v);
 }
 // ---- end package E -----------------------------------------------------------------------------------------------------
+
+// ---- car3 I: auto start/stop, the car's time zone, a check-control message, in manual mode ----------------------------
+// Manual values: msa (0 none, 1 active, 2 off, 3 engine stopped by MSA, 4 unavailable; the page's slider), tzCar (the
+// car's offset from UTC in minutes; API only, absent: the car sends none) and ccMsg (1 a message shows, 0 none; API
+// only). Fed as the raw value of the field app.json config.msa / config.clock / config.ccm names; while none is named,
+// the bench stands in bench.MSA / bench.Clock / bench.CheckControl (BENCH_LIMIT=off: as the car, nothing).
+if (process.env.BENCH_LIMIT !== 'off') {
+    if (!named(appCfg.msa)) appCfg.msa = { iface: 'bench.MSA', field: 'state', path: ['value'], map: { 0: null, 1: 'active', 2: 'off', 3: 'stopped', 4: 'unavailable' } };
+    if (!named(appCfg.clock)) appCfg.clock = { iface: 'bench.Clock', field: 'zone', kind: 'offset', path: ['value'], factor: 1, invalid: [-9999] };
+    if (!named(appCfg.ccm)) appCfg.ccm = { iface: 'bench.CheckControl', field: 'shown', kind: 'flag', path: ['value'], on: [1] };
+}
+const MSA_NAMES = [null, 'active', 'off', 'stopped', 'unavailable'];
+function feedCar3(v) {
+    const M = appCfg.msa, C = appCfg.clock, K = appCfg.ccm;
+    if (named(M) && 'msa' in v) {
+        const want = MSA_NAMES[Math.round(Number(v.msa)) || 0] || null;
+        const k = Object.keys(M.map || {}).find((key) => (M.map[key] || null) === want);
+        if (k !== undefined) hu.feed(M.iface, M.field, nest(M.path, /^-?\d+$/.test(k) ? Number(k) : k));
+    }
+    // a time zone only when one is asked for (offset kind in minutes); else the field's "none" value
+    if (named(C) && C.kind !== 'local' && 'tzCar' in v) {
+        const f = typeof C.factor === 'number' && C.factor ? C.factor : 1;
+        hu.feed(C.iface, C.field, nest(C.path, typeof v.tzCar === 'number' ? Math.round(v.tzCar / f) : (C.invalid || [null])[0]));
+    }
+    if (named(K) && 'ccMsg' in v) hu.feed(K.iface, K.field, K.kind === 'list' ? nest(K.path, v.ccMsg ? [{ id: 1 }] : []) : nest(K.path, v.ccMsg ? (K.on || [1])[0] : 0));
+}
+// ---- end car3 I --------------------------------------------------------------------------------------------------------
 
 // manual signals as raw SOME/IP values (a copy of kit/runtime/car.js SCALE; FES boost from hud.js)
 const SCALE = { rpm: [0.25, 0], speed: [0.015625, 0], accel: [0.002, -65], temp: [1, -48], torque: [0.5, -1023.5], boost: [0.01, 0] };
@@ -153,7 +184,8 @@ setInterval(() => {
     ['rpm', 'speed', 'oil', 'coolant', 'gear', 'gLong', 'gLat', 'torque'].forEach((n) => { out[n] = d[n] === undefined ? null : d[n]; });
     out.boost = hud._boost();
     out.fuelL = hud.fuelL; out.range = hud.rangeKm; out.ambient = hud.ambient;
-    out.limit = hud._raw('limitEnd') ? -10 : hud._raw('limit') || 0; out.nopass = hud._raw('nopass') ? 1 : 0;   // package E
+    out.limit = hud._raw('limitUnknown') ? -20 : hud._raw('limitEnd') ? -10 : hud._raw('limit') || 0; out.nopass = hud._raw('nopass') ? 1 : 0;   // package E; car3 I -20 "---"
+    out.msa = hud._raw('msa') || 0;      // car3 I
     send({ t: 'values', mode, values: out });
 }, 250);
 

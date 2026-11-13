@@ -38,6 +38,7 @@ const TYPES = {
     dial: ['measure'],
     wbback: ['dl', 'dr'],
     wbsign: [],
+    wbmsa: [],      // car3 I: the auto start/stop sign
     g20dial: ['base', 'lut', 'rows', 'bar', 'barC'],
     meter: ['signal', 'min', 'max'],
     gmeter: [],

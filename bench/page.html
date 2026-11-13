@@ -109,7 +109,8 @@
     ['boost', 0, 2.5, 0.05, 0], ['gear', 0, 8, 1, 1], ['gLong', -1.5, 1.5, 0.05, 0], ['gLat', -1.5, 1.5, 0.05, 0],
     ['fuelL', 0, 65, 1, 40], ['range', 0, 800, 5, 450], ['ambient', -20, 45, 1, 22],
     // package E: the signs. limit km/h (0: none known, -10: the end-of-limit sign); nopass 1: no overtaking
-    ['limit', -10, 130, 10, 0], ['nopass', 0, 1, 1, 0],
+    // car3 I: limit -20 is BMW's empty sign "---"; msa 0 none, 1 active, 2 off, 3 engine stopped by MSA, 4 unavailable
+    ['limit', -20, 130, 10, 0], ['nopass', 0, 1, 1, 0], ['msa', 0, 4, 1, 0],
   ];
   const canvas = document.getElementById('hud');
   const ctx = canvas.getContext('2d');

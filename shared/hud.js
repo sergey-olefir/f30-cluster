@@ -348,20 +348,29 @@ function driveModeOf(raw) {
 }
 
 // ---- package E: one raw speed-limit value (app.json config.limit, _setupVehicleData) as a sign state ----------------
-// { state: 'none' | 'limit' | 'end', kmh }. 'none': no limit known (no sign); 'end': the end-of-limit sign (the
-// derestriction sign: "end" values, or a "map" entry "end"); 'limit': kmh within min..max. Never throws.
-function limitOf(lim, raw, unitRaw) {
+// { state: 'none' | 'limit' | 'end' | 'unknown', kmh }. 'none': nothing to show (Speed Limit Info off or not sending: no
+// sign); 'end': the end-of-limit sign (the derestriction sign: "end" values, or a "map" entry "end"); 'limit': kmh within
+// min..max. car3 I: 'unknown': BMW's empty sign "---" (Speed Limit Info on, but no limit known): "unknown" values, a
+// "map" entry "unknown", or a separate state member (statePath + stateMap: { "<raw>": "unknown" | "none" | "end" |
+// "limit" }; "limit" or no entry: the value decides). Never throws.
+function limitOf(lim, raw, unitRaw, stateRaw) {
     const none = { state: 'none', kmh: null };
     const list = (a) => (Array.isArray(a) ? a : []);
-    if (raw === undefined || raw === null || !lim) return none;
+    if (!lim) return none;
+    if (lim.stateMap && typeof lim.stateMap === 'object' && stateRaw !== undefined && stateRaw !== null) {   // car3 I
+        const s = lim.stateMap[String(stateRaw)];
+        if (s === 'unknown' || s === 'none' || s === 'end') return { state: s, kmh: null };
+    }
+    if (raw === undefined || raw === null) return none;
     if (lim.map && typeof lim.map === 'object' && Object.prototype.hasOwnProperty.call(lim.map, String(raw))) {
         const m = lim.map[String(raw)];
-        if (m === 'end') return { state: 'end', kmh: null };
+        if (m === 'end' || m === 'unknown') return { state: m, kmh: null };
         if (typeof m !== 'number' || !isFinite(m)) return none;
         raw = m;                                    // a mapped value is km/h already
         lim = { min: lim.min, max: lim.max };
     } else {
         if (list(lim.end).indexOf(raw) >= 0) return { state: 'end', kmh: null };
+        if (list(lim.unknown).indexOf(raw) >= 0) return { state: 'unknown', kmh: null };   // car3 I: "---"
         if (list(lim.invalid).indexOf(raw) >= 0) return none;
     }
     if (typeof raw === 'string' && /^\s*\d+(\.\d+)?\s*$/.test(raw)) raw = Number(raw);
@@ -372,6 +381,55 @@ function limitOf(lim, raw, unitRaw) {
     return kmh >= lo && kmh <= hi ? { state: 'limit', kmh } : none;
 }
 // ---- end package E --------------------------------------------------------------------------------------------------
+
+// ---- car3 I: auto start/stop, the car's time zone, a check-control message (docs/CAR3-I-REPORT.md) -------------------
+// Each reads one raw value of a field app.json config names (scripts/car_signals.sh lists the candidates) and never throws.
+const MSA_STATES = { active: 1, off: 2, stopped: 3, unavailable: 4 };
+/** config.msa { map: { "<raw>": "active" | "off" | "stopped" | "unavailable" | null } } -> one of those, or null (hidden). */
+function msaOf(cfg, raw) {
+    if (!cfg || raw === undefined || raw === null) return null;
+    const m = cfg.map && typeof cfg.map === 'object' ? cfg.map[String(raw)] : undefined;
+    return typeof m === 'string' && MSA_STATES[m] ? m : null;
+}
+/** config.clock -> the car's offset from UTC in minutes, or null. kind "offset": the value at `path` times `factor` (1:
+ *  minutes; 60: hours; 1/60: seconds), plus `dstMinutes` (60) while the value at `dstPath` is truthy (not 0 / false /
+ *  "OFF"); `invalid`: raw values that mean none. kind "local": the car's local hour and minute (hourPath, minutePath)
+ *  against the unit's UTC clock, rounded to 15 minutes. */
+function tzOf(cfg, v, nowMs) {
+    const dig = (x, p) => { let r = x; (Array.isArray(p) ? p : []).forEach((k) => { r = r === null || r === undefined ? r : r[k]; }); return r; };
+    const num = (x) => (typeof x === 'number' && isFinite(x) ? x : typeof x === 'string' && /^\s*-?\d+(\.\d+)?\s*$/.test(x) ? Number(x) : null);
+    if (!cfg || v === undefined || v === null) return null;
+    if (cfg.kind === 'local') {
+        const h = num(dig(v, cfg.hourPath)), m = num(dig(v, cfg.minutePath));
+        if (h === null || m === null || h < 0 || h > 23 || m < 0 || m > 59) return null;
+        const u = new Date(nowMs), utc = u.getUTCHours() * 60 + u.getUTCMinutes();
+        let off = h * 60 + m - utc;
+        if (off > 14 * 60) off -= 1440;
+        if (off < -12 * 60) off += 1440;
+        return Math.round(off / 15) * 15;
+    }
+    const raw = dig(v, cfg.path);
+    if (Array.isArray(cfg.invalid) && cfg.invalid.indexOf(raw) >= 0) return null;
+    const n = num(raw);
+    if (n === null) return null;
+    let off = n * (typeof cfg.factor === 'number' && isFinite(cfg.factor) ? cfg.factor : 1);
+    if (cfg.dstPath) {
+        const d = dig(v, cfg.dstPath);
+        if (d && d !== 'OFF' && d !== '0') off += typeof cfg.dstMinutes === 'number' ? cfg.dstMinutes : 60;
+    }
+    return off >= -12 * 60 && off <= 14 * 60 ? Math.round(off) : null;
+}
+/** config.ccm -> true while a check-control message shows, false while none, null unknown. kind "list": a non-empty
+ *  array at `path`; kind "flag": the value at `path` is in `on` (or, with no `on`, not in `off`, default [0, false]). */
+function ccOf(cfg, v) {
+    let r = v;
+    (Array.isArray(cfg && cfg.path) ? cfg.path : []).forEach((k) => { r = r === null || r === undefined ? r : r[k]; });
+    if (!cfg || r === undefined || r === null) return null;
+    if (cfg.kind === 'list') return Array.isArray(r) ? r.length > 0 : null;
+    if (Array.isArray(cfg.on) && cfg.on.length) return cfg.on.indexOf(r) >= 0;
+    return (Array.isArray(cfg.off) ? cfg.off : [0, false]).indexOf(r) < 0;
+}
+// ---- end car3 I -----------------------------------------------------------------------------------------------------
 
 function rgb(c) { return [c[0] / 255, c[1] / 255, c[2] / 255]; }
 
@@ -676,8 +734,10 @@ class HudApp {
             extra[lim.iface] = Object.assign(extra[lim.iface] || {}, {
                 [lim.field]: (v) => {
                     const raw = dig(v, lim.path), unitRaw = lim.unitPath ? dig(v, lim.unitPath) : undefined;
-                    const t = String(JSON.stringify(raw)).slice(0, 80) + (lim.unitPath ? ' unit ' + String(JSON.stringify(unitRaw)).slice(0, 30) : '');
-                    const s = limitOf(lim, raw, unitRaw);
+                    const stRaw = lim.statePath ? dig(v, lim.statePath) : undefined;      // car3 I: a separate state member
+                    const t = String(JSON.stringify(raw)).slice(0, 80) + (lim.unitPath ? ' unit ' + String(JSON.stringify(unitRaw)).slice(0, 30) : '') +
+                        (lim.statePath ? ' state ' + String(JSON.stringify(stRaw)).slice(0, 30) : '');
+                    const s = limitOf(lim, raw, unitRaw, stRaw);
                     this.limitState = s.state; this.limitKmh = s.kmh;
                     if (t !== this.limitRaw) {      // to calibrate on the car: every new raw value once, with what it became
                         this.limitRaw = t;
@@ -702,6 +762,45 @@ class HudApp {
             });
         }
         // ---- end package E ------------------------------------------------------------------------------------------
+        // ---- car3 I: auto start/stop (config.msa), the car's time zone (config.clock), a check-control message showing
+        // (config.ccm). Each names its field once the car's catalogue has been read (scripts/car_signals.sh; the shapes
+        // are at msaOf / tzOf / ccOf and in docs/CAR3-I-REPORT.md); its interface must also be under app.json "signals".
+        // None named: nothing is subscribed (the MSA sign stays hidden, the clock keeps the "timeZone" setting). Every
+        // new raw value is logged once with what it became ("msa raw", "clock raw", "check-control raw"), to calibrate.
+        const watchRaw = (cfg, key, name, conv, after) => {
+            if (!cfg || !cfg.iface || !cfg.field) return;
+            extra[cfg.iface] = Object.assign(extra[cfg.iface] || {}, {
+                [cfg.field]: (v) => {
+                    const raw = cfg.path ? dig(v, cfg.path) : v;
+                    const out = conv(v, raw), prev = this[key];
+                    this[key] = out; this[key + 'At'] = Date.now();
+                    if (after && out !== prev) after(prev, out);
+                    const t = String(JSON.stringify(cfg.kind === 'local' || cfg.dstPath ? v : raw)).slice(0, 100);
+                    if (t !== this[key + 'Raw']) { this[key + 'Raw'] = t; this.log.info(name + ' raw: ' + t + ' -> ' + JSON.stringify(out)); }
+                },
+            });
+        };
+        this.msaState = null; this.tzCar = null; this.ccShown = null;
+        watchRaw(this.config.msa, 'msaState', 'msa', (v, raw) => msaOf(this.config.msa, raw));
+        // the first time zone from the car (or its loss) can flip 6WB Dials' clock "auto" between BMW's and ours: rebuild then
+        watchRaw(this.config.clock, 'tzCar', 'clock', (v) => tzOf(this.config.clock, v, Date.now()),
+            (prev, out) => { if (isNum(prev) !== isNum(out) && this.client && this.client.ready) this._rebuild(); });
+        watchRaw(this.config.ccm, 'ccShown', 'check-control', (v) => ccOf(this.config.ccm, v));
+        // The drive mode from another field (config.drive { iface, field, path, map: { "<raw>": "COMFORT" | "SPORT_PLUS" |
+        // "ECO_PRO" | 4 ... } }), when FES statusFESVehicleDynamicSwitchHMI gives nothing on a car (the owner's, photos 33
+        // and 41). Its value goes through the very same handler (driveModeOf / driveVariantOf, the layout by drive mode), so
+        // nothing about how a layout is chosen changes. Unset: only the FES field, as before.
+        const dc = this.config.drive, fes = extra['de.bmw.infotainment.drivingexcitement.FES'].statusFESVehicleDynamicSwitchHMI;
+        if (dc && dc.iface && dc.field) {
+            extra[dc.iface] = Object.assign(extra[dc.iface] || {}, {
+                [dc.field]: (v) => {
+                    let raw = dc.path ? dig(v, dc.path) : v;
+                    if (dc.map && typeof dc.map === 'object' && Object.prototype.hasOwnProperty.call(dc.map, String(raw))) raw = dc.map[String(raw)];
+                    fes({ actualValueModeDrivingExperience: raw });
+                },
+            });
+        }
+        // ---- end car3 I ---------------------------------------------------------------------------------------------
         // Instant fuel consumption (the 6WB Comfort theme's EfficientDynamics arc and {{cons}}), the same way: app.json
         // config.cons names the field once the car's catalogue has been looked at: { iface, field, path: [..], factor (1),
         // unit: "l100" | "lh" (litres per hour: divided by the speed), invalid: [..] }. None: "--" on the car.
@@ -1315,6 +1414,11 @@ class HudApp {
         // package E: the signs. limitEnd: 1 while the car shows the end of a limit (the derestriction sign)
         if (name === 'nopass') return this.nopassOn ? 1 : this.car.data().demo ? 1 : null;
         if (name === 'limitEnd') return this.limitState === 'end' ? 1 : null;
+        // car3 I: limitUnknown 1 while BMW would show its empty sign "---"; msa 1 active, 2 off, 3 engine stopped by MSA,
+        // 4 unavailable, null hidden (config.msa unset or the car's value unmapped); ccMsg 1 / 0 while config.ccm knows
+        if (name === 'limitUnknown') return this.limitState === 'unknown' ? 1 : null;
+        if (name === 'msa') return MSA_STATES[this.msaState] || null;
+        if (name === 'ccMsg') return this.ccShown === null || this.ccShown === undefined ? null : this.ccShown ? 1 : 0;
         if (name === 'cons') return isNum(this.consL) && Date.now() - this.consAt < 5000 ? this.consL : this.car.data().demo ? 7.4 : null;
         if (name === 'limit') return isNum(this.limitKmh) ? this.limitKmh : this.limitState === 'none' && this.car.data().demo ? 90 : null;
         if (name === 'fuel' || name === 'range' || name === 'ambient') {
@@ -1509,14 +1613,22 @@ class HudApp {
 
     /**
      * Local time. The head unit's clock runs on UTC (issues #6, #8: the clock 5 to 7 hours ahead), so the "timeZone"
-     * setting (minutes from UTC; TZ_AUTO = the unit's own) wins, then config.utcOffsetMinutes.
+     * setting (minutes from UTC; TZ_AUTO = the unit's own) wins, then the car's own (config.clock; car3 I), then
+     * config.utcOffsetMinutes.
      */
     _now() {
-        const tz = this.ctx.settings.item('timeZone') ? this.setting('timeZone') : TZ_AUTO;
-        const off = isNum(tz) && tz !== TZ_AUTO ? tz : this.config.utcOffsetMinutes;
+        const off = this._tzMinutes();
         if (!isNum(off)) return new Date();
         const d = new Date(Date.now() + off * 60000);
         return { getHours: () => d.getUTCHours(), getMinutes: () => d.getUTCMinutes() };
+    }
+    /** car3 I: minutes from UTC for our clock, or null (none known: the unit's own clock, UTC on the car): the "timeZone"
+     *  setting unless Automatic, then the car's time zone (config.clock, while it has sent one), then config.utcOffsetMinutes. */
+    _tzMinutes() {
+        const tz = this.ctx.settings.item('timeZone') ? this.setting('timeZone') : TZ_AUTO;
+        if (isNum(tz) && tz !== TZ_AUTO) return tz;
+        if (isNum(this.tzCar)) return this.tzCar;
+        return isNum(this.config.utcOffsetMinutes) ? this.config.utcOffsetMinutes : null;
     }
 
     _resolve(template) { return String(template).replace(/\{\{([a-zA-Z0-9:]+)\}\}/g, (_, t) => this._token(t)); }
@@ -1916,6 +2028,13 @@ class HudApp {
                 });
                 c.uniform(ref, 'u_tex', [1]);
             }
+        } else if (w.type === 'wbmsa') {
+            // car3 I: the auto start/stop sign (WBMSA). Shown by _update from config.msa: hidden until that field is wired
+            c.uniform(ref, 'u_size', [w.w, w.h]);
+            c.uniform(ref, 'u_msa', [0, 0, 0, 0]);
+            c.uniform(ref, 'u_fg', rgba(color(t, w.color || 'fg')));
+            c.uniform(ref, 'u_dim', rgba(color(t, 'dim')));
+            c.uniform(ref, 'u_on', [0.16, 0.78, 0.30, 1]);      // BMW's green for "on", as its own lamps (not dimmed at night)
         } else if (w.type === 'wbback') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_color', rgb(color(t, w.color || 'accent')));
@@ -2189,8 +2308,7 @@ class HudApp {
         if (!key || !this.ctx.settings.item(key)) return false;
         const v = this.setting(key);
         if (v !== 'auto') return v === 'ours';
-        const tz = this.ctx.settings.item('timeZone') ? this.setting('timeZone') : TZ_AUTO;
-        return (isNum(tz) && tz !== TZ_AUTO) || isNum(this.config.utcOffsetMinutes);
+        return isNum(this._tzMinutes());      // car3 I: the setting, the car's own time zone (config.clock) or config
     }
 
     /** WBBACK's black patches over BMW's bottom-row items we draw ourselves ("patches": [{ rect: [x0, y0, x1, y1] panel
@@ -2407,14 +2525,20 @@ class HudApp {
             x.c.uniform(x.ref, 'u_value', [q]);
             if (w.peak) x.c.uniform(x.ref, 'u_peak', [pk > q ? pk : -1]);
         } else if (w.type === 'wbsign') {
-            // package E: u_show.x 1 the limit sign, 2 the end-of-limit sign (WBSIGN), 0 none; .y the no-overtaking sign
-            const a = isNum(this._raw('limit')) ? 1 : this._raw('limitEnd') ? 2 : 0, b = this._raw('nopass') ? 1 : 0;
+            // package E: u_show.x 1 the limit sign, 2 the end-of-limit sign (WBSIGN), 0 none; .y the no-overtaking sign;
+            // car3 I: 3 the empty sign "---" (no limit known)
+            const a = isNum(this._raw('limit')) ? 1 : this._raw('limitEnd') ? 2 : this._raw('limitUnknown') ? 3 : 0, b = this._raw('nopass') ? 1 : 0;
             const key = a + '|' + b;
             if (!force && key === x.last) return;
             x.last = key;
             x.c.uniform(x.ref, 'u_show', [a, b]);
+        } else if (w.type === 'wbmsa') {
+            const m = this._raw('msa') || 0;        // car3 I: 0 hidden, 1 active (hidden too), 2 off, 3 stopped by MSA, 4 unavailable
+            if (!force && m === x.last) return;
+            x.last = m;
+            x.c.uniform(x.ref, 'u_msa', [m, 0, 0, 0]);
         } else if (w.type === 'wbback') {
-            const on = w.sign && (isNum(this._raw('limit')) || this._raw('limitEnd')) ? 1 : 0;   // package E: the end sign too
+            const on = w.sign && (isNum(this._raw('limit')) || this._raw('limitEnd') || this._raw('limitUnknown')) ? 1 : 0;   // package E: the end sign too; car3 I: "---"
             if (!force && on === x.last) return;
             x.last = on;
             x.c.uniform(x.ref, 'u_sign', on ? w.sign : [0, 0, 0]);
@@ -2432,7 +2556,8 @@ class HudApp {
             const mn = isNum(w.min) ? w.min : 0;
             let v = isNum(raw) ? Math.min(1, Math.max(0, (raw - mn) / (D.max - mn))) : 0;
             // a rev dial with an OFF mark ("off" degrees before 0): the needle parks there while the engine stands
-            if (w.off && w.measure === 'rpm' && !(isNum(raw) && raw >= 150)) v = -w.off / (w.sweep === undefined ? 270 : w.sweep);
+            // car3 I: ...except while auto start/stop has stopped it: then at READY (the scale's 0), as the F30's does
+            if (w.off && w.measure === 'rpm' && !(isNum(raw) && raw >= 150)) v = this._raw('msa') === MSA_STATES.stopped ? 0 : -w.off / (w.sweep === undefined ? 270 : w.sweep);
             const q = Math.round(v * 1000) / 1000;
             const hot = w.measure === 'rpm' && this._shift().now ? 1 : 0;
             let over = [-1, -1];
@@ -2463,7 +2588,7 @@ class HudApp {
                 // (config.limit / config.nopass wired): our sign is the only one, and while the car has sent nothing yet
                 // the spot stays black. Not wired: closed while our sign shows (the demo drive), open (1) otherwise, so
                 // BMW's own sign shows until the field is known.
-                const m = this._signWired() || isNum(this._raw('limit')) || this._raw('limitEnd') ? 3 : 1;
+                const m = this._signWired() || isNum(this._raw('limit')) || this._raw('limitEnd') || this._raw('limitUnknown') ? 3 : 1;   // car3 I: "---" too
                 if (force || m !== x.cutMode) { x.cutMode = m; x.c.uniform(x.ref, 'u_cut', this._cutVec(w, m)); }
             }
             const key = q + '|' + hot + '|' + over.join(',');
