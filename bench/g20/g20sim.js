@@ -13,6 +13,7 @@
  *
  * Debug (URL): ?g20dbg=outline draws the catalogue polygons (design/overlay/g20_comfort.json) on top;
  *              ?g20dbg=gauges draws only the stock pointers, their glow and the mini needles over black;
+ *              ?g20bb=0 leaves out BMW's black area (car3 J: absent when the theme is on at start-up);
  *              ?g20fill=b|d|both: the minis' fill from B (grey level clipped at D's needle; the default), from D
  *              (lit fill), or both (they model the same pixels: QC only).
  */
@@ -24,6 +25,7 @@
   var q = new URLSearchParams(location.search);
   var DBG = q.get('g20dbg') || '';
   var FILL = q.get('g20fill') || 'b';
+  var BB = q.get('g20bb') !== '0';                    // car3 J: ?g20bb=0, no black area (as at start-up)
 
   function loadScript(src) {
     return new Promise(function (resolve, reject) {
@@ -135,7 +137,9 @@
   function drawOver(ctx, s) {
     if (!M || DBG === 'gauges') return;
     if (mods.c) mods.c.drawOver(ctx, s);                         // C: (P), driver's belt, bottom-row gear
-    if (s.themeConnected) blackBox(ctx);                         // BMW's black area, only with a theme connected
+    // BMW's black area, only with a theme connected; car3 J: ?g20bb=0 leaves it out, as the car does when the theme
+    // is already on at start-up (docs/AGENT-BRIEF-car3.md 1, point 1)
+    if (s.themeConnected && BB) blackBox(ctx);
     if (DBG === 'outline') outlines(ctx, s);
   }
   function wantsFrame(s) { return !!(mods.live && mods.live.wantsFrame(s)); }

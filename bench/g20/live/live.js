@@ -1233,6 +1233,15 @@
    ],
    "note": "smoothstep fall to 0 at this depth"
   },
+  "q_in": {
+   "v": 34,
+   "ev": "medium",
+   "src": [
+    "39",
+    "40"
+   ],
+   "note": "car3 J: no glow outside this depth (px inside the tick ring), full 10 px further in: on 39/40 the tick zone between the band and the ticks stays dark by the pointer (the old fit lit it from the ring)"
+  },
   "res": {
    "v": 0.5,
    "ev": "none",
@@ -2040,26 +2049,28 @@
   },
   "needle": {
    "v": {
-    "w0": 10.0,
-    "w1": 4.5,
+    "w0": 9.0,
+    "w1": 5.5,
     "rgb": [
-     255,
-     112,
-     98
+     245,
+     92,
+     80
     ],
     "tip_rgb": [
-     190,
-     78,
-     74
+     185,
+     70,
+     62
     ]
    },
-   "ev": "medium",
+   "ev": "strong",
    "src": [
     "08",
     "09",
-    "14"
+    "14",
+    "39",
+    "40"
    ],
-   "note": "tapered red bar: width at the frame end / at the tip (4x crops), core colour (median of 6 needles), the tip dims"
+   "note": "tapered red bar: width at the frame end / at the tip, core colour, the tip dims. car3 J: refitted on the close-up 40 (5 photo px per panel px; half-max 9 px at the frame end, 7.5 px a quarter from the tip) and 39 (core 244-248, 90-94, 80-82); was 10 / 4.5, [255, 112, 98]"
   },
   "fill": {
    "v": {
@@ -2482,7 +2493,7 @@
     mx.closePath(); mx.fillStyle = '#fff'; mx.fill();
     var mask = mx.getImageData(0, 0, bw, bh).data;
     var rt = ringTable(which), C = V(dialP(which).centre);
-    var q0 = V(G.q0), q1 = V(G.q1);
+    var q0 = V(G.q0), q1 = V(G.q1), qi = G.q_in ? V(G.q_in) : -1e4;      // car3 J: q_in, none over the ticks
     var psi = new Float32Array(bw * bh), wq = new Float32Array(bw * bh);
     for (var j = 0; j < bh; j++) {
       for (var i = 0; i < bw; i++) {
@@ -2493,7 +2504,8 @@
         var q = interp(rt.ps, rt.rs, ps) - Math.hypot(x - C[0], y - C[1]);
         var t = clamp((q - q0) / (q1 - q0), 0, 1);
         psi[p] = ps;
-        wq[p] = m * (1 - t * t * (3 - 2 * t));
+        var u = clamp((q - qi) / 10, 0, 1);
+        wq[p] = m * (1 - t * t * (3 - 2 * t)) * u * u * (3 - 2 * u);
       }
     }
     var cv = makeCanvas(bw, bh);

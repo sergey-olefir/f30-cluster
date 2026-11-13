@@ -22,7 +22,42 @@ FRAME_LO = [(44, 586), (53, 599), (64, 613), (77, 626), (92, 637), (108, 645), (
 FILL_D = np.r_[np.arange(-2, 10, 0.5), np.arange(10, 30, 1.0), np.arange(30, 130.01, 4.0)]
 NEEDLE_CORRIDOR = 7.0
 INNER_OFF, INNER_W = 13.0, 3.4     # the fill's inner border line: offset from the outer frame, width (08)
-SIGMA = 0.9
+SIGMA = 0.5                        # car3 J: the crisp edges as on the close-up 40 (08's camera blur was 0.9)
+
+# ---- car3 J (2026-11-13): the frame refitted on the high-resolution photos 39 and 40 (docs/CAR3-J-REPORT.md)
+FRAME_WIDTH = {"white": 4.6, "red": 4.0, "blue": 4.0}    # half-max widths on 39/40 (08's fit drew 6.3 and 7.8)
+# the outer frame's centre against the traced fuel path, px along the path's left normal, by point index (39/40;
+# the oil mini: mirrored, so the sign flips)
+OFFSET_UP = [(20, -1.55), (35, -1.2), (50, -0.45), (65, -0.1), (80, 0.45), (95, 1.1), (110, 1.3), (140, 1.5),
+             (185, 1.45)]
+OFFSET_LO = [(5, 1.35), (20, 1.5), (50, 1.45), (65, 1.2), (95, 1.2), (110, 0.5), (140, 0.6), (160, 0.3)]
+TOP_END_X = 61.5      # the top segment ends here, at the foot of the '1' (40); the trace ran on under the '1'
+TOP_FADE = (31.0, 61.5, 0.5, 3.0)   # along the top segment from the corner (x0) to its end (x1): brightness to
+                                    # 0.5 and width to 3.0 px (39: peak 189 -> 90, width 4.8 -> 3.2)
+# the notch at 1/2 (40): the upper piece ends in a short foot to the right, the lower starts with a short stroke up
+# to the right; fuel space, panel px
+NOTCH_FOOT = [(37.5, 572.0), (48.0, 572.0)]
+NOTCH_HEAD = [(43.0, 580.5), (50.0, 576.5)]
+NOTCH_CUT_Y = (570.0, 582.5)        # the traced paths are dropped between these (the old round ends met there)
+NUM_BOX = {"1": [62, 433, 73, 456], "0": [174, 596, 191, 621]}    # ink boxes on 39/40 (08's '1' took in the frame)
+NUM_WGHT = 430
+
+
+def car3_paths(J, mini):
+    """The mini's two frame paths, shifted onto the photos' centre line (OFFSET_*), as (up, lo)."""
+    if mini == "fuel":
+        up, lo, sg = np.array(J["frame_up"]), np.array(J["frame_lo"]), 1.0
+    else:
+        up, lo, sg = np.array(J["oil_frame_up"]), np.array(J["oil_frame_lo"]), -1.0
+    out = []
+    for P, T in ((up, OFFSET_UP), (lo, OFFSET_LO)):
+        t = np.gradient(P, axis=0)
+        t /= np.linalg.norm(t, axis=1, keepdims=True)
+        n = np.stack([-t[:, 1], t[:, 0]], 1)
+        k = np.array(T)
+        o = np.interp(np.arange(len(P)), k[:, 0], k[:, 1])
+        out.append(P + sg * o[:, None] * n)
+    return out
 
 
 def mirror_x(p, axis):
@@ -362,29 +397,56 @@ def layers(look):
                                  "fuel fill's mirror image (symmetric fit)." % mini),
                           clip={"by": "%s_needle" % mini, "keep": "empty_end_side", "photo_needle": nd_photo}),
                     img, True))
-        # ---- frame strokes with zones
+        # ---- frame strokes with zones (car3 J: thinner, on the photos' centre line, the top segment ending at the
+        # '1' and fading, the notch at 1/2 drawn as 40 shows it)
         X2, Y2 = _canvas(box)
         acc = np.zeros(X2.shape + (4,), np.float32)
+        cup, clo = car3_paths(J, mini)
+        mx = (lambda x: x) if mini == "fuel" else (lambda x: 2 * axis - x)          # fuel space <-> this mini
+
+        def stroke(seg, w, col):
+            _, _, dd = lib.curve_coords(seg, X2, Y2, max_d=10)
+            aa = box_profile(np.where(np.isfinite(dd), dd, 99), w)
+            m = aa > acc[..., 3]
+            acc[m, :3] = col
+            acc[..., 3] = np.maximum(acc[..., 3], aa)
         for pc in J["pieces"]["%s_%s" % (mini, look)]:
-            if mini == "fuel":
-                path = up if pc["path"] == "up" else lo
-            else:
-                path = np.array(J["oil_frame_up"] if pc["path"] == "up" else J["oil_frame_lo"])
+            path = cup if pc["path"] == "up" else clo
             seg = path[max(0, pc["i0"] - 1):pc["i1"] + 1]
             if max(pc["colour"]) < 0.3:
                 continue
+            fx = mx(seg[:, 0])
+            keep = (fx <= TOP_END_X) if pc["path"] == "up" else np.ones(len(seg), bool)
+            keep &= ~((seg[:, 1] > NOTCH_CUT_Y[0]) & (seg[:, 1] < NOTCH_CUT_Y[1]))
+            seg, fx = seg[keep], fx[keep]
             if len(seg) < 2:
                 continue
-            _, _, dd = lib.curve_coords(seg, X2, Y2, max_d=10)
-            w = J["width"] * (1.25 if pc["kind"] != "white" else 1.0)
-            aa = box_profile(np.where(np.isfinite(dd), dd, 99), w)
-            m = aa > acc[..., 3]
-            acc[m, :3] = pc["colour"]
-            acc[..., 3] = np.maximum(acc[..., 3], aa)
+            w = FRAME_WIDTH[pc["kind"]]
+            col = np.asarray(pc["colour"], np.float32)
+            x0f, x1f, g1, w1 = TOP_FADE
+            top = (fx > x0f) & (seg[:, 1] < 450) if pc["path"] == "up" else np.zeros(len(seg), bool)
+            if not top.any():
+                stroke(seg, w, col)
+                continue
+            # the top segment in short pieces, each with its own width and brightness; the rest whole
+            idx = np.nonzero(top)[0]
+            for j in range(idx[0], idx[-1] + 1, 3):
+                piece = seg[max(0, j - 1):j + 4]
+                if len(piece) < 2:
+                    continue
+                u = np.clip((fx[j] - x0f) / (x1f - x0f), 0, 1)
+                stroke(piece, w + (w1 - w) * u, col * (1 + (g1 - 1) * u))
+            for r in (seg[:idx[0] + 1], seg[idx[-1]:]):
+                if len(r) >= 2:
+                    stroke(r, w, col)
+        white = np.asarray(max((p for p in J["pieces"]["%s_%s" % (mini, look)] if p["kind"] == "white"),
+                               key=lambda p: p["i1"] - p["i0"])["colour"], np.float32)
+        for pts in (NOTCH_FOOT, NOTCH_HEAD):
+            stroke(np.array([[mx(x), y] for x, y in pts], float), 3.0, white)
         # ---- numerals (fuel) and icons
         if mini == "fuel":
             for it in J["numerals"]:
-                al, ax, ay, _ = nm.place(it["text"], 550, 100, it["ink_box"], blur=SIGMA)
+                al, ax, ay, _ = nm.place(it["text"], NUM_WGHT, 100, NUM_BOX.get(it["text"], it["ink_box"]), blur=SIGMA)
                 _paste(acc, al, ax - box[0], ay - box[1], it["colour" if look == "night" else "colour_day"])
             ic = J["icons"]["pump"]
             _paste(acc, pump_icon(ic["ink_box"]), ic["ink_box"][0] - 3 - box[0], ic["ink_box"][1] - 3 - box[1],

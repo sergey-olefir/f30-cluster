@@ -10,7 +10,27 @@ import model
 import numerals as nm
 import render_soft as rs
 
-SIGMA_CAM = 0.9      # blur of crisp shapes (px), matched to the frame/numeral edges of rect 08
+SIGMA_CAM = 0.9      # blur of crisp shapes (px), matched to the frame/numeral edges of rect 08 (used to de-blur measures)
+
+# car3 J (2026-11-13): refitted on the high-resolution photos 39 and 40 (1.84 and 5.1 photo px per panel px, against
+# 08's 0.86; 39 is the only photo whose whites do not clip). Measures in docs/CAR3-J-REPORT.md.
+SIGMA_DRAW = 0.5     # the crisp shapes' own edge softness: 40 shows ~1 px edges (08's camera blur was baked in before)
+# the frame's width over the 08-fitted cross-profile's, along it (s / length from the bottom end): half-max width on
+# 39/40 6.1-6.7 px at the bottom, 7.0-7.7 on the sides, 3.5 at the top ends; the 08 profile drew 1.15-1.3x that
+FRAME_W = [(0.0, 0.90), (0.24, 0.90), (0.36, 0.80), (1.0, 0.80)]
+# the frame's brightness along it, s / length from its bottom end (both dials, mirror images), from 39's peaks (the
+# bottom line 150-160, the sides 213-235, the top ends 177-195: blur-corrected for the thinner top)
+FRAME_GAIN = [(0.0, 0.66), (0.24, 0.67), (0.31, 0.72), (0.38, 0.83), (0.45, 0.92), (0.52, 0.98), (0.58, 1.0),
+              (0.68, 1.0), (0.75, 0.95), (0.82, 0.90), (0.90, 0.87), (1.0, 0.86)]
+MINOR_TICK = 0.55    # the minor ticks' brightness against the majors' (39: 30-60 over the face against 145-215)
+NUMERAL_GREY = 0.68  # the dial numerals and "km/h": grey, this times the frame's white (39: 162-179 against the frame's
+                     # 245; the numeral by the pointer is lit to white, 238: G20DIAL draws that live)
+NUMERAL_WGHT = 430   # Roboto weight: stroke 4.1-4.3 px (speedo) and 4.3-4.6 (tacho) as 39/40 (08's fit, 550, was 5.5-6)
+
+
+def frame_gain(sf):
+    k = np.array(FRAME_GAIN)
+    return np.interp(sf, k[:, 0], k[:, 1]).astype(np.float32)
 
 COMMON = {"layer": "under", "lamp": None, "lit": None, "opacity": 1.0}
 
@@ -55,8 +75,13 @@ def frame_alpha(geo, C, dial, look, X, Y):
         d = -d             # the tacho polyline runs the other way round: its left normal points outwards
     ok = np.isfinite(d) & (np.abs(d) < 12)
     a = np.zeros(X.shape, np.float32)
-    a[ok] = lib.table_eval(np.array(T["alpha"])[..., None], np.array(T["s_edges"]), np.array(T["d"]), s[ok], d[ok])[..., 0]
-    return a
+    # car3 J: narrower (FRAME_W), the same profile shape
+    sf = np.where(np.isfinite(s), s, 0) / lib.arclen(F)[-1]
+    k = np.array(FRAME_W)
+    fw = np.interp(sf, k[:, 0], k[:, 1])
+    a[ok] = lib.table_eval(np.array(T["alpha"])[..., None], np.array(T["s_edges"]), np.array(T["d"]), s[ok],
+                           d[ok] / fw[ok])[..., 0]
+    return a, sf
 
 
 def ticks_alpha(C, dial, X, Y):
@@ -71,6 +96,7 @@ def ticks_alpha(C, dial, X, Y):
     ws = np.array([t["w"] for t in T])
     Wmaj, Wmin = true(np.median(ws[major])), true(np.median(ws[~major]))
     a = np.zeros(X.shape, np.float32)
+    am = np.zeros(X.shape, np.float32)        # car3 J: the minor ticks apart (drawn dimmer)
     for t, mj in zip(T, major):
         c, v = np.array(t["c"]), np.array(t["v"])
         L, Wd = (Lmaj, Wmaj) if mj else (Lmin, Wmin)
@@ -80,9 +106,10 @@ def ticks_alpha(C, dial, X, Y):
         near = (np.abs(along) < L) & (np.abs(perp) < L)
         if not near.any():
             continue
-        aa = box_profile(along[near], L, s) * box_profile(perp[near], Wd, s)
-        a[near] = np.maximum(a[near], aa)
-    return a, {"major": [Lmaj, Wmaj], "minor": [Lmin, Wmin], "n": [int(major.sum()), int((~major).sum())]}
+        aa = box_profile(along[near], L, SIGMA_DRAW) * box_profile(perp[near], Wd, SIGMA_DRAW)
+        tgt = a if mj else am
+        tgt[near] = np.maximum(tgt[near], aa)
+    return (a, am), {"major": [Lmaj, Wmaj], "minor": [Lmin, Wmin], "n": [int(major.sum()), int((~major).sum())]}
 
 
 # The slanted gap between the bottom frame line and the curved end next to the check-control area (polish C, from
@@ -101,7 +128,7 @@ def bottom_gap(geo, dial, X, Y, keep):
     if keep == "line":
         sd = -sd
     near = (np.abs(Y - py) < 14) & (np.abs(Xs - px) < 14)
-    k = 1.0 / (np.sqrt(2) * SIGMA_CAM)
+    k = 1.0 / (np.sqrt(2) * SIGMA_DRAW)
     cut = 0.5 * (1 + erf((sd - GAP["half"]) * k))
     return np.where(near, cut, 1.0).astype(np.float32)
 
@@ -118,11 +145,15 @@ def hook_path(P, run=5.0, ext=8.0):
 def frame_layer(geo, C, dial, look):
     x0, y0, x1, y1 = model.BOX[dial]
     X, Y = canvas(x0, y0, x1, y1)
-    a = frame_alpha(geo, C, dial, look, X, Y) * bottom_gap(geo, dial, X, Y, "line")
-    t, info = ticks_alpha(C, dial, X, Y)
-    a = np.maximum(a, t)
-    col = C["frame_profile"][look]["colour"]
-    img, x, y = crop(rgba(col, a), x0, y0)
+    fa, sf = frame_alpha(geo, C, dial, look, X, Y)
+    fa = fa * bottom_gap(geo, dial, X, Y, "line")
+    (tj, tn), info = ticks_alpha(C, dial, X, Y)
+    a = np.maximum(np.maximum(fa, tj), tn)
+    # car3 J: the frame's colour falls off along it (FRAME_GAIN), the minor ticks are dimmer (MINOR_TICK)
+    col = np.asarray(C["frame_profile"][look]["colour"], np.float32)
+    g = np.where(fa >= np.maximum(tj, tn), frame_gain(sf), np.where(tj >= tn, 1.0, MINOR_TICK)).astype(np.float32)
+    out = np.concatenate([col[None, None, :] * g[..., None], np.clip(a, 0, 1)[..., None]], -1).astype(np.float32)
+    img, x, y = crop(out, x0, y0)
     return img, x, y, info
 
 
@@ -131,7 +162,7 @@ def para_poly(seg, yt, yb):
     return np.array([[seg["x0_top"], yt], [seg["x1_top"], yt], [seg["x1_bot"], yb], [seg["x0_bot"], yb]], float)
 
 
-def soft_polys(polys, pad=6, blur=SIGMA_CAM):
+def soft_polys(polys, pad=6, blur=SIGMA_DRAW):        # car3 J: SIGMA_DRAW (was SIGMA_CAM)
     P = np.vstack(polys)
     x0, y0 = int(np.floor(P[:, 0].min())) - pad, int(np.floor(P[:, 1].min())) - pad
     x1, y1 = int(np.ceil(P[:, 0].max())) + pad, int(np.ceil(P[:, 1].max())) + pad
@@ -165,8 +196,8 @@ def curved_end_layer(geo, C, dial, look, width=6.2):
     x1, y1 = int(P[:, 0].max()) + 9, int(P[:, 1].max()) + 9
     X, Y = canvas(x0, y0, x1, y1)
     s, d, dist = lib.curve_coords(P, X, Y)
-    a = box_profile(dist, width, SIGMA_CAM) * bottom_gap(geo, dial, X, Y, "hook")
-    col = C["frame_profile"][look]["colour"]
+    a = box_profile(dist, width * FRAME_W[0][1], SIGMA_DRAW) * bottom_gap(geo, dial, X, Y, "hook")
+    col = np.asarray(C["frame_profile"][look]["colour"]) * FRAME_GAIN[0][1]     # car3 J: the bottom line's grey
     return crop(rgba(col, a), x0, y0)
 
 
@@ -185,8 +216,8 @@ def rev_band_layer(C, look, rim=2.0):
             out.append(np.array([[xa, ct[0] + ct[1] * xa + inset], [xb, ct[0] + ct[1] * xb + inset],
                                  [xb, cb[0] + cb[1] * xb - inset], [xa, cb[0] + cb[1] * xa - inset]]))
         return out
-    a_all, x, y = soft_polys(quads(0.0), blur=SIGMA_CAM)
-    a_core, x2, y2 = soft_polys(quads(rim), blur=SIGMA_CAM, pad=6)
+    a_all, x, y = soft_polys(quads(0.0), blur=SIGMA_DRAW)
+    a_core, x2, y2 = soft_polys(quads(rim), blur=SIGMA_DRAW, pad=6)
     core = np.zeros_like(a_all)
     core[y2 - y:y2 - y + a_core.shape[0], x2 - x:x2 - x + a_core.shape[1]] = a_core[:a_all.shape[0] - (y2 - y), :a_all.shape[1] - (x2 - x)]
     c_rim = np.array(R.get("rim_colour", [0.93, 0.27, 0.35]))
@@ -202,6 +233,8 @@ def numeral_layers(look):
     out = []
     for it in N["items"]:
         g = N["fit"]["unit" if it["text"] == "km/h" else "digits"]
-        a, ax, ay, size = nm.place(it["text"], g["wght"], g["wdth"], it["ink_box"], blur=SIGMA_CAM)
-        out.append((it, rgba(it["colour" if look == "night" else "colour_day"], a), ax, ay))
+        # car3 J: lighter (NUMERAL_WGHT) and grey (NUMERAL_GREY times the frame's white; 08/09 clipped them white)
+        a, ax, ay, size = nm.place(it["text"], NUMERAL_WGHT, g["wdth"], it["ink_box"], blur=SIGMA_DRAW)
+        col = np.asarray(P_crisp()["frame_profile"][look]["colour"]) * NUMERAL_GREY
+        out.append((it, rgba(col, a), ax, ay))
     return out, N
