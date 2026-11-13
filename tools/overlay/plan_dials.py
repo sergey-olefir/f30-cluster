@@ -43,7 +43,9 @@ CUT_Y, CUT_FADE = 656, 26                                      # as design/gen_6
 MINI_DY = -20
 SP, RV, R = (412, 380), (1508, 380), 335                         # the big dials (gen_6wb G20 geometry)
 # BMW's sign (centre 539, 622, r 41): the round window that shows it while ours has no data (gen_6wb: cut.round)
-SIGN_WIN = {'rect': [495, 578, 583, 666], 'radius': 44}
+# car3 G: measured on the car photos (centre 537.3, 621.3, r 41.5): the window is clear to r 42.5 round (537.5, 621.5)
+# and WBDIAL keeps a black ring 8 px wide round it (design/gen_6wb.py SIGN_WIN); the collar keep-off (SIGN_CLEAR) is as before
+SIGN_WIN = {'rect': [495, 579, 580, 664], 'radius': 42.5}
 SIGN_CLEAR = {'rect': [493, 576, 585, 668], 'radius': 46}      # no collar in it (the speedo's closed disc covers to r 50)
 SIGNS_BOX = [305, 460, 519, 553]                                # our wbsign widget (gen_6wb), under the speed hub
 MAP_WIN = [748, 155, 1172, 612]                                 # the gap between the dials (no dial pixels)
