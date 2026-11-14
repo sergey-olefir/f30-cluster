@@ -7,7 +7,10 @@
  *  - The center-screen page is hu-stub's fake RHMI. A setting from the bench panel is sent the way
  *    the car's HMI sends it: an 'action' on the SET_<KEY> component (the drop-down's row, or a
  *    checkbox press), so the kit's own wireSettings() handles it and saves bench/.data/<id>/settings.json.
- *  - The status row (ctx.ui.text('STATUS', ...)) is reported to the page.
+ *  - The engine's status line (hud.js onStatus) is reported to the page.
+ *  - The native centre screen (2026-11-14, shared/menu.js): what the app writes to its RHMI components (texts, cells,
+ *    Visible, checkbox and drop-down values, pushed pictures) and the stub's screen stack are kept for GET /probe; POST
+ *    /click presses any component as the HMI would ({ id, row }). bench/test-native-ui.js drives these.
  *  - Manual signals go in as RAW SOME/IP values through hu.feed, the scaling car.js undoes on the
  *    car; the FES boost field too. Demo mode is the kit's sim.js (the "demo" setting).
  *  - HUD_CLUSTER_SOCKET points hud.js at the bench's fake cluster-render socket.
@@ -35,7 +38,7 @@ process.on('uncaughtException', (e) => { log.error('uncaught (the car would exit
 
 try { fs.mkdirSync(dataDir); } catch (e) { /* there */ }
 const { headUnit } = require(path.join(__dirname, '..', 'kit', 'tools', 'hu-stub.js'));
-const hu = headUnit(stage, { live: true, dataDir, log, image: () => Promise.resolve() });
+const hu = headUnit(stage, { live: true, dataDir, log, image: (name, cv) => { if (hu.onImage) hu.onImage(name, cv); return Promise.resolve(); } });
 const { spec, settings, ui } = hu;
 
 // the app's HudApp instance, for the values the page shows (hud.js is loaded by the app's main.js)
@@ -52,12 +55,32 @@ Module._load = function (req) {
     return m;
 };
 
-// the center screen's status row
+// the engine's status line (sent to the page by the HudApp wrapper above)
 let status = '';
-const text = ui.text;
-ui.text = (n, t, row, cell) => {
-    if (n === 'STATUS' && !row) { status = String(t); send({ t: 'status', s: status }); }
-    return text(n, t, row, cell);
+
+// 2026-11-14, the native centre screen (shared/menu.js): what the app writes to the RHMI components, kept for
+// GET /probe (bench/test-native-ui.js). The stub's own calls do nothing on screen: the HMI isn't drawn here.
+const native = {};          // component -> { text, cells, visible, checked, selected }
+const images = {};          // component -> { n: pushes, w, h } (the HMI's own image: a native graphic row, or a canvas
+                            //   screen without the renderer)
+const rec = (n, k, v) => { (native[n] = native[n] || {})[k] = v; };
+['text', 'cells', 'visible', 'checked', 'selected'].forEach((m) => {
+    const orig = ui[m];
+    ui[m] = function (n, a, b, c) {
+        if (m === 'text') rec(n, b || (c && c !== 'Text') ? 'cell:' + (c || 'Text') + '@' + (b || 0) : 'text', String(a));
+        else if (m === 'cells') rec(n, 'cells', b);
+        else if (m === 'checked') rec(n, 'checked', !!a);
+        else rec(n, m, a);
+        return orig.apply(this, arguments);
+    };
+});
+hu.onImage = (name, cv) => {
+    const i = images[name] = images[name] || { n: 0 };
+    i.n++; i.w = cv && cv.w; i.h = cv && cv.h;
+    // BENCH_IMAGE_DIR: each picture also saved there as <component>.png (the last one), to look at
+    if (process.env.BENCH_IMAGE_DIR && cv) {
+        try { fs.writeFileSync(path.join(process.env.BENCH_IMAGE_DIR, name.toLowerCase() + '.png'), Buffer.isBuffer(cv) ? cv : cv.png()); } catch (e) { log.warn('bench: ' + e.message); }
+    }
 };
 
 const sendSettings = () => send({ t: 'settings', schema: spec.settings, values: Object.assign({}, settings.values) });
@@ -200,6 +223,19 @@ process.on('message', (m) => {
     } else if (m.t === 'set') press(m.key, m.value);
     else if (m.t === 'drive') drive = m.value;
     else if (m.t === 'shiftTest' && hud) hud.testShift();
+    // 2026-11-14 (native centre screen): an HMI action on any component (POST /click), the HMI's back arrow (POST /hmi),
+    // and what the app shows (GET /probe)
+    else if (m.t === 'click' && m.id) ui.comp(m.id).emit('action', typeof m.row === 'number' ? { row: m.row } : {});
+    else if (m.t === 'hmi' && m.a === 'back') { const top = hu.stack[hu.stack.length - 1]; if (top) ui.close(top); }
+    else if (m.t === 'probe') {
+        let layoutName = null, yielded = null;
+        try { layoutName = hud ? hud._layoutName() : null; yielded = hud && hud.screen ? hud.screen.yielded : null; } catch (e) { /* not up yet */ }
+        send({
+            t: 'probe', n: m.n, native, images, stack: hu.stack.slice(), settings: Object.assign({}, settings.values), status,
+            activeName: hud ? hud.activeName : null, layoutName, yielded, driveMode: hud ? hud.driveMode : null,
+            ready: !!(hud && hud.client && hud.client.ready),
+        });
+    }
 });
 process.on('disconnect', () => process.exit(0));
 process.on('SIGTERM', () => process.exit(0));

@@ -191,26 +191,31 @@ def build_ui(spec, language='en'):
         strings[s] = text
         return {cell: {'value': s, 'type': 'StringId'}}
 
-    def settings_items(items):
+    def setting_item(s, items):
+        """One setting's row: bool -> checkBox, choice / number -> dropDownMenu, else a two-row button."""
+        name = 'SET_' + s['key'].upper()
+        if s['type'] == 'bool':
+            items.append(comp('checkbox', name, rows=[text_row('SET_' + s['key'], s['label'])]))
+        elif s['type'] in ('choice', 'number'):
+            # a drop-down with every value, as BMW's parking app settings: rows = options
+            # (ItemText), HeaderText = the setting, SelectedItem = the chosen row (mgu.js sets it)
+            values, labels = setting_options(s)
+            did = nid()
+            items.append((did, [f'            <component id="{did}" type="dropDownMenu"/>'], {
+                'type': 'dropDownMenu', 'name': name,
+                'rows': [{'ItemText': {'value': hmi_text(lb), 'type': 'Text'}} for lb in labels],
+                'cells': {'HeaderText': {'value': hmi_text(s['label']), 'type': 'Text'},
+                          'SelectedItem': {'value': values.index(s['default']) if s['default'] in values else 0, 'type': 'UInt'}},
+            }))
+        else:
+            strings[sid(app, 'SET_' + s['key'])] = s['label']
+            items.append(comp('tworow', name, rows=[{'Text1stRow': {'value': s['label'], 'type': 'Text'},
+                                                    'Text2ndRow': {'value': '', 'type': 'Text'}}]))
+
+    def settings_items(items, skip=()):
         for s in spec['settings']:
-            name = 'SET_' + s['key'].upper()
-            if s['type'] == 'bool':
-                items.append(comp('checkbox', name, rows=[text_row('SET_' + s['key'], s['label'])]))
-            elif s['type'] in ('choice', 'number'):
-                # a drop-down with every value, as BMW's parking app settings: rows = options
-                # (ItemText), HeaderText = the setting, SelectedItem = the chosen row (mgu.js sets it)
-                values, labels = setting_options(s)
-                did = nid()
-                items.append((did, [f'            <component id="{did}" type="dropDownMenu"/>'], {
-                    'type': 'dropDownMenu', 'name': name,
-                    'rows': [{'ItemText': {'value': hmi_text(lb), 'type': 'Text'}} for lb in labels],
-                    'cells': {'HeaderText': {'value': hmi_text(s['label']), 'type': 'Text'},
-                              'SelectedItem': {'value': values.index(s['default']) if s['default'] in values else 0, 'type': 'UInt'}},
-                }))
-            else:
-                strings[sid(app, 'SET_' + s['key'])] = s['label']
-                items.append(comp('tworow', name, rows=[{'Text1stRow': {'value': s['label'], 'type': 'Text'},
-                                                        'Text2ndRow': {'value': '', 'type': 'Text'}}]))
+            if s['key'] not in skip:
+                setting_item(s, items)
         # Translated builds with a credit file only: credit for the translation (localize.py keeps its title)
         if credit(language):
             name = credit_name(language)
@@ -261,11 +266,33 @@ def build_ui(spec, language='en'):
             groups.append(('List', items))
         else:   # list / menu: components from "items" (a menu adds the settings after them)
             items = []
+            # bimmer-lab addition: in a menu with "settings": true, ["setting", key] puts that setting's row
+            # here, and ["settings"] puts the other settings here (else they follow the items, as before)
+            with_settings = kind == 'menu' and scr.get('settings') is True
+            placed = [it[1] for it in scr.get('items', []) if it[0] == 'setting']
+            rest_done = False
             for it in scr.get('items', []):
-                kindi, name = it[0], it[1]
+                kindi = it[0]
+                if kindi in ('setting', 'settings') and not with_settings:
+                    raise SystemExit('%s: screen %s: %r needs a "menu" screen with "settings": true' % (app, scr['name'], it))
+                if kindi == 'setting':
+                    s = next((x for x in spec.get('settings', []) if x['key'] == it[1]), None)
+                    if s is None:
+                        raise SystemExit('%s: screen %s: no setting %r' % (app, scr['name'], it[1]))
+                    setting_item(s, items)
+                    continue
+                if kindi == 'settings':
+                    settings_items(items, placed)
+                    rest_done = True
+                    continue
+                name = it[1]
                 label = it[2] if len(it) > 2 else ''
                 if kindi == 'twocol':
                     rows = [{'Text1stCol': {'value': label, 'type': 'Text'}, 'Text2ndCol': {'value': '', 'type': 'Text'}}]
+                elif kindi == 'tworow':
+                    # (bimmer-lab: the cells LT_Button_2Row_2Text has, as the settings' two-row buttons)
+                    first = text_row(name, label, 'Text1stRow') if label else {'Text1stRow': {'value': '', 'type': 'Text'}}
+                    rows = [dict(first, Text2ndRow={'value': '', 'type': 'Text'})]
                 elif kindi in ('graphic',):
                     rows = [{'Graphic': {'value': '', 'type': 'Text'}}]
                 elif kindi == 'laptimer':
@@ -273,8 +300,8 @@ def build_ui(spec, language='en'):
                 else:
                     rows = [text_row(name, label)] if label else [{'Text': {'value': '', 'type': 'Text'}}]
                 items.append(comp(kindi, name, rows=rows))
-            if kind == 'menu' and scr.get('settings'):
-                settings_items(items)
+            if with_settings and not rest_done:
+                settings_items(items, placed)
             groups.append(('List', items))
         tid = nid()
         groups.append(('Titlebar', [(tid, [f'            <component id="{tid}" type="title"/>'],
