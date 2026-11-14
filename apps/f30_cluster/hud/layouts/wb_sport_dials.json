@@ -366,6 +366,8 @@
       "font": "wb_big",
       "color": "fg",
       "align": "center",
+      "gpu": true,
+      "maxLen": 3,
       "conn": 1
     },
     {

@@ -128,6 +128,10 @@
  *             its texts). Roles "fill" (panel), "line", "trackColor" (track); "radius" (8), "border" (1.5), "strip"
  *             (3), "barH" (6) px. The labels and values are text widgets on top.
  * Any image widget: "own": true gives it its own image layer instead of a place in a packed sheet (above).
+ * A text widget: "gpu": true (0.7.14, _gpuTexts) draws it with the atext shader instead of pixels, pixel for pixel the
+ * same: a new value is one uniform message, no image upload (6WB Sport's and F30 basic's big speed). It becomes one
+ * effect layer, or two when centred with an odd figure advance (6WB Sport), and a small atlas; "maxLen" (what fits) is
+ * the longest value shown. Plain readouts only (one colour; no fit, glow, slot or colour rules), else it stays pixels.
  * Any widget: "conn": 0..3 puts its layer (or its sheet) on that connection to cluster-render. The 8-layer limit
  *   is per connection, so a second socket from the same app gets another 8 (DukeAPenguin saw 28 layers over four
  *   sockets on his car, Nov 5 2026; the calibration grids probe it here: L5..L16 on connections 2..4). 0 (the
@@ -230,7 +234,9 @@ const PIXEL_BYTES = 16 * 1024 * 1024;   // cluster-render's pixel memory for eve
 const SHEET_AREA_FRAC = 4;       // the first sheet size limit: 1/4 of the target area (see the header)
 const TICK_MS = 50;              // 20 Hz: shift bar and gauges
 const TEXT_MS = 200;             // text re-draws at most 5 times a second (what BMW's own readouts do)
-const PERF_LOG_MS = 10000, NEEDLE_MS = 33;   // package P (opt-in only, see PERF in the class): log period, needle prototype's timer
+const NEEDLE_MS = 33;            // 0.7.14: the speed and rev needles' own timer while "needleSmooth" is on (30 a second)
+const PERF_LOG_MS = 10000;       // package P (opt-in only, see PERF in the class): the perf log's period
+const EXACT_SPARE = 6;           // 0.7.14: spare cells in a "gpu" text's atlas, for cells the figures don't fill ("--")
 const DEFAULT_LOCATION = { lat: 35.2271, lon: -80.8431 }; // Charlotte, NC: for the Auto theme's sunset
 const TARGET_SIZES = { hud: [800, 480], panel: [1920, 720] };
 const MODE_KEY = { comfort: 'inComfort', sport: 'inSport', eco: 'inEco' };
@@ -523,6 +529,10 @@ class HudApp {
         this.atlases = new Map();        // "<conn>:<font>" -> { ref, c, ci, cols, rows, cellW, cellH, chars, bytes }: R8 assets, kept across rebuilds
         this.targetState = null;         // { state, holder, reason } of our target
         this.rpmF = null; this.rpmShown = null; this.lastTickT = 0;
+        this._d = null;                  // 0.7.14: the car's data copied once for the tick / needle timer running now (_data)
+        this.needleT = null;             // 0.7.14: the needles' own timer while "needleSmooth" is on (_needleApply)
+        this.needleOver = null;          // { rpm, speed } the needles read inside that timer (_raw)
+        this.needleHalt = false;         // stop() turned the needle timer off for good
         this.themeName = null;
         this.flash = false;
         this.problem = null;             // why nothing shows (a bad layout), for the status line
@@ -564,6 +574,7 @@ class HudApp {
             else if (LIVE_KEYS.indexOf(key) >= 0) this.widgets.forEach((x) => { x.last = null; });
             else if (WB_LIVE_KEYS.indexOf(key) >= 0 && this._wbLive()) { /* package F: the uniforms are sent, no rebuild */ }
             else if (NIGHT_KEYS.indexOf(key) >= 0 && this._nightLive()) { /* 2026-11-14: the night colours changed in place */ }
+            else if (key === 'needleSmooth') this._guard('needles', () => this._needleApply());   // 0.7.14: no rebuild
             else if (key !== 'demo') this._rebuild(); else this._status();
         });
     }
@@ -852,6 +863,9 @@ class HudApp {
         this.gSm = null;                 // { lat, long, at }: their average
         this.car.onSample((d, t) => this._gSample(d, t), () => { this.gBuf = []; this.gSm = null; this.resetG(); });
         this.resetG();
+        // 0.7.14, the smooth needles: every rpm / speed sample with its time (kept whether or not the setting is on)
+        this._needleReset();
+        this.car.onSample((d, t) => this._needleSample(d, t), () => this._needleReset());
         this.score = new ShiftScore(this.car, () => ({
             redline: this.setting('redline'), shiftBefore: this.setting('shiftBefore'), coldGuard: this.setting('coldGuard'),
         }), this.log);
@@ -909,6 +923,8 @@ class HudApp {
         this.started = true;
         this.clients.forEach((c) => c.connect());
         this.tickTimer = setInterval(() => this._guard('tick', () => this._tick()), TICK_MS);
+        this.needleHalt = false;
+        this._needleApply();    // 0.7.14: the needles' own timer while "needleSmooth" is on
         // Auto theme: check for sunrise / sunset once a minute; the status line too
         this.themeTimer = setInterval(() => this._guard('theme check', () => {
             if (this._themeName() !== this.themeName) this._rebuild();
@@ -948,7 +964,7 @@ class HudApp {
             const wantIntake = hasIntake && this.needsIntake && now - intakeAsk >= 2000;   // a temperature: every 2 s is plenty
             const wantHv = this.needsHv && now - hvAsk >= (hvMiss >= 3 ? HV_RETRY_MS : HV_EVERY_MS);
             const wantFuel = this.needsFuel && now - fuelAsk >= (fuelMiss >= 3 ? FUEL_RETRY_MS : FUEL_EVERY_MS);
-            if (busy || this.car.data().demo || (!wantBoost && !wantIntake && !wantHv && !wantFuel)) return;
+            if (busy || this._data().demo || (!wantBoost && !wantIntake && !wantHv && !wantFuel)) return;
             busy = true;
             (async () => {
                 if (wantFuel) {
@@ -993,6 +1009,7 @@ class HudApp {
         clearInterval(this.themeTimer);
         clearInterval(this.statusTimer);
         clearInterval(this.dmeTimer);
+        this.needleHalt = true; this._guard('needles', () => this._needleApply());     // 0.7.14: the needle timer off
         this._perfStop();       // package P
         clearTimeout(this.statusAskT);
         if (this.waze) this._guard('waze stop', () => this.waze.stop());
@@ -1060,7 +1077,8 @@ class HudApp {
         const out = new Set(), baked = this.setting('baked') !== false;
         widgets.forEach((w) => {
             const ci = this._connOf(w), add = (t) => { if (t && t.tex) out.add(ci + ':scene:' + t.tex); };
-            if (w.type === 'dial' && w.look === 'wb' && baked) { add(w.base); add(w.fill); }
+            if (w.type === 'atext' && w.exact) out.add(this._exactKey(w, ci));        // 0.7.14: a "gpu" text's atlas
+            else if (w.type === 'dial' && w.look === 'wb' && baked) { add(w.base); add(w.fill); }
             else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); add({ tex: w.fill }); }
             else if (w.type === 'wbsign' && w.tex && baked) { add(w.tex.limit); add(w.tex.nopass); }
             else if (w.type === 'wbback') {
@@ -1070,6 +1088,10 @@ class HudApp {
         });
         return out;
     }
+
+    /** An asset dropped as soon as the layout shown doesn't use it: a scene texture, or (0.7.14) a "gpu" text's atlas.
+     *  The glyph atlases of "atext" widgets stay while the connection lives. */
+    _dropsUnused(key) { return key.indexOf(':scene:') >= 0 || key.indexOf(':exact:') >= 0; }
 
     _atlasBytes() {
         let n = 0;
@@ -1102,6 +1124,176 @@ class HudApp {
             codes.push(i < n && ch !== null ? (k < 0 ? a.chars.indexOf(' ') : k) : -1);
         }
         return codes;
+    }
+
+    /* ---- 0.7.14: big text readouts on the GPU, "gpu": true on a text widget (docs/PERF-NEEDLE-REPORT.md) ----
+     * The text is drawn by the atlas text shader (ATEXT, the same small shader as the "atext" widget, seen on the car in
+     * the calibration layout's "ATLAS <clock> 950", photo 10) instead of as pixels: a new value is one uniform message,
+     * not an image upload. Pixel for pixel the image text's: the font's figures all have one advance and their ink stays
+     * inside it, the shader's cells sit on the figures' grid, and the atlas holds the very coverage hud_text.mask lays
+     * out in the widget's box, cut on that grid (sampled "nearest": one atlas texel per screen pixel).
+     * Centred, a text of odd and of even length sits half an advance apart: with an even advance the cells are half a
+     * figure wide (each figure two cells) and one layer does; with an odd one the widget becomes two layers (atext
+     * widgets "<id>" and "<id>#2", a value showing on the layer of its length). A cell the figures don't fill exactly
+     * ("--", another character) is cut from the laid-out text and uploaded into a spare atlas cell once (EXACT_SPARE).
+     * "maxLen": the longest value shown (default: what fits the box). Only plain readouts: one colour, no fit / glow /
+     * colour rules / slot; anything else stays an image text (logged). */
+    _gpuTexts(list) {
+        const out = [];
+        list.forEach((w) => {
+            if (w.type !== 'text' || !w.gpu) { out.push(w); return; }
+            let why = null, g = null;
+            try { why = this._gpuTextWhy(w); if (!why) g = this._gpuGrid(w); } catch (e) { why = String(e && e.message || e); }
+            if (why) { this.log.warn('widget "' + w.id + '": "gpu" ignored (' + why + '), drawn as an image'); out.push(w); return; }
+            g.groups.forEach((gr, i) => {
+                const a = Object.assign({}, w, { id: i ? w.id + '#' + (i + 1) : w.id, type: 'atext', x: w.x + gr.x0, w: gr.cells * g.cw, h: g.h, cells: gr.cells });
+                delete a.gpu;
+                a.exact = { boxX: w.x, boxW: w.w, lengths: gr.lengths, max: g.max, pitch: g.pitch, cw: g.cw, h: g.h, figs: g.figs };
+                out.push(a);
+            });
+        });
+        return out;
+    }
+
+    /** Why a "gpu" text widget can't be drawn exactly on the GPU (null: it can). */
+    _gpuTextWhy(w) {
+        if (w.fit || w.near || w.hotWhen || w.coldWhen || w.colorBy || w.color2 || w.glow || w.slot) return 'fit, glow, a slot or a colour rule';
+        if (w.warnFlash !== false && /\{\{(oil|coolant|boost|slot:)/.test(String(w.text))) return 'a warning flash';
+        if (w.align && w.align !== 'center' && w.align !== 'right' && w.align !== 'left') return 'align ' + w.align;
+        const font = textRaster.loadFont(w.font), gl = font.metrics.glyphs, z = gl['0'];
+        if (!z) return 'the font has no figures';
+        const adv = z.advance, pitch = adv + (w.spacing || 0);
+        if (!(pitch > 0) || Math.round(pitch) !== pitch) return 'the figures with their spacing are not whole pixels apart';
+        for (let d = 0; d <= 9; d++) { const g = gl[String(d)]; if (!g || g.advance !== adv) return 'the figures are not all one width'; }
+        return null;
+    }
+
+    /** The grid of a "gpu" text: the figure pitch, the cell width (the pitch or half of it), the layer height, the
+     *  figures whose ink stays in their own advance, the longest value, and per layer { x0 (in the box), cells,
+     *  lengths }: every length 1..max whose text starts on that layer's grid. */
+    _gpuGrid(w) {
+        const font = textRaster.loadFont(w.font), gl = font.metrics.glyphs, s = w.spacing || 0;
+        const pitch = gl['0'].advance + s, h = Math.min(w.h, font.metrics.cellHeight);
+        const figs = Object.keys(gl).filter((ch) => ch.length === 1 && gl[ch].advance + s === pitch).filter((ch) => {
+            const m = textRaster.mask(pitch + 8, h, ch, { font: w.font, x: 4 });     // ink only inside its own advance
+            for (let y = 0; y < h; y++) for (let x = 0; x < pitch + 8; x++) if (m[y * (pitch + 8) + x] && (x < 4 || x >= pitch + 4)) return false;
+            return true;
+        });
+        const fit = Math.floor((w.w + s) / pitch), max = Math.max(1, Math.min(32, isNum(w.maxLen) ? Math.min(w.maxLen, fit) : fit));
+        const starts = [];
+        for (let n = 1; n <= max; n++) {
+            const width = n * pitch - s;
+            starts.push({ n, x: w.align === 'right' ? w.w - width : w.align === 'center' ? Math.round((w.w - width) / 2) : 0 });
+        }
+        const group = (cw) => {
+            const by = new Map();
+            starts.forEach((t) => {
+                const ph = ((t.x % cw) + cw) % cw, g = by.get(ph) || { x0: Infinity, x1: -Infinity, lengths: [] };
+                g.lengths.push(t.n); g.x0 = Math.min(g.x0, t.x); g.x1 = Math.max(g.x1, t.x + t.n * pitch);
+                by.set(ph, g);
+            });
+            return Array.from(by.values()).map((g) => ({ x0: g.x0, cells: Math.round((g.x1 - g.x0) / cw), lengths: g.lengths }));
+        };
+        let cw = pitch, groups = group(pitch);
+        if (groups.length > 1 && pitch % 2 === 0 && group(pitch / 2).length === 1 && group(pitch / 2)[0].cells <= 32) { cw = pitch / 2; groups = group(cw); }
+        if (groups.some((g) => g.cells > 32)) throw new Error('more than 32 cells');
+        return { pitch, cw, h, max, figs: figs.sort(), groups };
+    }
+
+    _exactKey(w, ci) { return ci + ':exact:' + w.font + ':' + w.exact.pitch + '/' + w.exact.cw + 'x' + w.exact.h + ':' + (w.spacing || 0); }
+
+    /** The atlas of a "gpu" text on a connection: R8, each figure as mask lays it out at a pen on a cell's left edge (in
+     *  pitch / cw cells), plus spare cells; sampled "nearest" (each screen pixel is one atlas texel). Shared by the
+     *  widget's layers; dropped like a scene texture when the layout shown doesn't use it. */
+    _exactAtlas(w, ci) {
+        const key = this._exactKey(w, ci), E = w.exact;
+        if (this.sceneUsed) this.sceneUsed.add(key);
+        if (this.atlases.has(key)) return this.atlases.get(key);
+        const P = E.pitch, cw = E.cw, k = P / cw, h = E.h, fixed = E.figs.length * k, row = Math.floor(2048 / cw);
+        // the spare cells: EXACT_SPARE, or the rest of the first row when that keeps the atlas one row high
+        const spare = fixed + EXACT_SPARE > row && row - fixed >= 3 ? row - fixed : EXACT_SPARE, n = fixed + spare;
+        const cols = Math.max(1, Math.min(n, row)), rows = Math.ceil(n / cols);
+        const W = cols * cw, H = rows * h;
+        if (H > 2048) throw new Error('font "' + w.font + '": a ' + W + 'x' + H + ' atlas is too big');
+        const buf = Buffer.alloc(W * H, 0);
+        const a = { key, cols, rows, cellW: cw, cellH: h, bytes: W * H * 2, exact: true, byKey: new Map(), fig: {}, slots: [], use: 0 };
+        E.figs.forEach((ch) => {
+            const m = textRaster.mask(P, h, ch, { font: w.font });
+            a.fig[ch] = [];
+            for (let j = 0; j < k; j++) {
+                const i = a.slots.length, sl = Buffer.alloc(cw * h, 0);
+                for (let y = 0; y < h; y++) m.copy(sl, y * cw, y * P + j * cw, y * P + (j + 1) * cw);
+                const cx = (i % cols) * cw, cy = Math.floor(i / cols) * h;
+                for (let y = 0; y < h; y++) sl.copy(buf, (cy + y) * W + cx, y * cw, (y + 1) * cw);
+                if (!a.byKey.has(this._exactHash(sl))) a.byKey.set(this._exactHash(sl), i);
+                a.fig[ch].push(i);
+                a.slots.push({ fixed: true });
+            }
+        });
+        for (let i = 0; i < spare; i++) a.slots.push({ fixed: false, key: null, at: 0 });
+        const c = this._clientAt(ci);
+        const ref = c.asset({ target: this.target, format: 'r8', w: W, h: H, sampling: 'nearest' });
+        if (!ref) throw new Error('font "' + w.font + '": atlas asset refused (' + W + 'x' + H + ')');
+        c.pixels(ref, null, buf);
+        a.ref = ref; a.c = c; a.ci = ci;
+        this.atlases.set(key, a);
+        this.log.info('gpu text atlas "' + w.font + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + E.figs.length + ' figures in ' + fixed +
+            ' cells and ' + spare + ' spare cells of ' + cw + 'x' + h + ', ' + W + 'x' + H + ' R8 asset, ' + mib(a.bytes) + ' of pixel memory');
+        return a;
+    }
+
+    /** A cell's pixels as a map key (the bytes themselves: a few cells of a few KB, no crypto needed on the car). */
+    _exactHash(buf) { return buf.toString('latin1'); }
+
+    /** The atlas codes of a "gpu" text layer showing s: its cells' slices of the text as mask lays it out in the box. */
+    _exactCodes(x, s) {
+        const w = x.w, E = w.exact, a = x.atlas, P = E.pitch, cw = E.cw, k = P / cw, h = E.h, off = w.x - E.boxX;
+        const codes = [];
+        for (let i = 0; i < 32; i++) codes.push(-1);
+        s = String(s);
+        if (!s.length || E.lengths.indexOf(s.length) < 0) {
+            if (s.length > E.max && !x.warnedLong) { x.warnedLong = true; this.log.warn('widget "' + w.id + '": "' + s + '" is longer than the gpu text shows (' + E.max + ')'); }
+            return codes;
+        }
+        // the usual case, figures only: each on its own cells, no layout needed
+        const width = s.length * P - (w.spacing || 0);
+        const start = w.align === 'right' ? E.boxW - width : w.align === 'center' ? Math.round((E.boxW - width) / 2) : 0;
+        const k0 = (start - off) / cw;
+        if (k0 === Math.floor(k0) && k0 >= 0 && k0 + s.length * k <= x.cells && s.split('').every((ch) => a.fig[ch] !== undefined)) {
+            for (let i = 0; i < s.length; i++) for (let j = 0; j < k; j++) codes[k0 + i * k + j] = a.fig[s.charAt(i)][j];
+            return codes;
+        }
+        // anything else: the text laid out in the box as the image text would be, cut into the cells
+        const m = textRaster.mask(E.boxW, h, s, { font: w.font, align: w.align, spacing: w.spacing });
+        const inUse = new Set();
+        this.widgets.forEach((o) => { if (o !== x && o.atlas === a && o.codes) o.codes.forEach((c) => inUse.add(c)); });
+        for (let c = 0; c < x.cells; c++) {
+            const sl = Buffer.alloc(cw * h, 0);
+            let ink = false;
+            for (let y = 0; y < h; y++) {
+                m.copy(sl, y * cw, y * E.boxW + off + c * cw, y * E.boxW + off + (c + 1) * cw);
+                if (!ink) for (let i = y * cw; i < (y + 1) * cw; i++) if (sl[i]) { ink = true; break; }
+            }
+            if (!ink) continue;
+            const key = this._exactHash(sl);
+            let slot = a.byKey.get(key);
+            if (slot === undefined) slot = this._exactPut(a, key, sl, inUse);
+            if (slot >= 0) { codes[c] = slot; inUse.add(slot); if (!a.slots[slot].fixed) a.slots[slot].at = ++a.use; }
+        }
+        return codes;
+    }
+
+    /** A cell's pixels into the spare atlas cell used longest ago (not one shown now); its index, or -1 if none is free. */
+    _exactPut(a, key, sl, inUse) {
+        let best = -1;
+        a.slots.forEach((t, i) => { if (!t.fixed && !inUse.has(i) && (best < 0 || t.at < a.slots[best].at)) best = i; });
+        if (best < 0) { this.log.warn('gpu text atlas ' + a.key + ': no spare cell free'); return -1; }
+        const t = a.slots[best];
+        if (t.key) a.byKey.delete(t.key);
+        t.key = key;
+        a.byKey.set(key, best);
+        a.c.pixels(a.ref, [{ x: (best % a.cols) * a.cellW, y: Math.floor(best / a.cols) * a.cellH, w: a.cellW, h: a.cellH }], sl);
+        return best;
     }
 
     _guard(what, fn) {
@@ -1257,7 +1449,7 @@ class HudApp {
         if (this.activeName === 'off' && this.screen.yielded) return this.label + ' off: ' + this.screen.otherName + ' has the screen, pick one here to take it back';
         if (this.activeName === 'off') return this.label + ' off' + mode + ": BMW's own " + what + ' shows';
         const name = this._layoutLabel(this.activeName);
-        const d = this.car.data();
+        const d = this._data();
         const demo = d.demo ? ', demo data' : '';
         const drawn = this._drawnNote();
         const conns = this._connCount();
@@ -1325,6 +1517,8 @@ class HudApp {
         } else if (w.type === 'wbmsa') {
             c.uniform(ref, 'u_fg', rgba(color(this.theme, w.color || 'fg')));
             c.uniform(ref, 'u_dim', rgba(color(this.theme, 'dim')));
+        } else if (w.type === 'atext' && w.exact) {          // 0.7.14: a "gpu" text, as its image text would take it
+            c.uniform(ref, 'u_color', rgba(color(this.theme, w.color || 'fg')));
         }
     }
 
@@ -1334,7 +1528,8 @@ class HudApp {
     _nightLive() {
         try {
             if (!this.activeName || this.activeName === 'off' || !this.layoutTheme || !this.baseTheme || !this.widgets.size) return false;
-            const live = (w) => w.type === 'text' || w.type === 'wbback' || w.type === 'wbsign' || w.type === 'wbmsa' || (w.type === 'dial' && w.look === 'wb');
+            const live = (w) => w.type === 'text' || w.type === 'wbback' || w.type === 'wbsign' || w.type === 'wbmsa' || (w.type === 'dial' && w.look === 'wb') ||
+                (w.type === 'atext' && !!w.exact);      // 0.7.14: a "gpu" text (u_color)
             let ok = true;
             this.widgets.forEach((x) => { if (!x.w || !x.ref || !live(x.w)) ok = false; });
             if (!ok) return false;
@@ -1356,7 +1551,7 @@ class HudApp {
     /** Start the shift-light test: the rpm the lights, bars and readouts see climbs to the shift point and holds there
      *  (about 4 s). Only while the car stands (or on demo data). Returns false when it can't run now. */
     testShift() {
-        const d = this.car.data(), sp = d.speed;
+        const d = this._data(), sp = d.speed;
         if (isNum(sp) && sp > 3 && !d.demo) return false;
         this.testAt = Date.now();
         this.log.info('shift-light test');
@@ -1372,7 +1567,7 @@ class HudApp {
         const top = this._shiftPointRaw() + 200;
         return TEST_FROM + (top - TEST_FROM) * Math.min(1, t / TEST_CLIMB_MS);
     }
-    _shiftPointRaw() { return this.score.shiftPoint(this.car.data().oil).rpm; }
+    _shiftPointRaw() { return this.score.shiftPoint(this._data().oil).rpm; }
 
     /** A readout over its warning limit ("warnOil" C, "warnCoolant" C, "warnBoost" bar; 0 = off): which sensor, else null. */
     _warning(w) {
@@ -1395,7 +1590,7 @@ class HudApp {
 
     /** The shift point now ({ rpm, cold }) and whether the rpm is at or past it. */
     _shift() {
-        const d = this.car.data();
+        const d = this._data();
         const sp = this.score.shiftPoint(d.oil);
         const rpm = isNum(this.rpmF) ? this.rpmF : d.rpm;
         sp.now = isNum(rpm) && rpm >= sp.rpm;
@@ -1440,7 +1635,7 @@ class HudApp {
     _tyre(kind, corner) {
         const v = this.tyres[kind][corner];
         if (isNum(v)) return v;
-        if (!this.car.data().demo) return null;
+        if (!this._data().demo) return null;
         const rear = corner === 'RL' || corner === 'RR';
         return kind === 'p' ? (rear ? 2.5 : 2.3) : (rear ? 27 : 24);
     }
@@ -1538,33 +1733,34 @@ class HudApp {
     }
 
     _raw(name) {
-        if (this.perfOver && (name === 'rpm' || name === 'speed') && isNum(this.perfOver[name])) return this.perfOver[name];   // package P (opt-in)
+        // 0.7.14: inside the needle timer (_needleTick) the needles read rpm / speed interpolated between the car's samples
+        if (this.needleOver && (name === 'rpm' || name === 'speed') && isNum(this.needleOver[name])) return this.needleOver[name];
         if (name === 'boost') return this._boost();
         if (name === 'gLat' || name === 'gLong') {
             // the 150 ms average while samples come in; else the car's last reading, unless it is a bad one
             if (this.gSm && Date.now() - this.gSm.at < 1000) return name === 'gLat' ? this.gSm.lat : this.gSm.long;
-            const g = this.car.data()[name];
+            const g = this._data()[name];
             return isNum(g) && Math.abs(g) <= G_BAD ? g : null;
         }
         if (name === 'intake') {
             if (isNum(this.intakeDme) && Date.now() - this.intakeDmeAt < 10000) return this.intakeDme;
-            return this.car.data().demo ? 31 : null;
+            return this._data().demo ? 31 : null;
         }
         if (name === 'rpm' && isNum(this.rpmF)) return this.rpmF;
-        if (name === 'hvSoc') return isNum(this.hvSoc) && Date.now() - this.hvSocAt < HV_STALE_MS ? this.hvSoc : this.car.data().demo ? 64 : null;
+        if (name === 'hvSoc') return isNum(this.hvSoc) && Date.now() - this.hvSocAt < HV_STALE_MS ? this.hvSoc : this._data().demo ? 64 : null;
         // package E: the signs. limitEnd: 1 while the car shows the end of a limit (the derestriction sign)
-        if (name === 'nopass') return this.nopassOn ? 1 : this.car.data().demo ? 1 : null;
+        if (name === 'nopass') return this.nopassOn ? 1 : this._data().demo ? 1 : null;
         if (name === 'limitEnd') return this.limitState === 'end' ? 1 : null;
         // car3 I: limitUnknown 1 while BMW would show its empty sign "---"; msa 1 active, 2 off, 3 engine stopped by MSA,
         // 4 unavailable, null hidden (config.msa unset or the car's value unmapped); ccMsg 1 / 0 while config.ccm knows
         if (name === 'limitUnknown') return this.limitState === 'unknown' ? 1 : null;
         if (name === 'msa') return MSA_STATES[this.msaState] || null;
         if (name === 'ccMsg') { const cc = this._cc(); return cc === null ? null : cc ? 1 : 0; }
-        if (name === 'cons') return isNum(this.consL) && Date.now() - this.consAt < 5000 ? this.consL : this.car.data().demo ? 7.4 : null;
-        if (name === 'limit') return isNum(this.limitKmh) ? this.limitKmh : this.limitState === 'none' && this.car.data().demo ? 90 : null;
+        if (name === 'cons') return isNum(this.consL) && Date.now() - this.consAt < 5000 ? this.consL : this._data().demo ? 7.4 : null;
+        if (name === 'limit') return isNum(this.limitKmh) ? this.limitKmh : this.limitState === 'none' && this._data().demo ? 90 : null;
         if (name === 'fuel' || name === 'range' || name === 'ambient') {
             // the kit's demo drive has none of these: made-up but steady values while it runs
-            const demo = this.car.data().demo;
+            const demo = this._data().demo;
             if (name === 'fuel') {
                 if (isNum(this.fuelObd) && Date.now() - this.fuelObdAt < FUEL_STALE_MS) return this.fuelObd / 100;
                 return isNum(this.fuelL) ? Math.min(1, this.fuelL / this._tankLitres()) : demo ? 0.62 : null;
@@ -1579,13 +1775,13 @@ class HudApp {
                 const v = name === 'powerPct' ? this.sportPower : this.sportTorque;
                 if (isNum(v)) return v;
             }
-            const e = this.config.engine || {}, d = this.car.data();
+            const e = this.config.engine || {}, d = this._data();
             if (!isNum(d.torque)) return null;
             if (name === 'torquePct') return Math.max(0, d.torque) / (e.torqueNm || 500) * 100;
             return isNum(d.rpm) ? Math.max(0, d.torque) * d.rpm / 9549 / (e.powerKw || 285) * 100 : null;
         }
         if (name.indexOf('setupLevel:') === 0) { const s = this._setup(); return s ? SETUP_LEVEL[s[name.slice(11)]] || 0 : 0; }
-        const d = this.car.data();
+        const d = this._data();
         return Object.prototype.hasOwnProperty.call(d, name) ? d[name] : null;
     }
 
@@ -1663,7 +1859,7 @@ class HudApp {
             }
             case 'u:torque': return us ? 'lb-ft' : 'Nm';
             case 'power': {          // kW from the crank torque and rpm; hp in US units
-                const d = this.car.data(), rpm = this._raw('rpm');
+                const d = this._data(), rpm = this._raw('rpm');
                 if (!isNum(d.torque) || !isNum(rpm)) return '--';
                 const kw = Math.max(0, d.torque) * rpm / 9549;
                 return String(Math.round(us ? kw * 1.341 : kw));
@@ -1707,16 +1903,16 @@ class HudApp {
                 return sp.cold ? 'COLD · LIMIT ' + sp.rpm : 'OIL COLD · GO EASY';
             }
             case 'gearnum': {
-                const d = this.car.data();
+                const d = this._data();
                 if (d.stage === 'P' || d.stage === 'R' || d.stage === 'N') return d.stage;
                 return isNum(d.gear) && d.gear > 0 ? String(d.gear) : (d.gear === 0 ? 'N' : '-');
             }
             case 'stage': {          // the selector letter alone: P R N, or D / S / M by the shifter programme
-                const d = this.car.data();
+                const d = this._data();
                 return d.stage === 'D' || (!d.stage && isNum(d.gear) && d.gear > 0) ? this._program(d) : (d.stage || '-');
             }
             case 'gearInD': {        // the gear number while driving, else nothing (the M "2D")
-                const d = this.car.data();
+                const d = this._data();
                 return (d.stage === 'D' || (!d.stage && isNum(d.gear))) && isNum(d.gear) && d.gear > 0 ? String(d.gear) : '';
             }
             case 'mode': {
@@ -1733,7 +1929,7 @@ class HudApp {
                 return tok === 'g20mode1' ? base : v;
             }
             case 'gear': {
-                const d = this.car.data();
+                const d = this._data();
                 if (d.stage === 'P' || d.stage === 'R' || d.stage === 'N') return d.stage;
                 const g = isNum(d.gear) && d.gear > 0 ? String(d.gear) : '';
                 return d.stage === 'D' ? this._program(d) + g : g;
@@ -1828,7 +2024,8 @@ class HudApp {
         this._nightTheme();             // this.theme, with the night colours (the plain dimmer)
         this.log.info('layout "' + layout.name + '", theme ' + this.theme.name + (this.layoutTheme ? '' : ' (' + this.setting('hudTheme') + ')') +
             (this.nightOn ? ', night colours ' + this._nightNote() : ''));
-        const shown = layout.widgets.filter((w) => !(w.toggle && !this._toggleOn(w.toggle)) && !(w.themes && w.themes.indexOf(this.themeName) < 0));
+        // 0.7.14: a text widget with "gpu": true becomes its atlas text layers here (_gpuTexts)
+        const shown = this._gpuTexts(layout.widgets.filter((w) => !(w.toggle && !this._toggleOn(w.toggle)) && !(w.themes && w.themes.indexOf(this.themeName) < 0)));
         this._setNeeds(shown);
         // plan the layers first (a sheet's size is only known once every member is placed), then make them
         // in that order: within a class and z, cluster-render puts the newer layer on top. Small sheets
@@ -1849,7 +2046,7 @@ class HudApp {
         // pass the service's 16 MiB ("the service's pixel memory is full", seen on the car when switching to baked)
         const needs = this._sceneNeeds(shown);
         this.atlases.forEach((a, key) => {
-            if (key.indexOf(':scene:') < 0 || needs.has(key)) return;
+            if (!this._dropsUnused(key) || needs.has(key)) return;
             this._guard('drop ' + key, () => a.c.drop(a.ref));
             this.atlases.delete(key);
         });
@@ -1863,7 +2060,7 @@ class HudApp {
         });
         if (this._offset().x || this._offset().y || this._scale() !== 1) this._place();
         this.atlases.forEach((a, key) => {        // another mode's scene textures: give their pixel memory back
-            if (key.indexOf(':scene:') < 0 || this.sceneUsed.has(key)) return;
+            if (!this._dropsUnused(key) || this.sceneUsed.has(key)) return;
             this._guard('drop ' + key, () => a.c.drop(a.ref));
             this.atlases.delete(key);
         });
@@ -2013,7 +2210,7 @@ class HudApp {
         this.widgets.set(w.id, x);
         const t = this.theme;
         if (w.type === 'atext') {
-            const a = this._atlas(w.font, x.ci);
+            const a = w.exact ? this._exactAtlas(w, x.ci) : this._atlas(w.font, x.ci);     // 0.7.14: a "gpu" text's
             x.atlas = a;
             x.cells = Math.max(1, Math.min(32, isNum(w.cells) ? Math.floor(w.cells) : Math.floor(w.w / a.cellW)));
             c.bind(ref, 'u_font', a.ref);
@@ -2554,42 +2751,150 @@ class HudApp {
 
     _tick() {
         const now = Date.now();
-        this._smoothRpm(now);
-        // the 0-60 timer only on the car's own data (the demo drive would set a best time)
-        if (!this.car.data().demo) this.runs.update(this.car.data().speed, now, this.setting('units') === 'us' ? 'us' : 'metric');
-        this._trip(now);
-        this._gTick(now);
-        const b = this._boost();
-        if (isNum(b) && (!isNum(this.boostPeak) || b > this.boostPeak)) this.boostPeak = b;
-        if (!this.client.ready) return;
-        // shift light: blink the whole bar at 8 Hz once the rpm reaches the redline
-        const rpm = this._raw('rpm');
-        const flashing = isNum(rpm) && rpm >= this.setting('redline') - 150;
-        this.flash = flashing ? Math.floor(now / 62.5) % 2 === 0 : false;
-        this.widgets.forEach((x) => {
-            if (this.perfNeedle && this._perfIsNeedle(x)) return;     // package P: the needle timer draws it (opt-in only)
-            this._guard('widget ' + x.w.id, () => this._update(x, now, false));
-        });
+        this._d = this.car.data();      // 0.7.14: one copy of the car's data for the whole tick (_data)
+        try {
+            this._smoothRpm(now);
+            // the 0-60 timer only on the car's own data (the demo drive would set a best time)
+            if (!this._d.demo) this.runs.update(this._d.speed, now, this.setting('units') === 'us' ? 'us' : 'metric');
+            this._trip(now);
+            this._gTick(now);
+            const b = this._boost();
+            if (isNum(b) && (!isNum(this.boostPeak) || b > this.boostPeak)) this.boostPeak = b;
+            if (!this.client.ready) return;
+            // shift light: blink the whole bar at 8 Hz once the rpm reaches the redline
+            const rpm = this._raw('rpm');
+            const flashing = isNum(rpm) && rpm >= this.setting('redline') - 150;
+            this.flash = flashing ? Math.floor(now / 62.5) % 2 === 0 : false;
+            const smooth = !!this.needleT;
+            const socks = this._cork();     // 0.7.14: the tick's messages go out as one write per connection
+            try {
+                this.widgets.forEach((x) => {
+                    if (smooth && this._isNeedle(x)) return;     // the needle timer draws it ("needleSmooth")
+                    this._guard('widget ' + x.w.id, () => this._update(x, now, false));
+                });
+            } finally { this._uncork(socks); }
+        } finally { this._d = null; }
     }
 
-    // ---- PERF (package P, docs/PERF-AUDIT.md, 2026-11-14): an opt-in perf log and an opt-in needle prototype ----------
-    // Both are OFF unless the app's data folder holds perf.json, e.g. { "log": true } or { "log": true, "needle": "smooth" }
-    // (read at start and every PERF_LOG_MS; deleting the file turns both off again). Without the file only that check
-    // runs (one failed open every 10 s) and the engine behaves exactly as before. Hooks outside this block: start(),
-    // stop(), _tick() and _raw(), one guarded line each, all marked "package P".
-    //  "log": one "perf:" line every 10 s: car samples (rpm / speed changes a second and their gaps), the 50 ms tick's
-    //         real period, the event loop's lag, JS time in the tick, bytes written per connection, process CPU and
-    //         memory. Read by scripts/perf_probe.sh from the app log.
-    //  "needle": "smooth": the speed and rev needles (dial, g20dial) leave the 50 ms tick for their own NEEDLE_MS timer
-    //         (30 a second, cluster-render's frame rate) and show the value interpolated between the car's samples
-    //         (one sample period behind, so the needle moves at the car's own pace between samples instead of
-    //         jumping); rpm keeps the 120 ms filter ("rpmTau" overrides it). The needles' uniform messages go out
-    //         corked (one write per batch). Bench-measured only (docs/PERF-AUDIT.md 3.2); not checked on the car yet.
-    _perfIsNeedle(x) {
+    /** 0.7.14: the car's data (car.data(), a fresh copy each call). Inside the tick and the needle timer it is the
+     *  one copy taken when they began: nothing changes the car's data while they run (it arrives in events), so
+     *  every value is the same, without 150 to 350 copies a second. */
+    _data() { return this._d || this.car.data(); }
+
+    /** 0.7.14: cork every connected socket to cluster-render; the writes until _uncork leave as one write each (one
+     *  wake of the service, one scene flush) instead of one per message. Returns the sockets corked. */
+    _cork() {
+        const out = [];
+        this.clients.forEach((c) => {
+            const s = c.sock;
+            if (s && c.connected && !s.destroyed && typeof s.cork === 'function' && typeof s.uncork === 'function') { s.cork(); out.push(s); }
+        });
+        return out;
+    }
+    _uncork(socks) {
+        socks.forEach((s) => { try { s.uncork(); } catch (e) { this.log.warn('uncork: ' + e); } });
+    }
+
+    /* ---------------- the needles (0.7.14, docs/PERF-NEEDLE-REPORT.md) ----------------
+     * "needleSmooth" (Settings, on by default): the speed and rev needles (dial and g20dial widgets with "measure"
+     * speed or rpm) leave the 50 ms tick for their own NEEDLE_MS timer (30 a second, cluster-render's frame rate) and
+     * show the value interpolated between the car's samples, one sample period behind, so a needle moves at the
+     * car's own pace between samples instead of jumping 20 times a second on a clock that beats against the car's.
+     * The rev needle keeps the tick's 120 ms filter, and the shift-light test (_testRpm) drives it as before. The
+     * sample period is learnt from the gaps between changes (20 to 150 ms). A value that sat still is held until
+     * one period before its next change. Off: the needles move on the tick exactly as before 0.7.14.
+     * From package P's opt-in prototype (docs/PERF-AUDIT.md 3, 7 item 2 and 9), measured on the bench only. */
+    _isNeedle(x) {
         const w = x.w;
         return (w.type === 'dial' || w.type === 'g20dial') && (w.measure === 'rpm' || w.measure === 'speed');
     }
 
+    /** The needle timer on or off, as the setting says (and only while the app runs). */
+    _needleApply() {
+        const on = !!(this.started && !this.needleHalt && this.setting('needleSmooth') !== false);
+        if (on && !this.needleT) {
+            this.needleAt = 0; this.needleRpm = null;
+            this.needleT = setInterval(() => this._guard('needles', () => this._needleTick()), NEEDLE_MS);
+            this.log.info('needles: smooth (interpolated, ' + Math.round(1000 / NEEDLE_MS) + ' a second)');
+        } else if (!on && this.needleT) {
+            clearInterval(this.needleT);
+            this.needleT = null; this.needleOver = null;
+            this.widgets.forEach((x) => { if (this._isNeedle(x)) x.last = null; });   // the tick takes them back
+            this.log.info('needles: on the ' + TICK_MS + ' ms tick');
+        }
+    }
+
+    _needleReset() {
+        this.ndl = { rpm: [], speed: [], last: {}, period: { rpm: 50, speed: 50 } };
+    }
+
+    /** A car sample: rpm / speed when they change, with their arrival time (ms), and the sample period learnt. */
+    _needleSample(d, t) {
+        const S = this.ndl;
+        ['rpm', 'speed'].forEach((k) => {
+            const v = d[k];
+            if (!isNum(v) || v === S.last[k]) return;
+            const prevT = S.last[k + 'T'];
+            S.last[k] = v; S.last[k + 'T'] = t;
+            const h = S[k];
+            if (isNum(prevT)) {
+                const gap = t - prevT;
+                if (gap < 300) S.period[k] += (Math.min(150, Math.max(20, gap)) - S.period[k]) * 0.1;
+                // a value that sat still for a while: hold it until one period before the change, so the ramp
+                // runs over one period, not over the whole quiet stretch
+                else if (h.length) h.push([t - S.period[k], h[h.length - 1][1]]);
+            }
+            h.push([t, v]);
+            if (h.length > 64) h.splice(0, h.length - 64);
+        });
+    }
+
+    /** The value of rpm / speed at time t (ms), linear between the samples around it; the newest one past the end. */
+    _needleAt(k, t) {
+        const h = this.ndl && this.ndl[k];
+        if (!h || !h.length) return null;
+        if (t >= h[h.length - 1][0]) return h[h.length - 1][1];
+        for (let i = h.length - 1; i > 0; i--) {
+            const a = h[i - 1], b = h[i];
+            if (t >= a[0]) return a[1] + (b[1] - a[1]) * (t - a[0]) / Math.max(1, b[0] - a[0]);
+        }
+        return h[0][1];
+    }
+
+    /** The needle timer: every needle widget with rpm / speed interpolated one sample period back, corked. */
+    _needleTick() {
+        if (!this.client.ready) return;
+        const S = this.ndl, now = Date.now();
+        this._d = this.car.data();
+        const socks = this._cork();
+        try {
+            // the demo's samples carry the sim's own clock (simT), the car's Date.now(): both are wall ms
+            const sp = this._needleAt('speed', now - S.period.speed), rpmIn = this._needleAt('rpm', now - S.period.rpm);
+            const test = this._testRpm(now);
+            const raw = isNum(test) ? test : rpmIn;
+            const dt = this.needleAt ? Math.min(500, now - this.needleAt) : 0;
+            this.needleAt = now;
+            // the tick's filter (_smoothRpm, 120 ms) on the interpolated rpm
+            this.needleRpm = !isNum(raw) ? null : isNum(this.needleRpm) ? this.needleRpm + (raw - this.needleRpm) * (1 - Math.exp(-dt / 120)) : raw;
+            this.needleOver = { rpm: this.needleRpm, speed: sp };
+            this.widgets.forEach((x) => { if (this._isNeedle(x)) this._guard('widget ' + x.w.id, () => this._update(x, now, false)); });
+        } finally {
+            this.needleOver = null;
+            this._d = null;
+            this._uncork(socks);
+        }
+    }
+    /* ---------------- end the needles ---------------- */
+
+    // ---- PERF (package P, docs/PERF-AUDIT.md, 2026-11-14): the opt-in perf log ----------------------------------------
+    // OFF unless the app's data folder holds perf.json with "log": true, e.g. { "log": true } (read at start and every
+    // PERF_LOG_MS; deleting the file turns it off again). Without the file only that check runs (one failed open
+    // every 10 s). Hooks outside this block: start() and stop(), one line each, marked "package P".
+    //  "log": one "perf:" line every 10 s: car samples (rpm / speed changes a second and their gaps), the 50 ms tick's
+    //         real period, the event loop's lag, JS time in the tick and in the needle timer, bytes written per
+    //         connection, process CPU and memory. Read by scripts/perf_probe.sh from the app log.
+    // 0.7.14: the needle prototype ("needle": "smooth", "rpmTau") left this block for the engine (the needles above,
+    // the setting "needleSmooth"); perf.json's "needle" and "rpmTau" are ignored now.
     _perfStart() {
         this.perfFile = path.join(this.ctx.dataDir || '.', 'perf.json');
         this.perfCfg = null;
@@ -2601,6 +2906,7 @@ class HudApp {
             this.perfKey = key;
             this.perfCfg = cfg && typeof cfg === 'object' ? cfg : null;
             if (this.perfCfg) this.log.info('perf: ' + this.perfFile + ' ' + key);
+            if (this.perfCfg && this.perfCfg.needle !== undefined) this.log.info('perf: "needle" is ignored since 0.7.14: the setting "Smooth needles" (needleSmooth) is it');
             this._perfApply();
         };
         read();
@@ -2615,21 +2921,20 @@ class HudApp {
 
     _perfApply() {
         const cfg = this.perfCfg || {};
-        // the samples, for both the log and the needle (car.onSample: every rpm / speed / gLong notification, demo 20 Hz)
-        if ((cfg.log || cfg.needle) && !this.perfS) {
-            this.perfS = { rpm: [], speed: [], gaps: { rpm: [], speed: [] }, last: {}, n: { rpm: 0, speed: 0, emit: 0 }, period: { rpm: 50, speed: 50 } };
+        // the samples (car.onSample: every rpm / speed / gLong notification, demo 20 Hz)
+        if (cfg.log && !this.perfS) {
+            this.perfS = { gaps: { rpm: [], speed: [] }, last: {}, n: { rpm: 0, speed: 0, emit: 0 } };
             if (!this.perfListen) {          // once: the listener stays, idle while perfS is null
                 this.perfListen = true;
-                this.car.onSample((d, t) => { if (this.perfS) this._perfSample(d, t); }, () => { if (this.perfS) { this.perfS.rpm = []; this.perfS.speed = []; this.perfS.last = {}; } });
+                this.car.onSample((d, t) => { if (this.perfS) this._perfSample(d, t); }, () => { if (this.perfS) this.perfS.last = {}; });
             }
         }
-        if (!cfg.log && !cfg.needle) this.perfS = null;
-        // the log
+        if (!cfg.log) this.perfS = null;
         if (cfg.log && !this.perfLogT) {
             this.perfL = this._perfFresh();
             let due = Date.now() + 20;
             this.perfLagT = setInterval(() => { const t = Date.now(); this.perfL.lag.push(t - due); due = t + 20; }, 20);
-            const tick = this._tick;
+            const tick = this._tick, needle = this._needleTick;
             this._tick = function () {
                 const t0 = Date.now(), L = this.perfL;
                 if (L && L.tickAt) L.tick.push(t0 - L.tickAt);
@@ -2638,32 +2943,27 @@ class HudApp {
                 if (L) L.tickMs.push(Date.now() - t0);
                 return r;
             };
+            this._needleTick = function () {
+                const t0 = Date.now(), L = this.perfL;
+                const r = needle.apply(this, arguments);
+                if (L) L.needleMs.push(Date.now() - t0);
+                return r;
+            };
             this.perfLogT = setInterval(() => this._guard('perf log', () => this._perfLog()), PERF_LOG_MS);
         } else if (!cfg.log && this.perfLogT) {
             clearInterval(this.perfLogT); clearInterval(this.perfLagT);
             this.perfLogT = null; this.perfLagT = null; this.perfL = null;
             delete this._tick;               // back to the prototype's
-        }
-        // the needle prototype
-        const smooth = cfg.needle === 'smooth';
-        if (smooth && !this.perfNeedleT) {
-            this.perfNeedle = true;
-            this.perfTau = isNum(cfg.rpmTau) ? cfg.rpmTau : 120;
-            this.perfNeedleT = setInterval(() => this._guard('perf needle', () => this._perfNeedles()), NEEDLE_MS);
-            this.log.info('perf: needle prototype on (interpolated, ' + Math.round(1000 / NEEDLE_MS) + ' a second, rpm filter ' + this.perfTau + ' ms)');
-        } else if (!smooth && this.perfNeedleT) {
-            clearInterval(this.perfNeedleT);
-            this.perfNeedleT = null; this.perfNeedle = false; this.perfOver = null;
-            this.widgets.forEach((x) => { if (this._perfIsNeedle(x)) x.last = null; });   // the tick takes them back
+            delete this._needleTick;
         }
     }
 
     _perfFresh() {
-        return { t0: Date.now(), lag: [], tick: [], tickMs: [], tickAt: 0, sends: 0, sendGaps: [], cpu: process.cpuUsage(),
+        return { t0: Date.now(), lag: [], tick: [], tickMs: [], needleMs: [], tickAt: 0, cpu: process.cpuUsage(),
             bytes: this.clients.map((c) => (c.sock && c.sock.bytesWritten) || 0) };
     }
 
-    /** A car sample: record rpm / speed when they change, with their arrival time (ms) and the gap to the last change. */
+    /** A car sample, for the log: rpm / speed changes and the gap to the last change. */
     _perfSample(d, t) {
         const S = this.perfS;
         S.n.emit++;
@@ -2673,57 +2973,8 @@ class HudApp {
             const prevT = S.last[k + 'T'];
             S.last[k] = v; S.last[k + 'T'] = t;
             S.n[k]++;
-            const h = S[k];
-            if (isNum(prevT)) {
-                const gap = t - prevT;
-                if (S.gaps[k].length < 2000) S.gaps[k].push(gap);
-                if (gap < 300) S.period[k] += (Math.min(150, Math.max(20, gap)) - S.period[k]) * 0.1;
-                // a value that sat still for a while: hold it until one period before the change, so the ramp
-                // runs over one period, not over the whole quiet stretch
-                else if (h.length) h.push([t - S.period[k], h[h.length - 1][1]]);
-            }
-            h.push([t, v]);
-            if (h.length > 64) h.splice(0, h.length - 64);
+            if (isNum(prevT) && S.gaps[k].length < 2000) S.gaps[k].push(t - prevT);
         });
-    }
-
-    /** The value of rpm / speed at time t (ms), linear between the samples around it; the newest one past the end. */
-    _perfAt(k, t) {
-        const h = this.perfS && this.perfS[k];
-        if (!h || !h.length) return null;
-        if (t >= h[h.length - 1][0]) return h[h.length - 1][1];
-        for (let i = h.length - 1; i > 0; i--) {
-            const a = h[i - 1], b = h[i];
-            if (t >= a[0]) return a[1] + (b[1] - a[1]) * (t - a[0]) / Math.max(1, b[0] - a[0]);
-        }
-        return h[0][1];
-    }
-
-    /** The needle timer: every needle widget with rpm / speed interpolated one sample period back, corked. */
-    _perfNeedles() {
-        if (!this.client.ready || !this.perfS) return;
-        const S = this.perfS, now = Date.now();
-        // the demo's samples carry the sim's own clock (simT), the car's Date.now(): both are wall ms
-        const sp = this._perfAt('speed', now - S.period.speed), rpmIn = this._perfAt('rpm', now - S.period.rpm);
-        const test = this._testRpm(now);
-        const raw = isNum(test) ? test : rpmIn;
-        const dt = this.perfNeedleAt ? Math.min(500, now - this.perfNeedleAt) : 0;
-        this.perfNeedleAt = now;
-        this.perfRpm = !isNum(raw) ? null : isNum(this.perfRpm) && this.perfTau > 0 ? this.perfRpm + (raw - this.perfRpm) * (1 - Math.exp(-dt / this.perfTau)) : raw;
-        this.perfOver = { rpm: this.perfRpm, speed: sp };
-        const corked = this._perfCork();
-        try {
-            this.widgets.forEach((x) => { if (this._perfIsNeedle(x)) this._guard('widget ' + x.w.id, () => this._update(x, now, false)); });
-        } finally {
-            this.perfOver = null;
-            corked.forEach((s) => s.uncork());
-        }
-    }
-
-    _perfCork() {
-        const out = [];
-        this.clients.forEach((c) => { if (c.sock && c.connected && typeof c.sock.cork === 'function') { c.sock.cork(); out.push(c.sock); } });
-        return out;
     }
 
     _perfLog() {
@@ -2738,9 +2989,10 @@ class HudApp {
         const cpu = process.cpuUsage(L.cpu), mem = process.memoryUsage();
         const bytes = this.clients.map((c, i) => Math.round((((c.sock && c.sock.bytesWritten) || 0) - (L.bytes[i] || 0)) / secs));
         const sig = (k) => (S ? (S.n[k] / secs).toFixed(1) + '/s (gap ms ' + st(S.gaps[k]) + ')' : '-');
-        this.log.info('perf: ' + secs.toFixed(1) + ' s, layout ' + this.activeName + (this.perfNeedle ? ', needle smooth' : '') +
+        this.log.info('perf: ' + secs.toFixed(1) + ' s, layout ' + this.activeName + (this.needleT ? ', needles smooth' : ', needles on the tick') +
             '; car samples ' + (S ? (S.n.emit / secs).toFixed(1) : '-') + '/s, rpm changes ' + sig('rpm') + ', speed changes ' + sig('speed') +
-            '; tick ms ' + st(L.tick) + ', JS in tick ms ' + st(L.tickMs) + '; loop lag ms ' + st(L.lag) + ' (>50: ' + L.lag.filter((x) => x > 50).length + ')' +
+            '; tick ms ' + st(L.tick) + ', JS in tick ms ' + st(L.tickMs) + ', JS in needle timer ms ' + st(L.needleMs) +
+            '; loop lag ms ' + st(L.lag) + ' (>50: ' + L.lag.filter((x) => x > 50).length + ')' +
             '; bytes/s per connection ' + bytes.join(' ') + '; cpu ' + ((cpu.user + cpu.system) / (secs * 1e4)).toFixed(1) + ' %' +
             ', rss ' + (mem.rss / 1048576).toFixed(0) + ' MB, heap ' + (mem.heapUsed / 1048576).toFixed(0) + ' MB');
         if (S) { S.n = { rpm: 0, speed: 0, emit: 0 }; S.gaps = { rpm: [], speed: [] }; }
@@ -2750,7 +3002,7 @@ class HudApp {
 
     /** This drive's distance and moving time (the car's own data only; standing still doesn't count). */
     _trip(now) {
-        const d = this.car.data(), dt = this.tripT ? Math.min(1000, now - this.tripT) : 0;
+        const d = this._data(), dt = this.tripT ? Math.min(1000, now - this.tripT) : 0;
         this.tripT = now;
         if (d.demo || !isNum(d.speed) || d.speed < 2) return;
         this.tripKm += d.speed * dt / 3600000;
@@ -2759,14 +3011,14 @@ class HudApp {
 
     /** km/h: the average moving speed this drive, from the first minute on (null before it, 54 on the demo). */
     _avgSpeed() {
-        if (this.car.data().demo) return 54;
+        if (this._data().demo) return 54;
         return this.tripMs >= 60000 ? this.tripKm / (this.tripMs / 3600000) : null;
     }
 
     /** BMW-like tach: a 120 ms filter, and a readout that moves in 50 rpm steps, only by 40 rpm or more. */
     _smoothRpm(now) {
         const test = this._testRpm(now);
-        const raw = isNum(test) ? test : this.car.data().rpm;
+        const raw = isNum(test) ? test : this._data().rpm;
         const dt = this.lastTickT ? Math.min(500, now - this.lastTickT) : 0;
         this.lastTickT = now;
         if (!isNum(raw)) { this.rpmF = null; this.rpmShown = null; return; }
@@ -2781,6 +3033,14 @@ class HudApp {
             const s = this._resolve(w.text);
             if (!force && s === x.last) return;
             x.last = s; x.lastPaint = now;
+            if (w.exact) {          // 0.7.14: a "gpu" text's layer; the other one of the pair often stays empty: no message
+                const codes = this._exactCodes(x, s), key = codes.join(',');
+                x.codes = codes;
+                if (!force && key === x.lastCodes) return;
+                x.lastCodes = key;
+                x.c.uniform(x.ref, 'u_text', codes, { type: 'vec4' });
+                return;
+            }
             x.c.uniform(x.ref, 'u_text', this._atlasCodes(x, s), { type: 'vec4' });
         } else if (w.type === 'text') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
@@ -2982,7 +3242,7 @@ class HudApp {
                 // 2026-11-14: closed too while the car stands in P with the engine off (BMW's standby screen, "Total
                 // ... km"): BMW draws no sign then, and the window showed a bar of its bottom line (y ~645) that the
                 // sign otherwise covers. An auto start/stop stop is in D, so BMW's sign still shows at the lights.
-                const rpm = this._raw('rpm'), parked = this.car.data().stage === 'P' && !(isNum(rpm) && rpm >= 150);
+                const rpm = this._raw('rpm'), parked = this._data().stage === 'P' && !(isNum(rpm) && rpm >= 150);
                 const m = parked || this._signWired() || isNum(this._raw('limit')) || this._raw('limitEnd') || this._raw('limitUnknown') ? 3 : 1;   // car3 I: "---" too
                 if (force || m !== x.cutMode) { x.cutMode = m; x.c.uniform(x.ref, 'u_cut', this._cutVec(w, m)); }
             }

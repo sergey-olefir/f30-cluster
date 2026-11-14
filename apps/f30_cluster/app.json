@@ -232,6 +232,12 @@
       "default": true
     },
     {
+      "key": "needleSmooth",
+      "label": "Smooth needles",
+      "type": "bool",
+      "default": true
+    },
+    {
       "key": "stockMap",
       "label": "BMW map in 6WB Comfort",
       "type": "bool",
