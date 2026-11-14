@@ -188,10 +188,9 @@
  * past the shift point and holds there; only while the car stands. Shift scoring keeps the car's own rpm.
  * Night colours (Cluster Themes "nightDim" on Auto): after sunset (sun.js, config.location) a layout's own theme is
  * built with its whites and greys at 60 %; the minute timer rebuilds at sunset and sunrise.
- * Night looks (2026-11-14, "nightLook"): while the night colours are on ("nightDim" Auto after sunset, or Always), a
- * 6WB layout (WBDIAL / WBBACK layers) can take one of NIGHT_LOOKS instead of the plain dimmer: one colour transform for
- * the whole cluster, on the GPU for the dials and the backdrop (baked textures included) and here for the texts. A
- * change of either setting, and sunset / sunrise, is applied in place (_nightLive): no layer is made again.
+ * "nightDim" Always keeps them on by day. A change of it, and sunset / sunrise, is applied in place when every layer can
+ * take new colours (_nightLive): no layer is made again. (0.7.11's night looks, "nightLook", recoloured the 6WB layers
+ * on the GPU; 0.7.12 took them out: the KOMBI reset with them, docs/CAR-SNAPSHOT-2026-11-15.md.)
  *
  * Boost is a PUSH signal, not a diagnostic poll: tracing cauliflowermossgrape's
  * car_vitals showed its boost reading is de.bmw.infotainment.drivingexcitement.FES /
@@ -281,23 +280,8 @@ const TILE_MAX = 14;       // half a flash: red, then the normal colour
 const TEST_FROM = 1500, TEST_CLIMB_MS = 2500, TEST_HOLD_MS = 1200;
 // night colours (Cluster Themes "nightDim"): after sunset the theme's whites and greys go to this brightness
 const NIGHT_DIM = 0.6;
-// 2026-11-14: the night looks ("nightLook"): how the night colours look on a 6WB layout. "plain" is the dimmer above
-// (dimTheme); a look here recolours the whole cluster with one transform, the same on the GPU (shaders.js nightLook,
-// u_nk0..2: the baked dial and window textures change with no second copy of them) and here for the theme's colours
-// (lookTheme: the texts), so a figure and its tick agree. A colour's grey part, min(r, g, b), goes to "w"; what is
-// left over of its red, green and blue to "r", "g", "b" (0..1 each). "floor": the baked window and floor's level on top
-// (the brightest area that is not information). Judged on the bench only, not yet on the car at night.
-//   amber: the scales a dimmed warm white, the red needle, red zone and lit segments amber-orange, the floor bronze
-//   ice:   the scales an ice blue, the floor a deep blue, the needle stays red (the one warm thing, easy to find)
-//   red:   everything in a low red (night vision), the needle a brighter orange-red, the floor almost off
-// "sign": the road signs (WBSIGN) are only dimmed to that, never recoloured (a limit sign stays red and white).
-const NIGHT_LOOKS = {
-    amber: { w: [0.66, 0.59, 0.50], r: [1.0, 0.50, 0.06], g: [0.55, 0.45, 0.10], b: [0.62, 0.36, 0.08], floor: 0.55, sign: 0.66 },
-    ice: { w: [0.50, 0.68, 0.86], r: [0.92, 0.16, 0.12], g: [0.20, 0.70, 0.80], b: [0.16, 0.42, 1.0], floor: 0.8, sign: 0.66 },
-    red: { w: [0.60, 0.06, 0.03], r: [1.0, 0.34, 0.12], g: [0.40, 0.05, 0.02], b: [0.36, 0.04, 0.02], floor: 0.4, sign: 0.5 },
-};
 // settings the night colours follow (_nightLive: in place when every layer can take them, else a rebuild)
-const NIGHT_KEYS = ['nightDim', 'nightLook'];
+const NIGHT_KEYS = ['nightDim'];
 // the car's display units (Vehicle statusNewCurrentUnitsStatusExt, as BMW's own x_call reads them; car_vitals, MIT)
 const PRESS_UNITS = { 1: 'BAR', 2: 'KPA', 3: 'PSI' }, TEMP_UNITS = { 1: 'C', 2: 'F' };
 const PRESS_TO_BAR = { BAR: 1, KPA: 0.01, PSI: 1 / 14.5038 };
@@ -554,10 +538,7 @@ class HudApp {
             () => !!(this.started && this.activeName && this.activeName !== 'off'), () => this._guard('screen', () => this._rebuild()));
         this.testAt = null;              // the shift-light test's start (Date.now()), while it runs
         this.nightOn = false;            // the layout was built with the night colours (nightDim)
-        this.look = null;                // 2026-11-14: the night look on now (a NIGHT_LOOKS entry), null: none
-        this.lookName = null;
-        this.baseTheme = null;           // the layout's theme before the night colours (the 6WB shaders take it with a look)
-        this.wbLayout = false;           // the layout draws with WBDIAL / WBBACK (night looks apply)
+        this.baseTheme = null;           // the layout's theme before the night colours
 
         this._setupVehicleData();
         this.layouts.onChange(() => this._rebuild());
@@ -1233,7 +1214,7 @@ class HudApp {
             + (this.pixelBytes ? ', ' + mib(this.pixelBytes) + ' of 16 MiB pixels' : '');
         // car3 G: in 6WB Dials + G20, whose bottom-row items are ours (a photo of the Settings tab shows it)
         const row = this.ownRow ? '; row: ' + ['range', 'clock', 'temp'].map((i) => i + ' ' + (this._own(i) ? 'ours' : "BMW's")).join(', ') : '';
-        const night = this.nightOn ? ', night colours ' + (this.lookName || 'plain') : '';     // 2026-11-14
+        const night = this.nightOn ? ', night colours' : '';     // 2026-11-14
         if (this.layoutTheme) return this.label + ' on' + mode + ': ' + name + ' theme' + night + layers + demo + drawn + row;
         const theme = THEMES[this.themeName] ? THEMES[this.themeName].name : this.themeName;
         const auto = this.setting('hudTheme') === 'auto' ? ' (Auto)' : '';
@@ -1258,7 +1239,7 @@ class HudApp {
     }
 
     /** Night colours now: a theme of the layout's own, and Cluster Themes' "nightDim" on Auto with the sun down, or on
-     *  Always (2026-11-14: to see or keep a night look by day; also how the bench shows them). */
+     *  Always (2026-11-14: to see them by day; also how the bench shows them). */
     _nightDim() {
         if (!this.ctx.settings.item('nightDim') || !this.layoutTheme) return false;
         const v = this.setting('nightDim');
@@ -1267,32 +1248,18 @@ class HudApp {
         return sun.isNight(Date.now(), this.location.lat, this.location.lon);
     }
 
-    /* --- 2026-11-14: night looks ("nightLook", NIGHT_LOOKS) --- */
+    /* --- night colours (the plain dimmer) --- */
 
-    /** this.theme from this.baseTheme and the night colours now: a night look on a 6WB layout, else the plain dimmer. */
+    /** this.theme from this.baseTheme and the night colours now: the plain dimmer (dimTheme). */
     _nightTheme() {
         this.nightOn = this._nightDim();
-        const pick = this.nightOn && this.wbLayout && this.ctx.settings.item('nightLook') ? this.setting('nightLook') : null;
-        this.look = NIGHT_LOOKS.hasOwnProperty(pick) ? NIGHT_LOOKS[pick] : null;
-        this.lookName = this.look ? pick : null;
-        this.theme = this.look ? lookTheme(this.baseTheme, this.look) : this.nightOn ? dimTheme(this.baseTheme, NIGHT_DIM) : this.baseTheme;
+        this.theme = this.nightOn ? dimTheme(this.baseTheme, NIGHT_DIM) : this.baseTheme;
     }
 
-    /** The theme the 6WB shaders' colour uniforms come from: with a night look the day theme (the shader recolours it,
-     *  as it does the baked textures), else this.theme (the plain dimmer as before). */
-    _wbTheme() { return this.look ? this.baseTheme : this.theme; }
-
-    /** A wbback's baked window level (u_win): the layout's "gain", times the look's "floor" at night. */
-    _wbWin(w) {
-        const g = Array.isArray(w.gain) ? w.gain : [1, 0];
-        return [g[0] * (this.look ? this.look.floor : 1), g[1]];
-    }
-
-    /** The colours of a 6WB layer that follow the night colours: WBDIAL's and WBBACK's theme colours, the look's transform
-     *  (u_nk0..2, the identity without one; always sent: an unset vec4 would be black), WBBACK's window level and WBMSA's
-     *  text colours. Nothing for the other layers. */
+    /** The colours of a 6WB layer that follow the night colours: WBDIAL's and WBBACK's theme colours, WBBACK's window
+     *  level and WBMSA's text colours. Nothing for the other layers. */
     _wbColours(x) {
-        const w = x.w, c = x.c, ref = x.ref, tw = this._wbTheme();
+        const w = x.w, c = x.c, ref = x.ref, tw = this.theme;
         if (w.type === 'dial' && w.look === 'wb') {
             c.uniform(ref, 'u_ring', rgb(color(tw, w.ring || 'line')));
             c.uniform(ref, 'u_ring2', rgb(color(tw, w.ring2 || 'dim')));
@@ -1303,20 +1270,14 @@ class HudApp {
             c.uniform(ref, 'u_glow', rgb(color(tw, w.glow || 'accent')));
         } else if (w.type === 'wbback') {
             c.uniform(ref, 'u_color', rgb(color(tw, w.color || 'accent')));
-            if (!w.collar && w.tex && this.setting('baked') !== false) c.uniform(ref, 'u_win', this._wbWin(w));
+            if (!w.collar && w.tex && this.setting('baked') !== false) c.uniform(ref, 'u_win', Array.isArray(w.gain) ? w.gain : [1, 0]);
         } else if (w.type === 'wbmsa') {
             c.uniform(ref, 'u_fg', rgba(color(this.theme, w.color || 'fg')));
             c.uniform(ref, 'u_dim', rgba(color(this.theme, 'dim')));
-            return;
-        } else if (w.type === 'wbsign') {
-            const k = this.look ? this.look.sign : 1;        // dimmed only: the identity times k
-            lookRows(null).forEach((v, i) => c.uniform(ref, 'u_nk' + i, v.map((e) => e * k)));
-            return;
-        } else return;
-        lookRows(this.look).forEach((v, i) => c.uniform(ref, 'u_nk' + i, v));
+        }
     }
 
-    /** "nightDim" / "nightLook" changed, or the sun rose or set: the night colours change in place when every layer of the
+    /** "nightDim" changed, or the sun rose or set: the night colours change in place when every layer of the
      *  layout can take them (the texts paint again on the next tick, the 6WB layers get new uniforms), so a switch makes
      *  no layer again and asks for no pixel memory. False: rebuild (a layer that took its colours when it was made). */
     _nightLive() {
@@ -1326,9 +1287,9 @@ class HudApp {
             let ok = true;
             this.widgets.forEach((x) => { if (!x.w || !x.ref || !live(x.w)) ok = false; });
             if (!ok) return false;
-            const was = this.nightOn + '|' + this.lookName;
+            const was = this.nightOn;
             this._nightTheme();
-            if (was === this.nightOn + '|' + this.lookName) return true;
+            if (was === this.nightOn) return true;
             this.widgets.forEach((x) => { x.last = null; x.lastPaint = 0; this._wbColours(x); });
             this.log.info('night colours ' + this._nightNote() + ', in place');
             this._status();
@@ -1336,10 +1297,10 @@ class HudApp {
         } catch (e) { this.log.error('hud night live: ' + (e && e.stack || e)); return false; }
     }
 
-    /** The night colours for the log and the status line: "off", "on (plain)", "on (amber)" ... */
-    _nightNote() { return this.nightOn ? 'on (' + (this.lookName || 'plain') + ')' : 'off'; }
+    /** The night colours for the log: "on" / "off". */
+    _nightNote() { return this.nightOn ? 'on' : 'off'; }
 
-    /* --- end night looks --- */
+    /* --- end night colours --- */
 
     /** Start the shift-light test: the rpm the lights, bars and readouts see climbs to the shift point and holds there
      *  (about 4 s). Only while the car stands (or on demo data). Returns false when it can't run now. */
@@ -1813,8 +1774,7 @@ class HudApp {
         this.layoutTheme = layout.theme && THEMES[layout.theme] ? layout.theme : null;
         this.themeName = this._themeName();
         this.baseTheme = THEMES[this.themeName] || THEMES.classic;
-        this.wbLayout = layout.widgets.some((w) => w.type === 'wbback' || (w.type === 'dial' && w.look === 'wb'));
-        this._nightTheme();             // 2026-11-14: this.theme, with the night colours (a night look or the plain dimmer)
+        this._nightTheme();             // this.theme, with the night colours (the plain dimmer)
         this.log.info('layout "' + layout.name + '", theme ' + this.theme.name + (this.layoutTheme ? '' : ' (' + this.setting('hudTheme') + ')') +
             (this.nightOn ? ', night colours ' + this._nightNote() : ''));
         const shown = layout.widgets.filter((w) => !(w.toggle && !this._toggleOn(w.toggle)) && !(w.themes && w.themes.indexOf(this.themeName) < 0));
@@ -2096,7 +2056,7 @@ class HudApp {
             c.uniform(ref, 'u_zone', [w.measure === 'rpm' ? this._redMarks(D.max)[0] : (isNum(w.redFrom) ? w.redFrom : 2),
                 isNum(w.redTo) ? w.redTo : -1, isNum(w.coldTo) ? w.coldTo : -1, (w.off || 0) * r]);     // "off": degrees before the start where the needle parks (OFF)
             c.uniform(ref, 'u_mode', [WB_STYLE[w.style] || 0, isNum(w.hub) ? w.hub : 0.42, isNum(w.glowK) ? w.glowK : 1, w.box ? 1 : 0]);
-            this._wbColours(x);         // 2026-11-14: u_ring .. u_glow and the night look (u_nk0..2)
+            this._wbColours(x);         // u_ring .. u_glow
             x.wbKind = 0;
             if (w.base && baked) {      // a baked base texture: "base": { tex, x, y, w, h (its box in the layer's px), kind 1 | 2 | 3 }
                 c.bind(ref, 'u_base', this._scene(w.base.tex, x.ci).ref);
@@ -2165,7 +2125,6 @@ class HudApp {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_show', [0, 0]);       // shown by _update: the limit sign while a limit is known, the no-passing sign while it applies
             c.uniform(ref, 'u_tex', [0]);
-            this._wbColours(x);                     // 2026-11-14: u_nk0..2, the night looks' dimming
             if (w.tex && this.setting('baked') !== false) {   // baked signs: "tex": { limit, nopass: { tex, x, y, w, h } }
                 [['limit', 'u_s0', 'u_r0'], ['nopass', 'u_s1', 'u_r1']].forEach(([k, smp, rect]) => {
                     const t = w.tex[k];
@@ -2233,7 +2192,7 @@ class HudApp {
             const fl = Array.isArray(w.footLine) ? w.footLine : [0, 0, 1];
             c.uniform(ref, 'u_foot', [wb.foot, fl[0] - w.y, fl[1] - w.x, fl[2] - w.x]);
             x.wbFootNow = wb.foot;          // package F: the foot drawn now ("wbFoot" changes it live, _wbLive)
-            this._wbColours(x);             // 2026-11-14: u_color again, u_win and the night look (u_nk0..2)
+            this._wbColours(x);             // u_color again and u_win
         } else if (w.type === 'gmeter') {
             const L = color(t, w.line || 'dim');
             c.uniform(ref, 'u_size', [w.w, w.h]);
@@ -3140,34 +3099,6 @@ function dimTheme(theme, k) {
     });
     out.name = theme.name;
     return out;
-}
-
-/** 2026-11-14: a night look's transform as WBDIAL's / WBBACK's u_nk0..2 (rows: red's, green's, blue's image, then the
- *  grey's); null: the identity. */
-function lookRows(L) {
-    if (!L) return [[1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 1, 1]];
-    return [0, 1, 2].map((i) => [L.r[i], L.g[i], L.b[i], L.w[i]]);
-}
-
-/** A 0..255 colour through a night look: what shaders.js nightLook does to it on the GPU. Alpha kept. */
-function lookColour(c, L) {
-    const g = Math.min(c[0], c[1], c[2]), v = [c[0] - g, c[1] - g, c[2] - g];
-    const out = [0, 1, 2].map((i) => Math.max(0, Math.min(255, Math.round(v[0] * L.r[i] + v[1] * L.g[i] + v[2] * L.b[i] + g * L.w[i]))));
-    return c.length > 3 ? out.concat(c.slice(3)) : out;
-}
-
-/** A theme through a night look: every colour, the ones in its nested groups (bar, rev) too. */
-function lookTheme(theme, L) {
-    const isColour = (c) => Array.isArray(c) && c.length >= 3 && c.length <= 4 && c.every((v) => typeof v === 'number');
-    const map = (o) => {
-        const out = {};
-        Object.keys(o).forEach((k) => {
-            const c = o[k];
-            out[k] = isColour(c) ? lookColour(c, L) : c && typeof c === 'object' && !Array.isArray(c) ? map(c) : c;
-        });
-        return out;
-    };
-    return map(theme);
 }
 
 function pad2(n) { return n < 10 ? '0' + n : String(n); }
