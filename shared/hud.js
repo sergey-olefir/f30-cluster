@@ -282,6 +282,13 @@ const TEST_FROM = 1500, TEST_CLIMB_MS = 2500, TEST_HOLD_MS = 1200;
 const NIGHT_DIM = 0.6;
 // settings the night colours follow (_nightLive: in place when every layer can take them, else a rebuild)
 const NIGHT_KEYS = ['nightDim'];
+// 0.7.13, the KOMBI guard: when the cluster's display service goes away within KOMBI_GUARD_MS of our scene being shown,
+// KOMBI_STRIKES times within KOMBI_WINDOW_MS, the theme is turned off (every theme, so a drive-mode change doesn't try
+// another), and stays off, across restarts too (<data>/kombi-guard.json), until a theme is picked again. On 2026-11-14
+// a 6WB scene made the KOMBI reset ~2.7 s after each mapping, and the scene was mapped again each time it came back:
+// 6 to 13 resets in a row, with the driver-assistance warnings, until the theme was turned off by hand.
+const KOMBI_GUARD_MS = 8000, KOMBI_WINDOW_MS = 120000, KOMBI_STRIKES = 2, KOMBI_FILE = 'kombi-guard.json';
+const LOOK_KEYS = ['hudLayout', 'inComfort', 'inSport', 'inEco', 'byMode'];
 // the car's display units (Vehicle statusNewCurrentUnitsStatusExt, as BMW's own x_call reads them; car_vitals, MIT)
 const PRESS_UNITS = { 1: 'BAR', 2: 'KPA', 3: 'PSI' }, TEMP_UNITS = { 1: 'C', 2: 'F' };
 const PRESS_TO_BAR = { BAR: 1, KPA: 0.01, PSI: 1 / 14.5038 };
@@ -519,6 +526,13 @@ class HudApp {
         this.themeName = null;
         this.flash = false;
         this.problem = null;             // why nothing shows (a bad layout), for the status line
+        // 0.7.13: the KOMBI guard (KOMBI_* above): { layout, at } while tripped, read back after a restart
+        this.kombiFile = path.join(ctx.dataDir || '.', KOMBI_FILE);
+        this.kombiTrip = null;
+        try { const t = JSON.parse(fs.readFileSync(this.kombiFile, 'utf8')); if (t && t.layout) this.kombiTrip = t; } catch (e) { /* none */ }
+        this.kombiStrikes = [];
+        this.kombiShownAt = 0;
+        this.kombiPrev = null;
         this.statusListeners = [];
         this.lastStatus = null;
 
@@ -543,8 +557,9 @@ class HudApp {
         this._setupVehicleData();
         this.layouts.onChange(() => this._rebuild());
         ctx.settings.onChange((key) => {
+            if (LOOK_KEYS.indexOf(key) >= 0) this._kombiClear();      // 0.7.13: a theme picked: the guard lets it try again
             // a theme or layout picked anywhere (the page asks first, the kit's All settings list doesn't): no longer stepping aside
-            if (['hudLayout', 'inComfort', 'inSport', 'inEco', 'byMode'].indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
+            if (LOOK_KEYS.indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
             if (PLACE_KEYS.indexOf(key) >= 0) this._guard('place', () => this._place());
             else if (LIVE_KEYS.indexOf(key) >= 0) this.widgets.forEach((x) => { x.last = null; });
             else if (WB_LIVE_KEYS.indexOf(key) >= 0 && this._wbLive()) { /* package F: the uniforms are sent, no rebuild */ }
@@ -876,6 +891,7 @@ class HudApp {
             if (name !== this.target) return;
             this.targetState = { state, holder, reason };
             this.log.info('target ' + name + tag + ' ' + state + (holder ? ' (holder ' + holder + ')' : '') + (reason ? ': ' + reason : ''));
+            if (!ci) this._guard('kombi guard', () => this._kombiWatch(state, holder, reason));
             this._statusSoon();
         });
         c.on('refused', (op, ref, reason) => {
@@ -1112,8 +1128,42 @@ class HudApp {
         }
     }
 
+    /** 0.7.13, the KOMBI guard: a target event of the first connection. A strike when the display service goes away
+     *  soon after our scene was shown; KOMBI_STRIKES of them turn the theme off (_layoutName 'off' while kombiTrip). */
+    _kombiWatch(state, holder, reason) {
+        const now = Date.now(), prev = this.kombiPrev;
+        this.kombiPrev = state;
+        if (state === 'shown' && holder === 'us') {
+            if (prev !== 'shown' && prev !== 'lingering') this.kombiShownAt = now;
+            return;
+        }
+        if (state !== 'unavailable' || !/display service/i.test(reason || '')) return;
+        const since = this.kombiShownAt ? now - this.kombiShownAt : -1;
+        this.kombiShownAt = 0;
+        if (since < 0 || since > KOMBI_GUARD_MS || !this.activeName || this.activeName === 'off') return;
+        this.kombiStrikes = this.kombiStrikes.filter((t) => now - t < KOMBI_WINDOW_MS).concat(now);
+        this.log.warn('kombi guard: the cluster\'s display service went away ' + since + ' ms after "' + this.activeName +
+            '" was shown (' + this.kombiStrikes.length + ' of ' + KOMBI_STRIKES + ')');
+        if (this.kombiStrikes.length < KOMBI_STRIKES) return;
+        this.kombiTrip = { layout: this.activeName, at: new Date(now).toISOString() };
+        this.kombiStrikes = [];
+        try { fs.writeFileSync(this.kombiFile, JSON.stringify(this.kombiTrip)); } catch (e) { this.log.warn('kombi guard: ' + this.kombiFile + ': ' + e.message); }
+        this.log.warn('kombi guard: theme turned off ("' + this.kombiTrip.layout + '"), BMW\'s own cluster shows until a theme is picked again');
+        this._rebuild();
+    }
+
+    /** A theme was picked: the guard lets the themes try again. */
+    _kombiClear() {
+        this.kombiStrikes = [];
+        if (!this.kombiTrip) return;
+        this.log.info('kombi guard: a theme was picked, themes may show again (was off since ' + this.kombiTrip.at + ')');
+        this.kombiTrip = null;
+        try { fs.unlinkSync(this.kombiFile); } catch (e) { /* gone already */ }
+    }
+
     /** The layout name to show now: per drive mode when that's on and known, else the plain setting. */
     _layoutName() {
+        if (this.kombiTrip) return 'off';          // 0.7.13: the KOMBI guard tripped
         if (this.screen && this.screen.yielded) return 'off';
         if (this.setting('byMode') === true && this.driveMode && MODE_KEY[this.driveMode]) {
             const v = this.setting(MODE_KEY[this.driveMode]);
@@ -1198,6 +1248,7 @@ class HudApp {
             try { there = fs.existsSync(this.socketPath); } catch (e) { /* treat as missing */ }
             return there ? this.label + ': connecting to cluster-render' : this.label + ' off: cluster-render is not installed or not running';
         }
+        if (this.kombiTrip) return this.label + ' off: the cluster reset twice right after ' + this._layoutLabel(this.kombiTrip.layout) + ' was shown. Pick a theme to try again';
         if (this.problem) return this.label + ': ' + this.problem;
         const byMode = this.setting('byMode') === true;
         const mode = byMode ? (this.driveRaw ? ' (drive mode not recognised: the car sends ' + this.driveRaw + ')'
@@ -1949,7 +2000,11 @@ class HudApp {
             c = this._clientAt(this._connOf(w));
             const base = { target: this.target, klass: w.class || 'content', z: w.z || 0, x: w.x, y: w.y, w: w.w, h: w.h };
             if (IMAGE_TYPES[w.type]) ref = c.image(Object.assign({ iw: w.w, ih: w.h }, base));
-            else fs = w.type === 'swatch' ? calibration.SWATCH : (w.type === 'dial' && w.look === 'wb' ? shaders.wbdial : shaders[w.type]);
+            else if (w.type === 'swatch') fs = calibration.SWATCH;
+            // 0.7.13: a 6WB dial or backdrop gets only its own look's code (shaders.js styled): the KOMBI compiles every branch
+            else if (w.type === 'dial' && w.look === 'wb') fs = shaders.wbdialFor(WB_STYLE[w.style] || 0);
+            else if (w.type === 'wbback') fs = shaders.wbbackFor(WB_STYLE[w.style] || 0);
+            else fs = shaders[w.type];
             if (fs) ref = c.effect(Object.assign({ fs }, base));
             if (!ref) { this.log.warn('widget "' + w.id + '": layer refused'); return; }
             this.placed.push({ c, ref, x: w.x, y: w.y, w: w.w, h: w.h });
@@ -2148,7 +2203,7 @@ class HudApp {
             c.uniform(ref, 'u_dr', w.dr);
             x.ccKey = null;
             this._wbCcSend(x);              // the check-control window (closed until the car says a message shows)
-            c.uniform(ref, 'u_style', [WB_STYLE[w.style] || 0]);
+            // u_style: none (0.7.13: the look is compiled in, shaders.wbbackFor)
             c.uniform(ref, 'u_sign', [0, 0, 0]);       // "sign": [x, y, r]: the speed limit sign's disc, shown by _update while a limit is known
             c.uniform(ref, 'u_hole', this._hole(w));     // "hole" / "holeWhen": BMW's map window left see-through
             c.uniform(ref, 'u_holeR', [this._holeRadius(w)]);
