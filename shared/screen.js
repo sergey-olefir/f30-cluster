@@ -8,7 +8,8 @@
  * Each app reads the other's file. A claim from the other app that is newer than our own makes us step aside:
  * we draw nothing ("yielded") until the driver picks a theme or layout on our own page again (claim()). The
  * yield is saved in <dataDir>/screen.json, so it survives a restart of the unit (the files in /dev/shm don't).
- * The page asks first (page.js, "Turn HUD off?"); otherOn() says whether there is anything to ask about.
+ * Cluster Themes' centre screen (menu.js, since 2026-11-14 native) does not ask: a theme picked there takes the screen
+ * when the cluster then draws one, and says so when otherOn() was true. (The drawn page, page.js, asked first.)
  * A claim that was already there when we started is not acted on (it is old news).
  *
  *   dir: /dev/shm/bimmer-lab (0777: the two apps may run as different users); env SCREEN_DIR on the Mac bench.

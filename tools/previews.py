@@ -1,5 +1,5 @@
 """
-previews.py - the pictures the settings page shows of each theme (shared/page.js, shared/previews.js).
+previews.py - the pictures the centre screen shows of each theme (shared/menu.js, shared/gallery.js, shared/previews.js).
 
 The centre screen can't draw our themes live (they are cluster-render layers, many of them GLSL), so each
 one is shot on the bench with fixed demo values and shipped as a picture inside the app:

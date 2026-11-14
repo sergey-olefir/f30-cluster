@@ -56,7 +56,8 @@ const ROOT = path.join(__dirname, '..');
 const APP_ID = process.argv[2] || process.env.BENCH_APP || 'idrive_hud_widgets';
 const APP_DIR = path.join(ROOT, 'apps', APP_ID);
 if (!fs.existsSync(path.join(APP_DIR, 'app.json'))) { console.error('no app ' + APP_ID + ' under apps/'); process.exit(2); }
-const DATA_DIR = path.join(__dirname, '.data', APP_ID);   // the app's data/ on the bench (settings.json, layouts/)
+// the app's data/ on the bench (settings.json, layouts/); BENCH_DATA_DIR: another one (a scripted test's, kept apart)
+const DATA_DIR = process.env.BENCH_DATA_DIR ? path.resolve(process.env.BENCH_DATA_DIR) : path.join(__dirname, '.data', APP_ID);
 const STAGE = path.join(ROOT, 'dist', APP_ID);
 const TARGETS = { hud: [800, 480], map: [1088, 480], panel: [1920, 720] };
 const CLASSES = ['ambient', 'content', 'overlay', 'alert'];
@@ -440,6 +441,7 @@ function restartApp(why) {
     restartTimer = setTimeout(() => restartApp(path.basename(dir) + '/' + file + ' changed'), 300);
 }));
 let lastSettings = null;
+let probeSeq = 0;
 let lastStatus = null;
 
 /* ---------- HTTP ---------- */
@@ -544,6 +546,33 @@ const web = http.createServer(async (req, res) => {
         child.send({ t: 'set', key: b.key, value: b.value });
         log('info', 'bench: setting ' + b.key + ' = ' + JSON.stringify(b.value));
         res.writeHead(204); return res.end();
+    }
+    if (req.method === 'POST' && url === '/click') {
+        // 2026-11-14 (native centre screen): an 'action' on any RHMI component, as the car's HMI sends it: { id, row }
+        // (row: a drop-down's chosen row; none: a button press or a checkbox toggle). Scripted tests: bench/test-native-ui.js
+        const b = await body(req);
+        if (!child) { res.writeHead(409); return res.end('app not running'); }
+        child.send({ t: 'click', id: String(b.id || ''), row: b.row });
+        log('info', 'bench: HMI action on ' + b.id + (b.row !== undefined ? ' row ' + b.row : ''));
+        res.writeHead(204); return res.end();
+    }
+    if (req.method === 'POST' && url === '/hmi') {
+        // the HMI's back arrow: { a: 'back' } closes the screen on top (the stub's screen stack)
+        const b = await body(req);
+        if (!child) { res.writeHead(409); return res.end('app not running'); }
+        child.send({ t: 'hmi', a: b.a });
+        res.writeHead(204); return res.end();
+    }
+    if (req.method === 'GET' && url === '/probe') {
+        // what the app wrote to the native components, its screen stack and the engine's layout (run-app.js 'probe')
+        if (!child) { res.writeHead(409); return res.end('app not running'); }
+        const n = ++probeSeq, c = child;
+        const done = (out) => { clearTimeout(timer); c.removeListener('message', on); res.writeHead(out ? 200 : 504, { 'content-type': 'application/json' }); res.end(JSON.stringify(out || {})); };
+        const on = (m) => { if (m && m.t === 'probe' && m.n === n) done(m); };
+        const timer = setTimeout(() => done(null), 3000);
+        c.on('message', on);
+        c.send({ t: 'probe', n });
+        return;
     }
     res.writeHead(404); res.end();
 });
