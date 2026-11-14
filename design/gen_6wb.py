@@ -2,7 +2,7 @@
 """Generates the three 6WB-style layouts (our own drawing, traced by eye off photos of BMW's F-series
 multifunctional display; no BMW artwork is used):
     python3 design/gen_6wb.py apps/f30_cluster/hud/layouts
-Writes wb_comfort.json, wb_comfort_map.json, wb_dials.json, wb_sport.json, wb_eco.json. Edit this file, not the JSON.
+Writes wb_comfort.json, wb_dials.json, wb_sport.json, wb_eco.json. Edit this file, not the JSON.
 
 Proportions are measured off the photos, in dial radii (R): the two dial centres are 3.2 R apart, the display is
 6.6 R wide and the dials stand at mid height; a small gauge sits 1.355 R outside each dial, 0.39 R below centre,
@@ -55,8 +55,13 @@ FOOT_LINE = [607, 650, 1270]
 # corners round (WBBACK: the fade bands meet on arcs).
 # BMW's map is at 90 % only inside x 794-1150, y 208-458 anyway, so the map seen at full is the same size as before.
 # The floor (map off) keeps WINDOW and FADE
-MAP_WINDOW = [750, 180, 420, 384]
-MAP_FADE = [120, 80, 80, 24]
+# 2026-11-13: the window is BMW's map at its 10 % line (photo 41: x 700-1216, y 135-595), so its sides lie under our
+# dials' rims except near the top and bottom corners; short side fades (20 px) only round those corners off, and the
+# shade off the rims (50 px) shapes the see-through area: it follows both dials (concave sides) instead of a box
+# wider than BMW's box (the owner: its map is wider there), so the top runs out to the dials: the rims' shade alone
+# shapes the sides at every height
+MAP_WINDOW = [600, 135, 720, 460]
+MAP_FADE = [70, 24, 45, 50]
 
 def text(id, cx, cy, w, t, font, color="fg", align="center", conn=0, **kw):
     """A text box w wide, centred on (cx, cy) (align left / right: cx is that edge)."""
@@ -135,6 +140,7 @@ def comfort():
          # BMW's own map window (BAKE C9: drawn under a custom theme, roads seen inside x 592-1303, y 161-612), seen
          # through our window while the "stockMap" setting is on
          "hole": WINDOW, "holeWhen": "stockMap", "holeInset": 0, "holeRadius": 22,
+         "cc": CC_BOX,                                                       # BMW's message shows through (2026-11-13)
          # the soft window (docs/POLISH-A-REPORT.md): no box edge anywhere. The map fades into black toward the top,
          # sides and foot (the stock map veil's curve) and under the dials' rims; the floor fades at the sides and rims
          "window": WINDOW, "fade": FADE, "foot": FOOT, "footLine": FOOT_LINE,
@@ -173,9 +179,9 @@ def comfort():
     # car3 H: the clock only while it is right, as 6WB Dials' "ownClock" (auto: once a time zone is set; the head unit
     # runs on UTC). BMW's own clock sits under our speed dial's range arc, so no window opens over it: without our
     # clock the temperature stands alone in the middle. The temperature in BMW's 0.5 degree steps ({{ambient1}})
-    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="baked&own:clock"),
-          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="baked&own:clock"),
-          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="baked&!own:clock")]
+    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="baked&own:clock&!cc:shown"),
+          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="baked&own:clock&!cc:shown"),
+          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="baked&!own:clock&!cc:shown")]
     # the range under the road signs (its pictogram is baked into the speed dial), the instant consumption under the rev dial
     # ref 12: the range arc reads "0" at its left end, "km" at its right end and the range in the middle above it;
     # the EfficientDynamics arc the same way with the instant consumption (0 at 196.5 deg, 20 l/100 km at 143.3 deg)
@@ -188,7 +194,7 @@ def comfort():
         W.append(text(id_ + "_a1", x1, y1, 100, lab1, "wb_cap", "dim", conn=conn, toggle="baked"))
     for i, (head, tok, x) in enumerate([("Time", "{{time}}", 742), ("Range", "{{range}} km", 890),
                                         ("Temp", "{{ambient1}} {{u:temp}}", 1048)]):     # car3 H: clock as above, 0.5 degrees
-        tg = "!baked&own:clock" if i == 0 else "!baked"
+        tg = ("!baked&own:clock" if i == 0 else "!baked") + "&!cc:shown"
         W += [text("row_h%d" % i, x, 612, 150, head, "wb_cap", "dim", align="left", toggle=tg),
               text("row_v%d" % i, x, 650, 170 if i == 2 else 160, tok, "wb_val", align="left", toggle=tg)]
     W += tray_row()                  # car4 L: the mode label and our gear in the tray, as in 6WB Dials + G20
@@ -208,11 +214,17 @@ SIGN_WIN, SIGN_SOFT = [537.5, 621.5, 42.5], 1
 # BMW's map between our dials, as the car draws it (photos 41, 42: the map's own veil ends at about x 704 and 1212, its
 # top at y 158): WBBACK's collar path fades it to black at its sides (48 px) and top (80 px) (u_wbox, u_fade: top,
 # sides, foot), and the black fades out over the 30 px above y 596, 5 px above the check-control panel (y 601)
-MAP_WIN, MAP_FADE = [708, 156, 490, 440], [80, 48, 30, 0]
+# (DIALS_MAP_FADE: its own name; as MAP_FADE it overwrote Comfort's map fades, car3 H, from the car3 G merge on)
+MAP_WIN, DIALS_MAP_FADE = [708, 156, 490, 440], [80, 48, 30, 0]
 # BMW's left hook stub "/" (x 731-744, y 631-644 on photos 34 and 41), which F kept: it lies where the check-control
 # message's symbol draws ("i", the heated wheel, the open door: photos 08, 42, 43). Black over it only while the car
 # says no message shows ("cc:none"; package I's signal); while that is not known it stays
 HOOK_STUB = [729, 629, 746, 646]
+# 2026-11-13: BMW's check-control message panel (catalogue assist.cc_panel [712, 601, 1240, 691], grown 3 px). In every
+# 6WB layout it is see-through only while the car says a message shows ("cc" on the bg widget: WBBACK u_cc; our texts
+# there carry "!cc:shown"); otherwise ours is drawn there: Comfort's bar, Dials + G20 a black patch (no keep-out cut
+# round BMW's frame, text and hook any more). While the signal is unknown (config.ccm unset) it stays ours / black.
+CC_BOX = [709, 598, 1243, 694]
 # --- end car3 G ---
 # --- package F (docs/POLISH-F-REPORT.md): 6WB Dials + G20's bottom row ---
 # the full-size cover over BMW's bottom lines, hooks and grey dash (tools/overlay/plan_dials.py COVER_BOX, packed by
@@ -220,7 +232,7 @@ HOOK_STUB = [729, 629, 746, 646]
 COVER = [588, 598, 736, 64]
 # the shade at our dials' inner edges ("dialShade"; WBBACK u_shade): it fades out over these y, and stays off BMW's
 # right "i" (plan_dials SHADE_Y, SHADE_KO)
-SHADE = {"y": [575, 605], "ko": [1253, 588, 1273, 630]}
+SHADE = {"y": [575, 605], "ko": [0, 0, 0, 0]}   # no keep-out: BMW's right "i" is covered since 2026-11-13
 # BMW's bottom-row items we may draw ourselves at their stock places (D rows 11-13; catalogue bboxes grown 4 px): the
 # black patch under ours ("patches", WBBACK u_pat), shown while the item is ours ("own:<item>": ownRange / ownClock /
 # ownTemp). Our text's baseline sits on BMW's (y 697), BMW's size: values in wb_row (Arimo Bold 44, caps ~32 px as
@@ -298,13 +310,14 @@ def dials():
          # package F: BMW's bottom lines, hooks and dash under black; the shade's setting; patches under our row items
          "cover": {"tex": "cover", "x": COVER[0], "y": COVER[1], "w": COVER[2], "h": COVER[3]}, "shade": SHADE,
          "patches": [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")]
-                    + [{"rect": HOOK_STUB, "when": "cc:none"}],          # car3 G
-         "window": MAP_WIN, "fade": MAP_FADE},                              # car3 G: the map's soft edges
+                    + [{"rect": CC_BOX, "when": "!cc:shown"}],      # 2026-11-13: black over the message panel (was car3 G's hook stub)
+         "cc": CC_BOX,
+         "window": MAP_WIN, "fade": DIALS_MAP_FADE},                         # car3 G: the map's soft edges
         dial("speedo", SP, "comfort", ringW=10, base=base("speedo_d", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
              cut={"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": SIGN_SOFT, "cover": "limit"},
              measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10, start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "comfort", ringW=10, base=base("tacho_d", RV, R, RV[0] - R, RV[1] - R, 2 * R, 3),
-             cut={"y": CUT_Y, "fade": CUT_FADE, "box": I_WIN, "soft": WIN_SOFT},
+             cut={"y": CUT_Y, "fade": CUT_FADE},          # no "i" window (2026-11-13): cut like the speedo
              measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
              start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF),
         # the road signs under the speed hub, the same widgets as 6WB Comfort's (comfort(); BAKE C7)
@@ -374,20 +387,12 @@ def glowing(mode):
     return W
 
 out = sys.argv[1]
-def with_map(W):
-    """Comfort with BMW's map window always see-through (the "stockMap" setting does it in wb_comfort)."""
-    for w in W:
-        if w["id"] == "bg":
-            w["holeWhen"] = True
-    return W
-
-for name, mode, title in (("comfort", "comfort", "6WB Comfort"), ("comfort_map", "comfort", "6WB Comfort + BMW map"),
+# ("6WB Comfort + BMW map" is gone, 2026-11-13: it was 6WB Comfort with the map window always on = the stockMap setting)
+for name, mode, title in (("comfort", "comfort", "6WB Comfort"),
                           ("dials", "comfort", "6WB Dials + G20"),
                           ("sport", "sport", "6WB Sport"), ("eco", "eco", "6WB Eco Pro")):
     globals().update(G20 if mode == "comfort" else OLD)
     W = dials() if name == "dials" else comfort() if mode == "comfort" else glowing(mode)
-    if name == "comfort_map":
-        W = with_map(W)
     lay = {"schemaVersion": 2, "name": title, "packWaste": 8, "theme": "wb_" + mode,
            "_about": "6WB-style cluster (%s), generated by design/gen_6wb.py: edit that and regenerate." % title,
            "widgets": W}

@@ -1503,6 +1503,10 @@ uniform vec4 u_pat0;
 uniform vec4 u_pat1;
 uniform vec4 u_pat2;
 uniform vec4 u_pat3;
+// BMW's check-control message panel (2026-11-13): while the car says a message shows, this rounded box (x0, y0, x1, y1,
+// layer px; x1 <= x0: none) is see-through in every 6WB layout, so BMW's message shows clean; otherwise ours is drawn
+// there (Comfort: the bar; Dials + G20: a black patch, hud.js "cc" with "!cc:shown")
+uniform vec4 u_cc;
 // --- end package F ---
 
 const float PI = 3.14159265359;
@@ -1560,6 +1564,7 @@ void main() {
             a = max(a, mv);
         }
         // --- end car3 G ---
+        if (u_cc.z > u_cc.x) a *= smoothstep(-0.5, 3.0, boxOut(p, u_cc, 8.0));      // the message panel shows
         gl_FragColor = vec4(0.0, 0.0, 0.0, a);
         return;
     }
@@ -1690,6 +1695,7 @@ void main() {
         col = (L.rgb * L.a + col * alpha * (1.0 - L.a)) / max(a2, 1e-4);
         alpha = a2;
     }
+    if (u_cc.z > u_cc.x) alpha *= smoothstep(-0.5, 3.0, boxOut(p, u_cc, 8.0));  // the message panel shows
     gl_FragColor = vec4(min(col, vec3(1.0)), alpha);
 }
 `;

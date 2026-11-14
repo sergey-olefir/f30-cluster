@@ -81,8 +81,8 @@
    "decision": "reveal"
   },
   "assist.info_tacho": {
-   "decision": "reveal",
-   "notes": "small soft window in our tacho rim; the collar keeps clear of it"
+   "decision": "cover",
+   "notes": "the check-control \"i\" left of the tacho (lit only with a message, which BMW's message panel shows anyway): under our tacho rim and the collar, as in 6WB Comfort, so both dials end alike at the cut (the owner's call, 2026-11-13; it was a small soft window in our rim)"
   },
   "assist.mode_label_centre": {
    "decision": "drop",
@@ -454,21 +454,6 @@
     597,
     1244,
     695
-   ],
-   "margin": 4,
-   "radius": 4,
-   "edited": false
-  },
-  {
-   "id": "hole.assist.info_tacho",
-   "for": [
-    "assist.info_tacho"
-   ],
-   "rect": [
-    1252,
-    587,
-    1274,
-    631
    ],
    "margin": 4,
    "radius": 4,
@@ -923,31 +908,31 @@
    "message": "the reveal hole would cut our content (4529 px of the hole)"
   },
   {
-   "severity": "warning",
-   "rule": "hole-cuts-content",
+   "severity": "info",
+   "rule": "unknown-covered",
    "g20": "assist.info_tacho",
    "wb": "C2.tacho.static",
-   "overlap_px": 235,
-   "overlap_pct": 54.02,
-   "message": "the reveal hole would cut our content (235 px of the hole)"
+   "overlap_px": 60,
+   "overlap_pct": 13.79,
+   "message": "unknown element covered by us; it may be under (decision cover)"
   },
   {
-   "severity": "warning",
-   "rule": "hole-cuts-content",
+   "severity": "info",
+   "rule": "unknown-covered",
    "g20": "assist.info_tacho",
    "wb": "C2.tacho.bezel",
-   "overlap_px": 198,
-   "overlap_pct": 45.52,
-   "message": "the reveal hole would cut our content (198 px of the hole)"
+   "overlap_px": 67,
+   "overlap_pct": 15.4,
+   "message": "unknown element covered by us; it may be under (decision cover)"
   },
   {
-   "severity": "warning",
-   "rule": "hole-cuts-content",
+   "severity": "info",
+   "rule": "unknown-covered",
    "g20": "assist.info_tacho",
    "wb": "w.tacho",
-   "overlap_px": 438,
-   "overlap_pct": 100.69,
-   "message": "the reveal hole would cut our content (438 px of the hole)"
+   "overlap_px": 167,
+   "overlap_pct": 38.39,
+   "message": "unknown element covered by us; it may be under (decision cover)"
   },
   {
    "severity": "info",

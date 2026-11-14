@@ -62,6 +62,12 @@
       "holeWhen": "stockMap",
       "holeInset": 0,
       "holeRadius": 22,
+      "cc": [
+        709,
+        598,
+        1243,
+        694
+      ],
       "window": [
         592,
         158,
@@ -81,16 +87,16 @@
         1270
       ],
       "mapWindow": [
-        750,
-        180,
-        420,
-        384
+        600,
+        135,
+        720,
+        460
       ],
       "mapFade": [
-        80,
-        48,
-        30,
-        0
+        70,
+        24,
+        45,
+        50
       ]
     },
     {
@@ -759,7 +765,7 @@
       "font": "wb_val",
       "color": "fg",
       "align": "left",
-      "toggle": "baked&own:clock"
+      "toggle": "baked&own:clock&!cc:shown"
     },
     {
       "id": "row_b1",
@@ -773,7 +779,7 @@
       "font": "wb_val",
       "color": "fg",
       "align": "left",
-      "toggle": "baked&own:clock"
+      "toggle": "baked&own:clock&!cc:shown"
     },
     {
       "id": "row_b2",
@@ -787,7 +793,7 @@
       "font": "wb_val",
       "color": "fg",
       "align": "center",
-      "toggle": "baked&!own:clock"
+      "toggle": "baked&!own:clock&!cc:shown"
     },
     {
       "id": "range_v",
@@ -891,7 +897,7 @@
       "font": "wb_cap",
       "color": "dim",
       "align": "left",
-      "toggle": "!baked&own:clock"
+      "toggle": "!baked&own:clock&!cc:shown"
     },
     {
       "id": "row_v0",
@@ -905,7 +911,7 @@
       "font": "wb_val",
       "color": "fg",
       "align": "left",
-      "toggle": "!baked&own:clock"
+      "toggle": "!baked&own:clock&!cc:shown"
     },
     {
       "id": "row_h1",
@@ -919,7 +925,7 @@
       "font": "wb_cap",
       "color": "dim",
       "align": "left",
-      "toggle": "!baked"
+      "toggle": "!baked&!cc:shown"
     },
     {
       "id": "row_v1",
@@ -933,7 +939,7 @@
       "font": "wb_val",
       "color": "fg",
       "align": "left",
-      "toggle": "!baked"
+      "toggle": "!baked&!cc:shown"
     },
     {
       "id": "row_h2",
@@ -947,7 +953,7 @@
       "font": "wb_cap",
       "color": "dim",
       "align": "left",
-      "toggle": "!baked"
+      "toggle": "!baked&!cc:shown"
     },
     {
       "id": "row_v2",
@@ -961,7 +967,7 @@
       "font": "wb_val",
       "color": "fg",
       "align": "left",
-      "toggle": "!baked"
+      "toggle": "!baked&!cc:shown"
     },
     {
       "id": "mode",
