@@ -58,6 +58,7 @@ const APP_DIR = path.join(ROOT, 'apps', APP_ID);
 if (!fs.existsSync(path.join(APP_DIR, 'app.json'))) { console.error('no app ' + APP_ID + ' under apps/'); process.exit(2); }
 // the app's data/ on the bench (settings.json, layouts/); BENCH_DATA_DIR: another one (a scripted test's, kept apart)
 const DATA_DIR = process.env.BENCH_DATA_DIR ? path.resolve(process.env.BENCH_DATA_DIR) : path.join(__dirname, '.data', APP_ID);
+const HMI_IMG = process.env.BENCH_IMAGE_DIR ? path.resolve(process.env.BENCH_IMAGE_DIR) : path.join(DATA_DIR, 'hmi-img');
 const STAGE = path.join(ROOT, 'dist', APP_ID);
 const TARGETS = { hud: [800, 480], map: [1088, 480], panel: [1920, 720] };
 const CLASSES = ['ambient', 'content', 'overlay', 'alert'];
@@ -392,7 +393,9 @@ function startApp() {
     try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) { /* there */ }
     send(helloMsg());
     if (!build()) { send({ t: 'app', state: 'stopped' }); return; }
-    const opts = { cwd: DATA_DIR, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], env: Object.assign({}, process.env, { HUD_CLUSTER_SOCKET: SOCK }) };
+    try { fs.mkdirSync(HMI_IMG, { recursive: true }); } catch (e) { /* there */ }
+    // BENCH_IMAGE_DIR: the pictures the app pushes to its native graphic rows, for the /app mock of the centre screen
+    const opts = { cwd: DATA_DIR, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], env: Object.assign({ BENCH_IMAGE_DIR: HMI_IMG }, process.env, { HUD_CLUSTER_SOCKET: SOCK }) };
     if (APP_NODE) opts.execPath = APP_NODE;
     child = fork(path.join(__dirname, 'run-app.js'), [STAGE, DATA_DIR], opts);
     const c = child;
@@ -461,6 +464,42 @@ const web = http.createServer(async (req, res) => {
     if (req.method === 'GET' && url === '/') {
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
         return fs.createReadStream(path.join(__dirname, 'page.html')).pipe(res);
+    }
+    // ---- the centre screen as the car's HMI would show it (a mock: BMW's own skin is not on the bench) ----
+    // GET /app: the page; GET /hmi-ui: the built RHMI screens (dist/<app>/rhmiData) with their English strings;
+    // GET /hmi-img/<component>.png: the last picture the app pushed to a graphic row. Presses go to POST /click.
+    if (req.method === 'GET' && url === '/app') {
+        res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+        return fs.createReadStream(path.join(__dirname, 'hmi.html')).pipe(res);
+    }
+    if (req.method === 'GET' && url === '/hmi-ui') {
+        try {
+            const rd = path.join(STAGE, 'rhmiData');
+            const ui = JSON.parse(fs.readFileSync(path.join(rd, 'uiDescription', 'uiDescription.json'), 'utf8'));
+            let str = {};
+            try { str = JSON.parse(fs.readFileSync(path.join(rd, 'strings', 'en_GB.json'), 'utf8')); } catch (e) { /* none */ }
+            const txt = (c) => (!c ? '' : c.type === 'StringId' ? (str[c.value] !== undefined ? str[c.value] : c.value) : String(c.value));
+            const states = Object.keys(ui.containers).map((k) => ui.containers[k]).filter((c) => c.type === 'state').map((c) => ({
+                name: c.name,
+                comps: Object.keys(c.components).sort((a, b) => a - b).map((id) => {
+                    const p = c.components[id];
+                    return {
+                        name: p.name, type: p.type,
+                        rows: (p.rows || []).map((r) => { const o = {}; Object.keys(r).forEach((k) => { o[k] = txt(r[k]); }); return o; }),
+                        header: p.cells && p.cells.HeaderText ? txt(p.cells.HeaderText) : '',
+                    };
+                }),
+            }));
+            res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+            return res.end(JSON.stringify({ title: str[Object.keys(str).find((k) => /_TITLE$/.test(k))] || APP_ID, states }));
+        } catch (e) { res.writeHead(500); return res.end(String(e.message)); }
+    }
+    const hi = /^\/hmi-img\/([a-z0-9_]+)\.png$/.exec(url);
+    if (req.method === 'GET' && hi) {
+        const f = path.join(HMI_IMG, hi[1] + '.png');
+        if (!fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+        res.writeHead(200, { 'content-type': 'image/png', 'cache-control': 'no-store' });
+        return fs.createReadStream(f).pipe(res);
     }
     // GET /photo/<NN>.png: a car photo rectified to panel px (tools/overlay/rectify.py), as a static backdrop under the
     // theme. Local only: bake/work/ is git-ignored and holds third-party pixels, never shipped
