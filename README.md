@@ -26,7 +26,11 @@ tools/              bake_fonts.py, previews.py
 ```sh
 node bench/server.js f30_cluster       # the cluster, http://localhost:8078
 node kit/tools/emu.js f30_cluster      # the app on the centre screen, http://localhost:8077
+node bench/test-native-ui.js           # presses the centre screen's native rows, checks what the app does
 ```
+
+The centre screen is BMW's own menu (the HMI draws it on the car; the emulator only lists it), with a drawn theme
+gallery behind one button: see `docs/UI-NATIVE-REPORT.md`.
 
 Run one at a time: both rebuild `dist/`. Needs Python 3 and Node. Fonts and previews are re-made with Pillow
 (`uv run --no-project --with pillow python tools/bake_fonts.py f30_cluster`, `tools/previews.py f30_cluster 8078`).
