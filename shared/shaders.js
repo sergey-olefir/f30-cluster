@@ -1050,6 +1050,20 @@ void main() {
 }
 `;
 
+// 2026-11-14: the night looks ("nightLook", hud.js NIGHT_LOOKS) as one colour transform at the very end of WBDIAL and
+// WBBACK, so the baked static stacks (hud/scene) are recoloured on the GPU, live, with no second set of textures (16 MiB
+// pixel memory). A colour splits into its grey part w = min(r, g, b) and what is left over (c - w: the red of the needle,
+// the blue of the floor); u_nk0..2 are the output's rows: (red's, green's, blue's image, then the white's image). The
+// identity (1 0 0 1, 0 1 0 1, 0 0 1 1) leaves every colour as it is. hud.js sends it always (an unset vec4 is 0: black).
+const NIGHT_GLSL = `uniform vec4 u_nk0;
+uniform vec4 u_nk1;
+uniform vec4 u_nk2;
+vec3 nightLook(vec3 c) {
+    float w = min(c.r, min(c.g, c.b));
+    vec4 v = vec4(c - vec3(w), w);
+    return vec3(dot(u_nk0, v), dot(u_nk1, v), dot(u_nk2, v));
+}`;
+
 const WBDIAL = `// 6WB-style round gauges for a cluster-render "effect" layer (GLSL ES 1.00): our own drawing, traced by eye off
 // photos of BMW's F-series multifunctional display (no BMW artwork). One shader, five looks (u_style):
 //   0 Comfort: a glossy bezel ring (u_ringW px), free-standing ticks (major, half-step, minor) with a red band from
@@ -1062,7 +1076,7 @@ const WBDIAL = `// 6WB-style round gauges for a cluster-render "effect" layer (G
 //   3 mini: a small side gauge: the bezel, a few ticks, a red band below u_redTo and from u_redFrom, a blue one below
 //     u_coldTo, a white needle with a ring hub. u_flip 1 mirrors it left-right (the scale then runs anticlockwise).
 //   4 Eco Pro's efficiency dial: a thick white arc over the top split at 12 o'clock (CHARGE | POWER), a glowing inner
-//     arc, a white needle from the centre.
+//     arc, a white pointer from 0.40 R out (its middle stays black: BMW's black box sits there on the G20).
 // u_start / u_sweep in radians, clockwise from 12 o'clock; u_value 0..1 of the sweep; u_hot 1: the shift red.
 // v_uv (0,0) is the top-left; the dial fills the smaller side of the layer.
 #ifdef GL_FRAGMENT_PRECISION_HIGH
@@ -1097,6 +1111,7 @@ uniform vec4 u_cut;        // the open bottom (the G20's bottom row shows below 
                            // 3 round closed: the disc stays opaque, the dial fading into black, over BMW's sign), the
                            // window's soft edge (px past its shape until the dial is whole)
 uniform vec4 u_cutW;       // the window (BMW's own sign or lamp shows through), layer px: round cx, cy, r; box x0, y0, x1, y1
+${NIGHT_GLSL}
 #define u_size u_geo.xy
 #define u_ringW u_geo.z
 #define u_flip u_geo.w
@@ -1324,22 +1339,25 @@ void main() {
         }
     } else if (u_style < 2.5) {
         // ---- Eco Pro
+        // 2026-11-14: on 6WB Comfort's G20 geometry (R 335) the px sizes, drawn for the first geometry's R 290, scale
+        // with the dial (sk), so the bigger dial keeps its proportions
+        float sk = R / 289.0;
         float ri = u_hub * R;
         col = mix(col, u_ring2, ringAt(d, R - 1.5, 2.0) * 0.45);
-        col = mix(col, u_ring, ringAt(d, R - 1.5, 2.6) * open);
+        col = mix(col, u_ring, ringAt(d, R - 1.5, 2.6 * sk) * open);
         if (d > ri && d < R) col += glow * 0.07 * open;
-        col += glow * 0.85 * exp(-abs(d - ri) / 13.0) * open;                     // the inner arc's glow
-        col = mix(col, mix(glow, vec3(1.0), 0.8), ringAt(d, ri, 3.0) * open);
+        col += glow * 0.85 * exp(-abs(d - ri) / (13.0 * sk)) * open;              // the inner arc's glow
+        col = mix(col, mix(glow, vec3(1.0), 0.8), ringAt(d, ri, 3.0 * sk) * open);
         if (onTick) {
-            float len = major ? 24.0 : 10.0, wid = major ? 2.2 : 0.6;
-            float dd = seg(p, tdir * (R - 4.0 - len), tdir * (R - 4.0)) - wid;
+            float len = (major ? 24.0 : 10.0) * sk, wid = (major ? 2.2 : 0.6) * sk;
+            float dd = seg(p, tdir * (R - 4.0 * sk - len), tdir * (R - 4.0 * sk)) - wid;
             col = mix(col, u_tick, clamp(0.5 - dd, 0.0, 1.0));
         }
-        col = mix(col, glow, ringAt(d, 0.125 * R, 1.8));
-        float L = R - 20.0;
+        col = mix(col, glow, ringAt(d, 0.125 * R, 1.8 * sk));
+        float L = R - 20.0 * sk;
         if (q.y > 0.0 && q.y < L) {
-            float hw = mix(3.6, 1.4, q.y / L);
-            col += glow * 0.55 * clamp(1.0 - abs(q.x) / 16.0, 0.0, 1.0);
+            float hw = mix(3.6, 1.4, q.y / L) * sk;
+            col += glow * 0.55 * clamp(1.0 - abs(q.x) / (16.0 * sk), 0.0, 1.0);
             col = mix(col, u_needle, clamp(hw + 0.5 - abs(q.x), 0.0, 1.0));
         }
     } else if (u_style < 3.5) {
@@ -1377,20 +1395,26 @@ void main() {
         }
     } else {
         // ---- Eco Pro's efficiency dial
+        // 2026-11-14: on the G20 geometry this dial sits where BMW draws its black box over any theme (catalogue
+        // overlay.black_box, x 1422-1612, y 320-440: out to 0.36 R from our centre). So its middle is plain black: no hub
+        // ring, and the needle is a pointer from 0.40 R (soft over its first 0.03 R) that never reaches under the box, so
+        // nothing of ours is seen cut by it. Px sizes scale with the dial as the speedo's (sk)
+        float sk = R / 289.0;
         float ri = u_hub * R;
         col = mix(col, u_ring2, ringAt(d, R - 1.5, 2.0) * 0.55);
         float top = arcIn(a, -0.80, 2.55);                                        // -46 deg .. 100 deg
         float split = abs(a) < 0.022 ? 0.0 : 1.0;
-        if (d > R - 17.0 && d < R - 1.0) col = mix(col, u_ring, top * split);
+        if (d > R - 17.0 * sk && d < R - 1.0) col = mix(col, u_ring, top * split);
         float inner = arcIn(a, -1.05, 2.45);
-        col += glow * 0.85 * exp(-abs(d - ri) / 13.0) * inner;
-        col = mix(col, mix(glow, vec3(1.0), 0.8), ringAt(d, ri, 3.0) * inner);
-        col = mix(col, glow, ringAt(d, 0.125 * R, 1.8));
-        float L = R - 22.0;
-        if (q.y > 0.0 && q.y < L) {
-            float hw = mix(3.6, 1.4, q.y / L);
-            col += glow * 0.55 * clamp(1.0 - abs(q.x) / 16.0, 0.0, 1.0);
-            col = mix(col, u_needle, clamp(hw + 0.5 - abs(q.x), 0.0, 1.0));
+        col += glow * 0.85 * exp(-abs(d - ri) / (13.0 * sk)) * inner;
+        col = mix(col, mix(glow, vec3(1.0), 0.8), ringAt(d, ri, 3.0 * sk) * inner);
+        float r0 = 0.40 * R, L = R - 22.0 * sk;
+        if (d < r0 - 0.03 * R) col = u_face;                                      // under BMW's box: black only
+        if (q.y > r0 - 0.03 * R && q.y < L) {
+            float hw = mix(3.6, 1.4, q.y / L) * sk;
+            float k0 = smoothstep(r0 - 0.03 * R, r0, q.y);                         // the pointer's soft inner end
+            col += glow * 0.55 * clamp(1.0 - abs(q.x) / (16.0 * sk), 0.0, 1.0) * k0;
+            col = mix(col, u_needle, clamp(hw + 0.5 - abs(q.x), 0.0, 1.0) * k0);
         }
     }
     if ((u_style < 0.5 || (u_style > 2.5 && u_style < 3.5)) && !(u_style > 2.5 && u_hasBase > 0.5) && u_hasBase < 2.5) {
@@ -1430,7 +1454,10 @@ void main() {
         // car3 G: the open round window (BMW's sign) is tight on the sign's own disc and has a black ring round it out
         // to 8 px past its soft edge, so BMW's bottom line does not show beside the sign (photo 37: "line stubs")
         if (u_cut.z > 0.5 && u_cut.z < 1.5) {
-            float ring = smoothstep(u_cut.w, u_cut.w + 1.0, cutSd) * (1.0 - smoothstep(u_cut.w + 8.0, u_cut.w + 10.0, cutSd));
+            // 2026-11-14: the ring starts where the window ends (cutWin), not 1 px past its soft edge: in between, low in
+            // the dial (its cut fade, cutK ~0.4 at BMW's line, y ~645) the dial was half see-through and BMW's line
+            // showed as two short arcs beside the sign (car photo 2026-11-14, "the whiskers")
+            float ring = cutWin * (1.0 - smoothstep(u_cut.w + 8.0, u_cut.w + 10.0, cutSd));
             float ringA = max(cutK * cutWin, ring);
             col *= cutK * cutWin / max(ringA, 0.001);
             cutK = ringA;
@@ -1448,7 +1475,7 @@ void main() {
         }
         edge *= cutK;
     }
-    gl_FragColor = vec4(min(col, vec3(1.0)), edge);
+    gl_FragColor = vec4(min(nightLook(col), vec3(1.0)), edge);      // 2026-11-14: the night look (identity by day)
 }
 `;
 
@@ -1511,6 +1538,7 @@ uniform vec4 u_patSoft;
 // there (Comfort: the bar; Dials + G20: a black patch, hud.js "cc" with "!cc:shown")
 uniform vec4 u_cc;
 // --- end package F ---
+${NIGHT_GLSL}
 
 const float PI = 3.14159265359;
 
@@ -1611,7 +1639,7 @@ void main() {
             a = a2;
         }
         if (u_cc.z > u_cc.x) a *= smoothstep(-0.5, 3.0, boxOut(p, u_cc, 8.0));      // the message panel shows
-        gl_FragColor = vec4(min(fc, vec3(1.0)), a);
+        gl_FragColor = vec4(min(nightLook(fc), vec3(1.0)), a);       // 2026-11-14: the night look
         return;
     }
     // the soft window (u_wbox): its sides and the dials' rims shade it, its top and bottom fade the map
@@ -1675,9 +1703,21 @@ void main() {
         }
     } else {
         float y0 = cy + 0.47 * R, y1 = cy + 0.94 * R;                                 // horizon, base
+        float hw0 = (u_dr.x - u_dl.x) * 0.5;
+        if (u_style > 1.5) {
+            // 2026-11-14: Eco Pro on 6WB Comfort's G20 geometry: the shelf where Comfort's floor is (its horizon
+            // y 457, its foot line y 607, i.e. 0.23 R and 0.678 R below the centres), as wide as the gap between the
+            // dials at the horizon, so its slanted sides still show (from the first geometry's full centre-to-centre
+            // width they would run under the G20's bigger, closer dials)
+            y0 = cy + 0.23 * R; y1 = cy + 0.678 * R;
+            hw0 -= sqrt(1.0 - 0.23 * 0.23) * R;
+        }
+        // 2026-11-14: Sport on 6WB Comfort's geometry: its base at the layout's "footLine" y (Comfort's window foot,
+        // the info row below it), the horizon 0.42 R above it
+        if (u_style > 0.5 && u_style < 1.5 && u_foot.w > u_foot.z) { y1 = u_foot.y; y0 = y1 - 0.42 * R; }
         // the floor: narrower toward the base
         float t = clamp((p.y - y0) / (y1 - y0), 0.0, 1.0);
-        float hw0 = (u_dr.x - u_dl.x) * 0.5, hwd = hw0 * mix(1.0, 0.62, t);
+        float hwd = hw0 * mix(1.0, 0.62, t);
         float inFloor = p.y >= y0 && p.y <= y1 && abs(p.x - mid) < hwd ? 1.0 : 0.0;
         col += u_color * 0.34 * (1.0 - t) * (1.0 - t) * inFloor * out2;
         col += (u_color * 0.6 + vec3(0.12)) * clamp(1.2 - abs(p.y - y0), 0.0, 1.0) * out2 * 0.8;                 // horizon
@@ -1726,7 +1766,7 @@ void main() {
         alpha = a2;
     }
     if (u_cc.z > u_cc.x) alpha *= smoothstep(-0.5, 3.0, boxOut(p, u_cc, 8.0));  // the message panel shows
-    gl_FragColor = vec4(min(col, vec3(1.0)), alpha);
+    gl_FragColor = vec4(min(nightLook(col), vec3(1.0)), alpha);  // 2026-11-14: the night look (identity by day)
 }
 `;
 
@@ -1748,6 +1788,7 @@ uniform sampler2D u_s0;
 uniform sampler2D u_s1;
 uniform vec4 u_r0;
 uniform vec4 u_r1;
+${NIGHT_GLSL}     // 2026-11-14: at night only dimmed (hud.js "sign"), a road sign keeps its colours
 
 const vec3 RED = vec3(0.84, 0.05, 0.07);
 
@@ -1796,7 +1837,7 @@ void main() {
             vec4 b = tex(u_s1, u_r1, p);
             col = vec4(mix(col.rgb, b.rgb, b.a), max(col.a, b.a));
         }
-        gl_FragColor = col;
+        gl_FragColor = vec4(nightLook(col.rgb), col.a);
         return;
     }
     float R = 38.0;
@@ -1820,7 +1861,7 @@ void main() {
         s = mix(s, vec3(0.95), rbox(q, vec2(8.0, -3.0), vec2(4.0, 1.4), 0.8) * r * field);
         col = vec4(mix(col.rgb, s, a), max(col.a, a));
     }
-    gl_FragColor = col;
+    gl_FragColor = vec4(nightLook(col.rgb), col.a);
 }
 `;
 

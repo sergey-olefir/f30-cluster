@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generates the three 6WB-style layouts (our own drawing, traced by eye off photos of BMW's F-series
+"""Generates the 6WB-style layouts (our own drawing, traced by eye off photos of BMW's F-series
 multifunctional display; no BMW artwork is used):
     python3 design/gen_6wb.py apps/f30_cluster/hud/layouts
-Writes wb_comfort.json, wb_dials.json, wb_sport.json, wb_eco.json. Edit this file, not the JSON.
+Writes wb_comfort.json, wb_dials.json, wb_sport.json, wb_sport_dials.json, wb_eco.json. Edit this file, not the JSON.
 
 Proportions are measured off the photos, in dial radii (R): the two dial centres are 3.2 R apart, the display is
 6.6 R wide and the dials stand at mid height; a small gauge sits 1.355 R outside each dial, 0.39 R below centre,
@@ -19,17 +19,20 @@ def cell(font):
         _cell[font] = json.load(open(os.path.join(FONTS, font + '.json')))['cellHeight']
     return _cell[font]
 
-# Sport and Eco Pro still use the first geometry (measured off the 6WB photos); Comfort has been fitted to the G20
-# (see shared/visible.js): bigger dials, the rev dial centred on BMW's black box so the box hides only the hub.
+# Comfort has been fitted to the G20 (see shared/visible.js): bigger dials, the rev dial centred on BMW's black box so
+# the box hides only the hub. 2026-11-14: Sport (sport(), sport_dials()) and Eco Pro (eco()) too, on Comfort's
+# geometry; OLD is the first geometry (measured off the 6WB photos), kept for reference only.
 # car4 L (docs/CAR4-L-REPORT.md): every layout with the tacho's gear tray (6WB Comfort, Comfort + BMW map, Dials + G20)
 # draws our gear in it and our drive mode above it, the same widgets and settings (tray_row(): "gearTray", "modeLabel").
 # Before, only Dials + G20 did; Comfort drew no gear letter, as in the bimmer-lab themes, so as not to double BMW's
 # own letter in the bottom row (BMW draws that over any theme: docs/BAKE-C9-overlays.md). The owner chose ours anyway
-# (2026-11-13): the 6WB always shows the gear in the tray. Sport and Eco Pro have no tray (their own look) and print the
-# mode themselves.
+# (2026-11-13): the 6WB always shows the gear in the tray. 2026-11-14: Sport uses it too (tray_row("accent")); Eco Pro
+# prints the mode itself.
 OLD = dict(R=290, SP=(496, 360), RV=(1424, 360), MINI_R=90, FU=(103, 473), OT=(1817, 473))
-G20 = dict(R=335, SP=(412, 380), RV=(1508, 380), MINI_R=70, FU=(80, 628), OT=(1840, 628))
-globals().update(OLD)
+# 2026-11-14: the minis 20 px up in every layout (were y 628; 6WB Dials + G20 had them there already, so BMW's own
+# range "467 km" clears the fuel mini): Comfort, Dials + G20, Sport, Sport + G20 and Eco share one place
+G20 = dict(R=335, SP=(412, 380), RV=(1508, 380), MINI_R=70, FU=(80, 608), OT=(1840, 608))
+globals().update(G20)
 MID = 960
 SPD_START, SPD_SWEEP = 230, 260
 RPM_START, RPM_PER = 250.5, 32.1          # degrees; per 1000 rpm
@@ -113,10 +116,10 @@ def minis(baked=False):
     return [
         dial("fuel", FU, "mini", r=MINI_R, ringW=5, measure="signal", signal="fuel", scale={"max": 1, "ticks": 4}, minor=2,
              start=MINI_START, sweep=MINI_SWEEP, redTo=0.10, needle="fg",
-             **({"base": base("fuel", FU, MINI_R, 8, 556, 144)} if baked else {})),
+             **({"base": base("fuel", FU, MINI_R, FU[0] - 72, FU[1] - 72, 144)} if baked else {})),
         dial("oilt", OT, "mini", r=MINI_R, ringW=5, measure="signal", signal="oil", min=50, scale={"max": 150, "ticks": 4},
              minor=2, start=MINI_START, sweep=MINI_SWEEP, flip=True, coldTo=0.10, redFrom=0.90, needle="fg",
-             **({"base": base("oil", OT, MINI_R, 1768, 556, 144)} if baked else {})),
+             **({"base": base("oil", OT, MINI_R, OT[0] - 72, OT[1] - 72, 144)} if baked else {})),
         dict(icon("fuel_icon", "fuel", FU[0] + 0.40 * MINI_R, FU[1] - 0.42 * MINI_R, 1, "fg"), **({"toggle": "!baked"} if baked else {})),
         text("fuel_full", FU[0] - 0.42 * MINI_R, FU[1] - 0.26 * MINI_R, 30, "1/1", "wb_mini", conn=1),
         text("fuel_zero", FU[0] + 0.42 * MINI_R, FU[1] + 0.40 * MINI_R, 14, "0", "wb_mini", conn=1),
@@ -208,7 +211,7 @@ def comfort():
     return W
 
 CUT_Y, CUT_FADE = 656, 26      # the big dials' open bottom (docs/OVERLAY-PLAN-DIALS.md): BMW's bottom row starts at y 659
-MINI_DY = -20                  # the minis move up so BMW's range ("467 km") clears the fuel mini
+# (MINI_DY, the minis 20 px up in this layout only, is gone 2026-11-14: G20's FU / OT are there for every layout)
 # BMW's speed-limit sign (centre 539, 622, r 41) and check-control "i" ([1256, 591, 1270, 627]): the soft windows
 # that show them through our dials (tools/overlay/plan_dials.py keeps the collar off both)
 SIGN_WIN, I_WIN, WIN_SOFT = [539, 622, 44], [1254, 589, 1272, 629], 4
@@ -217,6 +220,9 @@ SIGN_WIN, I_WIN, WIN_SOFT = [539, 622, 44], [1254, 589, 1272, 629], 4
 # it (clear to r 42.5, 1 px soft), and WBDIAL draws a black ring 8 px wide round it, so BMW's bottom line no longer
 # shows beside the sign (photo 37's "line stubs")
 SIGN_WIN, SIGN_SOFT = [537.5, 621.5, 42.5], 1
+# 2026-11-14: on the measured centre and half a px tighter (half open at r 42.5, clear inside 42; BMW's red ring ends
+# at 42.2): with WBDIAL's ring now starting where the window ends, no slit of BMW's line is left beside the sign
+SIGN_WIN = [537.3, 621.3, 42.0]
 # BMW's map between our dials, as the car draws it (photos 41, 42: the map's own veil ends at about x 704 and 1212, its
 # top at y 158): WBBACK's collar path fades it to black at its sides (48 px) and top (80 px) (u_wbox, u_fade: top,
 # sides, foot), and the black fades out over the 30 px above y 596, 5 px above the check-control panel (y 601)
@@ -279,11 +285,11 @@ def own_row():
     ]
 # --- end package F ---
 
-def tray_row():
+def tray_row(mode_color="fg"):
     """car4 L: our drive mode above the tacho's gear tray ("modeLabel") and our gear in it ("gearTray": "D4" / "D" /
-    empty), the same in every layout that has the tray."""
+    empty), the same in every layout that has the tray (and in 6WB Sport, at the same places, its label red)."""
     return [
-        text("mode", MODE_C[0], MODE_C[1], 240, "{{mode}}", "wb_capb", conn=2, toggle="modeLabel"),
+        text("mode", MODE_C[0], MODE_C[1], 240, "{{mode}}", "wb_capb", mode_color, conn=2, toggle="modeLabel"),
         text("gear", TRAY_C[0], TRAY_C[1], 120, "{{gear}}", "wb_gear", conn=2, toggle="gearTray=gear"),
         text("gear_l", TRAY_C[0], TRAY_C[1], 120, "{{stage}}", "wb_gear", conn=2, toggle="gearTray=letter"),
     ]
@@ -293,7 +299,8 @@ def tray_row():
 # circular arrow) when it matters; ours is one small effect layer (shaders.js WBMSA): hidden while MSA is armed or the
 # car sends nothing (app.json config.msa unset), green while MSA has stopped the engine, crossed out when switched off
 # (white) or unavailable (grey). In the G20-geometry tacho it sits between READY / OFF and the gear tray, clear of the
-# needle at OFF and READY; Sport and Eco Pro (no READY mark) put it at the left end of the info row.
+# needle at OFF and READY; 6WB Sport has it at the same place (2026-11-14), Eco Pro (no READY mark) at the left end
+# of the info row.
 MSA_SIZE = 44
 
 def msa_sign(cx, cy, conn=0):
@@ -303,6 +310,19 @@ def msa_sign(cx, cy, conn=0):
             "y": int(round(cy - s / 2.0)), "w": s, "h": s, "conn": conn}
 MSA_AT = (-0.337, 0.418)     # in the tacho, in R from its centre
 # --- end car3 I ---
+
+def dials_bg(style):
+    """The see-through background of 6WB Dials + G20 and 6WB Sport + G20 (WBBACK's collar path; style is not drawn)."""
+    return {"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
+            "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": style, "color": "accent",
+            "collar": {"tex": "collar", "x": 0, "y": 0, "w": 1920, "h": 720},
+            # package F: BMW's bottom lines, hooks and dash under black; the shade's setting; patches under our row items
+            "cover": {"tex": "cover", "x": COVER[0], "y": COVER[1], "w": COVER[2], "h": COVER[3]}, "shade": SHADE,
+            "patches": [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")]
+                       + [{"rect": CC_TOP, "soft": CC_TOP_SOFT}],      # 2026-11-14: the foot band; the street name shows below it
+            "cc": CC_BOX,
+            "window": MAP_WINDOW, "fade": MAP_FADE,                             # 2026-11-14: Comfort's map window
+            "foot": FOOT, "footLine": FOOT_LINE}                              # ... and its foot line ("wbFoot")
 
 def dials():
     """6WB Dials + G20 (docs/OVERLAY-PLAN-DIALS.md): our four dials and road signs; the G20 draws everything else round
@@ -314,19 +334,8 @@ def dials():
     cover); the range, clock and outside temperature are ours or BMW's by setting (ownRange / ownClock / ownTemp), ours
     drawn at BMW's places over black patches; our drive-mode label ("modeLabel") and the gear in our tray ("gearTray")
     are on the tacho, as in 6WB Comfort (tray_row())."""
-    global FU, OT
-    FU, OT = (FU[0], FU[1] + MINI_DY), (OT[0], OT[1] + MINI_DY)
     W = [
-        {"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
-         "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "comfort", "color": "accent",
-         "collar": {"tex": "collar", "x": 0, "y": 0, "w": 1920, "h": 720},
-         # package F: BMW's bottom lines, hooks and dash under black; the shade's setting; patches under our row items
-         "cover": {"tex": "cover", "x": COVER[0], "y": COVER[1], "w": COVER[2], "h": COVER[3]}, "shade": SHADE,
-         "patches": [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")]
-                    + [{"rect": CC_TOP, "soft": CC_TOP_SOFT}],      # 2026-11-14: the foot band; the street name shows below it
-         "cc": CC_BOX,
-         "window": MAP_WINDOW, "fade": MAP_FADE,                             # 2026-11-14: Comfort's map window
-         "foot": FOOT, "footLine": FOOT_LINE},                             # ... and its foot line ("wbFoot")
+        dials_bg("comfort"),
         dial("speedo", SP, "comfort", ringW=10, base=base("speedo_d", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
              cut={"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": SIGN_SOFT, "cover": "limit"},
              measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10, start=SPD_START, sweep=SPD_SWEEP),
@@ -340,11 +349,7 @@ def dials():
                  "nopass": {"tex": "sign_nopass", "x": 124, "y": 2, "w": 88, "h": 89}}},
         text("limit", 351, 506, 60, "{{limit}}", "wb_val", "ink", conn=2),
     ]
-    M = minis(baked=True)
-    for w in M:                      # the minis' baked faces sit 20 px higher too (base() is relative to the layer)
-        if w["type"] == "dial":
-            w["base"]["y"] += MINI_DY
-    W += M
+    W += minis(baked=True)
     for i in range(14):
         n = 20 * i
         W.append(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1))
@@ -359,54 +364,128 @@ def dials():
     W += own_row()                   # package F: the bottom row's items ours
     W += tray_row()                  # the mode label, the gear in the tray (car4 L: shared with 6WB Comfort)
     W.append(msa_sign(RV[0] + MSA_AT[0] * R, RV[1] + MSA_AT[1] * R))      # car3 I
-    FU, OT = (FU[0], FU[1] - MINI_DY), (OT[0], OT[1] - MINI_DY)
     return W
 
-def glowing(mode):
-    """Sport and Eco Pro: the earlier pass, on the same geometry."""
-    sport = mode == "sport"
+# --- 2026-11-14: 6WB Sport on 6WB Comfort's geometry (G20), and "6WB Sport + G20" ---
+# The owner: Comfort is the reference; Sport keeps its own look (the red glowing bands, the big digital speed, the red
+# mode label) but every element stands where Comfort's does: the dial centres and radii (G20), the minis (FU / OT,
+# MINI_R), the scale numbers (ring_label, the box ending at 0.78 R), the captions (0.40 R above the centres), the mode
+# label and the gear (tray_row), the MSA sign (MSA_AT), the road signs under the speed hub and the info row at the foot.
+# The rev dial is centred on BMW's black box (catalogue overlay.black_box, x 1422-1612, y 320-440, drawn over any
+# theme): its corners lie 120 px from our centre, inside the dark disc's plain black (WBDIAL Sport: black out to
+# SPORT_HUB R - 70 px = 138 px; the needle runs in the band only, from SPORT_HUB R - 8 px), so the box is not seen.
+SPORT_HUB = 0.62        # the dark disc's radius, of R (the band runs from it to the rim)
+
+def sport_face(cut=False):
+    """6WB Sport's big dials on the G20 geometry, their scale numbers, captions, the big digital speed, the road signs
+    under it, the mode label and gear (tray_row) and the MSA sign. cut: the open bottoms of 6WB Dials + G20 (CUT_Y,
+    the round window over BMW's sign), for 6WB Sport + G20."""
+    W = [
+        dial("speedo", SP, "sport", hub=SPORT_HUB, ringW=6, measure="speed", kmh=True, scale={"max": 260, "ticks": 13},
+             minor=10, start=SPD_START, sweep=SPD_SWEEP,
+             **({"cut": {"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": SIGN_SOFT, "cover": "limit"}} if cut else {})),
+        dial("tacho", RV, "sport", hub=SPORT_HUB, ringW=6, measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0},
+             minor=10, start=RPM_START, sweep=RPM_SWEEP, **({"cut": {"y": CUT_Y, "fade": CUT_FADE}} if cut else {})),
+        # the road signs under the speed hub, the same widgets as 6WB Comfort's (comfort(); BAKE C7)
+        {"id": "signs", "type": "wbsign", "class": "content", "z": 3, "x": 305, "y": 460, "w": 214, "h": 93, "conn": 1,
+         "tex": {"limit": {"tex": "sign_limit", "x": 2, "y": 2, "w": 88, "h": 89},
+                 "nopass": {"tex": "sign_nopass", "x": 124, "y": 2, "w": 88, "h": 89}}},
+        text("limit", 351, 506, 60, "{{limit}}", "wb_val", "ink", conn=2),
+    ]
+    # Sport's scale: the speed dial's ends only, every 1000 rpm; placed as Comfort's (in the band's inner half here)
+    W += [ring_label("spd0", SP, SPD_START, 0.78 * R, "0", "wb_spd", 16.7, 1),
+          ring_label("spd13", SP, SPD_START + SPD_SWEEP, 0.78 * R, "260", "wb_spd", 16.7, 1)]
+    W += [ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 24.5, 2, w=40) for i in range(1, 8)]
+    W += [text("speed", SP[0], SP[1] + 0.02 * R, 260, "{{speed}}", "wb_big", conn=1),
+          text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "km/h", "wb_cap", conn=1),
+          text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "1/min x 1000", "wb_cap", conn=2)]
+    W += tray_row("accent")          # the mode label (red, Sport's) and our gear at Comfort's places
+    W.append(msa_sign(RV[0] + MSA_AT[0] * R, RV[1] + MSA_AT[1] * R))      # car3 I, where Comfort has it
+    return W
+
+def sport():
+    """6WB Sport: opaque, Sport's shelf and glowing bridge between the dials, Comfort's geometry."""
+    W = [{"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
+          "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "sport", "color": "accent",
+          "cc": CC_BOX,                                      # BMW's check-control message shows through, as in Comfort
+          # the shelf's base line at Comfort's window foot (WBBACK reads footLine's y; "none": no hairline of Comfort's)
+          "foot": "none", "footLine": FOOT_LINE}]
+    W += sport_face() + minis(baked=True)        # 2026-11-14: Comfort's baked minis
+    # the range at the speed dial's foot (Comfort's range figure is there, on its bottom arc), in the scale's gap
+    W += [icon("range_icon", "fuel", SP[0] - 45, SP[1] + 0.765 * R, 1, "fg"),
+          text("range_in", SP[0] - 25, SP[1] + 0.765 * R, 130, "{{range}} km", "wb_cap", align="left", conn=1)]
+    # the row under the shelf's base line, as 6WB Comfort's (baked) row: the clock only while it is right ("ownClock"),
+    # the temperature in BMW's 0.5 degree steps, none of it while BMW's message shows
+    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
+          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
+          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="!own:clock&!cc:shown")]
+    return W
+
+def sport_dials():
+    """6WB Sport + G20: 6WB Dials + G20 (dials(): see-through but for the baked collar, the cover, the patches, the soft
+    foot band, Comfort's map window and foot line, BMW's message window, the own row) with 6WB Sport's dials. They
+    take the same circles as Dials + G20's (G20 geometry), so the same collar fits."""
+    W = [dials_bg("sport")] + sport_face(cut=True) + minis(baked=True)     # Comfort's baked minis
+    W += own_row()                   # package F: the bottom row's items ours
+    return W
+# --- end 2026-11-14 ---
+
+# 2026-11-14 (the owner: "Comfort is practically the reference; fit Sport and Eco to it"): 6WB Eco Pro on Comfort's G20
+# geometry. Its own look stays (the blue glow speedo, the EfficientDynamics dial, blue accents, procedural minis, the
+# shelf); where each thing sits and how big it is follows comfort(): the dials' centres and radii, the minis, the scale
+# numbers (ring_label, ending at 0.78 R), the captions 0.40 R above the centres, the range at the speedo's foot, the
+# mode label at MODE_C, the info row at y 662 under the shelf's base (Comfort's foot line y 607), the check-control
+# window. The minis sit where comfort() puts them (every layout's, G20's FU / OT).
+# BMW's black box over the tacho's middle (x 1422-1612, y 320-440) covers the efficiency dial's middle, so nothing of
+# ours is there (WBDIAL style 4 keeps it black; the pointer starts at 0.40 R); the MSA sign takes the mirror of
+# Comfort's place (lower right of the dial), as the needle rests at 225 degrees, at Comfort's place
+ECO_MSA_AT = (-MSA_AT[0], MSA_AT[1])
+
+def eco():
+    """6WB Eco Pro (G20 geometry): a blue glow speedo, the EfficientDynamics CHARGE | POWER dial, on Comfort's layout."""
     hub = 0.62
     W = [
         {"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
-         "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": mode, "color": "accent"},
-        dial("speedo", SP, mode, hub=hub, ringW=6, measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
+         "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "eco", "color": "accent",
+         "cc": CC_BOX},                                                      # BMW's message shows through, as in Comfort
+        dial("speedo", SP, "eco", hub=hub, ringW=6, measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
              start=SPD_START, sweep=SPD_SWEEP),
-        dial("tacho", RV, mode if sport else "eff", hub=hub, ringW=6,
-             **({"measure": "rpm", "scale": {"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, "minor": 10,
-                 "start": RPM_START, "sweep": RPM_SWEEP} if sport else
-                {"measure": "signal", "signal": "torquePct", "scale": {"max": 100, "ticks": 10}, "minor": 1,
-                 "start": 225, "sweep": 235})),
-    ] + minis()
-    if sport:
-        W += [label("spd0", SP, SPD_START, 0.81 * R, "0", "wb_spd", 1), label("spd13", SP, SPD_START + SPD_SWEEP, 0.81 * R, "260", "wb_spd", 1)]
-        W += [label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.81 * R, str(i), "wb_rpm", 2, w=50) for i in range(1, 8)]
-        W += [text("speed", SP[0], SP[1] + 0.02 * R, 260, "{{speed}}", "wb_big", conn=1),
-              text("rpm_cap", RV[0], RV[1] - 0.34 * R, 200, "1/min x 1000", "wb_cap", conn=2)]
-    else:
-        for i in range(14):
-            n = 20 * i
-            W.append(label("spd%d" % i, SP, SPD_START + n, (0.76 if n >= 100 else 0.79) * R, str(n), "wb_spd", 1,
-                           color="fg" if i <= 6 else "dim"))
-        W += [label("charge", RV, -23, 0.78 * R, "CHARGE", "wb_capb", 2, w=130),
-              label("power", RV, 25, 0.78 * R, "POWER", "wb_capb", 2, w=130),
-              label("effdyn", RV, 0, 0.47 * R, "EfficientDynamics", "wb_cap", 2, w=240, color="accent"),
-              icon("range_icon", "fuel", SP[0] - 70, SP[1] + 0.72 * R, 1, "fg"),
-              text("range_in", SP[0] + 12, SP[1] + 0.72 * R, 130, "{{range}} km", "wb_cap", conn=1)]
-    W += [text("speed_unit", SP[0], SP[1] - 0.34 * R, 100, "km/h", "wb_cap", conn=1),
-          text("mode", RV[0], RV[1] + 0.42 * R, 240, "{{mode}}", "wb_capb", "accent" if sport else "fg", conn=2)]
-    for i, (head, tok, x) in enumerate([("Time", "{{time}}", 729), ("Range", "{{range}} km", 868), ("Temp", "{{ambient}} °C", 1054)]):
-        W += [text("row_h%d" % i, x, 652, 150, head, "wb_cap", "dim", align="left"),
-              text("row_v%d" % i, x, 688, 160, tok, "wb_val", align="left")]
-    W.append(msa_sign(700, 670, conn=1))     # car3 I: left of the info row (connection 0 is full here)
+        dial("tacho", RV, "eff", hub=hub, ringW=6, measure="signal", signal="torquePct", scale={"max": 100, "ticks": 10},
+             minor=1, start=225, sweep=235),
+    ] + minis(baked=True)                                                   # 2026-11-14: Comfort's baked minis
+    # the scale numbers where Comfort's are (0.78 R), Eco's colours: white to 120, then dim
+    for i in range(14):
+        n = 20 * i
+        W.append(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1,
+                            color="fg" if i <= 6 else "dim"))
+    W += [label("charge", RV, -23, 0.78 * R, "CHARGE", "wb_capb", 2, w=130),
+          label("power", RV, 25, 0.78 * R, "POWER", "wb_capb", 2, w=130),
+          # the captions 0.40 R above the centres, as Comfort's "km/h" and "1/min x 1000"
+          text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "km/h", "wb_cap", conn=1),
+          text("effdyn", RV[0], RV[1] - 0.40 * R, 240, "EfficientDynamics", "wb_cap", "accent", conn=2),
+          # the range at the speedo's foot, at the height of Comfort's range figure (0.765 R)
+          icon("range_icon", "fuel", SP[0] - 70, SP[1] + 0.765 * R, 1, "fg"),
+          text("range_in", SP[0] + 12, SP[1] + 0.765 * R, 130, "{{range}} km", "wb_cap", conn=1),
+          # the mode where Comfort's mode label is (no tray under it: Eco Pro prints its mode itself)
+          text("mode", MODE_C[0], MODE_C[1], 240, "{{mode}}", "wb_capb", conn=2)]
+    # the info row as Comfort's (baked) row: the clock while it is right, the outside temperature; none of ours while
+    # BMW's check-control message shows
+    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
+          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
+          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="!own:clock&!cc:shown")]
+    W.append(msa_sign(RV[0] + ECO_MSA_AT[0] * R, RV[1] + ECO_MSA_AT[1] * R))
     return W
 
 out = sys.argv[1]
 # ("6WB Comfort + BMW map" is gone, 2026-11-13: it was 6WB Comfort with the map window always on = the stockMap setting)
+# 2026-11-14: 6WB Sport on the G20 geometry (sport()), and "6WB Sport + G20" (sport_dials(), wb_sport_dials.json)
+MAKE = {"comfort": comfort, "dials": dials, "sport": sport, "sport_dials": sport_dials, "eco": eco}
 for name, mode, title in (("comfort", "comfort", "6WB Comfort"),
                           ("dials", "comfort", "6WB Dials + G20"),
-                          ("sport", "sport", "6WB Sport"), ("eco", "eco", "6WB Eco Pro")):
-    globals().update(G20 if mode == "comfort" else OLD)
-    W = dials() if name == "dials" else comfort() if mode == "comfort" else glowing(mode)
+                          ("sport", "sport", "6WB Sport"), ("sport_dials", "sport", "6WB Sport + G20"),
+                          ("eco", "eco", "6WB Eco Pro")):
+    globals().update(G20)        # 2026-11-14: every 6WB layout on the G20 geometry (Sport and Eco Pro fitted to Comfort)
+    W = MAKE[name]()
     lay = {"schemaVersion": 2, "name": title, "packWaste": 8, "theme": "wb_" + mode,
            "_about": "6WB-style cluster (%s), generated by design/gen_6wb.py: edit that and regenerate." % title,
            "widgets": W}

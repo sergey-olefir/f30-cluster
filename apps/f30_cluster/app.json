@@ -119,6 +119,10 @@
           "6WB Sport"
         ],
         [
+          "wb_sport_dials",
+          "6WB Sport + G20"
+        ],
+        [
           "wb_eco",
           "6WB Eco Pro"
         ],
@@ -180,7 +184,7 @@
     },
     {
       "key": "dialShade",
-      "label": "Dials + G20: shade at the dials' inner edges",
+      "label": "Dials / Sport + G20: shade at the dials' inner edges",
       "type": "choice",
       "default": "normal",
       "reset": 1,
@@ -205,7 +209,7 @@
     },
     {
       "key": "ownRange",
-      "label": "Dials + G20: range",
+      "label": "Dials / Sport + G20: range",
       "type": "choice",
       "default": "ours",
       "reset": 1,
@@ -222,7 +226,7 @@
     },
     {
       "key": "ownClock",
-      "label": "Dials + G20: clock",
+      "label": "Dials / Sport + G20: clock",
       "type": "choice",
       "default": "auto",
       "reset": 1,
@@ -243,7 +247,7 @@
     },
     {
       "key": "ownTemp",
-      "label": "Dials + G20: outside temperature",
+      "label": "Dials / Sport + G20: outside temperature",
       "type": "choice",
       "default": "ours",
       "reset": 1,
@@ -313,6 +317,10 @@
           "6WB Sport"
         ],
         [
+          "wb_sport_dials",
+          "6WB Sport + G20"
+        ],
+        [
           "wb_eco",
           "6WB Eco Pro"
         ],
@@ -349,6 +357,10 @@
           "6WB Sport"
         ],
         [
+          "wb_sport_dials",
+          "6WB Sport + G20"
+        ],
+        [
           "wb_eco",
           "6WB Eco Pro"
         ],
@@ -383,6 +395,10 @@
         [
           "wb_sport",
           "6WB Sport"
+        ],
+        [
+          "wb_sport_dials",
+          "6WB Sport + G20"
         ],
         [
           "wb_eco",
@@ -618,11 +634,39 @@
       "options": [
         [
           "auto",
-          "Auto (dimmer after sunset)"
+          "Auto (after sunset)"
+        ],
+        [
+          "always",
+          "Always"
         ],
         [
           "off",
           "Off"
+        ]
+      ]
+    },
+    {
+      "key": "nightLook",
+      "label": "Night look (6WB themes)",
+      "type": "choice",
+      "default": "plain",
+      "options": [
+        [
+          "plain",
+          "Dimmed white"
+        ],
+        [
+          "amber",
+          "Warm white, amber needles"
+        ],
+        [
+          "ice",
+          "Ice blue, red needles"
+        ],
+        [
+          "red",
+          "Red, low glare"
         ]
       ]
     },
