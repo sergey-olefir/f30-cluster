@@ -231,6 +231,7 @@ const PIXEL_BYTES = 16 * 1024 * 1024;   // cluster-render's pixel memory for eve
 const SHEET_AREA_FRAC = 4;       // the first sheet size limit: 1/4 of the target area (see the header)
 const TICK_MS = 50;              // 20 Hz: shift bar and gauges
 const TEXT_MS = 200;             // text re-draws at most 5 times a second (what BMW's own readouts do)
+const PERF_LOG_MS = 10000, NEEDLE_MS = 33;   // package P (opt-in only, see PERF in the class): log period, needle prototype's timer
 const DEFAULT_LOCATION = { lat: 35.2271, lon: -80.8431 }; // Charlotte, NC: for the Auto theme's sunset
 const TARGET_SIZES = { hud: [800, 480], panel: [1920, 720] };
 const MODE_KEY = { comfort: 'inComfort', sport: 'inSport', eco: 'inEco' };
@@ -922,6 +923,7 @@ class HudApp {
         this._startDme();
         if (this.waze) { this.waze.start(); this._wazeWant(); }
         this.screen.start();
+        this._perfStart();      // package P: off unless <data>/perf.json asks (see PERF below)
     }
 
     /** Waze's map on the panel only while the setting is on and the theme shown has a map window. */
@@ -994,6 +996,7 @@ class HudApp {
         clearInterval(this.themeTimer);
         clearInterval(this.statusTimer);
         clearInterval(this.dmeTimer);
+        this._perfStop();       // package P
         clearTimeout(this.statusAskT);
         if (this.waze) this._guard('waze stop', () => this.waze.stop());
         this._guard('screen stop', () => this.screen.stop());
@@ -1523,6 +1526,7 @@ class HudApp {
     }
 
     _raw(name) {
+        if (this.perfOver && (name === 'rpm' || name === 'speed') && isNum(this.perfOver[name])) return this.perfOver[name];   // package P (opt-in)
         if (name === 'boost') return this._boost();
         if (name === 'gLat' || name === 'gLong') {
             // the 150 ms average while samples come in; else the car's last reading, unless it is a bad one
@@ -2548,8 +2552,187 @@ class HudApp {
         const rpm = this._raw('rpm');
         const flashing = isNum(rpm) && rpm >= this.setting('redline') - 150;
         this.flash = flashing ? Math.floor(now / 62.5) % 2 === 0 : false;
-        this.widgets.forEach((x) => this._guard('widget ' + x.w.id, () => this._update(x, now, false)));
+        this.widgets.forEach((x) => {
+            if (this.perfNeedle && this._perfIsNeedle(x)) return;     // package P: the needle timer draws it (opt-in only)
+            this._guard('widget ' + x.w.id, () => this._update(x, now, false));
+        });
     }
+
+    // ---- PERF (package P, docs/PERF-AUDIT.md, 2026-11-14): an opt-in perf log and an opt-in needle prototype ----------
+    // Both are OFF unless the app's data folder holds perf.json, e.g. { "log": true } or { "log": true, "needle": "smooth" }
+    // (read at start and every PERF_LOG_MS; deleting the file turns both off again). Without the file only that check
+    // runs (one failed open every 10 s) and the engine behaves exactly as before. Hooks outside this block: start(),
+    // stop(), _tick() and _raw(), one guarded line each, all marked "package P".
+    //  "log": one "perf:" line every 10 s: car samples (rpm / speed changes a second and their gaps), the 50 ms tick's
+    //         real period, the event loop's lag, JS time in the tick, bytes written per connection, process CPU and
+    //         memory. Read by scripts/perf_probe.sh from the app log.
+    //  "needle": "smooth": the speed and rev needles (dial, g20dial) leave the 50 ms tick for their own NEEDLE_MS timer
+    //         (30 a second, cluster-render's frame rate) and show the value interpolated between the car's samples
+    //         (one sample period behind, so the needle moves at the car's own pace between samples instead of
+    //         jumping); rpm keeps the 120 ms filter ("rpmTau" overrides it). The needles' uniform messages go out
+    //         corked (one write per batch). Bench-measured only (docs/PERF-AUDIT.md 3.2); not checked on the car yet.
+    _perfIsNeedle(x) {
+        const w = x.w;
+        return (w.type === 'dial' || w.type === 'g20dial') && (w.measure === 'rpm' || w.measure === 'speed');
+    }
+
+    _perfStart() {
+        this.perfFile = path.join(this.ctx.dataDir || '.', 'perf.json');
+        this.perfCfg = null;
+        const read = () => {
+            let cfg = null;
+            try { cfg = JSON.parse(fs.readFileSync(this.perfFile, 'utf8')); } catch (e) { cfg = null; }
+            const key = JSON.stringify(cfg);
+            if (key === this.perfKey) return;
+            this.perfKey = key;
+            this.perfCfg = cfg && typeof cfg === 'object' ? cfg : null;
+            if (this.perfCfg) this.log.info('perf: ' + this.perfFile + ' ' + key);
+            this._perfApply();
+        };
+        read();
+        this.perfReadT = setInterval(() => this._guard('perf', read), PERF_LOG_MS);
+    }
+
+    _perfStop() {
+        clearInterval(this.perfReadT);
+        this.perfCfg = null;
+        this._guard('perf', () => this._perfApply());
+    }
+
+    _perfApply() {
+        const cfg = this.perfCfg || {};
+        // the samples, for both the log and the needle (car.onSample: every rpm / speed / gLong notification, demo 20 Hz)
+        if ((cfg.log || cfg.needle) && !this.perfS) {
+            this.perfS = { rpm: [], speed: [], gaps: { rpm: [], speed: [] }, last: {}, n: { rpm: 0, speed: 0, emit: 0 }, period: { rpm: 50, speed: 50 } };
+            if (!this.perfListen) {          // once: the listener stays, idle while perfS is null
+                this.perfListen = true;
+                this.car.onSample((d, t) => { if (this.perfS) this._perfSample(d, t); }, () => { if (this.perfS) { this.perfS.rpm = []; this.perfS.speed = []; this.perfS.last = {}; } });
+            }
+        }
+        if (!cfg.log && !cfg.needle) this.perfS = null;
+        // the log
+        if (cfg.log && !this.perfLogT) {
+            this.perfL = this._perfFresh();
+            let due = Date.now() + 20;
+            this.perfLagT = setInterval(() => { const t = Date.now(); this.perfL.lag.push(t - due); due = t + 20; }, 20);
+            const tick = this._tick;
+            this._tick = function () {
+                const t0 = Date.now(), L = this.perfL;
+                if (L && L.tickAt) L.tick.push(t0 - L.tickAt);
+                if (L) L.tickAt = t0;
+                const r = tick.apply(this, arguments);
+                if (L) L.tickMs.push(Date.now() - t0);
+                return r;
+            };
+            this.perfLogT = setInterval(() => this._guard('perf log', () => this._perfLog()), PERF_LOG_MS);
+        } else if (!cfg.log && this.perfLogT) {
+            clearInterval(this.perfLogT); clearInterval(this.perfLagT);
+            this.perfLogT = null; this.perfLagT = null; this.perfL = null;
+            delete this._tick;               // back to the prototype's
+        }
+        // the needle prototype
+        const smooth = cfg.needle === 'smooth';
+        if (smooth && !this.perfNeedleT) {
+            this.perfNeedle = true;
+            this.perfTau = isNum(cfg.rpmTau) ? cfg.rpmTau : 120;
+            this.perfNeedleT = setInterval(() => this._guard('perf needle', () => this._perfNeedles()), NEEDLE_MS);
+            this.log.info('perf: needle prototype on (interpolated, ' + Math.round(1000 / NEEDLE_MS) + ' a second, rpm filter ' + this.perfTau + ' ms)');
+        } else if (!smooth && this.perfNeedleT) {
+            clearInterval(this.perfNeedleT);
+            this.perfNeedleT = null; this.perfNeedle = false; this.perfOver = null;
+            this.widgets.forEach((x) => { if (this._perfIsNeedle(x)) x.last = null; });   // the tick takes them back
+        }
+    }
+
+    _perfFresh() {
+        return { t0: Date.now(), lag: [], tick: [], tickMs: [], tickAt: 0, sends: 0, sendGaps: [], cpu: process.cpuUsage(),
+            bytes: this.clients.map((c) => (c.sock && c.sock.bytesWritten) || 0) };
+    }
+
+    /** A car sample: record rpm / speed when they change, with their arrival time (ms) and the gap to the last change. */
+    _perfSample(d, t) {
+        const S = this.perfS;
+        S.n.emit++;
+        ['rpm', 'speed'].forEach((k) => {
+            const v = d[k];
+            if (!isNum(v) || v === S.last[k]) return;
+            const prevT = S.last[k + 'T'];
+            S.last[k] = v; S.last[k + 'T'] = t;
+            S.n[k]++;
+            const h = S[k];
+            if (isNum(prevT)) {
+                const gap = t - prevT;
+                if (S.gaps[k].length < 2000) S.gaps[k].push(gap);
+                if (gap < 300) S.period[k] += (Math.min(150, Math.max(20, gap)) - S.period[k]) * 0.1;
+                // a value that sat still for a while: hold it until one period before the change, so the ramp
+                // runs over one period, not over the whole quiet stretch
+                else if (h.length) h.push([t - S.period[k], h[h.length - 1][1]]);
+            }
+            h.push([t, v]);
+            if (h.length > 64) h.splice(0, h.length - 64);
+        });
+    }
+
+    /** The value of rpm / speed at time t (ms), linear between the samples around it; the newest one past the end. */
+    _perfAt(k, t) {
+        const h = this.perfS && this.perfS[k];
+        if (!h || !h.length) return null;
+        if (t >= h[h.length - 1][0]) return h[h.length - 1][1];
+        for (let i = h.length - 1; i > 0; i--) {
+            const a = h[i - 1], b = h[i];
+            if (t >= a[0]) return a[1] + (b[1] - a[1]) * (t - a[0]) / Math.max(1, b[0] - a[0]);
+        }
+        return h[0][1];
+    }
+
+    /** The needle timer: every needle widget with rpm / speed interpolated one sample period back, corked. */
+    _perfNeedles() {
+        if (!this.client.ready || !this.perfS) return;
+        const S = this.perfS, now = Date.now();
+        // the demo's samples carry the sim's own clock (simT), the car's Date.now(): both are wall ms
+        const sp = this._perfAt('speed', now - S.period.speed), rpmIn = this._perfAt('rpm', now - S.period.rpm);
+        const test = this._testRpm(now);
+        const raw = isNum(test) ? test : rpmIn;
+        const dt = this.perfNeedleAt ? Math.min(500, now - this.perfNeedleAt) : 0;
+        this.perfNeedleAt = now;
+        this.perfRpm = !isNum(raw) ? null : isNum(this.perfRpm) && this.perfTau > 0 ? this.perfRpm + (raw - this.perfRpm) * (1 - Math.exp(-dt / this.perfTau)) : raw;
+        this.perfOver = { rpm: this.perfRpm, speed: sp };
+        const corked = this._perfCork();
+        try {
+            this.widgets.forEach((x) => { if (this._perfIsNeedle(x)) this._guard('widget ' + x.w.id, () => this._update(x, now, false)); });
+        } finally {
+            this.perfOver = null;
+            corked.forEach((s) => s.uncork());
+        }
+    }
+
+    _perfCork() {
+        const out = [];
+        this.clients.forEach((c) => { if (c.sock && c.connected && typeof c.sock.cork === 'function') { c.sock.cork(); out.push(c.sock); } });
+        return out;
+    }
+
+    _perfLog() {
+        const L = this.perfL, S = this.perfS;
+        if (!L) return;
+        const now = Date.now(), secs = (now - L.t0) / 1000;
+        const st = (a) => {
+            if (!a.length) return '-';
+            const s = a.slice().sort((x, y) => x - y), q = (p) => s[Math.min(s.length - 1, Math.floor(p * s.length))];
+            return 'p50 ' + q(0.5) + ' p90 ' + q(0.9) + ' p99 ' + q(0.99) + ' max ' + s[s.length - 1];
+        };
+        const cpu = process.cpuUsage(L.cpu), mem = process.memoryUsage();
+        const bytes = this.clients.map((c, i) => Math.round((((c.sock && c.sock.bytesWritten) || 0) - (L.bytes[i] || 0)) / secs));
+        const sig = (k) => (S ? (S.n[k] / secs).toFixed(1) + '/s (gap ms ' + st(S.gaps[k]) + ')' : '-');
+        this.log.info('perf: ' + secs.toFixed(1) + ' s, layout ' + this.activeName + (this.perfNeedle ? ', needle smooth' : '') +
+            '; car samples ' + (S ? (S.n.emit / secs).toFixed(1) : '-') + '/s, rpm changes ' + sig('rpm') + ', speed changes ' + sig('speed') +
+            '; tick ms ' + st(L.tick) + ', JS in tick ms ' + st(L.tickMs) + '; loop lag ms ' + st(L.lag) + ' (>50: ' + L.lag.filter((x) => x > 50).length + ')' +
+            '; bytes/s per connection ' + bytes.join(' ') + '; cpu ' + ((cpu.user + cpu.system) / (secs * 1e4)).toFixed(1) + ' %' +
+            ', rss ' + (mem.rss / 1048576).toFixed(0) + ' MB, heap ' + (mem.heapUsed / 1048576).toFixed(0) + ' MB');
+        if (S) { S.n = { rpm: 0, speed: 0, emit: 0 }; S.gaps = { rpm: [], speed: [] }; }
+        this.perfL = this._perfFresh();
+    }
+    // ---- end PERF ----------------------------------------------------------------------------------------------------
 
     /** This drive's distance and moving time (the car's own data only; standing still doesn't count). */
     _trip(now) {
