@@ -147,6 +147,8 @@ class Menu {
         const demo = !!(hud.car && hud.car.data && hud.car.data().demo);
         let head;
         if (!ready) head = hud.statusText();
+        // 0.7.13: the KOMBI guard turned the theme off (hud.js _kombiWatch)
+        else if (hud.kombiTrip) head = 'Off: the cluster reset twice with ' + layoutName(this.ctx.settings, hud.kombiTrip.layout) + '. Pick a theme to try again';
         else if (hud.problem) head = 'Problem: ' + hud.problem;
         else if (scr && scr.yielded) head = 'Off: ' + scr.otherName + ' has the screen';
         else if (!hud.activeName || hud.activeName === 'off') head = "Off: BMW's own cluster shows";

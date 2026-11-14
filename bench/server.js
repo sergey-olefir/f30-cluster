@@ -157,8 +157,12 @@ function writeEv(sock, obj) {
     sock.write(m);
 }
 
+// 0.7.13: every app connection's socket, for /target (a target event sent as the car's cluster-render sends it)
+const renderSocks = new Set();
+
 const renderServer = net.createServer((sock) => {
     const conn = nextConn++;
+    renderSocks.add(sock);
     const st = { conn, app: '?', hello: false, buf: Buffer.alloc(0) };
     const bad = (why) => { log('error', 'protocol [' + st.app + ']: ' + why); };
     const refuse = (op, ref, reason) => { bad(op + ' ref ' + ref + ': ' + reason); writeEv(sock, { ev: 'error', op, ref, reason }); };
@@ -179,6 +183,7 @@ const renderServer = net.createServer((sock) => {
     });
     sock.on('error', () => {});
     sock.on('close', () => {
+        renderSocks.delete(sock);
         let n = 0;
         layers.forEach((l, k) => { if (l.conn === conn) { layers.delete(k); n++; } });
         log('info', 'renderer: ' + st.app + ' disconnected, dropped its ' + n + ' layer(s)');
@@ -561,6 +566,15 @@ const web = http.createServer(async (req, res) => {
         if (!child) { res.writeHead(409); return res.end('app not running'); }
         child.send({ t: 'shiftTest' });
         log('info', 'bench: shift-light test');
+        res.writeHead(204); return res.end();
+    }
+    if (req.method === 'POST' && url === '/target') {
+        // 0.7.13: a target event to every connection, as the car's cluster-render sends it, e.g. the KOMBI resetting:
+        // { "state": "unavailable", "reason": "display service not available" }, then { "state": "shown", "holder": "us" }
+        const b = await body(req);
+        const ev = { ev: 'target', target: b.target || 'panel', state: b.state || 'shown', holder: b.holder || 'none', reason: b.reason || '' };
+        renderSocks.forEach((sk) => { try { writeEv(sk, ev); } catch (e) { /* closed */ } });
+        log('info', 'bench: target event ' + JSON.stringify(ev) + ' to ' + renderSocks.size + ' connection(s)');
         res.writeHead(204); return res.end();
     }
     if (req.method === 'POST' && url === '/restart') {

@@ -1112,7 +1112,13 @@ uniform vec4 u_cutW;       // the window (BMW's own sign or lamp shows through),
 #define u_redTo u_zone.y
 #define u_coldTo u_zone.z
 #define u_pre u_zone.w
+// 0.7.13: STYLE (prepended by styled(), shaders.wbdialFor) leaves only that look's code in the source the KOMBI
+// compiles; -1 (the plain export) keeps all five, picked by u_mode.x as before
+#if STYLE < 0
 #define u_style u_mode.x
+#else
+#define u_style float(STYLE)
+#endif
 #define u_hub u_mode.y
 #define u_glowK u_mode.z
 #define u_box u_mode.w
@@ -1172,6 +1178,7 @@ void main() {
     bool red = (u_redFrom <= 1.0 && frac >= u_redFrom - 0.001) || frac < u_redTo;
     float pd = -p.y;                                                  // px below the centre
 
+#if STYLE < 0 || STYLE == 0
     if (u_style < 0.5) {
         // ---- Comfort
         float r1 = 0.51 * R, r2 = 0.36 * R, fl = 0.26 * R;
@@ -1302,7 +1309,10 @@ void main() {
             body = mix(body, vec3(1.0), smoothstep(0.955 * L, L, q.y) * 0.85);
             col = mix(col, body, clamp(hw + 0.5 - ax, 0.0, 1.0) * ends);
         }
-    } else if (u_style < 1.5) {
+    } else
+#endif
+#if STYLE < 0 || STYLE == 1
+    if (u_style < 1.5) {
         // ---- Sport
         float rb = u_hub * R, ro = R - 4.0;
         float band = clamp((d - rb) / (ro - rb), 0.0, 1.0);
@@ -1326,7 +1336,10 @@ void main() {
             col += vec3(0.5) * clamp(1.0 - abs(q.x) / 12.0, 0.0, 1.0);
             col = mix(col, u_needle, clamp(2.6 + 0.5 - abs(q.x), 0.0, 1.0));
         }
-    } else if (u_style < 2.5) {
+    } else
+#endif
+#if STYLE < 0 || STYLE == 2
+    if (u_style < 2.5) {
         // ---- Eco Pro
         // 2026-11-14: on 6WB Comfort's G20 geometry (R 335) the px sizes, drawn for the first geometry's R 290, scale
         // with the dial (sk), so the bigger dial keeps its proportions
@@ -1349,7 +1362,10 @@ void main() {
             col += glow * 0.55 * clamp(1.0 - abs(q.x) / (16.0 * sk), 0.0, 1.0);
             col = mix(col, u_needle, clamp(hw + 0.5 - abs(q.x), 0.0, 1.0));
         }
-    } else if (u_style < 3.5) {
+    } else
+#endif
+#if STYLE < 0 || STYLE == 3
+    if (u_style < 3.5) {
         // ---- mini side gauge
         float to = 0.84 * R;
         if (u_hasBase > 0.5) col = mix(vec3(0.0), bs.rgb, bs.a);             // baked: face, bezel, zones, ticks, pictogram
@@ -1382,7 +1398,10 @@ void main() {
             body = mix(body, vec3(1.0), smoothstep(0.30, 0.0, abs(nx + 0.15)) * 0.35);
             col = mix(col, body, clamp(hw + 0.5 - abs(q.x), 0.0, 1.0) * clamp(q.y - T + 0.5, 0.0, 1.0) * clamp(L + 0.5 - q.y, 0.0, 1.0));
         }
-    } else {
+    } else
+#endif
+#if STYLE < 0 || STYLE == 4
+    {
         // ---- Eco Pro's efficiency dial
         // 2026-11-14: on the G20 geometry this dial sits where BMW draws its black box over any theme (catalogue
         // overlay.black_box, x 1422-1612, y 320-440: out to 0.36 R from our centre). So its middle is plain black: no hub
@@ -1406,6 +1425,9 @@ void main() {
             col = mix(col, u_needle, clamp(hw + 0.5 - abs(q.x), 0.0, 1.0) * k0);
         }
     }
+#else
+    {}
+#endif
     if ((u_style < 0.5 || (u_style > 2.5 && u_style < 3.5)) && !(u_style > 2.5 && u_hasBase > 0.5) && u_hasBase < 2.5) {
         // the glossy bezel: brightest toward the upper left, a second light low on the right
         float rb0 = R - u_ringW;
@@ -1486,7 +1508,12 @@ uniform vec2 u_size;
 uniform vec3 u_color;
 uniform vec3 u_dl;
 uniform vec3 u_dr;
+// 0.7.13: STYLE (prepended by styled(), shaders.wbbackFor) leaves only that look's code; -1: all, by u_style
+#if STYLE < 0
 uniform float u_style;
+#else
+#define u_style float(STYLE)
+#endif
 uniform vec3 u_sign;      // the speed limit sign: centre x, y and radius, target px (radius 0: none)
 uniform sampler2D u_t0;   // baked textures (hud/scene): the window and the bar under it, the horizon line, the bar's top line
 uniform sampler2D u_t1;
@@ -1642,6 +1669,7 @@ void main() {
         vis = veil(1.0 - length(q)) * smoothstep(0.0, u_fade.w, min(dl, dr)) * (ex > 0.0 ? 1.0 : 0.0);
     }
     bool see = u_hole.z > 0.0 && u_wbox.z > 0.0;   // the map shows: the window and its floor are not drawn
+#if STYLE < 0 || STYLE == 0
     if (u_style < 0.5 && u_hasTex > 0.5) {
         // the background: black (BAKE C10's near-black blue and halo were the references' LCD black, not drawn)
         vec2 u0 = (p - u_r0.xy) / u_r0.zw, u1 = (p - u_r1.xy) / u_r1.zw, u2 = (p - u_r2.xy) / u_r2.zw;
@@ -1689,7 +1717,10 @@ void main() {
                 col = mix(col, vec3(0.10, 0.12, 0.16), clamp(1.4 - min(dx, dyb), 0.0, 1.0) * clamp(top - 1.0, 0.0, 1.0));
             }
         }
-    } else {
+    } else
+#endif
+#if STYLE != 0
+    {
         float y0 = cy + 0.47 * R, y1 = cy + 0.94 * R;                                 // horizon, base
         float hw0 = (u_dr.x - u_dl.x) * 0.5;
         if (u_style > 1.5) {
@@ -1729,6 +1760,9 @@ void main() {
             }
         }
     }
+#else
+    {}
+#endif
     if (u_sign.z > 0.0) {
         float ds = length(p - u_sign.xy);
         vec3 sc = ds < u_sign.z * 0.79 ? vec3(0.95, 0.95, 0.94) : vec3(0.84, 0.05, 0.07);
@@ -2349,4 +2383,50 @@ void main() {
 }
 `;
 
-module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: WBDIAL, wbback: WBBACK, wbsign: WBSIGN, wbmsa: WBMSA /* car3 I */, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, g20dial: G20DIAL };
+/** 0.7.13: a 6WB shader with only one look's code in it (STYLE, hud.js WB_STYLE: 0 Comfort .. 4 the efficiency dial),
+ *  style -1 keeps every look. The KOMBI compiles a whole shader, every branch: with all five looks in one source a 6WB
+ *  layout made it reset (0.7.11, 0.7.12; 0.7.10's sources were ~5 % shorter and drew). So the inactive looks are cut
+ *  out here, before the source leaves the app (the "#if STYLE" blocks, evaluated in JS), and so are the comments and
+ *  blank lines: the KOMBI gets a much shorter source with nothing in it to skip. */
+function styled(src, style) {
+    const n = Number.isInteger(style) && style >= 0 && style <= 4 ? style : -1;
+    return compact('#define STYLE ' + n + '\n' + src, n);
+}
+
+/** A shader source with its "#if STYLE ..." blocks resolved for STYLE n (other directives kept as they are), then
+ *  without comments, trailing spaces and blank lines. GLSL ES 1.00 has no strings, so "//" always starts a comment. */
+function compact(src, n) {
+    const out = [], stack = [];          // per open #if: { mine: a STYLE block, take: its branch is kept, done: one was }
+    const on = () => stack.every((f) => !f.mine || f.take);
+    const cond = (e) => {
+        const x = e.replace(/\bSTYLE\b/g, '(' + n + ')');
+        if (!/^[\d\s()<>=!|&-]+$/.test(x)) throw new Error('shaders.compact: cannot evaluate #if ' + e);
+        return !!Function('return (' + x + ');')();       // only digits and operators reach here
+    };
+    src.split('\n').forEach((line) => {
+        const t = line.trim();
+        let m;
+        if ((m = /^#if\s+(.*\bSTYLE\b.*)$/.exec(t))) {
+            const take = cond(m[1]);
+            stack.push({ mine: true, take, done: take });
+            return;
+        }
+        if (/^#if/.test(t)) { stack.push({ mine: false }); if (on()) out.push(line); return; }
+        if (/^#else\b/.test(t) && stack.length && stack[stack.length - 1].mine) {
+            const f = stack[stack.length - 1]; f.take = !f.done; f.done = true;
+            return;
+        }
+        if (/^#endif\b/.test(t) && stack.length) {
+            const f = stack.pop();
+            if (!f.mine && on()) out.push(line);
+            return;
+        }
+        if (!on()) return;
+        const c = line.replace(/\/\/.*$/, '').replace(/\s+$/, '');
+        if (c.trim()) out.push(c);
+    });
+    if (stack.length) throw new Error('shaders.compact: an #if without #endif');
+    return out.join('\n') + '\n';
+}
+
+module.exports = { wbdialFor: (style) => styled(WBDIAL, style), wbbackFor: (style) => styled(WBBACK, style), shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: styled(WBDIAL, -1), wbback: styled(WBBACK, -1), wbsign: compact(WBSIGN, -1), wbmsa: compact(WBMSA, -1) /* car3 I */, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, g20dial: G20DIAL };
