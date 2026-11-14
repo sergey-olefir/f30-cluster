@@ -2,7 +2,7 @@
   "id": "f30_cluster",
   "title": "F30 Cluster",
   "description": "Instrument cluster themes after the F-series 6WB look: Comfort, Sport and Eco Pro, following the drive mode",
-  "version": "0.7.11",
+  "version": "0.7.12",
   "vendor": "custom",
   "loggingId": "OAF3",
   "iconGlyph": "F30",
@@ -781,30 +781,6 @@
         [
           "off",
           "Off"
-        ]
-      ]
-    },
-    {
-      "key": "nightLook",
-      "label": "Night look (6WB)",
-      "type": "choice",
-      "default": "plain",
-      "options": [
-        [
-          "plain",
-          "Dimmed white"
-        ],
-        [
-          "amber",
-          "Warm white, amber needles"
-        ],
-        [
-          "ice",
-          "Ice blue, red needles"
-        ],
-        [
-          "red",
-          "Red, low glare"
         ]
       ]
     },
