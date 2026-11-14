@@ -41,6 +41,16 @@ const { headUnit } = require(path.join(__dirname, '..', 'kit', 'tools', 'hu-stub
 const hu = headUnit(stage, { live: true, dataDir, log, image: (name, cv) => { if (hu.onImage) hu.onImage(name, cv); return Promise.resolve(); } });
 const { spec, settings, ui } = hu;
 
+// 2026-11-15 (apps/driver_profiles): an app whose manifest asks for persod's UserAccountManager gets the bench's fake
+// persod (bench/fake-personalization.js); POST /fake steers it, GET /probe reports its accounts and every call made
+let fakePerso = null;
+try {
+    const manifest = JSON.parse(fs.readFileSync(path.join(stage, 'source', 'manifest.json'), 'utf8'));
+    if (manifest.proxies && manifest.proxies['de.bmw.infotainment.personalization.UserAccountManager']) {
+        fakePerso = require('./fake-personalization').install(hu);
+    }
+} catch (e) { log.warn('bench: fake persod not installed: ' + e.message); }
+
 // the app's HudApp instance, for the values the page shows (hud.js is loaded by the app's main.js)
 let hud = null;
 const realLoad = Module._load;
@@ -227,6 +237,7 @@ process.on('message', (m) => {
     // and what the app shows (GET /probe)
     else if (m.t === 'click' && m.id) ui.comp(m.id).emit('action', typeof m.row === 'number' ? { row: m.row } : {});
     else if (m.t === 'hmi' && m.a === 'back') { const top = hu.stack[hu.stack.length - 1]; if (top) ui.close(top); }
+    else if (m.t === 'fake' && fakePerso) fakePerso.control(m.v || {});
     else if (m.t === 'probe') {
         let layoutName = null, yielded = null;
         try { layoutName = hud ? hud._layoutName() : null; yielded = hud && hud.screen ? hud.screen.yielded : null; } catch (e) { /* not up yet */ }
@@ -234,6 +245,7 @@ process.on('message', (m) => {
             t: 'probe', n: m.n, native, images, stack: hu.stack.slice(), settings: Object.assign({}, settings.values), status,
             activeName: hud ? hud.activeName : null, layoutName, yielded, driveMode: hud ? hud.driveMode : null,
             ready: !!(hud && hud.client && hud.client.ready),
+            perso: fakePerso ? fakePerso.state() : null,
         });
     }
 });
