@@ -467,6 +467,7 @@ class HudApp {
     constructor(ctx) {
         this.ctx = ctx;
         this.log = ctx.log;
+        this._migrateComfortMap();
         this.config = (ctx.spec && ctx.spec.config) || {};
         this.location = this.config.location || DEFAULT_LOCATION;
         // HUD_CLUSTER_SOCKET: the Mac bench's fake cluster-render; never set on the car
@@ -1085,6 +1086,21 @@ class HudApp {
     /** fn(text) whenever the status line changes. */
     onStatus(fn) { this.statusListeners.push(fn); if (this.lastStatus) fn(this.lastStatus); }
 
+    /** 2026-11-13: "6WB Comfort + BMW map" (wb_comfort_map) is gone: it was 6WB Comfort with the map window always on,
+     *  which the stockMap setting does. A saved choice of it becomes wb_comfort with stockMap on, once. */
+    _migrateComfortMap() {
+        const st = this.ctx.settings;
+        if (!st || typeof st.get !== 'function' || typeof st.set !== 'function') return;
+        let moved = false;
+        ['hudLayout', 'inComfort', 'inSport', 'inEco'].forEach((k) => {
+            if (st.get(k) === 'wb_comfort_map') { st.set(k, 'wb_comfort'); moved = true; }
+        });
+        if (moved) {
+            st.set('stockMap', true);
+            if (this.log) this.log.info('settings: "6WB Comfort + BMW map" is now 6WB Comfort with "BMW\'s map in the middle" on');
+        }
+    }
+
     /** The layout name to show now: per drive mode when that's on and known, else the plain setting. */
     _layoutName() {
         if (this.screen && this.screen.yielded) return 'off';
@@ -1421,7 +1437,7 @@ class HudApp {
         // 4 unavailable, null hidden (config.msa unset or the car's value unmapped); ccMsg 1 / 0 while config.ccm knows
         if (name === 'limitUnknown') return this.limitState === 'unknown' ? 1 : null;
         if (name === 'msa') return MSA_STATES[this.msaState] || null;
-        if (name === 'ccMsg') return this.ccShown === null || this.ccShown === undefined ? null : this.ccShown ? 1 : 0;
+        if (name === 'ccMsg') { const cc = this._cc(); return cc === null ? null : cc ? 1 : 0; }
         if (name === 'cons') return isNum(this.consL) && Date.now() - this.consAt < 5000 ? this.consL : this.car.data().demo ? 7.4 : null;
         if (name === 'limit') return isNum(this.limitKmh) ? this.limitKmh : this.limitState === 'none' && this.car.data().demo ? 90 : null;
         if (name === 'fuel' || name === 'range' || name === 'ambient') {
@@ -1845,7 +1861,11 @@ class HudApp {
         if (k.indexOf('own:') === 0) return not ? !this._own(k.slice(4)) : this._own(k.slice(4));
         // car3 G: "cc:none" is on only while the car says no check-control message shows (this.ccShown === false);
         // while that is not known (no signal wired yet: package I) it is off
-        if (k.indexOf('cc:') === 0) { const on = k === 'cc:none' && this.ccShown === false; return not ? !on : on; }
+        // 2026-11-13: "cc:shown" is on only while the car says a message shows (unknown: off, so ours stays drawn)
+        if (k.indexOf('cc:') === 0) {
+            const cc = this._cc(), on = (k === 'cc:none' && cc === false) || (k === 'cc:shown' && cc === true);
+            return not ? !on : on;
+        }
         const on = eq > 0 ? String(this.setting(k.slice(0, eq))) === k.slice(eq + 1) : this.setting(k) !== false;
         return not ? !on : on;
     }
@@ -2060,6 +2080,8 @@ class HudApp {
             c.uniform(ref, 'u_color', rgb(color(t, w.color || 'accent')));
             c.uniform(ref, 'u_dl', w.dl);
             c.uniform(ref, 'u_dr', w.dr);
+            x.ccKey = null;
+            this._wbCcSend(x);              // the check-control window (closed until the car says a message shows)
             c.uniform(ref, 'u_style', [WB_STYLE[w.style] || 0]);
             c.uniform(ref, 'u_sign', [0, 0, 0]);       // "sign": [x, y, r]: the speed limit sign's disc, shown by _update while a limit is known
             c.uniform(ref, 'u_hole', this._hole(w));     // "hole" / "holeWhen": BMW's map window left see-through
@@ -2342,6 +2364,22 @@ class HudApp {
         return out;
     }
 
+    /** A check-control message showing: true / false as the car says (config.ccm; on the bench its stand-in
+     *  bench.CheckControl, fed from manual {ccMsg: 1 | 0}), null while unknown. */
+    _cc() {
+        return this.ccShown === true || this.ccShown === false ? this.ccShown : null;
+    }
+
+    /** u_cc: the bg widget's "cc" box [x0, y0, x1, y1] (panel px; BMW's check-control message panel) see-through
+     *  while the car says a message shows (this.ccShown === true), else none; sent when it changes. */
+    _wbCcSend(x) {
+        const w = x.w, b = Array.isArray(w.cc) && w.cc.length === 4 && this._cc() === true ? w.cc : null;
+        const v = b ? [b[0] - w.x, b[1] - w.y, b[2] - w.x, b[3] - w.y] : [0, 0, 0, 0], key = v.join(',');
+        if (key === x.ccKey) return;
+        x.ccKey = key;
+        x.c.uniform(x.ref, 'u_cc', v);
+    }
+
     /** car3 G: u_pat0..3 (plain vec4s: docs/CAR3-G-REPORT.md), sent when they change (a "cc:" patch follows the
      *  check-control message state on every update). */
     _wbPatchesSend(x) {
@@ -2581,6 +2619,7 @@ class HudApp {
             x.c.uniform(x.ref, 'u_msa', [m, 0, 0, 0]);
         } else if (w.type === 'wbback') {
             if (w.collar && Array.isArray(w.patches)) this._wbPatchesSend(x);     // car3 G: a "cc:" patch follows the message state
+            this._wbCcSend(x);                                                     // and the message window
             const on = w.sign && (isNum(this._raw('limit')) || this._raw('limitEnd') || this._raw('limitUnknown')) ? 1 : 0;   // package E: the end sign too; car3 I: "---"
             if (!force && on === x.last) return;
             x.last = on;

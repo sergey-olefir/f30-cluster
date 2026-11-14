@@ -60,8 +60,8 @@ GROW, SOFT = 6, 4.0          # px the collar grows past the stock graphics, then
 # "dialShade" setting picks (shared/hud.js WB_SHADE; "normal" = polish B's 0.80 at the rim, falling off over 20 px).
 # These are its numbers, for the scheme and the report; design/gen_6wb.py passes the same y span and keep-out box.
 SHADE_K, SHADE_L = 0.80, 20.0  # the shade beside our dials toward the middle: strength at the rim, falloff (px)
-SHADE_Y = (575.0, 605.0)     # ... fading out over these y, above the message panel and the check-control 'i'
-SHADE_KO = [1253, 588, 1273, 630]   # ... and none on BMW's right "i" (assist.info_tacho grown 3 px)
+SHADE_Y = (575.0, 605.0)     # ... fading out over these y, above the message panel
+SHADE_KO = [0, 0, 0, 0]      # ... no keep-out (it was BMW's right "i", covered since 2026-11-13)
 
 # ---- package F: the full-size cover (design/overlay/cover.dials.png; docs/POLISH-F-REPORT.md) ----
 # Black over BMW's stock bottom lines between our dials, their curved end hooks and the grey dash, at full size (the
@@ -101,6 +101,9 @@ COVER = {
     'assist.rpm_label': 'under our tacho; cosmetic',
     'assist.cold': 'under our oil-temperature mini, which shows the same',
     'assist.off': 'under our tacho; our own READY/OFF stays. A window here would show the stock tacho needle at rest',
+    'assist.info_tacho': 'the check-control "i" left of the tacho (lit only with a message, which BMW\'s message panel '
+                         'shows anyway): under our tacho rim and the collar, as in 6WB Comfort, so both dials end alike '
+                         'at the cut (the owner\'s call, 2026-11-13; it was a small soft window in our rim)',
     'assist.mode_label': 'the bottom-row COMFORT PLUS: under a black patch in the collar (PATCHES; the lead\'s call '
                          'after package D, 2026-11-12), at least 3 px clear of the check-control outline',
 }
@@ -114,7 +117,6 @@ DROP = {
 NOTES = {
     'map.region': 'reveal between the dials only (edited hole = the gap); the parts under our dials stay hidden; '
                   'it darkens toward our dials (the collar\'s shade)',
-    'assist.info_tacho': 'small soft window in our tacho rim; the collar keeps clear of it',
     'bottom.clock': 'below the speedo cut (y >= 656)',
     'bottom.belt_rear': 'below the speedo cut (y >= 656)',
     'bottom.range': 'below the speedo cut; the fuel mini moves up 20 px',
@@ -246,10 +248,8 @@ def main():
         if e.get('anchor') in ('speedo', 'tacho'):
             m[CUT_Y:, :] = False
         U |= m
-    # the windows: the check-control 'i' always; BMW's sign only while ours has no data (U below: ours shown, closed)
-    b = G['assist.info_tacho']['bbox']
-    win_i = rr_mask([int(b[0]) - 2, int(b[1]) - 2, int(np.ceil(b[2])) + 2, int(np.ceil(b[3])) + 2], 2)
-    U &= ~win_i
+    # the window: BMW's sign only while ours has no data (U below: ours shown, closed). The check-control 'i' has none
+    # since 2026-11-13: it is covered (COVER), so both dials end alike at the cut
     win_sign = rr_mask(SIGN_WIN['rect'], SIGN_WIN['radius'])
     sign_clear = rr_mask(SIGN_CLEAR['rect'], SIGN_CLEAR['radius'])
 

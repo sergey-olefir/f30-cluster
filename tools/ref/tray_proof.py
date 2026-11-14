@@ -104,7 +104,7 @@ cells = [label(crop(sh('opts', 'comfort_D3_%s.png' % k)), t) for k, t in
 grid(cells, 2).save(os.path.join(OUT, 'tray_settings.png'))
 
 # 3. the whole panel, every 6WB layout at P and D3 (after)
-for lay in ('wb_comfort', 'wb_comfort_map', 'wb_dials', 'wb_sport', 'wb_eco'):
+for lay in ('wb_comfort', 'wb_dials', 'wb_sport', 'wb_eco'):
     for g in ('P', 'D3'):
         Image.open(sh('after', '%s_%s.png' % (lay, g))).convert('RGB').save(os.path.join(OUT, '%s_%s.png' % (lay, g)), optimize=True)
 print('ok')
