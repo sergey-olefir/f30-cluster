@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Centre Screen Mock</title>
+<!--
+  bench/hmi.html (GET /app): the app's centre screen roughly as the car's HMI draws it. A MOCK: BMW's own skin is
+  not on the bench, so rows, fonts and colours are only close to iDrive 7. The screens and their rows come from the
+  built rhmiData (GET /hmi-ui), what the app wrote to them from GET /probe, pictures from GET /hmi-img/<row>.png.
+  A press goes to the app exactly as the car's HMI sends it (POST /click), the back arrow is POST /hmi.
+-->
+<style>
+  :root { --bg: #07090c; --panel: #0d1117; --row: #121821; --rowHi: #18324f; --line: #ffffff14; --text: #eef2f8;
+          --dim: #8d98a8; --blue: #2b7fff; --blueHi: #5aa2ff; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #000; color: var(--text); font: 15px/1.3 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  .wrap { padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .note { color: var(--dim); font-size: 12px; max-width: 1280px; width: 100%; }
+  .screen { width: 100%; max-width: 1280px; aspect-ratio: 1280 / 480; background: var(--bg); border-radius: 14px;
+            box-shadow: 0 0 0 1px #1d2430, 0 20px 60px #000; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+  .title { height: 54px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 18px;
+           background: linear-gradient(#141b25, #0c1118); border-bottom: 1px solid var(--line); font-size: 19px; font-weight: 600; }
+  .back { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #ffffff2a; background: none; color: var(--text);
+          font-size: 18px; cursor: pointer; }
+  .back:hover { border-color: var(--blueHi); }
+  .list { flex: 1; overflow-y: auto; padding: 8px 0; scrollbar-width: thin; scrollbar-color: #2b3546 transparent; }
+  .row { display: flex; align-items: center; gap: 14px; min-height: 58px; margin: 0 14px; padding: 8px 16px;
+         border-bottom: 1px solid var(--line); cursor: default; }
+  .row.press { cursor: pointer; }
+  .row.press:hover { background: var(--rowHi); box-shadow: inset 0 0 0 1px var(--blue); border-radius: 6px; }
+  .row .main { flex: 1; min-width: 0; }
+  .row .t1 { font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .t2 { font-size: 14px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .val { color: var(--blueHi); font-size: 16px; white-space: nowrap; }
+  .row.label .t1 { font-size: 15px; color: var(--dim); white-space: normal; }
+  .chev { color: var(--dim); font-size: 20px; }
+  .box { width: 26px; height: 26px; border-radius: 5px; border: 2px solid #9aa6b8; display: grid; place-items: center; flex: none; }
+  .box.on { background: var(--blue); border-color: var(--blue); }
+  .box.on::after { content: ""; width: 7px; height: 13px; border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg) translate(-1px, -2px); }
+  .gfx { margin: 6px 14px; display: flex; justify-content: center; }
+  .gfx img { max-width: 100%; max-height: 220px; border-radius: 8px; }
+  .canvas { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; }
+  .canvas img { max-width: 100%; max-height: 100%; }
+  .bar { display: flex; gap: 8px; padding: 8px 14px; background: #0c1118; border-top: 1px solid var(--line); }
+  .bar button { flex: 1; height: 40px; background: var(--row); color: var(--text); border: 1px solid #ffffff1c; border-radius: 6px; font-size: 15px; cursor: pointer; }
+  .bar button:hover { border-color: var(--blue); background: var(--rowHi); }
+  .pick { position: absolute; inset: 0; background: #000b; display: flex; justify-content: center; align-items: stretch; }
+  .pick .sheet { width: 60%; background: var(--panel); border-left: 1px solid var(--line); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+  .pick .sel { color: var(--blueHi); }
+  .pick .sel::before { content: "● "; }
+  .off { color: #e0a340; padding: 40px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="note">A mock of the centre screen: the rows, values and pictures are the app's own, the look only approximates BMW's HMI. A click is sent to the app as the car's HMI sends it. Panel view: <a href="/" style="color:#5aa2ff">/</a></div>
+  <div class="screen" id="screen"><div class="off">Loading…</div></div>
+</div>
+<script>
+(function () {
+  const $ = (s) => document.getElementById(s);
+  let ui = null, probe = null, pick = null, sig = '';
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const post = (u, b) => fetch(u, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }).then(poll).catch(() => {});
+
+  function loadUi() {
+    return fetch('/hmi-ui').then((r) => r.ok ? r.json() : null).then((j) => { if (j) ui = j; }).catch(() => {});
+  }
+  function poll() {
+    return fetch('/probe').then((r) => r.ok ? r.json() : null).then((p) => {
+      probe = p;
+      const s = JSON.stringify([p && p.native, p && p.images, p && p.stack, pick]);
+      if (s !== sig) { sig = s; render(); }
+    }).catch(() => {});
+  }
+
+  function render() {
+    const scr = $('screen');
+    if (!ui || !probe) { scr.innerHTML = '<div class="off">The app is not running on the bench (start bench/server.js).</div>'; return; }
+    const top = (probe.stack || [])[probe.stack.length - 1] || 'MAIN';
+    const st = ui.states.find((s) => s.name === top) || ui.states[0];
+    const nat = probe.native || {}, img = probe.images || {};
+    const titleC = st.comps.find((c) => c.type === 'title');
+    let h = '<div class="title">' + ((probe.stack || []).length > 1 ? '<button class="back" data-back="1" title="Back">‹</button>' : '') +
+            esc(titleC ? (nat[titleC.name] && nat[titleC.name].text) || (titleC.rows[0] || {}).Text : ui.title) + '</div>';
+    const comps = st.comps.filter((c) => c.type !== 'title' && !(nat[c.name] && nat[c.name].visible === false));
+    const isCanvas = comps.some((c) => /_GFX$/.test(c.name)) && comps.filter((c) => c.type === 'button').length && !comps.some((c) => c.type === 'checkBox' || c.type === 'dropDownMenu');
+    if (isCanvas) {
+      // a canvas screen: its picture full size, its buttons in the bar below
+      const g = comps.find((c) => /_GFX$/.test(c.name));
+      h += '<div class="canvas">' + (img[g.name] ? '<img src="/hmi-img/' + g.name.toLowerCase() + '.png?n=' + img[g.name].n + '">' : '<span class="t2">no picture yet</span>') + '</div>';
+      h += '<div class="bar">' + comps.filter((c) => c.type === 'button').map((c) => '<button data-click="' + c.name + '">' + esc((nat[c.name] && nat[c.name].text) || (c.rows[0] || {}).Text) + '</button>').join('') + '</div>';
+    } else {
+      h += '<div class="list">';
+      comps.forEach((c) => {
+        const n = nat[c.name] || {}, r0 = c.rows[0] || {};
+        if (c.type === 'label' && /_GFX$/.test(c.name)) {
+          if (img[c.name]) h += '<div class="gfx"><img src="/hmi-img/' + c.name.toLowerCase() + '.png?n=' + img[c.name].n + '"></div>';
+        } else if (c.type === 'label') {
+          const t = n.text !== undefined ? n.text : r0.Text;
+          if (t) h += '<div class="row label"><div class="main"><div class="t1">' + esc(t) + '</div></div></div>';
+        } else if (c.type === 'checkBox') {
+          h += '<div class="row press" data-click="' + c.name + '"><div class="main"><div class="t1">' + esc(n.text || r0.Text) + '</div></div><div class="box' + (n.checked ? ' on' : '') + '"></div></div>';
+        } else if (c.type === 'dropDownMenu') {
+          const sel = n.selected !== undefined ? n.selected : 0;
+          h += '<div class="row press" data-drop="' + c.name + '"><div class="main"><div class="t1">' + esc(c.header) + '</div></div><div class="val">' + esc((c.rows[sel] || {}).ItemText) + '</div><div class="chev">›</div></div>';
+        } else if (c.type === 'button') {
+          const cells = n.cells || {};
+          const t1 = cells.Text1stRow || n.text || r0.Text1stRow || r0.Text || r0.Text1stCol || c.name, t2 = cells.Text2ndRow || r0.Text2ndRow || '';
+          h += '<div class="row press" data-click="' + c.name + '"><div class="main"><div class="t1">' + esc(t1) + '</div>' + (t2 ? '<div class="t2">' + esc(t2) + '</div>' : '') + '</div><div class="chev">›</div></div>';
+        }
+      });
+      h += '</div>';
+    }
+    if (pick) {
+      const c = st.comps.find((x) => x.name === pick);
+      if (c) {
+        const sel = (nat[c.name] || {}).selected;
+        h += '<div class="pick"><div class="sheet"><div class="title"><button class="back" data-unpick="1">‹</button>' + esc(c.header) + '</div><div class="list">' +
+             c.rows.map((r, i) => '<div class="row press" data-row="' + i + '"><div class="main"><div class="t1' + (i === sel ? ' sel' : '') + '">' + esc(r.ItemText) + '</div></div></div>').join('') + '</div></div></div>';
+      }
+    }
+    scr.innerHTML = h;
+  }
+
+  $('screen').addEventListener('click', (e) => {
+    const el = e.target.closest('[data-click],[data-drop],[data-row],[data-back],[data-unpick]');
+    if (!el) return;
+    if (el.dataset.back) return post('/hmi', { a: 'back' });
+    if (el.dataset.unpick) { pick = null; sig = ''; return poll(); }
+    if (el.dataset.drop) { pick = el.dataset.drop; sig = ''; return poll(); }
+    if (el.dataset.row !== undefined) { const id = pick; pick = null; return post('/click', { id, row: Number(el.dataset.row) }); }
+    if (el.dataset.click) return post('/click', { id: el.dataset.click });
+  });
+  loadUi().then(poll);
+  setInterval(poll, 700);
+  setInterval(loadUi, 10000);     // a rebuild of the app may change the screens
+})();
+</script>
+</body>
+</html>
