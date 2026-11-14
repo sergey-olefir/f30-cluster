@@ -84,7 +84,7 @@
       "name": "MAIN",
       "kind": "menu",
       "title": "F30 Cluster",
-      "settings": true,
+      "settings": "placed",
       "items": [
         [
           "graphic",
@@ -131,13 +131,27 @@
           "Theme gallery"
         ],
         [
-          "settings"
+          "button",
+          "BTN_SETTINGS",
+          "Settings"
         ],
         [
           "text",
           "STATUS_LOG",
           ""
         ]
+      ]
+    },
+    {
+      "name": "SETTINGS",
+      "kind": "settings",
+      "title": "Settings",
+      "skip": [
+        "byMode",
+        "hudLayout",
+        "inComfort",
+        "inSport",
+        "inEco"
       ]
     },
     {

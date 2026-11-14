@@ -159,7 +159,10 @@ function liveUi(hu, displayOf, softImage) {
         }),
         // the HMI's own settings screen is not drawn here: the emulator's panel has the settings
         open: async (n) => {
-            if (n === 'SETTINGS' || !(hu.spec.screens || []).some((s) => s.name === n)) { log.info('open ' + n + ': an HMI screen the emulator does not draw'); hu.emit('hmiscreen', n); return; }
+            // (bimmer-lab) an app that declares its own SETTINGS screen gets it on the stack too, for a mock of the
+            // native screens (bench/hmi.html); it is still not drawn here
+            const own = (hu.spec.screens || []).some((s) => s.name === n);
+            if (!own || (n === 'SETTINGS' && !(hu.spec.screens || []).some((s) => s.name === n && s.kind === 'settings'))) { log.info('open ' + n + ': an HMI screen the emulator does not draw'); hu.emit('hmiscreen', n); return; }
             const top = stack[stack.length - 1];
             if (top === n) return;
             if (stack.indexOf(n) >= 0) stack.splice(stack.indexOf(n), 1);

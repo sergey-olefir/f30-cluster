@@ -162,7 +162,8 @@ def build_ui(spec, language='en'):
     ui = {'schemaVersion': '1.3.0', 'containers': {}}
     screens = list(spec.get('screens', []))
     # a "menu" screen with "settings": true shows the settings itself: no separate settings screen
-    if spec.get('settings') and not any(sc.get('settings') is True for sc in screens):
+    # (bimmer-lab: nor when the app declares its own "settings" screen, e.g. one that "skip"s the rows a menu shows)
+    if spec.get('settings') and not any(sc.get('settings') is True or sc.get('kind') == 'settings' for sc in screens):
         screens.append({'name': 'SETTINGS', 'kind': 'settings', 'title': 'Settings'})
     state_ids = {}
     for scr in screens:
@@ -262,13 +263,15 @@ def build_ui(spec, language='en'):
                 groups.append(('Bar', bar))
         elif kind == 'settings':
             items = []
-            settings_items(items)
+            # (bimmer-lab) "skip": [keys] leaves out the settings another screen shows (a menu's "setting" rows)
+            settings_items(items, scr.get('skip', ()))
             groups.append(('List', items))
         else:   # list / menu: components from "items" (a menu adds the settings after them)
             items = []
             # bimmer-lab addition: in a menu with "settings": true, ["setting", key] puts that setting's row
             # here, and ["settings"] puts the other settings here (else they follow the items, as before)
-            with_settings = kind == 'menu' and scr.get('settings') is True
+            # "settings": "placed" shows only its ["setting", key] rows, the rest living on a "settings" screen
+            with_settings = kind == 'menu' and scr.get('settings') in (True, 'placed')
             placed = [it[1] for it in scr.get('items', []) if it[0] == 'setting']
             rest_done = False
             for it in scr.get('items', []):
@@ -300,7 +303,7 @@ def build_ui(spec, language='en'):
                 else:
                     rows = [text_row(name, label)] if label else [{'Text': {'value': '', 'type': 'Text'}}]
                 items.append(comp(kindi, name, rows=rows))
-            if with_settings and not rest_done:
+            if with_settings and not rest_done and scr.get('settings') is True:
                 settings_items(items, placed)
             groups.append(('List', items))
         tid = nid()
