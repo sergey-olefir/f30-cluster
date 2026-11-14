@@ -96,6 +96,15 @@ function call(p, method, params, timeoutMs) {
 }
 
 /**
+ * Read a field once (its getter) on a proxy from proxy() or watch().proxy, as BMW's SDK does
+ * (_someIpProxy.getValue). Needs "r" in the field's app.json flags, or the installer leaves the
+ * getter out of the app's interface config. Rejects when the provider does not answer in time.
+ */
+function get(p, field, timeoutMs) {
+    return nativeTick(() => p.getValue(field, timeoutMs || 4000));
+}
+
+/**
  * Write a field that has a setter (e.g. ConditionBasedServicesLegacy.cBSReset) on a proxy from
  * proxy() or watch().proxy, as BMW's SDK does (_someIpProxy.setValue). value = the field's struct;
  * resolves when the provider took it. Needs "w" in the field's app.json flags, or the installer
@@ -116,4 +125,4 @@ function onAvailable(p, fn) {
         .then(() => { if (p.isAvailable && p.isAvailable()) fn(true); });
 }
 
-module.exports = { watch, proxy, call, set, on, onAvailable, loadConfig, hasNative: () => !!someip };
+module.exports = { watch, proxy, call, get, set, on, onAvailable, loadConfig, hasNative: () => !!someip };
