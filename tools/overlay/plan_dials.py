@@ -52,6 +52,14 @@ MAP_WIN = [748, 155, 1172, 612]                                 # the gap betwee
 # collar additions past the catalogue hulls: the stock '260' label reaches x 727 (bright pixels on rect 08 and 09);
 # structure.speedo's hull stops at x 704
 EXTRA_COLLAR = [[700, 66, 732, 110]]
+SYM_CORNERS = (260, 340)     # the outer corners made mirror images: x within this of either edge, y from this down
+# 2026-11-14, the owner (marked on a bench shot): the outer corner's black reaches up to an arc from the panel's edge
+# (y ~416) to the speedo's rim (y ~365), the empty corner above the stock fuel mini; drawn lower (the collar
+# grows GROW px, then blurs: placed by measuring the bench render). Mirrored to the oil side (SYM_CORNERS)
+CORNER_TOP = [[0, 445], [8, 428], [20, 412], [40, 395], [65, 380], [100, 372], [100, 460], [0, 460]]
+# ... and down the panel's outer edge to its foot, round our fuel mini's outer side (centre 80, 608, r 70): below it
+# the edge runs from its foot (x ~65, y 666) out to x ~40 at y 720 (the owner's line). Inside the mini it is ours anyway
+CORNER_SIDE = [[0, 440], [80, 440], [80, 645], [60, 662], [46, 692], [34, 720], [0, 720]]   # GROW px inside the line
 # (package F: polish B's LINE_OPEN, which kept the collar off the stock bottom line between our dials and BMW's hooks,
 # is gone: the owner wants that line, the hooks and the grey dash away. See COVER_BOX below.)
 # the collar's look (polish B): soft edges, the band under their faded bottoms
@@ -108,7 +116,16 @@ COVER = {
                          'after package D, 2026-11-12), at least 3 px clear of the check-control outline',
 }
 # black patches in the collar over G20 items we cover outside our dials (rect, panel px; trimmed by the keep-out)
-PATCHES = {'assist.mode_label': [1226, 659, 1366, 716]}
+# 2026-11-14, the owner's call: BMW's bottom-row gear too (ours is in the tray). The catalogue has it drawn over us
+# (photos 11-13), so this may change nothing on the car; to be checked there. Sized for "D" / "M4". One patch with the
+# mode label (no gap between them), its top up in the black under the tacho (no notch where it meets the foot band)
+PATCHES = {'assist.mode_label+gear': [1226, 640, 1470, 716]}
+FOOT_CLIP = [596, 652, 1212, 720]   # x0, y0, x1, y1: inside design/gen_6wb.py CC_TOP [590, 594, 1250, 665] (its 6 px
+                                     # corners off), left of the patch above; from where CC_TOP starts to fade
+FOOT_JOIN = 572                      # x where our speedo's dark bottom ends on that line (the foot continues it)
+PATCH_SOFT = 3.0             # px, the Gaussian of the patches' edges: as soft as the band's foot (grown 2 sigma more)
+# items BMW draws over us that a patch still tries (no keep-out round them)
+TRY_UNDER = {'assist.gear'}
 DROP = {
     'assist.mode_label_centre': 'BMW does not draw it with a custom theme; the bottom-row COMFORT PLUS shows instead',
     'assist.gear_centre': 'BMW does not draw it; the bottom-row gear (over) shows instead',
@@ -253,7 +270,8 @@ def main():
     win_sign = rr_mask(SIGN_WIN['rect'], SIGN_WIN['radius'])
     sign_clear = rr_mask(SIGN_CLEAR['rect'], SIGN_CLEAR['radius'])
 
-    show = [g for g in g20['elements'] if pg[g['id']]['decision'] in ('reveal', 'keep-clear') and g['group'] != 'structure']
+    show = [g for g in g20['elements'] if pg[g['id']]['decision'] in ('reveal', 'keep-clear') and g['group'] != 'structure'
+            and g['id'] not in TRY_UNDER]
     S = {g['id']: raster(g) for g in g20['elements']}
     stock = np.zeros((H, W), bool)       # what BMW draws under us that we hide: the stock dials and the 'cover' items
     for g in g20['elements']:
@@ -263,11 +281,28 @@ def main():
             stock |= S[g['id']]
     for r in EXTRA_COLLAR:
         stock[r[1]:r[3], r[0]:r[2]] = True
+    # 2026-11-14, the owner: the outer corners round our minis mirror each other. BMW's stock fuel and oil minis differ a
+    # little, so each corner takes both outlines (the left one and the right one mirrored about x 960, the panel's and
+    # our dials' axis): every stock pixel stays hidden. The keep-out still holds (BMW's DSC lamp, mirrored below)
+    ct = Image.new('L', (W, H), 0)
+    ImageDraw.Draw(ct).polygon([tuple(v) for v in CORNER_TOP], fill=1)
+    ImageDraw.Draw(ct).polygon([tuple(v) for v in CORNER_SIDE], fill=1)
+    stock |= np.asarray(ct, bool)
+    sx, sy = SYM_CORNERS
+    both = stock[sy:, :sx] | stock[sy:, W - sx:][:, ::-1]
+    cov = np.zeros((H, W), bool)         # what we cover on purpose stays covered there (BMW's "COLD" by the oil mini),
+    for gid in COVER:                    # mirrored too
+        cov |= S[gid]
+    both |= cov[sy:, :sx] | cov[sy:, W - sx:][:, ::-1]
+    stock[sy:, :sx], stock[sy:, W - sx:] = both, both[:, ::-1]
     # keep-out: every G20 item we show (and BMW's sign, for its window) gets no collar, shade or band, nor 3 px round it
     shown = np.zeros((H, W), bool)
     for g in show:
         if g['id'] != 'map.region':
             shown |= S[g['id']]
+    # 2026-11-14, the owner: the corners stay mirror images, so BMW's DSC lamp's keep-out (left, never covered: a
+    # safety lamp) has its twin on the right (BMW's background shows there, as in the left one while the lamp is off)
+    shown |= S['tt.dsc'][:, ::-1]
     clear = dilate(shown, 3) | sign_clear     # BMW's sign: r 46 (5 px round it) and no more, so the band meets the
                                               # speedo's closed disc (opaque to r 50) with no gap
     core = dilate(stock & ~U, 3) & ~U & ~clear
@@ -290,14 +325,27 @@ def main():
     sk = np.zeros((H, W), bool)
     sk[SHADE_KO[1]:SHADE_KO[3], SHADE_KO[0]:SHADE_KO[2]] = True
     shade[sk] = 0.0
-    # the patches: the rect grown 5 px, a 1 px blur, so its edge still covers the item fully after the bake's quarter
+    # the patches: the rect grown 5 px + 2 PATCH_SOFT, then that blur, so its edge still covers the item fully after the bake's quarter
     # size (the keep-out still holds it 3 px off the check-control outline)
     patch = np.zeros((H, W), np.float32)
+    g = int(round(5 + 2 * PATCH_SOFT))
     for r in PATCHES.values():
-        patch[max(r[1] - 5, 0):r[3] + 5, max(r[0] - 5, 0):r[2] + 5] = 1.0
-    patch = blur(patch, 1.0)
+        patch[max(r[1] - g, 0):r[3] + g, max(r[0] - g, 0):r[2] + g] = 1.0
+    patch = blur(patch, PATCH_SOFT)
     ko = np.maximum(np.clip(blur(dilate(shown, 3).astype(np.float32), 1.5) * 2.0, 0.0, 1.0), sign_clear)
-    baked = np.maximum(np.maximum(soft, band), patch) * (1.0 - ko)        # the collar texture: no shade (package F)
+    # 2026-11-14: the patches keep off what we show but not BMW's message panel and its "i": while a message shows,
+    # WBBACK opens that panel itself (u_cc), and a keep-out round its slanted end notched the patch over BMW's mode label
+    shown_p = shown & ~S['assist.cc_panel'] & ~S['bottom.cc_info']
+    ko_p = np.maximum(np.clip(blur(dilate(shown_p, 3).astype(np.float32), 1.5) * 2.0, 0.0, 1.0), sign_clear)
+    baked = np.maximum(np.maximum(soft, band) * (1.0 - ko), patch * (1.0 - ko_p))   # the collar texture: no shade (package F)
+    # ... and the foot band's soft edge (design/gen_6wb.py CC_TOP, WBBACK) alone draws the foot between the dials: no
+    # collar under it, whose own edge wavered a px or two round it
+    baked[FOOT_CLIP[1]:FOOT_CLIP[3], FOOT_CLIP[0]:FOOT_CLIP[2]] = 0.0
+    # ... and left of it, from our speedo's bottom to there, the same profile (BMW's sign window kept out)
+    t = np.clip((yy - FOOT_CLIP[1]) / 13.0, 0.0, 1.0)
+    foot = (1.0 - t * t * (3.0 - 2.0 * t)) * (yy >= FOOT_CLIP[1] - 12)        # GLSL smoothstep(652, 665, y), inverted
+    zone = (xx >= FOOT_JOIN) & (xx < FOOT_CLIP[0])
+    baked[zone] = np.maximum(baked[zone], (foot * (1.0 - ko))[zone])
     Image.fromarray(np.round(baked * 255).astype('uint8')).save(rel('design/overlay/collar.dials.png'), optimize=True)
     # package F: the full-size cover of the bottom lines, hooks and dash
     cov = bottom_cover(S, show, sign_clear)

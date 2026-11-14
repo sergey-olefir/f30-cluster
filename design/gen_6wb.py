@@ -101,15 +101,21 @@ def dial(id, c, style, r=None, **kw):
     d.update(kw)
     return d
 
+# 2026-11-14: the minis' needle path matches the baked scale (hud/scene fuel / oil, measured off the texture): 0 at the
+# red band's end (the fuel's 0 tick, 153 deg clockwise from 12 o'clock), full at the "1/1" tick (334.5 deg). It was
+# 135 / 185, so at 0 the needle sank ~18 deg past the scale's end and at full stopped ~14 deg short. Oil is the mirror
+MINI_START, MINI_SWEEP = 153, 181.5
+
+
 def minis(baked=False):
     """The two side gauges: fuel (0 low on the right, clockwise round the bottom to 1/1 upper left) and its mirror,
     the oil temperature (cold low on the left, anticlockwise to hot upper right)."""
     return [
         dial("fuel", FU, "mini", r=MINI_R, ringW=5, measure="signal", signal="fuel", scale={"max": 1, "ticks": 4}, minor=2,
-             start=135, sweep=185, redTo=0.10, needle="fg",
+             start=MINI_START, sweep=MINI_SWEEP, redTo=0.10, needle="fg",
              **({"base": base("fuel", FU, MINI_R, 8, 556, 144)} if baked else {})),
         dial("oilt", OT, "mini", r=MINI_R, ringW=5, measure="signal", signal="oil", min=50, scale={"max": 150, "ticks": 4},
-             minor=2, start=135, sweep=185, flip=True, coldTo=0.10, redFrom=0.90, needle="fg",
+             minor=2, start=MINI_START, sweep=MINI_SWEEP, flip=True, coldTo=0.10, redFrom=0.90, needle="fg",
              **({"base": base("oil", OT, MINI_R, 1768, 556, 144)} if baked else {})),
         dict(icon("fuel_icon", "fuel", FU[0] + 0.40 * MINI_R, FU[1] - 0.42 * MINI_R, 1, "fg"), **({"toggle": "!baked"} if baked else {})),
         text("fuel_full", FU[0] - 0.42 * MINI_R, FU[1] - 0.26 * MINI_R, 30, "1/1", "wb_mini", conn=1),
@@ -214,8 +220,8 @@ SIGN_WIN, SIGN_SOFT = [537.5, 621.5, 42.5], 1
 # BMW's map between our dials, as the car draws it (photos 41, 42: the map's own veil ends at about x 704 and 1212, its
 # top at y 158): WBBACK's collar path fades it to black at its sides (48 px) and top (80 px) (u_wbox, u_fade: top,
 # sides, foot), and the black fades out over the 30 px above y 596, 5 px above the check-control panel (y 601)
-# (DIALS_MAP_FADE: its own name; as MAP_FADE it overwrote Comfort's map fades, car3 H, from the car3 G merge on)
-MAP_WIN, DIALS_MAP_FADE = [708, 156, 490, 440], [80, 48, 30, 0]
+# 2026-11-14: Dials + G20 uses 6WB Comfort's window and fades (MAP_WINDOW, MAP_FADE): centred, wider than the gap, so
+# the dials and their rims shape it (car3 G's [708, 156, 490, 440] sat 7 px left of centre and read as a box)
 # BMW's left hook stub "/" (x 731-744, y 631-644 on photos 34 and 41), which F kept: it lies where the check-control
 # message's symbol draws ("i", the heated wheel, the open door: photos 08, 42, 43). Black over it only while the car
 # says no message shows ("cc:none"; package I's signal); while that is not known it stays
@@ -225,6 +231,13 @@ HOOK_STUB = [729, 629, 746, 646]
 # there carry "!cc:shown"); otherwise ours is drawn there: Comfort's bar, Dials + G20 a black patch (no keep-out cut
 # round BMW's frame, text and hook any more). While the signal is unknown (config.ccm unset) it stays ours / black.
 CC_BOX = [709, 598, 1243, 694]
+# 2026-11-14: Dials + G20's foot between the dials: one black band from under the speedo to under the tacho, its foot
+# one straight soft edge at the height of the band under our dials' faded bottoms (the collar: full black to y 652,
+# half at ~657, clear by 666): it fades out over CC_TOP_SOFT px to y 665. Always on: while a message shows, the "cc" box
+# (u_cc) opens BMW's panel in it. Below it BMW's street name (catalogue bottom.street, y 669-709) shows. From x 590
+# (5 px off BMW's sign window, SIGN_CLEAR r 46 round 539, 622) to 1250 (into the black over BMW's mode label and gear)
+CC_TOP = [590, 594, 1250, 665]
+CC_TOP_SOFT = 13
 # --- end car3 G ---
 # --- package F (docs/POLISH-F-REPORT.md): 6WB Dials + G20's bottom row ---
 # the full-size cover over BMW's bottom lines, hooks and grey dash (tools/overlay/plan_dials.py COVER_BOX, packed by
@@ -310,9 +323,10 @@ def dials():
          # package F: BMW's bottom lines, hooks and dash under black; the shade's setting; patches under our row items
          "cover": {"tex": "cover", "x": COVER[0], "y": COVER[1], "w": COVER[2], "h": COVER[3]}, "shade": SHADE,
          "patches": [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")]
-                    + [{"rect": CC_BOX, "when": "!cc:shown"}],      # 2026-11-13: black over the message panel (was car3 G's hook stub)
+                    + [{"rect": CC_TOP, "soft": CC_TOP_SOFT}],      # 2026-11-14: the foot band; the street name shows below it
          "cc": CC_BOX,
-         "window": MAP_WIN, "fade": DIALS_MAP_FADE},                         # car3 G: the map's soft edges
+         "window": MAP_WINDOW, "fade": MAP_FADE,                             # 2026-11-14: Comfort's map window
+         "foot": FOOT, "footLine": FOOT_LINE},                             # ... and its foot line ("wbFoot")
         dial("speedo", SP, "comfort", ringW=10, base=base("speedo_d", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
              cut={"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": SIGN_SOFT, "cover": "limit"},
              measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10, start=SPD_START, sweep=SPD_SWEEP),
