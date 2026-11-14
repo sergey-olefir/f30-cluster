@@ -2322,7 +2322,8 @@ class HudApp {
      *  whether it has a "window" box. While the map shows through a soft window, the window and horizon are not drawn. */
     _wbUses(w) {
         const box = Array.isArray(w.window) && w.window.length === 4;
-        const foot = WB_FOOT.hasOwnProperty(this._wbFoot(w)) ? WB_FOOT[this._wbFoot(w)] : 0;
+        let foot = WB_FOOT.hasOwnProperty(this._wbFoot(w)) ? WB_FOOT[this._wbFoot(w)] : 0;
+        if (w.collar && foot === 0) foot = WB_FOOT.hair;     // 6WB Dials + G20 has no baked glass line: the hairline
         return { box, foot, window: !(box && this._hole(w)[2] > 0), line: foot === 0 };
     }
 
@@ -2354,13 +2355,18 @@ class HudApp {
     }
 
     /** WBBACK's black patches over BMW's bottom-row items we draw ourselves ("patches": [{ rect: [x0, y0, x1, y1] panel
-     *  px, when: a toggle }]), as four vec4s (layer px; x1 <= x0: none). */
+     *  px, when: a toggle, soft: px its foot fades out over }]), as four vec4s (layer px; x1 <= x0: none) and a fifth,
+     *  u_patSoft, the four feet's fades. */
     _wbPatches(w) {
-        const out = [];
+        const out = [], soft = [0, 0, 0, 0];
         (Array.isArray(w.patches) ? w.patches : []).forEach((p) => {
-            if (out.length < 4 && Array.isArray(p.rect) && (!p.when || this._toggleOn(p.when))) out.push([p.rect[0] - w.x, p.rect[1] - w.y, p.rect[2] - w.x, p.rect[3] - w.y]);
+            if (out.length < 4 && Array.isArray(p.rect) && (!p.when || this._toggleOn(p.when))) {
+                if (isNum(p.soft)) soft[out.length] = p.soft;     // 2026-11-14: px its foot fades out over (0: hard)
+                out.push([p.rect[0] - w.x, p.rect[1] - w.y, p.rect[2] - w.x, p.rect[3] - w.y]);
+            }
         });
         while (out.length < 4) out.push([0, 0, 0, 0]);
+        out.push(soft);
         return out;
     }
 
@@ -2386,7 +2392,7 @@ class HudApp {
         const pats = this._wbPatches(x.w), key = JSON.stringify(pats);
         if (key === x.patKey) return;
         x.patKey = key;
-        pats.forEach((v, i) => x.c.uniform(x.ref, 'u_pat' + i, v));
+        pats.forEach((v, i) => x.c.uniform(x.ref, i < 4 ? 'u_pat' + i : 'u_patSoft', v));
     }
 
     /** car3 G: what 6WB Dials + G20's own row draws now and why, for the log and the status line (docs/CAR3-G-REPORT.md:
@@ -2410,10 +2416,13 @@ class HudApp {
             this.widgets.forEach((x) => {
                 if (need || !x.w || x.w.type !== 'wbback' || !x.ref) return;
                 const w = x.w;
-                if (w.collar) { x.c.uniform(x.ref, 'u_shade', this._wbShade(w)); done = true; return; }
-                const foot = this._wbUses(w).foot;
+                const foot = this._wbUses(w).foot, fl = Array.isArray(w.footLine) ? w.footLine : [0, 0, 1];
+                if (w.collar) {
+                    x.c.uniform(x.ref, 'u_shade', this._wbShade(w));
+                    x.c.uniform(x.ref, 'u_foot', [foot, fl[0] - w.y, fl[1] - w.x, fl[2] - w.x]);    // never "glass" here
+                    x.wbFootNow = foot; done = true; return;
+                }
                 if ((foot === 0) !== (x.wbFootNow === 0)) { need = true; return; }
-                const fl = Array.isArray(w.footLine) ? w.footLine : [0, 0, 1];
                 x.c.uniform(x.ref, 'u_foot', [foot, fl[0] - w.y, fl[1] - w.x, fl[2] - w.x]);
                 x.wbFootNow = foot; done = true;
             });

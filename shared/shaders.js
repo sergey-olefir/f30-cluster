@@ -1503,6 +1503,9 @@ uniform vec4 u_pat0;
 uniform vec4 u_pat1;
 uniform vec4 u_pat2;
 uniform vec4 u_pat3;
+// 2026-11-14: px each patch's foot fades out over, ending at its y1 (0: a hard, rounded edge), so a patch can meet the
+// band under our dials' faded bottoms (the collar) at its height and with its soft edge
+uniform vec4 u_patSoft;
 // BMW's check-control message panel (2026-11-13): while the car says a message shows, this rounded box (x0, y0, x1, y1,
 // layer px; x1 <= x0: none) is see-through in every 6WB layout, so BMW's message shows clean; otherwise ours is drawn
 // there (Comfort: the bar; Dials + G20: a black patch, hud.js "cc" with "!cc:shown")
@@ -1515,6 +1518,34 @@ const float PI = 3.14159265359;
 float boxOut(vec2 p, vec4 b, float r) {
     vec2 q = max(b.xy - p, p - b.zw) + r;
     return length(clamp(q, 0.0, 64.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+
+// package F: a black patch b (x0, y0, x1, y1), rounded 6 px; with a soft foot (px) its bottom fades out over that, to y1
+float patch(vec2 p, vec4 b, float soft) {
+    if (soft <= 0.0) return 1.0 - smoothstep(0.0, 2.0, boxOut(p, b, 6.0));
+    return (1.0 - smoothstep(0.0, 2.0, boxOut(p, vec4(b.xyz, b.w + 8.0), 6.0))) * (1.0 - smoothstep(b.w - soft, b.w, p.y));
+}
+
+// the line at the window's foot (u_foot), drawn over the map's fade: 1 a hairline fading out at both ends (the 6WB's
+// own info bar line), 2 a chrome rod with round caps, shaded as our dial bezels; rgb and its coverage, 0 off it
+vec4 footLine(vec2 p) {
+    if (!(u_foot.x > 0.5 && u_foot.x < 2.5 && abs(p.y - u_foot.y) < 12.0)) return vec4(0.0);
+    float t = (p.x - u_foot.z) / (u_foot.w - u_foot.z), dy = p.y - u_foot.y;
+    vec4 L = vec4(0.0);
+    if (u_foot.x < 1.5) {
+        float env = smoothstep(0.0, 0.30, t) * (1.0 - smoothstep(0.70, 1.0, t));
+        float core = clamp(1.4 - abs(dy), 0.0, 1.0), halo = exp(-abs(dy) / 2.4);
+        L = vec4(0.80, 0.85, 0.92, env * max(0.95 * core, 0.26 * halo));
+    } else {
+        // the bezels' profile (a bright lip on top, a dark groove, a dimmer lower ridge), sampled off our dials
+        float hh = 4.0, len = u_foot.w - u_foot.z;
+        float ax = max(abs(p.x - (u_foot.z + u_foot.w) * 0.5) - (len * 0.5 - hh), 0.0);
+        float cov = clamp(hh + 0.5 - length(vec2(min(ax, 16.0), dy) / 16.0) * 16.0, 0.0, 1.0);   // fp16-safe
+        float lum = 0.06 + 0.72 * exp(-(dy + 1.8) * (dy + 1.8) / 1.4) + 0.40 * exp(-(dy - 2.2) * (dy - 2.2) / 1.0);
+        float spec = 0.70 + 0.30 * exp(-(t - 0.5) * (t - 0.5) / 0.06);         // brightest in the middle
+        L = vec4(vec3(0.97, 0.98, 1.0) * lum * spec, cov);
+    }
+    return L;
 }
 
 // the stock map veil's curve (docs/G20SIM-D-live.md, the map): 0 at the edge, 1 at t >= 1, steep at first
@@ -1545,10 +1576,10 @@ void main() {
             if (u_shadeKo.z > u_shadeKo.x) sh *= smoothstep(0.0, 2.0, boxOut(p, u_shadeKo, 0.0));
             a = max(a, sh);
         }
-        if (u_pat0.z > u_pat0.x) a = max(a, 1.0 - smoothstep(0.0, 2.0, boxOut(p, u_pat0, 6.0)));
-        if (u_pat1.z > u_pat1.x) a = max(a, 1.0 - smoothstep(0.0, 2.0, boxOut(p, u_pat1, 6.0)));
-        if (u_pat2.z > u_pat2.x) a = max(a, 1.0 - smoothstep(0.0, 2.0, boxOut(p, u_pat2, 6.0)));
-        if (u_pat3.z > u_pat3.x) a = max(a, 1.0 - smoothstep(0.0, 2.0, boxOut(p, u_pat3, 6.0)));
+        if (u_pat0.z > u_pat0.x) a = max(a, patch(p, u_pat0, u_patSoft.x));
+        if (u_pat1.z > u_pat1.x) a = max(a, patch(p, u_pat1, u_patSoft.y));
+        if (u_pat2.z > u_pat2.x) a = max(a, patch(p, u_pat2, u_patSoft.z));
+        if (u_pat3.z > u_pat3.x) a = max(a, patch(p, u_pat3, u_patSoft.w));
         // --- end package F ---
         // car3 G: BMW's map between our dials gets soft edges (docs/CAR3-G-REPORT.md): black beside and above the
         // window u_wbox (x, y, w, h, measured on the car photos 41 and 42), fading to clear over u_fade.y px at its
@@ -1557,15 +1588,30 @@ void main() {
         // window's foot, which is the panel's top less a margin) nor on BMW's right "i" (u_shadeKo)
         if (u_wbox.z > 0.0 && between > 0.5) {
             float ex = min(p.x - u_wbox.x, u_wbox.x + u_wbox.z - p.x), yb = u_wbox.y + u_wbox.w;
-            float vis = veil(ex / max(u_fade.y, 1.0)) * veil((p.y - u_wbox.y) / max(u_fade.x, 1.0));
-            float mv = (1.0 - vis) * clamp((min(dl, dr) + 2.0) / 3.0, 0.0, 1.0);
-            mv *= 1.0 - smoothstep(yb - max(u_fade.z, 1.0), yb, p.y);
+            // 2026-11-14: the very shape of 6WB Comfort's map window (round corners, the foot faded too, shaded off
+            // the dials' rims over u_fade.w px). The collar's cover of BMW's stock dials stays off it (its straight
+            // edges at x 704 / 1204 squared the top corners), and the black runs 4 px under our rims (no hairline)
+            vec2 q = vec2(1.0 - clamp(ex / max(u_fade.y, 1.0), 0.0, 1.0),
+                          1.0 - clamp(min((p.y - u_wbox.y) / max(u_fade.x, 1.0), (yb - p.y) / max(u_fade.z, 1.0)), 0.0, 1.0));
+            float vis = veil(1.0 - length(q)) * (ex > 0.0 ? 1.0 : 0.0);
+            if (u_fade.w > 0.0) vis *= smoothstep(0.0, u_fade.w, min(dl, dr));
+            a *= 1.0 - vis;
+            float mv = (1.0 - vis) * clamp((min(dl, dr) + 6.0) / 3.0, 0.0, 1.0);
+            mv *= 1.0 - smoothstep(yb + 2.0, yb + 4.0, p.y);             // to the info field's top (CC_TOP, y 598)
             if (u_shadeKo.z > u_shadeKo.x) mv *= smoothstep(0.0, 2.0, boxOut(p, u_shadeKo, 0.0));
             a = max(a, mv);
         }
         // --- end car3 G ---
+        // 2026-11-14: the window's foot line as in 6WB Comfort ("wbFoot"), over the black foot band
+        vec4 L = footLine(p);
+        vec3 fc = vec3(0.0);
+        if (L.a > 0.0) {
+            float a2 = L.a + a * (1.0 - L.a);
+            fc = L.rgb * L.a / max(a2, 1e-4);
+            a = a2;
+        }
         if (u_cc.z > u_cc.x) a *= smoothstep(-0.5, 3.0, boxOut(p, u_cc, 8.0));      // the message panel shows
-        gl_FragColor = vec4(0.0, 0.0, 0.0, a);
+        gl_FragColor = vec4(min(fc, vec3(1.0)), a);
         return;
     }
     // the soft window (u_wbox): its sides and the dials' rims shade it, its top and bottom fade the map
@@ -1673,24 +1719,8 @@ void main() {
         alpha = smoothstep(-1.5, 0.5, sd);
         col = mix(col, vec3(0.22, 0.26, 0.33), clamp(1.6 - abs(sd - 1.0), 0.0, 1.0) * 0.8);
     }
-    if (u_foot.x > 0.5 && u_foot.x < 2.5 && abs(p.y - u_foot.y) < 12.0) {
-        // the line at the window's foot, drawn over the map's fade: 1 a hairline fading out at both ends (the 6WB's
-        // own info bar line), 2 a chrome rod with round caps, shaded as our dial bezels
-        float t = (p.x - u_foot.z) / (u_foot.w - u_foot.z), dy = p.y - u_foot.y;
-        vec4 L = vec4(0.0);
-        if (u_foot.x < 1.5) {
-            float env = smoothstep(0.0, 0.30, t) * (1.0 - smoothstep(0.70, 1.0, t));
-            float core = clamp(1.4 - abs(dy), 0.0, 1.0), halo = exp(-abs(dy) / 2.4);
-            L = vec4(0.80, 0.85, 0.92, env * max(0.95 * core, 0.26 * halo));
-        } else {
-            // the bezels' profile (a bright lip on top, a dark groove, a dimmer lower ridge), sampled off our dials
-            float hh = 4.0, len = u_foot.w - u_foot.z;
-            float ax = max(abs(p.x - (u_foot.z + u_foot.w) * 0.5) - (len * 0.5 - hh), 0.0);
-            float cov = clamp(hh + 0.5 - length(vec2(min(ax, 16.0), dy) / 16.0) * 16.0, 0.0, 1.0);   // fp16-safe
-            float lum = 0.06 + 0.72 * exp(-(dy + 1.8) * (dy + 1.8) / 1.4) + 0.40 * exp(-(dy - 2.2) * (dy - 2.2) / 1.0);
-            float spec = 0.70 + 0.30 * exp(-(t - 0.5) * (t - 0.5) / 0.06);         // brightest in the middle
-            L = vec4(vec3(0.97, 0.98, 1.0) * lum * spec, cov);
-        }
+    vec4 L = footLine(p);
+    if (L.a > 0.0) {
         float a2 = L.a + alpha * (1.0 - L.a);
         col = (L.rgb * L.a + col * alpha * (1.0 - L.a)) / max(a2, 1e-4);
         alpha = a2;

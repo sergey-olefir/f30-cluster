@@ -109,8 +109,8 @@
         "ticks": 4
       },
       "minor": 2,
-      "start": 135,
-      "sweep": 185,
+      "start": 153,
+      "sweep": 181.5,
       "redTo": 0.1
     },
     {
@@ -139,8 +139,8 @@
         "ticks": 4
       },
       "minor": 2,
-      "start": 135,
-      "sweep": 185,
+      "start": 153,
+      "sweep": 181.5,
       "flip": true,
       "coldTo": 0.1,
       "redFrom": 0.9
