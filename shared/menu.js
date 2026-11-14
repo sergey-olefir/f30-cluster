@@ -73,6 +73,7 @@ class Menu {
     start() {
         const ctx = this.ctx, ui = this.ui;
         ui.onClick('BTN_GALLERY', () => this.guard('gallery', () => ui.open('GALLERY')));
+        // BTN_SETTINGS (the second screen, app.json SETTINGS: every other setting) is the kit's own: mgu.js opens it
         ui.onClick('NOW', () => this.guard('now', () => {
             const scr = this.hud.screen;
             // stepping aside for the other app: a press takes the screen back; else the gallery
