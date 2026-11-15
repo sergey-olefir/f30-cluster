@@ -31,7 +31,8 @@
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {
       "statusEngineSpeed2": "rs",
-      "statusEngineTemperature": "rs"
+      "statusEngineTemperature": "rs",
+      "statusEngineStatus": "rs"
     },
     "de.bmw.infotainment.vehicle.CDS2": {
       "statusLongitudinalAccelerationMassCenter": "rs",
@@ -64,7 +65,12 @@
     },
     "de.bmw.infotainment.vehicle.Vehicle": {
       "statusNewCurrentUnitsStatusExt": "rs",
-      "_optional": "the car's pressure and temperature units, for the tyre block"
+      "statusMotorStartAuto": "s",
+      "_optional": "the car's pressure and temperature units, for the tyre block; statusMotorStartAuto: auto start/stop (config.msa)"
+    },
+    "de.bmw.infrastructure.VehicleCondition": {
+      "VehicleCondition": "s",
+      "_optional": "BMW's own vehicle state (statusConditionVehicle): 10 FAHREN = drive-ready, so a stopped engine rests the rev needle at READY, not OFF"
     },
     "de.bmw.infotainment.misc.MDrive": {
       "dataDisplayGearbox": "s",
@@ -1179,7 +1185,40 @@
     },
     "limit": null,
     "nopass": null,
-    "msa": null,
+    "msa": {
+      "iface": "de.bmw.infotainment.vehicle.Vehicle",
+      "field": "statusMotorStartAuto",
+      "path": [
+        "statusConditionMSA"
+      ],
+      "map": {
+        "0": null,
+        "INITIALISIERUNG": null,
+        "1": "unavailable",
+        "FUNKTION_PASSIV": "unavailable",
+        "2": "active",
+        "FUNKTION_AKTIV__MINUS__MOTOR_LAEUFT": "active",
+        "3": "stopped",
+        "MOTORSTOPP_BEABSICHTIGT": "stopped",
+        "4": "stopped",
+        "MOTORSTOPP_BEABSICHTIGT_MIT_GAA": "stopped",
+        "5": "stopped",
+        "MOTORSTOPP_BEABSICHTIGT_MIT_NUEN": "stopped",
+        "7": "stopped",
+        "MOTORSTOPP_IM_GANG": "stopped",
+        "8": "stopped",
+        "MOTOR_AUS": "stopped",
+        "9": "active",
+        "MOTORSTART_MIT_STARTSYSTEM": "active",
+        "10": "active",
+        "MOTORSTART_DURCH_VERBRENNUNGSENERGIE": "active",
+        "12": "off",
+        "FUNKTION_PASSIV_DURCH_BEDIENELEMENT": "off",
+        "15": null,
+        "SIGNAL_UNBEFUELLT": null
+      },
+      "_from": "audit/features, from the car's own catalogue (/etc/oap/someip/someip-interfaces.json, StatusConditionMSA). Flag s: notifier only, so the first value comes with the first change. The raw value is logged once per new value ('msa raw: ... -> ...'); check it on the car at a start/stop stop, with the MSA button off, and with a cold engine."
+    },
     "clock": null,
     "ccm": null,
     "drive": null,
