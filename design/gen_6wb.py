@@ -246,21 +246,28 @@ CC_TOP_SOFT = 13
 # ownInfo, "BMW's" by default); "ours" is wired here with PLACEHOLDER drawing - our own fonts and boxes at the stock
 # places, not yet the faithful G20 look. THE SEAM: everything below this comment down to "end bottom row" is what the
 # next agent replaces from docs/G20-DESIGN-SPEC.md and docs/ROAD-SHIELDS.md; nothing outside it needs to change.
-# BMW's check-control panel again (CC_BOX), split in two: the left column where the car draws its own symbol and its
-# animation (the "i", the open door, the heated wheel; catalogue bottom.cc_info [736, 637, 753, 682], with room round
-# it for the wider symbols) stays see-through while the message is ours, and our text goes in the rest.
-CC_SYM = [709, 598, 790, 694]
-CC_TEXT_X = 800                      # our message text starts here, clear of BMW's symbol
-CC_TEXT_W = CC_BOX[2] - CC_TEXT_X - 6
-# BMW's bottom-centre road label (catalogue bottom.street [795, 669, 1126, 709]), the line the check-control message
-# shares with it. Our black bar starts at x 690: clear of the rear-belt, driver-belt and airbag lamps (they end at
-# x 679 and are never covered), and runs into the black over BMW's mode label. While a message shows AND the info
-# field is BMW's, a hole in the bar opens over the panel so BMW's own message text is not covered.
+# The check-control field, from docs/G20-DESIGN-SPEC.md (design/g20-spec/measured.json, 2026-11-15): it is NOT a
+# box. A 4.9 px rail runs flat at y 604.8 from x 749 to 1176 and tapers to points at (702, 621) and (1221, 621); the
+# symbol slot is right-aligned at x 752.9, centre y 658.7, at most 41.3 px wide and 45-53 px tall; the text is
+# centred on x 967.5, one line at baseline 671.2 or two at 645.8 and 690.2 (leading 44.4), cap height 27.0.
+# While the message is ours, CC_SYM is the only part of BMW's panel left see-through, so the car keeps drawing its
+# own symbol and its animation there (WBBACK u_cc is one box, so only one can be opened: the rail is NOT exposed -
+# a second box would be a second vec4 in the shader, which the bottom-row package was not allowed to add. Either
+# the drawing package draws the rail itself from the numbers above, or it adds that uniform).
+CC_SYM = [700, 628, 757, 690]        # round the measured symbol slot, with room for the widest symbol seen
+CC_TEXT_C = 967.5                    # the measured text centre, not the panel's
+CC_TEXT_W = 420                      # 757.5..1177.5: clear of the symbol slot (752.9) and inside the rail's flat part (1176)
+CC_LINE_Y = [645.8, 690.2]           # the measured two-line baselines (one line: 671.2)
+# BMW's bottom-centre road label: centred on x 960.5, baseline y 700.5, cap height 30.9, descender 8 px, the widest
+# seen 509 px (measured). Our black bar masks BMW's own text there; it starts at x 690, clear of the rear-belt,
+# driver-belt and airbag lamps (they end at x 679 and are never covered), and runs into the black over BMW's mode
+# label. While a message shows AND the info field is BMW's, a hole in the bar opens over the panel so BMW's own
+# message text is not covered. The stock field has no fill of its own; ours is only there to hide BMW's label.
 NAV_BAR = [690, 666, 1250, 712]
 NAV_HOLE = [CC_BOX[0], 666, CC_BOX[2], 712]
-# our road label's centre, on BMW's street line, and its width: WIDER than BMW's own 331 px street field, so a long
-# road name is not shrunk (the owner, 2026-11-15, with docs/ROAD-SHIELDS.md)
-NAV_C, NAV_W = (960, 689), 540
+# our road label: BMW's centre and baseline, and WIDER than BMW's own field so a long name is not shrunk
+# (the owner, 2026-11-15, with docs/ROAD-SHIELDS.md; the widest street measured is 509 px)
+NAV_CX, NAV_BASE, NAV_W = 960.5, 700.5, 540   # 690.5..1230.5: the bar's own width, and 31 px wider than the widest street measured
 # --- end bottom row ---
 # --- package F (docs/POLISH-F-REPORT.md): 6WB Dials + G20's bottom row ---
 # the full-size cover over BMW's bottom lines, hooks and grey dash (tools/overlay/plan_dials.py COVER_BOX, packed by
@@ -323,17 +330,26 @@ def nav_row():
         {"id": "nav_bg", "type": "fill", "class": "content", "z": 2, "x": NAV_BAR[0], "y": NAV_BAR[1],
          "w": NAV_BAR[2] - NAV_BAR[0], "h": NAV_BAR[3] - NAV_BAR[1], "color": "bg", "toggle": "own:nav",
          "hole": [NAV_HOLE[0], NAV_HOLE[1], NAV_HOLE[2] - NAV_HOLE[0], NAV_HOLE[3] - NAV_HOLE[1]],
-         "holeWhen": "cc:shown&!own:info", "holeInset": 0, "holeRadius": 0, "conn": 0},
-        text("nav", NAV_C[0], NAV_C[1], NAV_W, "{{road}}", "wb_val", conn=1, toggle="own:nav"),
+         # connection 1, not 0: connection 0 already carries 7 of its 8 layers in these themes, and this one is the
+         # only effect layer the package adds (8 per connection is cluster-render's hard cap)
+         "holeWhen": "cc:shown&!own:info", "holeInset": 0, "holeRadius": 0, "conn": 1},
+        # wb_cap is the only 6WB font with letters in it (wb_val is digits and units): the placeholder uses it on
+        # the measured centre and baseline. It has no Cyrillic and no accents, and the owner's cluster is in
+        # Ukrainian, so on the car this label hands itself back to BMW until the drawing package bakes the measured
+        # font (Roboto, width axis 87.5, Light here against the values' Medium) - shared/hud.js _missingGlyphs
+        text("nav", NAV_CX, base_at("wb_cap", NAV_BASE), NAV_W, "{{road}}", "wb_cap", conn=1, toggle="own:nav"),
     ]
 
 def cc_row():
     """Our check-control text at BMW's place, only while the info field is ours. The car keeps drawing the symbol and
     its animation in CC_SYM (hud.js _wbCcSend opens only that box): we draw the name and the description beside it."""
     return [
-        text("cc_name", CC_TEXT_X, 640, CC_TEXT_W, "{{ccName}}", "wb_val", align="left", conn=2,
-             toggle="own:info", colorBy="cc"),
-        text("cc_desc", CC_TEXT_X, 674, CC_TEXT_W, "{{ccDesc}}", "wb_cap", "dim", align="left", conn=2,
+        # the two measured baselines, centred on the measured text centre (not the panel's); same font caveat as nav
+        # white only for now (the owner, 2026-11-15): cCColor is read and recorded but not drawn. THE SEAM is this
+        # one argument - add colorBy="cc" and shared/hud.js _ccRole() colours the line by the car's own severity
+        text("cc_name", CC_TEXT_C, base_at("wb_cap", CC_LINE_Y[0]), CC_TEXT_W, "{{ccName}}", "wb_cap", conn=2,
+             toggle="own:info"),
+        text("cc_desc", CC_TEXT_C, base_at("wb_cap", CC_LINE_Y[1]), CC_TEXT_W, "{{ccDesc}}", "wb_cap", "dim", conn=2,
              toggle="own:info"),
     ]
 # --- end bottom row ---

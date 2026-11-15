@@ -61,14 +61,26 @@ const SCENES = {
             desc: 'The front passenger airbag and belt tensioner may not work in an accident. Have the system checked by the nearest BMW Service. Drive on with care.',
         },
     },
-    'cc-clear': { cc: { clear: true }, ccList: [] },
+    'cc-clear': { cc: { clear: true }, ccList: [], ccFrame: { frame: 0, of: 0, ids: [0, 0, 0] } },
+    // the car cycles numbered frames (docs/G20-DESIGN-SPEC.md): no frame here, so ours runs its own clock
     'cc-three': {
-        cc: { name: 'Tyre pressure', desc: 'Check the tyre pressure.', color: 'yellow', symbol: 44 },
+        cc: { name: 'Tyre pressure', desc: 'Check the tyre pressure.', color: 'yellow', symbol: 44, id: 101 },
         ccList: [
-            { name: 'Tyre pressure', color: 'yellow' },
-            { name: 'Washer fluid low', color: 'orange' },
-            { name: 'Engine malfunction', color: 'red' },
+            { name: 'Tyre pressure', color: 'yellow', id: 101 },
+            { name: 'Washer fluid low', color: 'orange', id: 102 },
+            { name: 'Engine malfunction', color: 'red', id: 103 },
         ],
+        ccFrame: { frame: 0, of: 0, ids: [0, 0, 0] },
+    },
+    // the same three with the car saying which frame it is on: ours must follow it, not its own clock
+    'cc-frame-2': {
+        cc: { name: 'Tyre pressure', desc: 'Check the tyre pressure.', color: 'yellow', symbol: 44, id: 101 },
+        ccList: [
+            { name: 'Tyre pressure', color: 'yellow', id: 101 },
+            { name: 'Washer fluid low', color: 'orange', id: 102 },
+            { name: 'Engine malfunction', color: 'red', id: 103 },
+        ],
+        ccFrame: { frame: 2, of: 3, ids: [101, 102, 103] },
     },
     'clock-plus2': { clock: { minutes: 120, dst: false } },
     'clock-none': { clock: { minutes: null } },
@@ -84,7 +96,7 @@ const SCENES = {
 
 function install(hu, config, log) {
     const cfg = config || {};
-    const last = { sign: null, cc: null, road: null, nav: null, scene: null };
+    const last = { sign: null, cc: null, road: null, nav: null, sla: null, scene: null };
     const named = (s) => !!(s && s.iface && s.field);
     const say = (m) => { if (log && log.info) log.info('bench: fake ' + m); };
 
@@ -100,8 +112,8 @@ function install(hu, config, log) {
             : s.unit === 'mph' ? (c.mph || [1])[0] : 0;
         put(c.unitPath, unitRaw);
         const val = s.state === 'limit' ? Math.round(Number(s.value) / (typeof c.factor === 'number' && c.factor ? c.factor : 1))
-            : s.state === 'end' ? (c.end || [250])[0]
-                : s.state === 'unknown' ? (c.unknown || [254])[0] : (c.none || [0])[0];
+            : s.state === 'end' ? (c.end || [0])[0]
+                : s.state === 'unknown' ? (c.unknown || [254])[0] : (c.none || [])[0];
         put(c.valuePath, val);
         put(c.warnPath, rawFor(c.warnMap, Number(s.warn) || 0, 0));
         put(c.suppPath, rawFor(c.suppMap, s.supp === undefined ? null : s.supp, 0));
@@ -165,14 +177,48 @@ function install(hu, config, log) {
     function feedCcList(list) {
         const c = cfg.ccList;
         if (!named(c)) return;
-        const els = (Array.isArray(list) ? list : []).map((m) => {
+        const arr = Array.isArray(list) ? list : [];
+        const els = arr.map((m, i) => {
             let inner = {};
             const put = (path, val) => { if (path) merge(inner, nest(path, val)); };
             put(c.namePath, String(m.name || ''));
+            put(c.idPath, isFinite(Number(m.id)) && m.id !== undefined ? Number(m.id) : 100 + i);
             put(c.colorPath, rawFor(c.colorMap, m.color || 'default', 0));
             return nest(c.root, inner);
         });
+        last.ccList = arr.length;
         hu.feed(c.iface, c.field, nest(c.path, els));
+    }
+
+    /** The driver's own speed-limit settings (read only on the car; here just fed). { warn, warn2, show,
+     *  offset, offsetSlow, offsetSlowOn }, each "on" / "off" / null, the offsets a number. */
+    function feedSla(v) {
+        const c = cfg.sla;
+        if (!c || !c.iface || !Array.isArray(c.parts)) return;
+        const n = v || {};
+        c.parts.forEach((p) => {
+            if (!p || !p.field || !(p.key in n)) return;
+            let out = {};
+            const put = (path, val) => { if (path) merge(out, nest(path, val)); };
+            put(p.valuePath, p.number ? Math.max(0, Math.round(Number(n[p.key]) || 0)) : rawFor(c.onMap, n[p.key], 0));
+            put(p.availPath, rawFor(c.availMap, n[p.key] === null ? null : 'ok', 2));
+            hu.feed(c.iface, p.field, out);
+        });
+        last.sla = Object.assign({}, last.sla || {}, n);
+    }
+
+    /** Which frame of how many the car says it is showing (KombiIF statusMenuCCMessage). */
+    function feedCcFrame(v) {
+        const c = cfg.ccFrames;
+        if (!named(c)) return;
+        const n = v || {};
+        let out = {};
+        const put = (path, val) => { if (path) merge(out, nest(path, val)); };
+        put(c.numPath, Math.max(0, Math.round(Number(n.frame) || 0)));
+        put(c.countPath, Math.max(0, Math.round(Number(n.of) || 0)));
+        (Array.isArray(c.idPaths) ? c.idPaths : []).forEach((p, i) => put(p, (n.ids || [])[i] === undefined ? 0 : Number(n.ids[i])));
+        last.ccFrame = n;
+        hu.feed(c.iface, c.field, out);
     }
 
     /** The car's own clock: the time-zone offset config.clock reads (kind "offset"). */
@@ -232,6 +278,8 @@ function install(hu, config, log) {
         if (o.sign) feedSign(o.sign);
         if (o.cc) feedCc(o.cc);
         if (o.ccList) feedCcList(o.ccList);
+        if (o.ccFrame) feedCcFrame(o.ccFrame);
+        if (o.sla) feedSla(o.sla);
         if (o.road) feedRoad(o.road);
         if (o.nav) feedNav(o.nav);
         if (o.clock) feedClock(o.clock);

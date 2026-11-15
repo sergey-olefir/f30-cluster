@@ -63,6 +63,7 @@
       "statusRangeTankStatus": "rs",
       "timeDateUTC": "rs",
       "statusTimeDate": "rs",
+      "statusMenuCCMessage": "rs",
       "_optional": "the car's own clock and its time-zone offset (config.clock), so our clock no longer needs the manual timeZone setting (the head unit runs on UTC)"
     },
     "de.bmw.infotainment.vehicle.Vehicle": {
@@ -88,6 +89,15 @@
     "de.bmw.infotainment.fasus.FASuS": {
       "statusNextSpeedLimitRecognition": "rs",
       "_optional": "the NEXT limit ahead, not the one in force; not drawn yet, read for calibration"
+    },
+    "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions": {
+      "settingSpeedLimitInfoPresentation": "rs",
+      "settingSpeedLimitInfoWarning": "rs",
+      "settingSpeedLimitWarningSecondLevel": "rs",
+      "settingOffsetSpeed": "rs",
+      "settingOffsetSpeedSlow": "rs",
+      "settingOffsetSpeedSlowActivation": "rs",
+      "_optional": "the driver's OWN speed-limit settings, so our red arc follows the car's excess-speed display instead of our own guess. READ ONLY ON PURPOSE: every one of these is \"rws\" in the car's catalogue, and the flags here say \"rs\", so the installer leaves the setter out of our interface config and the app cannot write a driver-assistance setting even by mistake."
     },
     "de.bmw.infotainment.KombiInterface_2": {
       "newCCMessage": "rs",
@@ -452,8 +462,22 @@
     {
       "key": "limitArc",
       "label": "Red arc over the speed limit",
-      "type": "bool",
-      "default": true
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "As the car's own warning"
+        ],
+        [
+          "on",
+          "Always when over the limit"
+        ],
+        [
+          "off",
+          "Off"
+        ]
+      ]
     },
     {
       "key": "modeLabel",
@@ -1323,8 +1347,10 @@
       "unitPath": ["displaySpeedLimitUnit"],
       "mph": ["MPH", 1],
       "noUnit": ["NICHT_VERFUEGBAR", 2],
-      "none": [0],
+      "none": [],
+      "end": [0],
       "unknown": [254, 255],
+      "_values": "The raw speed values follow the convention of the car's own FASuS NextClassLimitSpeed enum, which is the only one in the catalogue that spells them out: 0 = AUFHEBUNG_ALLES (the end of all restrictions, the derestriction sign), 254 = NICHT_VERFUEGBAR and 255 = SIGNAL_UNBEFUELLT (no limit known, BMW's empty sign). displaySpeedLimit itself is a plain UInt8 with no names, so this is reasoning, not proof: the 'sign:' log line on the car settles it. \"none\" is empty on purpose - the owner's cluster essentially always shows a sign (2026-11-15).",
       "warnPath": ["displaySpeedLimitWarning"],
       "warnMap": {
         "SLI_WARNUNG_NICHT_ANGEFORDERT": 0, "0": 0,
@@ -1373,7 +1399,11 @@
       },
       "npDistPath": ["displayRemainingDistanceNoPassingRestriction"],
       "holdMs": 0,
-      "_hold": "The stock cluster animates the end of a limit and then shows the new one, and a sign is essentially always present (the owner, 2026-11-15), so there is no \"hide the sign\" state. holdMs keeps the last sign on while the car briefly says nothing; the animation itself lands in shared/hud.js _signShow() once docs/G20-DESIGN-SPEC.md has measured it.",
+      "changeFlashMs": 3000,
+      "flashPeriodMs": 500,
+      "_hold": "The stock cluster animates the end of a limit and then shows the new one, and a sign is essentially always present (the owner, 2026-11-15), so there is no \"hide the sign\" state. holdMs keeps the last sign on while the car briefly says nothing; the animation itself lands in shared/hud.js _signShow().",
+      "_timings": "changeFlashMs / flashPeriodMs are docs/G20-DESIGN-SPEC.md's PLACEHOLDERS for the flash after a limit changes - there is no video in the reference set, so nothing was measured. They are parameters only; nothing acts on them yet.",
+      "_empty": "docs/G20-DESIGN-SPEC.md: BMW's empty sign is THREE DASHES, 8.8 x 4.4 at pitch 13, not a blank disc. That is WBSIGN's u_show state 3, which this package already drives; whether the shader draws dashes is the drawing package's to check.",
       "_mph": "The unit is read and recorded ({{limitUnit}}, the 'sign:' log line) but changes nothing on screen: the sign stays the round one with the number, in every country (the owner, 2026-11-15)."
     },
     "ccm": {
@@ -1396,7 +1426,39 @@
       "idPath": ["cCIdentifier"],
       "typePath": ["cCType"],
       "clearIds": [],
-      "cycleMs": 4000
+      "ccFrameDwellMs": 4000,
+      "autoHideMs": 20000,
+      "reshowMs": 8000,
+      "_timings": "PARAMETERS ONLY - nothing acts on any of them. This package builds STATES, not animations (the owner, 2026-11-15): a message appears and disappears with no flash. ccFrameDwellMs is docs/G20-DESIGN-SPEC.md's guess at how long one frame of a cycling message is shown, which we do not need because the car says which frame it is on itself (config.ccFrames). autoHideMs / reshowMs are BMW's manual's ~20 s auto-hide and ~8 s hide-then-reshow. They live here so animation can be added later without touching the drawing.",
+      "_colour": "White only for now (the owner, 2026-11-15): cCColor is read and recorded but every message is drawn in the theme's normal foreground. The seam is one line - put \"colorBy\": \"cc\" back on the cc_name text in design/gen_6wb.py cc_row(), which turns on shared/hud.js _ccRole()."
+    },
+    "sla": {
+      "_about": "The driver's own speed-limit settings (read only). The red arc on our speed scale follows the car's own excess-speed verdict instead of comparing speed against the sign ourselves: displaySpeedLimitWarning in the sign struct says WHEN the car considers the driver over, and \"warn\" below says whether the driver asked for that warning at all. The offsets are the tolerance the driver set; we do not need them to draw, and they are read for the log so the car's behaviour can be understood.",
+      "_readonly": "Nothing here is ever written. The fields are \"rws\" on the car; app.json declares them \"rs\", so our generated interface config has no setter.",
+      "iface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "instance": "1",
+      "onMap": { "ACTIVATED": "on", "2": "on", "DEACTIVATED": "off", "1": "off", "NOT_CONFIGURABLE": null, "0": null },
+      "availMap": { "OPERABLE": "ok", "2": "ok", "NOT_OPERABLE": "notNow", "1": "notNow", "NOT_AVAILABLE": null, "0": null },
+      "parts": [
+        { "key": "warn", "field": "settingSpeedLimitInfoWarning", "valuePath": ["value"], "availPath": ["availability"], "note": "THIS is the field taken as \"the excess-speed display is on\"" },
+        { "key": "warn2", "field": "settingSpeedLimitWarningSecondLevel", "valuePath": ["value"], "availPath": ["availability"] },
+        { "key": "show", "field": "settingSpeedLimitInfoPresentation", "valuePath": ["value"], "availPath": ["availability"] },
+        { "key": "offset", "field": "settingOffsetSpeed", "valuePath": ["value"], "availPath": ["availability"], "number": true },
+        { "key": "offsetSlow", "field": "settingOffsetSpeedSlow", "valuePath": ["value"], "availPath": ["availability"], "number": true },
+        { "key": "offsetSlowOn", "field": "settingOffsetSpeedSlowActivation", "valuePath": ["value"], "availPath": ["availability"] }
+      ]
+    },
+    "ccFrames": {
+      "_about": "Which frame of how many the stock cluster is showing. docs/G20-DESIGN-SPEC.md: the car CYCLES NUMBERED FRAMES, it does not stack or side-scroll, and this field is how it says so. When it arrives, our text follows the car's frame exactly instead of running its own clock.",
+      "iface": "de.bmw.infotainment.KombiIF",
+      "field": "statusMenuCCMessage",
+      "numPath": ["numberFrameCheckControlMessageScroll"],
+      "countPath": ["quantityFrameCheckControlMessageScroll"],
+      "idPaths": [
+        ["numberCheckControlMessage1"],
+        ["numberCheckControlMessage2"],
+        ["numberCheckControlMessage3"]
+      ]
     },
     "ccList": {
       "_about": "Several messages at once: the car cycles through this list, and ours steps through it on the same clock (the owner, 2026-11-15). Each element carries a short name and a colour; config.ccm.cycleMs is how long each one is shown. The stock order and timing are being measured in docs/G20-DESIGN-SPEC.md.",
@@ -1405,6 +1467,7 @@
       "path": [],
       "root": ["cCListElement"],
       "namePath": ["cCShortName"],
+      "idPath": ["cCIdentifer"],
       "colorPath": ["cCColor"],
       "colorMap": {
         "DEFAULT": "default", "0": "default",

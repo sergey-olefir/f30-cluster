@@ -97,10 +97,10 @@
         694
       ],
       "ccSym": [
-        709,
-        598,
-        790,
-        694
+        700,
+        628,
+        757,
+        690
       ],
       "window": [
         600,
@@ -701,18 +701,18 @@
       "holeWhen": "cc:shown&!own:info",
       "holeInset": 0,
       "holeRadius": 0,
-      "conn": 0
+      "conn": 1
     },
     {
       "id": "nav",
       "type": "text",
       "z": 5,
       "x": 690,
-      "y": 673,
+      "y": 682,
       "w": 540,
-      "h": 32,
+      "h": 26,
       "text": "{{road}}",
-      "font": "wb_val",
+      "font": "wb_cap",
       "color": "fg",
       "align": "center",
       "conn": 1,
@@ -722,30 +722,29 @@
       "id": "cc_name",
       "type": "text",
       "z": 5,
-      "x": 800,
-      "y": 624,
-      "w": 437,
-      "h": 32,
+      "x": 758,
+      "y": 627,
+      "w": 420,
+      "h": 26,
       "text": "{{ccName}}",
-      "font": "wb_val",
+      "font": "wb_cap",
       "color": "fg",
-      "align": "left",
+      "align": "center",
       "conn": 2,
-      "toggle": "own:info",
-      "colorBy": "cc"
+      "toggle": "own:info"
     },
     {
       "id": "cc_desc",
       "type": "text",
       "z": 5,
-      "x": 800,
-      "y": 661,
-      "w": 437,
+      "x": 758,
+      "y": 671,
+      "w": 420,
       "h": 26,
       "text": "{{ccDesc}}",
       "font": "wb_cap",
       "color": "dim",
-      "align": "left",
+      "align": "center",
       "conn": 2,
       "toggle": "own:info"
     }

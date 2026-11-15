@@ -170,13 +170,26 @@ async function main() {
     ok(S(p).cc.name === 'Engine malfunction' && /Drive on/.test(S(p).cc.desc), 'and the text is the car\'s own (' + S(p).cc.name + ')');
     ok(S(p).road === '', 'the road label steps aside while a message shows, as BMW does');
 
-    console.log('several messages at once: the car cycles them, so do we');
+    console.log('several messages at once: the car numbers its frames, and we follow that counter');
     await scene('cc-three');
     p = await until((q) => S(q).cc && S(q).cc.list === 3, 4000);
     ok(S(p).cc.list === 3, 'the list of three is read');
     const seen = {};
-    for (let i = 0; i < 24; i++) { const q = await probe(); if (S(q).cc && S(q).cc.name) seen[S(q).cc.name] = 1; await sleep(500); }
-    ok(Object.keys(seen).length >= 2, 'the text steps through the list (' + Object.keys(seen).length + ' of 3 seen in 12 s)');
+    for (let i = 0; i < 20; i++) { const q = await probe(); if (S(q).cc && S(q).cc.name) seen[S(q).cc.name] = 1; await sleep(500); }
+    ok(Object.keys(seen).length === 1 && seen['Tyre pressure'],
+        'with no frame counter from the car nothing cycles: the newest message stays (' + Object.keys(seen).join(', ') + ')');
+    await scene('cc-frame-2');
+    p = await until((q) => S(q).cc && S(q).cc.frame && S(q).cc.frame.of === 3, 4000);
+    ok(S(p).cc.frame.n === 2 && S(p).cc.frame.of === 3, 'the frame number and count are read (' + JSON.stringify(S(p).cc.frame) + ')');
+    const held = {};
+    for (let i = 0; i < 20; i++) { const q = await probe(); if (S(q).cc && S(q).cc.name) held[S(q).cc.name] = 1; await sleep(500); }
+    ok(Object.keys(held).length === 1 && held['Washer fluid low'],
+        'frame 2 of 3 shows the car\'s own second message, and holds it (' + Object.keys(held).join(', ') + ')');
+    await fake({ ccFrame: { frame: 3, of: 3, ids: [101, 102, 103] } });
+    p = await until((q) => S(q).cc && S(q).cc.name === 'Engine malfunction', 5000);
+    ok(S(p).cc.name === 'Engine malfunction', 'frame 3 of 3 steps to the third (' + S(p).cc.name + ')');
+
+    await scene('cc-clear');
 
     console.log('back to BMW\'s, one row and then all six');
     await set('ownSign', 'bmw');
@@ -191,14 +204,46 @@ async function main() {
     p = await until((q) => JSON.stringify(S(q).widgets) === '[]', 20000);
     ok(JSON.stringify(S(p).widgets) === '[]', 'nothing of ours is built for the six again');
 
+    console.log('the red arc follows the car\'s own warning, and the driver\'s own setting');
+    // live data at 120 km/h, so the "always" case has a speed to compare against the sign
+    await req('POST', '/signals', { mode: 'manual', values: { rpm: 2000, speed: 120, gear: 5, oil: 95, coolant: 90 } });
+    await fake({ sla: { warn: 'on', warn2: 'on', show: 'on', offset: 3 } });
+    await fake({ sign: { state: 'limit', value: 80, unit: 'kmh', warn: 0 } });
+    p = await until((q) => S(q).arc === false, 5000);
+    ok(S(p).arc === false, 'the car says the driver is not over: no arc');
+    await fake({ sign: { state: 'limit', value: 80, unit: 'kmh', warn: 1 } });
+    p = await until((q) => S(q).arc === true, 5000);
+    ok(S(p).arc === true, 'the car warns at level 1: the arc is on');
+    await fake({ sla: { warn: 'off' } });
+    p = await until((q) => S(q).arc === false, 5000);
+    ok(S(p).arc === false, 'the driver switched the warning off in the car\'s menu: the arc stays off');
+    await set('limitArc', 'on');
+    p = await until((q) => S(q).arc === true, 8000);
+    ok(S(p).arc === true, '"Always when over the limit" overrides the car\'s menu');
+    await set('limitArc', 'off');
+    p = await until((q) => S(q).arc === false, 8000);
+    ok(S(p).arc === false, '"Off" is off');
+    await set('limitArc', 'auto');
+    await fake({ sla: { warn: 'on' } });
+
     console.log('the car\'s clock: read and logged, not used until it is confirmed');
     await fake({ clock: { minutes: 120, dst: false } });
     p = await until((q) => S(q).tzCandidate === 120, 5000);
     ok(S(p).tzCandidate === 120, 'the car\'s offset is parsed (' + S(p).tzCandidate + ' minutes)');
     ok(S(p).tzCar === null, 'but not used while config.clock.confirm is false (tzCar ' + S(p).tzCar + ')');
 
-    console.log('the way back when a signal is missing');
-    ok(JSON.stringify(S(p).fail) === '{}', 'nothing fell back while every signal was there (' + JSON.stringify(S(p).fail) + ')');
+    console.log('the way back');
+    ok(JSON.stringify(S(p).fail) === '{}', 'nothing fell back while every signal was there and could be drawn (' + JSON.stringify(S(p).fail) + ')');
+    // a word our baked font has no glyph for: the element gives itself back to the car rather than draw holes
+    await set('ownNav', 'ours');
+    await until((q) => (S(q).widgets || []).indexOf('nav') >= 0, 20000);
+    await fake({ road: { text: 'Львівська' } });
+    p = await until((q) => S(q).fail && S(q).fail.nav, 20000);
+    ok(S(p).fail && S(p).fail.nav === true, 'a street name the font cannot draw gives the label back to BMW');
+    p = await until((q) => (S(q).widgets || []).indexOf('nav') < 0, 20000);
+    ok((S(p).widgets || []).indexOf('nav') < 0, 'and our label is dropped, so the car draws its own again');
+    ok(/bottom row: nav is BMW's again \(the font/.test(logText), 'the log says which font and how many characters, not the name');
+    await set('ownNav', 'bmw');
 
     console.log('every layout still builds');
     for (const v of opts('hudLayout')) {
