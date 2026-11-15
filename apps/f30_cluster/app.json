@@ -68,9 +68,8 @@
       "_optional": "the car's own clock and its time-zone offset (config.clock), so our clock no longer needs the manual timeZone setting (the head unit runs on UTC)"
     },
     "de.bmw.infotainment.vehicle.Vehicle": {
-      "statusNewCurrentUnitsStatusExt": "rs",
       "statusMotorStartAuto": "s",
-      "_optional": "the car's pressure and temperature units, for the tyre block; statusMotorStartAuto: auto start/stop (config.msa)"
+      "_optional": "statusMotorStartAuto: auto start/stop (config.msa). statusNewCurrentUnitsStatusExt was dropped together with the vehicle.TPMS interface (the owner, 2026-11-15): in this app it only ever fed the tyre pressure / temperature conversions (hud.js carUnits -> _tyreBar / _tyreC), and nothing else reads it - {{u:temp}} and the rest follow the \"units\" setting, not the car"
     },
     "de.bmw.infrastructure.VehicleCondition": {
       "VehicleCondition": "s",
@@ -79,11 +78,6 @@
     "de.bmw.infotainment.misc.MDrive": {
       "dataDisplayGearbox": "s",
       "_optional": "S or M next to the gear"
-    },
-    "de.bmw.infotainment.vehicle.TPMS": {
-      "statusTyrePressure": "rs",
-      "statusTyreTemperature": "rs",
-      "_optional": "tyre pressures and temperatures in the M theme"
     },
     "de.bmw.infrastructure.EnvironmentalInformation": {
       "ExteriorTemperature": "s"
