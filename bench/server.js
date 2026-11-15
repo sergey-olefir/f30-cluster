@@ -616,6 +616,14 @@ const web = http.createServer(async (req, res) => {
         child.send({ t: 'hmi', a: b.a });
         res.writeHead(204); return res.end();
     }
+    if (req.method === 'POST' && url === '/fake') {
+        // 2026-11-15: steers the fake persod (bench/fake-personalization.js): { current, protect, maxUsers, engine, gear, piaTx, fail, slow, bmwId }
+        const b = await body(req);
+        if (!child) { res.writeHead(409); return res.end('app not running'); }
+        child.send({ t: 'fake', v: b });
+        log('info', 'bench: fake persod ' + JSON.stringify(b));
+        res.writeHead(204); return res.end();
+    }
     if (req.method === 'GET' && url === '/probe') {
         // what the app wrote to the native components, its screen stack and the engine's layout (run-app.js 'probe')
         if (!child) { res.writeHead(409); return res.end('app not running'); }

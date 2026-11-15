@@ -1,0 +1,160 @@
+{
+  "id": "driver_profiles",
+  "title": "Driver Profiles",
+  "description": "The car's driver profiles: guest, valet and the seven personal slots with their details; add a local (offline) profile, rename it, copy Guest's settings into it, delete it. Every write asks first.",
+  "version": "0.1.0",
+  "vendor": "custom",
+  "loggingId": "OADP",
+  "iconGlyph": "DP",
+  "mguHmi": ["ID7"],
+  "signals": {
+    "de.bmw.infotainment.personalization.UserAccountManager": {
+      "_instances": "de.bmw.infotainment.personalization.UserAccountManager",
+      "_methods": ["createUserAccount", "removeUserAccount", "copyGuestData"]
+    },
+    "de.bmw.infotainment.personalization.UserAccount": {
+      "_instances": "*",
+      "id": "r",
+      "name": "rws",
+      "firstName": "rs",
+      "type": "r",
+      "gcid": "rs",
+      "protection": "rs",
+      "creationDate": "r",
+      "lastLoginDate": "rs",
+      "synchronizationEnabled": "rs",
+      "connectedDriveUsername": "rs",
+      "emailAddress": "rs",
+      "avatarType": "rs",
+      "_broadcasts": ["requestUpdateConnectedDriveCredentials"]
+    },
+    "de.bmw.infotainment.personalization.UserAccountIntra": {
+      "_instances": "*",
+      "_methods": ["getCopyGuestTimestamp"],
+      "_optional": "when Guest's settings were copied into a profile"
+    },
+    "de.bmw.infrastructure.DriverSelectionModule": {
+      "_instances": "1",
+      "piaProfileId": "rs",
+      "BdcIdentityMappingTable": "rs",
+      "_optional": "the active PIA profile number and which key maps to which PIA profile"
+    },
+    "de.bmw.infotainment.vehicle.CDS": {
+      "statusEngineSpeed2": "rs",
+      "_optional": "the engine-off check before a write"
+    },
+    "de.bmw.infrastructure.VehicleInformation": {
+      "DataPowerTrain2": "s",
+      "_optional": "the gear-in-P check before a write"
+    },
+    "de.bmw.infrastructure.Pia": {
+      "PIATransaction": "s",
+      "_optional": "the no-PIA-job-running check before a write"
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "menu",
+      "title": "Driver Profiles",
+      "items": [
+        ["text", "STATUS", ""],
+        ["tworow", "P_GUEST", "Guest"],
+        ["tworow", "P_VALET", "Valet"],
+        ["tworow", "P_I01", "Profile slot 1"],
+        ["tworow", "P_I02", "Profile slot 2"],
+        ["tworow", "P_I03", "Profile slot 3"],
+        ["tworow", "P_I04", "Profile slot 4"],
+        ["tworow", "P_I05", "Profile slot 5"],
+        ["tworow", "P_I06", "Profile slot 6"],
+        ["tworow", "P_I07", "Profile slot 7"],
+        ["button", "BTN_ADD", "Add a local profile"],
+        ["button", "BTN_SETTINGS_VIEW", "Active profile: what the car shows"],
+        ["button", "BTN_REFRESH", "Read the profiles again"],
+        ["text", "MSG", ""]
+      ]
+    },
+    {
+      "name": "PROFILE",
+      "kind": "menu",
+      "title": "Profile",
+      "items": [
+        ["tworow", "D_NAME", "Name"],
+        ["tworow", "D_STATE", "Status"],
+        ["tworow", "D_TYPE", "Type"],
+        ["tworow", "D_ACCOUNT", "Account"],
+        ["tworow", "D_PROTECTION", "Protection"],
+        ["tworow", "D_PIA", "PIA profile number"],
+        ["tworow", "D_COPIED", "Guest's settings copied"],
+        ["tworow", "D_CREATED", "Created"],
+        ["tworow", "D_LOGIN", "Last login"],
+        ["tworow", "D_FIRST", "First name"],
+        ["tworow", "D_SYNC", "Cloud sync"],
+        ["tworow", "D_AVATAR", "Avatar"],
+        ["tworow", "D_ID", "Slot and internal id"],
+        ["button", "A_RENAME", "Rename"],
+        ["button", "A_COPY", "Copy Guest's settings here"],
+        ["button", "A_DELETE", "Delete this profile"],
+        ["text", "P_NOTE", ""],
+        ["text", "P_NOTE2", ""]
+      ]
+    },
+    {
+      "name": "NAMES",
+      "kind": "menu",
+      "title": "Choose a name",
+      "items": [
+        ["text", "N_HINT", ""],
+        ["button", "N_AUTO", "Profile N"],
+        ["button", "N_0", "Driver 1"],
+        ["button", "N_1", "Driver 2"],
+        ["button", "N_2", "Driver 3"],
+        ["button", "N_3", "Driver 4"],
+        ["button", "N_4", ""],
+        ["button", "N_5", ""],
+        ["button", "N_6", ""],
+        ["button", "N_7", ""],
+        ["button", "N_8", ""],
+        ["button", "N_9", ""],
+        ["button", "N_CANCEL", "Cancel"]
+      ]
+    },
+    {
+      "name": "CONFIRM",
+      "kind": "menu",
+      "title": "Confirm",
+      "items": [
+        ["text", "C_WHAT", ""],
+        ["text", "C_DETAIL", ""],
+        ["text", "C_CHECK", ""],
+        ["button", "C_YES", "Yes"],
+        ["button", "C_NO", "Cancel"],
+        ["text", "C_RESULT", ""],
+        ["text", "C_RESULT2", ""]
+      ]
+    },
+    {
+      "name": "SETTINGS_VIEW",
+      "kind": "menu",
+      "title": "Active profile",
+      "items": [
+        ["tworow", "S_USER", "Active profile"],
+        ["tworow", "S_PIA", "Active PIA profile"],
+        ["tworow", "S_KEYS", "Keys and their PIA profiles"],
+        ["tworow", "S_PIAMAP", "PIA numbers seen per profile"],
+        ["tworow", "S_UNITS", "Units (active profile)"],
+        ["tworow", "S_CAR", "Car state"],
+        ["text", "S_NOTE1", ""],
+        ["text", "S_NOTE2", ""],
+        ["text", "S_NOTE3", ""]
+      ]
+    }
+  ],
+  "config": {
+    "names": ["Driver 1", "Driver 2", "Driver 3", "Driver 4"],
+    "autoName": "Profile",
+    "requireParked": true,
+    "deleteArmSeconds": 10,
+    "comment": "names: the preset names Add and Rename offer (up to 10, owner-editable; non-ASCII works), plus '<autoName> N' with the first free N. requireParked: every write also needs the engine off and the gear in P (CDS rpm and VehicleInformation DataPowerTrain2) and no PIA job running; false skips that check (Guest-active and unprotected stay required for Copy). deleteArmSeconds: how long the second Delete press stays armed."
+  }
+}

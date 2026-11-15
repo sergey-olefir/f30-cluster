@@ -240,11 +240,20 @@ function liveLoop(hu) {
 
 /**
  * ctx.signals: watch() keeps the handlers; hu.feed(iface, field, value) calls them as a SOME/IP
- * notification would (the provider then counts as available). Methods (UDS, setters) fail.
+ * notification would (the provider then counts as available). Methods (UDS, setters) fail, except on
+ * an interface a fake provider stands in for:
+ *
+ *   hu.fakes[iface] = (instance) => proxy     (bench/fake-personalization.js is one)
+ *
+ * The proxy has the native binding's calls (getValue, setValue, callMethod, subscribe,
+ * subscribeToAvailability, isAvailable, shutdown), so proxy() / get / set / call / on / onAvailable
+ * reach it the way they reach the car's provider.
  */
 function liveSignals(hu) {
     const subs = hu.subs = {};
+    const fakes = hu.fakes = hu.fakes || {};
     const no = () => Promise.reject(new Error('emulator: no SOME/IP'));
+    const via = (p, fn) => (p && p.__fake ? Promise.resolve().then(fn) : no());
     hu.feed = (iface, field, value, avail) => (subs[iface] || []).forEach((s) => {
         if (!s.h[field]) return;
         if (avail !== false) s.res.available = true;
@@ -256,7 +265,13 @@ function liveSignals(hu) {
             (subs[iface] = subs[iface] || []).push({ h: handlers || {}, res });
             return res;
         },
-        proxy: no, call: no, set: no, on: no, onAvailable: () => Promise.resolve(), hasNative: () => false,
+        proxy: (iface, inst) => (fakes[iface] ? Promise.resolve().then(() => fakes[iface](String(inst))) : no()),
+        call: (p, m, params, ms) => via(p, () => p.callMethod(m, params || {}, ms || 5000)),
+        get: (p, f, ms) => via(p, () => p.getValue(f, ms || 4000)),
+        set: (p, f, v, ms) => via(p, () => p.setValue(f, v, ms || 5000)),
+        on: (p, name, fn) => via(p, () => p.subscribe({ name, onReceive: fn })),
+        onAvailable: (p, fn) => (p && p.__fake ? Promise.resolve().then(() => { p.subscribeToAvailability((a) => fn(!!a)); if (p.isAvailable()) fn(true); }) : Promise.resolve()),
+        hasNative: () => false,
         loadConfig: () => { throw new Error('emulator: no SOME/IP configs'); },
     };
 }
