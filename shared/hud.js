@@ -3813,15 +3813,18 @@ class HudApp {
             if (w.off && w.measure === 'rpm' && !(isNum(raw) && raw >= 150)) v = this._restFrac(w);
             const q = Math.round(v * 1000) / 1000;
             const hot = w.measure === 'rpm' && this._shift().now ? 1 : 0;
-            // The red arc on the speed scale, from the limit to the END of the scale (bottom row package; before it
-            // ran from the limit to the needle). No shader change: u_dyn.yz is the band WBDIAL already draws, and
-            // .z = 1 is simply the scale's end. When it is drawn is _arcOn().
+            // The red over-speed marking on the speed scale: from the limit TO THE NEEDLE (u_dyn.yz is the band
+            // WBDIAL draws, so .z is the needle's own fraction `q`). MEASURED on the F30, 2026-11-15
+            // (reference/6wb/12, docs/F30-FONT-SPEC.md 9.2): with a 60 limit and the needle at 80.19, the marking's
+            // leading edge is at 59.3 and its trailing edge at 77.4 - the needle is drawn over the end. The bottom-row
+            // package had sent .z = 1 (the scale's end) instead, which painted a horseshoe from the limit to 260.
+            // When it is drawn at all is _arcOn() - the CAR's own excess-speed verdict, not ours.
             let over = [-1, -1];
             if (w.look === 'wb' && w.measure === 'speed' && this._arcOn()) {
                 let lim = this._raw('limit');
                 if (isNum(lim)) {
                     if (us && !w.kmh) lim *= 0.621371;
-                    over = [Math.round(Math.min(1, Math.max(0, (lim - mn) / (D.max - mn))) * 1000) / 1000, 1];
+                    over = [Math.round(Math.min(1, Math.max(0, (lim - mn) / (D.max - mn))) * 1000) / 1000, q];
                 }
             }
             let fillA = null;
