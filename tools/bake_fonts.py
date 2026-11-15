@@ -93,18 +93,25 @@ CLUSTER_FONTS = [
     ('c_speed', 'BarlowSemiCondensed-Medium.ttf', 150, DIGITS + '-'),
     ('c_val', 'BarlowSemiCondensed-Medium.ttf', 62, DIGITS + '.:-+°'),
 ]
-# F30 Cluster's 6WB-style themes: Arimo (SIL OFL, tools/fonts-src/Arimo-OFL.txt), a Helvetica-shaped face as the
-# 6WB's own print is. The other fonts in apps/f30_cluster/hud/fonts are copies of Cluster Themes' (Barlow).
+# F30 Cluster's 6WB-style themes: Roboto variable (SIL OFL, tools/fonts-src/Roboto-OFL.txt) at width 87.5.
+# Until 2026-11-15 these were Arimo, picked because Arimo is Helvetica-shaped and the 6WB's print was assumed
+# to be. Measuring the 6WB references settled it the other way (docs/F30-FONT-SPEC.md): Arimo's "1" carries a
+# foot serif and the 6WB's does not, and Arimo's figures are 50-60% too wide in the "1" and too round
+# elsewhere - it ranked 17th, 17th and 11th of 22 free faces on the three runs with enough glyphs to rank on,
+# while Roboto at width 87.5 ranked 1st, 1st and 3rd. Sizes below are the ones that keep each font's RENDERED
+# height exactly what Arimo gave, so the layouts did not have to move; weights come from the measured
+# stroke/cap of each text kind. The other fonts in apps/f30_cluster/hud/fonts are copies of Cluster Themes'
+# (Barlow) - note Barlow has NO Cyrillic, so nothing the car supplies may be drawn in it.
 F30_FONTS = [
-    ('wb_spd', 'Arimo[wght].ttf', 30, DIGITS + '.-', 0, 'Bold'),                   # the speed scale's numbers, the range and consumption figures
-    ('wb_rpm', 'Arimo[wght].ttf', 44, DIGITS, 0, 'Bold'),                          # the rev scale's numbers
-    ('wb_cap', 'Arimo[wght].ttf', 22, LOWER + UPPER + DIGITS + '/ .:+-°', 0, 'Regular'),   # km/h, 1/min x 1000, Time, OFF
-    ('wb_capb', 'Arimo[wght].ttf', 22, UPPER + DIGITS + '/ ', 0, 'Bold'),          # READY, 1/1
-    ('wb_gear', 'Arimo[wght].ttf', 46, DIGITS + 'PRNDSM-', 0, 'Bold'),             # the gear in its box
-    ('wb_val', 'Arimo[wght].ttf', 36, DIGITS + ':+-.° kmCl/', 0, 'Bold'),            # the bottom row's values
-    ('wb_mini', 'Arimo[wght].ttf', 14, DIGITS + '/', 0, 'Bold'),                       # the small gauges' 1/1 and 0
-    ('wb_row', 'Arimo[wght].ttf', 44, DIGITS + ':+-.', 0, 'Bold'),                 # 6WB Dials + G20: our range, clock, temperature at BMW's places, its size (package F)
-    ('wb_big', 'Arimo[wght].ttf', 120, DIGITS + 'PRNDSM-', 0, 'Bold'),             # Sport: the speed and the gear in the discs
+    ('wb_spd', 'Roboto-wdth-wght.subset.ttf', 28, DIGITS + '.-', 0, [650, 87.5]),   # the speed scale's numbers, the range and consumption figures
+    ('wb_rpm', 'Roboto-wdth-wght.subset.ttf', 43, DIGITS, 0, [650, 87.5]),          # the rev scale's numbers
+    ('wb_cap', 'Roboto-wdth-wght.subset.ttf', 21, LOWER + UPPER + DIGITS + '/ .:+-°', 0, [650, 87.5]),   # km/h, 1/min x 1000, Time, OFF
+    ('wb_capb', 'Roboto-wdth-wght.subset.ttf', 21, UPPER + DIGITS + '/ ', 0, [700, 87.5]),   # READY, 1/1
+    ('wb_gear', 'Roboto-wdth-wght.subset.ttf', 45, DIGITS + 'PRNDSM-', 0, [650, 87.5]),      # the gear in its box
+    ('wb_val', 'Roboto-wdth-wght.subset.ttf', 36, DIGITS + ':+-.° kmCl/', 0, [650, 87.5]),   # the bottom row's values
+    ('wb_mini', 'Roboto-wdth-wght.subset.ttf', 14, DIGITS + '/', 0, [650, 87.5]),            # the small gauges' 1/1 and 0
+    ('wb_row', 'Roboto-wdth-wght.subset.ttf', 43, DIGITS + ':+-.', 0, [500, 87.5]),          # 6WB Dials + G20: our range, clock, temperature at BMW's places, its size (package F). Weight 500, not 650: this one stands in BMW's own row, so it takes the G20 spec's setting, not the F30's (docs/G20-DESIGN-SPEC.md 1.4)
+    ('wb_big', 'Roboto-wdth-wght.subset.ttf', 118, DIGITS + 'PRNDSM-', 0, [700, 87.5]),      # Sport: the speed and the gear in the discs
     # G20 Comfort: Roboto (SIL OFL, tools/fonts-src/Roboto-OFL.txt) semi-condensed, the bench simulation's face (docs/G20SIM-REPORT.md)
     ('g20_spd', 'Roboto-wdth-wght.subset.ttf', 105, DIGITS, 0, [700, 87.5]),             # the digital speed
     ('g20_unit', 'Roboto-wdth-wght.subset.ttf', 27, 'km/h', 0, [600, 87.5]),          # its km/h
