@@ -1538,7 +1538,7 @@ uniform vec4 u_foot;      // the line at the window's foot: style (0 the baked g
 // kept 3 px off the check-control frame, text and "i"; tools/overlay/plan_dials.py). u_shade: the shade at our dials'
 // inner edges over BMW's map ("dialShade"): strength at the rim (0: none), falloff px, the y span it fades out over;
 // none inside u_shadeKo (x0, y0, x1, y1: BMW's right "i"). u_pat0..3: up to 4 black patches (x0, y0, x1, y1; x1 <= x0:
-// none) over the bottom-row items we draw ourselves (ownRange / ownClock / ownTemp) and BMW's left hook stub
+// none) over the bottom-row items we draw ourselves (the "bottomRow" setting) and BMW's left hook stub
 // car3 G: four plain vec4s, not one vec4[4] array (docs/CAR3-G-REPORT.md: no array uniform on the car's WBBACK)
 uniform vec4 u_shade;
 uniform vec4 u_shadeKo;
