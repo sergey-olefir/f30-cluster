@@ -336,9 +336,13 @@ the source cannot produce a value on the car as the app is configured.
 
 ### 4.2 6WB Dials + G20 (`wb_dials`, 46 widgets)
 
+(Since 2026-11-15 this file is not a theme of its own: it is what **6WB Comfort** builds while the `g20` toggle is
+on, and the whole row is switched by the one `bottomRow` setting — `docs/ONE-SWITCH-DONE.md`. "6WB Sport + G20" in
+§4.3 is no longer offered at all; its file is kept but nothing loads it.)
+
 Same as Comfort, minus the EfficientDynamics / range arc labels, plus the own-row widgets `own_range`,
-`own_range_u`, `own_range_icon`, `own_clock`, `own_temp`, `own_temp_u` (toggled by `ownRange` / `ownClock` /
-`ownTemp`). All **live** except the clock's zone. `ready` / `off` / `msa` as Comfort. Its tacho has
+`own_range_u`, `own_range_icon`, `own_clock`, `own_temp`, `own_temp_u` (toggled by `own:range` / `own:clock` /
+`own:temp`, i.e. by `bottomRow`). All **live** except the clock's zone. `ready` / `off` / `msa` as Comfort. Its tacho has
 `cut: { y: 656, fade: 26 }` (the open bottom) but **no `fill`**, so no consumption arc to be dead.
 
 ### 4.3 6WB Sport (`wb_sport`, 32) and 6WB Sport + G20 (`wb_sport_dials`, 33)
