@@ -1232,7 +1232,7 @@ class HudApp {
         // "condition": BMW's own vehicle state (VehicleCondition), data().condition, 10 = FAHREN (drive-ready). Used
         // by _restFrac to tell READY from OFF on a rev dial. audit/features.
         this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
-        this.car.setRedline(this.setting('redline'));
+        this.car.setRedline(this._redline());
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
         this.gSm = null;                 // { lat, long, at }: their average
         this.car.onSample((d, t) => this._gSample(d, t), () => { this.gBuf = []; this.gSm = null; this.resetG(); });
@@ -1241,7 +1241,7 @@ class HudApp {
         this._needleReset();
         this.car.onSample((d, t) => this._needleSample(d, t), () => this._needleReset());
         this.score = new ShiftScore(this.car, () => ({
-            redline: this.setting('redline'), shiftBefore: this.setting('shiftBefore'), coldGuard: this.setting('coldGuard'),
+            redline: this._redline(), shiftBefore: this._shiftBefore(), coldGuard: this.setting('coldGuard'),
         }), this.log);
     }
 
@@ -1993,7 +1993,7 @@ class HudApp {
         return isNum(lim) && lim > 0 && isNum(v) && v > lim ? id : null;
     }
 
-    _barMax(w) { return Math.ceil(this.setting('redline') / 1000) * 1000 + ((w && w.over) || 0); }
+    _barMax(w) { return Math.ceil(this._redline() / 1000) * 1000 + ((w && w.over) || 0); }
 
     /** The shift point now ({ rpm, cold }) and whether the rpm is at or past it. */
     _shift() {
@@ -2212,7 +2212,7 @@ class HudApp {
      *  redline, but always covering at least the last 500 rpm (the M40i's scale ends right at its 7000 redline),
      *  orange over the 700 rpm before the red. */
     _redMarks(max) {
-        const redFrom = Math.min(this.setting('redline'), max - 500) / max;
+        const redFrom = Math.min(this._redline(), max - 500) / max;
         return [redFrom, redFrom - 700 / max];
     }
 
@@ -2378,8 +2378,8 @@ class HudApp {
             case 'time': case 'ampm': {
                 const now = this._now();
                 const h = now.getHours(), m = now.getMinutes();
-                if (tok === 'ampm') return this.setting('clock') === '12h' ? (h < 12 ? 'AM' : 'PM') : '';
-                if (this.setting('clock') === '24h') return pad2(h) + ':' + pad2(m);
+                if (tok === 'ampm') return !this._clock24() ? (h < 12 ? 'AM' : 'PM') : '';
+                if (this._clock24()) return pad2(h) + ':' + pad2(m);
                 return ((h % 12) || 12) + ':' + pad2(m);
             }
             default:
@@ -2389,6 +2389,30 @@ class HudApp {
                 if (tok.indexOf('signal:') === 0) { const v = this._raw(tok.slice(7)); return isNum(v) ? (Math.round(v * 10) / 10).toString() : '--'; }
                 return '{{' + tok + '}}';
         }
+    }
+
+    /* 2026-11-15, the owner: the settings "redline", "shiftBefore", "clock" and "units" were retired from the screen
+     * (app.json config._retiredSettings). Each of these three still PREFERS a setting when the app declares one, so
+     * putting any of them back in app.json's "settings" restores the control with no other change; with none, the
+     * value comes from config. "units" needed no accessor: its drop-down had the single option "metric", so the
+     * `setting('units') === 'us'` tests throughout simply stay false. */
+    /** The redline in rpm: the setting if there still is one, else config.redline, else 7000. */
+    _redline() {
+        const s = this.ctx.settings.item('redline') ? this.setting('redline') : null;
+        if (isNum(s) && s > 0) return s;
+        return isNum(this.config.redline) && this.config.redline > 0 ? this.config.redline : 7000;
+    }
+    /** How far before the redline the shift mark lights, in rpm. */
+    _shiftBefore() {
+        const s = this.ctx.settings.item('shiftBefore') ? this.setting('shiftBefore') : null;
+        if (isNum(s) && s >= 0) return s;
+        return isNum(this.config.shiftBefore) && this.config.shiftBefore >= 0 ? this.config.shiftBefore : 300;
+    }
+    /** 24-hour clock? The setting if there still is one, else config.clock24, else yes. */
+    _clock24() {
+        const s = this.ctx.settings.item('clock') ? this.setting('clock') : null;
+        if (s === '12h' || s === '24h') return s === '24h';
+        return this.config.clock24 !== false;
     }
 
     /** The fuel tank's size in litres: the "tankLitres" setting, else config.tankLitres (the car sends litres only). */
@@ -2438,7 +2462,7 @@ class HudApp {
         this.layerStates.clear();
         this.refused = null;
         clearTimeout(this.statusAskT); this.statusAskT = null;
-        this.car.setRedline(this.setting('redline'));
+        this.car.setRedline(this._redline());
         const name = this._layoutName();
         this.activeName = name;
         this.mapLayout = false;
@@ -2729,7 +2753,7 @@ class HudApp {
         } else if (w.type === 'stripe') this._paintStripe(x);
         else if (w.type === 'scale') this._paintScale(x);
         else if (w.type === 'shiftbar') {
-            const max = this._barMax(), red = this.setting('redline');
+            const max = this._barMax(), red = this._redline();
             const midAt = t.bar.midAt === 'shift' ? (red - 1500) / max : t.bar.midAt;
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_segs', [w.segments || 40]);
@@ -2902,7 +2926,7 @@ class HudApp {
             c.uniform(ref, 'u_trail', new Array(32).fill(0), { type: 'vec4' });
             c.uniform(ref, 'u_env', new Array(G_SECTORS).fill(0), { type: 'vec4' });
         } else if (w.type === 'revarc') {
-            const max = this._barMax(), red = this.setting('redline');
+            const max = this._barMax(), red = this._redline();
             const midAt = t.bar.midAt === 'shift' ? (red - 1500) / max : t.bar.midAt;
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_center', w.center);
@@ -2953,7 +2977,7 @@ class HudApp {
             c.uniform(ref, 'u_barH', [w.barH]);
             c.uniform(ref, 'u_slant', [w.slant || 12]);
             c.uniform(ref, 'u_max', [this._barMax(w)]);
-            c.uniform(ref, 'u_red', [this.setting('redline')]);
+            c.uniform(ref, 'u_red', [this._redline()]);
             c.uniform(ref, 'u_from', rgb(t.rev.from));
             c.uniform(ref, 'u_to', rgb(t.rev.to));
             c.uniform(ref, 'u_hot', rgb(t.hot));
@@ -3354,7 +3378,7 @@ class HudApp {
             if (!this.client.ready) return;
             // shift light: blink the whole bar at 8 Hz once the rpm reaches the redline
             const rpm = this._raw('rpm');
-            const flashing = isNum(rpm) && rpm >= this.setting('redline') - 150;
+            const flashing = isNum(rpm) && rpm >= this._redline() - 150;
             this.flash = flashing ? Math.floor(now / 62.5) % 2 === 0 : false;
             const smooth = !!this.needleT;
             const socks = this._cork();     // 0.7.14: the tick's messages go out as one write per connection
@@ -4019,7 +4043,7 @@ class HudApp {
     }
 
     _paintScale(x) {
-        const w = x.w, n = this._barMax(w) / 1000 + 1, red = this.setting('redline');
+        const w = x.w, n = this._barMax(w) / 1000 + 1, red = this._redline();
         const m = Buffer.alloc(w.w * w.h, 0), hot = Buffer.alloc(w.w * w.h, 0);
         for (let i = 0; i < n; i++) {
             const label = String(i);

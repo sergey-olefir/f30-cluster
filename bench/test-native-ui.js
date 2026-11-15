@@ -186,12 +186,18 @@ async function main() {
     ok(JSON.stringify(p.stack) === '["MAIN"]', 'the HMI back arrow closes it');
 
     console.log('odd input');
+    // 2026-11-15: this used to press SET_TIMEZONE, a "number" setting with "steps". The owner retired units / clock /
+    // timeZone / tankLitres / redline / shiftBefore, and with them went the LAST number setting this app has - every
+    // row left is a bool or a choice. The check is the same one (an out-of-range row is ignored, a good one is taken),
+    // now on a choice. The kit's number/steps path is still covered by its own tests, not by this app.
     await click('SET_BADGE', 999);
-    await click('SET_TIMEZONE', -1);
+    await click('SET_NIGHTDIM', -1);
     await click('NO_SUCH_COMPONENT');
-    await click('SET_TIMEZONE', spec.settings.find((s) => s.key === 'timeZone').steps.indexOf(120));
-    p = await until((q) => q.settings.timeZone === 120);
-    ok(p.settings.timeZone === 120 && p.settings.badge === 'none', 'bad rows ignored, a good one taken (timeZone 120)');
+    const nd = spec.settings.find((s) => s.key === 'nightDim');
+    const ndWant = nd.options[nd.options.length - 1][0];
+    await click('SET_NIGHTDIM', nd.options.length - 1);
+    p = await until((q) => q.settings.nightDim === ndWant);
+    ok(p.settings.nightDim === ndWant && p.settings.badge === 'none', 'bad rows ignored, a good one taken (nightDim ' + ndWant + ')');
     await sleep(1000);
     ok(!exited && !/uncaught|app exited/.test(logText), 'the app never exited (no uncaught exception)');
 }
