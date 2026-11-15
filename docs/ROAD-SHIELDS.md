@@ -30,6 +30,11 @@ and Т contain **yellow plates with black text**
 alongside blue ones. The official DSTU diagrams and a photograph of a real sign both show blue. We follow the
 standard.
 
+**Two hues deviate from DSTU on purpose**, both for legibility on a black LCD at 40 px, both approved or
+proposed in §2.3: the **E green is darkened** to `#037D4A` (the standard's green gives only 2.7 : 1 under the
+number) and the **Р/Т blue is lifted** to `#0B63A8` (the standard's would read as a dark hole). The standard
+values are kept in every table.
+
 ---
 
 ## 1. The real shields
@@ -210,8 +215,8 @@ Per shield:
 | **Н** національні | `#E30013` | `H-08` | 66 | **84 × 40** |
 | **Р** регіональні | `#0B63A8` | `P-42` | 64 | **82 × 40** |
 | **Т** територіальні | `#0B63A8` | `T-17-19` | 106 | **124 × 40** |
-| **E** European | `#04AE67` | `E 50` | 62 | **80 × 40** |
-| **E** 3-digit | `#04AE67` | `E 373` | 79 | **98 × 40** |
+| **E** European | `#037D4A` | `E 50` | 62 | **80 × 40** |
+| **E** 3-digit | `#037D4A` | `E 373` | 79 | **98 × 40** |
 | **neutral** fallback | `#5A616B` | `A7` | 39 | **58 × 40** |
 
 How it grows (same formula, any text):
@@ -229,28 +234,109 @@ How it grows (same formula, any text):
 
 ### 2.3 Colours
 
-**[design]** The day fills are the DSTU hues, with one change: the regional/territorial blue is lifted from
-`#005999` to **`#0B63A8`**. `#005999` has a perceived luminance of about 70/255 and on a pure-black LCD at
-40 px it reads as a dark hole rather than a blue plate. `#0B63A8` keeps the hue and gains the edge back.
-The DSTU value is kept in the table so the choice can be reversed in one line.
-
-| Shield | DSTU value | **Day fill (ours)** | Number on it, day | **Night fill** | Night factor |
-|---|---|---|---|---|---|
-| М, Н | `#E30013` | `#E30013` | 4.5 : 1 | `#5F0008` | × 0.42 |
-| Р, Т | `#005999` | `#0B63A8` | 5.8 : 1 | `#052A47` | × 0.42 |
-| E | `#04AE67` | `#04AE67` | **2.7 : 1** | `#01341F` | × 0.30 |
-| neutral | — | `#5A616B` | 5.8 : 1 | `#26292D` | × 0.42 |
-
 The **frame** and the **number** are not fixed colours: they are the theme's **`line`** and **`fg`** roles.
 In 6WB Comfort that is `#ECF0F6` and `#F4F6FA` (`shared/hud_themes.js`), and in 6WB Sport / Eco Pro the
-theme's own. See §5 for why that matters at night.
+theme's own. So **the number is `#F4F6FA`, not pure white**, and that is what every contrast figure below is
+measured against; the figure against pure white is given too, because it is the number usually quoted.
 
-**The E shield is the weak one by day** — white on `#04AE67` is 2.7 : 1 against our `fg`, 2.9 : 1 against pure
-white. That is inherited: the real European-route plate has the same problem, because its green is the
-brightest of the three hues (perceived luminance 115/255, against 70 for the red and the DSTU blue).
-**[design]** We keep the standard green by default, because the owner asked for green and the sign is green.
-If it reads badly on the panel, the single-line fix is a darker green **`#03824D`** (the same hue at × 0.75),
-which lifts it to 4.5 : 1 and still reads as the E green next to the others.
+All contrast is WCAG 2.x relative luminance, computed — the preview recomputes it live from the same hex
+values, so the tables and the drawing cannot drift apart.
+
+#### The shipped set
+
+| Shield | DSTU | **Day fill (ours)** | Number on it<br>(`#F4F6FA` / white) | Plate on black | **Night fill**<br>(day × 0.42) | Number on it<br>(night) |
+|---|---|---|---|---|---|---|
+| М, Н | `#E30013` | `#E30013` *(same)* | **4.54** / 4.91 | 4.28 | `#5F0008` | **4.63** |
+| Р, Т | `#005999` | `#0B63A8` *(lifted)* | **5.77** / 6.24 | 3.36 | `#052A47` | **4.83** |
+| E | `#04AE67` | `#037D4A` *(darkened)* | **4.81** / 5.20 | 4.04 | `#01341F` | **4.56** |
+| neutral | — | `#5A616B` | **5.78** / 6.26 | 3.36 | `#26292D` | **4.80** |
+| frame / number | — | `#ECF0F6` / `#F4F6FA` | — | 18.36 | × 0.6 → `#8E9094` / `#929496` | — |
+
+Every plate clears 4.5 : 1 under the number, by day and by night.
+
+#### The E green **[design, approved by the owner]**
+
+The standard `#04AE67` is the brightest of the three hues (perceived luminance 115/255, against 70 for the red
+and the DSTU blue), so the white number on it is weak — **2.68 : 1** against our `fg`, 2.89 : 1 against pure
+white. The real European-route plate has exactly the same problem; it is not a mistake in our drawing. The
+owner asked for it to be tuned rather than inherited.
+
+**Chosen: `#037D4A` — the DSTU green at 72 % of its value.** Scaling every channel keeps the hue at **155°**
+and the saturation at **98 %** and only lowers the value (68 % → 49 %), so it is the same green, not a drift
+towards teal and not a BMW accent colour.
+
+| Scale | Hex | Number on it (`#F4F6FA`) | (pure white) | Plate on black |
+|---|---|---|---|---|
+| × 1.00 (DSTU) | `#04AE67` | 2.68 | 2.89 | 7.26 |
+| × 0.80 | `#038B52` | 4.03 | 4.36 | 4.82 |
+| × 0.76 | `#03844E` | 4.40 | 4.76 | 4.41 |
+| × 0.75 | `#03824D` | 4.51 | 4.88 | 4.30 |
+| **× 0.72** | **`#037D4A`** | **4.81** | **5.20** | **4.04** |
+| × 0.70 | `#037A48` | 5.00 | 5.41 | 3.88 |
+
+Why 0.72 and not the 0.75 I suggested last time: `#03824D` clears 4.5 against *pure white* (4.88) but lands on
+**4.51** against the number we actually draw, `#F4F6FA` — no margin at all. And the margin matters here:
+`shared/hud_themes.js` and `docs/CAR-SNAPSHOT-2026-11-15.md` both record that **the car brightens dark tints**
+(a navy backdrop came out light steel blue on 2026-11-05). A lifted plate means *less* contrast under the
+number, so the value has to be chosen with headroom. `#037D4A` gives **4.81**, about 7 % of margin, and is the
+lightest scale that does — so it stays as green-looking as the budget allows.
+
+In the other direction, the plate still has to separate from the black panel: `#037D4A` is **4.04 : 1** against
+black on its own, and the white frame around it is 18 : 1, so the shape is never in doubt. Going darker than
+× 0.70 starts to trade that away for contrast the number does not need.
+
+**Sun and night.** In bright sun the LCD's surface reflection adds a constant luminance, which compresses every
+ratio — that argues for the *darkest* plate the shape can carry, so the tuned green is strictly better than the
+standard one in sun. At night see §5; the tuned green needs no special treatment at all, which the standard one
+did.
+
+**One honest loss.** On the real signs the green plate is visibly brighter than the blue one, and that
+luminance difference is part of how you tell them apart at speed. Darkening the green to 83/255 next to our
+lifted blue at 81/255 removes it: the two plates now differ by hue (155° vs 206°, both near-fully saturated)
+and by the letter, not by brightness. At 40 px, with `E` and `P`/`T` right there in the plate, that is a fair
+trade — but it is a trade, and it would be undone by putting the blue back to `#005999` (see below).
+
+#### The other four **[design, proposed — not changed]**
+
+The owner approved adjusting E only, so these keep their current values until they say otherwise.
+
+- **М / Н red `#E30013`** — **4.54 : 1**, i.e. it clears 4.5 by about 1 %. That is thinner than I would like,
+  though red is less exposed to the car's dark-tint lift than the others (its red channel is 227, nowhere near
+  the dark end of the curve). **Option, if the owner wants the same margin the green now has: `#D10011`**, the
+  DSTU red at 92 % of its value — 5.22 : 1 under the number, 3.72 : 1 on black, still unmistakably the sign
+  red. **Shipped default stays `#E30013`.**
+- **Р / Т blue `#0B63A8`** — 5.77 : 1, comfortable. This is already a deviation: the DSTU `#005999` was lifted
+  because at 2.89 : 1 against black it reads as a dark hole at 40 px. Worth noting the trade: **going back to
+  `#005999` would raise the number contrast to 6.72 : 1 and restore the green-brighter-than-blue cue**, at the
+  cost of the plate's own separation from black. Either is defensible; I kept the lift.
+- **neutral `#5A616B`** — 5.78 : 1, comfortable, nothing to do.
+
+`design/shields/preview.html` §2 shows the standard green beside ours, day and night, at the row's real scale,
+with every one of these numbers recomputed in the page.
+
+### 2.4 Where the row goes
+
+**[owner's decision]** The road label **may run wider than BMW's 331 px street field rather than shrinking the
+name.** So the group — shields, gaps, road name — is centred on x 960 and sized to its content; the name is not
+condensed and does not ellipsis until it runs out of the budget below.
+
+**[source]** The hard limit is the two big dials. `wb_comfort.json` puts them at centre (412, 380) and
+(1508, 380) with radius 335 (`dl` / `dr` on the `wbback` widget). At the row's **top** edge, y 669, where the
+circles are widest across the row, they reach x 581 and x 1339 — a **clear span of 757 px**. (Lower down it
+only gets wider: 837 px at y 689, 970 px at y 709.)
+
+**[design]** The working budget is **x 660 – 1260, 600 px**, centred on 960, which keeps a comfortable gap from
+the dial rims. What that leaves for the name:
+
+| Shields shown | Shields + gaps | Name room | ≈ characters at 30 px |
+|---|---|---|---|
+| `М-04` | 102 px | 498 px | ~32 |
+| `М-04` + `E 50` | 190 px | 410 px | ~26 |
+| `Т-17-19` + `E 50` (worst case) | 226 px | 374 px | ~24 |
+
+Even the worst case leaves room for a name like `ВЕЛИКА БАГАЧКА`. If a name ever exceeds the budget it should
+ellipsis at the end — the shields and the start of the name are the part that matters — but nothing here needs
+the name to shrink.
 
 ---
 
@@ -460,21 +546,31 @@ That has a sharp consequence for shields: **the frame and the number dim automat
 not.** Left alone, a night shield would be a full-strength red plate under a 60 %-dimmed number — the glare
 goes up and the legibility goes down. So the plate needs night values of its own.
 
-**[design] The rule: at night the plate fill is the day fill × 0.42, except the E green × 0.30.** The frame and
-the number just follow the theme (× 0.6), so nothing new is needed for them.
+**[design] The rule: at night the plate fill is the day fill × 0.42, for every shield.** The frame and the
+number just follow the theme (× 0.6), so nothing new is needed for them.
 
-| | Day | Night | Number against the plate, night |
-|---|---|---|---|
-| М, Н | `#E30013` | `#5F0008` | 4.6 : 1 |
-| Р, Т | `#0B63A8` | `#052A47` | 4.8 : 1 |
-| E | `#04AE67` | `#01341F` | 4.6 : 1 |
-| neutral | `#5A616B` | `#26292D` | 4.8 : 1 |
-| frame / number | `line` / `fg` | × 0.6 → `#8E9094` / `#929496` | |
+| | Day | Night | Number on the plate | Plate on black |
+|---|---|---|---|---|
+| М, Н | `#E30013` | `#5F0008` | 4.63 : 1 | 1.49 : 1 |
+| Р, Т | `#0B63A8` | `#052A47` | 4.83 : 1 | 1.43 : 1 |
+| E | `#037D4A` | `#01341F` | 4.56 : 1 | 1.51 : 1 |
+| neutral | `#5A616B` | `#26292D` | 4.80 : 1 | 1.44 : 1 |
+| frame | `line` `#ECF0F6` | `#8E9094` | — | 6.57 : 1 |
+| number | `fg` `#F4F6FA` | `#929496` | — | 6.90 : 1 |
 
-Why green gets its own factor: green is by far the brightest of the three hues (perceived luminance 115/255
-against red's 70 and the DSTU blue's 70), so at the common 0.42 the dimmed number on it falls to **3.5 : 1**.
-0.30 brings it back in line with the others. Note that the night E shield is therefore *better* than the day
-one (4.6 vs 2.7) — see §2.3.
+The hex values in the table are the authoritative ones; × 0.42 is how they were derived, not a formula to
+re-run (125 × 0.42 = 52.5, and the green rounds down).
+
+**One factor now covers all four.** In the first draft the E green needed its own × 0.30 while the rest took
+× 0.42, because the standard green was too bright to begin with. Fixing the green by day (§2.3) removed the
+exception: `#037D4A` × 0.42 lands on `#01341F`, which is *the same plate* the old `#04AE67` × 0.30 produced.
+So the night look does not change at all — only the day one does — and the rule got simpler.
+
+**How it reads.** At night the plate itself is only about 1.5 : 1 against the black panel; the **white frame at
+6.6 : 1 is what carries the shape**, exactly as the coordinator supposed. That is deliberate, not a shortfall:
+the plate is a colour cue, not an outline, and a dark plate with a bright frame is what stops a saturated
+rectangle glaring in a dark cabin. The three hues stay distinguishable at that level (the night view in the
+preview shows it), and on the car they will sit a little lighter still, since the panel brightens dark tints.
 
 Three things this rule gets right:
 
@@ -513,9 +609,8 @@ sign.
 - **Н red** is from the Wikipedia shield set, not from DSTU or a photo (§1.3).
 - **The composed road label** is described in the brief and is nowhere in the repo (§4.1). The parsing rule is
   written defensively but it has not been seen against real car data.
-- **Where the row goes.** `М-04` + `E 50` + a gap is 182 px before the name starts, and BMW's own street field
-  is only 331 px wide (x 795–1126). The group will need a wider box, or the name will need to shrink or
-  ellipsis. That is a layout decision and no layout was touched here.
-- **The lifted blue** `#0B63A8` vs the DSTU `#005999` is a judgement about a black LCD that the car has not
-  confirmed. `docs/CAR-SNAPSHOT-2026-11-15.md` and the themes file both note the car brightens dark tints, so
-  `#005999` may well be fine on the panel; one photo would settle it.
+- **The two hues** — the darkened green `#037D4A` and the lifted blue `#0B63A8` — are judgements about a black
+  LCD that the car has not confirmed. `docs/CAR-SNAPSHOT-2026-11-15.md` and the themes file both note the car
+  brightens dark tints, which is why the green was given margin (§2.3); one photo of the panel would settle
+  both, and both are one hex value each.
+- **The red's 1 % margin** (§2.3) is open: proposed `#D10011`, shipped `#E30013`, awaiting the owner.

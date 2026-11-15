@@ -78,11 +78,27 @@
 <p>The full 1920&nbsp;px panel width, cropped to the bottom row band (y&nbsp;655&ndash;720 of the cluster).
 Rendering&nbsp;A. Scroll sideways if the window is narrower than the cluster.</p>
 <div class="scroll"><canvas id="row" width="1920" height="66"></canvas></div>
-<p class="note">BMW's own street-name field sits at x&nbsp;795&ndash;1126, y&nbsp;669&ndash;709
-(<code>docs/POLISH-D-PROPOSAL.md</code>). The shield is 40&nbsp;px tall, so it fills that row's height exactly;
-the group is centred on x&nbsp;960 and is allowed to run wider than BMW's field.</p>
+<p class="note">BMW's own street-name field (outlined) sits at x&nbsp;795&ndash;1126, y&nbsp;669&ndash;709
+(<code>docs/POLISH-D-PROPOSAL.md</code>). The shield is 40&nbsp;px tall, so it fills that row's height exactly.
+The group is centred on x&nbsp;960 and <strong>runs wider than BMW's 331&nbsp;px field rather than shrinking
+the name</strong> &mdash; the owner's decision. The hard limit is the two dials: at the row's top edge
+(y&nbsp;669, where they are widest) the clear span is x&nbsp;581&ndash;1339, 757&nbsp;px. The working budget is
+<strong>x&nbsp;660&ndash;1260, 600&nbsp;px</strong>, which leaves the worst case
+(<code>T-17-19</code>&nbsp;+&nbsp;<code>E 50</code>, 226&nbsp;px of shields and gaps) about 374&nbsp;px of name,
+roughly 24 characters at 30&nbsp;px.</p>
 
-<h2>2 &middot; The set, both renderings</h2>
+<h2>2 &middot; The E green: the standard beside ours</h2>
+<p>Both at the row's real scale on black, day and night, with the contrast of the number on the plate measured
+live (WCAG 2.x relative luminance). Our number is the theme's <code>fg</code> <code>#F4F6FA</code>, not pure
+white, so both figures are given.</p>
+<div class="card"><div class="body"><canvas id="egreen"></canvas></div></div>
+<table id="etable"></table>
+<p class="note">The DSTU green is the brightest of the three hues, so white on it is weak &mdash; on the real
+sign too. Scaling it keeps the hue (155&deg;) and the saturation (98&nbsp;%) and only lowers the value, so it
+stays the E&nbsp;green rather than drifting to teal. At night both land on the same plate, so only the day
+plate changes.</p>
+
+<h2>3 &middot; The set, both renderings</h2>
 <div class="cols">
   <div class="card">
     <h3>A &mdash; text widget + drawn box (pixels)</h3>
@@ -97,21 +113,21 @@ the group is centred on x&nbsp;960 and is allowed to run wider than BMW's field.
 lit pixel is a mismatch): <span id="diffv" class="ok"></span></p>
 <div class="card"><div class="body"><canvas id="diff"></canvas></div></div>
 
-<h2>3 &middot; How the box grows</h2>
+<h2>4 &middot; How the box grows</h2>
 <p>Width is <code>W = 2&middot;border + 2&middot;pad + &Sigma;advance(c)</code> = <code>18 + ink</code>, clamped to
 &ge;&nbsp;44 and rounded up to an even number. Height is fixed at 40.</p>
 <div class="card"><div class="body"><canvas id="grow"></canvas></div></div>
 
-<h2>4 &middot; Parameters</h2>
+<h2>5 &middot; Parameters</h2>
 <table id="ptable"></table>
 
-<h2>5 &middot; Colours</h2>
+<h2>6 &middot; Colours</h2>
 <table id="ctable"></table>
 <p class="note">The border and the number use the theme's <code>line</code> / <code>fg</code> roles, which are
 near-greys, so <code>dimTheme()</code> in <code>shared/hud.js</code> already dims them at night (&times;0.6).
 Only the plate fills need night values of their own.</p>
 
-<h2>6 &middot; The shader</h2>
+<h2>7 &middot; The shader</h2>
 <p class="note">Rendering&nbsp;B's fragment source, run verbatim by the right-hand canvas above.
 <strong>9 vec4 uniform slots</strong> (samplers not counted, the way
 <code>docs/CAR-SNAPSHOT-2026-11-15.md</code> counts them) against cluster-render's 32-per-quad cap.
@@ -149,16 +165,30 @@ var SPEC = {
 };
 SPEC.textY = Math.round(SPEC.H / 2 - (SPEC.baseline - SPEC.cap / 2));   // cell top inside the shield
 
+// "dstu" is the value in the standard, kept for the comparison in section 2; "fill" is what we draw.
+// Night is always the day fill x 0.42 (see docs/ROAD-SHIELDS.md §5).
 var KINDS = {
-  M:       { fill:"#E30013", night:"#5F0008", label:"M  mizhnarodni / international" },
-  H:       { fill:"#E30013", night:"#5F0008", label:"H  natsionalni / national" },
-  P:       { fill:"#0B63A8", night:"#052A47", label:"P  rehionalni / regional" },
-  T:       { fill:"#0B63A8", night:"#052A47", label:"T  terytorialni / territorial" },
-  E:       { fill:"#04AE67", night:"#01341F", label:"E  European route" },
-  NEUTRAL: { fill:"#5A616B", night:"#26292D", label:"fallback, not recognised" }
+  M:       { fill:"#E30013", dstu:"#E30013", night:"#5F0008", label:"M  mizhnarodni / international" },
+  H:       { fill:"#E30013", dstu:"#E30013", night:"#5F0008", label:"H  natsionalni / national" },
+  P:       { fill:"#0B63A8", dstu:"#005999", night:"#052A47", label:"P  rehionalni / regional" },
+  T:       { fill:"#0B63A8", dstu:"#005999", night:"#052A47", label:"T  terytorialni / territorial" },
+  E:       { fill:"#037D4A", dstu:"#04AE67", night:"#01341F", label:"E  European route" },
+  NEUTRAL: { fill:"#5A616B", dstu:null,      night:"#26292D", label:"fallback, not recognised" }
 };
 var EDGE  = { day:"#ECF0F6", night:"#8E9094" };   // theme "line"  (6WB Comfort, dimmed x0.6)
 var INK   = { day:"#F4F6FA", night:"#929496" };   // theme "fg"
+
+/* ---- contrast, WCAG 2.x relative luminance -------------------------- */
+function srgb(c){ c = c / 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+function lum(hex){
+  var r = parseInt(hex.substr(1,2),16), g = parseInt(hex.substr(3,2),16), b = parseInt(hex.substr(5,2),16);
+  return 0.2126 * srgb(r) + 0.7152 * srgb(g) + 0.0722 * srgb(b);
+}
+function contrast(a, b){
+  var la = lum(a), lb = lum(b);
+  return ((Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05));
+}
+function cr1(a, b){ return contrast(a, b).toFixed(2) + ":1"; }
 
 /* ---- parsing: what the car's composed label turns into ------------- */
 
@@ -215,7 +245,7 @@ function platesPixels(w, h, plates, night){
   plates.forEach(function(s){
     if (!s) return;
     var k = KINDS[s.kind] || KINDS.NEUTRAL;
-    var fill = hex2rgb(night ? k.night : k.fill);
+    var fill = hex2rgb(s.fill || (night ? k.night : k.fill));
     var x0 = Math.max(0, Math.floor(s.x) - 2), x1 = Math.min(w, Math.ceil(s.x + s.w) + 2);
     var y0 = Math.max(0, Math.floor(s.y) - 2), y1 = Math.min(h, Math.ceil(s.y + SPEC.H) + 2);
     for (var y = y0; y < y1; y++){
@@ -239,12 +269,12 @@ function drawPlateA(g, x, y, w, kind, night){
   g.drawImage(platesPixels(w + 4, SPEC.H + 4, [{ x:2, y:2, w:w, kind:kind }], night), x - 2, y - 2);
 }
 
-function drawNumber(g, x, y, w, text, night){
+function drawNumber(g, x, y, w, text, night, inkHex){
   g.save();
   g.font = "700 " + SPEC.font + 'px Arimo,"Liberation Sans",Arial,Helvetica,sans-serif';
   g.textAlign = "center";
   g.textBaseline = "alphabetic";
-  g.fillStyle = night ? INK.night : INK.day;
+  g.fillStyle = inkHex || (night ? INK.night : INK.day);
   g.fillText(text, x + w / 2, y + SPEC.textY + SPEC.baseline);
   g.restore();
 }
@@ -337,7 +367,7 @@ function drawPlatesGL(ctx, w, h, plates, night){
     if (s){
       var k = KINDS[s.kind] || KINDS.NEUTRAL;
       rect.push(s.x, s.y, s.w, SPEC.H);
-      fill.push.apply(fill, rgba(night ? k.night : k.fill));
+      fill.push.apply(fill, rgba(s.fill || (night ? k.night : k.fill)));
     } else { rect.push(0,0,0,0); fill.push(0,0,0,0); }
   }
   gl.uniform2f(ctx.u("u_size"), w, h);
@@ -412,7 +442,61 @@ function drawRow(){
   g.fillText(name, x0 + lay.width + SPEC.gapName, topInBand + SPEC.textY + SPEC.baseline);
 }
 
-/* -- scene 2: the set, A and B ------------------------------------- */
+/* -- scene 2: the E green, standard beside ours --------------------- */
+
+// [name, day fill, night fill]
+var GREENS = [
+  ["DSTU 4100:2021", KINDS.E.dstu, "#01341F"],
+  ["ours",           KINDS.E.fill, KINDS.E.night]
+];
+
+function drawEGreen(){
+  var z = state.zoom, text = "E 50", w0 = shieldW(text);
+  var pitch = SPEC.H + 20, colGap = 34, padX = 10, padY = 10;
+  var w = padX * 2 + w0 * 2 + colGap + 400, h = padY * 2 + GREENS.length * pitch + 24;
+  var plates = [];
+  GREENS.forEach(function(gr, i){
+    var y = padY + 24 + i * pitch;
+    plates.push({ x:padX,                  y:y, w:w0, kind:"E", fill:gr[1] });   // day
+    plates.push({ x:padX + w0 + colGap,    y:y, w:w0, kind:"E", fill:gr[2] });   // night
+  });
+  var g = blit(document.getElementById("egreen"), platesPixels(w, h, plates, false), w, h, z);
+  g.font = '12px Arimo,"Liberation Sans",Arial,sans-serif';
+  g.textAlign = "left"; g.textBaseline = "alphabetic";
+  g.fillStyle = "#6f7682";
+  g.fillText("day", padX, padY + 14);
+  g.fillText("night (× 0.42)", padX + w0 + colGap, padY + 14);
+  GREENS.forEach(function(gr, i){
+    var y = padY + 24 + i * pitch;
+    drawNumber(g, padX, y, w0, text, false, INK.day);
+    drawNumber(g, padX + w0 + colGap, y, w0, text, false, INK.night);
+    g.textBaseline = "middle";
+    g.font = '13px Arimo,"Liberation Sans",Arial,sans-serif';
+    g.fillStyle = "#8d94a1";
+    g.fillText(gr[0] + "   " + gr[1] + "   day " + cr1(gr[1], INK.day) +
+               "   night " + cr1(gr[2], INK.night),
+               padX + w0 * 2 + colGap + 20, y + SPEC.H / 2);
+    g.textBaseline = "alphabetic";
+  });
+}
+
+function fillEtable(){
+  var rows = GREENS.map(function(gr){
+    return ["<strong>" + gr[0] + "</strong>",
+      "<span class='sw' style='background:" + gr[1] + "'></span>" + gr[1],
+      cr1(gr[1], INK.day), cr1(gr[1], "#FFFFFF"), cr1(gr[1], "#000000"),
+      "<span class='sw' style='background:" + gr[2] + "'></span>" + gr[2],
+      cr1(gr[2], INK.night), cr1(gr[2], "#000000")];
+  });
+  document.getElementById("etable").innerHTML =
+    "<tr><th>Green</th><th>Day fill</th><th>Number on it<br>(fg #F4F6FA)</th><th>Number on it<br>(pure white)</th>" +
+    "<th>Plate on black</th><th>Night fill</th><th>Number on it<br>(night fg)</th><th>Plate on black</th></tr>" +
+    rows.map(function(r){
+      return "<tr><td>" + r[0] + "</td>" + r.slice(1).map(function(c){ return "<td class='n'>" + c + "</td>"; }).join("") + "</tr>";
+    }).join("");
+}
+
+/* -- scene 3: the set, A and B ------------------------------------- */
 var glctx = null;
 
 function setGeometry(){
@@ -561,21 +645,32 @@ function fillTables(){
 
   var c = document.getElementById("ctable");
   var order = ["M","H","P","T","E","NEUTRAL"];
-  c.innerHTML = "<tr><th>Shield</th><th>Day fill</th><th>Night fill</th><th>Factor</th><th>Frame / number</th></tr>" +
+  c.innerHTML = "<tr><th>Shield</th><th>DSTU</th><th>Day fill</th><th>Number on it</th>" +
+                "<th>Plate on black</th><th>Night fill (&times; 0.42)</th><th>Number on it</th></tr>" +
     order.map(function(k){
       var v = KINDS[k];
-      var f = (k === "E") ? "× 0.30" : "× 0.42";
+      var dayOk = contrast(v.fill, INK.day) >= 4.5, nightOk = contrast(v.night, INK.night) >= 4.5;
       return "<tr><td>" + v.label + "</td>" +
+        "<td class='n'>" + (v.dstu
+          ? (v.dstu === v.fill ? "same" : "<span class='sw' style='background:" + v.dstu + "'></span>" + v.dstu)
+          : "—") + "</td>" +
         "<td class='n'><span class='sw' style='background:" + v.fill + "'></span>" + v.fill + "</td>" +
+        "<td class='n " + (dayOk ? "ok" : "warn") + "'>" + cr1(v.fill, INK.day) + "</td>" +
+        "<td class='n'>" + cr1(v.fill, "#000000") + "</td>" +
         "<td class='n'><span class='sw' style='background:" + v.night + "'></span>" + v.night + "</td>" +
-        "<td class='n'>" + f + "</td>" +
-        "<td class='n'><span class='sw' style='background:" + EDGE.day + "'></span>line / fg, × 0.6 at night</td></tr>";
-    }).join("");
+        "<td class='n " + (nightOk ? "ok" : "warn") + "'>" + cr1(v.night, INK.night) + "</td></tr>";
+    }).join("") +
+    "<tr><td>frame / number</td><td class='n'>—</td>" +
+    "<td class='n'><span class='sw' style='background:" + EDGE.day + "'></span>" + EDGE.day + " / " + INK.day + "</td>" +
+    "<td class='n'>—</td><td class='n'>" + cr1(EDGE.day, "#000000") + "</td>" +
+    "<td class='n'><span class='sw' style='background:" + EDGE.night + "'></span>" + EDGE.night + " / " + INK.night +
+    "</td><td class='n'>—</td></tr>";
 }
 
 /* -- redraw / controls ---------------------------------------------- */
 function redraw(){
   drawRow();
+  drawEGreen();
   drawSets();
   drawGrow();
 }
@@ -590,6 +685,7 @@ document.getElementById("z4").onclick = function(){ state.zoom = 4; press(["z1",
 
 document.getElementById("src").textContent = SHIELD_FS;
 fillTables();
+fillEtable();
 
 // a quick self-check of the parser, shown in the status note
 (function(){
