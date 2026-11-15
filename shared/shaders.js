@@ -1125,6 +1125,10 @@ uniform vec4 u_cutW;       // the window (BMW's own sign or lamp shows through),
 #define u_value u_dyn.x
 #define u_over u_dyn.yz
 #define u_hot u_dyn.w
+// The over-speed marking's leading "tab" (MEASURED 2026-11-15 off reference/6wb/12, see the u_over blocks below):
+// half its angular width, as a fraction of the sweep. 1.5 km/h of the 0..260 scale = 0.0058; the marking is only
+// ever drawn on the speed dial (hud.js guards w.measure === 'speed'), whose scale is 0..260 in every 6WB layout.
+#define LEADW 0.0058
 #define u_hasBase u_fill.z
 
 const float PI = 3.14159265359;
@@ -1193,8 +1197,12 @@ void main() {
             // 0.663 R, which is where the numeral band begins. It never reaches the numerals or the ticks.
             // Before 2026-11-15 this ran 0.64 R -> 0.80 R and faded the OTHER way (faint inside, strong outside).
             col = mix(u_face, bs.rgb, bs.a);
-            if (u_over.x >= 0.0 && inSweep && frac >= u_over.x && frac <= u_over.y && d > 0.521 * R && d < 0.663 * R) {
-                col = mix(col, u_red * 0.85, smoothstep(0.663 * R, 0.521 * R, d));
+            if (u_over.x >= 0.0 && inSweep && frac >= u_over.x - LEADW && frac <= u_over.y && d > 0.521 * R) {
+                float lead = 1.0 - smoothstep(0.0, LEADW, abs(frac - u_over.x));
+                float outR = mix(0.663, 0.795, lead) * R;
+                float a = 0.72 * clamp((outR - d) / (outR - 0.54 * R), 0.0, 1.0)
+                        + 0.30 * (1.0 - smoothstep(0.0, 0.014 * R, abs(d - 0.530 * R)));
+                if (d < outR) col = mix(col, u_red * 0.85, min(a, 1.0));
             }
         } else {
             // the face: black (the references' lifted dark is their LCD's black level and the camera, not drawn), a faint
@@ -1231,8 +1239,12 @@ void main() {
             if (inSweep && u_redFrom <= 1.0 && frac >= u_redFrom && d > 0.862 * R && d < to) col = u_red;
             // over the limit: a red wedge in the empty ring between the hub and the numerals. The same measured
             // radii as the baked path above; the angular ends are whatever the engine puts in u_over (hud.js).
-            if (u_over.x >= 0.0 && inSweep && frac >= u_over.x && frac <= u_over.y && d > 0.521 * R && d < 0.663 * R) {
-                col = mix(col, u_red * 0.85, smoothstep(0.663 * R, 0.521 * R, d));
+            if (u_over.x >= 0.0 && inSweep && frac >= u_over.x - LEADW && frac <= u_over.y && d > 0.521 * R) {
+                float lead = 1.0 - smoothstep(0.0, LEADW, abs(frac - u_over.x));
+                float outR = mix(0.663, 0.795, lead) * R;
+                float a = 0.72 * clamp((outR - d) / (outR - 0.54 * R), 0.0, 1.0)
+                        + 0.30 * (1.0 - smoothstep(0.0, 0.014 * R, abs(d - 0.530 * R)));
+                if (d < outR) col = mix(col, u_red * 0.85, min(a, 1.0));
             }
             // the tick track: a groove, darker than the face, between two lit rims
             if (u_hasBase < 0.5) {
