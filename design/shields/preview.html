@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Road-number shields — f30_cluster</title>
+<!--
+  Self-contained preview of the road-number shield set for the f30_cluster bottom row.
+  Design and geometry: docs/ROAD-SHIELDS.md. No external resources, no network, no images.
+
+  Left column  (A): "text widget + drawn box" — Canvas 2D, the way shared/hud.js paints an image widget.
+  Right column (B): the SHIELD fragment shader (GLSL ES 1.00) run in WebGL, with the number as a text
+                    layer on top, exactly as WBSIGN puts the speed-limit figure over the drawn sign.
+  The two must come out pixel-identical; the "difference" strip checks that.
+-->
+<style>
+  :root{
+    --bg:#000; --ink:#f4f6fa; --dim:#9aa0ab; --line:#262a31; --panel:#0b0d10;
+    --accent:#4870b0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font:14px/1.55 "Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1400px;margin:0 auto;padding:28px 16px 80px}
+  h1{font-size:22px;font-weight:600;letter-spacing:.2px;margin:0 0 4px}
+  h2{font-size:15px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--dim);
+     margin:38px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  p{color:#c3c8d2;margin:8px 0}
+  .sub{color:var(--dim);margin:0 0 20px}
+  code,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+  .bar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+       background:rgba(0,0,0,.92);backdrop-filter:blur(6px);padding:10px 0;border-bottom:1px solid var(--line)}
+  button{background:#14171c;color:#dfe3ea;border:1px solid #2b3039;border-radius:7px;
+         padding:6px 13px;font:inherit;font-size:13px;cursor:pointer}
+  button:hover{background:#1c2026;border-color:#3a414c}
+  button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .spacer{flex:1}
+  .note{color:var(--dim);font-size:12.5px}
+  .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:#000}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:980px){.cols{grid-template-columns:1fr}}
+  .card{border:1px solid var(--line);border-radius:10px;background:#000;overflow:hidden}
+  .card h3{margin:0;padding:9px 13px;font-size:12px;font-weight:600;letter-spacing:.7px;
+           text-transform:uppercase;color:var(--dim);background:var(--panel);border-bottom:1px solid var(--line)}
+  .card .body{padding:14px;overflow-x:auto}
+  canvas{display:block;image-rendering:pixelated}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin-top:6px}
+  th,td{border-bottom:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+  th{color:var(--dim);font-weight:600;font-size:11.5px;letter-spacing:.6px;text-transform:uppercase}
+  td.n{font-family:ui-monospace,Menlo,monospace}
+  .sw{display:inline-block;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin-right:7px;
+      border:1px solid rgba(255,255,255,.35)}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:13px;overflow:auto;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;color:#c9cfd9}
+  .warn{color:#e8b35a}
+  .ok{color:#5fc98a}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Road-number shields</h1>
+<p class="sub">For the f30_cluster bottom row, next to the road name. Cluster scale: the panel is
+1920&times;720 and the row is 40&nbsp;px tall. Spec: <code>docs/ROAD-SHIELDS.md</code>.</p>
+
+<div class="bar">
+  <button id="bLight" aria-pressed="true">Day</button>
+  <button id="bNight" aria-pressed="false">Night</button>
+  <span class="note">&nbsp;|&nbsp;</span>
+  <button id="z1" aria-pressed="true">1&times;</button>
+  <button id="z2" aria-pressed="false">2&times;</button>
+  <button id="z4" aria-pressed="false">4&times;</button>
+  <span class="spacer"></span>
+  <span class="note" id="glnote"></span>
+</div>
+
+<h2>1 &middot; The bottom row, 1:1</h2>
+<p>The full 1920&nbsp;px panel width, cropped to the bottom row band (y&nbsp;655&ndash;720 of the cluster).
+Rendering&nbsp;A. Scroll sideways if the window is narrower than the cluster.</p>
+<div class="scroll"><canvas id="row" width="1920" height="66"></canvas></div>
+<p class="note">BMW's own street-name field (outlined) sits at x&nbsp;795&ndash;1126, y&nbsp;669&ndash;709
+(<code>docs/POLISH-D-PROPOSAL.md</code>). The shield is 40&nbsp;px tall, so it fills that row's height exactly.
+The group is centred on x&nbsp;960 and <strong>runs wider than BMW's 331&nbsp;px field rather than shrinking
+the name</strong> &mdash; the owner's decision. The hard limit is the two dials: at the row's top edge
+(y&nbsp;669, where they are widest) the clear span is x&nbsp;581&ndash;1339, 757&nbsp;px. The working budget is
+<strong>x&nbsp;660&ndash;1260, 600&nbsp;px</strong>, which leaves the worst case
+(<code>T-17-19</code>&nbsp;+&nbsp;<code>E 50</code>, 226&nbsp;px of shields and gaps) about 374&nbsp;px of name,
+roughly 24 characters at 30&nbsp;px.</p>
+
+<h2>2 &middot; The E green: the standard beside ours</h2>
+<p>Both at the row's real scale on black, day and night, with the contrast of the number on the plate measured
+live (WCAG 2.x relative luminance). Our number is the theme's <code>fg</code> <code>#F4F6FA</code>, not pure
+white, so both figures are given.</p>
+<div class="card"><div class="body"><canvas id="egreen"></canvas></div></div>
+<table id="etable"></table>
+<p class="note">The DSTU green is the brightest of the three hues, so white on it is weak &mdash; on the real
+sign too. Scaling it keeps the hue (155&deg;) and the saturation (98&nbsp;%) and only lowers the value, so it
+stays the E&nbsp;green rather than drifting to teal. At night both land on the same plate, so only the day
+plate changes.</p>
+
+<h2>3 &middot; The set, both renderings</h2>
+<div class="cols">
+  <div class="card">
+    <h3>A &mdash; text widget + drawn box (pixels)</h3>
+    <div class="body"><canvas id="setA"></canvas></div>
+  </div>
+  <div class="card">
+    <h3>B &mdash; SHIELD effect layer (GLSL) + text widget</h3>
+    <div class="body"><canvas id="setB"></canvas></div>
+  </div>
+</div>
+<p class="note" style="margin-top:10px">Difference between the two plate drawings (should be black; any
+lit pixel is a mismatch): <span id="diffv" class="ok"></span></p>
+<div class="card"><div class="body"><canvas id="diff"></canvas></div></div>
+
+<h2>4 &middot; How the box grows</h2>
+<p>Width is <code>W = 2&middot;border + 2&middot;pad + &Sigma;advance(c)</code> = <code>18 + ink</code>, clamped to
+&ge;&nbsp;44 and rounded up to an even number. Height is fixed at 40.</p>
+<div class="card"><div class="body"><canvas id="grow"></canvas></div></div>
+
+<h2>5 &middot; Parameters</h2>
+<table id="ptable"></table>
+
+<h2>6 &middot; Colours</h2>
+<table id="ctable"></table>
+<p class="note">The border and the number use the theme's <code>line</code> / <code>fg</code> roles, which are
+near-greys, so <code>dimTheme()</code> in <code>shared/hud.js</code> already dims them at night (&times;0.6).
+Only the plate fills need night values of their own.</p>
+
+<h2>7 &middot; The shader</h2>
+<p class="note">Rendering&nbsp;B's fragment source, run verbatim by the right-hand canvas above.
+<strong>9 vec4 uniform slots</strong> (samplers not counted, the way
+<code>docs/CAR-SNAPSHOT-2026-11-15.md</code> counts them) against cluster-render's 32-per-quad cap.
+Not added to <code>shared/shaders.js</code>.</p>
+<pre id="src"></pre>
+
+<script>
+"use strict";
+/* ------------------------------------------------------------------ *
+ *  The spec, in one place. Everything below draws from this.
+ * ------------------------------------------------------------------ */
+
+// Arimo Bold advances (units per 1000 em; Arimo is metric-compatible with Arial, so the
+// browser's Arial Bold matches the baked atlas pixel for pixel at the same size).
+var ADV1000 = {
+  A:722,B:722,C:722,D:722,E:667,F:611,G:778,H:722,I:278,J:556,K:722,L:611,M:833,
+  N:722,O:778,P:667,Q:778,R:722,S:667,T:611,U:722,V:667,W:944,X:667,Y:667,Z:611,
+  "0":556,"1":556,"2":556,"3":556,"4":556,"5":556,"6":556,"7":556,"8":556,"9":556,
+  "-":333," ":278,"/":278
+};
+
+var SPEC = {
+  H: 40,          // shield height, px (= BMW's street row, y 669-709)
+  border: 2,      // white frame, px
+  radius: 6,      // outer corner radius, px (inner = radius - border)
+  pad: 7,         // from the inner edge of the frame to the ink, px
+  font: 30,       // Arimo Bold, px  -> cap height 0.688 * 30 = 20.6
+  cap: 20.6,
+  cellH: 34,      // baked cell height at 30 px
+  baseline: 25,   // baseline inside the cell
+  gapShield: 8,   // between two shields
+  gapName: 14,    // from the last shield to the road name
+  minW: 44,
+  nameFont: 30    // the road name beside them (Arimo Regular 30 ~ the 6WB caption size)
+};
+SPEC.textY = Math.round(SPEC.H / 2 - (SPEC.baseline - SPEC.cap / 2));   // cell top inside the shield
+
+// "dstu" is the value in the standard, kept for the comparison in section 2; "fill" is what we draw.
+// Night is always the day fill x 0.42 (see docs/ROAD-SHIELDS.md §5).
+var KINDS = {
+  M:       { fill:"#E30013", dstu:"#E30013", night:"#5F0008", label:"M  mizhnarodni / international" },
+  H:       { fill:"#E30013", dstu:"#E30013", night:"#5F0008", label:"H  natsionalni / national" },
+  P:       { fill:"#0B63A8", dstu:"#005999", night:"#052A47", label:"P  rehionalni / regional" },
+  T:       { fill:"#0B63A8", dstu:"#005999", night:"#052A47", label:"T  terytorialni / territorial" },
+  E:       { fill:"#037D4A", dstu:"#04AE67", night:"#01341F", label:"E  European route" },
+  NEUTRAL: { fill:"#5A616B", dstu:null,      night:"#26292D", label:"fallback, not recognised" }
+};
+var EDGE  = { day:"#ECF0F6", night:"#8E9094" };   // theme "line"  (6WB Comfort, dimmed x0.6)
+var INK   = { day:"#F4F6FA", night:"#929496" };   // theme "fg"
+
+/* ---- contrast, WCAG 2.x relative luminance -------------------------- */
+function srgb(c){ c = c / 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+function lum(hex){
+  var r = parseInt(hex.substr(1,2),16), g = parseInt(hex.substr(3,2),16), b = parseInt(hex.substr(5,2),16);
+  return 0.2126 * srgb(r) + 0.7152 * srgb(g) + 0.0722 * srgb(b);
+}
+function contrast(a, b){
+  var la = lum(a), lb = lum(b);
+  return ((Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05));
+}
+function cr1(a, b){ return contrast(a, b).toFixed(2) + ":1"; }
+
+/* ---- parsing: what the car's composed label turns into ------------- */
+
+// Cyrillic -> Latin homoglyph fold. All five category letters have an identical-looking Latin twin,
+// so the baked Latin-only atlases draw them with nothing lost.
+var FOLD = {"М":"M","Н":"H","Р":"P","Т":"T","Е":"E","І":"I",
+            "А":"A","В":"B","С":"C","К":"K","О":"O","Х":"X"};
+function fold(s){ return String(s).toUpperCase().replace(/[Ѐ-ӿ]/g, function(c){ return FOLD[c] || c; }); }
+
+function classify(piece){
+  var s = fold(piece).replace(/\s+/g, " ").trim();
+  var m;
+  if ((m = /^E[\s-]*(\d{1,3})$/.exec(s)))                 return { kind:"E", text:"E " + m[1] };
+  if ((m = /^M[\s-]*(\d{1,2})$/.exec(s)))                 return { kind:"M", text:"M-" + pad2(m[1]) };
+  if ((m = /^H[\s-]*(\d{1,2})$/.exec(s)))                 return { kind:"H", text:"H-" + pad2(m[1]) };
+  if ((m = /^P[\s-]*(\d{1,2})$/.exec(s)))                 return { kind:"P", text:"P-" + pad2(m[1]) };
+  if ((m = /^T[\s-]*(\d{2})[\s-]*(\d{2})$/.exec(s)))      return { kind:"T", text:"T-" + m[1] + "-" + m[2] };
+  if (/^[A-Z]{1,2}[\s-]?\d{1,4}$/.test(s))                return { kind:"NEUTRAL", text:s.slice(0, 6) };
+  return null;                                             // plain road-name text
+}
+function pad2(d){ return d.length < 2 ? "0" + d : d; }
+
+/* ---- measuring ----------------------------------------------------- */
+
+function advance(ch, size){ var a = ADV1000[ch]; return Math.round((a === undefined ? 556 : a) * size / 1000); }
+function ink(text, size){ var w = 0; for (var i = 0; i < text.length; i++) w += advance(text[i], size); return w; }
+function shieldW(text){
+  var w = 2 * SPEC.border + 2 * SPEC.pad + ink(text, SPEC.font);
+  w = Math.max(w, SPEC.minW);
+  return w + (w % 2);
+}
+
+/* ------------------------------------------------------------------ *
+ *  Rendering A: pixels, the way shared/hud.js fills an image widget's
+ *  RGBA buffer. Same rounded-box distance field as the shader, so the
+ *  two renderings are meant to come out identical.
+ * ------------------------------------------------------------------ */
+
+function sdBox(px, py, x, y, w, h, rad){
+  var hx = w * 0.5, hy = h * 0.5;
+  var qx = Math.abs(px - (x + hx)) - (hx - rad);
+  var qy = Math.abs(py - (y + hy)) - (hy - rad);
+  var mx = Math.max(qx, 0), my = Math.max(qy, 0);
+  return Math.sqrt(mx * mx + my * my) + Math.min(Math.max(qx, qy), 0) - rad;
+}
+function clamp01(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
+function hex2rgb(h){ return [parseInt(h.substr(1,2),16), parseInt(h.substr(3,2),16), parseInt(h.substr(5,2),16)]; }
+
+/** Paint plates into a fresh 1:1 canvas, straight alpha, nothing else. */
+function platesPixels(w, h, plates, night){
+  var c = document.createElement("canvas"); c.width = w; c.height = h;
+  var g = c.getContext("2d"), img = g.createImageData(w, h), o = img.data;
+  var edge = hex2rgb(night ? EDGE.night : EDGE.day);
+  plates.forEach(function(s){
+    if (!s) return;
+    var k = KINDS[s.kind] || KINDS.NEUTRAL;
+    var fill = hex2rgb(s.fill || (night ? k.night : k.fill));
+    var x0 = Math.max(0, Math.floor(s.x) - 2), x1 = Math.min(w, Math.ceil(s.x + s.w) + 2);
+    var y0 = Math.max(0, Math.floor(s.y) - 2), y1 = Math.min(h, Math.ceil(s.y + SPEC.H) + 2);
+    for (var y = y0; y < y1; y++){
+      for (var x = x0; x < x1; x++){
+        var d = sdBox(x + 0.5, y + 0.5, s.x, s.y, s.w, SPEC.H, SPEC.radius);
+        var a = clamp01(0.5 - d);
+        if (a <= 0) continue;
+        var e = clamp01(d + SPEC.border + 0.5);                 // 1 within the frame
+        var i = (y * w + x) * 4;
+        for (var ch = 0; ch < 3; ch++) o[i + ch] = Math.round(fill[ch] + (edge[ch] - fill[ch]) * e);
+        o[i + 3] = Math.round(a * 255);
+      }
+    }
+  });
+  g.putImageData(img, 0, 0);
+  return c;
+}
+
+/** Convenience for the 1:1 row: paint the plates and composite them onto g. */
+function drawPlateA(g, x, y, w, kind, night){
+  g.drawImage(platesPixels(w + 4, SPEC.H + 4, [{ x:2, y:2, w:w, kind:kind }], night), x - 2, y - 2);
+}
+
+function drawNumber(g, x, y, w, text, night, inkHex){
+  g.save();
+  g.font = "700 " + SPEC.font + 'px Arimo,"Liberation Sans",Arial,Helvetica,sans-serif';
+  g.textAlign = "center";
+  g.textBaseline = "alphabetic";
+  g.fillStyle = inkHex || (night ? INK.night : INK.day);
+  g.fillText(text, x + w / 2, y + SPEC.textY + SPEC.baseline);
+  g.restore();
+}
+
+/* ------------------------------------------------------------------ *
+ *  Rendering B: the SHIELD fragment shader, run for real.
+ * ------------------------------------------------------------------ */
+
+var SHIELD_FS =
+"// Road-number shields for a cluster-render \"effect\" layer (GLSL ES 1.00), beside the road name in the\n" +
+"// bottom row: up to three rounded plates, each a u_edge frame u_style.x px wide round a field u_fill[i],\n" +
+"// corner radius u_style.y px. The numbers are text widgets on top, as the speed-limit figure sits over\n" +
+"// WBSIGN. Our own drawing, after the Ukrainian road-number signs of DSTU 4100:2021 (shape only).\n" +
+"//   u_rect[i]  x, y, w, h of plate i in layer px     u_fill[i]  its rgba, straight alpha\n" +
+"//   u_style    frame px, corner radius px, plates in use, unused.  Plates must not overlap.\n" +
+"#ifdef GL_FRAGMENT_PRECISION_HIGH\n" +
+"precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU (x*x+y*y overflows past ~256 px)\n" +
+"#else\n" +
+"precision mediump float;\n" +
+"#endif\n" +
+"varying vec2 v_uv;\n" +
+"uniform vec2 u_size;\n" +
+"uniform vec4 u_rect[3];\n" +
+"uniform vec4 u_fill[3];\n" +
+"uniform vec4 u_edge;\n" +
+"uniform vec4 u_style;\n" +
+"\n" +
+"void main() {\n" +
+"    vec2 p = v_uv * u_size;\n" +
+"    vec4 c = vec4(0.0);\n" +
+"    for (int i = 0; i < 3; i++) {\n" +
+"        if (float(i) >= u_style.z) break;\n" +
+"        vec4 r = u_rect[i];\n" +
+"        vec2 hs = r.zw * 0.5;\n" +
+"        vec2 q = abs(p - (r.xy + hs)) - (hs - vec2(u_style.y));\n" +
+"        float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - u_style.y;   // < 0 inside\n" +
+"        float a = clamp(0.5 - d, 0.0, 1.0);\n" +
+"        if (a <= 0.0) continue;\n" +
+"        float edge = clamp(d + u_style.x + 0.5, 0.0, 1.0);                     // 1 within the frame\n" +
+"        vec4 col = mix(u_fill[i], u_edge, edge);\n" +
+"        c = vec4(col.rgb, col.a * a);\n" +
+"    }\n" +
+"    gl_FragColor = c;\n" +
+"}\n";
+
+var VS =
+"attribute vec2 a_pos;\nvarying vec2 v_uv;\n" +
+"void main(){ v_uv = a_pos * 0.5 + 0.5; v_uv.y = 1.0 - v_uv.y; gl_Position = vec4(a_pos, 0.0, 1.0); }\n";
+
+function GL(canvas){
+  var gl = canvas.getContext("webgl", { alpha:true, premultipliedAlpha:false, antialias:false });
+  if (!gl) return null;
+  function sh(type, src){
+    var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  var p = gl.createProgram();
+  gl.attachShader(p, sh(gl.VERTEX_SHADER, VS));
+  gl.attachShader(p, sh(gl.FRAGMENT_SHADER, SHIELD_FS));
+  gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  gl.useProgram(p);
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  var loc = gl.getAttribLocation(p, "a_pos");
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  return { gl:gl, p:p, u:function(n){ return gl.getUniformLocation(p, n); } };
+}
+
+function rgba(hex, a){
+  return [parseInt(hex.substr(1,2),16)/255, parseInt(hex.substr(3,2),16)/255,
+          parseInt(hex.substr(5,2),16)/255, a === undefined ? 1 : a];
+}
+
+/** One pass of up to three plates. plates: [{x,y,w,kind}] in canvas px. */
+function drawPlatesGL(ctx, w, h, plates, night){
+  var gl = ctx.gl;
+  gl.viewport(0, 0, w, h);
+  gl.clearColor(0, 0, 0, 0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  // No GL blending: the shader already returns the finished straight-alpha pixel, and the context is
+  // premultipliedAlpha:false. Blending here would premultiply the corners a second time.
+  gl.disable(gl.BLEND);
+  var rect = [], fill = [];
+  for (var i = 0; i < 3; i++){
+    var s = plates[i];
+    if (s){
+      var k = KINDS[s.kind] || KINDS.NEUTRAL;
+      rect.push(s.x, s.y, s.w, SPEC.H);
+      fill.push.apply(fill, rgba(s.fill || (night ? k.night : k.fill)));
+    } else { rect.push(0,0,0,0); fill.push(0,0,0,0); }
+  }
+  gl.uniform2f(ctx.u("u_size"), w, h);
+  gl.uniform4fv(ctx.u("u_rect[0]"), new Float32Array(rect));
+  gl.uniform4fv(ctx.u("u_fill[0]"), new Float32Array(fill));
+  gl.uniform4fv(ctx.u("u_edge"), new Float32Array(rgba(night ? EDGE.night : EDGE.day)));
+  gl.uniform4f(ctx.u("u_style"), SPEC.border, SPEC.radius, Math.min(plates.length, 3), 0);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+/* ------------------------------------------------------------------ *
+ *  Scenes
+ * ------------------------------------------------------------------ */
+
+var SET = [
+  { kind:"M", text:"M-04" },
+  { kind:"H", text:"H-08" },
+  { kind:"P", text:"P-42" },
+  { kind:"T", text:"T-17-19" },
+  { kind:"E", text:"E 50" },
+  { kind:"E", text:"E 373" },
+  { kind:"NEUTRAL", text:"A7" }
+];
+var GROW = [
+  { kind:"P", text:"P7",      n:"2 chars" },
+  { kind:"P", text:"P42",     n:"3 chars" },
+  { kind:"M", text:"M-04",    n:"4 chars" },
+  { kind:"E", text:"E 373",   n:"5 chars" },
+  { kind:"T", text:"T-17-19", n:"7 chars" }
+];
+
+var state = { night:false, zoom:1 };
+
+function layoutRow(items, gap){
+  var out = [], x = 0;
+  items.forEach(function(it){
+    var w = shieldW(it.text);
+    out.push({ x:x, y:0, w:w, kind:it.kind, text:it.text });
+    x += w + gap;
+  });
+  return { plates:out, width:x - gap };
+}
+
+/* -- scene 1: the bottom row at 1:1 -------------------------------- */
+function drawRow(){
+  var c = document.getElementById("row"), g = c.getContext("2d");
+  var night = state.night;
+  g.setTransform(1,0,0,1,0,0);
+  g.fillStyle = "#000"; g.fillRect(0, 0, c.width, c.height);
+
+  // the row band is cluster y 655..721; the shield row itself is y 669..709 -> 14 inside the band
+  var topInBand = 669 - 655;
+  var label = [{ kind:"M", text:"M-04" }, { kind:"E", text:"E 50" }];
+  var lay = layoutRow(label, SPEC.gapShield);
+  var name = "KYIV – KHARKIV";
+  g.font = SPEC.nameFont + 'px Arimo,"Liberation Sans",Arial,Helvetica,sans-serif';
+  var nameW = g.measureText(name).width;
+  var total = lay.width + SPEC.gapName + nameW;
+  var x0 = Math.round(960 - total / 2);
+
+  // BMW's own street field, for reference
+  g.strokeStyle = "#20242b"; g.lineWidth = 1;
+  g.strokeRect(795.5, topInBand + 0.5, 1126 - 795, 40);
+
+  lay.plates.forEach(function(s){
+    drawPlateA(g, x0 + s.x, topInBand, s.w, s.kind, night);
+    drawNumber(g, x0 + s.x, topInBand, s.w, s.text, night);
+  });
+  g.fillStyle = night ? INK.night : INK.day;
+  g.textAlign = "left"; g.textBaseline = "alphabetic";
+  g.font = SPEC.nameFont + 'px Arimo,"Liberation Sans",Arial,Helvetica,sans-serif';
+  g.fillText(name, x0 + lay.width + SPEC.gapName, topInBand + SPEC.textY + SPEC.baseline);
+}
+
+/* -- scene 2: the E green, standard beside ours --------------------- */
+
+// [name, day fill, night fill]
+var GREENS = [
+  ["DSTU 4100:2021", KINDS.E.dstu, "#01341F"],
+  ["ours",           KINDS.E.fill, KINDS.E.night]
+];
+
+function drawEGreen(){
+  var z = state.zoom, text = "E 50", w0 = shieldW(text);
+  var pitch = SPEC.H + 20, colGap = 34, padX = 10, padY = 10;
+  var w = padX * 2 + w0 * 2 + colGap + 400, h = padY * 2 + GREENS.length * pitch + 24;
+  var plates = [];
+  GREENS.forEach(function(gr, i){
+    var y = padY + 24 + i * pitch;
+    plates.push({ x:padX,                  y:y, w:w0, kind:"E", fill:gr[1] });   // day
+    plates.push({ x:padX + w0 + colGap,    y:y, w:w0, kind:"E", fill:gr[2] });   // night
+  });
+  var g = blit(document.getElementById("egreen"), platesPixels(w, h, plates, false), w, h, z);
+  g.font = '12px Arimo,"Liberation Sans",Arial,sans-serif';
+  g.textAlign = "left"; g.textBaseline = "alphabetic";
+  g.fillStyle = "#6f7682";
+  g.fillText("day", padX, padY + 14);
+  g.fillText("night (× 0.42)", padX + w0 + colGap, padY + 14);
+  GREENS.forEach(function(gr, i){
+    var y = padY + 24 + i * pitch;
+    drawNumber(g, padX, y, w0, text, false, INK.day);
+    drawNumber(g, padX + w0 + colGap, y, w0, text, false, INK.night);
+    g.textBaseline = "middle";
+    g.font = '13px Arimo,"Liberation Sans",Arial,sans-serif';
+    g.fillStyle = "#8d94a1";
+    g.fillText(gr[0] + "   " + gr[1] + "   day " + cr1(gr[1], INK.day) +
+               "   night " + cr1(gr[2], INK.night),
+               padX + w0 * 2 + colGap + 20, y + SPEC.H / 2);
+    g.textBaseline = "alphabetic";
+  });
+}
+
+function fillEtable(){
+  var rows = GREENS.map(function(gr){
+    return ["<strong>" + gr[0] + "</strong>",
+      "<span class='sw' style='background:" + gr[1] + "'></span>" + gr[1],
+      cr1(gr[1], INK.day), cr1(gr[1], "#FFFFFF"), cr1(gr[1], "#000000"),
+      "<span class='sw' style='background:" + gr[2] + "'></span>" + gr[2],
+      cr1(gr[2], INK.night), cr1(gr[2], "#000000")];
+  });
+  document.getElementById("etable").innerHTML =
+    "<tr><th>Green</th><th>Day fill</th><th>Number on it<br>(fg #F4F6FA)</th><th>Number on it<br>(pure white)</th>" +
+    "<th>Plate on black</th><th>Night fill</th><th>Number on it<br>(night fg)</th><th>Plate on black</th></tr>" +
+    rows.map(function(r){
+      return "<tr><td>" + r[0] + "</td>" + r.slice(1).map(function(c){ return "<td class='n'>" + c + "</td>"; }).join("") + "</tr>";
+    }).join("");
+}
+
+/* -- scene 3: the set, A and B ------------------------------------- */
+var glctx = null;
+
+function setGeometry(){
+  // one shield per row, label to the right
+  var rows = SET.map(function(it){ return { kind:it.kind, text:it.text, w:shieldW(it.text) }; });
+  var maxW = 0; rows.forEach(function(r){ maxW = Math.max(maxW, r.w); });
+  return { rows:rows, maxW:maxW, pitch:SPEC.H + 14, padX:10, padY:10, labelX:maxW + 26 };
+}
+
+/** Plates through the shader, at 1:1, into a plain 2D canvas (batched 3 at a time). */
+var _glCanvas = null, _gl = null;
+function platesGL(w, h, plates, night){
+  if (!_glCanvas){ _glCanvas = document.createElement("canvas"); }
+  if (_glCanvas.width !== w || _glCanvas.height !== h){ _glCanvas.width = w; _glCanvas.height = h; _gl = null; }
+  if (!_gl){ try { _gl = GL(_glCanvas); } catch (e){ _gl = null; glError = String(e); } }
+  if (!_gl) return null;
+  var acc = document.createElement("canvas"); acc.width = w; acc.height = h;
+  var ag = acc.getContext("2d");
+  for (var i = 0; i < plates.length; i += 3){
+    drawPlatesGL(_gl, w, h, plates.slice(i, i + 3), night);
+    ag.drawImage(_glCanvas, 0, 0);
+  }
+  return acc;
+}
+var glError = "";
+
+/** A canvas flattened onto opaque black, as the cluster's black panel shows it. */
+function overBlack(src, w, h){
+  var c = document.createElement("canvas"); c.width = w; c.height = h;
+  var g = c.getContext("2d");
+  g.fillStyle = "#000"; g.fillRect(0, 0, w, h);
+  g.drawImage(src, 0, 0);
+  return g.getImageData(0, 0, w, h).data;
+}
+
+function blit(canvas, src, w, h, z){
+  canvas.width = w * z; canvas.height = h * z; canvas.style.width = (w * z) + "px";
+  var g = canvas.getContext("2d");
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.fillStyle = "#000"; g.fillRect(0, 0, canvas.width, canvas.height);
+  if (src){ g.imageSmoothingEnabled = false; g.drawImage(src, 0, 0, w, h, 0, 0, w * z, h * z); }
+  g.setTransform(z, 0, 0, z, 0, 0);
+  return g;
+}
+
+function setPlates(geo){
+  return geo.rows.map(function(r, i){
+    return { x:geo.padX, y:geo.padY + i * geo.pitch, w:r.w, kind:r.kind };
+  });
+}
+
+function labelSet(g, geo, right){
+  geo.rows.forEach(function(r, i){
+    var y = geo.padY + i * geo.pitch;
+    drawNumber(g, geo.padX, y, r.w, r.text, state.night);
+    g.fillStyle = "#8d94a1";
+    g.font = '13px Arimo,"Liberation Sans",Arial,sans-serif';
+    g.textAlign = "left"; g.textBaseline = "middle";
+    g.fillText(right(r), geo.labelX, y + SPEC.H / 2);
+  });
+}
+
+function drawSets(){
+  var geo = setGeometry(), z = state.zoom;
+  var w = geo.labelX + 240, h = geo.padY * 2 + geo.rows.length * geo.pitch;
+  var plates = setPlates(geo);
+
+  var pxA = platesPixels(w, h, plates, state.night);
+  var gA = blit(document.getElementById("setA"), pxA, w, h, z);
+  labelSet(gA, geo, function(r){ return (KINDS[r.kind] || KINDS.NEUTRAL).label + "   " + r.w + "×" + SPEC.H; });
+
+  var pxB = platesGL(w, h, plates, state.night);
+  var gB = blit(document.getElementById("setB"), pxB, w, h, z);
+  if (!pxB){
+    gB.fillStyle = "#e8b35a"; gB.font = "14px sans-serif";
+    gB.fillText("WebGL unavailable" + (glError ? ": " + glError : ""), 12, 24);
+  } else {
+    labelSet(gB, geo, function(){ return "shader plate + text layer"; });
+  }
+  drawDiff(document.getElementById("diff"), pxA, pxB, w, h);
+}
+
+function drawDiff(canvas, pxA, pxB, w, h){
+  canvas.width = w; canvas.height = h; canvas.style.width = w + "px";
+  var g = canvas.getContext("2d");
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.fillStyle = "#000"; g.fillRect(0, 0, w, h);
+  var el = document.getElementById("diffv");
+  if (!pxB){ el.textContent = "not measured (no WebGL)"; el.className = "warn"; return; }
+  // Compare what the cluster shows: each rendering flattened onto opaque black by the same path.
+  // (Reading the two straight-alpha buffers directly would compare a putImageData round trip against a
+  // WebGL readback, which differ in how they carry alpha, not in what they draw.)
+  var A = overBlack(pxA, w, h), B = overBlack(pxB, w, h);
+  var out = g.createImageData(w, h), o = out.data, worst = 0, lit = 0;
+  for (var i = 0; i < A.length; i += 4){
+    var d = 0;
+    for (var k = 0; k < 3; k++) if (Math.abs(A[i+k] - B[i+k]) > d) d = Math.abs(A[i+k] - B[i+k]);
+    if (d > 8) lit++;
+    if (d > worst) worst = d;
+    var v = d * 16 > 255 ? 255 : d * 16;
+    o[i] = v; o[i+1] = v; o[i+2] = v; o[i+3] = 255;
+  }
+  g.putImageData(out, 0, 0);
+  el.textContent = "largest channel difference " + worst + "/255 over black, " + lit +
+                   " px over 8 of " + (w * h) + (worst <= 4 ? " — the two renderings agree" : "");
+  el.className = worst <= 4 ? "ok" : "warn";
+}
+
+/* -- scene 3: growth ----------------------------------------------- */
+function drawGrow(){
+  var z = state.zoom;
+  var rows = GROW.map(function(it){ return { kind:it.kind, text:it.text, n:it.n, w:shieldW(it.text) }; });
+  var maxW = 0; rows.forEach(function(r){ maxW = Math.max(maxW, r.w); });
+  var pitch = SPEC.H + 14, w = maxW + 300, h = 10 * 2 + rows.length * pitch;
+  var plates = rows.map(function(r, i){ return { x:10, y:10 + i * pitch, w:r.w, kind:r.kind }; });
+  var g = blit(document.getElementById("grow"), platesPixels(w, h, plates, state.night), w, h, z);
+  rows.forEach(function(r, i){
+    var y = 10 + i * pitch;
+    drawNumber(g, 10, y, r.w, r.text, state.night);
+    g.fillStyle = "#8d94a1";
+    g.font = '13px Arimo,"Liberation Sans",Arial,sans-serif';
+    g.textAlign = "left"; g.textBaseline = "middle";
+    g.fillText(r.n + "   ink " + ink(r.text, SPEC.font) + " px   →   W " + r.w + " px",
+               maxW + 26, y + SPEC.H / 2);
+  });
+}
+
+/* -- tables --------------------------------------------------------- */
+function fillTables(){
+  var p = document.getElementById("ptable");
+  var rows = [
+    ["Shield height H", SPEC.H + " px", "= BMW's street row, cluster y 669–709"],
+    ["Frame (border)", SPEC.border + " px", "0.05 × H, the proportion the real signs use"],
+    ["Corner radius", SPEC.radius + " px outer, " + (SPEC.radius - SPEC.border) + " px inner", "0.15 × H"],
+    ["Inner padding", SPEC.pad + " px each side", "from the inner edge of the frame to the ink"],
+    ["Number font", "Arimo Bold " + SPEC.font + " px", "cap height " + SPEC.cap.toFixed(1) +
+      " px = 0.52 × H; the 6WB family, not a road-sign face"],
+    ["Text cell", "cellH " + SPEC.cellH + ", baseline " + SPEC.baseline + ", offsetY " + SPEC.textY,
+      "centres the cap box in the shield"],
+    ["Width", "W = 18 + Σ advance(c), min " + SPEC.minW + ", rounded to even", "no extra tracking"],
+    ["Gap, shield to shield", SPEC.gapShield + " px", ""],
+    ["Gap, shields to name", SPEC.gapName + " px", ""]
+  ];
+  p.innerHTML = "<tr><th>Parameter</th><th>Value</th><th>Note</th></tr>" +
+    rows.map(function(r){ return "<tr><td>" + r[0] + "</td><td class='n'>" + r[1] + "</td><td>" + r[2] + "</td></tr>"; }).join("");
+
+  var c = document.getElementById("ctable");
+  var order = ["M","H","P","T","E","NEUTRAL"];
+  c.innerHTML = "<tr><th>Shield</th><th>DSTU</th><th>Day fill</th><th>Number on it</th>" +
+                "<th>Plate on black</th><th>Night fill (&times; 0.42)</th><th>Number on it</th></tr>" +
+    order.map(function(k){
+      var v = KINDS[k];
+      var dayOk = contrast(v.fill, INK.day) >= 4.5, nightOk = contrast(v.night, INK.night) >= 4.5;
+      return "<tr><td>" + v.label + "</td>" +
+        "<td class='n'>" + (v.dstu
+          ? (v.dstu === v.fill ? "same" : "<span class='sw' style='background:" + v.dstu + "'></span>" + v.dstu)
+          : "—") + "</td>" +
+        "<td class='n'><span class='sw' style='background:" + v.fill + "'></span>" + v.fill + "</td>" +
+        "<td class='n " + (dayOk ? "ok" : "warn") + "'>" + cr1(v.fill, INK.day) + "</td>" +
+        "<td class='n'>" + cr1(v.fill, "#000000") + "</td>" +
+        "<td class='n'><span class='sw' style='background:" + v.night + "'></span>" + v.night + "</td>" +
+        "<td class='n " + (nightOk ? "ok" : "warn") + "'>" + cr1(v.night, INK.night) + "</td></tr>";
+    }).join("") +
+    "<tr><td>frame / number</td><td class='n'>—</td>" +
+    "<td class='n'><span class='sw' style='background:" + EDGE.day + "'></span>" + EDGE.day + " / " + INK.day + "</td>" +
+    "<td class='n'>—</td><td class='n'>" + cr1(EDGE.day, "#000000") + "</td>" +
+    "<td class='n'><span class='sw' style='background:" + EDGE.night + "'></span>" + EDGE.night + " / " + INK.night +
+    "</td><td class='n'>—</td></tr>";
+}
+
+/* -- redraw / controls ---------------------------------------------- */
+function redraw(){
+  drawRow();
+  drawEGreen();
+  drawSets();
+  drawGrow();
+}
+
+function press(ids, on){ ids.forEach(function(id){ document.getElementById(id).setAttribute("aria-pressed", String(id === on)); }); }
+
+document.getElementById("bLight").onclick = function(){ state.night = false; press(["bLight","bNight"], "bLight"); redraw(); };
+document.getElementById("bNight").onclick = function(){ state.night = true;  press(["bLight","bNight"], "bNight"); redraw(); };
+document.getElementById("z1").onclick = function(){ state.zoom = 1; press(["z1","z2","z4"], "z1"); redraw(); };
+document.getElementById("z2").onclick = function(){ state.zoom = 2; press(["z1","z2","z4"], "z2"); redraw(); };
+document.getElementById("z4").onclick = function(){ state.zoom = 4; press(["z1","z2","z4"], "z4"); redraw(); };
+
+document.getElementById("src").textContent = SHIELD_FS;
+fillTables();
+fillEtable();
+
+// a quick self-check of the parser, shown in the status note
+(function(){
+  var probe = ["М-04", "М 04", "E 50", "Р50", "Т-17-19", "A7", "Khreshchatyk"];
+  var got = probe.map(function(s){ var r = classify(s); return s + " → " + (r ? r.kind + " \"" + r.text + "\"" : "name"); });
+  document.getElementById("glnote").textContent = got.join("   ·   ");
+})();
+
+redraw();
+</script>
+</div>
+</body>
+</html>
