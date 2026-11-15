@@ -18,8 +18,49 @@ const TAGS = {
     wb_sport: 'red glow', wb_sport_dials: 'red glow, G20 round them', wb_eco: 'blue glow', f30: 'basic',
 };
 
+// ---- one switch (docs/ONE-SWITCH-DONE.md): moving the settings saved by 0.7.15 and before, ONCE ------------------
+// Settings.values keeps keys that app.json no longer declares (kit/runtime/mgu.js: the saved file is merged over the
+// defaults), so the retired values can still be read here. Marked with _oneSwitchV, and run BEFORE the engine starts:
+// a hudLayout that still named a "+ G20" file would otherwise fall back to the default theme (hud.js setting(), the
+// value is no longer an option), and if that file were ever deleted layouts.load throws and NOTHING is drawn.
+const MIG_MARK = '_oneSwitchV';
+const OLD_ROWS = ['ownRange', 'ownClock', 'ownTemp', 'ownNav', 'ownSign', 'ownInfo', 'ownAll'];
+const THEME_KEYS = ['hudLayout', 'inComfort', 'inSport', 'inEco'];
+
+function migrate(ctx) {
+    const S = ctx.settings;
+    if (!S.item(HudApp.ROW_KEY) || !S.item('g20') || S.get(MIG_MARK) === 1) return;
+    const note = [];
+    // 1. "+ G20" is a toggle now: a saved theme naming a see-through file becomes its theme, and the toggle goes on -
+    //    but only for a theme that still HAS a see-through variant (HudApp.G20_OF). A car that had "6WB Sport + G20"
+    //    and nothing else keeps the toggle off: turning it on would not bring Sport's variant back (it was retired
+    //    with the theme) and would make Comfort see-through, which that driver never asked for.
+    let g20 = S.get('g20') === true;
+    THEME_KEYS.forEach((k) => {
+        const was = S.get(k), now = HudApp.themeOf(was);
+        if (!was || now === was) return;
+        S.values[k] = now;
+        const back = HudApp.G20_OF[now] === was;
+        if (back) g20 = true;
+        note.push(k + ' "' + was + '" -> "' + now + '"' + (back ? ' with the G20 toggle on' : ' (it has no see-through variant any more)'));
+    });
+    // 2. the seven own* rows become one. A mixed row cannot be kept (that is the point of the request), so it is
+    //    rounded UP: any item the driver had asked US to draw makes the whole row ours. A row that was all BMW's
+    //    stays all BMW's - which is the owner's own car (ownRange / ownClock / ownTemp all "bmw").
+    const saved = OLD_ROWS.filter((k) => S.get(k) !== undefined);
+    const row = saved.length ? (saved.some((k) => S.get(k) === 'ours') ? HudApp.ROW_OURS : HudApp.ROW_BMW) : null;
+    OLD_ROWS.forEach((k) => { delete S.values[k]; });
+    if (row) note.push(saved.length + ' own* row(s) -> ' + HudApp.ROW_KEY + ' "' + row + '"');
+    S.values.g20 = g20;
+    if (row) S.values[HudApp.ROW_KEY] = row;
+    S.set(MIG_MARK, 1);          // the mark last: it is only saved together with the values above
+    ctx.log.info('settings: one switch migration' + (note.length ? ': ' + note.join('; ') : ': nothing saved to move'));
+}
+
 mgu.run({
     start(ctx) {
+        // never let this stop the app: a failure here leaves the old values in place, which still draw
+        try { migrate(ctx); } catch (e) { ctx.log.error('settings migration: ' + (e && e.stack || e)); }
         let hud;
         try {
             hud = new HudApp(ctx);

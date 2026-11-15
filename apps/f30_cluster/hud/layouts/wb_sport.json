@@ -275,9 +275,9 @@
       "font": "wb_big",
       "color": "fg",
       "align": "center",
+      "conn": 1,
       "gpu": true,
-      "maxLen": 3,
-      "conn": 1
+      "maxLen": 3
     },
     {
       "id": "speed_unit",

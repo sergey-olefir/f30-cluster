@@ -1125,6 +1125,10 @@ uniform vec4 u_cutW;       // the window (BMW's own sign or lamp shows through),
 #define u_value u_dyn.x
 #define u_over u_dyn.yz
 #define u_hot u_dyn.w
+// The over-speed marking's leading "tab" (MEASURED 2026-11-15 off reference/6wb/12, see the u_over blocks below):
+// half its angular width, as a fraction of the sweep. 1.5 km/h of the 0..260 scale = 0.0058; the marking is only
+// ever drawn on the speed dial (hud.js guards w.measure === 'speed'), whose scale is 0..260 in every 6WB layout.
+#define LEADW 0.0058
 #define u_hasBase u_fill.z
 
 const float PI = 3.14159265359;
@@ -1187,10 +1191,18 @@ void main() {
         float lit = 0.5 + 0.5 * dot(nn, vec2(-0.6, 0.8));              // 1 on the side facing the light (upper left)
         if (u_hasBase > 2.5) {
             // baked: the whole static dial (face, ticks, red zone, OFF arc, discs, rings, bezel, bottom arc); live on top:
-            // the over-speed band (inside the ticks), then the hub and the needle below
+            // the over-speed marking, then the hub and the needle below.
+            // Radii MEASURED off the F30 (docs/F30-FONT-SPEC.md 9.2-9.3): the marking lives in the EMPTY RING between
+            // the hub and the numerals - hard inner edge 0.521 R, brightest there, fading outward to nothing at
+            // 0.663 R, which is where the numeral band begins. It never reaches the numerals or the ticks.
+            // Before 2026-11-15 this ran 0.64 R -> 0.80 R and faded the OTHER way (faint inside, strong outside).
             col = mix(u_face, bs.rgb, bs.a);
-            if (u_over.x >= 0.0 && inSweep && frac >= u_over.x && frac <= u_over.y && d > 0.64 * R && d < 0.80 * R) {
-                col = mix(col, u_red * 0.85, 0.75 * smoothstep(0.64 * R, 0.80 * R, d));
+            if (u_over.x >= 0.0 && inSweep && frac >= u_over.x - LEADW && frac <= u_over.y && d > 0.521 * R) {
+                float lead = 1.0 - smoothstep(0.0, LEADW, abs(frac - u_over.x));
+                float outR = mix(0.663, 0.795, lead) * R;
+                float a = 0.72 * clamp((outR - d) / (outR - 0.54 * R), 0.0, 1.0)
+                        + 0.30 * (1.0 - smoothstep(0.0, 0.014 * R, abs(d - 0.530 * R)));
+                if (d < outR) col = mix(col, u_red * 0.85, min(a, 1.0));
             }
         } else {
             // the face: black (the references' lifted dark is their LCD's black level and the camera, not drawn), a faint
@@ -1225,9 +1237,14 @@ void main() {
                 col = mix(col, u_red * 0.9, 0.6 * smoothstep(0.74 * R, 0.88 * R, d));
             }
             if (inSweep && u_redFrom <= 1.0 && frac >= u_redFrom && d > 0.862 * R && d < to) col = u_red;
-            // over the limit: a red wedge from the limit to the needle, inside the ticks
-            if (u_over.x >= 0.0 && inSweep && frac >= u_over.x && frac <= u_over.y && d > 0.64 * R && d < 0.905 * R) {
-                col = mix(col, u_red * 0.85, 0.8 * smoothstep(0.64 * R, 0.80 * R, d));
+            // over the limit: a red wedge in the empty ring between the hub and the numerals. The same measured
+            // radii as the baked path above; the angular ends are whatever the engine puts in u_over (hud.js).
+            if (u_over.x >= 0.0 && inSweep && frac >= u_over.x - LEADW && frac <= u_over.y && d > 0.521 * R) {
+                float lead = 1.0 - smoothstep(0.0, LEADW, abs(frac - u_over.x));
+                float outR = mix(0.663, 0.795, lead) * R;
+                float a = 0.72 * clamp((outR - d) / (outR - 0.54 * R), 0.0, 1.0)
+                        + 0.30 * (1.0 - smoothstep(0.0, 0.014 * R, abs(d - 0.530 * R)));
+                if (d < outR) col = mix(col, u_red * 0.85, min(a, 1.0));
             }
             // the tick track: a groove, darker than the face, between two lit rims
             if (u_hasBase < 0.5) {
@@ -1538,7 +1555,7 @@ uniform vec4 u_foot;      // the line at the window's foot: style (0 the baked g
 // kept 3 px off the check-control frame, text and "i"; tools/overlay/plan_dials.py). u_shade: the shade at our dials'
 // inner edges over BMW's map ("dialShade"): strength at the rim (0: none), falloff px, the y span it fades out over;
 // none inside u_shadeKo (x0, y0, x1, y1: BMW's right "i"). u_pat0..3: up to 4 black patches (x0, y0, x1, y1; x1 <= x0:
-// none) over the bottom-row items we draw ourselves (ownRange / ownClock / ownTemp) and BMW's left hook stub
+// none) over the bottom-row items we draw ourselves (the "bottomRow" setting) and BMW's left hook stub
 // car3 G: four plain vec4s, not one vec4[4] array (docs/CAR3-G-REPORT.md: no array uniform on the car's WBBACK)
 uniform vec4 u_shade;
 uniform vec4 u_shadeKo;

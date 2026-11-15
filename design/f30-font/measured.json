@@ -1,0 +1,221 @@
+{
+ "$comment": "Package design/f30-font: every number in docs/F30-FONT-SPEC.md that was measured on an F30 6WB reference image. Unlike design/g20-spec/measured.json these are the IMAGE's own pixels, not panel px: the references are third-party photographs of someone else's car at their own scales and there is no common panel frame to rectify them to. Ratios (x/cap, stem/cap, advance/figure, a digit's w/h) are scale-free and are what identifies the face; absolute px are only ever quoted together with the image they came from. No photo pixels are stored here.",
+ "kind": "f30-font-measurements",
+ "schema_version": 1,
+
+ "images": {
+  "05": {"file": "reference/6wb/05_comfort_tach-closeup.png", "size": [1000, 750], "nature": "photograph",
+         "evidence": "lateral chromatic aberration (orange/cyan fringes) on every high-contrast edge, lens vignetting, a studio highlight across the dial glass; watermarked product photo of a physical cluster",
+         "shows": "F30 6WB Comfort tacho close-up: rev digits 1-7, '1/min x 1000', READY, OFF, gear P",
+         "best_for": "rev-scale digits (figure height 48.5 px, the largest multi-glyph sample in the set)"},
+  "13": {"file": "reference/6wb/13_ticks_closeup.png", "size": [768, 926], "nature": "photograph",
+         "evidence": "strong blue/orange fringing, visible panel bloom, the glyph core is clipped to 255",
+         "shows": "the rev scale's '6' and the tick ring at the largest scale in the set",
+         "best_for": "one digit at figure height 205 px; a cross-scale check on the shape ratios"},
+  "04": {"file": "reference/6wb/04_comfort_whole-cluster_mph.png", "size": [1000, 750], "nature": "photograph",
+         "evidence": "same watermarked studio series as 05; straight-on, little perspective",
+         "shows": "whole F30 6WB cluster, mph: speed scale 0-160, 'mph', rev scale, READY/OFF",
+         "best_for": "the speed-scale digits and the tabular-advance test (8 numbers, all one size)"},
+  "03": {"file": "reference/6wb/03_three-modes_photo_bimmerstop.png", "size": [950, 1200], "nature": "photograph",
+         "evidence": "handheld through the steering wheel, three separate frames, reflections on the cluster glass",
+         "shows": "ECO PRO / Comfort / Sport; the Comfort frame has the real bottom row 'Time 14:21  Total 64747 km  Temp +39.0 C'",
+         "best_for": "the bottom row's labels, values and units, and the Sport layout's big speed and gear"},
+  "17": {"file": "reference/6wb/17_physical-cluster_full.png", "size": [2452, 1110], "nature": "photograph (video frame)",
+         "evidence": "motion/defocus blur, rolling-shutter-free but soft; a bench unit on a desk with the room behind it",
+         "shows": "whole cluster on a bench, km/h, bottom row 'Time / -40.0 C / km', 'Efficient Dynamics', 'l/100km 0 10 20'",
+         "best_for": "the bottom row and the side-gauge figures at a larger size (but blurred)"},
+  "07": {"file": "reference/6wb/07_physical-cluster_all-lamps-lit.png", "size": [1456, 824], "nature": "photograph (video frame)",
+         "shows": "bench unit, all lamps lit, bottom row 'Time / Trip 000.0 km / Total 00000 km'",
+         "best_for": "confirming the bottom row's field set; glyphs are bloomed together and not separable"},
+  "12": {"file": "reference/6wb/12_speedo_signs_overspeed-wedge.png", "size": [374, 344], "nature": "low-resolution frame, origin uncertain",
+         "evidence": "no camera artefact survives at 374 px wide, so photograph and screenshot cannot be told apart; the dial's own calibration fits a straight line to 0.03 deg rms, which is what a genuine rendering gives",
+         "shows": "F30 6WB speedo with a 60 km/h limit sign, a no-overtaking sign, the needle at 80 and the red over-speed marking",
+         "best_for": "the over-speed marking, and the dial's angular calibration"},
+  "02": {"file": "reference/6wb/02_three-modes_clean-render.png", "size": [1254, 1254], "nature": "SYNTHETIC - not a BMW asset",
+         "evidence": "'Fasten seatbelt' is doubled and smeared, 'EfficientDynamics' is illegible, 'OPO' appears where 'OFF' belongs, the Sport frame's layout does not match any F30 state, letterforms are inconsistent between the three frames",
+         "shows": "three mode frames",
+         "usable_for": "NOTHING typographic. Excluded from every measurement below."},
+  "01": {"file": "reference/6wb/01_three-modes_small.png", "size": [447, 447], "nature": "downscale of 02", "usable_for": "nothing typographic"},
+  "06": {"file": "reference/6wb/06_comfort_wide_with-wheel.png", "size": [1000, 750], "nature": "photograph", "usable_for": "layout only; the text is 6-8 px tall"},
+  "14": {"file": "reference/6wb/14_inner-rings_closeup.png", "size": [264, 232], "nature": "photograph", "usable_for": "the inner rings; no text"},
+  "15": {"file": "reference/6wb/15_hub-needle_closeup.png", "size": [892, 666], "nature": "photograph", "usable_for": "the hub and needle; no text"}
+ },
+
+ "method": {
+  "glyph_box": "tools/f30font/measure.py: the box is cut from the original image and upsampled n x (Lanczos), blurred by n/6, thresholded at the midpoint between the 5th and 99.5th percentile of the ink channel (max(RGB) for light text), then 8-connected components. The same half-max rule as tools/g20spec/measure.py, minus the rectification, which these images cannot have.",
+  "bloom": "Every reference is a bright LCD photographed with its core clipped to 255, so each glyph's ink is dilated by a roughly constant d px in BOTH width and height. Absolute widths, heights and strokes are therefore over-reported; the dilation is fitted and removed in tools/f30font/fontfit.py rather than being charged to a candidate face.",
+  "cross_check": "The rev scale's '6' measures w/h 0.6394 on image 05 (h 50.25 px) and 0.6390 on image 13 (h 205.0 px) - two different photographs at a 4x scale difference agreeing to 0.1%, which is what justifies using w/h ratios as the fingerprint.",
+  "uncertainty": "A single ink edge on one image is good to about +-0.3 px at the scale it was read. Where several glyphs of a run give the same quantity the spread is quoted. Nothing here is better than the bloom model's own residual, about 2% of a figure height."
+ },
+
+ "runs": {
+  "rev_digits": {
+   "source": "image 05, the Comfort tacho's rev scale",
+   "kind": "measured",
+   "text": "1234567",
+   "figure_height_px": 48.5,
+   "figure_height_note": "flat-topped 1/4/7 read 48.50/48.38/47.88 (mean 48.25); round 3/6 read 49.88/50.25 - about 1.6 px of overshoot, 3.3%, part of which is bloom on a curve",
+   "stem_px": 9.12,
+   "stem_char": "1",
+   "stem_note": "median horizontal ink run of the '1', whose p25/p75 is 9.00/9.25 - a clean stem reading; bloomed, see method",
+   "glyphs": {"1": [19.87, 48.50], "2": [30.88, 49.25], "3": [31.63, 49.88], "4": [33.13, 48.38],
+              "5": [31.13, 49.50], "6": [32.13, 50.25], "7": [30.50, 47.88]},
+   "counters": {"4": [8.87, 16.00], "6": [10.12, 17.26]},
+   "counters_note": "the holes inside the 4 and the 6, measured with tools/f30font/measure.py --invert. A counter SHRINKS by the same bloom that grows the ink, so it is what separates 'a bold face, sharply photographed' from 'a light face, bloomed' - the two fit a glyph's outline equally well."
+  },
+  "cap_1min": {
+   "source": "image 05, the '1/min x 1000' caption under the tacho's hub",
+   "kind": "measured",
+   "text": "1/minx1000",
+   "figure_height_px": 23.5,
+   "x_height_px": 17.44,
+   "x_height_note": "m 17.63, n 17.76, i 17.12, x 17.24",
+   "x_over_figure": 0.742,
+   "stem_px": 4.5,
+   "stem_char": "1",
+   "advance_px": 16.81,
+   "advance_note": "'0'->'0' twice in 1000: 17.00 and 16.62. The '1'->'0' ink advance is 12.76, where a '1' centred in a 16.81 cell would give 14.02 - so the '1' sits about 1.3 px LEFT of centre in its cell, 7.5% of the advance",
+   "glyphs": {"1": [9.37, 23.50], "/": [8.62, 23.38], "m": [22.63, 17.63], "n": [14.00, 17.76],
+              "x": [14.12, 17.24], "0": [15.20, 23.67]},
+   "counters": {"0": [5.60, 16.00]},
+   "counters_note": "the three 0s of '1000' read 5.60/5.80/5.40 wide and 16.00 tall each",
+   "sheet_crop": {"file": "reference/6wb/05_comfort_tach-closeup.png", "box": [434, 257, 606, 290], "height_scale": 1.35}
+  },
+  "ready": {
+   "source": "image 05, the READY label on the rev scale",
+   "kind": "measured",
+   "text": "RDY",
+   "cap_height_px": 24.38,
+   "cap_note": "R 24.38, D 24.26, Y 24.37; the E and the A touch and were excluded",
+   "stem_px": 5.38,
+   "stem_char": "R",
+   "stem_over_cap": 0.221,
+   "ink_width_px": 89.37,
+   "ink_width_note": "the whole word READY, x 228.88..318.25",
+   "glyphs": {"R": [16.00, 24.38], "D": [17.75, 24.26], "Y": [17.50, 24.37]},
+   "sheet_crop": {"file": "reference/6wb/05_comfort_tach-closeup.png", "box": [226, 497, 321, 529], "height_scale": 1.25}
+  },
+  "speed_digits": {
+   "source": "image 04, the mph speed scale 20..160 (eight numbers, all one size)",
+   "kind": "measured",
+   "text": "0124568",
+   "figure_height_px": 14.87,
+   "stem_px": null,
+   "advance_px": 10.26,
+   "advance_note": "advance between adjacent non-'1' digits across 20/40/60/80/100/120/140/160: 10.2, 10.0, 11.0, 10.0, 10.0, 10.5, 10.6, 9.8 - mean 10.26, sd 0.39, i.e. EQUAL within the noise, so the figures are tabular. A '1' leading a number gives 9.0-9.8 because its ink sits inside a cell of the same width.",
+   "glyphs": {"0": [9.07, 14.90], "1": [5.93, 14.70], "2": [8.90, 14.75], "4": [9.75, 15.00],
+              "6": [9.50, 15.00], "8": [9.00, 14.50]}
+  },
+  "gear_p": {
+   "source": "image 05, the gear letter in its box under the tacho hub",
+   "kind": "measured",
+   "text": "P",
+   "cap_height_px": 39.75,
+   "stem_px": 8.25,
+   "stem_char": "P",
+   "stem_over_cap": 0.208,
+   "glyphs": {"P": [24.63, 39.75]}
+  },
+  "six_closeup": {
+   "source": "image 13, the rev scale's '6' at the largest scale in the set",
+   "kind": "measured",
+   "text": "6",
+   "figure_height_px": 205.0,
+   "note": "used only as a cross-scale check on w/h; the core is clipped so its stroke is not usable",
+   "glyphs": {"6": [131.0, 205.0]}
+  }
+ },
+
+ "text_kinds": {
+  "$comment": "What the F30 6WB Comfort cluster shows, and which run measures it.",
+  "speed_scale_numbers": {"run": "speed_digits", "weight_read": "Bold", "case": "figures only"},
+  "rev_scale_numbers": {"run": "rev_digits", "weight_read": "Bold", "case": "figures only"},
+  "unit_captions": {"run": "cap_1min", "examples": ["km/h", "mph", "1/min x 1000"], "weight_read": "Medium/SemiBold", "case": "lowercase with figures"},
+  "ready_off": {"run": "ready", "weight_read": "Bold", "case": "all caps",
+                "note": "READY is white; OFF is drawn dimmer (grey) in the same size and weight - measured on image 05, where OFF's ink reads far below READY's against the same background"},
+  "gear": {"run": "gear_p", "weight_read": "Bold", "case": "one capital"},
+  "bottom_row_values": {"run": null, "examples": ["14:21", "64747", "+39.0"], "weight_read": "Bold",
+                        "note": "image 03 resolves them at a figure height of 13.2 px but adjacent digits bloom together, so no advance could be read; the shapes agree with the rev digits"},
+  "bottom_row_labels": {"run": null, "examples": ["Time", "Total", "Temp", "Trip"], "weight_read": "Bold",
+                        "note": "MIXED CASE, not all caps - an initial capital and lowercase. Cap height about 0.62 of the value figure height (image 03: label cap 8.2 against value figure 13.2)"},
+  "bottom_row_units": {"run": null, "examples": ["km", "C"], "weight_read": "Bold",
+                       "note": "lowercase, x-height 8.74 against the value's 13.2 figure height = 0.66; sits on the value baseline. The temperature unit reads as a degree ring followed by a LOWERCASE c on images 03 and 17."},
+  "side_gauge_figures": {"run": null, "examples": ["0", "10", "20", "1/1"], "weight_read": "Bold",
+                         "note": "the consumption scale's figures on image 17; 7-9 px tall and blurred, no shape reading possible"}
+ },
+
+ "speedo": {
+  "$comment": "Measured on image 12 by tools/f30font/wedge.py: the major (numbered) ticks are found as bright blobs, then the dial centre and a linear angle = a0 + k * speed are fitted together by least squares.",
+  "calibration": {
+   "centre_image_px": [187.37, 171.62],
+   "angle_at_zero_deg": 230.14,
+   "deg_per_kmh": 0.99897,
+   "deg_per_major_tick_20kmh": 19.979,
+   "sweep_0_to_260_deg": 259.73,
+   "fit_rms_deg": 0.028,
+   "fit_max_resid_deg": 0.047,
+   "kind": "measured",
+   "note": "essentially exactly 1.0 degree per km/h, 0 at 230 deg clockwise from 12 o'clock, 260 deg of sweep. 14 major ticks, residuals under 0.05 deg."
+  },
+  "radii_image_px": {
+   "tick_outer_end": 147.5,
+   "tick_inner_end": 133.0,
+   "tick_centroid": 140.8,
+   "numeral_band": [107.0, 128.8],
+   "dial_outer_ring": [158.2, 163.5],
+   "kind": "measured",
+   "note": "read off a radial brightness profile along the 60 km/h tick (tools/f30font/wedge.py --what profile). R below means the tick outer end, 147.5 px."
+  },
+  "numeral_magnification": {
+   "kind": "measured",
+   "image": "12",
+   "needle_at_kmh": 80.2,
+   "figure_height_px": {"40": 11.92, "60": 17.00, "80": 22.34, "100": 17.22, "120": 12.00},
+   "ratio_to_far_field": {"at_needle": 1.866, "one_major_away": 1.431, "two_majors_away": 1.0},
+   "note": "On image 12 the scale numerals grow towards the needle, symmetrically: 80 (the needle) is 1.87x the size of 40 and 120, and 60 and 100 are 1.43x. On image 04, with the needle at 0, all eight numerals measure 14.2-15.0 px - no magnification at all. The two images therefore disagree and the effect is NOT established for the F30 6WB Comfort dial; see docs/F30-FONT-SPEC.md."
+  },
+  "overspeed_marking": {
+   "kind": "measured",
+   "image": "12",
+   "shape": "a sector (a true wedge): in polar coordinates about the fitted centre it is a rectangle, so it is bounded by two radial edges and two arcs, not by a chord or a constant-width band",
+   "angular": {
+    "leading_edge_deg": 289.4,
+    "leading_edge_kmh": 59.3,
+    "leading_bright_line_peak_deg": 289.88,
+    "leading_bright_line_peak_kmh": 59.80,
+    "trailing_edge_deg": 307.55,
+    "trailing_edge_kmh": 77.4,
+    "needle_centre_deg": 310.25,
+    "needle_centre_kmh": 80.19,
+    "visible_extent_deg": 18.15,
+    "note": "The leading edge is a bright red radial line whose peak sits at 59.80 km/h against a 60 km/h limit - on the limit within the image's own blur. The visible trailing end stops 2.8 deg short of the needle's centre; the needle's own drawn width at that radius is about 4 deg (bright core 1.4 deg plus a dark red outline either side), so the wedge runs to the current speed and the needle is drawn over its end."
+   },
+   "radial": {
+    "inner_edge_px": 85.0,
+    "inner_edge_over_R": 0.576,
+    "bright_rim_peak_px": 86.2,
+    "bright_rim_peak_over_R": 0.584,
+    "half_intensity_px": 95.1,
+    "half_intensity_over_R": 0.645,
+    "outer_fade_to_zero_px": 108.0,
+    "outer_fade_over_R": 0.732,
+    "thickness_px": 23.0,
+    "note": "R is the tick outer end, 147.5 image px. The inner edge is hard (half-max at r 85.0) and carries a bright rim peaking at r 86.2; from there the fill fades monotonically outward and is gone by r 108, which is exactly where the numeral band begins. So the marking occupies the empty ring between the hub graphics and the scale numerals, and never touches the ticks."
+   },
+   "colour": {
+    "peak_rgb_in_photo": [181, 26, 17],
+    "mid_fill_rgb_in_photo": [175, 26, 18],
+    "limit_sign_ring_rgb_in_photo": [230, 44, 16],
+    "note": "The hue does not change across the marking (181,26,17 at the rim against 175,26,18 in the fill), only the intensity - so it is ONE red drawn with a radially falling alpha, not a two-colour gradient. In the same, non-colour-managed image the speed-limit sign's ring reads (230,44,16), so the marking is a DEEPER red than the standard sign red, about 0.77 of its red channel.",
+    "kind": "measured"
+   },
+   "not_measured": [
+    "whether the bright leading line is drawn whenever a limit is known, or only while the limit is exceeded - only the exceeded case was photographed",
+    "whether the marking flashes, and at what rate - a still cannot show it",
+    "what the marking does when the limit changes while it is up",
+    "the marking's appearance against a limit above the needle (i.e. not exceeding)",
+    "whether the outer fade is linear in alpha or a gamma curve - the photo's own response is unknown"
+   ]
+  }
+ }
+}

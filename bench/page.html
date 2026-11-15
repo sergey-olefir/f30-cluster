@@ -87,6 +87,13 @@
       <div id="sliders"></div>
       <div class="note" id="sigNote">Demo drive is the kit's simulator (sim.js). It has no boost signal, so boost reads "--" here, as on a car that does not fill that field.</div>
     </section>
+    <!-- bottom row (docs/BOTTOM-ROW-PACKAGE.md): the car's own speed-limit struct, check-control message and road
+         label have no stand-in on the bench, so bench/fake-signs.js feeds them. Each button is one scene (POST /fake). -->
+    <section>
+      <h2>Bottom row (sign, message, road)</h2>
+      <div class="seg" id="scenes"></div>
+      <div class="note">These feed the car's own fields (TrafficSignDisplayControl, KombiInterface_2, Guidance, NavigationStatus) as raw SOME/IP values. Whether any of it is DRAWN is the settings "Who draws this": they are BMW's by default, so pick "Ours" there first. <code>node bench/test-bottom-row.js</code> drives the same scenes.</div>
+    </section>
     <!-- G20SIM: controls of the stock G20 simulation drawn as the panel backdrop (bench/g20/, bench only) -->
     <section id="g20box" style="display:none">
       <h2>G20 (stock cluster, bench only)</h2>
@@ -559,6 +566,20 @@
   SIGNALS.forEach(([k, min, max, step, def]) => {
     sl.insertAdjacentHTML('beforeend', '<div class="row"><span>' + k + '</span><input type="range" id="s_' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + def + '" disabled><output id="o_' + k + '">--</output></div>');
   });
+  // bottom row: one button per scene of bench/fake-signs.js (the names come from the running app, GET /probe)
+  (function scenes() {
+    const box = document.getElementById('scenes');
+    if (!box) return;
+    fetch('/probe').then((r) => r.json()).then((p) => {
+      const list = (p.signs && p.signs.scenes) || [];
+      if (!list.length) { box.textContent = 'no fakes (this app reads none of these signals)'; return; }
+      box.innerHTML = list.map((s) => '<button data-scene="' + s + '">' + s + '</button>').join('');
+      box.addEventListener('click', (e) => {
+        const s = e.target && e.target.getAttribute('data-scene');
+        if (s) fetch('/fake', { method: 'POST', body: JSON.stringify({ scene: s }) });
+      });
+    }).catch(() => { box.textContent = 'the app is not running'; });
+  })();
   function values() { const o = {}; SIGNALS.forEach(([k]) => { o[k] = Number(document.getElementById('s_' + k).value); }); return o; }
   function pushSignals() { fetch('/signals', { method: 'POST', body: JSON.stringify({ mode, values: values() }) }); }
   SIGNALS.forEach(([k]) => document.getElementById('s_' + k).addEventListener('input', (e) => {

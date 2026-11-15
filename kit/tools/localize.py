@@ -59,6 +59,8 @@ def localize_spec(spec, language):
                 item[2] = text(item[2], words)
     for setting in s.get('settings', []):
         setting['label'] = text(setting['label'], words)
+        if setting.get('group'):                       # a settings group's heading (build.py settings_items)
+            setting['group'] = text(setting['group'], words)
         for option in setting.get('options', []):
             option[1] = text(option[1], words)
     return s
