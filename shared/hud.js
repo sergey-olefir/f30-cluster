@@ -151,7 +151,9 @@
  * Any widget: "toggle": "<bool setting>" hides it when that setting is off, "!<setting>" when it is on,
  * "<choice setting>=<value>" shows it only while that choice is picked (also with "!");
  * "own:range" / "own:clock" / "own:temp" while that item of BMW's bottom row is ours (settings ownRange / ownClock /
- * ownTemp, 6WB Dials + G20; package F); "cc:none" only while the car says no check-control message shows (car3 G:
+ * ownTemp, 6WB Dials + G20; package F); "own:nav" / "own:sign" / "own:info" the same way for the bottom-centre road
+ * label, the speed-limit sign and the check-control message (settings ownNav / ownSign / ownInfo, all "BMW's" by
+ * default: docs/BOTTOM-ROW-PACKAGE.md); "cc:none" only while the car says no check-control message shows (car3 G:
  * this.ccShown === false; off while that is unknown); token {{ambient1}}: the outside temperature as BMW shows it, "+3.5" (°C, 0.5 steps);
  * car3 H: "a&b" (any of the above, joined by "&") while every part is on;
  * "mapUp" (toggle or holeWhen) is not a saved setting: on while the Waze map shows inside the theme (waze.js; the
@@ -164,7 +166,8 @@
  *   (the GT3 look); "round": true for dots;
  * "off" the alpha of an unlit light (0.14).
  * Text "warnFlash": false: no flash over the warning limit (a tile that turns red itself).
- * Text "colorBy": "verdict" colours it by the last shift's grade. Text "near": ["speed" | "rpm", i] turns it
+ * Text "colorBy": "verdict" colours it by the last shift's grade; "cc" by the colour the car asked for its
+ * check-control message (cCColor: red / yellow / orange / green / white). Text "near": ["speed" | "rpm", i] turns it
  * "nearColor" (fg) while scale label i is the one nearest the value (BMW lights up the label by the needle).
  *
  * rpm is smoothed (a 120 ms filter, and the readout moves in 50 rpm steps only when it changes by 40 or
@@ -186,6 +189,9 @@
  * 0-60 run started) {{avgSpeed}} (average moving speed this drive, from its first minute) {{run}} (the 0-60 clock running, else the last time, s) {{runBest}} {{runState}} (READY / GO / DONE)
  * {{runLabel}} (0-60 MPH, 0-100 KM/H): runs.js. {{warm}}: WARMING UP while the oil is under 80 C, then ENGINE WARM.
  * {{badge}}: the model picked on the Badge tab (badges.js), "BMW X3 M40i" with the lettering on, '' for none.
+ * Bottom row (docs/BOTTOM-ROW-PACKAGE.md; each '' until the car sends one AND its setting is "ours"):
+ * {{road}} (the bottom-centre road label) {{ccName}} {{ccDesc}} (the check-control message's name and description)
+ * {{limitUnit}} {{limitSupp}} {{limitWarn}} {{nopassDist}} {{navDist}} {{navEta}} {{navMins}}.
  * Warnings: a text showing oil, coolant or boost (a {{oil}} / {{coolant}} / {{boost}} token, or a readout slot with that
  * sensor) flashes in the shift red while the value is over "warnOil" / "warnCoolant" (C) / "warnBoost" (bar); 0 = off.
  * Shift-light test (testShift(), the page's Alerts tab): for about 4 s the rpm every widget sees climbs from 1500 to just
@@ -254,6 +260,28 @@ const WB_SHADE = { off: [0, 20], weak: [0.5, 12], normal: [0.8, 20], strong: [0.
 const WB_LIVE_KEYS = ['dialShade', 'wbFoot'];
 // --- end package F ---
 const DIAL_SPEED = { us: { max: 160, ticks: 8 }, metric: { max: 240, ticks: 8 } };
+// --- bottom row (docs/BOTTOM-ROW-PACKAGE.md) ---
+// the supplemental sign under the limit, as a short word for the placeholder text ({{limitSupp}}); the faithful
+// pictograms come with the design spec (docs/G20-DESIGN-SPEC.md)
+const SUPP_TEXT = {
+    rain: 'RAIN', snow: 'SNOW', snowRain: 'SNOW/RAIN', fog: 'FOG', time: 'TIME', zone: 'ZONE', school: 'SCHOOL',
+    work: 'WORK ZONE', trailer: 'TRAILER', exitL: 'EXIT L', exitR: 'EXIT R', dist1: 'AHEAD', dist2: 'AHEAD',
+    restriction: 'RESTRICTED',
+};
+// the colour the car asks for a check-control message (cCColor), as a theme role or an RGBA of our own
+const CC_ROLE = {
+    red: [255, 60, 54, 255], yellow: [255, 206, 48, 255], orange: [255, 150, 40, 255],
+    green: [96, 220, 110, 255], white: 'fg', default: 'fg',
+};
+// settings of the bottom-row package that only change what a text shows or one uniform, so no rebuild is needed
+const ROW_KEYS = ['limitArc'];
+// the car's position is used for sunrise / sunset only, and only while it is this fresh (a parked car sends nothing)
+const POS_STALE_MS = 6 * 3600 * 1000;
+// the six rows of the "Who draws this" group, and the one row that puts them all back to BMW's ("ownAll")
+const OWN_ROWS = ['ownRange', 'ownClock', 'ownTemp', 'ownNav', 'ownSign', 'ownInfo'];
+// (no timer of ours for several messages at once: the car numbers its frames and says which one it is on;
+//  config.ccm.ccFrameDwellMs is carried as a parameter for a later animation package, unused here)
+// --- end bottom row ---
 // the HUD's place (the page's Position tab): settings that move / scale the layers already there, no rebuild
 const PLACE_KEYS = ['hudX', 'hudY', 'hudScale'];
 // settings that only change what a text shows (the next tick paints it), no rebuild
@@ -438,7 +466,9 @@ function tzOf(cfg, v, nowMs) {
     if (Array.isArray(cfg.invalid) && cfg.invalid.indexOf(raw) >= 0) return null;
     const n = num(raw);
     if (n === null) return null;
-    let off = n * (typeof cfg.factor === 'number' && isFinite(cfg.factor) ? cfg.factor : 1);
+    // "offsetBy": subtracted from the raw before scaling (a car that counts its steps from UTC-12, say)
+    let off = (n - (typeof cfg.offsetBy === 'number' && isFinite(cfg.offsetBy) ? cfg.offsetBy : 0)) *
+        (typeof cfg.factor === 'number' && isFinite(cfg.factor) ? cfg.factor : 1);
     if (cfg.dstPath) {
         const d = dig(v, cfg.dstPath);
         if (d && d !== 'OFF' && d !== '0') off += typeof cfg.dstMinutes === 'number' ? cfg.dstMinutes : 60;
@@ -456,6 +486,146 @@ function ccOf(cfg, v) {
     return (Array.isArray(cfg.off) ? cfg.off : [0, false]).indexOf(r) < 0;
 }
 // ---- end car3 I -----------------------------------------------------------------------------------------------------
+
+// ---- bottom row (docs/BOTTOM-ROW-PACKAGE.md): the car's own speed-limit struct, its check-control message and its
+// road label, each read from ONE field app.json config names (config.sign / config.ccm kind "message" / config.road).
+// Pure functions, never throw, and they never log: the caller logs SHAPES only (the message text, the street and the
+// position are personal data).
+/** The value at `path` inside `v` ([] or none: `v` itself); undefined when any step is missing. */
+function pick(v, path) {
+    let r = v;
+    (Array.isArray(path) ? path : []).forEach((k) => { r = r === null || r === undefined ? r : r[k]; });
+    return r;
+}
+const inList = (a, x) => Array.isArray(a) && a.indexOf(x) >= 0;
+/** A raw enum through a { "<raw>": value } map; `dflt` when there is no path, no value or no entry. */
+function mapRaw(v, path, map, dflt) {
+    if (!path) return dflt;
+    const raw = pick(v, path);
+    if (raw === undefined || raw === null) return dflt;
+    const m = map && typeof map === 'object' ? map[String(raw)] : undefined;
+    return m === undefined ? dflt : m;
+}
+// What our sign knows, with nothing read yet. state: 'none' (no sign at all), 'limit' (kmh), 'end' (the
+// derestriction sign), 'unknown' (BMW's empty sign "---"). warn 0 none / 1 level 1 / 2 level 2; supp the
+// supplemental sign ('rain', 'snow', 'fog', 'time', 'zone', 'school', 'work', 'trailer', 'exitL', 'exitR',
+// 'dist1', 'dist2', 'restriction', 'snowRain'); style 'ece' | 'us' | 'china' | 'japan' | 'korea' (+ 'sure': the
+// car is sure of the country); np 'none' | 'car' | 'trailer' | 'truck' | 'other' | 'left' | an 'end*' value.
+const SIGN_NONE = { state: 'none', kmh: null, shown: null, unit: null, warn: 0, supp: null, style: null, sure: null, np: 'none', npM: null };
+// the no-passing values that mean a sign is in force (the rest are "none" or an end-of-restriction sign)
+const NP_ON = ['car', 'trailer', 'truck', 'other', 'left'];
+/**
+ * config.sign -> SIGN_NONE's shape. The shape names every member of the car's struct:
+ *   { iface, field, invalidPath + invalidOn ([1, true]), valuePath, factor (1), min (5), max (250),
+ *     unitPath + mph: [raw unit values meaning mph] + noUnit: [raw values meaning "not available"],
+ *     none: [raw speed values meaning no sign], end: [...], unknown: [...],
+ *     warnPath + warnMap { "<raw>": 0 | 1 | 2 }, suppPath + suppMap, stylePath + styleMap, surePath + sureOn,
+ *     npPath + npMap, npDistPath (metres left of a no-passing restriction) }
+ * Anything not named is simply not read, so a car that fills only part of the struct still gives a sign.
+ */
+function signOf(cfg, v) {
+    const out = Object.assign({}, SIGN_NONE);
+    if (!cfg || v === undefined || v === null) return out;
+    if (cfg.invalidPath && inList(cfg.invalidOn || [1, true], pick(v, cfg.invalidPath))) return out;
+    const warn = Number(mapRaw(v, cfg.warnPath, cfg.warnMap, 0));
+    out.warn = warn === 1 || warn === 2 ? warn : 0;
+    out.supp = mapRaw(v, cfg.suppPath, cfg.suppMap, null) || null;
+    out.style = mapRaw(v, cfg.stylePath, cfg.styleMap, null) || null;
+    out.sure = cfg.surePath ? inList(cfg.sureOn || [1, true], pick(v, cfg.surePath)) : null;
+    out.np = mapRaw(v, cfg.npPath, cfg.npMap, 'none') || 'none';
+    const d = cfg.npDistPath ? pick(v, cfg.npDistPath) : null;
+    out.npM = typeof d === 'number' && isFinite(d) && d > 0 && d < 65535 ? d : null;
+    const unitRaw = cfg.unitPath ? pick(v, cfg.unitPath) : undefined;
+    const noUnit = inList(cfg.noUnit, unitRaw), mph = inList(cfg.mph, unitRaw);
+    out.unit = noUnit ? null : mph ? 'mph' : 'kmh';
+    let raw = cfg.valuePath ? pick(v, cfg.valuePath) : undefined;
+    if (typeof raw === 'string' && /^\s*\d+(\.\d+)?\s*$/.test(raw)) raw = Number(raw);
+    if (inList(cfg.end, raw)) { out.state = 'end'; return out; }
+    if (inList(cfg.unknown, raw) || noUnit) { out.state = 'unknown'; return out; }
+    if (inList(cfg.none, raw) || typeof raw !== 'number' || !isFinite(raw)) return out;
+    const shown = raw * (typeof cfg.factor === 'number' && isFinite(cfg.factor) ? cfg.factor : 1);
+    const kmh = mph ? shown * 1.609344 : shown;
+    const lo = typeof cfg.min === 'number' ? cfg.min : 5, hi = typeof cfg.max === 'number' ? cfg.max : 250;
+    if (!(kmh >= lo && kmh <= hi)) return out;
+    out.state = 'limit'; out.kmh = kmh; out.shown = shown;
+    return out;
+}
+/**
+ * config.ccm with kind "message" -> { name, desc, color, symbol, id, type }. The field is a union, so `roots` lists
+ * the member paths to try in order (the first one that is there wins):
+ *   { kind: "message", roots: [["cCMessageStruct"], ["cCMessageWithSymbol", "cCMessage"]], namePath, descPath,
+ *     colorPath + colorMap { "<raw>": "red" | "yellow" | "green" | "orange" | "white" | "default" },
+ *     symbolPath, idPath, typePath, clearIds: [ids that mean "no message"] }
+ * The text is the car's own, already localised. It is NEVER logged.
+ */
+function ccMsgOf(cfg, v) {
+    const out = { name: '', desc: '', color: null, symbol: null, id: null, type: null };
+    if (!cfg || v === undefined || v === null) return out;
+    const roots = Array.isArray(cfg.roots) && cfg.roots.length ? cfg.roots : [[]];
+    let m = null;
+    for (let i = 0; i < roots.length && m === null; i++) {
+        const r = pick(v, roots[i]);
+        if (r !== undefined && r !== null && typeof r === 'object') m = r;
+    }
+    if (m === null) return out;
+    const str = (p) => { const s = p ? pick(m, p) : undefined; return typeof s === 'string' ? s : ''; };
+    out.name = str(cfg.namePath).slice(0, 300);
+    out.desc = str(cfg.descPath).slice(0, 1536);
+    out.color = mapRaw(m, cfg.colorPath, cfg.colorMap, null) || null;
+    const sy = cfg.symbolPath ? pick(m, cfg.symbolPath) : undefined;
+    out.symbol = typeof sy === 'number' ? sy : null;
+    const id = cfg.idPath ? pick(m, cfg.idPath) : undefined;
+    out.id = typeof id === 'number' ? id : null;
+    const ty = cfg.typePath ? pick(m, cfg.typePath) : undefined;
+    out.type = ty === undefined || ty === null ? null : String(ty);
+    if (inList(cfg.clearIds, out.id)) { out.name = ''; out.desc = ''; }
+    return out;
+}
+/**
+ * config.road -> one line of text, '' when there is none. The car's field is an array of elements, each either a
+ * text, a spacer or an icon with its own text (its picture is a resource handle we cannot resolve, so only its text
+ * is used):
+ *   { iface, field, instance, path (["elements"]), textKey, spacerKey, iconKey, iconTextKey,
+ *     spacerMap { "<raw>": the characters it stands for }, maxLen (48) }
+ * The text is the car's own road name. It is NEVER logged.
+ */
+function roadOf(cfg, v) {
+    if (!cfg) return '';
+    const arr = pick(v, cfg.path);
+    if (typeof arr === 'string') return arr.slice(0, cfg.maxLen || 48);
+    if (!Array.isArray(arr)) return '';
+    const sp = cfg.spacerMap && typeof cfg.spacerMap === 'object' ? cfg.spacerMap : {};
+    let out = '';
+    for (let i = 0; i < arr.length && out.length < 160; i++) {
+        const e = arr[i];
+        if (e === null || e === undefined) continue;
+        if (typeof e === 'string') { out += e; continue; }
+        const t = e[cfg.textKey || 'text'];
+        if (typeof t === 'string' && t) { out += t; continue; }
+        const sk = e[cfg.spacerKey || 'spacer'];
+        if (sk !== undefined && sk !== null && typeof sk !== 'object') { out += sp[String(sk)] === undefined ? ' ' : sp[String(sk)]; continue; }
+        const ic = e[cfg.iconKey || 'icon'];
+        if (ic && typeof ic === 'object') {
+            const it = ic[cfg.iconTextKey || 'text'];
+            if (typeof it === 'string' && it) out += it;
+        }
+    }
+    return out.replace(/\s+/g, ' ').trim().slice(0, cfg.maxLen || 48);
+}
+/** The shape of a road label for the log: how many elements of each kind and how long the line is. No content. */
+function roadShape(cfg, v) {
+    const arr = pick(v, cfg && cfg.path);
+    if (!Array.isArray(arr)) return typeof arr === 'string' ? '1 text' : 'no array';
+    let t = 0, s = 0, ic = 0;
+    arr.forEach((e) => {
+        if (!e || typeof e !== 'object') { t++; return; }
+        if (typeof e[(cfg && cfg.textKey) || 'text'] === 'string') t++;
+        else if (e[(cfg && cfg.iconKey) || 'icon']) ic++;
+        else s++;
+    });
+    return arr.length + ' elements (' + t + ' text, ' + s + ' spacer, ' + ic + ' icon)';
+}
+// ---- end bottom row -------------------------------------------------------------------------------------------------
 
 function rgb(c) { return [c[0] / 255, c[1] / 255, c[2] / 255]; }
 
@@ -574,11 +744,24 @@ class HudApp {
         this._setupVehicleData();
         this.layouts.onChange(() => this._rebuild());
         ctx.settings.onChange((key) => {
+            // bottom row: one row that puts the whole "Who draws this" group back to BMW's, so there is a single way
+            // out on the road (the owner, 2026-11-15). It springs back to "keep" and rebuilds once, not six times.
+            if (key === 'ownAll' && ctx.settings.get('ownAll') === 'bmw' && !this.ownAllBusy) {
+                this.ownAllBusy = true;
+                try {
+                    OWN_ROWS.forEach((k) => { if (ctx.settings.item(k) && ctx.settings.get(k) !== 'bmw') ctx.settings.set(k, 'bmw'); });
+                    ctx.settings.set('ownAll', 'keep');
+                } finally { this.ownAllBusy = false; }
+                this.log.info('bottom row: every row of the group put back to BMW\'s');
+                this._rebuild();
+                return;
+            }
+            if (this.ownAllBusy) return;     // the six sets above: one rebuild at the end, not one each
             if (LOOK_KEYS.indexOf(key) >= 0) this._kombiClear();      // 0.7.13: a theme picked: the guard lets it try again
             // a theme or layout picked anywhere (the page asks first, the kit's All settings list doesn't): no longer stepping aside
             if (LOOK_KEYS.indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
             if (PLACE_KEYS.indexOf(key) >= 0) this._guard('place', () => this._place());
-            else if (LIVE_KEYS.indexOf(key) >= 0) this.widgets.forEach((x) => { x.last = null; });
+            else if (LIVE_KEYS.indexOf(key) >= 0 || ROW_KEYS.indexOf(key) >= 0) this.widgets.forEach((x) => { x.last = null; });
             else if (WB_LIVE_KEYS.indexOf(key) >= 0 && this._wbLive()) { /* package F: the uniforms are sent, no rebuild */ }
             else if (NIGHT_KEYS.indexOf(key) >= 0 && this._nightLive()) { /* 2026-11-14: the night colours changed in place */ }
             else if (key === 'needleSmooth') this._guard('needles', () => this._needleApply());   // 0.7.14: no rebuild
@@ -837,8 +1020,21 @@ class HudApp {
         this.msaState = null; this.tzCar = null; this.ccShown = null;
         watchRaw(this.config.msa, 'msaState', 'msa', (v, raw) => msaOf(this.config.msa, raw));
         // the first time zone from the car (or its loss) can flip 6WB Dials' clock "auto" between BMW's and ours: rebuild then
-        watchRaw(this.config.clock, 'tzCar', 'clock', (v) => tzOf(this.config.clock, v, Date.now()),
-            (prev, out) => { if (isNum(prev) !== isNum(out) && this.client && this.client.ready) this._rebuild(); });
+        // 2026-11-15 (the owner): the car's own clock, so our clock needs no manual time zone. The encoding of the
+        // car's offset is a guess until the car says otherwise, so while config.clock.confirm is not true the value
+        // is only parsed and LOGGED and our clock keeps using the "timeZone" setting: a wrong guess cannot put a
+        // wrong time on the cluster.
+        watchRaw(this.config.clock, 'tzCar', 'clock', (v) => {
+            const c = this.config.clock, off = tzOf(c, v, Date.now());
+            if (c && c.confirm !== true) {
+                if (off !== this.tzCandidate) {
+                    this.tzCandidate = off;
+                    this.log.info('clock: the car\'s offset would be ' + off + ' minutes (app.json config.clock.confirm is not true, so our clock still follows the "timeZone" setting)');
+                }
+                return null;
+            }
+            return off;
+        }, (prev, out) => { if (isNum(prev) !== isNum(out) && this.client && this.client.ready) this._rebuild(); });
         watchRaw(this.config.ccm, 'ccShown', 'check-control', (v) => ccOf(this.config.ccm, v));
         // The drive mode from another field (config.drive { iface, field, path, map: { "<raw>": "COMFORT" | "SPORT_PLUS" |
         // "ECO_PRO" | 4 ... } }), when FES statusFESVehicleDynamicSwitchHMI gives nothing on a car (the owner's, photos 33
@@ -855,6 +1051,171 @@ class HudApp {
             });
         }
         // ---- end car3 I ---------------------------------------------------------------------------------------------
+        // ---- bottom row (docs/BOTTOM-ROW-PACKAGE.md): the car's own speed-limit struct, check-control message, road
+        // label and guidance. Each is OPTIONAL and configurable (config.sign / config.ccm kind "message" / config.road /
+        // config.onRoad / config.nav); with none of them named nothing is subscribed and everything behaves as before.
+        // What is drawn is decided by the settings ownSign / ownInfo / ownNav, not by what the car sends: the default
+        // ("BMW's") leaves our windows open, as today, and only logs the shapes so they can be calibrated on the car.
+        // PRIVACY: the message text, the road name and the position are personal data and are never logged. Only shapes
+        // (kinds, lengths, enum values) go to the log, each once.
+        this.sign = Object.assign({}, SIGN_NONE); this.signShape = undefined; this.signLogs = 0;
+        this.ccMsg = { name: '', desc: '', color: null, symbol: null, id: null, type: null };
+        this.ccMsgAt = 0; this.ccShape = undefined; this.ccLogs = 0;
+        this.road = ''; this.roadAt = 0; this.roadShapeSeen = undefined;
+        this.onRoad = null; this.navState = null; this.navDist = ''; this.navUnit = null; this.navEta = null; this.navMins = null;
+        this.navShape = undefined; this.posShape = undefined;
+        const watchOne = (cfg, fn) => {
+            if (!cfg || !cfg.iface || !cfg.field) return false;
+            const e = extra[cfg.iface] = extra[cfg.iface] || {};
+            if (cfg.instance) e.$instance = cfg.instance;       // Guidance is Main_Instance (128), not 1
+            e[cfg.field] = (v) => fn(v);
+            return true;
+        };
+        // The speed-limit sign: one struct with the value, its unit, the warning level, the supplemental sign, the
+        // symbol style and the no-passing restriction (shape: signOf). It also feeds limitState / limitKmh / nopassOn,
+        // so {{limit}}, the WBSIGN layer and the over-limit arc work as they did from config.limit.
+        const sg = this.config.sign;
+        watchOne(sg, (v) => {
+            const s = signOf(sg, v);
+            this.sign = s; this.signAt = Date.now();
+            this.limitState = s.state; this.limitKmh = s.kmh;
+            this.nopassOn = NP_ON.indexOf(s.np) >= 0;
+            // a road sign is not personal data, but the log still says the SHAPE: each new combination once, at most 24
+            const key = s.state + '|' + (s.state === 'limit' ? Math.round(s.kmh) : '-') + '|' + s.unit + '|' + s.warn +
+                '|' + s.supp + '|' + s.style + '|' + s.sure + '|' + s.np + '|' + (s.npM === null ? '-' : 'dist');
+            if (key !== this.signShape && this.signLogs < 24) {
+                this.signShape = key; this.signLogs++;
+                this.log.info('sign: ' + key.split('|').join(' ') + ' (state value unit warn supplemental style sure no-passing distance)');
+            }
+        });
+        // The check-control message (a union of two structs; shape: ccMsgOf). It also feeds ccShown, so "cc:shown" /
+        // "cc:none" and the message window work whether config.ccm names this shape or the older flag / list one.
+        const cm = this.config.ccm;
+        if (cm && cm.kind === 'message') {
+            watchOne(cm, (v) => {
+                const m = ccMsgOf(cm, v);
+                this.ccMsg = m; this.ccMsgAt = Date.now();
+                this.ccShown = !!(m.name || m.desc);
+                const key = (m.name ? 'name ' + m.name.length + ' chars' : 'no name') + ', ' +
+                    (m.desc ? 'description ' + m.desc.length + ' chars' : 'no description') +
+                    ', colour ' + m.color + ', symbol ' + m.symbol + ', type ' + m.type;
+                if (key !== this.ccShape && this.ccLogs < 24) {    // lengths and enums only: never the text
+                    this.ccShape = key; this.ccLogs++;
+                    this.log.info('check-control message: ' + key);
+                }
+            });
+        }
+        // Several messages at once: the car cycles through its check-control list, so we do the same (the owner,
+        // 2026-11-15). config.ccList names the list field; each element gives a short name and a colour.
+        // THE SEAM: docs/G20-DESIGN-SPEC.md is measuring the stock order and timing; CC_CYCLE_MS / config.ccm.cycleMs
+        // is the one number to change.
+        const cl = this.config.ccList;
+        this.ccItems = []; this.ccListShape = undefined;
+        if (cl && cl.iface && cl.field) {
+            watchOne(cl, (v) => {
+                const arr = pick(v, cl.path);
+                const out = [];
+                (Array.isArray(arr) ? arr : []).forEach((e) => {
+                    const m = cl.root ? pick(e, cl.root) : e;
+                    if (!m || typeof m !== 'object') return;
+                    const n = pick(m, cl.namePath);
+                    if (typeof n !== 'string' || !n) return;
+                    const id = cl.idPath ? pick(m, cl.idPath) : undefined;
+                    out.push({ name: n.slice(0, 300), color: mapRaw(m, cl.colorPath, cl.colorMap, null) || null, id: isNum(id) ? id : null });
+                });
+                this.ccItems = out.slice(0, 16);
+                const key = out.length + ' messages, name lengths ' + out.map((o) => o.name.length).join('/');
+                if (key !== this.ccListShape) { this.ccListShape = key; this.log.info('check-control list: ' + key); }
+            });
+        }
+        // Which frame of how many the stock cluster is showing (docs/G20-DESIGN-SPEC.md: it cycles numbered frames,
+        // it does not stack or side-scroll). KombiIF statusMenuCCMessage carries the frame number, the count and up
+        // to three message ids, so ours can follow the car's own frame instead of guessing a period.
+        const cf = this.config.ccFrames;
+        this.ccFrame = { n: null, of: null, ids: [] }; this.ccFrameShape = undefined;
+        if (cf && cf.iface && cf.field) {
+            watchOne(cf, (v) => {
+                const n = pick(v, cf.numPath), of = pick(v, cf.countPath);
+                const ids = (Array.isArray(cf.idPaths) ? cf.idPaths : []).map((p) => pick(v, p)).filter(isNum);
+                this.ccFrame = { n: isNum(n) ? n : null, of: isNum(of) ? of : null, ids: ids };
+                const key = 'frame ' + this.ccFrame.n + ' of ' + this.ccFrame.of + ', ' + ids.length + ' ids';
+                if (key !== this.ccFrameShape) { this.ccFrameShape = key; this.log.info('check-control frames: ' + key); }
+            });
+        }
+        // The driver's own speed-limit settings (config.sla), READ ONLY: app.json declares these fields "rs", not
+        // "rws", so our generated interface config has no setter and the app cannot write one. They say whether the
+        // driver asked for the excess-speed warning at all, and with what tolerance; the arc on our speed scale
+        // follows the car's own verdict (displaySpeedLimitWarning) rather than a comparison of our own.
+        const sl = this.config.sla;
+        this.sla = {}; this.slaShape = undefined;
+        if (sl && sl.iface && Array.isArray(sl.parts)) {
+            sl.parts.forEach((p) => {
+                if (!p || !p.field) return;
+                watchOne({ iface: sl.iface, field: p.field, instance: sl.instance }, (v) => {
+                    const raw = pick(v, p.valuePath);
+                    this.sla[p.key] = p.number ? (isNum(raw) ? raw : null) : mapRaw(v, p.valuePath, sl.onMap, null);
+                    this.sla[p.key + 'Avail'] = mapRaw(v, p.availPath, sl.availMap, null);
+                    const key = Object.keys(this.sla).sort().map((k) => k + ' ' + this.sla[k]).join(', ');
+                    if (key !== this.slaShape) { this.slaShape = key; this.log.info('speed-limit settings: ' + key); }
+                });
+            });
+        }
+        // The road label (an array of text / spacer / icon elements; shape: roadOf). Its text is never logged.
+        const rd = this.config.road;
+        watchOne(rd, (v) => {
+            this.road = roadOf(rd, v); this.roadAt = Date.now();
+            const key = roadShape(rd, v) + ', ' + this.road.length + ' chars';
+            if (key !== this.roadShapeSeen) { this.roadShapeSeen = key; this.log.info('road label: ' + key); }
+        });
+        watchOne(this.config.onRoad, (v) => {
+            const r = this.config.onRoad.path ? dig(v, this.config.onRoad.path) : v;
+            this.onRoad = r === true || r === 1 ? true : r === false || r === 0 ? false : null;
+        });
+        // Guidance and position (NavigationStatus). The position is personal data: only the NAMES of the address
+        // members that arrived are logged, never their values, and the coordinates are not read at all.
+        const nv = this.config.nav;
+        if (nv && nv.iface) {
+            const one = (part, fn) => { if (part && part.field) watchOne({ iface: nv.iface, field: part.field, instance: nv.instance }, fn); };
+            one(nv.state, (v) => {
+                const s = mapRaw(v, nv.state.path, nv.state.map, null);
+                if (s !== this.navState) { this.navState = s; this.log.info('navigation: guiding ' + s); }
+            });
+            one(nv.next, (v) => {
+                const p = nv.next;
+                const d = pick(v, p.distPath), u = p.unitPath ? pick(v, p.unitPath) : null;
+                this.navDist = typeof d === 'string' ? d.slice(0, 12) : typeof d === 'number' && isFinite(d) ? String(Math.round(d)) : '';
+                this.navUnit = mapRaw(v, p.unitPath, p.unitMap, u === null || u === undefined ? null : String(u));
+                const eta = p.etaPath ? pick(v, p.etaPath) : null;
+                const okEta = eta && typeof eta === 'object' && !eta[p.etaInvalidKey || 'invalid'] &&
+                    typeof eta[p.etaHourKey || 'hour'] === 'number' && typeof eta[p.etaMinuteKey || 'minute'] === 'number';
+                this.navEta = okEta ? { h: eta[p.etaHourKey || 'hour'], m: eta[p.etaMinuteKey || 'minute'] } : null;
+                const t = p.timePath ? pick(v, p.timePath) : null;
+                this.navMins = typeof t === 'number' && isFinite(t) && t > 0 && t < 86400 * 7 ? Math.round(t / 60) : null;
+                const key = 'distance ' + this.navDist.length + ' chars, unit ' + this.navUnit + ', eta ' + (this.navEta ? 'valid' : 'none') +
+                    ', travel time ' + (this.navMins === null ? 'none' : 'valid');
+                if (key !== this.navShape) { this.navShape = key; this.log.info('navigation: ' + key); }
+            });
+            one(nv.here, (v) => {
+                const p = nv.here;
+                this.posValid = pick(v, p.validPath) === true;
+                const txt = (q) => { const s = pick(v, q); return typeof s === 'string' ? s : ''; };
+                this.posStreet = txt(p.streetPath); this.posCity = txt(p.cityPath);
+                // the coordinates: for sunrise and sunset only (_location), never logged, never sent anywhere
+                const la = pick(v, p.latPath), lo = pick(v, p.lonPath);
+                if (this.posValid && isNum(la) && isNum(lo) && Math.abs(la) <= 90 && Math.abs(lo) <= 180 && (la || lo)) {
+                    const moved = !isNum(this.posLat) || Math.abs(la - this.posLat) > 0.5 || Math.abs(lo - this.posLon) > 0.5;
+                    this.posLat = la; this.posLon = lo; this.posAt = Date.now();
+                    // a big move can change sunset: let the night colours follow (they are re-checked every minute)
+                    if (moved && !this.posMoved) { this.posMoved = true; this.log.info('position: coordinates in use for sunrise and sunset (never logged)'); }
+                }
+                // the NAMES of the members that carry something, never their values (personal data)
+                const key = (this.posValid ? 'valid' : 'not valid') + ', ' +
+                    [['street', this.posStreet], ['city', this.posCity], ['coordinates', isNum(this.posLat) ? 1 : '']]
+                        .filter((a) => a[1]).map((a) => a[0]).join(' + ');
+                if (key !== this.posShape) { this.posShape = key; this.log.info('position: ' + key + ' (contents are never logged)'); }
+            });
+        }
+        // ---- end bottom row -------------------------------------------------------------------------------------------
         // Instant fuel consumption (the 6WB Comfort theme's EfficientDynamics arc and {{cons}}), the same way: app.json
         // config.cons names the field once the car's catalogue has been looked at: { iface, field, path: [..], factor (1),
         // unit: "l100" | "lh" (litres per hour: divided by the speed), invalid: [..] }. None: "--" on the car.
@@ -1494,11 +1855,21 @@ class HudApp {
 
 /* ---------------- theme, units, values ---------------- */
 
+    /** Where the car is, for sunrise and sunset (the night colours): the car's own position while it is valid and
+     *  fresh (config.nav.here; the owner, 2026-11-15), else app.json config.location, else DEFAULT_LOCATION.
+     *  PRIVACY: the coordinates are personal data. They are used here and nowhere else, and never logged. */
+    _location() {
+        if (isNum(this.posLat) && isNum(this.posLon) && Date.now() - (this.posAt || 0) < POS_STALE_MS) {
+            return { lat: this.posLat, lon: this.posLon };
+        }
+        return this.location;
+    }
+
     _themeName() {
         if (this.layoutTheme) return this.layoutTheme;
         const t = this.setting('hudTheme');
         if (t !== 'auto') return t;
-        return sun.isNight(Date.now(), this.location.lat, this.location.lon) ? 'night' : this.setting('dayTheme');
+        return sun.isNight(Date.now(), this._location().lat, this._location().lon) ? 'night' : this.setting('dayTheme');
     }
 
     /** Night colours now: a theme of the layout's own, and Cluster Themes' "nightDim" on Auto with the sun down, or on
@@ -1508,7 +1879,7 @@ class HudApp {
         const v = this.setting('nightDim');
         if (v === 'always') return true;
         if (v !== 'auto') return false;
-        return sun.isNight(Date.now(), this.location.lat, this.location.lon);
+        return sun.isNight(Date.now(), this._location().lat, this._location().lon);
     }
 
     /* --- night colours (the plain dimmer) --- */
@@ -1884,7 +2255,25 @@ class HudApp {
             case 'u:distLc': return us ? 'mi' : 'km';
             case 'u:dist': return us ? 'MI' : 'KM';
             case 'avgSpeed': { const v = this._avgSpeed(); return fix(isNum(v) ? (us ? v * 0.621371 : v) : v, 0); }
-            case 'limit': { const v = this._raw('limit'); return isNum(v) ? String(us ? Math.round(v * 0.621371 / 5) * 5 : Math.round(v)) : ''; }
+            case 'limit': {
+                // the car's own figure when it sends one (its unit is the sign's), else ours converted
+                const s = this.sign;
+                if (s && s.state === 'limit' && isNum(s.shown)) return String(Math.round(s.shown));
+                const v = this._raw('limit');
+                return isNum(v) ? String(us ? Math.round(v * 0.621371 / 5) * 5 : Math.round(v)) : '';
+            }
+            // ---- bottom row: the sign's extras, the message and the road label (docs/BOTTOM-ROW-PACKAGE.md) ----
+            case 'limitUnit': { const s = this.sign; return s && s.unit === 'mph' ? 'mph' : s && s.unit === 'kmh' ? 'km/h' : ''; }
+            case 'limitSupp': { const s = this.sign; return s && s.supp ? SUPP_TEXT[s.supp] || String(s.supp) : ''; }
+            case 'limitWarn': { const s = this.sign; return s && s.warn ? String(s.warn) : ''; }
+            case 'nopassDist': { const s = this.sign; return s && isNum(s.npM) ? (s.npM >= 1000 ? (s.npM / 1000).toFixed(1) + ' km' : Math.round(s.npM) + ' m') : ''; }
+            case 'ccName': return this._ccText('name');
+            case 'ccDesc': return this._ccText('desc');
+            case 'road': return this._roadText();
+            case 'navDist': { const d = this.navDist || ''; return d ? d + (this.navUnit ? ' ' + this.navUnit : '') : ''; }
+            case 'navEta': { const e = this.navEta; return e ? ('0' + e.h).slice(-2) + ':' + ('0' + e.m).slice(-2) : ''; }
+            case 'navMins': return isNum(this.navMins) ? String(this.navMins) : '';
+            // ---- end bottom row ----
             case 'cons': { const v = this._raw('cons'); return isNum(v) ? (us ? (v > 0.5 ? 235.215 / v : 0).toFixed(0) : v.toFixed(1)) : '--'; }
             case 'range': { const v = this._raw('range'); return fix(isNum(v) ? (us ? v * 0.621371 : v) : v, 0); }
             case 'ambient': {
@@ -2023,6 +2412,7 @@ class HudApp {
 
     _rebuildInner() {
         if (!this.client.ready) return; // the 'ready' handler calls us again
+        this._rowCheck();               // bottom row: an element with no signal behind it goes back to BMW's
         this._layerRefs().forEach((r) => r.c.drop(r.ref));
         this.placed = [];
         this.widgets.clear();
@@ -2663,7 +3053,10 @@ class HudApp {
 
     /** A widget's map hole in layer px, inset by "holeInset" (6) a side, while "holeWhen" is on; else no hole. */
     _hole(w) {
-        const on = w.holeWhen === true || (w.holeWhen && this.setting(w.holeWhen) === true);   // true: always cut
+        // "holeWhen": true (always), a bool setting's key, or - bottom row - any toggle expression ("cc:shown",
+        // "a&b", "!a"), which is read live (_update resends u_hole on a fill when it changes)
+        const live = typeof w.holeWhen === 'string' && /[:&!]/.test(w.holeWhen);
+        const on = w.holeWhen === true || (live ? this._toggleOn(w.holeWhen) : (w.holeWhen && this.setting(w.holeWhen) === true));
         const h = w.hole && on ? w.hole : null;
         if (!h) return [0, 0, 0, 0];
         const inset = isNum(w.holeInset) ? w.holeInset : 6;
@@ -2697,15 +3090,60 @@ class HudApp {
         return [w.shade ? s[0] : 0, s[1], y[0] - w.y, y[1] - w.y];
     }
 
-    /** Whether an item of BMW's bottom row ("range", "clock", "temp") is ours in "6WB Dials + G20" (ownRange / ownClock /
-     *  ownTemp). The clock's "auto": ours once a time zone is set (the "timeZone" setting or config.utcOffsetMinutes),
-     *  since the head unit runs on UTC and only BMW's own clock is right without one. */
+    /** Whether an item of BMW's bottom row ("range", "clock", "temp", and the bottom-row package's "nav", "sign",
+     *  "info") is ours in "6WB Dials + G20" (ownRange / ownClock / ownTemp / ownNav / ownSign / ownInfo). The clock's
+     *  "auto": ours once a time zone is set (the "timeZone" setting or config.utcOffsetMinutes), since the head unit
+     *  runs on UTC and only BMW's own clock is right without one. A setting that is not in app.json is "BMW's". */
     _own(item) {
-        const key = { range: 'ownRange', clock: 'ownClock', temp: 'ownTemp' }[item];
+        const key = { range: 'ownRange', clock: 'ownClock', temp: 'ownTemp', nav: 'ownNav', sign: 'ownSign', info: 'ownInfo' }[item];
         if (!key || !this.ctx.settings.item(key)) return false;
+        // the automatic way back to the stock cluster (the owner, 2026-11-15): an element whose signal is missing or
+        // unmapped, or whose drawing threw, is BMW's again until the app restarts, whatever the setting says
+        if (this.rowFail && this.rowFail[item]) return false;
         const v = this.setting(key);
         if (v !== 'auto') return v === 'ours';
         return isNum(this._tzMinutes());      // car3 I: the setting, the car's own time zone (config.clock) or config
+    }
+
+    /** `s` cut to fit the widget's box, with "..." when it had to be cut. Never throws. A GUESS: no photo shows how
+     *  the stock cluster truncates a long road name or message (docs/G20-DESIGN-SPEC.md §8). */
+    _fitText(s, w) {
+        try {
+            if (textRaster.measure(s, w.font, w.spacing) <= w.w) return s;
+            let t = String(s);
+            while (t.length > 1 && textRaster.measure(t + '...', w.font, w.spacing) > w.w) t = t.slice(0, -1);
+            return t.replace(/[\s,.;:/-]+$/, '') + '...';
+        } catch (e) { return s; }
+    }
+
+    /** How many characters of `s` the font has no glyph for ("3 characters"), '' when it can draw all of them.
+     *  Spaces never count. Never throws: an unreadable font counts as "can draw nothing". */
+    _missingGlyphs(s, font) {
+        let g = null;
+        try { g = textRaster.loadFont(font).metrics.glyphs; } catch (e) { return 'every character (the font would not load)'; }
+        let n = 0;
+        String(s).split('').forEach((ch) => { if (ch !== ' ' && !g[ch]) n++; });
+        return n ? n + ' character' + (n > 1 ? 's' : '') : '';
+    }
+
+    /** Give one element of the bottom row back to the car: its window opens, ours is not drawn, and the reason is
+     *  logged once and put on the status line. Used when the signal the element needs is not configured or has
+     *  never arrived, and when drawing it throws. */
+    _rowFail(item, why) {
+        if (!this.rowFail) this.rowFail = {};
+        if (this.rowFail[item]) return;
+        this.rowFail[item] = true;
+        this.log.warn('bottom row: ' + item + ' is BMW\'s again (' + why + ')');
+        this._guard('row fallback', () => { this._status(); if (this.client && this.client.ready) this._rebuild(); });
+    }
+
+    /** Which of the three new rows have no signal behind them at all. Checked once the app has had time to hear from
+     *  the car, so a slow provider is not mistaken for a missing one. */
+    _rowCheck() {
+        const named = (s) => !!(s && s.iface && s.field);
+        if (this.setting('ownSign') === 'ours' && !named(this.config.sign) && !this._signWired()) this._rowFail('sign', 'no speed-limit field in app.json config.sign');
+        if (this.setting('ownInfo') === 'ours' && !(named(this.config.ccm) && this.config.ccm.kind === 'message')) this._rowFail('info', 'app.json config.ccm names no message field');
+        if (this.setting('ownNav') === 'ours' && !named(this.config.road) && !(this.config.nav && this.config.nav.iface)) this._rowFail('nav', 'app.json config.road names no field');
     }
 
     /** WBBACK's black patches over BMW's bottom-row items we draw ourselves ("patches": [{ rect: [x0, y0, x1, y1] panel
@@ -2730,10 +3168,104 @@ class HudApp {
         return this.ccShown === true || this.ccShown === false ? this.ccShown : null;
     }
 
+    /* ---- bottom row (docs/BOTTOM-ROW-PACKAGE.md) ---- */
+
+    /** Whether the red arc over the limit is drawn now. "limitArc":
+     *   "auto" (the default) follows the CAR's own verdict: the arc is on while the car says the driver is over
+     *          (displaySpeedLimitWarning level 1 or 2) and the driver has that warning switched on in the car's own
+     *          menu (config.sla "warn"); a car that says nothing about the setting counts as on, and the second
+     *          level follows "warn2" the same way. So the driver's own tolerance (settingOffsetSpeed) is honoured
+     *          without us knowing what it is: the car applies it;
+     *   "on"   ignores the car's menu and draws whenever our own speed is past the sign (what 0.7.14 did);
+     *   "off"  never.
+     *  The owner, 2026-11-15: the stock cluster has an "Excess speed display" of its own, and these are its
+     *  signals, so the verdict should be the car's and not ours. */
+    _arcOn() {
+        const v = this.ctx.settings.item('limitArc') ? this.setting('limitArc') : 'auto';
+        if (v === 'off' || v === false) return false;
+        if (v === 'on' || v === true) {
+            const lim = this._raw('limit'), speed = this._raw('speed');
+            return isNum(lim) && isNum(speed) && speed > lim + 1;
+        }
+        const warn = (this.sign || {}).warn || 0;
+        if (warn < 1) return false;
+        const want = warn >= 2 ? this.sla.warn2 : this.sla.warn;
+        return want !== 'off';            // null (the car said nothing) counts as on
+    }
+
+    /** What the sign layer shows now (WBSIGN u_show): [a, b]. a: 1 a limit, 2 the end-of-limit sign, 3 BMW's empty
+     *  sign "---", 0 nothing; b: the no-overtaking sign.
+     *  The stock cluster animates the derestriction and then shows the new limit, and a sign is essentially always
+     *  there (the owner, 2026-11-15), so there is no "hide it" state: the end state is shown as a state until the
+     *  animation lands. THE SEAM: docs/G20-DESIGN-SPEC.md is measuring that animation, and this method plus
+     *  config.sign.holdMs (how long the last sign stays while the car says nothing) is all it needs to change. */
+    _signShow() {
+        let a = isNum(this._raw('limit')) ? 1 : this._raw('limitEnd') ? 2 : this._raw('limitUnknown') ? 3 : 0;
+        const b = this._raw('nopass') ? 1 : 0;
+        const hold = isNum(this.config.sign && this.config.sign.holdMs) ? this.config.sign.holdMs : 0;
+        if (a === 0) {
+            if (hold > 0 && this.signLast && Date.now() - (this.signLastAt || 0) < hold) a = this.signLast;
+        } else { this.signLast = a; this.signLastAt = Date.now(); }
+        return [a, b];
+    }
+
+    /** Which check-control message is on show now. The car cycles through its list when several are on at once, so
+     *  ours steps through it on the same clock (the owner, 2026-11-15). One message (or no list): that one.
+     *  THE SEAM: the stock order and timing come from docs/G20-DESIGN-SPEC.md; only this method and CC_CYCLE_MS
+     *  decide them. */
+    _ccNow() {
+        const list = this.ccItems || [], m = this.ccMsg || {};
+        if (list.length < 2) return m;
+        // The car cycles numbered frames and says which one it is on, so ours follows that counter and never runs a
+        // timer of its own (the owner, 2026-11-15; docs/G20-DESIGN-SPEC.md). Without the counter the newest message
+        // is shown and nothing cycles: a wrong guess at the car's rhythm would look worse than not cycling.
+        const f = this.ccFrame || {};
+        if (!(isNum(f.n) && isNum(f.of) && f.of >= 1 && f.n >= 1 && f.n <= f.of)) return m;
+        const id = f.ids[f.n - 1];
+        const byId = isNum(id) ? list.map((x) => x.id).indexOf(id) : -1;
+        const one = list[byId >= 0 ? byId : (f.n - 1) % list.length];
+        // the list carries a short name and a colour; the description belongs to the message the car last sent
+        return { name: one.name, desc: one.name === m.name ? m.desc : '', color: one.color || m.color };
+    }
+
+    /** The check-control message's name or description, '' while none shows or the info field is BMW's. The text is
+     *  the car's own, already localised; it is never logged. */
+    _ccText(part) {
+        if (!this._own('info') || this._cc() !== true) return '';
+        const m = this._ccNow();
+        return String((part === 'desc' ? m.desc : m.name) || '');
+    }
+
+    /** The colour the car asked for the message, as a theme role or an RGBA (config.ccm colorMap). A sign's or a
+     *  message's own colours are kept at night and only dimmed, never recoloured (the owner, 2026-11-15), the way
+     *  the 6WB shaders treat WBSIGN.
+     *  NOT IN USE: white only for now (the owner, 2026-11-15). cCColor is read and recorded, every message is drawn
+     *  in the theme's foreground. THE SEAM is one line: put "colorBy": "cc" back on the cc_name text in
+     *  design/gen_6wb.py cc_row() and this method is what colours it. */
+    _ccRole() {
+        const c = this._ccNow().color, role = CC_ROLE[c] || null;
+        if (!Array.isArray(role) || !this.nightOn) return role;
+        return [Math.round(role[0] * NIGHT_DIM), Math.round(role[1] * NIGHT_DIM), Math.round(role[2] * NIGHT_DIM), role[3]];
+    }
+
+    /** The road label: the car's own road description, else the street of its position (config.nav.here), else ''.
+     *  Never logged. The demo drive shows a made-up street so the bench can be looked at. */
+    _roadText() {
+        // BMW shows the road name on the bottom line only while no check-control message is on it; ours does the same
+        if (!this._own('nav') || this._cc() === true) return '';
+        if (this.road) return this.road;
+        if (this.posStreet) return String(this.posStreet).slice(0, 48);
+        return this._data().demo ? 'Demo Road' : '';
+    }
+
     /** u_cc: the bg widget's "cc" box [x0, y0, x1, y1] (panel px; BMW's check-control message panel) see-through
-     *  while the car says a message shows (this.ccShown === true), else none; sent when it changes. */
+     *  while the car says a message shows (this.ccShown === true), else none; sent when it changes.
+     *  Bottom row: while the info field is OURS ("ownInfo") and the layout gives a "ccSym" box, only that box opens -
+     *  the car keeps drawing its own symbol and animation there and we draw the text around it. */
     _wbCcSend(x) {
-        const w = x.w, b = Array.isArray(w.cc) && w.cc.length === 4 && this._cc() === true ? w.cc : null;
+        const w = x.w, four = (a) => Array.isArray(a) && a.length === 4;
+        const box = this._own('info') && four(w.ccSym) ? w.ccSym : w.cc;
+        const b = four(box) && this._cc() === true ? box : null;
         const v = b ? [b[0] - w.x, b[1] - w.y, b[2] - w.x, b[3] - w.y] : [0, 0, 0, 0], key = v.join(',');
         if (key === x.ccKey) return;
         x.ccKey = key;
@@ -2757,7 +3289,10 @@ class HudApp {
         const tzSet = (isNum(tz) && tz !== TZ_AUTO) || isNum(this.config.utcOffsetMinutes);
         const one = (item, key) => item + ' ' + (this._own(item) ? 'ours' : "BMW's") + ' (' + key + ' ' + raw(key) +
             (item === 'clock' && this.setting(key) === 'auto' ? (tzSet ? ', time zone set' : ', no time zone') : '') + ')';
+        const more = ['nav', 'sign', 'info'].filter((k) => this.ctx.settings.item({ nav: 'ownNav', sign: 'ownSign', info: 'ownInfo' }[k]))
+            .map((k) => one(k, { nav: 'ownNav', sign: 'ownSign', info: 'ownInfo' }[k]));
         return 'own row: ' + one('range', 'ownRange') + ', ' + one('clock', 'ownClock') + ', ' + one('temp', 'ownTemp') +
+            (more.length ? ', ' + more.join(', ') : '') +
             '; mode label ' + (this.setting('modeLabel') === false ? 'off' : this.driveMode ? 'on' : 'on, empty: no drive mode from the car') +
             ' (modeLabel ' + raw('modeLabel') + ')';
     }
@@ -3064,6 +3599,24 @@ class HudApp {
 
     _update(x, now, force) {
         const w = x.w;
+        // the automatic way back to the stock cluster (the owner, 2026-11-15): if drawing one of the three new
+        // elements throws, that element goes back to BMW's instead of taking the tick (and the app) down with it
+        const row = this._rowOf(w);
+        if (row) {
+            try { return this._updateOne(x, now, force); } catch (e) { this._rowFail(row, 'drawing threw: ' + (e && e.message || e)); return; }
+        }
+        return this._updateOne(x, now, force);
+    }
+
+    /** Which of the three new bottom-row elements a widget belongs to ("own:nav" / "own:sign" / "own:info" in its
+     *  toggle or its hole condition), else null. */
+    _rowOf(w) {
+        const t = (w.toggle || '') + '|' + (typeof w.holeWhen === 'string' ? w.holeWhen : '');
+        return t.indexOf('own:nav') >= 0 ? 'nav' : t.indexOf('own:sign') >= 0 ? 'sign' : t.indexOf('own:info') >= 0 ? 'info' : null;
+    }
+
+    _updateOne(x, now, force) {
+        const w = x.w;
         if (w.type === 'atext') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             const s = this._resolve(w.text);
@@ -3080,9 +3633,24 @@ class HudApp {
             x.c.uniform(x.ref, 'u_text', this._atlasCodes(x, s), { type: 'vec4' });
         } else if (w.type === 'text') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
-            const s = this._resolve(w.text);
+            let s = this._resolve(w.text);
+            // Bottom row: the car's own words. Our 6WB fonts are baked subsets (Latin and figures only), so a road
+            // name or a message in another script would come out with holes. Rather than draw that, the element
+            // gives itself back to the car (the owner's "way back", 2026-11-15). The faithful drawing brings a font
+            // with the right glyphs (docs/G20-DESIGN-SPEC.md: Roboto, width axis 87.5).
+            const rowOf = this._rowOf(w);
+            if (rowOf && s) {
+                const miss = this._missingGlyphs(s, w.font);
+                if (miss) { this._rowFail(rowOf, 'the font "' + w.font + '" has no glyph for ' + miss + ' of the car\'s text'); return; }
+            }
+            // a road name or a message longer than its box is cut with "..." rather than clipped mid-letter.
+            // A GUESS: no photo in docs/G20-DESIGN-SPEC.md shows the stock cluster truncating (§8), so how BMW
+            // does it is unknown - this is the plainest thing that stays readable.
+            if (rowOf && s) s = this._fitText(s, w);
             let role = w.color || 'fg';
             if (w.colorBy === 'verdict' && this.score.last) role = VERDICT[this.score.last.verdict] || role;
+            // bottom row: a check-control text takes the colour the car asked for (cCColor), else its own role
+            if (w.colorBy === 'cc') role = this._ccRole() || role;
             if (w.near && this._nearMark(w.near[0]) === w.near[1]) role = w.nearColor || 'fg';
             // a readout slot goes red / blue at the shift point only while it shows engine speed or the shift point
             const shiftish = !w.slot || ['rpm', 'shiftAt'].indexOf((this.slotSensor(this.activeName, w.slot, this.layoutSlots) || {}).id) >= 0;
@@ -3209,10 +3777,15 @@ class HudApp {
             x.last = key;
             x.c.uniform(x.ref, 'u_value', [q]);
             if (w.peak) x.c.uniform(x.ref, 'u_peak', [pk > q ? pk : -1]);
+        } else if (w.type === 'fill' && typeof w.holeWhen === 'string' && /[:&!]/.test(w.holeWhen)) {
+            // bottom row: a fill whose hole follows a live toggle (the road label's black bar opens for BMW's own
+            // check-control text while the info field is BMW's)
+            const h = this._hole(w), key = h.join(',');
+            if (!force && key === x.last) return;
+            x.last = key;
+            x.c.uniform(x.ref, 'u_hole', h);
         } else if (w.type === 'wbsign') {
-            // package E: u_show.x 1 the limit sign, 2 the end-of-limit sign (WBSIGN), 0 none; .y the no-overtaking sign;
-            // car3 I: 3 the empty sign "---" (no limit known)
-            const a = isNum(this._raw('limit')) ? 1 : this._raw('limitEnd') ? 2 : this._raw('limitUnknown') ? 3 : 0, b = this._raw('nopass') ? 1 : 0;
+            const ab = this._signShow(), a = ab[0], b = ab[1];
             const key = a + '|' + b;
             if (!force && key === x.last) return;
             x.last = key;
@@ -3247,12 +3820,15 @@ class HudApp {
             if (w.off && w.measure === 'rpm' && !(isNum(raw) && raw >= 150)) v = this._restFrac(w);
             const q = Math.round(v * 1000) / 1000;
             const hot = w.measure === 'rpm' && this._shift().now ? 1 : 0;
+            // The red arc on the speed scale, from the limit to the END of the scale (bottom row package; before it
+            // ran from the limit to the needle). No shader change: u_dyn.yz is the band WBDIAL already draws, and
+            // .z = 1 is simply the scale's end. When it is drawn is _arcOn().
             let over = [-1, -1];
-            if (w.look === 'wb' && w.measure === 'speed') {
+            if (w.look === 'wb' && w.measure === 'speed' && this._arcOn()) {
                 let lim = this._raw('limit');
-                if (isNum(lim) && isNum(raw)) {
+                if (isNum(lim)) {
                     if (us && !w.kmh) lim *= 0.621371;
-                    if (raw > lim + 1) over = [Math.round(Math.min(1, Math.max(0, (lim - mn) / (D.max - mn))) * 1000) / 1000, q];
+                    over = [Math.round(Math.min(1, Math.max(0, (lim - mn) / (D.max - mn))) * 1000) / 1000, 1];
                 }
             }
             let fillA = null;
@@ -3271,15 +3847,17 @@ class HudApp {
                 x.c.uniform(x.ref, 'u_fill', x.wbFill);
             }
             if (w.look === 'wb' && w.cut && w.cut.round && w.cut.cover === 'limit') {
-                // package E: the round window over BMW's sign. Closed (3) whenever app.json names the car's limit field
-                // (config.limit / config.nopass wired): our sign is the only one, and while the car has sent nothing yet
-                // the spot stays black. Not wired: closed while our sign shows (the demo drive), open (1) otherwise, so
-                // BMW's own sign shows until the field is known.
+                // The round window over BMW's own sign. Bottom row package: the "ownSign" setting decides, not what the
+                // car sends. "ours" closes it (3): our sign is the only one, and while the car has sent nothing the
+                // spot stays black. "BMW's" (the default) leaves it open (1), exactly as before this package, so BMW
+                // draws the sign and our WBSIGN layer is not even built (the layout's "own:sign" toggle).
                 // 2026-11-14: closed too while the car stands in P with the engine off (BMW's standby screen, "Total
                 // ... km"): BMW draws no sign then, and the window showed a bar of its bottom line (y ~645) that the
                 // sign otherwise covers. An auto start/stop stop is in D, so BMW's sign still shows at the lights.
                 const rpm = this._raw('rpm'), parked = this._data().stage === 'P' && !(isNum(rpm) && rpm >= 150);
-                const m = parked || this._signWired() || isNum(this._raw('limit')) || this._raw('limitEnd') || this._raw('limitUnknown') ? 3 : 1;   // car3 I: "---" too
+                const own = this._own('sign') || (!this.ctx.settings.item('ownSign') &&
+                    (this._signWired() || isNum(this._raw('limit')) || this._raw('limitEnd') || this._raw('limitUnknown')));
+                const m = own || parked ? 3 : 1;
                 if (force || m !== x.cutMode) { x.cutMode = m; x.c.uniform(x.ref, 'u_cut', this._cutVec(w, m)); }
             }
             const key = q + '|' + hot + '|' + over.join(',');

@@ -214,9 +214,20 @@ def build_ui(spec, language='en'):
                                                     'Text2ndRow': {'value': '', 'type': 'Text'}}]))
 
     def settings_items(items, skip=()):
+        # (bimmer-lab) "group": "<heading>" on a setting puts a non-focusable header row (LT_Label_Header_1Row, the
+        # widget BMW's own lists use) above the first setting of each run of that group, so related rows read as a
+        # block. Settings without a "group" simply follow, as before. The drawn settings sheet does the same
+        # (kit/runtime/sheet.js listSheet).
+        group = None
         for s in spec['settings']:
-            if s['key'] not in skip:
-                setting_item(s, items)
+            if s['key'] in skip:
+                continue
+            g = s.get('group')
+            if g and g != group:
+                name = 'GRP_' + re.sub(r'[^A-Z0-9]+', '_', g.upper()).strip('_')
+                items.append(comp('header', name, rows=[text_row(name, g)]))
+            group = g
+            setting_item(s, items)
         # Translated builds with a credit file only: credit for the translation (localize.py keeps its title)
         if credit(language):
             name = credit_name(language)
