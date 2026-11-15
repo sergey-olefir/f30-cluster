@@ -10,7 +10,12 @@
  * engine, limits, failures) and reads back what the app wrote and what the fake was asked (GET /probe):
  * the list, a profile's details, Add / Rename / Copy / Delete through their confirm screens, the two-press Delete,
  * every refusal (Guest not active, protected, engine running, the active profile, Guest / Valet, BMW ID,
- * MAX_NUM_EXCEEDED), that nothing but the four allowed writes is ever sent, and that the app never exits.
+ * MAX_NUM_EXCEEDED), that nothing but the allowed writes is ever sent, and that the app never exits.
+ *
+ * 0.2.0 also covers the avatar: the type on the profile screen, the Avatar screen with no folder and with files,
+ * each preset, the six pictures that ship with the app, the owner's own picture written as avatar + avatarType =
+ * INDIVIDUAL, the app's own size refusal, a car-side rejection, the engine-off gate on an avatar write, and that no
+ * picture and no file name reach the log.
  *
  * The bench does not draw native screens (the HMI does that on the car): this checks the app's side only.
  * Mac only, Node 18 or newer (fetch). Never shipped.
@@ -20,10 +25,30 @@ const os = require('os');
 const path = require('path');
 const { spawn } = require('child_process');
 
-const PORT = Number(process.env.BENCH_PORT) || 8131;
+const PORT = Number(process.env.BENCH_PORT) || 8170;
 const BASE = 'http://127.0.0.1:' + PORT;
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'driver-profiles-'));
-const ALLOWED = ['createUserAccount', 'set UserAccount.name', 'copyGuestData', 'removeUserAccount'];
+const ALLOWED = ['createUserAccount', 'set UserAccount.name', 'set UserAccount.avatar', 'set UserAccount.avatarType',
+    'copyGuestData', 'removeUserAccount'];
+// the app's own avatars folder, where the owner drops a jpg (app.json config.avatarMaxKB = 48)
+const AVDIR = path.join(tmp, 'avatars');
+const MAXKB = 48;
+/** A buffer that passes the app's JPEG-header check, of exactly that many bytes. */
+function jpeg(bytes) {
+    const b = Buffer.alloc(bytes, 0x5a);
+    b[0] = 0xff; b[1] = 0xd8; b[2] = 0xff; b[3] = 0xe0;
+    b[bytes - 2] = 0xff; b[bytes - 1] = 0xd9;
+    return b;
+}
+/** The same checksum the app and the fake use, so the test can prove which bytes arrived without printing any. */
+const sum = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 2147483647; return h; };
+// the pictures that ship with the app (apps/driver_profiles/avatars/, packed into avatars.pack by the build), read
+// here straight from the repository so the test knows what should arrive at the far end
+const BUNDLE_DIR = path.join(__dirname, '..', 'apps', 'driver_profiles', 'avatars');
+const BUNDLED = fs.readdirSync(BUNDLE_DIR).filter((f) => /\.jpe?g$/i.test(f)).sort().map((name, index) => {
+    const buf = fs.readFileSync(path.join(BUNDLE_DIR, name));
+    return { index, name, bytes: buf.length, kb: Math.round(buf.length / 1024) + ' KB', sum: sum(buf.toString('base64')) };
+});
 
 let server = null, exited = false, logText = '';
 let passed = 0, failed = 0;
@@ -270,6 +295,194 @@ async function main() {
     await fake({ fail: null });
     p = await toMain();
 
+    console.log('the avatar: the profile row, and the Avatar screen with no folder');
+    await click('P_I01');
+    p = await until((q) => top(q) === 'PROFILE' && r2(q, 'D_NAME') === 'Driver A');
+    ok(r2(p, 'D_AVATAR') === 'Default (DEFAULT)', 'the avatar row: "' + r2(p, 'D_AVATAR') + '"');
+    ok(txt(p, 'A_AVATAR') === 'Avatar: Default - change it' && vis(p, 'A_AVATAR') === true, 'the Avatar button: "' + txt(p, 'A_AVATAR') + '"');
+    ok(!fs.existsSync(AVDIR), 'no avatars folder yet (the normal state before the owner puts a picture there)');
+    await click('A_AVATAR');
+    p = await until((q) => top(q) === 'AVATAR' && txt(q, 'AV_PATH'));
+    ok(top(p) === 'AVATAR', 'the Avatar screen opens (stack ' + JSON.stringify(p.stack) + ')');
+    ok(/^Avatar of "Driver A" - now: Default \(DEFAULT\)$/.test(txt(p, 'AV_NOW')), 'it says what is set now: "' + txt(p, 'AV_NOW') + '"');
+    ok(txt(p, 'AV_T0') === 'Default  (set now)' && txt(p, 'AV_T7') === 'Avatar 7' && txt(p, 'AV_T15') === 'Avatar 15',
+        'Default and the 15 built-in avatars by number: "' + txt(p, 'AV_T0') + '", "' + txt(p, 'AV_T7') + '", "' + txt(p, 'AV_T15') + '"');
+    ok(['AV_T0', 'AV_T1', 'AV_T8', 'AV_T15'].every((c) => vis(p, c) === true), 'the preset rows are shown');
+    ok(['AV_F0', 'AV_F1', 'AV_F2', 'AV_F3', 'AV_F4', 'AV_F5'].every((c) => vis(p, c) === false), 'no file rows with no folder');
+    ok(vis(p, 'AV_EMPTY') === true && /Make this folder, put a \.jpg in it/.test(txt(p, 'AV_EMPTY')), 'it says what to do: "' + txt(p, 'AV_EMPTY') + '"');
+    ok(txt(p, 'AV_PATH') === AVDIR, 'and the full path of the folder: "' + txt(p, 'AV_PATH') + '"');
+    ok(new RegExp('The ' + MAXKB + ' KB limit is our guess').test(txt(p, 'AV_NOTE')), 'the note names the limit and its standing: "' + txt(p, 'AV_NOTE') + '"');
+    ok(vis(p, 'AV_BUNDLED') === true && /^Pictures that came with the app/.test(txt(p, 'AV_BUNDLED')), 'the bundled pictures have their own heading: "' + txt(p, 'AV_BUNDLED') + '"');
+    ok(BUNDLED.every((f, i) => r1(p, 'AV_B' + i) === f.name && vis(p, 'AV_B' + i) === true),
+        'all six ship with the app, by name: ' + BUNDLED.map((f, i) => r1(p, 'AV_B' + i)).join(', '));
+    ok(BUNDLED.every((f, i) => r2(p, 'AV_B' + i) === f.kb + ' - came with the app, press to use it'),
+        'each with its size, so a smaller one can be tried: ' + BUNDLED.map((f, i) => r2(p, 'AV_B' + i)).join(' | '));
+    ok(BUNDLED.every((f) => f.bytes <= MAXKB * 1024), 'all six are inside the ' + MAXKB + ' KB limit (largest ' + BUNDLED[2].kb + ')');
+
+    console.log('a preset avatar');
+    ok(calls(p, 'set UserAccount.avatarType') === 0 && calls(p, 'set UserAccount.avatar') === 0, 'nothing written yet');
+    await click('AV_T7');
+    p = await until((q) => top(q) === 'CONFIRM' && /Avatar 7/.test(txt(q, 'C_WHAT')));
+    ok(/^Set the avatar of "Driver A" \(i01\) to Avatar 7\?$/.test(txt(p, 'C_WHAT')), 'CONFIRM: "' + txt(p, 'C_WHAT') + '"');
+    ok(/avatarType = AVATAR7 \(code 7\)/.test(txt(p, 'C_DETAIL')) && /No name, no type, no protection/.test(txt(p, 'C_DETAIL')),
+        'it names the one field: "' + txt(p, 'C_DETAIL') + '"');
+    ok(calls(p, 'set UserAccount.avatarType') === 0, 'nothing sent before Yes');
+    await click('C_YES');
+    p = await until((q) => /Result/.test(txt(q, 'C_RESULT')));
+    ok(txt(p, 'C_RESULT') === 'Result: avatarType is now AVATAR7 (Avatar 7)', 'result: "' + txt(p, 'C_RESULT') + '"');
+    ok(acc(p, 'i01').avatarType === 'AVATAR7' && acc(p, 'i01').avatarChars === 0, 'the fake persod has AVATAR7 and no picture');
+    ok(calls(p, 'set UserAccount.avatarType') === 1 && calls(p, 'set UserAccount.avatar') === 0, 'one field written, not the picture');
+    await click('C_NO');
+    p = await until((q) => top(q) === 'PROFILE' && r2(q, 'D_AVATAR') === 'Avatar 7 (AVATAR7)');
+    ok(top(p) === 'PROFILE' && r2(p, 'D_AVATAR') === 'Avatar 7 (AVATAR7)', 'back on PROFILE, the row reads "' + r2(p, 'D_AVATAR') + '"');
+
+    console.log('a picture that ships with the app');
+    const small = BUNDLED.find((f) => /128/.test(f.name)) || BUNDLED[0];
+    await click('A_AVATAR');
+    p = await until((q) => top(q) === 'AVATAR' && r1(q, 'AV_B' + small.index) === small.name);
+    await click('AV_B' + small.index);
+    p = await until((q) => top(q) === 'CONFIRM' && new RegExp(small.name.replace('.', '\\.')).test(txt(q, 'C_WHAT')));
+    ok(txt(p, 'C_WHAT') === 'Use "' + small.name + '" (' + small.kb + ', the copy that came with the app) as the avatar of "Driver A" (i01)?',
+        'CONFIRM says which copy: "' + txt(p, 'C_WHAT') + '"');
+    ok(/avatar = that jpg, Base64-encoded/.test(txt(p, 'C_DETAIL')) && /avatarType = INDIVIDUAL \(code 16\)/.test(txt(p, 'C_DETAIL')),
+        'the same two fields as any own picture: "' + txt(p, 'C_DETAIL') + '"');
+    await click('C_YES');
+    p = await until((q) => /Result/.test(txt(q, 'C_RESULT')));
+    ok(txt(p, 'C_RESULT') === 'Result: picture sent (' + small.kb + ' of jpg) and avatarType set to INDIVIDUAL', 'result: "' + txt(p, 'C_RESULT') + '"');
+    ok(acc(p, 'i01').avatarType === 'INDIVIDUAL' && acc(p, 'i01').avatarBytes === small.bytes && acc(p, 'i01').avatarSum === small.sum,
+        'the fake persod holds exactly the bundled file\'s ' + small.bytes + ' bytes, Base64-encoded');
+    await click('C_NO');
+    p = await until((q) => top(q) === 'PROFILE' && /INDIVIDUAL/.test(r2(q, 'D_AVATAR')));
+    ok(r2(p, 'D_AVATAR') === 'Custom picture (INDIVIDUAL) is set, ' + small.kb + ' of jpg', 'the profile row: "' + r2(p, 'D_AVATAR') + '"');
+
+    console.log('the folder with files in it');
+    fs.mkdirSync(AVDIR);
+    fs.writeFileSync(path.join(AVDIR, 'my-face.jpg'), jpeg(3072));
+    fs.writeFileSync(path.join(AVDIR, 'big-photo.jpg'), jpeg(80 * 1024));
+    fs.writeFileSync(path.join(AVDIR, 'empty.jpg'), Buffer.alloc(0));
+    fs.writeFileSync(path.join(AVDIR, 'notes.txt'), 'not a picture');
+    fs.writeFileSync(path.join(AVDIR, '.hidden.jpg'), jpeg(2048));
+    fs.mkdirSync(path.join(AVDIR, 'nested.jpg'));
+    fs.writeFileSync(path.join(tmp, 'outside.jpg'), jpeg(2048));
+    fs.symlinkSync(path.join(tmp, 'outside.jpg'), path.join(AVDIR, 'link.jpg'));
+    const want = fs.readFileSync(path.join(AVDIR, 'my-face.jpg'));
+    const wantSum = sum(want.toString('base64'));
+    await click('A_AVATAR');
+    p = await until((q) => top(q) === 'AVATAR' && r1(q, 'AV_F0'));
+    ok(r1(p, 'AV_F0') === 'big-photo.jpg' && r1(p, 'AV_F1') === 'empty.jpg' && r1(p, 'AV_F2') === 'my-face.jpg',
+        'the jpg files listed by name: ' + JSON.stringify([r1(p, 'AV_F0'), r1(p, 'AV_F1'), r1(p, 'AV_F2')]));
+    ok(/^3 KB - press to use it$/.test(r2(p, 'AV_F2')), 'each with its size: "' + r2(p, 'AV_F2') + '"');
+    ok(new RegExp('^80 KB: over the ' + MAXKB + ' KB limit').test(r2(p, 'AV_F0')) && r2(p, 'AV_F1') === 'the file is empty',
+        'the oversize and empty ones say so: "' + r2(p, 'AV_F0') + '" / "' + r2(p, 'AV_F1') + '"');
+    ok(['AV_F3', 'AV_F4', 'AV_F5'].every((c) => vis(p, c) === false) && vis(p, 'AV_EMPTY') === false, 'the spare rows and the hint are hidden');
+    const rows = ['AV_F0', 'AV_F1', 'AV_F2', 'AV_F3', 'AV_F4', 'AV_F5'].map((c) => r1(p, c)).join('|');
+    ok(!/notes\.txt|hidden|link\.jpg|nested/.test(rows), 'no .txt, dot-file, folder or symlink out of the folder is listed: ' + rows);
+
+    console.log('the app refuses an oversize or empty file before sending');
+    let avSets = calls(p, 'set UserAccount.avatar');
+    await click('AV_F0');
+    await sleep(300);
+    p = await probe();
+    ok(top(p) === 'AVATAR' && calls(p, 'set UserAccount.avatar') === avSets, 'the oversize one: no CONFIRM, nothing sent');
+    ok(new RegExp('^That one is 80 KB, over the ' + MAXKB + ' KB limit').test(txt(p, 'AV_NOTE')), 'it says why: "' + txt(p, 'AV_NOTE') + '"');
+    await click('AV_F1');
+    await sleep(300);
+    p = await probe();
+    ok(top(p) === 'AVATAR' && /^That file is empty/.test(txt(p, 'AV_NOTE')) && calls(p, 'set UserAccount.avatar') === avSets,
+        'the empty one: "' + txt(p, 'AV_NOTE') + '", nothing sent');
+
+    console.log("the owner's own picture");
+    await click('AV_F2');
+    p = await until((q) => top(q) === 'CONFIRM' && /my-face/.test(txt(q, 'C_WHAT')));
+    ok(txt(p, 'C_WHAT') === 'Use "my-face.jpg" (3 KB, from your avatars folder) as the avatar of "Driver A" (i01)?', 'CONFIRM: "' + txt(p, 'C_WHAT') + '"');
+    ok(/avatar = that jpg, Base64-encoded/.test(txt(p, 'C_DETAIL')) && /avatarType = INDIVIDUAL \(code 16\)/.test(txt(p, 'C_DETAIL')),
+        'it names both fields, in order: "' + txt(p, 'C_DETAIL') + '"');
+    await click('C_YES');
+    p = await until((q) => /Result/.test(txt(q, 'C_RESULT')));
+    ok(txt(p, 'C_RESULT') === 'Result: picture sent (3 KB of jpg) and avatarType set to INDIVIDUAL', 'result: "' + txt(p, 'C_RESULT') + '"');
+    ok(/^The same picture reads back/.test(txt(p, 'C_RESULT2')) && /Only those two fields were written/.test(txt(p, 'C_RESULT2')),
+        'and what the car holds now: "' + txt(p, 'C_RESULT2') + '"');
+    ok(acc(p, 'i01').avatarType === 'INDIVIDUAL' && acc(p, 'i01').avatarBytes === want.length && acc(p, 'i01').avatarSum === wantSum,
+        'the fake persod holds INDIVIDUAL and exactly those ' + want.length + ' bytes, Base64-encoded');
+    ok(calls(p, 'set UserAccount.avatar') === 2 && calls(p, 'set UserAccount.avatarType') === 3,
+        'it added one avatar write and one avatarType write (the bundled one before it makes 2 and 3)');
+    ok(acc(p, 'i01').name === 'Driver A' && acc(p, 'i01').type === 'USER' && acc(p, 'i01').protection.length === 0 && acc(p, 'i01').pia === 0,
+        'nothing else about the profile changed (name, type, protection, PIA)');
+    await click('C_NO');
+    p = await until((q) => top(q) === 'PROFILE' && /INDIVIDUAL/.test(r2(q, 'D_AVATAR')));
+    ok(r2(p, 'D_AVATAR') === 'Custom picture (INDIVIDUAL) is set, 3 KB of jpg', 'the profile row: "' + r2(p, 'D_AVATAR') + '"');
+
+    console.log('a bundled name and a folder name that clash');
+    // the owner's folder gets a file called exactly like one that ships with the app, with other bytes in it
+    const FROWS = ['AV_F0', 'AV_F1', 'AV_F2', 'AV_F3', 'AV_F4', 'AV_F5'];
+    fs.writeFileSync(path.join(AVDIR, small.name), jpeg(1024));
+    await click('A_AVATAR');
+    p = await until((q) => top(q) === 'AVATAR' && FROWS.some((c) => r1(q, c) === small.name));
+    ok(r1(p, 'AV_B' + small.index) === small.name && r2(p, 'AV_B' + small.index) === small.kb + " - came with the app (not your folder's file of that name), press to use it",
+        'the bundled row says which it is: "' + r2(p, 'AV_B' + small.index) + '"');
+    const clash = FROWS.find((c) => r1(p, c) === small.name);
+    ok(clash && r2(p, clash) === '1 KB - your own file of that name, press to use it',
+        'and so does the folder row (' + clash + '): "' + (clash ? r2(p, clash) : 'not listed') + '"');
+    await click('AV_B' + small.index);
+    await until((q) => top(q) === 'CONFIRM' && /came with the app/.test(txt(q, 'C_WHAT')));
+    await click('C_YES');
+    p = await until((q) => /Result/.test(txt(q, 'C_RESULT')));
+    ok(acc(p, 'i01').avatarSum === small.sum && acc(p, 'i01').avatarBytes === small.bytes,
+        'pressing the bundled row sent the bundled bytes, not the folder file of the same name');
+    await click('C_NO');
+    p = await until((q) => top(q) === 'PROFILE', 4000);
+    fs.unlinkSync(path.join(AVDIR, small.name));
+
+    console.log('the car refuses the picture');
+    await fake({ rejectAvatar: 'persod: avatar rejected, this unit takes less' });
+    await click('A_AVATAR');
+    await until((q) => top(q) === 'AVATAR' && r1(q, 'AV_F2') === 'my-face.jpg');
+    await click('AV_F2');
+    p = await until((q) => top(q) === 'CONFIRM' && /my-face/.test(txt(q, 'C_WHAT')));
+    const typeSets = calls(p, 'set UserAccount.avatarType');
+    await click('C_YES');
+    p = await until((q) => /Result/.test(txt(q, 'C_RESULT')));
+    ok(txt(p, 'C_RESULT') === 'Result: the car refused the picture: persod: avatar rejected, this unit takes less',
+        'the car\'s own words are shown: "' + txt(p, 'C_RESULT') + '"');
+    ok(/avatarType was left alone/.test(txt(p, 'C_RESULT2')) && calls(p, 'set UserAccount.avatarType') === typeSets,
+        'avatarType was not written after the refusal: "' + txt(p, 'C_RESULT2') + '"');
+    ok(acc(p, 'i01').avatarType === 'INDIVIDUAL' && acc(p, 'i01').avatarSum === small.sum, 'the profile still holds what it held');
+    await fake({ rejectAvatar: null });
+    await click('C_NO');
+    p = await until((q) => top(q) === 'AVATAR', 4000);
+    ok(top(p) === 'AVATAR', 'a refusal leaves the Avatar screen open to try again (stack ' + JSON.stringify(p.stack) + ')');
+
+    console.log('the enum by number, when the service will not take its name');
+    await fake({ avatarEnumByName: false });
+    await click('AV_T0');
+    await until((q) => top(q) === 'CONFIRM' && /Default/.test(txt(q, 'C_WHAT')));
+    await click('C_YES');
+    p = await until((q) => /Result/.test(txt(q, 'C_RESULT')));
+    ok(txt(p, 'C_RESULT') === 'Result: avatarType is now DEFAULT (Default)' && acc(p, 'i01').avatarType === 'DEFAULT',
+        'it falls back to the number on the same field: "' + txt(p, 'C_RESULT') + '"');
+    ok(/stays stored, unused/.test(txt(p, 'C_RESULT2')) && acc(p, 'i01').avatarSum === small.sum,
+        'and the stored picture is left alone: "' + txt(p, 'C_RESULT2') + '"');
+    await fake({ avatarEnumByName: true });
+    await click('C_NO');
+    p = await until((q) => top(q) === 'PROFILE' && r2(q, 'D_AVATAR') === 'Default (DEFAULT)');
+
+    console.log('an avatar write needs the car parked too');
+    await fake({ engine: true });
+    await sleep(1200);
+    await click('A_AVATAR');
+    await until((q) => top(q) === 'AVATAR' && r1(q, 'AV_F2') === 'my-face.jpg');
+    await click('AV_F2');
+    p = await until((q) => top(q) === 'CONFIRM' && /engine is running/.test(txt(q, 'C_CHECK')));
+    ok(/engine is running/.test(txt(p, 'C_CHECK')), 'CONFIRM shows it: "' + txt(p, 'C_CHECK') + '"');
+    avSets = calls(p, 'set UserAccount.avatar');
+    await click('C_YES');
+    p = await until((q) => /Not sent/.test(txt(q, 'C_RESULT')));
+    ok(/^Not sent: the engine is running$/.test(txt(p, 'C_RESULT')) && calls(p, 'set UserAccount.avatar') === avSets,
+        'Yes: "' + txt(p, 'C_RESULT') + '", no picture sent');
+    await fake({ engine: false });
+    await sleep(1200);
+    p = await toMain();
+
     console.log('odd input');
     await click('NO_SUCH_COMPONENT');
     await click('C_YES');                  // CONFIRM not open
@@ -278,15 +491,24 @@ async function main() {
     p = await until((q) => /Slot 5 is free/.test(txt(q, 'MSG')));
     ok(/Slot 5 is free/.test(txt(p, 'MSG')), 'a free slot row: "' + txt(p, 'MSG') + '"');
 
-    console.log('only the four writes, ever');
+    console.log('only the allowed writes, ever');
     p = await probe();
     const names = p.perso.calls.map((c) => c.call);
     ok(names.every((c) => ALLOWED.indexOf(c) >= 0), 'calls made: ' + JSON.stringify(names));
     ok(calls(p, 'createUserAccount') === 2 && calls(p, 'set UserAccount.name') === 1 && calls(p, 'copyGuestData') === 2 && calls(p, 'removeUserAccount') === 1,
         'one per confirmed Yes (2 creates incl. MAX_NUM_EXCEEDED, 1 rename, 2 copies incl. the failing one, 1 delete)');
+    ok(calls(p, 'set UserAccount.avatar') === 4 && calls(p, 'set UserAccount.avatarType') === 6,
+        'the avatar writes: 4 pictures (two bundled, one of the owner\'s, one refused by the car) and 6 avatarType sets'
+        + ' (AVATAR7, INDIVIDUAL three times, then DEFAULT by name and by number)');
+    const bigSend = p.perso.calls.filter((c) => typeof c.chars === 'number' && c.chars > MAXKB * 1024 * 4 / 3);
+    ok(bigSend.length === 0, 'no Base64 string over the ' + MAXKB + ' KB limit was ever handed to the setter');
     await sleep(800);
     ok(!exited && !/uncaught|app exited/.test(logText), 'the app never exited (no uncaught exception)');
-    ok(!/Driver A|Driver B|Profile 1|example\.com/.test(logText.split('\n').filter((l) => /\[driver_profiles\]/.test(l) && !/bench:/.test(l)).join('\n')), 'no profile names or e-mail in the app log');
+    const appLog = logText.split('\n').filter((l) => /\[driver_profiles\]/.test(l) && !/bench:/.test(l)).join('\n');
+    ok(!/Driver A|Driver B|Profile 1|example\.com/.test(appLog), 'no profile names or e-mail in the app log');
+    ok(!/my-face|big-photo|empty\.jpg|outside|hidden/.test(appLog) && !BUNDLED.some((f) => appLog.indexOf(f.name) >= 0),
+        'no avatar file name in the app log, bundled ones included');
+    ok(!/[A-Za-z0-9+/]{120,}/.test(appLog) && !/WlpaWlpa/.test(appLog), 'no image data in the app log (no run of Base64)');
 }
 
 main().catch((e) => { failed++; console.log('  FAIL ' + (e && e.stack || e)); }).then(() => {

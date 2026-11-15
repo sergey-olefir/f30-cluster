@@ -12,6 +12,13 @@
  *                              MAX_NUM_EXCEEDED past maxUsers (default 7, the car's ceiling; the provisioned limit can
  *                              be lower); FAILED while another create runs ("already a 'Create Local Account' job")
  *   UserAccount.name setter    takes the new name and answers with it, notifies (car, 2026-11-14)
+ *   UserAccount.avatar         Utf8D, the individual picture as Base64 jpg (persod's schema calls it avatarData);
+ *     + avatarType setters     avatarType is the enum DEFAULT / AVATAR1..15 / INDIVIDUAL / UNSPECIFIED. Both notify.
+ *                              INDIVIDUAL keeps whatever string was written, so a read gives its size back (hyp: the
+ *                              car's own behaviour has not been seen; only the field ids and setters are proven).
+ *                              Rejections for the refusal path (POST /fake): avatarMaxChars (how long a Base64 string
+ *                              it takes, default 200000), rejectAvatar / rejectAvatarType (a message to throw), and
+ *                              avatarEnumByName: false, which makes it take the enum only as a number
  *   copyGuestData(ref)         FAILED unless Guest is the active user ("Current user isn't guest"), IS_PROTECTED_ACCOUNT
  *                              for a protected target, else SUCCESS after ~0.5 s and copyGuestTimestamp = now (car)
  *   removeUserAccount(ref)     FAILED for guest / valet / the active user / a free slot (hyp), IS_PROTECTED_ACCOUNT for a
@@ -27,6 +34,24 @@ const SLOTS = ['guest', 'valet', 'i01', 'i02', 'i03', 'i04', 'i05', 'i06', 'i07'
 const now = () => Math.floor(Date.now() / 1000);
 const hex6 = () => ('000000' + Math.floor(Math.random() * 0xffffff).toString(16)).slice(-6);
 
+// the catalogue's enumAvatarType (0xFC03 avatarType, get 28 set 29 notif 32775)
+const AVATAR_TYPE = { DEFAULT: 0, INDIVIDUAL: 16, UNSPECIFIED: 17 };
+for (let i = 1; i <= 15; i++) AVATAR_TYPE['AVATAR' + i] = i;
+const avatarTypeName = (v) => {
+    if (typeof v === 'number') return Object.keys(AVATAR_TYPE).find((k) => AVATAR_TYPE[k] === v) || null;
+    return typeof v === 'string' && v in AVATAR_TYPE ? v : null;
+};
+/** A checksum, so the test can prove which bytes arrived without any of them being printed. */
+const sum = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 2147483647; return h; };
+/** The decoded size of a Base64 string (the same arithmetic the app does, so the two can be compared). */
+const b64Bytes = (s) => {
+    if (!s) return 0;
+    let pad = 0;
+    if (s.charAt(s.length - 1) === '=') pad++;
+    if (s.charAt(s.length - 2) === '=') pad++;
+    return Math.max(0, Math.floor(s.length / 4) * 3 - pad);
+};
+
 function install(hu, opts) {
     opts = opts || {};
     const log = hu.log || console;
@@ -35,11 +60,15 @@ function install(hu, opts) {
     const notif = {};        // slot -> field -> [fn]
     const smListeners = [];
     const calls = [];
-    const st = { current: 'guest', maxUsers: 7, creating: false, engine: false, gear: 'P', piaTx: 'ENDTRANSACTION', fail: null, slow: 0 };
+    const st = {
+        current: 'guest', maxUsers: 7, creating: false, engine: false, gear: 'P', piaTx: 'ENDTRANSACTION', fail: null, slow: 0,
+        // the avatar setters' behaviour, all steerable from POST /fake (see the header)
+        avatarMaxChars: 200000, rejectAvatar: null, rejectAvatarType: null, avatarEnumByName: true,
+    };
     const mk = (slot, type, name, pia, extra) => Object.assign({
         id: slot === 'guest' || slot === 'valet' ? slot : 'i' + hex6(), name, type, gcid: '', protection: [], firstName: '',
         creationDate: now() - 86400 * 30, lastLoginDate: now() - 3600, synchronizationEnabled: false, connectedDriveUsername: '',
-        emailAddress: '', avatarType: 'DEFAULT', copyTs: 0, pia,
+        emailAddress: '', avatarType: 'DEFAULT', avatar: '', copyTs: 0, pia,
     }, extra || {});
     acc.guest = mk('guest', 'GUEST', 'Guest', 10);
     acc.valet = mk('valet', 'VALET', 'Valet', 14);
@@ -80,11 +109,25 @@ function install(hu, opts) {
             return later(5, () => (Array.isArray(a[f]) ? a[f].slice() : a[f]));
         };
         p.setValue = (f, v) => {
-            calls.push({ call: 'set UserAccount.' + f, slot });
+            // recorded before anything is checked, so a test sees any field the app ever tried to write
+            calls.push({ call: 'set UserAccount.' + f, slot, chars: f === 'avatar' ? String(v).length : undefined });
             const a = acc[slot];
-            if (f !== 'name') return Promise.reject(new Error('no setter for ' + f));
+            if (f !== 'name' && f !== 'avatar' && f !== 'avatarType') return Promise.reject(new Error('no setter for ' + f));
             if (!a) return later(300, () => { throw new Error('timeout: ' + slot + ' not offered'); });
-            return later(10, () => { a.name = String(v); notify(slot, 'name'); return a.name; });
+            if (f === 'name') return later(10, () => { a.name = String(v); notify(slot, 'name'); return a.name; });
+            if (f === 'avatar') {
+                const s = String(v == null ? '' : v);
+                if (st.rejectAvatar) return later(20, () => { throw new Error(st.rejectAvatar); });
+                if (s.length > st.avatarMaxChars) return later(20, () => { throw new Error('persod: avatar rejected, ' + s.length + ' characters is more than this unit takes'); });
+                // a whole jpg over the binding takes a moment
+                return later(40, () => { a.avatar = s; notify(slot, 'avatar'); return a.avatar; });
+            }
+            // avatarType: the enum, by name as the binding hands them over, or by number
+            if (st.rejectAvatarType) return later(20, () => { throw new Error(st.rejectAvatarType); });
+            if (typeof v === 'string' && !st.avatarEnumByName) return later(20, () => { throw new Error('persod: avatarType takes the enum as a number on this unit'); });
+            const name = avatarTypeName(v);
+            if (!name) return later(20, () => { throw new Error('persod: ' + JSON.stringify(v) + ' is not an avatarType'); });
+            return later(10, () => { a.avatarType = name; notify(slot, 'avatarType'); return a.avatarType; });
         };
         p.subscribe = (o) => { const n = (notif[slot] = notif[slot] || {}); (n[o.name] = n[o.name] || []).push(o.onReceive); return Promise.resolve(); };
         return p;
@@ -162,7 +205,10 @@ function install(hu, opts) {
     setInterval(feed, 1000);
     setTimeout(feed, 50);
 
-    /** Bench control (POST /fake): { current, protect: { slot: [..] }, maxUsers, engine, gear, piaTx, fail, slow }. */
+    /**
+     * Bench control (POST /fake): { current, protect: { slot: [..] }, maxUsers, engine, gear, piaTx, fail, slow,
+     * bmwId, avatarMaxChars, rejectAvatar, rejectAvatarType, avatarEnumByName, setAvatar: { slot, bytes, type } }.
+     */
     function control(m) {
         if (m.current && acc[m.current]) {
             st.current = m.current;
@@ -177,12 +223,34 @@ function install(hu, opts) {
         if ('fail' in m) st.fail = m.fail || null;
         if (typeof m.slow === 'number') st.slow = m.slow;
         if (m.bmwId && acc[m.bmwId]) { acc[m.bmwId].gcid = 'fake-gcid'; acc[m.bmwId].connectedDriveUsername = 'driver@example.com'; notify(m.bmwId, 'gcid'); }
+        if (typeof m.avatarMaxChars === 'number') st.avatarMaxChars = m.avatarMaxChars;
+        if ('rejectAvatar' in m) st.rejectAvatar = m.rejectAvatar || null;
+        if ('rejectAvatarType' in m) st.rejectAvatarType = m.rejectAvatarType || null;
+        if (typeof m.avatarEnumByName === 'boolean') st.avatarEnumByName = m.avatarEnumByName;
+        // a profile that already has an own picture, so the read path has something to size up
+        if (m.setAvatar && acc[m.setAvatar.slot]) {
+            const a = acc[m.setAvatar.slot];
+            if (typeof m.setAvatar.bytes === 'number') {
+                a.avatar = Buffer.alloc(Math.max(0, m.setAvatar.bytes), 0x5a).toString('base64');
+                notify(m.setAvatar.slot, 'avatar');
+            }
+            const t = avatarTypeName(m.setAvatar.type === undefined ? 'INDIVIDUAL' : m.setAvatar.type);
+            if (t) { a.avatarType = t; notify(m.setAvatar.slot, 'avatarType'); }
+        }
         feed();
     }
     function state() {
         const out = {};
-        Object.keys(acc).forEach((s) => { const a = acc[s]; out[s] = { id: a.id, name: a.name, type: a.type, gcid: a.gcid, protection: a.protection.slice(), copyTs: a.copyTs, pia: a.pia }; });
-        return { accounts: out, current: st.current, calls: calls.slice(), maxUsers: st.maxUsers };
+        // the picture itself never leaves the fake: a test gets its size and a checksum
+        Object.keys(acc).forEach((s) => {
+            const a = acc[s];
+            out[s] = {
+                id: a.id, name: a.name, type: a.type, gcid: a.gcid, protection: a.protection.slice(), copyTs: a.copyTs, pia: a.pia,
+                avatarType: a.avatarType, avatarChars: a.avatar.length, avatarBytes: b64Bytes(a.avatar),
+                avatarSum: a.avatar ? sum(a.avatar) : 0,
+            };
+        });
+        return { accounts: out, current: st.current, calls: calls.slice(), maxUsers: st.maxUsers, avatarMaxChars: st.avatarMaxChars };
     }
     log.info('bench: fake persod (UserAccountManager, UserAccount, SessionManager) with guest, valet, i01, i02; guest active');
     return { control, state };
