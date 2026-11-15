@@ -893,23 +893,16 @@ class HudApp {
                     this.log.info('engine: ' + (s || 'not known') + ' (' + JSON.stringify(v && v.statusEngineRunDrive) + ')');
                 },
             },
-            // tyre pressure and temperature per corner, in the car's own display units (_tyreBar / _tyreC).
-            // The car never notifies these (BMW's own x_call only ever reads them), so they are polled.
-            'de.bmw.infotainment.vehicle.TPMS': {
-                $pollMs: 10000,
-                statusTyrePressure: (v) => TYRE_CORNERS.forEach((k) => { this.tyres.p[k] = this._tyreBar(v && v['actualValuePressureTyre' + k + 'H']); }),
-                statusTyreTemperature: (v) => TYRE_CORNERS.forEach((k) => { this.tyres.t[k] = this._tyreC(v && v['actualValueTemperatureTyre' + k + 'H']); }),
-            },
-            // the car's display units: the TPMS reports pressure as 0.1 x raw in the car's pressure unit and temperature
-            // as the car's degrees + 40 (car_vitals, MIT; a car set to psi / F showed 32 psi as 464 psi until this was read)
-            'de.bmw.infotainment.vehicle.Vehicle': {
-                statusNewCurrentUnitsStatusExt: (v) => {
-                    const press = unitName(PRESS_UNITS, v && v.unitOfMeasurementAirPressure), temp = unitName(TEMP_UNITS, v && v.unitOfMeasurementTemperature);
-                    if (press === this.carUnits.press && temp === this.carUnits.temp) return;
-                    this.carUnits.press = press; this.carUnits.temp = temp;
-                    this.log.info('car units: pressure ' + (press || '?') + ', temperature ' + (temp || '?'));
-                },
-            },
+            // 2026-11-15, the owner ("TPMS - забираємо і все"), from docs/FEATURE-AUDIT.md: the tyre watches are GONE.
+            // The car never notifies TPMS (BMW's own x_call only ever reads it), so it had to be POLLED - four getter
+            // round-trips every 10 s - and no widget in any layout of any app here shows a tyre value. The car's
+            // display units (vehicle.Vehicle statusNewCurrentUnitsStatusExt) went with them: in this engine they only
+            // ever fed _tyreBar / _tyreC, and {{u:temp}} / {{u:boost}} follow the "units" SETTING, not the car.
+            // Putting them back is this block plus the two interfaces in the app's "signals" (see git history):
+            //   'de.bmw.infotainment.vehicle.TPMS': { $pollMs: 10000, statusTyrePressure, statusTyreTemperature }
+            //   'de.bmw.infotainment.vehicle.Vehicle': { statusNewCurrentUnitsStatusExt }
+            // _tyreBar / _tyreC / carUnits / this.tyres and the {{tyreP:*}} / {{tyreT:*}} tokens are LEFT IN PLACE, so
+            // a layout that wants tyres still reads "no value" instead of throwing, and one block brings it back.
             // S / M next to the gear: the gearbox status carries no programme on some cars, the M drive display does
             'de.bmw.infotainment.misc.MDrive': {
                 dataDisplayGearbox: (v) => { this.program = PROGRAMS[v && v.displayProgramGearbox] || null; },
