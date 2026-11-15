@@ -37,7 +37,9 @@
       "text": "{{speed}}",
       "font": "n_speed",
       "color": "fg",
-      "align": "center"
+      "align": "center",
+      "gpu": true,
+      "maxLen": 3
     },
     {
       "id": "speed_unit",

@@ -1,6 +1,7 @@
 #!/bin/sh
-# Bench-only A/B of the needle prototype (hud.js PERF, <data>/perf.json): for each layout, 20 s of demo driving
-# with the perf log only (today's needles) and 20 s with "needle": "smooth", each with an idle event loop and with
+# Bench-only A/B of the needles: for each layout, 20 s on the 50 ms tick ("base": the setting "needleSmooth" off)
+# and 20 s smooth (the setting on; before 0.7.14, the package P prototype: perf.json "needle": "smooth"), with the
+# perf log on, each with an idle event loop and with
 # a busy one (the probe's "load": busy-waits LOAD_MS every 100 ms, a stand-in for the page's software frame on the
 # car's CPU). Same bench and preload as bench_sweep.sh; the app's data folder is bench/.data/f30_cluster.
 #   tools/perf/needle_test.sh <dir> [port] [layouts...]      then: python3 -I tools/perf/needle.py <dir>/n_*.dump.json
@@ -20,7 +21,9 @@ ctl pagestop x
 for L in $LAYOUTS; do
   post setting "{\"key\":\"hudLayout\",\"value\":\"$L\"}"
   for MODE in base smooth; do
+    # 0.7.14: the setting "needleSmooth" (on by default); before it, perf.json's "needle": "smooth" (package P)
     if [ $MODE = smooth ]; then echo '{ "log": true, "needle": "smooth" }' > "$DATA/perf.json"; else echo '{ "log": true }' > "$DATA/perf.json"; fi
+    if [ $MODE = smooth ]; then post setting '{"key":"needleSmooth","value":true}'; else post setting '{"key":"needleSmooth","value":false}'; fi
     sleep 12                                  # hud.js reads perf.json every 10 s
     for LOAD in 0 "$LOAD_MS"; do
       echo "== $L $MODE load $LOAD"

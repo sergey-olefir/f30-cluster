@@ -10,11 +10,12 @@
  *  - JS time per function: HudApp _tick / _update (per widget type) / _rebuildInner / _createSheet, hud_text drawText,
  *    Page render, car samples, the client's JSON encode and frame build, and every other 'long task' (> 8 ms) between;
  *  - socket traffic per cluster-render connection: messages and bytes by kind (uniform by name, frame by layer,
- *    layer / asset / bind / drop ...), and per widget (refs mapped to hud.widgets ids);
+ *    layer / asset / bind / drop ...), and per widget (refs mapped to hud.widgets ids); and (0.7.14) the socket's own
+ *    writes per connection ("flushes": one per syscall, so one service wake each; a corked batch is one);
  *  - the needle: every needle uniform send (dial u_dyn / u_value, g20dial u_val, sdash u_speed / u_rpm, mtach u_value)
  *    with its time and value, so update intervals, step sizes and 'stalls' can be computed;
  *  - the hud tick's real period (the 50 ms setInterval) and the car samples' arrival.
- * Control: PERF_DIR/ctl.json, polled every 200 ms: { "seq": n, "cmd": "reset" | "dump" | "profile" | "pagecost",
+ * Control: PERF_DIR/ctl.json, polled every 200 ms: { "seq": n, "cmd": "reset" | "dump" | "profile" | "pagecost" | "testshift",
  *   "label": "...", "ms": 15000 }. Each cmd with a new seq runs once; results go to PERF_DIR/<label>.<cmd>.json
  *   (profile: <label>.cpuprofile, from the inspector, which Node 8 has too).
  */
@@ -108,10 +109,21 @@ function start() {
         if (!P || P.__perfDone) return;
         P.__perfDone = true;
         const w0 = P._write, pump = P._pump;
-        P._write = function (msg) { if (this.sock && this.connected) account(this, msg); return w0.call(this, msg); };
+        // the socket's own writes (one per syscall, so one service wake each): a corked batch is one _writev
+        const flushes = (cr) => {
+            const s = cr.sock;
+            if (!s || s.__perfFlush) return;
+            s.__perfFlush = true;
+            const count = () => { const c = S.conn[cr.app] || (S.conn[cr.app] = { msgs: 0, bytes: 0, kinds: {} }); c.flushes = (c.flushes || 0) + 1; };
+            const sw = s._write, sv = s._writev;
+            if (sw) s._write = function () { count(); return sw.apply(this, arguments); };
+            if (sv) s._writev = function () { count(); return sv.apply(this, arguments); };
+        };
+        P._write = function (msg) { if (this.sock && this.connected) { flushes(this); account(this, msg); } return w0.call(this, msg); };
         // frames go out from _pump with sock.write directly: count them there
         P._pump = function () {
             const s = this.sock;
+            if (s && this.connected) flushes(this);
             if (s && !s.__perf) {
                 s.__perf = true;
                 const sw = s.write;
@@ -147,6 +159,8 @@ function start() {
             return ctor.apply(this, arguments);
         };
         wrap(P, '_tick', 'hud _tick (all widgets)');
+        wrap(P, '_needleTick', 'hud _needleTick (needle timer)');      // 0.7.14 (absent before)
+        wrap(P, '_perfNeedles', 'hud _needleTick (needle timer)');     // the package P prototype's name for it
         wrap(P, '_update', function (x) { return 'hud _update ' + (x && x.w ? x.w.type : '?'); });
         wrap(P, '_resolve', 'hud _resolve (token strings)');
         wrap(P, '_rebuildInner', 'hud _rebuildInner (layout build)');
@@ -243,6 +257,7 @@ function start() {
         else if (c.cmd === 'pagestop' && page && page.loop) page.loop.stop();     // as when the HMI hides the page
         else if (c.cmd === 'layers') layers(label);
         else if (c.cmd === 'load') busyLoad(c.ms || 0, c.every || 100);    // a stand-in for a slow CPU's busy event loop
+        else if (c.cmd === 'testshift' && hud) console.log('[perf] testShift: ' + hud.testShift());   // the shift-light test (_testRpm)
     }, 200).unref();
 
     function dump(label) {
