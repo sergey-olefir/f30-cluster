@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Package design/g20-spec: our own schematic of the stock G20 bottom strip, drawn at the measured
+     numbers in design/g20-spec/measured.json. Panel px, 1920x720; this file shows y 560..720.
+     No BMW artwork and no photo pixels: every shape here is drawn from the measured boxes. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="160" viewBox="0 560 1920 160">
+  <style>
+    .ink   { fill: none; stroke: #e8e2e4; }
+    .box   { fill: none; stroke: #4ab04a; stroke-width: 1; stroke-dasharray: 4 3; }
+    .base  { stroke: #c08cff; stroke-width: 1; stroke-dasharray: 6 4; }
+    .t     { font: 11px sans-serif; fill: #9aa; }
+    .tg    { font: 11px sans-serif; fill: #4ab04a; }
+  </style>
+  <rect x="0" y="560" width="1920" height="160" fill="#07080b"/>
+
+  <!-- the two dial bottom lines, 7 px, centre y 647, each ending in an upward hook -->
+  <path class="ink" stroke-width="7" d="M 60,647 H 695"/>
+  <path class="ink" stroke-width="7" d="M 1224,647 H 1860"/>
+  <path class="ink" stroke-width="5" d="M 700,646.5 C 730,646 744,636 753.5,614.5"/>
+  <path class="ink" stroke-width="5" d="M 1219,646.5 C 1189,646 1175,636 1166.5,614.5"/>
+  <text class="t" x="64" y="668">dial bottom line, 7 px, centre y 647; hook tip (753.5, 614.5) / (1166.5, 614.5)</text>
+
+  <!-- the check-control rail, shown dimmed: it replaces the two hooks while a message is up -->
+  <g opacity="0.55">
+    <path class="ink" stroke-width="5" d="M 702,621 C 724,614 736,606 749,604.8 H 1176 C 1189,606 1199,614 1221,621"/>
+    <text class="t" x="760" y="596">check-control rail, 5 px, flat y 604.8 from x 749 to 1176, tips (702, 621) / (1221, 621)</text>
+  </g>
+
+  <!-- speed-limit sign: centre (537.4, 621.3), r_out 41.1, ring 9.3 -->
+  <circle cx="537.4" cy="621.3" r="36.45" fill="none" stroke="#e2232e" stroke-width="9.3"/>
+  <circle cx="537.4" cy="621.3" r="31.8" fill="#fbf4f6"/>
+  <g fill="#2f2a2d">
+    <rect x="520.0" y="619.1" width="8.8" height="4.4"/>
+    <rect x="533.0" y="619.1" width="8.8" height="4.4"/>
+    <rect x="546.0" y="619.1" width="8.8" height="4.4"/>
+  </g>
+  <text class="tg" x="470" y="690">sign centre (537.4, 621.3) r_out 41.1 ring 9.3; empty state: 3 dashes 8.8x4.4, pitch 13</text>
+
+  <!-- the measured ink boxes of the bottom row -->
+  <rect class="box" x="135.6" y="666" width="167.5" height="33"/>
+  <text class="tg" x="135.6" y="662">range + pump icon</text>
+  <rect class="box" x="344.6" y="665" width="105.5" height="33.4"/>
+  <text class="tg" x="344.6" y="662">clock</text>
+  <rect class="box" x="706" y="669" width="509" height="40"/>
+  <text class="tg" x="706" y="665">street label, centred on x 960.5, widest seen 509 px</text>
+  <rect class="box" x="1539.6" y="665" width="122.3" height="33"/>
+  <text class="tg" x="1480" y="662">outside temperature</text>
+  <rect class="box" x="1223" y="657" width="133" height="52"/>
+  <text class="tg" x="1223" y="653">mode label (2 lines)</text>
+  <rect class="box" x="1395.1" y="666.9" width="24.8" height="33.2"/>
+  <text class="tg" x="1380" y="653">gear</text>
+  <rect class="box" x="712" y="633" width="41" height="52"/>
+  <text class="tg" x="620" y="630">symbol slot</text>
+  <rect class="box" x="1252" y="591" width="28" height="36"/>
+  <text class="tg" x="1286" y="600">severity marker</text>
+
+  <!-- baselines -->
+  <line class="base" x1="60" y1="698.1" x2="1860" y2="698.1"/>
+  <text class="t" x="1700" y="694">value baseline 698.1</text>
+  <line class="base" x1="700" y1="700.5" x2="1220" y2="700.5"/>
+  <text class="t" x="700" y="716">street baseline 700.5 | message: one line 671.2, two lines 645.8 / 690.2</text>
+</svg>

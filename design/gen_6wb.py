@@ -4,6 +4,14 @@ multifunctional display; no BMW artwork is used):
     python3 design/gen_6wb.py apps/f30_cluster/hud/layouts
 Writes wb_comfort.json, wb_dials.json, wb_sport.json, wb_sport_dials.json, wb_eco.json. Edit this file, not the JSON.
 
+Since 2026-11-15 the see-through look is a toggle, not a theme (the "g20" setting; docs/ONE-SWITCH-DONE.md):
+wb_dials.json is what 6WB Comfort builds while it is on, and the two "+ G20" entries are gone from the theme lists.
+wb_sport_dials.json is NO LONGER OFFERED (the owner dropped "6WB Sport + G20"), but it and sport_dials() are kept and
+still generated: nothing loads the file now, so it costs no layer and no pixel memory, it is the safety net for a
+settings.json that still names it (layouts.load would otherwise throw and nothing at all would be drawn), and
+re-offering it later is one entry in hud.js G20_OF. The layout titles below are unchanged on purpose: changing them
+would rewrite the JSON files for a log line.
+
 Proportions are measured off the photos, in dial radii (R): the two dial centres are 3.2 R apart, the display is
 6.6 R wide and the dials stand at mid height; a small gauge sits 1.355 R outside each dial, 0.39 R below centre,
 0.31 R in radius. The speed scale is km/h only: 0..260, 1 degree per km/h from -130 degrees. The rev scale: OFF at
@@ -176,16 +184,12 @@ def comfort():
         dict(icon("range_icon", "fuel", SP[0] - 70, SP[1] + 0.60 * R, 1, "fg"), toggle="!baked"),
         text("range_in", SP[0] + 12, SP[1] + 0.60 * R, 130, "{{range}} km", "wb_cap", conn=1, toggle="!baked"),
     ]
-    # the road signs under the speed dial's hub: the limit (its figure is text on the sign) and no overtaking
-    sy = SP[1] + SIGN_DY * R
-    W.append({"id": "signs", "type": "wbsign", "class": "content", "z": 3, "x": 305, "y": 460, "w": 214, "h": 93, "conn": 1,
-              "tex": {"limit": {"tex": "sign_limit", "x": 2, "y": 2, "w": 88, "h": 89},
-                      "nopass": {"tex": "sign_nopass", "x": 124, "y": 2, "w": 88, "h": 89}}})
-    # the limit's figure: a 2-digit box 37 x 30 centred 351, 505 (BAKE C7)
-    W.append(text("limit", 351, 506, 60, "{{limit}}", "wb_val", "ink", conn=2))
+    # the road signs under the speed dial's hub: the limit (its figure is text on the sign, a 2-digit box 37 x 30
+    # centred 351, 505; BAKE C7) and no overtaking. Always ours here: our backdrop covers BMW's own sign
+    W += road_signs()
     # the row at the middle window's foot
     # baked: one line, the range after the bar's pump pictogram (x 892-953, y 642-681); else headed columns
-    # car3 H: the clock only while it is right, as 6WB Dials' "ownClock" (auto: once a time zone is set; the head unit
+    # car3 H: the clock only while it is right ("own:clock": once a time zone is set; the head unit
     # runs on UTC). BMW's own clock sits under our speed dial's range arc, so no window opens over it: without our
     # clock the temperature stands alone in the middle. The temperature in BMW's 0.5 degree steps ({{ambient1}})
     W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="baked&own:clock&!cc:shown"),
@@ -245,6 +249,35 @@ CC_BOX = [709, 598, 1243, 694]
 CC_TOP = [590, 594, 1250, 665]
 CC_TOP_SOFT = 13
 # --- end car3 G ---
+# --- bottom row (docs/BOTTOM-ROW-PACKAGE.md): who draws the road label, the sign and the info message ---
+# These three places are see-through today so BMW draws them. They became a choice, and since 2026-11-15 ONE choice
+# for the whole row (setting "bottomRow": "allG20" BMW's, "all6WB" ours; "allG20" by default, docs/ONE-SWITCH-DONE.md).
+# "Ours" is wired here with PLACEHOLDER drawing - our own fonts and boxes at the stock
+# places, not yet the faithful G20 look. THE SEAM: everything below this comment down to "end bottom row" is what the
+# next agent replaces from docs/G20-DESIGN-SPEC.md and docs/ROAD-SHIELDS.md; nothing outside it needs to change.
+# The check-control field, from docs/G20-DESIGN-SPEC.md (design/g20-spec/measured.json, 2026-11-15): it is NOT a
+# box. A 4.9 px rail runs flat at y 604.8 from x 749 to 1176 and tapers to points at (702, 621) and (1221, 621); the
+# symbol slot is right-aligned at x 752.9, centre y 658.7, at most 41.3 px wide and 45-53 px tall; the text is
+# centred on x 967.5, one line at baseline 671.2 or two at 645.8 and 690.2 (leading 44.4), cap height 27.0.
+# While the message is ours, CC_SYM is the only part of BMW's panel left see-through, so the car keeps drawing its
+# own symbol and its animation there (WBBACK u_cc is one box, so only one can be opened: the rail is NOT exposed -
+# a second box would be a second vec4 in the shader, which the bottom-row package was not allowed to add. Either
+# the drawing package draws the rail itself from the numbers above, or it adds that uniform).
+CC_SYM = [700, 628, 757, 690]        # round the measured symbol slot, with room for the widest symbol seen
+CC_TEXT_C = 967.5                    # the measured text centre, not the panel's
+CC_TEXT_W = 420                      # 757.5..1177.5: clear of the symbol slot (752.9) and inside the rail's flat part (1176)
+CC_LINE_Y = [645.8, 690.2]           # the measured two-line baselines (one line: 671.2)
+# BMW's bottom-centre road label: centred on x 960.5, baseline y 700.5, cap height 30.9, descender 8 px, the widest
+# seen 509 px (measured). Our black bar masks BMW's own text there; it starts at x 690, clear of the rear-belt,
+# driver-belt and airbag lamps (they end at x 679 and are never covered), and runs into the black over BMW's mode
+# label. While a message shows AND the info field is BMW's, a hole in the bar opens over the panel so BMW's own
+# message text is not covered. The stock field has no fill of its own; ours is only there to hide BMW's label.
+NAV_BAR = [690, 666, 1250, 712]
+NAV_HOLE = [CC_BOX[0], 666, CC_BOX[2], 712]
+# our road label: BMW's centre and baseline, and WIDER than BMW's own field so a long name is not shrunk
+# (the owner, 2026-11-15, with docs/ROAD-SHIELDS.md; the widest street measured is 509 px)
+NAV_CX, NAV_BASE, NAV_W = 960.5, 700.5, 540   # 690.5..1230.5: the bar's own width, and 31 px wider than the widest street measured
+# --- end bottom row ---
 # --- package F (docs/POLISH-F-REPORT.md): 6WB Dials + G20's bottom row ---
 # the full-size cover over BMW's bottom lines, hooks and grey dash (tools/overlay/plan_dials.py COVER_BOX, packed by
 # tools/bake_scene.py as scene "cover"): x, y, w, h
@@ -253,8 +286,8 @@ COVER = [588, 598, 736, 64]
 # right "i" (plan_dials SHADE_Y, SHADE_KO)
 SHADE = {"y": [575, 605], "ko": [0, 0, 0, 0]}   # no keep-out: BMW's right "i" is covered since 2026-11-13
 # BMW's bottom-row items we may draw ourselves at their stock places (D rows 11-13; catalogue bboxes grown 4 px): the
-# black patch under ours ("patches", WBBACK u_pat), shown while the item is ours ("own:<item>": ownRange / ownClock /
-# ownTemp). Our text's baseline sits on BMW's (y 697), BMW's size: values in wb_row (Arimo Bold 44, caps ~32 px as
+# black patch under ours ("patches", WBBACK u_pat), shown while the item is ours ("own:<item>": the one "bottomRow"
+# setting). Our text's baseline sits on BMW's (y 697), BMW's size: values in wb_row (Arimo Bold 44, caps ~32 px as
 # BMW's), units in wb_val (Arimo Bold 36). The pump is on connection 0, so the range's box may run under it (a sheet
 # holds no overlapping members) and a 4-digit range still fits
 # The boxes are sized for BMW's widest text, not the photo's: its temperature is right-aligned (x ~1624), so "-22.5"
@@ -284,6 +317,52 @@ def own_row():
         text("own_temp_u", 1619, uy, 46, "{{u:temp}}", "wb_val", align="left", conn=2, toggle="own:temp"),
     ]
 # --- end package F ---
+
+# --- bottom row (docs/BOTTOM-ROW-PACKAGE.md): the widgets of the three "ours" paths. PLACEHOLDER drawing: our own
+# fonts and boxes at the stock places, the data and the switching final, the look not yet the G20's. THE SEAM. ---
+
+def road_signs(own=False):
+    """The speed-limit and no-overtaking signs under the speed dial's hub (BAKE C7), the same widgets everywhere.
+    own=True (the layouts with the round window over BMW's own sign): shown only while the sign is ours."""
+    tg = {"toggle": "own:sign"} if own else {}
+    return [
+        dict({"id": "signs", "type": "wbsign", "class": "content", "z": 3, "x": 305, "y": 460, "w": 214, "h": 93,
+              "conn": 1, "tex": {"limit": {"tex": "sign_limit", "x": 2, "y": 2, "w": 88, "h": 89},
+                                 "nopass": {"tex": "sign_nopass", "x": 124, "y": 2, "w": 88, "h": 89}}}, **tg),
+        text("limit", 351, 506, 60, "{{limit}}", "wb_val", "ink", conn=2, **tg),
+    ]
+
+def nav_row():
+    """Our road label on BMW's bottom-centre street line, over a black bar; only while the navigation label is ours.
+    The bar's hole lets BMW's own check-control text through while the info field is BMW's (hud.js _hole, live)."""
+    return [
+        {"id": "nav_bg", "type": "fill", "class": "content", "z": 2, "x": NAV_BAR[0], "y": NAV_BAR[1],
+         "w": NAV_BAR[2] - NAV_BAR[0], "h": NAV_BAR[3] - NAV_BAR[1], "color": "bg", "toggle": "own:nav",
+         "hole": [NAV_HOLE[0], NAV_HOLE[1], NAV_HOLE[2] - NAV_HOLE[0], NAV_HOLE[3] - NAV_HOLE[1]],
+         # connection 1, not 0: connection 0 already carries 7 of its 8 layers in these themes, and this one is the
+         # only effect layer the package adds (8 per connection is cluster-render's hard cap)
+         "holeWhen": "cc:shown&!own:info", "holeInset": 0, "holeRadius": 0, "conn": 1},
+        # wb_cap is the only 6WB font with letters in it (wb_val is digits and units): the placeholder uses it on
+        # the measured centre and baseline. It has no Cyrillic and no accents, and the owner's cluster is in
+        # Ukrainian, so on the car this label hands itself back to BMW until the drawing package bakes the measured
+        # font (Roboto, width axis 87.5, Light here against the values' Medium) - shared/hud.js _missingGlyphs
+        text("nav", NAV_CX, base_at("wb_cap", NAV_BASE), NAV_W, "{{road}}", "wb_cap", conn=1, toggle="own:nav"),
+    ]
+
+def cc_row():
+    """Our check-control text at BMW's place, only while the info field is ours. The car keeps drawing the symbol and
+    its animation in CC_SYM (hud.js _wbCcSend opens only that box): we draw the name and the description beside it."""
+    return [
+        # the two measured baselines, centred on the measured text centre (not the panel's); same font caveat as nav
+        # white only for now (the owner, 2026-11-15): cCColor is read and recorded but not drawn. THE SEAM is this
+        # one argument - add colorBy="cc" and shared/hud.js _ccRole() colours the line by the car's own severity
+        text("cc_name", CC_TEXT_C, base_at("wb_cap", CC_LINE_Y[0]), CC_TEXT_W, "{{ccName}}", "wb_cap", conn=2,
+             toggle="own:info"),
+        text("cc_desc", CC_TEXT_C, base_at("wb_cap", CC_LINE_Y[1]), CC_TEXT_W, "{{ccDesc}}", "wb_cap", "dim", conn=2,
+             toggle="own:info"),
+    ]
+# --- end bottom row ---
+
 
 def tray_row(mode_color="fg"):
     """car4 L: our drive mode above the tacho's gear tray ("modeLabel") and our gear in it ("gearTray": "D4" / "D" /
@@ -321,6 +400,7 @@ def dials_bg(style):
             "patches": [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")]
                        + [{"rect": CC_TOP, "soft": CC_TOP_SOFT}],      # 2026-11-14: the foot band; the street name shows below it
             "cc": CC_BOX,
+            "ccSym": CC_SYM,          # bottom row: while the info message is ours, only BMW's symbol column opens
             "window": MAP_WINDOW, "fade": MAP_FADE,                             # 2026-11-14: Comfort's map window
             "foot": FOOT, "footLine": FOOT_LINE}                              # ... and its foot line ("wbFoot")
 
@@ -331,7 +411,7 @@ def dials():
     bottom row shows. Our signs sit under the speed hub as in 6WB Comfort and close the round window over BMW's sign;
     while we have no limit (app.json config.limit unset) the window opens and BMW's shows. A small soft window shows
     BMW's check-control "i". Package F: BMW's stock bottom lines, their hooks and the grey dash are under black (the
-    cover); the range, clock and outside temperature are ours or BMW's by setting (ownRange / ownClock / ownTemp), ours
+    cover); the range, clock and outside temperature are ours or BMW's by the one "bottomRow" setting, ours
     drawn at BMW's places over black patches; our drive-mode label ("modeLabel") and the gear in our tray ("gearTray")
     are on the tacho, as in 6WB Comfort (tray_row())."""
     W = [
@@ -343,12 +423,7 @@ def dials():
              cut={"y": CUT_Y, "fade": CUT_FADE},          # no "i" window (2026-11-13): cut like the speedo
              measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
              start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF),
-        # the road signs under the speed hub, the same widgets as 6WB Comfort's (comfort(); BAKE C7)
-        {"id": "signs", "type": "wbsign", "class": "content", "z": 3, "x": 305, "y": 460, "w": 214, "h": 93, "conn": 1,
-         "tex": {"limit": {"tex": "sign_limit", "x": 2, "y": 2, "w": 88, "h": 89},
-                 "nopass": {"tex": "sign_nopass", "x": 124, "y": 2, "w": 88, "h": 89}}},
-        text("limit", 351, 506, 60, "{{limit}}", "wb_val", "ink", conn=2),
-    ]
+    ] + road_signs(own=True)        # bottom row: only while the sign is ours; else BMW's shows through the window
     W += minis(baked=True)
     for i in range(14):
         n = 20 * i
@@ -362,6 +437,7 @@ def dials():
         text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "OFF", "wb_cap", "dim", conn=2),
     ]
     W += own_row()                   # package F: the bottom row's items ours
+    W += nav_row() + cc_row()        # bottom row: the road label and the check-control text, each while it is ours
     W += tray_row()                  # the mode label, the gear in the tray (car4 L: shared with 6WB Comfort)
     W.append(msa_sign(RV[0] + MSA_AT[0] * R, RV[1] + MSA_AT[1] * R))      # car3 I
     return W
@@ -386,17 +462,16 @@ def sport_face(cut=False):
              **({"cut": {"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": SIGN_SOFT, "cover": "limit"}} if cut else {})),
         dial("tacho", RV, "sport", hub=SPORT_HUB, ringW=6, measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0},
              minor=10, start=RPM_START, sweep=RPM_SWEEP, **({"cut": {"y": CUT_Y, "fade": CUT_FADE}} if cut else {})),
-        # the road signs under the speed hub, the same widgets as 6WB Comfort's (comfort(); BAKE C7)
-        {"id": "signs", "type": "wbsign", "class": "content", "z": 3, "x": 305, "y": 460, "w": 214, "h": 93, "conn": 1,
-         "tex": {"limit": {"tex": "sign_limit", "x": 2, "y": 2, "w": 88, "h": 89},
-                 "nopass": {"tex": "sign_nopass", "x": 124, "y": 2, "w": 88, "h": 89}}},
-        text("limit", 351, 506, 60, "{{limit}}", "wb_val", "ink", conn=2),
-    ]
+    # the road signs under the speed hub, the same widgets as 6WB Comfort's (comfort(); BAKE C7). With the window
+    # (cut): only while the sign is ours, else BMW's own shows through it (bottom row package)
+    ] + road_signs(own=cut)
     # Sport's scale: the speed dial's ends only, every 1000 rpm; placed as Comfort's (in the band's inner half here)
     W += [ring_label("spd0", SP, SPD_START, 0.78 * R, "0", "wb_spd", 16.7, 1),
           ring_label("spd13", SP, SPD_START + SPD_SWEEP, 0.78 * R, "260", "wb_spd", 16.7, 1)]
     W += [ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 24.5, 2, w=40) for i in range(1, 8)]
-    W += [text("speed", SP[0], SP[1] + 0.02 * R, 260, "{{speed}}", "wb_big", conn=1),
+    # 0.7.14 (docs/PERF-NEEDLE-REPORT.md): the big speed is drawn by the GPU from a glyph atlas ("gpu"), so a new
+    # value is one uniform message instead of a 260 x 90 pixel upload; "maxLen" is the longest value shown
+    W += [text("speed", SP[0], SP[1] + 0.02 * R, 260, "{{speed}}", "wb_big", conn=1, gpu=True, maxLen=3),
           text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "km/h", "wb_cap", conn=1),
           text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "1/min x 1000", "wb_cap", conn=2)]
     W += tray_row("accent")          # the mode label (red, Sport's) and our gear at Comfort's places
@@ -414,7 +489,7 @@ def sport():
     # the range at the speed dial's foot (Comfort's range figure is there, on its bottom arc), in the scale's gap
     W += [icon("range_icon", "fuel", SP[0] - 45, SP[1] + 0.765 * R, 1, "fg"),
           text("range_in", SP[0] - 25, SP[1] + 0.765 * R, 130, "{{range}} km", "wb_cap", align="left", conn=1)]
-    # the row under the shelf's base line, as 6WB Comfort's (baked) row: the clock only while it is right ("ownClock"),
+    # the row under the shelf's base line, as 6WB Comfort's (baked) row: the clock only while it is right ("own:clock"),
     # the temperature in BMW's 0.5 degree steps, none of it while BMW's message shows
     W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
           text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
@@ -427,6 +502,7 @@ def sport_dials():
     take the same circles as Dials + G20's (G20 geometry), so the same collar fits."""
     W = [dials_bg("sport")] + sport_face(cut=True) + minis(baked=True)     # Comfort's baked minis
     W += own_row()                   # package F: the bottom row's items ours
+    W += nav_row() + cc_row()        # bottom row: the road label and the check-control text, each while it is ours
     return W
 # --- end 2026-11-14 ---
 

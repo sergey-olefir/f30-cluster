@@ -47,7 +47,9 @@ function fit(r, s, size, w, font) {
 }
 
 /**
- * A scrolling list of rows: rows = [{ label, value, kind: 'toggle'|'more'|'radio', on }].
+ * A scrolling list of rows: rows = [{ label, value, kind: 'toggle'|'more'|'radio'|'head', on }].
+ * 'head' is a group heading: drawn as a dim line of text with a rule under it, with no rect of its own, so it
+ * cannot be tapped (the caller steps the controller over it).
  * Draws them from y0, keeps row `focus` in view (smooth), returns the rows' rects.
  */
 function list(r, t, key, rows, focus, y0, controller) {
@@ -72,6 +74,12 @@ function list(r, t, key, rows, focus, y0, controller) {
         const y = y0 + i * (ROW_H + GAP) - sy;
         if (y + ROW_H < y0 || y > bottom) return;
         const x = 40, w = W - 80, on = i === focus && controller;
+        // a group heading (sheet.js listSheet): no box, no target, so it is neither focused nor tapped
+        if (row.kind === 'head') {
+            r.text(fit(r, row.label, 24, w - 56), x + 28, y + ROW_H - 16, 24, t.dim, { font: 'bold', spacing: 1.5 });
+            r.line(x + 28, y + ROW_H - 6, x + w - 28, y + ROW_H - 6, 1, withAlpha('#ffffff', 0.14));
+            return;
+        }
         r.roundRect(x, y, w, ROW_H, 14, on ? withAlpha(S, 0.22) : withAlpha('#ffffff', 0.05));
         if (on) r.strokeRoundRect(x, y, w, ROW_H, 14, 2, S);
         const cy = y + ROW_H / 2;
@@ -110,7 +118,22 @@ function values(s) {
 /** opts: { version } (the app's, shown at the settings' top) */
 function listSheet(settings, title, opts) {
     const version = opts && opts.version;
-    const schema = settings.schema.filter((s) => !s.hidden);
+    const shown = settings.schema.filter((s) => !s.hidden);
+    // a setting's "group": "<heading>" puts a heading row above the first setting of each run of that group, as the
+    // native settings screen does (kit/tools/build.py settings_items). `schema[i]` is null on a heading row, so the
+    // controller steps over it and a tap does nothing.
+    const schema = [];
+    let group = null;
+    shown.forEach((s) => {
+        if (s.group && s.group !== group) schema.push({ head: s.group });
+        group = s.group;
+        schema.push(s);
+    });
+    const real = (i, d) => {            // the next row from i that is a setting, in direction d
+        let j = i;
+        while (j >= 0 && j < schema.length && schema[j] && schema[j].head) j += d || 1;
+        return j;
+    };
     const sh = {
         title: title || 'Settings',
         focus: 0, open: null, sub: 0,        // open: the setting whose values are listed
@@ -120,9 +143,9 @@ function listSheet(settings, title, opts) {
                 const cur = settings.get(this.open.key);
                 return values(this.open).map((v) => ({ label: v[1], kind: 'radio', on: v[0] === cur }));
             }
-            return schema.map((s) => (s.type === 'bool'
-                ? { label: s.label, kind: 'toggle', on: !!settings.get(s.key) }
-                : { label: s.label, value: settings.display(s.key), kind: values(s) ? 'more' : null }));
+            return schema.map((s) => (s.head ? { label: s.head, kind: 'head' }
+                : s.type === 'bool' ? { label: s.label, kind: 'toggle', on: !!settings.get(s.key) }
+                    : { label: s.label, value: settings.display(s.key), kind: values(s) ? 'more' : null }));
         },
         draw(r, t) {
             r.clear(t.bg);
@@ -152,8 +175,14 @@ function listSheet(settings, title, opts) {
         move(d) {
             this.controller = true;
             const n = this.rows().length;
-            if (this.open) this.sub = Math.max(-1, Math.min(n - 1, this.sub + d));
-            else this.focus = Math.max(-1, Math.min(n - 1, this.focus + d));
+            if (this.open) { this.sub = Math.max(-1, Math.min(n - 1, this.sub + d)); return; }
+            // a heading row is stepped over (it is not a setting); at the ends the focus stays where it was
+            let f = Math.max(-1, Math.min(n - 1, this.focus + d));
+            if (f >= 0) {
+                const j = real(f, d >= 0 ? 1 : -1);
+                f = j >= 0 && j < n ? j : this.focus;
+            }
+            this.focus = f;
         },
         press() {
             this.controller = true;
@@ -168,7 +197,7 @@ function listSheet(settings, title, opts) {
                 return null;
             }
             const s = schema[this.focus];
-            if (!s) return null;
+            if (!s || s.head) return null;
             if (s.type === 'bool') settings.set(s.key, !settings.get(s.key));
             else if (values(s)) {
                 this.open = s;

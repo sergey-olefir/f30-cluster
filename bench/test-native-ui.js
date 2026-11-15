@@ -120,6 +120,26 @@ async function main() {
     p = await until((q) => q.activeName === 'wb_sport');
     ok(p.activeName === 'wb_sport', 'Theme = 6WB Sport shows');
 
+    // 2026-11-15: "+ G20" is a toggle, not a theme (docs/ONE-SWITCH-DONE.md). The theme name maps to the see-through
+    // file while it is on, and the one bottom-row setting is only shown while it is (config.menu.hideRowUnlessG20).
+    console.log('the G20 toggle, and the bottom-row row it shows');
+    ok((p.native.SET_G20 || {}).checked === false, 'kit wires the checkbox SET_G20 (off)');
+    ok(vis(p, 'SET_BOTTOMROW') === false, 'the bottom-row setting is hidden while G20 is off');
+    await click('SET_HUDLAYOUT', opts('hudLayout').indexOf('wb_comfort'));
+    await until((q) => q.activeName === 'wb_comfort');
+    await click('SET_G20');
+    // the NOW row follows 250 ms later (menu.js soon()), so it is part of what we wait for
+    p = await until((q) => q.activeName === 'wb_dials' && vis(q, 'SET_BOTTOMROW') === true &&
+        cell(q, 'NOW', 'Text1stRow') === '6WB Comfort + G20');
+    ok(p.settings.g20 === true && p.activeName === 'wb_dials', 'the toggle builds the see-through Comfort (' + p.activeName + ')');
+    ok(cell(p, 'NOW', 'Text1stRow') === '6WB Comfort + G20', 'the NOW row reads "' + cell(p, 'NOW', 'Text1stRow') + '"');
+    ok(vis(p, 'SET_BOTTOMROW') === true, 'and the bottom-row setting is shown while G20 is on');
+    await click('SET_G20');
+    p = await until((q) => q.activeName === 'wb_comfort' && vis(q, 'SET_BOTTOMROW') === false);
+    ok(p.settings.g20 === false && p.activeName === 'wb_comfort', 'the toggle off builds the opaque 6WB Comfort again');
+    await click('SET_HUDLAYOUT', opts('hudLayout').indexOf('wb_sport'));
+    await until((q) => q.activeName === 'wb_sport');
+
     console.log('checkbox on again');
     await click('SET_BYMODE');
     p = await until((q) => q.settings.byMode === true && q.activeName === 'wb_eco' && vis(q, 'SET_INCOMFORT') === true);
