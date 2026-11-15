@@ -36,7 +36,8 @@ package. Every number is marked **measured** (with the photo and the method) or 
 | Message cap height / x-height / stem | **26.6 / 20.6 / 5.1** — a **Bold** (stem 0.20 × cap) | measured, 42 |
 | Symbol slot (the "i" or the pictogram) | right edge **x 752.9**, centre **y 658.7**, up to 41 × 53 | measured, 08/17/42/43 |
 | Severity marker, right of the rail | box ≈ **[1252, 591, 1280, 627]** | measured, 08 ("i") / 43 (triangle) |
-| Anything on the speedometer scale for the limit | **nothing** | measured, 08/09/17/39 |
+| Anything on the speedometer scale for the limit | **nothing drawn** (the "Excess speed display" setting is off on this car) | measured, 08/09/17/39 |
+| Several check-control messages | **cycled** as numbered frames, up to 3, never stacked or scrolled | car's own `statusMenuCCMessage` |
 | Typeface | BMW's own; nearest free match **Roboto variable, wdth 87.5** | measured + web |
 
 ---
@@ -322,10 +323,12 @@ behaviour) carries:
 So, as states to draw:
 
 1. **A limit.** Round ECE sign with the number (§4.3).
-2. **"Unsure".** The `*_UNSURE` symbol styles pair with the i7 manual's "without a navigation system
-   the traffic signals are grayed out after curves or longer stretches of roadway"
-   ([BMW i7 manual](https://www.manualslib.com/manual/3351094/Bmw-I7.html?page=218)). So there is a
-   **dimmed/greyed variant** of the same sign. **Not photographed; geometry unmeasured.**
+2. **"Unsure" (greyed).** The `*_UNSURE` symbol styles pair with the **G20's own manual**: "without
+   navigation, the signs are greyed out after curves or long stretches of road"
+   ([BMW 3 Series 2020–2023, Displaying Speed Limit Info](https://www.autouserguide.com/bmw/3-series-bmw/bmw-3-series-2020-2023-displaying-speed-limit-info-user-manual/);
+   the same wording is in the [i7 manual](https://www.manualslib.com/manual/3351094/Bmw-I7.html?page=218)).
+   So there is a **dimmed/greyed variant** of the same sign on this car. **Not photographed; how far
+   it is dimmed is unmeasured.**
 3. **No limit known.** The sign stays, with **three dashes** instead of the number (§4.3). Photo 39,
    and 41/42/43 from the same session, all show it.
 4. **End of the limit.** Not photographed. BMW's symbol for it is the white disc with diagonal
@@ -398,24 +401,47 @@ two in its other clusters — about one ring width, so centre ≈ (537.4 + 2·41
   {`SLI_WARNUNG_NICHT_ANGEFORDERT`, `SLI_WARNUNG_ANGEFORDERT`, `SLI_WARNUNG_STUFE_2`}. So the look has
   at least two intensities — most plausibly stage 1 = flash for a while, stage 2 = keep flashing or
   flash faster. **Which is which is not established.**
+- The G20's own manual repeats it: *"When the detected limit is exceeded, the indicator light
+  flashes"*, switched by **"Warn when speeding"**
+  ([BMW 3 Series 2020–2023](https://www.autouserguide.com/bmw/3-series-bmw/bmw-3-series-2020-2023-displaying-speed-limit-info-user-manual/)).
+  It does not give a duration.
 - The owner's statement that a sign is essentially always present matches the photos: in four separate
-  sessions the sign is on screen, showing either a number or the three dashes, never absent.
+  sessions the sign is on screen, showing either a number or the three dashes, never absent. So the
+  "no sign at all" state our own `_signWired()` logic can produce (`docs/POLISH-E-REPORT.md` §3) has
+  **no stock equivalent**: BMW keeps the disc and empties the number.
+
+**On the owner's "it animates the derestriction, then shows the new limit".** The only animation BMW
+documents is the flash, and the only state change the car's field can express is
+`displaySpeedLimit` / `invalidFlag` / `displayNoPassingRestriction` changing value. So the most likely
+reading of what the owner sees is: the symbol swaps to the end-of-limit disc (or to the new number),
+and the new symbol then flashes for a few seconds — one mechanism, two appearances, no wipe or slide.
+This is **not proven**: a cross-fade or a short scale-in between the old and the new symbol would look
+the same from the driver's seat and cannot be ruled out from stills. The video in §8 settles it, and
+`feat/bottom-row` should keep the transition behind `limitChangeAnimation` so it can be switched from
+"swap" to "cross-fade" without touching the rest.
 
 **What is not measured: every timing.** There is no video in the reference set
 (`reference/` holds 22 JPEGs, 20 PNGs and no moving image), and public video cannot be frame-timed
 from here. So the flash period, the number of flashes and how long the new sign flashes after a change
 are **estimated**, not measured.
 
+The only quantitative hint found is an owner's report that the over-speed warning gives *"about four
+beeps and then stops until you drop below the speed limit and then exceed above it again"*
+([BimmerPost U11 thread](https://u11.bimmerpost.com/forums/showthread.php?t=2101886)) — a different
+model and an unverified post, but it says the warning is a **short burst that latches**, not a
+continuous blink, and it bounds the burst at roughly 2–4 s if the beeps are at 1–2 Hz.
+
 Parameters for `feat/bottom-row` to expose, with suggested defaults (**all estimated**):
 
 | Parameter | Suggested default | Basis |
 |---|---|---|
-| `limitChangeFlashMs` | 3000 | long enough to be noticed, short enough not to nag; BMW gives no figure |
+| `limitChangeFlashMs` | 3000 | a 4-beep burst at 1–2 Hz is 2–4 s (forum report above); BMW gives no figure |
 | `limitFlashPeriodMs` | 500 (on 250 / off 250) | a typical automotive attention blink, 2 Hz |
-| `overspeedFlashStage1` | flash for `limitChangeFlashMs`, then hold steady | `SLI_WARNUNG_ANGEFORDERT` |
+| `overspeedFlashStage1` | flash for `limitChangeFlashMs`, then hold steady; re-arm only after the speed drops below the limit | `SLI_WARNUNG_ANGEFORDERT` + the latch in the forum report |
 | `overspeedFlashStage2` | flash continuously while over the limit | `SLI_WARNUNG_STUFE_2` |
-| `limitChangeAnimation` | none beyond the flash: swap the symbol, then flash | the i7 manual describes a flash, not a transition |
+| `limitChangeAnimation` | none beyond the flash: swap the symbol, then flash | the manuals describe a flash, not a transition |
 | `flashDims` | the whole sign (ring, disc and number) blinks between full and off | **estimated**; it could be only the ring |
+| `derestrictionHoldMs` | show the end-of-limit symbol until the next limit arrives, no timer | **estimated**; nothing in the manuals or the interfaces sets a timer, and `displaySpeedLimit` simply changes |
 
 **How to settle it in one drive** (§8): with the car's log already wired for `speed limit raw`
 (`docs/POLISH-E-REPORT.md`), a phone video of the cluster through two limit changes and one
@@ -428,11 +454,14 @@ scale between 40 and 60 carries no tick, arc, band or marker of any kind — onl
 white ticks, the orange face gradient and the needle's glow. `bake/work/g20spec/speedo-no-marking.png`
 shows the 09 crop.
 
-A marker does exist in BMW's menu on other models: *"Excess speed display: the speed limit that is
-detected by the Speed Limit Info is displayed with a marking in the speedometer"*
-([M4 manual](https://www.manualslib.com/manual/2442666/Bmw-M4-Coupe.html?page=163)). It is a separate,
-off-by-default setting, and it is not on in this car. **Estimated:** if the owner ever turns it on, it
-is a small marker at the limit's angle on the speedo scale; its shape is unmeasured.
+A marker nonetheless exists as a **setting on this very car**. The G20's own manual has an **"Excess
+speed display"** entry: *"the speed limit that is detected by the Speed Limit Info is displayed with a
+marking in the speedometer"*
+([BMW 3 Series 2020–2023](https://www.autouserguide.com/bmw/3-series-bmw/bmw-3-series-2020-2023-displaying-speed-limit-info-user-manual/);
+the same sentence is in the [M4 manual](https://www.manualslib.com/manual/2442666/Bmw-M4-Coupe.html?page=163)).
+So the right statement is: **the setting is off on this car**, not that the feature is absent.
+**Estimated:** turned on, it is a small marker at the limit's angle on the speedo scale; its shape,
+colour and size are unmeasured, and a photo with the setting on would settle them (§8).
 
 (Our own 6WB theme already draws an over-limit band on the speedo — `docs/POLISH-E-REPORT.md` §4 — and
 that is our design, not BMW's.)
@@ -651,7 +680,9 @@ Review sheets with photo pixels (git-ignored, on this machine): `bake/work/g20sp
 |---|---|---|
 | The flash period and duration when the limit changes or is exceeded | no video in the reference set | one 30 fps phone video of the cluster through two limit changes and one over-speed |
 | Which of `SLI_WARNUNG_ANGEFORDERT` / `STUFE_2` looks like what | same | the same video, with `speed limit raw` logging on (`docs/POLISH-E-REPORT.md` §3) |
+| Whether a limit change swaps the symbol or cross-fades it | stills cannot tell | the same video |
 | The end-of-limit symbol's geometry | never photographed | a photo on a road where a limit ends (German autobahn derestriction, or any "end of all restrictions" sign) |
+| The "Excess speed display" marker on the speedo scale | the setting is off on this car | turn it on in `CAR > Settings > Driver Assistance > Speed Limit Assistance` and take one photo with a limit up |
 | The no-passing sign: position, size, the gap to the limit sign | never photographed | a photo on a road with a no-overtaking sign, with the limit sign also up |
 | The "unsure" (greyed) sign variant | never photographed | a photo after a long stretch with no signs, where the system dims the last limit |
 | A three-digit limit | never photographed | a photo on a 100 or 130 road |
