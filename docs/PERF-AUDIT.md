@@ -234,11 +234,13 @@ Read only. Nothing is written, killed or restarted on the car.
   2. our page open on the centre screen;
   3. page closed with the perf log on (below).
 
+**0.7.14 update.** The needle prototype is now the engine's default, behind the setting **Smooth needles** (`needleSmooth`, on). `perf.json`'s `"needle"` and `"rpmTau"` are ignored since then: for the A/B, switch the setting instead. The perf log is unchanged, and its line now says `needles smooth` or `needles on the tick` and adds `JS in needle timer ms`. See `docs/PERF-NEEDLE-REPORT.md`.
+
 **The opt-in perf log.** This is the owner's own step, because it is a write; the probe stays read only. It is the one marked block in `hud.js` ("PERF ... package P"). It is off unless the app's data folder holds `perf.json`:
 
 ```sh
 ssh root@<car> 'echo "{ \"log\": true }" > /var/opt/public/oap/oap_<uid>/data/perf.json'      # on (read within 10 s)
-ssh root@<car> 'echo "{ \"log\": true, \"needle\": \"smooth\" }" > /var/opt/public/oap/oap_<uid>/data/perf.json'   # plus the prototype
+ssh root@<car> 'echo "{ \"log\": true, \"needle\": \"smooth\" }" > /var/opt/public/oap/oap_<uid>/data/perf.json'   # plus the prototype (before 0.7.14 only)
 ssh root@<car> 'rm /var/opt/public/oap/oap_<uid>/data/perf.json'                            # off again (within 10 s)
 ```
 
@@ -266,7 +268,7 @@ That line answers the open questions directly:
 
 ## 9. The prototype
 
-The needle prototype is in `shared/hud.js`, in the PERF block. It is opt-in and off by default.
+The needle prototype is in `shared/hud.js`, in the PERF block. It is opt-in and off by default. (0.7.14: it left the PERF block and is on by default, the setting "Smooth needles"; `docs/PERF-NEEDLE-REPORT.md`.)
 
 - **Without `perf.json` nothing changes.** The bench baseline sweep (`run2`) ran with this code and no `perf.json`, and its numbers match a run before the change (`run1_old`).
 - **What it changes with `"needle": "smooth"`:**
