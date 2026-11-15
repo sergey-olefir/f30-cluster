@@ -405,6 +405,12 @@ function limitOf(lim, raw, unitRaw, stateRaw) {
 // ---- car3 I: auto start/stop, the car's time zone, a check-control message (docs/CAR3-I-REPORT.md) -------------------
 // Each reads one raw value of a field app.json config names (scripts/car_signals.sh lists the candidates) and never throws.
 const MSA_STATES = { active: 1, off: 2, stopped: 3, unavailable: 4 };
+// audit/features: BMW's own vehicle condition (VehicleCondition statusConditionVehicle, the kit's "condition" group)
+// that means "the car is ready to drive": FAHRBEREITSCHAFT_HERSTELLEN (8) and FAHREN (10). A rev needle rests at READY
+// in those, and at OFF in the others (PARKEN 1 / 2, WOHNEN 5, ...), as the stock F30 6WB tacho does.
+const COND_READY = [8, 10];
+// CDS statusEngineStatus statusEngineRunDrive: MOTOR_AUS 0, MOTOR_STARTET 1, MOTOR_LAEUFT 2, SIGNAL_UNGUELTIG 3
+const ENGINE_RUN = { 0: 'off', 1: 'starting', 2: 'running', MOTOR_AUS: 'off', MOTOR_STARTET: 'starting', MOTOR_LAEUFT: 'running' };
 /** config.msa { map: { "<raw>": "active" | "off" | "stopped" | "unavailable" | null } } -> one of those, or null (hidden). */
 function msaOf(cfg, raw) {
     if (!cfg || raw === undefined || raw === null) return null;
@@ -523,6 +529,7 @@ class HudApp {
         this.carUnits = { press: null, temp: null, psiSeen: false };   // the car's display units, for the TPMS values
         this.program = null;             // 'S' / 'M' from the MDrive gearbox display, else null (D)
         this.fuelL = null; this.rangeKm = null; this.ambient = null;   // KombiIF tank / range, outside temperature
+        this.engineRun = null;           // 'off' | 'starting' | 'running' from CDS statusEngineStatus (_restFrac)
         this.tyres = { p: {}, t: {} };                                  // TPMS pressure (bar) and temperature (C) per corner FL FR RL RR
         this.activeName = null;          // the layout shown now ('off' = nothing)
         this.pixelBytes = 0;             // what the layout's image layers and glyph atlases cost of cluster-render's pixel memory
@@ -692,6 +699,17 @@ class HudApp {
                     this.rangeKm = isNum(r) && r >= 0 && r < 4095 ? r : null;
                 },
             },
+            // audit/features: is the engine turning? CDS statusEngineStatus (rs, so the current value arrives at
+            // subscribe). With the vehicle condition it decides where a rev needle rests while no rpm is on the
+            // scale: READY (the car is drive-ready, auto start/stop has stopped the engine) or OFF. _restFrac.
+            'de.bmw.infotainment.vehicle.CDS': {
+                statusEngineStatus: (v) => {
+                    const s = ENGINE_RUN[v && v.statusEngineRunDrive] || null;
+                    if (s === this.engineRun) return;
+                    this.engineRun = s;
+                    this.log.info('engine: ' + (s || 'not known') + ' (' + JSON.stringify(v && v.statusEngineRunDrive) + ')');
+                },
+            },
             // tyre pressure and temperature per corner, in the car's own display units (_tyreBar / _tyreC).
             // The car never notifies these (BMW's own x_call only ever reads them), so they are polled.
             'de.bmw.infotainment.vehicle.TPMS': {
@@ -857,7 +875,9 @@ class HudApp {
                 },
             });
         }
-        this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque'], extra);
+        // "condition": BMW's own vehicle state (VehicleCondition), data().condition, 10 = FAHREN (drive-ready). Used
+        // by _restFrac to tell READY from OFF on a rev dial. audit/features.
+        this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
         this.car.setRedline(this.setting('redline'));
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
         this.gSm = null;                 // { lat, long, at }: their average
@@ -1638,6 +1658,22 @@ class HudApp {
         if (!this._data().demo) return null;
         const rear = corner === 'RL' || corner === 'RR';
         return kind === 'p' ? (rear ? 2.5 : 2.3) : (rear ? 27 : 24);
+    }
+
+    /**
+     * audit/features: where a rev dial's needle rests while no rpm is on the scale, as a fraction of the sweep.
+     * 0 is READY (the scale's zero); a negative fraction is the OFF mark, "off" degrees before the start.
+     * READY while the car is live with the engine not turning, which is what the F30's READY mark means:
+     *   - auto start/stop says it stopped the engine (config.msa "stopped"), or
+     *   - BMW's own vehicle condition is drive-ready (COND_READY: FAHREN / FAHRBEREITSCHAFT_HERSTELLEN), or
+     *   - the engine signal says the engine runs while rpm is missing or invalid (don't drop to OFF then).
+     * OFF otherwise: ignition off, parked, or nothing known yet - the stock cluster rests at OFF before the
+     * engine is started (reference/6wb photos 03 and 05).
+     */
+    _restFrac(w) {
+        const cond = this._data().condition;
+        const ready = this._raw('msa') === MSA_STATES.stopped || COND_READY.indexOf(cond) >= 0 || this.engineRun === 'running';
+        return ready ? 0 : -w.off / (w.sweep === undefined ? 270 : w.sweep);
     }
 
     /** A dial's scale: { max, ticks } in display units (speed: DIAL_SPEED by the units setting; rpm: "max", 8000). */
@@ -3206,9 +3242,9 @@ class HudApp {
             if (w.measure === 'speed' && isNum(raw) && us && !w.kmh) raw *= 0.621371;
             const mn = isNum(w.min) ? w.min : 0;
             let v = isNum(raw) ? Math.min(1, Math.max(0, (raw - mn) / (D.max - mn))) : 0;
-            // a rev dial with an OFF mark ("off" degrees before 0): the needle parks there while the engine stands
-            // car3 I: ...except while auto start/stop has stopped it: then at READY (the scale's 0), as the F30's does
-            if (w.off && w.measure === 'rpm' && !(isNum(raw) && raw >= 150)) v = this._raw('msa') === MSA_STATES.stopped ? 0 : -w.off / (w.sweep === undefined ? 270 : w.sweep);
+            // a rev dial with an OFF mark ("off" degrees before 0): the needle parks at READY or at OFF while the
+            // engine stands (car3 I; audit/features: _restFrac decides which, not only config.msa)
+            if (w.off && w.measure === 'rpm' && !(isNum(raw) && raw >= 150)) v = this._restFrac(w);
             const q = Math.round(v * 1000) / 1000;
             const hot = w.measure === 'rpm' && this._shift().now ? 1 : 0;
             let over = [-1, -1];
