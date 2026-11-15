@@ -1050,9 +1050,19 @@ void main() {
 }
 `;
 
-// 0.7.12: 0.7.11's night looks (nightLook(), u_nk0..2 in WBDIAL, WBBACK and WBSIGN) are taken out: with them the
-// KOMBI's display service reset ~2.3 s after every 6WB scene was mapped (docs/CAR-SNAPSHOT-2026-11-15.md). The code is
-// in git at 0.7.11 (commit 0aeda9a) for when they come back, tested on the car one shader at a time.
+// 2026-11-14: the night looks ("nightLook", hud.js NIGHT_LOOKS) as one colour transform at the very end of WBDIAL and
+// WBBACK, so the baked static stacks (hud/scene) are recoloured on the GPU, live, with no second set of textures (16 MiB
+// pixel memory). A colour splits into its grey part w = min(r, g, b) and what is left over (c - w: the red of the needle,
+// the blue of the floor); u_nk0..2 are the output's rows: (red's, green's, blue's image, then the white's image). The
+// identity (1 0 0 1, 0 1 0 1, 0 0 1 1) leaves every colour as it is. hud.js sends it always (an unset vec4 is 0: black).
+const NIGHT_GLSL = `uniform vec4 u_nk0;
+uniform vec4 u_nk1;
+uniform vec4 u_nk2;
+vec3 nightLook(vec3 c) {
+    float w = min(c.r, min(c.g, c.b));
+    vec4 v = vec4(c - vec3(w), w);
+    return vec3(dot(u_nk0, v), dot(u_nk1, v), dot(u_nk2, v));
+}`;
 
 const WBDIAL = `// 6WB-style round gauges for a cluster-render "effect" layer (GLSL ES 1.00): our own drawing, traced by eye off
 // photos of BMW's F-series multifunctional display (no BMW artwork). One shader, five looks (u_style):
@@ -1101,6 +1111,7 @@ uniform vec4 u_cut;        // the open bottom (the G20's bottom row shows below 
                            // 3 round closed: the disc stays opaque, the dial fading into black, over BMW's sign), the
                            // window's soft edge (px past its shape until the dial is whole)
 uniform vec4 u_cutW;       // the window (BMW's own sign or lamp shows through), layer px: round cx, cy, r; box x0, y0, x1, y1
+${NIGHT_GLSL}
 #define u_size u_geo.xy
 #define u_ringW u_geo.z
 #define u_flip u_geo.w
@@ -1503,7 +1514,7 @@ void main() {
         }
         edge *= cutK;
     }
-    gl_FragColor = vec4(min(col, vec3(1.0)), edge);
+    gl_FragColor = vec4(min(nightLook(col), vec3(1.0)), edge);      // 2026-11-14: the night look (identity by day)
 }
 `;
 
@@ -1571,6 +1582,7 @@ uniform vec4 u_patSoft;
 // there (Comfort: the bar; Dials + G20: a black patch, hud.js "cc" with "!cc:shown")
 uniform vec4 u_cc;
 // --- end package F ---
+${NIGHT_GLSL}
 
 const float PI = 3.14159265359;
 
@@ -1671,7 +1683,7 @@ void main() {
             a = a2;
         }
         if (u_cc.z > u_cc.x) a *= smoothstep(-0.5, 3.0, boxOut(p, u_cc, 8.0));      // the message panel shows
-        gl_FragColor = vec4(min(fc, vec3(1.0)), a);
+        gl_FragColor = vec4(min(nightLook(fc), vec3(1.0)), a);       // 2026-11-14: the night look
         return;
     }
     // the soft window (u_wbox): its sides and the dials' rims shade it, its top and bottom fade the map
@@ -1805,7 +1817,7 @@ void main() {
         alpha = a2;
     }
     if (u_cc.z > u_cc.x) alpha *= smoothstep(-0.5, 3.0, boxOut(p, u_cc, 8.0));  // the message panel shows
-    gl_FragColor = vec4(min(col, vec3(1.0)), alpha);
+    gl_FragColor = vec4(min(nightLook(col), vec3(1.0)), alpha);  // 2026-11-14: the night look (identity by day)
 }
 `;
 
@@ -1827,6 +1839,7 @@ uniform sampler2D u_s0;
 uniform sampler2D u_s1;
 uniform vec4 u_r0;
 uniform vec4 u_r1;
+${NIGHT_GLSL}     // 2026-11-14: at night only dimmed (hud.js "sign"), a road sign keeps its colours
 
 const vec3 RED = vec3(0.84, 0.05, 0.07);
 
@@ -1875,7 +1888,7 @@ void main() {
             vec4 b = tex(u_s1, u_r1, p);
             col = vec4(mix(col.rgb, b.rgb, b.a), max(col.a, b.a));
         }
-        gl_FragColor = col;
+        gl_FragColor = vec4(nightLook(col.rgb), col.a);
         return;
     }
     float R = 38.0;
@@ -1899,7 +1912,7 @@ void main() {
         s = mix(s, vec3(0.95), rbox(q, vec2(8.0, -3.0), vec2(4.0, 1.4), 0.8) * r * field);
         col = vec4(mix(col.rgb, s, a), max(col.a, a));
     }
-    gl_FragColor = col;
+    gl_FragColor = vec4(nightLook(col.rgb), col.a);
 }
 `;
 
