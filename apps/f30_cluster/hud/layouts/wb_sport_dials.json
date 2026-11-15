@@ -96,6 +96,12 @@
         1243,
         694
       ],
+      "ccSym": [
+        709,
+        598,
+        790,
+        694
+      ],
       "window": [
         600,
         135,
@@ -212,7 +218,8 @@
           "w": 88,
           "h": 89
         }
-      }
+      },
+      "toggle": "own:sign"
     },
     {
       "id": "limit",
@@ -226,7 +233,8 @@
       "font": "wb_val",
       "color": "ink",
       "align": "center",
-      "conn": 2
+      "conn": 2,
+      "toggle": "own:sign"
     },
     {
       "id": "spd0",
@@ -366,9 +374,9 @@
       "font": "wb_big",
       "color": "fg",
       "align": "center",
+      "conn": 1,
       "gpu": true,
-      "maxLen": 3,
-      "conn": 1
+      "maxLen": 3
     },
     {
       "id": "speed_unit",
@@ -672,6 +680,74 @@
       "align": "left",
       "conn": 2,
       "toggle": "own:temp"
+    },
+    {
+      "id": "nav_bg",
+      "type": "fill",
+      "class": "content",
+      "z": 2,
+      "x": 690,
+      "y": 666,
+      "w": 560,
+      "h": 46,
+      "color": "bg",
+      "toggle": "own:nav",
+      "hole": [
+        709,
+        666,
+        534,
+        46
+      ],
+      "holeWhen": "cc:shown&!own:info",
+      "holeInset": 0,
+      "holeRadius": 0,
+      "conn": 0
+    },
+    {
+      "id": "nav",
+      "type": "text",
+      "z": 5,
+      "x": 690,
+      "y": 673,
+      "w": 540,
+      "h": 32,
+      "text": "{{road}}",
+      "font": "wb_val",
+      "color": "fg",
+      "align": "center",
+      "conn": 1,
+      "toggle": "own:nav"
+    },
+    {
+      "id": "cc_name",
+      "type": "text",
+      "z": 5,
+      "x": 800,
+      "y": 624,
+      "w": 437,
+      "h": 32,
+      "text": "{{ccName}}",
+      "font": "wb_val",
+      "color": "fg",
+      "align": "left",
+      "conn": 2,
+      "toggle": "own:info",
+      "colorBy": "cc"
+    },
+    {
+      "id": "cc_desc",
+      "type": "text",
+      "z": 5,
+      "x": 800,
+      "y": 661,
+      "w": 437,
+      "h": 26,
+      "text": "{{ccDesc}}",
+      "font": "wb_cap",
+      "color": "dim",
+      "align": "left",
+      "conn": 2,
+      "toggle": "own:info"
     }
   ]
 }
