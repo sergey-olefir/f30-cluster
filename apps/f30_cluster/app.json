@@ -461,6 +461,7 @@
     },
     {
       "key": "limitArc",
+      "group": "Our own extras",
       "label": "Red arc over the speed limit",
       "type": "choice",
       "default": "auto",
@@ -481,6 +482,7 @@
     },
     {
       "key": "modeLabel",
+      "group": "Our own extras",
       "label": "Drive mode above gear",
       "type": "bool",
       "default": true,
@@ -488,6 +490,7 @@
     },
     {
       "key": "gearTray",
+      "group": "Our own extras",
       "label": "Gear tray (6WB)",
       "type": "choice",
       "default": "gear",

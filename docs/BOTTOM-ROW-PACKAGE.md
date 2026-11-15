@@ -86,6 +86,9 @@ six back at once. The kit had no settings group, so a small general one was adde
 The three new rows stay on "BMW's" until the owner has seen them on the car. No existing key or value was renamed,
 so a car that already has `ownRange` / `ownClock` / `ownTemp` set keeps them.
 
+On the settings screen the group reads as a block: a non-focusable heading row, the six rows, the "put them back"
+row, then a second heading ("Our own extras") so the group's end is unambiguous and the arc is plainly outside it.
+
 `ownAll` = "All six: BMW's" sets the six and then puts itself back to "keep", with a single rebuild. It is the one
 way out on the road without hunting through rows.
 
