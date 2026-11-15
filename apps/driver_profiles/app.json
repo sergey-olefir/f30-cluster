@@ -1,8 +1,8 @@
 {
   "id": "driver_profiles",
   "title": "Driver Profiles",
-  "description": "The car's driver profiles: guest, valet and the seven personal slots with their details; add a local (offline) profile, rename it, copy Guest's settings into it, delete it. Every write asks first.",
-  "version": "0.1.0",
+  "description": "The car's driver profiles: guest, valet and the seven personal slots with their details; add a local (offline) profile, rename it, copy Guest's settings into it, set its avatar (one of BMW's 15, or your own picture), delete it. Every write asks first.",
+  "version": "0.2.0",
   "vendor": "custom",
   "loggingId": "OADP",
   "iconGlyph": "DP",
@@ -25,7 +25,8 @@
       "synchronizationEnabled": "rs",
       "connectedDriveUsername": "rs",
       "emailAddress": "rs",
-      "avatarType": "rs",
+      "avatarType": "rws",
+      "avatar": "rws",
       "_broadcasts": ["requestUpdateConnectedDriveCredentials"]
     },
     "de.bmw.infotainment.personalization.UserAccountIntra": {
@@ -93,6 +94,7 @@
         ["tworow", "D_AVATAR", "Avatar"],
         ["tworow", "D_ID", "Slot and internal id"],
         ["button", "A_RENAME", "Rename"],
+        ["button", "A_AVATAR", "Avatar"],
         ["button", "A_COPY", "Copy Guest's settings here"],
         ["button", "A_DELETE", "Delete this profile"],
         ["text", "P_NOTE", ""],
@@ -117,6 +119,49 @@
         ["button", "N_8", ""],
         ["button", "N_9", ""],
         ["button", "N_CANCEL", "Cancel"]
+      ]
+    },
+    {
+      "name": "AVATAR",
+      "kind": "menu",
+      "title": "Avatar",
+      "items": [
+        ["text", "AV_NOW", ""],
+        ["button", "AV_T0", "Default"],
+        ["button", "AV_T1", "Avatar 1"],
+        ["button", "AV_T2", "Avatar 2"],
+        ["button", "AV_T3", "Avatar 3"],
+        ["button", "AV_T4", "Avatar 4"],
+        ["button", "AV_T5", "Avatar 5"],
+        ["button", "AV_T6", "Avatar 6"],
+        ["button", "AV_T7", "Avatar 7"],
+        ["button", "AV_T8", "Avatar 8"],
+        ["button", "AV_T9", "Avatar 9"],
+        ["button", "AV_T10", "Avatar 10"],
+        ["button", "AV_T11", "Avatar 11"],
+        ["button", "AV_T12", "Avatar 12"],
+        ["button", "AV_T13", "Avatar 13"],
+        ["button", "AV_T14", "Avatar 14"],
+        ["button", "AV_T15", "Avatar 15"],
+        ["text", "AV_BUNDLED", ""],
+        ["tworow", "AV_B0", ""],
+        ["tworow", "AV_B1", ""],
+        ["tworow", "AV_B2", ""],
+        ["tworow", "AV_B3", ""],
+        ["tworow", "AV_B4", ""],
+        ["tworow", "AV_B5", ""],
+        ["text", "AV_OWN", ""],
+        ["tworow", "AV_F0", ""],
+        ["tworow", "AV_F1", ""],
+        ["tworow", "AV_F2", ""],
+        ["tworow", "AV_F3", ""],
+        ["tworow", "AV_F4", ""],
+        ["tworow", "AV_F5", ""],
+        ["text", "AV_EMPTY", ""],
+        ["text", "AV_PATH", ""],
+        ["button", "AV_RESCAN", "Read the folder again"],
+        ["text", "AV_NOTE", ""],
+        ["button", "AV_CANCEL", "Cancel"]
       ]
     },
     {
@@ -155,6 +200,7 @@
     "autoName": "Profile",
     "requireParked": true,
     "deleteArmSeconds": 10,
-    "comment": "names: the preset names Add and Rename offer (up to 10, owner-editable; non-ASCII works), plus '<autoName> N' with the first free N. requireParked: every write also needs the engine off and the gear in P (CDS rpm and VehicleInformation DataPowerTrain2) and no PIA job running; false skips that check (Guest-active and unprotected stay required for Copy). deleteArmSeconds: how long the second Delete press stays armed."
+    "avatarMaxKB": 48,
+    "comment": "names: the preset names Add and Rename offer (up to 10, owner-editable; non-ASCII works), plus '<autoName> N' with the first free N. requireParked: every write also needs the engine off and the gear in P (CDS rpm and VehicleInformation DataPowerTrain2) and no PIA job running; false skips that check (Guest-active and unprotected stay required for Copy). deleteArmSeconds: how long the second Delete press stays armed. avatarMaxKB: the largest own-picture file the app will send (1..512; 48 KB of jpg = 64 KiB of Base64). It is our guess, not a figure from the car: nobody has seen what persod accepts. Put the jpg files in <the app's data folder>/avatars/."
   }
 }
