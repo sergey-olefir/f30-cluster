@@ -251,7 +251,7 @@ process.on('message', (m) => {
     else if (m.t === 'fake') {
         const v = m.v || {};
         // the bottom-row fakes take scene / sign / cc / ccList / road / nav / clock; the rest goes to the fake persod
-        if (v.scene || v.sign || v.cc || v.ccList || v.road || v.nav || v.clock) fakeSigns.control(v);
+        if (v.scene || v.sign || v.cc || v.ccList || v.ccFrame || v.sla || v.road || v.nav || v.clock) fakeSigns.control(v);
         else if (fakePerso) fakePerso.control(v);
     }
     else if (m.t === 'probe') {
@@ -269,10 +269,12 @@ process.on('message', (m) => {
                     shown: hud.ccShown, name: hud._ccText('name'), desc: hud._ccText('desc'), list: (hud.ccItems || []).length,
                     // what the parser made of it, whoever draws it: lengths and the colour, never the text
                     parsed: { name: (hud.ccMsg.name || '').length, desc: (hud.ccMsg.desc || '').length, color: hud.ccMsg.color, symbol: hud.ccMsg.symbol },
+                    frame: hud.ccFrame,
                 },
                 road: hud._roadText(), navState: hud.navState, navDist: hud.navDist, navEta: hud.navEta,
                 own: { nav: hud._own('nav'), sign: hud._own('sign'), info: hud._own('info'), range: hud._own('range'), clock: hud._own('clock'), temp: hud._own('temp') },
                 fail: hud.rowFail || {}, tzCar: hud.tzCar, tzCandidate: hud.tzCandidate,
+                sla: hud.sla, arc: hud._arcOn(),
                 widgets: ['signs', 'limit', 'nav', 'nav_bg', 'cc_name', 'cc_desc'].filter((id) => hud.widgets && hud.widgets.has(id)),
             } : {}),
         });

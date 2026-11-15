@@ -279,9 +279,8 @@ const ROW_KEYS = ['limitArc'];
 const POS_STALE_MS = 6 * 3600 * 1000;
 // the six rows of the "Who draws this" group, and the one row that puts them all back to BMW's ("ownAll")
 const OWN_ROWS = ['ownRange', 'ownClock', 'ownTemp', 'ownNav', 'ownSign', 'ownInfo'];
-// several check-control messages at once: the car cycles them. How long each one is shown; config.ccm.cycleMs
-// overrides it. THE SEAM: docs/G20-DESIGN-SPEC.md is measuring the stock timing and order.
-const CC_CYCLE_MS = 4000;
+// (no timer of ours for several messages at once: the car numbers its frames and says which one it is on;
+//  config.ccm.ccFrameDwellMs is carried as a parameter for a later animation package, unused here)
 // --- end bottom row ---
 // the HUD's place (the page's Position tab): settings that move / scale the layers already there, no rebuild
 const PLACE_KEYS = ['hudX', 'hudY', 'hudScale'];
@@ -1103,11 +1102,44 @@ class HudApp {
                     if (!m || typeof m !== 'object') return;
                     const n = pick(m, cl.namePath);
                     if (typeof n !== 'string' || !n) return;
-                    out.push({ name: n.slice(0, 300), color: mapRaw(m, cl.colorPath, cl.colorMap, null) || null });
+                    const id = cl.idPath ? pick(m, cl.idPath) : undefined;
+                    out.push({ name: n.slice(0, 300), color: mapRaw(m, cl.colorPath, cl.colorMap, null) || null, id: isNum(id) ? id : null });
                 });
                 this.ccItems = out.slice(0, 16);
                 const key = out.length + ' messages, name lengths ' + out.map((o) => o.name.length).join('/');
                 if (key !== this.ccListShape) { this.ccListShape = key; this.log.info('check-control list: ' + key); }
+            });
+        }
+        // Which frame of how many the stock cluster is showing (docs/G20-DESIGN-SPEC.md: it cycles numbered frames,
+        // it does not stack or side-scroll). KombiIF statusMenuCCMessage carries the frame number, the count and up
+        // to three message ids, so ours can follow the car's own frame instead of guessing a period.
+        const cf = this.config.ccFrames;
+        this.ccFrame = { n: null, of: null, ids: [] }; this.ccFrameShape = undefined;
+        if (cf && cf.iface && cf.field) {
+            watchOne(cf, (v) => {
+                const n = pick(v, cf.numPath), of = pick(v, cf.countPath);
+                const ids = (Array.isArray(cf.idPaths) ? cf.idPaths : []).map((p) => pick(v, p)).filter(isNum);
+                this.ccFrame = { n: isNum(n) ? n : null, of: isNum(of) ? of : null, ids: ids };
+                const key = 'frame ' + this.ccFrame.n + ' of ' + this.ccFrame.of + ', ' + ids.length + ' ids';
+                if (key !== this.ccFrameShape) { this.ccFrameShape = key; this.log.info('check-control frames: ' + key); }
+            });
+        }
+        // The driver's own speed-limit settings (config.sla), READ ONLY: app.json declares these fields "rs", not
+        // "rws", so our generated interface config has no setter and the app cannot write one. They say whether the
+        // driver asked for the excess-speed warning at all, and with what tolerance; the arc on our speed scale
+        // follows the car's own verdict (displaySpeedLimitWarning) rather than a comparison of our own.
+        const sl = this.config.sla;
+        this.sla = {}; this.slaShape = undefined;
+        if (sl && sl.iface && Array.isArray(sl.parts)) {
+            sl.parts.forEach((p) => {
+                if (!p || !p.field) return;
+                watchOne({ iface: sl.iface, field: p.field, instance: sl.instance }, (v) => {
+                    const raw = pick(v, p.valuePath);
+                    this.sla[p.key] = p.number ? (isNum(raw) ? raw : null) : mapRaw(v, p.valuePath, sl.onMap, null);
+                    this.sla[p.key + 'Avail'] = mapRaw(v, p.availPath, sl.availMap, null);
+                    const key = Object.keys(this.sla).sort().map((k) => k + ' ' + this.sla[k]).join(', ');
+                    if (key !== this.slaShape) { this.slaShape = key; this.log.info('speed-limit settings: ' + key); }
+                });
             });
         }
         // The road label (an array of text / spacer / icon elements; shape: roadOf). Its text is never logged.
@@ -3037,6 +3069,27 @@ class HudApp {
         return isNum(this._tzMinutes());      // car3 I: the setting, the car's own time zone (config.clock) or config
     }
 
+    /** `s` cut to fit the widget's box, with "..." when it had to be cut. Never throws. A GUESS: no photo shows how
+     *  the stock cluster truncates a long road name or message (docs/G20-DESIGN-SPEC.md §8). */
+    _fitText(s, w) {
+        try {
+            if (textRaster.measure(s, w.font, w.spacing) <= w.w) return s;
+            let t = String(s);
+            while (t.length > 1 && textRaster.measure(t + '...', w.font, w.spacing) > w.w) t = t.slice(0, -1);
+            return t.replace(/[\s,.;:/-]+$/, '') + '...';
+        } catch (e) { return s; }
+    }
+
+    /** How many characters of `s` the font has no glyph for ("3 characters"), '' when it can draw all of them.
+     *  Spaces never count. Never throws: an unreadable font counts as "can draw nothing". */
+    _missingGlyphs(s, font) {
+        let g = null;
+        try { g = textRaster.loadFont(font).metrics.glyphs; } catch (e) { return 'every character (the font would not load)'; }
+        let n = 0;
+        String(s).split('').forEach((ch) => { if (ch !== ' ' && !g[ch]) n++; });
+        return n ? n + ' character' + (n > 1 ? 's' : '') : '';
+    }
+
     /** Give one element of the bottom row back to the car: its window opens, ours is not drawn, and the reason is
      *  logged once and put on the status line. Used when the signal the element needs is not configured or has
      *  never arrived, and when drawing it throws. */
@@ -3081,6 +3134,29 @@ class HudApp {
 
     /* ---- bottom row (docs/BOTTOM-ROW-PACKAGE.md) ---- */
 
+    /** Whether the red arc over the limit is drawn now. "limitArc":
+     *   "auto" (the default) follows the CAR's own verdict: the arc is on while the car says the driver is over
+     *          (displaySpeedLimitWarning level 1 or 2) and the driver has that warning switched on in the car's own
+     *          menu (config.sla "warn"); a car that says nothing about the setting counts as on, and the second
+     *          level follows "warn2" the same way. So the driver's own tolerance (settingOffsetSpeed) is honoured
+     *          without us knowing what it is: the car applies it;
+     *   "on"   ignores the car's menu and draws whenever our own speed is past the sign (what 0.7.14 did);
+     *   "off"  never.
+     *  The owner, 2026-11-15: the stock cluster has an "Excess speed display" of its own, and these are its
+     *  signals, so the verdict should be the car's and not ours. */
+    _arcOn() {
+        const v = this.ctx.settings.item('limitArc') ? this.setting('limitArc') : 'auto';
+        if (v === 'off' || v === false) return false;
+        if (v === 'on' || v === true) {
+            const lim = this._raw('limit'), speed = this._raw('speed');
+            return isNum(lim) && isNum(speed) && speed > lim + 1;
+        }
+        const warn = (this.sign || {}).warn || 0;
+        if (warn < 1) return false;
+        const want = warn >= 2 ? this.sla.warn2 : this.sla.warn;
+        return want !== 'off';            // null (the car said nothing) counts as on
+    }
+
     /** What the sign layer shows now (WBSIGN u_show): [a, b]. a: 1 a limit, 2 the end-of-limit sign, 3 BMW's empty
      *  sign "---", 0 nothing; b: the no-overtaking sign.
      *  The stock cluster animates the derestriction and then shows the new limit, and a sign is essentially always
@@ -3104,9 +3180,14 @@ class HudApp {
     _ccNow() {
         const list = this.ccItems || [], m = this.ccMsg || {};
         if (list.length < 2) return m;
-        const ms = isNum(this.config.ccm && this.config.ccm.cycleMs) ? this.config.ccm.cycleMs : CC_CYCLE_MS;
-        const i = Math.floor(Date.now() / Math.max(500, ms)) % list.length;
-        const one = list[i];
+        // The car cycles numbered frames and says which one it is on, so ours follows that counter and never runs a
+        // timer of its own (the owner, 2026-11-15; docs/G20-DESIGN-SPEC.md). Without the counter the newest message
+        // is shown and nothing cycles: a wrong guess at the car's rhythm would look worse than not cycling.
+        const f = this.ccFrame || {};
+        if (!(isNum(f.n) && isNum(f.of) && f.of >= 1 && f.n >= 1 && f.n <= f.of)) return m;
+        const id = f.ids[f.n - 1];
+        const byId = isNum(id) ? list.map((x) => x.id).indexOf(id) : -1;
+        const one = list[byId >= 0 ? byId : (f.n - 1) % list.length];
         // the list carries a short name and a colour; the description belongs to the message the car last sent
         return { name: one.name, desc: one.name === m.name ? m.desc : '', color: one.color || m.color };
     }
@@ -3121,7 +3202,10 @@ class HudApp {
 
     /** The colour the car asked for the message, as a theme role or an RGBA (config.ccm colorMap). A sign's or a
      *  message's own colours are kept at night and only dimmed, never recoloured (the owner, 2026-11-15), the way
-     *  the 6WB shaders treat WBSIGN. */
+     *  the 6WB shaders treat WBSIGN.
+     *  NOT IN USE: white only for now (the owner, 2026-11-15). cCColor is read and recorded, every message is drawn
+     *  in the theme's foreground. THE SEAM is one line: put "colorBy": "cc" back on the cc_name text in
+     *  design/gen_6wb.py cc_row() and this method is what colours it. */
     _ccRole() {
         const c = this._ccNow().color, role = CC_ROLE[c] || null;
         if (!Array.isArray(role) || !this.nightOn) return role;
@@ -3513,7 +3597,20 @@ class HudApp {
             x.c.uniform(x.ref, 'u_text', this._atlasCodes(x, s), { type: 'vec4' });
         } else if (w.type === 'text') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
-            const s = this._resolve(w.text);
+            let s = this._resolve(w.text);
+            // Bottom row: the car's own words. Our 6WB fonts are baked subsets (Latin and figures only), so a road
+            // name or a message in another script would come out with holes. Rather than draw that, the element
+            // gives itself back to the car (the owner's "way back", 2026-11-15). The faithful drawing brings a font
+            // with the right glyphs (docs/G20-DESIGN-SPEC.md: Roboto, width axis 87.5).
+            const rowOf = this._rowOf(w);
+            if (rowOf && s) {
+                const miss = this._missingGlyphs(s, w.font);
+                if (miss) { this._rowFail(rowOf, 'the font "' + w.font + '" has no glyph for ' + miss + ' of the car\'s text'); return; }
+            }
+            // a road name or a message longer than its box is cut with "..." rather than clipped mid-letter.
+            // A GUESS: no photo in docs/G20-DESIGN-SPEC.md shows the stock cluster truncating (§8), so how BMW
+            // does it is unknown - this is the plainest thing that stays readable.
+            if (rowOf && s) s = this._fitText(s, w);
             let role = w.color || 'fg';
             if (w.colorBy === 'verdict' && this.score.last) role = VERDICT[this.score.last.verdict] || role;
             // bottom row: a check-control text takes the colour the car asked for (cCColor), else its own role
@@ -3687,16 +3784,15 @@ class HudApp {
             if (w.off && w.measure === 'rpm' && !(isNum(raw) && raw >= 150)) v = this._raw('msa') === MSA_STATES.stopped ? 0 : -w.off / (w.sweep === undefined ? 270 : w.sweep);
             const q = Math.round(v * 1000) / 1000;
             const hot = w.measure === 'rpm' && this._shift().now ? 1 : 0;
-            // The red arc on the speed scale, from the limit to the END of the scale, only while the car is over the
-            // limit (bottom row package; before it ran from the limit to the needle). Its own setting, "limitArc":
-            // off = no arc at all, so the scale is clean. No shader change: u_dyn.yz is the band the shader already
-            // draws, and .z = 1 is simply the scale's end.
+            // The red arc on the speed scale, from the limit to the END of the scale (bottom row package; before it
+            // ran from the limit to the needle). No shader change: u_dyn.yz is the band WBDIAL already draws, and
+            // .z = 1 is simply the scale's end. When it is drawn is _arcOn().
             let over = [-1, -1];
-            if (w.look === 'wb' && w.measure === 'speed' && this.setting('limitArc') !== false) {
+            if (w.look === 'wb' && w.measure === 'speed' && this._arcOn()) {
                 let lim = this._raw('limit');
-                if (isNum(lim) && isNum(raw)) {
+                if (isNum(lim)) {
                     if (us && !w.kmh) lim *= 0.621371;
-                    if (raw > lim + 1) over = [Math.round(Math.min(1, Math.max(0, (lim - mn) / (D.max - mn))) * 1000) / 1000, 1];
+                    over = [Math.round(Math.min(1, Math.max(0, (lim - mn) / (D.max - mn))) * 1000) / 1000, 1];
                 }
             }
             let fillA = null;
