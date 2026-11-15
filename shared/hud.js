@@ -150,10 +150,11 @@
  *             "accent" for all of them; the labels are text widgets on top. Sent as array uniforms (vec4 x 12).
  * Any widget: "toggle": "<bool setting>" hides it when that setting is off, "!<setting>" when it is on,
  * "<choice setting>=<value>" shows it only while that choice is picked (also with "!");
- * "own:range" / "own:clock" / "own:temp" while that item of BMW's bottom row is ours (settings ownRange / ownClock /
- * ownTemp, 6WB Dials + G20; package F); "own:nav" / "own:sign" / "own:info" the same way for the bottom-centre road
- * label, the speed-limit sign and the check-control message (settings ownNav / ownSign / ownInfo, all "BMW's" by
- * default: docs/BOTTOM-ROW-PACKAGE.md); "cc:none" only while the car says no check-control message shows (car3 G:
+ * "own:range" / "own:clock" / "own:temp" / "own:nav" / "own:sign" / "own:info" while that item of BMW's bottom row is
+ * ours: the one "bottomRow" setting ("allG20" BMW draws the row, "all6WB" we do), which only means anything while a
+ * see-through layout shows - in the opaque themes our background covers BMW's row, so the row is ours there (_own;
+ * it replaced the seven own* settings of package F, 2026-11-15, docs/ONE-SWITCH-DONE.md);
+ * "cc:none" only while the car says no check-control message shows (car3 G:
  * this.ccShown === false; off while that is unknown); token {{ambient1}}: the outside temperature as BMW shows it, "+3.5" (°C, 0.5 steps);
  * car3 H: "a&b" (any of the above, joined by "&") while every part is on;
  * "mapUp" (toggle or holeWhen) is not a saved setting: on while the Waze map shows inside the theme (waze.js; the
@@ -277,8 +278,11 @@ const CC_ROLE = {
 const ROW_KEYS = ['limitArc'];
 // the car's position is used for sunrise / sunset only, and only while it is this fresh (a parked car sends nothing)
 const POS_STALE_MS = 6 * 3600 * 1000;
-// the six rows of the "Who draws this" group, and the one row that puts them all back to BMW's ("ownAll")
-const OWN_ROWS = ['ownRange', 'ownClock', 'ownTemp', 'ownNav', 'ownSign', 'ownInfo'];
+// the one control for the whole of BMW's bottom row ("bottomRow": every item BMW's, or every item ours), and the
+// items it covers. The seven own* settings it replaced are read once by the migration in the app's main.js.
+const ROW_KEY = 'bottomRow';
+const ROW_OURS = 'all6WB', ROW_BMW = 'allG20';
+const OWN_ITEMS = ['range', 'clock', 'temp', 'nav', 'sign', 'info'];
 // (no timer of ours for several messages at once: the car numbers its frames and says which one it is on;
 //  config.ccm.ccFrameDwellMs is carried as a parameter for a later animation package, unused here)
 // --- end bottom row ---
@@ -322,7 +326,15 @@ const NIGHT_KEYS = ['nightDim'];
 // a 6WB scene made the KOMBI reset ~2.7 s after each mapping, and the scene was mapped again each time it came back:
 // 6 to 13 resets in a row, with the driver-assistance warnings, until the theme was turned off by hand.
 const KOMBI_GUARD_MS = 8000, KOMBI_WINDOW_MS = 120000, KOMBI_STRIKES = 2, KOMBI_FILE = 'kombi-guard.json';
-const LOOK_KEYS = ['hudLayout', 'inComfort', 'inSport', 'inEco', 'byMode'];
+const LOOK_KEYS = ['hudLayout', 'inComfort', 'inSport', 'inEco', 'byMode', 'g20'];
+// "+ G20" (the owner, 2026-11-15; docs/ONE-SWITCH-DONE.md): the see-through look is the "g20" setting, not a theme of
+// its own. A theme name maps to its see-through FILE while the toggle is on - the files are untouched, nothing new is
+// drawn and no shader changes. Only Comfort has one: "6WB Sport + G20" was retired with the toggle and Eco Pro never
+// had a variant, so both stay opaque with the toggle on (the setting's label says Comfort).
+const G20_OF = { wb_comfort: 'wb_dials' };
+// the way back, for the names on screen: a see-through file -> its theme (wb_sport_dials is kept here, and its layout
+// file is kept, so a settings.json that still names it after a failed migration is still labelled and still drawn)
+const G20_THEME = { wb_dials: 'wb_comfort', wb_sport_dials: 'wb_sport' };
 // the car's display units (Vehicle statusNewCurrentUnitsStatusExt, as BMW's own x_call reads them; car_vitals, MIT)
 const PRESS_UNITS = { 1: 'BAR', 2: 'KPA', 3: 'PSI' }, TEMP_UNITS = { 1: 'C', 2: 'F' };
 const PRESS_TO_BAR = { BAR: 1, KPA: 0.01, PSI: 1 / 14.5038 };
@@ -711,6 +723,7 @@ class HudApp {
         this.needleOver = null;          // { rpm, speed } the needles read inside that timer (_raw)
         this.needleHalt = false;         // stop() turned the needle timer off for good
         this.themeName = null;
+        this.seeThru = {};               // layout name -> whether BMW's own bottom row shows through it (_seeThrough)
         this.flash = false;
         this.problem = null;             // why nothing shows (a bad layout), for the status line
         // 0.7.13: the KOMBI guard (KOMBI_* above): { layout, at } while tripped, read back after a restart
@@ -742,21 +755,8 @@ class HudApp {
         this.baseTheme = null;           // the layout's theme before the night colours
 
         this._setupVehicleData();
-        this.layouts.onChange(() => this._rebuild());
+        this.layouts.onChange(() => { this.seeThru = {}; this._rebuild(); });
         ctx.settings.onChange((key) => {
-            // bottom row: one row that puts the whole "Who draws this" group back to BMW's, so there is a single way
-            // out on the road (the owner, 2026-11-15). It springs back to "keep" and rebuilds once, not six times.
-            if (key === 'ownAll' && ctx.settings.get('ownAll') === 'bmw' && !this.ownAllBusy) {
-                this.ownAllBusy = true;
-                try {
-                    OWN_ROWS.forEach((k) => { if (ctx.settings.item(k) && ctx.settings.get(k) !== 'bmw') ctx.settings.set(k, 'bmw'); });
-                    ctx.settings.set('ownAll', 'keep');
-                } finally { this.ownAllBusy = false; }
-                this.log.info('bottom row: every row of the group put back to BMW\'s');
-                this._rebuild();
-                return;
-            }
-            if (this.ownAllBusy) return;     // the six sets above: one rebuild at the end, not one each
             if (LOOK_KEYS.indexOf(key) >= 0) this._kombiClear();      // 0.7.13: a theme picked: the guard lets it try again
             // a theme or layout picked anywhere (the page asks first, the kit's All settings list doesn't): no longer stepping aside
             if (LOOK_KEYS.indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
@@ -1047,8 +1047,8 @@ class HudApp {
         // ---- bottom row (docs/BOTTOM-ROW-PACKAGE.md): the car's own speed-limit struct, check-control message, road
         // label and guidance. Each is OPTIONAL and configurable (config.sign / config.ccm kind "message" / config.road /
         // config.onRoad / config.nav); with none of them named nothing is subscribed and everything behaves as before.
-        // What is drawn is decided by the settings ownSign / ownInfo / ownNav, not by what the car sends: the default
-        // ("BMW's") leaves our windows open, as today, and only logs the shapes so they can be calibrated on the car.
+        // What is drawn is decided by the one "bottomRow" setting, not by what the car sends: the default ("allG20")
+        // leaves our windows open, as today, and only logs the shapes so they can be calibrated on the car.
         // PRIVACY: the message text, the road name and the position are personal data and are never logged. Only shapes
         // (kinds, lengths, enum values) go to the log, each once.
         this.sign = Object.assign({}, SIGN_NONE); this.signShape = undefined; this.signLogs = 0;
@@ -1727,21 +1727,43 @@ class HudApp {
         try { fs.unlinkSync(this.kombiFile); } catch (e) { /* gone already */ }
     }
 
-    /** The layout name to show now: per drive mode when that's on and known, else the plain setting. */
+    /** The see-through ("+ G20") file a theme maps to while the "g20" setting is on, else the theme itself. */
+    _g20Of(name) {
+        return this.setting('g20') === true && G20_OF[name] ? G20_OF[name] : name;
+    }
+
+    /** The layout name to show now: per drive mode when that's on and known, else the plain setting; the see-through
+     *  file of either while the "g20" toggle is on (_g20Of). */
     _layoutName() {
         if (this.kombiTrip) return 'off';          // 0.7.13: the KOMBI guard tripped
         if (this.screen && this.screen.yielded) return 'off';
         if (this.setting('byMode') === true && this.driveMode && MODE_KEY[this.driveMode]) {
             const v = this.setting(MODE_KEY[this.driveMode]);
-            if (v) return v;
+            if (v) return this._g20Of(v);
         }
-        return this.setting('hudLayout');
+        return this._g20Of(this.setting('hudLayout'));
     }
 
+    /** Whether BMW's own bottom row shows through the layout called `name`: it has a wbback with a "collar" (the
+     *  see-through path). There, and only there, who draws each item of the row is a choice (_own); elsewhere our own
+     *  background covers BMW's row. Cached per name: _own() is called on every text paint. */
+    _seeThrough(name) {
+        if (!name || name === 'off') return false;
+        if (!this.seeThru) this.seeThru = {};
+        if (this.seeThru[name] === undefined) {
+            try {
+                this.seeThru[name] = this.layouts.load(name).widgets.some((w) => w.type === 'wbback' && w.collar);
+            } catch (e) { this.seeThru[name] = false; }     // no such layout: the rebuild reports it
+        }
+        return this.seeThru[name];
+    }
+
+    /** A layout's name for the screen: a see-through file is shown as its theme plus " + G20". */
     _layoutLabel(name) {
+        const theme = G20_THEME[name] || name;
         const lay = this.ctx.settings.item('hudLayout');
-        const o = lay && (lay.options || []).find((x) => x[0] === name);
-        return o ? o[1] : name;
+        const o = lay && (lay.options || []).find((x) => x[0] === theme);
+        return (o ? o[1] : theme) + (G20_THEME[name] ? ' + G20' : '');
     }
 
     /** The first widget on that layer, for the logs; a sheet is named by its first member plus how many more it holds. */
@@ -1829,7 +1851,8 @@ class HudApp {
         const conns = this._connCount();
         const layers = ', ' + this._layerCount(this._layerRefs().length) + (conns > 1 ? ' on ' + conns + ' connections' : '')
             + (this.pixelBytes ? ', ' + mib(this.pixelBytes) + ' of 16 MiB pixels' : '');
-        // car3 G: in 6WB Dials + G20, whose bottom-row items are ours (a photo of the Settings tab shows it)
+        // car3 G: in a see-through theme, which items of BMW's row are ours ("bottomRow"; a photo of the Settings tab
+        // showed BMW's row where ours was expected)
         const row = this.ownRow ? '; row: ' + ['range', 'clock', 'temp'].map((i) => i + ' ' + (this._own(i) ? 'ours' : "BMW's")).join(', ') : '';
         const night = this.nightOn ? ', night colours' : '';     // 2026-11-14
         if (this.layoutTheme) return this.label + ' on' + mode + ': ' + name + ' theme' + night + layers + demo + drawn + row;
@@ -2492,7 +2515,7 @@ class HudApp {
             (counts.length > 1 ? ' on ' + counts.length + ' connections (' + counts.join(' + ') + ')' : '') + ', sheet limit ' +
             (maxPx === Infinity ? 'unlimited' : maxPx + ' px') + ', whole-sheet writes ' + bytes + ' bytes, pixel memory ' + mib(px) + ' of 16 MiB' +
             (atlasBytes ? ' (' + this.atlases.size + ' glyph atlas' + (this.atlases.size > 1 ? 'es' : '') + ' ' + mib(atlasBytes) + ')' : ''));
-        // car3 G: 6WB Dials + G20's own row, and why (on the car BMW's row showed although "ours" is the default)
+        // car3 G: a see-through theme's own bottom row, and why (on the car BMW's row showed where ours was expected)
         this.ownRow = shown.some((w) => w.type === 'wbback' && Array.isArray(w.patches));
         if (this.ownRow) this.log.info('layout "' + layout.name + '": ' + this._ownNote());
         counts.forEach((k, ci) => {
@@ -2595,7 +2618,7 @@ class HudApp {
         if (t.indexOf('&') > 0) return t.split('&').every((p) => this._toggleOn(p));
         const not = t.charAt(0) === '!';
         const k = not ? t.slice(1) : t, eq = k.indexOf('=');
-        // package F: "own:range|clock|temp" is on while that bottom-row item is ours (_own: ownRange / ownClock / ownTemp)
+        // package F: "own:<item>" is on while that item of BMW's bottom row is ours (_own: the "bottomRow" setting)
         if (k.indexOf('own:') === 0) return not ? !this._own(k.slice(4)) : this._own(k.slice(4));
         // car3 G: "cc:none" is on only while the car says no check-control message shows (this.ccShown === false);
         // while that is not known (no signal wired yet: package I) it is off
@@ -2830,7 +2853,7 @@ class HudApp {
                 c.uniform(ref, 'u_hasTex', [2]);
                 // package F: "cover": { tex, x, y, w, h }: more black at full size (BMW's bottom lines, hooks and dash;
                 // tools/overlay/plan_dials.py), "shade": { y: [y0, y1], ko: [x0, y0, x1, y1] } the shade at our dials'
-                // inner edges ("dialShade"), "patches" black over the bottom-row items we draw ourselves (ownRange ...)
+                // inner edges ("dialShade"), "patches" black over the bottom-row items we draw ourselves ("bottomRow")
                 if (w.cover) {
                     c.bind(ref, 'u_t1', this._scene(w.cover.tex, x.ci).ref);
                     c.uniform(ref, 'u_r1', [w.cover.x, w.cover.y, w.cover.w, w.cover.h]);
@@ -3084,18 +3107,22 @@ class HudApp {
     }
 
     /** Whether an item of BMW's bottom row ("range", "clock", "temp", and the bottom-row package's "nav", "sign",
-     *  "info") is ours in "6WB Dials + G20" (ownRange / ownClock / ownTemp / ownNav / ownSign / ownInfo). The clock's
-     *  "auto": ours once a time zone is set (the "timeZone" setting or config.utcOffsetMinutes), since the head unit
-     *  runs on UTC and only BMW's own clock is right without one. A setting that is not in app.json is "BMW's". */
+     *  "info") is drawn by us. ONE setting for the whole row, "bottomRow" ("all6WB" ours, "allG20" BMW's), and it is
+     *  asked only while a see-through layout shows: in the opaque themes our own background covers BMW's row, so the
+     *  row is ours there whatever the setting says (and menu.js hides the row then).
+     *  The clock is ours only once a time zone is known (the "timeZone" setting, the car's own zone or
+     *  config.utcOffsetMinutes), since the head unit runs on UTC and only BMW's own clock is right without one - the
+     *  rule the retired "ownClock" had as its "auto". A build whose app.json has no such setting reads as BMW's in a
+     *  see-through layout (the safe side: nothing of BMW's row is covered). */
     _own(item) {
-        const key = { range: 'ownRange', clock: 'ownClock', temp: 'ownTemp', nav: 'ownNav', sign: 'ownSign', info: 'ownInfo' }[item];
-        if (!key || !this.ctx.settings.item(key)) return false;
+        if (OWN_ITEMS.indexOf(item) < 0) return false;
         // the automatic way back to the stock cluster (the owner, 2026-11-15): an element whose signal is missing or
-        // unmapped, or whose drawing threw, is BMW's again until the app restarts, whatever the setting says
+        // unmapped, or whose drawing threw, is BMW's again until the app restarts, whatever the setting says.
+        // THIS STAYS FIRST: the latch wins over the switch, and the switch cannot clear the latch.
         if (this.rowFail && this.rowFail[item]) return false;
-        const v = this.setting(key);
-        if (v !== 'auto') return v === 'ours';
-        return isNum(this._tzMinutes());      // car3 I: the setting, the car's own time zone (config.clock) or config
+        if (this.setting(ROW_KEY) !== ROW_OURS && this._seeThrough(this._layoutName())) return false;
+        if (item === 'clock') return isNum(this._tzMinutes());   // car3 I: the setting, the car's zone (config.clock) or config
+        return true;
     }
 
     /** `s` cut to fit the widget's box, with "..." when it had to be cut. Never throws. A GUESS: no photo shows how
@@ -3130,13 +3157,16 @@ class HudApp {
         this._guard('row fallback', () => { this._status(); if (this.client && this.client.ready) this._rebuild(); });
     }
 
-    /** Which of the three new rows have no signal behind them at all. Checked once the app has had time to hear from
-     *  the car, so a slow provider is not mistaken for a missing one. */
+    /** Which of the three elements of the row have no signal behind them at all. Checked once the app has had time to
+     *  hear from the car, so a slow provider is not mistaken for a missing one. Asked through _own(), not off the
+     *  setting, so only an element the layout showing really asks us to draw can latch: in an opaque theme the three
+     *  are not drawn at all (nothing in those layouts reads them), so nothing latches there. */
     _rowCheck() {
+        if (!this._seeThrough(this._layoutName())) return;
         const named = (s) => !!(s && s.iface && s.field);
-        if (this.setting('ownSign') === 'ours' && !named(this.config.sign) && !this._signWired()) this._rowFail('sign', 'no speed-limit field in app.json config.sign');
-        if (this.setting('ownInfo') === 'ours' && !(named(this.config.ccm) && this.config.ccm.kind === 'message')) this._rowFail('info', 'app.json config.ccm names no message field');
-        if (this.setting('ownNav') === 'ours' && !named(this.config.road) && !(this.config.nav && this.config.nav.iface)) this._rowFail('nav', 'app.json config.road names no field');
+        if (this._own('sign') && !named(this.config.sign) && !this._signWired()) this._rowFail('sign', 'no speed-limit field in app.json config.sign');
+        if (this._own('info') && !(named(this.config.ccm) && this.config.ccm.kind === 'message')) this._rowFail('info', 'app.json config.ccm names no message field');
+        if (this._own('nav') && !named(this.config.road) && !(this.config.nav && this.config.nav.iface)) this._rowFail('nav', 'app.json config.road names no field');
     }
 
     /** WBBACK's black patches over BMW's bottom-row items we draw ourselves ("patches": [{ rect: [x0, y0, x1, y1] panel
@@ -3253,7 +3283,7 @@ class HudApp {
 
     /** u_cc: the bg widget's "cc" box [x0, y0, x1, y1] (panel px; BMW's check-control message panel) see-through
      *  while the car says a message shows (this.ccShown === true), else none; sent when it changes.
-     *  Bottom row: while the info field is OURS ("ownInfo") and the layout gives a "ccSym" box, only that box opens -
+     *  Bottom row: while the info field is OURS ("bottomRow" all6WB) and the layout gives a "ccSym" box, only that box opens -
      *  the car keeps drawing its own symbol and animation there and we draw the text around it. */
     _wbCcSend(x) {
         const w = x.w, four = (a) => Array.isArray(a) && a.length === 4;
@@ -3274,18 +3304,15 @@ class HudApp {
         pats.forEach((v, i) => x.c.uniform(x.ref, i < 4 ? 'u_pat' + i : 'u_patSoft', v));
     }
 
-    /** car3 G: what 6WB Dials + G20's own row draws now and why, for the log and the status line (docs/CAR3-G-REPORT.md:
-     *  on the car BMW's row showed although "ours" is the default). */
+    /** car3 G: what the bottom row draws now and why, for the log and the status line (docs/CAR3-G-REPORT.md: on the
+     *  car BMW's row showed although "ours" was the default). One setting now, so one reason per item. */
     _ownNote() {
         const raw = (k) => { const v = this.ctx.settings.get(k); return v === undefined ? 'unset' : JSON.stringify(v); };
-        const tz = this.ctx.settings.item('timeZone') ? this.setting('timeZone') : TZ_AUTO;
-        const tzSet = (isNum(tz) && tz !== TZ_AUTO) || isNum(this.config.utcOffsetMinutes);
-        const one = (item, key) => item + ' ' + (this._own(item) ? 'ours' : "BMW's") + ' (' + key + ' ' + raw(key) +
-            (item === 'clock' && this.setting(key) === 'auto' ? (tzSet ? ', time zone set' : ', no time zone') : '') + ')';
-        const more = ['nav', 'sign', 'info'].filter((k) => this.ctx.settings.item({ nav: 'ownNav', sign: 'ownSign', info: 'ownInfo' }[k]))
-            .map((k) => one(k, { nav: 'ownNav', sign: 'ownSign', info: 'ownInfo' }[k]));
-        return 'own row: ' + one('range', 'ownRange') + ', ' + one('clock', 'ownClock') + ', ' + one('temp', 'ownTemp') +
-            (more.length ? ', ' + more.join(', ') : '') +
+        const seen = this._seeThrough(this._layoutName());
+        const one = (item) => item + ' ' + (this._own(item) ? 'ours' : "BMW's") +
+            (this.rowFail && this.rowFail[item] ? ' (gave itself back)' : item === 'clock' && !isNum(this._tzMinutes()) ? ' (no time zone)' : '');
+        return 'bottom row: ' + OWN_ITEMS.map(one).join(', ') +
+            ' (' + ROW_KEY + ' ' + raw(ROW_KEY) + (seen ? '' : ', opaque theme: the row is ours') + ')' +
             '; mode label ' + (this.setting('modeLabel') === false ? 'off' : this.driveMode ? 'on' : 'on, empty: no drive mode from the car') +
             ' (modeLabel ' + raw('modeLabel') + ')';
     }
@@ -3843,17 +3870,15 @@ class HudApp {
                 x.c.uniform(x.ref, 'u_fill', x.wbFill);
             }
             if (w.look === 'wb' && w.cut && w.cut.round && w.cut.cover === 'limit') {
-                // The round window over BMW's own sign. Bottom row package: the "ownSign" setting decides, not what the
-                // car sends. "ours" closes it (3): our sign is the only one, and while the car has sent nothing the
-                // spot stays black. "BMW's" (the default) leaves it open (1), exactly as before this package, so BMW
-                // draws the sign and our WBSIGN layer is not even built (the layout's "own:sign" toggle).
+                // The round window over BMW's own sign. Bottom row package: the "bottomRow" setting decides, not what
+                // the car sends. "all6WB" closes it (3): our sign is the only one, and while the car has sent nothing
+                // the spot stays black. "allG20" (the default) leaves it open (1), exactly as before this package, so
+                // BMW draws the sign and our WBSIGN layer is not even built (the layout's "own:sign" toggle).
                 // 2026-11-14: closed too while the car stands in P with the engine off (BMW's standby screen, "Total
                 // ... km"): BMW draws no sign then, and the window showed a bar of its bottom line (y ~645) that the
                 // sign otherwise covers. An auto start/stop stop is in D, so BMW's sign still shows at the lights.
                 const rpm = this._raw('rpm'), parked = this._data().stage === 'P' && !(isNum(rpm) && rpm >= 150);
-                const own = this._own('sign') || (!this.ctx.settings.item('ownSign') &&
-                    (this._signWired() || isNum(this._raw('limit')) || this._raw('limitEnd') || this._raw('limitUnknown')));
-                const m = own || parked ? 3 : 1;
+                const m = this._own('sign') || parked ? 3 : 1;
                 if (force || m !== x.cutMode) { x.cutMode = m; x.c.uniform(x.ref, 'u_cut', this._cutVec(w, m)); }
             }
             const key = q + '|' + hot + '|' + over.join(',');
@@ -4111,5 +4136,15 @@ const CAR3K_KEEP_FS = 'precision mediump float;\nvarying vec2 v_uv;\nvoid main()
     };
 }
 // ---- end car3 K ----------------------------------------------------------------------------------------------------
+
+// "+ G20" as a toggle (docs/ONE-SWITCH-DONE.md): the maps and the keys menu.js, gallery.js and the app's own
+// migration need, so there is one source of truth for them.
+HudApp.G20_OF = G20_OF;
+HudApp.G20_THEME = G20_THEME;
+/** A layout file as the driver's theme: a see-through file -> the theme it belongs to, anything else unchanged. */
+HudApp.themeOf = (name) => G20_THEME[name] || name;
+HudApp.ROW_KEY = ROW_KEY;
+HudApp.ROW_OURS = ROW_OURS;
+HudApp.ROW_BMW = ROW_BMW;
 
 module.exports = HudApp;

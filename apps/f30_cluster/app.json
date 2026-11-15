@@ -146,6 +146,10 @@
         ],
         [
           "setting",
+          "g20"
+        ],
+        [
+          "setting",
           "inComfort"
         ],
         [
@@ -190,6 +194,7 @@
       "skip": [
         "byMode",
         "hudLayout",
+        "g20",
         "inComfort",
         "inSport",
         "inEco"
@@ -227,20 +232,12 @@
           "6WB Comfort"
         ],
         [
-          "wb_dials",
-          "6WB Dials + G20"
-        ],
-        [
           "g20_comfort",
           "G20 Comfort"
         ],
         [
           "wb_sport",
           "6WB Sport"
-        ],
-        [
-          "wb_sport_dials",
-          "6WB Sport + G20"
         ],
         [
           "wb_eco",
@@ -259,6 +256,13 @@
           "Map calibration"
         ]
       ]
+    },
+    {
+      "key": "g20",
+      "label": "BMW's G20 round our dials (Comfort)",
+      "type": "bool",
+      "default": false,
+      "_about": "The see-through look: our dials are drawn over BMW's own cluster, so BMW's bottom row, map and signs show between and under them (what the themes '6WB Dials + G20' and '6WB Sport + G20' used to be). ONLY 6WB Comfort has a see-through variant (hud/layouts/wb_dials.json): with this on, 6WB Sport and 6WB Eco Pro stay opaque, which is why the label says Comfort. MUST stay a bool: hud.js _toggleOn reads a plain key as 'on unless false', so a choice would read as always on."
     },
     {
       "key": "byMode",
@@ -334,130 +338,21 @@
       ]
     },
     {
-      "key": "ownRange",
-      "label": "Range (+ G20 themes)",
+      "key": "bottomRow",
+      "label": "Bottom row while G20 shows",
       "type": "choice",
-      "group": "Who draws this",
-      "default": "ours",
-      "reset": 1,
+      "default": "allG20",
       "options": [
         [
-          "bmw",
-          "BMW's"
+          "allG20",
+          "All BMW's"
         ],
         [
-          "ours",
-          "Ours (6WB style)"
+          "all6WB",
+          "All ours (6WB style)"
         ]
-      ]
-    },
-    {
-      "key": "ownClock",
-      "label": "Clock (+ G20 themes)",
-      "type": "choice",
-      "group": "Who draws this",
-      "default": "auto",
-      "reset": 1,
-      "options": [
-        [
-          "auto",
-          "Auto (ours if time zone set)"
-        ],
-        [
-          "bmw",
-          "BMW's"
-        ],
-        [
-          "ours",
-          "Ours (6WB style)"
-        ]
-      ]
-    },
-    {
-      "key": "ownTemp",
-      "label": "Outside temp (+ G20 themes)",
-      "type": "choice",
-      "group": "Who draws this",
-      "default": "ours",
-      "reset": 1,
-      "options": [
-        [
-          "bmw",
-          "BMW's"
-        ],
-        [
-          "ours",
-          "Ours (6WB style)"
-        ]
-      ]
-    },
-    {
-      "key": "ownNav",
-      "label": "Navigation label (+ G20 themes)",
-      "type": "choice",
-      "group": "Who draws this",
-      "default": "bmw",
-      "options": [
-        [
-          "bmw",
-          "BMW's"
-        ],
-        [
-          "ours",
-          "Ours (6WB style)"
-        ]
-      ]
-    },
-    {
-      "key": "ownSign",
-      "label": "Speed-limit sign (+ G20 themes)",
-      "type": "choice",
-      "group": "Who draws this",
-      "default": "bmw",
-      "options": [
-        [
-          "bmw",
-          "BMW's"
-        ],
-        [
-          "ours",
-          "Ours (6WB style)"
-        ]
-      ]
-    },
-    {
-      "key": "ownInfo",
-      "label": "Info message (+ G20 themes)",
-      "type": "choice",
-      "group": "Who draws this",
-      "default": "bmw",
-      "options": [
-        [
-          "bmw",
-          "BMW's"
-        ],
-        [
-          "ours",
-          "Ours (text only)"
-        ]
-      ]
-    },
-    {
-      "key": "ownAll",
-      "label": "Put the six rows above back to BMW's",
-      "type": "choice",
-      "group": "Who draws this",
-      "default": "keep",
-      "options": [
-        [
-          "keep",
-          "Leave each row as it is"
-        ],
-        [
-          "bmw",
-          "All six: BMW's"
-        ]
-      ]
+      ],
+      "_about": "ONE switch for the whole of BMW's bottom row (the owner, 2026-11-15: 'all6WB vs allG20'), in place of the seven own* settings of package F (ownRange / ownClock / ownTemp / ownNav / ownSign / ownInfo and the broken ownAll). 'all6WB': the range, the clock, the outside temperature, the road label, the speed-limit sign and the check-control message are all drawn by us, in the 6WB style; 'allG20': BMW draws all of them. The clock is ours only once a time zone is known (the 'timeZone' setting, the car's own zone or config.utcOffsetMinutes) - without one the head unit runs on UTC and only BMW's clock is right, which is what the retired ownClock 'auto' did. IT ONLY MEANS ANYTHING WHILE THE 'g20' TOGGLE SHOWS A SEE-THROUGH LAYOUT: in the opaque themes our own background covers BMW's row, so the row is always ours there and menu.js hides this one (config.menu.hideRowUnlessG20). NO 'reset' HERE: a reset would throw the migrated value away (kit/runtime/mgu.js:105-108). hud.js _rowFail still wins over this: an element whose signal is missing or whose drawing throws hands itself back to BMW whatever this says."
     },
     {
       "key": "limitArc",
@@ -525,20 +420,12 @@
           "6WB Comfort"
         ],
         [
-          "wb_dials",
-          "6WB Dials + G20"
-        ],
-        [
           "g20_comfort",
           "G20 Comfort"
         ],
         [
           "wb_sport",
           "6WB Sport"
-        ],
-        [
-          "wb_sport_dials",
-          "6WB Sport + G20"
         ],
         [
           "wb_eco",
@@ -565,20 +452,12 @@
           "6WB Comfort"
         ],
         [
-          "wb_dials",
-          "6WB Dials + G20"
-        ],
-        [
           "g20_comfort",
           "G20 Comfort"
         ],
         [
           "wb_sport",
           "6WB Sport"
-        ],
-        [
-          "wb_sport_dials",
-          "6WB Sport + G20"
         ],
         [
           "wb_eco",
@@ -605,20 +484,12 @@
           "6WB Comfort"
         ],
         [
-          "wb_dials",
-          "6WB Dials + G20"
-        ],
-        [
           "g20_comfort",
           "G20 Comfort"
         ],
         [
           "wb_sport",
           "6WB Sport"
-        ],
-        [
-          "wb_sport_dials",
-          "6WB Sport + G20"
         ],
         [
           "wb_eco",
@@ -1364,7 +1235,7 @@
       "invalid": [255]
     },
     "_bottomRow": {
-      "about": "Package 'bottom row' (docs/BOTTOM-ROW-PACKAGE.md). The three shapes below name the car's own fields for the speed-limit sign, the check-control message and the road label, verified member by member against the car's catalogue (reference/car/2026-11-15/someip/someip-interfaces.json, 2026-11-15). Each is OPTIONAL: set it to null and nothing is subscribed and nothing changes. WHAT IS DRAWN is decided by the settings ownSign / ownInfo / ownNav, which are \"bmw\" by default, so the car draws all three until the owner picks ours. Every new raw combination is logged ONCE as a SHAPE: the message text, the road name and the position are personal data and never reach the log.",
+      "about": "Package 'bottom row' (docs/BOTTOM-ROW-PACKAGE.md). The three shapes below name the car's own fields for the speed-limit sign, the check-control message and the road label, verified member by member against the car's catalogue (reference/car/2026-11-15/someip/someip-interfaces.json, 2026-11-15). Each is OPTIONAL: set it to null and nothing is subscribed and nothing changes. WHAT IS DRAWN is decided by the one setting \"bottomRow\", which is \"allG20\" by default, so the car draws all three until the owner picks \"all6WB\" (it replaced the seven own* settings, 2026-11-15). Every new raw combination is logged ONCE as a SHAPE: the message text, the road name and the position are personal data and never reach the log.",
       "calibrate": "On the car, watch for the log lines 'sign: ...', 'check-control message: ...', 'road label: ...', 'navigation: ...' and 'position: ...'. They say which enum values and lengths the car really sends; correct the maps below from them.",
       "signShape": "{ iface, field, invalidPath + invalidOn, valuePath, factor, min, max, unitPath + mph + noUnit, none / end / unknown (raw speed values), warnPath + warnMap, suppPath + suppMap, stylePath + styleMap, surePath + sureOn, npPath + npMap, npDistPath }: shared/hud.js signOf()",
       "ccmShape": "kind 'message': { roots (the union members to try), namePath, descPath, colorPath + colorMap, symbolPath, idPath, typePath, clearIds }: shared/hud.js ccMsgOf(). The older kinds 'list' and 'flag' (car3 I) still work.",
@@ -1578,7 +1449,8 @@
     },
     "menu": {
       "hideModeRows": true,
-      "comment": "The centre screen's native menu (shared/menu.js). hideModeRows: hide In Comfort / In Sport / In Eco Pro while Change with the drive mode is off (the RHMI Visible property, not yet seen on the car; false keeps them always shown)."
+      "hideRowUnlessG20": true,
+      "comment": "The centre screen's native menu (shared/menu.js). hideModeRows: hide In Comfort / In Sport / In Eco Pro while Change with the drive mode is off (the RHMI Visible property, not yet seen on the car; false keeps them always shown). hideRowUnlessG20: hide 'Bottom row while G20 shows' in the Settings list while the g20 toggle is off, the same property and the same caveat; false keeps it always shown, which costs nothing either way - with G20 off our background covers BMW's row, so the setting is inert then (hud.js _own)."
     }
   }
 }

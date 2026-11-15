@@ -4,6 +4,14 @@ multifunctional display; no BMW artwork is used):
     python3 design/gen_6wb.py apps/f30_cluster/hud/layouts
 Writes wb_comfort.json, wb_dials.json, wb_sport.json, wb_sport_dials.json, wb_eco.json. Edit this file, not the JSON.
 
+Since 2026-11-15 the see-through look is a toggle, not a theme (the "g20" setting; docs/ONE-SWITCH-DONE.md):
+wb_dials.json is what 6WB Comfort builds while it is on, and the two "+ G20" entries are gone from the theme lists.
+wb_sport_dials.json is NO LONGER OFFERED (the owner dropped "6WB Sport + G20"), but it and sport_dials() are kept and
+still generated: nothing loads the file now, so it costs no layer and no pixel memory, it is the safety net for a
+settings.json that still names it (layouts.load would otherwise throw and nothing at all would be drawn), and
+re-offering it later is one entry in hud.js G20_OF. The layout titles below are unchanged on purpose: changing them
+would rewrite the JSON files for a log line.
+
 Proportions are measured off the photos, in dial radii (R): the two dial centres are 3.2 R apart, the display is
 6.6 R wide and the dials stand at mid height; a small gauge sits 1.355 R outside each dial, 0.39 R below centre,
 0.31 R in radius. The speed scale is km/h only: 0..260, 1 degree per km/h from -130 degrees. The rev scale: OFF at
@@ -181,7 +189,7 @@ def comfort():
     W += road_signs()
     # the row at the middle window's foot
     # baked: one line, the range after the bar's pump pictogram (x 892-953, y 642-681); else headed columns
-    # car3 H: the clock only while it is right, as 6WB Dials' "ownClock" (auto: once a time zone is set; the head unit
+    # car3 H: the clock only while it is right ("own:clock": once a time zone is set; the head unit
     # runs on UTC). BMW's own clock sits under our speed dial's range arc, so no window opens over it: without our
     # clock the temperature stands alone in the middle. The temperature in BMW's 0.5 degree steps ({{ambient1}})
     W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="baked&own:clock&!cc:shown"),
@@ -242,8 +250,9 @@ CC_TOP = [590, 594, 1250, 665]
 CC_TOP_SOFT = 13
 # --- end car3 G ---
 # --- bottom row (docs/BOTTOM-ROW-PACKAGE.md): who draws the road label, the sign and the info message ---
-# These three places are see-through today so BMW draws them. Each becomes a choice (settings ownNav / ownSign /
-# ownInfo, "BMW's" by default); "ours" is wired here with PLACEHOLDER drawing - our own fonts and boxes at the stock
+# These three places are see-through today so BMW draws them. They became a choice, and since 2026-11-15 ONE choice
+# for the whole row (setting "bottomRow": "allG20" BMW's, "all6WB" ours; "allG20" by default, docs/ONE-SWITCH-DONE.md).
+# "Ours" is wired here with PLACEHOLDER drawing - our own fonts and boxes at the stock
 # places, not yet the faithful G20 look. THE SEAM: everything below this comment down to "end bottom row" is what the
 # next agent replaces from docs/G20-DESIGN-SPEC.md and docs/ROAD-SHIELDS.md; nothing outside it needs to change.
 # The check-control field, from docs/G20-DESIGN-SPEC.md (design/g20-spec/measured.json, 2026-11-15): it is NOT a
@@ -277,8 +286,8 @@ COVER = [588, 598, 736, 64]
 # right "i" (plan_dials SHADE_Y, SHADE_KO)
 SHADE = {"y": [575, 605], "ko": [0, 0, 0, 0]}   # no keep-out: BMW's right "i" is covered since 2026-11-13
 # BMW's bottom-row items we may draw ourselves at their stock places (D rows 11-13; catalogue bboxes grown 4 px): the
-# black patch under ours ("patches", WBBACK u_pat), shown while the item is ours ("own:<item>": ownRange / ownClock /
-# ownTemp). Our text's baseline sits on BMW's (y 697), BMW's size: values in wb_row (Arimo Bold 44, caps ~32 px as
+# black patch under ours ("patches", WBBACK u_pat), shown while the item is ours ("own:<item>": the one "bottomRow"
+# setting). Our text's baseline sits on BMW's (y 697), BMW's size: values in wb_row (Arimo Bold 44, caps ~32 px as
 # BMW's), units in wb_val (Arimo Bold 36). The pump is on connection 0, so the range's box may run under it (a sheet
 # holds no overlapping members) and a 4-digit range still fits
 # The boxes are sized for BMW's widest text, not the photo's: its temperature is right-aligned (x ~1624), so "-22.5"
@@ -402,7 +411,7 @@ def dials():
     bottom row shows. Our signs sit under the speed hub as in 6WB Comfort and close the round window over BMW's sign;
     while we have no limit (app.json config.limit unset) the window opens and BMW's shows. A small soft window shows
     BMW's check-control "i". Package F: BMW's stock bottom lines, their hooks and the grey dash are under black (the
-    cover); the range, clock and outside temperature are ours or BMW's by setting (ownRange / ownClock / ownTemp), ours
+    cover); the range, clock and outside temperature are ours or BMW's by the one "bottomRow" setting, ours
     drawn at BMW's places over black patches; our drive-mode label ("modeLabel") and the gear in our tray ("gearTray")
     are on the tacho, as in 6WB Comfort (tray_row())."""
     W = [
@@ -480,7 +489,7 @@ def sport():
     # the range at the speed dial's foot (Comfort's range figure is there, on its bottom arc), in the scale's gap
     W += [icon("range_icon", "fuel", SP[0] - 45, SP[1] + 0.765 * R, 1, "fg"),
           text("range_in", SP[0] - 25, SP[1] + 0.765 * R, 130, "{{range}} km", "wb_cap", align="left", conn=1)]
-    # the row under the shelf's base line, as 6WB Comfort's (baked) row: the clock only while it is right ("ownClock"),
+    # the row under the shelf's base line, as 6WB Comfort's (baked) row: the clock only while it is right ("own:clock"),
     # the temperature in BMW's 0.5 degree steps, none of it while BMW's message shows
     W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
           text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
