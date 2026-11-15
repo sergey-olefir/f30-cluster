@@ -223,11 +223,15 @@ async function main() {
     await set('limitArc', 'auto');
     await fake({ sla: { warn: 'on' } });
 
-    console.log('the car\'s clock: read and logged, not used until it is confirmed');
+    // 2026-11-15, the owner: the manual "timeZone" setting was retired with five others, so the car's own offset is
+    // the only source our clock has left and config.clock.confirm went true. This check used to assert the opposite
+    // (parsed, logged, NOT used). The encoding - "factor" 15, quarter hours - is still a guess that only the car can
+    // settle; the bench feeds a raw value through that same factor, so it proves the wiring, never the factor.
+    console.log('the car\'s clock is now our only source of a time zone');
     await fake({ clock: { minutes: 120, dst: false } });
-    p = await until((q) => S(q).tzCandidate === 120, 5000);
-    ok(S(p).tzCandidate === 120, 'the car\'s offset is parsed (' + S(p).tzCandidate + ' minutes)');
-    ok(S(p).tzCar === null, 'but not used while config.clock.confirm is false (tzCar ' + S(p).tzCar + ')');
+    p = await until((q) => S(q).tzCar === 120, 5000);
+    ok(S(p).tzCar === 120, 'the car\'s offset is taken and used (' + S(p).tzCar + ' minutes)');
+    ok(!item('timeZone'), 'and there is no manual time-zone setting left that could override it');
 
     console.log('the way back');
     ok(JSON.stringify(S(p).fail) === '{}', 'nothing fell back while every signal was there and could be drawn (' + JSON.stringify(S(p).fail) + ')');
