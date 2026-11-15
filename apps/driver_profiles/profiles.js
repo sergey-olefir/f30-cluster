@@ -8,17 +8,22 @@
  * The only calls that change anything, each re-checked right before it is sent (check()):
  *   UserAccountManager.createUserAccount(name)          method 21845
  *   UserAccount.<slot>.name = new name                  setter 5 (the call the owner's names were set with, 2026-11-14)
+ *   UserAccount.<slot>.avatar = Base64 jpg              setter 8  (0.2.0; catalogue: field avatar, Utf8D, get 7 set 8)
+ *   UserAccount.<slot>.avatarType = the enum            setter 29 (0.2.0; catalogue: get 28 set 29, INDIVIDUAL = 16)
  *   UserAccountManager.copyGuestData(ref)               method 21851
  *   UserAccountManager.removeUserAccount(ref)           method 21846
  * Nothing else is ever called: no UDS, no delete-all, no PIA reset, no login. The app.json manifest grants only these
- * (the installer's ACL then lets nothing else through).
+ * (the installer's ACL then lets nothing else through). An avatar change writes those two fields and nothing else:
+ * no name, no type, no protection.
  *
- * Names and e-mail addresses never go to the log: slots, result codes and errors only.
+ * Names and e-mail addresses never go to the log: slots, result codes and errors only. The avatar picture is never
+ * logged, shown or kept: a read turns it into a size and drops it, and a write holds it only until the setter has it.
  * Plain Node 8 (the car's 8.16.2). Every callback is guarded: an exception that escaped would end the app.
  */
 const fs = require('fs');
 const path = require('path');
 const F = require('./format');
+const A = require('./avatars');
 
 const PERS = F.PERS;
 const IF = {
@@ -31,7 +36,8 @@ const FIELDS = ['id', 'type', 'name', 'gcid', 'protection', 'firstName', 'creati
     'synchronizationEnabled', 'connectedDriveUsername', 'emailAddress', 'avatarType'];
 const AVAIL_WAIT_MS = 2500;      // how long a slot's instance may take to say it is offered
 const GET_MS = 4000;
-const CALL_MS = { createUserAccount: 30000, removeUserAccount: 60000, copyGuestData: 150000, name: 8000 };
+// the avatar is a whole jpg in Base64, so its getter and setter get longer than a name's
+const CALL_MS = { createUserAccount: 30000, removeUserAccount: 60000, copyGuestData: 150000, name: 8000, avatar: 20000, avatarType: 8000 };
 const MAX_USERS = 7;             // i01..i07: the hard ceiling (the provisioned limit can be lower: MAX_NUM_EXCEEDED)
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -48,6 +54,9 @@ class Profiles {
         this.ctx = ctx; this.sig = ctx.signals; this.log = ctx.log;
         const cfg = (ctx.spec && ctx.spec.config) || {};
         this.requireParked = cfg.requireParked !== false;
+        this.cfg = cfg;
+        this.avatarMaxKB = A.maxKB(cfg);        // our guess at what persod takes, not a figure from the car
+        this.dataDir = ctx.dataDir || '.';
         this.slots = {};                 // slot -> state (see readSlot)
         this.ua = {}; this.intra = {}; this.avail = {};
         this.um = null; this.sm = null;
@@ -176,6 +185,23 @@ class Profiles {
         return !!this.avail[slot];
     }
 
+    /**
+     * How large the stored custom picture is, for the avatar row. Only for avatarType INDIVIDUAL: the field holds a
+     * whole jpg in Base64, and there is no reason to pull that over the binding for every slot on every read.
+     * The string lives in this function and nowhere else: what is kept is its decoded size and a checksum.
+     */
+    async readAvatarSize(slot, st) {
+        st.avatarBytes = null; st.avatarChars = null; st.avatarSum = null; st.avatarErr = null;
+        if (A.typeName(st.avatarType) !== 'INDIVIDUAL') { st.avatarBytes = 0; return; }
+        try {
+            const v = await withTimeout(this.sig.get(this.ua[slot], 'avatar', CALL_MS.avatar), CALL_MS.avatar + 500, 'avatar');
+            if (typeof v !== 'string') { st.avatarErr = 'the service did not answer with text'; return; }
+            st.avatarChars = v.length;
+            st.avatarBytes = A.b64Bytes(v);
+            st.avatarSum = A.sum(v);
+        } catch (e) { st.avatarErr = msg(e); }
+    }
+
     /** Read every field of one slot. A slot exists when its instance is offered and has an id. */
     async readOne(slot) {
         const p = this.ua[slot];
@@ -191,6 +217,7 @@ class Profiles {
         }
         st.type = F.en(st.type, F.ENUM.type);
         st.exists = typeof st.id === 'string' ? st.id !== '' : st.type !== null;
+        if (st.exists) await this.readAvatarSize(slot, st);
         if (st.exists && st.type !== 'GUEST' && st.type !== 'VALET' && this.intra[slot]) {
             try {
                 const r = await withTimeout(this.sig.call(this.intra[slot], 'getCopyGuestTimestamp', {}, GET_MS), GET_MS + 500, 'getCopyGuestTimestamp');
@@ -215,6 +242,11 @@ class Profiles {
         })().catch((e) => this.log.error('refresh: ' + msg(e))).then(() => { this.reading = null; this.changed('refresh'); });
         return this.reading;
     }
+
+    /** The owner's own pictures, from <dataDir>/avatars/ only (see avatars.js). Never throws. */
+    avatarFiles() { return A.list(this.dataDir, this.cfg); }
+    /** The pictures that ship with the app (apps/driver_profiles/avatars/ -> avatars.pack). Never throws. */
+    avatarBundled() { return A.bundled(this.cfg); }
 
     list() { return F.SLOTS.map((s) => this.slots[s]); }
     users() { return F.USER_SLOTS.filter((s) => this.slots[s].exists); }
@@ -276,6 +308,20 @@ class Profiles {
                     if (prot === null) why.push('its protection is not known');
                     else if (prot.length) why.push('it is protected (' + F.protectionText(st.protection) + '): copying needs an unprotected profile');
                 }
+                if (op === 'avatar') {
+                    // the avatar is cosmetic and belongs to every kind of profile, so no type or protection rule
+                    // here; what matters is that the choice is still a real one
+                    const ch = arg || {};
+                    if (ch.kind === 'preset') {
+                        if (!A.presetOf(ch.type)) why.push('that is not one of the avatars the car has');
+                    } else if (ch.kind === 'file' || ch.kind === 'bundled') {
+                        const l = ch.kind === 'bundled' ? A.bundled(this.cfg) : A.list(this.dataDir, this.cfg);
+                        const f = l.files[ch.index];
+                        if (!f) why.push(ch.kind === 'bundled' ? 'that picture does not ship with the app' : 'that picture is not in the avatars folder any more');
+                        else if (f.empty) why.push('that file is empty');
+                        else if (f.tooBig) why.push('that file is ' + f.kb + ': over the ' + l.max + ' KB limit');
+                    } else why.push('no avatar chosen');
+                }
                 if (op === 'delete') {
                     if (st.type === 'GUEST' || st.type === 'VALET' || slot === 'guest' || slot === 'valet') why.push('Guest and Valet are never deleted');
                     else if (st.type !== 'USER') why.push('only personal profiles');
@@ -306,6 +352,7 @@ class Profiles {
             let res;
             if (op === 'create') res = await this.create(String(arg).trim());
             else if (op === 'rename') res = await this.rename(slot, String(arg).trim());
+            else if (op === 'avatar') res = await this.avatar(slot, arg || {});
             else if (op === 'copy') res = await this.copy(slot);
             else if (op === 'delete') res = await this.remove(slot);
             else res = { ok: false, text: 'unknown operation' };
@@ -350,6 +397,112 @@ class Profiles {
         const ok = st.name === name;
         this.log.info('name setter ' + slot + ' -> ' + (r === name ? 'took the new name' : 'answered differently') + '; read back ' + (ok ? 'matches' : 'does not match'));
         return { ok, code: ok ? 'accepted' : 'not taken', text: 'Result: ' + (ok ? 'name set (the service took it and reads it back)' : 'the name did not change'), detail: ok ? '' : 'The service answered, but reads back the old name' };
+    }
+
+    /**
+     * One enum field setter. The binding hands enums over by name on the way in (the car answers `type` as "USER"),
+     * and the only setter anyone has used on this car took a Utf8D, so a name is what we send first. If the provider
+     * refuses it, the same field is set once more with the catalogue's number. No other field is touched either way.
+     */
+    async setEnum(slot, field, name, ms) {
+        try {
+            const reply = await withTimeout(this.sig.set(this.ua[slot], field, name, ms), ms + 1000, field + ' setter');
+            return { form: 'name', reply };
+        } catch (e) {
+            const num = A.ENUM_TYPE[name];
+            if (num === undefined) throw e;
+            this.log.info(field + ' setter refused the enum by name (' + msg(e) + '); trying the number ' + num);
+            const reply = await withTimeout(this.sig.set(this.ua[slot], field, num, ms), ms + 1000, field + ' setter (number)');
+            return { form: 'number', reply };
+        }
+    }
+
+    /**
+     * Set a profile's avatar: either one of the car's own types (avatarType only), or a jpg - one of the two that
+     * ship with the app, or one of the owner's own (avatar = the Base64 jpg, then avatarType = INDIVIDUAL, in that
+     * order, so the type never points at a picture that is not there yet). Each write's result is reported; the
+     * picture is never logged.
+     * choice: { kind: 'preset', type: 'DEFAULT' | 'AVATARn' }, { kind: 'bundled', index } or { kind: 'file', index }.
+     */
+    async avatar(slot, choice) {
+        if (!this.ua[slot]) return { ok: false, text: 'Not sent: the profile service is not reachable' };
+        if (choice.kind === 'preset') return this.avatarPreset(slot, choice.type);
+        return this.avatarFile(slot, choice.index, choice.kind === 'bundled');
+    }
+
+    async avatarPreset(slot, type) {
+        this.log.info('SET ' + slot + '.avatarType <- ' + type);
+        const s = await this.setEnum(slot, 'avatarType', type, CALL_MS.avatarType);
+        const st = await this.readOne(slot);
+        const got = A.typeName(st.avatarType);
+        const ok = got === type;
+        this.log.info('avatarType ' + slot + ' -> ' + (s.form === 'name' ? 'took the name' : 'took the number') + '; reads back ' + (ok ? type : String(got)));
+        const extra = type === 'DEFAULT' || type === 'UNSPECIFIED'
+            ? 'Any picture you sent before stays stored, unused: nothing else was written' : 'Nothing else was written';
+        return {
+            ok, code: ok ? 'accepted' : 'not taken',
+            text: 'Result: ' + (ok ? 'avatarType is now ' + type + ' (' + A.typeLabel(type) + ')' : 'avatarType still reads ' + A.typeLabel(got) + ' (' + got + ')'),
+            detail: ok ? extra : 'The service answered, but reads back the old value',
+        };
+    }
+
+    async avatarFile(slot, index, isBundled) {
+        // read and encode here, right before sending: the size guard and the folder check run on the file as it is
+        const where = isBundled ? 'bundled picture' : 'own picture';
+        const enc = isBundled ? A.encodeBundled(index, this.cfg) : A.encode(this.dataDir, index, this.cfg);
+        if (!enc.ok) { this.log.info('avatar ' + where + ' #' + index + ' not sent: ' + enc.why); return { ok: false, text: 'Not sent: ' + enc.why }; }
+        const before = this.slots[slot] || {};
+        this.log.info('SET ' + slot + '.avatar <- ' + where + ' #' + index + ', ' + enc.bytes + ' bytes of jpg, ' + enc.chars + ' Base64 chars (name and data not logged)');
+        let data = enc.data;
+        let picture;
+        try {
+            await withTimeout(this.sig.set(this.ua[slot], 'avatar', data, CALL_MS.avatar), CALL_MS.avatar + 1000, 'avatar setter');
+            picture = { ok: true };
+        } catch (e) {
+            // whatever the car said, said as it said it: the refusal path is the point of the guard
+            this.log.info('avatar setter ' + slot + ' refused: ' + msg(e));
+            picture = { ok: false, why: msg(e) };
+        }
+        data = null;
+        if (!picture.ok) {
+            return {
+                ok: false, code: 'avatar refused',
+                text: 'Result: the car refused the picture: ' + picture.why,
+                detail: 'avatarType was left alone, so nothing about the profile changed',
+            };
+        }
+        // did it keep it? the size and checksum of what it reads back, never its content
+        const mid = { avatarType: 'INDIVIDUAL' };
+        await this.readAvatarSize(slot, mid);
+        const stored = mid.avatarSum === enc.sum ? 'the same picture reads back'
+            : mid.avatarBytes === enc.bytes ? 'a picture of the same size reads back'
+                : typeof mid.avatarBytes === 'number' ? 'it reads back ' + A.kb(mid.avatarBytes) + ', not ' + enc.kb
+                    : 'it could not be read back' + (mid.avatarErr ? ' (' + mid.avatarErr + ')' : '');
+        this.log.info('avatar ' + slot + ' stored: ' + stored);
+        let typeRes;
+        try {
+            const s = await this.setEnum(slot, 'avatarType', 'INDIVIDUAL', CALL_MS.avatarType);
+            typeRes = { ok: true, form: s.form };
+        } catch (e) { typeRes = { ok: false, why: msg(e) }; }
+        const st = await this.readOne(slot);
+        const got = A.typeName(st.avatarType);
+        const typeOk = got === 'INDIVIDUAL';
+        this.log.info('avatarType ' + slot + ' -> ' + (typeRes.ok ? 'set' : 'refused: ' + typeRes.why) + '; reads back ' + String(got));
+        if (!typeRes.ok || !typeOk) {
+            return {
+                ok: false, code: 'avatarType refused',
+                text: 'Result: the picture was stored (' + enc.kb + '), but avatarType is still ' + A.typeLabel(got)
+                    + (typeRes.ok ? '' : ': ' + typeRes.why),
+                detail: 'The car will keep showing the old avatar. Nothing else was written',
+            };
+        }
+        const name = before.name;
+        return {
+            ok: true, code: 'accepted',
+            text: 'Result: picture sent (' + enc.kb + ' of jpg) and avatarType set to INDIVIDUAL',
+            detail: stored.charAt(0).toUpperCase() + stored.slice(1) + '. Only those two fields were written'
+                + (st.name === name ? '' : '; the name reads differently now'),
+        };
     }
 
     async copy(slot) {

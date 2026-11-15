@@ -6,21 +6,25 @@
  *   MAIN           STATUS (active profile, slots in use), P_GUEST .. P_I07 (one two-row button per slot: name, then
  *                  type, local / BMW ID, protection; the active one marked; slots that do not exist are hidden),
  *                  BTN_ADD, BTN_SETTINGS_VIEW, BTN_REFRESH, MSG (the last result)
- *   PROFILE        D_* (every field readable), A_RENAME, A_COPY, A_DELETE (each says why not when it can't run),
- *                  P_NOTE, P_NOTE2
+ *   PROFILE        D_* (every field readable), A_RENAME, A_AVATAR, A_COPY, A_DELETE (each says why not when it
+ *                  can't run), P_NOTE, P_NOTE2
  *   NAMES          the preset names (app.json config.names, up to 10) and "Profile N"; no keyboard (see
  *                  docs/DRIVER-PROFILES-APP.md, "The speller")
+ *   AVATAR         Default, the car's 15 built-in avatars by number, the two pictures that ship with the app at
+ *                  three sizes each, and the owner's own jpg files from <dataDir>/avatars/ with their sizes; the
+ *                  folder's full path, so an empty folder still says where a picture goes
  *   CONFIRM        what will be sent, the checks, Yes / Cancel; Delete needs Yes twice; the result code afterwards
  *   SETTINGS_VIEW  what the car shows of the active profile (read only)
  *
- * Every write goes MAIN / PROFILE -> (NAMES) -> CONFIRM -> Yes, and profiles.js reads and checks again right before
- * sending it. Every handler runs inside guard(): an exception that escaped would end the app, and the car's crash
- * handler uninstalls an app after its second crash. Plain Node 8 (the car's 8.16.2).
+ * Every write goes MAIN / PROFILE -> (NAMES | AVATAR) -> CONFIRM -> Yes, and profiles.js reads and checks again right
+ * before sending it. Every handler runs inside guard(): an exception that escaped would end the app, and the car's
+ * crash handler uninstalls an app after its second crash. Plain Node 8 (the car's 8.16.2).
  */
 const F = require('./format');
+const A = require('./avatars');
 
 const NAME_ROWS = 10;
-const OP_TEXT = { create: 'Add', rename: 'Rename', copy: "Copy Guest's settings", delete: 'Delete' };
+const OP_TEXT = { create: 'Add', rename: 'Rename', avatar: 'Avatar', copy: "Copy Guest's settings", delete: 'Delete' };
 
 class Screens {
     constructor(ctx, profiles) {
@@ -30,9 +34,13 @@ class Screens {
         if (!this.presets.length) this.presets = ['Driver 1', 'Driver 2', 'Driver 3', 'Driver 4'];
         this.autoBase = typeof cfg.autoName === 'string' && cfg.autoName.trim() ? cfg.autoName.trim().slice(0, 24) : 'Profile';
         this.armMs = Math.max(3, Math.min(60, Number(cfg.deleteArmSeconds) || 10)) * 1000;
+        this.avatarMaxKB = A.maxKB(cfg);
         this.sel = null;              // the slot PROFILE shows
         this.naming = null;           // { op: 'create' | 'rename', slot }
-        this.pending = null;          // what CONFIRM asks: { op, slot, name, snap, armedUntil, state: 'ask' | 'sending' | 'done' }
+        this.avatarFor = null;        // the slot AVATAR is choosing for
+        this.avatarList = null;       // the last listing of <dataDir>/avatars/ (avatars.js list())
+        this.bundledList = null;      // the pictures that ship with the app (avatars.js bundled())
+        this.pending = null;          // what CONFIRM asks: { op, slot, arg, snap, armedUntil, state: 'ask' | 'sending' | 'done' }
         this.sent = Object.create(null);
         this.msg = '';
         this.timer = null;
@@ -77,11 +85,17 @@ class Screens {
         this.click('BTN_REFRESH', () => { this.msg = 'Reading the profiles again...'; this.render(); return this.p.refresh('refresh button'); });
         this.click('BTN_SETTINGS_VIEW', () => { this.render(); return ui.open('SETTINGS_VIEW'); });
         this.click('A_RENAME', () => this.startRename());
+        this.click('A_AVATAR', () => this.startAvatar());
         this.click('A_COPY', () => this.ask('copy', this.sel));
         this.click('A_DELETE', () => this.ask('delete', this.sel));
         this.click('N_AUTO', () => this.pickName(F.autoName(this.autoBase, this.p.names())));
         for (let i = 0; i < NAME_ROWS; i++) this.click('N_' + i, () => this.pickName(this.presets[i]));
         this.click('N_CANCEL', () => { this.naming = null; return ui.close('NAMES'); });
+        A.PRESETS.forEach((type, i) => this.click('AV_T' + i, () => this.pickAvatar({ kind: 'preset', type })));
+        for (let i = 0; i < A.MAX_BUNDLED; i++) this.click('AV_B' + i, () => this.pickAvatar({ kind: 'bundled', index: i }));
+        for (let i = 0; i < A.MAX_FILES; i++) this.click('AV_F' + i, () => this.pickAvatar({ kind: 'file', index: i }));
+        this.click('AV_RESCAN', () => this.scanAvatars('read again'));
+        this.click('AV_CANCEL', () => { this.avatarFor = null; return ui.close('AVATAR'); });
         this.click('C_YES', () => this.yes());
         this.click('C_NO', () => this.closeConfirm());
         this.p.onChange(() => this.soon());
@@ -91,6 +105,9 @@ class Screens {
             // CONFIRM left by the back arrow: nothing stays armed
             if (name === 'CONFIRM' && !on && this.pending && this.pending.state !== 'sending') this.pending = null;
             if (name === 'MAIN' && on && !this.p.reading) this.p.refresh('main screen opened');
+            // the folder may have gained a file while the app was on another screen
+            if (name === 'AVATAR' && on) this.scanAvatars('screen opened');
+            if (name === 'AVATAR' && !on && !this.pending) this.avatarFor = null;
         }));
         this.render();
     }
@@ -133,8 +150,53 @@ class Screens {
     }
     note(s) { this.noteText = s; this.render(); }
 
-    /** CONFIRM for op (the checks shown as they are now; Yes checks again). */
-    ask(op, slot, name) {
+    /* ---------------- the avatar ---------------- */
+
+    /** Read <dataDir>/avatars/ again. Never throws: a missing folder is the normal state. */
+    scanAvatars(why) {
+        this.avatarHint = '';
+        this.avatarList = this.p.avatarFiles();
+        this.bundledList = this.p.avatarBundled();
+        const l = this.avatarList;
+        this.log.info('avatars folder (' + why + '): ' + (l.exists ? l.files.length + ' file(s) listed' : 'not there')
+            + (l.error ? ', ' + l.error : '') + '; ' + this.bundledList.files.length + ' bundled (names not logged)');
+        this.render();
+        return null;
+    }
+    /** The listing a choice refers to: the app's own pictures, or the owner's folder. */
+    avatarSet(kind) {
+        if (kind === 'bundled') return this.bundledList || this.p.avatarBundled();
+        return this.avatarList || this.p.avatarFiles();
+    }
+    startAvatar() {
+        const slot = this.sel, st = slot && this.p.slots[slot];
+        if (!st || !st.exists) return null;
+        this.avatarFor = slot;
+        this.avatarHint = '';
+        this.scanAvatars('avatar screen');
+        return this.ui.open('AVATAR');
+    }
+    /** A row on AVATAR: a preset type, or the file at that row. Goes to CONFIRM; nothing is sent here. */
+    pickAvatar(choice) {
+        const slot = this.avatarFor;
+        if (!slot || !choice) return null;
+        if (choice.kind === 'file' || choice.kind === 'bundled') {
+            const l = this.avatarSet(choice.kind);
+            const f = l.files[choice.index];
+            if (!f) return null;                       // an empty row
+            if (f.empty) { this.avatarHint = 'That file is empty: put a real jpg there'; this.render(); return null; }
+            if (f.tooBig) {
+                this.avatarHint = 'That one is ' + f.kb + ', over the ' + l.max + ' KB limit: '
+                    + (choice.kind === 'bundled' ? 'try a smaller one of the same picture' : 'make it smaller first');
+                this.render();
+                return null;
+            }
+        }
+        return this.ask('avatar', slot, choice);
+    }
+
+    /** CONFIRM for op (the checks shown as they are now; Yes checks again). arg: a name, or an avatar choice. */
+    ask(op, slot, arg) {
         const st = slot ? this.p.slots[slot] : null;
         if (op !== 'create' && (!st || !st.exists)) return null;
         if (op === 'delete') {
@@ -145,7 +207,7 @@ class Screens {
             const c = this.p.check('copy', slot);
             if (!c.ok) { this.note('Copy not possible now: ' + c.why.join('; ')); return null; }
         }
-        this.pending = { op, slot, name: name || null, snap: st ? { id: st.id, name: st.name } : null, armedUntil: 0, state: 'ask', result: null };
+        this.pending = { op, slot, arg: arg || null, snap: st ? { id: st.id, name: st.name } : null, armedUntil: 0, state: 'ask', result: null };
         this.render();
         return this.ui.open('CONFIRM');
     }
@@ -154,9 +216,13 @@ class Screens {
         if (p && p.state === 'sending') return null;       // wait for the answer
         this.pending = null;
         const ui = this.ui;
+        const leaveAvatar = !!(this.avatarFor && p && p.op === 'avatar' && p.state === 'done' && p.ok);
         return Promise.resolve(ui.close('CONFIRM'))
             .then(() => (this.naming ? ui.close('NAMES') : null))
             .then(() => { this.naming = null; })
+            // the avatar is set: back to the profile, which now shows it. A refusal stays on AVATAR to try again
+            .then(() => (leaveAvatar ? ui.close('AVATAR') : null))
+            .then(() => { if (leaveAvatar) this.avatarFor = null; })
             // a deleted profile has no screen any more
             .then(() => (p && p.op === 'delete' && p.state === 'done' && p.ok ? ui.close('PROFILE') : null))
             .then(() => { if (p && p.op === 'create' && p.state === 'done' && p.ok && p.newSlot) this.sel = p.newSlot; this.render(); });
@@ -165,7 +231,7 @@ class Screens {
     yes() {
         const p = this.pending;
         if (!p || p.state !== 'ask') return null;
-        const c = this.p.check(p.op, p.slot, p.name, p.snap);
+        const c = this.p.check(p.op, p.slot, p.arg, p.snap);
         if (!c.ok) { p.result = { text: 'Not sent: ' + c.why.join('; ') }; this.render(); return null; }
         if (p.op === 'delete' && !(p.armedUntil > Date.now())) {
             // the first press only arms it
@@ -177,7 +243,7 @@ class Screens {
         p.state = 'sending';
         p.result = { text: 'Sending...' };
         this.render();
-        return this.p.write(p.op, p.slot, p.name, p.snap).then((r) => {
+        return this.p.write(p.op, p.slot, p.arg, p.snap).then((r) => {
             p.state = 'done'; p.ok = !!r.ok; p.result = r; p.newSlot = r.slot || null;
             this.msg = OP_TEXT[p.op] + ': ' + r.text + (r.detail ? '. ' + r.detail : '');
             this.render();
@@ -210,6 +276,7 @@ class Screens {
         this.guard('main', () => this.renderMain());
         this.guard('profile', () => this.renderProfile());
         this.guard('names', () => this.renderNames());
+        this.guard('avatar', () => this.renderAvatar());
         this.guard('confirm', () => this.renderConfirm());
         this.guard('settings view', () => this.renderSettingsView());
     }
@@ -242,7 +309,7 @@ class Screens {
         const st = p.slots[slot];
         if (!st || !st.exists) {
             this.cells('D_NAME', 'Name', '(this profile is not there any more)');
-            ['A_RENAME', 'A_COPY', 'A_DELETE'].forEach((n) => this.visible(n, false));
+            ['A_RENAME', 'A_AVATAR', 'A_COPY', 'A_DELETE'].forEach((n) => this.visible(n, false));
             return;
         }
         const active = slot === p.current, pia = p.piaOf(st);
@@ -261,12 +328,14 @@ class Screens {
         this.cells('D_LOGIN', 'Last login', F.date(st.lastLoginDate, 'not known'));
         this.cells('D_FIRST', 'First name', st.firstName ? st.firstName : '(none)');
         this.cells('D_SYNC', 'Cloud sync', st.synchronizationEnabled === true ? 'On' : st.synchronizationEnabled === false ? 'Off' : 'Not known');
-        this.cells('D_AVATAR', 'Avatar', st.avatarType === null || st.avatarType === undefined ? 'Not known' : String(st.avatarType));
+        this.cells('D_AVATAR', 'Avatar', A.avatarText(st));
         this.cells('D_ID', 'Slot and internal id', F.slotLabel(slot) + ' (' + slot + '), id ' + (st.id || '?'));
 
         const rw = this.renameWhy(st);
         this.visible('A_RENAME', !rw);
         this.text('A_RENAME', rw ? 'Rename: not here (' + rw + ')' : 'Rename');
+        this.text('A_AVATAR', 'Avatar: ' + A.typeLabel(st.avatarType) + ' - change it');
+        this.visible('A_AVATAR', true);
         const cc = p.check('copy', slot);
         const copyType = st.type === 'USER';
         this.visible('A_COPY', copyType);
@@ -295,19 +364,92 @@ class Screens {
         }
     }
 
+    /**
+     * AVATAR: the type the profile has now, Default and the car's 15 avatars (named by their numbers: we cannot
+     * draw BMW's own thumbnails), then the owner's jpg files with their sizes, and always the folder's full path.
+     */
+    renderAvatar() {
+        const slot = this.avatarFor, p = this.p;
+        if (!slot) return;
+        const st = p.slots[slot];
+        const l = this.avatarList || { dir: A.dirOf(p.dataDir), exists: false, files: [], max: this.avatarMaxKB, error: null };
+        const b = this.bundledList || { exists: false, files: [], max: l.max, error: null };
+        const now = A.typeName(st && st.avatarType);
+        this.text('AV_NOW', (st ? 'Avatar of "' + F.nameOf(st) + '"' : 'Avatar') + ' - now: ' + A.avatarText(st));
+        A.PRESETS.forEach((type, i) => {
+            const base = type === 'DEFAULT' ? 'Default' : 'Avatar ' + type.slice(6);
+            this.text('AV_T' + i, base + (now === type ? '  (set now)' : ''));
+            this.visible('AV_T' + i, true);
+        });
+        // the two that ship with the app, at three sizes each. A name in both sets is marked on both rows, so it is
+        // never in doubt which file a row would send
+        const mine = {}, shipped = {};
+        l.files.forEach((f) => { mine[f.name] = true; });
+        b.files.forEach((f) => { shipped[f.name] = true; });
+        this.text('AV_BUNDLED', b.files.length ? 'Pictures that came with the app - try a smaller one if the car refuses:' : '');
+        this.visible('AV_BUNDLED', !!b.files.length);
+        for (let i = 0; i < A.MAX_BUNDLED; i++) {
+            const f = b.files[i];
+            this.visible('AV_B' + i, !!f);
+            if (!f) continue;
+            const where = mine[f.name] ? 'with the app (not your folder\'s file of that name)' : 'with the app';
+            const state = f.tooBig ? f.kb + ': over the ' + b.max + ' KB limit, try a smaller one'
+                : f.kb + ' - came ' + where + ', press to use it';
+            this.cells('AV_B' + i, f.name, state);
+        }
+        this.text('AV_OWN', 'Your own picture - a .jpg of at most ' + l.max + ' KB in this folder:');
+        for (let i = 0; i < A.MAX_FILES; i++) {
+            const f = l.files[i];
+            this.visible('AV_F' + i, !!f);
+            if (!f) continue;
+            const state = f.empty ? 'the file is empty'
+                : f.tooBig ? f.kb + ': over the ' + l.max + ' KB limit, make it smaller'
+                    : shipped[f.name] ? f.kb + ' - your own file of that name, press to use it'
+                        : f.kb + ' - press to use it';
+            this.cells('AV_F' + i, f.name, state);
+        }
+        const none = !l.files.length;
+        this.visible('AV_EMPTY', none || !!l.error);
+        this.text('AV_EMPTY', l.error ? 'The folder cannot be read: ' + l.error
+            : !l.exists ? 'No pictures yet. Make this folder, put a .jpg in it, then press "Read the folder again":'
+                : 'No .jpg here yet. Put one in this folder, then press "Read the folder again":');
+        this.text('AV_PATH', l.dir);
+        this.visible('AV_PATH', true);
+        this.text('AV_NOTE', this.avatarHint || ('The ' + l.max + ' KB limit is our guess, not the car\'s: nobody has'
+            + ' seen what it accepts. Whether this car draws an own picture at all is unproven too'));
+    }
+
     renderConfirm() {
         const q = this.pending, p = this.p;
         if (!q) return;
         const st = q.slot ? p.slots[q.slot] : null, who = st ? '"' + F.nameOf(st) + '" (' + q.slot + ')' : '';
         let what, detail, yes;
         if (q.op === 'create') {
-            what = 'Add a local profile named "' + q.name + '"?';
+            what = 'Add a local profile named "' + q.arg + '"?';
             detail = 'It takes the first free slot (' + (p.freeSlot() || 'none') + '). No BMW ID; settings start at the defaults';
             yes = 'Yes, add it';
         } else if (q.op === 'rename') {
-            what = 'Rename ' + who + ' to "' + q.name + '"?';
+            what = 'Rename ' + who + ' to "' + q.arg + '"?';
             detail = 'Only the name changes';
             yes = 'Yes, rename it';
+        } else if (q.op === 'avatar') {
+            // exactly what goes on the wire, named field by field
+            const ch = q.arg || {};
+            if (ch.kind === 'preset') {
+                what = 'Set the avatar of ' + who + ' to ' + A.typeLabel(ch.type) + '?';
+                detail = 'Sends one field: avatarType = ' + ch.type + ' (code ' + A.ENUM_TYPE[ch.type] + '). No name, no type,'
+                    + ' no protection, and any own picture stays stored, unused';
+                yes = 'Yes, set ' + A.typeLabel(ch.type);
+            } else {
+                const l = this.avatarSet(ch.kind);
+                const f = l.files[ch.index];
+                const from = ch.kind === 'bundled' ? ', the copy that came with the app' : ', from your avatars folder';
+                what = 'Use ' + (f ? '"' + f.name + '" (' + f.kb + from + ')' : 'that picture') + ' as the avatar of ' + who + '?';
+                detail = 'Sends two fields: avatar = that jpg, Base64-encoded (about '
+                    + Math.round((f ? f.bytes : 0) * 4 / 3 / 1024) + ' KB of text), then avatarType = INDIVIDUAL (code 16).'
+                    + ' Nothing else. The ' + l.max + ' KB limit is our guess; the car may still refuse it';
+                yes = 'Yes, send this picture';
+            }
         } else if (q.op === 'copy') {
             what = "Copy Guest's settings into " + who + '?';
             detail = "Its car settings (PIA) and its iDrive data become Guest's: seats, lights, climate, navigation, media";
@@ -317,7 +459,7 @@ class Screens {
             detail = 'Its settings go with it. This cannot be undone';
             yes = q.armedUntil > Date.now() ? 'Press again to delete ' + who + ' for good' : 'Delete';
         }
-        const c = p.check(q.op, q.slot, q.name, q.snap, q.state === 'sending');
+        const c = p.check(q.op, q.slot, q.arg, q.snap, q.state === 'sending');
         this.text('C_WHAT', what);
         this.text('C_DETAIL', detail);
         this.text('C_CHECK', q.state === 'ask' ? (c.ok ? 'Checks now: all fine' + (p.requireParked ? ' (engine off, P, no PIA job)' : '') : 'Checks now: ' + c.why.join('; ')) : '');
