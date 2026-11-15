@@ -69,6 +69,11 @@ content ever reaches the log.
 
 ## 2. The settings
 
+> **Superseded on 2026-11-15 (`docs/ONE-SWITCH-DONE.md`).** The seven keys in the table below are gone: one choice,
+> `bottomRow` (`allG20` / `all6WB`), now decides the whole row, and the settings a car had saved are folded into it
+> once at startup. Everything else in this section — what each element is, where it is drawn, the fall-back — still
+> holds; only the keys changed.
+
 The owner's three existing rows and three new ones are now one group, **"Who draws this"**, plus a row that puts all
 six back at once. The kit had no settings group, so a small general one was added (section 6).
 

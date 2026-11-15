@@ -76,16 +76,18 @@ async function main() {
     const w = S(p).wired || {};
     ok(w.sign && w.ccm && w.road && w.nav, 'app.json names every field: sign ' + w.sign + ', message ' + w.ccm + ', road ' + w.road + ', navigation ' + w.nav);
 
-    // one theme for every mode, and the theme that has all three elements
+    // one theme for every mode, and the see-through look that has all three elements: since 2026-11-15 that is
+    // 6WB Comfort with the "g20" toggle on (a checkbox press), not a theme of its own (docs/ONE-SWITCH-DONE.md)
     await click('SET_BYMODE');
-    await set('hudLayout', 'wb_dials');
+    await set('hudLayout', 'wb_comfort');
+    await click('SET_G20');
     p = await until((q) => q.activeName === 'wb_dials', 20000);
-    ok(p.activeName === 'wb_dials', 'theme 6WB Dials + G20 shows');
+    ok(p.activeName === 'wb_dials' && p.settings.g20 === true, 'the G20 toggle builds the see-through Comfort (wb_dials)');
 
-    console.log('defaults: the three new rows are BMW\'s and nothing of ours is built');
-    ok(p.settings.ownNav === 'bmw' && p.settings.ownSign === 'bmw' && p.settings.ownInfo === 'bmw',
-        'ownNav / ownSign / ownInfo default to "bmw"');
-    ok(S(p).own && !S(p).own.nav && !S(p).own.sign && !S(p).own.info, 'the engine reports all three as BMW\'s');
+    console.log('defaults: the whole row is BMW\'s and nothing of ours is built');
+    ok(p.settings.bottomRow === 'allG20', 'bottomRow defaults to "allG20" (BMW draws the row)');
+    ok(S(p).own && !S(p).own.nav && !S(p).own.sign && !S(p).own.info && !S(p).own.range && !S(p).own.temp,
+        'the engine reports every item of the row as BMW\'s');
     ok(JSON.stringify(S(p).widgets) === '[]', 'no widget of ours is built for them (' + JSON.stringify(S(p).widgets) + ')');
 
     console.log('the speed-limit struct is read in every state');
@@ -145,7 +147,7 @@ async function main() {
 
     console.log('the road label: a street, a shield and a number, and guidance');
     await scene('road-street');
-    await set('ownNav', 'ours');
+    await set('bottomRow', 'all6WB');            // the one switch: every item of the row is ours from here on
     p = await until((q) => S(q).road === 'Hauptstrasse', 20000);
     ok(S(p).road === 'Hauptstrasse', 'a plain street reads back (' + S(p).road + ')');
     await scene('road-shield');
@@ -159,14 +161,12 @@ async function main() {
 
     console.log('the switching: ours is built and drawn, BMW\'s is not');
     p = await until((q) => (S(q).widgets || []).indexOf('nav') >= 0, 20000);
-    ok((S(p).widgets || []).indexOf('nav') >= 0 && (S(p).widgets || []).indexOf('nav_bg') >= 0, 'ownNav = ours builds the label and its bar (' + JSON.stringify(S(p).widgets) + ')');
-    await set('ownSign', 'ours');
+    ok((S(p).widgets || []).indexOf('nav') >= 0 && (S(p).widgets || []).indexOf('nav_bg') >= 0, 'all6WB builds the label and its bar (' + JSON.stringify(S(p).widgets) + ')');
     p = await until((q) => (S(q).widgets || []).indexOf('signs') >= 0, 20000);
-    ok((S(p).widgets || []).indexOf('signs') >= 0 && (S(p).widgets || []).indexOf('limit') >= 0, 'ownSign = ours builds the sign and its figure');
-    await set('ownInfo', 'ours');
+    ok((S(p).widgets || []).indexOf('signs') >= 0 && (S(p).widgets || []).indexOf('limit') >= 0, 'all6WB builds the sign and its figure');
     await scene('cc-red');
     p = await until((q) => (S(q).widgets || []).indexOf('cc_name') >= 0 && S(q).cc.name, 20000);
-    ok((S(p).widgets || []).indexOf('cc_name') >= 0 && (S(p).widgets || []).indexOf('cc_desc') >= 0, 'ownInfo = ours builds the message text');
+    ok((S(p).widgets || []).indexOf('cc_name') >= 0 && (S(p).widgets || []).indexOf('cc_desc') >= 0, 'all6WB builds the message text');
     ok(S(p).cc.name === 'Engine malfunction' && /Drive on/.test(S(p).cc.desc), 'and the text is the car\'s own (' + S(p).cc.name + ')');
     ok(S(p).road === '', 'the road label steps aside while a message shows, as BMW does');
 
@@ -191,18 +191,15 @@ async function main() {
 
     await scene('cc-clear');
 
-    console.log('back to BMW\'s, one row and then all six');
-    await set('ownSign', 'bmw');
+    console.log('back to BMW\'s: the one switch, in one press');
+    await set('bottomRow', 'allG20');
     p = await until((q) => (S(q).widgets || []).indexOf('signs') < 0, 20000);
-    ok((S(p).widgets || []).indexOf('signs') < 0, 'ownSign = BMW\'s drops our sign again');
-    await set('ownAll', 'bmw');
-    p = await until((q) => q.settings.ownNav === 'bmw' && q.settings.ownInfo === 'bmw' && q.settings.ownRange === 'bmw', 20000);
-    ok(p.settings.ownNav === 'bmw' && p.settings.ownSign === 'bmw' && p.settings.ownInfo === 'bmw' &&
-        p.settings.ownRange === 'bmw' && p.settings.ownTemp === 'bmw' && p.settings.ownClock === 'bmw',
-        'one row puts all six back to BMW\'s');
-    ok(p.settings.ownAll === 'keep', 'and the row springs back to "leave each row as it is"');
+    ok((S(p).widgets || []).indexOf('signs') < 0, 'allG20 drops our sign again');
+    ok(p.settings.bottomRow === 'allG20', 'and the switch holds the choice ("' + p.settings.bottomRow + '")');
     p = await until((q) => JSON.stringify(S(q).widgets) === '[]', 20000);
-    ok(JSON.stringify(S(p).widgets) === '[]', 'nothing of ours is built for the six again');
+    ok(JSON.stringify(S(p).widgets) === '[]', 'nothing of ours is built for the whole row again');
+    ok(!S(p).own.range && !S(p).own.clock && !S(p).own.temp && !S(p).own.nav && !S(p).own.sign && !S(p).own.info,
+        'and the engine reports every item of the row as BMW\'s');
 
     console.log('the red arc follows the car\'s own warning, and the driver\'s own setting');
     // live data at 120 km/h, so the "always" case has a speed to compare against the sign
@@ -235,7 +232,7 @@ async function main() {
     console.log('the way back');
     ok(JSON.stringify(S(p).fail) === '{}', 'nothing fell back while every signal was there and could be drawn (' + JSON.stringify(S(p).fail) + ')');
     // a word our baked font has no glyph for: the element gives itself back to the car rather than draw holes
-    await set('ownNav', 'ours');
+    await set('bottomRow', 'all6WB');
     await until((q) => (S(q).widgets || []).indexOf('nav') >= 0, 20000);
     await fake({ road: { text: 'Паркова' } });
     p = await until((q) => S(q).fail && S(q).fail.nav, 20000);
@@ -243,7 +240,26 @@ async function main() {
     p = await until((q) => (S(q).widgets || []).indexOf('nav') < 0, 20000);
     ok((S(p).widgets || []).indexOf('nav') < 0, 'and our label is dropped, so the car draws its own again');
     ok(/bottom row: nav is BMW's again \(the font/.test(logText), 'the log says which font and how many characters, not the name');
-    await set('ownNav', 'bmw');
+    ok(S(p).own.range === true && S(p).own.temp === true,
+        'and the latch is that element\'s alone: the rest of the row stays ours whatever the switch said');
+    await set('bottomRow', 'allG20');
+
+    console.log('the G20 toggle: on and off again with no restart');
+    await click('SET_G20');                       // off: back to the opaque Comfort
+    p = await until((q) => q.activeName === 'wb_comfort', 20000);
+    ok(p.activeName === 'wb_comfort' && p.settings.g20 === false, 'the toggle off builds the opaque 6WB Comfort');
+    for (let i = 1; i <= 4; i++) {
+        await click('SET_G20');
+        const want = i % 2 ? 'wb_dials' : 'wb_comfort';
+        p = await until((q) => q.activeName === want && /^Cluster on/.test(q.status) && !/drawn \(/.test(q.status), 20000);
+        ok(p.activeName === want && !/refused|unusable|Cluster: /.test(p.status), 'toggle ' + i + ': ' + (p.status || '').slice(0, 110));
+    }
+    await click('SET_G20');
+    p = await until((q) => q.activeName === 'wb_dials' && /\+ G20/.test(q.status), 20000);
+    ok(/6WB Comfort \+ G20/.test(p.status || ''), 'the status line names it "6WB Comfort + G20"');
+    ok(!/kombi guard/.test(logText), 'no KOMBI guard strike while toggling');
+    await click('SET_G20');
+    await until((q) => q.activeName === 'wb_comfort', 20000);
 
     console.log('every layout still builds');
     for (const v of opts('hudLayout')) {
