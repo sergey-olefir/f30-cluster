@@ -61,7 +61,11 @@
       ]
     },
     "de.bmw.infotainment.KombiIF": {
-      "statusRangeTankStatus": "rs"
+      "statusRangeTankStatus": "rs",
+      "timeDateUTC": "rs",
+      "statusTimeDate": "rs",
+      "statusMenuCCMessage": "rs",
+      "_optional": "the car's own clock and its time-zone offset (config.clock), so our clock no longer needs the manual timeZone setting (the head unit runs on UTC)"
     },
     "de.bmw.infotainment.vehicle.Vehicle": {
       "statusNewCurrentUnitsStatusExt": "rs",
@@ -83,6 +87,43 @@
     },
     "de.bmw.infrastructure.EnvironmentalInformation": {
       "ExteriorTemperature": "s"
+    },
+    "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl": {
+      "displaySpeedLimitAndNoPassingRestriction": "s",
+      "_optional": "the speed-limit sign and the no-overtaking sign in one struct (config.sign); notifier only, no getter"
+    },
+    "de.bmw.infotainment.fasus.FASuS": {
+      "statusNextSpeedLimitRecognition": "rs",
+      "_optional": "the NEXT limit ahead, not the one in force; not drawn yet, read for calibration"
+    },
+    "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions": {
+      "settingSpeedLimitInfoPresentation": "rs",
+      "settingSpeedLimitInfoWarning": "rs",
+      "settingSpeedLimitWarningSecondLevel": "rs",
+      "settingOffsetSpeed": "rs",
+      "settingOffsetSpeedSlow": "rs",
+      "settingOffsetSpeedSlowActivation": "rs",
+      "_optional": "the driver's OWN speed-limit settings, so our red arc follows the car's excess-speed display instead of our own guess. READ ONLY ON PURPOSE: every one of these is \"rws\" in the car's catalogue, and the flags here say \"rs\", so the installer leaves the setter out of our interface config and the app cannot write a driver-assistance setting even by mistake."
+    },
+    "de.bmw.infotainment.KombiInterface_2": {
+      "newCCMessage": "rs",
+      "ccList": "rs",
+      "_methods": [
+        "requestCCMessage"
+      ],
+      "_optional": "the check-control message the cluster shows (config.ccm kind \"message\"); its text is the car's own and is never logged"
+    },
+    "de.bmw.infotainment.navigation.guiding.Guidance": {
+      "_instances": "Main_Instance",
+      "currentRoad": "rs",
+      "isOnGuidableRoad": "rs",
+      "_optional": "the bottom-centre road label (config.road / config.onRoad). INSTANCE: the catalogue's instanceIDs give this interface Main_Instance = 128, not 1 (kit car.js $instance)"
+    },
+    "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus": {
+      "currentLocation": "rs",
+      "guidingState": "rs",
+      "nextDestinationInfo": "rs",
+      "_optional": "guidance state, distance and arrival time (config.nav); currentLocation is PERSONAL DATA: only used as a fallback road label, never logged"
     }
   },
   "screens": [
@@ -302,6 +343,7 @@
       "key": "ownRange",
       "label": "Range (+ G20 themes)",
       "type": "choice",
+      "group": "Who draws this",
       "default": "ours",
       "reset": 1,
       "options": [
@@ -319,6 +361,7 @@
       "key": "ownClock",
       "label": "Clock (+ G20 themes)",
       "type": "choice",
+      "group": "Who draws this",
       "default": "auto",
       "reset": 1,
       "options": [
@@ -340,6 +383,7 @@
       "key": "ownTemp",
       "label": "Outside temp (+ G20 themes)",
       "type": "choice",
+      "group": "Who draws this",
       "default": "ours",
       "reset": 1,
       "options": [
@@ -354,7 +398,97 @@
       ]
     },
     {
+      "key": "ownNav",
+      "label": "Navigation label (+ G20 themes)",
+      "type": "choice",
+      "group": "Who draws this",
+      "default": "bmw",
+      "options": [
+        [
+          "bmw",
+          "BMW's"
+        ],
+        [
+          "ours",
+          "Ours (6WB style)"
+        ]
+      ]
+    },
+    {
+      "key": "ownSign",
+      "label": "Speed-limit sign (+ G20 themes)",
+      "type": "choice",
+      "group": "Who draws this",
+      "default": "bmw",
+      "options": [
+        [
+          "bmw",
+          "BMW's"
+        ],
+        [
+          "ours",
+          "Ours (6WB style)"
+        ]
+      ]
+    },
+    {
+      "key": "ownInfo",
+      "label": "Info message (+ G20 themes)",
+      "type": "choice",
+      "group": "Who draws this",
+      "default": "bmw",
+      "options": [
+        [
+          "bmw",
+          "BMW's"
+        ],
+        [
+          "ours",
+          "Ours (text only)"
+        ]
+      ]
+    },
+    {
+      "key": "ownAll",
+      "label": "Put the six rows above back to BMW's",
+      "type": "choice",
+      "group": "Who draws this",
+      "default": "keep",
+      "options": [
+        [
+          "keep",
+          "Leave each row as it is"
+        ],
+        [
+          "bmw",
+          "All six: BMW's"
+        ]
+      ]
+    },
+    {
+      "key": "limitArc",
+      "group": "Our own extras",
+      "label": "Red arc over the speed limit",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "As the car's own warning"
+        ],
+        [
+          "on",
+          "Always when over the limit"
+        ],
+        [
+          "off",
+          "Off"
+        ]
+      ]
+    },
+    {
       "key": "modeLabel",
+      "group": "Our own extras",
       "label": "Drive mode above gear",
       "type": "bool",
       "default": true,
@@ -362,6 +496,7 @@
     },
     {
       "key": "gearTray",
+      "group": "Our own extras",
       "label": "Gear tray (6WB)",
       "type": "choice",
       "default": "gear",
@@ -1219,9 +1354,216 @@
       },
       "_from": "audit/features, from the car's own catalogue (/etc/oap/someip/someip-interfaces.json, StatusConditionMSA). Flag s: notifier only, so the first value comes with the first change. The raw value is logged once per new value ('msa raw: ... -> ...'); check it on the car at a start/stop stop, with the MSA button off, and with a cold engine."
     },
-    "clock": null,
-    "ccm": null,
     "drive": null,
+    "clock": {
+      "_about": "The car's own time-zone offset, so our clock is right without the manual timeZone setting (the owner, 2026-11-15; the head unit itself runs on UTC). The timeZone setting still wins when it is not Automatic.",
+      "_confirm": "UNCONFIRMED ENCODING. The catalogue says timeZonesOffsetAutomaticallyUTC is a UInt8 but not what one step is; 15 minutes with no bias is the guess below. While \"confirm\" is not true the car's value is only PARSED AND LOGGED ('clock: the car's offset would be N minutes') and our clock keeps using the timeZone setting, so a wrong guess cannot put a wrong time on the cluster. Read that line on the car once, set \"factor\" (1 minutes, 15 quarter hours, 60 hours) and \"offsetBy\" (subtracted from the raw first) so N is the real offset, then set \"confirm\": true.",
+      "iface": "de.bmw.infotainment.KombiIF",
+      "field": "timeDateUTC",
+      "kind": "offset",
+      "confirm": false,
+      "path": ["timeZonesOffsetAutomaticallyUTC"],
+      "factor": 15,
+      "offsetBy": 0,
+      "dstPath": ["offsetWintertimeSummertimeUTC"],
+      "dstMinutes": 60,
+      "invalid": [255]
+    },
+    "_bottomRow": {
+      "about": "Package 'bottom row' (docs/BOTTOM-ROW-PACKAGE.md). The three shapes below name the car's own fields for the speed-limit sign, the check-control message and the road label, verified member by member against the car's catalogue (reference/car/2026-11-15/someip/someip-interfaces.json, 2026-11-15). Each is OPTIONAL: set it to null and nothing is subscribed and nothing changes. WHAT IS DRAWN is decided by the settings ownSign / ownInfo / ownNav, which are \"bmw\" by default, so the car draws all three until the owner picks ours. Every new raw combination is logged ONCE as a SHAPE: the message text, the road name and the position are personal data and never reach the log.",
+      "calibrate": "On the car, watch for the log lines 'sign: ...', 'check-control message: ...', 'road label: ...', 'navigation: ...' and 'position: ...'. They say which enum values and lengths the car really sends; correct the maps below from them.",
+      "signShape": "{ iface, field, invalidPath + invalidOn, valuePath, factor, min, max, unitPath + mph + noUnit, none / end / unknown (raw speed values), warnPath + warnMap, suppPath + suppMap, stylePath + styleMap, surePath + sureOn, npPath + npMap, npDistPath }: shared/hud.js signOf()",
+      "ccmShape": "kind 'message': { roots (the union members to try), namePath, descPath, colorPath + colorMap, symbolPath, idPath, typePath, clearIds }: shared/hud.js ccMsgOf(). The older kinds 'list' and 'flag' (car3 I) still work.",
+      "roadShape": "{ iface, field, instance, path, textKey, spacerKey, iconKey, iconTextKey, spacerMap, maxLen }: shared/hud.js roadOf(). The icon's own picture is a navigation resource handle we cannot resolve, so only its text is used; the road shields come later (docs/ROAD-SHIELDS.md).",
+      "navShape": "{ iface, instance, state: { field, path, map }, next: { field, distPath, unitPath, unitMap, etaPath, timePath }, here: { field, validPath, streetPath, cityPath } }. 'here' is the car's position: PERSONAL DATA, read only as a fallback road label, never logged, never sent anywhere."
+    },
+    "sign": {
+      "iface": "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl",
+      "field": "displaySpeedLimitAndNoPassingRestriction",
+      "invalidPath": ["invalidFlag"],
+      "invalidOn": [1, true],
+      "valuePath": ["displaySpeedLimit"],
+      "factor": 1,
+      "min": 5,
+      "max": 250,
+      "unitPath": ["displaySpeedLimitUnit"],
+      "mph": ["MPH", 1],
+      "noUnit": ["NICHT_VERFUEGBAR", 2],
+      "none": [],
+      "end": [0],
+      "unknown": [254, 255],
+      "_values": "The raw speed values follow the convention of the car's own FASuS NextClassLimitSpeed enum, which is the only one in the catalogue that spells them out: 0 = AUFHEBUNG_ALLES (the end of all restrictions, the derestriction sign), 254 = NICHT_VERFUEGBAR and 255 = SIGNAL_UNBEFUELLT (no limit known, BMW's empty sign). displaySpeedLimit itself is a plain UInt8 with no names, so this is reasoning, not proof: the 'sign:' log line on the car settles it. \"none\" is empty on purpose - the owner's cluster essentially always shows a sign (2026-11-15).",
+      "warnPath": ["displaySpeedLimitWarning"],
+      "warnMap": {
+        "SLI_WARNUNG_NICHT_ANGEFORDERT": 0, "0": 0,
+        "SLI_WARNUNG_ANGEFORDERT": 1, "1": 1,
+        "SLI_WARNUNG_STUFE_2": 2, "2": 2
+      },
+      "suppPath": ["displaySpeedLimitSupplemental"],
+      "suppMap": {
+        "KEIN_ZUSATZZEICHEN": null, "0": null,
+        "UHRZEIT": "time", "1": "time",
+        "REGEN": "rain", "2": "rain",
+        "SCHNEE": "snow", "3": "snow",
+        "SCHNEE_REGEN": "snowRain", "4": "snowRain",
+        "AUSFAHRT_LINKS": "exitL", "5": "exitL",
+        "AUSFAHRT_RECHTS": "exitR", "6": "exitR",
+        "DISTANZ_1": "dist1", "7": "dist1",
+        "DISTANZ_2": "dist2", "8": "dist2",
+        "NEBEL": "fog", "9": "fog",
+        "RESTRIKTION": "restriction", "10": "restriction",
+        "ANHAENGER": "trailer", "11": "trailer",
+        "ZONE": "zone", "12": "zone",
+        "SCHOOL": "school", "13": "school",
+        "WORK_ZONE": "work", "14": "work"
+      },
+      "stylePath": ["displaySymbolStyle"],
+      "styleMap": {
+        "ECE": "ece", "0": "ece", "ECE_UNSURE": "ece", "1": "ece",
+        "US": "us", "2": "us", "US_UNSURE": "us", "3": "us",
+        "CHINA": "china", "4": "china", "CHINA_UNSURE": "china", "5": "china",
+        "KOREA": "korea", "6": "korea", "KOREA_UNSURE": "korea", "7": "korea",
+        "JAPAN": "japan", "8": "japan", "JAPAN_UNSURE": "japan", "9": "japan"
+      },
+      "surePath": ["displaySymbolStyle"],
+      "sureOn": ["ECE", 0, "US", 2, "CHINA", 4, "KOREA", 6, "JAPAN", 8],
+      "npPath": ["displayNoPassingRestriction"],
+      "npMap": {
+        "KEIN_UEBERHOLVERBOT_ERKANNT": "none", "0": "none",
+        "UEBERHOLVERBOT_PKW": "car", "1": "car",
+        "AUFHEBUNG_UEBERHOLVERBOT_PKW_ERKANNT": "endCar", "2": "endCar",
+        "UEBERHOLVERBOT_PKW_MIT_ANHAENGER_ERKANNT": "trailer", "3": "trailer",
+        "AUFHEBUNG_UEBERHOLVERBOT_PKW_MIT_ANHAENGER_ERKANNT": "endTrailer", "4": "endTrailer",
+        "UEBERHOLVERBOT_LKW": "truck", "5": "truck",
+        "AUFHEBUNG_UEBERHOLVERBOT_LKW": "endTruck", "6": "endTruck",
+        "ANDERE_UEBERHOLVERBOTE": "other", "7": "other",
+        "UEBERHOLVERBOT_LINKSVERKEHR": "left", "8": "left"
+      },
+      "npDistPath": ["displayRemainingDistanceNoPassingRestriction"],
+      "holdMs": 0,
+      "changeFlashMs": 3000,
+      "flashPeriodMs": 500,
+      "_hold": "The stock cluster animates the end of a limit and then shows the new one, and a sign is essentially always present (the owner, 2026-11-15), so there is no \"hide the sign\" state. holdMs keeps the last sign on while the car briefly says nothing; the animation itself lands in shared/hud.js _signShow().",
+      "_timings": "changeFlashMs / flashPeriodMs are docs/G20-DESIGN-SPEC.md's PLACEHOLDERS for the flash after a limit changes - there is no video in the reference set, so nothing was measured. They are parameters only; nothing acts on them yet.",
+      "_empty": "docs/G20-DESIGN-SPEC.md: BMW's empty sign is THREE DASHES, 8.8 x 4.4 at pitch 13, not a blank disc. That is WBSIGN's u_show state 3, which this package already drives; whether the shader draws dashes is the drawing package's to check.",
+      "_mph": "The unit is read and recorded ({{limitUnit}}, the 'sign:' log line) but changes nothing on screen: the sign stays the round one with the number, in every country (the owner, 2026-11-15)."
+    },
+    "ccm": {
+      "iface": "de.bmw.infotainment.KombiInterface_2",
+      "field": "newCCMessage",
+      "kind": "message",
+      "roots": [["cCMessageStruct"], ["cCMessageWithSymbol", "cCMessage"]],
+      "namePath": ["cCName"],
+      "descPath": ["additionalDescription"],
+      "colorPath": ["cCColor"],
+      "colorMap": {
+        "DEFAULT": "default", "0": "default",
+        "RED": "red", "1": "red",
+        "YELLOW": "yellow", "2": "yellow",
+        "GREEN": "green", "3": "green",
+        "ORANGE": "orange", "4": "orange",
+        "WHITE": "white", "5": "white"
+      },
+      "symbolPath": ["cCSymbolID"],
+      "idPath": ["cCIdentifier"],
+      "typePath": ["cCType"],
+      "clearIds": [],
+      "ccFrameDwellMs": 4000,
+      "autoHideMs": 20000,
+      "reshowMs": 8000,
+      "_timings": "PARAMETERS ONLY - nothing acts on any of them. This package builds STATES, not animations (the owner, 2026-11-15): a message appears and disappears with no flash. ccFrameDwellMs is docs/G20-DESIGN-SPEC.md's guess at how long one frame of a cycling message is shown, which we do not need because the car says which frame it is on itself (config.ccFrames). autoHideMs / reshowMs are BMW's manual's ~20 s auto-hide and ~8 s hide-then-reshow. They live here so animation can be added later without touching the drawing.",
+      "_colour": "White only for now (the owner, 2026-11-15): cCColor is read and recorded but every message is drawn in the theme's normal foreground. The seam is one line - put \"colorBy\": \"cc\" back on the cc_name text in design/gen_6wb.py cc_row(), which turns on shared/hud.js _ccRole()."
+    },
+    "sla": {
+      "_about": "The driver's own speed-limit settings (read only). The red arc on our speed scale follows the car's own excess-speed verdict instead of comparing speed against the sign ourselves: displaySpeedLimitWarning in the sign struct says WHEN the car considers the driver over, and \"warn\" below says whether the driver asked for that warning at all. The offsets are the tolerance the driver set; we do not need them to draw, and they are read for the log so the car's behaviour can be understood.",
+      "_readonly": "Nothing here is ever written. The fields are \"rws\" on the car; app.json declares them \"rs\", so our generated interface config has no setter.",
+      "iface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "instance": "1",
+      "onMap": { "ACTIVATED": "on", "2": "on", "DEACTIVATED": "off", "1": "off", "NOT_CONFIGURABLE": null, "0": null },
+      "availMap": { "OPERABLE": "ok", "2": "ok", "NOT_OPERABLE": "notNow", "1": "notNow", "NOT_AVAILABLE": null, "0": null },
+      "parts": [
+        { "key": "warn", "field": "settingSpeedLimitInfoWarning", "valuePath": ["value"], "availPath": ["availability"], "note": "THIS is the field taken as \"the excess-speed display is on\"" },
+        { "key": "warn2", "field": "settingSpeedLimitWarningSecondLevel", "valuePath": ["value"], "availPath": ["availability"] },
+        { "key": "show", "field": "settingSpeedLimitInfoPresentation", "valuePath": ["value"], "availPath": ["availability"] },
+        { "key": "offset", "field": "settingOffsetSpeed", "valuePath": ["value"], "availPath": ["availability"], "number": true },
+        { "key": "offsetSlow", "field": "settingOffsetSpeedSlow", "valuePath": ["value"], "availPath": ["availability"], "number": true },
+        { "key": "offsetSlowOn", "field": "settingOffsetSpeedSlowActivation", "valuePath": ["value"], "availPath": ["availability"] }
+      ]
+    },
+    "ccFrames": {
+      "_about": "Which frame of how many the stock cluster is showing. docs/G20-DESIGN-SPEC.md: the car CYCLES NUMBERED FRAMES, it does not stack or side-scroll, and this field is how it says so. When it arrives, our text follows the car's frame exactly instead of running its own clock.",
+      "iface": "de.bmw.infotainment.KombiIF",
+      "field": "statusMenuCCMessage",
+      "numPath": ["numberFrameCheckControlMessageScroll"],
+      "countPath": ["quantityFrameCheckControlMessageScroll"],
+      "idPaths": [
+        ["numberCheckControlMessage1"],
+        ["numberCheckControlMessage2"],
+        ["numberCheckControlMessage3"]
+      ]
+    },
+    "ccList": {
+      "_about": "Several messages at once: the car cycles through this list, and ours steps through it on the same clock (the owner, 2026-11-15). Each element carries a short name and a colour; config.ccm.cycleMs is how long each one is shown. The stock order and timing are being measured in docs/G20-DESIGN-SPEC.md.",
+      "iface": "de.bmw.infotainment.KombiInterface_2",
+      "field": "ccList",
+      "path": [],
+      "root": ["cCListElement"],
+      "namePath": ["cCShortName"],
+      "idPath": ["cCIdentifer"],
+      "colorPath": ["cCColor"],
+      "colorMap": {
+        "DEFAULT": "default", "0": "default",
+        "RED": "red", "1": "red",
+        "YELLOW": "yellow", "2": "yellow",
+        "GREEN": "green", "3": "green",
+        "ORANGE": "orange", "4": "orange",
+        "WHITE": "white", "5": "white"
+      }
+    },
+    "road": {
+      "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+      "field": "currentRoad",
+      "instance": "Main_Instance",
+      "path": ["elements"],
+      "textKey": "text",
+      "spacerKey": "spacer",
+      "iconKey": "icon",
+      "iconTextKey": "text",
+      "spacerMap": { "SMALL": " ", "1": " ", "BIG": "   ", "2": "   ", "NEW_LINE": " ", "3": " ", "SLASH": " / ", "4": " / " },
+      "maxLen": 32
+    },
+    "onRoad": {
+      "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+      "field": "isOnGuidableRoad",
+      "instance": "Main_Instance",
+      "path": []
+    },
+    "nav": {
+      "iface": "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus",
+      "instance": "1",
+      "state": {
+        "field": "guidingState",
+        "path": [],
+        "map": { "INACTIVE": "off", "0": "off", "CALCULATING_ROUTE": "calc", "1": "calc", "ACTIVE": "on", "2": "on" }
+      },
+      "next": {
+        "field": "nextDestinationInfo",
+        "distPath": ["formattedDistance", "distance"],
+        "unitPath": ["formattedDistance", "unit"],
+        "unitMap": { "KM": "km", "1": "km", "MILE_UK": "mi", "2": "mi", "MILE_US": "mi", "3": "mi", "METER": "m", "4": "m", "YARD": "yd", "5": "yd", "FEET": "ft", "6": "ft", "UNDEFINED": null, "0": null },
+        "etaPath": ["estimatedArrivalTime"],
+        "timePath": ["travelTime"]
+      },
+      "here": {
+        "_about": "PERSONAL DATA. The street is used only as a fallback road label; the coordinates only for the sunrise and sunset that drive the night colours (the owner, 2026-11-15), falling back to config.location when the position is not valid. Neither is ever logged or sent anywhere.",
+        "field": "currentLocation",
+        "validPath": ["valid"],
+        "streetPath": ["address", "street", "text"],
+        "cityPath": ["address", "city", "text"],
+        "latPath": ["coordinates", "latitude"],
+        "lonPath": ["coordinates", "longitude"]
+      }
+    },
     "_car3": {
       "driveShape": "{ iface, field, path: [..], map: { '<raw>': 'COMFORT' | 'COMFORT_PLUS' | 'SPORT' | 'SPORT_PLUS' | 'ECO_PRO' | 4 ... } }: the drive mode from another field than FES statusFESVehicleDynamicSwitchHMI (which gave nothing on the owner's car); the value goes through the same handler, so layout choice is unchanged. null: that FES field only.",
       "about": "Package I (docs/CAR3-I-REPORT.md). Fields not known yet, so null: then nothing is subscribed. ./scripts/car_signals.sh root@<car> ranks the car's catalogue for each and prints these lines; each interface must also go under signals (flag s, or rs with a getter). Every new raw value is logged once ('msa raw', 'clock raw', 'check-control raw') to calibrate.",

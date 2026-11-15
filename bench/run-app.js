@@ -118,7 +118,10 @@ function press(key, value) {
 // own sign), the bench stands in one, bench.SpeedLimit, so these can still be set; BENCH_LIMIT=off runs as the car does.
 const appCfg = spec.config || (spec.config = {});
 const named = (s) => !!(s && s.iface && s.field);
-if (process.env.BENCH_LIMIT !== 'off') {
+// Bottom row: once app.json names the car's own speed-limit struct (config.sign) the stand-in is not installed -
+// the real shape is wired, and bench/fake-signs.js feeds it (otherwise the manual slider, fed 20 times a second,
+// would overwrite every scene).
+if (process.env.BENCH_LIMIT !== 'off' && !named(appCfg.sign)) {
     if (!named(appCfg.limit)) appCfg.limit = { iface: 'bench.SpeedLimit', field: 'limit', path: ['value'], invalid: [0], end: [255], unknown: [254] };
     if (!named(appCfg.nopass)) appCfg.nopass = { iface: 'bench.SpeedLimit', field: 'nopass', path: ['value'], on: [1] };
     if (appCfg.limit.iface === 'bench.SpeedLimit') log.info('bench: app.json config.limit names no field (the car shows BMW\'s sign); the bench stands in bench.SpeedLimit so manual signals set our sign (BENCH_LIMIT=off: as the car)');
@@ -176,9 +179,17 @@ function feedCar3(v) {
         const f = typeof C.factor === 'number' && C.factor ? C.factor : 1;
         hu.feed(C.iface, C.field, nest(C.path, typeof v.tzCar === 'number' ? Math.round(v.tzCar / f) : (C.invalid || [null])[0]));
     }
-    if (named(K) && 'ccMsg' in v) hu.feed(K.iface, K.field, K.kind === 'list' ? nest(K.path, v.ccMsg ? [{ id: 1 }] : []) : nest(K.path, v.ccMsg ? (K.on || [1])[0] : 0));
+    // (bottom row: the "message" kind is the car's own union, fed by bench/fake-signs.js, not by this flag)
+    if (named(K) && 'ccMsg' in v && K.kind !== 'message') hu.feed(K.iface, K.field, K.kind === 'list' ? nest(K.path, v.ccMsg ? [{ id: 1 }] : []) : nest(K.path, v.ccMsg ? (K.on || [1])[0] : 0));
 }
 // ---- end car3 I --------------------------------------------------------------------------------------------------------
+
+// ---- bottom row (docs/BOTTOM-ROW-PACKAGE.md): the speed-limit struct, the check-control message, the road label,
+// the guidance, the position and the car's clock. The bench is the only place these can be seen, so a fake feeds
+// them as raw SOME/IP values through the very shapes app.json config names (bench/fake-signs.js). POST /fake takes
+// { scene: '<name>' } or the parts themselves; GET /probe reports what the engine made of them.
+const fakeSigns = require('./fake-signs').install(hu, appCfg, log);
+// ---- end bottom row ----
 
 // manual signals as raw SOME/IP values (a copy of kit/runtime/car.js SCALE; FES boost from hud.js)
 const SCALE = { rpm: [0.25, 0], speed: [0.015625, 0], accel: [0.002, -65], temp: [1, -48], torque: [0.5, -1023.5], boost: [0.01, 0] };
@@ -241,7 +252,12 @@ process.on('message', (m) => {
     // and what the app shows (GET /probe)
     else if (m.t === 'click' && m.id) ui.comp(m.id).emit('action', typeof m.row === 'number' ? { row: m.row } : {});
     else if (m.t === 'hmi' && m.a === 'back') { const top = hu.stack[hu.stack.length - 1]; if (top) ui.close(top); }
-    else if (m.t === 'fake' && fakePerso) fakePerso.control(m.v || {});
+    else if (m.t === 'fake') {
+        const v = m.v || {};
+        // the bottom-row fakes take scene / sign / cc / ccList / road / nav / clock; the rest goes to the fake persod
+        if (v.scene || v.sign || v.cc || v.ccList || v.ccFrame || v.sla || v.road || v.nav || v.clock) fakeSigns.control(v);
+        else if (fakePerso) fakePerso.control(v);
+    }
     else if (m.t === 'probe') {
         let layoutName = null, yielded = null;
         try { layoutName = hud ? hud._layoutName() : null; yielded = hud && hud.screen ? hud.screen.yielded : null; } catch (e) { /* not up yet */ }
@@ -250,6 +266,21 @@ process.on('message', (m) => {
             activeName: hud ? hud.activeName : null, layoutName, yielded, driveMode: hud ? hud.driveMode : null,
             ready: !!(hud && hud.client && hud.client.ready),
             perso: fakePerso ? fakePerso.state() : null,
+            // bottom row: what the fakes fed and what the engine made of it (bench/test-bottom-row.js)
+            signs: Object.assign(fakeSigns.state(), hud ? {
+                sign: hud.sign,
+                cc: {
+                    shown: hud.ccShown, name: hud._ccText('name'), desc: hud._ccText('desc'), list: (hud.ccItems || []).length,
+                    // what the parser made of it, whoever draws it: lengths and the colour, never the text
+                    parsed: { name: (hud.ccMsg.name || '').length, desc: (hud.ccMsg.desc || '').length, color: hud.ccMsg.color, symbol: hud.ccMsg.symbol },
+                    frame: hud.ccFrame,
+                },
+                road: hud._roadText(), navState: hud.navState, navDist: hud.navDist, navEta: hud.navEta,
+                own: { nav: hud._own('nav'), sign: hud._own('sign'), info: hud._own('info'), range: hud._own('range'), clock: hud._own('clock'), temp: hud._own('temp') },
+                fail: hud.rowFail || {}, tzCar: hud.tzCar, tzCandidate: hud.tzCandidate,
+                sla: hud.sla, arc: hud._arcOn(),
+                widgets: ['signs', 'limit', 'nav', 'nav_bg', 'cc_name', 'cc_desc'].filter((id) => hud.widgets && hud.widgets.has(id)),
+            } : {}),
         });
     }
 });
