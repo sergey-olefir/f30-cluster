@@ -3566,7 +3566,11 @@ class HudApp {
      *  maps its colours to its own marker: no stock photo pairs a known cCColor with the marker it showed. */
     _ccSeverity() {
         const c = this._ccNow().color;
-        return { name: c === 'red' || c === 'yellow' || c === 'orange' ? 'warn' : 'info', rgba: color(this.theme, this._ccRole() || 'fg') };
+        // strip integration (the owner's decision 6): three classes - "warn" (red, yellow, orange: package P's outline
+        // triangle cc_warn), "info" (white, green: cc_info) and "neutral" (default, or no colour from the car: NO
+        // marker, not a dot). Which cCColor BMW itself shows as which marker is still a guess (no stock photo pairs them)
+        const name = c === 'red' || c === 'yellow' || c === 'orange' ? 'warn' : c === 'white' || c === 'green' ? 'info' : 'neutral';
+        return { name, rgba: color(this.theme, this._ccRole() || 'fg') };
     }
 
     /** Our message line as straight RGBA, w.w x w.h: the headline in w.font (white: the owner, 2026-11-15), its cell
@@ -3576,9 +3580,13 @@ class HudApp {
         const W = w.w, H = w.h, fm = textRaster.loadFont(w.font).metrics;
         const top = isNum(w.textY) ? w.textY : 0, base = top + fm.baseline;
         const capH = Math.round(fm.size * 0.716), capTop = base - capH;         // Arimo's cap height, 0.716 em
-        const mH = style === 'A' ? Math.round(capH * 1.3) : 0;                   // the marker: a little taller than a capital
-        const mW = !mH ? 0 : sev.name === 'warn' ? Math.round(mH * 1.15) : mH;
-        const gap = mH ? Math.round(capH * 0.6) : 0, pad = 8;
+        // strip integration (decision 6): the marker is package P's pictogram (shared/strip_icons.js, painted by
+        // icons.js paintIcon) in an mH square - cc_warn's triangle spans 0.78 of it, so it stands a capital high -
+        // and the neutral case has none at all
+        const icon = style === 'A' ? (sev.name === 'warn' ? 'cc_warn' : sev.name === 'info' ? 'cc_info' : null) : null;
+        const mH = icon ? Math.round(capH * 1.3) : 0;                            // the marker's square
+        const mW = mH;
+        const gap = mH ? Math.round(capH * 0.5) : 0, pad = 8;
         let t = String(s);
         const fits = (v) => textRaster.measure(v, w.font, w.spacing) <= W - 2 * pad - mW - gap;
         if (!fits(t)) {
@@ -3586,7 +3594,7 @@ class HudApp {
             t = t.replace(/[\s,.;:/-]+$/, '') + '...';
         }
         const tw = textRaster.measure(t, w.font, w.spacing);
-        this.ccFit = { chars: t.length, cut: t !== String(s), width: tw };       // lengths only (the bench's probe)
+        this.ccFit = { chars: t.length, cut: t !== String(s), width: tw, marker: icon };   // lengths and the marker only (the bench's probe)
         const x0 = Math.round((W - (mW + gap + tw)) / 2), tx = x0 + mW + gap;
         const fg = color(this.theme, w.color || 'fg');
         const out = t ? textRaster.drawText(W, H, t, { font: w.font, offsetY: top, color: fg, align: 'left', x: tx, spacing: w.spacing })
@@ -3599,34 +3607,11 @@ class HudApp {
             for (let j = 0; j < 3; j++) out[o + j] = Math.round((rgba[j] * sa + out[o + j] * da * (1 - sa)) / a);
             out[o + 3] = Math.round(a * 255);
         };
-        const cov = (d) => Math.max(0, Math.min(1, 0.5 - d));                    // signed distance (px) -> coverage
-        if (style === 'A' && mH) {
-            const cx = x0 + mW / 2, cy = capTop + capH / 2;
-            const seg = (px, py, ax, ay, bx, by) => {
-                const pax = px - ax, pay = py - ay, bax = bx - ax, bay = by - ay;
-                const h = Math.max(0, Math.min(1, (pax * bax + pay * bay) / (bax * bax + bay * bay)));
-                return Math.hypot(pax - bax * h, pay - bay * h);
-            };
-            for (let y = Math.floor(cy - mH / 2) - 1; y <= Math.ceil(cy + mH / 2) + 1; y++) {
-                for (let x = Math.floor(x0) - 1; x <= Math.ceil(x0 + mW) + 1; x++) {
-                    const px = x + 0.5, py = y + 0.5;
-                    let body, ink;
-                    if (sev.name === 'warn') {
-                        // a warning triangle (ISO 2575's shape), its corners rounded by 1.5 px, a "!" knocked out of it
-                        const r = 1.5, ax = cx, ay = cy - mH / 2 + r, bx = x0 + r * 1.2, by = cy + mH / 2 - r, qx = x0 + mW - r * 1.2;
-                        const e = (x1, y1, x2, y2) => { const nx = y2 - y1, ny = x1 - x2, l = Math.hypot(nx, ny); return ((px - x1) * nx + (py - y1) * ny) / l; };
-                        body = Math.max(e(ax, ay, qx, by), e(qx, by, bx, by), e(bx, by, ax, ay)) - r;
-                        const sw = Math.max(1.2, mW * 0.07);
-                        ink = Math.min(seg(px, py, cx, cy - mH * 0.12, cx, cy + mH * 0.17) - sw, Math.hypot(px - cx, py - (cy + mH * 0.33)) - sw * 1.1);
-                    } else {
-                        // an "i" knocked out of a disc
-                        const R = mH / 2, sw = Math.max(1.2, R * 0.16);
-                        body = Math.hypot(px - cx, py - cy) - R;
-                        ink = Math.min(seg(px, py, cx, cy - R * 0.08, cx, cy + R * 0.55) - sw, Math.hypot(px - cx, py - (cy - R * 0.45)) - sw * 1.15);
-                    }
-                    put(x, y, sev.rgba, cov(body) * (1 - cov(ink)));
-                }
-            }
+        if (icon) {
+            // package P's drawing, its box centred on the capitals; each of its pixels laid over in the severity's colour
+            const ix = x0, iy = Math.round(capTop + capH / 2 - mH / 2);
+            const px = paintIcon(icon, mH, mH, [255, 255, 255, 255]);
+            for (let y = 0; y < mH; y++) for (let x = 0; x < mH; x++) put(ix + x, iy + y, sev.rgba, px[(y * mH + x) * 4 + 3] / 255);
         }
         if (style === 'B' && t) {
             // a hairline above, past the headline's ends by 48 px and fading out over its last 32, in a dim foreground;

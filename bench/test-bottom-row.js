@@ -581,6 +581,15 @@ async function main() {
     p = await until((q) => S(q).safety.onScreen === true, 5000);
     ok(S(p).safety.style === 'A' && S(p).safety.onScreen, 'look A (marker + headline) is the default, drawn');
     ok(S(p).road === '', 'the road label steps aside while our message shows');
+    // strip integration, the owner's decision 6: look A's marker is package P's drawing - the outline triangle for a
+    // warning, the "i" for information, and NOTHING (not a dot) for the neutral case
+    ok(S(p).safety.fit && S(p).safety.fit.marker === 'cc_info', 'a green message carries package P\'s "i" (' + JSON.stringify(S(p).safety.fit) + ')');
+    await scene('cc-red');
+    p = await until((q) => S(q).safety.onScreen === true && S(q).safety.fit && S(q).safety.fit.marker === 'cc_warn', 8000);
+    ok(S(p).safety.fit && S(p).safety.fit.marker === 'cc_warn', 'a red one the outline warning triangle (cc_warn)');
+    await fake({ cc: { name: 'Neutral note', desc: '', color: 'default', symbol: 3 } });
+    p = await until((q) => S(q).safety.onScreen === true && S(q).safety.fit && S(q).safety.fit.marker === null, 8000);
+    ok(S(p).safety.fit && S(p).safety.fit.marker === null && S(p).safety.onScreen, 'and one with no colour of its own no marker at all (no dot)');
     await set('ccStyle', 'B');
     p = await until((q) => S(q).safety.style === 'B', 8000);
     ok(S(p).safety.style === 'B' && S(p).safety.onScreen && (S(p).widgets || []).indexOf('cc_line') >= 0,
