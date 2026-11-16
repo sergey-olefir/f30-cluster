@@ -1,0 +1,332 @@
+{
+ "convention": "",
+ "zone": [
+  1240,
+  540,
+  1920,
+  720
+ ],
+ "shapes": [
+  {
+   "id": "bottom.temperature",
+   "kind": "hole",
+   "channels": [
+    "bmw",
+    "bmw_msg",
+    "standby"
+   ],
+   "polygon": [
+    [
+     1508.25,
+     662.0
+    ],
+    [
+     1666.75,
+     662.0
+    ],
+    [
+     1666.75,
+     702.5
+    ],
+    [
+     1508.25,
+     702.5
+    ]
+   ],
+   "corner_radius_px": 4.0,
+   "feather_in_px": 1.25,
+   "feather_out_px": 1.25,
+   "reason": "BMW draws the outside temperature under a theme (60: our grid line x 1600 runs over its digits); it must show in allG20 and in standby. The hole is the widest value, not the string of the day.",
+   "evidence": "R 61-64, 66, 67 ink boxes; widest case from glyph metrics (report section 2.4); halo at 2 px from the ink = 1.1-2.7 % of the ink peak, at 3 px 0.3-1.4 %",
+   "clearance": {
+    "rail.right (y ~651)": 11.0,
+    "assist.gear (x 1424.5)": 83.75,
+    "oil mini blue band": "> 20"
+   }
+  },
+  {
+   "id": "assist.mode_label",
+   "kind": "hole",
+   "channels": [
+    "bmw",
+    "bmw_msg",
+    "standby"
+   ],
+   "polygon": [
+    [
+     1220.0,
+     655.25
+    ],
+    [
+     1359.5,
+     655.25
+    ],
+    [
+     1359.5,
+     684.25
+    ],
+    [
+     1292.75,
+     684.25
+    ],
+    [
+     1292.75,
+     712.0
+    ],
+    [
+     1220.0,
+     712.0
+    ]
+   ],
+   "feather_in_px": 0.75,
+   "feather_out_px": 0.75,
+   "reason": "With a theme connected BMW moves the mode label into the row (60 = 10, 14, 17); it is drawn UNDER a theme (60: our grid line x 1300 runs over the F) and must show in allG20 and standby.",
+   "evidence": "theme position on R 60 (= 10) and R 14: C [1225.25, 657.25-657.5, 1240.5, 679.5-679.75], COMFORT to x 1355.0, PLUS 686.0-708.25 to x 1290.0; standby R 65 / ZR 65 the same within 2.5 / 1.0 px; H reads x 1223.2 on 17. The hole covers all of them.",
+   "clearance": {
+    "rail.right lower edge (y ~651) to the 0 % line": 3.5,
+    "cap top (656.6) to the 0 % line": 0.6,
+    "assist.gear (x 1395)": 35.5
+   },
+   "alternative": {
+    "polygon": [
+     [
+      1220.0,
+      655.25
+     ],
+     [
+      1388.0,
+      655.25
+     ],
+     [
+      1388.0,
+      712.0
+     ],
+     [
+      1220.0,
+      712.0
+     ]
+    ],
+    "why": "only COMFORT / PLUS has been seen; a longer mode name would need up to x 1388 (gear at 1395). Costs nothing in bmw: BMW draws only black there."
+   }
+  },
+  {
+   "id": "assist.info_tacho",
+   "kind": "hole",
+   "channels": [
+    "bmw",
+    "bmw_msg",
+    "standby?",
+    "ours?"
+   ],
+   "polygon": [
+    [
+     1287.62,
+     624.62
+    ],
+    [
+     1287.39,
+     625.77
+    ],
+    [
+     1286.24,
+     627.74
+    ],
+    [
+     1283.77,
+     629.65
+    ],
+    [
+     1281.12,
+     630.38
+    ],
+    [
+     1246.62,
+     630.38
+    ],
+    [
+     1243.73,
+     629.65
+    ],
+    [
+     1241.26,
+     627.5
+    ],
+    [
+     1240.61,
+     626.53
+    ],
+    [
+     1240.38,
+     623.12
+    ],
+    [
+     1240.61,
+     621.97
+    ],
+    [
+     1255.11,
+     593.23
+    ],
+    [
+     1257.0,
+     590.5
+    ],
+    [
+     1259.23,
+     589.11
+    ],
+    [
+     1262.12,
+     588.38
+    ],
+    [
+     1265.53,
+     589.11
+    ],
+    [
+     1268.24,
+     591.0
+    ],
+    [
+     1286.89,
+     621.73
+    ]
+   ],
+   "feather_in_px": 1.0,
+   "feather_out_px": 1.0,
+   "reason": "BMW's messages-present marker (\"i\" or warning triangle) outlives the message (63, 67); it is drawn UNDER a theme (43: our 0.7.7 paint clips its lower corners; 56 / 58: absent under our cover with a warning message up). In ours it stays open unless package X draws our own marker (X e).",
+   "evidence": "R 62, 63 (i), R 66, 67 (triangle); ZR provisional within 0.9 px",
+   "clearance": {
+    "CC panel rail tip (1221, 621)": 17.2,
+    "tacho rail (top ~644.5)": 14.0,
+    "map window corner (roads to y 593 at x 1247-1283 in 62, 64)": 0.0
+   },
+   "cost": "wb_dials (Comfort): our tacho's ring and ticks cross the slot, 165 px^2 of our ink above 5 % white would be cut if the hole cuts the dial layer too; wb_sport_dials: nothing of ours there"
+  },
+  {
+   "id": "rail.right.stub",
+   "kind": "cover",
+   "channels": [
+    "bmw",
+    "bmw_msg",
+    "standby",
+    "ours"
+   ],
+   "polygon": [
+    [
+     1222.0,
+     640.0
+    ],
+    [
+     1252.0,
+     640.0
+    ],
+    [
+     1252.0,
+     656.0
+    ],
+    [
+     1222.0,
+     656.0
+    ]
+   ],
+   "feather_in_px": 0.0,
+   "feather_out_px": 0.0,
+   "reason": "BMW's tacho rail from its notch (x ~1224) rightwards. Today CC_BOX (x to 1243) opens its first 20 px in every message state of allG20 and in all6WB unread / msg-latched: up to 0.94 of white.",
+   "evidence": "O maps x R 61-68 (LEAK, diff.json)",
+   "clearance": {
+    "ZC panel hole must stop at": "x <= 1222 for y > 640"
+   }
+  }
+ ],
+ "check": {
+  "bmw": {
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 29.8,
+     "sum_alpha_px": 12.5,
+     "ink_clipped_px": 0.0
+    },
+    "assist.info_tacho": {
+     "px": 8.1,
+     "sum_alpha_px": 2.71,
+     "ink_clipped_px": 1.4
+    }
+   },
+   "LEAK": {
+    "px": 0.3,
+    "sum_visible_white_px": 0.007,
+    "max_visible_white": 0.0231
+   },
+   "visible_stock_light_in_holes_outside_footprints_white_px": 3.571,
+   "LEAK_with_wide_mode_label": 7.314
+  },
+  "bmw_msg": {
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 29.8,
+     "sum_alpha_px": 12.5,
+     "ink_clipped_px": 0.0
+    },
+    "assist.info_tacho": {
+     "px": 8.1,
+     "sum_alpha_px": 2.71,
+     "ink_clipped_px": 1.4
+    }
+   },
+   "LEAK": {
+    "px": 0.3,
+    "sum_visible_white_px": 0.007,
+    "max_visible_white": 0.0231
+   },
+   "visible_stock_light_in_holes_outside_footprints_white_px": 3.571,
+   "LEAK_with_wide_mode_label": 7.314
+  },
+  "standby": {
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 29.8,
+     "sum_alpha_px": 12.5,
+     "ink_clipped_px": 0.0
+    }
+   },
+   "LEAK": {
+    "px": 6.6,
+    "sum_visible_white_px": 0.152,
+    "max_visible_white": 0.0275
+   },
+   "visible_stock_light_in_holes_outside_footprints_white_px": 19.104,
+   "LEAK_with_wide_mode_label": 2.412
+  },
+  "ours": {
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 8.1,
+     "sum_alpha_px": 2.71,
+     "ink_clipped_px": 1.4
+    }
+   },
+   "LEAK": {
+    "px": 0.0,
+    "sum_visible_white_px": 0.0,
+    "max_visible_white": 0.0
+   },
+   "visible_stock_light_in_holes_outside_footprints_white_px": 0.0
+  }
+ }
+}
