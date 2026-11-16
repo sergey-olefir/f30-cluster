@@ -1,0 +1,2377 @@
+{
+ "60": {
+  "source": "reference/g20/60_grid-over-stock_P_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.848550752172703,
+    -0.054586332513851706,
+    324.1617259352654
+   ],
+   [
+    0.053445045585652565,
+    2.729232353732355,
+    1376.2559306966168
+   ],
+   [
+    2.337868462274963e-05,
+    -2.098082231905432e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.8280179648144963,
+     -0.04260324770048086,
+     348.76913525266764
+    ],
+    [
+     0.05758945585801879,
+     2.7244910366551234,
+     1380.181421085269
+    ],
+    [
+     2.5268926391176745e-05,
+     -1.6768253965466366e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.03349999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.7118,
+  "photo_px_per_panel_px_strip": 2.7411,
+  "method": "grid crossings: our calibration grid (grid.json; majors [100k, 100k+2) continuous) by NCC of green-minus-red at 4 x in the photo warped by the current fit; grown from a 2-point start; homography + radial k1; inliers at 2 px",
+  "control_points": 92,
+  "inliers": 86,
+  "panel": {
+   "n": 86,
+   "rms": 0.798,
+   "max": 1.998
+  },
+  "panel_loo": {
+   "n": 86,
+   "rms": 0.856,
+   "max": 2.224
+  },
+  "strip_by_global_model": {
+   "n": 31,
+   "rms": 0.853,
+   "max": 1.988
+  },
+  "k1": -0.0335,
+  "plain_homography_rms_panel_px": 2.119,
+  "inlier_bbox_panel_opencv": [
+   100.5,
+   100.5,
+   1800.5,
+   700.5
+  ],
+  "outliers": [
+   "x400/y700",
+   "x500/y600",
+   "x1800/y200",
+   "x1800/y400",
+   "x1800/y500",
+   "x1800/y600"
+  ],
+  "field_used": false,
+  "field_smoothing": 3.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 0.4345,
+   "30.0": 0.4349,
+   "300.0": 0.4388,
+   "3000.0": 0.4713
+  },
+  "panel_field_loo": {
+   "n": 86,
+   "rms": 0.435,
+   "max": 1.267
+  },
+  "strip_field_loo": {
+   "n": 27,
+   "rms": 0.486,
+   "max": 1.267
+  }
+ },
+ "60_strip": {
+  "source": "reference/g20/60_grid-over-stock_P_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.8540297286280922,
+    -0.06919885155153933,
+    325.04456803434397
+   ],
+   [
+    0.058588372058215675,
+    2.7192768221719104,
+    1374.8882537346324
+   ],
+   [
+    2.5377219803413922e-05,
+    -2.5662455236987995e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.8331443258553266,
+     -0.056882183921853555,
+     349.6951505467654
+    ],
+    [
+     0.06253186351238639,
+     2.7146722675942456,
+     1378.8615180953905
+    ],
+    [
+     2.717942840236608e-05,
+     -2.1339753600464777e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.03349999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.7118,
+  "photo_px_per_panel_px_strip": 2.7458,
+  "method": "the global model form (k1 held) refitted on the crossings with y >= 400 only",
+  "control_points": 45,
+  "strip": {
+   "n": 45,
+   "rms": 0.817,
+   "max": 1.833
+  },
+  "strip_loo": {
+   "n": 45,
+   "rms": 0.985,
+   "max": 3.046
+  }
+ },
+ "_about": {
+  "frame": "panel 1920 x 720, x right, y down. The model takes OpenCV pixel-centre panel coordinates (= continuous - 0.5), like tools/overlay/rectify.py and tools/g20spec/zoom.py.",
+  "entries": "<id>: the global model (whole panel): `model` (homography + radial k1, what zoom.py reads) plus `field`, a smooth residual correction the rasters include. <id>_strip: the zoom.py form only, refitted on the control points in the lower half (y >= 400, k1 held): the best plain model for the STRIP when the field cannot be used (zoom.py --hjson this file --photo <id>_strip).",
+  "zoom_py_offset": "tools/g20spec/zoom.py samples crop pixel k at OpenCV panel x0 + k/n, i.e. continuous x0 + k/n + 0.5: its crop pixel k is NOT centred at continuous x0 + (k + .5)/n; the difference is (n - 1)/(2n) panel px (0.44 px at n = 8). The rasters of package R are centred.",
+  "residuals": "rms / max in panel px over the inlier control points (true panel point vs photo point mapped back by the model); *_strip = the same over control points with y >= 520; loo = leave-one-out.",
+  "chain": "60 is absolute (our grid). Every other photo is tied to 60's rect through BMW content that never moves (dial scales, rails, minis), so all share 60's frame."
+ },
+ "61": {
+  "source": "reference/g20/61_stock_D_limit50_road_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.5583984402245945,
+    -0.0872885284827164,
+    608.9066554561385
+   ],
+   [
+    0.0653046710581215,
+    2.468297984017402,
+    1154.4828722899997
+   ],
+   [
+    1.2266114676822813e-05,
+    -1.9932876829429808e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.53961247846537,
+     -0.08829198123555598,
+     638.0346910025402
+    ],
+    [
+     0.07348507965613245,
+     2.4509144402730425,
+     1161.2811202532332
+    ],
+    [
+     1.634271305816372e-05,
+     -2.030429448254455e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.05049999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.4734,
+  "photo_px_per_panel_px_strip": 2.5,
+  "method": "start: SIFT (CLAHE) photo 60 -> this photo, homography, composed with 60's model; then masked NCC (grey, sigma 0.8 panel px) of 366 fixed-content windows of 60's rect at 2 x (24..36 px, 2-D texture only) in the photo warped by the current fit, searches 12/6/3 px; homography + radial k1; inliers at 2 px",
+  "reference": "60",
+  "control_points": 110,
+  "inliers": 106,
+  "panel": {
+   "n": 106,
+   "rms": 0.628,
+   "max": 1.854
+  },
+  "panel_loo": {
+   "n": 106,
+   "rms": 0.66,
+   "max": 2.019
+  },
+  "strip_by_global_model": {
+   "n": 59,
+   "rms": 0.653,
+   "max": 1.744
+  },
+  "k1": -0.0505,
+  "plain_homography_rms_panel_px": 2.701,
+  "inlier_bbox_panel_opencv": [
+   83.5,
+   41.5,
+   1889.5,
+   643.5
+  ],
+  "ncc_median": 0.967,
+  "field_smoothing": 3000.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 0.7671,
+   "30.0": 0.7542,
+   "300.0": 0.6849,
+   "3000.0": 0.5776
+  },
+  "panel_field_loo": {
+   "n": 106,
+   "rms": 0.578,
+   "max": 2.417
+  },
+  "strip_field_loo": {
+   "n": 59,
+   "rms": 0.51,
+   "max": 1.756
+  },
+  "start": {
+   "good_matches": 407,
+   "inliers": 74,
+   "from_photo": "60"
+  }
+ },
+ "61_strip": {
+  "source": "reference/g20/61_stock_D_limit50_road_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.5574601138939443,
+    -0.09376141019448389,
+    611.6135643308029
+   ],
+   [
+    0.06607302550872096,
+    2.458018385080678,
+    1157.4866235111197
+   ],
+   [
+    1.2570983061145037e-05,
+    -2.1833819939377648e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.538807191585643,
+     -0.09451462226324277,
+     640.6056476192944
+    ],
+    [
+     0.07425745301041059,
+     2.4409544206102685,
+     1164.2239610882264
+    ],
+    [
+     1.6647557042060294e-05,
+     -2.212576041541459e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.05049999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.4706,
+  "photo_px_per_panel_px_strip": 2.4988,
+  "method": "the global model form (k1 held) refitted on the control points with y >= 400 only, inliers at 2 px",
+  "reference": "60",
+  "control_points": 77,
+  "strip": {
+   "n": 60,
+   "rms": 0.688,
+   "max": 1.974
+  },
+  "lower_half": {
+   "n": 77,
+   "rms": 0.62,
+   "max": 1.974
+  },
+  "lower_half_loo": {
+   "n": 77,
+   "rms": 0.65,
+   "max": 2.116
+  },
+  "strip_vs_global_shift_px": [
+   0.474,
+   0.18
+  ]
+ },
+ "62": {
+  "source": "reference/g20/62_stock_P_msg-2line_sym-i_limit50_belts_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.4498595935871252,
+    -0.07346720777647496,
+    628.5032496337014
+   ],
+   [
+    0.0005285048749507587,
+    2.3039583053585333,
+    1543.6751207770992
+   ],
+   [
+    1.6047299043480073e-05,
+    -4.062618354440687e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.4347864454077337,
+     -0.06162743662454861,
+     646.2447489984429
+    ],
+    [
+     0.0034867127898794317,
+     2.3032047330301144,
+     1546.129315774156
+    ],
+    [
+     1.726982587977714e-05,
+     -3.640608878132152e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.03599999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.3825,
+  "photo_px_per_panel_px_strip": 2.4251,
+  "method": "start: SIFT (CLAHE) photo 61 -> this photo, homography, composed with 61's model; then masked NCC (grey, sigma 0.8 panel px) of 1112 fixed-content windows of 61's rect at 2 x (24..36 px, 2-D texture only) in the photo warped by the current fit, searches 12/6/3 px; homography + radial k1; inliers at 2 px",
+  "reference": "61",
+  "control_points": 404,
+  "inliers": 401,
+  "panel": {
+   "n": 401,
+   "rms": 0.463,
+   "max": 1.838
+  },
+  "panel_loo": {
+   "n": 401,
+   "rms": 0.469,
+   "max": 1.857
+  },
+  "strip_by_global_model": {
+   "n": 214,
+   "rms": 0.422,
+   "max": 1.613
+  },
+  "k1": -0.036,
+  "plain_homography_rms_panel_px": 2.117,
+  "inlier_bbox_panel_opencv": [
+   83.5,
+   65.5,
+   1907.5,
+   643.5
+  ],
+  "ncc_median": 0.989,
+  "field_smoothing": 300.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 0.3529,
+   "30.0": 0.35,
+   "300.0": 0.3443,
+   "3000.0": 0.3489
+  },
+  "panel_field_loo": {
+   "n": 401,
+   "rms": 0.344,
+   "max": 2.859
+  },
+  "strip_field_loo": {
+   "n": 214,
+   "rms": 0.306,
+   "max": 1.826
+  },
+  "start": {
+   "good_matches": 649,
+   "inliers": 509,
+   "from_photo": "61"
+  }
+ },
+ "62_strip": {
+  "source": "reference/g20/62_stock_P_msg-2line_sym-i_limit50_belts_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.448120634193903,
+    -0.07762422088065271,
+    631.0712871286474
+   ],
+   [
+    -0.0003190950267842742,
+    2.3028567288816846,
+    1543.9754936795491
+   ],
+   [
+    1.5814869540261705e-05,
+    -4.0940746817367846e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.4331369405347156,
+     -0.06572527430417126,
+     648.750869093037
+    ],
+    [
+     0.0026777943438714034,
+     2.3021476477451306,
+     1546.4118980560775
+    ],
+    [
+     1.7051463818228894e-05,
+     -3.6718241736448665e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.03599999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.3826,
+  "photo_px_per_panel_px_strip": 2.4255,
+  "method": "the global model form (k1 held) refitted on the control points with y >= 400 only, inliers at 2 px",
+  "reference": "61",
+  "control_points": 276,
+  "strip": {
+   "n": 214,
+   "rms": 0.409,
+   "max": 1.602
+  },
+  "lower_half": {
+   "n": 276,
+   "rms": 0.404,
+   "max": 1.753
+  },
+  "lower_half_loo": {
+   "n": 276,
+   "rms": 0.411,
+   "max": 1.79
+  },
+  "strip_vs_global_shift_px": [
+   0.316,
+   0.148
+  ]
+ },
+ "63": {
+  "source": "reference/g20/63_stock_P_limit50_marker-i_service_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.454838725244958,
+    -0.07705062592774735,
+    623.4884292887556
+   ],
+   [
+    0.004907376178418258,
+    2.3056875388301363,
+    1544.8499820449965
+   ],
+   [
+    1.6945685134092747e-05,
+    -4.100139091894848e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.4392493378319977,
+     -0.06498717713447781,
+     641.4144190455108
+    ],
+    [
+     0.007622949697525415,
+     2.3048937581020508,
+     1547.3637665072667
+    ],
+    [
+     1.8064908702871788e-05,
+     -3.670656381319591e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.03599999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.3834,
+  "photo_px_per_panel_px_strip": 2.4262,
+  "method": "start: SIFT (CLAHE) photo 61 -> this photo, homography, composed with 61's model; then masked NCC (grey, sigma 0.8 panel px) of 1112 fixed-content windows of 61's rect at 2 x (24..36 px, 2-D texture only) in the photo warped by the current fit, searches 12/6/3 px; homography + radial k1; inliers at 2 px",
+  "reference": "61",
+  "control_points": 411,
+  "inliers": 407,
+  "panel": {
+   "n": 407,
+   "rms": 0.515,
+   "max": 1.912
+  },
+  "panel_loo": {
+   "n": 407,
+   "rms": 0.521,
+   "max": 1.932
+  },
+  "strip_by_global_model": {
+   "n": 220,
+   "rms": 0.503,
+   "max": 1.912
+  },
+  "k1": -0.036,
+  "plain_homography_rms_panel_px": 2.167,
+  "inlier_bbox_panel_opencv": [
+   83.5,
+   65.5,
+   1907.5,
+   643.5
+  ],
+  "ncc_median": 0.99,
+  "field_smoothing": 30.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 0.3448,
+   "30.0": 0.3433,
+   "300.0": 0.3457,
+   "3000.0": 0.3562
+  },
+  "panel_field_loo": {
+   "n": 407,
+   "rms": 0.343,
+   "max": 2.912
+  },
+  "strip_field_loo": {
+   "n": 220,
+   "rms": 0.29,
+   "max": 1.506
+  },
+  "start": {
+   "good_matches": 702,
+   "inliers": 530,
+   "from_photo": "61"
+  }
+ },
+ "63_strip": {
+  "source": "reference/g20/63_stock_P_limit50_marker-i_service_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.4539127239448932,
+    -0.07819389977426533,
+    624.5850470664667
+   ],
+   [
+    0.003996405850523384,
+    2.3058233504090295,
+    1545.5238254268863
+   ],
+   [
+    1.670213157180385e-05,
+    -4.068032074806418e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.4383723756126816,
+     -0.06611528038565385,
+     642.4835793537146
+    ],
+    [
+     0.006741405335408075,
+     2.3050347247706324,
+     1548.0245219796052
+    ],
+    [
+     1.783171109307834e-05,
+     -3.639223443496701e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.03599999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.3832,
+  "photo_px_per_panel_px_strip": 2.4258,
+  "method": "the global model form (k1 held) refitted on the control points with y >= 400 only, inliers at 2 px",
+  "reference": "61",
+  "control_points": 283,
+  "strip": {
+   "n": 220,
+   "rms": 0.493,
+   "max": 1.879
+  },
+  "lower_half": {
+   "n": 283,
+   "rms": 0.473,
+   "max": 1.879
+  },
+  "lower_half_loo": {
+   "n": 283,
+   "rms": 0.481,
+   "max": 1.907
+  },
+  "strip_vs_global_shift_px": [
+   0.26,
+   0.126
+  ]
+ },
+ "64": {
+  "source": "reference/g20/64_stock_P_limit30_belt1_road_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.382274852453903,
+    -0.07880635152836953,
+    631.3526908007923
+   ],
+   [
+    0.03953160639169285,
+    2.2793144599431545,
+    1543.7737770301055
+   ],
+   [
+    1.2544553690967448e-05,
+    -2.5922987611707886e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.3534279667925757,
+     -0.061097552172979575,
+     659.1051602044463
+    ],
+    [
+     0.039610520647855765,
+     2.2756284633926147,
+     1548.4726240420707
+    ],
+    [
+     1.2654491382935868e-05,
+     -1.971071126582445e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.05349999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.3114,
+  "photo_px_per_panel_px_strip": 2.3421,
+  "method": "start: SIFT (CLAHE) photo 61 -> this photo, homography, composed with 61's model; then masked NCC (grey, sigma 0.8 panel px) of 1112 fixed-content windows of 61's rect at 2 x (24..36 px, 2-D texture only) in the photo warped by the current fit, searches 12/6/3 px; homography + radial k1; inliers at 2 px",
+  "reference": "61",
+  "control_points": 405,
+  "inliers": 385,
+  "panel": {
+   "n": 385,
+   "rms": 0.638,
+   "max": 1.982
+  },
+  "panel_loo": {
+   "n": 385,
+   "rms": 0.619,
+   "max": 1.791
+  },
+  "strip_by_global_model": {
+   "n": 207,
+   "rms": 0.663,
+   "max": 1.982
+  },
+  "k1": -0.0535,
+  "plain_homography_rms_panel_px": 3.021,
+  "inlier_bbox_panel_opencv": [
+   83.5,
+   65.5,
+   1889.5,
+   643.5
+  ],
+  "ncc_median": 0.987,
+  "field_smoothing": 3000.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 0.3784,
+   "30.0": 0.376,
+   "300.0": 0.369,
+   "3000.0": 0.3629
+  },
+  "panel_field_loo": {
+   "n": 385,
+   "rms": 0.363,
+   "max": 2.575
+  },
+  "strip_field_loo": {
+   "n": 207,
+   "rms": 0.293,
+   "max": 2.55
+  },
+  "start": {
+   "good_matches": 643,
+   "inliers": 457,
+   "from_photo": "61"
+  }
+ },
+ "64_strip": {
+  "source": "reference/g20/64_stock_P_limit30_belt1_road_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.3659011234162084,
+    -0.09460140571510148,
+    640.0005797855201
+   ],
+   [
+    0.033716343814475955,
+    2.2551457168683378,
+    1548.8409103896672
+   ],
+   [
+    1.0541788737139454e-05,
+    -3.1243802745418626e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.33765306011068,
+     -0.07648391076680168,
+     667.3656212628151
+    ],
+    [
+     0.033943553968942566,
+     2.252145094282157,
+     1553.4144810897174
+    ],
+    [
+     1.070793046926934e-05,
+     -2.4898562268292528e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.05349999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.3097,
+  "photo_px_per_panel_px_strip": 2.3452,
+  "method": "the global model form (k1 held) refitted on the control points with y >= 400 only, inliers at 2 px",
+  "reference": "61",
+  "control_points": 274,
+  "strip": {
+   "n": 213,
+   "rms": 0.6,
+   "max": 1.809
+  },
+  "lower_half": {
+   "n": 274,
+   "rms": 0.632,
+   "max": 1.809
+  },
+  "lower_half_loo": {
+   "n": 274,
+   "rms": 0.644,
+   "max": 1.824
+  },
+  "strip_vs_global_shift_px": [
+   2.188,
+   0.641
+  ]
+ },
+ "68": {
+  "source": "reference/g20/68_stock_D_nolimit_msa_map_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    1.8855930454733207,
+    -0.06956506405090176,
+    183.19761663636476
+   ],
+   [
+    0.04143483016514624,
+    1.812471244008887,
+    853.8746866544858
+   ],
+   [
+    1.0654569391385117e-05,
+    -2.654941826430252e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     1.8543363223419302,
+     -0.06623435942436355,
+     209.09131979075065
+    ],
+    [
+     0.0378233959529428,
+     1.796579388574548,
+     860.5952098060587
+    ],
+    [
+     8.533709800913413e-06,
+     -2.4915315801883993e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.03799999999999999,
+   "centre_photo_px": [
+    2015.5,
+    1511.5
+   ],
+   "norm_radius_photo_px": 2520.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 1.8394,
+  "photo_px_per_panel_px_strip": 1.863,
+  "method": "start: SIFT (CLAHE) photo 61 -> this photo, homography, composed with 61's model; then masked NCC (grey, sigma 0.8 panel px) of 1112 fixed-content windows of 61's rect at 2 x (24..36 px, 2-D texture only) in the photo warped by the current fit, searches 12/6/3 px; homography + radial k1; inliers at 2 px",
+  "reference": "61",
+  "control_points": 360,
+  "inliers": 316,
+  "panel": {
+   "n": 316,
+   "rms": 0.738,
+   "max": 1.944
+  },
+  "panel_loo": {
+   "n": 316,
+   "rms": 0.75,
+   "max": 2.022
+  },
+  "strip_by_global_model": {
+   "n": 139,
+   "rms": 0.803,
+   "max": 1.944
+  },
+  "k1": -0.038,
+  "plain_homography_rms_panel_px": 2.106,
+  "inlier_bbox_panel_opencv": [
+   83.5,
+   65.5,
+   1817.5,
+   643.5
+  ],
+  "ncc_median": 0.957,
+  "field_smoothing": 3000.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 0.4037,
+   "30.0": 0.3992,
+   "300.0": 0.3878,
+   "3000.0": 0.3816
+  },
+  "panel_field_loo": {
+   "n": 316,
+   "rms": 0.382,
+   "max": 2.396
+  },
+  "strip_field_loo": {
+   "n": 139,
+   "rms": 0.352,
+   "max": 1.296
+  },
+  "start": {
+   "good_matches": 415,
+   "inliers": 284,
+   "from_photo": "61"
+  }
+ },
+ "68_strip": {
+  "source": "reference/g20/68_stock_D_nolimit_msa_map_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    1.8641089401579853,
+    -0.08080441836281174,
+    189.79827753303627
+   ],
+   [
+    0.03676293678682849,
+    1.777486908269711,
+    859.7428376066904
+   ],
+   [
+    7.948290750856402e-06,
+    -3.935393573093088e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     1.833515371238586,
+     -0.07707678594431355,
+     215.29848174273457
+    ],
+    [
+     0.03319461791824006,
+     1.762628750714798,
+     866.3264987922406
+    ],
+    [
+     5.866077721490216e-06,
+     -3.7355770696075925e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.03799999999999999,
+   "centre_photo_px": [
+    2015.5,
+    1511.5
+   ],
+   "norm_radius_photo_px": 2520.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 1.8379,
+  "photo_px_per_panel_px_strip": 1.8705,
+  "method": "the global model form (k1 held) refitted on the control points with y >= 400 only, inliers at 2 px",
+  "reference": "61",
+  "control_points": 205,
+  "strip": {
+   "n": 150,
+   "rms": 0.807,
+   "max": 1.976
+  },
+  "lower_half": {
+   "n": 205,
+   "rms": 0.79,
+   "max": 1.976
+  },
+  "lower_half_loo": {
+   "n": 205,
+   "rms": 0.812,
+   "max": 2.033
+  },
+  "strip_vs_global_shift_px": [
+   6.261,
+   1.324
+  ]
+ },
+ "66": {
+  "source": "reference/g20/66_stock_P_msg-1line_limit30_marker-warn_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.2084177441140938,
+    0.0957462137843311,
+    918.0315468359028
+   ],
+   [
+    0.0019909409731978436,
+    2.1867155972107133,
+    1106.6488764717703
+   ],
+   [
+    2.0366197062272876e-05,
+    1.88225501363892e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.1938216009736586,
+     0.0799607761986884,
+     938.5219636561288
+    ],
+    [
+     0.007486964870697377,
+     2.1611686892353457,
+     1113.242133974779
+    ],
+    [
+     2.2844613338799356e-05,
+     1.3424104182637547e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.047,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.0761,
+  "photo_px_per_panel_px_strip": 2.0661,
+  "method": "start: SIFT (CLAHE) photo 61 -> this photo, homography, composed with 61's model; then masked NCC (grey, sigma 0.8 panel px) of 1112 fixed-content windows of 61's rect at 2 x (24..36 px, 2-D texture only) in the photo warped by the current fit, searches 12/6/3 px; homography + radial k1; inliers at 2 px",
+  "reference": "61",
+  "control_points": 387,
+  "inliers": 363,
+  "panel": {
+   "n": 363,
+   "rms": 0.739,
+   "max": 1.858
+  },
+  "panel_loo": {
+   "n": 363,
+   "rms": 0.75,
+   "max": 1.887
+  },
+  "strip_by_global_model": {
+   "n": 191,
+   "rms": 0.659,
+   "max": 1.858
+  },
+  "k1": -0.047,
+  "plain_homography_rms_panel_px": 1.937,
+  "inlier_bbox_panel_opencv": [
+   83.5,
+   65.5,
+   1907.5,
+   643.5
+  ],
+  "ncc_median": 0.978,
+  "field_smoothing": 300.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 0.3364,
+   "30.0": 0.3335,
+   "300.0": 0.3297,
+   "3000.0": 0.3337
+  },
+  "panel_field_loo": {
+   "n": 363,
+   "rms": 0.33,
+   "max": 1.575
+  },
+  "strip_field_loo": {
+   "n": 191,
+   "rms": 0.262,
+   "max": 1.575
+  },
+  "start": {
+   "good_matches": 526,
+   "inliers": 356,
+   "from_photo": "61"
+  }
+ },
+ "66_strip": {
+  "source": "reference/g20/66_stock_P_msg-1line_limit30_marker-warn_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.204168241365327,
+    0.09855714744955427,
+    916.157058842952
+   ],
+   [
+    0.00034177533638494486,
+    2.172689147744579,
+    1113.3918578194232
+   ],
+   [
+    1.9594211643071445e-05,
+    1.7934221485260465e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.189626138873358,
+     0.08294653163579442,
+     936.6107138067697
+    ],
+    [
+     0.005805089899030869,
+     2.1474987355731474,
+     1119.9117154350108
+    ],
+    [
+     2.20604567080549e-05,
+     1.2627691227723034e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.047,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.0714,
+  "photo_px_per_panel_px_strip": 2.0621,
+  "method": "the global model form (k1 held) refitted on the control points with y >= 400 only, inliers at 2 px",
+  "reference": "61",
+  "control_points": 259,
+  "strip": {
+   "n": 199,
+   "rms": 0.734,
+   "max": 2.097
+  },
+  "lower_half": {
+   "n": 259,
+   "rms": 0.724,
+   "max": 2.097
+  },
+  "lower_half_loo": {
+   "n": 259,
+   "rms": 0.739,
+   "max": 2.132
+  },
+  "strip_vs_global_shift_px": [
+   1.284,
+   0.431
+  ]
+ },
+ "67": {
+  "source": "reference/g20/67_stock_P_limit30_marker-warn_road_service_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.1873152519084034,
+    0.1015077405106092,
+    916.9246565585769
+   ],
+   [
+    -0.008345783508153135,
+    2.1705756436128767,
+    1161.9598491941833
+   ],
+   [
+    1.84301087003765e-05,
+    1.8578575799559756e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.1719696703046676,
+     0.08715721984335775,
+     937.8950541381432
+    ],
+    [
+     -0.0029694418182676045,
+     2.145956022190731,
+     1168.2696200850698
+    ],
+    [
+     2.079787849442407e-05,
+     1.369480589869444e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.04949999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.0642,
+  "photo_px_per_panel_px_strip": 2.0548,
+  "method": "start: SIFT (CLAHE) photo 61 -> this photo, homography, composed with 61's model; then masked NCC (grey, sigma 0.8 panel px) of 1112 fixed-content windows of 61's rect at 2 x (24..36 px, 2-D texture only) in the photo warped by the current fit, searches 12/6/3 px; homography + radial k1; inliers at 2 px",
+  "reference": "61",
+  "control_points": 389,
+  "inliers": 372,
+  "panel": {
+   "n": 372,
+   "rms": 0.727,
+   "max": 1.976
+  },
+  "panel_loo": {
+   "n": 372,
+   "rms": 0.737,
+   "max": 1.97
+  },
+  "strip_by_global_model": {
+   "n": 196,
+   "rms": 0.631,
+   "max": 1.922
+  },
+  "k1": -0.0495,
+  "plain_homography_rms_panel_px": 2.025,
+  "inlier_bbox_panel_opencv": [
+   83.5,
+   65.5,
+   1907.5,
+   643.5
+  ],
+  "ncc_median": 0.977,
+  "field_smoothing": 300.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 0.3833,
+   "30.0": 0.3808,
+   "300.0": 0.3776,
+   "3000.0": 0.3795
+  },
+  "panel_field_loo": {
+   "n": 372,
+   "rms": 0.378,
+   "max": 2.795
+  },
+  "strip_field_loo": {
+   "n": 196,
+   "rms": 0.248,
+   "max": 1.148
+  },
+  "start": {
+   "good_matches": 550,
+   "inliers": 336,
+   "from_photo": "61"
+  }
+ },
+ "67_strip": {
+  "source": "reference/g20/67_stock_P_limit30_marker-warn_road_service_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    2.1836353274631666,
+    0.10647541139412257,
+    913.9650502165257
+   ],
+   [
+    -0.009718148654635583,
+    2.159422646198228,
+    1167.3780335040103
+   ],
+   [
+    1.769964426899309e-05,
+    1.7999272044414317e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     2.168275708338559,
+     0.0922213770379956,
+     934.9464621315853
+    ],
+    [
+     -0.004397693134133922,
+     2.135072842710409,
+     1173.6433871915847
+    ],
+    [
+     2.0046244298568968e-05,
+     1.3190188147261437e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.04949999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 2.0606,
+  "photo_px_per_panel_px_strip": 2.0515,
+  "method": "the global model form (k1 held) refitted on the control points with y >= 400 only, inliers at 2 px",
+  "reference": "61",
+  "control_points": 269,
+  "strip": {
+   "n": 209,
+   "rms": 0.76,
+   "max": 1.991
+  },
+  "lower_half": {
+   "n": 269,
+   "rms": 0.743,
+   "max": 1.991
+  },
+  "lower_half_loo": {
+   "n": 269,
+   "rms": 0.756,
+   "max": 2.026
+  },
+  "strip_vs_global_shift_px": [
+   1.231,
+   0.386
+  ]
+ },
+ "65": {
+  "source": "reference/g20/65_stock_standby_odometer_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    1.9300748916552308,
+    -0.11036375838502942,
+    1190.1739452139764
+   ],
+   [
+    0.04886145359096462,
+    1.827673818098756,
+    1553.5726934844547
+   ],
+   [
+    9.577753571377333e-06,
+    -2.8703484816790923e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     1.9285553916281024,
+     -0.10328098107559423,
+     1200.4488059781793
+    ],
+    [
+     0.05552705500418548,
+     1.828586076441936,
+     1555.0053470316216
+    ],
+    [
+     1.2710456980732498e-05,
+     -2.6257429637363487e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.05199999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 1.8864,
+  "photo_px_per_panel_px_strip": 1.9109,
+  "method": "start: SIFT (CLAHE) photo 61 -> this photo, homography, composed with 61's model; then masked NCC (grey, sigma 0.8 panel px) of 1112 fixed-content windows of 61's rect at 2 x (24..36 px, 2-D texture only) in the photo warped by the current fit, searches 12/6/3 px; homography + radial k1; inliers at 2 px",
+  "reference": "61",
+  "control_points": 105,
+  "inliers": 73,
+  "panel": {
+   "n": 73,
+   "rms": 0.921,
+   "max": 1.974
+  },
+  "panel_loo": {
+   "n": 73,
+   "rms": 0.966,
+   "max": 2.274
+  },
+  "strip_by_global_model": {
+   "n": 46,
+   "rms": 0.861,
+   "max": 1.916
+  },
+  "k1": -0.052,
+  "plain_homography_rms_panel_px": 1.754,
+  "inlier_bbox_panel_opencv": [
+   83.5,
+   65.5,
+   1907.5,
+   643.5
+  ],
+  "ncc_median": 0.941,
+  "field_smoothing": 3000.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 1.0848,
+   "30.0": 1.0706,
+   "300.0": 0.9945,
+   "3000.0": 0.8706
+  },
+  "panel_field_loo": {
+   "n": 73,
+   "rms": 0.871,
+   "max": 2.673
+  },
+  "strip_field_loo": {
+   "n": 46,
+   "rms": 0.686,
+   "max": 2.673
+  },
+  "start": {
+   "good_matches": 228,
+   "inliers": 92,
+   "from_photo": "61"
+  }
+ },
+ "65_strip": {
+  "source": "reference/g20/65_stock_standby_odometer_2026-11-16.png",
+  "H_panel_to_photo": [
+   [
+    1.926938185372759,
+    -0.09795043189857609,
+    1186.1495506490248
+   ],
+   [
+    0.04483620231460161,
+    1.834004525652202,
+    1555.703330945713
+   ],
+   [
+    8.149860009041386e-06,
+    -2.50835551108701e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     1.9253406805038795,
+     -0.09102507085363473,
+     1196.4977556970116
+    ],
+    [
+     0.05149339256455277,
+     1.8347679968350343,
+     1557.1415221207924
+    ],
+    [
+     1.1277176217937754e-05,
+     -2.268653733467157e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.05199999999999999,
+   "centre_photo_px": [
+    2855.5,
+    2141.5
+   ],
+   "norm_radius_photo_px": 3570.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 1.8859,
+  "photo_px_per_panel_px_strip": 1.9079,
+  "method": "the global model form (k1 held) refitted on the control points with y >= 400 only, inliers at 2 px",
+  "reference": "61",
+  "control_points": 58,
+  "strip": {
+   "n": 46,
+   "rms": 0.8,
+   "max": 1.909
+  },
+  "lower_half": {
+   "n": 58,
+   "rms": 0.848,
+   "max": 1.909
+  },
+  "lower_half_loo": {
+   "n": 58,
+   "rms": 0.922,
+   "max": 1.993
+  },
+  "strip_vs_global_shift_px": [
+   1.107,
+   0.704
+  ]
+ },
+ "10": {
+  "source": "reference/g20/10_grid_over-stock.jpg",
+  "H_panel_to_photo": [
+   [
+    1.021257415394443,
+    -0.019554055899669964,
+    116.36148651484379
+   ],
+   [
+    0.019133723909176913,
+    0.9785274790920626,
+    492.9170151219256
+   ],
+   [
+    2.3351863486049597e-05,
+    -2.097024357144319e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     1.0139443622384448,
+     -0.015269502330888148,
+     125.16469988833556
+    ],
+    [
+     0.02063991607377448,
+     0.9768394882952788,
+     494.3190292602082
+    ],
+    [
+     2.526856079151673e-05,
+     -1.6768002743910875e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.03349999999999999,
+   "centre_photo_px": [
+    1023.5,
+    767.5
+   ],
+   "norm_radius_photo_px": 1280.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 0.9723,
+  "photo_px_per_panel_px_strip": 0.9828,
+  "method": "same frame as photo 60 (package H): 60's model (with its field) then the resolution change x 0.35854, y 0.35854; no fit of its own. The zoom.py form here is the nearest homography + k1 to that (rms 0.000, max 0.000 panel px off it)",
+  "same_frame_as": "60",
+  "check_vs_new_rect": {
+   "before_shift": {
+    "panel": {
+     "ncc": 0.9914,
+     "shift_px": [
+      0.429,
+      -0.222
+     ]
+    },
+    "strip": {
+     "ncc": 0.9897,
+     "shift_px": [
+      0.429,
+      -0.282
+     ]
+    }
+   },
+   "after_shift": {
+    "panel": {
+     "ncc": 0.9984,
+     "shift_px": [
+      0.009,
+      -0.013
+     ]
+    },
+    "strip": {
+     "ncc": 0.9982,
+     "shift_px": [
+      0.004,
+      -0.07
+     ]
+    }
+   },
+   "shift_applied_panel_px": [
+    0.429,
+    -0.222
+   ],
+   "note": "the old JPG is not an exact rescale of the new frame (crop / resampling phase): a constant panel shift is applied"
+  },
+  "panel_px_per_photo_px": 1.029
+ },
+ "09": {
+  "source": "reference/g20/09_stock_map_day.jpg",
+  "H_panel_to_photo": [
+   [
+    0.9137472563948416,
+    -0.03368615643610319,
+    219.61501533764726
+   ],
+   [
+    0.022370010869524407,
+    0.8822983607629747,
+    413.8829156304814
+   ],
+   [
+    1.0840105765878285e-05,
+    -2.207765645802776e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     0.9074775077889304,
+     -0.03396245616813852,
+     229.46398219128534
+    ],
+    [
+     0.025186467977967402,
+     0.8764910035184439,
+     416.17454601085353
+    ],
+    [
+     1.4752980066959606e-05,
+     -2.2369805716080807e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.04799999999999999,
+   "centre_photo_px": [
+    1023.5,
+    767.5
+   ],
+   "norm_radius_photo_px": 1280.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 0.8881,
+  "photo_px_per_panel_px_strip": 0.898,
+  "method": "same frame as photo 61 (package H): 61's model (with its field) then the resolution change x 0.35854, y 0.35854; no fit of its own. The zoom.py form here is the nearest homography + k1 to that (rms 0.740, max 2.593 panel px off it)",
+  "same_frame_as": "61",
+  "check_vs_new_rect": {
+   "before_shift": {
+    "panel": {
+     "ncc": 0.994,
+     "shift_px": [
+      0.43,
+      -0.234
+     ]
+    },
+    "strip": {
+     "ncc": 0.9928,
+     "shift_px": [
+      0.405,
+      -0.287
+     ]
+    }
+   },
+   "after_shift": {
+    "panel": {
+     "ncc": 0.9988,
+     "shift_px": [
+      0.006,
+      -0.009
+     ]
+    },
+    "strip": {
+     "ncc": 0.9985,
+     "shift_px": [
+      -0.017,
+      -0.062
+     ]
+    }
+   },
+   "shift_applied_panel_px": [
+    0.43,
+    -0.234
+   ],
+   "note": "the old JPG is not an exact rescale of the new frame (crop / resampling phase): a constant panel shift is applied"
+  },
+  "panel_px_per_photo_px": 1.126
+ },
+ "08": {
+  "source": "reference/g20/08_stock_night_warnings-map.jpg",
+  "H_panel_to_photo": [
+   [
+    0.8764600361128443,
+    -0.026188056524573247,
+    225.753244333695
+   ],
+   [
+    -0.00033427260496460775,
+    0.824731692745633,
+    553.0707345654422
+   ],
+   [
+    1.5117066066203887e-05,
+    -4.077875592440393e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     0.8709034527556643,
+     -0.021784726563247234,
+     232.35310273541623
+    ],
+    [
+     0.0007951688872426323,
+     0.8244766355664699,
+     553.9808254177194
+    ],
+    [
+     1.6425932705351527e-05,
+     -3.6392615223627556e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.03749999999999999,
+   "centre_photo_px": [
+    1023.5,
+    767.5
+   ],
+   "norm_radius_photo_px": 1280.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 0.8527,
+  "photo_px_per_panel_px_strip": 0.8691,
+  "method": "same frame as photo 62 (package H): 62's model (with its field) then the resolution change x 0.35854, y 0.35854; no fit of its own. The zoom.py form here is the nearest homography + k1 to that (rms 0.793, max 2.530 panel px off it)",
+  "same_frame_as": "62",
+  "check_vs_new_rect": {
+   "before_shift": {
+    "panel": {
+     "ncc": 0.9919,
+     "shift_px": [
+      0.459,
+      -0.257
+     ]
+    },
+    "strip": {
+     "ncc": 0.9922,
+     "shift_px": [
+      0.43,
+      -0.303
+     ]
+    }
+   },
+   "after_shift": {
+    "panel": {
+     "ncc": 0.9985,
+     "shift_px": [
+      0.01,
+      -0.018
+     ]
+    },
+    "strip": {
+     "ncc": 0.9986,
+     "shift_px": [
+      -0.016,
+      -0.061
+     ]
+    }
+   },
+   "shift_applied_panel_px": [
+    0.459,
+    -0.257
+   ],
+   "note": "the old JPG is not an exact rescale of the new frame (crop / resampling phase): a constant panel shift is applied"
+  },
+  "panel_px_per_photo_px": 1.173
+ },
+ "39": {
+  "source": "reference/g20/39_g20-look_map_comfort-plus_hires_2026-11-13.jpg",
+  "H_panel_to_photo": [
+   [
+    1.8829183595610253,
+    -0.07330814581366943,
+    184.12548207603655
+   ],
+   [
+    0.04089548905534665,
+    1.8086717462284994,
+    853.9524639893697
+   ],
+   [
+    1.002204114224526e-05,
+    -2.8395957475877194e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     1.85383339207089,
+     -0.07009326142667197,
+     208.25685636204116
+    ],
+    [
+     0.03754778109223374,
+     1.7939739899237277,
+     860.2141673587846
+    ],
+    [
+     8.061732067087075e-06,
+     -2.6815191828804126e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.03549999999999999,
+   "centre_photo_px": [
+    2015.5,
+    1511.5
+   ],
+   "norm_radius_photo_px": 2520.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 1.8456,
+  "photo_px_per_panel_px_strip": 1.8666,
+  "method": "same frame as photo 68 (package H): 68's model (with its field) then the resolution change x 1.00000, y 1.00000; no fit of its own. The zoom.py form here is the nearest homography + k1 to that (rms 0.840, max 2.241 panel px off it)",
+  "same_frame_as": "68",
+  "check_vs_new_rect": {
+   "before_shift": {
+    "panel": {
+     "ncc": 0.9992,
+     "shift_px": [
+      0.008,
+      -0.006
+     ]
+    },
+    "strip": {
+     "ncc": 0.9993,
+     "shift_px": [
+      0.006,
+      -0.004
+     ]
+    }
+   },
+   "after_shift": {
+    "panel": {
+     "ncc": 0.9992,
+     "shift_px": [
+      0.0,
+      -0.0
+     ]
+    },
+    "strip": {
+     "ncc": 0.9993,
+     "shift_px": [
+      -0.002,
+      0.001
+     ]
+    }
+   },
+   "shift_applied_panel_px": [
+    0.008,
+    -0.006
+   ],
+   "note": "the old JPG is not an exact rescale of the new frame (crop / resampling phase): a constant panel shift is applied"
+  },
+  "panel_px_per_photo_px": 0.542
+ },
+ "14": {
+  "source": "reference/g20/14_stock-under-unbound-theme_2026-11-12.jpg",
+  "H_panel_to_photo": [
+   [
+    0.379753098460851,
+    -0.012645986714535509,
+    184.1666052240133
+   ],
+   [
+    0.006260752220127194,
+    0.36090829446153955,
+    289.79483511403566
+   ],
+   [
+    1.5997025786043053e-05,
+    -2.5993451978889418e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     0.37928702493643257,
+     -0.01076221233122295,
+     186.00472659296966
+    ],
+    [
+     0.007348666426071119,
+     0.3615784826752873,
+     289.9788224882494
+    ],
+    [
+     1.8750981178164356e-05,
+     -2.2315183517294537e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.041999999999999996,
+   "centre_photo_px": [
+    511.5,
+    383.5
+   ],
+   "norm_radius_photo_px": 640.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 0.3669,
+  "photo_px_per_panel_px_strip": 0.3713,
+  "method": "start: SIFT (CLAHE) photo 61 -> this photo, homography, composed with 61's model; then masked NCC (grey, sigma 0.8 panel px) of 1112 fixed-content windows of 61's rect at 2 x (24..36 px, 2-D texture only) in the photo warped by the current fit, searches 12/6/3 px; homography + radial k1; inliers at 2 px",
+  "reference": "61",
+  "control_points": 375,
+  "inliers": 363,
+  "panel": {
+   "n": 363,
+   "rms": 0.593,
+   "max": 1.709
+  },
+  "panel_loo": {
+   "n": 363,
+   "rms": 0.601,
+   "max": 1.734
+  },
+  "strip_by_global_model": {
+   "n": 208,
+   "rms": 0.511,
+   "max": 1.527
+  },
+  "k1": -0.042,
+  "plain_homography_rms_panel_px": 1.947,
+  "inlier_bbox_panel_opencv": [
+   83.5,
+   65.5,
+   1907.5,
+   643.5
+  ],
+  "ncc_median": 0.972,
+  "field_smoothing": 300.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 0.4365,
+   "30.0": 0.4348,
+   "300.0": 0.4309,
+   "3000.0": 0.4343
+  },
+  "panel_field_loo": {
+   "n": 363,
+   "rms": 0.431,
+   "max": 1.841
+  },
+  "strip_field_loo": {
+   "n": 208,
+   "rms": 0.347,
+   "max": 1.841
+  },
+  "start": {
+   "good_matches": 292,
+   "inliers": 189,
+   "from_photo": "61"
+  }
+ },
+ "14_strip": {
+  "source": "reference/g20/14_stock-under-unbound-theme_2026-11-12.jpg",
+  "H_panel_to_photo": [
+   [
+    0.38010479436513506,
+    -0.012260238383304452,
+    183.93627572317328
+   ],
+   [
+    0.006448354592101433,
+    0.3612146589991098,
+    289.6890688294259
+   ],
+   [
+    1.6326517437679e-05,
+    -2.5675924985388794e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     0.37963115548331444,
+     -0.010380197513187077,
+     185.77890118984683
+    ],
+    [
+     0.00753313207900739,
+     0.3618805126084124,
+     289.8747218220447
+    ],
+    [
+     1.9074253458759613e-05,
+     -2.1999196766745672e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.041999999999999996,
+   "centre_photo_px": [
+    511.5,
+    383.5
+   ],
+   "norm_radius_photo_px": 640.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 0.3669,
+  "photo_px_per_panel_px_strip": 0.3713,
+  "method": "the global model form (k1 held) refitted on the control points with y >= 400 only, inliers at 2 px",
+  "reference": "61",
+  "control_points": 262,
+  "strip": {
+   "n": 208,
+   "rms": 0.5,
+   "max": 1.599
+  },
+  "lower_half": {
+   "n": 262,
+   "rms": 0.515,
+   "max": 1.599
+  },
+  "lower_half_loo": {
+   "n": 262,
+   "rms": 0.524,
+   "max": 1.617
+  },
+  "strip_vs_global_shift_px": [
+   0.245,
+   0.123
+  ]
+ },
+ "17": {
+  "source": "reference/g20/17_stock-media-list_door-open_2026-11-12.jpg",
+  "H_panel_to_photo": [
+   [
+    0.6038850567198125,
+    -0.04005657068819222,
+    537.7812669750795
+   ],
+   [
+    -0.004492462491591223,
+    0.6005139459902472,
+    525.9616228641142
+   ],
+   [
+    -1.9492091905418177e-05,
+    -2.888666889217969e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     0.6241451153363098,
+     -0.040090172233483996,
+     542.1788650360702
+    ],
+    [
+     0.012378807452888154,
+     0.6030159130348255,
+     525.1623931721957
+    ],
+    [
+     2.6219006685592994e-06,
+     -2.889463900127522e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.156,
+   "centre_photo_px": [
+    1023.5,
+    767.5
+   ],
+   "norm_radius_photo_px": 1280.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 0.6302,
+  "photo_px_per_panel_px_strip": 0.6404,
+  "method": "start: SIFT (CLAHE) photo 61 -> this photo, homography, composed with 61's model; then masked NCC (grey, sigma 0.8 panel px) of 1112 fixed-content windows of 61's rect at 2 x (24..36 px, 2-D texture only) in the photo warped by the current fit, searches 12/6/3 px; homography + radial k1; inliers at 2 px",
+  "reference": "61",
+  "control_points": 216,
+  "inliers": 214,
+  "panel": {
+   "n": 214,
+   "rms": 0.51,
+   "max": 1.986
+  },
+  "panel_loo": {
+   "n": 214,
+   "rms": 0.539,
+   "max": 2.047
+  },
+  "strip_by_global_model": {
+   "n": 110,
+   "rms": 0.522,
+   "max": 1.986
+  },
+  "k1": -0.156,
+  "plain_homography_rms_panel_px": 1.028,
+  "inlier_bbox_panel_opencv": [
+   83.5,
+   65.5,
+   1481.5,
+   643.5
+  ],
+  "ncc_median": 0.989,
+  "field_smoothing": 3000.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 0.4111,
+   "30.0": 0.4067,
+   "300.0": 0.3874,
+   "3000.0": 0.3619
+  },
+  "panel_field_loo": {
+   "n": 214,
+   "rms": 0.362,
+   "max": 2.244
+  },
+  "strip_field_loo": {
+   "n": 110,
+   "rms": 0.407,
+   "max": 2.244
+  },
+  "start": {
+   "good_matches": 395,
+   "inliers": 239,
+   "from_photo": "61"
+  }
+ },
+ "17_strip": {
+  "source": "reference/g20/17_stock-media-list_door-open_2026-11-12.jpg",
+  "H_panel_to_photo": [
+   [
+    0.617916164154233,
+    -0.05101173040807196,
+    537.4582069460932
+   ],
+   [
+    0.014365658977666913,
+    0.583682666847666,
+    527.0535415445376
+   ],
+   [
+    1.194379720262709e-06,
+    -4.5815992168534635e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     0.6337695419764987,
+     -0.04990870743159513,
+     542.3254875031184
+    ],
+    [
+     0.02866082317867545,
+     0.585886774969433,
+     526.8041313060211
+    ],
+    [
+     2.0012900302146142e-05,
+     -4.452621634932127e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.156,
+   "centre_photo_px": [
+    1023.5,
+    767.5
+   ],
+   "norm_radius_photo_px": 1280.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 0.6158,
+  "photo_px_per_panel_px_strip": 0.6295,
+  "method": "the global model form (k1 held) refitted on the control points with y >= 400 only, inliers at 2 px",
+  "reference": "61",
+  "control_points": 139,
+  "strip": {
+   "n": 110,
+   "rms": 0.443,
+   "max": 1.782
+  },
+  "lower_half": {
+   "n": 139,
+   "rms": 0.427,
+   "max": 1.782
+  },
+  "lower_half_loo": {
+   "n": 139,
+   "rms": 0.446,
+   "max": 1.836
+  },
+  "strip_vs_global_shift_px": [
+   50.378,
+   13.341
+  ]
+ },
+ "40": {
+  "source": "reference/g20/40_g20-look_zoom_fuel_speedo_empty-sign_2026-11-13.jpg",
+  "H_panel_to_photo": [
+   [
+    -3.155793309734193,
+    -0.25452839405548894,
+    5369.806182280106
+   ],
+   [
+    0.1914923610904911,
+    -0.014733609112795334,
+    -307.99179732174736
+   ],
+   [
+    -0.0005752338542867699,
+    -7.898731328863037e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     4.549701448571969,
+     -0.33510576563516975,
+     710.1698469455723
+    ],
+    [
+     0.22193068125829207,
+     4.550616840729374,
+     -921.2485921199163
+    ],
+    [
+     -1.3469010738957815e-05,
+     -3.081037542751409e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.026499999999999996,
+   "centre_photo_px": [
+    2015.5,
+    1511.5
+   ],
+   "norm_radius_photo_px": 2520.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 5.1872,
+  "photo_px_per_panel_px_strip": 5.2524,
+  "method": "start: SIFT (CLAHE) photo 61 -> this photo, homography, composed with 61's model; then masked NCC (grey, sigma 0.8 panel px) of 1112 fixed-content windows of 61's rect at 2 x (24..36 px, 2-D texture only) in the photo warped by the current fit, searches 12/6/3 px; homography + radial k1; inliers at 2 px",
+  "reference": "61",
+  "control_points": 168,
+  "inliers": 164,
+  "panel": {
+   "n": 164,
+   "rms": 0.41,
+   "max": 1.206
+  },
+  "panel_loo": {
+   "n": 164,
+   "rms": 0.426,
+   "max": 1.263
+  },
+  "strip_by_global_model": {
+   "n": 103,
+   "rms": 0.381,
+   "max": 1.206
+  },
+  "k1": -0.0265,
+  "plain_homography_rms_panel_px": 0.472,
+  "inlier_bbox_panel_opencv": [
+   83.5,
+   209.5,
+   479.5,
+   643.5
+  ],
+  "ncc_median": 0.97,
+  "field_smoothing": 3000.0,
+  "field_loo_rms_by_smoothing": {
+   "3.0": 0.3572,
+   "30.0": 0.3519,
+   "300.0": 0.3328,
+   "3000.0": 0.3124
+  },
+  "panel_field_loo": {
+   "n": 164,
+   "rms": 0.312,
+   "max": 1.523
+  },
+  "strip_field_loo": {
+   "n": 103,
+   "rms": 0.239,
+   "max": 0.886
+  },
+  "start": {
+   "good_matches": 273,
+   "inliers": 140,
+   "from_photo": "61"
+  }
+ },
+ "40_strip": {
+  "source": "reference/g20/40_g20-look_zoom_fuel_speedo_empty-sign_2026-11-13.jpg",
+  "H_panel_to_photo": [
+   [
+    -0.916104037525874,
+    -1.4239602356833343,
+    1874.1226935192547
+   ],
+   [
+    -0.037871057167469725,
+    0.19353759179320604,
+    -119.50487023177563
+   ],
+   [
+    -0.0005521753902738532,
+    -4.53021793454597e-05,
+    1.0
+   ]
+  ],
+  "model": {
+   "H_panel_to_undistorted_photo": [
+    [
+     4.587011132489098,
+     -0.3200144984882833,
+     702.8077638232678
+    ],
+    [
+     0.2420296077548707,
+     4.58899996455841,
+     -936.8910565944184
+    ],
+    [
+     -8.380169675732235e-06,
+     -2.227301818347288e-05,
+     1.0
+    ]
+   ],
+   "k1": -0.026499999999999996,
+   "centre_photo_px": [
+    2015.5,
+    1511.5
+   ],
+   "norm_radius_photo_px": 2520.0,
+   "formula": "u = c + (q - c)(1 + k1 |q - c|^2 / s^2), u = H panel; q photo px; panel in OpenCV pixel-centre coordinates (continuous - 0.5)"
+  },
+  "photo_px_per_panel_px": 5.1649,
+  "photo_px_per_panel_px_strip": 5.2104,
+  "method": "the global model form (k1 held) refitted on the control points with y >= 400 only, inliers at 2 px",
+  "reference": "61",
+  "control_points": 134,
+  "strip": {
+   "n": 106,
+   "rms": 0.374,
+   "max": 1.252
+  },
+  "lower_half": {
+   "n": 134,
+   "rms": 0.413,
+   "max": 1.739
+  },
+  "lower_half_loo": {
+   "n": 134,
+   "rms": 0.438,
+   "max": 1.904
+  },
+  "strip_vs_global_shift_px": [
+   1932428.272,
+   6196.99
+  ]
+ }
+}
