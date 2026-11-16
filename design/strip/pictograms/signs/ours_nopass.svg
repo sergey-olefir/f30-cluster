@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ours proportions, no overtaking, drawn at the stock outer radius 41.1 px.
+     Our own drawing (package P, tools/strip/P/signs.js); ratios from design/strip/pictograms/signs/proportions.json.
+     Not BMW's artwork; no path copied from any sign file. Licence: MIT (the repository's LICENSE). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88.2 88.2" width="352.8" height="352.8">
+  <title>ours nopass</title>
+  <rect width="88.2" height="88.2" fill="#000"/>
+  <circle cx="44.1" cy="44.1" r="41.1" fill="#C8102E"/><circle cx="44.1" cy="44.1" r="33.58" fill="#F4F4F4"/><rect x="15.56" y="41.68" width="26.19" height="8.46" rx="2.01" fill="#C8102E"/><rect x="19.22" y="34.03" width="18.86" height="9.27" rx="2.42" fill="#C8102E"/><rect x="21.58" y="36.04" width="14.14" height="4.84" rx="1.21" fill="#F4F4F4"/><rect x="17.65" y="49.74" width="5.24" height="4.43" rx="1.01" fill="#C8102E"/><rect x="34.42" y="49.74" width="5.24" height="4.43" rx="1.01" fill="#C8102E"/><rect x="46.45" y="41.68" width="26.19" height="8.46" rx="2.01" fill="#1A1A1A"/><rect x="50.12" y="34.03" width="18.86" height="9.27" rx="2.42" fill="#1A1A1A"/><rect x="52.48" y="36.04" width="14.14" height="4.84" rx="1.21" fill="#F4F4F4"/><rect x="48.55" y="49.74" width="5.24" height="4.43" rx="1.01" fill="#1A1A1A"/><rect x="65.31" y="49.74" width="5.24" height="4.43" rx="1.01" fill="#1A1A1A"/>
+</svg>

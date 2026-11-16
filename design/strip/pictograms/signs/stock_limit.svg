@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- stock proportions, speed limit, drawn at the stock outer radius 41.1 px.
+     Our own drawing (package P, tools/strip/P/signs.js); ratios from design/strip/pictograms/signs/proportions.json.
+     Not BMW's artwork; no path copied from any sign file. Licence: MIT (the repository's LICENSE). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88.2 88.2" width="352.8" height="352.8">
+  <title>stock limit</title>
+  <rect width="88.2" height="88.2" fill="#000"/>
+  <circle cx="44.1" cy="44.1" r="41.1" fill="#C8102E"/><circle cx="44.1" cy="44.1" r="31.8" fill="#F4F4F4"/><text x="44.1" y="57.3" font-family="Roboto, Arial, sans-serif" font-size="36.67" text-anchor="middle" fill="#1A1A1A">50</text>
+</svg>

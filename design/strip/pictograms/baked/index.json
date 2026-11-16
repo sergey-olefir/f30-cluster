@@ -1,0 +1,499 @@
+{
+ "generator": "tools/strip/P/bake_pictograms.js",
+ "source": "design/strip/pictograms/pictograms.js",
+ "licence": "MIT (repository LICENSE); our own drawings",
+ "format": "PNG, 8-bit grey+alpha, white ink; alpha = coverage",
+ "note": "box: alpha ink box [x0, y0, x1, y1], half-open px; ink: summed alpha in px",
+ "items": [
+  {
+   "name": "cc_warn",
+   "group": "marker",
+   "w": 30,
+   "h": 36,
+   "file": "cc_warn_30x36.png",
+   "box": [
+    0,
+    4,
+    30,
+    30
+   ],
+   "ink": 222.2
+  },
+  {
+   "name": "cc_warn",
+   "group": "marker",
+   "w": 28,
+   "h": 28,
+   "file": "cc_warn_28x28.png",
+   "box": [
+    0,
+    1,
+    28,
+    26
+   ],
+   "ink": 193.5
+  },
+  {
+   "name": "cc_warn",
+   "group": "marker",
+   "w": 32,
+   "h": 32,
+   "file": "cc_warn_32x32.png",
+   "box": [
+    0,
+    1,
+    32,
+    29
+   ],
+   "ink": 253
+  },
+  {
+   "name": "cc_warn",
+   "group": "marker",
+   "w": 128,
+   "h": 128,
+   "file": "cc_warn_128x128.png",
+   "box": [
+    1,
+    4,
+    127,
+    115
+   ],
+   "ink": 4037.1
+  },
+  {
+   "name": "cc_warn_solid",
+   "group": "marker",
+   "w": 30,
+   "h": 36,
+   "file": "cc_warn_solid_30x36.png",
+   "box": [
+    0,
+    4,
+    30,
+    30
+   ],
+   "ink": 370.6
+  },
+  {
+   "name": "cc_warn_solid",
+   "group": "marker",
+   "w": 28,
+   "h": 28,
+   "file": "cc_warn_solid_28x28.png",
+   "box": [
+    0,
+    1,
+    28,
+    25
+   ],
+   "ink": 323
+  },
+  {
+   "name": "cc_warn_solid",
+   "group": "marker",
+   "w": 32,
+   "h": 32,
+   "file": "cc_warn_solid_32x32.png",
+   "box": [
+    0,
+    1,
+    32,
+    29
+   ],
+   "ink": 421.6
+  },
+  {
+   "name": "cc_warn_solid",
+   "group": "marker",
+   "w": 128,
+   "h": 128,
+   "file": "cc_warn_solid_128x128.png",
+   "box": [
+    1,
+    5,
+    127,
+    114
+   ],
+   "ink": 6748.9
+  },
+  {
+   "name": "cc_info",
+   "group": "marker",
+   "w": 30,
+   "h": 36,
+   "file": "cc_info_30x36.png",
+   "box": [
+    9,
+    4,
+    21,
+    31
+   ],
+   "ink": 121.5
+  },
+  {
+   "name": "cc_info",
+   "group": "marker",
+   "w": 28,
+   "h": 28,
+   "file": "cc_info_28x28.png",
+   "box": [
+    8,
+    1,
+    20,
+    26
+   ],
+   "ink": 105.4
+  },
+  {
+   "name": "cc_info",
+   "group": "marker",
+   "w": 32,
+   "h": 32,
+   "file": "cc_info_32x32.png",
+   "box": [
+    9,
+    2,
+    23,
+    30
+   ],
+   "ink": 138.2
+  },
+  {
+   "name": "cc_info",
+   "group": "marker",
+   "w": 128,
+   "h": 128,
+   "file": "cc_info_128x128.png",
+   "box": [
+    39,
+    8,
+    89,
+    119
+   ],
+   "ink": 2198
+  },
+  {
+   "name": "cc_dot",
+   "group": "marker",
+   "w": 30,
+   "h": 36,
+   "file": "cc_dot_30x36.png",
+   "box": [
+    10,
+    13,
+    20,
+    23
+   ],
+   "ink": 63.6
+  },
+  {
+   "name": "cc_dot",
+   "group": "marker",
+   "w": 28,
+   "h": 28,
+   "file": "cc_dot_28x28.png",
+   "box": [
+    9,
+    9,
+    19,
+    19
+   ],
+   "ink": 55.7
+  },
+  {
+   "name": "cc_dot",
+   "group": "marker",
+   "w": 32,
+   "h": 32,
+   "file": "cc_dot_32x32.png",
+   "box": [
+    11,
+    11,
+    21,
+    21
+   ],
+   "ink": 73.3
+  },
+  {
+   "name": "cc_dot",
+   "group": "marker",
+   "w": 128,
+   "h": 128,
+   "file": "cc_dot_128x128.png",
+   "box": [
+    44,
+    44,
+    84,
+    84
+   ],
+   "ink": 1158.7
+  },
+  {
+   "name": "cc_door",
+   "group": "symbol",
+   "w": 41,
+   "h": 53,
+   "file": "cc_door_41x53.png",
+   "box": [
+    3,
+    7,
+    36,
+    46
+   ],
+   "ink": 358.4
+  },
+  {
+   "name": "cc_door",
+   "group": "symbol",
+   "w": 32,
+   "h": 32,
+   "file": "cc_door_32x32.png",
+   "box": [
+    2,
+    1,
+    28,
+    31
+   ],
+   "ink": 217.7
+  },
+  {
+   "name": "cc_door",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_door_128x128.png",
+   "box": [
+    11,
+    5,
+    110,
+    123
+   ],
+   "ink": 3487.8
+  },
+  {
+   "name": "cc_brake",
+   "group": "symbol",
+   "w": 41,
+   "h": 53,
+   "file": "cc_brake_41x53.png",
+   "box": [
+    2,
+    13,
+    39,
+    45
+   ],
+   "ink": 452.2
+  },
+  {
+   "name": "cc_brake",
+   "group": "symbol",
+   "w": 32,
+   "h": 32,
+   "file": "cc_brake_32x32.png",
+   "box": [
+    1,
+    5,
+    31,
+    31
+   ],
+   "ink": 275.6
+  },
+  {
+   "name": "cc_brake",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_brake_128x128.png",
+   "box": [
+    6,
+    22,
+    122,
+    122
+   ],
+   "ink": 4405.9
+  },
+  {
+   "name": "cc_tyre",
+   "group": "symbol",
+   "w": 41,
+   "h": 53,
+   "file": "cc_tyre_41x53.png",
+   "box": [
+    5,
+    13,
+    36,
+    47
+   ],
+   "ink": 301.9
+  },
+  {
+   "name": "cc_tyre",
+   "group": "symbol",
+   "w": 32,
+   "h": 32,
+   "file": "cc_tyre_32x32.png",
+   "box": [
+    4,
+    5,
+    28,
+    32
+   ],
+   "ink": 185
+  },
+  {
+   "name": "cc_tyre",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_tyre_128x128.png",
+   "box": [
+    16,
+    23,
+    112,
+    126
+   ],
+   "ink": 2925.1
+  },
+  {
+   "name": "cc_engine",
+   "group": "symbol",
+   "w": 41,
+   "h": 53,
+   "file": "cc_engine_41x53.png",
+   "box": [
+    2,
+    16,
+    39,
+    39
+   ],
+   "ink": 331.9
+  },
+  {
+   "name": "cc_engine",
+   "group": "symbol",
+   "w": 32,
+   "h": 32,
+   "file": "cc_engine_32x32.png",
+   "box": [
+    2,
+    7,
+    30,
+    26
+   ],
+   "ink": 201.1
+  },
+  {
+   "name": "cc_engine",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_engine_128x128.png",
+   "box": [
+    8,
+    31,
+    120,
+    102
+   ],
+   "ink": 3242.3
+  },
+  {
+   "name": "cc_washer",
+   "group": "symbol",
+   "w": 41,
+   "h": 53,
+   "file": "cc_washer_41x53.png",
+   "box": [
+    1,
+    17,
+    40,
+    49
+   ],
+   "ink": 378.1
+  },
+  {
+   "name": "cc_washer",
+   "group": "symbol",
+   "w": 32,
+   "h": 32,
+   "file": "cc_washer_32x32.png",
+   "box": [
+    1,
+    9,
+    31,
+    32
+   ],
+   "ink": 226.6
+  },
+  {
+   "name": "cc_washer",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_washer_128x128.png",
+   "box": [
+    5,
+    36,
+    123,
+    128
+   ],
+   "ink": 3646.1
+  },
+  {
+   "name": "cc_belt",
+   "group": "symbol",
+   "w": 41,
+   "h": 53,
+   "file": "cc_belt_41x53.png",
+   "box": [
+    7,
+    8,
+    33,
+    47
+   ],
+   "ink": 330.7
+  },
+  {
+   "name": "cc_belt",
+   "group": "symbol",
+   "w": 32,
+   "h": 32,
+   "file": "cc_belt_32x32.png",
+   "box": [
+    6,
+    1,
+    26,
+    32
+   ],
+   "ink": 201.2
+  },
+  {
+   "name": "cc_belt",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_belt_128x128.png",
+   "box": [
+    24,
+    7,
+    102,
+    126
+   ],
+   "ink": 3209.3
+  },
+  {
+   "name": "cc_info",
+   "group": "symbol",
+   "w": 41,
+   "h": 53,
+   "file": "cc_info_41x53.png",
+   "box": [
+    12,
+    8,
+    29,
+    44
+   ],
+   "ink": 225.6
+  }
+ ]
+}
