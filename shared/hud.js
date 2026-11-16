@@ -24,7 +24,7 @@
  *
  * Layer packing (Nov 5 2026): cluster-render draws at most 8 layers per client connection (its
  * CompositorLimits.per_client; 32 across all clients; a 9th is refused with "too many layers"), which the car
- * photos showed as a theme's shaders plus the first few text widgets. So the image widgets (text, scale, stripe, badge, gridlabels, icon, swatchimg) are
+ * photos showed as a theme's shaders plus the first few text widgets. So the image widgets (text, scale, stripe, gridlabels, icon, swatchimg) are
  * packed into SHEETS, one image layer per sheet, instead of one layer each. Widgets are grouped by
  * (class, z) and placed in file order: a widget goes into the first sheet of its group opened after every
  * earlier layer or widget its rect intersects (so an image widget never clobbers one it overlaps, and
@@ -55,7 +55,6 @@
  *             "barH" bar height, "top" room for the marks above it, "slant" px, "over" rpm past the
  *             redline's thousand the scale runs to (1000: a 7000 redline gives 0..8)
  *   lights    effect layer; shaders.js lights, shift lights filling from "from" rpm (3000) up to the shift point
- *   badge     image layer; a rounded tag with text: "tone" verdict (the last shift's grade colour) or cold
  *   fill      effect layer; a solid colour (role "color", default "bg") over the whole widget, with an
  *             optional see-through "hole": [x, y, w, h] in target px, cut only while the bool setting
  *             "holeWhen" is on (true: always; the cluster's map window), shrunk by "holeInset" px on every side (6) with
@@ -140,7 +139,7 @@
  * Pixel memory: cluster-render has 16 MiB for every app's images together and counts each image twice
  *   (Compositor::add_image; a layer past it is refused with "the service's pixel memory is full"), so every
  *   image layer costs w*h*8 bytes. The rebuild log and the status row say what a layout costs.
- * Text and badge updates send only the one rectangle around the pixels that changed since the last paint
+ * Text updates send only the one rectangle around the pixels that changed since the last paint
  *   (changes() below, after PenguinDukeYDAuto/idrive7-EVAHUD's eva_canvas.js, MIT): a 3-digit readout
  *   that goes 123 -> 124 sends its last digit, not the widget.
  *   boxes     effect layer; the GT3 dash's frame in ONE layer (shaders.js boxes; the car draws only a few effect
@@ -191,7 +190,6 @@
  * {{intake}} (intake air, from the engine unit: app.json config.dme.intake) {{boostPeak}} (the highest boost since the last
  * 0-60 run started) {{avgSpeed}} (average moving speed this drive, from its first minute) {{run}} (the 0-60 clock running, else the last time, s) {{runBest}} {{runState}} (READY / GO / DONE)
  * {{runLabel}} (0-60 MPH, 0-100 KM/H): runs.js. {{warm}}: WARMING UP while the oil is under 80 C, then ENGINE WARM.
- * {{badge}}: the model picked on the Badge tab (badges.js), "BMW X3 M40i" with the lettering on, '' for none.
  * Bottom row (docs/BOTTOM-ROW-PACKAGE.md; each '' until the car sends one AND its setting is "ours"):
  * {{road}} (the bottom-centre road label) {{ccName}} {{ccDesc}} (the check-control message's name and description)
  * {{ccHead}} (package X: our one-line message, the headline; a text widget with "ccLine": true draws it with its
@@ -233,12 +231,11 @@ const calibration = require('./calibration');
 const Car = require('./kit/car');
 const Waze = require('./waze');
 const Screen = require('./screen');
-const badges = require('./badges');
 const Runs = require('./runs');
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
-const IMAGE_TYPES = { text: true, scale: true, stripe: true, badge: true, gridlabels: true, icon: true, swatchimg: true };
+const IMAGE_TYPES = { text: true, scale: true, stripe: true, gridlabels: true, icon: true, swatchimg: true };
 const STATUS_ASK_MS = 2000;      // after a rebuild: ask cluster-render for its own status text
 const LAYER_BUDGET = 8;          // cluster-render's limit per client connection (CompositorLimits.per_client; confirmed on the car Nov 5 2026)
 const MAX_CONN = 4;              // connections a layout may ask for ("conn"): 32 layers service-wide / 8 per connection
@@ -315,7 +312,7 @@ const OWN_ITEMS = ['range', 'clock', 'temp', 'nav', 'sign', 'info'];
 // the HUD's place (the page's Position tab): settings that move / scale the layers already there, no rebuild
 const PLACE_KEYS = ['hudX', 'hudY', 'hudScale'];
 // settings that only change what a text shows (the next tick paints it), no rebuild
-const LIVE_KEYS = ['warnOil', 'warnCoolant', 'warnBoost', 'badge', 'badgeBMW', 'gFlipLat', 'gFlipLong', 'gRange', 'gTrail'];
+const LIVE_KEYS = ['warnOil', 'warnCoolant', 'warnBoost', 'gFlipLat', 'gFlipLong', 'gRange', 'gTrail'];
 // g (after cauliflowermossgrape's G-Force, MIT, idea only): a sample over G_BAD is a bad reading, not a corner;
 // the rest are averaged over G_AVG_MS so kerbs and potholes don't throw the dot about
 const G_BAD = 3;
@@ -2369,7 +2366,6 @@ class HudApp {
             case 'runState': return this.runs.word();
             case 'runLabel': return us ? '0-60 MPH' : '0-100 KM/H';
             case 'warm': { const o = this._raw('oil'); return isNum(o) ? (o < 80 ? 'WARMING UP' : 'ENGINE WARM') : ''; }
-            case 'badge': return badges.text(this.setting('badge'), this.setting('badgeBMW') === true);
             case 'speed': { const v = this._raw('speed'); return fix(isNum(v) ? (us ? v * 0.621371 : v) : v, 0); }
             case 'u:speed': return us ? 'MPH' : 'KM/H';
             case 'oil': case 'coolant': { const v = this._raw(tok); return fix(isNum(v) ? (us ? v * 9 / 5 + 32 : v) : v, 0); }
@@ -4148,18 +4144,6 @@ class HudApp {
                 glow: w.glow ? this.theme.glow : 0,
             });
             this._blitDiff(x, buf);
-        } else if (w.type === 'badge') {
-            if (!force && now - x.lastPaint < TEXT_MS) return;
-            const s = this._resolve(w.text);
-            let tone = VERDICT.COLD, fresh = false;
-            if (w.tone === 'verdict' && this.score.last) {
-                tone = VERDICT[this.score.last.verdict] || this.theme.fg;
-                fresh = now - this.score.last.at < 2500;
-            }
-            const key = s + '|' + tone + '|' + fresh;
-            if (!force && key === x.last) return;
-            x.last = key; x.lastPaint = now;
-            this._blitDiff(x, this._paintBadge(w, s, tone, fresh));
         } else if (w.type === 'tiles') {
             // per tile: its bar (the slot's sensor, TILE_BAR) and whether that reading is over its warning limit
             const list = this._tiles(w), vals = [];
@@ -4413,35 +4397,6 @@ class HudApp {
             x.c.uniform(x.ref, 'u_lit', [lit]);
             x.c.uniform(x.ref, 'u_strobe', [sp.now ? 1 : 0]);
         }
-    }
-
-    /** A rounded tag: fill in the tone colour (bright for a fresh grade), text centred on it. Empty text: nothing. */
-    _paintBadge(w, s, tone, fresh) {
-        const W = w.w, H = w.h, buf = Buffer.alloc(W * H * 4, 0);
-        if (!s) return buf;
-        const r = Math.min(6, H / 2), fillA = fresh ? 0.45 : 0.2;
-        for (let y = 0; y < H; y++) {
-            for (let x = 0; x < W; x++) {
-                // rounded-rect coverage, 1 px soft edge
-                const qx = Math.max(Math.abs(x + 0.5 - W / 2) - (W / 2 - r), 0), qy = Math.max(Math.abs(y + 0.5 - H / 2) - (H / 2 - r), 0);
-                const cov = Math.min(1, Math.max(0, r + 0.5 - Math.sqrt(qx * qx + qy * qy)));
-                if (cov <= 0) continue;
-                const o = (y * W + x) * 4;
-                buf[o] = tone[0]; buf[o + 1] = tone[1]; buf[o + 2] = tone[2]; buf[o + 3] = Math.round(255 * fillA * cov);
-            }
-        }
-        const font = textRaster.loadFont(w.font);
-        const ty = Math.round((H - font.metrics.cellHeight) / 2);
-        const m = textRaster.mask(W, H, s, { font: w.font, align: 'center', spacing: w.spacing, offsetY: ty });
-        const tc = fresh ? this.theme.fg : tone;
-        for (let i = 0; i < m.length; i++) {
-            if (!m[i]) continue;
-            const a = m[i] / 255, o = i * 4, ba = buf[o + 3] / 255;
-            const outA = a + ba * (1 - a);
-            for (let c = 0; c < 3; c++) buf[o + c] = Math.round((tc[c] * a + buf[o + c] * ba * (1 - a)) / outA);
-            buf[o + 3] = Math.round(outA * 255);
-        }
-        return buf;
     }
 
     /** "x/y" at every step, uploaded as small rects (not the whole, mostly empty, image). */

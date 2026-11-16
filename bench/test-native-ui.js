@@ -190,14 +190,17 @@ async function main() {
     // timeZone / tankLitres / redline / shiftBefore, and with them went the LAST number setting this app has - every
     // row left is a bool or a choice. The check is the same one (an out-of-range row is ignored, a good one is taken),
     // now on a choice. The kit's number/steps path is still covered by its own tests, not by this app.
-    await click('SET_BADGE', 999);
+    // (2026-11-16: the "badge" choice it pressed was retired - no layout drew a badge - so the bad row goes to
+    // "dialShade" now, which nothing earlier in this test changes from its default)
+    await click('SET_DIALSHADE', 999);
     await click('SET_NIGHTDIM', -1);
     await click('NO_SUCH_COMPONENT');
     const nd = spec.settings.find((s) => s.key === 'nightDim');
     const ndWant = nd.options[nd.options.length - 1][0];
     await click('SET_NIGHTDIM', nd.options.length - 1);
     p = await until((q) => q.settings.nightDim === ndWant);
-    ok(p.settings.nightDim === ndWant && p.settings.badge === 'none', 'bad rows ignored, a good one taken (nightDim ' + ndWant + ')');
+    const dsDefault = spec.settings.find((s) => s.key === 'dialShade').default;
+    ok(p.settings.nightDim === ndWant && p.settings.dialShade === dsDefault,'bad rows ignored, a good one taken (nightDim ' + ndWant + ')');
     await sleep(1000);
     ok(!exited && !/uncaught|app exited/.test(logText), 'the app never exited (no uncaught exception)');
 }

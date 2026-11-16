@@ -13,7 +13,7 @@ import os
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
 LAYOUTS = os.path.join(ROOT, "apps", "f30_cluster", "hud", "layouts")
-IMAGE_TYPES = {"text", "scale", "stripe", "badge", "gridlabels", "icon", "swatchimg"}
+IMAGE_TYPES = {"text", "scale", "stripe", "gridlabels", "icon", "swatchimg"}
 LAYER_BUDGET, MAX_CONN, AREA = 8, 4, 1920 * 720
 MIB = 1024 * 1024
 
