@@ -15,27 +15,56 @@ package. Every number is marked **measured** (with the photo and the method) or 
 
 **The numbers live in `design/g20-spec/measured.json`**, which the tools and this document share.
 
+**Corrected on 2026-11-16** after the strip packages measured the bottom strip again on new, higher-resolution
+photos (`docs/strip/*-REPORT.md`, numbers in `design/strip/*/`). Package H checked every claim here against them
+(`docs/strip/H-REPORT.md`, `design/strip/H/claims.json`). What changed, in short:
+
+- **Four of the "new" photos are old frames.** 60 = 10, 61 = 09, 62 = 08 and 68 = 39 are the same exposures at a
+  higher resolution (identity transform, NCC ≥ 0.998, the same capture second; H). The new exposures are 63–67.
+  A cross-check between such a pair is one observation twice.
+- **What each photo shows was partly wrong.** 39 and 40 are stock (H, by content). 17 is **not** plain stock: it
+  is BMW's drawing **under a connected theme** (BMW's black box, and the mode label and gear moved into the row;
+  H claim C7). 08 was taken at dusk, not at night (H C18).
+- **BMW rearranges the row when a theme is connected** (§2): the mode label and gear move into the row. Of the
+  stock-visible photos only 10 = 60, 14 and 17 show that arrangement, which is the one the see-through layouts
+  live with.
+- **Every text size below was 1–2 px too big.** BMW's white text is overexposed in the photos, so half-max edges sit
+  0.8–1.6 px outside the true ones per edge (package T). Positions and advances survive; heights, stems and widths
+  do not. T's corrected values are given beside the old ones.
+- **Coordinates.** The old numbers carry `tools/g20spec/zoom.py`'s pixel-centre convention; the strip packages
+  use continuous panel px (pixel i covers [i, i+1)), which is +0.44–0.5 px on a position (T, ZL). Where an old
+  and a new position are compared below, that offset is part of the difference.
+- **Claims that were wrong**, each corrected in its section: there **is** a fill under the message rail (§5.1); the
+  marker right of the rail **outlives** the message (§5.6); the sign is centred at (538.45, 621.2) with r_outer
+  40.95 (§4.1); the street line is not always the street when no message shows (§3).
+
 ---
 
 ## 0. Headline numbers
 
+Corrected 2026-11-16: where a strip package re-measured a number, its value comes first and the old one is
+given as "was". Sizes are T's overexposure-corrected values.
+
 | What | Value (panel px) | How |
 |---|---|---|
-| Bottom-row value baseline (range, clock, temperature) | **y 698.1** ±0.6 | measured, 6 photos |
-| Bottom-row value figure height | **33.0** ±1.0 (31.9 on the two sharpest) | measured |
-| Bottom-row digit advance (tabular) | **24.2** ±0.2 | measured, 39/09/08/17/34/41 |
-| Unit text ("km", "°C") cap height | **25.7** ±0.8 = 0.78 × the value height | measured |
-| Street label | centred on **x 960.5** ±0.6, baseline **y 700.5**, cap **30.9**, x-height **22.8** | measured, 39/34/09 |
-| Street label weight | stem **3.4** px = 0.11 × cap — a **Light** | measured, 39/34 |
-| Dial bottom line | 7 px thick, centre **y 647**, hook tips (753.5, 614.5) and (1166.5, 614.5) | measured, 39 |
-| Speed-limit sign | centre **(537.4, 621.3)**, outer r **41.1**, ring width **9.3**, white disc r **31.8** | measured, 7 photos |
-| Sign digits | figure height **26.4**, advance **18.9**, centred in the disc | measured, 09/08/17/34 |
-| Sign empty state | three dashes 8.8 × 4.4, pitch 13.0, centred | measured, 39 |
-| Check-control rail | 5 px, flat at **y 604.8**, x 749…1176, tapered tips (702, 621) and (1221, 621) | measured, 08/17/42/43 |
-| Message text | centred on **x 967.5** ±1.5; one line baseline **671.2**; two lines **645.8 / 690.2**, leading **44.2** | measured |
-| Message cap height / x-height / stem | **26.6 / 20.6 / 5.1** — a **Bold** (stem 0.20 × cap) | measured, 42 |
-| Symbol slot (the "i" or the pictogram) | right edge **x 752.9**, centre **y 658.7**, up to 41 × 53 | measured, 08/17/42/43 |
-| Severity marker, right of the rail | box ≈ **[1252, 591, 1280, 627]** | measured, 08 ("i") / 43 (triangle) |
+| Bottom-row value baseline (range, clock, temperature) | **y 698.1** ±0.6; T 698.0–698.8, ZR 698.25–699.0 | measured, 6 photos; confirmed (T, ZR) |
+| Bottom-row value figure height | **31.0** ±0.3 (was 33.0: overexposure) | T, clock fit over 9 photos |
+| Bottom-row value stem | **4.4** ±0.4 (was 5.5) | T |
+| Bottom-row digit advance (tabular) | **24.2** ±0.2 (ZL reads 24.4) | measured, 39/09/08/17/34/41; T confirms |
+| Clock colon advance | **13.9** ±0.4 (was 12.9, read on a "1" pair) | T, photo 64 only |
+| Unit text ("km", "°C") cap height | **24.3**, stem 2.4, grey, not white (was 25.7) | T, photo 68 only |
+| Street label | centred on **x 960.6** (ZC; T 960.7), baseline **y ~700** (ZC 700.1, T 699.7; was 700.5), cap **29.8**, x-height **21.9** (T; was 30.9 / 22.8) | 39/34/09; ZC, T on 61/64/67/68 |
+| Street label weight | stem **3.0** px = 0.10 × cap — a **Light** (was 3.4) | T |
+| Dial bottom line | **6.5** px thick on the left (ZL; ZR 6.8–7.1 on the right; was 7.0), centre **y 647.45**; hook tips about (755.5, 616) and (1164, 616) (ZC; was (753.5, 614.5) / (1166.5, 614.5)); the hooks show only while no message does | ZL, ZR, ZC |
+| Speed-limit sign | centre **(538.45, 621.2)** ±0.3, outer r **40.95**, ring width **9.41**, white disc r **31.54** (was (537.4, 621.3), 41.1, 9.3, 31.8). **Open:** H and O read the centre ~0.7–0.8 px lower (§4.1) | ZL, photos 60–64, 66–68 |
+| Sign digits | figure height **26.9** (ZL; T 26.8; was 26.4), advance **18.9**, centred in the disc | 09/08/17/34; ZL, T |
+| Sign empty state | three dashes **9.4 × 4.9** (was 8.8 × 4.4), pitch 13.07, centred | ZL on 68 = 39 |
+| Check-control rail | **4.6** px (ZC; was 4.9), flat at **y 605.1**, x 747…1175; tapered ends: 50 % of the plateau at x 714.75 / 1207, faint tail to (701, 621) / (1220, 621) — the old "tips" (702, 621) / (1221, 621) are that tail; H's half-max 710.5 / 1211.2 is a third threshold | ZC on 62, 66; H |
+| Fill under the rail | **yes**: a faint warm purple-grey gradient, ~0.05 of white under the rail, fading down and towards both tips (was "no fill") | ZC, H on 08 = 62, 66, 17 |
+| Message text | centred on **x 968.6** ±0.4 (ZC; T 968–969; was 967.5); one line baseline **671.5** (ZC) / **670.2** (T); two lines **646.75 / 691.0** (ZC) / **645.3 / 689.4** (T), leading **44.25**. The ZC–T baseline difference (~1 px) is open | ZC, T on 62, 66 |
+| Message cap height / x-height / stem | **24.3–24.9 / 18.2–19.2 / 3.4–3.9** (T; was 26.6 / 20.6 / 5.1) — stem 0.14–0.16 × cap, heavier than the street label but not the "Bold" read before | T, one photo per line kind |
+| Symbol slot (the "i" or the pictogram) | centre **y 660.4** (was 658.7); right edge depends on the symbol: **752.75** for the "i", **756.0** for the door (was 752.9 for all); slot about **[711, 632, 757, 688]** | ZC on 62, 66 |
+| Stored-messages marker, right of the rail | "i" **[1255.75, 591.25, 1269.75, 626.5]**, warning triangle **[1243.25, 591.75, 1284.75, 627.5]** (41.25 × 35.75). It **outlives the message** (was "severity marker that appears with the message", box ≈ [1252, 591, 1280, 627] from our own window on 43) | ZR on 62/63, 66/67; P; H |
 | Anything on the speedometer scale for the limit | **nothing drawn** (the "Excess speed display" setting is off on this car) | measured, 08/09/17/39 |
 | Several check-control messages | **cycled** as numbered frames, up to 3, never stacked or scrolled | car's own `statusMenuCCMessage` |
 | Typeface | BMW's own; nearest free match **Roboto variable, wdth 87.5** | measured + web |
@@ -88,6 +117,12 @@ The x/cap difference between the street (0.74) and the message (0.77) is at the 
 bars (±1 % on the cap, ±1.5 % on the x-height), and part of it is letter choice: the street's
 x-height was read on flat-topped `ьві`, the message's on round `оев`, which overshoot. Treat the face
 as one design with **x/cap ≈ 0.75**, not as two.
+
+**Corrected 2026-11-16 (package T):** the heights and stems in this table are 1–2 px too big, because BMW's white
+text is overexposed in every photo and its half-max edges sit 0.8–1.6 px outside the true ones. The ratios that do
+not involve a stem survive (street x/cap 0.735, T). The stems do not: corrected, the street label is stem/cap
+**0.10** and the message **0.14–0.16**, not 0.198, so the message is a medium-heavy weight rather than a clear Bold
+(T recommends Roboto wght 450 for it). The per-field values are in `design/strip/T/typography.json`.
 
 Other measured glyph facts (all **measured**, photo 39 unless noted):
 
@@ -197,6 +232,11 @@ figure height **0.721 em**, so for a renderer whose "size" is the em (PIL's is):
 (Use the figure height, not the em size, as the thing you tune: 31.9 on the two sharpest photos and
 34 on the softest, so ±1 px of judgement is left to the eye on the car.)
 
+**Superseded 2026-11-16:** the target heights in this table are the overexposed ones. Package T's corrected
+targets and bakes replace them: row figure 31.0 (wght 450, wdth 100, advance 24), units cap 24 (wght 300),
+street cap 30 / x 22 (wght 325, wdth 90.6), message cap 25 / x 18 (wght 450, wdth 87.5), mode label cap
+20.1–20.7, sign figure 27 (`docs/strip/T-REPORT.md`, "Recommended bakes").
+
 If the owner would rather not depend on a font at all for the **sign digits** — ten glyphs, one size —
 §4.3 gives a measured specification from which they can be drawn directly.
 
@@ -206,6 +246,26 @@ If the owner would rather not depend on a font at all for the **sign digits** �
 
 All **measured**. Photo 39 (stock, day, 1.84 photo px per panel px) is the master; 09, 08, 17 and the
 hi-res 34/41 cross-check it. Elements left to right.
+
+**Corrected 2026-11-16 (package H, claim C17).** The cross-checks are fewer than they look. 34 and 41 are our
+theme over BMW's row, and 41 is registered via 39 and 34 via 41, so the hi-res chain is one registration. 17 is
+BMW's drawing with a theme connected, not plain stock. 68, 61 and 62 are the same frames as 39, 09 and 08. The
+independent stock exposures behind this section are 39, 09, 08 and 17 (17 with a theme), plus, since then,
+63–67 (packages ZL, ZR, T).
+
+**There are two stock arrangements of the row** (H verdict 3; ZR; package OVERLAY/CAR3-J before them):
+
+- **No theme connected** (39 = 68, 09 = 61, 08 = 62, 63, 64, 66, 67): the mode label and the gear letter are in
+  the tacho's centre, not in the row.
+- **A theme connected** (10 = 60, 14, 17): BMW moves its mode label (from x ~1223) and its gear letter
+  (x 1395–1424) into the row, and usually blacks out the old gear spot in the tacho hub (not always: 34). The gear
+  is drawn **over** the theme, the mode label **under** it (ZR on 60). This is the arrangement the see-through
+  layouts live with, and only 10 = 60, 14 and 17 show it.
+- BMW's **standby** row (65) is a third look: the odometer in the centre, the mode label in the row, no sign and no
+  belts (§3, ZC, P).
+
+Nothing in the left half of the row moves between the first two: sign, range, clock, rail ends and driver belt
+agree within 0.5 px between 60 and 61–64 (ZL).
 
 ```
  x:   136        303   345      450          537        712  753            960.5           1223   1395  1540    1662
@@ -223,16 +283,27 @@ hi-res 34/41 cross-check it. Elements left to right.
 | Degree ring | [1631.0, 673.1, 1641.0, 684.0] | — | outer ø ≈ 10.4, stroke ≈ 2.8 (estimated) | top aligned with the "C" cap |
 | "C" | [1644.6, 673.1, 1661.9, 698.0] | 698.1 | cap 25.7 | |
 | Street label | centred x 960.5, widest seen [706, 669, 1215, 709] | 700.5 | cap 30.9, x 22.8, descender 8.0 below the baseline | §3 |
-| Mode label (2 lines) | [1223, 657.6, 1356, 708.6] | 680.4 / 708.5 | cap 22.6, leading 28.1 | left-aligned at x 1223; only with a theme connected or the centre occupied |
-| Gear letter | P [1395.1, 666.9, 1419.9, 700.1], D [1395.6, 666.1, 1421.3, 698.3] | 699.2 ±1.0 | cap 32.7 | BMW draws this **over** any theme (`design/overlay/`) |
+| Mode label (2 lines) | [1223, 657.6, 1356, 708.6]; ZR: [1225.25, 657.25, 1355.0, 708.25] on 60 / 14, left 1222.75 on 65 | 680.4 / 708.5 (ZR 679.5–680.0 / 707.25–708.25) | cap 22.6 raw (ZR 22.25–22.5); **20.1–20.7** corrected (T); leading 28.0–28.5 | left-aligned at x **~1223** (1222.75–1225.25: the spread is between registrations, ZR). In the row **with a theme connected (10 = 60, 14, 17) or in BMW's standby (65)**, not "with the centre occupied": 63 and 67 have the car picture in the centre and keep the label in the tacho (H C5) |
+| Gear letter | P [1395.1, 666.9, 1419.9, 700.1], D [1395.6, 666.1, 1421.3, 698.3]; ZR P [1396.0, 666.25, 1419.75, 699.75] (60, 14) | 699.2 ±1.0 | cap 32.7 | in the row only with a theme connected; BMW draws it **over** the theme (ZR on 60: our grid line stops at the P; 58 shows two gear letters) |
 
-Alignment within the row is **not settled**: every photo shows a 3-digit range, a 2-digit hour
-starting with 1 and a "+d.d" temperature, so whether the groups are left-, centre- or right-aligned
-cannot be read off. The widths above are what to reproduce for exactly those shapes.
+The range icon's leftmost ink, the arrow tip, is at x **133.75** on the new photos (ZL; was 135.6). The temperature
+is **right-aligned in front of a fixed unit** (ZR verdict 6): the degree sign stays put within ±0.25 px and the
+last digit's right ink within ±0.5, while a "+d.0" value sits 2.0–2.9 px further left than the "+d.5" values. That
+rests on one capture of the odd string (61 = 09), so it is a strong hypothesis. The digits are then not quite
+tabular there (about 2 px between a final "0" and a final "5", ZR), against T's tabular advance 24.2 on the range and clock.
 
-The belt and airbag lamps sit between the clock and the sign ([503, 679, 576, 715] rear belts,
-[593, 666, 624, 715] driver belt, [635, 665, 679, 715] airbag) and are BMW's, drawn over any theme —
-see `design/overlay/g20_comfort.json`. Nothing we draw may cover the driver belt.
+Alignment of the range and the clock is **not settled**: every photo shows a 3-digit range and a 2-digit hour
+starting with 1, so whether those groups are left-, centre- or right-aligned cannot be read off. ZL and T lean to
+a left anchor after the pump for the range (a right-anchored 4th digit would run into the pump), as a
+**hypothesis**. The widths above are what to reproduce for exactly those shapes.
+
+The belt and airbag lamps sit between the clock and the sign. ZL's boxes on the new photos (continuous px) are
+**[500.5, 677.75, 580.25, 715.25]** rear belts, **[590.0, 664.5, 628.75, 715.25]** driver belt and
+**[632.75, 664.25, 684.25, 715.5]** airbag (was [503, 679, 576, 715], [593, 666, 624, 715], [635, 665, 679, 715]:
+each 2–5 px too tight). Only the **driver belt** is known to be drawn **over** a theme (catalogue, strong; ZL on
+59/60). Whether the rear belts and the airbag are drawn over or under is **unknown**: no photo has them lit under
+our paint (H C16, ZL). Package D's matte photo during the start-up lamp check settles it. Until then nothing we
+draw may cover any of the three.
 
 ### 2.1 The dial bottom lines
 
@@ -247,11 +318,28 @@ see `design/overlay/g20_comfort.json`. Nothing we draw may cover the driver belt
 - The speed-limit sign is drawn **on top** of this line (the line is visible as stubs either side of
   the sign, photo 34).
 
+**Corrected 2026-11-16.** On the new photos the line is **6.5 px** thick at half-max on the left, centre
+**y 647.45** ±0.3, flat (ZL); on the right ZR reads centre 647.5–647.9 and 6.8–7.1 px. The notches are centred at
+x **695.1** and **1224.1**, each a gap about **5.6 px** wide at 50 % and slanted (ZC; "about 2 px" above was the
+low-resolution reading). The hook tips are at about **(755.5, 616)** and **(1164, 616)** (ZC; about 2 px from the
+numbers above). The hooks exist **only while no message shows**: with a message the speedo line ends at x 683–687
+with a rounded end, the tacho line starts at x 1232.2–1232.6, and the message's rail takes the hooks' place (ZC,
+R finding 4). BMW's line is also cut round the sign: it stops at r 42.44 from the sign's centre on both sides, a
+black moat from the ring's edge (r 40.95) to r 42.45 (ZL).
+
 ---
 
 ## 3. The street / road label
 
 **Measured** on 09 (a 2-word street name), 39 (a one-word place name), 34 (a 3-word street name), 17 and 14.
+(Of these, 34 is our theme over BMW's row and 14 / 17 are BMW's drawing with a theme connected; 09 and 39 are the
+same frames as 61 and 68: H.)
+
+**Corrected 2026-11-16** (packages ZC and T on 61, 64, 67, 68; three strings of different width): centred on
+**x 960.6** (ZC, spread 1.5 px; T 960.7 ±1.3), so the centre anchor is confirmed. Baseline **700.1** (ZC) / **699.7**
+(T), not 700.5. Overexposure-corrected cap **29.8**, x-height **21.9**, stem **3.0** (T). ZC's half-max x-height is
+23.6–24.0, the same overexposure seen from the other side, not a disagreement about the glyphs. Descender 7.9–8.2
+(ZC). The widest string, 509 px on 34, is not re-measured and carries 1–2 px of the same dilation (T).
 
 - It is **the street name only**. No road shield, no road number, no distance appears in any of the
   five photos that show it. The text is plain, in the navigation's language (Ukrainian here), with no
@@ -260,12 +348,17 @@ see `design/overlay/g20_comfort.json`. Nothing we draw may cover the driver belt
   within 1 px of 960.5.
 - **Baseline y 700.5**, i.e. **2.4 px below** the range/clock/temperature baseline. Measured twice
   inside a single photo (39: 700.46 against 698.06; 34: 700.79 against 698.44), so it is real, not a
-  rectification difference.
+  rectification difference. *Corrected 2026-11-16:* the step is real but smaller on the new measurements,
+  about **1–2 px** (T: road 699.7 against the row's 698.0–698.8; ZC 700.1 against ZR's 698.25–699.0).
 - **Cap 30.9, x-height 22.8, descenders 8.0 px below the baseline**, Light weight (§1.2). It is
   noticeably lighter than the values beside it — that contrast is the most visible thing to get right.
-- **When it shows:** whenever the check-control line is free. Photos 09, 39, 34, 41 (no message) show
-  the street; 08, 17, 42, 43 (message) show the message instead and no street. So the message and the
-  street name are **the same line, mutually exclusive** — the message wins.
+- **When it shows:** *corrected 2026-11-16 (H claim C4):* **not** whenever the check-control line is free.
+  Photos 09, 39, 34, 41 (no message) show the street, and so do 61, 64, 67, 68; 08, 17, 42, 43 (message) show the
+  message instead and no street. But **63** has no message **and no street** (the centre shows the car picture,
+  and a faint ghost of the standby odometer, ~2.4 % of white, sits in the line: ZC), and in BMW's standby (**65**)
+  the line holds the **odometer** (ZC). So the message and the street name are **the same line, mutually
+  exclusive** — the message wins — but a free line can also be empty or hold the odometer. (34 and 41 are our
+  theme over BMW's row; 42 and 43 too.)
 - **Width available:** from the measured extremes, x ≈ 700…1220, about **520 px**. The widest name
   seen is 509 px, which nearly fills it. On the left the symbol slot ends at 753 and on the right the
   mode label starts at 1223, so a name longer than 520 px has nowhere to go.
@@ -274,7 +367,9 @@ see `design/overlay/g20_comfort.json`. Nothing we draw may cover the driver belt
   untested.
 - **Nothing else shares the line.** Left of it are the belt and airbag lamps and the check-control
   symbol slot; right of it the mode label and the gear letter. Neither moves when the street name
-  grows.
+  grows. (*2026-11-16:* the mode label and gear are there only with a theme connected or in standby, §2; in
+  standby the line itself is the odometer's — its digit group centred at x 959.4 with a label left and a unit right,
+  baseline 698, one string seen: ZC, hypothesis for the anchor.)
 
 ---
 
@@ -282,8 +377,38 @@ see `design/overlay/g20_comfort.json`. Nothing we draw may cover the driver belt
 
 ### 4.1 Geometry
 
+**Corrected 2026-11-16 (package ZL; H, O).** The geometry to use, in continuous panel px:
+
+| | Value | Spread | Source |
+|---|---|---|---|
+| Centre | **(538.45, 621.2)** | ±0.3 | ZL, photos 60–64, 66–68 (60 direct on our grid: y 621.29) |
+| Outer radius (red edge) | **40.95** | 40.91–41.22 | ZL |
+| Inner radius (white face) | **31.54** | 31.45–31.69 | ZL |
+| Ring width | **9.41** | | ZL |
+| BMW's black moat round the ring | r 40.95 … **42.45** | the rail is cut at r 42.44 (41.84–42.82) on both sides | ZL |
+
+The sign is round to the measurement (ellipticity 0.03–0.38 px with no common axis). The white face sits 0.37 px
+right of the ring's centre on every photo, too little to see (ZL).
+
+**Open: the centre's y (and x) differ by ~0.7–0.8 px between packages, and this is not resolved.** ZL reads
+(538.45, 621.2) on its own local photo models. Package H's ring fits on package R's strip rects give x 537.2–538.0,
+y 621.9–622.9 (r_outer 41.6–42.0 at its threshold); package O's per-photo fits on R's first rects average
+(537.68, 622.02); T's sign digits centre at (538.6, 621.9). ZL puts the spread down to registration (R's models
+put the sign at x 537.1–538.5, y 621.2–622.5 on the same photos, noisier). The code uses ZL's centre today; a photo
+on the car settles it.
+
+**Why the old numbers were off.** The table below is in `tools/g20spec/zoom.py`'s pixel-centre convention (+0.5 px
+to compare with the strip packages), on low-resolution rects with about ±1 px of registration error. Converted, the
+old centre is (537.9, 621.8): +0.55 / −0.6 px from ZL's. The old r_outer 41.1 and ring 9.3 are within 0.15 px of
+ZL's. Our window (`SIGN_WIN`) took that old centre unconverted, which put it 1.15 px left of BMW's sign: the cause of
+the owner's lopsided ring (ZL verdict 2, O §1).
+
+The original measurement, kept for the record:
+
 **Measured** by a least-squares circle fit on the red ring, in seven photos (39, 09, 08, 17, 34, 41,
 42). The four independent rectifications (39, 09, 08, 17) agree within 1.3 px in x and 0.4 px in y.
+(*2026-11-16:* 34, 41 and 42 are our theme over BMW's row and are registered through 39 — one chain, not three
+more observations — and 17 has a theme connected; H claim C17.)
 
 | | Value | Spread |
 |---|---|---|
@@ -299,6 +424,9 @@ The sign sits **on** the speedo's bottom line (its lower edge reaches y 662.4, 1
 line's centre at y 647, so the line passes behind it) and is drawn over it. There is a thin
 dark rim, 1–2 px, immediately outside the red ring in every photo; it is probably the display's own
 anti-aliasing against the dark background rather than a drawn outline (**estimated**).
+*Corrected 2026-11-16:* the dark rim is **BMW's own black moat**, about 1.5 px wide (r 40.95 to 42.45): the bottom
+line is cut there, symmetrically about the sign, on every photo (ZL). The ring's ink box is
+[497.5, 580.2, 579.4, 662.2] (ZL).
 
 Colour: the photos are not colour-managed. The ring reads (194, 23, 36) in 39 and (235, 34, 60) in 09;
 `g20_comfort.json` records (233, 37, 62) from rect 08, the disc (254, 241, 246) and the number
@@ -364,6 +492,10 @@ condenses three-digit limits. **Three digits were never photographed.**
 **13.0**, ink span x 520.0…554.9, centre y 621.4 — i.e. the same ink width as a two-digit number, and
 centred the same way. The dashes are the same near-black as the digits.
 
+*Corrected 2026-11-16 (ZL, continuous px):* digits "50" ink 34.9 × **26.9** (T: 26.8), centred 0.1–0.3 px right and
+0.25 px low of the face centre; dashes **9.4 × 4.9**, pitch 13.07, ink x 520.7–556.2, centre y 621.3 (on 68 = 39,
+the same frame as the photo above). 41/42/43 are our theme over BMW's row.
+
 ### 4.4 The no-passing sign
 
 **Not photographed.** No reference photo has one. What is known:
@@ -410,7 +542,10 @@ two in its other clusters — about one ring width, so centre ≈ (537.4 + 2·41
 - The owner's statement that a sign is essentially always present matches the photos: in four separate
   sessions the sign is on screen, showing either a number or the three dashes, never absent. So the
   "no sign at all" state our own `_signWired()` logic can produce (`docs/POLISH-E-REPORT.md` §3) has
-  **no stock equivalent**: BMW keeps the disc and empties the number.
+  **no stock equivalent**: BMW keeps the disc and empties the number. (*2026-11-16:* with one exception: BMW's
+  **standby** row (65) draws no sign, and the bottom line runs straight through its seat. Standby is BMW's vehicle
+  condition WOHNEN, `VehicleCondition` 5 — not P with the engine off: 62 and 63 are P with the engine off (the tacho
+  reads OFF), 64 is P at rpm 0, and all three show the sign. Package P; that 65 is condition 5 is P's hypothesis until a car log line confirms it.)
 
 **On the owner's "it animates the derestriction, then shows the new limit".** The only animation BMW
 documents is the flash, and the only state change the car's field can express is
@@ -475,7 +610,32 @@ that is our design, not BMW's.)
 ### 5.1 The frame is not a box
 
 **Measured** on 08 (night, two lines), 17 (day, one line), 42 (day, two lines), 43 (day, one line),
-against 39/09 (no message).
+against 39/09 (no message). (*2026-11-16, H:* 08 is dusk, not night; 17 is BMW's drawing with a theme connected;
+42 and 43 are **our** theme over BMW's row.)
+
+**Corrected 2026-11-16 (packages ZC and H): there IS a fill under the rail.** ZC measured the panel on 62 (= 08,
+two lines) and 66 (one line), cross-checked on 17:
+
+- **The rail:** centreline **y 605.1** (604.7 / 605.6), 50 % edges 602.9 / 607.5, **4.6 px** thick (FWHM), flat
+  from x **747** to **1175** with at most 0.26 px of sag. The shoulders are circular arcs of radius 78.5 (left) and
+  79.9 (right), centred at (753.2, 684.4) and (1168.0, 684.9). The panel is symmetric about x 960.9, 0.80–0.93 of
+  white with a pinkish tint like the dial lines.
+- **The tips** taper: brightness falls to 50 % of the plateau at x 714–715.5 and 1206–1208, to 10 % at x 707–709 and
+  1214, and a faint tail reaches **(701, 621)** and **(1220, 621)**. The old tips (702, 621) / (1221, 621) are that
+  tail. H's half-max ends, 710.5 / 1211.2 (R 62), are a third threshold. **Which "end" a redraw means must be
+  stated**: the three numbers are the same tip read at three levels, not a disagreement.
+- **The fill:** a gradient, about **0.05 of white** just under the rail's flat part, separated from the rail by a
+  2 px dark line, fading downwards (at x 791: 0.053 at y 612, 0.027 at y 642, 0.007 at y 672, 0.003 at y 690) and
+  towards both tips. Its 0.5 %-of-white contour runs x 701–1220 at y 620, 726–1205 at y 640, 734–1177 at y 660,
+  736–1130 at y 680: those are the "slanted ends" the owner saw. A warm purple-grey. **Not camera bloom**: at the
+  same distance from the text the area above the rail is black. H read the same band independently (max(RGB) median
+  91 / 102 / 74 on 08 / 66 / 17 against 25–30 just above the rail and 18–35 in the same box with no message).
+- **One line and two lines give the same outline**, within 0.9 px (ZC).
+- **A connected theme does not change the panel** (17 against 66, within 1.1 px: ZC, H; hypothesis, at 17's low
+  resolution).
+- The panel and its symbol are drawn **under** a theme (ZC on our photo 58; not registered, so medium evidence).
+
+The original reading, kept for the record (its "no fill" is refuted above):
 
 With no message, the two dial bottom lines end in the upward hooks of §2.1. **With a message, the
 hooks are replaced by a single rail that joins the two dials over the message area.** There is no
@@ -503,6 +663,9 @@ The 25th-percentile background inside the message area against the same strip ju
 tip reads 20 vs 14 in photo 42 but 26 vs 31 in photo 43 — opposite signs, both within the panel's own
 vignetting, which moves 5–8 levels across that span in photo 39 with no message at all. So: draw no
 fill under the message (**measured**, weak — it rests on two day photos).
+*Refuted 2026-11-16:* 42 and 43 are photos of **our** theme, which covered BMW's panel there; on BMW's own drawing
+(08 = 62, 66, 17) the fill is plainly there (ZC, H claim C1). There is still no **opaque** base: the fill is about
+5 % of white at its brightest.
 
 ### 5.2 The symbol
 
@@ -513,10 +676,19 @@ fill under the message (**measured**, weak — it rests on two day photos).
 - The "i" itself is a round dot 12.4 × 12.3 over a stem with a foot, total [735.9, 636.3, 752.8, 681.4].
 - The pictograms are BMW artwork. We must draw our own equivalents; the three seen are an "i", a
   car-from-above with one door open, and a steering wheel with three heat waves.
+- *Corrected 2026-11-16 (ZC on 62, 66):* the slot is centred at **y 660.4**; the "i" is
+  [736.5, 638.25, 752.75, 682.75] and the door [720.5, 635.0, 756.0, 685.5], so the right edges differ by 3.25 px
+  and no single edge is the anchor. Slot proposed: **[711, 632, 757, 688]**.
 
 ### 5.3 The text
 
-**Measured**, with photo 42 (1.90 photo px per panel px) as the master:
+**Measured**, with photo 42 (1.90 photo px per panel px) as the master. *Corrected 2026-11-16:* 42 is our theme
+over BMW's row, and the heights below are 1–2 px too big (overexposure). On the new photos: centre **x 968.6** ±0.4
+on three lines of two independent captures (ZC; T 968–969); one line baseline **671.5** (ZC) / **670.2** (T); two
+lines **646.75 / 691.0** (ZC) / **645.3 / 689.4** (T), leading 44.25; cap **24.3–24.9**, x-height **18.2–19.2**,
+stem **3.4–3.9** (T, overexposure-corrected; ZC's half-max reads cap 26.0–26.5, x 20.5–20.75). The ~1 px baseline
+difference between ZC (half-max edges) and T (corrected edges) is open; T's correction moves a bottom edge up by
+the same amount, which would explain it (hypothesis).
 
 | | Value |
 |---|---|
@@ -572,8 +744,10 @@ telltale colours measured on the same photos are a reasonable stand-in: red (236
   The timestamp is the ordering key the master has.
 
 **So: the stock cluster cycles, it does not stack and it does not scroll sideways.** One message
-occupies the line at a time; the set is a numbered sequence of frames; the severity marker right of
-the rail (§5.6) is what tells you there is something to cycle through.
+occupies the line at a time; the set is a numbered sequence of frames. ~~The severity marker right of
+the rail (§5.6) is what tells you there is something to cycle through.~~ *Corrected 2026-11-16 (H claim C2,
+P):* the marker right of the rail is not a cycle indicator. It stays after the message has gone (63, 67), and
+BMW's manuals describe an indicator for "at least one Check Control message displayed **or stored**" (P §1.1).
 
 **What BMW's manuals give:**
 
@@ -600,6 +774,28 @@ give it. Parameters for `feat/bottom-row`, with suggested defaults (**estimated*
 
 ### 5.6 The marker right of the rail
 
+**Corrected 2026-11-16 (packages H, P, ZR).** The marker is **independent of the message and outlives it**:
+
+- **It stays after the message.** 62 has a message and an "i"; 63, about a minute later, has no message and the
+  same "i". 66 has a door message and a triangle; 67, from the same minute, has no message and the triangle. 64,
+  61 and 68 have neither (P, H claim C2; verified on the photos).
+- **What it means:** most likely BMW's indicator that "at least one Check Control message is **displayed or
+  stored**" (G80 and X1 owner's manuals; P §1.1). That reading is a strong **hypothesis**: the manual's sentence
+  and the photos agree, but no public text ties the sentence to this slot.
+- **Its glyph** is probably the class of what is stored: "i" for information, a triangle once a warning is stored
+  (one example each: 62/63, 66/67; **hypothesis**). Which wins with both kinds stored, and whether a red message
+  tints it, is not photographed.
+- **Its size.** The "i" is **[1255.75, 591.25, 1269.75, 626.5]** (ZR on 62; the same slot on 63 within 0.75 px).
+  The warning triangle is **[1243.25, 591.75, 1284.75, 627.5], 41.25 × 35.75** (ZR on 66/67; H's provisional
+  [1241.5, 590.3, 1283.5, 626.4]), centred like the "i" at x ~1263 — about three times the "i". The slot is the
+  triangle. The box "≈ [1252, 591, 1280, 627]" below, and `triangle_43` in `measured.json`, are the outline of
+  **our own 0.7.7 window** clipping the triangle on 43, not the triangle (H, ZR). On 17 the triangle is cut at the
+  top by the media list.
+- **Relation:** drawn **under** a theme: on 43 only the apex and the middle of the base survive our paint (ZR).
+- Its apex touches the map window's lower corner (ZR).
+
+The original reading, kept for the record (its "appears with the message" and its box are refuted above):
+
 `design/overlay/g20_comfort.json` calls it `assist.info_tacho`, "meaning not known". The photos settle
 it: it is a **severity marker that appears with the message**, in a fixed slot just outside the rail's
 right end.
@@ -609,13 +805,17 @@ right end.
 | 08 (ready-to-drive, info) | an "i", dot + stem | [1255.5, 590.9, 1270.0, 626.6] |
 | 17 (door open) | a warning triangle with "!" | ≈ [1250, 593, 1282, 627] |
 | 43 (door open) | a warning triangle with "!" | ≈ [1252, 591, 1280, 627] |
-| 42 (heated wheel off) | **absent** | — |
+| 42 (heated wheel off) | **absent** | — (*2026-11-16:* 42 is our theme over BMW's row, and the marker is drawn under a theme, so its absence there is not conclusive) |
 | 39, 09 (no message) | absent | — |
+| *2026-11-16:* 63 (no message) | an "i" | [1256.5, 592.0, 1270.25, 626.75] (ZR) |
+| *2026-11-16:* 66 (door open) / 67 (no message) | a warning triangle with "!" | [1243.25, 591.75, 1284.75, 627.5] (ZR) |
 
 So the slot is about **[1252, 591, 1282, 627]**, roughly 30 × 36, and the glyph in it follows the
 message's class: "i" for an information message, a triangle for a warning, absent for at least one
 message (42). An "i" also appears at the symbol slot on the left in 08, so the left slot holds the
 message's own pictogram and the right slot a class marker; they are independent.
+(*2026-11-16:* the slot is about **[1243, 591, 1285, 628]**, the triangle's, and the marker follows what is
+**stored**, not the message on screen — see the top of this section.)
 
 ---
 
@@ -626,11 +826,15 @@ In order of how visible an error would be:
 1. **The two text weights in one row.** The street label is Light and the values beside it are
    Medium; drawing them at one weight is the biggest single giveaway.
 2. **The baselines, 698.1 and 700.5.** A 2.4 px step between the centre label and the values either
-   side; drawing them on one baseline reads as wrong even though it looks tidier.
+   side; drawing them on one baseline reads as wrong even though it looks tidier. (*2026-11-16:* about 698 and
+   700, a 1–2 px step: T, ZC; §3.)
 3. **The rail, not a box.** The check-control frame is one 5 px line above the text, growing out of
-   the dial bottom lines, with tapered ends — not a rounded rectangle.
+   the dial bottom lines, with tapered ends — not a rounded rectangle. (*Corrected 2026-11-16:* a 4.6 px rail
+   **and the faint gradient fill under it**, about 5 % of white, fading down and towards the tips — draw the fill
+   too, or the panel reads as a bare line: ZC, H; §5.1.)
 4. **The sign's ring ratio.** Ring 9.3 on an outer radius of 41.1 is 23 % of the radius; a thicker
-   ring reads as a different brand's sign.
+   ring reads as a different brand's sign. (*2026-11-16:* ring 9.41 on r_outer 40.95, still 23 %: ZL. And the sign
+   must be centred on BMW's centre to a fraction of a pixel, or the ring reads lopsided: §4.1.)
 5. **Tabular digits with the "1" set left.** Otherwise the clock jiggles every ten minutes.
 6. **The empty "- - -" state**, which is what the sign shows most of the time on roads without signs.
 
@@ -654,6 +858,26 @@ In order of how visible an error would be:
 - Photo 39 (1.84 photo px per panel px) and 34 (1.99) read heights about 1.3 px smaller than 09
   (0.89), 08 (0.86, night, bloomed) and 17 (0.64). Where a single number is given it is the median
   across photos, with the sharp-photo value noted.
+
+**Corrected 2026-11-16 (packages H, T, R, ZL).**
+
+- **Hi-res originals of old frames.** 39, 09 and 08 have higher-resolution originals: **68, 61 and 62** are the same
+  exposures (and 60 is 10). They add resolution, not observations (H verdict 1; R transfers their models rather
+  than refitting them).
+- **One registration chain.** 41 is fitted via 39, and 34, 42 and 43 via 41, so the hi-res set 34/41/42/43 rests on
+  one registration, and all four are our theme over BMW's row (H claim C17). The independent stock exposures
+  behind this document are 39, 09, 08 and 17, and 17 has a theme connected.
+- **08 is dusk, not night** (capture metadata; H claim C18): the panel is in its day/dusk look. It matters for
+  colour, not geometry.
+- **The size bias is overexposure, not sharpness.** BMW's white text is at or above the camera's highlight shoulder,
+  so a half-max edge sits 0.8–1.6 px outside the true one, and more so on the softer photos — which is the 1.3 px
+  above. T corrects it per photo (calibrated on our own grid labels in 60); its values replace every height and stem
+  here. R finding 6: a 50 % threshold is biased outwards even on unsaturated strokes (~0.45 px on a 2 px line).
+- **Coordinate convention.** `zoom.py` works in pixel centres; the strip packages in continuous px. Add about
+  0.44–0.5 px to an old position before comparing it (T, ZL).
+- **The rects.** R's strip models leave a coherent 0.5–0.7 px rms residual before its residual field; and between
+  x ~700 and ~1220 there are no fixed landmarks in any stock photo, so zone C positions are interpolated (R finding
+  3, about 0.5–1 px, hypothesis).
 
 **Reproducing the figures** (from the main checkout, which has `reference/` and `bake/work/`):
 
@@ -698,3 +922,8 @@ Review sheets with photo pixels (git-ignored, on this machine): `bake/work/g20sp
 
 The photo protocol in `docs/OVERLAY-PHOTO-PROTOCOL.md` covers how to take these so they rectify
 cleanly.
+
+*2026-11-16 (H claim C32):* the 2026-11-16 photo set settles none of the rows above. It did settle three things this
+document had wrong or open: the marker without a message (§5.6), standby (§3, §4.5) and the fill (§5.1). New open
+items it raised: the sign centre's ~0.8 px disagreement (§4.1), whether the rear belts and the airbag are drawn
+over a theme (§2; package D's photo), and the mode label's widest name (only one mode name seen; ZR).

@@ -1,17 +1,18 @@
 {
  "$comment": "Package design/g20-spec: every number in docs/G20-DESIGN-SPEC.md that was measured on a photo. Panel px (1920x720, x right, y down), the same frame as design/overlay/. Each entry names the photo it was read on and the method. Photos are rectified to panel px by tools/overlay/rectify.py (08-14, 17, 39; bake/work/overlay/rect/H.json) or, for 34/41/42/43, by tools/g20spec/fit_strip.py. No photo pixels are stored here.",
+ "$corrections": "2026-11-16, after the strip packages (docs/strip/*-REPORT.md, design/strip/*/; checked claim by claim by package H, design/strip/H/claims.json). Where a strip package re-measured a number, the entry's 'value' (or field) now holds the new number and 'was' the old one, with 'by' naming the package. (1) Coordinates: the old numbers are in tools/g20spec/zoom.py's pixel-centre convention; the strip packages use continuous panel px (pixel i covers [i, i+1)), about +0.44-0.5 px on a position; entries with 'convention': 'continuous' are the new frame. (2) Every old text height, stem and width is 1-2 px too big: BMW's white text is overexposed in the photos, so half-max edges sit 0.8-1.6 px outside the true ones (package T); positions and advances survive. (3) Photos 60 = 10, 61 = 09, 62 = 08 and 68 = 39 are the same exposures (H): they add resolution, not observations. 34/41/42/43 are our theme over BMW's row and one registration chain (41 via 39, the rest via 41). Disagreements still open are kept as 'open'.",
  "kind": "g20-spec-measurements",
  "schema_version": 1,
  "panel": {"w": 1920, "h": 720},
  "photos": {
-  "39": {"file": "reference/g20/39_g20-look_map_comfort-plus_hires_2026-11-13.jpg", "shows": "stock, day, map, empty limit sign, a one-word place name in the street line", "photo_px_per_panel_px": 1.842, "rect_rms_panel_px": 1.18, "model": "tools/overlay/rectify_more.py"},
-  "09": {"file": "reference/g20/09_stock_map_day.jpg", "shows": "stock, day, 50 sign, a 2-word street name", "photo_px_per_panel_px": 0.888, "rect_rms_panel_px": 1.02, "model": "tools/overlay/rectify.py"},
-  "08": {"file": "reference/g20/08_stock_night_warnings-map.jpg", "shows": "stock, night, check-control two-line message, 50 sign", "photo_px_per_panel_px": 0.855, "rect_rms_panel_px": 1.11, "model": "tools/overlay/rectify.py"},
-  "17": {"file": "reference/g20/17_stock-media-list_door-open_2026-11-12.jpg", "shows": "stock, media list in the middle, one-line message + door symbol + warning triangle, bottom-row mode label and gear", "photo_px_per_panel_px": 0.637, "rect_rms_panel_px": 1.05, "model": "tools/overlay/rectify_more.py"},
+  "39": {"file": "reference/g20/39_g20-look_map_comfort-plus_hires_2026-11-13.jpg", "shows": "stock, no theme connected (settled by content, H), day, map, empty limit sign, a one-word place name in the street line; the same exposure as 68", "photo_px_per_panel_px": 1.842, "rect_rms_panel_px": 1.18, "model": "tools/overlay/rectify_more.py"},
+  "09": {"file": "reference/g20/09_stock_map_day.jpg", "shows": "stock, no theme connected, day, 50 sign, a 2-word street name; the same exposure as 61", "photo_px_per_panel_px": 0.888, "rect_rms_panel_px": 1.02, "model": "tools/overlay/rectify.py"},
+  "08": {"file": "reference/g20/08_stock_night_warnings-map.jpg", "shows": "stock, no theme connected, dusk (not night: capture metadata, H claim C18), check-control two-line message, 50 sign, the 'i' marker; P with the engine off; the same exposure as 62", "photo_px_per_panel_px": 0.855, "rect_rms_panel_px": 1.11, "model": "tools/overlay/rectify.py"},
+  "17": {"file": "reference/g20/17_stock-media-list_door-open_2026-11-12.jpg", "shows": "NOT plain stock: BMW's drawing with a theme connected (BMW's black box over the media list, mode label and gear moved into the row; H claim C7). Media list in the middle, one-line message + door symbol + warning triangle (its top cut by the media list), bottom-row mode label and gear. 17 and 66 are the with-theme / without-theme pair of one message", "photo_px_per_panel_px": 0.637, "rect_rms_panel_px": 1.05, "model": "tools/overlay/rectify_more.py"},
   "34": {"file": "reference/ours/34_wb-dials_0.7.7_bmw-sign-50_belts_2026-11-13.jpg", "shows": "our 6WB Dials over the stock row: BMW's 50 sign, a long 3-word street name", "photo_px_per_panel_px": 1.994, "rect_rms_panel_px": 0.90, "model": "tools/g20spec/fit_strip.py via 41"},
   "41": {"file": "reference/ours/41_wb-dials_0.7.7_map_D2_bmw-row-not-ours_2026-11-13.jpg", "shows": "our 6WB Dials over the stock row: empty sign, a one-word place name in the street line", "photo_px_per_panel_px": 1.922, "rect_rms_panel_px": 1.51, "model": "tools/g20spec/fit_strip.py via 39"},
-  "42": {"file": "reference/ours/42_wb-dials_0.7.7_message-heated-wheel_2026-11-13.jpg", "shows": "two-line message + heated-wheel symbol, day", "photo_px_per_panel_px": 1.897, "rect_rms_panel_px": 0.87, "model": "tools/g20spec/fit_strip.py via 41"},
-  "43": {"file": "reference/ours/43_wb-dials_0.7.7_message-door-open_car-image_2026-11-13.jpg", "shows": "one-line message + door symbol + warning triangle + car graphic, day", "photo_px_per_panel_px": 1.845, "rect_rms_panel_px": 1.96, "model": "tools/g20spec/fit_strip.py via 41"}
+  "42": {"file": "reference/ours/42_wb-dials_0.7.7_message-heated-wheel_2026-11-13.jpg", "shows": "our 6WB Dials 0.7.7 over the stock row: two-line message + heated-wheel symbol, day (BMW's panel and marker are under our paint here)", "photo_px_per_panel_px": 1.897, "rect_rms_panel_px": 0.87, "model": "tools/g20spec/fit_strip.py via 41"},
+  "43": {"file": "reference/ours/43_wb-dials_0.7.7_message-door-open_car-image_2026-11-13.jpg", "shows": "our 6WB Dials 0.7.7 over the stock row: one-line message + door symbol + warning triangle (clipped by our 0.7.7 box window, H / ZR) + car graphic, day", "photo_px_per_panel_px": 1.845, "rect_rms_panel_px": 1.96, "model": "tools/g20spec/fit_strip.py via 41"}
  },
  "method": {
   "glyph_box": "tools/g20spec/measure.py --what glyphs: the panel box is warped out of the original photo at 8x panel resolution (Lanczos), blurred by n/6, thresholded at the midpoint between the 5th and 99.5th percentile of the ink channel (max(RGB) for light text, 255-min(RGB) for dark glyphs on the sign, R-max(G,B) for the red ring), then 8-connected components.",
@@ -21,17 +22,17 @@
  },
 
  "bottom_row": {
-  "value_text_baseline_y": {"value": 698.1, "spread": 0.6, "from": "digit bottoms, photos 39/09/08/17/34/41", "kind": "measured"},
-  "value_figure_height_px": {"value": 33.0, "spread": 1.0, "note": "39 and 34 (the sharpest) read 31.9-32.5; 09/08/17 read 33-34.6", "kind": "measured"},
+  "value_text_baseline_y": {"value": 698.1, "spread": 0.6, "from": "digit bottoms, photos 39/09/08/17/34/41", "confirmed": "T 698.0 (60/68 frame) / 698.8 (61-67 frame); ZR 698.25-699.0 (continuous px)", "kind": "measured"},
+  "value_figure_height_px": {"value": 31.0, "spread": 0.3, "was": 33.0, "by": "package T: overexposure-corrected clock fit over 9 photos; the old 33.0 was half-max on overexposed ink", "note": "old: 39 and 34 (the sharpest) read 31.9-32.5; 09/08/17 read 33-34.6", "kind": "measured"},
   "value_digit_advance_px": {"value": 24.2, "spread": 0.2, "from": "first-to-last ink left edge over the three range digits in 39/09/08/17/34/41", "kind": "measured"},
-  "value_stem_px": {"value": 5.5, "spread": 0.3, "from": "median horizontal ink run, 39 and 34", "kind": "measured"},
-  "unit_cap_height_px": {"value": 25.7, "spread": 0.8, "note": "'C' of °C; 0.78 of the value figure height", "kind": "measured"},
+  "value_stem_px": {"value": 4.4, "spread": 0.4, "was": 5.5, "by": "package T (overexposure-corrected)", "from": "old: median horizontal ink run, 39 and 34", "kind": "measured"},
+  "unit_cap_height_px": {"value": 24.3, "was": 25.7, "by": "package T, photo 68 only (the one photo where the grey units are not saturated); stem 2.4; the units are grey, ~0.35 of the values' white", "note": "'C' of °C", "kind": "measured"},
   "range": {
    "icon_box": [135.6, 667.0, 175.4, 696.9],
    "first_digit_ink_x": 183.6,
    "digits_ink_x1_3digit": 254.0,
    "km_ink_x": [261.8, 303.1],
-   "note": "all photos show a 3-digit range, so the alignment rule is not settled",
+   "note": "all photos show a 3-digit range, so the alignment rule is not settled (still open: ZL and T lean to a left anchor after the pump, hypothesis). ZL (continuous px): the arrow tip, the leftmost ink, is at x 133.75; km ink x [262.5-263.75, 303.5-304.5]",
    "kind": "measured"
   },
   "clock": {
@@ -40,7 +41,9 @@
    "minutes_first_digit_ink_x": 405.8,
    "hour_second_digit_ink_x": 367.9,
    "minutes_second_digit_ink_x": 429.4,
-   "colon_advance_px": 12.9,
+   "colon_advance_px": 13.9,
+   "colon_advance_was": 12.9,
+   "colon_advance_by": "package T, a same-digit pair either side of the colon on photo 64 only; the old 12.9 was read on a pair with a '1'",
    "tabular": "the minutes' first digit starts at x 405.3-406.4 whether it is 1, 3, 4 or 5 (photos 39/09/08/17), so the digits are tabular; the hours' '1' is the only first digit seen, and the next digit's ink starts 22.9 px after it rather than 24.2, i.e. the '1' ink sits about 1.3 px left of where another digit's ink would",
    "note": "every photo has a 2-digit hour starting with 1, so neither the alignment nor a 1-digit hour is settled",
    "kind": "measured"
@@ -51,6 +54,7 @@
    "digits_ink_x": [1565.4, 1621.3],
    "degree_ring_box": [1631.0, 673.1, 1641.0, 684.0],
    "C_ink_x": [1644.6, 1661.9],
+   "anchor": "right edge of the number in front of a fixed unit (package ZR verdict 6: the degree sign stays put within 0.25 px while a '+d.0' value sits 2.0-2.9 px left of the '+d.5' ones; one capture of the odd string, strong hypothesis)",
    "kind": "measured"
   },
   "street": {
@@ -62,6 +66,8 @@
    "descender_below_baseline_px": 8.0,
    "stem_px": 3.4,
    "widest_seen_px": 509,
+   "corrected": {"centre_x": 960.6, "baseline_y": [699.7, 700.1], "cap_height_px": 29.8, "x_height_px": 21.9, "stem_px": 3.0, "descender_below_baseline_px": [7.9, 8.2], "convention": "continuous", "by": "ZC (centre 960.6, baseline 700.1, descender; three strings on 61/64/67/68) and T (overexposure-corrected cap / x / stem, baseline 699.7, centre 960.7); ZC's half-max x-height reads 23.6-24.0, the same overexposure. The widest 509 px (photo 34) is not re-measured and carries 1-2 px of dilation (T)."},
+   "when": "the street line shows the street when no message is up, but not always: 63 has no message and no street (a faint standby-odometer ghost), and BMW's standby (65) shows the odometer there (H claim C4, ZC)",
    "kind": "measured"
   },
   "mode_label": {
@@ -70,7 +76,9 @@
    "line1_baseline_y": 680.4,
    "line2_baseline_y": 708.5,
    "leading_px": 28.1,
-   "from": "photo 17",
+   "from": "photo 17 (BMW's drawing with a theme connected, not plain stock)",
+   "corrected": {"left_x": [1222.75, 1225.25], "cap_height_px": [20.1, 20.7], "line_baselines_y": [[679.5, 680.0], [707.25, 708.25]], "line_pitch_px": [28.0, 28.5], "convention": "continuous", "by": "ZR: left 1225.25 on R's 60 / 14, 1222.75 on 65 (standby), 1223.2 on H's 17 - the 2-2.5 px spread is between registrations, so ~1223; T: cap 20.1-20.7 overexposure-corrected (ZR's half-max 22.25-22.5)"},
+   "when": "in the row with a theme connected (10 = 60, 14, 17) or in BMW's standby (65); NOT when the centre is occupied (63, 67 keep it in the tacho; H claim C5). BMW draws it UNDER a theme (ZR on 60)",
    "kind": "measured"
   },
   "gear_letter": {
@@ -80,6 +88,7 @@
    "baseline_y": 699.2,
    "spread": 1.0,
    "from": "photo 17 (P, baseline 700.1) and 41 (D, 698.3); the two photos disagree by 1.8 px",
+   "confirmed": "ZR: P [1396.0, 666.25, 1419.75, 699.75] on 60 / 14 (continuous px); in the row only with a theme connected, and drawn OVER the theme (60, 58)",
    "kind": "measured"
   }
  },
@@ -92,36 +101,44 @@
   "left_notch_x": 695,
   "right_notch_x": 1224,
   "from": "photo 39 (no message); the same line in 08/17 ends where the message rail starts",
+  "corrected": {"y_centre": 647.45, "thickness_px": 6.5, "right_y_centre": [647.5, 647.9], "right_thickness_px": [6.8, 7.1], "left_hook_tip": [755.5, 616], "right_hook_tip": [1164, 616], "left_notch_x": 695.1, "right_notch_x": 1224.1, "notch_gap_px": 5.6, "convention": "continuous", "by": "ZL (left line), ZR (right line), ZC (hooks, notches: a 5.6 px slanted gap at 50 %). The hooks exist only while no message shows; with a message the speedo line ends at x 683-687 and the tacho line starts at 1232.2-1232.6 (ZC). The line is cut round the sign at r 42.44 (ZL)."},
   "kind": "measured"
  },
 
  "check_control": {
-  "rail_y": {"value": 604.8, "spread": 0.9, "from": "08 603.6, 17 604.7, 42 605.9, 43 605.3", "kind": "measured"},
-  "rail_thickness_px": {"value": 4.9, "spread": 0.2, "kind": "measured"},
+  "rail_y": {"value": 604.8, "spread": 0.9, "from": "08 603.6, 17 604.7, 42 605.9, 43 605.3", "confirmed": "ZC 605.1 (62 604.7, 66 605.6), 50 % edges 602.9 / 607.5", "kind": "measured"},
+  "rail_thickness_px": {"value": 4.6, "spread": 0.1, "was": 4.9, "by": "ZC, FWHM on 62 / 66", "kind": "measured"},
   "rail_flat_x": [749, 1176],
+  "rail_flat_x_corrected": {"value": [747.25, 1174.5], "sag_px_max": 0.26, "shoulders": "circular arcs r 78.5 (left) / 79.9 (right), centred (753.2, 684.4) / (1168.0, 684.9)", "convention": "continuous", "by": "ZC"},
   "rail_tip_left": [702, 621],
   "rail_tip_right": [1221, 621],
-  "symbol_slot": {"right_x": 752.9, "centre_y": 658.7, "height_px": [45.1, 53.0], "widest_seen_px": 41.3, "kind": "measured"},
-  "text_centre_x": {"value": 967.5, "spread": 1.5, "kind": "measured"},
-  "one_line_baseline_y": {"value": 671.2, "spread": 0.4, "from": "17 670.9, 43 671.5", "kind": "measured"},
-  "two_line_baselines_y": {"value": [645.8, 690.2], "from": "photo 08", "kind": "measured"},
-  "two_line_leading_px": {"value": 44.4, "from": "photo 08; 42 reads 45.5 on a poorer fit", "kind": "measured"},
-  "cap_height_px": {"value": 27.0, "spread": 0.4, "kind": "measured"},
-  "x_height_px": {"value": 20.9, "spread": 0.3, "kind": "measured"},
-  "stem_px": {"value": 5.6, "spread": 0.6, "note": "photo 42, the sharpest message shot", "kind": "measured"},
-  "right_marker_box": {"i_08": [1255.5, 590.9, 1270.0, 626.6], "triangle_43": [1251.9, 591.0, 1277.9, 614.0], "kind": "measured"}
+  "rail_tips_note": "three readings of one tapering tip at three levels, not a disagreement - say which is meant: the faint tail reaches (701, 621) / (1220, 621) (= the old tips above); 10 % of the plateau at x 708 / 1214 and 50 % at x 714.75 / 1207 (ZC); H's half-max ink end 710.5 / 1211.2 (R 62)",
+  "fill": {"present": true, "was": "no fill (docs/G20-DESIGN-SPEC.md 5.1, read on 42/43, which are our theme)", "level": "about 0.05 of white just under the rail's flat part, separated from it by a 2 px dark line; at x 791: 0.053 (y 612), 0.045 (630), 0.027 (642), 0.014 (660), 0.007 (672), 0.003 (690)", "contour_0p5pct": {"y620": [701, 1220], "y640": [726, 1205], "y660": [734, 1177], "y680": [736, 1130]}, "colour": "warm purple-grey (linear R > B > G)", "by": "ZC on 62 / 66 and 17; H on 08 = 62, 66, 17 (max(RGB) median 91 / 102 / 74 against 25-30 above the rail); not bloom: black above the rail at the same distance", "kind": "measured"},
+  "relation": "under a theme (ZC on our photo 58, not registered: medium); a connected theme does not change the panel (17 against 66 within 1.1 px, hypothesis)",
+  "symbol_slot": {"right_x": 752.9, "centre_y": 658.7, "height_px": [45.1, 53.0], "widest_seen_px": 41.3, "corrected": {"centre_y": 660.4, "right_x": "symbol-dependent: 752.75 (the 'i', [736.5, 638.25, 752.75, 682.75]) / 756.0 (the door, [720.5, 635.0, 756.0, 685.5])", "slot": [711, 632, 757, 688], "convention": "continuous", "by": "ZC on 62 / 66"}, "kind": "measured"},
+  "text_centre_x": {"value": 968.6, "spread": 0.4, "was": 967.5, "by": "ZC: three lines of different width on two independent captures (62, 66); T 968-969", "kind": "measured"},
+  "one_line_baseline_y": {"value": 671.2, "spread": 0.4, "from": "17 670.9, 43 671.5", "open": "ZC 671.5 (half-max) against T 670.2 (overexposure-corrected), both on 66: ~1 px, not settled", "kind": "measured"},
+  "two_line_baselines_y": {"value": [645.8, 690.2], "from": "photo 08", "open": "ZC 646.75 / 691.0 against T 645.3 / 689.4 on 62 (= 08), leading 44.25: not settled", "kind": "measured"},
+  "two_line_leading_px": {"value": 44.4, "from": "photo 08; 42 reads 45.5 on a poorer fit", "confirmed": "ZC 44.25", "kind": "measured"},
+  "cap_height_px": {"value": [24.3, 24.9], "was": 27.0, "by": "T (overexposure-corrected, one photo per line kind: 62, 66); ZC's half-max reads 26.0-26.5", "kind": "measured"},
+  "x_height_px": {"value": [18.2, 19.2], "was": 20.9, "by": "T; ZC's half-max 20.5-20.75", "kind": "measured"},
+  "stem_px": {"value": [3.4, 3.9], "was": 5.6, "by": "T: stem/cap 0.14-0.16, not a clear Bold", "note": "old: photo 42, which is our theme over BMW's row", "kind": "measured"},
+  "right_marker_box": {"i_08": [1255.5, 590.9, 1270.0, 626.6], "triangle_43": [1251.9, 591.0, 1277.9, 614.0], "triangle_43_refuted": "43 is our 0.7.7 theme: that box is our own box window clipping the triangle, not the triangle (H claim C3, ZR)", "i_62": [1255.75, 591.25, 1269.75, 626.5], "i_63": [1256.5, 592.0, 1270.25, 626.75], "triangle": [1243.25, 591.75, 1284.75, 627.5], "triangle_by": "ZR on 66 / 67, 41.25 x 35.75 (H provisional [1241.5, 590.3, 1283.5, 626.4])", "slot": "the triangle's; ZR's mask hole is their hull grown 3 px, x 1240.4-1287.6, y 588.4-630.4", "meaning": "independent of the message and outlives it (62 -> 63, 66 -> 67); most likely BMW's 'check-control message displayed or stored' indicator (P, strong hypothesis); drawn UNDER a theme (ZR on 43)", "convention": "continuous for the new boxes", "kind": "measured"}
  },
 
  "speed_limit_sign": {
-  "centre": {"value": [537.4, 621.3], "spread": [1.3, 0.4], "from": "circle fit on the red ring in 39/09/08/17/34/41/42", "kind": "measured"},
-  "r_outer_px": {"value": 41.1, "spread": 0.4, "kind": "measured"},
-  "r_inner_px": {"value": 31.8, "spread": 0.3, "kind": "measured"},
-  "ring_width_px": {"value": 9.3, "spread": 0.15, "kind": "measured"},
+  "centre": {"value": [538.45, 621.2], "spread": [0.3, 0.3], "convention": "continuous", "by": "ZL on 60-64, 66-68 (60 direct on our grid: y 621.29)", "was": [537.4, 621.3], "was_from": "circle fit on the red ring in 39/09/08/17/34/41/42, pixel-centre convention (+0.5 -> (537.9, 621.8)) on low-resolution rects; 34/41/42 are one registration chain via 39 and 17 has a theme connected", "open": "not settled, ~0.7-0.8 px: H's ring fits on R's strip rects give x 537.2-538.0, y 621.9-622.9; O's per-photo fits on R's first rects average (537.68, 622.02); T's sign digits centre at (538.6, 621.9). ZL attributes the spread to registration. A photo on the car settles it.", "kind": "measured"},
+  "r_outer_px": {"value": 40.95, "spread": [40.91, 41.22], "was": 41.1, "by": "ZL", "kind": "measured"},
+  "r_inner_px": {"value": 31.54, "spread": [31.45, 31.69], "was": 31.8, "by": "ZL; the face sits 0.37 px right of the ring's centre on every photo", "kind": "measured"},
+  "ring_width_px": {"value": 9.41, "was": 9.3, "by": "ZL", "kind": "measured"},
+  "moat": {"r": [40.95, 42.45], "note": "BMW's own black gap round the ring: the dial bottom line is cut at r 42.44 (41.84-42.82) on both sides (ZL); the old 'thin dark rim, probably anti-aliasing' is this", "kind": "measured"},
+  "ink_box": {"value": [497.5, 580.2, 579.4, 662.2], "convention": "continuous", "by": "ZL", "kind": "measured"},
   "digits": {
-   "figure_height_px": {"value": 26.4, "spread": 0.7, "from": "'50' in 09/08/17/34; '30' in 14", "kind": "measured"},
+   "figure_height_px": {"value": 26.9, "was": 26.4, "by": "ZL (T 26.8; dark ink, so no overexposure bias either way)", "from": "old: '50' in 09/08/17/34; '30' in 14", "kind": "measured"},
    "advance_px": {"value": 18.9, "spread": 0.6, "kind": "measured"},
    "ink_width_2digit_px": {"value": 34.8, "spread": 0.4, "kind": "measured"},
-   "centred_on": [537.9, 620.9]
+   "centred_on": [537.9, 620.9],
+   "centred_on_corrected": "0.1-0.3 px right and 0.25 px low of the face centre (ZL)"
   },
   "empty_state": {
    "dashes": 3,
@@ -130,7 +147,8 @@
    "pitch_px": 13.0,
    "ink_x": [520.0, 554.9],
    "centre_y": 621.4,
-   "from": "photo 39, also seen in 41/42/43",
+   "from": "photo 39, also seen in 41/42/43 (ours)",
+   "corrected": {"dash_w_px": 9.4, "dash_h_px": 4.9, "pitch_px": 13.07, "ink_x": [520.7, 556.2], "centre_y": 621.3, "convention": "continuous", "by": "ZL on 68 (= 39)"},
    "kind": "measured"
   },
   "colour_note": "the photos are not colour-managed; the ring reads (194,23,36) in 39 and (235,34,60) in 09. design/overlay/g20_comfort.json records (233,37,62) from rect 08."
