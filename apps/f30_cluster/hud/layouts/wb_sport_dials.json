@@ -96,11 +96,11 @@
         1243,
         694
       ],
-      "ccSym": [
-        700,
-        628,
-        757,
-        690
+      "ccMark": [
+        1251,
+        589,
+        1283,
+        629
       ],
       "window": [
         600,
@@ -190,7 +190,14 @@
       "sweep": 240.75,
       "cut": {
         "y": 656,
-        "fade": 26
+        "fade": 26,
+        "box": [
+          1251,
+          589,
+          1283,
+          629
+        ],
+        "soft": 2
       }
     },
     {
@@ -687,18 +694,18 @@
       "class": "content",
       "z": 2,
       "x": 690,
-      "y": 666,
+      "y": 650,
       "w": 560,
-      "h": 46,
+      "h": 62,
       "color": "bg",
       "toggle": "own:nav",
       "hole": [
         709,
-        666,
+        650,
         534,
-        46
+        62
       ],
-      "holeWhen": "cc:open&!own:info",
+      "holeWhen": "cc:open",
       "holeInset": 0,
       "holeRadius": 0,
       "conn": 1
@@ -719,34 +726,22 @@
       "toggle": "own:nav"
     },
     {
-      "id": "cc_name",
+      "id": "cc_line",
       "type": "text",
+      "ccLine": true,
       "z": 5,
-      "x": 758,
-      "y": 625,
-      "w": 420,
-      "h": 28,
-      "text": "{{ccName}}",
+      "x": 690,
+      "y": 650,
+      "w": 560,
+      "h": 62,
+      "textY": 32,
+      "text": "{{ccHead}}",
       "font": "wb_cap",
       "color": "fg",
       "align": "center",
       "conn": 2,
-      "toggle": "own:info"
-    },
-    {
-      "id": "cc_desc",
-      "type": "text",
-      "z": 5,
-      "x": 758,
-      "y": 669,
-      "w": 420,
-      "h": 28,
-      "text": "{{ccDesc}}",
-      "font": "wb_cap",
-      "color": "dim",
-      "align": "center",
-      "conn": 2,
-      "toggle": "own:info"
+      "toggle": "own:info",
+      "rate": 50
     }
   ]
 }

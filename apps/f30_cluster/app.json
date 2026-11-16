@@ -344,7 +344,25 @@
           "All ours (6WB style)"
         ]
       ],
-      "_about": "ONE switch for the whole of BMW's bottom row (the owner, 2026-11-15: 'all6WB vs allG20'), in place of the seven own* settings of package F (ownRange / ownClock / ownTemp / ownNav / ownSign / ownInfo and the broken ownAll). 'all6WB': the range, the clock, the outside temperature, the road label, the speed-limit sign and the check-control message are all drawn by us, in the 6WB style; 'allG20': BMW draws all of them. The clock is ours only once a time zone is known (the 'timeZone' setting, the car's own zone or config.utcOffsetMinutes) - without one the head unit runs on UTC and only BMW's clock is right, which is what the retired ownClock 'auto' did. IT ONLY MEANS ANYTHING WHILE THE 'g20' TOGGLE SHOWS A SEE-THROUGH LAYOUT: in the opaque themes our own background covers BMW's row, so the row is always ours there and menu.js hides this one (config.menu.hideRowUnlessG20). NO 'reset' HERE: a reset would throw the migrated value away (kit/runtime/mgu.js:105-108). hud.js _rowFail still wins over this: an element whose signal is missing or whose drawing throws hands itself back to BMW whatever this says."
+      "_about": "ONE switch for the whole of BMW's bottom row (the owner, 2026-11-15: 'all6WB vs allG20'), in place of the seven own* settings of package F (ownRange / ownClock / ownTemp / ownNav / ownSign / ownInfo and the broken ownAll). 'all6WB': the range, the clock, the outside temperature, the road label, the speed-limit sign and the check-control message are all drawn by us, in the 6WB style; 'allG20': BMW draws all of them. The clock is ours only once a time zone is known (the 'timeZone' setting, the car's own zone or config.utcOffsetMinutes) - without one the head unit runs on UTC and only BMW's clock is right, which is what the retired ownClock 'auto' did. IT ONLY MEANS ANYTHING WHILE THE 'g20' TOGGLE SHOWS A SEE-THROUGH LAYOUT: in the opaque themes our own background covers BMW's row, so the row is always ours there and menu.js hides this one (config.menu.hideRowUnlessG20). NO 'reset' HERE: a reset would throw the migrated value away (kit/runtime/mgu.js:105-108). hud.js _rowFail still wins over this: an element whose signal is missing or whose drawing throws hands itself back to BMW whatever this says.",
+      "_packageX": "2026-11-16 (docs/strip/X-REPORT.md): 'all6WB' is ALL OR NOTHING. The whole row is ours, or the whole row is BMW's: when any one item cannot be drawn (a field missing, a message that cannot be read, a character the font lacks, a drawing that throws) the WHOLE row goes back to BMW until the app restarts, logged once with the reason. The row is also BMW's, without a latch, in standby (P with the engine off), while no time zone is known (the clock is always ours in all6WB: the car's own zone, config.clock, first) and until the car's check-control message has been read once. A BMW warning is never covered unless our own text for it has been on its way to the screen for 150 ms (hud.js _ccOpen)."
+    },
+    {
+      "key": "ccStyle",
+      "label": "Our message's look (all ours)",
+      "type": "choice",
+      "default": "A",
+      "options": [
+        [
+          "A",
+          "A: marker + headline"
+        ],
+        [
+          "B",
+          "B: hairline + coloured segment"
+        ]
+      ],
+      "_about": "Package X (the owner, 2026-11-16): our check-control message is our own design, one short line - the headline only - in the road label's slot, drawn while the bottom row is 'all6WB'. A: a severity marker (a warning triangle for a red, yellow or orange message, an 'i' otherwise, in the car's own colour) before the headline, no frame. B: the same headline with a hairline above it and a segment in the severity's colour under it, no marker. Changes no layer (hud.js ROW_KEYS): the line is repainted. Inert while the row is BMW's."
     },
     {
       "key": "limitArc",
@@ -948,7 +966,7 @@
     },
     "drive": null,
     "clock": {
-      "_about": "The car's own time-zone offset, so our clock is right without the manual timeZone setting (the owner, 2026-11-15; the head unit itself runs on UTC). The timeZone setting still wins when it is not Automatic.",
+      "_about": "The car's own time-zone offset, so our clock is right without the manual timeZone setting (the owner, 2026-11-15; the head unit itself runs on UTC). Package X (2026-11-16): THIS IS THE FIRST SOURCE; the timeZone setting (if a build still has it) and config.utcOffsetMinutes are the fallbacks, in that order. A decoded offset is taken only if it is a whole number of quarter hours within +-14 h; anything else is logged once as 'clock: the car's offset decodes to N minutes ... ignored' and the next source is used. The line to check on the car: 'clock: ours shows HH:MM, UTC+hh:mm from ...' - it must read what the head unit's own clock reads.",
       "_confirm": "STILL AN UNCONFIRMED ENCODING, now LIVE. The catalogue says timeZonesOffsetAutomaticallyUTC is a UInt8 but not what one step is; \"factor\" 15 (quarter hours) is a guess. It was only parsed and logged while the manual \"timeZone\" setting existed; the owner retired that setting on 2026-11-15 (\"забираємо все, можемо покластися на машину\"), so the car's value is now the ONLY source our clock has and \"confirm\" is true. It could not be settled off the car: the 2026-11-15 snapshot has no captured value, and timeDateUTC's other members carry UTC, not local time, so there is nothing to difference against. THE FAILURE MODE IS A VISIBLY WRONG CLOCK, nothing worse, and one glance at the car settles it: compare our clock with BMW's own. If ours is out by a whole number of hours, the step is wrong - set \"factor\" to 1 (minutes), 30 (half hours) or 60 (hours) so the logged line 'clock: the car's offset would be N minutes' reads the real offset. If it is out by a constant that is not a multiple of the step, use \"offsetBy\" (subtracted from the raw first).",
       "iface": "de.bmw.infotainment.KombiIF",
       "field": "timeDateUTC",
@@ -1160,7 +1178,7 @@
       "driveShape": "{ iface, field, path: [..], map: { '<raw>': 'COMFORT' | 'COMFORT_PLUS' | 'SPORT' | 'SPORT_PLUS' | 'ECO_PRO' | 4 ... } }: the drive mode from another field than FES statusFESVehicleDynamicSwitchHMI (which gave nothing on the owner's car); the value goes through the same handler, so layout choice is unchanged. null: that FES field only.",
       "about": "Package I (docs/CAR3-I-REPORT.md). Fields not known yet, so null: then nothing is subscribed. ./scripts/car_signals.sh root@<car> ranks the car's catalogue for each and prints these lines; each interface must also go under signals (flag s, or rs with a getter). Every new raw value is logged once ('msa raw', 'clock raw', 'check-control raw') to calibrate.",
       "msaShape": "{ iface, field, path: [..], map: { '<raw>': 'active' | 'off' | 'stopped' | 'unavailable' | null } }: our auto start/stop sign in the 6WB layouts (hidden while active or unmapped; green while MSA has stopped the engine, the rev needle at READY; crossed out while off or unavailable)",
-      "clockShape": "{ iface, field, kind: 'offset', path: [..], factor (1: minutes, 60: hours, 1/60: seconds), dstPath: [..] + dstMinutes (60), invalid: [..] } or { iface, field, kind: 'local', hourPath: [..], minutePath: [..] }: the car's time zone for our clock, after the timeZone setting and before utcOffsetMinutes",
+      "clockShape": "{ iface, field, kind: 'offset', path: [..], factor (1: minutes, 60: hours, 1/60: seconds), dstPath: [..] + dstMinutes (60), invalid: [..] } or { iface, field, kind: 'local', hourPath: [..], minutePath: [..] }: the car's time zone for our clock, the FIRST source (package X), then the timeZone setting, then utcOffsetMinutes",
       "ccmShape": "{ iface, field, kind: 'list', path: [..] (a message shows while the array is not empty) } or { iface, field, kind: 'flag', path: [..], on: [..] | off: [..] (default [0, false]) }: hud.js _raw('ccMsg'), for 6WB Dials + G20's hooks"
     },
     "_limit": {

@@ -305,14 +305,9 @@ CC_TOP_SOFT = 13
 # box. A 4.9 px rail runs flat at y 604.8 from x 749 to 1176 and tapers to points at (702, 621) and (1221, 621); the
 # symbol slot is right-aligned at x 752.9, centre y 658.7, at most 41.3 px wide and 45-53 px tall; the text is
 # centred on x 967.5, one line at baseline 671.2 or two at 645.8 and 690.2 (leading 44.4), cap height 27.0.
-# While the message is ours, CC_SYM is the only part of BMW's panel left see-through, so the car keeps drawing its
-# own symbol and its animation there (WBBACK u_cc is one box, so only one can be opened: the rail is NOT exposed -
-# a second box would be a second vec4 in the shader, which the bottom-row package was not allowed to add. Either
-# the drawing package draws the rail itself from the numbers above, or it adds that uniform).
-CC_SYM = [700, 628, 757, 690]        # round the measured symbol slot, with room for the widest symbol seen
-CC_TEXT_C = 967.5                    # the measured text centre, not the panel's
-CC_TEXT_W = 420                      # 757.5..1177.5: clear of the symbol slot (752.9) and inside the rail's flat part (1176)
-CC_LINE_Y = [645.8, 690.2]           # the measured two-line baselines (one line: 671.2)
+# Package X (the owner, 2026-11-16): our message is OUR OWN design, not a copy of BMW's panel, and for now without a
+# window for BMW's symbol (CC_SYM, the symbol column, and the two-line cc_name / cc_desc are gone). One short line,
+# the headline only, in the road label's slot (NAV_CX, NAV_BASE): see cc_row().
 # BMW's bottom-centre road label: centred on x 960.5, baseline y 700.5, cap height 30.9, descender 8 px, the widest
 # seen 509 px (measured). Our black bar masks BMW's own text there; it starts at x 690, clear of the rear-belt,
 # driver-belt and airbag lamps (they end at x 679 and are never covered), and runs into the black over BMW's mode
@@ -320,6 +315,20 @@ CC_LINE_Y = [645.8, 690.2]           # the measured two-line baselines (one line
 # message text is not covered. The stock field has no fill of its own; ours is only there to hide BMW's label.
 NAV_BAR = [690, 666, 1250, 712]
 NAV_HOLE = [CC_BOX[0], 666, CC_BOX[2], 712]
+# --- package X (docs/strip/X-REPORT.md): the bar starts at y 650, not 666. CC_TOP fades out from y 652 to 665, so a
+# 660 x 13 px band (y 652-666) under our message was half or wholly see-through and BMW's one-line message showed
+# through it (the strip audit, 2026-11-16: 13 of its ~21 px of x-height). The bar exists only while the whole row is
+# ours (toggle "own:nav"), x 690-1250 keeps 11 px off the airbag lamp (x 635-679), and its hole opens over BMW's
+# panel only while BMW's message must be seen ("cc:open": hud.js _ccOpen, the safety rule).
+NAV_BAR = [690, 650, 1250, 712]
+NAV_HOLE = [CC_BOX[0], 650, CC_BOX[2], 712]
+# BMW's marker right of the panel (none / warning triangle / "i": stored check-control messages; photos 08, 62, 63,
+# 66, 67; spec 5.6 [1252, 591, 1282, 627]): left see-through in both modes while no signal of ours stands in for it
+# (the brief's X.6). WBBACK opens it with u_cc while BMW's panel is shut ("ccMark"), and the tacho, whose rim it sits
+# on (r 332 from the tacho's centre), has a box window there (WBDIAL u_cut mode 2). PROVISIONAL: the low-resolution
+# photo 08 puts the "i" at x 1255-1270, y 590-627; package ZR measures the triangle and the box to the pixel.
+MARK_WIN, MARK_SOFT = [1251, 589, 1283, 629], 2
+# --- end package X ---
 # our road label: BMW's centre and baseline, and WIDER than BMW's own field so a long name is not shrunk
 # (the owner, 2026-11-15, with docs/ROAD-SHIELDS.md; the widest street measured is 509 px)
 NAV_CX, NAV_BASE, NAV_W = 960.5, 700.5, 540   # 690.5..1230.5: the bar's own width, and 31 px wider than the widest street measured
@@ -406,7 +415,9 @@ def nav_row():
          # only effect layer the package adds (8 per connection is cluster-render's hard cap)
          # 2026-11-16: "cc:open", not "cc:shown" - a car whose check-control message we cannot read never says a
          # message shows, and the bar would then cut BMW's own message in half at its top edge (y 666)
-         "holeWhen": "cc:open&!own:info", "holeInset": 0, "holeRadius": 0, "conn": 1},
+         # package X: "cc:open" alone - the bar exists only while the whole row is ours, and then the hole opens
+         # exactly while BMW's message must be seen (it arrived, our text for it is not on the screen yet)
+         "holeWhen": "cc:open", "holeInset": 0, "holeRadius": 0, "conn": 1},
         # wb_cap is the only 6WB font with letters in it (wb_val is digits and units): the placeholder uses it on
         # the measured centre and baseline. It has no Cyrillic and no accents, and the owner's cluster is in
         # Ukrainian, so on the car this label hands itself back to BMW until the drawing package bakes the measured
@@ -415,16 +426,20 @@ def nav_row():
     ]
 
 def cc_row():
-    """Our check-control text at BMW's place, only while the info field is ours. The car keeps drawing the symbol and
-    its animation in CC_SYM (hud.js _wbCcSend opens only that box): we draw the name and the description beside it."""
+    """Package X: our check-control message - ONE line, the headline only, in the road label's slot (the road label
+    steps aside while it shows: hud.js _roadText), only while the whole row is ours. ONE widget draws the headline and
+    what the "ccStyle" setting puts with it (A: a severity marker before it; B: a hairline above and a segment in the
+    severity's colour under it) in one raster (hud.js _ccLinePaint), so "our text is on the screen" is one paint, and
+    only after it does hud.js _ccOpen let BMW's panel be covered. The box is the road bar's own (NAV_BAR), the cell top
+    where the road label's is (textY), so the headline sits on the road label's baseline. White text (the owner,
+    2026-11-15); the marker and the segment take the car's own colour (cCColor, hud.js _ccSeverity)."""
+    cell_top = int(round(base_at("wb_cap", NAV_BASE) - cell("wb_cap") / 2.0))       # the "nav" text's own cell top
     return [
-        # the two measured baselines, centred on the measured text centre (not the panel's); same font caveat as nav
-        # white only for now (the owner, 2026-11-15): cCColor is read and recorded but not drawn. THE SEAM is this
-        # one argument - add colorBy="cc" and shared/hud.js _ccRole() colours the line by the car's own severity
-        text("cc_name", CC_TEXT_C, base_at("wb_cap", CC_LINE_Y[0]), CC_TEXT_W, "{{ccName}}", "wb_cap", conn=2,
-             toggle="own:info"),
-        text("cc_desc", CC_TEXT_C, base_at("wb_cap", CC_LINE_Y[1]), CC_TEXT_W, "{{ccDesc}}", "wb_cap", "dim", conn=2,
-             toggle="own:info"),
+        {"id": "cc_line", "type": "text", "ccLine": True, "z": 5, "x": NAV_BAR[0], "y": NAV_BAR[1],
+         "w": NAV_BAR[2] - NAV_BAR[0], "h": NAV_BAR[3] - NAV_BAR[1], "textY": cell_top - NAV_BAR[1],
+         "text": "{{ccHead}}", "font": "wb_cap", "color": "fg", "align": "center", "conn": 2, "toggle": "own:info",
+         # repainted every tick when it changes, not every 200 ms: BMW's panel is open until ours is drawn
+         "rate": 50},
     ]
 # --- end bottom row ---
 
@@ -464,7 +479,7 @@ def dials_bg(style):
             "cover": {"tex": "cover", "x": COVER[0], "y": COVER[1], "w": COVER[2], "h": COVER[3]}, "shade": SHADE,
             "patches": row_patches(),      # range, clock, temperature, the foot band - and no fifth, see row_patches()
             "cc": CC_BOX,
-            "ccSym": CC_SYM,          # bottom row: while the info message is ours, only BMW's symbol column opens
+            "ccMark": MARK_WIN,       # package X: BMW's marker, see-through while BMW's panel is shut (hud.js _wbCcSend)
             "window": MAP_WINDOW, "fade": MAP_FADE,                             # 2026-11-14: Comfort's map window
             "foot": FOOT, "footLine": FOOT_LINE}                              # ... and its foot line ("wbFoot")
 
@@ -484,7 +499,9 @@ def dials():
              cut={"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": SIGN_SOFT, "cover": "limit"},
              measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10, start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "comfort", ringW=10, base=base("tacho_d", RV, R, RV[0] - R, RV[1] - R, 2 * R, 3),
-             cut={"y": CUT_Y, "fade": CUT_FADE},          # no "i" window (2026-11-13): cut like the speedo
+             # package X: the box window over BMW's marker again (shut on 2026-11-13); its cost: WBDIAL blacks this
+             # dial's bezel below the window's top on its left half (u_cut mode 2), so the rim ends at the marker
+             cut={"y": CUT_Y, "fade": CUT_FADE, "box": MARK_WIN, "soft": MARK_SOFT},
              measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
              start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF),
     ] + road_signs(own=True)        # bottom row: only while the sign is ours; else BMW's shows through the window
@@ -525,7 +542,7 @@ def sport_face(cut=False):
              minor=10, start=SPD_START, sweep=SPD_SWEEP,
              **({"cut": {"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": SIGN_SOFT, "cover": "limit"}} if cut else {})),
         dial("tacho", RV, "sport", hub=SPORT_HUB, ringW=6, measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0},
-             minor=10, start=RPM_START, sweep=RPM_SWEEP, **({"cut": {"y": CUT_Y, "fade": CUT_FADE}} if cut else {})),
+             minor=10, start=RPM_START, sweep=RPM_SWEEP, **({"cut": {"y": CUT_Y, "fade": CUT_FADE, "box": MARK_WIN, "soft": MARK_SOFT}} if cut else {})),   # package X: the marker
     # the road signs under the speed hub, the same widgets as 6WB Comfort's (comfort(); BAKE C7). With the window
     # (cut): only while the sign is ours, else BMW's own shows through it (bottom row package)
     ] + road_signs(own=cut)

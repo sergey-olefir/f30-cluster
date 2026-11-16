@@ -25,6 +25,12 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'bottom-row-'));
 const dataDir = path.join(tmp, 'data'), screenDir = path.join(tmp, 'screen');
 fs.mkdirSync(dataDir); fs.mkdirSync(screenDir);
 const spec = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'app.json'), 'utf8'));
+// package X: the geometry the safety checks compare against, read from the layout itself (panel px, half-open boxes)
+const LAY = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts', 'wb_dials.json'), 'utf8'));
+const lw = (id) => LAY.widgets.find((w) => w.id === id);
+const CC_BOX = lw('bg').cc, MARK_WIN = lw('bg').ccMark, NB = lw('nav_bg');
+const NAV_BAR = [NB.x, NB.y, NB.x + NB.w, NB.y + NB.h];
+const NAV_HOLE = [NB.hole[0], NB.hole[1], NB.hole[0] + NB.hole[2], NB.hole[1] + NB.hole[3]];
 const item = (k) => spec.settings.find((s) => s.key === k);
 const opts = (k) => item(k).options.map((o) => o[0]);
 
@@ -136,25 +142,41 @@ async function main() {
     // window never opened because the window follows "a message shows", which that car never says. Until the car's
     // message has actually been read the field is BMW's and its panel is left see-through. No latch: the field comes
     // back by itself at the first message, so a slow provider costs nothing.
-    console.log('the message field waits for the car: unread means BMW\'s, and no latch');
+    // package X (2026-11-16, "fallback is all-or-nothing"): the row is ONE thing. It waits - BMW's, no latch - for a
+    // time zone (the clock is always ours in all6WB) and for the car's message to be read once, then comes in WHOLE,
+    // by itself, with no restart.
+    console.log('all6WB waits for the car, whole: no time zone, then no message read, means the whole row is BMW\'s');
+    const allOwn = (q, v) => ['range', 'clock', 'temp', 'nav', 'sign', 'info'].every((i) => (S(q).own || {})[i] === v);
     await set('bottomRow', 'all6WB');
-    p = await until((q) => S(q).own && S(q).own.nav === true, 20000);
+    p = await until((q) => /time zone/.test((S(q).row || {}).why || ''), 20000);
+    ok(/waiting for a time zone/.test(S(p).row.why), 'no time zone known yet: the row is BMW\'s (' + S(p).row.why + ')');
+    ok(allOwn(p, false), 'every item of it, not only the clock (' + JSON.stringify(S(p).own) + ')');
+    ok(JSON.stringify(S(p).widgets) === '[]', 'nothing of ours is built for the row (' + JSON.stringify(S(p).widgets) + ')');
+    ok(JSON.stringify(S(p).fail) === '{}', 'and nothing latched: it is a wait, not a fallback');
+    await scene('clock-plus2');
+    p = await until((q) => /check-control/.test((S(q).row || {}).why || ''), 20000);
     ok(S(p).cc && S(p).cc.shown === null, 'nothing has been read out of config.ccm yet (shown ' + JSON.stringify(S(p).cc.shown) + ')');
-    ok(S(p).own.info === false, 'the info field reads as BMW\'s although the switch says all6WB');
-    ok((S(p).widgets || []).indexOf('cc_name') < 0 && (S(p).widgets || []).indexOf('cc_desc') < 0,
-        'and no message text of ours is built, so nothing of ours covers BMW\'s (' + JSON.stringify(S(p).widgets) + ')');
-    ok(S(p).own.nav === true && S(p).own.sign === true, 'the rest of the row is ours: the message alone waits');
-    ok(JSON.stringify(S(p).fail) === '{}', 'and nothing latched: it is a wait, not a fallback (' + JSON.stringify(S(p).fail) + ')');
+    ok(/waiting for the car's check-control message/.test(S(p).row.why) && allOwn(p, false),
+        'with a zone, the row still waits, whole, for the car\'s message to be read once (' + S(p).row.why + ')');
+    for (let i = 0; i < 40 && !/clock: ours shows \d\d:\d\d, UTC\+02:00 from the car/.test(logText); i++) await sleep(100);
+    const clockLine = (logText.match(/clock: ours shows (\d\d):(\d\d), UTC\+02:00 from the car[^\n]*/) || [])[0] || '';
+    const utc2 = new Date(Date.now() + 120 * 60000), mins = (h, m) => Number(h) * 60 + Number(m);
+    const shownAt = clockLine ? mins(clockLine.slice(18, 20), clockLine.slice(21, 23)) : -99;
+    ok(clockLine && Math.abs(shownAt - (utc2.getUTCHours() * 60 + utc2.getUTCMinutes())) <= 5,
+        'one log line says what our clock shows, the offset and its source, and the time is UTC+2 (' + clockLine.slice(0, 60) + ')');
     await scene('cc-red');
-    // the first readable message must bring the field in BY ITSELF: it rebuilds the layout, the way the car's first
-    // time zone brings our clock in. Without that our text would wait for the next setting change.
-    p = await until((q) => (S(q).widgets || []).indexOf('cc_name') >= 0, 20000);
-    ok(S(p).own.info === true, 'the first message the car sends makes the field ours, with no restart');
-    ok((S(p).widgets || []).indexOf('cc_name') >= 0 && (S(p).widgets || []).indexOf('cc_desc') >= 0,
-        'and our own message text is built then, with no other change (' + JSON.stringify(S(p).widgets) + ')');
+    // the first readable message must bring the row in BY ITSELF (hud.js _rowSync rebuilds)
+    p = await until((q) => (S(q).widgets || []).indexOf('cc_line') >= 0, 20000);
+    ok(allOwn(p, true) && S(p).row.why === null, 'the first message the car sends makes the WHOLE row ours, with no restart');
+    ok(['cc_line', 'nav', 'nav_bg', 'signs', 'own_clock'].every((i) => (S(p).widgets || []).indexOf(i) >= 0),
+        'and our message line, road label, sign and clock are built then (' + JSON.stringify(S(p).widgets) + ')');
+    ok((S(p).widgets || []).indexOf('cc_name') < 0 && (S(p).widgets || []).indexOf('cc_desc') < 0, 'the two-line text is gone: one line');
+    p = await until((q) => (S(q).safety || {}).onScreen === true && JSON.stringify(S(q).safety.ucc) === JSON.stringify(MARK_WIN), 5000);
+    ok(S(p).safety.onScreen === true && JSON.stringify(S(p).safety.ucc) === JSON.stringify(MARK_WIN),
+        'once ours is on the screen BMW\'s panel is covered and only its marker is open (u_cc ' + JSON.stringify(S(p).safety.ucc) + ')');
     await scene('cc-clear');
     p = await until((q) => S(q).cc && S(q).cc.shown === false, 5000);
-    ok(S(p).own.info === true, 'and it stays ours once that message is cleared again');
+    ok(allOwn(p, true), 'and it stays ours once that message is cleared again');
     await set('bottomRow', 'allG20');
     p = await until((q) => JSON.stringify(S(q).widgets) === '[]', 20000);
     ok(JSON.stringify(S(p).widgets) === '[]', 'back to the default: nothing of ours is built again');
@@ -234,8 +256,8 @@ async function main() {
     p = await until((q) => (S(q).widgets || []).indexOf('signs') >= 0, 20000);
     ok((S(p).widgets || []).indexOf('signs') >= 0 && (S(p).widgets || []).indexOf('limit') >= 0, 'all6WB builds the sign and its figure');
     await scene('cc-red');
-    p = await until((q) => (S(q).widgets || []).indexOf('cc_name') >= 0 && S(q).cc.name, 20000);
-    ok((S(p).widgets || []).indexOf('cc_name') >= 0 && (S(p).widgets || []).indexOf('cc_desc') >= 0, 'all6WB builds the message text');
+    p = await until((q) => (S(q).widgets || []).indexOf('cc_line') >= 0 && S(q).cc.name, 20000);
+    ok((S(p).widgets || []).indexOf('cc_line') >= 0, 'all6WB builds our message line');
     ok(S(p).cc.name === 'Engine malfunction' && /Drive on/.test(S(p).cc.desc), 'and the text is the car\'s own (' + S(p).cc.name + ')');
     ok(S(p).road === '', 'the road label steps aside while a message shows, as BMW does');
 
@@ -378,10 +400,192 @@ async function main() {
     ok(S(p).fail && S(p).fail.nav === true, 'a street name the font cannot draw gives the label back to BMW');
     p = await until((q) => (S(q).widgets || []).indexOf('nav') < 0, 20000);
     ok((S(p).widgets || []).indexOf('nav') < 0, 'and our label is dropped, so the car draws its own again');
-    ok(/bottom row: nav is BMW's again \(the font/.test(logText), 'the log says which font and how many characters, not the name');
-    ok(S(p).own.range === true && S(p).own.temp === true,
-        'and the latch is that element\'s alone: the rest of the row stays ours whatever the switch said');
+    ok(/bottom row: the whole row is BMW's again until the app restarts - nav: the font/.test(logText),
+        'the log says once, for the whole row, which font and how many characters, not the name');
+    // package X: all-or-nothing - the per-element hand-back stacked three texts on each other (2026-11-16)
+    ok(allOwn(p, false) && JSON.stringify(S(p).widgets) === '[]',
+        'and the latch takes the WHOLE row: nothing of ours is left in it (' + JSON.stringify(S(p).own) + ', ' + JSON.stringify(S(p).widgets) + ')');
+    ok((logText.match(/the whole row is BMW's again/g) || []).length === 1, 'logged once');
     await set('bottomRow', 'allG20');
+
+    // ---- package X (docs/strip/X-REPORT.md): the safety rule, one case per way it can go wrong, each on a FRESH app
+    // (hud.js _rowFail is a latch until the app restarts, so a case measured after another would measure its latch).
+    // The rule: the car says a message shows and our own text for it is not on the screen -> BMW's panel is visible:
+    // WBBACK's u_cc is BMW's whole panel AND the road bar's hole is open. bench/run-app.js audits that between every
+    // two ticks of the engine (safety.audit); each case also asserts it at the probe, and the gap case at the renderer.
+    const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const restart = async () => {
+        await req('POST', '/restart');
+        await sleep(1000);
+        const q = await until((r) => r && r.ready && r.activeName === 'wb_dials' && S(r).row, 90000);
+        await req('POST', '/signals', { mode: 'manual', values: { rpm: 1500, speed: 50, gear: 3, oil: 95, coolant: 90 } });
+        return q;
+    };
+    // all6WB with a time zone and the message struct read once (no message on): the whole row ours
+    const rowReady = async () => {
+        await set('bottomRow', 'all6WB');
+        await scene('clock-plus2'); await scene('cc-clear'); await scene('road-street');
+        return until((q) => S(q).row && S(q).row.why === null && (S(q).widgets || []).indexOf('cc_line') >= 0, 20000);
+    };
+    const bmwOpen = (q) => same((S(q).safety || {}).ucc, CC_BOX);
+    // (half a second more of audit first, so a case that latched at once has frames of the message showing too)
+    const clean = async (q0, what) => {
+        await sleep(500);
+        const q = await probe();
+        ok(S(q).safety && S(q).safety.audit.shown > 0 && S(q).safety.audit.violations === 0,
+            what + ': never once covered while ours was not on the screen (' + JSON.stringify(S(q).safety && S(q).safety.audit) + ')');
+    };
+    /** The renderer's own scene (GET /events, its first "scene" message): every layer with its uniforms. */
+    async function renderer() {
+        const ac = new AbortController();
+        try {
+            const r = await fetch(BASE + '/events', { signal: ac.signal });
+            const rd = r.body.getReader();
+            let buf = '';
+            const end = Date.now() + 8000;
+            while (Date.now() < end) {
+                const { value, done } = await rd.read();
+                if (done) break;
+                buf += Buffer.from(value).toString();
+                let i;
+                while ((i = buf.indexOf('\n\n')) >= 0) {
+                    const chunk = buf.slice(0, i); buf = buf.slice(i + 2);
+                    if (chunk.indexOf('data: ') !== 0) continue;
+                    const m = JSON.parse(chunk.slice(6));
+                    if (m.t === 'scene') return m.layers;
+                }
+            }
+        } catch (e) { /* aborted below */ } finally { ac.abort(); }
+        return null;
+    }
+
+    console.log('package X, safety 1: the gap between the message arriving and our first draw');
+    await restart();
+    p = await rowReady();
+    ok(p && S(p).row.why === null, 'a fresh app with the whole row ours');
+    await fake({ hook: 'ccHold' });                      // our first draw is late: held back until released
+    await scene('cc-red');
+    let gapN = 0, gapOk = 0;
+    for (const t0 = Date.now(); Date.now() - t0 < 1500;) {
+        const q = await probe();
+        if (S(q).cc && S(q).cc.shown === true) {
+            gapN++;
+            if (!S(q).safety.onScreen && S(q).safety.open && bmwOpen(q) && same(S(q).safety.navHole, NAV_HOLE)) gapOk++;
+        }
+        await sleep(50);
+    }
+    ok(gapN >= 10 && gapOk === gapN, 'with our first draw held back for 1.5 s, BMW\'s panel stayed open in the backdrop and the road bar (' + gapOk + ' of ' + gapN + ' probes)');
+    const layers = await renderer();
+    const back = (layers || []).find((l) => l.uniforms && l.uniforms.u_cc);
+    ok(back && same(back.uniforms.u_cc.v, CC_BOX), 'the renderer itself holds u_cc = BMW\'s whole panel (' + JSON.stringify(back && back.uniforms.u_cc.v) + ')');
+    await fake({ hook: 'ccRelease' });
+    p = await until((q) => S(q).safety.onScreen === true && same(S(q).safety.ucc, MARK_WIN), 5000);
+    ok(S(p).safety.onScreen === true && same(S(p).safety.ucc, MARK_WIN) && same(S(p).safety.navHole, [0, 0, 0, 0]),
+        'released: ours is drawn, then BMW\'s panel is covered in both layers and only its marker stays open');
+    await clean(p, 'the gap');
+    // BMW's panel is FULLY covered while ours is drawn: every row of it is under CC_TOP's solid part or the road bar
+    const ccTop = lw('bg').patches.find((r) => !r.when), solidTo = ccTop.rect[3] - (ccTop.soft || 0);
+    let rowsBad = 0;
+    for (let y = CC_BOX[1]; y < CC_BOX[3]; y++) {
+        const top = y >= ccTop.rect[1] && y < solidTo && ccTop.rect[0] <= CC_BOX[0] && ccTop.rect[2] >= CC_BOX[2];
+        const bar = y >= NAV_BAR[1] && y < NAV_BAR[3] && NAV_BAR[0] <= CC_BOX[0] && NAV_BAR[2] >= CC_BOX[2];
+        if (!top && !bar) rowsBad++;
+    }
+    ok(rowsBad === 0, 'while ours is drawn BMW\'s whole panel ' + JSON.stringify(CC_BOX) + ' is under solid black (' + rowsBad + ' rows open; CC_TOP solid to y ' + solidTo + ', the road bar from y ' + NAV_BAR[1] + ')');
+    ['bottom.belt_rear', 'bottom.belt_driver', 'bottom.airbag'].forEach((id) => {
+        ok(!overlaps(cat[id].bbox, NAV_BAR) && !overlaps(cat[id].bbox, MARK_WIN), 'the road bar and the marker window keep off ' + id);
+    });
+
+    console.log('package X, safety 2: a character the font lacks');
+    await restart();
+    p = await rowReady();
+    await scene('cc-uk');
+    p = await until((q) => S(q).fail && S(q).fail.info && bmwOpen(q), 15000);
+    ok(S(p).fail.info === true && /glyph/.test(S(p).row.failWhy.info), 'a Ukrainian message latches: ' + S(p).row.failWhy.info);
+    ok(/^latched/.test(S(p).row.why) && allOwn(p, false), 'the WHOLE row goes back to BMW\'s (' + S(p).row.why + ')');
+    ok(bmwOpen(p) && S(p).safety.open, 'and BMW\'s panel is open: its own message is the one the driver reads');
+    p = await until((q) => JSON.stringify(S(q).widgets) === '[]', 10000);
+    ok(JSON.stringify(S(p).widgets) === '[]', 'nothing of ours is left in the row (' + JSON.stringify(S(p).widgets) + ')');
+    await clean(p, 'a missing glyph');
+
+    console.log('package X, safety 3: drawing our message throws');
+    await restart();
+    p = await rowReady();
+    await fake({ hook: 'ccThrow' });
+    await scene('cc-yellow');
+    p = await until((q) => S(q).fail && S(q).fail.info && bmwOpen(q), 15000);
+    ok(S(p).fail.info === true && /drawing threw/.test(S(p).row.failWhy.info), 'the throw latches: ' + S(p).row.failWhy.info);
+    ok(allOwn(p, false) && bmwOpen(p), 'the whole row is BMW\'s and its panel is open');
+    ok(!exited && !/uncaught/.test(logText), 'and the app did not go down with it');
+    await clean(p, 'a throw while drawing');
+
+    console.log('package X, safety 4: a message the struct does not let us read');
+    await restart();
+    p = await rowReady();
+    await scene('cc-unread');
+    p = await until((q) => S(q).fail && S(q).fail.info && bmwOpen(q), 15000);
+    ok(S(p).cc.shown === true && S(p).safety.unread === true, 'a symbol with no name or description counts as a message showing');
+    ok(/cannot read/.test(S(p).row.failWhy.info) && allOwn(p, false) && bmwOpen(p), 'it latches the whole row and BMW\'s panel is open (' + S(p).row.failWhy.info + ')');
+    await clean(p, 'an unreadable message (a symbol, no text)');
+    await restart();
+    p = await rowReady();
+    await scene('cc-unread-root');
+    p = await until((q) => S(q).fail && S(q).fail.info && bmwOpen(q), 15000);
+    ok(/no root of the union fits/.test(S(p).row.failWhy.info) && S(p).cc.shown === true && bmwOpen(p),
+        'a union member we do not know counts as showing, latches, and opens BMW\'s panel (' + S(p).row.failWhy.info + ')');
+    await clean(p, 'an unreadable message (an unknown union member)');
+
+    console.log('package X: standby is BMW\'s row, in both modes; our message\'s two looks; a long headline');
+    await restart();
+    p = await rowReady();
+    // package P's correction (photos 63, 64): P with the engine off is NOT standby - BMW draws its normal row then.
+    // Standby is BMW's vehicle condition WOHNEN (5; hud.js COND_STANDBY, a hypothesis to confirm on the car).
+    await req('POST', '/signals', { mode: 'manual', values: { rpm: 0, speed: 0, gear: 0, oil: 60, coolant: 60, condition: 7 } });
+    await sleep(2500);                                   // past STANDBY_MS: had it counted as standby, it would show now
+    p = await probe();
+    ok(S(p).row.why === null && allOwn(p, true), 'P, engine off, condition 7 (photo 63\'s state): the row stays ours, not standby');
+    await set('bottomRow', 'allG20');
+    p = await until((q) => JSON.stringify(S(q).widgets) === '[]' && S(q).row.signWin !== null, 20000);
+    await sleep(300);
+    p = await probe();
+    ok(S(p).row.signWin === 1, 'and in allG20 the window over BMW\'s sign stays OPEN there: BMW still draws its sign (u_cut mode ' + S(p).row.signWin + ')');
+    await req('POST', '/signals', { mode: 'manual', values: { rpm: 0, speed: 0, gear: 0, oil: 60, coolant: 60, condition: 5 } });
+    p = await until((q) => S(q).row && S(q).row.signWin === 3, 5000);
+    ok(S(p).row.signWin === 3, 'condition 5 (standby): the window over BMW\'s sign shuts in allG20 (u_cut mode ' + S(p).row.signWin + ')');
+    ok(/vehicle condition 5 = standby/.test(logText), 'each new condition value is logged once, to confirm 5 = standby on the car');
+    await set('bottomRow', 'all6WB');
+    p = await until((q) => /standby/.test((S(q).row || {}).why || '') && JSON.stringify(S(q).widgets) === '[]', 15000);
+    ok(/standby/.test(S(p).row.why) && allOwn(p, false) && JSON.stringify(S(p).widgets) === '[]',
+        'standby in all6WB: the whole row is BMW\'s, nothing of ours built (' + S(p).row.why + ')');
+    ok(JSON.stringify(S(p).fail) === '{}', 'standby is not a latch');
+    await req('POST', '/signals', { mode: 'manual', values: { rpm: 1500, speed: 50, gear: 3, oil: 95, coolant: 90 } });
+    p = await until((q) => S(q).row && S(q).row.why === null && (S(q).widgets || []).indexOf('cc_line') >= 0, 15000);
+    ok(S(p).row.why === null && allOwn(p, true), 'out of standby the row is ours again, by itself');
+    await scene('cc-green');
+    p = await until((q) => S(q).safety.onScreen === true, 5000);
+    ok(S(p).safety.style === 'A' && S(p).safety.onScreen, 'look A (marker + headline) is the default, drawn');
+    ok(S(p).road === '', 'the road label steps aside while our message shows');
+    await set('ccStyle', 'B');
+    p = await until((q) => S(q).safety.style === 'B', 8000);
+    ok(S(p).safety.style === 'B' && S(p).safety.onScreen && (S(p).widgets || []).indexOf('cc_line') >= 0,
+        'look B in place, with no rebuild and BMW\'s panel still covered');
+    await set('ccStyle', 'A');
+    await scene('cc-long-name');
+    p = await until((q) => S(q).safety.onScreen === true && S(q).safety.fit && S(q).safety.fit.cut, 8000);
+    ok(S(p).safety.fit && S(p).safety.fit.cut === true && S(p).safety.fit.width <= NB.w - 16,
+        'a headline wider than the slot is cut with "..." to ' + (S(p).safety.fit || {}).width + ' px (' + (S(p).safety.fit || {}).chars + ' characters)');
+    await clean(p, 'standby, the looks and a long headline');
+    await scene('cc-clear');
+    await fake({ clock: { minutes: 900, dst: false } });     // +15 h: no such zone
+    p = await until((q) => /time zone/.test((S(q).row || {}).why || ''), 10000);
+    ok(/time zone/.test(S(p).row.why) && S(p).tz === null && JSON.stringify(S(p).fail) === '{}',
+        'an offset past +14 h is not a time zone: the row waits, BMW\'s, no latch (' + S(p).row.why + ')');
+    await scene('clock-plus2');
+    p = await until((q) => S(q).row && S(q).row.why === null, 15000);
+    ok(S(p).row.why === null && S(p).tz && S(p).tz.min === 120, 'and with a zone again it is ours again (' + JSON.stringify(S(p).tz) + ')');
+    await set('bottomRow', 'allG20');
+    await until((q) => JSON.stringify(S(q).widgets) === '[]', 20000);
+    // ---- end package X ----
 
     console.log('the G20 toggle: on and off again with no restart');
     await click('SET_G20');                       // off: back to the opaque Comfort

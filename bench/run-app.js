@@ -254,6 +254,69 @@ function wbPatches() {
     } catch (e) { return null; }
 }
 
+// ---- package X (docs/strip/X-REPORT.md): fault injection for the safety tests, POST /fake { hook } ----
+// "ccHold": our message line is not painted (as a slow first draw) until "ccRelease"; "ccThrow": painting it throws.
+// Bench only: it wraps the live HudApp instance, nothing of it is in shared/ and the car never sees it.
+let ccHeld = false;
+function benchHook(h) {
+    if (!hud) return;
+    if (!hud.benchWrapped) {
+        hud.benchWrapped = true;
+        const upd = hud._updateOne;
+        hud._updateOne = function (x, now, force) { if (ccHeld && x.w && x.w.ccLine) return undefined; return upd.call(this, x, now, force); };
+    }
+    if (h === 'ccHold') ccHeld = true;
+    else if (h === 'ccRelease') ccHeld = false;
+    else if (h === 'ccThrow') hud._ccLinePaint = () => { throw new Error('bench: an injected failure while drawing the message'); };
+    log.info('bench: hook ' + h);
+}
+/** What WBBACK's u_cc and the road bar's hole were last SENT as, in panel px ([0, 0, 0, 0]: shut), or null. */
+function rowSent() {
+    const out = { ucc: null, navHole: null };
+    try {
+        hud.widgets.forEach((x) => {
+            if (x.w && x.w.type === 'wbback' && typeof x.ccKey === 'string') {
+                const v = x.ccKey.split(',').map(Number);
+                out.ucc = v[2] > v[0] ? [v[0] + x.w.x, v[1] + x.w.y, v[2] + x.w.x, v[3] + x.w.y] : [0, 0, 0, 0];
+            }
+            // the fill's live hole: x.last is the key of the u_hole it last sent (layer px x, y, w, h; w 0: shut)
+            if (x.w && x.w.id === 'nav_bg') {
+                // (not updated since it was made: what _create sent then, the same _hole of that moment)
+                const h = typeof x.last === 'string' ? x.last.split(',').map(Number) : hud._hole(x.w);
+                out.navHole = h[2] > 0 ? [h[0] + x.w.x, h[1] + x.w.y, h[0] + x.w.x + h[2], h[1] + x.w.y + h[3]] : [0, 0, 0, 0];
+            }
+        });
+    } catch (e) { /* not up */ }
+    return out;
+}
+/** The round window over BMW's own sign as last sent (WBDIAL u_cut mode: 1 open, 3 shut), or null. */
+function signWin() {
+    let m = null;
+    try { hud.widgets.forEach((x) => { if (x.w && x.w.cut && x.w.cut.cover === 'limit' && isFinite(x.cutMode) && x.cutMode >= 0) m = x.cutMode; }); } catch (e) { /* not up */ }
+    return m;
+}
+// The safety rule, audited between the engine's ticks (each sample sees what the last tick SENT, i.e. one frame of
+// ours): whenever the car says a message shows and our own text for it is not on the screen, BMW's panel must be open
+// in the backdrop (u_cc = the layout's "cc" box) AND in the road bar (its hole open, or no bar at all).
+const ccAudit = { samples: 0, shown: 0, violations: 0, first: null };
+setInterval(() => {
+    try {
+        if (!hud || !hud.client || !hud.client.ready || !hud._seeThrough(hud._layoutName())) return;
+        ccAudit.samples++;
+        if (hud._cc() !== true) return;
+        ccAudit.shown++;
+        if (hud._ccOnScreen()) return;
+        let cc = null;
+        hud.widgets.forEach((x) => { if (x.w && x.w.type === 'wbback') cc = x.w.cc; });
+        const s = rowSent(), same = (a, b) => Array.isArray(a) && Array.isArray(b) && a.join(',') === b.join(',');
+        const backOpen = same(s.ucc, cc), barOpen = s.navHole === null || (s.navHole[2] > s.navHole[0]);
+        if (backOpen && barOpen) return;
+        ccAudit.violations++;
+        if (!ccAudit.first) ccAudit.first = { at: Date.now(), ucc: s.ucc, navHole: s.navHole, why: hud._rowWhy() };
+    } catch (e) { /* not up */ }
+}, 10);
+// ---- end package X ----
+
 process.on('message', (m) => {
     if (!m) return;
     if (m.t === 'signals') {
@@ -272,7 +335,8 @@ process.on('message', (m) => {
     else if (m.t === 'fake') {
         const v = m.v || {};
         // the bottom-row fakes take scene / sign / cc / ccList / road / nav / clock; the rest goes to the fake persod
-        if (v.scene || v.sign || v.cc || v.ccList || v.ccFrame || v.sla || v.road || v.nav || v.clock) fakeSigns.control(v);
+        if (v.hook) benchHook(v.hook);           // package X: fault injection for the safety tests
+        else if (v.scene || v.sign || v.cc || v.ccList || v.ccFrame || v.sla || v.road || v.nav || v.clock) fakeSigns.control(v);
         else if (fakePerso) fakePerso.control(v);
     }
     else if (m.t === 'probe') {
@@ -296,7 +360,14 @@ process.on('message', (m) => {
                 own: { nav: hud._own('nav'), sign: hud._own('sign'), info: hud._own('info'), range: hud._own('range'), clock: hud._own('clock'), temp: hud._own('temp') },
                 fail: hud.rowFail || {}, tzCar: hud.tzCar, tzCandidate: hud.tzCandidate,
                 sla: hud.sla, arc: hud._arcOn(),
-                widgets: ['signs', 'limit', 'nav', 'nav_bg', 'cc_name', 'cc_desc'].filter((id) => hud.widgets && hud.widgets.has(id)),
+                widgets: ['signs', 'limit', 'nav', 'nav_bg', 'cc_name', 'cc_desc', 'cc_line', 'own_clock'].filter((id) => hud.widgets && hud.widgets.has(id)),
+                // package X: who draws the row and why, the time zone in use, and the safety handshake: the headline
+                // the car's message gives, whether ours for it is on the screen, whether BMW's panel must be open, and
+                // what WBBACK's u_cc and the road bar's hole were last SENT as (panel px)
+                row: { why: hud._rowWhy(), standby: !!hud.rowStandby, failWhy: hud.rowFailWhy || {}, signWin: signWin() },
+                tz: hud._tzSource(),
+                safety: Object.assign({ head: hud._ccText('head'), unread: !!hud.ccUnread, onScreen: hud._ccOnScreen(),
+                    open: hud._ccOpen(), style: hud._ccStyle(), fit: hud.ccFit || null, audit: ccAudit }, rowSent()),
                 // 2026-11-16: WBBACK's black patches over BMW's bottom row, in PANEL px, with how many rects the
                 // layout wanted and how many the shader can hold: "want > cap" is a silent leak (bench/test-bottom-row.js)
                 patches: wbPatches(),
