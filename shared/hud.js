@@ -194,6 +194,8 @@
  * {{badge}}: the model picked on the Badge tab (badges.js), "BMW X3 M40i" with the lettering on, '' for none.
  * Bottom row (docs/BOTTOM-ROW-PACKAGE.md; each '' until the car sends one AND its setting is "ours"):
  * {{road}} (the bottom-centre road label) {{ccName}} {{ccDesc}} (the check-control message's name and description)
+ * {{ccHead}} (package X: our one-line message, the headline; a text widget with "ccLine": true draws it with its
+ * marker or hairline, "textY": its cell top in the box, and is what lets BMW's panel be covered: hud.js _ccOpen)
  * {{limitUnit}} {{limitSupp}} {{limitWarn}} {{nopassDist}} {{navDist}} {{navEta}} {{navMins}}.
  * Warnings: a text showing oil, coolant or boost (a {{oil}} / {{coolant}} / {{boost}} token, or a readout slot with that
  * sensor) flashes in the shift red while the value is over "warnOil" / "warnCoolant" (C) / "warnBoost" (bar); 0 = off.
@@ -278,7 +280,28 @@ const CC_ROLE = {
     green: [96, 220, 110, 255], white: 'fg', default: 'fg',
 };
 // settings of the bottom-row package that only change what a text shows or one uniform, so no rebuild is needed
-const ROW_KEYS = ['limitArc'];
+// (package X: "ccStyle", our message's look, A or B, is drawn inside the message's own text raster)
+const ROW_KEYS = ['limitArc', 'ccStyle'];
+// ---- package X (docs/strip/X-REPORT.md): the row's logic -------------------------------------------------------------
+// BMW's message panel is covered only once OUR text for that very message has been sent this long ago: the text, the
+// backdrop (WBBACK u_cc) and the road bar (nav_bg) are on three different connections to cluster-render, which says
+// nothing back, so "sent in an earlier tick, and this long ago" is the strongest "it is on the screen" we can know.
+const CC_SETTLE_MS = 150;
+// standby (P with the engine off) must hold this long, and so must leaving it, before the row changes hands: the row
+// is rebuilt each time, and a shifter moved through P or an engine stalling must not rebuild it twice in a second
+const STANDBY_MS = 1000;
+// Standby = BMW's own vehicle condition (VehicleCondition statusConditionVehicle, data().condition) WOHNEN, 5. NOT
+// "P with the engine off" (package P, 2026-11-16: photos 63 and 64 are P with the engine off and BMW draws its
+// NORMAL row; only 65 shows the standby row). That 65 is condition 5 (and 63 condition 7, PRUEFEN_ANALYSE_DIAGNOSE) is
+// a HYPOTHESIS: every new condition value is logged once ("bottom row: vehicle condition N") to confirm on the car.
+const COND_STANDBY = 5;
+// our message's two looks (the owner picks on the bench): A a severity marker + the headline, B a hairline above and a
+// coloured segment under the headline
+const CC_STYLE_KEY = 'ccStyle';
+// a time zone is believed only if it is a whole number of quarter hours within +-14 h (config.clock's 15-minute step
+// is a guess: anything else means the guess is wrong, and then the next source is used)
+const tzOk = (v) => typeof v === 'number' && isFinite(v) && v % 15 === 0 && Math.abs(v) <= 14 * 60;
+// ---- end package X ---------------------------------------------------------------------------------------------------
 // the car's position is used for sunrise / sunset only, and only while it is this fresh (a parked car sends nothing)
 const POS_STALE_MS = 6 * 3600 * 1000;
 // the one control for the whole of BMW's bottom row ("bottomRow": every item BMW's, or every item ours), and the
@@ -1050,6 +1073,15 @@ class HudApp {
                 }
                 return null;
             }
+            // package X: only a whole number of quarter hours within +-14 h is a time zone; anything else says the
+            // encoding guess (config.clock.factor / offsetBy) is wrong, so it is unknown and the next source is used
+            if (off !== null && !tzOk(off)) {
+                if (off !== this.tzRejected) {
+                    this.tzRejected = off;
+                    this.log.warn('clock: the car\'s offset decodes to ' + off + ' minutes, not a whole number of quarter hours within +-14 h: ignored (check app.json config.clock factor / offsetBy)');
+                }
+                return null;
+            }
             return off;
         }, (prev, out) => { if (isNum(prev) !== isNum(out) && this.client && this.client.ready) this._rebuild(); });
         watchRaw(this.config.ccm, 'ccShown', 'check-control', (v) => ccOf(this.config.ccm, v));
@@ -1112,7 +1144,19 @@ class HudApp {
             watchOne(cm, (v) => {
                 const m = ccMsgOf(cm, v);
                 this.ccMsg = m; this.ccMsgAt = Date.now();
-                this.ccShown = !!(m.name || m.desc);
+                // package X, the safety rule: a message we cannot READ still counts as a message showing. Unreadable:
+                // no name and no description, but a symbol or an id says one is there; or, once a struct has fit, a
+                // notification none of config.ccm's roots fits. Then BMW's panel opens (_ccOpen) and, since our text
+                // can never stand in for it, the row goes back to BMW's (the latch says why, once).
+                const readable = !!(m.name || m.desc);
+                const marked = (isNum(m.symbol) && m.symbol !== 0) || (isNum(m.id) && m.id !== 0 && !inList(cm.clearIds, m.id));
+                const fits = readable || m.symbol !== null || m.id !== null || m.type !== null;
+                this.ccUnread = !readable && (marked || (this.ccAny === true && !fits));
+                this.ccShown = readable || this.ccUnread;
+                if (this.ccUnread) {
+                    this._rowFail('info', 'a check-control message arrived that app.json config.ccm cannot read (' +
+                        (fits ? 'symbol ' + m.symbol + ', id ' + m.id + ', no name or description' : 'no root of the union fits') + ')');
+                }
                 // 2026-11-16: did our paths find ANYTHING in the car's struct? A struct that fits carries its id and
                 // its type even with no message on; one that does not gives all five back empty, and then the info
                 // field is not ours and BMW's panel stays open (_ccWired). Sticky, and no text ever leaves here.
@@ -1124,11 +1168,12 @@ class HudApp {
                 }
                 const key = (m.name ? 'name ' + m.name.length + ' chars' : 'no name') + ', ' +
                     (m.desc ? 'description ' + m.desc.length + ' chars' : 'no description') +
-                    ', colour ' + m.color + ', symbol ' + m.symbol + ', type ' + m.type;
+                    ', colour ' + m.color + ', symbol ' + m.symbol + ', id ' + m.id + ', type ' + m.type;   // package X: + the id (not personal)
                 if (key !== this.ccShape && this.ccLogs < 24) {    // lengths and enums only: never the text
                     this.ccShape = key; this.ccLogs++;
                     this.log.info('check-control message: ' + key);
                 }
+                this._ccPush();         // package X: BMW's panel opens in THIS event, not at the next tick
             });
         }
         // Several messages at once: the car cycles through its check-control list, so we do the same (the owner,
@@ -1152,6 +1197,7 @@ class HudApp {
                 this.ccItems = out.slice(0, 16);
                 const key = out.length + ' messages, name lengths ' + out.map((o) => o.name.length).join('/');
                 if (key !== this.ccListShape) { this.ccListShape = key; this.log.info('check-control list: ' + key); }
+                this._ccPush();         // package X: another message on show opens BMW's panel at once
             });
         }
         // Which frame of how many the stock cluster is showing (docs/G20-DESIGN-SPEC.md: it cycles numbered frames,
@@ -1166,6 +1212,7 @@ class HudApp {
                 this.ccFrame = { n: isNum(n) ? n : null, of: isNum(of) ? of : null, ids: ids };
                 const key = 'frame ' + this.ccFrame.n + ' of ' + this.ccFrame.of + ', ' + ids.length + ' ids';
                 if (key !== this.ccFrameShape) { this.ccFrameShape = key; this.log.info('check-control frames: ' + key); }
+                this._ccPush();         // package X: the car's next frame opens BMW's panel at once
             });
         }
         // The driver's own speed-limit settings (config.sla), SUBSCRIBE ONLY: app.json declares these fields "s", not
@@ -2341,6 +2388,7 @@ class HudApp {
             case 'nopassDist': { const s = this.sign; return s && isNum(s.npM) ? (s.npM >= 1000 ? (s.npM / 1000).toFixed(1) + ' km' : Math.round(s.npM) + ' m') : ''; }
             case 'ccName': return this._ccText('name');
             case 'ccDesc': return this._ccText('desc');
+            case 'ccHead': return this._ccText('head');      // package X: our one-line message, the headline
             case 'road': return this._roadText();
             case 'navDist': { const d = this.navDist || ''; return d ? d + (this.navUnit ? ' ' + this.navUnit : '') : ''; }
             case 'navEta': { const e = this.navEta; return e ? ('0' + e.h).slice(-2) + ':' + ('0' + e.m).slice(-2) : ''; }
@@ -2488,13 +2536,36 @@ class HudApp {
         const d = new Date(Date.now() + off * 60000);
         return { getHours: () => d.getUTCHours(), getMinutes: () => d.getUTCMinutes() };
     }
-    /** car3 I: minutes from UTC for our clock, or null (none known: the unit's own clock, UTC on the car): the "timeZone"
-     *  setting unless Automatic, then the car's time zone (config.clock, while it has sent one), then config.utcOffsetMinutes. */
+    /** car3 I: minutes from UTC for our clock, or null (none known: the unit's own clock, UTC on the car).
+     *  Package X (the owner, 2026-11-16: "the clock is always ours in all6WB, from the car's signals"): the car's own
+     *  time zone FIRST (config.clock), then the "timeZone" setting unless Automatic (retired on 2026-11-15, read if a
+     *  build still has it), then config.utcOffsetMinutes; each only if it is a whole number of quarter hours within
+     *  +-14 h (tzOk). */
     _tzMinutes() {
+        const s = this._tzSource();
+        return s ? s.min : null;
+    }
+    /** package X: { min, from } of the time zone in use, or null. `from`: what the log line names. */
+    _tzSource() {
+        if (tzOk(this.tzCar)) return { min: this.tzCar, from: 'the car (app.json config.clock)' };
         const tz = this.ctx.settings.item('timeZone') ? this.setting('timeZone') : TZ_AUTO;
-        if (isNum(tz) && tz !== TZ_AUTO) return tz;
-        if (isNum(this.tzCar)) return this.tzCar;
-        return isNum(this.config.utcOffsetMinutes) ? this.config.utcOffsetMinutes : null;
+        if (tz !== TZ_AUTO && tzOk(tz)) return { min: tz, from: 'the "timeZone" setting' };
+        if (tzOk(this.config.utcOffsetMinutes)) return { min: this.config.utcOffsetMinutes, from: 'app.json config.utcOffsetMinutes' };
+        return null;
+    }
+    /** package X: ONE line the owner can check against the car at a glance, logged whenever the source or the offset
+     *  changes: what our clock shows now, the offset and where it came from. */
+    _clockNote() {
+        const s = this._tzSource(), key = s ? s.from + '|' + s.min : 'none';
+        if (key === this.clockNoteKey) return;
+        this.clockNoteKey = key;
+        if (!s) {
+            this.log.info('clock: no time zone known (not from the car, the "timeZone" setting or app.json config.utcOffsetMinutes): in "all6WB" the bottom row stays BMW\'s until one is');
+            return;
+        }
+        const d = this._now(), pad = (n) => (n < 10 ? '0' : '') + n, a = Math.abs(s.min);
+        this.log.info('clock: ours shows ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ', UTC' + (s.min < 0 ? '-' : '+') +
+            pad(Math.floor(a / 60)) + ':' + pad(a % 60) + ' from ' + s.from + ' - it must read what the head unit\'s own clock reads');
     }
 
     _resolve(template) { return String(template).replace(/\{\{([a-zA-Z0-9:]+)\}\}/g, (_, t) => this._token(t)); }
@@ -2509,6 +2580,10 @@ class HudApp {
     _rebuildInner() {
         if (!this.client.ready) return; // the 'ready' handler calls us again
         this._rowCheck();               // bottom row: an element with no signal behind it goes back to BMW's
+        // package X: who draws the row in the layout being built (_rowSync rebuilds when that changes), and nothing of
+        // our message is on the screen until its new layer has been painted
+        this.rowBuiltOurs = this._rowWhy() === null;
+        this.ccDrawn = null;
         this._layerRefs().forEach((r) => r.c.drop(r.ref));
         this.placed = [];
         this.widgets.clear();
@@ -3203,14 +3278,64 @@ class HudApp {
      *  while it cannot, our text would be empty and BMW's own message is the only one there is. */
     _own(item) {
         if (OWN_ITEMS.indexOf(item) < 0) return false;
-        // the automatic way back to the stock cluster (the owner, 2026-11-15): an element whose signal is missing or
-        // unmapped, or whose drawing threw, is BMW's again until the app restarts, whatever the setting says.
-        // THIS STAYS FIRST: the latch wins over the switch, and the switch cannot clear the latch.
+        // package X (the owner, 2026-11-16, "fallback is all-or-nothing"): in a see-through layout the WHOLE row is
+        // ours or the whole row is BMW's - _rowWhy() says which and why. Per-item hand-back is gone: it stacked three
+        // texts on each other (ours, BMW's message, BMW's road label).
+        if (this._seeThrough(this._layoutName())) return this._rowWhy() === null;
+        // the opaque themes (unchanged): our backdrop covers BMW's row, the latch is per item, the switch is not asked
         if (this.rowFail && this.rowFail[item]) return false;
-        if (this.setting(ROW_KEY) !== ROW_OURS && this._seeThrough(this._layoutName())) return false;
         if (item === 'clock') return isNum(this._tzMinutes());   // car3 I: the setting, the car's zone (config.clock) or config
         if (item === 'info') return this._ccWired();             // 2026-11-16: only once the car's message can be read
         return true;
+    }
+
+    /** package X: why the bottom row of a see-through layout is BMW's now, or null while the whole row is ours.
+     *  In this order: the switch; the latch (something could not be drawn: until the app restarts); standby (P with
+     *  the engine off: always BMW's standby row, in both modes); waiting for a time zone (the clock is always ours, and
+     *  without a zone it would show the head unit's UTC); waiting for the car's check-control message to be read
+     *  once (until then we are blind to BMW's panel and must not cover it). The two waits are not latches: the row
+     *  comes in by itself once the zone or the message arrives (_rowSync rebuilds). */
+    _rowWhy() {
+        if (this.setting(ROW_KEY) !== ROW_OURS) return 'the switch says ' + JSON.stringify(this.setting(ROW_KEY));
+        const f = this.rowFail ? Object.keys(this.rowFail) : [];
+        if (f.length) return 'latched until the app restarts (' + f[0] + ': ' + ((this.rowFailWhy || {})[f[0]] || '?') + ')';
+        if (this.rowStandby) return 'standby (vehicle condition ' + COND_STANDBY + '): BMW\'s standby row';
+        if (!isNum(this._tzMinutes())) return 'waiting for a time zone for the clock';
+        if (!this._ccWired()) return 'waiting for the car\'s check-control message to be read once';
+        return null;
+    }
+
+    /** package X: BMW is showing its standby screen now: its vehicle condition is COND_STANDBY (WOHNEN). Raw, not
+     *  debounced (the sign window follows it at once; the row through _rowSync's debounce). */
+    _standbyNow() {
+        return this._data().condition === COND_STANDBY;
+    }
+
+    /** package X: once a tick, before the widgets: standby (debounced), the clock's log line, and a rebuild when the
+     *  row's owner changed since the layout was built (a zone or the first message arrived, standby came or went, a
+     *  latch fell), so every way in or out of "ours" takes the same path. Only in a see-through layout. */
+    _rowSync(now) {
+        const name = this._layoutName();
+        if (!this._seeThrough(name)) return;
+        const cond = this._data().condition, sb = this._standbyNow();
+        if (cond !== this.condLogged) {
+            this.condLogged = cond;
+            this.log.info('bottom row: vehicle condition ' + JSON.stringify(cond === undefined ? null : cond) +
+                (sb ? ' = standby (COND_STANDBY ' + COND_STANDBY + '): BMW\'s standby row' : ''));
+        }
+        if (sb === !!this.rowStandby) this.rowStandbyAt = 0;
+        else if (!this.rowStandbyAt) this.rowStandbyAt = now;
+        else if (now - this.rowStandbyAt >= STANDBY_MS) {
+            this.rowStandby = sb; this.rowStandbyAt = 0;
+            this.log.info('bottom row: ' + (sb ? 'standby: BMW\'s standby row' : 'out of standby'));
+        }
+        if (this.setting(ROW_KEY) === ROW_OURS) this._clockNote();
+        const why = this._rowWhy();
+        if (why !== this.rowWhyLogged) {
+            this.rowWhyLogged = why;
+            this.log.info('bottom row: ' + (why === null ? 'all ours' : 'all BMW\'s - ' + why));
+        }
+        if ((why === null) !== this.rowBuiltOurs && this.activeName === name) this._rebuild();
     }
 
     /** `s` cut to fit the widget's box, with "..." when it had to be cut. Never throws. A GUESS: no photo shows how
@@ -3240,8 +3365,16 @@ class HudApp {
     _rowFail(item, why) {
         if (!this.rowFail) this.rowFail = {};
         if (this.rowFail[item]) return;
+        // package X: in a see-through layout one failure takes the WHOLE row back (_rowWhy), and that is logged ONCE,
+        // with the first reason; a later failure is only recorded (the probe and the status line show it)
+        const first = !Object.keys(this.rowFail).length;
         this.rowFail[item] = true;
-        this.log.warn('bottom row: ' + item + ' is BMW\'s again (' + why + ')');
+        (this.rowFailWhy = this.rowFailWhy || {})[item] = why;
+        if (first) {
+            this.log.warn(this._seeThrough(this._layoutName())
+                ? 'bottom row: the whole row is BMW\'s again until the app restarts - ' + item + ': ' + why
+                : 'bottom row: ' + item + ' is BMW\'s again (' + why + ')');
+        }
         this._guard('row fallback', () => { this._status(); if (this.client && this.client.ready) this._rebuild(); });
     }
 
@@ -3250,13 +3383,13 @@ class HudApp {
      *  setting, so only an element the layout showing really asks us to draw can latch: in an opaque theme the three
      *  are not drawn at all (nothing in those layouts reads them), so nothing latches there. */
     _rowCheck() {
-        if (!this._seeThrough(this._layoutName())) return;
+        // package X: asked off the switch, not _own() (which is false while the row waits for a zone or a message):
+        // a build with a field missing can never draw the row, so it latches - the whole row - and says why once
+        if (!this._seeThrough(this._layoutName()) || this.setting(ROW_KEY) !== ROW_OURS) return;
         const named = (s) => !!(s && s.iface && s.field);
-        if (this._own('sign') && !named(this.config.sign) && !this._signWired()) this._rowFail('sign', 'no speed-limit field in app.json config.sign');
-        // the info field reads as BMW's until the car's message has been read (_ccWired), so this one asks the
-        // switch and not _own(): a build with no message field at all still says so once, in the log
-        if (this.setting(ROW_KEY) === ROW_OURS && !this._ccNamed()) this._rowFail('info', 'app.json config.ccm names no message field');
-        if (this._own('nav') && !named(this.config.road) && !(this.config.nav && this.config.nav.iface)) this._rowFail('nav', 'app.json config.road names no field');
+        if (!named(this.config.sign) && !this._signWired()) this._rowFail('sign', 'no speed-limit field in app.json config.sign');
+        if (!this._ccNamed()) this._rowFail('info', 'app.json config.ccm names no message field');
+        if (!named(this.config.road) && !(this.config.nav && this.config.nav.iface)) this._rowFail('nav', 'app.json config.road names no field');
     }
 
     /** WBBACK's black patches over BMW's bottom-row items we draw ourselves ("patches": [{ rect: [x0, y0, x1, y1] panel
@@ -3315,8 +3448,43 @@ class HudApp {
      *  its messages at all and so must not cover a panel the cluster may be writing in. In the opaque themes our
      *  background covers BMW's cluster whole, so a window there would be a hole in the theme and nothing else. */
     _ccOpen() {
+        // package X, THE SAFETY RULE (the owner, 2026-11-16: "a BMW warning is never hidden unless our own text for it
+        // is on the screen in the same frame"). While the row is OURS, BMW's panel is covered only once our text for
+        // the very message the car says is showing has been sent, CC_SETTLE_MS ago, in an earlier tick (_ccOnScreen).
+        // Every other case - the message just arrived, it changed, it cannot be read (ccUnread), our text has a
+        // character the font lacks, drawing it threw - leaves BMW's panel open: the last three latch the row too.
+        if (this._seeThrough(this._layoutName()) && this._rowWhy() === null) return this._cc() === true && !this._ccOnScreen();
         if (this._cc() === true) return true;
         return this._ccNamed() && !this._ccWired() && this._seeThrough(this._layoutName());
+    }
+
+    /** package X: our own text for the message the car says is showing has been on its way to the screen for at least
+     *  CC_SETTLE_MS (sent in an earlier tick: _ccPainted). Keyed on the headline itself, so a new message, or the same
+     *  slot with other words, opens BMW's panel again until ours has caught up. */
+    _ccOnScreen() {
+        const d = this.ccDrawn, want = this._ccText('head');
+        return !!(d && want && d.key === want && Date.now() - d.at >= CC_SETTLE_MS);
+    }
+
+    /** package X: BMW's panel state sent NOW, from the signal handler, not at the next tick: a message that arrives
+     *  between two ticks would otherwise stay under our black for up to TICK_MS with nothing of ours over it (the
+     *  bench's audit caught exactly that). Opening is what matters here; covering still waits for _ccOnScreen. */
+    _ccPush() {
+        if (!this.client || !this.client.ready || !this.widgets) return;
+        this._guard('message panel', () => this.widgets.forEach((x) => {
+            if (!x.w || !x.ref) return;
+            if (x.w.type === 'wbback') this._wbCcSend(x);
+            else if (x.w.type === 'fill' && typeof x.w.holeWhen === 'string' && x.w.holeWhen.indexOf('cc:') >= 0) {
+                const h = this._hole(x.w), key = h.join(',');
+                if (key !== x.last) { x.last = key; x.c.uniform(x.ref, 'u_hole', h); }
+            }
+        }));
+    }
+
+    /** package X: called right after our message line's pixels were handed to the connection. '' clears. */
+    _ccPainted(s) {
+        if (!s) { this.ccDrawn = null; return; }
+        if (!this.ccDrawn || this.ccDrawn.key !== s) this.ccDrawn = { key: s, at: Date.now() };
     }
 
     /* ---- bottom row (docs/BOTTOM-ROW-PACKAGE.md) ---- */
@@ -3384,6 +3552,8 @@ class HudApp {
     _ccText(part) {
         if (!this._own('info') || this._cc() !== true) return '';
         const m = this._ccNow();
+        // package X: "head", our one line - the headline (the name; the description only when there is no name)
+        if (part === 'head') return String(m.name || m.desc || '').replace(/\s+/g, ' ').trim();
         return String((part === 'desc' ? m.desc : m.name) || '');
     }
 
@@ -3399,6 +3569,94 @@ class HudApp {
         return [Math.round(role[0] * NIGHT_DIM), Math.round(role[1] * NIGHT_DIM), Math.round(role[2] * NIGHT_DIM), role[3]];
     }
 
+    /* ---- package X (docs/strip/X-REPORT.md): our message, one line in the road label's slot ---- */
+
+    /** "ccStyle": "A" (a severity marker, then the headline; the default) or "B" (a hairline above the headline and a
+     *  segment in the severity's colour under it, no marker). The owner picks on the bench. */
+    _ccStyle() {
+        const v = this.ctx.settings.item(CC_STYLE_KEY) ? this.setting(CC_STYLE_KEY) : 'A';
+        return v === 'B' ? 'B' : 'A';
+    }
+
+    /** The message's severity: "warn" (cCColor red, yellow or orange: a warning triangle) or "info" (white, green,
+     *  default or none: an "i"), and its colour (CC_ROLE, only dimmed at night, never recoloured). A GUESS how BMW
+     *  maps its colours to its own marker: no stock photo pairs a known cCColor with the marker it showed. */
+    _ccSeverity() {
+        const c = this._ccNow().color;
+        return { name: c === 'red' || c === 'yellow' || c === 'orange' ? 'warn' : 'info', rgba: color(this.theme, this._ccRole() || 'fg') };
+    }
+
+    /** Our message line as straight RGBA, w.w x w.h: the headline in w.font (white: the owner, 2026-11-15), its cell
+     *  top at w.textY in the box, centred on the box together with what style puts beside it, and cut with "..." to
+     *  what is left of the box. Never logs the text. Shapes are distance functions, anti-aliased over one px. */
+    _ccLinePaint(w, s, style, sev) {
+        const W = w.w, H = w.h, fm = textRaster.loadFont(w.font).metrics;
+        const top = isNum(w.textY) ? w.textY : 0, base = top + fm.baseline;
+        const capH = Math.round(fm.size * 0.716), capTop = base - capH;         // Arimo's cap height, 0.716 em
+        const mH = style === 'A' ? Math.round(capH * 1.3) : 0;                   // the marker: a little taller than a capital
+        const mW = !mH ? 0 : sev.name === 'warn' ? Math.round(mH * 1.15) : mH;
+        const gap = mH ? Math.round(capH * 0.6) : 0, pad = 8;
+        let t = String(s);
+        const fits = (v) => textRaster.measure(v, w.font, w.spacing) <= W - 2 * pad - mW - gap;
+        if (!fits(t)) {
+            while (t.length > 1 && !fits(t + '...')) t = t.slice(0, -1);
+            t = t.replace(/[\s,.;:/-]+$/, '') + '...';
+        }
+        const tw = textRaster.measure(t, w.font, w.spacing);
+        this.ccFit = { chars: t.length, cut: t !== String(s), width: tw };       // lengths only (the bench's probe)
+        const x0 = Math.round((W - (mW + gap + tw)) / 2), tx = x0 + mW + gap;
+        const fg = color(this.theme, w.color || 'fg');
+        const out = t ? textRaster.drawText(W, H, t, { font: w.font, offsetY: top, color: fg, align: 'left', x: tx, spacing: w.spacing })
+            : Buffer.alloc(W * H * 4, 0);
+        // straight-alpha "over" of one colour with coverage k at (x, y)
+        const put = (x, y, rgba, k) => {
+            if (x < 0 || y < 0 || x >= W || y >= H || k <= 0) return;
+            const o = (y * W + x) * 4, sa = Math.min(1, k) * rgba[3] / 255, da = out[o + 3] / 255, a = sa + da * (1 - sa);
+            if (a <= 0) return;
+            for (let j = 0; j < 3; j++) out[o + j] = Math.round((rgba[j] * sa + out[o + j] * da * (1 - sa)) / a);
+            out[o + 3] = Math.round(a * 255);
+        };
+        const cov = (d) => Math.max(0, Math.min(1, 0.5 - d));                    // signed distance (px) -> coverage
+        if (style === 'A' && mH) {
+            const cx = x0 + mW / 2, cy = capTop + capH / 2;
+            const seg = (px, py, ax, ay, bx, by) => {
+                const pax = px - ax, pay = py - ay, bax = bx - ax, bay = by - ay;
+                const h = Math.max(0, Math.min(1, (pax * bax + pay * bay) / (bax * bax + bay * bay)));
+                return Math.hypot(pax - bax * h, pay - bay * h);
+            };
+            for (let y = Math.floor(cy - mH / 2) - 1; y <= Math.ceil(cy + mH / 2) + 1; y++) {
+                for (let x = Math.floor(x0) - 1; x <= Math.ceil(x0 + mW) + 1; x++) {
+                    const px = x + 0.5, py = y + 0.5;
+                    let body, ink;
+                    if (sev.name === 'warn') {
+                        // a warning triangle (ISO 2575's shape), its corners rounded by 1.5 px, a "!" knocked out of it
+                        const r = 1.5, ax = cx, ay = cy - mH / 2 + r, bx = x0 + r * 1.2, by = cy + mH / 2 - r, qx = x0 + mW - r * 1.2;
+                        const e = (x1, y1, x2, y2) => { const nx = y2 - y1, ny = x1 - x2, l = Math.hypot(nx, ny); return ((px - x1) * nx + (py - y1) * ny) / l; };
+                        body = Math.max(e(ax, ay, qx, by), e(qx, by, bx, by), e(bx, by, ax, ay)) - r;
+                        const sw = Math.max(1.2, mW * 0.07);
+                        ink = Math.min(seg(px, py, cx, cy - mH * 0.12, cx, cy + mH * 0.17) - sw, Math.hypot(px - cx, py - (cy + mH * 0.33)) - sw * 1.1);
+                    } else {
+                        // an "i" knocked out of a disc
+                        const R = mH / 2, sw = Math.max(1.2, R * 0.16);
+                        body = Math.hypot(px - cx, py - cy) - R;
+                        ink = Math.min(seg(px, py, cx, cy - R * 0.08, cx, cy + R * 0.55) - sw, Math.hypot(px - cx, py - (cy - R * 0.45)) - sw * 1.15);
+                    }
+                    put(x, y, sev.rgba, cov(body) * (1 - cov(ink)));
+                }
+            }
+        }
+        if (style === 'B' && t) {
+            // a hairline above, past the headline's ends by 48 px and fading out over its last 32, in a dim foreground;
+            // under the headline a 3 px segment in the severity's colour, as long as the headline
+            const hy = Math.round(capTop - capH * 0.6), x1 = Math.max(0, tx - 48), x2 = Math.min(W, tx + tw + 48);
+            for (let x = x1; x < x2; x++) put(x, hy, fg, 0.55 * Math.min(1, (x - x1 + 0.5) / 32, (x2 - x - 0.5) / 32));
+            const sy = base + Math.max(4, Math.round(capH * 0.3));
+            for (let y = sy; y < sy + 3; y++) for (let x = tx; x < tx + tw; x++) put(x, y, sev.rgba, 1);
+        }
+        return out;
+    }
+    /* ---- end package X ---- */
+
     /** The road label: the car's own road description, else the street of its position (config.nav.here), else ''.
      *  Never logged. The demo drive shows a made-up street so the bench can be looked at. */
     _roadText() {
@@ -3412,12 +3670,17 @@ class HudApp {
     /** u_cc: the bg widget's "cc" box [x0, y0, x1, y1] (panel px; BMW's check-control message panel) see-through
      *  while BMW's own message is the one on show (_ccOpen: the car says a message shows, or we cannot read its
      *  messages at all), else none; sent when it changes.
-     *  Bottom row: while the info field is OURS ("bottomRow" all6WB) and the layout gives a "ccSym" box, only that box opens -
-     *  the car keeps drawing its own symbol and animation there and we draw the text around it. */
+     *  Package X: "ccSym" (BMW's symbol column beside our text) is gone; "ccMark" (BMW's marker) takes the box while
+     *  the panel is shut. */
     _wbCcSend(x) {
         const w = x.w, four = (a) => Array.isArray(a) && a.length === 4;
-        const box = this._own('info') && four(w.ccSym) ? w.ccSym : w.cc;
-        const b = four(box) && this._ccOpen() ? box : null;
+        // package X: no symbol column any more ("ccSym"; the owner, 2026-11-16: our message is our own design, for now
+        // without a window for BMW's symbol): BMW's whole panel opens (_ccOpen), or nothing of it does. While it is
+        // shut, the one box WBBACK has goes to BMW's marker right of the panel ("ccMark": none / warning triangle /
+        // "i" for stored messages), which must stay visible in both modes while no signal of ours stands in for it.
+        // u_cc is ONE box, so while the panel is open the marker is under the collar again (docs/strip/X-REPORT.md;
+        // package M's mask lifts that).
+        const b = four(w.cc) && this._ccOpen() ? w.cc : four(w.ccMark) ? w.ccMark : null;
         const v = b ? [b[0] - w.x, b[1] - w.y, b[2] - w.x, b[3] - w.y] : [0, 0, 0, 0], key = v.join(',');
         if (key === x.ccKey) return;
         x.ccKey = key;
@@ -3438,6 +3701,13 @@ class HudApp {
     _ownNote() {
         const raw = (k) => { const v = this.ctx.settings.get(k); return v === undefined ? 'unset' : JSON.stringify(v); };
         const seen = this._seeThrough(this._layoutName());
+        // package X: in a see-through layout the row is one thing, so the note says that and why
+        if (seen) {
+            const why = this._rowWhy();
+            return 'bottom row: ' + (why === null ? 'all ours' : 'all BMW\'s - ' + why) + ' (' + ROW_KEY + ' ' + raw(ROW_KEY) +
+                ', message look ' + this._ccStyle() + '); mode label ' + (this.setting('modeLabel') === false ? 'off' : this.driveMode ? 'on' : 'on, empty: no drive mode from the car') +
+                ' (modeLabel ' + raw('modeLabel') + ')';
+        }
         const one = (item) => item + ' ' + (this._own(item) ? 'ours' : "BMW's") +
             (this.rowFail && this.rowFail[item] ? ' (gave itself back)'
                 : item === 'clock' && !isNum(this._tzMinutes()) ? ' (no time zone)'
@@ -3483,6 +3753,7 @@ class HudApp {
             const b = this._boost();
             if (isNum(b) && (!isNum(this.boostPeak) || b > this.boostPeak)) this.boostPeak = b;
             if (!this.client.ready) return;
+            this._guard('bottom row', () => this._rowSync(now));     // package X: standby, the clock line, the row's owner
             // shift light: blink the whole bar at 8 Hz once the rpm reaches the redline
             const rpm = this._raw('rpm');
             const flashing = isNum(rpm) && rpm >= this._redline() - 150;
@@ -3794,6 +4065,17 @@ class HudApp {
                 const miss = this._missingGlyphs(s, w.font);
                 if (miss) { this._rowFail(rowOf, 'the font "' + w.font + '" has no glyph for ' + miss + ' of the car\'s text'); return; }
             }
+            // package X: our message line - the marker or the hairline and segment AND the headline in ONE raster, so
+            // "our text is on the screen" is one paint; only after it may BMW's panel be covered (_ccPainted, _ccOpen)
+            if (w.ccLine) {
+                const style = this._ccStyle(), sev = this._ccSeverity();
+                const key = s + '|' + style + '|' + sev.name + '|' + sev.rgba.join(',');
+                if (!force && key === x.last) return;
+                x.last = key; x.lastPaint = now;
+                this._blitDiff(x, this._ccLinePaint(w, s, style, sev));
+                this._ccPainted(s);
+                return;
+            }
             // a road name or a message longer than its box is cut with "..." rather than clipped mid-letter.
             // A GUESS: no photo in docs/G20-DESIGN-SPEC.md shows the stock cluster truncating (§8), so how BMW
             // does it is unknown - this is the plainest thing that stays readable.
@@ -4008,7 +4290,9 @@ class HudApp {
                 // 2026-11-14: closed too while the car stands in P with the engine off (BMW's standby screen, "Total
                 // ... km"): BMW draws no sign then, and the window showed a bar of its bottom line (y ~645) that the
                 // sign otherwise covers. An auto start/stop stop is in D, so BMW's sign still shows at the lights.
-                const rpm = this._raw('rpm'), parked = this._data().stage === 'P' && !(isNum(rpm) && rpm >= 150);
+                // package X (package P's photos 63, 64: P with the engine off and BMW still draws its sign): closed in
+                // BMW's STANDBY only (vehicle condition COND_STANDBY), not in every "P, engine off"
+                const parked = this._standbyNow();
                 const m = this._own('sign') || parked ? 3 : 1;
                 if (force || m !== x.cutMode) { x.cutMode = m; x.c.uniform(x.ref, 'u_cut', this._cutVec(w, m)); }
             }
