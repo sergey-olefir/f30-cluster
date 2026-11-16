@@ -1,0 +1,137 @@
+{
+ "zone": [
+  0,
+  540,
+  700,
+  720
+ ],
+ "coords": "continuous panel px; alpha 1 = opaque",
+ "shapes": [
+  {
+   "id": "assist.speed_limit",
+   "channel": [
+    "bmw",
+    "bmw_msg"
+   ],
+   "kind": "hole",
+   "circle": [
+    538.45,
+    621.2,
+    41.8
+   ],
+   "feather_in_px": 0.3,
+   "feather_out_px": 0.3,
+   "reason": "BMW's sign shows whole; its own black moat (red edge r 40.96 -> the rail's cut ends r 42.45) takes the edge, so the rail stubs stay under black and no red is lost on any side",
+   "evidence": "ring r 40.91-41.22 on 61-64, 66, 67 (68 40.34, under-exposed); rail ends r 42.15-42.82 on 60-68; centre (538.44, 621.29) on 60 straight off our grid, 538.2-538.7 / 620.8-621.3 on 61, 63, 64, 67, 68",
+   "clearance": {
+    "speed readout (assist.speed_foot, covered)": 22.6,
+    "rear belts": 15.6,
+    "driver belt": 36.5,
+    "moat either side of the edge": 0.75,
+    "centre uncertainty": 0.3
+   }
+  },
+  {
+   "id": "bottom.range",
+   "channel": [
+    "bmw",
+    "bmw_msg",
+    "standby"
+   ],
+   "kind": "hole",
+   "polygon": null,
+   "rect": [
+    131.75,
+    663.25,
+    331.0,
+    701.5
+   ],
+   "corner_r": 3,
+   "feather_in_px": 0.5,
+   "feather_out_px": 0.5,
+   "reason": "pump pictogram + digits + unit; hard edge: BMW black on both sides of it",
+   "evidence": "ink [133.75, 665.25, 304.5, 699.5] over 60-68; unit stays at x 262.5-263.75 for every 3-digit string; a 4th digit adds one advance (24.4 px) to the right if the field is left-anchored",
+   "clearance": {
+    "clock": 37.0,
+    "speedo foot (covered) above": 11.0,
+    "fuel mini foot (covered)": 12.0
+   }
+  },
+  {
+   "id": "bottom.clock",
+   "channel": [
+    "bmw",
+    "bmw_msg",
+    "standby"
+   ],
+   "kind": "hole",
+   "rect": [
+    341.5,
+    663.25,
+    455.5,
+    701.5
+   ],
+   "corner_r": 3,
+   "feather_in_px": 0.5,
+   "feather_out_px": 0.5,
+   "reason": "HH:MM in tabular cells; the colon stays at x 392.75-402.75 for every time seen",
+   "evidence": "ink [345.25, 665.25, 453.5, 699.5] over 60-68; cells 24.4 px; first cell from x ~343.9",
+   "clearance": {
+    "range (4-digit worst case)": 10.5,
+    "speed readout (covered) above": 51.0,
+    "speedo's foot curve (covered) above": 10.8
+   }
+  },
+  {
+   "id": "belt_group",
+   "channel": [
+    "bmw",
+    "bmw_msg",
+    "ours",
+    "standby"
+   ],
+   "kind": "hole",
+   "polygon": [
+    [
+     497.5,
+     674.75
+    ],
+    [
+     587.0,
+     674.75
+    ],
+    [
+     587.0,
+     661.25
+    ],
+    [
+     683.25,
+     661.25
+    ],
+    [
+     683.25,
+     720.0
+    ],
+    [
+     497.5,
+     720.0
+    ]
+   ],
+   "feather_in_px": 0.0,
+   "feather_out_px": 0.0,
+   "reason": "SAFETY: the whole group, every lamp, plus 3 px; nothing of ours inside, ever, in any state",
+   "evidence": "rear [500.5, 677.75, 580.25, 715.25], driver [590.0, 664.5, 628.75, 715.25], airbag [632.75, 664.25, 684.25, 715.5] (union of 62, 63, 64, 67; 66 reads 2-3 px right: its model)",
+   "clearance": {
+    "sign's opaque ring": 15.6,
+    "today's CC_TOP foot (must not reach y > 661.25 over x 587-683)": 0
+   }
+  }
+ ],
+ "channels": {
+  "ours": "all6WB, row healthy: everything in zone L is opaque except the belt group: BMW's range, clock and sign, the speed readout, the rail and every dial remnant are covered (we draw range, clock, sign ourselves)",
+  "bmw": "allG20, or all6WB fallen back (decision 1.5), and P with the engine off (decision 1.6 + package H: BMW draws its full row there, so the sign hole stays OPEN - today hud.js closes it)",
+  "bmw_msg": "zone L is the same as bmw (the panel starts in zone C; package ZC owns x >= 690)",
+  "standby": "BMW's real standby (65): range, clock, belts; no sign (the rail runs straight through the sign's seat there, so the sign hole must be shut and the rail covered)"
+ },
+ "provisional": "positions on ZL's local models of 60-68 (tools/strip/ZL); R's strip models put the sign 0.4-1.3 px left / 0.3-1.3 px lower - see the report before baking"
+}
