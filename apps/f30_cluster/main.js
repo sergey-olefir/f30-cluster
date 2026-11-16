@@ -14,8 +14,8 @@ const Menu = require('./menu');
 const Gallery = require('./gallery');
 
 const TAGS = {
-    wb_comfort: 'white dials', wb_dials: 'white dials, G20 round them', g20_comfort: 'stock G20 look',
-    wb_sport: 'red glow', wb_sport_dials: 'red glow, G20 round them', wb_eco: 'blue glow', f30: 'basic',
+    wb_comfort: 'white dials', wb_dials: 'white dials, G20 round them',
+    wb_sport: 'red glow', wb_sport_dials: 'red glow, G20 round them', wb_eco: 'blue glow',
 };
 
 // ---- one switch (docs/ONE-SWITCH-DONE.md): moving the settings saved by 0.7.15 and before, ONCE ------------------
