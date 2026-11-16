@@ -1,7 +1,7 @@
 """Fit the wing centreline |v|(u) = vt - s*(u - 1) + c*exp(-(u - 0.78)/lam) to 03's four wings (mirrored into the
 upper-left frame), plus width / level tables. Prints the result; params.py holds the adopted numbers."""
-import json, itertools, numpy as np
-d = json.load(open("~/projects/f30-cluster/bake/work/C8-sport/measure_wings.json"))
+import json, itertools, numpy as np, os
+d = json.load(open(os.path.expanduser("~/projects/f30-cluster/bake/work/C8-sport/measure_wings.json")))
 for stem in ("03_three-modes_photo_bimmerstop", "02_three-modes_clean-render"):
     U, V, P, F = [], [], [], []
     for k, pts in d[stem]["wings"].items():

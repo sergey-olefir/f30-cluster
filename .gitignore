@@ -9,6 +9,8 @@ __pycache__/
 # agent worktrees and local tool state
 .claude/
 
-# third-party reference photos (not ours to publish), and work-in-progress bake output
-reference/
-bake/work/
+# third-party reference photos (not ours to publish), and work-in-progress bake output.
+# No trailing slash: agent worktrees symlink both from the main checkout, and a pattern ending in "/"
+# matches only a real directory, never a symlink, so the photos would show as untracked there.
+reference
+bake/work

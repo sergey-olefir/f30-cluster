@@ -1081,7 +1081,7 @@
    "edge_px_err": 2.924,
    "ref": "bake/work/C8-eco/rect/03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03",
    "roi": [
-    "mask:~/projects/f30-cluster/bake/work/C8-eco/roi_stack_tacho.png"
+    "mask:bake/work/C8-eco/roi_stack_tacho.png"
    ],
    "sheet": "bake/work/C8-eco/qc_stack-tacho-merged__03_three-modes_photo_bimmerstop.eco.C2.rc-tacho-band-03.png"
   },

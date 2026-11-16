@@ -3,7 +3,7 @@ after a Gaussian PSF (the photo's blur). Prints the best params; params.py holds
 import sys, os, json, itertools, numpy as np, cv2
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from common import geom
-W = "~/projects/f30-cluster/bake/work/rect/"
+W = os.path.expanduser("~/projects/f30-cluster/bake/work/rect/")
 def prof(stem, C, sectors):
     rgb = cv2.imread(W + stem + ".sport.%s.png" % C)[..., ::-1].astype(float)
     bits = cv2.imread(W + stem + ".sport.%s.maskbits.png" % C, 0)

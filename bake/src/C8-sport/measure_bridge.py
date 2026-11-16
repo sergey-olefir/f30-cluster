@@ -1,6 +1,6 @@
-import json, numpy as np, cv2
-W = "~/projects/f30-cluster/bake/work/rect/"
-REFS = json.load(open("~/projects/f30-cluster/bake/manifest/refs.json"))["images"]
+import json, numpy as np, cv2, os
+W = os.path.expanduser("~/projects/f30-cluster/bake/work/rect/")
+REFS = json.load(open(os.path.expanduser("~/projects/f30-cluster/bake/manifest/refs.json")))["images"]
 R = 335.0
 for stem in ("03_three-modes_photo_bimmerstop", "01_three-modes_small", "02_three-modes_clean-render"):
     rgb = cv2.imread(W + stem + ".sport.PANEL.png")[..., ::-1].astype(float)

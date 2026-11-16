@@ -51,7 +51,7 @@ The headless Chrome used its own profile, DevTools 9330, SwiftShader.
 
 ### 1.4 The big speed readouts on the GPU (`"gpu": true` on a text widget)
 
-- **The evidence that `atext` has drawn on the car.** Photo 10 (`reference/g20/10_grid_over-stock.jpg`) was taken on the car with the calibration grid layout (`grid.json`). It shows our atext widget reading **"ATLAS 14:29 950"**. The crop is at x 700 to 1350 and y 780 to 920 of the photo. `docs/OVERLAY-PHOTO-PROTOCOL.md` (photo 10 row) and `design/overlay/g20_comfort.json` (photo 10 entry: "ATLAS 14:29 950") describe the same picture. **So the conversion was done.**
+- **The evidence that `atext` has drawn on the car.** Photo 10 (`reference/g20/10_grid_over-stock.jpg`) was taken on the car with the calibration grid layout (`grid.json`). It shows our atext widget reading **"ATLAS", a clock and "950"**. The crop is at x 700 to 1350 and y 780 to 920 of the photo. `docs/OVERLAY-PHOTO-PROTOCOL.md` (photo 10 row) and `design/overlay/g20_comfort.json` (photo 10 entry: "ATLAS 14:29 950") describe the same picture. **So the conversion was done.**
 - **What `"gpu": true` does.** On a text widget it makes the engine (`_gpuTexts`, run on the shown widgets at each rebuild) draw that text with the existing ATEXT shader, unchanged, and an R8 atlas.
 - **Why it is pixel-exact by construction:**
   - In both fonts every figure has one advance, and its ink stays inside it (measured).

@@ -1,7 +1,7 @@
 """Measure the Sport wings and bridge in the rectified PANEL crops (6WB layout, R units of the nearer dial)."""
 import sys, os, json, numpy as np, cv2
-W = "~/projects/f30-cluster/bake/work/rect/"
-REFS = json.load(open("~/projects/f30-cluster/bake/manifest/refs.json"))["images"]
+W = os.path.expanduser("~/projects/f30-cluster/bake/work/rect/")
+REFS = json.load(open(os.path.expanduser("~/projects/f30-cluster/bake/manifest/refs.json")))["images"]
 R = 335.0
 def load(stem):
     rgb = cv2.imread(W + stem + ".sport.PANEL.png")[..., ::-1].astype(float)
@@ -52,7 +52,7 @@ for stem in sys.argv[1:]:
         br["t%.2f" % t] = prof
     res["bridge_red_minus_green"] = br
     out[stem] = res
-json.dump(out, open("~/projects/f30-cluster/bake/work/C8-sport/measure_mid.json", "w"), indent=0)
+json.dump(out, open(os.path.expanduser("~/projects/f30-cluster/bake/work/C8-sport/measure_mid.json"), "w"), indent=0)
 for stem, res in out.items():
     print(stem, res["dial_centres"])
     for k in ("L_upper", "L_lower", "R_upper", "R_lower"):

@@ -1,6 +1,6 @@
-import cv2, numpy as np, json
+import cv2, numpy as np, json, os
 R=70.0
-RECT='~/projects/f30-cluster/bake/work/rect/'
+RECT=os.path.expanduser('~/projects/f30-cluster/bake/work/rect/')
 def unwrap(base, cx, cy, dA=0.25, nr=424):
     im=cv2.imread(RECT+base+'.png').astype(np.float32); m=json.load(open(RECT+base+'.json'))
     x0,y0=m['box'][0],m['box'][1]; k=im.shape[0]/m['box'][3]

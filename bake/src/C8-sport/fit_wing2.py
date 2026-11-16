@@ -1,5 +1,5 @@
-import json, itertools, numpy as np
-d = json.load(open("~/projects/f30-cluster/bake/work/C8-sport/measure_wings.json"))
+import json, itertools, numpy as np, os
+d = json.load(open(os.path.expanduser("~/projects/f30-cluster/bake/work/C8-sport/measure_wings.json")))
 stem = "03_three-modes_photo_bimmerstop"
 U, V, S = [], [], []
 for k, pts in d[stem]["wings"].items():

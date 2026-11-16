@@ -1,7 +1,7 @@
 import sys, os, json, numpy as np, cv2
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from common import geom
-W = "~/projects/f30-cluster/bake/work/rect/"
+W = os.path.expanduser("~/projects/f30-cluster/bake/work/rect/")
 def load(base):
     m = json.load(open(W+base+".json")); rgb = cv2.imread(W+base+".png")[..., ::-1].astype(float)
     bits = cv2.imread(W+base+".maskbits.png", 0)

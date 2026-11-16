@@ -81,7 +81,7 @@ def main():
     ap.add_argument('--measured', default=os.path.join(ROOT, 'design', 'f30-font', 'measured.json'))
     ap.add_argument('--out', default=None)
     ap.add_argument('--photo-out', default=None)
-    ap.add_argument('--ref-root', default='~/projects/f30-cluster',
+    ap.add_argument('--ref-root', default=os.path.expanduser('~/projects/f30-cluster'),
                     help='checkout that actually has reference/ (the photo sheets need it)')
     a = ap.parse_args()
 
