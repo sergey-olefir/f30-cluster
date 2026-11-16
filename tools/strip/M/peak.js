@@ -20,7 +20,8 @@ const post = (url, body) => fetch(BASE + url, { method: 'POST', headers: { 'cont
 const set = (k, v) => { const it = spec.settings.find((s) => s.key === k); return post('/click', { id: 'SET_' + k.toUpperCase(), row: it.options.map((o) => o[0]).indexOf(v) }); };
 const click = (id) => post('/click', { id });
 const scene = (s) => post('/fake', { scene: s });
-const drive = (stage, rpm) => post('/signals', { mode: 'manual', values: { stage, rpm, speed: stage === 'D' ? 50 : 0 } });
+// (strip integration: standby is VehicleCondition 5 held 1 s, package X's COND_STANDBY, not "P with the engine off")
+const drive = (stage, rpm, condition) => post('/signals', { mode: 'manual', values: Object.assign({ stage, rpm, speed: stage === 'D' ? 50 : 0 }, condition === undefined ? {} : { condition }) });
 
 let phase = 'start';
 const peaks = {};
@@ -58,11 +59,14 @@ function listen() {
     const step = async (name, fn, wait) => { phase = name; await fn(); await sleep(wait || 2500); };
     await step('allG20', async () => { await drive('D', 1500); await set('bottomRow', 'allG20'); });
     await step('allG20 + message', () => scene('cc-red'));
-    await step('allG20 standby', () => drive('P', 0));
+    await step('allG20, P engine off (photo 63)', () => drive('P', 0, 7));
+    await step('allG20 standby', () => drive('P', 0, 5), 3000);
     await step('back to D', async () => { await drive('D', 1500); await scene('cc-clear'); });
     await step('all6WB (unread)', () => set('bottomRow', 'all6WB'), 3500);
     await step('all6WB, clock + message read', async () => { await scene('clock-plus2'); await scene('cc-red'); }, 3500);
     await step('all6WB, message gone', () => scene('cc-clear'));
+    await step('all6WB standby', () => drive('P', 0, 5), 3500);
+    await step('all6WB out of standby', () => drive('D', 1500, 10), 3500);
     await step('g20 off (opaque 6WB Comfort)', () => click('SET_G20'), 4000);
     await step('g20 on again (Comfort + G20)', () => click('SET_G20'), 4000);
     await step('allG20 again', () => set('bottomRow', 'allG20'), 3500);

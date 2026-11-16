@@ -41,12 +41,25 @@ import atlas as A  # noqa: E402
 
 ZD = A.ZD
 OD = os.path.join(A.S.LM.ROOT, 'bake', 'work', 'strip', 'pub', 'O', 'maps')
+# strip integration (the lead, 2026-11-16): another build's maps (STRIP_O_MAPS), another output folder (STRIP_DIFF_OUT,
+# nothing written to pub/ZL then), and the engine's own word on whether the row was ours (STRIP_O_INDEX: with package
+# X's all-or-nothing row, all6WB is BMW's row while it waits for a zone or the first message, latched, or in standby)
+OD = os.environ.get('STRIP_O_MAPS') or OD
+OUT_DIR = os.environ.get('STRIP_DIFF_OUT')
+ROW_OURS = {}
+if os.environ.get('STRIP_O_INDEX'):
+    for _r in json.load(open(os.environ['STRIP_O_INDEX'])):
+        ROW_OURS[(_r['layout'], _r['mode'], _r['state'])] = bool(_r.get('own')) and all((_r.get('own') or {}).values())
 N = 4
 ROW0 = int((540 - A.ZB[1]) * N)        # zone row of panel y 540
 XMAX = 700 * N
 PHOTO = {'drive': '61', 'unread': '61', 'drive-clock': '61', 'limit-end': '61', 'limit-none': '61', 'nopass': '61',
          'park': '63', 'msg': '62', 'msg-long': '62', 'msg-latched': '62', 'road-latched-msg': '62',
          'limit-unknown': '68', 'standby': '63'}
+if os.environ.get('STRIP_O_INDEX'):
+    # the integrated build's states (tools/strip/O/states.py): "p-engine-off" is photo 63's state (condition 7, BMW's
+    # normal row), "standby" BMW's real one (65), "no-zone" as drive, "msg-gap" / "standby-msg" carry a message
+    PHOTO = dict(PHOTO, **{'p-engine-off': '63', 'standby': '65', 'standby-msg': '62', 'no-zone': '61', 'msg-gap': '62'})
 BELTS = ('bottom.belt_rear', 'bottom.belt_driver', 'bottom.airbag')
 BELT_PHOTOS = ('62', '63', '64', '66', '67')
 
@@ -146,8 +159,19 @@ def ours(layout, mode, state):
     return a, lin * a[..., None], bd
 
 
-def must_show(mode, state, els, belts):
+def must_show(mode, state, els, belts, layout=None):
     healthy = state not in ('msg-latched', 'road-latched-msg')
+    if (layout, mode, state) in ROW_OURS:              # strip integration: the engine's own word
+        healthy = ROW_OURS[(layout, mode, state)]
+        if mode == 'all6WB' and not healthy:
+            mode = 'allG20'                              # the row fallen back / waiting is BMW's row, whole (1.5)
+        if state in ('standby', 'standby-msg'):
+            req = ['bottom.range', 'bottom.clock']       # 1.6: BMW's standby row, no sign (photo 65)
+            show = belts > 0.5
+            for k in req:
+                if k in els:
+                    show = show | (els[k] > 0.5)
+            return show, req
     show = belts > 0.5
     req = []
     # O's 'standby' is P with the engine off (hud.js: P + rpm < 150). Package H (2026-11-16): BMW draws its FULL
@@ -175,7 +199,7 @@ def run(layout):
             rgb, lum, els, W = stock(p)
             h = min(a.shape[0], lum.shape[0])
             a, prem, rgb, lum = a[:h], prem[:h], rgb[:h], lum[:h]
-            show, req = must_show(mode, state, {k: v[:h] for k, v in els.items()}, belts[:h])
+            show, req = must_show(mode, state, {k: v[:h] for k, v in els.items()}, belts[:h], layout)
             show_d = cv2.dilate(show.astype(np.uint8), np.ones((21, 21), np.uint8)) > 0   # 2.5 px: blur + glyph halo belong to the item
             lit = lum > 0.04
             hide = lit & ~show_d
@@ -260,6 +284,10 @@ def run(layout):
             res['states'][mode + '/' + state] = st
             print(layout, mode, state, p, 'CLIP', st['CLIP'], 'LEAK', st['LEAK']['px'], st['LEAK']['sum_visible_light'],
                   'SAFETY', st['SAFETY']['px'], 'DOUBLE', dbl, 'SEAMs>0.02', st['SEAM']['over_0.02'], flush=True)
+    if OUT_DIR:
+        os.makedirs(OUT_DIR, exist_ok=True)
+        json.dump(res, open(os.path.join(OUT_DIR, 'diff_%s.json' % layout), 'w'), indent=1)
+        return
     json.dump(res, open(os.path.join(ZD, 'diff_%s.json' % layout), 'w'), indent=1)
     pub = os.path.join(A.S.LM.ROOT, 'bake', 'work', 'strip', 'pub', 'ZL')
     os.makedirs(pub, exist_ok=True)

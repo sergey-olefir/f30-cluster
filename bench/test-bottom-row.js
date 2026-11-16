@@ -478,6 +478,9 @@ async function main() {
     const uv = (k) => back && back.uniforms[k] && (back.uniforms[k].v || back.uniforms[k]);
     ok(back && same(uv('u_mh'), MT.hole) && same(uv('u_mo').slice(2), MT.lanes.msg),
         'the renderer itself holds u_mh = BMW\'s panel hole box and u_mo = the "msg" tile (' + JSON.stringify(uv('u_mh')) + ', ' + JSON.stringify(uv('u_mo')) + ')');
+    // decision 7: no window over BMW's marker by default - no dial has its box window (WBDIAL u_cut mode 2) open
+    const boxWin = (layers || []).filter((l) => l.uniforms && l.uniforms.u_cut && Math.round((l.uniforms.u_cut.v || l.uniforms.u_cut)[2]) === 2);
+    ok(layers && boxWin.length === 0, 'and no dial opens a window over BMW\'s marker (config.ccMarker is null): ' + boxWin.length + ' box windows');
     await fake({ hook: 'ccRelease' });
     p = await until((q) => S(q).safety.onScreen === true && maskIs(q, 'ours', null), 5000);
     ok(S(p).safety.onScreen === true && maskIs(p, 'ours', null) && S(p).safety.navHole === null,

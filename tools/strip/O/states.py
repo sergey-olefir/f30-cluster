@@ -24,14 +24,22 @@ import snap as SN     # noqa: E402
 DRIVE = {'rpm': 1500, 'speed': 50, 'gear': 3, 'oil': 95, 'coolant': 90, 'ambient': 22, 'range': 368, 'fuelL': 40}
 PARK = dict(DRIVE, rpm=800, speed=0, gear=0)
 STANDBY = dict(DRIVE, rpm=0, speed=0, gear=0, engine=0)
-# a non-Latin string (Cyrillic, invented): the current fonts have no glyph for it, so the field latches back to BMW
-CYR = 'Перевірте тиск у шинах'
+# strip integration (2026-11-16): Cyrillic and the Latin accents are baked now (wb_road, wb_msg), so the string that
+# latches is Greek (invented); "p-engine-off" is photo 63's state (VehicleCondition 7) and "standby" BMW's real one
+# (condition 5, package X's COND_STANDBY, held 1 s); every state but "unread" and "no-zone" feeds the car's time zone,
+# so all6WB is the whole row ours (package X: no zone, the row waits, BMW's); "msg-gap" holds our first draw back
+# (bench/run-app.js hook ccHold) to see BMW's panel open through the mask's msg lane
+P63 = dict(STANDBY, condition=7)
+STANDBY = dict(STANDBY, condition=5)
+CYR = 'Ελέγξτε την πίεση των ελαστικών'
 
-BASE = [('sig', DRIVE), ('scene', 'limit-50'), ('scene', 'road-street'), ('scene', 'clock-none')]
+BASE = [('sig', DRIVE), ('scene', 'limit-50'), ('scene', 'road-street'), ('scene', 'clock-plus2')]
+NOZONE = [('sig', DRIVE), ('scene', 'limit-50'), ('scene', 'road-street'), ('scene', 'clock-none')]
 
 # name -> (steps, wait-for predicate on the probe's "signs", note)
 STATES = [
-    ('unread', BASE, lambda s: s['sign']['state'] == 'limit', 'D, limit 50, road label, NO message ever read (right after a restart): 69.png'),
+    ('unread', NOZONE, lambda s: s['sign']['state'] == 'limit', 'D, limit 50, road label, NO message ever read (right after a restart): 69.png'),
+    ('no-zone', NOZONE + [('scene', 'cc-clear')], lambda s: s['cc']['shown'] is False, 'as drive, but no time zone: all6WB waits, BMW\'s row'),
     ('drive', BASE + [('scene', 'cc-clear')], lambda s: s['cc']['shown'] is False, 'D, limit 50, road label, a message read and cleared'),
     ('drive-clock', BASE + [('scene', 'cc-clear'), ('scene', 'clock-plus2')], lambda s: s['cc']['shown'] is False and s.get('tzCar') is not None, 'as drive, the car\'s time zone known (+2 h)'),
     ('park', [('sig', PARK), ('scene', 'limit-50'), ('scene', 'road-street'), ('scene', 'clock-none'), ('scene', 'cc-clear')], lambda s: s['cc']['shown'] is False, 'P, engine running'),
@@ -44,11 +52,14 @@ STATES = [
     # NOT BMW's standby (package P, 2026-11-16): photo 63 is P with the engine off and BMW still draws its NORMAL row;
     # only photo 65 shows the standby row (car signal VehicleCondition, 5 = WOHNEN: hypothesis). This is "P + rpm 0
     # as the app treats it today" (hud.js cut.cover 'limit': P and rpm < 150 close the sign window).
-    ('p-engine-off', [('sig', STANDBY), ('scene', 'limit-50'), ('scene', 'road-street'), ('scene', 'clock-none'), ('scene', 'cc-clear')], lambda s: s['cc']['shown'] is False, 'P + rpm 0 as the app treats it today (photo 63 state: BMW still draws its normal row, sign included)'),
+    ('p-engine-off', [('sig', P63), ('scene', 'limit-50'), ('scene', 'road-street'), ('scene', 'clock-plus2'), ('scene', 'cc-clear'), ('wait', 1.5)], lambda s: s['cc']['shown'] is False, 'P, engine off, condition 7 (photo 63: BMW draws its NORMAL row, sign included)'),
+    ('standby', [('sig', STANDBY), ('scene', 'limit-none'), ('scene', 'road-street'), ('scene', 'clock-plus2'), ('scene', 'cc-clear'), ('wait', 1.5)], lambda s: s['row']['standby'] is True, 'BMW\'s standby (condition 5, held 1 s): BMW\'s standby row in both modes'),
+    ('standby-msg', [('sig', STANDBY), ('scene', 'limit-none'), ('scene', 'clock-plus2'), ('scene', 'cc-red'), ('wait', 1.5)], lambda s: s['row']['standby'] is True and s['cc']['shown'] is True, 'standby with a message: BMW\'s panel open'),
+    ('msg-gap', [('wait', 1.5), ('hook', 'ccHold'), ('scene', 'cc-yellow')], lambda s: s['cc']['shown'] is True, 'D, a message arrived and our first draw is held back (the safety gap): BMW\'s panel open'),
     # latched: last in the group, each followed by a restart
     ('msg-latched', BASE + [('scene', 'cc-clear'), ('cc', {'name': CYR, 'desc': CYR, 'color': 'yellow', 'symbol': 44})],
      lambda s: s['cc']['shown'] is True and bool((s.get('fail') or {})), 'a message with no glyph in our fonts: the field latches back to BMW'),
-    ('road-latched-msg', [('sig', DRIVE), ('scene', 'limit-50'), ('scene', 'clock-none'), ('scene', 'cc-clear'),
+    ('road-latched-msg', [('sig', DRIVE), ('scene', 'limit-50'), ('scene', 'clock-plus2'), ('scene', 'cc-clear'),
                           ('road', {'text': CYR}), ('wait', 2.0), ('scene', 'cc-red')],
      lambda s: s['cc']['shown'] is True and bool((s.get('fail') or {})), 'a road label with no glyph latched nav first, then a message'),
 ]
@@ -69,6 +80,8 @@ def apply(steps):
             B.fake({'road': v})
         elif kind == 'wait':
             time.sleep(v)
+        elif kind == 'hook':
+            B.fake({'hook': v})
         time.sleep(0.25)
 
 
@@ -146,8 +159,8 @@ def run(root, layouts, only=None):
                 index.append(row)
                 print('%-15s %-7s %-17s reached=%s own=%s fail=%s widgets=%d' % (layout, mode, name, ok, json.dumps(s.get('own')),
                                                                              json.dumps(s.get('fail')), len(s.get('widgets') or [])), flush=True)
-                if name in LATCHED:
-                    pass
+                if name == 'msg-gap':
+                    B.fake({'hook': 'ccRelease'})
     # leave the bench un-latched
     B.restart()
     os.makedirs(root, exist_ok=True)

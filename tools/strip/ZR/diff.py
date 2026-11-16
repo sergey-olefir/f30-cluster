@@ -25,9 +25,17 @@ import os
 import cv2
 import numpy as np
 
-import atlas as A
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # strip integration: runnable with python -I
+import atlas as A  # noqa: E402
 
 OPUB = os.path.join(A.MAIN, 'bake/work/strip/pub/O')
+# strip integration (the lead, 2026-11-16): another build's maps (STRIP_O_MAPS) and its index.json (STRIP_O_INDEX, which
+# also says whether the engine drew the row as ours: package X's all-or-nothing row makes all6WB BMW's row while it
+# waits, is latched or in standby); class maps go to STRIP_DIFF_OUT then
+OMAPS = os.environ.get('STRIP_O_MAPS') or os.path.join(OPUB, 'maps')
+OINDEX = os.environ.get('STRIP_O_INDEX') or os.path.join(OPUB, 'index.json')
+PNG_DIR = os.environ.get('STRIP_DIFF_OUT') or os.path.join(A.MAIN, 'bake/work/strip/zone-R/diff')
 ZX0, ZX1 = 1240, 1920
 K0, K1 = ZX0 * 4, ZX1 * 4
 NON_STANDBY_PHOTOS = ['61', '62', '63', '64', '66', '67', '68']
@@ -213,12 +221,12 @@ def main():
     T_ns_rgb = np.median([rgbs[k] for k in ['61', '62', '63', '64', '68']], 0)
     res = {'grid': '4x of O, zone x 1240-1920 y 540-720', 'stock_sources': srcs, 'white_core_lin': whites,
            'footprints': {k: {'polys': len(v)} for k, v in fp.items()}, 'cases': {}}
-    os.makedirs(os.path.join(A.MAIN, 'bake/work/strip/zone-R/diff'), exist_ok=True)
-    for e in json.load(open(os.path.join(OPUB, 'index.json'))):
+    os.makedirs(PNG_DIR, exist_ok=True)
+    for e in json.load(open(OINDEX)):
         lay, mode, state = e['layout'], e['mode'], e['state']
         if a.layouts and lay not in a.layouts:
             continue
-        d = os.path.join(OPUB, 'maps', lay, mode, state)
+        d = os.path.join(OMAPS, lay, mode, state)
         if not os.path.exists(os.path.join(d, 'alpha_4x.png')):
             continue
         alpha = cv2.imread(os.path.join(d, 'alpha_4x.png'), cv2.IMREAD_UNCHANGED)[:, K0:K1].astype(np.float32) / 65535
@@ -227,10 +235,11 @@ def main():
             A.srgb_to_lin(np.stack([rgba[..., 2], rgba[..., 1], rgba[..., 0]], -1) * 255.0)
         ours_prem = ours_lin * alpha[..., None]
         ours_lum = ours_prem @ np.array([0.2126, 0.7152, 0.0722])
-        standby = state == 'standby'
+        standby = state in ('standby', 'standby-msg') if os.environ.get('STRIP_O_INDEX') else state == 'standby'
+        ours_row = bool(e.get('own')) and all((e.get('own') or {}).values()) if os.environ.get('STRIP_O_INDEX') else mode == 'all6WB'
         if standby:
             show = ['bottom.temperature', 'assist.mode_label']
-        elif mode == 'allG20':
+        elif mode == 'allG20' or not ours_row:
             show = ['bottom.temperature', 'assist.mode_label', 'assist.info_tacho']
         else:
             show = ['assist.info_tacho']          # conditional on package X (e): BMW's marker stays unless we draw ours
@@ -288,7 +297,7 @@ def main():
         seen_rgb = (1 - alpha)[..., None] * Lt_rgb + ours_prem
         case['SEAM'] = seams(alpha, seen, seen_rgb, X, Y)[:10]
         res['cases']['%s/%s/%s' % (lay, mode, state)] = case
-        cv2.imwrite(os.path.join(A.MAIN, 'bake/work/strip/zone-R/diff/%s_%s_%s.png' % (lay, mode, state)), cls)
+        cv2.imwrite(os.path.join(PNG_DIR, '%s_%s_%s.png' % (lay, mode, state)), cls)
         print(lay, mode, state, 'CLIP', {k: v['px'] for k, v in case['CLIP'].items()}, 'LEAK', case['LEAK']['px'],
               case['LEAK']['sum_visible_white_px'], 'SAFETY', {k: v['px'] for k, v in case['SAFETY'].items()},
               'DOUBLE', dbl, 'seam1', (case['SEAM'][0]['box'], case['SEAM'][0]['step_mean_white']) if case['SEAM'] else None,

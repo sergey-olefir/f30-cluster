@@ -26,6 +26,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import zc_common as Z  # noqa: E402
 
 O = os.path.join(Z.WORK, 'pub', 'O', 'maps')
+# strip integration (the lead, 2026-11-16): re-run on another build's maps (STRIP_O_MAPS, made by tools/strip/O/states.py
+# and maps.py) and write elsewhere (STRIP_DIFF_OUT); STRIP_O_INDEX (that run's index.json) gives whether the engine
+# drew the row as ours in each state - with package X's all-or-nothing row, "all6WB" is BMW's row while it waits for a
+# time zone or the first message, latched or in standby, so "ours or BMW's" is read off the engine, not the mode
+O = os.environ.get('STRIP_O_MAPS') or O
+OUT_DIR = os.environ.get('STRIP_DIFF_OUT') or os.path.join(Z.WORK, 'zone-c')
+ROW_OURS = {}
+if os.environ.get('STRIP_O_INDEX'):
+    for _r in json.load(open(os.environ['STRIP_O_INDEX'])):
+        ROW_OURS[(_r['layout'], _r['mode'], _r['state'])] = bool(_r.get('own')) and all((_r.get('own') or {}).values())
 X0, X1 = 690, 1250                     # zone C
 N = 4
 WY = np.array([0.2126, 0.7152, 0.0722])
@@ -47,34 +57,38 @@ EL = {
 }
 STATE = {'61': {'nomsg', 'road'}, '64': {'nomsg', 'road'}, '67': {'nomsg', 'road'}, '68': {'nomsg', 'road'},
          '63': {'nomsg', 'ghost'}, '62': {'msg'}, '66': {'msg'}, '65': {'nomsg', 'odo'}}
-NOMSG_STATES = ['unread', 'drive', 'drive-clock', 'park', 'limit-unknown', 'limit-end', 'limit-none', 'nopass', 'p-engine-off']
-MSG_STATES = ['msg', 'msg-long', 'msg-latched', 'road-latched-msg']
+NOMSG_STATES = ['unread', 'drive', 'drive-clock', 'park', 'limit-unknown', 'limit-end', 'limit-none', 'nopass', 'p-engine-off', 'no-zone']
+MSG_STATES = ['msg', 'msg-long', 'msg-latched', 'road-latched-msg', 'msg-gap', 'standby-msg']
 PANEL = ['assist.cc_panel.arc', 'assist.cc_panel.fill', 'bottom.cc_info', 'cc.text']
 HIDE_ALWAYS = ['rail.centre.hook_l', 'rail.centre.hook_r', 'rail.left.end (ZL)', 'rail.right.start (ZR)',
                'bottom.odometer.ghost']
 
 
-def must(mode, state, el):
+def must(mode, state, el, layout=None):
     """True = must show, False = must be hidden, None = not judged here (neighbour)."""
     if 'neighbour' in el:
         return None
     if el in HIDE_ALWAYS:
         return False
-    if state == 'standby':
-        return el == 'bottom.odometer'                    # 1.6: standby is BMW's row in both modes
+    if state in ('standby', 'standby-msg'):            # 1.6: standby is BMW's row in both modes
+        return el == 'bottom.odometer' or (state == 'standby-msg' and el in PANEL)
     if el == 'bottom.odometer':
         return False
-    if mode == 'allG20':
-        return el in PANEL or el == 'bottom.street'      # 1.2
-    # all6WB: ours, except the row fallen back (1.5 all-or-nothing)
-    if state in ('msg-latched', 'road-latched-msg'):
-        return el in PANEL
-    return False
+    if (layout, mode, state) in ROW_OURS:              # strip integration: the engine's own word (STRIP_O_INDEX)
+        bmw_row = not ROW_OURS[(layout, mode, state)]
+    else:
+        bmw_row = mode == 'allG20' or state in ('msg-latched', 'road-latched-msg')
+    if bmw_row:
+        return el in PANEL or (el == 'bottom.street' and state not in MSG_STATES)      # 1.2, 1.5
+    # the row ours: BMW's panel only while our text for its message is not on the screen yet (the safety rule)
+    return el in PANEL and state == 'msg-gap'
 
 
 def photos_for(state):
     if state == 'standby':
         return ['65']
+    if state == 'standby-msg':
+        return ['62', '66']
     if state in MSG_STATES:
         return ['62', '66']
     return ['61', '64', '67', '68', '63']
@@ -225,7 +239,7 @@ def main():
                     case = {'layout': layout, 'mode': mode, 'state': state, 'photo': pid, 'maps_hash': key,
                             'elements': {}}
                     for el, m in ink['masks'].items():
-                        want = must(mode, state, el)
+                        want = must(mode, state, el, layout)
                         n = int(m.sum())
                         if n == 0:
                             continue
@@ -274,7 +288,8 @@ def main():
                     seen.setdefault(key, []).append('%s/%s/%s' % (layout, mode, state))
                 print(layout, mode, state, 'done')
     out['identical_maps'] = {k: v for k, v in seen.items()}
-    json.dump(out, open(os.path.join(Z.WORK, 'zone-c', 'diff.json'), 'w'), indent=1)
+    os.makedirs(OUT_DIR, exist_ok=True)
+    json.dump(out, open(os.path.join(OUT_DIR, 'diff.json'), 'w'), indent=1)
 
 
 if __name__ == '__main__':
