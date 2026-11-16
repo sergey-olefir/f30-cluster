@@ -1,0 +1,1471 @@
+{
+ "60": {
+  "black_level_lin_Y": 0.00258,
+  "black_level_p10_p90": [
+   0.00143,
+   0.00299
+  ],
+  "empty_tiles": 4719,
+  "black_level_srgb8": 8.5,
+  "white_text_lin_Y_minus_black": 0.9184,
+  "white_text_p999": 0.9239,
+  "exposure_factor": 1.089,
+  "black_rel_white": 0.0028,
+  "sign_ring_red_lin_minus_black": 0.7651,
+  "sign_ring_red_rel_white": 0.833,
+  "glare_excess_rel_white": {
+   "max": 0.0087,
+   "p95": 0.0075,
+   "fit_rms_lin": 0.00377,
+   "tiles_used": 4253
+  },
+  "valid_fraction": 0.9969,
+  "clipped_px_4x": 789,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.7583,
+    "centre_y": 647.915,
+    "fwhm": 6.322,
+    "edge_10_90_top": 5.584,
+    "edge_10_90_bottom": 0.859
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.7456,
+    "centre_y": 647.68,
+    "fwhm": 6.36,
+    "edge_10_90_top": 6.039,
+    "edge_10_90_bottom": 0.728
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.8097,
+    "centre_y": 647.697,
+    "fwhm": 6.413,
+    "edge_10_90_top": 5.59,
+    "edge_10_90_bottom": 0.997
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7759,
+    "centre_y": 647.86,
+    "fwhm": 6.454,
+    "edge_10_90_top": 5.511,
+    "edge_10_90_bottom": 1.217
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.744,
+    "centre_y": 647.919,
+    "fwhm": 6.438,
+    "edge_10_90_top": 5.414,
+    "edge_10_90_bottom": 1.666
+   }
+  ],
+  "rail_fwhm_median": 6.413,
+  "edge_10_90_median": 3.54,
+  "grid_2px_lines": [
+   {
+    "line_y": 600,
+    "x": [
+     820,
+     850
+    ],
+    "fwhm": 2.895,
+    "centre_minus_true": -0.695
+   },
+   {
+    "line_y": 600,
+    "x": [
+     880,
+     910
+    ],
+    "fwhm": 2.876,
+    "centre_minus_true": -0.713
+   },
+   {
+    "line_y": 600,
+    "x": [
+     940,
+     970
+    ],
+    "fwhm": 2.863,
+    "centre_minus_true": -0.79
+   },
+   {
+    "line_y": 600,
+    "x": [
+     1000,
+     1030
+    ],
+    "fwhm": 2.976,
+    "centre_minus_true": -0.806
+   },
+   {
+    "line_y": 600,
+    "x": [
+     1060,
+     1090
+    ],
+    "fwhm": 2.928,
+    "centre_minus_true": -0.735
+   },
+   {
+    "line_y": 600,
+    "x": [
+     1120,
+     1150
+    ],
+    "fwhm": 2.858,
+    "centre_minus_true": -0.673
+   },
+   {
+    "line_y": 700,
+    "x": [
+     820,
+     850
+    ],
+    "fwhm": 2.879,
+    "centre_minus_true": -0.527
+   },
+   {
+    "line_y": 700,
+    "x": [
+     880,
+     910
+    ],
+    "fwhm": 2.823,
+    "centre_minus_true": -0.535
+   },
+   {
+    "line_y": 700,
+    "x": [
+     940,
+     970
+    ],
+    "fwhm": 2.97,
+    "centre_minus_true": -0.619
+   },
+   {
+    "line_y": 700,
+    "x": [
+     1000,
+     1030
+    ],
+    "fwhm": 3.017,
+    "centre_minus_true": -0.638
+   },
+   {
+    "line_y": 700,
+    "x": [
+     1060,
+     1090
+    ],
+    "fwhm": 3.082,
+    "centre_minus_true": -0.512
+   },
+   {
+    "line_y": 700,
+    "x": [
+     1120,
+     1150
+    ],
+    "fwhm": 3.058,
+    "centre_minus_true": -0.442
+   }
+  ],
+  "grid_fwhm_median": 2.912,
+  "grid_centre_bias_median": -0.655
+ },
+ "61": {
+  "black_level_lin_Y": 0.00394,
+  "black_level_p10_p90": [
+   0.00148,
+   0.00668
+  ],
+  "empty_tiles": 11151,
+  "black_level_srgb8": 12.8,
+  "white_text_lin_Y_minus_black": 0.9163,
+  "white_text_p999": 0.9199,
+  "exposure_factor": 1.091,
+  "black_rel_white": 0.0043,
+  "sign_ring_red_lin_minus_black": 0.8386,
+  "sign_ring_red_rel_white": 0.915,
+  "glare_excess_rel_white": {
+   "max": 0.0417,
+   "p95": 0.0302,
+   "fit_rms_lin": 0.00344,
+   "tiles_used": 8847
+  },
+  "valid_fraction": 0.8222,
+  "clipped_px_4x": 91,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.65,
+    "centre_y": 647.785,
+    "fwhm": 7.247,
+    "edge_10_90_top": 3.956,
+    "edge_10_90_bottom": 1.77
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.6451,
+    "centre_y": 647.383,
+    "fwhm": 7.254,
+    "edge_10_90_top": 3.198,
+    "edge_10_90_bottom": 1.957
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6874,
+    "centre_y": 647.718,
+    "fwhm": 6.845,
+    "edge_10_90_top": 1.199,
+    "edge_10_90_bottom": 1.707
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6717,
+    "centre_y": 647.736,
+    "fwhm": 6.78,
+    "edge_10_90_top": 1.449,
+    "edge_10_90_bottom": 1.649
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6506,
+    "centre_y": 647.908,
+    "fwhm": 6.802,
+    "edge_10_90_top": 1.588,
+    "edge_10_90_bottom": 1.656
+   }
+  ],
+  "rail_fwhm_median": 6.845,
+  "edge_10_90_median": 1.681
+ },
+ "62": {
+  "black_level_lin_Y": 0.00223,
+  "black_level_p10_p90": [
+   0.00134,
+   0.00327
+  ],
+  "empty_tiles": 9224,
+  "black_level_srgb8": 7.3,
+  "white_text_lin_Y_minus_black": 0.9069,
+  "white_text_p999": 0.9198,
+  "exposure_factor": 1.103,
+  "black_rel_white": 0.0025,
+  "sign_ring_red_lin_minus_black": 0.8386,
+  "sign_ring_red_rel_white": 0.925,
+  "glare_excess_rel_white": {
+   "max": 0.0113,
+   "p95": 0.0081,
+   "fit_rms_lin": 0.00155,
+   "tiles_used": 7113
+  },
+  "valid_fraction": 0.998,
+  "clipped_px_4x": 724,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.6541,
+    "centre_y": 648.37,
+    "fwhm": 6.54,
+    "edge_10_90_top": 0.756,
+    "edge_10_90_bottom": 5.419
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.5676,
+    "centre_y": 648.046,
+    "fwhm": 6.49,
+    "edge_10_90_top": 0.886,
+    "edge_10_90_bottom": 4.835
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6853,
+    "centre_y": 647.323,
+    "fwhm": 6.693,
+    "edge_10_90_top": 0.99,
+    "edge_10_90_bottom": 1.281
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6575,
+    "centre_y": 647.648,
+    "fwhm": 6.676,
+    "edge_10_90_top": 0.688,
+    "edge_10_90_bottom": 1.426
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6554,
+    "centre_y": 647.917,
+    "fwhm": 6.69,
+    "edge_10_90_top": 0.867,
+    "edge_10_90_bottom": 1.588
+   }
+  ],
+  "rail_fwhm_median": 6.676,
+  "edge_10_90_median": 1.135
+ },
+ "63": {
+  "black_level_lin_Y": 0.00258,
+  "black_level_p10_p90": [
+   0.00156,
+   0.00323
+  ],
+  "empty_tiles": 10337,
+  "black_level_srgb8": 8.5,
+  "white_text_lin_Y_minus_black": 0.9169,
+  "white_text_p999": 0.9216,
+  "exposure_factor": 1.091,
+  "black_rel_white": 0.0028,
+  "sign_ring_red_lin_minus_black": 0.8437,
+  "sign_ring_red_rel_white": 0.92,
+  "glare_excess_rel_white": {
+   "max": 0.0018,
+   "p95": 0.0017,
+   "fit_rms_lin": 0.00068,
+   "tiles_used": 9133
+  },
+  "valid_fraction": 0.9967,
+  "clipped_px_4x": 873,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.661,
+    "centre_y": 647.872,
+    "fwhm": 6.436,
+    "edge_10_90_top": 0.728,
+    "edge_10_90_bottom": 5.886
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.6034,
+    "centre_y": 647.371,
+    "fwhm": 6.703,
+    "edge_10_90_top": 0.91,
+    "edge_10_90_bottom": 5.049
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6547,
+    "centre_y": 647.588,
+    "fwhm": 6.606,
+    "edge_10_90_top": 0.704,
+    "edge_10_90_bottom": 1.621
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6235,
+    "centre_y": 647.672,
+    "fwhm": 6.609,
+    "edge_10_90_top": 0.799,
+    "edge_10_90_bottom": 1.515
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6261,
+    "centre_y": 647.955,
+    "fwhm": 6.662,
+    "edge_10_90_top": 0.903,
+    "edge_10_90_bottom": 1.681
+   }
+  ],
+  "rail_fwhm_median": 6.609,
+  "edge_10_90_median": 1.212
+ },
+ "64": {
+  "black_level_lin_Y": 0.0123,
+  "black_level_p10_p90": [
+   0.00342,
+   0.01657
+  ],
+  "empty_tiles": 10525,
+  "black_level_srgb8": 29.0,
+  "white_text_lin_Y_minus_black": 0.9067,
+  "white_text_p999": 0.9108,
+  "exposure_factor": 1.103,
+  "black_rel_white": 0.0136,
+  "sign_ring_red_lin_minus_black": 0.814,
+  "sign_ring_red_rel_white": 0.898,
+  "glare_excess_rel_white": {
+   "max": 0.0712,
+   "p95": 0.0507,
+   "fit_rms_lin": 0.00782,
+   "tiles_used": 9490
+  },
+  "valid_fraction": 0.7399,
+  "clipped_px_4x": 233,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.7183,
+    "centre_y": 647.809,
+    "fwhm": 6.401,
+    "edge_10_90_top": 1.006,
+    "edge_10_90_bottom": 4.245
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.7214,
+    "centre_y": 647.473,
+    "fwhm": 6.495,
+    "edge_10_90_top": 1.073,
+    "edge_10_90_bottom": 1.133
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7149,
+    "centre_y": 647.699,
+    "fwhm": 6.394,
+    "edge_10_90_top": 0.929,
+    "edge_10_90_bottom": 1.198
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7328,
+    "centre_y": 647.641,
+    "fwhm": 6.641,
+    "edge_10_90_top": 0.855,
+    "edge_10_90_bottom": 1.469
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6953,
+    "centre_y": 647.82,
+    "fwhm": 6.521,
+    "edge_10_90_top": 0.947,
+    "edge_10_90_bottom": 1.396
+   }
+  ],
+  "rail_fwhm_median": 6.495,
+  "edge_10_90_median": 1.103
+ },
+ "65": {
+  "black_level_lin_Y": 0.0092,
+  "black_level_p10_p90": [
+   0.00612,
+   0.01354
+  ],
+  "empty_tiles": 11638,
+  "black_level_srgb8": 24.1,
+  "white_text_lin_Y_minus_black": 0.9136,
+  "white_text_p999": 0.9243,
+  "exposure_factor": 1.095,
+  "black_rel_white": 0.0101,
+  "sign_ring_red_lin_minus_black": null,
+  "sign_ring_red_rel_white": null,
+  "glare_excess_rel_white": {
+   "max": 0.0892,
+   "p95": 0.06,
+   "fit_rms_lin": 0.00711,
+   "tiles_used": 10568
+  },
+  "valid_fraction": 0.628,
+  "clipped_px_4x": 1207,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.8658,
+    "centre_y": 647.777,
+    "fwhm": 6.642,
+    "edge_10_90_top": 0.778,
+    "edge_10_90_bottom": 5.935
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.7901,
+    "centre_y": 647.331,
+    "fwhm": 6.649,
+    "edge_10_90_top": 0.92,
+    "edge_10_90_bottom": 0.914
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.8311,
+    "centre_y": 648.918,
+    "fwhm": 6.733,
+    "edge_10_90_top": 0.69,
+    "edge_10_90_bottom": 6.261
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7796,
+    "centre_y": 649.329,
+    "fwhm": 6.912,
+    "edge_10_90_top": 0.788,
+    "edge_10_90_bottom": 5.271
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7891,
+    "centre_y": 649.631,
+    "fwhm": 6.817,
+    "edge_10_90_top": 0.726,
+    "edge_10_90_bottom": 6.994
+   }
+  ],
+  "rail_fwhm_median": 6.733,
+  "edge_10_90_median": 0.917
+ },
+ "66": {
+  "black_level_lin_Y": 0.0064,
+  "black_level_p10_p90": [
+   0.00251,
+   0.01134
+  ],
+  "empty_tiles": 10268,
+  "black_level_srgb8": 18.8,
+  "white_text_lin_Y_minus_black": 0.9153,
+  "white_text_p999": 0.9216,
+  "exposure_factor": 1.093,
+  "black_rel_white": 0.007,
+  "sign_ring_red_lin_minus_black": 0.8279,
+  "sign_ring_red_rel_white": 0.904,
+  "glare_excess_rel_white": {
+   "max": 0.0279,
+   "p95": 0.0236,
+   "fit_rms_lin": 0.00549,
+   "tiles_used": 8935
+  },
+  "valid_fraction": 0.8615,
+  "clipped_px_4x": 1177,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.8038,
+    "centre_y": 648.541,
+    "fwhm": 6.576,
+    "edge_10_90_top": 0.779,
+    "edge_10_90_bottom": 5.589
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.6962,
+    "centre_y": 648.211,
+    "fwhm": 6.428,
+    "edge_10_90_top": 0.841,
+    "edge_10_90_bottom": 0.954
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.8016,
+    "centre_y": 647.623,
+    "fwhm": 6.758,
+    "edge_10_90_top": 0.838,
+    "edge_10_90_bottom": 1.38
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7767,
+    "centre_y": 647.671,
+    "fwhm": 6.815,
+    "edge_10_90_top": 0.847,
+    "edge_10_90_bottom": 1.473
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7733,
+    "centre_y": 647.827,
+    "fwhm": 6.824,
+    "edge_10_90_top": 0.945,
+    "edge_10_90_bottom": 1.766
+   }
+  ],
+  "rail_fwhm_median": 6.758,
+  "edge_10_90_median": 0.95
+ },
+ "67": {
+  "black_level_lin_Y": 0.00488,
+  "black_level_p10_p90": [
+   0.00311,
+   0.00736
+  ],
+  "empty_tiles": 10039,
+  "black_level_srgb8": 15.3,
+  "white_text_lin_Y_minus_black": 0.9164,
+  "white_text_p999": 0.9219,
+  "exposure_factor": 1.091,
+  "black_rel_white": 0.0053,
+  "sign_ring_red_lin_minus_black": 0.8587,
+  "sign_ring_red_rel_white": 0.937,
+  "glare_excess_rel_white": {
+   "max": 0.0374,
+   "p95": 0.0287,
+   "fit_rms_lin": 0.00451,
+   "tiles_used": 8892
+  },
+  "valid_fraction": 0.8005,
+  "clipped_px_4x": 9181,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.7766,
+    "centre_y": 647.994,
+    "fwhm": 6.515,
+    "edge_10_90_top": 0.792,
+    "edge_10_90_bottom": 3.917
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.7689,
+    "centre_y": 647.456,
+    "fwhm": 6.707,
+    "edge_10_90_top": 0.981,
+    "edge_10_90_bottom": 1.862
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7747,
+    "centre_y": 647.708,
+    "fwhm": 6.761,
+    "edge_10_90_top": 0.862,
+    "edge_10_90_bottom": 1.443
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7712,
+    "centre_y": 647.781,
+    "fwhm": 6.837,
+    "edge_10_90_top": 0.879,
+    "edge_10_90_bottom": 1.648
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.772,
+    "centre_y": 647.823,
+    "fwhm": 6.872,
+    "edge_10_90_top": 0.901,
+    "edge_10_90_bottom": 1.827
+   }
+  ],
+  "rail_fwhm_median": 6.761,
+  "edge_10_90_median": 1.212
+ },
+ "68": {
+  "black_level_lin_Y": 0.00419,
+  "black_level_p10_p90": [
+   0.00299,
+   0.00591
+  ],
+  "empty_tiles": 12807,
+  "black_level_srgb8": 13.5,
+  "white_text_lin_Y_minus_black": 0.7608,
+  "white_text_p999": 0.8071,
+  "exposure_factor": 1.314,
+  "black_rel_white": 0.0055,
+  "sign_ring_red_lin_minus_black": 0.6699,
+  "sign_ring_red_rel_white": 0.881,
+  "glare_excess_rel_white": {
+   "max": 0.0328,
+   "p95": 0.0237,
+   "fit_rms_lin": 0.00319,
+   "tiles_used": 11442
+  },
+  "valid_fraction": 0.8991,
+  "clipped_px_4x": 13942,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.2909,
+    "centre_y": 648.009,
+    "fwhm": 5.754,
+    "edge_10_90_top": 0.791,
+    "edge_10_90_bottom": 5.01
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.2915,
+    "centre_y": 647.547,
+    "fwhm": 5.623,
+    "edge_10_90_top": 0.87,
+    "edge_10_90_bottom": 4.902
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.2932,
+    "centre_y": 648.038,
+    "fwhm": 5.723,
+    "edge_10_90_top": 0.795,
+    "edge_10_90_bottom": 5.238
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.2754,
+    "centre_y": 648.264,
+    "fwhm": 5.672,
+    "edge_10_90_top": 0.864,
+    "edge_10_90_bottom": 4.745
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.2753,
+    "centre_y": 648.333,
+    "fwhm": 5.703,
+    "edge_10_90_top": 4.316,
+    "edge_10_90_bottom": 1.121
+   }
+  ],
+  "rail_fwhm_median": 5.703,
+  "edge_10_90_median": 2.718
+ },
+ "_about": "Package R: photometry and sharpness of the registered photos (reads bake/work/strip/rect/<id>_strip_4x.png and\n<id>_panel_2x.png; writes bake/work/strip/pub/R/photometry.json and bake/work/strip/rect/<id>_valid_4x.png).\n\nLinear light = sRGB EOTF of the photo's 8-bit codes (the 4 x strip is stored that way). Luminance Y = Rec.709 weights.\n\nBlack level: the display's black, from 4 x 4 panel-px tiles of the strip that hold no content: a tile is empty when\nits own spread is small and nothing bright lies within 8 panel px (the dilated ink mask); the level is the median of\nthe darkest half of the empty tiles, the spread their 10..90 % range. The glare field is a smooth surface (degree-2\npolynomial in x, y over the WHOLE panel's empty tiles, robust) minus that black; `valid` is where the glare excess is\nbelow a set fraction of white and the pixel is not clipped (any channel >= 0.98 linear).\n\nWhite (exposure reference): stock white text, the clock's digits (the 99th percentile of Y in the clock box, after\nblack subtraction); cross-checked by the speed-limit sign's red ring (median R of the ring annulus where present).\nExposure factor = 1 / white, so that after (x - black) * factor stock white text is 1.0.\n\nSharpness: the rails' vertical profile (bright line on black) at several straight stretches: FWHM and 10..90 % edge\nwidths in panel px; photo 60 also has our grid, whose majors are exactly 2 px wide, which calibrates the bias of a 50 %\nthreshold (measured FWHM - 2 px).\n",
+ "08": {
+  "black_level_lin_Y": 0.00226,
+  "black_level_p10_p90": [
+   0.00143,
+   0.00346
+  ],
+  "empty_tiles": 9321,
+  "black_level_srgb8": 7.4,
+  "white_text_lin_Y_minus_black": 0.9795,
+  "white_text_p999": 0.9977,
+  "exposure_factor": 1.021,
+  "black_rel_white": 0.0023,
+  "sign_ring_red_lin_minus_black": 0.7753,
+  "sign_ring_red_rel_white": 0.792,
+  "glare_excess_rel_white": {
+   "max": 0.0111,
+   "p95": 0.008,
+   "fit_rms_lin": 0.0017,
+   "tiles_used": 7179
+  },
+  "valid_fraction": 0.9485,
+  "clipped_px_4x": 143663,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.6632,
+    "centre_y": 648.288,
+    "fwhm": 6.298,
+    "edge_10_90_top": 1.405,
+    "edge_10_90_bottom": 1.567
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.6135,
+    "centre_y": 647.876,
+    "fwhm": 6.159,
+    "edge_10_90_top": 1.393,
+    "edge_10_90_bottom": 2.617
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7703,
+    "centre_y": 647.256,
+    "fwhm": 6.228,
+    "edge_10_90_top": 4.438,
+    "edge_10_90_bottom": 1.659
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7243,
+    "centre_y": 647.606,
+    "fwhm": 6.412,
+    "edge_10_90_top": 1.341,
+    "edge_10_90_bottom": 1.87
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6814,
+    "centre_y": 647.869,
+    "fwhm": 6.49,
+    "edge_10_90_top": 1.479,
+    "edge_10_90_bottom": 1.604
+   }
+  ],
+  "rail_fwhm_median": 6.298,
+  "edge_10_90_median": 1.586
+ },
+ "09": {
+  "black_level_lin_Y": 0.00416,
+  "black_level_p10_p90": [
+   0.00146,
+   0.00716
+  ],
+  "empty_tiles": 11218,
+  "black_level_srgb8": 13.4,
+  "white_text_lin_Y_minus_black": 0.9848,
+  "white_text_p999": 0.9958,
+  "exposure_factor": 1.015,
+  "black_rel_white": 0.0042,
+  "sign_ring_red_lin_minus_black": 0.812,
+  "sign_ring_red_rel_white": 0.825,
+  "glare_excess_rel_white": {
+   "max": 0.042,
+   "p95": 0.0309,
+   "fit_rms_lin": 0.00374,
+   "tiles_used": 8907
+  },
+  "valid_fraction": 0.7712,
+  "clipped_px_4x": 136092,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.6835,
+    "centre_y": 647.725,
+    "fwhm": 6.801,
+    "edge_10_90_top": 1.594,
+    "edge_10_90_bottom": 1.436
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.6869,
+    "centre_y": 647.302,
+    "fwhm": 6.794,
+    "edge_10_90_top": 1.589,
+    "edge_10_90_bottom": 1.449
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7406,
+    "centre_y": 647.65,
+    "fwhm": 6.451,
+    "edge_10_90_top": 1.68,
+    "edge_10_90_bottom": 1.581
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7109,
+    "centre_y": 647.637,
+    "fwhm": 6.399,
+    "edge_10_90_top": 1.674,
+    "edge_10_90_bottom": 1.656
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.694,
+    "centre_y": 647.842,
+    "fwhm": 6.387,
+    "edge_10_90_top": 1.787,
+    "edge_10_90_bottom": 1.733
+   }
+  ],
+  "rail_fwhm_median": 6.451,
+  "edge_10_90_median": 1.625
+ },
+ "10": {
+  "black_level_lin_Y": 0.00285,
+  "black_level_p10_p90": [
+   0.00163,
+   0.00338
+  ],
+  "empty_tiles": 5215,
+  "black_level_srgb8": 9.4,
+  "white_text_lin_Y_minus_black": 0.9922,
+  "white_text_p999": 0.9972,
+  "exposure_factor": 1.008,
+  "black_rel_white": 0.0029,
+  "sign_ring_red_lin_minus_black": 0.6964,
+  "sign_ring_red_rel_white": 0.702,
+  "glare_excess_rel_white": {
+   "max": 0.0125,
+   "p95": 0.0102,
+   "fit_rms_lin": 0.00424,
+   "tiles_used": 4307
+  },
+  "valid_fraction": 0.8653,
+  "clipped_px_4x": 322768,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.7691,
+    "centre_y": 647.913,
+    "fwhm": 6.092,
+    "edge_10_90_top": 5.194,
+    "edge_10_90_bottom": 1.153
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.7604,
+    "centre_y": 647.567,
+    "fwhm": 6.167,
+    "edge_10_90_top": 5.424,
+    "edge_10_90_bottom": 1.3
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.797,
+    "centre_y": 647.699,
+    "fwhm": 6.258,
+    "edge_10_90_top": 5.343,
+    "edge_10_90_bottom": 1.215
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7636,
+    "centre_y": 647.878,
+    "fwhm": 6.324,
+    "edge_10_90_top": 5.289,
+    "edge_10_90_bottom": 1.36
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.7191,
+    "centre_y": 647.989,
+    "fwhm": 6.495,
+    "edge_10_90_top": 4.921,
+    "edge_10_90_bottom": 1.629
+   }
+  ],
+  "rail_fwhm_median": 6.258,
+  "edge_10_90_median": 3.275
+ },
+ "14": {
+  "black_level_lin_Y": 0.00841,
+  "black_level_p10_p90": [
+   0.00519,
+   0.01302
+  ],
+  "empty_tiles": 8947,
+  "black_level_srgb8": 22.7,
+  "white_text_lin_Y_minus_black": 0.9916,
+  "white_text_p999": 0.9916,
+  "exposure_factor": 1.008,
+  "black_rel_white": 0.0085,
+  "sign_ring_red_lin_minus_black": 0.6136,
+  "sign_ring_red_rel_white": 0.619,
+  "glare_excess_rel_white": {
+   "max": 0.0692,
+   "p95": 0.0474,
+   "fit_rms_lin": 0.0069,
+   "tiles_used": 7662
+  },
+  "valid_fraction": 0.7013,
+  "clipped_px_4x": 125047,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.9383,
+    "centre_y": 647.944,
+    "fwhm": 5.22,
+    "edge_10_90_top": 3.109,
+    "edge_10_90_bottom": 3.475
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.9063,
+    "centre_y": 647.372,
+    "fwhm": 5.936,
+    "edge_10_90_top": 3.68,
+    "edge_10_90_bottom": 3.737
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.9209,
+    "centre_y": 648.048,
+    "fwhm": 6.076,
+    "edge_10_90_top": 3.633,
+    "edge_10_90_bottom": 3.573
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.9207,
+    "centre_y": 648.277,
+    "fwhm": 5.736,
+    "edge_10_90_top": 3.657,
+    "edge_10_90_bottom": 3.575
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.901,
+    "centre_y": 648.287,
+    "fwhm": 5.741,
+    "edge_10_90_top": 3.649,
+    "edge_10_90_bottom": 3.679
+   }
+  ],
+  "rail_fwhm_median": 5.741,
+  "edge_10_90_median": 3.641
+ },
+ "17": {
+  "black_level_lin_Y": 0.00078,
+  "black_level_p10_p90": [
+   0.00042,
+   0.00151
+  ],
+  "empty_tiles": 9223,
+  "black_level_srgb8": 2.6,
+  "white_text_lin_Y_minus_black": 0.963,
+  "white_text_p999": 0.9992,
+  "exposure_factor": 1.038,
+  "black_rel_white": 0.0008,
+  "sign_ring_red_lin_minus_black": 0.7186,
+  "sign_ring_red_rel_white": 0.746,
+  "glare_excess_rel_white": {
+   "max": 0.013,
+   "p95": 0.0095,
+   "fit_rms_lin": 0.00139,
+   "tiles_used": 7319
+  },
+  "valid_fraction": 0.9612,
+  "clipped_px_4x": 72553,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.6619,
+    "centre_y": 648.872,
+    "fwhm": 5.864,
+    "edge_10_90_top": 3.752,
+    "edge_10_90_bottom": 2.07
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.6674,
+    "centre_y": 648.894,
+    "fwhm": 5.549,
+    "edge_10_90_top": 2.195,
+    "edge_10_90_bottom": 1.968
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.6125,
+    "centre_y": 649.226,
+    "fwhm": 5.856,
+    "edge_10_90_top": 2.043,
+    "edge_10_90_bottom": 2.041
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.5746,
+    "centre_y": 648.899,
+    "fwhm": 5.97,
+    "edge_10_90_top": 2.136,
+    "edge_10_90_bottom": 2.2
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.5996,
+    "centre_y": 648.552,
+    "fwhm": 5.905,
+    "edge_10_90_top": 1.98,
+    "edge_10_90_bottom": 2.269
+   }
+  ],
+  "rail_fwhm_median": 5.864,
+  "edge_10_90_median": 2.103
+ },
+ "39": {
+  "black_level_lin_Y": 0.00418,
+  "black_level_p10_p90": [
+   0.00299,
+   0.00594
+  ],
+  "empty_tiles": 12879,
+  "black_level_srgb8": 13.4,
+  "white_text_lin_Y_minus_black": 0.7372,
+  "white_text_p999": 0.7856,
+  "exposure_factor": 1.356,
+  "black_rel_white": 0.0057,
+  "sign_ring_red_lin_minus_black": 0.5478,
+  "sign_ring_red_rel_white": 0.743,
+  "glare_excess_rel_white": {
+   "max": 0.035,
+   "p95": 0.0249,
+   "fit_rms_lin": 0.00319,
+   "tiles_used": 11477
+  },
+  "valid_fraction": 0.8901,
+  "clipped_px_4x": 1615,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.2861,
+    "centre_y": 648.017,
+    "fwhm": 5.744,
+    "edge_10_90_top": 0.8,
+    "edge_10_90_bottom": 5.002
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.287,
+    "centre_y": 647.543,
+    "fwhm": 5.602,
+    "edge_10_90_top": 0.883,
+    "edge_10_90_bottom": 4.884
+   },
+   {
+    "x": [
+     1300,
+     1340
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.2886,
+    "centre_y": 648.043,
+    "fwhm": 5.722,
+    "edge_10_90_top": 0.811,
+    "edge_10_90_bottom": 5.243
+   },
+   {
+    "x": [
+     1380,
+     1420
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.2662,
+    "centre_y": 648.271,
+    "fwhm": 5.684,
+    "edge_10_90_top": 4.335,
+    "edge_10_90_bottom": 1.042
+   },
+   {
+    "x": [
+     1460,
+     1500
+    ],
+    "what": "tacho rail",
+    "peak_lin": 0.2685,
+    "centre_y": 648.34,
+    "fwhm": 5.7,
+    "edge_10_90_top": 4.274,
+    "edge_10_90_bottom": 1.146
+   }
+  ],
+  "rail_fwhm_median": 5.7,
+  "edge_10_90_median": 2.71
+ },
+ "40": {
+  "black_level_lin_Y": 0.02725,
+  "black_level_p10_p90": [
+   0.01265,
+   0.03475
+  ],
+  "empty_tiles": 3803,
+  "black_level_srgb8": 45.9,
+  "white_text_lin_Y_minus_black": 0.9567,
+  "white_text_p999": 0.9702,
+  "exposure_factor": 1.045,
+  "black_rel_white": 0.0285,
+  "sign_ring_red_lin_minus_black": 0.8122,
+  "sign_ring_red_rel_white": 0.849,
+  "glare_excess_rel_white": {
+   "max": 0.6442,
+   "p95": 0.556,
+   "fit_rms_lin": 0.00994,
+   "tiles_used": 3312
+  },
+  "valid_fraction": 0.3049,
+  "clipped_px_4x": 62507,
+  "rails": [
+   {
+    "x": [
+     610,
+     650
+    ],
+    "what": "speedo rail right of the sign",
+    "peak_lin": 0.6856,
+    "centre_y": 649.08,
+    "fwhm": 6.383,
+    "edge_10_90_top": 1.511,
+    "edge_10_90_bottom": 0.482
+   },
+   {
+    "x": [
+     660,
+     700
+    ],
+    "what": "speedo rail",
+    "peak_lin": 0.6713,
+    "centre_y": 648.967,
+    "fwhm": 6.44,
+    "edge_10_90_top": 1.124,
+    "edge_10_90_bottom": 1.201
+   }
+  ],
+  "rail_fwhm_median": 6.412,
+  "edge_10_90_median": 1.163
+ }
+}

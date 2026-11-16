@@ -1,0 +1,365 @@
+{
+ "14": {
+  "speedo_rail_hook_right": {
+   "dx": -1.216,
+   "dy": 0.773,
+   "ncc": 0.391
+  },
+  "tacho_rail_hook_left": {
+   "dx": 0.211,
+   "dy": -0.059,
+   "ncc": 0.962
+  },
+  "fuel_mini_zero": {
+   "dx": 0.1,
+   "dy": -0.062,
+   "ncc": 0.929
+  },
+  "speedo_ticks_20": {
+   "dx": 0.085,
+   "dy": 0.012,
+   "ncc": 0.943
+  },
+  "tacho_label_1min_x1000": {
+   "dx": -0.041,
+   "dy": -0.1,
+   "ncc": 0.947
+  },
+  "temp_mini_scale_end": {
+   "dx": -0.139,
+   "dy": -0.009,
+   "ncc": 0.579
+  },
+  "_rms_ncc_gt_0.8": 0.142
+ },
+ "17": {
+  "speedo_rail_hook_right": {
+   "dx": 4.0,
+   "dy": 4.0,
+   "ncc": 0.091
+  },
+  "tacho_rail_hook_left": {
+   "dx": 4.0,
+   "dy": 1.509,
+   "ncc": 0.152
+  },
+  "fuel_mini_zero": {
+   "dx": 0.024,
+   "dy": -0.033,
+   "ncc": 0.979
+  },
+  "speedo_ticks_20": {
+   "dx": 0.014,
+   "dy": 0.037,
+   "ncc": 0.976
+  },
+  "tacho_label_1min_x1000": {
+   "dx": -4.0,
+   "dy": -0.299,
+   "ncc": 0.261
+  },
+  "temp_mini_scale_end": {
+   "dx": -4.0,
+   "dy": -2.842,
+   "ncc": 0.37
+  },
+  "_rms_ncc_gt_0.8": 0.04
+ },
+ "40": {
+  "speedo_rail_hook_right": {
+   "dx": -3.275,
+   "dy": 4.0,
+   "ncc": 0.579
+  },
+  "tacho_rail_hook_left": {
+   "dx": -4.0,
+   "dy": -4.0,
+   "ncc": 0.0
+  },
+  "fuel_mini_zero": {
+   "dx": -0.192,
+   "dy": -0.008,
+   "ncc": 0.913
+  },
+  "speedo_ticks_20": {
+   "dx": -0.082,
+   "dy": -0.014,
+   "ncc": 0.941
+  },
+  "tacho_label_1min_x1000": {
+   "dx": -4.0,
+   "dy": -4.0,
+   "ncc": 0.0
+  },
+  "temp_mini_scale_end": {
+   "dx": 4.0,
+   "dy": 4.0,
+   "ncc": 0.028
+  },
+  "_rms_ncc_gt_0.8": 0.148
+ },
+ "60": {
+  "speedo_rail_hook_right": {
+   "dx": -0.997,
+   "dy": 1.765,
+   "ncc": 0.373
+  },
+  "tacho_rail_hook_left": {
+   "dx": -0.594,
+   "dy": -0.054,
+   "ncc": 0.43
+  },
+  "fuel_mini_zero": {
+   "dx": -0.396,
+   "dy": 0.171,
+   "ncc": 0.607
+  },
+  "speedo_ticks_20": {
+   "dx": 2.85,
+   "dy": -4.0,
+   "ncc": -0.04
+  },
+  "tacho_label_1min_x1000": {
+   "dx": -0.016,
+   "dy": -0.029,
+   "ncc": 0.608
+  },
+  "temp_mini_scale_end": {
+   "dx": -0.094,
+   "dy": -0.254,
+   "ncc": 0.357
+  },
+  "_rms_ncc_gt_0.8": null
+ },
+ "62": {
+  "speedo_rail_hook_right": {
+   "dx": 4.0,
+   "dy": 4.0,
+   "ncc": 0.052
+  },
+  "tacho_rail_hook_left": {
+   "dx": 4.0,
+   "dy": -0.668,
+   "ncc": 0.521
+  },
+  "fuel_mini_zero": {
+   "dx": 0.027,
+   "dy": -0.016,
+   "ncc": 0.983
+  },
+  "speedo_ticks_20": {
+   "dx": 0.052,
+   "dy": 0.03,
+   "ncc": 0.978
+  },
+  "tacho_label_1min_x1000": {
+   "dx": -0.07,
+   "dy": 0.043,
+   "ncc": 0.831
+  },
+  "temp_mini_scale_end": {
+   "dx": 0.094,
+   "dy": 0.029,
+   "ncc": 0.981
+  },
+  "_rms_ncc_gt_0.8": 0.072
+ },
+ "63": {
+  "speedo_rail_hook_right": {
+   "dx": 0.23,
+   "dy": -0.235,
+   "ncc": 0.983
+  },
+  "tacho_rail_hook_left": {
+   "dx": 0.092,
+   "dy": -0.005,
+   "ncc": 0.993
+  },
+  "fuel_mini_zero": {
+   "dx": 0.041,
+   "dy": 0.017,
+   "ncc": 0.982
+  },
+  "speedo_ticks_20": {
+   "dx": 0.068,
+   "dy": -0.013,
+   "ncc": 0.975
+  },
+  "tacho_label_1min_x1000": {
+   "dx": -0.075,
+   "dy": 0.064,
+   "ncc": 0.839
+  },
+  "temp_mini_scale_end": {
+   "dx": 0.007,
+   "dy": -0.015,
+   "ncc": 0.986
+  },
+  "_rms_ncc_gt_0.8": 0.149
+ },
+ "64": {
+  "speedo_rail_hook_right": {
+   "dx": -0.049,
+   "dy": 0.158,
+   "ncc": 0.977
+  },
+  "tacho_rail_hook_left": {
+   "dx": 0.228,
+   "dy": -0.028,
+   "ncc": 0.986
+  },
+  "fuel_mini_zero": {
+   "dx": 0.16,
+   "dy": -0.13,
+   "ncc": 0.965
+  },
+  "speedo_ticks_20": {
+   "dx": 0.024,
+   "dy": 0.001,
+   "ncc": 0.976
+  },
+  "tacho_label_1min_x1000": {
+   "dx": 0.024,
+   "dy": -0.011,
+   "ncc": 0.98
+  },
+  "temp_mini_scale_end": {
+   "dx": -0.027,
+   "dy": -0.032,
+   "ncc": 0.588
+  },
+  "_rms_ncc_gt_0.8": 0.157
+ },
+ "65": {
+  "speedo_rail_hook_right": {
+   "dx": -0.185,
+   "dy": 0.091,
+   "ncc": 0.979
+  },
+  "tacho_rail_hook_left": {
+   "dx": -2.101,
+   "dy": 0.7,
+   "ncc": 0.992
+  },
+  "fuel_mini_zero": {
+   "dx": 0.059,
+   "dy": -0.121,
+   "ncc": 0.956
+  },
+  "speedo_ticks_20": {
+   "dx": 2.802,
+   "dy": 0.982,
+   "ncc": 0.403
+  },
+  "tacho_label_1min_x1000": {
+   "dx": -4.0,
+   "dy": -4.0,
+   "ncc": 0.39
+  },
+  "temp_mini_scale_end": {
+   "dx": -0.792,
+   "dy": 2.783,
+   "ncc": 0.619
+  },
+  "_rms_ncc_gt_0.8": 1.286
+ },
+ "66": {
+  "speedo_rail_hook_right": {
+   "dx": 4.0,
+   "dy": 4.0,
+   "ncc": 0.202
+  },
+  "tacho_rail_hook_left": {
+   "dx": 4.0,
+   "dy": -0.158,
+   "ncc": 0.344
+  },
+  "fuel_mini_zero": {
+   "dx": 0.173,
+   "dy": -0.045,
+   "ncc": 0.931
+  },
+  "speedo_ticks_20": {
+   "dx": 0.179,
+   "dy": -0.013,
+   "ncc": 0.958
+  },
+  "tacho_label_1min_x1000": {
+   "dx": -0.04,
+   "dy": -0.019,
+   "ncc": 0.974
+  },
+  "temp_mini_scale_end": {
+   "dx": -0.172,
+   "dy": 0.403,
+   "ncc": 0.598
+  },
+  "_rms_ncc_gt_0.8": 0.148
+ },
+ "67": {
+  "speedo_rail_hook_right": {
+   "dx": 0.312,
+   "dy": 0.062,
+   "ncc": 0.978
+  },
+  "tacho_rail_hook_left": {
+   "dx": -0.959,
+   "dy": -0.052,
+   "ncc": 0.913
+  },
+  "fuel_mini_zero": {
+   "dx": 0.18,
+   "dy": -0.055,
+   "ncc": 0.927
+  },
+  "speedo_ticks_20": {
+   "dx": 0.173,
+   "dy": -0.002,
+   "ncc": 0.954
+  },
+  "tacho_label_1min_x1000": {
+   "dx": -0.036,
+   "dy": -0.02,
+   "ncc": 0.974
+  },
+  "temp_mini_scale_end": {
+   "dx": -0.117,
+   "dy": 0.182,
+   "ncc": 0.593
+  },
+  "_rms_ncc_gt_0.8": 0.467
+ },
+ "68": {
+  "speedo_rail_hook_right": {
+   "dx": -0.528,
+   "dy": 0.203,
+   "ncc": 0.924
+  },
+  "tacho_rail_hook_left": {
+   "dx": 0.389,
+   "dy": 0.049,
+   "ncc": 0.945
+  },
+  "fuel_mini_zero": {
+   "dx": -0.033,
+   "dy": -0.086,
+   "ncc": 0.906
+  },
+  "speedo_ticks_20": {
+   "dx": -0.037,
+   "dy": -0.085,
+   "ncc": 0.896
+  },
+  "tacho_label_1min_x1000": {
+   "dx": 0.324,
+   "dy": 0.65,
+   "ncc": 0.403
+  },
+  "temp_mini_scale_end": {
+   "dx": 1.65,
+   "dy": 0.242,
+   "ncc": 0.895
+  },
+  "_rms_ncc_gt_0.8": 0.809
+ }
+}
