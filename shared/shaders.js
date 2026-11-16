@@ -1055,14 +1055,19 @@ void main() {
 // pixel memory). A colour splits into its grey part w = min(r, g, b) and what is left over (c - w: the red of the needle,
 // the blue of the floor); u_nk0..2 are the output's rows: (red's, green's, blue's image, then the white's image). The
 // identity (1 0 0 1, 0 1 0 1, 0 0 1 1) leaves every colour as it is. hud.js sends it always (an unset vec4 is 0: black).
-const NIGHT_GLSL = `uniform vec4 u_nk0;
+// 2026-11-16 (the owner: "the night themes in Sport and Eco must go"): "#if NIGHT" is resolved in JS like STYLE
+// (compact()); NIGHT 0 (hud.js, a 6WB Sport / Eco Pro layout) leaves u_nk0..2 and nightLook() out of the source and
+// compact() unwraps every nightLook(x) call to x, so a day-only layer's shader is the smaller one, not a switched-off one.
+const NIGHT_GLSL = `#if NIGHT
+uniform vec4 u_nk0;
 uniform vec4 u_nk1;
 uniform vec4 u_nk2;
 vec3 nightLook(vec3 c) {
     float w = min(c.r, min(c.g, c.b));
     vec4 v = vec4(c - vec3(w), w);
     return vec3(dot(u_nk0, v), dot(u_nk1, v), dot(u_nk2, v));
-}`;
+}
+#endif`;
 
 const WBDIAL = `// 6WB-style round gauges for a cluster-render "effect" layer (GLSL ES 1.00): our own drawing, traced by eye off
 // photos of BMW's F-series multifunctional display (no BMW artwork). One shader, five looks (u_style):
@@ -2430,25 +2435,26 @@ void main() {
  *  layout made it reset (0.7.11, 0.7.12; 0.7.10's sources were ~5 % shorter and drew). So the inactive looks are cut
  *  out here, before the source leaves the app (the "#if STYLE" blocks, evaluated in JS), and so are the comments and
  *  blank lines: the KOMBI gets a much shorter source with nothing in it to skip. */
-function styled(src, style) {
+function styled(src, style, night) {
     const n = Number.isInteger(style) && style >= 0 && style <= 4 ? style : -1;
-    return compact('#define STYLE ' + n + '\n' + src, n);
+    return compact('#define STYLE ' + n + '\n' + src, n, night);     // 2026-11-16: night false: no night look (NIGHT_GLSL)
 }
 
 /** A shader source with its "#if STYLE ..." blocks resolved for STYLE n (other directives kept as they are), then
  *  without comments, trailing spaces and blank lines. GLSL ES 1.00 has no strings, so "//" always starts a comment. */
-function compact(src, n) {
+function compact(src, n, night) {
+    const nk = night === false ? 0 : 1;  // 2026-11-16: NIGHT (NIGHT_GLSL); on unless false, so every other caller is as before
     const out = [], stack = [];          // per open #if: { mine: a STYLE block, take: its branch is kept, done: one was }
     const on = () => stack.every((f) => !f.mine || f.take);
     const cond = (e) => {
-        const x = e.replace(/\bSTYLE\b/g, '(' + n + ')');
+        const x = e.replace(/\bSTYLE\b/g, '(' + n + ')').replace(/\bNIGHT\b/g, '(' + nk + ')');      // 2026-11-16: NIGHT
         if (!/^[\d\s()<>=!|&-]+$/.test(x)) throw new Error('shaders.compact: cannot evaluate #if ' + e);
         return !!Function('return (' + x + ');')();       // only digits and operators reach here
     };
     src.split('\n').forEach((line) => {
         const t = line.trim();
         let m;
-        if ((m = /^#if\s+(.*\bSTYLE\b.*)$/.exec(t))) {
+        if ((m = /^#if\s+(.*\b(?:STYLE|NIGHT)\b.*)$/.exec(t))) {      // 2026-11-16: NIGHT too
             const take = cond(m[1]);
             stack.push({ mine: true, take, done: take });
             return;
@@ -2468,7 +2474,10 @@ function compact(src, n) {
         if (c.trim()) out.push(c);
     });
     if (stack.length) throw new Error('shaders.compact: an #if without #endif');
-    return out.join('\n') + '\n';
+    // 2026-11-16: NIGHT 0: nightLook(x) is gone from the source, so each call becomes its plain argument
+    const res = nk ? out.join('\n') + '\n' : out.join('\n').replace(/\bnightLook\(([\w.]+)\)/g, '$1') + '\n';
+    if (!nk && /\bnightLook\b|\bu_nk\d/.test(res)) throw new Error('shaders.compact: a night look left in a NIGHT 0 source');
+    return res;
 }
 
-module.exports = { wbdialFor: (style) => styled(WBDIAL, style), wbbackFor: (style) => styled(WBBACK, style), shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: styled(WBDIAL, -1), wbback: styled(WBBACK, -1), wbsign: compact(WBSIGN, -1), wbmsa: compact(WBMSA, -1) /* car3 I */, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, g20dial: G20DIAL };
+module.exports = { wbdialFor: (style, night) => styled(WBDIAL, style, night), wbbackFor: (style, night) => styled(WBBACK, style, night), wbsignFor: (night) => compact(WBSIGN, -1, night) /* 2026-11-16: night false: none (6WB Sport / Eco Pro) */, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: styled(WBDIAL, -1), wbback: styled(WBBACK, -1), wbsign: compact(WBSIGN, -1), wbmsa: compact(WBMSA, -1) /* car3 I */, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, g20dial: G20DIAL };

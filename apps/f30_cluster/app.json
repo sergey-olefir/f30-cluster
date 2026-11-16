@@ -508,8 +508,9 @@
     },
     {
       "key": "nightDim",
-      "label": "Night colours",
+      "label": "Night colours (Comfort)",
       "type": "choice",
+      "_about": "2026-11-16, the owner: 'the night themes in Sport and Eco must go'. 6WB Sport and 6WB Eco Pro look the same by night as by day whatever this says (hud.js DAY_ONLY_THEMES); 6WB Comfort and its G20 toggle take the night colours, which is why the label says Comfort. (The calibration layouts with a theme of their own keep the plain dimmer too.)",
       "default": "auto",
       "options": [
         [
@@ -528,7 +529,8 @@
     },
     {
       "key": "nightLook",
-      "label": "Night look (6WB)",
+      "label": "Night look (Comfort)",
+      "_about": "2026-11-16: only 6WB Comfort (and its G20 toggle) has night looks; 6WB Sport and 6WB Eco Pro have none, and their shaders are made without the night look's code (shared/shaders.js NIGHT 0).",
       "type": "choice",
       "default": "plain",
       "options": [

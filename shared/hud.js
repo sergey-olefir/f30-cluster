@@ -205,6 +205,8 @@
  * 6WB layout (WBDIAL / WBBACK layers) can take one of NIGHT_LOOKS instead of the plain dimmer: one colour transform for
  * the whole cluster, on the GPU for the dials and the backdrop (baked textures included) and here for the texts. A
  * change of either setting, and sunset / sunrise, is applied in place (_nightLive): no layer is made again.
+ * 2026-11-16 (the owner): 6WB Sport and 6WB Eco Pro have no night colours at all (DAY_ONLY_THEMES, _nightOk): neither
+ * the dimmer nor a look, and their 6WB shaders are made without the night look's code. Comfort (+ G20) keeps both.
  *
  * Boost is a PUSH signal, not a diagnostic poll: tracing cauliflowermossgrape's
  * car_vitals showed its boost reading is de.bmw.infotainment.drivingexcitement.FES /
@@ -360,6 +362,11 @@ const NIGHT_LOOKS = {
 };
 // settings the night colours follow (_nightLive: in place when every layer can take them, else a rebuild)
 const NIGHT_KEYS = ['nightDim', 'nightLook'];
+// 2026-11-16, the owner: "the night themes in Sport and Eco must go". A layout of these themes (wb_sport, wb_eco and
+// wb_sport_dials, by their "theme") looks the same by night as by day: no plain dimmer, no night look, and its 6WB
+// shaders are compiled without the night look (shaders.js NIGHT 0: no u_nk0..2, no nightLook()). Comfort and
+// Comfort + G20 (theme wb_comfort) keep theirs; the other layouts of a theme of their own keep the plain dimmer.
+const DAY_ONLY_THEMES = ['wb_sport', 'wb_eco'];
 // 0.7.13, the KOMBI guard: when the cluster's display service goes away within KOMBI_GUARD_MS of our scene being shown,
 // KOMBI_STRIKES times within KOMBI_WINDOW_MS, the theme is turned off (every theme, so a drive-mode change doesn't try
 // another), and stays off, across restarts too (<data>/kombi-guard.json), until a theme is picked again. On 2026-11-14
@@ -2108,12 +2115,16 @@ class HudApp {
     /** Night colours now: a theme of the layout's own, and Cluster Themes' "nightDim" on Auto with the sun down, or on
      *  Always (2026-11-14: to see or keep a night look by day; also how the bench shows them). */
     _nightDim() {
-        if (!this.ctx.settings.item('nightDim') || !this.layoutTheme) return false;
+        if (!this.ctx.settings.item('nightDim') || !this._nightOk()) return false;     // 2026-11-16: not Sport / Eco Pro
         const v = this.setting('nightDim');
         if (v === 'always') return true;
         if (v !== 'auto') return false;
         return sun.isNight(Date.now(), this._location().lat, this._location().lon);
     }
+
+    /** 2026-11-16: the layout has night colours at all: a theme of its own, not one of DAY_ONLY_THEMES (6WB Sport,
+     *  6WB Eco Pro). False: its 6WB shaders are made without the night look (shaders.js NIGHT 0) and get no u_nk. */
+    _nightOk() { return !!this.layoutTheme && DAY_ONLY_THEMES.indexOf(this.layoutTheme) < 0; }
 
     /* --- 2026-11-14: night looks ("nightLook", NIGHT_LOOKS) --- */
 
@@ -2160,10 +2171,12 @@ class HudApp {
             c.uniform(ref, 'u_color', rgba(color(this.theme, w.color || 'fg')));
             return;                                          // ...and no u_nk either, for the same reason
         } else if (w.type === 'wbsign') {
+            if (!x.nightGL) return;                          // 2026-11-16: made without the night look (Sport / Eco Pro)
             const k = this.look ? this.look.sign : 1;        // dimmed only: the identity times k
             lookRows(null).forEach((v, i) => c.uniform(ref, 'u_nk' + i, v.map((e) => e * k)));
             return;
         } else return;
+        if (!x.nightGL) return;                              // 2026-11-16: made without the night look: no u_nk0..2
         lookRows(this.look).forEach((v, i) => c.uniform(ref, 'u_nk' + i, v));
     }
 
@@ -2173,6 +2186,7 @@ class HudApp {
     _nightLive() {
         try {
             if (!this.activeName || this.activeName === 'off' || !this.layoutTheme || !this.baseTheme || !this.widgets.size) return false;
+            if (!this._nightOk() && !this.nightOn) return true;     // 2026-11-16: 6WB Sport / Eco Pro: nothing to change, no rebuild
             const live = (w) => w.type === 'text' || w.type === 'wbback' || w.type === 'wbsign' || w.type === 'wbmsa' || (w.type === 'dial' && w.look === 'wb') ||
                 (w.type === 'atext' && !!w.exact);      // 0.7.14: a "gpu" text (u_color)
             let ok = true;
@@ -2935,14 +2949,17 @@ class HudApp {
             if (IMAGE_TYPES[w.type]) ref = c.image(Object.assign({ iw: w.w, ih: w.h }, base));
             else if (w.type === 'swatch') fs = calibration.SWATCH;
             // 0.7.13: a 6WB dial or backdrop gets only its own look's code (shaders.js styled): the KOMBI compiles every branch
-            else if (w.type === 'dial' && w.look === 'wb') fs = shaders.wbdialFor(WB_STYLE[w.style] || 0);
-            else if (w.type === 'wbback') fs = shaders.wbbackFor(WB_STYLE[w.style] || 0);
+            // 2026-11-16: in 6WB Sport / Eco Pro (_nightOk false) without the night look (shaders.js NIGHT 0)
+            else if (w.type === 'dial' && w.look === 'wb') fs = shaders.wbdialFor(WB_STYLE[w.style] || 0, this._nightOk());
+            else if (w.type === 'wbback') fs = shaders.wbbackFor(WB_STYLE[w.style] || 0, this._nightOk());
+            else if (w.type === 'wbsign') fs = shaders.wbsignFor(this._nightOk());
             else fs = shaders[w.type];
             if (fs) ref = c.effect(Object.assign({ fs }, base));
             if (!ref) { this.log.warn('widget "' + w.id + '": layer refused'); return; }
             this.placed.push({ c, ref, x: w.x, y: w.y, w: w.w, h: w.h });
         }
         const x = { w, ref, c, ci: sheet ? sheet.ci : this._connOf(w), sheet: sheet || null, last: null, lastPaint: 0, px: null };
+        x.nightGL = this._nightOk();    // 2026-11-16: its 6WB shader has the night look (u_nk0..2); false in Sport / Eco Pro
         this.widgets.set(w.id, x);
         const t = this.theme;
         if (w.type === 'atext') {
