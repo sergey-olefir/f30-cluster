@@ -62,6 +62,16 @@ const SCENES = {
         },
     },
     'cc-clear': { cc: { clear: true }, ccList: [], ccFrame: { frame: 0, of: 0, ids: [0, 0, 0] } },
+    // ---- package X: the safety cases (bench/test-bottom-row.js). Made-up texts, none of them personal ----
+    // a message the car marks (a symbol) but whose text our paths do not find: it must count as showing
+    'cc-unread': { cc: { name: '', desc: '', color: 'red', symbol: 12, id: 0 } },
+    // a notification none of config.ccm's roots fits (another union member than the two we know)
+    'cc-unread-root': { cc: { variant: 'other', name: 'Engine malfunction', symbol: 12 } },
+    // a Ukrainian message: our current fonts have no Cyrillic, so it cannot be drawn
+    'cc-uk': { cc: { name: 'Низький тиск у шинах', desc: 'Перевірте тиск у шинах.', color: 'yellow', symbol: 44 } },
+    // a headline wider than the slot: cut with "..."
+    'cc-long-name': { cc: { name: 'Front passenger restraint system and belt tensioner malfunction in the rear', desc: 'Drive on with care.', color: 'orange', symbol: 21 } },
+    // ---- end package X ----
     // the car cycles numbered frames (docs/G20-DESIGN-SPEC.md): no frame here, so ours runs its own clock
     'cc-three': {
         cc: { name: 'Tyre pressure', desc: 'Check the tyre pressure.', color: 'yellow', symbol: 44, id: 101 },
@@ -139,7 +149,8 @@ function install(hu, config, log) {
         put(c.idPath, Math.round(Number(m.id) || 0));
         put(c.typePath, m.type);
         const roots = Array.isArray(c.roots) && c.roots.length ? c.roots : [[]];
-        const root = m.variant === 'symbol' && roots[1] ? roots[1] : roots[0];
+        // package X: "other" puts the message under a member config.ccm does not name (an unreadable union)
+        const root = m.variant === 'other' ? ['cCMessageUnknownMember'] : m.variant === 'symbol' && roots[1] ? roots[1] : roots[0];
         const out = nest(root, inner);
         // the union's other member is absent, as the binding hands a union over
         last.cc = m;
