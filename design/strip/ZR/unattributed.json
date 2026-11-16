@@ -1,0 +1,799 @@
+{
+ "source": "R",
+ "zone": [
+  1240,
+  540,
+  1920,
+  720
+ ],
+ "photos": {
+  "61": {
+   "black_lin": 0.00154,
+   "noise_lin": 0.00054,
+   "white_core_lin": 0.8708,
+   "black_rel_white": 0.0018,
+   "attributed": {
+    "structure.tacho_needle": {
+     "n": 18,
+     "area_px": 3753.9,
+     "box": [
+      1508.0,
+      540.0,
+      1686.75,
+      642.75
+     ]
+    },
+    "rail.right": {
+     "n": 1,
+     "area_px": 5148.2,
+     "box": [
+      1240.0,
+      540.0,
+      1749.25,
+      652.5
+     ]
+    },
+    "structure.oil_mini.rail_ticks": {
+     "n": 11,
+     "area_px": 4507.2,
+     "box": [
+      1693.75,
+      540.0,
+      1902.0,
+      641.0
+     ]
+    },
+    "structure.tacho.ticks": {
+     "n": 8,
+     "area_px": 317.8,
+     "box": [
+      1555.25,
+      581.5,
+      1693.5,
+      639.5
+     ]
+    },
+    "structure.tacho.rev_band": {
+     "n": 2,
+     "area_px": 34.9,
+     "box": [
+      1508.5,
+      602.25,
+      1598.0,
+      610.25
+     ]
+    },
+    "structure.oil_mini.cold_band": {
+     "n": 1,
+     "area_px": 550.9,
+     "box": [
+      1716.5,
+      627.5,
+      1816.5,
+      650.0
+     ]
+    }
+   },
+   "unexplained": [],
+   "diffuse_boxes_rel_white": {
+    "0.02": [
+     1240.0,
+     540.0,
+     1887.0,
+     692.5
+    ],
+    "0.1": [
+     1526.5,
+     540.0,
+     1857.2,
+     638.2
+    ]
+   }
+  },
+  "62": {
+   "black_lin": 0.00159,
+   "noise_lin": 0.00061,
+   "white_core_lin": 0.8685,
+   "black_rel_white": 0.0018,
+   "attributed": {
+    "map.region": {
+     "n": 4,
+     "area_px": 628.3,
+     "box": [
+      1247.75,
+      540.0,
+      1283.0,
+      593.0
+     ]
+    },
+    "structure.tacho_needle": {
+     "n": 68,
+     "area_px": 4681.6,
+     "box": [
+      1416.25,
+      540.0,
+      1682.5,
+      609.5
+     ]
+    },
+    "structure.oil_mini.rail_ticks": {
+     "n": 21,
+     "area_px": 3197.8,
+     "box": [
+      1693.75,
+      540.0,
+      1863.25,
+      641.25
+     ]
+    },
+    "rail.right": {
+     "n": 2,
+     "area_px": 5365.9,
+     "box": [
+      1240.0,
+      540.0,
+      1748.25,
+      652.75
+     ]
+    },
+    "structure.oil_mini.needle_or_hot_band": {
+     "n": 1,
+     "area_px": 1410.9,
+     "box": [
+      1781.0,
+      540.0,
+      1896.5,
+      599.0
+     ]
+    },
+    "structure.tacho.ticks": {
+     "n": 9,
+     "area_px": 278.0,
+     "box": [
+      1556.0,
+      582.0,
+      1693.0,
+      639.25
+     ]
+    },
+    "structure.tacho.rev_band": {
+     "n": 4,
+     "area_px": 123.0,
+     "box": [
+      1508.25,
+      597.25,
+      1579.0,
+      609.5
+     ]
+    },
+    "structure.oil_mini.cold_band": {
+     "n": 1,
+     "area_px": 496.5,
+     "box": [
+      1717.75,
+      628.0,
+      1816.0,
+      649.75
+     ]
+    },
+    "halo.of_catalogued_element": {
+     "n": 5,
+     "area_px": 21.3,
+     "box": [
+      1574.0,
+      673.25,
+      1664.5,
+      699.5
+     ]
+    }
+   },
+   "unexplained": [],
+   "diffuse_boxes_rel_white": {
+    "0.02": [
+     1433.8,
+     540.0,
+     1857.8,
+     639.0
+    ],
+    "0.1": [
+     1445.8,
+     540.0,
+     1855.5,
+     637.8
+    ]
+   }
+  },
+  "63": {
+   "black_lin": 0.00181,
+   "noise_lin": 0.00066,
+   "white_core_lin": 0.863,
+   "black_rel_white": 0.0021,
+   "attributed": {
+    "structure.tacho_needle": {
+     "n": 39,
+     "area_px": 5813.4,
+     "box": [
+      1416.25,
+      540.0,
+      1683.0,
+      611.5
+     ]
+    },
+    "rail.right": {
+     "n": 2,
+     "area_px": 5350.8,
+     "box": [
+      1240.0,
+      540.0,
+      1748.75,
+      653.0
+     ]
+    },
+    "structure.oil_mini.rail_ticks": {
+     "n": 18,
+     "area_px": 4913.1,
+     "box": [
+      1693.5,
+      540.0,
+      1896.25,
+      641.5
+     ]
+    },
+    "structure.tacho.ticks": {
+     "n": 10,
+     "area_px": 400.2,
+     "box": [
+      1555.75,
+      582.0,
+      1693.75,
+      641.25
+     ]
+    },
+    "structure.tacho.rev_band": {
+     "n": 1,
+     "area_px": 74.4,
+     "box": [
+      1508.75,
+      604.5,
+      1532.0,
+      611.5
+     ]
+    },
+    "structure.oil_mini.cold_band": {
+     "n": 1,
+     "area_px": 524.1,
+     "box": [
+      1715.0,
+      627.5,
+      1816.0,
+      650.5
+     ]
+    },
+    "halo.of_catalogued_element": {
+     "n": 8,
+     "area_px": 30.6,
+     "box": [
+      1555.0,
+      672.75,
+      1664.25,
+      700.25
+     ]
+    }
+   },
+   "unexplained": [],
+   "diffuse_boxes_rel_white": {
+    "0.02": [
+     1432.8,
+     540.0,
+     1858.0,
+     639.8
+    ],
+    "0.1": [
+     1445.0,
+     540.0,
+     1855.8,
+     638.5
+    ]
+   }
+  },
+  "64": {
+   "black_lin": 0.0233,
+   "noise_lin": 0.00466,
+   "white_core_lin": 0.8605,
+   "black_rel_white": 0.0271,
+   "attributed": {
+    "map.region": {
+     "n": 4,
+     "area_px": 373.6,
+     "box": [
+      1240.0,
+      540.0,
+      1353.75,
+      590.0
+     ]
+    },
+    "structure.tacho_needle": {
+     "n": 18,
+     "area_px": 6233.2,
+     "box": [
+      1509.75,
+      540.0,
+      1749.0,
+      653.0
+     ]
+    },
+    "structure.oil_mini.rail_ticks": {
+     "n": 18,
+     "area_px": 3409.0,
+     "box": [
+      1694.0,
+      540.0,
+      1906.5,
+      687.75
+     ]
+    },
+    "structure.tacho.ticks": {
+     "n": 9,
+     "area_px": 392.5,
+     "box": [
+      1539.5,
+      581.75,
+      1692.75,
+      643.5
+     ]
+    },
+    "structure.tacho.rev_band": {
+     "n": 1,
+     "area_px": 76.5,
+     "box": [
+      1506.0,
+      599.25,
+      1518.25,
+      609.0
+     ]
+    },
+    "structure.oil_mini.needle_or_hot_band": {
+     "n": 1,
+     "area_px": 619.1,
+     "box": [
+      1717.0,
+      609.25,
+      1780.0,
+      639.5
+     ]
+    },
+    "rail.right": {
+     "n": 1,
+     "area_px": 2558.6,
+     "box": [
+      1240.0,
+      643.25,
+      1545.75,
+      653.25
+     ]
+    },
+    "halo.of_catalogued_element": {
+     "n": 2,
+     "area_px": 10.0,
+     "box": [
+      1651.5,
+      679.0,
+      1664.75,
+      700.25
+     ]
+    }
+   },
+   "unexplained": [],
+   "diffuse_boxes_rel_white": {
+    "0.02": [
+     1240.0,
+     540.0,
+     1884.8,
+     719.8
+    ],
+    "0.1": [
+     1553.2,
+     540.0,
+     1648.5,
+     606.5
+    ]
+   }
+  },
+  "65": {
+   "black_lin": 0.00857,
+   "noise_lin": 0.00113,
+   "white_core_lin": 0.874,
+   "black_rel_white": 0.0098,
+   "attributed": {
+    "structure.tacho_needle": {
+     "n": 88,
+     "area_px": 5343.1,
+     "box": [
+      1413.5,
+      540.0,
+      1684.0,
+      612.25
+     ]
+    },
+    "rail.right": {
+     "n": 1,
+     "area_px": 5411.2,
+     "box": [
+      1240.0,
+      540.0,
+      1750.75,
+      655.25
+     ]
+    },
+    "structure.oil_mini.rail_ticks": {
+     "n": 11,
+     "area_px": 2053.2,
+     "box": [
+      1796.25,
+      540.0,
+      1906.0,
+      689.5
+     ]
+    },
+    "structure.tacho.rev_band": {
+     "n": 1,
+     "area_px": 80.3,
+     "box": [
+      1506.0,
+      605.25,
+      1530.0,
+      612.25
+     ]
+    },
+    "structure.oil_mini.needle_or_hot_band": {
+     "n": 1,
+     "area_px": 355.8,
+     "box": [
+      1710.0,
+      612.75,
+      1771.0,
+      641.75
+     ]
+    },
+    "structure.oil_mini.cold_band": {
+     "n": 1,
+     "area_px": 623.8,
+     "box": [
+      1711.5,
+      629.75,
+      1816.5,
+      653.75
+     ]
+    },
+    "halo.of_catalogued_element": {
+     "n": 8,
+     "area_px": 57.2,
+     "box": [
+      1554.25,
+      679.25,
+      1664.5,
+      703.0
+     ]
+    },
+    "glass.speck": {
+     "n": 1,
+     "area_px": 5.6,
+     "box": [
+      1289.0,
+      694.25,
+      1293.5,
+      695.75
+     ]
+    }
+   },
+   "unexplained": [],
+   "diffuse_boxes_rel_white": {
+    "0.02": [
+     1240.0,
+     540.0,
+     1885.2,
+     695.5
+    ],
+    "0.1": [
+     1427.5,
+     540.0,
+     1627.5,
+     610.8
+    ]
+   }
+  },
+  "66": {
+   "black_lin": 0.00379,
+   "noise_lin": 0.00076,
+   "white_core_lin": 0.8795,
+   "black_rel_white": 0.0043,
+   "attributed": {
+    "structure.tacho_needle": {
+     "n": 21,
+     "area_px": 4926.9,
+     "box": [
+      1539.5,
+      540.0,
+      1705.75,
+      624.25
+     ]
+    },
+    "rail.right": {
+     "n": 1,
+     "area_px": 5589.3,
+     "box": [
+      1240.0,
+      540.0,
+      1750.5,
+      652.75
+     ]
+    },
+    "structure.oil_mini.rail_ticks": {
+     "n": 11,
+     "area_px": 2430.0,
+     "box": [
+      1702.75,
+      540.0,
+      1907.5,
+      682.5
+     ]
+    },
+    "structure.tacho.ticks": {
+     "n": 13,
+     "area_px": 508.8,
+     "box": [
+      1496.0,
+      581.75,
+      1692.5,
+      642.75
+     ]
+    },
+    "halo.of_catalogued_element": {
+     "n": 5,
+     "area_px": 58.6,
+     "box": [
+      1468.5,
+      585.75,
+      1667.25,
+      700.0
+     ]
+    },
+    "structure.tacho.rev_band": {
+     "n": 1,
+     "area_px": 74.4,
+     "box": [
+      1505.75,
+      600.0,
+      1517.5,
+      609.25
+     ]
+    },
+    "structure.oil_mini.needle_or_hot_band": {
+     "n": 1,
+     "area_px": 372.9,
+     "box": [
+      1714.75,
+      610.25,
+      1775.5,
+      639.0
+     ]
+    },
+    "glass.speck": {
+     "n": 2,
+     "area_px": 6.6,
+     "box": [
+      1293.0,
+      676.5,
+      1486.5,
+      694.75
+     ]
+    }
+   },
+   "unexplained": [],
+   "diffuse_boxes_rel_white": {
+    "0.02": [
+     1240.0,
+     540.0,
+     1886.0,
+     688.0
+    ],
+    "0.1": [
+     1568.0,
+     540.0,
+     1679.5,
+     605.8
+    ]
+   }
+  },
+  "67": {
+   "black_lin": 0.00455,
+   "noise_lin": 0.00089,
+   "white_core_lin": 0.8783,
+   "black_rel_white": 0.0052,
+   "attributed": {
+    "structure.tacho_needle": {
+     "n": 40,
+     "area_px": 4790.8,
+     "box": [
+      1539.25,
+      540.0,
+      1706.25,
+      624.0
+     ]
+    },
+    "rail.right": {
+     "n": 1,
+     "area_px": 5636.7,
+     "box": [
+      1240.0,
+      540.0,
+      1750.5,
+      653.0
+     ]
+    },
+    "structure.oil_mini.rail_ticks": {
+     "n": 9,
+     "area_px": 3804.9,
+     "box": [
+      1702.75,
+      540.0,
+      1907.25,
+      682.5
+     ]
+    },
+    "structure.tacho.ticks": {
+     "n": 13,
+     "area_px": 515.4,
+     "box": [
+      1495.75,
+      581.75,
+      1693.5,
+      643.25
+     ]
+    },
+    "halo.of_catalogued_element": {
+     "n": 7,
+     "area_px": 65.5,
+     "box": [
+      1469.0,
+      586.75,
+      1667.25,
+      700.0
+     ]
+    },
+    "structure.tacho.rev_band": {
+     "n": 2,
+     "area_px": 79.3,
+     "box": [
+      1505.0,
+      600.0,
+      1587.75,
+      609.25
+     ]
+    },
+    "structure.oil_mini.needle_or_hot_band": {
+     "n": 1,
+     "area_px": 375.1,
+     "box": [
+      1716.0,
+      610.5,
+      1775.5,
+      638.75
+     ]
+    },
+    "glass.speck": {
+     "n": 1,
+     "area_px": 3.2,
+     "box": [
+      1293.25,
+      693.25,
+      1296.0,
+      695.25
+     ]
+    }
+   },
+   "unexplained": [],
+   "diffuse_boxes_rel_white": {
+    "0.02": [
+     1250.0,
+     540.0,
+     1886.2,
+     690.8
+    ],
+    "0.1": [
+     1570.5,
+     540.0,
+     1687.8,
+     606.0
+    ]
+   }
+  },
+  "68": {
+   "black_lin": 0.00305,
+   "noise_lin": 0.00062,
+   "white_core_lin": 0.651,
+   "black_rel_white": 0.0047,
+   "attributed": {
+    "structure.tacho_needle": {
+     "n": 9,
+     "area_px": 2483.8,
+     "box": [
+      1540.0,
+      540.0,
+      1679.0,
+      629.5
+     ]
+    },
+    "structure.oil_mini.rail_ticks": {
+     "n": 11,
+     "area_px": 1992.2,
+     "box": [
+      1694.25,
+      540.0,
+      1876.5,
+      640.5
+     ]
+    },
+    "rail.right": {
+     "n": 2,
+     "area_px": 3836.0,
+     "box": [
+      1240.0,
+      540.0,
+      1745.75,
+      652.0
+     ]
+    },
+    "structure.oil_mini.needle_or_hot_band": {
+     "n": 1,
+     "area_px": 871.6,
+     "box": [
+      1789.25,
+      540.0,
+      1897.5,
+      575.5
+     ]
+    },
+    "structure.tacho.ticks": {
+     "n": 12,
+     "area_px": 384.5,
+     "box": [
+      1504.0,
+      576.25,
+      1690.75,
+      642.0
+     ]
+    },
+    "structure.tacho.rev_band": {
+     "n": 2,
+     "area_px": 38.6,
+     "box": [
+      1498.25,
+      600.5,
+      1558.75,
+      606.25
+     ]
+    },
+    "structure.oil_mini.cold_band": {
+     "n": 1,
+     "area_px": 340.6,
+     "box": [
+      1727.25,
+      632.75,
+      1814.75,
+      649.0
+     ]
+    }
+   },
+   "unexplained": [],
+   "diffuse_boxes_rel_white": {
+    "0.02": [
+     1240.0,
+     540.0,
+     1856.8,
+     637.2
+    ]
+   }
+  }
+ }
+}

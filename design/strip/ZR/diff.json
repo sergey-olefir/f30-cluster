@@ -1,0 +1,10473 @@
+{
+ "grid": "4x of O, zone x 1240-1920 y 540-720",
+ "stock_sources": {
+  "61": "R",
+  "62": "R",
+  "63": "R",
+  "64": "R",
+  "66": "R",
+  "67": "R",
+  "68": "R",
+  "65": "R"
+ },
+ "white_core_lin": {
+  "61": 0.8708,
+  "62": 0.8685,
+  "63": 0.863,
+  "64": 0.8605,
+  "66": 0.8795,
+  "67": 0.8783,
+  "68": 0.651,
+  "65": 0.874
+ },
+ "footprints": {
+  "bottom.temperature": {
+   "polys": 37
+  },
+  "assist.mode_label": {
+   "polys": 22
+  },
+  "assist.info_tacho": {
+   "polys": 6
+  },
+  "assist.gear": {
+   "polys": 1
+  }
+ },
+ "cases": {
+  "wb_dials/allG20/unread": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4238.8,
+     "sum_alpha_px": 4183.7,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2511.2
+    },
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 85.8,
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 95.1,
+    "sum_visible_white_px": 29.24,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0516,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0517,
+     "inside_white": 0.0001,
+     "dE2000": 19.28,
+     "edge_width_px": 2.6,
+     "visibility": 5.394
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/drive": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/drive-clock": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/park": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/msg": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4238.8,
+     "sum_alpha_px": 4183.7,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2511.2
+    },
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 85.8,
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 95.1,
+    "sum_visible_white_px": 29.24,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0516,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0517,
+     "inside_white": 0.0001,
+     "dE2000": 19.28,
+     "edge_width_px": 2.6,
+     "visibility": 5.394
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/msg-long": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4238.8,
+     "sum_alpha_px": 4183.7,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2511.2
+    },
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 85.8,
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 95.1,
+    "sum_visible_white_px": 29.24,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0516,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0517,
+     "inside_white": 0.0001,
+     "dE2000": 19.28,
+     "edge_width_px": 2.6,
+     "visibility": 5.394
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/limit-unknown": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/limit-end": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/limit-none": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/nopass": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/p-engine-off": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/msg-latched": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4238.8,
+     "sum_alpha_px": 4183.7,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2511.2
+    },
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 85.8,
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 95.1,
+    "sum_visible_white_px": 29.24,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0516,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0517,
+     "inside_white": 0.0001,
+     "dE2000": 19.28,
+     "edge_width_px": 2.6,
+     "visibility": 5.394
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/allG20/road-latched-msg": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4238.8,
+     "sum_alpha_px": 4183.7,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2511.2
+    },
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 85.8,
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 95.1,
+    "sum_visible_white_px": 29.24,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0516,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0517,
+     "inside_white": 0.0001,
+     "dE2000": 19.28,
+     "edge_width_px": 2.6,
+     "visibility": 5.394
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    }
+   ]
+  },
+  "wb_dials/all6WB/unread": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 91.4,
+    "sum_visible_white_px": 29.15,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0517,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0518,
+     "inside_white": 0.0001,
+     "dE2000": 19.29,
+     "edge_width_px": 2.3,
+     "visibility": 5.404
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/drive": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/drive-clock": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/park": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/msg": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/msg-long": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/limit-unknown": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/limit-end": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/limit-none": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/nopass": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/p-engine-off": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/msg-latched": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 91.4,
+    "sum_visible_white_px": 29.15,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0517,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0518,
+     "inside_white": 0.0001,
+     "dE2000": 19.29,
+     "edge_width_px": 2.3,
+     "visibility": 5.404
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_dials/all6WB/road-latched-msg": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0041,
+     "step_p95_white": 0.0137,
+     "outside_white": 0.0002,
+     "inside_white": 0.004,
+     "dE2000": 2.14,
+     "edge_width_px": 6.9,
+     "visibility": 2.252
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/unread": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4238.8,
+     "sum_alpha_px": 4183.7,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2511.2
+    },
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 85.8,
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 95.1,
+    "sum_visible_white_px": 29.24,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0516,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0517,
+     "inside_white": 0.0001,
+     "dE2000": 19.28,
+     "edge_width_px": 2.6,
+     "visibility": 5.394
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/drive": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/drive-clock": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/park": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/msg": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4238.8,
+     "sum_alpha_px": 4183.7,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2511.2
+    },
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 85.8,
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 95.1,
+    "sum_visible_white_px": 29.24,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0516,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0517,
+     "inside_white": 0.0001,
+     "dE2000": 19.28,
+     "edge_width_px": 2.6,
+     "visibility": 5.394
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/msg-long": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4238.8,
+     "sum_alpha_px": 4183.7,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2511.2
+    },
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 85.8,
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 95.1,
+    "sum_visible_white_px": 29.24,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0516,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0517,
+     "inside_white": 0.0001,
+     "dE2000": 19.28,
+     "edge_width_px": 2.6,
+     "visibility": 5.394
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/limit-unknown": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/limit-end": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/limit-none": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/nopass": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/p-engine-off": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4324.6,
+     "sum_alpha_px": 4324.6,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2544.4
+    },
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 0.0,
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 43.8,
+    "sum_visible_white_px": 1.0,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1631.25,
+       665.75,
+       1631.75,
+       666.5
+      ],
+      "px": 0.3,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.023
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/msg-latched": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4238.8,
+     "sum_alpha_px": 4183.7,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2511.2
+    },
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 85.8,
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 95.1,
+    "sum_visible_white_px": 29.24,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0516,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0517,
+     "inside_white": 0.0001,
+     "dE2000": 19.28,
+     "edge_width_px": 2.6,
+     "visibility": 5.394
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/allG20/road-latched-msg": {
+   "show": [
+    "bottom.temperature",
+    "assist.mode_label",
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "bottom.temperature": {
+     "px": 0.0,
+     "sum_alpha_px": 0.0,
+     "footprint_px": 4185.6,
+     "ink_clipped_px": 0.0
+    },
+    "assist.mode_label": {
+     "px": 4238.8,
+     "sum_alpha_px": 4183.7,
+     "footprint_px": 4324.6,
+     "ink_clipped_px": 2511.2
+    },
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "bottom.temperature": 4185.6,
+    "assist.mode_label": 85.8,
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 95.1,
+    "sum_visible_white_px": 29.24,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1648.75,
+       703.75,
+       1651.75,
+       706.25
+      ],
+      "px": 3.0,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.03
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0516,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0517,
+     "inside_white": 0.0001,
+     "dE2000": 19.28,
+     "edge_width_px": 2.6,
+     "visibility": 5.394
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/unread": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 91.4,
+    "sum_visible_white_px": 29.15,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0517,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0518,
+     "inside_white": 0.0001,
+     "dE2000": 19.29,
+     "edge_width_px": 2.3,
+     "visibility": 5.404
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/drive": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/drive-clock": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/park": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/msg": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/msg-long": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/limit-unknown": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/limit-end": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/limit-none": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/nopass": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/p-engine-off": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/msg-latched": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1135.6,
+     "sum_alpha_px": 1120.0,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 16.4
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 91.4,
+    "sum_visible_white_px": 29.15,
+    "blobs": [
+     {
+      "box": [
+       1240.0,
+       642.75,
+       1245.75,
+       652.0
+      ],
+      "px": 51.3,
+      "sum_visible_white_px": 28.24,
+      "max_visible_white": 0.94
+     },
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1240.1,
+      598.1,
+      1244.4,
+      693.9
+     ],
+     "length_px": 104.5,
+     "step_mean_white": 0.0517,
+     "step_p95_white": 0.6921,
+     "outside_white": 0.0518,
+     "inside_white": 0.0001,
+     "dE2000": 19.29,
+     "edge_width_px": 2.3,
+     "visibility": 5.404
+    },
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  },
+  "wb_sport_dials/all6WB/road-latched-msg": {
+   "show": [
+    "assist.info_tacho"
+   ],
+   "over": [
+    "assist.gear"
+   ],
+   "CLIP": {
+    "assist.info_tacho": {
+     "px": 1152.0,
+     "sum_alpha_px": 1151.7,
+     "footprint_px": 1152.0,
+     "ink_clipped_px": 880.9
+    }
+   },
+   "SHOW_ok_px": {
+    "assist.info_tacho": 0.0
+   },
+   "SAFETY": {
+    "assist.gear": {
+     "px": 1536.9,
+     "sum_alpha_px": 1536.9,
+     "note": "BMW draws it over a theme; our alpha under it hides nothing (it is not a telltale), listed because the brief counts any alpha over an over-element"
+    }
+   },
+   "LEAK": {
+    "px": 40.1,
+    "sum_visible_white_px": 0.91,
+    "blobs": [
+     {
+      "box": [
+       1491.75,
+       650.75,
+       1530.75,
+       651.5
+      ],
+      "px": 15.5,
+      "sum_visible_white_px": 0.32,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1551.5,
+       650.75,
+       1571.25,
+       651.5
+      ],
+      "px": 9.9,
+      "sum_visible_white_px": 0.21,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1747.5,
+       683.25,
+       1749.5,
+       684.75
+      ],
+      "px": 2.3,
+      "sum_visible_white_px": 0.08,
+      "max_visible_white": 0.058
+     },
+     {
+      "box": [
+       1834.0,
+       703.0,
+       1837.0,
+       704.25
+      ],
+      "px": 2.7,
+      "sum_visible_white_px": 0.07,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1853.0,
+       686.25,
+       1855.0,
+       687.75
+      ],
+      "px": 2.1,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.031
+     },
+     {
+      "box": [
+       1820.0,
+       690.5,
+       1821.25,
+       692.0
+      ],
+      "px": 1.2,
+      "sum_visible_white_px": 0.05,
+      "max_visible_white": 0.062
+     },
+     {
+      "box": [
+       1572.75,
+       651.0,
+       1577.75,
+       651.5
+      ],
+      "px": 1.9,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1780.5,
+       695.75,
+       1781.75,
+       698.25
+      ],
+      "px": 1.8,
+      "sum_visible_white_px": 0.04,
+      "max_visible_white": 0.023
+     },
+     {
+      "box": [
+       1531.25,
+       651.0,
+       1533.75,
+       651.5
+      ],
+      "px": 0.9,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.022
+     },
+     {
+      "box": [
+       1535.75,
+       651.0,
+       1538.75,
+       651.25
+      ],
+      "px": 0.8,
+      "sum_visible_white_px": 0.02,
+      "max_visible_white": 0.021
+     },
+     {
+      "box": [
+       1779.5,
+       697.75,
+       1780.25,
+       698.5
+      ],
+      "px": 0.5,
+      "sum_visible_white_px": 0.01,
+      "max_visible_white": 0.022
+     }
+    ]
+   },
+   "DOUBLE_px": {
+    "bottom.temperature": 0.0
+   },
+   "SEAM": [
+    {
+     "box": [
+      1480.9,
+      643.4,
+      1870.6,
+      719.9
+     ],
+     "length_px": 550.0,
+     "step_mean_white": 0.0015,
+     "step_p95_white": 0.0071,
+     "outside_white": 0.0002,
+     "inside_white": 0.0014,
+     "dE2000": 1.15,
+     "edge_width_px": 6.9,
+     "visibility": 0.832
+    },
+    {
+     "box": [
+      1497.1,
+      661.1,
+      1667.9,
+      705.9
+     ],
+     "length_px": 431.0,
+     "step_mean_white": 0.0006,
+     "step_p95_white": 0.0015,
+     "outside_white": 0.0006,
+     "inside_white": 0.0,
+     "dE2000": 2.07,
+     "edge_width_px": 1.8,
+     "visibility": 0.241
+    }
+   ]
+  }
+ }
+}
