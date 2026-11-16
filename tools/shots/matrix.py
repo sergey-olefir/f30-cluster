@@ -13,9 +13,9 @@ import random
 COMMON = {
     'byMode': False,            # held off, or the drive mode switches the theme under us
     'nightDim': 'off',          # the baseline is day; the default "auto" follows the clock and the sun
-    'nightLook': 'plain', 'baked': True, 'needleSmooth': True, 'stockMap': False, 'wbFoot': 'hair',
+    'nightLook': 'plain', 'needleSmooth': True, 'stockMap': False, 'wbFoot': 'hair',
     'dialShade': 'normal', 'ccStyle': 'A', 'limitArc': 'auto', 'modeLabel': True, 'gearTray': 'gear',
-    'coldGuard': True, 'badge': 'none', 'badgeBMW': True,
+    'coldGuard': True,          # "baked", "badge" and "badgeBMW" were retired in 0.7.18 (fix/settings)
 }
 CONTEXTS = {
     'comfort': dict(COMMON, hudLayout='wb_comfort', g20=False, bottomRow='allG20'),
@@ -122,9 +122,6 @@ def axes():
     out += [('stockMap', str(v).lower(), {'settings': {'stockMap': v}}) for v in (False, True)]
     out += [('night', 'off', {'settings': {'nightDim': 'off'}}), ('night', 'auto', {'settings': {'nightDim': 'auto'}})]
     out += [('night', 'always-' + v, {'settings': {'nightDim': 'always', 'nightLook': v}}) for v in ('plain', 'amber', 'ice', 'red')]
-    out += [('baked', str(v).lower(), {'settings': {'baked': v}}) for v in (True, False)]
-    out += [('badge', v.replace(' ', '-'), {'settings': {'badge': v}}) for v in ('none', 'M340i', 'i4 M50')]
-    out += [('badgeBMW', str(v).lower(), {'settings': {'badge': 'M340i', 'badgeBMW': v}}) for v in (True, False)]
     out += [('coldGuard', str(v).lower(), {'settings': {'coldGuard': v}, 'motion': 'redline', 'sig': {'coolant': 20, 'oil': 20}}) for v in (True, False)]
     out += [('needleSmooth', str(v).lower(), {'settings': {'needleSmooth': v}}) for v in (True, False)]
     return out
