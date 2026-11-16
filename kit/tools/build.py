@@ -528,6 +528,8 @@ def build(app_id, language='en'):
         shutil.copy(os.path.join(KIT, 'localization', 'fonts', 'cyrillic-ru.json'),
                     os.path.join(src, 'javascript', 'kit', 'fonts', 'cyrillic.json'))
     if language == 'zh-CN':
+        shutil.copy(os.path.join(KIT, 'localization', 'fonts', 'ui-zh-CN.json'),
+                    os.path.join(src, 'javascript', 'kit', 'fonts', 'cjk.json'))
         # Diagnostic glyphs are Chinese-only; keep the English runtime atlas intact.
         if app_id == 'dtc_scanner':
             shutil.copy(os.path.join(KIT, 'localization', 'fonts', 'diagnostic-zh-CN.json'),
