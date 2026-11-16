@@ -2,6 +2,7 @@
 
     UV_CACHE_DIR=$F30/bake/work/.uvcache uv run -q --no-project --with numpy --with pillow --with moderngl \\
         python -I tools/shots/run.py [--only A,B,C,D|<context>|<axis>[,...]] [--out <folder>] [--benches 6] [--render 4]
+        [--keep-snaps]
 
 No browser. Six benches (bench/server.js) on ports 8181-8186, each from its own copy of bench/ (apps/, shared/,
 kit/ linked) so their builds into dist/ never race, each with its own BENCH_DATA_DIR, each wrapped by bounded.py so
@@ -205,7 +206,9 @@ def main():
     ctx = mp.get_context('spawn')
     inq, outq = ctx.Queue(), ctx.Queue()
     import paint   # noqa: F401  (the workers import it themselves)
-    workers = [ctx.Process(target=_paint_worker, args=(inq, outq, pool, KEEP_SNAPS), daemon=True) for _ in range(nr)]
+    # --keep-snaps: every snapshot of this run is kept in <out>/sanity/ (to read its uniforms afterwards)
+    keep = set(KEEP_SNAPS) | (set(j['id'] for j in planned) if '--keep-snaps' in sys.argv else set())
+    workers = [ctx.Process(target=_paint_worker, args=(inq, outq, pool, keep), daemon=True) for _ in range(nr)]
     for w in workers:
         w.start()
 
@@ -277,7 +280,7 @@ def main():
     still = [p for p in PORTS[:nb] if port_open(p)]
     assemble(out, pool, planned, jobs_all, order, results, rendered, logs, still, time.time() - t_start, t_drive, only)
     # the snapshots tools/shots/check.py replays against the owner's bench screenshot: kept (our layers only)
-    for k in KEEP_SNAPS:
+    for k in keep:
         src = os.path.join(snaps, k.replace('/', '__'))
         if os.path.isdir(src):
             dst = os.path.join(out, 'sanity', k.replace('/', '__'))

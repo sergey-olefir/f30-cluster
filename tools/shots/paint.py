@@ -94,12 +94,14 @@ def our_hash(A, P):
 def save(arr, path, thumb):
     from PIL import Image
     im = Image.fromarray(np.round(np.clip(arr, 0, 1) * 255).astype(np.uint8), 'RGB')
-    tmp = path + '.tmp.png'
+    # two workers may draw the same picture at once (two states, one hash): each writes its own temp file
+    tmp = '%s.%d.tmp.png' % (path, os.getpid())
     im.save(tmp, compress_level=6)
     os.replace(tmp, path)
     t = im.resize((480, 180), Image.LANCZOS)
-    t.save(thumb + '.tmp.jpg', quality=82)
-    os.replace(thumb + '.tmp.jpg', thumb)
+    tt = '%s.%d.tmp.jpg' % (thumb, os.getpid())
+    t.save(tt, quality=82)
+    os.replace(tt, thumb)
 
 
 def paint_one(P, item, pool, keep):
