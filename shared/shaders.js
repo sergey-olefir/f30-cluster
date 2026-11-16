@@ -1653,13 +1653,13 @@ void main() {
             vec2 u0 = (p - u_r0.xy) / u_r0.zw;
             a = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? r8a(texture2D(u_t0, u0)) : 0.0;
         }
-        // --- package F: the shade at our dials' inner edges ---
+        // --- package F: the shade at our dials' inner edges (laid over the window's veil below) ---
+        float sh = 0.0;
         if (u_shade.x > 0.0 && between > 0.5) {
             float o = min(dl, dr);                                   // px outside the nearer dial (scaled lengths above)
             float vy = 1.0 - clamp((p.y - u_shade.z) / max(u_shade.w - u_shade.z, 1.0), 0.0, 1.0);
-            float sh = u_shade.x * exp(-max(o, 0.0) / u_shade.y) * vy * clamp((o + 3.0) / 3.0, 0.0, 1.0);
+            sh = u_shade.x * exp(-max(o, 0.0) / u_shade.y) * vy * clamp((o + 3.0) / 3.0, 0.0, 1.0);
             if (u_shadeKo.z > u_shadeKo.x) sh *= smoothstep(0.0, 2.0, boxOut(p, u_shadeKo, 0.0));
-            a = max(a, sh);
         }
         // --- end package F ---
         // car3 G: BMW's map between our dials gets soft edges (docs/CAR3-G-REPORT.md): black beside and above the
@@ -1683,6 +1683,9 @@ void main() {
             a = max(a, mv);
         }
         // --- end car3 G ---
+        // 2026-11-16: the shade goes OVER the veil (alpha-over, black on black). It was max()ed in before the veil, whose
+        // a *= 1 - vis and max(a, mv) = 1 - vis then overwrote it everywhere: "dialShade" changed nothing. sh 0: a as before
+        a += sh * (1.0 - a);
         // 2026-11-14: the window's foot line as in 6WB Comfort ("wbFoot"), over the black foot band
         vec4 L = footLine(p);
         vec3 fc = vec3(0.0);

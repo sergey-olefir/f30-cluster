@@ -24,7 +24,12 @@ const BASE = 'http://127.0.0.1:' + PORT;
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'bottom-row-'));
 const dataDir = path.join(tmp, 'data'), screenDir = path.join(tmp, 'screen');
 fs.mkdirSync(dataDir); fs.mkdirSync(screenDir);
+// fix/settings (2026-11-16): start on a settings.json that still holds the retired "baked", "badge" and "badgeBMW", as a
+// car that saved them does; "baked": false is the value that would have dropped the baked look ("retired settings" below)
+const RETIRED = { baked: false, badge: 'M340i', badgeBMW: true };
+fs.writeFileSync(path.join(dataDir, 'settings.json'), JSON.stringify(RETIRED));
 const spec = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'app.json'), 'utf8'));
+const shaders = require(path.join(ROOT, 'shared', 'shaders.js'));
 // package X: the geometry the safety checks compare against, read from the layout itself (panel px, half-open boxes)
 const LAY = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts', 'wb_dials.json'), 'utf8'));
 const lw = (id) => LAY.widgets.find((w) => w.id === id);
@@ -629,6 +634,112 @@ async function main() {
     p = await until((q) => q.activeName === 'wb_dials' && /\+ G20/.test(q.status), 20000);
     ok(/6WB Comfort \+ G20/.test(p.status || ''), 'the status line names it "6WB Comfort + G20"');
     ok(!/kombi guard/.test(logText), 'no KOMBI guard strike while toggling');
+    await click('SET_G20');
+    await until((q) => q.activeName === 'wb_comfort', 20000);
+
+    // fix/settings (2026-11-16): "baked", "badge" and "badgeBMW" were retired. This bench started on a settings.json
+    // that still holds them, as a car that saved them does (RETIRED, above main): they are kept, unread, and the
+    // baked look stays on although the stored "baked" says false (hud.js _toggleOn reads a key with no schema item
+    // raw, so a toggle left on "baked" would have followed the stored false)
+    console.log('retired settings: stored values are ignored');
+    ok(['baked', 'badge', 'badgeBMW'].every((k) => !item(k)), 'app.json has no "baked", "badge" or "badgeBMW" any more');
+    ok(p.settings.baked === false && p.settings.badge === 'M340i', 'the stored values are still in settings.json (nothing migrates them)');
+    const layoutsDir = path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts');
+    const toggles = fs.readdirSync(layoutsDir).filter((f) => /\.json$/.test(f)).map((f) => JSON.stringify(JSON.parse(fs.readFileSync(path.join(layoutsDir, f), 'utf8'))))
+        .join('').match(/"(toggle|holeWhen)":"[^"]*"/g) || [];
+    ok(!toggles.some((t) => /\b(baked|badge|badgeBMW)\b/.test(t)), 'no layout toggle reads a retired key (' + toggles.length + ' toggles)');
+    await until((q) => q.activeName === 'wb_comfort' && /^Cluster on/.test(q.status) && !/drawn \(/.test(q.status), 20000);
+    let bases = 0, signTex = false;
+    for (let i = 0; i < 30 && !(bases === 4 && signTex); i++) {
+        const sc = await sceneNow();
+        // a base really bound has its box in u_baseR (a blank sampler, _bindBlanks, has none); a baked sign has u_tex 1
+        bases = sc.filter((l) => l.binds && l.binds.u_base && l.uniforms && l.uniforms.u_baseR && l.uniforms.u_baseR.v[2] > 0).length;
+        signTex = sc.some((l) => l.binds && l.binds.u_s0 && l.uniforms && l.uniforms.u_tex && l.uniforms.u_tex.v[0] === 1);
+        if (!(bases === 4 && signTex)) await sleep(300);
+    }
+    ok(bases === 4 && signTex, '6WB Comfort draws its baked dial bases (' + bases + ') and road signs with "baked": false stored');
+    ok(!/ERROR/.test(logText), 'no error in the log from the retired keys');
+
+    // fix/settings: "dialShade" reached WBBACK (u_shade 0 .. 0.95) but 6WB Comfort + G20's frame stayed bit for bit the
+    // same: the shade was max()ed into the alpha BEFORE the window's veil, whose a *= 1 - vis and a = max(a, mv)
+    // (mv = 1 - vis there) then overwrote it, inside the window and out. It is laid over the veil now (a += sh * (1 - a)).
+    // No GPU here, so: the uniforms the engine sends for each value, read off the bench, put through WBBACK's collar
+    // path re-computed in JS (as test-strip-mask.js does), old order and new, along the window's floor off each rim
+    console.log('dialShade: off / weak / normal / strong differ in 6WB Comfort + G20');
+    const src = shaders.wbbackFor(0), iMv = src.indexOf('a = max(a, mv);'), iSh = src.indexOf('a += sh * (1.0 - a);');
+    ok(iMv > 0 && iSh > iMv && src.indexOf('a = max(a, sh)') < 0, 'WBBACK lays the shade over the veil (after a = max(a, mv)), not under it');
+    await click('SET_G20');
+    p = await until((q) => q.activeName === 'wb_dials' && /^Cluster on/.test(q.status), 20000);
+    const U = {};
+    for (const v of opts('dialShade')) {
+        await set('dialShade', v);
+        await until((q) => q.settings.dialShade === v, 8000);
+        await sleep(400);
+        const bg = (await sceneNow()).find((l) => l.fs && l.fs.indexOf('u_shadeKo') >= 0);
+        U[v] = bg ? Object.assign({}, ...Object.keys(bg.uniforms).map((k) => ({ [k]: bg.uniforms[k].v }))) : null;
+    }
+    ok(opts('dialShade').every((v) => U[v]), 'WBBACK found for every value');
+    const shadeStr = opts('dialShade').map((v) => JSON.stringify((U[v] || {}).u_shade)).join(' ');
+    ok(new Set(opts('dialShade').map((v) => JSON.stringify((U[v] || {}).u_shade))).size === 4 && U.off && U.off.u_shade[0] === 0,
+        'the engine sends four different u_shade, off has strength 0 (' + shadeStr + ')');
+    const collar = (() => {
+        const j = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'scene', 'collar_r8.json'), 'utf8'));
+        const b = Buffer.from(j.r8, 'base64');
+        return { w: j.w, h: j.h, at: (i, k) => b[Math.min(Math.max(k, 0), j.h - 1) * j.w + Math.min(Math.max(i, 0), j.w - 1)] / 255 };
+    })();
+    const sm = (e0, e1, x) => { const t = Math.min(Math.max((x - e0) / (e1 - e0), 0), 1); return t * t * (3 - 2 * t); };
+    const cl = (x, a, b) => Math.min(Math.max(x, a), b);
+    /** WBBACK's collar-path alpha at layer px (px, py) (pixel centre), the shade before the veil (old) or over it. */
+    function alphaAt(u, px, py, old) {
+        const r0 = u.u_r0;
+        const dl = (Math.hypot((px - u.u_dl[0]) / u.u_dl[2], (py - u.u_dl[1]) / u.u_dl[2]) - 1) * u.u_dl[2];
+        const dr = (Math.hypot((px - u.u_dr[0]) / u.u_dr[2], (py - u.u_dr[1]) / u.u_dr[2]) - 1) * u.u_dr[2];
+        const between = px > u.u_dl[0] && px < u.u_dr[0] ? 1 : 0;
+        const mk = u.u_mk;
+        if (mk[2] > mk[0] && px >= mk[0] && py >= mk[1] && px < mk[2] && py < mk[3]) return null;     // the strip lane: not modelled
+        const fx = (px - r0[0]) / r0[2] * collar.w - 0.5, fy = (py - r0[1]) / r0[3] * collar.h - 0.5, x0 = Math.floor(fx), y0 = Math.floor(fy);
+        const tx = fx - x0, ty = fy - y0;
+        let a = collar.at(x0, y0) * (1 - tx) * (1 - ty) + collar.at(x0 + 1, y0) * tx * (1 - ty) + collar.at(x0, y0 + 1) * (1 - tx) * ty + collar.at(x0 + 1, y0 + 1) * tx * ty;
+        let sh = 0;
+        if (u.u_shade[0] > 0 && between) {
+            const o = Math.min(dl, dr), vy = 1 - cl((py - u.u_shade[2]) / Math.max(u.u_shade[3] - u.u_shade[2], 1), 0, 1);
+            sh = u.u_shade[0] * Math.exp(-Math.max(o, 0) / u.u_shade[1]) * vy * cl((o + 3) / 3, 0, 1);
+        }
+        if (old) a = Math.max(a, sh);
+        const wb = u.u_wbox, fd = u.u_fade;
+        if (wb[2] > 0 && between) {
+            const ex = Math.min(px - wb[0], wb[0] + wb[2] - px), yb = wb[1] + wb[3];
+            const q = [1 - cl(ex / Math.max(fd[1], 1), 0, 1), 1 - cl(Math.min((py - wb[1]) / Math.max(fd[0], 1), (yb - py) / Math.max(fd[2], 1)), 0, 1)];
+            const t = 1 - cl(1 - Math.hypot(q[0], q[1]), 0, 1);
+            let vis = (1 - t * t) * (ex > 0 ? 1 : 0);
+            if (fd[3] > 0) vis *= sm(0, fd[3], Math.min(dl, dr));
+            a *= 1 - vis;
+            let mv = (1 - vis) * cl((Math.min(dl, dr) + 6) / 3, 0, 1);
+            mv *= 1 - sm(yb + 2, yb + 4, py);
+            a = Math.max(a, mv);
+        }
+        if (!old) a += sh * (1 - a);
+        return a;
+    }
+    // the floor of the window, y 400 .. 560 (the shade's full strength runs to y 575), 0 .. 80 px off each rim
+    const pts = [];
+    for (let y = 400; y <= 560; y += 40) {
+        for (const side of [-1, 1]) {
+            const c = side < 0 ? U.off.u_dl : U.off.u_dr, rimX = c[0] - side * Math.sqrt(c[2] * c[2] - (y - c[1]) * (y - c[1]));
+            for (let o = 2; o <= 80; o += 6) pts.push([rimX - side * o, y]);
+        }
+    }
+    const mean = (v, old) => { let n = 0, s = 0; pts.forEach(([x, y]) => { const a = alphaAt(U[v], x + 0.5, y + 0.5, old); if (a !== null) { s += a; n++; } }); return n ? s / n : NaN; };
+    const before = opts('dialShade').map((v) => mean(v, true)), after = opts('dialShade').map((v) => mean(v, false));
+    const f3 = (a) => a.map((v) => v.toFixed(3)).join(' / ');
+    ok(before.every((v) => Math.abs(v - before[0]) < 1e-9), 'the old order: the same alpha for all four (' + f3(before) + ': the bug, reproduced)');
+    ok(Math.abs(after[0] - before[0]) < 1e-12, 'off is unchanged by the fix (' + after[0].toFixed(4) + ')');
+    ok(after.every((v, i) => i === 0 || v - after[i - 1] > 0.01), 'the fix: each step darkens the floor by the rims more (' + f3(after) + ' mean alpha over ' + pts.length + ' px)');
+    // and visibly: the largest step at any one of those px, in 8-bit levels of black over BMW's map
+    const steps = opts('dialShade').slice(1).map((v, i) => Math.max(...pts.map(([x, y]) =>
+        (alphaAt(U[v], x + 0.5, y + 0.5, false) || 0) - (alphaAt(U[opts('dialShade')[i]], x + 0.5, y + 0.5, false) || 0))) * 255);
+    ok(steps.every((d) => d >= 12), 'each step is at least 12 of 255 levels darker somewhere by the rims (' + steps.map((d) => d.toFixed(0)).join(' / ') + ')');
+    await set('dialShade', 'normal');
     await click('SET_G20');
     await until((q) => q.activeName === 'wb_comfort', 20000);
 

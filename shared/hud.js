@@ -24,7 +24,7 @@
  *
  * Layer packing (Nov 5 2026): cluster-render draws at most 8 layers per client connection (its
  * CompositorLimits.per_client; 32 across all clients; a 9th is refused with "too many layers"), which the car
- * photos showed as a theme's shaders plus the first few text widgets. So the image widgets (text, scale, stripe, badge, gridlabels, icon, swatchimg) are
+ * photos showed as a theme's shaders plus the first few text widgets. So the image widgets (text, scale, stripe, gridlabels, icon, swatchimg) are
  * packed into SHEETS, one image layer per sheet, instead of one layer each. Widgets are grouped by
  * (class, z) and placed in file order: a widget goes into the first sheet of its group opened after every
  * earlier layer or widget its rect intersects (so an image widget never clobbers one it overlaps, and
@@ -55,7 +55,6 @@
  *             "barH" bar height, "top" room for the marks above it, "slant" px, "over" rpm past the
  *             redline's thousand the scale runs to (1000: a 7000 redline gives 0..8)
  *   lights    effect layer; shaders.js lights, shift lights filling from "from" rpm (3000) up to the shift point
- *   badge     image layer; a rounded tag with text: "tone" verdict (the last shift's grade colour) or cold
  *   fill      effect layer; a solid colour (role "color", default "bg") over the whole widget, with an
  *             optional see-through "hole": [x, y, w, h] in target px, cut only while the bool setting
  *             "holeWhen" is on (true: always; the cluster's map window), shrunk by "holeInset" px on every side (6) with
@@ -140,7 +139,7 @@
  * Pixel memory: cluster-render has 16 MiB for every app's images together and counts each image twice
  *   (Compositor::add_image; a layer past it is refused with "the service's pixel memory is full"), so every
  *   image layer costs w*h*8 bytes. The rebuild log and the status row say what a layout costs.
- * Text and badge updates send only the one rectangle around the pixels that changed since the last paint
+ * Text updates send only the one rectangle around the pixels that changed since the last paint
  *   (changes() below, after PenguinDukeYDAuto/idrive7-EVAHUD's eva_canvas.js, MIT): a 3-digit readout
  *   that goes 123 -> 124 sends its last digit, not the widget.
  *   boxes     effect layer; the GT3 dash's frame in ONE layer (shaders.js boxes; the car draws only a few effect
@@ -191,7 +190,6 @@
  * {{intake}} (intake air, from the engine unit: app.json config.dme.intake) {{boostPeak}} (the highest boost since the last
  * 0-60 run started) {{avgSpeed}} (average moving speed this drive, from its first minute) {{run}} (the 0-60 clock running, else the last time, s) {{runBest}} {{runState}} (READY / GO / DONE)
  * {{runLabel}} (0-60 MPH, 0-100 KM/H): runs.js. {{warm}}: WARMING UP while the oil is under 80 C, then ENGINE WARM.
- * {{badge}}: the model picked on the Badge tab (badges.js), "BMW X3 M40i" with the lettering on, '' for none.
  * Bottom row (docs/BOTTOM-ROW-PACKAGE.md; each '' until the car sends one AND its setting is "ours"):
  * {{road}} (the bottom-centre road label) {{ccName}} {{ccDesc}} (the check-control message's name and description)
  * {{ccHead}} (package X: our one-line message, the headline; a text widget with "ccLine": true draws it with its
@@ -233,12 +231,11 @@ const calibration = require('./calibration');
 const Car = require('./kit/car');
 const Waze = require('./waze');
 const Screen = require('./screen');
-const badges = require('./badges');
 const Runs = require('./runs');
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
-const IMAGE_TYPES = { text: true, scale: true, stripe: true, badge: true, gridlabels: true, icon: true, swatchimg: true };
+const IMAGE_TYPES = { text: true, scale: true, stripe: true, gridlabels: true, icon: true, swatchimg: true };
 const STATUS_ASK_MS = 2000;      // after a rebuild: ask cluster-render for its own status text
 const LAYER_BUDGET = 8;          // cluster-render's limit per client connection (CompositorLimits.per_client; confirmed on the car Nov 5 2026)
 const MAX_CONN = 4;              // connections a layout may ask for ("conn"): 32 layers service-wide / 8 per connection
@@ -260,8 +257,10 @@ const WB_STYLE = { comfort: 0, sport: 1, eco: 2, mini: 3, eff: 4 };
 const WB_FOOT = { glass: 0, hair: 1, chrome: 2, none: 3 };
 // --- package F (docs/POLISH-F-REPORT.md): settings of the 6WB layouts ---
 // "dialShade" (6WB Dials + G20): the shade at our dials' inner edges over BMW's map, drawn by WBBACK's collar path
-// (u_shade): strength at our rim, falloff px. "normal" is polish B's baked 0.8 / 20 px
-const WB_SHADE = { off: [0, 20], weak: [0.5, 12], normal: [0.8, 20], strong: [0.95, 34] };
+// (u_shade): strength at our rim, falloff px. "normal" is polish B's baked 0.8 / 20 px. fix/settings (2026-11-16): the
+// shade now lies over the window's own 50 px rim veil, which hides its first px, so "weak" falls off over 16 px, not 12
+// (at 12 it was at most 8 of 255 levels darker than "off"; at 16, 13 - and "normal" 17 more, "strong" 42 more)
+const WB_SHADE = { off: [0, 20], weak: [0.5, 16], normal: [0.8, 20], strong: [0.95, 34] };
 // settings that only change a uniform of a layer already there (_wbLive); "wbFoot" to or from "glass" rebuilds (texture)
 const WB_LIVE_KEYS = ['dialShade', 'wbFoot'];
 // --- end package F ---
@@ -315,7 +314,7 @@ const OWN_ITEMS = ['range', 'clock', 'temp', 'nav', 'sign', 'info'];
 // the HUD's place (the page's Position tab): settings that move / scale the layers already there, no rebuild
 const PLACE_KEYS = ['hudX', 'hudY', 'hudScale'];
 // settings that only change what a text shows (the next tick paints it), no rebuild
-const LIVE_KEYS = ['warnOil', 'warnCoolant', 'warnBoost', 'badge', 'badgeBMW', 'gFlipLat', 'gFlipLong', 'gRange', 'gTrail'];
+const LIVE_KEYS = ['warnOil', 'warnCoolant', 'warnBoost', 'gFlipLat', 'gFlipLong', 'gRange', 'gTrail'];
 // g (after cauliflowermossgrape's G-Force, MIT, idea only): a sample over G_BAD is a bad reading, not a corner;
 // the rest are averaged over G_AVG_MS so kerbs and potholes don't throw the dot about
 const G_BAD = 3;
@@ -1536,16 +1535,16 @@ class HudApp {
 
     /** The scene textures (keys as in this.atlases) the widgets will sample: the same choices _create makes. */
     _sceneNeeds(widgets) {
-        const out = new Set(), baked = this.setting('baked') !== false;
+        const out = new Set();
         widgets.forEach((w) => {
             const ci = this._connOf(w), add = (t) => { if (t && t.tex) out.add(ci + ':scene:' + t.tex); };
             if (w.type === 'atext' && w.exact) out.add(this._exactKey(w, ci));        // 0.7.14: a "gpu" text's atlas
-            else if (w.type === 'dial' && w.look === 'wb' && baked) { add(w.base); add(w.fill); }
+            else if (w.type === 'dial' && w.look === 'wb') { add(w.base); add(w.fill); }
             else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); add({ tex: w.fill }); }
-            else if (w.type === 'wbsign' && w.tex && baked) { add(w.tex.limit); add(w.tex.nopass); }
+            else if (w.type === 'wbsign' && w.tex) { add(w.tex.limit); add(w.tex.nopass); }
             else if (w.type === 'wbback') {
                 if (w.collar) { add(w.collar); add(w.mask); }       // package M: "mask", the strip mask
-                else if (w.tex && baked) { const u = this._wbUses(w); if (u.window) { add(w.tex.window); add(w.tex.horizon); } if (u.line) add(w.tex.line); }
+                else if (w.tex) { const u = this._wbUses(w); if (u.window) { add(w.tex.window); add(w.tex.horizon); } if (u.line) add(w.tex.line); }
             }
         });
         return out;
@@ -2022,7 +2021,7 @@ class HudApp {
             c.uniform(ref, 'u_glow', rgb(color(tw, w.glow || 'accent')));
         } else if (w.type === 'wbback') {
             c.uniform(ref, 'u_color', rgb(color(tw, w.color || 'accent')));
-            if (!w.collar && w.tex && this.setting('baked') !== false) c.uniform(ref, 'u_win', this._wbWin(w));
+            if (!w.collar && w.tex) c.uniform(ref, 'u_win', this._wbWin(w));
         } else if (w.type === 'wbmsa') {
             c.uniform(ref, 'u_fg', rgba(color(this.theme, w.color || 'fg')));
             c.uniform(ref, 'u_dim', rgba(color(this.theme, 'dim')));
@@ -2369,7 +2368,6 @@ class HudApp {
             case 'runState': return this.runs.word();
             case 'runLabel': return us ? '0-60 MPH' : '0-100 KM/H';
             case 'warm': { const o = this._raw('oil'); return isNum(o) ? (o < 80 ? 'WARMING UP' : 'ENGINE WARM') : ''; }
-            case 'badge': return badges.text(this.setting('badge'), this.setting('badgeBMW') === true);
             case 'speed': { const v = this._raw('speed'); return fix(isNum(v) ? (us ? v * 0.621371 : v) : v, 0); }
             case 'u:speed': return us ? 'MPH' : 'KM/H';
             case 'oil': case 'coolant': { const v = this._raw(tok); return fix(isNum(v) ? (us ? v * 9 / 5 + 32 : v) : v, 0); }
@@ -2776,7 +2774,7 @@ class HudApp {
 
     /** "key" is on while that bool setting is on; "!key" while it is off. */
     _toggleOn(t) {
-        // car3 H: "a&b" is on while every part is (6WB Comfort's row: "baked&own:clock", "baked&!own:clock")
+        // car3 H: "a&b" is on while every part is (6WB Comfort's row: "own:clock&!cc:shown")
         if (t.indexOf('&') > 0) return t.split('&').every((p) => this._toggleOn(p));
         const not = t.charAt(0) === '!';
         const k = not ? t.slice(1) : t, eq = k.indexOf('=');
@@ -2914,7 +2912,6 @@ class HudApp {
             // the 6WB-style dials (shaders.js wbdial): "style" comfort | sport | eco | mini | eff. Packed in vec4s: a
             // cluster-render layer holds up to 32 uniforms (_wbDyn sends the live ones, u_dyn and u_fill)
             const D = this._dialScale(w), r = Math.PI / 180;
-            const baked = this.setting('baked') !== false;
             c.uniform(ref, 'u_geo', [w.w, w.h, w.ringW || 14, w.flip ? 1 : 0]);
             c.uniform(ref, 'u_scale', [(w.start === undefined ? 225 : w.start) * r, (w.sweep === undefined ? 270 : w.sweep) * r, D.ticks, w.minor || 4]);
             c.uniform(ref, 'u_zone', [w.measure === 'rpm' ? this._redMarks(D.max)[0] : (isNum(w.redFrom) ? w.redFrom : 2),
@@ -2922,13 +2919,13 @@ class HudApp {
             c.uniform(ref, 'u_mode', [WB_STYLE[w.style] || 0, isNum(w.hub) ? w.hub : 0.42, isNum(w.glowK) ? w.glowK : 1, w.box ? 1 : 0]);
             this._wbColours(x);         // 2026-11-14: u_ring .. u_glow and the night look (u_nk0..2)
             x.wbKind = 0;
-            if (w.base && baked) {      // a baked base texture: "base": { tex, x, y, w, h (its box in the layer's px), kind 1 | 2 | 3 }
+            if (w.base) {               // a baked base texture: "base": { tex, x, y, w, h (its box in the layer's px), kind 1 | 2 | 3 }
                 c.bind(ref, 'u_base', this._scene(w.base.tex, x.ci).ref);
                 c.uniform(ref, 'u_baseR', [w.base.x, w.base.y, w.base.w, w.base.h]);
                 x.wbKind = w.base.kind || 1;
             }
             c.uniform(ref, 'u_decoR', [0, 0, 0, 0]);
-            if (w.fill && baked) {      // the bottom arc's live fill: "fill": { tex (segment coverage), x, y, w, h,
+            if (w.fill) {               // the bottom arc's live fill: "fill": { tex (segment coverage), x, y, w, h,
                 const f = w.fill;       //   from, to (degrees cw from 12 at 0 and at max), of ('fuel' | 'cons'), max, color }
                 c.bind(ref, 'u_deco', this._scene(f.tex, x.ci).ref);
                 c.uniform(ref, 'u_decoR', [f.x, f.y, f.w, f.h]);
@@ -2992,7 +2989,7 @@ class HudApp {
             c.uniform(ref, 'u_show', [0, 0]);       // shown by _update: the limit sign while a limit is known, the no-passing sign while it applies
             c.uniform(ref, 'u_tex', [0]);
             this._wbColours(x);                     // 2026-11-14: u_nk0..2, the night looks' dimming
-            if (w.tex && this.setting('baked') !== false) {   // baked signs: "tex": { limit, nopass: { tex, x, y, w, h } }
+            if (w.tex) {                            // baked signs: "tex": { limit, nopass: { tex, x, y, w, h } }
                 [['limit', 'u_s0', 'u_r0'], ['nopass', 'u_s1', 'u_r1']].forEach(([k, smp, rect]) => {
                     const t = w.tex[k];
                     c.bind(ref, smp, this._scene(t.tex, x.ci).ref);
@@ -3030,7 +3027,7 @@ class HudApp {
                 const ko = w.shade && Array.isArray(w.shade.ko) ? w.shade.ko : [0, 0, 0, 0];
                 c.uniform(ref, 'u_shadeKo', [ko[0] - w.x, ko[1] - w.y, ko[2] - w.x, ko[3] - w.y]);
                 this._wbMaskSend(x, true);      // package M: the strip mask's atlas and lanes ("mask"; none: zeros)
-            } else if (w.tex && this.setting('baked') !== false) {   // baked textures: "tex": { window, horizon, line: { tex, x, y, w, h } }, "gain": [window level, y above which it applies]
+            } else if (w.tex) {                     // baked textures: "tex": { window, horizon, line: { tex, x, y, w, h } }, "gain": [window level, y above which it applies]
                 const u = this._wbUses(w);       // only what is drawn: the window while the map is off, the line for "glass"
                 [['window', 'u_t0', 'u_r0'], ['horizon', 'u_t1', 'u_r1'], ['line', 'u_t2', 'u_r2']].forEach(([k, smp, rect]) => {
                     const t = w.tex[k];
@@ -3204,7 +3201,7 @@ class HudApp {
 
     /**
      * Every sampler2D the shader declares gets an asset: the car's renderer (RAMSES) does not draw a mesh whose
-     * appearance has a texture input left unset, so a sampler this widget does not use (baked off, a mini with no arc
+     * appearance has a texture input left unset, so a sampler this widget does not use (a dial with no base, a mini with no arc
      * fill) samples a 1x1 transparent asset instead. The bench draws such a layer only with every sampler bound too.
      */
     _bindBlanks(x, fs) {
@@ -4148,18 +4145,6 @@ class HudApp {
                 glow: w.glow ? this.theme.glow : 0,
             });
             this._blitDiff(x, buf);
-        } else if (w.type === 'badge') {
-            if (!force && now - x.lastPaint < TEXT_MS) return;
-            const s = this._resolve(w.text);
-            let tone = VERDICT.COLD, fresh = false;
-            if (w.tone === 'verdict' && this.score.last) {
-                tone = VERDICT[this.score.last.verdict] || this.theme.fg;
-                fresh = now - this.score.last.at < 2500;
-            }
-            const key = s + '|' + tone + '|' + fresh;
-            if (!force && key === x.last) return;
-            x.last = key; x.lastPaint = now;
-            this._blitDiff(x, this._paintBadge(w, s, tone, fresh));
         } else if (w.type === 'tiles') {
             // per tile: its bar (the slot's sensor, TILE_BAR) and whether that reading is over its warning limit
             const list = this._tiles(w), vals = [];
@@ -4302,7 +4287,7 @@ class HudApp {
                 }
             }
             let fillA = null;
-            if (w.fill && w.look === 'wb' && this.setting('baked') !== false) {
+            if (w.fill && w.look === 'wb') {
                 const f = w.fill, fv = this._raw(f.of);
                 const k = isNum(fv) ? Math.max(0, Math.min(1, fv / (f.max || 1))) : 0;
                 const fk = Math.round(k * 200);
@@ -4413,35 +4398,6 @@ class HudApp {
             x.c.uniform(x.ref, 'u_lit', [lit]);
             x.c.uniform(x.ref, 'u_strobe', [sp.now ? 1 : 0]);
         }
-    }
-
-    /** A rounded tag: fill in the tone colour (bright for a fresh grade), text centred on it. Empty text: nothing. */
-    _paintBadge(w, s, tone, fresh) {
-        const W = w.w, H = w.h, buf = Buffer.alloc(W * H * 4, 0);
-        if (!s) return buf;
-        const r = Math.min(6, H / 2), fillA = fresh ? 0.45 : 0.2;
-        for (let y = 0; y < H; y++) {
-            for (let x = 0; x < W; x++) {
-                // rounded-rect coverage, 1 px soft edge
-                const qx = Math.max(Math.abs(x + 0.5 - W / 2) - (W / 2 - r), 0), qy = Math.max(Math.abs(y + 0.5 - H / 2) - (H / 2 - r), 0);
-                const cov = Math.min(1, Math.max(0, r + 0.5 - Math.sqrt(qx * qx + qy * qy)));
-                if (cov <= 0) continue;
-                const o = (y * W + x) * 4;
-                buf[o] = tone[0]; buf[o + 1] = tone[1]; buf[o + 2] = tone[2]; buf[o + 3] = Math.round(255 * fillA * cov);
-            }
-        }
-        const font = textRaster.loadFont(w.font);
-        const ty = Math.round((H - font.metrics.cellHeight) / 2);
-        const m = textRaster.mask(W, H, s, { font: w.font, align: 'center', spacing: w.spacing, offsetY: ty });
-        const tc = fresh ? this.theme.fg : tone;
-        for (let i = 0; i < m.length; i++) {
-            if (!m[i]) continue;
-            const a = m[i] / 255, o = i * 4, ba = buf[o + 3] / 255;
-            const outA = a + ba * (1 - a);
-            for (let c = 0; c < 3; c++) buf[o + c] = Math.round((tc[c] * a + buf[o + c] * ba * (1 - a)) / outA);
-            buf[o + 3] = Math.round(outA * 255);
-        }
-        return buf;
     }
 
     /** "x/y" at every step, uploaded as small rects (not the whole, mostly empty, image). */
