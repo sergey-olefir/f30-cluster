@@ -273,6 +273,19 @@ SIGN_WIN = [537.3, 621.3, 42.0]
 # under black everywhere and the sign loses only the outermost 1.5 px of its red ring (invisible: the ring is
 # ~7 px thick). Nothing else changes - no uniform, no shader line, no layer.
 SIGN_WIN = [537.3, 621.3, 40.0]
+# --- strip integration, the owner's decision 1 (2026-11-16): the window moves to BMW's MEASURED centre, it does not go
+# back to r 42. The lopsided ring was never the radius: our circle sat 1.15 px left of BMW's sign (package O: our window
+# is round to 0.005 px; package ZL: the old centre was measured.json's OpenCV-convention number, +0.5 px, plus ~0.6 px of
+# old low-resolution rects). Package ZL, photos 60-64, 66-68, continuous panel px: centre (538.45, 621.2) +-0.3, BMW's
+# red ring out to r 40.95, BMW's own rail cut at r 42.44 - its black moat. Our edge is hard at r 41.8, inside that moat
+# on every side, so the whole red ring shows and no rail stub ("whisker") does. The same centre is the collar's keep-off
+# (tools/overlay/plan_dials.py SIGN_CLEAR) and the strip mask's sign hole (design/strip/mask_final.json).
+# WBDIAL's window is smoothstep(-0.5, soft + 0.5, d - r): soft -0.4 makes it a 0.6 px ramp (decision: <= 0.6) centred
+# on d - r = -0.2, so r 42.0 puts its half at 41.8; the black ring round it then runs to r 51.6.
+# OPEN: packages H and O read the centre ~0.8 px lower / to the left; a photo on the car settles it (docs/strip).
+SIGN_C, SIGN_EDGE = (538.45, 621.2), 41.8
+SIGN_WIN, SIGN_SOFT = [SIGN_C[0], SIGN_C[1], SIGN_EDGE + 0.2], -0.4
+# --- end strip integration ---
 # BMW's map between our dials, as the car draws it (photos 41, 42: the map's own veil ends at about x 704 and 1212, its
 # top at y 158): WBBACK's collar path fades it to black at its sides (48 px) and top (80 px) (u_wbox, u_fade: top,
 # sides, foot), and the black fades out over the 30 px above y 596, 5 px above the check-control panel (y 601)

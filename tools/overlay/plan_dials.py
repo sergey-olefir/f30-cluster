@@ -47,6 +47,16 @@ SP, RV, R = (412, 380), (1508, 380), 335                         # the big dials
 # and WBDIAL keeps a black ring 8 px wide round it (design/gen_6wb.py SIGN_WIN); the collar keep-off (SIGN_CLEAR) is as before
 SIGN_WIN = {'rect': [495, 579, 580, 664], 'radius': 42.5}
 SIGN_CLEAR = {'rect': [493, 576, 585, 668], 'radius': 46}      # no collar in it (the speedo's closed disc covers to r 50)
+# strip integration (the owner's decision 1, 2026-11-16): ONE centre for BMW's sign in all three places - the dials'
+# window (design/gen_6wb.py SIGN_WIN), this keep-off and the strip mask's sign hole: package ZL's measured centre
+# (538.45, 621.2) in continuous panel px, BMW's red ring out to r 40.95, its own rail cut at r 42.44. The keep-off is a
+# disc of r 46 round it, by pixel centre (the rounded rect above could only sit on whole px). It moves the collar only:
+# package F's cover (bottom_cover, cover.dials.png) keeps the old disc - no layout draws the cover any more, and inside
+# the strip mask's box (y >= 596) the mask's lanes decide every px - so that photo-derived file is not re-made.
+SIGN_C = (538.45, 621.2)
+SIGN_WIN = {'circle': [SIGN_C[0], SIGN_C[1], 41.8]}
+SIGN_CLEAR_COVER = {'rect': [493, 576, 585, 668], 'radius': 46}
+SIGN_CLEAR = {'circle': [SIGN_C[0], SIGN_C[1], 46.0]}
 SIGNS_BOX = [305, 460, 519, 553]                                # our wbsign widget (gen_6wb), under the speed hub
 MAP_WIN = [748, 155, 1172, 612]                                 # the gap between the dials (no dial pixels)
 # collar additions past the catalogue hulls: the stock '260' label reaches x 727 (bright pixels on rect 08 and 09);
@@ -178,6 +188,12 @@ def rr_mask(rect, r):
     return np.array(im, bool)
 
 
+def disc_mask(c):
+    """Pixels whose centre lies within r of (cx, cy) (continuous panel px: pixel (i, j)'s centre is (i + .5, j + .5))."""
+    yy, xx = np.mgrid[0:H, 0:W]
+    return np.hypot(xx + 0.5 - c[0], yy + 0.5 - c[1]) <= c[2]
+
+
 def dilate(m, px):
     return np.array(Image.fromarray((m * 255).astype('uint8')).filter(ImageFilter.MaxFilter(2 * px + 1))) > 0
 
@@ -267,8 +283,9 @@ def main():
         U |= m
     # the window: BMW's sign only while ours has no data (U below: ours shown, closed). The check-control 'i' has none
     # since 2026-11-13: it is covered (COVER), so both dials end alike at the cut
-    win_sign = rr_mask(SIGN_WIN['rect'], SIGN_WIN['radius'])
-    sign_clear = rr_mask(SIGN_CLEAR['rect'], SIGN_CLEAR['radius'])
+    win_sign = disc_mask(SIGN_WIN['circle'])
+    sign_clear = disc_mask(SIGN_CLEAR['circle'])          # strip integration: on the one measured centre
+    sign_clear_cover = rr_mask(SIGN_CLEAR_COVER['rect'], SIGN_CLEAR_COVER['radius'])
 
     show = [g for g in g20['elements'] if pg[g['id']]['decision'] in ('reveal', 'keep-clear') and g['group'] != 'structure'
             and g['id'] not in TRY_UNDER]
@@ -348,7 +365,7 @@ def main():
     baked[zone] = np.maximum(baked[zone], (foot * (1.0 - ko))[zone])
     Image.fromarray(np.round(baked * 255).astype('uint8')).save(rel('design/overlay/collar.dials.png'), optimize=True)
     # package F: the full-size cover of the bottom lines, hooks and dash
-    cov = bottom_cover(S, show, sign_clear)
+    cov = bottom_cover(S, show, sign_clear_cover)       # (the old keep-off: see SIGN_CLEAR_COVER)
     alpha = np.maximum(np.maximum(baked, shade * (1.0 - ko)), cov)       # what the car draws (dialShade "normal")
     collar = alpha >= 0.5
     left = stock & ~U & ~collar
@@ -543,8 +560,8 @@ def scheme(U, collar, G, pg, show, photo, out):
             ty = y0 + 4
             x0 += 4
         d.text((x0, ty), lab, fill=c + (255,), font=fs)
-    for r, rad in ((SIGN_WIN['rect'], SIGN_WIN['radius']),):
-        d.rounded_rectangle([r[0], r[1], r[2] - 1, r[3] - 1], radius=rad, outline=(120, 200, 255, 255), width=2)
+    cx, cy, rr = SIGN_WIN['circle']
+    d.ellipse([cx - rr, cy - rr, cx + rr, cy + rr], outline=(120, 200, 255, 255), width=2)
     d.rectangle(MAP_WIN, outline=(70, 220, 120, 120), width=1)
     # legend
     lx, ly = 760, 20
