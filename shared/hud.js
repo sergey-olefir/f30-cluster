@@ -2808,8 +2808,13 @@ class HudApp {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_step', [w.step || 50]);
             c.uniform(ref, 'u_major', [w.major || 2]);
-            c.uniform(ref, 'u_minor', rgba([255, 255, 255, 90]));
-            c.uniform(ref, 'u_majorC', rgba([0, 255, 140, 255]));
+            // --- strip package D: a layout may name the grid's colours ("minorColor", "majorColor": [r, g, b, a]), so
+            // the diagnostic mattes (design/gen_matte.py) get a ruler that shows on magenta, green and black; without
+            // them the calibration grid's own, as before ---
+            const okC = (a) => Array.isArray(a) && a.length >= 3 && a.every(isNum);
+            c.uniform(ref, 'u_minor', rgba(okC(w.minorColor) ? w.minorColor : [255, 255, 255, 90]));
+            c.uniform(ref, 'u_majorC', rgba(okC(w.majorColor) ? w.majorColor : [0, 255, 140, 255]));
+            // --- end strip package D ---
         } else if (w.type === 'stripe') this._paintStripe(x);
         else if (w.type === 'scale') this._paintScale(x);
         else if (w.type === 'shiftbar') {
