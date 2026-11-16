@@ -2,16 +2,13 @@
 /**
  * avatars.js - the avatar choices Driver Profiles offers, and the one file read it ever does.
  *
- * Three kinds of choice:
+ * Two kinds of choice:
  *   a preset   avatarType = DEFAULT, or AVATAR1..AVATAR15 (BMW's own 15 pictures). Only the enum is written; the
  *              stored custom picture, if there is one, is left alone.
- *   bundled    the two pictures that ship with the app, at 128, 256 and 512 px (apps/driver_profiles/avatars/, in
- *              the repository at the owner's own request). The build packs that folder into avatars.pack next to
- *              the code (kit/tools/pack_data.py), so the three sizes can be tried one after another on the car.
  *   a file     the owner's own jpg, from <dataDir>/avatars/ only. On confirm it is Base64-encoded and written to
  *              UserAccount.avatar, then avatarType = INDIVIDUAL. persod's own schema calls the backing value
  *              avatarData, "The individual avatar picture (Base64-encoded jpg)".
- * The last two go down exactly the same write path; only where the bytes come from differs.
+ * The app ships no pictures of its own: a custom avatar is always one the owner puts in that folder.
  *
  * The rules this file exists to keep:
  *   - **one folder, nothing else.** Names come from readdir() of <dataDir>/avatars/ and are used only by index; no
@@ -28,7 +25,6 @@
  */
 const fs = require('fs');
 const path = require('path');
-const zlib = require('zlib');
 
 const TYPES = ['DEFAULT', 'AVATAR1', 'AVATAR2', 'AVATAR3', 'AVATAR4', 'AVATAR5', 'AVATAR6', 'AVATAR7', 'AVATAR8',
     'AVATAR9', 'AVATAR10', 'AVATAR11', 'AVATAR12', 'AVATAR13', 'AVATAR14', 'AVATAR15', 'INDIVIDUAL', 'UNSPECIFIED'];
@@ -42,11 +38,8 @@ for (let i = 1; i <= 15; i++) PRESETS.push('AVATAR' + i);
 
 const DEFAULT_MAX_KB = 48;        // see docs: 48 KB of jpg = 64 KiB of Base64, the payload handed to the setter
 const MAX_FILES = 6;              // how many of the owner's files the screen can list (rows in app.json)
-const MAX_BUNDLED = 6;            // the six that ship with the app (AV_B0..AV_B5)
 const FOLDER = 'avatars';
 const NAME_RE = /^[^.\/\\][^\/\\]*\.(jpg|jpeg)$/i;            // one plain file name in that folder, nothing else
-const PACK_MAGIC = 'MGUPACK1';
-const CODE_DIR = __dirname;       // where the app's own code and avatars.pack sit after the build
 
 /** config.avatarMaxKB -> the limit actually used, in whole KB (1..512; 48 when unset or odd). */
 function maxKB(cfg) {
@@ -163,105 +156,7 @@ function encode(dataDir, index, cfg) {
     return { ok: true, index: f.index, name: f.name, bytes: buf.length, chars: data.length, kb: kb(buf.length), data, sum: sum(data) };
 }
 
-/* ---------------- the pictures that ship with the app ---------------- */
-
-/**
- * Where the bundled pictures are: the build packs apps/driver_profiles/avatars/ into avatars.pack next to the code
- * (kit/tools/pack_data.py: magic, u32 index length, the raw-deflated index, then each file raw-deflated). Without a
- * pack - a preview, or running from the source tree - the plain folder next to the code is read instead.
- * Only the index is kept; the file handle is opened and closed around each read.
- */
-let source = null;
-function bundleSource() {
-    if (source) return source;
-    const file = path.join(CODE_DIR, FOLDER + '.pack');
-    try {
-        const fd = fs.openSync(file, 'r');
-        try {
-            const head = Buffer.alloc(12);
-            fs.readSync(fd, head, 0, 12, 0);
-            if (head.toString('latin1', 0, 8) !== PACK_MAGIC) throw new Error('not a data pack');
-            const ilen = head.readUInt32LE(8);
-            const ibuf = Buffer.alloc(ilen);
-            fs.readSync(fd, ibuf, 0, ilen, 12);
-            const index = JSON.parse(zlib.inflateRawSync(ibuf).toString('utf8'));
-            source = { kind: 'pack', file: file, index: index, base: 12 + ilen, sizes: {} };
-        } finally { fs.closeSync(fd); }
-        return source;
-    } catch (e) { /* no pack next to the code: try the folder */ }
-    const dir = path.join(CODE_DIR, FOLDER);
-    let names = null;
-    try { names = fs.readdirSync(dir); } catch (e) { names = null; }
-    source = names ? { kind: 'folder', dir: dir, names: names, sizes: {} } : { kind: 'none', sizes: {} };
-    return source;
-}
-/** The bytes of one bundled picture, by the name the listing gave. null when it is not there. */
-function bundleRead(name) {
-    const src = bundleSource();
-    if (!NAME_RE.test(name)) return null;
-    if (src.kind === 'pack') {
-        const e = src.index.files[name];
-        if (!e) return null;
-        const fd = fs.openSync(src.file, 'r');
-        try {
-            const b = Buffer.alloc(e[1]);
-            fs.readSync(fd, b, 0, e[1], src.base + e[0]);
-            return zlib.inflateRawSync(b);
-        } finally { fs.closeSync(fd); }
-    }
-    if (src.kind === 'folder') {
-        const full = path.join(src.dir, name);
-        const stat = fs.lstatSync(full);
-        if (!stat.isFile()) return null;
-        return fs.readFileSync(full);
-    }
-    return null;
-}
-/**
- * The pictures that ship with the app: the same row shape list() gives, plus bundled: true.
- * -> { exists, error, max, files: [{ index, name, bytes, kb, tooBig, empty, ok, bundled }] }
- * A packed file's size is only known once it is inflated, so the first listing inflates each one, keeps its size
- * and drops the bytes.
- */
-function bundled(cfg) {
-    const out = { exists: false, error: null, max: maxKB(cfg), files: [] };
-    let src;
-    try { src = bundleSource(); } catch (e) { out.error = String(e && e.message ? e.message : e).slice(0, 120); return out; }
-    if (src.kind === 'none') return out;
-    out.exists = true;
-    const limit = out.max * 1024;
-    let names;
-    try { names = src.kind === 'pack' ? Object.keys(src.index.files) : src.names.slice(); } catch (e) { names = []; }
-    names.filter((n) => NAME_RE.test(n)).sort().forEach((name) => {
-        if (out.files.length >= MAX_BUNDLED) return;
-        let size = src.sizes[name];
-        if (size === undefined) {
-            try { const b = bundleRead(name); size = b ? b.length : null; } catch (e) { size = null; }
-            src.sizes[name] = size;
-        }
-        if (size === null || size === undefined) return;
-        const f = { index: out.files.length, name: name, bytes: size, kb: kb(size), tooBig: size > limit, empty: size === 0, bundled: true };
-        f.ok = !f.tooBig && !f.empty;
-        out.files.push(f);
-    });
-    return out;
-}
-/** Read the bundled picture at `index` of a fresh listing and Base64-encode it. Same shape as encode(). */
-function encodeBundled(index, cfg) {
-    const l = bundled(cfg);
-    const f = l.files[index];
-    if (!f) return { ok: false, why: 'that picture does not ship with this version of the app' };
-    if (f.tooBig) return { ok: false, why: 'that picture is ' + f.kb + ': over the ' + l.max + ' KB limit' };
-    let buf;
-    try { buf = bundleRead(f.name); } catch (e) { buf = null; }
-    if (!buf || !buf.length) return { ok: false, why: 'that picture cannot be read out of the app' };
-    if (buf.length > l.max * 1024) return { ok: false, why: 'that picture is over the ' + l.max + ' KB limit' };
-    if (buf.length < 4 || buf[0] !== 0xff || buf[1] !== 0xd8 || buf[2] !== 0xff) return { ok: false, why: 'not a jpg (its first bytes are not a JPEG header)' };
-    const data = buf.toString('base64');
-    return { ok: true, index: f.index, name: f.name, bytes: buf.length, chars: data.length, kb: kb(buf.length), data: data, sum: sum(data), bundled: true };
-}
-
 module.exports = {
-    TYPES, ENUM_TYPE, PRESETS, FOLDER, MAX_FILES, MAX_BUNDLED, DEFAULT_MAX_KB,
-    maxKB, dirOf, kb, b64Bytes, sum, presetOf, typeName, typeLabel, avatarText, list, encode, bundled, encodeBundled,
+    TYPES, ENUM_TYPE, PRESETS, FOLDER, MAX_FILES, DEFAULT_MAX_KB,
+    maxKB, dirOf, kb, b64Bytes, sum, presetOf, typeName, typeLabel, avatarText, list, encode,
 };

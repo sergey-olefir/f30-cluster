@@ -10,9 +10,9 @@
  *                  can't run), P_NOTE, P_NOTE2
  *   NAMES          the preset names (app.json config.names, up to 10) and "Profile N"; no keyboard (see
  *                  docs/DRIVER-PROFILES-APP.md, "The speller")
- *   AVATAR         Default, the car's 15 built-in avatars by number, the two pictures that ship with the app at
- *                  three sizes each, and the owner's own jpg files from <dataDir>/avatars/ with their sizes; the
- *                  folder's full path, so an empty folder still says where a picture goes
+ *   AVATAR         Default, the car's 15 built-in avatars by number, and the owner's own jpg files from
+ *                  <dataDir>/avatars/ with their sizes; the folder's full path, so an empty folder still says where
+ *                  a picture goes. The app ships no pictures of its own
  *   CONFIRM        what will be sent, the checks, Yes / Cancel; Delete needs Yes twice; the result code afterwards
  *   SETTINGS_VIEW  what the car shows of the active profile (read only)
  *
@@ -39,7 +39,6 @@ class Screens {
         this.naming = null;           // { op: 'create' | 'rename', slot }
         this.avatarFor = null;        // the slot AVATAR is choosing for
         this.avatarList = null;       // the last listing of <dataDir>/avatars/ (avatars.js list())
-        this.bundledList = null;      // the pictures that ship with the app (avatars.js bundled())
         this.pending = null;          // what CONFIRM asks: { op, slot, arg, snap, armedUntil, state: 'ask' | 'sending' | 'done' }
         this.sent = Object.create(null);
         this.msg = '';
@@ -92,7 +91,6 @@ class Screens {
         for (let i = 0; i < NAME_ROWS; i++) this.click('N_' + i, () => this.pickName(this.presets[i]));
         this.click('N_CANCEL', () => { this.naming = null; return ui.close('NAMES'); });
         A.PRESETS.forEach((type, i) => this.click('AV_T' + i, () => this.pickAvatar({ kind: 'preset', type })));
-        for (let i = 0; i < A.MAX_BUNDLED; i++) this.click('AV_B' + i, () => this.pickAvatar({ kind: 'bundled', index: i }));
         for (let i = 0; i < A.MAX_FILES; i++) this.click('AV_F' + i, () => this.pickAvatar({ kind: 'file', index: i }));
         this.click('AV_RESCAN', () => this.scanAvatars('read again'));
         this.click('AV_CANCEL', () => { this.avatarFor = null; return ui.close('AVATAR'); });
@@ -156,16 +154,14 @@ class Screens {
     scanAvatars(why) {
         this.avatarHint = '';
         this.avatarList = this.p.avatarFiles();
-        this.bundledList = this.p.avatarBundled();
         const l = this.avatarList;
         this.log.info('avatars folder (' + why + '): ' + (l.exists ? l.files.length + ' file(s) listed' : 'not there')
-            + (l.error ? ', ' + l.error : '') + '; ' + this.bundledList.files.length + ' bundled (names not logged)');
+            + (l.error ? ', ' + l.error : '') + ' (names not logged)');
         this.render();
         return null;
     }
-    /** The listing a choice refers to: the app's own pictures, or the owner's folder. */
-    avatarSet(kind) {
-        if (kind === 'bundled') return this.bundledList || this.p.avatarBundled();
+    /** The listing a file choice refers to: the owner's folder (the app ships no pictures of its own). */
+    avatarSet() {
         return this.avatarList || this.p.avatarFiles();
     }
     startAvatar() {
@@ -180,14 +176,14 @@ class Screens {
     pickAvatar(choice) {
         const slot = this.avatarFor;
         if (!slot || !choice) return null;
-        if (choice.kind === 'file' || choice.kind === 'bundled') {
-            const l = this.avatarSet(choice.kind);
+        if (choice.kind !== 'preset' && choice.kind !== 'file') return null;
+        if (choice.kind === 'file') {
+            const l = this.avatarSet();
             const f = l.files[choice.index];
             if (!f) return null;                       // an empty row
             if (f.empty) { this.avatarHint = 'That file is empty: put a real jpg there'; this.render(); return null; }
             if (f.tooBig) {
-                this.avatarHint = 'That one is ' + f.kb + ', over the ' + l.max + ' KB limit: '
-                    + (choice.kind === 'bundled' ? 'try a smaller one of the same picture' : 'make it smaller first');
+                this.avatarHint = 'That one is ' + f.kb + ', over the ' + l.max + ' KB limit: make it smaller first';
                 this.render();
                 return null;
             }
@@ -373,7 +369,6 @@ class Screens {
         if (!slot) return;
         const st = p.slots[slot];
         const l = this.avatarList || { dir: A.dirOf(p.dataDir), exists: false, files: [], max: this.avatarMaxKB, error: null };
-        const b = this.bundledList || { exists: false, files: [], max: l.max, error: null };
         const now = A.typeName(st && st.avatarType);
         this.text('AV_NOW', (st ? 'Avatar of "' + F.nameOf(st) + '"' : 'Avatar') + ' - now: ' + A.avatarText(st));
         A.PRESETS.forEach((type, i) => {
@@ -381,22 +376,6 @@ class Screens {
             this.text('AV_T' + i, base + (now === type ? '  (set now)' : ''));
             this.visible('AV_T' + i, true);
         });
-        // the two that ship with the app, at three sizes each. A name in both sets is marked on both rows, so it is
-        // never in doubt which file a row would send
-        const mine = {}, shipped = {};
-        l.files.forEach((f) => { mine[f.name] = true; });
-        b.files.forEach((f) => { shipped[f.name] = true; });
-        this.text('AV_BUNDLED', b.files.length ? 'Pictures that came with the app - try a smaller one if the car refuses:' : '');
-        this.visible('AV_BUNDLED', !!b.files.length);
-        for (let i = 0; i < A.MAX_BUNDLED; i++) {
-            const f = b.files[i];
-            this.visible('AV_B' + i, !!f);
-            if (!f) continue;
-            const where = mine[f.name] ? 'with the app (not your folder\'s file of that name)' : 'with the app';
-            const state = f.tooBig ? f.kb + ': over the ' + b.max + ' KB limit, try a smaller one'
-                : f.kb + ' - came ' + where + ', press to use it';
-            this.cells('AV_B' + i, f.name, state);
-        }
         this.text('AV_OWN', 'Your own picture - a .jpg of at most ' + l.max + ' KB in this folder:');
         for (let i = 0; i < A.MAX_FILES; i++) {
             const f = l.files[i];
@@ -404,8 +383,7 @@ class Screens {
             if (!f) continue;
             const state = f.empty ? 'the file is empty'
                 : f.tooBig ? f.kb + ': over the ' + l.max + ' KB limit, make it smaller'
-                    : shipped[f.name] ? f.kb + ' - your own file of that name, press to use it'
-                        : f.kb + ' - press to use it';
+                    : f.kb + ' - press to use it';
             this.cells('AV_F' + i, f.name, state);
         }
         const none = !l.files.length;
@@ -441,9 +419,9 @@ class Screens {
                     + ' no protection, and any own picture stays stored, unused';
                 yes = 'Yes, set ' + A.typeLabel(ch.type);
             } else {
-                const l = this.avatarSet(ch.kind);
+                const l = this.avatarSet();
                 const f = l.files[ch.index];
-                const from = ch.kind === 'bundled' ? ', the copy that came with the app' : ', from your avatars folder';
+                const from = ', from your avatars folder';
                 what = 'Use ' + (f ? '"' + f.name + '" (' + f.kb + from + ')' : 'that picture') + ' as the avatar of ' + who + '?';
                 detail = 'Sends two fields: avatar = that jpg, Base64-encoded (about '
                     + Math.round((f ? f.bytes : 0) * 4 / 3 / 1024) + ' KB of text), then avatarType = INDIVIDUAL (code 16).'

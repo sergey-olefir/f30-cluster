@@ -245,8 +245,6 @@ class Profiles {
 
     /** The owner's own pictures, from <dataDir>/avatars/ only (see avatars.js). Never throws. */
     avatarFiles() { return A.list(this.dataDir, this.cfg); }
-    /** The pictures that ship with the app (apps/driver_profiles/avatars/ -> avatars.pack). Never throws. */
-    avatarBundled() { return A.bundled(this.cfg); }
 
     list() { return F.SLOTS.map((s) => this.slots[s]); }
     users() { return F.USER_SLOTS.filter((s) => this.slots[s].exists); }
@@ -314,10 +312,10 @@ class Profiles {
                     const ch = arg || {};
                     if (ch.kind === 'preset') {
                         if (!A.presetOf(ch.type)) why.push('that is not one of the avatars the car has');
-                    } else if (ch.kind === 'file' || ch.kind === 'bundled') {
-                        const l = ch.kind === 'bundled' ? A.bundled(this.cfg) : A.list(this.dataDir, this.cfg);
+                    } else if (ch.kind === 'file') {
+                        const l = A.list(this.dataDir, this.cfg);
                         const f = l.files[ch.index];
-                        if (!f) why.push(ch.kind === 'bundled' ? 'that picture does not ship with the app' : 'that picture is not in the avatars folder any more');
+                        if (!f) why.push('that picture is not in the avatars folder any more');
                         else if (f.empty) why.push('that file is empty');
                         else if (f.tooBig) why.push('that file is ' + f.kb + ': over the ' + l.max + ' KB limit');
                     } else why.push('no avatar chosen');
@@ -418,16 +416,17 @@ class Profiles {
     }
 
     /**
-     * Set a profile's avatar: either one of the car's own types (avatarType only), or a jpg - one of the two that
-     * ship with the app, or one of the owner's own (avatar = the Base64 jpg, then avatarType = INDIVIDUAL, in that
-     * order, so the type never points at a picture that is not there yet). Each write's result is reported; the
+     * Set a profile's avatar: either one of the car's own types (avatarType only), or one of the owner's own jpg
+     * files (avatar = the Base64 jpg, then avatarType = INDIVIDUAL, in that order, so the type never points at a
+     * picture that is not there yet). The app ships no pictures of its own. Each write's result is reported; the
      * picture is never logged.
-     * choice: { kind: 'preset', type: 'DEFAULT' | 'AVATARn' }, { kind: 'bundled', index } or { kind: 'file', index }.
+     * choice: { kind: 'preset', type: 'DEFAULT' | 'AVATARn' } or { kind: 'file', index }; anything else is not sent.
      */
     async avatar(slot, choice) {
         if (!this.ua[slot]) return { ok: false, text: 'Not sent: the profile service is not reachable' };
-        if (choice.kind === 'preset') return this.avatarPreset(slot, choice.type);
-        return this.avatarFile(slot, choice.index, choice.kind === 'bundled');
+        if (choice && choice.kind === 'preset') return this.avatarPreset(slot, choice.type);
+        if (choice && choice.kind === 'file') return this.avatarFile(slot, choice.index);
+        return { ok: false, text: 'Not sent: no avatar chosen' };
     }
 
     async avatarPreset(slot, type) {
@@ -446,10 +445,10 @@ class Profiles {
         };
     }
 
-    async avatarFile(slot, index, isBundled) {
+    async avatarFile(slot, index) {
         // read and encode here, right before sending: the size guard and the folder check run on the file as it is
-        const where = isBundled ? 'bundled picture' : 'own picture';
-        const enc = isBundled ? A.encodeBundled(index, this.cfg) : A.encode(this.dataDir, index, this.cfg);
+        const where = 'own picture';
+        const enc = A.encode(this.dataDir, index, this.cfg);
         if (!enc.ok) { this.log.info('avatar ' + where + ' #' + index + ' not sent: ' + enc.why); return { ok: false, text: 'Not sent: ' + enc.why }; }
         const before = this.slots[slot] || {};
         this.log.info('SET ' + slot + '.avatar <- ' + where + ' #' + index + ', ' + enc.bytes + ' bytes of jpg, ' + enc.chars + ' Base64 chars (name and data not logged)');

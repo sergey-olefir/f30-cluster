@@ -5,9 +5,9 @@ Branches `app/profiles` (0.1.0) and `app/profiles-avatar` (0.2.0, the avatar), 2
 
 **Status:** built and tested on the bench only. Nothing of it has run on the car.
 
-**0.2.0 adds the avatar**: the type a profile has now, the car's own 15 avatars, six pictures that ship with the app
-(two pictures at three sizes each, at the owner's own request — present in the branch but not committed, see the note
-at the head of section 9), and the owner's own jpg from a folder in the app's data directory. See **section 9**, which also says plainly what is proven and what is not, and
+**0.2.0 adds the avatar**: the type a profile has now, the car's own 15 avatars, and the owner's own jpg from a folder
+in the app's data directory. **0.2.2** removes the profile pictures that had been bundled with the app: it ships no
+pictures of its own, and a custom avatar only ever comes from that folder (see the note at the head of section 9). See **section 9**, which also says plainly what is proven and what is not, and
 gives the owner a numbered test. The car was offline for all of 0.2.0: no SSH, no UDS, no service call was made.
 
 The car was used only for read-only research (`ls`, `cat`, `grep`, `strings`), and the owner then disconnected it:
@@ -27,7 +27,7 @@ named and given Guest's data from a root script). That report is not in git, and
 | **MAIN** "Driver Profiles" | `STATUS`: the active profile, and how many of the 7 personal slots are used and free. One row per slot that exists (guest, valet, i01..i07). The first line of a row is the name, with "(active)" on the active profile. The second line is the type (Personal / Guest / Valet / Fleet), local or BMW ID, and the protection (none / key / PIN / NFC / Digital Key). Free slots are hidden. Below the rows: **Add a local profile (N free)**, **Active profile: what the car shows**, **Read the profiles again**, and `MSG` (the last result). |
 | **PROFILE** | Name; status (active or not); type; account (local, or BMW ID with the user name masked: `d***@example.com`); protection; **PIA profile number**; **when Guest's settings were copied** (`getCopyGuestTimestamp`); created; last login; first name; cloud sync; **avatar** (the type by name, and for `INDIVIDUAL` that a custom picture is set and how large it is); slot and persod's internal id. Then **Rename**, **Avatar**, **Copy Guest's settings here**, **Delete this profile**. When one of these can't run, it says why, and a press only explains. |
 | **NAMES** | The preset names (`app.json` `config.names`, up to 10), marked "(in use)" when a profile already has that name, plus "Profile N" with the first free N, and Cancel. Used by both Add and Rename. |
-| **AVATAR** (0.2.0) | What is set now, then **Default**, the car's **15 built-in avatars** by number ("Avatar 1" … "Avatar 15"; we cannot draw BMW's own thumbnails, see section 9), then the **six pictures that ship with the app** (two pictures at 128, 256 and 512 px) with their sizes, then the owner's own `.jpg` files from `<dataDir>/avatars/`, each with its size in KB. An empty or missing folder is normal: the screen then says what to do and prints **the folder's full path**. Also **Read the folder again**, a note with the size limit and its standing, and Cancel. |
+| **AVATAR** (0.2.0) | What is set now, then **Default**, the car's **15 built-in avatars** by number ("Avatar 1" … "Avatar 15"; we cannot draw BMW's own thumbnails, see section 9), then the owner's own `.jpg` files from `<dataDir>/avatars/`, each with its size in KB. An empty or missing folder is normal: the screen then says what to do and prints **the folder's full path**. Also **Read the folder again**, a note with the size limit and its standing, and Cancel. |
 | **CONFIRM** | What will be sent, what it does, the checks as they are now, **Yes** / **Cancel**. Delete needs Yes **twice**: the first press only arms it for `config.deleteArmSeconds` (10 s), and leaving the screen disarms it. Afterwards: the result code ("Result: SUCCESS (code 0)", "MAX_NUM_EXCEEDED (code 1)", "IS_PROTECTED_ACCOUNT (code 2)", "Not sent: …", "Error: …") and what a fresh read shows. |
 | **SETTINGS_VIEW** | Read only: the active profile, the active PIA number, which key maps to which PIA number, the PIA numbers seen per profile, the active profile's units, the car state for changes, and three lines on what can't be shown (section 5). |
 
@@ -38,7 +38,7 @@ named and given Guest's data from a root script). That report is not in git, and
 | Add | `UserAccountManager.createUserAccount(name)` (0xFC02, method 21845) | a free slot exists, and no profile has that name yet |
 | Rename | `UserAccount.<slot>.name` setter (0xFC03, setter 5): the call the owner's two names were set with | a personal (USER), local profile; the slot still holds the same profile (id and name) the confirm screen showed |
 | Avatar: a preset (0.2.0) | `UserAccount.<slot>.avatarType` setter (0xFC03, **setter 29**) | the slot still holds the same profile; the choice is one of `DEFAULT`, `AVATAR1`…`AVATAR15`. **One field, nothing else** |
-| Avatar: a picture (0.2.0) | `UserAccount.<slot>.avatar` setter (0xFC03, **setter 8**) with the Base64 jpg, **then** `avatarType = INDIVIDUAL` (setter 29) | the picture is still there (one of the app's own six, or a file in `<dataDir>/avatars/`), is a jpg and is at most `config.avatarMaxKB` (48 KB). If the picture is refused, `avatarType` is **not** written |
+| Avatar: a picture (0.2.0) | `UserAccount.<slot>.avatar` setter (0xFC03, **setter 8**) with the Base64 jpg, **then** `avatarType = INDIVIDUAL` (setter 29) | the picture is still there (a file in `<dataDir>/avatars/`), is a jpg and is at most `config.avatarMaxKB` (48 KB). If the picture is refused, `avatarType` is **not** written |
 | Copy Guest's settings | `UserAccountManager.copyGuestData(ref)` (method 21851) | Guest is the active profile; the target is a personal profile with protection `[]` (no key, PIN or NFC) |
 | Delete | `UserAccountManager.removeUserAccount(ref)` (method 21846) | never guest, valet or the active profile; only a local personal profile; the slot still holds the same profile; two presses |
 | all of them | | engine off (CDS `statusEngineSpeed2` raw 0), gear P (VehicleInformation `DataPowerTrain2`), no PIA job open (`Pia.PIATransaction`), no other change running. `config.requireParked: false` turns this check off. |
@@ -61,8 +61,8 @@ named and given Guest's data from a root script). That report is not in git, and
 
 ## 2. What works on the bench
 
-`node bench/test-driver-profiles.js` (port **8170**): **116 passed, 0 failed** — the 57 checks of 0.1.0 and 59 more
-for the avatar (section 9.4; 104 when the bundled-pictures folder is empty, which skips 12 of them). `node bench/test-native-ui.js` (f30_cluster, port 8132) passed **42 / 42** at 0.1.0;
+`node bench/test-driver-profiles.js` (port **8170**): **105 passed, 0 failed** at 0.2.2 — the 57 checks of 0.1.0 and
+48 for the avatar (section 9.4). `node bench/test-native-ui.js` (f30_cluster, port 8132) passed **42 / 42** at 0.1.0;
 0.2.0 touches nothing it covers (only `apps/driver_profiles/`, the fake persod and this test), so it was not run
 again.
 
@@ -98,8 +98,8 @@ Other checks:
 - **Syntax.** Every app file (including the new `avatars.js`) and `kit/runtime/signals.js` parse as ECMAScript 2017
   (acorn), which Node 8.16 supports. No Node 8 binary is on this Mac, so the bench ran the app on Node 22.
 - **Build.** `python3 kit/tools/build.py driver_profiles` builds **6** screens (states MAIN 1, PROFILE 19, NAMES 42,
-  **AVATAR 59**, CONFIRM 99, SETTINGS_VIEW 110) and packs `avatars/` into `avatars.pack` (110 KB; jpgs do not
-  compress). The package is 943 KiB.
+  **AVATAR 59**, CONFIRM 92, SETTINGS_VIEW 103) at 0.2.2. There is no data folder to pack any more; the package is
+  832 KiB.
 
 To run it yourself:
 
@@ -255,10 +255,7 @@ names; non-ASCII works, through the kit's dynamic string slots) and reinstalls. 
   - `profiles.js` (SOME/IP, checks, writes);
   - `screens.js` (native screens);
   - `format.js` (enums, texts);
-  - `avatars.js` (0.2.0: the avatar types, the two folders the app reads, the size guard and the Base64 encoding);
-  - `avatars/` (0.2.0: the six bundled pictures, **at the owner's own request**; the build packs the folder into
-    `avatars.pack` next to the code). **Present in this branch's working tree but not committed** — see the note at
-    the head of section 9.
+  - `avatars.js` (0.2.0: the avatar types, the one folder the app reads, the size guard and the Base64 encoding).
 - `kit/runtime/signals.js` (`get`), `kit/tools/hu-stub.js` (`hu.fakes`).
 - `bench/fake-personalization.js` (0.2.0: the `avatar` and `avatarType` setters, their notifiers and the
   rejections), `bench/test-driver-profiles.js`, `bench/run-app.js` and `bench/server.js` (`POST /fake`, `perso` in
@@ -271,15 +268,10 @@ names; non-ASCII works, through the kit's dynamic string slots) and reinstalls. 
 Branch `app/profiles-avatar`. **The car was offline throughout**: no SSH, no UDS, no SOME/IP call. Everything below is
 either read off the dumps in `reference/car/2026-11-15/` (git-ignored) or run on the Mac bench.
 
-> **The six bundled pictures are not committed.** They sit in `apps/driver_profiles/avatars/` in this branch's
-> working tree, and everything that reads them is committed and tested, but the commit of the image files themselves
-> was refused by this session's permission layer — they are photographs of named people going into a public
-> repository, which is a decision only the owner can make directly, not something an agent should carry out on a
-> relayed approval. **For the owner / coordinator:** if you want them in, commit that one directory yourself
-> (`git add apps/driver_profiles/avatars && git commit`). Nothing else waits on it: the app, the bench and the data
-> folder mechanism all work with the folder empty, and the test skips the bundled checks then (104 of 116 instead of
-> 116). Those six files are the only thing from `reference/` that was copied into the app at all, and nothing from
-> `reference/` is in any commit.
+> **0.2.2: no bundled pictures.** 0.2.0 shipped two profile pictures (three sizes each) inside the app, at the
+> owner's request. They were removed in 0.2.2, together with their rows on the Avatar screen and the code that read
+> them: the app ships no pictures of its own. A custom avatar is always a jpg the owner puts in `<dataDir>/avatars/`
+> (step 4 of section 9.5); the presets need no picture at all. Nothing from `reference/` is in any commit.
 
 ### 9.1 Proven: the fields, their ids and their setters
 
@@ -316,8 +308,8 @@ the test below).
    - The guard runs on `lstat` **before the file is opened**, so an oversize photo never reaches memory, let alone
      the binding. The screen shows the limit, the row of an oversize file says how big it is and that it is over the
      limit, and pressing it refuses with the reason instead of sending.
-   - Raising it is one number in `app.json` (clamped to 1…512 KB) plus a reinstall. Lowering it is how to make the
-     app offer only the small bundled sizes.
+   - Raising it is one number in `app.json` (clamped to 1…512 KB) plus a reinstall. Lowering it makes the app
+     refuse larger files in the folder before anything is sent.
 2. **Whether persod validates the data.** Unknown. It may store any string, or it may check that it decodes, that it
    is a jpg, or that it is within some size. The app does the two checks it can do cheaply itself — the Base64 is its
    own, and the first bytes must be a JPEG header (`FF D8 FF`) — and then **shows whatever the car answers,
@@ -327,7 +319,7 @@ the test below).
    online services, and BMW normally loads a custom avatar through the My BMW app. persod may well store it while
    the HMI shows the default picture. The app can only prove that the **field** holds it: after a write it re-reads
    `avatar` and reports whether the same size and checksum come back. **Only the owner's eyes on the centre screen
-   can answer this one** (step 6 below).
+   can answer this one** (step 5 below).
 
 Two smaller designed-but-unproven points:
 
@@ -350,28 +342,17 @@ Two smaller designed-but-unproven points:
     app the avatar artwork. **Not depended on, but worth a look later:** the HMI's own resources (`mappings.pbm` and
     the compiled `/mnt/dataro/data/hmi`) presumably hold the 15 pictures; if they can be read off the unit and
     bundled, the rows could show them. That was not tried, and the car was offline.
-  - **the six pictures that ship with the app** — two pictures at **128, 256 and 512 px**, each row showing its file
-    name and its size ("6 KB — came with the app, press to use it"). They go in `apps/driver_profiles/avatars/`
-    **at the owner's own request** (see the note at the head of this section: present but not committed); the build
-    packs that folder into `avatars.pack` next to the code, and `avatars.js` reads one file out of the pack when it
-    is chosen. Three sizes per picture is the point: if the car refuses 512, step down to 256, then 128, without
-    touching a file. With the folder empty these rows and their heading simply do not appear.
   - **the owner's own `.jpg`**, listed from `<dataDir>/avatars/` with each file's size in KB. Up to 6 files are
     listed, sorted by name. An oversize or empty file is listed too, with the reason, and cannot be chosen.
   - When that folder is missing or has no jpg — the normal state until the owner puts one there — a row says so and
     the next row prints **the folder's full path**, so it can be read off the screen. **Read the folder again**
-    re-lists both sets without leaving the screen.
-- **The two sets cannot be confused.** They are separate lists with separate rows, and a row sends only from its own
-  set. If a name appears in both, both rows say which is which: the bundled row reads "came with the app (not your
-  folder's file of that name)", and the folder row reads "your own file of that name". The confirm screen repeats it
-  ("…(6 KB, the copy that came with the app)" / "…(3 KB, from your avatars folder)").
+    re-lists the folder without leaving the screen.
 - **The only folder the app reads for the owner's own pictures** is `<dataDir>/avatars/`. Names come from `readdir`
   of that one folder and travel through the screen only as a row number; no path is ever built from anything the HMI
   hands back. Skipped at listing time and again right before the read: anything that is not `*.jpg` / `*.jpeg`,
   dot-files, directories, and **symlinks** (`lstat`, never `stat`, so a link cannot lead out of the folder).
 - **On confirm**: `avatar` ← the Base64 jpg, **then** `avatarType` ← `INDIVIDUAL`, in that order, so the type never
-  points at a picture that is not there yet. Each write's result is reported. A bundled picture and the owner's own
-  go down exactly the same path; only where the bytes come from differs. For a preset only `avatarType` is written,
+  points at a picture that is not there yet. Each write's result is reported. For a preset only `avatarType` is written,
   and a picture already stored is **left alone** (the confirm screen says so).
 - **Nothing else about the account is touched**: no name, no type, no protection, no PIA. The bench test asserts
   exactly that after a write.
@@ -382,9 +363,7 @@ Two smaller designed-but-unproven points:
 
 ### 9.4 What the bench proves
 
-`node bench/test-driver-profiles.js` (port 8170): **116 passed, 0 failed** with the bundled pictures in place, and
-**104 passed, 0 failed** with that folder empty (the 12 bundled checks are skipped, not failed, and the run says so).
-0.1.0's 57 checks are unchanged. The rest:
+`node bench/test-driver-profiles.js` (port 8170): **105 passed, 0 failed** at 0.2.2. 0.1.0's 57 checks are unchanged. The rest:
 
 - `bench/fake-personalization.js` now behaves like the car as far as anyone knows it: both setters with their
   notifiers, an `INDIVIDUAL` that really holds the data (`POST /fake {setAvatar:{slot,bytes}}` preloads one), and
@@ -394,11 +373,7 @@ Two smaller designed-but-unproven points:
 - the avatar row and button on PROFILE; the Avatar screen **with no data folder at all** (no file rows, the hint, the
   full path) and **with files** (three jpgs with their sizes, the oversize and empty ones marked, the spare rows
   hidden, and **neither a `.txt`, a dot-file, a sub-directory nor a symlink pointing outside the folder listed**);
-- **the six bundled pictures**: all listed by name with their sizes, all inside the 48 KB limit (largest 46 KB), and
-  one of them sent end to end — exactly its bytes arriving (size and checksum), out of the **packed** folder, since
-  the bench runs the built app;
-- **a clash of names**: a data-folder file called exactly like a bundled one, with different bytes. Both rows say
-  which they are, and pressing the bundled row sends the bundled bytes;
+- **no bundled pictures**: the app has no `apps/driver_profiles/avatars/` folder and the Avatar screen no rows for one;
 - **each kind of preset**: `AVATAR7` written as one field, with no picture written, and the row reading back
   "Avatar 7 (AVATAR7)";
 - **a custom write**: the confirm text naming both fields in order, then exactly those bytes arriving,
@@ -413,15 +388,15 @@ Two smaller designed-but-unproven points:
 - **the parked gate** on an avatar write: engine running → the confirm screen says so and Yes sends nothing;
 - **only the allowed writes, ever**: the six calls, counted one per confirmed Yes, and no Base64 string over the
   limit ever handed to a setter;
-- **nothing leaks into the log**: no profile name, no e-mail, **no avatar file name** (bundled ones included), and no
+- **nothing leaks into the log**: no profile name, no e-mail, **no avatar file name**, and no
   run of Base64.
 
 ### 9.5 What the owner should do on the car
 
 Do this after the read-only steps of section 6, on **one profile you do not mind changing**, with the ignition on,
-the engine off, in P, and a battery charger connected. Nothing here can delete a profile, and step 7 undoes it all.
+the engine off, in P, and a battery charger connected. Nothing here can delete a profile, and step 6 undoes it all.
 
-1. **Install** 0.2.0 from this branch (the Store, as in section 7). If the install complains, its log names the field
+1. **Install** 0.2.2 (or later) (the Store, as in section 7). If the install complains, its log names the field
    it refused — most likely `avatar` or `avatarType`. Send that line; nothing else needs doing.
 2. **Look, before pressing anything.** Open a profile. The **Avatar** row should read "Default (DEFAULT)" (or
    whatever BMW's menu set). If it says "Not known", the getters are refused and nothing else in this section will
@@ -431,14 +406,7 @@ the engine off, in P, and a battery charger connected. Nothing here can delete a
    Профілі водія): does the picture there change? That answers whether the HMI follows this field at all.
    - If the result says "avatarType still reads …", persod took the call and kept the old value: tell us, and say
      whether the result mentioned the number.
-4. **A picture that came with the app** — nothing to copy anywhere (if those rows are not on the screen, the six
-   files were not committed: see the note at the head of this section, and go to step 5 instead). Profile →
-   **Avatar** → one of the rows under "Pictures that came with the app" → Yes.
-   - **Start with a 128 row** (3–6 KB). If that works, try the matching **256**, then **512** (24–46 KB). The point
-     of the three sizes is to find where the car stops accepting, so **tell us the largest one that worked**.
-   - Expect "Result: picture sent (NN KB of jpg) and avatarType set to INDIVIDUAL" and, on the next line, "The same
-     picture reads back".
-5. **Your own picture**, if you want one that is not in the app. On the Mac:
+4. **Your own picture**. On the Mac:
    - make it **square and small**: about 200×200 px, saved as **.jpg**, **at most 48 KB** (`sips -Z 200 me.jpg --out
      me-small.jpg` gets close; check the file size afterwards);
    - the Avatar screen **prints the folder it reads** — open it on the car and read that path off the screen, then
@@ -451,12 +419,12 @@ the engine off, in P, and a battery charger connected. Nothing here can delete a
      ```
    - then on the car: Avatar → **Read the folder again** → your file's row (it shows its name and size) → Yes.
    - A USB stick works just as well, as long as the file ends up in that folder.
-6. **The question only you can answer:** does BMW's own profile screen now show the picture? Look at CAR → Профілі
+5. **The question only you can answer:** does BMW's own profile screen now show the picture? Look at CAR → Профілі
    водія, and at the profile's own settings page. If it shows the default picture instead, the field holds the data
    but this HMI does not draw a custom avatar on this car — which is what we half expect, and is worth knowing.
-7. **To undo**: Avatar → **Default** → Yes. That writes one field. The picture stays stored, unused.
+6. **To undo**: Avatar → **Default** → Yes. That writes one field. The picture stays stored, unused.
 
-Two things to report back, because they are the whole point of the exercise: **the largest picture the car accepted**
-(step 4), and **whether the centre screen changed** (step 6). Also send the text of any "Result: the car refused …"
+Two things to report back, because they are the whole point of the exercise: **whether the car accepted your
+picture, and its size** (step 4), and **whether the centre screen changed** (steps 3 and 5). Also send the text of any "Result: the car refused …"
 line and, if anything says "Error", the app's log
 (`/var/opt/public/oap/oap_<uid>/data/driver_profiles.log`) — it has no names, no file names and no picture data in it.
