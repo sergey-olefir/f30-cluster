@@ -129,8 +129,21 @@ F30_FONTS = [
     ('wb_gear', 'Roboto-wdth-wght.subset.ttf', 45, DIGITS + 'PRNDSM-', 0, [650, 87.5]),      # the gear in its box
     ('wb_val', 'Roboto-wdth-wght.subset.ttf', 36, DIGITS + ':+-.° kmCl/', 0, [650, 87.5]),   # the bottom row's values
     ('wb_mini', 'Roboto-wdth-wght.subset.ttf', 14, DIGITS + '/', 0, [650, 87.5]),            # the small gauges' 1/1 and 0
-    ('wb_row', 'Roboto-wdth-wght.subset.ttf', 43, DIGITS + ':+-.', 0, [500, 87.5]),          # 6WB Dials + G20: our range, clock, temperature at BMW's places, its size (package F). Weight 500, not 650: this one stands in BMW's own row, so it takes the G20 spec's setting, not the F30's (docs/G20-DESIGN-SPEC.md 1.4)
+    # 6WB Dials + G20: our range, clock, temperature at BMW's places, its size (package F). Weight 500, not 650: this one stands in BMW's own row, so it takes the G20 spec's setting, not the F30's (docs/G20-DESIGN-SPEC.md 1.4).
+    # Strip package F, 2026-11-16, from package T's measurement of photos 60-68 (bake/work/strip/pub/T/typography.json,
+    # PROVISIONAL): wght 450, wdth 100 instead of [500, 87.5] - the same 43 px and the same figure height (31), the
+    # tabular advance 24 (BMW 24.12; was 23) and the stem 4.47 (BMW 4.31; was 5.0). Same cell, same baseline: no box moves
+    ('wb_row', 'Roboto-wdth-wght.subset.ttf', 43, DIGITS + ':+-.', 0, [450, 100]),
     ('wb_big', 'Roboto-wdth-wght.subset.ttf', 118, DIGITS + 'PRNDSM-', 0, [700, 87.5]),      # Sport: the speed and the gear in the discs
+    # --- strip package F, 2026-11-16: the bottom row's own faces at BMW's sizes, from package T's measurement of the
+    # stock strip (photos 60-68; bake/work/strip/pub/T/typography.json, PROVISIONAL). Baked so package X (and the lead)
+    # can move the row's texts onto them; NO layout uses them yet, so they cost nothing but hud.pack bytes until then.
+    # wb_cap (21 px, cap 15) draws the dial captions too, so it cannot simply grow to BMW's road label (cap 29.8).
+    ('wb_road', 'Roboto-wdth-wght.subset.ttf', 42, LOWER + UPPER + DIGITS + ' ./:+-°' + CAR_TEXT, 0, [325, 90.625], CAR_SUBS),  # the road label: BMW cap 29.76, x 22.0, baseline 700.17, centred on 961.38
+    ('wb_msg', 'Roboto-wdth-wght.subset.ttf', 35, LOWER + UPPER + DIGITS + ' ./:+-°' + CAR_TEXT, 0, [450, 87.5], CAR_SUBS),     # our message line: BMW cap 24.6-25.0, x 18.3-19.2; one line at baseline 669.23
+    ('wb_rowu', 'Roboto-wdth-wght.subset.ttf', 34, 'kmiCF°l/h', 0, [300, 87.5]),                # the row's units (km, mi, °C, °F; T's set plus the i of mi): BMW's are smaller and lighter than wb_val (C 24.25 against 26)
+    ('wb_lim', 'Roboto-wdth-wght.subset.ttf', 38, DIGITS, 0, [450, 87.5]),                      # our sign's limit (optional): BMW's digits 26.75 tall, stem 3.94 (wb_val: 26, 4.8)
+    # --- end strip package F ---
     # G20 Comfort: Roboto (SIL OFL, tools/fonts-src/Roboto-OFL.txt) semi-condensed, the bench simulation's face (docs/G20SIM-REPORT.md)
     ('g20_spd', 'Roboto-wdth-wght.subset.ttf', 105, DIGITS, 0, [700, 87.5]),             # the digital speed
     ('g20_unit', 'Roboto-wdth-wght.subset.ttf', 27, 'km/h', 0, [600, 87.5]),          # its km/h
