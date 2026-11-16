@@ -710,6 +710,48 @@ function changes(was, now, w, h) {
 function rgba(c) { return [c[0] / 255, c[1] / 255, c[2] / 255, (c[3] === undefined ? 255 : c[3]) / 255]; }
 function isNum(v) { return typeof v === 'number' && isFinite(v); }
 
+// ---- probes (0.7.18 diagnostics: READ ONLY, LOG ONLY; the HudApp methods _probe* below) --------------------------------
+// One short photo session on the owner's car has to answer three questions from the log alone:
+//   1. the vehicle condition: is 5 BMW's standby row, and 7 "P, engine off"? ("probe: vehicle condition N")
+//   2. the stored check-control list: which signal says BMW draws its warning / "i" marker right of its panel?
+//      (config.ccMarker stays null until one is confirmed) KombiInterface_2 ccList / ccListRiskClass and
+//      CheckControlMaster basicList, each logged once per change as NUMBERS and enum names only, never text
+//   3. the cluster's default check-control symbols: requestDefaultSymbols(CC_LIST_SYMBOL), called ONCE; only the count
+//      and each symbol's id, format and byte length are logged. The bitmaps are BMW's artwork: never logged, written,
+//      kept or baked - the reply is dropped as soon as it is counted.
+// Nothing here writes to the car, draws anything or changes what is drawn, and every path is caught: a failure only
+// logs a warning (an uncaught exception ends the app on the car, and two crashes uninstall it).
+const PROBE_KI2 = 'de.bmw.infotainment.KombiInterface_2';
+const PROBE_CCM = 'de.bmw.infotainment.checkcontrol.CheckControlMaster';
+const PROBE_SYM_AFTER_MS = 8000;       // 3: a few seconds after start ...
+const PROBE_SYM_WAIT_MS = 20000;       //    ... and at most this much longer for the provider, then called anyway
+const PROBE_SYM_CALL_MS = 5000;        //    the binding's own timeout
+const PROBE_SYM_GUARD_MS = 8000;       //    ours on top of it, in case the binding never settles
+const PROBE_LINES = 40;                // 2: lines per field at most (a flapping list cannot flood the log)
+const PROBE_ENTRIES = 24;              // 2: entries per line, then "+N more"
+/** A number, or "-" for none: an id can never carry text through here. */
+const probeNum = (x) => (isNum(x) ? String(x) : x === undefined || x === null ? '-' : '?');
+/** An enum: its wire number or its NAME (an upper-case identifier), else "?". Only ever read from enum members. */
+const probeEnum = (x) => (isNum(x) ? String(x) : typeof x === 'string' && /^[A-Z][A-Z0-9_]{0,39}$/.test(x) ? x
+    : x === undefined || x === null ? '-' : '?');
+/** How many bytes a symbol's data holds (Buffer, typed array or array), without looking at one of them. */
+const probeLen = (d) => (d && typeof d === 'object' && isNum(d.length) ? d.length + ' bytes'
+    : typeof d === 'string' ? 'a string of ' + d.length + ' chars' : d === undefined || d === null ? 'no data' : '? bytes');
+/** One line for a list field: "<n> entries: [id 101 colour YELLOW ...] ...". `member`: the union member holding each
+ *  entry (absent: the entry itself); cols: [[label, member name, probeNum | probeEnum], ...]. Never any other member. */
+function probeListLine(v, member, cols) {
+    if (!Array.isArray(v)) return 'not a list (' + (v === null ? 'null' : typeof v) + ')';
+    const one = (el) => {
+        const e = el && typeof el === 'object' && member && el[member] && typeof el[member] === 'object' ? el[member] : el;
+        if (!e || typeof e !== 'object') return '[?]';
+        return '[' + cols.map((c) => c[0] + ' ' + c[2](e[c[1]])).join(' ') + ']';
+    };
+    const shown = v.slice(0, PROBE_ENTRIES).map(one).join(' ');
+    return v.length + (v.length === 1 ? ' entry' : ' entries') + (v.length ? ': ' + shown : '') +
+        (v.length > PROBE_ENTRIES ? ' +' + (v.length - PROBE_ENTRIES) + ' more' : '');
+}
+// ---- end probes (module part) -------------------------------------------------------------------------------------
+
 class HudApp {
     constructor(ctx) {
         this.ctx = ctx;
@@ -1315,6 +1357,10 @@ class HudApp {
                 },
             });
         }
+        // ---- probes, item 2 (0.7.18, READ ONLY / LOG ONLY; see "probes" above HudApp): the stored check-control
+        // lists, chained IN FRONT of any handler already on the field (config.ccList's), which still runs as before
+        this._probeWire(extra);
+        // ---- end probes ----
         // "condition": BMW's own vehicle state (VehicleCondition), data().condition, 10 = FAHREN (drive-ready). Used
         // by _restFrac to tell READY from OFF on a rev dial. audit/features.
         this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
@@ -1397,6 +1443,7 @@ class HudApp {
         if (this.waze) { this.waze.start(); this._wazeWant(); }
         this.screen.start();
         this._perfStart();      // package P: off unless <data>/perf.json asks (see PERF below)
+        this._guard('probes', () => this._probeSymbolsLater());     // probes, item 3: the symbol list, once (0.7.18)
     }
 
     /** Waze's map on the panel only while the setting is on and the theme shown has a map window. */
@@ -1471,6 +1518,7 @@ class HudApp {
         clearInterval(this.dmeTimer);
         this.needleHalt = true; this._guard('needles', () => this._needleApply());     // 0.7.14: the needle timer off
         this._perfStop();       // package P
+        clearTimeout(this.probeSymT); this.probeSymT = null;        // probes, item 3 (0.7.18)
         clearTimeout(this.statusAskT);
         if (this.waze) this._guard('waze stop', () => this.waze.stop());
         this._guard('screen stop', () => this.screen.stop());
@@ -1756,6 +1804,88 @@ class HudApp {
         a.c.pixels(a.ref, [{ x: (best % a.cols) * a.cellW, y: Math.floor(best / a.cols) * a.cellH, w: a.cellW, h: a.cellH }], sl);
         return best;
     }
+
+    /* ---- probes (0.7.18 diagnostics: READ ONLY, LOG ONLY; see "probes" above HudApp) ------------------------------- */
+
+    /** Item 1: every new vehicle condition the CAR sends, once, in every layout and with or without cluster-render
+     *  (package X's "bottom row: vehicle condition N" only runs in a see-through layout). The car's own value
+     *  (car.live), not the demo drive's. Hypothesis to confirm: 5 = BMW's standby row, 7 = P with the engine off. */
+    _probeTick() {
+        const c = this.car && this.car.live ? this.car.live.condition : undefined;
+        if (c === this.probeCond) return;
+        this.probeCond = c;
+        this.log.info('probe: vehicle condition ' + probeNum(c) + (c === COND_STANDBY ? ' (= COND_STANDBY, taken as BMW\'s standby row)' : ''));
+    }
+
+    /** Item 2: the stored check-control lists, logged once per change: ids, colours, risk classes, symbol ids,
+     *  reasons and states - numbers and enum names only. cCShortName (the message text) is never read. Each handler
+     *  runs IN FRONT of the one already on the field (config.ccList's), which then runs exactly as before. */
+    _probeWire(extra) {
+        const ID = ['id', 'cCIdentifer', probeNum], COL = ['colour', 'cCColor', probeEnum], SYM = ['symbol', 'cCListSymbolID', probeNum];
+        const on = (iface, field, member, cols) => {
+            const e = extra[iface] = extra[iface] || {};
+            const prev = e[field], st = { last: undefined, n: 0 };
+            e[field] = (v) => {
+                try {
+                    const line = probeListLine(v, member, cols);
+                    if (line !== st.last && st.n < PROBE_LINES) {
+                        st.last = line; st.n++;
+                        this.log.info('probe: ' + field + ': ' + line + (st.n === PROBE_LINES ? ' (the last line for this field)' : ''));
+                    }
+                } catch (err) { this.log.warn('probe: ' + field + ': ' + (err && err.message || err)); }
+                if (prev) prev(v);
+            };
+        };
+        on(PROBE_KI2, 'ccList', 'cCListElement', [ID, COL, SYM]);
+        on(PROBE_KI2, 'ccListRiskClass', 'cCListRiskClassElement', [ID, COL, ['risk', 'cCRiskClass', probeEnum], SYM]);
+        on(PROBE_CCM, 'basicList', null, [['id', 'ccmId', probeNum], ['reason', 'reason', probeEnum], ['state', 'activeState', probeEnum]]);
+    }
+
+    /** Item 3, the schedule: PROBE_SYM_AFTER_MS after start, then up to PROBE_SYM_WAIT_MS more for KombiInterface_2's
+     *  provider; then _probeSymbols, once per run of the app. Never throws. */
+    _probeSymbolsLater() {
+        if (this.probeSymT || this.probeSymDone) return;
+        const t0 = Date.now() + PROBE_SYM_AFTER_MS;
+        const step = () => {
+            this.probeSymT = null;
+            try {
+                const sub = this.car && (this.car.subs || []).find((s) => s && s.iface === PROBE_KI2);
+                if (!(sub && sub.available) && Date.now() - t0 < PROBE_SYM_WAIT_MS && this.started) { this.probeSymT = setTimeout(step, 1000); return; }
+                this._probeSymbols(sub);
+            } catch (e) { this.log.warn('probe: cc symbols: ' + (e && e.message || e)); }
+        };
+        this.probeSymT = setTimeout(step, PROBE_SYM_AFTER_MS);
+    }
+
+    /** Item 3, the call: requestDefaultSymbols(CC_LIST_SYMBOL) ONCE, through the watch's own proxy (or a proxy of its
+     *  own when the watch has none), with the binding's timeout and ours on top. Logs the count and each symbol's id,
+     *  format and byte length; the reply is dropped right after - not one byte of a bitmap is logged or kept.
+     *  Resolves always (never rejects); any failure is one warning line. */
+    _probeSymbols(sub) {
+        if (this.probeSymDone) return Promise.resolve();
+        this.probeSymDone = true;
+        let gt = null;
+        const S = this.ctx && this.ctx.signals;
+        return Promise.resolve().then(async () => {
+            if (!S || typeof S.call !== 'function') throw new Error('no signals.call');
+            const p = sub && sub.proxy ? sub.proxy : await S.proxy(PROBE_KI2, '1');
+            const guard = new Promise((res, rej) => { gt = setTimeout(() => rej(new Error('no answer in ' + PROBE_SYM_GUARD_MS + ' ms')), PROBE_SYM_GUARD_MS); });
+            let r = await Promise.race([Promise.resolve().then(() => S.call(p, 'requestDefaultSymbols', { symbolType: 'CC_LIST_SYMBOL' }, PROBE_SYM_CALL_MS)), guard]);
+            let list = Array.isArray(r) ? r : r && typeof r === 'object'
+                ? (Array.isArray(r.defaultSymbolList) ? r.defaultSymbolList : Object.keys(r).map((k) => r[k]).find(Array.isArray)) : undefined;
+            const kind = r === null ? 'null' : typeof r;
+            r = null;
+            if (!list) { this.log.warn('probe: cc symbols: the reply is not a list (' + kind + ')'); return; }
+            const n = list.length;
+            const each = list.slice(0, 32).map((s) => (s && typeof s === 'object'
+                ? '[id ' + probeNum(s.symbolID) + ' ' + probeEnum(s.symbolFormat) + ' ' + probeLen(s.symbolData) + ']' : '[?]')).join(' ');
+            list = null;            // BMW's artwork: dropped here, never kept
+            this.log.info('probe: cc symbols: ' + n + (n === 1 ? ' symbol' : ' symbols') + (n ? ': ' + each : '') + (n > 32 ? ' +' + (n - 32) + ' more' : ''));
+        }).catch((e) => {
+            this.log.warn('probe: cc symbols: requestDefaultSymbols failed: ' + String(e && e.message || e).slice(0, 160));
+        }).then(() => { clearTimeout(gt); }).catch(() => { /* a failing log: nothing left to do, and nothing to throw */ });
+    }
+    /* ---- end probes ---- */
 
     _guard(what, fn) {
         try { fn(); } catch (e) { this.log.error('hud ' + what + ': ' + (e && e.stack || e)); }
@@ -3829,6 +3959,7 @@ class HudApp {
             this._gTick(now);
             const b = this._boost();
             if (isNum(b) && (!isNum(this.boostPeak) || b > this.boostPeak)) this.boostPeak = b;
+            this._guard('probes', () => this._probeTick());     // probes, item 1: the vehicle condition (0.7.18)
             if (!this.client.ready) return;
             this._guard('bottom row', () => this._rowSync(now));     // package X: standby, the clock line, the row's owner
             // shift light: blink the whole bar at 8 Hz once the rpm reaches the redline
