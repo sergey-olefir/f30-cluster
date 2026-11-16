@@ -262,8 +262,10 @@ SIGN_WIN = [537.3, 621.3, 42.0]
 # it were left sticking out at the sign's 8 and 4 o'clock: the whiskers (measured off the owner's close-ups of
 # 2026-11-16: a mark at panel (502.7, 645.3), r 42.1 from the sign's centre).
 # r 40 moves the ring's full black in to r 41.5, which is where BMW's red ring itself ends, so the line's stubs are
-# under black everywhere and the sign loses only the outermost 1.5 px of its red ring (invisible: the ring is
-# ~7 px thick). Nothing else changes - no uniform, no shader line, no layer.
+# under black everywhere and the sign loses only the outermost 1.5 px of its red ring. (WRONG, packages O and ZL:
+# not invisible - the ring is 9.4 px, and with this centre 1.15 px left of BMW's sign the loss was uneven, ~2.5 px on
+# the right and none on the left: the owner's lopsided ring. See the strip integration below.) Nothing else changes -
+# no uniform, no shader line, no layer.
 SIGN_WIN = [537.3, 621.3, 40.0]
 # --- strip integration, the owner's decision 1 (2026-11-16): the window moves to BMW's MEASURED centre, it does not go
 # back to r 42. The lopsided ring was never the radius: our circle sat 1.15 px left of BMW's sign (package O: our window
@@ -310,25 +312,30 @@ CC_TOP_SOFT = 13
 # box. A 4.9 px rail runs flat at y 604.8 from x 749 to 1176 and tapers to points at (702, 621) and (1221, 621); the
 # symbol slot is right-aligned at x 752.9, centre y 658.7, at most 41.3 px wide and 45-53 px tall; the text is
 # centred on x 967.5, one line at baseline 671.2 or two at 645.8 and 690.2 (leading 44.4), cap height 27.0.
+# (2026-11-16, docs/strip ZC / T: the rail is 4.6 px at y 605.1 WITH a faint gradient fill under it; text centre 968.6;
+# cap 24.3-24.9 - every size above is 1-2 px too big from overexposure; the symbol slot is centred at y 660.4.)
 # Package X (the owner, 2026-11-16): our message is OUR OWN design, not a copy of BMW's panel, and for now without a
 # window for BMW's symbol (CC_SYM, the symbol column, and the two-line cc_name / cc_desc are gone). One short line,
 # the headline only, in the road label's slot (NAV_CX, NAV_BASE): see cc_row().
 # BMW's bottom-centre road label: centred on x 960.5, baseline y 700.5, cap height 30.9, descender 8 px, the widest
 # seen 509 px (measured). Our black bar masks BMW's own text there; it starts at x 690, clear of the rear-belt,
-# driver-belt and airbag lamps (they end at x 679 and are never covered), and runs into the black over BMW's mode
-# label. While a message shows AND the info field is BMW's, a hole in the bar opens over the panel so BMW's own
-# message text is not covered. The stock field has no fill of its own; ours is only there to hide BMW's label.
+# driver-belt and airbag lamps (they end at x 684.25 - package ZL; 679 on the old rects - and are never covered), and
+# runs into the black over BMW's mode label. While a message shows AND the info field is BMW's, a hole in the bar opens
+# over the panel so BMW's own message text is not covered. BMW's road label has no fill of its own (its message panel
+# does: a faint gradient under the rail - packages H and ZC); ours is only there to hide BMW's label.
 NAV_BAR = [690, 666, 1250, 712]
 NAV_HOLE = [CC_BOX[0], 666, CC_BOX[2], 712]
 # --- package X (docs/strip/X-REPORT.md): the bar starts at y 650, not 666. CC_TOP fades out from y 652 to 665, so a
 # 660 x 13 px band (y 652-666) under our message was half or wholly see-through and BMW's one-line message showed
 # through it (the strip audit, 2026-11-16: 13 of its ~21 px of x-height). The bar exists only while the whole row is
-# ours (toggle "own:nav"), x 690-1250 keeps 11 px off the airbag lamp (x 635-679), and its hole opens over BMW's
+# ours (toggle "own:nav"), x 690-1250 keeps 5.75 px off the airbag lamp (x 632.75-684.25, package ZL; the old rects
+# said 635-679, 11 px), and its hole opens over BMW's
 # panel only while BMW's message must be seen ("cc:open": hud.js _ccOpen, the safety rule).
 NAV_BAR = [690, 650, 1250, 712]
 NAV_HOLE = [CC_BOX[0], 650, CC_BOX[2], 712]
 # BMW's marker right of the panel (none / warning triangle / "i": stored check-control messages; photos 08, 62, 63,
-# 66, 67; spec 5.6 [1252, 591, 1282, 627]): left see-through in both modes while no signal of ours stands in for it
+# 66, 67; spec 5.6 [1252, 591, 1282, 627] - that box was our 0.7.7 window clipping the triangle, which is
+# [1243.25, 591.75, 1284.75, 627.5]: package ZR): left see-through in both modes while no signal of ours stands in for it
 # (the brief's X.6). WBBACK opens it with u_cc while BMW's panel is shut ("ccMark"), and the tacho, whose rim it sits
 # on (r 332 from the tacho's centre), has a box window there (WBDIAL u_cut mode 2). PROVISIONAL: the low-resolution
 # photo 08 puts the "i" at x 1255-1270, y 590-627; package ZR measures the triangle and the box to the pixel.
@@ -366,10 +373,15 @@ SHADE = {"y": [575, 605], "ko": [0, 0, 0, 0]}   # no keep-out: BMW's right "i" i
 # setting). Our text's baseline sits on BMW's (y 697), BMW's size: values in wb_row (Arimo Bold 44, caps ~32 px as
 # BMW's), units in wb_val (Arimo Bold 36). The pump is on connection 0, so the range's box may run under it (a sheet
 # holds no overlapping members) and a 4-digit range still fits
+# (2026-11-16, package T: BMW's row baseline is 698 and its figure height 31.0 - the ~32-33 px read before was
+# overexposure; see ROW_BASE below.)
 # The boxes are sized for BMW's widest text, not the photo's: its temperature is right-aligned (x ~1624), so "-22.5"
 # or "+22.0" starts ~30 px left of the photo's "+3.5" and the patch runs to 1498; its range is left-aligned after the
 # pump, so a 4-digit range ends ~25 px right of a 3-digit range (patch to 334, short of the clock's). The clock is centred
 # (x ~397), and "23:59" fits the 115 px box.
+# (2026-11-16, package H claim C24: these anchors are GUESSES. Only the temperature's right alignment has a photo
+# behind it - package ZR, one capture of the odd value, a strong hypothesis; the range's left anchor is a hypothesis
+# (ZL, T) and the clock's centring is unsupported: every photo has a 3-digit range and a 2-digit hour.)
 OWN = {"range": [132, 662, 334, 703], "clock": [340, 662, 455, 704], "temp": [1498, 662, 1667, 705]}
 # THE FOUR RECTS BELOW ARE ALL THERE IS (2026-11-16, "in all-6WB mode, G20 elements show through"): hud.js
 # _wbPatches hands WBBACK four vec4s (u_pat0..3) and drops anything past that, and with the whole row ours these
@@ -377,7 +389,9 @@ OWN = {"range": [132, 662, 334, 703], "clock": [340, 662, 455, 704], "temp": [14
 # the warning _wbPatches now logs when one does not fit. What else BMW puts in that row, and why none of it needs
 # a fifth rect (measured on the baked collar and these rects, 2026-11-16):
 #   * its drive-mode label (assist.mode_label [1226, 659, 1359, 711], relation "under") is already fully black
-#     under the baked collar (opaque x 1232-1488 from y 650 down), so it wants no patch;
+#     under the baked collar (opaque x 1232-1488 from y 650 down), so it wants no patch; (WRONG by 9 px, package H
+#     claim C23 / ZR: the label starts at x ~1223 (1222.75-1225.25), so x 1223-1232 lies outside that span; NAV_BAR
+#     to 1250 covered it while own:nav, and the strip mask now covers it in every lane - test-strip-mask.js)
 #   * its gear letter (assist.gear [1398, 668, 1424, 703]) is relation "OVER" with strong evidence - BMW draws it
 #     on top of any theme, so no patch of ours can ever hide it. Ours is in the tacho's tray (tray_row, TRAY_C);
 #   * its belt and airbag lamps (x 494-692) are safety telltales and are deliberately never covered;
