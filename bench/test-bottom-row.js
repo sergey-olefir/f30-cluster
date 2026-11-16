@@ -363,7 +363,10 @@ async function main() {
     const base = navW.y + capF.baseline;
     const rows = await inkRows([navW.x, navW.y, navW.x + navW.w, navW.y + navW.h]);
     ok(rows.total > 0, 'the label has ink on the bench (' + rows.total + ' px with alpha in its box)');
-    ok(rows.at(base - 19, base - 15) > 0, 'including the rows above the capitals, where Ґ turns up (' + rows.at(base - 19, base - 15) + ' px)');
+    // (strip integration: the label is in wb_road now; the capitals' top is read off its size - Roboto's cap 0.711 em -
+    // instead of wb_cap's fixed 15 px)
+    const capTop = base - Math.round(capF.size * 0.711);
+    ok(rows.at(capTop - 5, capTop) > 0, 'including the rows above the capitals, where Ґ turns up (' + rows.at(capTop - 5, capTop) + ' px)');
     ok(rows.at(base, base + 5) > 0, 'and below the baseline, where р and у reach (' + rows.at(base, base + 5) + ' px)');
     await scene('cc-cyrillic');
     // (strip integration: package X made the message one line, "cc_line"; F's check was written on "cc_name")

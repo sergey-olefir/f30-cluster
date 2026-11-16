@@ -10,8 +10,9 @@
  *   2. every text of those layouts sits on the baseline recorded in design/strip/F/text-ink.json, so a font re-bake
  *      that changes a cell (as the Cyrillic one did) cannot move ink without this test saying so, and its box is
  *      exactly its font's cell high (a shorter box clips a descender or a breve, a taller one wastes pixel memory);
- *   3. the fonts that draw the car's own words (wb_cap, wb_capb; wb_road, wb_msg) hold the whole Ukrainian alphabet, the apostrophe
- *      forms, the guillemets, the dashes and the number sign, every glyph one cell high, and U+02BC drawn as U+2019.
+ *   3. the fonts that draw the car's own words (read off the layouts: wb_road, wb_msg since the strip integration) hold
+ *      the whole Ukrainian alphabet, the apostrophe forms, the guillemets, the dashes and the number sign, and the wider
+ *      set (Russian, Belarusian, the Latin accents), every glyph one cell high, and U+02BC drawn as U+2019; wb_capb none.
  * Node 8 or newer, plain fs and child_process. Never shipped.
  */
 const fs = require('fs');
@@ -52,29 +53,48 @@ NAMES.forEach((n) => {
         k++;
         const f = font(w.font), r = (rec[n] || {})[w.id];
         if (!r) { miss.push(w.id); return; }
-        if (w.y + f.baseline !== r.baseline) bad.push(w.id + ' ' + (w.y + f.baseline) + ' (recorded ' + r.baseline + ')');
-        if (w.h !== f.cellHeight) tall.push(w.id + ' ' + w.h + ' (cell ' + f.cellHeight + ')');
+        // strip integration: package X's message line ("ccLine") draws its cell at "textY" inside a taller box (the
+        // marker, look B's hairline and segment): its baseline counts from there, and the cell must fit the box
+        const ty = w.ccLine ? (w.textY || 0) : 0;
+        if (w.y + ty + f.baseline !== r.baseline) bad.push(w.id + ' ' + (w.y + ty + f.baseline) + ' (recorded ' + r.baseline + ')');
+        if (w.ccLine ? !(ty >= 0 && ty + f.cellHeight <= w.h) : w.h !== f.cellHeight) tall.push(w.id + ' ' + w.h + ' (cell ' + f.cellHeight + ')');
     });
     ok(!miss.length, n + ': every one of its ' + k + ' texts is in the record' + (miss.length ? ' (not: ' + miss.join(', ') + ')' : ''));
     ok(!bad.length, n + ': every text\'s baseline is where it was recorded' + (bad.length ? ' (moved: ' + bad.join(', ') + ')' : ''));
     ok(!tall.length, n + ': every text\'s box is its font\'s cell high' + (tall.length ? ' (' + tall.join(', ') + ')' : ''));
 });
 
-console.log('the fonts that draw the car\'s own words carry Ukrainian');
+console.log('the fonts that draw the car\'s own words carry the full set');
 const UA = 'АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯабвгґдеєжзиіїйклмнопрстуфхцчшщьюя';
 const PUNCT = '\'’ʼ«»–—№,.:;!?()"%/-';
-// wb_road and wb_msg: the road label's and the message's own faces at BMW's sizes (package T), for package X to use
-['wb_cap', 'wb_capb', 'wb_road', 'wb_msg'].forEach((n) => {
+// strip integration, the owner's decision 5 ("full text, always"): Russian and Belarusian, and the Latin accents of
+// European street names, as package F listed them (tools/bake_fonts.py WIDE)
+const WIDE = 'ЁЪЫЭЎёъыэў' + 'ÄÖÜßäöüÀÂÇÉÈÊËÎÏÔÙÛàâçéèêëîïôùûÁÍÓÚÑáíóúñĄĆĘŁŃŚŹŻąćęłńśźżČĎĚŇŘŠŤŮŽčďěňřšťůž';
+// which fonts draw the car's words is read off the layouts, not listed: every text widget whose text holds one of the
+// car's own tokens ({{road}}, {{ccHead}}, {{ccName}}, {{ccDesc}})
+const CAR_TOK = /\{\{(road|ccHead|ccName|ccDesc)\}\}/;
+const carFonts = new Set();
+NAMES.forEach((n) => JSON.parse(fs.readFileSync(path.join(LAY, n + '.json'), 'utf8')).widgets.forEach((w) => {
+    if (w.type === 'text' && CAR_TOK.test(String(w.text || ''))) carFonts.add(w.font);
+}));
+ok(carFonts.size > 0 && ['wb_road', 'wb_msg'].every((n) => carFonts.has(n)),
+    'the car\'s words are drawn in ' + JSON.stringify([...carFonts]) + ' (the road label in wb_road, our message in wb_msg)');
+// decision 4: wb_capb draws only our own Latin texts (READY, the mode name): no Cyrillic in it
+const capb = font('wb_capb').glyphs;
+ok(!carFonts.has('wb_capb') && !Object.keys(capb).some((c) => /[Ѐ-ӿ]/.test(c)), 'wb_capb draws no car text and carries no Cyrillic (decision 4)');
+[...carFonts].forEach((n) => {
     const f = font(n), g = f.glyphs;
     const lack = (UA + PUNCT).split('').filter((c) => !g[c]);
     ok(!lack.length, n + ': all 66 Ukrainian letters and the punctuation are baked' + (lack.length ? ' (missing ' + lack.length + ')' : ''));
+    const wl = WIDE.split('').filter((c) => !g[c]);
+    ok(!wl.length, n + ': and the wider set, Russian, Belarusian and the Latin accents (' + WIDE.length + ' more)' + (wl.length ? ' (missing ' + wl.join('') + ')' : ''));
     const alpha = Buffer.from(f.alpha, 'base64');
     ok(alpha.length === f.width * f.height, n + ': the atlas is ' + f.width + 'x' + f.height + ' as its header says');
     const off = Object.keys(g).filter((c) => c !== ' ' && g[c].w && g[c].h !== f.cellHeight);
     ok(!off.length, n + ': every glyph is one cell (' + f.cellHeight + ' px) high');
     const pix = (c) => { const q = g[c], out = []; for (let y = 0; y < q.h; y++) out.push(alpha.slice((q.y + y) * f.width + q.x, (q.y + y) * f.width + q.x + q.w).toString('hex')); return out.join('|'); };
     ok(g['ʼ'] && g['’'] && pix('ʼ') === pix('’') && g['ʼ'].advance === g['’'].advance, n + ': U+02BC (the Ukrainian apostrophe) is drawn with U+2019\'s glyph');
-    ok(!g['Ω'] && !g['ß'], n + ': and a character outside the set is still missing, so the element falls back to BMW\'s (Greek, German sharp s)');
+    ok(!g['Ω'] && !g['λ'], n + ': and a character outside the set is still missing, so the element falls back to BMW\'s (Greek)');
 });
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');

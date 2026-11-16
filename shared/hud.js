@@ -4102,10 +4102,11 @@ class HudApp {
         } else if (w.type === 'text') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             let s = this._resolve(w.text);
-            // Bottom row: the car's own words. Our 6WB fonts are baked subsets (Latin and figures only), so a road
-            // name or a message in another script would come out with holes. Rather than draw that, the element
-            // gives itself back to the car (the owner's "way back", 2026-11-15). The faithful drawing brings a font
-            // with the right glyphs (docs/G20-DESIGN-SPEC.md: Roboto, width axis 87.5).
+            // Bottom row: the car's own words. They are drawn in wb_road (the road label) and wb_msg (our message line),
+            // which carry Ukrainian, Russian and Belarusian and the Latin accents of European street names (strip
+            // packages F and the integration: tools/bake_fonts.py CAR_TEXT). A character still outside that set (Greek,
+            // say) would come out as a hole; rather than draw that, the row gives itself back to the car, whole (the
+            // owner's "way back", 2026-11-15; package X's all-or-nothing). Never a replacement glyph.
             const rowOf = this._rowOf(w);
             if (rowOf && s) {
                 const miss = this._missingGlyphs(s, w.font);

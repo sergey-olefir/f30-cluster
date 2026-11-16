@@ -340,6 +340,14 @@ MARK_CUT = {"box": MARK_BOX, "soft": MARK_BOX_SOFT, "boxWhen": "ccMarker"}
 # our road label: BMW's centre and baseline, and WIDER than BMW's own field so a long name is not shrunk
 # (the owner, 2026-11-15, with docs/ROAD-SHIELDS.md; the widest street measured is 509 px)
 NAV_CX, NAV_BASE, NAV_W = 960.5, 700.5, 540   # 690.5..1230.5: the bar's own width, and 31 px wider than the widest street measured
+# strip integration (packages T and ZC, photos 61, 64, 67, 68: three strings of different width): centre 960.6,
+# baseline 700 (699.7-700.1); the box 691..1230, 539 wide, so its centre is 960.5
+NAV_CX, NAV_BASE, NAV_W = 960.6, 700, 539
+# our one-line message (package X's cc_line) in wb_msg (package T: BMW's message cap 24.3-24.9, stem 3.4-3.9), centred
+# on BMW's message axis x 968.6 (package ZC, three lines on two captures; T 968-969) on BMW's one-line baseline 671
+# (ZC 671.5, T 670.2). The box runs 690..1247 (centre 968.5), from 8 px above the cell (look B's hairline) to 4 px
+# under it (its coloured segment)
+CC_LINE_X, CC_LINE_W, CC_LINE_BASE = 690, 557, 671
 # --- end bottom row ---
 # --- package F (docs/POLISH-F-REPORT.md): 6WB Dials + G20's bottom row ---
 # the full-size cover over BMW's bottom lines, hooks and grey dash (tools/overlay/plan_dials.py COVER_BOX, packed by
@@ -377,6 +385,13 @@ def row_patches():
     return [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")] \
         + [{"rect": CC_TOP, "soft": CC_TOP_SOFT}]         # 2026-11-14: the foot band; the street name shows below it
 ROW_BASE = 697
+# --- strip integration, package T (docs/strip/T-REPORT.md; bake/work/strip/pub/T/typography.json): BMW's row sits
+# on baseline 698 (697 was 1 px high); our range ends where BMW's does (x 253, box from 143), the temperature at x 1623
+# (box from 1513), and the units are BMW's smaller, lighter face (wb_rowu) starting at x 259 and 1629. Every widest
+# string still fits its box: "9999" 96 of 110, "+40.0" 107 of 110, "km" / "mi" 39 of 54, "°C" / "°F" 30 of 46.
+ROW_BASE = 698
+ROW_RANGE_R, ROW_TEMP_R, ROW_RANGE_U, ROW_TEMP_U = 253, 1623, 259, 1629
+# --- end strip integration ---
 # our drive-mode label above the gear tray (D row 15) and the gear in the tray (D row 17), on the tacho (G20 geometry:
 # the same place in every layout with the tray; its shape is baked: bake/src/C2 params.PBOX)
 MODE_C, TRAY_C = (1508, 527), (1508, 583)
@@ -389,14 +404,14 @@ def base_at(font, baseline):
 
 def own_row():
     """Our range (with the pump), clock and outside temperature at BMW's places, each shown while it is ours."""
-    vy, uy = base_at("wb_row", ROW_BASE), base_at("wb_val", ROW_BASE)
+    vy, uy = base_at("wb_row", ROW_BASE), base_at("wb_rowu", ROW_BASE)       # strip integration: the units in wb_rowu (T)
     return [
         dict(icon("own_range_icon", "fuel", 150, 682, 0, "fg", w=30, h=34), toggle="own:range"),
-        text("own_range", 249, vy, 110, "{{range}}", "wb_row", align="right", conn=1, toggle="own:range"),
-        text("own_range_u", 253, uy, 54, "{{u:distLc}}", "wb_val", align="left", conn=1, toggle="own:range"),
+        text("own_range", ROW_RANGE_R, vy, 110, "{{range}}", "wb_row", align="right", conn=1, toggle="own:range"),
+        text("own_range_u", ROW_RANGE_U, uy, 54, "{{u:distLc}}", "wb_rowu", align="left", conn=1, toggle="own:range"),
         text("own_clock", 397, vy, 124, "{{time}}", "wb_row", conn=1, toggle="own:clock"),
-        text("own_temp", 1615, vy, 110, "{{ambient1}}", "wb_row", align="right", conn=2, toggle="own:temp"),
-        text("own_temp_u", 1619, uy, 46, "{{u:temp}}", "wb_val", align="left", conn=2, toggle="own:temp"),
+        text("own_temp", ROW_TEMP_R, vy, 110, "{{ambient1}}", "wb_row", align="right", conn=2, toggle="own:temp"),
+        text("own_temp_u", ROW_TEMP_U, uy, 46, "{{u:temp}}", "wb_rowu", align="left", conn=2, toggle="own:temp"),
     ]
 # --- end package F ---
 
@@ -411,8 +426,11 @@ def road_signs(own=False):
         dict({"id": "signs", "type": "wbsign", "class": "content", "z": 3, "x": 305, "y": 460, "w": 214, "h": 93,
               "conn": 1, "tex": {"limit": {"tex": "sign_limit", "x": 2, "y": 2, "w": 88, "h": 89},
                                  "nopass": {"tex": "sign_nopass", "x": 124, "y": 2, "w": 88, "h": 89}}}, **tg),
-        text("limit", 351, 506, 60, "{{limit}}", "wb_val", "ink", conn=2, **tg),
+        # strip integration, package T: the figure in wb_lim (BMW's 26.8 px figure, stem 3.9; wb_val's was 26 / 4.8),
+        # on baseline 520 so its 27 px figure stays centred on our sign's disc (y 506.5), as wb_val's 26 px one was
+        text("limit", 351, base_at("wb_lim", LIMIT_BASE), 60, "{{limit}}", "wb_lim", "ink", conn=2, **tg),
     ]
+LIMIT_BASE = 520
 
 def nav_row():
     """Our road label on BMW's bottom-centre street line, over a black bar; only while the navigation label is ours.
@@ -422,7 +440,11 @@ def nav_row():
     # through the mask's "msg" hole lane (hud.js _maskLanes, the safety rule), so the bar and its hole only doubled
     # that - one effect layer fewer on connection 1 (bench/test-strip-mask.js checks the coverage).
     return [
-        text("nav", NAV_CX, base_at("wb_cap", NAV_BASE), NAV_W, "{{road}}", "wb_cap", conn=1, toggle="own:nav"),
+        # strip integration: the car's own words in wb_road (package T: BMW's cap 29.8, x 21.9, stem 3.0; wb_cap's cap
+        # was 15), which carries the full set the car may send (Ukrainian, Russian and Belarusian, the Latin accents of
+        # European street names: tools/bake_fonts.py CAR_TEXT); a character still outside it hands the row back to
+        # BMW (shared/hud.js _missingGlyphs), never a box. Centred on x 960.6 (packages T and ZC), baseline 700
+        text("nav", NAV_CX, base_at("wb_road", NAV_BASE), NAV_W, "{{road}}", "wb_road", conn=1, toggle="own:nav"),
     ]
 
 def cc_row():
@@ -433,11 +455,15 @@ def cc_row():
     only after it does hud.js _ccOpen let BMW's panel be covered. The box is the road bar's own (NAV_BAR), the cell top
     where the road label's is (textY), so the headline sits on the road label's baseline. White text (the owner,
     2026-11-15); the marker and the segment take the car's own colour (cCColor, hud.js _ccSeverity)."""
-    cell_top = int(round(base_at("wb_cap", NAV_BASE) - cell("wb_cap") / 2.0))       # the "nav" text's own cell top
+    # strip integration (package T): wb_msg, on BMW's message axis and one-line baseline (CC_LINE_*); the box is the
+    # line's own, not the retired road bar's
+    ch, cb = metrics("wb_msg")
+    cell_top = CC_LINE_BASE - cb
+    y0, y1 = cell_top - 8, cell_top + ch + 4
     return [
-        {"id": "cc_line", "type": "text", "ccLine": True, "z": 5, "x": NAV_BAR[0], "y": NAV_BAR[1],
-         "w": NAV_BAR[2] - NAV_BAR[0], "h": NAV_BAR[3] - NAV_BAR[1], "textY": cell_top - NAV_BAR[1],
-         "text": "{{ccHead}}", "font": "wb_cap", "color": "fg", "align": "center", "conn": 2, "toggle": "own:info",
+        {"id": "cc_line", "type": "text", "ccLine": True, "z": 5, "x": CC_LINE_X, "y": y0,
+         "w": CC_LINE_W, "h": y1 - y0, "textY": cell_top - y0,
+         "text": "{{ccHead}}", "font": "wb_msg", "color": "fg", "align": "center", "conn": 2, "toggle": "own:info",
          # repainted every tick when it changes, not every 200 ms: BMW's panel is open until ours is drawn
          "rate": 50},
     ]

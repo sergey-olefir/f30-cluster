@@ -16,9 +16,9 @@ import base64, json, math, os, re, sys
 LAYOUTS = ('wb_comfort', 'wb_dials', 'wb_sport', 'wb_sport_dials', 'wb_eco')
 SAMPLE = {'range': '467', 'time': '23:59', 'ambient1': '+22.5', 'u:temp': '°C', 'u:distLc': 'km', 'limit': '50',
           'mode': 'COMFORT', 'gear': 'D4', 'stage': 'D', 'road': 'Hauptstrasse', 'ccName': 'Tyre pressure',
-          'ccDesc': 'Check the tyre pressure.', 'speed': '188', 'cons': '7.5'}
+          'ccDesc': 'Check the tyre pressure.', 'ccHead': 'Tyre pressure', 'speed': '188', 'cons': '7.5'}
 # Й Ї Ґ: the tallest capitals; Щ Ц Д: the capitals that reach below the baseline; « » № – ’ ʼ: the punctuation asked for
-CAR = {'road': 'ЙЇҐ Щуцдй', 'ccName': 'ЇҐЙ щільність', 'ccDesc': '«№ 3» – ЩЦД’ʼ'}
+CAR = {'road': 'ЙЇҐ Щуцдй', 'ccName': 'ЇҐЙ щільність', 'ccDesc': '«№ 3» – ЩЦД’ʼ', 'ccHead': 'ЇҐЙ «№ 3» – ЩЦД’ʼ'}
 
 _fonts = {}
 
@@ -70,7 +70,8 @@ def ink(fonts, w, s):
         pen += g['advance'] + sp
     if x1 < 0:
         return None, len(clipped)
-    return [w['x'] + x0, w['y'] + y0, w['x'] + x1, w['y'] + y1], len(clipped)
+    ty = (w.get('textY') or 0) if w.get('ccLine') else 0      # strip integration: the message line's cell sits at textY
+    return [w['x'] + x0, w['y'] + ty + y0, w['x'] + x1, w['y'] + ty + y1], len(clipped)
 
 
 def resolve(t, tab):
@@ -88,7 +89,8 @@ def table(layouts, fonts):
             s = resolve(w['text'], SAMPLE)
             box, clip = ink(fonts, w, s)
             f = font(fonts, w['font'])
-            r = {'font': w['font'], 'box': [w['x'], w['y'], w['w'], w['h']], 'baseline': w['y'] + f['baseline'],
+            ty = (w.get('textY') or 0) if w.get('ccLine') else 0
+            r = {'font': w['font'], 'box': [w['x'], w['y'], w['w'], w['h']], 'baseline': w['y'] + ty + f['baseline'],
                  'text': w['text'], 'ink': box, 'clip': clip}
             toks = re.findall(r'\{\{([a-zA-Z0-9:]+)\}\}', w['text'])
             if any(t in CAR for t in toks):

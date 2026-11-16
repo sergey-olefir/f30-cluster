@@ -53,7 +53,10 @@ UA_UPPER = 'АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ'
 UA_LOWER = 'абвгґдеєжзиіїйклмнопрстуфхцчшщьюя'
 CAR_PUNCT = ",;!?()'\"%&#*=_’ʼ‘«»„“”–—№…"
 CAR_SUBS = {'ʼ': '’'}
-CAR_WIDE = False
+# strip integration, the owner's decision 5 (2026-11-16, "full text, always"): the wider set is ON. Every font that
+# draws text the car supplies carries Ukrainian, Russian and Belarusian and the Latin accents of European street names,
+# so a real road label or message never falls back for a missing glyph (package F priced it: docs/strip/F-REPORT.md 3.3)
+CAR_WIDE = True
 WIDE = 'ЁЪЫЭЎёъыэў' + 'ÄÖÜßäöüÀÂÇÉÈÊËÎÏÔÙÛàâçéèêëîïôùûÁÍÓÚÑáíóúñĄĆĘŁŃŚŹŻąćęłńśźżČĎĚŇŘŠŤŮŽčďěňřšťůž'
 CAR_TEXT = UA_UPPER + UA_LOWER + CAR_PUNCT + (WIDE if CAR_WIDE else '')
 # --- end package F ---
@@ -122,10 +125,14 @@ CLUSTER_FONTS = [
 F30_FONTS = [
     ('wb_spd', 'Roboto-wdth-wght.subset.ttf', 28, DIGITS + '.-', 0, [650, 87.5]),   # the speed scale's numbers, the range and consumption figures
     ('wb_rpm', 'Roboto-wdth-wght.subset.ttf', 43, DIGITS, 0, [650, 87.5]),          # the rev scale's numbers
-    # package F (strip): wb_cap and wb_capb also draw the car's own words (the road label, the message), so both carry
-    # CAR_TEXT. The taller cell this gives them does not move any text: design/gen_6wb.py places text by its baseline
-    ('wb_cap', 'Roboto-wdth-wght.subset.ttf', 21, LOWER + UPPER + DIGITS + '/ .:+-°' + CAR_TEXT, 0, [650, 87.5], CAR_SUBS),   # km/h, 1/min x 1000, Time, OFF; the road label, the message
-    ('wb_capb', 'Roboto-wdth-wght.subset.ttf', 21, UPPER + DIGITS + '/ ' + LOWER + '.:+-°' + CAR_TEXT, 0, [700, 87.5], CAR_SUBS),   # READY, 1/1; a message headline
+    # package F (strip) baked CAR_TEXT into wb_cap and wb_capb while they drew the car's words. Strip integration
+    # (2026-11-16): the road label is in wb_road and our message in wb_msg now (package T's sizes), so neither draws car
+    # text any more and both are Latin again - wb_cap no longer can (decision 5: "as long as it can still draw car
+    # text"), and wb_capb draws only our own Latin labels, READY and the mode name (decision 4). bench/test-fonts.js
+    # checks that every font a layout uses for the car's words carries the full set. Their cells shrink back; no ink
+    # moves (design/gen_6wb.py places text by its baseline)
+    ('wb_cap', 'Roboto-wdth-wght.subset.ttf', 21, LOWER + UPPER + DIGITS + '/ .:+-°', 0, [650, 87.5]),   # km/h, 1/min x 1000, Time, OFF
+    ('wb_capb', 'Roboto-wdth-wght.subset.ttf', 21, UPPER + DIGITS + '/ ', 0, [700, 87.5]),   # READY, 1/1, the mode name
     ('wb_gear', 'Roboto-wdth-wght.subset.ttf', 45, DIGITS + 'PRNDSM-', 0, [650, 87.5]),      # the gear in its box
     ('wb_val', 'Roboto-wdth-wght.subset.ttf', 36, DIGITS + ':+-.° kmCl/', 0, [650, 87.5]),   # the bottom row's values
     ('wb_mini', 'Roboto-wdth-wght.subset.ttf', 14, DIGITS + '/', 0, [650, 87.5]),            # the small gauges' 1/1 and 0
@@ -133,7 +140,9 @@ F30_FONTS = [
     # Strip package F, 2026-11-16, from package T's measurement of photos 60-68 (bake/work/strip/pub/T/typography.json,
     # PROVISIONAL): wght 450, wdth 100 instead of [500, 87.5] - the same 43 px and the same figure height (31), the
     # tabular advance 24 (BMW 24.12; was 23) and the stem 4.47 (BMW 4.31; was 5.0). Same cell, same baseline: no box moves
-    ('wb_row', 'Roboto-wdth-wght.subset.ttf', 43, DIGITS + ':+-.', 0, [450, 100]),
+    # strip integration: the colon's advance is BMW's 14 (package T: 13.9 +- 0.4, photo 64), not Roboto's 11, centred
+    # in it - a per-glyph override (ADV), so "1x:xx" lands its minutes where BMW's do
+    ('wb_row', 'Roboto-wdth-wght.subset.ttf', 43, DIGITS + ':+-.', 0, [450, 100], None, '', {':': 14}),
     ('wb_big', 'Roboto-wdth-wght.subset.ttf', 118, DIGITS + 'PRNDSM-', 0, [700, 87.5]),      # Sport: the speed and the gear in the discs
     # --- strip package F, 2026-11-16: the bottom row's own faces at BMW's sizes, from package T's measurement of the
     # stock strip (photos 60-68; bake/work/strip/pub/T/typography.json, PROVISIONAL). Baked so package X (and the lead)
@@ -158,12 +167,15 @@ PAD = 2
 ATLAS_W = 1024
 
 
-def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''):
+def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck='', adv_over=None):
     """stroke: px of extra weight round every glyph (Michroma has one weight). weight: a named instance of a
     variable font (Orbitron: Regular .. Black), for the M theme's squared BMW-style gear, speed and numbers.
     subs: {char: glyph drawn for it} (Orbitron's zero is slashed; the M8's is plain, so its O stands in).
     tuck: characters added to a font after layouts were built on its cell height (° on value / y_val, Nov 7 2026):
-    they don't count towards the cell, and one that rises above it is drawn lower so its top meets the cell's."""
+    they don't count towards the cell, and one that rises above it is drawn lower so its top meets the cell's.
+    adv_over: {char: advance px} - a glyph's advance set by hand, its ink centred in it (strip integration: wb_row's
+    colon at BMW's 14)."""
+    adv_over = adv_over or {}
     font = ImageFont.truetype(os.path.join(SRC, file), size)
     if isinstance(weight, (list, tuple)): font.set_variation_by_axes(list(weight))     # [wght, wdth] of a variable font
     elif weight: font.set_variation_by_name(weight)
@@ -187,8 +199,8 @@ def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''
         w = r - l + 2 * PAD
         img = Image.new('L', (w, height), 0)
         ImageDraw.Draw(img).text((PAD - l, PAD - top + drop.get(c, 0)), glyph(c), font=font, fill=255, anchor='ls', stroke_width=stroke, stroke_fill=255)
-        shift = (tab - adv) / 2 if c in DIGITS else 0
-        cells.append((c, img, round(l - PAD + shift), round(tab if c in DIGITS else adv)))
+        shift = (tab - adv) / 2 if c in DIGITS else (adv_over[c] - adv) / 2 if c in adv_over else 0
+        cells.append((c, img, round(l - PAD + shift), round(tab if c in DIGITS else adv_over.get(c, adv))))
 
     # simple row packing
     x = y = 0
