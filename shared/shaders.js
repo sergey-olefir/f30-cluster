@@ -1586,9 +1586,32 @@ uniform vec4 u_patSoft;
 // there (Comfort: the bar; Dials + G20: a black patch, hud.js "cc" with "!cc:shown")
 uniform vec4 u_cc;
 // --- end package F ---
+// --- package M (docs/strip/M-REPORT.md): the STRIP mask, the collar path only ---
+// One baked R8 atlas (u_t2; its size in px in u_r2.zw; tools/strip/bake_mask.py) holds our coverage over BMW's
+// bottom strip at full size, one byte a px, one "lane" per state of the row, each in its own tile. u_mk: the box the
+// cover lanes share (layer px x0, y0, x1, y1; x1 <= x0: no lane, and the collar, the cover and the patches draw as
+// before); inside it our black IS the lane (the collar, the cover and the patches are not drawn there), outside it the
+// collar and the cover are, the patches not. u_mh: the hole lane's box (BMW's message panel, its symbol and marker), a
+// multiplier applied last in place of u_cc (x1 <= x0: none, u_cc as before). u_mo: where the cover lane and the hole
+// lane start in the atlas, px (cover x, y, hole x, y): one message switches the lane.
+uniform vec4 u_mk;
+uniform vec4 u_mh;
+uniform vec4 u_mo;
+// --- end package M ---
 ${NIGHT_GLSL}
 
 const float PI = 3.14159265359;
+
+// package M: is p in the box b (x0, y0, x1, y1; half-open; x1 <= x0: never)
+bool inBox(vec2 p, vec4 b) { return b.z > b.x && p.x >= b.x && p.y >= b.y && p.x < b.z && p.y < b.w; }
+// package M: a lane's value at p (its box b, its origin o in the atlas). floor() + 0.5 lands on the texel's centre
+// whatever the rounding of p (fp16 would miss by up to 0.94 texel past x 1024: highp, and the snap, docs/strip/
+// M-REPORT.md). An R8 asset samples as (r, 0, 0, 1) on the car; the bench page gets it as (r', r', r', r) with r'
+// rounded by its canvas's premultiplied alpha, so .a is read wherever it is not 1
+float laneAt(vec2 p, vec4 b, vec2 o) {
+    vec4 s = texture2D(u_t2, (floor(p - b.xy) + 0.5 + o) / u_r2.zw);
+    return s.a < 0.999 ? s.a : s.r;
+}
 
 // package F: px outside the box b (x0, y0, x1, y1), rounded by r; < 0 inside. fp16-safe: length() of a clamped vector
 float boxOut(vec2 p, vec4 b, float r) {
@@ -1637,13 +1660,25 @@ void main() {
     float cy = u_dl.y, R = u_dl.z;
     vec3 col = vec3(0.0);
     if (u_hasTex > 1.5) {
+        float a = 0.0;
+        bool lane = u_mk.z > u_mk.x;                                  // package M: a cover lane is on
+        if (lane && inBox(p, u_mk)) a = laneAt(p, u_mk, u_mo.xy);    // package M: the lane is our black here
+        else {
         // the collar: pure black (empty space is black), its coverage soft and baked (tools/overlay/plan_dials.py)
         vec2 u0 = (p - u_r0.xy) / u_r0.zw;
-        float a = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? texture2D(u_t0, u0).a : 0.0;
+        a = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? texture2D(u_t0, u0).a : 0.0;
         // --- package F: the full-size cover, the shade at our dials' inner edges, the bottom-row patches ---
         if (u_r1.z > 0.0) {
             vec2 u1 = (p - u_r1.xy) / u_r1.zw;
             if (u1.x >= 0.0 && u1.y >= 0.0 && u1.x <= 1.0 && u1.y <= 1.0) a = max(a, texture2D(u_t1, u1).a);
+        }
+        // package M: the patches only while no lane is on (they are max()ed, so before the shade is the same as after)
+        if (!lane) {
+        if (u_pat0.z > u_pat0.x) a = max(a, patch(p, u_pat0, u_patSoft.x));
+        if (u_pat1.z > u_pat1.x) a = max(a, patch(p, u_pat1, u_patSoft.y));
+        if (u_pat2.z > u_pat2.x) a = max(a, patch(p, u_pat2, u_patSoft.z));
+        if (u_pat3.z > u_pat3.x) a = max(a, patch(p, u_pat3, u_patSoft.w));
+        }
         }
         if (u_shade.x > 0.0 && between > 0.5) {
             float o = min(dl, dr);                                   // px outside the nearer dial (scaled lengths above)
@@ -1652,10 +1687,6 @@ void main() {
             if (u_shadeKo.z > u_shadeKo.x) sh *= smoothstep(0.0, 2.0, boxOut(p, u_shadeKo, 0.0));
             a = max(a, sh);
         }
-        if (u_pat0.z > u_pat0.x) a = max(a, patch(p, u_pat0, u_patSoft.x));
-        if (u_pat1.z > u_pat1.x) a = max(a, patch(p, u_pat1, u_patSoft.y));
-        if (u_pat2.z > u_pat2.x) a = max(a, patch(p, u_pat2, u_patSoft.z));
-        if (u_pat3.z > u_pat3.x) a = max(a, patch(p, u_pat3, u_patSoft.w));
         // --- end package F ---
         // car3 G: BMW's map between our dials gets soft edges (docs/CAR3-G-REPORT.md): black beside and above the
         // window u_wbox (x, y, w, h, measured on the car photos 41 and 42), fading to clear over u_fade.y px at its
@@ -1686,7 +1717,8 @@ void main() {
             fc = L.rgb * L.a / max(a2, 1e-4);
             a = a2;
         }
-        if (u_cc.z > u_cc.x) a *= smoothstep(-0.5, 3.0, boxOut(p, u_cc, 8.0));      // the message panel shows
+        if (u_mh.z > u_mh.x) { if (inBox(p, u_mh)) a *= laneAt(p, u_mh, u_mo.zw); }  // package M: BMW's panel shows
+        else if (u_cc.z > u_cc.x) a *= smoothstep(-0.5, 3.0, boxOut(p, u_cc, 8.0));      // the message panel shows
         gl_FragColor = vec4(min(nightLook(fc), vec3(1.0)), a);       // 2026-11-14: the night look
         return;
     }

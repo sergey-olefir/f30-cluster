@@ -418,9 +418,23 @@ def msa_sign(cx, cy, conn=0):
 MSA_AT = (-0.337, 0.418)     # in the tacho, in R from its centre
 # --- end car3 I ---
 
+# --- package M (docs/strip/M-REPORT.md): the STRIP mask ---
+# One baked R8 atlas of our coverage over BMW's bottom strip, one lane per state of the row (ours, bmw, standby; msg,
+# BMW's message panel's holes), made by tools/strip/bake_mask.py from the zone packages' shapes (or, "--today", from
+# the rectangles above, which it reproduces exactly). The lane table (boxes, tiles) lives in the texture's own file
+# and shared/hud.js reads it from there, so a new bake needs no new layout. No file: no mask, the rects as before.
+STRIP_MASK = "strip_mask"
+
+def strip_mask():
+    """The bg widget's "mask" entry, or None when no mask has been baked."""
+    f = os.path.join(HERE, '..', 'apps', 'f30_cluster', 'hud', 'scene', STRIP_MASK + '.json')
+    return {"tex": STRIP_MASK} if os.path.exists(f) else None
+# --- end package M ---
+
 def dials_bg(style):
     """The see-through background of 6WB Dials + G20 and 6WB Sport + G20 (WBBACK's collar path; style is not drawn)."""
-    return {"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
+    m = strip_mask()                 # package M
+    return dict({"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
             "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": style, "color": "accent",
             "collar": {"tex": "collar", "x": 0, "y": 0, "w": 1920, "h": 720},
             # package F: BMW's bottom lines, hooks and dash under black; the shade's setting; patches under our row items
@@ -429,7 +443,8 @@ def dials_bg(style):
             "cc": CC_BOX,
             "ccSym": CC_SYM,          # bottom row: while the info message is ours, only BMW's symbol column opens
             "window": MAP_WINDOW, "fade": MAP_FADE,                             # 2026-11-14: Comfort's map window
-            "foot": FOOT, "footLine": FOOT_LINE}                              # ... and its foot line ("wbFoot")
+            "foot": FOOT, "footLine": FOOT_LINE},                             # ... and its foot line ("wbFoot")
+            **({"mask": m} if m else {}))                                     # package M: the strip mask
 
 def dials():
     """6WB Dials + G20 (docs/OVERLAY-PLAN-DIALS.md): our four dials and road signs; the G20 draws everything else round

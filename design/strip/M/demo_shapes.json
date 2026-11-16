@@ -1,0 +1,24 @@
+{
+  "_about": "Package M DEMO, not a proposal: shapes that exercise tools/strip/bake_mask.py (a round hole with a soft edge, a panel with an arc and slanted ends, per-edge feathers, the always-open belt group). Boxes are the catalogue's (design/overlay/g20_comfort.json) or round numbers; the true shapes are the zone packages' (docs/AGENT-BRIEF-strip.md ZL-ZR.4).",
+  "shapes": [
+    {"id": "demo.floor", "channel": "all", "kind": "cover", "rect": [120, 592, 1680, 720], "feather_in_px": 0, "feather_out_px": 0,
+     "reason": "opaque everywhere in the row unless a hole says otherwise"},
+    {"id": "demo.belts", "channel": "all", "kind": "hole", "rect": [498, 661, 684, 720], "feather_in_px": 0, "feather_out_px": 0,
+     "reason": "the belt and airbag group, the full group, every lane: never covered"},
+    {"id": "demo.sign", "channel": "bmw", "kind": "hole", "circle": [537.3, 621.3, 41.5], "feather_in_px": 0, "feather_out_px": 2,
+     "reason": "BMW's sign, round, a 2 px soft edge outward"},
+    {"id": "demo.range", "channel": "bmw", "kind": "hole", "rect": [134, 664, 305, 701], "feather_in_px": 0, "feather_out_px": 1.5},
+    {"id": "demo.clock", "channel": "bmw", "kind": "hole", "rect": [342, 664, 453, 702], "feather_in_px": 0, "feather_out_px": 1.5},
+    {"id": "demo.street", "channel": "bmw", "kind": "hole", "rect": [793, 667, 1128, 711], "feather_in_px": 0, "feather_out_px": 2},
+    {"id": "demo.mode_label", "channel": "bmw", "kind": "hole", "rect": [1224, 657, 1361, 713], "feather_in_px": 0, "feather_out_px": 1},
+    {"id": "demo.temperature", "channel": "bmw", "kind": "hole", "rect": [1538, 664, 1665, 703], "feather_in_px": 0, "feather_out_px": 1.5},
+    {"id": "demo.panel", "channel": "bmw_msg", "kind": "hole",
+     "polygon": [[702, 691], [702, 630], [712, 621], [745.6, 615.5], [800, 610.3], [860, 606.9], [920, 605.1], [964.5, 604.5],
+                 [1009, 605.1], [1069, 606.9], [1129, 610.3], [1183.4, 615.5], [1217, 621], [1227, 630], [1227, 691]],
+     "per_edge": [[0, 0], [0, 2], [0, 2], [0, 3], [0, 3], [0, 3], [0, 3], [0, 3], [0, 3], [0, 3], [0, 3], [0, 3], [0, 2], [0, 2], [0, 0]],
+     "reason": "a panel: an arc on top and slanted ends; a 3 px shadow on the arc, 2 px on the ends, hard at the foot"},
+    {"id": "demo.marker", "channel": "bmw_msg", "kind": "hole", "rect": [1252, 589, 1274, 629], "feather_in_px": 0, "feather_out_px": 1},
+    {"id": "demo.odometer", "channel": "standby", "kind": "hole", "rect": [860, 670, 1060, 706], "feather_in_px": 0, "feather_out_px": 2},
+    {"id": "demo.mode_standby", "channel": "standby", "kind": "hole", "rect": [1224, 657, 1361, 713], "feather_in_px": 0, "feather_out_px": 1}
+  ]
+}

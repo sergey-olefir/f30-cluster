@@ -1468,16 +1468,17 @@ class HudApp {
         if (this.sceneUsed) this.sceneUsed.add(key);
         if (this.atlases.has(key)) return this.atlases.get(key);
         const j = data.json('scene/' + name + '.json');
-        if (!j || !j.rgba) throw new Error('scene texture "' + name + '" is missing from hud/scene');
-        const buf = Buffer.from(j.rgba, 'base64');
-        if (buf.length !== j.w * j.h * 4) throw new Error('scene texture "' + name + '": size does not match');
+        const r8 = !!(j && j.format === 'r8' && j.r8), bpp = r8 ? 1 : 4;   // package M: an R8 one ("r8"), the strip mask
+        if (!j || !(r8 || j.rgba)) throw new Error('scene texture "' + name + '" is missing from hud/scene');
+        const buf = Buffer.from(r8 ? j.r8 : j.rgba, 'base64');
+        if (buf.length !== j.w * j.h * bpp) throw new Error('scene texture "' + name + '": size does not match');
         const c = this._clientAt(ci);
-        const ref = c.asset({ target: this.target, format: 'rgba8', w: j.w, h: j.h, sampling: j.sampling === 'nearest' ? 'nearest' : 'bilinear' });
+        const ref = c.asset({ target: this.target, format: r8 ? 'r8' : 'rgba8', w: j.w, h: j.h, sampling: j.sampling === 'nearest' ? 'nearest' : 'bilinear' });
         if (!ref) throw new Error('scene texture "' + name + '": asset refused (' + j.w + 'x' + j.h + ')');
         c.pixels(ref, null, buf);
-        const a = { ref, c, ci, w: j.w, h: j.h, bytes: j.w * j.h * 8 };
+        const a = { ref, c, ci, w: j.w, h: j.h, bytes: j.w * j.h * bpp * 2, mask: j.mask || null };   // package M: its lane table
         this.atlases.set(key, a);
-        this.log.info('scene texture "' + name + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + j.w + 'x' + j.h + ' RGBA8 asset, ' + mib(a.bytes) + ' of pixel memory');
+        this.log.info('scene texture "' + name + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + j.w + 'x' + j.h + (r8 ? ' R8' : ' RGBA8') + ' asset, ' + mib(a.bytes) + ' of pixel memory');
         return a;
     }
 
@@ -1491,7 +1492,7 @@ class HudApp {
             else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); add({ tex: w.fill }); }
             else if (w.type === 'wbsign' && w.tex && baked) { add(w.tex.limit); add(w.tex.nopass); }
             else if (w.type === 'wbback') {
-                if (w.collar) { add(w.collar); add(w.cover); }       // package F: "cover", BMW's bottom lines and hooks
+                if (w.collar) { add(w.collar); add(w.cover); add(w.mask); }       // package F: "cover"; package M: "mask"
                 else if (w.tex && baked) { const u = this._wbUses(w); if (u.window) { add(w.tex.window); add(w.tex.horizon); } if (u.line) add(w.tex.line); }
             }
         });
@@ -2947,6 +2948,7 @@ class HudApp {
                 const ko = w.shade && Array.isArray(w.shade.ko) ? w.shade.ko : [0, 0, 0, 0];
                 c.uniform(ref, 'u_shadeKo', [ko[0] - w.x, ko[1] - w.y, ko[2] - w.x, ko[3] - w.y]);
                 this._wbPatchesSend(x);         // car3 G: u_pat0..3, plain vec4s
+                this._wbMaskSend(x, true);      // package M: the strip mask's atlas and lanes ("mask"; none: zeros)
             } else if (w.tex && this.setting('baked') !== false) {   // baked textures: "tex": { window, horizon, line: { tex, x, y, w, h } }, "gain": [window level, y above which it applies]
                 const u = this._wbUses(w);       // only what is drawn: the window while the map is off, the line for "glass"
                 [['window', 'u_t0', 'u_r0'], ['horizon', 'u_t1', 'u_r1'], ['line', 'u_t2', 'u_r2']].forEach(([k, smp, rect]) => {
@@ -3432,6 +3434,66 @@ class HudApp {
         x.patKey = key;
         pats.forEach((v, i) => x.c.uniform(x.ref, i < 4 ? 'u_pat' + i : 'u_patSoft', v));
     }
+
+    /* ---- package M (docs/strip/M-REPORT.md): the STRIP mask ----
+     * A see-through layout's bg (a "wbback" with a collar) may carry "mask": { tex } (design/gen_6wb.py strip_mask()).
+     * hud/scene/<tex>.json (tools/strip/bake_mask.py) is an R8 atlas of our coverage over BMW's bottom strip, one byte
+     * a px, one lane per state of the row (docs/AGENT-BRIEF-strip.md 4.4), and its own lane table, "mask": { atlas: [w,
+     * h], cover: [x0, y0, x1, y1], hole: [x0, y0, x1, y1] (panel px), lanes: { <lane>: [ax, ay] } }, so a new bake needs
+     * no new layout. The cover lanes "ours", "bmw" and "standby" share the box "cover" (inside it the lane IS our black:
+     * no collar, cover or patch there); the hole lane "msg" has the box "hole" (a multiplier: BMW's message panel, its
+     * symbol and its marker; it replaces u_cc). Each lane's tile starts at [ax, ay] in the atlas. With no lane (a row
+     * half ours and half BMW's, which only lasts until the row falls back all-or-nothing) the collar, the cover, the
+     * patches and u_cc draw as before. */
+
+    /** The lanes for now: { cover, hole } (lane names; hole null) or null for the old rects. The cover lane follows the
+     *  row: every item ours, "ours"; none ours, "standby" while the car stands in P with the engine off (BMW's standby
+     *  row), else "bmw". The hole lane opens BMW's message panel whenever the row is BMW's and its panel must show
+     *  (_ccOpen): in standby too, since a warning is never covered. While the row is ours, u_cc decides as before.
+     *  m: the texture's lane table. */
+    _maskLanes(m) {
+        if (!m || !m.lanes || !Array.isArray(m.cover)) return null;
+        const own = OWN_ITEMS.map((k) => this._own(k)), all = own.every(Boolean), none = !own.some(Boolean);
+        if (!all && !none) return null;
+        const rpm = this._raw('rpm'), parked = this._data().stage === 'P' && !(isNum(rpm) && rpm >= 150);
+        const cover = all ? 'ours' : parked && m.lanes.standby ? 'standby' : 'bmw';
+        const hole = none && Array.isArray(m.hole) && m.lanes.msg && this._ccOpen() ? 'msg' : null;
+        return m.lanes[cover] ? { cover, hole } : null;
+    }
+
+    /** u_mk, u_mh, u_mo when the lanes change. Every frame between two of these messages must be a whole picture (the
+     *  service may draw between them): a lane goes off before the origins move and comes on after them, and the cover
+     *  lanes share one box, so going from one to another is a single u_mo. */
+    _wbMaskSend(x, init) {
+        const w = x.w, c = x.c, ref = x.ref, none = [0, 0, 0, 0];
+        if (init) {
+            x.mask = { k: null, h: null };
+            x.maskT = null;
+            c.uniform(ref, 'u_mk', none); c.uniform(ref, 'u_mh', none); c.uniform(ref, 'u_mo', none);
+            if (!(w.mask && w.mask.tex)) return;
+            const a = this._scene(w.mask.tex, x.ci), t = a.mask;
+            if (!t || !Array.isArray(t.atlas) || t.atlas[0] !== a.w || t.atlas[1] !== a.h) {
+                this.log.warn('strip mask "' + w.mask.tex + '": no lane table that fits it, the rects draw instead');
+                return;
+            }
+            x.maskT = t;
+            c.bind(ref, 'u_t2', a.ref);
+            c.uniform(ref, 'u_r2', [0, 0, a.w, a.h]);
+        }
+        const m = x.maskT;
+        if (!m) return;
+        const L = this._maskLanes(m), k = L ? L.cover : null, h = L ? L.hole : null, prev = x.mask;
+        if (prev.k === k && prev.h === h) return;
+        const org = (n) => (n && m.lanes[n]) || [0, 0];
+        const lp = (b) => [b[0] - w.x, b[1] - w.y, b[2] - w.x, b[3] - w.y];
+        if (prev.h && prev.h !== h) c.uniform(ref, 'u_mh', none);
+        if (prev.k && !k) c.uniform(ref, 'u_mk', none);
+        c.uniform(ref, 'u_mo', org(k).concat(org(h)));
+        if (k && !prev.k) c.uniform(ref, 'u_mk', lp(m.cover));
+        if (h && prev.h !== h) c.uniform(ref, 'u_mh', lp(m.hole));
+        x.mask = { k, h };
+    }
+    /* ---- end package M ---- */
 
     /** car3 G: what the bottom row draws now and why, for the log and the status line (docs/CAR3-G-REPORT.md: on the
      *  car BMW's row showed although "ours" was the default). One setting now, so one reason per item. */
@@ -3947,6 +4009,7 @@ class HudApp {
             x.last = m;
             x.c.uniform(x.ref, 'u_msa', [m, 0, 0, 0]);
         } else if (w.type === 'wbback') {
+            if (w.collar) this._wbMaskSend(x);                                     // package M: the strip mask's lanes
             if (w.collar && Array.isArray(w.patches)) this._wbPatchesSend(x);     // car3 G: a "cc:" patch follows the message state
             this._wbCcSend(x);                                                     // and the message window
             const on = w.sign && (isNum(this._raw('limit')) || this._raw('limitEnd') || this._raw('limitUnknown')) ? 1 : 0;   // package E: the end sign too; car3 I: "---"

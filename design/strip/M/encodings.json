@@ -1,0 +1,200 @@
+{
+ "strip": [
+  0,
+  540,
+  1920,
+  720
+ ],
+ "ss": 8,
+ "nmax": 2.5,
+ "memory_MiB_per_lane_as_counted": {
+  "full_alpha_r8": 0.6591796875,
+  "half_r8": 0.164794921875
+ },
+ "cases": {
+  "rect_fractional_hard": {
+   "what": "today's CC_TOP with a fractional edge",
+   "feather_px": 0.0,
+   "full_alpha": {
+    "max_abs_alpha_err": 0.0015,
+    "p99_abs_alpha_err_near_edge": 0.0015,
+    "mean_edge_shift_px": 0.001,
+    "pixels_off_by_more_than_1/255": 0
+   },
+   "half_alpha": {
+    "max_abs_alpha_err": 0.4375,
+    "p99_abs_alpha_err_near_edge": 0.25,
+    "mean_edge_shift_px": -0.001,
+    "pixels_off_by_more_than_1/255": 4380
+   },
+   "half_sdf": {
+    "max_abs_alpha_err": 0.4069,
+    "p99_abs_alpha_err_near_edge": 0.027,
+    "mean_edge_shift_px": 0.004,
+    "pixels_off_by_more_than_1/255": 1460
+   }
+  },
+  "sign_hole_hard": {
+   "what": "BMW's sign, a round hole r 41.5 (cover outside)",
+   "feather_px": 0.0,
+   "full_alpha": {
+    "max_abs_alpha_err": 0.002,
+    "p99_abs_alpha_err_near_edge": 0.0018,
+    "mean_edge_shift_px": 0.0,
+    "pixels_off_by_more_than_1/255": 0
+   },
+   "half_alpha": {
+    "max_abs_alpha_err": 0.3542,
+    "p99_abs_alpha_err_near_edge": 0.3293,
+    "mean_edge_shift_px": -0.0,
+    "pixels_off_by_more_than_1/255": 1196
+   },
+   "half_sdf": {
+    "max_abs_alpha_err": 0.0671,
+    "p99_abs_alpha_err_near_edge": 0.0469,
+    "mean_edge_shift_px": 0.007,
+    "pixels_off_by_more_than_1/255": 261
+   }
+  },
+  "sign_hole_feather2": {
+   "what": "the same, a 2 px soft edge",
+   "feather_px": 2.0,
+   "full_alpha": {
+    "max_abs_alpha_err": 0.002,
+    "p99_abs_alpha_err_near_edge": 0.0019,
+    "mean_edge_shift_px": 0.0,
+    "pixels_off_by_more_than_1/255": 0
+   },
+   "half_alpha": {
+    "max_abs_alpha_err": 0.155,
+    "p99_abs_alpha_err_near_edge": 0.15,
+    "mean_edge_shift_px": -0.0,
+    "pixels_off_by_more_than_1/255": 1490
+   },
+   "half_sdf": {
+    "max_abs_alpha_err": 0.0634,
+    "p99_abs_alpha_err_near_edge": 0.0533,
+    "mean_edge_shift_px": 0.009,
+    "pixels_off_by_more_than_1/255": 553
+   }
+  },
+  "panel_hole_hard": {
+   "what": "a panel with an arc and slanted ends",
+   "feather_px": 0.0,
+   "full_alpha": {
+    "max_abs_alpha_err": 0.002,
+    "p99_abs_alpha_err_near_edge": 0.0018,
+    "mean_edge_shift_px": 0.0,
+    "pixels_off_by_more_than_1/255": 0
+   },
+   "half_alpha": {
+    "max_abs_alpha_err": 0.6096,
+    "p99_abs_alpha_err_near_edge": 0.3765,
+    "mean_edge_shift_px": 0.002,
+    "pixels_off_by_more_than_1/255": 4647
+   },
+   "half_sdf": {
+    "max_abs_alpha_err": 0.5613,
+    "p99_abs_alpha_err_near_edge": 0.0356,
+    "mean_edge_shift_px": -0.002,
+    "pixels_off_by_more_than_1/255": 1039
+   }
+  },
+  "panel_hole_feather3": {
+   "what": "the same, a 3 px shadow",
+   "feather_px": 3.0,
+   "full_alpha": {
+    "max_abs_alpha_err": 0.002,
+    "p99_abs_alpha_err_near_edge": 0.0018,
+    "mean_edge_shift_px": -0.0,
+    "pixels_off_by_more_than_1/255": 0
+   },
+   "half_alpha": {
+    "max_abs_alpha_err": 0.18,
+    "p99_abs_alpha_err_near_edge": 0.0995,
+    "mean_edge_shift_px": 0.002,
+    "pixels_off_by_more_than_1/255": 8397
+   },
+   "half_sdf": {
+    "max_abs_alpha_err": 0.1316,
+    "p99_abs_alpha_err_near_edge": 0.0417,
+    "mean_edge_shift_px": -0.01,
+    "pixels_off_by_more_than_1/255": 3686
+   }
+  },
+  "corridor_3px_hard": {
+   "what": "a 3 px wide cover between two holes (a corridor)",
+   "feather_px": 0.0,
+   "full_alpha": {
+    "max_abs_alpha_err": 0.0,
+    "p99_abs_alpha_err_near_edge": 0.0,
+    "mean_edge_shift_px": 0.0,
+    "pixels_off_by_more_than_1/255": 0
+   },
+   "half_alpha": {
+    "max_abs_alpha_err": 0.5301,
+    "p99_abs_alpha_err_near_edge": 0.3765,
+    "mean_edge_shift_px": 0.003,
+    "pixels_off_by_more_than_1/255": 612
+   },
+   "half_sdf": {
+    "max_abs_alpha_err": 0.5637,
+    "p99_abs_alpha_err_near_edge": 0.2549,
+    "mean_edge_shift_px": -0.191,
+    "pixels_off_by_more_than_1/255": 202
+   }
+  },
+  "corridor_2px_hard": {
+   "what": "a 2 px corridor",
+   "feather_px": 0.0,
+   "full_alpha": {
+    "max_abs_alpha_err": 0.001,
+    "p99_abs_alpha_err_near_edge": 0.001,
+    "mean_edge_shift_px": 0.0,
+    "pixels_off_by_more_than_1/255": 0
+   },
+   "half_alpha": {
+    "max_abs_alpha_err": 0.4846,
+    "p99_abs_alpha_err_near_edge": 0.3127,
+    "mean_edge_shift_px": 0.0,
+    "pixels_off_by_more_than_1/255": 612
+   },
+   "half_sdf": {
+    "max_abs_alpha_err": 0.4804,
+    "p99_abs_alpha_err_near_edge": 0.1275,
+    "mean_edge_shift_px": -0.204,
+    "pixels_off_by_more_than_1/255": 300
+   }
+  },
+  "slanted_feather4": {
+   "what": "a slanted straight edge, 4 px shadow",
+   "feather_px": 4.0,
+   "full_alpha": {
+    "max_abs_alpha_err": 0.002,
+    "p99_abs_alpha_err_near_edge": 0.0019,
+    "mean_edge_shift_px": -0.0,
+    "pixels_off_by_more_than_1/255": 0
+   },
+   "half_alpha": {
+    "max_abs_alpha_err": 0.0871,
+    "p99_abs_alpha_err_near_edge": 0.0752,
+    "mean_edge_shift_px": -0.0,
+    "pixels_off_by_more_than_1/255": 1283
+   },
+   "half_sdf": {
+    "max_abs_alpha_err": 0.0407,
+    "p99_abs_alpha_err_near_edge": 0.0262,
+    "mean_edge_shift_px": 0.001,
+    "pixels_off_by_more_than_1/255": 517
+   }
+  }
+ },
+ "fp16": {
+  "mediump_wrong_texel_columns": 60,
+  "mediump_max_offset_from_centre_texels": 0.938,
+  "mediump_p_spacing_at_x_1500_px": 1.0,
+  "mediump_bilinear_neighbour_weight_max": 0.938,
+  "highp_max_offset_from_centre_texels": 5.340576171875e-05,
+  "highp_snapped_max_offset_texels": 5.340576171875e-05
+ }
+}
