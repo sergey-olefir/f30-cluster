@@ -1496,7 +1496,10 @@ void main() {
             // 2026-11-14: the ring starts where the window ends (cutWin), not 1 px past its soft edge: in between, low in
             // the dial (its cut fade, cutK ~0.4 at BMW's line, y ~645) the dial was half see-through and BMW's line
             // showed as two short arcs beside the sign (car photo 2026-11-14, "the whiskers")
-            float ring = cutWin * (1.0 - smoothstep(u_cut.w + 8.0, u_cut.w + 10.0, cutSd));
+            // 2026-11-16: 10 px, not 8, so the ring still reaches as far out as it did while the window was 2 px
+            // wider (gen_6wb.py SIGN_WIN 42 -> 40): the collar's own black keeps clear of r 46 round the sign and
+            // its baked edge is soft, so the ring has to meet it at ~r 51, not stop at 49.
+            float ring = cutWin * (1.0 - smoothstep(u_cut.w + 10.0, u_cut.w + 12.0, cutSd));
             float ringA = max(cutK * cutWin, ring);
             col *= cutK * cutWin / max(ringA, 0.001);
             cutK = ringA;
@@ -1504,9 +1507,10 @@ void main() {
         }
         // --- end car3 G ---
         if (u_cut.z > 2.5) {
-            // the closed disc: opaque out to 8 px past the window's soft edge, as the open window's black ring (car3 G:
-            // the window is tight on the sign now, and the collar keeps off r 46 round it)
-            float cutA = max(cutK, 1.0 - smoothstep(u_cut.w + 8.0, u_cut.w + 10.0, cutSd));
+            // the closed disc: opaque out to 10 px past the window's soft edge, as the open window's black ring (car3 G:
+            // the window is tight on the sign now, and the collar keeps off r 46 round it; 2026-11-16: 8 -> 10 px
+            // with the window 2 px tighter, so the disc still meets the collar's soft black edge)
+            float cutA = max(cutK, 1.0 - smoothstep(u_cut.w + 10.0, u_cut.w + 12.0, cutSd));
             col *= cutK / max(cutA, 0.001);
             cutK = cutA;
         } else {
