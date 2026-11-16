@@ -1,5 +1,7 @@
 # F30 Cluster
 
+[简体中文说明](README.zh-CN.md)
+
 A cluster theme for BMW iDrive 7 head units (MGU) that redraws the instrument cluster in the look of the F-series
 6WB multifunctional display: Comfort, Sport and Eco Pro, following the drive mode. Built on the community
 [MGU App Kit](https://github.com/cauliflowermossgrape/idrive7-apps) and drawn through

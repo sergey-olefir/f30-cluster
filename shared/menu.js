@@ -222,7 +222,7 @@ class Menu {
         if (p) cv = new Canvas(p.w, p.h).drawImage(p.px, p.w, p.h, 0, 0, p.w, p.h);
         else {
             cv = new Canvas(888, 333).clear(PIC_BG);
-            cv.text(layoutName(this.ctx.settings, name), 444, 178, 30, '#8a96a8', { align: 'center', literal: true });
+            cv.text(layoutName(this.ctx.settings, name), 444, 178, 30, '#8a96a8', { align: 'center' });
         }
         // a canvas.js Canvas, not a Recorder: the kit hands it to the HMI as a PNG (mgu.js Ui._image), as on a
         // canvas screen without the renderer; failures are logged there, never thrown

@@ -103,8 +103,8 @@ class Gallery {
             const ih = Math.min(ch - 70, (cw - 20) * 0.375), iw = ih / 0.375;
             this.picture(cv, v, x + (cw - iw) / 2, y + 10, iw, ih);
             const ty = y + 10 + ih + 26;
-            cv.text(this.name(v), x + 14, ty, 18, '#ffffff', { font: 'bold', literal: true });
-            cv.text(this.tag(v), x + cw - 14, ty, 13, C.dim, { align: 'right', literal: true });
+            cv.text(this.name(v), x + 14, ty, 18, '#ffffff', { font: 'bold' });
+            cv.text(this.tag(v), x + cw - 14, ty, 13, C.dim, { align: 'right' });
             // the drive modes that show it
             const modes = byMode ? MODES.filter((m) => this.get(m[0]) === v).map((m) => m[1]) : [];
             const sub = byMode ? (modes.length ? 'In ' + modes.join(', ') : '') : (this.get('hudLayout') === v ? 'In every drive mode' : '');
@@ -118,12 +118,12 @@ class Gallery {
         cv.roundRect(x, y, w, h, 10, '#000000');
         const p = name !== 'off' && previews.get(name, 'small');
         if (p) cv.image(p.id, x, y, w, h);
-        else cv.text(this.name(name), x + w / 2, y + h / 2 + 7, 18, C.dim, { align: 'center', literal: true });
+        else cv.text(this.name(name), x + w / 2, y + h / 2 + 7, 18, C.dim, { align: 'center' });
         cv.strokeRoundRect(x, y, w, h, 10, 1, '#ffffff10');
     }
 }
 
-function label(cv, x, y, s, c) { cv.text(s.toUpperCase(), x, y, 14, c || C.label, { font: 'bold', spacing: 2.4, literal: true }); }
+function label(cv, x, y, s, c) { cv.text(s.toUpperCase(), x, y, 14, c || C.label, { font: 'bold', spacing: 2.4 }); }
 function glass(cv, x, y, w, h, sel) {
     if (sel) {
         cv.card(x, y, w, h, 16, [[0, A(C.blue, 0.16)], [1, A(C.blueDeep, 0.05)]]);
