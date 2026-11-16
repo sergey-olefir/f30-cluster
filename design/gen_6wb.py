@@ -227,6 +227,16 @@ SIGN_WIN, SIGN_SOFT = [537.5, 621.5, 42.5], 1
 # 2026-11-14: on the measured centre and half a px tighter (half open at r 42.5, clear inside 42; BMW's red ring ends
 # at 42.2): with WBDIAL's ring now starting where the window ends, no slit of BMW's line is left beside the sign
 SIGN_WIN = [537.3, 621.3, 42.0]
+# 2026-11-16 ("the whiskers next to the speed limit sign are still there"): r 42 was still half a window.
+# WBDIAL's black ring begins where the window's SOFT EDGE begins, so with r 42 and 1 px soft the ring is only
+# HALF opaque at r 42 and does not reach full black until r 43.5. BMW's own bottom line runs behind the sign at
+# y ~645 and crosses the window's rim at (501.5, 645) and (573.1, 645) - r 42 exactly - so two half-bright stubs of
+# it were left sticking out at the sign's 8 and 4 o'clock: the whiskers (measured off the owner's close-ups of
+# 2026-11-16: a mark at panel (502.7, 645.3), r 42.1 from the sign's centre).
+# r 40 moves the ring's full black in to r 41.5, which is where BMW's red ring itself ends, so the line's stubs are
+# under black everywhere and the sign loses only the outermost 1.5 px of its red ring (invisible: the ring is
+# ~7 px thick). Nothing else changes - no uniform, no shader line, no layer.
+SIGN_WIN = [537.3, 621.3, 40.0]
 # BMW's map between our dials, as the car draws it (photos 41, 42: the map's own veil ends at about x 704 and 1212, its
 # top at y 158): WBBACK's collar path fades it to black at its sides (48 px) and top (80 px) (u_wbox, u_fade: top,
 # sides, foot), and the black fades out over the 30 px above y 596, 5 px above the check-control panel (y 601)
@@ -295,6 +305,22 @@ SHADE = {"y": [575, 605], "ko": [0, 0, 0, 0]}   # no keep-out: BMW's right "i" i
 # pump, so a 4-digit range ends ~25 px right of a 3-digit range (patch to 334, short of the clock's). The clock is centred
 # (x ~397), and "23:59" fits the 115 px box.
 OWN = {"range": [132, 662, 334, 703], "clock": [340, 662, 455, 704], "temp": [1498, 662, 1667, 705]}
+# THE FOUR RECTS BELOW ARE ALL THERE IS (2026-11-16, "in all-6WB mode, G20 elements show through"): hud.js
+# _wbPatches hands WBBACK four vec4s (u_pat0..3) and drops anything past that, and with the whole row ours these
+# three plus CC_TOP already fill all four. A fifth rect is NOT available - merge two of these instead, and read
+# the warning _wbPatches now logs when one does not fit. What else BMW puts in that row, and why none of it needs
+# a fifth rect (measured on the baked collar and these rects, 2026-11-16):
+#   * its drive-mode label (assist.mode_label [1226, 659, 1359, 711], relation "under") is already fully black
+#     under the baked collar (opaque x 1232-1488 from y 650 down), so it wants no patch;
+#   * its gear letter (assist.gear [1398, 668, 1424, 703]) is relation "OVER" with strong evidence - BMW draws it
+#     on top of any theme, so no patch of ours can ever hide it. Ours is in the tacho's tray (tray_row, TRAY_C);
+#   * its belt and airbag lamps (x 494-692) are safety telltales and are deliberately never covered;
+#   * its clock is left to BMW whenever no time zone is known (hud.js _own('clock')), and then the "own:clock"
+#     rect below is correctly off: BMW's clock is the only right one there.
+def row_patches():
+    """The black patches a see-through layout sends, in the order _wbPatches takes them. Exactly four: see above."""
+    return [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")] \
+        + [{"rect": CC_TOP, "soft": CC_TOP_SOFT}]         # 2026-11-14: the foot band; the street name shows below it
 ROW_BASE = 697
 # our drive-mode label above the gear tray (D row 15) and the gear in the tray (D row 17), on the tacho (G20 geometry:
 # the same place in every layout with the tray; its shape is baked: bake/src/C2 params.PBOX)
@@ -397,8 +423,7 @@ def dials_bg(style):
             "collar": {"tex": "collar", "x": 0, "y": 0, "w": 1920, "h": 720},
             # package F: BMW's bottom lines, hooks and dash under black; the shade's setting; patches under our row items
             "cover": {"tex": "cover", "x": COVER[0], "y": COVER[1], "w": COVER[2], "h": COVER[3]}, "shade": SHADE,
-            "patches": [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")]
-                       + [{"rect": CC_TOP, "soft": CC_TOP_SOFT}],      # 2026-11-14: the foot band; the street name shows below it
+            "patches": row_patches(),      # range, clock, temperature, the foot band - and no fifth, see row_patches()
             "cc": CC_BOX,
             "ccSym": CC_SYM,          # bottom row: while the info message is ours, only BMW's symbol column opens
             "window": MAP_WINDOW, "fade": MAP_FADE,                             # 2026-11-14: Comfort's map window

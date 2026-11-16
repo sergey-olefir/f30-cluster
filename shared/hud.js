@@ -284,6 +284,9 @@ const POS_STALE_MS = 6 * 3600 * 1000;
 const ROW_KEY = 'bottomRow';
 const ROW_OURS = 'all6WB', ROW_BMW = 'allG20';
 const OWN_ITEMS = ['range', 'clock', 'temp', 'nav', 'sign', 'info'];
+// how many black patches WBBACK can hold (u_pat0..3, plain vec4s: car3 G found no array uniform works there).
+// A layout with more rects than this loses the extras - _wbPatches says so in the log now.
+const WB_PATCHES = 4;
 // (no timer of ours for several messages at once: the car numbers its frames and says which one it is on;
 //  config.ccm.ccFrameDwellMs is carried as a parameter for a later animation package, unused here)
 // --- end bottom row ---
@@ -3239,16 +3242,28 @@ class HudApp {
 
     /** WBBACK's black patches over BMW's bottom-row items we draw ourselves ("patches": [{ rect: [x0, y0, x1, y1] panel
      *  px, when: a toggle, soft: px its foot fades out over }]), as four vec4s (layer px; x1 <= x0: none) and a fifth,
-     *  u_patSoft, the four feet's fades. */
+     *  u_patSoft, the four feet's fades.
+     *  WB_PATCHES IS A HARD CAP: WBBACK has u_pat0..3 and no more (car3 G: four plain vec4s, no array uniform on the
+     *  car's WBBACK), so a layout that wants a fifth rect must MERGE two of them (design/gen_6wb.py row_patches()
+     *  names the four and what else of BMW's row is covered by the baked collar instead). 2026-11-16: dropping the
+     *  extras in silence cost a car trip - a rect that does not fit is now said out loud, once per layout, in the
+     *  log and nowhere else (a rect is geometry, never personal data). */
     _wbPatches(w) {
         const out = [], soft = [0, 0, 0, 0];
+        let dropped = 0;
         (Array.isArray(w.patches) ? w.patches : []).forEach((p) => {
-            if (out.length < 4 && Array.isArray(p.rect) && (!p.when || this._toggleOn(p.when))) {
-                if (isNum(p.soft)) soft[out.length] = p.soft;     // 2026-11-14: px its foot fades out over (0: hard)
-                out.push([p.rect[0] - w.x, p.rect[1] - w.y, p.rect[2] - w.x, p.rect[3] - w.y]);
-            }
+            if (!Array.isArray(p.rect) || (p.when && !this._toggleOn(p.when))) return;
+            if (out.length >= WB_PATCHES) { dropped++; return; }
+            if (isNum(p.soft)) soft[out.length] = p.soft;     // 2026-11-14: px its foot fades out over (0: hard)
+            out.push([p.rect[0] - w.x, p.rect[1] - w.y, p.rect[2] - w.x, p.rect[3] - w.y]);
         });
-        while (out.length < 4) out.push([0, 0, 0, 0]);
+        if (dropped && !this.patWarned) {
+            this.patWarned = true;
+            this.log.warn('layout "' + this._layoutName() + '": ' + dropped + ' of its ' +
+                'black patches do not fit (WBBACK holds ' + WB_PATCHES + '): BMW\'s own row shows through there. ' +
+                'Merge two rects in design/gen_6wb.py row_patches().');
+        }
+        while (out.length < WB_PATCHES) out.push([0, 0, 0, 0]);
         out.push(soft);
         return out;
     }
@@ -4242,5 +4257,6 @@ HudApp.themeOf = (name) => G20_THEME[name] || name;
 HudApp.ROW_KEY = ROW_KEY;
 HudApp.ROW_OURS = ROW_OURS;
 HudApp.ROW_BMW = ROW_BMW;
+HudApp.WB_PATCHES = WB_PATCHES;     // the hard cap the bench's patch-coverage test checks against
 
 module.exports = HudApp;

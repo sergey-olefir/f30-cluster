@@ -237,6 +237,23 @@ setInterval(() => {
     send({ t: 'values', mode, values: out });
 }, 250);
 
+/** 2026-11-16: WBBACK's black patches over BMW's bottom row as the engine sends them, in PANEL px, plus the two
+ *  numbers a silent leak hides behind: how many rects the layout wanted now ("want", after each rect's "when") and
+ *  how many WBBACK can hold ("cap", hud.js WB_PATCHES). want > cap means the extras are dropped and BMW's own row
+ *  shows through there - bench/test-bottom-row.js asserts it never happens. Null while no 6WB backdrop is up. */
+function wbPatches() {
+    try {
+        let w = null;
+        hud.widgets.forEach((x) => { if (!w && x.w && x.w.type === 'wbback' && Array.isArray(x.w.patches)) w = x.w; });
+        if (!w) return null;
+        const cap = hud.constructor.WB_PATCHES;
+        const want = w.patches.filter((p) => Array.isArray(p.rect) && (!p.when || hud._toggleOn(p.when)));
+        const sent = hud._wbPatches(w).slice(0, cap).filter((v) => v[2] > v[0])
+            .map((v) => [v[0] + w.x, v[1] + w.y, v[2] + w.x, v[3] + w.y]);
+        return { want: want.length, cap, sent };
+    } catch (e) { return null; }
+}
+
 process.on('message', (m) => {
     if (!m) return;
     if (m.t === 'signals') {
@@ -280,6 +297,9 @@ process.on('message', (m) => {
                 fail: hud.rowFail || {}, tzCar: hud.tzCar, tzCandidate: hud.tzCandidate,
                 sla: hud.sla, arc: hud._arcOn(),
                 widgets: ['signs', 'limit', 'nav', 'nav_bg', 'cc_name', 'cc_desc'].filter((id) => hud.widgets && hud.widgets.has(id)),
+                // 2026-11-16: WBBACK's black patches over BMW's bottom row, in PANEL px, with how many rects the
+                // layout wanted and how many the shader can hold: "want > cap" is a silent leak (bench/test-bottom-row.js)
+                patches: wbPatches(),
             } : {}),
         });
     }
