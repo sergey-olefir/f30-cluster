@@ -45,7 +45,7 @@ one (61-68): the sign, range, clock, readout, rail ends and driver belt agree wi
 6. **Nothing in zone L is left unaccounted for** (section 3) except one bright blob in 62 only, [672.5, 536, 683.5,
    591], passed to ZC.
 
-## 2. Defect table (wb_dials; wb_sport_dials: O has not published it yet)
+## 2. Defect table (wb_dials; wb_sport_dials gives the same numbers in zone L to 0.01 px in every state O has published for it, standby not yet)
 
 Counts in panel px; light in units of stock white text (the range digits' ink = 1.0) over BMW's black.
 
