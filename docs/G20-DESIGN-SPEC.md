@@ -74,9 +74,9 @@ so they identify the face; see §7 for the method and its error bars.
 
 | Run | cap | x-height | x/cap | stem | stem/cap | Photo |
 |---|---|---|---|---|---|---|
-| Street label "Мирона Петрушина вулиця" | 30.75 | 22.9 | **0.745** | 3.62 | **0.118** | 34 |
-| Street label "Лорин" | 30.87 | 22.7 | **0.735** | 3.25 | **0.105** | 39 |
-| Check-control "Підігрів вікна / розблоковано." | 25.88 | 19.9 | **0.769** | 5.12 | **0.198** | 42 |
+| Street label (a 3-word street name, 509 px) | 30.75 | 22.9 | **0.745** | 3.62 | **0.118** | 34 |
+| Street label (a one-word place name, 98 px) | 30.87 | 22.7 | **0.735** | 3.25 | **0.105** | 39 |
+| Check-control (a two-line heated-wheel message) | 25.88 | 19.9 | **0.769** | 5.12 | **0.198** | 42 |
 | Bottom-row values (a 3-digit range, a 4-digit clock) | — | — | — | 5.3–5.9 | **0.166** of the figure height | 39 |
 
 So the stock cluster uses **at least three weights of one family**: a Light for the street label, a
@@ -117,7 +117,7 @@ tried (`tools/g20spec/fingerprint.py` prints the shape ratios for all of them). 
 Jost and Public Sans** — turned out to have no Cyrillic at all and are disqualified whatever they
 score; a street name or a check-control message here is Ukrainian.
 
-**Street label** ("Мирона Петрушина вулиця", cap 30.75, photo ink width 508.9 px):
+**Street label** (photo 34's 3-word street name, 23 characters, cap 30.75, photo ink width 508.9 px):
 
 | Face | Setting | Rendered ink width | Deviation |
 |---|---|---|---|
@@ -128,8 +128,8 @@ score; a street name or a check-control message here is Ukrainian.
 | Open Sans | wght 350 | 542 | +6.5 % |
 | IBM Plex Sans | wght 350 | 552 | +8.5 % |
 
-**Check-control message** ("Підігрів вікна", cap 25.88, photo ink 220.1 px; the second line
-"розблоковано." fitted on its x-height gives the second figure):
+**Check-control message** (photo 42's first line, 14 characters, cap 25.88, photo ink 220.1 px; the
+13-character second line fitted on its x-height gives the second figure):
 
 | Face | Setting | Deviation, line 1 (cap-fit) | Deviation, line 2 (x-fit) |
 |---|---|---|---|
@@ -158,9 +158,11 @@ Inter is out: its figures are strongly proportional (its "1" is 31 % narrower th
 face's are tabular. Roboto at width 87.5 brings the digit advance to 0.743 of the figure height
 against the measured 0.760, i.e. 2 % narrow — between its two widths, 87.5 is the better clock fit.
 
-Comparison images: `design/g20-spec/fonts/*.png` (renders with the photo's measured ink box drawn
-around them — committed, no photo pixels) and `bake/work/g20spec/font-*.png` (photo above the
-candidates — git-ignored, because reference pixels are).
+Comparison images: `design/g20-spec/fonts/*.png` (renders of an invented stand-in string with the
+photo string's character count, with the photo's measured ink box drawn around them, so their
+deviations differ a little from the tables above, which were fitted on the photo's own string;
+committed, no photo pixels) and `bake/work/g20spec/font-*.png` (photo above the candidates;
+git-ignored, because reference pixels are).
 
 ### 1.4 Recommendation
 
@@ -249,11 +251,11 @@ see `design/overlay/g20_comfort.json`. Nothing we draw may cover the driver belt
 
 ## 3. The street / road label
 
-**Measured** on 09 ("Лісопарна вулиця"), 39 ("Лорин"), 34 ("Мирона Петрушина вулиця"), 17 and 14.
+**Measured** on 09 (a 2-word street name), 39 (a one-word place name), 34 (a 3-word street name), 17 and 14.
 
 - It is **the street name only**. No road shield, no road number, no distance appears in any of the
   five photos that show it. The text is plain, in the navigation's language (Ukrainian here), with no
-  prefix or suffix of its own — "Мирона Петрушина вулиця" is simply the name as the map holds it.
+  prefix or suffix of its own — photo 34's 3-word name is simply the name as the map holds it.
 - **Centred on x 960.5** ±0.6: three different lengths (98, 331, 509 px) all have their ink centre
   within 1 px of 960.5.
 - **Baseline y 700.5**, i.e. **2.4 px below** the range/clock/temperature baseline. Measured twice

@@ -1,6 +1,6 @@
-import cv2, numpy as np, json
-exec(open('~/projects/f30-cluster/bake/src/C3/measure/measure.py').read().split('np.set_printoptions')[0])
-RECT='~/projects/f30-cluster/bake/work/rect/'
+import cv2, numpy as np, json, os
+exec(open(os.path.expanduser('~/projects/f30-cluster/bake/src/C3/measure/measure.py')).read().split('np.set_printoptions')[0])
+RECT=os.path.expanduser('~/projects/f30-cluster/bake/work/rect/')
 for base,c,flip in [('17_physical-cluster_full.comfort.C3@2x',(80,628),0),('04_comfort_whole-cluster_mph.comfort.C3',(80,628),0),('07_physical-cluster_all-lamps-lit.comfort.C3',(80,628),0),('17_physical-cluster_full.comfort.C4',(1840,628),1),('04_comfort_whole-cluster_mph.comfort.C4',(1840,628),1),('07_physical-cluster_all-lamps-lit.comfort.C4',(1840,628),1),('02_three-modes_clean-render.comfort.C3',(80,628),0)]:
     A,r,u=unwrap(base,*c,dA=1.0)
     if flip: u=u[:,::-1][:, np.r_[len(A)-1, 0:len(A)-1]]

@@ -1,5 +1,5 @@
-import cv2, numpy as np, json
-exec(open('~/projects/f30-cluster/bake/src/C3/measure/measure.py').read().split('np.set_printoptions')[0])
+import cv2, numpy as np, json, os
+exec(open(os.path.expanduser('~/projects/f30-cluster/bake/src/C3/measure/measure.py')).read().split('np.set_printoptions')[0])
 import sys
 DX=float(sys.argv[1]); DY=float(sys.argv[2])
 for base,c,flip in [('17_physical-cluster_full.comfort.C3@2x',(80,628),0),('04_comfort_whole-cluster_mph.comfort.C3',(80,628),0),('07_physical-cluster_all-lamps-lit.comfort.C3',(80,628),0),('17_physical-cluster_full.comfort.C4',(1840,628),1),('04_comfort_whole-cluster_mph.comfort.C4',(1840,628),1)]:

@@ -1,6 +1,6 @@
-import cv2, numpy as np, json, sys
-sys.path.insert(0,'~/projects/f30-cluster/bake/work/C3'); 
-exec(open('~/projects/f30-cluster/bake/src/C3/measure/measure.py').read().split('np.set_printoptions')[0])
+import cv2, numpy as np, json, sys, os
+sys.path.insert(0,os.path.expanduser('~/projects/f30-cluster/bake/work/C3')); 
+exec(open(os.path.expanduser('~/projects/f30-cluster/bake/src/C3/measure/measure.py')).read().split('np.set_printoptions')[0])
 np.set_printoptions(linewidth=220,precision=3,suppress=True)
 for base,c,flip in [('17_physical-cluster_full.comfort.C3@2x',(80,628),0),('04_comfort_whole-cluster_mph.comfort.C3',(80,628),0),('07_physical-cluster_all-lamps-lit.comfort.C3',(80,628),0),('17_physical-cluster_full.comfort.C4',(1840,628),1),('04_comfort_whole-cluster_mph.comfort.C4',(1840,628),1),('07_physical-cluster_all-lamps-lit.comfort.C4',(1840,628),1)]:
     A,r,u=unwrap(base,*c)

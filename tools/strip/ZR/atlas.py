@@ -24,7 +24,7 @@ import os
 import cv2
 import numpy as np
 
-MAIN = os.environ.get('F30_MAIN', '~/projects/f30-cluster')
+MAIN = os.environ.get('F30_MAIN', os.path.expanduser('~/projects/f30-cluster'))
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 N = 4

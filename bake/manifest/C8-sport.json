@@ -469,7 +469,7 @@
     "edge_px_err": null,
     "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
     "roi": [
-     "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_bridge_03.png"
+     "mask:bake/work/C8-sport/roi_bridge_03.png"
     ],
     "sheet": "bake/work/C8-sport/qc_sport.bridge.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
    },
@@ -503,7 +503,7 @@
       "edge_px_err": null,
       "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_bridge_02.png"
+       "mask:bake/work/C8-sport/roi_bridge_02.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.bridge.02__02_three-modes_clean-render.sport.PANEL.png"
      },
@@ -513,7 +513,7 @@
       "edge_px_err": null,
       "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_bridge_01.png"
+       "mask:bake/work/C8-sport/roi_bridge_01.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.bridge.01__01_three-modes_small.sport.PANEL.png"
      }
@@ -554,7 +554,7 @@
     "edge_px_err": 2.095,
     "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
     "roi": [
-     "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+     "mask:bake/work/C8-sport/roi_wings_03.png"
     ],
     "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
    },
@@ -637,7 +637,7 @@
       "edge_px_err": 2.095,
       "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+       "mask:bake/work/C8-sport/roi_wings_03.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
      },
@@ -647,7 +647,7 @@
       "edge_px_err": 5.334,
       "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+       "mask:bake/work/C8-sport/roi_wings_02.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.02__02_three-modes_clean-render.sport.PANEL.png"
      },
@@ -657,7 +657,7 @@
       "edge_px_err": 6.781,
       "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+       "mask:bake/work/C8-sport/roi_wings_01.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.01__01_three-modes_small.sport.PANEL.png"
      }
@@ -669,7 +669,7 @@
       "edge_px_err": 2.097,
       "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+       "mask:bake/work/C8-sport/roi_wings_03.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
      },
@@ -679,7 +679,7 @@
       "edge_px_err": 5.333,
       "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+       "mask:bake/work/C8-sport/roi_wings_02.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.02__02_three-modes_clean-render.sport.PANEL.png"
      },
@@ -689,7 +689,7 @@
       "edge_px_err": 6.785,
       "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+       "mask:bake/work/C8-sport/roi_wings_01.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.01__01_three-modes_small.sport.PANEL.png"
      }
@@ -730,7 +730,7 @@
     "edge_px_err": 2.095,
     "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
     "roi": [
-     "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+     "mask:bake/work/C8-sport/roi_wings_03.png"
     ],
     "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
    },
@@ -813,7 +813,7 @@
       "edge_px_err": 2.095,
       "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+       "mask:bake/work/C8-sport/roi_wings_03.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
      },
@@ -823,7 +823,7 @@
       "edge_px_err": 5.334,
       "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+       "mask:bake/work/C8-sport/roi_wings_02.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.02__02_three-modes_clean-render.sport.PANEL.png"
      },
@@ -833,7 +833,7 @@
       "edge_px_err": 6.781,
       "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+       "mask:bake/work/C8-sport/roi_wings_01.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.01__01_three-modes_small.sport.PANEL.png"
      }
@@ -845,7 +845,7 @@
       "edge_px_err": 2.097,
       "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+       "mask:bake/work/C8-sport/roi_wings_03.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
      },
@@ -855,7 +855,7 @@
       "edge_px_err": 5.333,
       "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+       "mask:bake/work/C8-sport/roi_wings_02.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.02__02_three-modes_clean-render.sport.PANEL.png"
      },
@@ -865,7 +865,7 @@
       "edge_px_err": 6.785,
       "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+       "mask:bake/work/C8-sport/roi_wings_01.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.01__01_three-modes_small.sport.PANEL.png"
      }
@@ -906,7 +906,7 @@
     "edge_px_err": 2.095,
     "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
     "roi": [
-     "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+     "mask:bake/work/C8-sport/roi_wings_03.png"
     ],
     "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
    },
@@ -989,7 +989,7 @@
       "edge_px_err": 2.095,
       "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+       "mask:bake/work/C8-sport/roi_wings_03.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
      },
@@ -999,7 +999,7 @@
       "edge_px_err": 5.334,
       "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+       "mask:bake/work/C8-sport/roi_wings_02.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.02__02_three-modes_clean-render.sport.PANEL.png"
      },
@@ -1009,7 +1009,7 @@
       "edge_px_err": 6.781,
       "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+       "mask:bake/work/C8-sport/roi_wings_01.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.01__01_three-modes_small.sport.PANEL.png"
      }
@@ -1021,7 +1021,7 @@
       "edge_px_err": 2.097,
       "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+       "mask:bake/work/C8-sport/roi_wings_03.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
      },
@@ -1031,7 +1031,7 @@
       "edge_px_err": 5.333,
       "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+       "mask:bake/work/C8-sport/roi_wings_02.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.02__02_three-modes_clean-render.sport.PANEL.png"
      },
@@ -1041,7 +1041,7 @@
       "edge_px_err": 6.785,
       "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+       "mask:bake/work/C8-sport/roi_wings_01.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.01__01_three-modes_small.sport.PANEL.png"
      }
@@ -1082,7 +1082,7 @@
     "edge_px_err": 2.095,
     "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
     "roi": [
-     "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+     "mask:bake/work/C8-sport/roi_wings_03.png"
     ],
     "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
    },
@@ -1165,7 +1165,7 @@
       "edge_px_err": 2.095,
       "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+       "mask:bake/work/C8-sport/roi_wings_03.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
      },
@@ -1175,7 +1175,7 @@
       "edge_px_err": 5.334,
       "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+       "mask:bake/work/C8-sport/roi_wings_02.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.02__02_three-modes_clean-render.sport.PANEL.png"
      },
@@ -1185,7 +1185,7 @@
       "edge_px_err": 6.781,
       "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+       "mask:bake/work/C8-sport/roi_wings_01.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.wings.01__01_three-modes_small.sport.PANEL.png"
      }
@@ -1197,7 +1197,7 @@
       "edge_px_err": 2.097,
       "ref": "bake/work/rect/03_three-modes_photo_bimmerstop.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_03.png"
+       "mask:bake/work/C8-sport/roi_wings_03.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.03__03_three-modes_photo_bimmerstop.sport.PANEL.png"
      },
@@ -1207,7 +1207,7 @@
       "edge_px_err": 5.333,
       "ref": "bake/work/rect/02_three-modes_clean-render.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_02.png"
+       "mask:bake/work/C8-sport/roi_wings_02.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.02__02_three-modes_clean-render.sport.PANEL.png"
      },
@@ -1217,7 +1217,7 @@
       "edge_px_err": 6.785,
       "ref": "bake/work/rect/01_three-modes_small.sport.PANEL",
       "roi": [
-       "mask:~/projects/f30-cluster/bake/work/C8-sport/roi_wings_01.png"
+       "mask:bake/work/C8-sport/roi_wings_01.png"
       ],
       "sheet": "bake/work/C8-sport/qc_sport.mid-stack.01__01_three-modes_small.sport.PANEL.png"
      }

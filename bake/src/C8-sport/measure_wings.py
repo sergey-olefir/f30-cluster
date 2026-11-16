@@ -1,8 +1,8 @@
 """Wing centrelines, widths and peak levels in the rectified PANEL crops, in R units of the nearer dial
 (left dial frame: u = (x - cx)/R toward the middle, v = (y - cy)/R, y down; right dial mirrored)."""
-import sys, json, numpy as np, cv2
-W = "~/projects/f30-cluster/bake/work/rect/"
-REFS = json.load(open("~/projects/f30-cluster/bake/manifest/refs.json"))["images"]
+import sys, json, numpy as np, cv2, os
+W = os.path.expanduser("~/projects/f30-cluster/bake/work/rect/")
+REFS = json.load(open(os.path.expanduser("~/projects/f30-cluster/bake/manifest/refs.json")))["images"]
 R = 335.0
 WIN = {"02_three-modes_clean-render": {"upper": (-0.80, -0.45), "lower": (0.15, 0.40)},
        "03_three-modes_photo_bimmerstop": {"upper": (-0.75, -0.35), "lower": (0.35, 0.62)},
@@ -39,7 +39,7 @@ for stem, win in WIN.items():
                             "bg": round(bg, 1), "fwhm_px": int(j1 - j0 + 1), "rgb_peak": [int(t) for t in c]})
             res[side + "_" + part] = pts
     out[stem] = {"dial_centres": dc, "wings": res}
-json.dump(out, open("~/projects/f30-cluster/bake/work/C8-sport/measure_wings.json", "w"), indent=0)
+json.dump(out, open(os.path.expanduser("~/projects/f30-cluster/bake/work/C8-sport/measure_wings.json"), "w"), indent=0)
 for stem, o in out.items():
     print(stem)
     for k, pts in o["wings"].items():

@@ -5,10 +5,10 @@
  "panel": {"w": 1920, "h": 720},
  "photos": {
   "39": {"file": "reference/g20/39_g20-look_map_comfort-plus_hires_2026-11-13.jpg", "shows": "stock, day, map, empty limit sign, a one-word place name in the street line", "photo_px_per_panel_px": 1.842, "rect_rms_panel_px": 1.18, "model": "tools/overlay/rectify_more.py"},
-  "09": {"file": "reference/g20/09_stock_map_day.jpg", "shows": "stock, day, 50 sign, street 'Лісопарна вулиця'", "photo_px_per_panel_px": 0.888, "rect_rms_panel_px": 1.02, "model": "tools/overlay/rectify.py"},
+  "09": {"file": "reference/g20/09_stock_map_day.jpg", "shows": "stock, day, 50 sign, a 2-word street name", "photo_px_per_panel_px": 0.888, "rect_rms_panel_px": 1.02, "model": "tools/overlay/rectify.py"},
   "08": {"file": "reference/g20/08_stock_night_warnings-map.jpg", "shows": "stock, night, check-control two-line message, 50 sign", "photo_px_per_panel_px": 0.855, "rect_rms_panel_px": 1.11, "model": "tools/overlay/rectify.py"},
   "17": {"file": "reference/g20/17_stock-media-list_door-open_2026-11-12.jpg", "shows": "stock, media list in the middle, one-line message + door symbol + warning triangle, bottom-row mode label and gear", "photo_px_per_panel_px": 0.637, "rect_rms_panel_px": 1.05, "model": "tools/overlay/rectify_more.py"},
-  "34": {"file": "reference/ours/34_wb-dials_0.7.7_bmw-sign-50_belts_2026-11-13.jpg", "shows": "our 6WB Dials over the stock row: BMW's 50 sign, long street name", "photo_px_per_panel_px": 1.994, "rect_rms_panel_px": 0.90, "model": "tools/g20spec/fit_strip.py via 41"},
+  "34": {"file": "reference/ours/34_wb-dials_0.7.7_bmw-sign-50_belts_2026-11-13.jpg", "shows": "our 6WB Dials over the stock row: BMW's 50 sign, a long 3-word street name", "photo_px_per_panel_px": 1.994, "rect_rms_panel_px": 0.90, "model": "tools/g20spec/fit_strip.py via 41"},
   "41": {"file": "reference/ours/41_wb-dials_0.7.7_map_D2_bmw-row-not-ours_2026-11-13.jpg", "shows": "our 6WB Dials over the stock row: empty sign, a one-word place name in the street line", "photo_px_per_panel_px": 1.922, "rect_rms_panel_px": 1.51, "model": "tools/g20spec/fit_strip.py via 39"},
   "42": {"file": "reference/ours/42_wb-dials_0.7.7_message-heated-wheel_2026-11-13.jpg", "shows": "two-line message + heated-wheel symbol, day", "photo_px_per_panel_px": 1.897, "rect_rms_panel_px": 0.87, "model": "tools/g20spec/fit_strip.py via 41"},
   "43": {"file": "reference/ours/43_wb-dials_0.7.7_message-door-open_car-image_2026-11-13.jpg", "shows": "one-line message + door symbol + warning triangle + car graphic, day", "photo_px_per_panel_px": 1.845, "rect_rms_panel_px": 1.96, "model": "tools/g20spec/fit_strip.py via 41"}
@@ -135,6 +135,8 @@
   },
   "colour_note": "the photos are not colour-managed; the ring reads (194,23,36) in 39 and (235,34,60) in 09. design/overlay/g20_comfort.json records (233,37,62) from rect 08."
  },
+
+ "runs_text_note": "Each run's \"text\" is an invented stand-in with the photo string's character count, word lengths and height probe; the photo's own text (street names, clock and range readings, messages) is not published. The numbers were measured on the photo's string, so a width deviation from rendering the stand-in is approximate.",
 
  "runs": {
   "range_digits": {"text": "408", "height_kind": "figure", "height_probe": "4", "height_px": 32.0, "ink_width_px": 69.0, "advance_px": 24.31, "stem_px": 5.5, "source": "photo 39"},

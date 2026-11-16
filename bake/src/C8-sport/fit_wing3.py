@@ -1,7 +1,7 @@
 """Wing centreline in the upper-left dial frame: |v - v0| = vt - s*(u - 1) + m/2*(sqrt((u-uc)^2 + b^2) - (u-uc)).
 Tail slope s, extra slope m before the corner at uc (roundness b). Fitted to 03's four wings (mirrored)."""
-import json, itertools, numpy as np
-d = json.load(open("~/projects/f30-cluster/bake/work/C8-sport/measure_wings.json"))
+import json, itertools, numpy as np, os
+d = json.load(open(os.path.expanduser("~/projects/f30-cluster/bake/work/C8-sport/measure_wings.json")))
 def fit(stem, umax=1.12):
     U, V, S, K = [], [], [], []
     for k, pts in d[stem]["wings"].items():

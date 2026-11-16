@@ -23,6 +23,8 @@ OUT = os.path.join(WT, 'bake', 'work', 'g20sim', 'C', 'text_fit.json')
 IMS = {p: cv2.imread(RECT + p + '.png').astype(np.float32)[..., ::-1] for p in ('08', '09', '14')}
 
 # name, photo, text, search box, invert (dark text on light)
+# The range, clock, street and message texts are invented stand-ins with the photo string's length: the photos'
+# own text stays out of the repo, so a re-fit of those runs needs the string read off the photo.
 RUNS = [
     ('range_digits', '08', '408', (181, 660, 258, 705), False),
     ('range_digits_09', '09', '480', (181, 660, 258, 705), False),

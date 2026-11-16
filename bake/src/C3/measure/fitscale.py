@@ -1,6 +1,6 @@
-import cv2, numpy as np, json
+import cv2, numpy as np, json, os
 from scipy.optimize import least_squares
-RECT='~/projects/f30-cluster/bake/work/rect/'
+RECT=os.path.expanduser('~/projects/f30-cluster/bake/work/rect/')
 allpts=[]
 for base,c,flip in [('17_physical-cluster_full.comfort.C3@2x',(80,628),0),('04_comfort_whole-cluster_mph.comfort.C3',(80,628),0),('07_physical-cluster_all-lamps-lit.comfort.C3',(80,628),0),('17_physical-cluster_full.comfort.C4',(1840,628),1),('04_comfort_whole-cluster_mph.comfort.C4',(1840,628),1),('07_physical-cluster_all-lamps-lit.comfort.C4',(1840,628),1)]:
     im=cv2.imread(RECT+base+'.png').astype(np.float32); m=json.load(open(RECT+base+'.json')); k=im.shape[0]/m['box'][3]

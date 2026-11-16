@@ -18,7 +18,7 @@ import sys
 import cv2
 import numpy as np
 
-ROOT = os.environ.get('F30_MAIN', '~/projects/f30-cluster')
+ROOT = os.environ.get('F30_MAIN', os.path.expanduser('~/projects/f30-cluster'))
 sys.path.insert(0, os.path.join(ROOT, 'tools', 'overlay'))
 import rectify as R  # noqa: E402
 

@@ -10,7 +10,7 @@ import statistics as st
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
-MAIN = os.environ.get('F30_MAIN', '~/projects/f30-cluster')
+MAIN = os.environ.get('F30_MAIN', os.path.expanduser('~/projects/f30-cluster'))
 ZD = os.path.join(MAIN, 'bake', 'work', 'strip', 'zone-L')
 PUB = os.path.join(MAIN, 'bake', 'work', 'strip', 'pub', 'ZL')
 SIGN_P = ['60', '61', '62', '63', '64', '66', '67', '68']
