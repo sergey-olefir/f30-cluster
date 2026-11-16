@@ -1,0 +1,1619 @@
+{
+ "_about": "Package ZC mask proposal for zone C (x 690-1250, y 540-720), continuous panel px. Channels as in docs/AGENT-BRIEF-strip.md 4.4. Alpha 1 = our opaque cover. Numbers from tools/strip/ZC/{atlas,geometry,texts}.py on the 2026-11-16 photos; no photo pixels here.",
+ "registration": {
+  "61": "R",
+  "64": "R",
+  "67": "R",
+  "68": "R",
+  "63": "R",
+  "62": "R",
+  "66": "R",
+  "65": "R"
+ },
+ "shapes": [
+  {
+   "id": "zc.cover",
+   "channel": [
+    "ours",
+    "bmw",
+    "bmw_msg",
+    "standby"
+   ],
+   "kind": "cover",
+   "polygon": [
+    [
+     690,
+     596.0
+    ],
+    [
+     1250,
+     596.0
+    ],
+    [
+     1250,
+     720
+    ],
+    [
+     690,
+     720
+    ]
+   ],
+   "feather_in_px": 0,
+   "feather_out_px": 0,
+   "reason": "zone C is opaque ours in every channel except the holes below: BMW's rails, the centre hooks, the odometer ghost and the panel when it must not show are all hidden (section 1.2, 1.3)",
+   "evidence": "O maps: our cover in the strip is RGB black (median linear Y 0 on opaque pixels)",
+   "clearance": "above y 596 the map-window foot of the existing collar is left as it is"
+  },
+  {
+   "id": "zc.panel",
+   "channel": [
+    "bmw_msg"
+   ],
+   "kind": "hole",
+   "polygon": [
+    [
+     699.0,
+     625.0
+    ],
+    [
+     699.0,
+     620.0
+    ],
+    [
+     704.0,
+     616.5
+    ],
+    [
+     710.45,
+     614.27
+    ],
+    [
+     714.51,
+     611.78
+    ],
+    [
+     718.61,
+     609.6
+    ],
+    [
+     722.72,
+     607.68
+    ],
+    [
+     726.82,
+     606.12
+    ],
+    [
+     730.91,
+     604.74
+    ],
+    [
+     735.04,
+     603.58
+    ],
+    [
+     739.17,
+     602.78
+    ],
+    [
+     743.27,
+     602.2
+    ],
+    [
+     747.36,
+     601.82
+    ],
+    [
+     751.41,
+     601.63
+    ],
+    [
+     755.44,
+     601.47
+    ],
+    [
+     759.48,
+     601.38
+    ],
+    [
+     763.51,
+     601.4
+    ],
+    [
+     767.49,
+     601.42
+    ],
+    [
+     771.49,
+     601.37
+    ],
+    [
+     775.51,
+     601.36
+    ],
+    [
+     779.51,
+     601.4
+    ],
+    [
+     783.49,
+     601.39
+    ],
+    [
+     787.5,
+     601.36
+    ],
+    [
+     791.49,
+     601.41
+    ],
+    [
+     795.49,
+     601.34
+    ],
+    [
+     799.51,
+     601.37
+    ],
+    [
+     803.5,
+     601.36
+    ],
+    [
+     807.5,
+     601.36
+    ],
+    [
+     811.48,
+     601.37
+    ],
+    [
+     815.46,
+     601.27
+    ],
+    [
+     819.48,
+     601.23
+    ],
+    [
+     823.49,
+     601.18
+    ],
+    [
+     827.5,
+     601.2
+    ],
+    [
+     831.5,
+     601.19
+    ],
+    [
+     835.5,
+     601.19
+    ],
+    [
+     839.5,
+     601.2
+    ],
+    [
+     843.5,
+     601.21
+    ],
+    [
+     847.5,
+     601.21
+    ],
+    [
+     851.51,
+     601.2
+    ],
+    [
+     854.9,
+     601.33
+    ],
+    [
+     859.5,
+     598.7
+    ],
+    [
+     864.09,
+     601.32
+    ],
+    [
+     867.48,
+     601.17
+    ],
+    [
+     871.48,
+     601.15
+    ],
+    [
+     875.48,
+     601.08
+    ],
+    [
+     879.49,
+     601.07
+    ],
+    [
+     883.49,
+     601.04
+    ],
+    [
+     887.5,
+     601.01
+    ],
+    [
+     891.51,
+     601.03
+    ],
+    [
+     895.31,
+     601.04
+    ],
+    [
+     899.5,
+     600.26
+    ],
+    [
+     903.69,
+     601.02
+    ],
+    [
+     907.49,
+     601.01
+    ],
+    [
+     911.49,
+     600.98
+    ],
+    [
+     915.5,
+     600.99
+    ],
+    [
+     919.5,
+     600.97
+    ],
+    [
+     923.49,
+     600.97
+    ],
+    [
+     927.5,
+     600.94
+    ],
+    [
+     931.5,
+     600.95
+    ],
+    [
+     935.48,
+     600.92
+    ],
+    [
+     939.47,
+     600.88
+    ],
+    [
+     943.48,
+     600.81
+    ],
+    [
+     947.51,
+     600.81
+    ],
+    [
+     951.51,
+     600.84
+    ],
+    [
+     955.51,
+     600.84
+    ],
+    [
+     959.5,
+     600.87
+    ],
+    [
+     963.5,
+     600.84
+    ],
+    [
+     967.51,
+     600.87
+    ],
+    [
+     971.49,
+     600.87
+    ],
+    [
+     975.5,
+     600.84
+    ],
+    [
+     979.5,
+     600.87
+    ],
+    [
+     983.49,
+     600.85
+    ],
+    [
+     987.5,
+     600.83
+    ],
+    [
+     991.5,
+     600.84
+    ],
+    [
+     995.48,
+     600.84
+    ],
+    [
+     999.47,
+     600.75
+    ],
+    [
+     1003.49,
+     600.71
+    ],
+    [
+     1007.49,
+     600.72
+    ],
+    [
+     1011.49,
+     600.68
+    ],
+    [
+     1015.52,
+     600.68
+    ],
+    [
+     1019.52,
+     600.74
+    ],
+    [
+     1023.51,
+     600.77
+    ],
+    [
+     1027.49,
+     600.77
+    ],
+    [
+     1031.49,
+     600.73
+    ],
+    [
+     1035.49,
+     600.72
+    ],
+    [
+     1039.5,
+     600.68
+    ],
+    [
+     1043.51,
+     600.72
+    ],
+    [
+     1047.5,
+     600.71
+    ],
+    [
+     1051.5,
+     600.73
+    ],
+    [
+     1055.49,
+     600.73
+    ],
+    [
+     1059.48,
+     600.69
+    ],
+    [
+     1063.5,
+     600.66
+    ],
+    [
+     1067.51,
+     600.69
+    ],
+    [
+     1071.5,
+     600.7
+    ],
+    [
+     1075.5,
+     600.68
+    ],
+    [
+     1079.49,
+     600.7
+    ],
+    [
+     1083.48,
+     600.65
+    ],
+    [
+     1087.49,
+     600.6
+    ],
+    [
+     1091.51,
+     600.61
+    ],
+    [
+     1095.5,
+     600.63
+    ],
+    [
+     1099.51,
+     600.63
+    ],
+    [
+     1103.51,
+     600.66
+    ],
+    [
+     1107.5,
+     600.68
+    ],
+    [
+     1111.51,
+     600.68
+    ],
+    [
+     1115.51,
+     600.72
+    ],
+    [
+     1119.48,
+     600.71
+    ],
+    [
+     1123.49,
+     600.64
+    ],
+    [
+     1127.5,
+     600.66
+    ],
+    [
+     1131.5,
+     600.65
+    ],
+    [
+     1135.5,
+     600.66
+    ],
+    [
+     1139.5,
+     600.64
+    ],
+    [
+     1143.51,
+     600.66
+    ],
+    [
+     1147.51,
+     600.67
+    ],
+    [
+     1151.49,
+     600.68
+    ],
+    [
+     1155.49,
+     600.64
+    ],
+    [
+     1159.5,
+     600.66
+    ],
+    [
+     1163.5,
+     600.64
+    ],
+    [
+     1167.54,
+     600.65
+    ],
+    [
+     1171.6,
+     600.79
+    ],
+    [
+     1175.66,
+     601.03
+    ],
+    [
+     1179.77,
+     601.46
+    ],
+    [
+     1183.89,
+     602.16
+    ],
+    [
+     1188.01,
+     603.11
+    ],
+    [
+     1192.11,
+     604.3
+    ],
+    [
+     1196.23,
+     605.76
+    ],
+    [
+     1200.32,
+     607.55
+    ],
+    [
+     1204.4,
+     609.45
+    ],
+    [
+     1208.45,
+     611.62
+    ],
+    [
+     1212.45,
+     613.79
+    ],
+    [
+     1217.0,
+     616.5
+    ],
+    [
+     1223.0,
+     620.0
+    ],
+    [
+     1223.0,
+     625.0
+    ],
+    [
+     1210.0,
+     640.0
+    ],
+    [
+     1186.0,
+     660.0
+    ],
+    [
+     1184.0,
+     701.0
+    ],
+    [
+     708.0,
+     701.0
+    ],
+    [
+     708.0,
+     628.0
+    ]
+   ],
+   "feather_per_edge_in_out_px": [
+    [
+     0,
+     1.5
+    ],
+    [
+     0,
+     1.5
+    ],
+    [
+     0,
+     1.5
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ],
+    [
+     0,
+     1.5
+    ],
+    [
+     0,
+     1.5
+    ],
+    [
+     0,
+     1.5
+    ],
+    [
+     3,
+     3
+    ],
+    [
+     3,
+     3
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     0,
+     2
+    ],
+    [
+     0,
+     2
+    ]
+   ],
+   "reason": "BMW's check-control panel: arc rail, the gradient fill under it, the symbol slot and one or two text lines; same outline for one and two lines",
+   "evidence": "arc and fill measured on 62 (two lines) and 66 (one line), independent captures; cross-checked on 17 (theme connected) within 1.1 px",
+   "clearance": "top: 2.0 px outside the arc's 50 % edge (about the 5 % level of its edge spread); tips: the arc's faint tail ends at (701, 621) / (1220, 621), hole to 699 / 1223; left: 3 px left of the widest symbol (45 px, right-aligned at 753-756), 13 px right of the speedo rail end (686 in the message state); right: 9 px left of the tacho rail start (1232.5), 18 px left of the marker (ZR, 1241.5); slanted right side follows the fill's 0.5 %-of-white contour (y 640: 1205, y 660: 1177) and stays 6 px right of the widest text (1177.5); bottom: 3 px under the deepest descender of line 2 (690.25 + ~7.5)"
+  },
+  {
+   "id": "zc.street",
+   "channel": [
+    "bmw"
+   ],
+   "kind": "hole",
+   "polygon": [
+    [
+     703,
+     665.25
+    ],
+    [
+     1219,
+     665.25
+    ],
+    [
+     1219,
+     711.5
+    ],
+    [
+     703,
+     711.5
+    ]
+   ],
+   "feather_in_px": 0,
+   "feather_out_px": 1.5,
+   "reason": "BMW's road label, centre-anchored at x 961; the hole follows the widest string seen (509 px, photo 34 in design/g20-spec/measured.json) plus 3.5 px a side",
+   "evidence": "centre 960.6 / 962.1 / 960.5 / 960.6 on 61, 64, 67, 68 (three different strings); tall top 667.75-669.75, descender bottom 707.25-709.0",
+   "clearance": "left 24 px to the airbag (ZL, 679); right 4 px to the mode label in the theme-connected row (1223, photo 17); BMW draws only black around it, so the edge is invisible on the car"
+  },
+  {
+   "id": "zc.odometer",
+   "channel": [
+    "standby"
+   ],
+   "kind": "hole",
+   "polygon": [
+    [
+     793,
+     661.5
+    ],
+    [
+     1095,
+     661.5
+    ],
+    [
+     1095,
+     701
+    ],
+    [
+     793,
+     701
+    ]
+   ],
+   "feather_in_px": 0,
+   "feather_out_px": 1.5,
+   "reason": "BMW's standby odometer (label, six digits centred on x 960.5, unit); one more digit allowed each way (advance 23.2 px)",
+   "evidence": "photo 65 only (one string); position confirmed by the ghost in 63 (digits within 1.75 px)",
+   "clearance": "label left edge 808 - 15, unit right edge 1080.25 + 15; 128 px to the standby mode label"
+  }
+ ],
+ "check_against_photos": {
+  "ours": {
+   "61": {
+    "rail.centre.hook_l": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.centre.hook_r": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "bottom.street": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    }
+   },
+   "64": {
+    "rail.centre.hook_l": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.centre.hook_r": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "bottom.street": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    }
+   },
+   "67": {
+    "rail.centre.hook_l": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.centre.hook_r": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "bottom.street": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    }
+   },
+   "68": {
+    "rail.centre.hook_l": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.centre.hook_r": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "bottom.street": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    }
+   },
+   "63": {
+    "rail.centre.hook_l": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.centre.hook_r": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "bottom.odometer.ghost": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    }
+   }
+  },
+  "bmw": {
+   "61": {
+    "rail.centre.hook_l": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.centre.hook_r": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "bottom.street": {
+     "must": "show",
+     "CLIP_px": 0.0,
+     "CLIP_sum_alpha_px": 0.0,
+     "CLIP_light": 0.0,
+     "CLIP_peak_Yn": 0
+    }
+   },
+   "64": {
+    "rail.centre.hook_l": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.centre.hook_r": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "bottom.street": {
+     "must": "show",
+     "CLIP_px": 0.0,
+     "CLIP_sum_alpha_px": 0.0,
+     "CLIP_light": 0.0,
+     "CLIP_peak_Yn": 0
+    }
+   },
+   "67": {
+    "rail.centre.hook_l": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.centre.hook_r": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "bottom.street": {
+     "must": "show",
+     "CLIP_px": 0.0,
+     "CLIP_sum_alpha_px": 0.0,
+     "CLIP_light": 0.0,
+     "CLIP_peak_Yn": 0
+    }
+   },
+   "68": {
+    "rail.centre.hook_l": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.centre.hook_r": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "bottom.street": {
+     "must": "show",
+     "CLIP_px": 0.0,
+     "CLIP_sum_alpha_px": 0.0,
+     "CLIP_light": 0.0,
+     "CLIP_peak_Yn": 0
+    }
+   },
+   "63": {
+    "rail.centre.hook_l": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.centre.hook_r": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "bottom.odometer.ghost": {
+     "must": "hide",
+     "LEAK_px": 836.2,
+     "LEAK_light": 12.66
+    }
+   }
+  },
+  "bmw_msg": {
+   "62": {
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "assist.cc_panel.arc": {
+     "must": "show",
+     "CLIP_px": 0.0,
+     "CLIP_sum_alpha_px": 0.0,
+     "CLIP_light": 0.0,
+     "CLIP_peak_Yn": 0
+    },
+    "assist.cc_panel.fill": {
+     "must": "show",
+     "CLIP_px": 57.1,
+     "CLIP_sum_alpha_px": 19.08,
+     "CLIP_light": 0.103,
+     "CLIP_peak_Yn": 0.008
+    },
+    "bottom.cc_info": {
+     "must": "show",
+     "CLIP_px": 0.0,
+     "CLIP_sum_alpha_px": 0.0,
+     "CLIP_light": 0.0,
+     "CLIP_peak_Yn": 0
+    },
+    "cc.text": {
+     "must": "show",
+     "CLIP_px": 0.0,
+     "CLIP_sum_alpha_px": 0.0,
+     "CLIP_light": 0.0,
+     "CLIP_peak_Yn": 0
+    }
+   },
+   "66": {
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "assist.cc_panel.arc": {
+     "must": "show",
+     "CLIP_px": 0.9,
+     "CLIP_sum_alpha_px": 0.59,
+     "CLIP_light": 0.033,
+     "CLIP_peak_Yn": 0.1253
+    },
+    "assist.cc_panel.fill": {
+     "must": "show",
+     "CLIP_px": 316.1,
+     "CLIP_sum_alpha_px": 250.7,
+     "CLIP_light": 2.948,
+     "CLIP_peak_Yn": 0.1272
+    },
+    "bottom.cc_info": {
+     "must": "show",
+     "CLIP_px": 0.0,
+     "CLIP_sum_alpha_px": 0.0,
+     "CLIP_light": 0.0,
+     "CLIP_peak_Yn": 0
+    },
+    "cc.text": {
+     "must": "show",
+     "CLIP_px": 0.0,
+     "CLIP_sum_alpha_px": 0.0,
+     "CLIP_light": 0.0,
+     "CLIP_peak_Yn": 0
+    }
+   }
+  },
+  "standby": {
+   "65": {
+    "rail.centre.hook_l": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.centre.hook_r": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.left.end (ZL)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "rail.right.start (ZR)": {
+     "must": "hide",
+     "LEAK_px": 0.0,
+     "LEAK_light": 0.0
+    },
+    "bottom.odometer": {
+     "must": "show",
+     "CLIP_px": 0.0,
+     "CLIP_sum_alpha_px": 0.0,
+     "CLIP_light": 0.0,
+     "CLIP_peak_Yn": 0
+    }
+   }
+  }
+ }
+}
