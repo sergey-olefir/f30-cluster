@@ -263,6 +263,7 @@ async function benchChecks() {
     let p = await until((q) => q && q.ready && q.activeName, 90000);
     ok(p && p.ready, 'the app reaches the fake cluster-render');
     if (!p || !p.ready) return;
+    await fake('clock-none');        // fix/opaque-cc: no demo time zone (bench/run-app.js); "half ours" below needs none
     await click('SET_BYMODE');
     await set('hudLayout', 'wb_comfort');
     await click('SET_G20');

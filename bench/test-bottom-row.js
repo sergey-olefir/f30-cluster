@@ -164,6 +164,10 @@ async function main() {
     console.log('all6WB waits for the car, whole: no time zone, then no message read, means the whole row is BMW\'s');
     const allOwn = (q, v) => ['range', 'clock', 'temp', 'nav', 'sign', 'info'].every((i) => (S(q).own || {})[i] === v);
     await set('bottomRow', 'all6WB');
+    // fix/opaque-cc: demo mode feeds a time zone (+2 h) by default now (bench/run-app.js); "clock-none" overrides it
+    p = await until((q) => S(q).tzCar === 120 && S(q).tz && S(q).tz.min === 120, 10000);
+    ok(S(p).tzCar === 120, 'demo mode feeds the car\'s time zone, +2 h, by default (' + JSON.stringify(S(p).tz) + ')');
+    await scene('clock-none');
     p = await until((q) => /time zone/.test((S(q).row || {}).why || ''), 20000);
     ok(/waiting for a time zone/.test(S(p).row.why), 'no time zone known yet: the row is BMW\'s (' + S(p).row.why + ')');
     ok(allOwn(p, false), 'every item of it, not only the clock (' + JSON.stringify(S(p).own) + ')');
@@ -796,6 +800,83 @@ async function main() {
     await set('hudLayout', 'wb_comfort');
     await until((q) => q.activeName === 'wb_comfort', 20000);
     // ---- end fix/row-cc ----
+
+    // ---- fix/opaque-cc (2026-11-16): the blind case in the opaque themes. Until config.ccm has been read once we
+    // cannot know when BMW writes in its panel, so BMW's panel is left open there too (hud.js _ccOpen), cut to BMW's
+    // own outline (WBBACK u_cc + u_ccS + u_ccE, design/gen_6wb.py CC_PANEL), and our row steps aside ("!cc:open").
+    // Each layout on a FRESH app (_ccWired is sticky). No GPU here: WBBACK's cut is re-computed in JS off the uniforms
+    // the renderer got, as the dialShade check above does.
+    console.log('fix/opaque-cc: blind, the opaque themes leave BMW\'s panel open, cut to its own outline');
+    const SRC0 = shaders.wbbackFor(0);
+    ok(SRC0.indexOf('u_ccS') > 0 && SRC0.indexOf('u_ccE') > 0, 'WBBACK cuts BMW\'s panel with u_ccS / u_ccE');
+    const clamp = (x, a, b) => Math.min(Math.max(x, a), b);
+    const smooth = (e0, e1, x) => { const t = clamp((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t); };
+    const boxOut = (x, y, b, r) => {
+        const qx = Math.max(b[0] - x, x - b[2]) + r, qy = Math.max(b[1] - y, y - b[3]) + r;
+        return Math.hypot(clamp(qx, 0, 64), clamp(qy, 0, 64)) + Math.min(Math.max(qx, qy), 0) - r;
+    };
+    /** WBBACK's coverage factor of the u_cc cut at panel pixel (x, y) (its centre): 0 open, 1 ours (shaders.js). */
+    const ccCover = (u, x, y) => {
+        const c = u.u_cc, s = u.u_ccS || [0, 0, 0, 0], e = u.u_ccE || [0, 0, 0, 0];
+        if (!(c[2] > c[0])) return 1;
+        x += 0.5; y += 0.5;
+        let sd = boxOut(x, y, c, s[3] > 0 ? 0 : 8);
+        if (s[3] > 0) {
+            const q = [clamp(Math.max(s[0] - x, x - s[1]), 0, 128), clamp(s[2] - y, 0, 128)];
+            sd = Math.max(sd, Math.hypot(q[0], q[1]) - s[3], Math.max(e[0] - Math.max(e[1] - y, 0) - x, x - e[2] - Math.max(e[3] - y, 0)));
+        }
+        return smooth(-0.5, 1.5, sd);
+    };
+    const ccUniforms = async () => {
+        const bg = ((await renderer()) || []).find((l) => l.uniforms && l.uniforms.u_cc);
+        if (!bg) return null;
+        const g = (k) => (bg.uniforms[k] ? (bg.uniforms[k].v || bg.uniforms[k]) : null);
+        return { u_cc: g('u_cc'), u_ccS: g('u_ccS'), u_ccE: g('u_ccE') };
+    };
+    // inside BMW's panel (open): its middle, its symbol slot, the text's right end, under the flat top, in a shoulder;
+    // inside the bounds but outside BMW's outline (ours): the four corners and the arc's corners
+    const OPEN = [[960, 650], [733, 660], [1176, 671], [960, 603], [726, 614], [1194, 612], [712, 698], [1183, 698]];
+    const SHUT = [[700, 601], [1221, 601], [701, 699], [1220, 699], [712, 606], [1210, 606], [702, 640], [1215, 660]];
+    for (const v of ['wb_comfort', 'wb_sport', 'wb_eco']) {
+        const box = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts', v + '.json'), 'utf8'))
+            .widgets.find((x) => x.id === 'bg').cc;
+        const inkIn = async () => (await inkRows(box)).total;
+        const worstFor = async (ms) => { let n = 0; for (const t0 = Date.now(); Date.now() - t0 < ms;) { n = Math.max(n, await inkIn()); await sleep(100); } return n; };
+        await req('POST', '/restart');
+        await sleep(1000);
+        await until((q) => q && q.ready && q.activeName, 90000);
+        await set('hudLayout', v);
+        await scene('clock-plus2');                  // a time zone: our clock would be drawn, were it allowed
+        p = await until((q) => q.activeName === v && same(S(q).safety.ucc, box), 20000);
+        ok(p.activeName === v && S(p).cc.shown === null && S(p).safety.open === true && same(S(p).safety.ucc, box),
+            v + ': blind (nothing read out of config.ccm) - BMW\'s panel is open (u_cc ' + JSON.stringify(S(p).safety.ucc) + ')');
+        let n = await worstFor(1000);
+        ok(n === 0, v + ': blind - nothing of ours is painted inside it for a second (' + n + ' px)');
+        const u = await ccUniforms();
+        ok(u && u.u_ccS && u.u_ccS[3] > 0 && u.u_ccE, v + ': the hole is BMW\'s outline (u_ccS ' + JSON.stringify(u && u.u_ccS) + ', u_ccE ' + JSON.stringify(u && u.u_ccE) + ')');
+        const open = OPEN.filter(([x, y]) => ccCover(u, x, y) === 0), shut = SHUT.filter(([x, y]) => ccCover(u, x, y) === 1);
+        ok(open.length === OPEN.length && shut.length === SHUT.length,
+            v + ': not a rectangle - open inside BMW\'s outline (' + open.length + '/' + OPEN.length + '), ours at the bounds\' and the arc\'s corners (' + shut.length + '/' + SHUT.length + ')');
+        let soft = 0;
+        for (let y = 595; y < 612; y++) { const a = ccCover(u, 960, y); if (a > 0 && a < 1) soft++; }
+        ok(soft >= 1 && soft <= 2, v + ': a clean edge, ' + soft + ' px of feather across the top');
+        // readable, no message: the panel shuts and our row is drawn
+        await scene('cc-clear');
+        p = await until((q) => S(q).cc.shown === false && S(q).safety.open === false && same(S(q).safety.ucc, [0, 0, 0, 0]), 8000);
+        ok(S(p).safety.open === false && same(S(p).safety.ucc, [0, 0, 0, 0]), v + ': read, no message - BMW\'s panel is shut');
+        for (const t0 = Date.now(); Date.now() - t0 < 4000 && (n = await inkIn()) === 0;) await sleep(100);
+        ok(n > 0, v + ': and our row is drawn in its place (' + n + ' px)');
+        // readable with a message: open again, nothing of ours inside
+        await scene('cc-red');
+        p = await until((q) => S(q).cc.shown === true && same(S(q).safety.ucc, box), 8000);
+        ok(S(p).safety.open === true && same(S(p).safety.ucc, box), v + ': read, a message - BMW\'s panel is open');
+        n = await worstFor(1000);
+        ok(n === 0, v + ': with nothing of ours painted inside it (' + n + ' px)');
+        await scene('cc-clear');
+    }
+    await set('hudLayout', 'wb_comfort');
+    await until((q) => q.activeName === 'wb_comfort', 20000);
+    // ---- end fix/opaque-cc ----
 
     console.log('every layout still builds');
     for (const v of opts('hudLayout')) {

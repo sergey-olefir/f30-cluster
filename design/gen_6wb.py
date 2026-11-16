@@ -192,7 +192,7 @@ def comfort():
          # BMW's own map window (BAKE C9: drawn under a custom theme, roads seen inside x 592-1303, y 161-612), seen
          # through our window while the "stockMap" setting is on
          "hole": WINDOW, "holeWhen": "stockMap", "holeInset": 0, "holeRadius": 22,
-         "cc": CC_BOX,                                                       # BMW's message shows through (2026-11-13)
+         **CC_PANEL,                         # BMW's message shows through (2026-11-13); fix/opaque-cc: its own outline
          # the soft window (docs/POLISH-A-REPORT.md): no box edge anywhere. The map fades into black toward the top,
          # sides and foot (the stock map veil's curve) and under the dials' rims; the floor fades at the sides and rims
          "window": WINDOW, "fade": FADE, "foot": FOOT, "footLine": FOOT_LINE,
@@ -225,9 +225,9 @@ def comfort():
     # car3 H: the clock only while it is right ("own:clock": once a time zone is set; the head unit
     # runs on UTC). BMW's own clock sits under our speed dial's range arc, so no window opens over it: without our
     # clock the temperature stands alone in the middle. The temperature in BMW's 0.5 degree steps ({{ambient1}})
-    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
-          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
-          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="!own:clock&!cc:shown")]
+    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:open"),
+          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="own:clock&!cc:open"),
+          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="!own:clock&!cc:open")]
     # the range under the road signs (its pictogram is baked into the speed dial), the instant consumption under the rev dial
     # ref 12: the range arc reads "0" at its left end, "km" at its right end and the range in the middle above it;
     # the EfficientDynamics arc the same way with the instant consumption (0 at 196.5 deg, 20 l/100 km at 143.3 deg)
@@ -294,6 +294,17 @@ HOOK_STUB = [729, 629, 746, 646]
 # there carry "!cc:shown"); otherwise ours is drawn there: Comfort's bar, Dials + G20 a black patch (no keep-out cut
 # round BMW's frame, text and hook any more). While the signal is unknown (config.ccm unset) it stays ours / black.
 CC_BOX = [709, 598, 1243, 694]
+# ---- fix/opaque-cc (2026-11-16): the opaque themes' window over BMW's panel follows BMW's OWN outline, not CC_BOX ----
+# package ZC (docs/strip/ZC-REPORT.md; design/strip/ZC/mask_proposal.json "zc.panel", design/strip/mask_final.json):
+# the arc rail's flat top (centreline y 605.1, top edge 602.9; the hole 2 px outside it, y 601.2), round shoulders
+# (r 78.5 / 79.9 round (753.2, 684.4) / (1168.0, 684.9): here one r 83 each, out to the hole), the tips at x 699 /
+# 1223, the left side straight down at x 708 (3 px left of the widest symbol), the right side slanting along the
+# fill's fade to x 1186 (6 px right of the widest text), the bottom at y 701 (3 px under line 2's descenders).
+# WBBACK u_cc (the bounds) + u_ccS ("ccArc": left centre x, right centre x, centre y, r) + u_ccE ("ccSide": L, Ly, R,
+# Ry: x >= L - max(Ly - y, 0) and x <= R + max(Ry - y, 0)); a 2 px feather. It opens while hud.js _ccOpen says so:
+# a message shows, or config.ccm has never been read (the blind case); our row steps aside ("!cc:open").
+CC_PANEL = {"cc": [699, 600, 1223, 701], "ccArc": [753.2, 1168.0, 684.2, 83.0], "ccSide": [708, 632, 1186, 662]}
+# ---- end fix/opaque-cc ----
 # 2026-11-14: Dials + G20's foot between the dials: one black band from under the speedo to under the tacho, its foot
 # one straight soft edge at the height of the band under our dials' faded bottoms (the collar: full black to y 652,
 # half at ~657, clear by 666): it fades out over CC_TOP_SOFT px to y 665. Always on: while a message shows, the "cc" box
@@ -623,7 +634,7 @@ def sport():
     """6WB Sport: opaque, Sport's shelf and glowing bridge between the dials, Comfort's geometry."""
     W = [{"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
           "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "sport", "color": "accent",
-          "cc": CC_BOX,                                      # BMW's check-control message shows through, as in Comfort
+          **CC_PANEL,                        # BMW's check-control message shows through, as in Comfort (fix/opaque-cc)
           # the shelf's base line at Comfort's window foot (WBBACK reads footLine's y; "none": no hairline of Comfort's)
           "foot": "none", "footLine": FOOT_LINE}]
     W += sport_face() + minis()        # 2026-11-14: Comfort's baked minis
@@ -632,9 +643,9 @@ def sport():
           text("range_in", SP[0] - 25, SP[1] + 0.765 * R, 130, "{{range}} km", "wb_cap", align="left", conn=1)]
     # the row under the shelf's base line, as 6WB Comfort's (baked) row: the clock only while it is right ("own:clock"),
     # the temperature in BMW's 0.5 degree steps, none of it while BMW's message shows
-    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
-          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
-          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="!own:clock&!cc:shown")]
+    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:open"),
+          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="own:clock&!cc:open"),
+          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="!own:clock&!cc:open")]
     return W
 
 def sport_dials():
@@ -664,7 +675,7 @@ def eco():
     W = [
         {"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
          "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "eco", "color": "accent",
-         "cc": CC_BOX},                                                      # BMW's message shows through, as in Comfort
+         **CC_PANEL},                        # BMW's message shows through, as in Comfort (fix/opaque-cc)
         dial("speedo", SP, "eco", hub=hub, ringW=6, measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
              start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "eff", hub=hub, ringW=6, measure="signal", signal="torquePct", scale={"max": 100, "ticks": 10},
@@ -687,9 +698,9 @@ def eco():
           text("mode", MODE_C[0], MODE_C[1], 240, "{{mode}}", "wb_capb", conn=2)]
     # the info row as Comfort's (baked) row: the clock while it is right, the outside temperature; none of ours while
     # BMW's check-control message shows
-    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
-          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
-          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="!own:clock&!cc:shown")]
+    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:open"),
+          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="own:clock&!cc:open"),
+          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="!own:clock&!cc:open")]
     W.append(msa_sign(RV[0] + ECO_MSA_AT[0] * R, RV[1] + ECO_MSA_AT[1] * R))
     return W
 

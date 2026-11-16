@@ -195,6 +195,18 @@ const fakeSigns = require('./fake-signs').install(hu, appCfg, log);
 const SCALE = { rpm: [0.25, 0], speed: [0.015625, 0], accel: [0.002, -65], temp: [1, -48], torque: [0.5, -1023.5], boost: [0.01, 0] };
 const raw = (k, v) => Math.round((v - SCALE[k][1]) / SCALE[k][0]);
 let mode = 'demo', manual = {}, drive = null;
+// ---- fix/opaque-cc (2026-11-16): demo mode feeds the car's time zone, +2 h (the "clock-plus2" scene), so that with
+// bottomRow "all6WB" the bench shows the row all ours instead of BMW's "waiting for a time zone". Fed until the app has
+// taken it (and again if it loses it), only in demo mode. Any clock of POST /fake - a "clock" part or a scene with one,
+// "clock-none" among them - overrides it for the rest of this run; BENCH_DEMO_TZ=off starts with no zone at all.
+const DEMO_TZ = { minutes: 120, dst: false };
+let demoTz = process.env.BENCH_DEMO_TZ !== 'off';
+const demoTzOverride = (v) => { if (v && (v.clock || (v.scene && (require('./fake-signs').SCENES[v.scene] || {}).clock))) demoTz = false; };
+setInterval(() => {
+    if (!demoTz || mode !== 'demo' || (hud && hud.tzCar === DEMO_TZ.minutes)) return;
+    fakeSigns.control({ clock: DEMO_TZ });
+}, 1000);
+// ---- end fix/opaque-cc ----
 // the drive mode buttons, sent once a second as the car does on change (wire numbers: 1 Sport, 4 Comfort, 7 Eco Pro)
 setInterval(() => { if (drive !== null) hu.feed('de.bmw.infotainment.drivingexcitement.FES', 'statusFESVehicleDynamicSwitchHMI', { actualValueModeDrivingExperience: drive }); }, 1000);
 setInterval(() => {
@@ -355,6 +367,7 @@ process.on('message', (m) => {
     else if (m.t === 'fake') {
         const v = m.v || {};
         // the bottom-row fakes take scene / sign / cc / ccList / road / nav / clock; the rest goes to the fake persod
+        demoTzOverride(v);                       // fix/opaque-cc: a clock of the fake's own ends the demo's time zone
         if (v.hook) benchHook(v.hook);           // package X: fault injection for the safety tests
         else if (v.scene || v.sign || v.cc || v.ccList || v.ccFrame || v.sla || v.road || v.nav || v.clock) fakeSigns.control(v);
         else if (v.ccRisk || v.ccBasic || v.symbols) fakeSigns.control(v);     // probes (0.7.18): bench/test-probes.js
