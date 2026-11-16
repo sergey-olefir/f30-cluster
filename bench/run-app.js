@@ -272,9 +272,14 @@ function benchHook(h) {
 }
 /** What WBBACK's u_cc and the road bar's hole were last SENT as, in panel px ([0, 0, 0, 0]: shut), or null. */
 function rowSent() {
-    const out = { ucc: null, navHole: null };
+    const out = { ucc: null, navHole: null, mask: null };
     try {
         hud.widgets.forEach((x) => {
+            // strip integration: a layout with the strip mask opens BMW's panel through its hole lane, not u_cc. What
+            // the engine last SENT: the cover lane, the hole lane, and the hole lane's box in panel px (u_mh)
+            if (x.w && x.w.type === 'wbback' && x.w.collar && x.w.mask && x.mask && x.maskT) {
+                out.mask = { cover: x.mask.k, hole: x.mask.h, box: x.mask.h ? x.maskT.hole : [0, 0, 0, 0] };
+            }
             if (x.w && x.w.type === 'wbback' && typeof x.ccKey === 'string') {
                 const v = x.ccKey.split(',').map(Number);
                 out.ucc = v[2] > v[0] ? [v[0] + x.w.x, v[1] + x.w.y, v[2] + x.w.x, v[3] + x.w.y] : [0, 0, 0, 0];
@@ -306,13 +311,17 @@ setInterval(() => {
         if (hud._cc() !== true) return;
         ccAudit.shown++;
         if (hud._ccOnScreen()) return;
-        let cc = null;
-        hud.widgets.forEach((x) => { if (x.w && x.w.type === 'wbback') cc = x.w.cc; });
+        let cc = null, mk = null;
+        hud.widgets.forEach((x) => { if (x.w && x.w.type === 'wbback') { cc = x.w.cc; mk = x.w.collar && x.w.mask ? x : null; } });
         const s = rowSent(), same = (a, b) => Array.isArray(a) && Array.isArray(b) && a.join(',') === b.join(',');
-        const backOpen = same(s.ucc, cc), barOpen = s.navHole === null || (s.navHole[2] > s.navHole[0]);
+        // strip integration: with the strip mask, "open in the backdrop" is its hole lane on BMW's panel ("msg", or
+        // "msgMark" with the marker), with the lane table's own hole box sent; without it, u_cc = the layout's "cc" box
+        const backOpen = mk ? !!(s.mask && /^msg/.test(s.mask.hole || '') && mk.maskT && same(s.mask.box, mk.maskT.hole))
+            : same(s.ucc, cc);
+        const barOpen = s.navHole === null || (s.navHole[2] > s.navHole[0]);
         if (backOpen && barOpen) return;
         ccAudit.violations++;
-        if (!ccAudit.first) ccAudit.first = { at: Date.now(), ucc: s.ucc, navHole: s.navHole, why: hud._rowWhy() };
+        if (!ccAudit.first) ccAudit.first = { at: Date.now(), ucc: s.ucc, mask: s.mask, navHole: s.navHole, why: hud._rowWhy() };
     } catch (e) { /* not up */ }
 }, 10);
 // ---- end package X ----

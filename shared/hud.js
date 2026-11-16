@@ -1082,6 +1082,14 @@ class HudApp {
             return off;
         }, (prev, out) => { if (isNum(prev) !== isNum(out) && this.client && this.client.ready) this._rebuild(); });
         watchRaw(this.config.ccm, 'ccShown', 'check-control', (v) => ccOf(this.config.ccm, v));
+        // strip integration, decision 7: BMW's marker right of its panel opens only while a CONFIRMED field says BMW
+        // draws it (config.ccMarker, null today: _markShown). "shownWhen" lists the raw values meaning "shown"; without
+        // it a truthy value does. The lane (and the tacho's box window) follow at once (_ccPush).
+        this.ccMarkerOn = null;
+        watchRaw(this.config.ccMarker, 'ccMarkerOn', 'marker', (v, raw) => {
+            const c = this.config.ccMarker;
+            return Array.isArray(c.shownWhen) ? c.shownWhen.map(String).indexOf(String(raw)) >= 0 : !!raw;
+        }, () => { this._ccPush(); });
         // The drive mode from another field (config.drive { iface, field, path, map: { "<raw>": "COMFORT" | "SPORT_PLUS" |
         // "ECO_PRO" | 4 ... } }), when FES statusFESVehicleDynamicSwitchHMI gives nothing on a car (the owner's, photos 33
         // and 41). Its value goes through the very same handler (driveModeOf / driveVariantOf, the layout by drive mode), so
@@ -2932,7 +2940,9 @@ class HudApp {
             // always closed once app.json config.limit / config.nopass is wired)
             const cut = w.cut, cw = cut && (cut.round || cut.box);
             x.cutMode = -1;
-            c.uniform(ref, 'u_cut', this._cutVec(w, cut && cut.round ? 1 : cut && cut.box ? 2 : 0));
+            // (strip integration: a box with "boxWhen": "ccMarker" - BMW's marker in the tacho's rim - is shut until
+            // config.ccMarker says BMW draws the marker; _update opens it)
+            c.uniform(ref, 'u_cut', this._cutVec(w, cut && cut.round ? 1 : cut && cut.box && (cut.boxWhen !== 'ccMarker' || this._markShown()) ? 2 : 0));
             c.uniform(ref, 'u_cutW', !cw ? [0, 0, 0, 0] : cut.round ? [cw[0] - w.x, cw[1] - w.y, cw[2], 0]
                 : [cw[0] - w.x, cw[1] - w.y, cw[2] - w.x, cw[3] - w.y]);
             x.wbDyn = [0, -1, -1, 0];
@@ -3444,7 +3454,9 @@ class HudApp {
         if (!this.client || !this.client.ready || !this.widgets) return;
         this._guard('message panel', () => this.widgets.forEach((x) => {
             if (!x.w || !x.ref) return;
-            if (x.w.type === 'wbback') this._wbCcSend(x);
+            // strip integration: in a layout with the strip mask BMW's panel opens through the mask's "msg" hole lane
+            // (_maskLanes, the same _ccOpen), pushed from here exactly as u_cc was; u_cc is the opaque themes' only
+            if (x.w.type === 'wbback') { if (x.w.collar && x.w.mask) this._wbMaskSend(x); else this._wbCcSend(x); }
             else if (x.w.type === 'fill' && typeof x.w.holeWhen === 'string' && x.w.holeWhen.indexOf('cc:') >= 0) {
                 const h = this._hole(x.w), key = h.join(',');
                 if (key !== x.last) { x.last = key; x.c.uniform(x.ref, 'u_hole', h); }
@@ -3645,13 +3657,12 @@ class HudApp {
      *  the panel is shut. */
     _wbCcSend(x) {
         const w = x.w, four = (a) => Array.isArray(a) && a.length === 4;
+        // strip integration: a layout with the strip mask has no u_cc (package M); its panel opens through the mask
+        if (w.collar && w.mask) return;
         // package X: no symbol column any more ("ccSym"; the owner, 2026-11-16: our message is our own design, for now
-        // without a window for BMW's symbol): BMW's whole panel opens (_ccOpen), or nothing of it does. While it is
-        // shut, the one box WBBACK has goes to BMW's marker right of the panel ("ccMark": none / warning triangle /
-        // "i" for stored messages), which must stay visible in both modes while no signal of ours stands in for it.
-        // u_cc is ONE box, so while the panel is open the marker is under the collar again (docs/strip/X-REPORT.md;
-        // package M's mask lifts that).
-        const b = four(w.cc) && this._ccOpen() ? w.cc : four(w.ccMark) ? w.ccMark : null;
+        // without a window for BMW's symbol): BMW's whole panel opens (_ccOpen), or nothing of it does.
+        // (Strip integration, the owner's decision 7: no "ccMark" window - BMW's marker is covered by default.)
+        const b = four(w.cc) && this._ccOpen() ? w.cc : null;
         const v = b ? [b[0] - w.x, b[1] - w.y, b[2] - w.x, b[3] - w.y] : [0, 0, 0, 0], key = v.join(',');
         if (key === x.ccKey) return;
         x.ccKey = key;
@@ -3669,17 +3680,32 @@ class HudApp {
      * four patches, and u_cc in this layout - are gone.) */
 
     /** The lanes for now: { cover, hole } (lane names; hole null), null without a lane table. The cover lane follows
-     *  the row: every item ours, "ours"; otherwise BMW's row - "standby" while the car stands in P with the engine off
-     *  (BMW's standby row), else "bmw" (a row half ours falls back whole: the owner, 2026-11-16). The hole lane
-     *  opens BMW's message panel whenever the info field is not ours and the panel must show (_ccOpen): in standby
-     *  too, since a warning is never covered unless our own text for it is drawn. m: the texture's lane table. */
+     *  the row: every item ours, "ours"; otherwise BMW's row - "standby" while BMW shows its standby row, else "bmw"
+     *  (a row half ours falls back whole: the owner, 2026-11-16). The hole lane opens BMW's message panel whenever
+     *  _ccOpen says it must be seen, and BMW's marker only while config.ccMarker says BMW draws it (_markShown).
+     *  m: the texture's lane table.
+     *  Strip integration (2026-11-16, docs/strip):
+     *   - standby is package X's: VehicleCondition COND_STANDBY held STANDBY_MS (this.rowStandby, _rowSync), never "P
+     *     with the engine off" - photos 62 and 63 are P with the engine off and BMW draws its NORMAL row there;
+     *   - THE SAFETY RULE: "msg" follows _ccOpen alone, with the row ours too. In the gap between a message arriving and
+     *     our first draw of it (_ccOnScreen), after a missing glyph, a throw or an unreadable struct, BMW's panel is open
+     *     through this lane - the job u_cc and the road bar's hole did before the mask (package X's _ccPush). */
     _maskLanes(m) {
         if (!m || !m.lanes || !Array.isArray(m.cover)) return null;
         const all = OWN_ITEMS.every((k) => this._own(k));
-        const rpm = this._raw('rpm'), parked = this._data().stage === 'P' && !(isNum(rpm) && rpm >= 150);
-        const cover = all ? 'ours' : parked && m.lanes.standby ? 'standby' : 'bmw';
-        const hole = !this._own('info') && Array.isArray(m.hole) && m.lanes.msg && this._ccOpen() ? 'msg' : null;
+        const cover = all ? 'ours' : this.rowStandby && m.lanes.standby ? 'standby' : 'bmw';
+        const msg = Array.isArray(m.hole) && !!m.lanes.msg && this._ccOpen(), mark = this._markShown();
+        // a marker lane only exists in a bake made with it (tools/strip/bake_mask.py --marker); the panel always wins
+        const hole = msg ? (mark && m.lanes.msgMark ? 'msgMark' : 'msg') : mark && m.lanes.mark ? 'mark' : null;
         return m.lanes[cover] ? { cover, hole } : null;
+    }
+
+    /** Strip integration, the owner's decision 7 (2026-11-16): BMW's marker right of its panel (none / warning
+     *  triangle / "i") is COVERED by default, in every lane and both modes. It opens only while a CONFIRMED signal says
+     *  BMW is drawing it: app.json config.ccMarker { iface, field, path?, shownWhen?: [raw values] } (null: never).
+     *  None is confirmed today, so config.ccMarker is null and this is false. */
+    _markShown() {
+        return !!(this.config.ccMarker && this.ccMarkerOn === true);
     }
 
     /** u_mk, u_mh, u_mo when the lanes change. Every frame between two of these messages must be a whole picture (the
@@ -4314,6 +4340,11 @@ class HudApp {
                 // BMW's STANDBY only (vehicle condition COND_STANDBY), not in every "P, engine off"
                 const parked = this._standbyNow();
                 const m = this._own('sign') || parked ? 3 : 1;
+                if (force || m !== x.cutMode) { x.cutMode = m; x.c.uniform(x.ref, 'u_cut', this._cutVec(w, m)); }
+            }
+            if (w.look === 'wb' && w.cut && w.cut.box && w.cut.boxWhen === 'ccMarker') {
+                // strip integration, decision 7: the tacho's box window over BMW's marker, only while it is confirmed shown
+                const m = this._markShown() ? 2 : 0;
                 if (force || m !== x.cutMode) { x.cutMode = m; x.c.uniform(x.ref, 'u_cut', this._cutVec(w, m)); }
             }
             const key = q + '|' + hot + '|' + over.join(',');

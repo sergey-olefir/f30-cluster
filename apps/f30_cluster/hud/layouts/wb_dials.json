@@ -144,12 +144,13 @@
         "y": 656,
         "fade": 26,
         "box": [
-          1251,
-          589,
-          1283,
-          629
+          1240,
+          588,
+          1288,
+          631
         ],
-        "soft": 2
+        "soft": 1,
+        "boxWhen": "ccMarker"
       },
       "measure": "rpm",
       "scale": {
@@ -772,28 +773,6 @@
       "align": "left",
       "conn": 2,
       "toggle": "own:temp"
-    },
-    {
-      "id": "nav_bg",
-      "type": "fill",
-      "class": "content",
-      "z": 2,
-      "x": 690,
-      "y": 650,
-      "w": 560,
-      "h": 62,
-      "color": "bg",
-      "toggle": "own:nav",
-      "hole": [
-        709,
-        650,
-        534,
-        62
-      ],
-      "holeWhen": "cc:open",
-      "holeInset": 0,
-      "holeRadius": 0,
-      "conn": 1
     },
     {
       "id": "nav",

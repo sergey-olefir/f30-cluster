@@ -157,7 +157,7 @@ async function req(method, url, body) {
 const probe = () => req('GET', '/probe');
 const click = (id, row) => req('POST', '/click', row === undefined ? { id } : { id, row });
 const fake = (s) => req('POST', '/fake', { scene: s });
-const drive = (stage, rpm) => req('POST', '/signals', { mode: 'manual', values: { stage, rpm, speed: stage === 'D' ? 50 : 0 } });
+const drive = (stage, rpm, condition) => req('POST', '/signals', { mode: 'manual', values: Object.assign({ stage, rpm, speed: stage === 'D' ? 50 : 0 }, condition === undefined ? {} : { condition }) });
 const set = (k, v) => click('SET_' + k.toUpperCase(), spec.settings.find((s) => s.key === k).options.map((o) => o[0]).indexOf(v));
 async function until(fn, ms) {
     const end = Date.now() + (ms || 8000);
@@ -231,13 +231,19 @@ async function benchChecks() {
     await fake('cc-red');
     L = await laneUntil((x) => x.mh && x.mh[2] > x.mh[0], 8000);
     ok(eq(L.mh, hole) && eq(L.mo.slice(2), T.lanes.msg), 'allG20 with a message: the "msg" hole lane opens BMW\'s panel');
-    await drive('P', 0);
+    // strip integration: standby is VehicleCondition COND_STANDBY (5) held 1 s (package X), NOT "P with the engine off":
+    // photos 62 and 63 are P with the engine off (condition 7) and BMW draws its NORMAL row, sign included
+    await drive('P', 0, 7);
+    await sleep(1800);
+    L = await laneUntil((x) => x.mh[2] > x.mh[0], 8000);
+    ok(eq(L.mo.slice(0, 2), T.lanes.bmw) && eq(L.mh, hole), 'P with the engine off, condition 7 (photo 63): still the "bmw" lane, not standby, the message open');
+    await drive('P', 0, 5);
     L = await laneUntil((x) => eq(x.mo.slice(0, 2), T.lanes.standby) && x.mh[2] > x.mh[0], 8000);
-    ok(eq(L.mo.slice(0, 2), T.lanes.standby) && eq(L.mh, hole), 'P with the engine off: the "standby" lane, and the message still open (a warning is never covered)');
+    ok(eq(L.mo.slice(0, 2), T.lanes.standby) && eq(L.mh, hole), 'condition 5 (standby) held 1 s: the "standby" lane, and the message still open (a warning is never covered)');
     await fake('cc-clear');
     L = await laneUntil((x) => x.mh[2] <= x.mh[0], 8000);
     ok(eq(L.mo.slice(0, 2), T.lanes.standby) && L.mh[2] <= L.mh[0], 'standby, the message gone: its hole closes');
-    await drive('D', 1500);
+    await drive('D', 1500, 10);
     L = await laneUntil((x) => eq(x.mo.slice(0, 2), T.lanes.bmw), 8000);
     ok(eq(L.mo.slice(0, 2), T.lanes.bmw) && L.mh[2] <= L.mh[0], 'driving again, no message: the "bmw" lane and no hole');
 

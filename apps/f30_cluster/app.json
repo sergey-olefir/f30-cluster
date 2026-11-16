@@ -1124,6 +1124,8 @@
         ["numberCheckControlMessage3"]
       ]
     },
+    "_ccMarker": "Strip integration, the owner's decision 7 (2026-11-16): BMW's marker right of its check-control panel (none / warning triangle / 'i') is COVERED in every lane of the strip mask and in both modes. It may open only while a CONFIRMED signal says BMW draws it: set ccMarker to { iface, field, path?, shownWhen?: [raw values meaning shown] } (shared/hud.js _markShown) and bake the mask with its marker lanes (tools/strip/bake_mask.py --marker). No such signal is confirmed (ccList is the candidate, docs/strip/P-REPORT.md 1.1), so it stays null.",
+    "ccMarker": null,
     "ccList": {
       "_about": "Several messages at once: the car cycles through this list, and ours steps through it on the same clock (the owner, 2026-11-15). Each element carries a short name and a colour; config.ccm.cycleMs is how long each one is shown. The stock order and timing are being measured in docs/G20-DESIGN-SPEC.md.",
       "iface": "de.bmw.infotainment.KombiInterface_2",

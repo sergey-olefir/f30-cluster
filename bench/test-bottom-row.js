@@ -28,9 +28,20 @@ const spec = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', '
 // package X: the geometry the safety checks compare against, read from the layout itself (panel px, half-open boxes)
 const LAY = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts', 'wb_dials.json'), 'utf8'));
 const lw = (id) => LAY.widgets.find((w) => w.id === id);
-const CC_BOX = lw('bg').cc, MARK_WIN = lw('bg').ccMark, NB = lw('nav_bg');
-const NAV_BAR = [NB.x, NB.y, NB.x + NB.w, NB.y + NB.h];
-const NAV_HOLE = [NB.hole[0], NB.hole[1], NB.hole[0] + NB.hole[2], NB.hole[1] + NB.hole[3]];
+// strip integration: package M's strip mask replaced u_cc ("cc"), the marker window ("ccMark") and the road bar
+// ("nav_bg"): BMW's panel opens through the mask's "msg" hole lane, whose box is the lane table's "hole". Its lanes are
+// read off the baked texture here so the coverage checks below run on the very bytes the car gets.
+const MASKF = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'scene', lw('bg').mask.tex + '.json'), 'utf8'));
+const MT = MASKF.mask, MASK_BYTES = Buffer.from(MASKF.r8, 'base64');
+/** A lane's coverage (0..1) at panel pixel (x, y) (whole px), or null outside its box. */
+const laneAt = (k, x, y) => {
+    const box = k === 'msg' || k === 'mark' || k === 'msgMark' ? MT.hole : MT.cover, o = MT.lanes[k];
+    if (!o || x < box[0] || y < box[1] || x >= box[2] || y >= box[3]) return null;
+    return MASK_BYTES[(y - box[1] + o[1]) * MASKF.w + (x - box[0] + o[0])] / 255;
+};
+const CCL = lw('cc_line');
+const cat = {};
+JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'overlay', 'g20_comfort.json'), 'utf8')).elements.forEach((e) => { cat[e.id] = e; });
 const item = (k) => spec.settings.find((s) => s.key === k);
 const opts = (k) => item(k).options.map((o) => o[0]);
 
@@ -168,12 +179,14 @@ async function main() {
     // the first readable message must bring the row in BY ITSELF (hud.js _rowSync rebuilds)
     p = await until((q) => (S(q).widgets || []).indexOf('cc_line') >= 0, 20000);
     ok(allOwn(p, true) && S(p).row.why === null, 'the first message the car sends makes the WHOLE row ours, with no restart');
-    ok(['cc_line', 'nav', 'nav_bg', 'signs', 'own_clock'].every((i) => (S(p).widgets || []).indexOf(i) >= 0),
+    ok(['cc_line', 'nav', 'signs', 'own_clock'].every((i) => (S(p).widgets || []).indexOf(i) >= 0),
         'and our message line, road label, sign and clock are built then (' + JSON.stringify(S(p).widgets) + ')');
     ok((S(p).widgets || []).indexOf('cc_name') < 0 && (S(p).widgets || []).indexOf('cc_desc') < 0, 'the two-line text is gone: one line');
-    p = await until((q) => (S(q).safety || {}).onScreen === true && JSON.stringify(S(q).safety.ucc) === JSON.stringify(MARK_WIN), 5000);
-    ok(S(p).safety.onScreen === true && JSON.stringify(S(p).safety.ucc) === JSON.stringify(MARK_WIN),
-        'once ours is on the screen BMW\'s panel is covered and only its marker is open (u_cc ' + JSON.stringify(S(p).safety.ucc) + ')');
+    // strip integration: covered = the "ours" lane and NO hole lane; and BMW's marker stays covered too (decision 7)
+    const maskIs = (q, cover, hole) => { const m = (S(q).safety || {}).mask; return !!m && m.cover === cover && m.hole === hole; };
+    p = await until((q) => (S(q).safety || {}).onScreen === true && maskIs(q, 'ours', null), 5000);
+    ok(S(p).safety.onScreen === true && maskIs(p, 'ours', null),
+        'once ours is on the screen BMW\'s panel is covered, and its marker too: the "ours" lane, no hole lane (' + JSON.stringify(S(p).safety.mask) + ')');
     await scene('cc-clear');
     p = await until((q) => S(q).cc && S(q).cc.shown === false, 5000);
     ok(allOwn(p, true), 'and it stays ours once that message is cleared again');
@@ -252,7 +265,8 @@ async function main() {
 
     console.log('the switching: ours is built and drawn, BMW\'s is not');
     p = await until((q) => (S(q).widgets || []).indexOf('nav') >= 0, 20000);
-    ok((S(p).widgets || []).indexOf('nav') >= 0 && (S(p).widgets || []).indexOf('nav_bg') >= 0, 'all6WB builds the label and its bar (' + JSON.stringify(S(p).widgets) + ')');
+    // strip integration: no bar any more ("nav_bg"): the strip mask's "ours" lane is the black under the label
+    ok((S(p).widgets || []).indexOf('nav') >= 0 && (S(p).widgets || []).indexOf('nav_bg') < 0, 'all6WB builds the label, on the mask\'s black, with no bar layer (' + JSON.stringify(S(p).widgets) + ')');
     p = await until((q) => (S(q).widgets || []).indexOf('signs') >= 0, 20000);
     ok((S(p).widgets || []).indexOf('signs') >= 0 && (S(p).widgets || []).indexOf('limit') >= 0, 'all6WB builds the sign and its figure');
     await scene('cc-red');
@@ -352,12 +366,13 @@ async function main() {
     ok(rows.at(base - 19, base - 15) > 0, 'including the rows above the capitals, where Ґ turns up (' + rows.at(base - 19, base - 15) + ' px)');
     ok(rows.at(base, base + 5) > 0, 'and below the baseline, where р and у reach (' + rows.at(base, base + 5) + ' px)');
     await scene('cc-cyrillic');
-    p = await until((q) => (S(q).widgets || []).indexOf('cc_name') >= 0 && S(q).cc && S(q).cc.name, 20000);
-    ok((S(p).widgets || []).indexOf('cc_name') >= 0 && S(p).cc.name === 'Низький тиск у шинах', 'a Ukrainian message is ours and built (apostrophes, guillemets, dash and number sign in it)');
+    // (strip integration: package X made the message one line, "cc_line"; F's check was written on "cc_name")
+    p = await until((q) => (S(q).widgets || []).indexOf('cc_line') >= 0 && S(q).cc && S(q).cc.name, 20000);
+    ok((S(p).widgets || []).indexOf('cc_line') >= 0 && S(p).cc.name === 'Низький тиск у шинах', 'a Ukrainian message is ours and built (apostrophes, guillemets, dash and number sign in it)');
     await sleep(1500);
     p = await probe();
     ok(JSON.stringify(S(p).fail) === '{}' && S(p).own.info === true, 'and nothing latched back to BMW (' + JSON.stringify(S(p).fail) + ')');
-    const ccW = lay.widgets.find((w) => w.id === 'cc_name');
+    const ccW = lay.widgets.find((w) => w.id === 'cc_line');
     const ccRows = await inkRows([ccW.x, ccW.y, ccW.x + ccW.w, ccW.y + ccW.h]);
     ok(ccRows.total > 0, 'the message has ink on the bench (' + ccRows.total + ' px)');
     ok(!/has no glyph for/.test(logText), 'and no font reported a missing glyph');
@@ -390,6 +405,9 @@ async function main() {
     // The rule: the car says a message shows and our own text for it is not on the screen -> BMW's panel is visible:
     // WBBACK's u_cc is BMW's whole panel AND the road bar's hole is open. bench/run-app.js audits that between every
     // two ticks of the engine (safety.audit); each case also asserts it at the probe, and the gap case at the renderer.
+    // Strip integration: after package M there is no u_cc and no road bar in this layout. "BMW's panel open" is the
+    // strip mask's "msg" hole lane sent with the lane table's hole box (u_mh) and the msg tile's origin (u_mo.zw), and
+    // no layer of ours left over the panel (no bar: navHole null). Every assertion below is the same, on the mask.
     const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     const restart = async () => {
         await req('POST', '/restart');
@@ -404,7 +422,7 @@ async function main() {
         await scene('clock-plus2'); await scene('cc-clear'); await scene('road-street');
         return until((q) => S(q).row && S(q).row.why === null && (S(q).widgets || []).indexOf('cc_line') >= 0, 20000);
     };
-    const bmwOpen = (q) => same((S(q).safety || {}).ucc, CC_BOX);
+    const bmwOpen = (q) => { const m = (S(q).safety || {}).mask; return !!m && m.hole === 'msg' && same(m.box, MT.hole); };
     // (half a second more of audit first, so a case that latched at once has frames of the message showing too)
     const clean = async (q0, what) => {
         await sleep(500);
@@ -447,38 +465,56 @@ async function main() {
         const q = await probe();
         if (S(q).cc && S(q).cc.shown === true) {
             gapN++;
-            if (!S(q).safety.onScreen && S(q).safety.open && bmwOpen(q) && same(S(q).safety.navHole, NAV_HOLE)) gapOk++;
+            if (!S(q).safety.onScreen && S(q).safety.open && bmwOpen(q) && S(q).safety.navHole === null) gapOk++;
         }
         await sleep(50);
     }
-    ok(gapN >= 10 && gapOk === gapN, 'with our first draw held back for 1.5 s, BMW\'s panel stayed open in the backdrop and the road bar (' + gapOk + ' of ' + gapN + ' probes)');
+    ok(gapN >= 10 && gapOk === gapN, 'with our first draw held back for 1.5 s, BMW\'s panel stayed open through the mask\'s "msg" lane, with no bar of ours over it (' + gapOk + ' of ' + gapN + ' probes)');
     const layers = await renderer();
-    const back = (layers || []).find((l) => l.uniforms && l.uniforms.u_cc);
-    ok(back && same(back.uniforms.u_cc.v, CC_BOX), 'the renderer itself holds u_cc = BMW\'s whole panel (' + JSON.stringify(back && back.uniforms.u_cc.v) + ')');
+    const back = (layers || []).find((l) => l.uniforms && l.uniforms.u_mh && l.uniforms.u_mo);
+    const uv = (k) => back && back.uniforms[k] && (back.uniforms[k].v || back.uniforms[k]);
+    ok(back && same(uv('u_mh'), MT.hole) && same(uv('u_mo').slice(2), MT.lanes.msg),
+        'the renderer itself holds u_mh = BMW\'s panel hole box and u_mo = the "msg" tile (' + JSON.stringify(uv('u_mh')) + ', ' + JSON.stringify(uv('u_mo')) + ')');
     await fake({ hook: 'ccRelease' });
-    p = await until((q) => S(q).safety.onScreen === true && same(S(q).safety.ucc, MARK_WIN), 5000);
-    ok(S(p).safety.onScreen === true && same(S(p).safety.ucc, MARK_WIN) && same(S(p).safety.navHole, [0, 0, 0, 0]),
-        'released: ours is drawn, then BMW\'s panel is covered in both layers and only its marker stays open');
+    p = await until((q) => S(q).safety.onScreen === true && maskIs(q, 'ours', null), 5000);
+    ok(S(p).safety.onScreen === true && maskIs(p, 'ours', null) && S(p).safety.navHole === null,
+        'released: ours is drawn, then BMW\'s panel is covered (the "ours" lane, no hole lane) and its marker stays covered');
     await clean(p, 'the gap');
-    // BMW's panel is FULLY covered while ours is drawn: every row of it is under CC_TOP's solid part or the road bar
-    const ccTop = lw('bg').patches.find((r) => !r.when), solidTo = ccTop.rect[3] - (ccTop.soft || 0);
-    let rowsBad = 0;
-    for (let y = CC_BOX[1]; y < CC_BOX[3]; y++) {
-        const top = y >= ccTop.rect[1] && y < solidTo && ccTop.rect[0] <= CC_BOX[0] && ccTop.rect[2] >= CC_BOX[2];
-        const bar = y >= NAV_BAR[1] && y < NAV_BAR[3] && NAV_BAR[0] <= CC_BOX[0] && NAV_BAR[2] >= CC_BOX[2];
-        if (!top && !bar) rowsBad++;
+    // BMW's panel is FULLY covered while ours is drawn: wherever the "msg" lane would open it (its coverage < 1), the
+    // "ours" lane is solid black (>= 254/255), read off the baked texture itself
+    let open = 0, rowsBad = 0, worst = 1;
+    for (let y = MT.hole[1]; y < MT.hole[3]; y++) {
+        let bad = false;
+        for (let x = MT.hole[0]; x < MT.hole[2]; x++) {
+            if (laneAt('msg', x, y) >= 1) continue;
+            open++;
+            const o = laneAt('ours', x, y);
+            const v = o === null ? 0 : o;
+            worst = Math.min(worst, v);
+            if (v < 254 / 255) bad = true;
+        }
+        if (bad) rowsBad++;
     }
-    ok(rowsBad === 0, 'while ours is drawn BMW\'s whole panel ' + JSON.stringify(CC_BOX) + ' is under solid black (' + rowsBad + ' rows open; CC_TOP solid to y ' + solidTo + ', the road bar from y ' + NAV_BAR[1] + ')');
-    ['bottom.belt_rear', 'bottom.belt_driver', 'bottom.airbag'].forEach((id) => {
-        ok(!overlaps(cat[id].bbox, NAV_BAR) && !overlaps(cat[id].bbox, MARK_WIN), 'the road bar and the marker window keep off ' + id);
+    ok(open > 0 && rowsBad === 0, 'while ours is drawn BMW\'s whole panel (' + open + ' px the "msg" lane opens) is under solid black in "ours" (' + rowsBad + ' rows open, least ' + worst.toFixed(3) + ')');
+    // the safety footprint: no cover lane puts any black within 3 px of a belt or airbag telltale (package ZL's
+    // measured boxes, which are wider than the catalogue's), and the panel's hole keeps off them too
+    const ZLB = { 'bottom.belt_rear': [500.5, 677.75, 580.25, 715.25], 'bottom.belt_driver': [590.0, 664.5, 628.75, 715.25], 'bottom.airbag': [632.75, 664.25, 684.25, 715.5] };
+    Object.keys(ZLB).forEach((id) => {
+        const b = ZLB[id], f = [Math.floor(b[0] - 3), Math.floor(b[1] - 3), Math.ceil(b[2] + 3), Math.min(720, Math.ceil(b[3] + 3))];
+        let most = 0;
+        for (let y = f[1]; y < f[3]; y++) for (let x = f[0]; x < f[2]; x++) {
+            ['ours', 'bmw', 'standby'].forEach((k) => { const v = laneAt(k, x, y); if (v !== null) most = Math.max(most, v); });
+        }
+        ok(most === 0, 'no lane puts black within 3 px of ' + id + ' ' + JSON.stringify(b) + ' (most ' + most.toFixed(3) + ')');
     });
 
     console.log('package X, safety 2: a character the font lacks');
     await restart();
     p = await rowReady();
-    await scene('cc-uk');
+    // (strip integration: Ukrainian is baked since package F, so the character the font lacks is Greek now)
+    await scene('cc-greek');
     p = await until((q) => S(q).fail && S(q).fail.info && bmwOpen(q), 15000);
-    ok(S(p).fail.info === true && /glyph/.test(S(p).row.failWhy.info), 'a Ukrainian message latches: ' + S(p).row.failWhy.info);
+    ok(S(p).fail.info === true && /glyph/.test(S(p).row.failWhy.info), 'a Greek message (no such glyphs) latches: ' + S(p).row.failWhy.info);
     ok(/^latched/.test(S(p).row.why) && allOwn(p, false), 'the WHOLE row goes back to BMW\'s (' + S(p).row.why + ')');
     ok(bmwOpen(p) && S(p).safety.open, 'and BMW\'s panel is open: its own message is the one the driver reads');
     p = await until((q) => JSON.stringify(S(q).widgets) === '[]', 10000);
@@ -549,7 +585,7 @@ async function main() {
     await set('ccStyle', 'A');
     await scene('cc-long-name');
     p = await until((q) => S(q).safety.onScreen === true && S(q).safety.fit && S(q).safety.fit.cut, 8000);
-    ok(S(p).safety.fit && S(p).safety.fit.cut === true && S(p).safety.fit.width <= NB.w - 16,
+    ok(S(p).safety.fit && S(p).safety.fit.cut === true && S(p).safety.fit.width <= CCL.w - 16,
         'a headline wider than the slot is cut with "..." to ' + (S(p).safety.fit || {}).width + ' px (' + (S(p).safety.fit || {}).chars + ' characters)');
     await clean(p, 'standby, the looks and a long headline');
     await scene('cc-clear');

@@ -329,6 +329,14 @@ NAV_HOLE = [CC_BOX[0], 650, CC_BOX[2], 712]
 # photo 08 puts the "i" at x 1255-1270, y 590-627; package ZR measures the triangle and the box to the pixel.
 MARK_WIN, MARK_SOFT = [1251, 589, 1283, 629], 2
 # --- end package X ---
+# --- strip integration (the owner's decision 7, 2026-11-16): BMW's marker is COVERED by default, in every lane and both
+# modes: no hole in the mask and no window in the tacho. It may open only while a CONFIRMED signal says BMW draws it
+# (app.json config.ccMarker, null today; hud.js _markShown). For that case the tacho keeps a box window that stays shut
+# until then ("boxWhen": "ccMarker"), over package ZR's measured marker slot - the hull of the "i" and the warning
+# triangle grown 3 px (x 1240.4-1287.6, y 588.4-630.4; photos 62, 63, 66, 67) - instead of the provisional MARK_WIN.
+MARK_BOX, MARK_BOX_SOFT = [1240, 588, 1288, 631], 1
+MARK_CUT = {"box": MARK_BOX, "soft": MARK_BOX_SOFT, "boxWhen": "ccMarker"}
+# --- end strip integration ---
 # our road label: BMW's centre and baseline, and WIDER than BMW's own field so a long name is not shrunk
 # (the owner, 2026-11-15, with docs/ROAD-SHIELDS.md; the widest street measured is 509 px)
 NAV_CX, NAV_BASE, NAV_W = 960.5, 700.5, 540   # 690.5..1230.5: the bar's own width, and 31 px wider than the widest street measured
@@ -409,21 +417,11 @@ def road_signs(own=False):
 def nav_row():
     """Our road label on BMW's bottom-centre street line, over a black bar; only while the navigation label is ours.
     The bar's hole lets BMW's own check-control text through while the message is BMW's (hud.js _hole, live)."""
+    # Strip integration (2026-11-16): the black bar "nav_bg" is gone. The strip mask's "ours" lane is opaque over the
+    # whole of BMW's road label and message panel (x 690-1250, y 596 down: package ZC's cover), and BMW's panel opens
+    # through the mask's "msg" hole lane (hud.js _maskLanes, the safety rule), so the bar and its hole only doubled
+    # that - one effect layer fewer on connection 1 (bench/test-strip-mask.js checks the coverage).
     return [
-        {"id": "nav_bg", "type": "fill", "class": "content", "z": 2, "x": NAV_BAR[0], "y": NAV_BAR[1],
-         "w": NAV_BAR[2] - NAV_BAR[0], "h": NAV_BAR[3] - NAV_BAR[1], "color": "bg", "toggle": "own:nav",
-         "hole": [NAV_HOLE[0], NAV_HOLE[1], NAV_HOLE[2] - NAV_HOLE[0], NAV_HOLE[3] - NAV_HOLE[1]],
-         # connection 1, not 0: connection 0 already carries 7 of its 8 layers in these themes, and this one is the
-         # only effect layer the package adds (8 per connection is cluster-render's hard cap)
-         # 2026-11-16: "cc:open", not "cc:shown" - a car whose check-control message we cannot read never says a
-         # message shows, and the bar would then cut BMW's own message in half at its top edge (y 666)
-         # package X: "cc:open" alone - the bar exists only while the whole row is ours, and then the hole opens
-         # exactly while BMW's message must be seen (it arrived, our text for it is not on the screen yet)
-         "holeWhen": "cc:open", "holeInset": 0, "holeRadius": 0, "conn": 1},
-        # wb_cap is the only 6WB font with letters in it (wb_val is digits and units): the placeholder uses it on
-        # the measured centre and baseline. It has no Cyrillic and no accents, and the owner's cluster is in
-        # Ukrainian, so on the car this label hands itself back to BMW until the drawing package bakes the measured
-        # font (Roboto, width axis 87.5, Light here against the values' Medium) - shared/hud.js _missingGlyphs
         text("nav", NAV_CX, base_at("wb_cap", NAV_BASE), NAV_W, "{{road}}", "wb_cap", conn=1, toggle="own:nav"),
     ]
 
@@ -516,8 +514,9 @@ def dials():
              measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10, start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "comfort", ringW=10, base=base("tacho_d", RV, R, RV[0] - R, RV[1] - R, 2 * R, 3),
              # package X: the box window over BMW's marker again (shut on 2026-11-13); its cost: WBDIAL blacks this
-             # dial's bezel below the window's top on its left half (u_cut mode 2), so the rim ends at the marker
-             cut={"y": CUT_Y, "fade": CUT_FADE, "box": MARK_WIN, "soft": MARK_SOFT},
+             # dial's bezel below the window's top on its left half (u_cut mode 2), so the rim ends at the marker.
+             # Strip integration (decision 7): the window exists but stays shut unless config.ccMarker confirms the marker
+             cut=dict({"y": CUT_Y, "fade": CUT_FADE}, **MARK_CUT),
              measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
              start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF),
     ] + road_signs(own=True)        # bottom row: only while the sign is ours; else BMW's shows through the window
@@ -558,7 +557,7 @@ def sport_face(cut=False):
              minor=10, start=SPD_START, sweep=SPD_SWEEP,
              **({"cut": {"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": SIGN_SOFT, "cover": "limit"}} if cut else {})),
         dial("tacho", RV, "sport", hub=SPORT_HUB, ringW=6, measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0},
-             minor=10, start=RPM_START, sweep=RPM_SWEEP, **({"cut": {"y": CUT_Y, "fade": CUT_FADE, "box": MARK_WIN, "soft": MARK_SOFT}} if cut else {})),   # package X: the marker
+             minor=10, start=RPM_START, sweep=RPM_SWEEP, **({"cut": dict({"y": CUT_Y, "fade": CUT_FADE}, **MARK_CUT)} if cut else {})),   # package X: the marker (strip integration: shut unless config.ccMarker)
     # the road signs under the speed hub, the same widgets as 6WB Comfort's (comfort(); BAKE C7). With the window
     # (cut): only while the sign is ours, else BMW's own shows through it (bottom row package)
     ] + road_signs(own=cut)
