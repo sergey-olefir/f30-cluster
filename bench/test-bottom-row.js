@@ -59,6 +59,46 @@ async function until(fn, ms) {
     return p;
 }
 const S = (p) => (p && p.signs) || {};
+// --- package F (strip, 2026-11-16): what our image layers hold inside a panel box, read off the bench ---
+/** The bench's layers now: the first "scene" event of GET /events, then the stream is closed. */
+async function sceneNow() {
+    const ac = new AbortController();
+    const r = await fetch(BASE + '/events', { signal: ac.signal });
+    const reader = r.body.getReader(), dec = new TextDecoder();
+    let buf = '';
+    try {
+        for (;;) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buf += dec.decode(value, { stream: true });
+            let i;
+            while ((i = buf.indexOf('\n\n')) >= 0) {
+                const chunk = buf.slice(0, i);
+                buf = buf.slice(i + 2);
+                if (chunk.indexOf('data: ') !== 0) continue;
+                const m = JSON.parse(chunk.slice(6));
+                if (m.t === 'scene') { ac.abort(); return m.layers; }
+            }
+        }
+    } catch (e) { if (e.name !== 'AbortError') throw e; }
+    return [];
+}
+/** Pixels with alpha in panel box [x0, y0, x1, y1) over every image layer of ours, per panel row: { total, at(y0, y1) }. */
+async function inkRows(box) {
+    const per = {};
+    let total = 0;
+    for (const l of await sceneNow()) {
+        if (l.kind !== 'image' || l.target !== 'panel' || l.iw !== l.w || l.ih !== l.h) continue;
+        const x0 = Math.max(box[0], l.x), y0 = Math.max(box[1], l.y), x1 = Math.min(box[2], l.x + l.w), y1 = Math.min(box[3], l.y + l.h);
+        if (x1 <= x0 || y1 <= y0) continue;
+        const r = await fetch(BASE + '/px?key=' + encodeURIComponent(l.key) + '&x=' + (x0 - l.x) + '&y=' + (y0 - l.y) + '&w=' + (x1 - x0) + '&h=' + (y1 - y0));
+        if (r.status !== 200) continue;
+        const px = Buffer.from(await r.arrayBuffer());
+        for (let y = 0; y < y1 - y0; y++) for (let x = 0; x < x1 - x0; x++) if (px[(y * (x1 - x0) + x) * 4 + 3]) { per[y0 + y] = (per[y0 + y] || 0) + 1; total++; }
+    }
+    return { total, at: (a, b) => { let n = 0; for (let y = a; y < b; y++) n += per[y] || 0; return n; } };
+}
+// --- end package F ---
 
 async function main() {
     console.log('bench on ' + BASE + ', data in ' + tmp);
@@ -293,12 +333,47 @@ async function main() {
     ok(S(p).tzCar === 120, 'the car\'s offset is taken and used (' + S(p).tzCar + ' minutes)');
     ok(!item('timeZone'), 'and there is no manual time-zone setting left that could override it');
 
+    // --- package F (strip, 2026-11-16): the car's words in Ukrainian draw, with no latch. Until the fonts carried
+    // Cyrillic, any of them handed the element back to BMW at once (the old "way back" check below used a Ukrainian
+    // street for that). Checked on the pixels too: the road label's sheet has ink in the label's box, including the
+    // rows above the capitals (Ґ's upturn) and below the baseline (р, у), so neither end of the taller cell is clipped.
+    console.log('Ukrainian: the road label and the message are drawn by us, nothing falls back');
+    await set('bottomRow', 'all6WB');
+    await scene('road-cyrillic');
+    p = await until((q) => (S(q).widgets || []).indexOf('nav') >= 0 && S(q).road === 'Ґрунтова вулиця', 20000);
+    ok(S(p).road === 'Ґрунтова вулиця' && (S(p).widgets || []).indexOf('nav') >= 0, 'a Ukrainian road label is ours and built (' + (S(p).road || '').length + ' characters)');
+    await sleep(1500);
+    p = await probe();
+    ok(JSON.stringify(S(p).fail) === '{}' && S(p).own.nav === true, 'and nothing latched back to BMW (' + JSON.stringify(S(p).fail) + ')');
+    const lay = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts', p.activeName + '.json'), 'utf8'));
+    const navW = lay.widgets.find((w) => w.id === 'nav'), capF = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'fonts', navW.font + '.json'), 'utf8'));
+    const base = navW.y + capF.baseline;
+    const rows = await inkRows([navW.x, navW.y, navW.x + navW.w, navW.y + navW.h]);
+    ok(rows.total > 0, 'the label has ink on the bench (' + rows.total + ' px with alpha in its box)');
+    ok(rows.at(base - 19, base - 15) > 0, 'including the rows above the capitals, where Ґ turns up (' + rows.at(base - 19, base - 15) + ' px)');
+    ok(rows.at(base, base + 5) > 0, 'and below the baseline, where р and у reach (' + rows.at(base, base + 5) + ' px)');
+    await scene('cc-cyrillic');
+    p = await until((q) => (S(q).widgets || []).indexOf('cc_name') >= 0 && S(q).cc && S(q).cc.name, 20000);
+    ok((S(p).widgets || []).indexOf('cc_name') >= 0 && S(p).cc.name === 'Низький тиск у шинах', 'a Ukrainian message is ours and built (apostrophes, guillemets, dash and number sign in it)');
+    await sleep(1500);
+    p = await probe();
+    ok(JSON.stringify(S(p).fail) === '{}' && S(p).own.info === true, 'and nothing latched back to BMW (' + JSON.stringify(S(p).fail) + ')');
+    const ccW = lay.widgets.find((w) => w.id === 'cc_name');
+    const ccRows = await inkRows([ccW.x, ccW.y, ccW.x + ccW.w, ccW.y + ccW.h]);
+    ok(ccRows.total > 0, 'the message has ink on the bench (' + ccRows.total + ' px)');
+    ok(!/has no glyph for/.test(logText), 'and no font reported a missing glyph');
+    await scene('cc-clear');
+    await scene('road-street');
+    await set('bottomRow', 'allG20');
+    // --- end package F ---
+
     console.log('the way back');
     ok(JSON.stringify(S(p).fail) === '{}', 'nothing fell back while every signal was there and could be drawn (' + JSON.stringify(S(p).fail) + ')');
     // a word our baked font has no glyph for: the element gives itself back to the car rather than draw holes
+    // (package F: Greek, since Ukrainian is baked now - a character outside the set still falls back, never a box)
     await set('bottomRow', 'all6WB');
     await until((q) => (S(q).widgets || []).indexOf('nav') >= 0, 20000);
-    await fake({ road: { text: 'Паркова' } });
+    await fake({ road: { text: 'Οδός Ελιάς' } });
     p = await until((q) => S(q).fail && S(q).fail.nav, 20000);
     ok(S(p).fail && S(p).fail.nav === true, 'a street name the font cannot draw gives the label back to BMW');
     p = await until((q) => (S(q).widgets || []).indexOf('nav') < 0, 20000);
