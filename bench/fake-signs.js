@@ -284,6 +284,52 @@ function install(hu, config, log) {
         last.nav = n;
     }
 
+    // ---- probes (0.7.18 diagnostics, shared/hud.js "probes"): the stored check-control lists and the cluster's default
+    // symbols. Invented numbers, invented text and dummy bytes: the test proves none of the text and none of the bytes
+    // ever reaches the log. symbols: 'ok' (three dummy symbols) | 'fail' (the call rejects) | 'throw' (callMethod
+    // throws at once) | 'hang' (never answers) | 'garbage' (a reply that is not a list) | 'absent' (no provider) ----
+    const KI2 = 'de.bmw.infotainment.KombiInterface_2', CCM = 'de.bmw.infotainment.checkcontrol.CheckControlMaster';
+    const DUMMY = (n) => Buffer.from('BENCHSYMBYTES'.repeat(Math.ceil(n / 13)).slice(0, n), 'latin1');
+    const sym = { mode: 'ok', calls: 0, params: [] };
+    const symProxy = () => ({
+        __fake: true, inst: '1', isAvailable: () => true, subscribeToAvailability: () => {}, shutdown: () => Promise.resolve(),
+        getValue: () => Promise.reject(new Error('no getter')), setValue: () => Promise.reject(new Error('no setter')),
+        subscribe: () => Promise.resolve(),
+        callMethod: (m, params) => {
+            sym.calls++; sym.params.push(Object.assign({ method: m }, params || {}));
+            if (m !== 'requestDefaultSymbols') return Promise.reject(new Error('bench: no method ' + m));
+            if (sym.mode === 'throw') throw new Error('bench: callMethod threw');
+            if (sym.mode === 'fail') return Promise.reject(new Error('bench: REQUEST_FAILED'));
+            if (sym.mode === 'hang') return new Promise(() => {});
+            if (sym.mode === 'garbage') return Promise.resolve('BENCHSYMBYTES not a list');
+            return Promise.resolve({ defaultSymbolList: [
+                { symbolID: 1, symbolFormat: 'PNG', symbolData: DUMMY(1024) },
+                { symbolID: 2, symbolFormat: 'RLE32', symbolData: DUMMY(4096) },
+                { symbolID: 33, symbolFormat: 'JPEG', symbolData: DUMMY(0) },
+            ] });
+        },
+    });
+    const setSymbols = (mode) => {
+        sym.mode = String(mode);
+        if (sym.mode === 'absent') delete hu.fakes[KI2]; else hu.fakes[KI2] = symProxy;
+    };
+    setSymbols('ok');
+    /** ccListRiskClass: [{ id, name, color (enum name), risk (enum name), symbol }]; anything not a list goes as is. */
+    function feedCcRisk(list) {
+        last.ccRisk = Array.isArray(list) ? list.length : 'other';
+        hu.feed(KI2, 'ccListRiskClass', !Array.isArray(list) ? list : list.map((m) => ({ cCListRiskClassElement: {
+            cCIdentifer: m.id, cCShortName: String(m.name || ''), cCListSymbolID: m.symbol, cCColor: m.color,
+            cCIndentation: 'INDENT_LEVEL_0', ricResourceID: 7, cCRiskClass: m.risk } })));
+    }
+    /** CheckControlMaster.basicList: [{ id, reason, state }]. */
+    function feedCcBasic(list) {
+        last.ccBasic = Array.isArray(list) ? list.length : 'other';
+        hu.feed(CCM, 'basicList', !Array.isArray(list) ? list : list.map((m) => ({
+            ccmId: m.id, reason: m.reason, requestorDiagAddr: 0x40, timeStamp_s: 1763300000, timeStamp_ms: 5, syncMethod: 0,
+            filterInformation: 'D0', activeState: m.state })));
+    }
+    // ---- end probes ----
+
     function control(v) {
         const o = v || {};
         if (o.scene) {
@@ -302,6 +348,9 @@ function install(hu, config, log) {
         if (o.road) feedRoad(o.road);
         if (o.nav) feedNav(o.nav);
         if (o.clock) feedClock(o.clock);
+        if (o.ccRisk) feedCcRisk(o.ccRisk);         // probes (0.7.18)
+        if (o.ccBasic) feedCcBasic(o.ccBasic);      // probes
+        if (o.symbols) setSymbols(o.symbols);       // probes
     }
 
     return {
@@ -310,6 +359,7 @@ function install(hu, config, log) {
         state: () => ({
             scenes: Object.keys(SCENES),
             wired: { sign: named(cfg.sign), ccm: named(cfg.ccm) && cfg.ccm.kind === 'message', road: named(cfg.road), nav: !!(cfg.nav && cfg.nav.iface) },
+            symbols: { mode: sym.mode, calls: sym.calls, params: sym.params.slice() },     // probes (0.7.18)
             last: { sign: last.sign, cc: last.cc ? { name: (last.cc.name || '').length, desc: (last.cc.desc || '').length, color: last.cc.color } : null, scene: last.scene },
         }),
     };

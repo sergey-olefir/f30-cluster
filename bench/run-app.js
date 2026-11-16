@@ -268,6 +268,8 @@ function benchHook(h) {
     if (h === 'ccHold') ccHeld = true;
     else if (h === 'ccRelease') ccHeld = false;
     else if (h === 'ccThrow') hud._ccLinePaint = () => { throw new Error('bench: an injected failure while drawing the message'); };
+    // probes (0.7.18): the once-per-run symbol call again, so each failure mode of the fake can be tried in one run
+    else if (h === 'symbolsAgain') { hud.probeSymDone = false; hud._probeSymbols(null); }
     log.info('bench: hook ' + h);
 }
 /** What WBBACK's u_cc and the road bar's hole were last SENT as, in panel px ([0, 0, 0, 0]: shut), or null. */
@@ -346,6 +348,7 @@ process.on('message', (m) => {
         // the bottom-row fakes take scene / sign / cc / ccList / road / nav / clock; the rest goes to the fake persod
         if (v.hook) benchHook(v.hook);           // package X: fault injection for the safety tests
         else if (v.scene || v.sign || v.cc || v.ccList || v.ccFrame || v.sla || v.road || v.nav || v.clock) fakeSigns.control(v);
+        else if (v.ccRisk || v.ccBasic || v.symbols) fakeSigns.control(v);     // probes (0.7.18): bench/test-probes.js
         else if (fakePerso) fakePerso.control(v);
     }
     else if (m.t === 'probe') {
