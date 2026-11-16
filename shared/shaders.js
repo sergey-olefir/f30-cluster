@@ -1194,6 +1194,10 @@ void main() {
     float pd = -p.y;                                                  // px below the centre
 
 #if STYLE < 0 || STYLE == 0
+// fix/colour-daynight: the over-speed marking's own red, the real F30 6WB's (181, 26, 17), not u_red * 0.85
+// (217, 36, 36): u_red is the redline's and keeps its colour. A constant, so no uniform; the night look (nightLook
+// at the end) recolours it as it did u_red, and the plain dimmer never dimmed a red (dimTheme: greys only).
+#define OVER_RED vec3(0.710, 0.102, 0.067)
     if (u_style < 0.5) {
         // ---- Comfort
         float r1 = 0.51 * R, r2 = 0.36 * R, fl = 0.26 * R;
@@ -1213,7 +1217,7 @@ void main() {
                 float outR = mix(0.663, 0.795, lead) * R;
                 float a = 0.72 * clamp((outR - d) / (outR - 0.54 * R), 0.0, 1.0)
                         + 0.30 * (1.0 - smoothstep(0.0, 0.014 * R, abs(d - 0.530 * R)));
-                if (d < outR) col = mix(col, u_red * 0.85, min(a, 1.0));
+                if (d < outR) col = mix(col, OVER_RED, min(a, 1.0));
             }
         } else {
             // the face: black (the references' lifted dark is their LCD's black level and the camera, not drawn), a faint
@@ -1255,7 +1259,7 @@ void main() {
                 float outR = mix(0.663, 0.795, lead) * R;
                 float a = 0.72 * clamp((outR - d) / (outR - 0.54 * R), 0.0, 1.0)
                         + 0.30 * (1.0 - smoothstep(0.0, 0.014 * R, abs(d - 0.530 * R)));
-                if (d < outR) col = mix(col, u_red * 0.85, min(a, 1.0));
+                if (d < outR) col = mix(col, OVER_RED, min(a, 1.0));
             }
             // the tick track: a groove, darker than the face, between two lit rims
             if (u_hasBase < 0.5) {

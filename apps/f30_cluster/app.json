@@ -69,6 +69,8 @@
     },
     "de.bmw.infotainment.vehicle.Vehicle": {
       "statusMotorStartAuto": "s",
+      "statusDayNightChangeOver": "rs",
+      "_dayNight": "fix/colour-daynight: statusDayNightChangeOver is the car's own day/night verdict (config.dayNight), the night colours' first source; the sun at our position is the fallback. \"rs\" from the catalogue (reference/car/2026-11-15): getter id 19 (NON-ZERO), notifier id 32787, so the value is read once at start and not only at the next change (day/night changes twice a day)",
       "_optional": "statusMotorStartAuto: auto start/stop (config.msa). statusNewCurrentUnitsStatusExt was dropped together with the vehicle.TPMS interface (the owner, 2026-11-15): in this app it only ever fed the tyre pressure / temperature conversions (hud.js carUnits -> _tyreBar / _tyreC), and nothing else reads it - {{u:temp}} and the rest follow the \"units\" setting, not the car"
     },
     "de.bmw.infrastructure.VehicleCondition": {
@@ -730,6 +732,30 @@
         "SIGNAL_UNBEFUELLT": null
       },
       "_from": "audit/features, from the car's own catalogue (/etc/oap/someip/someip-interfaces.json, StatusConditionMSA). Flag s: notifier only, so the first value comes with the first change. The raw value is logged once per new value ('msa raw: ... -> ...'); check it on the car at a start/stop stop, with the MSA button off, and with a cold engine."
+    },
+    "dayNight": {
+      "iface": "de.bmw.infotainment.vehicle.Vehicle",
+      "field": "statusDayNightChangeOver",
+      "path": [
+        "dayNightChangeOver"
+      ],
+      "map": {
+        "0": "keep",
+        "KEINE_AENDERUNG": "keep",
+        "1": "day",
+        "TAG": "day",
+        "2": "night",
+        "NACHT": "night",
+        "3": null,
+        "SIGNAL_UNGUELTIG": null
+      },
+      "codes": {
+        "KEINE_AENDERUNG": 0,
+        "TAG": 1,
+        "NACHT": 2,
+        "SIGNAL_UNGUELTIG": 3
+      },
+      "_from": "fix/colour-daynight, from the car's catalogue (reference/car/2026-11-15/someip/someip-interfaces.json): Vehicle (service 46352, instance 1) field statusDayNightChangeOver, getter 19, notifier 32787, struct StatusDayNightChangeOverWrapper { dayNightChangeOver: enum DayNightChangeOver (default 3), destinationLCDLuminance, dampingLCDLuminance }. DayNightChangeOver: 0 KEINE_AENDERUNG (no change: the last day/night the car gave holds; none yet: the sun), 1 TAG (day), 2 NACHT (night), 3 SIGNAL_UNGUELTIG (invalid: the sun). Any other value counts as invalid. The meaning of 0 is read off its German name only and is UNCONFIRMED on the car. 'codes' turns an enum NAME back into its number for the log (numbers only). hud.js _isNight."
     },
     "drive": null,
     "clock": {

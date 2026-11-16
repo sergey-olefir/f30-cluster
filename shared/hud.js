@@ -201,6 +201,8 @@
  * past the shift point and holds there; only while the car stands. Shift scoring keeps the car's own rpm.
  * Night colours (Cluster Themes "nightDim" on Auto): after sunset (sun.js, config.location) a layout's own theme is
  * built with its whites and greys at 60 %; the minute timer rebuilds at sunset and sunrise.
+ * (fix/colour-daynight: "night" is the CAR's own day/night first, config.dayNight / Vehicle.statusDayNightChangeOver,
+ * applied as soon as it changes; the sunset above only while the car's value is missing or invalid: _isNight.)
  * Night looks (2026-11-14, "nightLook"): while the night colours are on ("nightDim" Auto after sunset, or Always), a
  * 6WB layout (WBDIAL / WBBACK layers) can take one of NIGHT_LOOKS instead of the plain dimmer: one colour transform for
  * the whole cluster, on the GPU for the dials and the backdrop (baked textures included) and here for the texts. A
@@ -498,7 +500,14 @@ function msaOf(cfg, raw) {
     const m = cfg.map && typeof cfg.map === 'object' ? cfg.map[String(raw)] : undefined;
     return typeof m === 'string' && MSA_STATES[m] ? m : null;
 }
-/** config.clock -> the car's offset from UTC in minutes, or null. kind "offset": the value at `path` times `factor` (1:
+/** fix/colour-daynight: config.dayNight { map: { "<raw>": "day" | "night" | "keep" | null } } -> one of those; anything
+ *  unmapped (a value the catalogue does not list, a missing member) is null: invalid, the sun decides. */
+function dayNightOf(cfg, raw) {
+    if (!cfg || raw === undefined || raw === null) return null;
+    const m = cfg.map && typeof cfg.map === 'object' && cfg.map.hasOwnProperty(String(raw)) ? cfg.map[String(raw)] : null;
+    return m === 'day' || m === 'night' || m === 'keep' ? m : null;
+}
+/** config.clock ->the car's offset from UTC in minutes, or null. kind "offset": the value at `path` times `factor` (1:
  *  minutes; 60: hours; 1/60: seconds), plus `dstMinutes` (60) while the value at `dstPath` is truthy (not 0 / false /
  *  "OFF"); `invalid`: raw values that mean none. kind "local": the car's local hour and minute (hourPath, minutePath)
  *  against the unit's UTC clock, rounded to 15 minutes. */
@@ -1098,6 +1107,27 @@ class HudApp {
         };
         this.msaState = null; this.tzCar = null; this.ccShown = null;
         watchRaw(this.config.msa, 'msaState', 'msa', (v, raw) => msaOf(this.config.msa, raw));
+        // ---- fix/colour-daynight: the car's own day/night (config.dayNight, Vehicle.statusDayNightChangeOver), the
+        // night colours' first source; _isNight falls back to the sun while it is missing or invalid. this.dnCar:
+        // 'day' | 'night' | null. Each change of the car's value is logged once, as its number only.
+        this.dnCar = null; this.dnCode = undefined; this.dnSource = null;
+        const dn = this.config.dayNight;
+        if (dn && dn.iface && dn.field) {
+            extra[dn.iface] = Object.assign(extra[dn.iface] || {}, {
+                [dn.field]: (v) => {
+                    const raw = dig(v, dn.path);
+                    const out = dayNightOf(dn, raw), was = this.dnCar;
+                    if (out !== 'keep') this.dnCar = out;          // 'keep' (no change): the last day/night holds
+                    const code = isNum(raw) ? raw : dn.codes && dn.codes.hasOwnProperty(raw) ? dn.codes[raw] : '?';
+                    if (code !== this.dnCode) {
+                        this.dnCode = code;
+                        this.log.info('day/night: the car says ' + code + ' -> ' + (out || 'invalid'));
+                    }
+                    if (this.dnCar !== was && this.started) this._guard('day/night', () => this._dayNightCheck());
+                },
+            });
+        }
+        // ---- end fix/colour-daynight
         // the first time zone from the car (or its loss) can flip 6WB Dials' clock "auto" between BMW's and ours: rebuild then
         // 2026-11-15 (the owner): the car's own clock, so our clock needs no manual time zone. The encoding of the
         // car's offset is a guess until the car says otherwise, so while config.clock.confirm is not true the value
@@ -2103,7 +2133,7 @@ class HudApp {
         if (this.layoutTheme) return this.layoutTheme;
         const t = this.setting('hudTheme');
         if (t !== 'auto') return t;
-        return sun.isNight(Date.now(), this._location().lat, this._location().lon) ? 'night' : this.setting('dayTheme');
+        return this._isNight() ? 'night' : this.setting('dayTheme');      // fix/colour-daynight: the car first, then the sun
     }
 
     /** Night colours now: a theme of the layout's own, and Cluster Themes' "nightDim" on Auto with the sun down, or on
@@ -2113,8 +2143,31 @@ class HudApp {
         const v = this.setting('nightDim');
         if (v === 'always') return true;
         if (v !== 'auto') return false;
-        return sun.isNight(Date.now(), this._location().lat, this._location().lon);
+        return this._isNight();             // fix/colour-daynight: the car first, then the sun
     }
+
+    /* --- fix/colour-daynight: day or night, the car's own verdict first --- */
+
+    /** Night now: the car's statusDayNightChangeOver (config.dayNight; this.dnCar) while it says day or night, else the
+     *  sun at _location(). Logs once which of the two is in use, and again each time that changes. */
+    _isNight() {
+        const src = this.dnCar === 'day' || this.dnCar === 'night' ? 'car' : 'sun';
+        if (src !== this.dnSource) {
+            this.dnSource = src;
+            this.log.info('day/night source: ' + (src === 'car' ? 'the car (statusDayNightChangeOver)' : 'the sun (the car\'s day/night is missing or invalid)'));
+        }
+        return src === 'car' ? this.dnCar === 'night' : sun.isNight(Date.now(), this._location().lat, this._location().lon);
+    }
+
+    /** The car's day/night changed: what the minute timer (start) does at sunset, now rather than within the minute. */
+    _dayNightCheck() {
+        if (!this.activeName) return;
+        if (this._themeName() !== this.themeName) this._rebuild();
+        else if (this._nightDim() !== this.nightOn && !this._nightLive()) this._rebuild();
+        this._status();
+    }
+
+    /* --- end fix/colour-daynight --- */
 
     /* --- 2026-11-14: night looks ("nightLook", NIGHT_LOOKS) --- */
 

@@ -330,6 +330,20 @@ function install(hu, config, log) {
     }
     // ---- end probes ----
 
+    // ---- fix/colour-daynight: the car's own day/night (config.dayNight, Vehicle.statusDayNightChangeOver). v: 'day' |
+    // 'night' | 'keep' | 'invalid' (the raw value config.dayNight.map turns into that), a number (fed as it is, any
+    // value: 7 is one the catalogue does not list) or an enum name ('NACHT'). The struct's two luminance members go
+    // along at their catalogue defaults (255) ----
+    function feedDayNight(v) {
+        const c = cfg.dayNight;
+        if (!named(c)) return;
+        const word = { day: 'day', night: 'night', keep: 'keep', invalid: null };
+        const raw = typeof v === 'string' && word.hasOwnProperty(v) ? rawFor(c.map, word[v], 3) : v;
+        last.dayNight = raw;
+        hu.feed(c.iface, c.field, merge({ destinationLCDLuminance: 255, dampingLCDLuminance: 255 }, nest(c.path, raw)));
+    }
+    // ---- end fix/colour-daynight ----
+
     function control(v) {
         const o = v || {};
         if (o.scene) {
@@ -351,6 +365,7 @@ function install(hu, config, log) {
         if (o.ccRisk) feedCcRisk(o.ccRisk);         // probes (0.7.18)
         if (o.ccBasic) feedCcBasic(o.ccBasic);      // probes
         if (o.symbols) setSymbols(o.symbols);       // probes
+        if (o.dayNight !== undefined) feedDayNight(o.dayNight);     // fix/colour-daynight
     }
 
     return {
@@ -360,6 +375,7 @@ function install(hu, config, log) {
             scenes: Object.keys(SCENES),
             wired: { sign: named(cfg.sign), ccm: named(cfg.ccm) && cfg.ccm.kind === 'message', road: named(cfg.road), nav: !!(cfg.nav && cfg.nav.iface) },
             symbols: { mode: sym.mode, calls: sym.calls, params: sym.params.slice() },     // probes (0.7.18)
+            dayNight: last.dayNight === undefined ? null : last.dayNight,                  // fix/colour-daynight
             last: { sign: last.sign, cc: last.cc ? { name: (last.cc.name || '').length, desc: (last.cc.desc || '').length, color: last.cc.color } : null, scene: last.scene },
         }),
     };
