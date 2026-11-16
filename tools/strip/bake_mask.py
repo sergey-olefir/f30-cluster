@@ -284,6 +284,10 @@ SAFETY = ('bottom.belt_rear', 'bottom.belt_driver', 'bottom.airbag')
 # than the catalogue's on every side but one - the guard takes the union of both
 SAFETY_ZL = {'bottom.belt_rear': [500.5, 677.75, 580.25, 715.25], 'bottom.belt_driver': [590.0, 664.5, 628.75, 715.25],
              'bottom.airbag': [632.75, 664.25, 684.25, 715.5]}
+# ... and ZL's photo footprint of each lamp, already grown 3 px (its ink above 2 % with blur and halo, dilated: the
+# zone tools/strip/ZL/diff.py counts SAFETY in; photos 62-64, 66, 67)
+SAFETY_ZONE = {'bottom.belt_rear': [497.0, 674.25, 583.75, 718.75], 'bottom.belt_driver': [586.5, 661.0, 632.25, 718.75],
+               'bottom.airbag': [629.25, 660.75, 687.75, 719.0]}
 
 
 def safety_guard(cov):
@@ -296,8 +300,8 @@ def safety_guard(cov):
     px, py = centres()
     near = np.zeros((H, W), bool)
     for i in SAFETY:
-        for b in (cat[i]['bbox'], SAFETY_ZL[i]):
-            f = [b[0] - 3, b[1] - 3, b[2] + 3, b[3] + 3]
+        for f in ([v - 3 if k < 2 else v + 3 for k, v in enumerate(cat[i]['bbox'])],
+                  [v - 3 if k < 2 else v + 3 for k, v in enumerate(SAFETY_ZL[i])], SAFETY_ZONE[i]):
             # the pixel [x, x+1) x [y, y+1) touches the footprint
             near |= (px - 0.5 < f[2]) & (px + 0.5 > f[0]) & (py - 0.5 < f[3]) & (py + 0.5 > f[1])
     note = {}

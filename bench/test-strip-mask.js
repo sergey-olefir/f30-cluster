@@ -151,6 +151,11 @@ function staticChecks() {
     const bq = (s1 * syz - sy1 * sz) / (s1 * syy - sy1 * sy1), aq = (sz - bq * sy1) / s1, cy = bq / 2, rq = Math.sqrt(aq + cy * cy);
     ok(rows.length > 40 && Math.abs(mx - sw[0]) < 0.05 && Math.abs(cy - sw[1]) < 0.05 && Math.abs(rq - 41.8) < 0.05,
         'the "bmw" lane\'s sign hole sits on the speedo\'s window: centre (' + mx.toFixed(3) + ', ' + cy.toFixed(3) + ') against (' + sw[0] + ', ' + sw[1] + '), edge r ' + rq.toFixed(3) + ' (41.8), ' + rows.length + ' rows');
+    // ... and the speedo's own black ring round that window (WBDIAL: smoothstep(w + a, w + b, d - r)) ends above the rear
+    // belts' safety footprint (package ZL's photo footprint, ink + blur + 3 px, from y 674.25): no black of the DIAL there
+    const rm = /smoothstep\(u_cut\.w \+ ([\d.]+), u_cut\.w \+ ([\d.]+), cutSd\)/.exec(shaders.wbdialFor(0));
+    const ringEnd = rm ? sw[1] + sw[2] + spd.cut.soft + Number(rm[2]) : Infinity;
+    ok(ringEnd < 674.25, 'the speedo\'s black ring and closed disc end at y ' + ringEnd.toFixed(2) + ', above the rear belts\' footprint (674.25)');
 
     // the synthetic bake (bake_mask.py --today) against the rects it replaced, re-computed here as shared/shaders.js drew
     // them at 3c8ef46 (bake_mask.py TODAY): only while the shipped mask is that one; a bake from shapes skips it

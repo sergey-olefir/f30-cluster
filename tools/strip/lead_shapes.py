@@ -22,9 +22,12 @@ What the lead changed, and why (docs: the lead's report):
      used only while config.ccMarker confirms the marker (shared/hud.js _markShown).
   5. ZC's pre-open band [757, 653, 1178, 700] in the bmw lane, so BMW's message is never clipped in the frames before
      the msg lane opens: between the hooks and under the rails, it exposes nothing the road-label hole does not.
-  6. The belt hole is the whole group [500.5, 664.25, 684.25, 715.5] + 3 px, rounded OUT to whole px so no pixel that
-     touches the 3 px footprint carries any black: x 497-688, y 661-720, with ZL's notch over the rear belts (x < 587
-     from y 674). ZL's polygon ended at x 683.25, 4 px short of the airbag's 684.25 + 3.
+  6. The belt hole is the whole group [500.5, 664.25, 684.25, 715.5] + 3 px - and + 3 px round ZL's own photo footprint
+     of the lamps (their ink above 2 % with its blur and halo: rear x 497-583.75 from y 674.25, driver x 586.5-632.25
+     from y 661.0, airbag x 629.25-687.75 from y 660.75; tools/strip/ZL/diff.py's SAFETY zone) - rounded OUT to whole
+     px so no pixel that touches either footprint carries any black: x 497-688, y 660-720, with ZL's notch over the
+     rear belts (x < 586 from y 674). ZL's polygon ended at x 683.25, 4 px short of the airbag's 684.25 + 3, and the
+     first bake (y 661, x 587) left 6.4 px of black on ZL's photo footprint.
   7. Every other zone shape as proposed; where two met: ZC's panel stays left of x 1222 below y 640 (ZR's rail stub,
      checked by bake_mask.py), and nothing over x 587-683 comes below y 661.25 (ZL).
   8. The standby lane is the bmw lane (see main(): the dial's closed disc shuts the sign seat in standby, and the bmw
@@ -39,7 +42,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 Z = {z: json.load(open(os.path.join(ROOT, 'design', 'strip', z, 'mask_proposal.json')))['shapes'] for z in ('ZL', 'ZC', 'ZR')}
 COVER_TOP = 596
 SIGN = [538.45, 621.2, 41.8]
-BELTS = [[497, 674], [587, 674], [587, 661], [688, 661], [688, 720], [497, 720]]
+BELTS = [[497, 674], [586, 674], [586, 660], [688, 660], [688, 720], [497, 720]]
 PRE_OPEN = [757, 653, 1178, 700]
 
 
