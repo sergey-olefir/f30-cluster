@@ -16,7 +16,10 @@ Proportions are measured off the photos, in dial radii (R): the two dial centres
 6.6 R wide and the dials stand at mid height; a small gauge sits 1.355 R outside each dial, 0.39 R below centre,
 0.31 R in radius. The speed scale is km/h only: 0..260, 1 degree per km/h from -130 degrees. The rev scale: OFF at
 -130 degrees, 0 at -109.5, 32.1 degrees per 1000 rpm up to 7.5, red from the "redline" setting.
-Fonts: Arimo (tools/bake_fonts.py F30_FONTS); a text widget's box is its font's cell height."""
+Fonts: Roboto wdth 87.5 (tools/bake_fonts.py F30_FONTS); a text widget's box is its font's cell height, placed so its
+baseline is where the text was placed (package F, 2026-11-16: PLACED_ON below; a font re-bake moves boxes, never ink).
+bench/test-fonts.js checks that this file reproduces the committed layouts exactly: regenerate after any change here
+or in the fonts, and commit the JSON with it."""
 import json, math, sys, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))

@@ -10,7 +10,7 @@
  *   2. every text of those layouts sits on the baseline recorded in design/strip/F/text-ink.json, so a font re-bake
  *      that changes a cell (as the Cyrillic one did) cannot move ink without this test saying so, and its box is
  *      exactly its font's cell high (a shorter box clips a descender or a breve, a taller one wastes pixel memory);
- *   3. the fonts that draw the car's own words (wb_cap, wb_capb) hold the whole Ukrainian alphabet, the apostrophe
+ *   3. the fonts that draw the car's own words (wb_cap, wb_capb; wb_road, wb_msg) hold the whole Ukrainian alphabet, the apostrophe
  *      forms, the guillemets, the dashes and the number sign, every glyph one cell high, and U+02BC drawn as U+2019.
  * Node 8 or newer, plain fs and child_process. Never shipped.
  */
@@ -63,7 +63,8 @@ NAMES.forEach((n) => {
 console.log('the fonts that draw the car\'s own words carry Ukrainian');
 const UA = 'АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯабвгґдеєжзиіїйклмнопрстуфхцчшщьюя';
 const PUNCT = '\'’ʼ«»–—№,.:;!?()"%/-';
-['wb_cap', 'wb_capb'].forEach((n) => {
+// wb_road and wb_msg: the road label's and the message's own faces at BMW's sizes (package T), for package X to use
+['wb_cap', 'wb_capb', 'wb_road', 'wb_msg'].forEach((n) => {
     const f = font(n), g = f.glyphs;
     const lack = (UA + PUNCT).split('').filter((c) => !g[c]);
     ok(!lack.length, n + ': all 66 Ukrainian letters and the punctuation are baked' + (lack.length ? ' (missing ' + lack.length + ')' : ''));
