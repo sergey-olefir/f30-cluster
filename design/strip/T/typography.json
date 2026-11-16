@@ -1,0 +1,561 @@
+{
+ "about": "Package T (strip typography). BMW = the stock G20 strip measured on photos 60-68 (2026-11-16 set; 68 is the same shot as 39), dilation-corrected (tools/strip/T/analyse.py; calibration on our own text in photo 60, tools/strip/T/calib60.py). Ours = the baked atlases and wb_dials.json as of the base. Panel px, continuous coordinates (pixel i covers [i, i+1)). Baseline = the bottom edge of flat-bottomed ink. Heights of Roboto bakes are hinted to whole px (Pillow rounds the size to an integer too).",
+ "status": "provisional",
+ "fields": {},
+ "bmw": {
+  "row": {
+   "figure_h_round": 31.11,
+   "figure_h_flat": 30.84,
+   "figure_h_round_range": 31.03,
+   "stem": 4.31,
+   "digit_advance": 24.12,
+   "digit_advance_n": 1,
+   "digit_advance_from": "two identical digits side by side (photo 63); legacy measured.json 24.2 +- 0.2 over six photos",
+   "colon_advance": 13.94,
+   "colon_advance_from": "the same digit before and after the colon (photo 64): pitch minus one digit advance",
+   "baseline": 698.13,
+   "baseline_spread": 0.84,
+   "tabular": true
+  },
+  "range": {
+   "ink_l": 185.06,
+   "ink_r": 252.63,
+   "ink_spread": 1.78,
+   "anchor": "unsettled: every photo shows a 3-digit range and the digits are tabular, so left, right and centre alignment draw the same; the unit does not move"
+  },
+  "range_u": {
+   "ink_l": 261.49,
+   "ink_r": 300.85
+  },
+  "clock": {
+   "ink_l": 345.65,
+   "ink_r": 449.97,
+   "colon_cx": 396.56,
+   "colon_spread": 1.06,
+   "anchor": "unsettled: every photo shows a 2-digit hour starting with 1 (tabular, so the layout is fixed); the colon centre is the stable reference"
+  },
+  "temp": {
+   "ink_l": 1540.18,
+   "ink_r": 1621.29,
+   "ink_r_spread": 2.09,
+   "anchor": "unsettled: every photo shows \"+d.d\"; a negative or two-digit value is not photographed"
+  },
+  "temp_u": {
+   "ink_l": 1631.03,
+   "ink_r": 1660.32
+  },
+  "units": {
+   "k_ascender_h": 22.62,
+   "m_x_h": 17.12,
+   "C_cap_h": 24.25,
+   "ring_h": 10.5,
+   "stem": 2.38,
+   "colour": "grey: about 0.35 of the values' white in linear light (photo 68 plateau 0.30-0.36 against 0.95)",
+   "from": "photo 68 only (the one photo where the grey units are not saturated); -2 x 0.25 unsaturated dilation"
+  },
+  "road": {
+   "cap_h": 29.76,
+   "x_h": 22.0,
+   "stem": 2.94,
+   "stem_note": "weak (k fit 0.5, rms 0.46)",
+   "baseline": 700.17,
+   "baseline_spread": 0.19,
+   "ink_cx": 961.38,
+   "ink_cx_spread": 0.81,
+   "anchor": "centre (two strings of very different width centre on the same x)"
+  },
+  "msg": {
+   "cap_h": [
+    24.58,
+    25.03
+   ],
+   "x_h": [
+    18.33,
+    19.22
+   ],
+   "stem": [
+    3.32,
+    3.84
+   ],
+   "baseline_1line": 669.23,
+   "baselines_2line": [
+    645.23,
+    688.98
+   ],
+   "ink_cx": 969.31,
+   "anchor": "centre",
+   "from": "one photo per line kind (62 two lines, 66 one line): a range for k 1..0.75"
+  },
+  "sign": {
+   "figure_h": 26.75,
+   "stem": 3.94,
+   "ink_cx": 537.69,
+   "mid_y": 622.11,
+   "note": "dark digits on the light face, not dilation-corrected (their raw height does not follow b)"
+  },
+  "mode": {
+   "mode_l1": {
+    "cap_h": [
+     20.33,
+     20.94
+    ],
+    "baseline": 679.67,
+    "ink_cx": 1297.5
+   },
+   "mode_l2": {
+    "cap_h": [
+     20.21,
+     20.81
+    ],
+    "baseline": 707.79,
+    "ink_cx": 1255.94
+   },
+   "note": "standby only (photo 65, provisional registration); left-aligned at x ~1224, two lines"
+  }
+ },
+ "ours_now": {
+  "wb_row": {
+   "size": 43,
+   "cellHeight": 35,
+   "baseline": 33,
+   "figure_h": 30.98,
+   "stem_1": 4.97,
+   "digit_advance": 23,
+   "source": "apps/f30_cluster/hud/fonts/wb_row.json"
+  },
+  "wb_val": {
+   "size": 36,
+   "cellHeight": 33,
+   "baseline": 29,
+   "figure_h": 25.98,
+   "stem_1": 4.8,
+   "digit_advance": 19,
+   "C_h": 25.98,
+   "k_h": 27.0,
+   "m_h": 19.0,
+   "source": "apps/f30_cluster/hud/fonts/wb_val.json"
+  },
+  "wb_cap": {
+   "size": 21,
+   "cellHeight": 24,
+   "baseline": 18,
+   "figure_h": 14.97,
+   "stem_1": 2.8,
+   "digit_advance": 11,
+   "cap_h_latin": 15.0,
+   "x_h_latin": 11.0,
+   "C_h": 14.98,
+   "k_h": 16.0,
+   "m_h": 11.0,
+   "stem_H": 2.91,
+   "source": "apps/f30_cluster/hud/fonts/wb_cap.json"
+  },
+  "wb_capb": {
+   "size": 21,
+   "cellHeight": 22,
+   "baseline": 17,
+   "figure_h": 14.97,
+   "stem_1": 2.93,
+   "digit_advance": 11,
+   "cap_h_latin": 15.0,
+   "C_h": 14.98,
+   "stem_H": 3.05,
+   "source": "apps/f30_cluster/hud/fonts/wb_capb.json"
+  }
+ },
+ "recommended_bakes": {
+  "wb_row": {
+   "size": 43.0,
+   "cellHeight": 35,
+   "baseline": 33,
+   "figure_h": 30.98,
+   "stem_1": 4.47,
+   "digit_advance": 24,
+   "file": "Roboto-wdth-wght.subset.ttf",
+   "wght": 450.0,
+   "wdth": 100.0,
+   "chars": "DIGITS + \":+-.\"",
+   "why": "figure height stays 31 (BMW 31.1 round / 30.8 flat); the tabular advance becomes 24 (BMW 24.12; now 23); stem 4.47 (BMW 4.31; now 5.0)"
+  },
+  "wb_rowu (new; units of the row)": {
+   "size": 34.0,
+   "cellHeight": 30,
+   "baseline": 28,
+   "C_h": 23.97,
+   "k_h": 26.0,
+   "m_h": 18.0,
+   "file": "Roboto-wdth-wght.subset.ttf",
+   "wght": 300.0,
+   "wdth": 87.5,
+   "chars": "\"kmC°\" + LOWER for other units",
+   "why": "BMW's units are smaller and lighter than wb_val (36 px, C 26, stem 5)"
+  },
+  "wb_road (new; road label, with Cyrillic)": {
+   "size": 42.0,
+   "cellHeight": 44,
+   "baseline": 33,
+   "cap_h": 30.0,
+   "cap_h_latin": 30.0,
+   "x_h": 21.97,
+   "x_h_latin": 22.0,
+   "stem_П": 2.82,
+   "stem_H": 2.82,
+   "file": "Roboto-wdth-wght.subset.ttf",
+   "wght": 325.0,
+   "wdth": 90.625,
+   "why": "BMW's road label: cap 29.76, x 22.00; wb_cap (21 px, cap 15) is half its size and also draws the dial captions, so it cannot simply grow"
+  },
+  "wb_msg (new; our message line, with Cyrillic)": {
+   "size": 35.0,
+   "cellHeight": 36,
+   "baseline": 27,
+   "cap_h": 25.0,
+   "cap_h_latin": 25.0,
+   "x_h": 17.98,
+   "x_h_latin": 18.0,
+   "stem_П": 3.71,
+   "stem_H": 3.72,
+   "file": "Roboto-wdth-wght.subset.ttf",
+   "wght": 450.0,
+   "wdth": 87.5,
+   "why": "BMW's message: cap 24.6-25.0, x 18.3-19.2, heavier than the road label"
+  },
+  "wb_lim (new; the limit digits on our sign, optional)": {
+   "size": 38.0,
+   "cellHeight": 31,
+   "baseline": 29,
+   "figure_h": 26.97,
+   "stem_1": 3.89,
+   "digit_advance": 20,
+   "file": "Roboto-wdth-wght.subset.ttf",
+   "wght": 450.0,
+   "wdth": 87.5,
+   "why": "BMW's sign digits: 26.75 tall, stem 3.94; wb_val draws them 26 tall, stem 4.8"
+  }
+ },
+ "placement": {
+  "own_range": {
+   "widget": "own_range",
+   "now": {
+    "x": 139,
+    "y": 664,
+    "w": 110,
+    "h": 35,
+    "font": "wb_row",
+    "align": "right",
+    "ink_edge_at_current_x": 247.12,
+    "baseline_at_current_y": 697,
+    "dx_needed": 5.51,
+    "dy_needed": 1.13,
+    "box_x": 144.51,
+    "box_y": 665.13,
+    "box_x_int": 145,
+    "box_y_int": 665,
+    "residual_x": -0.49,
+    "residual_y": 0.13,
+    "cellHeight": 35
+   },
+   "rec": {
+    "ink_edge_at_current_x": 247.38,
+    "baseline_at_current_y": 697,
+    "dx_needed": 5.25,
+    "dy_needed": 1.13,
+    "box_x": 144.25,
+    "box_y": 665.13,
+    "box_x_int": 144,
+    "box_y_int": 665,
+    "residual_x": 0.25,
+    "residual_y": 0.13,
+    "cellHeight": 35
+   },
+   "bmw": {
+    "edge": "r",
+    "at": 252.63,
+    "baseline": 698.13
+   }
+  },
+  "own_clock": {
+   "widget": "own_clock",
+   "now": {
+    "x": 335,
+    "y": 664,
+    "w": 124,
+    "h": 35,
+    "font": "wb_row",
+    "align": "center",
+    "ink_edge_at_current_x": 396.79,
+    "baseline_at_current_y": 697,
+    "dx_needed": -0.23,
+    "dy_needed": 1.13,
+    "box_x": 334.77,
+    "box_y": 665.13,
+    "box_x_int": 335,
+    "box_y_int": 665,
+    "residual_x": -0.23,
+    "residual_y": 0.13,
+    "cellHeight": 35
+   },
+   "rec": {
+    "ink_edge_at_current_x": 396.61,
+    "baseline_at_current_y": 697,
+    "dx_needed": -0.05,
+    "dy_needed": 1.13,
+    "box_x": 334.95,
+    "box_y": 665.13,
+    "box_x_int": 335,
+    "box_y_int": 665,
+    "residual_x": -0.05,
+    "residual_y": 0.13,
+    "cellHeight": 35
+   },
+   "bmw": {
+    "edge": "colon",
+    "at": 396.56,
+    "baseline": 698.13
+   }
+  },
+  "own_temp": {
+   "widget": "own_temp",
+   "now": {
+    "x": 1505,
+    "y": 664,
+    "w": 110,
+    "h": 35,
+    "font": "wb_row",
+    "align": "right",
+    "ink_edge_at_current_x": 1613.09,
+    "baseline_at_current_y": 697,
+    "dx_needed": 8.2,
+    "dy_needed": 1.13,
+    "box_x": 1513.2,
+    "box_y": 665.13,
+    "box_x_int": 1513,
+    "box_y_int": 665,
+    "residual_x": 0.2,
+    "residual_y": 0.13,
+    "cellHeight": 35
+   },
+   "rec": {
+    "ink_edge_at_current_x": 1613.54,
+    "baseline_at_current_y": 697,
+    "dx_needed": 7.75,
+    "dy_needed": 1.13,
+    "box_x": 1512.75,
+    "box_y": 665.13,
+    "box_x_int": 1513,
+    "box_y_int": 665,
+    "residual_x": -0.25,
+    "residual_y": 0.13,
+    "cellHeight": 35
+   },
+   "bmw": {
+    "edge": "r",
+    "at": 1621.29,
+    "baseline": 698.13
+   }
+  },
+  "own_range_u": {
+   "widget": "own_range_u",
+   "now": {
+    "x": 253,
+    "y": 668,
+    "w": 54,
+    "h": 32,
+    "font": "wb_val",
+    "align": "left",
+    "ink_edge_at_current_x": 254.95,
+    "baseline_at_current_y": 697,
+    "dx_needed": 6.54,
+    "dy_needed": 1.13,
+    "box_x": 259.54,
+    "box_y": 669.13,
+    "box_x_int": 260,
+    "box_y_int": 669,
+    "residual_x": -0.46,
+    "residual_y": 0.13,
+    "cellHeight": 33
+   },
+   "rec": {
+    "ink_edge_at_current_x": 255.53,
+    "baseline_at_current_y": 696,
+    "dx_needed": 5.96,
+    "dy_needed": 2.13,
+    "box_x": 258.96,
+    "box_y": 670.13,
+    "box_x_int": 259,
+    "box_y_int": 670,
+    "residual_x": -0.04,
+    "residual_y": 0.13,
+    "cellHeight": 30
+   },
+   "bmw": {
+    "edge": "l",
+    "at": 261.49,
+    "baseline": 698.13
+   }
+  },
+  "own_temp_u": {
+   "widget": "own_temp_u",
+   "now": {
+    "x": 1619,
+    "y": 668,
+    "w": 46,
+    "h": 32,
+    "font": "wb_val",
+    "align": "left",
+    "ink_edge_at_current_x": 1621.29,
+    "baseline_at_current_y": 697,
+    "dx_needed": 9.74,
+    "dy_needed": 1.13,
+    "box_x": 1628.74,
+    "box_y": 669.13,
+    "box_x_int": 1629,
+    "box_y_int": 669,
+    "residual_x": -0.26,
+    "residual_y": 0.13,
+    "cellHeight": 33
+   },
+   "rec": {
+    "ink_edge_at_current_x": 1621.44,
+    "baseline_at_current_y": 696,
+    "dx_needed": 9.59,
+    "dy_needed": 2.13,
+    "box_x": 1628.59,
+    "box_y": 670.13,
+    "box_x_int": 1629,
+    "box_y_int": 670,
+    "residual_x": -0.41,
+    "residual_y": 0.13,
+    "cellHeight": 30
+   },
+   "bmw": {
+    "edge": "l",
+    "at": 1631.03,
+    "baseline": 698.13
+   }
+  },
+  "nav": {
+   "widget": "nav",
+   "now": {
+    "cannot_draw": "the font has no glyph for some characters of the photo strings (no Cyrillic)",
+    "baseline_at_current_y": 700,
+    "dy_needed": 0.17,
+    "box_y": 682.17,
+    "box_y_int": 682,
+    "cellHeight": 24
+   },
+   "rec": {
+    "ink_edge_at_current_x": 959.84,
+    "baseline_at_current_y": 715,
+    "dx_needed": 1.54,
+    "dy_needed": -14.83,
+    "box_x": 691.54,
+    "box_y": 667.17,
+    "box_x_int": 692,
+    "box_y_int": 667,
+    "residual_x": -0.46,
+    "residual_y": 0.17,
+    "cellHeight": 44
+   },
+   "bmw": {
+    "edge": "c",
+    "at": 961.38,
+    "baseline": 700.17
+   }
+  },
+  "note": "box_x / box_y: where the widget box goes so the ink edge named in \"bmw\" lands on BMW's (median over the photo strings; tabular digits keep it string-independent). The layout takes integers (gen_6wb.text() rounds), so residual_* is what stays. dx/dy_needed: the move from the current box. For a right-aligned widget the box right edge is box_x + w."
+ },
+ "for_F": {
+  "about": "tools/bake_fonts.py F30_FONTS entries, (name, file, size, chars, 0, [wght, wdth]). Sizes are integers (Pillow rounds a float size). Widget y must come from the baked font (gen_6wb base_at(font, baseline)), because Cyrillic capitals with marks change cellHeight and baseline. Baselines below are BMW's.",
+  "wb_row": {
+   "bake": [
+    "Roboto-wdth-wght.subset.ttf",
+    43,
+    [
+     450.0,
+     100.0
+    ]
+   ],
+   "change": "was [Roboto, 43, [500, 87.5]]: same size and height, wider and lighter",
+   "chars": "DIGITS + \":+-.\"",
+   "colon_advance": 13.94,
+   "colon_note": "BMW's colon advance; ours bakes 11. Optional: an advance override for \":\"",
+   "baseline": 698.13,
+   "draws": "own_range, own_clock, own_temp"
+  },
+  "wb_rowu": {
+   "bake": [
+    "Roboto-wdth-wght.subset.ttf",
+    34,
+    [
+     300.0,
+     87.5
+    ]
+   ],
+   "new": true,
+   "chars": "kmCF°l/h",
+   "baseline": 698.13,
+   "draws": "own_range_u, own_temp_u (today wb_val, 36 px, wght 650: too big and too bold)",
+   "note": "BMW's \"k\" is shorter than its \"C\" (22.6 against 24.25); Roboto's is taller, so ours stands ~3 px over BMW's k"
+  },
+  "wb_road": {
+   "bake": [
+    "Roboto-wdth-wght.subset.ttf",
+    42,
+    [
+     325.0,
+     90.625
+    ]
+   ],
+   "new": true,
+   "chars": "LOWER + UPPER + DIGITS + \" .,-/()\" + the apostrophes + Ukrainian (package F)",
+   "baseline": 700.17,
+   "centre_x": 961.38,
+   "draws": "nav (today wb_cap, 21 px: half BMW's size)",
+   "alternative": [
+    "Roboto-wdth-wght.subset.ttf",
+    42,
+    [
+     375,
+     87.5
+    ]
+   ]
+  },
+  "wb_msg": {
+   "bake": [
+    "Roboto-wdth-wght.subset.ttf",
+    35,
+    [
+     450.0,
+     87.5
+    ]
+   ],
+   "new": true,
+   "chars": "as wb_road",
+   "baselines": {
+    "one_line": 669.23,
+    "two_lines": [
+     645.23,
+     688.98
+    ]
+   },
+   "centre_x": 969.31,
+   "draws": "our message (package X; today cc_name / cc_desc in wb_cap)"
+  },
+  "wb_lim": {
+   "bake": [
+    "Roboto-wdth-wght.subset.ttf",
+    38,
+    [
+     450.0,
+     87.5
+    ]
+   ],
+   "new": true,
+   "optional": true,
+   "chars": "DIGITS",
+   "draws": "limit (today wb_val)"
+  },
+  "wb_cap_wb_capb": "unchanged: they draw the dial captions and READY; no strip item should use them once the above exist"
+ }
+}
