@@ -1,0 +1,327 @@
+{
+  "port": 8165,
+  "layerCap": 8,
+  "pixelCapMiB": 16,
+  "wbComfortPixelBytes": 12041232,
+  "matte_magenta": {
+    "colour": [
+      255,
+      0,
+      255
+    ],
+    "status": "Cluster on: Diagnostic matte: magenta theme, night colours plain, 4 layers, 0.2 MiB of 16 MiB pixels, demo data",
+    "layers": [
+      {
+        "kind": "effect",
+        "conn": 1,
+        "class": "content",
+        "z": -10,
+        "rect": [
+          0,
+          0,
+          1920,
+          720
+        ],
+        "state": "shown"
+      },
+      {
+        "kind": "effect",
+        "conn": 1,
+        "class": "content",
+        "z": 0,
+        "rect": [
+          0,
+          540,
+          1920,
+          12
+        ],
+        "state": "shown"
+      },
+      {
+        "kind": "effect",
+        "conn": 1,
+        "class": "content",
+        "z": 0,
+        "rect": [
+          0,
+          708,
+          1920,
+          12
+        ],
+        "state": "shown"
+      },
+      {
+        "kind": "image",
+        "conn": 1,
+        "class": "content",
+        "z": 5,
+        "rect": [
+          0,
+          552,
+          1900,
+          17
+        ],
+        "state": "shown"
+      }
+    ],
+    "shaderBytes": {
+      "FILL": 985,
+      "GRID": 869
+    },
+    "pixelBytes": 258400,
+    "leftoverAssetBytes": 8,
+    "opaque": true,
+    "wrongPixels": 0,
+    "matteOffRuler": 1331316,
+    "labelInkPixels": 6772,
+    "labelInkBox": [
+      2,
+      556,
+      1862,
+      567
+    ],
+    "labelOffsets": [
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "composeMs": 120
+  },
+  "matte_green": {
+    "colour": [
+      0,
+      255,
+      0
+    ],
+    "status": "Cluster on: Diagnostic matte: green theme, night colours plain, 4 layers, 0.2 MiB of 16 MiB pixels, demo data",
+    "layers": [
+      {
+        "kind": "effect",
+        "conn": 1,
+        "class": "content",
+        "z": -10,
+        "rect": [
+          0,
+          0,
+          1920,
+          720
+        ],
+        "state": "shown"
+      },
+      {
+        "kind": "effect",
+        "conn": 1,
+        "class": "content",
+        "z": 0,
+        "rect": [
+          0,
+          540,
+          1920,
+          12
+        ],
+        "state": "shown"
+      },
+      {
+        "kind": "effect",
+        "conn": 1,
+        "class": "content",
+        "z": 0,
+        "rect": [
+          0,
+          708,
+          1920,
+          12
+        ],
+        "state": "shown"
+      },
+      {
+        "kind": "image",
+        "conn": 1,
+        "class": "content",
+        "z": 5,
+        "rect": [
+          0,
+          552,
+          1900,
+          17
+        ],
+        "state": "shown"
+      }
+    ],
+    "shaderBytes": {
+      "FILL": 985,
+      "GRID": 869
+    },
+    "pixelBytes": 258400,
+    "leftoverAssetBytes": 8,
+    "opaque": true,
+    "wrongPixels": 0,
+    "matteOffRuler": 1331316,
+    "labelInkPixels": 6772,
+    "labelInkBox": [
+      2,
+      556,
+      1862,
+      567
+    ],
+    "labelOffsets": [
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "composeMs": 160
+  },
+  "matte_black": {
+    "colour": [
+      0,
+      0,
+      0
+    ],
+    "status": "Cluster on: Diagnostic matte: black theme, night colours plain, 4 layers, 0.2 MiB of 16 MiB pixels, demo data",
+    "layers": [
+      {
+        "kind": "effect",
+        "conn": 1,
+        "class": "content",
+        "z": -10,
+        "rect": [
+          0,
+          0,
+          1920,
+          720
+        ],
+        "state": "shown"
+      },
+      {
+        "kind": "effect",
+        "conn": 1,
+        "class": "content",
+        "z": 0,
+        "rect": [
+          0,
+          540,
+          1920,
+          12
+        ],
+        "state": "shown"
+      },
+      {
+        "kind": "effect",
+        "conn": 1,
+        "class": "content",
+        "z": 0,
+        "rect": [
+          0,
+          708,
+          1920,
+          12
+        ],
+        "state": "shown"
+      },
+      {
+        "kind": "image",
+        "conn": 1,
+        "class": "content",
+        "z": 5,
+        "rect": [
+          0,
+          552,
+          1900,
+          17
+        ],
+        "state": "shown"
+      }
+    ],
+    "shaderBytes": {
+      "FILL": 985,
+      "GRID": 869
+    },
+    "pixelBytes": 258400,
+    "leftoverAssetBytes": 8,
+    "opaque": true,
+    "wrongPixels": 0,
+    "matteOffRuler": 1331316,
+    "labelInkPixels": 6772,
+    "labelInkBox": [
+      2,
+      556,
+      1862,
+      567
+    ],
+    "labelOffsets": [
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "composeMs": 145
+  },
+  "peakPixelBytes": 12041232,
+  "nightColour": [
+    255,
+    0,
+    255,
+    255
+  ],
+  "visibilityWarnings": [
+    "app: [f30_cluster] WARN layout \"matte_magenta\": matte: top-right corner 225 px under the hood",
+    "app: [f30_cluster] WARN layout \"matte_magenta\": matte: overlaps BMW's seat-belt light x587-626 y665-720",
+    "app: [f30_cluster] WARN layout \"matte_magenta\": matte: overlaps BMW's parking-brake lamp x1838-1900 y217-260",
+    "app: [f30_cluster] WARN layout \"matte_magenta\": ruler_bot: overlaps BMW's seat-belt light x587-626 y665-720",
+    "app: [f30_cluster] WARN layout \"matte_green\": matte: top-right corner 225 px under the hood",
+    "app: [f30_cluster] WARN layout \"matte_green\": matte: overlaps BMW's seat-belt light x587-626 y665-720",
+    "app: [f30_cluster] WARN layout \"matte_green\": matte: overlaps BMW's parking-brake lamp x1838-1900 y217-260",
+    "app: [f30_cluster] WARN layout \"matte_green\": ruler_bot: overlaps BMW's seat-belt light x587-626 y665-720",
+    "app: [f30_cluster] WARN layout \"matte_black\": matte: top-right corner 225 px under the hood",
+    "app: [f30_cluster] WARN layout \"matte_black\": matte: overlaps BMW's seat-belt light x587-626 y665-720",
+    "app: [f30_cluster] WARN layout \"matte_black\": matte: overlaps BMW's parking-brake lamp x1838-1900 y217-260",
+    "app: [f30_cluster] WARN layout \"matte_black\": ruler_bot: overlaps BMW's seat-belt light x587-626 y665-720"
+  ]
+}
