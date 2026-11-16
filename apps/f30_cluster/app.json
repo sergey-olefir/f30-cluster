@@ -275,12 +275,6 @@
       "default": true
     },
     {
-      "key": "baked",
-      "label": "Baked 6WB textures",
-      "type": "bool",
-      "default": true
-    },
-    {
       "key": "needleSmooth",
       "label": "Smooth needles",
       "type": "bool",

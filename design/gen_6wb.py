@@ -154,20 +154,19 @@ def dial(id, c, style, r=None, **kw):
 MINI_START, MINI_SWEEP = 153, 181.5
 
 
-def minis(baked=False):
+def minis():
     """The two side gauges: fuel (0 low on the right, clockwise round the bottom to 1/1 upper left) and its mirror,
-    the oil temperature (cold low on the left, anticlockwise to hot upper right)."""
+    the oil temperature (cold low on the left, anticlockwise to hot upper right). Their faces and pictograms are the
+    baked textures (2026-11-16: the "baked" setting is retired, so the drawn pump and oil-can icons went with it)."""
     return [
         dial("fuel", FU, "mini", r=MINI_R, ringW=5, measure="signal", signal="fuel", scale={"max": 1, "ticks": 4}, minor=2,
              start=MINI_START, sweep=MINI_SWEEP, redTo=0.10, needle="fg",
-             **({"base": base("fuel", FU, MINI_R, FU[0] - 72, FU[1] - 72, 144)} if baked else {})),
+             base=base("fuel", FU, MINI_R, FU[0] - 72, FU[1] - 72, 144)),
         dial("oilt", OT, "mini", r=MINI_R, ringW=5, measure="signal", signal="oil", min=50, scale={"max": 150, "ticks": 4},
              minor=2, start=MINI_START, sweep=MINI_SWEEP, flip=True, coldTo=0.10, redFrom=0.90, needle="fg",
-             **({"base": base("oil", OT, MINI_R, OT[0] - 72, OT[1] - 72, 144)} if baked else {})),
-        dict(icon("fuel_icon", "fuel", FU[0] + 0.40 * MINI_R, FU[1] - 0.42 * MINI_R, 1, "fg"), **({"toggle": "!baked"} if baked else {})),
+             base=base("oil", OT, MINI_R, OT[0] - 72, OT[1] - 72, 144)),
         text("fuel_full", FU[0] - 0.42 * MINI_R, FU[1] - 0.26 * MINI_R, 30, "1/1", "wb_mini", conn=1),
         text("fuel_zero", FU[0] + 0.42 * MINI_R, FU[1] + 0.40 * MINI_R, 14, "0", "wb_mini", conn=1),
-        dict(icon("oil_icon", "oilcan", OT[0] - 0.40 * MINI_R, OT[1] - 0.42 * MINI_R, 2, "fg", w=30), **({"toggle": "!baked"} if baked else {})),
     ]
 
 def base(tex, c, r, ox, oy, w, kind=1):
@@ -204,7 +203,7 @@ def comfort():
         dial("tacho", RV, "comfort", ringW=10, base=base("tacho", RV, R, RV[0] - R, RV[1] - R, 2 * R, 3),
              fill=arc_fill("ed_seg", RV, 1338, 612, 346, 70, 196.5, 143.3, "cons", 20, [114, 66, 70]), measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
              start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF),
-    ] + minis(baked=True)
+    ] + minis()
     # the scale numbers: the box ends at 0.78 R, inside the ticks' inner ends (0.82 R)
     for i in range(14):
         n = 20 * i
@@ -216,36 +215,29 @@ def comfort():
         text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "1/min x 1000", "wb_cap", conn=2),
         text("ready", RV[0] - 0.63 * R, RV[1] + 0.25 * R, 110, "READY", "wb_capb", conn=2),
         text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "OFF", "wb_cap", "dim", conn=2),
-        # the range at the speed dial's foot
-        dict(icon("range_icon", "fuel", SP[0] - 70, SP[1] + 0.60 * R, 1, "fg"), toggle="!baked"),
-        text("range_in", SP[0] + 12, SP[1] + 0.60 * R, 130, "{{range}} km", "wb_cap", conn=1, toggle="!baked"),
     ]
     # the road signs under the speed dial's hub: the limit (its figure is text on the sign, a 2-digit box 37 x 30
     # centred 351, 505; BAKE C7) and no overtaking. Always ours here: our backdrop covers BMW's own sign
     W += road_signs()
     # the row at the middle window's foot
-    # baked: one line, the range after the bar's pump pictogram (x 892-953, y 642-681); else headed columns
+    # one line, the range after the bar's pump pictogram (x 892-953, y 642-681) (the headed columns of the unbaked
+    # look went with the retired "baked" setting, 2026-11-16)
     # car3 H: the clock only while it is right ("own:clock": once a time zone is set; the head unit
     # runs on UTC). BMW's own clock sits under our speed dial's range arc, so no window opens over it: without our
     # clock the temperature stands alone in the middle. The temperature in BMW's 0.5 degree steps ({{ambient1}})
-    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="baked&own:clock&!cc:shown"),
-          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="baked&own:clock&!cc:shown"),
-          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="baked&!own:clock&!cc:shown")]
+    W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
+          text("row_b1", 1010, 662, 170, "{{ambient1}} {{u:temp}}", "wb_val", align="left", toggle="own:clock&!cc:shown"),
+          text("row_b2", MID, 662, 200, "{{ambient1}} {{u:temp}}", "wb_val", toggle="!own:clock&!cc:shown")]
     # the range under the road signs (its pictogram is baked into the speed dial), the instant consumption under the rev dial
     # ref 12: the range arc reads "0" at its left end, "km" at its right end and the range in the middle above it;
     # the EfficientDynamics arc the same way with the instant consumption (0 at 196.5 deg, 20 l/100 km at 143.3 deg)
     for id_, c, a0, a1, lab0, lab1, tok, conn in (("range", SP, 216.0, 144.0, "0", "km", "{{range}}", 1),
                                                   ("cons", RV, 196.5, 143.3, "0", "l/100 km", "{{cons}}", 2)):
-        W.append(text(id_ + "_v", c[0], c[1] + 0.765 * R, 110, tok, "wb_spd", conn=conn, toggle="baked"))
+        W.append(text(id_ + "_v", c[0], c[1] + 0.765 * R, 110, tok, "wb_spd", conn=conn))
         x0, y0 = at(c, a0, 0.775 * R)
         x1, y1 = at(c, a1, 0.775 * R)
-        W.append(text(id_ + "_a0", x0, y0, 40, lab0, "wb_cap", "dim", conn=conn, toggle="baked"))
-        W.append(text(id_ + "_a1", x1, y1, 100, lab1, "wb_cap", "dim", conn=conn, toggle="baked"))
-    for i, (head, tok, x) in enumerate([("Time", "{{time}}", 742), ("Range", "{{range}} km", 890),
-                                        ("Temp", "{{ambient1}} {{u:temp}}", 1048)]):     # car3 H: clock as above, 0.5 degrees
-        tg = ("!baked&own:clock" if i == 0 else "!baked") + "&!cc:shown"
-        W += [text("row_h%d" % i, x, 612, 150, head, "wb_cap", "dim", align="left", toggle=tg),
-              text("row_v%d" % i, x, 650, 170 if i == 2 else 160, tok, "wb_val", align="left", toggle=tg)]
+        W.append(text(id_ + "_a0", x0, y0, 40, lab0, "wb_cap", "dim", conn=conn))
+        W.append(text(id_ + "_a1", x1, y1, 100, lab1, "wb_cap", "dim", conn=conn))
     W += tray_row()                  # car4 L: the mode label and our gear in the tray, as in 6WB Dials + G20
     W.append(msa_sign(RV[0] + MSA_AT[0] * R, RV[1] + MSA_AT[1] * R))      # car3 I
     return W
@@ -559,7 +551,7 @@ def dials():
              measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
              start=RPM_START, sweep=RPM_SWEEP, off=RPM_OFF),
     ] + road_signs(own=True)        # bottom row: only while the sign is ours; else BMW's shows through the window
-    W += minis(baked=True)
+    W += minis()
     for i in range(14):
         n = 20 * i
         W.append(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1))
@@ -620,7 +612,7 @@ def sport():
           "cc": CC_BOX,                                      # BMW's check-control message shows through, as in Comfort
           # the shelf's base line at Comfort's window foot (WBBACK reads footLine's y; "none": no hairline of Comfort's)
           "foot": "none", "footLine": FOOT_LINE}]
-    W += sport_face() + minis(baked=True)        # 2026-11-14: Comfort's baked minis
+    W += sport_face() + minis()        # 2026-11-14: Comfort's baked minis
     # the range at the speed dial's foot (Comfort's range figure is there, on its bottom arc), in the scale's gap
     W += [icon("range_icon", "fuel", SP[0] - 45, SP[1] + 0.765 * R, 1, "fg"),
           text("range_in", SP[0] - 25, SP[1] + 0.765 * R, 130, "{{range}} km", "wb_cap", align="left", conn=1)]
@@ -635,7 +627,7 @@ def sport_dials():
     """6WB Sport + G20: 6WB Dials + G20 (dials(): see-through but for the baked collar, the cover, the patches, the soft
     foot band, Comfort's map window and foot line, BMW's message window, the own row) with 6WB Sport's dials. They
     take the same circles as Dials + G20's (G20 geometry), so the same collar fits."""
-    W = [dials_bg("sport")] + sport_face(cut=True) + minis(baked=True)     # Comfort's baked minis
+    W = [dials_bg("sport")] + sport_face(cut=True) + minis()     # Comfort's baked minis
     W += own_row()                   # package F: the bottom row's items ours
     W += nav_row() + cc_row()        # bottom row: the road label and the check-control text, each while it is ours
     return W
@@ -663,7 +655,7 @@ def eco():
              start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "eff", hub=hub, ringW=6, measure="signal", signal="torquePct", scale={"max": 100, "ticks": 10},
              minor=1, start=225, sweep=235),
-    ] + minis(baked=True)                                                   # 2026-11-14: Comfort's baked minis
+    ] + minis()                                                   # 2026-11-14: Comfort's baked minis
     # the scale numbers where Comfort's are (0.78 R), Eco's colours: white to 120, then dim
     for i in range(14):
         n = 20 * i

@@ -441,19 +441,6 @@
       }
     },
     {
-      "id": "fuel_icon",
-      "type": "icon",
-      "icon": "fuel",
-      "z": 5,
-      "x": 97,
-      "y": 566,
-      "w": 22,
-      "h": 26,
-      "color": "fg",
-      "conn": 1,
-      "toggle": "!baked"
-    },
-    {
       "id": "fuel_full",
       "type": "text",
       "z": 5,
@@ -480,19 +467,6 @@
       "color": "fg",
       "align": "center",
       "conn": 1
-    },
-    {
-      "id": "oil_icon",
-      "type": "icon",
-      "icon": "oilcan",
-      "z": 5,
-      "x": 1797,
-      "y": 566,
-      "w": 30,
-      "h": 26,
-      "color": "fg",
-      "conn": 2,
-      "toggle": "!baked"
     },
     {
       "id": "range_icon",

@@ -24,6 +24,10 @@ const BASE = 'http://127.0.0.1:' + PORT;
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'bottom-row-'));
 const dataDir = path.join(tmp, 'data'), screenDir = path.join(tmp, 'screen');
 fs.mkdirSync(dataDir); fs.mkdirSync(screenDir);
+// fix/settings (2026-11-16): start on a settings.json that still holds the retired "baked", "badge" and "badgeBMW", as a
+// car that saved them does; "baked": false is the value that would have dropped the baked look ("retired settings" below)
+const RETIRED = { baked: false, badge: 'M340i', badgeBMW: true };
+fs.writeFileSync(path.join(dataDir, 'settings.json'), JSON.stringify(RETIRED));
 const spec = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'app.json'), 'utf8'));
 // package X: the geometry the safety checks compare against, read from the layout itself (panel px, half-open boxes)
 const LAY = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts', 'wb_dials.json'), 'utf8'));
@@ -631,6 +635,29 @@ async function main() {
     ok(!/kombi guard/.test(logText), 'no KOMBI guard strike while toggling');
     await click('SET_G20');
     await until((q) => q.activeName === 'wb_comfort', 20000);
+
+    // fix/settings (2026-11-16): "baked", "badge" and "badgeBMW" were retired. This bench started on a settings.json
+    // that still holds them, as a car that saved them does (RETIRED, above main): they are kept, unread, and the
+    // baked look stays on although the stored "baked" says false (hud.js _toggleOn reads a key with no schema item
+    // raw, so a toggle left on "baked" would have followed the stored false)
+    console.log('retired settings: stored values are ignored');
+    ok(['baked', 'badge', 'badgeBMW'].every((k) => !item(k)), 'app.json has no "baked", "badge" or "badgeBMW" any more');
+    ok(p.settings.baked === false && p.settings.badge === 'M340i', 'the stored values are still in settings.json (nothing migrates them)');
+    const layoutsDir = path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts');
+    const toggles = fs.readdirSync(layoutsDir).filter((f) => /\.json$/.test(f)).map((f) => JSON.stringify(JSON.parse(fs.readFileSync(path.join(layoutsDir, f), 'utf8'))))
+        .join('').match(/"(toggle|holeWhen)":"[^"]*"/g) || [];
+    ok(!toggles.some((t) => /\b(baked|badge|badgeBMW)\b/.test(t)), 'no layout toggle reads a retired key (' + toggles.length + ' toggles)');
+    await until((q) => q.activeName === 'wb_comfort' && /^Cluster on/.test(q.status) && !/drawn \(/.test(q.status), 20000);
+    let bases = 0, signTex = false;
+    for (let i = 0; i < 30 && !(bases === 4 && signTex); i++) {
+        const sc = await sceneNow();
+        // a base really bound has its box in u_baseR (a blank sampler, _bindBlanks, has none); a baked sign has u_tex 1
+        bases = sc.filter((l) => l.binds && l.binds.u_base && l.uniforms && l.uniforms.u_baseR && l.uniforms.u_baseR.v[2] > 0).length;
+        signTex = sc.some((l) => l.binds && l.binds.u_s0 && l.uniforms && l.uniforms.u_tex && l.uniforms.u_tex.v[0] === 1);
+        if (!(bases === 4 && signTex)) await sleep(300);
+    }
+    ok(bases === 4 && signTex, '6WB Comfort draws its baked dial bases (' + bases + ') and road signs with "baked": false stored');
+    ok(!/ERROR/.test(logText), 'no error in the log from the retired keys');
 
     console.log('every layout still builds');
     for (const v of opts('hudLayout')) {
