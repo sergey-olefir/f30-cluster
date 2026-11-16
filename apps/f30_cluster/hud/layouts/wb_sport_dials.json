@@ -698,7 +698,7 @@
         534,
         46
       ],
-      "holeWhen": "cc:shown&!own:info",
+      "holeWhen": "cc:open&!own:info",
       "holeInset": 0,
       "holeRadius": 0,
       "conn": 1

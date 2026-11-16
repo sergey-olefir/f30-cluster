@@ -90,6 +90,35 @@ async function main() {
         'the engine reports every item of the row as BMW\'s');
     ok(JSON.stringify(S(p).widgets) === '[]', 'no widget of ours is built for them (' + JSON.stringify(S(p).widgets) + ')');
 
+    // 2026-11-16, the owner's car: with "all6WB" BMW's own message came out sliced across the middle. The info field
+    // counted as ours the moment the switch said so, although NOTHING had ever been read out of config.ccm: our own
+    // text was empty, our black covered BMW's message from y 666 down and the patch covered it to y 652, and the "cc"
+    // window never opened because the window follows "a message shows", which that car never says. Until the car's
+    // message has actually been read the field is BMW's and its panel is left see-through. No latch: the field comes
+    // back by itself at the first message, so a slow provider costs nothing.
+    console.log('the message field waits for the car: unread means BMW\'s, and no latch');
+    await set('bottomRow', 'all6WB');
+    p = await until((q) => S(q).own && S(q).own.nav === true, 20000);
+    ok(S(p).cc && S(p).cc.shown === null, 'nothing has been read out of config.ccm yet (shown ' + JSON.stringify(S(p).cc.shown) + ')');
+    ok(S(p).own.info === false, 'the info field reads as BMW\'s although the switch says all6WB');
+    ok((S(p).widgets || []).indexOf('cc_name') < 0 && (S(p).widgets || []).indexOf('cc_desc') < 0,
+        'and no message text of ours is built, so nothing of ours covers BMW\'s (' + JSON.stringify(S(p).widgets) + ')');
+    ok(S(p).own.nav === true && S(p).own.sign === true, 'the rest of the row is ours: the message alone waits');
+    ok(JSON.stringify(S(p).fail) === '{}', 'and nothing latched: it is a wait, not a fallback (' + JSON.stringify(S(p).fail) + ')');
+    await scene('cc-red');
+    // the first readable message must bring the field in BY ITSELF: it rebuilds the layout, the way the car's first
+    // time zone brings our clock in. Without that our text would wait for the next setting change.
+    p = await until((q) => (S(q).widgets || []).indexOf('cc_name') >= 0, 20000);
+    ok(S(p).own.info === true, 'the first message the car sends makes the field ours, with no restart');
+    ok((S(p).widgets || []).indexOf('cc_name') >= 0 && (S(p).widgets || []).indexOf('cc_desc') >= 0,
+        'and our own message text is built then, with no other change (' + JSON.stringify(S(p).widgets) + ')');
+    await scene('cc-clear');
+    p = await until((q) => S(q).cc && S(q).cc.shown === false, 5000);
+    ok(S(p).own.info === true, 'and it stays ours once that message is cleared again');
+    await set('bottomRow', 'allG20');
+    p = await until((q) => JSON.stringify(S(q).widgets) === '[]', 20000);
+    ok(JSON.stringify(S(p).widgets) === '[]', 'back to the default: nothing of ours is built again');
+
     console.log('the speed-limit struct is read in every state');
     const cases = [
         ['limit-50', (s) => s.state === 'limit' && Math.round(s.kmh) === 50 && s.unit === 'kmh'],

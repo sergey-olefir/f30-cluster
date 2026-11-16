@@ -116,6 +116,14 @@ ones do).
   `bottom.cc_info` "i" at x 736–753 with room for the wider symbols). `_wbCcSend()` opens `cc` on "BMW's" and
   `ccSym` on "ours", so BMW's symbol area stays see-through either way and our `cc_name` / `cc_desc` texts sit
   beside it.
+  **2026-11-16: the field is ours only once the car's message has been READ** (`_ccWired()`: one notification from
+  `config.ccm` carried a name, a description, a symbol, an id or a type — a struct whose paths fit the car carries
+  its id and type even with no message on). Until then we are blind: we never learn when the cluster writes in that
+  panel, our own text is empty, and the panel was being half covered — our black patch to y 665 and the road bar
+  from y 666 left only a 14 px band of BMW's own message, which is the sliced message the owner photographed on
+  2026-11-16. Blind now means the field reads as BMW's (`_own`) and the panel is left see-through (`_ccOpen()`,
+  the toggle `cc:open`, in the see-through layouts only — in the opaque themes a window there would be a hole in
+  the theme). It is a wait, not a latch: the first readable message makes the field ours with no restart.
 - **The road label.** On "ours" a black bar (a `fill` widget, x 690–1250, y 666–712) covers BMW's street line and
   our `{{road}}` text draws on it, wider than BMW's own 331 px field so a long name is not shrunk. The bar starts at
   x 690 so the rear-belt, driver-belt and airbag lamps (which end at x 679) are **never** covered. While a message
@@ -231,7 +239,7 @@ allowed.
   group. Settings without a group follow as before. `kit/tools/localize.py` translates the heading.
 - `kit/runtime/sheet.js`: the drawn settings sheet does the same — a `kind: 'head'` row with no box and no tap
   target, which the controller steps over.
-- `shared/hud.js`: `_hole()` accepts a live toggle expression (`"cc:shown&!own:info"`), and a `fill` widget with one
+- `shared/hud.js`: `_hole()` accepts a live toggle expression (`"cc:open&!own:info"`), and a `fill` widget with one
   resends `u_hole` when it changes.
 
 ## 7. Layers, memory, and what nothing changed

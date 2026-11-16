@@ -155,7 +155,9 @@
  * see-through layout shows - in the opaque themes our background covers BMW's row, so the row is ours there (_own;
  * it replaced the seven own* settings of package F, 2026-11-15, docs/ONE-SWITCH-DONE.md);
  * "cc:none" only while the car says no check-control message shows (car3 G:
- * this.ccShown === false; off while that is unknown); token {{ambient1}}: the outside temperature as BMW shows it, "+3.5" (°C, 0.5 steps);
+ * this.ccShown === false; off while that is unknown), "cc:shown" only while it says one does, "cc:open" while BMW's
+ * own message panel must be left see-through (_ccOpen: "cc:shown", or a car whose messages we cannot read at all);
+ * token {{ambient1}}: the outside temperature as BMW shows it, "+3.5" (°C, 0.5 steps);
  * car3 H: "a&b" (any of the above, joined by "&") while every part is on;
  * "mapUp" (toggle or holeWhen) is not a saved setting: on while the Waze map shows inside the theme (waze.js; the
  * "mapInTheme" setting); the map is a content z 0 layer, so a frame meant to sit over it is content z 1 or more.
@@ -1072,7 +1074,7 @@ class HudApp {
         // (kinds, lengths, enum values) go to the log, each once.
         this.sign = Object.assign({}, SIGN_NONE); this.signShape = undefined; this.signLogs = 0;
         this.ccMsg = { name: '', desc: '', color: null, symbol: null, id: null, type: null };
-        this.ccMsgAt = 0; this.ccShape = undefined; this.ccLogs = 0;
+        this.ccMsgAt = 0; this.ccShape = undefined; this.ccLogs = 0; this.ccAny = false;
         this.road = ''; this.roadAt = 0; this.roadShapeSeen = undefined;
         this.onRoad = null; this.navState = null; this.navDist = ''; this.navUnit = null; this.navEta = null; this.navMins = null;
         this.navShape = undefined; this.posShape = undefined;
@@ -1108,6 +1110,15 @@ class HudApp {
                 const m = ccMsgOf(cm, v);
                 this.ccMsg = m; this.ccMsgAt = Date.now();
                 this.ccShown = !!(m.name || m.desc);
+                // 2026-11-16: did our paths find ANYTHING in the car's struct? A struct that fits carries its id and
+                // its type even with no message on; one that does not gives all five back empty, and then the info
+                // field is not ours and BMW's panel stays open (_ccWired). Sticky, and no text ever leaves here.
+                // The first one that does makes the info field ours, so the layout is rebuilt then - our own text
+                // widgets are only built at a rebuild, the way the car's first time zone brings our clock in.
+                if (!this.ccAny && (m.name || m.desc || m.symbol !== null || m.id !== null || m.type !== null)) {
+                    this.ccAny = true;
+                    if (this.client && this.client.ready) this._rebuild();
+                }
                 const key = (m.name ? 'name ' + m.name.length + ' chars' : 'no name') + ', ' +
                     (m.desc ? 'description ' + m.desc.length + ' chars' : 'no description') +
                     ', colour ' + m.color + ', symbol ' + m.symbol + ', type ' + m.type;
@@ -2690,8 +2701,11 @@ class HudApp {
         // car3 G: "cc:none" is on only while the car says no check-control message shows (this.ccShown === false);
         // while that is not known (no signal wired yet: package I) it is off
         // 2026-11-13: "cc:shown" is on only while the car says a message shows (unknown: off, so ours stays drawn)
+        // 2026-11-16: "cc:open" is on while BMW's own message panel must be left see-through (_ccOpen), which is
+        // "cc:shown" plus the car whose messages we cannot read at all
         if (k.indexOf('cc:') === 0) {
-            const cc = this._cc(), on = (k === 'cc:none' && cc === false) || (k === 'cc:shown' && cc === true);
+            const cc = this._cc();
+            const on = (k === 'cc:none' && cc === false) || (k === 'cc:shown' && cc === true) || (k === 'cc:open' && this._ccOpen());
             return not ? !on : on;
         }
         const on = eq > 0 ? String(this.setting(k.slice(0, eq))) === k.slice(eq + 1) : this.setting(k) !== false;
@@ -3181,7 +3195,9 @@ class HudApp {
      *  The clock is ours only once a time zone is known (the "timeZone" setting, the car's own zone or
      *  config.utcOffsetMinutes), since the head unit runs on UTC and only BMW's own clock is right without one - the
      *  rule the retired "ownClock" had as its "auto". A build whose app.json has no such setting reads as BMW's in a
-     *  see-through layout (the safe side: nothing of BMW's row is covered). */
+     *  see-through layout (the safe side: nothing of BMW's row is covered).
+     *  The info field is ours only once the car's check-control message can be read (_ccWired), by the same rule:
+     *  while it cannot, our text would be empty and BMW's own message is the only one there is. */
     _own(item) {
         if (OWN_ITEMS.indexOf(item) < 0) return false;
         // the automatic way back to the stock cluster (the owner, 2026-11-15): an element whose signal is missing or
@@ -3190,6 +3206,7 @@ class HudApp {
         if (this.rowFail && this.rowFail[item]) return false;
         if (this.setting(ROW_KEY) !== ROW_OURS && this._seeThrough(this._layoutName())) return false;
         if (item === 'clock') return isNum(this._tzMinutes());   // car3 I: the setting, the car's zone (config.clock) or config
+        if (item === 'info') return this._ccWired();             // 2026-11-16: only once the car's message can be read
         return true;
     }
 
@@ -3233,7 +3250,9 @@ class HudApp {
         if (!this._seeThrough(this._layoutName())) return;
         const named = (s) => !!(s && s.iface && s.field);
         if (this._own('sign') && !named(this.config.sign) && !this._signWired()) this._rowFail('sign', 'no speed-limit field in app.json config.sign');
-        if (this._own('info') && !(named(this.config.ccm) && this.config.ccm.kind === 'message')) this._rowFail('info', 'app.json config.ccm names no message field');
+        // the info field reads as BMW's until the car's message has been read (_ccWired), so this one asks the
+        // switch and not _own(): a build with no message field at all still says so once, in the log
+        if (this.setting(ROW_KEY) === ROW_OURS && !this._ccNamed()) this._rowFail('info', 'app.json config.ccm names no message field');
         if (this._own('nav') && !named(this.config.road) && !(this.config.nav && this.config.nav.iface)) this._rowFail('nav', 'app.json config.road names no field');
     }
 
@@ -3257,6 +3276,32 @@ class HudApp {
      *  bench.CheckControl, fed from manual {ccMsg: 1 | 0}), null while unknown. */
     _cc() {
         return this.ccShown === true || this.ccShown === false ? this.ccShown : null;
+    }
+
+    /** Whether app.json even names the car's check-control message field (config.ccm kind "message"). */
+    _ccNamed() {
+        const c = this.config.ccm;
+        return !!(c && c.iface && c.field && c.kind === 'message');
+    }
+
+    /** Whether the car's own check-control message can be READ: one notification from config.ccm has carried
+     *  something our paths found - a name, a description, a symbol, an id or a type. A struct whose paths fit the
+     *  car carries its id and its type even with no message on, so this says "config.ccm fits this car", never "a
+     *  message is showing" (that is _cc). Sticky: once read, read.
+     *  2026-11-16, the owner's car: while this is false we are BLIND - we never learn when the cluster writes in
+     *  BMW's message panel - so the info field stays BMW's (_own) and that panel is left see-through (_ccOpen)
+     *  instead of being half covered by our own black, which sliced BMW's message across the middle. */
+    _ccWired() {
+        return this._ccNamed() && this.ccAny === true;
+    }
+
+    /** Whether BMW's own check-control panel must be left see-through now ("cc:open"): the car says a message shows,
+     *  or - in a see-through layout, where BMW's own panel is what the driver would otherwise read - we cannot read
+     *  its messages at all and so must not cover a panel the cluster may be writing in. In the opaque themes our
+     *  background covers BMW's cluster whole, so a window there would be a hole in the theme and nothing else. */
+    _ccOpen() {
+        if (this._cc() === true) return true;
+        return this._ccNamed() && !this._ccWired() && this._seeThrough(this._layoutName());
     }
 
     /* ---- bottom row (docs/BOTTOM-ROW-PACKAGE.md) ---- */
@@ -3350,13 +3395,14 @@ class HudApp {
     }
 
     /** u_cc: the bg widget's "cc" box [x0, y0, x1, y1] (panel px; BMW's check-control message panel) see-through
-     *  while the car says a message shows (this.ccShown === true), else none; sent when it changes.
+     *  while BMW's own message is the one on show (_ccOpen: the car says a message shows, or we cannot read its
+     *  messages at all), else none; sent when it changes.
      *  Bottom row: while the info field is OURS ("bottomRow" all6WB) and the layout gives a "ccSym" box, only that box opens -
      *  the car keeps drawing its own symbol and animation there and we draw the text around it. */
     _wbCcSend(x) {
         const w = x.w, four = (a) => Array.isArray(a) && a.length === 4;
         const box = this._own('info') && four(w.ccSym) ? w.ccSym : w.cc;
-        const b = four(box) && this._cc() === true ? box : null;
+        const b = four(box) && this._ccOpen() ? box : null;
         const v = b ? [b[0] - w.x, b[1] - w.y, b[2] - w.x, b[3] - w.y] : [0, 0, 0, 0], key = v.join(',');
         if (key === x.ccKey) return;
         x.ccKey = key;
@@ -3378,7 +3424,9 @@ class HudApp {
         const raw = (k) => { const v = this.ctx.settings.get(k); return v === undefined ? 'unset' : JSON.stringify(v); };
         const seen = this._seeThrough(this._layoutName());
         const one = (item) => item + ' ' + (this._own(item) ? 'ours' : "BMW's") +
-            (this.rowFail && this.rowFail[item] ? ' (gave itself back)' : item === 'clock' && !isNum(this._tzMinutes()) ? ' (no time zone)' : '');
+            (this.rowFail && this.rowFail[item] ? ' (gave itself back)'
+                : item === 'clock' && !isNum(this._tzMinutes()) ? ' (no time zone)'
+                : item === 'info' && !this._ccWired() ? ' (the car\'s check-control message has not been read)' : '');
         return 'bottom row: ' + OWN_ITEMS.map(one).join(', ') +
             ' (' + ROW_KEY + ' ' + raw(ROW_KEY) + (seen ? '' : ', opaque theme: the row is ours') + ')' +
             '; mode label ' + (this.setting('modeLabel') === false ? 'off' : this.driveMode ? 'on' : 'on, empty: no drive mode from the car') +

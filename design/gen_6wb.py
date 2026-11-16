@@ -334,14 +334,16 @@ def road_signs(own=False):
 
 def nav_row():
     """Our road label on BMW's bottom-centre street line, over a black bar; only while the navigation label is ours.
-    The bar's hole lets BMW's own check-control text through while the info field is BMW's (hud.js _hole, live)."""
+    The bar's hole lets BMW's own check-control text through while the message is BMW's (hud.js _hole, live)."""
     return [
         {"id": "nav_bg", "type": "fill", "class": "content", "z": 2, "x": NAV_BAR[0], "y": NAV_BAR[1],
          "w": NAV_BAR[2] - NAV_BAR[0], "h": NAV_BAR[3] - NAV_BAR[1], "color": "bg", "toggle": "own:nav",
          "hole": [NAV_HOLE[0], NAV_HOLE[1], NAV_HOLE[2] - NAV_HOLE[0], NAV_HOLE[3] - NAV_HOLE[1]],
          # connection 1, not 0: connection 0 already carries 7 of its 8 layers in these themes, and this one is the
          # only effect layer the package adds (8 per connection is cluster-render's hard cap)
-         "holeWhen": "cc:shown&!own:info", "holeInset": 0, "holeRadius": 0, "conn": 1},
+         # 2026-11-16: "cc:open", not "cc:shown" - a car whose check-control message we cannot read never says a
+         # message shows, and the bar would then cut BMW's own message in half at its top edge (y 666)
+         "holeWhen": "cc:open&!own:info", "holeInset": 0, "holeRadius": 0, "conn": 1},
         # wb_cap is the only 6WB font with letters in it (wb_val is digits and units): the placeholder uses it on
         # the measured centre and baseline. It has no Cyrillic and no accents, and the owner's cluster is in
         # Ukrainian, so on the car this label hands itself back to BMW until the drawing package bakes the measured
