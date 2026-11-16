@@ -16,16 +16,51 @@ Proportions are measured off the photos, in dial radii (R): the two dial centres
 6.6 R wide and the dials stand at mid height; a small gauge sits 1.355 R outside each dial, 0.39 R below centre,
 0.31 R in radius. The speed scale is km/h only: 0..260, 1 degree per km/h from -130 degrees. The rev scale: OFF at
 -130 degrees, 0 at -109.5, 32.1 degrees per 1000 rpm up to 7.5, red from the "redline" setting.
-Fonts: Arimo (tools/bake_fonts.py F30_FONTS); a text widget's box is its font's cell height."""
+Fonts: Roboto wdth 87.5 (tools/bake_fonts.py F30_FONTS); a text widget's box is its font's cell height, placed so its
+baseline is where the text was placed (package F, 2026-11-16: PLACED_ON below; a font re-bake moves boxes, never ink).
+bench/test-fonts.js checks that this file reproduces the committed layouts exactly: regenerate after any change here
+or in the fonts, and commit the JSON with it."""
 import json, math, sys, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.join(HERE, '..', 'apps', 'f30_cluster', 'hud', 'fonts')
-_cell = {}
+# --- package F (strip, 2026-11-16; docs/strip/F-REPORT.md): text placed by its baseline, so a font re-bake moves no ink ---
+# The engine draws a text's glyph cell from the top of its box (shared/hud_text.js), so where the ink lands is the
+# box's y plus the font's own baseline - and the cell (its height, its baseline) changes whenever a font gains a
+# taller or a lower glyph. text() used to centre the box on cy with the font's CURRENT cell, so every re-bake moved
+# the ink: the committed layouts had been built on the Arimo cells (wb_cap 26 px, wb_capb 25, wb_val 32, wb_big 90),
+# the fonts were re-baked in Roboto (24, 22, 33, 92), and regenerating moved every caption 1-2 px ("the generator
+# drift"). Now a position is turned into a BASELINE once, on the cell it was placed and checked on (PLACED_ON: the
+# box height it was centred with, and the baseline of the font the car has drawn it in since), and the box is then
+# built round that baseline from the font as baked now: y = baseline - baseline offset, h = cell height. Re-baking a
+# font (Cyrillic, 2026-11-16: wb_cap and wb_capb went from 24 / 22 px cells to 28) changes boxes only, never ink.
+# These numbers are frozen: they are what the car shows. Do not update them after a re-bake.
+PLACED_ON = {
+    'wb_cap': (26, 18), 'wb_capb': (25, 17), 'wb_val': (32, 29), 'wb_big': (90, 88),
+    'wb_spd': (24, 22), 'wb_rpm': (35, 33), 'wb_gear': (36, 34), 'wb_mini': (15, 12), 'wb_row': (35, 33),
+}
+_font = {}
+def metrics(font):
+    """The font as baked now: (cell height, baseline offset in the cell)."""
+    if font not in _font:
+        f = json.load(open(os.path.join(FONTS, font + '.json')))
+        _font[font] = (f['cellHeight'], f['baseline'])
+    return _font[font]
+
 def cell(font):
-    if font not in _cell:
-        _cell[font] = json.load(open(os.path.join(FONTS, font + '.json')))['cellHeight']
-    return _cell[font]
+    """The cell height a position of this font was laid out with (ring_label's extent along the radius)."""
+    return PLACED_ON[font][0] if font in PLACED_ON else metrics(font)[0]
+
+def baseline_of(font, cy):
+    """The panel baseline (the y below a flat glyph's last ink row) of a text centred on cy as it was placed."""
+    h, b = PLACED_ON.get(font) or metrics(font)
+    return int(round(cy - h / 2.0)) + b
+
+def text_box(font, cy):
+    """(y, h) of the box that puts this text's baseline where it was placed, in the font as baked now."""
+    h, b = metrics(font)
+    return baseline_of(font, cy) - b, h
+# --- end package F ---
 
 # Comfort has been fitted to the G20 (see shared/visible.js): bigger dials, the rev dial centred on BMW's black box so
 # the box hides only the hub. 2026-11-14: Sport (sport(), sport_dials()) and Eco Pro (eco()) too, on Comfort's
@@ -75,10 +110,11 @@ MAP_WINDOW = [600, 135, 720, 460]
 MAP_FADE = [70, 24, 45, 50]
 
 def text(id, cx, cy, w, t, font, color="fg", align="center", conn=0, **kw):
-    """A text box w wide, centred on (cx, cy) (align left / right: cx is that edge)."""
-    h = cell(font)
+    """A text box w wide, centred on (cx, cy) (align left / right: cx is that edge). Package F: cy is turned into a
+    baseline on the cell it was placed with (PLACED_ON), and the box is built round that baseline (text_box)."""
+    y, h = text_box(font, cy)
     x = cx - w / 2.0 if align == "center" else cx if align == "left" else cx - w
-    d = {"id": id, "type": "text", "z": 5, "x": int(round(x)), "y": int(round(cy - h / 2.0)), "w": w, "h": h,
+    d = {"id": id, "type": "text", "z": 5, "x": int(round(x)), "y": y, "w": w, "h": h,
          "text": t, "font": font, "color": color, "align": align}
     if conn: d["conn"] = conn
     d.update(kw)
@@ -327,9 +363,10 @@ ROW_BASE = 697
 MODE_C, TRAY_C = (1508, 527), (1508, 583)
 
 def base_at(font, baseline):
-    """The centre y of a text box of `font` whose glyphs sit on `baseline`."""
-    f = json.load(open(os.path.join(FONTS, font + '.json')))
-    return baseline - f['baseline'] + f['cellHeight'] / 2.0
+    """The cy to give text() so that its glyphs sit on `baseline` (rounded to a whole px). Package F: in text()'s
+    terms (PLACED_ON), so it holds whatever the font's cell is now."""
+    h, b = PLACED_ON.get(font) or metrics(font)
+    return baseline - b + h / 2.0
 
 def own_row():
     """Our range (with the pump), clock and outside temperature at BMW's places, each shown while it is ours."""

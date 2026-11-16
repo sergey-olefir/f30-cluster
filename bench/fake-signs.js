@@ -93,6 +93,14 @@ const SCENES = {
     'road-none': { road: { text: '', onRoad: false }, nav: { state: 'off' } },
     clear: { sign: { state: 'none' }, cc: { clear: true }, road: { text: '' }, nav: { state: 'off' } },
 };
+// --- package F (strip, 2026-11-16): the car's words in Ukrainian, as the owner's cluster runs. Made-up text, no real
+// place: the tallest and lowest capitals (Ї Й Ґ, Щ Ц Д), both apostrophes, guillemets, the dash and the number sign ---
+Object.assign(SCENES, {
+    'road-cyrillic': { road: { text: 'Ґрунтова вулиця' }, nav: { state: 'off' } },
+    'cc-cyrillic': { cc: { name: 'Низький тиск у шинах', desc: 'Перевірте тиск: шина «№ 2» – ЩЦД, з’їзд, підʼїзд.', color: 'yellow', symbol: 44 } },
+    'cc-greek': { cc: { name: 'Χαμηλή πίεση', desc: 'Ελέγξτε την πίεση.', color: 'yellow', symbol: 44 } },
+});
+// --- end package F ---
 
 function install(hu, config, log) {
     const cfg = config || {};
