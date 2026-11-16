@@ -296,6 +296,15 @@ function rowSent() {
     } catch (e) { /* not up */ }
     return out;
 }
+/** fix/colour-daynight: the engine's day/night state for GET /probe. */
+function dayNightProbe() {
+    try {
+        const loc = hud._location();
+        return { car: hud.dnCar, code: hud.dnCode === undefined ? null : hud.dnCode, night: hud._isNight(), source: hud.dnSource,
+            sun: require(path.join(__dirname, '..', 'shared', 'sun.js')).isNight(Date.now(), loc.lat, loc.lon),
+            nightOn: !!hud.nightOn, theme: hud.themeName || null };
+    } catch (e) { return { error: String(e && e.message || e) }; }
+}
 /** The round window over BMW's own sign as last sent (WBDIAL u_cut mode: 1 open, 3 shut), or null. */
 function signWin() {
     let m = null;
@@ -349,6 +358,7 @@ process.on('message', (m) => {
         if (v.hook) benchHook(v.hook);           // package X: fault injection for the safety tests
         else if (v.scene || v.sign || v.cc || v.ccList || v.ccFrame || v.sla || v.road || v.nav || v.clock) fakeSigns.control(v);
         else if (v.ccRisk || v.ccBasic || v.symbols) fakeSigns.control(v);     // probes (0.7.18): bench/test-probes.js
+        else if (v.dayNight !== undefined) fakeSigns.control(v);    // fix/colour-daynight: bench/test-daynight.js
         else if (fakePerso) fakePerso.control(v);
     }
     else if (m.t === 'probe') {
@@ -359,6 +369,9 @@ process.on('message', (m) => {
             activeName: hud ? hud.activeName : null, layoutName, yielded, driveMode: hud ? hud.driveMode : null,
             ready: !!(hud && hud.client && hud.client.ready),
             perso: fakePerso ? fakePerso.state() : null,
+            // fix/colour-daynight: the car's day/night as the engine took it, the source in use, night now, and what
+            // the sun alone would say (bench/test-daynight.js)
+            dayNight: hud ? dayNightProbe() : null,
             // bottom row: what the fakes fed and what the engine made of it (bench/test-bottom-row.js)
             signs: Object.assign(fakeSigns.state(), hud ? {
                 sign: hud.sign,
