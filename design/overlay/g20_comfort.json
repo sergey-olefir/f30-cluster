@@ -1514,10 +1514,10 @@
    "name": "Rear seat belts (red, three seated figures)",
    "safety": "critical",
    "bbox": [
-    503.0,
-    679.0,
-    576.0,
-    715.0
+    500.5,
+    677.75,
+    580.25,
+    715.25
    ],
    "poly": [
     [
@@ -1643,8 +1643,8 @@
     }
    ],
    "schematic": "design/overlay/schematic/bottom.belt_rear.svg",
-   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
-   "notes": "F: unknown (none): Lit only in 08 (start-up check); unlit in 10/14; 11-13 inconclusive. Its neighbour the driver belt is over, so over is plausible but not observed.",
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08 | 2026-11-16 (strip packages, docs/strip/): bbox from package ZL on photos 62, 63, 67 (rear), 64 (driver, lit alone), 60-64 (continuous panel px); E's box on rect 08 was [503.0, 679.0, 576.0, 715.0], 2-5 px tight. The poly is still E's outline on 08.",
+   "notes": "F: unknown (none): Lit only in 08 (start-up check); unlit in 10/14; 11-13 inconclusive. Its neighbour the driver belt is over, so over is plausible but not observed. | 2026-11-16 (strip packages, docs/strip/): still unknown: no photo has the rear belts lit under our paint (ZL, H claim C16); package D's matte photo during the start-up lamp check settles it.",
    "parts": [
     "c.bottom.belt_rear"
    ]
@@ -1655,10 +1655,10 @@
    "name": "Driver seat belt (red, seated figure with belt)",
    "safety": "critical",
    "bbox": [
-    593.0,
-    666.0,
-    624.0,
-    715.0
+    590.0,
+    664.5,
+    628.75,
+    715.25
    ],
    "poly": [
     [
@@ -1790,8 +1790,8 @@
     }
    ],
    "schematic": "design/overlay/schematic/bottom.belt_driver.svg",
-   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08; same ROI on 10, 11, 12, 14 in the metrics (centres within 2 px)",
-   "notes": "B check: belt centre 08/09/12/14 within ~2 px of each other. | F: over (strong): Seen on top of our opaque background in 11, 12, 13; in 10 it interrupts our grid lines (x 600, y 700).",
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08; same ROI on 10, 11, 12, 14 in the metrics (centres within 2 px) | 2026-11-16 (strip packages, docs/strip/): bbox from package ZL on photos 62, 63, 67 (rear), 64 (driver, lit alone), 60-64 (continuous panel px); E's box on rect 08 was [593.0, 666.0, 624.0, 715.0], 2-5 px tight. The poly is still E's outline on 08.",
+   "notes": "B check: belt centre 08/09/12/14 within ~2 px of each other. | F: over (strong): Seen on top of our opaque background in 11, 12, 13; in 10 it interrupts our grid lines (x 600, y 700). | 2026-11-16 (strip packages, docs/strip/): over confirmed (ZL: session photos 59/60, lit over our opaque background).",
    "parts": [
     "c.bottom.belt_driver"
    ]
@@ -1802,10 +1802,10 @@
    "name": "Airbag (red, seated figure with an airbag disc)",
    "safety": "critical",
    "bbox": [
-    635.0,
-    665.0,
-    679.0,
-    715.0
+    632.75,
+    664.25,
+    684.25,
+    715.5
    ],
    "poly": [
     [
@@ -1939,8 +1939,8 @@
     }
    ],
    "schematic": "design/overlay/schematic/bottom.airbag.svg",
-   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08",
-   "notes": "C9 split it in two boxes (the disc 636-656 x 662-688 and the whole 637-682 x 662-713); one lamp here. | F: unknown (none): Lit only in 08 (start-up check); unlit in 10/14; 11-13 inconclusive.",
+   "measured_by": "E: per-stroke half-max of R-max(G,B) on rect 08 | 2026-11-16 (strip packages, docs/strip/): bbox from package ZL on photos 62, 63, 67 (rear), 64 (driver, lit alone), 60-64 (continuous panel px); E's box on rect 08 was [635.0, 665.0, 679.0, 715.0], 2-5 px tight. The poly is still E's outline on 08.",
+   "notes": "C9 split it in two boxes (the disc 636-656 x 662-688 and the whole 637-682 x 662-713); one lamp here. | F: unknown (none): Lit only in 08 (start-up check); unlit in 10/14; 11-13 inconclusive. | 2026-11-16 (strip packages, docs/strip/): still unknown, as the rear belts (ZL, H claim C16). Its right edge is x 684.25 (ZL), not 679: our road bar from x 690 clears it by 5.75 px, not 11.",
    "parts": [
     "c.bottom.airbag"
    ]
@@ -2040,8 +2040,8 @@
      "note": "our clock covers the spot"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
+   "relation": "under",
+   "evidence": "medium",
    "relation_basis": [
     {
      "photo": "10",
@@ -2077,11 +2077,18 @@
      "our_pixels_opaque_there": true,
      "lit_expected": false,
      "note": "our clock's glyphs cover the spot"
+    },
+    {
+     "photo": "58",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "2026-11-16 (package ZC): BMW's symbol shows only inside the uncovered band under our paint, as the panel's text does"
     }
    ],
    "schematic": "design/overlay/schematic/bottom.cc_info.svg",
    "measured_by": "E: half-max of min(RGB) on rect 08",
-   "notes": "Comes with assist.cc_panel. | F: unknown (none): Shown only with a check-control message (08); no message in 10/14; in 14 our clock covers the spot.",
+   "notes": "Comes with assist.cc_panel. | F: unknown (none): Shown only with a check-control message (08); no message in 10/14; in 14 our clock covers the spot. | 2026-11-16 (strip packages, docs/strip/): under, with the panel (ZC on photo 58, medium). The box is confirmed for the 'i' ([736.5, 638.25, 752.75, 682.75], ZC on 62 = 08); the slot is wider - the door symbol is [720.5, 635.0, 756.0, 685.5] - and centred at y 660.4 (ZC).",
    "parts": [
     "c.bottom.cc_info"
    ]
@@ -2224,7 +2231,7 @@
    ],
    "schematic": "design/overlay/schematic/bottom.street.svg",
    "measured_by": "E: half-max of min(RGB) on rect 09 (08 shows the check-control message there instead); width depends on the text: 10 (a one-word name) ~910-1010, 14 ~820-1105",
-   "notes": "Centred near x 960; variable width. | F: under (strong): Seen in 10 (our x 950/1000 grid lines run over the name) and 14; hidden in 11-13 where we are opaque.",
+   "notes": "Centred near x 960; variable width. | F: under (strong): Seen in 10 (our x 950/1000 grid lines run over the name) and 14; hidden in 11-13 where we are opaque. | 2026-11-16 (strip packages, docs/strip/): centre 960.6 (ZC), so the centre anchor is confirmed. A free line is not always the street: 63 has no message and no street, and BMW's standby (65) shows the odometer there (H claim C4, ZC).",
    "parts": [
     "c.bottom.street"
    ]
@@ -2556,7 +2563,7 @@
    ],
    "schematic": "design/overlay/schematic/assist.speed_limit.svg",
    "measured_by": "E: half-max of R-max(G,B) on rect 08 (the red ring's outer edge)",
-   "notes": "Drawn over the speedo's bottom line. | F: under (strong): Seen in 10 with our yellow '500/600' label drawn over it, and in 14; hidden in 11-13.",
+   "notes": "Drawn over the speedo's bottom line. | F: under (strong): Seen in 10 with our yellow '500/600' label drawn over it, and in 14; hidden in 11-13. | 2026-11-16 (strip packages, docs/strip/): package ZL on 60-64, 66-68 (continuous panel px): centre (538.45, 621.2) +-0.3, red edge r 40.95, white face r 31.54, ring 9.41, ink [497.5, 580.2, 579.4, 662.2]; BMW's own black moat runs to r 42.45 (the dial line is cut at r 42.44). Open: H and O read the centre ~0.7-0.8 px lower on R's rects (y 621.9-622.9 / mean 622.02). The bbox above is E's, on rect 08. Not drawn in BMW's standby (65).",
    "parts": [
     "c.assist.speed_limit"
    ]
@@ -2567,67 +2574,51 @@
    "name": "Check-control panel (curved frame, 'i', two-line message)",
    "safety": "critical",
    "bbox": [
-    712.0,
-    601.0,
-    1240.0,
-    691.0
+    699.0,
+    602.9,
+    1223.0,
+    700.0
    ],
    "poly": [
     [
-     1240,
-     650
+     701.0,
+     621.0
     ],
     [
-     1107,
-     691
+     747.25,
+     602.9
     ],
     [
-     832,
-     691
+     1174.5,
+     602.9
     ],
     [
-     738,
-     682
+     1220.0,
+     621.0
     ],
     [
-     736,
-     680
+     1205.0,
+     640.0
     ],
     [
-     712,
-     615
+     1177.5,
+     660.0
     ],
     [
-     716,
-     611
+     1177.5,
+     700.0
     ],
     [
-     733,
-     604
+     736.0,
+     700.0
     ],
     [
-     744,
-     602
+     720.5,
+     685.5
     ],
     [
-     934,
-     601
-    ],
-    [
-     1177,
-     602
-    ],
-    [
-     1194,
-     606
-    ],
-    [
-     1208,
-     613
-    ],
-    [
-     1240,
-     643
+     720.5,
+     635.0
     ]
    ],
    "colour": {
@@ -2676,8 +2667,8 @@
      "note": "no message; the street line shows"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
+   "relation": "under",
+   "evidence": "medium",
    "relation_basis": [
     {
      "photo": "10",
@@ -2713,11 +2704,18 @@
      "our_pixels_opaque_there": false,
      "lit_expected": false,
      "note": "no message; the street line shows"
+    },
+    {
+     "photo": "58",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "2026-11-16 (package ZC): our opaque paint; BMW's message and symbol show only inside the uncovered 13 px band (y 652-666), with no rail above it. Not registered: the band matches the audit's computed gap"
     }
    ],
    "schematic": "design/overlay/schematic/assist.cc_panel.svg",
-   "measured_by": "E: half-max of min(RGB) on rect 08 (frame + 'i' + text; the panel's dark fill may run on to the panel's bottom edge)",
-   "notes": "F: unknown (none): Only seen in 08 (stock); never photographed with a check-control message while our theme was up. Safety review (F): raised to critical. The panel is the channel for check-control warnings, including the oil-pressure and coolant warnings that section 3 lists and that have no lamp among the catalogued telltales; a plan must not hide it without a redraw.",
+   "measured_by": "E: half-max of min(RGB) on rect 08 (frame + 'i' + text; the panel's dark fill may run on to the panel's bottom edge) | 2026-11-16 (strip packages, docs/strip/): bbox from package ZC on 62 (= 08) and 66 (continuous panel px; was [712.0, 601.0, 1240.0, 691.0], whose x 1240 included the marker and whose left edge missed the rail's tail): rail x 699-1223 including its faint tails, top edge 602.9, the fill to about y 700. Poly: a coarse outline through ZC's measured points - the tails (701, 621) / (1220, 621), the rail's flat top x 747.25-1174.5, the fill's 0.5 %-of-white contour on the right, the widest text (to x 1177.5) and the door symbol on the left (x 720.5).",
+   "notes": "Corrected 2026-11-16 (packages ZC, H): an arc rail (4.6 px, flat at y 605.1) WITH a faint gradient fill under it, about 0.05 of white just under the rail, fading down and towards the tips - not 'no fill'. One and two lines give the same outline. Drawn UNDER a theme (ZC on our photo 58, unregistered: medium). A connected theme does not change it (17 against 66 within 1.1 px; hypothesis). | F: unknown (none): Only seen in 08 (stock); never photographed with a check-control message while our theme was up. Safety review (F): raised to critical. The panel is the channel for check-control warnings, including the oil-pressure and coolant warnings that section 3 lists and that have no lamp among the catalogued telltales; a plan must not hide it without a redraw.",
    "parts": [
     "c.assist.cc_panel"
    ]
@@ -2725,46 +2723,26 @@
   {
    "id": "assist.info_tacho",
    "group": "assist-message",
-   "name": "'i' marker under the map, right (above the tacho's bottom line)",
+   "name": "Stored check-control messages marker ('i' or warning triangle), right of the message rail",
    "safety": "info",
    "bbox": [
-    1256.0,
-    591.0,
-    1270.0,
-    627.0
+    1243.25,
+    591.75,
+    1284.75,
+    627.5
    ],
    "poly": [
     [
-     1270,
-     627
+     1264.0,
+     591.75
     ],
     [
-     1258,
-     627
+     1284.75,
+     627.5
     ],
     [
-     1256,
-     625
-    ],
-    [
-     1256,
-     605
-    ],
-    [
-     1258,
-     594
-    ],
-    [
-     1261,
-     591
-    ],
-    [
-     1266,
-     592
-    ],
-    [
-     1268,
-     595
+     1243.25,
+     627.5
     ]
    ],
    "colour": {
@@ -2811,8 +2789,8 @@
      "note": "spot visible, empty"
     }
    ],
-   "relation": "unknown",
-   "evidence": "none",
+   "relation": "under",
+   "evidence": "medium",
    "relation_basis": [
     {
      "photo": "10",
@@ -2848,11 +2826,18 @@
      "our_pixels_opaque_there": false,
      "lit_expected": false,
      "note": "spot visible, empty"
+    },
+    {
+     "photo": "43",
+     "seen": true,
+     "our_pixels_opaque_there": true,
+     "lit_expected": true,
+     "note": "2026-11-16 (package ZR): our 0.7.7 over the row; only the triangle's apex and the middle of its base survive our paint, its lower corners are cut by it: drawn under a theme"
     }
    ],
    "schematic": "design/overlay/schematic/assist.info_tacho.svg",
-   "measured_by": "E: half-max of min(RGB) on rect 08",
-   "notes": "Meaning not known (a pending check-control or info marker; appears with the 08 message). | F: unknown (none): Only seen in 08 (with a pending message); absent in 14; 11-13 inconclusive.",
+   "measured_by": "E: half-max of min(RGB) on rect 08 | 2026-11-16 (strip packages, docs/strip/): bbox is the warning triangle, the slot's widest glyph: [1243.25, 591.75, 1284.75, 627.5], 41.25 x 35.75 (package ZR on 66 / 67; H provisional [1241.5, 590.3, 1283.5, 626.4]); poly a coarse triangle through it. The 'i' alone: [1255.75, 591.25, 1269.75, 626.5] (ZR on 62 = 08, confirming E's [1256, 591, 1270, 627]) and [1256.5, 592.0, 1270.25, 626.75] on 63. The old box was the 'i' only; the box measured on photo 43 was our own 0.7.7 window clipping the triangle (H, ZR).",
+   "notes": "Corrected 2026-11-16 (packages H, P, ZR): NOT a marker that appears with the message. It is independent of the message and outlives it: 62 has a message and the 'i', 63 (about a minute later) no message and the same 'i'; 66 a door message and the triangle, 67 no message and the triangle; 61, 64, 68 neither. Most likely BMW's indicator that at least one check-control message is displayed or stored (G80 / X1 owner's manuals; P, strong hypothesis); the glyph follows the class of what is stored ('i' information, triangle warning; one example each, hypothesis). Drawn UNDER a theme (ZR on 43). Its apex touches the map window's lower corner (ZR). | F (before): unknown (none): Only seen in 08 (with a pending message); absent in 14; 11-13 inconclusive.",
    "parts": [
     "c.assist.info_tacho"
    ]
@@ -3010,54 +2995,42 @@
   {
    "id": "assist.mode_label",
    "group": "assist-message",
-   "name": "Mode label 'COMFORT PLUS', custom-theme position (bottom row)",
+   "name": "Mode label 'COMFORT PLUS', row position (theme connected, or BMW's standby)",
    "safety": "info",
    "bbox": [
-    1226.0,
-    659.0,
-    1359.0,
-    711.0
+    1222.75,
+    656.6,
+    1356.4,
+    709.0
    ],
    "poly": [
     [
-     1359,
-     661
+     1225.25,
+     657.25
     ],
     [
-     1354,
-     682
+     1355.0,
+     657.25
     ],
     [
-     1289,
-     711
+     1355.0,
+     681.25
     ],
     [
-     1230,
-     711
+     1290.0,
+     686.0
     ],
     [
-     1227,
-     708
+     1290.0,
+     708.25
     ],
     [
-     1226,
-     670
+     1226.0,
+     708.25
     ],
     [
-     1227,
-     664
-    ],
-    [
-     1233,
-     659
-    ],
-    [
-     1316,
-     659
-    ],
-    [
-     1358,
-     660
+     1225.25,
+     681.25
     ]
    ],
    "colour": {
@@ -3145,8 +3118,8 @@
     }
    ],
    "schematic": "design/overlay/schematic/assist.mode_label.svg",
-   "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it; 14 is coarse, edges +-2-3 px); cross-check 10",
-   "notes": "F: under (strong): Shown in the bottom row with a theme connected (10: our x 1300 grid line runs over 'COMFORT'; 14); hidden in 11-13 although the P next to it is drawn over us.",
+   "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it; 14 is coarse, edges +-2-3 px); cross-check 10 | 2026-11-16 (strip packages, docs/strip/): bbox is package ZR's footprint over every registration (continuous panel px; was [1226.0, 659.0, 1359.0, 711.0]): the left edge is 1225.25 on R's 60 / 14, 1223.2 on H's 17 and 1222.75 on 65 - a 2-2.5 px spread between registrations, so the label starts at x ~1223, not 1226. Poly: ZR's two lines on 60 / 14, line 1 [1225.25, 657.25, 1355.0, 681.25], line 2 [1226.0, 686.0, 1290.0, 708.25]. Overexposure-corrected cap 20.1-20.7 (T).",
+   "notes": "F: under (strong): Shown in the bottom row with a theme connected (10: our x 1300 grid line runs over 'COMFORT'; 14); hidden in 11-13 although the P next to it is drawn over us. | 2026-11-16 (strip packages, docs/strip/): in the row with a theme connected (10 = 60, 14, 17) or in BMW's standby (65), not when the centre is merely occupied (63 and 67 keep it in the tacho; H claim C5). Under a theme confirmed (ZR on 60: our x 1300 grid line runs over it). Only one mode name was ever seen, so its widest extent is unknown (ZR).",
    "parts": [
     "c.assist.mode_label"
    ]
@@ -3463,7 +3436,7 @@
    ],
    "schematic": "design/overlay/schematic/assist.gear.svg",
    "measured_by": "E: half-max of min(RGB) on rect 14 (08/09 lack it). Checks: 12 [1397,666,1425,704] (same centre, glyph bloomed at night), 11 [1395,666,1420,700] (extrapolated fit below y 562), 13 coarse; 10 not measurable this way (grid lines)",
-   "notes": "Other gears (R, N, D, S, M) are wider than P: keep C9's/visible.js margin. | F: over (strong): P seen on top of our opaque background in 11, 12, 13; in 10 it interrupts our x 1400 grid line.",
+   "notes": "Other gears (R, N, D, S, M) are wider than P: keep C9's/visible.js margin. | F: over (strong): P seen on top of our opaque background in 11, 12, 13; in 10 it interrupts our x 1400 grid line. | 2026-11-16 (strip packages, docs/strip/): over confirmed (ZR: 60, 58). ZR's box on 60 / 14: [1396.0, 666.25, 1419.75, 699.75]; in the row only with a theme connected.",
    "parts": [
     "c.assist.gear"
    ]

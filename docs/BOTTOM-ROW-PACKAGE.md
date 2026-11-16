@@ -39,7 +39,11 @@ Corrections to the brief, from the catalogue:
 - `Guidance` is **not instance 1**: the catalogue's `instanceIDs` give it `Main_Instance` = 128. The kit subscribed
   `"1"` for every interface, so `kit/runtime/car.js` gained a per-interface `$instance` (below). Without it
   `currentRoad` would simply never arrive;
-- `requestDefaultSymbols` is not on `KombiInterface_2` on this firmware; `requestCCMessage` is, and is declared;
+- ~~`requestDefaultSymbols` is not on `KombiInterface_2` on this firmware~~ — *corrected 2026-11-16:* it **is**:
+  the catalogue has `KombiInterface_2.requestDefaultSymbols`, methodId 15 (checked by
+  `tools/signals/check_signals.py`; `bench/test-probes.js` asserts it; package P lists it from the catalogue:
+  `requestDefaultSymbols(CC_LIST_SYMBOL …)` returns up to 32 symbols, `docs/strip/P-REPORT.md` §2). 0.7.18's probes call it once, log only. `requestCCMessage` is
+  on it too, and is declared;
 - `nextDestinationInfo` is `{ travelTime (s), estimatedArrivalTime (a struct whose seconds member is spelled
   `secound`), formattedDistance { distance (text), unit (enum), rawDistance } }`;
 - `currentLocation.address` has `street`, `houseNumber`, `junction`, `district`, `city`, `region`, `country`,
@@ -110,12 +114,22 @@ ones do).
   "ours" the window closes (mode 3) and our sign is the only one. It goes **inside the speedometer, below the needle
   hub**, where the bench already puts it. The window also closes while the car stands in P with the engine off, as
   before (BMW draws no sign on its standby screen).
+  *Corrected 2026-11-16 (packages P, H, ZL, O; fixed in code by package X):* P with the engine off is **not** BMW's
+  standby. In 62 and 63 the car is in P with the engine off (the tacho reads OFF) and BMW draws its **normal** row,
+  sign included; only 65 shows the standby row (odometer, mode label in the row, no sign, no belts). Closing the
+  window on "P and rpm < 150" blacked out a sign BMW was drawing (O: 5389 px in `allG20`). Standby is BMW's vehicle
+  condition WOHNEN, **`VehicleCondition` 5** (`COND_STANDBY` in `shared/hud.js`), and the window now closes only
+  there. That 65 is condition 5 is a hypothesis until the car logs `bottom row: vehicle condition N` beside it.
 - **The info message: a split, and that is the point.** On "ours" the car keeps drawing the graphic and its
   animation in its own column, and we draw only the text. `wbback` gained `ccSym` next to the existing `cc` box:
   `cc` is BMW's whole message panel (x 709–1243), `ccSym` is only the symbol column (x 709–790, around the stock
   `bottom.cc_info` "i" at x 736–753 with room for the wider symbols). `_wbCcSend()` opens `cc` on "BMW's" and
   `ccSym` on "ours", so BMW's symbol area stays see-through either way and our `cc_name` / `cc_desc` texts sit
   beside it.
+  *Superseded:* `CC_SYM` has been [700, 628, 757, 690] since `d882270` (H claim C21), and package X removed `ccSym`
+  and the two-line `cc_name` / `cc_desc` altogether (one line, `cc_line`; `docs/strip/X-REPORT.md`). BMW's panel
+  is also not just a frame: it has a faint gradient **fill** under its rail (ZC, H; `docs/G20-DESIGN-SPEC.md`
+  §5.1), and its marker right of the rail outlives the message (§5.6 there).
   **2026-11-16: the field is ours only once the car's message has been READ** (`_ccWired()`: one notification from
   `config.ccm` carried a name, a description, a symbol, an id or a type — a struct whose paths fit the car carries
   its id and type even with no message on). Until then we are blind: we never learn when the cluster writes in that
@@ -129,6 +143,10 @@ ones do).
   x 690 so the rear-belt, driver-belt and airbag lamps (which end at x 679) are **never** covered. While a message
   shows and the info field is BMW's, a hole in the bar opens over the panel so BMW's own message text is not
   blacked out; our road text steps aside while a message shows, as the stock cluster does.
+  *Corrected 2026-11-16:* 331 px was one street's ink width (photo 09), not BMW's field; the widest name seen is
+  509 px (photo 34) and the field is about 520 px (H claim C19; spec §3). The airbag lamp ends at x **684.25**, not
+  679 (package ZL), so the bar from x 690 clears it by 5.75 px; it is still never covered. (Package X later moved
+  the bar's top to y 650, and the strip mask has since replaced the bar.)
 - **Colour: white only for now.** `cCColor` is read and recorded; every message is drawn in the theme's normal
   foreground. The severity colours are one line away (`colorBy: "cc"` on the `cc_name` text), and `_ccRole()`
   already dims a colour at night instead of recolouring it, the way the 6WB shaders treat `WBSIGN`.
@@ -172,12 +190,14 @@ Everything the design agents replace is in one block, marked **THE SEAM** in the
 Where the spec measured a number, this package already uses it: the street label is centred on **x 960.5** with
 baseline **y 700.5**, the message text on **x 967.5** with the two-line baselines **645.8 / 690.2**, and the
 symbol slot is sized from the measured one (right edge 752.9, centre y 658.7, up to 41.3 px wide). What is still
-placeholder is the typeface, the weights, and the rail.
+placeholder is the typeface, the weights, and the rail. (*2026-11-16:* several of these numbers were re-measured
+by the strip packages — street centre 960.6 / baseline ~700, message centre 968.6, symbol centre y 660.4, and
+every text size 1–2 px smaller; `docs/G20-DESIGN-SPEC.md` §0 has the corrected table.)
 
 | Where | What is there now | What replaces it |
 |---|---|---|
 | `design/gen_6wb.py`, between `# --- bottom row ... ---` and `# --- end bottom row ---` (the constants `CC_SYM`, `CC_TEXT_C`, `CC_TEXT_W`, `CC_LINE_Y`, `NAV_BAR`, `NAV_HOLE`, `NAV_CX`, `NAV_BASE`, `NAV_W`, and the three builders `road_signs()`, `nav_row()`, `cc_row()`) | the measured positions, drawn in `wb_cap` | the measured typeface and weights (Roboto, width axis 87.5; the street in Light against the values' Medium), and the shields. Regenerate with `python3 design/gen_6wb.py apps/f30_cluster/hud/layouts` |
-| **the rail** | not drawn, and not exposed | The check-control field is a 4.9 px rail at y 604.8 (x 749–1176, tapering to points at 702,621 and 1221,621), not a box. `WBBACK u_cc` is **one** vec4, so only one area of BMW's panel can be opened and this package opened the symbol slot; the rail stays under our black band. Either draw the rail ourselves from those numbers, or add a second box uniform — which is a shader change this package was not allowed to make |
+| **the rail** | not drawn, and not exposed | The check-control field is a 4.9 px rail at y 604.8 (x 749–1176, tapering to points at 702,621 and 1221,621), not a box. (*Corrected 2026-11-16, ZC:* a 4.6 px rail at y 605.1, flat x 747–1175, **with a faint gradient fill under it**; spec §5.1.) `WBBACK u_cc` is **one** vec4, so only one area of BMW's panel can be opened and this package opened the symbol slot; the rail stays under our black band. Either draw the rail ourselves from those numbers, or add a second box uniform — which is a shader change this package was not allowed to make |
 | `shared/hud.js` `_signShow()` + `config.sign.holdMs` / `changeFlashMs` / `flashPeriodMs` | the end-of-limit **state**, no animation | the derestriction animation, once there is a video to measure |
 | `shared/hud.js` `_ccRole()` + `colorBy: "cc"` on `cc_name` | white only; `cCColor` read and recorded | the severity colours |
 | `config.road.spacerMap`, `roadOf()`'s icon handling | an icon contributes its own text (`A 9`) | the road shields (`docs/ROAD-SHIELDS.md`); the icon's `iconHandle` is a navigation resource we cannot resolve, so a shield has to be drawn by us |
@@ -352,9 +372,13 @@ Nothing here has been seen on a car. In rough order:
    cluster marks the limit on its own scale too, and "matching the stock look" means something different.
 5. **The split.** With the info field on "ours", BMW's symbol and its animation must still be visible in their
    column and our text beside them. `ccSym` (x 709–790) is sized from the stock `bottom.cc_info` box plus room; a
-   wider stock symbol would need it widened.
+   wider stock symbol would need it widened. *Superseded:* `CC_SYM` became [700, 628, 757, 690] in `d882270` (H
+   claim C21), and package X removed the symbol column; the widest stock symbol seen, the door, is
+   [720.5, 635.0, 756.0, 685.5] (ZC).
 6. **Safety lamps.** With the navigation label on "ours", the belt and airbag lamps (x 503–679) must still be fully
-   visible: our bar starts at x 690.
+   visible: our bar starts at x 690. *Corrected 2026-11-16:* the lamps span x **500.5–684.25** (package ZL), so
+   the bar clears the airbag by 5.75 px. Only the driver belt is known to be drawn over a theme; the rear belts and
+   the airbag are unknown (ZL, H claim C16), so none of the three may be covered.
 7. **Layers.** With all three on "ours", confirm the rebuild line still says 8 or fewer layers per connection.
 8. **The KOMBI.** No shader changed, so the 2026-11-14 reset should not be in play — but the 6WB themes are still
    the ones that caused it, and this package does not address that.
@@ -380,9 +404,9 @@ Where something was unknown, a sensible value was picked, marked in the code and
 | unit `NICHT_VERFUEGBAR` means BMW's empty sign "---" | `config.sign.noUnit` | the same line |
 | `invalidFlag` ≠ 0 means nothing is known | `config.sign.invalidPath` | the same line |
 | the car's time-zone offset is in 15-minute steps from UTC | `config.clock.factor` / `offsetBy` | one `clock:` line (and `confirm` keeps it harmless until then) |
-| the message's name goes on the first measured line and its description on the second | `design/gen_6wb.py cc_row()` | a photo of a two-line message where the two lines are a wrapped sentence rather than name + description |
+| the message's name goes on the first measured line and its description on the second | `design/gen_6wb.py cc_row()` | a photo of a two-line message where the two lines are a wrapped sentence rather than name + description. *2026-11-16 (H claim C22):* unsupported — the only stock two-line message (08 = 62) is one sentence broken after a colon, and a photo cannot say which struct field each line came from. Moot for our drawing since package X draws one line, the headline only |
 | a long name or message is cut with "..." | `shared/hud.js _fitText()` | a photo of the stock cluster with a street name too long for its field (spec §8) |
-| the symbol slot is 700–757 × 628–690 | `CC_SYM` | a photo of the widest stock symbol (spec §8: only the "i", a door and a heated wheel were ever shot) |
+| the symbol slot is 700–757 × 628–690 | `CC_SYM` | a photo of the widest stock symbol (spec §8: only the "i", a door and a heated wheel were ever shot). *2026-11-16:* ZC proposes [711, 632, 757, 688], centred at y 660.4; the door reaches x 756.0. `CC_SYM` is gone with package X |
 | the no-passing sign keeps the place it has had since package E (beside the limit sign, inside the speedometer) | `road_signs()` | a photo of the stock cluster showing both signs at once (spec §8) |
 | the end-of-limit and the greyed "unsure" symbols are whatever `WBSIGN` already draws for states 2 and 3 | `shared/shaders.js` | a photo of each (spec §8) |
 | a three-digit limit and any supplementary plate fit the sign as it is | `WBSIGN` | a photo of each (spec §8) |

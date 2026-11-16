@@ -286,7 +286,8 @@ const ROW_KEYS = ['limitArc', 'ccStyle'];
 // backdrop (WBBACK u_cc) and the road bar (nav_bg) are on three different connections to cluster-render, which says
 // nothing back, so "sent in an earlier tick, and this long ago" is the strongest "it is on the screen" we can know.
 const CC_SETTLE_MS = 150;
-// standby (P with the engine off) must hold this long, and so must leaving it, before the row changes hands: the row
+// standby (BMW's vehicle condition COND_STANDBY below - not "P with the engine off") must hold this long, and so must
+// leaving it, before the row changes hands: the row
 // is rebuilt each time, and a shifter moved through P or an engine stalling must not rebuild it twice in a second
 const STANDBY_MS = 1000;
 // Standby = BMW's own vehicle condition (VehicleCondition statusConditionVehicle, data().condition) WOHNEN, 5. NOT
@@ -3426,8 +3427,9 @@ class HudApp {
     }
 
     /** package X: why the bottom row of a see-through layout is BMW's now, or null while the whole row is ours.
-     *  In this order: the switch; the latch (something could not be drawn: until the app restarts); standby (P with
-     *  the engine off: always BMW's standby row, in both modes); waiting for a time zone (the clock is always ours, and
+     *  In this order: the switch; the latch (something could not be drawn: until the app restarts); standby (vehicle
+     *  condition COND_STANDBY, not "P with the engine off": always BMW's standby row, in both modes); waiting for a
+     *  time zone (the clock is always ours, and
      *  without a zone it would show the head unit's UTC); waiting for the car's check-control message to be read
      *  once (until then we are blind to BMW's panel and must not cover it). The two waits are not latches: the row
      *  comes in by itself once the zone or the message arrives (_rowSync rebuilds). */
@@ -4488,9 +4490,11 @@ class HudApp {
                 // the car sends. "all6WB" closes it (3): our sign is the only one, and while the car has sent nothing
                 // the spot stays black. "allG20" (the default) leaves it open (1), exactly as before this package, so
                 // BMW draws the sign and our WBSIGN layer is not even built (the layout's "own:sign" toggle).
-                // 2026-11-14: closed too while the car stands in P with the engine off (BMW's standby screen, "Total
-                // ... km"): BMW draws no sign then, and the window showed a bar of its bottom line (y ~645) that the
-                // sign otherwise covers. An auto start/stop stop is in D, so BMW's sign still shows at the lights.
+                // 2026-11-14: closed too while the car stands in P with the engine off (taken then for BMW's standby
+                // screen, which draws no sign: the window showed a bar of its bottom line (y ~645) that the sign
+                // otherwise covers). That was WRONG: in P with the engine off BMW draws its normal row and its sign
+                // (photos 62, 63); only its real standby draws none. An auto start/stop stop is in D, so BMW's sign
+                // still shows at the lights.
                 // package X (package P's photos 63, 64: P with the engine off and BMW still draws its sign): closed in
                 // BMW's STANDBY only (vehicle condition COND_STANDBY), not in every "P, engine off"
                 const parked = this._standbyNow();
