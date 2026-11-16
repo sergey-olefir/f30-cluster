@@ -632,6 +632,61 @@ async function main() {
     await click('SET_G20');
     await until((q) => q.activeName === 'wb_comfort', 20000);
 
+    // ---- fix/row-cc (the state gallery bake/work/shots/20261116-2107): the opaque themes' own row vs BMW's panel.
+    // Defect 1: a message arriving after the build opened BMW's panel (u_cc) with our clock / temperature row still
+    // drawn over BMW's text. Defect 2: a layout built while a message showed had no row, and it stayed missing after the
+    // message cleared. The row's "!cc:shown" was read only at a rebuild; now it is read live (hud.js _ccHidden).
+    console.log('fix/row-cc: in the opaque themes our row steps aside for BMW\'s message panel, and comes back');
+    await req('POST', '/restart');
+    await sleep(1000);
+    await until((q) => q && q.ready && q.activeName, 90000);
+    const builds = () => (logText.match(/layout "[^"]*": \d+ widgets/g) || []).length;
+    const ccIs = (v) => (q) => S(q).cc && S(q).cc.shown === v;
+    for (const v of ['wb_comfort', 'wb_sport', 'wb_eco']) {
+        const box = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts', v + '.json'), 'utf8'))
+            .widgets.find((x) => x.id === 'bg').cc;
+        const inkIn = async () => (await inkRows(box)).total;
+        const inkUntil = async (fn, ms) => { let n = -1; for (const t0 = Date.now(); Date.now() - t0 < ms;) { n = await inkIn(); if (fn(n)) break; await sleep(100); } return n; };
+        await set('hudLayout', v);
+        p = await until((q) => q.activeName === v, 20000);
+        await scene('clock-plus2'); await scene('cc-clear');
+        await until(ccIs(false), 5000);
+        let n = await inkUntil((k) => k > 0, 5000);
+        ok(p.activeName === v && n > 0, v + ': no message - our row is drawn inside the panel box ' + JSON.stringify(box) + ' (' + n + ' px)');
+        const b0 = builds();
+        await scene('cc-red');
+        await until(ccIs(true), 5000);
+        n = await inkIn();
+        let worst = n;
+        for (const t0 = Date.now(); Date.now() - t0 < 1000;) { worst = Math.max(worst, await inkIn()); await sleep(100); }
+        const bg = ((await renderer()) || []).find((l) => l.uniforms && l.uniforms.u_cc);
+        const ucc = bg && (bg.uniforms.u_cc.v || bg.uniforms.u_cc);
+        ok(ucc && ucc[2] > ucc[0], v + ': a message shows - BMW\'s panel is open (u_cc ' + JSON.stringify(ucc) + ')');
+        ok(n === 0 && worst === 0, v + ': and nothing of ours is painted in it, at once and for the next second (' + n + ' / ' + worst + ' px)');
+        await scene('cc-clear');
+        await until(ccIs(false), 5000);
+        n = await inkUntil((k) => k > 0, 2000);
+        ok(n > 0 && builds() === b0, v + ': the message clears - our row is back, with no rebuild (' + n + ' px, ' + (builds() - b0) + ' rebuilds)');
+        // built WHILE a message shows (the gallery's "15-cold-engine-redline" after a message job), then cleared
+        await scene('cc-red');
+        await until(ccIs(true), 5000);
+        await set('hudLayout', v === 'wb_comfort' ? 'wb_sport' : 'wb_comfort');
+        await until((q) => q.activeName !== v, 20000);
+        await set('hudLayout', v);
+        await until((q) => q.activeName === v, 20000);
+        await sleep(800);
+        n = await inkIn();
+        ok(n === 0, v + ': built while the message shows - nothing of ours in BMW\'s panel (' + n + ' px)');
+        const b1 = builds();
+        await scene('cc-clear');
+        await until(ccIs(false), 5000);
+        n = await inkUntil((k) => k > 0, 2000);
+        ok(n > 0 && builds() === b1, v + ': then cleared - the row comes back by itself, with no rebuild (' + n + ' px, ' + (builds() - b1) + ' rebuilds)');
+    }
+    await set('hudLayout', 'wb_comfort');
+    await until((q) => q.activeName === 'wb_comfort', 20000);
+    // ---- end fix/row-cc ----
+
     console.log('every layout still builds');
     for (const v of opts('hudLayout')) {
         await set('hudLayout', v);

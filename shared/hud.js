@@ -2629,7 +2629,8 @@ class HudApp {
         this.log.info('layout "' + layout.name + '", theme ' + this.theme.name + (this.layoutTheme ? '' : ' (' + this.setting('hudTheme') + ')') +
             (this.nightOn ? ', night colours ' + this._nightNote() : ''));
         // 0.7.14: a text widget with "gpu": true becomes its atlas text layers here (_gpuTexts)
-        const shown = this._gpuTexts(layout.widgets.filter((w) => !(w.toggle && !this._toggleOn(w.toggle)) && !(w.themes && w.themes.indexOf(this.themeName) < 0)));
+        // fix/row-cc: _builtOn - a text's "cc:" toggle parts are read live (_ccHidden), not here
+        const shown = this._gpuTexts(layout.widgets.filter((w) => this._builtOn(w) &&!(w.themes && w.themes.indexOf(this.themeName) < 0)));
         this._setNeeds(shown);
         // plan the layers first (a sheet's size is only known once every member is placed), then make them
         // in that order: within a class and z, cluster-render puts the newer layer on top. Small sheets
@@ -3452,6 +3453,9 @@ class HudApp {
      *  bench's audit caught exactly that). Opening is what matters here; covering still waits for _ccOnScreen. */
     _ccPush() {
         if (!this.client || !this.client.ready || !this.widgets) return;
+        // ---- fix/row-cc (2026-11-16): our "cc:"-toggled texts step aside BEFORE BMW's panel opens (_ccLiveSync) ----
+        this._guard('message panel texts', () => this._ccLiveSync(true));
+        // ---- end fix/row-cc ----
         this._guard('message panel', () => this.widgets.forEach((x) => {
             if (!x.w || !x.ref) return;
             // strip integration: in a layout with the strip mask BMW's panel opens through the mask's "msg" hole lane
@@ -3462,7 +3466,50 @@ class HudApp {
                 if (key !== x.last) { x.last = key; x.c.uniform(x.ref, 'u_hole', h); }
             }
         }));
+        // ---- fix/row-cc: and come back only AFTER BMW's panel has shut again ----
+        this._guard('message panel texts', () => this._ccLiveSync(false));
+        // ---- end fix/row-cc ----
     }
+
+    /* ---- fix/row-cc (2026-11-16, the state gallery bake/work/shots/20261116-2107): LIVE "cc:" toggles ----
+     * The opaque 6WB themes' own clock / temperature row carries "!cc:shown" (design/gen_6wb.py), but a widget's
+     * toggle was read only at _rebuild, and a check-control message never rebuilds (it only pushes u_cc, _ccPush).
+     * So a message that arrived after the build opened BMW's panel (u_cc) with our row still drawn on top of BMW's
+     * text (defect 1, against the safety rule), and a layout built while a message showed had no row at all, which
+     * stayed missing after the message cleared until something else rebuilt (defect 2: Sport and Eco).
+     * Now a TEXT widget's "cc:" parts are not asked at the build (_builtOn counts them as on); the widget is always
+     * built, and is painted empty for as long as its whole toggle is off (_ccHidden, read live in _updateOne). The
+     * signal handler's _ccPush applies it in the same event: texts are blanked before the panel opens, and drawn
+     * again only after it has shut. Other widget types keep the build-time reading (no layout gives them "cc:"). */
+
+    /** Whether a widget's toggle has a "cc:" part that is read live rather than at the build. */
+    _ccLive(w) {
+        return !!(w && w.type === 'text' && typeof w.toggle === 'string' && w.toggle.indexOf('cc:') >= 0);
+    }
+
+    /** _rebuild's question, "is this widget built?": its toggle, with a live widget's "cc:" parts counted as on. */
+    _builtOn(w) {
+        if (!w.toggle) return true;
+        if (!this._ccLive(w)) return this._toggleOn(w.toggle);
+        const rest = w.toggle.split('&').filter((p) => p.replace(/^!/, '').indexOf('cc:') !== 0);
+        return !rest.length || this._toggleOn(rest.join('&'));
+    }
+
+    /** A live widget whose whole toggle is off now: built, but painted empty. */
+    _ccHidden(w) {
+        return this._ccLive(w) && !this._toggleOn(w.toggle);
+    }
+
+    /** Repaint at once every live widget that must go (hide true) or may come back (hide false). */
+    _ccLiveSync(hide) {
+        const now = Date.now();
+        this.widgets.forEach((x) => {
+            if (!x.w || !x.ref || !this._ccLive(x.w) || this._ccHidden(x.w) !== hide) return;
+            if (hide ? x.ccHid : !x.ccHid) return;              // already as wanted: nothing to send
+            this._update(x, now, true);
+        });
+    }
+    /* ---- end fix/row-cc ---- */
 
     /** package X: called right after our message line's pixels were handed to the connection. '' clears. */
     _ccPainted(s) {
@@ -4089,6 +4136,10 @@ class HudApp {
         } else if (w.type === 'text') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             let s = this._resolve(w.text);
+            // ---- fix/row-cc: a live "cc:" toggle that is off paints the widget empty (BMW's panel is open) ----
+            x.ccHid = this._ccHidden(w);
+            if (x.ccHid) s = '';
+            // ---- end fix/row-cc ----
             // Bottom row: the car's own words. They are drawn in wb_road (the road label) and wb_msg (our message line),
             // which carry Ukrainian, Russian and Belarusian and the Latin accents of European street names (strip
             // packages F and the integration: tools/bake_fonts.py CAR_TEXT). A character still outside that set (Greek,
