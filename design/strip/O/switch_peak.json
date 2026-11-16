@@ -1,0 +1,74 @@
+{
+ "start": {
+  "pixel_peak_mib": 12.025,
+  "layers_peak": 20,
+  "per_conn_peak": 7,
+  "assets_peak": 9
+ },
+ "allG20": {
+  "pixel_peak_mib": 10.728,
+  "layers_peak": 15,
+  "per_conn_peak": 6,
+  "assets_peak": 7
+ },
+ "all6WB": {
+  "pixel_peak_mib": 12.025,
+  "layers_peak": 20,
+  "per_conn_peak": 7,
+  "assets_peak": 9
+ },
+ "msg (info ours)": {
+  "pixel_peak_mib": 13.216,
+  "layers_peak": 20,
+  "per_conn_peak": 7,
+  "assets_peak": 9
+ },
+ "clock ours": {
+  "pixel_peak_mib": 13.216,
+  "layers_peak": 20,
+  "per_conn_peak": 7,
+  "assets_peak": 9
+ },
+ "cc-clear": {
+  "pixel_peak_mib": 13.216,
+  "layers_peak": 20,
+  "per_conn_peak": 7,
+  "assets_peak": 9
+ },
+ "P rpm 0": {
+  "pixel_peak_mib": 13.216,
+  "layers_peak": 20,
+  "per_conn_peak": 7,
+  "assets_peak": 9
+ },
+ "D": {
+  "pixel_peak_mib": 13.216,
+  "layers_peak": 20,
+  "per_conn_peak": 7,
+  "assets_peak": 9
+ },
+ "allG20 again": {
+  "pixel_peak_mib": 10.728,
+  "layers_peak": 15,
+  "per_conn_peak": 6,
+  "assets_peak": 7
+ },
+ "all6WB again": {
+  "pixel_peak_mib": 13.216,
+  "layers_peak": 20,
+  "per_conn_peak": 7,
+  "assets_peak": 9
+ },
+ "g20 off (opaque Comfort)": {
+  "pixel_peak_mib": 11.527,
+  "layers_peak": 21,
+  "per_conn_peak": 7,
+  "assets_peak": 11
+ },
+ "g20 on (Comfort + G20)": {
+  "pixel_peak_mib": 13.216,
+  "layers_peak": 20,
+  "per_conn_peak": 7,
+  "assets_peak": 9
+ }
+}
