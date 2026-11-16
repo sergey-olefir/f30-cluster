@@ -257,8 +257,10 @@ const WB_STYLE = { comfort: 0, sport: 1, eco: 2, mini: 3, eff: 4 };
 const WB_FOOT = { glass: 0, hair: 1, chrome: 2, none: 3 };
 // --- package F (docs/POLISH-F-REPORT.md): settings of the 6WB layouts ---
 // "dialShade" (6WB Dials + G20): the shade at our dials' inner edges over BMW's map, drawn by WBBACK's collar path
-// (u_shade): strength at our rim, falloff px. "normal" is polish B's baked 0.8 / 20 px
-const WB_SHADE = { off: [0, 20], weak: [0.5, 12], normal: [0.8, 20], strong: [0.95, 34] };
+// (u_shade): strength at our rim, falloff px. "normal" is polish B's baked 0.8 / 20 px. fix/settings (2026-11-16): the
+// shade now lies over the window's own 50 px rim veil, which hides its first px, so "weak" falls off over 16 px, not 12
+// (at 12 it was at most 8 of 255 levels darker than "off"; at 16, 13 - and "normal" 17 more, "strong" 42 more)
+const WB_SHADE = { off: [0, 20], weak: [0.5, 16], normal: [0.8, 20], strong: [0.95, 34] };
 // settings that only change a uniform of a layer already there (_wbLive); "wbFoot" to or from "glass" rebuilds (texture)
 const WB_LIVE_KEYS = ['dialShade', 'wbFoot'];
 // --- end package F ---
