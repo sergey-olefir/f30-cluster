@@ -1,0 +1,435 @@
+{
+ "design/gen_6wb.py:CC_BOX": [
+  {
+   "commit": "729ee63",
+   "date": "2026-11-14",
+   "subject": "6WB: check-control window, map window around the dials, symmetric G20 cut; drop \"Comfort + BMW map\"",
+   "removed": [],
+   "added": [
+    "CC_BOX = [709, 598, 1243, 694]"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:CC_TOP": [
+  {
+   "commit": "f59e5f8",
+   "date": "2026-11-14",
+   "subject": "6WB Dials + G20: Comfort's map window and foot line, one soft foot band, mirrored corners; minis calibrated; bench G20 photos",
+   "removed": [],
+   "added": [
+    "CC_TOP = [590, 594, 1250, 665]"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:CC_TOP_SOFT": [
+  {
+   "commit": "f59e5f8",
+   "date": "2026-11-14",
+   "subject": "6WB Dials + G20: Comfort's map window and foot line, one soft foot band, mirrored corners; minis calibrated; bench G20 photos",
+   "removed": [],
+   "added": [
+    "CC_TOP_SOFT = 13"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:NAV_BAR": [
+  {
+   "commit": "ab24414",
+   "date": "2026-11-15",
+   "subject": "Bottom row: wire the car's sign, message and road signals, and make each one a choice",
+   "removed": [],
+   "added": [
+    "NAV_BAR = [690, 666, 1250, 712]"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:NAV_HOLE": [
+  {
+   "commit": "ab24414",
+   "date": "2026-11-15",
+   "subject": "Bottom row: wire the car's sign, message and road signals, and make each one a choice",
+   "removed": [],
+   "added": [
+    "NAV_HOLE = [CC_BOX[0], 666, CC_BOX[2], 712]"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:SIGN_WIN": [
+  {
+   "commit": "d289700",
+   "date": "2026-11-12",
+   "subject": "6WB Dials + G20: black soft collar (band under the dial bottoms, shade at their inner edges, COMFORT PLUS patch, keep-out round shown G20 items); our road signs, BMW's sign window open only while our limit is unknown; soft windows",
+   "removed": [],
+   "added": [
+    "SIGN_WIN, I_WIN, WIN_SOFT = [539, 622, 44], [1254, 589, 1272, 629], 4"
+   ]
+  },
+  {
+   "commit": "5979f85",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20 on the car: patches as plain vec4s, own-row settings reset once to their defaults, own row logged and on the status line; sign window tight on BMW's sign with a black ring; bezel ends at the check-control window; map gets soft edges; hook-stub patch while no message shows (cc:none)",
+   "removed": [],
+   "added": [
+    "SIGN_WIN, SIGN_SOFT = [537.5, 621.5, 42.5], 1"
+   ]
+  },
+  {
+   "commit": "8fe3c81",
+   "date": "2026-11-14",
+   "subject": "6WB Sport + G20 layout; night looks (nightLook), night colours changed in place",
+   "removed": [],
+   "added": [
+    "SIGN_WIN = [537.3, 621.3, 42.0]"
+   ]
+  },
+  {
+   "commit": "3bfce09",
+   "date": "2026-11-16",
+   "subject": "The whiskers beside BMW's sign, and a dropped patch says so",
+   "removed": [],
+   "added": [
+    "SIGN_WIN = [537.3, 621.3, 40.0]"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:SIGN_SOFT": [
+  {
+   "commit": "5979f85",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20 on the car: patches as plain vec4s, own-row settings reset once to their defaults, own row logged and on the status line; sign window tight on BMW's sign with a black ring; bezel ends at the check-control window; map gets soft edges; hook-stub patch while no message shows (cc:none)",
+   "removed": [],
+   "added": [
+    "SIGN_WIN, SIGN_SOFT = [537.5, 621.5, 42.5], 1"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:I_WIN": [
+  {
+   "commit": "d289700",
+   "date": "2026-11-12",
+   "subject": "6WB Dials + G20: black soft collar (band under the dial bottoms, shade at their inner edges, COMFORT PLUS patch, keep-out round shown G20 items); our road signs, BMW's sign window open only while our limit is unknown; soft windows",
+   "removed": [],
+   "added": [
+    "SIGN_WIN, I_WIN, WIN_SOFT = [539, 622, 44], [1254, 589, 1272, 629], 4"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:WIN_SOFT": [
+  {
+   "commit": "d289700",
+   "date": "2026-11-12",
+   "subject": "6WB Dials + G20: black soft collar (band under the dial bottoms, shade at their inner edges, COMFORT PLUS patch, keep-out round shown G20 items); our road signs, BMW's sign window open only while our limit is unknown; soft windows",
+   "removed": [],
+   "added": [
+    "SIGN_WIN, I_WIN, WIN_SOFT = [539, 622, 44], [1254, 589, 1272, 629], 4"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:HOOK_STUB": [
+  {
+   "commit": "5979f85",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20 on the car: patches as plain vec4s, own-row settings reset once to their defaults, own row logged and on the status line; sign window tight on BMW's sign with a black ring; bezel ends at the check-control window; map gets soft edges; hook-stub patch while no message shows (cc:none)",
+   "removed": [],
+   "added": [
+    "HOOK_STUB = [729, 629, 746, 646]"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:OWN": [
+  {
+   "commit": "82aa980",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20: BMW's bottom lines, hooks and dash under black; our range, clock, temperature at BMW's places; settings wbFoot, dialShade, ownRange/ownClock/ownTemp, modeLabel, gearTray",
+   "removed": [],
+   "added": [
+    "OWN = {\"range\": [132, 662, 307, 703], \"clock\": [340, 662, 455, 704], \"temp\": [1536, 662, 1667, 705]}"
+   ]
+  },
+  {
+   "commit": "64c2ac0",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20: patches under our temperature and range sized for BMW's widest text (a 5-char temperature peeked past the photo-sized box)",
+   "removed": [
+    "OWN = {\"range\": [132, 662, 307, 703], \"clock\": [340, 662, 455, 704], \"temp\": [1536, 662, 1667, 705]}"
+   ],
+   "added": [
+    "OWN = {\"range\": [132, 662, 334, 703], \"clock\": [340, 662, 455, 704], \"temp\": [1498, 662, 1667, 705]}"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:COVER": [
+  {
+   "commit": "82aa980",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20: BMW's bottom lines, hooks and dash under black; our range, clock, temperature at BMW's places; settings wbFoot, dialShade, ownRange/ownClock/ownTemp, modeLabel, gearTray",
+   "removed": [],
+   "added": [
+    "COVER = [588, 598, 736, 64]"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:SHADE": [
+  {
+   "commit": "82aa980",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20: BMW's bottom lines, hooks and dash under black; our range, clock, temperature at BMW's places; settings wbFoot, dialShade, ownRange/ownClock/ownTemp, modeLabel, gearTray",
+   "removed": [],
+   "added": [
+    "SHADE = {\"y\": [575, 605], \"ko\": [1253, 588, 1273, 630]}"
+   ]
+  },
+  {
+   "commit": "729ee63",
+   "date": "2026-11-14",
+   "subject": "6WB: check-control window, map window around the dials, symmetric G20 cut; drop \"Comfort + BMW map\"",
+   "removed": [
+    "SHADE = {\"y\": [575, 605], \"ko\": [1253, 588, 1273, 630]}"
+   ],
+   "added": [
+    "SHADE = {\"y\": [575, 605], \"ko\": [0, 0, 0, 0]}   # no keep-out: BMW's right \"i\" is covered since 2026-11-13"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:CC_SYM": [
+  {
+   "commit": "ab24414",
+   "date": "2026-11-15",
+   "subject": "Bottom row: wire the car's sign, message and road signals, and make each one a choice",
+   "removed": [],
+   "added": [
+    "CC_SYM = [709, 598, 790, 694]"
+   ]
+  },
+  {
+   "commit": "d882270",
+   "date": "2026-11-15",
+   "subject": "Bottom row: the design spec's numbers, the car's own verdicts, states only",
+   "removed": [
+    "CC_SYM = [709, 598, 790, 694]"
+   ],
+   "added": [
+    "CC_SYM = [700, 628, 757, 690]        # round the measured symbol slot, with room for the widest symbol seen"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:CC_TEXT_C": [
+  {
+   "commit": "d882270",
+   "date": "2026-11-15",
+   "subject": "Bottom row: the design spec's numbers, the car's own verdicts, states only",
+   "removed": [],
+   "added": [
+    "CC_TEXT_C = 967.5                    # the measured text centre, not the panel's"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:CC_TEXT_W": [
+  {
+   "commit": "ab24414",
+   "date": "2026-11-15",
+   "subject": "Bottom row: wire the car's sign, message and road signals, and make each one a choice",
+   "removed": [],
+   "added": [
+    "CC_TEXT_W = CC_BOX[2] - CC_TEXT_X - 6"
+   ]
+  },
+  {
+   "commit": "d882270",
+   "date": "2026-11-15",
+   "subject": "Bottom row: the design spec's numbers, the car's own verdicts, states only",
+   "removed": [
+    "CC_TEXT_W = CC_BOX[2] - CC_TEXT_X - 6"
+   ],
+   "added": [
+    "CC_TEXT_W = 420                      # 757.5..1177.5: clear of the symbol slot (752.9) and inside the rail's flat part (1176)"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:CC_LINE_Y": [
+  {
+   "commit": "d882270",
+   "date": "2026-11-15",
+   "subject": "Bottom row: the design spec's numbers, the car's own verdicts, states only",
+   "removed": [],
+   "added": [
+    "CC_LINE_Y = [645.8, 690.2]           # the measured two-line baselines (one line: 671.2)"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:NAV_CX": [
+  {
+   "commit": "d882270",
+   "date": "2026-11-15",
+   "subject": "Bottom row: the design spec's numbers, the car's own verdicts, states only",
+   "removed": [],
+   "added": [
+    "NAV_CX, NAV_BASE, NAV_W = 960.5, 700.5, 540   # 690.5..1230.5: the bar's own width, and 31 px wider than the widest street measured"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:ROW_BASE": [
+  {
+   "commit": "82aa980",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20: BMW's bottom lines, hooks and dash under black; our range, clock, temperature at BMW's places; settings wbFoot, dialShade, ownRange/ownClock/ownTemp, modeLabel, gearTray",
+   "removed": [],
+   "added": [
+    "ROW_BASE = 697"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:CUT_Y": [
+  {
+   "commit": "d30056f",
+   "date": "2026-11-12",
+   "subject": "6WB Dials + G20 layout; free scene textures before a rebuild; version 0.7.4",
+   "removed": [],
+   "added": [
+    "CUT_Y, CUT_FADE = 656, 26      # the big dials' open bottom (docs/OVERLAY-PLAN-DIALS.md): BMW's bottom row starts at y 659"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:MAP_WINDOW": [
+  {
+   "commit": "b1db0eb",
+   "date": "2026-11-13",
+   "subject": "6WB Comfort (+ BMW map): the map window is BMW's map as the car draws it with a theme on (x 750-1170, y 180-564, round fades), so its box no longer shows; clock only once a time zone is set (ownClock rule), else the temperature alone in the middle; temperature in 0.5 degree steps; toggles may join parts with &",
+   "removed": [],
+   "added": [
+    "MAP_WINDOW = [750, 180, 420, 384]"
+   ]
+  },
+  {
+   "commit": "729ee63",
+   "date": "2026-11-14",
+   "subject": "6WB: check-control window, map window around the dials, symmetric G20 cut; drop \"Comfort + BMW map\"",
+   "removed": [
+    "MAP_WINDOW = [750, 180, 420, 384]"
+   ],
+   "added": [
+    "MAP_WINDOW = [600, 135, 720, 460]"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:MAP_FADE": [
+  {
+   "commit": "b1db0eb",
+   "date": "2026-11-13",
+   "subject": "6WB Comfort (+ BMW map): the map window is BMW's map as the car draws it with a theme on (x 750-1170, y 180-564, round fades), so its box no longer shows; clock only once a time zone is set (ownClock rule), else the temperature alone in the middle; temperature in 0.5 degree steps; toggles may join parts with &",
+   "removed": [],
+   "added": [
+    "MAP_FADE = [120, 80, 80, 24]"
+   ]
+  },
+  {
+   "commit": "5979f85",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20 on the car: patches as plain vec4s, own-row settings reset once to their defaults, own row logged and on the status line; sign window tight on BMW's sign with a black ring; bezel ends at the check-control window; map gets soft edges; hook-stub patch while no message shows (cc:none)",
+   "removed": [],
+   "added": [
+    "MAP_WIN, MAP_FADE = [708, 156, 490, 440], [80, 48, 30, 0]"
+   ]
+  },
+  {
+   "commit": "729ee63",
+   "date": "2026-11-14",
+   "subject": "6WB: check-control window, map window around the dials, symmetric G20 cut; drop \"Comfort + BMW map\"",
+   "removed": [
+    "MAP_FADE = [120, 80, 80, 24]",
+    "MAP_WIN, MAP_FADE = [708, 156, 490, 440], [80, 48, 30, 0]"
+   ],
+   "added": [
+    "MAP_FADE = [70, 24, 45, 50]"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:FOOT_LINE": [
+  {
+   "commit": "437a505",
+   "date": "2026-11-12",
+   "subject": "6WB Comfort middle: a soft window (map fades to black at its edges and under the dial rims, floor shaded), foot line variants hair/chrome/none/glass (default hair)",
+   "removed": [],
+   "added": [
+    "FOOT_LINE = [607, 650, 1270]"
+   ]
+  }
+ ],
+ "design/gen_6wb.py:MODE_C": [
+  {
+   "commit": "82aa980",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20: BMW's bottom lines, hooks and dash under black; our range, clock, temperature at BMW's places; settings wbFoot, dialShade, ownRange/ownClock/ownTemp, modeLabel, gearTray",
+   "removed": [],
+   "added": [
+    "MODE_C, TRAY_C = (1508, 527), (1508, 583)"
+   ]
+  }
+ ],
+ "tools/overlay/plan_dials.py:COVER_BOX": [
+  {
+   "commit": "82aa980",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20: BMW's bottom lines, hooks and dash under black; our range, clock, temperature at BMW's places; settings wbFoot, dialShade, ownRange/ownClock/ownTemp, modeLabel, gearTray",
+   "removed": [],
+   "added": [
+    "COVER_BOX = [588, 598, 1324, 662]   # x0, y0, x1, y1: the texture's box (design/gen_6wb.py COVER, tools/bake_scene.py)"
+   ]
+  }
+ ],
+ "tools/overlay/plan_dials.py:SIGN_CLEAR": [
+  {
+   "commit": "34b06a6",
+   "date": "2026-11-12",
+   "subject": "6WB Dials + G20: the closed sign disc covers to r 50 and the collar keeps off r 46, so neither state leaves a stub of the bottom line; plan.dials conflicts recomputed",
+   "removed": [],
+   "added": [
+    "SIGN_CLEAR = {'rect': [493, 576, 585, 668], 'radius': 46}      # no collar in it (the speedo's closed disc covers to r 50)"
+   ]
+  }
+ ],
+ "tools/overlay/plan_dials.py:SHADE_Y": [
+  {
+   "commit": "d289700",
+   "date": "2026-11-12",
+   "subject": "6WB Dials + G20: black soft collar (band under the dial bottoms, shade at their inner edges, COMFORT PLUS patch, keep-out round shown G20 items); our road signs, BMW's sign window open only while our limit is unknown; soft windows",
+   "removed": [],
+   "added": [
+    "SHADE_Y = (575.0, 605.0)     # ... fading out over these y, above the message panel and the check-control 'i'"
+   ]
+  },
+  {
+   "commit": "729ee63",
+   "date": "2026-11-14",
+   "subject": "6WB: check-control window, map window around the dials, symmetric G20 cut; drop \"Comfort + BMW map\"",
+   "removed": [
+    "SHADE_Y = (575.0, 605.0)     # ... fading out over these y, above the message panel and the check-control 'i'"
+   ],
+   "added": [
+    "SHADE_Y = (575.0, 605.0)     # ... fading out over these y, above the message panel"
+   ]
+  }
+ ],
+ "tools/overlay/plan_dials.py:SHADE_KO": [
+  {
+   "commit": "82aa980",
+   "date": "2026-11-13",
+   "subject": "6WB Dials + G20: BMW's bottom lines, hooks and dash under black; our range, clock, temperature at BMW's places; settings wbFoot, dialShade, ownRange/ownClock/ownTemp, modeLabel, gearTray",
+   "removed": [],
+   "added": [
+    "SHADE_KO = [1253, 588, 1273, 630]   # ... and none on BMW's right \"i\" (assist.info_tacho grown 3 px)"
+   ]
+  },
+  {
+   "commit": "729ee63",
+   "date": "2026-11-14",
+   "subject": "6WB: check-control window, map window around the dials, symmetric G20 cut; drop \"Comfort + BMW map\"",
+   "removed": [
+    "SHADE_KO = [1253, 588, 1273, 630]   # ... and none on BMW's right \"i\" (assist.info_tacho grown 3 px)"
+   ],
+   "added": [
+    "SHADE_KO = [0, 0, 0, 0]      # ... no keep-out (it was BMW's right \"i\", covered since 2026-11-13)"
+   ]
+  }
+ ]
+}
