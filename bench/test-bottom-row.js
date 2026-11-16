@@ -261,36 +261,13 @@ async function main() {
     ok(S(p).cc.name === 'Engine malfunction' && /Drive on/.test(S(p).cc.desc), 'and the text is the car\'s own (' + S(p).cc.name + ')');
     ok(S(p).road === '', 'the road label steps aside while a message shows, as BMW does');
 
-    // 2026-11-16 ("in all-6WB mode, G20 elements show through"): the black patches are what hides BMW's own row
-    // under ours, and WBBACK holds only four of them (u_pat0..3). _wbPatches used to drop the rest without a word,
-    // so a fifth rect would have read as "my range/clock is doubled" on the car and nowhere else. This checks the
-    // GEOMETRY, not a screenshot: every item we draw ourselves must have a patch that really contains BMW's own
-    // box for it (design/overlay/g20_comfort.json, the catalogue measured on the car), the layout must never ask
-    // for more rects than WBBACK can hold, and no patch may ever reach a safety telltale.
-    console.log('the black patches: BMW\'s row is really covered, and nothing is dropped in silence');
-    const cat = {};
-    JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'overlay', 'g20_comfort.json'), 'utf8'))
-        .elements.forEach((e) => { cat[e.id] = e; });
-    const pat = () => S(p).patches || {};
-    const inside = (box, r) => box[0] >= r[0] && box[1] >= r[1] && box[2] <= r[2] && box[3] <= r[3];
-    const overlaps = (box, r) => box[0] < r[2] && box[2] > r[0] && box[1] < r[3] && box[3] > r[1];
-    const covered = (id) => (pat().sent || []).some((r) => inside(cat[id].bbox, r));
-    const touched = (id) => (pat().sent || []).some((r) => overlaps(cat[id].bbox, r));
-    p = await until((q) => (S(q).patches || {}).sent, 20000);
-    ok(!!pat().sent, 'the engine reports the patches it sends (' + JSON.stringify(pat().sent) + ')');
-    ok(pat().want <= pat().cap,
-        'the layout asks for no more patches than WBBACK can hold (' + pat().want + ' of ' + pat().cap + ')');
-    ok(!/black patches do not fit/.test(logText), 'and the engine never had to drop one');
-    ['bottom.range', 'bottom.temperature'].forEach((id) => {
-        ok(covered(id), 'BMW\'s own ' + id + ' ' + JSON.stringify(cat[id].bbox) + ' is inside one of our patches');
-    });
-    // the clock is ours only once a time zone is known; while it is BMW's its patch is correctly off
-    ok(S(p).own.clock ? covered('bottom.clock') : !touched('bottom.clock'),
-        'the clock\'s patch follows who draws the clock (ours: ' + S(p).own.clock + ')');
-    // safety: the belt and airbag telltales are BMW's alone and must never end up under our black
-    ['bottom.belt_rear', 'bottom.belt_driver', 'bottom.airbag'].forEach((id) => {
-        ok(!touched(id), 'no patch reaches BMW\'s ' + id + ' (a safety telltale, never covered)');
-    });
+    // package M (docs/strip/M-REPORT.md): the four black patches (u_pat0..3, at most four, a fifth dropped in
+    // silence) are gone; the strip mask's lanes hide BMW's row now, with no cap. bench/test-strip-mask.js checks
+    // their geometry against the catalogue: "ours" covers BMW's range, clock and temperature whole, no lane puts any
+    // black on a belt or airbag telltale, and the engine picks the right lane in every state.
+    console.log('the black patches are gone: the strip mask hides BMW\'s row (bench/test-strip-mask.js)');
+    ok(S(p).patches === null, 'the engine sends no patch rects any more (' + JSON.stringify(S(p).patches) + ')');
+    ok(!/black patches do not fit/.test(logText), 'and never warns about a dropped one');
 
     console.log('several messages at once: the car numbers its frames, and we follow that counter');
     await scene('cc-three');

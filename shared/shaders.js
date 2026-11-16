@@ -1566,40 +1566,45 @@ uniform vec4 u_fade;
 uniform vec4 u_foot;      // the line at the window's foot: style (0 the baked glass line u_t2, 1 hairline, 2 chrome,
                           // 3 none), y, x0, x1
 // --- package F (docs/POLISH-F-REPORT.md), the collar path (u_hasTex 2, 6WB Dials + G20) only ---
-// u_t1 over u_r1 (w 0: none): more black at full size, coverage in alpha (BMW's bottom lines, hooks and grey dash,
-// kept 3 px off the check-control frame, text and "i"; tools/overlay/plan_dials.py). u_shade: the shade at our dials'
-// inner edges over BMW's map ("dialShade"): strength at the rim (0: none), falloff px, the y span it fades out over;
-// none inside u_shadeKo (x0, y0, x1, y1: BMW's right "i"). u_pat0..3: up to 4 black patches (x0, y0, x1, y1; x1 <= x0:
-// none) over the bottom-row items we draw ourselves (the "bottomRow" setting) and BMW's left hook stub
-// car3 G: four plain vec4s, not one vec4[4] array (docs/CAR3-G-REPORT.md: no array uniform on the car's WBBACK)
+// u_shade: the shade at our dials' inner edges over BMW's map ("dialShade"): strength at the rim (0: none), falloff px,
+// the y span it fades out over; none inside u_shadeKo (x0, y0, x1, y1: BMW's right "i"). (Package F's cover and the
+// four black patches u_pat0..3 are gone: package M's strip mask draws that black now.)
 uniform vec4 u_shade;
 uniform vec4 u_shadeKo;
-uniform vec4 u_pat0;
-uniform vec4 u_pat1;
-uniform vec4 u_pat2;
-uniform vec4 u_pat3;
-// 2026-11-14: px each patch's foot fades out over, ending at its y1 (0: a hard, rounded edge), so a patch can meet the
-// band under our dials' faded bottoms (the collar) at its height and with its soft edge
-uniform vec4 u_patSoft;
-// BMW's check-control message panel (2026-11-13): while the car says a message shows, this rounded box (x0, y0, x1, y1,
-// layer px; x1 <= x0: none) is see-through in every 6WB layout, so BMW's message shows clean; otherwise ours is drawn
-// there (Comfort: the bar; Dials + G20: a black patch, hud.js "cc" with "!cc:shown")
+// BMW's check-control message panel (2026-11-13), the opaque layouts: while the car says a message shows, this
+// rounded box (x0, y0, x1, y1, layer px; x1 <= x0: none) is see-through, so BMW's message shows clean. (The collar
+// path opens BMW's panel with the strip mask's hole lane instead.)
 uniform vec4 u_cc;
 // --- end package F ---
+// --- package M (docs/strip/M-REPORT.md): the STRIP mask, the collar path only ---
+// One baked R8 atlas (u_t2; its size in px in u_r2.zw; tools/strip/bake_mask.py) holds our coverage over BMW's
+// bottom strip at full size, one byte a px, one "lane" per state of the row, each in its own tile. u_mk: the box the
+// cover lanes share (layer px x0, y0, x1, y1; x1 <= x0: no lane, the collar alone); inside it our black IS the lane,
+// outside it the collar draws. u_mh: the hole lane's box (BMW's message panel, its symbol and marker), a multiplier
+// applied last (x1 <= x0: none). u_mo: where the cover lane and the hole lane start in the atlas, px (cover x, y,
+// hole x, y): one message switches the lane.
+uniform vec4 u_mk;
+uniform vec4 u_mh;
+uniform vec4 u_mo;
+// --- end package M ---
 ${NIGHT_GLSL}
 
 const float PI = 3.14159265359;
+
+// package M: is p in the box b (x0, y0, x1, y1; half-open; x1 <= x0: never)
+bool inBox(vec2 p, vec4 b) { return b.z > b.x && p.x >= b.x && p.y >= b.y && p.x < b.z && p.y < b.w; }
+// package M: an R8 asset's byte. The car samples R8 as (r, 0, 0, 1); the bench page gets it as (r', r', r', r) with
+// r' rounded by its canvas's premultiplied alpha, so .a is read wherever it is not 1 (exact on both, bilinear too)
+float r8a(vec4 s) { return s.a < 0.999 ? s.a : s.r; }
+// package M: a lane's value at p (its box b, its origin o in the atlas). floor() + 0.5 lands on the texel's centre
+// whatever the rounding of p (fp16 would miss by up to 0.94 texel past x 1024: highp, and the snap, docs/strip/
+// M-REPORT.md)
+float laneAt(vec2 p, vec4 b, vec2 o) { return r8a(texture2D(u_t2, (floor(p - b.xy) + 0.5 + o) / u_r2.zw)); }
 
 // package F: px outside the box b (x0, y0, x1, y1), rounded by r; < 0 inside. fp16-safe: length() of a clamped vector
 float boxOut(vec2 p, vec4 b, float r) {
     vec2 q = max(b.xy - p, p - b.zw) + r;
     return length(clamp(q, 0.0, 64.0)) + min(max(q.x, q.y), 0.0) - r;
-}
-
-// package F: a black patch b (x0, y0, x1, y1), rounded 6 px; with a soft foot (px) its bottom fades out over that, to y1
-float patch(vec2 p, vec4 b, float soft) {
-    if (soft <= 0.0) return 1.0 - smoothstep(0.0, 2.0, boxOut(p, b, 6.0));
-    return (1.0 - smoothstep(0.0, 2.0, boxOut(p, vec4(b.xyz, b.w + 8.0), 6.0))) * (1.0 - smoothstep(b.w - soft, b.w, p.y));
 }
 
 // the line at the window's foot (u_foot), drawn over the map's fade: 1 a hairline fading out at both ends (the 6WB's
@@ -1637,14 +1642,15 @@ void main() {
     float cy = u_dl.y, R = u_dl.z;
     vec3 col = vec3(0.0);
     if (u_hasTex > 1.5) {
-        // the collar: pure black (empty space is black), its coverage soft and baked (tools/overlay/plan_dials.py)
-        vec2 u0 = (p - u_r0.xy) / u_r0.zw;
-        float a = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? texture2D(u_t0, u0).a : 0.0;
-        // --- package F: the full-size cover, the shade at our dials' inner edges, the bottom-row patches ---
-        if (u_r1.z > 0.0) {
-            vec2 u1 = (p - u_r1.xy) / u_r1.zw;
-            if (u1.x >= 0.0 && u1.y >= 0.0 && u1.x <= 1.0 && u1.y <= 1.0) a = max(a, texture2D(u_t1, u1).a);
+        float a = 0.0;
+        if (inBox(p, u_mk)) a = laneAt(p, u_mk, u_mo.xy);            // package M: the strip mask's lane is our black
+        else {
+            // the collar: pure black (empty space is black), its coverage soft and baked (tools/overlay/plan_dials.py);
+            // package M: R8 now (collar_r8: a quarter of the pixel memory), read by r8a()
+            vec2 u0 = (p - u_r0.xy) / u_r0.zw;
+            a = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? r8a(texture2D(u_t0, u0)) : 0.0;
         }
+        // --- package F: the shade at our dials' inner edges ---
         if (u_shade.x > 0.0 && between > 0.5) {
             float o = min(dl, dr);                                   // px outside the nearer dial (scaled lengths above)
             float vy = 1.0 - clamp((p.y - u_shade.z) / max(u_shade.w - u_shade.z, 1.0), 0.0, 1.0);
@@ -1652,10 +1658,6 @@ void main() {
             if (u_shadeKo.z > u_shadeKo.x) sh *= smoothstep(0.0, 2.0, boxOut(p, u_shadeKo, 0.0));
             a = max(a, sh);
         }
-        if (u_pat0.z > u_pat0.x) a = max(a, patch(p, u_pat0, u_patSoft.x));
-        if (u_pat1.z > u_pat1.x) a = max(a, patch(p, u_pat1, u_patSoft.y));
-        if (u_pat2.z > u_pat2.x) a = max(a, patch(p, u_pat2, u_patSoft.z));
-        if (u_pat3.z > u_pat3.x) a = max(a, patch(p, u_pat3, u_patSoft.w));
         // --- end package F ---
         // car3 G: BMW's map between our dials gets soft edges (docs/CAR3-G-REPORT.md): black beside and above the
         // window u_wbox (x, y, w, h, measured on the car photos 41 and 42), fading to clear over u_fade.y px at its
@@ -1686,7 +1688,7 @@ void main() {
             fc = L.rgb * L.a / max(a2, 1e-4);
             a = a2;
         }
-        if (u_cc.z > u_cc.x) a *= smoothstep(-0.5, 3.0, boxOut(p, u_cc, 8.0));      // the message panel shows
+        if (inBox(p, u_mh)) a *= laneAt(p, u_mh, u_mo.zw);           // package M: BMW's message panel shows
         gl_FragColor = vec4(min(nightLook(fc), vec3(1.0)), a);       // 2026-11-14: the night look
         return;
     }

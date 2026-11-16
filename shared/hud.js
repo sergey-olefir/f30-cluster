@@ -309,9 +309,6 @@ const POS_STALE_MS = 6 * 3600 * 1000;
 const ROW_KEY = 'bottomRow';
 const ROW_OURS = 'all6WB', ROW_BMW = 'allG20';
 const OWN_ITEMS = ['range', 'clock', 'temp', 'nav', 'sign', 'info'];
-// how many black patches WBBACK can hold (u_pat0..3, plain vec4s: car3 G found no array uniform works there).
-// A layout with more rects than this loses the extras - _wbPatches says so in the log now.
-const WB_PATCHES = 4;
 // (no timer of ours for several messages at once: the car numbers its frames and says which one it is on;
 //  config.ccm.ccFrameDwellMs is carried as a parameter for a later animation package, unused here)
 // --- end bottom row ---
@@ -1515,16 +1512,17 @@ class HudApp {
         if (this.sceneUsed) this.sceneUsed.add(key);
         if (this.atlases.has(key)) return this.atlases.get(key);
         const j = data.json('scene/' + name + '.json');
-        if (!j || !j.rgba) throw new Error('scene texture "' + name + '" is missing from hud/scene');
-        const buf = Buffer.from(j.rgba, 'base64');
-        if (buf.length !== j.w * j.h * 4) throw new Error('scene texture "' + name + '": size does not match');
+        const r8 = !!(j && j.format === 'r8' && j.r8), bpp = r8 ? 1 : 4;   // package M: an R8 one ("r8"), the strip mask
+        if (!j || !(r8 || j.rgba)) throw new Error('scene texture "' + name + '" is missing from hud/scene');
+        const buf = Buffer.from(r8 ? j.r8 : j.rgba, 'base64');
+        if (buf.length !== j.w * j.h * bpp) throw new Error('scene texture "' + name + '": size does not match');
         const c = this._clientAt(ci);
-        const ref = c.asset({ target: this.target, format: 'rgba8', w: j.w, h: j.h, sampling: j.sampling === 'nearest' ? 'nearest' : 'bilinear' });
+        const ref = c.asset({ target: this.target, format: r8 ? 'r8' : 'rgba8', w: j.w, h: j.h, sampling: j.sampling === 'nearest' ? 'nearest' : 'bilinear' });
         if (!ref) throw new Error('scene texture "' + name + '": asset refused (' + j.w + 'x' + j.h + ')');
         c.pixels(ref, null, buf);
-        const a = { ref, c, ci, w: j.w, h: j.h, bytes: j.w * j.h * 8 };
+        const a = { ref, c, ci, w: j.w, h: j.h, bytes: j.w * j.h * bpp * 2, mask: j.mask || null };   // package M: its lane table
         this.atlases.set(key, a);
-        this.log.info('scene texture "' + name + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + j.w + 'x' + j.h + ' RGBA8 asset, ' + mib(a.bytes) + ' of pixel memory');
+        this.log.info('scene texture "' + name + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + j.w + 'x' + j.h + (r8 ? ' R8' : ' RGBA8') + ' asset, ' + mib(a.bytes) + ' of pixel memory');
         return a;
     }
 
@@ -1538,7 +1536,7 @@ class HudApp {
             else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); add({ tex: w.fill }); }
             else if (w.type === 'wbsign' && w.tex && baked) { add(w.tex.limit); add(w.tex.nopass); }
             else if (w.type === 'wbback') {
-                if (w.collar) { add(w.collar); add(w.cover); }       // package F: "cover", BMW's bottom lines and hooks
+                if (w.collar) { add(w.collar); add(w.mask); }       // package M: "mask", the strip mask
                 else if (w.tex && baked) { const u = this._wbUses(w); if (u.window) { add(w.tex.window); add(w.tex.horizon); } if (u.line) add(w.tex.line); }
             }
         });
@@ -2672,7 +2670,7 @@ class HudApp {
             (maxPx === Infinity ? 'unlimited' : maxPx + ' px') + ', whole-sheet writes ' + bytes + ' bytes, pixel memory ' + mib(px) + ' of 16 MiB' +
             (atlasBytes ? ' (' + this.atlases.size + ' glyph atlas' + (this.atlases.size > 1 ? 'es' : '') + ' ' + mib(atlasBytes) + ')' : ''));
         // car3 G: a see-through theme's own bottom row, and why (on the car BMW's row showed where ours was expected)
-        this.ownRow = shown.some((w) => w.type === 'wbback' && Array.isArray(w.patches));
+        this.ownRow = shown.some((w) => w.type === 'wbback' && w.collar && w.mask);     // package M: the strip mask
         if (this.ownRow) this.log.info('layout "' + layout.name + '": ' + this._ownNote());
         counts.forEach((k, ci) => {
             if (k > LAYER_BUDGET) this.log.warn('layout "' + layout.name + '" needs ' + k + ' layers on connection ' + (ci + 1) + ', cluster-render draws at most ' + LAYER_BUDGET + ' per connection');
@@ -3011,17 +3009,12 @@ class HudApp {
                 c.bind(ref, 'u_t0', this._scene(w.collar.tex, x.ci).ref);
                 c.uniform(ref, 'u_r0', [w.collar.x, w.collar.y, w.collar.w, w.collar.h]);
                 c.uniform(ref, 'u_hasTex', [2]);
-                // package F: "cover": { tex, x, y, w, h }: more black at full size (BMW's bottom lines, hooks and dash;
-                // tools/overlay/plan_dials.py), "shade": { y: [y0, y1], ko: [x0, y0, x1, y1] } the shade at our dials'
-                // inner edges ("dialShade"), "patches" black over the bottom-row items we draw ourselves ("bottomRow")
-                if (w.cover) {
-                    c.bind(ref, 'u_t1', this._scene(w.cover.tex, x.ci).ref);
-                    c.uniform(ref, 'u_r1', [w.cover.x, w.cover.y, w.cover.w, w.cover.h]);
-                }
+                // package F: "shade": { y: [y0, y1], ko: [x0, y0, x1, y1] } the shade at our dials' inner edges
+                // ("dialShade"). (Its "cover" and "patches" are gone: package M's strip mask draws that black now.)
                 c.uniform(ref, 'u_shade', this._wbShade(w));
                 const ko = w.shade && Array.isArray(w.shade.ko) ? w.shade.ko : [0, 0, 0, 0];
                 c.uniform(ref, 'u_shadeKo', [ko[0] - w.x, ko[1] - w.y, ko[2] - w.x, ko[3] - w.y]);
-                this._wbPatchesSend(x);         // car3 G: u_pat0..3, plain vec4s
+                this._wbMaskSend(x, true);      // package M: the strip mask's atlas and lanes ("mask"; none: zeros)
             } else if (w.tex && this.setting('baked') !== false) {   // baked textures: "tex": { window, horizon, line: { tex, x, y, w, h } }, "gain": [window level, y above which it applies]
                 const u = this._wbUses(w);       // only what is drawn: the window while the map is off, the line for "glass"
                 [['window', 'u_t0', 'u_r0'], ['horizon', 'u_t1', 'u_r1'], ['line', 'u_t2', 'u_r2']].forEach(([k, smp, rect]) => {
@@ -3392,33 +3385,6 @@ class HudApp {
         if (!named(this.config.road) && !(this.config.nav && this.config.nav.iface)) this._rowFail('nav', 'app.json config.road names no field');
     }
 
-    /** WBBACK's black patches over BMW's bottom-row items we draw ourselves ("patches": [{ rect: [x0, y0, x1, y1] panel
-     *  px, when: a toggle, soft: px its foot fades out over }]), as four vec4s (layer px; x1 <= x0: none) and a fifth,
-     *  u_patSoft, the four feet's fades.
-     *  WB_PATCHES IS A HARD CAP: WBBACK has u_pat0..3 and no more (car3 G: four plain vec4s, no array uniform on the
-     *  car's WBBACK), so a layout that wants a fifth rect must MERGE two of them (design/gen_6wb.py row_patches()
-     *  names the four and what else of BMW's row is covered by the baked collar instead). 2026-11-16: dropping the
-     *  extras in silence cost a car trip - a rect that does not fit is now said out loud, once per layout, in the
-     *  log and nowhere else (a rect is geometry, never personal data). */
-    _wbPatches(w) {
-        const out = [], soft = [0, 0, 0, 0];
-        let dropped = 0;
-        (Array.isArray(w.patches) ? w.patches : []).forEach((p) => {
-            if (!Array.isArray(p.rect) || (p.when && !this._toggleOn(p.when))) return;
-            if (out.length >= WB_PATCHES) { dropped++; return; }
-            if (isNum(p.soft)) soft[out.length] = p.soft;     // 2026-11-14: px its foot fades out over (0: hard)
-            out.push([p.rect[0] - w.x, p.rect[1] - w.y, p.rect[2] - w.x, p.rect[3] - w.y]);
-        });
-        if (dropped && !this.patWarned) {
-            this.patWarned = true;
-            this.log.warn('layout "' + this._layoutName() + '": ' + dropped + ' of its ' +
-                'black patches do not fit (WBBACK holds ' + WB_PATCHES + '): BMW\'s own row shows through there. ' +
-                'Merge two rects in design/gen_6wb.py row_patches().');
-        }
-        while (out.length < WB_PATCHES) out.push([0, 0, 0, 0]);
-        out.push(soft);
-        return out;
-    }
 
     /** A check-control message showing: true / false as the car says (config.ccm; on the bench its stand-in
      *  bench.CheckControl, fed from manual {ccMsg: 1 | 0}), null while unknown. */
@@ -3687,14 +3653,63 @@ class HudApp {
         x.c.uniform(x.ref, 'u_cc', v);
     }
 
-    /** car3 G: u_pat0..3 (plain vec4s: docs/CAR3-G-REPORT.md), sent when they change (a "cc:" patch follows the
-     *  check-control message state on every update). */
-    _wbPatchesSend(x) {
-        const pats = this._wbPatches(x.w), key = JSON.stringify(pats);
-        if (key === x.patKey) return;
-        x.patKey = key;
-        pats.forEach((v, i) => x.c.uniform(x.ref, i < 4 ? 'u_pat' + i : 'u_patSoft', v));
+    /* ---- package M (docs/strip/M-REPORT.md): the STRIP mask ----
+     * A see-through layout's bg (a "wbback" with a collar) carries "mask": { tex } (design/gen_6wb.py strip_mask()).
+     * hud/scene/<tex>.json (tools/strip/bake_mask.py) is an R8 atlas of our coverage over BMW's bottom strip, one byte
+     * a px, one lane per state of the row (docs/strip/M-REPORT.md 3), and its own lane table, "mask": { atlas: [w,
+     * h], cover: [x0, y0, x1, y1], hole: [x0, y0, x1, y1] (panel px), lanes: { <lane>: [ax, ay] } }, so a new bake needs
+     * no new layout. The cover lanes "ours", "bmw" and "standby" share the box "cover" (inside it the lane IS our black,
+     * outside it the collar); the hole lane "msg" has the box "hole" (a multiplier: BMW's message panel, its symbol and
+     * its marker). Each lane's tile starts at [ax, ay] in the atlas. (The rects it replaced - package F's cover and
+     * four patches, and u_cc in this layout - are gone.) */
+
+    /** The lanes for now: { cover, hole } (lane names; hole null), null without a lane table. The cover lane follows
+     *  the row: every item ours, "ours"; otherwise BMW's row - "standby" while the car stands in P with the engine off
+     *  (BMW's standby row), else "bmw" (a row half ours falls back whole: the owner, 2026-11-16). The hole lane
+     *  opens BMW's message panel whenever the info field is not ours and the panel must show (_ccOpen): in standby
+     *  too, since a warning is never covered unless our own text for it is drawn. m: the texture's lane table. */
+    _maskLanes(m) {
+        if (!m || !m.lanes || !Array.isArray(m.cover)) return null;
+        const all = OWN_ITEMS.every((k) => this._own(k));
+        const rpm = this._raw('rpm'), parked = this._data().stage === 'P' && !(isNum(rpm) && rpm >= 150);
+        const cover = all ? 'ours' : parked && m.lanes.standby ? 'standby' : 'bmw';
+        const hole = !this._own('info') && Array.isArray(m.hole) && m.lanes.msg && this._ccOpen() ? 'msg' : null;
+        return m.lanes[cover] ? { cover, hole } : null;
     }
+
+    /** u_mk, u_mh, u_mo when the lanes change. Every frame between two of these messages must be a whole picture (the
+     *  service may draw between them): a lane goes off before the origins move and comes on after them, and the cover
+     *  lanes share one box, so going from one to another is a single u_mo. */
+    _wbMaskSend(x, init) {
+        const w = x.w, c = x.c, ref = x.ref, none = [0, 0, 0, 0];
+        if (init) {
+            x.mask = { k: null, h: null };
+            x.maskT = null;
+            c.uniform(ref, 'u_mk', none); c.uniform(ref, 'u_mh', none); c.uniform(ref, 'u_mo', none);
+            if (!(w.mask && w.mask.tex)) return;
+            const a = this._scene(w.mask.tex, x.ci), t = a.mask;
+            if (!t || !Array.isArray(t.atlas) || t.atlas[0] !== a.w || t.atlas[1] !== a.h) {
+                this.log.warn('strip mask "' + w.mask.tex + '": no lane table that fits it, only the collar draws (BMW\'s row shows)');
+                return;
+            }
+            x.maskT = t;
+            c.bind(ref, 'u_t2', a.ref);
+            c.uniform(ref, 'u_r2', [0, 0, a.w, a.h]);
+        }
+        const m = x.maskT;
+        if (!m) return;
+        const L = this._maskLanes(m), k = L ? L.cover : null, h = L ? L.hole : null, prev = x.mask;
+        if (prev.k === k && prev.h === h) return;
+        const org = (n) => (n && m.lanes[n]) || [0, 0];
+        const lp = (b) => [b[0] - w.x, b[1] - w.y, b[2] - w.x, b[3] - w.y];
+        if (prev.h && prev.h !== h) c.uniform(ref, 'u_mh', none);
+        if (prev.k && !k) c.uniform(ref, 'u_mk', none);
+        c.uniform(ref, 'u_mo', org(k).concat(org(h)));
+        if (k && !prev.k) c.uniform(ref, 'u_mk', lp(m.cover));
+        if (h && prev.h !== h) c.uniform(ref, 'u_mh', lp(m.hole));
+        x.mask = { k, h };
+    }
+    /* ---- end package M ---- */
 
     /** car3 G: what the bottom row draws now and why, for the log and the status line (docs/CAR3-G-REPORT.md: on the
      *  car BMW's row showed although "ours" was the default). One setting now, so one reason per item. */
@@ -4229,7 +4244,7 @@ class HudApp {
             x.last = m;
             x.c.uniform(x.ref, 'u_msa', [m, 0, 0, 0]);
         } else if (w.type === 'wbback') {
-            if (w.collar && Array.isArray(w.patches)) this._wbPatchesSend(x);     // car3 G: a "cc:" patch follows the message state
+            if (w.collar) this._wbMaskSend(x);                                     // package M: the strip mask's lanes
             this._wbCcSend(x);                                                     // and the message window
             const on = w.sign && (isNum(this._raw('limit')) || this._raw('limitEnd') || this._raw('limitUnknown')) ? 1 : 0;   // package E: the end sign too; car3 I: "---"
             if (!force && on === x.last) return;
@@ -4589,6 +4604,5 @@ HudApp.themeOf = (name) => G20_THEME[name] || name;
 HudApp.ROW_KEY = ROW_KEY;
 HudApp.ROW_OURS = ROW_OURS;
 HudApp.ROW_BMW = ROW_BMW;
-HudApp.WB_PATCHES = WB_PATCHES;     // the hard cap the bench's patch-coverage test checks against
 
 module.exports = HudApp;

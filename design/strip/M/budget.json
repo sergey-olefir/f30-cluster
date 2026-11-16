@@ -1,0 +1,25 @@
+{
+  "_about": "Package M budgets, 6WB Comfort + G20 (wb_dials; wb_sport_dials has the same WBBACK collar path and the same textures). Measured on the bench (tools/strip/M/peak.js over the scene stream, BENCH 16 MiB accounting: every image and asset counted twice) and with node (shader sources as the KOMBI receives them, shaders.wbbackFor / wbdialFor). 'base' = integrate/bottom-row 3c8ef46 (package O's numbers, same method, agree with this bench); 'transition' = commits 33c6672..d3cc47f (mask + R8 collar, the rects still in); 'final' = the clean-up commit (rects removed). Synthetic mask (bake_mask.py --today).",
+  "pixel_MiB": {
+    "allG20":                 {"base": 10.728, "transition_mask_only": 11.704, "transition": 11.209, "final": 10.850},
+    "all6WB_info_ours_clock": {"base": 13.216, "transition_mask_only": 14.191, "transition": 13.697, "final": 13.337},
+    "switch_peak_any":        {"base": 13.216, "transition": 13.697, "final": 13.337},
+    "g20_off_opaque_comfort": {"base": 11.527, "final": 11.527}
+  },
+  "assets_bytes_counted_MiB": {
+    "collar": {"base": "480x180 RGBA8 0.659", "final": "collar_r8 480x180 R8 0.165"},
+    "cover":  {"base": "736x64 RGBA8 0.359", "final": "gone (its black is in every lane)"},
+    "strip_mask": {"base": "-", "final": "1540x332 R8 0.975 (synthetic: 2 cover tiles, standby shares bmw's; a demo bake with 3 distinct cover tiles: 1560x489 R8 1.455)"}
+  },
+  "layers": {"allG20": {"base": "15 (6+5+4)", "final": "15 (6+5+4)"}, "all6WB": {"base": "20 (7+7+6)", "final": "20 (7+7+6)"},
+             "note": "the mask is an asset, not a layer. nav_bg (FILL, connection 1) becomes redundant once the 'ours' lane covers the road label's place: -1 layer, not done here (package X's nav_row)"},
+  "assets": {"allG20": {"base": 7, "final": 7}, "all6WB": {"base": 9, "final": 9}, "cap": "16 per connection, 32 in all"},
+  "shader_bytes": {
+    "WBBACK_style0_comfort": {"base": 9030, "transition": 9621, "final": 8595},
+    "WBBACK_style1_sport":   {"base": 8376, "transition": 8967, "final": 7941},
+    "WBDIAL_style0":         {"base": 13234, "final": 13234, "removable_with_the_sign_window_in_the_mask": 498},
+    "kombi_rule": "WBDIAL with every look in one source reset the KOMBI at 26.7k chars and drew at 25.4k (0.7.13); every source here is under 13.3k"
+  },
+  "WBBACK_uniforms_declared": {"base": 29, "transition": 32, "final": 27, "cap": "32 a quad"},
+  "WBBACK_uniforms_set_by_hud": {"base": 24, "transition": 28, "final": 22}
+}
