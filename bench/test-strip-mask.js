@@ -109,6 +109,48 @@ function staticChecks() {
         const w = over('ours', id, Math.min);
         ok(w >= 254 / 255, '"ours" covers BMW\'s ' + id + ' ' + JSON.stringify(cat[id].bbox) + ' whole (least ' + w.toFixed(3) + ')');
     });
+    // strip integration: the road bar (nav_bg) is gone, so "ours" itself must be solid over BMW's road label and message
+    // panel (package ZC's zone, x 690-1250 from y 596), and over BMW's mode label in every lane (decision 2) and its
+    // marker (decision 7)
+    // (WBBACK's black at a px: inside the cover box the lane, outside it the collar, as the shader samples it)
+    const colA = alphaOf(scene(bg.collar.tex));
+    const blackAt = (k, px, py) => (px >= T.cover[0] && px < T.cover[2] && py >= T.cover[1] && py < T.cover[3]) ? lane(k, px, py, T.cover) : sampled(colA, bg.collar, px, py);
+    const solid = (k, b) => { let v = 1; for (let y = b[1]; y < b[3]; y++) for (let x = b[0]; x < b[2]; x++) v = Math.min(v, blackAt(k, x + 0.5, y + 0.5)); return v; };
+    if (T.cover[0] <= 690 && T.cover[2] >= 1250 && T.cover[1] <= 596 && T.cover[3] >= 720) {
+        const v = solid('ours', [690, 596, 1250, 720]);
+        ok(v >= 254 / 255, '"ours" is solid over BMW\'s road label and message panel [690, 596, 1250, 720] (least ' + v.toFixed(3) + ')');
+        ['ours', 'bmw', 'standby'].forEach((k) => {
+            const ml = solid(k, [1223, 657, 1356, 709]), mk = solid(k, [1243, 596, 1285, 628]);
+            ok(ml >= 254 / 255 && mk >= 254 / 255, '"' + k + '" covers BMW\'s mode label (decision 2) and its marker from y 596 (decision 7) (least ' + ml.toFixed(3) + ', ' + mk.toFixed(3) + ')');
+        });
+        // the marker's top rows (y 591-596, above the box) lie inside our tacho's disc, opaque above its cut: every px of
+        // ZR's slot there that the disc (centre, radius from the layout) does not hold must be under the collar
+        const tac = layout('wb_dials').widgets.find((w) => w.id === 'tacho'), tc = [tac.x + tac.w / 2, tac.y + tac.h / 2], tr = tac.w / 2;
+        let outDisc = 0, worstC = 1;
+        for (let y = 591; y < 596; y++) for (let x = 1243; x < 1285; x++) {
+            if (Math.hypot(x + 0.5 - tc[0], y + 0.5 - tc[1]) < tr - 1.5) continue;     // inside the disc (its bezel to R), 1.5 px in from its anti-aliased edge
+            outDisc++; worstC = Math.min(worstC, blackAt('bmw', x + 0.5, y + 0.5));
+        }
+        ok(worstC >= 0.98, 'above y 596 the marker is under our tacho\'s disc, or the collar at >= 0.98: its bilinear quarter-size edge (' + outDisc + ' px outside the disc, least ' + worstC.toFixed(3) + ')');
+    } else ok(false, 'the cover box ' + JSON.stringify(T.cover) + ' holds zone C from y 596');
+    // decision 1: ONE centre for BMW's sign - the "bmw" lane's round hole sits on the speedo's own window (WBDIAL u_cut)
+    const spd = layout('wb_dials').widgets.find((w) => w.id === 'speedo'), sw = spd.cut.round;
+    // (the box starts at y 596, so the hole is read row by row from there: each row's two 0.5 crossings give the
+    // centre's x as their middle, and the half chords c fit c^2 + y^2 = (r^2 - cy^2) + 2 cy y for cy and r)
+    const rows = [];
+    for (let y = Math.max(T.cover[1], Math.ceil(sw[1] - 38)); y < Math.floor(sw[1] + 38); y++) {
+        const yc = y + 0.5, at = (x) => lane('bmw', x + 0.5, yc, T.cover);
+        let xl = null, xr = null;
+        for (let x = Math.floor(sw[0] - 46); x < sw[0] && xl === null; x++) if (at(x) >= 0.5 && at(x + 1) < 0.5) xl = x + 0.5 + (at(x) - 0.5) / (at(x) - at(x + 1));
+        for (let x = Math.ceil(sw[0] + 46); x > sw[0] && xr === null; x--) if (at(x) >= 0.5 && at(x - 1) < 0.5) xr = x + 0.5 - (at(x) - 0.5) / (at(x) - at(x - 1));
+        if (xl !== null && xr !== null) rows.push([yc, (xl + xr) / 2, (xr - xl) / 2]);
+    }
+    const mx = rows.reduce((a, r) => a + r[1], 0) / rows.length;
+    let s1 = 0, sy1 = 0, syy = 0, sz = 0, syz = 0;
+    rows.forEach(([y, , c]) => { const z = c * c + y * y; s1++; sy1 += y; syy += y * y; sz += z; syz += y * z; });
+    const bq = (s1 * syz - sy1 * sz) / (s1 * syy - sy1 * sy1), aq = (sz - bq * sy1) / s1, cy = bq / 2, rq = Math.sqrt(aq + cy * cy);
+    ok(rows.length > 40 && Math.abs(mx - sw[0]) < 0.05 && Math.abs(cy - sw[1]) < 0.05 && Math.abs(rq - 41.8) < 0.05,
+        'the "bmw" lane\'s sign hole sits on the speedo\'s window: centre (' + mx.toFixed(3) + ', ' + cy.toFixed(3) + ') against (' + sw[0] + ', ' + sw[1] + '), edge r ' + rq.toFixed(3) + ' (41.8), ' + rows.length + ' rows');
 
     // the synthetic bake (bake_mask.py --today) against the rects it replaced, re-computed here as shared/shaders.js drew
     // them at 3c8ef46 (bake_mask.py TODAY): only while the shipped mask is that one; a bake from shapes skips it

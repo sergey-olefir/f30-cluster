@@ -239,27 +239,37 @@ def lanes_today(bg):
     return collar_alpha(bg, px, py), {'ours': ours, 'bmw': bmw, 'standby': bmw.copy()}, msg
 
 
-def lanes_from_shapes(bg, shapes, cover=True):
+def lanes_from_shapes(bg, shapes, cover=True, marker=False):
+    """The cover lanes and the hole lanes ({"msg": ..., and with marker "mark" and "msgMark" = msg x mark}).
+    Strip integration: channel "mark" (BMW's marker right of its panel, the owner's decision 7) is a hole lane of its
+    own, baked only with marker=True (--marker) and used only while app.json config.ccMarker confirms the marker."""
     px, py = centres()
     base = base_alpha(bg, px, py, cover)
     cov = {k: base.copy() for k in COVER_LANES}
-    msg = np.ones((H, W))
+    msg, mark = np.ones((H, W)), np.ones((H, W))
     order = [s for s in shapes if s.get('kind') == 'cover'] + [s for s in shapes if s.get('kind') == 'hole']
     for sh in order:
         ch, kind = sh.get('channel'), sh.get('kind')
-        if ch not in COVER_LANES + ('bmw_msg', 'all') or kind not in ('cover', 'hole'):
+        if ch not in COVER_LANES + ('bmw_msg', 'all', 'mark') or kind not in ('cover', 'hole'):
             raise SystemExit('shape %s: channel %r / kind %r unknown' % (sh.get('id'), ch, kind))
-        if ch == 'bmw_msg' and kind == 'cover':
-            raise SystemExit('shape %s: bmw_msg takes holes only (it is bmw x the panel holes)' % sh.get('id'))
+        if ch in ('bmw_msg', 'mark') and kind == 'cover':
+            raise SystemExit('shape %s: %s takes holes only (a hole lane multiplies the cover lane)' % (sh.get('id'), ch))
+        if ch == 'mark' and not marker:
+            continue
         s = shape_cover(sh)
         for lane in (COVER_LANES if ch == 'all' else ('msg',) if ch == 'bmw_msg' else (ch,)):
             if lane == 'msg':
                 msg *= 1.0 - s
+            elif lane == 'mark':
+                mark *= 1.0 - s
             elif kind == 'cover':
                 cov[lane] = np.maximum(cov[lane], s)
             else:
                 cov[lane] *= 1.0 - s
-    return collar_alpha(bg, px, py), cov, msg
+    holes = {'msg': msg}
+    if marker:
+        holes.update(mark=mark, msgMark=msg * mark)
+    return collar_alpha(bg, px, py), cov, holes
 
 
 def bbox(mask):
@@ -270,38 +280,48 @@ def bbox(mask):
 
 
 SAFETY = ('bottom.belt_rear', 'bottom.belt_driver', 'bottom.airbag')
+# strip integration: package ZL's measured boxes of the same telltales (photos 60-64, 66-68; continuous panel px), wider
+# than the catalogue's on every side but one - the guard takes the union of both
+SAFETY_ZL = {'bottom.belt_rear': [500.5, 677.75, 580.25, 715.25], 'bottom.belt_driver': [590.0, 664.5, 628.75, 715.25],
+             'bottom.airbag': [632.75, 664.25, 684.25, 715.5]}
 
 
 def safety_guard(cov):
-    """Belt and airbag telltales are never covered, in any lane, whatever a shape or the collar says: every cover lane
-    is 0 over the catalogue's boxes (design/overlay/g20_comfort.json; a px whose centre is inside). Returns, per
-    lane, how much it had to take away and the most black left within 3 px round them (the brief's SAFETY
-    footprint), for the log."""
+    """Belt and airbag telltales are never covered, in any lane, whatever a shape or the collar says. Strip
+    integration: every cover lane is 0 over the brief's whole SAFETY footprint - each telltale's box (the catalogue's,
+    design/overlay/g20_comfort.json, and ZL's measured one) grown 3 px - on EVERY pixel that touches it, not only
+    those whose centre is inside. Returns, per lane, how much black it had to take away there, and the most black
+    left within 3 px (0 by construction now), for the log."""
     cat = {e['id']: e for e in json.load(open(os.path.join(ROOT, 'design', 'overlay', 'g20_comfort.json')))['elements']}
     px, py = centres()
-    inside, near = np.zeros((H, W), bool), np.zeros((H, W), bool)
+    near = np.zeros((H, W), bool)
     for i in SAFETY:
-        b = cat[i]['bbox']
-        inside |= (px >= b[0]) & (px < b[2]) & (py >= b[1]) & (py < b[3])
-        near |= (px >= b[0] - 3) & (px < b[2] + 3) & (py >= b[1] - 3) & (py < b[3] + 3)
+        for b in (cat[i]['bbox'], SAFETY_ZL[i]):
+            f = [b[0] - 3, b[1] - 3, b[2] + 3, b[3] + 3]
+            # the pixel [x, x+1) x [y, y+1) touches the footprint
+            near |= (px - 0.5 < f[2]) & (px + 0.5 > f[0]) & (py - 0.5 < f[3]) & (py + 0.5 > f[1])
     note = {}
     for k, v in cov.items():
-        took = float(v[inside].max()) if inside.any() else 0.0
-        v[inside] = 0.0
+        took = float(v[near].max()) if near.any() else 0.0
+        v[near] = 0.0
         note[k] = (took, float(v[near].max()) if near.any() else 0.0)
     return note
 
 
 def pack(base, cov, msg):
-    """The R8 atlas: one tile per distinct cover lane (all over one box) and one for the hole lane. base: what WBBACK
-    draws outside the box (the collar), so the box holds every px where a lane differs from it."""
+    """The R8 atlas: one tile per distinct cover lane (all over one box) and one per hole lane (all over the hole box).
+    base: what WBBACK draws outside the box (the collar), so the box holds every px where a lane differs from it.
+    msg: the hole lane, or (strip integration) a dict of hole lanes {"msg", and with --marker "mark", "msgMark"}."""
+    holes = msg if isinstance(msg, dict) else {'msg': msg}
     q = {k: np.round(np.clip(v, 0, 1) * 255).astype(np.uint8) for k, v in cov.items()}
-    qm = np.round(np.clip(msg, 0, 1) * 255).astype(np.uint8)
     changed = np.zeros((H, W), bool)
     for v in cov.values():
         changed |= np.abs(v - base) > TOL
     cb = bbox(changed)
-    hb = bbox(msg < 1 - TOL)
+    hole_any = np.zeros((H, W), bool)
+    for v in holes.values():
+        hole_any |= v < 1 - TOL
+    hb = bbox(hole_any)
     if cb is None:
         raise SystemExit('no cover lane differs from the collar: nothing to bake')
     cw, chh = cb[2] - cb[0], cb[3] - cb[1]
@@ -314,23 +334,26 @@ def pack(base, cov, msg):
             same = len(tiles) - 1
         lanes[k] = [0, same * chh]
     aw, ah = cw, len(tiles) * chh
-    hole = None
+    placed = []
     if hb is not None:
         hw, hh = hb[2] - hb[0], hb[3] - hb[1]
-        ht = qm[hb[1] - Y0:hb[3] - Y0, hb[0] - X0:hb[2] - X0]
-        cw4 = (cw + 3) // 4 * 4                  # beside the cover tiles when it fits, else under them
-        if cw4 + hw <= 2048 and hh <= ah:
-            lanes['msg'], aw = [cw4, 0], cw4 + hw
-        else:
-            lanes['msg'], aw, ah = [0, ah], max(cw, hw), ah + hh
-        hole = (hb, ht)
+        cw4 = (cw + 3) // 4 * 4                  # beside the cover tiles when they fit, else under them
+        side = cw4 + hw <= 2048 and hh * len(holes) <= ah
+        for i, (k, v) in enumerate(holes.items()):
+            ht = np.round(np.clip(v, 0, 1) * 255).astype(np.uint8)[hb[1] - Y0:hb[3] - Y0, hb[0] - X0:hb[2] - X0]
+            if side:
+                lanes[k] = [cw4, i * hh]
+            else:
+                lanes[k] = [0, ah]
+                ah += hh
+            placed.append((lanes[k], ht))
+        aw = cw4 + hw if side else max(cw, hw)
     aw = (aw + 3) // 4 * 4                      # rows on a 4-byte boundary: GL's default unpack alignment
     atlas = np.zeros((ah, aw), np.uint8)
     for i, (n, t) in enumerate(tiles):
         atlas[i * chh:(i + 1) * chh, :cw] = t
-    if hole:
-        ax, ay = lanes['msg']
-        atlas[ay:ay + hole[1].shape[0], ax:ax + hole[1].shape[1]] = hole[1]
+    for (ax, ay), ht in placed:
+        atlas[ay:ay + ht.shape[0], ax:ax + ht.shape[1]] = ht
     if aw > 2048 or ah > 2048:
         raise SystemExit('the atlas is %d x %d: past the 2048 px an asset may have' % (aw, ah))
     entry = {'tex': None, 'atlas': [aw, ah], 'cover': cb, 'hole': hb or [0, 0, 0, 0], 'lanes': lanes}
@@ -356,6 +379,8 @@ def main():
     ap.add_argument('--layout', default=LAYOUT, help='the layout whose bg (its collar) the lanes start from')
     ap.add_argument('--dir', default=SCENE, help='where to write it (default the app\'s hud/scene; a trial bake elsewhere)')
     ap.add_argument('--preview', help='write a 1x PNG of each lane here (git-ignored place, e.g. bake/work/strip/M)')
+    ap.add_argument('--marker', action='store_true', help='also bake the "mark" / "msgMark" hole lanes (BMW\'s marker; '
+                    'only for a car whose app.json config.ccMarker is confirmed: the owner\'s decision 7)')
     a = ap.parse_args()
     if os.path.abspath(a.dir) == os.path.abspath(SCENE):
         print('collar_r8: %d x %d R8 from collar.json' % collar_r8())
@@ -370,11 +395,19 @@ def main():
             shapes += d['shapes'] if isinstance(d, dict) else d
         if not shapes:
             raise SystemExit('no shapes given (or --today)')
-        base, cov, msg = lanes_from_shapes(bg, shapes, not a.no_cover)
-        about = 'package M lanes from %d shapes: %s' % (len(shapes), ', '.join(os.path.basename(f) for f in a.shapes))
+        base, cov, msg = lanes_from_shapes(bg, shapes, not a.no_cover, a.marker)
+        about = 'package M lanes from %d shapes: %s%s' % (len(shapes), ', '.join(os.path.basename(f) for f in a.shapes),
+                                                         ' (with the marker lanes)' if a.marker else '')
     for k, (took, near) in safety_guard(cov).items():
-        print('safety: lane %-8s took %.3f off the belt and airbag telltales; most black within 3 px of them %.3f%s'
-              % (k, took, near, '  <- a shape should clear them' if near > 0.02 else ''))
+        print('safety: lane %-8s took %.3f off the belt and airbag telltales\' 3 px footprint; most black left there %.3f%s'
+              % (k, took, near, '  <- a shape should clear them' if took > 0.02 else ''))
+    # strip integration: the zones' constraints on each other, read off the lanes as baked
+    holes = msg if isinstance(msg, dict) else {'msg': msg}
+    px, py = centres()
+    stub = (px >= 1222) & (px < 1252) & (py >= 640) & (py < 656)
+    print('check: the msg lane over ZR\'s rail stub [1222, 640, 1252, 656] keeps at least %.3f of the black (want 1)' % float(holes['msg'][stub].min()))
+    belts = (px >= 587) & (px < 683) & (py >= 661.25)
+    print('check: most black of any cover lane over x 587-683 below y 661.25 (ZL): %.3f' % max(float(v[belts].max()) for v in cov.values()))
     atlas, entry = pack(base, cov, msg)
     path = write(a.out, atlas, entry, about, a.dir)
     print('%s: %d x %d R8, %.3f MiB as an asset (counted twice)' % (os.path.relpath(path, ROOT), atlas.shape[1],
@@ -383,7 +416,7 @@ def main():
     if a.preview:
         from PIL import Image
         os.makedirs(a.preview, exist_ok=True)
-        for k, v in list(cov.items()) + [('msg', msg)]:
+        for k, v in list(cov.items()) + list(holes.items()):
             Image.fromarray(np.round(np.clip(v, 0, 1) * 255).astype(np.uint8)).save(os.path.join(a.preview, a.out + '.' + k + '.png'))
 
 

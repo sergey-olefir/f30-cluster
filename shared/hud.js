@@ -3718,11 +3718,13 @@ class HudApp {
         if (prev.k === k && prev.h === h) return;
         const org = (n) => (n && m.lanes[n]) || [0, 0];
         const lp = (b) => [b[0] - w.x, b[1] - w.y, b[2] - w.x, b[3] - w.y];
-        if (prev.h && prev.h !== h) c.uniform(ref, 'u_mh', none);
+        // (strip integration: every hole lane - "msg", and with the marker "mark", "msgMark" - shares the box m.hole, so
+        // going from one to another is a single u_mo, with no frame in between where BMW's panel is shut)
+        if (prev.h && !h) c.uniform(ref, 'u_mh', none);
         if (prev.k && !k) c.uniform(ref, 'u_mk', none);
         c.uniform(ref, 'u_mo', org(k).concat(org(h)));
         if (k && !prev.k) c.uniform(ref, 'u_mk', lp(m.cover));
-        if (h && prev.h !== h) c.uniform(ref, 'u_mh', lp(m.hole));
+        if (h && !prev.h) c.uniform(ref, 'u_mh', lp(m.hole));
         x.mask = { k, h };
     }
     /* ---- end package M ---- */
