@@ -86,7 +86,8 @@ def wbback(l, lanes, atlas):
     tex = {}
     for smp, key in binds.items():
         tex[smp] = key
-    collar = TEX[tex['u_t0']]
+    # the old code sampled the RGBA collar's alpha; the new one the R8 copy of it (collar_r8)
+    collar = TEX[tex['u_t0']] if lanes else scene_tex('collar')
     a = bm.sampled(collar, r0, px, py)
     if r1[2] > 0:
         a = np.maximum(a, bm.sampled(TEX[tex['u_t1']], r1, px, py))
@@ -154,7 +155,7 @@ def main():
         mk = l['binds']
         TEX.clear()
         for smp, key in mk.items():
-            name = {'u_t0': 'collar', 'u_t1': 'cover', 'u_t2': 'strip_mask'}[smp]
+            name = {'u_t0': 'collar_r8', 'u_t1': 'cover', 'u_t2': 'strip_mask'}[smp]
             TEX[key] = scene_tex(name)
         atlas = TEX[mk['u_t2']] if 'u_t2' in mk else None
         a_new, c_new = wbback(l, True, atlas)

@@ -1604,14 +1604,13 @@ const float PI = 3.14159265359;
 
 // package M: is p in the box b (x0, y0, x1, y1; half-open; x1 <= x0: never)
 bool inBox(vec2 p, vec4 b) { return b.z > b.x && p.x >= b.x && p.y >= b.y && p.x < b.z && p.y < b.w; }
+// package M: an R8 asset's byte. The car samples R8 as (r, 0, 0, 1); the bench page gets it as (r', r', r', r) with
+// r' rounded by its canvas's premultiplied alpha, so .a is read wherever it is not 1 (exact on both, bilinear too)
+float r8a(vec4 s) { return s.a < 0.999 ? s.a : s.r; }
 // package M: a lane's value at p (its box b, its origin o in the atlas). floor() + 0.5 lands on the texel's centre
 // whatever the rounding of p (fp16 would miss by up to 0.94 texel past x 1024: highp, and the snap, docs/strip/
-// M-REPORT.md). An R8 asset samples as (r, 0, 0, 1) on the car; the bench page gets it as (r', r', r', r) with r'
-// rounded by its canvas's premultiplied alpha, so .a is read wherever it is not 1
-float laneAt(vec2 p, vec4 b, vec2 o) {
-    vec4 s = texture2D(u_t2, (floor(p - b.xy) + 0.5 + o) / u_r2.zw);
-    return s.a < 0.999 ? s.a : s.r;
-}
+// M-REPORT.md)
+float laneAt(vec2 p, vec4 b, vec2 o) { return r8a(texture2D(u_t2, (floor(p - b.xy) + 0.5 + o) / u_r2.zw)); }
 
 // package F: px outside the box b (x0, y0, x1, y1), rounded by r; < 0 inside. fp16-safe: length() of a clamped vector
 float boxOut(vec2 p, vec4 b, float r) {
@@ -1666,7 +1665,8 @@ void main() {
         else {
         // the collar: pure black (empty space is black), its coverage soft and baked (tools/overlay/plan_dials.py)
         vec2 u0 = (p - u_r0.xy) / u_r0.zw;
-        a = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? texture2D(u_t0, u0).a : 0.0;
+        // package M: the collar is R8 now (collar_r8: a quarter of the pixel memory), read by r8a()
+        a = u0.x >= 0.0 && u0.y >= 0.0 && u0.x <= 1.0 && u0.y <= 1.0 ? r8a(texture2D(u_t0, u0)) : 0.0;
         // --- package F: the full-size cover, the shade at our dials' inner edges, the bottom-row patches ---
         if (u_r1.z > 0.0) {
             vec2 u1 = (p - u_r1.xy) / u_r1.zw;

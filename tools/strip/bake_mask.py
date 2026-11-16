@@ -31,6 +31,9 @@ to the three cover lanes. Shapes are 8 x 8 supersampled.
     python3 tools/strip/bake_mask.py --today [--out NAME]          synthetic lanes from today's rectangles
     python3 tools/strip/bake_mask.py shapes_L.json shapes_C.json shapes_R.json [--out NAME] [--preview DIR]
 
+Also rewrites hud/scene/collar_r8.json, the collar (tools/bake_scene.py's collar.json) as R8, which the see-through
+layouts sample now: run this after bake_scene.py changes the collar.
+
 Writes apps/f30_cluster/hud/scene/<NAME>.json (default "strip_mask": {w, h, format: "r8", r8: base64, sampling:
 "nearest", mask: the layout entry}) - design/gen_6wb.py strip_mask() reads the layout entry from it - and prints the
 lanes, their boxes and the memory. Needs numpy (and pillow for --preview). Our own geometry only: no photo pixel goes
@@ -76,9 +79,26 @@ def patch(px, py, b, soft):
 
 
 def tex_alpha(name):
+    """A scene texture's coverage: an R8 one's byte, an RGBA one's alpha."""
     j = json.load(open(os.path.join(SCENE, name + '.json')))
-    a = np.frombuffer(base64.b64decode(j['rgba']), np.uint8).reshape(j['h'], j['w'], 4)[..., 3]
+    if j.get('format') == 'r8':
+        a = np.frombuffer(base64.b64decode(j['r8']), np.uint8).reshape(j['h'], j['w'])
+    else:
+        a = np.frombuffer(base64.b64decode(j['rgba']), np.uint8).reshape(j['h'], j['w'], 4)[..., 3]
     return a.astype(np.float64) / 255.0
+
+
+def collar_r8(src='collar', dst='collar_r8'):
+    """The collar as R8 (its alpha, byte for byte; tools/bake_scene.py writes the RGBA one, black with coverage in
+    alpha): a quarter of the pixel memory (0.66 -> 0.16 MiB), sampled the same way (WBBACK r8a(), bilinear)."""
+    j = json.load(open(os.path.join(SCENE, src + '.json')))
+    a = np.frombuffer(base64.b64decode(j['rgba']), np.uint8).reshape(j['h'], j['w'], 4)
+    if a[..., :3].any():
+        raise SystemExit('%s.json is not pure black: its colour would be lost as R8' % src)
+    out = {'w': j['w'], 'h': j['h'], 'format': 'r8', '_about': 'package M: %s.json\'s alpha as R8 (tools/strip/bake_mask.py)' % src,
+           'r8': base64.b64encode(np.ascontiguousarray(a[..., 3]).tobytes()).decode('ascii')}
+    json.dump(out, open(os.path.join(SCENE, dst + '.json'), 'w'))
+    return a.shape[1], a.shape[0]
 
 
 def bilinear(t, u, v):
@@ -296,6 +316,8 @@ def main():
     ap.add_argument('--dir', default=SCENE, help='where to write it (default the app\'s hud/scene; a trial bake elsewhere)')
     ap.add_argument('--preview', help='write a 1x PNG of each lane here (git-ignored place, e.g. bake/work/strip/M)')
     a = ap.parse_args()
+    if os.path.abspath(a.dir) == os.path.abspath(SCENE):
+        print('collar_r8: %d x %d R8 from collar.json' % collar_r8())
     bg = bg_widget(a.layout)
     if a.today:
         base, cov, msg = lanes_today(bg)

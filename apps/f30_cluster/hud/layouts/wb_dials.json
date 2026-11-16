@@ -27,7 +27,7 @@
       "style": "comfort",
       "color": "accent",
       "collar": {
-        "tex": "collar",
+        "tex": "collar_r8",
         "x": 0,
         "y": 0,
         "w": 1920,

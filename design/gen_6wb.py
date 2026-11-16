@@ -436,7 +436,8 @@ def dials_bg(style):
     m = strip_mask()                 # package M
     return dict({"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
             "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": style, "color": "accent",
-            "collar": {"tex": "collar", "x": 0, "y": 0, "w": 1920, "h": 720},
+            # package M: the collar as R8 (tools/strip/bake_mask.py writes collar_r8 from collar): 0.16 MiB, not 0.66
+            "collar": {"tex": "collar_r8", "x": 0, "y": 0, "w": 1920, "h": 720},
             # package F: BMW's bottom lines, hooks and dash under black; the shade's setting; patches under our row items
             "cover": {"tex": "cover", "x": COVER[0], "y": COVER[1], "w": COVER[2], "h": COVER[3]}, "shade": SHADE,
             "patches": row_patches(),      # range, clock, temperature, the foot band - and no fifth, see row_patches()
