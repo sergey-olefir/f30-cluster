@@ -1,0 +1,698 @@
+{
+ "fuel_full": {
+  "font": "wb_mini",
+  "size": 14,
+  "cellHeight": 15,
+  "baseline_panel_y": 594,
+  "box": [
+   36,
+   582,
+   66,
+   597
+  ],
+  "align": "center",
+  "anchor": "centre",
+  "widest": {
+   "text": "(free text, cut to fit with \"...\")",
+   "advance_px": 30,
+   "ink": [
+    36,
+    582,
+    66,
+    597
+   ]
+  },
+  "candidates": [
+   {
+    "text": "(free text, cut to fit with \"...\")",
+    "advance_px": 30,
+    "ink": [
+     36,
+     582,
+     66,
+     597
+    ]
+   }
+  ]
+ },
+ "fuel_zero": {
+  "font": "wb_mini",
+  "size": 14,
+  "cellHeight": 15,
+  "baseline_panel_y": 640,
+  "box": [
+   102,
+   628,
+   116,
+   643
+  ],
+  "align": "center",
+  "anchor": "centre",
+  "widest": {
+   "text": "(free text, cut to fit with \"...\")",
+   "advance_px": 14,
+   "ink": [
+    102,
+    628,
+    116,
+    643
+   ]
+  },
+  "candidates": [
+   {
+    "text": "(free text, cut to fit with \"...\")",
+    "advance_px": 14,
+    "ink": [
+     102,
+     628,
+     116,
+     643
+    ]
+   }
+  ]
+ },
+ "spd0": {
+  "font": "wb_spd",
+  "size": 28,
+  "cellHeight": 24,
+  "baseline_panel_y": 547,
+  "box": [
+   180,
+   525,
+   270,
+   549
+  ],
+  "align": "center",
+  "anchor": "centre",
+  "widest": {
+   "text": "(free text, cut to fit with \"...\")",
+   "advance_px": 90,
+   "ink": [
+    180,
+    525,
+    270,
+    549
+   ]
+  },
+  "candidates": [
+   {
+    "text": "(free text, cut to fit with \"...\")",
+    "advance_px": 90,
+    "ink": [
+     180,
+     525,
+     270,
+     549
+    ]
+   }
+  ]
+ },
+ "spd13": {
+  "font": "wb_spd",
+  "size": 28,
+  "cellHeight": 24,
+  "baseline_panel_y": 539,
+  "box": [
+   544,
+   517,
+   634,
+   541
+  ],
+  "align": "center",
+  "anchor": "centre",
+  "widest": {
+   "text": "(free text, cut to fit with \"...\")",
+   "advance_px": 90,
+   "ink": [
+    544,
+    517,
+    634,
+    541
+   ]
+  },
+  "candidates": [
+   {
+    "text": "(free text, cut to fit with \"...\")",
+    "advance_px": 90,
+    "ink": [
+     544,
+     517,
+     634,
+     541
+    ]
+   }
+  ]
+ },
+ "off": {
+  "font": "wb_cap",
+  "size": 21,
+  "cellHeight": 24,
+  "baseline_panel_y": 541,
+  "box": [
+   1280,
+   523,
+   1350,
+   549
+  ],
+  "align": "center",
+  "anchor": "centre",
+  "widest": {
+   "text": "(free text, cut to fit with \"...\")",
+   "advance_px": 70,
+   "ink": [
+    1280,
+    523,
+    1350,
+    549
+   ]
+  },
+  "candidates": [
+   {
+    "text": "(free text, cut to fit with \"...\")",
+    "advance_px": 70,
+    "ink": [
+     1280,
+     523,
+     1350,
+     549
+    ]
+   }
+  ]
+ },
+ "own_range": {
+  "font": "wb_row",
+  "size": 43,
+  "cellHeight": 35,
+  "baseline_panel_y": 697,
+  "box": [
+   139,
+   664,
+   249,
+   699
+  ],
+  "align": "right",
+  "anchor": "right edge",
+  "widest": {
+   "text": "9999",
+   "advance_px": 92,
+   "ink": [
+    155,
+    664,
+    249,
+    699
+   ],
+   "overflows_box": false,
+   "missing_glyphs": []
+  },
+  "candidates": [
+   {
+    "text": "9999",
+    "advance_px": 92,
+    "ink": [
+     155,
+     664,
+     249,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   },
+   {
+    "text": "999",
+    "advance_px": 69,
+    "ink": [
+     178,
+     664,
+     249,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   },
+   {
+    "text": "---",
+    "advance_px": 42,
+    "ink": [
+     205,
+     664,
+     249,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   }
+  ]
+ },
+ "own_range_u": {
+  "font": "wb_val",
+  "size": 36,
+  "cellHeight": 33,
+  "baseline_panel_y": 697,
+  "box": [
+   253,
+   668,
+   307,
+   700
+  ],
+  "align": "left",
+  "anchor": "left edge",
+  "widest": {
+   "text": "km",
+   "advance_px": 47,
+   "ink": [
+    253,
+    668,
+    302,
+    700
+   ],
+   "overflows_box": false,
+   "missing_glyphs": []
+  },
+  "candidates": [
+   {
+    "text": "km",
+    "advance_px": 47,
+    "ink": [
+     253,
+     668,
+     302,
+     700
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   },
+   {
+    "text": "mi",
+    "advance_px": 38,
+    "ink": [
+     253,
+     668,
+     284,
+     700
+    ],
+    "overflows_box": false,
+    "missing_glyphs": [
+     "i"
+    ]
+   }
+  ]
+ },
+ "own_clock": {
+  "font": "wb_row",
+  "size": 43,
+  "cellHeight": 35,
+  "baseline_panel_y": 697,
+  "box": [
+   335,
+   664,
+   459,
+   699
+  ],
+  "align": "center",
+  "anchor": "centre",
+  "widest": {
+   "text": "23:59",
+   "advance_px": 103,
+   "ink": [
+    344,
+    664,
+    451,
+    699
+   ],
+   "overflows_box": false,
+   "missing_glyphs": []
+  },
+  "candidates": [
+   {
+    "text": "23:59",
+    "advance_px": 103,
+    "ink": [
+     344,
+     664,
+     451,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   },
+   {
+    "text": "00:00",
+    "advance_px": 103,
+    "ink": [
+     344,
+     664,
+     451,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   },
+   {
+    "text": "11:59",
+    "advance_px": 103,
+    "ink": [
+     344,
+     664,
+     451,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   },
+   {
+    "text": "--:--",
+    "advance_px": 67,
+    "ink": [
+     362,
+     664,
+     433,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   }
+  ]
+ },
+ "own_temp": {
+  "font": "wb_row",
+  "size": 43,
+  "cellHeight": 35,
+  "baseline_panel_y": 697,
+  "box": [
+   1505,
+   664,
+   1615,
+   699
+  ],
+  "align": "right",
+  "anchor": "right edge",
+  "widest": {
+   "text": "+40.0",
+   "advance_px": 103,
+   "ink": [
+    1510,
+    664,
+    1615,
+    699
+   ],
+   "overflows_box": false,
+   "missing_glyphs": []
+  },
+  "candidates": [
+   {
+    "text": "-40.0",
+    "advance_px": 95,
+    "ink": [
+     1518,
+     664,
+     1615,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   },
+   {
+    "text": "-9.5",
+    "advance_px": 72,
+    "ink": [
+     1541,
+     664,
+     1615,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   },
+   {
+    "text": "+40.0",
+    "advance_px": 103,
+    "ink": [
+     1510,
+     664,
+     1615,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   },
+   {
+    "text": "+24.0",
+    "advance_px": 103,
+    "ink": [
+     1510,
+     664,
+     1615,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   },
+   {
+    "text": "---",
+    "advance_px": 42,
+    "ink": [
+     1571,
+     664,
+     1615,
+     699
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   }
+  ]
+ },
+ "own_temp_u": {
+  "font": "wb_val",
+  "size": 36,
+  "cellHeight": 33,
+  "baseline_panel_y": 697,
+  "box": [
+   1619,
+   668,
+   1665,
+   700
+  ],
+  "align": "left",
+  "anchor": "left edge",
+  "widest": {
+   "text": "\u00b0C",
+   "advance_px": 36,
+   "ink": [
+    1619,
+    668,
+    1657,
+    700
+   ],
+   "overflows_box": false,
+   "missing_glyphs": []
+  },
+  "candidates": [
+   {
+    "text": "\u00b0C",
+    "advance_px": 36,
+    "ink": [
+     1619,
+     668,
+     1657,
+     700
+    ],
+    "overflows_box": false,
+    "missing_glyphs": []
+   },
+   {
+    "text": "\u00b0F",
+    "advance_px": 23,
+    "ink": [
+     1619,
+     668,
+     1635,
+     700
+    ],
+    "overflows_box": false,
+    "missing_glyphs": [
+     "F"
+    ]
+   }
+  ]
+ },
+ "nav": {
+  "font": "wb_cap",
+  "size": 21,
+  "cellHeight": 24,
+  "baseline_panel_y": 700,
+  "box": [
+   690,
+   682,
+   1230,
+   708
+  ],
+  "align": "center",
+  "anchor": "centre",
+  "widest": {
+   "text": "(free text, cut to fit with \"...\")",
+   "advance_px": 540,
+   "ink": [
+    690,
+    682,
+    1230,
+    708
+   ]
+  },
+  "candidates": [
+   {
+    "text": "(free text, cut to fit with \"...\")",
+    "advance_px": 540,
+    "ink": [
+     690,
+     682,
+     1230,
+     708
+    ]
+   }
+  ]
+ },
+ "cc_name": {
+  "font": "wb_cap",
+  "size": 21,
+  "cellHeight": 24,
+  "baseline_panel_y": 645,
+  "box": [
+   758,
+   627,
+   1178,
+   653
+  ],
+  "align": "center",
+  "anchor": "centre",
+  "widest": {
+   "text": "(free text, cut to fit with \"...\")",
+   "advance_px": 420,
+   "ink": [
+    758,
+    627,
+    1178,
+    653
+   ]
+  },
+  "candidates": [
+   {
+    "text": "(free text, cut to fit with \"...\")",
+    "advance_px": 420,
+    "ink": [
+     758,
+     627,
+     1178,
+     653
+    ]
+   }
+  ]
+ },
+ "cc_desc": {
+  "font": "wb_cap",
+  "size": 21,
+  "cellHeight": 24,
+  "baseline_panel_y": 689,
+  "box": [
+   758,
+   671,
+   1178,
+   697
+  ],
+  "align": "center",
+  "anchor": "centre",
+  "widest": {
+   "text": "(free text, cut to fit with \"...\")",
+   "advance_px": 420,
+   "ink": [
+    758,
+    671,
+    1178,
+    697
+   ]
+  },
+  "candidates": [
+   {
+    "text": "(free text, cut to fit with \"...\")",
+    "advance_px": 420,
+    "ink": [
+     758,
+     671,
+     1178,
+     697
+    ]
+   }
+  ]
+ },
+ "gear": {
+  "font": "wb_gear",
+  "size": 45,
+  "cellHeight": 36,
+  "baseline_panel_y": 599,
+  "box": [
+   1448,
+   565,
+   1568,
+   601
+  ],
+  "align": "center",
+  "anchor": "centre",
+  "widest": {
+   "text": "(free text, cut to fit with \"...\")",
+   "advance_px": 120,
+   "ink": [
+    1448,
+    565,
+    1568,
+    601
+   ]
+  },
+  "candidates": [
+   {
+    "text": "(free text, cut to fit with \"...\")",
+    "advance_px": 120,
+    "ink": [
+     1448,
+     565,
+     1568,
+     601
+    ]
+   }
+  ]
+ },
+ "gear_l": {
+  "font": "wb_gear",
+  "size": 45,
+  "cellHeight": 36,
+  "baseline_panel_y": 599,
+  "box": [
+   1448,
+   565,
+   1568,
+   601
+  ],
+  "align": "center",
+  "anchor": "centre",
+  "widest": {
+   "text": "(free text, cut to fit with \"...\")",
+   "advance_px": 120,
+   "ink": [
+    1448,
+    565,
+    1568,
+    601
+   ]
+  },
+  "candidates": [
+   {
+    "text": "(free text, cut to fit with \"...\")",
+    "advance_px": 120,
+    "ink": [
+     1448,
+     565,
+     1568,
+     601
+    ]
+   }
+  ]
+ }
+}

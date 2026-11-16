@@ -1,0 +1,2272 @@
+[
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "unread",
+  "note": "D, limit 50, road label, NO message ever read (right after a restart): 69.png",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": null,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "drive",
+  "note": "D, limit 50, road label, a message read and cleared",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "drive-clock",
+  "note": "as drive, the car's time zone known (+2 h)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": 120,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "park",
+  "note": "P, engine running",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "msg",
+  "note": "D, a short message (two lines: name + description)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "msg-long",
+  "note": "D, the longest fake message",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "limit-unknown",
+  "note": "BMW's empty sign \"---\"",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "unknown",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "limit-end",
+  "note": "end of limit",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "end",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "limit-none",
+  "note": "no sign",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "none",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "nopass",
+  "note": "limit 80 + no overtaking",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "p-engine-off",
+  "note": "P + rpm 0 as the app treats it today (photo 63 state: BMW still draws its normal row, sign included)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "msg-latched",
+  "note": "a message with no glyph in our fonts: the field latches back to BMW",
+  "reached": false,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "allG20",
+  "state": "road-latched-msg",
+  "note": "a road label with no glyph latched nav first, then a message",
+  "reached": false,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 11249616
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "unread",
+  "note": "D, limit 50, road label, NO message ever read (right after a restart): 69.png",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": false,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": null,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 12609040
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "drive",
+  "note": "D, limit 50, road label, a message read and cleared",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 13858000
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "drive-clock",
+  "note": "as drive, the car's time zone known (+2 h)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": true,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": 120,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 4,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     340,
+     662,
+     455,
+     704
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 13858000
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "park",
+  "note": "P, engine running",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 13858000
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "msg",
+  "note": "D, a short message (two lines: name + description)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 13858000
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "msg-long",
+  "note": "D, the longest fake message",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 13858000
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "limit-unknown",
+  "note": "BMW's empty sign \"---\"",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "unknown",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 13858000
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "limit-end",
+  "note": "end of limit",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "end",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 13858000
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "limit-none",
+  "note": "no sign",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "none",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 13858000
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "nopass",
+  "note": "limit 80 + no overtaking",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 13858000
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "p-engine-off",
+  "note": "P + rpm 0 as the app treats it today (photo 63 state: BMW still draws its normal row, sign included)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 13858000
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "msg-latched",
+  "note": "a message with no glyph in our fonts: the field latches back to BMW",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": false,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {
+   "info": true
+  },
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 12609040
+ },
+ {
+  "layout": "wb_dials",
+  "mode": "all6WB",
+  "state": "road-latched-msg",
+  "note": "a road label with no glyph latched nav first, then a message",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {
+   "nav": true
+  },
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 12910272
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "unread",
+  "note": "D, limit 50, road label, NO message ever read (right after a restart): 69.png",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": null,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "drive",
+  "note": "D, limit 50, road label, a message read and cleared",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "drive-clock",
+  "note": "as drive, the car's time zone known (+2 h)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": 120,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "park",
+  "note": "P, engine running",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "msg",
+  "note": "D, a short message (two lines: name + description)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "msg-long",
+  "note": "D, the longest fake message",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "limit-unknown",
+  "note": "BMW's empty sign \"---\"",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "unknown",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "limit-end",
+  "note": "end of limit",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "end",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "limit-none",
+  "note": "no sign",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "none",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "nopass",
+  "note": "limit 80 + no overtaking",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "p-engine-off",
+  "note": "P + rpm 0 as the app treats it today (photo 63 state: BMW still draws its normal row, sign included)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "msg-latched",
+  "note": "a message with no glyph in our fonts: the field latches back to BMW",
+  "reached": false,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "allG20",
+  "state": "road-latched-msg",
+  "note": "a road label with no glyph latched nav first, then a message",
+  "reached": false,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": false,
+   "info": false,
+   "range": false,
+   "clock": false,
+   "temp": false
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [],
+  "patches": {
+   "want": 1,
+   "cap": 4,
+   "sent": [
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 2668440
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "unread",
+  "note": "D, limit 50, road label, NO message ever read (right after a restart): 69.png",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": false,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": null,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 4226920
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "drive",
+  "note": "D, limit 50, road label, a message read and cleared",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 5164360
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "drive-clock",
+  "note": "as drive, the car's time zone known (+2 h)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": true,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": 120,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 4,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     340,
+     662,
+     455,
+     704
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 5164360
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "park",
+  "note": "P, engine running",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 5164360
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "msg",
+  "note": "D, a short message (two lines: name + description)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 5164360
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "msg-long",
+  "note": "D, the longest fake message",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 5164360
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "limit-unknown",
+  "note": "BMW's empty sign \"---\"",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "unknown",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 5164360
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "limit-end",
+  "note": "end of limit",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "end",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 5164360
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "limit-none",
+  "note": "no sign",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "none",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 5164360
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "nopass",
+  "note": "limit 80 + no overtaking",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 5164360
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "p-engine-off",
+  "note": "P + rpm 0 as the app treats it today (photo 63 state: BMW still draws its normal row, sign included)",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {},
+  "cc_shown": false,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 5164360
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "msg-latched",
+  "note": "a message with no glyph in our fonts: the field latches back to BMW",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": true,
+   "sign": true,
+   "info": false,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {
+   "info": true
+  },
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "nav",
+   "nav_bg"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 4226920
+ },
+ {
+  "layout": "wb_sport_dials",
+  "mode": "all6WB",
+  "state": "road-latched-msg",
+  "note": "a road label with no glyph latched nav first, then a message",
+  "reached": true,
+  "activeName": "wb_dials",
+  "own": {
+   "nav": false,
+   "sign": true,
+   "info": true,
+   "range": true,
+   "clock": false,
+   "temp": true
+  },
+  "fail": {
+   "nav": true
+  },
+  "cc_shown": true,
+  "sign": "limit",
+  "tzCar": null,
+  "widgets": [
+   "signs",
+   "limit",
+   "cc_name",
+   "cc_desc"
+  ],
+  "patches": {
+   "want": 3,
+   "cap": 4,
+   "sent": [
+    [
+     132,
+     662,
+     334,
+     703
+    ],
+    [
+     1498,
+     662,
+     1667,
+     705
+    ],
+    [
+     590,
+     594,
+     1250,
+     665
+    ]
+   ]
+  },
+  "pixels": 4216632
+ }
+]
