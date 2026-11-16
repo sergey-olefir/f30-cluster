@@ -1154,8 +1154,10 @@ class HudApp {
                 if (key !== this.ccFrameShape) { this.ccFrameShape = key; this.log.info('check-control frames: ' + key); }
             });
         }
-        // The driver's own speed-limit settings (config.sla), READ ONLY: app.json declares these fields "rs", not
-        // "rws", so our generated interface config has no setter and the app cannot write one. They say whether the
+        // The driver's own speed-limit settings (config.sla), SUBSCRIBE ONLY: app.json declares these fields "s", not
+        // "rws", so our generated interface config has no setter and the app cannot write one. The "r" is gone because
+        // the car's getters for all six carry {"id": 0} and the installer reads a zero id as no getter at all (it
+        // refused 0.7.16 outright); the notifiers are real, so watchOne below still gets every value. They say whether the
         // driver asked for the excess-speed warning at all, and with what tolerance; the arc on our speed scale
         // follows the car's own verdict (displaySpeedLimitWarning) rather than a comparison of our own.
         const sl = this.config.sla;

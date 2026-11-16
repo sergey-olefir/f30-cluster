@@ -2,7 +2,7 @@
   "id": "f30_cluster",
   "title": "F30 Cluster",
   "description": "Instrument cluster themes after the F-series 6WB look: Comfort, Sport and Eco Pro, following the drive mode",
-  "version": "0.7.16",
+  "version": "0.7.17",
   "vendor": "custom",
   "loggingId": "OAF3",
   "iconGlyph": "F30",
@@ -91,13 +91,13 @@
       "_optional": "the NEXT limit ahead, not the one in force; not drawn yet, read for calibration"
     },
     "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions": {
-      "settingSpeedLimitInfoPresentation": "rs",
-      "settingSpeedLimitInfoWarning": "rs",
-      "settingSpeedLimitWarningSecondLevel": "rs",
-      "settingOffsetSpeed": "rs",
-      "settingOffsetSpeedSlow": "rs",
-      "settingOffsetSpeedSlowActivation": "rs",
-      "_optional": "the driver's OWN speed-limit settings, so our red arc follows the car's excess-speed display instead of our own guess. READ ONLY ON PURPOSE: every one of these is \"rws\" in the car's catalogue, and the flags here say \"rs\", so the installer leaves the setter out of our interface config and the app cannot write a driver-assistance setting even by mistake."
+      "settingSpeedLimitInfoPresentation": "s",
+      "settingSpeedLimitInfoWarning": "s",
+      "settingSpeedLimitWarningSecondLevel": "s",
+      "settingOffsetSpeed": "s",
+      "settingOffsetSpeedSlow": "s",
+      "settingOffsetSpeedSlowActivation": "s",
+      "_optional": "the driver's OWN speed-limit settings, so our red arc follows the car's excess-speed display instead of our own guess. SUBSCRIBE ONLY, and that is not a style choice: all six are \"rws\" in the car's catalogue, but every one of their getters is {\"id\": 0}, and MainApp's IFConfigGenerator tests that id for truthiness. A zero reads as absent, so an \"r\" flag here makes the install fail with \"Requested read for settingOffsetSpeed but no getter available\", which the Store only ever shows as UPDATE_FAILED. That is what blocked 0.7.16 on the car four times; 0.7.17 dropped the \"r\". The notifiers are real (32789 and its neighbours), so the values still arrive, and with no \"w\" the app still cannot write a driver-assistance setting even by mistake. Checking that a getter EXISTS is not enough - check that its id is non-zero."
     },
     "de.bmw.infotainment.KombiInterface_2": {
       "newCCMessage": "rs",
@@ -1100,7 +1100,7 @@
     },
     "sla": {
       "_about": "The driver's own speed-limit settings (read only). The red arc on our speed scale follows the car's own excess-speed verdict instead of comparing speed against the sign ourselves: displaySpeedLimitWarning in the sign struct says WHEN the car considers the driver over, and \"warn\" below says whether the driver asked for that warning at all. The offsets are the tolerance the driver set; we do not need them to draw, and they are read for the log so the car's behaviour can be understood.",
-      "_readonly": "Nothing here is ever written. The fields are \"rws\" on the car; app.json declares them \"rs\", so our generated interface config has no setter.",
+      "_readonly": "Nothing here is ever written. The fields are \"rws\" on the car; app.json declares them \"s\", so our generated interface config has neither a setter nor a getter. The values arrive by notification only - see the note beside the interface in \"signals\" for why the getter had to go.",
       "iface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
       "instance": "1",
       "onMap": { "ACTIVATED": "on", "2": "on", "DEACTIVATED": "off", "1": "off", "NOT_CONFIGURABLE": null, "0": null },
