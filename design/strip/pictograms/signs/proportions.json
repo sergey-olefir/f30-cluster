@@ -1,0 +1,71 @@
+{
+ "generator": "tools/strip/P/signs.js",
+ "units": "px for stock / ours (panel px), mm for vzkat; ratios unitless",
+ "sets": {
+  "stock": {
+   "source": "docs/G20-DESIGN-SPEC.md §4.1/§4.3 (photos 08, 09, 17, 34, 39; ±0.3 px); PROVISIONAL until package ZL re-measures 61-68",
+   "outer": 41.1,
+   "inner": 31.8,
+   "ringOverOuter": 0.226,
+   "innerOverOuter": 0.774,
+   "figureOverInnerDiameter": 0.415,
+   "pairWidthOverInnerDiameter": 0.547,
+   "whiteRim": "none drawn; a 1-2 px dark rim outside the red (spec §4.1, probably anti-aliasing)",
+   "nopass": "never photographed"
+  },
+  "vzkat": {
+   "source": "Zeichen 274-50 and 276, StVO; Wikimedia Commons SVGs (public domain, amtliches Werk); 600 mm sign: 10 mm light rim, 80 mm red ring, 420 mm white field",
+   "outer": 290,
+   "inner": 209.6,
+   "ringOverOuter": 0.277,
+   "innerOverOuter": 0.723,
+   "figureOverInnerDiameter": 0.601,
+   "pairWidthOverInnerDiameter": 0.742,
+   "whiteRim": "0.034 of the red outer radius",
+   "nopass": {
+    "carWidthOverInnerRadius": 0.803,
+    "carHeightOverInnerRadius": 0.612,
+    "gapOverInnerRadius": 0.119,
+    "left": "red",
+    "right": "black"
+   }
+  },
+  "ours": {
+   "source": "apps/f30_cluster/hud/scene/sign_limit.json + sign_nopass.json (88 x 89), measured by tools/strip/P/signs.js",
+   "outer": 41.87,
+   "inner": 34.21,
+   "ringOverOuter": 0.183,
+   "innerOverOuter": 0.817,
+   "figure": "a text widget on top (wb_val); package T owns its size",
+   "whiteRim": "none",
+   "nopass": {
+    "carWidthOverInnerRadius": 0.731,
+    "carHeightOverInnerRadius": 0.555,
+    "gapOverInnerRadius": 0.175,
+    "left": "red",
+    "right": "near-black",
+    "boxes": {
+     "red": [
+      16,
+      35,
+      41,
+      54
+     ],
+     "dark": [
+      47,
+      35,
+      72,
+      54
+     ]
+    }
+   }
+  },
+  "shaderFallback": {
+   "source": "shared/shaders.js WBSIGN (u_tex 0): R 38, white field r < 0.79 R",
+   "outer": 38,
+   "inner": 30.02,
+   "ringOverOuter": 0.21,
+   "innerOverOuter": 0.79
+  }
+ }
+}

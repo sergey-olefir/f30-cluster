@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vzkat proportions, no overtaking, drawn at the stock outer radius 41.1 px.
+     Our own drawing (package P, tools/strip/P/signs.js); ratios from design/strip/pictograms/signs/proportions.json.
+     Not BMW's artwork; no path copied from any sign file. Licence: MIT (the repository's LICENSE). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88.2 88.2" width="352.8" height="352.8">
+  <title>vzkat nopass</title>
+  <rect width="88.2" height="88.2" fill="#000"/>
+  <circle cx="44.1" cy="44.1" r="42.52" fill="#F4F4F4"/><circle cx="44.1" cy="44.1" r="41.1" fill="#C8102E"/><circle cx="44.1" cy="44.1" r="29.71" fill="#F4F4F4"/><rect x="18.48" y="41.92" width="23.85" height="7.63" rx="1.82" fill="#C8102E"/><rect x="21.82" y="35.02" width="17.17" height="8.36" rx="2.18" fill="#C8102E"/><rect x="23.96" y="36.83" width="12.88" height="4.36" rx="1.09" fill="#F4F4F4"/><rect x="20.38" y="49.19" width="4.77" height="4" rx="0.91" fill="#C8102E"/><rect x="35.65" y="49.19" width="4.77" height="4" rx="0.91" fill="#C8102E"/><rect x="45.87" y="41.92" width="23.85" height="7.63" rx="1.82" fill="#1A1A1A"/><rect x="49.21" y="35.02" width="17.17" height="8.36" rx="2.18" fill="#1A1A1A"/><rect x="51.36" y="36.83" width="12.88" height="4.36" rx="1.09" fill="#F4F4F4"/><rect x="47.78" y="49.19" width="4.77" height="4" rx="0.91" fill="#1A1A1A"/><rect x="63.05" y="49.19" width="4.77" height="4" rx="0.91" fill="#1A1A1A"/>
+</svg>
