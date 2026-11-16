@@ -148,6 +148,9 @@ def main():
             'colon_advance_from': 'the same digit before and after the colon (photo 64): pitch minus one digit advance',
             'baseline': med([r.get('baseline_flat') for f in ('range', 'clock') for r in reg(f)]),
             'baseline_spread': spread([r.get('baseline_flat') for f in ('range', 'clock') for r in reg(f)]),
+            'baseline_photo60_68': med([r.get('baseline_flat') for f in ('range', 'clock') for r in reg(f) if r['photo'] in ('60', '68')]),
+            'baseline_photos61_67': med([r.get('baseline_flat') for f in ('range', 'clock') for r in reg(f) if r['photo'] not in ('60', '68')]),
+            'baseline_note': '60 is registered absolutely (our grid), 61-67 through BMW content tied to 60: the two frames differ by ~0.8 px in y (and 1-2 px in x) in the strip; recommended integer 698',
             'tabular': True,
         },
         'range': {'ink_l': med([r['ink_x'][0] for r in reg('range')]), 'ink_r': med([r['ink_x'][1] for r in reg('range')]),
@@ -195,7 +198,7 @@ def main():
                    'ink_cx': med([r['ink_cx'] for r in reg('sign')]), 'mid_y': med([r.get('mid_y') for r in reg('sign')]),
                    'note': 'dark digits on the light face, not dilation-corrected (their raw height does not follow b)'}
     for kk in ('mode_l1', 'mode_l2'):
-        if kk in fit:
+        if kk in fit and 'cap_h' in fit[kk]:
             bmw.setdefault('mode', {})[kk] = {'cap_h': [fit[kk]['cap_h']['true_k1'], fit[kk]['cap_h']['true_k075']],
                                               'baseline': fit[kk]['baseline']['median'], 'ink_cx': fit[kk]['ink_cx']['median']}
     if 'mode' in bmw:
@@ -275,14 +278,15 @@ def main():
         place_rows.append((key, out))
         return out
 
-    bl = bmw['row']['baseline']
+    bl = float(round((bmw['row']['baseline_photo60_68'] + bmw['row']['baseline_photos61_67']) / 2))   # the two frames' mean, as an integer
+    bmw['row']['baseline_recommended'] = bl
     T['placement'] = {
         'own_range': widget_plan('own_range', 'range', cur['wb_row'], rec_row, 'r', bmw['range']['ink_r'], bl, 'range'),
         'own_clock': widget_plan('own_clock', 'clock', cur['wb_row'], rec_row, ('colon',), bmw['clock']['colon_cx'], bl, 'clock'),
         'own_temp': widget_plan('own_temp', 'temp', cur['wb_row'], rec_row, 'r', bmw['temp']['ink_r'], bl, 'temp'),
         'own_range_u': widget_plan('own_range_u', 'range_u', cur['wb_val'], rec_unit, 'l', bmw['range_u']['ink_l'], bl, 'km'),
         'own_temp_u': widget_plan('own_temp_u', 'temp_u', cur['wb_val'], rec_unit, 'l', bmw['temp_u']['ink_l'], bl, 'degC'),
-        'nav': widget_plan('nav', 'street', cur['wb_cap'], rec_road, 'c', bmw['road']['ink_cx'], bmw['road']['baseline'], 'road'),
+        'nav': widget_plan('nav', 'street', cur['wb_cap'], rec_road, 'c', bmw['road']['ink_cx'], float(round(bmw['road']['baseline'])), 'road'),
     }
     T['placement']['note'] = ('box_x / box_y: where the widget box goes so the ink edge named in "bmw" lands on BMW\'s (median '
                               'over the photo strings; tabular digits keep it string-independent). The layout takes '
@@ -297,8 +301,8 @@ def main():
         'wb_row': {'bake': spec(rec_row), 'change': 'was [Roboto, 43, [500, 87.5]]: same size and height, wider and lighter',
                    'chars': 'DIGITS + ":+-."', 'colon_advance': bmw['row'].get('colon_advance'),
                    'colon_note': 'BMW\'s colon advance; ours bakes %d. Optional: an advance override for ":"' % rec_row['glyphs'][':']['advance'],
-                   'baseline': bmw['row']['baseline'], 'draws': 'own_range, own_clock, own_temp'},
-        'wb_rowu': {'bake': spec(rec_unit), 'new': True, 'chars': 'kmCF°l/h', 'baseline': bmw['row']['baseline'],
+                   'baseline': bl, 'draws': 'own_range, own_clock, own_temp'},
+        'wb_rowu': {'bake': spec(rec_unit), 'new': True, 'chars': 'kmCF°l/h', 'baseline': bl,
                     'draws': 'own_range_u, own_temp_u (today wb_val, 36 px, wght 650: too big and too bold)',
                     'note': 'BMW\'s "k" is shorter than its "C" (22.6 against 24.25); Roboto\'s is taller, so ours stands ~3 px over BMW\'s k'},
         'wb_road': {'bake': spec(rec_road), 'new': True, 'chars': 'LOWER + UPPER + DIGITS + " .,-/()" + the apostrophes + Ukrainian (package F)',
