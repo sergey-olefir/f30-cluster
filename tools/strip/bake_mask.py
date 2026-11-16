@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Package M (docs/AGENT-BRIEF-strip.md 4.4, docs/strip/M-REPORT.md): bake the STRIP mask.
+"""Package M (docs/strip/M-REPORT.md): bake the STRIP mask.
 
 The mask is our coverage over BMW's bottom strip (panel y 540-720) at FULL size, one byte a px, one "lane" per state of
 the row. WBBACK (shared/shaders.js, the collar path) samples one cover lane and one hole lane, chosen live by
@@ -12,10 +12,10 @@ shared/hud.js _maskLanes():
     msg       hole    the row BMW's and its message panel must show     a multiplier: BMW's panel, symbol and marker
 
 (The brief's channel "bmw_msg" is bmw x msg; the shader multiplies them, so the panel's holes are drawn once.)
-Inside the cover lanes' box the lane IS our black (no collar, cover or patch there); outside it the collar and the
-cover draw as before. The bake therefore starts every cover lane from what WBBACK draws there today without any
-patch - the collar and the cover, re-sampled at full size exactly as the shader samples them - so a lane differs from
-"no mask" only where a shape says, and the box is the bounding box of those differences.
+Inside the cover lanes' box the lane IS our black; outside it the collar draws. The bake starts every cover lane
+from the collar and package F's cover (BMW's bottom lines, hooks and grey dash under black; --no-cover leaves it
+out), re-sampled at full size exactly as the shader sampled them, so a lane differs from that only where a shape
+says; the box is the bounding box of every px where a lane differs from the collar alone.
 
 Input: the zone packages' shape lists (brief ZL-ZR.4), JSON, one list or {"shapes": [...]} per file:
     {"id", "channel": "ours" | "bmw" | "bmw_msg" | "standby" | "all", "kind": "hole" | "cover",
@@ -127,12 +127,28 @@ def bg_widget(path=LAYOUT):
     return next(w for w in json.load(open(path))['widgets'] if w['type'] == 'wbback')
 
 
-def base_alpha(bg, px, py):
-    """WBBACK's black where no patch and no lane is: the collar and the cover (max), at the pixel centres px, py."""
+# The rects the mask replaced, frozen as they were at 3c8ef46 (design/gen_6wb.py COVER, OWN, CC_TOP, CC_TOP_SOFT,
+# CC_BOX; the layouts no longer carry them): --today re-draws them, and the cover (package F's black over BMW's bottom
+# lines, hooks and grey dash, tools/overlay/plan_dials.py) stays in every lane's base unless --no-cover.
+TODAY = {
+    'cover': {'tex': 'cover', 'x': 588, 'y': 598, 'w': 736, 'h': 64},
+    'patches': [{'rect': [132, 662, 334, 703], 'when': 'own:range'}, {'rect': [340, 662, 455, 704], 'when': 'own:clock'},
+                {'rect': [1498, 662, 1667, 705], 'when': 'own:temp'}, {'rect': [590, 594, 1250, 665], 'soft': 13}],
+    'cc': [709, 598, 1243, 694],
+}
+
+
+def collar_alpha(bg, px, py):
+    """WBBACK's black outside the lanes' box: the collar alone, at the pixel centres px, py."""
     c = bg['collar']
-    a = sampled(tex_alpha(c['tex']), (c['x'], c['y'], c['w'], c['h']), px, py)
-    if bg.get('cover'):
-        v = bg['cover']
+    return sampled(tex_alpha(c['tex']), (c['x'], c['y'], c['w'], c['h']), px, py)
+
+
+def base_alpha(bg, px, py, cover=True):
+    """Every lane's start: the collar and, unless cover is False, package F's cover (max)."""
+    a = collar_alpha(bg, px, py)
+    if cover:
+        v = bg.get('cover') or TODAY['cover']
         a = np.maximum(a, sampled(tex_alpha(v['tex']), (v['x'], v['y'], v['w'], v['h']), px, py))
     return a
 
@@ -207,25 +223,25 @@ def shape_cover(sh):
 
 # ------------------------------------------------------------------------------------------------------- lanes
 def lanes_today(bg):
-    """The synthetic lanes: exactly what today's rectangles draw (layout wb_dials, shared/hud.js _wbPatches/_wbCcSend):
-    "ours" every patch on (range, clock, temp, the foot band), "bmw" and "standby" the unconditional foot band only
-    (BMW's standby row has no lane of its own today), "msg" u_cc over the "cc" box."""
+    """The synthetic lanes: exactly what the rectangles drew at 3c8ef46 (layout wb_dials, shared/hud.js _wbPatches /
+    _wbCcSend; TODAY): "ours" every patch on (range, clock, temp, the foot band), "bmw" and "standby" the unconditional
+    foot band only (BMW's standby row had no lane of its own), "msg" u_cc over the "cc" box."""
     px, py = centres()
     base = base_alpha(bg, px, py)
-    pats = [(p['rect'], float(p.get('soft', 0) or 0), p.get('when')) for p in bg.get('patches', [])]
+    pats = [(p['rect'], float(p.get('soft', 0) or 0), p.get('when')) for p in bg.get('patches') or TODAY['patches']]
     ours, bmw = base.copy(), base.copy()
     for r, s, when in pats:
         pa = patch(px, py, r, s)
         ours = np.maximum(ours, pa)
         if not when:
             bmw = np.maximum(bmw, pa)
-    msg = smoothstep(-0.5, 3.0, box_out(px, py, bg['cc'], 8.0))
-    return base, {'ours': ours, 'bmw': bmw, 'standby': bmw.copy()}, msg
+    msg = smoothstep(-0.5, 3.0, box_out(px, py, bg.get('cc') or TODAY['cc'], 8.0))
+    return collar_alpha(bg, px, py), {'ours': ours, 'bmw': bmw, 'standby': bmw.copy()}, msg
 
 
-def lanes_from_shapes(bg, shapes):
+def lanes_from_shapes(bg, shapes, cover=True):
     px, py = centres()
-    base = base_alpha(bg, px, py)
+    base = base_alpha(bg, px, py, cover)
     cov = {k: base.copy() for k in COVER_LANES}
     msg = np.ones((H, W))
     order = [s for s in shapes if s.get('kind') == 'cover'] + [s for s in shapes if s.get('kind') == 'hole']
@@ -243,7 +259,7 @@ def lanes_from_shapes(bg, shapes):
                 cov[lane] = np.maximum(cov[lane], s)
             else:
                 cov[lane] *= 1.0 - s
-    return base, cov, msg
+    return collar_alpha(bg, px, py), cov, msg
 
 
 def bbox(mask):
@@ -253,8 +269,32 @@ def bbox(mask):
     return [int(xs.min()) + X0, int(ys.min()) + Y0, int(xs.max()) + 1 + X0, int(ys.max()) + 1 + Y0]
 
 
+SAFETY = ('bottom.belt_rear', 'bottom.belt_driver', 'bottom.airbag')
+
+
+def safety_guard(cov):
+    """Belt and airbag telltales are never covered, in any lane, whatever a shape or the collar says: every cover lane
+    is 0 over the catalogue's boxes (design/overlay/g20_comfort.json; a px whose centre is inside). Returns, per
+    lane, how much it had to take away and the most black left within 3 px round them (the brief's SAFETY
+    footprint), for the log."""
+    cat = {e['id']: e for e in json.load(open(os.path.join(ROOT, 'design', 'overlay', 'g20_comfort.json')))['elements']}
+    px, py = centres()
+    inside, near = np.zeros((H, W), bool), np.zeros((H, W), bool)
+    for i in SAFETY:
+        b = cat[i]['bbox']
+        inside |= (px >= b[0]) & (px < b[2]) & (py >= b[1]) & (py < b[3])
+        near |= (px >= b[0] - 3) & (px < b[2] + 3) & (py >= b[1] - 3) & (py < b[3] + 3)
+    note = {}
+    for k, v in cov.items():
+        took = float(v[inside].max()) if inside.any() else 0.0
+        v[inside] = 0.0
+        note[k] = (took, float(v[near].max()) if near.any() else 0.0)
+    return note
+
+
 def pack(base, cov, msg):
-    """The R8 atlas: one tile per distinct cover lane (all over one box) and one for the hole lane."""
+    """The R8 atlas: one tile per distinct cover lane (all over one box) and one for the hole lane. base: what WBBACK
+    draws outside the box (the collar), so the box holds every px where a lane differs from it."""
     q = {k: np.round(np.clip(v, 0, 1) * 255).astype(np.uint8) for k, v in cov.items()}
     qm = np.round(np.clip(msg, 0, 1) * 255).astype(np.uint8)
     changed = np.zeros((H, W), bool)
@@ -310,9 +350,10 @@ def write(name, atlas, entry, about, where=SCENE):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('shapes', nargs='*', help='shape-list JSON files (zone packages)')
-    ap.add_argument('--today', action='store_true', help="synthetic lanes from today's rectangles")
+    ap.add_argument('--today', action='store_true', help="synthetic lanes from the rectangles of 3c8ef46 (TODAY)")
+    ap.add_argument('--no-cover', action='store_true', help="shapes: start the lanes from the collar alone, not + the cover")
     ap.add_argument('--out', default='strip_mask', help='scene texture name (hud/scene/<name>.json)')
-    ap.add_argument('--layout', default=LAYOUT, help='the layout whose bg (collar, cover, patches, cc) is the base')
+    ap.add_argument('--layout', default=LAYOUT, help='the layout whose bg (its collar) the lanes start from')
     ap.add_argument('--dir', default=SCENE, help='where to write it (default the app\'s hud/scene; a trial bake elsewhere)')
     ap.add_argument('--preview', help='write a 1x PNG of each lane here (git-ignored place, e.g. bake/work/strip/M)')
     a = ap.parse_args()
@@ -329,8 +370,11 @@ def main():
             shapes += d['shapes'] if isinstance(d, dict) else d
         if not shapes:
             raise SystemExit('no shapes given (or --today)')
-        base, cov, msg = lanes_from_shapes(bg, shapes)
+        base, cov, msg = lanes_from_shapes(bg, shapes, not a.no_cover)
         about = 'package M lanes from %d shapes: %s' % (len(shapes), ', '.join(os.path.basename(f) for f in a.shapes))
+    for k, (took, near) in safety_guard(cov).items():
+        print('safety: lane %-8s took %.3f off the belt and airbag telltales; most black within 3 px of them %.3f%s'
+              % (k, took, near, '  <- a shape should clear them' if near > 0.02 else ''))
     atlas, entry = pack(base, cov, msg)
     path = write(a.out, atlas, entry, about, a.dir)
     print('%s: %d x %d R8, %.3f MiB as an asset (counted twice)' % (os.path.relpath(path, ROOT), atlas.shape[1],

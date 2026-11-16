@@ -10,7 +10,7 @@
  * in JS as shared/shaders.js does (this catches a bake that drifted from the rects, or a lane table pointing at the
  * wrong tile).
  * With the bench (its own, on BENCH_PORT, its own data folder): WBBACK's u_mk / u_mh / u_mo in every state of the row
- * - BMW's row, its message, standby, ours, and a row half ours (the rects then) - read off GET /events.
+ * - BMW's row, its message, standby, ours, and a row half ours (BMW's lane then) - read off GET /events.
  * Mac only, Node 18 or newer (fetch). Never shipped.
  */
 const fs = require('fs');
@@ -85,16 +85,48 @@ function staticChecks() {
         ok(us <= 32, 'WBBACK style ' + st + ': ' + us + ' uniforms, within the 32 a quad holds');
     }
 
-    // the synthetic lanes against the rects, re-computed here (shared/shaders.js WBBACK, layout wb_dials)
-    const bg = layout('wb_dials').widgets.find((w) => w.type === 'wbback');
-    const col = alphaOf(scene(bg.collar.tex)), cov = alphaOf(scene(bg.cover.tex));
     const lane = (k, px, py, box) => { const o = T.lanes[k]; return bytes[(Math.floor(py - box[1]) + o[1]) * m.w + Math.floor(px - box[0]) + o[0]] / 255; };
+    const bg = layout('wb_dials').widgets.find((w) => w.type === 'wbback');
+    ok(bg.mask && bg.mask.tex === 'strip_mask' && !bg.patches && !bg.cover && !bg.cc, 'wb_dials\' bg names the mask and no rect (no patches, cover or cc)');
+
+    // safety, whatever the bake: no cover lane puts any black on BMW's belt and airbag telltales (the catalogue's
+    // boxes, design/overlay/g20_comfort.json), and "ours" covers BMW's range, clock and temperature whole
+    const cat = {};
+    JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'overlay', 'g20_comfort.json'), 'utf8')).elements.forEach((e) => { cat[e.id] = e; });
+    const over = (k, id, f) => {
+        const b = cat[id].bbox, box = T.cover;
+        let v = f === Math.max ? 0 : 1;
+        for (let y = Math.max(b[1], box[1]); y < Math.min(b[3], box[3]); y++) {
+            for (let x = Math.max(b[0], box[0]); x < Math.min(b[2], box[2]); x++) v = f(v, lane(k, x + 0.5, y + 0.5, box));
+        }
+        return v;
+    };
+    ['bottom.belt_rear', 'bottom.belt_driver', 'bottom.airbag'].forEach((id) => {
+        const w = Math.max(...['ours', 'bmw', 'standby'].map((k) => over(k, id, Math.max)));
+        ok(w === 0, 'no lane covers BMW\'s ' + id + ' ' + JSON.stringify(cat[id].bbox) + ' (most black ' + w.toFixed(3) + ')');
+    });
+    ['bottom.range', 'bottom.clock', 'bottom.temperature'].forEach((id) => {
+        const w = over('ours', id, Math.min);
+        ok(w >= 254 / 255, '"ours" covers BMW\'s ' + id + ' ' + JSON.stringify(cat[id].bbox) + ' whole (least ' + w.toFixed(3) + ')');
+    });
+
+    // the synthetic bake (bake_mask.py --today) against the rects it replaced, re-computed here as shared/shaders.js drew
+    // them at 3c8ef46 (bake_mask.py TODAY): only while the shipped mask is that one; a bake from shapes skips it
+    if (!/synthetic lanes/.test(m._about || '')) { console.log('  (a mask baked from shapes: the rects comparison is skipped)'); return; }
+    const TODAY = {
+        cover: { tex: 'cover', x: 588, y: 598, w: 736, h: 64 }, cc: [709, 598, 1243, 694],
+        patches: [{ rect: [132, 662, 334, 703], when: 'own:range' }, { rect: [340, 662, 455, 704], when: 'own:clock' },
+            { rect: [1498, 662, 1667, 705], when: 'own:temp' }, { rect: [590, 594, 1250, 665], soft: 13 }],
+    };
+    const col = alphaOf(scene(bg.collar.tex)), cov = alphaOf(scene(TODAY.cover.tex));
     let worst = { ours: 0, bmw: 0, standby: 0, msg: 0 }, n = 0;
     for (let y = T.cover[1]; y < T.cover[3]; y++) {
         for (let x = T.cover[0]; x < T.cover[2]; x++) {
             const px = x + 0.5, py = y + 0.5;
-            let base = Math.max(sampled(col, bg.collar, px, py), sampled(cov, bg.cover, px, py)), ours = base, bmw = base;
-            bg.patches.forEach((p) => { const a = patch(px, py, p.rect, p.soft || 0); ours = Math.max(ours, a); if (!p.when) bmw = Math.max(bmw, a); });
+            let base = Math.max(sampled(col, bg.collar, px, py), sampled(cov, TODAY.cover, px, py)), ours = base, bmw = base;
+            TODAY.patches.forEach((p) => { const a = patch(px, py, p.rect, p.soft || 0); ours = Math.max(ours, a); if (!p.when) bmw = Math.max(bmw, a); });
+            // bake_mask.py's safety guard: 0 over the belt and airbag boxes (the rects left the collar's 2/255 tail there)
+            if (['bottom.belt_rear', 'bottom.belt_driver', 'bottom.airbag'].some((id) => { const b = cat[id].bbox; return px >= b[0] && px < b[2] && py >= b[1] && py < b[3]; })) { ours = 0; bmw = 0; }
             worst.ours = Math.max(worst.ours, Math.abs(lane('ours', px, py, T.cover) - ours));
             worst.bmw = Math.max(worst.bmw, Math.abs(lane('bmw', px, py, T.cover) - bmw));
             worst.standby = Math.max(worst.standby, Math.abs(lane('standby', px, py, T.cover) - bmw));
@@ -103,7 +135,7 @@ function staticChecks() {
     }
     for (let y = T.hole[1]; y < T.hole[3]; y++) {
         for (let x = T.hole[0]; x < T.hole[2]; x++) {
-            const want = smooth(-0.5, 3.0, boxOut(x + 0.5, y + 0.5, bg.cc, 8));
+            const want = smooth(-0.5, 3.0, boxOut(x + 0.5, y + 0.5, TODAY.cc, 8));
             worst.msg = Math.max(worst.msg, Math.abs(lane('msg', x + 0.5, y + 0.5, T.hole) - want));
         }
     }
@@ -198,7 +230,7 @@ async function benchChecks() {
     ok(/strip_mask": \d+x\d+ R8 asset/.test(logText) && /collar_r8": 480x180 R8 asset/.test(logText), 'the mask and the collar go up as R8 assets');
     await fake('cc-red');
     L = await laneUntil((x) => x.mh && x.mh[2] > x.mh[0], 8000);
-    ok(eq(L.mh, hole) && eq(L.mo.slice(2), T.lanes.msg), 'allG20 with a message: the "msg" hole lane opens BMW\'s panel (u_cc is then not read)');
+    ok(eq(L.mh, hole) && eq(L.mo.slice(2), T.lanes.msg), 'allG20 with a message: the "msg" hole lane opens BMW\'s panel');
     await drive('P', 0);
     L = await laneUntil((x) => eq(x.mo.slice(0, 2), T.lanes.standby) && x.mh[2] > x.mh[0], 8000);
     ok(eq(L.mo.slice(0, 2), T.lanes.standby) && eq(L.mh, hole), 'P with the engine off: the "standby" lane, and the message still open (a warning is never covered)');
@@ -210,14 +242,18 @@ async function benchChecks() {
     ok(eq(L.mo.slice(0, 2), T.lanes.bmw) && L.mh[2] <= L.mh[0], 'driving again, no message: the "bmw" lane and no hole');
 
     await set('bottomRow', 'all6WB');
-    L = await laneUntil((x) => x.mk[2] <= x.mk[0], 8000);
-    ok(L.mk && L.mk[2] <= L.mk[0], 'all6WB with the clock BMW\'s (no time zone) and the message unread: a row half ours, so no lane, the rects (' + JSON.stringify(L.mk) + ')');
+    await sleep(1500);
+    // the message was read above, so the info field is ours; the clock is not (no time zone yet): half ours
+    L = await laneUntil((x) => eq(x.mo.slice(0, 2), T.lanes.bmw), 8000);
+    ok(eq(L.mk, cov) && eq(L.mo.slice(0, 2), T.lanes.bmw) && L.mh[2] <= L.mh[0],
+        'all6WB with the clock BMW\'s (no time zone): a row half ours falls back whole to "bmw" (' + JSON.stringify(L) + ')');
     await fake('clock-plus2'); await fake('cc-red'); await sleep(300); await fake('cc-clear');
-    L = await laneUntil((x) => x.mk[2] > x.mk[0], 12000);
+    L = await laneUntil((x) => eq(x.mo.slice(0, 2), T.lanes.ours), 12000);
     ok(eq(L.mk, cov) && eq(L.mo.slice(0, 2), T.lanes.ours) && L.mh[2] <= L.mh[0], 'all6WB, every item ours: the "ours" lane');
     await fake('cc-red');
-    L = await laneUntil((x) => x.cc && x.cc[2] > x.cc[0], 8000);
-    ok(eq(L.mo.slice(0, 2), T.lanes.ours) && L.mh[2] <= L.mh[0] && L.cc[2] > L.cc[0], 'all6WB with a message: "ours", no hole lane, u_cc as before (' + JSON.stringify(L.cc) + ')');
+    await sleep(800);
+    L = await laneUntil((x) => eq(x.mo.slice(0, 2), T.lanes.ours), 8000);
+    ok(eq(L.mo.slice(0, 2), T.lanes.ours) && L.mh[2] <= L.mh[0], 'all6WB with a message of ours: "ours", BMW\'s panel stays covered (no symbol window, brief 1.7)');
     ok(L.pixels < 16 * 1048576, 'pixel memory ' + (L.pixels / 1048576).toFixed(2) + ' MiB of 16');
     ok(!/the service's pixel memory is full|too many layers|refused/.test(logText), 'no layer, asset or pixel-memory refusal');
     ok(!/strip mask ".*": no lane table/.test(logText), 'the lane table fits the texture');

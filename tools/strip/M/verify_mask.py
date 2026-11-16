@@ -73,8 +73,11 @@ def in_box(px, py, b):
     return (b[2] > b[0]) & (px >= b[0]) & (py >= b[1]) & (px < b[2]) & (py < b[3])
 
 
-def wbback(l, lanes, atlas):
-    """The collar path of WBBACK (u_hasTex 2) at every pixel centre of the layer: (alpha, premultiplied rgb)."""
+def wbback(l, mode, atlas):
+    """The collar path of WBBACK (u_hasTex 2) at every pixel centre of the layer: (alpha, premultiplied rgb).
+    mode "old": the rects as at 3c8ef46 (RGBA collar, cover, patches, u_cc; any lane ignored); "transition": as the
+    commits before the clean-up (a lane while u_mk is set, else the rects; u_mh, else u_cc); "final": as after it
+    (inside u_mk the lane, else the collar alone; u_mh only)."""
     w, h = int(l['w']), int(l['h'])
     px, py = np.meshgrid(np.arange(w) + 0.5, np.arange(h) + 0.5)
     dlv, drv = uni(l, 'u_dl', 3), uni(l, 'u_dr', 3)
@@ -82,28 +85,28 @@ def wbback(l, lanes, atlas):
     dr = (np.hypot((px - drv[0]) / drv[2], (py - drv[1]) / drv[2]) - 1.0) * drv[2]
     between = (px > dlv[0]) & (px < drv[0])
     r0, r1, mk, mh, mo = uni(l, 'u_r0'), uni(l, 'u_r1'), uni(l, 'u_mk'), uni(l, 'u_mh'), uni(l, 'u_mo')
-    binds = l.get('binds') or {}
-    tex = {}
-    for smp, key in binds.items():
-        tex[smp] = key
+    tex = dict((l.get('binds') or {}).items())
     # the old code sampled the RGBA collar's alpha; the new one the R8 copy of it (collar_r8)
-    collar = TEX[tex['u_t0']] if lanes else scene_tex('collar')
+    collar = scene_tex('collar') if mode == 'old' else TEX[tex['u_t0']]
     a = bm.sampled(collar, r0, px, py)
-    if r1[2] > 0:
+    if mode != 'final' and r1[2] > 0:
         a = np.maximum(a, bm.sampled(TEX[tex['u_t1']], r1, px, py))
     pats = [uni(l, 'u_pat%d' % i) for i in range(4)]
     soft = uni(l, 'u_patSoft')
-    lane_on = lanes and mk[2] > mk[0]
-    if not lane_on:
+    lane_on = mode != 'old' and mk[2] > mk[0]
+    if not lane_on and mode != 'final':
         for i, b in enumerate(pats):
             if b[2] > b[0]:
                 a = np.maximum(a, bm.patch(px, py, b, soft[i]))
-    else:
+    elif lane_on:
         ins = in_box(px, py, mk)
         tx = (np.floor(px - mk[0]) + mo[0]).astype(int)
         ty = (np.floor(py - mk[1]) + mo[1]).astype(int)
         v = atlas[np.clip(ty, 0, atlas.shape[0] - 1), np.clip(tx, 0, atlas.shape[1] - 1)]
-        a = np.where(ins, v, a)
+        if mode == 'final':
+            a = np.where(ins, v, bm.sampled(collar, r0, px, py))
+        else:
+            a = np.where(ins, v, a)
     sh, ko = uni(l, 'u_shade'), uni(l, 'u_shadeKo')
     if sh[0] > 0:
         o = np.minimum(dl, dr)
@@ -131,13 +134,13 @@ def wbback(l, lanes, atlas):
     fc = np.where((L[..., 3] > 0)[..., None], L[..., :3] * L[..., 3:4] / np.maximum(a2, 1e-4)[..., None], 0.0)
     a = np.where(L[..., 3] > 0, a2, a)
     cc = uni(l, 'u_cc')
-    if lanes and mh[2] > mh[0]:
+    if mode != 'old' and mh[2] > mh[0]:
         ins = in_box(px, py, mh)
         tx = (np.floor(px - mh[0]) + mo[2]).astype(int)
         ty = (np.floor(py - mh[1]) + mo[3]).astype(int)
         v = atlas[np.clip(ty, 0, atlas.shape[0] - 1), np.clip(tx, 0, atlas.shape[1] - 1)]
         a = a * np.where(ins, v, 1.0)
-    elif cc[2] > cc[0]:
+    elif mode != 'final' and cc[2] > cc[0]:
         a = a * bm.smoothstep(-0.5, 3.0, bm.box_out(px, py, cc, 8.0))
     return a, fc * a[..., None]
 
@@ -145,28 +148,40 @@ def wbback(l, lanes, atlas):
 TEX = {}
 
 
-def main():
-    worst = 0.0
-    for f in sys.argv[1:]:
-        d = json.load(open(f))
-        l = next(l for l in d['layers'] if l.get('fs') and 'u_mk' in l['fs'] and 'u_hasTex' in l['fs']
-                 and (l['uniforms'].get('u_hasTex') or {}).get('v', [0])[0] == 2)
-        # the assets bound to it (the bench keys them "<conn>:<ref>"), by the sampler they are bound to
-        mk = l['binds']
-        TEX.clear()
-        for smp, key in mk.items():
-            name = {'u_t0': 'collar_r8', 'u_t1': 'cover', 'u_t2': 'strip_mask'}[smp]
+def load(f):
+    """A dump's WBBACK layer and its textures (TEX, keyed as the bench keys the assets), and its era."""
+    d = json.load(open(f))
+    l = next(l for l in d['layers'] if l.get('fs') and 'u_mk' in l['fs'] and 'u_hasTex' in l['fs']
+             and (l['uniforms'].get('u_hasTex') or {}).get('v', [0])[0] == 2)
+    for smp, key in l['binds'].items():
+        name = {'u_t0': 'collar_r8', 'u_t1': 'cover', 'u_t2': 'strip_mask'}[smp]
+        try:
             TEX[key] = scene_tex(name)
-        atlas = TEX[mk['u_t2']] if 'u_t2' in mk else None
-        a_new, c_new = wbback(l, True, atlas)
-        a_old, c_old = wbback(l, False, atlas)
+        except (KeyError, ValueError):
+            pass                              # a blank (the cover sampler after the clean-up)
+    atlas = TEX[l['binds']['u_t2']] if 'u_t2' in l['binds'] else None
+    return l, atlas, ('transition' if 'u_pat0' in l['uniforms'] else 'final')
+
+
+def main():
+    """verify_mask.py [--against DIR] dump.json ...: each dump as drawn now against the rects; with --against, the
+    rects of the same-named dump in DIR (made before the clean-up, which no longer sends them)."""
+    args, against, worst = sys.argv[1:], None, 0.0
+    if args[:1] == ['--against']:
+        against, args = args[1], args[2:]
+    for f in args:
+        TEX.clear()
+        l, atlas, era = load(f)
+        a_new, c_new = wbback(l, era, atlas)
+        lo, ao, _ = load(os.path.join(against, os.path.basename(f))) if against else (l, atlas, era)
+        a_old, c_old = wbback(lo, 'old', ao)
         da = np.abs(a_new - a_old) * 255
         dc = np.abs(c_new - c_old).max(-1) * 255
         j, i = np.unravel_index(np.argmax(da), da.shape)
         worst = max(worst, da.max(), dc.max())
         on = lambda k: list(map(float, uni(l, k)))
-        print('%-28s lanes mk %s mh %s mo %s | max |d alpha| %.3f/255 at (%d, %d), max |d rgb*a| %.3f/255, px off > 1/255: %d'
-              % (os.path.basename(f), on('u_mk'), on('u_mh'), on('u_mo'), da.max(), i, j, dc.max(), int((da > 1.0).sum())))
+        print('%-16s %-10s mk %s mh %s mo %s | max |d alpha| %.3f/255 at (%d, %d), max |d rgb*a| %.3f/255, px off > 1/255: %d'
+              % (os.path.basename(f), era, on('u_mk'), on('u_mh'), on('u_mo'), da.max(), i, j, dc.max(), int((da > 1.0).sum())))
     print('worst over all dumps: %.3f/255' % worst)
     return 0 if worst <= 1.0 else 1
 

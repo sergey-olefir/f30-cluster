@@ -1,4 +1,4 @@
-"""Package M (docs/AGENT-BRIEF-strip.md, "the mask mechanism"): which texture encoding for the STRIP mask.
+"""Package M (docs/strip/M-REPORT.md 2): which texture encoding for the STRIP mask.
 
 Measures, on synthetic shapes with known geometry (no photo pixels), how well each encoding reproduces the exact
 coverage a perfect full-resolution mask would hold, when the GPU samples it the way WBBACK will (GLSL texture2D,

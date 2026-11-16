@@ -317,6 +317,8 @@ OWN = {"range": [132, 662, 334, 703], "clock": [340, 662, 455, 704], "temp": [14
 #   * its belt and airbag lamps (x 494-692) are safety telltales and are deliberately never covered;
 #   * its clock is left to BMW whenever no time zone is known (hud.js _own('clock')), and then the "own:clock"
 #     rect below is correctly off: BMW's clock is the only right one there.
+# package M: the strip mask replaced these rects in the layouts; tools/strip/bake_mask.py TODAY keeps a frozen copy
+# (its --today re-draws them exactly), and nothing here uses row_patches() any more
 def row_patches():
     """The black patches a see-through layout sends, in the order _wbPatches takes them. Exactly four: see above."""
     return [{"rect": OWN[k], "when": "own:" + k} for k in ("range", "clock", "temp")] \
@@ -438,11 +440,9 @@ def dials_bg(style):
             "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": style, "color": "accent",
             # package M: the collar as R8 (tools/strip/bake_mask.py writes collar_r8 from collar): 0.16 MiB, not 0.66
             "collar": {"tex": "collar_r8", "x": 0, "y": 0, "w": 1920, "h": 720},
-            # package F: BMW's bottom lines, hooks and dash under black; the shade's setting; patches under our row items
-            "cover": {"tex": "cover", "x": COVER[0], "y": COVER[1], "w": COVER[2], "h": COVER[3]}, "shade": SHADE,
-            "patches": row_patches(),      # range, clock, temperature, the foot band - and no fifth, see row_patches()
-            "cc": CC_BOX,
-            "ccSym": CC_SYM,          # bottom row: while the info message is ours, only BMW's symbol column opens
+            # package F: the shade's setting. Package M: its cover, the patches under our row items and the "cc" /
+            # "ccSym" windows are gone - the strip mask draws all of that black, and opens BMW's panel, now
+            "shade": SHADE,
             "window": MAP_WINDOW, "fade": MAP_FADE,                             # 2026-11-14: Comfort's map window
             "foot": FOOT, "footLine": FOOT_LINE},                             # ... and its foot line ("wbFoot")
             **({"mask": m} if m else {}))                                     # package M: the strip mask
