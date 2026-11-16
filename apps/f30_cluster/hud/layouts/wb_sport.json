@@ -27,10 +27,22 @@
       "style": "sport",
       "color": "accent",
       "cc": [
-        709,
-        598,
-        1243,
-        694
+        699,
+        600,
+        1223,
+        701
+      ],
+      "ccArc": [
+        753.2,
+        1168.0,
+        684.2,
+        83.0
+      ],
+      "ccSide": [
+        708,
+        632,
+        1186,
+        662
       ],
       "foot": "none",
       "footLine": [
@@ -506,7 +518,7 @@
       "font": "wb_val",
       "color": "fg",
       "align": "left",
-      "toggle": "own:clock&!cc:shown"
+      "toggle": "own:clock&!cc:open"
     },
     {
       "id": "row_b1",
@@ -520,7 +532,7 @@
       "font": "wb_val",
       "color": "fg",
       "align": "left",
-      "toggle": "own:clock&!cc:shown"
+      "toggle": "own:clock&!cc:open"
     },
     {
       "id": "row_b2",
@@ -534,7 +546,7 @@
       "font": "wb_val",
       "color": "fg",
       "align": "center",
-      "toggle": "!own:clock&!cc:shown"
+      "toggle": "!own:clock&!cc:open"
     }
   ]
 }

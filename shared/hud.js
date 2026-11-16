@@ -3554,8 +3554,8 @@ class HudApp {
 
     /** Whether BMW's own check-control panel must be left see-through now ("cc:open"): the car says a message shows,
      *  or - in a see-through layout, where BMW's own panel is what the driver would otherwise read - we cannot read
-     *  its messages at all and so must not cover a panel the cluster may be writing in. In the opaque themes our
-     *  background covers BMW's cluster whole, so a window there would be a hole in the theme and nothing else. */
+     *  its messages at all and so must not cover a panel the cluster may be writing in. fix/opaque-cc: the opaque
+     *  themes too - their background covers BMW's cluster whole, so while we are blind it would hide BMW's warnings. */
     _ccOpen() {
         // package X, THE SAFETY RULE (the owner, 2026-11-16: "a BMW warning is never hidden unless our own text for it
         // is on the screen in the same frame"). While the row is OURS, BMW's panel is covered only once our text for
@@ -3564,6 +3564,12 @@ class HudApp {
         // character the font lacks, drawing it threw - leaves BMW's panel open: the last three latch the row too.
         if (this._seeThrough(this._layoutName()) && this._rowWhy() === null) return this._cc() === true && !this._ccOnScreen();
         if (this._cc() === true) return true;
+        // ---- fix/opaque-cc (2026-11-16): the blind case in the OPAQUE themes too. Our background covers BMW's whole
+        // cluster there, and on the owner's car no message has ever been read, so BMW's warnings were hidden. While
+        // config.ccm has never been read (_ccWired; also when app.json names no message field at all) BMW's panel
+        // is left open - the hole cut to BMW's own outline (WBBACK u_ccS / u_ccE) - and our row steps aside ("!cc:open")
+        if (!this._seeThrough(this._layoutName())) return !this._ccWired();
+        // ---- end fix/opaque-cc ----
         return this._ccNamed() && !this._ccWired() && this._seeThrough(this._layoutName());
     }
 
@@ -3825,6 +3831,13 @@ class HudApp {
         const v = b ? [b[0] - w.x, b[1] - w.y, b[2] - w.x, b[3] - w.y] : [0, 0, 0, 0], key = v.join(',');
         if (key === x.ccKey) return;
         x.ccKey = key;
+        // ---- fix/opaque-cc: BMW's panel outline ("ccArc", "ccSide": design/gen_6wb.py CC_PANEL), sent before u_cc
+        // opens, so no frame shows the bounding box. Layer px.
+        if (b && four(w.ccArc) && four(w.ccSide)) {
+            x.c.uniform(x.ref, 'u_ccS', [w.ccArc[0] - w.x, w.ccArc[1] - w.x, w.ccArc[2] - w.y, w.ccArc[3]]);
+            x.c.uniform(x.ref, 'u_ccE', [w.ccSide[0] - w.x, w.ccSide[1] - w.y, w.ccSide[2] - w.x, w.ccSide[3] - w.y]);
+        }
+        // ---- end fix/opaque-cc ----
         x.c.uniform(x.ref, 'u_cc', v);
     }
 

@@ -1578,6 +1578,13 @@ uniform vec4 u_shadeKo;
 // rounded box (x0, y0, x1, y1, layer px; x1 <= x0: none) is see-through, so BMW's message shows clean. (The collar
 // path opens BMW's panel with the strip mask's hole lane instead.)
 uniform vec4 u_cc;
+// ---- fix/opaque-cc (2026-11-16): BMW's panel OUTLINE, not a box (docs/strip/ZC-REPORT.md, "zc.panel"). u_cc is then
+// the outline's bounds (tips x, top, bottom). u_ccS: the arc rail's shoulder circles, left centre x, right centre x,
+// centre y, radius (w 0: none, the old rounded box); u_ccE: the sides, x >= L - max(Ly - y, 0) (left: the tip, then
+// straight down) and x <= R + max(Ry - y, 0) (right: the slant along the fill's fade), as L, Ly, R, Ry.
+uniform vec4 u_ccS;
+uniform vec4 u_ccE;
+// ---- end fix/opaque-cc ----
 // --- end package F ---
 // --- package M (docs/strip/M-REPORT.md): the STRIP mask, the collar path only ---
 // One baked R8 atlas (u_t2; its size in px in u_r2.zw; tools/strip/bake_mask.py) holds our coverage over BMW's
@@ -1828,7 +1835,18 @@ void main() {
         col = (L.rgb * L.a + col * alpha * (1.0 - L.a)) / max(a2, 1e-4);
         alpha = a2;
     }
-    if (u_cc.z > u_cc.x) alpha *= smoothstep(-0.5, 3.0, boxOut(p, u_cc, 8.0));  // the message panel shows
+    // ---- fix/opaque-cc: the message panel shows, cut to BMW's own outline (flat top, round shoulders, tips, sides),
+    // a 2 px feather outward. sd < 0 inside; the shoulder's offsets are clamped to 128 px (fp16-safe length())
+    if (u_cc.z > u_cc.x) {
+        float sd = boxOut(p, u_cc, u_ccS.w > 0.0 ? 0.0 : 8.0);
+        if (u_ccS.w > 0.0) {
+            vec2 q = clamp(vec2(max(u_ccS.x - p.x, p.x - u_ccS.y), u_ccS.z - p.y), 0.0, 128.0);
+            sd = max(sd, max(length(q) - u_ccS.w,
+                max(u_ccE.x - max(u_ccE.y - p.y, 0.0) - p.x, p.x - u_ccE.z - max(u_ccE.w - p.y, 0.0))));
+        }
+        alpha *= smoothstep(-0.5, 1.5, sd);
+    }
+    // ---- end fix/opaque-cc ----
     gl_FragColor = vec4(min(nightLook(col), vec3(1.0)), alpha);  // 2026-11-14: the night look (identity by day)
 }
 `;
