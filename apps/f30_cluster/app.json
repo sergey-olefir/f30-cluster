@@ -246,6 +246,18 @@
         [
           "mapcal",
           "Map calibration"
+        ],
+        [
+          "matte_magenta",
+          "Diagnostic matte: magenta"
+        ],
+        [
+          "matte_green",
+          "Diagnostic matte: green"
+        ],
+        [
+          "matte_black",
+          "Diagnostic matte: black"
         ]
       ]
     },

@@ -25,7 +25,8 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-SKIP = {'off', 'grid', 'mapcal', 'wincal'}           # calibration layouts get no picture
+SKIP = {'off', 'grid', 'mapcal', 'wincal',           # calibration layouts get no picture
+        'matte_magenta', 'matte_green', 'matte_black'}  # strip package D: the diagnostic mattes (design/gen_matte.py)
 # the values every picture shows: 3rd gear at 4200 rpm, 61 mph, warm engine, a little boost, braking into a left turn
 SIGNALS = {'rpm': 4200, 'speed': 98, 'gear': 3, 'oil': 95, 'coolant': 90, 'boost': 1.1, 'torque': 290,
            'fuelL': 38, 'range': 310, 'ambient': 18, 'tyreP': 2.4, 'tyreT': 30, 'gLat': 0.42, 'gLong': -0.3}
