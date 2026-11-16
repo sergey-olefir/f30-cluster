@@ -103,10 +103,17 @@
     "de.bmw.infotainment.KombiInterface_2": {
       "newCCMessage": "rs",
       "ccList": "rs",
+      "ccListRiskClass": "rs",
       "_methods": [
-        "requestCCMessage"
+        "requestCCMessage",
+        "requestDefaultSymbols"
       ],
-      "_optional": "the check-control message the cluster shows (config.ccm kind \"message\"); its text is the car's own and is never logged"
+      "_optional": "the check-control message the cluster shows (config.ccm kind \"message\"); its text is the car's own and is never logged",
+      "_probes": "0.7.18 diagnostics, READ ONLY and LOG ONLY (shared/hud.js 'probes' block, tools/signals/check_signals.py passes): ccListRiskClass (getter 16, notifier 32773) and ccList (getter 7, notifier 32770) are logged once per change as ids, colours, risk classes and symbol ids, never their text; requestDefaultSymbols (methodId 15, reliable) is called ONCE with CC_LIST_SYMBOL and only the count, ids, formats and byte lengths are logged - the bitmaps are BMW's artwork and are dropped unread. Both look for the signal behind BMW's warning / 'i' marker (config.ccMarker stays null)."
+    },
+    "de.bmw.infotainment.checkcontrol.CheckControlMaster": {
+      "basicList": "rs",
+      "_probes": "0.7.18 diagnostics, READ ONLY and LOG ONLY (shared/hud.js 'probes' block): the stored check-control list (serviceId 46412, instance 1; getter 1, notifier 32769), logged once per change as ccmId, reason (CCM_SHOWN_BY_IC ...) and activeState only. Nothing in it is text. Drop this interface to drop the probe."
     },
     "de.bmw.infotainment.navigation.guiding.Guidance": {
       "_instances": "Main_Instance",
