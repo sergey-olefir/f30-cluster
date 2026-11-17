@@ -47,7 +47,7 @@ h2 { font-size:14px; margin:22px 0 6px; }
 #lb button.on { background:var(--acc); color:#0b1a2a; }
 #lb table { border-collapse:collapse; margin:10px auto; font-size:12px; } #lb td, #lb th { border:1px solid var(--line); padding:3px 7px; text-align:left; }
 #lb .x { position:fixed; top:8px; right:14px; font-size:22px; background:none; border:0; color:var(--fg); }
-tr.f td { color:var(--bad); }
+tr.f td { color:var(--bad); } tr.w td { color:var(--warn); }
 </style></head><body>
 <header><h1>twin_dial: every state <span class="stat" id="app"></span></h1><input type="search" id="q" placeholder="Filter: day, night, ours, window, blind, trip, law_speed, FAIL">
 <span class="stat" id="stat"></span></header>
@@ -59,13 +59,14 @@ const main = document.getElementById('main'), lb = document.getElementById('lb')
 document.getElementById('app').textContent = '(app: ' + D.which + ', ' + D.when + ')';
 let cur = null, view = 'car';
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
-function failed(e) { return e.checks.filter(c => !c.ok); }
+function failed(e) { return e.checks.filter(c => !c.ok && !c.warn); }
+function warned(e) { return e.checks.filter(c => !c.ok && c.warn); }
 function card(e) {
   const f = failed(e), c = document.createElement('div');
   c.className = 'card'; c.dataset.q = (e.id + ' ' + (e.cc_state || '') + ' ' + (f.length ? 'FAIL' : 'PASS')).toLowerCase();
   c.innerHTML = '<img loading="lazy" src="' + e.files.thumb + '"><div class="cap"><b>' + esc(e.name) + '</b><br>' +
     '<span class="pill ' + (f.length ? 'bad' : 'ok') + '">' + (f.length ? f.length + ' check(s) fail' : e.checks.length + ' checks pass') + '</span>' +
-    '<span class="pill warn">cc ' + esc(e.cc_state || 'n/a') + '</span>' + (e.mockup ? '<span class="pill">vs mockup</span>' : '') + '</div>';
+    (warned(e).length ? '<span class="pill warn">' + warned(e).length + ' warning</span>' : '') + '<span class="pill warn">cc ' + esc(e.cc_state || 'n/a') + '</span>' + (e.mockup ? '<span class="pill">vs mockup</span>' : '') + '</div>';
   c.onclick = () => open(e);
   return c;
 }
@@ -77,7 +78,7 @@ function show() {
     .map(v => '<button data-v="' + v[0] + '" class="' + (v[0] === view ? 'on' : '') + '">' + v[1] + '</button>').join('') + ' <b>' + esc(cur.id) + '</b>';
   bar.querySelectorAll('button').forEach(b => b.onclick = () => { view = b.dataset.v; show(); });
   let h = '<table><tr><th>check</th><th>value</th><th>limit</th><th>note</th></tr>' + cur.checks.map(c =>
-    '<tr class="' + (c.ok ? '' : 'f') + '"><td>' + (c.ok ? 'ok ' : 'FAIL ') + esc(c.name) + '</td><td>' + esc(JSON.stringify(c.value)) + '</td><td>' + esc(c.limit) + '</td><td>' + esc(c.note) + '</td></tr>').join('') + '</table>';
+    '<tr class="' + (c.ok ? '' : c.warn ? 'w' : 'f') + '"><td>' + (c.ok ? 'ok ' : c.warn ? 'WARN ' : 'FAIL ') + esc(c.name) + '</td><td>' + esc(JSON.stringify(c.value)) + '</td><td>' + esc(c.limit) + '</td><td>' + esc(c.note) + '</td></tr>').join('') + '</table>';
   if (cur.mockup) {
     const cols = ['mae', 'diff', 'ink_ratio', 'd_centroid', 'rec2', 'prec2', 'colour_dE'];
     h += '<table><tr><th>region vs ' + esc(cur.mockup.file) + '</th>' + cols.map(c => '<th>' + c + '</th>').join('') + '</tr>' +
@@ -135,7 +136,7 @@ def assemble(out, planned, results, rendered, logs, still, wall, which, config):
     by = {}
     for e in pics:
         for c in e['checks']:
-            k = by.setdefault(c['name'], {'pass': 0, 'fail': 0, 'failing': []})
+            k = by.setdefault(c['name'], {'pass': 0, 'fail': 0, 'warn': bool(c.get('warn')), 'failing': []})
             k['pass' if c['ok'] else 'fail'] += 1
             if not c['ok'] and len(k['failing']) < 12:
                 k['failing'].append(e['id'])
@@ -147,7 +148,7 @@ def assemble(out, planned, results, rendered, logs, still, wall, which, config):
                     bad.append(fn + ': ' + ln.strip()[:300])
     summary = {'out': out, 'when': __import__('time').strftime('%Y-%m-%d %H:%M:%S'), 'app': which, 'config_patch': config, 'wall_secs': round(wall),
                'planned_now': len(planned), 'pictures': len(pics), 'failed_jobs': len(failed),
-               'pictures_with_failing_check': [e['id'] for e in pics if not e['ok']], 'checks': by,
+               'pictures_with_failing_check': [e['id'] for e in pics if not e['ok']], 'pictures_with_warning': [e['id'] for e in pics if any((not c['ok']) and c.get('warn') for c in e['checks'])], 'checks': by,
                'unstable': [e['id'] for e in pics if e.get('stable') is False and not (e.get('state') or {}).get('demo')],
                'bench_log_problems': bad[:40], 'ports_still_listening': still,
                'engine_cc_state_exposed': sum(1 for e in pics if e.get('cc_state')) > 0,

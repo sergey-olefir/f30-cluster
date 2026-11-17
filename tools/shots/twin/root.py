@@ -18,6 +18,14 @@ ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 STANDIN = os.environ.get('TWIN_STANDIN_DIR') or os.path.join(HERE, 'standin', 'twin_dial')      # TWIN_STANDIN_DIR: a patched copy (a test)
 
 
+def scene_dir():
+    """Where A2's baked faces and panel mask are: the checkout's apps/twin_dial/hud/scene, else A2's published copy."""
+    for d in (os.path.join(ROOT, 'apps', 'twin_dial', 'hud', 'scene'), os.path.join(ROOT, 'bake', 'work', 'twin-dial', 'pub', 'R2', 'A2')):
+        if os.path.isfile(os.path.join(d, 'face_tacho.json')):
+            return d
+    return None
+
+
 def has_real():
     return os.path.isfile(os.path.join(ROOT, 'apps', 'twin_dial', 'app.json'))
 

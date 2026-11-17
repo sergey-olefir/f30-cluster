@@ -79,6 +79,8 @@ def start_bench(work, logs, i, port, mode, config):
     env = dict(os.environ, BENCH_PORT=str(port), BENCH_DATA_DIR=data, BENCH_NOW=SC.BENCH_NOW)
     if config:
         env['BENCH_CONFIG'] = config
+    if RT.scene_dir():
+        env['TWIN_SCENE_DIR'] = RT.scene_dir()      # the stand-in reads A2's baked faces and mask from there
     p = subprocess.Popen([sys.executable, '-I', os.path.join(SHOTS, 'bounded.py'), '3000', stop, log, '--', 'node',
                           os.path.join(r, 'bench', 'server.js'), 'twin_dial'], cwd=r, env=env,
                          stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

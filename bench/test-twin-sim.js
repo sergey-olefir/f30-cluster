@@ -119,6 +119,13 @@ async function until(fn, ms) {
     while (Date.now() < end) { try { p = await probe(); if (fn(p)) return p; } catch (e) { /* starting */ } await sleep(150); }
     return p;
 }
+/** A2's baked faces and mask for the stand-in: the checkout's own, else A2's published copy. */
+function sceneEnv() {
+    for (const d of [path.join(ROOT, 'apps', 'twin_dial', 'hud', 'scene'), path.join(ROOT, 'bake', 'work', 'twin-dial', 'pub', 'R2', 'A2')]) {
+        if (fs.existsSync(path.join(d, 'face_tacho.json'))) return { TWIN_SCENE_DIR: d };
+    }
+    return {};
+}
 function startBench(tag, extraEnv, standinDir) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'twin-sim-' + tag + '-'));
     const env = Object.assign({}, process.env, standinDir ? { TWIN_STANDIN_DIR: standinDir } : {});
@@ -127,7 +134,7 @@ function startBench(tag, extraEnv, standinDir) {
     fs.mkdirSync(data);
     let log = '';
     const p = spawn('node', [path.join(root, 'bench', 'server.js'), 'twin_dial'], { cwd: root,
-        env: Object.assign({}, process.env, { BENCH_PORT: String(PORT), BENCH_DATA_DIR: data, BENCH_NOW: '2026-11-17T12:43:00Z' }, extraEnv || {}), stdio: ['ignore', 'pipe', 'pipe'] });
+        env: Object.assign({}, process.env, { BENCH_PORT: String(PORT), BENCH_DATA_DIR: data, BENCH_NOW: '2026-11-17T12:43:00Z' }, sceneEnv(), extraEnv || {}), stdio: ['ignore', 'pipe', 'pipe'] });
     p.stdout.on('data', (d) => { log += d; }); p.stderr.on('data', (d) => { log += d; });
     return { p, dir, log: () => log };
 }

@@ -102,7 +102,7 @@ def paint_one(P, item, out):
     save(car, base + '.png', base + '.t.jpg')
     save(prem, base + '.ours.png')
     r = {'id': item['id'], 'name': item['name'], 'set': item['set'], 'rel': item['rel'], 'cc_state': cc_state,
-         'severity': cc.get('severity'), 'checks': checks, 'ok': all(c['ok'] for c in checks),
+         'severity': cc.get('severity'), 'checks': checks, 'ok': all(c['ok'] or c.get('warn') for c in checks),
          'layers_drawn': len([l for l in comp['layers'] if l.get('alpha') is not None]), 'render_notes': notes,
          'coverage': round(float(A.mean()), 4), 'render_secs': round(time.time() - t0, 2),
          'files': {'car': item['rel'] + '.png', 'ours': item['rel'] + '.ours.png', 'thumb': item['rel'] + '.t.jpg'}}

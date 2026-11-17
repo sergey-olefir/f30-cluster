@@ -12,22 +12,39 @@
  *     { state: none | window | ours, severity } as the engine contract names it;
  *   - STANDIN_LEAK=belt|gear|window|half (env): draws something it must not, so the audits can be shown to fail.
  */
+const fs = require('fs');
+const path = require('path');
 const { ClusterRender } = require('./cluster_render_client.js');
+
+/** A2's baked R8 scene texture (apps/twin_dial/hud/scene/<name>.json), from TWIN_SCENE_DIR; null when not there. */
+function scene(name) {
+    const dirs = [process.env.TWIN_SCENE_DIR].filter(Boolean);
+    for (let i = 0; i < dirs.length; i++) {
+        try {
+            const d = JSON.parse(fs.readFileSync(path.join(dirs[i], name + '.json'), 'utf8'));
+            const b = Buffer.from(d.r8, 'base64');
+            if (b.length === d.w * d.h) return { w: d.w, h: d.h, buf: b };
+        } catch (e) { /* next */ }
+    }
+    return null;
+}
 
 const BELT = [497, 660, 688, 720];
 const LAMPS = [[22, 211, 88, 258], [21, 264, 80, 317], [11, 324, 76, 372], [16, 378, 66, 432], [1774, 176, 1873, 208], [1835, 214, 1903, 263], [1844, 262, 1908, 318]];
-const WINDOW = [696, 596, 1226, 704];
+const MASK_RECT = [694, 592, 1230, 704];      // A2's panel_mask.json rect (panel px)
 const PLATE = [694, 592, 536, 128];
 const HOLES_FS = [
     'precision highp float;', 'varying vec2 v_uv;', 'uniform vec2 u_size;', 'uniform vec4 u_hole[8];',
+    'uniform sampler2D u_mask; uniform vec4 u_mrect; uniform float u_open;',      // the baked window (A2's panel_mask): 255 = BMW's panel shows through
     'void main(){ vec2 p = v_uv * u_size; float a = 1.0;',
     '  for (int i = 0; i < 8; i++) { vec4 h = u_hole[i]; if (p.x >= h.x && p.x < h.z && p.y >= h.y && p.y < h.w) a = 0.0; }',
+    '  if (p.x >= u_mrect.x && p.x < u_mrect.z && p.y >= u_mrect.y && p.y < u_mrect.w) a *= 1.0 - u_open * texture2D(u_mask, (p - u_mrect.xy) / (u_mrect.zw - u_mrect.xy)).r;',
     '  gl_FragColor = vec4(0.0, 0.0, 0.0, a); }',
 ].join('\n');
 const DIAL_FS = [
     'precision highp float;', 'varying vec2 v_uv;', 'uniform sampler2D u_face;', 'uniform vec2 u_size;',
     'uniform float u_ang; uniform float u_gain;',
-    'void main(){ vec2 p = v_uv * u_size - vec2(310.0, 310.0);',
+    'void main(){ vec2 p = v_uv * u_size - vec2(308.0, 310.0);',
     '  float L = texture2D(u_face, v_uv).r;',
     '  vec2 d = vec2(sin(u_ang), -cos(u_ang));',
     '  float t = clamp(dot(p, d), 139.5, 297.0);',
@@ -62,6 +79,7 @@ class HudApp {
         this.L = {};            // layers: name -> { c, ref, w, h, buf, dirty }
         this.build();
         this.wire();
+        this.evaluate();        // blind start: nothing read yet, so the window is open from the first frame (SPEC 8.4 keep-open 1)
     }
     onStatus(cb) { this.statusCb = cb; if (cb) cb('stand-in'); }
     setting(k) { return this.ctx.settings.get(k); }
@@ -75,29 +93,43 @@ class HudApp {
         const ref = c.effect({ target: 'panel', klass: 'content', z: 0, x, y, w, h, fs: HOLES_FS });
         this.L[name] = { c, ref, fx: true, x, y, w, h };
         c.uniform(ref, 'u_size', [w, h], { type: 'vec2' });
+        return ref;
     }
     build() {
         const A = this.conns[0], B = this.conns[1];
+        // the window mask: A2's baked one when found, else a rectangle of 255 over the design polygon's box
+        const mk = scene('panel_mask') || { w: 536, h: 112, buf: Buffer.alloc(536 * 112, 255) };
+        const mask = A.asset({ target: 'panel', format: 'r8', w: mk.w, h: mk.h, sampling: 'bilinear' });
+        A.pixels(mask, null, mk.buf);
+        this.realMask = !!scene('panel_mask');
         this.holes(A, 'bgL', 0, 0, 1380, 720);
+        A.bind(this.L.bgL.ref, 'u_mask', mask);
+        A.uniform(this.L.bgL.ref, 'u_mrect', MASK_RECT, { type: 'vec4' });
+        // bgRT and bgRB carry the shader too: their mask sampler needs an asset, and their window box is empty
         this.holes(A, 'bgRT', 1380, 0, 540, 660);
         this.holes(A, 'bgRB', 1460, 660, 460, 60);
-        // the faces: R8 assets 124 x 114 texels, 5 px each, centre at (62, 62) texels = layer (310, 310)
-        const face = A.asset({ target: 'panel', format: 'r8', w: 124, h: 114, sampling: 'bilinear' });
-        const fb = Buffer.alloc(124 * 114);
-        for (let j = 0; j < 114; j++) for (let i = 0; i < 124; i++) {
-            const x = (i + 0.5) * 5 - 310, y = (j + 0.5) * 5 - 310, r = Math.sqrt(x * x + y * y) / 300, a = Math.abs(Math.atan2(x, -y) * 180 / Math.PI);
-            let v = 0;
-            if (r >= 0.58 && r <= 0.94 && a <= 144) v = 70;
-            if ((r >= 0.537 && r <= 0.553) || (r >= 0.96 && r <= 0.985 && a <= 144)) v = 255;
-            fb[j * 124 + i] = v;
-        }
-        A.pixels(face, null, fb);
-        this.faceBuf = fb;
-        ['tach:70', 'speed:1230'].forEach((s) => {
-            const [n, x] = s.split(':');
-            const ref = A.effect({ target: 'panel', klass: 'content', z: 2, x: Number(x), y: 90, w: 620, h: 570, fs: DIAL_FS });
-            this.L[n] = { c: A, ref, fx: true, x: Number(x), y: 90, w: 620, h: 570 };
-            A.uniform(ref, 'u_size', [620, 570], { type: 'vec2' });
+        ['bgRT', 'bgRB'].forEach((n) => { A.bind(this.L[n].ref, 'u_mask', mask); A.uniform(this.L[n].ref, 'u_mrect', [0, 0, 0, 0], { type: 'vec4' }); A.uniform(this.L[n].ref, 'u_open', [0]); });
+        // the faces: A2's baked 616 x 560 R8 faces when found (centre (308, 310), texel = panel px), else a drawn ring
+        const faces = {};
+        [['tach', 72], ['speed', 1232]].forEach((s2) => {
+            const n = s2[0], x = s2[1], real = scene(n === 'tach' ? 'face_tacho' : 'face_speedo');
+            let fw = 124, fh = 114, fb;
+            if (real) { fw = real.w; fh = real.h; fb = real.buf; } else {
+                fb = Buffer.alloc(124 * 114);
+                for (let j = 0; j < 114; j++) for (let i = 0; i < 124; i++) {
+                    const px = (i + 0.5) * 616 / 124 - 308, py = (j + 0.5) * 560 / 114 - 310, r = Math.sqrt(px * px + py * py) / 300, a = Math.abs(Math.atan2(px, -py) * 180 / Math.PI);
+                    let v = 0;
+                    if (r >= 0.58 && r <= 0.94 && a <= 144) v = 70;
+                    if ((r >= 0.537 && r <= 0.553) || (r >= 0.96 && r <= 0.985 && a <= 144)) v = 255;
+                    fb[j * 124 + i] = v;
+                }
+            }
+            this.realFaces = !!real;
+            const face = A.asset({ target: 'panel', format: 'r8', w: fw, h: fh, sampling: 'bilinear' });
+            A.pixels(face, null, fb);
+            const ref = A.effect({ target: 'panel', klass: 'content', z: 2, x, y: 90, w: 616, h: 560, fs: DIAL_FS });
+            this.L[n] = { c: A, ref, fx: true, x, y: 90, w: 616, h: 560 };
+            A.uniform(ref, 'u_size', [616, 560], { type: 'vec2' });
             A.bind(ref, 'u_face', face);
         });
         this.img(B, 'tabs', 618, 127, 684, 52, 2);
@@ -183,11 +215,12 @@ class HudApp {
         this.lastKey = key;
         const A = this.conns[0];
         const hole = (arr) => { const o = arr.slice(0, 8).reduce((a, h) => a.concat(h), []); while (o.length < 32) o.push(0); return o; };
-        const win = open && this.leak !== 'window' ? [WINDOW] : [];
+        const winOpen = open && this.leak !== 'window' ? 1 : 0;
         const belt = this.leak === 'belt' ? [] : [BELT];
-        A.uniform(this.L.bgL.ref, 'u_hole', hole(belt.concat(LAMPS.slice(0, 4), win)), { type: 'vec4' });
+        A.uniform(this.L.bgL.ref, 'u_hole', hole(belt.concat(LAMPS.slice(0, 4))), { type: 'vec4' });
         A.uniform(this.L.bgRT.ref, 'u_hole', hole(LAMPS.slice(4).map((h) => [h[0] - 1380, h[1], h[2] - 1380, h[3]])), { type: 'vec4' });
         A.uniform(this.L.bgRB.ref, 'u_hole', hole([]), { type: 'vec4' });
+        A.uniform(this.L.bgL.ref, 'u_open', [winOpen]);
         A.uniform(this.L.tach.ref, 'u_ang', [tachA * Math.PI / 180]);
         A.uniform(this.L.speed.ref, 'u_ang', [speedA * Math.PI / 180]);
         A.uniform(this.L.tach.ref, 'u_gain', [gain]);
