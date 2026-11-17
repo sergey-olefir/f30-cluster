@@ -215,12 +215,10 @@ function program(hud) {
     return 'COMFORT';
 }
 
-/** Is the car drive-ready (VehicleCondition 10)? */
+/** Is the car drive-ready (VehicleCondition 10)? The engine's data (the car's, or the demo drive's, which has none). */
 function ready(hud) {
-    const live = hud.car && hud.car.live ? hud.car.live : null;
     const d = hud._data ? hud._data() : null;
-    const c = d && d.condition !== undefined ? d.condition : live ? live.condition : undefined;
-    return c === COND_READY_TWIN;
+    return !!d && d.condition === COND_READY_TWIN;
 }
 
 /* ------------------------------------------------------------------ tokens -------------------------------------- */
@@ -247,7 +245,11 @@ function resolve(hud, name) {
         case 'ready': return ready(hud) ? 'READY' : '';
         // ---- tab bar
         case 'rangeTab': { const v = hud._raw('range'); return isNum(v) ? km(v) : DASH; }
-        case 'media': return typeof td.media === 'string' ? td.media : '';
+        case 'media': {      // icon only until P8 (config.twin.media); a long title is cut with an ellipsis
+            if (typeof td.media !== 'string') return '';
+            const max = isNum(cfg(hud).mediaMax) ? cfg(hud).mediaMax : 14;
+            return td.media.length > max ? td.media.slice(0, max - 1) + '\u2026' : td.media;
+        }
         // ---- centre pages
         case 'cTitle': return TITLES[page(hud)];
         case 'cTime': return onPage('clock', clockText(local(hud)));

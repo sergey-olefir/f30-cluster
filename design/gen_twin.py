@@ -210,13 +210,14 @@ def row():
     clock, R1 the trip distance (the range until probe P4), R2 the outside temperature."""
     z, tg = 8, '!cc:open'
     L, Rr = 846, 1153
-    W = [text('row_l1', L, 656, 130, '{{td:odo}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_l1u', L + 5, 656, 40, 'км', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg),
-         text('row_l2', L, 703, 110, '{{td:clock}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_r1', Rr, 656, 110, '{{td:r1}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_r1u', Rr + 5, 656, 40, 'км', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg),
-         text('row_r2', Rr, 703, 110, '{{td:ambient}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_r2u', Rr + 5, 703, 40, '°C', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg)]
+    nw = lambda *worst: max(width('td_row', t) for t in worst) + 1          # a number's box: its worst text (the odometer "999 999")
+    W = [text('row_l1', L, 656, nw('999\u2009999'), '{{td:odo}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
+         text('row_l1u', L + 5, 656, width('td_u21', 'км') + 1, 'км', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg),
+         text('row_l2', L, 703, nw('––:––', '00:00'), '{{td:clock}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
+         text('row_r1', Rr, 656, nw('9999.9'), '{{td:r1}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
+         text('row_r1u', Rr + 5, 656, width('td_u21', 'км') + 1, 'км', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg),
+         text('row_r2', Rr, 703, nw('-30.5', '+88.8'), '{{td:ambient}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
+         text('row_r2u', Rr + 5, 703, width('td_u21', '°C') + 1, '°C', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg)]
     return W
 
 
