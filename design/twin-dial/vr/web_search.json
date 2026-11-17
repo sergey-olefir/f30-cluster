@@ -1,0 +1,15 @@
+{
+ "_doc": "Package VR web search for further facelift references (2026-11-17). Source URLs and licences of every candidate are kept untracked under bake/work/twin-dial/refs/<folder>/ (meta.json / SOURCES.json). Generic search terms only.",
+ "result": "no new usable reference: the round works from references 02, 04, 05 (facelift) and 01, 03 (classic)",
+ "searches": [
+  {"source": "public media library file search (API), 20 queries on interior / cockpit / instrument terms", "local": "refs/commons-thumbs/",
+   "found": "36 candidate files (2019-2023 interiors, CC BY-SA)", "verdict": "rejected: whole-dashboard shots from the seat or the door; the cluster under 150 px wide and oblique; none frontal"},
+  {"source": "the maker's press-site image search (studio interior photos tagged with the cockpit's name)", "local": "refs/press-studio-cockpit/SOURCES.json (pixels deleted)",
+   "found": "3 studio photos, 4961 x 3721", "verdict": "rejected: the newer panoramic-display generation, not the twin-dial facelift design"},
+  {"source": "third-party car-image galleries (two sites)", "local": "refs/web-probe/, refs/netcarshow-probe/",
+   "found": "-", "verdict": "blocked (HTTP 403) or no image index reachable without a browser"},
+  {"source": "web search for owner's-manual diagrams naming the cluster's elements", "local": "-",
+   "found": "text only. The maker's press texts give the large cluster as 12.3 in, 1920 x 720 px, and the smaller one as 1440 x 540; two views switched with a steering-wheel button",
+   "verdict": "no diagram found. Hypothesis for VG: the references' large cluster has the same 1920 x 720 pixel grid as the G20 panel"}
+ ]
+}
