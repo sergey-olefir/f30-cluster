@@ -1005,7 +1005,7 @@ class HudApp {
                     this.rangeKm = isNum(r) && r >= 0 && r < 4095 ? r : null;
                     // twin_dial: the reserve warning (enum: 1 / AKTIV = active, 3 = no value); nothing of f30_cluster reads it
                     const sp = v && v.statusFluidLevelFuelTankSpare;
-                    this.fuelReserve = sp === undefined || sp === null || sp === 3 ? null : typeof sp === 'string' ? /AKTIV|ACTIVE/i.test(sp) : sp === 1;
+                    this.fuelReserve = sp === undefined || sp === null || sp === 3 ? null : typeof sp === 'string' ? /^(AKTIV|ACTIVE)$/i.test(sp) : sp === 1;
                 },
             },
             // audit/features: is the engine turning? CDS statusEngineStatus (rs, so the current value arrives at

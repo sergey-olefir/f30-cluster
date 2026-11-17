@@ -294,7 +294,7 @@
     },
     "trip": {
       "factors": null,
-      "_about": "SPEC 6.2 / probe P4: null = the trip page shows a dash for every value. Once P4 proves the fields: { speedAvg: 0.1, consAvg: 0.1, wayPassed: 1 } (km/h per bit, l/100 km per bit, km per bit), nothing else changes."
+      "_about": "SPEC 6.2 / probe P4: null = the trip page shows a dash for every value. Once P4 proves the fields: { bc: 1 (or 2: which board computer is 'since start'), speed: 0.1, cons: 0.1, way: 0.1 } (km/h per bit, l/100 km per bit, km per bit; the keys shared/twin_tokens.js tripValues reads), nothing else changes."
     },
     "dayNight": {
       "iface": "de.bmw.infotainment.vehicle.Vehicle",
