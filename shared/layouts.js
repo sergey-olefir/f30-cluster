@@ -43,6 +43,7 @@ const TYPES = {
     gmeter: [],
     tiles: ['tiles'],
     revarc: ['center', 'r', 'start', 'sweep'],
+    ccplate: ['font'],      // twin_dial: our check-control plate sheet (shared/twin_cc.js)
 };
 const CLASSES = ['ambient', 'content', 'overlay', 'alert'];
 
