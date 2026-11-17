@@ -111,7 +111,7 @@ lamps fall inside the dials. Tightest clearances: auto-hold lamp 3.7 px (right r
 | Tick strip (lighter annulus) | 0.893–0.940 | verified |
 | Grey scale band | 0.580–0.940, from −144° to +144°: it runs past both scale ends to the bezel ends and **ends in a radial cut; nothing below** | verified (02, 04) |
 | Gap rim → band | 0.553–0.578, black | verified |
-| Inner disc rim (D2) | r 0.545, width 0.016, white, full circle except where hub content needs it (none in rev 2) | owner |
+| Inner disc rim (D2) | r 0.545, width 0.016, white; as the mockup and the baked faces draw it: **open below ±150°** (the drive-program label sits at the rim's radius) | owner |
 | Inner disc | black, no vignette | verified |
 | Major line across the band | 0.580–0.893, near black (6, 6, 8), width 0.006 | span verified, width hypothesis |
 | Minor tick | 0.896–0.934, width 0.012, white | verified |

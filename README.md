@@ -10,6 +10,17 @@ Status: **work in progress, not yet tried on a car.** Everything was checked onl
 The visible-area numbers in `shared/visible.js` were measured on an X3 M40i and must be re-measured on the target car.
 The graphics are our own drawing (GLSL shaders and Arimo type), traced by eye off photos; no BMW artwork or fonts.
 
+## Apps
+
+- **F30 Cluster** (`apps/f30_cluster`): the F-series 6WB look on the G20 cluster, three themes.
+- **Twin Dial** (`apps/twin_dial`, 0.1.0): a separate cluster from scratch, a twin-round-dial design with the tachometer
+  left and the speedometer right, a clock and a trip page, our own check-control message plate, day and night looks.
+  Specification `docs/twin-dial/SPEC.md`, probe protocol `docs/twin-dial/PROBE-PROTOCOL.md`. Bench only so far: not yet
+  tried on a car. It shows BMW's own message panel until the car has confirmed which message is on screen.
+- **Driver Profiles** (`apps/driver_profiles`).
+
+Only one of the two cluster apps should draw at a time: turn the other one off in its own settings.
+
 ## Layout
 
 ```
@@ -17,6 +28,7 @@ apps/f30_cluster/   the app: app.json, main.js, hud/ (layouts, fonts, previews)
 design/             gen_6wb.py writes the three layouts (edit it, not the JSON); gen_f30.py the basic one
 shared/             the drawing engine (shaders.js has the 6WB dial and backdrop)
 kit/                the MGU App Kit runtime and build tools
+docs/twin-dial/     the Twin Dial specification, reports and probe protocol
 bench/              cluster bench: node bench/server.js f30_cluster
 tools/              bake_fonts.py, previews.py
 ```
