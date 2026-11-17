@@ -36,7 +36,7 @@ function dSeg(px, py, ax, ay, bx, by) {
     return Math.hypot(pax - bax * h, pay - bay * h);
 }
 function dArc(px, py, cx, cy, r, a0, a1) {          // angles in radians clockwise from 12 o'clock, a0 < a1
-    let a = Math.atan2(px - cx, -(py - cy)); if (a < a0) a += Math.PI * 2;
+    let a = Math.atan2(px - cx, -(py - cy)); a = a0 + (((a - a0) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);   // a in [a0, a0 + 2pi): the one wrap was wrong for a0 > 180 degrees (A1, 2026-11-17)
     if (a <= a1) return Math.abs(Math.hypot(px - cx, py - cy) - r);
     const e = (b) => Math.hypot(px - (cx + r * Math.sin(b)), py - (cy - r * Math.cos(b)));
     return Math.min(e(a0), e(a1));
@@ -228,4 +228,5 @@ ${body}
 `;
 }
 
-module.exports = { ICONS, DRAWINGS, svg };
+// stepDist: one step's signed distance (Twin Dial round 2, package A1: the twin set reuses it instead of keeping a copy)
+module.exports = { ICONS, DRAWINGS, svg, stepDist };

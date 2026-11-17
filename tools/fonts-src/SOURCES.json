@@ -1,0 +1,19 @@
+{
+ "_about": "Where the Twin Dial fonts (package A1) come from. Only the files listed here; the older faces in this folder carry their own licence file. Both are SIL Open Font License 1.1, no Reserved Font Name; the files here are cut-down copies (glyph subset, narrower axis ranges), made by tools/twin-dial/a1/subset_fonts.py from the downloaded originals.",
+ "Saira[wdth,wght].ttf": {
+  "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/saira/Saira%5Bwdth%2Cwght%5D.ttf",
+  "licence": "SIL OFL 1.1",
+  "licence_file": "Saira-OFL.txt",
+  "licence_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/saira/OFL.txt",
+  "copyright": "Copyright 2020 The Saira Project Authors (https://github.com/Omnibus-Type/Saira)",
+  "cut": "Basic Latin, Latin-1, Latin Extended-A/B, punctuation, arrows; wght 400-700, wdth 100-125 (Saira draws digits and our Latin labels only)"
+ },
+ "NotoSans-wght.subset.ttf": {
+  "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosans/NotoSans%5Bwdth%2Cwght%5D.ttf",
+  "licence": "SIL OFL 1.1",
+  "licence_file": "NotoSans-OFL.txt",
+  "licence_url": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosans/OFL.txt",
+  "copyright": "Copyright 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic)",
+  "cut": "Latin, Cyrillic block, General Punctuation, the number sign, the minus, and tools/bake_fonts.py CAR_TEXT; wdth pinned at 100, wght 400-600"
+ }
+}
