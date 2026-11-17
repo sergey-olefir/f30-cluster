@@ -32,7 +32,7 @@ def has_real():
 
 def make_root(work, mode=None):
     """-> (root dir, which app: 'real' | 'standin')."""
-    mode = mode or ('real' if has_real() else 'standin')
+    mode = mode or ('standin' if os.environ.get('TWIN_STANDIN_DIR') or not has_real() else 'real')
     if mode == 'real' and not has_real():
         raise SystemExit('no apps/twin_dial in this checkout (use --standin)')
     r = os.path.join(work, 'root')

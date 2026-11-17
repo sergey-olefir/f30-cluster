@@ -119,9 +119,11 @@ def main():
     config = arg('--config')
     which = mode or ('real' if RT.has_real() else 'standin')
     if config is None and which == 'real':
-        # the bench feeds the trip fields in tenths (twin-sim.js, hypothesis P4); the app shows a dash until config.trip.factors says
-        # how to read them, so the gallery sets the factors that match what it feeds (C's schema: speedAvg, consAvg, wayPassed)
-        config = json.dumps({'trip': {'factors': {'speedAvg': 0.1, 'consAvg': 0.1, 'wayPassed': 0.1}}})
+        # what the owner sets in the config after the probes (SPEC 6.2, P4 and P8): the app shows a dash for the trip values until
+        # config.trip.factors says how to read the raw fields, and draws no media text until config.twin.media is on. The bench feeds
+        # the trip fields in tenths (twin-sim.js, hypothesis), so the factors that match are 0.1 (shared/twin_tokens.js: bc, speed,
+        # cons, way). Without them the picture is the app's own "unproven" state, which the report says
+        config = json.dumps({'trip': {'factors': {'bc': 1, 'speed': 0.1, 'cons': 0.1, 'way': 0.1}}, 'twin': {'media': True}})
     groups = select(SC.plan(), arg('--only'))
     planned = [j for g in groups for j in g]
     os.makedirs(out, exist_ok=True)
@@ -164,7 +166,7 @@ def main():
             results[job['id']] = r
         if r['ok']:
             inq.put({'snap': r['snap'], 'id': job['id'], 'name': job['name'], 'set': job['set'], 'rel': job['rel'],
-                     'state': job['state'], 'expect': job['expect'], 'keep': '--keep' in sys.argv})
+                     'state': job['state'], 'expect': job['expect'], 'keep': '--keep' in sys.argv, 'which': which})
 
     def run_driver(i, bench):
         dv = TD.Driver('bench %d' % bench['port'], bench['bench'], snaps, os.path.join(logs, 'drive.log'), bench['app']['settings'])

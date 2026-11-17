@@ -51,7 +51,7 @@ def save(arr, path, thumb=None):
         os.replace(tt, thumb)
 
 
-def content_checks(prem, st, probe_cc):
+def content_checks(prem, st, probe_cc, real=False):
     """The state's content, read off our own picture: the needles, READY, the warning tab. -> list of check dicts."""
     out = []
     sig = SC.signals_of(st)
@@ -66,6 +66,11 @@ def content_checks(prem, st, probe_cc):
             add('%s needle angle' % kind, False, None, '%.1f deg +-%.1f' % (want, NEEDLE_TOL), 'no needle found (white along the ray: %.2f)' % conf)
         else:
             add('%s needle angle' % kind, abs(a - want) <= NEEDLE_TOL, round(a, 2), '%.1f deg +-%.1f' % (want, NEEDLE_TOL), 'measured %.2f, law %.2f' % (a, want))
+    if real:
+        # SPEC 7.2: night = white x 0.80 in linear light = sRGB code 231 (day 255); the picture's brightest pixel in the tachometer
+        hi = int(round(float(prem[90:660, 70:690].max()) * 255))
+        want = 231 if st['look'] == 'night' else 255
+        add('%s look: white at its level' % st['look'], abs(hi - want) <= 3, hi, '%d +-3' % want, 'brightest code in the tachometer (SPEC 7.2: white 0.80 linear at night)')
     # READY (green, SPEC 5.1) iff the car is ready to drive
     x0, y0, x1, y1 = 270, 315, 490, 365
     box = prem[y0:y1, x0:x1]
@@ -91,10 +96,16 @@ def paint_one(P, item, out):
     st = item['state']
     cc = (S.meta.get('probe') or {}).get('cc') or {}
     cc_state = cc.get('state')
-    res = TA.audit(A, prem, layers, cc_state, S.meta.get('pixels'), notes)
+    # the pixels are judged against the state the scene asks for (a blind start must open BMW's panel whatever the engine
+    # says); what the engine says is a check of its own
+    want_cc = (item.get('expect') or {}).get('cc')
+    res = TA.audit(A, prem, layers, want_cc or cc_state, S.meta.get('pixels'), notes)
     checks = res['checks']
+    if want_cc:
+        checks.append({'name': 'engine message state as the scene asks', 'ok': cc_state in (None, want_cc), 'value': cc_state, 'limit': want_cc,
+                       'note': 'hud.twinCc.state; a blind start and an unconfirmed message (D7) must say window' + ('' if cc_state is not None else ' (not exposed)')})
     if not st['demo']:
-        checks += content_checks(prem, st, cc)
+        checks += content_checks(prem, st, cc, item.get('which') == 'real')
     shown = cc_state in ('window', 'ours') if cc_state else st['msg'] != 'none'
     car = prem + BD.under(shown) * (1.0 - A[..., None])
     car = BD.over(car, 'D' if SC.signals_of(st).get('gear') else 'P')

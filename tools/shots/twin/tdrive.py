@@ -72,7 +72,7 @@ class Driver:
         b.fake({'clock': {'minutes': SC.CLOCK_MINUTES, 'dst': False}})
         b.fake({'clockLocal': {'minutes': SC.CLOCK_MINUTES}})
         b.fake({'dayNight': 'night' if st['look'] == 'night' else 'day'})
-        b.fake({'twin': dict(SC.TWIN, displayed=0)})
+        b.fake({'twin': dict(SC.TWIN)})                         # nothing about messages here: a blind start stays blind (displayed is a message witness)
 
     def feed_message(self, st):
         b = self.b
@@ -151,10 +151,16 @@ class Driver:
         st = job['state']
         self.apply(job)
         time.sleep(0.8)
-        ok, p = self.b.until(lambda q: not self.check(job, q), 15.0, 0.15)
+        ok, p = self.b.until(lambda q: not self.check(job, q), 9.0, 0.15)
+        cc_wrong = None
         if not ok:
-            self.dirty = True
-            return {'ok': False, 'reason': self.check(job, p) if p else ['no probe answer'], 'probe': self.summary(p), 'secs': round(time.time() - t0, 1)}
+            bad = self.check(job, p) if p else ['no probe answer']
+            if p and bad and all(b.startswith('cc.state') for b in bad):
+                # the engine says another message state than the scene asks for: that is a finding, not a missing picture
+                cc_wrong = bad[0]
+            else:
+                self.dirty = True
+                return {'ok': False, 'reason': bad, 'probe': self.summary(p), 'secs': round(time.time() - t0, 1)}
         volatile = bool(job['expect'].get('volatile'))
         time.sleep(0.9)
         prev, sc, stable = None, None, False
@@ -171,11 +177,13 @@ class Driver:
             time.sleep(0.35)
         p = self.b.probe()
         bad = self.check(job, p) if p else ['no probe answer']
+        if cc_wrong:
+            bad = [b for b in bad if not b.startswith('cc.state')]
         if bad:
             self.dirty = True
             return {'ok': False, 'reason': ['left the state while settling'] + bad, 'probe': self.summary(p), 'secs': round(time.time() - t0, 1)}
         d = self.snap(job, p, sc)
-        return {'ok': True, 'snap': d, 'stable': stable, 'probe': self.summary(p), 'secs': round(time.time() - t0, 1)}
+        return {'ok': True, 'snap': d, 'stable': stable, 'probe': self.summary(p), 'secs': round(time.time() - t0, 1), 'cc_wrong': cc_wrong}
 
     def run_group(self, group, on_result):
         try:
