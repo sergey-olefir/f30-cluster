@@ -30,7 +30,7 @@ class, z, conn, toggle`. Layer budget is the SPEC's (§13.2); the engine does no
 ```json
 { "id": "dial_tach", "type": "tdial", "kind": "tach", "x": 70, "y": 90, "w": 620, "h": 570, "conn": 0,
   "centre": [380, 400], "R": 300,
-  "face": { "tex": "face_tacho", "x": 72, "y": 96, "w": 616, "h": 560 },
+  "face": { "tex": "face_tacho", "x": 72, "y": 90, "w": 616, "h": 560 },
   "sweep": 125, "scaleMax": 8000, "redline": "setting", "restDeg": -135,
   "shadow": true,
   "bar": { "y": 619, "x0": 254, "x1": 506, "h": 7.5, "segs": 5, "gap": 4,
@@ -72,8 +72,8 @@ Not linear light: the dark band needs the code precision. Concretely:
 * **no red anywhere, no wedge, no needle, no fill**: red is the shader's;
 * everything outside the bezel is 0.
 
-The shader separates "ink" from "band" by value (`ink = smoothstep(0.62, 0.90, code)`), so no band texel may exceed
-code 0.62 x 255 = 158 at `bandGain` 1.0 (the SPEC's brightest band texel is code ~140; the strip is ~137). Region
+The shader separates "ink" from "band" by value (`ink = smoothstep(0.70, 0.85, code)`), so no band texel may exceed
+code 0.70 x 255 = 178 at `bandGain` 1.0 (inside the sweep the band is <= 158, the lit ends past it reach 173; the strip is 137). Region
 constants the shader uses (rho in R, theta in degrees clockwise from 12): bezel rho > 0.97; inner rim 0.52..0.57;
 band and strip rho 0.580..0.940 with |theta| <= 144.5; tick zone 0.893..0.940; numerals/everything else "white". A2's
 region JSON beside the face is informational (the shader does not read it) but must agree with these.
@@ -100,7 +100,7 @@ white; the **flagged segment is red**: tach `reserve: "reserve"` (signal `reserv
   "rules": [ { "x0": 741, "y0": 295.2, "x1": 1180, "y1": 296.7, "role": "rule" },
              { "x0": 629, "y0": 612.4, "x1": 1292, "y1": 614.6, "role": "rule",
                "ours": { "y0": 611, "y1": 615, "x1": 1291, "role": "severity" } } ],
-  "panelMask": { "tex": "panel_mask", "x": 696, "y": 596, "w": 536, "h": 112 } }
+  "panelMask": { "tex": "panel_mask", "x": 694, "y": 592, "w": 536, "h": 112 } }
 ```
 
 | Part | Rect (C) | Carries |
@@ -153,7 +153,7 @@ x its SPEC multiplier in linear light). No layer is rebuilt. By day all multipli
 
 **Theme `twin`** (roles for `text` widgets' `color`), day sRGB: `fg` 255,255,255; `dim` 227,227,227 (secondary text, units);
 `hot` 218,13,43 (red); `ready` 59,155,26 (green); `amber` 240,170,10; `grey` 111,111,110; `rule` 231,231,231; `bg` 0,0,0; plus the
-usual `line`, `track`, `accent` fall-backs. Night multipliers (linear light): fg .80, dim .75, hot .85, ready .80, amber .85, grey .55, rule .70.
+usual `line`, `track`, `accent` fall-backs. Night multipliers (linear light): fg .80, dim .75, hot .85, ready .75, amber .85, grey .55, rule .70.
 Use `"theme": "twin"` in the layout.
 
 ## 4. Budget (what B tests, `bench/test-twin-budget.js`)
@@ -172,3 +172,9 @@ steady pixel memory <= 6 MiB, peak <= 8 MiB; no layer rect meets [1380, 660, 146
 ## Changelog
 
 * 2026-11-17 initial publication.
+* 2026-11-17 (B, after A2 landed; no name or uniform changed): the real face boxes are tacho [72, 90, 688, 650] and speedo
+  [1232, 90, 1848, 650] (dial centre at face px (308, 310)) and the mask box [694, 592, 1230, 704]; the ink threshold is
+  `smoothstep(0.70, 0.85, code)` (A2: the lit ends past the sweep reach code 173); the READY multiplier is 0.75 (SPEC 7.2;
+  the first text said 0.80); the engine's own fallback window (no mask in the layout) is A2's box. The face decode is
+  compatible with `tools/twin-dial/face_shade.py` (tint, gain, wedge ink): the shader works in linear light and finds ink
+  over the wedge by subtracting the band formula, A2's reference by a code threshold; the two agree to a few codes at ink edges.
