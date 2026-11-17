@@ -236,6 +236,7 @@ const Car = require('./kit/car');
 const Waze = require('./waze');
 const Screen = require('./screen');
 const Runs = require('./runs');
+const twin = require('./twin_tokens');       // twin_dial: the {{td:...}} tokens, the centre pages' cycle, the extra signals
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
@@ -1498,7 +1499,9 @@ class HudApp {
         // ---- end probes ----
         // "condition": BMW's own vehicle state (VehicleCondition), data().condition, 10 = FAHREN (drive-ready). Used
         // by _restFrac to tell READY from OFF on a rev dial. audit/features.
-        this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
+        // twin_dial: the fields only Twin Dial reads (config.twin), chained behind the handlers above; config.carGroups: its own list
+        if (this.config.twin) twin.wire(this, extra);
+        this.car = new Car(this.ctx, this.config.carGroups || ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
         this.car.setRedline(this._redline());
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
         this.gSm = null;                 // { lat, long, at }: their average
@@ -2338,7 +2341,7 @@ class HudApp {
         try {
             if (!this.activeName || this.activeName === 'off' || !this.layoutTheme || !this.baseTheme || !this.widgets.size) return false;
             if (!this._nightOk() && !this.nightOn) return true;     // 2026-11-16: 6WB Sport / Eco Pro: nothing to change, no rebuild
-            const live = (w) => w.type === 'text' || w.type === 'wbback' || w.type === 'wbsign' || w.type === 'wbmsa' || (w.type === 'dial' && w.look === 'wb') ||
+            const live = (w) => w.type === 'text' || (w.type === 'icon' && !!w.tdLive) /* twin_dial */ || w.type === 'wbback' || w.type === 'wbsign' || w.type === 'wbmsa' || (w.type === 'dial' && w.look === 'wb') ||
                 (w.type === 'atext' && !!w.exact);      // 0.7.14: a "gpu" text (u_color)
             let ok = true;
             this.widgets.forEach((x) => { if (!x.w || !x.ref || !live(x.w)) ok = false; });
@@ -2786,6 +2789,7 @@ class HudApp {
                 return ((h % 12) || 12) + ':' + pad2(m);
             }
             default:
+                if (tok.indexOf('td:') === 0) return twin.token(this, tok);        // twin_dial: shared/twin_tokens.js
                 if (tok.indexOf('spd:') === 0) { const v = SPEED_SCALE[us ? 'us' : 'metric'][Number(tok.slice(4))]; return v === undefined ? '' : String(v); }   // speed scale labels
                 if (tok.indexOf('temp:') === 0) { const c = Number(tok.slice(5)); return isNum(c) ? String(us ? Math.round((c * 9 / 5 + 32) / 10) * 10 : Math.round(c)) : '--'; }   // gauge labels: °F to the 10
                 if (tok.indexOf('setup:') === 0) { const s = this._setup(); return s ? s[tok.slice(6)] || '' : '--'; }
@@ -4518,6 +4522,7 @@ class HudApp {
 
     _updateOne(x, now, force) {
         const w = x.w;
+        if (w.type === 'icon' && w.tdLive) return twin.updateIcon(this, x, now, force);       // twin_dial: a tab-bar icon that follows the car
         if (w.type === 'atext') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             const s = this._resolve(w.text);

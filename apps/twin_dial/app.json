@@ -1,0 +1,439 @@
+{
+  "id": "twin_dial",
+  "title": "Twin Dial",
+  "description": "A twin round-dial instrument cluster for the G20 panel: tachometer left, speedometer right, our own centre pages and check-control message",
+  "version": "0.1.0",
+  "vendor": "custom",
+  "loggingId": "OATD",
+  "iconGlyph": "TD",
+  "shared": [
+    "hud.js",
+    "hud_text.js",
+    "hud_data.js",
+    "hud_themes.js",
+    "layouts.js",
+    "shaders.js",
+    "icons.js",
+    "strip_icons.js",
+    "shift_score.js",
+    "sun.js",
+    "cluster_render_client.js",
+    "visible.js",
+    "waze.js",
+    "sensors.js",
+    "screen.js",
+    "runs.js",
+    "calibration.js",
+    "menu.js",
+    "gallery.js",
+    "previews.js",
+    "twin_tokens.js",
+    "twin_cc.js",
+    "twin_probe.js"
+  ],
+  "signals": {
+    "de.bmw.infotainment.vehicle.CDS": {
+      "statusEngineSpeed2": "rs",
+      "statusEngineTemperature": "rs",
+      "statusEngineStatus": "rs"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "statusCarSpeed2": "rs",
+      "statusDisplayedCCMessage": "rs",
+      "_about": "statusDisplayedCCMessage (getter 61): the number of the message the cluster displays, the second witness beside KombiIF.statusActiveCCMessage (SPEC 8.4). Read only; unseen on the car until probe P1."
+    },
+    "de.bmw.infrastructure.VehicleInformation": {
+      "statusGearboxDrive": "s",
+      "DataPowerTrain2": "s"
+    },
+    "de.bmw.infotainment.misc.MDrive": {
+      "dataDisplayGearbox": "s"
+    },
+    "de.bmw.infotainment.drivingexcitement.FES": {
+      "statusFESVehicleDynamicSwitchHMI": "rs"
+    },
+    "de.bmw.infrastructure.VehicleCondition": {
+      "VehicleCondition": "s",
+      "_about": "READY: VehicleCondition 10 (statusConditionVehicle), SPEC 5.1"
+    },
+    "de.bmw.infrastructure.EnvironmentalInformation": {
+      "ExteriorTemperature": "s",
+      "UnitBN2020": "rs",
+      "_about": "UnitBN2020.unitOfMeasurementMileage (getter 1): unseen (P5); round 2 only logs it and keeps km"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle": {
+      "statusDayNightChangeOver": "rs"
+    },
+    "de.bmw.infotainment.KombiIF": {
+      "statusRangeTankStatus": "rs",
+      "statusBordcomputerAverage": "rs",
+      "statusBordcomputerTravelData": "rs",
+      "statusBordcomputerTravelStart": "rs",
+      "timeDateUTC": "rs",
+      "statusShowTimeDate": "rs",
+      "statusActiveCCMessage": "rs",
+      "statusMenuCCMessage": "rs",
+      "_about": "statusRangeTankStatus: fuel litres, range km, spare (reserve) and mileageKilometre (the odometer, member unread until probe P3). The trip computer fields are unseen (P4): the page shows a dash until config.trip.factors is set. statusActiveCCMessage / statusMenuCCMessage: READ ONLY (standardCCMessage / extendedCCMessage are setters and are never declared)."
+    },
+    "de.bmw.infotainment.KombiInterface_2": {
+      "ccList": "rs",
+      "_about": "ccList only (live on the car); newCCMessage never arrived and requestDefaultSymbols is not used: our own symbols (SPEC 8.3)"
+    },
+    "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
+      "playerMetadata": "rs",
+      "_instances": "HMI_CID",
+      "_about": "unseen (P8); the media text is never logged, lengths only"
+    },
+    "de.bmw.infotainment.entertainment.mediasource.MediaSource": {
+      "activeSourceId": "rs",
+      "sources": "rs",
+      "_about": "unseen (P8)"
+    },
+    "de.bmw.infotainment.connectivity.telephony.ConnectivityAggregator": {
+      "aggregatedCallState": "rs",
+      "_about": "unseen (P9): an enum only, no number or name is read"
+    },
+    "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus": {
+      "guidingState": "rs",
+      "_about": "the navigation tab's icon: lit while a route is guided"
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "menu",
+      "title": "Twin Dial",
+      "settings": "placed",
+      "items": [
+        [
+          "setting",
+          "hudLayout"
+        ],
+        [
+          "setting",
+          "centre"
+        ],
+        [
+          "text",
+          "STATUS",
+          ""
+        ],
+        [
+          "text",
+          "STATUS2",
+          ""
+        ],
+        [
+          "button",
+          "BTN_SETTINGS",
+          "Settings"
+        ],
+        [
+          "text",
+          "STATUS_LOG",
+          ""
+        ]
+      ]
+    },
+    {
+      "name": "SETTINGS",
+      "kind": "settings",
+      "title": "Settings",
+      "skip": [
+        "hudLayout",
+        "centre"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "hudLayout",
+      "label": "Cluster",
+      "type": "choice",
+      "default": "twin",
+      "options": [
+        [
+          "twin",
+          "Twin Dial"
+        ],
+        [
+          "off",
+          "Off (BMW's own cluster)"
+        ]
+      ],
+      "_about": "the app's on / off (SPEC 14.5): 'off' drops every layer and asset, so f30_cluster can draw the panel alone; the two apps never draw together"
+    },
+    {
+      "key": "centre",
+      "label": "Centre page",
+      "type": "choice",
+      "default": "cycle",
+      "options": [
+        [
+          "clock",
+          "Date and clock"
+        ],
+        [
+          "trip",
+          "Trip computer"
+        ],
+        [
+          "cycle",
+          "Both, in turn"
+        ]
+      ],
+      "_about": "SPEC 6.2: cycle holds each page 10 s while the car stands and keeps the page it is on above 5 km/h"
+    },
+    {
+      "key": "redline",
+      "label": "Redline",
+      "type": "number",
+      "default": 6500,
+      "unit": "rpm",
+      "steps": [
+        5000,
+        5250,
+        5500,
+        5750,
+        6000,
+        6250,
+        6500,
+        6750,
+        7000,
+        7250,
+        7500
+      ],
+      "markDefault": true
+    },
+    {
+      "key": "nightLook",
+      "label": "Night look",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Auto (the car's day / night)"
+        ],
+        [
+          "on",
+          "Always night"
+        ],
+        [
+          "off",
+          "Off"
+        ]
+      ]
+    },
+    {
+      "key": "bandGain",
+      "label": "Dial band level",
+      "type": "number",
+      "default": 1.0,
+      "steps": [
+        0.6,
+        0.7,
+        0.8,
+        0.9,
+        1.0,
+        1.1,
+        1.2,
+        1.3,
+        1.4,
+        1.5,
+        1.6,
+        1.7
+      ],
+      "markDefault": true,
+      "_about": "SPEC 7.1 / 17.2: the band and tick strip level, set from one photo on the car"
+    },
+    {
+      "key": "demo",
+      "label": "Demo data",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Off"
+        ],
+        [
+          "on",
+          "On"
+        ]
+      ]
+    }
+  ],
+  "config": {
+    "target": "panel",
+    "statusName": "Twin Dial",
+    "socketPath": "/dev/shm/cluster-render/render.sock",
+    "location": {
+      "lat": 50.45,
+      "lon": 30.52
+    },
+    "utcOffsetMinutes": null,
+    "_comment": "target panel: the whole 1920x720 instrument cluster (docs/twin-dial/SPEC.md 14). tankLitres: the fuel bar's full mark (the car sends litres, not the tank size; the owner confirms 59). carGroups: the signal groups hud.js asks the kit's Car for (no accel / torque: twin_dial declares neither). redline: the setting 'redline' wins. trip.factors: null until probe P4 has proven the fields (docs/twin-dial/PROBE-PROTOCOL.md): then {avgSpeed, avgCons, distance, hours...} go here, not into code.",
+    "tankLitres": 59,
+    "carGroups": [
+      "rpm",
+      "speed",
+      "temps",
+      "gear",
+      "condition"
+    ],
+    "redline": 6500,
+    "clock24": true,
+    "twin": {
+      "_about": "shared/twin_tokens.js (the {{td:...}} tokens and the centre pages' cycle): switches the app's extra signal wiring on",
+      "cyclePageMs": 10000,
+      "holdAboveKmh": 5
+    },
+    "trip": {
+      "factors": null,
+      "_about": "SPEC 6.2 / probe P4: null = the trip page shows a dash for every value. Once P4 proves the fields: { speedAvg: 0.1, consAvg: 0.1, wayPassed: 1 } (km/h per bit, l/100 km per bit, km per bit), nothing else changes."
+    },
+    "dayNight": {
+      "iface": "de.bmw.infotainment.vehicle.Vehicle",
+      "field": "statusDayNightChangeOver",
+      "path": [
+        "dayNightChangeOver"
+      ],
+      "map": {
+        "0": "keep",
+        "KEINE_AENDERUNG": "keep",
+        "1": "day",
+        "TAG": "day",
+        "2": "night",
+        "NACHT": "night",
+        "3": null,
+        "SIGNAL_UNGUELTIG": null
+      },
+      "codes": {
+        "KEINE_AENDERUNG": 0,
+        "TAG": 1,
+        "NACHT": 2,
+        "SIGNAL_UNGUELTIG": 3
+      },
+      "_from": "fix/colour-daynight, from the car's catalogue (reference/car/2026-11-15/someip/someip-interfaces.json): Vehicle (service 46352, instance 1) field statusDayNightChangeOver, getter 19, notifier 32787, struct StatusDayNightChangeOverWrapper { dayNightChangeOver: enum DayNightChangeOver (default 3), destinationLCDLuminance, dampingLCDLuminance }. DayNightChangeOver: 0 KEINE_AENDERUNG (no change: the last day/night the car gave holds; none yet: the sun), 1 TAG (day), 2 NACHT (night), 3 SIGNAL_UNGUELTIG (invalid: the sun). Any other value counts as invalid. The meaning of 0 is read off its German name only and is UNCONFIRMED on the car. 'codes' turns an enum NAME back into its number for the log (numbers only). hud.js _isNight."
+    },
+    "clock": {
+      "_about": "The car's own time-zone offset, so our clock is right without the manual timeZone setting (the owner, 2026-11-15; the head unit itself runs on UTC). Package X (2026-11-16): THIS IS THE FIRST SOURCE; the timeZone setting (if a build still has it) and config.utcOffsetMinutes are the fallbacks, in that order. A decoded offset is taken only if it is a whole number of quarter hours within +-14 h; anything else is logged once as 'clock: the car's offset decodes to N minutes ... ignored' and the next source is used. The line to check on the car: 'clock: ours shows HH:MM, UTC+hh:mm from ...' - it must read what the head unit's own clock reads.",
+      "_confirm": "STILL AN UNCONFIRMED ENCODING, now LIVE. The catalogue says timeZonesOffsetAutomaticallyUTC is a UInt8 but not what one step is; \"factor\" 15 (quarter hours) is a guess. It was only parsed and logged while the manual \"timeZone\" setting existed; the owner retired that setting on 2026-11-15 (\"забираємо все, можемо покластися на машину\"), so the car's value is now the ONLY source our clock has and \"confirm\" is true. It could not be settled off the car: the 2026-11-15 snapshot has no captured value, and timeDateUTC's other members carry UTC, not local time, so there is nothing to difference against. THE FAILURE MODE IS A VISIBLY WRONG CLOCK, nothing worse, and one glance at the car settles it: compare our clock with BMW's own. If ours is out by a whole number of hours, the step is wrong - set \"factor\" to 1 (minutes), 30 (half hours) or 60 (hours) so the logged line 'clock: the car's offset would be N minutes' reads the real offset. If it is out by a constant that is not a multiple of the step, use \"offsetBy\" (subtracted from the raw first).",
+      "iface": "de.bmw.infotainment.KombiIF",
+      "field": "timeDateUTC",
+      "kind": "offset",
+      "confirm": true,
+      "path": [
+        "timeZonesOffsetAutomaticallyUTC"
+      ],
+      "factor": 15,
+      "offsetBy": 0,
+      "dstPath": [
+        "offsetWintertimeSummertimeUTC"
+      ],
+      "dstMinutes": 60,
+      "invalid": [
+        255
+      ],
+      "logOn": [
+        "timeZonesOffsetAutomaticallyUTC",
+        "offsetWintertimeSummertimeUTC",
+        "statusTimeZonesId",
+        "statusClockTimeDateUTC"
+      ],
+      "_log": "fix/cclist (0.7.19): 0.7.18's 'clock raw:' line was cut at 100 characters, just before the three zone members, and repeated every 10 s (the seconds change). Now the WHOLE struct (all ten members of TimeDateUTCWrapper) is logged, uncut, once per change of the members named in logOn only. On the owner's car (2026-11-17) statusClockTimeDateUTC read UHRZEIT_UEBER_UTC_VERFUEGBAR_UND_UEBER_QUARZ_WEITERGEZAEHLT_OFFSETS_NICHT_VERFUEGBAR (the catalogue enum, value 3: 'UTC available, counted on by the quartz, OFFSETS NOT AVAILABLE') - the car itself says this struct carries no offset, so config.clockLocal below is what gives the zone there. The factor (15) is NOT changed: there is still no evidence for any step."
+    },
+    "clockLocal": {
+      "_about": "fix/cclist (0.7.19): the time zone's FALLBACK after config.clock (hud.js _tzSource): the local time the cluster shows, KombiIF statusShowTimeDate (ShowTimeDateWrapper displayHour / displayMinute; getter 30, notifier 32798), against the head unit's own UTC clock, rounded to 15 minutes (hud.js tzOf kind 'local'). An hour or minute out of range (the catalogue default 255) gives none. UNCONFIRMED on the car: that this field reaches the head unit, and that it carries LOCAL time (its sibling DisplayStatus.TimeDate is the same struct). The line to check: 'clock (local) raw: {...} -> 120' and 'clock: ours shows HH:MM, UTC+02:00 from the car's shown clock'. Set to null to drop it.",
+      "iface": "de.bmw.infotainment.KombiIF",
+      "field": "statusShowTimeDate",
+      "kind": "local",
+      "hourPath": [
+        "displayHour"
+      ],
+      "minutePath": [
+        "displayMinute"
+      ],
+      "logOn": "out"
+    },
+    "ccList": {
+      "_about": "Several messages at once: the car cycles through this list, and ours steps through it on the same clock (the owner, 2026-11-15). Each element carries a short name and a colour; config.ccm.cycleMs is how long each one is shown. The stock order and timing are being measured in docs/G20-DESIGN-SPEC.md.",
+      "iface": "de.bmw.infotainment.KombiInterface_2",
+      "field": "ccList",
+      "path": [],
+      "root": [
+        "cCListElement"
+      ],
+      "namePath": [
+        "cCShortName"
+      ],
+      "idPath": [
+        "cCIdentifer"
+      ],
+      "symbolPath": [
+        "cCListSymbolID"
+      ],
+      "ignoreIds": [
+        0
+      ],
+      "_cclist": "fix/cclist (0.7.19), the owner's car 2026-11-17: newCCMessage (config.ccm) sent NOTHING in 25 minutes, a door-open message included; ccList is live and carries the message on show. Resting: [id 0 GREEN symbol 6]; driver's door open: [id 15 WHITE symbol 2], name 16 characters; shut: id 0 again. So THIS is the primary source of 'a message shows' (an entry whose cCIdentifer is not in ignoreIds - from ONE test, hence configurable) and of our message's headline (cCShortName), colour and severity (cCColor) and symbol id (cCListSymbolID). newCCMessage stays wired as a second source; whichever says a message shows wins. The first notification that is a list whose entries fit 'root' ends the blind case (hud.js _ccWired). Member names from the catalogue: CCListElementUnion.cCListElement = CCListElementStruct { cCIdentifer (sic), cCShortName, cCListSymbolID, cCColor, cCIndentation, ricResourceID }. The text is never logged.",
+      "colorPath": [
+        "cCColor"
+      ],
+      "colorMap": {
+        "DEFAULT": "default",
+        "0": "default",
+        "RED": "red",
+        "1": "red",
+        "YELLOW": "yellow",
+        "2": "yellow",
+        "GREEN": "green",
+        "3": "green",
+        "ORANGE": "orange",
+        "4": "orange",
+        "WHITE": "white",
+        "5": "white"
+      }
+    },
+    "ccActive": {
+      "_about": "fix/active-cc (0.7.20), the owner's car 2026-11-17: ccList lists the ACTIVE AND THE STORED messages - a ready-to-drive message (id 987) stayed listed after BMW hid it (~20 s), so 0.7.19 kept our message area open / drawn with nothing of BMW's on screen. This field, KombiIF statusActiveCCMessage, is taken as the cluster's own 'message shown now' (a HYPOTHESIS until the car confirms it). Every change is logged once, numbers only: 'active cc: number N control C frame F/G utility U'. Once it has notified with a number ('wired') it alone decides: a message shows iff numberPath is not in noneValues; text, colour and severity come from the ccList entry whose cCIdentifer equals that number. No such entry: still shown, BMW's panel stays open, our line empty, and 'active cc: no ccList entry for number N' is logged once per N - that line tells whether the two numberings match. The catalogue default of the number is 65535 (unfilled); it is NOT in noneValues, so it reads as shown with no entry: BMW's panel open (the safe side). shared/hud.js _ccListEval.",
+      "iface": "de.bmw.infotainment.KombiIF",
+      "field": "statusActiveCCMessage",
+      "numberPath": [
+        "numberDisplayControlCheckControlMessage"
+      ],
+      "controlPath": [
+        "displayControlCheckControlMessage"
+      ],
+      "frameNumberPath": [
+        "numberFrameDisplayControlCheckControlMessage"
+      ],
+      "framePath": [
+        "frameDisplayControlCheckControlMessage"
+      ],
+      "utilityPath": [
+        "utilityDataDisplayControlCheckControlMessage"
+      ],
+      "noneValues": [
+        0
+      ],
+      "_fallback": "A HEURISTIC, used only while statusActiveCCMessage has never given a number: a ccList entry counts as showing for hideAfterMs (null: config.ccm.autoHideMs, 20000 - BMW's manual's ~20 s auto-hide) after it was first listed; an entry whose colour is in keepColors shows for as long as it is listed. An entry that leaves the list and comes back starts its clock again. on: false gives back 0.7.19 (every listed entry shows while listed).",
+      "fallback": {
+        "on": true,
+        "hideAfterMs": null,
+        "keepColors": [
+          "red"
+        ]
+      },
+      "strict": true,
+      "_strict": "SPEC 8.4 / D7 (the owner, 2026-11-17): until statusActiveCCMessage has once delivered a number that matched a ccList entry, our plate is never drawn over BMW's panel: the fallback window opens whenever the heuristic says a message may show. Package D."
+    },
+    "ccDisplayed": "Vehicle2.statusDisplayedCCMessage",
+    "menu": {
+      "hideModeRows": false,
+      "hideRowUnlessG20": false,
+      "comment": "shared/menu.js: twin_dial has neither the drive-mode rows nor the G20 toggle"
+    }
+  }
+}
