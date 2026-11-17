@@ -589,7 +589,7 @@
       "color": "fg",
       "align": "right",
       "conn": 2,
-      "toggle": "!cc:open"
+      "toggle": "cc:rest"
     },
     {
       "id": "row_l1u",
@@ -604,7 +604,7 @@
       "color": "fg",
       "align": "left",
       "conn": 2,
-      "toggle": "!cc:open"
+      "toggle": "cc:rest"
     },
     {
       "id": "row_l2",
@@ -619,7 +619,7 @@
       "color": "fg",
       "align": "right",
       "conn": 2,
-      "toggle": "!cc:open"
+      "toggle": "cc:rest"
     },
     {
       "id": "row_r1",
@@ -634,7 +634,7 @@
       "color": "fg",
       "align": "right",
       "conn": 2,
-      "toggle": "!cc:open"
+      "toggle": "cc:rest"
     },
     {
       "id": "row_r1u",
@@ -649,7 +649,7 @@
       "color": "fg",
       "align": "left",
       "conn": 2,
-      "toggle": "!cc:open"
+      "toggle": "cc:rest"
     },
     {
       "id": "row_r2",
@@ -664,7 +664,7 @@
       "color": "fg",
       "align": "right",
       "conn": 2,
-      "toggle": "!cc:open"
+      "toggle": "cc:rest"
     },
     {
       "id": "row_r2u",
@@ -679,22 +679,19 @@
       "color": "fg",
       "align": "left",
       "conn": 2,
-      "toggle": "!cc:open"
+      "toggle": "cc:rest"
     },
     {
-      "id": "plate_head",
-      "type": "text",
+      "id": "plate",
+      "type": "ccplate",
       "z": 9,
-      "x": 783,
-      "y": 635,
-      "w": 441,
-      "h": 57,
-      "text": "{{ccHead}}",
+      "x": 694,
+      "y": 592,
+      "w": 536,
+      "h": 128,
       "font": "td_msg",
-      "color": "fg",
-      "align": "left",
-      "conn": 2,
-      "toggle": "cc:ours"
+      "counterFont": "td_cnt",
+      "conn": 2
     }
   ]
 }

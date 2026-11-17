@@ -432,7 +432,13 @@
       "strict": true,
       "_strict": "SPEC 8.4 / D7 (the owner, 2026-11-17): until statusActiveCCMessage has once delivered a number that matched a ccList entry, our plate is never drawn over BMW's panel: the fallback window opens whenever the heuristic says a message may show. Package D."
     },
-    "ccDisplayed": "Vehicle2.statusDisplayedCCMessage",
+    "ccDisplayed": {
+      "iface": "de.bmw.infotainment.vehicle.Vehicle2",
+      "field": "statusDisplayedCCMessage",
+      "numberPath": [
+        "statusNumberCheckControlMessageDisplay"
+      ]
+    },
     "menu": {
       "hideModeRows": false,
       "hideRowUnlessG20": false,

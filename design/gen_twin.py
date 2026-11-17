@@ -206,9 +206,9 @@ def gpu_texts():
 def row():
     """SPEC 6.3: the bottom row. Rule y 613 (a tdback rule), baselines 656 and 703, numbers Noto 40 right-aligned at x 846
     and 1153, units Noto 21 five px after, on the number's baseline. A "cc:" layer: it steps aside while BMW's panel or
-    our plate shows (package D refines the toggle; "!cc:open" is the engine's own today). Slots: L1 the odometer, L2 the
+    our plate shows (package D's toggle "cc:rest": neither BMW's panel nor our plate). Slots: L1 the odometer, L2 the
     clock, R1 the trip distance (the range until probe P4), R2 the outside temperature."""
-    z, tg = 8, '!cc:open'
+    z, tg = 8, 'cc:rest'
     L, Rr = 846, 1153
     nw = lambda *worst: max(width('td_row', t) for t in worst) + 1          # a number's box: its worst text (the odometer "999 999")
     W = [text('row_l1', L, 656, nw('999\u2009999'), '{{td:odo}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
@@ -222,10 +222,10 @@ def row():
 
 
 def plate_seam():
-    """Package D's seam (SPEC 8.1): our message's plate, [694.5, 592, 1230, 720], one "cc:" sheet on connection 2 above the
-    bottom row. C lays out only the headline's first line as a placeholder, so the layer exists in the budget; D replaces
-    it with the symbol cell, the two-line headline and the counter in ONE paint (package X's "ccLine")."""
-    return [text('plate_head', 783, 680, 441, '{{ccHead}}', 'td_msg', 'fg', 'left', 2, 9, toggle='cc:ours')]
+    """Package D's plate (SPEC 8.1): our message, [694, 592, 536, 128], ONE "cc:" image sheet on connection 2 above the bottom
+    row, painted by shared/twin_cc.js (symbol cell, two-line headline in Noto 42, counter in Noto 29)."""
+    return [{'id': 'plate', 'type': 'ccplate', 'z': 9, 'x': 694, 'y': 592, 'w': 536, 'h': 128,
+             'font': 'td_msg', 'counterFont': 'td_cnt', 'conn': 2}]
 
 
 def widgets():
