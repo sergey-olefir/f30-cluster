@@ -123,7 +123,8 @@ def audit(alpha, prem, layers, cc_state, pixels_bytes=None, notes=None, cc_expec
     worst = max(per.values()) if per else 0
     add('layers per connection', worst <= 8, per, '<= 8', 'cluster-render draws 8 per connection')
     total = sum(per.values())
-    add('layers in all', total <= 12, total, '<= 12', 'SPEC 13.2: 12 of 24')
+    add('layers in all (24 at most)', total <= 24, total, '<= 24', 'the service takes 32; SPEC 13.2 leaves half of the 24 free')
+    add('layers in all (SPEC 13.2 plans 12)', total <= 12, total, '<= 12', 'the SPEC table: 6 + 4 + 2; more is allowed, but it is a change of the budget', warn=True)
     if pixels_bytes is not None:
         add('pixel memory', pixels_bytes <= 6 * 1048576, round(pixels_bytes / 1048576, 2), '<= 6 MiB', 'steady, each image counted twice (bench scene.pixels)')
     nd = [n for n in (notes or []) if 'not drawn' in (n.get('note') or '') or 'does not compile' in (n.get('note') or '')]

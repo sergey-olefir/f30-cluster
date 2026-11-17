@@ -88,7 +88,10 @@ def start_bench(work, logs, i, port, mode, config):
     b = benchc.Bench(port, app)
     ok, q = b.until(lambda q: q.get('ready') and q.get('activeName'), 120, 0.3)
     if not ok:
-        raise RuntimeError('bench on %d did not come up (see %s)' % (port, log))
+        open(stop, 'w').write('did not come up\n')      # its wrapper ends the bench; nothing is left listening
+        p.wait(timeout=40)
+        why = [ln.strip() for ln in open(log, errors='replace') if 'build failed' in ln or 'ERROR' in ln][-2:]
+        raise RuntimeError('bench on %d did not come up (see %s) %s' % (port, log, why))
     return {'proc': p, 'stop': stop, 'log': log, 'bench': b, 'port': port, 'app': app, 'which': which}
 
 
