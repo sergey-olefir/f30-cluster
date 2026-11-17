@@ -44,8 +44,7 @@ const laneAt = (k, x, y) => {
     if (!o || x < box[0] || y < box[1] || x >= box[2] || y >= box[3]) return null;
     return MASK_BYTES[(y - box[1] + o[1]) * MASKF.w + (x - box[0] + o[0])] / 255;
 };
-const CCL = lw('cc_line');
-const cat = {};
+const CCL = lw('cc_line');const cat = {};
 JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'overlay', 'g20_comfort.json'), 'utf8')).elements.forEach((e) => { cat[e.id] = e; });
 const item = (k) => spec.settings.find((s) => s.key === k);
 const opts = (k) => item(k).options.map((o) => o[0]);
@@ -307,6 +306,11 @@ async function main() {
     for (let i = 0; i < 20; i++) { const q = await probe(); if (S(q).cc && S(q).cc.name) held[S(q).cc.name] = 1; await sleep(500); }
     ok(Object.keys(held).length === 1 && held['Washer fluid low'],
         'frame 2 of 3 shows the car\'s own second message, and holds it (' + Object.keys(held).join(', ') + ')');
+    // fix/active-cc (0.7.20): statusActiveCCMessage is silent here, so the ccList fallback counts a non-red entry for
+    // config.ccm.autoHideMs (20 s) after it was first listed - and the 20 s of probing above used that up. List them
+    // anew (the resting list, then the three) so the step below is tested on a list that still shows all three
+    await scene('cclist-rest');
+    await scene('cc-three-list');
     await fake({ ccFrame: { frame: 3, of: 3, ids: [101, 102, 103] } });
     p = await until((q) => S(q).cc && S(q).cc.name === 'Engine malfunction', 5000);
     ok(S(p).cc.name === 'Engine malfunction', 'frame 3 of 3 steps to the third (' + S(p).cc.name + ')');
@@ -998,6 +1002,112 @@ async function main() {
     await until((q) => q.activeName === 'wb_comfort', 20000);
     // ---- end fix/cclist ----
 
+    // ---- fix/active-cc (0.7.20): the owner's car 2026-11-17 - ccList holds ACTIVE and STORED messages (id 987 stayed
+    // listed with nothing on BMW's screen). KombiIF statusActiveCCMessage (config.ccActive) is the cluster's "message
+    // shown now": once it has given a number, it alone says whether a message shows, and the ccList entry with that
+    // id gives the text. Before it ever speaks, a listed entry shows only for config.ccm.autoHideMs (red: while listed).
+    console.log('fix/active-cc: the opaque themes - a stored entry is not a message, the active number is');
+    {
+        const box = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts', 'wb_comfort.json'), 'utf8'))
+            .widgets.find((x) => x.id === 'bg').cc;
+        const inkIn = async () => (await inkRows(box)).total;
+        const worstFor = async (ms) => { let n = 0; for (const t0 = Date.now(); Date.now() - t0 < ms;) { n = Math.max(n, await inkIn()); await sleep(100); } return n; };
+        await req('POST', '/restart');
+        await sleep(1000);
+        await until((q) => q && q.ready && q.activeName, 90000);
+        await set('hudLayout', 'wb_comfort');
+        await scene('clock-plus2');
+        await until((q) => q.activeName === 'wb_comfort', 20000);
+        await scene('active-stored');
+        p = await until((q) => S(q).cc.activeWired === true && S(q).cc.shown === false && same(S(q).safety.ucc, [0, 0, 0, 0]), 8000);
+        ok(S(p).cc.activeWired === true && S(p).cc.shown === false && S(p).cc.ccList === false && S(p).cc.wired === true,
+            'ccList holds stored id 987, the active number is 0: no message (' + JSON.stringify({ shown: S(p).cc.shown, list: S(p).cc.ccList, active: S(p).cc.active }) + ')');
+        ok(S(p).safety.open === false && same(S(p).safety.ucc, [0, 0, 0, 0]), 'and BMW\'s panel window is shut');
+        let n = 0;
+        for (const t0 = Date.now(); Date.now() - t0 < 4000 && (n = await inkIn()) === 0;) await sleep(100);
+        ok(n > 0, 'our clock / temperature row is drawn in its place (' + n + ' px)');
+        ok(/active cc: number 0 control 0 frame 0\/0 utility 0/.test(logText), 'the struct is logged as numbers: "active cc: number 0 control 0 frame 0/0 utility 0"');
+        await scene('active-40');
+        p = await until((q) => S(q).cc.shown === true && same(S(q).safety.ucc, box), 8000);
+        ok(S(p).cc.shown === true && S(p).cc.now.id === 40 && S(p).cc.now.name === 37 && S(p).safety.open === true && same(S(p).safety.ucc, box),
+            'active 40 with ccList id 40: shown, from its own entry (' + JSON.stringify(S(p).cc.now) + '), BMW\'s panel open');
+        n = await worstFor(1000);
+        ok(n === 0, 'with nothing of ours painted inside it (' + n + ' px)');
+        ok(/active cc: number 40 control 1 frame 1\/1 utility 0/.test(logText), 'the change is logged: "active cc: number 40 control 1 frame 1/1 utility 0"');
+        await scene('active-none');
+        p = await until((q) => S(q).cc.shown === false && same(S(q).safety.ucc, [0, 0, 0, 0]), 8000);
+        for (const t0 = Date.now(); Date.now() - t0 < 4000 && (n = await inkIn()) === 0;) await sleep(100);
+        ok(S(p).cc.shown === false && n > 0, 'active 0 again with both still listed: no message, the window shuts, our row is back (' + n + ' px)');
+        const zeros = () => logText.split('\n').filter((l) => /active cc: number 0 control 0 frame 0\/0 utility 0/.test(l)).length;
+        const z0 = zeros();
+        for (let i = 0; i < 4; i++) { await scene('active-none'); await sleep(100); }
+        await sleep(300);
+        ok(zeros() === z0, 'the same struct four more times: no new log line (once per change, never periodic)');
+        ok(S(p).cc.ccm === null, 'newCCMessage silent throughout');
+    }
+
+    console.log('fix/active-cc: all6WB - our line follows the active number');
+    await click('SET_G20');
+    await until((q) => q.activeName === 'wb_dials', 20000);
+    await restart();
+    await set('bottomRow', 'all6WB');
+    await scene('clock-plus2'); await scene('road-street'); await scene('active-stored');
+    p = await until((q) => S(q).row && S(q).row.why === null && (S(q).widgets || []).indexOf('cc_line') >= 0 && S(q).cc.activeWired, 20000);
+    ok(S(p).row.why === null && allOwn(p, true) && S(p).cc.shown === false && S(p).safety.head === '' && S(p).cc.name === '',
+        'stored 987 with active 0: the row is ours, no message, our line hidden (head "' + S(p).safety.head.length + ' chars")');
+    ok(!S(p).safety.open && maskIs(p, 'ours', null), 'and BMW\'s panel is covered (' + JSON.stringify(S(p).safety.mask) + ')');
+    await scene('active-40');
+    p = await until((q) => S(q).safety.onScreen === true && maskIs(q, 'ours', null), 8000);
+    ok(S(p).cc.now.id === 40 && S(p).safety.head.length === 37 && S(p).cc.list === 1,
+        'active 40: our line shows entry 40\'s own name (' + S(p).safety.head.length + ' characters), only that entry');
+    await clean(p, 'an active message');
+    await scene('active-nomatch');
+    let nmOpen = 0, nmAll = 0;
+    for (const t0 = Date.now(); Date.now() - t0 < 1200;) {
+        const q = await probe();
+        if (S(q).cc.shown === true && S(q).cc.noMatch === 1234) { nmAll++; if (bmwOpen(q) && S(q).safety.head === '') nmOpen++; }
+        await sleep(60);
+    }
+    p = await probe();
+    ok(nmAll > 0 && nmOpen === nmAll, 'active 1234, no ccList entry: shown, BMW\'s panel open, our line empty (' + nmOpen + ' of ' + nmAll + ' probes)');
+    ok(JSON.stringify(S(p).fail) === '{}' && allOwn(p, true), 'nothing latches: the row stays ours around BMW\'s open panel');
+    await scene('active-nomatch'); await sleep(300);
+    ok(logText.split('\n').filter((l) => /active cc: no ccList entry for number 1234/.test(l)).length === 1, 'logged ONCE: "active cc: no ccList entry for number 1234"');
+    await clean(p, 'an active number with no entry');
+    await scene('active-stored');
+    p = await until((q) => S(q).cc.shown === false && maskIs(q, 'ours', null), 8000);
+    ok(S(p).cc.shown === false && S(p).safety.head === '' && maskIs(p, 'ours', null), 'back to active 0: no message, BMW\'s panel covered again');
+
+    console.log('fix/active-cc: the fallback while statusActiveCCMessage never speaks (config.ccm.autoHideMs)');
+    await restart();
+    await set('bottomRow', 'all6WB');
+    await scene('clock-plus2'); await scene('road-street'); await scene('cclist-rest');
+    await until((q) => S(q).row && S(q).row.why === null && (S(q).widgets || []).indexOf('cc_line') >= 0, 20000);
+    const t0w = Date.now();
+    await scene('stored-white');
+    p = await until((q) => S(q).cc.shown === true && S(q).safety.onScreen === true, 8000);
+    ok(S(p).cc.activeWired === false && S(p).cc.shown === true && S(p).cc.now.id === 987, 'a new white entry shows at first (' + JSON.stringify(S(p).cc.now) + ')');
+    await scene('stored-white-red');
+    p = await until((q) => S(q).cc.list === 2, 5000);
+    ok(S(p).cc.list === 2, 'a red entry joins it: both show');
+    const hideMs = spec.config.ccm.autoHideMs;
+    p = await until((q) => S(q).cc.list === 1, hideMs + 8000);
+    const took = Date.now() - t0w;
+    ok(S(p).cc.list === 1 && S(p).cc.now.id === 50 && S(p).cc.now.color === 'red' && took >= hideMs - 1000,
+        'after ' + (took / 1000).toFixed(1) + ' s (autoHideMs ' + hideMs + ') the white entry stops counting, the red one stays');
+    await sleep(2000);
+    p = await probe();
+    ok(S(p).cc.shown === true && S(p).cc.now.id === 50, 'the red entry still shows while it is listed');
+    await scene('stored-white');
+    p = await until((q) => S(q).cc.shown === false && maskIs(q, 'ours', null), 8000);
+    ok(S(p).cc.shown === false && S(p).safety.head === '' && maskIs(p, 'ours', null) && JSON.stringify(S(p).fail) === '{}',
+        'only the stored white entry left: no message, our line hidden, BMW\'s panel covered, nothing latched');
+    await clean(p, 'the fallback');
+    await set('bottomRow', 'allG20');
+    await click('SET_G20');
+    await until((q) => q.activeName === 'wb_comfort', 20000);
+    // ---- end fix/active-cc ----
+
     console.log('every layout still builds');
     for (const v of opts('hudLayout')) {
         await set('hudLayout', v);
@@ -1013,7 +1123,7 @@ main().catch((e) => { failed++; console.log('  FAIL ' + (e && e.stack || e)); })
     if (server) server.kill('SIGTERM');
     const errs = logText.split('\n').filter((l) => /ERROR/.test(l));
     if (errs.length) { console.log('app errors in the log:'); errs.slice(0, 20).forEach((l) => console.log('  ' + l)); }
-    const priv = logText.split('\n').filter((l) => /Hauptstrasse|Nuernberg|Ingolstaedter|Engine malfunction|Drive on with care|Driver door open|All systems OK|Boot lid open|latitude|longitude/.test(l));
+    const priv = logText.split('\n').filter((l) => /Hauptstrasse|Nuernberg|Ingolstaedter|Engine malfunction|Drive on with care|Driver door open|All systems OK|Boot lid open|Ready to drive|Stored notice|Brake fault|latitude|longitude/.test(l));
     console.log(priv.length ? 'PRIVACY: ' + priv.length + ' log line(s) carry content:\n  ' + priv.slice(0, 5).join('\n  ')
         : 'privacy: no road name, message text or coordinate in the log');
     if (priv.length) failed++;

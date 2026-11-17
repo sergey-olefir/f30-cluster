@@ -123,6 +123,26 @@ Object.assign(SCENES, {
     'clock-local-none': { clockLocal: { minutes: null } },
 });
 // ---- end fix/cclist ----
+// ---- fix/active-cc (0.7.20): the owner's car 2026-11-17 - ccList holds ACTIVE and STORED messages; KombiIF
+// statusActiveCCMessage says which one the cluster shows now (config.ccActive). Invented names, none of them the car's.
+// The ready-to-drive message: id 40 (37 characters on the car), then id 987 (27), WHITE symbol 5 ---
+const CC_READY = { name: 'Ready to drive - press brake to start', color: 'white', id: 40, symbol: 5 };
+const CC_STORED = { name: 'Stored notice, not on show.', color: 'white', id: 987, symbol: 5 };
+Object.assign(SCENES, {
+    // the car after ~20 s: 987 is still listed, but the cluster shows nothing
+    'active-stored': { ccList: [CC_STORED], ccActive: { number: 0 } },
+    // the cluster shows id 40, and the list carries it
+    'active-40': { ccList: [CC_READY, CC_STORED], ccActive: { number: 40, control: 1, frame: 1, of: 1 } },
+    // the cluster shows a number no ccList entry carries (the numbering differs)
+    'active-nomatch': { ccList: [CC_STORED], ccActive: { number: 1234, control: 1 } },
+    'active-none': { ccActive: { number: 0 } },
+    // the fallback (statusActiveCCMessage silent): a stored white entry, and a red one beside it
+    'stored-white': { ccList: [CC_STORED] },
+    'stored-white-red': { ccList: [CC_STORED, { name: 'Brake fault - stop', color: 'red', id: 50, symbol: 12 }] },
+    // cc-frame-2's three entries alone, to list them anew (the fallback's clock starts again)
+    'cc-three-list': { ccList: SCENES['cc-frame-2'].ccList },
+});
+// ---- end fix/active-cc ----
 // --- package F (strip, 2026-11-16): the car's words in Ukrainian, as the owner's cluster runs. Made-up text, no real
 // place: the tallest and lowest capitals (Ї Й Ґ, Щ Ц Д), both apostrophes, guillemets, the dash and the number sign ---
 Object.assign(SCENES, {
@@ -229,6 +249,23 @@ function install(hu, config, log) {
         });
         last.ccList = arr.length;
         hu.feed(c.iface, c.field, nest(c.path, els));
+    }
+
+    /** fix/active-cc: the cluster's "message shown now" (config.ccActive, KombiIF statusActiveCCMessage):
+     *  { number, control, frame, of, utility }, each a number (0 when left out). */
+    function feedCcActive(v) {
+        const c = cfg.ccActive;
+        if (!named(c)) return;
+        const n = v || {}, num = (x) => (isFinite(Number(x)) ? Number(x) : 0);
+        let out = {};
+        const put = (path, val) => { if (path) merge(out, nest(path, val)); };
+        put(c.numberPath, num(n.number));
+        put(c.controlPath, num(n.control));
+        put(c.frameNumberPath, num(n.frame));
+        put(c.framePath, num(n.of));
+        put(c.utilityPath, num(n.utility));
+        last.ccActive = n;
+        hu.feed(c.iface, c.field, out);
     }
 
     /** The driver's own speed-limit settings (read only on the car; here just fed). { warn, warn2, show,
@@ -394,6 +431,7 @@ function install(hu, config, log) {
         if (o.sign) feedSign(o.sign);
         if (o.cc) feedCc(o.cc);
         if (o.ccList) feedCcList(o.ccList);
+        if (o.ccActive) feedCcActive(o.ccActive);     // fix/active-cc: after the list, as the car's order is unknown
         if (o.ccFrame) feedCcFrame(o.ccFrame);
         if (o.sla) feedSla(o.sla);
         if (o.road) feedRoad(o.road);

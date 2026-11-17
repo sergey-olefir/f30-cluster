@@ -1300,41 +1300,51 @@ class HudApp {
         // as an unreadable newCCMessage does. Any notification that is a list whose entries fit config.ccList.root
         // makes the field READ (ccListAny, _ccWired): from then on the blind case is over. Lengths, ids and colours
         // only go to the log, never the text.
+        // ---- fix/active-cc (0.7.20, the owner's car 2026-11-17): ccList lists the ACTIVE AND THE STORED messages, not
+        // what is on the screen - a ready-to-drive message (id 987) stayed in it after BMW had hidden it (~20 s, the
+        // manual), and our area stayed open / drawn with nothing of BMW's there. So the handler below only RECORDS the
+        // list (ccListAll); which of its entries shows is decided by _ccListEval: by the cluster's own "message shown
+        // now" (config.ccActive, KombiIF statusActiveCCMessage) once that has spoken, else by a time-limited fallback.
         const cl = this.config.ccList;
         this.ccItems = []; this.ccListShape = undefined; this.ccListLogs = 0;
+        this.ccListAll = null; this.ccListSeen = {}; this.ccNoMatch = null;
         if (cl && cl.iface && cl.field) {
             const ignore = Array.isArray(cl.ignoreIds) ? cl.ignoreIds : [0];
             watchOne(cl, (v) => {
                 const arr = pick(v, cl.path);
-                const out = [], ids = [];
-                let fits = Array.isArray(arr), unread = 0;
-                (Array.isArray(arr) ? arr : []).forEach((e) => {
+                const all = [], ids = [];
+                let fits = Array.isArray(arr);
+                (Array.isArray(arr) ? arr : []).forEach((e, i) => {
                     const m = cl.root ? pick(e, cl.root) : e;
                     if (!m || typeof m !== 'object') { fits = false; return; }
                     const idRaw = cl.idPath ? pick(m, cl.idPath) : undefined, id = isNum(idRaw) ? idRaw : null;
-                    if (id !== null && inList(ignore, id)) return;          // the car's resting entry: no message
                     const n = pick(m, cl.namePath);
                     const sy = cl.symbolPath ? pick(m, cl.symbolPath) : undefined;
                     const color = mapRaw(m, cl.colorPath, cl.colorMap, null) || null;
-                    ids.push(id === null ? '-' : String(id) + ' ' + (color || '?'));
-                    if (typeof n !== 'string' || !n.trim()) { unread++; return; }
-                    out.push({ name: n.slice(0, 300), color: color, id: id, symbol: isNum(sy) ? sy : null });
+                    const ignored = id !== null && inList(ignore, id);      // the car's resting entry: no message
+                    if (!ignored) ids.push(id === null ? '-' : String(id) + ' ' + (color || '?'));
+                    all.push({ key: id === null ? 'at ' + i : 'id ' + id, ignored: ignored, id: id, color: color,
+                        name: typeof n === 'string' && n.trim() ? n.slice(0, 300) : null, symbol: isNum(sy) ? sy : null });
                 });
-                this.ccItems = out.slice(0, 16);
-                this.ccListUnread = unread > 0;
-                this.ccListShown = fits ? (out.length > 0 || unread > 0) : this.ccListShown;
+                const now = Date.now();
+                if (fits) {
+                    // fix/active-cc: when each entry was FIRST listed (the fallback's clock); an entry that leaves the
+                    // list and comes back starts again
+                    const seen = {};
+                    all.forEach((e) => { if (!e.ignored) seen[e.key] = this.ccListSeen[e.key] || now; });
+                    this.ccListSeen = seen;
+                    this.ccListAll = all.slice(0, 32);
+                }
                 if (fits && !this.ccListAny) {
                     const was = this._ccWired();
                     this.ccListAny = true;
                     if (!was && this.client && this.client.ready) this._rebuild();
                 }
-                this._ccMerge();
-                if (this.ccListUnread) {
-                    this._rowFail('info', 'a check-control message arrived in ccList that app.json config.ccList cannot read (' + unread + ' entr' + (unread === 1 ? 'y' : 'ies') + ' with no name)');
-                }
-                // lengths, ids and colours only: never the text ("N messages" counts the readable ones shown)
-                const key = out.length + ' messages, name lengths ' + out.map((o) => o.name.length).join('/') +
-                    (fits ? '' : ' (not a list config.ccList fits)') + '; showing ' + (ids.length ? ids.join(', ') : 'none') +
+                this._ccListEval(now, false);
+                // lengths, ids and colours only: never the text ("N messages" counts the readable ones listed)
+                const named = all.filter((e) => !e.ignored && e.name), unread = all.filter((e) => !e.ignored && !e.name).length;
+                const key = named.length + ' messages, name lengths ' + named.map((o) => o.name.length).join('/') +
+                    (fits ? '' : ' (not a list config.ccList fits)') + '; listed ' + (ids.length ? ids.join(', ') : 'none') +
                     (Array.isArray(arr) ? ' of ' + arr.length + ' entries' : '') + (unread ? ', ' + unread + ' with no name' : '');
                 if (key !== this.ccListShape && this.ccListLogs < 40) {
                     this.ccListShape = key; this.ccListLogs++;
@@ -1343,6 +1353,33 @@ class HudApp {
                 this._ccPush();         // package X: another message on show opens BMW's panel at once
             });
         }
+        // ---- fix/active-cc: the cluster's own "message shown now" (config.ccActive: KombiIF statusActiveCCMessage,
+        // struct ActiveCCMessageWrapper; getter 1, notifier 32769). Every change is logged once, numbers only. Once it
+        // has notified with a number ("wired", ccActAny) it alone says whether a message shows: one does while its
+        // number is not in config.ccActive.noneValues (default [0]); text, colour and severity then come from the
+        // ccList entry whose id is that number (_ccListEval). Whether the numbering is ccList's is UNCONFIRMED.
+        const ca = this.config.ccActive;
+        this.ccAct = null; this.ccActAny = false; this.ccActLogged = undefined; this.ccNoMatchLogged = {};
+        if (ca && ca.iface && ca.field) {
+            watchOne(ca, (v) => {
+                const num = (p) => { const r = p ? pick(v, p) : undefined; return isNum(r) ? r : null; };
+                const a = { number: num(ca.numberPath), control: num(ca.controlPath), frameNumber: num(ca.frameNumberPath),
+                    frame: num(ca.framePath), utility: num(ca.utilityPath) };
+                const line = 'number ' + a.number + ' control ' + a.control + ' frame ' + a.frameNumber + '/' + a.frame + ' utility ' + a.utility;
+                if (line !== this.ccActLogged) { this.ccActLogged = line; this.log.info('active cc: ' + line); }
+                if (a.number === null) return;      // not a struct our paths fit: it decides nothing
+                this.ccAct = a;
+                if (!this.ccActAny) {
+                    const was = this._ccWired();
+                    this.ccActAny = true;
+                    this.log.info('active cc: wired - from now on it alone says whether a message shows');
+                    if (!was && this.client && this.client.ready) this._rebuild();
+                }
+                this._ccListEval(Date.now(), false);
+                this._ccPush();
+            });
+        }
+        // ---- end fix/active-cc (handler) ----
         // ---- end fix/cclist (handler) ----
         // Which frame of how many the stock cluster is showing (docs/G20-DESIGN-SPEC.md: it cycles numbered frames,
         // it does not stack or side-scroll). KombiIF statusMenuCCMessage carries the frame number, the count and up
@@ -3689,6 +3726,64 @@ class HudApp {
         this.ccUnread = (a === true && this.ccListUnread === true) || (b === true && this.ccmUnread === true);
     }
 
+    /** fix/active-cc (0.7.20): the list source's verdict - ccListShown, ccItems (what our line may show),
+     *  ccListUnread and ccNoMatch - from the recorded list (ccListAll) and the cluster's "message shown now" (ccAct).
+     *   wired (config.ccActive has notified a number): a message shows iff that number is not in noneValues (default
+     *     [0]); our text is the ccList entry with that id. No such entry: it still shows, our line stays empty
+     *     (ccNoMatch) so BMW's panel stays open, and "active cc: no ccList entry for number N" is logged once per N;
+     *   not wired, the FALLBACK (a heuristic: BMW hides a temporary message after ~20 s and keeps it stored): an
+     *     entry counts as showing for config.ccActive.fallback.hideAfterMs (null: config.ccm.autoHideMs, 20000)
+     *     after it was first listed, except an entry whose colour is in fallback.keepColors (default ["red"]), which
+     *     shows while listed. fallback.on false: every listed entry shows while listed (0.7.19).
+     *  From the signal handlers and, while the fallback has an entry still to expire, from the tick. Returns whether
+     *  the verdict changed; `push` sends BMW's panel state at once when it did. */
+    _ccListEval(now, push) {
+        const ca = this.config.ccActive || {}, all = this.ccListAll;
+        const before = this.ccListShown + '|' + this.ccListUnread + '|' + this.ccNoMatch + '|' + (this.ccItems || []).map((e) => e.key).join(',');
+        let shown = this.ccListShown, items = this.ccItems || [], unread = 0, noMatch = null;
+        this.ccFallbackLive = false;
+        if (this.ccActAny && this.ccAct) {
+            const n = this.ccAct.number, none = Array.isArray(ca.noneValues) ? ca.noneValues : [0];
+            items = [];
+            if (inList(none, n)) shown = false;
+            else {
+                shown = true;
+                const e = (all || []).find((x) => x.id === n);
+                if (!e) {
+                    noMatch = n;
+                    if (!this.ccNoMatchLogged[n]) {
+                        this.ccNoMatchLogged[n] = true;
+                        this.log.info('active cc: no ccList entry for number ' + n + ' - shown, BMW\'s panel stays open');
+                    }
+                } else if (e.name) items = [e];
+                else unread = 1;
+            }
+        } else if (all) {
+            const fb = ca.fallback || {};
+            const on = !!ca.iface && fb.on !== false;
+            const ms = isNum(fb.hideAfterMs) ? fb.hideAfterMs : isNum(this.config.ccm && this.config.ccm.autoHideMs) ? this.config.ccm.autoHideMs : 20000;
+            const keep = Array.isArray(fb.keepColors) ? fb.keepColors : ['red'];
+            const live = all.filter((e) => {
+                if (e.ignored) return false;
+                if (!on || inList(keep, e.color)) return true;
+                const left = (this.ccListSeen[e.key] || now) + ms - now;
+                if (left > 0) this.ccFallbackLive = true;
+                return left > 0;
+            });
+            items = live.filter((e) => e.name).slice(0, 16);
+            unread = live.length - live.filter((e) => e.name).length;
+            shown = live.length > 0;
+        }
+        this.ccItems = items; this.ccListShown = shown; this.ccListUnread = unread > 0; this.ccNoMatch = noMatch;
+        this._ccMerge();
+        if (this.ccListUnread) {
+            this._rowFail('info', 'a check-control message arrived in ccList that app.json config.ccList cannot read (' + unread + ' entr' + (unread === 1 ? 'y' : 'ies') + ' with no name)');
+        }
+        const changed = before !== this.ccListShown + '|' + this.ccListUnread + '|' + this.ccNoMatch + '|' + items.map((e) => e.key).join(',');
+        if (changed && push) this._ccPush();
+        return changed;
+    }
+
     /** Whether the car's own check-control message can be READ: one notification from config.ccm has carried
      *  something our paths found - a name, a description, a symbol, an id or a type. A struct whose paths fit the
      *  car carries its id and its type even with no message on, so this says "config.ccm fits this car", never "a
@@ -3698,7 +3793,8 @@ class HudApp {
      *  instead of being half covered by our own black, which sliced BMW's message across the middle. */
     _ccWired() {
         // fix/cclist: or ccList has spoken once (a list config.ccList fits), which the owner's car does at once
-        return (this._ccNamed() && this.ccAny === true) || (this._ccListNamed() && this.ccListAny === true);
+        // fix/active-cc: or the cluster's "message shown now" has given a number once
+        return (this._ccNamed() && this.ccAny === true) || (this._ccListNamed() && this.ccListAny === true) || this.ccActAny === true;
     }
 
     /** Whether BMW's own check-control panel must be left see-through now ("cc:open"): the car says a message shows,
@@ -3846,6 +3942,11 @@ class HudApp {
      *  decide them. */
     _ccNow() {
         const list = this.ccItems || [], m = this.ccMsg || {};
+        // fix/active-cc: the cluster shows a number no ccList entry carries: no text of ours for it (BMW's panel stays
+        // open), unless newCCMessage itself reports a message
+        if (this.ccNoMatch !== null && this.ccNoMatch !== undefined && !(this.ccmShown === true && (m.name || m.desc))) {
+            return { name: '', desc: '', color: null, symbol: null, id: null };
+        }
         if (!list.length) return m;
         // fix/cclist: newCCMessage's message, when it reports one, is the richer (it has a description); else the
         // list's entry is the message - on the owner's car the list is all there is
@@ -4128,6 +4229,8 @@ class HudApp {
             const b = this._boost();
             if (isNum(b) && (!isNum(this.boostPeak) || b > this.boostPeak)) this.boostPeak = b;
             this._guard('probes', () => this._probeTick());     // probes, item 1: the vehicle condition (0.7.18)
+            // fix/active-cc: the fallback's entries expire with time, not with a notification
+            if (this.ccFallbackLive) this._guard('check-control', () => this._ccListEval(now, true));
             if (!this.client.ready) return;
             this._guard('bottom row', () => this._rowSync(now));     // package X: standby, the clock line, the row's owner
             // shift light: blink the whole bar at 8 Hz once the rpm reaches the redline

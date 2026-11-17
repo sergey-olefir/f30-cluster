@@ -369,7 +369,7 @@ process.on('message', (m) => {
         // the bottom-row fakes take scene / sign / cc / ccList / road / nav / clock; the rest goes to the fake persod
         demoTzOverride(v);                       // fix/opaque-cc: a clock of the fake's own ends the demo's time zone
         if (v.hook) benchHook(v.hook);           // package X: fault injection for the safety tests
-        else if (v.scene || v.sign || v.cc || v.ccList || v.ccFrame || v.sla || v.road || v.nav || v.clock || v.clockLocal) fakeSigns.control(v);
+        else if (v.scene || v.sign || v.cc || v.ccList || v.ccActive || v.ccFrame || v.sla || v.road || v.nav || v.clock || v.clockLocal) fakeSigns.control(v);
         else if (v.ccRisk || v.ccBasic || v.symbols) fakeSigns.control(v);     // probes (0.7.18): bench/test-probes.js
         else if (v.dayNight !== undefined) fakeSigns.control(v);    // fix/colour-daynight: bench/test-daynight.js
         else if (fakePerso) fakePerso.control(v);
@@ -396,6 +396,9 @@ process.on('message', (m) => {
                     // fix/cclist: each source on its own, whether the field has been read, and the list entry on show
                     // (its name's length, colour, id and symbol - never the text)
                     ccm: hud.ccmShown, ccList: hud.ccListShown, wired: hud._ccWired(), sev: (() => { try { return hud._ccSeverity().name; } catch (e) { return null; } })(),
+                    // fix/active-cc: the cluster's "message shown now" as read, whether it decides, and a number no
+                    // ccList entry carries
+                    active: hud.ccAct, activeWired: !!hud.ccActAny, noMatch: hud.ccNoMatch === undefined ? null : hud.ccNoMatch,
                     now: (() => { const m = hud._ccNow() || {}; return { name: (m.name || '').length, color: m.color || null, id: m.id === undefined ? null : m.id, symbol: m.symbol === undefined ? null : m.symbol }; })(),
                 },
                 road: hud._roadText(), navState: hud.navState, navDist: hud.navDist, navEta: hud.navEta,

@@ -2,7 +2,7 @@
   "id": "f30_cluster",
   "title": "F30 Cluster",
   "description": "Instrument cluster themes after the F-series 6WB look: Comfort, Sport and Eco Pro, following the drive mode",
-  "version": "0.7.19",
+  "version": "0.7.20",
   "vendor": "custom",
   "loggingId": "OAF3",
   "iconGlyph": "F30",
@@ -66,7 +66,9 @@
       "statusTimeDate": "rs",
       "statusShowTimeDate": "rs",
       "statusMenuCCMessage": "rs",
+      "statusActiveCCMessage": "rs",
       "_optional": "the car's own clock and its time-zone offset (config.clock), so our clock no longer needs the manual timeZone setting (the head unit runs on UTC)",
+      "_activeCC": "fix/active-cc (0.7.20): statusActiveCCMessage (struct ActiveCCMessageWrapper: numberDisplayControlCheckControlMessage, displayControlCheckControlMessage, numberFrame..., frame..., utilityData...) is the cluster's own 'message shown now' (config.ccActive). Catalogue: getter 1 (NON-ZERO), notifier 32769, so \"rs\" passes tools/signals/check_signals.py. READ ONLY: standardCCMessage / extendedCCMessage are setters (they write messages into the cluster) and are deliberately NOT declared.",
       "_showTimeDate": "fix/cclist (0.7.19): statusShowTimeDate (struct ShowTimeDateWrapper: displayHour, displayMinute, displaySecond, displayDate*, statusDisplayClockTimeDate) is the time the cluster shows, i.e. LOCAL time: config.clockLocal, the time zone's fallback after timeDateUTC. Catalogue: getter 30 (NON-ZERO), notifier 32798, so \"rs\" passes tools/signals/check_signals.py"
     },
     "de.bmw.infotainment.vehicle.Vehicle": {
@@ -889,7 +891,7 @@
       "ccFrameDwellMs": 4000,
       "autoHideMs": 20000,
       "reshowMs": 8000,
-      "_timings": "PARAMETERS ONLY - nothing acts on any of them. This package builds STATES, not animations (the owner, 2026-11-15): a message appears and disappears with no flash. ccFrameDwellMs is docs/G20-DESIGN-SPEC.md's guess at how long one frame of a cycling message is shown, which we do not need because the car says which frame it is on itself (config.ccFrames). autoHideMs / reshowMs are BMW's manual's ~20 s auto-hide and ~8 s hide-then-reshow. They live here so animation can be added later without touching the drawing.",
+      "_timings": "PARAMETERS ONLY - nothing acts on them, except autoHideMs since 0.7.20 (config.ccActive.fallback, the ccList heuristic while statusActiveCCMessage has not spoken). This package builds STATES, not animations (the owner, 2026-11-15): a message appears and disappears with no flash. ccFrameDwellMs is docs/G20-DESIGN-SPEC.md's guess at how long one frame of a cycling message is shown, which we do not need because the car says which frame it is on itself (config.ccFrames). autoHideMs / reshowMs are BMW's manual's ~20 s auto-hide and ~8 s hide-then-reshow. They live here so animation can be added later without touching the drawing.",
       "_colour": "White only for now (the owner, 2026-11-15): cCColor is read and recorded but every message is drawn in the theme's normal foreground. The seam is one line - put \"colorBy\": \"cc\" back on the cc_name text in design/gen_6wb.py cc_row(), which turns on shared/hud.js _ccRole()."
     },
     "sla": {
@@ -922,6 +924,19 @@
     },
     "_ccMarker": "Strip integration, the owner's decision 7 (2026-11-16): BMW's marker right of its check-control panel (none / warning triangle / 'i') is COVERED in every lane of the strip mask and in both modes. It may open only while a CONFIRMED signal says BMW draws it: set ccMarker to { iface, field, path?, shownWhen?: [raw values meaning shown] } (shared/hud.js _markShown) and bake the mask with its marker lanes (tools/strip/bake_mask.py --marker). No such signal is confirmed (ccList is the candidate, docs/strip/P-REPORT.md 1.1), so it stays null.",
     "ccMarker": null,
+    "ccActive": {
+      "_about": "fix/active-cc (0.7.20), the owner's car 2026-11-17: ccList lists the ACTIVE AND THE STORED messages - a ready-to-drive message (id 987) stayed listed after BMW hid it (~20 s), so 0.7.19 kept our message area open / drawn with nothing of BMW's on screen. This field, KombiIF statusActiveCCMessage, is taken as the cluster's own 'message shown now' (a HYPOTHESIS until the car confirms it). Every change is logged once, numbers only: 'active cc: number N control C frame F/G utility U'. Once it has notified with a number ('wired') it alone decides: a message shows iff numberPath is not in noneValues; text, colour and severity come from the ccList entry whose cCIdentifer equals that number. No such entry: still shown, BMW's panel stays open, our line empty, and 'active cc: no ccList entry for number N' is logged once per N - that line tells whether the two numberings match. The catalogue default of the number is 65535 (unfilled); it is NOT in noneValues, so it reads as shown with no entry: BMW's panel open (the safe side). shared/hud.js _ccListEval.",
+      "iface": "de.bmw.infotainment.KombiIF",
+      "field": "statusActiveCCMessage",
+      "numberPath": ["numberDisplayControlCheckControlMessage"],
+      "controlPath": ["displayControlCheckControlMessage"],
+      "frameNumberPath": ["numberFrameDisplayControlCheckControlMessage"],
+      "framePath": ["frameDisplayControlCheckControlMessage"],
+      "utilityPath": ["utilityDataDisplayControlCheckControlMessage"],
+      "noneValues": [0],
+      "_fallback": "A HEURISTIC, used only while statusActiveCCMessage has never given a number: a ccList entry counts as showing for hideAfterMs (null: config.ccm.autoHideMs, 20000 - BMW's manual's ~20 s auto-hide) after it was first listed; an entry whose colour is in keepColors shows for as long as it is listed. An entry that leaves the list and comes back starts its clock again. on: false gives back 0.7.19 (every listed entry shows while listed).",
+      "fallback": { "on": true, "hideAfterMs": null, "keepColors": ["red"] }
+    },
     "ccList": {
       "_about": "Several messages at once: the car cycles through this list, and ours steps through it on the same clock (the owner, 2026-11-15). Each element carries a short name and a colour; config.ccm.cycleMs is how long each one is shown. The stock order and timing are being measured in docs/G20-DESIGN-SPEC.md.",
       "iface": "de.bmw.infotainment.KombiInterface_2",
