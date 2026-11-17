@@ -1,0 +1,498 @@
+{
+ "_about": "VT text samples on package VR's rectified references (bake/work/twin-dial/pub/VR/<ref>_rect.png, R = 400 px). box = [x0, y0, x1, y1] in rectified px, a search window only: the glyphs are found inside it by tools/twin-dial/vt/glyphs.py. role: scale = dial scale numerals, readout = the big digital readouts in the hubs, label = small labels and running text, dlabel = the small caps labels on the dials. Text = exactly the inked characters, spaces only where the photo has a gap.",
+ "samples": [
+  {
+   "id": "s100",
+   "ref": "02",
+   "role": "scale",
+   "text": "100",
+   "box": [
+    2262,
+    368,
+    2366,
+    418
+   ]
+  },
+  {
+   "id": "s80",
+   "ref": "02",
+   "role": "scale",
+   "text": "80",
+   "box": [
+    2136,
+    400,
+    2226,
+    452
+   ]
+  },
+  {
+   "id": "s140",
+   "ref": "02",
+   "role": "scale",
+   "text": "140",
+   "box": [
+    2388,
+    400,
+    2508,
+    452
+   ],
+   "skip": "the 1 and the 4 bloom together"
+  },
+  {
+   "id": "s60",
+   "ref": "02",
+   "role": "scale",
+   "text": "60",
+   "box": [
+    2032,
+    486,
+    2122,
+    538
+   ]
+  },
+  {
+   "id": "s180",
+   "ref": "02",
+   "role": "scale",
+   "text": "180",
+   "box": [
+    2496,
+    486,
+    2616,
+    538
+   ]
+  },
+  {
+   "id": "s40",
+   "ref": "02",
+   "role": "scale",
+   "text": "40",
+   "box": [
+    1982,
+    594,
+    2058,
+    648
+   ]
+  },
+  {
+   "id": "s220",
+   "ref": "02",
+   "role": "scale",
+   "text": "220",
+   "box": [
+    2548,
+    594,
+    2688,
+    648
+   ],
+   "skip": "the 0 runs into the light band edge"
+  },
+  {
+   "id": "s20",
+   "ref": "02",
+   "role": "scale",
+   "text": "20",
+   "box": [
+    1972,
+    722,
+    2052,
+    776
+   ]
+  },
+  {
+   "id": "s260",
+   "ref": "02",
+   "role": "scale",
+   "text": "260",
+   "box": [
+    2548,
+    722,
+    2688,
+    776
+   ],
+   "skip": "the 0 runs into the light band edge"
+  },
+  {
+   "id": "s300",
+   "ref": "02",
+   "role": "scale",
+   "text": "300",
+   "box": [
+    2508,
+    838,
+    2644,
+    892
+   ],
+   "skip": "the 0 runs into the light band edge"
+  },
+  {
+   "id": "m160",
+   "ref": "02",
+   "role": "scale_small",
+   "text": "160",
+   "box": [
+    2472,
+    444,
+    2544,
+    484
+   ]
+  },
+  {
+   "id": "m200",
+   "ref": "02",
+   "role": "scale_small",
+   "text": "200",
+   "box": [
+    2532,
+    546,
+    2632,
+    584
+   ],
+   "skip": "the 0 runs into the light band edge"
+  },
+  {
+   "id": "m240",
+   "ref": "02",
+   "role": "scale_small",
+   "text": "240",
+   "box": [
+    2566,
+    666,
+    2666,
+    706
+   ],
+   "skip": "the 0 runs into the light band edge"
+  },
+  {
+   "id": "t50",
+   "ref": "02",
+   "role": "scale",
+   "text": "50%",
+   "box": [
+    622,
+    396,
+    726,
+    448
+   ],
+   "fit_skip": "%"
+  },
+  {
+   "id": "t75",
+   "ref": "02",
+   "role": "scale",
+   "text": "75%",
+   "box": [
+    818,
+    396,
+    926,
+    448
+   ],
+   "fit_skip": "%"
+  },
+  {
+   "id": "t25",
+   "ref": "02",
+   "role": "scale",
+   "text": "25%",
+   "box": [
+    478,
+    492,
+    586,
+    548
+   ],
+   "fit_skip": "%"
+  },
+  {
+   "id": "hub0",
+   "ref": "02",
+   "role": "readout",
+   "text": "0",
+   "box": [
+    2250,
+    640,
+    2370,
+    760
+   ],
+   "k": 181
+  },
+  {
+   "id": "d1",
+   "ref": "02",
+   "role": "readout",
+   "text": "D1",
+   "box": [
+    680,
+    800,
+    820,
+    890
+   ],
+   "k": 181
+  },
+  {
+   "id": "auto",
+   "ref": "02",
+   "role": "dlabel",
+   "text": "AUTO",
+   "box": [
+    706,
+    892,
+    818,
+    938
+   ]
+  },
+  {
+   "id": "max",
+   "ref": "02",
+   "role": "dlabel",
+   "text": "MAX",
+   "box": [
+    998,
+    662,
+    1082,
+    704
+   ]
+  },
+  {
+   "id": "kmh",
+   "ref": "02",
+   "role": "label",
+   "text": "km/h",
+   "box": [
+    2258,
+    762,
+    2364,
+    804
+   ],
+   "skip": "k and m bloom together"
+  },
+  {
+   "id": "rpm",
+   "ref": "02",
+   "role": "label",
+   "text": "1 / min x 1000",
+   "box": [
+    658,
+    956,
+    864,
+    998
+   ]
+  },
+  {
+   "id": "title",
+   "ref": "02",
+   "role": "label",
+   "text": "Short-term memory",
+   "box": [
+    1278,
+    488,
+    1794,
+    562
+   ]
+  },
+  {
+   "id": "reset",
+   "ref": "02",
+   "role": "label",
+   "text": "Reset values with OK",
+   "box": [
+    1328,
+    876,
+    1740,
+    932
+   ]
+  },
+  {
+   "id": "time",
+   "ref": "02",
+   "role": "label",
+   "text": "0:43 h",
+   "box": [
+    1712,
+    566,
+    1852,
+    612
+   ]
+  },
+  {
+   "id": "v00",
+   "ref": "02",
+   "role": "label",
+   "text": "0.0",
+   "box": [
+    1362,
+    628,
+    1464,
+    688
+   ]
+  },
+  {
+   "id": "v273",
+   "ref": "02",
+   "role": "label",
+   "text": "27.3",
+   "box": [
+    1326,
+    722,
+    1458,
+    788
+   ]
+  },
+  {
+   "id": "v45",
+   "ref": "02",
+   "role": "label",
+   "text": "4.5",
+   "box": [
+    1644,
+    726,
+    1744,
+    788
+   ]
+  },
+  {
+   "id": "v694",
+   "ref": "02",
+   "role": "label",
+   "text": "694",
+   "box": [
+    1278,
+    992,
+    1394,
+    1052
+   ]
+  },
+  {
+   "id": "clock",
+   "ref": "02",
+   "role": "label",
+   "text": "14:43",
+   "box": [
+    1240,
+    1052,
+    1392,
+    1118
+   ]
+  },
+  {
+   "id": "temp",
+   "ref": "02",
+   "role": "label",
+   "text": "+25.5",
+   "box": [
+    1644,
+    1056,
+    1796,
+    1120
+   ]
+  },
+  {
+   "id": "radio",
+   "ref": "02",
+   "role": "label",
+   "text": "DANCE FM",
+   "box": [
+    1492,
+    332,
+    1722,
+    392
+   ]
+  },
+  {
+   "id": "f3",
+   "ref": "05",
+   "role": "scale",
+   "text": "3",
+   "box": [
+    562,
+    422,
+    650,
+    504
+   ]
+  },
+  {
+   "id": "f4",
+   "ref": "05",
+   "role": "scale",
+   "text": "4",
+   "box": [
+    720,
+    370,
+    800,
+    444
+   ]
+  },
+  {
+   "id": "f5",
+   "ref": "05",
+   "role": "scale",
+   "text": "5",
+   "box": [
+    882,
+    424,
+    962,
+    500
+   ]
+  },
+  {
+   "id": "f2",
+   "ref": "05",
+   "role": "scale",
+   "text": "2",
+   "box": [
+    462,
+    554,
+    538,
+    624
+   ]
+  },
+  {
+   "id": "f6",
+   "ref": "05",
+   "role": "scale",
+   "text": "6",
+   "box": [
+    994,
+    554,
+    1074,
+    624
+   ]
+  },
+  {
+   "id": "fhub0",
+   "ref": "05",
+   "role": "readout",
+   "text": "0",
+   "box": [
+    2150,
+    652,
+    2250,
+    748
+   ],
+   "k": 181
+  },
+  {
+   "id": "flang",
+   "ref": "05",
+   "role": "label",
+   "text": "Language",
+   "box": [
+    1384,
+    554,
+    1598,
+    614
+   ]
+  },
+  {
+   "id": "feng",
+   "ref": "05",
+   "role": "label",
+   "text": "English",
+   "box": [
+    1396,
+    710,
+    1586,
+    780
+   ]
+  }
+ ]
+}
