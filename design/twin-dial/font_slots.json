@@ -1,0 +1,22 @@
+{
+ "_about": "SPEC 9's slot table -> the atlas in apps/twin_dial/hud/fonts/<atlas>.json that serves it (package A1, tools/bake_fonts.py TWIN_FONTS). Saira slots are baked at stretch 1.06 and carry digits and our own Latin labels only; Noto slots carry the full car text except td_cnt.",
+ "slots": {
+  "scale_large": { "atlas": "td_scale_l", "face": "Saira", "px": 28, "note": "speedometer numerals 0 20 .. 300; drawn into the baked face (A2), atlas for tests and gallery" },
+  "scale_small": { "atlas": "td_scale_s", "face": "Saira", "px": 18, "note": "speedometer numerals 10 30 50 70 160 200 240 280" },
+  "tach_numerals": { "atlas": "td_tach", "face": "Saira", "px": 57 },
+  "digital_speed": { "atlas": "td_big", "face": "Saira", "px": 92, "note": "atext cells = widest advance (digit, 82 px)" },
+  "clock_time": { "atlas": "td_big", "face": "Saira", "px": 92, "note": "digits are tabular: a '1' stands in a full cell" },
+  "gear": { "atlas": "td_gear", "face": "Saira", "px": 64, "note": "widest glyph is M (70), digits 57" },
+  "dial_labels": { "atlas": "td_label", "face": "Saira", "px": 22, "note": "READY, OFF, COMFORT, SPORT, SPORT+, ECO PRO, ADAPTIVE" },
+  "centre_title": { "atlas": "td_title", "face": "Noto", "px": 41 },
+  "centre_values": { "atlas": "td_val", "face": "Noto", "px": 39, "note": "trip values, weekday, date" },
+  "centre_body": { "atlas": "td_body", "face": "Noto", "px": 31, "note": "body, footer, the range value in the tab bar" },
+  "bottom_row": { "atlas": "td_row", "face": "Noto", "px": 40 },
+  "tab_media": { "atlas": "td_tab", "face": "Noto", "px": 33 },
+  "units_19": { "atlas": "td_u19", "face": "Noto", "px": 19, "note": "the tab bar's km" },
+  "units_20": { "atlas": "td_u20", "face": "Noto", "px": 20, "note": "the hub's unit label" },
+  "units_21": { "atlas": "td_u21", "face": "Noto", "px": 21, "note": "units, bar ends, km/h" },
+  "message_headline": { "atlas": "td_msg", "face": "Noto", "px": 42 },
+  "message_counter": { "atlas": "td_cnt", "face": "Noto", "px": 29, "note": "digits, slash, space only" }
+ }
+}
