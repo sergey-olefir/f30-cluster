@@ -50,3 +50,13 @@ The page draws whichever target the app's `app.json` `config.target` names. One 
 ```
 
 (800x480 for the HUD.) `?dbg=1` shows whether it worked: `images N px N` means every image layer's pixels arrived.
+
+## twin_dial (round 2, package E)
+
+`node bench/server.js twin_dial` runs the Twin Dial app (the checkout's `apps/twin_dial`). The page's G20 simulation (`?backdrop=1`, `bench/g20/`) draws BMW's lamps, belt group, gear letter and message panel beneath and over it as for any panel app. Without a browser, `tools/shots/twin/` does the same from SPEC numbers (`backdrop.py`).
+
+- **`bench/twin-sim.js`** (installed by `run-app.js` for the app id `twin_dial` only): the SPEC section 11 fields the f30 bench does not feed. POST `/signals` (manual) now also takes `reserve` (1, 0, null), `odometer` (km, null) next to `fuelL`, `range`, `coolant`, `ambient`, `condition`, `engine`, `gear`, `program`. POST `/fake` takes `{ "twin": { trip, units, media, phone, guiding, displayed, sweep, reset } }` (each key replaces that group; `null` is the field's "none" value; `sweep: true` runs the 4 s needle sweep over the manual values). Day/night, the clock, ccList, the cluster's "shown now" number and the frame counter go through the existing `/fake` parts (`dayNight`, `clock`, `clockLocal`, `ccList`, `ccActive`, `ccFrame`), which need the f30-style `config` blocks in app.json. Enums go in by name (`BENCH_ENUM=number`: wire numbers). The trip fields go in as tenths (the scale is unseen, probe P4).
+- **A ledger and the "rs" behaviour**: every raw value fed is remembered, and an app that subscribes after a value was fed gets the last one at once (as the car's getter answers). GET `/probe` has `twin`: which field of SPEC 11 the app never watches (`missing`: a typo in app.json), what was fed, the last raw values (text becomes its length), which of `ccList`/`ccActive`/`clock`/`dayNight` app.json names, and the engine's message state (`hud.twinCc`).
+- **`BENCH_NOW=<ISO UTC>`**: the app's clock starts there when the app starts (`BENCH_NOW_WRAP=<s>` brings it back every <s> seconds; off by default, a timer that straddles the wrap sees time go backwards). **`BENCH_CONFIG=<JSON or file>`**: merged over app.json `config` before the app starts.
+- `node bench/test-twin-sim.js` (port 8205) tests all of it, including a bench whose app does not watch the speed (it must be reported).
+- `python3 tools/shots/twin/root.py <dir> [--standin]` makes a bench's own tree (a copy of `bench/`, links to `shared/`, `kit/` and `apps/`); `--standin` (the default while the checkout has no `apps/twin_dial`) uses `tools/shots/twin/standin/twin_dial`, an app of flat blocks that draws SPEC 13.2's layers with A2's faces and window mask, for testing the tools.

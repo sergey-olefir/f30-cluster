@@ -1,0 +1,349 @@
+{
+ "id": "twin_dial",
+ "title": "Twin Dial (bench stand-in)",
+ "description": "STAND-IN for the bench tools only (tools/shots/twin/standin): flat blocks where the real app draws dials and text. Never shipped.",
+ "version": "0.0.0",
+ "vendor": "custom",
+ "loggingId": "OATS",
+ "iconGlyph": "TS",
+ "shared": [
+  "cluster_render_client.js"
+ ],
+ "signals": {
+  "de.bmw.infotainment.vehicle.Vehicle2": {
+   "statusCarSpeed2": "rs",
+   "statusDisplayedCCMessage": "rs"
+  },
+  "de.bmw.infotainment.vehicle.CDS": {
+   "statusEngineSpeed2": "rs",
+   "statusEngineStatus": "rs",
+   "statusEngineTemperature": "rs"
+  },
+  "de.bmw.infrastructure.VehicleInformation": {
+   "statusGearboxDrive": "rs"
+  },
+  "de.bmw.infotainment.misc.MDrive": {
+   "dataDisplayGearbox": "rs"
+  },
+  "de.bmw.infotainment.drivingexcitement.FES": {
+   "statusFESVehicleDynamicSwitchHMI": "rs"
+  },
+  "de.bmw.infrastructure.VehicleCondition": {
+   "VehicleCondition": "rs"
+  },
+  "de.bmw.infotainment.KombiIF": {
+   "statusRangeTankStatus": "rs",
+   "timeDateUTC": "rs",
+   "statusShowTimeDate": "rs",
+   "statusActiveCCMessage": "rs",
+   "statusMenuCCMessage": "rs",
+   "statusBordcomputerAverage": "rs",
+   "statusBordcomputerTravelData": "rs",
+   "statusBordcomputerTravelStart": "rs"
+  },
+  "de.bmw.infrastructure.EnvironmentalInformation": {
+   "ExteriorTemperature": "rs",
+   "UnitBN2020": "rs"
+  },
+  "de.bmw.infotainment.vehicle.Vehicle": {
+   "statusDayNightChangeOver": "rs"
+  },
+  "de.bmw.infotainment.KombiInterface_2": {
+   "ccList": "rs"
+  },
+  "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
+   "playerMetadata": "rs",
+   "_instances": "HMI_CID"
+  },
+  "de.bmw.infotainment.entertainment.mediasource.MediaSource": {
+   "activeSourceId": "rs"
+  },
+  "de.bmw.infotainment.connectivity.telephony.ConnectivityAggregator": {
+   "aggregatedCallState": "rs"
+  },
+  "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus": {
+   "guidingState": "rs"
+  }
+ },
+ "screens": [
+  {
+   "name": "MAIN",
+   "kind": "menu",
+   "title": "Twin Dial stand-in",
+   "settings": "placed",
+   "items": [
+    [
+     "text",
+     "STATUS",
+     ""
+    ],
+    [
+     "button",
+     "BTN_SETTINGS",
+     "Settings"
+    ]
+   ]
+  },
+  {
+   "name": "SETTINGS",
+   "kind": "settings",
+   "title": "Settings"
+  }
+ ],
+ "settings": [
+  {
+   "key": "centre",
+   "label": "Centre page",
+   "type": "choice",
+   "default": "cycle",
+   "options": [
+    [
+     "clock",
+     "Date and time"
+    ],
+    [
+     "trip",
+     "Trip computer"
+    ],
+    [
+     "cycle",
+     "Both, in turn"
+    ]
+   ]
+  },
+  {
+   "key": "redline",
+   "label": "Redline",
+   "type": "number",
+   "default": 6500,
+   "min": 5000,
+   "max": 7500,
+   "steps": [
+    5000,
+    5250,
+    5500,
+    5750,
+    6000,
+    6250,
+    6500,
+    6750,
+    7000,
+    7250,
+    7500
+   ]
+  },
+  {
+   "key": "nightLook",
+   "label": "Night look",
+   "type": "choice",
+   "default": "auto",
+   "options": [
+    [
+     "auto",
+     "Auto"
+    ],
+    [
+     "on",
+     "On"
+    ],
+    [
+     "off",
+     "Off"
+    ]
+   ]
+  },
+  {
+   "key": "bandGain",
+   "label": "Band level",
+   "type": "number",
+   "default": 1.0,
+   "min": 0.6,
+   "max": 1.7,
+   "steps": [
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0,
+    1.1,
+    1.2,
+    1.3,
+    1.4,
+    1.5,
+    1.6,
+    1.7
+   ]
+  },
+  {
+   "key": "demo",
+   "label": "Demo data",
+   "type": "choice",
+   "default": "off",
+   "options": [
+    [
+     "on",
+     "On"
+    ],
+    [
+     "off",
+     "Off"
+    ]
+   ]
+  }
+ ],
+ "config": {
+  "target": "panel",
+  "tankLitres": 59,
+  "ccList": {
+   "iface": "de.bmw.infotainment.KombiInterface_2",
+   "field": "ccList",
+   "path": [],
+   "root": [
+    "cCListElement"
+   ],
+   "namePath": [
+    "cCShortName"
+   ],
+   "idPath": [
+    "cCIdentifer"
+   ],
+   "symbolPath": [
+    "cCListSymbolID"
+   ],
+   "ignoreIds": [
+    0
+   ],
+   "colorPath": [
+    "cCColor"
+   ],
+   "colorMap": {
+    "DEFAULT": "default",
+    "0": "default",
+    "RED": "red",
+    "1": "red",
+    "YELLOW": "yellow",
+    "2": "yellow",
+    "GREEN": "green",
+    "3": "green",
+    "ORANGE": "orange",
+    "4": "orange",
+    "WHITE": "white",
+    "5": "white"
+   }
+  },
+  "ccActive": {
+   "iface": "de.bmw.infotainment.KombiIF",
+   "field": "statusActiveCCMessage",
+   "numberPath": [
+    "numberDisplayControlCheckControlMessage"
+   ],
+   "controlPath": [
+    "displayControlCheckControlMessage"
+   ],
+   "frameNumberPath": [
+    "numberFrameDisplayControlCheckControlMessage"
+   ],
+   "framePath": [
+    "frameDisplayControlCheckControlMessage"
+   ],
+   "utilityPath": [
+    "utilityDataDisplayControlCheckControlMessage"
+   ],
+   "noneValues": [
+    0
+   ],
+   "fallback": {
+    "on": true,
+    "hideAfterMs": null,
+    "keepColors": [
+     "red"
+    ]
+   },
+   "strict": true
+  },
+  "ccFrames": {
+   "iface": "de.bmw.infotainment.KombiIF",
+   "field": "statusMenuCCMessage",
+   "numPath": [
+    "numberFrameCheckControlMessageScroll"
+   ],
+   "countPath": [
+    "quantityFrameCheckControlMessageScroll"
+   ],
+   "idPaths": [
+    [
+     "numberCheckControlMessage1"
+    ],
+    [
+     "numberCheckControlMessage2"
+    ],
+    [
+     "numberCheckControlMessage3"
+    ]
+   ]
+  },
+  "clock": {
+   "iface": "de.bmw.infotainment.KombiIF",
+   "field": "timeDateUTC",
+   "kind": "offset",
+   "confirm": true,
+   "path": [
+    "timeZonesOffsetAutomaticallyUTC"
+   ],
+   "factor": 15,
+   "offsetBy": 0,
+   "dstPath": [
+    "offsetWintertimeSummertimeUTC"
+   ],
+   "dstMinutes": 60,
+   "invalid": [
+    255
+   ],
+   "logOn": [
+    "timeZonesOffsetAutomaticallyUTC",
+    "offsetWintertimeSummertimeUTC",
+    "statusTimeZonesId",
+    "statusClockTimeDateUTC"
+   ]
+  },
+  "clockLocal": {
+   "iface": "de.bmw.infotainment.KombiIF",
+   "field": "statusShowTimeDate",
+   "kind": "local",
+   "hourPath": [
+    "displayHour"
+   ],
+   "minutePath": [
+    "displayMinute"
+   ],
+   "logOn": "out"
+  },
+  "dayNight": {
+   "iface": "de.bmw.infotainment.vehicle.Vehicle",
+   "field": "statusDayNightChangeOver",
+   "path": [
+    "dayNightChangeOver"
+   ],
+   "map": {
+    "0": "keep",
+    "KEINE_AENDERUNG": "keep",
+    "1": "day",
+    "TAG": "day",
+    "2": "night",
+    "NACHT": "night",
+    "3": null,
+    "SIGNAL_UNGUELTIG": null
+   },
+   "codes": {
+    "KEINE_AENDERUNG": 0,
+    "TAG": 1,
+    "NACHT": 2,
+    "SIGNAL_UNGUELTIG": 3
+   }
+  },
+  "ccDisplayed": "Vehicle2.statusDisplayedCCMessage",
+  "trip": {
+   "factors": null
+  }
+ }
+}
