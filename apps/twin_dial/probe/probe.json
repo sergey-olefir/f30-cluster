@@ -1,0 +1,129 @@
+{
+  "_about": "twin_dial probe build (SPEC section 17.1, docs/twin-dial/PROBE-PROTOCOL.md): the interfaces and fields of the probe items P1..P12, ADDED to the normal build's app.json signals by tools/twin-dial/probe_build.py (a field both blocks name is declared once; the flags must agree). READ ONLY: no 'w' flag, no setter, no _methods, no _broadcasts, no KombiIF standardCCMessage / extendedCCMessage / any setter, no requestDefaultSymbols, no newCCMessage. Every 'r' has a NON-ZERO getter id and every 's' a non-zero notifier id in the car's catalogue (tools/signals/check_signals.py passes on this file alone and on the merged app.json). Keys starting with '_' are notes. config.probe turns shared/twin_probe.js on; the normal build has no config.probe.",
+  "config": {
+    "probe": {
+      "maxLines": 60,
+      "minGapMs": 1000,
+      "summaryS": [
+        30,
+        120,
+        600
+      ]
+    },
+    "legacyProbes": false
+  },
+  "signals": {
+    "de.bmw.infotainment.KombiIF": {
+      "statusActiveCCMessage": "rs",
+      "statusMenuCCMessage": "rs",
+      "statusRangeTankStatus": "rs",
+      "statusBordcomputerAverage": "rs",
+      "statusBordcomputerTravelData": "rs",
+      "statusBordcomputerTravelStart": "rs",
+      "statusBordcomputerStatus2": "rs",
+      "statusKombiExternalDisplay": "rs",
+      "dataInstrumentPack": "rs",
+      "statusKombiSelection": "rs",
+      "statusKombiSelectionAvailability": "rs",
+      "statusConfigurationKombi5": "rs",
+      "_probe": "P1 statusActiveCCMessage; P1 statusMenuCCMessage; P11 statusConfigurationKombi5; P11 statusKombiSelection; P11 statusKombiSelectionAvailability; P3 statusRangeTankStatus; P4 statusBordcomputerAverage; P4 statusBordcomputerStatus2; P4 statusBordcomputerTravelData; P4 statusBordcomputerTravelStart; P5 statusKombiExternalDisplay; P6 dataInstrumentPack"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "statusDisplayedCCMessage": "rs",
+      "statusZVStatus": "rs",
+      "statusDisplayKombi": "rs",
+      "_probe": "P1 statusDisplayedCCMessage; P11 statusDisplayKombi; P7 statusZVStatus"
+    },
+    "de.bmw.infotainment.KombiInterface_2": {
+      "ccList": "rs",
+      "ccListRiskClass": "rs",
+      "_probe": "P1 ccList; P2 ccListRiskClass"
+    },
+    "de.bmw.infotainment.checkcontrol.CheckControlMaster": {
+      "basicList": "rs",
+      "_probe": "P2 basicList"
+    },
+    "de.bmw.infrastructure.VehicleInformation": {
+      "Range": "s",
+      "_probe": "P3 Range"
+    },
+    "de.bmw.infrastructure.MileageSupreme": {
+      "mileageSupreme": "rs",
+      "_probe": "P3 mileageSupreme"
+    },
+    "de.bmw.infrastructure.SecureMileage": {
+      "mileage": "rs",
+      "_probe": "P3 mileage"
+    },
+    "de.bmw.infotainment.resetlogic.ResetLogic3": {
+      "bcDataAll": "rs",
+      "_probe": "P4 bcDataAll"
+    },
+    "de.bmw.infrastructure.EnvironmentalInformation": {
+      "UnitBN2020": "rs",
+      "_probe": "P5 UnitBN2020"
+    },
+    "de.bmw.infotainment.vehicle.CDS": {
+      "statusEngineTemperature": "rs",
+      "statusBattery2": "rs",
+      "_probe": "P10 statusBattery2; P6 statusEngineTemperature"
+    },
+    "de.bmw.body.DoorsWindowsRoofMirrors": {
+      "CentralLockingSystemAndPanelStatus2": "s",
+      "_probe": "P7 CentralLockingSystemAndPanelStatus2"
+    },
+    "de.bmw.infotainment.vehicle.A4A": {
+      "statusA4ALids": "rs",
+      "_probe": "P7 statusA4ALids"
+    },
+    "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
+      "_instances": "HMI_CID",
+      "playerMetadata": "rs",
+      "_probe": "P8 playerMetadata"
+    },
+    "de.bmw.infotainment.entertainment.mediasource.MediaSource": {
+      "activeSourceId": "rs",
+      "sources": "rs",
+      "_probe": "P8 activeSourceId; P8 sources"
+    },
+    "de.bmw.infotainment.connectivity.telephony.ConnectivityAggregator": {
+      "aggregatedCallState": "rs",
+      "_probe": "P9 aggregatedCallState"
+    },
+    "de.bmw.infotainment.a4a.carplay.CarPlayManager": {
+      "_instances": "CarPlayManagerInst1",
+      "projectedTelephonyActive": "rs",
+      "_probe": "P9 projectedTelephonyActive"
+    },
+    "de.bmw.infrastructure.analytics.BasicDataSet": {
+      "basicDataSet": "s",
+      "_probe": "P10 basicDataSet"
+    },
+    "com.harman.infotainment.systeminfrastructure.environment.levelmonitor.LevelMonitor": {
+      "_instances": "Inst1",
+      "systemVoltage": "rs",
+      "_probe": "P10 systemVoltage"
+    },
+    "de.bmw.infotainment.hmi.hmicontext.HMIContext": {
+      "_instances": "HMI_CID",
+      "currentICWidget": "rs",
+      "currentICGraphicalContext": "rs",
+      "_probe": "P11 currentICGraphicalContext; P11 currentICWidget"
+    },
+    "de.bmw.infotainment.hmi.hmicontext2.HMIContext2": {
+      "_instances": "1",
+      "currentICWidget": "rs",
+      "currentICGraphicalContext": "rs",
+      "_probe": "P11 currentICGraphicalContext; P11 currentICWidget"
+    },
+    "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus": {
+      "guidingState": "rs",
+      "_probe": "P12 guidingState"
+    },
+    "de.bmw.infotainment.navigation.guiding.Guidance": {
+      "_instances": "Main_Instance",
+      "nextIntersection": "rs",
+      "_probe": "P12 nextIntersection"
+    }
+  }
+}

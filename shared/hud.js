@@ -1496,6 +1496,14 @@ class HudApp {
         // lists, chained IN FRONT of any handler already on the field (config.ccList's), which still runs as before
         this._probeWire(extra);
         // ---- end probes ----
+        // ---- twin_dial: probe mode (SPEC 17.1, package F). config.probe on: shared/twin_probe.js subscribes P1..P12 read
+        // only, chained in front of the handlers already on `extra`, and logs numbers / enums / text lengths. Inert (no
+        // require, no handler) while config.probe is off, as in f30_cluster and the normal twin_dial build.
+        this.twinProbe = null;
+        if (this.config.probe) {
+            try { this.twinProbe = require('./twin_probe').wire(extra, { log: this.log, cfg: this.config.probe }); } catch (e) { this.log.warn('probe: twin_probe not started: ' + (e && e.message || e)); }
+        }
+        // ---- end twin_dial ----
         // "condition": BMW's own vehicle state (VehicleCondition), data().condition, 10 = FAHREN (drive-ready). Used
         // by _restFrac to tell READY from OFF on a rev dial. audit/features.
         this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
@@ -1579,6 +1587,7 @@ class HudApp {
         this.screen.start();
         this._perfStart();      // package P: off unless <data>/perf.json asks (see PERF below)
         this._guard('probes', () => this._probeSymbolsLater());     // probes, item 3: the symbol list, once (0.7.18)
+        if (this.twinProbe) this._guard('twin probe', () => this.twinProbe.start());     // twin_dial: package F
     }
 
     /** Waze's map on the panel only while the setting is on and the theme shown has a map window. */
@@ -1654,6 +1663,7 @@ class HudApp {
         this.needleHalt = true; this._guard('needles', () => this._needleApply());     // 0.7.14: the needle timer off
         this._perfStop();       // package P
         clearTimeout(this.probeSymT); this.probeSymT = null;        // probes, item 3 (0.7.18)
+        if (this.twinProbe) this._guard('twin probe stop', () => this.twinProbe.stop());     // twin_dial: package F
         clearTimeout(this.statusAskT);
         if (this.waze) this._guard('waze stop', () => this.waze.stop());
         this._guard('screen stop', () => this.screen.stop());
@@ -1942,6 +1952,15 @@ class HudApp {
 
     /* ---- probes (0.7.18 diagnostics: READ ONLY, LOG ONLY; see "probes" above HudApp) ------------------------------- */
 
+    /** twin_dial (package F): the 0.7.18 probes above (ccListRiskClass, basicList, requestDefaultSymbols) belong to
+     *  f30_cluster. twin_dial declares none of those fields and never calls requestDefaultSymbols (SPEC 1, 11), so they
+     *  are off there: config.legacyProbes false, or - when the app says nothing - an app id starting "twin_dial".
+     *  f30_cluster and every other app: unchanged (on). */
+    _legacyProbesOff() {
+        const c = this.config.legacyProbes;
+        return c === undefined ? /^twin_dial/.test(String((this.ctx.spec && this.ctx.spec.id) || '')) : c === false;
+    }
+
     /** Item 1: every new vehicle condition the CAR sends, once, in every layout and with or without cluster-render
      *  (package X's "bottom row: vehicle condition N" only runs in a see-through layout). The car's own value
      *  (car.live), not the demo drive's. Hypothesis to confirm: 5 = BMW's standby row, 7 = P with the engine off. */
@@ -1956,6 +1975,7 @@ class HudApp {
      *  reasons and states - numbers and enum names only. cCShortName (the message text) is never read. Each handler
      *  runs IN FRONT of the one already on the field (config.ccList's), which then runs exactly as before. */
     _probeWire(extra) {
+        if (this._legacyProbesOff()) return;        // twin_dial: package F
         const ID = ['id', 'cCIdentifer', probeNum], COL = ['colour', 'cCColor', probeEnum], SYM = ['symbol', 'cCListSymbolID', probeNum];
         const on = (iface, field, member, cols) => {
             const e = extra[iface] = extra[iface] || {};
@@ -1979,6 +1999,7 @@ class HudApp {
     /** Item 3, the schedule: PROBE_SYM_AFTER_MS after start, then up to PROBE_SYM_WAIT_MS more for KombiInterface_2's
      *  provider; then _probeSymbols, once per run of the app. Never throws. */
     _probeSymbolsLater() {
+        if (this._legacyProbesOff()) return;        // twin_dial: package F
         if (this.probeSymT || this.probeSymDone) return;
         const t0 = Date.now() + PROBE_SYM_AFTER_MS;
         const step = () => {
