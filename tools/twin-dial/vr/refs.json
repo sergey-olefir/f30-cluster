@@ -1,0 +1,83 @@
+{
+ "_doc": "Per reference: source, state, and rough ring guesses [cx, cy, r, [a0, a1], mode, window] (OpenCV source px; angles clockwise from 12 in the SOURCE). bezel = the thin outer white ring (outermost ridge in the window), inner = the inner disc's rim (strongest ridge). Guesses only seed the ridge search; every published number comes from the fits. lines: boxes [x0, y0, x1, y1] in RECTIFIED dial px around a straight horizontal design line (edge = strongest vertical gradient per column); used only to check the rectification (tilt vs the centre line, straightness).",
+ "refs": {
+  "02": {
+   "path": "reference/vc/02_facelift_hybrid_powermeter_trip.png",
+   "gen": "facelift",
+   "kind": "owner photo (phone), in car, daylight",
+   "state": "hybrid power meter left, trip computer centre, tab bar, bottom row, rev strip",
+   "rings": {
+    "L_bezel": [685, 780, 215, [-140, 140], "outer", 0.12],
+    "L_inner": [685, 780, 118, [-125, 125], "max", 0.1],
+    "R_bezel": [1500, 794, 207, [-140, 140], "outer", 0.12],
+    "R_inner": [1500, 794, 113, [-125, 125], "max", 0.1]
+   },
+   "lines": {
+    "tab_bar_top": [1350, 300, 1800, 350],
+    "rule_above_bottom_row": [1110, 955, 1960, 1010]
+   }
+  },
+  "04": {
+   "path": "reference/vc/04_facelift_bench_red-wedge_car.png",
+   "gen": "facelift",
+   "kind": "seller photo (phone), unit on a bench, dark room",
+   "state": "tachometer with red wedge, fuel bar under left dial, coolant bar under right, car picture centre",
+   "rings": {
+    "L_bezel": [335, 297, 108, [-140, 140], "outer", 0.12],
+    "L_inner": [335, 297, 57, [-125, 125], "max", 0.1],
+    "R_bezel": [735, 300, 103, [-140, 140], "outer", 0.12],
+    "R_inner": [735, 300, 55, [-125, 125], "max", 0.1]
+   },
+   "lines": {
+    "tab_bar_top": [1330, 325, 1700, 375],
+    "red_rule_centre": [1100, 935, 1950, 980]
+   }
+  },
+  "05": {
+   "path": "reference/vc/05_facelift_render_settings.png",
+   "gen": "facelift",
+   "kind": "seller product image (render or composite)",
+   "state": "tachometer and speedometer, settings list centre, tab bar, bottom labels",
+   "rings": {
+    "L_bezel": [297, 227, 112, [-140, 140], "outer", 0.12],
+    "L_inner": [297, 227, 57, [-125, 125], "max", 0.1],
+    "R_bezel": [688, 227, 112, [-140, 140], "outer", 0.12],
+    "R_inner": [688, 227, 57, [-125, 125], "max", 0.1]
+   },
+   "lines": {
+    "tab_bar_top": [1300, 305, 1650, 355],
+    "rule_under_title": [1240, 600, 1740, 640]
+   }
+  },
+  "01": {
+   "path": "reference/vc/01_classic_map_tacho-left_mph.png",
+   "gen": "classic",
+   "kind": "press photo, in car",
+   "state": "classic: map centre, tab bar, gear in hub",
+   "rings": {
+    "L_bezel": [347, 400, 166, [-140, 140], "outer", 0.12],
+    "L_inner": [347, 400, 91, [-125, 125], "max", 0.1],
+    "R_bezel": [989, 389, 166, [-140, 140], "outer", 0.12],
+    "R_inner": [989, 389, 91, [-125, 125], "max", 0.1]
+   },
+   "lines": {
+
+   }
+  },
+  "03": {
+   "path": "reference/vc/03_classic_compact_date-panel_led-bars.png",
+   "gen": "classic",
+   "kind": "photo, in car, night",
+   "state": "classic: date panel centre, bottom row, LED bars outside the screen",
+   "rings": {
+    "L_bezel": [385, 527, 298, [-140, 140], "outer", 0.12],
+    "L_inner": [385, 527, 164, [-125, 125], "max", 0.1],
+    "R_bezel": [1535, 526, 298, [-140, 140], "outer", 0.12],
+    "R_inner": [1535, 526, 164, [-125, 125], "max", 0.1]
+   },
+   "lines": {
+
+   }
+  }
+ }
+}

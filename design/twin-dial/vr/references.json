@@ -1,0 +1,585 @@
+{
+ "_doc": "Package VR numbers (no pixels). Dial units: R = left bezel ring centre-line radius. Method: tools/twin-dial/vr/*.py; report docs/twin-dial/VR-REPORT.md.",
+ "refs": {
+  "02": {
+   "gen": "facelift",
+   "kind": "owner photo (phone), in car, daylight",
+   "state": "hybrid power meter left, trip computer centre, tab bar, bottom row, rev strip",
+   "source_size": [
+    2160,
+    1620
+   ],
+   "canvas": {
+    "size": [
+     3070,
+     1320
+    ],
+    "R_px": 400.0,
+    "left_centre": [
+     760.0,
+     700.0
+    ],
+    "right_centre": [
+     2309.906500718016,
+     700.0
+    ],
+    "centre_distance_R": 3.87477
+   },
+   "radii_R": {
+    "left_bezel": 1.0,
+    "left_inner": 0.54501,
+    "right_bezel": 0.9986,
+    "right_inner": 0.54393
+   },
+   "residual_rms_dial_px": 0.347,
+   "residual_per_ring": {
+    "L_bezel": {
+     "rms_px": 0.378,
+     "p95_abs_px": 0.678,
+     "radius_R": 1.0,
+     "n": 560,
+     "line_fwhm_src_px": 4.72
+    },
+    "L_inner": {
+     "rms_px": 0.256,
+     "p95_abs_px": 0.475,
+     "radius_R": 0.54501,
+     "n": 494,
+     "line_fwhm_src_px": 2.41
+    },
+    "R_bezel": {
+     "rms_px": 0.456,
+     "p95_abs_px": 0.932,
+     "radius_R": 0.9986,
+     "n": 559,
+     "line_fwhm_src_px": 4.82
+    },
+    "R_inner": {
+     "rms_px": 0.226,
+     "p95_abs_px": 0.4,
+     "radius_R": 0.54393,
+     "n": 496,
+     "line_fwhm_src_px": 2.49
+    }
+   },
+   "src_px_per_R": {
+    "left": 209.7,
+    "right": 202.1
+   },
+   "line_checks": {
+    "tab_bar_top": {
+     "tilt_deg_vs_centre_line": -0.114,
+     "straightness_rms_px": 1.923,
+     "inlier_share": 0.96,
+     "y_at_left_centre_R": -0.884,
+     "n": 99
+    },
+    "rule_above_bottom_row": {
+     "tilt_deg_vs_centre_line": -0.003,
+     "straightness_rms_px": 0.108,
+     "inlier_share": 0.98,
+     "y_at_left_centre_R": 0.706,
+     "n": 425
+    }
+   },
+   "sharpness": {
+    "left_bezel": {
+     "line_centre_R": 0.99976,
+     "fwhm_dial_px": 8.59,
+     "fwhm_R": 0.02147,
+     "outer_edge_10_90_dial_px": 2.56,
+     "outer_edge_10_90_src_px": 1.34,
+     "fwhm_src_px": 4.5
+    },
+    "right_bezel": {
+     "line_centre_R": 0.99869,
+     "fwhm_dial_px": 9.25,
+     "fwhm_R": 0.02313,
+     "outer_edge_10_90_dial_px": 3.16,
+     "outer_edge_10_90_src_px": 1.6,
+     "fwhm_src_px": 4.67
+    }
+   },
+   "photometry": {
+    "black_lin_Y": 0.0003,
+    "black_srgb8": 1.0,
+    "black_tiles_p10_p90": [
+     0.0,
+     0.00035
+    ],
+    "tiles": 9421,
+    "white_bezel_lin_Y_minus_black": 0.9472,
+    "black_rel_white": 0.0003,
+    "glare_excess_rel_white_in_screen_box": {
+     "max": 0.0133,
+     "p95": 0.0071
+    },
+    "clipped_share_in_screen_box": 0.02096,
+    "bezel_clipped_share": 0.2613,
+    "valid_share_in_screen_box": 0.8856
+   },
+   "usable_geometry": "yes",
+   "usable_colour": "partial: bezel white clipped 26 %",
+   "note": "the only in-car photo of the facelift design; phone tone mapping crushes black (code ~1); bezel white clipped in places",
+   "source": "reference 02"
+  },
+  "04": {
+   "gen": "facelift",
+   "kind": "seller photo (phone), unit on a bench, dark room",
+   "state": "tachometer with red wedge, fuel bar under left dial, coolant bar under right, car picture centre",
+   "source_size": [
+    1080,
+    608
+   ],
+   "canvas": {
+    "size": [
+     3039,
+     1320
+    ],
+    "R_px": 400.0,
+    "left_centre": [
+     760.0,
+     700.0
+    ],
+    "right_centre": [
+     2278.5247291781807,
+     700.0
+    ],
+    "centre_distance_R": 3.79631
+   },
+   "radii_R": {
+    "left_bezel": 1.0,
+    "left_inner": 0.53145,
+    "right_bezel": 0.99829,
+    "right_inner": 0.53063
+   },
+   "residual_rms_dial_px": 0.562,
+   "residual_per_ring": {
+    "L_bezel": {
+     "rms_px": 0.66,
+     "p95_abs_px": 1.381,
+     "radius_R": 1.0,
+     "n": 542,
+     "line_fwhm_src_px": 2.43
+    },
+    "L_inner": {
+     "rms_px": 0.435,
+     "p95_abs_px": 0.784,
+     "radius_R": 0.53145,
+     "n": 495,
+     "line_fwhm_src_px": 2.92
+    },
+    "R_bezel": {
+     "rms_px": 0.638,
+     "p95_abs_px": 1.195,
+     "radius_R": 0.99829,
+     "n": 545,
+     "line_fwhm_src_px": 2.34
+    },
+    "R_inner": {
+     "rms_px": 0.461,
+     "p95_abs_px": 0.888,
+     "radius_R": 0.53063,
+     "n": 497,
+     "line_fwhm_src_px": 2.79
+    }
+   },
+   "src_px_per_R": {
+    "left": 107.0,
+    "right": 103.9
+   },
+   "line_checks": {
+    "tab_bar_top": {
+     "tilt_deg_vs_centre_line": 0.812,
+     "straightness_rms_px": 3.262,
+     "inlier_share": 1.0,
+     "y_at_left_centre_R": -0.8554,
+     "n": 125
+    },
+    "red_rule_centre": {
+     "tilt_deg_vs_centre_line": -0.196,
+     "straightness_rms_px": 2.98,
+     "inlier_share": 0.9,
+     "y_at_left_centre_R": 0.6593,
+     "n": 425
+    }
+   },
+   "sharpness": {
+    "left_bezel": {
+     "line_centre_R": 0.99986,
+     "fwhm_dial_px": 6.68,
+     "fwhm_R": 0.01669,
+     "outer_edge_10_90_dial_px": 5.31,
+     "outer_edge_10_90_src_px": 1.42,
+     "fwhm_src_px": 1.79
+    },
+    "right_bezel": {
+     "line_centre_R": 0.99817,
+     "fwhm_dial_px": 6.33,
+     "fwhm_R": 0.01583,
+     "outer_edge_10_90_dial_px": 4.86,
+     "outer_edge_10_90_src_px": 1.26,
+     "fwhm_src_px": 1.64
+    }
+   },
+   "photometry": {
+    "black_lin_Y": 0.00089,
+    "black_srgb8": 2.9,
+    "black_tiles_p10_p90": [
+     0.00065,
+     0.00096
+    ],
+    "tiles": 14700,
+    "white_bezel_lin_Y_minus_black": 0.8179,
+    "black_rel_white": 0.0011,
+    "glare_excess_rel_white_in_screen_box": {
+     "max": 0.0003,
+     "p95": 0.0002
+    },
+    "clipped_share_in_screen_box": 0.01641,
+    "bezel_clipped_share": 0.0005,
+    "valid_share_in_screen_box": 0.9488
+   },
+   "usable_geometry": "yes, low-res",
+   "usable_colour": "yes",
+   "note": "unit on a bench, dark room: clean black, no glare; low resolution (about 107 source px per R); its layout (centre distance 3.80 R) differs from 02 (3.87 R): possibly a different unit/software, hypothesis",
+   "source": "reference 04"
+  },
+  "05": {
+   "gen": "facelift",
+   "kind": "seller product image (render or composite)",
+   "state": "tachometer and speedometer, settings list centre, tab bar, bottom labels",
+   "source_size": [
+    1000,
+    472
+   ],
+   "canvas": {
+    "size": [
+     2970,
+     1320
+    ],
+    "R_px": 400.0,
+    "left_centre": [
+     760.0,
+     700.0
+    ],
+    "right_centre": [
+     2209.8265744562177,
+     700.0
+    ],
+    "centre_distance_R": 3.62457
+   },
+   "radii_R": {
+    "left_bezel": 1.0,
+    "left_inner": 0.53133,
+    "right_bezel": 1.00157,
+    "right_inner": 0.53216
+   },
+   "residual_rms_dial_px": 0.364,
+   "residual_per_ring": {
+    "L_bezel": {
+     "rms_px": 0.319,
+     "p95_abs_px": 0.652,
+     "radius_R": 1.0,
+     "n": 403,
+     "line_fwhm_src_px": 2.75
+    },
+    "L_inner": {
+     "rms_px": 0.392,
+     "p95_abs_px": 0.692,
+     "radius_R": 0.53133,
+     "n": 501,
+     "line_fwhm_src_px": 1.95
+    },
+    "R_bezel": {
+     "rms_px": 0.339,
+     "p95_abs_px": 0.707,
+     "radius_R": 1.00157,
+     "n": 551,
+     "line_fwhm_src_px": 2.79
+    },
+    "R_inner": {
+     "rms_px": 0.393,
+     "p95_abs_px": 0.71,
+     "radius_R": 0.53216,
+     "n": 501,
+     "line_fwhm_src_px": 1.95
+    }
+   },
+   "src_px_per_R": {
+    "left": 108.0,
+    "right": 107.8
+   },
+   "line_checks": {
+    "tab_bar_top": {
+     "tilt_deg_vs_centre_line": -6.372,
+     "straightness_rms_px": 1.408,
+     "inlier_share": 1.0,
+     "y_at_left_centre_R": -0.6945,
+     "n": 18
+    },
+    "rule_under_title": {
+     "tilt_deg_vs_centre_line": 0.334,
+     "straightness_rms_px": 1.471,
+     "inlier_share": 0.94,
+     "y_at_left_centre_R": -0.2014,
+     "n": 250
+    }
+   },
+   "sharpness": {
+    "left_bezel": {
+     "line_centre_R": 1.00011,
+     "fwhm_dial_px": 8.6,
+     "fwhm_R": 0.0215,
+     "outer_edge_10_90_dial_px": 3.84,
+     "outer_edge_10_90_src_px": 1.04,
+     "fwhm_src_px": 2.32
+    },
+    "right_bezel": {
+     "line_centre_R": 1.00158,
+     "fwhm_dial_px": 9.19,
+     "fwhm_R": 0.02297,
+     "outer_edge_10_90_dial_px": 3.63,
+     "outer_edge_10_90_src_px": 0.98,
+     "fwhm_src_px": 2.48
+    }
+   },
+   "photometry": {
+    "black_lin_Y": 0.00061,
+    "black_srgb8": 2.0,
+    "black_tiles_p10_p90": [
+     0.0,
+     0.0035
+    ],
+    "tiles": 10820,
+    "white_bezel_lin_Y_minus_black": 0.9994,
+    "black_rel_white": 0.0006,
+    "glare_excess_rel_white_in_screen_box": {
+     "max": 0.0202,
+     "p95": 0.0149
+    },
+    "clipped_share_in_screen_box": 0.01594,
+    "bezel_clipped_share": 0.5577,
+    "valid_share_in_screen_box": 0.9397
+   },
+   "usable_geometry": "yes, low-res",
+   "usable_colour": "partial: bezel white clipped 56 %; glare p95 1.5 % of white",
+   "note": "seller image, dials drawn as exact circles (render or screen capture composited into a product shot); centre distance 3.62 R differs from 02 and 04: a different layout, hypothesis; red arc instead of a wedge",
+   "source": "reference 05"
+  },
+  "01": {
+   "gen": "classic",
+   "kind": "press photo, in car",
+   "state": "classic: map centre, tab bar, gear in hub",
+   "source_size": [
+    1280,
+    720
+   ],
+   "canvas": {
+    "size": [
+     2958,
+     1320
+    ],
+    "R_px": 400.0,
+    "left_centre": [
+     760.0,
+     700.0
+    ],
+    "right_centre": [
+     2197.834621153989,
+     700.0
+    ],
+    "centre_distance_R": 3.59459
+   },
+   "radii_R": {
+    "left_bezel": 1.0,
+    "left_inner": 0.53388,
+    "right_bezel": 1.0018,
+    "right_inner": 0.53857
+   },
+   "residual_rms_dial_px": 1.756,
+   "residual_per_ring": {
+    "L_bezel": {
+     "rms_px": 2.432,
+     "p95_abs_px": 5.889,
+     "radius_R": 1.0,
+     "n": 335,
+     "line_fwhm_src_px": 4.06
+    },
+    "L_inner": {
+     "rms_px": 0.882,
+     "p95_abs_px": 1.406,
+     "radius_R": 0.53388,
+     "n": 488,
+     "line_fwhm_src_px": 2.52
+    },
+    "R_bezel": {
+     "rms_px": 2.622,
+     "p95_abs_px": 6.353,
+     "radius_R": 1.0018,
+     "n": 371,
+     "line_fwhm_src_px": 3.8
+    },
+    "R_inner": {
+     "rms_px": 0.795,
+     "p95_abs_px": 1.324,
+     "radius_R": 0.53857,
+     "n": 501,
+     "line_fwhm_src_px": 2.54
+    }
+   },
+   "src_px_per_R": {
+    "left": 176.5,
+    "right": 184.1
+   },
+   "line_checks": {},
+   "sharpness": {
+    "left_bezel": {
+     "line_centre_R": 0.99677,
+     "fwhm_dial_px": 6.7,
+     "fwhm_R": 0.01674,
+     "outer_edge_10_90_dial_px": 7.85,
+     "outer_edge_10_90_src_px": 3.46,
+     "fwhm_src_px": 2.95
+    },
+    "right_bezel": {
+     "line_centre_R": 1.00152,
+     "fwhm_dial_px": 7.38,
+     "fwhm_R": 0.01845,
+     "outer_edge_10_90_dial_px": 8.42,
+     "outer_edge_10_90_src_px": 3.88,
+     "fwhm_src_px": 3.4
+    }
+   },
+   "photometry": {
+    "black_lin_Y": 0.00018,
+    "black_srgb8": 0.6,
+    "black_tiles_p10_p90": [
+     0.0,
+     0.00097
+    ],
+    "tiles": 6959,
+    "white_bezel_lin_Y_minus_black": 0.7125,
+    "black_rel_white": 0.0002,
+    "glare_excess_rel_white_in_screen_box": {
+     "max": 0.0067,
+     "p95": 0.0058
+    },
+    "clipped_share_in_screen_box": 0.00338,
+    "bezel_clipped_share": 0.002,
+    "valid_share_in_screen_box": 0.9731
+   },
+   "usable_geometry": "check only",
+   "usable_colour": "partial: classic generation",
+   "note": "classic generation; press photo; chrome bezel profile makes the ridge less defined (rms 1.8 px)",
+   "source": "reference 01"
+  },
+  "03": {
+   "gen": "classic",
+   "kind": "photo, in car, night",
+   "state": "classic: date panel centre, bottom row, LED bars outside the screen",
+   "source_size": [
+    1920,
+    1280
+   ],
+   "canvas": {
+    "size": [
+     3070,
+     1320
+    ],
+    "R_px": 400.0,
+    "left_centre": [
+     760.0,
+     700.0
+    ],
+    "right_centre": [
+     2310.0197273497756,
+     700.0
+    ],
+    "centre_distance_R": 3.87505
+   },
+   "radii_R": {
+    "left_bezel": 1.0,
+    "left_inner": 0.54768,
+    "right_bezel": 1.01398,
+    "right_inner": 0.55607
+   },
+   "residual_rms_dial_px": 1.163,
+   "residual_per_ring": {
+    "L_bezel": {
+     "rms_px": 1.548,
+     "p95_abs_px": 3.499,
+     "radius_R": 1.0,
+     "n": 438,
+     "line_fwhm_src_px": 6.34
+    },
+    "L_inner": {
+     "rms_px": 0.751,
+     "p95_abs_px": 1.49,
+     "radius_R": 0.54768,
+     "n": 487,
+     "line_fwhm_src_px": 4.22
+    },
+    "R_bezel": {
+     "rms_px": 1.169,
+     "p95_abs_px": 1.764,
+     "radius_R": 1.01398,
+     "n": 537,
+     "line_fwhm_src_px": 6.05
+    },
+    "R_inner": {
+     "rms_px": 1.089,
+     "p95_abs_px": 2.447,
+     "radius_R": 0.55607,
+     "n": 501,
+     "line_fwhm_src_px": 4.26
+    }
+   },
+   "src_px_per_R": {
+    "left": 297.6,
+    "right": 294.3
+   },
+   "line_checks": {},
+   "sharpness": {
+    "left_bezel": {
+     "line_centre_R": 0.99882,
+     "fwhm_dial_px": 6.97,
+     "fwhm_R": 0.01742,
+     "outer_edge_10_90_dial_px": 7.55,
+     "outer_edge_10_90_src_px": 5.62,
+     "fwhm_src_px": 5.19
+    },
+    "right_bezel": {
+     "line_centre_R": 1.01307,
+     "fwhm_dial_px": 6.49,
+     "fwhm_R": 0.01623,
+     "outer_edge_10_90_dial_px": 8.88,
+     "outer_edge_10_90_src_px": 6.54,
+     "fwhm_src_px": 4.78
+    }
+   },
+   "photometry": {
+    "black_lin_Y": 0.00282,
+    "black_srgb8": 9.3,
+    "black_tiles_p10_p90": [
+     0.00152,
+     0.00436
+    ],
+    "tiles": 10806,
+    "white_bezel_lin_Y_minus_black": 0.8441,
+    "black_rel_white": 0.0033,
+    "glare_excess_rel_white_in_screen_box": {
+     "max": 0.0061,
+     "p95": 0.0058
+    },
+    "clipped_share_in_screen_box": 0.01294,
+    "bezel_clipped_share": 0.0067,
+    "valid_share_in_screen_box": 0.946
+   },
+   "usable_geometry": "check only",
+   "usable_colour": "partial: classic generation",
+   "note": "classic generation; night photo; right bezel fitted 1.4 % larger than left",
+   "source": "reference 03"
+  }
+ }
+}
