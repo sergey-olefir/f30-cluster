@@ -147,7 +147,8 @@ class Menu {
     nowLine(name) {
         const hud = this.hud, tag = name === 'off' ? 'stock cluster' : (this.cfg.tags || {})[name] || '';
         let why;
-        if (hud.setting('byMode') !== true) why = 'same in every drive mode';
+        if (!this.ctx.settings.item('byMode')) why = 'one layout';        // twin_dial: no drive-mode themes
+        else if (hud.setting('byMode') !== true) why = 'same in every drive mode';
         else if (MODE_KEY[hud.driveMode]) why = 'picked by ' + MODE_NAME[hud.driveMode];
         else why = 'Theme, until the car sends its drive mode';
         return (tag ? tag + ', ' : '') + why;
@@ -169,7 +170,8 @@ class Menu {
         const parts = [];
         if (this.note && Date.now() < this.note.until) parts.push(this.note.text);
         else this.note = null;
-        if (hud.setting('byMode') !== true) parts.push('Same theme in every drive mode');
+        if (!this.ctx.settings.item('byMode')) { /* twin_dial: no drive-mode themes, nothing to say */ }
+        else if (hud.setting('byMode') !== true) parts.push('Same theme in every drive mode');
         else if (hud.driveRaw) parts.push('Drive mode not recognised (the car sends ' + hud.driveRaw + '): Theme shows');
         else if (MODE_KEY[hud.driveMode]) parts.push('Drive mode: ' + MODE_NAME[hud.driveMode]);
         else parts.push('Drive mode not seen yet: Theme shows');

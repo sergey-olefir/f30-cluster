@@ -1,0 +1,13 @@
+Twin Dial is built from these parts; their licences stay with them.
+
+- bimmer-lab/apps (MIT): the drawing engine in shared/, the bench, the layout format and the font baking tools.
+- cauliflowermossgrape/idrive7-apps (MIT): the MGU App Kit in kit/.
+- robertnisipeanu/idrive-apps: cluster-render, the service and the client protocol the engine draws through
+  (client MPL-2.0, service GPL-3.0). Not included here; installed from its Store source.
+- Saira (SIL Open Font License 1.1, tools/fonts-src/Saira-OFL.txt): the scale numerals, the digital speed, the gear
+  and the dial labels, baked into hud/fonts as bitmap atlases.
+- Noto Sans (SIL Open Font License 1.1, tools/fonts-src/NotoSans-OFL.txt): every other text, a subset of the Latin,
+  Ukrainian, Russian and Belarusian letters, baked into hud/fonts as bitmap atlases.
+
+The dial faces, frame, pictograms and layouts are original drawings made from numbers; they use no BMW artwork,
+fonts, bitmaps or code. "BMW" names the car and its display and implies no endorsement.
