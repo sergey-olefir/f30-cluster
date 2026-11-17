@@ -115,6 +115,10 @@ def main():
     nb, nr = int(arg('--benches', '3')), int(arg('--render', '3'))
     config = arg('--config')
     which = mode or ('real' if RT.has_real() else 'standin')
+    if config is None and which == 'real':
+        # the bench feeds the trip fields in tenths (twin-sim.js, hypothesis P4); the app shows a dash until config.trip.factors says
+        # how to read them, so the gallery sets the factors that match what it feeds (C's schema: speedAvg, consAvg, wayPassed)
+        config = json.dumps({'trip': {'factors': {'speedAvg': 0.1, 'consAvg': 0.1, 'wayPassed': 0.1}}})
     groups = select(SC.plan(), arg('--only'))
     planned = [j for g in groups for j in g]
     os.makedirs(out, exist_ok=True)

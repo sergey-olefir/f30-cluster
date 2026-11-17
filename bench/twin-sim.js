@@ -198,7 +198,7 @@ function install(hu, spec, log, opts) {
             clock: clockOk, dayNight: !!(cfg.dayNight && cfg.dayNight.iface) };
         let cc = null, extra = null;
         try {
-            const c = hud && hud.cc;
+            const c = hud && (hud.twinCc || hud.cc);       // B's engine keeps the state in twinCc (ENGINE-CONTRACT 2); the brief's name was cc
             if (c && typeof c === 'object') cc = { state: c.state === undefined ? null : c.state, severity: c.severity === undefined ? null : c.severity };
             // optional: whatever the engine offers for the bench (D, C): hud.benchProbe() -> plain numbers / enums / lengths
             if (hud && typeof hud.benchProbe === 'function') extra = redact(hud.benchProbe());
