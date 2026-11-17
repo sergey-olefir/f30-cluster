@@ -243,7 +243,8 @@ try { twin = require('./twin_tokens'); } catch (e) { if (e.code !== 'MODULE_NOT_
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
-const IMAGE_TYPES = { text: true, scale: true, stripe: true, gridlabels: true, icon: true, swatchimg: true };
+const IMAGE_TYPES = { text: true, scale: true, stripe: true, gridlabels: true, icon: true, swatchimg: true,
+    ccplate: true };      // twin_dial: our check-control plate sheet (shared/twin_cc.js paintPlate)
 const STATUS_ASK_MS = 2000;      // after a rebuild: ask cluster-render for its own status text
 const LAYER_BUDGET = 8;          // cluster-render's limit per client connection (CompositorLimits.per_client; confirmed on the car Nov 5 2026)
 const MAX_CONN = 4;              // connections a layout may ask for ("conn"): 32 layers service-wide / 8 per connection
@@ -1403,6 +1404,28 @@ class HudApp {
             });
         }
         // ---- end fix/active-cc (handler) ----
+        // ---- twin_dial (docs/twin-dial/R2-D-REPORT.md): the strict message state machine (shared/twin_cc.js). Only an app
+        // whose config.ccActive carries "strict" (true | false) gets one; f30_cluster has none, and every hook below
+        // is guarded by this.twinMsg, so for it nothing changes. config.ccDisplayed is the second "shown now" witness
+        // (Vehicle2 statusDisplayedCCMessage); the log has numbers only ----
+        this.twinMsg = null; this.twin = null; this.twinCc = { state: 'none', severity: null }; this.ccDisp = null; this.ccDispAny = false; this.ccDispLogged = undefined;
+        if (ca && typeof ca.strict === 'boolean') {
+            this.twin = require('./twin_cc');
+            this.twinMsg = new this.twin.TwinCC({ strict: ca.strict, confirmNow: ca.confirmNow === true,
+                settleMs: CC_SETTLE_MS, log: (l) => this.log.info(l) });
+            const cd = this.config.ccDisplayed;
+            if (cd && cd.iface && cd.field) {
+                watchOne(cd, (v) => {
+                    const r = pick(v, cd.numberPath || []);
+                    if (!isNum(r)) return;
+                    this.ccDisp = r;
+                    if (r !== this.ccDispLogged) { this.ccDispLogged = r; this.log.info('displayed cc: number ' + r); }
+                    if (!this.ccDispAny) { this.ccDispAny = true; this.log.info('displayed cc: the second "shown now" witness has spoken'); }
+                    this._ccPush();
+                });
+            }
+        }
+        // ---- end twin_dial (handler) ----
         // ---- end fix/cclist (handler) ----
         // Which frame of how many the stock cluster is showing (docs/G20-DESIGN-SPEC.md: it cycles numbered frames,
         // it does not stack or side-scroll). KombiIF statusMenuCCMessage carries the frame number, the count and up
@@ -1583,6 +1606,12 @@ class HudApp {
             this._statusSoon();
         });
         c.on('refused', (op, ref, reason) => {
+            // twin_dial: our plate's sheet refused (pixel memory, layer cap): BMW's panel stays open for every message
+            if (this.twinMsg) {
+                let plate = false;
+                this.widgets.forEach((x) => { if (x.ci === ci && x.ref === ref && x.w && x.w.type === 'ccplate') plate = true; });
+                if (plate) { this.twinMsg.sheetRefused(op + ': ' + reason); this._guard('twin cc', () => this._ccPush()); }
+            }
             const w = this._widgetOf(ci, ref);
             this.log.warn('refused ' + op + ' on ' + ref + tag + (w ? ' (' + w + ')' : '') + ': ' + reason);
             if (!this.refused) this.refused = (w || op) + ': ' + reason;   // the first one, until the next rebuild
@@ -3143,6 +3172,9 @@ class HudApp {
         // our message is on the screen until its new layer has been painted
         this.rowBuiltOurs = this._rowWhy() === null;
         this.ccDrawn = null;
+        // twin_dial: nothing of ours is on the screen after the drop; the state is decided again BEFORE the layers are made,
+        // so the new backdrop is born with BMW's window open if a message shows (_twinPush paints the plate at the end)
+        if (this.twinMsg) this._guard('twin cc', () => { this.twinMsg.rebuilt(); this.twinMsg.update(this._twinInputs(), this.twin.mono()); });
         this._layerRefs().forEach((r) => r.c.drop(r.ref));
         this.placed = [];
         this.widgets.clear();
@@ -3240,6 +3272,7 @@ class HudApp {
         });
         if (px > PIXEL_BYTES) this.log.warn('layout "' + layout.name + '" needs ' + mib(px) + ' of pixel memory; cluster-render has 16 MiB for every app together (each image counts twice)');
         this.statusAskT = setTimeout(() => { this.statusAskT = null; this._guard('status request', () => this.client.status()); }, STATUS_ASK_MS);
+        if (this.twinMsg) this._guard('twin cc', () => this._twinPush(true));      // twin_dial: the new plate gets its pixels, the rows their state
     }
 
     /**
@@ -3342,6 +3375,13 @@ class HudApp {
         // 2026-11-13: "cc:shown" is on only while the car says a message shows (unknown: off, so ours stays drawn)
         // 2026-11-16: "cc:open" is on while BMW's own message panel must be left see-through (_ccOpen), which is
         // "cc:shown" plus the car whose messages we cannot read at all
+        if (this.twinMsg && /^cc:(rest|ours|window|any)$/.test(k)) {
+            // twin_dial: the message state (shared/twin_cc.js): rest = no message shown (the bottom row), ours = our plate is
+            // on the screen, window = BMW's own panel is see-through, any = ours or the window
+            const st = this.twinMsg.state;
+            const on = k === 'cc:rest' ? st === 'none' : k === 'cc:ours' ? st === 'ours' : k === 'cc:window' ? st === 'window' : st !== 'none';
+            return not ? !on : on;
+        }
         if (k.indexOf('cc:') === 0) {
             const cc = this._cc();
             const on = (k === 'cc:none' && cc === false) || (k === 'cc:shown' && cc === true) || (k === 'cc:open' && this._ccOpen());
@@ -3390,6 +3430,7 @@ class HudApp {
             }
         } else if (w.type === 'gridlabels') this._paintGridLabels(x);
         else if (w.type === 'icon') this._blit(x, null, paintIcon(w.icon, w.w, w.h, color(t, w.color || 'fg')));
+        else if (w.type === 'ccplate') { x.px = Buffer.alloc(w.w * w.h * 4, 0); x.plateKey = ''; x.plateMsg = null; x.plateAt = 0; }     // twin_dial: empty until _twinPush paints it
         else if (w.type === 'sdash') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_geo', w.geo);
@@ -4065,6 +4106,7 @@ class HudApp {
      *  its messages at all and so must not cover a panel the cluster may be writing in. fix/opaque-cc: the opaque
      *  themes too - their background covers BMW's cluster whole, so while we are blind it would hide BMW's warnings. */
     _ccOpen() {
+        if (this.twinMsg) return this.twinMsg.window;      // twin_dial: the state machine's verdict (SPEC 8.4)
         // package X, THE SAFETY RULE (the owner, 2026-11-16: "a BMW warning is never hidden unless our own text for it
         // is on the screen in the same frame"). While the row is OURS, BMW's panel is covered only once our text for
         // the very message the car says is showing has been sent, CC_SETTLE_MS ago, in an earlier tick (_ccOnScreen).
@@ -4094,6 +4136,7 @@ class HudApp {
      *  bench's audit caught exactly that). Opening is what matters here; covering still waits for _ccOnScreen. */
     _ccPush() {
         if (!this.client || !this.client.ready || !this.widgets) return;
+        if (this.twinMsg) { this._guard('twin cc', () => this._twinPush()); return; }     // twin_dial
         // ---- fix/row-cc (2026-11-16): our "cc:"-toggled texts step aside BEFORE BMW's panel opens (_ccLiveSync) ----
         this._guard('message panel texts', () => this._ccLiveSync(true));
         // ---- end fix/row-cc ----
@@ -4111,6 +4154,109 @@ class HudApp {
         this._guard('message panel texts', () => this._ccLiveSync(false));
         // ---- end fix/row-cc ----
     }
+
+    /* ---- twin_dial (docs/twin-dial/R2-D-REPORT.md): the strict check-control state machine, shared/twin_cc.js ----
+     * One verdict per signal event or tick: this.twinMsg.state is none | window | ours, .window the see-through flag of
+     * tdback's fallback window, .severity 0..4 (none grey green amber red) for the tab highlight and the rule. The
+     * plate (widget type "ccplate") is painted here, in the signal handler's own turn, never in a later tick, and
+     * everything that changes in one turn goes out as one corked write. The order inside the turn is the order in which
+     * no step leaves BMW's panel covered without our text for the shown message: the plate for the message to show goes
+     * up first, the rows step aside, the window opens or shuts, a plate that has nothing to show is cleared only then,
+     * and the rows come back last, after the window has shut. */
+
+    /** What the state machine reads from the engine (the fields _ccListEval and the two "shown now" handlers keep). */
+    _twinInputs() {
+        const ca = this.config.ccActive || {}, all = this.ccListAll || [];
+        const wired = this._ccWired() || this.ccDispAny === true;
+        return {
+            read: wired,
+            actWired: this.ccActAny === true, act: this.ccAct ? this.ccAct.number : null,
+            dispWired: this.ccDispAny === true, disp: this.ccDisp,
+            noneValues: Array.isArray(ca.noneValues) ? ca.noneValues : [0],
+            find: (id) => all.find((e) => e.id === id) || null,
+            shown: this.ccListShown, live: this.ccItems || [], heurEntry: (this.ccItems || [])[0] || null,
+            frame: this.ccFrame,
+        };
+    }
+
+    /** The key a plate widget's pixels must have to show candidate `c` (or nothing). */
+    _twinPlateKey(c) { return c ? c.key + '|' + c.counter + '|' + (this.nightOn ? 'n' : 'd') : ''; }
+
+    /** One decision, then every layer it touches, in one corked write. `force`: the layers are new (a rebuild), send all. */
+    _twinPush(force) {
+        const t = this.twinMsg, now = this.twin.mono();
+        const changed = t.update(this._twinInputs(), now);
+        const plates = [];
+        this.widgets.forEach((x) => { if (x.w && x.w.type === 'ccplate' && x.ref) plates.push(x); });
+        const want = this._twinPlateKey(t.candidate);
+        if (!force && !changed && !plates.some((x) => x.plateKey !== want)) return;     // nothing moved: nothing to send
+        // the plate's pixels are made first (that can fail: a character the font lacks, a throw), so a failure
+        // latches BEFORE anything is sent and the state is decided again without a candidate
+        let bufs = null;
+        for (let pass = 0; pass < 3; pass++) {
+            bufs = null;
+            if (t.candidate && plates.length) {
+                bufs = plates.map((x) => this._twinPlateBuf(x, t.candidate));
+                if (bufs.some((b) => b === null)) { t.update(this._twinInputs(), now); continue; }
+            }
+            break;
+        }
+        // the state the backdrop (tdback, B's contract) reads: this.twinCc, then this._twinSync()
+        this.twinCc = { state: t.state, severity: t.severity ? this.twin.SEV_NAMES[t.severity] : null };
+        const socks = this._cork();
+        try {
+            // 1. the plate for the message to show goes up: from here on our text for it covers BMW's panel
+            if (bufs) plates.forEach((x, i) => this._twinSend(x, bufs[i], t.candidate, now));
+            // 2. the rows step aside before BMW's panel opens
+            if (t.state !== 'none') this._guard('message panel texts', () => this._ccLiveSync(true));
+            // 3. the window (the backdrop's fallback hole), the tab highlight and the rule colour
+            if (typeof this._twinSync === 'function') this._guard('tdback cc', () => this._twinSync());
+            this.widgets.forEach((x) => {
+                if (x.w && x.ref && x.w.type === 'fill' && typeof x.w.holeWhen === 'string' && x.w.holeWhen.indexOf('cc:') >= 0) {
+                    const h = this._hole(x.w), key = h.join(',');
+                    if (key !== x.last) { x.last = key; x.c.uniform(x.ref, 'u_hole', h); }
+                }
+            });
+            // 4. a plate with nothing to show is cleared only now
+            if (!bufs) plates.forEach((x) => this._twinSend(x, null, null, now));
+            // 5. the rows come back last, after BMW's panel has shut
+            if (t.state === 'none') this._guard('message panel texts', () => this._ccLiveSync(false));
+        } finally { this._uncork(socks); }
+    }
+
+    /** The plate's pixels for message `c` as a widget `x` shows it, or null after latching a failure (a character the
+     *  font lacks, or a throw while painting). Never logs the text. */
+    _twinPlateBuf(x, c) {
+        const w = x.w, t = this.twinMsg;
+        try {
+            const miss = this._missingGlyphs(c.name + c.counter, w.font);
+            const missCounter = c.counter ? this._missingGlyphs(c.counter, w.counterFont || w.font) : '';
+            if (miss || missCounter) { t.fail('glyph', c.key, (miss || missCounter)); return null; }
+            const dev = this.twin.paintPlate({ textRaster, paintIcon, icons: require('./icons').ICONS }, c,
+                { font: w.font, counterFont: w.counterFont, night: this.nightOn, x: w.x, y: w.y, w: w.w, h: w.h });
+            this.ccFit = { lines: dev.lines.length, cut: dev.cut, symbol: dev.symbol, sev: dev.sev };       // lengths and names only
+            return dev.buf;
+        } catch (e) {
+            t.fail('throw', c.key, String(e && e.message || e).slice(0, 80));
+            return null;
+        }
+    }
+
+    /** Hand a plate widget its pixels (null: the empty plate, nothing of ours over BMW's panel) as ONE paint. */
+    _twinSend(x, buf, c, now) {
+        const w = x.w, t = this.twinMsg;
+        const key = this._twinPlateKey(c);
+        if (x.plateKey === key && x.px) { if (c) t.painted(c.key, x.plateAt || now); return; }
+        this._blitDiff(x, buf || Buffer.alloc(w.w * w.h * 4, 0));
+        x.plateKey = key;
+        if (c) {
+            // the counter and the night look repaint the same message: the stamp (its id and words) keeps its time
+            if (!x.plateMsg || x.plateMsg !== c.key) x.plateAt = now;
+            x.plateMsg = c.key;
+            t.painted(c.key, x.plateAt);
+        } else { x.plateMsg = null; x.plateAt = 0; t.painted(null); }
+    }
+    /* ---- end twin_dial ---- */
 
     /* ---- fix/row-cc (2026-11-16, the state gallery bake/work/shots/20261116-2107): LIVE "cc:" toggles ----
      * The opaque 6WB themes' own clock / temperature row carries "!cc:shown" (design/gen_6wb.py), but a widget's
@@ -4494,6 +4640,8 @@ class HudApp {
             this._guard('probes', () => this._probeTick());     // probes, item 1: the vehicle condition (0.7.18)
             // fix/active-cc: the fallback's entries expire with time, not with a notification
             if (this.ccFallbackLive) this._guard('check-control', () => this._ccListEval(now, true));
+            // twin_dial: our plate was sent a moment ago; once it has been on the screen long enough the window shuts
+            if (this.twinMsg && this.twinMsg.needsTick) this._ccPush();
             if (!this.client.ready) return;
             this._guard('bottom row', () => this._rowSync(now));     // package X: standby, the clock line, the row's owner
             // shift light: blink the whole bar at 8 Hz once the rpm reaches the redline
@@ -4783,6 +4931,13 @@ class HudApp {
     _updateOne(x, now, force) {
         const w = x.w;
         if (twin && w.type === 'icon' && w.tdLive) return twin.updateIcon(this, x, now, force);       // twin_dial: a tab-bar icon that follows the car
+        // twin_dial: the plate is painted only from _twinPush (a signal event, or here when what it shows has gone stale:
+        // the counter, the night look); a tick in between has nothing to do
+        if (w.type === 'ccplate') {
+            const c = this.twinMsg && this.twinMsg.candidate;
+            if (c && x.plateKey !== this._twinPlateKey(c)) this._ccPush();
+            return;
+        }
         if (w.type === 'atext') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             const s = this._resolve(w.text);
