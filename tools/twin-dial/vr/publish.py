@@ -32,7 +32,7 @@ def verdicts(r, ph):
     g = 'yes' if rms <= 1 and spr >= 150 else ('yes, low-res' if rms <= 1 and spr >= 100 else 'check only')
     p = ph.get('photometry', {})
     reasons = []
-    if p.get('bezel_clipped_share', 1) >= 0.05:
+    if p.get("bezel_clipped_share", 1) >= 0.05:
         reasons.append('bezel white clipped %.0f %%' % (100 * p['bezel_clipped_share']))
     if p.get('glare_excess_rel_white_in_screen_box', {}).get('p95', 1) >= 0.01:
         reasons.append('glare p95 %.1f %% of white' % (100 * p['glare_excess_rel_white_in_screen_box']['p95']))
@@ -44,7 +44,7 @@ def verdicts(r, ph):
 
 def main():
     refs = C.cfg()['refs']
-    idx = {'version': 1, 'R_px': C.R_PX, 'conventions': (
+    idx = {'version': 2, 'R_px': C.R_PX, 'conventions': (
         'Rectified "dial frame": x right, y down, the centre line horizontal, left bezel radius R = 400 px; '
         'pixel coordinates OpenCV (index = pixel centre); left centre at canvas.left_centre. '
         'H_src_to_dial maps OpenCV source px (after the k1 radial term when k1 != 0) to dial px.'), 'refs': {}}
