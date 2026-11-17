@@ -5,7 +5,7 @@
   "scale_small": { "atlas": "td_scale_s", "face": "Saira", "px": 18, "note": "speedometer numerals 10 30 50 70 160 200 240 280" },
   "tach_numerals": { "atlas": "td_tach", "face": "Saira", "px": 57 },
   "digital_speed": { "atlas": "td_big", "face": "Saira", "px": 92, "note": "atext cells = widest advance (digit, 82 px)" },
-  "clock_time": { "atlas": "td_big", "face": "Saira", "px": 92, "note": "digits are tabular: a '1' stands in a full cell" },
+  "clock_time": { "atlas": "td_clock", "face": "Saira", "px": 92, "note": "package C: proportional digits (td_big's tabular ones leave a '1' in a full cell, \"14:43\" looks gapped)" },
   "gear": { "atlas": "td_gear", "face": "Saira", "px": 64, "note": "widest glyph is M (70), digits 57" },
   "dial_labels": { "atlas": "td_label", "face": "Saira", "px": 22, "note": "READY, OFF, COMFORT, SPORT, SPORT+, ECO PRO, ADAPTIVE" },
   "centre_title": { "atlas": "td_title", "face": "Noto", "px": 41 },

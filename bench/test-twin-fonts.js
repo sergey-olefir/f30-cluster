@@ -38,7 +38,7 @@ const noto = atlases.filter((n) => !saira.includes(n));
 // ---- the layout check, a function so it can be shown to fail ----
 const CYR = /[Ͱ-ԯ]/;
 // tokens whose value is Latin or digits only (our own labels, numbers): the only ones a Saira widget may carry
-const SAIRA_TOKEN = /^(speed|spd|rpm|gear|gearNum|mode|program|prog|drive|ready|clock|time|hhmm|hour|minute|digits?|v|value)\b/i;
+const SAIRA_TOKEN = /^(speed|cTime|spd|rpm|gear|gearNum|mode|program|prog|drive|ready|clock|time|hhmm|hour|minute|digits?|v|value)\b/i;
 function sairaViolations(layout, sairaNames, glyphsOf) {
     const bad = [];
     (layout.widgets || []).forEach((w) => {
@@ -47,7 +47,7 @@ function sairaViolations(layout, sairaNames, glyphsOf) {
         const lit = t.replace(/\{\{([^}]*)\}\}/g, '');
         if (CYR.test(lit)) bad.push(w.id + ': Cyrillic in the text');
         (t.match(/\{\{([^}]*)\}\}/g) || []).forEach((tok) => {
-            const name = tok.slice(2, -2).split(':')[0].replace(/^[a-z]+\./, '');
+            const raw = tok.slice(2, -2), name = raw.indexOf('td:') === 0 ? raw.slice(3) : raw.split(':')[0].replace(/^[a-z]+\./, '');       // package C: {{td:speed}} is the name "speed"
             if (!SAIRA_TOKEN.test(name)) bad.push(w.id + ': token ' + tok + ' is not known to be Latin/digits only');
         });
         const g = glyphsOf(w.font);
@@ -57,7 +57,7 @@ function sairaViolations(layout, sairaNames, glyphsOf) {
 }
 
 console.log('every slot of SPEC 9 has its atlas');
-ok(Object.keys(slots).length === 17 && atlases.length === 16, '17 slots, 16 atlases (td_big serves the speed and the clock)');
+ok(Object.keys(slots).length === 17 && atlases.length === 17, '17 slots, 17 atlases (td_big serves the digital speed, td_clock the clock page)');
 atlases.forEach((n) => {
     const exists = fs.existsSync(path.join(FONTS, n + '.json'));
     ok(exists, n + '.json exists');
@@ -70,13 +70,14 @@ atlases.forEach((n) => {
     ok(!off.length, n + ': every glyph is one cell (' + f.cellHeight + ' px) high');
     ok(f.baseline > 0 && f.baseline < f.cellHeight, n + ': baseline ' + f.baseline + ' inside the cell');
     const dig = '0123456789'.split('').filter((c) => g[c]);
-    ok(dig.length === 10 && dig.every((c) => g[c].advance === g['0'].advance), n + ': ten digits, one tabular advance (' + g['0'].advance + ')');
+    if (n === 'td_clock') ok(dig.length === 10 && g['1'].advance < g['0'].advance, n + ': ten digits, PROPORTIONAL (package C: "14:43" is not gapped)');
+    else ok(dig.length === 10 && dig.every((c) => g[c].advance === g['0'].advance), n + ': ten digits, one tabular advance (' + g['0'].advance + ')');
     const outside = Object.keys(g).filter((c) => g[c].w && (g[c].x < 0 || g[c].x + g[c].w > f.width || g[c].y < 0 || g[c].y + g[c].h > f.height));
     ok(!outside.length, n + ': every glyph lies inside the atlas');
     const mib = f.width * f.height / 1048576;
     if (noto.includes(n) && n !== 'td_cnt') ok(mib <= 0.8, n + ': full-text atlas ' + mib.toFixed(2) + ' MiB <= 0.8');
 });
-ok(font('td_big').stretch === 1.06 && saira.every((n) => font(n).stretch === 1.06) && noto.every((n) => font(n).stretch === undefined), 'the six Saira atlases were baked at stretch 1.06, no Noto one');
+ok(font('td_big').stretch === 1.06 && saira.every((n) => font(n).stretch === 1.06) && noto.every((n) => font(n).stretch === undefined), 'the seven Saira atlases were baked at stretch 1.06, no Noto one');
 
 console.log('Saira carries no Cyrillic and nothing the car sends');
 saira.forEach((n) => {
