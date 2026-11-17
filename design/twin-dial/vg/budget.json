@@ -1,0 +1,182 @@
+{
+ "_about": "VG: the Twin Dial's layers and images per connection to cluster-render (R = 300 px). kind: effect (a shader layer, no pixel memory), sheet (an image layer packed by hud.js, RGBA8), scene (a baked texture sampled by a shader, an asset but not a layer: layer false), atlas (a glyph atlas, asset, layer false). Sizes in panel px; hypothesis until round 2 builds it. Read by tools/twin-dial/vg/budget.py.",
+ "connections": {
+  "0": [
+   {
+    "id": "bgL",
+    "kind": "effect",
+    "x": 0,
+    "y": 0,
+    "w": 1380,
+    "h": 720,
+    "what": "background left of the gear gap: frame, tab-bar plates, rules, left telltale holes, belt hole, BMW-panel fallback window"
+   },
+   {
+    "id": "bgRT",
+    "kind": "effect",
+    "x": 1380,
+    "y": 0,
+    "w": 540,
+    "h": 660,
+    "what": "background right, above the gear gap; right telltale holes"
+   },
+   {
+    "id": "bgRB",
+    "kind": "effect",
+    "x": 1460,
+    "y": 660,
+    "w": 460,
+    "h": 60,
+    "what": "background right of the gear gap"
+   },
+   {
+    "id": "tacho",
+    "kind": "effect",
+    "x": 70,
+    "y": 90,
+    "w": 620,
+    "h": 570,
+    "what": "left dial: face (R8 sample), red wedge, needle, rev strip / fuel bar"
+   },
+   {
+    "id": "speedo",
+    "kind": "effect",
+    "x": 1230,
+    "y": 90,
+    "w": 620,
+    "h": 570,
+    "what": "right dial: face, needle, coolant bar; rect ends at y 660 (gear gap)"
+   },
+   {
+    "id": "speed",
+    "kind": "effect",
+    "w": 140,
+    "h": 70,
+    "what": "digital speed, gpu atext in the right hub"
+   },
+   {
+    "id": "face_tacho",
+    "kind": "scene",
+    "format": "r8",
+    "w": 616,
+    "h": 560,
+    "layer": false,
+    "what": "baked face: band, ticks, numerals, rim, bezel; colour by region in the shader"
+   },
+   {
+    "id": "face_speedo",
+    "kind": "scene",
+    "format": "r8",
+    "w": 616,
+    "h": 560,
+    "layer": false
+   },
+   {
+    "id": "panel_mask",
+    "kind": "scene",
+    "format": "r8",
+    "w": 528,
+    "h": 104,
+    "layer": false,
+    "what": "BMW's message panel outline (zc.panel), the fallback window"
+   },
+   {
+    "id": "speed_atlas",
+    "kind": "atlas",
+    "format": "r8",
+    "w": 400,
+    "h": 80,
+    "layer": false
+   },
+   {
+    "id": "blank",
+    "kind": "atlas",
+    "format": "rgba8",
+    "w": 1,
+    "h": 1,
+    "layer": false,
+    "what": "hud.js _bindBlanks"
+   }
+  ],
+  "1": [
+   {
+    "id": "gear",
+    "kind": "effect",
+    "w": 120,
+    "h": 50,
+    "what": "gear (D1 / P / R / N, M1..) gpu atext in the left hub"
+   },
+   {
+    "id": "tabs",
+    "kind": "sheet",
+    "w": 552,
+    "h": 52,
+    "what": "tab-bar icons and its text slot"
+   },
+   {
+    "id": "centre",
+    "kind": "sheet",
+    "w": 540,
+    "h": 400,
+    "what": "the centre panel (trip computer, date and clock, media, guidance)"
+   },
+   {
+    "id": "labels",
+    "kind": "sheet",
+    "w": 300,
+    "h": 60,
+    "what": "hub labels that change: program (AUTO / SPORT), unit km/h | mph"
+   },
+   {
+    "id": "gear_atlas",
+    "kind": "atlas",
+    "format": "r8",
+    "w": 300,
+    "h": 60,
+    "layer": false
+   },
+   {
+    "id": "blank1",
+    "kind": "atlas",
+    "format": "rgba8",
+    "w": 1,
+    "h": 1,
+    "layer": false
+   }
+  ],
+  "2": [
+   {
+    "id": "row",
+    "kind": "sheet",
+    "w": 524,
+    "h": 88,
+    "what": "bottom row (odometer, trip, clock, temperature) in the message area; steps aside on cc:open"
+   },
+   {
+    "id": "msg",
+    "kind": "sheet",
+    "w": 536,
+    "h": 128,
+    "what": "OUR check-control message, VF's M2 plate [694.5,592,1230,720]: symbol + headline + 2nd line in ONE raster (package X)"
+   },
+   {
+    "id": "blank2",
+    "kind": "atlas",
+    "format": "rgba8",
+    "w": 1,
+    "h": 1,
+    "layer": false
+   }
+  ]
+ },
+ "optional": [
+  {
+   "id": "car",
+   "kind": "scene",
+   "format": "rgba8",
+   "w": 220,
+   "h": 330,
+   "what": "proposal (d): the car seen from above, our own drawing; doors as shader quads"
+  }
+ ]
+}
