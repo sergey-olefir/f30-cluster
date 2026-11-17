@@ -2452,6 +2452,183 @@ void main() {
 }
 `;
 
+// ---- twin_dial (docs/twin-dial/SPEC.md, ENGINE-CONTRACT.md): the Twin Dial's dials and backdrop ----------------------------
+// A colour as GLSL linear light, from an sRGB code (the SPEC's constants are codes; the GPU maths here is linear).
+function linC(r, g, b) {
+    const f = (c) => { const v = c / 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    return 'vec3(' + [r, g, b].map((c) => f(c).toFixed(5)).join(', ') + ')';
+}
+
+const TDIAL = `// One Twin Dial gauge in one cluster-render "effect" layer (GLSL ES 1.00): the baked R8 face (u_face, one byte a px =
+// the sRGB code of its grey, 1 = white: band, strip, ticks, numerals, bezel, rim, labels, empty bar segments), coloured
+// by region here (cool tint and level of the band, red numerals and ticks from the redline), the red wedge, the needle
+// with its shadow, the fuel / coolant bar's fill, and the night multipliers (u_n0..u_n2; all 1 by day). One source for
+// both gauges: the tachometer sends a wedge (u_red.x < 900), the speedometer sends none. Alpha is 1 inside the bezel's
+// disc, 0 outside (BMW's lamps 3.7 px outside it stay visible). v_uv (0,0) is the top-left.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU
+#else
+precision mediump float;
+#endif
+varying vec2 v_uv;
+uniform vec4 u_geo;       // layer w, h; the dial centre x, y (layer px)
+uniform vec4 u_dim;       // R px; sweep deg; band level (bandGain); needle shadow (1)
+uniform sampler2D u_face;
+uniform vec4 u_faceR;     // the face's box in layer px: x, y, w, h
+uniform vec4 u_dyn;       // needle deg (cw from 12); bar fill 0..1; the red segment (-1: none)
+uniform vec4 u_red;       // wedge from deg (999: none); red numerals from deg; red ticks from deg; wedge to deg
+uniform vec4 u_bar;       // the bar: y, x0, x1 (layer px), thickness (0: none)
+uniform vec4 u_bar2;      // segments; gap px
+uniform vec4 u_n0;        // night: white ink, bezel and rim, ticks, strip
+uniform vec4 u_n1;        // night: band inner/mid, band outer, band lit ends, red
+uniform vec4 u_n2;        // night: wedge fill
+const vec3 RED = ${linC(218, 13, 43)};
+const vec3 FILL = ${linC(78, 0, 0)};
+const vec3 TINT = vec3(0.96, 1.0, 1.08);
+
+float lin1(float c) { return c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4); }
+vec3 enc(vec3 l) {
+    l = clamp(l, 0.0, 1.0);
+    return mix(l * 12.92, 1.055 * pow(l, vec3(0.4166667)) - 0.055, step(vec3(0.0031308), l));
+}
+// an R8 asset's byte: the car samples (r, 0, 0, 1), the bench page (r', r', r', r): .a where it is not 1
+float r8a(vec4 s) { return s.a < 0.999 ? s.a : s.r; }
+// the needle's width in R at s R along it (SPEC 4)
+float nw(float s) {
+    float w = mix(0.030, 0.039, clamp((s - 0.465) / 0.095, 0.0, 1.0));
+    w = s > 0.56 ? mix(0.039, 0.032, clamp((s - 0.56) / 0.12, 0.0, 1.0)) : w;
+    w = s > 0.68 ? mix(0.032, 0.022, clamp((s - 0.68) / 0.09, 0.0, 1.0)) : w;
+    w = s > 0.77 ? mix(0.022, 0.020, clamp((s - 0.77) / 0.09, 0.0, 1.0)) : w;
+    w = s > 0.86 ? mix(0.020, 0.016, clamp((s - 0.86) / 0.03, 0.0, 1.0)) : w;
+    return s > 0.89 ? mix(0.016, 0.004, clamp((s - 0.89) / 0.10, 0.0, 1.0)) : w;
+}
+
+void main() {
+    vec2 px = v_uv * u_geo.xy;
+    vec2 p = px - u_geo.zw;                              // px from the centre, +y down
+    float R = u_dim.x;
+    float rho = length(p / R);                           // not length(p): fp16 overflows past 256 px
+    float rd = rho * R;
+    float cv = clamp(1.0128 * R + 0.5 - rd, 0.0, 1.0);
+    if (cv <= 0.0) { gl_FragColor = vec4(0.0); return; }
+    float th = degrees(atan(p.x, -p.y));                 // deg clockwise from 12
+    float ath = abs(th);
+    vec2 fu = (px - u_faceR.xy) / u_faceR.zw;
+    float lc = 0.0;
+    if (fu.x >= 0.0 && fu.y >= 0.0 && fu.x <= 1.0 && fu.y <= 1.0) lc = r8a(texture2D(u_face, fu));
+    float L = lin1(lc);
+    float ink = smoothstep(0.70, 0.85, lc);
+    // the materials by region (SPEC 4): the band and the tick strip run to +-144 deg
+    float ang = 1.0 - smoothstep(144.0, 145.5, ath);
+    float band = smoothstep(0.572, 0.580, rho) * (1.0 - smoothstep(0.940, 0.948, rho)) * ang;
+    float strip = smoothstep(0.889, 0.896, rho) * (1.0 - smoothstep(0.940, 0.948, rho)) * ang;
+    float bm = mix(mix(u_n1.x, u_n1.y, smoothstep(0.70, 0.88, rho)), u_n1.z, smoothstep(70.0, 125.0, ath) * smoothstep(0.80, 0.90, rho));
+    bm = mix(bm, u_n0.w, strip);
+    vec3 bgF = mix(vec3(1.0), TINT, band - strip) * mix(1.0, u_dim.z, band) * mix(u_n0.x, bm, band);
+    float inkM = mix(u_n0.x, u_n0.y, max(step(0.975, rho), step(0.52, rho) * (1.0 - step(0.575, rho))));
+    inkM = mix(inkM, u_n0.z, strip);
+    float red = max(step(u_red.y, th) * ang * step(0.575, rho) * (1.0 - step(0.893, rho)), step(u_red.z, th) * strip);
+    vec3 inkF = mix(vec3(inkM), RED * u_n1.w, red);
+    vec3 col = vec3(L) * mix(bgF, inkF, ink);
+    // the needle's frame
+    float na = radians(u_dyn.x);
+    vec2 nd = vec2(sin(na), -cos(na));
+    float al = dot(p, nd) / R;
+    float ac = dot(p, vec2(-nd.y, nd.x));
+    float hw = 0.5 * R * nw(clamp(al, 0.465, 0.99));
+    float alo = clamp((al - 0.465) * R + 0.5, 0.0, 1.0) * clamp((0.99 - al) * R + 0.5, 0.0, 1.0);
+    if (u_dim.w > 0.5 && band > 0.0) {
+        float sh = clamp(hw + 0.05 * R - abs(ac) + 0.5, 0.0, 1.0) * alo;
+        col *= 1.0 - 0.15 * sh * (1.0 - ink) * (band - strip);
+    }
+    if (u_red.x < 900.0) {
+        float d = min(min(rd - 0.550 * R, 0.940 * R - rd), min((th - u_red.x) * rd * 0.0174533, (u_red.w - th) * rd * 0.0174533));
+        float inW = clamp(d + 0.5, 0.0, 1.0);
+        if (inW > 0.0) {
+            vec3 wc = mix(RED * u_n1.w, FILL * u_n2.x, clamp(d - 2.5, 0.0, 1.0));
+            float Lb = rho >= 0.893 ? 0.25 : rho < 0.58 ? 0.0 : 0.010 * exp(7.5 * (rho - 0.60)) * exp(-0.85 * (cos(radians(th)) - 1.0));
+            col = mix(col, mix(wc, inkF, clamp((L - Lb) / (1.0 - Lb), 0.0, 1.0)), inW);
+        }
+    }
+    col = mix(col, vec3(u_n0.x), clamp(hw + 0.5 - abs(ac), 0.0, 1.0) * alo);
+    if (u_bar.w > 0.0) {
+        float sw = (u_bar.z - u_bar.y - (u_bar2.x - 1.0) * u_bar2.y) / u_bar2.x;
+        float rx = px.x - u_bar.y;
+        float i = clamp(floor(rx / (sw + u_bar2.y)), 0.0, u_bar2.x - 1.0);
+        float lx = rx - i * (sw + u_bar2.y);
+        float f = clamp(u_dyn.y * u_bar2.x - i, 0.0, 1.0);
+        float c = clamp(f * sw - lx + 0.5, 0.0, 1.0) * clamp(lx + 0.5, 0.0, 1.0) * step(0.001, f) * step(0.0, rx) * step(rx, u_bar.z - u_bar.y);
+        c *= clamp(u_bar.w * 0.5 + 0.5 - abs(px.y - u_bar.x), 0.0, 1.0);
+        col = mix(col, abs(i - u_dyn.z) < 0.5 ? RED * u_n1.w : vec3(u_n0.x), c);
+    }
+    gl_FragColor = vec4(enc(col), cv);
+}
+`;
+
+const TDBACK = `// The Twin Dial's backdrop in one cluster-render "effect" layer (GLSL ES 1.00): opaque black with see-through holes
+// (BMW's belt group and side lamps; u_hole, up to 8 rects), and in part L (STYLE 0) also the tab bar (ramp, separators,
+// highlight cell, rule), the rules, and the fallback window over BMW's message panel (u_mask, an R8 mask). Parts RT and RB
+// (STYLE 1) are black with holes only. Colours arrive as sRGB codes (night already applied, in hud.js). v_uv (0,0) is the top-left.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying vec2 v_uv;
+uniform vec4 u_geo;       // layer w, h
+uniform vec4 u_hole[8];   // see-through rects x0, y0, x1, y1 (layer px)
+#if STYLE < 0 || STYLE == 0
+uniform vec4 u_tab;       // the tab bar x0, y0, x1, y1
+uniform vec4 u_tabR;      // the rule under it: y0, y1; the ramp's linear light at the top and the bottom
+uniform vec4 u_sep;       // the four separators' x
+uniform vec4 u_sepC;      // the light line's code
+uniform vec4 u_ruleT;     // the rule under the bar
+uniform vec4 u_hi;        // the highlight cell: x0, x1, on
+uniform vec4 u_hiC;
+uniform vec4 u_rule[4];   // rects x0, y0, x1, y1 (y0 = y1: none)
+uniform vec4 u_ruleC[4];
+uniform vec4 u_win;       // the fallback window: open, the mask is a keep mask, no mask: the whole rect
+uniform sampler2D u_mask;
+uniform vec4 u_maskR;     // its box in layer px: x, y, w, h
+float r8a(vec4 s) { return s.a < 0.999 ? s.a : s.r; }
+float enc1(float l) { return l <= 0.0031308 ? l * 12.92 : 1.055 * pow(l, 0.4166667) - 0.055; }
+#endif
+// the share of the pixel at p (its centre) that lies in [a, b]
+float span(float p, float a, float b) { return clamp(min(p + 0.5, b) - max(p - 0.5, a), 0.0, 1.0); }
+float box(vec2 p, vec4 r) { return span(p.x, r.x, r.z) * span(p.y, r.y, r.w); }
+
+void main() {
+    vec2 p = v_uv * u_geo.xy;
+    float a = 1.0;
+    for (int i = 0; i < 8; i++) a *= 1.0 - box(p, u_hole[i]);
+    vec3 c = vec3(0.0);
+#if STYLE < 0 || STYLE == 0
+    vec4 T = u_tab;
+    float inT = box(p, T);
+    c = mix(c, vec3(enc1(mix(u_tabR.z, u_tabR.w, clamp((p.y - T.y) / (T.w - T.y), 0.0, 1.0)))), inT);
+    float cell = span(p.x, u_hi.x, u_hi.y) * u_hi.z;
+    c = mix(c, u_hiC.rgb, cell * span(p.y, T.y, T.w));
+    for (int i = 0; i < 4; i++) {
+        float row = span(p.y, T.y, T.w);
+        c = mix(c, vec3(0.0), span(p.x, u_sep[i], u_sep[i] + 1.0) * row);
+        c = mix(c, u_sepC.rgb, span(p.x, u_sep[i] + 1.0, u_sep[i] + 2.0) * row);
+    }
+    float under = span(p.x, T.x, T.z) * span(p.y, u_tabR.x, u_tabR.y);
+    c = mix(c, u_ruleT.rgb, under);
+    c = mix(c, u_hiC.rgb, cell * span(p.y, u_tabR.x, u_tabR.y));
+    for (int i = 0; i < 4; i++) c = mix(c, u_ruleC[i].rgb, box(p, u_rule[i]));
+    if (u_win.x > 0.5) {
+        vec2 m = p - u_maskR.xy;
+        if (m.x >= 0.0 && m.y >= 0.0 && m.x < u_maskR.z && m.y < u_maskR.w) {
+            float k = u_win.z > 0.5 ? 1.0 : r8a(texture2D(u_mask, (floor(m) + 0.5) / u_maskR.zw));
+            a *= 1.0 - (u_win.y > 0.5 ? 1.0 - k : k);
+        }
+    }
+#endif
+    gl_FragColor = vec4(c, a);
+}
+`;
+
 /** 0.7.13: a 6WB shader with only one look's code in it (STYLE, hud.js WB_STYLE: 0 Comfort .. 4 the efficiency dial),
  *  style -1 keeps every look. The KOMBI compiles a whole shader, every branch: with all five looks in one source a 6WB
  *  layout made it reset (0.7.11, 0.7.12; 0.7.10's sources were ~5 % shorter and drew). So the inactive looks are cut
@@ -2502,4 +2679,4 @@ function compact(src, n, night) {
     return res;
 }
 
-module.exports = { wbdialFor: (style, night) => styled(WBDIAL, style, night), wbbackFor: (style, night) => styled(WBBACK, style, night), wbsignFor: (night) => compact(WBSIGN, -1, night) /* 2026-11-16: night false: none (6WB Sport / Eco Pro) */, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: styled(WBDIAL, -1), wbback: styled(WBBACK, -1), wbsign: compact(WBSIGN, -1), wbmsa: compact(WBMSA, -1) /* car3 I */, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, g20dial: G20DIAL };
+module.exports = { /* twin_dial */ tdial: compact(TDIAL, -1), tdback: styled(TDBACK, -1), tdbackFor: (part) => styled(TDBACK, part === 'L' ? 0 : 1), wbdialFor: (style, night) => styled(WBDIAL, style, night), wbbackFor: (style, night) => styled(WBBACK, style, night), wbsignFor: (night) => compact(WBSIGN, -1, night) /* 2026-11-16: night false: none (6WB Sport / Eco Pro) */, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: styled(WBDIAL, -1), wbback: styled(WBBACK, -1), wbsign: compact(WBSIGN, -1), wbmsa: compact(WBMSA, -1) /* car3 I */, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, g20dial: G20DIAL };

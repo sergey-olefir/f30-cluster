@@ -119,6 +119,20 @@ const THEMES = {
         ink: [12, 12, 14, 255], accent: [44, 120, 255, 255], well: [0, 0, 0, 255],
         chrome: [232, 242, 255, 255], chrome2: [70, 96, 140, 255], needle: [255, 255, 255, 255], face: [0, 0, 0, 255],
     },
+    // Twin Dial (layout twin.json, apps/twin_dial): white on black with the SPEC 7.1 colours (sRGB codes, the G20's black floor
+    // taken out), roles for the text widgets: fg white, dim secondary text, hot red, ready green, amber, grey, rule. By night
+    // hud.js twinNightTheme() puts each role at its multiplier (docs/twin-dial/ENGINE-CONTRACT.md 3).
+    twin: {
+        name: 'Twin Dial',
+        fg: [255, 255, 255, 255], dim: [227, 227, 227, 255], track: [46, 47, 50, 255], arc: [255, 255, 255, 255],
+        glow: 0, stripe: false,
+        bar: { low: [255, 255, 255], mid: [255, 255, 255], high: [218, 13, 43], midAt: 'shift' },
+        rev: { from: [255, 255, 255], to: [255, 255, 255] },
+        bg: [0, 0, 0, 255], panel: [0, 0, 0, 255], line: [231, 231, 231, 255], head: [255, 255, 255, 255],
+        ink: [0, 0, 0, 255], accent: [255, 255, 255, 255], well: [0, 0, 0, 255],
+        hot: [218, 13, 43, 255], ready: [59, 155, 26, 255], amber: [240, 170, 10, 255], grey: [111, 111, 110, 255], rule: [231, 231, 231, 255],
+        needle: [255, 255, 255, 255], face: [0, 0, 0, 255],
+    },
     // Minimal (layout minimal.json): white on black, nothing but the speed, the gear and a fuel line.
     minimal: {
         name: 'Minimal',
@@ -206,7 +220,7 @@ const THEMES = {
     },
 };
 // every theme: the shift-point red, used by "hot" (the gear and SHIFT at the shift point, the rev bar past it)
-Object.keys(THEMES).forEach((k) => { THEMES[k].hot = [255, 42, 42, 255]; });
+Object.keys(THEMES).forEach((k) => { if (!THEMES[k].hot) THEMES[k].hot = [255, 42, 42, 255]; });     // twin_dial: the Twin Dial's own red (SPEC 7.1) stays
 
 // Redline layout (after cauliflowermossgrape's Redline app): rev bar segments ramp rev.from -> rev.to up to
 // the shift point; the shift lights run green -> yellow -> red in every theme; grade badges by verdict.

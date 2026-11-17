@@ -43,6 +43,8 @@ const TYPES = {
     gmeter: [],
     tiles: ['tiles'],
     revarc: ['center', 'r', 'start', 'sweep'],
+    tdial: ['kind', 'centre', 'R', 'face'],     // twin_dial (docs/twin-dial/ENGINE-CONTRACT.md)
+    tdback: ['part'],
 };
 const CLASSES = ['ambient', 'content', 'overlay', 'alert'];
 
