@@ -134,10 +134,7 @@ class Canvas:
 
     def dial(self, c, kind, value, gear='D3'):
         self.band(c)
-        # grey feet below the band's ends, down to y +0.85 R
-        for s in (-1, 1):
-            pi, po = self.polar(c, 144 * s, 0.58 * R), self.polar(c, 144 * s, 0.94 * R)
-            self.poly([pi, po, (po[0], c[1] + 0.85 * R), (pi[0], c[1] + 0.85 * R)], FEET)
+        # no "feet": on references 02 and 04 the band simply ends in a radial cut and the black below is free
         if kind == 'tach':
             majors = [(k, tach_angle(k)) for k in range(0, 9)]
             minors = [tach_angle(k + 0.5) for k in range(0, 8)]
