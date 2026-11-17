@@ -369,7 +369,7 @@ process.on('message', (m) => {
         // the bottom-row fakes take scene / sign / cc / ccList / road / nav / clock; the rest goes to the fake persod
         demoTzOverride(v);                       // fix/opaque-cc: a clock of the fake's own ends the demo's time zone
         if (v.hook) benchHook(v.hook);           // package X: fault injection for the safety tests
-        else if (v.scene || v.sign || v.cc || v.ccList || v.ccFrame || v.sla || v.road || v.nav || v.clock) fakeSigns.control(v);
+        else if (v.scene || v.sign || v.cc || v.ccList || v.ccFrame || v.sla || v.road || v.nav || v.clock || v.clockLocal) fakeSigns.control(v);
         else if (v.ccRisk || v.ccBasic || v.symbols) fakeSigns.control(v);     // probes (0.7.18): bench/test-probes.js
         else if (v.dayNight !== undefined) fakeSigns.control(v);    // fix/colour-daynight: bench/test-daynight.js
         else if (fakePerso) fakePerso.control(v);
@@ -393,10 +393,14 @@ process.on('message', (m) => {
                     // what the parser made of it, whoever draws it: lengths and the colour, never the text
                     parsed: { name: (hud.ccMsg.name || '').length, desc: (hud.ccMsg.desc || '').length, color: hud.ccMsg.color, symbol: hud.ccMsg.symbol },
                     frame: hud.ccFrame,
+                    // fix/cclist: each source on its own, whether the field has been read, and the list entry on show
+                    // (its name's length, colour, id and symbol - never the text)
+                    ccm: hud.ccmShown, ccList: hud.ccListShown, wired: hud._ccWired(), sev: (() => { try { return hud._ccSeverity().name; } catch (e) { return null; } })(),
+                    now: (() => { const m = hud._ccNow() || {}; return { name: (m.name || '').length, color: m.color || null, id: m.id === undefined ? null : m.id, symbol: m.symbol === undefined ? null : m.symbol }; })(),
                 },
                 road: hud._roadText(), navState: hud.navState, navDist: hud.navDist, navEta: hud.navEta,
                 own: { nav: hud._own('nav'), sign: hud._own('sign'), info: hud._own('info'), range: hud._own('range'), clock: hud._own('clock'), temp: hud._own('temp') },
-                fail: hud.rowFail || {}, tzCar: hud.tzCar, tzCandidate: hud.tzCandidate,
+                fail: hud.rowFail || {}, tzCar: hud.tzCar, tzCandidate: hud.tzCandidate, tzLocal: hud.tzLocal,
                 sla: hud.sla, arc: hud._arcOn(),
                 widgets: ['signs', 'limit', 'nav', 'nav_bg', 'cc_name', 'cc_desc', 'cc_line', 'own_clock'].filter((id) => hud.widgets && hud.widgets.has(id)),
                 // package X: who draws the row and why, the time zone in use, and the safety handshake: the headline

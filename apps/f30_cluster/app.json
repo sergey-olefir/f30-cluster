@@ -2,7 +2,7 @@
   "id": "f30_cluster",
   "title": "F30 Cluster",
   "description": "Instrument cluster themes after the F-series 6WB look: Comfort, Sport and Eco Pro, following the drive mode",
-  "version": "0.7.18",
+  "version": "0.7.19",
   "vendor": "custom",
   "loggingId": "OAF3",
   "iconGlyph": "F30",
@@ -64,8 +64,10 @@
       "statusRangeTankStatus": "rs",
       "timeDateUTC": "rs",
       "statusTimeDate": "rs",
+      "statusShowTimeDate": "rs",
       "statusMenuCCMessage": "rs",
-      "_optional": "the car's own clock and its time-zone offset (config.clock), so our clock no longer needs the manual timeZone setting (the head unit runs on UTC)"
+      "_optional": "the car's own clock and its time-zone offset (config.clock), so our clock no longer needs the manual timeZone setting (the head unit runs on UTC)",
+      "_showTimeDate": "fix/cclist (0.7.19): statusShowTimeDate (struct ShowTimeDateWrapper: displayHour, displayMinute, displaySecond, displayDate*, statusDisplayClockTimeDate) is the time the cluster shows, i.e. LOCAL time: config.clockLocal, the time zone's fallback after timeDateUTC. Catalogue: getter 30 (NON-ZERO), notifier 32798, so \"rs\" passes tools/signals/check_signals.py"
     },
     "de.bmw.infotainment.vehicle.Vehicle": {
       "statusMotorStartAuto": "s",
@@ -772,7 +774,18 @@
       "offsetBy": 0,
       "dstPath": ["offsetWintertimeSummertimeUTC"],
       "dstMinutes": 60,
-      "invalid": [255]
+      "invalid": [255],
+      "logOn": ["timeZonesOffsetAutomaticallyUTC", "offsetWintertimeSummertimeUTC", "statusTimeZonesId", "statusClockTimeDateUTC"],
+      "_log": "fix/cclist (0.7.19): 0.7.18's 'clock raw:' line was cut at 100 characters, just before the three zone members, and repeated every 10 s (the seconds change). Now the WHOLE struct (all ten members of TimeDateUTCWrapper) is logged, uncut, once per change of the members named in logOn only. On the owner's car (2026-11-17) statusClockTimeDateUTC read UHRZEIT_UEBER_UTC_VERFUEGBAR_UND_UEBER_QUARZ_WEITERGEZAEHLT_OFFSETS_NICHT_VERFUEGBAR (the catalogue enum, value 3: 'UTC available, counted on by the quartz, OFFSETS NOT AVAILABLE') - the car itself says this struct carries no offset, so config.clockLocal below is what gives the zone there. The factor (15) is NOT changed: there is still no evidence for any step."
+    },
+    "clockLocal": {
+      "_about": "fix/cclist (0.7.19): the time zone's FALLBACK after config.clock (hud.js _tzSource): the local time the cluster shows, KombiIF statusShowTimeDate (ShowTimeDateWrapper displayHour / displayMinute; getter 30, notifier 32798), against the head unit's own UTC clock, rounded to 15 minutes (hud.js tzOf kind 'local'). An hour or minute out of range (the catalogue default 255) gives none. UNCONFIRMED on the car: that this field reaches the head unit, and that it carries LOCAL time (its sibling DisplayStatus.TimeDate is the same struct). The line to check: 'clock (local) raw: {...} -> 120' and 'clock: ours shows HH:MM, UTC+02:00 from the car's shown clock'. Set to null to drop it.",
+      "iface": "de.bmw.infotainment.KombiIF",
+      "field": "statusShowTimeDate",
+      "kind": "local",
+      "hourPath": ["displayHour"],
+      "minutePath": ["displayMinute"],
+      "logOn": "out"
     },
     "_bottomRow": {
       "about": "Package 'bottom row' (docs/BOTTOM-ROW-PACKAGE.md). The three shapes below name the car's own fields for the speed-limit sign, the check-control message and the road label, verified member by member against the car's catalogue (reference/car/2026-11-15/someip/someip-interfaces.json, 2026-11-15). Each is OPTIONAL: set it to null and nothing is subscribed and nothing changes. WHAT IS DRAWN is decided by the one setting \"bottomRow\", which is \"allG20\" by default, so the car draws all three until the owner picks \"all6WB\" (it replaced the seven own* settings, 2026-11-15). Every new raw combination is logged ONCE as a SHAPE: the message text, the road name and the position are personal data and never reach the log.",
@@ -917,6 +930,9 @@
       "root": ["cCListElement"],
       "namePath": ["cCShortName"],
       "idPath": ["cCIdentifer"],
+      "symbolPath": ["cCListSymbolID"],
+      "ignoreIds": [0],
+      "_cclist": "fix/cclist (0.7.19), the owner's car 2026-11-17: newCCMessage (config.ccm) sent NOTHING in 25 minutes, a door-open message included; ccList is live and carries the message on show. Resting: [id 0 GREEN symbol 6]; driver's door open: [id 15 WHITE symbol 2], name 16 characters; shut: id 0 again. So THIS is the primary source of 'a message shows' (an entry whose cCIdentifer is not in ignoreIds - from ONE test, hence configurable) and of our message's headline (cCShortName), colour and severity (cCColor) and symbol id (cCListSymbolID). newCCMessage stays wired as a second source; whichever says a message shows wins. The first notification that is a list whose entries fit 'root' ends the blind case (hud.js _ccWired). Member names from the catalogue: CCListElementUnion.cCListElement = CCListElementStruct { cCIdentifer (sic), cCShortName, cCListSymbolID, cCColor, cCIndentation, ricResourceID }. The text is never logged.",
       "colorPath": ["cCColor"],
       "colorMap": {
         "DEFAULT": "default", "0": "default",

@@ -878,6 +878,126 @@ async function main() {
     await until((q) => q.activeName === 'wb_comfort', 20000);
     // ---- end fix/opaque-cc ----
 
+    // ---- fix/cclist (0.7.19): the owner's car never sends newCCMessage (config.ccm) but its ccList is live: at rest
+    // one entry, id 0 GREEN symbol 6; the driver's door open, id 15 WHITE symbol 2. ccList alone must end the blind
+    // case, say when a message shows, and give our line its text. newCCMessage stays SILENT through every case here
+    // (S(q).cc.ccm null), each on a fresh app (_ccWired is sticky).
+    console.log('fix/cclist: the opaque themes from ccList alone, newCCMessage silent');
+    {
+        const box = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts', 'wb_comfort.json'), 'utf8'))
+            .widgets.find((x) => x.id === 'bg').cc;
+        const inkIn = async () => (await inkRows(box)).total;
+        const worstFor = async (ms) => { let n = 0; for (const t0 = Date.now(); Date.now() - t0 < ms;) { n = Math.max(n, await inkIn()); await sleep(100); } return n; };
+        await req('POST', '/restart');
+        await sleep(1000);
+        await until((q) => q && q.ready && q.activeName, 90000);
+        await set('hudLayout', 'wb_comfort');
+        await scene('clock-plus2');
+        p = await until((q) => q.activeName === 'wb_comfort' && same(S(q).safety.ucc, box), 20000);
+        ok(S(p).cc.shown === null && S(p).cc.wired === false && S(p).safety.open === true, 'wb_comfort, nothing heard yet: blind, BMW\'s panel open');
+        await scene('cclist-rest');
+        p = await until((q) => S(q).cc.shown === false && same(S(q).safety.ucc, [0, 0, 0, 0]), 8000);
+        ok(S(p).cc.shown === false && S(p).cc.wired === true && S(p).cc.ccm === null && S(p).cc.ccList === false,
+            'ccList with only id 0: the field is read, no message (' + JSON.stringify({ shown: S(p).cc.shown, ccm: S(p).cc.ccm, list: S(p).cc.ccList, wired: S(p).cc.wired }) + ')');
+        ok(S(p).safety.open === false && same(S(p).safety.ucc, [0, 0, 0, 0]), 'and BMW\'s panel shuts (the blind case is over)');
+        let n = 0;
+        for (const t0 = Date.now(); Date.now() - t0 < 4000 && (n = await inkIn()) === 0;) await sleep(100);
+        ok(n > 0, 'our clock / temperature row is drawn in its place (' + n + ' px)');
+        await scene('cclist-door');
+        p = await until((q) => S(q).cc.shown === true && same(S(q).safety.ucc, box), 8000);
+        ok(S(p).cc.shown === true && S(p).cc.ccm === null && S(p).safety.open === true && same(S(p).safety.ucc, box),
+            'the door entry (id 15 WHITE symbol 2): a message shows, BMW\'s panel is open');
+        n = await worstFor(1000);
+        ok(n === 0, 'with nothing of ours painted inside it (' + n + ' px)');
+        await scene('cclist-rest');
+        p = await until((q) => S(q).cc.shown === false && same(S(q).safety.ucc, [0, 0, 0, 0]), 8000);
+        for (const t0 = Date.now(); Date.now() - t0 < 4000 && (n = await inkIn()) === 0;) await sleep(100);
+        ok(S(p).safety.open === false && n > 0, 'the door shut (id 0 again): the panel shuts and our row is back (' + n + ' px)');
+        ok(S(p).cc.ccm === null, 'newCCMessage said nothing throughout');
+    }
+
+    console.log('fix/cclist: all6WB from ccList alone - the info field becomes ours and shows the name');
+    await click('SET_G20');
+    await until((q) => q.activeName === 'wb_dials', 20000);
+    await restart();
+    await set('bottomRow', 'all6WB');
+    await scene('clock-plus2'); await scene('road-street');
+    p = await until((q) => /check-control/.test((S(q).row || {}).why || ''), 20000);
+    ok(/waiting for the car's check-control message/.test(S(p).row.why) && allOwn(p, false), 'nothing heard yet: the row waits, BMW\'s (' + S(p).row.why + ')');
+    await scene('cclist-rest');
+    p = await until((q) => S(q).row && S(q).row.why === null && (S(q).widgets || []).indexOf('cc_line') >= 0, 20000);
+    ok(S(p).row.why === null && allOwn(p, true) && S(p).cc.shown === false && S(p).cc.ccm === null,
+        'the resting list (id 0) alone makes the WHOLE row ours, info field included, no message on');
+    ok(!S(p).safety.open && maskIs(p, 'ours', null), 'and BMW\'s panel is covered by ours (' + JSON.stringify(S(p).safety.mask) + ')');
+    await scene('cclist-door');
+    let lg = 0, lgOk = 0;
+    for (const t0 = Date.now(); Date.now() - t0 < 400;) {
+        const q = await probe();
+        if (S(q).cc.shown === true && !S(q).safety.onScreen) { lg++; if (bmwOpen(q)) lgOk++; }
+        await sleep(20);
+    }
+    p = await until((q) => S(q).safety.onScreen === true && maskIs(q, 'ours', null), 8000);
+    ok(S(p).cc.name === 'Driver door open' && S(p).safety.head === 'Driver door open',
+        'the door entry: our line shows the list\'s own name (' + (S(p).cc.name || '').length + ' characters)');
+    ok(S(p).cc.now.id === 15 && S(p).cc.now.color === 'white' && S(p).cc.now.symbol === 2 && S(p).cc.sev === 'info',
+        'with its id, colour, symbol and severity from ccList (' + JSON.stringify(S(p).cc.now) + ', ' + S(p).cc.sev + ')');
+    ok(S(p).safety.fit && S(p).safety.fit.marker === 'cc_info', 'a white message carries the "i" (' + JSON.stringify(S(p).safety.fit) + ')');
+    ok(lgOk === lg, 'until ours was on the screen BMW\'s panel stayed open (' + lgOk + ' of ' + lg + ' probes)');
+    await clean(p, 'a ccList message');
+    await scene('cclist-two');
+    p = await until((q) => S(q).cc.name === 'Boot lid open' && S(q).safety.onScreen === true, 8000);
+    ok(S(p).cc.list === 2 && S(p).cc.name === 'Boot lid open', 'two entries (ids 14, 17) and no frame counter: the first stays (' + S(p).cc.list + ')');
+    await scene('cclist-rest');
+    p = await until((q) => S(q).cc.shown === false && S(q).cc.name === '', 8000);
+    ok(S(p).cc.shown === false && allOwn(p, true) && JSON.stringify(S(p).fail) === '{}' && S(p).cc.ccm === null,
+        'back to id 0: no message, the row stays ours, nothing latched, newCCMessage still silent');
+
+    console.log('fix/cclist: the safety rule with ccList');
+    await restart();
+    await set('bottomRow', 'all6WB');
+    await scene('clock-plus2'); await scene('road-street'); await scene('cclist-rest');
+    await until((q) => S(q).row && S(q).row.why === null && (S(q).widgets || []).indexOf('cc_line') >= 0, 20000);
+    await scene('cclist-noname');
+    p = await until((q) => S(q).fail && S(q).fail.info && bmwOpen(q), 15000);
+    ok(S(p).cc.shown === true && S(p).safety.unread === true && /cannot read/.test(S(p).row.failWhy.info) && bmwOpen(p),
+        'an entry to show with no name counts as showing, latches the row, BMW\'s panel is open (' + S(p).row.failWhy.info + ')');
+    await clean(p, 'a ccList entry with no name');
+    await restart();
+    await set('bottomRow', 'all6WB');
+    await scene('clock-plus2'); await scene('road-street'); await scene('cclist-rest');
+    await until((q) => S(q).row && S(q).row.why === null && (S(q).widgets || []).indexOf('cc_line') >= 0, 20000);
+    await scene('cclist-greek');
+    p = await until((q) => S(q).fail && S(q).fail.info && bmwOpen(q), 15000);
+    ok(/glyph/.test(S(p).row.failWhy.info) && allOwn(p, false) && bmwOpen(p), 'a name the font cannot draw: the row latches, BMW\'s panel is open (' + S(p).row.failWhy.info + ')');
+    await clean(p, 'a ccList name with a missing glyph');
+    ok(S(p).cc.ccm === null, 'newCCMessage silent throughout');
+
+    // the car's clock: timeDateUTC says "offsets not available" there; the time the cluster SHOWS gives the zone
+    console.log('fix/cclist: the clock - the full raw struct, once per zone change, and the shown clock as a fallback');
+    const rawLines = () => logText.split('\n').filter((l) => /clock raw: /.test(l));
+    await fake({ clock: { minutes: 60, dst: false } });
+    await until((q) => S(q).tzCar === 60, 5000);
+    const r0 = rawLines().length;
+    for (let i = 0; i < 4; i++) { await fake({ clock: { minutes: 60, dst: false } }); await sleep(150); }
+    await sleep(300);
+    ok(rawLines().length === r0, 'the same zone fed four more times: no new "clock raw" line (' + (rawLines().length - r0) + ')');
+    await scene('clock-local-plus2');
+    p = await until((q) => S(q).tzLocal === 120 && S(q).tz && S(q).tz.min === 120, 8000);
+    const lastRaw = rawLines().filter((l) => !/clock \(local\)/.test(l)).pop() || '';
+    ok(/"timeZonesOffsetAutomaticallyUTC":255/.test(lastRaw) && /"statusClockTimeDateUTC":3/.test(lastRaw) && /-> null$/.test(lastRaw),
+        'a zone change logs the whole struct, uncut (' + lastRaw.replace(/^.*clock raw: /, '').length + ' characters)');
+    ok(S(p).tzCar === null && S(p).tzLocal === 120 && /shown clock/.test(S(p).tz.from),
+        'timeDateUTC gives no zone, the shown clock gives +2 h and is used (' + JSON.stringify(S(p).tz) + ')');
+    ok(/clock \(local\) raw: \{[^\n]*"displayHour"[^\n]*-> 120/.test(logText), 'and its raw struct is logged with what it became');
+    await scene('clock-local-none');
+    p = await until((q) => S(q).tz === null, 8000);
+    ok(S(p).tz === null && S(p).own.clock === false, 'neither gives a zone: none, and our clock is not drawn (' + JSON.stringify(S(p).tz) + ')');
+    await scene('clock-plus2');
+    await set('bottomRow', 'allG20');
+    await click('SET_G20');
+    await until((q) => q.activeName === 'wb_comfort', 20000);
+    // ---- end fix/cclist ----
+
     console.log('every layout still builds');
     for (const v of opts('hudLayout')) {
         await set('hudLayout', v);
@@ -893,7 +1013,7 @@ main().catch((e) => { failed++; console.log('  FAIL ' + (e && e.stack || e)); })
     if (server) server.kill('SIGTERM');
     const errs = logText.split('\n').filter((l) => /ERROR/.test(l));
     if (errs.length) { console.log('app errors in the log:'); errs.slice(0, 20).forEach((l) => console.log('  ' + l)); }
-    const priv = logText.split('\n').filter((l) => /Hauptstrasse|Nuernberg|Ingolstaedter|Engine malfunction|Drive on with care|latitude|longitude/.test(l));
+    const priv = logText.split('\n').filter((l) => /Hauptstrasse|Nuernberg|Ingolstaedter|Engine malfunction|Drive on with care|Driver door open|All systems OK|Boot lid open|latitude|longitude/.test(l));
     console.log(priv.length ? 'PRIVACY: ' + priv.length + ' log line(s) carry content:\n  ' + priv.slice(0, 5).join('\n  ')
         : 'privacy: no road name, message text or coordinate in the log');
     if (priv.length) failed++;

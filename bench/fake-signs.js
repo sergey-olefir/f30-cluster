@@ -61,7 +61,8 @@ const SCENES = {
             desc: 'The front passenger airbag and belt tensioner may not work in an accident. Have the system checked by the nearest BMW Service. Drive on with care.',
         },
     },
-    'cc-clear': { cc: { clear: true }, ccList: [], ccFrame: { frame: 0, of: 0, ids: [0, 0, 0] } },
+    // fix/cclist: cleared as the owner's car is at rest - ccList holds its one resting entry, id 0 GREEN symbol 6
+    'cc-clear': { cc: { clear: true }, ccList: 'rest', ccFrame: { frame: 0, of: 0, ids: [0, 0, 0] } },
     // ---- package X: the safety cases (bench/test-bottom-row.js). Made-up texts, none of them personal ----
     // a message the car marks (a symbol) but whose text our paths do not find: it must count as showing
     'cc-unread': { cc: { name: '', desc: '', color: 'red', symbol: 12, id: 0 } },
@@ -101,8 +102,27 @@ const SCENES = {
         nav: { state: 'on', dist: '12', unit: 'km', etaH: 14, etaM: 35, mins: 18, street: 'Ingolstaedter Strasse', city: 'Muenchen' },
     },
     'road-none': { road: { text: '', onRoad: false }, nav: { state: 'off' } },
-    clear: { sign: { state: 'none' }, cc: { clear: true }, road: { text: '' }, nav: { state: 'off' } },
+    clear: { sign: { state: 'none' }, cc: { clear: true }, ccList: 'rest', road: { text: '' }, nav: { state: 'off' } },
 };
+// ---- fix/cclist (0.7.19): ccList the way the owner's car sends it (2026-11-17), and newCCMessage SILENT: none of these
+// scenes feeds "cc". Resting: one entry, id 0 GREEN symbol 6 (its name 14 characters on the car); the driver's door
+// open: one entry, id 15 WHITE symbol 2 (16 characters). Invented names of the same lengths, none of them the car's.
+const CC_REST = { name: 'All systems OK', color: 'green', id: 0, symbol: 6 };
+const CC_DOOR = { name: 'Driver door open', color: 'white', id: 15, symbol: 2 };
+Object.assign(SCENES, {
+    'cclist-rest': { ccList: [CC_REST] },
+    'cclist-door': { ccList: [CC_DOOR] },
+    // the car's other short-lived entries (ids 14 and 17, WHITE, symbol 2), two at once
+    'cclist-two': { ccList: [{ name: 'Boot lid open', color: 'white', id: 14, symbol: 2 }, { name: 'Bonnet open', color: 'white', id: 17, symbol: 2 }] },
+    // an entry to show whose name is empty: it must count as showing, and keep BMW's panel open
+    'cclist-noname': { ccList: [{ name: '', color: 'red', id: 15, symbol: 2 }] },
+    // a name our fonts cannot draw (Greek): BMW's panel stays open, the row latches
+    'cclist-greek': { ccList: [{ name: 'Πόρτα ανοιχτή', color: 'white', id: 15, symbol: 2 }] },
+    // the time the cluster shows (config.clockLocal), with timeDateUTC giving no zone, as on the owner's car
+    'clock-local-plus2': { clock: { minutes: null, status: 3 }, clockLocal: { minutes: 120 } },
+    'clock-local-none': { clockLocal: { minutes: null } },
+});
+// ---- end fix/cclist ----
 // --- package F (strip, 2026-11-16): the car's words in Ukrainian, as the owner's cluster runs. Made-up text, no real
 // place: the tallest and lowest capitals (Ї Й Ґ, Щ Ц Д), both apostrophes, guillemets, the dash and the number sign ---
 Object.assign(SCENES, {
@@ -192,17 +212,19 @@ function install(hu, config, log) {
         if (named(cfg.onRoad) && 'onRoad' in r) hu.feed(cfg.onRoad.iface, cfg.onRoad.field, nest(cfg.onRoad.path, !!r.onRoad));
     }
 
-    /** The check-control LIST (several messages at once; the car cycles them). */
+    /** The check-control LIST (several messages at once; the car cycles them). "rest": the car's resting list.
+     *  Each entry { name, id, color, symbol }; a symbol only goes in when one is given. */
     function feedCcList(list) {
         const c = cfg.ccList;
         if (!named(c)) return;
-        const arr = Array.isArray(list) ? list : [];
+        const arr = list === 'rest' ? [CC_REST] : Array.isArray(list) ? list : [];
         const els = arr.map((m, i) => {
             let inner = {};
             const put = (path, val) => { if (path) merge(inner, nest(path, val)); };
             put(c.namePath, String(m.name || ''));
             put(c.idPath, isFinite(Number(m.id)) && m.id !== undefined ? Number(m.id) : 100 + i);
             put(c.colorPath, rawFor(c.colorMap, m.color || 'default', 0));
+            if (m.symbol !== undefined) put(c.symbolPath, Number(m.symbol));      // fix/cclist
             return nest(c.root, inner);
         });
         last.ccList = arr.length;
@@ -251,8 +273,23 @@ function install(hu, config, log) {
         const by = typeof c.offsetBy === 'number' ? c.offsetBy : 0;
         put(c.path, n.minutes === null || n.minutes === undefined ? (c.invalid || [255])[0] : Math.round(Number(n.minutes) / f) + by);
         put(c.dstPath, n.dst ? 1 : 0);
+        if (n.status !== undefined) put(['statusClockTimeDateUTC'], n.status);     // fix/cclist: 3 = offsets not available
         put(['hourUTC'], new Date().getUTCHours());
         put(['minuteUTC'], new Date().getUTCMinutes());
+        hu.feed(c.iface, c.field, out);
+    }
+
+    /** fix/cclist: the time the cluster shows (config.clockLocal, kind "local"): UTC now plus `minutes`, or 255 (the
+     *  catalogue default: none) when minutes is null. */
+    function feedClockLocal(v) {
+        const c = cfg.clockLocal;
+        if (!named(c) || c.kind !== 'local') return;
+        const n = v || {}, none = n.minutes === null || n.minutes === undefined;
+        const d = new Date(Date.now() + (none ? 0 : Number(n.minutes)) * 60000);
+        let out = { displaySecond: none ? 255 : d.getUTCSeconds(), displayDateDay: none ? 255 : d.getUTCDate(), statusDisplayClockTimeDate: 0 };
+        merge(out, nest(c.hourPath, none ? 255 : d.getUTCHours()));
+        merge(out, nest(c.minutePath, none ? 255 : d.getUTCMinutes()));
+        last.clockLocal = n;
         hu.feed(c.iface, c.field, out);
     }
 
@@ -362,6 +399,7 @@ function install(hu, config, log) {
         if (o.road) feedRoad(o.road);
         if (o.nav) feedNav(o.nav);
         if (o.clock) feedClock(o.clock);
+        if (o.clockLocal) feedClockLocal(o.clockLocal);     // fix/cclist
         if (o.ccRisk) feedCcRisk(o.ccRisk);         // probes (0.7.18)
         if (o.ccBasic) feedCcBasic(o.ccBasic);      // probes
         if (o.symbols) setSymbols(o.symbols);       // probes

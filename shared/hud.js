@@ -1107,12 +1107,24 @@ class HudApp {
                     const out = conv(v, raw), prev = this[key];
                     this[key] = out; this[key + 'At'] = Date.now();
                     if (after && out !== prev) after(prev, out);
+                    // fix/cclist (0.7.19): "logOn" - [member names]: the WHOLE struct is logged, uncut, once per change
+                    // of those members only (the car's clock sends its seconds every 10 s and the log rotates);
+                    // "out": once per change of what it became. Without it: as before, the first 100 characters.
+                    if (Array.isArray(cfg.logOn) || cfg.logOn === 'out') {
+                        const k = cfg.logOn === 'out' ? JSON.stringify(out) : JSON.stringify(cfg.logOn.map((m) => (v && typeof v === 'object' ? v[m] : undefined)));
+                        if (k !== this[key + 'Raw']) { this[key + 'Raw'] = k; this.log.info(name + ' raw: ' + String(JSON.stringify(v)).slice(0, 2000) + ' -> ' + JSON.stringify(out)); }
+                        return;
+                    }
                     const t = String(JSON.stringify(cfg.kind === 'local' || cfg.dstPath ? v : raw)).slice(0, 100);
                     if (t !== this[key + 'Raw']) { this[key + 'Raw'] = t; this.log.info(name + ' raw: ' + t + ' -> ' + JSON.stringify(out)); }
                 },
             });
         };
         this.msaState = null; this.tzCar = null; this.ccShown = null;
+        // fix/cclist (0.7.19): "a message shows" has two sources, merged by _ccMerge: config.ccm (newCCMessage, never
+        // heard on the owner's car) and config.ccList (the list the car really sends). Whichever says one shows wins.
+        this.ccmShown = null; this.ccmUnread = false; this.ccListShown = null; this.ccListUnread = false; this.ccListAny = false;
+        this.tzLocal = null;
         watchRaw(this.config.msa, 'msaState', 'msa', (v, raw) => msaOf(this.config.msa, raw));
         // ---- fix/colour-daynight: the car's own day/night (config.dayNight, Vehicle.statusDayNightChangeOver), the
         // night colours' first source; _isNight falls back to the sun while it is missing or invalid. this.dnCar:
@@ -1160,7 +1172,20 @@ class HudApp {
             }
             return off;
         }, (prev, out) => { if (isNum(prev) !== isNum(out) && this.client && this.client.ready) this._rebuild(); });
-        watchRaw(this.config.ccm, 'ccShown', 'check-control', (v) => ccOf(this.config.ccm, v));
+        // ---- fix/cclist (0.7.19): the car's time zone from the time the CLUSTER SHOWS, the fallback after config.clock.
+        // On the owner's car timeDateUTC's statusClockTimeDateUTC reads UHRZEIT_UEBER_UTC_VERFUEGBAR_..._OFFSETS_NICHT_
+        // VERFUEGBAR ("UTC available, offsets NOT available") and its offset gives none. config.clockLocal names a
+        // field with the local hour and minute (KombiIF statusShowTimeDate: displayHour / displayMinute), and tzOf
+        // kind "local" takes the difference to the unit's UTC clock, rounded to 15 minutes. Used only while
+        // config.clock gives no zone (_tzSource). Logged once per change of the offset it gives (logOn "out").
+        watchRaw(this.config.clockLocal, 'tzLocal', 'clock (local)', (v) => {
+            const off = tzOf(this.config.clockLocal, v, Date.now());
+            return off !== null && tzOk(off) ? off : null;
+        }, (prev, out) => {
+            if (!tzOk(this.tzCar) && isNum(prev) !== isNum(out) && this.client && this.client.ready) this._rebuild();
+        });
+        // ---- end fix/cclist (clock) ----
+        watchRaw(this.config.ccm, 'ccmShown', 'check-control', (v) => ccOf(this.config.ccm, v), () => this._ccMerge());
         // strip integration, decision 7: BMW's marker right of its panel opens only while a CONFIRMED field says BMW
         // draws it (config.ccMarker, null today: _markShown). "shownWhen" lists the raw values meaning "shown"; without
         // it a truthy value does. The lane (and the tacho's box window) follow at once (_ccPush).
@@ -1235,9 +1260,10 @@ class HudApp {
                 const readable = !!(m.name || m.desc);
                 const marked = (isNum(m.symbol) && m.symbol !== 0) || (isNum(m.id) && m.id !== 0 && !inList(cm.clearIds, m.id));
                 const fits = readable || m.symbol !== null || m.id !== null || m.type !== null;
-                this.ccUnread = !readable && (marked || (this.ccAny === true && !fits));
-                this.ccShown = readable || this.ccUnread;
-                if (this.ccUnread) {
+                this.ccmUnread = !readable && (marked || (this.ccAny === true && !fits));
+                this.ccmShown = readable || this.ccmUnread;
+                this._ccMerge();
+                if (this.ccmUnread) {
                     this._rowFail('info', 'a check-control message arrived that app.json config.ccm cannot read (' +
                         (fits ? 'symbol ' + m.symbol + ', id ' + m.id + ', no name or description' : 'no root of the union fits') + ')');
                 }
@@ -1247,8 +1273,9 @@ class HudApp {
                 // The first one that does makes the info field ours, so the layout is rebuilt then - our own text
                 // widgets are only built at a rebuild, the way the car's first time zone brings our clock in.
                 if (!this.ccAny && (m.name || m.desc || m.symbol !== null || m.id !== null || m.type !== null)) {
+                    const was = this._ccWired();     // fix/cclist: ccList may have wired the field already
                     this.ccAny = true;
-                    if (this.client && this.client.ready) this._rebuild();
+                    if (!was && this.client && this.client.ready) this._rebuild();
                 }
                 const key = (m.name ? 'name ' + m.name.length + ' chars' : 'no name') + ', ' +
                     (m.desc ? 'description ' + m.desc.length + ' chars' : 'no description') +
@@ -1264,26 +1291,59 @@ class HudApp {
         // 2026-11-15). config.ccList names the list field; each element gives a short name and a colour.
         // THE SEAM: docs/G20-DESIGN-SPEC.md is measuring the stock order and timing; CC_CYCLE_MS / config.ccm.cycleMs
         // is the one number to change.
+        // ---- fix/cclist (0.7.19, the owner's car, 2026-11-17): newCCMessage never sends anything on that car, but
+        // ccList is live and carries the message on show. Resting: one entry, id 0 GREEN symbol 6; driver's door open:
+        // one entry, id 15 WHITE symbol 2, its name 16 characters; door shut: id 0 again. So ccList is now the PRIMARY
+        // source of "a message shows" (an entry whose id is not in config.ccList.ignoreIds, default [0]) and of our
+        // message's headline (cCShortName), colour (cCColor, and from it the severity) and symbol id (cCListSymbolID).
+        // An entry we must show but cannot read (no name) still counts as showing and latches the row (ccListUnread),
+        // as an unreadable newCCMessage does. Any notification that is a list whose entries fit config.ccList.root
+        // makes the field READ (ccListAny, _ccWired): from then on the blind case is over. Lengths, ids and colours
+        // only go to the log, never the text.
         const cl = this.config.ccList;
-        this.ccItems = []; this.ccListShape = undefined;
+        this.ccItems = []; this.ccListShape = undefined; this.ccListLogs = 0;
         if (cl && cl.iface && cl.field) {
+            const ignore = Array.isArray(cl.ignoreIds) ? cl.ignoreIds : [0];
             watchOne(cl, (v) => {
                 const arr = pick(v, cl.path);
-                const out = [];
+                const out = [], ids = [];
+                let fits = Array.isArray(arr), unread = 0;
                 (Array.isArray(arr) ? arr : []).forEach((e) => {
                     const m = cl.root ? pick(e, cl.root) : e;
-                    if (!m || typeof m !== 'object') return;
+                    if (!m || typeof m !== 'object') { fits = false; return; }
+                    const idRaw = cl.idPath ? pick(m, cl.idPath) : undefined, id = isNum(idRaw) ? idRaw : null;
+                    if (id !== null && inList(ignore, id)) return;          // the car's resting entry: no message
                     const n = pick(m, cl.namePath);
-                    if (typeof n !== 'string' || !n) return;
-                    const id = cl.idPath ? pick(m, cl.idPath) : undefined;
-                    out.push({ name: n.slice(0, 300), color: mapRaw(m, cl.colorPath, cl.colorMap, null) || null, id: isNum(id) ? id : null });
+                    const sy = cl.symbolPath ? pick(m, cl.symbolPath) : undefined;
+                    const color = mapRaw(m, cl.colorPath, cl.colorMap, null) || null;
+                    ids.push(id === null ? '-' : String(id) + ' ' + (color || '?'));
+                    if (typeof n !== 'string' || !n.trim()) { unread++; return; }
+                    out.push({ name: n.slice(0, 300), color: color, id: id, symbol: isNum(sy) ? sy : null });
                 });
                 this.ccItems = out.slice(0, 16);
-                const key = out.length + ' messages, name lengths ' + out.map((o) => o.name.length).join('/');
-                if (key !== this.ccListShape) { this.ccListShape = key; this.log.info('check-control list: ' + key); }
+                this.ccListUnread = unread > 0;
+                this.ccListShown = fits ? (out.length > 0 || unread > 0) : this.ccListShown;
+                if (fits && !this.ccListAny) {
+                    const was = this._ccWired();
+                    this.ccListAny = true;
+                    if (!was && this.client && this.client.ready) this._rebuild();
+                }
+                this._ccMerge();
+                if (this.ccListUnread) {
+                    this._rowFail('info', 'a check-control message arrived in ccList that app.json config.ccList cannot read (' + unread + ' entr' + (unread === 1 ? 'y' : 'ies') + ' with no name)');
+                }
+                // lengths, ids and colours only: never the text ("N messages" counts the readable ones shown)
+                const key = out.length + ' messages, name lengths ' + out.map((o) => o.name.length).join('/') +
+                    (fits ? '' : ' (not a list config.ccList fits)') + '; showing ' + (ids.length ? ids.join(', ') : 'none') +
+                    (Array.isArray(arr) ? ' of ' + arr.length + ' entries' : '') + (unread ? ', ' + unread + ' with no name' : '');
+                if (key !== this.ccListShape && this.ccListLogs < 40) {
+                    this.ccListShape = key; this.ccListLogs++;
+                    this.log.info('check-control list: ' + key);
+                }
                 this._ccPush();         // package X: another message on show opens BMW's panel at once
             });
         }
+        // ---- end fix/cclist (handler) ----
         // Which frame of how many the stock cluster is showing (docs/G20-DESIGN-SPEC.md: it cycles numbered frames,
         // it does not stack or side-scroll). KombiIF statusMenuCCMessage carries the frame number, the count and up
         // to three message ids, so ours can follow the car's own frame instead of guessing a period.
@@ -2750,6 +2810,7 @@ class HudApp {
     /** package X: { min, from } of the time zone in use, or null. `from`: what the log line names. */
     _tzSource() {
         if (tzOk(this.tzCar)) return { min: this.tzCar, from: 'the car (app.json config.clock)' };
+        if (tzOk(this.tzLocal)) return { min: this.tzLocal, from: 'the car\'s shown clock (app.json config.clockLocal)' };
         const tz = this.ctx.settings.item('timeZone') ? this.setting('timeZone') : TZ_AUTO;
         if (tz !== TZ_AUTO && tzOk(tz)) return { min: tz, from: 'the "timeZone" setting' };
         if (tzOk(this.config.utcOffsetMinutes)) return { min: this.config.utcOffsetMinutes, from: 'app.json config.utcOffsetMinutes' };
@@ -3596,7 +3657,7 @@ class HudApp {
         if (!this._seeThrough(this._layoutName()) || this.setting(ROW_KEY) !== ROW_OURS) return;
         const named = (s) => !!(s && s.iface && s.field);
         if (!named(this.config.sign) && !this._signWired()) this._rowFail('sign', 'no speed-limit field in app.json config.sign');
-        if (!this._ccNamed()) this._rowFail('info', 'app.json config.ccm names no message field');
+        if (!this._ccNamed() && !this._ccListNamed()) this._rowFail('info', 'app.json names no message field (config.ccm, config.ccList)');
         if (!named(this.config.road) && !(this.config.nav && this.config.nav.iface)) this._rowFail('nav', 'app.json config.road names no field');
     }
 
@@ -3613,6 +3674,21 @@ class HudApp {
         return !!(c && c.iface && c.field && c.kind === 'message');
     }
 
+    /** fix/cclist: whether app.json names the car's check-control LIST (config.ccList), the primary source since 0.7.19. */
+    _ccListNamed() {
+        const c = this.config.ccList;
+        return !!(c && c.iface && c.field);
+    }
+
+    /** fix/cclist: ccShown / ccUnread from both sources. A message shows when EITHER says one does (ccList on the
+     *  owner's car, newCCMessage on a car that sends it); none shows when one says none and neither says one does;
+     *  unknown (null) while neither has said anything. */
+    _ccMerge() {
+        const a = this.ccListShown, b = this.ccmShown;
+        this.ccShown = a === true || b === true ? true : a === false || b === false ? false : null;
+        this.ccUnread = (a === true && this.ccListUnread === true) || (b === true && this.ccmUnread === true);
+    }
+
     /** Whether the car's own check-control message can be READ: one notification from config.ccm has carried
      *  something our paths found - a name, a description, a symbol, an id or a type. A struct whose paths fit the
      *  car carries its id and its type even with no message on, so this says "config.ccm fits this car", never "a
@@ -3621,7 +3697,8 @@ class HudApp {
      *  BMW's message panel - so the info field stays BMW's (_own) and that panel is left see-through (_ccOpen)
      *  instead of being half covered by our own black, which sliced BMW's message across the middle. */
     _ccWired() {
-        return this._ccNamed() && this.ccAny === true;
+        // fix/cclist: or ccList has spoken once (a list config.ccList fits), which the owner's car does at once
+        return (this._ccNamed() && this.ccAny === true) || (this._ccListNamed() && this.ccListAny === true);
     }
 
     /** Whether BMW's own check-control panel must be left see-through now ("cc:open"): the car says a message shows,
@@ -3642,7 +3719,7 @@ class HudApp {
         // is left open - the hole cut to BMW's own outline (WBBACK u_ccS / u_ccE) - and our row steps aside ("!cc:open")
         if (!this._seeThrough(this._layoutName())) return !this._ccWired();
         // ---- end fix/opaque-cc ----
-        return this._ccNamed() && !this._ccWired() && this._seeThrough(this._layoutName());
+        return (this._ccNamed() || this._ccListNamed()) && !this._ccWired() && this._seeThrough(this._layoutName());
     }
 
     /** package X: our own text for the message the car says is showing has been on its way to the screen for at least
@@ -3769,17 +3846,23 @@ class HudApp {
      *  decide them. */
     _ccNow() {
         const list = this.ccItems || [], m = this.ccMsg || {};
-        if (list.length < 2) return m;
+        if (!list.length) return m;
+        // fix/cclist: newCCMessage's message, when it reports one, is the richer (it has a description); else the
+        // list's entry is the message - on the owner's car the list is all there is
+        const mOn = this.ccmShown === true && !!(m.name || m.desc);
+        const asMsg = (one) => ({ name: one.name, desc: mOn && one.name === m.name ? m.desc : '', color: one.color || (mOn ? m.color : null),
+            symbol: one.symbol === undefined ? null : one.symbol, id: one.id });
         // The car cycles numbered frames and says which one it is on, so ours follows that counter and never runs a
         // timer of its own (the owner, 2026-11-15; docs/G20-DESIGN-SPEC.md). Without the counter the newest message
         // is shown and nothing cycles: a wrong guess at the car's rhythm would look worse than not cycling.
         const f = this.ccFrame || {};
-        if (!(isNum(f.n) && isNum(f.of) && f.of >= 1 && f.n >= 1 && f.n <= f.of)) return m;
-        const id = f.ids[f.n - 1];
-        const byId = isNum(id) ? list.map((x) => x.id).indexOf(id) : -1;
-        const one = list[byId >= 0 ? byId : (f.n - 1) % list.length];
-        // the list carries a short name and a colour; the description belongs to the message the car last sent
-        return { name: one.name, desc: one.name === m.name ? m.desc : '', color: one.color || m.color };
+        if (list.length >= 2 && isNum(f.n) && isNum(f.of) && f.of >= 1 && f.n >= 1 && f.n <= f.of) {
+            const id = f.ids[f.n - 1];
+            const byId = isNum(id) ? list.map((x) => x.id).indexOf(id) : -1;
+            // the list carries a short name and a colour; the description belongs to the message the car last sent
+            return asMsg(list[byId >= 0 ? byId : (f.n - 1) % list.length]);
+        }
+        return mOn ? m : asMsg(list[0]);
     }
 
     /** The check-control message's name or description, '' while none shows or the info field is BMW's. The text is
