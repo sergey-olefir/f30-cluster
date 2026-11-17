@@ -1,0 +1,111 @@
+{
+ "_about": "Package VS (twin-dial round 1): the proposed app.json \"signals\" block for twin_dial. READ ONLY: no \"w\" flag, no setter, no KombiIF.standardCCMessage / extendedCCMessage / operationBordcomputer / kombiSelection / timeDate. Every \"r\" has a NON-ZERO getter id in the car's catalogue (reference/car/2026-11-15/someip/someip-interfaces.json); fields with no getter are \"s\" only. Checked with tools/signals/check_signals.py on a scratch app.json (bake/work/twin-dial/vs/app.json). Keys starting with '_' are notes and are ignored by the generator. Groups: 'carried' = what f30_cluster already reads on this car; 'new' = new content, NOT yet seen on this car (probe list in docs/twin-dial/VS-REPORT.md).",
+ "signals": {
+  "de.bmw.infotainment.vehicle.CDS": {
+   "statusEngineSpeed2": "rs",
+   "statusEngineTemperature": "rs",
+   "statusEngineStatus": "rs",
+   "statusBattery2": "rs",
+   "_carried": "rpm (x0.25), coolant / oil (raw - 48 C, 255 = none), engine running",
+   "_new": "statusBattery2.conditionBatteryChargingCondition (getter 5): a charge-condition byte, NOT a voltage; scaling unknown, probe first"
+  },
+  "de.bmw.infotainment.vehicle.Vehicle2": {
+   "statusCarSpeed2": "rs",
+   "statusDisplayedCCMessage": "rs",
+   "statusZVStatus": "rs",
+   "_carried": "speed (x0.015625 km/h)",
+   "_new": "statusDisplayedCCMessage (getter 61): the number of the message the cluster displays - a second witness beside KombiIF.statusActiveCCMessage; statusZVStatus (getter 85): central locking and boot lid unlocked, for the car picture"
+  },
+  "de.bmw.infrastructure.VehicleInformation": {
+   "statusGearboxDrive": "s",
+   "DataPowerTrain2": "s",
+   "Range": "s",
+   "_new": "Range.mileageKilometre: the odometer, notifier only (32770); the first-choice odometer is KombiIF.statusRangeTankStatus.mileageKilometre (has a getter)"
+  },
+  "de.bmw.infotainment.misc.MDrive": { "dataDisplayGearbox": "s" },
+  "de.bmw.infotainment.drivingexcitement.FES": { "statusFESVehicleDynamicSwitchHMI": "rs" },
+  "de.bmw.infrastructure.VehicleCondition": { "VehicleCondition": "s" },
+  "de.bmw.infrastructure.EnvironmentalInformation": {
+   "ExteriorTemperature": "s",
+   "UnitBN2020": "rs",
+   "_new": "UnitBN2020.unitOfMeasurementMileage (getter 1): km or miles for the odometer and trip"
+  },
+  "de.bmw.infotainment.vehicle.Vehicle": {
+   "statusDayNightChangeOver": "rs",
+   "statusMotorStartAuto": "s"
+  },
+  "de.bmw.infotainment.KombiIF": {
+   "statusRangeTankStatus": "rs",
+   "statusBordcomputerAverage": "rs",
+   "statusBordcomputerTravelData": "rs",
+   "statusBordcomputerTravelStart": "rs",
+   "statusBordcomputerStatus2": "rs",
+   "dataInstrumentPack": "rs",
+   "statusKombiExternalDisplay": "rs",
+   "statusKombiSelection": "rs",
+   "statusKombiSelectionAvailability": "rs",
+   "statusConfigurationKombi5": "rs",
+   "timeDateUTC": "rs",
+   "statusShowTimeDate": "rs",
+   "statusActiveCCMessage": "rs",
+   "statusMenuCCMessage": "rs",
+   "_carried": "statusRangeTankStatus (fuel litres 255 = none, range km 4095 = none), timeDateUTC, statusShowTimeDate, statusActiveCCMessage, statusMenuCCMessage",
+   "_new": "the trip computer (Bordcomputer*), statusRangeTankStatus.mileageKilometre (odometer), dataInstrumentPack.engineTemperatureEvaluated (BMW's own COLD/OK/HOT/dashes verdict for the coolant bar), statusKombiExternalDisplay (the cluster's outside temperature, range and C/F), the cluster-view candidates statusKombiSelection / statusKombiSelectionAvailability / statusConfigurationKombi5"
+  },
+  "de.bmw.infotainment.KombiInterface_2": {
+   "ccList": "rs",
+   "ccListRiskClass": "rs",
+   "_carried": "ccList: the messages' names, colours and symbol ids (live on this car); ccListRiskClass: the 0.7.18 probe. newCCMessage is deliberately NOT declared: it never arrived on this car in 25 min. requestDefaultSymbols is NOT declared: decision 6, we draw our own symbols"
+  },
+  "de.bmw.infotainment.checkcontrol.CheckControlMaster": {
+   "basicList": "rs",
+   "_new": "activeState AKTIV / INAKTIV and reason CCM_SHOWN_BY_IC per ccmId: the candidate for the stored-message marker; log-only until confirmed"
+  },
+  "de.bmw.body.DoorsWindowsRoofMirrors": {
+   "CentralLockingSystemAndPanelStatus2": "s",
+   "_new": "four door switches, boot lid, bonnet, second flap: the car picture (reference 04). NOTIFIER ONLY (no getter): nothing arrives until a door changes, so the picture starts 'unknown', never 'closed'"
+  },
+  "de.bmw.infotainment.vehicle.A4A": {
+   "statusA4ALids": "rs",
+   "_new": "bonnet only, but with a getter (3): the one lid readable at start"
+  },
+  "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
+   "_instances": "HMI_CID",
+   "playerMetadata": "rs",
+   "_new": "the two lines the head unit shows for the front player (first/second line text and type ARTIST / ALBUM / TITLE). Text is PERSONAL: never logged, lengths only"
+  },
+  "de.bmw.infotainment.entertainment.mediasource.MediaSource": {
+   "activeSourceId": "rs",
+   "sources": "rs",
+   "_new": "the active source id (UTF-16) and the list with displayText and playerType (TUNER_FM ... MEDIA_PLAYER)"
+  },
+  "de.bmw.infotainment.connectivity.telephony.ConnectivityAggregator": {
+   "aggregatedCallState": "rs",
+   "_new": "one enum for all phones: DISCONNECTED / INCOMING / ACTIVE / DIALING / HELD. No number or name is read"
+  },
+  "de.bmw.infotainment.hmi.hmicontext.HMIContext": {
+   "_instances": "HMI_CID",
+   "currentICWidget": "rs",
+   "currentICGraphicalContext": "rs",
+   "_new": "the HMI's 'IC widget' (UInt32) and its graphical context: the candidate for following the driver's cluster view. Raw values logged only, meaning unknown"
+  },
+  "de.bmw.infotainment.navigation.guiding.Guidance": {
+   "_instances": "Main_Instance",
+   "currentRoad": "rs",
+   "isOnGuidableRoad": "rs",
+   "nextIntersection": "rs",
+   "_new": "nextIntersection (getter 9): the next manoeuvre's road description and formatted distance, for centre proposal (f); the turn arrow itself is a TurnDirection enum inside a large union - parse cost to be checked"
+  },
+  "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus": {
+   "guidingState": "rs",
+   "nextDestinationInfo": "rs"
+  }
+ },
+ "_notDeclared": {
+  "setters_never": "KombiIF standardCCMessage (setter 34), extendedCCMessage (33), operationBordcomputer (35), kombiSelection (44), operationConfigKombi (51), timeDate (37), operationTimeDateUTC (52), terminCBS (38): all write into the cluster",
+  "zero_getter": "body.AntiTheft.statusDwa: getter id 0 (an 'r' would fail the install); not needed",
+  "voltage": "no field on this car carries the 12 V battery VOLTAGE with a getter. Candidates: analytics.BasicDataSet.basicDataSet.statusVoltageIntelligentBoardnetSensor (UInt16, notifier 32769 only, a ~40-member analytics struct, scaling unknown) and Harman LevelMonitor.systemVoltage (instance Inst1 = 128, getter 1; the head unit's own supply, Int16, probably mV). Both are probe-first; neither is declared",
+  "media_alternatives": "MediaPlayer.currentItemMetadata has ~50 instances (one per source) and no stable 'current' one; TunerFmAmDabMetadata.currentStationFmDabAm carries picture buffers. Neither is declared",
+  "icview_alternatives": "HMIContext2.currentICWidget (VisualContext2 StateID / AppletID, instance '1') and Vehicle2.statusDisplayKombi (STANDARD / M view) - add to the probe if HMIContext gives nothing"
+ }
+}
