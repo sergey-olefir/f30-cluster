@@ -1,0 +1,41 @@
+{
+ "_about": "Package VF: the frame of the Twin Dial (facelift design), proposed values in dial units: u, v in R (R = the bezel ring's centre line, package VR's convention) from the midpoint M of the two dial centres, u right, v down; u_D = u_R / centre_distance_R. Lead reference 02 (the only sharp OEM facelift frame), cross-checked on 04 and 05 (bench / product pictures of the same design, less sharp, slightly different layout). Every value: source refs, uncertainty (R), status. Measured numbers per reference: frame_measured.json. Proposal for the message: message_panel.json.",
+ "centre_distance_R": {"value": 3.875, "refs": {"02": 3.8748, "03": 3.8751, "04": 3.7963, "05": 3.6246, "01": 3.5946}, "status": "verified (VR's canvas); 02 and 03 (in-car photos) agree to 0.0003, 04/05 are smaller units or composites", "for": "u_D conversion; VG owns the G20 value"},
+ "tab_bar": {
+  "extent_u": {"value": [-1.139, 1.139], "refs": {"02": [-1.139, 1.139], "04": [-1.184, 1.171], "05": [-1.118, 1.161]}, "unc": 0.005, "status": "verified on 02 (symmetric about M to 0.001 R); 04/05 within 0.05 R"},
+  "free_gap_to_bezel_R": {"value": 0.19, "status": "verified (02): the bar floats; it does not touch either dial (bezel at v -0.835 is at u -1.33)"},
+  "rule": {"v": -0.761, "thick_R": 0.005, "refs": {"02": -0.761, "04": -0.718, "05": -0.746}, "unc": 0.003, "status": "verified (02: level to 0.001 R over 4 cells; thickness = 1 source px, unresolved, so 'one panel px or a little more')", "colour": "white; under the highlighted tab it takes the tab's colour (02)"},
+  "cell_top_v": {"value": -0.911, "refs": {"02": -0.911, "04": -0.844, "05": -0.859}, "unc": 0.005, "status": "verified (the highlighted fill's top)"},
+  "cell_height_R": {"value": 0.150, "refs": {"02": 0.150, "04": 0.126, "05": 0.113}, "status": "verified on 02; 04/05 lower"},
+  "cell_fill": {"value": "vertical gradient, clear at the top to grey just above the rule; 50 % at v -0.822 (02), -0.816 (04), -0.801 (05)", "status": "verified (shape); colour: package VC"},
+  "separators_u": {"value": [-0.721, -0.492, 0.694, 0.922], "refs": {"02": [-0.721, -0.492, 0.694, 0.922], "04": [-0.717, -0.505, 0.532, 0.748, 0.964], "05": [-0.754, -0.544, 0.522, 0.729, 0.935]}, "unc": 0.004, "status": "verified", "shape": "a dark 1-px gap followed by a light 1-px line at the left edge of the next cell (02, zoomed)"},
+  "tabs": {"value": [["range", -1.139, -0.721], ["warning", -0.721, -0.492], ["media / centre page", -0.492, 0.694], ["phone", 0.694, 0.922], ["nav", 0.922, 1.139]], "rule": "icon tabs 0.22 +- 0.01 R wide (02: 0.229 0.228 0.217; 04: 0.212 0.216 0.216 0.207; 05: 0.210 0.207 0.206 0.226); the first tab is as wide as its icon + value (02: 0.418 R); the middle tab takes the rest (02: 1.186 R) and centres its content (02: content centre 0.100 vs cell centre 0.101)", "status": "verified on 02; 04/05 add a sixth tab (more / settings) at the right"},
+  "content": {"text_baseline_v": -0.814, "text_cap_R": 0.077, "icon_h_R": 0.12, "icon_centre_v": -0.855, "status": "verified (02); text: tab 1 value and the media title; icons: phone 0.125, nav 0.118"},
+  "highlighted_tab": {"value": "the whole cell filled flat in the meaning's colour from cell top to the rule, the rule under it in the same colour, its icon / text white", "refs": {"02": "range tab, red (low fuel)", "04": "warning tab, red", "05": "settings tab, green"}, "status": "verified (shape); colours: VC. The classic generation (01, 03) uses an outlined trapezoid instead - not used"}
+ },
+ "telltale_strip": {"v": [-1.144, -0.951], "items_u": [[-1.321, -0.966], [-0.549, -0.371], [-0.066, 0.069]], "status": "verified on 02 only (04/05 bench units show none)", "on_g20": "BMW's own telltales stay where they are; we draw nothing here (VG: hood and telltale zones)"},
+ "centre_window": {
+  "bounds_v": {"value": [-0.761, 0.710], "status": "verified (02): from the tab-bar rule to the bottom rule; the facelift draws NO border around it (02, 04, 05); the classic 03 does: box u [-0.847, 0.80], v [-0.785, 0.389]"},
+  "bounds_u": {"value": "free space between the bezels (+-0.937 R at v 0); content keeps inside +-0.77 R", "refs": {"02": "text block -0.771..0.769", "05": "title rule +-0.66, scroll bar at u 0.820", "04": "car picture +-0.28"}, "status": "verified"},
+  "page_grammar": {"title": {"centre_u": 0.0, "box_v": [-0.496, -0.371], "baseline_v_est": -0.40, "cap_R_est": 0.096}, "title_rule": {"v": -0.347, "u": [-0.731, 0.734], "thick_R": 0.005}, "body_v": [-0.346, 0.546], "refs": "02 (05 shows the same title / rule / value pattern at v -0.286 / -0.190 / 0.116, centred for a two-item list)", "status": "verified on 02, 05"},
+  "car_picture": {"centre": [-0.001, -0.066], "height_R": 0.96, "caption_v": [0.554, 0.644], "refs": "04", "status": "verified (one ref)"},
+  "map": {"value": "full-bleed between the dials, cut by the bezels: u -1.121..0.906, v -0.956..0.724; road label box v 0.354..0.664", "refs": "01 (classic only; no facelift map frame available)", "status": "hypothesis for the facelift"},
+  "scroll_bar": {"u": 0.820, "v": [-0.261, 0.154], "refs": "05", "status": "verified (one ref)"}
+ },
+ "bottom_row": {
+  "rule": {"v": 0.710, "u": [-1.104, 1.106], "thick_R": 0.0075, "refs": {"02": "0.710, -1.104..1.106, white", "04": "0.655, -1.094..1.091, red", "03 classic": "0.490 (+-0.90) and 0.684 (+-0.83)"}, "unc": 0.003, "status": "verified (02: level to VR's 0.003 deg)", "gap_to_bezel_R": 0.13},
+  "lines": {"baselines_v": [0.854, 1.010], "pitch_R": 0.156, "digit_cap_R": 0.100, "unit_h_R": 0.068, "unit_gap_R": 0.02, "status": "verified (02)"},
+  "columns": {"left_number_right_edge_u": -0.379, "right_number_right_edge_u": 0.644, "unc": 0.006, "rule": "two columns, numbers RIGHT-aligned (right column: 4.5 / +25.5 end at 0.644 both, the decimal points line up at 0.541..0.559), units hang after the number", "status": "verified for the right column (0.001 R); left column 694 / 14:43 end 0.010 R apart: hypothesis that it is the same rule"},
+  "slots": {"L1": "odometer", "R1": "trip", "L2": "clock", "R2": "outside temperature", "refs": "02; 03 (classic) puts odometer / trip on line 1 and clock / icons / temperature on line 2 as well"},
+  "replica_variant": {"value": "one line: 'trip' value starting at u -1.157 (04 and 05 agree to 0.001), range ending at u +1.09..1.14, baseline v 0.95 (04) / 0.88 (05)", "status": "verified, not used (02 is the lead)"}
+ },
+ "joining_outline": {"value": "none: in the facelift the tab bar, the centre content and the bottom rule float in the black; nothing joins them to the dials (gaps 0.19 R at the bar, 0.13 R at the bottom rule)", "status": "verified on 02, 04, 05"},
+ "reduced_view": {"value": "not found: package VR published no further references", "status": "open"},
+ "alignment_rules": [
+  "everything of the frame is symmetric about M's vertical (02: bar +-1.139, title rule -0.731/+0.734, bottom rule -1.104/+1.106)",
+  "the tab-bar rule, the title rule and the bottom rule are level (02, rectified)",
+  "centred texts: page titles and the middle tab's content on u 0 / their cell centre",
+  "the bottom row's numbers are right-aligned in two columns, units hang",
+  "tab content shares one baseline (v -0.814)"
+ ]
+}
