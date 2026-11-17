@@ -17,7 +17,7 @@ character. `ox` shifts a cell from the pen position (ink overhang), `advance`
 moves the pen. Digits get one shared advance (tabular), so a changing number
 doesn't shift sideways.
 """
-import base64, json, os
+import base64, json, math, os
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -162,45 +162,129 @@ F30_FONTS = [
     ('g20_mode', 'Roboto-wdth-wght.subset.ttf', 31.5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ ', 0, [500, 94]),
     ('g20_gear', 'Roboto-wdth-wght.subset.ttf', 105, 'PRNDSM-', 0, [650, 87.5]),
 ]
-FONTS = {'idrive_hud_widgets': HUD_FONTS, 'cluster_themes': CLUSTER_FONTS, 'f30_cluster': F30_FONTS}
+# --- Twin Dial (package A1, round 2, 2026-11-17; docs/twin-dial/SPEC.md 9, docs/twin-dial/R2-A1-REPORT.md) ---
+# Saira (SIL OFL; draws digits and our own Latin labels, NEVER Cyrillic or anything the car sends: no glyph of it is
+# in an atlas, so bench/test-twin-fonts.js can prove a Cyrillic string cannot reach one) at weight 550, width 125,
+# stretched 1.06 horizontally (the references' zero is ~7 % wider; docs/twin-dial/SPEC.md 9). Noto Sans (SIL OFL) at
+# weight 500 for everything else: full car text (CAR_TEXT incl. U+02BC, Latin accents) plus the app's own characters.
+# One atlas per face and size. design/twin-dial/font_slots.json says which slot of the SPEC's table each one serves.
+TD_SAIRA = ('Saira[wdth,wght].ttf', [550, 125], 1.06)      # axes in the file's order: wght, wdth
+TD_NOTO = ('NotoSans-wght.subset.ttf', [500], 1.0)         # wdth is pinned at 100 in the cut-down file
+TD_THIN = '\u2009'          # thin space: the odometer's thousands separator ("48 215 km")
+TD_OURS = "°×ø·±−+" + TD_THIN + '№'
+TD_TEXT = ''.join(chr(c) for c in range(0x20, 0x7f)) + CAR_TEXT + TD_OURS    # every Noto atlas but the counter
+TD_LABELS = UPPER + DIGITS + '+ -–/'
+
+
+def _td(face, name, size, chars, tabular=True):
+    file, weight, stretch = face
+    if face is TD_SAIRA:        # a Cyrillic (or any non-Latin) character can never get into a Saira atlas: the bake refuses
+        bad = [c for c in chars if ord(c) >= 0x250 and c != '–']
+        if bad:
+            raise ValueError('Saira atlas %s: no Cyrillic or other non-Latin characters (%r)' % (name, ''.join(bad)))
+    return (name, file, size, chars, 0, weight, CAR_SUBS if face is TD_NOTO else None, '', None, stretch, tabular)
+
+
+TWIN_FONTS = [
+    # Saira: the dials and the hubs
+    _td(TD_SAIRA, 'td_scale_l', 28, DIGITS),                    # speedometer numerals, large set (face bake; atlas for the tests and the gallery)
+    _td(TD_SAIRA, 'td_scale_s', 18, DIGITS),                    # speedometer numerals, small set
+    _td(TD_SAIRA, 'td_tach', 57, DIGITS),                       # tachometer numerals
+    _td(TD_SAIRA, 'td_big', 92, DIGITS + ':-–'),                # digital speed (atext) and the clock page's time; "–" = no value
+    _td(TD_SAIRA, 'td_clock', 92, DIGITS + ':-–', tabular=False),   # package C: the clock page's time, proportional digits (td_big's tabular ones look gapped in "14:43"); the digital speed keeps td_big (the GPU text needs one pitch)
+    _td(TD_SAIRA, 'td_gear', 64, DIGITS + 'PRNDMS-–'),          # gear and its number (D3, M1..M8, S1..S8)
+    _td(TD_SAIRA, 'td_label', 22, TD_LABELS),                   # READY, OFF, COMFORT / SPORT / SPORT+ / ECO PRO / ADAPTIVE
+    # Noto Sans: titles, values, bottom row, tabs, units, messages
+    _td(TD_NOTO, 'td_title', 41, TD_TEXT),                      # centre page title
+    _td(TD_NOTO, 'td_val', 39, TD_TEXT),                        # centre values, weekday, date
+    _td(TD_NOTO, 'td_body', 31, TD_TEXT),                       # centre body, footer; the range value in the tab bar
+    _td(TD_NOTO, 'td_row', 40, TD_TEXT),                        # bottom row numbers
+    _td(TD_NOTO, 'td_tab', 33, TD_TEXT),                        # the media text in the tab bar
+    _td(TD_NOTO, 'td_u19', 19, TD_TEXT),                        # units, small labels (tab bar "км")
+    _td(TD_NOTO, 'td_u20', 20, TD_TEXT),                        # the hub's unit label
+    _td(TD_NOTO, 'td_u21', 21, TD_TEXT),                        # units, bar ends, "км/год"
+    _td(TD_NOTO, 'td_msg', 42, TD_TEXT),                        # the message headline
+    _td(TD_NOTO, 'td_cnt', 29, DIGITS + '/ '),                  # the message counter "n/m"
+]
+# --- end Twin Dial ---
+FONTS = {'idrive_hud_widgets': HUD_FONTS, 'cluster_themes': CLUSTER_FONTS, 'f30_cluster': F30_FONTS, 'twin_dial': TWIN_FONTS}
 PAD = 2
 ATLAS_W = 1024
+SS = 4            # stretch: glyphs are drawn this many times larger and reduced by area (package A1)
+BLANK = ' \u2009\u200a\u202f\u00a0'      # characters with an advance and no ink
 
 
-def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck='', adv_over=None):
+def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck='', adv_over=None, stretch=1.0, tabular=True):
     """stroke: px of extra weight round every glyph (Michroma has one weight). weight: a named instance of a
     variable font (Orbitron: Regular .. Black), for the M theme's squared BMW-style gear, speed and numbers.
     subs: {char: glyph drawn for it} (Orbitron's zero is slashed; the M8's is plain, so its O stands in).
     tuck: characters added to a font after layouts were built on its cell height (° on value / y_val, Nov 7 2026):
     they don't count towards the cell, and one that rises above it is drawn lower so its top meets the cell's.
     adv_over: {char: advance px} - a glyph's advance set by hand, its ink centred in it (strip integration: wb_row's
-    colon at BMW's 14)."""
+    colon at BMW's 14).
+    stretch: a horizontal stretch of every glyph and its advance (Twin Dial, package A1: Saira 1.06, SPEC 9). 1.0 is
+    the plain path, byte for byte what every other list has always baked; anything else draws each glyph SS times
+    larger, with the stretch applied in the reduction (area average, so the coverage stays exact), and takes the metrics
+    from that drawing. out=None returns the metrics without writing a file (the comparison sheet)."""
+    meta = make_font(name, file, size, chars, stroke, weight, subs, tuck, adv_over, stretch, tabular)
+    if out is not None:
+        with open(os.path.join(out, name + '.json'), 'w') as f:
+            json.dump(meta, f, separators=(',', ':'), ensure_ascii=False)
+        print('%-6s %3dpx  cell height %3d  atlas %dx%d  %d glyphs%s' % (name, size, meta['cellHeight'], ATLAS_W, meta['height'], len(meta['glyphs']), '  stretch %.2f' % stretch if stretch != 1.0 else ''))
+    return meta
+
+
+def make_font(name, file, size, chars, stroke=0, weight=None, subs=None, tuck='', adv_over=None, stretch=1.0, tabular=True):
     adv_over = adv_over or {}
-    font = ImageFont.truetype(os.path.join(SRC, file), size)
-    if isinstance(weight, (list, tuple)): font.set_variation_by_axes(list(weight))     # [wght, wdth] of a variable font
-    elif weight: font.set_variation_by_name(weight)
+    path = os.path.join(SRC, file)
+    def load(px):
+        font = ImageFont.truetype(path, px)
+        if isinstance(weight, (list, tuple)): font.set_variation_by_axes(list(weight))     # [wght, wdth] of a variable font
+        elif weight: font.set_variation_by_name(weight)
+        return font
+    font = load(size)
+    big = load(size * SS) if stretch != 1.0 else None
     subs = subs or {}
     glyph = lambda c: subs.get(c, c)
-    ink = [c for c in chars if c != ' ']
-    boxes = {c: font.getbbox(glyph(c), anchor='ls', stroke_width=stroke) for c in ink}
+    blank = lambda c: c in BLANK
+    ink = [c for c in chars if not blank(c)]
+    if big:
+        def box(c):                  # the glyph's box in final px: stretched across, plain down
+            l, t, r, b = big.getbbox(glyph(c), anchor='ls', stroke_width=stroke * SS)
+            return (math.floor(l * stretch / SS), math.floor(t / SS), math.ceil(r * stretch / SS), math.ceil(b / SS))
+        boxes = {c: box(c) for c in ink}
+        length = lambda c: big.getlength(glyph(c)) / SS * stretch
+    else:
+        boxes = {c: font.getbbox(glyph(c), anchor='ls', stroke_width=stroke) for c in ink}
+        length = lambda c: font.getlength(glyph(c))
     top = min(b[1] for c, b in boxes.items() if c not in tuck)
     bottom = max(b[3] for c, b in boxes.items() if c not in tuck)
     drop = {c: max(0, top - boxes[c][1]) for c in tuck if c in boxes}
     height = bottom - top + 2 * PAD
-    tab = (max(font.getlength(glyph(d)) for d in DIGITS if d in chars) + 2 * stroke) if any(d in chars for d in DIGITS) else 0
+    tab = (max(length(d) for d in DIGITS if d in chars) + 2 * stroke) if tabular and any(d in chars for d in DIGITS) else 0
 
     cells = []
     for c in chars:
-        adv = font.getlength(glyph(c)) + (2 * stroke if c != ' ' else 0)
-        if c == ' ':
+        adv = length(c) + (2 * stroke if not blank(c) else 0)
+        if blank(c):
             cells.append((c, None, 0, round(adv if adv else size * 0.25)))
             continue
         l, _, r, _ = boxes[c]
         w = r - l + 2 * PAD
-        img = Image.new('L', (w, height), 0)
-        ImageDraw.Draw(img).text((PAD - l, PAD - top + drop.get(c, 0)), glyph(c), font=font, fill=255, anchor='ls', stroke_width=stroke, stroke_fill=255)
-        shift = (tab - adv) / 2 if c in DIGITS else (adv_over[c] - adv) / 2 if c in adv_over else 0
-        cells.append((c, img, round(l - PAD + shift), round(tab if c in DIGITS else adv_over.get(c, adv))))
+        if big:
+            M = 8 * SS
+            ox4 = M + max(0, math.ceil((PAD - l) * SS / stretch))
+            oy4 = M + max(0, (PAD - top) * SS)
+            canvas = Image.new('L', (ox4 + max(0, math.ceil((r + PAD) * SS / stretch)) + M, oy4 + (bottom + PAD) * SS + M), 0)
+            ImageDraw.Draw(canvas).text((ox4, oy4 + drop.get(c, 0) * SS), glyph(c), font=big, fill=255, anchor='ls', stroke_width=stroke * SS, stroke_fill=255)
+            x0 = ox4 + (l - PAD) * SS / stretch
+            y0 = oy4 + (top - PAD) * SS
+            img = canvas.resize((w, height), Image.BOX, box=(x0, y0, x0 + w * SS / stretch, y0 + height * SS))
+        else:
+            img = Image.new('L', (w, height), 0)
+            ImageDraw.Draw(img).text((PAD - l, PAD - top + drop.get(c, 0)), glyph(c), font=font, fill=255, anchor='ls', stroke_width=stroke, stroke_fill=255)
+        shift = (tab - adv) / 2 if tab and c in DIGITS else (adv_over[c] - adv) / 2 if c in adv_over else 0
+        cells.append((c, img, round(l - PAD + shift), round(tab if tab and c in DIGITS else adv_over.get(c, adv))))
 
     # simple row packing
     x = y = 0
@@ -224,9 +308,8 @@ def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''
         glyphs[c] = {'x': gx, 'y': gy, 'w': img.width, 'h': img.height, 'ox': ox, 'advance': adv}
     meta = {'source': file, 'size': size, 'cellHeight': height, 'baseline': PAD - top, 'glyphs': glyphs,
             'width': ATLAS_W, 'height': atlas_h, 'alpha': base64.b64encode(atlas.tobytes()).decode('ascii')}
-    with open(os.path.join(out, name + '.json'), 'w') as f:
-        json.dump(meta, f, separators=(',', ':'), ensure_ascii=False)
-    print('%-6s %3dpx  cell height %3d  atlas %dx%d  %d glyphs' % (name, size, height, ATLAS_W, atlas_h, len(glyphs)))
+    if stretch != 1.0: meta['stretch'] = stretch
+    return meta
 
 
 if __name__ == '__main__':

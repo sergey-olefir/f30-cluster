@@ -236,10 +236,15 @@ const Car = require('./kit/car');
 const Waze = require('./waze');
 const Screen = require('./screen');
 const Runs = require('./runs');
+// twin_dial: the {{td:...}} tokens, the centre pages' cycle, the extra signals (shared/twin_tokens.js). Only twin_dial packs the
+// file, so for every other app it is simply absent (null) and none of the twin_dial hooks below does anything.
+let twin = null;
+try { twin = require('./twin_tokens'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_tokens') < 0) throw e; }
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
-const IMAGE_TYPES = { text: true, scale: true, stripe: true, gridlabels: true, icon: true, swatchimg: true };
+const IMAGE_TYPES = { text: true, scale: true, stripe: true, gridlabels: true, icon: true, swatchimg: true,
+    ccplate: true };      // twin_dial: our check-control plate sheet (shared/twin_cc.js paintPlate)
 const STATUS_ASK_MS = 2000;      // after a rebuild: ask cluster-render for its own status text
 const LAYER_BUDGET = 8;          // cluster-render's limit per client connection (CompositorLimits.per_client; confirmed on the car Nov 5 2026)
 const MAX_CONN = 4;              // connections a layout may ask for ("conn"): 32 layers service-wide / 8 per connection
@@ -370,6 +375,18 @@ const NIGHT_KEYS = ['nightDim', 'nightLook'];
 // shaders are compiled without the night look (shaders.js NIGHT 0: no u_nk0..2, no nightLook()). Comfort and
 // Comfort + G20 (theme wb_comfort) keep theirs; the other layouts of a theme of their own keep the plain dimmer.
 const DAY_ONLY_THEMES = ['wb_sport', 'wb_eco'];
+// twin_dial (docs/twin-dial/ENGINE-CONTRACT.md): the Twin Dial's night is one multiplier per material in linear light
+// (SPEC 7.2, hypothesis: no night reference), applied on the GPU to the dial faces (tdial u_n0..u_n2) and to the tab bar's
+// colours (tdback, computed here), and to the text roles by twinNightTheme(). By day every multiplier is 1.
+const TW_NIGHT = { white: 0.80, bezel: 0.70, tick: 0.75, strip: 0.55, bandIn: 0.60, bandOut: 0.55, bandEnd: 0.50, red: 0.85,
+    wedge: 0.80, green: 0.75, ramp: 0.55, rule: 0.70, amber: 0.85, grey: 0.55 };
+const TW_ROLE_NIGHT = { fg: 0.80, dim: 0.75, hot: 0.85, ready: 0.75, amber: 0.85, grey: 0.55, rule: 0.70 };
+// the message severity colours (sRGB codes, the SPEC 7.1 / 8.2 values with the G20's black floor taken out) and their night role
+const TW_SEV = { red: { c: [176, 7, 30], n: 'red' }, amber: { c: [240, 170, 10], n: 'amber' },
+    green: { c: [59, 155, 26], n: 'green' }, grey: { c: [231, 231, 231], n: 'rule' } };
+const TW_RULE = { rule: [231, 231, 231], tab: [237, 237, 237] };     // flat rules (SPEC 7.1); both take the rules' night multiplier
+const TW_LIVE_KEYS = ['redline', 'bandGain'];       // settings the twin layers take in place (uniforms, no rebuild)
+const TW_PANEL = [694, 592, 536, 112];              // the fallback window's box (package A2's mask rect), used when the layout has no mask
 // 0.7.13, the KOMBI guard: when the cluster's display service goes away within KOMBI_GUARD_MS of our scene being shown,
 // KOMBI_STRIKES times within KOMBI_WINDOW_MS, the theme is turned off (every theme, so a drive-mode change doesn't try
 // another), and stays off, across restarts too (<data>/kombi-guard.json), until a theme is picked again. On 2026-11-14
@@ -810,6 +827,9 @@ class HudApp {
         this.carUnits = { press: null, temp: null, psiSeen: false };   // the car's display units, for the TPMS values
         this.program = null;             // 'S' / 'M' from the MDrive gearbox display, else null (D)
         this.fuelL = null; this.rangeKm = null; this.ambient = null;   // KombiIF tank / range, outside temperature
+        this.fuelReserve = null;         // twin_dial: the tank's reserve warning (statusFluidLevelFuelTankSpare): true / false / null
+        this.twinCc = { state: 'none', severity: null };   // twin_dial: the message state package D owns (ENGINE-CONTRACT 2)
+        this.twinLayout = false;         // twin_dial: the layout shown has a tdial / tdback
         this.engineRun = null;           // 'off' | 'starting' | 'running' from CDS statusEngineStatus (_restFrac)
         this.tyres = { p: {}, t: {} };                                  // TPMS pressure (bar) and temperature (C) per corner FL FR RL RR
         this.activeName = null;          // the layout shown now ('off' = nothing)
@@ -863,6 +883,7 @@ class HudApp {
             // a theme or layout picked anywhere (the page asks first, the kit's All settings list doesn't): no longer stepping aside
             if (LOOK_KEYS.indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
             if (PLACE_KEYS.indexOf(key) >= 0) this._guard('place', () => this._place());
+            else if (this.twinLayout && TW_LIVE_KEYS.indexOf(key) >= 0) this._guard('twin live', () => this._twinLive());     // twin_dial: in place
             else if (LIVE_KEYS.indexOf(key) >= 0 || ROW_KEYS.indexOf(key) >= 0) this.widgets.forEach((x) => { x.last = null; });
             else if (WB_LIVE_KEYS.indexOf(key) >= 0 && this._wbLive()) { /* package F: the uniforms are sent, no rebuild */ }
             else if (NIGHT_KEYS.indexOf(key) >= 0 && this._nightLive()) { /* 2026-11-14: the night colours changed in place */ }
@@ -982,6 +1003,9 @@ class HudApp {
                     const f = v && v.fluidLevelFuelTank, r = v && v.range;
                     this.fuelL = isNum(f) && f >= 0 && f < 255 ? f : null;
                     this.rangeKm = isNum(r) && r >= 0 && r < 4095 ? r : null;
+                    // twin_dial: the reserve warning (enum: 1 / AKTIV = active, 3 = no value); nothing of f30_cluster reads it
+                    const sp = v && v.statusFluidLevelFuelTankSpare;
+                    this.fuelReserve = sp === undefined || sp === null || sp === 3 ? null : typeof sp === 'string' ? /AKTIV|ACTIVE/i.test(sp) : sp === 1;
                 },
             },
             // audit/features: is the engine turning? CDS statusEngineStatus (rs, so the current value arrives at
@@ -1380,6 +1404,28 @@ class HudApp {
             });
         }
         // ---- end fix/active-cc (handler) ----
+        // ---- twin_dial (docs/twin-dial/R2-D-REPORT.md): the strict message state machine (shared/twin_cc.js). Only an app
+        // whose config.ccActive carries "strict" (true | false) gets one; f30_cluster has none, and every hook below
+        // is guarded by this.twinMsg, so for it nothing changes. config.ccDisplayed is the second "shown now" witness
+        // (Vehicle2 statusDisplayedCCMessage); the log has numbers only ----
+        this.twinMsg = null; this.twin = null; this.twinCc = { state: 'none', severity: null }; this.ccDisp = null; this.ccDispAny = false; this.ccDispLogged = undefined;
+        if (ca && typeof ca.strict === 'boolean') {
+            this.twin = require('./twin_cc');
+            this.twinMsg = new this.twin.TwinCC({ strict: ca.strict, confirmNow: ca.confirmNow === true,
+                settleMs: CC_SETTLE_MS, log: (l) => this.log.info(l) });
+            const cd = this.config.ccDisplayed;
+            if (cd && cd.iface && cd.field) {
+                watchOne(cd, (v) => {
+                    const r = pick(v, cd.numberPath || []);
+                    if (!isNum(r)) return;
+                    this.ccDisp = r;
+                    if (r !== this.ccDispLogged) { this.ccDispLogged = r; this.log.info('displayed cc: number ' + r); }
+                    if (!this.ccDispAny) { this.ccDispAny = true; this.log.info('displayed cc: the second "shown now" witness has spoken'); }
+                    this._ccPush();
+                });
+            }
+        }
+        // ---- end twin_dial (handler) ----
         // ---- end fix/cclist (handler) ----
         // Which frame of how many the stock cluster is showing (docs/G20-DESIGN-SPEC.md: it cycles numbered frames,
         // it does not stack or side-scroll). KombiIF statusMenuCCMessage carries the frame number, the count and up
@@ -1496,9 +1542,19 @@ class HudApp {
         // lists, chained IN FRONT of any handler already on the field (config.ccList's), which still runs as before
         this._probeWire(extra);
         // ---- end probes ----
+        // ---- twin_dial: probe mode (SPEC 17.1, package F). config.probe on: shared/twin_probe.js subscribes P1..P12 read
+        // only, chained in front of the handlers already on `extra`, and logs numbers / enums / text lengths. Inert (no
+        // require, no handler) while config.probe is off, as in f30_cluster and the normal twin_dial build.
+        this.twinProbe = null;
+        if (this.config.probe) {
+            try { this.twinProbe = require('./twin_probe').wire(extra, { log: this.log, cfg: this.config.probe }); } catch (e) { this.log.warn('probe: twin_probe not started: ' + (e && e.message || e)); }
+        }
+        // ---- end twin_dial ----
         // "condition": BMW's own vehicle state (VehicleCondition), data().condition, 10 = FAHREN (drive-ready). Used
         // by _restFrac to tell READY from OFF on a rev dial. audit/features.
-        this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
+        // twin_dial: the fields only Twin Dial reads (config.twin), chained behind the handlers above; config.carGroups: its own list
+        if (twin && this.config.twin) twin.wire(this, extra);
+        this.car = new Car(this.ctx, this.config.carGroups || ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
         this.car.setRedline(this._redline());
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
         this.gSm = null;                 // { lat, long, at }: their average
@@ -1550,6 +1606,12 @@ class HudApp {
             this._statusSoon();
         });
         c.on('refused', (op, ref, reason) => {
+            // twin_dial: our plate's sheet refused (pixel memory, layer cap): BMW's panel stays open for every message
+            if (this.twinMsg) {
+                let plate = false;
+                this.widgets.forEach((x) => { if (x.ci === ci && x.ref === ref && x.w && x.w.type === 'ccplate') plate = true; });
+                if (plate) { this.twinMsg.sheetRefused(op + ': ' + reason); this._guard('twin cc', () => this._ccPush()); }
+            }
             const w = this._widgetOf(ci, ref);
             this.log.warn('refused ' + op + ' on ' + ref + tag + (w ? ' (' + w + ')' : '') + ': ' + reason);
             if (!this.refused) this.refused = (w || op) + ': ' + reason;   // the first one, until the next rebuild
@@ -1579,6 +1641,7 @@ class HudApp {
         this.screen.start();
         this._perfStart();      // package P: off unless <data>/perf.json asks (see PERF below)
         this._guard('probes', () => this._probeSymbolsLater());     // probes, item 3: the symbol list, once (0.7.18)
+        if (this.twinProbe) this._guard('twin probe', () => this.twinProbe.start());     // twin_dial: package F
     }
 
     /** Waze's map on the panel only while the setting is on and the theme shown has a map window. */
@@ -1654,6 +1717,7 @@ class HudApp {
         this.needleHalt = true; this._guard('needles', () => this._needleApply());     // 0.7.14: the needle timer off
         this._perfStop();       // package P
         clearTimeout(this.probeSymT); this.probeSymT = null;        // probes, item 3 (0.7.18)
+        if (this.twinProbe) this._guard('twin probe stop', () => this.twinProbe.stop());     // twin_dial: package F
         clearTimeout(this.statusAskT);
         if (this.waze) this._guard('waze stop', () => this.waze.stop());
         this._guard('screen stop', () => this.screen.stop());
@@ -1724,6 +1788,8 @@ class HudApp {
             if (w.type === 'atext' && w.exact) out.add(this._exactKey(w, ci));        // 0.7.14: a "gpu" text's atlas
             else if (w.type === 'dial' && w.look === 'wb') { add(w.base); add(w.fill); }
             else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); add({ tex: w.fill }); }
+            else if (w.type === 'tdial') add(w.face);                                  // twin_dial: the dial's R8 face
+            else if (w.type === 'tdback') add(w.panelMask);                            // twin_dial: the fallback window's R8 mask
             else if (w.type === 'wbsign' && w.tex) { add(w.tex.limit); add(w.tex.nopass); }
             else if (w.type === 'wbback') {
                 if (w.collar) { add(w.collar); add(w.mask); }       // package M: "mask", the strip mask
@@ -1942,6 +2008,15 @@ class HudApp {
 
     /* ---- probes (0.7.18 diagnostics: READ ONLY, LOG ONLY; see "probes" above HudApp) ------------------------------- */
 
+    /** twin_dial (package F): the 0.7.18 probes above (ccListRiskClass, basicList, requestDefaultSymbols) belong to
+     *  f30_cluster. twin_dial declares none of those fields and never calls requestDefaultSymbols (SPEC 1, 11), so they
+     *  are off there: config.legacyProbes false, or - when the app says nothing - an app id starting "twin_dial".
+     *  f30_cluster and every other app: unchanged (on). */
+    _legacyProbesOff() {
+        const c = this.config.legacyProbes;
+        return c === undefined ? /^twin_dial/.test(String((this.ctx.spec && this.ctx.spec.id) || '')) : c === false;
+    }
+
     /** Item 1: every new vehicle condition the CAR sends, once, in every layout and with or without cluster-render
      *  (package X's "bottom row: vehicle condition N" only runs in a see-through layout). The car's own value
      *  (car.live), not the demo drive's. Hypothesis to confirm: 5 = BMW's standby row, 7 = P with the engine off. */
@@ -1956,6 +2031,7 @@ class HudApp {
      *  reasons and states - numbers and enum names only. cCShortName (the message text) is never read. Each handler
      *  runs IN FRONT of the one already on the field (config.ccList's), which then runs exactly as before. */
     _probeWire(extra) {
+        if (this._legacyProbesOff()) return;        // twin_dial: package F
         const ID = ['id', 'cCIdentifer', probeNum], COL = ['colour', 'cCColor', probeEnum], SYM = ['symbol', 'cCListSymbolID', probeNum];
         const on = (iface, field, member, cols) => {
             const e = extra[iface] = extra[iface] || {};
@@ -1979,6 +2055,7 @@ class HudApp {
     /** Item 3, the schedule: PROBE_SYM_AFTER_MS after start, then up to PROBE_SYM_WAIT_MS more for KombiInterface_2's
      *  provider; then _probeSymbols, once per run of the app. Never throws. */
     _probeSymbolsLater() {
+        if (this._legacyProbesOff()) return;        // twin_dial: package F
         if (this.probeSymT || this.probeSymDone) return;
         const t0 = Date.now() + PROBE_SYM_AFTER_MS;
         const step = () => {
@@ -2243,6 +2320,7 @@ class HudApp {
     /** Night colours now: a theme of the layout's own, and Cluster Themes' "nightDim" on Auto with the sun down, or on
      *  Always (2026-11-14: to see or keep a night look by day; also how the bench shows them). */
     _nightDim() {
+        if (this.twinLayout) return this._twinNight();         // twin_dial: its own night (the "nightLook" on / off / auto)
         if (!this.ctx.settings.item('nightDim') || !this._nightOk()) return false;     // 2026-11-16: not Sport / Eco Pro
         const v = this.setting('nightDim');
         if (v === 'always') return true;
@@ -2282,6 +2360,11 @@ class HudApp {
     /** this.theme from this.baseTheme and the night colours now: a night look on a 6WB layout, else the plain dimmer. */
     _nightTheme() {
         this.nightOn = this._nightDim();
+        if (this.twinLayout) {          // twin_dial: the night is multipliers per material (TW_NIGHT), no look
+            this.look = null; this.lookName = null;
+            this.theme = this.nightOn ? twinNightTheme(this.baseTheme) : this.baseTheme;
+            return;
+        }
         const pick = this.nightOn && this.wbLayout && this.ctx.settings.item('nightLook') ? this.setting('nightLook') : null;
         this.look = NIGHT_LOOKS.hasOwnProperty(pick) ? NIGHT_LOOKS[pick] : null;
         this.lookName = this.look ? pick : null;
@@ -2336,9 +2419,10 @@ class HudApp {
      *  no layer again and asks for no pixel memory. False: rebuild (a layer that took its colours when it was made). */
     _nightLive() {
         try {
+            if (this.twinLayout && this.baseTheme) return this._twinNightLive();      // twin_dial
             if (!this.activeName || this.activeName === 'off' || !this.layoutTheme || !this.baseTheme || !this.widgets.size) return false;
             if (!this._nightOk() && !this.nightOn) return true;     // 2026-11-16: 6WB Sport / Eco Pro: nothing to change, no rebuild
-            const live = (w) => w.type === 'text' || w.type === 'wbback' || w.type === 'wbsign' || w.type === 'wbmsa' || (w.type === 'dial' && w.look === 'wb') ||
+            const live = (w) => w.type === 'text' || (w.type === 'icon' && !!w.tdLive) /* twin_dial */ || w.type === 'wbback' || w.type === 'wbsign' || w.type === 'wbmsa' || (w.type === 'dial' && w.look === 'wb') ||
                 (w.type === 'atext' && !!w.exact);      // 0.7.14: a "gpu" text (u_color)
             let ok = true;
             this.widgets.forEach((x) => { if (!x.w || !x.ref || !live(x.w)) ok = false; });
@@ -2357,6 +2441,208 @@ class HudApp {
     _nightNote() { return this.nightOn ? 'on (' + (this.lookName || 'plain') + ')' : 'off'; }
 
     /* --- end night looks --- */
+
+    /* ---- twin_dial (docs/twin-dial/ENGINE-CONTRACT.md, package B): the Twin Dial's dials and backdrop ----------------------
+     * "tdial" (one effect layer a dial, shaders.js TDIAL) and "tdback" (the three-part backdrop, TDBACK). Everything is
+     * behind w.type or this.twinLayout, so f30_cluster never reaches it. The needle angle is worked out here (the
+     * tachometer's linear law, the speedometer's piecewise one), so the shader only draws; the redline, the band level,
+     * the night multipliers and the message state are uniforms, sent in place (no layer is made again). */
+
+    /** Night now for a twin layout: the "nightLook" setting (on / off), else (auto) the car's day / night, then the sun. */
+    _twinNight() {
+        const v = this.ctx.settings.item('nightLook') ? this.setting('nightLook') : 'auto';
+        return v === 'on' ? true : v === 'off' ? false : this._isNight();
+    }
+
+    /** this.twinCc (package D's message state), cleaned: { state: none | window | ours, severity: red | amber | green | grey | null }. */
+    _twinCcNow() {
+        const c = this.twinCc || {};
+        const state = c.state === 'window' || c.state === 'ours' ? c.state : 'none';
+        return { state, severity: state === 'none' ? null : TW_SEV[c.severity] ? c.severity : 'grey' };
+    }
+
+    /** The night multipliers as the three vec4s of TDIAL (u_n0, u_n1, u_n2); all 1 by day. */
+    _twinMults() {
+        const m = (k) => this.nightOn ? TW_NIGHT[k] : 1;
+        return [[m('white'), m('bezel'), m('tick'), m('strip')], [m('bandIn'), m('bandOut'), m('bandEnd'), m('red')], [m('wedge'), m('green'), m('ramp'), m('rule')]];
+    }
+
+    /** A sRGB code as the shader's colour (0..1, alpha 1), at the night multiplier of `role` when night colours are on. */
+    _twinCode(c, role) {
+        const k = this.nightOn ? TW_NIGHT[role] : 1;
+        return c.map((v) => (k === 1 ? v : twinDim(v, k)) / 255).concat([1]);
+    }
+
+    _twinDialInit(x) {
+        const w = x.w, c = x.c, ref = x.ref, f = w.face || {}, b = w.bar;
+        x.tw = { tach: w.kind === 'tach', sweep: isNum(w.sweep) ? w.sweep : 125, max: isNum(w.scaleMax) ? w.scaleMax : 8000 };
+        c.uniform(ref, 'u_geo', [w.w, w.h, w.centre[0] - w.x, w.centre[1] - w.y]);
+        try { c.bind(ref, 'u_face', this._scene(f.tex, x.ci).ref); } catch (e) {
+            this.log.error('dial "' + w.id + '": no face (' + (e && e.message || e) + '); only the needle and the bar draw');
+        }
+        c.uniform(ref, 'u_faceR', [(f.x || 0) - w.x, (f.y || 0) - w.y, f.w || 1, f.h || 1]);
+        c.uniform(ref, 'u_bar', b ? [b.y - w.y, b.x0 - w.x, b.x1 - w.x, isNum(b.h) ? b.h : 7.5] : [0, 0, 0, 0]);
+        c.uniform(ref, 'u_bar2', [b && b.segs || 5, b && isNum(b.gap) ? b.gap : 4, 0, 0]);
+        c.uniform(ref, 'u_dyn', [-x.tw.sweep, 0, -1, 0]);
+        this._twinDialSend(x);
+    }
+
+    /** What changes with a setting or the night colours, not with the car's data: u_dim, u_red, u_n0..u_n2. */
+    _twinDialSend(x) {
+        const w = x.w, c = x.c, ref = x.ref, t = x.tw;
+        const g = this.ctx.settings.item('bandGain') ? this.setting('bandGain') : 1;
+        c.uniform(ref, 'u_dim', [isNum(w.R) ? w.R : 300, t.sweep, isNum(g) ? Math.max(0.6, Math.min(1.7, g)) : 1, w.shadow === false ? 0 : 1]);
+        let red = [999, 999, 999, 999];
+        if (t.tach) {
+            const rl = w.redline === undefined || w.redline === 'setting' ? this._redline() : w.redline;
+            if (isNum(rl) && rl > 0 && rl < t.max) {
+                // a numeral is red from the redline rounded up to a thousand (half a step before its centre), a tick from the redline itself
+                const ang = (r) => -t.sweep + 2 * t.sweep * r / t.max, step = 2 * t.sweep / (t.max / 1000);
+                red = [ang(rl), ang(Math.ceil(rl / 1000) * 1000) - step / 2, ang(rl) - 0.6, t.sweep];
+            }
+        }
+        c.uniform(ref, 'u_red', red);
+        const n = this._twinMults();
+        c.uniform(ref, 'u_n0', n[0]); c.uniform(ref, 'u_n1', n[1]); c.uniform(ref, 'u_n2', n[2]);
+        x.last = null;
+    }
+
+    /** The needle's angle, degrees clockwise from 12 o'clock (SPEC 4, 5.1, 5.2). */
+    _twinDeg(x) {
+        const w = x.w, t = x.tw, sw = t.sweep;
+        let deg;
+        if (t.tach) {
+            const rpm = this._raw('rpm');
+            if (!(isNum(rpm) && rpm >= 150)) {         // engine off: ready to drive rests at 0, else on the OFF mark (as _restFrac)
+                const ready = this._raw('msa') === MSA_STATES.stopped || COND_READY.indexOf(this._data().condition) >= 0 || this.engineRun === 'running';
+                return ready ? -sw : isNum(w.restDeg) ? w.restDeg : -135;
+            }
+            deg = -sw + 2 * sw * rpm / t.max;
+        } else {
+            const v = this._raw('speed');
+            if (!isNum(v)) return -sw;
+            deg = v <= 100 ? -sw + sw / 5 * v / 20 : sw / 5 * (v - 100) / 40;
+        }
+        return Math.max(-sw, Math.min(sw, deg));
+    }
+
+    _twinDialUpdate(x, force) {
+        const w = x.w, b = w.bar;
+        const deg = Math.round(this._twinDeg(x) * 50) / 50;
+        let fill = 0, seg = -1;
+        if (b) {
+            const sig = this._raw(b.signal), mn = isNum(b.min) ? b.min : 0, mx = isNum(b.max) ? b.max : 1;
+            if (isNum(sig)) {
+                fill = Math.round(Math.max(0, Math.min(1, (sig - mn) / (mx - mn))) * 1000) / 1000;
+                if (b.reserve && this._raw(b.reserve)) seg = 0;
+                else if (isNum(b.hotAt) && sig >= b.hotAt) seg = (b.segs || 5) - 1;
+            }
+        }
+        const key = deg + '|' + fill + '|' + seg;
+        if (!force && key === x.last) return;
+        x.last = key;
+        x.c.uniform(x.ref, 'u_dyn', [deg, fill, seg, 0]);
+    }
+
+    _twinBackInit(x) {
+        const w = x.w, c = x.c, ref = x.ref, L = w.part === 'L';
+        c.uniform(ref, 'u_geo', [w.w, w.h, 0, 0]);
+        const holes = (Array.isArray(w.holes) ? w.holes : []).map((h) => [h[0] - w.x, h[1] - w.y, h[2] - w.x, h[3] - w.y])
+            .filter((h) => h[2] > 0 && h[3] > 0 && h[0] < w.w && h[1] < w.h);
+        if (holes.length > 8) this.log.warn('backdrop "' + w.id + '": ' + holes.length + ' holes, the shader takes 8: the rest are left covered');
+        const flat = [];
+        for (let i = 0; i < 8; i++) flat.push.apply(flat, holes[i] || [0, 0, 0, 0]);
+        c.uniform(ref, 'u_hole', flat, { type: 'vec4' });
+        x.tw = { L };
+        x.twKey = null;
+        if (!L) return;
+        const t = w.tab || {}, r = Array.isArray(t.rect) ? t.rect : [0, 0, 0, 0], pm = w.panelMask;
+        c.uniform(ref, 'u_tab', [r[0] - w.x, r[1] - w.y, r[2] - w.x, r[3] - w.y]);
+        c.uniform(ref, 'u_sep', [0, 1, 2, 3].map((i) => isNum((t.seps || [])[i]) ? t.seps[i] - w.x : -10));
+        const hl = Array.isArray(t.highlight) ? t.highlight : [0, 0];
+        Object.assign(x.tw, { rule: (Array.isArray(t.rule) ? t.rule : [0, 0]).map((v) => v - w.y), ramp: Array.isArray(t.ramp) ? t.ramp : [0.002, 0.16],
+            hi: [hl[0] - w.x, hl[1] - w.x], rules: Array.isArray(w.rules) ? w.rules.slice(0, 4) : [], keep: w.maskKeep === true, mask: false });
+        let mr = [TW_PANEL[0] - w.x, TW_PANEL[1] - w.y, TW_PANEL[2], TW_PANEL[3]];
+        if (pm && pm.tex) {
+            try {
+                const a = this._scene(pm.tex, x.ci);
+                c.bind(ref, 'u_mask', a.ref);
+                mr = [(isNum(pm.x) ? pm.x : TW_PANEL[0]) - w.x, (isNum(pm.y) ? pm.y : TW_PANEL[1]) - w.y, isNum(pm.w) ? pm.w : a.w, isNum(pm.h) ? pm.h : a.h];
+                x.tw.mask = true;
+            } catch (e) {
+                // no mask: the window opens as the whole bbox of BMW's panel (more of it than the polygon, never less)
+                this.log.error('backdrop "' + w.id + '": no panel mask (' + (e && e.message || e) + '); the fallback window is the whole bbox');
+            }
+        } else this.log.warn('backdrop "' + w.id + '": no panelMask; the fallback window is the whole bbox of BMW\'s panel');
+        c.uniform(ref, 'u_maskR', mr);
+        this._twinBackSend(x, true);
+    }
+
+    /** Everything of the backdrop that follows the message state or the night colours (part L; the others are static). */
+    _twinBackSend(x, force) {
+        const t = x.tw;
+        if (!t || !t.L || !x.ref) return;
+        const w = x.w, c = x.c, ref = x.ref, cc = this._twinCcNow();
+        const key = cc.state + '|' + cc.severity + '|' + this.nightOn;
+        if (!force && key === x.twKey) return;
+        x.twKey = key;
+        const sev = cc.state !== 'none' ? TW_SEV[cc.severity] : null, sevC = sev ? this._twinCode(sev.c, sev.n) : null;
+        const rm = this.nightOn ? TW_NIGHT.ramp : 1;
+        c.uniform(ref, 'u_tabR', [t.rule[0], t.rule[1], t.ramp[0] * rm, t.ramp[1] * rm]);
+        c.uniform(ref, 'u_sepC', this._twinCode([96, 96, 96], 'ramp'));
+        c.uniform(ref, 'u_ruleT', this._twinCode(TW_RULE.tab, 'rule'));
+        c.uniform(ref, 'u_hi', [t.hi[0], t.hi[1], sev ? 1 : 0, 0]);
+        c.uniform(ref, 'u_hiC', sevC || [0, 0, 0, 1]);
+        const rects = [], cols = [];
+        for (let i = 0; i < 4; i++) {
+            let r = t.rules[i];
+            if (!r) { rects.push(0, 0, 0, 0); cols.push(0, 0, 0, 1); continue; }
+            if (cc.state === 'ours' && r.ours) r = Object.assign({}, r, r.ours);
+            rects.push(r.x0 - w.x, r.y0 - w.y, r.x1 - w.x, r.y1 - w.y);
+            cols.push.apply(cols, r.role === 'severity' ? sevC || this._twinCode(TW_RULE.rule, 'rule') : this._twinCode(TW_RULE[r.role] || TW_RULE.rule, 'rule'));
+        }
+        c.uniform(ref, 'u_rule', rects, { type: 'vec4' });
+        c.uniform(ref, 'u_ruleC', cols, { type: 'vec4' });
+        c.uniform(ref, 'u_win', [cc.state === 'window' ? 1 : 0, t.mask && t.keep ? 1 : 0, t.mask ? 0 : 1, 0]);
+    }
+
+    /** D's entry (ENGINE-CONTRACT 2): this.twinCc changed. Resends what depends on it, nothing when nothing changed. */
+    _twinSync() {
+        this.widgets.forEach((x) => { if (x.w && x.w.type === 'tdback' && x.ref) this._guard('twin sync', () => this._twinBackSend(x, false)); });
+    }
+
+    /** "redline" / "bandGain" changed: the dials' uniforms, in place. */
+    _twinLive() {
+        this.widgets.forEach((x) => { if (x.w && x.w.type === 'tdial' && x.ref) this._twinDialSend(x); });
+    }
+
+    /** The night colours of a twin layer, again (the night changed): the shader's multipliers, the backdrop's colours, the
+     *  GPU digits' colour, the icons' pixels; the texts paint again on the next tick (x.last = null). */
+    _twinNightSend(x) {
+        const w = x.w;
+        x.last = null; x.lastPaint = 0;
+        if (w.type === 'tdial') this._twinDialSend(x);
+        else if (w.type === 'tdback') this._twinBackSend(x, true);
+        else if (w.type === 'atext' && !w.exact) x.c.uniform(x.ref, 'u_color', rgba(color(this.theme, w.color || 'fg')));
+        else if (w.type === 'icon') this._blit(x, null, paintIcon(w.icon, w.w, w.h, color(this.theme, w.color || 'fg')));
+    }
+
+    /** The night changed on a twin layout: in place (true), or a rebuild is needed (false). */
+    _twinNightLive() {
+        if (!this.activeName || this.activeName === 'off' || !this.widgets.size) return false;
+        let ok = true;
+        this.widgets.forEach((x) => { if (!x.w || !x.ref) ok = false; });
+        if (!ok) return false;
+        const was = this.nightOn;
+        this._nightTheme();
+        if (was === this.nightOn) return true;
+        this.widgets.forEach((x) => this._guard('twin night', () => this._twinNightSend(x)));
+        this.log.info('night colours ' + (this.nightOn ? 'on' : 'off') + ', in place');
+        this._status();
+        return true;
+    }
+
+    /* ---- end twin_dial ---- */
 
     /** Start the shift-light test: the rpm the lights, bars and readouts see climbs to the shift point and holds there
      *  (about 4 s). Only while the car stands (or on demo data). Returns false when it can't run now. */
@@ -2582,6 +2868,7 @@ class HudApp {
         if (name === 'limitUnknown') return this.limitState === 'unknown' ? 1 : null;
         if (name === 'msa') return MSA_STATES[this.msaState] || null;
         if (name === 'ccMsg') { const cc = this._cc(); return cc === null ? null : cc ? 1 : 0; }
+        if (name === 'reserve') return this.fuelReserve === true ? 1 : this.fuelReserve === false ? 0 : null;     // twin_dial
         if (name === 'cons') return isNum(this.consL) && Date.now() - this.consAt < 5000 ? this.consL : this._data().demo ? 7.4 : null;
         if (name === 'limit') return isNum(this.limitKmh) ? this.limitKmh : this.limitState === 'none' && this._data().demo ? 90 : null;
         if (name === 'fuel' || name === 'range' || name === 'ambient') {
@@ -2786,6 +3073,7 @@ class HudApp {
                 return ((h % 12) || 12) + ':' + pad2(m);
             }
             default:
+                if (twin && tok.indexOf('td:') === 0) return twin.token(this, tok);        // twin_dial: shared/twin_tokens.js
                 if (tok.indexOf('spd:') === 0) { const v = SPEED_SCALE[us ? 'us' : 'metric'][Number(tok.slice(4))]; return v === undefined ? '' : String(v); }   // speed scale labels
                 if (tok.indexOf('temp:') === 0) { const c = Number(tok.slice(5)); return isNum(c) ? String(us ? Math.round((c * 9 / 5 + 32) / 10) * 10 : Math.round(c)) : '--'; }   // gauge labels: °F to the 10
                 if (tok.indexOf('setup:') === 0) { const s = this._setup(); return s ? s[tok.slice(6)] || '' : '--'; }
@@ -2884,6 +3172,9 @@ class HudApp {
         // our message is on the screen until its new layer has been painted
         this.rowBuiltOurs = this._rowWhy() === null;
         this.ccDrawn = null;
+        // twin_dial: nothing of ours is on the screen after the drop; the state is decided again BEFORE the layers are made,
+        // so the new backdrop is born with BMW's window open if a message shows (_twinPush paints the plate at the end)
+        if (this.twinMsg) this._guard('twin cc', () => { this.twinMsg.rebuilt(); this.twinMsg.update(this._twinInputs(), this.twin.mono()); });
         this._layerRefs().forEach((r) => r.c.drop(r.ref));
         this.placed = [];
         this.widgets.clear();
@@ -2919,6 +3210,7 @@ class HudApp {
         this.themeName = this._themeName();
         this.baseTheme = THEMES[this.themeName] || THEMES.classic;
         this.wbLayout = layout.widgets.some((w) => w.type === 'wbback' || (w.type === 'dial' && w.look === 'wb'));
+        this.twinLayout = layout.widgets.some((w) => w.type === 'tdial' || w.type === 'tdback');     // twin_dial
         this._nightTheme();             // 2026-11-14: this.theme, with the night colours (a night look or the plain dimmer)
         this.log.info('layout "' + layout.name + '", theme ' + this.theme.name + (this.layoutTheme ? '' : ' (' + this.setting('hudTheme') + ')') +
             (this.nightOn ? ', night colours ' + this._nightNote() : ''));
@@ -2980,6 +3272,7 @@ class HudApp {
         });
         if (px > PIXEL_BYTES) this.log.warn('layout "' + layout.name + '" needs ' + mib(px) + ' of pixel memory; cluster-render has 16 MiB for every app together (each image counts twice)');
         this.statusAskT = setTimeout(() => { this.statusAskT = null; this._guard('status request', () => this.client.status()); }, STATUS_ASK_MS);
+        if (this.twinMsg) this._guard('twin cc', () => this._twinPush(true));      // twin_dial: the new plate gets its pixels, the rows their state
     }
 
     /**
@@ -3082,6 +3375,13 @@ class HudApp {
         // 2026-11-13: "cc:shown" is on only while the car says a message shows (unknown: off, so ours stays drawn)
         // 2026-11-16: "cc:open" is on while BMW's own message panel must be left see-through (_ccOpen), which is
         // "cc:shown" plus the car whose messages we cannot read at all
+        if (this.twinMsg && /^cc:(rest|ours|window|any)$/.test(k)) {
+            // twin_dial: the message state (shared/twin_cc.js): rest = no message shown (the bottom row), ours = our plate is
+            // on the screen, window = BMW's own panel is see-through, any = ours or the window
+            const st = this.twinMsg.state;
+            const on = k === 'cc:rest' ? st === 'none' : k === 'cc:ours' ? st === 'ours' : k === 'cc:window' ? st === 'window' : st !== 'none';
+            return not ? !on : on;
+        }
         if (k.indexOf('cc:') === 0) {
             const cc = this._cc();
             const on = (k === 'cc:none' && cc === false) || (k === 'cc:shown' && cc === true) || (k === 'cc:open' && this._ccOpen());
@@ -3105,6 +3405,7 @@ class HudApp {
             else if (w.type === 'dial' && w.look === 'wb') fs = shaders.wbdialFor(WB_STYLE[w.style] || 0, this._nightOk());
             else if (w.type === 'wbback') fs = shaders.wbbackFor(WB_STYLE[w.style] || 0, this._nightOk());
             else if (w.type === 'wbsign') fs = shaders.wbsignFor(this._nightOk());
+            else if (w.type === 'tdback') fs = shaders.tdbackFor(w.part);                // twin_dial: part L has the tab bar and the window
             else fs = shaders[w.type];
             if (fs) ref = c.effect(Object.assign({ fs }, base));
             if (!ref) { this.log.warn('widget "' + w.id + '": layer refused'); return; }
@@ -3129,6 +3430,7 @@ class HudApp {
             }
         } else if (w.type === 'gridlabels') this._paintGridLabels(x);
         else if (w.type === 'icon') this._blit(x, null, paintIcon(w.icon, w.w, w.h, color(t, w.color || 'fg')));
+        else if (w.type === 'ccplate') { x.px = Buffer.alloc(w.w * w.h * 4, 0); x.plateKey = ''; x.plateMsg = null; x.plateAt = 0; }     // twin_dial: empty until _twinPush paints it
         else if (w.type === 'sdash') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_geo', w.geo);
@@ -3352,7 +3654,9 @@ class HudApp {
             c.uniform(ref, 'u_foot', [wb.foot, fl[0] - w.y, fl[1] - w.x, fl[2] - w.x]);
             x.wbFootNow = wb.foot;          // package F: the foot drawn now ("wbFoot" changes it live, _wbLive)
             this._wbColours(x);             // 2026-11-14: u_color again, u_win and the night look (u_nk0..2)
-        } else if (w.type === 'gmeter') {
+        } else if (w.type === 'tdial') this._twinDialInit(x);      // twin_dial
+        else if (w.type === 'tdback') this._twinBackInit(x);
+        else if (w.type === 'gmeter') {
             const L = color(t, w.line || 'dim');
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_line', rgba([L[0], L[1], L[2], isNum(w.lineAlpha) ? w.lineAlpha : 150]));
@@ -3802,6 +4106,7 @@ class HudApp {
      *  its messages at all and so must not cover a panel the cluster may be writing in. fix/opaque-cc: the opaque
      *  themes too - their background covers BMW's cluster whole, so while we are blind it would hide BMW's warnings. */
     _ccOpen() {
+        if (this.twinMsg) return this.twinMsg.window;      // twin_dial: the state machine's verdict (SPEC 8.4)
         // package X, THE SAFETY RULE (the owner, 2026-11-16: "a BMW warning is never hidden unless our own text for it
         // is on the screen in the same frame"). While the row is OURS, BMW's panel is covered only once our text for
         // the very message the car says is showing has been sent, CC_SETTLE_MS ago, in an earlier tick (_ccOnScreen).
@@ -3831,6 +4136,7 @@ class HudApp {
      *  bench's audit caught exactly that). Opening is what matters here; covering still waits for _ccOnScreen. */
     _ccPush() {
         if (!this.client || !this.client.ready || !this.widgets) return;
+        if (this.twinMsg) { this._guard('twin cc', () => this._twinPush()); return; }     // twin_dial
         // ---- fix/row-cc (2026-11-16): our "cc:"-toggled texts step aside BEFORE BMW's panel opens (_ccLiveSync) ----
         this._guard('message panel texts', () => this._ccLiveSync(true));
         // ---- end fix/row-cc ----
@@ -3848,6 +4154,109 @@ class HudApp {
         this._guard('message panel texts', () => this._ccLiveSync(false));
         // ---- end fix/row-cc ----
     }
+
+    /* ---- twin_dial (docs/twin-dial/R2-D-REPORT.md): the strict check-control state machine, shared/twin_cc.js ----
+     * One verdict per signal event or tick: this.twinMsg.state is none | window | ours, .window the see-through flag of
+     * tdback's fallback window, .severity 0..4 (none grey green amber red) for the tab highlight and the rule. The
+     * plate (widget type "ccplate") is painted here, in the signal handler's own turn, never in a later tick, and
+     * everything that changes in one turn goes out as one corked write. The order inside the turn is the order in which
+     * no step leaves BMW's panel covered without our text for the shown message: the plate for the message to show goes
+     * up first, the rows step aside, the window opens or shuts, a plate that has nothing to show is cleared only then,
+     * and the rows come back last, after the window has shut. */
+
+    /** What the state machine reads from the engine (the fields _ccListEval and the two "shown now" handlers keep). */
+    _twinInputs() {
+        const ca = this.config.ccActive || {}, all = this.ccListAll || [];
+        const wired = this._ccWired() || this.ccDispAny === true;
+        return {
+            read: wired,
+            actWired: this.ccActAny === true, act: this.ccAct ? this.ccAct.number : null,
+            dispWired: this.ccDispAny === true, disp: this.ccDisp,
+            noneValues: Array.isArray(ca.noneValues) ? ca.noneValues : [0],
+            find: (id) => all.find((e) => e.id === id) || null,
+            shown: this.ccListShown, live: this.ccItems || [], heurEntry: (this.ccItems || [])[0] || null,
+            frame: this.ccFrame,
+        };
+    }
+
+    /** The key a plate widget's pixels must have to show candidate `c` (or nothing). */
+    _twinPlateKey(c) { return c ? c.key + '|' + c.counter + '|' + (this.nightOn ? 'n' : 'd') : ''; }
+
+    /** One decision, then every layer it touches, in one corked write. `force`: the layers are new (a rebuild), send all. */
+    _twinPush(force) {
+        const t = this.twinMsg, now = this.twin.mono();
+        const changed = t.update(this._twinInputs(), now);
+        const plates = [];
+        this.widgets.forEach((x) => { if (x.w && x.w.type === 'ccplate' && x.ref) plates.push(x); });
+        const want = this._twinPlateKey(t.candidate);
+        if (!force && !changed && !plates.some((x) => x.plateKey !== want)) return;     // nothing moved: nothing to send
+        // the plate's pixels are made first (that can fail: a character the font lacks, a throw), so a failure
+        // latches BEFORE anything is sent and the state is decided again without a candidate
+        let bufs = null;
+        for (let pass = 0; pass < 3; pass++) {
+            bufs = null;
+            if (t.candidate && plates.length) {
+                bufs = plates.map((x) => this._twinPlateBuf(x, t.candidate));
+                if (bufs.some((b) => b === null)) { t.update(this._twinInputs(), now); continue; }
+            }
+            break;
+        }
+        // the state the backdrop (tdback, B's contract) reads: this.twinCc, then this._twinSync()
+        this.twinCc = { state: t.state, severity: t.severity ? this.twin.SEV_NAMES[t.severity] : null };
+        const socks = this._cork();
+        try {
+            // 1. the plate for the message to show goes up: from here on our text for it covers BMW's panel
+            if (bufs) plates.forEach((x, i) => this._twinSend(x, bufs[i], t.candidate, now));
+            // 2. the rows step aside before BMW's panel opens
+            if (t.state !== 'none') this._guard('message panel texts', () => this._ccLiveSync(true));
+            // 3. the window (the backdrop's fallback hole), the tab highlight and the rule colour
+            if (typeof this._twinSync === 'function') this._guard('tdback cc', () => this._twinSync());
+            this.widgets.forEach((x) => {
+                if (x.w && x.ref && x.w.type === 'fill' && typeof x.w.holeWhen === 'string' && x.w.holeWhen.indexOf('cc:') >= 0) {
+                    const h = this._hole(x.w), key = h.join(',');
+                    if (key !== x.last) { x.last = key; x.c.uniform(x.ref, 'u_hole', h); }
+                }
+            });
+            // 4. a plate with nothing to show is cleared only now
+            if (!bufs) plates.forEach((x) => this._twinSend(x, null, null, now));
+            // 5. the rows come back last, after BMW's panel has shut
+            if (t.state === 'none') this._guard('message panel texts', () => this._ccLiveSync(false));
+        } finally { this._uncork(socks); }
+    }
+
+    /** The plate's pixels for message `c` as a widget `x` shows it, or null after latching a failure (a character the
+     *  font lacks, or a throw while painting). Never logs the text. */
+    _twinPlateBuf(x, c) {
+        const w = x.w, t = this.twinMsg;
+        try {
+            const miss = this._missingGlyphs(c.name + c.counter, w.font);
+            const missCounter = c.counter ? this._missingGlyphs(c.counter, w.counterFont || w.font) : '';
+            if (miss || missCounter) { t.fail('glyph', c.key, (miss || missCounter)); return null; }
+            const dev = this.twin.paintPlate({ textRaster, paintIcon, icons: require('./icons').ICONS }, c,
+                { font: w.font, counterFont: w.counterFont, night: this.nightOn, x: w.x, y: w.y, w: w.w, h: w.h });
+            this.ccFit = { lines: dev.lines.length, cut: dev.cut, symbol: dev.symbol, sev: dev.sev };       // lengths and names only
+            return dev.buf;
+        } catch (e) {
+            t.fail('throw', c.key, String(e && e.message || e).slice(0, 80));
+            return null;
+        }
+    }
+
+    /** Hand a plate widget its pixels (null: the empty plate, nothing of ours over BMW's panel) as ONE paint. */
+    _twinSend(x, buf, c, now) {
+        const w = x.w, t = this.twinMsg;
+        const key = this._twinPlateKey(c);
+        if (x.plateKey === key && x.px) { if (c) t.painted(c.key, x.plateAt || now); return; }
+        this._blitDiff(x, buf || Buffer.alloc(w.w * w.h * 4, 0));
+        x.plateKey = key;
+        if (c) {
+            // the counter and the night look repaint the same message: the stamp (its id and words) keeps its time
+            if (!x.plateMsg || x.plateMsg !== c.key) x.plateAt = now;
+            x.plateMsg = c.key;
+            t.painted(c.key, x.plateAt);
+        } else { x.plateMsg = null; x.plateAt = 0; t.painted(null); }
+    }
+    /* ---- end twin_dial ---- */
 
     /* ---- fix/row-cc (2026-11-16, the state gallery bake/work/shots/20261116-2107): LIVE "cc:" toggles ----
      * The opaque 6WB themes' own clock / temperature row carries "!cc:shown" (design/gen_6wb.py), but a widget's
@@ -4231,6 +4640,8 @@ class HudApp {
             this._guard('probes', () => this._probeTick());     // probes, item 1: the vehicle condition (0.7.18)
             // fix/active-cc: the fallback's entries expire with time, not with a notification
             if (this.ccFallbackLive) this._guard('check-control', () => this._ccListEval(now, true));
+            // twin_dial: our plate was sent a moment ago; once it has been on the screen long enough the window shuts
+            if (this.twinMsg && this.twinMsg.needsTick) this._ccPush();
             if (!this.client.ready) return;
             this._guard('bottom row', () => this._rowSync(now));     // package X: standby, the clock line, the row's owner
             // shift light: blink the whole bar at 8 Hz once the rpm reaches the redline
@@ -4278,6 +4689,7 @@ class HudApp {
      * From package P's opt-in prototype (docs/PERF-AUDIT.md 3, 7 item 2 and 9), measured on the bench only. */
     _isNeedle(x) {
         const w = x.w;
+        if (w.type === 'tdial') return true;      // twin_dial: both gauges take the smooth path
         return (w.type === 'dial' || w.type === 'g20dial') && (w.measure === 'rpm' || w.measure === 'speed');
     }
 
@@ -4518,6 +4930,14 @@ class HudApp {
 
     _updateOne(x, now, force) {
         const w = x.w;
+        if (twin && w.type === 'icon' && w.tdLive) return twin.updateIcon(this, x, now, force);       // twin_dial: a tab-bar icon that follows the car
+        // twin_dial: the plate is painted only from _twinPush (a signal event, or here when what it shows has gone stale:
+        // the counter, the night look); a tick in between has nothing to do
+        if (w.type === 'ccplate') {
+            const c = this.twinMsg && this.twinMsg.candidate;
+            if (c && x.plateKey !== this._twinPlateKey(c)) this._ccPush();
+            return;
+        }
         if (w.type === 'atext') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             const s = this._resolve(w.text);
@@ -4700,7 +5120,9 @@ class HudApp {
             if (!force && m === x.last) return;
             x.last = m;
             x.c.uniform(x.ref, 'u_msa', [m, 0, 0, 0]);
-        } else if (w.type === 'wbback') {
+        } else if (w.type === 'tdial') this._twinDialUpdate(x, force);      // twin_dial
+        else if (w.type === 'tdback') this._twinBackSend(x, false);
+        else if (w.type === 'wbback') {
             if (w.collar) this._wbMaskSend(x);                                     // package M: the strip mask's lanes
             this._wbCcSend(x);                                                     // and the message window
             const on = w.sign && (isNum(this._raw('limit')) || this._raw('limitEnd') || this._raw('limitUnknown')) ? 1 : 0;   // package E: the end sign too; car3 I: "---"
@@ -4911,6 +5333,27 @@ function dimTheme(theme, k) {
         const c = theme[key];
         const grey = Array.isArray(c) && c.length >= 3 && Math.max(c[0], c[1], c[2]) - Math.min(c[0], c[1], c[2]) < 40;
         out[key] = grey ? [Math.round(c[0] * k), Math.round(c[1] * k), Math.round(c[2] * k)].concat(c.length > 3 ? [c[3]] : []) : c;
+    });
+    out.name = theme.name;
+    return out;
+}
+
+/** twin_dial: a sRGB code (0..255) at `k` of its linear light. */
+function twinDim(c, k) {
+    const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    const enc = (l) => { l = Math.max(0, Math.min(1, l)); return 255 * (l <= 0.0031308 ? l * 12.92 : 1.055 * Math.pow(l, 1 / 2.4) - 0.055); };
+    return Math.round(enc(lin(c) * k));
+}
+
+/** twin_dial: the `twin` theme at night: each role colour at its multiplier (TW_ROLE_NIGHT) in linear light; other
+ *  colours (greys of the engine's fall-backs) at the white's. Alpha kept. */
+function twinNightTheme(theme) {
+    const out = {};
+    Object.keys(theme).forEach((key) => {
+        const c = theme[key];
+        const isC = Array.isArray(c) && c.length >= 3 && c.length <= 4 && c.every((v) => typeof v === 'number');
+        const k = TW_ROLE_NIGHT.hasOwnProperty(key) ? TW_ROLE_NIGHT[key] : key === 'bg' || key === 'panel' ? 1 : TW_ROLE_NIGHT.fg;
+        out[key] = isC ? [twinDim(c[0], k), twinDim(c[1], k), twinDim(c[2], k)].concat(c.length > 3 ? [c[3]] : []) : c;
     });
     out.name = theme.name;
     return out;

@@ -1,0 +1,148 @@
+diff --git a/bench/test-twin-fonts.js b/bench/test-twin-fonts.js
+index 892ad38..18c8783 100644
+--- a/bench/test-twin-fonts.js
++++ b/bench/test-twin-fonts.js
+@@ -38,7 +38,7 @@ const noto = atlases.filter((n) => !saira.includes(n));
+ // ---- the layout check, a function so it can be shown to fail ----
+ const CYR = /[Ͱ-ԯ]/;
+ // tokens whose value is Latin or digits only (our own labels, numbers): the only ones a Saira widget may carry
+-const SAIRA_TOKEN = /^(speed|spd|rpm|gear|gearNum|mode|program|prog|drive|ready|clock|time|hhmm|hour|minute|digits?|v|value)\b/i;
++const SAIRA_TOKEN = /^(speed|cTime|spd|rpm|gear|gearNum|mode|program|prog|drive|ready|clock|time|hhmm|hour|minute|digits?|v|value)\b/i;
+ function sairaViolations(layout, sairaNames, glyphsOf) {
+     const bad = [];
+     (layout.widgets || []).forEach((w) => {
+@@ -47,7 +47,7 @@ function sairaViolations(layout, sairaNames, glyphsOf) {
+         const lit = t.replace(/\{\{([^}]*)\}\}/g, '');
+         if (CYR.test(lit)) bad.push(w.id + ': Cyrillic in the text');
+         (t.match(/\{\{([^}]*)\}\}/g) || []).forEach((tok) => {
+-            const name = tok.slice(2, -2).split(':')[0].replace(/^[a-z]+\./, '');
++            const raw = tok.slice(2, -2), name = raw.indexOf('td:') === 0 ? raw.slice(3) : raw.split(':')[0].replace(/^[a-z]+\./, '');       // package C: {{td:speed}} is the name "speed"
+             if (!SAIRA_TOKEN.test(name)) bad.push(w.id + ': token ' + tok + ' is not known to be Latin/digits only');
+         });
+         const g = glyphsOf(w.font);
+@@ -57,7 +57,7 @@ function sairaViolations(layout, sairaNames, glyphsOf) {
+ }
+ 
+ console.log('every slot of SPEC 9 has its atlas');
+-ok(Object.keys(slots).length === 17 && atlases.length === 16, '17 slots, 16 atlases (td_big serves the speed and the clock)');
++ok(Object.keys(slots).length === 17 && atlases.length === 17, '17 slots, 17 atlases (td_big serves the digital speed, td_clock the clock page)');
+ atlases.forEach((n) => {
+     const exists = fs.existsSync(path.join(FONTS, n + '.json'));
+     ok(exists, n + '.json exists');
+@@ -70,13 +70,14 @@ atlases.forEach((n) => {
+     ok(!off.length, n + ': every glyph is one cell (' + f.cellHeight + ' px) high');
+     ok(f.baseline > 0 && f.baseline < f.cellHeight, n + ': baseline ' + f.baseline + ' inside the cell');
+     const dig = '0123456789'.split('').filter((c) => g[c]);
+-    ok(dig.length === 10 && dig.every((c) => g[c].advance === g['0'].advance), n + ': ten digits, one tabular advance (' + g['0'].advance + ')');
++    if (n === 'td_clock') ok(dig.length === 10 && g['1'].advance < g['0'].advance, n + ': ten digits, PROPORTIONAL (package C: "14:43" is not gapped)');
++    else ok(dig.length === 10 && dig.every((c) => g[c].advance === g['0'].advance), n + ': ten digits, one tabular advance (' + g['0'].advance + ')');
+     const outside = Object.keys(g).filter((c) => g[c].w && (g[c].x < 0 || g[c].x + g[c].w > f.width || g[c].y < 0 || g[c].y + g[c].h > f.height));
+     ok(!outside.length, n + ': every glyph lies inside the atlas');
+     const mib = f.width * f.height / 1048576;
+     if (noto.includes(n) && n !== 'td_cnt') ok(mib <= 0.8, n + ': full-text atlas ' + mib.toFixed(2) + ' MiB <= 0.8');
+ });
+-ok(font('td_big').stretch === 1.06 && saira.every((n) => font(n).stretch === 1.06) && noto.every((n) => font(n).stretch === undefined), 'the six Saira atlases were baked at stretch 1.06, no Noto one');
++ok(font('td_big').stretch === 1.06 && saira.every((n) => font(n).stretch === 1.06) && noto.every((n) => font(n).stretch === undefined), 'the seven Saira atlases were baked at stretch 1.06, no Noto one');
+ 
+ console.log('Saira carries no Cyrillic and nothing the car sends');
+ saira.forEach((n) => {
+diff --git a/design/twin-dial/font_slots.json b/design/twin-dial/font_slots.json
+index 39642da..057873e 100644
+--- a/design/twin-dial/font_slots.json
++++ b/design/twin-dial/font_slots.json
+@@ -5,7 +5,7 @@
+   "scale_small": { "atlas": "td_scale_s", "face": "Saira", "px": 18, "note": "speedometer numerals 10 30 50 70 160 200 240 280" },
+   "tach_numerals": { "atlas": "td_tach", "face": "Saira", "px": 57 },
+   "digital_speed": { "atlas": "td_big", "face": "Saira", "px": 92, "note": "atext cells = widest advance (digit, 82 px)" },
+-  "clock_time": { "atlas": "td_big", "face": "Saira", "px": 92, "note": "digits are tabular: a '1' stands in a full cell" },
++  "clock_time": { "atlas": "td_clock", "face": "Saira", "px": 92, "note": "package C: proportional digits (td_big's tabular ones leave a '1' in a full cell, \"14:43\" looks gapped)" },
+   "gear": { "atlas": "td_gear", "face": "Saira", "px": 64, "note": "widest glyph is M (70), digits 57" },
+   "dial_labels": { "atlas": "td_label", "face": "Saira", "px": 22, "note": "READY, OFF, COMFORT, SPORT, SPORT+, ECO PRO, ADAPTIVE" },
+   "centre_title": { "atlas": "td_title", "face": "Noto", "px": 41 },
+diff --git a/tools/bake_fonts.py b/tools/bake_fonts.py
+index 61825f0..5416db1 100644
+--- a/tools/bake_fonts.py
++++ b/tools/bake_fonts.py
+@@ -176,13 +176,13 @@ TD_TEXT = ''.join(chr(c) for c in range(0x20, 0x7f)) + CAR_TEXT + TD_OURS    # e
+ TD_LABELS = UPPER + DIGITS + '+ -–/'
+ 
+ 
+-def _td(face, name, size, chars):
++def _td(face, name, size, chars, tabular=True):
+     file, weight, stretch = face
+     if face is TD_SAIRA:        # a Cyrillic (or any non-Latin) character can never get into a Saira atlas: the bake refuses
+         bad = [c for c in chars if ord(c) >= 0x250 and c != '–']
+         if bad:
+             raise ValueError('Saira atlas %s: no Cyrillic or other non-Latin characters (%r)' % (name, ''.join(bad)))
+-    return (name, file, size, chars, 0, weight, CAR_SUBS if face is TD_NOTO else None, '', None, stretch)
++    return (name, file, size, chars, 0, weight, CAR_SUBS if face is TD_NOTO else None, '', None, stretch, tabular)
+ 
+ 
+ TWIN_FONTS = [
+@@ -191,6 +191,7 @@ TWIN_FONTS = [
+     _td(TD_SAIRA, 'td_scale_s', 18, DIGITS),                    # speedometer numerals, small set
+     _td(TD_SAIRA, 'td_tach', 57, DIGITS),                       # tachometer numerals
+     _td(TD_SAIRA, 'td_big', 92, DIGITS + ':-–'),                # digital speed (atext) and the clock page's time; "–" = no value
++    _td(TD_SAIRA, 'td_clock', 92, DIGITS + ':-–', tabular=False),   # package C: the clock page's time, proportional digits (td_big's tabular ones look gapped in "14:43"); the digital speed keeps td_big (the GPU text needs one pitch)
+     _td(TD_SAIRA, 'td_gear', 64, DIGITS + 'PRNDMS-–'),          # gear and its number (D3, M1..M8, S1..S8)
+     _td(TD_SAIRA, 'td_label', 22, TD_LABELS),                   # READY, OFF, COMFORT / SPORT / SPORT+ / ECO PRO / ADAPTIVE
+     # Noto Sans: titles, values, bottom row, tabs, units, messages
+@@ -213,7 +214,7 @@ SS = 4            # stretch: glyphs are drawn this many times larger and reduced
+ BLANK = ' \u2009\u200a\u202f\u00a0'      # characters with an advance and no ink
+ 
+ 
+-def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck='', adv_over=None, stretch=1.0):
++def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck='', adv_over=None, stretch=1.0, tabular=True):
+     """stroke: px of extra weight round every glyph (Michroma has one weight). weight: a named instance of a
+     variable font (Orbitron: Regular .. Black), for the M theme's squared BMW-style gear, speed and numbers.
+     subs: {char: glyph drawn for it} (Orbitron's zero is slashed; the M8's is plain, so its O stands in).
+@@ -225,7 +226,7 @@ def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''
+     the plain path, byte for byte what every other list has always baked; anything else draws each glyph SS times
+     larger, with the stretch applied in the reduction (area average, so the coverage stays exact), and takes the metrics
+     from that drawing. out=None returns the metrics without writing a file (the comparison sheet)."""
+-    meta = make_font(name, file, size, chars, stroke, weight, subs, tuck, adv_over, stretch)
++    meta = make_font(name, file, size, chars, stroke, weight, subs, tuck, adv_over, stretch, tabular)
+     if out is not None:
+         with open(os.path.join(out, name + '.json'), 'w') as f:
+             json.dump(meta, f, separators=(',', ':'), ensure_ascii=False)
+@@ -233,7 +234,7 @@ def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''
+     return meta
+ 
+ 
+-def make_font(name, file, size, chars, stroke=0, weight=None, subs=None, tuck='', adv_over=None, stretch=1.0):
++def make_font(name, file, size, chars, stroke=0, weight=None, subs=None, tuck='', adv_over=None, stretch=1.0, tabular=True):
+     adv_over = adv_over or {}
+     path = os.path.join(SRC, file)
+     def load(px):
+@@ -260,7 +261,7 @@ def make_font(name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''
+     bottom = max(b[3] for c, b in boxes.items() if c not in tuck)
+     drop = {c: max(0, top - boxes[c][1]) for c in tuck if c in boxes}
+     height = bottom - top + 2 * PAD
+-    tab = (max(length(d) for d in DIGITS if d in chars) + 2 * stroke) if any(d in chars for d in DIGITS) else 0
++    tab = (max(length(d) for d in DIGITS if d in chars) + 2 * stroke) if tabular and any(d in chars for d in DIGITS) else 0
+ 
+     cells = []
+     for c in chars:
+@@ -282,8 +283,8 @@ def make_font(name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''
+         else:
+             img = Image.new('L', (w, height), 0)
+             ImageDraw.Draw(img).text((PAD - l, PAD - top + drop.get(c, 0)), glyph(c), font=font, fill=255, anchor='ls', stroke_width=stroke, stroke_fill=255)
+-        shift = (tab - adv) / 2 if c in DIGITS else (adv_over[c] - adv) / 2 if c in adv_over else 0
+-        cells.append((c, img, round(l - PAD + shift), round(tab if c in DIGITS else adv_over.get(c, adv))))
++        shift = (tab - adv) / 2 if tab and c in DIGITS else (adv_over[c] - adv) / 2 if c in adv_over else 0
++        cells.append((c, img, round(l - PAD + shift), round(tab if tab and c in DIGITS else adv_over.get(c, adv))))
+ 
+     # simple row packing
+     x = y = 0
+diff --git a/tools/twin-dial/a1/test_bake.py b/tools/twin-dial/a1/test_bake.py
+index d166243..e9b25b2 100644
+--- a/tools/twin-dial/a1/test_bake.py
++++ b/tools/twin-dial/a1/test_bake.py
+@@ -68,6 +68,6 @@ ok(refused, 'baking a Cyrillic letter into a Saira atlas is refused')
+ cm = TTFont(os.path.join(bf.SRC, bf.TD_SAIRA[0])).getBestCmap()
+ ok(not [c for c in cm if 0x370 <= c <= 0x52F], 'the Saira file in tools/fonts-src has no Greek or Cyrillic glyph')
+ sa = [s for s in bf.FONTS['twin_dial'] if s[1] == bf.TD_SAIRA[0]]
+-ok(len(sa) == 6 and all(all(ord(c) in cm for c in s[3] if c != ' ') for s in sa), 'every character of the 6 Saira atlases is in the file')
++ok(len(sa) == 7 and all(all(ord(c) in cm for c in s[3] if c != ' ') for s in sa), 'every character of the 7 Saira atlases is in the file')
+ print('\n%s' % ('FAILED %d' % fails if fails else 'python checks passed'))
+ sys.exit(1 if fails else 0)

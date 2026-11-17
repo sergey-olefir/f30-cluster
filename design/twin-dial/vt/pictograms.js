@@ -11,8 +11,7 @@
  * unchanged (cc_warn, cc_warn_solid, cc_info, cc_dot, cc_door, cc_brake, cc_tyre, cc_engine, cc_washer, cc_belt):
  *   ICONS[name](x, y) -> distance to the ink in box units (x, y in 0..1, y down, < 0 inside), so
  *   shared/icons.js paintIcon() draws them unchanged; svg(name) gives the vector.
- * The primitives below are a copy of package P's (the strip module exports DRAWINGS and svg but not its step
- * evaluator); round 2 should export stepDist from one module and drop this copy.
+ * The step evaluator is package P's, exported from design/strip/pictograms/pictograms.js (round 2, package A1).
  *
  *   seg  [ax, ay, bx, by, w]     ring [cx, cy, r, w]     arc [cx, cy, r, a0, a1, w] (deg clockwise from 12)
  *   disc [cx, cy, r]             box [cx, cy, hw, hh, r] boxo [cx, cy, hw, hh, r, w]   poly [[x, y], ...], r
@@ -21,44 +20,7 @@
 const path = require('path');
 const STRIP = require(path.join(__dirname, '..', '..', 'strip', 'pictograms', 'pictograms.js'));
 
-const RAD = Math.PI / 180;
-function dSeg(px, py, ax, ay, bx, by) {
-    const pax = px - ax, pay = py - ay, bax = bx - ax, bay = by - ay;
-    const h = Math.max(0, Math.min(1, (pax * bax + pay * bay) / (bax * bax + bay * bay || 1)));
-    return Math.hypot(pax - bax * h, pay - bay * h);
-}
-function dArc(px, py, cx, cy, r, a0, a1) {
-    let a = Math.atan2(px - cx, -(py - cy)); if (a < a0) a += Math.PI * 2;
-    if (a <= a1) return Math.abs(Math.hypot(px - cx, py - cy) - r);
-    const e = (b) => Math.hypot(px - (cx + r * Math.sin(b)), py - (cy - r * Math.cos(b)));
-    return Math.min(e(a0), e(a1));
-}
-function dBox(px, py, cx, cy, hw, hh, r) {
-    const qx = Math.abs(px - cx) - (hw - r), qy = Math.abs(py - cy) - (hh - r);
-    return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;
-}
-function dPoly(px, py, pts) {
-    let d = Infinity, inside = false;
-    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
-        const [xi, yi] = pts[i], [xj, yj] = pts[j];
-        d = Math.min(d, dSeg(px, py, xj, yj, xi, yi));
-        if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi) inside = !inside;
-    }
-    return inside ? -d : d;
-}
-function stepDist(s, x, y) {
-    const a = s.a;
-    switch (s.k) {
-        case 'seg': return dSeg(x, y, a[0], a[1], a[2], a[3]) - a[4] / 2;
-        case 'ring': return Math.abs(Math.hypot(x - a[0], y - a[1]) - a[2]) - a[3] / 2;
-        case 'arc': return dArc(x, y, a[0], a[1], a[2], a[3] * RAD, a[4] * RAD) - a[5] / 2;
-        case 'disc': return Math.hypot(x - a[0], y - a[1]) - a[2];
-        case 'box': return dBox(x, y, a[0], a[1], a[2], a[3], a[4]);
-        case 'boxo': return Math.abs(dBox(x, y, a[0], a[1], a[2], a[3], a[4])) - a[5] / 2;
-        case 'poly': return dPoly(x, y, a) - (s.r || 0);
-        default: throw new Error('unknown step ' + s.k);
-    }
-}
+const { stepDist } = STRIP;       // package P's step evaluator, exported since round 2 (the copy that stood here is gone)
 
 const S = (k, a, o) => Object.assign({ k, a }, o || {});
 const cut = { cut: true };
