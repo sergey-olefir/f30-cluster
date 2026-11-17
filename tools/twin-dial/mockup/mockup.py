@@ -68,6 +68,42 @@ def tach_angle(k):                                   # 0..8 x 1000 rpm over the 
     return -SWEEP + 2 * SWEEP * k / 8.0
 
 
+SPD_LARGE = (0, 20, 40, 60, 80, 100, 140, 180, 220, 260, 300)
+SPD_SMALL = (10, 30, 50, 70, 160, 200, 240, 280)      # 90 and 120 dropped: they crowd 100 at the top
+SPD_LARGE_PX, SPD_SMALL_PX = 28, 18                  # small: VT's own "160" (0.046 R), not VD's 0.054
+SPD_LARGE_RHO, SPD_SMALL_RHO = 0.76, 0.78
+SPD_MIN_GAP = 4.0                                    # panel px of black between two numerals' ink boxes (a check)
+
+
+def _ink_box(xy, s, f):
+    l, t, r, b = f.getbbox(s, anchor='ls')
+    w, h = (r - l) / SS, (b - t) / SS
+    return (xy[0] - w / 2, xy[1] - h / 2, xy[0] + w / 2, xy[1] + h / 2)
+
+
+def _gap(a, b):                                      # black between two boxes (negative = overlap)
+    dx = max(b[0] - a[2], a[0] - b[2])
+    dy = max(b[1] - a[3], a[1] - b[3])
+    return max(dx, dy)
+
+
+def speedo_numerals(c, cv):
+    """Owner (2026-11-17): 'thin the numerals out a little'. The large set always draws; a small numeral draws
+    only if its ink box keeps SPD_MIN_GAP px of black to every large one (with 90 and 120 left out of the set, every
+    one does). Returns (value, centre, font)."""
+    big = [(v, cv.polar(c, spd_angle(v), SPD_LARGE_RHO * R), saira(SPD_LARGE_PX)) for v in SPD_LARGE]
+    boxes = [_ink_box(xy, str(v), f) for v, xy, f in big]
+    out = list(big)
+    for v in SPD_SMALL:
+        xy, f = cv.polar(c, spd_angle(v), SPD_SMALL_RHO * R), saira(SPD_SMALL_PX)
+        g = min(_gap(_ink_box(xy, str(v), f), b) for b in boxes)
+        if g >= SPD_MIN_GAP:
+            out.append((v, xy, f))
+        else:
+            print(f'speedometer: small numeral {v} dropped (gap {g:.1f} px)')
+    return out
+
+
 class Canvas:
     def __init__(self):
         self.img = Image.new('RGB', (W * SS, H * SS), (0, 0, 0))
@@ -159,10 +195,8 @@ class Canvas:
             for k in range(1, 9):
                 self.ctext(self.polar(c, tach_angle(k), 0.745 * R), str(k), saira(57), RED if k >= 7 else WHITE)
         else:
-            for v in (0, 20, 40, 60, 80, 100, 140, 180, 220, 260, 300):
-                self.ctext(self.polar(c, spd_angle(v), 0.76 * R), str(v), saira(28))
-            for v in (10, 30, 50, 70, 90, 120, 160, 200, 240, 280):
-                self.ctext(self.polar(c, spd_angle(v), 0.775 * R), str(v), saira(20))
+            for v, xy, f in speedo_numerals(c, self):
+                self.ctext(xy, str(v), f)
         # bezel ring (open at the bottom) and the inner disc's rim
         self.sector(c, R - 0.0105 * R, R + 0.0105 * R, -144, 144, WHITE)
         self.sector(c, 0.545 * R - 0.008 * R, 0.545 * R + 0.008 * R, -150, 150, WHITE)
@@ -193,7 +227,7 @@ class Canvas:
             self.rect(xa, y - 0.0125 * R, xb, y + 0.0125 * R, (46, 47, 50))
             f = max(0.0, min(1.0, fill_n - i))
             if f > 0:
-                self.rect(xa, y - 0.0125 * R, xa + (xb - xa) * f, y + 0.0125 * R, RED if (kind == 'tach' and i == 0) else WHITE)
+                self.rect(xa, y - 0.0125 * R, xa + (xb - xa) * f, y + 0.0125 * R, RED if (kind == 'tach' and i == 0 and fill_n < 1.0) else WHITE)   # red = reserve only (SPEC §5.1)
         lo, hi = ('0', '1/1') if kind == 'tach' else ('C', 'H')
         self.ctext((c[0] - 0.35 * R, c[1] + 0.68 * R), lo, noto(21))
         self.ctext((c[0] + 0.35 * R, c[1] + 0.68 * R), hi, noto(21))
@@ -252,7 +286,7 @@ def centre(cv, page):
             cv.btext(911, base, u1, noto(21), WHITE, 'l')
             cv.btext(1105, base, n2, noto(39), WHITE, 'r')
             cv.btext(1111, base, u2, noto(21), WHITE, 'l')
-        cv.ctext((960, 520), 'Скинути значення: OK', noto(31), (227, 227, 227))
+        cv.ctext((960, 520), 'від початку поїздки, 14:00', noto(31), (227, 227, 227))   # we never reset: no "OK" hint
 
 
 def bottom_row(cv):
