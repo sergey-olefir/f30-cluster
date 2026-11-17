@@ -1,0 +1,228 @@
+{
+ "_about": "Package VG: the Twin Dial placed on the G20 panel (1920 x 720, continuous px, y down). R = the bezel ring's centre line (VR / VD). Dials from tools/twin-dial/vg/fit_layout.py on design/twin-dial/vg/dial_units.json (rev 2, VD dials.json v1); frame from VF's published frame_spec.json and message_panel.json. docs/twin-dial/VG-REPORT.md explains every entry.",
+ "rev": 2,
+ "R_px": 300,
+ "dials": {
+  "tacho": {
+   "side": "left",
+   "centre": [
+    380,
+    400
+   ],
+   "ring_outer_px": 303.9,
+   "ring_ends_deg": [
+    -144,
+    144
+   ],
+   "foot_y": 645.9
+  },
+  "speedo": {
+   "side": "right",
+   "centre": [
+    1540,
+    400
+   ],
+   "ring_outer_px": 303.9,
+   "ring_ends_deg": [
+    -144,
+    144
+   ],
+   "foot_y": 645.9
+  },
+  "centre_distance": {
+   "px": 1160,
+   "R": 3.867,
+   "ref_02_R": 3.875,
+   "ref_04_R": 3.796,
+   "ref_05_R": 3.625
+  },
+  "status": "verified as a fit (every clearance below computed); the dial units it rests on are VD's (verified on 02) except the furniture box (hypothesis)"
+ },
+ "clearances_px": {
+  "hood": {
+   "left": 51.8,
+   "right": 48.5,
+   "rule": ">= 4 (hood line residual 3.5)"
+  },
+  "tt.brake": 24.4,
+  "tt.tpms": 10.6,
+  "tt.abs": 4.3,
+  "tt.dsc": 12.6,
+  "tt.auto_h": 3.7,
+  "tt.parking_brake": 24.9,
+  "tt.steering": 14.4,
+  "belt_group (ring)": 14.1,
+  "gear_gap (ring)": 14.1,
+  "cc_panel (ring)": 70.7,
+  "rule": ">= 3 from every BMW item (strip round); the ring's foot is the disc's lowest point"
+ },
+ "keep_outs": {
+  "telltales_holes": {
+   "rects_plus_3px": [
+    [
+     22,
+     211,
+     88,
+     258
+    ],
+    [
+     21,
+     264,
+     80,
+     317
+    ],
+    [
+     11,
+     324,
+     76,
+     372
+    ],
+    [
+     16,
+     378,
+     66,
+     432
+    ],
+    [
+     1774,
+     176,
+     1873,
+     208
+    ],
+    [
+     1835,
+     214,
+     1903,
+     263
+    ],
+    [
+     1844,
+     262,
+     1908,
+     318
+    ]
+   ],
+   "what": "see-through holes in our background (relation unknown, plan.safe), nothing of ours inside"
+  },
+  "belt_group": {
+   "rect": [
+    497,
+    660,
+    688,
+    720
+   ],
+   "what": "hole in every state (design/strip/mask_final.json)"
+  },
+  "gear_gap": {
+   "rect": [
+    1380,
+    660,
+    1460,
+    720
+   ],
+   "what": "NO layer rectangle of ours intersects it (bg split in three)"
+  },
+  "cc_fallback_window": {
+   "outline": "zc.panel dilated by 3 px (VF message_panel.json fallback_window.polygon_px)",
+   "bbox": [
+    696.0,
+    595.75,
+    1226.0,
+    704.0
+   ]
+  }
+ },
+ "dial_furniture_rule": "nothing of a dial below y 657 where x is in 494..691 or 1377..1463",
+ "frame": {
+  "_source": "VF frame_spec.json (published 2026-11-17, lead ref 02), u from the midpoint between the dials, v from the centre line, both in R; x = 960 + 300 u, y = 400 + 300 v",
+  "telltale_strip": {
+   "rect": [
+    564,
+    58,
+    981,
+    115
+   ],
+   "use": "stays black: BMW's own lamps on the G20 are at the sides; nothing of ours is a lamp"
+  },
+  "tab_bar": {
+   "rect": [
+    618,
+    127,
+    1302,
+    172
+   ],
+   "cell_top_v": -0.911,
+   "rule_v": -0.761,
+   "u": [
+    -1.139,
+    1.139
+   ],
+   "separators_x": [
+    744,
+    812,
+    1168,
+    1237
+   ],
+   "text_baseline_y": 156,
+   "icon_centre_y": 143
+  },
+  "centre_window": {
+   "rect": [
+    729,
+    172,
+    1191,
+    613
+   ],
+   "v": [
+    -0.761,
+    0.71
+   ],
+   "content_u": [
+    -0.77,
+    0.77
+   ],
+   "border": "none (facelift)"
+  },
+  "bottom_rule": {
+   "y": 613,
+   "x": [
+    629,
+    1292
+   ]
+  },
+  "bottom_row": {
+   "rect": [
+    723,
+    626,
+    1197,
+    705
+   ],
+   "baselines_y": [
+    656,
+    703
+   ],
+   "right_edges_x": [
+    846,
+    1153
+   ],
+   "slots": {
+    "L1": "odometer",
+    "R1": "trip",
+    "L2": "clock",
+    "R2": "outside temperature"
+   },
+   "note": "inside BMW's message panel footprint: by design, our message (VF M2 plate [694.5,592,1230,720]) replaces it"
+  },
+  "centre_title": {
+   "box_y": [
+    251,
+    289
+   ],
+   "rule_y": 296,
+   "rule_x": [
+    741,
+    1180
+   ]
+  }
+ }
+}

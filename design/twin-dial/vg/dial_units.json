@@ -1,0 +1,22 @@
+{
+ "_about": "VG's dial model in dial units (R = the bezel ring's centre line) for tools/twin-dial/vg/fit_layout.py. rev 2: from VD's dials.json v1 (bake/work/twin-dial/pub/VD, 2026-11-17 12:04) and VR's index.json; VF's frame not yet in.",
+ "k_ref": 3.87,
+ "k_ref_evidence": "centre distance / R from VR's rectification (bake/work/twin-dial/pub/VR/index.json, 2026-11-17): ref 02 (the only in-car photo, ring rms 0.35 px) 3.875; ref 04 (bench) 3.796; ref 05 (render) 3.625. The spec takes 02 (sharpest, the real car); 05 is a render of a different (aftermarket) panel. VG's own first fit (ring_fit.py) agreed on 05: 3.62. Uncertainty +-0.02 for 02 itself; the spread between references is 0.25.",
+ "k_range": [
+  3.6,
+  3.9
+ ],
+ "ring_out": 1.013,
+ "ring_out_evidence": "VD bezel.width 0.021 +-0.002 (02): outer edge 1.0105, plus ~1 px anti-aliasing at R 300 (0.003)",
+ "theta_end": 144,
+ "theta_end_evidence": "VD bezel.ends_deg [144, 216] +-1 (02R); 04: 140.75",
+ "base_box": [
+  -0.42,
+  0.6,
+  0.48,
+  0.89
+ ],
+ "base_box_evidence": "furniture under the dial (VD): bars y 0.73 x -0.42..0.42 (04), end labels to y 0.71, rev strip numerals y 0.855 h 0.070 -> 0.89 (02L), '1/min x 1000' curved at rho 0.93 theta 149-164 (x 0.26..0.48, y 0.80..0.89), feet to +0.85",
+ "cy_pref": 370,
+ "cy_pref_evidence": "ref 05: centre 0.51 of the screen height down (screen edges read by hand, +-0.03) -> 370 px on 720"
+}
