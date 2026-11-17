@@ -16,7 +16,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
-MAIN = os.environ.get('F30_MAIN', '/Users/solefir/projects/f30-cluster')
+MAIN = os.environ.get('F30_MAIN') or os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 WORK = os.path.join(MAIN, 'bake', 'work', 'twin-dial')
 VRW = os.path.join(WORK, 'vr')           # intermediate (diagnostics)
 PUB = os.path.join(WORK, 'pub', 'VR')    # published to the other packages

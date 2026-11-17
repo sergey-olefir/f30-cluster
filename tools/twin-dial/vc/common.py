@@ -9,7 +9,7 @@ import os
 import cv2
 import numpy as np
 
-MAIN = '/Users/solefir/projects/f30-cluster'
+MAIN = os.environ.get('F30_MAIN') or os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 REF = os.path.join(MAIN, 'reference', 'vc')
 WORK = os.path.join(MAIN, 'bake', 'work', 'twin-dial', 'VC')
 PUB = os.path.join(MAIN, 'bake', 'work', 'twin-dial', 'pub', 'VC')

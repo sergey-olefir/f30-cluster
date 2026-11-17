@@ -9,7 +9,7 @@ This works on the ORIGINAL references (package VR's rectified ones replace them 
 gives ellipses, and the frame numbers made on it are PROVISIONAL.
 
 Run from the repo root:
-    UV_CACHE_DIR=/Users/solefir/projects/f30-cluster/bake/work/.uvcache uv run -q --no-project \
+    UV_CACHE_DIR=<repo>/bake/work/.uvcache uv run -q --no-project \
       --with opencv-python-headless --with numpy python -I tools/twin-dial/vf/fit_dials.py [src_dir] [out.json]
 """
 import json
