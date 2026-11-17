@@ -1,0 +1,78 @@
+{
+ "_about": "Twin Dial round 1, package VD: the two dials in dial units. Lengths are fractions of R = the centre line of the thin outer white bezel ring; angles are degrees clockwise from 12 o'clock (0 = top, -125 = lower left); x right, y down from the dial centre. 'refs' = the dials that agree (02L/02R = reference 02 left/right, etc.; measured on package VR's homography-rectified frames). status: verified = measured; hypothesis = read by eye, from one blurred reference, or inferred. Variant A = references 02 and 05 (ticks inside the band); variant B = reference 04 (white rule, ticks outside the band, thick rim, the solid red wedge). The spec value follows 02 (sharpest, homography rms 0.35 px) unless noted.",
+ "units": {"length": "R", "angle": "deg clockwise from 12 o'clock", "origin": "dial centre"},
+ "bezel": {
+  "radius": {"value": 1.0, "unc": 0.0, "refs": ["02L", "02R", "04L", "04R", "05L", "05R"], "status": "verified", "note": "definition of R; right dial / left dial = 0.9986 (02), 0.9983 (04), 1.0016 (05): the two dials are the same size"},
+  "width": {"value": 0.021, "unc": 0.002, "refs": ["02L", "02R", "05L", "05R"], "alt": {"04": 0.016}, "status": "verified", "method": "VR line FWHM, blur 10-90 < 1.6 src px so FWHM ~ width"},
+  "profile": {"value": "flat white line, sharp edges, no gradient", "status": "hypothesis", "note": "02 white clipped 26 %, 05 56 %: the profile cannot be read; VC"},
+  "ends_deg": {"value": [144.0, 216.0], "unc": 1.0, "refs": ["02R"], "alt": {"04": [140.75, 219.25]}, "status": "verified", "note": "open at the bottom, symmetric about 180; 02L is hidden by the hybrid arc"}
+ },
+ "gap_bezel_band": {"inner": 0.940, "outer": 0.989, "unc": 0.004, "refs": ["02R"], "alt": {"05": [0.950, 0.987]}, "colour": "black (luma 0.02-0.03 of white)", "status": "verified"},
+ "band": {
+  "outer_edge": {"value": 0.940, "unc": 0.004, "refs": ["02R", "02L"], "alt": {"05": 0.950, "04": 0.885}, "status": "verified", "method": "half-level crossing of the median radial luma profile, windows 240-300 and 60-120 deg"},
+  "inner_edge": {"value": 0.580, "unc": 0.004, "refs": ["02R", "02L"], "alt": {"05": 0.553, "04": 0.585}, "status": "verified"},
+  "tick_strip": {"inner": 0.893, "outer": 0.940, "unc": 0.004, "refs": ["02R", "02L", "05L", "05R"], "alt": {"05": [0.895, 0.948]}, "status": "verified", "note": "a lighter grey annulus at the band's outer edge carrying the ticks (variant A); 04 has a white rule at 0.905 (width 0.020) instead and the ticks outside it at 0.925-0.939"},
+  "shading_srgb_over_white": {"value": [[0.585, 0.21], [0.65, 0.29], [0.715, 0.40], [0.79, 0.55], [0.86, 0.61], [0.88, 0.62], [0.915, 0.66]], "refs": ["02R"], "alt": {"05": [[0.56, 0.16], [0.70, 0.22], [0.80, 0.34], [0.88, 0.41], [0.92, 0.52]], "04": "flat 0.19-0.25"}, "status": "verified (sRGB code/255, not linear; VC owns the colour)", "note": "brightens outward roughly linearly; luma relative to the clipped bezel white"},
+  "texture": {"value": "not resolved", "status": "hypothesis", "note": "02 and 05: smooth gradient, no repeatable FFT peak at the references' resolution (0.5 % R per source px). 04 alone: a regular grid, pitch about 0.044 R, diagonal, contrast a few % — may be screen moire. Spec: subtle noise/grid <= 3 % luma, pitch 0.03-0.045 R, to be chosen by eye on the bench"},
+  "feet": {"value": "the band continues past the scale ends to the bezel ends (+-144 deg) and below them as two grey trapezoids down to about y +0.85", "status": "hypothesis"}
+ },
+ "rim": {
+  "radius": {"value": 0.545, "unc": 0.002, "refs": ["02L", "02R"], "alt": {"04": 0.531, "05": 0.531}, "status": "verified", "note": "references disagree by 0.014 R (4 dials say 0.531): different software variants; spec takes 02 with the 02 band"},
+  "width": {"value": 0.016, "unc": 0.003, "refs": ["02R"], "alt": {"05": 0.014, "04": 0.040}, "status": "verified"},
+  "gap_to_band": {"value": [0.553, 0.578], "refs": ["02R"], "alt": {"05": [0.540, 0.552]}, "status": "verified", "colour": "black"}
+ },
+ "inner_disc": {"radius": "inside the rim (< 0.537)", "colour": "black (02 luma 0.004 = black level)", "shading": "none in 02; 05 (render) ~0.05 flat; no vignette measured", "status": "verified (02)"},
+ "speedometer_kmh": {
+  "law": {"value": "piecewise linear: 0 km/h at -125, 100 at 0, 300 at +125; 24.93 deg per major; 20 km/h per major below 100, 40 km/h per major above 100", "refs": ["02R"], "alt": {"05": "0 at -130.1, 100 at ~0, 300 at +128.0 (25.9 deg/major below, 25.5 above)", "04 mph": "linear, 20 mph per 25.0 deg major, 100 at 0, 200 at +124.8"}, "status": "verified", "method": "dark major lines in the band at 260.2, 285.1, 310.0, 335.0, 25.2, 50.1, 75.0, 99.9, 124.9 deg; minor ticks lattice pitch 6.233 deg, rms < 0.2"},
+  "majors_kmh": [0, 20, 40, 60, 80, 100, 140, 180, 220, 260, 300],
+  "minors_per_major": {"value": 4, "refs": ["02R", "05R", "04R"], "status": "verified", "note": "every 5 km/h below 100, every 10 above"},
+  "numerals_large": {"values": [0, 20, 40, 60, 80, 100, 140, 180, 220, 260, 300], "height": 0.071, "unc": 0.004, "centre_rho": 0.760, "rho_unc": 0.010, "refs": ["02R", "05R"], "status": "verified (heights), hypothesis for 0 (under the needle)"},
+  "numerals_small": {"values": [10, 30, 50, 70, 90, 120, 160, 200, 240, 280], "height": 0.054, "unc": 0.004, "centre_rho": 0.775, "refs": ["02R", "05R"], "status": "verified (affine 02, 05)"}
+ },
+ "tachometer": {
+  "law": {"value": "linear 0..8 x1000 rpm; 0 at -120, 8 at +120, 30.0 deg per 1000", "refs": ["04L"], "alt": {"05": "0 at -130.1, 8 at +129.8, 32.47 deg per 1000"}, "status": "verified (04: dots at 270.35, 300.39, 330.25, 30.00, 59.92; needle at rest 240.6)", "note": "02's left dial is a power meter. Choose 04 (the only facelift tacho with the solid wedge) or 05; the speedometer's +-125 sits between"},
+  "minors_per_1000": {"value": 1, "alt": {"05": 3}, "refs": ["04L"], "status": "verified"},
+  "numerals": {"values": [1, 2, 3, 4, 5, 6, 7, 8], "height": 0.135, "unc": 0.005, "alt": {"05": 0.120}, "centre_rho": 0.745, "rho_unc": 0.015, "outer_extent_rho": 0.80, "refs": ["04L", "05L"], "status": "verified", "note": "upright, centred on the value angle; 0 has no numeral (OFF / READY sits there); 7 and 8 red"}
+ },
+ "ticks": {
+  "minor": {"r_in": 0.896, "r_out": 0.934, "width": 0.012, "unc": 0.002, "colour": "white", "refs": ["02R", "02L", "05R", "05L"], "alt": {"05": [0.902, 0.944]}, "status": "verified"},
+  "major": {"r_in": 0.896, "r_out": 0.934, "width": 0.018, "unc": 0.002, "colour": "white", "refs": ["02R", "05R"], "status": "verified", "note": "same length, wider. 04: round dots 0.039 wide at 0.925-0.939"},
+  "major_band_line": {"r_in": 0.580, "r_out": 0.893, "width": 0.006, "colour": "near black (85-98 % darker than the band)", "refs": ["02R", "02L", "05R", "05L"], "status": "verified (span, depth); hypothesis (width)"}
+ },
+ "red_zone": {
+  "wedge": {"theta": [74.9, 120.0], "rpm": [6500, 8000], "r_in": 0.550, "r_out": 0.940, "edges": "radial", "fill_srgb": [105, 4, 14], "outline_srgb": [242, 12, 48], "outline_width": 0.01, "refs": ["04L"], "status": "verified (extent, colour); hypothesis (outline width)", "note": "covers band and tick strip from the rim's outer edge to 0.94; ticks/dots and numerals on it are bright red; start = redline value (variable), end = scale end"},
+  "alt_05": {"value": "no wedge: a red arc replaces the bezel from 66.6 to 144.9 deg at rho 0.97-1.025, numerals 7 and 8 red", "status": "verified"}
+ },
+ "needle": {
+  "axis": "straight radial line through the centre",
+  "root": {"value": 0.465, "unc": 0.01, "refs": ["02R", "02L"], "alt": {"04": 0.55}, "status": "verified"},
+  "tip": {"value": 0.99, "unc": 0.01, "refs": ["02R", "02L", "04L", "04R"], "status": "verified", "note": "crosses the tick strip and the dark gap, stops at the bezel's inner edge"},
+  "width": {"value": [[0.47, 0.020], [0.56, 0.039], [0.62, 0.036], [0.68, 0.032], [0.77, 0.022], [0.86, 0.020], [0.89, 0.016], [0.95, 0.020], [0.98, 0.020]], "refs": ["02R", "02L"], "alt": {"04": "0.045 at 0.57 to 0.029 at 0.95 (blur-inflated)"}, "status": "verified", "note": "widest just outside the rim, tapering outward; a tapered stub inside the rim; no hub cap"},
+  "colour": {"value": "white", "refs": ["02", "04"], "alt": {"05": "red-orange"}, "status": "verified"},
+  "glow": {"value": "none visible", "status": "hypothesis"},
+  "rest": {"value": "at scale 0", "alt": {"04": "both needles at -119.4"}, "status": "verified"}
+ },
+ "hub": {
+  "speed_digits": {"centre": [0.0, 0.03], "height": 0.23, "unc": 0.02, "refs": ["02R"], "status": "verified (affine)"},
+  "speed_unit": {"centre": [0.0, 0.24], "height": 0.06, "refs": ["02R"], "alt": {"04 'mph'": [0.0, 0.126]}, "status": "verified (affine)"},
+  "gear": {"centre": [-0.02, 0.39], "height": 0.15, "refs": ["02L"], "status": "verified (affine)", "note": "D1; 04 shows '-' at the centre"},
+  "program": {"centre": [0.02, 0.56], "height": 0.055, "refs": ["02L"], "status": "verified (affine)", "note": "AUTO"},
+  "hub_bars_02": {"fuel_bar_y": -0.13, "battery_bar_y": 0.19, "x": [-0.36, 0.38], "status": "hypothesis (read by eye, hybrid only)"}
+ },
+ "marks": {
+  "READY": {"centre": [-0.725, -0.005], "height": 0.04, "colour": "green", "refs": ["02L"], "alt": {"05": "in the left foot"}, "status": "hypothesis"},
+  "OFF": {"centre": [-0.505, 0.60], "refs": ["02L"], "alt": {"04": [-0.60, 0.53]}, "status": "hypothesis", "note": "in the left foot, below scale 0"}
+ },
+ "bars_under_dials": {
+  "bar": {"y": 0.73, "x": [-0.42, 0.42], "thickness": 0.025, "refs": ["04L"], "status": "verified (red bar in 04L); hypothesis for 04R (same layout by eye)", "note": "left = fuel (0 .. 1/1), right = coolant (C .. H); segmented, count not resolved (4-5)"},
+  "end_labels": {"left": [-0.352, 0.682], "right": [0.306, 0.681], "height": 0.050, "refs": ["04L", "04R"], "status": "verified"},
+  "icon": {"centre": [0.0, 0.632], "height": 0.11, "refs": ["04L", "04R"], "status": "verified"},
+  "unit_label": {"text": "1/min x 1000", "where": "curved along the outside, theta 149-164, rho 0.93", "refs": ["04L"], "status": "verified"}
+ },
+ "rev_strip_02": {
+  "label": {"centre_y": 0.708, "height": 0.055, "status": "verified (affine)"},
+  "bar": {"y": 0.775, "x": [-0.39, 0.42], "thickness": 0.015, "red_from_krpm": 6.8, "status": "hypothesis (read by eye)"},
+  "numerals": {"values": [0, 2, 4, 6, 8], "y": 0.855, "height": 0.070, "x_of_krpm": "x = -0.347 + 0.0906 * krpm", "red": [8], "status": "verified (affine)"},
+  "refs": ["02L"]
+ }
+}
