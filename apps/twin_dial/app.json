@@ -15,6 +15,7 @@
     "shaders.js",
     "icons.js",
     "strip_icons.js",
+    "twin_icons.js",
     "shift_score.js",
     "sun.js",
     "cluster_render_client.js",
@@ -282,6 +283,8 @@
       "gear",
       "condition"
     ],
+    "legacyProbes": false,
+    "_legacyProbes": "package F: f30_cluster's 0.7.18 log probes (ccListRiskClass, basicList, requestDefaultSymbols) must not run in twin_dial; hud.js _legacyProbesOff() reads this. config.probe is NOT here: the probe build adds it (apps/twin_dial/probe/probe.json, package F)",
     "redline": 6500,
     "clock24": true,
     "twin": {

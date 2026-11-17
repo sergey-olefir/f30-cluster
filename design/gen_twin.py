@@ -171,8 +171,8 @@ def centre():
     clock page and one of the trip page overlap, so the engine puts the trip page in a sheet of its own (2 sheets)."""
     z = 6
     W = [text('c_title', MID, BASE['title'], 440, '{{td:cTitle}}', 'td_title', 'fg', 'center', 1, z)]
-    # page "clock": the time in Saira 92 (digits and the dash only), the weekday and the date in Noto 39
-    W += [text('c_time', MID, BASE['time'], 360, '{{td:cTime}}', 'td_big', 'fg', 'center', 1, z, below=3),
+    # page "clock": the time in Saira 92, proportional digits (td_clock; the digital speed's td_big is tabular for the GPU), the weekday and the date in Noto 39
+    W += [text('c_time', MID, BASE['time'], 360, '{{td:cTime}}', 'td_clock', 'fg', 'center', 1, z, below=3),
           text('c_weekday', MID, BASE['weekday'], 300, '{{td:cWeekday}}', 'td_val', 'fg', 'center', 1, z),
           text('c_date', MID, BASE['date'], 300, '{{td:cDate}}', 'td_val', 'fg', 'center', 1, z, below=3)]
     # page "trip": two rows, numbers right-aligned at x 905 and 1105, units 6 px after, baselines 362 and 430. A box is as

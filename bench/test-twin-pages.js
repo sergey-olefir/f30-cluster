@@ -56,6 +56,19 @@ console.log('the hooks into the engine');
     ok(HudApp.prototype._token.call(h, 'speed') === '--' && HudApp.prototype._token.call(h, 'gear') === '', 'the engine\'s own tokens are unchanged (speed with no value "--", gear "")');
 }
 
+{
+    // an app that does not pack shared/twin_tokens.js (f30_cluster's app.json does not list it): the engine still loads and every hook is inert
+    const dir2 = H.tree('f30_cluster', ['twin_tokens.js', 'twin_icons.js', 'twin_cc.js', 'twin_probe.js']);
+    let App2 = null, err = null;
+    try { App2 = require(path.join(dir2, 'hud.js')); } catch (e) { err = e; }
+    ok(App2 !== null, 'shared/hud.js loads when shared/twin_tokens.js is not packed (f30_cluster\'s build)' + (err ? ': ' + err.message : ''));
+    if (App2) {
+        const h2 = H.fakeHud(App2, { config: {} });
+        h2._d = {};
+        ok(App2.prototype._token.call(h2, 'td:cTitle') === '{{td:cTitle}}' && App2.prototype._token.call(h2, 'speed') === '--', '... a {{td:...}} token is then an unknown token and the engine\'s own tokens are unchanged');
+    }
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 console.log('the centre page: clock | trip | cycle');
 {

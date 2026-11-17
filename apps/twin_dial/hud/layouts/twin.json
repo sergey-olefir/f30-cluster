@@ -389,7 +389,7 @@
       "w": 360,
       "h": 70,
       "text": "{{td:cTime}}",
-      "font": "td_big",
+      "font": "td_clock",
       "color": "fg",
       "align": "center",
       "conn": 1

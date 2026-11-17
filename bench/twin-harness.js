@@ -10,10 +10,10 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 
-/** A temp folder holding a copy of every shared/*.js, kit -> kit/runtime and hud -> apps/<app>/hud. */
-function tree(app) {
+/** A temp folder holding a copy of every shared/*.js (but the files named in `omit`: an app that does not pack them), kit -> kit/runtime and hud -> apps/<app>/hud. */
+function tree(app, omit) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'twin-js-'));
-    fs.readdirSync(path.join(ROOT, 'shared')).filter((f) => /\.js$/.test(f)).forEach((f) => fs.copyFileSync(path.join(ROOT, 'shared', f), path.join(dir, f)));
+    fs.readdirSync(path.join(ROOT, 'shared')).filter((f) => /\.js$/.test(f) && (omit || []).indexOf(f) < 0).forEach((f) => fs.copyFileSync(path.join(ROOT, 'shared', f), path.join(dir, f)));
     fs.symlinkSync(path.join(ROOT, 'kit', 'runtime'), path.join(dir, 'kit'));
     // hud/: the app's own folder, entry by entry; a missing fonts/ (package A1's bake, not merged yet) or scene/ (A2's) can be
     // lent by TWIN_FONTS / TWIN_SCENE (a folder of td_*.json / of the scene textures), so the tests run before the merge
@@ -21,7 +21,13 @@ function tree(app) {
     fs.mkdirSync(hud);
     fs.readdirSync(own).forEach((f) => fs.symlinkSync(path.join(own, f), path.join(hud, f)));
     [['fonts', process.env.TWIN_FONTS], ['scene', process.env.TWIN_SCENE]].forEach((e) => {
-        if (!fs.existsSync(path.join(hud, e[0])) && e[1] && fs.existsSync(e[1])) fs.symlinkSync(path.resolve(e[1]), path.join(hud, e[0]));
+        if (!e[1] || !fs.existsSync(e[1])) return;
+        // the lent folder's files are added to the app's own (a half-merged fonts/ holds only some of them)
+        const mine = path.join(own, e[0]), merged = path.join(hud, e[0]);
+        if (fs.existsSync(merged)) fs.unlinkSync(merged);
+        fs.mkdirSync(merged);
+        fs.readdirSync(path.resolve(e[1])).forEach((f) => fs.symlinkSync(path.join(path.resolve(e[1]), f), path.join(merged, f)));
+        if (fs.existsSync(mine)) fs.readdirSync(mine).forEach((f) => { const t = path.join(merged, f); if (!fs.existsSync(t)) fs.symlinkSync(path.join(mine, f), t); });
     });
     return dir;
 }

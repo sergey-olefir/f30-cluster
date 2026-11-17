@@ -13,6 +13,7 @@
  * f30_cluster's own "Off" does the same for it; shared/screen.js keeps the two from drawing together.
  */
 const mgu = require('./kit/mgu');
+require('./twin_icons');          // package A1: the app's pictograms join shared/icons.js ICONS (the tab bar's, the message symbols')
 const HudApp = require('./hud');
 const Menu = require('./menu');
 
