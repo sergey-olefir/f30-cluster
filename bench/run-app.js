@@ -24,6 +24,24 @@ const Module = require('module');
 const stage = process.argv[2], dataDir = process.argv[3];
 if (!stage || !dataDir) { console.error('usage: run-app.js <dist/<id>> <data dir>'); process.exit(2); }
 
+// twin_dial: BENCH_NOW=<ISO instant, UTC>: the app's wall clock starts at that instant when the app starts, and runs on
+// from there (each bench restart is a new start), so the gallery's clock reads the same minute in the first minute of a run
+// and the mockup's 14:43 can be matched. BENCH_NOW_WRAP=<seconds> instead brings the clock back to its start every <seconds>
+// (the minute then never changes; but a timer that straddles the wrap sees time go backwards, so it is off by default).
+// Bench only.
+if (process.env.BENCH_NOW) {
+    const RealDate = Date, base = RealDate.parse(process.env.BENCH_NOW), t0 = RealDate.now();
+    const wrap = Number(process.env.BENCH_NOW_WRAP) * 1000 || 0;
+    const fakeNow = () => base + (wrap ? (RealDate.now() - t0) % wrap : RealDate.now() - t0);
+    if (isFinite(base)) {
+        global.Date = class extends RealDate {
+            constructor(...a) { if (a.length === 0) super(fakeNow()); else super(...a); }
+            static now() { return fakeNow(); }
+        };
+    }
+}
+// end twin_dial
+
 const send = (m) => { if (process.connected) process.send(m); };
 const fmt = (a) => a.map((x) => (x && x.stack) ? x.stack : (typeof x === 'object' ? JSON.stringify(x) : String(x))).join(' ');
 const tag = '[' + path.basename(stage) + '] ';
@@ -40,6 +58,19 @@ try { fs.mkdirSync(dataDir); } catch (e) { /* there */ }
 const { headUnit } = require(path.join(__dirname, '..', 'kit', 'tools', 'hu-stub.js'));
 const hu = headUnit(stage, { live: true, dataDir, log, image: (name, cv) => { if (hu.onImage) hu.onImage(name, cv); return Promise.resolve(); } });
 const { spec, settings, ui } = hu;
+
+// twin_dial: BENCH_CONFIG=<JSON, inline or a file path>: merged over app.json "config" before the app starts (a trip
+// factor, the tank, a switch) so a scripted run can set what the car's owner would set in the config. Bench only.
+if (process.env.BENCH_CONFIG) {
+    try {
+        const txt = process.env.BENCH_CONFIG.trim();
+        const patch = JSON.parse(txt[0] === '{' ? txt : fs.readFileSync(txt, 'utf8'));
+        const deep = (a, b) => { Object.keys(b).forEach((k) => { if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a[k] && typeof a[k] === 'object' && !Array.isArray(a[k])) deep(a[k], b[k]); else a[k] = b[k]; }); return a; };
+        deep(spec.config || (spec.config = {}), patch);
+        log.info('bench: config patched by BENCH_CONFIG (' + Object.keys(patch).join(', ') + ')');
+    } catch (e) { log.warn('bench: BENCH_CONFIG not applied: ' + e.message); }
+}
+// end twin_dial
 
 // 2026-11-15 (apps/driver_profiles): an app whose manifest asks for persod's UserAccountManager gets the bench's fake
 // persod (bench/fake-personalization.js); POST /fake steers it, GET /probe reports its accounts and every call made
@@ -102,7 +133,8 @@ function press(key, value) {
     if (!s) return log.warn('bench: no setting ' + key);
     const comp = ui.comp('SET_' + key.toUpperCase());
     if (s.type === 'bool') {
-        if (!!settings.get(key) !== !!value) comp.emit('action', {});      // a checkbox press toggles
+        const want = value === 'on' ? true : value === 'off' ? false : !!value;      // twin_dial: the manual-signals "demo" off/on word
+        if (!!settings.get(key) !== want) comp.emit('action', {});      // a checkbox press toggles
         return;
     }
     const rows = s.type === 'choice' ? s.options.map((o) => o[0]) : s.steps;
@@ -191,6 +223,11 @@ function feedCar3(v) {
 const fakeSigns = require('./fake-signs').install(hu, appCfg, log);
 // ---- end bottom row ----
 
+// ---- twin_dial (package E, round 2): the fields SPEC section 11 adds, the feed ledger, the demo sweep (bench/twin-sim.js) ----
+const twinSim = spec.id === 'twin_dial' ? require('./twin-sim').install(hu, spec, log) : null;
+let twinSweepAt = 0, twinSweepSaved = null;
+// ---- end twin_dial ----
+
 // manual signals as raw SOME/IP values (a copy of kit/runtime/car.js SCALE; FES boost from hud.js)
 const SCALE = { rpm: [0.25, 0], speed: [0.015625, 0], accel: [0.002, -65], temp: [1, -48], torque: [0.5, -1023.5], boost: [0.01, 0] };
 const raw = (k, v) => Math.round((v - SCALE[k][1]) / SCALE[k][0]);
@@ -210,6 +247,13 @@ setInterval(() => {
 // the drive mode buttons, sent once a second as the car does on change (wire numbers: 1 Sport, 4 Comfort, 7 Eco Pro)
 setInterval(() => { if (drive !== null) hu.feed('de.bmw.infotainment.drivingexcitement.FES', 'statusFESVehicleDynamicSwitchHMI', { actualValueModeDrivingExperience: drive }); }, 1000);
 setInterval(() => {
+    // twin_dial: the demo sweep takes rpm and speed for SWEEP_MS, then hands the saved values back
+    if (twinSim && twinSweepAt) {
+        const sw = twinSim.sweepValues(Date.now() - twinSweepAt);
+        if (sw) manual = Object.assign({}, twinSweepSaved, sw, { gear: sw.speed > 0 ? 3 : 0, engine: 2 });
+        else { manual = twinSweepSaved; twinSweepAt = 0; twinSweepSaved = null; }
+    }
+    // end twin_dial
     if (mode !== 'manual') return;
     const v = manual, num = (k, d) => (typeof v[k] === 'number' && isFinite(v[k]) ? v[k] : d);
     const g = Math.round(num('gear', 0));
@@ -221,7 +265,8 @@ setInterval(() => {
     hu.feed('de.bmw.infrastructure.VehicleInformation', 'statusGearboxDrive', { statusActualGearDrive: g > 0 ? 'G' + g : 'N_OR_P', statusActualStageDrive: g > 0 ? 'D' : 'P' });
     hu.feed('de.bmw.infotainment.drivingexcitement.FES', 'statusActualValueTorque2', { actualValueTorqueCrankshaft: raw('torque', num('torque', 0)) });
     hu.feed('de.bmw.infotainment.drivingexcitement.FES', 'statusSwitchDriveDynamicSport2', { displayBoostPressure: raw('boost', Math.max(0, num('boost', 0))) });
-    hu.feed('de.bmw.infotainment.KombiIF', 'statusRangeTankStatus', { fluidLevelFuelTank: Math.round(num('fuelL', 40)), range: Math.round(num('range', 450)) });
+    const rangeBase = { fluidLevelFuelTank: Math.round(num('fuelL', 40)), range: Math.round(num('range', 450)) };
+    hu.feed('de.bmw.infotainment.KombiIF', 'statusRangeTankStatus', twinSim ? twinSim.rangeStruct(rangeBase, manual) : rangeBase);   // twin_dial: reserve, odometer
     // audit/features: is the engine turning (0 off, 1 starting, 2 running; default from rpm), and BMW's own vehicle
     // state (10 FAHREN = drive-ready, 2 PARKEN_BN_IO = parked). Together they decide READY vs OFF on the rev dial.
     hu.feed('de.bmw.infotainment.vehicle.CDS', 'statusEngineStatus', { statusEngineRunDrive: Math.round(num('engine', num('rpm', 0) >= 150 ? 2 : 0)) });
@@ -239,7 +284,7 @@ setInterval(() => {
 
 // what the app actually sees, so the page shows demo values too
 setInterval(() => {
-    if (!hud) return;
+    if (!hud || !hud.car) return;      // twin_dial: an engine without the f30 members (the bench stand-in) has nothing to show here
     const d = hud.car.data(), out = {};
     ['rpm', 'speed', 'oil', 'coolant', 'gear', 'gLong', 'gLat', 'torque'].forEach((n) => { out[n] = d[n] === undefined ? null : d[n]; });
     out.boost = hud._boost();
@@ -368,7 +413,11 @@ process.on('message', (m) => {
         const v = m.v || {};
         // the bottom-row fakes take scene / sign / cc / ccList / road / nav / clock; the rest goes to the fake persod
         demoTzOverride(v);                       // fix/opaque-cc: a clock of the fake's own ends the demo's time zone
-        if (v.hook) benchHook(v.hook);           // package X: fault injection for the safety tests
+        if (v.twin && twinSim) {                 // twin_dial: the fields twin-sim.js owns, the demo sweep
+            if (v.twin.sweep && !twinSweepAt) { twinSweepSaved = manual; twinSweepAt = Date.now(); mode = 'manual'; if (settings.get('demo') !== 'off') press('demo', 'off'); }
+            twinSim.control(v.twin);
+        }
+        else if (v.hook) benchHook(v.hook);      // package X: fault injection for the safety tests
         else if (v.scene || v.sign || v.cc || v.ccList || v.ccActive || v.ccFrame || v.sla || v.road || v.nav || v.clock || v.clockLocal) fakeSigns.control(v);
         else if (v.ccRisk || v.ccBasic || v.symbols) fakeSigns.control(v);     // probes (0.7.18): bench/test-probes.js
         else if (v.dayNight !== undefined) fakeSigns.control(v);    // fix/colour-daynight: bench/test-daynight.js
@@ -382,11 +431,13 @@ process.on('message', (m) => {
             activeName: hud ? hud.activeName : null, layoutName, yielded, driveMode: hud ? hud.driveMode : null,
             ready: !!(hud && hud.client && hud.client.ready),
             perso: fakePerso ? fakePerso.state() : null,
+            twin: twinSim ? twinSim.state(hud) : null,      // twin_dial: ledger, coverage, the engine's message state
             // fix/colour-daynight: the car's day/night as the engine took it, the source in use, night now, and what
             // the sun alone would say (bench/test-daynight.js)
             dayNight: hud ? dayNightProbe() : null,
             // bottom row: what the fakes fed and what the engine made of it (bench/test-bottom-row.js)
-            signs: Object.assign(fakeSigns.state(), hud ? {
+            // twin_dial: the f30 engine's block below reads members another engine need not have; a failure there is reported, not fatal
+            signs: (() => { try { return Object.assign(fakeSigns.state(), hud ? {
                 sign: hud.sign,
                 cc: {
                     shown: hud.ccShown, name: hud._ccText('name'), desc: hud._ccText('desc'), list: (hud.ccItems || []).length,
@@ -416,7 +467,7 @@ process.on('message', (m) => {
                 // 2026-11-16: WBBACK's black patches over BMW's bottom row, in PANEL px, with how many rects the
                 // layout wanted and how many the shader can hold: "want > cap" is a silent leak (bench/test-bottom-row.js)
                 patches: wbPatches(),
-            } : {}),
+            } : {}); } catch (e) { return Object.assign(fakeSigns.state(), { probeError: String(e && e.message || e) }); } })(),
         });
     }
 });
