@@ -147,8 +147,24 @@ async function stopBench(b) {
 async function part2() {
     console.log('a bench');
     server = startBench('a');
+    // the first seconds of the app, sampled fast: every answer after the app has connected must say "window"
+    const early = [];
+    const t0 = Date.now();
+    while (Date.now() - t0 < 60000) {
+        try {
+            const q = await probe();
+            if (q && q.twin && q.twin.cc) early.push({ ready: q.ready, state: q.twin.cc.state, t: Date.now() - t0 });
+            if (q && q.ready && early.filter((e) => e.ready).length >= 12) break;
+        } catch (e) { /* not up */ }
+        await sleep(40);
+    }
+    const bad = early.filter((e) => e.ready && e.state !== 'window');
+    ok(early.some((e) => e.ready) && bad.length === 0, 'blind start, ' + early.filter((e) => e.ready).length + ' answers from the first ready one: all window' + (bad.length ? ' (first none at ' + bad[0].t + ' ms)' : ''));
     let p = await until((q) => q && q.ready && q.twin, 90000);
     ok(p && p.ready, 'the app is up (' + (p && p.status) + ')');
+    // the blind start: from the first moment the app is connected to cluster-render, with no message field ever fed, the
+    // engine must say "window" (SPEC 8.4 keep-open 1). The first probe answers are read at 40 ms; a "none" once ready is a hole.
+    ok(p && p.twin && p.twin.cc && p.twin.cc.state === 'window', 'blind start: the engine says window (' + JSON.stringify(p && p.twin && p.twin.cc) + ')');
     const T = p.twin;
     ok(Array.isArray(T.missing) && T.missing.length === 0, 'every needed field of SPEC section 11 is watched by the app (missing: ' + JSON.stringify(T.missing) + ')');
     ok(T.wired.ccList && T.wired.ccActive && T.wired.clock && T.wired.dayNight, 'app.json config names ccList, ccActive, clock and dayNight (' + JSON.stringify(T.wired) + ')');
