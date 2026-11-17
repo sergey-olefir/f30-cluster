@@ -1,0 +1,407 @@
+{
+ "_about": "package R2-A2: what the tdial shader needs to colour and animate face_tacho (tools/twin-dial/bake_face.py). theta = degrees clockwise from 12 o'clock = atan2(dx, -dy) of the pixel centre about the dial centre; rho = distance / R. Panel px = face px + rect_panel[0:2].",
+ "face": "face_tacho",
+ "format": "r8",
+ "w": 616,
+ "h": 560,
+ "R_px": 300.0,
+ "rect_panel": [
+  72,
+  90,
+  688,
+  650
+ ],
+ "centre_face_px": [
+  308.0,
+  310.0
+ ],
+ "centre_panel_px": [
+  380.0,
+  400.0
+ ],
+ "stretch_saira": 1.06,
+ "encoding": {
+  "byte": "the neutral sRGB code (the G channel of the picture) / 255; 0 = black",
+  "band_strip_code": 137,
+  "major_line_code": 6,
+  "bar_frame_code": 47,
+  "hub_text_grey_code": 227,
+  "ink_code": 255,
+  "note": "ticks, numerals, bezel, rim, OFF, end labels, icon: 255 (their antialiased edges blend with the band)"
+ },
+ "regions": {
+  "band": {
+   "rho": [
+    0.58,
+    0.94
+   ],
+   "theta_abs_max_deg": 144.0,
+   "tint_linear": [
+    0.96,
+    1.0,
+    1.08
+   ],
+   "tint_fade_g": [
+    0.7,
+    0.8
+   ],
+   "what": "the grey scale band (ticks strip included). Only here the tint is applied."
+  },
+  "strip": {
+   "rho": [
+    0.893,
+    0.94
+   ],
+   "code": 137,
+   "what": "the tick strip, constant 137 inside band.theta_abs_max"
+  },
+  "ink_numerals": {
+   "rho": [
+    0.6634,
+    0.8298
+   ],
+   "what": "every numeral ink pixel lies in this radius range"
+  },
+  "ink_ticks": {
+   "rho": [
+    0.896,
+    0.934
+   ],
+   "what": "ticks (the strip is 0.893-0.940)"
+  },
+  "bezel": {
+   "rho": [
+    0.9895,
+    1.0105
+   ],
+   "theta_abs_max_deg": 144.0,
+   "what": "white ring, open at the bottom"
+  },
+  "rim": {
+   "rho": [
+    0.537,
+    0.553
+   ],
+   "theta_abs_max_deg": 150.0,
+   "what": "white inner rim (D2); open below +-150 deg as the mockup (SPEC \u00a74 says a full circle: lead decides)"
+  }
+ },
+ "decode": {
+  "band_tint": "inside regions.band: c_k = max(0, (k_k)^(1/2.4) * (g + 0.055) - 0.055), k = tint_linear * bandGain, per channel; w = 1 - smoothstep(0.70, 0.80, g); rgb = mix(vec3(g), c, w). Outside the band rgb = g. Exact for sRGB(Y*k) while Y*k > 0.0031308 (everywhere in the band at bandGain >= 0.6).",
+  "night": "multiply in linear light on top (SPEC \u00a77.2), per material class: region + luma class",
+  "ink_alpha": "for recolouring ink (red numerals/ticks, ink over the wedge): alpha = clamp((g - t0) / (1 - t0), 0, 1), t0 = 0.54 for rho in ink_ticks (the strip is the constant 137/255, exact), t0 = see ink_alpha_t0_numerals",
+  "ink_alpha_t0_numerals": 0.52
+ },
+ "numerals": [
+  {
+   "value": 1,
+   "theta_deg": -93.75,
+   "centre_px": [
+    84.979,
+    324.618
+   ],
+   "ink_box_px": [
+    73.33,
+    305.0,
+    91.0,
+    344.33
+   ]
+  },
+  {
+   "value": 2,
+   "theta_deg": -62.5,
+   "centre_px": [
+    109.753,
+    206.799
+   ],
+   "ink_box_px": [
+    92.0,
+    187.0,
+    127.33,
+    226.67
+   ]
+  },
+  {
+   "value": 3,
+   "theta_deg": -31.25,
+   "centre_px": [
+    192.054,
+    118.927
+   ],
+   "ink_box_px": [
+    174.0,
+    99.0,
+    209.0,
+    139.0
+   ]
+  },
+  {
+   "value": 4,
+   "theta_deg": 0.0,
+   "centre_px": [
+    308.0,
+    86.5
+   ],
+   "ink_box_px": [
+    287.67,
+    67.0,
+    328.33,
+    106.33
+   ]
+  },
+  {
+   "value": 5,
+   "theta_deg": 31.25,
+   "centre_px": [
+    423.946,
+    118.927
+   ],
+   "ink_box_px": [
+    407.0,
+    99.0,
+    441.67,
+    138.67
+   ]
+  },
+  {
+   "value": 6,
+   "theta_deg": 62.5,
+   "centre_px": [
+    506.247,
+    206.799
+   ],
+   "ink_box_px": [
+    486.67,
+    186.67,
+    526.0,
+    226.67
+   ]
+  },
+  {
+   "value": 7,
+   "theta_deg": 93.75,
+   "centre_px": [
+    531.021,
+    324.618
+   ],
+   "ink_box_px": [
+    513.33,
+    304.67,
+    548.33,
+    344.33
+   ]
+  },
+  {
+   "value": 8,
+   "theta_deg": 125.0,
+   "centre_px": [
+    491.08,
+    438.194
+   ],
+   "ink_box_px": [
+    471.0,
+    418.0,
+    511.0,
+    458.33
+   ]
+  }
+ ],
+ "ticks": [
+  {
+   "value_rpm": 0,
+   "theta_deg": -125.0,
+   "kind": "major"
+  },
+  {
+   "value_rpm": 500,
+   "theta_deg": -109.375,
+   "kind": "minor"
+  },
+  {
+   "value_rpm": 1000,
+   "theta_deg": -93.75,
+   "kind": "major"
+  },
+  {
+   "value_rpm": 1500,
+   "theta_deg": -78.125,
+   "kind": "minor"
+  },
+  {
+   "value_rpm": 2000,
+   "theta_deg": -62.5,
+   "kind": "major"
+  },
+  {
+   "value_rpm": 2500,
+   "theta_deg": -46.875,
+   "kind": "minor"
+  },
+  {
+   "value_rpm": 3000,
+   "theta_deg": -31.25,
+   "kind": "major"
+  },
+  {
+   "value_rpm": 3500,
+   "theta_deg": -15.625,
+   "kind": "minor"
+  },
+  {
+   "value_rpm": 4000,
+   "theta_deg": 0.0,
+   "kind": "major"
+  },
+  {
+   "value_rpm": 4500,
+   "theta_deg": 15.625,
+   "kind": "minor"
+  },
+  {
+   "value_rpm": 5000,
+   "theta_deg": 31.25,
+   "kind": "major"
+  },
+  {
+   "value_rpm": 5500,
+   "theta_deg": 46.875,
+   "kind": "minor"
+  },
+  {
+   "value_rpm": 6000,
+   "theta_deg": 62.5,
+   "kind": "major"
+  },
+  {
+   "value_rpm": 6500,
+   "theta_deg": 78.125,
+   "kind": "minor"
+  },
+  {
+   "value_rpm": 7000,
+   "theta_deg": 93.75,
+   "kind": "major"
+  },
+  {
+   "value_rpm": 7500,
+   "theta_deg": 109.375,
+   "kind": "minor"
+  },
+  {
+   "value_rpm": 8000,
+   "theta_deg": 125.0,
+   "kind": "major"
+  }
+ ],
+ "bar": {
+  "y_px": 529.0,
+  "x0_px": 182.0,
+  "x1_px": 434.0,
+  "segments": 5,
+  "gap_px": 4,
+  "half_thickness_px": 3.75,
+  "segment_rects_face_px": [
+   [
+    182.0,
+    525.25,
+    229.2,
+    532.75
+   ],
+   [
+    233.2,
+    525.25,
+    280.4,
+    532.75
+   ],
+   [
+    284.4,
+    525.25,
+    331.6,
+    532.75
+   ],
+   [
+    335.6,
+    525.25,
+    382.8,
+    532.75
+   ],
+   [
+    386.8,
+    525.25,
+    434.0,
+    532.75
+   ]
+  ],
+  "frame_code": 47,
+  "what": "frames of the 5 segments are baked (47); the shader fills them (white; first segment red on reserve; last red when hot)"
+ },
+ "icons": [
+  {
+   "name": "td_fuel_side",
+   "size": 32,
+   "centre_panel_px": [
+    380.0,
+    593.5
+   ]
+  }
+ ],
+ "baked_text": [
+  "1/\u0445\u0432 \u00d7 1000 (unit, Noto 20, code 227)",
+  "OFF (Saira 22)",
+  "0",
+  "1/1"
+ ],
+ "not_baked": [
+  "needle",
+  "wedge",
+  "bar fills",
+  "READY",
+  "gear",
+  "drive program",
+  "digital speed"
+ ],
+ "clearance": {
+  "min_numeral_numeral": 71.81,
+  "min_numeral_tick": 20.11,
+  "min_numeral_needle_rest": 123.35,
+  "by_design_covered_by_the_needle_at_rest": [
+   "OFF"
+  ],
+  "violations": [],
+  "rule_px": 4.0
+ },
+ "dropped_small_numerals": [],
+ "scale": {
+  "law": "0..8 x 1000 rpm linear, 0 at -125 deg, 8 at +125 deg (31.25 deg per 1000)",
+  "sweep_deg": 125.0,
+  "rest_deg": -135.0,
+  "rest_note": "OFF position, engine not running"
+ },
+ "wedge": {
+  "rho": [
+   0.55,
+   0.94
+  ],
+  "from": "redline rpm (setting)",
+  "to_deg": 125.0,
+  "edges": "radial",
+  "fill_rgb": [
+   78,
+   2,
+   11
+  ],
+  "outline_rgb": [
+   218,
+   16,
+   48
+  ],
+  "outline_px": 3,
+  "edge_inset_deg": 0.9,
+  "what": "drawn by the shader; inside it the face band is replaced and only face INK is kept (alpha rule)"
+ },
+ "red_rules": {
+  "ticks": "red when theta >= theta(redline) - 0.45 deg (half the width of a tick), rho in regions.ink_ticks",
+  "numerals": "a numeral is red when its value >= redline rounded up to 1000: red when theta >= theta(ceil(redline/1000) - 0.5), rho in regions.ink_numerals",
+  "limit": "both only for theta <= 140 deg (scale end + 15, the ink of 8 reaches 131): the bar end label \"1/1\" and the icon lie at larger theta"
+ }
+}

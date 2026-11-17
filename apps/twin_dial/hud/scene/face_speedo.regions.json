@@ -1,0 +1,652 @@
+{
+ "_about": "package R2-A2: what the tdial shader needs to colour and animate face_speedo (tools/twin-dial/bake_face.py). theta = degrees clockwise from 12 o'clock = atan2(dx, -dy) of the pixel centre about the dial centre; rho = distance / R. Panel px = face px + rect_panel[0:2].",
+ "face": "face_speedo",
+ "format": "r8",
+ "w": 616,
+ "h": 560,
+ "R_px": 300.0,
+ "rect_panel": [
+  1232,
+  90,
+  1848,
+  650
+ ],
+ "centre_face_px": [
+  308.0,
+  310.0
+ ],
+ "centre_panel_px": [
+  1540.0,
+  400.0
+ ],
+ "stretch_saira": 1.06,
+ "encoding": {
+  "byte": "the neutral sRGB code (the G channel of the picture) / 255; 0 = black",
+  "band_strip_code": 137,
+  "major_line_code": 6,
+  "bar_frame_code": 47,
+  "hub_text_grey_code": 227,
+  "ink_code": 255,
+  "note": "ticks, numerals, bezel, rim, OFF, end labels, icon: 255 (their antialiased edges blend with the band)"
+ },
+ "regions": {
+  "band": {
+   "rho": [
+    0.58,
+    0.94
+   ],
+   "theta_abs_max_deg": 144.0,
+   "tint_linear": [
+    0.96,
+    1.0,
+    1.08
+   ],
+   "tint_fade_g": [
+    0.7,
+    0.8
+   ],
+   "what": "the grey scale band (ticks strip included). Only here the tint is applied."
+  },
+  "strip": {
+   "rho": [
+    0.893,
+    0.94
+   ],
+   "code": 137,
+   "what": "the tick strip, constant 137 inside band.theta_abs_max"
+  },
+  "ink_numerals": {
+   "rho": [
+    0.649,
+    0.8684
+   ],
+   "what": "every numeral ink pixel lies in this radius range"
+  },
+  "ink_ticks": {
+   "rho": [
+    0.896,
+    0.934
+   ],
+   "what": "ticks (the strip is 0.893-0.940)"
+  },
+  "bezel": {
+   "rho": [
+    0.9895,
+    1.0105
+   ],
+   "theta_abs_max_deg": 144.0,
+   "what": "white ring, open at the bottom"
+  },
+  "rim": {
+   "rho": [
+    0.537,
+    0.553
+   ],
+   "theta_abs_max_deg": 150.0,
+   "what": "white inner rim (D2); open below +-150 deg as the mockup (SPEC \u00a74 says a full circle: lead decides)"
+  }
+ },
+ "decode": {
+  "band_tint": "inside regions.band: c_k = max(0, (k_k)^(1/2.4) * (g + 0.055) - 0.055), k = tint_linear * bandGain, per channel; w = 1 - smoothstep(0.70, 0.80, g); rgb = mix(vec3(g), c, w). Outside the band rgb = g. Exact for sRGB(Y*k) while Y*k > 0.0031308 (everywhere in the band at bandGain >= 0.6).",
+  "night": "multiply in linear light on top (SPEC \u00a77.2), per material class: region + luma class",
+  "ink_alpha": "for recolouring ink (red numerals/ticks, ink over the wedge): alpha = clamp((g - t0) / (1 - t0), 0, 1), t0 = 0.54 for rho in ink_ticks (the strip is the constant 137/255, exact), t0 = see ink_alpha_t0_numerals",
+  "ink_alpha_t0_numerals": 0.52
+ },
+ "numerals": [
+  {
+   "value": 0,
+   "theta_deg": -125.0,
+   "centre_px": [
+    121.233,
+    440.775
+   ],
+   "ink_box_px": [
+    112.0,
+    431.0,
+    130.67,
+    450.33
+   ]
+  },
+  {
+   "value": 20,
+   "theta_deg": -100.0,
+   "centre_px": [
+    83.464,
+    349.592
+   ],
+   "ink_box_px": [
+    62.67,
+    339.67,
+    103.67,
+    359.33
+   ]
+  },
+  {
+   "value": 40,
+   "theta_deg": -75.0,
+   "centre_px": [
+    87.769,
+    250.989
+   ],
+   "ink_box_px": [
+    65.67,
+    241.33,
+    109.0,
+    260.67
+   ]
+  },
+  {
+   "value": 60,
+   "theta_deg": -50.0,
+   "centre_px": [
+    133.342,
+    163.444
+   ],
+   "ink_box_px": [
+    112.0,
+    153.33,
+    155.0,
+    173.33
+   ]
+  },
+  {
+   "value": 80,
+   "theta_deg": -25.0,
+   "centre_px": [
+    211.643,
+    103.362
+   ],
+   "ink_box_px": [
+    190.0,
+    93.67,
+    233.33,
+    113.0
+   ]
+  },
+  {
+   "value": 100,
+   "theta_deg": 0.0,
+   "centre_px": [
+    308.0,
+    82.0
+   ],
+   "ink_box_px": [
+    278.33,
+    72.33,
+    336.33,
+    91.67
+   ]
+  },
+  {
+   "value": 140,
+   "theta_deg": 25.0,
+   "centre_px": [
+    404.357,
+    103.362
+   ],
+   "ink_box_px": [
+    375.0,
+    93.67,
+    432.67,
+    113.0
+   ]
+  },
+  {
+   "value": 180,
+   "theta_deg": 50.0,
+   "centre_px": [
+    482.658,
+    163.444
+   ],
+   "ink_box_px": [
+    452.67,
+    153.67,
+    511.0,
+    173.0
+   ]
+  },
+  {
+   "value": 220,
+   "theta_deg": 75.0,
+   "centre_px": [
+    528.231,
+    250.989
+   ],
+   "ink_box_px": [
+    496.67,
+    241.0,
+    559.67,
+    260.67
+   ]
+  },
+  {
+   "value": 260,
+   "theta_deg": 100.0,
+   "centre_px": [
+    532.536,
+    349.592
+   ],
+   "ink_box_px": [
+    500.0,
+    339.67,
+    565.0,
+    359.67
+   ]
+  },
+  {
+   "value": 300,
+   "theta_deg": 125.0,
+   "centre_px": [
+    494.767,
+    440.775
+   ],
+   "ink_box_px": [
+    462.0,
+    430.67,
+    527.33,
+    450.67
+   ]
+  },
+  {
+   "value": 10,
+   "theta_deg": -112.5,
+   "centre_px": [
+    91.812,
+    399.548
+   ],
+   "ink_box_px": [
+    80.33,
+    393.33,
+    102.0,
+    405.67
+   ]
+  },
+  {
+   "value": 30,
+   "theta_deg": -87.5,
+   "centre_px": [
+    74.223,
+    299.793
+   ],
+   "ink_box_px": [
+    60.67,
+    293.67,
+    87.33,
+    306.0
+   ]
+  },
+  {
+   "value": 50,
+   "theta_deg": -62.5,
+   "centre_px": [
+    100.439,
+    201.951
+   ],
+   "ink_box_px": [
+    87.33,
+    195.67,
+    113.67,
+    208.0
+   ]
+  },
+  {
+   "value": 70,
+   "theta_deg": -37.5,
+   "centre_px": [
+    165.55,
+    124.355
+   ],
+   "ink_box_px": [
+    152.33,
+    118.33,
+    178.33,
+    130.67
+   ]
+  },
+  {
+   "value": 160,
+   "theta_deg": 37.5,
+   "centre_px": [
+    450.45,
+    124.355
+   ],
+   "ink_box_px": [
+    431.33,
+    118.33,
+    468.67,
+    130.67
+   ]
+  },
+  {
+   "value": 200,
+   "theta_deg": 62.5,
+   "centre_px": [
+    515.561,
+    201.951
+   ],
+   "ink_box_px": [
+    494.33,
+    195.67,
+    536.67,
+    208.0
+   ]
+  },
+  {
+   "value": 240,
+   "theta_deg": 87.5,
+   "centre_px": [
+    541.777,
+    299.793
+   ],
+   "ink_box_px": [
+    520.67,
+    293.67,
+    562.67,
+    306.0
+   ]
+  },
+  {
+   "value": 280,
+   "theta_deg": 112.5,
+   "centre_px": [
+    524.188,
+    399.548
+   ],
+   "ink_box_px": [
+    502.67,
+    393.33,
+    545.33,
+    405.67
+   ]
+  }
+ ],
+ "ticks": [
+  {
+   "value_kmh": 0,
+   "theta_deg": -125.0,
+   "kind": "major"
+  },
+  {
+   "value_kmh": 5,
+   "theta_deg": -118.75,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 10,
+   "theta_deg": -112.5,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 15,
+   "theta_deg": -106.25,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 20,
+   "theta_deg": -100.0,
+   "kind": "major"
+  },
+  {
+   "value_kmh": 25,
+   "theta_deg": -93.75,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 30,
+   "theta_deg": -87.5,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 35,
+   "theta_deg": -81.25,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 40,
+   "theta_deg": -75.0,
+   "kind": "major"
+  },
+  {
+   "value_kmh": 45,
+   "theta_deg": -68.75,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 50,
+   "theta_deg": -62.5,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 55,
+   "theta_deg": -56.25,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 60,
+   "theta_deg": -50.0,
+   "kind": "major"
+  },
+  {
+   "value_kmh": 65,
+   "theta_deg": -43.75,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 70,
+   "theta_deg": -37.5,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 75,
+   "theta_deg": -31.25,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 80,
+   "theta_deg": -25.0,
+   "kind": "major"
+  },
+  {
+   "value_kmh": 85,
+   "theta_deg": -18.75,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 90,
+   "theta_deg": -12.5,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 95,
+   "theta_deg": -6.25,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 100,
+   "theta_deg": 0.0,
+   "kind": "major"
+  },
+  {
+   "value_kmh": 110,
+   "theta_deg": 6.25,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 120,
+   "theta_deg": 12.5,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 130,
+   "theta_deg": 18.75,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 140,
+   "theta_deg": 25.0,
+   "kind": "major"
+  },
+  {
+   "value_kmh": 150,
+   "theta_deg": 31.25,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 160,
+   "theta_deg": 37.5,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 170,
+   "theta_deg": 43.75,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 180,
+   "theta_deg": 50.0,
+   "kind": "major"
+  },
+  {
+   "value_kmh": 190,
+   "theta_deg": 56.25,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 200,
+   "theta_deg": 62.5,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 210,
+   "theta_deg": 68.75,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 220,
+   "theta_deg": 75.0,
+   "kind": "major"
+  },
+  {
+   "value_kmh": 230,
+   "theta_deg": 81.25,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 240,
+   "theta_deg": 87.5,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 250,
+   "theta_deg": 93.75,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 260,
+   "theta_deg": 100.0,
+   "kind": "major"
+  },
+  {
+   "value_kmh": 270,
+   "theta_deg": 106.25,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 280,
+   "theta_deg": 112.5,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 290,
+   "theta_deg": 118.75,
+   "kind": "minor"
+  },
+  {
+   "value_kmh": 300,
+   "theta_deg": 125.0,
+   "kind": "major"
+  }
+ ],
+ "bar": {
+  "y_px": 529.0,
+  "x0_px": 182.0,
+  "x1_px": 434.0,
+  "segments": 5,
+  "gap_px": 4,
+  "half_thickness_px": 3.75,
+  "segment_rects_face_px": [
+   [
+    182.0,
+    525.25,
+    229.2,
+    532.75
+   ],
+   [
+    233.2,
+    525.25,
+    280.4,
+    532.75
+   ],
+   [
+    284.4,
+    525.25,
+    331.6,
+    532.75
+   ],
+   [
+    335.6,
+    525.25,
+    382.8,
+    532.75
+   ],
+   [
+    386.8,
+    525.25,
+    434.0,
+    532.75
+   ]
+  ],
+  "frame_code": 47,
+  "what": "frames of the 5 segments are baked (47); the shader fills them (white; first segment red on reserve; last red when hot)"
+ },
+ "icons": [
+  {
+   "name": "cc_coolant",
+   "size": 32,
+   "centre_panel_px": [
+    1540.0,
+    593.5
+   ]
+  }
+ ],
+ "baked_text": [
+  "\u043a\u043c/\u0433\u043e\u0434 (unit, Noto 21, code 255)",
+  "C",
+  "H"
+ ],
+ "not_baked": [
+  "needle",
+  "wedge",
+  "bar fills",
+  "READY",
+  "gear",
+  "drive program",
+  "digital speed"
+ ],
+ "clearance": {
+  "min_numeral_numeral": 7.57,
+  "min_numeral_tick": 7.67,
+  "min_numeral_needle_rest": 37.2,
+  "by_design_covered_by_the_needle_at_rest": [
+   "0"
+  ],
+  "violations": [],
+  "rule_px": 4.0
+ },
+ "dropped_small_numerals": [],
+ "scale": {
+  "law": "0 at -125 deg, 100 at 0, 300 at +125; 20 km/h per major to 100, 40 above (piecewise linear)",
+  "sweep_deg": 125.0,
+  "rest_deg": -125.0
+ }
+}

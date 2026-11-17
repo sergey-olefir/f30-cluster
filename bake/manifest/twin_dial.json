@@ -1,0 +1,69 @@
+{
+ "_about": "Twin Dial baked files (package R2-A2): one command regenerates every one of them: tools/twin-dial/bake_all.sh. Our own drawings from SPEC numbers only; no reference image is an input.",
+ "generator": "tools/twin-dial/bake_all.sh",
+ "files": {
+  "face_speedo": {
+   "file": "apps/twin_dial/hud/scene/face_speedo.json",
+   "regions": "apps/twin_dial/hud/scene/face_speedo.regions.json",
+   "w": 616,
+   "h": 560,
+   "format": "r8",
+   "sha256_r8": "24838589c8610c5e4e014e40466c391f1ce03c11189e8cfd5d32a613d072eb29",
+   "stretch_saira": 1.06,
+   "fonts": {
+    "Saira[wdth,wght].ttf": "9d050fc5a01c85f74c4257c207d50b55d1e40c37308c642f974a2c5003231dde",
+    "NotoSans[wdth,wght].ttf": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
+   },
+   "inputs": [
+    "docs/twin-dial/SPEC.md \u00a74, \u00a75 (the numbers; design/twin-dial/vd/dials.json is their evidence)",
+    "design/twin-dial/vt/pictograms/baked/*.png",
+    "tools/twin-dial/bake_face.py"
+   ],
+   "pixel_memory_MiB_counted_twice": 0.658
+  },
+  "face_tacho": {
+   "file": "apps/twin_dial/hud/scene/face_tacho.json",
+   "regions": "apps/twin_dial/hud/scene/face_tacho.regions.json",
+   "w": 616,
+   "h": 560,
+   "format": "r8",
+   "sha256_r8": "cac68bb3875328cc1ee35d109ccd32c4204fb9918c7bf45bd295004511b186ab",
+   "stretch_saira": 1.06,
+   "fonts": {
+    "Saira[wdth,wght].ttf": "9d050fc5a01c85f74c4257c207d50b55d1e40c37308c642f974a2c5003231dde",
+    "NotoSans[wdth,wght].ttf": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
+   },
+   "inputs": [
+    "docs/twin-dial/SPEC.md \u00a74, \u00a75 (the numbers; design/twin-dial/vd/dials.json is their evidence)",
+    "design/twin-dial/vt/pictograms/baked/*.png",
+    "tools/twin-dial/bake_face.py"
+   ],
+   "pixel_memory_MiB_counted_twice": 0.658
+  },
+  "panel_mask": {
+   "file": "apps/twin_dial/hud/scene/panel_mask.json",
+   "w": 536,
+   "h": 112,
+   "format": "r8",
+   "sha256_r8": "e507f16299cce65da38f4436b86511efe3b93498fab761fe46638bcb4a486f0e",
+   "rect_panel": [
+    694,
+    592,
+    1230,
+    704
+   ],
+   "polarity": "coverage (255 = window)",
+   "inputs": [
+    "design/twin-dial/vf/message_panel.json",
+    "tools/strip/bake_mask.py (shape_cover)",
+    "tools/twin-dial/bake_mask.py"
+   ],
+   "pixel_memory_MiB_counted_twice": 0.115
+  }
+ },
+ "tools": {
+  "python": "3.11",
+  "numpy": "2.4.6",
+  "pillow": "13.0.0"
+ }
+}
