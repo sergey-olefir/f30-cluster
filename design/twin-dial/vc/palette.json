@@ -1,0 +1,2374 @@
+{
+ "version": 1,
+ "source_frames": "VR rectified (pub/VR, index v1)",
+ "units": "linear light, white text = 1",
+ "g20_floor_rel_white": [
+  0.0012,
+  0.0009,
+  0.0056
+ ],
+ "palette": [
+  {
+   "name": "white_text",
+   "linear": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "srgb": [
+    255,
+    255,
+    255
+   ],
+   "hex": "#FFFFFF",
+   "Y_rel_white": 1.0,
+   "uncertainty_x": 1.0,
+   "status": "verified",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "text_heading",
+     "L": 0.9812,
+     "srgb_photo": [
+      255,
+      252,
+      253
+     ],
+     "clipped": 1.0
+    },
+    {
+     "ref": "05",
+     "sample": "text_heading",
+     "L": 1.0,
+     "srgb_photo": [
+      255,
+      255,
+      255
+     ],
+     "clipped": 1.0
+    },
+    {
+     "ref": "04",
+     "sample": "text_trip",
+     "L": 0.742,
+     "srgb_photo": [
+      214,
+      225,
+      227
+     ],
+     "clipped": 0.03
+    }
+   ],
+   "rule": "big numerals and texts: clipped in every reference, so white = panel 255 by definition",
+   "g20": {
+    "panel_srgb": [
+     255,
+     255,
+     255
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.001,
+     0.001,
+     0.006
+    ]
+   },
+   "night": {
+    "mult": 0.8,
+    "linear": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "srgb": [
+     231,
+     231,
+     231
+    ],
+    "hex": "#E7E7E7",
+    "note": "whites dimmed 0.8 in linear (~0.91 in sRGB)"
+   }
+  },
+  {
+   "name": "bezel_ring",
+   "linear": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "srgb": [
+    255,
+    255,
+    255
+   ],
+   "hex": "#FFFFFF",
+   "Y_rel_white": 1.0,
+   "uncertainty_x": 1.15,
+   "status": "verified",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "bezel.speedo",
+     "L": 0.8659,
+     "srgb_photo": [
+      253,
+      236,
+      230
+     ],
+     "clipped": 0.79
+    },
+    {
+     "ref": "05",
+     "sample": "bezel.speedo",
+     "L": 1.0,
+     "srgb_photo": [
+      255,
+      255,
+      255
+     ],
+     "clipped": 0.95
+    },
+    {
+     "ref": "04",
+     "sample": "bezel.speedo",
+     "L": 0.6572,
+     "srgb_photo": [
+      206,
+      213,
+      212
+     ],
+     "clipped": 0.0
+    }
+   ],
+   "rule": "clipped on 02 (79 %) and 05 (95 %); 04 reads 0.66 but its ring is 1.6 photo px wide (blur-limited); take white",
+   "g20": {
+    "panel_srgb": [
+     255,
+     255,
+     255
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.001,
+     0.001,
+     0.006
+    ]
+   },
+   "night": {
+    "mult": 0.7,
+    "linear": [
+     0.7,
+     0.7,
+     0.7
+    ],
+    "srgb": [
+     218,
+     218,
+     218
+    ],
+    "hex": "#DADADA",
+    "note": "the brightest long line: 0.7"
+   }
+  },
+  {
+   "name": "inner_ring",
+   "linear": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "srgb": [
+    255,
+    255,
+    255
+   ],
+   "hex": "#FFFFFF",
+   "Y_rel_white": 1.0,
+   "uncertainty_x": 1.1,
+   "status": "verified",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "inner_ring.speedo",
+     "L": 0.9177,
+     "srgb_photo": [
+      245,
+      245,
+      246
+     ],
+     "clipped": 0.37
+    },
+    {
+     "ref": "04",
+     "sample": "inner_ring.speedo",
+     "L": 0.997,
+     "srgb_photo": [
+      251,
+      255,
+      255
+     ],
+     "clipped": 0.94
+    },
+    {
+     "ref": "05",
+     "sample": "inner_ring.speedo",
+     "L": 0.9645,
+     "srgb_photo": [
+      251,
+      251,
+      252
+     ],
+     "clipped": 0.59
+    }
+   ],
+   "rule": "0.92 / 0.997 / 0.96, all partly clipped: white",
+   "g20": {
+    "panel_srgb": [
+     255,
+     255,
+     255
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.001,
+     0.001,
+     0.006
+    ]
+   },
+   "night": {
+    "mult": 0.7,
+    "linear": [
+     0.7,
+     0.7,
+     0.7
+    ],
+    "srgb": [
+     218,
+     218,
+     218
+    ],
+    "hex": "#DADADA",
+    "note": null
+   }
+  },
+  {
+   "name": "numerals",
+   "linear": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "srgb": [
+    255,
+    255,
+    255
+   ],
+   "hex": "#FFFFFF",
+   "Y_rel_white": 1.0,
+   "uncertainty_x": 1.0,
+   "status": "verified",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "text_value",
+     "L": 0.9863,
+     "srgb_photo": [
+      255,
+      253,
+      250
+     ],
+     "clipped": 1.0
+    },
+    {
+     "ref": "05",
+     "sample": "text_value",
+     "L": 1.0,
+     "srgb_photo": [
+      255,
+      255,
+      255
+     ],
+     "clipped": 1.0
+    }
+   ],
+   "rule": "white as the texts; 05 small numerals the same",
+   "g20": {
+    "panel_srgb": [
+     255,
+     255,
+     255
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.001,
+     0.001,
+     0.006
+    ]
+   },
+   "night": {
+    "mult": 0.8,
+    "linear": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "srgb": [
+     231,
+     231,
+     231
+    ],
+    "hex": "#E7E7E7",
+    "note": null
+   }
+  },
+  {
+   "name": "ticks",
+   "linear": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "srgb": [
+    255,
+    255,
+    255
+   ],
+   "hex": "#FFFFFF",
+   "Y_rel_white": 1.0,
+   "uncertainty_x": 1.4,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "ticks.speedo",
+     "L": 0.6006,
+     "srgb_photo": [
+      207,
+      203,
+      200
+     ],
+     "clipped": 0.1
+    },
+    {
+     "ref": "05",
+     "sample": "ticks.speedo",
+     "L": 0.2958,
+     "srgb_photo": [
+      147,
+      148,
+      161
+     ],
+     "clipped": 0.07
+    },
+    {
+     "ref": "04",
+     "sample": "track_line.speedo",
+     "L": 0.7906,
+     "srgb_photo": [
+      224,
+      231,
+      231
+     ],
+     "clipped": 0.11
+    }
+   ],
+   "rule": "peaks 0.60 (02) / 0.30 (05) are 1-2 photo px lines (blur-limited); 04 track line 0.79; the references draw them as white strokes",
+   "g20": {
+    "panel_srgb": [
+     255,
+     255,
+     255
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.001,
+     0.001,
+     0.006
+    ]
+   },
+   "night": {
+    "mult": 0.75,
+    "linear": [
+     0.75,
+     0.75,
+     0.75
+    ],
+    "srgb": [
+     225,
+     225,
+     225
+    ],
+    "hex": "#E1E1E1",
+    "note": null
+   }
+  },
+  {
+   "name": "track",
+   "linear": [
+    0.24066,
+    0.25068,
+    0.27074
+   ],
+   "srgb": [
+    135,
+    137,
+    142
+   ],
+   "hex": "#87898E",
+   "Y_rel_white": 0.25,
+   "uncertainty_x": 1.6,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "track.speedo",
+     "L": 0.3952,
+     "srgb_photo": [
+      173,
+      168,
+      163
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "02",
+     "sample": "track.tacho",
+     "L": 0.3423,
+     "srgb_photo": [
+      160,
+      158,
+      156
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "05",
+     "sample": "track.speedo",
+     "L": 0.2009,
+     "srgb_photo": [
+      124,
+      123,
+      138
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "05",
+     "sample": "track.tacho",
+     "L": 0.1941,
+     "srgb_photo": [
+      120,
+      122,
+      138
+     ],
+     "clipped": 0.0
+    }
+   ],
+   "rule": "the lighter ring under the ticks (02, 05; 04 has only a white line): 0.34-0.39 on 02 (phone tone curve lifts mid-greys), 0.19-0.20 on 05 (no camera); geometric mean 0.26 -> 0.25",
+   "g20": {
+    "panel_srgb": [
+     134,
+     137,
+     141
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.005,
+     0.004,
+     0.021
+    ]
+   },
+   "night": {
+    "mult": 0.55,
+    "linear": [
+     0.13236,
+     0.13788,
+     0.14891
+    ],
+    "srgb": [
+     102,
+     104,
+     108
+    ],
+    "hex": "#66686C",
+    "note": "mid-greys darker at night than whites, so the dial reads as rings, not a lit disc"
+   }
+  },
+  {
+   "name": "scale_gap",
+   "linear": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "srgb": [
+    0,
+    0,
+    0
+   ],
+   "hex": "#000000",
+   "Y_rel_white": 0.0,
+   "uncertainty_x": 1.0,
+   "status": "verified",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "gap.speedo",
+     "L": 0.0017,
+     "srgb_photo": [
+      9,
+      7,
+      6
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "05",
+     "sample": "gap.speedo",
+     "L": -0.0023,
+     "srgb_photo": [
+      4,
+      4,
+      7
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "04",
+     "sample": "gap.speedo",
+     "L": 0.0008,
+     "srgb_photo": [
+      3,
+      7,
+      7
+     ],
+     "clipped": 0.0
+    }
+   ],
+   "rule": "black between the track and the bezel: L 0.001-0.002",
+   "g20": {
+    "panel_srgb": [
+     0,
+     0,
+     0
+    ],
+    "below_floor": [],
+    "floor_share": [
+     1200.0,
+     900.0,
+     5600.0
+    ]
+   },
+   "night": {
+    "mult": 1.0,
+    "linear": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "srgb": [
+     0,
+     0,
+     0
+    ],
+    "hex": "#000000",
+    "note": null
+   }
+  },
+  {
+   "name": "band_inner (rho 0.60, top)",
+   "linear": [
+    0.00963,
+    0.01003,
+    0.01083
+   ],
+   "srgb": [
+    25,
+    26,
+    27
+   ],
+   "hex": "#191A1B",
+   "Y_rel_white": 0.01,
+   "uncertainty_x": 1.7,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "band_in.speedo",
+     "L": 0.0295,
+     "srgb_photo": [
+      50,
+      48,
+      49
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "05",
+     "sample": "band_in.speedo",
+     "L": 0.0093,
+     "srgb_photo": [
+      29,
+      29,
+      33
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "04",
+     "sample": "band_in.speedo",
+     "L": 0.0287,
+     "srgb_photo": [
+      41,
+      49,
+      53
+     ],
+     "clipped": 0.0
+    }
+   ],
+   "rule": "see gradient band: 02 0.030, 05 0.009, 04 0.029 (flat)",
+   "g20": {
+    "panel_srgb": [
+     23,
+     24,
+     16
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.125,
+     0.09,
+     0.517
+    ]
+   },
+   "night": {
+    "mult": 0.6,
+    "linear": [
+     0.00578,
+     0.00602,
+     0.0065
+    ],
+    "srgb": [
+     17,
+     18,
+     19
+    ],
+    "hex": "#111213",
+    "note": null
+   }
+  },
+  {
+   "name": "band_mid (rho 0.72, top)",
+   "linear": [
+    0.0231,
+    0.02407,
+    0.02599
+   ],
+   "srgb": [
+    42,
+    43,
+    45
+   ],
+   "hex": "#2A2B2D",
+   "Y_rel_white": 0.024,
+   "uncertainty_x": 1.7,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "band_mid.speedo",
+     "L": 0.0766,
+     "srgb_photo": [
+      80,
+      78,
+      79
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "05",
+     "sample": "band_mid.speedo",
+     "L": 0.0136,
+     "srgb_photo": [
+      34,
+      35,
+      40
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "04",
+     "sample": "band_mid.speedo",
+     "L": 0.0284,
+     "srgb_photo": [
+      39,
+      49,
+      52
+     ],
+     "clipped": 0.0
+    }
+   ],
+   "rule": "model value; 02 0.077, 05 0.014, 04 0.028",
+   "g20": {
+    "panel_srgb": [
+     41,
+     42,
+     39
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.052,
+     0.037,
+     0.215
+    ]
+   },
+   "night": {
+    "mult": 0.6,
+    "linear": [
+     0.01386,
+     0.01444,
+     0.01559
+    ],
+    "srgb": [
+     31,
+     32,
+     33
+    ],
+    "hex": "#1F2021",
+    "note": null
+   }
+  },
+  {
+   "name": "band_outer (rho 0.88, top)",
+   "linear": [
+    0.07894,
+    0.08222,
+    0.0888
+   ],
+   "srgb": [
+    79,
+    81,
+    84
+   ],
+   "hex": "#4F5154",
+   "Y_rel_white": 0.082,
+   "uncertainty_x": 1.7,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "band_out.speedo",
+     "L": 0.3142,
+     "srgb_photo": [
+      155,
+      151,
+      146
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "05",
+     "sample": "band_out.speedo",
+     "L": 0.0838,
+     "srgb_photo": [
+      81,
+      82,
+      98
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "04",
+     "sample": "band_out.speedo",
+     "L": 0.0267,
+     "srgb_photo": [
+      39,
+      48,
+      49
+     ],
+     "clipped": 0.0
+    }
+   ],
+   "rule": "model value; 02 0.31, 05 0.084, 04 0.027",
+   "g20": {
+    "panel_srgb": [
+     79,
+     81,
+     82
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.015,
+     0.011,
+     0.063
+    ]
+   },
+   "night": {
+    "mult": 0.55,
+    "linear": [
+     0.04341,
+     0.04522,
+     0.04884
+    ],
+    "srgb": [
+     59,
+     60,
+     62
+    ],
+    "hex": "#3B3C3E",
+    "note": null
+   }
+  },
+  {
+   "name": "band_outer (rho 0.88, theta +-110)",
+   "linear": [
+    0.24643,
+    0.2567,
+    0.27724
+   ],
+   "srgb": [
+    136,
+    139,
+    144
+   ],
+   "hex": "#888B90",
+   "Y_rel_white": 0.256,
+   "uncertainty_x": 1.8,
+   "status": "hypothesis",
+   "measured": [],
+   "rule": "model value; fits: 02 0.44-0.52, 05 0.18-0.19",
+   "g20": {
+    "panel_srgb": [
+     136,
+     138,
+     143
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.005,
+     0.004,
+     0.02
+    ]
+   },
+   "night": {
+    "mult": 0.5,
+    "linear": [
+     0.12322,
+     0.12835,
+     0.13862
+    ],
+    "srgb": [
+     98,
+     100,
+     104
+    ],
+    "hex": "#626468",
+    "note": "the lit lower ends lose most at night (glare in a dark cabin)"
+   }
+  },
+  {
+   "name": "band_feet (theta beyond the scale)",
+   "linear": [
+    0.11552,
+    0.12033,
+    0.12995
+   ],
+   "srgb": [
+    95,
+    97,
+    101
+   ],
+   "hex": "#5F6165",
+   "Y_rel_white": 0.12,
+   "uncertainty_x": 2.0,
+   "status": "hypothesis",
+   "measured": [],
+   "rule": "05 feet sRGB 86-131 (L 0.09-0.23), 02 35-85: the band ends' grey cut-outs",
+   "g20": {
+    "panel_srgb": [
+     95,
+     97,
+     99
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.01,
+     0.007,
+     0.043
+    ]
+   },
+   "night": {
+    "mult": 0.5,
+    "linear": [
+     0.05776,
+     0.06016,
+     0.06498
+    ],
+    "srgb": [
+     68,
+     69,
+     72
+    ],
+    "hex": "#444548",
+    "note": null
+   }
+  },
+  {
+   "name": "hub_disc",
+   "linear": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "srgb": [
+    0,
+    0,
+    0
+   ],
+   "hex": "#000000",
+   "Y_rel_white": 0.0,
+   "uncertainty_x": 1.0,
+   "status": "verified",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "hub.speedo",
+     "L": -0.0003,
+     "srgb_photo": [
+      1,
+      1,
+      2
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "04",
+     "sample": "hub.speedo",
+     "L": -0.0001,
+     "srgb_photo": [
+      2,
+      3,
+      5
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "05",
+     "sample": "hub.speedo",
+     "L": -0.0005,
+     "srgb_photo": [
+      10,
+      10,
+      10
+     ],
+     "clipped": 0.0
+    }
+   ],
+   "rule": "black (L <= 0.003 on every reference); the G20 shows its floor",
+   "g20": {
+    "panel_srgb": [
+     0,
+     0,
+     0
+    ],
+    "below_floor": [],
+    "floor_share": [
+     1200.0,
+     900.0,
+     5600.0
+    ]
+   },
+   "night": {
+    "mult": 1.0,
+    "linear": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "srgb": [
+     0,
+     0,
+     0
+    ],
+    "hex": "#000000",
+    "note": null
+   }
+  },
+  {
+   "name": "lcd_black / surround",
+   "linear": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "srgb": [
+    0,
+    0,
+    0
+   ],
+   "hex": "#000000",
+   "Y_rel_white": 0.0,
+   "uncertainty_x": 1.0,
+   "status": "verified",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "lcd_black",
+     "L": 0.0,
+     "srgb_photo": [
+      2,
+      2,
+      2
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "04",
+     "sample": "lcd_black",
+     "L": -0.0,
+     "srgb_photo": [
+      2,
+      3,
+      9
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "05",
+     "sample": "outside.speedo",
+     "L": -0.003,
+     "srgb_photo": [
+      2,
+      2,
+      2
+     ],
+     "clipped": 0.0
+    }
+   ],
+   "rule": "black",
+   "g20": {
+    "panel_srgb": [
+     0,
+     0,
+     0
+    ],
+    "below_floor": [],
+    "floor_share": [
+     1200.0,
+     900.0,
+     5600.0
+    ]
+   },
+   "night": {
+    "mult": 1.0,
+    "linear": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "srgb": [
+     0,
+     0,
+     0
+    ],
+    "hex": "#000000",
+    "note": null
+   }
+  },
+  {
+   "name": "red (wedge numerals, red marks, warning tab)",
+   "linear": [
+    0.7,
+    0.005,
+    0.03
+   ],
+   "srgb": [
+    218,
+    16,
+    48
+   ],
+   "hex": "#DA1030",
+   "Y_rel_white": 0.15456,
+   "uncertainty_x": 1.3,
+   "status": "verified (hue) / hypothesis (level)",
+   "measured": [
+    {
+     "ref": "04",
+     "sample": "wedge_numeral.tacho",
+     "L": 0.1926,
+     "srgb_photo": [
+      226,
+      10,
+      38
+     ],
+     "clipped": 0.36
+    },
+    {
+     "ref": "02",
+     "sample": "tab_red",
+     "L": 0.1049,
+     "srgb_photo": [
+      175,
+      14,
+      44
+     ],
+     "clipped": 0.04
+    },
+    {
+     "ref": "04",
+     "sample": "tab_red",
+     "L": 0.1718,
+     "srgb_photo": [
+      214,
+      52,
+      76
+     ],
+     "clipped": 0.14
+    },
+    {
+     "ref": "05",
+     "sample": "red_numeral.tacho",
+     "L": 0.1433,
+     "srgb_photo": [
+      176,
+      70,
+      77
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "01",
+     "sample": "red_numeral.tacho",
+     "L": 0.2066,
+     "srgb_photo": [
+      243,
+      6,
+      10
+     ],
+     "clipped": 0.22
+    }
+   ],
+   "rule": "a carmine red: G/R 0.004-0.01, B/R 0.03-0.06 on the saturated samples (04 numerals 226,10,38; 02 tab 175,14,44); 05 is desaturated by JPEG chroma subsampling; level between 02's tab (0.43 R) and 04's numerals (0.76 R)",
+   "g20": {
+    "panel_srgb": [
+     218,
+     13,
+     43
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.002,
+     0.18,
+     0.187
+    ]
+   },
+   "night": {
+    "mult": 0.85,
+    "linear": [
+     0.595,
+     0.00425,
+     0.0255
+    ],
+    "srgb": [
+     203,
+     14,
+     44
+    ],
+    "hex": "#CB0E2C",
+    "note": "reds kept near full: a warning colour must not fade"
+   }
+  },
+  {
+   "name": "red_wedge_fill",
+   "linear": [
+    0.077,
+    0.00055,
+    0.0033
+   ],
+   "srgb": [
+    78,
+    2,
+    11
+   ],
+   "hex": "#4E020B",
+   "Y_rel_white": 0.017,
+   "uncertainty_x": 1.6,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "04",
+     "sample": "wedge_fill.tacho",
+     "L": 0.0165,
+     "srgb_photo": [
+      79,
+      3,
+      14
+     ],
+     "clipped": 0.03
+    }
+   ],
+   "rule": "only 04 fills the red zone (79,3,14 = 0.11 of the red); 05 and 02 draw no fill (red bezel arc and red numerals instead)",
+   "g20": {
+    "panel_srgb": [
+     78,
+     0,
+     0
+    ],
+    "below_floor": [
+     "G",
+     "B"
+    ],
+    "floor_share": [
+     0.016,
+     1.636,
+     1.697
+    ]
+   },
+   "night": {
+    "mult": 0.8,
+    "linear": [
+     0.0616,
+     0.00044,
+     0.00264
+    ],
+    "srgb": [
+     70,
+     1,
+     9
+    ],
+    "hex": "#460109",
+    "note": null
+   }
+  },
+  {
+   "name": "red_wedge_edge",
+   "linear": [
+    0.7,
+    0.005,
+    0.03
+   ],
+   "srgb": [
+    218,
+    16,
+    48
+   ],
+   "hex": "#DA1030",
+   "Y_rel_white": 0.15456,
+   "uncertainty_x": 1.3,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "04",
+     "sample": "wedge_edge.tacho",
+     "L": 0.1601,
+     "srgb_photo": [
+      180,
+      77,
+      89
+     ],
+     "clipped": 0.03
+    },
+    {
+     "ref": "05",
+     "sample": "bezel_red.tacho",
+     "L": 0.1273,
+     "srgb_photo": [
+      182,
+      55,
+      65
+     ],
+     "clipped": 0.0
+    }
+   ],
+   "rule": "the wedge outline / the bezel arc past the red line: full red (photo peaks 0.16-0.13 R are blur-mixed thin lines)",
+   "g20": {
+    "panel_srgb": [
+     218,
+     13,
+     43
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.002,
+     0.18,
+     0.187
+    ]
+   },
+   "night": {
+    "mult": 0.85,
+    "linear": [
+     0.595,
+     0.00425,
+     0.0255
+    ],
+    "srgb": [
+     203,
+     14,
+     44
+    ],
+    "hex": "#CB0E2C",
+    "note": null
+   }
+  },
+  {
+   "name": "needle (white, lead)",
+   "linear": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "srgb": [
+    255,
+    255,
+    255
+   ],
+   "hex": "#FFFFFF",
+   "Y_rel_white": 1.0,
+   "uncertainty_x": 1.0,
+   "status": "verified",
+   "measured": [
+    {
+     "ref": "02",
+     "core_srgb": [
+      254,
+      243,
+      240
+     ]
+    },
+    {
+     "ref": "04",
+     "core_srgb": [
+      248,
+      253,
+      253
+     ]
+    }
+   ],
+   "rule": "white on 02 (the in-car facelift) and 04, core clipped; 05 (seller render) and 01/03 (classic) use red",
+   "g20": {
+    "panel_srgb": [
+     255,
+     255,
+     255
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.001,
+     0.001,
+     0.006
+    ]
+   },
+   "night": {
+    "mult": 0.75,
+    "linear": [
+     0.75,
+     0.75,
+     0.75
+    ],
+    "srgb": [
+     225,
+     225,
+     225
+    ],
+    "hex": "#E1E1E1",
+    "note": null
+   }
+  },
+  {
+   "name": "needle (red, option)",
+   "linear": [
+    0.7,
+    0.005,
+    0.03
+   ],
+   "srgb": [
+    218,
+    16,
+    48
+   ],
+   "hex": "#DA1030",
+   "Y_rel_white": 0.15456,
+   "uncertainty_x": 1.3,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "05",
+     "core_srgb": [
+      217,
+      148,
+      150
+     ]
+    },
+    {
+     "ref": "01",
+     "core_srgb": [
+      244,
+      7,
+      6
+     ]
+    }
+   ],
+   "rule": "red needle as on 05 and the classic generation",
+   "g20": {
+    "panel_srgb": [
+     218,
+     13,
+     43
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.002,
+     0.18,
+     0.187
+    ]
+   },
+   "night": {
+    "mult": 0.85,
+    "linear": [
+     0.595,
+     0.00425,
+     0.0255
+    ],
+    "srgb": [
+     203,
+     14,
+     44
+    ],
+    "hex": "#CB0E2C",
+    "note": null
+   }
+  },
+  {
+   "name": "needle_glow",
+   "linear": [
+    0.02,
+    0.02,
+    0.02
+   ],
+   "srgb": [
+    39,
+    39,
+    39
+   ],
+   "hex": "#272727",
+   "Y_rel_white": 0.02,
+   "uncertainty_x": 2.0,
+   "status": "hypothesis",
+   "measured": [],
+   "rule": "no glow measurable on 02 / 04 (excess at 2-6 half-widths within -0.15..+0.06 of the core: 02 shows a dark drop shadow beside the needle); 05 0.02-0.03 of the core; propose 0.02 of the needle colour over 0.03 R, or none",
+   "g20": {
+    "panel_srgb": [
+     37,
+     38,
+     32
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.06,
+     0.045,
+     0.28
+    ]
+   },
+   "night": {
+    "mult": 0.5,
+    "linear": [
+     0.01,
+     0.01,
+     0.01
+    ],
+    "srgb": [
+     25,
+     25,
+     25
+    ],
+    "hex": "#191919",
+    "note": null
+   }
+  },
+  {
+   "name": "needle_shadow",
+   "linear": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "srgb": [
+    0,
+    0,
+    0
+   ],
+   "hex": "#000000",
+   "Y_rel_white": 0.0,
+   "uncertainty_x": 1.0,
+   "status": "hypothesis",
+   "measured": [],
+   "rule": "02: the band beside the needle is 10-15 % darker out to ~0.05 R: a soft drop shadow (multiply 0.85)",
+   "g20": {
+    "panel_srgb": [
+     0,
+     0,
+     0
+    ],
+    "below_floor": [],
+    "floor_share": [
+     1200.0,
+     900.0,
+     5600.0
+    ]
+   },
+   "night": {
+    "mult": 1.0,
+    "linear": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "srgb": [
+     0,
+     0,
+     0
+    ],
+    "hex": "#000000",
+    "note": null
+   }
+  },
+  {
+   "name": "tab_body (bottom of its ramp)",
+   "linear": [
+    0.16,
+    0.16,
+    0.16
+   ],
+   "srgb": [
+    111,
+    111,
+    111
+   ],
+   "hex": "#6F6F6F",
+   "Y_rel_white": 0.16,
+   "uncertainty_x": 1.5,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "tab_body",
+     "L": 0.0405,
+     "srgb_photo": [
+      57,
+      57,
+      57
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "05",
+     "sample": "tab_body",
+     "L": 0.0323,
+     "srgb_photo": [
+      54,
+      52,
+      59
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "04",
+     "sample": "tab_body",
+     "L": 0.4667,
+     "srgb_photo": [
+      161,
+      185,
+      189
+     ],
+     "clipped": 0.0
+    }
+   ],
+   "rule": "vertical ramp: top 0.002-0.003, bottom 0.16 (02) / 0.24 (05); 04 is lit (0.5): outlier",
+   "g20": {
+    "panel_srgb": [
+     111,
+     111,
+     110
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.007,
+     0.006,
+     0.035
+    ]
+   },
+   "night": {
+    "mult": 0.55,
+    "linear": [
+     0.088,
+     0.088,
+     0.088
+    ],
+    "srgb": [
+     84,
+     84,
+     84
+    ],
+    "hex": "#545454",
+    "note": null
+   }
+  },
+  {
+   "name": "tab_rule (under the tab bar)",
+   "linear": [
+    0.85,
+    0.85,
+    0.85
+   ],
+   "srgb": [
+    237,
+    237,
+    237
+   ],
+   "hex": "#EDEDED",
+   "Y_rel_white": 0.85,
+   "uncertainty_x": 1.15,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "05",
+     "sample": "tab_rule",
+     "L": 0.8495,
+     "srgb_photo": [
+      238,
+      237,
+      245
+     ],
+     "clipped": 0.27
+    }
+   ],
+   "rule": "05 0.85 (row profile 0.83), 04 0.93",
+   "g20": {
+    "panel_srgb": [
+     237,
+     237,
+     237
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.001,
+     0.001,
+     0.007
+    ]
+   },
+   "night": {
+    "mult": 0.7,
+    "linear": [
+     0.595,
+     0.595,
+     0.595
+    ],
+    "srgb": [
+     203,
+     203,
+     203
+    ],
+    "hex": "#CBCBCB",
+    "note": null
+   }
+  },
+  {
+   "name": "tab_highlight_green (selected, 05)",
+   "linear": [
+    0.11,
+    0.42,
+    0.02
+   ],
+   "srgb": [
+    93,
+    173,
+    39
+   ],
+   "hex": "#5DAD27",
+   "Y_rel_white": 0.32521,
+   "uncertainty_x": 1.4,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "05",
+     "sample": "tab_green",
+     "L": 0.3185,
+     "srgb_photo": [
+      93,
+      171,
+      39
+     ],
+     "clipped": 0.06
+    }
+   ],
+   "rule": "05 only (93,171,39)",
+   "g20": {
+    "panel_srgb": [
+     93,
+     173,
+     32
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.011,
+     0.002,
+     0.28
+    ]
+   },
+   "night": {
+    "mult": 0.75,
+    "linear": [
+     0.0825,
+     0.315,
+     0.015
+    ],
+    "srgb": [
+     81,
+     152,
+     33
+    ],
+    "hex": "#519821",
+    "note": null
+   }
+  },
+  {
+   "name": "tab_highlight_red (warning, 02 / 04)",
+   "linear": [
+    0.434,
+    0.0031,
+    0.0186
+   ],
+   "srgb": [
+    176,
+    10,
+    37
+   ],
+   "hex": "#B00A25",
+   "Y_rel_white": 0.09583,
+   "uncertainty_x": 1.4,
+   "status": "verified (hue)",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "tab_red",
+     "L": 0.1049,
+     "srgb_photo": [
+      175,
+      14,
+      44
+     ],
+     "clipped": 0.04
+    },
+    {
+     "ref": "04",
+     "sample": "tab_red",
+     "L": 0.1718,
+     "srgb_photo": [
+      214,
+      52,
+      76
+     ],
+     "clipped": 0.14
+    }
+   ],
+   "rule": "red fill of a tab with an active warning: 02 0.43 R",
+   "g20": {
+    "panel_srgb": [
+     176,
+     7,
+     30
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.003,
+     0.29,
+     0.301
+    ]
+   },
+   "night": {
+    "mult": 0.85,
+    "linear": [
+     0.3689,
+     0.00264,
+     0.01581
+    ],
+    "srgb": [
+     164,
+     9,
+     34
+    ],
+    "hex": "#A40922",
+    "note": null
+   }
+  },
+  {
+   "name": "rule_white (heading / bottom-row rules)",
+   "linear": [
+    0.8,
+    0.8,
+    0.8
+   ],
+   "srgb": [
+    231,
+    231,
+    231
+   ],
+   "hex": "#E7E7E7",
+   "Y_rel_white": 0.8,
+   "uncertainty_x": 1.3,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "rule_heading",
+     "L": 0.7302,
+     "srgb_photo": [
+      225,
+      221,
+      219
+     ],
+     "clipped": 0.08
+    },
+    {
+     "ref": "02",
+     "sample": "rule_bottom",
+     "L": 0.9838,
+     "srgb_photo": [
+      255,
+      253,
+      247
+     ],
+     "clipped": 1.0
+    },
+    {
+     "ref": "05",
+     "sample": "rule_heading",
+     "L": 0.3116,
+     "srgb_photo": [
+      152,
+      152,
+      152
+     ],
+     "clipped": 0.0
+    },
+    {
+     "ref": "05",
+     "sample": "rule_vertical",
+     "L": 0.5447,
+     "srgb_photo": [
+      199,
+      194,
+      195
+     ],
+     "clipped": 0.18
+    },
+    {
+     "ref": "05",
+     "sample": "rule_under_dial",
+     "L": 0.9128,
+     "srgb_photo": [
+      245,
+      245,
+      245
+     ],
+     "clipped": 0.44
+    }
+   ],
+   "rule": "1-2 px lines, blur-limited: 0.73 / 0.98 (02), 0.31 / 0.55 / 0.91 (05): white-ish, 0.8",
+   "g20": {
+    "panel_srgb": [
+     231,
+     231,
+     231
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.001,
+     0.001,
+     0.007
+    ]
+   },
+   "night": {
+    "mult": 0.7,
+    "linear": [
+     0.56,
+     0.56,
+     0.56
+    ],
+    "srgb": [
+     197,
+     197,
+     197
+    ],
+    "hex": "#C5C5C5",
+    "note": null
+   }
+  },
+  {
+   "name": "text_grey (small labels)",
+   "linear": [
+    0.77,
+    0.77,
+    0.77
+   ],
+   "srgb": [
+    227,
+    227,
+    227
+   ],
+   "hex": "#E3E3E3",
+   "Y_rel_white": 0.77,
+   "uncertainty_x": 1.3,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "05",
+     "sample": "text_small",
+     "L": 0.7712,
+     "srgb_photo": [
+      228,
+      228,
+      228
+     ],
+     "clipped": 0.11
+    },
+    {
+     "ref": "05",
+     "sample": "text_trip",
+     "L": 0.9515,
+     "srgb_photo": [
+      249,
+      250,
+      249
+     ],
+     "clipped": 0.5
+    },
+    {
+     "ref": "04",
+     "sample": "text_trip",
+     "L": 0.742,
+     "srgb_photo": [
+      214,
+      225,
+      227
+     ],
+     "clipped": 0.03
+    }
+   ],
+   "rule": "small labels peak 0.74-0.95 (blur-limited strokes): the references show no grey text level apart from white; use white, or 0.77 for secondary labels",
+   "g20": {
+    "panel_srgb": [
+     227,
+     227,
+     227
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.002,
+     0.001,
+     0.007
+    ]
+   },
+   "night": {
+    "mult": 0.75,
+    "linear": [
+     0.5775,
+     0.5775,
+     0.5775
+    ],
+    "srgb": [
+     200,
+     200,
+     200
+    ],
+    "hex": "#C8C8C8",
+    "note": null
+   }
+  },
+  {
+   "name": "green_ready",
+   "linear": [
+    0.045,
+    0.33,
+    0.016
+   ],
+   "srgb": [
+    60,
+    155,
+    34
+   ],
+   "hex": "#3C9B22",
+   "Y_rel_white": 0.24674,
+   "uncertainty_x": 1.4,
+   "status": "hypothesis",
+   "measured": [
+    {
+     "ref": "02",
+     "sample": "green_ready",
+     "L": 0.2501,
+     "srgb_photo": [
+      58,
+      156,
+      34
+     ],
+     "clipped": 0.04
+    }
+   ],
+   "rule": "02 READY (58,156,34)",
+   "g20": {
+    "panel_srgb": [
+     59,
+     155,
+     26
+    ],
+    "below_floor": [],
+    "floor_share": [
+     0.027,
+     0.003,
+     0.35
+    ]
+   },
+   "night": {
+    "mult": 0.8,
+    "linear": [
+     0.036,
+     0.264,
+     0.0128
+    ],
+    "srgb": [
+     53,
+     140,
+     30
+    ],
+    "hex": "#358C1E",
+    "note": null
+   }
+  }
+ ],
+ "band_model": {
+  "formula": "Y(rho, theta) = Y0 * exp(k_r * (rho - 0.60)) * exp(-k_t * (cos(theta) - 1)), rho 0.585..0.89, theta cw from 12; chroma = band tint",
+  "Y0": 0.01,
+  "k_r": 7.5,
+  "k_t": 0.85,
+  "tint_rgb": [
+   0.96,
+   1.0,
+   1.08
+  ],
+  "fits": {
+   "02": {
+    "tacho": {
+     "a1_per_R": 8.428178475095377,
+     "a2_cos": -0.904890104720521,
+     "rms_log": 0.4421659890333278,
+     "Y_at": {
+      "in0.60@0": 0.014488564361687372,
+      "in0.60@110": 0.04880049330840023,
+      "out0.88@0": 0.15343079931488876,
+      "out0.88@110": 0.5167867918693302
+     }
+    },
+    "speedo": {
+     "a1_per_R": 7.782651606036239,
+     "a2_cos": -0.6618033162132755,
+     "rms_log": 0.4166998908732671,
+     "Y_at": {
+      "in0.60@0": 0.020684751198122648,
+      "in0.60@110": 0.05027712252106209,
+      "out0.88@0": 0.18282679356661435,
+      "out0.88@110": 0.44438557719349625
+     }
+    }
+   },
+   "04": {
+    "tacho": {
+     "a1_per_R": -0.6386238116180001,
+     "a2_cos": 0.2375274128363313,
+     "rms_log": 0.4258486670837576,
+     "Y_at": {
+      "in0.60@0": 0.034926329103490555,
+      "in0.60@110": 0.025393021387089234,
+      "out0.88@0": 0.029207522416489842,
+      "out0.88@110": 0.021235190196718733
+     }
+    },
+    "speedo": {
+     "a1_per_R": -0.08099244544744262,
+     "a2_cos": -0.260597122616857,
+     "rms_log": 0.3752367676938231,
+     "Y_at": {
+      "in0.60@0": 0.02548648929829306,
+      "in0.60@110": 0.036157162731405804,
+      "out0.88@0": 0.024915014048475344,
+      "out0.88@110": 0.03534642244612007
+     }
+    }
+   },
+   "05": {
+    "tacho": {
+     "a1_per_R": 7.406566549266716,
+     "a2_cos": -0.8848016222555517,
+     "rms_log": 0.24008025527127774,
+     "Y_at": {
+      "in0.60@0": 0.006863511709202701,
+      "in0.60@110": 0.022502824206736213,
+      "out0.88@0": 0.054601308928515724,
+      "out0.88@110": 0.17901676406097597
+     }
+    },
+    "speedo": {
+     "a1_per_R": 6.969295534760035,
+     "a2_cos": -0.9945152016161171,
+     "rms_log": 0.44652140222765685,
+     "Y_at": {
+      "in0.60@0": 0.007077092280024878,
+      "in0.60@110": 0.026883764705280817,
+      "out0.88@0": 0.049812496095597354,
+      "out0.88@110": 0.18922282929622194
+     }
+    }
+   }
+  },
+  "status": "hypothesis: 02 (k_r 7.8-8.4, k_t 0.66-0.90) and 05 (k_r 7.0-7.4, k_t 0.88-0.99) agree on the shape, 04 is flat (0.03, an aftermarket unit); levels between 05 and 02 (02 lifted by the phone tone curve)"
+ },
+ "texture": {
+  "finding": "no texture resolved: relative rms 0.06-0.08 (02), 0.04-0.10 (05) with correlation length = 1 photo px along both rho and theta (0.005-0.009 R), the same as the noise floor on 05's black hub (0.03-0.06); 04 0.11-0.28 is LCD moire / JPEG",
+  "proposal": "optional fine isotropic grain, two tones = band x (1 -/+ 0.04), cell <= 0.005 R; or none",
+  "measured": {
+   "02": {
+    "tacho": {
+     "inner": {
+      "rms": 0.07582779521876028,
+      "p10": -0.09119650004384607,
+      "p90": 0.09085910602668185,
+      "radial_corr_len_R": 0.005008347245409016,
+      "theta_corr_len_R": 0.0054105206811824215
+     },
+     "outer": {
+      "rms": 0.0716835739556143,
+      "p10": -0.08382483457467593,
+      "p90": 0.08171225861738152,
+      "radial_corr_len_R": 0.005008347245409016,
+      "theta_corr_len_R": 0.007352199474026114
+     },
+     "hub_floor": {
+      "rms": 3.227455114167128e-06,
+      "p10": 0.0,
+      "p90": 0.0,
+      "radial_corr_len_R": 0.029048414023372292,
+      "theta_corr_len_R": 0.08115781021773631
+     }
+    },
+    "speedo": {
+     "inner": {
+      "rms": 0.05766955420679,
+      "p10": -0.0678832987651756,
+      "p90": 0.07091558098300729,
+      "radial_corr_len_R": 0.006010016694490819,
+      "theta_corr_len_R": 0.0054105206811824215
+     },
+     "outer": {
+      "rms": 0.06018295611169463,
+      "p10": -0.07271289445744317,
+      "p90": 0.0659881960583174,
+      "radial_corr_len_R": 0.008013355592654425,
+      "theta_corr_len_R": 0.007352199474026114
+     },
+     "hub_floor": {
+      "rms": 9.894650349550541e-06,
+      "p10": 0.0,
+      "p90": 0.0,
+      "radial_corr_len_R": 0.029048414023372292,
+      "theta_corr_len_R": 0.08115781021773631
+     }
+    }
+   },
+   "04": {
+    "tacho": {
+     "inner": {
+      "rms": 0.10636998807647681,
+      "p10": -0.13890709931521483,
+      "p90": 0.12933509858278378,
+      "radial_corr_len_R": 0.008013355592654425,
+      "theta_corr_len_R": 0.008115781021773632
+     },
+     "outer": {
+      "rms": 0.11938494556113148,
+      "p10": -0.157041482821364,
+      "p90": 0.13844388572711885,
+      "radial_corr_len_R": 0.008013355592654425,
+      "theta_corr_len_R": 0.007352199474026114
+     },
+     "hub_floor": {
+      "rms": 0.1556745206793894,
+      "p10": -0.22191390096768893,
+      "p90": 0.1594323382059793,
+      "radial_corr_len_R": 0.007011686143572623,
+      "theta_corr_len_R": 0.006086835766330225
+     }
+    },
+    "speedo": {
+     "inner": {
+      "rms": 0.10897743959394032,
+      "p10": -0.13905062604704826,
+      "p90": 0.13469337272436438,
+      "radial_corr_len_R": 0.008013355592654425,
+      "theta_corr_len_R": 0.008115781021773632
+     },
+     "outer": {
+      "rms": 0.28334965026906933,
+      "p10": -0.39896976860033384,
+      "p90": 0.2931909517914428,
+      "radial_corr_len_R": 0.011018363939899835,
+      "theta_corr_len_R": 0.01102829921103917
+     },
+     "hub_floor": {
+      "rms": 0.14260010532304526,
+      "p10": -0.20461009091143445,
+      "p90": 0.15450881341910058,
+      "radial_corr_len_R": 0.006010016694490819,
+      "theta_corr_len_R": 0.006086835766330225
+     }
+    }
+   },
+   "05": {
+    "tacho": {
+     "inner": {
+      "rms": 0.05800254485347904,
+      "p10": -0.070759194047931,
+      "p90": 0.05888656942896203,
+      "radial_corr_len_R": 0.008013355592654425,
+      "theta_corr_len_R": 0.008115781021773632
+     },
+     "outer": {
+      "rms": 0.03908529516364471,
+      "p10": -0.04982343188926703,
+      "p90": 0.041989053268465984,
+      "radial_corr_len_R": 0.009015025041736228,
+      "theta_corr_len_R": 0.007352199474026114
+     },
+     "hub_floor": {
+      "rms": 0.058060679153091876,
+      "p10": -0.06624683902507994,
+      "p90": 0.03785297599286985,
+      "radial_corr_len_R": 0.006010016694490819,
+      "theta_corr_len_R": 0.006086835766330225
+     }
+    },
+    "speedo": {
+     "inner": {
+      "rms": 0.10325668155113223,
+      "p10": -0.1419231700090633,
+      "p90": 0.11279081876683916,
+      "radial_corr_len_R": 0.008013355592654425,
+      "theta_corr_len_R": 0.008115781021773632
+     },
+     "outer": {
+      "rms": 0.20429803461524088,
+      "p10": -0.2821129791025509,
+      "p90": 0.21484374435785056,
+      "radial_corr_len_R": 0.007011686143572623,
+      "theta_corr_len_R": 0.007352199474026114
+     },
+     "hub_floor": {
+      "rms": 0.033160336271903984,
+      "p10": -0.040679893237273834,
+      "p90": 0.02183239454169006,
+      "radial_corr_len_R": 0.006010016694490819,
+      "theta_corr_len_R": 0.006086835766330225
+     }
+    }
+   }
+  }
+ },
+ "tab_ramp": {
+  "rows_Y": {
+   "02": [
+    0.0016807806714016875,
+    0.0023012600128549878,
+    0.003549173341341996,
+    0.004248823933032266,
+    0.005023136195829857,
+    0.0063292145500775535,
+    0.007814851768747275,
+    0.008908228424112817,
+    0.011612245179743885,
+    0.014443843596092545,
+    0.017641954488384078,
+    0.019382360956935723,
+    0.024157632448504756,
+    0.027320891639074897,
+    0.03189603307301153,
+    0.038204371595346495,
+    0.04373502925697346,
+    0.04817182422688942,
+    0.056787409989304385,
+    0.06597415115414282,
+    0.07247825527359703,
+    0.08437621154414882,
+    0.09361816573783721,
+    0.09644740688641358,
+    0.11346001471087581,
+    0.1212213726381766,
+    0.130144717328396,
+    0.140655373957132,
+    0.14964897302627275,
+    0.15069764336300642,
+    0.17581107174198948,
+    0.16027286607799177
+   ],
+   "04": [
+    0.0034875173193361785,
+    0.004922362864437936,
+    0.011054304345932506,
+    0.026332584257697515,
+    0.06220446277587933,
+    0.11702320255290097,
+    0.18842343467255415,
+    0.26436123998564787,
+    0.3360153691633761,
+    0.3832862649627683,
+    0.4251167045493294,
+    0.4542868569732309,
+    0.46879302909831644,
+    0.49837482406694755,
+    0.507631930852534,
+    0.49747781605900643,
+    0.7237561446232728,
+    0.9276576697331378
+   ],
+   "05": [
+    0.0024282158683907,
+    0.004330783665874324,
+    0.004712522751298304,
+    0.005461975601397144,
+    0.0073274668642496574,
+    0.01042241390886538,
+    0.014555930469444457,
+    0.018629338487800986,
+    0.021358670864915667,
+    0.03337802074342658,
+    0.03787480356156016,
+    0.05099934611672809,
+    0.0673066885775185,
+    0.09338500184033748,
+    0.12802857570135423,
+    0.16631357469344152,
+    0.19618462240559564,
+    0.2578223971959868,
+    0.23775219595200633,
+    0.8274886720399497,
+    0.11305190707453476
+   ]
+  },
+  "proposal": "linear Y from 0.003 (top) to 0.16 (bottom), exponential in between; white-ish rule 0.85 under it"
+ },
+ "centre_background": {
+  "finding": "02 and 04 black (02's lower haze is the steering wheel's reflection, glare); 05 rises smoothly from 0 at the dial centre line to sRGB 64 (L 0.05) at +0.92 R: a floor glow",
+  "proposal": "black; 05's floor glow as an option (L 0 -> 0.05 over y 0.2..0.92 R below the centre line)"
+ },
+ "night": {
+  "status": "hypothesis (no facelift night reference)",
+  "from_03": "03 (classic, night): whites stay white (clipped), reds clip to orange in the photo (R channel saturated: not a design tint), the band is (34,38,42): the design keeps its hues by night; the camera, not the cluster, changes them",
+  "rule": "no tint; whites x0.8, rings x0.7, mid-greys x0.55, lit band ends x0.5, reds x0.85; the car dims the backlight itself (statusDayNightChangeOver / destinationLCDLuminance), so this is a contrast shape, not a dimmer"
+ }
+}
