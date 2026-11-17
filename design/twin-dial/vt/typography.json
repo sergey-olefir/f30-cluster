@@ -1,0 +1,778 @@
+{
+ "_about": "Package VT typography for the Twin Dial. box = rms of every glyph box edge after a fitted size, position and bloom, in % of the sample's tallest glyph; d_fill = squareness of 0 / O / D (candidate - reference); score = hypot(box, 100 d_fill); bloom = fitted ink growth per edge, rectified px at R 400 (>= 0). The references are rectified by package VR (R = 400 px). Tools: tools/twin-dial/vt/.",
+ "choice": {
+  "scale": {
+   "face": "Saira",
+   "file": "Saira[wdth,wght].ttf",
+   "wght": 550,
+   "wdth": 125,
+   "licence": "SIL OFL 1.1",
+   "why": "rank 1 of 38 families (75 font files), box 4.23 % of the figure height, squareness d_fill +0.004; next best 7.13 % (and a squarer zero)",
+   "weight_range": [
+    500,
+    600
+   ],
+   "status": "verified (02, 05: 14 samples)"
+  },
+  "scale_small": {
+   "face": "Saira",
+   "file": "Saira[wdth,wght].ttf",
+   "wght": 550,
+   "wdth": 125,
+   "licence": "SIL OFL 1.1",
+   "why": "rank 1 (box 2.93 %), one sample",
+   "weight_range": [
+    400,
+    700
+   ],
+   "status": "hypothesis (1 sample)"
+  },
+  "readout": {
+   "face": "Saira",
+   "file": "Saira[wdth,wght].ttf",
+   "wght": 550,
+   "wdth": 125,
+   "licence": "SIL OFL 1.1",
+   "why": "rank 1, box 3.22 %, d_fill -0.015; next 4.46 %",
+   "weight_range": [
+    450,
+    600
+   ],
+   "status": "verified (3 samples, 02 and 05)"
+  },
+  "dlabel": {
+   "face": "Saira",
+   "file": "Saira[wdth,wght].ttf",
+   "wght": 550,
+   "wdth": 125,
+   "licence": "SIL OFL 1.1",
+   "why": "best box fit (2.38 %); Play Bold ranks first on score (3.34 % box) only through the squareness of one 21 px \"O\". One family for all the dial print.",
+   "alt": "Play Bold (OFL, has Cyrillic)",
+   "weight_range": [
+    450,
+    650
+   ],
+   "status": "hypothesis (2 samples)"
+  },
+  "label": {
+   "face": "Noto Sans",
+   "file": "NotoSans[wdth,wght].ttf",
+   "wght": 500,
+   "wdth": 100,
+   "licence": "SIL OFL 1.1",
+   "why": "rank 1 of the faces with every car character, box 3.14 % (Open Sans 3.30, Roboto 3.56, already in the repo, is the zero-cost fallback); all of CAR_TEXT incl. U+02BC natively",
+   "weight_range": [
+    400,
+    550
+   ],
+   "status": "verified (13 samples, 02 and 05)"
+  }
+ },
+ "rankings_with_bloom": {
+  "dlabel": [
+   {
+    "file": "Play-Bold.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 3.34,
+    "d_fill": 0.024,
+    "score": 4.11,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "Archivo[wdth,wght].ttf",
+    "wght": 600,
+    "wdth": 112.5,
+    "box": 2.23,
+    "d_fill": -0.046,
+    "score": 5.11,
+    "bloom": 0.21,
+    "missing_car_text": 76
+   },
+   {
+    "file": "Kanit-Medium.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 3.46,
+    "d_fill": -0.038,
+    "score": 5.14,
+    "bloom": 0.0,
+    "missing_car_text": 77
+   },
+   {
+    "file": "Rubik[wght].ttf",
+    "wght": 700,
+    "wdth": null,
+    "box": 4.88,
+    "d_fill": -0.016,
+    "score": 5.14,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "Kanit-Regular.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 3.98,
+    "d_fill": -0.035,
+    "score": 5.3,
+    "bloom": 0.0,
+    "missing_car_text": 77
+   },
+   {
+    "file": "Saira[wdth,wght].ttf",
+    "wght": 550,
+    "wdth": 125,
+    "box": 2.38,
+    "d_fill": 0.048,
+    "score": 5.36,
+    "bloom": 0.37,
+    "missing_car_text": 76
+   }
+  ],
+  "label": [
+   {
+    "file": "NotoSans[wdth,wght].ttf",
+    "wght": 400,
+    "wdth": 100,
+    "box": 3.14,
+    "d_fill": -0.007,
+    "score": 3.22,
+    "bloom": 0.01,
+    "missing_car_text": 0
+   },
+   {
+    "file": "OpenSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "box": 3.3,
+    "d_fill": -0.008,
+    "score": 3.4,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "Roboto-wdth-wght.subset.ttf",
+    "wght": 650,
+    "wdth": 100,
+    "box": 3.56,
+    "d_fill": 0.005,
+    "score": 3.59,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "EncodeSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 125,
+    "box": 3.54,
+    "d_fill": -0.007,
+    "score": 3.61,
+    "bloom": 0.0,
+    "missing_car_text": 76
+   },
+   {
+    "file": "RobotoFlex[GRAD,XOPQ,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght].ttf",
+    "wght": 400,
+    "wdth": 125,
+    "box": 3.24,
+    "d_fill": 0.016,
+    "score": 3.61,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "TitilliumWeb-SemiBold.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 3.35,
+    "d_fill": 0.014,
+    "score": 3.63,
+    "bloom": 0.0,
+    "missing_car_text": 77
+   }
+  ],
+  "readout": [
+   {
+    "file": "Saira[wdth,wght].ttf",
+    "wght": 550,
+    "wdth": 125,
+    "box": 3.22,
+    "d_fill": -0.015,
+    "score": 3.55,
+    "bloom": 1.38,
+    "missing_car_text": 76
+   },
+   {
+    "file": "Orbitron[wght].ttf",
+    "wght": 550,
+    "wdth": null,
+    "box": 2.76,
+    "d_fill": 0.035,
+    "score": 4.46,
+    "bloom": 1.51,
+    "missing_car_text": 110
+   },
+   {
+    "file": "Michroma-Regular.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 5.74,
+    "d_fill": -0.014,
+    "score": 5.91,
+    "bloom": 4.02,
+    "missing_car_text": 77
+   },
+   {
+    "file": "Tomorrow-SemiBold.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 6.28,
+    "d_fill": 0.004,
+    "score": 6.29,
+    "bloom": 0.84,
+    "missing_car_text": 76
+   },
+   {
+    "file": "ChakraPetch-Bold.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 6.4,
+    "d_fill": 0.003,
+    "score": 6.41,
+    "bloom": 1.12,
+    "missing_car_text": 77
+   },
+   {
+    "file": "Tomorrow-Medium.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 6.41,
+    "d_fill": 0.003,
+    "score": 6.42,
+    "bloom": 1.77,
+    "missing_car_text": 76
+   }
+  ],
+  "scale": [
+   {
+    "file": "Saira[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 125,
+    "box": 4.23,
+    "d_fill": 0.008,
+    "score": 4.3,
+    "bloom": 0.79,
+    "missing_car_text": 76
+   },
+   {
+    "file": "Orbitron[wght].ttf",
+    "wght": 400,
+    "wdth": null,
+    "box": 2.13,
+    "d_fill": 0.068,
+    "score": 7.13,
+    "bloom": 1.71,
+    "missing_car_text": 110
+   },
+   {
+    "file": "Jura[wght].ttf",
+    "wght": 700,
+    "wdth": null,
+    "box": 7.2,
+    "d_fill": 0.003,
+    "score": 7.21,
+    "bloom": 1.65,
+    "missing_car_text": 0
+   },
+   {
+    "file": "ChakraPetch-Bold.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 7.33,
+    "d_fill": 0.026,
+    "score": 7.78,
+    "bloom": 0.0,
+    "missing_car_text": 77
+   },
+   {
+    "file": "Tomorrow-SemiBold.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 7.15,
+    "d_fill": 0.031,
+    "score": 7.79,
+    "bloom": 0.0,
+    "missing_car_text": 76
+   },
+   {
+    "file": "Tektur[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "box": 6.47,
+    "d_fill": 0.047,
+    "score": 8.0,
+    "bloom": 0.58,
+    "missing_car_text": 0
+   }
+  ],
+  "scale_small": [
+   {
+    "file": "Saira[wdth,wght].ttf",
+    "wght": 400,
+    "wdth": 125,
+    "box": 2.93,
+    "d_fill": 0.038,
+    "score": 4.8,
+    "bloom": 1.43,
+    "missing_car_text": 76
+   },
+   {
+    "file": "Jura[wght].ttf",
+    "wght": 700,
+    "wdth": null,
+    "box": 4.58,
+    "d_fill": 0.022,
+    "score": 5.08,
+    "bloom": 1.1,
+    "missing_car_text": 0
+   },
+   {
+    "file": "Rubik[wght].ttf",
+    "wght": 550,
+    "wdth": null,
+    "box": 5.08,
+    "d_fill": -0.014,
+    "score": 5.27,
+    "bloom": 0.16,
+    "missing_car_text": 0
+   },
+   {
+    "file": "Kanit-SemiBold.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 3.54,
+    "d_fill": -0.044,
+    "score": 5.65,
+    "bloom": 0.0,
+    "missing_car_text": 77
+   },
+   {
+    "file": "Exo2[wght].ttf",
+    "wght": 850,
+    "wdth": null,
+    "box": 5.45,
+    "d_fill": -0.017,
+    "score": 5.71,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "Kanit-Bold.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 3.56,
+    "d_fill": -0.046,
+    "score": 5.82,
+    "bloom": 0.0,
+    "missing_car_text": 77
+   }
+  ]
+ },
+ "rankings_no_bloom": {
+  "dlabel": [
+   {
+    "file": "Play-Bold.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 3.34,
+    "d_fill": 0.024,
+    "score": 4.11,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "Saira[wdth,wght].ttf",
+    "wght": 650,
+    "wdth": 125,
+    "box": 2.49,
+    "d_fill": 0.039,
+    "score": 4.63,
+    "bloom": 0.0,
+    "missing_car_text": 76
+   },
+   {
+    "file": "OpenSans[wdth,wght].ttf",
+    "wght": 800,
+    "wdth": 100,
+    "box": 4.65,
+    "d_fill": -0.044,
+    "score": 6.4,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "NotoSans[wdth,wght].ttf",
+    "wght": 850,
+    "wdth": 100,
+    "box": 4.7,
+    "d_fill": -0.05,
+    "score": 6.86,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   }
+  ],
+  "label": [
+   {
+    "file": "NotoSans[wdth,wght].ttf",
+    "wght": 400,
+    "wdth": 100,
+    "box": 3.14,
+    "d_fill": -0.007,
+    "score": 3.22,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "OpenSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "box": 3.3,
+    "d_fill": -0.008,
+    "score": 3.4,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "Roboto-wdth-wght.subset.ttf",
+    "wght": 650,
+    "wdth": 100,
+    "box": 3.56,
+    "d_fill": 0.005,
+    "score": 3.59,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "Saira[wdth,wght].ttf",
+    "wght": 550,
+    "wdth": 100,
+    "box": 3.32,
+    "d_fill": 0.083,
+    "score": 8.94,
+    "bloom": 0.0,
+    "missing_car_text": 76
+   }
+  ],
+  "readout": [
+   {
+    "file": "Saira[wdth,wght].ttf",
+    "wght": 600,
+    "wdth": 125,
+    "box": 3.46,
+    "d_fill": -0.014,
+    "score": 3.73,
+    "bloom": 0.0,
+    "missing_car_text": 76
+   },
+   {
+    "file": "Play-Bold.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 6.66,
+    "d_fill": -0.004,
+    "score": 6.67,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "Roboto-wdth-wght.subset.ttf",
+    "wght": 850,
+    "wdth": 100,
+    "box": 8.31,
+    "d_fill": -0.076,
+    "score": 11.26,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "NotoSans[wdth,wght].ttf",
+    "wght": 600,
+    "wdth": 100,
+    "box": 7.84,
+    "d_fill": -0.089,
+    "score": 11.86,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   }
+  ],
+  "scale": [
+   {
+    "file": "Saira[wdth,wght].ttf",
+    "wght": 550,
+    "wdth": 125,
+    "box": 5.35,
+    "d_fill": 0.004,
+    "score": 5.36,
+    "bloom": 0.0,
+    "missing_car_text": 76
+   },
+   {
+    "file": "Roboto-wdth-wght.subset.ttf",
+    "wght": 850,
+    "wdth": 100,
+    "box": 9.52,
+    "d_fill": -0.057,
+    "score": 11.1,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "OpenSans[wdth,wght].ttf",
+    "wght": 700,
+    "wdth": 100,
+    "box": 9.98,
+    "d_fill": -0.07,
+    "score": 12.19,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "NotoSans[wdth,wght].ttf",
+    "wght": 750,
+    "wdth": 100,
+    "box": 9.8,
+    "d_fill": -0.077,
+    "score": 12.46,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   }
+  ],
+  "scale_small": [
+   {
+    "file": "Saira[wdth,wght].ttf",
+    "wght": 700,
+    "wdth": 100,
+    "box": 4.84,
+    "d_fill": 0.034,
+    "score": 5.91,
+    "bloom": 0.0,
+    "missing_car_text": 76
+   },
+   {
+    "file": "Play-Bold.ttf",
+    "wght": null,
+    "wdth": null,
+    "box": 8.19,
+    "d_fill": 0.036,
+    "score": 8.95,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "Roboto-wdth-wght.subset.ttf",
+    "wght": 850,
+    "wdth": 100,
+    "box": 8.12,
+    "d_fill": -0.04,
+    "score": 9.05,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   },
+   {
+    "file": "OpenSans[wdth,wght].ttf",
+    "wght": 750,
+    "wdth": 100,
+    "box": 8.0,
+    "d_fill": -0.046,
+    "score": 9.23,
+    "bloom": 0.0,
+    "missing_car_text": 0
+   }
+  ]
+ },
+ "bake": {
+  "_about": "VT bake sizes for the Twin Dial on the G20 panel. h_R = measured ink height in dial units; target = h_R * R; size = the integer px size to bake (tools/bake_fonts.py) so the face's own figure/cap height meets the target; got = that height at the integer size.",
+  "R_px": 300.0,
+  "layout_rev": 3,
+  "slots": {
+   "scale_major": {
+    "face": "Saira[wdth,wght].ttf",
+    "wght": 550,
+    "wdth": 125,
+    "kind": "fig",
+    "h_R": 0.0667,
+    "target_px": 20.0,
+    "size_px": 28,
+    "got_px": 19.78,
+    "source": "02 rect: 6 speedometer numerals (less 2 x bloom 0.79 px at R 400)"
+   },
+   "scale_minor": {
+    "face": "Saira[wdth,wght].ttf",
+    "wght": 550,
+    "wdth": 125,
+    "kind": "fig",
+    "h_R": 0.054,
+    "target_px": 16.2,
+    "size_px": 23,
+    "got_px": 16.24,
+    "source": "VD (02R 05R, 10 numerals); VT 02 \"160\": 0.046"
+   },
+   "tacho_numerals": {
+    "face": "Saira[wdth,wght].ttf",
+    "wght": 550,
+    "wdth": 125,
+    "kind": "fig",
+    "h_R": 0.135,
+    "target_px": 40.5,
+    "size_px": 57,
+    "got_px": 40.26,
+    "source": "VD 04L (05L 0.120; VT 05 \"2-6\": 0.1175)"
+   },
+   "rev_strip_numerals": {
+    "face": "Saira[wdth,wght].ttf",
+    "wght": 450,
+    "wdth": 125,
+    "kind": "fig",
+    "h_R": 0.07,
+    "target_px": 21.0,
+    "size_px": 30,
+    "got_px": 21.19,
+    "source": "VD 02L"
+   },
+   "speed_readout": {
+    "face": "Saira[wdth,wght].ttf",
+    "wght": 550,
+    "wdth": 125,
+    "kind": "fig",
+    "h_R": 0.2169,
+    "target_px": 65.06,
+    "size_px": 92,
+    "got_px": 64.98,
+    "source": "02 rect hub \"0\" (05: 0.170, a smaller hub) (less 2 x bloom 1.38 px at R 400)"
+   },
+   "gear": {
+    "face": "Saira[wdth,wght].ttf",
+    "wght": 550,
+    "wdth": 125,
+    "kind": "cap",
+    "h_R": 0.1469,
+    "target_px": 44.05,
+    "size_px": 64,
+    "got_px": 44.0,
+    "source": "02 rect \"D\" (less 2 x bloom 1.38 px at R 400)"
+   },
+   "dial_label": {
+    "face": "Saira[wdth,wght].ttf",
+    "wght": 550,
+    "wdth": 125,
+    "kind": "cap",
+    "h_R": 0.051,
+    "target_px": 15.29,
+    "size_px": 22,
+    "got_px": 15.12,
+    "source": "02 rect \"AUTO\" (MAX 0.0444) (less 2 x bloom 0.37 px at R 400)"
+   },
+   "centre_title": {
+    "face": "NotoSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "kind": "cap",
+    "h_R": 0.0968,
+    "target_px": 29.05,
+    "size_px": 41,
+    "got_px": 29.21,
+    "source": "02 rect \"Short-term memory\" (less 2 x bloom 0.01 px at R 400)"
+   },
+   "centre_value": {
+    "face": "NotoSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "kind": "fig",
+    "h_R": 0.0956,
+    "target_px": 28.67,
+    "size_px": 39,
+    "got_px": 28.76,
+    "source": "02 rect \"0.0\" \"27.3\" \"4.5\" (less 2 x bloom 0.01 px at R 400)"
+   },
+   "centre_body": {
+    "face": "NotoSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "kind": "cap",
+    "h_R": 0.0731,
+    "target_px": 21.92,
+    "size_px": 31,
+    "got_px": 22.09,
+    "source": "02 rect \"Reset values with OK\" (05 \"Language\" 0.0725) (less 2 x bloom 0.01 px at R 400)"
+   },
+   "centre_small_value": {
+    "face": "NotoSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "kind": "fig",
+    "h_R": 0.0725,
+    "target_px": 21.73,
+    "size_px": 29,
+    "got_px": 21.39,
+    "source": "02 rect \"0:43 h\" (less 2 x bloom 0.01 px at R 400)"
+   },
+   "bottom_row": {
+    "face": "NotoSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "kind": "fig",
+    "h_R": 0.0987,
+    "target_px": 29.61,
+    "size_px": 40,
+    "got_px": 29.5,
+    "source": "02 rect \"694\" \"14:43\" \"+25.5\" (less 2 x bloom 0.01 px at R 400)"
+   },
+   "tab_text": {
+    "face": "NotoSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "kind": "cap",
+    "h_R": 0.0787,
+    "target_px": 23.61,
+    "size_px": 33,
+    "got_px": 23.51,
+    "source": "02 rect \"DANCE FM\" (less 2 x bloom 0.01 px at R 400)"
+   },
+   "units_small": {
+    "face": "NotoSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "kind": "fig",
+    "h_R": 0.0506,
+    "target_px": 15.17,
+    "size_px": 21,
+    "got_px": 15.49,
+    "source": "02 rect \"1 / min x 1000\" (less 2 x bloom 0.01 px at R 400)"
+   },
+   "message_text": {
+    "face": "NotoSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "kind": "cap",
+    "h_R": 0.1,
+    "target_px": 30.0,
+    "size_px": 42,
+    "got_px": 29.92,
+    "source": "VF message_panel.json M2 / M1 text cap_R 0.1 (one or two lines; BMW's own cap 24.6 px)"
+   },
+   "message_counter": {
+    "face": "NotoSans[wdth,wght].ttf",
+    "wght": 500,
+    "wdth": 100,
+    "kind": "cap",
+    "h_R": 0.068,
+    "target_px": 20.4,
+    "size_px": 29,
+    "got_px": 20.66,
+    "source": "VF message_panel.json counter cap_R 0.068"
+   }
+  }
+ }
+}

@@ -1,0 +1,1100 @@
+{
+ "generator": "tools/twin-dial/vt/bake_pictograms.js",
+ "source": "design/twin-dial/vt/pictograms.js",
+ "licence": "MIT (repository LICENSE); our own drawings",
+ "format": "PNG, 8-bit grey+alpha, white ink; alpha = coverage",
+ "provisional": "sizes at R = 300 panel px (VG layout rev 2); re-bake with --sizes if R changes",
+ "groups": {
+  "tab": [
+   "td_fuel",
+   "cc_warn",
+   "td_media",
+   "td_radio",
+   "td_phone",
+   "td_nav",
+   "td_settings"
+  ],
+  "gauge": [
+   "td_fuel",
+   "td_fuel_side",
+   "cc_coolant",
+   "cc_battery",
+   "td_avg"
+  ],
+  "marker": [
+   "cc_warn",
+   "cc_warn_solid",
+   "cc_info",
+   "cc_dot"
+  ],
+  "symbol": [
+   "cc_door",
+   "cc_bonnet",
+   "cc_boot",
+   "cc_belt",
+   "cc_brake",
+   "cc_tyre",
+   "cc_engine",
+   "cc_washer",
+   "cc_oil",
+   "cc_coolant",
+   "cc_battery",
+   "cc_pedal",
+   "cc_service",
+   "cc_info",
+   "cc_warn"
+  ]
+ },
+ "items": [
+  {
+   "name": "td_fuel",
+   "group": "tab",
+   "w": 38,
+   "h": 38,
+   "file": "td_fuel_38x38.png",
+   "box": [
+    2,
+    7,
+    33,
+    36
+   ],
+   "ink": 356.9
+  },
+  {
+   "name": "td_fuel",
+   "group": "tab",
+   "w": 128,
+   "h": 128,
+   "file": "td_fuel_128x128.png",
+   "box": [
+    8,
+    23,
+    109,
+    120
+   ],
+   "ink": 4047.7
+  },
+  {
+   "name": "cc_warn",
+   "group": "tab",
+   "w": 38,
+   "h": 38,
+   "file": "cc_warn_38x38.png",
+   "box": [
+    0,
+    1,
+    38,
+    34
+   ],
+   "ink": 356.5
+  },
+  {
+   "name": "cc_warn",
+   "group": "tab",
+   "w": 128,
+   "h": 128,
+   "file": "cc_warn_128x128.png",
+   "box": [
+    1,
+    4,
+    127,
+    115
+   ],
+   "ink": 4037.1
+  },
+  {
+   "name": "td_media",
+   "group": "tab",
+   "w": 38,
+   "h": 38,
+   "file": "td_media_38x38.png",
+   "box": [
+    6,
+    3,
+    30,
+    33
+   ],
+   "ink": 244.4
+  },
+  {
+   "name": "td_media",
+   "group": "tab",
+   "w": 128,
+   "h": 128,
+   "file": "td_media_128x128.png",
+   "box": [
+    23,
+    12,
+    101,
+    109
+   ],
+   "ink": 2771.1
+  },
+  {
+   "name": "td_radio",
+   "group": "tab",
+   "w": 38,
+   "h": 38,
+   "file": "td_radio_38x38.png",
+   "box": [
+    6,
+    5,
+    32,
+    36
+   ],
+   "ink": 239.7
+  },
+  {
+   "name": "td_radio",
+   "group": "tab",
+   "w": 128,
+   "h": 128,
+   "file": "td_radio_128x128.png",
+   "box": [
+    20,
+    19,
+    108,
+    120
+   ],
+   "ink": 2716.2
+  },
+  {
+   "name": "td_phone",
+   "group": "tab",
+   "w": 38,
+   "h": 38,
+   "file": "td_phone_38x38.png",
+   "box": [
+    9,
+    2,
+    29,
+    36
+   ],
+   "ink": 258.4
+  },
+  {
+   "name": "td_phone",
+   "group": "tab",
+   "w": 128,
+   "h": 128,
+   "file": "td_phone_128x128.png",
+   "box": [
+    31,
+    8,
+    97,
+    120
+   ],
+   "ink": 2923.5
+  },
+  {
+   "name": "td_nav",
+   "group": "tab",
+   "w": 38,
+   "h": 38,
+   "file": "td_nav_38x38.png",
+   "box": [
+    4,
+    1,
+    34,
+    36
+   ],
+   "ink": 252.4
+  },
+  {
+   "name": "td_nav",
+   "group": "tab",
+   "w": 128,
+   "h": 128,
+   "file": "td_nav_128x128.png",
+   "box": [
+    14,
+    5,
+    114,
+    120
+   ],
+   "ink": 2861.1
+  },
+  {
+   "name": "td_settings",
+   "group": "tab",
+   "w": 38,
+   "h": 38,
+   "file": "td_settings_38x38.png",
+   "box": [
+    1,
+    1,
+    37,
+    37
+   ],
+   "ink": 465.6
+  },
+  {
+   "name": "td_settings",
+   "group": "tab",
+   "w": 128,
+   "h": 128,
+   "file": "td_settings_128x128.png",
+   "box": [
+    3,
+    3,
+    125,
+    125
+   ],
+   "ink": 5301.7
+  },
+  {
+   "name": "td_fuel",
+   "group": "gauge",
+   "w": 32,
+   "h": 32,
+   "file": "td_fuel_32x32.png",
+   "box": [
+    2,
+    5,
+    28,
+    30
+   ],
+   "ink": 252.4
+  },
+  {
+   "name": "td_fuel_side",
+   "group": "gauge",
+   "w": 32,
+   "h": 32,
+   "file": "td_fuel_side_32x32.png",
+   "box": [
+    0,
+    5,
+    32,
+    30
+   ],
+   "ink": 254
+  },
+  {
+   "name": "td_fuel_side",
+   "group": "gauge",
+   "w": 128,
+   "h": 128,
+   "file": "td_fuel_side_128x128.png",
+   "box": [
+    3,
+    23,
+    125,
+    120
+   ],
+   "ink": 4068.2
+  },
+  {
+   "name": "cc_coolant",
+   "group": "gauge",
+   "w": 32,
+   "h": 32,
+   "file": "cc_coolant_32x32.png",
+   "box": [
+    2,
+    1,
+    30,
+    32
+   ],
+   "ink": 175.3
+  },
+  {
+   "name": "cc_coolant",
+   "group": "gauge",
+   "w": 128,
+   "h": 128,
+   "file": "cc_coolant_128x128.png",
+   "box": [
+    8,
+    7,
+    120,
+    125
+   ],
+   "ink": 2790.8
+  },
+  {
+   "name": "cc_battery",
+   "group": "gauge",
+   "w": 32,
+   "h": 32,
+   "file": "cc_battery_32x32.png",
+   "box": [
+    2,
+    7,
+    30,
+    29
+   ],
+   "ink": 241.3
+  },
+  {
+   "name": "cc_battery",
+   "group": "gauge",
+   "w": 128,
+   "h": 128,
+   "file": "cc_battery_128x128.png",
+   "box": [
+    8,
+    30,
+    120,
+    114
+   ],
+   "ink": 3865.2
+  },
+  {
+   "name": "td_avg",
+   "group": "gauge",
+   "w": 32,
+   "h": 32,
+   "file": "td_avg_32x32.png",
+   "box": [
+    5,
+    4,
+    27,
+    29
+   ],
+   "ink": 178.1
+  },
+  {
+   "name": "td_avg",
+   "group": "gauge",
+   "w": 128,
+   "h": 128,
+   "file": "td_avg_128x128.png",
+   "box": [
+    23,
+    18,
+    105,
+    115
+   ],
+   "ink": 2857
+  },
+  {
+   "name": "cc_warn",
+   "group": "marker",
+   "w": 30,
+   "h": 36,
+   "file": "cc_warn_30x36.png",
+   "box": [
+    0,
+    4,
+    30,
+    30
+   ],
+   "ink": 222.2
+  },
+  {
+   "name": "cc_warn",
+   "group": "marker",
+   "w": 28,
+   "h": 28,
+   "file": "cc_warn_28x28.png",
+   "box": [
+    0,
+    1,
+    28,
+    26
+   ],
+   "ink": 193.5
+  },
+  {
+   "name": "cc_warn_solid",
+   "group": "marker",
+   "w": 30,
+   "h": 36,
+   "file": "cc_warn_solid_30x36.png",
+   "box": [
+    0,
+    4,
+    30,
+    30
+   ],
+   "ink": 370.6
+  },
+  {
+   "name": "cc_warn_solid",
+   "group": "marker",
+   "w": 28,
+   "h": 28,
+   "file": "cc_warn_solid_28x28.png",
+   "box": [
+    0,
+    1,
+    28,
+    25
+   ],
+   "ink": 323
+  },
+  {
+   "name": "cc_warn_solid",
+   "group": "marker",
+   "w": 128,
+   "h": 128,
+   "file": "cc_warn_solid_128x128.png",
+   "box": [
+    1,
+    5,
+    127,
+    114
+   ],
+   "ink": 6748.9
+  },
+  {
+   "name": "cc_info",
+   "group": "marker",
+   "w": 30,
+   "h": 36,
+   "file": "cc_info_30x36.png",
+   "box": [
+    9,
+    4,
+    21,
+    31
+   ],
+   "ink": 121.5
+  },
+  {
+   "name": "cc_info",
+   "group": "marker",
+   "w": 28,
+   "h": 28,
+   "file": "cc_info_28x28.png",
+   "box": [
+    8,
+    1,
+    20,
+    26
+   ],
+   "ink": 105.4
+  },
+  {
+   "name": "cc_info",
+   "group": "marker",
+   "w": 128,
+   "h": 128,
+   "file": "cc_info_128x128.png",
+   "box": [
+    39,
+    8,
+    89,
+    119
+   ],
+   "ink": 2198
+  },
+  {
+   "name": "cc_dot",
+   "group": "marker",
+   "w": 30,
+   "h": 36,
+   "file": "cc_dot_30x36.png",
+   "box": [
+    10,
+    13,
+    20,
+    23
+   ],
+   "ink": 63.6
+  },
+  {
+   "name": "cc_dot",
+   "group": "marker",
+   "w": 28,
+   "h": 28,
+   "file": "cc_dot_28x28.png",
+   "box": [
+    9,
+    9,
+    19,
+    19
+   ],
+   "ink": 55.7
+  },
+  {
+   "name": "cc_dot",
+   "group": "marker",
+   "w": 128,
+   "h": 128,
+   "file": "cc_dot_128x128.png",
+   "box": [
+    44,
+    44,
+    84,
+    84
+   ],
+   "ink": 1158.7
+  },
+  {
+   "name": "cc_door",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_door_54x54.png",
+   "box": [
+    4,
+    2,
+    47,
+    52
+   ],
+   "ink": 620.7
+  },
+  {
+   "name": "cc_door",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_door_66x66.png",
+   "box": [
+    6,
+    2,
+    57,
+    64
+   ],
+   "ink": 927.5
+  },
+  {
+   "name": "cc_door",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_door_128x128.png",
+   "box": [
+    11,
+    5,
+    110,
+    123
+   ],
+   "ink": 3487.8
+  },
+  {
+   "name": "cc_bonnet",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_bonnet_54x54.png",
+   "box": [
+    2,
+    14,
+    54,
+    45
+   ],
+   "ink": 570.1
+  },
+  {
+   "name": "cc_bonnet",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_bonnet_66x66.png",
+   "box": [
+    2,
+    18,
+    65,
+    55
+   ],
+   "ink": 850.4
+  },
+  {
+   "name": "cc_bonnet",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_bonnet_128x128.png",
+   "box": [
+    5,
+    35,
+    127,
+    105
+   ],
+   "ink": 3205.1
+  },
+  {
+   "name": "cc_boot",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_boot_54x54.png",
+   "box": [
+    1,
+    14,
+    52,
+    45
+   ],
+   "ink": 562.7
+  },
+  {
+   "name": "cc_boot",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_boot_66x66.png",
+   "box": [
+    1,
+    18,
+    64,
+    55
+   ],
+   "ink": 838.4
+  },
+  {
+   "name": "cc_boot",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_boot_128x128.png",
+   "box": [
+    3,
+    35,
+    123,
+    105
+   ],
+   "ink": 3150.6
+  },
+  {
+   "name": "cc_belt",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_belt_54x54.png",
+   "box": [
+    10,
+    2,
+    43,
+    53
+   ],
+   "ink": 572.5
+  },
+  {
+   "name": "cc_belt",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_belt_66x66.png",
+   "box": [
+    12,
+    3,
+    53,
+    65
+   ],
+   "ink": 854.1
+  },
+  {
+   "name": "cc_belt",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_belt_128x128.png",
+   "box": [
+    24,
+    7,
+    102,
+    126
+   ],
+   "ink": 3209.3
+  },
+  {
+   "name": "cc_brake",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_brake_54x54.png",
+   "box": [
+    2,
+    9,
+    52,
+    52
+   ],
+   "ink": 784.8
+  },
+  {
+   "name": "cc_brake",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_brake_66x66.png",
+   "box": [
+    3,
+    11,
+    63,
+    63
+   ],
+   "ink": 1171.6
+  },
+  {
+   "name": "cc_brake",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_brake_128x128.png",
+   "box": [
+    6,
+    22,
+    122,
+    122
+   ],
+   "ink": 4405.9
+  },
+  {
+   "name": "cc_tyre",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_tyre_54x54.png",
+   "box": [
+    7,
+    9,
+    47,
+    53
+   ],
+   "ink": 522
+  },
+  {
+   "name": "cc_tyre",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_tyre_66x66.png",
+   "box": [
+    8,
+    11,
+    58,
+    65
+   ],
+   "ink": 779.7
+  },
+  {
+   "name": "cc_tyre",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_tyre_128x128.png",
+   "box": [
+    16,
+    23,
+    112,
+    126
+   ],
+   "ink": 2925.1
+  },
+  {
+   "name": "cc_engine",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_engine_54x54.png",
+   "box": [
+    3,
+    13,
+    51,
+    43
+   ],
+   "ink": 577
+  },
+  {
+   "name": "cc_engine",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_engine_66x66.png",
+   "box": [
+    4,
+    16,
+    62,
+    53
+   ],
+   "ink": 861.4
+  },
+  {
+   "name": "cc_engine",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_engine_128x128.png",
+   "box": [
+    8,
+    31,
+    120,
+    102
+   ],
+   "ink": 3242.3
+  },
+  {
+   "name": "cc_washer",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_washer_54x54.png",
+   "box": [
+    2,
+    15,
+    52,
+    54
+   ],
+   "ink": 648.8
+  },
+  {
+   "name": "cc_washer",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_washer_66x66.png",
+   "box": [
+    2,
+    18,
+    64,
+    66
+   ],
+   "ink": 968.2
+  },
+  {
+   "name": "cc_washer",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_washer_128x128.png",
+   "box": [
+    5,
+    36,
+    123,
+    128
+   ],
+   "ink": 3646.1
+  },
+  {
+   "name": "cc_oil",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_oil_54x54.png",
+   "box": [
+    5,
+    18,
+    50,
+    41
+   ],
+   "ink": 393.8
+  },
+  {
+   "name": "cc_oil",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_oil_66x66.png",
+   "box": [
+    6,
+    22,
+    62,
+    50
+   ],
+   "ink": 587.9
+  },
+  {
+   "name": "cc_oil",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_oil_128x128.png",
+   "box": [
+    12,
+    43,
+    119,
+    97
+   ],
+   "ink": 2212.6
+  },
+  {
+   "name": "cc_coolant",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_coolant_54x54.png",
+   "box": [
+    3,
+    3,
+    51,
+    53
+   ],
+   "ink": 497
+  },
+  {
+   "name": "cc_coolant",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_coolant_66x66.png",
+   "box": [
+    4,
+    3,
+    62,
+    65
+   ],
+   "ink": 742.1
+  },
+  {
+   "name": "cc_battery",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_battery_54x54.png",
+   "box": [
+    3,
+    12,
+    51,
+    48
+   ],
+   "ink": 688.4
+  },
+  {
+   "name": "cc_battery",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_battery_66x66.png",
+   "box": [
+    4,
+    15,
+    62,
+    59
+   ],
+   "ink": 1028.1
+  },
+  {
+   "name": "cc_pedal",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_pedal_54x54.png",
+   "box": [
+    9,
+    2,
+    48,
+    54
+   ],
+   "ink": 884.7
+  },
+  {
+   "name": "cc_pedal",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_pedal_66x66.png",
+   "box": [
+    11,
+    2,
+    59,
+    65
+   ],
+   "ink": 1321.7
+  },
+  {
+   "name": "cc_pedal",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_pedal_128x128.png",
+   "box": [
+    22,
+    5,
+    113,
+    127
+   ],
+   "ink": 4968.9
+  },
+  {
+   "name": "cc_service",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_service_54x54.png",
+   "box": [
+    6,
+    8,
+    46,
+    48
+   ],
+   "ink": 405.8
+  },
+  {
+   "name": "cc_service",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_service_66x66.png",
+   "box": [
+    7,
+    10,
+    56,
+    59
+   ],
+   "ink": 606.1
+  },
+  {
+   "name": "cc_service",
+   "group": "symbol",
+   "w": 128,
+   "h": 128,
+   "file": "cc_service_128x128.png",
+   "box": [
+    15,
+    20,
+    108,
+    113
+   ],
+   "ink": 2276
+  },
+  {
+   "name": "cc_info",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_info_54x54.png",
+   "box": [
+    16,
+    3,
+    38,
+    50
+   ],
+   "ink": 390.9
+  },
+  {
+   "name": "cc_info",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_info_66x66.png",
+   "box": [
+    20,
+    4,
+    46,
+    62
+   ],
+   "ink": 585.1
+  },
+  {
+   "name": "cc_warn",
+   "group": "symbol",
+   "w": 54,
+   "h": 54,
+   "file": "cc_warn_54x54.png",
+   "box": [
+    0,
+    1,
+    54,
+    49
+   ],
+   "ink": 718.7
+  },
+  {
+   "name": "cc_warn",
+   "group": "symbol",
+   "w": 66,
+   "h": 66,
+   "file": "cc_warn_66x66.png",
+   "box": [
+    0,
+    2,
+    66,
+    60
+   ],
+   "ink": 1073.8
+  }
+ ]
+}

@@ -1,0 +1,32 @@
+{
+ "_about": "Package VT, 2026-11-17: which of our own pictograms (design/twin-dial/vt/pictograms.js) the Twin Dial's check-control message draws, and the rule for anything we have no drawing for. Ids and meanings are package P's public-source catalogue (design/strip/pictograms/cc_catalogue.json, community numbering, UNVERIFIED on this car unless its 'g20' is true); this file only re-points the symbols to the larger Twin Dial set. The car's own symbol bitmaps (requestDefaultSymbols, symbol ids 0-6 seen so far) are maker's artwork: never drawn from, saved, baked, logged or committed.",
+ "_key": "Symbols are chosen by the message's cCIdentifier (ccList entry id), not by its symbol id: the symbol id has no public enumeration and the car's log has not yet paired the two. Once the log shows (cCIdentifier, cCSymbolID) pairs, 'by_symbol_id' may be filled from that log (ids only, never the bitmaps).",
+ "by_meaning": {
+  "door": "cc_door", "bonnet": "cc_bonnet", "boot": "cc_boot", "belt": "cc_belt", "restraint": "cc_belt",
+  "brake": "cc_brake", "parking_brake": "cc_brake", "tyre": "cc_tyre", "engine": "cc_engine", "drivetrain": "cc_engine",
+  "washer": "cc_washer", "oil": "cc_oil", "coolant": "cc_coolant", "overheat": "cc_coolant", "battery": "cc_battery",
+  "voltage": "cc_battery", "ready_to_drive": "cc_pedal", "brake_pedal": "cc_pedal", "service": "cc_service",
+  "info": "cc_info", "warning": "cc_warn"
+ },
+ "by_cc_id": {
+  "14": "cc_door", "15": "cc_door", "16": "cc_door", "17": "cc_door",
+  "18": "cc_bonnet", "19": "cc_boot",
+  "27": "cc_oil", "28": "cc_oil", "212": "cc_oil",
+  "29": "cc_engine", "30": "cc_engine", "49": "cc_engine",
+  "39": "cc_coolant", "166": "cc_coolant",
+  "40": "cc_pedal", "41": "cc_service",
+  "42": "cc_brake", "48": "cc_brake", "52": "cc_brake", "71": "cc_brake", "74": "cc_brake", "236": "cc_brake",
+  "46": "cc_belt", "91": "cc_belt", "97": "cc_belt",
+  "50": "cc_tyre", "63": "cc_tyre", "139": "cc_tyre", "140": "cc_tyre", "141": "cc_tyre", "142": "cc_tyre", "143": "cc_tyre", "144": "cc_tyre", "147": "cc_tyre",
+  "164": "cc_washer",
+  "213": "cc_battery", "229": "cc_battery"
+ },
+ "by_symbol_id": {},
+ "generic_rule": {
+  "_why": "Any id with no entry above (and every id while the table is unconfirmed on the car) gets a generic marker chosen by the message's colour (CCColorEnum), so a message is never drawn without a symbol and never with a wrong specific one.",
+  "RED": "cc_warn", "YELLOW": "cc_warn", "ORANGE": "cc_warn",
+  "WHITE": "cc_info", "GREEN": "cc_info", "DEFAULT": "cc_info",
+  "unknown_colour": "cc_warn"
+ },
+ "fallback_window": "A missing glyph in the message text (the message font lacks a character), no readable name, or a throw while drawing opens BMW's own panel (decision 6). A missing pictogram never does: the generic rule always yields one."
+}
