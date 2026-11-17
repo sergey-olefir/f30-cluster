@@ -1,0 +1,695 @@
+{
+ "_about": "Package VF: rough boxes [x0, y0, x1, y1] (original px of each reference, read off zoomed crops) and the method measure_frame.py applies inside each. The methods find the edges; a box only has to contain its element and some background.",
+ "02_facelift_hybrid_powermeter_trip.png": {
+  "bar.top50": [
+   "yedge",
+   [
+    1010,
+    590,
+    1050,
+    632
+   ],
+   "rise"
+  ],
+  "bar.rule": [
+   "hrule",
+   [
+    1010,
+    626,
+    1050,
+    642
+   ]
+  ],
+  "bar.left": [
+   "xedge",
+   [
+    849,
+    612,
+    867,
+    630
+   ],
+   "rise"
+  ],
+  "bar.right": [
+   "xedge",
+   [
+    1339,
+    612,
+    1357,
+    630
+   ],
+   "fall"
+  ],
+  "bar.sep1": [
+   "vdip",
+   [
+    945,
+    612,
+    958,
+    630
+   ]
+  ],
+  "bar.sep2": [
+   "vdip",
+   [
+    995,
+    612,
+    1008,
+    630
+   ]
+  ],
+  "bar.sep3": [
+   "vdip",
+   [
+    1249,
+    612,
+    1262,
+    630
+   ]
+  ],
+  "bar.sep4": [
+   "vdip",
+   [
+    1297,
+    612,
+    1310,
+    630
+   ]
+  ],
+  "tab.hi_red": [
+   "red",
+   [
+    850,
+    588,
+    962,
+    642
+   ]
+  ],
+  "tab1.content": [
+   "words",
+   [
+    862,
+    598,
+    949,
+    631
+   ],
+   3
+  ],
+  "tab2.content": [
+   "ink",
+   [
+    955,
+    598,
+    999,
+    631
+   ]
+  ],
+  "tab3.content": [
+   "words",
+   [
+    1004,
+    598,
+    1252,
+    631
+   ],
+   6
+  ],
+  "tab4.content": [
+   "ink",
+   [
+    1258,
+    598,
+    1301,
+    631
+   ]
+  ],
+  "tab5.content": [
+   "ink",
+   [
+    1307,
+    598,
+    1347,
+    631
+   ]
+  ],
+  "telltales": [
+   "words",
+   [
+    780,
+    535,
+    1180,
+    592
+   ],
+   10
+  ],
+  "centre.title": [
+   "ink",
+   [
+    930,
+    680,
+    1260,
+    716
+   ]
+  ],
+  "centre.title_rule": [
+   "hrule",
+   [
+    920,
+    712,
+    1280,
+    728
+   ]
+  ],
+  "centre.block": [
+   "ink",
+   [
+    925,
+    728,
+    1275,
+    912
+   ]
+  ],
+  "bottom.rule": [
+   "hrule",
+   [
+    850,
+    924,
+    1345,
+    944
+   ]
+  ],
+  "bottom.line1": [
+   "words",
+   [
+    950,
+    941,
+    1270,
+    966
+   ],
+   3
+  ],
+  "bottom.line2": [
+   "words",
+   [
+    945,
+    966,
+    1270,
+    1000
+   ],
+   3
+  ],
+  "bottom.belt": [
+   "red",
+   [
+    900,
+    955,
+    945,
+    1002
+   ]
+  ],
+  "bar.rule_c2": [
+   "hrule",
+   [
+    958,
+    626,
+    995,
+    642
+   ]
+  ],
+  "bar.rule_c4": [
+   "hrule",
+   [
+    1262,
+    626,
+    1298,
+    642
+   ]
+  ],
+  "bar.rule_c5": [
+   "hrule",
+   [
+    1308,
+    626,
+    1344,
+    642
+   ]
+  ]
+ },
+ "04_facelift_bench_red-wedge_car.png": {
+  "bar.top50": [
+   "yedge",
+   [
+    487,
+    192,
+    507,
+    214
+   ],
+   "rise"
+  ],
+  "bar.rule": [
+   "hrule",
+   [
+    490,
+    212,
+    510,
+    228
+   ]
+  ],
+  "bar.left": [
+   "xedge",
+   [
+    402,
+    200,
+    420,
+    214
+   ],
+   "rise"
+  ],
+  "bar.right": [
+   "xedge",
+   [
+    654,
+    200,
+    672,
+    214
+   ],
+   "fall"
+  ],
+  "bar.sep1": [
+   "vdip",
+   [
+    454,
+    200,
+    467,
+    214
+   ]
+  ],
+  "bar.sep2": [
+   "vdip",
+   [
+    479,
+    200,
+    492,
+    214
+   ]
+  ],
+  "bar.sep3": [
+   "vdip",
+   [
+    589,
+    200,
+    602,
+    214
+   ]
+  ],
+  "bar.sep4": [
+   "vdip",
+   [
+    610,
+    200,
+    623,
+    214
+   ]
+  ],
+  "bar.sep5": [
+   "vdip",
+   [
+    632,
+    200,
+    645,
+    214
+   ]
+  ],
+  "tab.hi_red": [
+   "red",
+   [
+    452,
+    194,
+    500,
+    226
+   ]
+  ],
+  "centre.picture": [
+   "ink",
+   [
+    495,
+    228,
+    585,
+    348
+   ]
+  ],
+  "centre.caption": [
+   "words",
+   [
+    500,
+    348,
+    575,
+    364
+   ],
+   3
+  ],
+  "centre.rule_red": [
+   "red",
+   [
+    395,
+    356,
+    680,
+    372
+   ]
+  ],
+  "bottom.left": [
+   "words",
+   [
+    405,
+    382,
+    470,
+    400
+   ],
+   3
+  ],
+  "bottom.right": [
+   "words",
+   [
+    610,
+    382,
+    660,
+    400
+   ],
+   3
+  ],
+  "centre.rule": [
+   "hrule",
+   [
+    420,
+    358,
+    650,
+    372
+   ]
+  ]
+ },
+ "05_facelift_render_settings.png": {
+  "bar.top50": [
+   "yedge",
+   [
+    443,
+    115,
+    460,
+    146
+   ],
+   "rise"
+  ],
+  "bar.rule": [
+   "hrule",
+   [
+    450,
+    138,
+    470,
+    156
+   ]
+  ],
+  "bar.left": [
+   "xedge",
+   [
+    361,
+    126,
+    379,
+    144
+   ],
+   "rise"
+  ],
+  "bar.right": [
+   "xedge",
+   [
+    607,
+    126,
+    625,
+    144
+   ],
+   "fall"
+  ],
+  "bar.sep1": [
+   "vdip",
+   [
+    406,
+    126,
+    419,
+    144
+   ]
+  ],
+  "bar.sep2": [
+   "vdip",
+   [
+    428,
+    126,
+    441,
+    144
+   ]
+  ],
+  "bar.sep3": [
+   "vdip",
+   [
+    543,
+    126,
+    556,
+    144
+   ]
+  ],
+  "bar.sep4": [
+   "vdip",
+   [
+    566,
+    126,
+    579,
+    144
+   ]
+  ],
+  "bar.sep5": [
+   "vdip",
+   [
+    587,
+    126,
+    600,
+    144
+   ]
+  ],
+  "tab.hi_green": [
+   "green",
+   [
+    585,
+    118,
+    640,
+    152
+   ]
+  ],
+  "centre.title": [
+   "ink",
+   [
+    455,
+    183,
+    535,
+    202
+   ]
+  ],
+  "centre.title_rule": [
+   "hrule",
+   [
+    405,
+    198,
+    585,
+    212
+   ]
+  ],
+  "centre.value": [
+   "ink",
+   [
+    460,
+    225,
+    530,
+    247
+   ]
+  ],
+  "centre.scrollbar": [
+   "vrule",
+   [
+    568,
+    150,
+    584,
+    290
+   ]
+  ],
+  "bottom.left": [
+   "words",
+   [
+    360,
+    308,
+    432,
+    326
+   ],
+   3
+  ],
+  "bottom.right": [
+   "words",
+   [
+    572,
+    308,
+    615,
+    326
+   ],
+   3
+  ]
+ },
+ "03_classic_compact_date-panel_led-bars.png": {
+  "tab.hi_red": [
+   "red",
+   [
+    560,
+    195,
+    765,
+    262
+   ]
+  ],
+  "bar.line_right": [
+   "hrule",
+   [
+    770,
+    240,
+    1250,
+    265
+   ]
+  ],
+  "bar.content": [
+   "words",
+   [
+    590,
+    200,
+    1330,
+    252
+   ],
+   14
+  ],
+  "centre.window_top": [
+   "hrule",
+   [
+    720,
+    285,
+    1200,
+    305
+   ]
+  ],
+  "centre.window_left": [
+   "vrule",
+   [
+    700,
+    300,
+    725,
+    640
+   ]
+  ],
+  "centre.window_right": [
+   "vrule",
+   [
+    1203,
+    300,
+    1218,
+    640
+   ]
+  ],
+  "centre.window_bottom": [
+   "hrule",
+   [
+    720,
+    630,
+    1200,
+    650
+   ]
+  ],
+  "centre.title_rule": [
+   "hrule",
+   [
+    740,
+    350,
+    1180,
+    370
+   ]
+  ],
+  "bottom.rule_top": [
+   "hrule",
+   [
+    640,
+    662,
+    1280,
+    684
+   ]
+  ],
+  "bottom.line1": [
+   "words",
+   [
+    740,
+    680,
+    1200,
+    722
+   ],
+   6
+  ],
+  "bottom.rule_mid": [
+   "hrule",
+   [
+    620,
+    722,
+    1300,
+    742
+   ]
+  ],
+  "bottom.line2": [
+   "words",
+   [
+    740,
+    742,
+    1200,
+    795
+   ],
+   6
+  ]
+ },
+ "01_classic_map_tacho-left_mph.png": {
+  "tab.hi_cyan": [
+   "cyan",
+   [
+    825,
+    200,
+    890,
+    248
+   ]
+  ],
+  "bar.content": [
+   "words",
+   [
+    455,
+    210,
+    830,
+    245
+   ],
+   14
+  ],
+  "map.window": [
+   "ink",
+   [
+    470,
+    238,
+    830,
+    515
+   ],
+   0.25
+  ],
+  "map.label_box": [
+   "words",
+   [
+    520,
+    460,
+    820,
+    505
+   ],
+   30
+  ]
+ }
+}

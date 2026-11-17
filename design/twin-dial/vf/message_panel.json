@@ -1,0 +1,355 @@
+{
+ "_about": "Package VF: our check-control message and BMW's fallback window (decision 6). Dial units: u, v in R from the midpoint of the two dial centres; panel px for package VG's layout rev 2 (R 300, centres [380, 400] [1540, 400]), which is PROVISIONAL. Made by tools/twin-dial/vf/message_panel.py.",
+ "vg_rev": 2,
+ "M2": {
+  "variant": "M2 \"bottom plate\" (recommended): the message takes the bottom row's place, BMW's own spot",
+  "plate": [
+   -0.885,
+   0.64,
+   0.9,
+   1.0667
+  ],
+  "rule": {
+   "v": 0.71,
+   "u": [
+    -1.105,
+    1.105
+   ],
+   "thick_R": 0.0075,
+   "thick_msg_R": 0.012
+  },
+  "symbol_cell": [
+   -0.86,
+   0.745,
+   -0.64,
+   1.025
+  ],
+  "symbol_h_R": 0.18,
+  "text": {
+   "left_u": -0.59,
+   "right_u": 0.88,
+   "cap_R": 0.1,
+   "baselines_two": [
+    0.854,
+    1.01
+   ],
+   "baseline_one": 0.932,
+   "max_lines": 2
+  },
+  "counter": {
+   "right_u": 0.88,
+   "baseline": 1.01,
+   "cap_R": 0.068,
+   "text_right_u_when_shown": 0.74
+  },
+  "tab": "the tab bar's warning tab is the highlighted tab, filled in the severity colour (reference 04 state)"
+ },
+ "M2_px": {
+  "plate": [
+   694.5,
+   592.0,
+   1230.0,
+   720.01
+  ],
+  "symbol_cell": [
+   702.0,
+   623.5,
+   768.0,
+   707.5
+  ],
+  "rule_message": [
+   628.5,
+   611.2,
+   1291.5,
+   614.8
+  ],
+  "text_block": [
+   783.0,
+   626.2,
+   1224.0,
+   710.5
+  ],
+  "baselines_two_y": [
+   656.2,
+   703.0
+  ],
+  "baseline_one_y": 679.6,
+  "cap_px": 30.0,
+  "text_width_px": 441.0
+ },
+ "M1": {
+  "variant": "M1 \"centre card\" (option): the warning page in the centre window, as reference 04's state",
+  "symbol_cell": [
+   -0.15,
+   -0.56,
+   0.15,
+   -0.23
+  ],
+  "symbol_h_R": 0.22,
+  "rule": {
+   "v": -0.15,
+   "u": [
+    -0.733,
+    0.733
+   ],
+   "thick_R": 0.012
+  },
+  "text": {
+   "centre_u": 0.0,
+   "half_width_R": 0.733,
+   "cap_R": 0.1,
+   "baselines_two": [
+    0.08,
+    0.236
+   ],
+   "baseline_one": 0.12,
+   "max_lines": 2
+  },
+  "counter": {
+   "centre_u": 0.0,
+   "baseline": 0.45,
+   "cap_R": 0.068
+  }
+ },
+ "M1_px": {
+  "symbol_cell": [
+   915.0,
+   232.0,
+   1005.0,
+   331.0
+  ],
+  "baselines_two_y": [
+   424.0,
+   470.8
+  ],
+  "text_width_px": 439.8
+ },
+ "fallback_window": {
+  "what": "zc.panel (BMW's message panel: arc rail, fill, symbol slot, one or two lines) dilated by 3 px; a hole through EVERY layer of ours that draws inside it, opened from the signal handler",
+  "polygon_px": [
+   [
+    696.0,
+    619.5
+   ],
+   [
+    696.0,
+    625.5
+   ],
+   [
+    696.62,
+    626.88
+   ],
+   [
+    698.0,
+    627.88
+   ],
+   [
+    705.0,
+    630.25
+   ],
+   [
+    705.0,
+    701.5
+   ],
+   [
+    706.12,
+    703.38
+   ],
+   [
+    708.0,
+    704.0
+   ],
+   [
+    1184.88,
+    703.88
+   ],
+   [
+    1186.38,
+    702.88
+   ],
+   [
+    1187.0,
+    701.5
+   ],
+   [
+    1189.0,
+    661.5
+   ],
+   [
+    1211.5,
+    642.75
+   ],
+   [
+    1225.0,
+    627.38
+   ],
+   [
+    1226.0,
+    625.5
+   ],
+   [
+    1226.0,
+    619.5
+   ],
+   [
+    1224.75,
+    617.5
+   ],
+   [
+    1213.88,
+    611.0
+   ],
+   [
+    1201.75,
+    604.75
+   ],
+   [
+    1192.75,
+    601.25
+   ],
+   [
+    1185.0,
+    599.25
+   ],
+   [
+    1176.12,
+    598.0
+   ],
+   [
+    1169.5,
+    597.62
+   ],
+   [
+    903.62,
+    598.0
+   ],
+   [
+    899.25,
+    597.25
+   ],
+   [
+    895.38,
+    598.0
+   ],
+   [
+    864.88,
+    598.38
+   ],
+   [
+    860.75,
+    596.0
+   ],
+   [
+    859.5,
+    595.75
+   ],
+   [
+    858.25,
+    596.0
+   ],
+   [
+    854.12,
+    598.38
+   ],
+   [
+    821.62,
+    598.12
+   ],
+   [
+    750.5,
+    598.62
+   ],
+   [
+    742.75,
+    599.25
+   ],
+   [
+    735.62,
+    600.38
+   ],
+   [
+    730.25,
+    601.75
+   ],
+   [
+    721.38,
+    604.88
+   ],
+   [
+    713.12,
+    609.0
+   ],
+   [
+    709.0,
+    611.62
+   ],
+   [
+    702.25,
+    614.0
+   ],
+   [
+    697.25,
+    617.5
+   ]
+  ],
+  "bbox_px": [
+   696.0,
+   595.75,
+   1226.0,
+   704.0
+  ],
+  "bbox_R": [
+   -0.88,
+   0.6525,
+   0.8867,
+   1.0133
+  ],
+  "zc_panel_bbox_px": [
+   699.0,
+   598.7,
+   1223.0,
+   701.0
+  ]
+ },
+ "checks": {
+  "plate_covers_window": {
+   "ok": true,
+   "margins_px": [
+    1.5,
+    3.75,
+    4.0,
+    16.01
+   ]
+  },
+  "plate_vs_belts_px": {
+   "clear_px": 6.5,
+   "ok": true
+  },
+  "plate_vs_gear_gap_px": {
+   "clear_px": 150.0,
+   "ok": true
+  },
+  "symbol_cell_vs_belts_px": {
+   "clear_px": 14.0,
+   "ok": true
+  },
+  "rule_vs_belts_px": {
+   "clear_px": 45.2,
+   "ok": true
+  },
+  "rule_vs_gear_gap_px": {
+   "clear_px": 88.5,
+   "ok": true
+  },
+  "text_vs_belts_px": {
+   "clear_px": 95.0,
+   "ok": true
+  },
+  "inside_the_window_when_open": [
+   "plate",
+   "rule",
+   "symbol_cell",
+   "text"
+  ]
+ }
+}
