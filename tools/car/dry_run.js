@@ -46,7 +46,7 @@ function gen(ref, v, name, depth) {
     depth = depth || 0;
     const r = base(ref), t = DT[r];
     if (!t) {
-        if (/^Utf|^ByteBuffer/.test(r)) return 'CANARY_' + String(name || 'TEXT').toUpperCase();
+        if (/^Utf|^ByteBuffer/.test(r)) return 'CANARY_' + String(name || 'TEXT').toUpperCase() + 'x'.repeat(v % 7);   // a new length per value: lengths are all the probe logs of a text
         if (r === 'Bool') return v % 2 === 0;
         if (/^Float|^Double/.test(r)) return 10 + v;
         const m = /^(U?)Int(\d+)$/.exec(r);
@@ -132,7 +132,11 @@ async function main() {
                 const ok1 = await waitFor(/probe: sets on=/, 15000, lastSetsLine + 1);
                 lastSetsLine = count(/probe: sets on=/g);
                 ok(ok1, b.id + ': the "sets on=" line for ' + (want.join('+') || 'none'));
-                await sleep(400);
+                // the probe builds one interface's proxy at a time (a pause between them): wait until no new "watch" line comes,
+                // as the lead waits for every "watch ... ok" line before the owner's first press (RUNBOOK 2.4)
+                let w = -1, t0 = Date.now();
+                while (count(/probe: watch /g) !== w && Date.now() - t0 < 20000) { w = count(/probe: watch /g); await sleep(700); }
+                ok(count(/probe: watch [^\n]* error/g) === 0, b.id + ': every interface of the sets subscribed ("watch ... ok", no error), ' + w + ' watch lines so far');
             }
             on = want;
             let marksHere = 0, linesHere = 0;
