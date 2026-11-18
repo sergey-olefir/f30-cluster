@@ -86,7 +86,7 @@
       "P0"
      ],
      "lead": "check the start line of the probe (version, sets) and the marker line",
-     "uk": "Відкрийте Signal Probe в меню iDrive. Переконайтеся, що жоден набір не ввімкнено. Натисніть «Позначка» з номером, що вказаний тут: це пробна позначка. Скажіть ведучому, ведучий підтвердить, що рядок з'явився в логу.",
+     "uk": "Відкрийте Signal Probe в меню iDrive (центральний екран). Переконайтеся, що жоден прапорець набору не поставлений. Натисніть «Позначка»: це пробна позначка №1. Скажіть ведучому: він підтвердить, що рядок «mark M1» з'явився в логу.",
      "wait_uk": "до 1 хв",
      "shoot_uk": "",
      "expect": []
@@ -114,9 +114,13 @@
       "P11"
      ],
      "lead": "S6 on; read the 'sets on' line",
-     "uk": "У меню Signal Probe → Набори ввімкніть тільки S6 «Вигляд і кнопки». Ведучий бачить у логу рядок, що S6 увімкнено.",
+     "uk": "",
      "wait_uk": "до 1 хв",
-     "shoot_uk": ""
+     "shoot_uk": "",
+     "sets_on": [
+      "S6"
+     ],
+     "sets_off": []
     },
     {
      "id": "B1.2",
@@ -369,7 +373,7 @@
      "expect": [
       [
        "P13",
-       "sw-search"
+       "sw-skip"
       ]
      ],
      "lead": "",
@@ -387,7 +391,7 @@
      "expect": [
       [
        "P13",
-       "sw-ptt"
+       "sw-voice"
       ]
      ],
      "lead": "",
@@ -683,9 +687,13 @@
      "mark": false,
      "items": [],
      "lead": "",
-     "uk": "Поверніться до штатної панелі: у f30_cluster Theme = «Off (BMW's own cluster)», Twin Dial лишається Off. Вимкніть S6 у Signal Probe.",
+     "uk": "Поверніться до штатної панелі: у f30_cluster Theme = «Off (BMW's own cluster)», Twin Dial Cluster = «Off (BMW's own cluster)».",
      "wait_uk": "до 30 с",
-     "shoot_uk": ""
+     "shoot_uk": "",
+     "sets_on": [],
+     "sets_off": [
+      "S6"
+     ]
     }
    ]
   },
@@ -713,9 +721,14 @@
       "P6"
      ],
      "lead": "S2+S3 on (S6 was switched off at the end of B1)",
-     "uk": "Signal Probe → Набори: ввімкніть S2 «Бортовий комп'ютер» і S3 «Кузов». Ведучий підтверджує.",
+     "uk": "",
      "wait_uk": "до 1 хв",
-     "shoot_uk": ""
+     "shoot_uk": "",
+     "sets_on": [
+      "S2",
+      "S3"
+     ],
+     "sets_off": []
     },
     {
      "id": "B2.2",
@@ -905,9 +918,15 @@
       "P10"
      ],
      "lead": "S1+S3 on, S2 off",
-     "uk": "Signal Probe → Набори: вимкніть S2, ввімкніть S1 «Повідомлення». S3 лишається.",
+     "uk": "S3 лишається.",
      "wait_uk": "до 1 хв",
-     "shoot_uk": ""
+     "shoot_uk": "",
+     "sets_on": [
+      "S1"
+     ],
+     "sets_off": [
+      "S2"
+     ]
     },
     {
      "id": "B3.2",
@@ -1115,9 +1134,16 @@
       "P8"
      ],
      "lead": "S4 on",
-     "uk": "Signal Probe → Набори: вимкніть S2 і S3, ввімкніть S4 «Медіа».",
+     "uk": "",
      "wait_uk": "до 1 хв",
-     "shoot_uk": ""
+     "shoot_uk": "",
+     "sets_on": [
+      "S4"
+     ],
+     "sets_off": [
+      "S1",
+      "S3"
+     ]
     },
     {
      "id": "B4.2",
@@ -1356,9 +1382,13 @@
       "P9"
      ],
      "lead": "S5 on, then wait 2 min (no phone connected: the summary)",
-     "uk": "Телефон-1: вимкніть на ньому Bluetooth і від'єднайте кабель, щоб авто нікого не бачило. Signal Probe → Набори: ввімкніть S5 «Телефон». Чекайте 2 хв.",
+     "uk": "Телефон-1: вимкніть на ньому Bluetooth і від'єднайте кабель, щоб авто нікого не бачило. S4 лишається. Чекайте 2 хв.",
      "wait_uk": "2 хв",
-     "shoot_uk": ""
+     "shoot_uk": "",
+     "sets_on": [
+      "S5"
+     ],
+     "sets_off": []
     },
     {
      "id": "B5.2",
@@ -1410,7 +1440,7 @@
       ],
       [
        "P9",
-       "phone-call1"
+       "phone-call1-state"
       ]
      ],
      "lead": "",
@@ -1597,9 +1627,13 @@
      "mark": false,
      "items": [],
      "lead": "verify the call-state sequence INCOMING -> ACTIVE -> DISCONNECTED in both Bluetooth and CarPlay; summary",
-     "uk": "Чекайте 2 хв. Ведучий читає підсумок. Потім у Twin Dial Cluster = Off (штатна панель) і вимкніть S5, S4.",
+     "uk": "Чекайте 2 хв. Ведучий читає підсумок. Потім у Twin Dial Cluster = «Off» (штатна панель).",
      "wait_uk": "2 хв",
-     "shoot_uk": ""
+     "shoot_uk": "",
+     "sets_off": [
+      "S5",
+      "S4"
+     ]
     }
    ]
   },
@@ -1623,9 +1657,16 @@
       "P1"
      ],
      "lead": "S1 on",
-     "uk": "Signal Probe → Набори: тільки S1 «Повідомлення».",
+     "uk": "",
      "wait_uk": "до 1 хв",
-     "shoot_uk": ""
+     "shoot_uk": "",
+     "sets_on": [
+      "S1"
+     ],
+     "sets_off": [
+      "S4",
+      "S5"
+     ]
     },
     {
      "id": "B6.2",
@@ -1843,10 +1884,13 @@
      "items": [],
      "expect": [],
      "lead": "collect #2",
-     "uk": "Поверніть f30_cluster, як було записано в блоці 0 (тема, G20, «Change with the drive mode»). Вимкніть S1. Ведучий збирає логи №2.",
+     "uk": "Поверніть f30_cluster, як було записано в блоці 0 (тема, G20, «Change with the drive mode»). Ведучий збирає логи №2.",
      "wait_uk": "до 5 хв",
      "shoot_uk": "",
-     "tag": "f30"
+     "tag": "f30",
+     "sets_off": [
+      "S1"
+     ]
     }
    ]
   },
@@ -1872,10 +1916,17 @@
       "P14"
      ],
      "lead": "S7+S6 on",
-     "uk": "Signal Probe → Набори: S7 «Навігація» і S6. Штатна панель. Запишіть на папері час за годинником авто при першій позначці (для звірки з логом).",
+     "uk": "Штатна панель. Запишіть на папері час за годинником авто при першій позначці (для звірки з логом).",
      "wait_uk": "1 хв",
      "shoot_uk": "",
-     "parked": true
+     "parked": true,
+     "sets_on": [
+      "S7",
+      "S6"
+     ],
+     "sets_off": [
+      "S1"
+     ]
     },
     {
      "id": "B7.2",
@@ -2002,10 +2053,18 @@
       "P17"
      ],
      "lead": "S8+S9 on",
-     "uk": "Signal Probe → Набори: S8 «Допомога водієві» і S9 «Технічні». Вимкніть S7 і S6.",
+     "uk": "",
      "wait_uk": "1 хв",
      "shoot_uk": "",
-     "parked": true
+     "parked": true,
+     "sets_on": [
+      "S8",
+      "S9"
+     ],
+     "sets_off": [
+      "S7",
+      "S6"
+     ]
     },
     {
      "id": "B8.2",
@@ -2178,9 +2237,14 @@
      "items": [],
      "expect": [],
      "lead": "final marker",
-     "uk": "Позначка «кінець». Вимкніть усі набори в Signal Probe.",
+     "uk": "Позначка «кінець».",
      "wait_uk": "1 хв",
-     "shoot_uk": ""
+     "shoot_uk": "",
+     "sets_on": [],
+     "sets_off": [
+      "S8",
+      "S9"
+     ]
     },
     {
      "id": "B9.2",
@@ -2283,5 +2347,17 @@
   "F4": [
    "not in this session: needs the diag_overlay build (OVERLAY-PHOTO-PROTOCOL photo 16), which was never built"
   ]
- }
+ },
+ "sets_uk": {
+  "S1": "Повідомлення",
+  "S2": "Комп’ютер, пробіг, одиниці",
+  "S3": "Кузов і напруга",
+  "S4": "Медіа і радіо",
+  "S5": "Телефон",
+  "S6": "Вид і кнопки",
+  "S7": "Навігація",
+  "S8": "Допоміжні системи",
+  "S9": "Технічне"
+ },
+ "_sets_note": "The Ukrainian names are the checkbox labels of apps/signal_probe (CP, fields.js SETS); keep them equal."
 }

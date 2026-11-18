@@ -60,6 +60,14 @@ def number_marks(plan):
     return n
 
 
+def probe_table():
+    """CP's field table (design/car/probe_fields.json after the merge, else the early copy CP published), or None."""
+    for p in (os.path.join(ROOT, 'design', 'car', 'probe_fields.json'), os.path.join(ROOT, 'bake', 'work', 'car', 'pub', 'CP', 'probe_fields.json')):
+        if os.path.exists(p):
+            return load(p)
+    return None
+
+
 def coverage(plan, reg):
     cov = dict((k, list(v)) for k, v in plan.get('coverage_extra', {}).items() if not k.startswith('_'))
     for b in plan['blocks']:
@@ -84,10 +92,36 @@ def problems(plan, reg, cov):
                     bad.append('step %s names %s, which is not in the register' % (s['id'], it))
             if s.get('markNo') and not s.get('expect') and s.get('expect') != []:
                 bad.append('marked step %s has no expect key (use [] when nothing must be logged)' % s['id'])
+    tab = probe_table()
+    if tab:
+        tags = {}
+        for f in tab['fields']:
+            tags[(f['item'], f['tag'])] = f['set']
+        for b in plan['blocks']:
+            for s in b['steps']:
+                for it, tag in s.get('expect', []):
+                    st = tags.get((it, tag))
+                    if st is None:
+                        bad.append('step %s expects %s %s, which is not in the probe table' % (s['id'], it, tag))
+                    elif st not in b['sets']:
+                        bad.append('step %s expects %s %s (set %s) but block %s has sets %s on' % (s['id'], it, tag, st, b['id'], b['sets']))
     for it in reg:
         if it not in cov:
             bad.append('register item %s has no step, collection or reason in the plan' % it)
     return bad
+
+
+def sets_text(plan, s):
+    names = plan['sets_uk']
+    lab = lambda ids: ', '.join('%s «%s»' % (i, names[i]) for i in ids)
+    parts = []
+    if s.get('sets_off'):
+        parts.append('ВИМКНІТЬ %s' % lab(s['sets_off']))
+    if s.get('sets_on'):
+        parts.append('ВВІМКНІТЬ %s' % lab(s['sets_on']))
+    if not parts:
+        return ''
+    return 'У меню Signal Probe (центральний екран) змініть прапорці наборів: %s. Ведучий підтверджує рядок «sets on=…» у логу. ' % '; '.join(parts)
 
 
 def md_escape(t):
@@ -118,7 +152,7 @@ def render_blocks(plan, reg):
         out.append('|---|---|---|---|')
         for s in b['steps']:
             mk = '**Позначка %d**' % s['markNo'] if s['markNo'] else '-'
-            do = md_escape(s['uk'])
+            do = md_escape((sets_text(plan, s) + s['uk']).strip())
             if s.get('optional'):
                 do = '(за бажанням) ' + do
             if s.get('parked') is False:

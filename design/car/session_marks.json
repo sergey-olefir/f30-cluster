@@ -289,7 +289,7 @@
    "expect": [
     [
      "P13",
-     "sw-search"
+     "sw-skip"
     ]
    ],
    "tag": "stock",
@@ -309,7 +309,7 @@
    "expect": [
     [
      "P13",
-     "sw-ptt"
+     "sw-voice"
     ]
    ],
    "tag": "stock",
@@ -1305,7 +1305,7 @@
     ],
     [
      "P9",
-     "phone-call1"
+     "phone-call1-state"
     ]
    ],
    "tag": "stock",

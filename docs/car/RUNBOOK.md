@@ -90,8 +90,8 @@ Cluster states in step order: `stock` = Twin Dial and f30 both Off; `twin` = Twi
 | 12 | B1.12 | stock | P13: sw-wheel-steps |
 | 13 | B1.13 | stock | P13: sw-fav |
 | 14 | B1.14 (optional) | stock | P13: sw-special2 |
-| 15 | B1.15 | stock | P13: sw-search |
-| 16 | B1.16 | stock | P13: sw-ptt |
+| 15 | B1.15 | stock | P13: sw-skip |
+| 16 | B1.16 | stock | P13: sw-voice |
 | 17 | B1.17 | stock | P13: sw-phone |
 | 18 | B1.18 | stock | P13: sw-volume |
 | 19 | B1.19 | stock | P13: controller |
@@ -157,7 +157,7 @@ Cluster states in step order: `stock` = Twin Dial and f30 both Off; `twin` = Twi
 |---|---|---|---|
 | 60 | B5.2 | stock | P9: phone-devices |
 | 61 | B5.3 | stock | P9: call-state |
-| 62 | B5.4 | stock | P9: call-state, P9: phone-call1 |
+| 62 | B5.4 | stock | P9: call-state, P9: phone-call1-state |
 | 63 | B5.5 | twin | P9: call-state |
 | 64 | B5.6 | twin | P9: call-state, P9: phone-calllist |
 | 65 | B5.7 | twin | P9: call-state |
