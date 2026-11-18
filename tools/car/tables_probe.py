@@ -543,7 +543,8 @@ def p13(ctx: Ctx) -> Ans:
                 d["ambiguous_bits"] = cand
                 a.why.append("more than one bit moved only in bc-short windows: repeat with one press at a time")
             else:
-                d["stalk_row"] = "stalk byte moved, but no bit is private to bc-short"
+                d["stalk_row_private_bit"] = False
+                a.why.append("the stalk byte moved, but no bit is private to the bc-short steps")
         else:
             a.needs.append("design/car/markers.json (marker number -> step class) to say which bit moved on which step")
             a.why.append("the stalk byte changed; without the marker map the bits cannot be attributed to steps")
@@ -646,7 +647,8 @@ def p12(ctx: Ctx) -> Ans:
     dart = [p for p in ctx.probe if canon(p.tag) == "dart"]
     d["dart_arrives"] = bool(dart)
     if dart:
-        d["dart_kinds"] = sorted({p.enum("kind") or str(p.kv.get("kind")) for p in dart if p.kv.get("kind")} - {"None"})[:8]
+        d["dart_kinds"] = sorted({(p.enum("kind") or str(p.kv.get("kind"))) if (p.enum("kind") or str(p.kv.get("kind"))) in ("intersection", "roundabout", "destinationManeuver", "fork", "exit", "ferry", "tunnel", "lane") else "other"
+                                      for p in dart if p.kv.get("kind")})[:8]
         d["dart_directions"] = sorted({p.enum("direction") for p in dart if p.enum("direction")})[:12]
         raws = [p.val("raw") for p in dart if p.val("raw") is not None]
         d["raw_falls_to_zero_at_a_turn"] = bool(raws) and min(raws) == 0 and max(raws) > 0

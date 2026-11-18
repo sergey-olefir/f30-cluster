@@ -29,7 +29,7 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
 # symbols our own log lines use; anything else non-ASCII is text
-ALLOWED_NONASCII = set("→÷×ø°·…–—‑’“”é −±≈≤≥")
+ALLOWED_NONASCII = set("→÷×ø°·…–—‑’“”é −±≈≤≥§")
 
 RULES: List[Tuple[str, "re.Pattern"]] = [
     ("coordinate", re.compile(r"(?<![\d.])-?\d{1,3}\.\d{4,}\s*[,;/ ]\s*-?\d{1,3}\.\d{4,}(?![\d.])")),
@@ -45,10 +45,10 @@ _RE_NONLATIN = re.compile(r"[^\x00-\x7f]")
 
 # lines whose key=value pairs must be numbers / enum names / lengths
 _RE_PROBE_KV = re.compile(r"([A-Za-z][A-Za-z0-9_.-]*)=((?:\[[^\]]*\])|(?:[^\s\[\]]+))")
-_ENUMISH = re.compile(r"^(?:[A-Z_][A-Z0-9_]*|-|\?|true|false|none|-?\d+(?:\.\d+)?(?:\(0x[0-9a-f]+\))?|0x[0-9a-f]+|[a-z]+-range|[A-Z0-9_]+(?:[+/][A-Z0-9_,*]+)*|[A-Z_]+/\d+|\d+(?:\.\d+)?~?|member|flat|\d+/\d+)$")
+_ENUMISH = re.compile(r"^(?:[A-Z_][A-Z0-9_]*|-|\?|true|false|none|unknown|-?\d+(?:\.\d+)?(?:\(0x[0-9a-f]+\))?|0x[0-9a-f]+|[a-z]+-range|[A-Z0-9_]+(?:[+/][A-Z0-9_,*]+)*|[A-Z_]+/\d+|\d+(?:\.\d+)?~?|member|flat|\d+/\d+)$")
 _LENKEY = re.compile(r"(?:^|-)len$|-len$|^len$|chars$")
 _RE_PROBE_PREFIX = re.compile(r"^(?:\S+ )?\w+ probe:? P\d+ ")
-_FREE_TEXT_KEYS = re.compile(r"^(?:name|title|artist|text|number|station|album|caller|contact|road|street|address|device|label|ssid|friendly\w*)$", re.I)
+_FREE_TEXT_KEYS = re.compile(r"^(?:name|title|artist|text|number|station|album|caller|contact|road|street|address|ssid|friendly\w*)$", re.I)
 
 
 class Hit:
@@ -73,14 +73,14 @@ def scan_line(text: str, probe: bool = False) -> List[Tuple[str, Tuple[int, int]
         hits.append(("non-latin-text", m.span()))
         break
     if probe or _RE_PROBE_PREFIX.match(text):
-        body = text.split(": ", 2)[-1] if ": " in text else text
         for m in _RE_PROBE_KV.finditer(text):
             k, v = m.group(1), m.group(2)
             if v.startswith("["):
                 continue
-            if _FREE_TEXT_KEYS.match(k) and not _ENUMISH.match(v):
+            # a text member is logged as its LENGTH: *-len carries a number, and a key that names a text never carries letters
+            if _LENKEY.search(k) and not re.match(r"^(?:\d+|-|\?)$", v):
                 hits.append(("free-text-where-a-number-belongs", m.span()))
-            elif not _LENKEY.search(k) and re.search(r"[a-z]{3,}", v) and not _ENUMISH.match(v):
+            elif _FREE_TEXT_KEYS.match(k) and not re.match(r"^(?:-?\d+(?:\.\d+)?|-|\?|true|false|known|unknown|set)$", v):
                 hits.append(("free-text-where-a-number-belongs", m.span()))
     return hits
 

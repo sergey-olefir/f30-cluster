@@ -241,7 +241,7 @@ def l4_trip(ctx: Ctx) -> Tuple[Ans, Ans]:
         cross = out
         d["cross_check_pairs"] = [{"bc": b, "way": fw, "speed": fs, "ratio": r} for b, fw, fs, r in out[:12]]
         d["cross_check_ratio_fixed"] = sorted({round(fw / fs, 3) for _b, fw, fs, _r in out})[:6]
-        d["cross_check_note"] = "the ratio way-factor / speed-factor is what the cross-check fixes; the size needs a reading"
+        p4.why.append("the cross-check fixes the ratio way-factor / speed-factor, not their size: the size needs a reading or the plausible range")
     # the app's own check lines
     for l in td:
         m = _RE_CHECK.match(l.msg)

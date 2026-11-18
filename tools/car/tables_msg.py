@@ -262,6 +262,8 @@ def analyse_cc(evs: List[dict], runs: List[tuple], version_ok_ts: Optional[float
         end_t = r1 if r1 is not None else (last_ev["ts"] if last_ev else r0)
         if iv is not None:
             close_iv(end_t, open_at_end=True)
+        if stored is not None:
+            stored["last"] = max(stored.get("last") or 0, end_t or 0)    # nothing changed since: it holds to the end of the run
         if stored is not None and stored.get("last") is not None and stored["last"] - stored["start"] >= STORED_S:
             out["stored"].append(stored)
         out["silent_act"] = out["n_act"] == 0
@@ -409,7 +411,7 @@ def l1_l2(ctx: Ctx) -> List[Ans]:
         decided["witness_zero_seen"] = bool(zeros)
         if zeros and (cases or stored):
             rows.append("11")
-            rec_release["witness"] = "usable (ccDisplayed.use true, release.witness true)"
+            rec_release["witness"] = True
     if latches:
         rows.append("13")
         decided["latch_seen"] = True
@@ -483,7 +485,7 @@ def l1_l2(ctx: Ctx) -> List[Ans]:
         d2["number_is_ccList_id"] = (matches == tot) if tot else None
         d2["number_matches"] = "%d/%d" % (matches, tot)
         d2["noneValues"] = [0]
-        d2["noneValues_why"] = "0 stays the only rest value: 65535 in noneValues would cover a listed message (MC F0, UNSAFE)"
+        a2.why.append("0 stays the only rest value: 65535 in noneValues would cover a listed message (MC F0, UNSAFE)")
         if d2["rests_on"] == "65535":
             d2["deferValues"] = [65535]
         if d2["rests_on"] == "kept":

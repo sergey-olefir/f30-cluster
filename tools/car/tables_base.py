@@ -21,9 +21,37 @@ SAFE_WORDS = {
     "kombi", "rl3", "average", "travel", "start", "rangeTank", "supreme", "range", "secure", "ms", "s", "other", "limit", "end", "off", "on",
     "opaque", "g20-our-row", "g20-bmw-row", "unknown", "stalk-bit", "indirect-any", "press", "scroll", "provider-not-available",
     "watch-error", "mixed", "car", "sun", "day", "night", "invalid",
+    "intersection", "roundabout", "destinationManeuver", "fork", "exit", "ferry", "tunnel", "lane",
 }
 _ENUM = re.compile(r"^[A-Z_][A-Z0-9_]{0,95}$")
 _ID_TOKEN = re.compile(r"^[a-z][a-z0-9_.-]{0,40}$")     # a field tag or a key: ours, never a log's free text
+
+
+_TAGS = None
+_FIELD_WORDS = {"IndicatorSteeringColumn", "operationColumnStalks", "IndicatorSteeringColumnComplete", "statusActiveCCMessage", "statusDisplayedCCMessage"}
+
+
+def known_tags() -> set:
+    """The probe's own tags (ours): CP's probe_fields.json and the fixtures of the formatter bodies."""
+    global _TAGS
+    if _TAGS is None:
+        import json
+        import os
+        here = os.path.dirname(os.path.abspath(__file__))
+        t = set()
+        for p in (os.path.join(here, "fixtures", "probe_bodies.json"),):
+            try:
+                t |= set(json.load(open(p, encoding="utf-8")).get("tags", {}))
+            except (OSError, ValueError):
+                pass
+        repo = os.path.abspath(os.path.join(here, "..", ".."))
+        for p in (os.path.join(repo, "design", "car", "probe_fields.json"), os.path.join(repo, "bake", "work", "car", "pub", "CP", "probe_fields.json")):
+            try:
+                t |= {f["tag"] for f in json.load(open(p, encoding="utf-8")).get("fields", []) if isinstance(f.get("tag"), str)}
+            except (OSError, ValueError):
+                pass
+        _TAGS = t
+    return _TAGS
 
 
 def safe_value(v: Any) -> Any:
@@ -31,7 +59,8 @@ def safe_value(v: Any) -> Any:
     if v is None or isinstance(v, (bool, int, float)):
         return v
     if isinstance(v, str):
-        if _ENUM.match(v) or v in SAFE_WORDS or re.match(r"^0x[0-9a-fA-F]{1,8}$", v):
+        if _ENUM.match(v) or v in SAFE_WORDS or v in _FIELD_WORDS or v in known_tags() or re.match(r"^(?:wb|g20)_[a-z0-9_]+$|^all[A-Za-z0-9]+$", v) or re.match(r"^-?\d+(?:\.\d+)?(?:/\d+)?$", v) or re.match(r"^0x[0-9a-fA-F]{1,8}$", v) or \
+                re.match(r"^de\.bmw\.[A-Za-z0-9_.]+$", v):
             return v
         raise ValueError("unsafe evidence value %r" % v[:40])
     if isinstance(v, (list, tuple)):

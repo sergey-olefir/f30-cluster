@@ -66,7 +66,7 @@ def parse_line(text: str, no: int = 0, src: str = "") -> Line:
     if m:
         return Line(_epoch(m.group(1)), m.group(2), m.group(3), no, src)
     m = _RE_JOURNAL.match(text)
-    if m and m.group(2).startswith("cluster-render"):
+    if m and (m.group(2).startswith("cluster-render") or m.group(3).startswith("cluster-render")):
         body = m.group(4)
         lv = _RE_JOURNAL_LEVEL.match(body)
         level, msg = (lv.group(1), lv.group(2)) if lv else ("I", body)

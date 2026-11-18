@@ -33,6 +33,7 @@ import tables_probe                        # noqa: E402
 import tables_render                       # noqa: E402
 import tables_trip                         # noqa: E402
 import steps                               # noqa: E402
+import tables_l2                           # noqa: E402
 from context import Ctx, load_json         # noqa: E402
 from tables_base import Ans                # noqa: E402
 
@@ -94,6 +95,10 @@ BUILTIN: Dict[str, Dict[str, str]] = {
 }
 
 
+def ascii_text(x: str) -> str:
+    return "".join(c if ord(c) < 128 or c == "\u00a7" else "?" for c in x)
+
+
 def load_register(path: Optional[str]) -> Dict[str, Dict[str, str]]:
     reg = {k: dict(v) for k, v in BUILTIN.items()}
     cands = [path] if path else [os.path.join(REPO, "design", "car", "register.json"),
@@ -111,10 +116,10 @@ def load_register(path: Optional[str]) -> Dict[str, Dict[str, str]]:
             if isinstance(it, dict) and isinstance(it.get("id"), str):
                 cur = reg.setdefault(it["id"], {"kind": str(it.get("kind", "?"))[:1], "q": ""})
                 if it.get("question"):
-                    cur["q"] = str(it["question"])[:200]
+                    cur["q"] = ascii_text(str(it["question"]))[:200]
                 cur["from_register"] = True
                 if it.get("blocks"):
-                    cur["blocks"] = it["blocks"]
+                    cur["blocks"] = [ascii_text(str(b))[:160] for b in (it["blocks"] if isinstance(it["blocks"], list) else [it["blocks"]])]
         reg["_source"] = {"path": cl.rel(p)}
         break
     return reg
@@ -154,6 +159,11 @@ def run_tables(ctx: Ctx) -> Dict[str, Ans]:
                   ("P8", tables_probe.p8), ("P9", tables_probe.p9), ("P10", tables_probe.p10), ("P11", tables_probe.p11), ("P12", tables_probe.p12),
                   ("P13", tables_probe.p13), ("P14", tables_probe.p14), ("P15", tables_probe.p15), ("P16", tables_probe.p16), ("P17", tables_probe.p17),
                   ("X5", tables_render.x5_switch), ("X10", x10), ("X6", x6)):
+        run([i], lambda fn=fn: fn(ctx))
+    run(["L16"], lambda: tables_l2.l16(ctx))
+    run(["L17", "L18", "L19"], lambda: tables_l2.l17_l18_l19(ctx))
+    for i, fn in (("L20", tables_l2.l20), ("L21", tables_l2.l21), ("L24", tables_l2.l24), ("L25", tables_l2.l25), ("L26", tables_l2.l26),
+                  ("L27", tables_l2.l27), ("L28", tables_l2.l28), ("L29", tables_l2.l29), ("L30", tables_l2.l30)):
         run([i], lambda fn=fn: fn(ctx))
     l1 = out.get("L1")
     if l1 is not None:
@@ -234,7 +244,7 @@ def build(session_dir: str, readings_path: Optional[str], markers_path: Optional
     session = cl.Session(session_dir)
     readings = load_json(readings_path)
     mpath = markers_path
-    if not mpath:
+    if markers_path is None:
         for cand in (os.path.join(REPO, "design", "car", "session_marks.json"), os.path.join(REPO, "bake", "work", "car", "pub", "CQ", "marks.json"),
                      os.path.join(REPO, "design", "car", "markers.json")):
             if os.path.isfile(cand):
@@ -252,6 +262,12 @@ def build(session_dir: str, readings_path: Optional[str], markers_path: Optional
             continue
         a = answers.get(k)
         info = reg.get(k, {"kind": k[0], "q": ""})
+        if a is None and info.get("kind") == "P":
+            try:
+                a = tables_l2.generic_p(ctx, k, info.get("q", ""))
+            except Exception as e:
+                sys.stderr.write("parse_logs: generic table for %s raised %s\n" % (k, type(e).__name__))
+                a = None
         if a is None:
             a = manual(k, info) if info.get("kind") in ("X", "F") else Ans(k, info.get("q", ""))
             if info.get("kind") not in ("X", "F"):
