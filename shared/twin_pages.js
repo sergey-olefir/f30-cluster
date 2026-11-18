@@ -940,7 +940,10 @@ function mapSend(hud, open) {
 /** "tdpage" born (a layout build): empty until the first update paints it. */
 function init(hud, x) {
     const p = st(hud);
-    x.px = Buffer.alloc(x.w.w * x.w.h * 4, 0);
+    // integration (B7): no "previous" pixels for a layer just made - its first paint goes up WHOLE. With a zero buffer here _blitDiff
+    // sent only the rectangle that differs from black-transparent, which leaves the rest of a new layer to whatever cluster-render
+    // starts it with (measured: after a rebuild the page layer never got a whole frame; tools/research3/mp/measure.js)
+    x.px = null;
     x.pgKey = null;
     p.built = nowMs(hud); p.mapSent = null; p.evalAt = -1e9;
     update(hud, x, nowMs(hud), true);
