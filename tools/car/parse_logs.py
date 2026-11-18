@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import re
 import os
 import sys
 from typing import Dict, List, Optional
@@ -118,6 +119,8 @@ def load_register(path: Optional[str]) -> Dict[str, Dict[str, str]]:
                 if it.get("question"):
                     cur["q"] = ascii_text(str(it["question"]))[:200]
                 cur["from_register"] = True
+                if isinstance(it.get("status"), str):
+                    cur["reg_status"] = it["status"] if re.match(r"^[a-z-]+$", it["status"]) else None
                 if it.get("blocks"):
                     cur["blocks"] = [ascii_text(str(b))[:160] for b in (it["blocks"] if isinstance(it["blocks"], list) else [it["blocks"]])]
         reg["_source"] = {"path": cl.rel(p)}
@@ -287,6 +290,8 @@ def build(session_dir: str, readings_path: Optional[str], markers_path: Optional
         j["kind"] = info.get("kind", k[0])
         if info.get("from_register"):
             j["in_register"] = True
+            if info.get("reg_status"):
+                j["register_status"] = info["reg_status"]
         if info.get("blocks") and not j["blocks"]:
             j["blocks"] = info["blocks"] if isinstance(info["blocks"], list) else [str(info["blocks"])]
         items[k] = j
@@ -336,11 +341,22 @@ def main(argv: List[str]) -> int:
         return 2
     # the input first: what in the collected material should not be there
     if not flags["--no-privacy-check"]:
-        hits = 0
-        for f in pc.iter_files([session_dir]):
-            if f.endswith((".log", ".txt")) or ".log." in os.path.basename(f):
-                hits += len(pc.scan_file(f))
-        print("privacy check of the input: %d flagged line(s) (python3 -I tools/car/privacy_check.py <folder> lists them; --redact-to makes clean copies)" % hits)
+        sess = cl.Session(session_dir)
+        files = [p for app in ("f30_cluster", "twin_dial", "signal_probe", "car_vitals", "driver_profiles") for p in sess.app_logs(app)]
+        files += sess.cluster_render_logs() + sess.status_files()
+        hits, by = 0, {}
+        for f in files:
+            if "woc-journal" in f or os.path.basename(f).startswith("journal"):
+                # a whole-system journal copy: only the renderer's own lines are read by the tables, so only those are scanned
+                with open(f, "r", encoding="utf-8", errors="replace") as fh:
+                    hs = [r for t in fh if "cluster-render" in t for r, _s in pc.scan_line(t.rstrip("\n"))]
+            else:
+                hs = [h.rule for h in pc.scan_file(f)]
+            for r in hs:
+                hits += 1
+                by[r] = by.get(r, 0) + 1
+        print("privacy check of the %d file(s) the tables read: %d flagged line(s)%s (privacy_check.py <folder> lists them; --redact-to makes clean copies)" %
+              (len(files), hits, (" - " + ", ".join("%s %d" % kv for kv in sorted(by.items()))) if by else ""))
     only = opts["--only"].split(",") if opts["--only"] else None
     ans = build(session_dir, opts["--readings"], opts["--markers"], opts["--register"], only)
     bad = pc.check_derived(ans)

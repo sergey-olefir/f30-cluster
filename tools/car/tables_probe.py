@@ -52,6 +52,8 @@ def _mk(ctx: Ctx, aid: str, title: str, *tags: str) -> Tuple[Ans, Optional[str]]
     a = Ans(aid, title)
     st, mins = pstate(ctx, *tags)
     a.material = sorted({cl.rel(p) for app in ("signal_probe", "twin_dial") for p in ctx.session.app_logs(app)})
+    pts = [p.ts for p in ctx.probe if p.ts]
+    a.dated = (cl.fmt_ts(max(pts)) or "")[:10] if pts else None
     if st == "no-material":
         a.status = "no-material"
         a.needs.append("the probe's log (signal_probe or Twin Dial's probe build) of the session")

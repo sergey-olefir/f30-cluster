@@ -97,8 +97,9 @@ def l17_l18_l19(ctx: Ctx) -> List[Ans]:
     if dm or bad:
         a.status = "answered" if dm else "partial"
         a.label = "arrives"
-        a.decided = {"modes_seen": sorted({m.group(1) for _l, m in dm if re.match(r"^[A-Z_]+$|^[a-z_]+$", m.group(1)) and len(m.group(1)) < 20})[:8],
-                     "changes_logged": len(dm), "unrecognised_values": len(bad)}
+        unrec = sorted({cl.enum_name(re.sub(r'^drive mode not recognised: "?([^"]*)"?$', r"\1", l.msg)) for l in bad} - {None})
+        a.decided = {"modes_seen": sorted({cl.enum_name(m.group(3)) for _l, m in dm} - {None})[:8], "changes_logged": len(dm),
+                     "unrecognised_lines": len(bad), "unrecognised_values": unrec[:8]}
         if dm:
             a.cite(dm[0][0], "first drive mode line")
         for l in bad[:1]:
@@ -174,6 +175,9 @@ def l24(ctx: Ctx) -> Ans:
         a.cite(l, "cluster-render guard disabled the panel after a strike", strike=g["events"][0]["strike"])
     for l, m in kg[:1]:
         a.cite(l, "f30's own kombi guard: the display service went away %s ms after the scene was shown" % m.group(1), ms=int(m.group(1)))
+    times = [l.ts for l in ctx.cr_lines if l.ts]
+    a.dated = (cl.fmt_ts(max(times)) or "")[:10] if times else None
+    a.material = sorted({cl.rel(p) for p in ctx.session.cluster_render_logs()})
     a.why.append("whether the 0.7.13 shader-size fix holds with the night looks back is read from the absence of these lines over the session's start / mode switch / day-night steps")
     return a
 
