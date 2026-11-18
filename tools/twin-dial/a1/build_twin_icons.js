@@ -27,7 +27,7 @@ const TWIN = require(path.join(ROOT, 'design', 'twin-dial', 'vt', 'pictograms.js
 const OUT_JS = path.join(ROOT, 'shared', 'twin_icons.js');
 const OUT_JSON = path.join(ROOT, 'apps', 'twin_dial', 'hud', 'icons', 'icons.json');
 
-// SPEC 10 (rev 2) and SPEC-R3 7: which icon is drawn at which size. Round 3 (package B6): the tab icons are 36 px (SPEC-R3
+// SPEC 10 (rev 2) and SPEC-R3 7: which icon is drawn at which size. Round 3 (package B6): the tab icons are 36 px of ink in a 46 px box (SPEC-R3
 // 3.1), the message symbols are drawn twice (54 px in the card's cell, 32 px in a row), and the guidance set has its
 // 120 px page size and its 30 px lane-row size.
 const MESSAGE = ['cc_door', 'cc_belt', 'cc_brake', 'cc_tyre', 'cc_engine', 'cc_washer', 'cc_bonnet', 'cc_boot', 'cc_oil', 'cc_pedal', 'cc_service', 'cc_battery', 'cc_coolant', 'cc_warn', 'cc_info'];
@@ -36,7 +36,7 @@ const GUIDANCE = TURNS.concat(['td_fork_left', 'td_fork_right', 'td_fork_straigh
     'td_flag_left', 'td_flag_centre', 'td_flag_right', 'td_lane_change_left', 'td_lane_change_right', 'td_dot'],
     [1, 2, 3, 4, 5, 6].map((n) => 'td_rb' + n + '_r'), [1, 2, 3, 4, 5, 6].map((n) => 'td_rb' + n + '_l'));
 const SLOTS = {
-    tab: { size: [36, 36], names: ['td_fuel', 'cc_warn', 'td_radio', 'td_media', 'td_proj', 'td_phone', 'td_phone_bars', 'td_phone_off', 'td_nav'], use: 'the tab bar, centred at y 143, and the trip page\'s pump (SPEC-R3 3.1, 4.1)' },
+    tab: { size: [46, 46], names: ['td_fuel', 'cc_warn', 'td_radio', 'td_media', 'td_proj', 'td_phone', 'td_phone_bars', 'td_phone_off', 'td_nav'], use: 'the tab bar: a 46 px box whose ink is 36 px, on the centre line y 147 (SPEC-R3 3.1 says 36 px of INK; integration decision, see docs/twin-dial/R3B-INTEGRATION.md), and the trip page\'s pump (SPEC-R3 4.1)' },
     gauge: { size: [32, 32], names: ['td_fuel_side', 'cc_coolant'], use: 'under the dials, over the bars' },
     symbol: { size: [54, 54], names: MESSAGE, use: 'the tab-2 card\'s symbol cell, centred (960, 344) (SPEC-R3 5.1)' },
     row: { size: [32, 32], names: MESSAGE, use: 'the tab-2 rows, x 741 (SPEC-R3 5.1)' },

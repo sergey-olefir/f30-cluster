@@ -60,6 +60,19 @@ function once(hud, key, line) {
 
 /** A member of a struct value, or undefined. */
 const member = (v, k) => (v && typeof v === 'object' ? v[k] : undefined);
+/**
+ * b7 (CP's finding): ResetLogic3.bcDataAll.bcData3 is an ARRAY of up to 5 BCData3 structs in the catalogue (arrayMaxLength 5), one per reset
+ * logic, so the struct reads of the rl3 fallback found nothing. The entry used is the first one that carries a value (an average speed, a
+ * consumption or a distance that is not the unfilled marker); with none valid, the first object (the page then shows dashes by its own rules);
+ * a plain struct (the shape the tests and an older reading used) is taken as it is.
+ */
+function rl3Entry(d) {
+    if (!Array.isArray(d)) return d;
+    const valid = (e) => !!e && typeof e === 'object' && ((isNum(e.speedAverage) && e.speedAverage < 65535) || (isNum(e.consumptionCombustionAverageDigit) && e.consumptionCombustionAverageDigit < 65535)
+        || (isNum(e.counterDistance) && e.counterDistance < 4294967295));
+    return d.find(valid) || d.find((e) => e && typeof e === 'object');
+}
+
 /** An enum that may arrive as its name or its number: true when it is `on`. */
 function enumIs(raw, names, nums) {
     if (typeof raw === 'string') return names.indexOf(raw) >= 0;
@@ -150,7 +163,7 @@ function wire(hud, extra) {
     // research3/MK: the head unit's own trip computer (ResetLogic3), the fallback for every trip value (config.trip.order)
     if (tripOrder(hud).indexOf('rl3') >= 0) {
         chain(hud, extra, SOURCES.rl3[0], SOURCES.rl3[1], (v) => {
-            const d = member(v, 'bcData3'), u = member(v, 'bcUnits'), mx = member(v, 'maxValues');
+            const d = rl3Entry(member(v, 'bcData3')), u = member(v, 'bcUnits'), mx = member(v, 'maxValues');     // b7: bcData3 is an ARRAY (0..5) in the catalogue
             const dt = member(d, 'dateTimeTrip'), dr = member(d, 'dateTimeReset');
             td.rl3 = {
                 option: member(d, 'resetOption'), speed: member(d, 'speedAverage'),
@@ -600,5 +613,5 @@ function iconState(hud, w) { return require('./twin_tabs').iconState(hud, w); }
 /** Repaint a live icon when its name, colour or text changed (also after a night change: the engine clears x.last). Called from _updateOne. */
 function updateIcon(hud, x, nowMs, force) { return require('./twin_tabs').updateIcon(hud, x, nowMs, force); }
 
-module.exports = { token, wire, page, updateIcon, iconState, program, ready, local, tripValues, odometer, factors, summary, grouped, DASH, THIN, WEEKDAYS, TITLES, fresh,
+module.exports = { rl3Entry, token, wire, page, updateIcon, iconState, program, ready, local, tripValues, odometer, factors, summary, grouped, DASH, THIN, WEEKDAYS, TITLES, fresh,
     SOURCES, DEFAULT_FACTORS };

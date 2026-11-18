@@ -5,9 +5,9 @@
  "_about": "SPEC 10 / SPEC-R3 7 slot table. The engine draws icons from the distance functions at the widget's own size and colour; this file records what that gives at each slot size (ink box in px, ink sum, hash of the alpha plane) so a change in a drawing or in icons.js shows up in bench/test-twin-fonts.js.",
  "slots": {
   "tab": {
-   "w": 36,
-   "h": 36,
-   "use": "the tab bar, centred at y 143, and the trip page's pump (SPEC-R3 3.1, 4.1)"
+   "w": 46,
+   "h": 46,
+   "use": "the tab bar: a 46 px box whose ink is 36 px, on the centre line y 147 (SPEC-R3 3.1 says 36 px of INK; integration decision, see docs/twin-dial/R3B-INTEGRATION.md), and the trip page's pump (SPEC-R3 4.1)"
   },
   "gauge": {
    "w": 32,
@@ -64,128 +64,128 @@
   {
    "name": "td_fuel",
    "slot": "tab",
-   "w": 36,
-   "h": 36,
+   "w": 46,
+   "h": 46,
    "box": [
     2,
-    6,
-    31,
-    34
+    8,
+    40,
+    44
    ],
-   "ink": 320.3,
-   "alpha_sha1": "1ca07f92682a0c8b"
+   "ink": 522.1,
+   "alpha_sha1": "1f23188d11a1b6c8"
   },
   {
    "name": "cc_warn",
    "slot": "tab",
-   "w": 36,
-   "h": 36,
+   "w": 46,
+   "h": 46,
    "box": [
     0,
     1,
-    36,
-    33
+    46,
+    42
    ],
-   "ink": 319.9,
-   "alpha_sha1": "ae2ee25f6399a458"
+   "ink": 521.4,
+   "alpha_sha1": "dda49e5e31d3c272"
   },
   {
    "name": "td_radio",
    "slot": "tab",
-   "w": 36,
-   "h": 36,
+   "w": 46,
+   "h": 46,
    "box": [
-    5,
-    5,
-    31,
-    34
+    7,
+    6,
+    39,
+    43
    ],
-   "ink": 197.1,
-   "alpha_sha1": "b2e467c929c7ff9f"
+   "ink": 320.2,
+   "alpha_sha1": "fd7e65367c6e2242"
   },
   {
    "name": "td_media",
    "slot": "tab",
-   "w": 36,
-   "h": 36,
+   "w": 46,
+   "h": 46,
    "box": [
-    6,
-    3,
-    29,
-    31
+    8,
+    4,
+    37,
+    40
    ],
-   "ink": 219.2,
-   "alpha_sha1": "94e9e42fa7c06df0"
+   "ink": 357.8,
+   "alpha_sha1": "5346974e6dee6b03"
   },
   {
    "name": "td_proj",
    "slot": "tab",
-   "w": 36,
-   "h": 36,
+   "w": 46,
+   "h": 46,
    "box": [
     1,
-    3,
-    35,
-    33
+    4,
+    45,
+    42
    ],
-   "ink": 342.8,
-   "alpha_sha1": "6e301dc21f9d665c"
+   "ink": 559.6,
+   "alpha_sha1": "107150e2e2fb61c8"
   },
   {
    "name": "td_phone",
    "slot": "tab",
-   "w": 36,
-   "h": 36,
+   "w": 46,
+   "h": 46,
    "box": [
-    8,
+    11,
     2,
-    28,
-    34
+    35,
+    44
    ],
-   "ink": 232.1,
-   "alpha_sha1": "502a8b12c4136968"
+   "ink": 377.8,
+   "alpha_sha1": "ffbaed5506a8616a"
   },
   {
    "name": "td_phone_bars",
    "slot": "tab",
-   "w": 36,
-   "h": 36,
+   "w": 46,
+   "h": 46,
    "box": [
-    3,
-    3,
-    34,
-    33
+    4,
+    4,
+    43,
+    42
    ],
-   "ink": 291.4,
-   "alpha_sha1": "b052a1a36af75277"
+   "ink": 475.5,
+   "alpha_sha1": "e905b64a8e840312"
   },
   {
    "name": "td_phone_off",
    "slot": "tab",
-   "w": 36,
-   "h": 36,
+   "w": 46,
+   "h": 46,
    "box": [
-    5,
-    1,
-    31,
-    35
+    6,
+    2,
+    40,
+    44
    ],
-   "ink": 271,
-   "alpha_sha1": "3fa004be2c654834"
+   "ink": 441.9,
+   "alpha_sha1": "76761273acbbd777"
   },
   {
    "name": "td_nav",
    "slot": "tab",
-   "w": 36,
-   "h": 36,
+   "w": 46,
+   "h": 46,
    "box": [
-    4,
-    1,
-    32,
-    34
+    5,
+    2,
+    41,
+    43
    ],
-   "ink": 227.1,
-   "alpha_sha1": "346e390c6d503bb6"
+   "ink": 368.8,
+   "alpha_sha1": "c408e050c523e28d"
   },
   {
    "name": "td_fuel_side",

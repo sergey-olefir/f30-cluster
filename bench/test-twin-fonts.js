@@ -214,8 +214,8 @@ ALL.forEach((n) => {
 ok(!outside.length, 'no icon has ink outside its box (none is clipped; the arrows\' stems and td_bars excepted by design)' + (outside.length ? ': ' + [...new Set(outside)].join(' ') : ''));
 // the slot table: sizes of SPEC-R3 7 and the places that name them
 const sz = (k) => man.slots[k] && man.slots[k].w + 'x' + man.slots[k].h;
-ok(sz('tab') === '36x36' && sz('gauge') === '32x32' && sz('symbol') === '54x54' && sz('row') === '32x32' && sz('big') === '66x66' && sz('page') === '54x54' && sz('cruise') === '36x36' && sz('arrow') === '120x120' && sz('lane') === '30x30' && sz('sign') === '51x51',
-    'slot table: tab 36, gauge 32, symbol 54, row 32, page 54, big 66, cruise 36, arrow 120, lane 30, sign 51 (SPEC-R3 3.1, 4, 5.1, 8, 9)');
+ok(sz('tab') === '46x46' && sz('gauge') === '32x32' && sz('symbol') === '54x54' && sz('row') === '32x32' && sz('big') === '66x66' && sz('page') === '54x54' && sz('cruise') === '36x36' && sz('arrow') === '120x120' && sz('lane') === '30x30' && sz('sign') === '51x51',
+    'slot table: tab 46 (a box of 36 px of ink: integration), gauge 32, symbol 54, row 32, page 54, big 66, cruise 36, arrow 120, lane 30, sign 51 (SPEC-R3 3.1, 4, 5.1, 8, 9)');
 ok(man.items.length === Object.keys(gen.SLOTS).reduce((a, k) => a + gen.SLOTS[k].names.length, 0) && man.items.every((i) => i.ink > 20 && i.box[0] >= 0 && i.box[1] >= 0 && i.box[2] <= i.w && i.box[3] <= i.h), 'slot table: ' + man.items.length + ' entries, each with ink and its ink box inside its slot');
 const slotNames = new Set(man.items.map((i) => i.name));
 ok(ALL.every((n) => slotNames.has(n)), 'every icon of the set sits in a slot (a size to draw it at)');

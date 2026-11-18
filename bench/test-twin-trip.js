@@ -143,6 +143,29 @@ console.log('3. the fallback chain: KombiIF, then ResetLogic3');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
+// b7 (CP's finding): the catalogue declares ResetLogic3.bcDataAll.bcData3 as an ARRAY (arrayMaxLength 5): the car sends a list of structs
+console.log('3b. ResetLogic3 bcData3 is an array: the first entry that carries a value');
+{
+    const entry = (o) => Object.assign({ resetOption: 'STARTOFDRIVING', dateTimeReset: { year: 26, month: 11, day: 18, hour: 9, minute: 5, second: 0 },
+        dateTimeTrip: { day: 0, hour: 1, minute: 7, second: 30 }, speedAverage: 388, consumptionCombustionAverageDigit: 72, consumptionCombustionAverageScale: 24, counterDistance: 4330 }, o || {});
+    const unfilled = entry({ speedAverage: 65535, consumptionCombustionAverageDigit: 65535, counterDistance: 4294967295, dateTimeTrip: { day: 0, hour: 255, minute: 255, second: 255 } });
+    const arr = (h, list) => h.extra[RL3].bcDataAll({ bcUnits: { tachoDigital: 'KILOMETERS', averageConsumptionCombustion: 'CONSUMPTION_KM' }, activeResetLogic: 1, availableResetLogic: 31,
+        maxValues: { maxValueAverageConsumptionCombustion: 300 }, bcData3: list });
+    let h = mk();
+    arr(h, [entry()]);
+    eq(page(h), ['ø 7.2', 'ø 39', '433.0', '1:07', 'від початку поїздки, 09:05'], 'a one-entry array gives the same page as the plain struct (before the fix: dashes, nothing was read)');
+    h = mk();
+    arr(h, [unfilled, entry({ speedAverage: 500 }), entry({ speedAverage: 900 })]);
+    eq(page(h).slice(0, 2), ['ø 7.2', 'ø 50'], 'the first entry that carries a value is used (an unfilled one before it is skipped; a later one is not read)');
+    h = mk({ config: { trip: { order: ['rl3'] } } });
+    arr(h, [unfilled, unfilled]);
+    eq(page(h).slice(0, 4), ['ø ' + DASH, 'ø ' + DASH, DASH, DASH], 'an array of unfilled entries: dashes by the page\'s own rules');
+    h = mk({ config: { trip: { order: ['rl3'] } } });
+    arr(h, []);
+    eq(page(h).slice(0, 4), ['ø ' + DASH, 'ø ' + DASH, DASH, DASH], 'an empty array: dashes, no error');
+    eq(twin.rl3Entry(entry({ speedAverage: 1 })).speedAverage, 1, 'a plain struct is still taken as it is');
+}
+
 console.log('4. the odometer chain');
 {
     const h = mk({ settings: { centre: 'clock' } });
