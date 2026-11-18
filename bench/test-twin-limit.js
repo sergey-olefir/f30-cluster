@@ -245,7 +245,16 @@ function geometryChecks() {
     ok(sigs && sigs.displaySpeedLimitAndNoPassingRestriction === 's' && sigs.displayDriverAssistanceLongitudinal === 's', 'app.json declares the sign and the longitudinal field, both notifier only ("s")');
     const f30 = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'app.json'), 'utf8'));
     ok(JSON.stringify(APP.config.sign) === JSON.stringify(f30.config.sign), 'config.sign is f30_cluster\'s, key for key');
-    ok(APP.config.cruise === null && APP.config.limit && APP.config.limit.strip === 'L1' && !APP.config.limit.iface, 'config.cruise is null (dark), config.limit.strip is "L1" (and config.limit names no field of its own)');
+    ok(APP.config.cruise && APP.config.cruise.place === 'C1' && APP.config.limit && APP.config.limit.strip === 'L1' && !APP.config.limit.iface, 'config.cruise is { place: "C1" } (car-fix CF2: on), config.limit.strip is "L1" (and config.limit names no field of its own)');
+    // car-fix CF2: the real sources' declarations
+    const tsrD = APP.signals['de.bmw.dass.TrafficSignRecognition'], camD = APP.signals['de.bmw.environmentalmodel.SignRecognitionFrontCamera'], ddsD = APP.signals['de.bmw.infotainment.displaydataserver.DisplayDataServer'];
+    const keysOf = (o) => Object.keys(o).filter((k) => k.charAt(0) !== '_' || k === '_methods' || k === '_broadcasts').sort().join();
+    ok(tsrD && tsrD._instances === '1' && tsrD._broadcasts.join() === 'TrafficSignRecognition' && keysOf(tsrD) === '_broadcasts' && camD && camD._broadcasts.join() === 'TrafficSignRecognitionFrontCamera' && keysOf(camD) === '_broadcasts',
+        'app.json declares the two events as _broadcasts, instance 1, and nothing else on those interfaces (no field, no method)');
+    ok(ddsD && ddsD._instances === '1' && ddsD.functionalLibraryData === 'rs' && keysOf(ddsD) === 'functionalLibraryData', 'DisplayDataServer: functionalLibraryData "rs" only (getter 1, notifier 32769; no setter, no method)');
+    ok(['de.bmw.dass.TrafficSignRecognition', 'de.bmw.environmentalmodel.SignRecognitionFrontCamera'].every((i) => JSON.stringify(f30.signals[i]) === JSON.stringify(Object.assign({}, APP.signals[i], { _about: f30.signals[i]._about }))) &&
+        !f30.signals['de.bmw.infotainment.displaydataserver.DisplayDataServer'], 'f30_cluster declares the same two events (and not the HUD feed: it draws no cruise)');
+    ok(APP.shared.indexOf('limit_src.js') >= 0 && f30.shared.indexOf('limit_src.js') >= 0, 'limit_src.js is packed into both apps');
     ok(APP.shared.indexOf('twin_limit.js') >= 0, 'twin_limit.js is packed into twin_dial');
     const f30shared = f30.shared.indexOf('twin_limit.js') < 0;
     ok(f30shared, 'f30_cluster does not pack twin_limit.js');
@@ -328,6 +337,133 @@ function handlerChecks() {
     const none = [];
     L.dial(h3, { ref: 9, tw: { tach: false }, c: { uniform: () => none.push(1) } }, 'void main(){}');
     ok(none.length === 0, 'alone, with a shader that has no u_lim: nothing is sent (a name the shader lacks must never reach the car)');
+}
+
+// ---- car-fix CF2: shared/limit_src.js with the car's own values (2026-11-18) --------------------------------------------
+const S = require(path.join(dir, 'limit_src.js'));
+/** The TrafficSignRecognition event as the binding hands it over: every one of its 16 outputs, the car's values by default. */
+const tsrEv = (o) => Object.assign({ presentWithdrawalLimitSpeed: 1, recognitionNoPassing: 0, nextWithdrawalLimitSpeed: 3, presentClassLimitSpeed: 8, nextClassLimitSpeed: 254,
+    countryCodingTrafficSign: 0, displayTextMessage: 0, unitOfMeasurementSpeedLimit: 0, displayTextMessageNpi: 0, statusDataMatchingCameraADAS: 0, statusStreetTyp: 0,
+    evaluationStreetTyp: 0, displaySupplementalSign: 0, triggerPresentClassLimitSpeed: 0, displaySpeedNPIDistance: 255, controlSLIWarning: 0 }, o || {});
+/** DisplayDataServer.functionalLibraryData: the probe's first line (cruise 65535, LDM_SYM_NONE, LDM_OFF, the HUD off), then overrides. */
+const hudEv = (o) => Object.assign({ speed: { kmH: 0, mlsH: 0 }, activeCruiseControl: { symbolACC: 'LDM_CAR_OFF', accBarsHUD: 0, barsColorACC: 'LDM_OFF' },
+    xSpeedLimitAssist: { vSLISymbol: 'LDM_VZA_VSLI_NO_SYMBOL', vSLISpeedValue: 0 }, system: { modeHUD: 0, statusHUD: 'HUDSTATUS_OFF' }, rpm: 780, currentGear: 0,
+    ldmSym: 'LDM_SYM_NONE', ldmSymColor: 'LDM_OFF', statusLimiter: 'STATUS_INACTIVE', cruiseCtrlSpeedHUD: 65535 }, o || {});
+
+function srcChecks() {
+    console.log('car-fix CF2: the TrafficSignRecognition event (shared/limit_src.js) with the car\'s values');
+    const c = S.tsrCfg(APP.config.sign);
+    ok(c && c.iface === S.TSR_IF && c.event === S.TSR_EV && c.factor === 5 && c.instance === '1', 'config.sign.tsr names the event de.bmw.dass.TrafficSignRecognition.TrafficSignRecognition, instance 1, factor 5');
+    const seen = { 8: 40, 6: 30, 10: 50, 12: 60, 2: 10, 1: 5, 26: 130, 30: 150 };
+    ok(Object.keys(seen).every((k) => { const r = S.tsrOf(c, tsrEv({ presentClassLimitSpeed: Number(k) })); return r.state === 'limit' && r.shown === seen[k] && r.kmh === seen[k] && r.unit === 'kmh' && r.src === 'tsr' && r.cls === Number(k); }),
+        'class x 5 = km/h: 8 -> 40, 6 -> 30, 10 -> 50, 12 -> 60, 2 -> 10, 1 -> 5 (the car\'s), 26 -> 130, 30 -> 150');
+    ok([0, 29, 253, 254, 255, 51, 99, -1, 'x', null, undefined].every((k) => S.tsrOf(c, tsrEv({ presentClassLimitSpeed: k })).state === 'none'),
+        '0, 29 (the chime request), 253, 254, 255, out of range (51 = 255 km/h, 99, -1), not a number: no sign');
+    ok(S.tsrOf(c, tsrEv({ presentClassLimitSpeed: '8' })).kmh === 40, 'a class handed over as a numeric string still reads');
+    ok(S.tsrOf(c, tsrEv({ controlSLIWarning: 1 })).warn === 1 && S.tsrOf(c, tsrEv({ controlSLIWarning: 0 })).warn === 0 && S.tsrOf(c, tsrEv({ controlSLIWarning: 3 })).warn === 0,
+        'controlSLIWarning 1 -> warn 1 (over the limit: the hypothesis), 0 and 3 (unfilled) -> 0');
+    const m = S.tsrOf(c, tsrEv({ unitOfMeasurementSpeedLimit: 1, presentClassLimitSpeed: 6 }));
+    ok(m.unit === 'mph' && m.shown === 30 && near(m.kmh, 48.28032, 1e-9) && S.tsrOf(c, tsrEv({ unitOfMeasurementSpeedLimit: 3 })).unit === 'kmh' && S.tsrOf(c, tsrEv({ unitOfMeasurementSpeedLimit: 2 })).unit === 'kmh',
+        'the unit: 1 (MPH by FASuS\'s enum) -> 30 mph = 48.28 km/h for the marker; 0, 2, 3 -> km/h');
+    ok(S.tsrOf(c, tsrEv({ presentWithdrawalLimitSpeed: 2 })).state === 'limit' && S.tsrOf(Object.assign({}, c, { endOn: [2] }), tsrEv({ presentWithdrawalLimitSpeed: 2 })).state === 'end',
+        'withdrawal 2 (AUFHEBUNG) changes nothing until config.sign.tsr.endOn names it (then the end sign)');
+    ok([null, undefined, 5, 'x', []].every((v) => S.tsrOf(c, v).state === 'none') && S.tsrOf(null, tsrEv()).state === 'none', 'not a struct, or no config: no sign');
+    ok(S.tsrCfg({ iface: 'I', field: 'f' }) === null && S.tsrCfg({ tsr: null }) === null && S.events({ iface: 'I', field: 'f' }).length === 0 && S.events(APP.config.sign).join() === [S.TSR_IF, S.TSR_EV].join(),
+        'a config.sign without "tsr" subscribes no event (an app opts in); twin_dial\'s does: [' + S.events(APP.config.sign).join(', ') + ']');
+    // the display through twin_limit, and the marker
+    ok(L.displayOf(S.tsrOf(c, tsrEv())).kind === 'limit' && L.limUniform(L.displayOf(S.tsrOf(c, tsrEv())), 'L1').join() === '-75,1,0,1' &&
+        L.limUniform(L.displayOf(S.tsrOf(c, tsrEv({ presentClassLimitSpeed: 6 }))), 'L1').join() === '-87.5,1,0,1' && L.limUniform(L.displayOf(S.tsrOf(c, tsrEv({ presentClassLimitSpeed: 10, controlSLIWarning: 1 }))), 'L1').join() === '-62.5,1,1,1',
+        'the event\'s 40 / 30 / 50 (warn 1) give u_lim [-75, 1, 0, 1], [-87.5, 1, 0, 1], [-62.5, 1, 1, 1]');
+
+    console.log('car-fix CF2: the camera witness');
+    const cam = { eventDataQualifier: 'X', trafficSignRecognition: { version: 1, speedLimitUnit: 'KMH' }, trafficSign: [{ value: 0, type: 'NO_PASSING' }, { value: 40, type: 'SPEED_LIMIT', trafficSignForm: 'ROUND' }] };
+    const w = S.camOf(cam);
+    ok(w && w.value === 40 && w.kmh === 40 && w.unit === 'kmh' && w.n === 2, 'the camera\'s [value=40 type=SPEED_LIMIT form=ROUND] reads as 40 km/h (the first speed-limit sign of the list)');
+    ok(S.camOf({ trafficSign: [{ value: 40, type: 'END_OF_SPEED_LIMIT' }] }) === null && S.camOf({ trafficSign: [] }) === null && S.camOf(null) === null, 'an end sign, an empty list or nothing: no witness');
+
+    console.log('car-fix CF2: the merger (the event first, config.sign\'s field the fallback)');
+    const lines = [];
+    let t = 1000;
+    const mg = S.create(APP.config.sign, { log: { info: (s) => lines.push(s) }, clock: () => t });
+    ok(mg.current().state === 'none' && mg.source() === null, 'nothing yet: no sign');
+    let r = mg.tsr(tsrEv());
+    ok(r.state === 'limit' && r.kmh === 40 && mg.source() === 'tsr', 'the event alone (the owner\'s car): its 40 is the sign');
+    t = 1400; r = mg.field(sg({ state: 'limit', kmh: 70, shown: 70, unit: 'kmh' }));
+    ok(r.kmh === 40 && r.src === 'tsr', 'the field speaks while the event is live: the event still wins (config.sign.order tsr, field)');
+    t = 5000; r = mg.field(sg({ state: 'limit', kmh: 70, shown: 70, unit: 'kmh' }));
+    ok(r.kmh === 70 && r.src === 'field' && mg.source() === 'field', 'the event silent for longer than staleMs (3000): the field takes over');
+    t = 5100; r = mg.tsr(tsrEv({ presentClassLimitSpeed: 6 }));
+    ok(r.kmh === 30 && mg.source() === 'tsr', 'the event back: it wins again');
+    t = 5200; r = mg.tsr(tsrEv({ presentClassLimitSpeed: 255 }));
+    ok(r.kmh === 70 && r.src === 'field', 'the event says "none" (255) while the field holds a limit: the field\'s');
+    const solo = S.create(APP.config.sign, { log: null, clock: () => t });
+    solo.tsr(tsrEv()); t = 99999;
+    ok(solo.tsr(tsrEv({ presentClassLimitSpeed: 255 })).state === 'none' && solo.current().state === 'none', 'the event alone saying 255: no sign (no field to fall back on)');
+    t = 200000;
+    ok(solo.current().src === 'tsr', 'the event alone, gone quiet: its last reading stays (nothing newer)');
+    mg.cam({ trafficSignRecognition: { speedLimitUnit: 'KMH' }, trafficSign: [{ value: 30, type: 'SPEED_LIMIT' }] });
+    mg.tsr(tsrEv({ presentClassLimitSpeed: 6 }));
+    ok(lines.some((l) => l === 'limit: camera 30 kmh') && lines.some((l) => l === 'limit: camera 30 km/h, tsr 30 km/h agree'), 'the camera is logged as a witness, with the verdict "agree"');
+    mg.cam({ trafficSignRecognition: { speedLimitUnit: 'KMH' }, trafficSign: [{ value: 50, type: 'SPEED_LIMIT' }] });
+    ok(lines[lines.length - 1] === 'limit: camera 50 km/h, tsr 30 km/h differ', '... and "differ" when it reads another number: "' + lines[lines.length - 1] + '"');
+    ok(lines.some((l) => /^limit: tsr class 8 -> limit 40 kmh warn 0 \(warn raw 0, withdrawal 1, unit raw 0, next class 254\)$/.test(l)) && lines.some((l) => l === 'limit: source tsr (TrafficSignRecognition event)') && lines.some((l) => l === 'limit: source field (TrafficSignDisplayControl)'),
+        'the log: "limit: tsr class 8 -> limit 40 kmh ..." and a line per change of source');
+    const n0 = lines.length;
+    for (let i = 0; i < 20; i++) mg.tsr(tsrEv({ presentClassLimitSpeed: 6 }));
+    ok(lines.length === n0, 'the event twice a second with nothing new writes nothing');
+    const canary = 'CANARY-Kyiv-Street-12';
+    mg.tsr(tsrEv({ presentClassLimitSpeed: 12, unitOfMeasurementSpeedLimit: canary, controlSLIWarning: canary, nextClassLimitSpeed: canary, road: canary }));
+    mg.cam({ trafficSignRecognition: { speedLimitUnit: canary }, trafficSign: [{ value: 60, type: 'SPEED_LIMIT', text: canary }] });
+    ok(lines.every((l) => l.indexOf(canary) < 0 && /^[A-Za-z0-9 ()._\/:,=\->]*$/.test(l)), 'every line is numbers, enum names and the format\'s words; a canary in any member never appears (' + lines.length + ' lines)');
+    const flood = S.create(APP.config.sign, { log: { info: (s) => lines.push(s) }, clock: () => t });
+    const f0 = lines.length;
+    for (let i = 0; i < 500; i++) flood.tsr(tsrEv({ presentClassLimitSpeed: 1 + (i % 28) }));
+    ok(lines.length - f0 <= S.MAX_LINES, 'a flood of changes is capped at ' + S.MAX_LINES + ' lines (' + (lines.length - f0) + ')');
+    const ex = {}, got = [];
+    const wm = S.create(APP.config.sign, { log: null });
+    ex[S.TSR_IF] = { [S.TSR_EV]: () => got.push('before') };
+    wm.wire(ex, (rd) => got.push(rd.kmh));
+    ex[S.TSR_IF][S.TSR_EV](tsrEv({ presentClassLimitSpeed: 10 }));
+    ex[S.CAM_IF][S.CAM_EV]({ trafficSign: [{ value: 50, type: 'SPEED_LIMIT' }] });
+    ok(got.join() === 'before,50' && !ex[S.TSR_IF].$instance && Object.keys(ex).length === 2 && typeof ex[S.CAM_IF][S.CAM_EV] === 'function',
+        'wire: the event handler (a handler already there runs first) hands the merged reading to the engine; the camera is subscribed, instance 1 (no $instance)');
+
+    console.log('car-fix CF2: cruise / limiter from DisplayDataServer (the car\'s values)');
+    const h = S.hudCruiseCfg(APP.config.cruise);
+    const hc = (o) => S.hudCruiseOf(h, hudEv(o));
+    ok(APP.config.cruise && APP.config.cruise.place === 'C1', 'config.cruise is { place: "C1" }: switched on');
+    ok(hc().status === 'off' && hc().kind === null, 'the probe\'s first line (cruise 65535, LDM_SYM_NONE, LDM_OFF): nothing');
+    const a61 = hc({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 61 });
+    ok(a61.kind === 'cruise' && a61.status === 'active' && a61.shown === 61 && a61.kmh === 61 && a61.unit === 'kmh', 'DCC, ACTIVE, 61: the cruise, active (green), 61 km/h');
+    ok(hc({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 59 }).shown === 59, '59 the same');
+    const s40 = hc({ ldmSym: 'LDM_SYM_SLD', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 40 });
+    ok(s40.kind === 'limiter' && s40.status === 'active' && s40.shown === 40, 'SLD, ACTIVE, 40: the limiter, active, 40');
+    ok(hc({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_OFF', cruiseCtrlSpeedHUD: 61 }).status === 'standby' && hc({ ldmSym: 'LDM_SYM_SLD', ldmSymColor: 'LDM_STANDBY', cruiseCtrlSpeedHUD: 40 }).status === 'standby' &&
+        hc({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_UEBERTRETEN', cruiseCtrlSpeedHUD: 61 }).status === 'standby', 'any colour but LDM_ACTIVE (OFF, STANDBY, overridden): grey (standby)');
+    ok(hc({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 65535 }).status === 'off' && hc({ ldmSym: 'LDM_SYM_NONE', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 61 }).status === 'off' &&
+        hc({ ldmSym: 'LDM_SYM_HDC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 8 }).status === 'off', 'set speed 65535, LDM_SYM_NONE, hill descent: nothing at all');
+    ok(hc({ ldmSym: 1, ldmSymColor: 1, cruiseCtrlSpeedHUD: 61 }).status === 'active' && hc({ ldmSym: 7, ldmSymColor: 0, cruiseCtrlSpeedHUD: 40 }).kind === 'limiter' && hc({ ldmSym: 'LDM_SYM_ACC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 100 }).kind === 'acc',
+        'enums as numbers (1 DCC, 7 SLD, colour 1 ACTIVE) and the adaptive family (LDM_SYM_ACC -> acc)');
+    ok(JSON.stringify(L.cruUniform(a61)) === '[-48.75,1,0,0]' && JSON.stringify(L.cruUniform(s40)) === '[-75,1,0,0]' && L.cruUniform(hc({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_OFF', cruiseCtrlSpeedHUD: 61 }))[1] === 0,
+        'u_cru: 61 active [-48.75, 1, 0, 0], the limiter at 40 [-75, 1, 0, 0], grey: no marker');
+    // the handlers through twin_limit: the HUD feed wins once it has spoken
+    const hl = [];
+    const hud = { config: { sign: APP.config.sign, limit: { strip: 'L1' }, cruise: { place: 'C1' } }, log: { info: (x) => hl.push(x), warn: (x) => hl.push('WARN ' + x), error: (x) => hl.push('ERR ' + x) }, sign: SIGN_NONE };
+    const ex2 = { [APP.config.sign.iface]: { [APP.config.sign.field]: () => {} }, [S.TSR_IF]: { [S.TSR_EV]: (v) => { hud.sign = S.tsrOf(S.tsrCfg(APP.config.sign), v); } } };
+    L.wire(hud, ex2);
+    ok(typeof ex2[S.DDS_IF][S.DDS_F] === 'function' && !ex2[S.DDS_IF].$instance, 'twin_limit.wire watches DisplayDataServer.functionalLibraryData (instance 1)');
+    ex2[S.TSR_IF][S.TSR_EV](tsrEv());
+    ok(L.displayNow(hud).kind === 'limit' && L.displayNow(hud).shown === 40 && hl.some((x) => x === 'limit: limit 40 kmh (40 km/h) conditional no warn 0'), 'the event reaches the sign through twin_limit\'s chain: 40, logged');
+    ex2[L.IF][L.FIELD]({ activeFuncLongitudinal: 'XCC_AKTIV', valueRequestedSpeed: 110, dispRequestedSpeed: { dispRequestedSpeedStatus: 2 } });
+    ok(L.cruiseNow(hud).shown === 110, 'before the HUD feed: TrafficSignDisplayControl\'s struct is the reading (the fallback)');
+    ex2[S.DDS_IF][S.DDS_F](hudEv());
+    ok(L.cruiseNow(hud).status === 'off', 'the HUD feed arrives (65535, NONE): it wins, nothing is drawn');
+    ex2[S.DDS_IF][S.DDS_F](hudEv({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 61 }));
+    ok(L.cruiseNow(hud).kind === 'cruise' && L.cruiseNow(hud).shown === 61, 'DCC 61 active');
+    const nh = hl.length;
+    for (let i = 0; i < 30; i++) ex2[S.DDS_IF][S.DDS_F](hudEv({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 61, rpm: 1500 + i * 10, speed: { kmH: 60 + i, mlsH: 0 } }));
+    ok(hl.length === nh, 'the feed again and again (rpm and speed changing): no new line');
+    ok(hl.some((x) => x === 'limit: cruise hud ldm LDM_SYM_DCC colour LDM_ACTIVE speed 61 limiter STATUS_INACTIVE -> cruise active 61 km/h'), 'the line names ldm, colour, speed, limiter and the reading');
 }
 
 // =====================================================================================================================
@@ -434,7 +570,7 @@ async function engineChecks() {
     const sheet0 = sheetOf('limit_sign');
     ok(sheet0 && sheet0.w === 96 && sheet0.h === 88 && sheet0.x === 1252 && sheet0.y === 628 && hud.widgets.get('limit_sign').ci === 2, 'the sign is an image sheet of exactly 96 x 88 at [1252, 628] on connection 2 (a layer of its own)');
     ok(sheet0 && inkOf(sheet0) === 0, 'before the car says anything: the sheet is blank (no sign at all)');
-    ok(!hud.widgets.has('cruise_c1') && !hud.widgets.has('cruise_c2'), 'config.cruise is null: the readout is not even built (no layer, no pixel memory)');
+    ok(hud.widgets.has('cruise_c1') && !hud.widgets.has('cruise_c2') && sheetOf('cruise_c1') && inkOf(sheetOf('cruise_c1')) === 0, 'config.cruise is { place: "C1" } (car-fix CF2): the C1 readout is built, blank before the car says anything');
     ok(hud.config.sign && hud.config.sign.iface === SIGN_IF && hud.subsOk !== false, 'the engine\'s own reading of config.sign is on (hud.sign)');
 
     // the signal path: the field arrives
@@ -522,7 +658,46 @@ async function engineChecks() {
     await settle(); await sleep(200);
     ok(dishes(sheetOf('limit_sign'))[0] === dayWhite, 'and back to day');
 
-    // cruise: dark
+    // car-fix CF2: the sign from the TrafficSignRecognition event, through the real engine (hud.js -> limit_src -> twin_limit)
+    ok(hud.limitSrc && hud.limitSrc.source() === 'field', 'so far only config.sign\'s field has spoken (the bench\'s stand-in): its source is the field');
+    hu.feed(S.TSR_IF, S.TSR_EV, tsrEv({ presentClassLimitSpeed: 8 }));
+    await settle();
+    s = sheetOf('limit_sign');
+    ok(hud.sign.src === 'tsr' && hud.sign.state === 'limit' && hud.sign.kmh === 40 && hud.limitState === 'limit' && hud.limitKmh === 40 && near(hud.twinLim.deg, -75) && hud.twinLim.state === 1,
+        'the event, class 8: the engine\'s sign is 40 from the event (limitKmh 40), the marker at -75 degrees');
+    const s40 = s.buf.toString('base64');
+    feedSign({ displaySpeedLimit: 90 }); await settle();
+    ok(hud.sign.kmh === 40 && hud.sign.src === 'tsr' && sheetOf('limit_sign').buf.toString('base64') === s40, 'the field says 90 while the event is live: the event\'s 40 stays (pixel for pixel)');
+    hu.feed(S.TSR_IF, S.TSR_EV, tsrEv({ presentClassLimitSpeed: 6 })); await settle();
+    ok(hud.sign.kmh === 30 && near(hud.twinLim.deg, -87.5) && sheetOf('limit_sign').buf.toString('base64') !== s40, 'class 6 (a 30 sign): 30, the marker at -87.5 degrees, the sign repainted');
+    hu.feed(S.TSR_IF, S.TSR_EV, tsrEv({ presentClassLimitSpeed: 10, controlSLIWarning: 1 })); await settle();
+    ok(hud.sign.kmh === 50 && hud.sign.warn === 1 && hud.twinLim.warn === 1 && near(hud.twinLim.deg, -62.5), 'class 10 with controlSLIWarning 1: 50, the over-limit level 1 reaches u_lim.z');
+    const limLogs = () => logs.filter((l) => /^limit:|^sign:/.test(l)).length;
+    const m0 = marks.length, l0 = limLogs();
+    for (let i = 0; i < 6; i++) { hu.feed(S.TSR_IF, S.TSR_EV, tsrEv({ presentClassLimitSpeed: 10, controlSLIWarning: 1 })); await sleep(40); }
+    await settle();
+    ok(marks.length === m0 && limLogs() === l0, 'the event repeating (twice a second on the car) hands nothing over and logs nothing');
+    hu.feed(S.TSR_IF, S.TSR_EV, tsrEv({ presentClassLimitSpeed: 12, unitOfMeasurementSpeedLimit: 1 })); await settle();
+    ok(hud.sign.unit === 'mph' && hud.sign.shown === 60 && near(hud.twinLim.deg, L.angleOf(60 * 1.609344), 1e-2), 'the unit 1 (MPH): 60 on the sign, the marker at 96.6 km/h');
+    hu.feed(S.TSR_IF, S.TSR_EV, tsrEv({ presentClassLimitSpeed: 8 })); await settle();
+    ok(logs.some((l) => l === 'limit: source tsr (TrafficSignRecognition event)') && logs.some((l) => /^limit: tsr class 8 -> limit 40 kmh warn 0 /.test(l)) && logs.some((l) => l === 'limit: limit 40 kmh (40 km/h) conditional no warn 0'),
+        'the log: the source, "limit: tsr class 8 -> limit 40 kmh ...", and twin_limit\'s own "limit: limit 40 kmh ..."');
+    hu.feed(S.CAM_IF, S.CAM_EV, { eventDataQualifier: 'X', trafficSignRecognition: { version: 1, speedLimitUnit: 'KMH' }, trafficSign: [{ value: 40, type: 'SPEED_LIMIT', trafficSignForm: 'ROUND' }] }); await settle();
+    ok(logs.some((l) => l === 'limit: camera 40 km/h, tsr 40 km/h agree') && hud.sign.kmh === 40, 'the camera\'s 40 is logged as agreeing; it draws nothing of its own');
+    // the event goes quiet: the field takes over after staleMs (shortened here: the merger reads it live)
+    hud.limitSrc.cfg.tsr.staleMs = 150;
+    await sleep(250);
+    feedSign({ displaySpeedLimit: 90 }); await settle();
+    ok(hud.sign.src === 'field' && hud.sign.kmh === 90 && near(hud.twinLim.deg, -12.5) && logs.some((l) => l === 'limit: source field (TrafficSignDisplayControl)'), 'the event silent past staleMs: config.sign\'s field (90) is the fallback');
+    hu.feed(S.TSR_IF, S.TSR_EV, tsrEv({ presentClassLimitSpeed: 255 })); await settle();
+    ok(hud.sign.src === 'field' && hud.sign.kmh === 90, 'the event back with 255 (no limit known): the field\'s 90 stays');
+    hud.limitSrc.cfg.tsr.staleMs = 3000;
+
+    // cruise: dark (the fallback struct first: the HUD feed has not spoken yet)
+    hud.config.cruise = null;
+    hud._rebuild();
+    await until(() => !hud.widgets.has('cruise_c1') && hud.widgets.has('limit_sign') && sheetOf('limit_sign'), 6000);
+    await settle();
     marks.length = 0;
     feedCru();
     await settle();
@@ -561,6 +736,42 @@ async function engineChecks() {
     await settle();
     ok(!hud.widgets.has('cruise_c1') && !hud.widgets.has('cruise_c2') && hud.twinCru.state === 0, 'config.cruise null again: both readouts are gone, the marker is off');
 
+    // car-fix CF2: cruise / limiter from DisplayDataServer with the car's values (61 / 59 / 40, DCC <-> SLD, 65535 off)
+    hud.config.cruise = { place: 'C1' };
+    hud._rebuild();
+    await until(() => hud.widgets.has('cruise_c1') && sheetOf('cruise_c1'), 6000);
+    await settle();
+    const feedHud = async (o) => { hu.feed(S.DDS_IF, S.DDS_F, hudEv(o)); await settle(); };
+    await feedHud({});
+    ok(hud.tl.cruHud && hud.tl.cruHud.status === 'off' && inkOf(sheetOf('cruise_c1')) === 0 && hud.twinCru.state === 0, 'the HUD feed\'s first line (65535, LDM_SYM_NONE): it takes over from the struct (whose limiter was on) and nothing is drawn');
+    await feedHud({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 61 });
+    c1 = sheetOf('cruise_c1');
+    ok(inkOf(c1, green) > 300 && near(hud.twinCru.deg, -48.75) && hud.twinCru.state === 1, 'DCC 61 active: green readout (' + inkOf(c1, green) + ' px), the green marker at -48.75 degrees');
+    const g61 = c1.buf.toString('base64');
+    await feedHud({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 59 });
+    ok(sheetOf('cruise_c1').buf.toString('base64') !== g61 && near(hud.twinCru.deg, -51.25), 'DCC 59: the number changes, the marker at -51.25');
+    const m1 = marks.length, l1 = limLogs();
+    for (let i = 0; i < 8; i++) { hu.feed(S.DDS_IF, S.DDS_F, hudEv({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 59, rpm: 1500 + 50 * i, speed: { kmH: 57 + i, mlsH: 0 } })); await sleep(30); }
+    await settle();
+    ok(marks.length === m1 && limLogs() === l1, 'the feed repeating with rpm and speed changing: nothing handed over, nothing logged');
+    await feedHud({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_OFF', cruiseCtrlSpeedHUD: 59 });
+    c1 = sheetOf('cruise_c1');
+    ok(inkOf(c1, green) === 0 && inkOf(c1) > 300 && hud.twinCru.state === 0, 'DCC 59 with LDM_OFF: grey, no marker');
+    const greyDcc = c1.buf.toString('base64');
+    await feedHud({ ldmSym: 'LDM_SYM_SLD', ldmSymColor: 'LDM_OFF', cruiseCtrlSpeedHUD: 59 });
+    ok(hud.tl.cruHud.kind === 'limiter' && sheetOf('cruise_c1').buf.toString('base64') !== greyDcc, 'DCC -> SLD at the same speed: the symbol changes to the limiter\'s');
+    await feedHud({ ldmSym: 'LDM_SYM_SLD', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 40 });
+    ok(inkOf(sheetOf('cruise_c1'), green) > 300 && near(hud.twinCru.deg, -75) && hud.twinCru.state === 1, 'SLD 40 active: green, the marker at -75 degrees');
+    await feedHud({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 61 });
+    ok(hud.tl.cruHud.kind === 'cruise' && near(hud.twinCru.deg, -48.75) && sheetOf('cruise_c1').buf.toString('base64') === g61, 'SLD -> DCC 61: the cruise again, the same pixels as before');
+    await feedHud({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 65535 });
+    ok(inkOf(sheetOf('cruise_c1')) === 0 && hud.twinCru.state === 0, 'the set speed 65535: nothing at all, no marker');
+    await feedHud({ ldmSym: 'LDM_SYM_NONE', ldmSymColor: 'LDM_OFF', cruiseCtrlSpeedHUD: 65535 });
+    ok(inkOf(sheetOf('cruise_c1')) === 0 && hud.twinCru.state === 0, 'LDM_SYM_NONE: nothing');
+    feedCru({ activeFuncLongitudinal: 'XCC_AKTIV', valueRequestedSpeed: 120 }); await settle();
+    ok(inkOf(sheetOf('cruise_c1')) === 0, 'once the HUD feed has spoken, the struct (now saying 120 active) no longer draws');
+    ok(logs.some((l) => l === 'limit: cruise hud ldm LDM_SYM_SLD colour LDM_ACTIVE speed 40 limiter STATUS_INACTIVE -> limiter active 40 km/h'), 'the log names the raw ldm, colour, speed and limiter with the reading');
+
     // the shader: the markers reach u_lim / u_cru when the compiled speedometer shader has them (B1's tdial)
     if (L.shaderReady()) {
         const dl = hud.widgets.get('dial_speed'), ul = dl.c.layers.get(dl.ref).uniforms['0:u_lim'], uc = dl.c.layers.get(dl.ref).uniforms['0:u_cru'];
@@ -593,6 +804,7 @@ async function engineChecks() {
         pixelChecks();
         geometryChecks();
         handlerChecks();
+        srcChecks();
         await engineChecks();
     } catch (e) {
         failed++;

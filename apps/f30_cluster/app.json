@@ -28,7 +28,8 @@
     "gallery.js",
     "previews.js",
     "mb_exp.js",
-    "diag_settings.js"
+    "diag_settings.js",
+    "limit_src.js"
   ],
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {
@@ -95,6 +96,20 @@
     "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl": {
       "displaySpeedLimitAndNoPassingRestriction": "s",
       "_optional": "the speed-limit sign and the no-overtaking sign in one struct (config.sign); notifier only, no getter"
+    },
+    "de.bmw.dass.TrafficSignRecognition": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognition"
+      ],
+      "_about": "car-fix CF2: the speed limit as the owner's car sends it (2026-11-18, signal_probe set S13): an EVENT (eventId 32769, service 13632), so _broadcasts; no getter, no setter, no method. config.sign.tsr (shared/limit_src.js): presentClassLimitSpeed x 5 = km/h. TrafficSignDisplayControl above stays the fallback."
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognitionFrontCamera"
+      ],
+      "_about": "car-fix CF2: the front camera's own sign event, a second witness (config.sign.camera): logged as numbers ('limit: camera ...'), never drawn. Read only."
     },
     "de.bmw.infotainment.fasus.FASuS": {
       "statusNextSpeedLimitRecognition": "rs",
@@ -1001,7 +1016,30 @@
       "_hold": "The stock cluster animates the end of a limit and then shows the new one, and a sign is essentially always present (the owner, 2026-11-15), so there is no \"hide the sign\" state. holdMs keeps the last sign on while the car briefly says nothing; the animation itself lands in shared/hud.js _signShow().",
       "_timings": "changeFlashMs / flashPeriodMs are docs/G20-DESIGN-SPEC.md's PLACEHOLDERS for the flash after a limit changes - there is no video in the reference set, so nothing was measured. They are parameters only; nothing acts on them yet.",
       "_empty": "docs/G20-DESIGN-SPEC.md: BMW's empty sign is THREE DASHES, 8.8 x 4.4 at pitch 13, not a blank disc. That is WBSIGN's u_show state 3, which this package already drives; whether the shader draws dashes is the drawing package's to check.",
-      "_mph": "The unit is read and recorded ({{limitUnit}}, the 'sign:' log line) but changes nothing on screen: the sign stays the round one with the number, in every country (the owner, 2026-11-15)."
+      "_mph": "The unit is read and recorded ({{limitUnit}}, the 'sign:' log line) but changes nothing on screen: the sign stays the round one with the number, in every country (the owner, 2026-11-15).",
+      "tsr": {
+        "iface": "de.bmw.dass.TrafficSignRecognition",
+        "event": "TrafficSignRecognition",
+        "instance": "1",
+        "classPath": ["presentClassLimitSpeed"],
+        "factor": 5,
+        "none": [0, 29, 253, 254, 255],
+        "end": [],
+        "warnPath": ["controlSLIWarning"],
+        "warnMap": {"1": 1, "2": 2},
+        "unitPath": ["unitOfMeasurementSpeedLimit"],
+        "mph": [1, "MPH"],
+        "withdrawalPath": ["presentWithdrawalLimitSpeed"],
+        "endOn": [],
+        "staleMs": 3000
+      },
+      "camera": {
+        "iface": "de.bmw.environmentalmodel.SignRecognitionFrontCamera",
+        "event": "TrafficSignRecognitionFrontCamera",
+        "instance": "1"
+      },
+      "order": ["tsr", "field"],
+      "_tsr": "car-fix CF2 (the car session of 2026-11-18): the field above never arrives on the owner's car (its provider never comes up); the limit comes as the EVENT de.bmw.dass.TrafficSignRecognition.TrafficSignRecognition (service 13632, instance 1, about 2 a second): presentClassLimitSpeed x 5 = km/h (class 8 with a 40 sign, 6 with a 30, 10 = 50 in town). shared/limit_src.js reads it into the same sign shape; 'order' says which source speaks first while it is live (the event, then this field as the fallback; an event older than staleMs is not live). 'none' classes draw no sign: 0 (FASuS's AUFHEBUNG_ALLES), 29 (its chime request, not a speed), 253..255 (n/a, unfilled); warnMap: controlSLIWarning 0 / 1 seen, 1 = over the limit is a hypothesis; mph: unitOfMeasurementSpeedLimit 1 = MPH by FASuS's enum, anything else km/h; endOn (presentWithdrawalLimitSpeed values that mean the derestriction sign; 2 = AUFHEBUNG by the enum) is empty until the car shows one. 'camera' (the front camera's own event) is a witness: logged ('limit: camera ...'), never drawn."
     },
     "ccm": {
       "iface": "de.bmw.infotainment.KombiInterface_2",

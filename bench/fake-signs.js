@@ -154,7 +154,7 @@ Object.assign(SCENES, {
 
 function install(hu, config, log) {
     const cfg = config || {};
-    const last = { sign: null, cc: null, road: null, nav: null, sla: null, scene: null };
+    const last = { sign: null, tsr: null, cc: null, road: null, nav: null, sla: null, scene: null };
     const named = (s) => !!(s && s.iface && s.field);
     const say = (m) => { if (log && log.info) log.info('bench: fake ' + m); };
 
@@ -180,6 +180,25 @@ function install(hu, config, log) {
         put(c.npDistPath, Math.max(0, Math.round(Number(s.npM) || 0)));
         last.sign = s;
         hu.feed(c.iface, c.field, out);
+    }
+
+    /** car-fix CF2: the TrafficSignRecognition EVENT (all 16 outputs, the car's values of 2026-11-18 by default), through
+     *  config.sign.tsr's own paths: { cls (presentClassLimitSpeed), warn (controlSLIWarning), unit, withdrawal, next }. */
+    function feedTsr(v) {
+        const c = cfg.sign && cfg.sign.tsr;
+        if (!c || !c.iface || !c.event) return;
+        const s = Object.assign({ cls: 8, warn: 0, unit: 0, withdrawal: 1, next: 254 }, v || {});
+        const out = { presentWithdrawalLimitSpeed: 1, recognitionNoPassing: 0, nextWithdrawalLimitSpeed: 3, presentClassLimitSpeed: 255, nextClassLimitSpeed: 254,
+            countryCodingTrafficSign: 0, displayTextMessage: 0, unitOfMeasurementSpeedLimit: 0, displayTextMessageNpi: 0, statusDataMatchingCameraADAS: 0, statusStreetTyp: 0,
+            evaluationStreetTyp: 0, displaySupplementalSign: 0, triggerPresentClassLimitSpeed: 0, displaySpeedNPIDistance: 255, controlSLIWarning: 0 };
+        const put = (path, val) => { if (path) merge(out, nest(path, val)); };
+        put(c.classPath || ['presentClassLimitSpeed'], s.cls);
+        put(c.warnPath || ['controlSLIWarning'], s.warn);
+        put(c.unitPath || ['unitOfMeasurementSpeedLimit'], s.unit);
+        put(c.withdrawalPath || ['presentWithdrawalLimitSpeed'], s.withdrawal);
+        out.nextClassLimitSpeed = s.next;
+        last.tsr = s;
+        hu.feed(c.iface, c.event, out);
     }
 
     /** The check-control message union; "variant": which union member carries it. */
@@ -429,6 +448,7 @@ function install(hu, config, log) {
             return;
         }
         if (o.sign) feedSign(o.sign);
+        if (o.tsr) feedTsr(o.tsr);                  // car-fix CF2
         if (o.cc) feedCc(o.cc);
         if (o.ccList) feedCcList(o.ccList);
         if (o.ccActive) feedCcActive(o.ccActive);     // fix/active-cc: after the list, as the car's order is unknown
@@ -449,7 +469,7 @@ function install(hu, config, log) {
         scenes: Object.keys(SCENES),
         state: () => ({
             scenes: Object.keys(SCENES),
-            wired: { sign: named(cfg.sign), ccm: named(cfg.ccm) && cfg.ccm.kind === 'message', road: named(cfg.road), nav: !!(cfg.nav && cfg.nav.iface) },
+            wired: { tsr: !!(cfg.sign && cfg.sign.tsr && cfg.sign.tsr.iface), sign: named(cfg.sign), ccm: named(cfg.ccm) && cfg.ccm.kind === 'message', road: named(cfg.road), nav: !!(cfg.nav && cfg.nav.iface) },
             symbols: { mode: sym.mode, calls: sym.calls, params: sym.params.slice() },     // probes (0.7.18)
             dayNight: last.dayNight === undefined ? null : last.dayNight,                  // fix/colour-daynight
             last: { sign: last.sign, cc: last.cc ? { name: (last.cc.name || '').length, desc: (last.cc.desc || '').length, color: last.cc.color } : null, scene: last.scene },

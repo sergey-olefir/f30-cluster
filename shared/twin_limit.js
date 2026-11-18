@@ -21,6 +21,12 @@
  * The decisions that are the lead's, not the car's, are config keys: config.limit.strip "L1" | "L2" | "L3" | "off"
  * (the strip red from the limit: the shader's mode), config.cruise null (dark) or { place: "C1" | "C2", ... }.
  *
+ * car-fix CF2 (the car session of 2026-11-18): the sign's field never arrives; the limit comes as the TrafficSignRecognition
+ * event, which hud.js reads through shared/limit_src.js into the same hud.sign (so wire() also chains behind that event), and
+ * the cruise / limiter come from DisplayDataServer.functionalLibraryData (ldmSym, ldmSymColor, cruiseCtrlSpeedHUD: decoded
+ * by limit_src.hudCruiseOf). That reading wins once it has arrived; the TrafficSignDisplayControl struct below stays the
+ * fallback (declared, logged, never seen on the owner's car).
+ *
  * The cruise struct is UNSEEN on the car (SPEC 9: after probe). Its member and enum names below are the catalogue's
  * (reference/car/2026-11-15/someip/someip-interfaces.json, DisplayDriverAssistanceLongitudinalStruct); WHAT each value
  * means on the car (which enum is the plain cruise, which the adaptive one; the unit flag's sense; the speed's scale)
@@ -31,6 +37,9 @@
  */
 const textRaster = require('./hud_text');
 const { paintIcon, ICONS } = require('./icons');
+// car-fix CF2: the real sources (the TrafficSignRecognition event for the sign, DisplayDataServer for cruise / limiter)
+let src = null;
+try { src = require('./limit_src'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('limit_src') < 0) throw e; }
 
 const isNum = (x) => typeof x === 'number' && isFinite(x);
 const IF = 'de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl';
@@ -382,7 +391,8 @@ function paintCruise(c, opts) {
 /* ---------------------------------------------------------------- state ------------------------------------------- */
 
 function fresh() {
-    return { disp: displayOf(null), held: null, heldAt: 0, cru: cruiseOf(null, null), clock: null, logged: {}, lines: 0, cruRaw: undefined, signAt: 0, cruAt: 0 };
+    return { disp: displayOf(null), held: null, heldAt: 0, cru: cruiseOf(null, null), clock: null, logged: {}, lines: 0, cruRaw: undefined, signAt: 0, cruAt: 0,
+        cruHud: null, cruHudAt: 0 };       // car-fix CF2: the HUD feed's reading (null until it first arrives)
 }
 const st = (hud) => hud.tl || (hud.tl = fresh());
 const nowMs = (hud) => { const t = st(hud); return t.clock ? t.clock() : Date.now(); };
@@ -435,6 +445,21 @@ function onCruise(hud, v) {
         (cruiseOn(hud) ? '' : ' (drawing is off: config.cruise null)'));
 }
 
+/**
+ * car-fix CF2: the cruise / limiter from DisplayDataServer.functionalLibraryData (the HUD's feed; it arrives with the HUD
+ * off). The field also carries rpm and speed, so it comes often: the reading is cheap and the log line names only the
+ * members that matter (one line per change).
+ */
+function onHudCruise(hud, v) {
+    if (!src) return;
+    const t = st(hud);
+    if (!t.hudCfg || t.hudCfgOf !== hud.config.cruise) { t.hudCfg = src.hudCruiseCfg(hud.config.cruise); t.hudCfgOf = hud.config.cruise; }
+    const r = src.hudCruiseOf(t.hudCfg, v);
+    t.cruHud = r; t.cruHudAt = nowMs(hud);
+    say(hud, 'cruiseHud', 'limit: cruise hud ' + src.hudCruiseRaw(t.hudCfg, v) + ' -> ' + (r.kind || 'none') + ' ' + r.status + (isNum(r.kmh) ? ' ' + Math.round(r.kmh) + ' km/h' : '') +
+        (cruiseOn(hud) ? '' : ' (drawing is off: config.cruise null)'));
+}
+
 /** The display now: the sign state, or the last real one for config.sign.holdMs after the car goes quiet. */
 function displayNow(hud) {
     const t = st(hud), d = t.disp;
@@ -448,7 +473,8 @@ function displayNow(hud) {
 const cruiseOn = (hud) => !!(hud && hud.config && hud.config.cruise);
 function cruiseNow(hud) {
     const t = st(hud);
-    return cruiseOn(hud) ? t.cru : cruiseOf(null, null);
+    // car-fix CF2: the HUD feed once it has spoken (the owner's car); TrafficSignDisplayControl's struct (never seen) else
+    return cruiseOn(hud) ? (t.cruHud ? t.cruHud : t.cru) : cruiseOf(null, null);
 }
 const placeOf = (hud) => { const p = hud && hud.config && hud.config.cruise && hud.config.cruise.place; return CRU[p] ? p : 'C1'; };
 
@@ -459,8 +485,19 @@ function wire(hud, extra) {
     const t = st(hud);
     const sg = hud.config && hud.config.sign;
     if (sg && sg.iface && sg.field) chain(hud, extra, sg.iface, sg.field, () => onSign(hud));
-    else log(hud, 'warn', 'limit: no config.sign: the speed limit stays hidden');
+    // car-fix CF2: and behind the TrafficSignRecognition event's handler (hud.js / limit_src.js), which sets hud.sign the same way
+    const evs = sg && src ? src.events(sg) : [];
+    evs.forEach((e) => chain(hud, extra, e[0], e[1], () => onSign(hud)));
+    if (!(sg && sg.iface && sg.field) && !evs.length) log(hud, 'warn', 'limit: no config.sign: the speed limit stays hidden');
     chain(hud, extra, IF, FIELD, (v) => onCruise(hud, v));     // read only; drawn only while config.cruise is set
+    // car-fix CF2: the cruise / limiter as the owner's car sends it (DisplayDataServer, read only: getter 1, notifier 32769)
+    if (src) {
+        const hc = src.hudCruiseCfg(hud.config && hud.config.cruise);
+        if (hc.hudIface && hc.hudField) {
+            chain(hud, extra, hc.hudIface, hc.hudField, (v) => onHudCruise(hud, v));
+            if (hc.hudInstance && String(hc.hudInstance) !== '1') extra[hc.hudIface].$instance = String(hc.hudInstance);
+        }
+    }
     t.wired = true;
 }
 
