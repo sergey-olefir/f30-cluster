@@ -39,7 +39,9 @@
       "statusLateralAccelerationMassCenter": "rs"
     },
     "de.bmw.infotainment.vehicle.Vehicle2": {
-      "statusCarSpeed2": "rs"
+      "statusCarSpeed2": "rs",
+      "statusDisplayedCCMessage": "rs",
+      "_displayedCC": "research3/mc: getter 61, notifier 32829 (non-zero; Twin Dial 0.1.0 installs the same declaration). Read only; subscribed only when config.ccDisplayed is set (null here)."
     },
     "de.bmw.infotainment.drivingexcitement.FES": {
       "statusSwitchDriveDynamicSport2": "rs",
@@ -935,8 +937,11 @@
       "utilityPath": ["utilityDataDisplayControlCheckControlMessage"],
       "noneValues": [0],
       "_fallback": "A HEURISTIC, used only while statusActiveCCMessage has never given a number: a ccList entry counts as showing for hideAfterMs (null: config.ccm.autoHideMs, 20000 - BMW's manual's ~20 s auto-hide) after it was first listed; an entry whose colour is in keepColors shows for as long as it is listed. An entry that leaves the list and comes back starts its clock again. on: false gives back 0.7.19 (every listed entry shows while listed).",
-      "fallback": { "on": true, "hideAfterMs": null, "keepColors": ["red"] }
+      "fallback": { "on": true, "hideAfterMs": null, "keepColors": ["red"] },
+      "_release": "research3/mc (docs/research3/MC-REPORT.md), OFF while absent: 0.7.20 exactly. When set, an object {deferValues, deferControls, leftList, noEntryMs, witness, then} that says when the 'shown now' value is NO VERDICT, and the list then decides - then 'listed' (default: shown while ccList lists any entry outside ignoreIds, never closes over a listed message) or 'heuristic' (the fallback above). The report's recommended value for the next install, after the log read: {\"deferValues\": [65535], \"leftList\": true}. noEntryMs can hide a message ccList never carries (case S5) and is not recommended. Every change logs 'active cc: released to the list (...)' once, numbers only. shared/hud.js _ccRelease."
     },
+    "ccDisplayed": null,
+    "_ccDisplayed": "research3/mc, OFF (null): the second 'shown now' witness for f30, Vehicle2.statusDisplayedCCMessage (getter 61, declared under signals, the field Twin Dial already installs). {\"iface\": \"de.bmw.infotainment.vehicle.Vehicle2\", \"field\": \"statusDisplayedCCMessage\", \"numberPath\": [\"statusNumberCheckControlMessageDisplay\"], \"use\": false} logs 'displayed cc: number N' once per change and decides nothing; use true with config.ccActive.release.witness true lets 'displayed says none' release the active number to the list.",
     "ccList": {
       "_about": "Several messages at once: the car cycles through this list, and ours steps through it on the same clock (the owner, 2026-11-15). Each element carries a short name and a colour; config.ccm.cycleMs is how long each one is shown. The stock order and timing are being measured in docs/G20-DESIGN-SPEC.md.",
       "iface": "de.bmw.infotainment.KombiInterface_2",
