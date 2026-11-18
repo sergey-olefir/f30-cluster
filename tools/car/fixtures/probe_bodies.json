@@ -1,0 +1,779 @@
+{
+ "_about": "Bodies of the probe's log lines as the branches' own tests (bench/test-twin-probe.js, invented values) expect them, plus SB's shapes from its report. Used only to test the parser against real formatter output. No car data.",
+ "tags": {
+  "aa-guidance": {
+   "bodies": [
+    "active=false"
+   ],
+   "branch_p": "P12"
+  },
+  "acm-data": {
+   "bodies": [
+    "device=BMW status=CONNECTED tech=LTE voiceData=true"
+   ],
+   "branch_p": "P9"
+  },
+  "acm-phone": {
+   "bodies": [
+    "state=AVAILABLE"
+   ],
+   "branch_p": "P9"
+  },
+  "active-cc": {
+   "bodies": [
+    "number=15 control=1 frameNumber=1 frame=1 utility=4096(0x1000)"
+   ],
+   "branch_p": "P1"
+  },
+  "active-source": {
+   "bodies": [
+    "len=12 matches-source-entry=unknown"
+   ],
+   "branch_p": "P8"
+  },
+  "assist-avail": {
+   "bodies": [
+    "acc=ACTIVE sla=NOT_EQUIPPED sld=AVAILABLE dcc=AVAILABLE setSpeed=110 setInfo=1 proposal=ACC"
+   ],
+   "branch_p": "P13"
+  },
+  "audio-tel-mute": {
+   "bodies": [
+    "mute=1"
+   ],
+   "branch_p": "P9"
+  },
+  "basicList": {
+   "bodies": [
+    "entries=1 [id=15 reason=CCM_SHOWN_BY_IC state=AKTIV filter=-]"
+   ],
+   "branch_p": "P2"
+  },
+  "battery-condition": {
+   "bodies": [
+    "condition=2"
+   ],
+   "branch_p": "P10"
+  },
+  "bc-all1": {
+   "bodies": [
+    "option=STARTOFDRIVING speedAvg=412 consAvg=68 consNow=90 tripDay=0 tripH=0 tripM=43 resetH=14 resetMi=0 speedUnit=KILOMETERS consUnit=CONSUMPTION_KM"
+   ],
+   "branch_p": "P4"
+  },
+  "bc-all2": {
+   "bodies": [
+    "option=LONGTERM speedAvg=455 consAvgScale=2 consAvgDigit=71 tripDay=3 tripH=4 tripM=5 resetH=8 resetMi=30 speedUnit=KILOMETERS"
+   ],
+   "branch_p": "P4"
+  },
+  "bc-average": {
+   "bodies": [
+    "speed1=412 cons1=68 speed2=65535 cons2=65535 speedUnit=KM_S_H__KM consUnit=VERBRAUCH_IN_L_S_100KM"
+   ],
+   "branch_p": "P4"
+  },
+  "bc-avgcons1": {
+   "bodies": [
+    "consNowScale=3 consNowDigit=90 unit=CONSUMPTION_KM"
+   ],
+   "branch_p": "P4"
+  },
+  "bc-segment": {
+   "bodies": [
+    "segment=2 trigger=INTERVALRUNNING durDrive=43 durMoving=30 distance=12 speedDrive=17 speedMoving=25 fuel=68"
+   ],
+   "branch_p": "P4"
+  },
+  "bc-start": {
+   "bodies": [
+    "hour=14 minute=0 day=17 month=11 year=2026"
+   ],
+   "branch_p": "P4"
+  },
+  "bc-status2": {
+   "bodies": [
+    "bc2=BC2_LAEUFT reset=AUS limit=KEINE_AKTION boundary=0 speedUnit=KM_S_H"
+   ],
+   "branch_p": "P4"
+  },
+  "bc-travel": {
+   "bodies": [
+    "hours=0 minutes=43 way=124"
+   ],
+   "branch_p": "P4"
+  },
+  "call-state": {
+   "bodies": [
+    "state=INCOMING"
+   ],
+   "branch_p": "P9"
+  },
+  "carplay-call": {
+   "bodies": [
+    "active=true"
+   ],
+   "branch_p": "P9"
+  },
+  "carplay-guidance": {
+   "bodies": [
+    "active=false"
+   ],
+   "branch_p": "P12"
+  },
+  "cbs-list": {
+   "bodies": [
+    "id=3 colour=GREEN name-len=10 way-len=9 date-len=11 symbol=12 avail=1 count=4 plainId=- plainColour=-"
+   ],
+   "branch_p": "P15"
+  },
+  "ccList": {
+   "bodies": [
+    "entries=2 [id=0 colour=GREEN symbol=6 indent=- ric=- name-len=0] [id=15 colour=WHITE symbol=2 indent=- ric=- name-len=16]"
+   ],
+   "branch_p": "P1"
+  },
+  "ccListRiskClass": {
+   "bodies": [
+    "entries=1 [id=15 colour=WHITE risk=RK2 symbol=2 name-len=16]"
+   ],
+   "branch_p": "P2"
+  },
+  "cons-history": {
+   "bodies": [
+    "reason=1 unit=L_100KM max=300 avg=79 historic=82 distance=1500 bar=4 bars=30 barValue=91 barType=CURRENT_VALUE_1"
+   ],
+   "branch_p": "P15"
+  },
+  "cons-now": {
+   "bodies": [
+    "scale=40 digit=87 unit=CONSUMPTION_KM"
+   ],
+   "branch_p": "P15"
+  },
+  "controller": {
+   "bodies": [
+    "seq=4 turn=2 press=- tilt=-"
+   ],
+   "branch_p": "P13"
+  },
+  "coolant": {
+   "bodies": [
+    "coolant-raw=126 (78 C) oil-raw=255"
+   ],
+   "branch_p": "P6"
+  },
+  "cp-device": {
+   "bodies": [
+    "type=CARPLAY status=1 device=3 source=172 name-len=12"
+   ],
+   "branch_p": "P8"
+  },
+  "cp-item-metadata": {
+   "bodies": [
+    "keys=4 [TITLE len=12] [ARTIST len=13] [TRACK_NUMBER=4] [ITEM_ID id-len=3]"
+   ],
+   "branch_p": "P8"
+  },
+  "cp-item-position": {
+   "bodies": [
+    "position=4 of=12"
+   ],
+   "branch_p": "P8"
+  },
+  "cp-item-time": {
+   "bodies": [
+    "elapsed=61 total=215"
+   ],
+   "branch_p": "P8"
+  },
+  "cp-player-state": {
+   "bodies": [
+    "state=PLAYER_STATE_PLAY"
+   ],
+   "branch_p": "P8"
+  },
+  "dart": {
+   "bodies": [
+    "kind=intersection bar=40 direction=SLIGHT_RIGHT geometry=TWO_WAY_FORK_TAKE_RIGHT dist-len=3 unit=METER raw=350 step=GS2 combined=SINGLE toDest=12000 unreliable=false desc-elements=1"
+   ],
+   "branch_p": "P12"
+  },
+  "display-kombi": {
+   "bodies": [
+    "view=STANDARD_VIEW"
+   ],
+   "branch_p": "P11"
+  },
+  "displayed-cc": {
+   "bodies": [
+    "number=15"
+   ],
+   "branch_p": "P1"
+  },
+  "doors": {
+   "bodies": [
+    "driver=FAT_IST_OFFEN passenger=BEIFAHRERTUER_IST_GESCHLOSSEN rearDriver=0 rearPassenger=0 boot=HK_IST_GESCHLOSSEN bonnet=MOTORHAUBE_GESCHLOSSEN boot2=KLAPPE_2_GESCHLOSSEN softClose=SCA_VORRASTE_GESCHLOSSEN locking=5 hotel=HOTELSTELLUNG_NICHT_AKTIV"
+   ],
+   "branch_p": "P7"
+  },
+  "engine-max": {
+   "bodies": [
+    "power=285 torque=500"
+   ],
+   "branch_p": "P14"
+  },
+  "engine-verdict": {
+   "bodies": [
+    "verdict=COLD auxPower=3"
+   ],
+   "branch_p": "P6"
+  },
+  "esim-signal": {
+   "bodies": [
+    "value=-85"
+   ],
+   "branch_p": "P9"
+  },
+  "esim-status": {
+   "bodies": [
+    "state=NO_PROFILE"
+   ],
+   "branch_p": "P9"
+  },
+  "esim-telephony": {
+   "bodies": [
+    "active=false"
+   ],
+   "branch_p": "P9"
+  },
+  "external-display": {
+   "bodies": [
+    "outside=75 range=412 tempUnit=C"
+   ],
+   "branch_p": "P5"
+  },
+  "foresight": {
+   "bodies": [
+    "invalid=0 speed=SPEED_50 dist=300 event=GESCHWINDIGKEITSBEGRENZUNG unit=EINHEIT_KMH"
+   ],
+   "branch_p": "P13"
+  },
+  "front-vehicle": {
+   "bodies": [
+    "gapX=3120 speedX=2000 qualifier=EVENT_DATA_AVAILABLE"
+   ],
+   "branch_p": "P13"
+  },
+  "gps-ext": {
+   "bodies": [
+    "heading=135 height=1200~ quality=7 speed=720"
+   ],
+   "branch_p": "P15"
+  },
+  "guidance-state": {
+   "bodies": [
+    "state=ACTIVE"
+   ],
+   "branch_p": "P12"
+  },
+  "guiding-provider": {
+   "bodies": [
+    "state=NONE"
+   ],
+   "branch_p": "P12"
+  },
+  "guiding-state": {
+   "bodies": [
+    "state=ACTIVE"
+   ],
+   "branch_p": "P12"
+  },
+  "heading": {
+   "bodies": [
+    "heading=271.25 status=ON_ROAD"
+   ],
+   "branch_p": "P15"
+  },
+  "hmi-app": {
+   "bodies": [
+    "state=COMMUNICATION"
+   ],
+   "branch_p": "P9"
+  },
+  "hmi-shortcut": {
+   "bodies": [
+    "state=ENTERTAINMENT_MODE"
+   ],
+   "branch_p": "P13"
+  },
+  "hud-data": {
+   "bodies": [
+    "kmh=72 accSym=LDM_CAR_NORMAL accBars=3 accColour=LDM_ACTIVE vsli=LDM_VZA_VSLI_NO_SYMBOL vsliSpeed=0 ldm=LDM_SYM_ACC ldmColour=LDM_ACTIVE limiter=STATUS_INACTIVE cruise=110 hud=HUDSTATUS_OFF"
+   ],
+   "branch_p": "P13"
+  },
+  "hud-data2": {
+   "bodies": [
+    "setSpeed=110 setColour=ACTIVE_GREEN icon=ACC_WITH_TARGET_OBJECT iconState=ACTIVE bars=DISTANCE_3 sliState=ACTIVE_SPEED_LIMIT sliValue=LIMIT_70 npi=NO_DISPLAY warnIC=NO_DISPLAY hud=HUDSTATUS_OFF"
+   ],
+   "branch_p": "P13"
+  },
+  "ic-context": {
+   "bodies": [
+    "focus=0 list=-1 visible=65537(0x10001)"
+   ],
+   "branch_p": "P11"
+  },
+  "ic-context2": {
+   "bodies": [
+    "state=12 applet=3 focus=0 focusApplet=3 list=-1"
+   ],
+   "branch_p": "P11"
+  },
+  "ic-widget": {
+   "bodies": [
+    "widget=1234(0x4d2)"
+   ],
+   "branch_p": "P11"
+  },
+  "ic-widget2": {
+   "bodies": [
+    "state=12 applet=3"
+   ],
+   "branch_p": "P11"
+  },
+  "junction-3d-in-kombi": {
+   "bodies": [
+    "active=false"
+   ],
+   "branch_p": "P13"
+  },
+  "kombi-available": {
+   "bodies": [
+    "packBC=1023(0x3ff) content=3(0x3) preselect=0"
+   ],
+   "branch_p": "P11"
+  },
+  "kombi-config": {
+   "bodies": [
+    "content2=0(0x0) preselect2=ANZEIGE_RADIOBUTTON__ALLES_EIN__AKTIV navDisplay=KARTE dzmOrPower=DZM entertainment=ANZEIGE_AUS"
+   ],
+   "branch_p": "P11"
+  },
+  "kombi-lanes-ext": {
+   "bodies": [
+    "distManeuver=350"
+   ],
+   "branch_p": "P12"
+  },
+  "kombi-selection": {
+   "bodies": [
+    "packBC=255(0xff) content=5(0x5) preselect=ANZEIGE_RADIOBUTTON__ALLES_EIN__AKTIV"
+   ],
+   "branch_p": "P11"
+  },
+  "lanes": {
+   "bodies": [
+    "rows=1 car=1 [lanes=3 rec=2 bar=60 LEFT,*STRAIGHT_ON,*RIGHT/BUS]"
+   ],
+   "branch_p": "P12"
+  },
+  "ldm-guidance": {
+   "bodies": [
+    "xcc=513 func=XCC_AKTIV sld=0 isa=ISA_NICHT_AKTIV gapMode=KEINE_ANFORDERUNG gapInfo=ANZEIGE_DER_AI gap=3 reqDisp=1 setSpeed=110"
+   ],
+   "branch_p": "P13"
+  },
+  "lids": {
+   "bodies": [
+    "bonnet=MOTORHAUBE_OFFEN"
+   ],
+   "branch_p": "P7"
+  },
+  "longitudinal": {
+   "bodies": [
+    "invalid=0 func=XCC_AKTIV xcc=DISP_ACC xccOn=true object=true sld=SLD_OFF lim=LIM_WARNING_OFF setSpeed=110 setState=DISP_OF_REQUESTED_SPEED_ACTIVE setUnit=false sla=SLA_NICHT_AKTIV hdc=KEINE_HDC_ANZEIGE"
+   ],
+   "branch_p": "P13"
+  },
+  "lsc-cluster": {
+   "bodies": [
+    "speedAvg=41 consAvg=70 fuel=38"
+   ],
+   "branch_p": "P4"
+  },
+  "main-connections": {
+   "bodies": [
+    "entries=1 [id=5 source=172 sink=1 state=CS_CONNECTED]"
+   ],
+   "branch_p": "P8"
+  },
+  "main-menu-metadata": {
+   "bodies": [
+    "sink=FRONT menuEntry=12345 track=7 line1-len=12 line2-len=13 line3-len=0"
+   ],
+   "branch_p": "P8"
+  },
+  "map-without-route": {
+   "bodies": [
+    "active=true"
+   ],
+   "branch_p": "P13"
+  },
+  "media-menu": {
+   "bodies": [
+    "sink=FRONT selected=22 selected-icon=CARPLAY entries=2 [21 FM on=true name-len=12 subs=0] [22 CARPLAY on=true name-len=14 subs=1]"
+   ],
+   "branch_p": "P8"
+  },
+  "menu-cc": {
+   "bodies": [
+    "frameNumber=1 frames=2 id1=15 id2=14 id3=0"
+   ],
+   "branch_p": "P1"
+  },
+  "mileage-secure": {
+   "bodies": [
+    "mileage=48215 alive=3 manipulation=0"
+   ],
+   "branch_p": "P3"
+  },
+  "mileage-supreme": {
+   "bodies": [
+    "mileage=48216 qualifier=EVENT_DATA_AVAILABLE"
+   ],
+   "branch_p": "P3"
+  },
+  "nad-call": {
+   "bodies": [
+    "shape=member id=1 direction=MOBILE_TERMINATED_CALL state=INCOMING mode=VOICE multiparty=NO_MULTI_PARTY_CALL"
+   ],
+   "branch_p": "P9"
+  },
+  "nad-operator": {
+   "bodies": [
+    "shape=member mode=0 tech=E_UTRAN"
+   ],
+   "branch_p": "P9"
+  },
+  "nad-register": {
+   "bodies": [
+    "shape=flat cs=REGISTERED ps=REGISTERED_AND_ROAMING"
+   ],
+   "branch_p": "P9"
+  },
+  "nad-signal": {
+   "bodies": [
+    "shape=member rssi=21 ber=99 code-len=5 name-len=10"
+   ],
+   "branch_p": "P9"
+  },
+  "next-destination": {
+   "bodies": [
+    "travel=1500 delay=120 delayStatus=YELLOW dist-len=4 unit=KM raw=14200 toFinal=14200 flag=true stopover=0 etaInvalid=false etaH=9 etaM=32 tzValid=true tz=120"
+   ],
+   "branch_p": "P12"
+  },
+  "next-limit": {
+   "bodies": [
+    "withdrawal=BESCHRAENKUNG class=_80"
+   ],
+   "branch_p": "P13"
+  },
+  "no-passing": {
+   "bodies": [
+    "np=UEBERHOLVERBOT_PKW"
+   ],
+   "branch_p": "P13"
+  },
+  "oil-level": {
+   "bodies": [
+    "m1=300 level=MOTOROELSTAND_4_4 m2=0 possible=DETAILMESSUNG_ERLAUBT"
+   ],
+   "branch_p": "P14"
+  },
+  "oil-temp2": {
+   "bodies": [
+    "oil=140 injection=1200"
+   ],
+   "branch_p": "P14"
+  },
+  "on-guidable-road": {
+   "bodies": [
+    "active=true"
+   ],
+   "branch_p": "P12"
+  },
+  "phone-active-roles": {
+   "bodies": [
+    "entries=4 roles=HANDS_FREE_PHONE+BT_AUDIO+SIGNAL_STRENGTH+BATTERY_STATE"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-call1-contact": {
+   "bodies": [
+    "known=true"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-call1-duration": {
+   "bodies": [
+    "value=75"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-call1-modem": {
+   "bodies": [
+    "value=2"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-call1-multiparty": {
+   "bodies": [
+    "active=false"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-call1-name": {
+   "bodies": [
+    "len=13"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-call1-number": {
+   "bodies": [
+    "len=12"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-call1-picture": {
+   "bodies": [
+    "url-len=14 initials-len=2"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-call1-state": {
+   "bodies": [
+    "state=ACTIVE"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-calllist": {
+   "bodies": [
+    "entries=3 incoming=1 outgoing=1 missed=1 other=0 with-contact=2 with-name=2 max-count=2 first=MISSED last=INCOMING"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-comm-blocked": {
+   "bodies": [
+    "active=false"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-devices": {
+   "bodies": [
+    "entries=2 [id=3 connected=true present=true battery=80 signal=4 gsm=3 register=ROAMING lock=UNLOCKED personal=false active=HANDS_FREE_PHONE+BT_AUDIO connectedTech=BT caps=3 name-len=13] [id=5 connected=false present=false battery=0 signal=0 gsm=0 register=0 lock=0 personal=- active=none connectedTech=none caps=0 name-len=0]"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-hfp-blocked": {
+   "bodies": [
+    "active=false"
+   ],
+   "branch_p": "P9"
+  },
+  "phone-mic-muted": {
+   "bodies": [
+    "active=true"
+   ],
+   "branch_p": "P9"
+  },
+  "player-metadata": {
+   "bodies": [
+    "sink=FRONT uiType=TWO_LINES menuEntry=12345 track=7 line1-type=ARTIST line1-len=13 line2-type=TITLE line2-len=17 line3-len=0"
+   ],
+   "branch_p": "P8"
+  },
+  "power-torque": {
+   "bodies": [
+    "power=12 torque=31"
+   ],
+   "branch_p": "P14"
+  },
+  "range-alt": {
+   "bodies": [
+    "mileage=48215"
+   ],
+   "branch_p": "P3"
+  },
+  "range-tank": {
+   "bodies": [
+    "fuel=38 fuelL=255 fuelR=255 spare=NICHT_AKTIV range=412 mileage=48215"
+   ],
+   "branch_p": "P3"
+  },
+  "road": {
+   "bodies": [
+    "elements=3 [text len=18] [spacer=BIG] [icon text-len=3]"
+   ],
+   "branch_p": "P12"
+  },
+  "sign": {
+   "bodies": [
+    "invalid=0 value=70 unit=KM_H warn=SLI_WARNUNG_NICHT_ANGEFORDERT supp=KEIN_ZUSATZZEICHEN style=ECE np=KEIN_UEBERHOLVERBOT_ERKANNT npDist=0"
+   ],
+   "branch_p": "P13"
+  },
+  "sources": {
+   "bodies": [
+    "entries=2 [#0 type=TUNER_FM selectable=true order=1 id-len=12 text-len=12 instance-len=1] [#1 type=MEDIA_PLAYER selectable=true order=2 id-len=12 text-len=3 instance-len=1] active-is-entry=1"
+   ],
+   "branch_p": "P8"
+  },
+  "sport-display": {
+   "bodies": [
+    "boost=9 boostMax=160 lat=200 long=200 degradation=KEINE"
+   ],
+   "branch_p": "P14"
+  },
+  "stalk": {
+   "bodies": [
+    "stalks=64(0x40)"
+   ],
+   "branch_p": "P13"
+  },
+  "stalk-complete": {
+   "bodies": [
+    "stalks=64(0x40) mainBeamAssist=-"
+   ],
+   "branch_p": "P13"
+  },
+  "station": {
+   "bodies": [
+    "band=WB_FM reception=ANALOG freq=fm-range pos=3 current=ON fav=OFF tp=TPS_TP pty=10 short-len=12 long-len=0 artist-len=13 title-len=14 ens-len=0 rt-len=17 rtplus=1 [RTPINR_TITLE len=12] epg-days=0 icon=DF_PICTURE_PNG/4 cover=DF_RAW/0 slide=DF_RAW/0"
+   ],
+   "branch_p": "P8"
+  },
+  "sw-special1": {
+   "bodies": [
+    "press=TASTER_GEDRUECKT"
+   ],
+   "branch_p": "P13"
+  },
+  "sw-special2": {
+   "bodies": [
+    "press=TASTER_GEDRUECKT"
+   ],
+   "branch_p": "P13"
+  },
+  "sw-wheel-press": {
+   "bodies": [
+    "press=TASTER_GEDRUECKT"
+   ],
+   "branch_p": "P13"
+  },
+  "sw-wheel-steps": {
+   "bodies": [
+    "steps=17"
+   ],
+   "branch_p": "P13"
+  },
+  "telesync-call": {
+   "bodies": [
+    "state=FREE"
+   ],
+   "branch_p": "P9"
+  },
+  "telesync-gsm": {
+   "bodies": [
+    "value=4"
+   ],
+   "branch_p": "P9"
+  },
+  "telesync-lock": {
+   "bodies": [
+    "state=UNLOCKED"
+   ],
+   "branch_p": "P9"
+  },
+  "telesync-register": {
+   "bodies": [
+    "state=REGISTERED"
+   ],
+   "branch_p": "P9"
+  },
+  "track-progress": {
+   "bodies": [
+    "sink=FRONT menuEntry=12345 track=7 elapsed=61000 total=215000 hasProgress=true seekable=false"
+   ],
+   "branch_p": "P8"
+  },
+  "tyre-pressure": {
+   "bodies": [
+    "fl=23 fr=24 rl=25 rr=24"
+   ],
+   "branch_p": "P14"
+  },
+  "tyre-target": {
+   "bodies": [
+    "fl=22 fr=22 rl=26 rr=26"
+   ],
+   "branch_p": "P14"
+  },
+  "tyre-temp": {
+   "bodies": [
+    "fl=43 fr=43 rl=44 rr=42"
+   ],
+   "branch_p": "P14"
+  },
+  "tyres-status": {
+   "bodies": [
+    "alive=5 info=1 loss=0 failure=0"
+   ],
+   "branch_p": "P14"
+  },
+  "units": {
+   "bodies": [
+    "mileage=KILOMETER"
+   ],
+   "branch_p": "P5"
+  },
+  "units-ext": {
+   "bodies": [
+    "temp=C speed=KILOMETER cons=L_S_100KM fuel=LITER pressure=BAR power=KW torque=NM"
+   ],
+   "branch_p": "P14"
+  },
+  "voltage-basic": {
+   "bodies": [
+    "voltage=1420"
+   ],
+   "branch_p": "P10"
+  },
+  "voltage-hu": {
+   "bodies": [
+    "sim=false value=12850"
+   ],
+   "branch_p": "P10"
+  },
+  "wca-body": {
+   "bodies": [
+    "status=3 temp=70 efficiency=60"
+   ],
+   "branch_p": "P9"
+  },
+  "wca-front": {
+   "bodies": [
+    "status=WCA_AKTIV_HANDY_ERKANNT_WIRD_GELADEN coil=SPULE_2_AKTIV temp=70 efficiency=60"
+   ],
+   "branch_p": "P9"
+  },
+  "zv-status": {
+   "bodies": [
+    "locking=5 bootUnlocked=HECKKLAPPE_NICHT_LOGISCH_ENTRIEGELT dwa=0"
+   ],
+   "branch_p": "P7"
+  }
+ }
+}
