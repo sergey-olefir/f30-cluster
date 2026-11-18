@@ -1,0 +1,2611 @@
+{
+ "schema": 1,
+ "tool": "tools/car/parse_logs.py",
+ "generated": "2026-11-18",
+ "session": {
+  "folder": "reference/car/2026-11-15",
+  "date": "2026-11-15",
+  "material": {
+   "f30_cluster": {
+    "lines": 3687,
+    "from": "2026-11-14T14:16:11Z",
+    "to": "2026-11-14T19:17:12Z",
+    "version_last": [
+     0,
+     7,
+     11
+    ],
+    "runs": 5,
+    "probe_lines": 0
+   },
+   "car_vitals": {
+    "lines": 1877,
+    "from": "2026-11-09T17:02:11Z",
+    "to": "2026-11-14T14:21:21Z",
+    "version_last": [
+     2,
+     27,
+     3
+    ],
+    "runs": 8,
+    "probe_lines": 0
+   },
+   "cluster_render_lines": 8297
+  },
+  "readings": false,
+  "markers": 0,
+  "marker_map": true
+ },
+ "register": {
+  "path": "bake/work/car/pub/CA/register.json"
+ },
+ "summary": {
+  "manual": 36,
+  "no-material": 25,
+  "not-yet": 17,
+  "answered": 6,
+  "partial": 7
+ },
+ "items": {
+  "F1": {
+   "id": "F1",
+   "title": "Twin Dial 0.1.0 draws no limit and covers BMW's sign at (538.45, 621.2) r 41 under its opaque background; does BMW still draw it anywhere?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a78, \u00a713"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F2": {
+   "id": "F2",
+   "title": "With Twin Dial on, belt unbuckled and a door open: do BMW's belt lamp, the seven side lamps and the door message (ours or BMW's) show; after a layout and a drive-mode switch, no black box; day/night s",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC rev 2 \u00a715, \u00a717.2"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F3": {
+   "id": "F3",
+   "title": "Is the car's inner ring shorter than ours (the owner's finding), against SD's measurement that the references' ring ends with the band?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a72.1, \u00a716 (SD / K1 override)"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F4": {
+   "id": "F4",
+   "title": "Of the seven side lamps, which are drawn over our theme (relation unknown for six), and the telltale column on the left.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC rev 2 \u00a715",
+    "FEATURE-AUDIT gap 4 (safety, unresolved)"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F5": {
+   "id": "F5",
+   "title": "Is the set speed on BMW's HUD (this car has one)?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a79"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F6": {
+   "id": "F6",
+   "title": "How the stock cluster shows cruise / ACC / limiter states and set speed.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a79"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F7": {
+   "id": "F7",
+   "title": "What the RIC services draw that apps cannot read: the media line / list, the phone list and the ringing pad.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.3, \u00a74.4"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "F8": {
+   "id": "F8",
+   "title": "How long are the car's Ukrainian check-control names (the card's three lines)?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a75.2"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F9": {
+   "id": "F9",
+   "title": "What do f30 0.7.20 (each theme, G20 on/off, bottom-row modes) and Twin Dial 0.1.0 look like on the car today?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "X1-X11 comparisons",
+    "MT \u00a78 (a 0.7.20 photo beside the prototype)"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F10": {
+   "id": "F10",
+   "title": "Stock pointers in motion (~50 km/h, ~2000 rpm); a fixed-exposure night photo beside a day one; SPORT / ECO PRO frames; a three-digit limit; a negative temperature; a one-digit hour; other check-contro",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "G20SIM",
+    "strip ZL / ZR anchors"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F11": {
+   "id": "F11",
+   "title": "A long street name cut with '...'; the widest stock symbol; both signs at once (limit and no-passing); the end-of-limit and 'unsure' symbols; a three-digit limit with a supplementary plate.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 bottom row"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F12": {
+   "id": "F12",
+   "title": "Sport band level (0.35 vs 0.48); window gain; Eco speed-arc end (130?); Eco tint strength; are Comfort's red zone / OFF arc hidden under Eco's CHARGE/POWER band; minis' pivot; tick-ring offsets (paral",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "BAKE-REPORT \u00a75 items 1, 3, 5, 7, 10, 11, 13, 14, 17, 20"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "F13": {
+   "id": "F13",
+   "title": "The owner checklists of CAR3-G \u00a76, CAR3-H \u00a77, CAR3-J \u00a77, CAR4-L \u00a76, POLISH-E \u00a77-8, POLISH-F \u00a77 (map window edges, row ownership, mode label, sign window stubs, gear tray, long mode names, hooks while ",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F14": {
+   "id": "F14",
+   "title": "Does the car's stock tachometer use reference 02's D = 3.875 R or 04's 3.80 R; a sharp frontal frame of the stock cluster.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "docs/twin-dial/VR-REPORT.md \u00a76",
+    "VD open 1-2"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F15": {
+   "id": "F15",
+   "title": "Do the needles sweep without steps with 'Smooth needles' on, and step with it off; the big digital speed unchanged in Sport (no flicker at 9->10, 99->100; '--' at start).",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "PERF-NEEDLE \u00a74"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F16": {
+   "id": "F16",
+   "title": "Does the HMI offer 'Driver recognition' for a local (offline) profile; after it, does UserAccount.protection list NFC?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F17": {
+   "id": "F17",
+   "title": "Is the box in the same place in Sport and Eco Pro (x 1406-1597 or 1420-1611)? Does the left stalk have the HBA button; which headlights?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a712",
+    "HIGH-BEAM \u00a76 rows 5-6"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L1": {
+   "id": "L1",
+   "title": "why f30's window over BMW's panel stays open (MC section 6)",
+   "status": "no-material",
+   "label": null,
+   "decided": {
+    "builds_seen": [
+     [
+      0,
+      7,
+      10
+     ],
+     [
+      0,
+      7,
+      11
+     ]
+    ],
+    "needs_build_at_least": [
+     0,
+     7,
+     19
+    ]
+   },
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [
+    "the saved f30_cluster log is from build(s) 0.7.10, 0.7.11; the check-control lines were added in 0.7.19 (list) and 0.7.20 (active cc)"
+   ],
+   "needs": [
+    "a log of f30_cluster 0.7.19+ with a door message in it (P1 steps 2-4)"
+   ],
+   "material": [
+    "reference/car/2026-11-15/oap/f30_cluster.log.1",
+    "reference/car/2026-11-15/oap/f30_cluster.log"
+   ],
+   "dated": "2026-11-14",
+   "blocks": [
+    "f30 config.ccActive.release (X7)",
+    "SPEC-R3 \u00a75.4 item 7 (Twin Dial release)"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L2": {
+   "id": "L2",
+   "title": "does statusActiveCCMessage notify, what it rests on, is its number the ccList id",
+   "status": "no-material",
+   "label": null,
+   "decided": {
+    "builds_seen": [
+     [
+      0,
+      7,
+      10
+     ],
+     [
+      0,
+      7,
+      11
+     ]
+    ],
+    "needs_build_at_least": [
+     0,
+     7,
+     19
+    ]
+   },
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [
+    "the saved f30_cluster log is from build(s) 0.7.10, 0.7.11; the check-control lines were added in 0.7.19 (list) and 0.7.20 (active cc)"
+   ],
+   "needs": [
+    "a log of f30_cluster 0.7.19+ with a door message in it (P1 steps 2-4)"
+   ],
+   "material": [],
+   "dated": "2026-11-14",
+   "blocks": [
+    "SPEC-R3 \u00a75.4",
+    "SPEC \u00a78.4 D7",
+    "MC H1"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L3": {
+   "id": "L3",
+   "title": "the clock's fallback: statusShowTimeDate arrives and is local time",
+   "status": "not-yet",
+   "label": null,
+   "decided": {
+    "local_arrives": false,
+    "utc_clock_lines": 0
+   },
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a 0.7.19+ log: the 'clock (local) raw' line"
+   ],
+   "material": [
+    "reference/car/2026-11-15/oap/f30_cluster.log",
+    "reference/car/2026-11-15/oap/f30_cluster.log.1"
+   ],
+   "dated": null,
+   "blocks": [
+    "f30 / Twin Dial clock",
+    "bottom row ownClock"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L4": {
+   "id": "L4",
+   "title": "Twin Dial's trip fields: arrive or not; raw values against iDrive's trip page",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "twin_dial.log of the build on the car (collect.sh finds its data folder)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.1",
+    "config.trip",
+    "MK-PROTOCOL.md"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L5": {
+   "id": "L5",
+   "title": "the odometer member arrives; factor 1 km",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a Twin Dial log (odometer line) or the probe's P3 lines"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.1 bottom row"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L6": {
+   "id": "L6",
+   "title": "phone state: aggregatedCallState arrives",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "twin_dial.log"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.4"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L7": {
+   "id": "L7",
+   "title": "media: HmiMediaState on HMI_CID arrives (lengths only)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "twin_dial.log"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.3"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L8": {
+   "id": "L8",
+   "title": "the second witness: displayed cc arrives and returns to 0",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [
+    "no 'displayed cc:' line: either never sent or the build does not subscribe it"
+   ],
+   "needs": [
+    "a Twin Dial 0.1.0+ (or f30 with config.ccDisplayed) log with a door message in it"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 config.ccDisplayed",
+    "SPEC-R3 \u00a75.4 item 7"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L9": {
+   "id": "L9",
+   "title": "layout builds in the first 10 s of a start (bench predicts 3; 1 means the getters beat cluster-render)",
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "runs": [
+     {
+      "app": "f30_cluster",
+      "version": [
+       0,
+       7,
+       10
+      ],
+      "builds_10s": 0,
+      "builds_30s": 0,
+      "first_build_s": null,
+      "snapshot": false
+     },
+     {
+      "app": "f30_cluster",
+      "version": [
+       0,
+       7,
+       10
+      ],
+      "builds_10s": 1,
+      "builds_30s": 1,
+      "first_build_s": 5.0,
+      "snapshot": false
+     },
+     {
+      "app": "f30_cluster",
+      "version": [
+       0,
+       7,
+       10
+      ],
+      "builds_10s": 1,
+      "builds_30s": 1,
+      "first_build_s": 5.5,
+      "snapshot": false
+     },
+     {
+      "app": "f30_cluster",
+      "version": [
+       0,
+       7,
+       11
+      ],
+      "builds_10s": 0,
+      "builds_30s": 0,
+      "first_build_s": null,
+      "snapshot": false
+     },
+     {
+      "app": "f30_cluster",
+      "version": [
+       0,
+       7,
+       11
+      ],
+      "builds_10s": 1,
+      "builds_30s": 3,
+      "first_build_s": 3.8,
+      "snapshot": false
+     },
+     {
+      "app": "f30_cluster",
+      "version": [
+       0,
+       7,
+       11
+      ],
+      "builds_10s": 0,
+      "builds_30s": 2,
+      "first_build_s": 10.3,
+      "snapshot": true
+     },
+     {
+      "app": "f30_cluster",
+      "version": [
+       0,
+       7,
+       12
+      ],
+      "builds_10s": 0,
+      "builds_30s": 0,
+      "first_build_s": null,
+      "snapshot": true
+     },
+     {
+      "app": "f30_cluster",
+      "version": [
+       0,
+       7,
+       12
+      ],
+      "builds_10s": 1,
+      "builds_30s": 1,
+      "first_build_s": 9.0,
+      "snapshot": true
+     }
+    ],
+    "max_10s": 1,
+    "min_10s": 0,
+    "max_30s": 3,
+    "runs_of_the_current_engine": 0,
+    "matches_bench_3": null
+   },
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 108,
+     "ts": "2026-11-14T14:18:08Z",
+     "shape": "first layout build line within 10 s of the start, 1 builds in all",
+     "n": {
+      "builds": 1,
+      "version": [
+       0,
+       7,
+       10
+      ]
+     }
+    }
+   ],
+   "evidence_total": 1,
+   "why": [
+    "every run in this material is a build before 0.7.19: the time-zone and ccList rebuilds that make the bench's 3 did not exist yet, so these counts are not comparable; the first build line comes 5.0/5.5 s after the start (the cluster-render connection)",
+    "a build line is `layout \"...\": N widgets ... whole-sheet writes ...`; only starts that the log shows from the first line are counted"
+   ],
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-15/oap/f30_cluster-0712.log",
+    "reference/car/2026-11-15/oap/f30_cluster.log",
+    "reference/car/2026-11-15/oap/f30_cluster.log.1"
+   ],
+   "dated": "2026-11-14",
+   "blocks": [
+    "research3/MP \u00a77.4"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L10": {
+   "id": "L10",
+   "title": "upload accounting: the cap, KB per minute, 'goes whole' KB (the real cost of a theme switch)",
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "goes_whole_panel_KB": {
+     "n": 38,
+     "min": 0.0,
+     "median": 5526.0,
+     "max": 5952.0,
+     "p90": 5952.0
+    },
+    "goes_whole_map_KB": {
+     "n": 24,
+     "min": 1275.0,
+     "median": 1275.0,
+     "max": 1275.0,
+     "p90": 1275.0
+    },
+    "kb_per_minute_map": {
+     "n": 63,
+     "min": 0.0,
+     "median": 287330.0,
+     "max": 330688.0,
+     "p90": 327530.0
+    },
+    "budget_holds_per_minute_map": {
+     "n": 63,
+     "min": 0.0,
+     "median": 0.0,
+     "max": 365.0,
+     "p90": 180.0
+    },
+    "kb_per_minute_guide_auto": {
+     "n": 60,
+     "min": 0.0,
+     "median": 0.0,
+     "max": 0.0,
+     "p90": 0.0
+    },
+    "budget_holds_per_minute_guide_auto": {
+     "n": 60,
+     "min": 0.0,
+     "median": 0.0,
+     "max": 0.0,
+     "p90": 0.0
+    },
+    "kb_per_minute_panel": {
+     "n": 97,
+     "min": 0.0,
+     "median": 24.0,
+     "max": 1662.0,
+     "p90": 1075.0
+    },
+    "budget_holds_per_minute_panel": {
+     "n": 97,
+     "min": 0.0,
+     "median": 0.0,
+     "max": 742.0,
+     "p90": 32.0
+    },
+    "kb_per_minute_hud": {
+     "n": 0
+    },
+    "budget_holds_per_minute_hud": {
+     "n": 0
+    },
+    "cap_KBps_seen": [
+     5500
+    ],
+    "cap_ceiling": 5500,
+    "cap_floor": 2000,
+    "cap_steps_below_ceiling": false,
+    "cap_lines_in_journal": 0,
+    "goes_whole_panel_values": {
+     "5526": 11,
+     "5561": 8,
+     "5952": 7,
+     "996": 2,
+     "5377": 2,
+     "2275": 2
+    },
+    "goes_whole_map_values": {
+     "1275": 24
+    },
+    "panel_whole_events": 38,
+    "map_whole_events": 24
+   },
+   "evidence": [
+    {
+     "file": "cluster-render.log.1",
+     "line": 44,
+     "ts": "2026-11-13T11:46:51Z",
+     "shape": "target panel goes whole: 5952 KB charged",
+     "n": {
+      "target": "panel",
+      "kb": 5952
+     }
+    },
+    {
+     "file": "cluster-render.log.1",
+     "line": 970,
+     "ts": "2026-11-13T12:00:19Z",
+     "shape": "target map goes whole: 1275 KB charged",
+     "n": {
+      "target": "map",
+      "kb": 1275
+     }
+    },
+    {
+     "file": "status-1.txt",
+     "line": 2,
+     "ts": null,
+     "shape": "upload cap 5500 KB/s (ceiling 5500, floor 2000)",
+     "n": {
+      "cap": 5500,
+      "ceiling": 5500,
+      "floor": 2000
+     }
+    }
+   ],
+   "evidence_total": 3,
+   "why": [
+    "per-target numbers from every 'goes whole' and 'in the last N s' line; a 'goes whole' on the panel happens each time the KOMBI maps our content again"
+   ],
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-15/cluster-render/cluster-render.log",
+    "reference/car/2026-11-15/cluster-render/cluster-render.log.1",
+    "reference/car/2026-11-15/cluster-render/status-1.txt",
+    "reference/car/2026-11-15/cluster-render/status-samples-3x10s.txt",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.1",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.2",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.3",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.4"
+   ],
+   "dated": "2026-11-14",
+   "blocks": [
+    "research3/MP \u00a77",
+    "research3/MT \u00a78 item 4"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "L11": {
+   "id": "L11",
+   "title": "the map slot (0x100) while our panel is up: was BMW's map there when no black box showed (theory H-M)",
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "own_map_scene_mapped_s": 3346.7,
+    "bmw_scene_0x1000300_mapped_s": 1488.5,
+    "bmw_scene_0x1000300_unmapped_s": 1357.5,
+    "panel_up_intervals": 28,
+    "panel_up_seconds": 6788.9,
+    "slot_0x100_content_seconds": {
+     "0x10004f0": {
+      "1": 3346.7,
+      "0": 340.1,
+      "3": 4.1
+     },
+     "0x1000300": {
+      "3": 33.1,
+      "0": 1324.4,
+      "1": 1488.5
+     },
+     "0x0": {
+      "0": 251.9
+     }
+    },
+    "slot_0x100_dominant": "0x10004f0",
+    "slot_0x100_dominant_mapped": true,
+    "panel_scene": "0x10004f8"
+   },
+   "evidence": [
+    {
+     "file": "cluster-render.log.1",
+     "line": 630,
+     "ts": "2026-11-13T11:50:39Z",
+     "shape": "slot 0x100 held 0x10004f0 while the panel was up",
+     "n": {
+      "seconds": 3346.7
+     }
+    }
+   ],
+   "evidence_total": 1,
+   "why": [
+    "the panel's scene id (0x10004f8, slot 0x203) is the same for f30_cluster and Twin Dial; the material is f30's, so this says what the slot held under OUR panel, not yet under Twin Dial",
+    "a content id other than ours with map 1 in slot 0x100 means the display kept a scene there (BMW's map, hypothesis H-M); it does not say the map was visible"
+   ],
+   "needs": [
+    "repeat with Twin Dial up (X6: mapSlots logging, or this table on the journal of that run)"
+   ],
+   "material": [
+    "reference/car/2026-11-15/cluster-render/cluster-render.log",
+    "reference/car/2026-11-15/cluster-render/cluster-render.log.1",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.1",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.2",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.3",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.4"
+   ],
+   "dated": "2026-11-13",
+   "blocks": [
+    "SPEC-R3 \u00a74.5",
+    "research3/MB theories"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "L12": {
+   "id": "L12",
+   "title": "cluster-render's version (>= 0.5.12 for ETC2)",
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "version": [
+     0,
+     5,
+     12
+    ],
+    "ge_0_5_12": true,
+    "component_json": [
+     0,
+     5,
+     12
+    ],
+    "starts_in_journal": 6
+   },
+   "evidence": [
+    {
+     "file": "cluster-render.log",
+     "line": 1413,
+     "ts": "2026-11-14T19:07:16Z",
+     "shape": "start: cluster-render 0.5.12",
+     "n": {
+      "version": [
+       0,
+       5,
+       12
+      ]
+     }
+    }
+   ],
+   "evidence_total": 1,
+   "why": [],
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-15/cluster-render/cluster-render.log",
+    "reference/car/2026-11-15/cluster-render/cluster-render.log.1",
+    "reference/car/2026-11-15/cluster-render/component.json",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.1",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.2",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.3",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.4"
+   ],
+   "dated": "2026-11-14",
+   "blocks": [
+    "research3/MT \u00a78 item 1"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "answered"
+  },
+  "L13": {
+   "id": "L13",
+   "title": "the 0.7.18 probes' results: ccListRiskClass / basicList lines, which entry marks a stored message",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [
+    "the 0.7.18 lines were never recorded in the repository; the saved logs are 0.7.10 .. 0.7.12"
+   ],
+   "needs": [
+    "f30_cluster.log of 0.7.18 .. 0.7.20 (the lines 'probe: basicList:' / 'probe: ccListRiskClass:'), if still present on the car"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC rev 2 D7",
+    "strip P-REPORT 1.1",
+    "f30 config.ccMarker"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L14": {
+   "id": "L14",
+   "title": "the speed-limit sign in f30: TrafficSignDisplayControl arrives",
+   "status": "partial",
+   "label": "unseen",
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [
+    "the round-3 brief claimed the sign arrives; no line is in the repository"
+   ],
+   "needs": [
+    "a drive past speed-limit signs with f30 0.7.x running (the 'sign:' line is written at each new combination)"
+   ],
+   "material": [
+    "reference/car/2026-11-15/oap/f30_cluster.log",
+    "reference/car/2026-11-15/oap/f30_cluster.log.1"
+   ],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a78",
+    "AGENT-BRIEF-twin-build-r3 B1"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L15": {
+   "id": "L15",
+   "title": "day/night: the car's value against the sun; the meaning of 0",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a log with 'day/night' lines (fix/colour-daynight, 0.7.x)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "night looks",
+    "SPEC rev 2 \u00a77.2"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L16": {
+   "id": "L16",
+   "title": "the clock's primary source: timeDateUTC offsets (logged whole once per zone change)",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a log with a 'clock raw:' line (the car's first time zone)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 / Twin Dial clock"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "answered"
+  },
+  "L17": {
+   "id": "L17",
+   "title": "auto start/stop (statusConditionMSA) and READY / OFF",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "f30_cluster.log of a drive with an auto start/stop stop"
+   ],
+   "material": [
+    "reference/car/2026-11-15/oap/f30_cluster.log",
+    "reference/car/2026-11-15/oap/f30_cluster.log.1"
+   ],
+   "dated": "2026-11-14",
+   "blocks": [
+    "6WB READY/OFF state machine",
+    "WBMSA"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L18": {
+   "id": "L18",
+   "title": "vehicle condition values (standby row, P with engine off)",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "f30_cluster.log across ignition on / engine off / standby ('vehicle condition N')"
+   ],
+   "material": [
+    "reference/car/2026-11-15/oap/f30_cluster.log",
+    "reference/car/2026-11-15/oap/f30_cluster.log.1"
+   ],
+   "dated": "2026-11-14",
+   "blocks": [
+    "bottom row standby"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L19": {
+   "id": "L19",
+   "title": "drive mode changes: notified; every mode maps",
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "modes_seen": [
+     "COMFORT_PLUS"
+    ],
+    "changes_logged": 3,
+    "unrecognised_lines": 6,
+    "unrecognised_values": [
+     "INITIALISIERUNG",
+     "SIGNAL_UNBEFUELLT"
+    ]
+   },
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 311,
+     "ts": "2026-11-14T14:18:11Z",
+     "shape": "first drive mode line",
+     "n": {}
+    },
+    {
+     "file": "f30_cluster.log.1",
+     "line": 1257,
+     "ts": "2026-11-14T14:39:51Z",
+     "shape": "a drive mode value the app does not map",
+     "n": {}
+    }
+   ],
+   "evidence_total": 2,
+   "why": [],
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-15/oap/f30_cluster.log",
+    "reference/car/2026-11-15/oap/f30_cluster.log.1"
+   ],
+   "dated": "2026-11-14",
+   "blocks": [
+    "f30 Change with the drive mode",
+    "MB experiments X1-X4"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "L20": {
+   "id": "L20",
+   "title": "the driver's speed-limit settings (notifier-only)",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "f30_cluster.log of a build that writes these lines, with the situation in it (see the register's steps)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 over-speed marking"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L21": {
+   "id": "L21",
+   "title": "road label, navigation state, position: do they reach f30 (shapes only)",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "f30_cluster.log with a guided route (lines 'road label:' 'navigation:')"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "bottom row road label"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "L22": {
+   "id": "L22",
+   "title": "Does the read-only UDS read of the DME give a plausible boost when the sport display sends none; which candidate wins; are the intake-air candidates right.",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "no decision table for this register item in tools/car (add one to tables_*.py)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 boost / intake readouts"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L23": {
+   "id": "L23",
+   "title": "How often does the car send rpm / speed ('rpm changes N/s (gap ms ...)'); how long does cluster-render take per flush (slow_flush_ms = 150 alarm); the app's CPU % against the bench's 2 %.",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "no decision table for this register item in tools/car (add one to tables_*.py)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "PERF-AUDIT \u00a73.1",
+    "PERF-NEEDLE"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "needs-owner-approval"
+  },
+  "L24": {
+   "id": "L24",
+   "title": "KOMBI resets and the guard since 0.7.16",
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "renderer_guard_disabled_events": 1,
+    "guard_events": [
+     {
+      "strike": 2,
+      "ms_after_mapping": 2287
+     }
+    ],
+    "app_kombi_guard_lines": 0,
+    "kombi_guard_json_present": false,
+    "cluster_render_display_unavailable_lines": 2
+   },
+   "evidence": [
+    {
+     "file": "cluster-render.log",
+     "line": 1410,
+     "ts": "2026-11-14T19:07:13Z",
+     "shape": "cluster-render guard disabled the panel after a strike",
+     "n": {
+      "strike": 2
+     }
+    }
+   ],
+   "evidence_total": 1,
+   "why": [
+    "whether the 0.7.13 shader-size fix holds with the night looks back is read from the absence of these lines over the session's start / mode switch / day-night steps"
+   ],
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-15/cluster-render/cluster-render.log",
+    "reference/car/2026-11-15/cluster-render/cluster-render.log.1",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.1",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.2",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.3",
+    "reference/car/2026-11-15/logs/woc-journal/journal.log.4"
+   ],
+   "dated": "2026-11-14",
+   "blocks": [
+    "night looks",
+    "X10 (Twin Dial shaders)"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L25": {
+   "id": "L25",
+   "title": "ccList pairs (id, symbol id, colour) the car lists",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "logs with 'check-control list:' lines over as many days of use as they hold"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a75.2",
+    "message_symbols.json"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "L26": {
+   "id": "L26",
+   "title": "message auto-hide and re-show timing; the frame dwell",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a door message left open until BMW hides it (B3.3) in a log of 0.7.19+ / Twin Dial / the probe"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 config.ccActive.fallback",
+    "X8"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L27": {
+   "id": "L27",
+   "title": "slot rows at the moment the black box shows",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the owner's clock times when the box showed (readings.json: black_box_times, ISO UTC) and cluster-render's journal of that time"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MB \u00a75 item 1",
+    "boxes BR \u00a76"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L28": {
+   "id": "L28",
+   "title": "does the cluster-render status socket return status.txt's text (map window presence rule S1)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a build with config.mapSlots (SN) or the client's status ask line"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.5",
+    "SN X3"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L29": {
+   "id": "L29",
+   "title": "does cluster-render upload a layer dropped before its upload finished (status 'asset N ... writes, KB')",
+   "status": "partial",
+   "label": "arrives",
+   "decided": {
+    "asset_rows": 8,
+    "assets_with_kb_above_0": 0,
+    "max_kb": 0
+   },
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "status.txt sampled during a start (the torn-down build): whether KB for a dropped asset keeps growing"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MP \u00a77.4"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L30": {
+   "id": "L30",
+   "title": "is newCCMessage ever sent",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [],
+   "material": [],
+   "dated": null,
+   "blocks": [],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "answered"
+  },
+  "L31": {
+   "id": "L31",
+   "title": "UPDATE_FAILED on 0.7.16 four times.",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "no decision table for this register item in tools/car (add one to tables_*.py)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "answered"
+  },
+  "P1": {
+   "id": "P1",
+   "title": "which message the cluster shows now (decides D7; the frame counter)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a75.4",
+    "SPEC \u00a78.4 D7",
+    "f30 X7",
+    "MC H1-H4"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P2": {
+   "id": "P2",
+   "title": "the stored-message mark: basicList / ccListRiskClass",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 config.ccMarker",
+    "strip P-REPORT item 6",
+    "SPEC \u00a73.3 marker box [1240, 588, 1288, 630]"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P3": {
+   "id": "P3",
+   "title": "odometer: carriers, factor, invalid values",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a Twin Dial log (odometer line) or the probe's P3 lines"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.1 bottom row"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P4": {
+   "id": "P4",
+   "title": "trip computer: factors, which counter is 'since start', the departure time, the cross-check",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "twin_dial.log of the build on the car (collect.sh finds its data folder)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.1",
+    "config.trip"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P5": {
+   "id": "P5",
+   "title": "units: km / miles, Celsius, bar",
+   "status": "partial",
+   "label": "arrives-other-app",
+   "decided": {
+    "pressure_unit": "BAR",
+    "temperature_unit": "C"
+   },
+   "evidence": [
+    {
+     "file": "car_vitals.log",
+     "line": 29,
+     "ts": "2026-11-09T17:02:44Z",
+     "shape": "car_vitals 'car units' line (another app's log)",
+     "n": {
+      "pressure": "BAR",
+      "temperature": "C"
+     }
+    }
+   ],
+   "evidence_total": 1,
+   "why": [],
+   "needs": [
+    "the distance unit (km / miles): Twin Dial's 'units raw (P5)' line or the probe's units line"
+   ],
+   "material": [
+    "reference/car/2026-11-15/logs/other-apps/car_vitals.log",
+    "car_vitals.log"
+   ],
+   "dated": "2026-11-14",
+   "blocks": [
+    "SPEC rev 2 \u00a712 (km only)",
+    "tyre page units"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P6": {
+   "id": "P6",
+   "title": "cold start to warm: the car's own coolant verdict against the temperature",
+   "status": "partial",
+   "label": "arrives-other-app",
+   "decided": {
+    "engine_temp_raw_range_1": [
+     111,
+     147
+    ],
+    "engine_temp_raw_range_2": [
+     48,
+     153
+    ],
+    "engine_temp_minus_48_plausible": true
+   },
+   "evidence": [
+    {
+     "file": "car_vitals.log",
+     "line": 38,
+     "ts": "2026-11-09T17:02:44Z",
+     "shape": "car_vitals raw engine temperatures line (another app's log)",
+     "n": {}
+    }
+   ],
+   "evidence_total": 1,
+   "why": [
+    "the engine temperatures arrive (another app's log); the raw range is in the decided block (raw - 48 is the scale SV verified for the coolant); the car's own verdict (COLD / OK / HOT) is not in that log"
+   ],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session",
+    "the probe's engine-verdict through a cold start (P6)"
+   ],
+   "material": [
+    "reference/car/2026-11-15/logs/other-apps/car_vitals.log",
+    "car_vitals.log"
+   ],
+   "dated": "2026-11-14",
+   "blocks": [
+    "SPEC \u00a75.2 coolant bar"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "P7": {
+   "id": "P7",
+   "title": "doors, boot, bonnet, central locking: notifies at all; sends once at subscribe",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74 V2 car picture"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P8": {
+   "id": "P8",
+   "title": "media: titles, progress, source icon, radio detail, CarPlay player",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.3",
+    "SPEC-R3 \u00a73.3 tab 3"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P9": {
+   "id": "P9",
+   "title": "phone: the call's states, battery / signal, the car's own modem",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.4",
+    "SPEC-R3 \u00a710 name setting"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P10": {
+   "id": "P10",
+   "title": "voltage: a plausible 12-14.8 V; the scale",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "a future battery readout"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P11": {
+   "id": "P11",
+   "title": "the cluster's view setting (map view) and the indirect key",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.5 presence rule",
+    "SPEC-R3 \u00a73.4 tab key"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P12": {
+   "id": "P12",
+   "title": "guided route: guidance state, the manoeuvre kind, the distance unit, lanes (SN 3.1)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.5",
+    "SPEC-R3 \u00a73.3 tab 5 turn arrow"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P13": {
+   "id": "P13",
+   "title": "the tab key: which button, which bit (SB 3.3)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a73.4",
+    "SPEC-R3 \u00a714 phase D",
+    "FEATURE-AUDIT \u00a76.1-6.2"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P14": {
+   "id": "P14",
+   "title": "when BMW's map exists: map-without-route and junction-3d-in-kombi",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.5"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P15": {
+   "id": "P15",
+   "title": "the sign arrives; the cruise set speed and the active function (SPEC-R3 section 9)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a78, \u00a79"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P16": {
+   "id": "P16",
+   "title": "technical: boost scale, tyres' scale and whether the car notifies",
+   "status": "partial",
+   "label": "arrives-other-app",
+   "decided": {
+    "tyre_pressure_raw_range": [
+     22,
+     25
+    ],
+    "tyre_pressure_invalid_65535_seen": true,
+    "tyre_pressure_plausible_factors": [
+     0.1
+    ],
+    "tyre_pressure_samples": 29,
+    "tyre_target_raw_range": [
+     22,
+     27
+    ],
+    "target_minus_actual_raw_last": [
+     -1,
+     -1,
+     2,
+     4
+    ],
+    "tyre_temp_raw_range": [
+     40,
+     49
+    ],
+    "tyre_temp_invalid_65535_seen": true,
+    "tyre_temp_plausible_as_celsius_directly": true,
+    "boost_raw_range": [
+     0,
+     255
+    ],
+    "boost_255_seen": true,
+    "boost_raw_range_without_255": [
+     0,
+     11
+    ],
+    "boost_samples": 36,
+    "boost_ramp_repeats": 4,
+    "engine_temp_raw_range_1": [
+     111,
+     147
+    ],
+    "engine_temp_raw_range_2": [
+     48,
+     153
+    ],
+    "engine_temp_minus_48_plausible": true,
+    "pressure_unit": "BAR",
+    "temperature_unit": "C"
+   },
+   "evidence": [
+    {
+     "file": "car_vitals.log",
+     "line": 41,
+     "ts": "2026-11-09T17:02:44Z",
+     "shape": "car_vitals raw tyre pressure line (another app's log)",
+     "n": {}
+    },
+    {
+     "file": "car_vitals.log",
+     "line": 44,
+     "ts": "2026-11-09T17:02:44Z",
+     "shape": "car_vitals raw tyre target line (another app's log)",
+     "n": {}
+    },
+    {
+     "file": "car_vitals.log",
+     "line": 35,
+     "ts": "2026-11-09T17:02:44Z",
+     "shape": "car_vitals raw tyre temp line (another app's log)",
+     "n": {}
+    },
+    {
+     "file": "car_vitals.log",
+     "line": 32,
+     "ts": "2026-11-09T17:02:44Z",
+     "shape": "car_vitals raw boost line (another app's log)",
+     "n": {}
+    }
+   ],
+   "evidence_total": 4,
+   "why": [
+    "another app's log shows the car sends tyre pressure / temperature, target pressure and FES boost through getters; raw values only, scale from a reading",
+    "tyre pressure: factor 0.1 is the only one that puts the raw values in 1.5-4 bar (car_vitals also logs the car's pressure unit BAR)"
+   ],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session",
+    "iDrive's tyre page read next to a probe line (readings.json: tyres), and a drive under load for boost (readings.json: boost_peak_bar)"
+   ],
+   "material": [
+    "reference/car/2026-11-15/logs/other-apps/car_vitals.log",
+    "car_vitals.log"
+   ],
+   "dated": "2026-11-14",
+   "blocks": [
+    "SPEC-R3 \u00a74.1 technical page, tyres page"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "P17": {
+   "id": "P17",
+   "title": "others: heading, altitude, service due, instantaneous consumption: only whether they arrive",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.1 optional pages"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P18": {
+   "id": "P18",
+   "title": "Does anything the head unit tells the KOMBI change at the moment the box appears or goes: the gear display data (Powertrain.dataDisplayGearboxSecure), the welcome animation, the cluster configuration,",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the signal_probe log of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MB theories a-e",
+    "SPEC-R3 \u00a712 black box",
+    "boxes BS \u00a77 ranked candidates"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P19": {
+   "id": "P19",
+   "title": "Do the signals that FEATURE-AUDIT ranked as gaps arrive, and with what values: turn indicators, belt contacts and seat occupancy, the lamp status (main beam, fog, position), the dimmer, the engine-oil",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "the signal_probe log of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "FEATURE-AUDIT gaps 3, 12; BAKE-REPORT \u00a75 item 5",
+    "bottom.belt_rear / bottom.airbag overlay unknowns"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "P20": {
+   "id": "P20",
+   "title": "Does any service offer RecogFrontCameraLightDetection (0xD089 = 53385) on this car? The catalogue is a shipped platform file and proves nothing.",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "CP's probe_fields.json has no field for P20 yet"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "HIGH-BEAM-ASSIST-REPORT \u00a76 question 1"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "needs-lead-decision"
+  },
+  "P21": {
+   "id": "P21",
+   "title": "Which named events, if the lead allows them, answer something no field can: sinkMuteStateChanged (mute mark), InputRelay.onKeyInput (controller / voice keys), RICServiceList / RICServiceGuidance ric_s",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "CP's probe_fields.json has no field for P21 yet"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a73.4",
+    "SPEC-R3 \u00a74.3",
+    "SPEC-R3 \u00a74.5"
+   ],
+   "kind": "P",
+   "in_register": true,
+   "register_status": "needs-lead-decision"
+  },
+  "X1": {
+   "id": "X1",
+   "title": "With f30 never rebuilding on a mode change, does the black box still come with gear and drive-mode changes? (MB's E5: a KOMBI event while the letter is covered, without our rebuild.)",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MB theories",
+    "SPEC-R3 \u00a712"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X2": {
+   "id": "X2",
+   "title": "Does the KOMBI react to a layer RECTANGLE over BMW's gear letter (clear pixels) or to the PIXELS there (E2, then E3 black, then grey)?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 strip mask design",
+    "SPEC-R3 \u00a712"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X3": {
+   "id": "X3",
+   "title": "Does leaving no layer rectangle over x 1380-1460, y 660-720 keep the box away in every theme (E1)?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MB",
+    "strip mask lanes"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X4": {
+   "id": "X4",
+   "title": "Does rebuilding alone, with the letter free, bring the box (theory b; E4)?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MB",
+    "MP \u00a77 no-rebuild plan"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X5": {
+   "id": "X5",
+   "title": "f30 textures: 'goes whole' KB over three Sport -> Comfort switches; picture is a photo (manual)",
+   "status": "partial",
+   "label": null,
+   "decided": {
+    "goes_whole_events": 62
+   },
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "marker windows of class mode-switch (design/car/markers.json from CQ) and cluster-render's journal of the session"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MT \u00a78",
+    "MP \u00a77 items 2-3"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X6": {
+   "id": "X6",
+   "title": "the map window: BMW's map on the panel's own id (photo) and that the app can read the slot rows (log side)",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "photos (centre in P and D, with and without a route); log side: mapSlots lines or the journal (see L11)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.5",
+    "SPEC-R3 \u00a710 ??????????? menu"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X7": {
+   "id": "X7",
+   "title": "f30's message release: the window closes and never over a listed message",
+   "status": "not-yet",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "an f30 build with config.ccActive.release set, a door message, a second message, a message that returns"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 next version",
+    "Twin Dial release (SPEC-R3 \u00a75.4 item 7)"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X8": {
+   "id": "X8",
+   "title": "Does 150 ms cover a 462 x 270 sheet's upload plus the panel's opening; does the service apply one turn's writes on several connections together?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a75.4-5.5"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X9": {
+   "id": "X9",
+   "title": "What band gain matches the car (references differ by about 2x), and are the night multipliers (band x 0.6 / 0.55 / 0.5, strip x 0.55, white x 0.8, red x 0.85, tab fills x 0.75, amber x 0.8) right?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a76",
+    "SPEC \u00a77.2, \u00a717.2"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X10": {
+   "id": "X10",
+   "title": "the KOMBI accepts the round-3 shaders: no reset, no missing layer (log side: guard strikes, restarts)",
+   "status": "partial",
+   "label": "arrives",
+   "decided": {
+    "guard_strikes": 1,
+    "guard_events": [
+     {
+      "strike": 2,
+      "ms_after_mapping": 2287
+     }
+    ],
+    "renderer_starts_in_journal": 6,
+    "app_nonzero_exits": 0
+   },
+   "evidence": [
+    {
+     "file": "cluster-render.log",
+     "line": 1410,
+     "ts": "2026-11-14T19:07:13Z",
+     "shape": "cluster-render guard disabled the panel scene after mapping it",
+     "n": {
+      "strike": 2
+     }
+    }
+   ],
+   "evidence_total": 1,
+   "why": [
+    "the guard switched the panel off after a strike; it is not asked for again until cluster-render's version changes (or guard-reset): after a guard line the owner's photo of the cluster means nothing until that is read"
+   ],
+   "needs": [
+    "the owner's observation: no cluster reset after start, a mode switch, day/night"
+   ],
+   "material": [
+    "cluster-render.log"
+   ],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a712"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X11": {
+   "id": "X11",
+   "title": "How long is the screen incomplete on a mode switch (predicted 0.14-0.4 s to Sport, 1.0-2.8 s back to Comfort, 0 for Twin Dial); do f30's needles step more than Twin Dial's at the same speed (GPU arith",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MP \u00a77"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X12": {
+   "id": "X12",
+   "title": "With our gear letter at BMW's place and the gap closed, does the box come? (Only together with the black-box experiments.)",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC \u00a717.3"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X13": {
+   "id": "X13",
+   "title": "Does a fresh mapping clear the box: our layout Off, wait >= 5 s, back on; a door open / close at standstill (a 0x203 lock -> re-map on 0.5.12)? Does keeping Waze's HUD map off change the box?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MB",
+    "boxes BR \u00a75"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X14": {
+   "id": "X14",
+   "title": "Which KOMBI event comes with the box, and do 0x200 / 0x202 change then (E3); does a re-seat after a switch clear the box every time (E4: a data file car3k.json {\"slot\":\"reseat\"}, E5: re-seat on gear)?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MB",
+    "boxes BR \u00a75"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "needs-owner-approval"
+  },
+  "X15": {
+   "id": "X15",
+   "title": "Effects of no fallback id (E6), guide_hold 0 (E7), cluster-render 0.6.6 (E8), panel_content_class 512 / 771 / 1024 (E9), another slot 0x200 (E10), another content id (E11), a system patch (E12).",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MB"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "needs-owner-approval"
+  },
+  "X16": {
+   "id": "X16",
+   "title": "What does BMW draw over an opaque panel in each state: the telltale columns, belt and airbag group, OFF / MSA marks, the message panel and symbol, the marker 'i', dark pads under its over-items, glow ",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC rev 2 \u00a715 side lamps (6 of 7 unknown)",
+    "FEATURE-AUDIT gaps 4, 15",
+    "OVERLAY-PHOTO-PROTOCOL"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X17": {
+   "id": "X17",
+   "title": "Does the HMI honour Visible on list rows (hideModeRows, hideRowUnlessG20)? It rejects Visible on buttons that lack property 2 (INVALID_MODELID, verified).",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 native menu"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X18": {
+   "id": "X18",
+   "title": "Does MAIN list Guest (active), Valet and the two local profiles with the right names; are free slots hidden (Visible); do the dates, 'Guest's settings copied' and the PIA number read; does currentUser",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "DRIVER-PROFILES-APP \u00a76"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "X19": {
+   "id": "X19",
+   "title": "createUserAccount from an app (MAX_NUM_EXCEEDED?), rename, copy Guest's settings (only on a NEW test profile; it overwrites), delete (not for Guest / Valet / the active one; IS_PROTECTED_ACCOUNT with ",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "DRIVER-PROFILES-APP \u00a76"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "needs-owner-approval"
+  },
+  "X20": {
+   "id": "X20",
+   "title": "What size persod accepts (guess 48 KB jpg), whether persod validates the data, and whether this car's HMI draws a custom avatar at all.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "Driver Profiles 0.2.x"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "needs-owner-approval"
+  },
+  "X21": {
+   "id": "X21",
+   "title": "Is 5AC / 5AP in the vehicle order; does the KAFAS hold the HBA FSC and which AppID (432 or 0180/0181); the KAFAS fault of 2026-11-10; does the US ConnectedDrive store offer HBA; what is LMV_G11?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "HIGH-BEAM-ASSIST-REPORT \u00a76 rows 2-4, 7-9"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "out-of-session"
+  },
+  "X22": {
+   "id": "X22",
+   "title": "What is the KOMBI's GLOBAL_LAYOUT_VARIANTE (DKOMBI4)? Public reports tie the black box to cluster coding.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MB",
+    "boxes BC \u00a73.3"
+   ],
+   "kind": "X",
+   "in_register": true,
+   "register_status": "out-of-session"
+  }
+ }
+}

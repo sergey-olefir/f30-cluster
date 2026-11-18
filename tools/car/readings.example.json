@@ -1,0 +1,18 @@
+{
+  "_about": "The owner's readings of what the CAR shows, typed by the lead from the photos (numbers only). Pass with --readings. Every key is optional; a table without its reading says what it still needs.",
+  "at_marker": null,
+  "odometer_km": 48215,
+  "odometer_shown_on_0_1_0": true,
+  "trip": {
+    "since_start": {"cons": 6.8, "speed": 41, "way": 12.4, "time": [0, 43], "from": [14, 0]},
+    "other": {"cons": 7.1, "speed": 55, "way": 80.2, "time": [1, 31], "from": [8, 30]}
+  },
+  "tyres": {"fl": 2.3, "fr": 2.4, "rl": 2.5, "rr": 2.4},
+  "boost_peak_bar": 0.9,
+  "media": {"4": {"title_len": 17}},
+  "guidance": {"20": {"metres": 350}},
+  "sign_values": [50, 70],
+  "cruise_set_speeds": [80, 100],
+  "sun": {"set_min_utc": 960, "rise_min_utc": 300},
+  "black_box_times": ["2026-11-20T10:15:00Z"]
+}
