@@ -39,3 +39,6 @@ Other suites: see the end of this file (run with `BENCH_PORT` in 8651+ because o
 - C2: only the box is the spec's; the positions inside it are mine. C2 does not hide the coolant bar (its empty segments are baked in the face: that needs B1 / a re-bake).
 - The unknown sign's grey / ring: drawn as a red ring with three dashes as in the mockup `La_unknown`; the derestriction sign's colours are mine (mockup `La_end`).
 - B6's icon names (`td_cruise`, `td_cruise_acc`, `td_limiter`) were read from B6's worktree, not yet merged; until then the readout has no symbol.
+
+## Other suites (each one at a time, bench ones on `BENCH_PORT` 8651+; the first run on the default ports failed in bench suites because other agents' servers sit on neighbouring ports, and `test-twin-budget` shares its fixture folder under `bake/work/` with the other packages: it passed when run alone)
+bottom-row 254, cc-release 57, daynight 24, driver-profiles 105, fonts 34, mb-exp 46, native-ui 47, night 48, probes 25, scene-tex 54, strip-mask 40, twin-bake 35, twin-budget 75, twin-cc 149, twin-fonts 219, twin-layout 61, twin-pages 101, twin-probe 115, twin-sim 39, twin-trip 82 — all equal to main's counts; plus twin-limit 150 (new).
