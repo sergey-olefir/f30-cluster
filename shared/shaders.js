@@ -2458,13 +2458,25 @@ function linC(r, g, b) {
     const f = (c) => { const v = c / 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
     return 'vec3(' + [r, g, b].map((c) => f(c).toFixed(5)).join(', ') + ')';
 }
+// twin_dial B1 (SPEC-R3 §6, §7.1): the same with the G20 panel's black floor taken out, L' = (L - F) / (1 - F), F = (0.12 %, 0.09 %, 0.56 %)
+function linF(r, g, b) {
+    const F = [0.0012, 0.0009, 0.0056];
+    const f = (c, i) => { const v = c / 255, l = v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); return Math.max(0, (l - F[i]) / (1 - F[i])); };
+    return 'vec3(' + [r, g, b].map((c, i) => f(c, i).toFixed(5)).join(', ') + ')';
+}
+// twin_dial B1: the linear-light R : G : B ratios of a colour against its own G (what multiplies the face's neutral G code)
+function tintOf(r, g, b) {
+    const f = (c) => { const v = c / 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    return 'vec3(' + [f(r) / f(g), 1, f(b) / f(g)].map((c) => c.toFixed(4)).join(', ') + ')';
+}
 
 const TDIAL = `// One Twin Dial gauge in one cluster-render "effect" layer (GLSL ES 1.00): the baked R8 face (u_face, one byte a px =
 // the sRGB code of its grey, 1 = white: band, strip, ticks, numerals, bezel, rim, labels, empty bar segments), coloured
-// by region here (cool tint and level of the band, red numerals and ticks from the redline), the red wedge, the needle
-// with its shadow, the fuel / coolant bar's fill, and the night multipliers (u_n0..u_n2; all 1 by day). One source for
-// both gauges: the tachometer sends a wedge (u_red.x < 900), the speedometer sends none. Alpha is 1 inside the bezel's
-// disc, 0 outside (BMW's lamps 3.7 px outside it stay visible). v_uv (0,0) is the top-left.
+// by region here (cool tint and level of the band, the strip's own tint, red numerals and ticks from the redline, the red
+// arc on the bezel), the speed-limit marker and the strip's red from the limit (u_lim), the cruise marker (u_cru), the
+// needle with its shadow, the fuel / coolant bar's fill, and the night multipliers (u_n0..u_n2; all 1 by day). One source
+// for both gauges: the tachometer sends a red arc (u_red.x < 900), the speedometer sends none and carries the markers.
+// Alpha is 1 inside the bezel's disc, 0 outside (BMW's lamps 3.7 px outside it stay visible). v_uv (0,0) is the top-left.
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;     // px-scale maths: mediump is fp16 on the car's GPU
 #else
@@ -2476,15 +2488,22 @@ uniform vec4 u_dim;       // R px; sweep deg; band level (bandGain); needle shad
 uniform sampler2D u_face;
 uniform vec4 u_faceR;     // the face's box in layer px: x, y, w, h
 uniform vec4 u_dyn;       // needle deg (cw from 12); bar fill 0..1; the red segment (-1: none)
-uniform vec4 u_red;       // wedge from deg (999: none); red numerals from deg; red ticks from deg; wedge to deg
+uniform vec4 u_red;       // red arc from deg (999: none); red numerals from deg; red ticks from deg; arc to deg
+uniform vec4 u_lim;       // the limit: marker deg; state 0 none, 1 limit, 2 conditional (hollow), 3 hollow + red strip; warn; strip mode 0 / 1 L1 / 2 L2 / 3 L3
+uniform vec4 u_cru;       // the cruise set speed: marker deg; state 0 none, 1 active
 uniform vec4 u_bar;       // the bar: y, x0, x1 (layer px), thickness (0: none)
 uniform vec4 u_bar2;      // segments; gap px
 uniform vec4 u_n0;        // night: white ink, bezel and rim, ticks, strip
 uniform vec4 u_n1;        // night: band inner/mid, band outer, band lit ends, red
-uniform vec4 u_n2;        // night: wedge fill
+uniform vec4 u_n2;        // night: -, green, -, -
 const vec3 RED = ${linC(218, 13, 43)};
-const vec3 FILL = ${linC(78, 0, 0)};
-const vec3 TINT = vec3(0.96, 1.0, 1.08);
+const vec3 RARC = ${linF(210, 20, 21)};
+const vec3 MRED = ${linF(181, 26, 17)};
+const vec3 CGRN = ${linF(60, 155, 34)};
+const vec3 TINT = vec3(0.76, 1.0, 1.064);
+const vec3 STINT = ${tintOf(98, 109, 111)};
+const vec3 LTINT = ${tintOf(115, 124, 126)};
+const float LS = 0.1529;   // the strip body's linear light (G code 109)
 
 float lin1(float c) { return c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4); }
 vec3 enc(vec3 l) {
@@ -2513,23 +2532,41 @@ void main() {
     if (cv <= 0.0) { gl_FragColor = vec4(0.0); return; }
     float th = degrees(atan(p.x, -p.y));                 // deg clockwise from 12
     float ath = abs(th);
+    float pxd = rd * 0.0174533;                          // px per degree at this radius
     vec2 fu = (px - u_faceR.xy) / u_faceR.zw;
     float lc = 0.0;
     if (fu.x >= 0.0 && fu.y >= 0.0 && fu.x <= 1.0 && fu.y <= 1.0) lc = r8a(texture2D(u_face, fu));
     float L = lin1(lc);
-    float ink = smoothstep(0.70, 0.85, lc);
-    // the materials by region (SPEC 4): the band and the tick strip run to +-144 deg
+    // the materials by region (SPEC-R3 2): the band and the tick strip run to +-143 deg (the face's own edge)
     float ang = 1.0 - smoothstep(144.0, 145.5, ath);
     float band = smoothstep(0.572, 0.580, rho) * (1.0 - smoothstep(0.940, 0.948, rho)) * ang;
     float strip = smoothstep(0.889, 0.896, rho) * (1.0 - smoothstep(0.940, 0.948, rho)) * ang;
+    float ln = smoothstep(0.9225, 0.9245, rho) * (1.0 - smoothstep(0.9335, 0.9355, rho));
     float bm = mix(mix(u_n1.x, u_n1.y, smoothstep(0.70, 0.88, rho)), u_n1.z, smoothstep(70.0, 125.0, ath) * smoothstep(0.80, 0.90, rho));
     bm = mix(bm, u_n0.w, strip);
-    vec3 bgF = mix(vec3(1.0), TINT, band - strip) * mix(1.0, u_dim.z, band) * mix(u_n0.x, bm, band);
+    vec3 bgF = mix(vec3(1.0), mix(TINT, mix(STINT, LTINT, ln), strip), band) * mix(1.0, u_dim.z, band) * mix(u_n0.x, bm, band);
     float inkM = mix(u_n0.x, u_n0.y, max(step(0.975, rho), step(0.52, rho) * (1.0 - step(0.575, rho))));
     inkM = mix(inkM, u_n0.z, strip);
     float red = max(step(u_red.y, th) * ang * step(0.575, rho) * (1.0 - step(0.893, rho)), step(u_red.z, th) * strip);
-    vec3 inkF = mix(vec3(inkM), RED * u_n1.w, red);
+    float ink = max(smoothstep(0.70, 0.85, lc), max(step(0.975, rho), red * smoothstep(0.50, 0.70, lc)));      // the bezel is all ink (its antialiased edge keeps the arc's red); a red tick or numeral takes its edge earlier (no grey halo)
+    float arc = step(0.975, rho) * clamp((th - u_red.x) * pxd + 0.5, 0.0, 1.0) * step(th, u_red.w);
+    vec3 inkF = mix(mix(vec3(inkM), RED * u_n1.w, red), RARC * u_n1.w, arc);
     vec3 col = vec3(L) * mix(bgF, inkF, ink);
+    // the red tick strip from the limit (SPEC-R3 8): L1 dim below the limit, full when over; L2 only between the marker and the needle, over only; L3 always full
+    float act = step(0.5, u_lim.y) * (1.0 - step(1.5, u_lim.y) * (1.0 - step(2.5, u_lim.y)));
+    float over = max(step(u_lim.x, u_dyn.x), step(0.5, u_lim.z));
+    float lvl = u_lim.w < 1.5 ? mix(0.45, 1.0, over) : (u_lim.w < 2.5 ? over : 1.0);
+    float hi = u_lim.w < 2.5 && u_lim.w > 1.5 ? u_dyn.x : 125.5;
+    float rs = act * step(0.5, u_lim.w) * clamp((th - u_lim.x) * pxd + 0.5, 0.0, 1.0) * clamp((hi - th) * pxd + 0.5, 0.0, 1.0);
+    col = mix(col, MRED * lvl * u_n0.w, rs * strip * clamp(L / LS, 0.0, 1.0) * (1.0 - ink));
+    // the markers: the limit's across the strip (2 deg wide, rho 0.893-0.94), the cruise set speed's in the dark gap (rho 0.94-0.985, pointing in)
+    float rin = clamp(rd - 0.893 * R + 0.5, 0.0, 1.0) * clamp(0.94 * R - rd + 0.5, 0.0, 1.0);
+    float mk = step(0.5, u_lim.y) * clamp((1.0 - abs(th - u_lim.x)) * pxd + 0.5, 0.0, 1.0) * rin;
+    float hole = clamp((1.0 - abs(th - u_lim.x)) * pxd - 1.5, 0.0, 1.0) * clamp(rd - 0.893 * R - 2.0 + 0.5, 0.0, 1.0) * clamp(0.94 * R - rd - 2.0 + 0.5, 0.0, 1.0);
+    col = mix(col, MRED * u_n1.w, mk * (1.0 - step(1.5, u_lim.y) * hole));
+    float ct = clamp((rd - 0.94 * R) / (0.045 * R), 0.0, 1.0);
+    float cm = step(0.5, u_cru.y) * clamp((0.3 + 1.2 * ct - abs(th - u_cru.x)) * pxd * 0.8 + 0.5, 0.0, 1.0) * clamp(rd - 0.94 * R + 0.5, 0.0, 1.0) * clamp(0.985 * R - rd + 0.5, 0.0, 1.0);
+    col = mix(col, CGRN * u_n2.y, cm);
     // the needle's frame
     float na = radians(u_dyn.x);
     vec2 nd = vec2(sin(na), -cos(na));
@@ -2540,15 +2577,6 @@ void main() {
     if (u_dim.w > 0.5 && band > 0.0) {
         float sh = clamp(hw + 0.05 * R - abs(ac) + 0.5, 0.0, 1.0) * alo;
         col *= 1.0 - 0.15 * sh * (1.0 - ink) * (band - strip);
-    }
-    if (u_red.x < 900.0) {
-        float d = min(min(rd - 0.550 * R, 0.940 * R - rd), min((th - u_red.x) * rd * 0.0174533, (u_red.w - th) * rd * 0.0174533));
-        float inW = clamp(d + 0.5, 0.0, 1.0);
-        if (inW > 0.0) {
-            vec3 wc = mix(RED * u_n1.w, FILL * u_n2.x, clamp(d - 2.5, 0.0, 1.0));
-            float Lb = rho >= 0.893 ? 0.25 : rho < 0.58 ? 0.0 : 0.010 * exp(7.5 * (rho - 0.60)) * exp(-0.85 * (cos(radians(th)) - 1.0));
-            col = mix(col, mix(wc, inkF, clamp((L - Lb) / (1.0 - Lb), 0.0, 1.0)), inW);
-        }
     }
     col = mix(col, vec3(u_n0.x), clamp(hw + 0.5 - abs(ac), 0.0, 1.0) * alo);
     if (u_bar.w > 0.0) {
@@ -2567,8 +2595,9 @@ void main() {
 
 const TDBACK = `// The Twin Dial's backdrop in one cluster-render "effect" layer (GLSL ES 1.00): opaque black with see-through holes
 // (BMW's belt group and side lamps; u_hole, up to 8 rects), and in part L (STYLE 0) also the tab bar (ramp, separators,
-// highlight cell, rule), the rules, and the fallback window over BMW's message panel (u_mask, an R8 mask). Parts RT and RB
-// (STYLE 1) are black with holes only. Colours arrive as sRGB codes (night already applied, in hud.js). v_uv (0,0) is the top-left.
+// the selected tab's cell filled in its colour and the rule under it), the rules, the fallback window over BMW's message
+// panel (u_mask, an R8 mask) and the map window (u_map: a soft box). Parts RT and RB (STYLE 1) are black with holes only.
+// Colours arrive as sRGB codes (night already applied, in hud.js), except u_hiC (the fill's colour, linear light). v_uv (0,0) is the top-left.
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
@@ -2583,15 +2612,22 @@ uniform vec4 u_tabR;      // the rule under it: y0, y1; the ramp's linear light 
 uniform vec4 u_sep;       // the four separators' x
 uniform vec4 u_sepC;      // the light line's code
 uniform vec4 u_ruleT;     // the rule under the bar
-uniform vec4 u_hi;        // the highlight cell: x0, x1, on
-uniform vec4 u_hiC;
+uniform vec4 u_hi;        // the selected tab's cell: x0, x1, on
+uniform vec4 u_hiC;       // its fill's colour, linear light (the ramp's shape times this)
+uniform vec4 u_hiR;       // the rule under it (code)
 uniform vec4 u_rule[4];   // rects x0, y0, x1, y1 (y0 = y1: none)
 uniform vec4 u_ruleC[4];
 uniform vec4 u_win;       // the fallback window: open, the mask is a keep mask, no mask: the whole rect
 uniform sampler2D u_mask;
 uniform vec4 u_maskR;     // its box in layer px: x, y, w, h
+uniform vec4 u_map;       // the map window's zero box x0, y0, x1, y1 (layer px; x1 <= x0: closed)
+uniform vec4 u_mapF;      // its fades: top, sides, bottom (px); the corner radius (px)
+const vec3 RT = vec3(0.96, 1.0, 1.08);   // the ramp's cool tint (SPEC-R3 3.1, with the band look B)
 float r8a(vec4 s) { return s.a < 0.999 ? s.a : s.r; }
-float enc1(float l) { return l <= 0.0031308 ? l * 12.92 : 1.055 * pow(l, 0.4166667) - 0.055; }
+vec3 enc3(vec3 l) {
+    l = clamp(l, 0.0, 1.0);
+    return mix(l * 12.92, 1.055 * pow(l, vec3(0.4166667)) - 0.055, step(vec3(0.0031308), l));
+}
 #endif
 // the share of the pixel at p (its centre) that lies in [a, b]
 float span(float p, float a, float b) { return clamp(min(p + 0.5, b) - max(p - 0.5, a), 0.0, 1.0); }
@@ -2605,17 +2641,18 @@ void main() {
 #if STYLE < 0 || STYLE == 0
     vec4 T = u_tab;
     float inT = box(p, T);
-    c = mix(c, vec3(enc1(mix(u_tabR.z, u_tabR.w, clamp((p.y - T.y) / (T.w - T.y), 0.0, 1.0)))), inT);
+    float rl = mix(u_tabR.z, u_tabR.w, clamp((p.y - T.y) / (T.w - T.y), 0.0, 1.0));
+    c = mix(c, enc3(vec3(rl) * RT), inT);
     float cell = span(p.x, u_hi.x, u_hi.y) * u_hi.z;
-    c = mix(c, u_hiC.rgb, cell * span(p.y, T.y, T.w));
+    c = mix(c, enc3(u_hiC.rgb * (rl / u_tabR.w)), cell * span(p.y, T.y, T.w));
     for (int i = 0; i < 4; i++) {
         float row = span(p.y, T.y, T.w);
-        c = mix(c, vec3(0.0), span(p.x, u_sep[i], u_sep[i] + 1.0) * row);
-        c = mix(c, u_sepC.rgb, span(p.x, u_sep[i] + 1.0, u_sep[i] + 2.0) * row);
+        c = mix(c, vec3(0.0), span(p.x, u_sep[i] - 1.0, u_sep[i] + 1.0) * row);
+        c = mix(c, u_sepC.rgb, span(p.x, u_sep[i] + 2.0, u_sep[i] + 3.0) * row);
     }
     float under = span(p.x, T.x, T.z) * span(p.y, u_tabR.x, u_tabR.y);
     c = mix(c, u_ruleT.rgb, under);
-    c = mix(c, u_hiC.rgb, cell * span(p.y, u_tabR.x, u_tabR.y));
+    c = mix(c, u_hiR.rgb, cell * span(p.y, u_tabR.x, u_tabR.y));
     for (int i = 0; i < 4; i++) c = mix(c, u_ruleC[i].rgb, box(p, u_rule[i]));
     if (u_win.x > 0.5) {
         vec2 m = p - u_maskR.xy;
@@ -2623,6 +2660,13 @@ void main() {
             float k = u_win.z > 0.5 ? 1.0 : r8a(texture2D(u_mask, (floor(m) + 0.5) / u_maskR.zw));
             a *= 1.0 - (u_win.y > 0.5 ? 1.0 - k : k);
         }
+    }
+    if (u_map.z > u_map.x) {
+        float R = max(u_mapF.w, 1.0);                // the corner radius; length() of an offset normalised by it (fp16)
+        vec2 q = max(abs(p - (u_map.xy + u_map.zw) * 0.5) - ((u_map.zw - u_map.xy) * 0.5 - R), 0.0) / R;
+        float h = min(min(clamp((p.y - u_map.y) / u_mapF.x, 0.0, 1.0), clamp((u_map.w - p.y) / u_mapF.z, 0.0, 1.0)), min(clamp((p.x - u_map.x) / u_mapF.y, 0.0, 1.0), clamp((u_map.z - p.x) / u_mapF.y, 0.0, 1.0)));
+        h *= clamp(R + 0.5 - sqrt(dot(q, q)) * R, 0.0, 1.0);
+        a *= 1.0 - h;
     }
 #endif
     gl_FragColor = vec4(c, a);

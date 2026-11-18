@@ -45,7 +45,7 @@ const VG = JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'twin-dial', 'vg
 const L = JSON.parse(fs.readFileSync(LAYOUT, 'utf8'));
 const W = L.widgets;
 const byId = {}; W.forEach((w) => { byId[w.id] = w; });
-const ink = W.filter((w) => w.type === 'text' || w.type === 'icon' || w.type === 'atext');   // what draws glyphs and pictograms
+const ink = W.filter((w) => w.type === 'text' || w.type === 'icon' || w.type === 'atext' || w.type === 'tdpage');   // what draws glyphs and pictograms (round 3: the centre pages' one layer)
 const FONTDIR = fs.existsSync(path.join(dir, 'hud', 'fonts', 'td_big.json')) ? path.join(dir, 'hud', 'fonts') : null;
 const snap = JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'twin-dial', 'c', 'font_metrics.json'), 'utf8')).fonts;
 const atlas = (n) => JSON.parse(fs.readFileSync(path.join(FONTDIR, n + '.json'), 'utf8'));
@@ -181,8 +181,9 @@ console.log('the dials and the background in the contract\'s fields (docs/twin-d
     ok(t.bar.y === 619 && t.bar.x0 === 254 && t.bar.x1 === 506 && t.bar.segs === 5 && t.bar.gap === 4 && t.bar.signal === 'fuel' && t.bar.reserve === 'reserve', 'tachometer bar: y 619, x 254..506, 5 segments, fuel, reserve (SPEC 5.1)');
     ok(s.bar.y === 619 && s.bar.x0 === 1414 && s.bar.x1 === 1666 && s.bar.segs === 5 && s.bar.signal === 'coolant' && s.bar.min === 50 && s.bar.max === 130 && s.bar.hotAt === 120, 'speedometer bar: x 1414..1666 (the dial centre +-0.42 R; the contract text 1394..1646 is 20 px off the dial, a typo), coolant 50..130, red from 120 (SPEC 5.2)');
     const L0 = byId.bg_l;
-    ok(JSON.stringify(L0.tab.rect) === '[618,127,1302,172]' && JSON.stringify(L0.tab.seps) === '[744,812,1168,1237]' && JSON.stringify(L0.tab.ramp) === '[0.002,0.16]' && JSON.stringify(L0.tab.highlight) === '[744,812]', 'tab bar [618, 127, 1302, 172], separators 744 812 1168 1237, ramp 0.002 .. 0.16, warning cell 744..812 (SPEC 6.1)');
-    ok(L0.rules.length === 2 && L0.rules[0].y0 === 295.2 && L0.rules[0].x0 === 741 && L0.rules[0].x1 === 1180 && L0.rules[1].y0 === 612.4 && L0.rules[1].x0 === 629 && L0.rules[1].x1 === 1292 && L0.rules[1].ours.y0 === 611 && L0.rules[1].ours.y1 === 615 && L0.rules[1].ours.role === 'severity', 'rules: the title rule y 296, the bottom rule y 613 (4 px in the severity colour while our plate shows) (SPEC 6.2, 6.3, 8.1)');
+    ok(JSON.stringify(L0.tab.rect) === '[618,127,1302,172]' && JSON.stringify(L0.tab.seps) === '[780,848,1168,1237]' && JSON.stringify(L0.tab.ramp) === '[0.002,0.16]' && JSON.stringify(L0.tab.highlight) === '[780,848]' && JSON.stringify(L0.tab.rule) === '[170,173]', 'tab bar [618, 127, 1302, 172], separators 780 848 1168 1237, ramp 0.002 .. 0.16, tab 2\'s cell 780..848, the rule 3 px (SPEC-R3 3.1)');
+    // round 3 B4 (SPEC-R3 4): the title rule is 2.5 px at y 295-297.5, x 739-1181, code 205 (role "title")
+    ok(L0.rules.length === 2 && L0.rules[0].y0 === 295 && L0.rules[0].y1 === 297.5 && L0.rules[0].x0 === 739 && L0.rules[0].x1 === 1181 && L0.rules[0].role === 'title' && L0.rules[1].y0 === 612.4 && L0.rules[1].x0 === 629 && L0.rules[1].x1 === 1292 && L0.rules[1].ours.y0 === 611 && L0.rules[1].ours.y1 === 615 && L0.rules[1].ours.role === 'severity', 'rules: the title rule 2.5 px at y 295-297.5 (SPEC-R3 4), the bottom rule y 613 (4 px in the severity colour while our plate shows) (SPEC 6.3, 8.1)');
     const m = L0.panelMask;
     ok(m.tex === 'panel_mask' && m.x === 694 && m.y === 592 && m.w === 536 && m.h === 112, 'panel mask panel_mask at [694, 592, 1230, 704] (package A2)');
     const plate = [694.5, 592, 1230, 720];
@@ -196,17 +197,13 @@ const fontBase = (n) => (FONTDIR ? atlas(n).baseline : snap[n].baseline);
 const fontCell = (n) => (FONTDIR ? atlas(n).cellHeight : snap[n].cellHeight);
 const baseOf = (w) => w.y + fontBase(w.font);
 const centreX = (w) => w.x + w.w / 2;
-const SAIRA = ['td_big', 'td_clock', 'td_gear', 'td_label', 'td_tach', 'td_scale_l', 'td_scale_s'];
+const SAIRA = ['td_big', 'td_clock', 'td_label', 'td_prog', 'td_dist', 'td_cru', 'td_sign', 'td_sign3', 'td_tach', 'td_scale_l', 'td_scale_s'];
 {
     const T = (id) => byId[id];
     // [id, baseline, x of the text's anchor (centre / left / right edge by its align), font, role]
     const spec = [
-        ['speed', 441, 1540, 'td_big', 'fg'], ['gear', 539, 374, 'td_gear', 'fg'], ['ready', 348, 380, 'td_label', 'ready'], ['program', 576, 386, 'td_label', 'fg'],
-        ['tab_range_u', 156, null, 'td_u19', 'fg'], ['tab_media_t', 156, 925, 'td_tab', 'fg'],
-        ['c_title', 282, 960, 'td_title', 'fg'], ['c_time', 404, 960, 'td_clock', 'fg'], ['c_weekday', 460, 960, 'td_val', 'fg'], ['c_date', 519, 960, 'td_val', 'fg'],
-        ['t1_a', 362, 905, 'td_val', 'fg'], ['t1_au', 362, 911, 'td_u21', 'fg'], ['t1_b', 362, 1105, 'td_val', 'fg'], ['t1_bu', 362, 1111, 'td_u21', 'fg'],
-        ['t2_a', 430, 905, 'td_val', 'fg'], ['t2_au', 430, 911, 'td_u21', 'fg'], ['t2_b', 430, 1105, 'td_val', 'fg'], ['t2_bu', 430, 1111, 'td_u21', 'fg'],
-        ['t_from', 528, 960, 'td_body', 'dim'],
+        ['speed', 441, 1540, 'td_big', 'fg'], ['gear', 432, 380, 'td_big', 'fg'], ['ready', 321, 380, 'td_label', 'ready'], ['program', 471, 380, 'td_prog', 'fg'],
+        ['tab_range_u', 156, null, 'td_u19', 'fg'], ['tab_range_v', 156, null, W.find((w) => w.id === 'tab_range_v').font === 'td_tabs' ? 'td_tabs' : 'td_tab', 'fg'],
         ['row_l1', 656, 846, 'td_row', 'fg'], ['row_l1u', 656, 851, 'td_u21', 'fg'], ['row_l2', 703, 846, 'td_row', 'fg'],
         ['row_r1', 656, 1153, 'td_row', 'fg'], ['row_r1u', 656, 1158, 'td_u21', 'fg'], ['row_r2', 703, 1153, 'td_row', 'fg'], ['row_r2u', 703, 1158, 'td_u21', 'fg'],
     ];
@@ -224,9 +221,11 @@ const SAIRA = ['td_big', 'td_clock', 'td_gear', 'td_label', 'td_tach', 'td_scale
     ok(W.filter((w) => w.type === 'text' || w.type === 'icon').every((w) => ROLES.indexOf(w.color) >= 0), 'every colour is a role of the theme "twin": ' + ROLES.join(' '));
     if (THEMES.twin) ok(ROLES.every((r) => Array.isArray(THEMES.twin[r])), 'the theme "twin" of shared/hud_themes.js has every one of those roles');
     else skip('the theme "twin" is not in shared/hud_themes.js yet (package B merges it)');
-    // the icons: SPEC 6.1, 38 x 38 centred at y 143
-    const icons = { tab_range_i: ['td_fuel', 636], tab_warn_i: ['cc_warn', 778], tab_media_i: ['td_radio', 905], tab_phone_i: ['td_phone', 1202], tab_nav_i: ['td_nav', 1270] };
-    ok(Object.keys(icons).every((id) => T(id) && T(id).icon === icons[id][0] && T(id).w === 38 && T(id).h === 38 && T(id).x + 19 === icons[id][1] && T(id).y + 19 === 143 && T(id).tdLive), 'tab bar pictograms: 38 x 38 at x 636 778 905 1202 1270, centre y 143, all live (night colours repaint them)');
+    // the icons: SPEC-R3 3.1, 36 px of ink = a 46 px box on the centre line y 147 (the approved mockups); tab 3's cell is ONE live widget (icon + text as a group)
+    const icons = { tab_range_i: 'td_fuel', tab_warn_i: 'cc_warn', tab_phone_i: 'td_phone', tab_nav_i: 'td_nav' };
+    ok(Object.keys(icons).every((id) => T(id) && T(id).icon === icons[id] && T(id).w === 46 && T(id).h === 46 && T(id).y + 23 === 147 && T(id).tdLive), 'tab bar pictograms: 46 x 46 boxes (36 px of ink) on y 147, all live (night colours repaint them)');
+    // FIN: the media widget reaches into the cell that grows when tab 2 is hidden (780-1168): from the warning icon's box to 1158
+    ok(T('tab_media') && T('tab_media').tdLive === 'media' && T('tab_media').x === 837 && T('tab_media').w === 321 && T('tab_media').h === 46 && T('tab_media').y === 124, 'tab 3: one live widget [837, 124, 1158, 170] painting the source icon and its text as a centred group (FIN: in the cell it has now)');
     // the speed and the gear are GPU texts of the right pitch (the atlas decides; the engine's own test)
     ok(T('speed').gpu === true && T('speed').maxLen === 3 && T('gear').gpu === true, 'the digital speed and the gear are GPU texts (hud.js "gpu")');
 }
@@ -285,7 +284,7 @@ const SAIRA = ['td_big', 'td_clock', 'td_gear', 'td_label', 'td_tach', 'td_scale
     // two boxes of one sheet group may not overlap, but the two centre pages' widgets do (they are one sheet each, by design)
     const grp = {};
     W.filter((w) => w.type === 'text' || w.type === 'icon').forEach((w) => { const k = (w.conn || 0) + ':' + w.z; (grp[k] = grp[k] || []).push(w); });
-    const clock = ['c_time', 'c_weekday', 'c_date'], trip = W.filter((w) => /^t[12]_|^t_from$/.test(w.id)).map((w) => w.id);
+    const clock = [], trip = [];
     const bad = [];
     Object.keys(grp).forEach((k) => grp[k].forEach((a, i) => grp[k].slice(i + 1).forEach((b) => {
         const cross = (clock.indexOf(a.id) >= 0 && trip.indexOf(b.id) >= 0) || (clock.indexOf(b.id) >= 0 && trip.indexOf(a.id) >= 0);
@@ -313,11 +312,20 @@ console.log('the layer plan (the engine\'s own planner, shared/hud.js _plan)');
     const mib = px / 1048576;
     ok(mib <= 3.5, 'the text sheets cost ' + mib.toFixed(2) + ' MiB of pixel memory (each image counted twice; the SPEC budgets 6 MiB for everything)');
     console.log('       sheets: ' + sheets.map((s) => 'conn ' + s.conn + ' z ' + s.z + ' ' + s.w + 'x' + s.h + ' [' + s.members.length + ']').join(', '));
-    const centre = sheets.filter((s) => s.z === 6);
-    ok(centre.length === 2, 'the centre pages are two sheets (the clock page with the title, the trip page): a page change repaints text boxes, nothing is rebuilt');
-    ok(sheets.filter((s) => s.conn === 2).length === 2 && sheets.filter((s) => s.conn === 2).every((s) => s.z >= 8), 'connection 2: the bottom row\'s sheet and the plate\'s sheet, both "cc:" layers');
-    const cc = W.filter((w) => w.conn === 2 && w.type === 'text');
-    ok(cc.length > 0 && cc.every((w) => /cc:/.test(w.toggle || '')), 'every text on connection 2 is toggled by a "cc:" part, so it steps aside live (hud.js _ccLive)');
+    const centre = plan.filter((e) => e.kind === 'layer' && e.w.type === 'tdpage');
+    ok(centre.length === 1 && sheets.filter((s) => s.z === 6).length === 0, 'the centre pages are ONE own image layer (tdpage), no sheet: a page change repaints it, nothing is rebuilt (round 3 B4)');
+    ok(centre.length === 1 && centre[0].conn === 1, 'the centre layer is on connection 1');
+    // B3 (SPEC-R3 5.1, 5.5): the bottom plate is gone; tab 2's ONE sheet is the only "cc:" sheet on connection 2, the bottom row's sheet is on
+    // connection 0 with the window; B5's sign sheet (and the cruise readout's, built only with config.cruise) share connection 2 and are not "cc:" (integration)
+    const ccSheets = sheets.filter((s) => s.conn === 2 && !s.members.every((m) => m.type === 'tdsign' || m.type === 'tdcru'));
+    ok(ccSheets.length === 1 && ccSheets.every((s) => s.z === 9 && s.members.length === 1 && s.members[0].type === 'ccsheet' &&
+        s.x === 729 && s.y === 298 && s.w === 462 && s.h === 270), 'connection 2: tab 2\'s sheet [729, 298, 462 x 270], a "ccsheet", the only "cc:" sheet there (the old bottom plate is gone)');
+    ok(!W.some((w) => w.type === 'ccplate'), 'no "ccplate" widget in the layout (the code path is gone)');
+    const rowTexts = W.filter((w) => w.type === 'text' && /^row_/.test(w.id));
+    ok(rowTexts.length === 7 && rowTexts.every((w) => !w.conn && w.toggle === 'cc:row'), 'the bottom row\'s seven texts are on connection 0 (the window\'s) and toggled by "cc:row", so they step aside live (hud.js _ccLive)');
+    ok(sheets.filter((s) => s.conn === 0 && s.z === 8).length === 1 && (per[0] || 0) <= 8 && (per[1] || 0) <= 8 && (per[2] || 0) <= 8, 'layers per connection: ' + (per[0] || 0) + ' / ' + (per[1] || 0) + ' / ' + (per[2] || 0) + ' (connection 0 gains the bottom row\'s sheet; at most 8 each)');
+    const ccTexts = W.filter((w) => w.type === 'text' && /cc:/.test(w.toggle || ''));
+    ok(ccTexts.length > 0 && ccTexts.every((w) => !w.conn), 'every "cc:" text is on connection 0, one socket with the window (an order for "row aside" before "window open")');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -350,6 +358,128 @@ else {
     ok(outer + 4 <= 0.893 * R, 'every speedometer numeral stays 4 px inside the tick strip (outermost corner ' + outer.toFixed(1) + ' px, strip at ' + (0.893 * R).toFixed(1) + ')');
     const tach = [1, 2, 3, 4, 5, 6, 7, 8].map((k) => { const c = polar(-125 + 31.25 * k, 0.745 * R), b = inkBox('td_tach', String(k)); return [c[0] - b.w / 2, c[1] - b.h / 2, c[0] + b.w / 2, c[1] + b.h / 2]; });
     ok(Math.max.apply(null, tach.map(radial)) + 4 <= 0.893 * R, 'every tachometer numeral stays 4 px inside the tick strip (outermost ' + Math.max.apply(null, tach.map(radial)).toFixed(1) + ' px)');
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+console.log('the tachometer\'s hub (SPEC-R3 2.7): gear (0, 0) R, programme (0, +0.209) R, READY (0, -0.29) R');
+if (!FONTDIR) skip('the hub (no atlases in the tree)');
+else {
+    const textRaster = require(path.join(dir, 'hud_text.js'));
+    const C = VG.dials.tacho.centre, Rr = VG.R_px;
+    const inkOf = (font, s) => {       // the ink box of a text drawn on its baseline 0 at x 0 (centred): [x0, y0, x1, y1] relative to baseline and centre
+        const f = atlas(font), wd = Math.ceil(textRaster.measure(s, font)) + 8, m = textRaster.mask(wd, f.cellHeight, s, { font, x: 4 });
+        let x0 = wd, y0 = f.cellHeight, x1 = -1, y1 = -1;
+        for (let y = 0; y < f.cellHeight; y++) for (let x = 0; x < wd; x++) if (m[y * wd + x] > 127) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+        const w0 = textRaster.measure(s, font);
+        return [x0 - 4 - w0 / 2, y0 - f.baseline, x1 + 1 - 4 - w0 / 2, y1 + 1 - f.baseline];
+    };
+    const gear = byId.gear, prog = byId.program, rdy = byId.ready;
+    const centreOf = (w, s) => { const b = inkOf(w.font, s), base = w.y + atlas(w.font).baseline; return [(C[0] + (w.x + w.w / 2 - C[0]) + (b[0] + b[2]) / 2 - C[0]) , (base + (b[1] + b[3]) / 2 - C[1])]; };
+    // SPEC-R3 2.7: the centres of the gear (0, 0) R, the programme (0, +0.209) R, READY (0, -0.29) R, from the atlases' own ink
+    const gc = centreOf(gear, 'D3'), pc = centreOf(prog, 'COMFORT'), rc = centreOf(rdy, 'READY');
+    ok(Math.abs(gc[1]) <= 1.5 && Math.abs(gc[0]) <= 1.5, 'the gear\'s ink is centred on the dial centre (offset ' + gc.map((v) => v.toFixed(1)).join(', ') + ' px)');
+    ok(Math.abs(pc[1] - 0.209 * Rr) <= 1.5 && Math.abs(pc[0]) <= 1.5, 'the drive programme is centred at (0, +0.209) R (y ' + pc[1].toFixed(1) + ' of ' + (0.209 * Rr).toFixed(1) + ')');
+    ok(Math.abs(rc[1] + 0.29 * Rr) <= 1.5 && Math.abs(rc[0]) <= 1.5, 'READY is centred at (0, -0.29) R (y ' + rc[1].toFixed(1) + ' of ' + (-0.29 * Rr).toFixed(1) + ')');
+    const cap = inkOf('td_big', 'D')[3] - inkOf('td_big', 'D')[1], capSpeed = inkOf('td_big', '8')[3] - inkOf('td_big', '8')[1];
+    ok(Math.abs(cap - 0.222 * Rr) <= 4 && Math.abs(cap - capSpeed) <= 2, 'the gear\'s cap height is ' + cap + ' px (0.222 R = ' + (0.222 * Rr).toFixed(1) + '), the digital speed\'s: ' + capSpeed);
+    ok(gear.gpu === true && gear.maxLen === 2 && gear.w >= 164 && gear.font === 'td_big', 'the gear is a GPU text of td_big in a box >= 164 px (two figure pitches of 82)');
+    // every gear string: glyphs in td_big, the ink inside the box
+    const strs = ['P', 'R', 'N', 'D', '–'].concat([1, 2, 3, 4, 5, 6, 7, 8].map((n) => 'D' + n), [1, 2, 3, 4, 5, 6, 7, 8].map((n) => 'M' + n), [1, 2, 3, 4, 5, 6, 7, 8].map((n) => 'S' + n));
+    const miss = [], wide = [];
+    strs.forEach((t) => { Array.from(t).forEach((c) => { if (glyphsOf('td_big').indexOf(c) < 0) miss.push(t + ':' + c); }); const b = inkOf('td_big', t); if (b[2] - b[0] > gear.w + 4) wide.push(t + ' ' + (b[2] - b[0])); });
+    ok(!miss.length, 'every gear string is in td_big (D M N P R S, the figures, the dash)' + (miss.length ? ': ' + miss.join(', ') : ''));
+    ok(!wide.length, 'every gear string\'s ink fits the 164 px layer (the GPU text is four 41 px cells) to within 2 px a side (M4 is 166 px: the outer stems of the M may lose their last pixel; M8 is 164)' + (wide.length ? ': ' + wide.join(', ') : ''));
+    // the programme's worst text and READY inside their boxes; no Cyrillic in any of the three (Saira)
+    const progs = ['COMFORT', 'SPORT', 'SPORT+', 'ECO PRO', 'ADAPTIVE'];
+    ok(progs.every((t) => Array.from(t).every((c) => glyphsOf('td_prog').indexOf(c) >= 0) && textRaster.measure(t, 'td_prog') <= prog.w), 'every drive programme fits td_prog and its ' + prog.w + ' px box (the widest ' + Math.max.apply(null, progs.map((t) => textRaster.measure(t, 'td_prog'))) + ' px)');
+    ok(textRaster.measure('READY', 'td_label') <= rdy.w, 'READY fits its ' + rdy.w + ' px box');
+    ok([gear, prog, rdy].every((w) => SAIRA.indexOf(w.font) >= 0 && !/[Ѐ-ӿ]/.test(w.text)), 'the three hub widgets are Saira widgets whose templates carry no Cyrillic letter');
+    // the clearance to the inner ring: its outer edge 0.544 R + 0.004 R; every corner of each box (and of the ink) stays >= 4 px inside it
+    const ring = 0.548 * Rr;
+    [gear, prog, rdy].forEach((w) => {
+        const cs = [[w.x, w.y], [w.x + w.w, w.y], [w.x, w.y + w.h], [w.x + w.w, w.y + w.h]].map((p) => Math.hypot(p[0] - C[0], p[1] - C[1]));
+        ok(Math.max.apply(null, cs) + 4 <= ring, w.id + ': every corner of its box is >= 4 px inside the inner ring (farthest ' + Math.max.apply(null, cs).toFixed(1) + ' of ' + ring.toFixed(1) + ')');
+    });
+    // vertical room between the three: ink gaps
+    const ink = (w, s) => { const b = inkOf(w.font, s), base = w.y + atlas(w.font).baseline; return [base + b[1], base + b[3]]; };
+    const gi = ink(gear, 'D3'), pi = ink(prog, 'COMFORT'), ri = ink(rdy, 'READY');
+    ok(gi[0] - ri[1] >= 20 && pi[0] - gi[1] >= 12, 'READY, the gear and the programme keep clear of each other (gaps ' + (gi[0] - ri[1]).toFixed(0) + ' and ' + (pi[0] - gi[1]).toFixed(0) + ' px)');
+    ok(![gear, prog, rdy].some((w) => hit(box(w), BELT) || hit(box(w), GAP) || LAMPS.some((l) => hit(box(w), l))), 'the hub widgets keep clear of the belt group, the gear-letter gap and the lamps');
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+console.log('the centre pages (round 3 B4, SPEC-R3 4): one layer, every page, every text inside its box');
+{
+    const S = require('./twin-centre-states');
+    const R = S.rig();
+    const P = byId.c_page;
+    ok(P && P.type === 'tdpage' && P.own === true && P.conn === 1 && P.z === 6 && JSON.stringify(box(P)) === '[729,248,1191,595]', 'c_page: a tdpage, its own layer, connection 1, z 6, rect [729, 248, 1191, 595]');
+    ok(!hit(box(P), BELT) && !hit(box(P), GAP) && !LAMPS.some((l) => hit(box(P), l)) && !hit(box(P), STRIP) && !hit(box(P), MARKER) && !hit(box(P), [1406, 342, 1597, 419]) && !hit(box(P), [1420, 320, 1611, 440]),
+        'the page layer keeps clear of the belt group, the gear gap, the lamps, the lamp strip, the stored-message marker and the black box');
+    ok(P.y >= 173 && P.y + P.h <= 595.75, 'the page layer is under the tab bar (y 173) and ends above BMW\'s panel (y 595.75): nothing of it can sit on the message panel');
+    ok(!bgs.some((b) => (b.holes || []).some((h) => hit(h, box(P)))), 'no see-through hole of the backdrop lies under the page layer (the map window is a uniform, not a hole)');
+    const need = ['clock', 'trip', 'tech', 'tyres', 'msg', 'media', 'radio', 'track', 'phone', 'call', 'map', 'guide', 'calc', 'road', 'none'];
+    ok(need.every((k) => P.pages[k] && Array.isArray(P.pages[k].items) && P.pages[k].items.length), 'every page of the spec has its items: ' + need.join(' '));
+    // the grammar: title baseline 281, meta line baseline 326 right edge 1190, footer baseline 565
+    const items = (page, id) => P.pages[page].items.filter((i) => i.id === id)[0];
+    const titled = need.filter((k) => k !== 'map');
+    ok(titled.every((k) => { const t = items(k, 'title'); return t && t.b === 281 && t.x === 960 && t.al === 'c' && t.f === 'title' && t.s === '{{td:pgTitle}}'; }), 'every page but the map has the title at baseline 281, centred, Noto 41');
+    ok(['trip', 'radio', 'track', 'call'].every((k) => { const m = items(k, 'meta'); return m && m.b === 326 && m.x === 1190 && m.al === 'r'; }), 'the meta line: baseline 326, right edge 1190');
+    ok(['trip', 'radio'].every((k) => items(k, 'foot').b === 565), 'the footer: baseline 565');
+    // SPEC-R3 4.1: the clock, the trip table, the technical rows
+    ok(items('clock', 'time').b === 404 && items('clock', 'weekday').b === 460 && items('clock', 'date').b === 519 && items('clock', 'time').f === 'clock', 'clock page: the time Saira 92 at baseline 404, weekday 460, date 519');
+    ok(items('trip', 'cons').x === 896 && items('trip', 'speed').x === 1109 && items('trip', 'way').x === 896 && items('trip', 'cons').b === 384 && items('trip', 'way').b === 455 && items('trip', 'i1').sz === 46, 'trip page: number columns right at 896 / 1109, rows at 384 / 455, the pictogram at x 729');
+    const techB = [352, 418, 484, 550];
+    ok([0, 1, 2, 3].every((i) => items('tech', 'l' + i).b === techB[i] && items('tech', 'l' + i).x === 745 && items('tech', 'v' + i).x === 1150 && items('tech', 'u' + i).x === (i === 2 ? 1152 : 1156) && (i === 3 ? !items('tech', 'b3') : (items('tech', 'b' + i).y === techB[i] + 12 && items('tech', 'b' + i).x0 === 745 && items('tech', 'b' + i).x1 === 1175 && items('tech', 'b' + i).h === 6))),
+        'technical data: labels at x 745, values right at 1150, units 6 px after ("бар" 2 px: the layer ends at 1191), baselines 352 / 418 / 484 / 550, bars x 745-1175 12 px under the baseline, 6 px thick, none under the outside temperature');
+    ok(P.pages.tech.items.filter((i) => i.k === 't' && /^l\d$/.test(i.id)).map((i) => i.s).join() === 'Олива,Охолодження,Наддув,Зовні', 'technical data: the labels Олива / Охолодження / Наддув / Зовні');
+    // SPEC-R3 4.3 / 4.4 / 4.5
+    ok(items('media', 'src').sz === 66 && items('media', 'src').cx === 960 && items('media', 'src').cy === 392, 'the certain media page: the source pictogram 66 px at (960, 392), nothing else but the title');
+    ok(items('radio', 'ic').sz === 54 && items('radio', 'ic').cy === 344 && items('radio', 'station').b === 424 && items('radio', 'text').b === 471, 'radio page: pictogram 54 px at y 344, station at 424, radio text at 471');
+    ok(items('track', 'name').b === 400 && items('track', 'artist').b === 444 && items('track', 'prog').x0 === 800 && items('track', 'prog').x1 === 1120 && items('track', 'prog').y === 500, 'now playing: title 400, artist 444, the progress line x 800-1120 at y 500');
+    ok(items('phone', 'ic').sz === 54 && items('phone', 'ic').cy === 344 && items('phone', 'l1').b === 424 && items('phone', 'l2').b === 471, 'idle phone page: pictogram 54 px at y 344, lines at 424 / 471');
+    ok(items('call', 'ring').sz === 66 && items('call', 'ring').cy === 372 && items('call', 'timer').b === 410 && items('call', 'timer').f === 's72' && items('call', 'who').b === 478, 'call card: the handset 66 px at (960, 372), the timer Saira 72 at 410, who at 478');
+    ok(items('guide', 'arrow').sz === 120 && items('guide', 'arrow').cx === 830 && items('guide', 'arrow').cy === 378 && items('guide', 'dist').x === 915 && items('guide', 'dist').b === 410 && items('guide', 'road').b === 480 && items('guide', 'lanes').pitch === 34 && items('guide', 'lanes').sz === 30 && items('guide', 'foot').b === 560,
+        'guidance page: arrow 120 px at [770, 318, 890, 438], distance at x 915 baseline 410, road 480, lanes 34 px pitch / 30 px arrows, footer 560');
+    ok(items('calc', 'msg').b === 400 && items('road', 'road').b === 400 && items('road', 'sub').b === 452, 'fallback pages: calculating at 400, the road at 400 with the grey line at 452');
+    ok(!P.pages.map.items.some((i) => i.id === 'title') && P.pages.map.items.every((i) => i.y1 === undefined || i.y1 <= 595), 'the map page has no title and only a road bar at the window\'s foot');
+    // renders: every state, no data and with data: ink inside the layer, inside the window's sides, bodies inside y 300-568
+    const SAIRA_KEYS = R.pages.SAIRA, cyr2 = /[Ѐ-ӿ]/;
+    const bad = [], badSaira = [], unresolved = [], missing = [];
+    Object.keys(S.STATES).forEach((id) => {
+        const h = S.make(R, id), r = S.render(R, h);
+        const spec = P.pages[r.page];
+        if (r.page !== S.STATES[id].page) bad.push(id + ' shows ' + r.page + ', wanted ' + S.STATES[id].page);
+        r.ink.forEach((i) => {
+            const b = i.box, isTitle = i.id === 'title', isBar = r.page === 'map';
+            if (b[0] < 729 || b[2] > 1191) bad.push(id + '/' + i.id + ' x ' + b[0] + '..' + b[2] + ' leaves the window\'s sides');
+            if (b[1] < 248 || b[3] > (isBar ? 595 : 575)) bad.push(id + '/' + i.id + ' y ' + b[1] + '..' + b[3]);
+            if (!isTitle && !isBar && b[1] < 300 && !/^meta/.test(i.id) && i.id !== 'cons_u.t' && i.id !== 'time') bad.push(id + '/' + i.id + ' above the body (y ' + b[1] + ')');
+            if (isTitle && (b[1] < 248 || b[3] > 296)) bad.push(id + '/title y ' + b[1] + '..' + b[3] + ' (the rule is at 295)');
+        });
+        // every answer: no token left over, no Cyrillic in a Saira item, every character in its font
+        const res = R.pages.resolveItems(h, spec.items);
+        res.forEach((q) => {
+            const it = q.it, strs = [q.s].concat((q.parts || []).map((x) => x.s)).filter((x) => typeof x === 'string');
+            const fonts = it.k === 't' ? [it.f] : (it.parts || []).map((x) => x.f);
+            strs.forEach((t, k) => {
+                if (/\{\{/.test(t)) unresolved.push(id + '/' + it.id + ' ' + t);
+                const f = it.k === 't' ? it.f : (it.parts || [])[k] && it.parts[k].f;
+                if (!f) return;
+                if (SAIRA_KEYS.indexOf(f) >= 0 && cyr2.test(t)) badSaira.push(id + '/' + it.id + ' ' + JSON.stringify(t));
+                const name = R.pages.fontName(f);
+                if (!name) { missing.push(id + '/' + it.id + ' font role ' + f + ' has no atlas'); return; }
+                const g = JSON.parse(fs.readFileSync(path.join(FONTDIR, name + '.json'), 'utf8')).glyphs;
+                Array.from(t).forEach((c) => { if (!g[c]) missing.push(id + '/' + it.id + ' needs ' + JSON.stringify(c) + ' in ' + name); });
+            });
+        });
+    });
+    ok(!bad.length, 'every state renders on its page, every ink box inside the layer and the window\'s sides, titles above the rule, bodies in y 300-575 (' + Object.keys(S.STATES).length + ' states)' + (bad.length ? ': ' + bad.slice(0, 6).join('; ') : ''));
+    ok(!unresolved.length, 'no token is left unanswered in any state' + (unresolved.length ? ': ' + unresolved.slice(0, 4).join('; ') : ''));
+    ok(!badSaira.length, 'no Cyrillic ever reaches a Saira item of a page (the clock, the call timer, the guidance distance)' + (badSaira.length ? ': ' + badSaira.join('; ') : ''));
+    ok(!missing.length, 'every character a page can draw is in its font (the atlases in the tree; a role without its own atlas uses its stand-in)' + (missing.length ? ': ' + Array.from(new Set(missing)).slice(0, 6).join('; ') : ''));
+    // the furniture rules: nothing of the page below y 657 (it ends at 595) and nothing in x 494..691 / 1377..1463
+    ok(P.x >= 729 && P.x + P.w <= 1191, 'the page layer lies between the dials\' bezels (x 729..1191; the bezel\'s inner edge at y 400 is 684 / 1236)');
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed, ' + skipped + ' skipped');

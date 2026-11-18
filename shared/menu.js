@@ -82,6 +82,7 @@ class Menu {
     start() {
         const ctx = this.ctx, ui = this.ui;
         ui.onClick('BTN_GALLERY', () => this.guard('gallery', () => ui.open('GALLERY')));
+        ui.onClick('BTN_DIAG', () => this.guard('diag', () => ui.open('DIAG')));      // b7: the Діагностика sub-screen (app.json screen DIAG; its rows are the kit's)
         // BTN_SETTINGS (the second screen, app.json SETTINGS: every other setting) is the kit's own: mgu.js opens it
         ui.onClick('NOW', () => this.guard('now', () => {
             const scr = this.hud.screen;
@@ -177,6 +178,7 @@ class Menu {
         else parts.push('Drive mode not seen yet: Theme shows');
         const drawn = ready && typeof hud._drawnNote === 'function' ? hud._drawnNote().replace(/^, /, '') : '';
         if (drawn) parts.push(drawn);
+        if (hud.diag && hud.diag.summary()) parts.push(hud.diag.summary());      // b7: a diagnostics setting is on
         if (ready && hud.ownRow && typeof hud._own === 'function') {
             parts.push('Row: ' + ['range', 'clock', 'temp'].map((i) => i + ' ' + (hud._own(i) ? 'ours' : "BMW's")).join(', '));
         }

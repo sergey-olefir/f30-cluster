@@ -8,7 +8,7 @@
  * How the engine reads an icon: shared/hud.js paints an "icon" widget with shared/icons.js paintIcon(name, w, h, colour),
  * a distance function drawn at the widget's size with one pixel of anti-aliasing, at build time of the sheet, in any
  * colour (day, night, severity). So the thing to "bake" is not a bitmap but the distance functions, in a file the car
- * has: shared/twin_icons.js, written here from design/twin-dial/vt/pictograms.js (the 25 drawings; ten of them are
+ * has: shared/twin_icons.js, written here from design/twin-dial/vt/pictograms.js (the drawings the slot table names; ten of them are
  * package P's) with the step evaluator copied out of design/strip/pictograms/pictograms.js as text (one source of
  * truth: that file exports stepDist, the VT copy is gone). Requiring the file registers the icons in icons.js ICONS.
  *
@@ -27,12 +27,26 @@ const TWIN = require(path.join(ROOT, 'design', 'twin-dial', 'vt', 'pictograms.js
 const OUT_JS = path.join(ROOT, 'shared', 'twin_icons.js');
 const OUT_JSON = path.join(ROOT, 'apps', 'twin_dial', 'hud', 'icons', 'icons.json');
 
-// SPEC 10: which icon is drawn at which size
+// SPEC 10 (rev 2) and SPEC-R3 7: which icon is drawn at which size. Round 3 (package B6): the tab icons are 36 px of ink in a 46 px box (SPEC-R3
+// 3.1), the message symbols are drawn twice (54 px in the card's cell, 32 px in a row), and the guidance set has its
+// 120 px page size and its 30 px lane-row size.
+const MESSAGE = ['cc_door', 'cc_belt', 'cc_brake', 'cc_tyre', 'cc_engine', 'cc_washer', 'cc_bonnet', 'cc_boot', 'cc_oil', 'cc_pedal', 'cc_service', 'cc_battery', 'cc_coolant', 'cc_warn', 'cc_info'];
+const TURNS = ['td_straight', 'td_turn_slight_left', 'td_turn_left', 'td_turn_hard_left', 'td_uturn_left', 'td_turn_slight_right', 'td_turn_right', 'td_turn_hard_right', 'td_uturn_right'];
+const GUIDANCE = TURNS.concat(['td_fork_left', 'td_fork_right', 'td_fork_straight', 'td_exit_left', 'td_exit_right', 'td_merge_left', 'td_merge_right',
+    'td_flag_left', 'td_flag_centre', 'td_flag_right', 'td_lane_change_left', 'td_lane_change_right', 'td_dot'],
+    [1, 2, 3, 4, 5, 6].map((n) => 'td_rb' + n + '_r'), [1, 2, 3, 4, 5, 6].map((n) => 'td_rb' + n + '_l'));
 const SLOTS = {
-    tab: { size: [38, 38], names: ['td_fuel', 'cc_warn', 'td_radio', 'td_media', 'td_phone', 'td_nav'], use: 'the tab bar, centred at y 143' },
+    tab: { size: [46, 46], names: ['td_fuel', 'cc_warn', 'td_radio', 'td_media', 'td_proj', 'td_phone', 'td_phone_bars', 'td_phone_off', 'td_nav'], use: 'the tab bar: a 46 px box whose ink is 36 px, on the centre line y 147 (SPEC-R3 3.1 says 36 px of INK; integration decision, see docs/twin-dial/R3B-INTEGRATION.md), and the trip page\'s pump (SPEC-R3 4.1)' },
     gauge: { size: [32, 32], names: ['td_fuel_side', 'cc_coolant'], use: 'under the dials, over the bars' },
-    symbol: { size: [54, 54], names: ['cc_door', 'cc_belt', 'cc_brake', 'cc_tyre', 'cc_engine', 'cc_washer', 'cc_bonnet', 'cc_boot', 'cc_oil', 'cc_pedal', 'cc_service', 'cc_battery', 'cc_coolant', 'cc_warn', 'cc_info'], use: 'the message plate\'s symbol cell, centred (735, 665.5)' },
-    spare: { size: [32, 32], names: ['td_avg', 'td_settings', 'cc_warn_solid', 'cc_dot'], use: 'not drawn in round 2' },
+    symbol: { size: [54, 54], names: MESSAGE, use: 'the tab-2 card\'s symbol cell, centred (960, 344) (SPEC-R3 5.1)' },
+    row: { size: [32, 32], names: MESSAGE, use: 'the tab-2 rows, x 741 (SPEC-R3 5.1)' },
+    page: { size: [54, 54], names: ['td_radio', 'td_phone', 'td_phone_bars', 'td_phone_off', 'td_proj'], use: 'the radio and phone pages, centred (960, 344) (SPEC-R3 4.3, 4.4)' },
+    big: { size: [66, 66], names: ['td_radio', 'td_media', 'td_proj', 'td_phone', 'td_phone_off', 'td_handset', 'cc_info'], use: 'the media source pictogram at (960, 392), the incoming call\'s handset at (960, 372), the empty page (SPEC-R3 4.3, 4.4, 5.1)' },
+    cruise: { size: [36, 36], names: ['td_cruise', 'td_cruise_acc', 'td_limiter'], use: 'the set-speed readout, centred (1572, 528) (SPEC-R3 9)' },
+    sign: { size: [51, 51], names: ['td_end_stripes'], use: 'the end-of-restrictions sign: the stripes over the 50.8 px white disc (SPEC-R3 8)' },
+    arrow: { size: [120, 120], names: GUIDANCE, use: 'the guidance page, [770, 318, 890, 438] (SPEC-R3 4.5)' },
+    lane: { size: [30, 30], names: TURNS.concat(['td_lane_change_left', 'td_lane_change_right']), use: 'the lane row, 34 px pitch, and the navigation tab\'s turn arrow after probe P12 (SPEC-R3 3.3, 4.5)' },
+    mark: { size: [32, 32], names: ['td_mute', 'td_mic_off', 'td_play', 'td_pause', 'td_check', 'td_bars', 'td_limit', 'td_dot', 'td_car', 'td_engine', 'td_gauge', 'td_clock', 'td_road', 'td_rain', 'td_compass', 'td_handset', 'td_phone_ring', 'td_flag', 'td_avg', 'td_settings', 'cc_warn_solid', 'cc_dot'], use: 'small marks: the mute mark, the muted microphone, the page and mockup symbols; sized by the page that draws them' },
 };
 
 function evaluator() {
@@ -111,9 +125,9 @@ function manifestText() {
         }
     }
     const j = {
-        generator: 'tools/twin-dial/a1/build_twin_icons.js', source: 'design/twin-dial/vt/pictograms.js (25 drawings, MIT, our own)',
+        generator: 'tools/twin-dial/a1/build_twin_icons.js', source: 'design/twin-dial/vt/pictograms.js (' + names().length + ' drawings, MIT, our own)',
         runtime: 'shared/twin_icons.js (the distance functions the engine paints; shared/icons.js paintIcon)',
-        _about: 'SPEC 10 slot table. The engine draws icons from the distance functions at the widget\'s own size and colour; this file records what that gives at each slot size (ink box in px, ink sum, hash of the alpha plane) so a change in a drawing or in icons.js shows up in bench/test-twin-fonts.js.',
+        _about: 'SPEC 10 / SPEC-R3 7 slot table. The engine draws icons from the distance functions at the widget\'s own size and colour; this file records what that gives at each slot size (ink box in px, ink sum, hash of the alpha plane) so a change in a drawing or in icons.js shows up in bench/test-twin-fonts.js.',
         slots: Object.fromEntries(Object.entries(SLOTS).map(([k, g]) => [k, { w: g.size[0], h: g.size[1], use: g.use }])),
         items,
     };

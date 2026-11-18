@@ -236,15 +236,31 @@ const Car = require('./kit/car');
 const Waze = require('./waze');
 const Screen = require('./screen');
 const Runs = require('./runs');
+const DiagSettings = require('./diag_settings');     // b7: the Діагностика settings and the start-up hold
 // twin_dial: the {{td:...}} tokens, the centre pages' cycle, the extra signals (shared/twin_tokens.js). Only twin_dial packs the
 // file, so for every other app it is simply absent (null) and none of the twin_dial hooks below does anything.
 let twin = null;
 try { twin = require('./twin_tokens'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_tokens') < 0) throw e; }
+// twin_dial: tabs (B2): the live tabs and the tab bar's pixels (shared/twin_tabs.js). Absent (null) for every app that does not pack it.
+let twinTabs = null;
+try { twinTabs = require('./twin_tabs'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_tabs') < 0) throw e; }
+// twin_dial round 3 (package B4): the centre pages, one image layer (shared/twin_pages.js). Absent (null) for every app that does not pack it.
+let twinPages = null;
+try { twinPages = require('./twin_pages'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_pages') < 0) throw e; }
+// twin_dial: the speed limit's sign, its marker and the cruise readout (shared/twin_limit.js; same rule: absent for every other app)
+let twinLimit = null;
+try { twinLimit = require('./twin_limit'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_limit') < 0) throw e; }
+// car-fix CF2: the speed limit's real sources (shared/limit_src.js: the TrafficSignRecognition event, config.sign's field as
+// the fallback). Packed by twin_dial and f30_cluster; absent: config.sign's field alone, as before.
+let limitSrc = null;
+try { limitSrc = require('./limit_src'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('limit_src') < 0) throw e; }
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
 const IMAGE_TYPES = { text: true, scale: true, stripe: true, gridlabels: true, icon: true, swatchimg: true,
-    ccplate: true };      // twin_dial: our check-control plate sheet (shared/twin_cc.js paintPlate)
+    ccsheet: true,        // twin_dial: tab 2's sheet, the check-control card in the centre (shared/twin_cc.js paintSheet; B3: the plate is gone)
+    tdpage: true,       // twin_dial round 3 (B4): the centre pages' one layer (shared/twin_pages.js)
+    tdsign: true, tdcru: true };      // twin_dial: the speed-limit sign and the cruise readout (shared/twin_limit.js)
 const STATUS_ASK_MS = 2000;      // after a rebuild: ask cluster-render for its own status text
 const LAYER_BUDGET = 8;          // cluster-render's limit per client connection (CompositorLimits.per_client; confirmed on the car Nov 5 2026)
 const MAX_CONN = 4;              // connections a layout may ask for ("conn"): 32 layers service-wide / 8 per connection
@@ -379,13 +395,26 @@ const DAY_ONLY_THEMES = ['wb_sport', 'wb_eco'];
 // (SPEC 7.2, hypothesis: no night reference), applied on the GPU to the dial faces (tdial u_n0..u_n2) and to the tab bar's
 // colours (tdback, computed here), and to the text roles by twinNightTheme(). By day every multiplier is 1.
 const TW_NIGHT = { white: 0.80, bezel: 0.70, tick: 0.75, strip: 0.55, bandIn: 0.60, bandOut: 0.55, bandEnd: 0.50, red: 0.85,
-    wedge: 0.80, green: 0.75, ramp: 0.55, rule: 0.70, amber: 0.85, grey: 0.55 };
-const TW_ROLE_NIGHT = { fg: 0.80, dim: 0.75, hot: 0.85, ready: 0.75, amber: 0.85, grey: 0.55, rule: 0.70 };
+    wedge: 0.80, green: 0.75, ramp: 0.55, rule: 0.70, amber: 0.80 /* twin_dial B1: SPEC-R3 6 */, grey: 0.55, tab: 0.75 /* twin_dial B1: the selected tab's fill */ };
+const TW_ROLE_NIGHT = { fg: 0.80, dim: 0.75, hot: 0.85, ready: 0.75, amber: 0.80, grey: 0.55, rule: 0.70 };
 // the message severity colours (sRGB codes, the SPEC 7.1 / 8.2 values with the G20's black floor taken out) and their night role
 const TW_SEV = { red: { c: [176, 7, 30], n: 'red' }, amber: { c: [240, 170, 10], n: 'amber' },
     green: { c: [59, 155, 26], n: 'green' }, grey: { c: [231, 231, 231], n: 'rule' } };
-const TW_RULE = { rule: [231, 231, 231], tab: [237, 237, 237] };     // flat rules (SPEC 7.1); both take the rules' night multiplier
+const TW_RULE = { rule: [231, 231, 231], tab: [230, 230, 230], title: [205, 205, 205] };     // flat rules (SPEC 7.1; the tab bar's is 3 px, code 230: SPEC-R3 3.1; B4: the title rule is code 205, SPEC-R3 4); both take the rules' night multiplier
+// twin_dial B1 (SPEC-R3 3.2): the selected tab's fill colour, sRGB before the G20 black floor (the engine takes the floor out: twinFloor),
+// the fill law is colour_linear x ramp(y) / 0.16. State: this.twinTab (1..5), written by shared/twin_tabs.js.
+const TW_TAB = { 1: [176, 10, 37], 2: [176, 10, 37], 3: [240, 150, 10], 4: [60, 155, 34], 5: [30, 150, 200] };
+const TW_FLOOR = [0.0012, 0.0009, 0.0056];          // the G20 panel's black floor (R, G, B) in linear light: SPEC rev 2 7.1
+const TW_ARC_END = 143.6;                           // twin_dial B1: where the tachometer's red arc on the bezel ends (SPEC-R3 2.5)
+const TW_MAP = { W1: { box: [750, 180, 1170, 564], fade: [120, 80, 80], r: 24 }, W2: { box: [700, 173, 1220, 600], fade: [1, 1, 1], r: 1 } };   // twin_dial B1: SPEC-R3 4.5
+const TW_LIM_STRIP = { L1: 1, L2: 2, L3: 3 };       // twin_dial B1: config.limit.strip -> u_lim.w
+// twin_dial B1: an sRGB code -> linear light, the black floor taken out, the night multiplier k applied; and back to a code
+function twinLin(c, i, k, noFloor) { const v = c / 255, l = v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); return (noFloor ? l : Math.max(0, (l - TW_FLOOR[i]) / (1 - TW_FLOOR[i]))) * k; }
+function twinEnc(l) { l = Math.max(0, Math.min(1, l)); return l <= 0.0031308 ? l * 12.92 : 1.055 * Math.pow(l, 1 / 2.4) - 0.055; }
+const TW_PAGE_KEYS = ['centre', 'techData', 'callerName', 'navView'];     // round 3 B4: the centre page's settings, applied in place (no rebuild); FIN: navView ("Навігація")
 const TW_LIVE_KEYS = ['redline', 'bandGain'];       // settings the twin layers take in place (uniforms, no rebuild)
+// twin_dial: tabs (B2): the settings that move the selected tab or the centre page, in place (no layout rebuild; package B4 adds its own keys here)
+const TW_TAB_KEYS = ['tab', 'tabLock', 'centre'];
 const TW_PANEL = [694, 592, 536, 112];              // the fallback window's box (package A2's mask rect), used when the layout has no mask
 // 0.7.13, the KOMBI guard: when the cluster's display service goes away within KOMBI_GUARD_MS of our scene being shown,
 // KOMBI_STRIKES times within KOMBI_WINDOW_MS, the theme is turned off (every theme, so a drive-mode change doesn't try
@@ -796,6 +825,9 @@ class HudApp {
         this.log = ctx.log;
         this._migrateComfortMap();
         this.config = (ctx.spec && ctx.spec.config) || {};
+        // b7: the Діагностика settings (config.diag) overlay `config` here, before anything reads it; all off = app.json's own keys (shared/diag_settings.js)
+        this.diag = null;
+        try { this.diag = DiagSettings.Diag.create(this.config, ctx.settings, this.log); } catch (e) { this.log.warn('diag: settings overlay not applied: ' + (e && e.message || e)); }
         // ---- research3 MB: the black-box experiments (shared/mb_exp.js), inert unless app.json config names one ----
         this.mbExp = null;
         if (this.config.mbGap || this.config.mbCover || this.config.mbRebuild) {
@@ -890,11 +922,16 @@ class HudApp {
         this._setupVehicleData();
         this.layouts.onChange(() => { this.seeThru = {}; this._rebuild(); });
         ctx.settings.onChange((key) => {
+            if (this.diag && this.diag.has(key)) { this._guard('diag', () => this.diag.changed(this, key)); return; }     // b7: the Діагностика settings, in place or by their own rebuild
             if (LOOK_KEYS.indexOf(key) >= 0) this._kombiClear();      // 0.7.13: a theme picked: the guard lets it try again
             // a theme or layout picked anywhere (the page asks first, the kit's All settings list doesn't): no longer stepping aside
             if (LOOK_KEYS.indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
             if (PLACE_KEYS.indexOf(key) >= 0) this._guard('place', () => this._place());
             else if (this.twinLayout && TW_LIVE_KEYS.indexOf(key) >= 0) this._guard('twin live', () => this._twinLive());     // twin_dial: in place
+            else if (this.twinLayout && (TW_TAB_KEYS.indexOf(key) >= 0 || (twinPages && TW_PAGE_KEYS.indexOf(key) >= 0))) this._guard('twin tabs', () => {     // twin_dial: tabs (B2) and the centre pages (B4): in place, ONE hook (integration)
+                if (TW_TAB_KEYS.indexOf(key) >= 0 && this._twinTabsOn()) this._twinTabsChanged();
+                if (twinPages && TW_PAGE_KEYS.indexOf(key) >= 0) twinPages.changed(this);
+            });
             else if (LIVE_KEYS.indexOf(key) >= 0 || ROW_KEYS.indexOf(key) >= 0) this.widgets.forEach((x) => { x.last = null; });
             else if (WB_LIVE_KEYS.indexOf(key) >= 0 && this._wbLive()) { /* package F: the uniforms are sent, no rebuild */ }
             else if (NIGHT_KEYS.indexOf(key) >= 0 && this._nightLive()) { /* 2026-11-14: the night colours changed in place */ }
@@ -1270,8 +1307,11 @@ class HudApp {
         // symbol style and the no-passing restriction (shape: signOf). It also feeds limitState / limitKmh / nopassOn,
         // so {{limit}}, the WBSIGN layer and the over-limit arc work as they did from config.limit.
         const sg = this.config.sign;
-        watchOne(sg, (v) => {
-            const s = signOf(sg, v);
+        // car-fix CF2: the owner's car never sends config.sign's field; the limit comes as the TrafficSignRecognition
+        // EVENT (class x 5 km/h). limit_src merges the two (the event first while it is live, the field as the fallback)
+        // and logs "limit:" lines (numbers and enum names only). Without limit_src: the field alone, as before.
+        this.limitSrc = limitSrc && sg ? limitSrc.create(sg, { log: this.log }) : null;
+        const applySign = (s) => {
             this.sign = s; this.signAt = Date.now();
             this.limitState = s.state; this.limitKmh = s.kmh;
             this.nopassOn = NP_ON.indexOf(s.np) >= 0;
@@ -1282,7 +1322,9 @@ class HudApp {
                 this.signShape = key; this.signLogs++;
                 this.log.info('sign: ' + key.split('|').join(' ') + ' (state value unit warn supplemental style sure no-passing distance)');
             }
-        });
+        };
+        watchOne(sg, (v) => { const s = signOf(sg, v); applySign(this.limitSrc ? this.limitSrc.field(s) : s); });     // car-fix CF2: through the merger
+        if (this.limitSrc) this.limitSrc.wire(extra, applySign);       // car-fix CF2: the events (read only; no getter, no method)
         // The check-control message (a union of two structs; shape: ccMsgOf). It also feeds ccShown, so "cc:shown" /
         // "cc:none" and the message window work whether config.ccm names this shape or the older flag / list one.
         const cm = this.config.ccm;
@@ -1397,6 +1439,7 @@ class HudApp {
         // ccList entry whose id is that number (_ccListEval). Whether the numbering is ccList's is UNCONFIRMED.
         const ca = this.config.ccActive;
         this.ccAct = null; this.ccActAny = false; this.ccActLogged = undefined; this.ccNoMatchLogged = {};
+        this.ccActFirst = undefined; this.ccActLive = false;      // car-fix CF1: whether the number has ever changed (_ccActWitness)
         if (ca && ca.iface && ca.field) {
             watchOne(ca, (v) => {
                 const num = (p) => { const r = p ? pick(v, p) : undefined; return isNum(r) ? r : null; };
@@ -1406,10 +1449,19 @@ class HudApp {
                 if (line !== this.ccActLogged) { this.ccActLogged = line; this.log.info('active cc: ' + line); }
                 if (a.number === null) return;      // not a struct our paths fit: it decides nothing
                 this.ccAct = a;
+                // car-fix CF1: on the owner's car this number is 65535 the whole run (2026-11-18); it is a witness beside
+                // config.ccDisplayed only once it has CHANGED to a number outside ccActive.deadValues (default [65535])
+                if (this.ccActFirst === undefined) this.ccActFirst = a.number;
+                else if (!this.ccActLive && a.number !== this.ccActFirst && !inList(this._ccDeadValues(), a.number)) {
+                    this.ccActLive = true;
+                    if (this._ccDispSource()) this.log.info('active cc: it changed (' + this.ccActFirst + ' -> ' + a.number + ')' + (ca.dead === true ? ', but config.ccActive.dead: still no witness' : ': a witness again beside displayed cc'));
+                }
+                // ---- end car-fix CF1 ----
                 if (!this.ccActAny) {
                     const was = this._ccWired();
                     this.ccActAny = true;
-                    this.log.info('active cc: wired - from now on it alone says whether a message shows');
+                    // car-fix CF1: with config.ccActive.source "displayed" it is read and logged, it does not decide alone
+                    this.log.info('active cc: wired - ' + (this._ccDispSource() ? 'not the "shown now" source (config.ccActive.source displayed' + (ca.dead === true ? ', dead' : '') + ')' : 'from now on it alone says whether a message shows'));
                     if (!was && this.client && this.client.ready) this._rebuild();
                 }
                 this._ccListEval(Date.now(), false);
@@ -1424,8 +1476,12 @@ class HudApp {
         this.twinMsg = null; this.twin = null; this.twinCc = { state: 'none', severity: null }; this.ccDisp = null; this.ccDispAny = false; this.ccDispLogged = undefined;
         if (ca && typeof ca.strict === 'boolean') {
             this.twin = require('./twin_cc');
-            this.twinMsg = new this.twin.TwinCC({ strict: ca.strict, confirmNow: ca.confirmNow === true,
-                settleMs: CC_SETTLE_MS, log: (l) => this.log.info(l) });
+            // twin_dial B3 (SPEC-R3 5): the centre machine (tab 2's card, the window, the rows, the tab); its text measure is the
+            // engine's own atlases, its fonts the tab-2 sheet widget's (_twinPush sets them), its paint the sheet's pixels
+            this.twinMsg = new this.twin.TwinCentre({ strict: ca.strict, confirmNow: ca.confirmNow === true,
+                settleMs: CC_SETTLE_MS, openSettleMs: CC_SETTLE_MS, log: (l) => this.log.info(l),
+                deps: { measure: (f, str) => textRaster.measure(str, f, 0), has: (f, ch) => !!textRaster.loadFont(f).metrics.glyphs[ch], fonts: this.twin.FONTS },
+                paint: (page) => this._twinSheetBuf(page) });
             const cd = this.config.ccDisplayed;
             if (cd && cd.iface && cd.field) {
                 watchOne(cd, (v) => {
@@ -1433,7 +1489,8 @@ class HudApp {
                     if (!isNum(r)) return;
                     this.ccDisp = r;
                     if (r !== this.ccDispLogged) { this.ccDispLogged = r; this.log.info('displayed cc: number ' + r); }
-                    if (!this.ccDispAny) { this.ccDispAny = true; this.log.info('displayed cc: the second "shown now" witness has spoken'); }
+                    if (!this.ccDispAny) { this.ccDispAny = true; this.log.info('displayed cc: the ' + (this._ccDispSource() ? '"shown now" source' : 'second "shown now" witness') + ' has spoken'); }
+                    if (this._ccDispSource()) this._ccListEval(Date.now(), false);       // car-fix CF1: the list's verdict follows it too
                     this._ccPush();
                 });
             }
@@ -1449,11 +1506,15 @@ class HudApp {
                     if (!isNum(r)) return;
                     this.ccDisp = r;
                     if (r !== this.ccDispLogged) { this.ccDispLogged = r; this.log.info('displayed cc: number ' + r); }
+                    const src = this._ccDispSource();     // car-fix CF1: config.ccActive.source "displayed": it decides
                     if (!this.ccDispAny) {
+                        const was = this._ccWired();
                         this.ccDispAny = true;
-                        this.log.info('displayed cc: the second "shown now" witness has spoken' + (cd.use === true ? '' : ' (logged only)'));
+                        this.log.info(src ? 'displayed cc: the "shown now" source has spoken (config.ccActive.source displayed)'
+                            : 'displayed cc: the second "shown now" witness has spoken' + (cd.use === true ? '' : ' (logged only)'));
+                        if (src && !was && this.client && this.client.ready) this._rebuild();      // car-fix CF1: it can end the blind case
                     }
-                    if (cd.use === true) { this._ccListEval(Date.now(), false); this._ccPush(); }
+                    if (cd.use === true || src) { this._ccListEval(Date.now(), false); this._ccPush(); }
                 });
             }
         }
@@ -1587,6 +1648,9 @@ class HudApp {
         // by _restFrac to tell READY from OFF on a rev dial. audit/features.
         // twin_dial: the fields only Twin Dial reads (config.twin), chained behind the handlers above; config.carGroups: its own list
         if (twin && this.config.twin) twin.wire(this, extra);
+        // twin_dial: tabs (B2): the tab key (config.tabKey, null until the car session names one), chained in front of the field's own handler
+        if (twinTabs && this.config.tabs) twinTabs.wire(this, extra, () => this._guard('twin tabs', () => this._twinTabsChanged()));
+        if (twinLimit && this.config.twin) twinLimit.wire(this, extra);       // twin_dial: the sign (behind the engine's own watch of config.sign) and the cruise struct
         this.car = new Car(this.ctx, this.config.carGroups || ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
         this.car.setRedline(this._redline());
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
@@ -1639,10 +1703,10 @@ class HudApp {
             this._statusSoon();
         });
         c.on('refused', (op, ref, reason) => {
-            // twin_dial: our plate's sheet refused (pixel memory, layer cap): BMW's panel stays open for every message
+            // twin_dial: our tab-2 sheet refused (pixel memory, layer cap): BMW's panel stays open for every message
             if (this.twinMsg) {
                 let plate = false;
-                this.widgets.forEach((x) => { if (x.ci === ci && x.ref === ref && x.w && x.w.type === 'ccplate') plate = true; });
+                this.widgets.forEach((x) => { if (x.ci === ci && x.ref === ref && x.w && x.w.type === 'ccsheet') plate = true; });
                 if (plate) { this.twinMsg.sheetRefused(op + ': ' + reason); this._guard('twin cc', () => this._ccPush()); }
             }
             const w = this._widgetOf(ci, ref);
@@ -1651,7 +1715,7 @@ class HudApp {
             this._statusSoon();
         });
         c.on('budget', (capKb, maxKb, reason) => this.log.info('budget' + tag + ' ' + capKb + '/' + maxKb + ' kb/s (' + reason + ')'));
-        c.on('status', (text) => this.log.info('cluster-render status: ' + text));
+        c.on('status', (text) => { this.log.info('cluster-render status: ' + text); if (twinPages && this.twinLayout) twinPages.onStatus(this, text); });     // round 3 B4: the map slot rows
     }
 
     start() {
@@ -1751,6 +1815,7 @@ class HudApp {
         clearInterval(this.statusTimer);
         clearInterval(this.dmeTimer);
         clearInterval(this.mbTimer);     // research3 MB
+        DiagSettings.release(this);      // b7: the start-up hold's timer, the diagnostics' timers
         this.needleHalt = true; this._guard('needles', () => this._needleApply());     // 0.7.14: the needle timer off
         this._perfStop();       // package P
         clearTimeout(this.probeSymT); this.probeSymT = null;        // probes, item 3 (0.7.18)
@@ -2581,13 +2646,37 @@ class HudApp {
             if (isNum(rl) && rl > 0 && rl < t.max) {
                 // a numeral is red from the redline rounded up to a thousand (half a step before its centre), a tick from the redline itself
                 const ang = (r) => -t.sweep + 2 * t.sweep * r / t.max, step = 2 * t.sweep / (t.max / 1000);
-                red = [ang(rl), ang(Math.ceil(rl / 1000) * 1000) - step / 2, ang(rl) - 0.6, t.sweep];
+                red = [ang(rl), ang(Math.ceil(rl / 1000) * 1000) - step / 2, ang(rl) - 0.6, TW_ARC_END /* twin_dial B1: the arc on the bezel ends with it */];
             }
         }
         c.uniform(ref, 'u_red', red);
         const n = this._twinMults();
         c.uniform(ref, 'u_n0', n[0]); c.uniform(ref, 'u_n1', n[1]); c.uniform(ref, 'u_n2', n[2]);
+        this._twinMarks(x);        // twin_dial B1
         x.last = null;
+    }
+
+    /** twin_dial B1 (SPEC-R3 8, 9): the speed-limit marker with the red strip (u_lim) and the cruise marker (u_cru) of the speedometer.
+     *  this.twinLim = { deg, state, warn } (state 0 none, 1 limit, 2 conditional: hollow, 3 hollow with the red strip), this.twinCru = { deg,
+     *  state } (1 active) are written by shared/twin_limit.js, which then calls this with no argument (every dial, nothing else is sent);
+     *  config.limit.strip = "L1" | "L2" | "L3" picks the strip's reading. The tachometer always gets zeros. */
+    _twinMarks(x) {
+        if (!x) { this.widgets.forEach((y) => { if (y.w && y.w.type === 'tdial' && y.ref) this._twinMarks(y); }); return; }
+        const w = x.w, c = x.c, ref = x.ref;
+        let lim = [0, 0, 0, 0], cru = [0, 0, 0, 0];
+        if (w.kind === 'speed') {
+            lim = [0, 0, 0, 1];
+            const l = this.twinLim || {}, k = this.twinCru || {}, cfg = this.config.limit || {};
+            const num = (v) => (isNum(v) ? v : 0);
+            const mode = TW_LIM_STRIP[cfg.strip] || 1;
+            if (isNum(l.deg) && (l.state === 1 || l.state === 2 || l.state === 3)) lim = [Math.max(-125, Math.min(125, l.deg)), l.state, num(l.warn), mode];
+            if (isNum(k.deg) && k.state === 1) cru = [Math.max(-125, Math.min(125, k.deg)), 1, 0, 0];
+        }
+        const key = lim.join() + '|' + cru.join();
+        if (key === x.twMarks) return;
+        x.twMarks = key;
+        c.uniform(ref, 'u_lim', lim);
+        c.uniform(ref, 'u_cru', cru);
     }
 
     /** The needle's angle, degrees clockwise from 12 o'clock (SPEC 4, 5.1, 5.2). */
@@ -2611,6 +2700,7 @@ class HudApp {
 
     _twinDialUpdate(x, force) {
         const w = x.w, b = w.bar;
+        if (twinLimit) twinLimit.dial(this, x);        // twin_dial: the speedometer's u_lim / u_cru (limit and cruise markers), when they changed
         const deg = Math.round(this._twinDeg(x) * 50) / 50;
         let fill = 0, seg = -1;
         if (b) {
@@ -2643,8 +2733,12 @@ class HudApp {
         c.uniform(ref, 'u_tab', [r[0] - w.x, r[1] - w.y, r[2] - w.x, r[3] - w.y]);
         c.uniform(ref, 'u_sep', [0, 1, 2, 3].map((i) => isNum((t.seps || [])[i]) ? t.seps[i] - w.x : -10));
         const hl = Array.isArray(t.highlight) ? t.highlight : [0, 0];
+        // twin_dial B1: the five tab cells, each between its separators (the bar's ends for the first and the last): the selected one is filled
+        const sp = [0, 1, 2, 3].map((i) => (isNum((t.seps || [])[i]) ? t.seps[i] : r[2]));
+        const cells = [[r[0], sp[0]], [sp[0], sp[1]], [sp[1], sp[2]], [sp[2], sp[3]], [sp[3], r[2]]].map((q) => [q[0] - w.x, q[1] - w.x]);
         Object.assign(x.tw, { rule: (Array.isArray(t.rule) ? t.rule : [0, 0]).map((v) => v - w.y), ramp: Array.isArray(t.ramp) ? t.ramp : [0.002, 0.16],
-            hi: [hl[0] - w.x, hl[1] - w.x], rules: Array.isArray(w.rules) ? w.rules.slice(0, 4) : [], keep: w.maskKeep === true, mask: false });
+            hi: [hl[0] - w.x, hl[1] - w.x], cells, rules: Array.isArray(w.rules) ? w.rules.slice(0, 4) : [], keep: w.maskKeep === true, mask: false,
+            seps: sp, rect: r, t2: true });      // FIN: the bar's own numbers (panel px), for the bar without tab 2 (_twinBackSend)
         let mr = [TW_PANEL[0] - w.x, TW_PANEL[1] - w.y, TW_PANEL[2], TW_PANEL[3]];
         if (pm && pm.tex) {
             try {
@@ -2666,21 +2760,43 @@ class HudApp {
         const t = x.tw;
         if (!t || !t.L || !x.ref) return;
         const w = x.w, c = x.c, ref = x.ref, cc = this._twinCcNow();
-        const key = cc.state + '|' + cc.severity + '|' + this.nightOn;
+        // twin_dial B1: the selected tab (this.twinTab, 1..5) and the map window (this.twinMap: null | 'W1' | 'W2') are part of the key
+        // integration (B7): B2's tab (mirrored on twinTab) when live tabs run, else B3's machine's (an app without config.tabs)
+        const tabSrc = this.tabs || !this.twinMsg ? this.twinTab : this.twinMsg.tab;
+        const tab = Math.max(1, Math.min(5, Math.round(Number(tabSrc) || 1))), mapN = TW_MAP[this.twinMap] ? this.twinMap : null;
+        // FIN (the owner, 2026-11-18): tab 2 is in the bar only while there is a message (shared/twin_tabs.js tab2Shown); without it the
+        // separator at 848 goes and tab 3's cell is 780-1168. The separators are uniforms already: no shader change.
+        const t2 = !(this._twinTabsOn() && twinTabs && typeof twinTabs.tab2Shown === 'function') || twinTabs.tab2Shown(this) || tab === 2;
+        const key = cc.state + '|' + cc.severity + '|' + this.nightOn + '|' + tab + '|' + mapN + '|' + t2;
         if (!force && key === x.twKey) return;
         x.twKey = key;
+        if (t.seps && t.rect && twinTabs && typeof twinTabs.barGeometry === 'function') {
+            const g = twinTabs.barGeometry(t.seps, t.rect, t2);
+            c.uniform(ref, 'u_sep', [0, 1, 2, 3].map((i) => (isNum(g.seps[i]) ? g.seps[i] - w.x : -10)));
+            t.cells = g.cells.map((q) => (q ? [q[0] - w.x, q[1] - w.x] : null));
+            t.t2 = t2;
+        }
         const sev = cc.state !== 'none' ? TW_SEV[cc.severity] : null, sevC = sev ? this._twinCode(sev.c, sev.n) : null;
         const rm = this.nightOn ? TW_NIGHT.ramp : 1;
         c.uniform(ref, 'u_tabR', [t.rule[0], t.rule[1], t.ramp[0] * rm, t.ramp[1] * rm]);
-        c.uniform(ref, 'u_sepC', this._twinCode([96, 96, 96], 'ramp'));
+        c.uniform(ref, 'u_sepC', this._twinCode([84, 84, 84], 'ramp'));
         c.uniform(ref, 'u_ruleT', this._twinCode(TW_RULE.tab, 'rule'));
-        c.uniform(ref, 'u_hi', [t.hi[0], t.hi[1], sev ? 1 : 0, 0]);
-        c.uniform(ref, 'u_hiC', sevC || [0, 0, 0, 1]);
+        // the selected tab's cell (SPEC-R3 3.2): the fill is the tab's colour in linear light (black floor out, night x 0.75) times the ramp's
+        // shape in the shader; the rule under that cell is the fill's bottom colour + 0.15 x the white rule, in linear light
+        const cell = (t.cells && t.cells[tab - 1]) || t.hi, tk = this.nightOn ? TW_NIGHT.tab : 1, rk = this.nightOn ? TW_NIGHT.rule : 1;
+        const fill = TW_TAB[tab].map((v, i) => twinLin(v, i, tk));
+        c.uniform(ref, 'u_hi', [cell[0], cell[1], 1, 0]);
+        c.uniform(ref, 'u_hiC', fill.concat([1]));
+        c.uniform(ref, 'u_hiR', fill.map((v, i) => twinEnc(v + 0.15 * twinLin(TW_RULE.tab[i], i, rk, true))).concat([1]));
+        const mp = mapN ? TW_MAP[mapN] : null;
+        c.uniform(ref, 'u_map', mp ? [mp.box[0] - w.x, mp.box[1] - w.y, mp.box[2] - w.x, mp.box[3] - w.y] : [0, 0, 0, 0]);
+        c.uniform(ref, 'u_mapF', mp ? [mp.fade[0], mp.fade[1], mp.fade[2], mp.r] : [1, 1, 1, 1]);
         const rects = [], cols = [];
         for (let i = 0; i < 4; i++) {
             let r = t.rules[i];
             if (!r) { rects.push(0, 0, 0, 0); cols.push(0, 0, 0, 1); continue; }
             if (cc.state === 'ours' && r.ours) r = Object.assign({}, r, r.ours);
+            if (r.role === 'title' && twinPages && twinPages.hideTitleRule(this)) { rects.push(0, 0, 0, 0); cols.push(0, 0, 0, 1); continue; }     // round 3 B4: no title over the map window
             rects.push(r.x0 - w.x, r.y0 - w.y, r.x1 - w.x, r.y1 - w.y);
             cols.push.apply(cols, r.role === 'severity' ? sevC || this._twinCode(TW_RULE.rule, 'rule') : this._twinCode(TW_RULE[r.role] || TW_RULE.rule, 'rule'));
         }
@@ -2689,9 +2805,30 @@ class HudApp {
         c.uniform(ref, 'u_win', [cc.state === 'window' ? 1 : 0, t.mask && t.keep ? 1 : 0, t.mask ? 0 : 1, 0]);
     }
 
+    /** Round 3 B4: resend every backdrop part now (the map window opened or shut: the title rule steps aside). */
+    _twinBackForce() {
+        this.widgets.forEach((x) => { if (x.w && x.w.type === 'tdback' && x.ref) this._guard('twin back', () => this._twinBackSend(x, true)); });
+    }
+
     /** D's entry (ENGINE-CONTRACT 2): this.twinCc changed. Resends what depends on it, nothing when nothing changed. */
     _twinSync() {
+        if (this._twinTabsOn()) this._guard('twin tabs', () => twinTabs.update(this));      // twin_dial: tabs (B2): the tab follows the message, guidance, the speed, the settings
         this.widgets.forEach((x) => { if (x.w && x.w.type === 'tdback' && x.ref) this._guard('twin sync', () => this._twinBackSend(x, false)); });
+        // FIN: tab 2 came or went - the warning and media widgets repaint in the same turn as the backdrop's separators
+        if (this._twinTabsOn() && typeof twinTabs.tab2Shown === 'function') {
+            const t2 = twinTabs.tab2Shown(this);
+            if (t2 !== this.twinT2) { this.twinT2 = t2; this._guard('tab 2 shown', () => this._twinWarnIcons(Date.now())); }
+        }
+    }
+
+    /** twin_dial: tabs (B2): live tabs are on (the module packed, config.tabs set, a twin layout shown). */
+    _twinTabsOn() { return !!(twinTabs && this.twinLayout && this.config && this.config.tabs); }
+
+    /** twin_dial: tabs (B2): a tab setting changed or the key was pressed: decide again, resend the backdrop; the centre's texts and the
+     *  bottom row follow (their tokens answer by tab, so the engine repaints what changed); nothing is rebuilt. */
+    _twinTabsChanged() {
+        if (this.td) this.td.pageEval = 0;
+        this._twinSync();
     }
 
     /** "redline" / "bandGain" changed: the dials' uniforms, in place. */
@@ -3250,14 +3387,15 @@ class HudApp {
 
     _rebuildInner() {
         if (!this.client.ready) return; // the 'ready' handler calls us again
+        if (DiagSettings.hold(this)) return;     // b7: config.startupHold: the first build waits for the car's first time zone and message list (shared/diag_settings.js)
         this._rowCheck();               // bottom row: an element with no signal behind it goes back to BMW's
         // package X: who draws the row in the layout being built (_rowSync rebuilds when that changes), and nothing of
         // our message is on the screen until its new layer has been painted
         this.rowBuiltOurs = this._rowWhy() === null;
         this.ccDrawn = null;
-        // twin_dial: nothing of ours is on the screen after the drop; the state is decided again BEFORE the layers are made,
-        // so the new backdrop is born with BMW's window open if a message shows (_twinPush paints the plate at the end)
-        if (this.twinMsg) this._guard('twin cc', () => { this.twinMsg.rebuilt(); this.twinMsg.update(this._twinInputs(), this.twin.mono()); });
+        // twin_dial: nothing of ours is on the screen after the drop; the new layers are BORN in the state the machine gives
+        // (BMW's window open and the bottom row aside while a message shows), and _twinPush(true) paints the sheet at the end
+        if (this.twinMsg) this._guard('twin cc', () => { const born = this.twinMsg.rebuild(); this._twinCcAssign(born.window ? 'window' : 'none'); });
         this._layerRefs().forEach((r) => r.c.drop(r.ref));
         if (this.mbExp) this._guard('mb', () => this.mbExp.dropOwn());      // research3 MB: the cover layer
         this.placed = [];
@@ -3357,7 +3495,7 @@ class HudApp {
         if (px > PIXEL_BYTES) this.log.warn('layout "' + layout.name + '" needs ' + mib(px) + ' of pixel memory; cluster-render has 16 MiB for every app together (each image counts twice)');
         if (this.mbExp) this._guard('mb', () => this.mbExp.afterBuild((i) => this._clientAt(i), this.target));     // research3 MB: config.mbCover
         this.statusAskT = setTimeout(() => { this.statusAskT = null; this._guard('status request', () => this.client.status()); }, STATUS_ASK_MS);
-        if (this.twinMsg) this._guard('twin cc', () => this._twinPush(true));      // twin_dial: the new plate gets its pixels, the rows their state
+        if (this.twinMsg) this._guard('twin cc', () => this._twinPush(true));      // twin_dial: the new tab-2 sheet gets its pixels, the rows their state
     }
 
     /**
@@ -3461,11 +3599,12 @@ class HudApp {
         // 2026-11-13: "cc:shown" is on only while the car says a message shows (unknown: off, so ours stays drawn)
         // 2026-11-16: "cc:open" is on while BMW's own message panel must be left see-through (_ccOpen), which is
         // "cc:shown" plus the car whose messages we cannot read at all
-        if (this.twinMsg && /^cc:(rest|ours|window|any)$/.test(k)) {
-            // twin_dial: the message state (shared/twin_cc.js): rest = no message shown (the bottom row), ours = our plate is
-            // on the screen, window = BMW's own panel is see-through, any = ours or the window
+        if (this.twinMsg && /^cc:(rest|ours|window|any|row)$/.test(k)) {
+            // twin_dial: the message state (shared/twin_cc.js): rest = no message shown, ours = our card is on the screen (BMW's panel
+            // covered), window = BMW's own panel is see-through, any = ours or the window, row = the bottom row's ink may be drawn
+            // (SPEC-R3 5.4: the row returns after the window has shut, so in "ours" too; the plan's own flag, applied in step)
             const st = this.twinMsg.state;
-            const on = k === 'cc:rest' ? st === 'none' : k === 'cc:ours' ? st === 'ours' : k === 'cc:window' ? st === 'window' : st !== 'none';
+            const on = k === 'cc:row' ? this.twinMsg.applied.rows === true : k === 'cc:rest' ? st === 'none' : k === 'cc:ours' ? st === 'ours' : k === 'cc:window' ? st === 'window' : st !== 'none';
             return not ? !on : on;
         }
         if (k.indexOf('cc:') === 0) {
@@ -3473,6 +3612,7 @@ class HudApp {
             const on = (k === 'cc:none' && cc === false) || (k === 'cc:shown' && cc === true) || (k === 'cc:open' && this._ccOpen());
             return not ? !on : on;
         }
+        if (k.indexOf('tl:') === 0) { const on = twinLimit ? twinLimit.toggle(this, k.slice(3)) : false; return not ? !on : on; }     // twin_dial: "tl:cruise", "tl:cruise:C1"
         const on = eq > 0 ? String(this.setting(k.slice(0, eq))) === k.slice(eq + 1) : this.setting(k) !== false;
         return not ? !on : on;
     }
@@ -3516,7 +3656,10 @@ class HudApp {
             }
         } else if (w.type === 'gridlabels') this._paintGridLabels(x);
         else if (w.type === 'icon') this._blit(x, null, paintIcon(w.icon, w.w, w.h, color(t, w.color || 'fg')));
-        else if (w.type === 'ccplate') { x.px = Buffer.alloc(w.w * w.h * 4, 0); x.plateKey = ''; x.plateMsg = null; x.plateAt = 0; }     // twin_dial: empty until _twinPush paints it
+        else if (w.type === 'ccsheet') { x.px = Buffer.alloc(w.w * w.h * 4, 0); x.sheetSig = null; }     // twin_dial: empty until _twinPush paints it
+        else if (w.type === 'tdpage') { if (twinPages) twinPages.init(this, x); }     // twin_dial round 3 (B4): the centre pages, painted in one go
+        else if (w.type === 'tdsign' && twinLimit) twinLimit.updateSign(this, x, Date.now(), true);      // twin_dial: the speed-limit sign, painted from what the car said
+        else if (w.type === 'tdcru' && twinLimit) twinLimit.updateCru(this, x, Date.now(), true);        // twin_dial: the cruise readout (built only while config.cruise is set)
         else if (w.type === 'sdash') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_geo', w.geo);
@@ -4135,18 +4278,52 @@ class HudApp {
         const before = this.ccListShown + '|' + this.ccListUnread + '|' + this.ccNoMatch + '|' + (this.ccItems || []).map((e) => e.key).join(',');
         let shown = this.ccListShown, items = this.ccItems || [], unread = 0, noMatch = null;
         this.ccFallbackLive = false;
+        // ---- car-fix CF1 (docs/car-fix/CF1-REPORT.md; the owner's car 2026-11-18): config.ccActive.source "displayed" -
+        // Vehicle2 statusDisplayedCCMessage (config.ccDisplayed) is the cluster's "shown now" once it has given a number:
+        // door opened -> ccList id 15 and displayed 15 in the same ~50 ms; closed -> the list at rest, displayed 0 ~0.2-0.7 s
+        // later; 285 / 926 / 927 / 184 shown with no ccList entry. 0 (noneValues): nothing shown, listed entries are stored
+        // ones; N with an entry: that entry; N with none: shown, BMW's panel stays open; 65535 (unknownValues): unknown,
+        // shown, BMW's panel stays open; a live active number (_ccActWitness) that disagrees: BMW's panel stays open. The
+        // release (below) is for the active number only and is not consulted here. Before displayed speaks: 0.7.20's path. ----
+        const dsrc = this._ccDispSource() && this.ccDispAny === true && isNum(this.ccDisp);
+        if (dsrc) {
+            const d = this.ccDisp, none = Array.isArray(ca.noneValues) ? ca.noneValues : [0];
+            const unk = Array.isArray(ca.unknownValues) ? ca.unknownValues : [65535];
+            const actW = this._ccActWitness(), an = actW ? this.ccAct.number : null;
+            const agree = !actW || (inList(none, an) ? inList(none, d) : an === d);
+            this.ccReleased = false; this.ccNoEntry = null;
+            items = [];
+            let why = null;
+            if (inList(unk, d)) { shown = true; noMatch = d; why = 'number ' + d + ' is unknown (config.ccActive.unknownValues)'; }
+            else if (!agree) { shown = true; noMatch = d; why = 'the active number ' + an + ' disagrees with ' + d; }
+            else if (inList(none, d)) shown = false;
+            else {
+                shown = true;
+                const e = (all || []).find((x) => x.id === d);
+                if (!e) { noMatch = d; why = 'no ccList entry for number ' + d; }
+                else if (e.name) items = [e];
+                else unread = 1;
+            }
+            if (why && !this.ccNoMatchLogged['d' + why]) {      // once per reason and number: numbers only
+                this.ccNoMatchLogged['d' + why] = true;
+                this.log.info('displayed cc: ' + why + ' - shown, BMW\'s panel stays open');
+            }
+        }
+        // ---- end car-fix CF1 (the displayed branch; 0.7.20's path follows, `rel` unused while displayed decides) ----
         // ---- research3/mc (docs/research3/MC-REPORT.md): config.ccActive.release, absent = 0.7.20 exactly. When the
         // "shown now" value is no verdict (_ccRelease), the list decides instead (release.then: "listed" - shown while
         // ccList lists any entry outside ignoreIds, the safe side; "heuristic" - the 0.7.20 fallback below)
-        const rel = this._ccRelease(now, all);
-        if (rel === 'listed' && all) {
+        const rel = dsrc ? null : this._ccRelease(now, all);
+        if (!dsrc) this.ccReleased = !!rel;      // twin_dial B3: _twinInputs hands the machine "not wired" while the "shown now" value is no verdict
+        if (dsrc) { /* car-fix CF1: decided above */ }
+        else if (rel === 'listed' && all) {
             const live = all.filter((e) => !e.ignored);
             items = live.filter((e) => e.name).slice(0, 16);
             unread = live.length - items.length;
             shown = live.length > 0;
         } else if (rel === 'listed') {
             // no list recorded yet: nothing to decide from, the last verdict holds (the safe side while it was shown)
-        } else if (this.ccActAny && this.ccAct && !rel) {
+        } else if (this._ccActDecides() && !rel) {       // car-fix CF1: was `this.ccActAny && this.ccAct` (the same unless ccActive.dead)
             const n = this.ccAct.number, none = Array.isArray(ca.noneValues) ? ca.noneValues : [0];
             items = [];
             // research3/mc, release.witness: "shown now" says none but the second witness names a number: shown
@@ -4168,7 +4345,7 @@ class HudApp {
                 } else if (e.name) items = [e];
                 else unread = 1;
             }
-        } else if (all && (rel === 'heuristic' || !(this.ccActAny && this.ccAct))) {
+        } else if (all && (rel === 'heuristic' || !this._ccActDecides())) {
             const fb = ca.fallback || {};
             const on = !!ca.iface && fb.on !== false;
             const ms = isNum(fb.hideAfterMs) ? fb.hideAfterMs : isNum(this.config.ccm && this.config.ccm.autoHideMs) ? this.config.ccm.autoHideMs : 20000;
@@ -4211,17 +4388,30 @@ class HudApp {
      *  tick evaluates again when it ends. */
     _ccRelease(now, all) {
         const ca = this.config.ccActive || {}, r = ca.release;
-        if (!r || typeof r !== 'object' || !this.ccActAny || !this.ccAct) { this.ccNoEntry = null; return null; }
+        if (!r || typeof r !== 'object' || !this._ccActDecides()) { this.ccNoEntry = null; return null; }      // car-fix CF1: a dead active number has nothing to release
         const a = this.ccAct, n = a.number, none = Array.isArray(ca.noneValues) ? ca.noneValues : [0];
         const then = r.then === 'heuristic' ? 'heuristic' : 'listed';
         // every id the list has carried (outside ignoreIds) in this run, for leftList
         const ever = this.ccListEver = this.ccListEver || {};
         (all || []).forEach((x) => { if (!x.ignored && x.id !== null) ever[x.id] = true; });
         const listed = (all || []).some((x) => x.id === n);
+        // ---- twin_dial B3 (docs/twin-dial/r3/SC-REPORT.md section 4.7, SPEC-R3 5.4.7): the NARROWED leftList, release.leftList "kept":
+        // only a number that was ALREADY that value when its entry left the list is released (the message ended and the car never
+        // notified 0). Twin Dial reads leftList true as "kept" (its machine never takes the wide rule; "wide" is for the bench's proof only). MC's wider true also releases a number that arrives AFTER its entry has left (a door message coming back with its
+        // number before its list entry): that covers BMW's panel with no text of ours (case S3b). Order is counted in events (strict). ----
+        this.ccEvSeq = (this.ccEvSeq || 0) + 1;
+        if (this.ccActNum !== n) { this.ccActNum = n; this.ccActNumSeq = this.ccEvSeq; }
+        const left = this.ccListLeftSeq = this.ccListLeftSeq || {};
+        Object.keys(ever).forEach((id) => {
+            if (!all) return;
+            if (all.some((x) => x.id === Number(id))) delete left[id];
+            else if (left[id] === undefined) left[id] = this.ccEvSeq;
+        });
         let why = null;
         if (inList(r.deferValues, n)) why = 'number ' + n + ' is in release.deferValues';
         else if (a.control !== null && inList(r.deferControls, a.control) && !inList(none, n)) why = 'control ' + a.control + ' is in release.deferControls';
-        else if (r.leftList === true && !inList(none, n) && ever[n] && all && !listed) why = 'number ' + n + ' was listed and has left ccList';
+        else if ((r.leftList === 'wide' || (r.leftList === true && !this.twinMsg)) && !inList(none, n) && ever[n] && all && !listed) why = 'number ' + n + ' was listed and has left ccList';
+        else if ((r.leftList === 'kept' || (r.leftList === true && this.twinMsg)) && !inList(none, n) && ever[n] && all && !listed && left[n] !== undefined && this.ccActNumSeq < left[n]) why = 'number ' + n + ' was kept after its entry left ccList';
         else if (r.witness === true && this._ccWitness() !== null && inList(none, this._ccWitness()) && !inList(none, n)) why = 'displayed cc says ' + this._ccWitness();
         else if (isNum(r.noEntryMs) && !inList(none, n) && !(all || []).some((x) => x.id === n)) {
             if (!this.ccNoEntry || this.ccNoEntry.n !== n) this.ccNoEntry = { n, at: now };
@@ -4244,6 +4434,38 @@ class HudApp {
         return this.ccDisp;
     }
 
+    // ---- car-fix CF1 (docs/car-fix/CF1-REPORT.md): the "shown now" source ----
+    /** Whether config.ccActive.source is "displayed" and config.ccDisplayed names the field (Vehicle2 statusDisplayedCCMessage). */
+    _ccDispSource() {
+        const ca = this.config.ccActive || {}, cd = this.config.ccDisplayed;
+        return ca.source === 'displayed' && !!(cd && cd.iface && cd.field);
+    }
+
+    /** The active numbers that are no witness while the source is displayed (config.ccActive.deadValues, default [65535]). */
+    _ccDeadValues() {
+        const ca = this.config.ccActive || {};
+        return Array.isArray(ca.deadValues) ? ca.deadValues : [65535];
+    }
+
+    /** Whether statusActiveCCMessage is a "shown now" witness NOW. Source active (0.7.20): from its first number. Source
+     *  displayed: never with ccActive.dead true (the owner's car: 65535 the whole run); else only once it has changed in
+     *  this run (ccActLive) and while it does not read a dead value (65535): a field that never moves is no witness. */
+    _ccActWitness() {
+        const ca = this.config.ccActive || {};
+        if (!this.ccActAny || !this.ccAct) return false;
+        if (!this._ccDispSource()) return true;
+        if (ca.dead === true) return false;
+        return this.ccActLive === true && !inList(this._ccDeadValues(), this.ccAct.number);
+    }
+
+    /** Whether 0.7.20's path (before displayed has spoken) may take the active number as its verdict: as in 0.7.20, unless
+     *  the source is displayed and config.ccActive.dead is true (then the list's fallback decides until displayed speaks). */
+    _ccActDecides() {
+        const ca = this.config.ccActive || {};
+        return !!(this.ccActAny && this.ccAct) && !(this._ccDispSource() && ca.dead === true);
+    }
+    // ---- end car-fix CF1 ----
+
     /** Whether the car's own check-control message can be READ: one notification from config.ccm has carried
      *  something our paths found - a name, a description, a symbol, an id or a type. A struct whose paths fit the
      *  car carries its id and its type even with no message on, so this says "config.ccm fits this car", never "a
@@ -4254,7 +4476,9 @@ class HudApp {
     _ccWired() {
         // fix/cclist: or ccList has spoken once (a list config.ccList fits), which the owner's car does at once
         // fix/active-cc: or the cluster's "message shown now" has given a number once
-        return (this._ccNamed() && this.ccAny === true) || (this._ccListNamed() && this.ccListAny === true) || this.ccActAny === true;
+        // car-fix CF1: or displayed, the "shown now" source, has given a number once
+        return (this._ccNamed() && this.ccAny === true) || (this._ccListNamed() && this.ccListAny === true) || this.ccActAny === true ||
+            (this._ccDispSource() && this.ccDispAny === true);
     }
 
     /** Whether BMW's own check-control panel must be left see-through now ("cc:open"): the car says a message shows,
@@ -4311,106 +4535,158 @@ class HudApp {
         // ---- end fix/row-cc ----
     }
 
-    /* ---- twin_dial (docs/twin-dial/R2-D-REPORT.md): the strict check-control state machine, shared/twin_cc.js ----
-     * One verdict per signal event or tick: this.twinMsg.state is none | window | ours, .window the see-through flag of
-     * tdback's fallback window, .severity 0..4 (none grey green amber red) for the tab highlight and the rule. The
-     * plate (widget type "ccplate") is painted here, in the signal handler's own turn, never in a later tick, and
-     * everything that changes in one turn goes out as one corked write. The order inside the turn is the order in which
-     * no step leaves BMW's panel covered without our text for the shown message: the plate for the message to show goes
-     * up first, the rows step aside, the window opens or shuts, a plate that has nothing to show is cleared only then,
-     * and the rows come back last, after the window has shut. */
+    /* ---- twin_dial (docs/twin-dial/R2-D-REPORT.md, round 3 package B3, SPEC-R3 5): the check-control message in the CENTRE, shared/twin_cc.js ----
+     * One decision per signal event or tick (TwinCentre.update): this.twinMsg.state is none | window | ours, .window the see-through
+     * flag of tdback's fallback window, .severity 0..4, .tab the selected tab, and the plan: the operations of the turn in the order
+     * in which no step leaves BMW's panel covered without our text for the shown message: the bottom row steps aside, the window
+     * opens (both first); then the tab, tab 2's sheet (the card, painted in ONE go) and the warning tab; the window shuts and the
+     * row returns last, and only on text sent in an EARLIER turn at least CC_SETTLE_MS ago. The whole turn is one corked write;
+     * the row's sheet and the window's backdrop are on connection 0 (one socket, one order), the tab-2 sheet on another. */
 
     /** What the state machine reads from the engine (the fields _ccListEval and the two "shown now" handlers keep). */
     _twinInputs() {
         const ca = this.config.ccActive || {}, all = this.ccListAll || [];
         const wired = this._ccWired() || this.ccDispAny === true;
+        const rel = this.ccReleased === true;        // the narrowed release (_ccRelease): the "shown now" value is no verdict, the list decides
+        // car-fix CF1: with config.ccActive.source "displayed" the active number is a witness only while _ccActWitness says so
+        // (never on the owner's car: 65535 the whole run), displayed is never released, and 65535 on it is "unknown"
+        const ds = this._ccDispSource(), actW = ds ? this._ccActWitness() : this.ccActAny === true;
         return {
             read: wired,
-            actWired: this.ccActAny === true, act: this.ccAct ? this.ccAct.number : null,
-            dispWired: this.ccDispAny === true, disp: this.ccDisp,
+            actWired: actW && !rel, act: this.ccAct && actW && !rel ? this.ccAct.number : null,
+            dispWired: this.ccDispAny === true && (ds || !rel), disp: rel && !ds ? null : this.ccDisp,
+            prefer: ds ? 'displayed' : 'active',
+            unknownValues: ds ? (Array.isArray(ca.unknownValues) ? ca.unknownValues : [65535]) : [],
             noneValues: Array.isArray(ca.noneValues) ? ca.noneValues : [0],
             find: (id) => all.find((e) => e.id === id) || null,
             shown: this.ccListShown, live: this.ccItems || [], heurEntry: (this.ccItems || [])[0] || null,
             frame: this.ccFrame,
+            entries: all.filter((e) => !e.ignored && e.name).map((e) => ({ id: e.id, name: e.name, color: e.color })),     // tab 2's rows
+            released: rel,
         };
     }
 
-    /** The key a plate widget's pixels must have to show candidate `c` (or nothing). */
-    _twinPlateKey(c) { return c ? c.key + '|' + c.counter + '|' + (this.nightOn ? 'n' : 'd') : ''; }
+    /** The tab 2 sheet widgets of the layout that were made. */
+    _twinSheets() {
+        const sheets = [];
+        this.widgets.forEach((x) => { if (x.w && x.w.type === 'ccsheet' && x.ref) sheets.push(x); });
+        return sheets;
+    }
+
+    /** this.twinCc (what tdback and the warning tab read) from the machine: none | window | ours and the severity's name. */
+    _twinCcAssign(state) {
+        const t = this.twinMsg;
+        this.twinCc = { state, severity: state !== 'none' && t.severity ? this.twin.SEV_NAMES[t.severity] : null };
+    }
+
+    /** The selected tab (1..5): package B2's (hud.tabs.tab, mirrored on hud.twinTab) when live tabs are on, else the machine's, else 1. */
+    _twinTabNow() { return this.tabs && isNum(this.tabs.tab) ? this.tabs.tab : (this.twinMsg ? this.twinMsg.tab : 1); }
+
+    /** Package B2 told us: the selected tab moved from `from` to `to` because of rule `why` (twin_tabs.js select(), in the turn it
+     *  happens). The machine owns the message period: it pulled tab 2 itself (then this is a no-op); here it learns of the driver's
+     *  choice (the key, the setting: leaving tab 2 while a message shows opens BMW's window in THIS turn, SPEC-R3 5.4.4) or of
+     *  an automatic rule (a call, guidance, the message's own end: a new base, never a leave). */
+    _twinTabMoved(from, to, why) {
+        const m = this.twinMsg;
+        if (!m || to === m.tab) return;
+        this._twinTabChosen(to, /^(2 call|3 guidance|1 message ended)/.test(String(why)) ? 'auto' : 'driver');
+    }
+
+    /** The driver (the key, the setting: who 'driver') or an automatic rule (who 'auto') chose tab n. Leaving tab 2 while a
+     *  message shows opens BMW's panel in THIS turn (SPEC-R3 5.4.4); the machine decides, the turn is sent at once. */
+    _twinTabChosen(n, who) {
+        if (!this.twinMsg || !this.client || !this.client.ready || !this.widgets) return;
+        if (who === 'auto') this.twinMsg.auto(n); else this.twinMsg.driver(n);
+        this._guard('twin cc', () => this._twinPush());
+    }
 
     /** One decision, then every layer it touches, in one corked write. `force`: the layers are new (a rebuild), send all. */
     _twinPush(force) {
+        if (this.twinPushing) { this.twinRepush = true; return; }      // a tab moved DURING a turn (B2's rules run inside _twinSync): decided again at its end
+        this.twinPushing = true;
+        try {
+            this._twinPushOnce(force);
+            for (let again = 0; this.twinRepush && again < 3; again++) { this.twinRepush = false; this._twinPushOnce(false); }
+        } finally { this.twinPushing = false; this.twinRepush = false; }
+    }
+
+    _twinPushOnce(force) {
         const t = this.twinMsg, now = this.twin.mono();
-        const changed = t.update(this._twinInputs(), now);
-        const plates = [];
-        this.widgets.forEach((x) => { if (x.w && x.w.type === 'ccplate' && x.ref) plates.push(x); });
-        const want = this._twinPlateKey(t.candidate);
-        if (!force && !changed && !plates.some((x) => x.plateKey !== want)) return;     // nothing moved: nothing to send
-        // the plate's pixels are made first (that can fail: a character the font lacks, a throw), so a failure
-        // latches BEFORE anything is sent and the state is decided again without a candidate
-        let bufs = null;
-        for (let pass = 0; pass < 3; pass++) {
-            bufs = null;
-            if (t.candidate && plates.length) {
-                bufs = plates.map((x) => this._twinPlateBuf(x, t.candidate));
-                if (bufs.some((b) => b === null)) { t.update(this._twinInputs(), now); continue; }
-            }
-            break;
+        const sheets = this._twinSheets();
+        t.sheetOn = sheets.length > 0;
+        t.night = this.nightOn === true;
+        t.unlistedPullsTab = (this.config.ccActive || {}).unlistedPullsTab === true;     // car-fix CF1: read each turn (settable live)
+        if (sheets.length) {      // the layout's own fonts (a stand-in layout may name others)
+            const w = sheets[0].w;
+            t.deps.fonts = { head: w.font, counter: w.counterFont || w.font, row: w.rowFont || w.font, text: w.textFont || w.font };
+            this.twinSheetFonts = t.deps.fonts;
         }
-        // the state the backdrop (tdback, B's contract) reads: this.twinCc, then this._twinSync()
-        this.twinCc = { state: t.state, severity: t.severity ? this.twin.SEV_NAMES[t.severity] : null };
+        const was = t.state + '|' + t.severity + '|' + t.tab;
+        const res = t.update(this._twinInputs(), now);
+        // B2's centre page follows the selected tab at once; while the machine keeps tab 2's card up for the open settle (the driver has
+        // left tab 2) the page of tab 2 is HELD, so the title and the texts do not change under the card (SPEC-R3 5.4.4)
+        if (this.tabs) {
+            const hold = res.deferred && t.tab !== 2 ? 2 : null;
+            if (this.tabs.hold !== hold) { this.tabs.hold = hold; if (this.td) this.td.pageEval = 0; }
+        }
+        if (!force && !res.ops.length && was === t.state + '|' + t.severity + '|' + t.tab) return;      // nothing moved: nothing to send
         const socks = this._cork();
         try {
-            // 1. the plate for the message to show goes up: from here on our text for it covers BMW's panel
-            if (bufs) plates.forEach((x, i) => this._twinSend(x, bufs[i], t.candidate, now));
-            // 2. the rows step aside before BMW's panel opens
-            if (t.state !== 'none') this._guard('message panel texts', () => this._ccLiveSync(true));
-            // 3. the window (the backdrop's fallback hole), the tab highlight and the rule colour
-            if (typeof this._twinSync === 'function') this._guard('tdback cc', () => this._twinSync());
-            this.widgets.forEach((x) => {
-                if (x.w && x.ref && x.w.type === 'fill' && typeof x.w.holeWhen === 'string' && x.w.holeWhen.indexOf('cc:') >= 0) {
-                    const h = this._hole(x.w), key = h.join(',');
-                    if (key !== x.last) { x.last = key; x.c.uniform(x.ref, 'u_hole', h); }
-                }
+            let ccDone = false;     // (a window op assigned this.twinCc to the turn's final state at its place in the order)
+            res.ops.forEach((op) => {
+                if (op.op === 'rows') this._guard('message panel texts', () => this._ccLiveSync(op.on === false));        // the row's ink away / back
+                else if (op.op === 'window') {
+                    this._twinCcAssign(t.state);
+                    ccDone = true;
+                    if (typeof this._twinSync === 'function') this._guard('tdback cc', () => this._twinSync());
+                    this._twinHoles();
+                } else if (op.op === 'tab') { if (typeof this._twinSync === 'function') this._guard('tdback tab', () => this._twinSync()); }
+                else if (op.op === 'page') sheets.forEach((x) => this._twinSheetSend(x, op, res.buf));
+                else if (op.op === 'warn') this._guard('warning tab', () => this._twinWarnIcons(now));
             });
-            // 4. a plate with nothing to show is cleared only now
-            if (!bufs) plates.forEach((x) => this._twinSend(x, null, null, now));
-            // 5. the rows come back last, after BMW's panel has shut
-            if (t.state === 'none') this._guard('message panel texts', () => this._ccLiveSync(false));
+            // the state's own change (none <-> ours with no window op, the severity): the backdrop's rule colour
+            const before = this.twinCc.state + '|' + this.twinCc.severity;
+            this._twinCcAssign(t.state);
+            if (ccDone ? before !== this.twinCc.state + '|' + this.twinCc.severity : true) {
+                if (typeof this._twinSync === 'function') this._guard('tdback cc', () => this._twinSync());
+                this._twinHoles();
+            }
         } finally { this._uncork(socks); }
     }
 
-    /** The plate's pixels for message `c` as a widget `x` shows it, or null after latching a failure (a character the
-     *  font lacks, or a throw while painting). Never logs the text. */
-    _twinPlateBuf(x, c) {
-        const w = x.w, t = this.twinMsg;
-        try {
-            const miss = this._missingGlyphs(c.name + c.counter, w.font);
-            const missCounter = c.counter ? this._missingGlyphs(c.counter, w.counterFont || w.font) : '';
-            if (miss || missCounter) { t.fail('glyph', c.key, (miss || missCounter)); return null; }
-            const dev = this.twin.paintPlate({ textRaster, paintIcon, icons: require('./icons').ICONS }, c,
-                { font: w.font, counterFont: w.counterFont, night: this.nightOn, x: w.x, y: w.y, w: w.w, h: w.h });
-            this.ccFit = { lines: dev.lines.length, cut: dev.cut, symbol: dev.symbol, sev: dev.sev };       // lengths and names only
-            return dev.buf;
-        } catch (e) {
-            t.fail('throw', c.key, String(e && e.message || e).slice(0, 80));
-            return null;
-        }
+    /** "cc:" holes of fill widgets (a stand-in backdrop; tdback has its own uniform). */
+    _twinHoles() {
+        this.widgets.forEach((x) => {
+            if (x.w && x.ref && x.w.type === 'fill' && typeof x.w.holeWhen === 'string' && x.w.holeWhen.indexOf('cc:') >= 0) {
+                const h = this._hole(x.w), key = h.join(',');
+                if (key !== x.last) { x.last = key; x.c.uniform(x.ref, 'u_hole', h); }
+            }
+        });
     }
 
-    /** Hand a plate widget its pixels (null: the empty plate, nothing of ours over BMW's panel) as ONE paint. */
-    _twinSend(x, buf, c, now) {
-        const w = x.w, t = this.twinMsg;
-        const key = this._twinPlateKey(c);
-        if (x.plateKey === key && x.px) { if (c) t.painted(c.key, x.plateAt || now); return; }
-        this._blitDiff(x, buf || Buffer.alloc(w.w * w.h * 4, 0));
-        x.plateKey = key;
-        if (c) {
-            // the counter and the night look repaint the same message: the stamp (its id and words) keeps its time
-            if (!x.plateMsg || x.plateMsg !== c.key) x.plateAt = now;
-            x.plateMsg = c.key;
-            t.painted(c.key, x.plateAt);
-        } else { x.plateMsg = null; x.plateAt = 0; t.painted(null); }
+    /** The warning tab's icon, repainted at once (its colour follows the severity and the selected tab). */
+    _twinWarnIcons(now) {
+        // FIN: the media cell too - it grows or shrinks with tab 2 in the same turn (shared/twin_tabs.js tab2Shown)
+        this.widgets.forEach((x) => { if (x.w && x.w.type === 'icon' && (x.w.tdLive === 'warn' || x.w.tdLive === 'media') && x.ref && twin) twin.updateIcon(this, x, now, false); });
+    }
+
+    /** Tab 2's sheet pixels for a page: the card, rows, pointer or empty page of shared/twin_cc.js, in ONE paint. Throws
+     *  (the machine latches the message) when a font will not load or the painter fails. Never logs a word of the text. */
+    _twinSheetBuf(page) {
+        const sheets = this._twinSheets();
+        if (!sheets.length) return null;
+        const dev = this.twin.paintSheet({ textRaster, paintIcon, icons: require('./icons').ICONS }, page, { night: this.nightOn, fonts: this.twinSheetFonts });
+        this.ccFit = page.card ? { lines: page.card.lines.length, cut: page.card.cut, symbol: dev.symbol, sev: page.card.sev, rows: page.rows.length } : { rows: page.rows.length };       // lengths and names only
+        return dev.buf;
+    }
+
+    /** Hand a sheet widget its pixels as ONE paint: the page's buffer, or an empty (transparent) sheet when tab 2 is not shown. */
+    _twinSheetSend(x, op, buf) {
+        const w = x.w;
+        if (x.sheetSig === op.sig && x.px) return;
+        const px = op.kind === 'other' || op.kind === 'blank' || !buf ? Buffer.alloc(w.w * w.h * 4, 0) : buf;
+        this._blitDiff(x, px);
+        x.sheetSig = op.sig;
     }
     /* ---- end twin_dial ---- */
 
@@ -4796,8 +5072,9 @@ class HudApp {
             this._guard('probes', () => this._probeTick());     // probes, item 1: the vehicle condition (0.7.18)
             // fix/active-cc: the fallback's entries expire with time, not with a notification
             if (this.ccFallbackLive) this._guard('check-control', () => this._ccListEval(now, true));
-            // twin_dial: our plate was sent a moment ago; once it has been on the screen long enough the window shuts
+            // twin_dial: our card was sent a moment ago; once it has been on the screen long enough the window shuts
             if (this.twinMsg && this.twinMsg.needsTick) this._ccPush();
+            if (this._twinTabsOn()) this._twinSync();      // twin_dial: tabs (B2): guidance, speed and settings move the tab (nothing is sent when nothing changed)
             if (!this.client.ready) return;
             this._guard('bottom row', () => this._rowSync(now));     // package X: standby, the clock line, the row's owner
             // shift light: blink the whole bar at 8 Hz once the rpm reaches the redline
@@ -5087,13 +5364,15 @@ class HudApp {
     _updateOne(x, now, force) {
         const w = x.w;
         if (twin && w.type === 'icon' && w.tdLive) return twin.updateIcon(this, x, now, force);       // twin_dial: a tab-bar icon that follows the car
-        // twin_dial: the plate is painted only from _twinPush (a signal event, or here when what it shows has gone stale:
-        // the counter, the night look); a tick in between has nothing to do
-        if (w.type === 'ccplate') {
-            const c = this.twinMsg && this.twinMsg.candidate;
-            if (c && x.plateKey !== this._twinPlateKey(c)) this._ccPush();
+        if (w.type === 'tdpage') { if (twinPages) twinPages.update(this, x, now, force); return; }     // twin_dial round 3 (B4): the centre pages
+        // twin_dial: tab 2's sheet is painted only from _twinPush (a signal event, or here when the night look changed under it);
+        // a tick in between has nothing to do
+        if (w.type === 'ccsheet') {
+            if (this.twinMsg && this.twinMsg.night !== (this.nightOn === true)) this._ccPush();
             return;
         }
+        if (w.type === 'tdsign') { if (twinLimit) twinLimit.updateSign(this, x, now, force); return; }     // twin_dial: not a "cc:" widget: nothing of BMW's window touches it
+        if (w.type === 'tdcru') { if (twinLimit) twinLimit.updateCru(this, x, now, force); return; }       // twin_dial
         if (w.type === 'atext') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             const s = this._resolve(w.text);

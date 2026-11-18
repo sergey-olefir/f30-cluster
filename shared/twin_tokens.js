@@ -20,11 +20,15 @@
 const DASH = '–';            // en dash: "no value"
 const THIN = ' ';            // thousands separator
 const WEEKDAYS = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'];
-const TITLES = { clock: 'Дата і час', trip: 'Поїздка' };
+const TITLES = { clock: 'Дата і час', trip: 'Поїздка', msg: 'Повідомлення', nav: 'Навігація', tab3: 'Медіа', tab4: 'Телефон' };     // twin_dial: tabs (B2): the titles of tabs 2..5 (package B4 owns the pages' content)
 const KOMBI = 'de.bmw.infotainment.KombiIF';
 const COND_READY_TWIN = 10;       // VehicleCondition 10 = FAHREN (SPEC 5.1)
 const PAGE_EVAL_MS = 250;         // the page is decided at most this often, so every widget of one tick sees one page
 const isNum = (x) => typeof x === 'number' && isFinite(x);
+/** CallState (ConnectivityAggregator.aggregatedCallState, VoiceCall.state) as a number 0..4, or null for anything else. */
+const CALL = { DISCONNECTED: 0, INCOMING: 1, ACTIVE: 2, DIALING: 3, HELD: 4 };
+const callNum = (raw) => (isNum(raw) && raw >= 0 && raw <= 4 ? raw : typeof raw === 'string' && CALL.hasOwnProperty(raw) ? CALL[raw] : null);
+const pages = () => require('./twin_pages');      // round 3 (B4): required when first used (twin_pages requires this file too)
 const pad2 = (n) => (n < 10 ? '0' : '') + n;
 
 function fresh() {
@@ -56,6 +60,19 @@ function once(hud, key, line) {
 
 /** A member of a struct value, or undefined. */
 const member = (v, k) => (v && typeof v === 'object' ? v[k] : undefined);
+/**
+ * b7 (CP's finding): ResetLogic3.bcDataAll.bcData3 is an ARRAY of up to 5 BCData3 structs in the catalogue (arrayMaxLength 5), one per reset
+ * logic, so the struct reads of the rl3 fallback found nothing. The entry used is the first one that carries a value (an average speed, a
+ * consumption or a distance that is not the unfilled marker); with none valid, the first object (the page then shows dashes by its own rules);
+ * a plain struct (the shape the tests and an older reading used) is taken as it is.
+ */
+function rl3Entry(d) {
+    if (!Array.isArray(d)) return d;
+    const valid = (e) => !!e && typeof e === 'object' && ((isNum(e.speedAverage) && e.speedAverage < 65535) || (isNum(e.consumptionCombustionAverageDigit) && e.consumptionCombustionAverageDigit < 65535)
+        || (isNum(e.counterDistance) && e.counterDistance < 4294967295));
+    return d.find(valid) || d.find((e) => e && typeof e === 'object');
+}
+
 /** An enum that may arrive as its name or its number: true when it is `on`. */
 function enumIs(raw, names, nums) {
     if (typeof raw === 'string') return names.indexOf(raw) >= 0;
@@ -115,7 +132,7 @@ function wire(hud, extra) {
         const s = SOURCES[key];
         chain(hud, extra, s[0], s[1], (v) => {
             const raw = ODO_MEMBER[key](v);
-            td.odo[key] = raw.ok ? odoValue(raw.km, 1) : null;          // raw; the factor is applied when it is read
+            td.odo[key] = raw.ok ? odoValue(raw.km, 1, ODO_BAD_OF[key]) : null;          // raw; the factor is applied when it is read
             arrive(hud, key, 'odometer', raw.text, () => (td.odo[key] === null ? 'no value' : td.odo[key] * odoFactor(hud, key) + ' km (factor ' + odoFactor(hud, key) + ' km)'), odoVerified(hud) ? '' : 'compare with the cluster\'s odometer');
         });
         keep(key);
@@ -146,7 +163,7 @@ function wire(hud, extra) {
     // research3/MK: the head unit's own trip computer (ResetLogic3), the fallback for every trip value (config.trip.order)
     if (tripOrder(hud).indexOf('rl3') >= 0) {
         chain(hud, extra, SOURCES.rl3[0], SOURCES.rl3[1], (v) => {
-            const d = member(v, 'bcData3'), u = member(v, 'bcUnits'), mx = member(v, 'maxValues');
+            const d = rl3Entry(member(v, 'bcData3')), u = member(v, 'bcUnits'), mx = member(v, 'maxValues');     // b7: bcData3 is an ARRAY (0..5) in the catalogue
             const dt = member(d, 'dateTimeTrip'), dr = member(d, 'dateTimeReset');
             td.rl3 = {
                 option: member(d, 'resetOption'), speed: member(d, 'speedAverage'),
@@ -180,6 +197,7 @@ function wire(hud, extra) {
     chain(hud, extra, IF.phone, 'aggregatedCallState', (v) => {
         const raw = isNum(v) || typeof v === 'string' ? v : member(v, 'aggregatedCallState');
         td.call = raw === undefined ? null : !enumIs(raw, ['DISCONNECTED'], [0]);
+        td.callState = raw === undefined ? null : callNum(raw);        // twin_dial: tabs (B2): 0 none, 1 incoming, 2 active, 3 dialing, 4 held (rule 2, gated off)
         once(hud, 'call', 'phone state raw (P9): ' + String(raw));
     });
     // navigation: lit while a route is guided
@@ -196,6 +214,8 @@ function wire(hud, extra) {
         once(hud, 'media', 'media text (P8): first line ' + (la === null ? 'none' : la + ' characters') + ', second ' + (lb === null ? 'none' : lb + ' characters'));
         if (cfg(hud).media === true) td.media = typeof b === 'string' && b ? b : typeof a === 'string' ? a : null;
     });
+    // twin_dial round 3 (B4): the fields only the centre pages read (shared/twin_pages.js), chained behind the ones above
+    try { pages().wire(hud, extra); } catch (e) { log(hud, 'warn', 'twin pages: not wired (' + (e && e.message || e) + ')'); }
 }
 
 /* ------------------------------------- research3/MK: the trip computer's and the odometer's sources -------------------- */
@@ -246,7 +266,10 @@ function odoFactor(hud, key) {
     const f = odoCfg(hud).factors;
     return f && isNum(f[key]) ? f[key] : 1;
 }
-const odoValue = (m, factor) => (isNum(m) && m > 0 && m < ODO_BAD ? m * factor : null);
+// integration (B7, the car 2026-11-18): MileageSupreme.mileageSupreme is a UInt32 in METRES (114747213 for 114747 km), so its unfilled marker is
+// 0xFFFFFFFF, not the 24-bit kilometre counters' 0xFFFFFF (which would have thrown every real value away); its factor is 0.001 (app.json)
+const ODO_BAD_OF = { supreme: 4294967295 };
+const odoValue = (m, factor, bad) => (isNum(m) && m > 0 && m < (bad || ODO_BAD) ? m * factor : null);
 function odoOrder(hud) {
     const o = odoCfg(hud).order;
     return Array.isArray(o) ? o.filter((k) => ODO_ORDER.indexOf(k) >= 0) : ODO_ORDER;
@@ -331,8 +354,13 @@ function rl3Trip(td, f) {
 
 /* ------------------------------------------------------------------ pages --------------------------------------- */
 
-/** The page that shows now: 'clock' | 'trip'. Setting `centre` = clock | trip | cycle (SPEC 6.2). */
+/** The page that shows now: 'clock' | 'trip' (tab 1), or with live tabs 'msg' | 'tab3' | 'tab4' | 'nav'. Setting `centre` = clock | trip | cycle (SPEC 6.2). */
 function page(hud) {
+    // twin_dial: tabs (B2): with live tabs (config.tabs) the selected tab picks the page; tab 1 is the computer (clock / trip below)
+    if (hud._twinTabsOn && hud._twinTabsOn()) {
+        const tp = require('./twin_tabs').pageOf(hud);
+        if (tp !== 'computer') return tp;
+    }
     const td = st(hud), t = now(hud), mode = hud.setting ? hud.setting('centre') : 'cycle';
     if (mode === 'clock' || mode === 'trip') { td.page = mode; td.pageSince = t; return mode; }
     if (td.pageEval && t - td.pageEval < PAGE_EVAL_MS && t >= td.pageEval) return td.page;
@@ -503,12 +531,15 @@ function ready(hud) {
 
 /* ------------------------------------------------------------------ tokens -------------------------------------- */
 
+/** twin_dial: tabs (B2): the bottom row shows ONE line (every tab but 1, live tabs on). */
+const rowOne = (hud) => require('./twin_tabs').rowLines(hud) === 1;
+
 /**
  * {{td:<name>}} -> text. Never throws; an unknown name comes back as the token itself (as the engine does).
  *   hub:     speed gear program ready
  *   tabs:    rangeTab media
  *   centre:  cTitle cTime cWeekday cDate (clock page), tConsAvg tSpeedAvg tDist tTime tFrom (trip page)
- *   bottom:  odo clock r1 r1Unit ambient
+ *   bottom:  odo clock r1 r1Unit ambient; rowL1 rowL1u rowL2 rowR1 rowR1u rowR2 rowR2u (the row by tab: one line off tab 1)
  */
 function token(hud, tok) {
     try { return resolve(hud, tok.slice(3)); } catch (e) { log(hud, 'warn', 'twin token ' + tok + ': ' + (e && e.message || e)); return ''; }
@@ -531,7 +562,8 @@ function resolve(hud, name) {
             return td.media.length > max ? td.media.slice(0, max - 1) + '\u2026' : td.media;
         }
         // ---- centre pages
-        case 'cTitle': return TITLES[page(hud)];
+        // integration: B2's (TITLES.msg is tab 2's title); without live tabs, B3's machine's tab 2 still titles the centre "Повідомлення"
+        case 'cTitle': return !(hud._twinTabsOn && hud._twinTabsOn()) && hud._twinTabNow && hud._twinTabNow() === 2 ? TITLES.msg : TITLES[page(hud)];
         case 'cTime': return onPage('clock', clockText(local(hud)));
         case 'cWeekday': { const L = local(hud); return onPage('clock', L ? WEEKDAYS[L.wd] : ''); }
         case 'cDate': { const L = local(hud); return onPage('clock', L ? pad2(L.d) + '.' + pad2(L.mo) + '.' + L.y : ''); }
@@ -544,7 +576,14 @@ function resolve(hud, name) {
         case 'tSpeedU': return onPage('trip', 'км/год');
         case 'tDistU': return onPage('trip', 'км');
         case 'tTimeU': return onPage('trip', 'год');
-        // ---- bottom row
+        // ---- bottom row: two lines on tab 1, one line (the clock left, the temperature right, on the upper baseline) on every other tab (SPEC-R3 3.5)
+        case 'rowL1': return rowOne(hud) ? clockText(local(hud)) : resolve(hud, 'odo');
+        case 'rowL1u': return rowOne(hud) ? '' : 'км';
+        case 'rowL2': return rowOne(hud) ? '' : resolve(hud, 'clock');
+        case 'rowR1': return rowOne(hud) ? resolve(hud, 'ambient') : resolve(hud, 'r1');
+        case 'rowR1u': return rowOne(hud) ? '°C' : 'км';
+        case 'rowR2': return rowOne(hud) ? '' : resolve(hud, 'ambient');
+        case 'rowR2u': return rowOne(hud) ? '' : '°C';
         case 'odo': { const o = odometer(hud); return isNum(o.km) ? grouped(o.km) : DASH; }     // research3/MK: the first valid carrier
         case 'clock': return clockText(local(hud));
         case 'r1': {         // the trip distance whenever a source delivers one (research3/MK: factors on by default), else the range (SPEC 6.3)
@@ -559,44 +598,24 @@ function resolve(hud, name) {
             const r = Math.round(v * 10) / 10;
             return (r >= 0 ? '+' : '-') + Math.abs(r).toFixed(1);
         }
-        default: return '{{td:' + name + '}}';
+        default: {      // twin_dial round 3 (B4): the centre pages' tokens (shared/twin_pages.js token())
+            const r = name.indexOf('pg') === 0 ? pages().token(hud, name) : undefined;
+            return r === undefined ? '{{td:' + name + '}}' : r;
+        }
     }
 }
 
 /* --------------------------------------------------------------- live icons -------------------------------------- */
 
 /**
- * The state of a tab-bar icon (widget "tdLive": "warn" | "media" | "phone" | "nav" | "fixed"): { icon, role }.
- *   warn   always shown; white, black (role bg) on an amber highlight (SPEC 6.1; hud.twinCc.severity, package D)
- *   media  the radio's icon (the media cell is icon only until P8)
- *   phone  dim (theme role grey, the tab ramp's bottom: SPEC's "dim (0.5)") until a call state says otherwise
- *   nav    the same while no route is guided
+ * The state of a tab-bar icon (widget "tdLive": "fixed" | "warn" | "media" | "phone" | "nav"): { icon, color, tag }.
+ * twin_dial: tabs (B2): moved to shared/twin_tabs.js - no icon is dimmed any more (SPEC-R3 3.1), the state is the icon's variant;
+ * the warning icon is white, or red / amber while a message shows and tab 2 is not selected.
  */
-function iconState(hud, w) {
-    const td = st(hud);
-    switch (w.tdLive) {
-        case 'warn': {
-            const sev = hud.twinCc && hud.twinCc.severity;       // package D: 'red' | 'amber' | 'green' | 'grey' | null
-            return { icon: w.icon, role: sev === 'amber' ? 'bg' : 'fg' };
-        }
-        case 'phone': return { icon: w.icon, role: td.call === true ? 'fg' : 'grey' };
-        case 'nav': return { icon: w.icon, role: td.nav === true ? 'fg' : 'grey' };
-        default: return { icon: w.icon, role: w.color || 'fg' };
-    }
-}
+function iconState(hud, w) { return require('./twin_tabs').iconState(hud, w); }
 
-/**
- * Repaint a live icon when its name or its colour changed (also after a night change: the engine clears x.last).
- * Called from _updateOne for a widget with "tdLive".
- */
-function updateIcon(hud, x, nowMs, force) {
-    const s = iconState(hud, x.w), col = hud.theme[s.role] || hud.theme.fg;
-    const key = s.icon + '|' + col.join(',');
-    if (!force && key === x.last) return;
-    x.last = key;
-    const paint = require('./icons').paintIcon;
-    hud._blitDiff(x, paint(s.icon, x.w.w, x.w.h, col));
-}
+/** Repaint a live icon when its name, colour or text changed (also after a night change: the engine clears x.last). Called from _updateOne. */
+function updateIcon(hud, x, nowMs, force) { return require('./twin_tabs').updateIcon(hud, x, nowMs, force); }
 
-module.exports = { token, wire, page, updateIcon, iconState, program, ready, local, tripValues, odometer, factors, summary, grouped, DASH, THIN, WEEKDAYS, TITLES, fresh,
+module.exports = { rl3Entry, token, wire, page, updateIcon, iconState, program, ready, local, tripValues, odometer, factors, summary, grouped, DASH, THIN, WEEKDAYS, TITLES, fresh,
     SOURCES, DEFAULT_FACTORS };

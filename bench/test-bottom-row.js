@@ -242,6 +242,38 @@ async function main() {
     }
     ok(npOk === nps.length, 'all ' + nps.length + ' no-passing values map (' + npOk + ' ok)');
 
+    // car-fix CF2: the owner's car never sends config.sign's field; the limit comes as the TrafficSignRecognition EVENT
+    // (class x 5 km/h). The same sign path (hud.sign, limitState / limitKmh) reads it; the field is the fallback.
+    console.log('car-fix CF2: the speed limit from the TrafficSignRecognition event (the car\'s values, 2026-11-18)');
+    ok(S(p).wired && S(p).wired.tsr === true && spec.config.sign.tsr && spec.config.sign.tsr.event === 'TrafficSignRecognition', 'app.json config.sign.tsr names the event');
+    const tsrCases = [
+        [{ cls: 8 }, (s) => s.src === 'tsr' && s.state === 'limit' && s.kmh === 40 && s.shown === 40 && s.unit === 'kmh' && s.warn === 0, 'class 8 (a 40 sign) -> 40 km/h'],
+        [{ cls: 6 }, (s) => s.src === 'tsr' && s.kmh === 30, 'class 6 (a 30 sign) -> 30'],
+        [{ cls: 10, warn: 1 }, (s) => s.src === 'tsr' && s.kmh === 50 && s.warn === 1, 'class 10 with controlSLIWarning 1 -> 50, warn 1'],
+        [{ cls: 12 }, (s) => s.src === 'tsr' && s.kmh === 60 && s.warn === 0, 'class 12 -> 60'],
+        [{ cls: 26, unit: 1 }, (s) => s.src === 'tsr' && s.unit === 'mph' && s.shown === 130 && Math.round(s.kmh) === 209, 'unit 1 (MPH): 130 shown, 209 km/h'],
+    ];
+    for (const c of tsrCases) {
+        await fake({ tsr: c[0] });
+        p = await until((q) => c[1](S(q).sign || {}), 4000);
+        ok(c[1](S(p).sign || {}), c[2] + ' -> ' + JSON.stringify(S(p).sign));
+    }
+    await fake({ tsr: { cls: 8 } });
+    p = await until((q) => (S(q).sign || {}).kmh === 40, 3000);
+    await fake({ sign: { state: 'limit', value: 90, unit: 'kmh' } });
+    await sleep(500);
+    p = await probe();
+    ok(S(p).sign.src === 'tsr' && S(p).sign.kmh === 40, 'the field says 90 while the event is live: the event\'s 40 stays (config.sign.order: tsr, field)');
+    await fake({ tsr: { cls: 255 } });
+    p = await until((q) => (S(q).sign || {}).src === 'field', 3000);
+    ok(S(p).sign.src === 'field' && S(p).sign.kmh === 90, 'the event says 255 (no limit known): the field\'s 90 (the fallback) is the sign');
+    await fake({ tsr: { cls: 0 } });
+    await sleep(300);
+    p = await probe();
+    ok(S(p).sign.src === 'field', 'class 0: still no limit from the event, the field stays');
+    ok(/limit: tsr class 8 -> limit 40 kmh warn 0 \(warn raw 0, withdrawal 1, unit raw 0, next class 254\)/.test(logText) && /limit: source tsr \(TrafficSignRecognition event\)/.test(logText) &&
+        /limit: source field \(TrafficSignDisplayControl\)/.test(logText), 'f30\'s log has the "limit: tsr ..." and "limit: source ..." lines (numbers and enum names)');
+
     console.log('the check-control message is read in every colour, and a long one');
     for (const c of ['cc-red', 'cc-yellow', 'cc-green', 'cc-orange', 'cc-white']) {
         await scene(c);
@@ -1072,7 +1104,8 @@ async function main() {
     ok(nmAll > 0 && nmOpen === nmAll, 'active 1234, no ccList entry: shown, BMW\'s panel open, our line empty (' + nmOpen + ' of ' + nmAll + ' probes)');
     ok(JSON.stringify(S(p).fail) === '{}' && allOwn(p, true), 'nothing latches: the row stays ours around BMW\'s open panel');
     await scene('active-nomatch'); await sleep(300);
-    ok(logText.split('\n').filter((l) => /active cc: no ccList entry for number 1234/.test(l)).length === 1, 'logged ONCE: "active cc: no ccList entry for number 1234"');
+    // car-fix CF1: displayed (the scene feeds 1234 to both) is the source now, so the line is displayed's
+    ok(logText.split('\n').filter((l) => /displayed cc: no ccList entry for number 1234 - shown, BMW's panel stays open/.test(l)).length === 1, 'logged ONCE: "displayed cc: no ccList entry for number 1234 - shown, BMW\'s panel stays open"');
     await clean(p, 'an active number with no entry');
     await scene('active-stored');
     p = await until((q) => S(q).cc.shown === false && maskIs(q, 'ours', null), 8000);
@@ -1107,6 +1140,102 @@ async function main() {
     await click('SET_G20');
     await until((q) => q.activeName === 'wb_comfort', 20000);
     // ---- end fix/active-cc ----
+
+    // ---- car-fix CF1 (docs/car-fix/CF1-REPORT.md): the owner's car on 2026-11-18. KombiIF statusActiveCCMessage sat on 65535
+    // the whole run (0.7.20 read that as "a message with no entry": the stuck window); Vehicle2 statusDisplayedCCMessage is the
+    // real "shown now" (config.ccActive.source "displayed", dead true). The car's own sequences (bench/fake-signs.js car-*),
+    // each on a fresh app, with bench/run-app.js's frame audit (clean) ----
+    console.log('car-fix CF1: the opaque themes - the car\'s sequences, "shown now" from statusDisplayedCCMessage');
+    {
+        const box = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts', 'wb_comfort.json'), 'utf8'))
+            .widgets.find((x) => x.id === 'bg').cc;
+        const inkIn = async () => (await inkRows(box)).total;
+        const worstFor = async (ms) => { let n = 0; for (const t0 = Date.now(); Date.now() - t0 < ms;) { n = Math.max(n, await inkIn()); await sleep(100); } return n; };
+        const shut = (q) => S(q).cc.shown === false && same(S(q).safety.ucc, [0, 0, 0, 0]);
+        const open = (q) => S(q).cc.shown === true && same(S(q).safety.ucc, box);
+        await req('POST', '/restart');
+        await sleep(1000);
+        await until((q) => q && q.ready && q.activeName, 90000);
+        await set('hudLayout', 'wb_comfort');
+        await scene('clock-plus2');
+        await until((q) => q.activeName === 'wb_comfort', 20000);
+        await scene('car-start');
+        p = await until((q) => S(q).cc.displayed === 65535 && open(q), 8000);
+        ok(S(p).cc.source === 'displayed' && S(p).cc.displayed === 65535 && S(p).cc.activeWitness === false && open(p) && S(p).cc.noMatch === 65535,
+            'the start: active 65535 (no witness) and displayed 65535 = unknown: BMW\'s panel open (' + JSON.stringify({ src: S(p).cc.source, disp: S(p).cc.displayed, aw: S(p).cc.activeWitness }) + ')');
+        await scene('car-rest');
+        p = await until(shut, 8000);
+        let n = 0;
+        for (const t0 = Date.now(); Date.now() - t0 < 4000 && (n = await inkIn()) === 0;) await sleep(100);
+        ok(shut(p) && S(p).cc.active && S(p).cc.active.number === 65535 && n > 0,
+            '0.7.20\'s stuck window is gone: active still 65535, displayed 0, the list at rest - BMW\'s panel shuts, our row is back (' + n + ' px)');
+        await scene('car-door');
+        p = await until(open, 8000);
+        ok(open(p) && S(p).cc.now.id === 15, 'the door: ccList 15 and displayed 15 - a message shows, BMW\'s panel open (' + JSON.stringify(S(p).cc.now) + ')');
+        n = await worstFor(800);
+        ok(n === 0, 'with nothing of ours painted inside it (' + n + ' px)');
+        await scene('car-door-closing');
+        await sleep(300);
+        p = await probe();
+        ok(open(p) && S(p).cc.noMatch === 15, 'the list at rest first, displayed still 15: still shown, BMW\'s panel stays open (number 15 has no entry now)');
+        await scene('car-door-closed');
+        p = await until(shut, 8000);
+        ok(shut(p), 'displayed 0 (0.7 s later on the car): the panel shuts');
+        await scene('car-285');
+        p = await until(open, 8000);
+        ok(open(p) && S(p).cc.noMatch === 285, 'displayed 285, no ccList entry: BMW\'s own message, its panel open');
+        await scene('car-door-closed');
+        await scene('car-stored');
+        p = await until(shut, 8000);
+        await sleep(600);
+        p = await probe();
+        ok(shut(p) && S(p).cc.list === 0, 'a stored entry (987) listed with displayed 0: no message, the panel stays shut');
+        ok(/active cc: wired - not the "shown now" source \(config\.ccActive\.source displayed, dead\)/.test(logText) &&
+            /displayed cc: the "shown now" source has spoken \(config\.ccActive\.source displayed\)/.test(logText),
+            'the log says which field decides ("active cc: wired - not the "shown now" source ...", "displayed cc: the "shown now" source has spoken ...")');
+    }
+
+    console.log('car-fix CF1: all6WB - the car\'s door and an unlisted number, audited frame by frame');
+    await click('SET_G20');
+    await until((q) => q.activeName === 'wb_dials', 20000);
+    await restart();
+    await set('bottomRow', 'all6WB');
+    await scene('clock-plus2'); await scene('road-street'); await scene('car-start');
+    p = await until((q) => S(q).cc.displayed === 65535 && bmwOpen(q), 20000);
+    ok(S(p).cc.displayed === 65535 && bmwOpen(p) && S(p).safety.head === '', 'the start (displayed 65535): BMW\'s panel open, no text of ours');
+    await scene('car-rest');
+    p = await until((q) => S(q).row && S(q).row.why === null && (S(q).widgets || []).indexOf('cc_line') >= 0 && S(q).cc.shown === false && maskIs(q, 'ours', null), 20000);
+    ok(S(p).row.why === null && allOwn(p, true) && maskIs(p, 'ours', null), 'displayed 0, active 65535: the whole row ours, BMW\'s panel covered (' + JSON.stringify(S(p).safety.mask) + ')');
+    await scene('car-door');
+    {
+        let lg = 0, lgOk = 0;
+        for (const t0 = Date.now(); Date.now() - t0 < 400;) {
+            const q = await probe();
+            if (S(q).cc.shown === true && !S(q).safety.onScreen) { lg++; if (bmwOpen(q)) lgOk++; }
+            await sleep(20);
+        }
+        p = await until((q) => S(q).safety.onScreen === true && maskIs(q, 'ours', null), 8000);
+        ok(S(p).cc.now.id === 15 && S(p).safety.head.length === 16 && maskIs(p, 'ours', null), 'the door: our line shows entry 15\'s name (' + S(p).safety.head.length + ' characters) and covers BMW\'s panel');
+        ok(lgOk === lg, 'until ours was on the screen BMW\'s panel stayed open (' + lgOk + ' of ' + lg + ' probes)');
+    }
+    await clean(p, 'the car\'s door');
+    await scene('car-door-closing');
+    p = await until((q) => bmwOpen(q) && S(q).safety.head === '', 8000);
+    ok(bmwOpen(p) && S(p).cc.noMatch === 15 && S(p).safety.head === '', 'the list at rest, displayed still 15: BMW\'s panel opens, our line empty');
+    await scene('car-door-closed');
+    p = await until((q) => S(q).cc.shown === false && maskIs(q, 'ours', null), 8000);
+    ok(S(p).cc.shown === false && maskIs(p, 'ours', null) && JSON.stringify(S(p).fail) === '{}', 'displayed 0: covered again, nothing latched');
+    await scene('car-285');
+    p = await until((q) => bmwOpen(q), 8000);
+    await sleep(400);
+    p = await probe();
+    ok(bmwOpen(p) && S(p).safety.head === '' && S(p).cc.noMatch === 285, 'displayed 285 with no entry: BMW\'s panel open, our line empty');
+    await clean(p, 'an unlisted displayed number');
+    await scene('car-door-closed');
+    await set('bottomRow', 'allG20');
+    await click('SET_G20');
+    await until((q) => q.activeName === 'wb_comfort', 20000);
+    // ---- end car-fix CF1 ----
 
     console.log('every layout still builds');
     for (const v of opts('hudLayout')) {

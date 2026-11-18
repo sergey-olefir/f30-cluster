@@ -178,3 +178,24 @@ steady pixel memory <= 6 MiB, peak <= 8 MiB; no layer rect meets [1380, 660, 146
   the first text said 0.80); the engine's own fallback window (no mask in the layout) is A2's box. The face decode is
   compatible with `tools/twin-dial/face_shade.py` (tint, gain, wedge ink): the shader works in linear light and finds ink
   over the wedge by subtracting the band formula, A2's reference by a code threshold; the two agree to a few codes at ink edges.
+* 2026-11-18 (B1, Twin Dial 0.1.1, SPEC-R3; additive except where it says "changed"):
+  * **`tdial`**: the red wedge is gone (**changed**): the tachometer's red zone is an arc on the bezel (rho 0.990-1.010, sRGB (210, 20, 21) less the
+    black floor) from the redline to `u_red.w`, now **143.6** (was the sweep, 125; hud.js `TW_ARC_END`); `u_red.x` is still 999 on the speedometer.
+    New uniforms `u_lim` (marker deg; state 0 none / 1 limit / 2 conditional, hollow, strip not red / 3 hollow + red strip; warn; strip mode
+    0 marker only / 1 L1 / 2 L2 / 3 L3) and `u_cru` (marker deg; state 0 / 1), both zeros on the tachometer; the engine reads `this.twinLim =
+    { deg, state, warn }`, `this.twinCru = { deg, state }` and `config.limit.strip`, and `this._twinMarks()` resends them (nothing else).
+    Band tint now 0.76 : 1 : 1.064 (**changed**), the tick strip has its own tint (from its sRGB (98, 109, 111)) and a bright line (115, 124, 126);
+    the band, strip, rings and numeral shadow are the face's (re-baked, same names and size). The u_n2.x multiplier ("wedge") is unused; u_n2.y
+    (green) now also dims the cruise marker, u_n1.w (red) the limit marker and the arc, u_n0.w (strip) the red strip. A red tick or numeral
+    takes its antialiased edge earlier (no grey halo); the bezel is all ink. Size 5.7 KB after compact() (was 4.5).
+  * **`tdback` part L**: the highlight cell is now the **selected tab**, filled in its own colour (**changed**; it was lit by the message's
+    severity): `this.twinTab` (1..5, default 1) picks one of five cells cut by the separators; uniforms `u_hi` (x0, x1, on), `u_hiC` (the fill's
+    colour in linear light, black floor out, night x 0.75), new `u_hiR` (the rule under that cell, a code); fill law colour x ramp(y) / 0.16;
+    the ramp has the cool tint (0.96, 1.0, 1.08); separators: a 2 px dark column [x-1, x+1) and a 1 px light line [x+2, x+3), code 84; the tab
+    rule is 3 px (`tab.rule` [170, 173]) in code 230 (was 237). `tab.highlight` is no longer read. The severity still drives `u_win` and the
+    rules' `severity` role; never the fill. New `u_map` / `u_mapF`: the map window (a soft box in the background, hole fraction = the smallest of
+    the four edge ramps, rounded corner), driven by `this.twinMap` (null | "W1" | "W2"). Size 2.7 KB (was 2.0).
+  * **hud.js**: `TW_NIGHT.amber` and the amber text role 0.85 -> 0.80 (SPEC-R3 6); `TW_NIGHT.tab` 0.75.
+  * **Faces** `face_tacho` / `face_speedo`: re-baked (look B, SD's numeral shadow, three rings ending at 143.0 / 143.6 / 143.55, thin rim, strip + line,
+    major lines 0.010 R, the tachometer's unit at (0, +0.40) R); the regions JSON has `red_arc` instead of `wedge`, `strip`, `strip_line`,
+    `major_lines`, `numeral_shadow`, `hub`. Same files, same 616 x 560 R8, same pixel memory.

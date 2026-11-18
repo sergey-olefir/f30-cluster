@@ -27,7 +27,7 @@ const F = require('./twin-fixture');
 const ROOT = path.join(__dirname, '..');
 const PORT = Number(process.env.BENCH_PORT) || 8202;
 const BASE = 'http://127.0.0.1:' + PORT;
-const WORK = path.join(ROOT, 'bake', 'work', 'twin-dial', 'r2', 'B', 'budget-root');
+const WORK = path.join(ROOT, 'bake', 'work', 'twin-dial', 'r2', 'B', 'budget-root-' + PORT);       // per port: bake/work is shared between checkouts (twin_dial B1)
 const shaders = require(path.join(ROOT, 'shared', 'shaders.js'));
 const MIB = 1048576;
 const GAP = [1380, 660, 1460, 720];
@@ -213,14 +213,14 @@ async function benchChecks(keep) {
     const keys = (m) => layersIn(m).map((l) => l.key).sort().join(' ');
     const logCount = () => (logText.match(/layout "twin_test": /g) || []).length;
     const before = keys(w.last), builds = logCount();
-    ok(near(uni(tach(), 'u_red'), [78.125, 78.125, 77.525, 125], 0.01), 'redline 6500: wedge from 78.1 deg, red numerals from 78.1, red ticks from 77.5, to 125 (' + fmt(uni(tach(), 'u_red')) + ')');
-    ok(near(uni(speed(), 'u_red'), [999, 999, 999, 999], 0), 'the speedometer has no wedge');
+    ok(near(uni(tach(), 'u_red'), [78.125, 78.125, 77.525, 143.6], 0.01), 'redline 6500: red arc from 78.1 deg, red numerals from 78.1, red ticks from 77.5, the arc to 143.6 (' + fmt(uni(tach(), 'u_red')) + ')');
+    ok(near(uni(speed(), 'u_red'), [999, 999, 999, 999], 0), 'the speedometer has no red arc');
     await set('redline', 6000);
     await sleep(1200);
-    ok(near(uni(tach(), 'u_red'), [62.5, 46.875, 61.9, 125], 0.01), 'redline 6000, in place: wedge from 62.5, numerals from 46.9 (6 is red), ticks from 61.9 (' + fmt(uni(tach(), 'u_red')) + ')');
+    ok(near(uni(tach(), 'u_red'), [62.5, 46.875, 61.9, 143.6], 0.01), 'redline 6000, in place: arc from 62.5, numerals from 46.9 (6 is red), ticks from 61.9 (' + fmt(uni(tach(), 'u_red')) + ')');
     await set('redline', 7000);
     await sleep(1200);
-    ok(near(uni(tach(), 'u_red'), [93.75, 78.125, 93.15, 125], 0.01), 'redline 7000: wedge from 93.75, numerals from 78.1 (7 and 8 are red) (' + fmt(uni(tach(), 'u_red')) + ')');
+    ok(near(uni(tach(), 'u_red'), [93.75, 78.125, 93.15, 143.6], 0.01), 'redline 7000: arc from 93.75, numerals from 78.1 (7 and 8 are red) (' + fmt(uni(tach(), 'u_red')) + ')');
     await set('redline', 6500);
     await set('bandGain', 1.4);
     await sleep(1200);
@@ -242,38 +242,85 @@ async function benchChecks(keep) {
     await sleep(1500);
     ok(near(uni(tach(), 'u_n0'), [1, 1, 1, 1], 0) && near(uni(backL(w.last), 'u_tabR'), rampDay, 1e-9), 'nightLook off: back to day, in place');
 
-    // ---- the message state ----
+    // ---- the message state (SPEC-R3 3.2, 5.3: the window and the rules follow it; the tab's fill never carries the severity) ----
     const bl = () => backL(w.last), ucol = (l, n, i) => (uni(l, n) || []).slice(i * 4, i * 4 + 4);
-    ok(uni(bl(), 'u_win')[0] === 0 && uni(bl(), 'u_hi')[2] === 0, 'no message: the window shut, the warning cell not lit');
+    const FLOOR = [0.0012, 0.0009, 0.0056];
+    const lin = (c) => { const v = c / 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    const fillOf = (rgb, k) => rgb.map((c, i) => Math.max(0, (lin(c) - FLOOR[i]) / (1 - FLOOR[i])) * (k || 1));
+    const TAB = { 1: [176, 10, 37], 2: [176, 10, 37], 3: [240, 150, 10], 4: [60, 155, 34], 5: [30, 150, 200] };
+    const CELLS = { 1: [618, 780], 2: [780, 848], 3: [848, 1168], 4: [1168, 1237], 5: [1237, 1302] };
+    const wantFill = (t, k) => fillOf(TAB[t], k).concat([1]);
+    ok(uni(bl(), 'u_win')[0] === 0 && uni(bl(), 'u_hi')[2] === 1, 'no message: the window shut; the selected tab (1) is always filled');
+    ok(near(uni(bl(), 'u_hi'), [CELLS[1][0], CELLS[1][1], 1, 0], 0.001) && near(uni(bl(), 'u_hiC'), wantFill(1), 0.0005), 'tab 1 selected: cell ' + fmt(uni(bl(), 'u_hi')) + ' in the red, linear light ' + fmt(uni(bl(), 'u_hiC')));
     ok(near(uni(bl(), 'u_rule'), [741, 295.2, 1180, 296.7, 629, 612.4, 1292, 614.6], 0.001), 'no message: the bottom rule is the 2.2 px one');
     await hook('twinCc:window,red');
     await sleep(800);
     ok(uni(bl(), 'u_win')[0] === 1 && uni(bl(), 'u_win')[2] === 0, 'twinCc window: the fallback window opens (the mask is bound)');
-    ok(uni(bl(), 'u_hi')[2] === 1 && near(uni(bl(), 'u_hiC'), [176 / 255, 7 / 255, 30 / 255, 1], 0.002), 'twinCc window, red: the warning cell lit in the severity red ' + fmt(uni(bl(), 'u_hiC')));
+    ok(near(uni(bl(), 'u_hiC'), wantFill(1), 0.0005), 'twinCc window, red: the tab\'s fill is still the selected tab\'s colour, not the severity ' + fmt(uni(bl(), 'u_hiC')));
     ok(near(uni(bl(), 'u_rule'), [741, 295.2, 1180, 296.7, 629, 612.4, 1292, 614.6], 0.001), 'twinCc window: the rules keep their normal rects (BMW\'s panel is open, not our plate)');
     ok(keys(w.last) === before && logCount() === builds, 'the message state came in place: no layer made again');
     await hook('twinCc:ours,amber');
     await sleep(800);
-    ok(uni(bl(), 'u_win')[0] === 0 && uni(bl(), 'u_hi')[2] === 1 && near(uni(bl(), 'u_hiC'), [240 / 255, 170 / 255, 10 / 255, 1], 0.002), 'twinCc ours, amber: the window shut, the cell amber');
+    ok(uni(bl(), 'u_win')[0] === 0 && near(uni(bl(), 'u_hiC'), wantFill(1), 0.0005), 'twinCc ours, amber: the window shut, the fill still the tab\'s red');
     ok(near(uni(bl(), 'u_rule'), [741, 295.2, 1180, 296.7, 629, 611, 1291, 615], 0.001) && near(ucol(bl(), 'u_ruleC', 1), [240 / 255, 170 / 255, 10 / 255, 1], 0.002),
         'twinCc ours: the bottom rule is the 4 px one (y 611..615) in the severity colour ' + fmt(ucol(bl(), 'u_ruleC', 1)));
     await hook('twinCc:ours,green');
     await sleep(500);
-    ok(near(uni(bl(), 'u_hiC'), [59 / 255, 155 / 255, 26 / 255, 1], 0.002), 'twinCc ours, green: the cell green');
+    ok(near(ucol(bl(), 'u_ruleC', 1), [59 / 255, 155 / 255, 26 / 255, 1], 0.002) && near(uni(bl(), 'u_hiC'), wantFill(1), 0.0005), 'twinCc ours, green: the rule green, the fill unchanged');
     await hook('twinCc:ours,grey');
     await sleep(500);
-    ok(near(uni(bl(), 'u_hiC'), [231 / 255, 231 / 255, 231 / 255, 1], 0.002), 'twinCc ours, grey: the cell light grey');
+    ok(near(ucol(bl(), 'u_ruleC', 1), [231 / 255, 231 / 255, 231 / 255, 1], 0.002), 'twinCc ours, grey: the rule light grey');
     await set('nightLook', 'on');
     await sleep(1200);
-    ok(uni(bl(), 'u_hi')[2] === 1 && uni(bl(), 'u_hiC')[0] < 231 / 255 - 0.05, 'a message shown while the night comes: the cell dims, still lit');
+    ok(near(uni(bl(), 'u_hiC'), wantFill(1, 0.75), 0.0005) && ucol(bl(), 'u_ruleC', 1)[0] < 231 / 255 - 0.05, 'a message shown while the night comes: the fill at 0.75 (' + fmt(uni(bl(), 'u_hiC')) + '), the rule dims');
     await set('nightLook', 'off');
     await sleep(800);
     await hook('twinCc:window,');
     await sleep(500);
-    ok(uni(bl(), 'u_win')[0] === 1 && uni(bl(), 'u_hi')[2] === 1 && near(uni(bl(), 'u_hiC'), [231 / 255, 231 / 255, 231 / 255, 1], 0.002), 'a window with no severity: lit in grey, the window open');
+    ok(uni(bl(), 'u_win')[0] === 1 && near(uni(bl(), 'u_hiC'), wantFill(1), 0.0005), 'a window with no severity (B3: the blind keep-open): the window open, the fill the tab\'s');
     await hook('twinCc:none,');
     await sleep(500);
-    ok(uni(bl(), 'u_win')[0] === 0 && uni(bl(), 'u_hi')[2] === 0 && near(uni(bl(), 'u_rule'), [741, 295.2, 1180, 296.7, 629, 612.4, 1292, 614.6], 0.001), 'the message ends: window shut, cell dark, the 2.2 px rule back');
+    ok(uni(bl(), 'u_win')[0] === 0 && near(uni(bl(), 'u_rule'), [741, 295.2, 1180, 296.7, 629, 612.4, 1292, 614.6], 0.001), 'the message ends: window shut, the 2.2 px rule back');
+
+    // ---- the selected tab (B1: SPEC-R3 3.2) ----
+    for (const t of [2, 3, 4, 5, 1]) {
+        await hook('twinTab:' + t);
+        await sleep(400);
+        ok(near(uni(bl(), 'u_hi'), [CELLS[t][0], CELLS[t][1], 1, 0], 0.001) && near(uni(bl(), 'u_hiC'), wantFill(t), 0.0005), 'tab ' + t + ' selected: cell ' + fmt(CELLS[t]) + ', its colour (' + fmt(uni(bl(), 'u_hiC')) + '), in place');
+    }
+    await hook('twinTab:3');
+    await sleep(300);
+    const rr = uni(bl(), 'u_hiR'), want = fillOf(TAB[3]).map((v) => { const l = v + 0.15 * lin(230); return l <= 0.0031308 ? l * 12.92 : 1.055 * Math.pow(l, 1 / 2.4) - 0.055; });
+    ok(near(rr, want, 0.002), 'the rule under the selected cell is its colour + 0.15 x the white rule, linear light ' + fmt(rr));
+    ok(near(uni(bl(), 'u_tabR'), [170, 173, 0.002, 0.16], 0.0001) && near(uni(bl(), 'u_sep'), [780, 848, 1168, 1237], 0.001), 'the rule is 3 px (y 170..173), the separators at 780 848 1168 1237');
+    ok(keys(w.last) === before && logCount() === builds, 'the tab came in place: no layer made again');
+    await hook('twinTab:1');
+
+    // ---- the limit and cruise markers, and the map window (B1) ----
+    const lim = () => uni(speed(), 'u_lim'), cru = () => uni(speed(), 'u_cru');
+    ok(near(lim(), [0, 0, 0, 1], 0) && near(cru(), [0, 0, 0, 0], 0) && near(uni(tach(), 'u_lim'), [0, 0, 0, 0], 0), 'no limit, no cruise: u_lim [0, 0, 0, 1], u_cru zeros, the tachometer zeros');
+    await hook('twinMarks:-62.5,1,0,18.75,1,L2');
+    await sleep(400);
+    ok(near(lim(), [-62.5, 1, 0, 2], 0) && near(cru(), [18.75, 1, 0, 0], 0), 'a 50 km/h limit and a 110 km/h cruise: u_lim ' + fmt(lim()) + ', u_cru ' + fmt(cru()) + ', strip mode L2 from config.limit.strip');
+    ok(near(uni(tach(), 'u_lim'), [0, 0, 0, 0], 0) && near(uni(tach(), 'u_cru'), [0, 0, 0, 0], 0), 'the tachometer never gets a marker');
+    await hook('twinMarks:200,3,1,0,2,L3');
+    await sleep(400);
+    ok(near(lim(), [125, 3, 1, 3], 0) && near(cru(), [0, 0, 0, 0], 0), 'an angle past the scale clamps to 125; cruise standby (state 2) draws no marker; mode L3');
+    ok(keys(w.last) === before && logCount() === builds, 'the markers came in place: no layer made again');
+    await hook('twinMarks:0,0,0,0,0,L1');
+    await sleep(300);
+    ok(near(lim(), [0, 0, 0, 1], 0) && near(cru(), [0, 0, 0, 0], 0), 'state 0: the markers are gone');
+    ok(near(uni(bl(), 'u_map'), [0, 0, 0, 0], 0), 'the map window is closed by default (u_map zeros)');
+    await hook('twinMap:W1');
+    await sleep(400);
+    ok(near(uni(bl(), 'u_map'), [750, 180, 1170, 564], 0) && near(uni(bl(), 'u_mapF'), [120, 80, 80, 24], 0), 'twinMap W1: the zero box [750, 180, 1170, 564], fades 120 / 80 / 80, radius 24');
+    await hook('twinMap:W2');
+    await sleep(400);
+    ok(near(uni(bl(), 'u_map'), [700, 173, 1220, 600], 0), 'twinMap W2: the open box [700, 173, 1220, 600]');
+    await hook('twinMap:');
+    await sleep(400);
+    ok(near(uni(bl(), 'u_map'), [0, 0, 0, 0], 0), 'twinMap null: closed again');
+    ok(keys(w.last) === before && logCount() === builds, 'the map window came in place: no layer made again');
 
     // ---- the holes ----
     const hl = (l) => uni(l, 'u_hole');

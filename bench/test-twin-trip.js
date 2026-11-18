@@ -79,7 +79,17 @@ console.log('1. the factors: on by default');
     eq(page(h).slice(0, 2), ['ø 5.5', 'ø 52'], 'bc 2 takes the second board computer');
     h.config.trip = { factors: false };
     eq(page(h), ['ø ' + DASH, 'ø ' + DASH, DASH, DASH, 'від початку поїздки, ' + DASH], 'factors false: every value a dash (the kill switch)');
-    eq(APP.config.trip.factors, { bc: 1, speed: 0.1, cons: 0.1, way: 0.1, rl3: { speed: 0.1, cons: 0.1, way: 0.1 } }, 'the shipped app.json carries the same factors explicitly');
+    // integration (B7): the car (2026-11-18, against its own trip page) says KombiIF's distance is whole units: way 1; the rest as the defaults
+    const shipped = JSON.parse(JSON.stringify(APP.config.trip.factors)); delete shipped._verified;
+    eq(shipped, { bc: 1, speed: 0.1, cons: 0.1, way: 1, rl3: { speed: 0.1, cons: 0.1, way: 0.1 } }, 'the shipped app.json carries the factors explicitly, KombiIF distance x 1 as verified on the car');
+    {
+        const hc = mk({ config: { trip: { factors: APP.config.trip.factors, order: ['kombi'] } } });
+        travel(hc, 1, 28, 19);
+        eq(tok(hc, 'tDist'), '19.0', 'with the shipped factors a KombiIF distance of 19 reads 19.0 km (x 1), not 1.9');
+        const ho = mk({ config: { odometer: APP.config.odometer } });
+        ho.extra['de.bmw.infrastructure.MileageSupreme'].mileageSupreme({ mileageSupreme: 114747213, qualifierMileageSupreme: 'EVENT_DATA_AVAILABLE' });
+        ok(Math.round(twin.odometer(ho).km) === 114747, 'MileageSupreme in metres (114747213, above the 24-bit marker) reads 114747 km with the shipped factor 0.001 (' + JSON.stringify(twin.odometer(ho)) + ')');
+    }
     ok(APP.config.trip.verified === false && APP.config.odometer.verified === false, '... and verified false for the trip and the odometer (the first drive compares)');
 }
 
@@ -143,6 +153,29 @@ console.log('3. the fallback chain: KombiIF, then ResetLogic3');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
+// b7 (CP's finding): the catalogue declares ResetLogic3.bcDataAll.bcData3 as an ARRAY (arrayMaxLength 5): the car sends a list of structs
+console.log('3b. ResetLogic3 bcData3 is an array: the first entry that carries a value');
+{
+    const entry = (o) => Object.assign({ resetOption: 'STARTOFDRIVING', dateTimeReset: { year: 26, month: 11, day: 18, hour: 9, minute: 5, second: 0 },
+        dateTimeTrip: { day: 0, hour: 1, minute: 7, second: 30 }, speedAverage: 388, consumptionCombustionAverageDigit: 72, consumptionCombustionAverageScale: 24, counterDistance: 4330 }, o || {});
+    const unfilled = entry({ speedAverage: 65535, consumptionCombustionAverageDigit: 65535, counterDistance: 4294967295, dateTimeTrip: { day: 0, hour: 255, minute: 255, second: 255 } });
+    const arr = (h, list) => h.extra[RL3].bcDataAll({ bcUnits: { tachoDigital: 'KILOMETERS', averageConsumptionCombustion: 'CONSUMPTION_KM' }, activeResetLogic: 1, availableResetLogic: 31,
+        maxValues: { maxValueAverageConsumptionCombustion: 300 }, bcData3: list });
+    let h = mk();
+    arr(h, [entry()]);
+    eq(page(h), ['ø 7.2', 'ø 39', '433.0', '1:07', 'від початку поїздки, 09:05'], 'a one-entry array gives the same page as the plain struct (before the fix: dashes, nothing was read)');
+    h = mk();
+    arr(h, [unfilled, entry({ speedAverage: 500 }), entry({ speedAverage: 900 })]);
+    eq(page(h).slice(0, 2), ['ø 7.2', 'ø 50'], 'the first entry that carries a value is used (an unfilled one before it is skipped; a later one is not read)');
+    h = mk({ config: { trip: { order: ['rl3'] } } });
+    arr(h, [unfilled, unfilled]);
+    eq(page(h).slice(0, 4), ['ø ' + DASH, 'ø ' + DASH, DASH, DASH], 'an array of unfilled entries: dashes by the page\'s own rules');
+    h = mk({ config: { trip: { order: ['rl3'] } } });
+    arr(h, []);
+    eq(page(h).slice(0, 4), ['ø ' + DASH, 'ø ' + DASH, DASH, DASH], 'an empty array: dashes, no error');
+    eq(twin.rl3Entry(entry({ speedAverage: 1 })).speedAverage, 1, 'a plain struct is still taken as it is');
+}
+
 console.log('4. the odometer chain');
 {
     const h = mk({ settings: { centre: 'clock' } });

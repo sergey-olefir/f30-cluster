@@ -29,11 +29,20 @@
     "gallery.js",
     "previews.js",
     "twin_tokens.js",
+    "twin_pages.js",
     "twin_cc.js",
+    "twin_tabs.js",
     "twin_probe.js",
-    "mb_exp.js"
+    "mb_exp.js",
+    "diag_settings.js",
+    "twin_limit.js",
+    "limit_src.js"
   ],
   "signals": {
+    "de.bmw.body.Light": {
+      "IndicatorSteeringColumn": "s",
+      "_about": "the tab key (config.tabKey): the stalk's TRIP button, bit 0x40 of operationColumnStalks; notifier 32773 only (no getter), so s. Verified on the car 2026-11-18. Read only."
+    },
     "de.bmw.infotainment.vehicle.CDS": {
       "statusEngineSpeed2": "rs",
       "statusEngineTemperature": "rs",
@@ -66,7 +75,9 @@
       "dataDisplayGearbox": "s"
     },
     "de.bmw.infotainment.drivingexcitement.FES": {
-      "statusFESVehicleDynamicSwitchHMI": "rs"
+      "statusFESVehicleDynamicSwitchHMI": "rs",
+      "statusSwitchDriveDynamicSport2": "rs",
+      "_about": "statusSwitchDriveDynamicSport2 (getter 39 / notifier 32807): displayBoostPressure, the technical page's boost row (round 3 B4; the engine already reads it: hud.js boostFes). Read only."
     },
     "de.bmw.infrastructure.VehicleCondition": {
       "VehicleCondition": "s",
@@ -89,7 +100,8 @@
       "statusShowTimeDate": "rs",
       "statusActiveCCMessage": "rs",
       "statusMenuCCMessage": "rs",
-      "_about": "statusRangeTankStatus: fuel litres, range km, spare (reserve) and mileageKilometre (the odometer, first carrier). The trip computer fields are unseen (P4); research3/MK: the most likely factors are on by default (config.trip), each value UNVERIFIED in the log until the first drive compares it with the car's trip page. statusActiveCCMessage / statusMenuCCMessage: READ ONLY (standardCCMessage / extendedCCMessage are setters and are never declared)."
+      "_about": "statusRangeTankStatus: fuel litres, range km, spare (reserve) and mileageKilometre (the odometer, first carrier). The trip computer fields are unseen (P4); research3/MK: the most likely factors are on by default (config.trip), each value UNVERIFIED in the log until the first drive compares it with the car's trip page. statusActiveCCMessage / statusMenuCCMessage: READ ONLY (standardCCMessage / extendedCCMessage are setters and are never declared).",
+      "statusConfigurationKombi5": "rs"
     },
     "de.bmw.infotainment.KombiInterface_2": {
       "ccList": "rs",
@@ -98,7 +110,9 @@
     "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
       "playerMetadata": "rs",
       "_instances": "HMI_CID",
-      "_about": "unseen (P8); the media text is never logged, lengths only"
+      "_about": "car-fix CF3, seen on the car (P8, 2026-11-18; signal_probe): playerMetadata (with CarPlay: line 1 ARTIST, line 2 ALBUM, no TITLE line), trackProgress (Int64 elapsed / total: not plain numbers), menu (selected icon CARPLAY; Int64 ids) feed the tab-3 pages (config.pages.media). On 0.1.0 this interface was subscribed on instance 1 and failed ('Instance not available'): B4's $instance HMI_CID fixes it. The text is drawn, never logged (lengths only). coverArt is NOT declared (up to 850 kB a notification).",
+      "trackProgress": "rs",
+      "menu": "rs"
     },
     "de.bmw.infotainment.entertainment.mediasource.MediaSource": {
       "activeSourceId": "rs",
@@ -107,11 +121,79 @@
     },
     "de.bmw.infotainment.connectivity.telephony.ConnectivityAggregator": {
       "aggregatedCallState": "rs",
-      "_about": "unseen (P9): an enum only, no number or name is read"
+      "_about": "seen on the car (Twin Dial 0.1.0's log, 2026-11-18: DISCONNECTED, DIALING, ACTIVE): the call card and tab rule 2 (car-fix CF3). An enum only, no number or name is read"
     },
     "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus": {
       "guidingState": "rs",
       "_about": "the navigation tab's icon: lit while a route is guided"
+    },
+    "de.bmw.infotainment.tuner.fmamdab.tunerfmamdab.TunerFmAmDab": {
+      "currentStationFmDabAm": "rs",
+      "_about": "seen on the car (P8, 2026-11-18: band WB_FM, the frequency in kHz in the FM range, preset 0, TPS_NO_TP, names and radio text present): the radio page (config.pages.media). Read only."
+    },
+    "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer": {
+      "_instances": "CarPlayMedia",
+      "currentItemPosition": "rs",
+      "playerState": "rs",
+      "currentItemMetadata": "rs",
+      "currentItemTime": "rs",
+      "_about": "seen on the car (P8, 2026-11-18, CarPlay): playerState PLAYER_STATE_PLAY, currentItemPosition 0 of 0 (= none), currentItemMetadata keyed ARTIST / ALBUM / TITLE / COVER_FILE (car-fix CF3: the title the HMI lines lack with CarPlay; COVER_FILE is never read), currentItemTime elapsed / total in ms. One instance per interface (SPEC-R3 4.3). Read only."
+    },
+    "de.bmw.infotainment.connectivity.telephony.VoiceCall": {
+      "_instances": "Call1",
+      "state": "rs",
+      "contactID": "rs",
+      "name": "rs",
+      "_about": "unseen (P9; the probe's phone set was never switched on): the call card's contact line, behind config.pages.callDetail (false). name is private: kept only while callDetail and the setting \"callerName\" are on and the call lasts, never logged. Read only."
+    },
+    "de.bmw.infotainment.connectivity.telephony.VoiceCallManager": {
+      "micMuted": "rs",
+      "_about": "unseen (P9): the muted-microphone mark on the call card, behind config.pages.callDetail (false). Read only (its setter is never declared)."
+    },
+    "de.bmw.infotainment.devicemanager.devicepresentation.DevicePresentation": {
+      "deviceList": "rs",
+      "_about": "unseen (P9): the idle phone page (connected, path, battery, signal) and tab 4's icon variant, behind config.pages.phoneDevices (false); friendlyName and persistentAttributes are never read. Read only."
+    },
+    "de.bmw.infotainment.navigation.guiding.Guidance": {
+      "_instances": "Main_Instance",
+      "currentRoad": "rs",
+      "conclusiveDart": "rs",
+      "currentLaneGuiding": "rs",
+      "nextDestinationInfo": "rs",
+      "visualizationInKombiNonNaviEnabled": "rs",
+      "guidingProvider": "rs",
+      "isOnGuidableRoad": "rs",
+      "_about": "P12 on the car (2026-11-18, a route by CarPlay): guidingProvider CAR_PLAY, nextDestinationInfo (rawDistance in metres, travelTime s, the arrival time local), currentRoad and isOnGuidableRoad arrive - the CarPlay route page (config.pages.route, car-fix CF3); conclusiveDart and the lanes stay empty with CarPlay (the guidance page, config.pages.guidance, stays dark: BMW's own guidance is untested). The map window's presence rule (config.mapWindow). Road text is drawn, never logged; positions and bearings are never read. Read only."
+    },
+    "de.bmw.infotainment.vehicle.TPMS": {
+      "statusTyrePressure": "rs",
+      "statusTyreTemperature": "rs",
+      "statusTargetTyrePressure": "rs",
+      "_about": "the tyre page (config.pages.tyres, dark): the car never notifies TPMS, so the page reads the getters every 10 s while it shows (shared/twin_pages.js tpmsPoll). Read only."
+    },
+    "de.bmw.dass.TrafficSignRecognition": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognition"
+      ],
+      "_about": "car-fix CF2: the speed limit as the owner's car sends it (2026-11-18, signal_probe set S13): an EVENT (eventId 32769, service 13632), so _broadcasts; no getter, no setter, no method. config.sign.tsr (shared/limit_src.js): presentClassLimitSpeed x 5 = km/h. TrafficSignDisplayControl below stays the fallback."
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognitionFrontCamera"
+      ],
+      "_about": "car-fix CF2: the front camera's own sign event, a second witness (config.sign.camera): logged as numbers ('limit: camera ...'), never drawn. Read only."
+    },
+    "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
+      "_instances": "1",
+      "functionalLibraryData": "rs",
+      "_about": "car-fix CF2: the cruise / limiter as the owner's car sends it (2026-11-18, the probe's hud-data, filled with the HUD off): cruiseCtrlSpeedHUD (set speed km/h, 65535 none), ldmSym (LDM_SYM_DCC cruise / LDM_SYM_SLD limiter / LDM_SYM_NONE), ldmSymColor (LDM_ACTIVE green, else grey). Getter 1 (NON-ZERO), notifier 32769, so rs. READ ONLY: this interface has no setter and no method; codingData is not declared."
+    },
+    "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl": {
+      "displaySpeedLimitAndNoPassingRestriction": "s",
+      "displayDriverAssistanceLongitudinal": "s",
+      "_about": "SPEC-R3 8 and 9 (package B5). Both notifier only (32769 / 32772, no getter), flag s: nothing here is a getter, a setter or a method. displaySpeedLimitAndNoPassingRestriction: the sign (config.sign, copied from f30_cluster as it is). displayDriverAssistanceLongitudinal: the cruise / limiter's struct, UNSEEN on the car until the car session (SPEC 9); read and logged (numbers and enum names), drawn only while config.cruise is set. That the sign field arrives is not yet shown by a log line in the repository: the build logs 'limit:' lines (shared/twin_limit.js) and the car session confirms."
     }
   },
   "screens": [
@@ -130,6 +212,18 @@
           "centre"
         ],
         [
+          "setting",
+          "tab"
+        ],
+        [
+          "setting",
+          "techData"
+        ],
+        [
+          "setting",
+          "navView"
+        ],
+        [
           "text",
           "STATUS",
           ""
@@ -145,6 +239,11 @@
           "Settings"
         ],
         [
+          "button",
+          "BTN_DIAG",
+          "Діагностика"
+        ],
+        [
           "text",
           "STATUS_LOG",
           ""
@@ -157,7 +256,43 @@
       "title": "Settings",
       "skip": [
         "hudLayout",
-        "centre"
+        "centre",
+        "tab",
+        "techData",
+        "navView",
+        "diagRelease",
+        "diagMapWindow",
+        "diagMapForce",
+        "diagMapSlots",
+        "diagSilent"
+      ]
+    },
+    {
+      "name": "DIAG",
+      "kind": "menu",
+      "title": "Діагностика",
+      "settings": "placed",
+      "items": [
+        [
+          "setting",
+          "diagRelease"
+        ],
+        [
+          "setting",
+          "diagMapWindow"
+        ],
+        [
+          "setting",
+          "diagMapForce"
+        ],
+        [
+          "setting",
+          "diagMapSlots"
+        ],
+        [
+          "setting",
+          "diagSilent"
+        ]
       ]
     }
   ],
@@ -181,24 +316,132 @@
     },
     {
       "key": "centre",
-      "label": "Centre page",
+      "label": "Сторінка бортового комп'ютера",
       "type": "choice",
       "default": "cycle",
       "options": [
         [
           "clock",
-          "Date and clock"
+          "Годинник"
         ],
         [
           "trip",
-          "Trip computer"
+          "Поїздка"
+        ],
+        [
+          "tech",
+          "Технічні дані"
         ],
         [
           "cycle",
-          "Both, in turn"
+          "По колу"
         ]
       ],
-      "_about": "SPEC 6.2: cycle holds each page 10 s while the car stands and keeps the page it is on above 5 km/h"
+      "_about": "SPEC-R3 4.1 / 10: tab 1's page: one page or in turn (cycle: 10 s a page while the car stands, held above 5 km/h). Technical data out of the choice and the cycle when \"techData\" is hide. Applied in place (shared/twin_pages.js)."
+    },
+    {
+      "key": "tab",
+      "label": "Таба",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "авто"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ]
+      ],
+      "_about": "SPEC-R3 3.4 (package B2, shared/twin_tabs.js): the selected tab, applied in place (no layout rebuild). auto = a message selects tab 2 until it ends, a call tab 4 (config.tabs.callSelects, off), guidance tab 5, else the driver's last choice (the key, config.tabKey; or this setting set to a number). 1 on-board computer, 2 messages, 3 media, 4 phone, 5 navigation"
+    },
+    {
+      "key": "tabLock",
+      "label": "Не перемикати таби вище",
+      "type": "choice",
+      "default": "5",
+      "options": [
+        [
+          "0",
+          "вимк."
+        ],
+        [
+          "5",
+          "5 км/год"
+        ],
+        [
+          "10",
+          "10 км/год"
+        ],
+        [
+          "20",
+          "20 км/год"
+        ],
+        [
+          "30",
+          "30 км/год"
+        ],
+        [
+          "50",
+          "50 км/год"
+        ]
+      ],
+      "_about": "SPEC-R3 3.4: an automatic tab change (a call, guidance, the return to the driver's choice) waits until the car is at or below this speed; a message never waits, and the driver's own key is never locked"
+    },
+    {
+      "key": "techData",
+      "label": "Технічні дані",
+      "type": "choice",
+      "default": "show",
+      "options": [
+        [
+          "show",
+          "Показувати"
+        ],
+        [
+          "hide",
+          "Сховати"
+        ]
+      ],
+      "_about": "SPEC-R3 4.1: hide = the technical page AND the tyre page are out of tab 1's choice and the cycle (R4; FIN, the owner 2026-11-18: both). Applied in place."
+    },
+    {
+      "key": "navView",
+      "label": "Навігація",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "авто"
+        ],
+        [
+          "map",
+          "карта"
+        ],
+        [
+          "arrows",
+          "стрілки"
+        ]
+      ],
+      "_about": "FIN (the owner, 2026-11-18): what tab 5 shows. auto = BMW's map when it is present (the map view with BMW's guidance or 'map without a route'), else the arrow / CarPlay-route page; map = the map window whenever BMW's map view is on (a CarPlay route included), else the same fallback; arrows = never the map. The map window itself stays the experiment config.mapWindow (Діагностика). Applied in place (shared/twin_pages.js navView). No key: the TRIP button stays the tab key only."
     },
     {
       "key": "redline",
@@ -264,6 +507,23 @@
       "_about": "SPEC 7.1 / 17.2: the band and tick strip level, set from one photo on the car"
     },
     {
+      "key": "callerName",
+      "label": "Показувати ім'я абонента",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Ні"
+        ],
+        [
+          "on",
+          "Так"
+        ]
+      ],
+      "_about": "SPEC-R3 4.4: the call card shows the caller's name (private text: kept only while the call lasts, never logged). Off = \"Контакт\" or \"Номер\". Only has an effect once config.pages.phone is switched on."
+    },
+    {
       "key": "demo",
       "label": "Demo data",
       "type": "choice",
@@ -278,6 +538,55 @@
           "On"
         ]
       ]
+    },
+    {
+      "key": "diagRelease",
+      "label": "Закривати повідомлення, що застрягло",
+      "type": "bool",
+      "default": false,
+      "_about": "B7, the Діагностика menu (shared/diag_settings.js; what each one writes is config.diag): off = app.json's own key. Release of a stuck message: config.ccActive.release"
+    },
+    {
+      "key": "diagMapWindow",
+      "label": "Вікно карти",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "вимк."
+        ],
+        [
+          "W2",
+          "W2"
+        ],
+        [
+          "W1",
+          "W1"
+        ]
+      ],
+      "_about": "config.mapWindow (SPEC-R3 4.5): the map window on tab 5, an experiment. FIN (the owner, 2026-11-18): W2 is the window (the largest: open box [700, 173, 1220, 600], no fade, BMW's own edge shows, clipped above by the tab rule; no lens), so it is the FIRST option after off - switching the setting on gives W2; W1 stays one more press away"
+    },
+    {
+      "key": "diagMapForce",
+      "label": "Примусове вікно карти",
+      "type": "bool",
+      "default": false,
+      "_about": "config.mapForce: the map window opens on tab 5 whatever the presence rule says (for the photograph on the car)"
+    },
+    {
+      "key": "diagMapSlots",
+      "label": "Журнал слотів карти",
+      "type": "bool",
+      "default": false,
+      "_about": "config.mapSlotLog (B4): log cluster-render's slot-0x100 rows (numbers only) once per state, asked every 2 s on tab 5 with a map window chosen: the proof the app can read them before config.mapSlots (S1) is trusted"
+    },
+    {
+      "key": "diagSilent",
+      "label": "Журнал полів, що мовчать",
+      "type": "bool",
+      "default": false,
+      "_about": "an action, no config key: the silent-fields summary of research3/MK once now and every 5 minutes while on"
     }
   ],
   "config": {
@@ -307,12 +616,28 @@
       "cyclePageMs": 10000,
       "holdAboveKmh": 5
     },
+    "tabs": {
+      "_about": "SPEC-R3 3: live tabs on (shared/twin_tabs.js, package B2; the key absent = live tabs off, the round 2 look). lockAboveKmh: used while the app has no tabLock setting. messageTab false: a message does not select tab 2. callSelects: rule 2, a call rings or runs -> tab 4 (the call card); ON since car-fix CF3: the car showed the call state (aggregatedCallState DISCONNECTED -> DIALING -> ACTIVE -> DISCONNECTED in Twin Dial 0.1.0's log, 2026-11-18). A message still outranks a call; false switches the rule off again",
+      "lockAboveKmh": 5,
+      "messageTab": true,
+      "callSelects": true
+    },
+    "tabKey": {
+      "iface": "de.bmw.body.Light",
+      "field": "IndicatorSteeringColumn",
+      "path": ["operationColumnStalks"],
+      "mask": 64,
+      "invalid": [255],
+      "_verified": "THE CAR, 2026-11-18 (signal_probe log, the owner confirmed the presses): the stalk's TRIP button is bit 0x40 of de.bmw.body.Light IndicatorSteeringColumn.operationColumnStalks (UInt8, notifier 32773, no getter: declared s). 17 presses gave 17 clean 0 -> 0x40 -> 0 pairs, held about 0.15 s, about 0.5 s apart. The rising edge only is a press (shared/twin_tabs.js keyHandler); 255 is the catalogue's unfilled default (every bit set) and counts as no state."
+    },
+    "_tabKey": "SPEC-R3 R9: the tab key source, null until the car session (docs/AGENT-BRIEF-car-signals.md, probe P13) finds a field that moves on one press. Forms: {\"iface\": \"...\", \"field\": \"...\", \"path\": [\"member\"], \"mask\": 64} (a bit), {..., \"press\": [1, \"TASTER_GEDRUECKT\"]} (a level; the rising edge counts), {..., \"counter\": true} (a step counter), {..., \"any\": true} (any change); optional \"instance\", \"dir\" (1 | -1), \"rateMs\". The field must also be in \"signals\" (rs / s): the key reads, it never writes. shared/twin_tabs.js",
     "trip": {
       "factors": {
         "bc": 1,
         "speed": 0.1,
         "cons": 0.1,
-        "way": 0.1,
+        "way": 1,
+        "_verified": "THE CAR, 2026-11-18, against the car's own trip page (15.5 l/100 km, 13.7 km/h, 19.2 km, 1:28): KombiIF speed x 0.1, consumption x 0.1, distance x 1 (NOT 0.1), board computer 1; hours and minutes plain. rl3 (ResetLogic3) is still unverified.",
         "rl3": {
           "speed": 0.1,
           "cons": 0.1,
@@ -334,7 +659,8 @@
     "odometer": {
       "factors": {
         "rangeTank": 1,
-        "supreme": 1,
+        "supreme": 0.001,
+        "_verified": "THE CAR, 2026-11-18: statusRangeTankStatus.mileageKilometre is km (factor 1, 114747 km); MileageSupreme.mileageSupreme carries METRES (114747213): factor 0.001 (shared/twin_tokens.js reads it as a UInt32).",
         "range": 1,
         "secure": 1
       },
@@ -481,7 +807,16 @@
         ]
       },
       "strict": true,
-      "_strict": "SPEC 8.4 / D7 (the owner, 2026-11-17): until statusActiveCCMessage has once delivered a number that matched a ccList entry, our plate is never drawn over BMW's panel: the fallback window opens whenever the heuristic says a message may show. Package D."
+      "_strict": "SPEC 8.4 / D7 (the owner, 2026-11-17): until statusActiveCCMessage has once delivered a number that matched a ccList entry, our plate is never drawn over BMW's panel: the fallback window opens whenever the heuristic says a message may show. Package D.",
+      "release": null,
+      "_release": "twin_dial B3 (SPEC-R3 5.4.7, off): null, or { deferValues: [65535], leftList: \"kept\" } - the narrowed release: a shown-now value that is no verdict (65535, or a number whose ccList entry has left AFTER the number was set) lets the list decide. leftList true is research3/MC's wider rule and is unsafe (a returning door message whose number arrives before its list entry), never set it. shared/hud.js _ccRelease. car-fix CF1: it acts on the ACTIVE number only, so with source displayed it is obsolete (it can act only before displayed has spoken, and with dead true not even then).",
+      "source": "displayed",
+      "dead": true,
+      "unknownValues": [65535],
+      "confirmNow": true,
+      "unlistedPullsTab": false,
+      "_unlistedPullsTab": "car-fix CF1 (the lead, 2026-11-18): a displayed number with NO ccList entry (285, 926, 927, 184 on the owner's car, ~6 s each, several per drive) keeps BMW's panel open but does not pull tab 2 and so shows no pointer page by itself - the driver reads BMW's own panel. Only a number that matches a ccList entry, or 65535 with a message in the list, pulls tab 2. true gives back the pull (SPEC-R3 5.1's pointer page). shared/twin_cc.js TwinCentre.",
+      "_carfix": "car-fix CF1 (docs/car-fix/CF1-REPORT.md), the owner's car 2026-11-18 (signal_probe 0.1.1 and twin_dial.log): statusActiveCCMessage sat on 65535 the whole run, also while a message showed (dead: true - it stays declared, subscribed and logged, it decides nothing; without dead it would count as a witness only once it CHANGED to a number outside deadValues, default [65535]). Vehicle2.statusDisplayedCCMessage (config.ccDisplayed) is the real 'shown now' (source: displayed): door opened -> ccList id 15 and displayed 15 within ~50 ms; closed -> ccList at rest, displayed 0 0.2-0.7 s later; 14, 19 and 2255 matched their entries the same way; 285, 926, 927 and 184 showed with no ccList entry (BMW's panel stays open for them). unknownValues: 65535 on displayed (after an app start, at the end of a drive) is unknown: BMW's panel open, no tab pulled unless the list holds a message. confirmNow true: the numbering is car-verified (four ids), so D7 falls on the first match and THAT message's card may cover BMW's panel after its 150 ms (SPEC-R3 5.4.6 'until ... has once delivered'); false gives back 'ours from the next one'. shared/hud.js _ccListEval / _twinInputs, shared/twin_cc.js."
     },
     "ccDisplayed": {
       "iface": "de.bmw.infotainment.vehicle.Vehicle2",
@@ -494,6 +829,251 @@
       "hideModeRows": false,
       "hideRowUnlessG20": false,
       "comment": "shared/menu.js: twin_dial has neither the drive-mode rows nor the G20 toggle"
-    }
+    },
+    "startupHold": {
+      "ms": 1000,
+      "_about": "B7 (research3/MP): the FIRST build waits until the car's first time zone and first message list are in, or ms after cluster-render is ready, whichever is first: one build at start instead of three (shared/diag_settings.js hold; the bytes before and after are in docs/twin-dial/R3B-INTEGRATION.md). Remove the key (or set false) for the three builds of 0.1.0."
+    },
+    "diag": {
+      "_about": "B7, the Діагностика menu (screen DIAG, shared/diag_settings.js): each setting writes the config paths named here while it is ON (every one is OFF by default = app.json's own key, put back when it goes off); a path is dotted; a choice lists its options. The changes apply in place (no layout rebuild).",
+      "settings": {
+        "diagRelease": {
+          "on": { "ccActive.release": { "deferValues": [65535], "leftList": true } },
+          "_about": "the narrowed release of research3/MC for Twin Dial (SPEC-R3 5.4 step 7: only a number that was set before its entry left the list may be released; 65535 deferred): package B3 owns the engine side, this is the value the setting switches on"
+        },
+        "diagMapWindow": { "options": { "W2": { "mapWindow": "W2" }, "W1": { "mapWindow": "W1" } } },
+        "diagMapForce": { "on": { "mapForce": true } },
+        "diagMapSlots": { "on": { "mapSlotLog": true } },
+        "diagSilent": { "act": "silent" }
+      }
+    },
+    "pages": {
+      "_about": "round 3 B4 (SPEC-R3 4): the pages built DARK, each switched on by the car session once its signal has been seen (docs/AGENT-BRIEF-car-signals.md). tyres: tab 1's tyre page joins the cycle (TPMS getters polled every 10 s while it shows); media: tab 3's radio and now-playing pages (P8); phone: tab 4's call card (P9); guidance: tab 5's guidance page (P12). false = the certain page or the fallback shows.",
+      "tyres": false,
+      "media": true,
+      "phone": true,
+      "phoneDevices": false,
+      "callDetail": false,
+      "guidance": false,
+      "route": true,
+      "routeOffRoad": false,
+      "_carFix": "car-fix CF3 (2026-11-18, the car; docs/car-fix/CF3-REPORT.md): media ON (HmiMediaState, the tuner and the CarPlay player all arrive; CarPlay's title / artist / time from MediaPlayer on CarPlayMedia, the source from the HMI menu's selected icon); phone ON for what arrives (aggregatedCallState -> the call card, its title by state and our own timer); phoneDevices (DevicePresentation: the idle page's connection lines, tab 4's icon variant) and callDetail (VoiceCall contact / name, micMuted) stay OFF: never seen; route ON (tab 5 with CarPlay guiding: remaining distance, arrival and travel time, the road; no arrow; it also selects tab 5 by rule 3 like BMW's guidance; routeOffRoad: the \"Поза дорогою\" note from isOnGuidableRoad, OFF: it read false at the start of a CarPlay route, its meaning is unverified); guidance (BMW's own arrow page) stays OFF: untested."
+    },
+    "mapWindow": null,
+    "_mapWindow": "round 3 B4 (SPEC-R3 4.5), an EXPERIMENT (FIN, the owner 2026-11-18: W2 is the chosen window and the Діагностика setting's first option; still off by default): null = no map window; \"W1\" = the soft-edged window (zero box [750, 180, 1170, 564], fades 120 / 80 / 80, corner 24), \"W2\" = open wider so that BMW's own edge shows. It opens only while tab 5 is selected and BMW's map is believed present (mapSlots / the cluster's map-view setting) and closes at once on any doubt. Needs B1's u_map uniform in tdback.",
+    "mapSlots": false,
+    "_mapSlots": "true once the experiment has shown that cluster-render's status rows (slot 0x100 ... map 1) are readable: the window then follows them (S1); false = it follows the cluster's map-view setting and guidance (S2).",
+    "mapForce": false,
+    "mapShutMs": 8000,
+    "sign": {
+      "iface": "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl",
+      "field": "displaySpeedLimitAndNoPassingRestriction",
+      "invalidPath": [
+        "invalidFlag"
+      ],
+      "invalidOn": [
+        1,
+        true
+      ],
+      "valuePath": [
+        "displaySpeedLimit"
+      ],
+      "factor": 1,
+      "min": 5,
+      "max": 250,
+      "unitPath": [
+        "displaySpeedLimitUnit"
+      ],
+      "mph": [
+        "MPH",
+        1
+      ],
+      "noUnit": [
+        "NICHT_VERFUEGBAR",
+        2
+      ],
+      "none": [],
+      "end": [
+        0
+      ],
+      "unknown": [
+        254,
+        255
+      ],
+      "_values": "The raw speed values follow the convention of the car's own FASuS NextClassLimitSpeed enum, which is the only one in the catalogue that spells them out: 0 = AUFHEBUNG_ALLES (the end of all restrictions, the derestriction sign), 254 = NICHT_VERFUEGBAR and 255 = SIGNAL_UNBEFUELLT (no limit known, BMW's empty sign). displaySpeedLimit itself is a plain UInt8 with no names, so this is reasoning, not proof: the 'sign:' log line on the car settles it. \"none\" is empty on purpose - the owner's cluster essentially always shows a sign (2026-11-15).",
+      "warnPath": [
+        "displaySpeedLimitWarning"
+      ],
+      "warnMap": {
+        "SLI_WARNUNG_NICHT_ANGEFORDERT": 0,
+        "0": 0,
+        "SLI_WARNUNG_ANGEFORDERT": 1,
+        "1": 1,
+        "SLI_WARNUNG_STUFE_2": 2,
+        "2": 2
+      },
+      "suppPath": [
+        "displaySpeedLimitSupplemental"
+      ],
+      "suppMap": {
+        "KEIN_ZUSATZZEICHEN": null,
+        "0": null,
+        "UHRZEIT": "time",
+        "1": "time",
+        "REGEN": "rain",
+        "2": "rain",
+        "SCHNEE": "snow",
+        "3": "snow",
+        "SCHNEE_REGEN": "snowRain",
+        "4": "snowRain",
+        "AUSFAHRT_LINKS": "exitL",
+        "5": "exitL",
+        "AUSFAHRT_RECHTS": "exitR",
+        "6": "exitR",
+        "DISTANZ_1": "dist1",
+        "7": "dist1",
+        "DISTANZ_2": "dist2",
+        "8": "dist2",
+        "NEBEL": "fog",
+        "9": "fog",
+        "RESTRIKTION": "restriction",
+        "10": "restriction",
+        "ANHAENGER": "trailer",
+        "11": "trailer",
+        "ZONE": "zone",
+        "12": "zone",
+        "SCHOOL": "school",
+        "13": "school",
+        "WORK_ZONE": "work",
+        "14": "work"
+      },
+      "stylePath": [
+        "displaySymbolStyle"
+      ],
+      "styleMap": {
+        "ECE": "ece",
+        "0": "ece",
+        "ECE_UNSURE": "ece",
+        "1": "ece",
+        "US": "us",
+        "2": "us",
+        "US_UNSURE": "us",
+        "3": "us",
+        "CHINA": "china",
+        "4": "china",
+        "CHINA_UNSURE": "china",
+        "5": "china",
+        "KOREA": "korea",
+        "6": "korea",
+        "KOREA_UNSURE": "korea",
+        "7": "korea",
+        "JAPAN": "japan",
+        "8": "japan",
+        "JAPAN_UNSURE": "japan",
+        "9": "japan"
+      },
+      "surePath": [
+        "displaySymbolStyle"
+      ],
+      "sureOn": [
+        "ECE",
+        0,
+        "US",
+        2,
+        "CHINA",
+        4,
+        "KOREA",
+        6,
+        "JAPAN",
+        8
+      ],
+      "npPath": [
+        "displayNoPassingRestriction"
+      ],
+      "npMap": {
+        "KEIN_UEBERHOLVERBOT_ERKANNT": "none",
+        "0": "none",
+        "UEBERHOLVERBOT_PKW": "car",
+        "1": "car",
+        "AUFHEBUNG_UEBERHOLVERBOT_PKW_ERKANNT": "endCar",
+        "2": "endCar",
+        "UEBERHOLVERBOT_PKW_MIT_ANHAENGER_ERKANNT": "trailer",
+        "3": "trailer",
+        "AUFHEBUNG_UEBERHOLVERBOT_PKW_MIT_ANHAENGER_ERKANNT": "endTrailer",
+        "4": "endTrailer",
+        "UEBERHOLVERBOT_LKW": "truck",
+        "5": "truck",
+        "AUFHEBUNG_UEBERHOLVERBOT_LKW": "endTruck",
+        "6": "endTruck",
+        "ANDERE_UEBERHOLVERBOTE": "other",
+        "7": "other",
+        "UEBERHOLVERBOT_LINKSVERKEHR": "left",
+        "8": "left"
+      },
+      "npDistPath": [
+        "displayRemainingDistanceNoPassingRestriction"
+      ],
+      "holdMs": 0,
+      "changeFlashMs": 3000,
+      "flashPeriodMs": 500,
+      "_hold": "The stock cluster animates the end of a limit and then shows the new one, and a sign is essentially always present (the owner, 2026-11-15), so there is no \"hide the sign\" state. holdMs keeps the last sign on while the car briefly says nothing; the animation itself lands in shared/hud.js _signShow().",
+      "_timings": "changeFlashMs / flashPeriodMs are docs/G20-DESIGN-SPEC.md's PLACEHOLDERS for the flash after a limit changes - there is no video in the reference set, so nothing was measured. They are parameters only; nothing acts on them yet.",
+      "_empty": "docs/G20-DESIGN-SPEC.md: BMW's empty sign is THREE DASHES, 8.8 x 4.4 at pitch 13, not a blank disc. That is WBSIGN's u_show state 3, which this package already drives; whether the shader draws dashes is the drawing package's to check.",
+      "_mph": "The unit is read and recorded ({{limitUnit}}, the 'sign:' log line) but changes nothing on screen: the sign stays the round one with the number, in every country (the owner, 2026-11-15).",
+      "tsr": {
+        "iface": "de.bmw.dass.TrafficSignRecognition",
+        "event": "TrafficSignRecognition",
+        "instance": "1",
+        "classPath": [
+          "presentClassLimitSpeed"
+        ],
+        "factor": 5,
+        "none": [
+          0,
+          29,
+          253,
+          254,
+          255
+        ],
+        "end": [],
+        "warnPath": [
+          "controlSLIWarning"
+        ],
+        "warnMap": {
+          "1": 1,
+          "2": 2
+        },
+        "unitPath": [
+          "unitOfMeasurementSpeedLimit"
+        ],
+        "mph": [
+          1,
+          "MPH"
+        ],
+        "withdrawalPath": [
+          "presentWithdrawalLimitSpeed"
+        ],
+        "endOn": [],
+        "staleMs": 3000
+      },
+      "camera": {
+        "iface": "de.bmw.environmentalmodel.SignRecognitionFrontCamera",
+        "event": "TrafficSignRecognitionFrontCamera",
+        "instance": "1"
+      },
+      "order": [
+        "tsr",
+        "field"
+      ],
+      "_tsr": "car-fix CF2 (the car session of 2026-11-18): the field above never arrives on the owner's car (its provider never comes up); the limit comes as the EVENT de.bmw.dass.TrafficSignRecognition.TrafficSignRecognition (service 13632, instance 1, about 2 a second): presentClassLimitSpeed x 5 = km/h (class 8 with a 40 sign, 6 with a 30, 10 = 50 in town). shared/limit_src.js reads it into the same sign shape; 'order' says which source speaks first while it is live (the event, then this field as the fallback; an event older than staleMs is not live). 'none' classes draw no sign: 0 (FASuS's AUFHEBUNG_ALLES), 29 (its chime request, not a speed), 253..255 (n/a, unfilled); warnMap: controlSLIWarning 0 / 1 seen, 1 = over the limit is a hypothesis; mph: unitOfMeasurementSpeedLimit 1 = MPH by FASuS's enum, anything else km/h; endOn (presentWithdrawalLimitSpeed values that mean the derestriction sign; 2 = AUFHEBUNG by the enum) is empty until the car shows one. 'camera' (the front camera's own event) is a witness: logged ('limit: camera ...'), never drawn."
+    },
+    "limit": {
+      "strip": "L2",
+      "_about": "SPEC-R3 8 (b): the speedometer's tick strip red from the limit. 'L1' = red from the limit's angle to the scale's end, dim while the needle is below the limit and full when over (SPEC-R3 8, the lead's reading); 'L2' = red only between the limit and the needle, only while over; 'L3' = as L1 but always full; 'off' = the marker only. THE OWNER CHOSE L2 (2026-11-18, package FIN). Not f30_cluster's config.limit (no iface / field here: nothing is subscribed by it)."
+    },
+    "cruise": {
+      "place": "C1"
+    },
+    "_cruise": "SPEC-R3 9; car-fix CF2 switched it ON (the car session of 2026-11-18 showed the source): { place: 'C1' } = the readout in the speedometer hub's lower part (C2 = the coolant bar's place; null = dark, the sheet not even built). The source is DisplayDataServer.functionalLibraryData (shared/limit_src.js hudCruiseOf): cruiseCtrlSpeedHUD = the set speed in km/h (61 / 59 / 40 seen; 65535 = none: nothing drawn), ldmSym = the symbol (LDM_SYM_DCC cruise, LDM_SYM_SLD limiter, the ACC / assistant family adaptive; NONE / HDC / EDP nothing), ldmSymColor LDM_ACTIVE = green with the green marker on the scale (u_cru), any other colour = grey, no marker. Keys of limit_src.js HUD_CRUISE_DEFAULT (symMap, activeOn, hudInvalid, hudMph ...) correct the meanings; TrafficSignDisplayControl's longitudinal struct (shared/twin_limit.js CRUISE_DEFAULT: funcMap, statusMap, speedPath ...) stays the fallback until the HUD feed first arrives."
   }
 }

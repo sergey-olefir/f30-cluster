@@ -8,14 +8,16 @@
    "w": 616,
    "h": 560,
    "format": "r8",
-   "sha256_r8": "24838589c8610c5e4e014e40466c391f1ce03c11189e8cfd5d32a613d072eb29",
+   "sha256_r8": "a34c9470fd48b611850601a973570f66b51edbf7c0bbe37868e31695fd5fb282",
    "stretch_saira": 1.06,
+   "shadow_model": null,
    "fonts": {
-    "Saira[wdth,wght].ttf": "9d050fc5a01c85f74c4257c207d50b55d1e40c37308c642f974a2c5003231dde",
+    "Saira[wdth,wght].ttf": "9befb732277693ea2c997a2b94eb1c458033ac1e22414be72d6d36f57a9d9b99",
     "NotoSans[wdth,wght].ttf": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
    },
    "inputs": [
-    "docs/twin-dial/SPEC.md \u00a74, \u00a75 (the numbers; design/twin-dial/vd/dials.json is their evidence)",
+    "docs/twin-dial/SPEC-R3.md \u00a72 (the numbers; SD dials_v2.json and K1 looks.json are their evidence)",
+    "docs/twin-dial/SPEC.md \u00a74, \u00a75",
     "design/twin-dial/vt/pictograms/baked/*.png",
     "tools/twin-dial/bake_face.py"
    ],
@@ -27,14 +29,16 @@
    "w": 616,
    "h": 560,
    "format": "r8",
-   "sha256_r8": "cac68bb3875328cc1ee35d109ccd32c4204fb9918c7bf45bd295004511b186ab",
+   "sha256_r8": "c915abff62082f650d9ce84b9285dd789f30a1e65992fc4d3511c05eeaba5590",
    "stretch_saira": 1.06,
+   "shadow_model": null,
    "fonts": {
-    "Saira[wdth,wght].ttf": "9d050fc5a01c85f74c4257c207d50b55d1e40c37308c642f974a2c5003231dde",
+    "Saira[wdth,wght].ttf": "9befb732277693ea2c997a2b94eb1c458033ac1e22414be72d6d36f57a9d9b99",
     "NotoSans[wdth,wght].ttf": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
    },
    "inputs": [
-    "docs/twin-dial/SPEC.md \u00a74, \u00a75 (the numbers; design/twin-dial/vd/dials.json is their evidence)",
+    "docs/twin-dial/SPEC-R3.md \u00a72 (the numbers; SD dials_v2.json and K1 looks.json are their evidence)",
+    "docs/twin-dial/SPEC.md \u00a74, \u00a75",
     "design/twin-dial/vt/pictograms/baked/*.png",
     "tools/twin-dial/bake_face.py"
    ],

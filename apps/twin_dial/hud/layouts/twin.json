@@ -56,31 +56,31 @@
           172
         ],
         "seps": [
-          744,
-          812,
+          780,
+          848,
           1168,
           1237
         ],
         "rule": [
-          171.2,
-          172.7
+          170,
+          173
         ],
         "ramp": [
           0.002,
           0.16
         ],
         "highlight": [
-          744,
-          812
+          780,
+          848
         ]
       },
       "rules": [
         {
-          "x0": 741,
-          "y0": 295.2,
-          "x1": 1180,
-          "y1": 296.7,
-          "role": "rule"
+          "x0": 739,
+          "y0": 295,
+          "x1": 1181,
+          "y1": 297.5,
+          "role": "title"
         },
         {
           "x0": 629,
@@ -247,12 +247,12 @@
       "id": "gear",
       "type": "text",
       "z": 5,
-      "x": 314,
-      "y": 492,
-      "w": 120,
-      "h": 50,
+      "x": 298,
+      "y": 365,
+      "w": 164,
+      "h": 70,
       "text": "{{td:gear}}",
-      "font": "td_gear",
+      "font": "td_big",
       "color": "fg",
       "align": "center",
       "conn": 1,
@@ -264,10 +264,10 @@
       "type": "icon",
       "icon": "td_fuel",
       "z": 5,
-      "x": 617,
+      "x": 634,
       "y": 124,
-      "w": 38,
-      "h": 38,
+      "w": 46,
+      "h": 46,
       "color": "fg",
       "conn": 1,
       "tdLive": "fixed"
@@ -276,12 +276,12 @@
       "id": "tab_range_v",
       "type": "text",
       "z": 5,
-      "x": 655,
-      "y": 123,
-      "w": 53,
-      "h": 36,
+      "x": 680,
+      "y": 119,
+      "w": 57,
+      "h": 40,
       "text": "{{td:rangeTab}}",
-      "font": "td_body",
+      "font": "td_tabs",
       "color": "fg",
       "align": "right",
       "conn": 1
@@ -290,7 +290,7 @@
       "id": "tab_range_u",
       "type": "text",
       "z": 5,
-      "x": 711,
+      "x": 740,
       "y": 134,
       "w": 30,
       "h": 25,
@@ -305,50 +305,46 @@
       "type": "icon",
       "icon": "cc_warn",
       "z": 5,
-      "x": 759,
+      "x": 791,
       "y": 124,
-      "w": 38,
-      "h": 38,
+      "w": 46,
+      "h": 46,
       "color": "fg",
       "conn": 1,
       "tdLive": "warn"
     },
     {
-      "id": "tab_media_i",
+      "id": "tab_media",
       "type": "icon",
       "icon": "td_radio",
       "z": 5,
-      "x": 886,
+      "x": 837,
       "y": 124,
-      "w": 38,
-      "h": 38,
+      "w": 321,
+      "h": 46,
       "color": "fg",
       "conn": 1,
-      "tdLive": "fixed"
-    },
-    {
-      "id": "tab_media_t",
-      "type": "text",
-      "z": 5,
-      "x": 925,
-      "y": 121,
-      "w": 235,
-      "h": 45,
-      "text": "{{td:media}}",
-      "font": "td_tab",
-      "color": "fg",
-      "align": "left",
-      "conn": 1
+      "tdLive": "media",
+      "font": "td_tabs",
+      "textBase": 32,
+      "iconBox": 46,
+      "seps": [
+        780,
+        848,
+        1168,
+        1237
+      ],
+      "leftMost": 791
     },
     {
       "id": "tab_phone_i",
       "type": "icon",
       "icon": "td_phone",
       "z": 5,
-      "x": 1183,
+      "x": 1180,
       "y": 124,
-      "w": 38,
-      "h": 38,
+      "w": 46,
+      "h": 46,
       "color": "fg",
       "conn": 1,
       "tdLive": "phone"
@@ -358,202 +354,1088 @@
       "type": "icon",
       "icon": "td_nav",
       "z": 5,
-      "x": 1251,
+      "x": 1246,
       "y": 124,
-      "w": 38,
-      "h": 38,
+      "w": 46,
+      "h": 46,
       "color": "fg",
       "conn": 1,
       "tdLive": "nav"
     },
     {
-      "id": "c_title",
-      "type": "text",
+      "id": "c_page",
+      "type": "tdpage",
+      "class": "content",
       "z": 6,
-      "x": 740,
-      "y": 237,
-      "w": 440,
-      "h": 57,
-      "text": "{{td:cTitle}}",
-      "font": "td_title",
-      "color": "fg",
-      "align": "center",
-      "conn": 1
-    },
-    {
-      "id": "c_time",
-      "type": "text",
-      "z": 6,
-      "x": 780,
-      "y": 337,
-      "w": 360,
-      "h": 70,
-      "text": "{{td:cTime}}",
-      "font": "td_clock",
-      "color": "fg",
-      "align": "center",
-      "conn": 1
-    },
-    {
-      "id": "c_weekday",
-      "type": "text",
-      "z": 6,
-      "x": 810,
-      "y": 417,
-      "w": 300,
-      "h": 55,
-      "text": "{{td:cWeekday}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "center",
-      "conn": 1
-    },
-    {
-      "id": "c_date",
-      "type": "text",
-      "z": 6,
-      "x": 810,
-      "y": 476,
-      "w": 300,
-      "h": 46,
-      "text": "{{td:cDate}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "center",
-      "conn": 1
-    },
-    {
-      "id": "t1_a",
-      "type": "text",
-      "z": 6,
-      "x": 793,
-      "y": 319,
-      "w": 112,
-      "h": 46,
-      "text": "{{td:tConsAvg}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "right",
-      "conn": 1
-    },
-    {
-      "id": "t1_au",
-      "type": "text",
-      "z": 6,
-      "x": 911,
-      "y": 338,
-      "w": 92,
-      "h": 31,
-      "text": "{{td:tConsU}}",
-      "font": "td_u21",
-      "color": "fg",
-      "align": "left",
-      "conn": 1
-    },
-    {
-      "id": "t1_b",
-      "type": "text",
-      "z": 6,
-      "x": 1004,
-      "y": 319,
-      "w": 101,
-      "h": 46,
-      "text": "{{td:tSpeedAvg}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "right",
-      "conn": 1
-    },
-    {
-      "id": "t1_bu",
-      "type": "text",
-      "z": 6,
-      "x": 1111,
-      "y": 338,
-      "w": 75,
-      "h": 31,
-      "text": "{{td:tSpeedU}}",
-      "font": "td_u21",
-      "color": "fg",
-      "align": "left",
-      "conn": 1
-    },
-    {
-      "id": "t2_a",
-      "type": "text",
-      "z": 6,
-      "x": 805,
-      "y": 387,
-      "w": 100,
-      "h": 46,
-      "text": "{{td:tDist}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "right",
-      "conn": 1
-    },
-    {
-      "id": "t2_au",
-      "type": "text",
-      "z": 6,
-      "x": 911,
-      "y": 406,
-      "w": 30,
-      "h": 31,
-      "text": "{{td:tDistU}}",
-      "font": "td_u21",
-      "color": "fg",
-      "align": "left",
-      "conn": 1
-    },
-    {
-      "id": "t2_b",
-      "type": "text",
-      "z": 6,
-      "x": 1005,
-      "y": 387,
-      "w": 100,
-      "h": 46,
-      "text": "{{td:tTime}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "right",
-      "conn": 1
-    },
-    {
-      "id": "t2_bu",
-      "type": "text",
-      "z": 6,
-      "x": 1111,
-      "y": 406,
-      "w": 38,
-      "h": 31,
-      "text": "{{td:tTimeU}}",
-      "font": "td_u21",
-      "color": "fg",
-      "align": "left",
-      "conn": 1
-    },
-    {
-      "id": "t_from",
-      "type": "text",
-      "z": 6,
-      "x": 740,
-      "y": 495,
-      "w": 440,
-      "h": 42,
-      "text": "{{td:tFrom}}",
-      "font": "td_body",
-      "color": "dim",
-      "align": "center",
-      "conn": 1
+      "x": 729,
+      "y": 248,
+      "w": 462,
+      "h": 347,
+      "conn": 1,
+      "own": true,
+      "pages": {
+        "clock": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "time",
+              "x": 960,
+              "b": 404,
+              "f": "clock",
+              "s": "{{td:pgTime}}",
+              "c": "fg",
+              "al": "c"
+            },
+            {
+              "k": "t",
+              "id": "weekday",
+              "x": 960,
+              "b": 460,
+              "f": "n39",
+              "s": "{{td:pgWeekday}}",
+              "c": "fg",
+              "al": "c"
+            },
+            {
+              "k": "t",
+              "id": "date",
+              "x": 960,
+              "b": 519,
+              "f": "n39",
+              "s": "{{td:pgDate}}",
+              "c": "fg",
+              "al": "c"
+            }
+          ]
+        },
+        "trip": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "meta",
+              "x": 1190,
+              "b": 326,
+              "f": "n31",
+              "s": "{{td:pgTripMeta}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "i",
+              "id": "i1",
+              "n": "{{td:pgIconFuel}}",
+              "cx": 752,
+              "cy": 369,
+              "sz": 46,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "cons",
+              "x": 896,
+              "b": 384,
+              "f": "n42",
+              "s": "{{td:pgTripCons}}",
+              "c": "fg",
+              "al": "r"
+            },
+            {
+              "k": "frac",
+              "id": "cons_u",
+              "x": 906,
+              "b": 384,
+              "top": "л",
+              "bot": "100 км",
+              "dt": -17,
+              "dr": -14,
+              "db": 3,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "speed",
+              "x": 1109,
+              "b": 384,
+              "f": "n42",
+              "s": "{{td:pgTripSpeed}}",
+              "c": "fg",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "speed_u",
+              "x": 1116,
+              "b": 384,
+              "f": "u21",
+              "s": "км/год",
+              "c": "fg",
+              "al": "l"
+            },
+            {
+              "k": "i",
+              "id": "i2",
+              "n": "{{td:pgIconRoad}}",
+              "cx": 752,
+              "cy": 440,
+              "sz": 46,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "way",
+              "x": 896,
+              "b": 455,
+              "f": "n42",
+              "s": "{{td:pgTripWay}}",
+              "c": "fg",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "way_u",
+              "x": 906,
+              "b": 455,
+              "f": "u21",
+              "s": "км",
+              "c": "fg",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "foot",
+              "x": 960,
+              "b": 565,
+              "f": "n31",
+              "s": "{{td:pgTripFooter}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 440
+            }
+          ]
+        },
+        "tech": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "l0",
+              "x": 745,
+              "b": 352,
+              "f": "n31",
+              "s": "Олива",
+              "c": "dim",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "v0",
+              "x": 1150,
+              "b": 352,
+              "f": "n40",
+              "s": "{{td:pgTechV0}}",
+              "c": "{{td:pgTechC0}}",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "u0",
+              "x": 1156,
+              "b": 352,
+              "f": "u21",
+              "s": "{{td:pgTechU0}}",
+              "c": "{{td:pgTechC0}}",
+              "al": "l"
+            },
+            {
+              "k": "bar",
+              "id": "b0",
+              "x0": 745,
+              "x1": 1175,
+              "y": 364,
+              "h": 6,
+              "v": "{{td:pgTechF0}}",
+              "w": "{{td:pgTechW0}}",
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "l1",
+              "x": 745,
+              "b": 418,
+              "f": "n31",
+              "s": "Охолодження",
+              "c": "dim",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "v1",
+              "x": 1150,
+              "b": 418,
+              "f": "n40",
+              "s": "{{td:pgTechV1}}",
+              "c": "{{td:pgTechC1}}",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "u1",
+              "x": 1156,
+              "b": 418,
+              "f": "u21",
+              "s": "{{td:pgTechU1}}",
+              "c": "{{td:pgTechC1}}",
+              "al": "l"
+            },
+            {
+              "k": "bar",
+              "id": "b1",
+              "x0": 745,
+              "x1": 1175,
+              "y": 430,
+              "h": 6,
+              "v": "{{td:pgTechF1}}",
+              "w": "{{td:pgTechW1}}",
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "l2",
+              "x": 745,
+              "b": 484,
+              "f": "n31",
+              "s": "Наддув",
+              "c": "dim",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "v2",
+              "x": 1150,
+              "b": 484,
+              "f": "n40",
+              "s": "{{td:pgTechV2}}",
+              "c": "{{td:pgTechC2}}",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "u2",
+              "x": 1152,
+              "b": 484,
+              "f": "u21",
+              "s": "{{td:pgTechU2}}",
+              "c": "{{td:pgTechC2}}",
+              "al": "l"
+            },
+            {
+              "k": "bar",
+              "id": "b2",
+              "x0": 745,
+              "x1": 1175,
+              "y": 496,
+              "h": 6,
+              "v": "{{td:pgTechF2}}",
+              "w": "{{td:pgTechW2}}",
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "l3",
+              "x": 745,
+              "b": 550,
+              "f": "n31",
+              "s": "Зовні",
+              "c": "dim",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "v3",
+              "x": 1150,
+              "b": 550,
+              "f": "n40",
+              "s": "{{td:pgTechV3}}",
+              "c": "{{td:pgTechC3}}",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "u3",
+              "x": 1156,
+              "b": 550,
+              "f": "u21",
+              "s": "{{td:pgTechU3}}",
+              "c": "{{td:pgTechC3}}",
+              "al": "l"
+            }
+          ]
+        },
+        "tyres": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "car",
+              "id": "car",
+              "cx": 960,
+              "cy": 430,
+              "w": 110,
+              "h": 230,
+              "c": "dim"
+            },
+            {
+              "k": "g",
+              "id": "p0",
+              "cx": 800,
+              "b": 360,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgTyreP0}}",
+                  "f": "n40",
+                  "c": "{{td:pgTyreC0}}"
+                },
+                {
+                  "s": "бар",
+                  "f": "u21",
+                  "gap": 4,
+                  "c": "{{td:pgTyreC0}}"
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "t0",
+              "x": 800,
+              "b": 400,
+              "f": "n31",
+              "s": "{{td:pgTyreT0}}",
+              "c": "grey",
+              "al": "c"
+            },
+            {
+              "k": "g",
+              "id": "p1",
+              "cx": 1120,
+              "b": 360,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgTyreP1}}",
+                  "f": "n40",
+                  "c": "{{td:pgTyreC1}}"
+                },
+                {
+                  "s": "бар",
+                  "f": "u21",
+                  "gap": 4,
+                  "c": "{{td:pgTyreC1}}"
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "t1",
+              "x": 1120,
+              "b": 400,
+              "f": "n31",
+              "s": "{{td:pgTyreT1}}",
+              "c": "grey",
+              "al": "c"
+            },
+            {
+              "k": "g",
+              "id": "p2",
+              "cx": 800,
+              "b": 505,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgTyreP2}}",
+                  "f": "n40",
+                  "c": "{{td:pgTyreC2}}"
+                },
+                {
+                  "s": "бар",
+                  "f": "u21",
+                  "gap": 4,
+                  "c": "{{td:pgTyreC2}}"
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "t2",
+              "x": 800,
+              "b": 545,
+              "f": "n31",
+              "s": "{{td:pgTyreT2}}",
+              "c": "grey",
+              "al": "c"
+            },
+            {
+              "k": "g",
+              "id": "p3",
+              "cx": 1120,
+              "b": 505,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgTyreP3}}",
+                  "f": "n40",
+                  "c": "{{td:pgTyreC3}}"
+                },
+                {
+                  "s": "бар",
+                  "f": "u21",
+                  "gap": 4,
+                  "c": "{{td:pgTyreC3}}"
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "t3",
+              "x": 1120,
+              "b": 545,
+              "f": "n31",
+              "s": "{{td:pgTyreT3}}",
+              "c": "grey",
+              "al": "c"
+            }
+          ]
+        },
+        "msg": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            }
+          ]
+        },
+        "media": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "i",
+              "id": "src",
+              "n": "{{td:pgSrcIcon}}",
+              "cx": 960,
+              "cy": 392,
+              "sz": 66,
+              "c": "fg"
+            }
+          ]
+        },
+        "radio": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "meta",
+              "x": 1190,
+              "b": 326,
+              "f": "n31",
+              "s": "{{td:pgMediaMeta}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "i",
+              "id": "ic",
+              "n": "{{td:pgIconRadio}}",
+              "cx": 960,
+              "cy": 344,
+              "sz": 54,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "station",
+              "x": 960,
+              "b": 424,
+              "f": "title",
+              "s": "{{td:pgStation}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "text",
+              "x": 960,
+              "b": 471,
+              "f": "n29",
+              "s": "{{td:pgRadioText}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "foot",
+              "x": 960,
+              "b": 565,
+              "f": "n29",
+              "s": "{{td:pgRadioFoot}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            }
+          ]
+        },
+        "track": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "meta",
+              "x": 1190,
+              "b": 326,
+              "f": "n31",
+              "s": "{{td:pgMediaMeta}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "name",
+              "x": 960,
+              "b": 400,
+              "f": "title",
+              "s": "{{td:pgTrackTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "artist",
+              "x": 960,
+              "b": 444,
+              "f": "n31",
+              "s": "{{td:pgTrackArtist}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "prog",
+              "id": "prog",
+              "x0": 800,
+              "x1": 1120,
+              "y": 500,
+              "v": "{{td:pgTrackFrac}}"
+            },
+            {
+              "k": "t",
+              "id": "el",
+              "x": 800,
+              "b": 530,
+              "f": "u21",
+              "s": "{{td:pgTrackEl}}",
+              "c": "dim",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "tot",
+              "x": 1120,
+              "b": 530,
+              "f": "u21",
+              "s": "{{td:pgTrackTot}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "no",
+              "x": 960,
+              "b": 530,
+              "f": "u21",
+              "s": "{{td:pgTrackNo}}",
+              "c": "dim",
+              "al": "c"
+            },
+            {
+              "k": "i",
+              "id": "mute",
+              "n": "{{td:pgMute}}",
+              "cx": 960,
+              "cy": 560,
+              "sz": 26,
+              "c": "grey"
+            }
+          ]
+        },
+        "phone": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "i",
+              "id": "ic",
+              "n": "{{td:pgIconPhone}}",
+              "cx": 960,
+              "cy": 344,
+              "sz": 54,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "l1",
+              "x": 960,
+              "b": 424,
+              "f": "n39",
+              "s": "{{td:pgPhoneLine1}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "l2",
+              "x": 960,
+              "b": 471,
+              "f": "n29",
+              "s": "{{td:pgPhoneLine2}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            }
+          ]
+        },
+        "call": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "meta",
+              "x": 1190,
+              "b": 326,
+              "f": "n31",
+              "s": "{{td:pgCallPath}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "i",
+              "id": "ring",
+              "n": "{{td:pgCallIcon}}",
+              "cx": 960,
+              "cy": 372,
+              "sz": 66,
+              "c": "ready"
+            },
+            {
+              "k": "t",
+              "id": "timer",
+              "x": 960,
+              "b": 410,
+              "f": "s72",
+              "s": "{{td:pgCallTimer}}",
+              "c": "fg",
+              "al": "c"
+            },
+            {
+              "k": "t",
+              "id": "who",
+              "x": 960,
+              "b": 478,
+              "f": "n39",
+              "s": "{{td:pgCallWho}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "i",
+              "id": "mic",
+              "n": "{{td:pgCallMic}}",
+              "cx": 960,
+              "cy": 540,
+              "sz": 30,
+              "c": "grey"
+            }
+          ]
+        },
+        "map": {
+          "items": [
+            {
+              "k": "r",
+              "id": "bar",
+              "x0": 760,
+              "y0": 556,
+              "x1": 1160,
+              "y1": 594,
+              "c": "bg",
+              "a": 0.6,
+              "if": "{{td:pgRoadBar}}"
+            },
+            {
+              "k": "t",
+              "id": "road",
+              "x": 960,
+              "b": 588,
+              "f": "n31",
+              "s": "{{td:pgRoadBar}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 380
+            }
+          ]
+        },
+        "guide": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "i",
+              "id": "arrow",
+              "n": "{{td:pgGuideIcon}}",
+              "cx": 830,
+              "cy": 378,
+              "sz": 120,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "exit",
+              "x": 830,
+              "b": 386,
+              "f": "u21",
+              "s": "{{td:pgGuideExit}}",
+              "c": "fg",
+              "al": "c"
+            },
+            {
+              "k": "g",
+              "id": "dist",
+              "x": 915,
+              "al": "l",
+              "b": 410,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgGuideDist}}",
+                  "f": "s72"
+                },
+                {
+                  "s": "{{td:pgGuideUnit}}",
+                  "f": "n29",
+                  "gap": 8
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "road",
+              "x": 770,
+              "b": 480,
+              "f": "n33",
+              "s": "{{td:pgGuideRoad}}",
+              "c": "fg",
+              "al": "l",
+              "mw": 410
+            },
+            {
+              "k": "lanes",
+              "id": "lanes",
+              "cx": 960,
+              "cy": 515,
+              "pitch": 34,
+              "sz": 30
+            },
+            {
+              "k": "t",
+              "id": "foot",
+              "x": 960,
+              "b": 560,
+              "f": "n29",
+              "s": "{{td:pgGuideFoot}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            }
+          ]
+        },
+        "route": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "meta",
+              "x": 1190,
+              "b": 326,
+              "f": "n31",
+              "s": "{{td:pgRouteMeta}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "g",
+              "id": "dist",
+              "cx": 960,
+              "b": 410,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgRouteDist}}",
+                  "f": "s72"
+                },
+                {
+                  "s": "{{td:pgRouteUnit}}",
+                  "f": "n29",
+                  "gap": 8
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "eta",
+              "x": 960,
+              "b": 466,
+              "f": "n33",
+              "s": "{{td:pgRouteEta}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "road",
+              "x": 960,
+              "b": 512,
+              "f": "n31",
+              "s": "{{td:pgRouteRoad}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "foot",
+              "x": 960,
+              "b": 565,
+              "f": "n29",
+              "s": "{{td:pgRouteFoot}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            }
+          ]
+        },
+        "calc": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "msg",
+              "x": 960,
+              "b": 400,
+              "f": "n33",
+              "s": "{{td:pgCalc}}",
+              "c": "fg",
+              "al": "c"
+            }
+          ]
+        },
+        "road": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "road",
+              "x": 960,
+              "b": 400,
+              "f": "title",
+              "s": "{{td:pgRoad}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "sub",
+              "x": 960,
+              "b": 452,
+              "f": "n29",
+              "s": "{{td:pgNavSub}}",
+              "c": "dim",
+              "al": "c"
+            }
+          ]
+        },
+        "none": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "sub",
+              "x": 960,
+              "b": 400,
+              "f": "n29",
+              "s": "Маршрут не прокладено",
+              "c": "dim",
+              "al": "c"
+            }
+          ]
+        }
+      }
     },
     {
       "id": "ready",
       "type": "text",
       "z": 7,
       "x": 330,
-      "y": 329,
+      "y": 302,
       "w": 100,
       "h": 22,
       "text": "{{td:ready}}",
@@ -566,12 +1448,12 @@
       "id": "program",
       "type": "text",
       "z": 7,
-      "x": 316,
-      "y": 557,
-      "w": 140,
-      "h": 22,
+      "x": 305,
+      "y": 451,
+      "w": 150,
+      "h": 23,
       "text": "{{td:program}}",
-      "font": "td_label",
+      "font": "td_prog",
       "color": "fg",
       "align": "center",
       "conn": 1
@@ -584,12 +1466,11 @@
       "y": 613,
       "w": 146,
       "h": 46,
-      "text": "{{td:odo}}",
+      "text": "{{td:rowL1}}",
       "font": "td_row",
       "color": "fg",
       "align": "right",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_l1u",
@@ -599,12 +1480,11 @@
       "y": 632,
       "w": 30,
       "h": 27,
-      "text": "км",
+      "text": "{{td:rowL1u}}",
       "font": "td_u21",
       "color": "fg",
       "align": "left",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_l2",
@@ -614,12 +1494,11 @@
       "y": 660,
       "w": 105,
       "h": 46,
-      "text": "{{td:clock}}",
+      "text": "{{td:rowL2}}",
       "font": "td_row",
       "color": "fg",
       "align": "right",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_r1",
@@ -629,12 +1508,11 @@
       "y": 613,
       "w": 128,
       "h": 46,
-      "text": "{{td:r1}}",
+      "text": "{{td:rowR1}}",
       "font": "td_row",
       "color": "fg",
       "align": "right",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_r1u",
@@ -644,12 +1522,11 @@
       "y": 632,
       "w": 30,
       "h": 27,
-      "text": "км",
+      "text": "{{td:rowR1u}}",
       "font": "td_u21",
       "color": "fg",
       "align": "left",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_r2",
@@ -659,12 +1536,11 @@
       "y": 660,
       "w": 105,
       "h": 46,
-      "text": "{{td:ambient}}",
+      "text": "{{td:rowR2}}",
       "font": "td_row",
       "color": "fg",
       "align": "right",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_r2u",
@@ -674,24 +1550,59 @@
       "y": 679,
       "w": 23,
       "h": 27,
-      "text": "°C",
+      "text": "{{td:rowR2u}}",
       "font": "td_u21",
       "color": "fg",
       "align": "left",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
-      "id": "plate",
-      "type": "ccplate",
+      "id": "msg_sheet",
+      "type": "ccsheet",
       "z": 9,
-      "x": 694,
-      "y": 592,
-      "w": 536,
-      "h": 128,
+      "x": 729,
+      "y": 298,
+      "w": 462,
+      "h": 270,
       "font": "td_msg",
       "counterFont": "td_cnt",
+      "rowFont": "td_tab",
+      "textFont": "td_val",
       "conn": 2
+    },
+    {
+      "id": "limit_sign",
+      "type": "tdsign",
+      "z": 11,
+      "x": 1252,
+      "y": 628,
+      "w": 96,
+      "h": 88,
+      "conn": 2
+    },
+    {
+      "id": "cruise_c1",
+      "type": "tdcru",
+      "z": 12,
+      "x": 1456,
+      "y": 500,
+      "w": 140,
+      "h": 70,
+      "conn": 2,
+      "place": "C1",
+      "toggle": "tl:cruise:C1"
+    },
+    {
+      "id": "cruise_c2",
+      "type": "tdcru",
+      "z": 12,
+      "x": 1466,
+      "y": 588,
+      "w": 188,
+      "h": 64,
+      "conn": 2,
+      "place": "C2",
+      "toggle": "tl:cruise:C2"
     }
   ]
 }

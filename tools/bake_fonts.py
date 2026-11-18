@@ -170,15 +170,22 @@ F30_FONTS = [
 # One atlas per face and size. design/twin-dial/font_slots.json says which slot of the SPEC's table each one serves.
 TD_SAIRA = ('Saira[wdth,wght].ttf', [550, 125], 1.06)      # axes in the file's order: wght, wdth
 TD_NOTO = ('NotoSans-wght.subset.ttf', [500], 1.0)         # wdth is pinned at 100 in the cut-down file
+# round 3 (package B6): the speed-limit sign's number (SPEC-R3 8): Saira at its heaviest (700) and, because the file has no
+# width below 100, squeezed 12 % (two digits) or 15 % (three) across in the reduction so the number clears the 50.8 px white
+# disc's red ring by 3.5 px at its corners (digits only: bench/test-twin-fonts.js). Still Saira: Latin and digits, never Cyrillic.
+TD_SIGN2 = ('Saira[wdth,wght].ttf', [700, 100], 0.88)
+TD_SIGN3 = ('Saira[wdth,wght].ttf', [700, 100], 0.85)
+TD_SAIRA_ALL = (TD_SAIRA, TD_SIGN2, TD_SIGN3)
 TD_THIN = '\u2009'          # thin space: the odometer's thousands separator ("48 215 km")
 TD_OURS = "°×ø·±−+" + TD_THIN + '№'
 TD_TEXT = ''.join(chr(c) for c in range(0x20, 0x7f)) + CAR_TEXT + TD_OURS    # every Noto atlas but the counter
 TD_LABELS = UPPER + DIGITS + '+ -–/'
+TD_GEAR = 'DMNPRS'          # the gear letters (and the gear's number is a digit): drawn by the tachometer's hub, SPEC-R3 2.7
 
 
 def _td(face, name, size, chars, tabular=True):
     file, weight, stretch = face
-    if face is TD_SAIRA:        # a Cyrillic (or any non-Latin) character can never get into a Saira atlas: the bake refuses
+    if face in TD_SAIRA_ALL:        # a Cyrillic (or any non-Latin) character can never get into a Saira atlas: the bake refuses
         bad = [c for c in chars if ord(c) >= 0x250 and c != '–']
         if bad:
             raise ValueError('Saira atlas %s: no Cyrillic or other non-Latin characters (%r)' % (name, ''.join(bad)))
@@ -190,16 +197,23 @@ TWIN_FONTS = [
     _td(TD_SAIRA, 'td_scale_l', 28, DIGITS),                    # speedometer numerals, large set (face bake; atlas for the tests and the gallery)
     _td(TD_SAIRA, 'td_scale_s', 18, DIGITS),                    # speedometer numerals, small set
     _td(TD_SAIRA, 'td_tach', 57, DIGITS),                       # tachometer numerals
-    _td(TD_SAIRA, 'td_big', 92, DIGITS + ':-–'),                # digital speed (atext) and the clock page's time; "–" = no value
+    _td(TD_SAIRA, 'td_big', 92, DIGITS + ':-–' + TD_GEAR),      # digital speed (atext), the clock page's time ("–" = no value) and, from round 3, the gear in the tachometer's hub (SPEC-R3 2.7, B6): the gear letters add a second row, the digits' metrics, the cell and the baseline are the 0.1.0 ones
     _td(TD_SAIRA, 'td_clock', 92, DIGITS + ':-–', tabular=False),   # package C: the clock page's time, proportional digits (td_big's tabular ones look gapped in "14:43"); the digital speed keeps td_big (the GPU text needs one pitch)
-    _td(TD_SAIRA, 'td_gear', 64, DIGITS + 'PRNDMS-–'),          # gear and its number (D3, M1..M8, S1..S8)
     _td(TD_SAIRA, 'td_label', 22, TD_LABELS),                   # READY, OFF, COMFORT / SPORT / SPORT+ / ECO PRO / ADAPTIVE
+    # round 3 (package B6, SPEC-R3 7): the sizes the new pages and hubs need
+    _td(TD_SAIRA, 'td_prog', 24, TD_LABELS),                    # the drive program under the gear (cap 17 px, SPEC-R3 2.7)
+    _td(TD_SAIRA, 'td_cru', 40, DIGITS + '-–'),                 # the cruise / limiter set speed (SPEC-R3 9); "–" = no value
+    _td(TD_SAIRA, 'td_dist', 72, DIGITS + ':.,-–'),             # the guidance distance and the call timer (SPEC-R3 4.4, 4.5); tabular digits: a timer must not shift sideways
+    _td(TD_SIGN2, 'td_sign', 31, DIGITS + '-–'),           # the speed-limit sign's number, one or two digits (cap 22 px in a 50.8 px disc), also the three dashes (SPEC-R3 8)
+    _td(TD_SIGN3, 'td_sign3', 23, DIGITS + '-–'),          # the same, three digits: the number shrinks to fit (cap 16 px)
     # Noto Sans: titles, values, bottom row, tabs, units, messages
     _td(TD_NOTO, 'td_title', 41, TD_TEXT),                      # centre page title
     _td(TD_NOTO, 'td_val', 39, TD_TEXT),                        # centre values, weekday, date
     _td(TD_NOTO, 'td_body', 31, TD_TEXT),                       # centre body, footer; the range value in the tab bar
     _td(TD_NOTO, 'td_row', 40, TD_TEXT),                        # bottom row numbers
-    _td(TD_NOTO, 'td_tab', 33, TD_TEXT),                        # the media text in the tab bar
+    _td(TD_NOTO, 'td_tab', 33, TD_TEXT),                        # the media text in the tab bar (0.1.0); round 3: the tab-2 rows, the map's road name, the route-calculating text (Noto 33)
+    _td(TD_NOTO, 'td_tabs', 34, TD_TEXT),                       # round 3 (B6): the tab bar's text, cap 24 px (SPEC-R3 3.1, 7)
+    _td(TD_NOTO, 'td_sub', 29, TD_TEXT),                        # round 3 (B6): the grey second lines, next road, footers, the radio text (Noto 29; td_cnt is its digits-only twin)
     _td(TD_NOTO, 'td_u19', 19, TD_TEXT),                        # units, small labels (tab bar "км")
     _td(TD_NOTO, 'td_u20', 20, TD_TEXT),                        # the hub's unit label
     _td(TD_NOTO, 'td_u21', 21, TD_TEXT),                        # units, bar ends, "км/год"

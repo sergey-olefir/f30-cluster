@@ -22,7 +22,7 @@
  "stretch_saira": 1.06,
  "encoding": {
   "byte": "the neutral sRGB code (the G channel of the picture) / 255; 0 = black",
-  "band_strip_code": 137,
+  "band_strip_code": 109,
   "major_line_code": 6,
   "bar_frame_code": 47,
   "hub_text_grey_code": 227,
@@ -32,28 +32,71 @@
  "regions": {
   "band": {
    "rho": [
-    0.58,
-    0.94
+    0.5795,
+    0.9375
    ],
-   "theta_abs_max_deg": 144.0,
+   "theta_abs_max_deg": 143.0,
    "tint_linear": [
-    0.96,
+    0.76,
     1.0,
-    1.08
+    1.064
    ],
    "tint_fade_g": [
     0.7,
     0.8
    ],
+   "law": {
+    "k": 0.0188,
+    "a": 4.6,
+    "b": 0.59,
+    "what": "Y = k exp(a (rho - 0.60)) exp(b (1 - cos theta)), linear light, the G channel (look B)"
+   },
    "what": "the grey scale band (ticks strip included). Only here the tint is applied."
   },
   "strip": {
    "rho": [
     0.893,
-    0.94
+    0.9375
    ],
-   "code": 137,
-   "what": "the tick strip, constant 137 inside band.theta_abs_max"
+   "code": 109,
+   "srgb": [
+    98,
+    109,
+    111
+   ],
+   "tint_linear": [
+    0.7987,
+    1.0,
+    1.0395
+   ],
+   "what": "the tick strip, constant G code inside band.theta_abs_max; its own tint (the strip is not the band's)"
+  },
+  "strip_line": {
+   "rho": [
+    0.924,
+    0.934
+   ],
+   "code": 124,
+   "srgb": [
+    115,
+    124,
+    126
+   ],
+   "tint_linear": [
+    0.8506,
+    1.0,
+    1.0351
+   ],
+   "what": "the bright line at the strip's outer edge (+45 % over the strip in linear light)"
+  },
+  "major_lines": {
+   "rho": [
+    0.5795,
+    0.893
+   ],
+   "width_R": 0.01,
+   "code": 6,
+   "what": "near-black lines across the band at each major mark"
   },
   "ink_numerals": {
    "rho": [
@@ -67,30 +110,36 @@
     0.896,
     0.934
    ],
-   "what": "ticks (the strip is 0.893-0.940)"
+   "what": "ticks (the strip is 0.893-0.9375)"
   },
   "bezel": {
    "rho": [
     0.9895,
     1.0105
    ],
-   "theta_abs_max_deg": 144.0,
-   "what": "white ring, open at the bottom"
+   "theta_abs_max_deg": 143.6,
+   "what": "white ring, open at the bottom, cut square at 143.6 (the tachometer's red arc recolours it from the redline)"
   },
   "rim": {
    "rho": [
-    0.537,
-    0.553
+    0.54,
+    0.548
    ],
-   "theta_abs_max_deg": 150.0,
-   "what": "white inner rim (D2); open below +-150 deg as the mockup (SPEC \u00a74 says a full circle: lead decides)"
+   "theta_abs_max_deg": 143.55,
+   "what": "white inner rim, width 0.008 R, ends with the band and the bezel (SPEC-R3 \u00a72.1)"
   }
  },
  "decode": {
-  "band_tint": "inside regions.band: c_k = max(0, (k_k)^(1/2.4) * (g + 0.055) - 0.055), k = tint_linear * bandGain, per channel; w = 1 - smoothstep(0.70, 0.80, g); rgb = mix(vec3(g), c, w). Outside the band rgb = g. Exact for sRGB(Y*k) while Y*k > 0.0031308 (everywhere in the band at bandGain >= 0.6).",
-  "night": "multiply in linear light on top (SPEC \u00a77.2), per material class: region + luma class",
-  "ink_alpha": "for recolouring ink (red numerals/ticks, ink over the wedge): alpha = clamp((g - t0) / (1 - t0), 0, 1), t0 = 0.54 for rho in ink_ticks (the strip is the constant 137/255, exact), t0 = see ink_alpha_t0_numerals",
-  "ink_alpha_t0_numerals": 0.52
+  "band_tint": "inside regions.band: c_k = max(0, (k_k)^(1/2.4) * (g + 0.055) - 0.055), k = tint_linear * bandGain, per channel; w = 1 - smoothstep(0.70, 0.80, g); rgb = mix(vec3(g), c, w). Outside the band rgb = g. On the strip the tint is regions.strip.tint_linear (and regions.strip_line.tint_linear on its bright line), not the band's. Exact for sRGB(Y*k) while Y*k > 0.0031308 (everywhere in the band at bandGain >= 0.6).",
+  "night": "multiply in linear light on top (SPEC-R3 \u00a76), per material class: region + luma class",
+  "red_arc": "tachometer: the bezel ink (rho >= 0.975) from theta(redline) to red_arc.to_deg is sRGB (210, 20, 21); the band stays grey",
+  "ink_alpha": "red numerals and ticks recolour ink only: the shader mixes the ink colour by the face byte (smoothstep(0.70, 0.85, g))"
+ },
+ "numeral_shadow": {
+  "model": null,
+  "params": null,
+  "stats": null,
+  "what": "baked: the band's codes under and around each numeral are darkened in linear light, Y' = Y (1 - D)"
  },
  "numerals": [
   {
@@ -346,19 +395,22 @@
   }
  ],
  "baked_text": [
-  "1/\u0445\u0432 \u00d7 1000 (unit, Noto 20, code 227)",
+  "1/\u0445\u0432 \u00d7 1000 (unit, Noto 20, code 227, centre (0, +0.40) R)",
   "OFF (Saira 22)",
   "0",
   "1/1"
  ],
  "not_baked": [
   "needle",
-  "wedge",
+  "red arc",
+  "limit and cruise markers",
+  "red tick strip",
   "bar fills",
   "READY",
   "gear",
   "drive program",
-  "digital speed"
+  "digital speed",
+  "cruise readout"
  ],
  "clearance": {
   "min_numeral_numeral": 71.81,
@@ -377,27 +429,49 @@
   "rest_deg": -135.0,
   "rest_note": "OFF position, engine not running"
  },
- "wedge": {
+ "red_arc": {
   "rho": [
-   0.55,
-   0.94
+   0.99,
+   1.01
   ],
   "from": "redline rpm (setting)",
-  "to_deg": 125.0,
-  "edges": "radial",
-  "fill_rgb": [
-   78,
-   2,
-   11
+  "to_deg": 143.6,
+  "srgb": [
+   210,
+   20,
+   21
   ],
-  "outline_rgb": [
-   218,
-   16,
-   48
-  ],
-  "outline_px": 3,
-  "edge_inset_deg": 0.9,
-  "what": "drawn by the shader; inside it the face band is replaced and only face INK is kept (alpha rule)"
+  "what": "drawn by the shader (u_red.x .. u_red.w) over the bezel ink; no wedge (SPEC-R3 \u00a72.5)"
+ },
+ "hub": {
+  "gear": {
+   "centre_R": [
+    0.0,
+    0.0
+   ],
+   "cap_R": 0.222,
+   "what": "GPU text; the face keeps the centre free of ink"
+  },
+  "program": {
+   "centre_R": [
+    0.0,
+    0.209
+   ],
+   "cap_R": 0.058
+  },
+  "ready": {
+   "centre_R": [
+    0.0,
+    -0.29
+   ]
+  },
+  "unit": {
+   "centre_R": [
+    0.0,
+    0.4
+   ],
+   "baked": true
+  }
  },
  "red_rules": {
   "ticks": "red when theta >= theta(redline) - 0.45 deg (half the width of a tick), rho in regions.ink_ticks",
