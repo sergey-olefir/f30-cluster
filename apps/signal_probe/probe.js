@@ -33,7 +33,7 @@
 const F = require('./format');
 const FIELDS = require('./fields');
 
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 const LOG_FORMAT = 1;
 const SUMMARY_S = [30, 120, 600];
 const ASK_AT_S = 120;                 // the silent fields' getters are asked once, at this summary
@@ -203,6 +203,7 @@ class Probe {
     _ask(st, why) {
         const f = st.f, h = st.hub;
         const say = (what) => { this._info('ask ' + f.p + ' ' + f.tag + ' (' + why + '): ' + what); return what; };
+        if (f.flags === 'b') return Promise.resolve(say('an event (no getter)'));
         if (f.flags.indexOf('r') < 0) return Promise.resolve(say('no getter (notifier only)'));
         if (!this.signals || typeof this.signals.get !== 'function') return Promise.resolve(say('no signals.get'));
         if (!h || !h.sub) return Promise.resolve(say('not subscribed'));
@@ -223,6 +224,11 @@ class Probe {
         if (f.cols) return F.cols(v, f.cols) + (f.sub ? ' ' + F.listLine(F.dig(v, f.sub.path), { member: null, cols: f.sub.cols }, f.sub.label) : '');
         if (f.list) return F.listLine(v, f.list);
         if (f.union) return F.unionLine(v, f.union);
+        if (f.one) {
+            // an event with one output: the binding may hand over { member: v } or v itself
+            const x = v && typeof v === 'object' && !Array.isArray(v) && Object.prototype.hasOwnProperty.call(v, f.one[0]) ? v[f.one[0]] : v;
+            return f.one[0] + '=' + F.KIND[f.one[1]](x);
+        }
         switch (f.fmt) {
             case 'enum': return 'state=' + F.fEnum(v);
             case 'bool': return 'active=' + F.fBool(v);

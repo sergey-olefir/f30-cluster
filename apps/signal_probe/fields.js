@@ -12,7 +12,9 @@
  * An entry:
  *   set, p, tag      the set (S1..S9), the item (P1..P17), the field's tag in the log line ("probe: P3 range-tank #2 ...")
  *   also             [set ids]: the field is also read while one of these sets is on (S10 needs eight fields of S6 / S7)
- *   iface, field     the interface and the field; flags "r" / "s" / "rs" as the catalogue allows (checked by the test)
+ *   iface, field     the interface and the field; flags "r" / "s" / "rs" as the catalogue allows (checked by the test), or "b": an EVENT,
+ *                    declared under "_broadcasts" (S13 only, the lead's decision of 2026-11-18)
+ *   one              [member, kind]: an event with one output, handed over as { member: v } or as v itself
  *   instance         the instance it is read on (default "1"); an interface with several instances is declared "*" in the manifest
  *   gapMs, cap       minimum ms between two lines of this field (the last value wins, "+k folded") and the most lines; per-set defaults below
  *   pollMs           re-read its getter this often (TPMS: BMW's own app only ever reads it)
@@ -87,6 +89,10 @@ const I = {
     Powertrain: 'de.bmw.powertrain.Powertrain',
     Dialog: 'de.bmw.infotainment.speech.dialog.Dialog',
     MDrive: 'de.bmw.infotainment.misc.MDrive',
+    TrafficSignRecognition: 'de.bmw.dass.TrafficSignRecognition',
+    SignRecognitionFrontCamera: 'de.bmw.environmentalmodel.SignRecognitionFrontCamera',
+    SignRecognitionFrontCameraLegacy: 'de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy',
+    CCP: 'de.bmw.infotainment.navigation.externalize.adasng.CCP',
 };
 const TABLE = [
     // ---- S1 P1 ----
@@ -272,6 +278,21 @@ const TABLE = [
     { set: 'S11', p: 'P19', tag: 'cons-eco', iface: I.KombiIF, field: 'statusConsumptionValueECOa', flags: 'rs', gapMs: 5000, cols: [['v1', 'consumptionValueECO1', 'n'], ['v2', 'consumptionValueECO2', 'n'], ['v3', 'consumptionValueECO3', 'n'], ['v4', 'consumptionValueECO4', 'n']] },
     { set: 'S11', p: 'P19', tag: 'eco-range', iface: I.KombiIF, field: 'statusECORange', flags: 'rs', gapMs: 5000, cols: [['range', 'displayRangeECO', 'n']] },
     { set: 'S11', p: 'P19', tag: 'driving-style', iface: I.KombiIF, field: 'statusDrivingStyleDisplay', flags: 'rs', cols: [['c1', 'drivingBehaviourECOCategorie1', 'n'], ['c2', 'drivingBehaviourECOCategorie2', 'n'], ['c3', 'drivingBehaviourECOCategorie3', 'n'], ['c1s', 'drivingBehaviourECOCategorie1Status', 'e'], ['c2s', 'drivingBehaviourECOCategorie2Status', 'e'], ['c3s', 'drivingBehaviourECOCategorie3Status', 'e']] },
+    // ---- S13 P22 "Знаки" (the lead, 2026-11-18, for the owner at the car with a 30 on the cluster): where the cluster's limit comes from.
+    //      EVENTS (flags 'b' = declared as _broadcasts, allowed for this set only by the lead's decision) and two FASuS fields. A sign's
+    //      position or location, and every time stamp, are never read.
+    { set: 'S13', p: 'P22', tag: 'tsr', iface: I.TrafficSignRecognition, field: 'TrafficSignRecognition', flags: 'b', cols: [['presentWithdrawalLimitSpeed', 'presentWithdrawalLimitSpeed', 'n'], ['recognitionNoPassing', 'recognitionNoPassing', 'n'], ['nextWithdrawalLimitSpeed', 'nextWithdrawalLimitSpeed', 'n'], ['presentClassLimitSpeed', 'presentClassLimitSpeed', 'n'], ['nextClassLimitSpeed', 'nextClassLimitSpeed', 'n'], ['countryCodingTrafficSign', 'countryCodingTrafficSign', 'n'], ['displayTextMessage', 'displayTextMessage', 'n'], ['unitOfMeasurementSpeedLimit', 'unitOfMeasurementSpeedLimit', 'n'], ['displayTextMessageNpi', 'displayTextMessageNpi', 'n'], ['statusDataMatchingCameraADAS', 'statusDataMatchingCameraADAS', 'n'], ['statusStreetTyp', 'statusStreetTyp', 'n'], ['evaluationStreetTyp', 'evaluationStreetTyp', 'n'], ['displaySupplementalSign', 'displaySupplementalSign', 'n'], ['triggerPresentClassLimitSpeed', 'triggerPresentClassLimitSpeed', 'n'], ['displaySpeedNPIDistance', 'displaySpeedNPIDistance', 'n'], ['controlSLIWarning', 'controlSLIWarning', 'n']] },
+    { set: 'S13', p: 'P22', tag: 'cam-signs', iface: I.SignRecognitionFrontCamera, field: 'TrafficSignRecognitionFrontCamera', flags: 'b', cols: [['qualifier', 'eventDataQualifier', 'e'], ['extQualifier', 'extendedQualifier', 'e'], ['version', ['trafficSignRecognition', 'version'], 'n'], ['visibility', ['trafficSignRecognition', 'visibilityCondition'], 'e'], ['numberSigns', ['trafficSignRecognition', 'numberSigns'], 'n'], ['unit', ['trafficSignRecognition', 'speedLimitUnit'], 'e'], ['qualities', 'trafficSignRecognitionQuality', 't']],
+      sub: { path: 'trafficSign', label: 'signs', cols: [['value', 'value', 'n'], ['type', 'type', 'e'], ['form', 'trafficSignForm', 'e'], ['supp1', 'firstSupplementalType', 'e'], ['supp2', 'secondSupplementalType', 'e'], ['info', 'additionalInfo', 'e'], ['variable', 'variable', 'b']] } },
+    { set: 'S13', p: 'P22', tag: 'cam-legacy', iface: I.SignRecognitionFrontCameraLegacy, field: 'RecognitionTrafficSignCamera', flags: 'b', cols: [['id', 'trafficSignID', 'n'], ['type', 'trafficSignType', 'n'], ['addOn1', 'trafficSignAddOnType1', 'n'], ['addOn2', 'trafficSignAddOnType2', 'n'], ['quality', 'qualityRecognitionTrafficSign', 'n'], ['value', 'trafficSignValue', 'n'], ['unit', 'speedLimitUnitOfMeasurement', 'n'], ['status', 'trafficSignStatus', 'n']] },
+    { set: 'S13', p: 'P22', tag: 'cam-legacy2', iface: I.SignRecognitionFrontCameraLegacy, field: 'recognitionTrafficSignCamera2', flags: 'b', cols: [['qualifier', 'eventDataQualifier', 'e'], ['extQualifier', 'extendedQualifier', 'e'], ['version', ['trafficSignRecognition', 'version'], 'n'], ['visibility', ['trafficSignRecognition', 'visibilityCondition'], 'e'], ['numberSigns', ['trafficSignRecognition', 'numberSigns'], 'n'], ['unit', ['trafficSignRecognition', 'speedLimitUnit'], 'e'], ['qualities', 'trafficSignRecognitionQuality', 't']],
+      sub: { path: 'trafficSign', label: 'signs', cols: [['value', 'value', 'n'], ['type', 'type', 'e'], ['form', 'trafficSignForm', 'e'], ['supp1', 'firstSupplementalType', 'e'], ['supp2', 'secondSupplementalType', 'e'], ['info', 'additionalInfo', 'e'], ['relevance', 'relevance', 'e'], ['variable', 'variable', 'b']] } },
+    { set: 'S13', p: 'P22', tag: 'ccp-limit', iface: I.CCP, field: 'effectiveSpeedLimit', flags: 'b', one: ['speedLimit', 'n'] },
+    { set: 'S13', p: 'P22', tag: 'ccp-unit', iface: I.CCP, field: 'speedLimitUnit', flags: 'b', one: ['speedLimitUnit', 'e'] },
+    { set: 'S13', p: 'P22', tag: 'ccp-variable', iface: I.CCP, field: 'variableSpeedLimitSign', flags: 'b', one: ['variableSide', 'e'] },
+    { set: 'S13', p: 'P22', tag: 'ccp-builtup', iface: I.CCP, field: 'builtupAreaFlag', flags: 'b', one: ['isBuiltupArea', 'b'] },
+    { set: 'S13', p: 'P22', tag: 'sli-text', iface: I.FASuS, field: 'statusSLITextMessage', flags: 'rs', cols: [['text', 'displayTextMessage', 'e']] },
+    { set: 'S13', p: 'P22', tag: 'sign-config', iface: I.FASuS, field: 'statusRoadSignConfigStatus', flags: 'rs', cols: [['country', 'countryCodingTrafficSign', 'e'], ['unit', 'unitOfMeasurementSpeedLimit', 'e']] },
 ];
 
 // ---- the sets: each one switchable on its own in the app's centre-screen menu (settings key set1..set9), default all off ----
@@ -287,11 +308,12 @@ const SETS = [
     { id: 'S9', key: 'set9', name: 'technical', uk: 'Технічне', items: ['P16', 'P17'] },
     { id: 'S10', key: 'set10', name: 'black box', uk: 'Чорна коробка', items: ['P18'] },
     { id: 'S11', key: 'set11', name: 'unwired', uk: 'Непідключені сигнали f30', items: ['P19'] },
+    { id: 'S13', key: 'set13', name: 'signs', uk: 'Знаки', items: ['P22'] },
 ];
 // per-set defaults (a field's own gapMs / cap win): messages and doors are events, the drive sets are long
 const SET_DEFAULTS = {
     S1: { gapMs: 500, cap: 100 }, S2: { gapMs: 1000, cap: 60 }, S3: { gapMs: 250, cap: 100 }, S4: { gapMs: 1000, cap: 100 },
-    S5: { gapMs: 500, cap: 100 }, S6: { gapMs: 500, cap: 150 }, S7: { gapMs: 1000, cap: 200 }, S8: { gapMs: 1000, cap: 200 }, S9: { gapMs: 1000, cap: 200 }, S10: { gapMs: 500, cap: 100 }, S11: { gapMs: 500, cap: 100 },
+    S5: { gapMs: 500, cap: 100 }, S6: { gapMs: 500, cap: 150 }, S7: { gapMs: 1000, cap: 200 }, S8: { gapMs: 1000, cap: 200 }, S9: { gapMs: 1000, cap: 200 }, S10: { gapMs: 500, cap: 100 }, S11: { gapMs: 500, cap: 100 }, S13: { gapMs: 250, cap: 300 },
 };
 
 const instOf = (f) => f.instance || '1';
@@ -299,9 +321,9 @@ const instOf = (f) => f.instance || '1';
 function interfaces() {
     const m = {};
     TABLE.forEach((f) => {
-        const e = m[f.iface] = m[f.iface] || { iface: f.iface, instances: [], fields: {} };
+        const e = m[f.iface] = m[f.iface] || { iface: f.iface, instances: [], fields: {}, events: [] };
         if (e.instances.indexOf(instOf(f)) < 0) e.instances.push(instOf(f));
-        e.fields[f.field] = f.flags;
+        if (f.flags === 'b') { if (e.events.indexOf(f.field) < 0) e.events.push(f.field); } else e.fields[f.field] = f.flags;
     });
     return Object.keys(m).map((k) => m[k]);
 }
@@ -312,6 +334,7 @@ function manifestSignals() {
         const o = {};
         o._instances = e.instances.length > 1 ? '*' : e.instances[0];
         Object.keys(e.fields).sort().forEach((k) => { o[k] = e.fields[k]; });
+        if (e.events.length) o._broadcasts = e.events.slice().sort();
         out[e.iface] = o;
     });
     return out;
