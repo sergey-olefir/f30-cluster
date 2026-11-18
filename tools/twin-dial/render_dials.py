@@ -126,6 +126,45 @@ def render_dial(kind, st=None, faces=SCENE, fs=None, scale=1):
     return np.clip(out, 0, 1)
 
 
+
+def render_back(u, part='L', size=(1380, 720), mask=None):
+    """The real tdback shader (shared/shaders.js tdbackFor(part), compact()ed) over a layer of `size` px with uniforms u (name -> numbers;
+    u_hole / u_rule / u_ruleC as flat lists of vec4s). -> float32 H x W x 4 straight RGBA, or raises if the shader does not compile."""
+    ctx, mgl, quad = _ctx()
+    src = subprocess.check_output(['node', '-e', "process.stdout.write(require(%s).tdbackFor(%s))" % (json.dumps(os.path.join(ROOT, 'shared', 'shaders.js')), json.dumps(part))]).decode()
+    prog = ctx.program(vertex_shader=RD.VS, fragment_shader=RD.shim(src))
+    m8 = mask if mask is not None else np.zeros((112, 536), np.uint8)
+    tex = ctx.texture((m8.shape[1], m8.shape[0]), 1, np.ascontiguousarray(m8).tobytes())
+    tex.filter = (mgl.LINEAR, mgl.LINEAR)
+    for name in prog:
+        m = prog[name]
+        if not isinstance(m, mgl.Uniform):
+            continue
+        if m.gl_type == 0x8B5E:
+            tex.use(0)
+            m.value = 0
+        elif name in u:
+            v = [float(a) for a in u[name]]
+            if m.array_length > 1:
+                n = m.array_length
+                v = (v + [0.0] * (4 * n))[:4 * n]
+                m.value = [tuple(v[4 * i:4 * i + 4]) for i in range(n)]
+            else:
+                m.value = tuple(v)
+    W, H = size
+    fbo = ctx.framebuffer(color_attachments=[ctx.texture((W, H), 4, dtype='f4')])
+    fbo.use()
+    fbo.clear(0, 0, 0, 0)
+    prog['o_uvA_'].value = (0.0, 0.0)
+    prog['o_uvB_'].value = (1.0, 1.0)
+    ctx.viewport = (0, 0, W, H)
+    vao = ctx.vertex_array(prog, [(quad, '2f', 'a_pos')])
+    vao.render(mgl.TRIANGLE_STRIP)
+    out = np.frombuffer(fbo.read(components=4, dtype='f4'), dtype=np.float32).reshape(H, W, 4)[::-1].copy()
+    vao.release(); fbo.color_attachments[0].release(); fbo.release(); tex.release(); prog.release()   # noqa: E702
+    return np.clip(out, 0, 1)
+
+
 def over_black(rgba):
     """The layer over black: straight colour x alpha, 8 bit."""
     return np.clip(np.round(rgba[..., :3] * rgba[..., 3:4] * 255), 0, 255).astype(np.uint8)

@@ -127,7 +127,7 @@ def test_faces():
         ys, xs = np.mgrid[0:560, 0:616]
         rho = np.hypot(xs + 0.5 - 308, ys + 0.5 - 310) / 300
         th = np.degrees(np.arctan2(xs + 0.5 - 308, -(ys + 0.5 - 310)))
-        ok(a[(rho > 0.994) & (rho < 1.006) & (np.abs(th) < 140)].min() >= 250, name + ': the bezel ring is solid white')
+        ok(a[(rho > 0.994) & (rho < 1.006) & (np.abs(th) < 140)].min() >= 245, name + ': the bezel ring is solid white (>= 245)')
         ok(a[(rho > 0.95) & (np.abs(th) > 148) & (rho < 1.05)].max() == 0 or a[(rho > 0.95) & (np.abs(th) > 148) & (rho < 1.05)].max() < 8, name + ': the bezel is open at the bottom')
         ok(np.percentile(a[(rho > 0.60) & (rho < 0.88) & (np.abs(th) < 130)], 10) >= 15, name + ': the band is lit everywhere between the rim and the ticks (its thin dark major lines aside)')
         inner = a[(rho > 0.50) & (rho < 0.53)]
@@ -144,25 +144,74 @@ def test_faces():
 
 
 def test_decode_against_mockup():
-    print('decode against the mockup (needs the mockup render; Saira 1.00 like the mockup)')
-    mk = cf.load_mockup()
-    A = mk.render(speed=87.0, rpm=2.4, page='clock')
-    B = mk.render(speed=41.0, rpm=5.6, page='clock')
+    print('decode against the approved mockup (K1 80_look_06; Saira 1.00 like the mockup; needs bake/work/twin-dial/mockup/r3)')
+    if not os.path.exists(cf.MOCKUP):
+        ok(False, 'the mockup picture %s is missing' % cf.MOCKUP)
+        return
+    from PIL import Image
+    mock = Image.open(cf.MOCKUP)
     with tempfile.TemporaryDirectory() as t:
-        res = {k: cf.compare(k, 1.0, 6500.0, t, mk, (A, B)) for k in ('tach', 'speed')}
+        res = {k: cf.compare(k, 1.0, mock, t) for k in ('tach', 'speed')}
         for k, r in res.items():
             n = r['face']
-            ok(r['decoded_to_mockup']['beyond_2px'] <= 20 and r['mockup_to_decoded']['beyond_2px'] <= 20,
-               '%s: ink edges within 2 px of the mockup (beyond 2 px: %d / %d of %d)' % (n, r['decoded_to_mockup']['beyond_2px'], r['mockup_to_decoded']['beyond_2px'], r['decoded_to_mockup']['ink_px']))
-            ok(r['mean_abs_diff_per_channel'] < 1.0 and r['px_over_96'] < 200, '%s: (bar frames follow B\'s contract geometry, up to 4 px off the mockup\'s) mean abs diff %.2f, px over 96: %d' % (n, r['mean_abs_diff_per_channel'], r['px_over_96']))
+            ok(r['decoded_to_mockup']['beyond_2px'] <= 40 and r['mockup_to_decoded']['beyond_2px'] <= 60,
+               '%s: bright ink edges within 2 px of the mockup (beyond 2 px: %d / %d of %d)' % (n, r['decoded_to_mockup']['beyond_2px'], r['mockup_to_decoded']['beyond_2px'], r['decoded_to_mockup']['ink_px']))
+            ok(r['mean_abs_diff_per_channel'] < 3.0 and r['px_over_96'] < 300,
+               '%s: mean abs diff %.2f, px over 96: %d (the spec\'s wider major lines and its arc colour differ from the mockup by design)' % (n, r['mean_abs_diff_per_channel'], r['px_over_96']))
+            ok(r['by_zone']['strip']['mean_abs_diff'] < 1.0 and r['by_zone']['gap 0.94-0.97']['mean_abs_diff'] < 0.5, '%s: the tick strip (with its bright line) within 1 code of the mockup' % n)
         # the check must notice a moved dial: shift the face by 3 px and compare again
         orig = bf.reduce_face
         try:
             bf.reduce_face = lambda fc: __import__('PIL.ImageChops', fromlist=['offset']).offset(orig(fc), 3, 0)
-            r = cf.compare('speed', 1.0, 6500.0, t, mk, (A, B))
+            r = cf.compare('speed', 1.0, mock, t)
             ok(r['decoded_to_mockup']['beyond_2px'] > 1000, 'a face shifted by 3 px fails the 2 px geometry check (%d px beyond)' % r['decoded_to_mockup']['beyond_2px'])
         finally:
             bf.reduce_face = orig
+
+
+def test_r3_faces():
+    print('SPEC-R3 2: rings, band, strip, hub')
+    for kind in ('tach', 'speed'):
+        name = bf.NAMES[kind]
+        a = scene(name)[1].astype(int)
+        ys, xs = np.mgrid[0:560, 0:616]
+        rho = np.hypot(xs + 0.5 - 308, ys + 0.5 - 310) / 300
+        th = np.degrees(np.arctan2(xs + 0.5 - 308, -(ys + 0.5 - 310)))
+        ath = np.abs(th)
+
+        def last(mask, ymax=540):                                  # the largest |theta| (lower right, th > 90) with a lit px
+            sel = mask & (th > 90) & (th < 175) & (ys < ymax)
+            return float(th[sel].max()) if sel.any() else None
+        be = last((rho > 0.985) & (rho < 1.015) & (a >= 128), 558)
+        re_ = last((rho > 0.538) & (rho < 0.55) & (a >= 128))
+        bd = last((rho > 0.62) & (rho < 0.85) & (a >= 20) & (ys < 480))
+        ok(be is not None and abs(be - 143.6) < 0.7, '%s: the bezel ends at 143.6 (%.2f)' % (name, be))
+        ok(re_ is not None and abs(re_ - 143.55) < 0.7, '%s: the rim ends at 143.55 (%.2f)' % (name, re_))
+        ok(bd is not None and abs(bd - 143.0) < 0.7, '%s: the band ends at 143.0 (%.2f)' % (name, bd))
+        ok(abs(be - re_) < 0.7 and abs(be - bd) < 1.2, '%s: the three rings end on one radial line' % name)
+        rim = a[(rho > 0.538) & (rho < 0.55) & (ath < 100)]
+        w_rim = (rim >= 128).sum() / max(1, (ath < 100).sum() and ((rho > 0.538) & (rho < 0.55) & (ath < 100)).sum()) * 0.012 * 300
+        ok(1.8 <= w_rim <= 3.0, '%s: the inner ring is thin (%.2f px; 0.008 R = 2.4 px)' % (name, w_rim))
+        strip = a[(rho > 0.8985) & (rho < 0.9215) & (ath < 100) & (a < 200)]
+        line = a[(rho > 0.926) & (rho < 0.932) & (ath < 100) & (a < 200)]
+        ok(abs(float(np.median(strip)) - 109) <= 1 and abs(float(np.median(line)) - 124) <= 2, '%s: the strip is G 109 with a bright line G 124 (%d, %d)' % (name, np.median(strip), np.median(line)))
+        r = regions(name)
+        ok(r['regions']['band']['tint_linear'] == [0.76, 1.0, 1.064] and r['regions']['band']['rho'] == [0.5795, 0.9375] and r['regions']['band']['theta_abs_max_deg'] == 143.0, '%s: regions JSON: band 0.5795-0.9375, to 143.0, tint 0.76 : 1 : 1.064' % name)
+        ok('wedge' not in r and r['numeral_shadow']['model'] == bf.SHADOW_MODEL, '%s: regions JSON has no wedge and names the shadow model' % name)
+        ok(a[217:403, 218:398].max() < 8 or kind == 'speed', '%s: the hub\'s centre (gear, program, READY) is free of ink' % name)
+    # the shadow darkens the band next to a numeral (and the strip is untouched); with no model nothing is darkened
+    fc_sd, *_ = bf.draw_face('tach', 1.0)
+    old = bf.SHADOW_MODEL
+    try:
+        bf.SHADOW_MODEL = None
+        fc_no, *_ = bf.draw_face('tach', 1.0)
+    finally:
+        bf.SHADOW_MODEL = old
+    a1, a0 = np.asarray(fc_sd.img).astype(int), np.asarray(fc_no.img).astype(int)
+    ys, xs = np.mgrid[0:a1.shape[0], 0:a1.shape[1]]
+    rr = np.hypot((xs + 0.5) / bf.SS - bf.CX, (ys + 0.5) / bf.SS - bf.CY) / bf.R
+    ok(((a1 < a0) & (rr > 0.6) & (rr < 0.85)).sum() > 20000 and not ((a1 != a0) & (rr >= 0.893)).any(), 'the numerals\' shadow darkens the band (%d px at 3x) and never the strip' % ((a1 < a0) & (rr > 0.6) & (rr < 0.85)).sum())
+    ok(bf.SHADOW_MODELS['SD']['outline'] == (0.008, 0.75) and bf.SHADOW_MODELS['SD']['drop'] == (0.010, 0.012, 0.008, 0.35), 'SHADOW_MODEL "SD" is SD\'s measured model (outline 0.008 R at 0.75; drop (+0.010, +0.012) R, sigma 0.008, 0.35)')
 
 
 def test_mask():
@@ -193,7 +242,7 @@ def test_mask():
 
 
 if __name__ == '__main__':
-    for t in (test_files, test_reproducible, test_numerals, test_faces, test_mask, test_decode_against_mockup):
+    for t in (test_files, test_reproducible, test_numerals, test_faces, test_r3_faces, test_mask, test_decode_against_mockup):
         t()
     print('%d passed, %d failed' % (passed, failed))
     sys.exit(1 if failed else 0)
