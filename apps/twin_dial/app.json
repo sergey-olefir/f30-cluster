@@ -110,7 +110,7 @@
     "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
       "playerMetadata": "rs",
       "_instances": "HMI_CID",
-      "_about": "unseen (P8): playerMetadata, trackProgress, menu feed the tab-3 pages (config.pages.media, dark); the text is drawn, never logged (lengths only). coverArt is NOT declared (up to 850 kB a notification).",
+      "_about": "car-fix CF3, seen on the car (P8, 2026-11-18; signal_probe): playerMetadata (with CarPlay: line 1 ARTIST, line 2 ALBUM, no TITLE line), trackProgress (Int64 elapsed / total: not plain numbers), menu (selected icon CARPLAY; Int64 ids) feed the tab-3 pages (config.pages.media). On 0.1.0 this interface was subscribed on instance 1 and failed ('Instance not available'): B4's $instance HMI_CID fixes it. The text is drawn, never logged (lengths only). coverArt is NOT declared (up to 850 kB a notification).",
       "trackProgress": "rs",
       "menu": "rs"
     },
@@ -121,7 +121,7 @@
     },
     "de.bmw.infotainment.connectivity.telephony.ConnectivityAggregator": {
       "aggregatedCallState": "rs",
-      "_about": "unseen (P9): an enum only, no number or name is read"
+      "_about": "seen on the car (Twin Dial 0.1.0's log, 2026-11-18: DISCONNECTED, DIALING, ACTIVE): the call card and tab rule 2 (car-fix CF3). An enum only, no number or name is read"
     },
     "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus": {
       "guidingState": "rs",
@@ -129,28 +129,30 @@
     },
     "de.bmw.infotainment.tuner.fmamdab.tunerfmamdab.TunerFmAmDab": {
       "currentStationFmDabAm": "rs",
-      "_about": "unseen (P8): the radio page (config.pages.media, dark). Read only."
+      "_about": "seen on the car (P8, 2026-11-18: band WB_FM, the frequency in kHz in the FM range, preset 0, TPS_NO_TP, names and radio text present): the radio page (config.pages.media). Read only."
     },
     "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer": {
       "_instances": "CarPlayMedia",
       "currentItemPosition": "rs",
       "playerState": "rs",
-      "_about": "unseen (P8): CarPlay track n of m and play state, one instance per interface (SPEC-R3 4.3). Read only."
+      "currentItemMetadata": "rs",
+      "currentItemTime": "rs",
+      "_about": "seen on the car (P8, 2026-11-18, CarPlay): playerState PLAYER_STATE_PLAY, currentItemPosition 0 of 0 (= none), currentItemMetadata keyed ARTIST / ALBUM / TITLE / COVER_FILE (car-fix CF3: the title the HMI lines lack with CarPlay; COVER_FILE is never read), currentItemTime elapsed / total in ms. One instance per interface (SPEC-R3 4.3). Read only."
     },
     "de.bmw.infotainment.connectivity.telephony.VoiceCall": {
       "_instances": "Call1",
       "state": "rs",
       "contactID": "rs",
       "name": "rs",
-      "_about": "unseen (P9): the call card (config.pages.phone, dark). name is private: kept only while the setting \"callerName\" is on and the call lasts, never logged. Read only."
+      "_about": "unseen (P9; the probe's phone set was never switched on): the call card's contact line, behind config.pages.callDetail (false). name is private: kept only while callDetail and the setting \"callerName\" are on and the call lasts, never logged. Read only."
     },
     "de.bmw.infotainment.connectivity.telephony.VoiceCallManager": {
       "micMuted": "rs",
-      "_about": "unseen (P9): the muted-microphone mark on the call card. Read only (its setter is never declared)."
+      "_about": "unseen (P9): the muted-microphone mark on the call card, behind config.pages.callDetail (false). Read only (its setter is never declared)."
     },
     "de.bmw.infotainment.devicemanager.devicepresentation.DevicePresentation": {
       "deviceList": "rs",
-      "_about": "unseen (P9): the idle phone page (connected, path, battery, signal); friendlyName and persistentAttributes are never read. Read only."
+      "_about": "unseen (P9): the idle phone page (connected, path, battery, signal) and tab 4's icon variant, behind config.pages.phoneDevices (false); friendlyName and persistentAttributes are never read. Read only."
     },
     "de.bmw.infotainment.navigation.guiding.Guidance": {
       "_instances": "Main_Instance",
@@ -159,7 +161,9 @@
       "currentLaneGuiding": "rs",
       "nextDestinationInfo": "rs",
       "visualizationInKombiNonNaviEnabled": "rs",
-      "_about": "unseen (P12): the road line, the guidance page (config.pages.guidance, dark) and the map window's presence rule (config.mapWindow). Road text is drawn, never logged; positions and bearings are never read. Read only."
+      "guidingProvider": "rs",
+      "isOnGuidableRoad": "rs",
+      "_about": "P12 on the car (2026-11-18, a route by CarPlay): guidingProvider CAR_PLAY, nextDestinationInfo (rawDistance in metres, travelTime s, the arrival time local), currentRoad and isOnGuidableRoad arrive - the CarPlay route page (config.pages.route, car-fix CF3); conclusiveDart and the lanes stay empty with CarPlay (the guidance page, config.pages.guidance, stays dark: BMW's own guidance is untested). The map window's presence rule (config.mapWindow). Road text is drawn, never logged; positions and bearings are never read. Read only."
     },
     "de.bmw.infotainment.vehicle.TPMS": {
       "statusTyrePressure": "rs",
@@ -587,10 +591,10 @@
       "holdAboveKmh": 5
     },
     "tabs": {
-      "_about": "SPEC-R3 3: live tabs on (shared/twin_tabs.js, package B2; the key absent = live tabs off, the round 2 look). lockAboveKmh: used while the app has no tabLock setting. messageTab false: a message does not select tab 2. callSelects: rule 2, a call rings or runs -> tab 4; OFF until the car session has shown the call state (probe P9)",
+      "_about": "SPEC-R3 3: live tabs on (shared/twin_tabs.js, package B2; the key absent = live tabs off, the round 2 look). lockAboveKmh: used while the app has no tabLock setting. messageTab false: a message does not select tab 2. callSelects: rule 2, a call rings or runs -> tab 4 (the call card); ON since car-fix CF3: the car showed the call state (aggregatedCallState DISCONNECTED -> DIALING -> ACTIVE -> DISCONNECTED in Twin Dial 0.1.0's log, 2026-11-18). A message still outranks a call; false switches the rule off again",
       "lockAboveKmh": 5,
       "messageTab": true,
-      "callSelects": false
+      "callSelects": true
     },
     "tabKey": {
       "iface": "de.bmw.body.Light",
@@ -820,9 +824,14 @@
     "pages": {
       "_about": "round 3 B4 (SPEC-R3 4): the pages built DARK, each switched on by the car session once its signal has been seen (docs/AGENT-BRIEF-car-signals.md). tyres: tab 1's tyre page joins the cycle (TPMS getters polled every 10 s while it shows); media: tab 3's radio and now-playing pages (P8); phone: tab 4's call card (P9); guidance: tab 5's guidance page (P12). false = the certain page or the fallback shows.",
       "tyres": false,
-      "media": false,
-      "phone": false,
-      "guidance": false
+      "media": true,
+      "phone": true,
+      "phoneDevices": false,
+      "callDetail": false,
+      "guidance": false,
+      "route": true,
+      "routeOffRoad": false,
+      "_carFix": "car-fix CF3 (2026-11-18, the car; docs/car-fix/CF3-REPORT.md): media ON (HmiMediaState, the tuner and the CarPlay player all arrive; CarPlay's title / artist / time from MediaPlayer on CarPlayMedia, the source from the HMI menu's selected icon); phone ON for what arrives (aggregatedCallState -> the call card, its title by state and our own timer); phoneDevices (DevicePresentation: the idle page's connection lines, tab 4's icon variant) and callDetail (VoiceCall contact / name, micMuted) stay OFF: never seen; route ON (tab 5 with CarPlay guiding: remaining distance, arrival and travel time, the road; no arrow; it also selects tab 5 by rule 3 like BMW's guidance; routeOffRoad: the \"Поза дорогою\" note from isOnGuidableRoad, OFF: it read false at the start of a CarPlay route, its meaning is unverified); guidance (BMW's own arrow page) stays OFF: untested."
     },
     "mapWindow": null,
     "_mapWindow": "round 3 B4 (SPEC-R3 4.5), an EXPERIMENT: null = no map window; \"W1\" = the soft-edged window (zero box [750, 180, 1170, 564], fades 120 / 80 / 80, corner 24), \"W2\" = open wider so that BMW's own edge shows. It opens only while tab 5 is selected and BMW's map is believed present (mapSlots / the cluster's map-view setting) and closes at once on any doubt. Needs B1's u_map uniform in tdback.",

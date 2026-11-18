@@ -46,6 +46,50 @@ function base(R, over) {
 const TRIP = { avg: { speed1: 410, cons1: 68, speed2: 1, cons2: 1 }, travel: { hours: 0, minutes: 43, way: 124 }, start: { h: 14, m: 0 } };
 const FACT = { trip: { factors: { bc: 1, speed: 0.1, cons: 0.1, way: 0.1 } } };
 
+const FULL_PHONE = { phone: true, phoneDevices: true, callDetail: true };       // the call card's whole drawing (car-fix CF3: the unseen parts too)
+const CAR_PAGES = { media: true, phone: true, phoneDevices: false, callDetail: false, guidance: false, route: true, routeOffRoad: false, tyres: false };    // app.json after car-fix CF3
+
+/** The page model wired through the real handlers (shared/twin_pages.js wire): returns the handler table. */
+function wired(h, R) { const extra = {}; R.pages.wire(h, extra); h._extra = extra; return extra; }
+/** Neutral text of exactly n characters (the car gave the lengths, never the text). */
+const textOf = (seed, n) => { let s = ''; while (s.length < n) s += seed + ' '; return s.slice(0, n).replace(/ $/, '.'); };
+/** The car's media: CarPlay playing. HMI lines ARTIST (17) + ALBUM (16) and no TITLE; Int64 ids and times as non-numbers; the
+ *  menu's seven entries, CARPLAY selected; MediaPlayer (CarPlayMedia): PLAY, 0 of 0, ARTIST 17 / ALBUM 16 / TITLE 16 / COVER_FILE,
+ *  25583 of 184785 ms; the tuner holds an FM station all along (short and long name 8, radio text 64). */
+const CAR = { artist: textOf('Гурт Приклад', 17), album: textOf('Альбом Приклад', 16), title: textOf('Ранкова хвиля', 16), station: textOf('Радіо Приклад', 8), rt: textOf('Текст радіо приклад', 64) };
+const I64 = (n) => ({ low: n, high: 0 });         // one Int64 shape (the probe printed "?": not a plain number)
+const MENU = (sel) => ({ sink: 'FRONT', selectedEntryId: I64(sel), menuEntries: [['MUSIC_COLLECTION', 1], ['BLUETOOTH', 2], ['PRESETS', 3], ['FM', 4], ['AM', 5], ['MIRACAST', 6], ['CARPLAY', 7]]
+    .map((e) => ({ id: I64(e[1]), name: textOf('Пункт', 16), iconKind: e[0], enabled: true, subentries: [] })) });
+function carMedia(h, R, sel) {
+    const e = wired(h, R), I = R.pages.IF;
+    e[I.media].playerMetadata({ sink: 'FRONT', uiType: 'TWO_LINES', menuEntry: I64(7), trackId: I64(1), firstLineType: 'ARTIST', firstLineText: CAR.artist, secondLineType: 'ALBUM', secondLineText: CAR.album, threeRowText: '' });
+    e[I.media].trackProgress({ sink: 'FRONT', menuEntry: I64(7), trackId: I64(1), elapsed: '?', total: '?', hasProgress: true, isSeekable: false });
+    e[I.media].menu(MENU(sel));
+    e[I.tuner].currentStationFmDabAm({ stationListEntry: { waveBand: 'WB_FM', receptionMode: 'ANALOG', frequencyKhz: 101700, positionNumber: 0, tp: 'TPS_NO_TP', stationShortName: CAR.station, stationLongName: CAR.station }, radioTextName: CAR.rt });
+    e[I.player].playerState(sel === 7 ? 'PLAYER_STATE_PLAY' : 'PLAYER_STATE_PAUSE');
+    e[I.player].currentItemPosition({ position: 0, totalNumber: 0 });
+    e[I.player].currentItemMetadata([{ key: 'ARTIST', value: { stringValue: CAR.artist } }, { key: 'ALBUM', value: { stringValue: CAR.album } }, { key: 'TITLE', value: { stringValue: CAR.title } }, { key: 'COVER_FILE', value: { stringValue: textOf('/cover/item', 59) } }]);
+    e[I.player].currentItemTime({ elapsed: 25583, total: 184785 });
+    return e;
+}
+const carPlay = (h, R) => carMedia(h, R, 7);
+const carRadio = (h, R) => carMedia(h, R, 4);
+/** The car's CarPlay route: provider CAR_PLAY, BMW's guiding INACTIVE, an empty manoeuvre and no lanes; the destination 5700 (unit KM,
+ *  a 3-character text), 660 s, arrival 20:41 local; a road of 14 characters; not on a guidable road. */
+function carRoute(h, R) {
+    const e = wired(h, R), I = R.pages.IF;
+    e[I.guiding].guidingState('INACTIVE');
+    e[I.guidance].guidingProvider('CAR_PLAY');
+    e[I.guidance].conclusiveDart({ maneuver: { pointOfInterest: {} }, bargraphProgress: 0 });
+    e[I.guidance].currentLaneGuiding({ rows: [], carPositionLaneIndex: 0 });
+    e[I.guidance].currentRoad({ elements: [{ text: textOf('вулиця Тестова', 14) }] });
+    e[I.guidance].isOnGuidableRoad(false);
+    e[I.guidance].nextDestinationInfo({ travelTime: 660, delayTime: 0, delayStatus: 'UNDEFINED', formattedDistance: { distance: '5.7', unit: 'KM', rawDistance: 5700 },
+        distanceFromCurrentToFinalDestination: 0, isCheckeredFlag: true, stopOverNumber: 0,
+        estimatedArrivalTime: { time: { invalid: false, hour: 20, minute: 41 }, includedTimeOffset: { valid: false, timeZoneOffset: 120 } } });
+    return e;
+}
+
 const WIRED = {       // handler input the fields really carry (shapes from the catalogue), neutral text
     media: { firstLineText: 'Ранкова хвиля', firstLineType: 'TITLE', secondLineText: 'Гурт Приклад', secondLineType: 'ARTIST', uiType: 'TWO_LINES' },
 };
@@ -71,10 +115,11 @@ const STATES = {
     track: { tab: 3, page: 'track', over: { config: { pages: { media: true } } },
         setup: (h, R) => { const m = R.pages.st(h).media; m.src = 'usb'; m.title = 'Ранкова хвиля'; m.artist = 'Гурт Приклад'; m.has = true; m.el = 61000; m.tot = 215000; m.cpPos = 4; m.cpTotal = 12; } },
     phone_nodata: { tab: 4, page: 'phone' },
-    phone: { tab: 4, page: 'phone', setup: (h, R) => { const p = R.pages.st(h).phone; p.dev = { path: 'CarPlay', battery: 80, signal: 3 }; p.devSeen = true; } },
-    phone_none: { tab: 4, page: 'phone', setup: (h, R) => { const p = R.pages.st(h).phone; p.dev = null; p.devSeen = true; } },
-    call_in: { tab: 4, page: 'call', over: { config: { pages: { phone: true } } }, setup: (h, R) => { const p = R.pages.st(h).phone; p.agg = 'INCOMING'; p.contact = true; p.dev = { path: 'CarPlay', battery: 80, signal: 3 }; } },
-    call_active: { tab: 4, page: 'call', over: { config: { pages: { phone: true } } }, setup: (h, R) => { const p = R.pages.st(h).phone; p.agg = 'ACTIVE'; p.contact = false; p.mic = true; p.activeAt = h._now_ms - 157000; p.dev = { path: 'CarPlay', battery: 80, signal: 3 }; } },
+    // car-fix CF3: the device lines and the call's contact / microphone are drawn only with config.pages.phoneDevices / callDetail (unseen on the car)
+    phone: { tab: 4, page: 'phone', over: { config: { pages: { phoneDevices: true } } }, setup: (h, R) => { const p = R.pages.st(h).phone; p.dev = { path: 'CarPlay', battery: 80, signal: 3 }; p.devSeen = true; } },
+    phone_none: { tab: 4, page: 'phone', over: { config: { pages: { phoneDevices: true } } }, setup: (h, R) => { const p = R.pages.st(h).phone; p.dev = null; p.devSeen = true; } },
+    call_in: { tab: 4, page: 'call', over: { config: { pages: FULL_PHONE } }, setup: (h, R) => { const p = R.pages.st(h).phone; p.agg = 'INCOMING'; p.contact = true; p.dev = { path: 'CarPlay', battery: 80, signal: 3 }; } },
+    call_active: { tab: 4, page: 'call', over: { config: { pages: FULL_PHONE } }, setup: (h, R) => { const p = R.pages.st(h).phone; p.agg = 'ACTIVE'; p.contact = false; p.mic = true; p.activeAt = h._now_ms - 157000; p.dev = { path: 'CarPlay', battery: 80, signal: 3 }; } },
     nav_none: { tab: 5, page: 'none' },
     nav_road: { tab: 5, page: 'road', setup: (h, R) => { R.pages.st(h).road = 'вулиця Тестова'; } },
     nav_calc: { tab: 5, page: 'calc', setup: (h, R) => { R.pages.st(h).guiding = 'CALCULATING_ROUTE'; } },
@@ -83,6 +128,13 @@ const STATES = {
             p.lanes = [{ dir: 'left', hi: false }, { dir: 'straight', hi: true }, { dir: 'straight', hi: true }, { dir: 'right', hi: false }]; p.dest = { eta: { h: 9, m: 32 }, dist: 14200 }; } },
     nav_map: { tab: 5, page: 'map', over: { config: { mapWindow: 'W1', mapShutMs: 0 } },
         setup: (h, R) => { const p = R.pages.st(h); p.guiding = 'ACTIVE'; p.navType = 2; p.road = 'вулиця Тестова'; } },
+    // ---- car-fix CF3: the car's own shapes (signal_probe and Twin Dial 0.1.0 on the car, 2026-11-18), fed through the real handlers.
+    // Only the lengths, enums and numbers are the car's; every text is invented and neutral.
+    car_carplay: { tab: 3, page: 'track', over: { config: { pages: CAR_PAGES } }, setup: (h, R) => carPlay(h, R) },
+    car_radio: { tab: 3, page: 'radio', over: { config: { pages: CAR_PAGES } }, setup: (h, R) => carRadio(h, R) },
+    car_call: { tab: 4, page: 'call', over: { config: { pages: CAR_PAGES } }, setup: (h, R) => { const e = wired(h, R); e[R.pages.IF.agg].aggregatedCallState('DIALING'); h._now_ms += 10000; e[R.pages.IF.agg].aggregatedCallState('ACTIVE'); h._now_ms += 83000; } },
+    car_phone: { tab: 4, page: 'phone', over: { config: { pages: CAR_PAGES } }, setup: (h, R) => { const e = wired(h, R); e[R.pages.IF.agg].aggregatedCallState('DISCONNECTED'); } },
+    car_route: { tab: 5, page: 'route', over: { config: { pages: CAR_PAGES } }, setup: (h, R) => carRoute(h, R) },
 };
 
 /** A fake engine in state `id`. */
@@ -101,4 +153,4 @@ function render(R, h) {
     return { buf: h.captured, ink: x.pgInk || [], page: R.pages.st(h).page, x };
 }
 
-module.exports = { rig, base, make, render, STATES, TRIP, FACT, WIRED, T0 };
+module.exports = { rig, base, make, render, STATES, TRIP, FACT, WIRED, T0, CAR, CAR_PAGES, FULL_PHONE, wired, textOf, MENU, I64 };

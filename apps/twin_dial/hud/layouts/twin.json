@@ -1259,6 +1259,82 @@
             }
           ]
         },
+        "route": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "meta",
+              "x": 1190,
+              "b": 326,
+              "f": "n31",
+              "s": "{{td:pgRouteMeta}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "g",
+              "id": "dist",
+              "cx": 960,
+              "b": 410,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgRouteDist}}",
+                  "f": "s72"
+                },
+                {
+                  "s": "{{td:pgRouteUnit}}",
+                  "f": "n29",
+                  "gap": 8
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "eta",
+              "x": 960,
+              "b": 466,
+              "f": "n33",
+              "s": "{{td:pgRouteEta}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "road",
+              "x": 960,
+              "b": 512,
+              "f": "n31",
+              "s": "{{td:pgRouteRoad}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "foot",
+              "x": 960,
+              "b": 565,
+              "f": "n29",
+              "s": "{{td:pgRouteFoot}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            }
+          ]
+        },
         "calc": {
           "items": [
             {

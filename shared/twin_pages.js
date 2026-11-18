@@ -9,12 +9,22 @@
  *
  *   tab 1  the on-board computer: clock | trip | tech | tyres  (setting "centre": one page or "cycle", "techData" show / hide)
  *   tab 2  the messages: only the title here (the card, the rows, the pointer page are shared/twin_cc.js's sheet)
- *   tab 3  media: "media" (the certain-only page) | "radio" | "track"            (the last two: config.pages.media, built dark)
- *   tab 4  phone: "phone" (idle) | "call"                                         (the call card: config.pages.phone, dark)
- *   tab 5  navigation: "map" (the map window, config.mapWindow) | "guide" (config.pages.guidance, dark) | "calc" | "road" | "none"
+ *   tab 3  media: "media" (the certain-only page) | "radio" | "track"            (the last two: config.pages.media)
+ *   tab 4  phone: "phone" (idle) | "call"                                         (the call card: config.pages.phone)
+ *   tab 5  navigation: "map" (the map window, config.mapWindow) | "guide" (config.pages.guidance, dark) | "route" (config.pages.route)
+ *          | "calc" | "road" | "none"
  *
  * Built dark = the drawing and its model exist and are tested; a config key switches them on once the car has shown the
  * signal (docs/AGENT-BRIEF-car-signals.md). Every page has an empty state (a dash, "Немає даних", the certain page).
+ *
+ * car-fix CF3 (the car, 2026-11-18; docs/car-fix/CF3-REPORT.md): media, the call card and the CarPlay route are ON. What the car
+ * sends: HmiMediaState (HMI_CID) with CarPlay playing gives ARTIST + ALBUM lines and NO title line, its Int64 ids and times
+ * arrive as non-numbers; the title and the time come from MediaPlayer on CarPlayMedia (currentItemMetadata keyed TITLE /
+ * ARTIST / ALBUM, currentItemTime in ms). The call state is ConnectivityAggregator's only (DISCONNECTED, DIALING, ACTIVE seen);
+ * DevicePresentation / VoiceCall / micMuted were never seen and stay dark (config.pages.phoneDevices / callDetail). With
+ * CarPlay guiding, BMW's guidingState stays INACTIVE and the manoeuvre / lanes are empty; nextDestinationInfo, currentRoad,
+ * isOnGuidableRoad and guidingProvider = CAR_PLAY arrive: the "route" page. FormattedDistance.rawDistance is in METRES
+ * whatever its unit (5700 with unit KM, a 3-character text, 660 s travel = 5.7 km).
  *
  * Where it plugs into the engine (small marked blocks `// twin_dial:` in shared/hud.js, inert for every other app):
  *   _create / _updateOne   the "tdpage" widget: init(hud, x) and update(hud, x, now, force)
@@ -40,6 +50,7 @@ const DWELL_MS = 10000;             // a cycle page's time while the car stands 
 const TPMS_POLL_MS = 10000;
 const MAP_SHUT_MS = 8000;           // SPEC 4.5: the map slots are off 6-8 s after a fresh panel mapping
 const SLOT_FRESH_MS = 6000;         // a cluster-render status older than this says nothing about the map
+const ROUTE_FRESH_MS = 60000;       // car-fix CF3: a CarPlay destination older than this is no route (the car sends it every few s)
 
 /* ------------------------------------------------------------------ names ---------------------------------------- */
 
@@ -103,11 +114,13 @@ function fresh() {
         page: 'clock', evalAt: -1e9, built: 0,
         cyc: 'clock', cycSince: 0, hold: false,
         // navigation
-        guiding: null, road: null, dart: null, lanes: null, dest: null, nextRoad: null, navType: null, nonNavi: null,
+        guiding: null, road: null, dart: null, lanes: null, dest: null, destAt: 0, nextRoad: null, navType: null, nonNavi: null,
+        provider: null, onRoad: null,      // car-fix CF3: Guidance.guidingProvider (CAR_PLAY ...), isOnGuidableRoad
         slots: null, slotsAt: 0, mapSent: null, mapNote: '', mapAskAt: 0,
-        // media
+        // media (cp*: MediaPlayer on CarPlayMedia, car-fix CF3)
         media: { title: null, artist: null, album: null, three: null, el: null, tot: null, has: false, src: null, srcRaw: null,
-            station: null, stationText: null, band: null, freq: null, preset: null, tp: false, cpPos: null, cpTotal: null, cpState: null, mute: false, at: 0 },
+            station: null, stationText: null, band: null, freq: null, preset: null, tp: false, cpPos: null, cpTotal: null, cpState: null, mute: false, at: 0,
+            cpTitle: null, cpArtist: null, cpAlbum: null, cpEl: null, cpTot: null },
         // phone
         phone: { agg: null, call1: null, contact: null, name: null, mic: null, dev: null, devSeen: false, activeAt: 0, activeKey: '', path: null, at: 0 },
         // tyres
@@ -151,6 +164,28 @@ function enumName(raw, names) {
 }
 const str = (v, max) => (typeof v === 'string' && v.length ? v.slice(0, max || 200) : null);
 const arr = (v) => (Array.isArray(v) ? v : []);
+/**
+ * car-fix CF3: an Int64 as the car's SDK hands it (Node 8 has no bigint): HmiMediaState's ids and times reached the probe as
+ * non-numbers. A number, a digit string, a bigint, a { low, high } pair or an 8-byte buffer -> a number; anything else null.
+ */
+function int64(v) {
+    if (isNum(v)) return v;
+    if (typeof v === 'string' && /^-?\d{1,18}$/.test(v)) return Number(v);
+    if (typeof v === 'bigint') return Number(v);          // a newer Node's SDK; Node 8 never gets here
+    if (v && typeof v === 'object') {
+        if (isNum(v.low) && isNum(v.high)) return v.high * 4294967296 + (v.low >>> 0);
+        if (Buffer.isBuffer(v) && v.length === 8) return v.readInt32BE(0) * 4294967296 + v.readUInt32BE(4);
+    }
+    return null;
+}
+/** An id of any shape (number, string, Int64 pair, buffer, struct) -> a comparable string key, or null. */
+function idKey(v) {
+    if (v === null || v === undefined) return null;
+    if (typeof v !== 'object') return String(v);
+    const n = int64(v);
+    if (n !== null) return String(n);
+    try { return JSON.stringify(v); } catch (e) { return null; }
+}
 
 const CALL_STATES = ['DISCONNECTED', 'INCOMING', 'ACTIVE', 'DIALING', 'HELD'];
 const GUIDING_STATES = ['INACTIVE', 'CALCULATING_ROUTE', 'ACTIVE'];
@@ -160,6 +195,10 @@ const ICON_KINDS = ['UNDEFINED', 'NO_ICON', 'MEDIA_OVERVIEW', 'PRESETS', 'SDARS'
 const WAVE_BANDS = ['WB_UNDEF', 'WB_FM', 'WB_MW', 'WB_DAB', 'WB_FM_DAB', 'WB_TRF', 'WB_SXM_SAT', 'WB_TV', 'WB_SXM_IP'];
 const SOURCE_OF_KIND = { FM: 'radio', AM: 'radio', TRF: 'radio', RADIO: 'radio', PRESETS: 'radio', SDARS: 'radio', USB: 'usb', BLUETOOTH: 'bluetooth',
     CARPLAY: 'carplay', SMARTPHONE: 'phone', ONLINE_ENTERTAINMENT: 'online', MUSIC_COLLECTION: 'usb' };
+// car-fix CF3: MediaPlayer (CarPlayMedia), the catalogue's enums
+const PLAYER_STATES = ['PLAYER_STATE_UNKNOWN', 'PLAYER_STATE_PLAY', 'PLAYER_STATE_STOP', 'PLAYER_STATE_PAUSE', 'PLAYER_STATE_FAST_FORWARD', 'PLAYER_STATE_FAST_BACKWARD'];
+const META_KEYS = { 3: 'TITLE', 5: 'ARTIST', 7: 'ALBUM' };           // MetadataKey: the three the page draws (by name or number)
+const PROVIDERS = ['NONE', 'CAR_PLAY', 'ANDROID_AUTO', 'CAR_LIFE', 'OTHER'];      // Guidance.guidingProvider (ProjectedModeGuidingProvider)
 const TURN = ['NONE', 'STRAIGHT_ON', 'LEFT', 'SLIGHT_LEFT', 'HARD_LEFT', 'RIGHT', 'SLIGHT_RIGHT', 'HARD_RIGHT', 'UTURN_RIGHT', 'UTURN_LEFT'];
 
 /** Chain `fn` behind whatever handler a field already has (the engine's own keeps running first); a throw in `fn` is caught. */
@@ -183,6 +222,7 @@ function wire(hud, extra) {
     chain(hud, extra, IF.guiding, 'guidingState', (v) => {
         const raw = isNum(v) || typeof v === 'string' ? v : pick(v, 'guidingState');
         p.guiding = enumName(raw, GUIDING_STATES);
+        routeBridge(hud);          // car-fix CF3
         once(hud, 'guiding', 'nav page: guiding state ' + (p.guiding || 'none'));
     });
     chain(hud, extra, IF.guidance, 'currentRoad', (v) => {
@@ -191,7 +231,22 @@ function wire(hud, extra) {
     }, 'Main_Instance');
     chain(hud, extra, IF.guidance, 'conclusiveDart', (v) => { p.dart = dartOf(v); once(hud, 'dart', 'nav page: manoeuvre ' + (p.dart ? p.dart.kind + (p.dart.dist !== null ? ' with a distance' : '') : 'none')); }, 'Main_Instance');
     chain(hud, extra, IF.guidance, 'currentLaneGuiding', (v) => { p.lanes = lanesOf(v); once(hud, 'lanes', 'nav page: lanes ' + (p.lanes ? p.lanes.length : 0)); }, 'Main_Instance');
-    chain(hud, extra, IF.guidance, 'nextDestinationInfo', (v) => { p.dest = destOf(v); once(hud, 'dest', 'nav page: destination ' + (p.dest ? 'known' : 'none')); }, 'Main_Instance');
+    chain(hud, extra, IF.guidance, 'nextDestinationInfo', (v) => {
+        p.dest = destOf(v); p.destAt = nowMs(hud); routeBridge(hud);
+        // car-fix CF3: which parts came, never their values (a distance or an arrival time says where the car goes); once per change of shape
+        once(hud, 'dest', 'nav page: destination ' + (p.dest ? 'distance ' + (p.dest.dist !== null ? 'yes' : 'no') + ', travel time ' +
+            (p.dest.travel !== null ? 'yes' : 'no') + ', arrival ' + (p.dest.eta ? 'yes' : 'no') : 'none'));
+    }, 'Main_Instance');
+    // car-fix CF3: who guides (CAR_PLAY on this car) and whether the car is on a road the navigation knows (both enums / booleans)
+    chain(hud, extra, IF.guidance, 'guidingProvider', (v) => {
+        p.provider = enumName(isNum(v) || typeof v === 'string' ? v : pick(v, 'guidingProvider'), PROVIDERS);
+        once(hud, 'provider', 'nav page: guiding provider ' + String(p.provider));
+        routeBridge(hud);
+    }, 'Main_Instance');
+    chain(hud, extra, IF.guidance, 'isOnGuidableRoad', (v) => {
+        p.onRoad = v === true || v === 1 ? true : v === false || v === 0 ? false : null;
+        once(hud, 'onRoad', 'nav page: on a guidable road ' + String(p.onRoad));
+    }, 'Main_Instance');
     chain(hud, extra, IF.guidance, 'visualizationInKombiNonNaviEnabled', (v) => { p.nonNavi = v === true || v === 1 ? true : v === false || v === 0 ? false : null; }, 'Main_Instance');
     chain(hud, extra, IF.kombi, 'statusConfigurationKombi5', (v) => {
         const raw = pick(v, 'statusNavigationDisplayType');
@@ -207,20 +262,24 @@ function wire(hud, extra) {
         if (title === null && lines[0][0] !== null && lines[0][1] !== 'ARTIST' && lines[0][1] !== 'ALBUM') title = lines[0][0];      // types unknown: the first line is the title
         if (artist === null && album === null && lines[1][0] !== null && lines[1][0] !== title) artist = lines[1][0];
         m.title = title; m.album = album; m.artist = artist || album; m.three = str(pick(v, 'threeRowText'), 300); m.at = nowMs(hud);
-        once(hud, 'media', 'media page: text ' + lines.map((l) => (l[0] === null ? 'none' : l[0].length + ' characters')).join(', '));
+        once(hud, 'media', 'media page: text ' + lines.map((l) => (l[0] === null ? 'none' : l[0].length + ' characters' + (l[1] ? ' ' + l[1] : ''))).join(', '));
+        tabBridge(hud);
     }, 'HMI_CID');
     chain(hud, extra, IF.media, 'trackProgress', (v) => {
-        const m = p.media, el = pick(v, 'elapsed'), tot = pick(v, 'total'), has = pick(v, 'hasProgress');
+        // car-fix CF3: elapsed / total are Int64 (they reached the probe as non-numbers): int64() reads every shape
+        const m = p.media, el = int64(pick(v, 'elapsed')), tot = int64(pick(v, 'total')), has = pick(v, 'hasProgress');
         m.has = has !== false && isNum(tot) && tot > 0;
         m.el = isNum(el) && el >= 0 ? el : null; m.tot = isNum(tot) && tot > 0 ? tot : null;
     }, 'HMI_CID');
     chain(hud, extra, IF.media, 'menu', (v) => {
-        const m = p.media, sel = pick(v, 'selectedEntryId');
-        const e = arr(pick(v, 'menuEntries')).filter((x) => x && x.id === sel)[0];
-        const kind = e ? enumName(e.iconKind, ICON_KINDS) : null;
-        m.srcRaw = kind; m.src = kind && SOURCE_OF_KIND[kind] ? SOURCE_OF_KIND[kind] : kind ? 'other' : null;
+        // car-fix CF3: the ids are Int64 (the probe read them as non-numbers): compared by idKey, and only ONE entry may match
+        // (two entries with the same key, or no selected id, is no source: the CarPlay player's own state decides then)
+        const m = p.media, sel = idKey(pick(v, 'selectedEntryId'));
+        const hits = sel === null ? [] : arr(pick(v, 'menuEntries')).filter((x) => x && typeof x === 'object' && idKey(x.id) === sel);
+        const kind = hits.length === 1 ? enumName(hits[0].iconKind, ICON_KINDS) : null;
+        m.srcRaw = kind; m.src = srcOf(m);
         if (kind === 'FM' || kind === 'AM') m.band = kind;
-        once(hud, 'mediaSrc', 'media page: source ' + String(kind));
+        once(hud, 'mediaSrc', 'media page: source ' + String(kind) + (hits.length > 1 ? ' (' + hits.length + ' entries match: none taken)' : ''));
         tabBridge(hud);      // b7: tab 3's icon follows the source (B2 reads hud.td.mediaSource)
     }, 'HMI_CID');
     chain(hud, extra, IF.tuner, 'currentStationFmDabAm', (v) => {
@@ -236,12 +295,37 @@ function wire(hud, extra) {
         const tp = pick(e, 'tp');
         m.tp = tp === 1 || tp === 'TPS_TP' || tp === 2 || tp === 'TPS_EON_TP';
         once(hud, 'tuner', 'media page: station ' + (m.station ? m.station.length + ' characters' : 'none') + ', band ' + String(m.band));
+        tabBridge(hud);
     });
     chain(hud, extra, IF.player, 'currentItemPosition', (v) => {
         const m = p.media, pos = pick(v, 'position'), n = pick(v, 'totalNumber');
-        m.cpPos = isNum(pos) && pos > 0 ? pos : null; m.cpTotal = isNum(n) && n > 0 ? n : null;
+        m.cpPos = isNum(pos) && pos > 0 ? pos : null; m.cpTotal = isNum(n) && n > 0 ? n : null;      // the car: 0 of 0 with CarPlay = none
     }, 'CarPlayMedia');
-    chain(hud, extra, IF.player, 'playerState', (v) => { p.media.cpState = typeof v === 'string' ? v : isNum(v) ? v : null; }, 'CarPlayMedia');
+    chain(hud, extra, IF.player, 'playerState', (v) => {
+        const m = p.media;
+        m.cpState = enumName(isNum(v) || typeof v === 'string' ? v : pick(v, 'playerState'), PLAYER_STATES);
+        m.src = srcOf(m);
+        once(hud, 'cpState', 'media page: CarPlay player ' + String(m.cpState));
+        tabBridge(hud);
+    }, 'CarPlayMedia');
+    // car-fix CF3: the CarPlay item - the TITLE the HMI lines do not carry with CarPlay (the car: ARTIST + ALBUM only), and its time
+    chain(hud, extra, IF.player, 'currentItemMetadata', (v) => {
+        const m = p.media, got = {};
+        arr(v).forEach((it) => {
+            if (!it || typeof it !== 'object') return;
+            const k = typeof it.key === 'string' ? it.key : META_KEYS[it.key];
+            const s = str(pick(it, 'value', 'stringValue'), 200);
+            if ((k === 'TITLE' || k === 'ARTIST' || k === 'ALBUM') && s !== null && !got[k]) got[k] = s;
+        });
+        m.cpTitle = got.TITLE || null; m.cpArtist = got.ARTIST || null; m.cpAlbum = got.ALBUM || null;
+        once(hud, 'cpMeta', 'media page: CarPlay item ' + arr(v).length + ' keys, title ' + (m.cpTitle ? m.cpTitle.length + ' characters' : 'none'));
+        tabBridge(hud);
+    }, 'CarPlayMedia');
+    chain(hud, extra, IF.player, 'currentItemTime', (v) => {
+        const m = p.media, el = pick(v, 'elapsed'), tot = pick(v, 'total');          // UInt32 ms (the car: 25583 of 184785, +10 s every 10 s)
+        m.cpTot = isNum(tot) && tot > 0 && tot < 864e5 ? tot : null;
+        m.cpEl = m.cpTot !== null && isNum(el) && el >= 0 ? Math.min(el, m.cpTot) : null;
+    }, 'CarPlayMedia');
     // ---- phone
     chain(hud, extra, IF.agg, 'aggregatedCallState', (v) => {
         const raw = isNum(v) || typeof v === 'string' ? v : pick(v, 'aggregatedCallState');
@@ -250,8 +334,9 @@ function wire(hud, extra) {
     chain(hud, extra, IF.call, 'state', (v) => { callEdge(hud, 'call1', enumName(isNum(v) || typeof v === 'string' ? v : pick(v, 'state'), CALL_STATES)); }, 'Call1');
     chain(hud, extra, IF.call, 'contactID', (v) => { p.phone.contact = isNum(v) ? v !== 0 : null; }, 'Call1');
     chain(hud, extra, IF.call, 'name', (v) => {
-        // private: kept only while the setting is on and the call lasts (never logged)
-        p.phone.name = setting(hud, 'callerName') === 'on' ? str(v, 80) : null;
+        // private: kept only while the setting is on and the call lasts (never logged); car-fix CF3: and only with config.pages.callDetail
+        // (VoiceCall has never been seen on the car: dark)
+        p.phone.name = setting(hud, 'callerName') === 'on' && pagesCfg(hud).callDetail === true ? str(v, 80) : null;
     }, 'Call1');
     chain(hud, extra, IF.callMgr, 'micMuted', (v) => { p.phone.mic = v === true || v === 1 ? true : v === false || v === 0 ? false : null; });
     chain(hud, extra, IF.devices, 'deviceList', (v) => { p.phone.dev = deviceOf(v); p.phone.devSeen = true; tabBridge(hud); once(hud, 'devices', 'phone page: devices ' + arr(v).length + (p.phone.dev ? ', one connected' : ', none connected')); });
@@ -273,19 +358,16 @@ function descText(v) {
     });
     return out ? out.slice(0, 120) : null;
 }
-/** The distance of a manoeuvre in metres ({ rawDistance } or a formatted one), or null. */
+/**
+ * A FormattedDistance's raw distance in metres, or null. car-fix CF3, THE CAR (2026-11-18, CarPlay route): rawDistance 5700 came with
+ * unit KM, a 3-character text (the car's own "5.7") and a travel time of 660 s - so rawDistance is METRES whatever the unit (the
+ * unit names the formatted text's unit only). 5700 km or 57 km in 11 minutes is impossible; 5.7 km is 31 km/h in town. Zero is
+ * no distance (the car's empty manoeuvre: raw 0, unit NONE).
+ */
 function metres(fd) {
     if (!fd || typeof fd !== 'object') return null;
     const raw = fd.rawDistance;
-    if (isNum(raw) && raw >= 0 && raw < 1e7) {
-        const unit = typeof fd.unit === 'string' ? fd.unit : isNum(fd.unit) ? ['NONE', 'KM', 'MILE_UK', 'MILE_US', 'METER', 'YARD', 'FEET'][fd.unit] : null;
-        if (unit === 'MILE_UK' || unit === 'MILE_US') return raw * 1609.344;
-        if (unit === 'YARD') return raw * 0.9144;
-        if (unit === 'FEET') return raw * 0.3048;
-        if (unit === 'KM') return raw * 1000;
-        return raw;
-    }
-    return null;
+    return isNum(raw) && raw > 0 && raw < 4e7 ? raw : null;
 }
 /** The manoeuvre (SN guidance.json): { kind, dist, exit, side }; kind is one of our own pictogram keys. */
 function dartOf(v) {
@@ -328,14 +410,20 @@ function lanesOf(v) {
         return { dir: d && d !== 'NONE' ? (d === 'STRAIGHT_ON' ? 'straight' : d.toLowerCase()) : 'straight', hi: !!(l && l.isHighlighted) };
     });
 }
-/** The destination (SN): { eta: {h, m} | null, dist: metres | null }. */
+/**
+ * The destination (SN): { eta: {h, m} | null, dist: metres | null, travel: seconds | null }. car-fix CF3, THE CAR: the arrival time
+ * is the car's LOCAL time (18:31 UTC + 660 s gave 20:41 with the zone UTC+2; includedTimeOffset.valid false): drawn as it comes.
+ * travelTime is seconds (UInt32). A destination with none of the three is none.
+ */
 function destOf(v) {
     if (!v || typeof v !== 'object') return null;
     const t = pick(v, 'estimatedArrivalTime', 'time'), t2 = pick(v, 'estimatedArrivalTime');
     const tt = t && typeof t === 'object' ? t : t2;
     const h = pick(tt, 'hour'), mi = pick(tt, 'minute'), inv = pick(tt, 'invalid');
     const eta = isNum(h) && isNum(mi) && !inv && h >= 0 && h < 24 && mi >= 0 && mi < 60 ? { h: h, m: mi } : null;
-    return { eta: eta, dist: metres(v.formattedDistance) };
+    const tr = v.travelTime, travel = isNum(tr) && tr > 0 && tr < 864000 ? tr : null;
+    const dist = metres(v.formattedDistance);
+    return eta || dist !== null || travel !== null ? { eta: eta, dist: dist, travel: travel } : null;
 }
 /**
  * b7 (integration): what the tab bar (shared/twin_tabs.js, B2) reads from this page model: hud.td.mediaSource ('tuner' | 'player' |
@@ -346,10 +434,38 @@ function destOf(v) {
 function tabBridge(hud) {
     const td = hud && hud.td, p = st(hud);
     if (!td || typeof td !== 'object') return;
-    const src = p.media.src;
-    td.mediaSource = pagesCfg(hud).media === true && src ? (src === 'radio' ? 'tuner' : src === 'carplay' ? 'projection' : 'player') : null;
-    td.phoneConnected = pagesCfg(hud).phone === true && p.phone.devSeen ? !!p.phone.dev : null;
+    const src = p.media.src, on = pagesCfg(hud).media === true;
+    td.mediaSource = on && src ? (src === 'radio' ? 'tuner' : src === 'carplay' ? 'projection' : 'player') : null;
+    // car-fix CF3: tab 3's text (SPEC-R3 3.3) - the station on the radio page, the title on the now-playing page, nothing on the
+    // certain page; B2's paintMedia cuts it with "…" to the cell. Drawn, never logged. Only while config.pages.media is on
+    // (config.twin.media, the old "second line" rule of twin_tokens.js, would show the ALBUM with CarPlay: it stays off)
+    if (on) {
+        const pg = mediaPage(hud);
+        td.media = pg === 'radio' ? p.media.station || p.media.title || null : pg === 'track' ? trackTitle(p.media) : null;
+    }
+    td.phoneConnected = pagesCfg(hud).phone === true && devicesOn(hud) && p.phone.devSeen ? !!p.phone.dev : null;
 }
+
+/* car-fix CF3: the sources of the media pages. CarPlay first: with CarPlay playing the HMI lines are ARTIST + ALBUM and carry no
+ * title, so the title, the artist and the time come from MediaPlayer on CarPlayMedia; any other source reads the HMI lines. */
+
+/** The source: the HMI menu's selected entry (one match), else the CarPlay player playing = CarPlay, else null. */
+function srcOf(m) {
+    const kind = m.srcRaw;
+    if (kind) return SOURCE_OF_KIND[kind] || 'other';
+    return m.cpState === 'PLAYER_STATE_PLAY' ? 'carplay' : null;
+}
+const isCarPlay = (m) => m.src === 'carplay';
+function trackTitle(m) { return (isCarPlay(m) ? m.cpTitle || m.title : m.title) || null; }
+function trackArtist(m) { return (isCarPlay(m) ? m.cpArtist || m.cpAlbum || m.artist : m.artist) || null; }
+/** { el, tot } in ms: CarPlay's own item time, else the HMI progress (only when it says it has one). */
+function trackTime(m) {
+    if (isCarPlay(m) && isNum(m.cpTot)) return { el: m.cpEl, tot: m.cpTot };
+    return m.has && isNum(m.tot) ? { el: m.el, tot: m.tot } : { el: null, tot: null };
+}
+/** car-fix CF3: the phone's unseen sources stay dark: DevicePresentation (config.pages.phoneDevices), VoiceCall / micMuted (callDetail). */
+const devicesOn = (hud) => pagesCfg(hud).phoneDevices === true;
+const detailOn = (hud) => pagesCfg(hud).callDetail === true;
 
 /** The connected phone of a DevicePresentation list: { path, battery 0-100 | null, signal 0-4 | null }, or null. */
 function deviceOf(v) {
@@ -382,7 +498,8 @@ function callEdge(hud, which, state) {
 }
 const callState = (hud) => {
     const ph = st(hud).phone;
-    return ph.agg !== null && ph.agg !== undefined ? ph.agg : ph.call1 !== null && ph.call1 !== undefined ? ph.call1 : null;
+    // car-fix CF3: ConnectivityAggregator's state is the one the car sends; VoiceCall's only with config.pages.callDetail (unseen)
+    return ph.agg !== null && ph.agg !== undefined ? ph.agg : detailOn(hud) && ph.call1 !== null && ph.call1 !== undefined ? ph.call1 : null;
 };
 const callLive = (hud) => ['INCOMING', 'ACTIVE', 'DIALING', 'HELD'].indexOf(callState(hud)) >= 0;
 
@@ -468,7 +585,7 @@ function mediaPage(hud) {
     if (pagesCfg(hud).media !== true) return 'media';
     const m = st(hud).media;
     if (m.src === 'radio' && (m.station || m.title)) return 'radio';
-    if (m.title) return 'track';
+    if (m.src !== 'radio' && trackTitle(m)) return 'track';        // car-fix CF3: a CarPlay title, or the HMI's TITLE line
     return 'media';
 }
 function phonePage(hud) { return pagesCfg(hud).phone === true && callLive(hud) ? 'call' : 'phone'; }
@@ -521,10 +638,29 @@ function onStatus(hud, text) {
     } catch (e) { /* never */ }
 }
 
+/**
+ * car-fix CF3: a route guided by CarPlay (config.pages.route): the provider is CAR_PLAY, BMW's own guidance is not running (its
+ * arrow page keeps BMW's route, dark until tested) and a destination came within the last minute. Android Auto and the others
+ * have not been seen: no page for them.
+ */
+function routeLive(hud, t) {
+    const p = st(hud);
+    if (pagesCfg(hud).route !== true || p.provider !== 'CAR_PLAY' || !p.dest) return false;
+    if (p.guiding === 'ACTIVE' || p.guiding === 'CALCULATING_ROUTE') return false;
+    return t - p.destAt <= ROUTE_FRESH_MS && t >= p.destAt;
+}
+
+/** car-fix CF3: tab rule 3 for a CarPlay route - hud.td.route (shared/twin_tabs.js navOn), kept current from the nav handlers and every page tick. */
+function routeBridge(hud) {
+    const td = hud && hud.td;
+    if (td && typeof td === 'object') td.route = routeLive(hud, nowMs(hud));
+}
+
 function navPage(hud, t) {
     const p = st(hud);
     if (mapState(hud, t).open) return 'map';
     if (p.guiding === 'ACTIVE' && pagesCfg(hud).guidance === true) return 'guide';
+    if (routeLive(hud, t)) return 'route';
     if (p.guiding === 'CALCULATING_ROUTE') return 'calc';
     return p.road ? 'road' : 'none';
 }
@@ -547,7 +683,7 @@ function changed(hud) { const p = st(hud); p.evalAt = -1e9; if (hud && hud.widge
 /* ------------------------------------------------------------------ tokens --------------------------------------- */
 
 const TITLES = { clock: 'Дата і час', trip: 'Поточна поїздка', tech: 'Технічні дані', tyres: 'Шини', msg: 'Повідомлення', media: 'Медіа', track: 'Медіа', radio: 'Радіо',
-    phone: 'Телефон', guide: 'Навігація', calc: 'Навігація', road: 'Навігація', none: 'Навігація', map: '' };
+    phone: 'Телефон', guide: 'Навігація', route: 'Навігація', calc: 'Навігація', road: 'Навігація', none: 'Навігація', map: '' };
 const WEEKDAYS = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'];
 
 const fixed = (n, d) => (isNum(n) ? n.toFixed(d) : DASH);
@@ -583,6 +719,12 @@ function fmtDist(m) {
     if (m < 1000) return { n: String(Math.round(m / 50) * 50), u: 'м' };
     if (m < 10000) return { n: (m / 1000).toFixed(1), u: 'км' };
     return { n: String(Math.round(m / 1000)), u: 'км' };
+}
+/** car-fix CF3: a travel time in seconds -> "11 хв" / "1 год 05 хв" (at least one minute), or ''. */
+function fmtTravel(s) {
+    if (!isNum(s) || s <= 0) return '';
+    const mins = Math.max(1, Math.round(s / 60)), h = Math.floor(mins / 60), mi = mins % 60;
+    return h ? h + ' год ' + pad2(mi) + ' хв' : mi + ' хв';
 }
 
 /** B6's pictogram of a turn direction (also the lane arrows): straight, (slight_ / hard_)left|right, uturn_left|right. */
@@ -679,20 +821,21 @@ function resolveToken(hud, name) {
             if (md.tp) bits.push('TP');
             return bits.join('  ·  ');
         }
-        case 'pgTrackTitle': return md.title || '';
-        case 'pgTrackArtist': return md.artist || '';
-        case 'pgTrackFrac': return md.has && isNum(md.el) && isNum(md.tot) ? String(Math.max(0, Math.min(1, md.el / md.tot)).toFixed(4)) : '';
-        case 'pgTrackEl': return md.has && isNum(md.el) ? mmss(md.el / 1000) : '';
-        case 'pgTrackTot': return md.has && isNum(md.tot) ? mmss(md.tot / 1000) : '';
+        // car-fix CF3: CarPlay's title / artist / time when CarPlay plays, the HMI's otherwise (trackTitle / trackArtist / trackTime)
+        case 'pgTrackTitle': return trackTitle(md) || '';
+        case 'pgTrackArtist': return trackArtist(md) || '';
+        case 'pgTrackFrac': { const tm = trackTime(md); return isNum(tm.el) && isNum(tm.tot) ? String(Math.max(0, Math.min(1, tm.el / tm.tot)).toFixed(4)) : ''; }
+        case 'pgTrackEl': { const tm = trackTime(md); return isNum(tm.el) && isNum(tm.tot) ? mmss(tm.el / 1000) : ''; }
+        case 'pgTrackTot': { const tm = trackTime(md); return isNum(tm.tot) ? mmss(tm.tot / 1000) : ''; }
         case 'pgTrackNo': return md.cpPos && md.cpTotal ? md.cpPos + ' / ' + md.cpTotal : '';
         case 'pgMute': return md.mute ? pickIcon(ICON.mute) : '';
-        // ---- tab 4
+        // ---- tab 4 (car-fix CF3: the device lines only with config.pages.phoneDevices - DevicePresentation has never been seen)
         case 'pgPhoneLine1': {
-            const d = p.phone.dev;
-            return d ? 'Підключено' + (d.path ? ' · ' + d.path : '') : p.phone.devSeen ? 'Телефон не підключено' : 'Немає даних';
+            const d = devicesOn(hud) ? p.phone.dev : null;
+            return d ? 'Підключено' + (d.path ? ' · ' + d.path : '') : devicesOn(hud) && p.phone.devSeen ? 'Телефон не підключено' : 'Немає даних';
         }
         case 'pgPhoneLine2': {
-            const d = p.phone.dev, bits = [];
+            const d = devicesOn(hud) ? p.phone.dev : null, bits = [];
             if (d && d.battery !== null) bits.push(Math.round(d.battery) + ' %');
             if (d && d.signal !== null) bits.push(d.signal + '/4');
             return bits.join('  ·  ');
@@ -704,11 +847,12 @@ function resolveToken(hud, name) {
         }
         case 'pgCallWho': {
             const ph = p.phone;
+            if (!detailOn(hud)) return '';          // car-fix CF3: VoiceCall (contact, name) unseen: dark
             if (ph.name && setting(hud, 'callerName') === 'on') return ph.name;
             return ph.contact === true ? 'Контакт' : ph.contact === false ? 'Номер' : '';
         }
-        case 'pgCallPath': return p.phone.dev && p.phone.dev.path ? p.phone.dev.path : '';
-        case 'pgCallMic': return p.phone.mic === true ? pickIcon(ICON.micOff) : '';
+        case 'pgCallPath': return devicesOn(hud) && p.phone.dev && p.phone.dev.path ? p.phone.dev.path : '';
+        case 'pgCallMic': return detailOn(hud) && p.phone.mic === true ? pickIcon(ICON.micOff) : '';
         case 'pgCallHandset': { const s = callState(hud); return s === 'ACTIVE' || s === 'HELD' ? pickIcon(ICON.handset) : ''; }
         // ---- tab 5
         case 'pgRoad': return p.road || '';
@@ -727,6 +871,20 @@ function resolveToken(hud, name) {
             return bits.join(' · ');
         }
         case 'pgRoadBar': return p.road || '';
+        // ---- tab 5, the CarPlay route (car-fix CF3): the destination block, no arrow
+        case 'pgRouteMeta': return p.provider === 'CAR_PLAY' ? 'CarPlay' : '';
+        case 'pgRouteDist': { const f = p.dest ? fmtDist(p.dest.dist) : null; return f ? f.n : DASH; }
+        case 'pgRouteUnit': { const f = p.dest ? fmtDist(p.dest.dist) : null; return f ? f.u : ''; }
+        case 'pgRouteEta': {
+            const d = p.dest, bits = [];
+            if (d && d.eta) bits.push('прибуття ' + pad2(d.eta.h) + ':' + pad2(d.eta.m));
+            if (d && d.travel !== null) bits.push(fmtTravel(d.travel));
+            return bits.join(' · ');
+        }
+        case 'pgRouteRoad': return p.road || '';
+        // car-fix CF3 (the lead): isOnGuidableRoad read false at the start of a CarPlay route - its meaning is unverified, so the note
+        // is drawn only with config.pages.routeOffRoad (false)
+        case 'pgRouteFoot': return pagesCfg(hud).routeOffRoad === true && p.onRoad === false ? 'Поза дорогою' : '';
         default: break;
     }
     if ((m = /^pgLane([0-7])([IC])$/.exec(name))) {
@@ -956,6 +1114,7 @@ function update(hud, x, now, force) {
     p.evalAt = now;
     const page = decide(hud, nowMs(hud));
     p.page = page;
+    routeBridge(hud);          // car-fix CF3: a route older than 60 s stops selecting tab 5 at the next tick
     tpmsSync(hud, page === 'tyres');
     // the map window follows the page; the backdrop's title rule steps aside while it is open
     const open = page === 'map';
@@ -987,4 +1146,6 @@ module.exports = { tabBridge, LAYER, FONTS, SAIRA, ICON, TITLES, TECH, IF, fontN
     wire, token, update, init, changed, current, decide, tabOf, computerList, mapState, mapVariant, parseSlots, onStatus, hideTitleRule,
     resolveItems, paintItems, keyOf, fmtDist, maneuverIcon, tyreBar, callState, callLive, st, fresh,
     // for the tests
-    descText, dartOf, lanesOf, destOf, deviceOf, tpmsPoll };
+    descText, dartOf, lanesOf, destOf, deviceOf, tpmsPoll,
+    // car-fix CF3
+    int64, idKey, srcOf, trackTitle, trackArtist, trackTime, routeLive, routeBridge, fmtTravel, metres, ROUTE_FRESH_MS };

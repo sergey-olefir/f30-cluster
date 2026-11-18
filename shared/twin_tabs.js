@@ -111,6 +111,8 @@ function select(hud, t, why) {
 }
 
 const callNow = (hud) => cfg(hud).callSelects === true && !!(hud.td && isNum(hud.td.callState) && hud.td.callState !== 0);
+// car-fix CF3: rule 3 also for a route guided by CarPlay (hud.td.route, shared/twin_pages.js: provider CAR_PLAY and a destination within 60 s)
+const navOn = (hud) => !!(hud.td && (hud.td.nav === true || hud.td.route === true));
 
 /** What the auto rules want now (not the message): 4 (call), 5 (guidance) or the driver's last choice. */
 function autoTarget(hud, s, navNow, callOn) {
@@ -128,7 +130,7 @@ function update(hud) {
     const cc = hud.twinCc || {};
     // a message SHOWS when the machine says window / ours with a severity; a window with none is only the keep-open of a car that cannot be read yet
     const msgNow = (cc.state === 'window' || cc.state === 'ours') && cc.severity !== null && cc.severity !== undefined;
-    const navNow = !!(hud.td && hud.td.nav === true);
+    const navNow = navOn(hud);      // car-fix CF3: BMW's guidance or a CarPlay route
     const callOn = callNow(hud);
     const lock = lockKmh(hud);
     const v = hud._raw ? hud._raw('speed') : null;
@@ -180,7 +182,7 @@ function press(hud, dir) {
     if (mode(hud) !== 'auto') { log(hud, 'key ignored: the tab is fixed by the setting'); return false; }
     const av = keyTabs(hud), i = av.indexOf(s.tab);
     const n = av[((i < 0 ? 0 : i) + (dir < 0 ? -1 : 1) + av.length) % av.length];
-    s.choice = n; s.dis.nav = !!(hud.td && hud.td.nav === true); s.dis.call = callNow(hud); s.hold = null;
+    s.choice = n; s.dis.nav = navOn(hud); s.dis.call = callNow(hud); s.hold = null;      // car-fix CF3: navOn
     s.lastKeyAt = t;
     if (s.msg) s.msgLeft = n !== 2;               // leaving tab 2 while a message shows is allowed (SPEC-R3 3.4); B3 opens the panel
     return select(hud, n, 'K key');
