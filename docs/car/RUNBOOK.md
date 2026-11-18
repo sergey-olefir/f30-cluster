@@ -49,6 +49,19 @@ If Twin Dial 0.1.1 is ready before the session, install it **before** the probe 
 - Rules that always hold: never `kill` an OAP app process; only `systemctl restart oapcontroller`, only you, only with the owner's word; never a setter, never a method call with a side effect, never `KombiIF.standardCCMessage` / `extendedCCMessage`, never `A19B`, never a write to a driver-assistance setting, never `requestDefaultSymbols`.
 - Privacy: collected logs contain numbers, enum names and lengths only; photos and the owner's paper notes are personal. The privacy check (`tools/car/privacy_check.py` or CL's equivalent) runs on everything before anything derived is committed.
 
+### 1.4 Decisions to take before the session
+
+| # | Decision | Default in this plan | Source |
+|---|---|---|---|
+| Q1 | One sitting or two. The plan is about 5.5 h with the lead's checks (CQ-REPORT §2). | **Two sittings**: A = blocks 0-5 on a cold morning (about 3 h; the cold start of block 2 happens once a day); B = blocks 6-9 (about 2.75 h, with the passenger). Block 0's collection and safety check open each sitting. | CQ |
+| Q2 | Sets S10 (black-box signals, P18) and S11 (f30's unwired signals, P19): CA's register has them, CP's app has S1-S9 only. | Not in the session; the steps that would answer them are marked in the checklist (B6 gear / mode switches, lamps, belts). If CP adds them, B6 runs S1+S10, and B1's stalk steps can run S6+S11. | CA D3 |
+| Q3 | Events (`_broadcasts`, P21) and the high-beam camera service (P20). | None declared. | CA D2, D4 |
+| Q4 | f30_cluster 0.7.18-0.7.20 already calls `requestDefaultSymbols` once per run (an earlier approved log-only probe), which the brief forbids. The session runs f30 in B0, B1 and B6 but restarts no app, so the call is not repeated during the session unless the car restarts the app. | Run f30 as installed; decide before any f30 reinstall (`config.legacyProbes`). | CA C3, D1 |
+| Q5 | CarPlay or Android Auto (the probe reads `MediaPlayer` on `CarPlayMedia`). | CarPlay (SESSION B4, B5). | CA D5 |
+| Q6 | Which builds exist before the session (Twin Dial 0.1.1, f30 with keys). | None: pass 2. | CA D7 |
+| Q7 | Changing the car's speed-limit warning setting for L20. | Not done (a driver-assistance setting); L20 is read from whatever the logs hold. | CQ |
+| Q8 | The long press of the trip button (B1). | The owner's call on the day; optional in the table. | the owner |
+
 ## 2. During the session
 
 ### 2.1 Collections (read-only; `tools/car/collect.sh`)
@@ -250,7 +263,12 @@ The mark row counts up by itself ("Позначка N" shows the next number). T
 | X1 (f30 byMode off, Twin baseline) | whether the black box follows the rebuild | research3 MB table 4.2; chooses which of E1-E4 to install in pass 2 |
 | X9 pair | band level, night multipliers | SPEC rev 2 §7, §17.2 |
 | X11 film | MP's predictions of the switch time | MP §8 |
-| F1-F8 | see the checklist | per item |
+| X13 / L27 (only if a box shows) | whether a re-map clears the box; the slot rows at that moment | research3 MB, boxes BR (E0-E2) |
+| X16 / F4 (mattes, the lamp check) | what BMW draws over an opaque panel; which side lamps are over us | `design/overlay` relations (OVERLAY-PHOTO-PROTOCOL), SPEC rev 2 §15 |
+| X17 | whether the HMI honours Visible on list rows | f30's menu (`hideModeRows`, `hideRowUnlessG20`) |
+| X18 | Driver Profiles' read-only screen is right | DRIVER-PROFILES-APP §6 |
+| L17-L29 | f30's MSA, vehicle condition, drive modes, road label, boost over UDS, KOMBI resets, ccList pairs, message timing, slot rows, status socket, dropped uploads | per CA's register `blocks` |
+| F1-F17 | see the checklist | per item |
 
 ## 4. Pass 2: the experiments that need a build
 
@@ -264,6 +282,11 @@ Each is an install the owner must approve and each is a separate step on the car
 | 4 | f30 `sceneTex: "etc2"` | X5 (does `etc2rgb` draw) | log: `asset … etc2rgb`; dials close up | L12 >= 0.5.12 and 3 looks right |
 | 5-7 | Twin `mbCover` clear, black, grey | X2 (rectangle versus pixels) | the speedometer hub | X1 baseline on Twin Dial showed a box; stop at the first outcome that decides (MB §4.2) |
 | 8 | Twin `mbRebuild.onMode` | X4 (rebuild brings the box) | the box | E2 / E3 gave no box |
+| 9 | f30 with `gearCover` (D10) | X12 (our letter over BMW's place, the gap closed) | the box | only with the black-box experiments |
+| 10 | f30 / Twin slot-row logging build; `car3k.json` reseat flag | X14 (BR E3-E5) | the box; the slot rows | the owner approves a data-file write |
+| - | `perf.json {"log": true}` in an app's data folder | L23 (notification rates, flush times, CPU) | the `perf:` lines after a drive | the owner approves the write |
+
+Not in any pass of this plan (each a different kind of work): X15 (cluster-render configuration writes and restarts, BR E6-E12), X19-X20 (Driver Profiles writes), X21-X22 (diagnostic and coding reads), F16 (the owner's own HMI steps for driver recognition).
 
 State the number of installs to the owner before asking: the recommended pass 2 is builds 1-3 (and 4 if 3 is clean); 5-8 only as the decision table drives it.
 

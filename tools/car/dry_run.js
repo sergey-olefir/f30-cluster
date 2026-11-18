@@ -108,7 +108,16 @@ async function main() {
         cwd: OUT, stdio: ['ignore', 'pipe', 'pipe', 'ipc'], env: Object.assign({}, process.env, { HUD_CLUSTER_SOCKET: path.join(OUT, 'no-cluster-render.sock') }),
     });
     let exited = false;
-    child.stdout.on('data', (x) => { out += x; }); child.stderr.on('data', (x) => { out += x; });
+    // every line keeps the wall time it arrived at, as the kit's log on the car stamps it (the parser places marks and changes by it)
+    const stamped = [];
+    let part = '';
+    const take = (x) => {
+        out += x; part += x;
+        const ls = part.split('\n'); part = ls.pop();
+        const now = new Date().toISOString();
+        ls.forEach((l) => stamped.push({ ts: now, l }));
+    };
+    child.stdout.on('data', take); child.stderr.on('data', take);
     child.on('exit', () => { exited = true; });
     const send = (m) => child.send(m);
     const count = (re) => (out.match(re) || []).length;
@@ -170,9 +179,11 @@ async function main() {
         await sleep(400);
 
         console.log('3. the log');
-        const lines = out.split('\n').filter((l) => /^\[signal_probe\] /.test(l)).map((l) => l.replace(/^\[signal_probe\] /, ''));
-        const stamp = new Date().toISOString();
-        const carLog = lines.map((l) => stamp + (/^WARN /.test(l) ? ' WARN ' + l.slice(5) : /^ERROR /.test(l) ? ' ERROR ' + l.slice(6) : ' INFO ' + l)).join('\n') + '\n';
+        // the app's own lines only (the bench's "bench:" lines and the stub's click echoes are not on the car)
+        const own = stamped.filter((x) => /^\[signal_probe\] /.test(x.l)).map((x) => ({ ts: x.ts, l: x.l.replace(/^\[signal_probe\] /, '') }))
+            .filter((x) => !/^bench: |^click /.test(x.l));
+        const lines = own.map((x) => x.l);
+        const carLog = own.map((x) => x.ts + (/^WARN /.test(x.l) ? ' WARN ' + x.l.slice(5) : /^ERROR /.test(x.l) ? ' ERROR ' + x.l.slice(6) : ' INFO ' + x.l)).join('\n') + '\n';
         const logPath = path.join(OUT, 'signal_probe.log');
         fs.writeFileSync(logPath, carLog);
         const probeLines = lines.filter((l) => /probe: /.test(l));
@@ -191,6 +202,7 @@ async function main() {
         const verify = (extra) => spawnSync('python3', ['-I', path.join(ROOT, 'tools', 'car', 'verify_steps.py'), logPath, '--json', vOut, '--until', UNTIL].concat(extra), { encoding: 'utf8' });
         const r1 = verify([]);
         fs.writeFileSync(path.join(OUT, 'verify-strict.txt'), r1.stdout);
+        ok(!/\/Users\/|\/home\//.test(carLog), 'no home-directory path in the log written');
         const miss = r1.stdout.split('\n').filter((l) => /MISSING|NO MARK/.test(l));
         const expectMissing = UNTIL >= 'B1' ? 1 : 0;
         ok(miss.length === expectMissing && (!expectMissing || /sw-fav/.test(miss[0])), 'strict: only the never-fed pair is missing (' + miss.length + ' step(s): ' + miss.map((x) => x.trim().split(/\s+/)[1]).join(', ') + ')');
@@ -213,7 +225,7 @@ async function main() {
             fs.writeFileSync(path.join(sess, 'session.json'), JSON.stringify({ dryRun: true, apps: { signal_probe: { version: spec.version } } }, null, 1) + '\n');
             const ans = path.join(OUT, 'answers.json');
             const p = spawnSync('python3', ['-I', parser, sess, '--out', ans, '--markers', path.join(ROOT, 'design', 'car', 'markers.json'), '--print'], { encoding: 'utf8', cwd: ROOT });
-            fs.writeFileSync(path.join(OUT, 'parser.txt'), p.stdout + p.stderr);
+            fs.writeFileSync(path.join(OUT, 'parser.txt'), (p.stdout + p.stderr).split(ROOT).join('<repo>').split(OUT).join('<out>'));
             ok(p.status === 0 && fs.existsSync(ans), 'parse_logs.py ran on the dry-run session folder with the marker map (exit ' + p.status + ')');
             if (fs.existsSync(ans)) {
                 const A = JSON.parse(fs.readFileSync(ans, 'utf8'));
