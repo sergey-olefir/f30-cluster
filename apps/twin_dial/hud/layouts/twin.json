@@ -1387,8 +1387,7 @@
       "font": "td_row",
       "color": "fg",
       "align": "right",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_l1u",
@@ -1402,8 +1401,7 @@
       "font": "td_u21",
       "color": "fg",
       "align": "left",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_l2",
@@ -1417,8 +1415,7 @@
       "font": "td_row",
       "color": "fg",
       "align": "right",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_r1",
@@ -1432,8 +1429,7 @@
       "font": "td_row",
       "color": "fg",
       "align": "right",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_r1u",
@@ -1447,8 +1443,7 @@
       "font": "td_u21",
       "color": "fg",
       "align": "left",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_r2",
@@ -1462,8 +1457,7 @@
       "font": "td_row",
       "color": "fg",
       "align": "right",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
       "id": "row_r2u",
@@ -1477,19 +1471,20 @@
       "font": "td_u21",
       "color": "fg",
       "align": "left",
-      "conn": 2,
-      "toggle": "cc:rest"
+      "toggle": "cc:row"
     },
     {
-      "id": "plate",
-      "type": "ccplate",
+      "id": "msg_sheet",
+      "type": "ccsheet",
       "z": 9,
-      "x": 694,
-      "y": 592,
-      "w": 536,
-      "h": 128,
+      "x": 729,
+      "y": 298,
+      "w": 462,
+      "h": 270,
       "font": "td_msg",
       "counterFont": "td_cnt",
+      "rowFont": "td_tab",
+      "textFont": "td_val",
       "conn": 2
     },
     {

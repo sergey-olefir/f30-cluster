@@ -1,0 +1,738 @@
+{
+ "_about": "SC (Twin Dial round 3): the message safety machine for the message in the CENTRE (tab 2). The state table, the per-turn order of operations, the keep-open conditions, the tab rules, the release, and the cases the build round's bench test must carry. Model and tests: tools/twin-dial/r3/sc/ (centre_cc.js, cases.js, test.js). Report: docs/twin-dial/r3/SC-REPORT.md.",
+ "status": "proposal; verified = by the model's tests (node tools/twin-dial/r3/sc/test.js, 52 checks); nothing here is seen on the car",
+ "rule": "A BMW warning is never hidden unless our own text for that exact message is on the screen in the same frame (the owner, 2026-11-16). Centre reading: BMW's panel [696, 595.75, 1226, 704] may be covered (window shut) only while the tab-2 sheet that is on the screen carries the WHOLE text of the message the car says it shows now, sent >= CC_SETTLE_MS (150) ago, in an earlier turn.",
+ "inputs": {
+  "message": "round 2's TwinCC inputs (shared/hud.js _twinInputs): read, the shown-now witness KombiIF.statusActiveCCMessage (getter 1 / notifier 32769, UInt16 numberDisplayControlCheckControlMessage, default 65535), the second witness Vehicle2.statusDisplayedCCMessage (61 / 32829, UInt16, default 65535), ccList (KombiInterface_2, 7 / 32770: cCIdentifer, cCShortName utf16be <= 300, cCListSymbolID, cCColor, cCIndentation, ricResourceID), the frame field KombiIF.statusMenuCCMessage (28 / 32796), the list heuristic. Plus: entries = ccList outside ignoreIds (for the rows).",
+  "tab": "base = the tab SB's model would show without a message (setting, guidance, the driver's last choice); driver(n) = the driver's choice (key or app setting); auto(n) = SB's automatic choice."
+ },
+ "outputs_per_turn": [
+  "window (tdback's fallback hole)",
+  "rows (the bottom row's ink: the 'cc:' text layers)",
+  "tab (the selected tab: tab bar fill)",
+  "page (tab 2's one sheet: card / rows / pointer / empty, or another tab's page)",
+  "warn (the warning tab's look W0..W3)"
+ ],
+ "states": [
+  {
+   "id": "REST",
+   "when": "the car says no message shows (state none)",
+   "window": "shut",
+   "rows": "drawn",
+   "tab": "base",
+   "page": "base's page (tab 2: list or empty)",
+   "warn": "W0 nothing listed / W1 entries listed / W3 if tab 2 is the base",
+   "bottom_rule": "white"
+  },
+  {
+   "id": "BLIND",
+   "when": "the car's messages are not readable yet (condition 1)",
+   "window": "open",
+   "rows": "aside",
+   "tab": "base",
+   "page": "base's page",
+   "warn": "W0"
+  },
+  {
+   "id": "OPENING",
+   "when": "a message shows, ours is drawable (TwinCC candidate), its whole text is not yet >= 150 ms in the visible tab-2 sheet",
+   "window": "open",
+   "rows": "aside",
+   "tab": "2 (pulled)",
+   "page": "card for the shown message (+ rows)",
+   "warn": "W3",
+   "note": "BMW's panel and our card both visible for >= 150 ms: allowed (never neither)"
+  },
+  {
+   "id": "OURS",
+   "when": "a message shows and its whole text has been in the visible tab-2 sheet >= 150 ms",
+   "window": "shut",
+   "rows": "drawn",
+   "tab": "2",
+   "page": "card",
+   "warn": "W3",
+   "bottom_rule": "the severity colour (round 2's tdback rules[1].ours)"
+  },
+  {
+   "id": "NODRAW",
+   "when": "a message shows or may show and ours cannot be drawn: keep-open conditions 2-8, 13",
+   "window": "open",
+   "rows": "aside",
+   "tab": "base (no pull without a drawable card; stays 2 if it was pulled or chosen)",
+   "page": "tab 2 selected: the pointer block + rows",
+   "warn": "W2 (W3 if tab 2 selected)"
+  },
+  {
+   "id": "LEFT",
+   "when": "a drawable message shows and the driver left tab 2 in this period (condition 9)",
+   "window": "open",
+   "rows": "aside",
+   "tab": "the driver's",
+   "page": "that tab's page",
+   "warn": "W2: the icon in the severity colour"
+  }
+ ],
+ "transitions": [
+  {
+   "from": "REST",
+   "event": "a message N arrives, drawable",
+   "turn_ops": [
+    "rows aside",
+    "window open",
+    "tab 2",
+    "page: card N (+ rows)",
+    "warn W3"
+   ],
+   "to": "OPENING",
+   "then": "tick >= 150 ms after the page op: window shut, rows back -> OURS"
+  },
+  {
+   "from": "REST",
+   "event": "a message arrives, not drawable (D7, no entry, ...)",
+   "turn_ops": [
+    "rows aside",
+    "window open",
+    "warn W2"
+   ],
+   "to": "NODRAW"
+  },
+  {
+   "from": "OURS",
+   "event": "N -> M, M's whole text NOT on the page",
+   "turn_ops": [
+    "rows aside",
+    "window open",
+    "(page change waits for the open settle: >= 150 ms after 'window open' was sent, since the window and the sheet are on different connections)",
+    "page: card M",
+    "settle 150 ms",
+    "window shut",
+    "rows back"
+   ],
+   "to": "OPENING -> OURS"
+  },
+  {
+   "from": "OURS",
+   "event": "N -> M, M's whole text already on the page (a whole row, settled)",
+   "turn_ops": [
+    "page: card M (M's text stays on the screen across the repaint)"
+   ],
+   "to": "OURS",
+   "note": "no window: our text for M was on the screen before the car named it (case C5, C12)"
+  },
+  {
+   "from": "OURS",
+   "event": "same id, other words / a different message key",
+   "turn_ops": [
+    "as N -> M"
+   ],
+   "to": "OPENING"
+  },
+  {
+   "from": "OURS",
+   "event": "the counter, night, the list (rows) change",
+   "turn_ops": [
+    "page repaint (the card's key unchanged: its stamp keeps its time)"
+   ],
+   "to": "OURS"
+  },
+  {
+   "from": "OURS / OPENING",
+   "event": "the driver leaves tab 2",
+   "turn_ops": [
+    "rows aside",
+    "window open",
+    "tab n",
+    "(after the open settle) page: tab n's page"
+   ],
+   "to": "LEFT"
+  },
+  {
+   "from": "LEFT",
+   "event": "the driver comes back to tab 2",
+   "turn_ops": [
+    "tab 2",
+    "page: card"
+   ],
+   "to": "OPENING -> OURS"
+  },
+  {
+   "from": "LEFT",
+   "event": "a message NOT yet seen in this period",
+   "turn_ops": [
+    "tab 2",
+    "page: card"
+   ],
+   "to": "OPENING (the new message pulls tab 2 again)"
+  },
+  {
+   "from": "LEFT",
+   "event": "BMW cycles between messages already seen this period",
+   "turn_ops": [],
+   "to": "LEFT"
+  },
+  {
+   "from": "any but REST",
+   "event": "the message ends (shown-now none)",
+   "turn_ops": [
+    "tab base",
+    "page: base's page",
+    "window shut",
+    "rows back"
+   ],
+   "to": "REST"
+  },
+  {
+   "from": "any",
+   "event": "rebuild (layout switch)",
+   "turn_ops": [
+    "state decided before the layers are made: born with the window open if a message shows",
+    "page painted last",
+    "settle again"
+   ],
+   "to": "OPENING or REST"
+  },
+  {
+   "from": "any",
+   "event": "the tab-2 sheet refused / a throw / a glyph missing",
+   "turn_ops": [
+    "window open (latched as round 2)"
+   ],
+   "to": "NODRAW"
+  }
+ ],
+ "order_rule": {
+  "within_a_turn": "opening ops first (rows aside, then window open), then the centre (tab, page, warn), then closing ops (window shut, then rows back). Closing is only ever on text sent in an EARLIER turn (the 150 ms settle).",
+  "open_settle": "a page change that takes away text the covering relied on waits until 'window open' was sent >= 150 ms ago (verified needed by the interleave audit: the window (conn 0) and the tab-2 sheet (conn 2) have no order between sockets)",
+  "connections": "move the bottom-row sheet onto the window's connection 0 (7 of 8 layers): 'rows aside' then 'window open' are then in one socket, in order. With today's assignment (rows on conn 2) the interleave audit finds rows' ink over an opening or closing panel (V2) whenever the sockets are not applied together - a round 2 hazard too (hypothesis: the service may apply them together)."
+ },
+ "keep_open": [
+  {
+   "n": 1,
+   "what": "the car's messages are not readable yet (blind start)",
+   "from": "SPEC 8.4"
+  },
+  {
+   "n": 2,
+   "what": "D7: shown-now has not yet matched a ccList entry, or this is the message that confirmed it",
+   "from": "SPEC 8.4"
+  },
+  {
+   "n": 3,
+   "what": "the shown number has no ccList entry",
+   "from": "SPEC 8.4"
+  },
+  {
+   "n": 4,
+   "what": "the entry has no name",
+   "from": "SPEC 8.4"
+  },
+  {
+   "n": 5,
+   "what": "a character of the name is missing from td_msg (latched until the message ends)",
+   "from": "SPEC 8.4"
+  },
+  {
+   "n": 6,
+   "what": "painting threw (latched until the message ends; three: until restart)",
+   "from": "SPEC 8.4"
+  },
+  {
+   "n": 7,
+   "what": "the message changed (new id or new words) and its whole text is not yet >= 150 ms on the screen",
+   "from": "SPEC 8.4"
+  },
+  {
+   "n": 8,
+   "what": "the tab-2 sheet could not be made (pixel memory, refused): until the next rebuild",
+   "from": "SPEC 8.4"
+  },
+  {
+   "n": 9,
+   "what": "tab 2 is not the selected tab (the driver left it)",
+   "from": "SC"
+  },
+  {
+   "n": 10,
+   "what": "the tab-2 sheet on the screen does not carry the message's text WHOLE (a cut row; a page in flight)",
+   "from": "SC"
+  },
+  {
+   "n": 11,
+   "what": "the open settle: the centre is changing away from text the cover relied on",
+   "from": "SC"
+  },
+  {
+   "n": 12,
+   "what": "the two witnesses disagree",
+   "from": "round 2 (TwinCC)"
+  },
+  {
+   "n": 13,
+   "what": "the shown-now number is released to the list (MC's release, SC's refined leftList): the list decides 'may show' and no card is drawn",
+   "from": "research3/MC + SC"
+  }
+ ],
+ "tab_rules": {
+  "pull": "a drawable message that is new in this period selects tab 2 at once, at any speed, whatever the Tab setting (auto or fixed)",
+  "hold": "SB's automatic rules (guidance -> 5, ...) never leave tab 2 during a message period; they change the base",
+  "leave": "choice A: the driver may leave tab 2 (key or setting) at any time; BMW's panel opens in the same turn; a message not yet seen in the period pulls tab 2 again; BMW cycling between known messages does not",
+  "end": "when the car says no message shows, the tab returns to the base (the driver's last choice or SB's auto)",
+  "no_timer": "no 6-10 s pop-up timer (the references' maker's): returning early would only swap our text for BMW's panel; we follow the car's shown-now",
+  "period": "from the first shown message to the car's 'none'"
+ },
+ "choice_leave_tab2": {
+  "chosen": "A: leaving is allowed and re-opens BMW's panel",
+  "rejected": "B: tab 2 locked while a message shows",
+  "why": [
+   "A keeps the rule by construction: BMW's own text is visible whenever ours is not",
+   "A stuck shown-now number (MC's A5: 987 stays named after BMW hid it) hangs our card; under B it would also lock the driver out of navigation and the computer until the number moves (case A5 / A5d)",
+   "MC's A1-A4 kind of hang without the release would lock every tab under B",
+   "a dead key (B) on the stalk/wheel is a worse experience than a missing bottom row (A)"
+  ],
+  "cost_of_A": "while the driver looks at another tab during a message the bottom row is gone and BMW's panel shows (round 2's window state)"
+ },
+ "release": {
+  "proposal": "give Twin Dial MC's release through one hook (_twinInputs hands act: null while released): deferValues [65535], leftList REFINED",
+  "refinement": "leftList releases a number only if the number was already that value when its entry left ccList (the number was KEPT: A3, A4); a number that changes to an id after the id's entry left is a new message the list has not caught up with - not released",
+  "why": "MC's leftList as written (shared/hud.js _ccRelease: ever listed and not listed now) covers BMW's panel in case S3b (a second door message whose number arrives before the list re-lists it): UNSAFE in the three f30 views on MC's real-engine replay (tools/twin-dial/r3/sc/mc_s3b.js), and V1 in this model's S3 (test.js)"
+ },
+ "cases": [
+  {
+   "id": "V1",
+   "what": "blind start: nothing read; window open, rows aside, no card"
+  },
+  {
+   "id": "V2",
+   "what": "ccList fits, the shown-now field never speaks: D7 keeps every message BMW's (window), list rows only"
+  },
+  {
+   "id": "V3",
+   "what": "the first matched message stays BMW's; the next one: tab 2, card, window shut 150 ms after the card"
+  },
+  {
+   "id": "V4",
+   "what": "no entry, empty name, a Greek name, a throw: window, latched while the message stays"
+  },
+  {
+   "id": "V5",
+   "what": "N -> M without 0 between: window at once, the card says M, shut after M settles"
+  },
+  {
+   "id": "V6",
+   "what": "the end: card gone, window shut, rows back, the tab returns"
+  },
+  {
+   "id": "V7",
+   "what": "the second witness disagrees -> window; the tab-2 sheet refused -> window for every message until a rebuild"
+  },
+  {
+   "id": "V8",
+   "what": "a rebuild and day / night while a message is ours"
+  },
+  {
+   "id": "A0",
+   "what": "door opens and shuts (list first)"
+  },
+  {
+   "id": "A0b",
+   "what": "door, the number first"
+  },
+  {
+   "id": "A1",
+   "what": "the getter answers 65535 and nothing ever shows"
+  },
+  {
+   "id": "A2",
+   "what": "a message, then 65535 instead of 0"
+  },
+  {
+   "id": "A3",
+   "what": "a message, then the number is never notified again (kept 15); the list returns to rest"
+  },
+  {
+   "id": "A5",
+   "what": "a temporary message hidden by BMW after ~20 s, still listed, the number stays (987): the CARD hangs"
+  },
+  {
+   "id": "A5d",
+   "what": "A5, and the driver leaves tab 2 after BMW hid it (choice A: the tab is free, the window opens)"
+  },
+  {
+   "id": "A8",
+   "what": "the shown-now field silent; a stored red entry stays listed"
+  },
+  {
+   "id": "A9",
+   "what": "silent field; red, then a list that does not fit"
+  },
+  {
+   "id": "A16",
+   "what": "A3 with the witness going back to 0"
+  },
+  {
+   "id": "S1",
+   "what": "a listed message while the shown-now field is stuck on 65535"
+  },
+  {
+   "id": "S2",
+   "what": "a RED listed message, the field stuck on 65535 for a minute"
+  },
+  {
+   "id": "S3",
+   "what": "the number arrives 2 s before the list carries it"
+  },
+  {
+   "id": "S5",
+   "what": "a message under a number the list never carries"
+  },
+  {
+   "id": "C1",
+   "what": "the driver leaves tab 2 while the message shows: window at once; comes back: card, settle, shut"
+  },
+  {
+   "id": "C2",
+   "what": "guidance starts during a message: tab 2 holds; tab 5 after the message"
+  },
+  {
+   "id": "C3",
+   "what": "a new message after the driver left pulls tab 2 again"
+  },
+  {
+   "id": "C4",
+   "what": "BMW cycles N / M / N after the driver left: no message is new, the driver's tab holds, the window stays open"
+  },
+  {
+   "id": "C5",
+   "what": "N -> M where M is already on the page as a whole row: no window (our text for M was on screen)"
+  },
+  {
+   "id": "C6",
+   "what": "N -> M where M's row is cut: window until M's card settles"
+  },
+  {
+   "id": "C7",
+   "what": "the counter changes and the list grows while ours: no window"
+  },
+  {
+   "id": "C8",
+   "what": "the same id with other words: window until the new words settle"
+  },
+  {
+   "id": "C9",
+   "what": "a red message while the driver is on tab 5 with guidance: pulled to 2 at once (any speed)"
+  },
+  {
+   "id": "C10",
+   "what": "stored entries only, the driver opens tab 2: the list page, nothing hidden, no window"
+  },
+  {
+   "id": "C11",
+   "what": "D7 not yet fallen, the driver on tab 2: the pointer page, window open"
+  },
+  {
+   "id": "C12",
+   "what": "a stored entry already on the page as a whole row is named by shown-now (D7 fallen): ours at once"
+  },
+  {
+   "id": "C13",
+   "what": "the same with a stored entry whose row is cut: the window opens until its card settles"
+  }
+ ],
+ "mutants": {
+  "noSettle (window shuts in the turn the card is sent)": {
+   "violations": 17,
+   "cases": [
+    "V3",
+    "V5",
+    "C1"
+   ]
+  },
+  "ignoreTab (leaving tab 2 does not reopen)": {
+   "violations": 91,
+   "cases": [
+    "C1",
+    "C3"
+   ]
+  },
+  "rowsFirst (rows back before the window shuts)": {
+   "violations": 14,
+   "cases": [
+    "V3",
+    "V6"
+   ]
+  },
+  "windowLast (the centre changes before the window opens)": {
+   "violations": 3,
+   "cases": [
+    "C1"
+   ]
+  },
+  "wrongCard (the card shows the previous message)": {
+   "violations": 76,
+   "cases": [
+    "V5",
+    "C3"
+   ]
+  },
+  "keepStamps (stamps survive leaving tab 2)": {
+   "violations": 4,
+   "cases": [
+    "C1"
+   ]
+  },
+  "cutRows (a cut row counts as our text)": {
+   "violations": 3,
+   "cases": [
+    "C6"
+   ]
+  },
+  "latency 300 ms > settle (the settle's assumption)": {
+   "violations": 24,
+   "cases": [
+    "V3",
+    "V5",
+    "C1",
+    "C6",
+    "C8"
+   ]
+  }
+ },
+ "results": {
+  "runs": {
+   "atomic": {
+    "frames": 15783,
+    "V1": 0,
+    "V2": 0,
+    "bad": []
+   },
+   "serial": {
+    "frames": 16300,
+    "V1": 0,
+    "V2": 0,
+    "bad": []
+   },
+   "interleave-proposed": {
+    "frames": 20384,
+    "V1": 0,
+    "V2": 0,
+    "bad": []
+   },
+   "atomic+release": {
+    "frames": 15779,
+    "V1": 0,
+    "V2": 0,
+    "bad": []
+   },
+   "serial+release": {
+    "frames": 16277,
+    "V1": 0,
+    "V2": 0,
+    "bad": []
+   },
+   "interleave-proposed+release": {
+    "frames": 19246,
+    "V1": 0,
+    "V2": 0,
+    "bad": []
+   },
+   "atomic+release-MC-leftList": {
+    "V1": 62,
+    "cases": [
+     "S3"
+    ]
+   },
+   "interleave-today": {
+    "V1": 0,
+    "V2": 677,
+    "cases": [
+     "V2",
+     "V3",
+     "V4",
+     "V5",
+     "V6",
+     "V7",
+     "V8",
+     "A0",
+     "A0b",
+     "A2",
+     "A3",
+     "A5",
+     "A5d",
+     "A8",
+     "A9",
+     "A16",
+     "S3",
+     "S5",
+     "C1",
+     "C2",
+     "C3",
+     "C4",
+     "C5",
+     "C6",
+     "C7",
+     "C8",
+     "C9",
+     "C10",
+     "C11",
+     "C12",
+     "C13"
+    ]
+   }
+  },
+  "hangs": {
+   "V1": {
+    "strict": "window",
+    "release": "window"
+   },
+   "V2": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "V3": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "V4": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "V5": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "V6": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "V7": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "V8": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "A0": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "A0b": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "A1": {
+    "strict": "window",
+    "release": "ok"
+   },
+   "A2": {
+    "strict": "window+tab2",
+    "release": "ok"
+   },
+   "A3": {
+    "strict": "window+tab2",
+    "release": "ok"
+   },
+   "A5": {
+    "strict": "card+tab2",
+    "release": "card+tab2"
+   },
+   "A5d": {
+    "strict": "window",
+    "release": "window"
+   },
+   "A8": {
+    "strict": "window",
+    "release": "window"
+   },
+   "A9": {
+    "strict": "window",
+    "release": "window"
+   },
+   "A16": {
+    "strict": "window",
+    "release": "ok"
+   },
+   "S1": {
+    "strict": "window",
+    "release": "ok"
+   },
+   "S2": {
+    "strict": "window",
+    "release": "ok"
+   },
+   "S3": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "S5": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C1": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C2": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C3": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C4": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C5": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C6": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C7": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C8": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C9": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C10": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C11": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C12": {
+    "strict": "ok",
+    "release": "ok"
+   },
+   "C13": {
+    "strict": "ok",
+    "release": "ok"
+   }
+  },
+  "behaviour": {
+   "V3": {
+    "pullAt": 3000,
+    "shutAfterMs": 150
+   }
+  }
+ },
+ "bench_port": {
+  "file": "bench/test-twin-cc.js (build round)",
+  "audit": "after every turn AND after every arrival of the tab-2 sheet's pixels: while the injected truth says BMW shows message K (during a batch of signals: the old or the new display), BMW's panel bbox (+3 px, 3 px grid) may be covered only if the tab-2 sheet on the screen equals, pixel for pixel, the planned paint of a page that carries K's whole text (the card for K, or a page whose row for K is uncut); and the rows' ink is never in the panel while the window is open",
+  "stand_in": "the plate widget becomes the tab-2 sheet widget [729, 298, 1191, 568]; planned(K) = the page painted from layoutTab2's output",
+  "modes": "atomic (the service applies a turn together), serial (each message its own frame), interleave (no order between sockets)",
+  "mutants": "the eight of test.js"
+ }
+}

@@ -275,6 +275,9 @@ async function benchChecks(keep) {
     ok(near(uni(bl(), 'u_hiC'), wantFill(1, 0.75), 0.0005) && ucol(bl(), 'u_ruleC', 1)[0] < 231 / 255 - 0.05, 'a message shown while the night comes: the fill at 0.75 (' + fmt(uni(bl(), 'u_hiC')) + '), the rule dims');
     await set('nightLook', 'off');
     await sleep(800);
+    await hook('twinCc:window,');
+    await sleep(500);
+    ok(uni(bl(), 'u_win')[0] === 1 && near(uni(bl(), 'u_hiC'), wantFill(1), 0.0005), 'a window with no severity (B3: the blind keep-open): the window open, the fill the tab\'s');
     await hook('twinCc:none,');
     await sleep(500);
     ok(uni(bl(), 'u_win')[0] === 0 && near(uni(bl(), 'u_rule'), [741, 295.2, 1180, 296.7, 629, 612.4, 1292, 614.6], 0.001), 'the message ends: window shut, the 2.2 px rule back');

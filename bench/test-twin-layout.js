@@ -314,11 +314,17 @@ console.log('the layer plan (the engine\'s own planner, shared/hud.js _plan)');
     const centre = plan.filter((e) => e.kind === 'layer' && e.w.type === 'tdpage');
     ok(centre.length === 1 && sheets.filter((s) => s.z === 6).length === 0, 'the centre pages are ONE own image layer (tdpage), no sheet: a page change repaints it, nothing is rebuilt (round 3 B4)');
     ok(centre.length === 1 && centre[0].conn === 1, 'the centre layer is on connection 1');
-    // package B5: the speed-limit sign's sheet and the cruise readout's (z 11, 12) share connection 2 and are not "cc:" layers (bench/test-twin-limit.js checks them)
+    // B3 (SPEC-R3 5.1, 5.5): the bottom plate is gone; tab 2's ONE sheet is the only "cc:" sheet on connection 2, the bottom row's sheet is on
+    // connection 0 with the window; B5's sign sheet (and the cruise readout's, built only with config.cruise) share connection 2 and are not "cc:" (integration)
     const ccSheets = sheets.filter((s) => s.conn === 2 && !s.members.every((m) => m.type === 'tdsign' || m.type === 'tdcru'));
-    ok(ccSheets.length === 2 && ccSheets.every((s) => s.z >= 8), 'connection 2: the bottom row\'s sheet and the plate\'s sheet, both "cc:" layers');
-    const cc = W.filter((w) => w.conn === 2 && w.type === 'text');
-    ok(cc.length > 0 && cc.every((w) => /cc:/.test(w.toggle || '')), 'every text on connection 2 is toggled by a "cc:" part, so it steps aside live (hud.js _ccLive)');
+    ok(ccSheets.length === 1 && ccSheets.every((s) => s.z === 9 && s.members.length === 1 && s.members[0].type === 'ccsheet' &&
+        s.x === 729 && s.y === 298 && s.w === 462 && s.h === 270), 'connection 2: tab 2\'s sheet [729, 298, 462 x 270], a "ccsheet", the only "cc:" sheet there (the old bottom plate is gone)');
+    ok(!W.some((w) => w.type === 'ccplate'), 'no "ccplate" widget in the layout (the code path is gone)');
+    const rowTexts = W.filter((w) => w.type === 'text' && /^row_/.test(w.id));
+    ok(rowTexts.length === 7 && rowTexts.every((w) => !w.conn && w.toggle === 'cc:row'), 'the bottom row\'s seven texts are on connection 0 (the window\'s) and toggled by "cc:row", so they step aside live (hud.js _ccLive)');
+    ok(sheets.filter((s) => s.conn === 0 && s.z === 8).length === 1 && (per[0] || 0) <= 8 && (per[1] || 0) <= 8 && (per[2] || 0) <= 8, 'layers per connection: ' + (per[0] || 0) + ' / ' + (per[1] || 0) + ' / ' + (per[2] || 0) + ' (connection 0 gains the bottom row\'s sheet; at most 8 each)');
+    const ccTexts = W.filter((w) => w.type === 'text' && /cc:/.test(w.toggle || ''));
+    ok(ccTexts.length > 0 && ccTexts.every((w) => !w.conn), 'every "cc:" text is on connection 0, one socket with the window (an order for "row aside" before "window open")');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -45,7 +45,7 @@ const TYPES = {
     revarc: ['center', 'r', 'start', 'sweep'],
     tdial: ['kind', 'centre', 'R', 'face'],     // twin_dial (docs/twin-dial/ENGINE-CONTRACT.md)
     tdback: ['part'],
-    ccplate: ['font'],      // twin_dial: our check-control plate sheet (shared/twin_cc.js)
+    ccsheet: ['font'],      // twin_dial: tab 2's sheet (shared/twin_cc.js)
     tdpage: ['pages'],      // twin_dial round 3 (B4): the centre pages' one layer (shared/twin_pages.js)
     tdsign: [], tdcru: [],  // twin_dial: the speed-limit sign and the cruise readout (shared/twin_limit.js)
 };

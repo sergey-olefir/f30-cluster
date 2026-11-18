@@ -744,7 +744,9 @@
         ]
       },
       "strict": true,
-      "_strict": "SPEC 8.4 / D7 (the owner, 2026-11-17): until statusActiveCCMessage has once delivered a number that matched a ccList entry, our plate is never drawn over BMW's panel: the fallback window opens whenever the heuristic says a message may show. Package D."
+      "_strict": "SPEC 8.4 / D7 (the owner, 2026-11-17): until statusActiveCCMessage has once delivered a number that matched a ccList entry, our plate is never drawn over BMW's panel: the fallback window opens whenever the heuristic says a message may show. Package D.",
+      "release": null,
+      "_release": "twin_dial B3 (SPEC-R3 5.4.7, off): null, or { deferValues: [65535], leftList: \"kept\" } - the narrowed release: a shown-now value that is no verdict (65535, or a number whose ccList entry has left AFTER the number was set) lets the list decide. leftList true is research3/MC's wider rule and is unsafe (a returning door message whose number arrives before its list entry), never set it. shared/hud.js _ccRelease."
     },
     "ccDisplayed": {
       "iface": "de.bmw.infotainment.vehicle.Vehicle2",

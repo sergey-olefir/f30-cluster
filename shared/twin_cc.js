@@ -1,49 +1,45 @@
 'use strict';
 /**
- * twin_cc.js - Twin Dial's check-control message (docs/twin-dial/SPEC.md section 8, package D of round 2).
+ * twin_cc.js - Twin Dial's check-control message in the CENTRE (docs/twin-dial/SPEC-R3.md section 5; package B3 of the
+ * 0.1.1 build, after SC's model twin-r3/sc: docs/twin-dial/r3/SC-REPORT.md). Round 2's bottom plate is gone.
  *
- * Three things, none of which touches the engine until shared/hud.js calls them (hud.js has a few marked
- * "// twin_dial:" hooks; f30_cluster never creates a TwinCC, so for it all of this is inert):
+ * Four things, none of which touches the engine until shared/hud.js calls them (hud.js has marked "// twin_dial:" hooks;
+ * f30_cluster never creates a TwinCentre, so for it all of this is inert):
  *
- *   TwinCC        the state machine: none | window | ours, the severity, the plate to paint, the D7 latch.
- *   paintPlate    our plate sheet (536 x 128, panel [694, 592, 1230, 720]) as straight RGBA, in ONE paint:
- *                 the rule, the symbol cell, the symbol, the headline (wrapped to 441 px, two lines, "..."), the counter.
- *   helpers       severityOf, symbolFor, wrapHeadline, nightRgb.
+ *   TwinCC        the verdict: none | window | ours, the severity, the card to paint, the D7 latch, the witnesses (round 2, unchanged).
+ *   TwinCentre    the safety machine of the centre: TwinCC's verdict + the tab overlay (a message pulls tab 2, only the driver
+ *                 leaves it, leaving opens BMW's panel in the same turn) + the per-turn plan of operations (rows aside, window,
+ *                 tab, the tab-2 sheet, the warning tab; closing ones last) + the two settles (150 ms).
+ *   layoutTab2    what tab 2's ONE sheet paints (card, rows, pointer, empty) and which messages' text it carries WHOLE.
+ *   paintSheet    the sheet [729, 298, 1191, 568] as straight RGBA, in ONE paint.
  *
  * THE SAFETY RULE (the owner, 2026-11-16, SPEC 8.4): a BMW warning is never hidden unless our own text for THAT message
- * is on the screen in the same frame. So "ours" is a state the machine reaches only after
+ * is on the screen in the same frame. "ours" is a state the machine reaches only after
  *   - the car's own "message shown now" (KombiIF statusActiveCCMessage, second witness Vehicle2.statusDisplayedCCMessage)
- *     has named a number, and that number has a ccList entry with a name (the stored entries of ccList are never drawn);
- *   - the D7 latch (config.ccActive.strict, the owner's decision 7) has fallen: the "shown now" number has once matched a
- *     ccList entry, and the message it matched has ended;
+ *     has named a number, and that number has a ccList entry with a name (the stored entries of ccList are never drawn as the card);
+ *   - the D7 latch (config.ccActive.strict) has fallen: the "shown now" number has once matched a ccList entry, and the
+ *     message it matched has ended;
  *   - no latch (a glyph our font lacks, a throw while painting, our sheet refused) holds;
- *   - our plate for that exact message (its id and its words) was handed to the connection at least settleMs ago.
+ *   - tab 2 is selected and the sheet carries the WHOLE text of that exact message (the card, or a row whose whole name fits)
+ *     since at least settleMs, sent in an earlier turn; and no page change that takes away text the cover relied on is
+ *     pending (the open settle: the window and the sheet are on different connections, nothing orders sockets).
  * In every other state in which the car says, or may say, a message shows, the state is "window": BMW's own panel is
- * see-through (tdback's fallback window), and our texts over it are gone. "none" is reached only when the car itself
- * says no message shows (the witness says none, or - before any witness has spoken - the heuristic does).
+ * see-through (tdback's fallback window). "none" is reached only when the car itself says no message shows.
  *
  * Pure logic: no engine, no clock of its own (every call takes `now`), no text ever logged (numbers and lengths).
  * Written for the car's Node 8: no spread, no optional chaining.
  */
 
-// ---- geometry of the plate (panel px; SPEC 8.1, VF message_panel.json M2) ---------------------------------------------
-const PLATE = { x: 694, y: 592, w: 536, h: 128 };         // the sheet (the plate rectangle is [694.5, 592, 1230, 720])
-const RULE = { y0: 611, y1: 615 };                          // 4 px, in the severity colour (tdback draws the rest of it)
-const CELL = { x0: 702, y0: 623.5, x1: 768, y1: 707.5 };
-const SYMBOL = { size: 54, cx: 735, cy: 665.5 };
-const HEAD = { x: 783, maxW: 441, base1: 656, base2: 703, base0: 680 };
-const COUNTER = { right: 1224, base: 703, line2End: 1182 };
-
 // ---- severity (SPEC 8.2): 0 none, 1 grey, 2 green, 3 amber, 4 red ------------------------------------------------------
-// colours: the black-floor-corrected codes B's tdback uses for the highlight cell and the rule (ENGINE-CONTRACT 1.2), so the
-// plate's cell and rule are the same colour as the tab above them
+// colours: the black-floor-corrected codes B's tdback uses for the rule (ENGINE-CONTRACT 1.2); cell = the card's symbol cell,
+// icon = a row's symbol and the warning tab's icon (SPEC-R3 5.3). Severity is never in the selected tab's fill.
 const SEV_NAMES = ['none', 'grey', 'green', 'amber', 'red'];
 const SEVERITY = [
     null,
-    { idx: 1, name: 'grey', cell: null, rule: [231, 231, 231], symbol: [255, 255, 255], mult: 0.55, ruleMult: 0.7 },
-    { idx: 2, name: 'green', cell: [59, 155, 26], rule: [59, 155, 26], symbol: [255, 255, 255], mult: 0.8, ruleMult: 0.8 },
-    { idx: 3, name: 'amber', cell: [240, 170, 10], rule: [240, 170, 10], symbol: [0, 0, 0], mult: 0.85, ruleMult: 0.85 },
-    { idx: 4, name: 'red', cell: [176, 7, 30], rule: [176, 7, 30], symbol: [255, 255, 255], mult: 0.85, ruleMult: 0.85 },
+    { idx: 1, name: 'grey', cell: null, rule: [231, 231, 231], symbol: [255, 255, 255], icon: [255, 255, 255], mult: 0.55, ruleMult: 0.7 },
+    { idx: 2, name: 'green', cell: [59, 155, 26], rule: [59, 155, 26], symbol: [255, 255, 255], icon: [59, 155, 26], mult: 0.8, ruleMult: 0.8 },
+    { idx: 3, name: 'amber', cell: [240, 170, 10], rule: [240, 170, 10], symbol: [0, 0, 0], icon: [240, 170, 10], mult: 0.85, ruleMult: 0.85 },
+    { idx: 4, name: 'red', cell: [176, 7, 30], rule: [176, 7, 30], symbol: [255, 255, 255], icon: [218, 16, 48], mult: 0.85, ruleMult: 0.85 },
 ];
 const COLOR_SEV = { red: 4, orange: 3, yellow: 3, green: 2, white: 1, default: 1 };
 const GREY_RAMP = [0.002, 0.16];          // the tab ramp (SPEC 6.1): the grey cell is its gradient, top to bottom, linear light
@@ -82,50 +78,115 @@ const enc = (l) => Math.round(255 * (l <= 0.0031308 ? 12.92 * l : 1.055 * Math.p
 /** rgb scaled by `mult` in linear light. */
 function nightRgb(rgb, mult) { return [enc(lin(rgb[0]) * mult), enc(lin(rgb[1]) * mult), enc(lin(rgb[2]) * mult)]; }
 
-// ---- the headline: wrapped to two lines (SPEC 8.1) ----------------------------------------------------------------------------
-/**
- * Words wrapped greedily to `maxW` px, at most two lines; what does not fit goes to line 2, which then ends in the
- * ellipsis. `measure(str)` is the text's width in px; `maxW2` is line 2's room (the counter takes some of it).
- * Returns { lines: [one or two strings], cut: bool }. A word wider than a whole line is broken between letters.
- */
-function wrapHeadline(text, measure, maxW, maxW2, ellipsis) {
-    const ell = ellipsis || '…';
+// ---- geometry of tab 2's sheet (SPEC-R3 5.1; design/twin-dial/r3/sc/card.json, the counter's baseline is the SPEC's 326) --------
+const SHEET = { x: 729, y: 298, w: 462, h: 270 };           // [729, 298, 1191, 568], opaque black while tab 2 is selected
+const CELL = { x0: 922, y0: 306, x1: 998, y1: 382 };        // the symbol cell of the card
+const SYMBOL = { size: 54, cx: 960, cy: 344 };
+const HEAD = { cx: 960, maxW: 436, lines: 3, bases: { 1: [424], 2: [424, 471], 3: [424, 471, 518] }, pitch: 47 };
+const COUNTER = { right: 1180, base: 326 };                 // "n/m" Noto 29 grey, top right, only when the car gives a frame count
+const ROWS = { pitch: 44, symX: 741, symSize: 32, symDy: 6, nameX: 781, maxW: 399, nameDy: 33, top: 300, bottom: 564, below: 26,
+    scroll: { x: 1188, w: 3, y0: 300, y1: 564, track: 40, thumb: 180 } };
+const POINTER = { lines: ['Повідомлення', 'на панелі внизу'], bases: [424, 471] };       // our fixed words: never a message's
+const EMPTY = { icon: 'cc_info', size: 66, cx: 960, cy: 392, text: 'Немає повідомлень', base: 478 };
+const FONTS = { head: 'td_msg', counter: 'td_cnt', row: 'td_tab', text: 'td_val' };      // Noto 42 / 29 / 33 / 39
+const SHEET_RECT = [SHEET.x, SHEET.y, SHEET.x + SHEET.w, SHEET.y + SHEET.h];
+
+/** The characters of `s` that `font` has no glyph for (spaces aside), as a string; '' when it can draw all of them.
+ *  deps.has(font, ch) answers; a font that will not load counts as "cannot draw anything". */
+function missingChars(deps, font, s) {
+    let out = '';
+    String(s).split('').forEach((ch) => {
+        if (ch === ' ' || out.indexOf(ch) >= 0) return;
+        let ok = false;
+        try { ok = deps.has(font, ch); } catch (e) { ok = false; }
+        if (!ok) out += ch;
+    });
+    return out;
+}
+
+/** Greedy word wrap into lines of widths[i] px (the last width repeats), at most widths.length lines; what is left ends the
+ *  last line in the ellipsis. A word wider than a line is broken between letters. measure(str) is the text's width in px.
+ *  Returns { lines, cut }. */
+function wrapWords(text, measure, widths, ell) {
+    const e = ell || '…';
     const words = String(text).replace(/\s+/g, ' ').trim().split(' ').filter(Boolean);
     if (!words.length) return { lines: [''], cut: false };
-    if (!(maxW2 > 0)) maxW2 = maxW;
-    // greedy break of the whole text into lines of at most maxW (the first) and maxW2 (the second)
-    const fit = (s, w) => measure(s) <= w;
+    const room = (i) => widths[Math.min(i, widths.length - 1)];
+    const fit = (s, i) => measure(s) <= room(i);
     const lines = [];
     let cur = '', i = 0;
-    const room = () => (lines.length === 0 ? maxW : maxW2);
-    while (i < words.length && lines.length < 2) {
-        const word = words[i], trial = cur ? cur + ' ' + word : word;
-        if (fit(trial, room())) { cur = trial; i++; continue; }
+    while (i < words.length && lines.length < widths.length) {
+        const trial = cur ? cur + ' ' + words[i] : words[i];
+        if (fit(trial, lines.length)) { cur = trial; i++; continue; }
         if (cur) { lines.push(cur); cur = ''; continue; }
-        // one word wider than the line: as many of its letters as fit, the rest goes on
-        let n = word.length;
-        while (n > 1 && !fit(word.slice(0, n), room())) n--;
-        cur = word.slice(0, n);
-        words[i] = word.slice(n);
+        let n = words[i].length;
+        while (n > 1 && !fit(words[i].slice(0, n), lines.length)) n--;
+        lines.push(words[i].slice(0, n));
+        words[i] = words[i].slice(n);
         if (!words[i]) i++;
-        lines.push(cur); cur = '';
     }
-    if (cur && lines.length < 2) lines.push(cur);
+    if (cur && lines.length < widths.length) { lines.push(cur); cur = ''; }
     let cut = false;
-    if (i < words.length) {
-        // text left over after two lines: line 2 takes what it can and ends in the ellipsis
+    if (i < words.length || cur) {
         cut = true;
-        let last = lines.length === 2 ? lines[1] : '';
-        const rest = words.slice(i).join(' ');
-        let t = (last ? last + ' ' : '') + rest;
-        while (t.length > 1 && !fit(t + ell, maxW2)) t = t.slice(0, -1);
-        t = t.replace(/[\s,.;:\/-]+$/, '');
-        if (lines.length < 2) lines.push(t + ell); else lines[1] = t + ell;
+        const k = lines.length - 1;
+        let t = lines[k] + ' ' + (cur ? cur + ' ' : '') + words.slice(i).join(' ');
+        while (t.length > 1 && !fit(t + e, k)) t = t.slice(0, -1);
+        lines[k] = t.replace(/[\s,.;:\/-]+$/, '') + e;
     }
     return { lines, cut };
 }
 
-// ---- the plate ------------------------------------------------------------------------------------------------------------------
+const SEV_ORDER = { 4: 0, 3: 1, 2: 2, 1: 2, 0: 2 };         // rows: red, amber, then the rest in the car's order
+/** TwinCC's key for a ccList entry: its id and its words as the car sent them. */
+const keyOf = (e) => String(e.id) + '\u0001' + e.name;
+
+/**
+ * What tab 2's sheet paints. s = { cand (TwinCC.candidate or null), shown (a message shows or may show), sev (0..4),
+ * entries [{ id, name, color }] (ccList outside ignoreIds, the car's order), night };
+ * deps = { measure(font, str), has(font, ch), fonts }.
+ * Returns { kind: 'card' | 'pointer' | 'list' | 'empty', card, rows, more, total, keys (the messages whose text is drawn
+ * WHOLE), sig (equal sigs = equal pixels) }. A row whose name has a glyph the font lacks is not drawn and counts for nothing;
+ * a row whose name is cut by "…" is drawn but is never counted as our text for its message (SPEC-R3 5.1).
+ */
+function layoutTab2(s, deps) {
+    const F = deps.fonts || FONTS;
+    const out = { kind: 'empty', card: null, rows: [], more: 0, total: 0, keys: [] };
+    let top = ROWS.top;
+    if (s.cand) {
+        const w = wrapWords(s.cand.name, (t) => deps.measure(F.head, t), [HEAD.maxW, HEAD.maxW, HEAD.maxW]);
+        const bases = HEAD.bases[String(w.lines.length)];
+        out.kind = 'card';
+        out.card = { key: s.cand.key, id: s.cand.id, sev: severityOf(s.cand.color), symbol: symbolFor(s.cand.id, s.cand.color),
+            lines: w.lines, cut: w.cut, bases, counter: s.cand.counter || '' };
+        out.keys.push(s.cand.key);                    // the card counts as our text (round 2's plate did, cut or not: "…" is ours)
+        top = bases[bases.length - 1] + ROWS.below;
+    } else if (s.shown) {
+        out.kind = 'pointer';
+        const sev = s.sev || 1;
+        out.card = { key: null, sev, symbol: sev >= 3 ? 'cc_warn' : 'cc_info', lines: POINTER.lines.slice(), cut: false, bases: POINTER.bases, counter: '' };
+        top = POINTER.bases[POINTER.bases.length - 1] + ROWS.below;
+    }
+    const others = (s.entries || []).filter((e) => e && e.name && !(s.cand && keyOf(e) === s.cand.key) && !missingChars(deps, F.row, e.name))
+        .map((e, i) => ({ e, i, sev: severityOf(e.color) }))
+        .sort((a, b) => (SEV_ORDER[a.sev] - SEV_ORDER[b.sev]) || (a.i - b.i));
+    let y = top;
+    for (let k = 0; k < others.length && y + ROWS.pitch <= ROWS.bottom; k++) {
+        const o = others[k];
+        const w = wrapWords(o.e.name, (t) => deps.measure(F.row, t), [ROWS.maxW]);
+        const key = keyOf(o.e);
+        out.rows.push({ key, id: o.e.id, sev: o.sev, symbol: symbolFor(o.e.id, o.e.color), text: w.lines[0], cut: w.cut, top: y });
+        if (!w.cut) out.keys.push(key);               // a row counts as our text for its message only when its WHOLE name is drawn
+        y += ROWS.pitch;
+    }
+    out.more = others.length - out.rows.length;        // the scroll line shows that more exist
+    out.total = others.length;
+    if (out.kind === 'empty' && out.rows.length + out.more > 0) out.kind = 'list';
+    out.sig = JSON.stringify([out.kind, out.card && out.card.key, out.card && out.card.lines, out.card && out.card.counter, out.card && out.card.sev,
+        out.card && out.card.symbol, out.rows.map((r) => [r.key, r.sev, r.text]), out.more, !!s.night]);
+    return out;
+}
+
 /** straight-alpha RGBA `src` (same size as `dst`) laid over the opaque buffer `dst` (RGBA, alpha stays 255). */
 function overOpaque(dst, src) {
     for (let o = 0; o < src.length; o += 4) {
@@ -140,20 +201,17 @@ function overOpaque(dst, src) {
 }
 
 /**
- * Our plate as straight RGBA, `w` x `h` (the sheet, default PLATE), opaque black where nothing is drawn: one paint holds
- * the rule, the symbol cell, the symbol, the headline and the counter, so "our text is on the screen" is one event.
+ * Tab 2's sheet as straight RGBA, SHEET.w x SHEET.h, opaque black where nothing is drawn, in ONE paint, so "our text for
+ * message K is on the screen" is one event per send.
  *   deps    { textRaster, paintIcon, icons }   (hud.js hands its own in; icons is paintIcon's table, to know a name)
- *   c       { id, name, color, counter }       the message (the candidate of TwinCC)
- *   o       { font, counterFont, night, x, y, w, h }
- * Returns { buf, lines, cut, symbol, sev }.
+ *   page    layoutTab2's answer
+ *   o       { night, fonts }
+ * Returns { buf, symbol } (symbol: the card's pictogram name actually drawn).
  */
-function paintPlate(deps, c, o) {
-    const T = deps.textRaster, geo = { x: o.x === undefined ? PLATE.x : o.x, y: o.y === undefined ? PLATE.y : o.y,
-        w: o.w || PLATE.w, h: o.h || PLATE.h };
-    const W = geo.w, H = geo.h, buf = Buffer.alloc(W * H * 4, 0);
+function paintSheet(deps, page, o) {
+    const T = deps.textRaster, F = (o && o.fonts) || FONTS, night = !!(o && o.night);
+    const W = SHEET.w, H = SHEET.h, buf = Buffer.alloc(W * H * 4, 0);
     for (let i = 3; i < buf.length; i += 4) buf[i] = 255;
-    const sev = SEVERITY[severityOf(c.color)];
-    const night = !!o.night;
     const put = (x, y, rgb, k) => {
         if (x < 0 || y < 0 || x >= W || y >= H || k <= 0) return;
         const p = (y * W + x) * 4, kk = Math.min(1, k);
@@ -161,63 +219,64 @@ function paintPlate(deps, c, o) {
         buf[p + 1] = Math.round(rgb[1] * kk + buf[p + 1] * (1 - kk));
         buf[p + 2] = Math.round(rgb[2] * kk + buf[p + 2] * (1 - kk));
     };
-    // the rule in the severity colour (the 2.2 px white one of the rest state is tdback's)
-    const ruleRgb = night ? nightRgb(sev.rule, sev.ruleMult) : sev.rule;
-    for (let y = RULE.y0; y < RULE.y1; y++) for (let x = 0; x < W; x++) put(x, y - geo.y, ruleRgb, 1);
-    // the symbol cell: flat in the severity colour, the grey one a tab-ramp gradient (linear light, top to bottom)
-    const cx0 = CELL.x0 - geo.x, cx1 = CELL.x1 - geo.x, cy0 = CELL.y0 - geo.y, cy1 = CELL.y1 - geo.y;
-    for (let y = Math.floor(cy0); y < Math.ceil(cy1); y++) {
-        const ky = Math.min(y + 1, cy1) - Math.max(y, cy0);          // vertical coverage of this row (half rows at .5)
-        let rgb = sev.cell;
-        if (!rgb) {
-            const f = Math.min(1, Math.max(0, (y + 0.5 - cy0) / (cy1 - cy0)));
-            const L = GREY_RAMP[0] + (GREY_RAMP[1] - GREY_RAMP[0]) * f, v = enc(L);
-            rgb = [v, v, v];
+    const rect = (x0, y0, x1, y1, rgb) => { for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) put(x, y, rgb, 1); };
+    const icon = (name, size, cx, cy, rgb) => {
+        const have = deps.icons && deps.icons[name] ? name : null;
+        if (!have) return null;
+        const px = deps.paintIcon(have, size, size, [rgb[0], rgb[1], rgb[2], 255]);
+        const ix = Math.round(cx - size / 2 - SHEET.x), iy = Math.round(cy - size / 2 - SHEET.y);
+        for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) put(ix + x, iy + y, rgb, px[(y * size + x) * 4 + 3] / 255);
+        return have;
+    };
+    const text = (str, font, base, rgb, opt) => {
+        const m = T.loadFont(font).metrics;
+        const layer = T.drawText(W, H, str, { font, offsetY: base - SHEET.y - m.baseline, x: opt.x || 0, color: [rgb[0], rgb[1], rgb[2], 255], align: opt.align || 'left' });
+        overOpaque(buf, layer);
+    };
+    const nt = (rgb, k) => (night ? nightRgb(rgb, k) : rgb);
+    let symbolDrawn = null;
+    if (page.kind === 'card' || page.kind === 'pointer') {
+        const c = page.card, sev = SEVERITY[c.sev] || SEVERITY[1];
+        // the symbol cell: flat in the severity colour, the grey one a tab-ramp gradient (linear light, top to bottom)
+        const cx0 = CELL.x0 - SHEET.x, cx1 = CELL.x1 - SHEET.x, cy0 = CELL.y0 - SHEET.y, cy1 = CELL.y1 - SHEET.y;
+        for (let y = cy0; y < cy1; y++) {
+            let rgb = sev.cell;
+            if (!rgb) { const f = (y + 0.5 - cy0) / (cy1 - cy0), v = enc(GREY_RAMP[0] + (GREY_RAMP[1] - GREY_RAMP[0]) * f); rgb = [v, v, v]; }
+            rect(cx0, y, cx1, y + 1, night ? nightRgb(rgb, sev.mult) : rgb);
         }
-        if (night) rgb = nightRgb(rgb, sev.mult);
-        for (let x = Math.floor(cx0); x < Math.ceil(cx1); x++) put(x, y, rgb, ky * (Math.min(x + 1, cx1) - Math.max(x, cx0)));
-    }
-    // the symbol, 54 x 54 centred on the cell's centre line
-    const symName = symbolFor(c.id, c.color), size = SYMBOL.size;
-    const have = deps.icons && deps.icons[symName] ? symName : (deps.icons && deps.icons[GENERIC[c.color] || 'cc_warn'] ? (GENERIC[c.color] || 'cc_warn') : null);
-    if (have) {
         const sRgb = night ? nightRgb(sev.symbol, 0.8) : sev.symbol;
-        const px = deps.paintIcon(have, size, size, [sRgb[0], sRgb[1], sRgb[2], 255]);
-        const ix = Math.round(SYMBOL.cx - size / 2 - geo.x), iy = Math.round(SYMBOL.cy - size / 2 - geo.y);
-        for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) put(ix + x, iy + y, sRgb, px[(y * size + x) * 4 + 3] / 255);
+        symbolDrawn = icon(c.symbol, SYMBOL.size, SYMBOL.cx, SYMBOL.cy, sRgb) || icon(sev.idx >= 3 ? 'cc_warn' : 'cc_info', SYMBOL.size, SYMBOL.cx, SYMBOL.cy, sRgb);
+        const white = nt([255, 255, 255], 0.8), grey = nt([227, 227, 227], 0.75);
+        c.lines.forEach((ln, i) => { if (ln) text(ln, page.kind === 'card' ? F.head : F.text, c.bases[i], page.kind === 'card' ? white : grey, { align: 'center' }); });
+        if (c.counter) {
+            const cw = T.measure(c.counter, F.counter, 0);
+            text(c.counter, F.counter, COUNTER.base, grey, { x: COUNTER.right - SHEET.x - cw });
+        }
+    } else if (page.kind === 'empty') {
+        icon(EMPTY.icon, EMPTY.size, EMPTY.cx, EMPTY.cy, nt([188, 188, 188], 0.8));
+        text(EMPTY.text, F.text, EMPTY.base, nt([227, 227, 227], 0.75), { align: 'center' });
     }
-    // the headline: Noto 42, from x 783, one line at baseline 680 or two at 656 / 703; the counter right-aligned at 1224
-    const font = o.font, cfont = o.counterFont || o.font;
-    const fm = T.loadFont(font).metrics, cm = T.loadFont(cfont).metrics;
-    const glyphs = fm.glyphs, ell = glyphs['…'] ? '…' : '...';
-    const measure = (s) => T.measure(s, font, 0);
-    const counter = c.counter ? String(c.counter) : '';
-    const cw = counter ? T.measure(counter, cfont, 0) : 0;
-    const maxW2 = counter ? Math.min(HEAD.maxW, COUNTER.line2End - HEAD.x) : HEAD.maxW;
-    let wrap = wrapHeadline(c.name, measure, HEAD.maxW, maxW2, ell);
-    // a one-line headline keeps the middle baseline (680) unless it would run into the counter's x range: then it goes up
-    let bases;
-    if (wrap.lines.length === 1) bases = [counter && measure(wrap.lines[0]) > maxW2 ? HEAD.base1 : HEAD.base0];
-    else bases = [HEAD.base1, HEAD.base2];
-    const white = night ? nightRgb([255, 255, 255], 0.8) : [255, 255, 255];
-    wrap.lines.forEach((ln, i) => {
-        if (!ln) return;
-        const layer = T.drawText(W, H, ln, { font, offsetY: bases[i] - geo.y - fm.baseline, x: HEAD.x - geo.x, color: [white[0], white[1], white[2], 255], align: 'left' });
-        overOpaque(buf, layer);
+    // rows (every other listed entry): the symbol in the severity colour, the name in white
+    const white = nt([255, 255, 255], 0.8);
+    (page.rows || []).forEach((r) => {
+        const sev = SEVERITY[r.sev] || SEVERITY[1];
+        icon(r.symbol, ROWS.symSize, ROWS.symX + ROWS.symSize / 2, r.top + ROWS.symDy + ROWS.symSize / 2, nt(sev.icon, sev.mult));
+        text(r.text, F.row, r.top + ROWS.nameDy, white, { x: ROWS.nameX - SHEET.x });
     });
-    if (counter) {
-        const grey = night ? nightRgb([227, 227, 227], 0.75) : [227, 227, 227];
-        const layer = T.drawText(W, H, counter, { font: cfont, offsetY: COUNTER.base - geo.y - cm.baseline, x: COUNTER.right - geo.x - cw, color: [grey[0], grey[1], grey[2], 255], align: 'left' });
-        overOpaque(buf, layer);
+    if (page.more > 0) {       // the scroll line: a track and a thumb at the top (we never scroll: no key yet)
+        const sc = ROWS.scroll, n = (page.rows || []).length, total = n + page.more;
+        const x0 = sc.x - SHEET.x, y0 = sc.y0 - SHEET.y, len = sc.y1 - sc.y0;
+        rect(x0, y0, x0 + sc.w, y0 + len, nt([sc.track, sc.track, sc.track], 0.75));
+        rect(x0, y0, x0 + sc.w, y0 + Math.max(8, Math.round(len * n / total)), nt([sc.thumb, sc.thumb, sc.thumb], 0.75));
     }
-    return { buf, lines: wrap.lines, cut: wrap.cut, symbol: have, sev: sev.idx, counterWidth: cw, bases };
+    return { buf, symbol: symbolDrawn };
 }
 
 // ---- the state machine --------------------------------------------------------------------------------------------------------------
 /** a monotonic clock in ms (Date.now() can jump when the car sets the time; the settle time must not) */
 const mono = () => { const t = process.hrtime(); return t[0] * 1000 + t[1] / 1e6; };
 const SETTLE_MS = 150;       // hud.js CC_SETTLE_MS: sent in an earlier tick and this long ago is "on the screen"
-const MAX_THROWS = 3;        // a plate that throws this many times in one run is never drawn again until a restart
+const MAX_THROWS = 3;        // a card that throws this many times in one run is never drawn again until a restart
 
 class TwinCC {
     /** opts: { strict (default true), settleMs, log(line), confirmNow (false) } */
@@ -233,13 +292,13 @@ class TwinCC {
         this.reason = 'the car\'s check-control messages have not been read yet';
         this.window = true;
         this.severity = 0;
-        this.candidate = null;           // the plate to be on screen: { key, id, name, color, symbol, counter } or null
+        this.candidate = null;           // the card to be on screen: { key, id, name, color, symbol, counter } or null
         this.needsTick = false;          // the settle (or an expiring entry) is pending: evaluate again at the next tick
         // memory
         this.confirmed = false;          // D7: a "shown now" number has once matched a ccList entry
         this.confirmEpisode = -1;
         this.episode = 0; this.episodeKey = null;
-        this.drawn = null;               // { key, at }: our plate for that message was handed to the connection
+        this.drawn = null;               // { key, at }: (round 2's stamp; the centre machine keeps its own, per message)
         this.latch = null;               // { why, key } for the current message; cleared when the message ends
         this.sheetLatch = false;         // our sheet was refused: until the next rebuild
         this.throws = 0; this.dead = false;
@@ -269,7 +328,7 @@ class TwinCC {
      *   shown       the heuristic's verdict while no witness has spoken (hud ccListShown: true | false | null)
      *   live        [{ id, name, color, symbol }] the entries the heuristic counts as showing
      *   frame       { n, of, ids } (statusMenuCCMessage)
-     * Returns whether state, reason, severity or the plate to show changed.
+     * Returns whether state, reason, severity or the card to show changed.
      */
     update(inp, now) {
         const before = this.state + '|' + this.reason + '|' + this.severity + '|' + (this.candidate ? this.candidate.key + '|' + this.candidate.counter : '');
@@ -320,15 +379,15 @@ class TwinCC {
         this._episode(w.wired ? (shown ? String(w.n) : '0') : shown ? 'h' : '0');
         if (conf) this.logFn('cc: shown-now confirmed (number ' + w.n + ' matched a ccList entry)');
         if (shown === false) {
-            // the message ended: latches go (they held until now), the plate with it
+            // the message ended: latches go (they held until now), the card with it
             this.latch = null;
             state = 'none'; reason = 'no message shown';
         } else if (shown === true && entry && entry.name && !reason) {
             const key = String(entry.id) + '\u0001' + entry.name;
             // can this message be ours at all?
             let why = '';
-            if (this.dead) why = 'drawing the plate threw ' + this.throws + ' times: ours is off until the app restarts';
-            else if (this.sheetLatch) why = 'our plate sheet was refused (pixel memory or an asset)';
+            if (this.dead) why = 'drawing the card threw ' + this.throws + ' times: ours is off until the app restarts';
+            else if (this.sheetLatch) why = 'our tab-2 sheet was refused (pixel memory or an asset)';
             else if (this.latch && this.latch.key === key) why = this.latch.why;
             else if (this.latch && this.latch.key === '*') why = this.latch.why;
             else if (this.strict && !this.confirmed) why = 'D7: not confirmed';
@@ -339,10 +398,10 @@ class TwinCC {
                 cand = { key, id: entry.id, name: String(entry.name).replace(/\s+/g, ' ').trim(), color: entry.color || null,
                     symbol: symbolFor(entry.id, entry.color), counter };
                 sev = severityOf(entry.color);
-                if (this.drawn && this.drawn.key === key && now - this.drawn.at >= this.settleMs) { state = 'ours'; reason = 'our plate is on the screen'; }
+                if (this.drawn && this.drawn.key === key && now - this.drawn.at >= this.settleMs) { state = 'ours'; reason = 'our card is on the screen'; }
                 else {
                     state = 'window';
-                    reason = this.drawn && this.drawn.key === key ? 'our plate was just sent (waiting ' + this.settleMs + ' ms)' : 'our plate is not on the screen yet';
+                    reason = this.drawn && this.drawn.key === key ? 'our card was just sent (waiting ' + this.settleMs + ' ms)' : 'our card is not on the screen yet';
                     this.needsTick = true;
                 }
             }
@@ -353,9 +412,8 @@ class TwinCC {
         }
         this.state = state; this.window = state === 'window'; this.reason = reason;
         this.candidate = cand;
-        if (!cand) this.drawn = null;             // hud.js clears the plate when there is nothing to show: its stamp goes too
+        if (!cand) this.drawn = null;             // nothing to show: the stamp goes too
         this.severity = state === 'none' ? 0 : (sev || (shown === true ? 1 : 0));
-        if (state === 'none' && this.drawn && !cand) { /* the plate is cleared by hud.js; its stamp goes with it */ }
         // the log line: one per change of what was decided (numbers and lengths only; the text never)
         const sig = [shownNow, entry ? entry.id : '-', entry ? entry.color : '-', entry && entry.name ? entry.name.length : 0, state, reason].join('|');
         if (sig !== this.sigLogged) {
@@ -378,7 +436,7 @@ class TwinCC {
         if (key === this.episodeKey) return;
         this.episodeKey = key; this.episode++;
         if (key === '0') this.latch = null;
-        // a new message: the old plate stamp is for another message (its key differs; kept until painted over)
+        // a new message: the old stamp is for another message (its key differs)
     }
 
     /** "n/m" while the car says which frame of how many it is on and that frame is this message. */
@@ -391,7 +449,7 @@ class TwinCC {
     }
 
     // ---- events from the engine ---------------------------------------------------------------------------------------------------
-    /** our plate for `key` was handed to the connection at `now` (one paint: cell, symbol, words, counter). */
+    /** (round 2's plate stamp: unused by the centre machine, which keeps one per message) */
     painted(key, now) {
         if (!key) { this.drawn = null; return; }
         if (!this.drawn || this.drawn.key !== key) this.drawn = { key, at: now };
@@ -402,17 +460,17 @@ class TwinCC {
         if (kind === 'throw') {
             this.throws++;
             if (this.throws >= MAX_THROWS) this.dead = true;
-            this.latch = { key: '*', why: 'drawing the plate threw' + (why ? ' (' + why + ')' : '') };
+            this.latch = { key: '*', why: 'drawing the card threw' + (why ? ' (' + why + ')' : '') };
         } else this.latch = { key, why: kind === 'glyph' ? 'a character of the name is missing from our font' + (why ? ' (' + why + ')' : '') : why };
         this.drawn = null;
-        this.logFn('cc: plate latched until the message ends: ' + this.latch.why);
+        this.logFn('cc: card latched until the message ends: ' + this.latch.why);
     }
 
-    /** our plate sheet could not be made (the service refused it): until the next rebuild. */
+    /** our tab-2 sheet could not be made (the service refused it): until the next rebuild. */
     sheetRefused(why) {
         if (this.sheetLatch) return;
         this.sheetLatch = true; this.drawn = null;
-        this.logFn('cc: plate sheet refused' + (why ? ' (' + why + ')' : '') + ': BMW\'s panel stays open for every message');
+        this.logFn('cc: tab-2 sheet refused' + (why ? ' (' + why + ')' : '') + ': BMW\'s panel stays open for every message');
     }
 
     /** layers were dropped and made again: nothing of ours is on the screen; a refusal may not repeat. */
@@ -420,10 +478,205 @@ class TwinCC {
 
     describe() {
         return { state: this.state, reason: this.reason, severity: this.severity, confirmed: this.confirmed, episode: this.episode,
-            plate: this.candidate ? this.candidate.key : null, drawn: this.drawn ? this.drawn.key : null,
+            card: this.candidate ? this.candidate.key : null, drawn: this.drawn ? this.drawn.key : null,
             latch: this.latch ? this.latch.why : null, sheetLatch: this.sheetLatch, dead: this.dead, throws: this.throws };
     }
 }
 
-module.exports = { TwinCC, paintPlate, wrapHeadline, severityOf, symbolFor, nightRgb, mono, SEV_NAMES, SEVERITY, SYMBOL_BY_ID, GENERIC,
-    PLATE, RULE, CELL, SYMBOL, HEAD, COUNTER, SETTLE_MS, GREY_RAMP };
+
+// ---- the centre machine ---------------------------------------------------------------------------------------------------------------
+/**
+ * The safety machine of the centre (SC's CentreCC, docs/twin-dial/r3/SC-REPORT.md section 4): TwinCC's verdict, the tab overlay,
+ * and the ordered operations of one turn. One decision per signal event or tick; the ENGINE sends what `update` returns.
+ *
+ * opts: { strict (true), confirmNow (false), settleMs (150), openSettleMs (150), base (1: the tab that shows without a
+ *         message), deps (layoutTab2's: { measure, has, fonts }), paint (page -> RGBA Buffer; may throw), sheetOn (true: the
+ *         layout has a tab-2 sheet), log,
+ *         mutant: null | 'noSettle' | 'ignoreTab' | 'rowsFirst' | 'windowLast' | 'wrongCard' | 'keepStamps' | 'cutRows'
+ *                 (a seam for the model's deliberately broken machines, tools/twin-dial/r3/sc/test.js; never set by the engine) }
+ *
+ * States, read by the engine: state (none | window | ours), window (BMW's panel is see-through), severity (0..4), tab (1..5),
+ * candidate (the message the card is for), reason, needsTick, applied ({ window, rows, tab, sig, warn }: what the last plan
+ * wants the screen to be, which is also what the "cc:row" toggle reads).
+ *
+ * Operations (update's `ops`, in the order to send): { op: 'rows', on } the bottom row's ink away / back; { op: 'window', open }
+ * BMW's panel see-through / covered; { op: 'tab', tab }; { op: 'page', sig, keys, kind } the tab-2 sheet's pixels (the engine
+ * takes the buffer from `buf`); { op: 'warn', look }. Opening ones first, the centre next, closing ones last.
+ */
+class TwinCentre {
+    constructor(opts) {
+        const o = opts || {};
+        this.t = new TwinCC({ strict: o.strict !== false, confirmNow: o.confirmNow === true, settleMs: o.settleMs, log: o.log });
+        this.settleMs = typeof o.settleMs === 'number' ? o.settleMs : SETTLE_MS;
+        // the open settle: a centre change that takes away the text BMW's panel relies on waits until the window has been
+        // open this long (the window and the tab-2 sheet are on different connections: no order between sockets)
+        this.openSettleMs = typeof o.openSettleMs === 'number' ? o.openSettleMs : SETTLE_MS;
+        this.deps = o.deps || null;
+        this.paint = typeof o.paint === 'function' ? o.paint : null;
+        this.sheetOn = o.sheetOn !== false;
+        this.mutant = o.mutant || null;
+        this.base = o.base || 1;                 // the tab without a message (the driver's last choice, or auto's)
+        this.pulled = false;                     // a message has taken tab 2 for this period
+        this.left = false;                       // the driver left tab 2 during this period
+        this.periodKeys = {};                    // the messages seen in this period (a new one pulls again)
+        this.onScreen = {};                      // key -> the time its whole text was first sent in the sheet still shown
+        this.openedAt = -Infinity;               // when the window-open op was sent (born open, blind); null while shut
+        this.applied = { window: true, rows: false, tab: null, sig: null, warn: null };   // what the service has (born blind)
+        this.state = 'window'; this.reason = 'the car\'s check-control messages have not been read yet';
+        this.window = true; this.severity = 0; this.tab = this.base; this.page = null; this.candidate = null;
+        this.needsTick = false; this.night = false; this.deferred = false; this.mutKey = null; this.paintFailed = false;
+        this.sigLogged = null; this.logs = 0;
+    }
+
+    // ---- what the engine reads of the verdict (so hud.js asks the same questions as before) ----
+    get confirmed() { return this.t.confirmed; }
+    get sheetLatch() { return this.t.sheetLatch; }
+    get dead() { return this.t.dead; }
+    get latch() { return this.t.latch; }
+
+    /** the driver chose tab n (the key or the app setting). During a message: leaving 2 is allowed and opens BMW's panel
+     *  in the same turn (the caller then runs update); going to 2 takes the card back. */
+    driver(n) {
+        if (n === 2) { if (this._period()) { this.pulled = true; this.left = false; } else this.base = 2; return; }
+        this.base = n;
+        if (this._period()) { this.pulled = false; this.left = true; }
+    }
+    /** an automatic choice (guidance -> 5, ...): it changes the base, never leaves tab 2 during a message period */
+    auto(n) { this.base = n; }
+    _period() { return this.t.state !== 'none'; }
+
+    /** layers dropped and made again: nothing of ours is on the screen. The new layers are born in the state this returns
+     *  (round 2's order: decided BEFORE the layers are made, so the backdrop is born with BMW's panel open while a message shows). */
+    rebuild() {
+        this.t.rebuilt(); this.onScreen = {};
+        const shown = this.t.state !== 'none';
+        this.applied = { window: shown, rows: !shown, tab: null, sig: null, warn: null };
+        this.page = null; this.openedAt = shown ? -Infinity : null;     // born open: open since the layer exists
+        this.paintFailed = false;
+        return { window: shown, rows: !shown };
+    }
+
+    /** our tab-2 sheet was refused by the service: BMW's panel stays open for every message until the next rebuild */
+    sheetRefused(why) { this.t.sheetRefused(why); this.onScreen = {}; }
+
+    /**
+     * One decision and its plan. inp: the engine's inputs (TwinCC's, plus `entries`). Returns
+     * { ops, state, tab, page, deferred, buf } - buf the sheet's pixels when ops carries a page that needs painting.
+     */
+    update(inp, now) {
+        const t = this.t, deps = this.deps;
+        let page = null, cand = null, buf = null, bufSig = null;
+        this.paintFailed = false;
+        for (let pass = 0; pass < 4; pass++) {
+            t.update(inp, now);
+            cand = t.candidate;
+            const shown = t.state !== 'none';
+            if (!shown) { this.pulled = false; this.left = false; this.periodKeys = {}; this.mutKey = null; }
+            // a message pulls tab 2: a new drawable one (its card), or - once per period - one that shows but ours cannot be drawn (the pointer
+            // page, SPEC-R3 5.1). NOT the blind keep-open (severity 0: nothing is known to show; package B2's convention: a window with
+            // no severity is not a message)
+            const pullKey = cand ? cand.key : (shown && t.severity > 0 && !this.left ? '#nodraw' : null);
+            if (shown && pullKey && !this.periodKeys[pullKey]) { this.periodKeys[pullKey] = true; this.pulled = true; this.left = false; }
+            this.tab = this.pulled ? 2 : this.base;
+            buf = null; bufSig = null;
+            if (this.tab !== 2) { page = { kind: 'other', tab: this.tab, keys: [], sig: 'tab' + this.tab }; break; }
+            if (!this.sheetOn || !deps || this.paintFailed) { page = { kind: 'blank', keys: [], sig: 'blank' }; break; }
+            let c = cand;
+            if (c && this.mutant === 'wrongCard') { this.mutKey = this.mutKey || c.key; c = Object.assign({}, c, { key: this.mutKey }); }
+            // (mutant wrongCard: the card keeps the period's first message and the real one is believed drawn, so no row)
+            const ents = this.mutant === 'wrongCard' && cand ? (inp.entries || []).filter((e) => keyOf(e) !== cand.key) : inp.entries;
+            page = layoutTab2({ cand: c, shown, sev: t.severity, entries: ents, night: this.night }, deps);
+            // painting can fail before anything is sent: a glyph our font lacks (the headline, the counter), a throw
+            if (cand && page.card) {
+                const F = deps.fonts || FONTS;
+                const miss = missingChars(deps, F.head, cand.name) + missingChars(deps, F.counter, cand.counter || '');
+                if (miss) { t.fail('glyph', cand.key, miss.length + ' characters'); continue; }
+            }
+            if (this.paint && page.sig !== this.applied.sig) {
+                try { buf = this.paint(page); bufSig = page.sig; }
+                catch (e) {
+                    if (cand) t.fail('throw', cand.key, String(e && e.message || e).slice(0, 80));
+                    else { t.fail('throw', '*', String(e && e.message || e).slice(0, 80)); this.paintFailed = true; }
+                    continue;
+                }
+            }
+            break;
+        }
+        // the open settle: while BMW's panel must open (or is opening), the centre may not take away text we relied on
+        // before the window has been open openSettleMs - the page change waits (the tab bar's fill does not)
+        const shownNow = t.state !== 'none';
+        const relied = Object.keys(this.onScreen).filter((k) => page.keys.indexOf(k) < 0);
+        const openFor = this.openedAt === null || this.applied.window !== true ? -1 : now - this.openedAt;
+        const noDefer = this.mutant === 'windowLast' || this.mutant === 'ignoreTab' || this.openSettleMs <= 0;
+        let deferred = false;
+        if (!noDefer && shownNow && relied.length && this.page && this.page.sig !== page.sig && openFor < this.openSettleMs) {
+            const at0 = cand ? this.onScreen[cand.key] : undefined;
+            const wouldBeOurs = cand && at0 !== undefined && now - at0 >= this.settleMs && this.tab === 2 && page.keys.indexOf(cand.key) >= 0;
+            if (!wouldBeOurs) { page = this.page; deferred = true; buf = null; }
+        }
+        // which messages' text the sheet will carry whole after this turn, and since when (continuous presence)
+        const sent = page.keys.slice();     // what the pixels carry whole (the op); `keys` are what the machine stamps
+        let keys = page.keys.slice();
+        if (this.mutant === 'cutRows' && page.rows) keys = keys.concat(page.rows.filter((r) => r.cut).map((r) => r.key));
+        const next = {};
+        if (this.mutant === 'keepStamps' || (this.mutant === 'ignoreTab' && this.tab !== 2)) Object.keys(this.onScreen).forEach((k) => { next[k] = this.onScreen[k]; });
+        if (this.mutant === 'wrongCard' && cand && page.card && page.card.key !== cand.key) keys = keys.map((k) => (k === page.card.key ? cand.key : k));
+        keys.forEach((k) => { next[k] = this.onScreen[k] !== undefined ? this.onScreen[k] : now; });
+        this.onScreen = next;
+        // the verdict: ours only if the shown message's text has been in the visible sheet settleMs
+        const shown = t.state !== 'none';
+        const at = cand ? this.onScreen[cand.key] : undefined;
+        const settled = at !== undefined && (this.mutant === 'noSettle' || now - at >= this.settleMs);
+        const tabOk = (this.tab === 2 && !deferred) || this.mutant === 'ignoreTab';
+        let state, reason;
+        if (!shown) { state = 'none'; reason = t.reason; }
+        else if (cand && settled && tabOk) { state = 'ours'; reason = 'our text for the shown message is on the screen'; }
+        else if (cand && !this.sheetOn) { state = 'window'; reason = 'the layout has no tab-2 sheet'; }
+        else if (cand && this.tab !== 2) { state = 'window'; reason = this.left ? 'the driver left tab 2: our text is not on the screen' : 'tab 2 is not shown'; }
+        else if (cand) { state = 'window'; reason = 'our card was just sent (waiting ' + this.settleMs + ' ms)'; }
+        else { state = 'window'; reason = inp.released ? 'released to the list: ' + t.reason : t.reason; }
+        this.state = state; this.reason = reason; this.severity = t.severity; this.page = page; this.candidate = cand;
+        this.window = state === 'window';
+        const sig = state + '|' + this.tab + '|' + reason + '|' + page.kind;
+        if (sig !== this.sigLogged && this.logs < 400) {       // one line per change; numbers and our own words only, never a message's
+            this.sigLogged = sig; this.logs++;
+            t.logFn('cc: centre ' + state + ', tab ' + this.tab + ', page ' + page.kind + ' (' + reason + ')');
+        }
+        this.needsTick = !!(shown && cand && this.sheetOn && this.tab === 2 && state !== 'ours') || deferred;
+        this.deferred = deferred;
+        const warn = this.tab === 2 ? 'W3' : shown ? 'W2' : (inp.entries || []).length ? 'W1' : 'W0';
+        const ops = this._plan({ window: state === 'window', rows: state !== 'window', tab: this.tab, sig: page.sig, keys: sent, kind: page.kind, warn });
+        ops.forEach((op) => { if (op.op === 'window') this.openedAt = op.open ? now : null; });
+        const doPage = ops.some((op) => op.op === 'page');
+        return { ops, state, tab: this.tab, page, deferred, buf: doPage && buf && bufSig === page.sig ? buf : null };
+    }
+
+    /** The ordered operations from what the service has to what is wanted. Opening (rows aside, window open) first, the
+     *  centre next, closing (window shut, rows back) last: under any partial application the panel is open before our
+     *  text changes, and it shuts only on text sent in an EARLIER turn (the settle). */
+    _plan(want) {
+        const a = this.applied, ops = [];
+        const open = [], centre = [], close = [];
+        if (!want.rows && a.rows !== false) open.push({ op: 'rows', on: false });
+        if (want.window && a.window !== true) open.push({ op: 'window', open: true });
+        if (want.tab !== a.tab) centre.push({ op: 'tab', tab: want.tab });
+        if (want.sig !== a.sig) centre.push({ op: 'page', sig: want.sig, keys: want.keys, kind: want.kind });
+        if (want.warn !== a.warn) centre.push({ op: 'warn', look: want.warn });
+        if (!want.window && a.window !== false) close.push({ op: 'window', open: false });
+        if (want.rows && a.rows !== true) close.push({ op: 'rows', on: true });
+        if (this.mutant === 'rowsFirst') { ops.push.apply(ops, close.reverse()); ops.push.apply(ops, open.reverse()); ops.push.apply(ops, centre); }
+        else if (this.mutant === 'windowLast') { ops.push.apply(ops, centre); ops.push.apply(ops, open); ops.push.apply(ops, close); }
+        else { ops.push.apply(ops, open); ops.push.apply(ops, centre); ops.push.apply(ops, close); }
+        this.applied = { window: want.window, rows: want.rows, tab: want.tab, sig: want.sig, warn: want.warn };
+        return ops;
+    }
+
+    describe() {
+        const d = this.t.describe();
+        return Object.assign(d, { state: this.state, reason: this.reason, severity: this.severity, tab: this.tab, page: this.page ? this.page.kind : null,
+            applied: this.applied, deferred: this.deferred });
+    }
+}
+
+module.exports = { TwinCC, TwinCentre, layoutTab2, paintSheet, wrapWords, missingChars, keyOf, severityOf, symbolFor, nightRgb, mono, SEV_NAMES, SEVERITY,
+    SYMBOL_BY_ID, GENERIC, SHEET, SHEET_RECT, CELL, SYMBOL, HEAD, COUNTER, ROWS, POINTER, EMPTY, FONTS, SETTLE_MS, GREY_RAMP };

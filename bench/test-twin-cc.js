@@ -1,22 +1,29 @@
 'use strict';
 /**
- * test-twin-cc.js - Twin Dial's check-control messages (package D of round 2; docs/twin-dial/R2-D-REPORT.md).
+ * test-twin-cc.js - Twin Dial's check-control messages in the CENTRE (package B3 of the 0.1.1 build; docs/twin-dial/SPEC-R3.md 5;
+ * docs/twin-dial/r3b/B3-REPORT.md). Round 2's bottom plate is gone: the message is tab 2's card.
  *
  *   node bench/test-twin-cc.js
  *
- * Part 1, without the engine: shared/twin_cc.js on its own - the symbol table equals VT's, the headline wraps to two lines
- * with "...", severity, the plate's raster (opaque, one paint, covers BMW's panel and nothing it must not), and the
- * state machine (VG report 5.4's cases, the D7 latch, both witnesses, the latches) with an injected clock.
- *
- * Part 2, the real engine (shared/hud.js, built by the kit as the Store builds it) in this process, against a stand-in
- * cluster-render that models the service's rules (layer caps, pixel memory, refusals): the engine's own clients keep every
- * layer, uniform and pixel they sent, and after EVERY turn of the event loop in which anything was sent (a frame: all
- * the engine's messages of one turn are applied together by the service) the audit looks at BMW's panel:
- *     while the car says a message shows (or may show), BMW's panel is covered by us ONLY IF the plate on the screen is
- *     our plate for exactly that message (pixel for pixel), and the bottom row's ink never sits in the panel then.
- * That is VG 5.4 cases 1-9 on the stand-in layouts (a plain black backdrop with the fallback hole, the bottom row, the plate;
- * tdback and C's layout are B's and C's: once they land, test-twin-layout.js and the lead's merge run this on them), and
- * three mutants prove the audit is not vacuous: break the engine in three ways and it must fail.
+ * Part 1, without the engine: shared/twin_cc.js on its own - the symbol table equals VT's, severity, the sheet's layout (the card
+ *   wraps to 3 lines, rows 6 / 2 / 1 / 0, the pointer and the empty page, a row counts only when its whole name fits) and raster
+ *   (opaque, ONE paint, every item where SPEC-R3 5.1 puts it, clear of BMW's keep-outs), TwinCC (the verdict: VG 5.4's cases,
+ *   D7, both witnesses, the latches) with an injected clock.
+ * Part 2, the model: SC's 35 cases in every way the service may apply a turn (atomically, op by op, every interleaving of the
+ *   connections) with and without the narrowed release, and eight deliberately broken machines (tools/twin-dial/r3/sc/test.js).
+ * Part 3, the real engine (shared/hud.js, built by the kit as the Store builds it) in this process, against a stand-in
+ *   cluster-render that models the service's rules (layer caps, pixel memory, refusals): the engine's own clients keep every
+ *   layer, uniform and pixel they sent, and after EVERY turn of the event loop in which anything was sent the audit looks at BMW's
+ *   panel and at tab 2's sheet, pixel for pixel:
+ *     V1  while the car says a message shows (or may show) BMW's panel is covered by us ONLY IF our card for exactly that message,
+ *         or a row with its whole name, is completely on the sheet (compared with an independent render), and has been for 150 ms;
+ *     V2  the bottom row's ink never sits in an open panel;
+ *     V3  the centre never takes away the text the cover relied on before the window has been open 150 ms (the window and the
+ *         sheet are on different connections: nothing orders sockets);
+ *     V4  the bottom row's layer and the window's backdrop are on one connection;
+ *     V5  no layer of ours reaches BMW's belt group or the gear-letter gap.
+ *   Six deliberately broken engines must each make the audit fail (the row never steps aside, the window never opens, a stale
+ *   card stays, a card for the wrong message, the 150 ms waits removed, the row left on connection 2).
  *
  * Mac only, Node 18 or newer. Never shipped. It builds into dist/ and uses apps/twin_cc_test/ for the time it runs.
  */
@@ -29,6 +36,7 @@ const { execFileSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const F30 = path.join(ROOT, 'apps', 'f30_cluster');
+const TWIN = path.join(ROOT, 'apps', 'twin_dial');
 const APP_ID = 'twin_cc_test';
 const APP_DIR = path.join(ROOT, 'apps', APP_ID), STAGE = path.join(ROOT, 'dist', APP_ID);
 
@@ -36,11 +44,11 @@ let passed = 0, failed = 0;
 const ok = (cond, what) => { if (cond) { passed++; console.log('  ok   ' + what); } else { failed++; console.log('  FAIL ' + what); } };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// ---- fonts for the plate outside the engine: hud_data wants the kit's pack; read the f30 fonts as plain files --------------
+// ---- fonts for the sheet outside the engine: hud_data wants the kit's pack; read Twin Dial's own atlases as plain files -------------
 const realLoad = Module._load;
 Module._load = function (req) {
     if (req === './kit/pack' && !global.__twinCcEngine) {
-        return { open: () => ({ json: (rel) => { try { return JSON.parse(fs.readFileSync(path.join(F30, 'hud', rel), 'utf8')); } catch (e) { return {}; } } }) };
+        return { open: () => ({ json: (rel) => { for (const d of [path.join(TWIN, 'hud'), path.join(F30, 'hud')]) { try { return JSON.parse(fs.readFileSync(path.join(d, rel), 'utf8')); } catch (e) { /* next */ } } return {}; } }) };
     }
     return realLoad.apply(this, arguments);
 };
@@ -48,7 +56,10 @@ const T = require(path.join(ROOT, 'shared', 'twin_cc.js'));
 const textRaster = require(path.join(ROOT, 'shared', 'hud_text.js'));
 const icons = require(path.join(ROOT, 'shared', 'icons.js'));
 const deps = { textRaster, paintIcon: icons.paintIcon, icons: icons.ICONS };
-const FONT = 'wb_msg';          // the stand-in for Noto 42 / 29 (Cyrillic, the car's punctuation); A1's atlases come with the app
+const FONTS = T.FONTS;           // td_msg 42, td_cnt 29, td_tab 33, td_val 39: Twin Dial's own atlases
+const layDeps = { measure: (f, s) => textRaster.measure(s, f, 0), has: (f, ch) => !!textRaster.loadFont(f).metrics.glyphs[ch], fonts: FONTS };
+const hit = (a, b) => a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3];
+const BELT = [497, 660, 688, 720], GAP = [1380, 660, 1460, 720], BMW_PANEL = [696, 595.75, 1226, 704];
 
 // =====================================================================================================================
 // Part 1: the module on its own
@@ -75,70 +86,79 @@ function unitChecks() {
         T.SEVERITY[1].rule.join() === '231,231,231' && T.SEVERITY[3].symbol.join() === '0,0,0',
         'the severity colours are SPEC 7.1 / 8.2 in B\'s black-floor-corrected codes (red 176 7 30, amber 240 170 10 with a black symbol, green 59 155 26, grey rule 231)');
 
-    // the headline
-    const measure = (s) => textRaster.measure(s, FONT, 0);
-    const w1 = T.wrapHeadline('Driver door open', measure, 441, 441, '…');
-    ok(w1.lines.length === 1 && !w1.cut && w1.lines[0] === 'Driver door open', 'a short headline is one line');
-    const long2 = 'Tyre pressure low, check all four tyres soon please';
-    const w2 = T.wrapHeadline(long2, measure, 441, 441, '…');
-    ok(w2.lines.length === 2 && !w2.cut && w2.lines.every((l) => measure(l) <= 441) && w2.lines.join(' ') === long2, 'a longer one wraps at a space to two lines inside 441 px, losing no word');
-    const huge = 'Front passenger restraint system malfunction: the belt tensioner and the airbag may not work in an accident, have it checked';
-    const w3 = T.wrapHeadline(huge, measure, 441, 441, '…');
-    ok(w3.lines.length === 2 && w3.cut && /…$/.test(w3.lines[1]) && w3.lines.every((l) => measure(l) <= 441), 'too much text: two lines, the second ends in "…" and fits 441 px');
-    const w4 = T.wrapHeadline(huge, measure, 441, 399, '…');
-    ok(w4.lines.length === 2 && measure(w4.lines[1]) <= 399, 'with a counter, line 2 stops at x 1182 (399 px from the text start)');
-    const w5 = T.wrapHeadline('A' + 'W'.repeat(60), measure, 441, 441, '…');
-    ok(w5.lines.length === 2 && w5.lines.every((l) => measure(l) <= 441), 'a single word wider than the line is broken between letters');
-    ok(T.wrapHeadline('   ', measure, 441, 441).lines[0] === '', 'blank text is an empty line');
+    // ---- the sheet's layout (SPEC-R3 5.1) ----
+    const S = T.SHEET;
+    const mkc = (id, name, color, counter) => ({ key: String(id) + '\u0001' + name, id, name, color, counter: counter || '' });
+    const lay = (cand, entries, o) => T.layoutTab2(Object.assign({ cand, shown: !!cand, sev: cand ? T.severityOf(cand.color) : 0, entries: entries || [], night: false }, o || {}), layDeps);
+    const one = lay(mkc(15, 'Двері відчинено', 'white'));
+    const two = lay(mkc(50, 'Тиск у шинах: перевірте', 'yellow'));
+    const three = lay(mkc(42, 'Несправність гальм: зупиніться в безпечному місці', 'red'));
+    const cut = lay(mkc(42, 'Несправність гальмівної системи: обережно зупиніться та зверніться до сервісу', 'red'));
+    ok(one.card.lines.length === 1 && two.card.lines.length === 2 && three.card.lines.length === 3 && !three.card.cut && cut.card.lines.length === 3 && cut.card.cut && /…$/.test(cut.card.lines[2]),
+        'the headline wraps by words to 1 / 2 / 3 lines inside 436 px (Noto 42) and a longer one ends line 3 in "…" (' + [one, two, three, cut].map((p) => p.card.lines.length).join(' / ') + ')');
+    ok(one.card.bases.join() === '424' && two.card.bases.join() === '424,471' && three.card.bases.join() === '424,471,518', 'baselines 424 / 471 / 518 (SPEC-R3 5.1)');
+    ok([one, two, three, cut].every((p) => p.card.lines.every((l) => layDeps.measure(FONTS.head, l) <= T.HEAD.maxW)), 'every headline line fits 436 px');
+    const rowsE = [];
+    for (let i = 0; i < 9; i++) rowsE.push({ id: 100 + i, name: 'Повідомлення ' + (i + 1), color: i === 4 ? 'red' : i === 6 ? 'yellow' : 'white' });
+    const withRows = (c) => lay(c, rowsE).rows.length;
+    ok(withRows(mkc(15, 'Двері відчинено', 'white')) === 2 && withRows(mkc(50, 'Тиск у шинах: перевірте', 'yellow')) === 1 && withRows(mkc(42, 'Несправність гальм: зупиніться в безпечному місці', 'red')) === 0 && lay(null, rowsE).rows.length === 6,
+        'rows: 2 under a one-line card, 1 under two lines, none under three; 6 on the list page (pitch 44, y 300 to 564)');
+    const lst = lay(null, rowsE);
+    ok(lst.kind === 'list' && lst.rows[0].sev === 4 && lst.rows[1].sev === 3 && lst.more === 3 && lst.rows.every((r, i) => r.top === 300 + 44 * i), 'the list: red first, then amber, then the car\'s order; the rest is counted for the scroll line (' + lst.more + ' more)');
+    ok(lay(null, []).kind === 'empty' && lay(null, [], { shown: true, sev: 4 }).kind === 'pointer' && lay(null, [], { shown: true }).card.lines.join('|') === 'Повідомлення|на панелі внизу', 'the empty page and the pointer page ("Повідомлення / на панелі внизу")');
+    const longRow = lay(null, [{ id: 41, name: 'Потрібне сервісне обслуговування найближчим часом', color: 'white' }, { id: 15, name: 'Двері відчинено', color: 'white' }]);
+    ok(longRow.rows[0].cut && !longRow.rows[1].cut && longRow.keys.indexOf(longRow.rows[0].key) < 0 && longRow.keys.indexOf(longRow.rows[1].key) >= 0,
+        'a row counts as our text for its message only when its WHOLE name fits (the cut one does not)');
+    const greek = lay(null, [{ id: 17, name: 'Πόρτα ανοιχτή', color: 'white' }]);
+    ok(greek.rows.length === 0 && greek.keys.length === 0, 'a row whose name has a glyph the font lacks is not drawn and counts for nothing');
+    ok(lay(mkc(15, 'Двері відчинено', 'white'), [{ id: 15, name: 'Двері відчинено', color: 'white' }]).rows.length === 0, 'the shown message is the card, never also a row');
+    ok(one.sig !== lay(mkc(15, 'Двері відчинено', 'white', '1/2')).sig && one.sig !== lay(mkc(15, 'Двері відчинено', 'white'), [], { night: true }).sig && one.sig === lay(mkc(15, 'Двері відчинено', 'white')).sig,
+        'the sig changes with the counter and the night, not otherwise (the stamp of a message keeps its time across those)');
 
-    // the plate raster
-    const msg = { id: 15, name: 'Driver door open', color: 'white', counter: '' };
-    const P = T.paintPlate(deps, msg, { font: FONT, counterFont: FONT });
-    const W = T.PLATE.w, H = T.PLATE.h;
+    // ---- the sheet's raster ----
+    const P = T.paintSheet(deps, one, { night: false });
+    const W = S.w, H = S.h;
+    const at = (b, x, y) => { const o = ((y - S.y) * W + (x - S.x)) * 4; return [b[o], b[o + 1], b[o + 2], b[o + 3]]; };
     let opaque = true;
     for (let i = 3; i < P.buf.length; i += 4) if (P.buf[i] !== 255) { opaque = false; break; }
-    ok(P.buf.length === W * H * 4 && opaque, 'the plate is opaque black everywhere ' + W + ' x ' + H + ' (it covers BMW\'s panel whole)');
-    const poly = JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'twin-dial', 'vf', 'message_panel.json'), 'utf8')).fallback_window.polygon_px;
-    const inPlate = poly.every((p) => p[0] >= T.PLATE.x + 1.5 && p[0] <= T.PLATE.x + W - 1.5 && p[1] >= T.PLATE.y + 1.5 && p[1] <= T.PLATE.y + H - 1.5);
-    ok(inPlate, 'the fallback window\'s polygon (' + poly.length + ' points) lies inside the plate with at least 1.5 px to spare');
-    const belt = [497, 660, 688, 720], gap = [1380, 660, 1460, 720];
-    const hit = (a, b) => a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3];
-    const rect = [T.PLATE.x, T.PLATE.y, T.PLATE.x + W, T.PLATE.y + H];
-    ok(!hit(rect, belt) && !hit(rect, gap) && rect[0] >= 694 && rect[2] <= 1230, 'the plate rectangle ' + JSON.stringify(rect) + ' touches neither BMW\'s belt group nor the gear-letter gap');
-    const px = (x, y) => { const o = ((y - T.PLATE.y) * W + (x - T.PLATE.x)) * 4; return [P.buf[o], P.buf[o + 1], P.buf[o + 2]]; };
-    ok(px(900, 612).join() === '231,231,231' && px(900, 614).join() === '231,231,231' && px(900, 610).join() === '0,0,0' && px(900, 615).join() === '0,0,0',
-        'the rule is 4 px (y 611-614) in the severity colour (grey 231 for a white message), black above and below');
-    const red = T.paintPlate(deps, { id: 50, name: 'Brake', color: 'red' }, { font: FONT });
-    const amber = T.paintPlate(deps, { id: 50, name: 'Brake', color: 'orange' }, { font: FONT });
-    const green = T.paintPlate(deps, { id: 50, name: 'Brake', color: 'green' }, { font: FONT });
-    const at = (r, x, y) => { const o = ((y - T.PLATE.y) * W + (x - T.PLATE.x)) * 4; return [r.buf[o], r.buf[o + 1], r.buf[o + 2]].join(); };
-    ok(at(red, 900, 612) === '176,7,30' && at(amber, 900, 612) === '240,170,10' && at(green, 900, 612) === '59,155,26', 'the rule takes red 176 7 30, amber 240 170 10, green 59 155 26');
-    ok(at(red, 705, 640) === '176,7,30' && at(amber, 705, 640) === '240,170,10' && at(green, 705, 640) === '59,155,26', 'the symbol cell is flat in the severity colour');
-    const g1 = at(P, 705, 626).split(',')[0] | 0, g2 = at(P, 705, 705).split(',')[0] | 0;
-    ok(g1 < g2 && g2 >= 100 && g2 <= 112, 'the grey cell is the tab ramp\'s gradient (top ' + g1 + ' to bottom ' + g2 + ' of 255)');
-    let whiteIn = 0, ink = 0;
-    for (let y = 640; y < 690; y++) for (let x = 710; x < 764; x++) { const o = ((y - T.PLATE.y) * W + (x - T.PLATE.x)) * 4; if (P.buf[o] > 200 && P.buf[o + 1] > 200 && P.buf[o + 2] > 200) whiteIn++; }
-    const am = T.paintPlate(deps, { id: 9999, name: 'x', color: 'yellow' }, { font: FONT });
-    for (let y = 640; y < 690; y++) for (let x = 710; x < 764; x++) { const o = ((y - T.PLATE.y) * W + (x - T.PLATE.x)) * 4; if (am.buf[o] < 60 && am.buf[o + 1] < 60) ink++; }
-    ok(whiteIn > 100 && ink > 100, 'the symbol is white on grey / red / green and black on amber (' + whiteIn + ' white px, ' + ink + ' black px)');
-    // the headline starts at x 783, below y 650
-    let left = 1e9;
-    for (let y = 640; y < 700; y++) for (let x = 770; x < 1230; x++) { const o = ((y - T.PLATE.y) * W + (x - T.PLATE.x)) * 4; if (P.buf[o] > 100) left = Math.min(left, x); }
-    ok(left >= 783 - 3 && left <= 783 + 6, 'the headline\'s first ink is at x ' + left + ' (783 plus the glyph\'s side bearing)');
-    ok(P.lines.length === 1 && P.bases[0] === 680, 'one line sits on baseline 680, two on 656 / 703');
-    const two = T.paintPlate(deps, { id: 15, name: long2, color: 'white' }, { font: FONT });
-    ok(two.lines.length === 2 && two.bases.join() === '656,703', 'two lines: baselines 656 and 703');
-    const cnt = T.paintPlate(deps, { id: 15, name: 'Driver door open', color: 'white', counter: '2/3' }, { font: FONT, counterFont: FONT });
-    let cr = 0;
-    for (let y = 684; y < 708; y++) for (let x = 1100; x < 1230; x++) { const o = ((y - T.PLATE.y) * W + (x - T.PLATE.x)) * 4; if (cnt.buf[o] > 100) cr = Math.max(cr, x); }
-    ok(cr >= 1224 - 8 && cr <= 1224, 'the counter "2/3" is right-aligned at x 1224 on line 2 (last ink at x ' + cr + ')');
-    ok(!P.buf.equals(cnt.buf) && P.buf.equals(T.paintPlate(deps, msg, { font: FONT, counterFont: FONT }).buf), 'the plate is deterministic and the counter changes it');
-    const nightP = T.paintPlate(deps, msg, { font: FONT, night: true });
-    ok(!nightP.buf.equals(P.buf) && T.nightRgb([255, 255, 255], 0.8).join() === '231,231,231' && T.nightRgb([218, 16, 48], 0.85).join() === '203,14,44',
-        'the night plate is the same drawing in the night multipliers (white 0.8 = 231, red 0.85 = 203 14 44, as VC\'s palette)');
+    ok(P.buf.length === W * H * 4 && opaque, 'the sheet is opaque black everywhere, ' + W + ' x ' + H + ' at [' + T.SHEET_RECT.join(', ') + '] (it hides the clock or trip page under it)');
+    ok(!hit(T.SHEET_RECT, BELT) && !hit(T.SHEET_RECT, GAP) && !hit(T.SHEET_RECT, BMW_PANEL) && T.SHEET_RECT[1] >= 297.5 && T.SHEET_RECT[0] >= 729 && T.SHEET_RECT[2] <= 1191,
+        'the sheet touches neither the belt group, the gear-letter gap nor BMW\'s panel, and lies under the title rule inside the centre window');
+    const card = (color, name, o2) => T.paintSheet(deps, lay(mkc(42, name || 'Тест', color, (o2 && o2.counter) || '')), o2 || {});
+    ok(at(card('red').buf, 930, 312).slice(0, 3).join() === '176,7,30' && at(card('yellow').buf, 930, 312).slice(0, 3).join() === '240,170,10' && at(card('green').buf, 930, 312).slice(0, 3).join() === '59,155,26',
+        'the symbol cell [922, 306, 998, 382] is flat in the severity colour (red 176 7 30, amber 240 170 10, green 59 155 26)');
+    const g1 = at(P.buf, 925, 308)[0], g2 = at(P.buf, 925, 380)[0];
+    ok(g1 < g2 && g2 >= 90 && g2 <= 112 && at(P.buf, 921, 340).join() === '0,0,0,255' && at(P.buf, 998, 340).join() === '0,0,0,255', 'the grey cell is the tab ramp\'s gradient (top ' + g1 + ' to bottom ' + g2 + ' of 255), exactly the cell\'s box');
+    let whiteIn = 0, blackIn = 0;
+    const am = card('yellow');
+    for (let y = 317; y < 371; y++) for (let x = 933; x < 987; x++) { const a = at(P.buf, x, y), b = at(am.buf, x, y); if (a[0] > 200 && a[1] > 200) whiteIn++; if (b[0] < 60 && b[1] < 60) blackIn++; }
+    ok(whiteIn > 100 && blackIn > 100, 'the symbol (54 px at (960, 344)) is white on grey, black on amber (' + whiteIn + ' white px, ' + blackIn + ' black px)');
+    // the headline: centred on x 960, ink between baselines - cap and + descent
+    const inkBox = (b, x0, y0, x1, y1, th) => { let r = [1e9, 1e9, -1, -1]; for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { const a = at(b, x, y); if (a[0] > (th || 100)) { r = [Math.min(r[0], x), Math.min(r[1], y), Math.max(r[2], x), Math.max(r[3], y)]; } } return r; };
+    const ib = inkBox(P.buf, 735, 395, 1185, 440);
+    ok(Math.abs((ib[0] + ib[2]) / 2 - 960) <= 6 && ib[3] <= 424 + 12 && ib[1] >= 424 - 36, 'one headline line: centred on x 960 (ink ' + ib[0] + '..' + ib[2] + '), on baseline 424 (ink y ' + ib[1] + '..' + ib[3] + ')');
+    const ib3 = inkBox(T.paintSheet(deps, three, {}).buf, 735, 487, 1185, 535);
+    ok(ib3[3] >= 518 - 2 && ib3[3] <= 518 + 12, 'a three-line card puts its third line on baseline 518 (ink to y ' + ib3[3] + ')');
+    const cnt = T.paintSheet(deps, lay(mkc(15, 'Двері відчинено', 'white', '2/3')), {});
+    const ic = inkBox(cnt.buf, 1050, 300, 1191, 340);
+    ok(ic[2] <= 1180 && ic[2] >= 1180 - 6 && ic[3] <= 326 + 2 && ic[3] >= 326 - 2 && ic[1] >= 298, 'the counter "2/3" is top right: right edge x ' + ic[2] + ' (1180), baseline 326 (ink to y ' + ic[3] + '), under the sheet\'s top');
+    ok(!P.buf.equals(cnt.buf) && P.buf.equals(T.paintSheet(deps, lay(mkc(15, 'Двері відчинено', 'white')), {}).buf), 'the sheet is deterministic and the counter changes it');
+    const rp = T.paintSheet(deps, lay(mkc(15, 'Двері відчинено', 'white'), [{ id: 164, name: 'Мало рідини омивача', color: 'white' }, { id: 50, name: 'Тиск у шинах: перевірте', color: 'yellow' }]), {});
+    const r1 = inkBox(rp.buf, 775, 450, 1185, 494), ri = inkBox(rp.buf, 741, 450, 775, 494, 60);
+    ok(r1[0] >= 781 - 1 && r1[0] <= 781 + 6 && r1[3] <= 450 + 33 + 12 && ri[0] >= 741 && ri[2] <= 773, 'a row: name from x 781 on baseline top + 33, the 32 px symbol at x 741 (first row top 450)');
+    let amberSeen = 0;
+    for (let y = 450 + 6; y < 450 + 38; y++) for (let x = 741; x < 773; x++) { const a = at(rp.buf, x, y); if (a[0] > 150 && a[1] > 90 && a[2] < 60) amberSeen++; }
+    ok(amberSeen > 20, 'the amber message\'s row symbol is amber (240, 170, 10): ' + amberSeen + ' px');
+    const sc = T.paintSheet(deps, lay(null, rowsE), {});
+    ok(at(sc.buf, 1189, 320)[0] >= 150 && at(sc.buf, 1189, 560)[0] <= 60 && at(sc.buf, 1189, 560)[0] >= 30 && at(sc.buf, 1180, 320)[0] < 20, 'the scroll line at x 1188..1191: a thumb at the top, a track below, only when more rows exist');
+    const nightP = T.paintSheet(deps, one, { night: true });
+    ok(!nightP.buf.equals(P.buf) && T.nightRgb([255, 255, 255], 0.8).join() === '231,231,231' && T.nightRgb([218, 16, 48], 0.85).join() === '203,14,44', 'the night sheet is the same drawing in the night multipliers (white 0.8 = 231, red 0.85 = 203 14 44)');
+    const empty = T.paintSheet(deps, lay(null, []), {}), pointer = T.paintSheet(deps, lay(null, [], { shown: true, sev: 4 }), {});
+    ok(inkBox(empty.buf, 735, 300, 1185, 520, 60)[3] > 0 && inkBox(pointer.buf, 735, 395, 1185, 480)[3] > 0 && at(pointer.buf, 930, 312).slice(0, 3).join() === '176,7,30', 'the empty page ("Немає повідомлень") and the pointer page (a red cell and our two fixed lines) paint');
     let thrown = false;
-    try { T.paintPlate({ textRaster, paintIcon: icons.paintIcon, icons: icons.ICONS }, msg, { font: 'no_such_font' }); } catch (e) { thrown = true; }
+    try { T.paintSheet(deps, one, { fonts: { head: 'no_such_font', counter: 'td_cnt', row: 'td_tab', text: 'td_val' } }); } catch (e) { thrown = true; }
     ok(thrown, 'a font that will not load throws (the engine latches that: window stays open)');
+    ok(T.missingChars(layDeps, FONTS.head, 'Πόρτα').length === 5 && T.missingChars(layDeps, FONTS.head, 'Двері') === '', 'missingChars names the characters a font lacks (Greek)');
 }
 
 // ---- the state machine alone, with an injected clock --------------------------------------------------------------------
@@ -290,28 +310,42 @@ function machineChecks() {
 }
 
 // =====================================================================================================================
-// Part 2: the engine
+// Part 2: the model (SC's 35 cases, the connection assignments, the eight broken machines)
+// =====================================================================================================================
+function modelChecks() {
+    console.log('the model: SC\'s cases against shared/twin_cc.js (tools/twin-dial/r3/sc/test.js)');
+    const M = require(path.join(ROOT, 'tools', 'twin-dial', 'r3', 'sc', 'test.js'));
+    const r = M.main();
+    passed += r.passed; failed += r.failed;
+}
+
+// =====================================================================================================================
+// Part 3: the engine
 // =====================================================================================================================
 const RECT = [696, 595, 1226, 704];                // BMW's message panel (bbox of zc.panel dilated 3 px, rounded out)
 const HOLE = [696, 595, 530, 109];                 // the stand-in backdrop's fallback hole: x, y, w, h
-const PLATE_RECT = [T.PLATE.x, T.PLATE.y, T.PLATE.w, T.PLATE.h];
+const SHEET_RECT = [T.SHEET.x, T.SHEET.y, T.SHEET.w, T.SHEET.h];
+const SYM = { x: 0 };
 
 const LAY = (name, extra) => {
+    const rc = extra && extra.rowConn ? extra.rowConn : 0;
+    const row = (id, x, y, w, h, text) => Object.assign({ id, type: 'text', class: 'content', z: 8, x, y, w, h, text, font: 'td_row', color: 'fg', align: 'right', toggle: 'cc:row' }, rc ? { conn: rc } : {});
     const widgets = [
-        // a stand-in for tdback L: black, with the fallback hole opened by "cc:window" (B's tdback replaces it)
+        // a stand-in for tdback L: black, with the fallback hole opened by "cc:window" (the real tdback's uniform is tested below)
         { id: 'back', type: 'fill', class: 'content', z: 0, x: 0, y: 0, w: 1380, h: 720, color: 'bg', hole: HOLE, holeWhen: 'cc:window', holeInset: 0, holeRadius: 0, conn: 0 },
-        // the bottom row (a "cc:" layer: it steps aside whenever a message shows or may show)
-        { id: 'row_l1', type: 'text', class: 'content', z: 2, x: 700, y: 640, w: 150, h: 40, text: '48 215 km', font: FONT, color: 'fg', align: 'right', conn: 2, toggle: 'cc:rest' },
-        { id: 'row_r1', type: 'text', class: 'content', z: 2, x: 1000, y: 640, w: 150, h: 40, text: '412.6 km', font: FONT, color: 'fg', align: 'right', conn: 2, toggle: 'cc:rest' },
-        { id: 'row_l2', type: 'text', class: 'content', z: 2, x: 700, y: 678, w: 150, h: 36, text: '14:43', font: FONT, color: 'fg', align: 'right', conn: 2, toggle: 'cc:rest' },
+        // the bottom row, as design/gen_twin.py lays it (connection 0, "cc:row"): its ink steps aside while BMW's panel is open
+        row('row_l1', 700, 640, 150, 40, '48215'), row('row_r1', 1000, 640, 150, 40, '412.6'), row('row_l2', 700, 678, 150, 36, '14:43'),
+        // the warning tab's icon (tdLive "warn")
+        { id: 'tab_warn_i', type: 'icon', icon: 'cc_warn', class: 'content', z: 5, x: 760, y: 124, w: 38, h: 38, color: 'fg', conn: 1, tdLive: 'warn' },
     ];
-    if (!(extra && extra.noPlate)) widgets.push({ id: 'plate', type: 'ccplate', class: 'content', z: 3, x: PLATE_RECT[0], y: PLATE_RECT[1], w: PLATE_RECT[2], h: PLATE_RECT[3], font: FONT, counterFont: FONT, conn: 2 });
+    if (!(extra && extra.noSheet)) widgets.push({ id: 'msg_sheet', type: 'ccsheet', class: 'content', z: 9, x: SHEET_RECT[0], y: SHEET_RECT[1], w: SHEET_RECT[2], h: SHEET_RECT[3],
+        font: 'td_msg', counterFont: 'td_cnt', rowFont: 'td_tab', textFont: 'td_val', conn: 2 });
     return { schemaVersion: 2, name: name, theme: 'wb_comfort', widgets };
 };
 
 /** The stand-in cluster-render: protocol v1 enough for the engine's clients, with the service's rules. */
 function startRender(sockPath, knobs) {
-    const st = { layers: new Map(), violations: [], hellos: [], refusals: [], pixel: 0 };
+    const st = { layers: new Map(), violations: [], hellos: [], refusals: [], pixel: 0, peak: 0 };
     const writeEv = (sock, obj) => {
         const body = Buffer.from(JSON.stringify(obj), 'utf8'), m = Buffer.alloc(5 + body.length);
         m.writeUInt32LE(body.length + 1, 0); m[4] = 0x4a; body.copy(m, 5); sock.write(m);
@@ -338,7 +372,7 @@ function startRender(sockPath, knobs) {
                     else if (m.op === 'layer' && inConn >= 8) why = 'too many layers';
                     else if (st.pixel + bytes > 16 * 1048576) why = 'the service\'s pixel memory is full';
                     if (why) { st.refusals.push({ app: c.app, ref: m.ref, why }); writeEv(sock, { ev: 'error', op: m.op, ref: m.ref, reason: why }); continue; }
-                    st.pixel += bytes;
+                    st.pixel += bytes; st.peak = Math.max(st.peak, st.pixel);
                     st.layers.set(key, { app: c.app, ref: m.ref, kind: m.op === 'asset' ? 'asset' : m.kind, bytes });
                     writeEv(sock, { ev: 'layer', ref: m.ref, state: 'shown' });
                 } else if (m.op === 'drop') {
@@ -358,9 +392,9 @@ function buildApp() {
     const spec = JSON.parse(JSON.stringify(f30));
     spec.id = APP_ID; spec.title = 'Twin CC test'; spec.description = 'test stand-in for twin_dial\'s message path (bench/test-twin-cc.js); never shipped';
     spec.version = '0.0.1'; spec.loggingId = 'OATC'; spec.iconGlyph = 'TC';
-    spec.shared = f30.shared.filter((f) => ['menu.js', 'gallery.js', 'previews.js'].indexOf(f) < 0).concat(['twin_cc.js']);
+    spec.shared = f30.shared.filter((f) => ['menu.js', 'gallery.js', 'previews.js'].indexOf(f) < 0).concat(['twin_cc.js', 'twin_tokens.js']);
     spec.settings.forEach((s) => {
-        if (s.key === 'hudLayout') { s.options = s.options.concat([['twin_cc', 'Twin CC'], ['twin_cc_b', 'Twin CC b'], ['twin_cc_noplate', 'Twin CC without a plate']]); s.default = 'twin_cc'; }
+        if (s.key === 'hudLayout') { s.options = s.options.concat([['twin_cc', 'Twin CC'], ['twin_cc_b', 'Twin CC b'], ['twin_cc_nosheet', 'Twin CC without a sheet'], ['twin_cc_c', 'Twin CC row on 2']]); s.default = 'twin_cc'; }
         if (s.key === 'byMode') s.default = false;
         if (s.key === 'demo') s.default = 'off';
         if (s.key === 'nightDim') s.default = 'off';
@@ -375,7 +409,7 @@ function buildApp() {
     fs.writeFileSync(path.join(APP_DIR, 'main.js'), [
         "'use strict';", "const mgu = require('./kit/mgu');", "const HudApp = require('./hud');",
         "mgu.run({ start(ctx) { const hud = new HudApp(ctx); hud.start(); process.on('exit', () => { try { hud.stop(); } catch (e) { /* exiting */ } }); } });", ''].join('\n'));
-    ['wb_msg'].forEach((f) => fs.copyFileSync(path.join(F30, 'hud', 'fonts', f + '.json'), path.join(APP_DIR, 'hud', 'fonts', f + '.json')));
+    ['td_msg', 'td_cnt', 'td_tab', 'td_val', 'td_row'].forEach((f) => fs.copyFileSync(path.join(TWIN, 'hud', 'fonts', f + '.json'), path.join(APP_DIR, 'hud', 'fonts', f + '.json')));
     const sdk = path.join(ROOT, 'oap-sdk');
     if (!fs.existsSync(path.join(sdk, 'index.js'))) {
         fs.mkdirSync(sdk, { recursive: true });
@@ -392,6 +426,53 @@ function cleanup() {
     try { fs.readdirSync(path.join(ROOT, 'dist')).filter((f) => f.indexOf(APP_ID + '@') === 0).forEach((f) => fs.rmSync(path.join(ROOT, 'dist', f), { force: true })); } catch (e) { /* none */ }
 }
 
+// ---- the backdrop's fill: the selected tab's cell, never the message's severity (SPEC-R3 3.2, 5.3) ------------------------------
+function tabFillChecks() {
+    console.log('the tab fill and the warning icon, without the engine');
+    const H = require('./twin-harness');
+    const dir = H.tree('twin_dial');
+    const HudApp = require(path.join(dir, 'hud.js'));
+    const twinTok = require(path.join(dir, 'twin_tokens.js'));
+    const Ld = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'twin_dial', 'hud', 'layouts', 'twin.json'), 'utf8'));
+    const w = Ld.widgets.find((x) => x.id === 'bg_l');
+    const h = Object.create(HudApp.prototype);
+    const rec = {};
+    h.log = H.nolog; h.nightOn = false; h.config = { twin: {} };
+    h._scene = () => ({ ref: 7, w: 536, h: 112 });
+    const x = { w, ref: 1, c: { uniform: (ref, n, v) => { rec[n] = v; }, bind: () => {} }, ci: 0 };
+    h.twinCc = { state: 'none', severity: null };
+    h.twinMsg = { tab: 1 };
+    h._twinBackInit(x);
+    const near = (a, b) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 0.003);
+    const TAB = { 1: [176 / 255, 10 / 255, 37 / 255, 1], 2: [176 / 255, 10 / 255, 37 / 255, 1], 3: [240 / 255, 150 / 255, 10 / 255, 1] };
+    ok(rec.u_hi[2] === 1 && rec.u_hi[0] === 618 - w.x && rec.u_hi[1] === 744 - w.x && near(rec.u_hiC, TAB[1]), 'tab 1 selected: its cell [618, 744] is filled in the tab\'s colour (176, 10, 37)');
+    ['red', 'amber', 'green', 'grey'].forEach((sev) => {
+        ['window', 'ours'].forEach((state) => {
+            h.twinCc = { state, severity: sev }; h.twinMsg.tab = 2; h._twinBackSend(x, false);
+            ok(rec.u_hi[0] === 744 && rec.u_hi[1] === 812 && near(rec.u_hiC, TAB[2]), 'a ' + sev + ' message (' + state + '), tab 2 selected: the fill is the tab\'s own, never the severity');
+        });
+    });
+    h.twinCc = { state: 'window', severity: 'amber' }; h.twinMsg.tab = 3; h._twinBackSend(x, false);
+    ok(rec.u_hi[0] === 812 && rec.u_hi[1] === 1168 && near(rec.u_hiC, TAB[3]), 'tab 3 selected with an amber message: tab 3\'s cell in amber-orange (its own colour), the severity nowhere in it');
+    h.twinCc = { state: 'ours', severity: 'red' }; h._twinBackSend(x, false);
+    ok(rec.u_rule[4] === 629 && rec.u_rule[5] === 611 && rec.u_rule[7] === 615 && near(rec.u_ruleC.slice(4, 8), [176 / 255, 7 / 255, 30 / 255, 1]), 'the bottom rule is the severity colour only while our card covers BMW\'s panel (4 px, y 611..615)');
+    h.twinCc = { state: 'window', severity: 'red' }; h._twinBackSend(x, false);
+    ok(rec.u_win[0] === 1 && rec.u_rule[5] === 612.4, 'while BMW\'s window is open the rule is the normal 2.2 px white one and u_win is 1');
+    // the warning tab's icon
+    h.twinCc = { state: 'ours', severity: 'red' }; h.theme = { fg: [255, 255, 255, 255], bg: [0, 0, 0, 255] };
+    const warn = Ld.widgets.find((q) => q.id === 'tab_warn_i');
+    h.twinMsg.tab = 1;
+    ok(JSON.stringify(twinTok.iconState(h, warn).rgb) === '[218,16,48]', 'the warning icon is red (218, 16, 48) while a red message shows and tab 2 is not selected');
+    h.twinCc = { state: 'window', severity: 'amber' };
+    ok(JSON.stringify(twinTok.iconState(h, warn).rgb) === '[240,170,10]', 'amber (240, 170, 10) for an amber one');
+    h.twinCc = { state: 'window', severity: 'grey' };
+    ok(twinTok.iconState(h, warn).rgb === null, 'white for a white / green / grey one');
+    h.twinCc = { state: 'ours', severity: 'red' }; h.twinMsg.tab = 2;
+    ok(twinTok.iconState(h, warn).rgb === null, 'white on the fill while tab 2 is selected');
+    h.twinCc = { state: 'none', severity: null }; h.twinMsg.tab = 1;
+    ok(twinTok.iconState(h, warn).rgb === null, 'white when nothing shows (never dimmed)');
+}
+
 async function engineChecks() {
     console.log('the real engine, frame by frame');
     const spec = buildApp();
@@ -400,7 +481,8 @@ async function engineChecks() {
     fs.mkdirSync(path.join(dataDir, 'layouts'), { recursive: true });
     fs.writeFileSync(path.join(dataDir, 'layouts', 'twin_cc.json'), JSON.stringify(LAY('Twin CC')));
     fs.writeFileSync(path.join(dataDir, 'layouts', 'twin_cc_b.json'), JSON.stringify(LAY('Twin CC b')));
-    fs.writeFileSync(path.join(dataDir, 'layouts', 'twin_cc_noplate.json'), JSON.stringify(LAY('Twin CC without a plate', { noPlate: true })));
+    fs.writeFileSync(path.join(dataDir, 'layouts', 'twin_cc_nosheet.json'), JSON.stringify(LAY('Twin CC without a sheet', { noSheet: true })));
+    fs.writeFileSync(path.join(dataDir, 'layouts', 'twin_cc_c.json'), JSON.stringify(LAY('Twin CC row on 2', { rowConn: 2 })));
     const sockPath = path.join(tmp, 'render.sock');
     const knobs = { refuse: null };
     const { st, server } = await startRender(sockPath, knobs);
@@ -424,83 +506,129 @@ async function engineChecks() {
     };
     const fakeSigns = require(path.join(__dirname, 'fake-signs')).install(hu, spec.config, log);
 
+    // ---- the independent reference renders: our card for K, a whole row for K (the audit's idea of "our text is on the screen") ----
+    const keyOf = (e) => String(e.id) + '\u0001' + e.name;
+    const refCache = {};
+    const refCard = (e, night) => {
+        const k = 'c' + keyOf(e) + night;
+        if (!refCache[k]) {
+            const p = T.layoutTab2({ cand: { key: keyOf(e), id: e.id, name: String(e.name).replace(/\s+/g, ' ').trim(), color: e.color, counter: '' }, shown: true, entries: [], night }, layDeps);
+            refCache[k] = { buf: T.paintSheet(deps, p, { night }).buf, y1: p.card.bases[p.card.bases.length - 1] + 14 - T.SHEET.y };
+        }
+        return refCache[k];
+    };
+    const refRow = (e, night, top) => {
+        const k = 'r' + keyOf(e) + night + top;
+        if (!refCache[k]) {
+            const r = { key: keyOf(e), id: e.id, sev: T.severityOf(e.color), symbol: T.symbolFor(e.id, e.color), text: e.name, cut: false, top };
+            refCache[k] = T.paintSheet(deps, { kind: 'list', card: null, rows: [r], more: 0 }, { night }).buf;
+        }
+        return refCache[k];
+    };
+    const SW = T.SHEET.w;
+    const same = (a, b, x0, y0, x1, y1, skip) => {
+        for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+            if (skip && skip(x, y)) continue;
+            const o = (y * SW + x) * 4;
+            if (a[o] !== b[o] || a[o + 1] !== b[o + 1] || a[o + 2] !== b[o + 2] || a[o + 3] !== b[o + 3]) return false;
+        }
+        return true;
+    };
+    const TOPS = [];
+    [300, 450, 497].forEach((t0) => { for (let t = t0; t + 44 <= 564; t += 44) TOPS.push(t); });
+    /** 'card' | 'row' | '' - where the sheet's pixels carry the WHOLE text of entry e (pixel for pixel against our own render) */
+    function textOf(img, e) {
+        if (!img || !e || !e.name) return '';
+        for (const night of [false, true]) {
+            const c = refCard(e, night);
+            if (same(img, c.buf, 0, 0, SW, c.y1, (x, y) => x >= 1186 - T.SHEET.x || (x >= 1100 - T.SHEET.x && y < 334 - T.SHEET.y))) return 'card';   // (the counter's box and the scroll line are not the message's)
+        }
+        for (const night of [false, true]) for (const top of TOPS) {
+            if (same(img, refRow(e, night, top), 0, top - T.SHEET.y, 1186 - T.SHEET.x, top - T.SHEET.y + 44)) return 'row';
+        }
+        return '';
+    }
+
     // ---- the model and the audit ------------------------------------------------------------------------------------
     const CR = require(path.join(STAGE, 'source', 'javascript', 'cluster_render_client.js'));
-    const model = { frames: 0, violations: [], truth: { shown: false, may: true, expect: [] }, trace: [], rowsInk: 0 };
+    const model = { frames: 0, violations: [], truth: { shown: false, may: true, expect: [] }, trace: [], since: {}, watch: {}, openSince: 0, hadText: false };
     let pending = false, last = '';
     const clientsOf = () => (hud ? hud.clients : []);
     const accepted = (c, l) => !(knobs.refuse && knobs.refuse(Object.assign({ kind: l.kind }, l.opts)));
+    const isSheet = (o) => o.x === SHEET_RECT[0] && o.y === SHEET_RECT[1] && o.w === SHEET_RECT[2] && o.h === SHEET_RECT[3];
     /** what covers BMW's panel now: every layer of ours the service accepted, over the panel's bbox, sampled on a 3 px grid */
     function snapshot() {
         const layers = [];
-        clientsOf().forEach((c) => c.layers.forEach((l) => { if (l.kind !== 'asset' && l.opts && accepted(c, l) && l.opts.visible !== false && l.opts.visible !== 0) layers.push(l); }));
-        let covered = 0, rows = 0, hole = null;
-        let plate = null;
+        clientsOf().forEach((c, ci) => c.layers.forEach((l) => { if (l.kind !== 'asset' && l.opts && accepted(c, l) && l.opts.visible !== false && l.opts.visible !== 0) layers.push(Object.assign({ ci }, l, { l })); }));
+        let covered = 0, rows = 0, sheet = null, rowConn = null, backConn = null;
         const at = (l, x, y) => {
             const o = l.opts, lx = x - o.x, ly = y - o.y;
             if (lx < 0 || ly < 0 || lx >= o.w || ly >= o.h) return 0;
             if (l.kind === 'image') return l.image[(ly * l.iw + lx) * 4 + 3] > 0 ? 1 : 0;
             if (l.kind === 'effect') {
                 const u = l.uniforms['0:u_hole'];
-                if (u) {
-                    const v = String(u.v).trim().split(/\s+/).map(Number);
-                    hole = v;
-                    if (v[2] > 0 && lx >= v[0] && ly >= v[1] && lx < v[0] + v[2] && ly < v[1] + v[3]) return 0;
-                }
+                if (u) { const v = String(u.v).trim().split(/\s+/).map(Number); if (v[2] > 0 && lx >= v[0] && ly >= v[1] && lx < v[0] + v[2] && ly < v[1] + v[3]) return 0; }
                 return 1;
             }
             return 0;
         };
-        layers.forEach((l) => { if (l.kind === 'image' && l.opts.w === PLATE_RECT[2] && l.opts.h === PLATE_RECT[3] && l.opts.x === PLATE_RECT[0]) plate = l.image; });
+        const rowsL = layers.filter((l) => l.kind === 'image' && hit([l.opts.x, l.opts.y, l.opts.x + l.opts.w, l.opts.y + l.opts.h], RECT));
+        const back = layers.find((l) => l.kind === 'effect' && l.uniforms['0:u_hole']);
+        layers.forEach((l) => { if (l.kind === 'image' && isSheet(l.opts)) sheet = l.image; });
+        if (rowsL.length) rowConn = rowsL[0].ci;
+        if (back) backConn = back.ci;
         for (let y = RECT[1]; y < RECT[3]; y += 3) {
             for (let x = RECT[0]; x < RECT[2]; x += 3) {
                 let c = 0, r = 0;
-                layers.forEach((l) => { const a = at(l, x, y); if (a) { c = 1; if (l.kind === 'image' && !(l.opts.w === PLATE_RECT[2] && l.opts.h === PLATE_RECT[3])) r = 1; } });
+                layers.forEach((l) => { if (l.kind === 'effect' && l !== back) return; const a = at(l, x, y); if (a) { c = 1; if (l.kind === 'image') r = 1; } });
                 covered += c; rows += r;
             }
         }
-        const back = layers.find((l) => l.kind === 'effect');
         let open = false;
-        if (back) { const u = back.uniforms['0:u_hole']; if (u) { const v = String(u.v).trim().split(/\s+/).map(Number); open = v[2] > 0; } }
-        // BMW's belt group and the gear-letter gap: no pixel of ours
+        if (back) { const v = String(back.uniforms['0:u_hole'].v).trim().split(/\s+/).map(Number); open = v[2] > 0; }
         let keepOut = 0;
-        layers.forEach((l) => {
-            if (l.kind !== 'image') return;
-            const o = l.opts;
-            [[497, 660, 688, 720], [1380, 660, 1460, 720]].forEach((b) => { if (o.x < b[2] && b[0] < o.x + o.w && o.y < b[3] && b[1] < o.y + o.h) keepOut++; });
-        });
-        let plateBlank = true;
-        if (plate) for (let i = 3; i < plate.length; i += 4) if (plate[i]) { plateBlank = false; break; }
-        return { covered, rows, plate, plateBlank, open, keepOut };
+        layers.forEach((l) => { if (l.kind !== 'image') return; const o = l.opts; [BELT, GAP].forEach((b) => { if (hit([o.x, o.y, o.x + o.w, o.y + o.h], b)) keepOut++; }); });
+        let sheetBlank = true;
+        if (sheet) for (let i = 3; i < sheet.length; i += 4) if (sheet[i]) { sheetBlank = false; break; }
+        const has = sheet ? model.truth.expect.map((e) => textOf(sheet, e)).filter(Boolean)[0] || '' : '';
+        // since when each known message's text is on the sheet (continuously): the settle is measured per message
+        const now = model.frameAt || T.mono();
+        Object.keys(model.watch).forEach((k) => { if (sheet && textOf(sheet, model.watch[k])) { if (model.since[k] === undefined) model.since[k] = now; } else delete model.since[k]; });
+        return { covered, rows, sheet, sheetBlank, has, open, keepOut, rowConn, backConn };
     }
     function audit() {
         pending = false;
         if (!hud || !hud.client || !hud.client.ready) return;
         model.frames++;
-        const s = snapshot();
-        const tr = [s.covered > 0 ? 'C' : '-', s.rows > 0 ? 'R' : '-', s.plateBlank ? 'b' : 'P', s.open ? 'O' : 'S', hud.twinMsg ? hud.twinMsg.state[0] : '?'].join('');
-        if (tr !== last) { last = tr; model.trace.push({ t: T.mono(), tr, state: hud.twinMsg && hud.twinMsg.state, covered: s.covered, rows: s.rows, plateBlank: s.plateBlank, open: s.open }); }
+        const now = model.frameAt || T.mono(), s = snapshot();      // the clocks run on the turn's own time, not on how long the audit took
+        const tr = [s.covered > 0 ? 'C' : '-', s.rows > 0 ? 'R' : '-', s.has ? (s.has === 'card' ? 'P' : 'W') : s.sheetBlank ? 'b' : 'x', s.open ? 'O' : 'S', hud.twinMsg ? hud.twinMsg.state[0] : '?', hud.twinMsg ? String(hud.twinMsg.tab) : '?'].join('');
+        if (tr !== last) { last = tr; model.trace.push({ t: now, tr, state: hud.twinMsg && hud.twinMsg.state, covered: s.covered, rows: s.rows, has: s.has, open: s.open, blank: s.sheetBlank }); }
         const why = (w) => { model.violations.push({ w, tr, t: Date.now(), truth: JSON.stringify({ shown: model.truth.shown, may: model.truth.may }) }); };
-        if (s.keepOut) why('a layer of ours reaches BMW\'s belt group or gear gap');
+        // the clocks of the audit itself: since when our text is on the sheet, since when the window is open
+        if (s.open) { if (model.openSince === null) model.openSince = now; } else model.openSince = null;
+        if (s.keepOut) why('V5 a layer of ours reaches BMW\'s belt group or gear gap');
+        if (s.rowConn !== null && s.backConn !== null && s.rowConn !== s.backConn) why('V4 the bottom row is on connection ' + s.rowConn + ', the window on ' + s.backConn);
         if ((model.truth.shown || model.truth.may) && s.covered) {
-            const same = s.plate && model.truth.expect.some((b) => b.equals(s.plate));
-            if (!same) why('BMW\'s panel is covered (' + s.covered + ' samples) while our plate for the shown message is not on the screen' + (s.rows ? ' (the bottom row\'s ink is in the panel)' : ''));
+            if (!s.has) why('V1 BMW\'s panel is covered (' + s.covered + ' samples) while our text for the shown message is not on the sheet' + (s.rows ? ' (the bottom row\'s ink is in the panel)' : '') + ' [expect ' + model.truth.expect.map((e) => e.id).join() + ', whole on the sheet: ' + Object.keys(model.since).map((k) => k.split('\u0001')[0]).join() + ']');
+            else {
+                const ages = model.truth.expect.map((e) => model.since[keyOf(e)]).filter((v) => v !== undefined).map((v) => now - v);
+                const best = ages.length ? Math.max.apply(null, ages) : 0;
+                if (!s.open && best < 140) why('V1 BMW\'s panel covered ' + Math.round(best) + ' ms after our text first showed (settle 150)');
+            }
         }
-        // the bottom row returns only after the window has shut, and never over a plate or an open window
-        if (s.rows && (s.open || !s.plateBlank)) why('the bottom row\'s ink is in BMW\'s panel while the window is open or the plate is up');
+        if (s.rows && s.open) why('V2 the bottom row\'s ink is in BMW\'s open panel');
+        if (model.truth.shown && model.hadText && !s.has && s.open && model.openSince !== null && now - model.openSince < 140) why('V3 our text was taken away ' + Math.round(now - model.openSince) + ' ms after the window opened (open settle 150)');
+        model.hadText = !!s.has;
     }
-    const dirty = () => { if (!pending) { pending = true; setImmediate(audit); } };
+    const dirty = () => { if (!pending) { pending = true; model.frameAt = T.mono(); setImmediate(audit); } };
     ['_send', 'pixels', '_add', 'drop', 'uniform', 'set'].forEach((m) => {
         const o = CR.ClusterRender.prototype[m];
         CR.ClusterRender.prototype[m] = function () { const r = o.apply(this, arguments); dirty(); return r; };
     });
 
     // ---- helpers for the cases --------------------------------------------------------------------------------------
-    const planned = (entry, counter, night) => {
-        const base = { id: entry.id, name: String(entry.name).replace(/\s+/g, ' ').trim(), color: entry.color, counter: counter || '' };
-        return [false, true].filter((n) => night === undefined || n === night).map((n) => T.paintPlate(deps, base, { font: FONT, counterFont: FONT, night: n }).buf);
-    };
-    const truth = (shown, may, entry, counter, night) => { model.truth = { shown, may, expect: shown && entry ? planned(entry, counter, night) : [] }; dirty(); };
+    const truth = (shown, may, entry) => { model.truth = { shown, may, expect: shown && entry ? [entry] : [] }; model.hadText = false; dirty(); };
+    const none = () => { model.truth = { shown: false, may: false, expect: [] }; model.hadText = false; dirty(); };
     const feedList = (arr) => fakeSigns.control({ ccList: arr });
     let both = false;               // once the second witness has spoken, the car sends both numbers together
     const feedDisp = (n) => hu.feed('de.bmw.infotainment.vehicle.Vehicle2', 'statusDisplayedCCMessage', { statusNumberCheckControlMessageDisplay: n });
@@ -514,7 +642,6 @@ async function engineChecks() {
         const rows = s.type === 'choice' ? s.options.map((o) => o[0]) : s.steps;
         comp.emit('action', { row: rows.indexOf(value) });
     };
-    // (a satisfied wait lets the audit's own setImmediate run before it returns: both can be due in one pass of the event loop)
     const turn = () => new Promise((r) => setImmediate(() => setImmediate(r)));
     const until = async (fn, ms) => { const end = Date.now() + (ms || 3000); while (Date.now() < end) { if (fn()) { await turn(); return true; } await sleep(15); } return fn(); };
     const T0 = () => hud.twinMsg;
@@ -523,233 +650,254 @@ async function engineChecks() {
         boot: { id: 14, name: 'Boot lid open', color: 'white' },
         tyre: { id: 50, name: 'Check the tyre pressure', color: 'yellow' },
         brake: { id: 42, name: 'Brake fault: stop the car at the next safe place and call for help right now', color: 'red' },
+        wash: { id: 164, name: 'Washer fluid low', color: 'white' },
         noname: { id: 16, name: '', color: 'red' },
         greek: { id: 17, name: 'Πόρτα ανοιχτή', color: 'white' },
         rest: { id: 0, name: 'All systems OK', color: 'green' },
     };
+    Object.keys(E).forEach((k) => { if (E[k].name && k !== 'greek') model.watch[keyOf(E[k])] = E[k]; });
+    const L = (...es) => es.map((e) => Object.assign({ symbol: 2 }, e));
     const clean = () => { model.violations.length = 0; };
     const noViolations = (what) => ok(model.violations.length === 0, what + ' (' + model.frames + ' frames audited, ' + model.violations.length + ' violations' +
         (model.violations[0] ? ': ' + model.violations[0].w + ' [' + model.violations[0].tr + ']' : '') + ')');
+    const warnIcon = () => { const x = hud.widgets.get('tab_warn_i'); return x ? String(x.last) : ''; };
+    const endMsg = async () => { none(); feedAct(0); await sleep(250); };
 
     // ---- case 1: the blind start --------------------------------------------------------------------------------------
     hu.start();
     const started = await until(() => hud && hud.client && hud.client.ready && hud.widgets.size >= 5 && hud.twinMsg, 8000);
-    ok(started, 'the engine is up with ' + (hud ? hud.widgets.size : 0) + ' widgets on the stand-in layout and a TwinCC (config.ccActive.strict)');
+    ok(started, 'the engine is up with ' + (hud ? hud.widgets.size : 0) + ' widgets on the stand-in layout and a TwinCentre (config.ccActive.strict)');
     if (!started) { console.log(logs.slice(-20).join('\n')); throw new Error('engine did not start'); }
-    // B's contract (ENGINE-CONTRACT 2): D assigns this.twinCc and calls this._twinSync() (B's method; a counter stands in here)
-    let syncs = 0, seenCc = [];
-    hud._twinSync = () => { syncs++; seenCc.push(hud.twinCc.state + '/' + hud.twinCc.severity); };
     await sleep(400);
-    truth(false, true);         // blind: the car may be showing anything
+    truth(false, true);
     await sleep(300);
     {
         const t = T0(), s = snapshot();
-        ok(t.state === 'window' && t.window && s.open && s.plateBlank && s.rows === 0 && s.covered === 0, '1. blind start: window open (hole ' + s.open + '), the plate empty, no row ink, nothing of ours over BMW\'s panel');
-        ok(hud._toggleOn('cc:window') && !hud._toggleOn('cc:rest') && !hud._toggleOn('cc:ours') && hud._toggleOn('cc:any') && hud._ccOpen() === true, 'the toggles cc:window / cc:rest / cc:ours / cc:any and _ccOpen follow the state');
+        ok(t.state === 'window' && t.window && s.open && s.rows === 0 && s.covered === 0 && t.tab === 1 && hud.twinCc.severity === null, '1. blind start: window open, no row ink, nothing of ours over BMW\'s panel, tab 1 (a window with no severity is not a message: no pull)');
+        ok(s.sheet && s.sheetBlank, '1. tab 2\'s sheet is made and empty (transparent) while tab 1 is selected');
+        ok(hud._toggleOn('cc:window') && !hud._toggleOn('cc:row') && !hud._toggleOn('cc:ours') && hud._toggleOn('cc:any') && hud._ccOpen() === true, 'the toggles cc:window / cc:row / cc:ours / cc:any and _ccOpen follow the state');
         noViolations('1. no frame covered BMW\'s panel while the car could not be read');
     }
 
     // ---- case 2: ccList fits, no active number ever -----------------------------------------------------------------
     clean();
-    model.truth = { shown: false, may: false, expect: [] };      // the car's list says only its resting entry: no message
-    feedList([E.rest]);
+    none();
+    feedList(L(E.rest));
     await sleep(200);
-    {
-        const t = T0();
-        ok(t.state === 'none' && !t.window && snapshot().rows > 0, '2a. a list with only the resting entry (id 0) and no message: none - the bottom row is back (' + snapshot().rows + ' ink samples in the panel)');
-    }
+    ok(T0().state === 'none' && !T0().window && snapshot().rows > 0 && hud._toggleOn('cc:row'), '2a. a list with only the resting entry and no message: none, the bottom row is back (' + snapshot().rows + ' ink samples)');
     model.truth = { shown: false, may: true, expect: [] };
-    feedList([Object.assign({ symbol: 2 }, E.door)]);
+    feedList(L(E.door));
     await sleep(500);
     {
         const t = T0(), s = snapshot();
-        ok(t.state === 'window' && t.candidate === null && s.open && s.plateBlank && s.rows === 0 && s.covered === 0 && /D7/.test(t.reason), '2b. the list shows a door entry, "shown now" never spoke: window open, no plate, no row ink (' + t.reason + ')');
+        ok(t.state === 'window' && s.open && s.rows === 0 && s.covered === 0 && /D7/.test(t.reason) && t.tab === 2 && t.page.kind === 'pointer', '2b. the list shows a door entry, "shown now" never spoke: window open, no row ink, tab 2 with the pointer page - never a card (' + t.reason + ')');
         noViolations('2b. never covered while D7 was open');
     }
-    await sleep(900);                   // the heuristic's 900 ms: a white entry stops showing
     await until(() => T0().state === 'none', 2000);
     ok(T0().state === 'none' && snapshot().rows > 0 && !snapshot().open, '2c. the heuristic lets go of a white entry after hideAfterMs: none, row back, window shut');
-    model.truth = { shown: false, may: false, expect: [] };
-    feedList([E.rest]);
-    await sleep(150);
+    none(); feedList(L(E.rest)); await sleep(150);
     clean();
     model.truth = { shown: false, may: true, expect: [] };
-    feedList([Object.assign({ symbol: 12 }, E.brake)]);
+    feedList(L(E.brake));
     await sleep(1400);
     ok(T0().state === 'window' && snapshot().covered === 0, '2d. a RED entry keeps the window open for as long as it is listed (' + T0().reason + ')');
     noViolations('2d. never covered by a red entry');
-    model.truth = { shown: false, may: false, expect: [] };
-    feedList([E.rest]);
-    await sleep(200);
+    none(); feedList(L(E.rest)); await sleep(200);
 
-    // ---- case 3: the D7 latch, then ours ---------------------------------------------------------------------------
+    // ---- case 3: the D7 latch, then ours in the centre ----------------------------------------------------------------
     clean();
-    model.truth = { shown: true, may: true, expect: [] };      // while D7 holds there is NO plate of ours to be on the screen
-    feedList([Object.assign({ symbol: 2 }, E.door), Object.assign({ symbol: 5 }, { id: 987, name: 'Stored notice', color: 'white' })]);
+    model.truth = { shown: true, may: true, expect: [] };      // while D7 holds there is NO text of ours to be on the screen
+    feedList(L(E.door, { id: 987, name: 'Stored notice', color: 'white' }));
     feedAct(15);
     await sleep(500);
     {
         const t = T0(), s = snapshot();
-        ok(t.confirmed && t.state === 'window' && s.plateBlank && s.covered === 0 && /confirmed/.test(t.reason), '3a. the first "shown now" that matches an entry confirms D7 - and that very message stays BMW\'s (' + t.reason + ')');
+        ok(t.confirmed && t.state === 'window' && s.covered === 0 && /confirmed/.test(t.reason) && t.tab === 2 && t.page.kind === 'pointer', '3a. the first "shown now" that matches an entry confirms D7 - and that very message stays BMW\'s: tab 2 shows the pointer page, no card (' + t.reason + ')');
         ok(logs.some((l) => /cc: shown-now confirmed \(number 15 matched a ccList entry\)/.test(l)), '3a. the log says "cc: shown-now confirmed"');
         noViolations('3a. the confirming message was never covered');
     }
-    model.truth = { shown: false, may: false, expect: [] };
-    feedAct(0);
-    await sleep(250);
+    await endMsg();
     ok(T0().state === 'none' && snapshot().rows > 0, '3b. the message ends: none, the row is back');
     clean();
     const nTrace3 = model.trace.length;
     truth(true, true, E.door);
-    feedAct(15);                         // the same message again: now ours may be drawn
-    await sleep(60);
+    feedAct(15);
+    await sleep(40);
     {
         const s = snapshot(), t = T0();
-        ok(t.state === 'window' && s.open && !s.plateBlank && s.plate && model.truth.expect.some((b) => b.equals(s.plate)) && s.rows === 0,
-            '3c. in the turn the number arrives: window open AND our plate for exactly that message is up, the row gone (state ' + t.state + ', ' + t.reason + ')');
+        ok(t.state === 'window' && s.open && s.has === 'card' && s.rows === 0 && t.tab === 2 && hud.twinCc.state === 'window',
+            '3c. in the turn the number arrives: tab 2, window open AND our card for exactly that message on the sheet, the row gone (' + t.reason + ')');
+        ok(hud._token('td:cTitle') === 'Повідомлення', '3c. the centre\'s title is "Повідомлення" on tab 2');
     }
     await until(() => T0().state === 'ours', 1500);
-    const since3 = model.trace.slice(nTrace3);          // the frames from the turn the number arrived (by index: a millisecond can hold two)
-    const trUp = since3.filter((x) => !x.plateBlank)[0];
-    const trShut = since3.filter((x) => !x.open && x.state === 'ours')[0];
+    await sleep(60);
+    const since3 = model.trace.slice(nTrace3);
+    const trUp = since3.filter((x) => x.has === 'card')[0], trShut = since3.filter((x) => !x.open && x.state === 'ours')[0];
     if (!(trShut && trUp)) console.log('  trace since the paint: ' + since3.map((x) => x.tr).join(' '));
     ok(T0().state === 'ours' && !snapshot().open && trShut && trUp && trShut.t - trUp.t >= 145 && trShut.t - trUp.t < 400,
-        '3c. the window shut ' + (trShut && trUp ? Math.round(trShut.t - trUp.t) : '?') + ' ms after the plate went up (CC_SETTLE_MS 150, the audit\'s own jitter 5 ms, not much more)');
+        '3c. the window shut ' + (trShut && trUp ? Math.round(trShut.t - trUp.t) : '?') + ' ms after the card went up (CC_SETTLE_MS 150)');
+    ok(snapshot().rows > 0 && hud._toggleOn('cc:row'), '3c. the bottom row came back after the window shut (SPEC-R3 5.4.2)');
+    ok(hud.twinCc.state === 'ours' && hud.twinCc.severity === 'grey' && hud.ccFit && hud.ccFit.symbol === 'cc_door', '3c. this.twinCc ours / grey (the bottom rule in the severity colour, tdback), the symbol cc_door');
+    ok(!/218,16,48|240,170,10/.test(warnIcon()) && /cc_warn/.test(warnIcon()), '3c. the warning tab\'s icon is white while tab 2 is selected (' + warnIcon() + ')');
     noViolations('3c. at no frame was BMW\'s panel covered without our text for the shown number');
-    // the text is on screen: the plate is the pixels of OUR plate for 15, with the symbol the table gives
-    ok(syncs > 0 && hud.twinCc.state === 'ours' && hud.twinCc.severity === 'grey' && seenCc.indexOf('window/grey') >= 0,
-        '3c. B\'s contract: this.twinCc was assigned and _twinSync() called in step (' + seenCc.slice(-4).join(', ') + '; ' + syncs + ' calls)');
-    ok(hud.ccFit && hud.ccFit.symbol === 'cc_door' && hud.ccFit.sev === 1, '3c. the symbol is cc_door (id 15) and the severity grey (white message)');
 
-    // ---- case 4: no entry / empty name / a Greek letter / a throw: window, latched until the message ends ------------
-    // (each with a plate that must NEVER be up: expect is empty, so any cover is a violation)
+    // ---- case 4: leaving tab 2 while the message shows (SPEC-R3 5.4.4) ---------------------------------------------------
+    clean();
+    const nTrace4 = model.trace.length;
+    hud._twinTabChosen(1, 'driver');
+    await turn();
+    {
+        const s = snapshot(), t = T0();
+        ok(t.tab === 1 && t.state === 'window' && s.open && s.rows === 0, '4a. the driver leaves tab 2: in the SAME turn the window opens and the row steps aside');
+        ok(s.has === 'card' && t.deferred, '4a. the card stays on the sheet until the window has been open 150 ms (the open settle)');
+    }
+    await sleep(300);
+    {
+        const s = snapshot(), since = model.trace.slice(nTrace4);
+        const opened = since.filter((x) => x.open)[0], gone = since.filter((x) => !x.has)[0];
+        ok(s.sheetBlank && s.open && T0().tab === 1 && gone && opened && gone.t - opened.t >= 145, '4b. then the sheet goes (' + (gone && opened ? Math.round(gone.t - opened.t) : '?') + ' ms after the window opened); BMW\'s panel shows the message');
+        ok(!/218,16,48|240,170,10/.test(warnIcon()) && hud._token('td:cTitle') !== 'Повідомлення', '4b. the title is tab 1\'s again; the warning icon follows the severity (the text colour for a white message: ' + warnIcon() + ')');
+    }
+    noViolations('4. leaving tab 2');
+    clean();
+    hud._twinTabChosen(2, 'driver');
+    await turn();
+    ok(T0().tab === 2 && snapshot().has === 'card' && snapshot().open, '4c. back to tab 2: the card again, the window still open');
+    await until(() => T0().state === 'ours', 1500);
+    ok(T0().state === 'ours' && !snapshot().open, '4c. and after the settle: ours');
+    noViolations('4c. coming back');
+    await endMsg();
+    ok(T0().state === 'none' && T0().tab === 1 && snapshot().sheetBlank && !snapshot().open && snapshot().rows > 0, '4d. the end: tab 1 again, the sheet empty, the window shut, the row back');
+
+    // ---- case 5: no entry / empty name / a Greek letter / a throw: window, latched until the message ends ------------
     const never = async (what, start, extra) => {
         clean();
         model.truth = { shown: true, may: true, expect: [] };
         start();
         await sleep(450);
         const t = T0(), s = snapshot();
-        ok(t.state === 'window' && t.candidate === null && s.open && s.plateBlank && s.covered === 0 && s.rows === 0, what + ': window open, nothing of ours over BMW\'s panel (' + t.reason + ')');
+        ok(t.state === 'window' && s.open && s.covered === 0 && s.rows === 0, what + ': window open, nothing of ours over BMW\'s panel (' + t.reason + ')');
         if (extra) extra(t);
         await sleep(300);
         ok(T0().state === 'window' && snapshot().covered === 0, what + ': the latch holds while the message stays');
         noViolations(what);
-        model.truth = { shown: false, may: false, expect: [] };
-        feedAct(0);
-        await sleep(250);
+        await endMsg();
         ok(T0().state === 'none' && snapshot().rows > 0, what + ': the message ends: the latch falls, the row is back');
     };
-    await never('4a. a "shown now" number with no ccList entry', () => { feedAct(77); }, (t) => ok(/no ccList entry for number 77/.test(t.reason) && logs.some((l) => /active cc: no ccList entry for number 77/.test(l)), '4a. the reason is named and logged'));
-    await never('4b. an entry with an empty name', () => { feedList([Object.assign({ symbol: 2 }, E.noname)]); feedAct(16); }, (t) => ok(/no name/.test(t.reason), '4b. the reason is named'));
-    await never('4c. a name with a character the font lacks (Greek)', () => { feedList([Object.assign({ symbol: 2 }, E.greek)]); feedAct(17); },
-        (t) => ok(/missing from our font/.test(t.reason) && logs.some((l) => /cc: plate latched until the message ends: a character of the name is missing/.test(l)) && logs.every((l) => !/Π/.test(l)), '4c. latched with the reason in the log, and not one letter of the name there'));
+    await never('5a. a "shown now" number with no ccList entry', () => { feedAct(77); }, (t) => ok(/no ccList entry for number 77/.test(t.reason), '5a. the reason is named'));
+    await never('5b. an entry with an empty name', () => { feedList(L(E.noname)); feedAct(16); }, (t) => ok(/no name/.test(t.reason), '5b. the reason is named'));
+    await never('5c. a name with a character the font lacks (Greek)', () => { feedList(L(E.greek)); feedAct(17); },
+        (t) => ok(/missing from our font/.test(t.reason) && logs.some((l) => /cc: card latched until the message ends: a character of the name is missing/.test(l)) && logs.every((l) => !/Π/.test(l)), '5c. latched, the reason in the log, and not one letter of the name there'));
     {
-        feedList([Object.assign({ symbol: 2 }, E.door)]);
-        const realPaint = hud.twin.paintPlate;
-        hud.twin.paintPlate = () => { throw new Error('bench: an injected failure while painting the plate'); };
-        await never('4d. a throw while painting the plate', () => { feedAct(15); }, (t) => ok(/threw/.test(t.reason) && logs.some((l) => /cc: plate latched until the message ends: drawing the plate threw/.test(l)), '4d. latched, reason logged'));
-        hud.twin.paintPlate = realPaint;
+        feedList(L(E.door));
+        const realPaint = hud.twin.paintSheet;
+        hud.twin.paintSheet = () => { throw new Error('bench: an injected failure while painting the sheet'); };
+        await never('5d. a throw while painting the card', () => { feedAct(15); }, (t) => ok(/threw/.test(t.reason) && logs.some((l) => /cc: card latched until the message ends: drawing the card threw/.test(l)), '5d. latched, reason logged'));
+        hud.twin.paintSheet = realPaint;
         clean();
         truth(true, true, E.door);
         feedAct(15);
         await until(() => T0().state === 'ours', 1500);
-        ok(T0().state === 'ours', '4d. one failure did not end ours: the next message is drawn again');
-        noViolations('4d. and it was audited too');
-        model.truth = { shown: false, may: false, expect: [] };
-        feedAct(0);
-        await sleep(250);
+        ok(T0().state === 'ours', '5d. one failure did not end ours: the next message is drawn again');
+        noViolations('5d. and it was audited too');
+        await endMsg();
     }
 
-    // ---- case 5: N -> M, window at once, closes only after M's text ------------------------------------------------
+    // ---- case 6: N -> M, a row already whole on the page, a cut row, the counter -----------------------------------------
     clean();
-    feedList([Object.assign({ symbol: 2 }, E.door), Object.assign({ symbol: 2 }, E.boot), Object.assign({ symbol: 44 }, E.tyre)]);
+    feedList(L(E.door, E.boot, E.tyre));
     truth(true, true, E.door);
     feedAct(15);
     await until(() => T0().state === 'ours', 1500);
-    ok(T0().state === 'ours', '5. N: ours (door)');
-    const nTrace5 = model.trace.length;
-    truth(true, true, E.boot);
-    feedAct(14);                         // N -> M with no 0 between
-    {
-        const s = snapshot(), t = T0();
-        ok(t.state === 'window' && s.open && !s.plateBlank && model.truth.expect.some((b) => b.equals(s.plate)),
-            '5. N -> M in one turn: the window is open at once and the plate already says M, not N');
-    }
+    ok(T0().state === 'ours' && snapshot().has === 'card', '6. N: ours (the door card)');
+    const nTrace6 = model.trace.length;
+    truth(true, true, E.tyre);                // the tyre message is on the page as a whole row under the door card? (amber first: yes)
+    const tyreRowFirst = textOf(snapshot().sheet, E.tyre) === 'row';
+    feedAct(50);
+    await turn();
+    if (tyreRowFirst) ok(T0().state === 'ours' && !snapshot().open && snapshot().has === 'card', '6a. N -> M where M was already a whole row on the page: ours at once, the window never opened, M\'s card now');
+    else ok(T0().state === 'window' && snapshot().open, '6a. N -> M (M not wholly on the page): the window opens at once');
     await until(() => T0().state === 'ours', 1500);
-    const since5 = model.trace.slice(nTrace5), up5 = since5.filter((x) => !x.plateBlank)[0], sw = since5.filter((x) => !x.open && x.state === 'ours')[0];
-    if (!(up5 && sw)) console.log('  trace since the switch: ' + since5.map((x) => x.tr).join(' '));
-    ok(T0().state === 'ours' && up5 && sw && sw.t - up5.t >= 145, '5. the window shut ' + (up5 && sw ? Math.round(sw.t - up5.t) : '?') + ' ms after M\'s plate went up (not before 150)');
-    noViolations('5. N -> M');
-    // N -> a message we cannot draw (no entry): the plate must go in the same turn the window opens
+    noViolations('6a. N -> M');
+    void nTrace6;
+    feedList(L(E.door, E.boot, E.tyre, E.brake));
+    await sleep(60);
+    truth(true, true, E.brake);                 // a long red message: never a whole row (cut), so the window opens until its card settles
+    feedAct(42);
+    await turn();
+    ok(T0().state === 'window' && snapshot().open && snapshot().rows === 0 && T0().deferred, '6b. N -> M whose row is cut: the window opens at once; the sheet keeps N\'s card until it has been open 150 ms (the open settle)');
+    await sleep(260);
+    ok(snapshot().has === 'card' && T0().state === 'window', '6b. then M\'s card goes up, the window stays open for its own 150 ms');
+    await until(() => T0().state === 'ours', 1500);
+    ok(T0().state === 'ours' && hud.twinCc.severity === 'red', '6b. M settles: ours, severity red in this.twinCc (the bottom rule)');
+    noViolations('6b. a cut row never counted');
     truth(true, true, null);
     feedAct(88);
-    {
-        const s = snapshot();
-        ok(T0().state === 'window' && s.open && s.plateBlank && s.covered === 0, '5. N -> a message with no entry: the plate is cleared in the very turn the window opens');
-    }
-    await sleep(250);
-    noViolations('5. N -> unnamed');
-    // and a counter: frame 2 of 3 comes with the next message
-    truth(true, true, E.tyre, '2/3');
+    await turn();
+    ok(T0().state === 'window' && snapshot().open && snapshot().covered === 0, '6c. N -> a message with no entry: the window opens in the very turn');
+    await sleep(300);
+    ok(T0().page && T0().page.kind === 'pointer' && !snapshot().has, '6c. tab 2 shows the pointer page ("Повідомлення / на панелі внизу"), never a card');
+    noViolations('6c. N -> unnamed');
+    truth(true, true, E.tyre);
     feedFrame(2, 3, [14, 50, 15]);
     feedAct(50);
     await until(() => T0().state === 'ours', 1500);
-    ok(hud.twinCc.severity === 'amber', '5. a yellow message gives severity "amber" in this.twinCc');
-    ok(T0().state === 'ours' && T0().candidate.counter === '2/3', '5. a message with the car\'s frame counter: "2/3" is on the plate');
-    truth(true, true, E.tyre, '3/3');
-    feedFrame(3, 3, [14, 50, 15]);       // frame 3 of 3 is message 15's, not this one's: no counter
-    truth(true, true, E.tyre, '');
+    ok(T0().state === 'ours' && T0().candidate.counter === '2/3', '6d. a message with the car\'s frame counter: "2/3" on the card');
+    const n6 = model.trace.length;
+    feedFrame(3, 3, [14, 50, 15]);
     await sleep(250);
-    ok(T0().state === 'ours' && T0().candidate.counter === '', '5. a frame whose id is not this message takes the counter away without reopening the window');
-    noViolations('5. counters');
+    ok(T0().state === 'ours' && T0().candidate.counter === '' && !model.trace.slice(n6).some((x) => x.open), '6d. a frame of another message takes the counter away without opening the window');
+    noViolations('6d. counters');
+    await endMsg();
+    feedFrame(0, 0, [0, 0, 0]);
+    ok(T0().state === 'none' && snapshot().sheetBlank && !snapshot().open && snapshot().rows > 0, '6e. number 0: the sheet empty, the window shut, the row back');
 
-    // ---- case 6: the end ---------------------------------------------------------------------------------------------
-    model.truth = { shown: false, may: false, expect: [] };
-    feedAct(0);
-    feedFrame(0, 0, [0, 0, 0]);         // the car's frame counter goes quiet with the message
-    {
-        const s = snapshot(), t = T0();
-        ok(t.state === 'none' && s.plateBlank && !s.open && s.rows > 0, '6. number 0: the plate goes, the window shuts and the row returns, in that order, in one turn');
-    }
-    await sleep(200);
-    noViolations('6. the end');
-
-    // ---- case 7: the second witness, and the plate sheet refused -------------------------------------------------------
+    // ---- case 7: a stored entry whole on the list page becomes ours at once (C12) ----------------------------------------
     clean();
-    truth(true, true, null);
-    feedDisp(14);                        // the second witness says 14 while the first says 0: they disagree
-    both = true;                         // (from here on the car sends both numbers together)
+    feedList(L(E.wash));
     await sleep(200);
-    ok(T0().state === 'window' && snapshot().covered === 0, '7a. the witnesses disagree (0 and 14): window, nothing of ours over BMW\'s panel');
+    hud._twinTabChosen(2, 'driver');
+    await sleep(300);
+    ok(T0().tab === 2 && T0().state === 'none' && T0().page.kind === 'list' && textOf(snapshot().sheet, E.wash) === 'row', '7a. the driver opens tab 2 with nothing shown: the list page, the stored entry a whole row');
+    const n7 = model.trace.length;
+    truth(true, true, E.wash);
+    feedAct(164);
+    await sleep(300);
+    ok(T0().state === 'ours' && !model.trace.slice(n7).some((x) => x.open), '7b. shown-now names it: ours at once, BMW\'s panel never opened (our text for it was on the screen)');
+    noViolations('7. a whole row as our text');
+    await endMsg();
+    hud._twinTabChosen(1, 'driver');
+    await sleep(200);
+    ok(T0().tab === 1 && snapshot().sheetBlank, '7c. back to tab 1: the sheet is empty');
+
+    // ---- case 8: the second witness, the sheet refused, a layout without a sheet ---------------------------------------------
+    clean();
+    feedList(L(E.door, E.boot));
+    truth(true, true, null);
+    feedDisp(14);
+    both = true;
+    await sleep(200);
+    ok(T0().state === 'window' && snapshot().covered === 0, '8a. the witnesses disagree (0 and 14): window, nothing of ours over BMW\'s panel');
     truth(true, true, E.boot);
     feedAct(14);
     await until(() => T0().state === 'ours', 1500);
-    ok(T0().state === 'ours', '7a. both witnesses say 14: ours');
-    noViolations('7a. two witnesses');
-    model.truth = { shown: false, may: false, expect: [] };
-    feedAct(0); feedDisp(0);
-    await sleep(250);
-    // the sheet refused: the service has no room for the plate's sheet at the next build
-    knobs.refuse = (m) => m.kind === 'image' && m.w === PLATE_RECT[2] && m.h === PLATE_RECT[3];
+    ok(T0().state === 'ours', '8a. both witnesses say 14: ours');
+    noViolations('8a. two witnesses');
+    none(); feedAct(0); feedDisp(0); await sleep(250);
+    knobs.refuse = (m) => m.kind === 'image' && m.w === SHEET_RECT[2] && m.h === SHEET_RECT[3];
     press('hudLayout', 'twin_cc_b');
     await until(() => hud.activeName === 'twin_cc_b' && st.refusals.length > 0, 3000);
     await sleep(300);
-    ok(st.refusals.some((r) => /pixel memory/.test(r.why)), '7b. the service refused the plate\'s sheet ("' + (st.refusals[0] && st.refusals[0].why) + '")');
+    ok(st.refusals.some((r) => /pixel memory/.test(r.why)), '8b. the service refused the tab-2 sheet');
     clean();
     truth(true, true, null);
     feedAct(15);
     await sleep(500);
-    {
-        const s = snapshot(), t = T0();
-        ok(t.state === 'window' && t.sheetLatch && s.open && s.covered === 0 && /refused/.test(t.reason), '7b. refused sheet: window open for the message, nothing of ours over BMW\'s panel (' + t.reason + ')');
-        ok(logs.some((l) => /cc: plate sheet refused/.test(l)), '7b. the log says the sheet was refused');
-        noViolations('7b. a plate with no sheet never closes the window');
-    }
-    model.truth = { shown: false, may: false, expect: [] };
-    feedAct(0);
-    await sleep(250);
-    knobs.refuse = null;
-    st.refusals.length = 0;
+    ok(T0().state === 'window' && T0().sheetLatch && snapshot().open && snapshot().covered === 0 && /refused/.test(T0().reason), '8b. refused sheet: window open for the message (' + T0().reason + ')');
+    ok(logs.some((l) => /cc: tab-2 sheet refused/.test(l)), '8b. the log says the sheet was refused');
+    noViolations('8b. a refused sheet never closes the window');
+    none(); feedAct(0); await sleep(250);
+    knobs.refuse = null; st.refusals.length = 0;
     press('hudLayout', 'twin_cc');
     await until(() => hud.activeName === 'twin_cc', 3000);
     await sleep(200);
@@ -757,28 +905,23 @@ async function engineChecks() {
     truth(true, true, E.door);
     feedAct(15);
     await until(() => T0().state === 'ours', 1500);
-    ok(T0().state === 'ours' && !T0().sheetLatch, '7b. the next build tries the sheet again and it works: ours');
-    model.truth = { shown: false, may: false, expect: [] };
-    feedAct(0);
-    await sleep(250);
-    // a layout with no plate at all can never close the window
-    press('hudLayout', 'twin_cc_noplate');
-    await until(() => hud.activeName === 'twin_cc_noplate', 3000);
+    ok(T0().state === 'ours' && !T0().sheetLatch, '8b. the next build tries the sheet again and it works: ours');
+    await endMsg();
+    press('hudLayout', 'twin_cc_nosheet');
+    await until(() => hud.activeName === 'twin_cc_nosheet', 3000);
     await sleep(200);
     clean();
     truth(true, true, null);
     feedAct(15);
     await sleep(500);
-    ok(T0().state === 'window' && snapshot().open && snapshot().covered === 0, '7c. a layout with no plate widget: window open for every message, never closed');
-    noViolations('7c. no plate widget');
-    model.truth = { shown: false, may: false, expect: [] };
-    feedAct(0);
-    await sleep(250);
+    ok(T0().state === 'window' && snapshot().open && snapshot().covered === 0, '8c. a layout with no tab-2 sheet: window open for every message, never closed (' + T0().reason + ')');
+    noViolations('8c. no sheet widget');
+    await endMsg();
     press('hudLayout', 'twin_cc');
     await until(() => hud.activeName === 'twin_cc', 3000);
     await sleep(200);
 
-    // ---- case 8: a layout switch and day / night with a message showing -------------------------------------------------
+    // ---- case 9: a layout switch and day / night with a message showing ---------------------------------------------------
     clean();
     truth(true, true, E.door);
     feedAct(15);
@@ -786,31 +929,64 @@ async function engineChecks() {
     const nb = model.frames;
     press('hudLayout', 'twin_cc_b');
     await sleep(40);
-    {
-        const s = snapshot();
-        ok(hud.activeName === 'twin_cc_b' && T0().state === 'window' && s.open, '8a. layout switch with a message showing: the new backdrop is born with BMW\'s window open (state ' + T0().state + ')');
-    }
+    ok(hud.activeName === 'twin_cc_b' && T0().state === 'window' && snapshot().open, '9a. layout switch with a message showing: the new backdrop is born with BMW\'s window open (' + T0().state + ')');
     await until(() => T0().state === 'ours', 1500);
-    ok(T0().state === 'ours' && model.frames > nb, '8a. after the rebuild the plate is painted again and settles: ours');
-    noViolations('8a. across the layout switch');
+    ok(T0().state === 'ours' && model.frames > nb, '9a. after the rebuild the card is painted again and settles: ours');
+    noViolations('9a. across the layout switch');
     press('nightDim', 'always');
-    await sleep(100);
-    truth(true, true, E.door);          // accepts the day or the night plate of the same message
-    await until(() => T0().state === 'ours', 1500);
-    ok(hud.nightOn === true && T0().state === 'ours', '8b. night colours with a message showing: the plate is painted again (' + (hud.nightOn ? 'night' : 'day') + '), ours');
-    noViolations('8b. across the day / night change');
+    await sleep(150);
+    await until(() => T0().state === 'ours' && T0().night === true, 1500);
+    ok(hud.nightOn === true && T0().state === 'ours' && T0().night === true, '9b. night colours with a message showing: the card painted again at night, ours');
+    noViolations('9b. across the day / night change');
     press('nightDim', 'off');
     await sleep(300);
-    noViolations('8b. and back to day');
+    noViolations('9b. and back to day');
+    await endMsg();
 
-    // ---- case 9: the audit itself ------------------------------------------------------------------------------------
-    model.truth = { shown: false, may: false, expect: [] };
-    feedAct(0);
-    await sleep(250);
-    ok(model.frames >= 50, '9. the pixel audit ran on ' + model.frames + ' frames (every turn of the event loop in which the engine sent anything)');
+    // ---- case 10: the narrowed release (config.ccActive.release, SPEC-R3 5.4.7; SC's S3b) -----------------------------------
+    const s3b = async (leftList) => {
+        clean();
+        hud.config.ccActive.release = { deferValues: [65535], leftList };
+        none(); feedList(L(E.rest)); feedAct(0); await sleep(200);
+        truth(true, true, E.door); feedList(L(E.rest, E.door)); feedAct(15);
+        await until(() => T0().state === 'ours', 1500);
+        none(); feedList(L(E.rest)); feedAct(0); await sleep(300);
+        truth(true, true, null); feedAct(15);              // the door again: its number before its list entry
+        await sleep(600);
+        truth(true, true, E.door); feedList(L(E.rest, E.door));
+        await sleep(600);
+        none(); feedList(L(E.rest)); feedAct(0); await sleep(300);
+        const n = model.violations.length;
+        hud.config.ccActive.release = null;
+        return n;
+    };
+    const wide = await s3b('wide');
+    ok(wide > 0, '10a. MC\'s wide leftList ("wide") covers BMW\'s panel when a door message comes back with its number before its list entry: ' + wide + ' violations (the test fails without the narrowing)');
+    const narrow = await s3b('kept');
+    ok(narrow === 0, '10b. the narrowed leftList ("kept") keeps the window open there: 0 violations');
+    const asTrue = await s3b(true);
+    ok(asTrue === 0, '10b. leftList true on Twin Dial is read as "kept" (its machine never takes the wide rule): 0 violations');
+    {
+        clean();
+        hud.config.ccActive.release = { deferValues: [65535], leftList: 'kept' };
+        none(); feedList(L(E.rest)); feedAct(0); await sleep(200);
+        truth(true, true, E.door); feedList(L(E.rest, E.door)); feedAct(15);
+        await until(() => T0().state === 'ours', 1500);
+        none(); feedList(L(E.rest));                          // the number is never notified again (MC's A3): kept 15
+        await sleep(400);
+        ok(T0().state === 'none' && hud.ccReleased === true && logs.some((l) => /released to the list \(listed\): number 15 was kept after its entry left ccList/.test(l)),
+            '10c. a number KEPT after its entry left is released: the list decides, none (MC\'s A3 no longer hangs)');
+        noViolations('10c. the release');
+        hud.config.ccActive.release = null;
+        feedAct(0); await sleep(200);
+    }
+    ok(JSON.parse(fs.readFileSync(path.join(TWIN, 'app.json'), 'utf8')).config.ccActive.release === null, '10d. Twin Dial\'s app.json ships the release off (config.ccActive.release null)');
+
+    // ---- case 11: the audit itself ------------------------------------------------------------------------------------
+    ok(model.frames >= 50, '11. the pixel audit ran on ' + model.frames + ' frames');
     const seen = (re) => model.trace.some((x) => re.test(x.tr));
-    ok(seen(/^C-PSo/) && seen(/^C-PO[wn]/) && seen(/^CRbSn/) && seen(/^--bOw/),
-        '9. the trace saw every kind of frame: ours (plate up, window shut), the plate up with the window open, the row alone, BMW\'s panel alone (' + model.trace.length + ' distinct states)');
+    ok(seen(/^CRPSo2/) && seen(/^--POw2/) && seen(/^CRbSn1/) && seen(/^--bOw1/) && seen(/^--xOw2/),
+        '11. the trace saw ours (card, window shut, row back), the card with the window open, the row alone, BMW\'s panel alone, the old card kept under the open window (' + model.trace.length + ' states)');
 
     // ---- the mutants: the audit must fail when the engine is broken -----------------------------------------------------
     const mutant = async (what, apply, restore, play) => {
@@ -820,54 +996,68 @@ async function engineChecks() {
         const n = model.violations.length;
         ok(n > 0, 'mutant: ' + what + ' - the audit saw ' + n + ' violation' + (n === 1 ? '' : 's') + (n ? ' (first: ' + model.violations[0].w + ')' : ''));
         clean();
-        model.truth = { shown: false, may: false, expect: [] };
-        feedAct(0);
-        await sleep(300);
-        feedAct(0);
+        none(); feedAct(0); await sleep(300); feedAct(0); await sleep(100);
+        if (hud.activeName !== 'twin_cc') { press('hudLayout', 'twin_cc'); await until(() => hud.activeName === 'twin_cc', 3000); await sleep(200); }
+        clean();
     };
-    {   // M1: the rows never step aside
+    feedList(L(E.door, E.boot, E.tyre));
+    await sleep(100);
+    {
         const live = hud._ccLiveSync;
         await mutant('the bottom row never steps aside', () => { hud._ccLiveSync = () => {}; hud._ccHidden = () => false; }, () => { hud._ccLiveSync = live; delete hud._ccHidden; hud._ccPush(); },
             async () => { truth(true, true, E.boot); feedAct(14); await sleep(400); });
-        await sleep(300);
     }
-    {   // M2: the window never opens (the hole stays shut) while the plate is not yet on the screen
-        const upd = hud.twinMsg.update;
-        await mutant('the window never opens, our plate goes up late', () => {
-            hud.twinMsg.update = function () { const r = upd.apply(this, arguments); this.window = false; this.state = 'ours'; this.candidate = this.candidate && null; return r; };
-        }, () => { hud.twinMsg.update = upd; hud._ccPush(); }, async () => { truth(true, true, E.tyre); feedAct(50); await sleep(400); });
-        await sleep(300);
+    {
+        const sync = hud._twinSync, holes = hud._twinHoles, send = hud._twinSheetSend;
+        await mutant('the window never opens, our card goes up late', () => {
+            hud._twinSync = () => {}; hud._twinHoles = () => {};
+            hud._twinSheetSend = function (x, op, buf) { setTimeout(() => send.call(hud, x, op, buf), 300); };
+        }, () => { hud._twinSync = sync; hud._twinHoles = holes; hud._twinSheetSend = send; hud._ccPush(); }, async () => { truth(true, true, E.tyre); feedAct(50); await sleep(600); });
     }
-    {   // M3: N's plate stays up when M arrives (the plate is never replaced or cleared)
-        const send = hud._twinSend;
-        let ours = false;
-        await mutant('the plate of N stays up when M arrives', () => {
+    {
+        const send = hud._twinSheetSend;
+        await mutant('a stale card stays (the sheet is never repainted when M arrives)', () => {}, () => { hud._twinSheetSend = send; hud._ccPush(); }, async () => {
             truth(true, true, E.door); feedAct(15);
-        }, () => { hud._twinSend = send; hud._ccPush(); }, async () => {
             await until(() => T0().state === 'ours', 1500);
-            hud._twinSend = function () { return undefined; };           // from now on no plate is painted or cleared
-            truth(true, true, E.boot); feedAct(14);
-            await sleep(400);
+            hud._twinSheetSend = function () { return undefined; };
+            feedList(L(E.door, E.boot, E.tyre, E.brake));
+            truth(true, true, E.brake); feedAct(42);
+            await sleep(500);
         });
-        void ours;
-        await sleep(300);
     }
-    {   // M4: the stale-plate check itself: a plate of ANOTHER message is "covered without our text for the shown number"
-        const upd = hud.twinMsg.update;
-        await mutant('the window opens but the plate is painted for the WRONG message', () => {
-            hud.twinMsg.update = function () { const r = upd.apply(this, arguments); if (this.candidate) this.candidate = Object.assign({}, this.candidate, { name: this.candidate.name + ' (stale)', key: this.candidate.key + '*' }); return r; };
-        }, () => { hud.twinMsg.update = upd; hud._ccPush(); }, async () => { truth(true, true, E.boot); feedAct(14); await sleep(400); });
-        await sleep(300);
+    {
+        const buf = hud._twinSheetBuf;
+        await mutant('the card is painted for the WRONG message', () => {
+            hud._twinSheetBuf = function (page) {
+                const p = page.card && page.card.key ? Object.assign({}, page, { card: Object.assign({}, page.card, { lines: ['Stale words'], bases: [424] }) }) : page;
+                return buf.call(hud, p);
+            };
+        }, () => { hud._twinSheetBuf = buf; hud._ccPush(); }, async () => { truth(true, true, E.boot); feedAct(14); await sleep(500); });
     }
+    await mutant('the 150 ms waits removed (the window shuts on the card\'s own turn; the centre drops it when the tab is left)', () => { T0().settleMs = 0; T0().openSettleMs = 0; },
+        () => { T0().settleMs = 150; T0().openSettleMs = 150; }, async () => {
+            truth(true, true, E.door); feedAct(15);
+            await sleep(300);
+            hud._twinTabChosen(1, 'driver');
+            await sleep(300);
+            hud._twinTabChosen(2, 'driver');
+            await sleep(100);
+        });
+    await mutant('the bottom row left on connection 2 (the window on 0)', () => { press('hudLayout', 'twin_cc_c'); }, () => {}, async () => {
+        await until(() => hud.activeName === 'twin_cc_c', 3000);
+        await sleep(300);
+        truth(true, true, E.door); feedAct(15); await sleep(400);
+    });
 
-    // ---- budgets the stand-in layout and the engine keep: layers per connection, pixel memory -------------------------------
+    // ---- budgets and the log -------------------------------------------------------------------------------------------
     const perApp = {};
     st.layers.forEach((l) => { if (l.kind !== 'asset') perApp[l.app] = (perApp[l.app] || 0) + 1; });
-    ok(Object.keys(perApp).every((a) => perApp[a] <= 8) && st.pixel <= 16 * 1048576, 'the service\'s own limits hold (layers per connection ' + JSON.stringify(perApp) + ', pixel memory ' + (st.pixel / 1048576).toFixed(2) + ' MiB)');
+    ok(Object.keys(perApp).every((a) => perApp[a] <= 8) && st.peak <= 16 * 1048576, 'the service\'s own limits hold (layers per connection ' + JSON.stringify(perApp) + ', peak pixel memory ' + (st.peak / 1048576).toFixed(2) + ' MiB)');
     ok(!logs.some((l) => /^ERROR/.test(l)), 'the engine logged no error (' + logs.filter((l) => /^ERROR/.test(l)).slice(0, 2).join(' | ') + ')');
     const text = logs.join('\n');
-    ok(!/Driver door|Boot lid|Brake fault|tyre pressure|Πόρτα/i.test(text.replace(/layer "[^"]*"/g, '')), 'no message text ever reached the log (' + logs.length + ' lines checked)');
-    ok(/cc: id 15 colour white name len 16 shown-now 15 → ours \(our plate is on the screen\)/.test(text), 'the log has the evaluation line: "cc: id 15 colour white name len 16 shown-now 15 → ours (our plate is on the screen)"');
+    ok(!/Driver door|Boot lid|Brake fault|tyre pressure|Washer fluid|Stored notice|Πόρτα/i.test(text.replace(/layer "[^"]*"/g, '')), 'no message text ever reached the log (' + logs.length + ' lines checked)');
+    ok(/cc: centre ours, tab 2, page card \(our text for the shown message is on the screen\)/.test(text) && /cc: centre window, tab 1, page other \(the driver left tab 2/.test(text),
+        'the log has the centre\'s own lines ("cc: centre ours, tab 2, page card ...", "... the driver left tab 2 ...")');
     ok(/cc: id 15 colour white name len 16 shown-now 15 → window \(D7: this is the message that confirmed/.test(text), 'and the D7 one: "→ window (D7: this is the message that confirmed ...)"');
 
     hud.stop();
@@ -880,6 +1070,8 @@ async function engineChecks() {
     try {
         unitChecks();
         machineChecks();
+        modelChecks();
+        tabFillChecks();
         await engineChecks();
     } catch (e) {
         failed++;
