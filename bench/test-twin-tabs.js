@@ -205,6 +205,37 @@ console.log('1. the rules');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
+// integration (B7): the key as the car sends it (app.json config.tabKey, verified 2026-11-18: 0 -> 0x40 -> 0 per press, ~0.15 s held, ~0.5 s apart)
+console.log('2a. the car\'s TRIP button (app.json config.tabKey, injected bytes)');
+{
+    const K = APP.config.tabKey;
+    const h = mk({ tabKey: K });
+    const extra = {};
+    eq(tabs.wire(h, extra), 1, 'app.json\'s key wires one handler on ' + K.iface + ' ' + K.field);
+    sel(h);
+    h.ccListAll = [{ id: 15 }];                       // a listed message: tab 2 exists in the cycle (1 -> 2 -> 3 ...)
+    const f = (x, ms) => { h._now_ms += (ms || 150); extra[K.iface][K.field]({ operationColumnStalks: x }); };
+    f(0x00, 500);
+    const t0 = h.tabs.tab;
+    f(0x40); eq(h.tabs.tab, 2, 'a press (0 -> 0x40, the rising edge): one tab on (' + t0 + ' -> 2)');
+    f(0x40); eq(h.tabs.tab, 2, 'held (0x40 again, 150 ms later): nothing');
+    f(0x00); eq(h.tabs.tab, 2, 'released (0x40 -> 0, the falling edge): nothing');
+    f(0x40, 500); f(0x00);
+    eq(h.tabs.tab, 3, 'the next press 0.5 s later: one more tab (2 -> 3)');
+    f(0x01, 500); f(0x02); f(0x81); f(0x00);
+    eq(h.tabs.tab, 3, 'other bits (0x01, 0x02, 0x80) rising and falling: ignored');
+    f(0x41, 500);
+    eq(h.tabs.tab, 4, 'bit 0x40 rising with another bit set (0x41): a press');
+    f(0x00, 500); f(255, 500); f(0x40, 500);
+    eq(h.tabs.tab, 4, '255 (the unfilled default, every bit set) is no state: neither 0 -> 255 nor 255 -> 0x40 is a press');
+    f(0x00, 500); f(0x40, 500);
+    eq(h.tabs.tab, 5, 'after a real 0, the next rising edge is a press again');
+    let moved = 0;
+    for (let i = 0; i < 17; i++) { f(0x00, 350); const was = h.tabs.tab; f(0x40, 150); if (h.tabs.tab !== was) moved++; }
+    f(0x00, 150);
+    eq(moved, 17, 'seventeen presses as the car sent them (0 / 0x40, 0.15 s held, 0.5 s apart): seventeen tab steps');
+}
+
 console.log('2. the key (config.tabKey)');
 {
     const SW = 'de.bmw.infotainment.controlelements.SteeringWheelPushButton';
@@ -676,7 +707,10 @@ function hygiene() {
     const main = APP.screens.find((s) => s.name === 'MAIN');
     ok(main.items.some((i) => i[0] === 'setting' && i[1] === 'tab') && APP.screens.find((s) => s.name === 'SETTINGS').skip.indexOf('tab') >= 0 && APP.screens.find((s) => s.name === 'SETTINGS').skip.indexOf('tabLock') < 0, 'the menu: "Таба" on the main screen, "Не перемикати таби вище" in the settings list');
     ok(APP.shared.indexOf('twin_tabs.js') >= 0, 'app.json packs shared/twin_tabs.js');
-    ok(APP.config.tabKey === null, 'config.tabKey is null until the car session names a key');
+    // integration (B7): the car session found the key (2026-11-18): the stalk's TRIP button, bit 0x40 of IndicatorSteeringColumn
+    ok(APP.config.tabKey && APP.config.tabKey.iface === 'de.bmw.body.Light' && APP.config.tabKey.field === 'IndicatorSteeringColumn' && APP.config.tabKey.mask === 64 &&
+        JSON.stringify(APP.config.tabKey.path) === '["operationColumnStalks"]' && APP.signals['de.bmw.body.Light'].IndicatorSteeringColumn === 's',
+        'config.tabKey is the car-verified TRIP button (bit 0x40 of de.bmw.body.Light IndicatorSteeringColumn, declared notifier-only "s")');
     eq([APP.config.tabs.callSelects, APP.config.tabs.messageTab, APP.config.tabs.lockAboveKmh], [false, true, 5], 'config.tabs: callSelects off, a message selects tab 2, lock 5');
     const F30 = JSON.parse(fs.readFileSync(path.join(H.ROOT, 'apps', 'f30_cluster', 'app.json'), 'utf8'));
     ok((F30.shared || []).indexOf('twin_tabs.js') < 0 && !F30.config.tabs, 'f30_cluster does not pack the module and has no config.tabs');

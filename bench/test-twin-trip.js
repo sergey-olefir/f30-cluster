@@ -79,7 +79,17 @@ console.log('1. the factors: on by default');
     eq(page(h).slice(0, 2), ['ø 5.5', 'ø 52'], 'bc 2 takes the second board computer');
     h.config.trip = { factors: false };
     eq(page(h), ['ø ' + DASH, 'ø ' + DASH, DASH, DASH, 'від початку поїздки, ' + DASH], 'factors false: every value a dash (the kill switch)');
-    eq(APP.config.trip.factors, { bc: 1, speed: 0.1, cons: 0.1, way: 0.1, rl3: { speed: 0.1, cons: 0.1, way: 0.1 } }, 'the shipped app.json carries the same factors explicitly');
+    // integration (B7): the car (2026-11-18, against its own trip page) says KombiIF's distance is whole units: way 1; the rest as the defaults
+    const shipped = JSON.parse(JSON.stringify(APP.config.trip.factors)); delete shipped._verified;
+    eq(shipped, { bc: 1, speed: 0.1, cons: 0.1, way: 1, rl3: { speed: 0.1, cons: 0.1, way: 0.1 } }, 'the shipped app.json carries the factors explicitly, KombiIF distance x 1 as verified on the car');
+    {
+        const hc = mk({ config: { trip: { factors: APP.config.trip.factors, order: ['kombi'] } } });
+        travel(hc, 1, 28, 19);
+        eq(tok(hc, 'tDist'), '19.0', 'with the shipped factors a KombiIF distance of 19 reads 19.0 km (x 1), not 1.9');
+        const ho = mk({ config: { odometer: APP.config.odometer } });
+        ho.extra['de.bmw.infrastructure.MileageSupreme'].mileageSupreme({ mileageSupreme: 114747213, qualifierMileageSupreme: 'EVENT_DATA_AVAILABLE' });
+        ok(Math.round(twin.odometer(ho).km) === 114747, 'MileageSupreme in metres (114747213, above the 24-bit marker) reads 114747 km with the shipped factor 0.001 (' + JSON.stringify(twin.odometer(ho)) + ')');
+    }
     ok(APP.config.trip.verified === false && APP.config.odometer.verified === false, '... and verified false for the trip and the odometer (the first drive compares)');
 }
 

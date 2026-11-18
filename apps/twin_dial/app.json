@@ -38,6 +38,10 @@
     "twin_limit.js"
   ],
   "signals": {
+    "de.bmw.body.Light": {
+      "IndicatorSteeringColumn": "s",
+      "_about": "the tab key (config.tabKey): the stalk's TRIP button, bit 0x40 of operationColumnStalks; notifier 32773 only (no getter), so s. Verified on the car 2026-11-18. Read only."
+    },
     "de.bmw.infotainment.vehicle.CDS": {
       "statusEngineSpeed2": "rs",
       "statusEngineTemperature": "rs",
@@ -568,14 +572,22 @@
       "messageTab": true,
       "callSelects": false
     },
-    "tabKey": null,
+    "tabKey": {
+      "iface": "de.bmw.body.Light",
+      "field": "IndicatorSteeringColumn",
+      "path": ["operationColumnStalks"],
+      "mask": 64,
+      "invalid": [255],
+      "_verified": "THE CAR, 2026-11-18 (signal_probe log, the owner confirmed the presses): the stalk's TRIP button is bit 0x40 of de.bmw.body.Light IndicatorSteeringColumn.operationColumnStalks (UInt8, notifier 32773, no getter: declared s). 17 presses gave 17 clean 0 -> 0x40 -> 0 pairs, held about 0.15 s, about 0.5 s apart. The rising edge only is a press (shared/twin_tabs.js keyHandler); 255 is the catalogue's unfilled default (every bit set) and counts as no state."
+    },
     "_tabKey": "SPEC-R3 R9: the tab key source, null until the car session (docs/AGENT-BRIEF-car-signals.md, probe P13) finds a field that moves on one press. Forms: {\"iface\": \"...\", \"field\": \"...\", \"path\": [\"member\"], \"mask\": 64} (a bit), {..., \"press\": [1, \"TASTER_GEDRUECKT\"]} (a level; the rising edge counts), {..., \"counter\": true} (a step counter), {..., \"any\": true} (any change); optional \"instance\", \"dir\" (1 | -1), \"rateMs\". The field must also be in \"signals\" (rs / s): the key reads, it never writes. shared/twin_tabs.js",
     "trip": {
       "factors": {
         "bc": 1,
         "speed": 0.1,
         "cons": 0.1,
-        "way": 0.1,
+        "way": 1,
+        "_verified": "THE CAR, 2026-11-18, against the car's own trip page (15.5 l/100 km, 13.7 km/h, 19.2 km, 1:28): KombiIF speed x 0.1, consumption x 0.1, distance x 1 (NOT 0.1), board computer 1; hours and minutes plain. rl3 (ResetLogic3) is still unverified.",
         "rl3": {
           "speed": 0.1,
           "cons": 0.1,
@@ -597,7 +609,8 @@
     "odometer": {
       "factors": {
         "rangeTank": 1,
-        "supreme": 1,
+        "supreme": 0.001,
+        "_verified": "THE CAR, 2026-11-18: statusRangeTankStatus.mileageKilometre is km (factor 1, 114747 km); MileageSupreme.mileageSupreme carries METRES (114747213): factor 0.001 (shared/twin_tokens.js reads it as a UInt32).",
         "range": 1,
         "secure": 1
       },

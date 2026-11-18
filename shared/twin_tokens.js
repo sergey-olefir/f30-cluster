@@ -132,7 +132,7 @@ function wire(hud, extra) {
         const s = SOURCES[key];
         chain(hud, extra, s[0], s[1], (v) => {
             const raw = ODO_MEMBER[key](v);
-            td.odo[key] = raw.ok ? odoValue(raw.km, 1) : null;          // raw; the factor is applied when it is read
+            td.odo[key] = raw.ok ? odoValue(raw.km, 1, ODO_BAD_OF[key]) : null;          // raw; the factor is applied when it is read
             arrive(hud, key, 'odometer', raw.text, () => (td.odo[key] === null ? 'no value' : td.odo[key] * odoFactor(hud, key) + ' km (factor ' + odoFactor(hud, key) + ' km)'), odoVerified(hud) ? '' : 'compare with the cluster\'s odometer');
         });
         keep(key);
@@ -266,7 +266,10 @@ function odoFactor(hud, key) {
     const f = odoCfg(hud).factors;
     return f && isNum(f[key]) ? f[key] : 1;
 }
-const odoValue = (m, factor) => (isNum(m) && m > 0 && m < ODO_BAD ? m * factor : null);
+// integration (B7, the car 2026-11-18): MileageSupreme.mileageSupreme is a UInt32 in METRES (114747213 for 114747 km), so its unfilled marker is
+// 0xFFFFFFFF, not the 24-bit kilometre counters' 0xFFFFFF (which would have thrown every real value away); its factor is 0.001 (app.json)
+const ODO_BAD_OF = { supreme: 4294967295 };
+const odoValue = (m, factor, bad) => (isNum(m) && m > 0 && m < (bad || ODO_BAD) ? m * factor : null);
 function odoOrder(hud) {
     const o = odoCfg(hud).order;
     return Array.isArray(o) ? o.filter((k) => ODO_ORDER.indexOf(k) >= 0) : ODO_ORDER;

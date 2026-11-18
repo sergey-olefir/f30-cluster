@@ -194,8 +194,13 @@ function dig(v, path) {
     return cur;
 }
 
+/** integration (B7, the car's key): a value in k.invalid (e.g. [255], the field's "unfilled" default, which has every bit set) is no
+ *  state at all: never pressed, and the edge after it is not counted (the next real value only sets the level). */
+const invalid = (k, x) => Array.isArray(k.invalid) && k.invalid.indexOf(x) >= 0;
+
 /** Is raw value `x` "pressed" for key entry `k`? (a level in k.press, or a bit of k.mask) */
 function pressed(k, x) {
+    if (invalid(k, x)) return false;
     if (isNum(k.mask)) return isNum(x) && (x & k.mask) !== 0;
     const set = Array.isArray(k.press) ? k.press : [k.press];
     return x !== undefined && x !== null && set.indexOf(x) >= 0;      // an enum arrives as its name or its number: list both
@@ -219,7 +224,7 @@ function keyHandler(hud, k, onChange) {
                 steps = d === 0 ? 0 : d < 128 ? 1 : -1;
             }
         } else if (pressed(k, x) && !pressed(k, ks.prev) && ks.prev !== undefined) steps = 1;
-        ks.prev = x;
+        ks.prev = invalid(k, x) ? undefined : x;      // integration (B7): an invalid value forgets the level
         if (!steps || t - ks.at < rate) return;
         ks.at = t;
         log(hud, 'key ' + k.field + ' raw ' + (isNum(x) ? x : (typeof x === 'string' && /^[A-Z0-9_]{1,60}$/.test(x) ? x : '?')));
