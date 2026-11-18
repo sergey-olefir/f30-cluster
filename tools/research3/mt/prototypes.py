@@ -38,6 +38,19 @@ def main():
             if not os.path.exists(os.path.join(d, st, 'scene.json')) or not os.path.exists(os.path.join(base, st, 'scene.json')):
                 continue
             b, v = EX.Snap(os.path.join(base, st), 'b'), EX.Snap(os.path.join(d, st), mode)
+            # the needles move by themselves (smoothing): give each of the variant's dials the needle and fill angles
+            # the base froze, so the difference is the textures' alone (the layer's rect identifies the widget)
+            by_rect = {(l['x'], l['y'], l['w'], l['h']): l for l in b.layers if l['kind'] == 'effect'}
+            for l in v.layers:
+                o = by_rect.get((l['x'], l['y'], l['w'], l['h'])) if l['kind'] == 'effect' else None
+                if not o:
+                    continue
+                for k in ('u_dyn',):
+                    if k in o['uniforms'] and k in l['uniforms']:
+                        l['uniforms'][k] = dict(o['uniforms'][k])
+                if 'u_fill' in o['uniforms'] and 'u_fill' in l['uniforms']:
+                    fv, ov = l['uniforms']['u_fill']['v'], o['uniforms']['u_fill']['v']
+                    l['uniforms']['u_fill'] = {'v': [ov[0], ov[1]] + fv[2:], 'type': None}
             P0, A0, bad0 = EX.frame(R, b)
             P1, A1, bad1 = EX.frame(R, v)
             for x0, y0, x1, y1 in MOVING:          # the clock may have turned between the two runs
