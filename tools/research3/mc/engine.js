@@ -125,7 +125,7 @@ function verdict(e) {
     if (h.twinMsg) {
         const t = h.twinMsg;
         t.update(h._twinInputs(), fakeNow);
-        if (t.candidate) { t.painted(t.candidate.key, fakeNow); fakeNow += 160; t.update(h._twinInputs(), fakeNow); }
+        if (t.candidate) { if (typeof t.painted === 'function') t.painted(t.candidate.key, fakeNow); fakeNow += 160; t.update(h._twinInputs(), fakeNow); }     // (B3: the centre machine keeps its own per-message stamps)
         open = t.window;
         return { shown, open, ours: t.state === 'ours', state: t.state, reason: t.reason, head: t.candidate ? t.candidate.name.length : 0 };
     }

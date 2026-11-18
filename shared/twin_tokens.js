@@ -21,6 +21,8 @@ const DASH = '–';            // en dash: "no value"
 const THIN = ' ';            // thousands separator
 const WEEKDAYS = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'];
 const TITLES = { clock: 'Дата і час', trip: 'Поїздка' };
+const TAB2_TITLE = 'Повідомлення';                               // twin_dial B3: tab 2's title (SPEC-R3 5.1)
+const WARN_ICON = { red: [218, 16, 48], amber: [240, 170, 10] };    // twin_dial B3: the warning tab's icon while a message shows and tab 2 is not selected (SPEC-R3 5.3)
 const KOMBI = 'de.bmw.infotainment.KombiIF';
 const COND_READY_TWIN = 10;       // VehicleCondition 10 = FAHREN (SPEC 5.1)
 const PAGE_EVAL_MS = 250;         // the page is decided at most this often, so every widget of one tick sees one page
@@ -531,7 +533,7 @@ function resolve(hud, name) {
             return td.media.length > max ? td.media.slice(0, max - 1) + '\u2026' : td.media;
         }
         // ---- centre pages
-        case 'cTitle': return TITLES[page(hud)];
+        case 'cTitle': return hud._twinTabNow && hud._twinTabNow() === 2 ? TAB2_TITLE : TITLES[page(hud)];     // twin_dial B3: tab 2's title
         case 'cTime': return onPage('clock', clockText(local(hud)));
         case 'cWeekday': { const L = local(hud); return onPage('clock', L ? WEEKDAYS[L.wd] : ''); }
         case 'cDate': { const L = local(hud); return onPage('clock', L ? pad2(L.d) + '.' + pad2(L.mo) + '.' + L.y : ''); }
@@ -576,8 +578,11 @@ function iconState(hud, w) {
     const td = st(hud);
     switch (w.tdLive) {
         case 'warn': {
-            const sev = hud.twinCc && hud.twinCc.severity;       // package D: 'red' | 'amber' | 'green' | 'grey' | null
-            return { icon: w.icon, role: sev === 'amber' ? 'bg' : 'fg' };
+            // twin_dial B3 (SPEC-R3 3.3, 5.3): white; the SEVERITY colour (red, amber) while a message shows and tab 2 is not selected;
+            // white on the selected fill. Never dimmed. The fill itself never carries the severity.
+            const cc = hud.twinCc || {}, sev = cc.severity, tab = hud._twinTabNow ? hud._twinTabNow() : 1;
+            const lit = cc.state && cc.state !== 'none' && tab !== 2 && (sev === 'red' || sev === 'amber');
+            return { icon: w.icon, role: 'fg', rgb: lit ? WARN_ICON[sev] : null, mult: lit ? 0.85 : null };
         }
         case 'phone': return { icon: w.icon, role: td.call === true ? 'fg' : 'grey' };
         case 'nav': return { icon: w.icon, role: td.nav === true ? 'fg' : 'grey' };
@@ -590,7 +595,9 @@ function iconState(hud, w) {
  * Called from _updateOne for a widget with "tdLive".
  */
 function updateIcon(hud, x, nowMs, force) {
-    const s = iconState(hud, x.w), col = hud.theme[s.role] || hud.theme.fg;
+    const s = iconState(hud, x.w);
+    let col = hud.theme[s.role] || hud.theme.fg;
+    if (s.rgb) col = hud.nightOn && s.mult ? require('./twin_cc').nightRgb(s.rgb, s.mult) : s.rgb;     // twin_dial B3: the warning tab's severity colour
     const key = s.icon + '|' + col.join(',');
     if (!force && key === x.last) return;
     x.last = key;

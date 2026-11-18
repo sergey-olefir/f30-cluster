@@ -90,10 +90,10 @@ console.log('the recommended set: deferValues [65535] + leftList + ccm.clearIds 
 ok(unsafeIn('rec').length === 0, 'no safety case violated in any view (' + unsafeIn('rec').join(', ') + ')');
 ok(unsafeIn('rec-w').length === 0, 'rec with the witness used: no safety case violated');
 
-console.log('Twin Dial is unchanged by any of it (its own machine decides)');
+console.log('Twin Dial: off by default, and with the release set it takes only the NARROWED leftList (B3: SC, SPEC-R3 5.4.7)');
 ['A1', 'A3', 'A15', 'A16'].forEach((id) => {
     const a = run(id, TWIN, 'none'), b = run(id, TWIN, 'rec-w');
-    ok(a.endsOpen === b.endsOpen && JSON.stringify(a.steps.map((s) => s.open)) === JSON.stringify(b.steps.map((s) => s.open)), id + ': twin the same with and without (' + (a.endsOpen ? 'hangs' : 'closes') + ')');
+    ok(a.endsOpen && !b.endsOpen && !b.unsafe && !a.unsafe, id + ': twin hangs without the release (as shipped) and closes with it, never unsafe (' + (a.endsOpen ? 'hangs' : 'closes') + ' -> ' + (b.endsOpen ? 'hangs' : 'closes') + ')');
 });
 
 console.log('privacy: numbers only');

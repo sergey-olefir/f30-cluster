@@ -16,10 +16,12 @@ The gen_6wb pattern: a text is placed by its BASELINE; its box is built round th
 text(below=)). Re-baking a font moves boxes, never ink.
 
 Layers (SPEC 13.2; "conn" = the connection to cluster-render, 8 layers each):
-  conn 0  bg_l, bg_rt, bg_rb (tdback), dial_tach, dial_speed (tdial), speed (the digital speed on the GPU)
+  conn 0  bg_l, bg_rt, bg_rb (tdback), dial_tach, dial_speed (tdial), speed (the digital speed on the GPU), the bottom row's sheet
+          (SPEC-R3 5.5: the row is on the connection of the layer that opens BMW's window, so "row aside" and "window open" are
+          one socket's order; B3)
   conn 1  gear (GPU), the tab bar's sheet, the centre pages' sheets, the left hub's labels
-  conn 2  the bottom row's sheet and the check-control plate's sheet (package D: both are "cc:" layers)
-Package D owns the plate's content and the "cc:" logic; this file lays out the seam (plate_seam()).
+  conn 2  tab 2's sheet (the check-control card in the centre; the old bottom plate is gone, SPEC-R3 5.1; B3)
+Package B3 owns tab 2's sheet and the "cc:" logic; this file lays out the seam (tab2_sheet()).
 """
 import json, os, sys
 
@@ -205,32 +207,35 @@ def gpu_texts():
 
 def row():
     """SPEC 6.3: the bottom row. Rule y 613 (a tdback rule), baselines 656 and 703, numbers Noto 40 right-aligned at x 846
-    and 1153, units Noto 21 five px after, on the number's baseline. A "cc:" layer: it steps aside while BMW's panel or
-    our plate shows (package D's toggle "cc:rest": neither BMW's panel nor our plate). Slots: L1 the odometer, L2 the
-    clock, R1 the trip distance (the range until probe P4), R2 the outside temperature."""
-    z, tg = 8, 'cc:rest'
+    and 1153, units Noto 21 five px after, on the number's baseline. A "cc:" layer: its ink steps aside while BMW's panel
+    is open (B3's toggle "cc:row": drawn while the window is shut, so also while our card in the centre covers the panel;
+    SPEC-R3 5.4). It is on connection 0, the window's own (SPEC-R3 5.5). Slots: L1 the odometer, L2 the clock, R1 the trip
+    distance (the range until probe P4), R2 the outside temperature."""
+    z, tg = 8, 'cc:row'
     L, Rr = 846, 1153
     nw = lambda *worst: max(width('td_row', t) for t in worst) + 1          # a number's box: its worst text (the odometer "999 999")
-    W = [text('row_l1', L, 656, nw('999\u2009999'), '{{td:odo}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_l1u', L + 5, 656, width('td_u21', 'км') + 1, 'км', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg),
-         text('row_l2', L, 703, nw('––:––', '00:00'), '{{td:clock}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_r1', Rr, 656, nw('9999.9'), '{{td:r1}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_r1u', Rr + 5, 656, width('td_u21', 'км') + 1, 'км', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg),
-         text('row_r2', Rr, 703, nw('-30.5', '+88.8'), '{{td:ambient}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_r2u', Rr + 5, 703, width('td_u21', '°C') + 1, '°C', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg)]
+    W = [text('row_l1', L, 656, nw('999\u2009999'), '{{td:odo}}', 'td_row', 'fg', 'right', 0, z, below=3, toggle=tg),
+         text('row_l1u', L + 5, 656, width('td_u21', 'км') + 1, 'км', 'td_u21', 'fg', 'left', 0, z, below=3, toggle=tg),
+         text('row_l2', L, 703, nw('––:––', '00:00'), '{{td:clock}}', 'td_row', 'fg', 'right', 0, z, below=3, toggle=tg),
+         text('row_r1', Rr, 656, nw('9999.9'), '{{td:r1}}', 'td_row', 'fg', 'right', 0, z, below=3, toggle=tg),
+         text('row_r1u', Rr + 5, 656, width('td_u21', 'км') + 1, 'км', 'td_u21', 'fg', 'left', 0, z, below=3, toggle=tg),
+         text('row_r2', Rr, 703, nw('-30.5', '+88.8'), '{{td:ambient}}', 'td_row', 'fg', 'right', 0, z, below=3, toggle=tg),
+         text('row_r2u', Rr + 5, 703, width('td_u21', '°C') + 1, '°C', 'td_u21', 'fg', 'left', 0, z, below=3, toggle=tg)]
     return W
 
 
-def plate_seam():
-    """Package D's plate (SPEC 8.1): our message, [694, 592, 536, 128], ONE "cc:" image sheet on connection 2 above the bottom
-    row, painted by shared/twin_cc.js (symbol cell, two-line headline in Noto 42, counter in Noto 29)."""
-    return [{'id': 'plate', 'type': 'ccplate', 'z': 9, 'x': 694, 'y': 592, 'w': 536, 'h': 128,
-             'font': 'td_msg', 'counterFont': 'td_cnt', 'conn': 2}]
+def tab2_sheet():
+    """SPEC-R3 5.1: tab 2's body, ONE image sheet [729, 298, 1191, 568] (462 x 270) on connection 2, above every centre layer,
+    painted in one go by shared/twin_cc.js paintSheet: the card (symbol cell, Noto 42 headline up to 3 lines, the counter), the
+    rows, the pointer and the empty page. Transparent while another tab is selected. The title "Повідомлення" is the ordinary
+    text widget c_title (token cTitle). The old bottom plate is gone."""
+    return [{'id': 'msg_sheet', 'type': 'ccsheet', 'z': 9, 'x': 729, 'y': 298, 'w': 462, 'h': 270,
+             'font': 'td_msg', 'counterFont': 'td_cnt', 'rowFont': 'td_tab', 'textFont': 'td_val', 'conn': 2}]
 
 
 def widgets():
     W = [tdback('L'), tdback('RT'), tdback('RB'), tdial('tach'), tdial('speed')]
-    W += gpu_texts() + tabs() + centre() + hubs() + row() + plate_seam()
+    W += gpu_texts() + tabs() + centre() + hubs() + row() + tab2_sheet()
     return W
 
 

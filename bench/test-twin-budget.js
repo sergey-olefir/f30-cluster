@@ -244,25 +244,27 @@ async function benchChecks(keep) {
 
     // ---- the message state ----
     const bl = () => backL(w.last), ucol = (l, n, i) => (uni(l, n) || []).slice(i * 4, i * 4 + 4);
-    ok(uni(bl(), 'u_win')[0] === 0 && uni(bl(), 'u_hi')[2] === 0, 'no message: the window shut, the warning cell not lit');
+    // B3 (SPEC-R3 3.2, 5.3): the highlight is the SELECTED tab's cell in the tab's colour, never the message's severity
+    const TAB1 = [176 / 255, 10 / 255, 37 / 255, 1], tabLit = () => uni(bl(), 'u_hi')[2] === 1 && uni(bl(), 'u_hi')[0] === 618 && uni(bl(), 'u_hi')[1] === 744 && near(uni(bl(), 'u_hiC'), TAB1, 0.002);
+    ok(uni(bl(), 'u_win')[0] === 0 && tabLit(), 'no message: the window shut, tab 1\'s cell [618, 744] filled in its colour (176, 10, 37)');
     ok(near(uni(bl(), 'u_rule'), [741, 295.2, 1180, 296.7, 629, 612.4, 1292, 614.6], 0.001), 'no message: the bottom rule is the 2.2 px one');
     await hook('twinCc:window,red');
     await sleep(800);
     ok(uni(bl(), 'u_win')[0] === 1 && uni(bl(), 'u_win')[2] === 0, 'twinCc window: the fallback window opens (the mask is bound)');
-    ok(uni(bl(), 'u_hi')[2] === 1 && near(uni(bl(), 'u_hiC'), [176 / 255, 7 / 255, 30 / 255, 1], 0.002), 'twinCc window, red: the warning cell lit in the severity red ' + fmt(uni(bl(), 'u_hiC')));
+    ok(tabLit(), 'twinCc window, red: the fill stays the selected tab\'s, not the severity ' + fmt(uni(bl(), 'u_hiC')));
     ok(near(uni(bl(), 'u_rule'), [741, 295.2, 1180, 296.7, 629, 612.4, 1292, 614.6], 0.001), 'twinCc window: the rules keep their normal rects (BMW\'s panel is open, not our plate)');
     ok(keys(w.last) === before && logCount() === builds, 'the message state came in place: no layer made again');
     await hook('twinCc:ours,amber');
     await sleep(800);
-    ok(uni(bl(), 'u_win')[0] === 0 && uni(bl(), 'u_hi')[2] === 1 && near(uni(bl(), 'u_hiC'), [240 / 255, 170 / 255, 10 / 255, 1], 0.002), 'twinCc ours, amber: the window shut, the cell amber');
+    ok(uni(bl(), 'u_win')[0] === 0 && tabLit(), 'twinCc ours, amber: the window shut, the fill the tab\'s (never amber)');
     ok(near(uni(bl(), 'u_rule'), [741, 295.2, 1180, 296.7, 629, 611, 1291, 615], 0.001) && near(ucol(bl(), 'u_ruleC', 1), [240 / 255, 170 / 255, 10 / 255, 1], 0.002),
         'twinCc ours: the bottom rule is the 4 px one (y 611..615) in the severity colour ' + fmt(ucol(bl(), 'u_ruleC', 1)));
     await hook('twinCc:ours,green');
     await sleep(500);
-    ok(near(uni(bl(), 'u_hiC'), [59 / 255, 155 / 255, 26 / 255, 1], 0.002), 'twinCc ours, green: the cell green');
+    ok(tabLit(), 'twinCc ours, green: the fill the tab\'s (never green)');
     await hook('twinCc:ours,grey');
     await sleep(500);
-    ok(near(uni(bl(), 'u_hiC'), [231 / 255, 231 / 255, 231 / 255, 1], 0.002), 'twinCc ours, grey: the cell light grey');
+    ok(tabLit(), 'twinCc ours, grey: the fill the tab\'s (never grey)');
     await set('nightLook', 'on');
     await sleep(1200);
     ok(uni(bl(), 'u_hi')[2] === 1 && uni(bl(), 'u_hiC')[0] < 231 / 255 - 0.05, 'a message shown while the night comes: the cell dims, still lit');
@@ -270,10 +272,10 @@ async function benchChecks(keep) {
     await sleep(800);
     await hook('twinCc:window,');
     await sleep(500);
-    ok(uni(bl(), 'u_win')[0] === 1 && uni(bl(), 'u_hi')[2] === 1 && near(uni(bl(), 'u_hiC'), [231 / 255, 231 / 255, 231 / 255, 1], 0.002), 'a window with no severity: lit in grey, the window open');
+    ok(uni(bl(), 'u_win')[0] === 1 && tabLit(), 'a window with no severity: the window open, the fill the tab\'s');
     await hook('twinCc:none,');
     await sleep(500);
-    ok(uni(bl(), 'u_win')[0] === 0 && uni(bl(), 'u_hi')[2] === 0 && near(uni(bl(), 'u_rule'), [741, 295.2, 1180, 296.7, 629, 612.4, 1292, 614.6], 0.001), 'the message ends: window shut, cell dark, the 2.2 px rule back');
+    ok(uni(bl(), 'u_win')[0] === 0 && tabLit() && near(uni(bl(), 'u_rule'), [741, 295.2, 1180, 296.7, 629, 612.4, 1292, 614.6], 0.001), 'the message ends: window shut, tab 1 filled, the 2.2 px rule back');
 
     // ---- the holes ----
     const hl = (l) => uni(l, 'u_hole');

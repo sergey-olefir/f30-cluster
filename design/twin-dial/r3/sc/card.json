@@ -1,0 +1,462 @@
+{
+ "_about": "SC (Twin Dial round 3): tab 2's page - the check-control message in the centre window, the other listed messages as rows, the empty and pointer states, the warning tab's looks. Panel px (1920 x 720). Read by tools/twin-dial/r3/sc/centre_cc.js (the model) and card_draw.py (the preview / K2). Everything here is a DESIGN proposal for the lead (docs/twin-dial/r3/SC-REPORT.md); the page grammar (title, rule) is today's SPEC 6.2 until SF publishes its own. [B3: ported into the build; the counter's baseline is the SPEC-R3's 326, the rest is SC's.]",
+ "status": "proposal",
+ "grammar": {
+  "_why": "SF's measured grammar (bake/work/twin-dial/r3/pub/SF/pages.json, rev 1): title baseline ~281 (ours matches to 1 px), title rule y 295-297.5 (P: 2.5 px, code ~205), body below it; window [729, 172, 1191, 613]",
+  "window": [
+   729,
+   172,
+   1191,
+   613
+  ],
+  "title": {
+   "text": "Повідомлення",
+   "font": "td_title",
+   "size": 41,
+   "centre": [
+    960,
+    270
+   ],
+   "box": [
+    740,
+    237,
+    1180,
+    294
+   ],
+   "widget": "c_title (an existing text widget, conn 1; NOT part of the message's paint)"
+  },
+  "rule": {
+   "x0": 739,
+   "x1": 1181,
+   "y0": 295,
+   "y1": 297.5,
+   "colour": "SF's proposal (code ~205); tdback rules[0]; option: the severity colour while tab 2 shows a card (see severity.where)"
+  },
+  "body_top": 300,
+  "body_bottom": 564,
+  "content_x": [
+   741,
+   1180
+  ]
+ },
+ "sheet": {
+  "_why": "ONE image widget paints tab 2's whole body (card block, rows, counter, scroll indicator) in ONE paint, so 'our text for message K is on the screen' is one event per sheet send, exactly as round 2's plate. Its rect is the window's width (the scroll indicator sits at x 1189, SF) under the title rule.",
+  "rect": [
+   729,
+   298,
+   1191,
+   568
+  ],
+  "w": 462,
+  "h": 270,
+  "conn_option_a": 2,
+  "conn_option_b": "the one page sheet of all centre pages (see cost)",
+  "z": "above every other centre layer (nothing of ours may overlap it while it shows a message)",
+  "opaque": true,
+  "background": [
+   0,
+   0,
+   0
+  ]
+ },
+ "card": {
+  "_what": "the message the car says it shows NOW (TwinCC.candidate): the first block of the page, centred (VF's M1 'centre card' grammar: the symbol above, the words below), so a line gets the window's whole width",
+  "cell": [
+   922,
+   306,
+   998,
+   382
+  ],
+  "cell_fill": "by severity (severity.colours.cell); grey: the tab ramp 0.002 -> 0.16 linear, top to bottom (as round 2's plate)",
+  "symbol": {
+   "size": 54,
+   "centre": [
+    960,
+    344
+   ],
+   "colour": "white; black on amber",
+   "name": "shared/twin_cc.js symbolFor(id, colour) (VT's table, generic by colour)"
+  },
+  "headline": {
+   "font": "td_msg",
+   "size": 42,
+   "cap": 30,
+   "max_w": 436,
+   "right": 1180,
+   "max_lines": 3,
+   "pitch": 47,
+   "baselines": {
+    "1": [
+     424
+    ],
+    "2": [
+     424,
+     471
+    ],
+    "3": [
+     424,
+     471,
+     518
+    ]
+   },
+   "colour": [
+    255,
+    255,
+    255
+   ],
+   "cut": "words wrapped greedily; what does not fit in three lines ends line 3 with the ellipsis (round 2's rule, one line more)",
+   "capacity_note": "Noto 42 lower-case Cyrillic averages 25.5 px (td_msg advances): about 17 letters per line, about 50 in three lines. The names seen on the car so far are 14, 16, 27 and 37 characters long (MC-REPORT). The left-aligned variant (cell left, text from x 833) gives only 13 letters per line: rejected, kept for the mockups as 'card_left'",
+   "centre_x": 960,
+   "left": 742,
+   "align": "center"
+  },
+  "counter": {
+   "font": "td_cnt",
+   "size": 29,
+   "colour": [
+    227,
+    227,
+    227
+   ],
+   "right": 1180,
+   "baseline": 326,
+   "when": "the car gives a frame n of m (statusMenuCCMessage) and that frame is this message (round 2's TwinCC._counter); top right of the sheet, beside the cell, clear of the headline",
+   "_build": "B3 (Twin Dial 0.1.1): baseline 326 as SPEC-R3 5.1 says (SC proposed 334); SPEC-R3 wins"
+  },
+  "block_bottom": "last baseline + 12 + 8 (444 / 491 / 538 for 1 / 2 / 3 lines); rows start 6 px lower",
+  "separator": "none",
+  "rows_after": "1 line: two rows; 2 lines: one row; 3 lines: none (the scroll indicator says more exist; the list page shows them once nothing shows now)",
+  "variant_card_left": {
+   "cell": [
+    741,
+    308,
+    817,
+    384
+   ],
+   "symbol_centre": [
+    779,
+    346
+   ],
+   "x": 833,
+   "max_w": 345,
+   "baselines": {
+    "1": [
+     361
+    ],
+    "2": [
+     338,
+     385
+    ],
+    "3": [
+     338,
+     385,
+     432
+    ]
+   },
+   "note": "for comparison only"
+  }
+ },
+ "rows": {
+  "_what": "every other ccList entry outside ignoreIds (the car's list holds active AND stored messages and cannot tell them apart: MC-REPORT A5). The card is the one shown now; a row is 'in the car's list'. Grammar: SF's list proposal for our window (pages.json list_page.proposal_P_for_our_window), without a selection bar (we have no key to move one; SB may add it).",
+  "order": "severity first (red, amber, then grey / white / green / default), then the car's own array order (stable). ccListRiskClass (RK10..RK900, unseen, probe P2) may replace the colour as the sort key once the probe shows it",
+  "pitch": 44,
+  "first_top": "body_top (300) on the list page; card block bottom + 6 under a card",
+  "rows_visible": {
+   "list_page": 6,
+   "under_1_line_card": 2,
+   "under_2_line_card": 1,
+   "under_3_line_card": 0
+  },
+  "symbol": {
+   "size": 32,
+   "left": 741,
+   "centre_x": 757,
+   "colour": "by severity: red (218, 16, 48), amber (240, 170, 10), green (59, 155, 26), white otherwise; no cell"
+  },
+  "name": {
+   "font": "td_tab",
+   "size": 33,
+   "x": 781,
+   "max_w": 399,
+   "right": 1180,
+   "baseline": "row top + 33",
+   "colour": [
+    255,
+    255,
+    255
+   ],
+   "cut": "one line; a longer name ends in the ellipsis"
+  },
+  "separator": "none (SF: the maker's list rows have none; the normal view has no borders)",
+  "scroll_indicator": {
+   "x": 1188,
+   "w": 3,
+   "y": [
+    300,
+    564
+   ],
+   "track": [
+    40,
+    40,
+    40
+   ],
+   "thumb": [
+    180,
+    180,
+    180
+   ],
+   "thumb_len": "visible / total of the track; at the top (we never scroll: no key yet)",
+   "when": "more entries than rows (SF's 05 grammar)"
+  },
+  "counts_as_our_text": "a row counts as our text for its message only when its WHOLE name is drawn (not cut). A cut row never lets BMW's panel be covered."
+ },
+ "pointer": {
+  "_what": "tab 2 is selected, the car says a message shows, but ours cannot be drawn (D7, no entry, empty name, missing glyph, throw, sheet refused, release): a block that sends the driver to BMW's own panel. Our fixed words, never the message's: it never counts as our text for any message.",
+  "cell": "as card.cell (centred), fill by the severity the machine knows (grey when none)",
+  "symbol": "generic by colour: cc_warn (red / amber / unknown), cc_info (otherwise)",
+  "lines": [
+   "Повідомлення",
+   "на панелі внизу"
+  ],
+  "font": "td_val",
+  "size": 39,
+  "baselines": [
+   424,
+   471
+  ],
+  "colour": [
+   227,
+   227,
+   227
+  ],
+  "centre_x": 960,
+  "align": "center"
+ },
+ "empty": {
+  "_what": "tab 2 selected, no message shown, nothing listed",
+  "symbol": {
+   "name": "cc_info",
+   "size": 66,
+   "centre": [
+    960,
+    392
+   ],
+   "colour": "white x 0.5 linear (188)"
+  },
+  "text": {
+   "s": "Немає повідомлень",
+   "font": "td_val",
+   "size": 39,
+   "centre_x": 960,
+   "baseline": 478,
+   "colour": [
+    227,
+    227,
+    227
+   ]
+  }
+ },
+ "warning_tab": {
+  "_what": "the tab's looks; the cell is [744, 812] of the bar, icon cc_warn 38 at (778, 143). 'Filled = selected' (the brief's reading of 02 / 06 / 08): the fill never carries severity in the recommended variant.",
+  "always_there": true,
+  "looks": {
+   "W0_nothing": {
+    "when": "no message shown, the list empty",
+    "icon": "white x 0.5 (dim, as the phone / navigation tabs' 'nothing there')",
+    "fill": "none (the bar's ramp)"
+   },
+   "W1_listed": {
+    "when": "no message shown, entries listed (stored)",
+    "icon": "white",
+    "fill": "none"
+   },
+   "W2_message": {
+    "when": "a message shows (any state but none) and tab 2 is not selected",
+    "icon": "the severity colour: red (218, 16, 48), amber (240, 170, 10); white for grey / white / default / green",
+    "fill": "none"
+   },
+   "W3_selected": {
+    "when": "tab 2 selected",
+    "icon": "white",
+    "fill": "the selection fill of every tab (SF; red on the references)"
+   }
+  },
+  "variant_S2": "tab 2's selection fill takes the severity colour while a red or amber message shows (amber: black icon); the standard selection fill otherwise. Keeps round 2's look; mixes the two meanings of the fill (05 shows a green fill for its settings tab, so the references' fill colour does vary by tab)",
+  "variant_hidden": "W0 hidden (the cell drawn without an icon): rejected - the bar's cells would change meaning by position"
+ },
+ "severity": {
+  "colours": {
+   "red": {
+    "cell": [
+     176,
+     7,
+     30
+    ],
+    "symbol": [
+     255,
+     255,
+     255
+    ],
+    "rule": [
+     176,
+     7,
+     30
+    ],
+    "icon": [
+     218,
+     16,
+     48
+    ]
+   },
+   "amber": {
+    "cell": [
+     240,
+     170,
+     10
+    ],
+    "symbol": [
+     0,
+     0,
+     0
+    ],
+    "rule": [
+     240,
+     170,
+     10
+    ],
+    "icon": [
+     240,
+     170,
+     10
+    ]
+   },
+   "green": {
+    "cell": [
+     59,
+     155,
+     26
+    ],
+    "symbol": [
+     255,
+     255,
+     255
+    ],
+    "rule": [
+     59,
+     155,
+     26
+    ],
+    "icon": [
+     255,
+     255,
+     255
+    ]
+   },
+   "grey": {
+    "cell": "tab ramp gradient",
+    "symbol": [
+     255,
+     255,
+     255
+    ],
+    "rule": [
+     231,
+     231,
+     231
+    ],
+    "icon": [
+     255,
+     255,
+     255
+    ]
+   }
+  },
+  "from": "ccList cCColor: RED red; YELLOW, ORANGE amber; GREEN green; WHITE, DEFAULT grey (SPEC 8.2, shared/twin_cc.js severityOf)",
+  "where": [
+   "the card's symbol cell (always)",
+   "the warning tab's icon while tab 2 is NOT selected (W2)",
+   "the bottom rule y 611-615 while state is ours (round 2's tdback rules[1].ours, unchanged; 04 / 08 show the rule above the bottom row red while the warning tab is selected, 02 / 06 white with tab 1: hypothesis that the references colour it)",
+   "option: the title rule (tdback rules[0]) in the severity colour while tab 2 shows a card (needs an 'ours'-like entry keyed on tab 2: an additive contract change)"
+  ],
+  "night": "as round 2's plate: shared/twin_cc.js nightRgb with SEVERITY[].mult / ruleMult; white text 0.80, grey 0.75"
+ },
+ "keep_outs": {
+  "_checked_by": "tools/twin-dial/r3/sc/test.js (geometry part)",
+  "belt_group": [
+   497,
+   660,
+   688,
+   720
+  ],
+  "gear_gap": [
+   1380,
+   660,
+   1460,
+   720
+  ],
+  "bmw_panel_bbox": [
+   696,
+   595.75,
+   1226,
+   704
+  ],
+  "black_box": [
+   1406,
+   342,
+   1597,
+   419
+  ],
+  "telltale_strip": [
+   564,
+   58,
+   981,
+   115
+  ]
+ },
+ "samples_for_mockups": {
+  "_why": "invented, neutral Ukrainian, lengths like the car's (14-37 characters); never a real log's text",
+  "card_one_line": {
+   "id": 15,
+   "colour": "white",
+   "name": "Двері відчинено"
+  },
+  "card_two_lines": {
+   "id": 50,
+   "colour": "yellow",
+   "name": "Тиск у шинах: перевірте"
+  },
+  "card_three_lines": {
+   "id": 42,
+   "colour": "red",
+   "name": "Несправність гальм: зупиніться в безпечному місці"
+  },
+  "card_cut": {
+   "id": 42,
+   "colour": "red",
+   "name": "Несправність гальмівної системи: обережно зупиніться та зверніться до сервісу"
+  },
+  "rows": [
+   {
+    "id": 164,
+    "colour": "white",
+    "name": "Мало рідини омивача"
+   },
+   {
+    "id": 41,
+    "colour": "white",
+    "name": "Потрібне сервісне обслуговування"
+   },
+   {
+    "id": 213,
+    "colour": "yellow",
+    "name": "Акумулятор розряджається"
+   }
+  ],
+  "counter": "2/3",
+  "card_two_lines_b": {
+   "id": 987,
+   "colour": "white",
+   "name": "Готовність до руху: пристебніться"
+  }
+ }
+}

@@ -277,7 +277,9 @@ console.log('the tab bar\'s live icons');
     const phone = mkx('tab_phone_i'), nav = mkx('tab_nav_i'), warn = mkx('tab_warn_i');
     eq([twin.iconState(h, phone.w).role, twin.iconState(h, nav.w).role, twin.iconState(h, warn.w).role], ['grey', 'grey', 'fg'], 'phone and navigation are dim without a call or a route, the warning icon is white');
     h.td.call = true; h.td.nav = true; h.twinCc = { state: 'ours', severity: 'amber' };
-    eq([twin.iconState(h, phone.w).role, twin.iconState(h, nav.w).role, twin.iconState(h, warn.w).role], ['fg', 'fg', 'bg'], 'a call and a route light them; the warning icon is black on the amber cell');
+    // B3 (SPEC-R3 3.3, 5.3): the warning icon is never black on a severity fill any more; while a message shows and tab 2 is not selected it takes the severity colour
+    eq([twin.iconState(h, phone.w).role, twin.iconState(h, nav.w).role, twin.iconState(h, warn.w).role], ['fg', 'fg', 'fg'], 'a call and a route light them; the warning icon keeps the text role');
+    eq(twin.iconState(h, warn.w).rgb, [240, 170, 10], 'the warning icon is amber (240, 170, 10) while an amber message shows and tab 2 is not selected');
     h.twinCc = { state: 'ours', severity: 'red' };
     eq(twin.iconState(h, warn.w).role, 'fg', 'white on red');
     // repaint only when something changed
