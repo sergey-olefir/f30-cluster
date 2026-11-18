@@ -53,6 +53,8 @@ If Twin Dial 0.1.1 is ready before the session, install it **before** the probe 
 
 ### 2.1 Collections (read-only; `tools/car/collect.sh`)
 
+The kit rotates every app log at **256 KB** (`signal_probe.log` and `.log.1`), and the probe writes up to 150 KB per 900 lines in a busy block, so **collect the probe's log after every block** (a quick `collect.sh` run is only reads), not only at the four full collections below. Two things overwrite history if you wait: the rotation, and a restart of the app (the marks start again at M1 per run, the `probe: start` line separates runs).
+
 | # | When | Why | Which L items it answers |
 |---|---|---|---|
 | 0 | At arrival, before the owner changes anything (B0.1) | the history of 0.7.18-0.7.20 and of Twin Dial 0.1.0 as the car has it, and the versions and uids | L1-L5, L10-L15 |
@@ -60,13 +62,15 @@ If Twin Dial 0.1.1 is ready before the session, install it **before** the probe 
 | 2 | End of block 6 (B6.16) | Twin Dial and f30 both run today; the door-message reaction, the upload accounting, the slot rows while Twin Dial's panel is up | L1, L8, L10, L11 |
 | 3 | End of the session (B9.2) | the probe's complete log, Twin Dial's phone, media and sign lines | L6, L7, L14, everything else |
 
-Each collection goes to a new dated folder under `reference/car/` (git-ignored). Run the parser on each; between blocks a quick `collect.sh` on just the probe's log is enough for the checks below.
+Each full collection goes to a new dated folder under `reference/car/` (git-ignored). Run the parser on each. After every block: collect, then `python3 -I tools/car/verify_steps.py <signal_probe.log> --block B<n>` (below) before you say "go on".
 
 ### 2.2 Clock anchor
 
 The log's `t=` is seconds since the probe's start; the owner's paper has wall-clock times. At B0.6 (mark 1) write down the wall clock and the line's `t=`. The marks make the rest unambiguous; the anchor is only for the drives (blocks 7-8), where marks are pressed at stops and the passenger dictates the clock.
 
 ### 2.3 The verify table (what to see in the log before the owner moves on)
+
+`python3 -I tools/car/verify_steps.py <signal_probe.log> --block B1` prints, per marked step, OK / MISSING / SILENT for every pair below (it reads `design/car/session_marks.json` and the probe's `mark M<n>` lines; the `since=M<n>+<ms>` tail of S6 lines names the mark exactly). Add `--silent P13:sw-fav` for a pair you have already accepted as silent. It exits 1 on a required pair that is missing. The marks are numbered per run of the app; if the log has two runs it says so.
 
 Per marked step: between mark N and mark N+1 there must be a probe line for each pair listed; a missing pair means either the field is **not sent** (an answer, after the step was done correctly and the summary has run) or the step was done wrongly (ask the owner to repeat once). **Never ask for a repeat of a block that has already produced a "silent" summary**: silence after a correct step is the finding.
 
@@ -181,7 +185,7 @@ Cluster states in step order: `stock` = Twin Dial and f30 both Off; `twin` = Twi
 
 | Mark | Step | Cluster | The probe must log (item: field tag) |
 |---|---|---|---|
-| 87 | B7.2 | stock | P14: map-without-route |
+| 87 | B7.2 | stock | P14: map-without-route, P11: kombi-config |
 | 88 | B7.3 | stock | P12: guiding-state |
 | 89 | B7.4 | stock | P12: next-intersection, P12: dart |
 | 90 | B7.5 | stock | P12: dart |
@@ -202,7 +206,7 @@ Cluster states in step order: `stock` = Twin Dial and f30 both Off; `twin` = Twi
 
 ### 2.4 Set switching
 
-Sets are switched in the probe's own centre-screen menu by the owner. After each switch the log must carry the `sets on:` line (CP); do not let the owner start a block before you have seen it. Per block: B1 S6; B2 S2+S3; B3 S1+S3; B4 S4; B5 S5+S4; B6 S1; B7 S7+S6; B8 S8+S9. Never more than two sets at once (the load of 135 fields on about 45 interfaces is untested on this car). If the car stutters (cluster freezes, the platform restarts an app): stop, switch every set off, read the platform's lines, tell the owner.
+Sets are one checkbox each (`set1`..`set9`) on the probe's own centre screen, switched by the owner. After each switch the log must carry `probe: sets on=… changed=…` (CP); 30 s later the `summary S<n> +30s` lines (which fields spoke, which are silent, which providers are down) and at +120 s one `ask` per silent field (a read-only getter); do not let the owner start a block before you have seen it. Per block: B1 S6; B2 S2+S3; B3 S1+S3; B4 S4; B5 S5+S4; B6 S1; B7 S7+S6; B8 S8+S9. Never more than two sets at once (the load of 135 fields on about 45 interfaces is untested on this car). If the car stutters (cluster freezes, the platform restarts an app): stop, switch every set off, read the platform's lines, tell the owner.
 
 ### 2.5 Stop conditions
 
@@ -249,7 +253,7 @@ Each is an install the owner must approve and each is a separate step on the car
 |---|---|---|---|---|
 | 1 | Twin Dial 0.1.1 normal | X10 (KOMBI accepts the round-3 shaders), X8 (150 ms; slow-motion of a message and of leaving tab 2), X6 (map window W1 / W2, `mapWindowForce`, `mapSlots` from its Діагностика menu) | MB / SN protocols | 0.1.1 exists |
 | 2 | f30 with `ccActive.release` and `mbGap` | X7 (door message, second message, returning message), X3 (the box; the notch in Comfort's strip) | door message; the box after P-D-N-R-P and mode switches | X1 showed a box on f30, or L1 shows case A1-A5 |
-| 3 | f30 `sceneTex: "r8"` | X5 look and "goes whole … KB" over three Sport to Comfort switches | dials close up | L12 confirms cluster-render at least 0.5.12 not needed for r8; always safe to try |
+| 3 | f30 `sceneTex: "r8"` | X5 look and "goes whole … KB" over three Sport to Comfort switches | dials close up | always (r8 needs no ETC2 support) |
 | 4 | f30 `sceneTex: "etc2"` | X5 (does `etc2rgb` draw) | log: `asset … etc2rgb`; dials close up | L12 >= 0.5.12 and 3 looks right |
 | 5-7 | Twin `mbCover` clear, black, grey | X2 (rectangle versus pixels) | the speedometer hub | X1 baseline on Twin Dial showed a box; stop at the first outcome that decides (MB §4.2) |
 | 8 | Twin `mbRebuild.onMode` | X4 (rebuild brings the box) | the box | E2 / E3 gave no box |
@@ -263,38 +267,38 @@ Tick when the answer has been read and recorded (answers.json carries the eviden
 <!-- BEGIN:checklist -->
 | Done | Id | Kind | Question | Answered by | Decides |
 |---|---|---|---|---|---|
-| [ ] | L1 | L | Why f30's window over BMW's panel stays open (cases A1-A16) | collection #0; collection #2; B0.1; B6.10 (mark 80); B6.11 (mark 81); B6.15 (mark 85) | which release setting |
-| [ ] | L2 | L | Does statusActiveCCMessage notify; what it rests on; does its number equal the ccList id | collection #0; B0.1 | D7; noneValues |
-| [ ] | L3 | L | The clock fallback: statusShowTimeDate arrives and is local time | collection #0; collection #1; B0.1 | 0.7.19 clock note |
-| [ ] | L4 | L | Twin Dial's trip fields arrive; raw values against iDrive's trip page | collection #0; collection #2; B0.1 | trip factors |
-| [ ] | L5 | L | The odometer member arrives; factor 1 km; did the number show on 0.1.0 | collection #0; B0.1; B6.2 (mark 72) | odometer |
-| [ ] | L6 | L | aggregatedCallState arrives (Twin Dial's phone state line) | collection #3; B0.1 | phone card |
-| [ ] | L7 | L | HmiMediaState on HMI_CID arrives (Twin Dial's media lines) | collection #3; B0.1; B5.10 (mark 68) | media tab |
-| [ ] | L8 | L | Vehicle2.statusDisplayedCCMessage arrives and returns to 0 | collection #2; B0.1 | second witness |
-| [ ] | L9 | L | Layout builds in the first 10 s of both apps (the bench predicts 3) | collection #1; B0.1 | start-up fix |
-| [ ] | L10 | L | cluster-render's upload cap, per-minute KB, 'goes whole' lines | collection #0; collection #2; B0.1 | cost of a switch |
-| [ ] | L11 | L | Slot 0x100 rows while Twin Dial's panel 0x10004f8 in 0x203 is up | collection #2; B0.1 | theory H-M |
-| [ ] | L12 | L | cluster-render's version is at least 0.5.12 | collection #0; B0.1 | ETC2 |
-| [ ] | L13 | L | The 0.7.18 probes' results (ccListRiskClass, basicList) | collection #0; B0.1 | stored-message mark |
-| [ ] | L14 | L | f30's speed-limit sign lines: TrafficSignDisplayControl arrives | collection #0; collection #3; B0.1 | sign |
-| [ ] | L15 | L | day/night source: the car's value against the sun; the meaning of 0 | collection #0; collection #1; B0.1 | day/night |
-| [ ] | P1 | P | statusActiveCCMessage, statusDisplayedCCMessage, statusMenuCCMessage, ccList | B1.20 (mark 20); B3.1; B3.2 (mark 40); B3.3 (mark 41); B3.9 (mark 47); B3.10 (mark 48); B6.1; B6.10 (mark 80); B6.15 (mark 85) | shown now = list id; rest value; frame counter |
+| [ ] | L1 | L | Why f30's window over BMW's panel stays open (cases A1-A16) | collection #0; collection #2; B6.10 (mark 80); B6.11 (mark 81); B6.15 (mark 85) | which release setting |
+| [ ] | L2 | L | Does statusActiveCCMessage notify; what it rests on; does its number equal the ccList id | collection #0 | D7; noneValues |
+| [ ] | L3 | L | The clock fallback: statusShowTimeDate arrives and is local time | collection #0; collection #1 | 0.7.19 clock note |
+| [ ] | L4 | L | Twin Dial's trip fields arrive; raw values against iDrive's trip page | collection #0; collection #2 | trip factors |
+| [ ] | L5 | L | The odometer member arrives; factor 1 km; did the number show on 0.1.0 | collection #0; B6.2 (mark 72) | odometer |
+| [ ] | L6 | L | aggregatedCallState arrives (Twin Dial's phone state line) | collection #3 | phone card |
+| [ ] | L7 | L | HmiMediaState on HMI_CID arrives (Twin Dial's media lines) | collection #3; B5.10 (mark 68) | media tab |
+| [ ] | L8 | L | Vehicle2.statusDisplayedCCMessage arrives and returns to 0 | collection #2 | second witness |
+| [ ] | L9 | L | Layout builds in the first 10 s of both apps (the bench predicts 3) | collection #1 | start-up fix |
+| [ ] | L10 | L | cluster-render's upload cap, per-minute KB, 'goes whole' lines | collection #0; collection #2 | cost of a switch |
+| [ ] | L11 | L | Slot 0x100 rows while Twin Dial's panel 0x10004f8 in 0x203 is up | collection #2 | theory H-M |
+| [ ] | L12 | L | cluster-render's version is at least 0.5.12 | collection #0 | ETC2 |
+| [ ] | L13 | L | The 0.7.18 probes' results (ccListRiskClass, basicList) | collection #0 | stored-message mark |
+| [ ] | L14 | L | f30's speed-limit sign lines: TrafficSignDisplayControl arrives | collection #0; collection #3 | sign |
+| [ ] | L15 | L | day/night source: the car's value against the sun; the meaning of 0 | collection #0; collection #1 | day/night |
+| [ ] | P1 | P | statusActiveCCMessage, statusDisplayedCCMessage, statusMenuCCMessage, ccList | B1.20 (mark 20); B3.2 (mark 40); B3.3 (mark 41); B3.9 (mark 47); B3.10 (mark 48); B6.10 (mark 80); B6.15 (mark 85) | shown now = list id; rest value; frame counter |
 | [ ] | P2 | P | basicList, ccListRiskClass | B3.9 (mark 47) | stored-message mark; risk class |
-| [ ] | P3 | P | odometer carriers | B2.1; B2.2 (mark 32) | factor; invalid value |
-| [ ] | P4 | P | trip computer fields | B2.1; B2.3 (mark 33); B2.9 (mark 39) | factors; which computer is since start; departure |
-| [ ] | P5 | P | units | B2.1; B2.2 (mark 32); B2.8 (mark 38) | km / miles, C, bar |
-| [ ] | P6 | P | engine temperature verdict and coolant | B2.1; B2.5 (mark 35); B2.6 (mark 36) | the car's own coolant verdict |
-| [ ] | P7 | P | doors, boot, bonnet, central locking | B3.1; B3.2 (mark 40); B3.3 (mark 41); B3.4 (mark 42); B3.5 (mark 43); B3.6 (mark 44); B3.7 (mark 45); B3.8 (mark 46) | notifies at all; sends once at subscribe |
-| [ ] | P8 | P | media state, sources, tuner, CarPlay player | B4.1; B4.2 (mark 49); B4.3 (mark 50); B4.4 (mark 51); B4.5 (mark 52); B4.6 (mark 53); B4.7 (mark 54); B4.8 (mark 55); B4.9 (mark 56); B4.10 (mark 57); B4.11 (mark 58); B4.12 (mark 59); B5.10 (mark 68) | title line; progress; source icon kind |
-| [ ] | P9 | P | phone: VoiceCall, manager, aggregator, device list, Telephone | B5.1; B5.2 (mark 60); B5.3 (mark 61); B5.4 (mark 62); B5.5 (mark 63); B5.6 (mark 64); B5.7 (mark 65); B5.8 (mark 66); B5.9 (mark 67); B5.11 (mark 69); B5.12 (mark 70); B5.13 (mark 71) | call states; battery and signal; modem or phone |
-| [ ] | P10 | P | voltage carriers | B2.4 (mark 34); B2.5 (mark 35); B2.7 (mark 37); B3.1; B3.2 (mark 40) | a plausible 12-14.8 V |
-| [ ] | P11 | P | HMI context, cluster selection and configuration | B1.1; B1.21 (mark 21) | the cluster's map-view setting; an indirect key |
-| [ ] | P12 | P | navigation and guidance fields | B7.1; B7.3 (mark 88); B7.4 (mark 89); B7.5 (mark 90) | manoeuvre kinds; distance unit |
-| [ ] | P13 | P | steering-wheel buttons, turn-signal stalk, controller | B1.1; B1.2 (mark 2); B1.3 (mark 3); B1.4 (mark 4); B1.5 (mark 5); B1.6 (mark 6); B1.7 (mark 7); B1.8 (mark 8); B1.9 (mark 9); B1.10 (mark 10); B1.11 (mark 11); B1.12 (mark 12); B1.13 (mark 13); B1.14 (mark 14); B1.15 (mark 15); B1.16 (mark 16); B1.17 (mark 17); B1.18 (mark 18); B1.19 (mark 19); B1.20 (mark 20); B1.22 (mark 22); B1.23 (mark 23); B1.24 (mark 24); B1.25 (mark 25); B1.26 (mark 26); B1.27 (mark 27); B1.28 (mark 28); B1.29 (mark 29); B1.30 (mark 30); B1.31 (mark 31) | the tab key (SB 3.3) |
-| [ ] | P14 | P | map presence fields | B1.21 (mark 21); B7.1; B7.2 (mark 87); B7.3 (mark 88); B7.6 (mark 91) | when BMW's map exists |
-| [ ] | P15 | P | speed-limit sign, longitudinal assistance, HUD feed | B8.1; B8.4 (mark 94); B8.5 (mark 95) | the sign arrives; set speed and active function |
-| [ ] | P16 | P | boost, engine dynamics, oil, tyres | B8.1; B8.2 (mark 92); B8.6 (mark 96); B8.9 (mark 99) | scales; whether the car notifies |
-| [ ] | P17 | P | heading, altitude, service due | B8.1; B8.3 (mark 93); B8.7 (mark 97) | whether they arrive |
+| [ ] | P3 | P | odometer carriers | B2.2 (mark 32) | factor; invalid value |
+| [ ] | P4 | P | trip computer fields | B2.3 (mark 33); B2.9 (mark 39) | factors; which computer is since start; departure |
+| [ ] | P5 | P | units | B2.2 (mark 32); B2.8 (mark 38) | km / miles, C, bar |
+| [ ] | P6 | P | engine temperature verdict and coolant | B2.5 (mark 35); B2.6 (mark 36) | the car's own coolant verdict |
+| [ ] | P7 | P | doors, boot, bonnet, central locking | B3.2 (mark 40); B3.3 (mark 41); B3.4 (mark 42); B3.5 (mark 43); B3.6 (mark 44); B3.7 (mark 45); B3.8 (mark 46) | notifies at all; sends once at subscribe |
+| [ ] | P8 | P | media state, sources, tuner, CarPlay player | B4.2 (mark 49); B4.3 (mark 50); B4.4 (mark 51); B4.5 (mark 52); B4.6 (mark 53); B4.7 (mark 54); B4.8 (mark 55); B4.9 (mark 56); B4.10 (mark 57); B4.11 (mark 58); B4.12 (mark 59); B5.10 (mark 68) | title line; progress; source icon kind |
+| [ ] | P9 | P | phone: VoiceCall, manager, aggregator, device list, Telephone | B5.2 (mark 60); B5.3 (mark 61); B5.4 (mark 62); B5.5 (mark 63); B5.6 (mark 64); B5.7 (mark 65); B5.8 (mark 66); B5.9 (mark 67); B5.11 (mark 69); B5.12 (mark 70); B5.13 (mark 71) | call states; battery and signal; modem or phone |
+| [ ] | P10 | P | voltage carriers | B2.4 (mark 34); B2.5 (mark 35); B2.7 (mark 37); B3.2 (mark 40) | a plausible 12-14.8 V |
+| [ ] | P11 | P | HMI context, cluster selection and configuration | B1.21 (mark 21); B7.2 (mark 87) | the cluster's map-view setting; an indirect key |
+| [ ] | P12 | P | navigation and guidance fields | B7.3 (mark 88); B7.4 (mark 89); B7.5 (mark 90) | manoeuvre kinds; distance unit |
+| [ ] | P13 | P | steering-wheel buttons, turn-signal stalk, controller | B1.2 (mark 2); B1.3 (mark 3); B1.4 (mark 4); B1.5 (mark 5); B1.6 (mark 6); B1.7 (mark 7); B1.8 (mark 8); B1.9 (mark 9); B1.10 (mark 10); B1.11 (mark 11); B1.12 (mark 12); B1.13 (mark 13); B1.14 (mark 14); B1.15 (mark 15); B1.16 (mark 16); B1.17 (mark 17); B1.18 (mark 18); B1.19 (mark 19); B1.20 (mark 20); B1.22 (mark 22); B1.23 (mark 23); B1.24 (mark 24); B1.25 (mark 25); B1.26 (mark 26); B1.27 (mark 27); B1.28 (mark 28); B1.29 (mark 29); B1.30 (mark 30); B1.31 (mark 31) | the tab key (SB 3.3) |
+| [ ] | P14 | P | map presence fields | B1.21 (mark 21); B7.2 (mark 87); B7.3 (mark 88); B7.6 (mark 91) | when BMW's map exists |
+| [ ] | P15 | P | speed-limit sign, longitudinal assistance, HUD feed | B8.4 (mark 94); B8.5 (mark 95) | the sign arrives; set speed and active function |
+| [ ] | P16 | P | boost, engine dynamics, oil, tyres | B8.2 (mark 92); B8.6 (mark 96); B8.9 (mark 99) | scales; whether the car notifies |
+| [ ] | P17 | P | heading, altitude, service due | B8.3 (mark 93); B8.7 (mark 97) | whether they arrive |
 | [ ] | X1 | X | f30 with 'Change with the drive mode' off | B6.8 (mark 78); B6.9 (mark 79); B6.11 (mark 81); B6.12 (mark 82); B6.13 (mark 83); B6.14 (mark 84) | whether the rebuild brings the black box |
 | [ ] | X2 | X | Twin Dial with a clear layer over the gear letter (mbCover) | pass 2 (a build) | rectangle versus pixels |
 | [ ] | X3 | X | f30 with the gap cut out of its layer rectangles (mbGap) | pass 2 (a build) | the fix |

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """verify_steps.py - did the owner's steps leave the lines the parser needs? (package CQ)
 
-    python3 -I tools/car/verify_steps.py <signal_probe.log> [--block B1] [--silent P13:sw-fav,...] [--json out.json]
+    python3 -I tools/car/verify_steps.py <signal_probe.log> [--block B1] [--silent P13:sw-fav,...] [--shift M:K] [--json out.json]
 
 Reads the probe's log (the kit's file; the probe's lines all contain 'probe: ') and design/car/session_marks.json (generated
 from the session plan) and, for every marked step, lists whether each expected line (item + field tag) appeared between that
@@ -9,6 +9,7 @@ step's mark and the next mark of the same run. A line of an S6 field carries sin
 preferred over position. Used by the lead between blocks, and by tools/car/dry_run.js.
 
 A missing pair is a finding only after the step was done correctly: a field the car never sends is 'not sent', an answer.
+--shift M:K: the owner pressed K marks too many from M<M> on (counter ahead of the plan); the log's marks from M count one lower.
 --silent lists pairs the lead has already accepted as silent (they show as SILENT, not MISSING).
 Exit status 1 if a required (non-optional) pair is missing and not accepted. Read-only. Standard library only."""
 import json
@@ -26,9 +27,16 @@ FIELD = re.compile(r'probe: (P\d+) (\S+) #(\d+) t=([\d.]+): (.*)$')
 SINCE = re.compile(r'since=M(\d+)\+(\d+)')
 
 
-def parse(path):
-    """-> runs: [{start, marks: {n: {t, sets}}, lines: [(markN or None, item, tag, count, t, body)]}]"""
+def parse(path, shifts=()):
+    """shifts: [(m, k)]: the owner pressed k marks too many from M<m> on (the counter is ahead of the plan): M<n> with n >= m counts as n-k.
+    -> runs: [{start, marks: {n: {t, sets}}, lines: [(markN or None, item, tag, count, t, body)]}]"""
     runs = []
+
+    def remap(n):
+        for m, k in sorted(shifts):
+            if n >= m:
+                n -= k
+        return n
     with open(path, encoding='utf-8', errors='replace') as f:
         for raw in f:
             m = START.search(raw)
@@ -40,8 +48,8 @@ def parse(path):
             run = runs[-1]
             m = MARK.search(raw)
             if m:
-                run['marks'][int(m.group(1))] = {'t': float(m.group(2)), 'tms': int(m.group(3)), 'sets': m.group(4)}
-                run['_cur'] = int(m.group(1))
+                run['marks'][remap(int(m.group(1)))] = {'t': float(m.group(2)), 'tms': int(m.group(3)), 'sets': m.group(4)}
+                run['_cur'] = remap(int(m.group(1)))
                 continue
             m = SETS.search(raw)
             if m:
@@ -51,7 +59,7 @@ def parse(path):
             if m:
                 body = m.group(5)
                 s = SINCE.search(body)
-                mk = int(s.group(1)) if s else run.get('_cur')
+                mk = remap(int(s.group(1))) if s else run.get('_cur')
                 run['lines'].append((mk, m.group(1), m.group(2), int(m.group(3)), float(m.group(4)), body))
     return runs
 
@@ -100,6 +108,7 @@ def verify(runs, marks, only_block=None, silent=()):
 
 def main(argv):
     block = silent = out = None
+    shift = []
     it = iter(argv)
     for a in it:
         if a == '--block':
@@ -108,12 +117,14 @@ def main(argv):
             silent = next(it)
         elif a == '--json':
             out = next(it)
-    pos = [a for a in argv if not a.startswith('--') and a not in (block, silent, out)]
+        elif a == '--shift':
+            shift.append(tuple(int(x) for x in next(it).split(':')))
+    pos = [a for a in argv if not a.startswith('--') and a not in (block, silent, out) and not re.match(r'^\d+:\d+$', a)]
     if len(pos) != 1:
         print(__doc__)
         return 2
     marks = json.load(open(MARKS, encoding='utf-8'))
-    rows, problems = verify(parse(pos[0]), marks, block, set((silent or '').split(',')) if silent else set())
+    rows, problems = verify(parse(pos[0], shift), marks, block, set((silent or '').split(',')) if silent else set())
     for r in rows:
         ex = ', '.join('%s %s %s' % (e['item'], e['tag'], e['status']) for e in r['expect']) or '(nothing required)'
         print('%-4d %-6s %-16s %s' % (r['mark'], r['step'], r['status'], ex))

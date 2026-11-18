@@ -1770,12 +1770,17 @@
    "step": "B7.2",
    "block": "B7",
    "items": [
-    "P14"
+    "P14",
+    "P11"
    ],
    "expect": [
     [
      "P14",
      "map-without-route"
+    ],
+    [
+     "P11",
+     "kombi-config"
     ]
    ],
    "tag": "stock",

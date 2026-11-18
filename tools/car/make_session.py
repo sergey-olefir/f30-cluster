@@ -72,6 +72,8 @@ def coverage(plan, reg):
     cov = dict((k, list(v)) for k, v in plan.get('coverage_extra', {}).items() if not k.startswith('_'))
     for b in plan['blocks']:
         for s in b['steps']:
+            if 'sets_on' in s:
+                continue   # a set-switching step does not answer anything
             for it in s.get('items', []):
                 cov.setdefault(it, []).append(s['id'])
     return cov
