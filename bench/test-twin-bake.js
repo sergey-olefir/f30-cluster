@@ -37,12 +37,13 @@ for (const name of ['face_tacho', 'face_speedo']) {
     ok(reg.bar.segments === 5 && reg.bar.segment_rects_face_px.length === 5 && reg.bar.gap_px === 4, name + ': bar of 5 segments, 4 px gaps');
     ok(Array.isArray(reg.numerals) && reg.numerals.every((n) => n.ink_box_px.length === 4), name + ': numerals carry ink boxes');
     ok(reg.clearance.violations.length === 0 && reg.clearance.rule_px === 4, name + ': numeral clearance record: no violation of the 4 px rule');
-    ok(reg.regions.band.rho[0] === 0.58 && reg.regions.band.rho[1] === 0.94 && reg.regions.band.theta_abs_max_deg === 144, name + ': band region 0.58-0.94, |theta| <= 144');
+    ok(reg.regions.band.rho[0] === 0.5795 && reg.regions.band.rho[1] === 0.9375 && reg.regions.band.theta_abs_max_deg === 143 && reg.regions.band.tint_linear.join() === '0.76,1,1.064', name + ': band region 0.5795-0.9375, |theta| <= 143, tint 0.76 : 1 : 1.064 (SPEC-R3 2.1, 2.2)');
+    ok(reg.regions.bezel.theta_abs_max_deg === 143.6 && reg.regions.rim.theta_abs_max_deg === 143.55 && !reg.wedge, name + ': bezel to 143.6, rim to 143.55, no wedge');
 }
 const tv = load('face_tacho.regions').numerals.map((n) => n.value), sv = load('face_speedo.regions').numerals.map((n) => n.value);
 ok(tv.join() === '1,2,3,4,5,6,7,8', 'tachometer numerals 1-8');
 ok(sv.indexOf(90) < 0 && sv.indexOf(120) < 0 && sv.indexOf(100) >= 0 && sv.length === 19, 'speedometer numerals: 19, no 90, no 120');
-ok(load('face_tacho.regions').wedge.to_deg === 125 && load('face_tacho.regions').scale.rest_deg === -135, 'tachometer: wedge to 125 deg, rest -135 (OFF)');
+ok(load('face_tacho.regions').red_arc.to_deg === 143.6 && load('face_tacho.regions').red_arc.srgb.join() === '210,20,21' && load('face_tacho.regions').scale.rest_deg === -135, 'tachometer: red arc (210, 20, 21) to 143.6 deg, rest -135 (OFF)');
 ok(load('face_speedo.regions').scale.rest_deg === -125, 'speedometer: rest -125 (0)');
 
 {

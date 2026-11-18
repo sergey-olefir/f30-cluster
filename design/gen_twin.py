@@ -145,7 +145,10 @@ def tdback(part):
 # Baselines of the texts the mockup centres on their INK (tools/twin-dial/mockup/mockup.py ctext): the baseline that puts
 # the ink's centre where the mockup has it, from the face's own ink box of the mockup's example string, rounded. Frozen:
 # they are what the owner approved.
-BASE = {'time': 404, 'weekday': 460, 'date': 519, 'footer': 528, 'speed': 441, 'gear': 539, 'program': 576, 'ready': 348, 'title': 282}
+BASE = {'time': 404, 'weekday': 460, 'date': 519, 'footer': 528, 'speed': 441, 'title': 282,
+        # twin_dial B1 (SPEC-R3 2.7): the gear in the hub's centre (centre (0, 0), cap 0.222 R = the digital speed's size: baseline 432), the drive
+        # program under it at (0, +0.209) R, READY at (0, -0.29) R (Saira 22: cap 16 px). The unit "1/хв x 1000" is baked at (0, +0.40) R.
+        'gear': 432, 'program': 471, 'ready': 321}
 
 
 def tabs():
@@ -193,14 +196,14 @@ def centre():
 def hubs():
     """SPEC 5.1 / 5.2: the hubs. The units "1/хв x 1000" and "км/год" are in the faces (package A2 bakes them, SPEC 13.1), OFF too."""
     W = [text('ready', CT[0], BASE['ready'], 100, '{{td:ready}}', 'td_label', 'ready', 'center', 1, 7, below=3),
-         text('program', CT[0] + round(0.02 * R), BASE['program'], 140, '{{td:program}}', 'td_label', 'fg', 'center', 1, 7, below=3)]
+         text('program', CT[0], BASE['program'], 140, '{{td:program}}', 'td_label', 'fg', 'center', 1, 7, below=3)]
     return W
 
 
 def gpu_texts():
     """The digital speed and the gear: GPU texts (hud.js "gpu": the atlas text layers, one uniform per change)."""
     return [text('speed', CS[0], BASE['speed'], 260, '{{td:speed}}', 'td_big', 'fg', 'center', 0, 5, gpu=True, maxLen=3, below=3),
-            text('gear', CT[0] - round(0.02 * R), BASE['gear'], 120, '{{td:gear}}', 'td_gear', 'fg', 'center', 1, 5, gpu=True, maxLen=2, below=3)]
+            text('gear', CT[0], BASE['gear'], 120, '{{td:gear}}', 'td_gear', 'fg', 'center', 1, 5, gpu=True, maxLen=2, below=3)]
 
 
 def row():

@@ -2537,7 +2537,6 @@ void main() {
     float lc = 0.0;
     if (fu.x >= 0.0 && fu.y >= 0.0 && fu.x <= 1.0 && fu.y <= 1.0) lc = r8a(texture2D(u_face, fu));
     float L = lin1(lc);
-    float ink = max(smoothstep(0.70, 0.85, lc), step(0.975, rho));      // the bezel is all ink: its antialiased edge keeps the arc's red
     // the materials by region (SPEC-R3 2): the band and the tick strip run to +-143 deg (the face's own edge)
     float ang = 1.0 - smoothstep(144.0, 145.5, ath);
     float band = smoothstep(0.572, 0.580, rho) * (1.0 - smoothstep(0.940, 0.948, rho)) * ang;
@@ -2549,6 +2548,7 @@ void main() {
     float inkM = mix(u_n0.x, u_n0.y, max(step(0.975, rho), step(0.52, rho) * (1.0 - step(0.575, rho))));
     inkM = mix(inkM, u_n0.z, strip);
     float red = max(step(u_red.y, th) * ang * step(0.575, rho) * (1.0 - step(0.893, rho)), step(u_red.z, th) * strip);
+    float ink = max(smoothstep(0.70, 0.85, lc), max(step(0.975, rho), red * smoothstep(0.50, 0.70, lc)));      // the bezel is all ink (its antialiased edge keeps the arc's red); a red tick or numeral takes its edge earlier (no grey halo)
     float arc = step(0.975, rho) * clamp((th - u_red.x) * pxd + 0.5, 0.0, 1.0) * step(th, u_red.w);
     vec3 inkF = mix(mix(vec3(inkM), RED * u_n1.w, red), RARC * u_n1.w, arc);
     vec3 col = vec3(L) * mix(bgF, inkF, ink);
