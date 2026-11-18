@@ -18,6 +18,7 @@ PLAN = os.path.join(ROOT, 'design', 'car', 'session_plan.json')
 MARKS = os.path.join(ROOT, 'design', 'car', 'session_marks.json')
 MARKERS = os.path.join(ROOT, 'design', 'car', 'markers.json')   # package CL's parse_logs.py --markers
 REGISTER = os.path.join(ROOT, 'design', 'car', 'register.json')
+CA_PUB = os.path.join(ROOT, 'bake', 'work', 'car', 'pub', 'CA', 'register.json')   # CA's early copy, until car/ca is merged
 BRIEF = os.path.join(ROOT, 'tools', 'car', 'register_brief.json')
 SESSION = os.path.join(ROOT, 'docs', 'car', 'SESSION.uk.md')
 RUNBOOK = os.path.join(ROOT, 'docs', 'car', 'RUNBOOK.md')
@@ -39,14 +40,15 @@ def register():
     for k, v in load(BRIEF).items():
         if not k.startswith('_'):
             out[k] = {'kind': v[0], 'question': v[1], 'decides': v[2], 'from': 'brief'}
-    if os.path.exists(REGISTER):
-        r = load(REGISTER)
+    src = REGISTER if os.path.exists(REGISTER) else CA_PUB if os.path.exists(CA_PUB) else None
+    if src:
+        r = load(src)
         rows = r.get('items', r) if isinstance(r, dict) else r
         if isinstance(rows, dict):
             rows = [dict(v, id=k) for k, v in rows.items()]
         for it in rows:
             if isinstance(it, dict) and it.get('id'):
-                out[it['id']] = {'kind': it.get('kind', ''), 'question': it.get('question', ''), 'decides': it.get('decides', ''),
+                out[it['id']] = {'kind': it.get('kind', ''), 'question': it.get('title') or it.get('question', ''), 'decides': it.get('decides', ''),
                                  'from': 'CA', 'status': it.get('status', '')}
     return out
 

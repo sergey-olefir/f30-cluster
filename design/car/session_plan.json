@@ -764,7 +764,7 @@
   {
    "id": "B2",
    "title_uk": "Холодний запуск двигуна",
-   "minutes": 25,
+   "minutes": 28,
    "engine": "on",
    "cluster": "stock",
    "sets": [
@@ -864,6 +864,21 @@
      "id": "B2.5",
      "mark": true,
      "items": [
+      "X18"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "Driver Profiles (лише подивитися, нічого не змінювати): відкрийте застосунок Driver Profiles в iDrive. Чи є в списку Guest (активний), Valet і два ваші профілі з правильними іменами; чи сховані вільні місця; чи видно дати і номер PIA. Нічого не натискайте, крім «Назад».",
+     "wait_uk": "2 хв",
+     "shoot_uk": "Екран списку профілів (читається).",
+     "tag": "stock",
+     "class": "driver-profiles",
+     "optional": true
+    },
+    {
+     "id": "B2.6",
+     "mark": true,
+     "items": [
       "P6",
       "P10"
      ],
@@ -885,7 +900,7 @@
      "class": "engine-start"
     },
     {
-     "id": "B2.6",
+     "id": "B2.7",
      "mark": true,
      "items": [
       "P6"
@@ -905,7 +920,7 @@
      "class": "cold-gone"
     },
     {
-     "id": "B2.7",
+     "id": "B2.8",
      "mark": true,
      "items": [
       "P10"
@@ -924,7 +939,7 @@
      "class": "voltage-engine-on"
     },
     {
-     "id": "B2.8",
+     "id": "B2.9",
      "mark": true,
      "items": [
       "P5"
@@ -945,7 +960,7 @@
      "class": "units-miles"
     },
     {
-     "id": "B2.9",
+     "id": "B2.10",
      "mark": true,
      "items": [
       "P4"
@@ -1744,7 +1759,7 @@
   {
    "id": "B6",
    "title_uk": "Панель із застосунками BMW-стилю, стоїмо",
-   "minutes": 50,
+   "minutes": 70,
    "engine": "on",
    "cluster": "twin then f30",
    "sets": [
@@ -1776,8 +1791,26 @@
      "id": "B6.2",
      "mark": true,
      "items": [
+      "F14",
+      "F12",
+      "F10",
+      "F17"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "ШТАТНА панель (обидва застосунки Off). Різкий фронтальний кадр усієї панелі. Потім кнопкою режимів: Sport - кадр, Eco Pro - кадр, назад Comfort. Нога на гальмі: R - кадр, N - кадр, P. Окремо сфотографуйте торець лівого важеля (кнопки на ньому) і одну фару ззовні.",
+     "wait_uk": "3 хв",
+     "shoot_uk": "Штатна панель: фронтально; Sport; Eco Pro; R; N. Торець важеля. Фара.",
+     "tag": "stock",
+     "class": "stock-photos"
+    },
+    {
+     "id": "B6.3",
+     "mark": true,
+     "items": [
       "F2",
-      "L5"
+      "L5",
+      "F9"
      ],
      "expect": [
       [
@@ -1788,15 +1821,16 @@
      "lead": "",
      "uk": "Twin Dial ввімкнено (Cluster = Twin Dial), f30_cluster Off. Зачекайте, поки панель намалюється. Запишіть: чи видно число пробігу внизу ліворуч.",
      "wait_uk": "до 30 с",
-     "shoot_uk": "Кадр усієї панелі (день), експозиція зафіксована.",
+     "shoot_uk": "Кадр усієї панелі (день), експозиція зафіксована: це «як є сьогодні» для Twin Dial 0.1.0.",
      "tag": "twin",
      "class": "twin-up"
     },
     {
-     "id": "B6.3",
+     "id": "B6.4",
      "mark": true,
      "items": [
-      "F2"
+      "F2",
+      "P19"
      ],
      "expect": [
       [
@@ -1813,11 +1847,12 @@
      "class": "safety-belt-door"
     },
     {
-     "id": "B6.4",
+     "id": "B6.5",
      "mark": true,
      "items": [
       "F2",
-      "F4"
+      "F4",
+      "P19"
      ],
      "expect": [],
      "lead": "",
@@ -1828,7 +1863,7 @@
      "class": "side-lamps"
     },
     {
-     "id": "B6.5",
+     "id": "B6.6",
      "mark": true,
      "items": [
       "F3"
@@ -1842,7 +1877,7 @@
      "class": "dial-ends-photo"
     },
     {
-     "id": "B6.6",
+     "id": "B6.7",
      "mark": true,
      "items": [
       "X9"
@@ -1856,7 +1891,7 @@
      "class": "band-day"
     },
     {
-     "id": "B6.7",
+     "id": "B6.8",
      "mark": true,
      "items": [
       "X9"
@@ -1870,13 +1905,17 @@
      "class": "band-night"
     },
     {
-     "id": "B6.8",
+     "id": "B6.9",
      "mark": true,
      "items": [
-      "X1"
+      "X1",
+      "P18",
+      "L27",
+      "F17",
+      "L19"
      ],
      "expect": [],
-     "lead": "",
+     "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
      "uk": "Чорний прямокутник: Twin Dial, нога на гальмі. Селектор P → D → N → R → P (по одному кроку, пауза 5 с). Після кожного кроку кадр правого циферблата і нижнього ряду.",
      "wait_uk": "40 с",
      "shoot_uk": "Чотири кадри: правий циферблат (чи є чорний прямокутник), нижній ряд.",
@@ -1884,14 +1923,18 @@
      "class": "gear-switch"
     },
     {
-     "id": "B6.9",
+     "id": "B6.10",
      "mark": true,
      "items": [
       "X1",
-      "X11"
+      "X11",
+      "P18",
+      "L27",
+      "F17",
+      "L19"
      ],
      "expect": [],
-     "lead": "",
+     "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
      "uk": "Twin Dial: кнопка режимів руху Comfort → Sport → Eco Pro → Comfort (пауза 8 с). ВІДЕО 60 кадрів/с на всю панель, що охоплює натиск і поки панель не стане повною. Запишіть час від натиску до повної панелі.",
      "wait_uk": "1 хв",
      "shoot_uk": "Відео 60 fps усієї панелі; після кожного режиму кадр правого циферблата.",
@@ -1899,7 +1942,7 @@
      "class": "mode-switch"
     },
     {
-     "id": "B6.10",
+     "id": "B6.11",
      "mark": true,
      "items": [
       "L1",
@@ -1920,28 +1963,34 @@
      "class": "msg-twin"
     },
     {
-     "id": "B6.11",
+     "id": "B6.12",
      "mark": true,
      "items": [
       "L1",
-      "X1"
+      "X1",
+      "F9",
+      "F13"
      ],
      "expect": [],
      "lead": "",
      "uk": "f30_cluster: у Twin Dial Cluster = Off; у f30_cluster Theme = «6WB Comfort», «Change with the drive mode» УВІМКНЕНО (як є), G20 вимкнено. Зачекайте, поки панель намалюється.",
      "wait_uk": "до 30 с",
-     "shoot_uk": "Кадр усієї панелі.",
+     "shoot_uk": "Кадр усієї панелі (6WB Comfort). Потім з G20 увімкненим: кадр з «Bottom row while G20 shows» = «All BMW's» і кадр з «All ours (6WB style)»; поверніть як було. Це фото «як є сьогодні».",
      "tag": "f30",
      "class": "f30-up"
     },
     {
-     "id": "B6.12",
+     "id": "B6.13",
      "mark": true,
      "items": [
-      "X1"
+      "X1",
+      "P18",
+      "L27",
+      "F17",
+      "L19"
      ],
      "expect": [],
-     "lead": "",
+     "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
      "uk": "f30_cluster, нога на гальмі: P → D → N → R → P (по кроку, пауза 5 с) і режими Comfort → Sport → Eco Pro → Comfort. ВІДЕО 60 fps. Чи з'являється чорний прямокутник на правому циферблаті?",
      "wait_uk": "1,5 хв",
      "shoot_uk": "Відео 60 fps; кадр на кожен перехід.",
@@ -1949,35 +1998,45 @@
      "class": "mode-switch"
     },
     {
-     "id": "B6.13",
+     "id": "B6.14",
      "mark": true,
      "items": [
-      "X1"
+      "X1",
+      "X17",
+      "P18",
+      "L27",
+      "F17",
+      "L19"
      ],
      "expect": [],
-     "lead": "",
-     "uk": "f30_cluster: вимкніть «Change with the drive mode» і повторіть ті самі P → D → N → R → P та режими. Записуйте: чорний прямокутник є чи ні.",
+     "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
+     "uk": "f30_cluster: вимкніть «Change with the drive mode» і повторіть ті самі P → D → N → R → P та режими. Записуйте: чорний прямокутник є чи ні. Перемикаючи це налаштування, подивіться на список налаштувань f30: чи зникають рядки «In Comfort / In Sport / In Eco Pro» - кадр списку до і після.",
      "wait_uk": "1,5 хв",
      "shoot_uk": "Кадри як у попередньому кроці.",
      "tag": "f30",
      "class": "mode-switch"
     },
     {
-     "id": "B6.14",
+     "id": "B6.15",
      "mark": true,
      "items": [
-      "X1"
+      "X1",
+      "X17",
+      "P18",
+      "L27",
+      "F17",
+      "L19"
      ],
      "expect": [],
-     "lead": "",
-     "uk": "f30_cluster: ввімкніть G20 («BMW's G20 round our dials») і знову ті самі P → D → N → R → P та режими.",
+     "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
+     "uk": "f30_cluster: ввімкніть G20 («BMW's G20 round our dials») і знову ті самі P → D → N → R → P та режими. Кадр списку налаштувань: чи з'явився рядок «Bottom row while G20 shows».",
      "wait_uk": "1,5 хв",
      "shoot_uk": "Кадри як вище.",
      "tag": "f30",
      "class": "mode-switch"
     },
     {
-     "id": "B6.15",
+     "id": "B6.16",
      "mark": true,
      "items": [
       "L1",
@@ -1997,7 +2056,55 @@
      "class": "msg-f30"
     },
     {
-     "id": "B6.16",
+     "id": "B6.17",
+     "mark": true,
+     "items": [
+      "X13",
+      "L27"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "ТІЛЬКИ ЯКЩО в якомусь кроці вище з'явився чорний прямокутник і він ще є: (1) f30_cluster Theme = Off, чекайте 6 с, поверніть 6WB Comfort - чи зник? (2) Відчиніть і зачиніть двері на місці - чи зник? (3) Якщо Waze показує карту на панелі: у Waze вимкніть показ на панелі - чи зник? Після кожного кроку кадр. Кажіть ведучому вголос «прямокутник є» чи «немає».",
+     "wait_uk": "3 хв",
+     "shoot_uk": "Кадр правого циферблата після кожної дії.",
+     "tag": "f30",
+     "class": "box-remap",
+     "optional": true
+    },
+    {
+     "id": "B6.18",
+     "mark": true,
+     "items": [
+      "X16",
+      "F4",
+      "P19"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "Матові теми (що BMW малює поверх суцільної панелі): у f30_cluster вимкніть «Change with the drive mode» (інакше тема не зміниться), Theme = «Diagnostic matte: magenta». Двигун працює: кадр. Відчиніть двері водія: кадр. Розстебніть ремінь: кадр. Вимкніть автостоп (кнопка MSA): кадр, і ввімкніть назад.",
+     "wait_uk": "3 хв",
+     "shoot_uk": "Чотири кадри всієї панелі.",
+     "tag": "f30",
+     "class": "matte-running"
+    },
+    {
+     "id": "B6.19",
+     "mark": true,
+     "items": [
+      "X16",
+      "F4"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "Перевірка ламп при ввімкненні: заглушіть двигун кнопкою Start (P, ручник). Почекайте 5 с. Натисніть Start БЕЗ гальма (запалювання без двигуна) і знімайте ВІДЕО 60 fps з першої секунди: лампи світяться 2-4 с. Знімайте, доки знову не з'явиться пурпурова панель, потім ще 20 с (кадр із повідомленням «натисніть гальмо»). Потім заведіть двигун (нога на гальмі).",
+     "wait_uk": "1 хв",
+     "shoot_uk": "Відео з першої секунди + кадр через 10-20 с.",
+     "tag": "f30",
+     "class": "matte-lamp-check",
+     "warn_uk": "Заглушити й завести лише на місці, P, ручне гальмо."
+    },
+    {
+     "id": "B6.20",
      "mark": true,
      "items": [],
      "expect": [],
@@ -2097,7 +2204,9 @@
      "id": "B7.4",
      "mark": true,
      "items": [
-      "P12"
+      "P12",
+      "F10",
+      "L21"
      ],
      "expect": [
       [
@@ -2112,7 +2221,7 @@
      "lead": "",
      "uk": "Ще на місці: позначка. Потім ЇДЬТЕ маршрутом. Пасажир голосом диктує на запис телефону час (за годинником авто) і подію («поворот ліворуч», «кільце», «розвилка») і фотографує панель на поворотах: стрілка, відстань, смуги.",
      "wait_uk": "10-20 хв",
-     "shoot_uk": "Пасажир: панель на кількох поворотах і на розвилці чи кільці.",
+     "shoot_uk": "Пасажир: панель на кількох поворотах і на розвилці чи кільці. Також: штатна панель у русі близько 50 км/год і близько 2000 об/хв (стрілки), один кадр.",
      "tag": "stock",
      "parked": false,
      "class": "drive-guided"
@@ -2241,7 +2350,9 @@
      "items": [
       "P15",
       "F6",
-      "F5"
+      "F5",
+      "F11",
+      "F10"
      ],
      "expect": [
       [
@@ -2252,7 +2363,7 @@
      "lead": "",
      "uk": "Стоїмо: позначка. Потім ЇДЬТЕ 10 хв дорогою зі знаками. Пасажир записує час і число на знаку, яке показує панель, на кількох знаках; фотографує панель зі знаком.",
      "wait_uk": "10 хв",
-     "shoot_uk": "Пасажир: панель зі знаком (кілька кадрів).",
+     "shoot_uk": "Пасажир: панель зі знаком (кілька кадрів). Якщо трапиться: знак із трьома цифрами, обидва знаки разом (обмеження і обгін), кінець обмеження, довга назва вулиці.",
      "tag": "stock",
      "parked": false,
      "class": "drive-signs"
@@ -2265,7 +2376,8 @@
       "F5",
       "F6",
       "P16",
-      "P17"
+      "P17",
+      "L17"
      ],
      "expect": [
       [
@@ -2282,7 +2394,7 @@
       ]
      ],
      "lead": "",
-     "uk": "СТОП (безпечне місце): позначка. Далі на прямій дорозі, де це безпечно, пасажир підказує, а водій робить: круїз увімкнути, задати швидкість (напр. 80), змінити + і -, змінити дистанцію (якщо адаптивний), вимкнути, відновити, перемкнути на обмежувач швидкості й назад. Потім одне помірне прискорення без перевищення. Потім кілька хвилин на північ і кілька на схід. Пасажир записує час кожної дії.",
+     "uk": "СТОП (безпечне місце): позначка. Далі на прямій дорозі, де це безпечно, пасажир підказує, а водій робить: круїз увімкнути, задати швидкість (напр. 80), змінити + і -, змінити дистанцію (якщо адаптивний), вимкнути, відновити, перемкнути на обмежувач швидкості й назад. Потім одне помірне прискорення без перевищення. Потім кілька хвилин на північ і кілька на схід. Пасажир записує час кожної дії. Якщо в заторі чи на світлофорі двигун глушиться автостопом: пасажир записує час.",
      "wait_uk": "15 хв",
      "shoot_uk": "Пасажир: панель (штатний вигляд круїзу і обмежувача) і проекційний дисплей, якщо є (чи показує задану швидкість).",
      "tag": "stock",
@@ -2415,7 +2527,7 @@
    "lead:collect#2"
   ],
   "L12": [
-   "lead:collect#0"
+   "answered before the session (CA register); confirm at collection #0"
   ],
   "L13": [
    "lead:collect#0"
@@ -2452,8 +2564,100 @@
   "X10": [
    "pass2"
   ],
-  "F4": [
-   "not in this session: needs the diag_overlay build (OVERLAY-PHOTO-PROTOCOL photo 16), which was never built"
+  "L16": [
+   "answered before the session (CA register)"
+  ],
+  "L30": [
+   "answered before the session (CA register)"
+  ],
+  "L31": [
+   "answered before the session (CA register)"
+  ],
+  "L17": [
+   "lead:collect#3",
+   "only if f30_cluster's handlers log with Theme Off (check at collection #0); else a drive with f30 drawing"
+  ],
+  "L18": [
+   "lead:collect#1",
+   "lead:collect#3"
+  ],
+  "L19": [
+   "lead:collect#2"
+  ],
+  "L20": [
+   "lead:collect#0",
+   "not the change step: changing the car's limit-warning setting is a driver-assistance setting (the lead decides)"
+  ],
+  "L21": [
+   "lead:collect#3"
+  ],
+  "L22": [
+   "lead:collect#2",
+   "only if f30 showed a boost readout"
+  ],
+  "L23": [
+   "pass2",
+   "needs the owner's approval: perf.json is a write in the app's data folder (CA D6)"
+  ],
+  "L24": [
+   "lead:collect#0",
+   "lead:collect#3"
+  ],
+  "L25": [
+   "lead:collect#0",
+   "lead:collect#3"
+  ],
+  "L26": [
+   "lead:collect#2"
+  ],
+  "L27": [
+   "lead:collect#2"
+  ],
+  "L28": [
+   "lead:collect#2"
+  ],
+  "L29": [
+   "lead:collect#1"
+  ],
+  "P18": [
+   "needs set S10 in signal_probe (CA D3: not in CP's S1-S9); the steps that would answer it are listed"
+  ],
+  "P19": [
+   "needs set S11 in signal_probe (CA D3: not in CP's S1-S9); the steps that would answer it are listed"
+  ],
+  "P20": [
+   "lead decision (CA D4): a read-only subscribe attempt; no field to read"
+  ],
+  "P21": [
+   "lead decision (CA D2): named _broadcasts only; none declared"
+  ],
+  "X12": [
+   "pass2"
+  ],
+  "X14": [
+   "pass2",
+   "needs the owner's approval: a build and a data-file write (CA D6)"
+  ],
+  "X15": [
+   "not in this session: writes to cluster-render's configuration or a service restart (BR E6-E12)"
+  ],
+  "X19": [
+   "not in this session: Driver Profiles write tests (CA D9), a separate sitting with the owner's approval"
+  ],
+  "X20": [
+   "not in this session: Driver Profiles avatar (CA D9), a write"
+  ],
+  "X21": [
+   "not in this session: a diagnostic FA / FSC read, not an OAP read (CA)"
+  ],
+  "X22": [
+   "not in this session: an E-Sys / BimmerCode coding read (CA)"
+  ],
+  "F15": [
+   "not in this session: needs a drive with f30_cluster drawing (both drives run the stock cluster or Twin Dial); add an f30 segment to block 8 if the owner wants"
+  ],
+  "F16": [
+   "not in this session: the owner's own HMI steps for driver recognition (CA D9)"
   ]
  },
  "sets_uk": {
