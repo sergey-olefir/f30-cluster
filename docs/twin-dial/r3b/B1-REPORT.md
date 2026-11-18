@@ -42,7 +42,9 @@ New: `tools/twin-dial/render_dials.py` (the real shader on the GPU: `render_dial
 
 ## Results
 
-TESTS_PLACEHOLDER
+All 20 `bench/test-*.js` suites run one at a time on this branch (port 8601), 0 failures. Counts against `main` today: bottom-row 254, cc-release 57, daynight 24, driver-profiles 105, fonts 34, mb-exp 46, native-ui 47, night 48, probes 25, scene-tex 54, strip-mask 40, twin-cc 149, twin-fonts 219, twin-layout 61, twin-pages 101, twin-probe 115, twin-sim 39, twin-trip 82 — all identical (f30_cluster's seven suites unchanged; `apps/f30_cluster` and `apps/driver_profiles` untouched);
+**twin-bake 35 -> 37**, **twin-budget 75 -> 94**. `sh tools/twin-dial/bake_all.sh --check`: `test_bake.py` 85, `test_shader.py` 44 (GPU), `test-twin-bake.js` 37, all green. Static budget: tdial 5763 bytes, tdback L 2672, RT/RB 537; 13 / 17 uniforms; no `length()` of an unnormalised offset; one sampler each (`u_face`, `u_mask`).
+`tools/signals/check_signals.py` was not run for a change: B1 declares no signal and does not touch `app.json`.
 
 ## Open problems and decisions for the lead
 
