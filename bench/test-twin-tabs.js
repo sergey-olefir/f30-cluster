@@ -354,21 +354,29 @@ console.log('4. the tab bar: geometry and icons');
     eq(T.rule, [170, 173], 'the rule under the bar is 3 px (y 170-173)');
     eq(T.highlight, [780, 848], 'the round 2 warning cell is tab 2\'s cell');
     const cells = [[618, 780], [780, 848], [848, 1168], [1168, 1237], [1237, 1302]];
+    const boxesIn = (ws) => ws.every((w) => w.y >= 124 && w.y + w.h <= 170);
     const inCell = (w, i) => w.x >= cells[i][0] && w.x + w.w <= cells[i][1];
     const IC = (id) => byId[id];
-    ok(['tab_range_i', 'tab_warn_i', 'tab_phone_i', 'tab_nav_i'].every((id) => IC(id).w === 36 && IC(id).h === 36 && IC(id).y + 18 === 143), 'the icons are 36 x 36, centred at y 143');
-    eq(IC('tab_range_i').x, 636, 'tab 1\'s icon starts 18 px from the bar\'s left end (x 636)');
-    eq([IC('tab_warn_i'), IC('tab_phone_i'), IC('tab_nav_i')].map((w) => w.x + 18), [814, 1202, 1270], 'icon centres: tab 2 at 814, tab 4 at 1202, tab 5 at 1270 (the cells\' middles within 1 px)');
+    // SPEC-R3 3.1 "icons 36 px" is the INK height (SF: the references' 36 against ours 29): the drawings' ink is ~0.79 of the box, the box is 46 (K2's mockups)
+    ok(['tab_range_i', 'tab_warn_i', 'tab_phone_i', 'tab_nav_i'].every((id) => IC(id).w === 46 && IC(id).h === 46 && IC(id).y + 23 === 147), 'the icon boxes are 46 x 46 on the centre line y 147 (36 px of ink, as the approved mockups)');
+    const inkOf = (name) => { const it = JSON.parse(fs.readFileSync(path.join(H.ROOT, 'apps', 'twin_dial', 'hud', 'icons', 'icons.json'), 'utf8')).items.find((i) => i.name === name && i.slot === 'tab'); return it.box.map((v, k) => v / (k % 2 ? it.h : it.w)); };
+    const inkBox = (id) => { const w = IC(id), f = inkOf(w.icon); return [w.x + f[0] * 46, w.y + f[1] * 46, w.x + f[2] * 46, w.y + f[3] * 46]; };
+    ok(Math.abs(inkBox('tab_range_i')[0] - 636) <= 1, 'tab 1\'s icon: its INK starts 18 px from the bar\'s left end (x 636): ' + inkBox('tab_range_i')[0].toFixed(1));
+    const mid = (id) => { const b = inkBox(id); return (b[0] + b[2]) / 2; };
+    ok(Math.abs(mid('tab_warn_i') - 814) <= 1 && Math.abs(mid('tab_phone_i') - 1202.5) <= 1.5 && Math.abs(mid('tab_nav_i') - 1269.5) <= 1.5, 'the ink of tabs 2, 4 and 5 is centred in its cell (814 / 1202.5 / 1269.5): ' + ['tab_warn_i', 'tab_phone_i', 'tab_nav_i'].map((id) => mid(id).toFixed(1)).join(' / '));
     ok(IC('tab_warn_i').tdLive === 'warn' && IC('tab_phone_i').tdLive === 'phone' && IC('tab_nav_i').tdLive === 'nav' && IC('tab_media').tdLive === 'media', 'tabs 2..5 carry live icons (their variant follows the state)');
     ok(inCell(IC('tab_range_i'), 0) && inCell(IC('tab_range_v'), 0) && inCell(IC('tab_range_u'), 0), 'tab 1: the icon, the range value and its unit lie inside the cell (nothing across the separator at 780)');
     ok(inCell(IC('tab_warn_i'), 1) && inCell(IC('tab_media'), 2) && inCell(IC('tab_phone_i'), 3) && inCell(IC('tab_nav_i'), 4), 'tabs 2..5: every widget lies inside its cell');
+    const tw = IC('tab_range_u'); const unitInk = tw.x + (tw.w - 3);
+    ok(unitInk <= 778, 'tab 1: the unit "км" ends at x ' + unitInk + ', inside the cell with room to the separator (780)');
+    ok(boxesIn([IC('tab_range_i'), IC('tab_warn_i'), IC('tab_media'), IC('tab_phone_i'), IC('tab_nav_i')]), 'the icon boxes lie inside the bar\'s height band y 124..170 (the rule is y 170..173)');
     const boxes = W.filter((w) => w.id.indexOf('tab_') === 0);
     let overlaps = 0;
     boxes.forEach((a, i) => boxes.forEach((b, j) => { if (j > i && a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h) overlaps++; }));
     eq(overlaps, 0, 'no two tab-bar boxes overlap (an overlap costs the engine a sheet)');
-    eq(byId.tab_range_v.font, 'td_tab', 'the range value is Noto 33 (td_tab; B6 re-bakes it at 34)');
+    ok(['td_tab', 'td_tabs'].indexOf(byId.tab_range_v.font) >= 0, 'the range value is Noto 33 / 34 (' + byId.tab_range_v.font + ': td_tabs once B6\'s atlas is in the tree)');
     ok(!byId.tab_media_t, 'the old media text widget is gone: the media cell is one live widget');
-    ok(byId.tab_media.w === 300 && byId.tab_media.x === 858, 'the media widget fills its cell less 10 px each side [858, 1158]');
+    ok(byId.tab_media.w === 300 && byId.tab_media.x === 858 && byId.tab_media.h === 46 && byId.tab_media.y === 124, 'the media widget fills its cell less 10 px each side, as tall as an icon box [858, 124, 1158, 170]');
 }
 {
     // icons: no dimming, the variant is the state
@@ -413,9 +421,9 @@ console.log('4. the tab bar: geometry and icons');
     h.theme = { fg: [204, 204, 204, 255], grey: [61, 61, 61, 255], bg: [0, 0, 0, 255] };
     twin.updateIcon(h, warn, 150, false);
     eq(painted.length, 3, 'a night change (new theme colours) repaints it');
-    eq(painted[0].length, 36 * 36 * 4, 'the pixels are the 36 x 36 RGBA of the widget');
+    eq(painted[0].length, 46 * 46 * 4, 'the pixels are the 46 x 46 RGBA of the widget (36 px of ink)');
     twin.updateIcon(h, range, 0, true);
-    eq(painted[painted.length - 1].length, 36 * 36 * 4, 'the range icon is live too');
+    eq(painted[painted.length - 1].length, 46 * 46 * 4, 'the range icon is live too');
     ok(W.filter((w) => w.type === 'icon').every((w) => w.tdLive), 'every icon of the layout is live (repainted by twin_tabs.js, so a night change needs no rebuild)');
     h.nightOn = true; h.twinCc = { state: 'ours', severity: 'red' };
     twin.updateIcon(h, warn, 200, true);

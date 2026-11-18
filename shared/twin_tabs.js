@@ -32,7 +32,7 @@
  * declared in app.json "signals" ("rs" or "s"); the key reads, it never writes. One press = the next tab that exists,
  * cyclic (1 -> 2 only if a message is listed -> 3 -> 4 -> 5 -> 1).
  *
- * The tab bar's own pixels (the live icons and the media cell: an icon and its text centred as ONE group) are painted
+ * The tab bar's own pixels (the live icons - 36 px of ink in a 46 px box - and the media cell: an icon and its text centred as ONE group) are painted
  * here too: iconState() / updateIcon(), called through shared/twin_tokens.js. NO icon is ever dimmed (SPEC-R3 3.1): the
  * state is the icon's VARIANT; names a build does not have yet fall back to the plain one (resolve()).
  *
@@ -52,14 +52,14 @@ const ICON = {
     warn: ['cc_warn'],
     tuner: ['td_radio', 'td_media'],
     player: ['td_media', 'td_radio'],
-    projection: ['td_projection', 'td_proj', 'td_media'],
+    projection: ['td_proj', 'td_media'],
     media: ['td_radio', 'td_media'],
     phoneBars: ['td_phone_bars', 'td_phone'],
     phoneOff: ['td_phone_off', 'td_phone'],
     phone: ['td_phone'],
     nav: ['td_nav'],
 };
-const MEDIA_GAP = 12;            // px between the media icon and its text (hypothesis; the references' group is tight)
+const MEDIA_GAP = 13;            // px between the media icon's ink and its text (K2's approved mockup: icon box + 6 + text; the box's margin is ~7)
 
 const cfg = (hud) => (hud && hud.config && hud.config.tabs && typeof hud.config.tabs === 'object') ? hud.config.tabs : {};
 const log = (hud, s) => { try { if (hud && hud.log) hud.log.info('tabs: ' + s); } catch (e) { /* never */ } };
@@ -325,19 +325,24 @@ function colourOf(hud, s) {
     return th.fg || [255, 255, 255, 255];
 }
 
-/** The media cell's pixels: the source icon and the station / title text centred as ONE group, the text cut with an ellipsis. */
+/** The media cell's pixels: the source icon and the station / title text centred as ONE group (by the icon's INK, not its box), the text cut with an ellipsis. */
 function paintMedia(hud, w, name, col, text) {
     const paintIcon = require('./icons').paintIcon;
     const TR = require('./hud_text');
-    const W = w.w, H = w.h, S = Math.min(H, 36);
+    const W = w.w, H = w.h, S = isNum(w.iconBox) ? w.iconBox : Math.min(H, 46);
     const out = Buffer.alloc(W * H * 4, 0);
+    const ic = paintIcon(name, S, S, col), iy = Math.round((H - S) / 2);
+    let il = S, ir = -1;                                   // the icon's ink, left and right (alpha above a quarter)
+    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) if (ic[(y * S + x) * 4 + 3] > 64) { if (x < il) il = x; if (x > ir) ir = x; }
+    if (ir < il) { il = 0; ir = S - 1; }
+    const inkW = ir - il + 1;
     let t = typeof text === 'string' ? text : '';
     let tw = 0;
+    const font = w.font || 'td_tab';
     if (t) {
-        const font = w.font || 'td_tab';
-        const avail = W - S - MEDIA_GAP;
+        const avail = W - inkW - MEDIA_GAP;
         const g = TR.loadFont(font).metrics.glyphs;
-        const ell = g['…'] ? '…' : '...';
+        const ell = g['\u2026'] ? '\u2026' : '...';
         const fit = (v) => TR.measure(v, font, 0) <= avail;
         if (!fit(t)) {
             let u = t;
@@ -346,17 +351,17 @@ function paintMedia(hud, w, name, col, text) {
         }
         tw = TR.measure(t, font, 0);
     }
-    const group = S + (tw ? MEDIA_GAP + tw : 0), x0 = Math.round((W - group) / 2);
-    const ic = paintIcon(name, S, S, col), iy = Math.round((H - S) / 2);
+    const group = inkW + (tw ? MEDIA_GAP + tw : 0), left = Math.round((W - group) / 2), x0 = left - il;
     for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
-        const a = ((y * S + x) * 4), o = (((y + iy) * W) + x + x0) * 4;
-        if (x + x0 < 0 || x + x0 >= W || ic[a + 3] === 0) continue;
+        const a = ((y * S + x) * 4), px = x + x0;
+        if (px < 0 || px >= W || ic[a + 3] === 0) continue;
+        const o = ((y + iy) * W + px) * 4;
         out[o] = ic[a]; out[o + 1] = ic[a + 1]; out[o + 2] = ic[a + 2]; out[o + 3] = ic[a + 3];
     }
     if (tw) {
-        const font = w.font || 'td_tab', fm = TR.loadFont(font).metrics;
+        const fm = TR.loadFont(font).metrics;
         const base = isNum(w.textBase) ? w.textBase : 156 - w.y;               // the text's baseline in the box (panel baseline 156)
-        const lay = TR.drawText(W, H, t, { font, offsetY: base - fm.baseline, x: x0 + S + MEDIA_GAP, color: col, align: 'left' });
+        const lay = TR.drawText(W, H, t, { font, offsetY: base - fm.baseline, x: left + inkW + MEDIA_GAP, color: col, align: 'left' });
         for (let i = 0; i < W * H; i++) {
             const a = lay[i * 4 + 3];
             if (!a) continue;

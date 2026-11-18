@@ -224,10 +224,10 @@ const SAIRA = ['td_big', 'td_clock', 'td_gear', 'td_label', 'td_tach', 'td_scale
     ok(W.filter((w) => w.type === 'text' || w.type === 'icon').every((w) => ROLES.indexOf(w.color) >= 0), 'every colour is a role of the theme "twin": ' + ROLES.join(' '));
     if (THEMES.twin) ok(ROLES.every((r) => Array.isArray(THEMES.twin[r])), 'the theme "twin" of shared/hud_themes.js has every one of those roles');
     else skip('the theme "twin" is not in shared/hud_themes.js yet (package B merges it)');
-    // the icons: SPEC-R3 3.1, 36 x 36 centred at y 143; tab 3's cell is ONE live widget (icon + text as a group, 300 x 36)
-    const icons = { tab_range_i: ['td_fuel', 654], tab_warn_i: ['cc_warn', 814], tab_phone_i: ['td_phone', 1202], tab_nav_i: ['td_nav', 1270] };
-    ok(Object.keys(icons).every((id) => T(id) && T(id).icon === icons[id][0] && T(id).w === 36 && T(id).h === 36 && T(id).x + 18 === icons[id][1] && T(id).y + 18 === 143 && T(id).tdLive), 'tab bar pictograms: 36 x 36 at x 654 814 1202 1270 (centres), centre y 143, all live (night colours repaint them)');
-    ok(T('tab_media') && T('tab_media').tdLive === 'media' && T('tab_media').x === 858 && T('tab_media').w === 300 && T('tab_media').h === 36 && T('tab_media').y + 18 === 143, 'tab 3: one live widget [858, 125, 1158, 161] painting the source icon and its text as a centred group');
+    // the icons: SPEC-R3 3.1, 36 px of ink = a 46 px box on the centre line y 147 (the approved mockups); tab 3's cell is ONE live widget (icon + text as a group)
+    const icons = { tab_range_i: 'td_fuel', tab_warn_i: 'cc_warn', tab_phone_i: 'td_phone', tab_nav_i: 'td_nav' };
+    ok(Object.keys(icons).every((id) => T(id) && T(id).icon === icons[id] && T(id).w === 46 && T(id).h === 46 && T(id).y + 23 === 147 && T(id).tdLive), 'tab bar pictograms: 46 x 46 boxes (36 px of ink) on y 147, all live (night colours repaint them)');
+    ok(T('tab_media') && T('tab_media').tdLive === 'media' && T('tab_media').x === 858 && T('tab_media').w === 300 && T('tab_media').h === 46 && T('tab_media').y === 124, 'tab 3: one live widget [858, 124, 1158, 170] painting the source icon and its text as a centred group');
     // the speed and the gear are GPU texts of the right pitch (the atlas decides; the engine's own test)
     ok(T('speed').gpu === true && T('speed').maxLen === 3 && T('gear').gpu === true, 'the digital speed and the gear are GPU texts (hud.js "gpu")');
 }

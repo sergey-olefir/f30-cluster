@@ -150,27 +150,54 @@ def tdback(part):
 BASE = {'time': 404, 'weekday': 460, 'date': 519, 'footer': 528, 'speed': 441, 'gear': 539, 'program': 576, 'ready': 348, 'title': 282}
 
 
+ICON_Y = 147           # the icon boxes' centre line: K2's approved mockups (ICON_Y 147: the pump's ink 133-167, the warning triangle's 126-165 in the bar 127-172). The spec's
+                       # "centred at y 143" is the round 2 box centre of a 38 px box; 36 px of ink centred on 143 would stand 1.5 px above the bar (reported)
+ICON_BOX = 46          # SPEC-R3 3.1 "icons 36 px" is the INK height (SF: the references' 36 px against ours 29, the ink of the 38-box drawings); the
+                       # drawings' ink is ~0.79 of their box, so the box is 46 (K2's mockup: ICON_BOX 46); B6's slot table says "tab 36" (a box): reported
+TAB_FONT = 'td_tabs' if os.path.exists(os.path.join(FONTS, 'td_tabs.json')) else 'td_tab'      # SPEC-R3 7: tab text Noto 34 (B6's td_tabs); Noto 33 (td_tab) until it is baked
+
+
+def _ink_fractions():
+    """{icon name: (cx, cy)}: the centre of each tab-slot icon's INK in its box, as a fraction of the box (apps/twin_dial/hud/icons/icons.json:
+    package A1 / B6's slot table), so an icon's ink - not its box - is what lands on the spec's centre."""
+    p = os.path.join(ROOT, 'apps', 'twin_dial', 'hud', 'icons', 'icons.json')
+    out = {}
+    if os.path.exists(p):
+        for it in json.load(open(p))['items']:
+            if it['slot'] == 'tab':
+                b = it['box']
+                out[it['name']] = ((b[0] + b[2]) / 2.0 / it['w'], (b[1] + b[3]) / 2.0 / it['h'], b[0] / float(it['w']))
+    return out
+
+
 def tabs():
-    """SPEC-R3 3.1 / 3.3 (package B2): the tab bar's contents. Icons 36 x 36 centred at y 143, text baseline 156 (Noto 33, cap 24).
-    Tab 1: its icon starts 18 px from the bar's left end (x 636), then the range and its unit. Tab 2: the warning icon, white or
-    in the severity colour (shared/twin_tabs.js). Tab 3: ONE live widget that paints the source icon and its text centred as one
-    group (icon only until the media probe has shown the field). Tab 4 / 5: the phone and navigation icons; no icon is ever dimmed,
-    the state is the icon's variant."""
-    S = 36
-    W = [icon('tab_range_i', 'td_fuel', 636 + S / 2.0, 143, S)]
-    # the range value, then its unit 3 px after the value's widest form ("888"). The value's box starts at x 672, the icon
-    # box's right edge: two boxes that overlap cost the engine a sheet
-    vw = width('td_tab', '888')
-    W += [text('tab_range_v', 672 + vw, 156, vw, '{{td:rangeTab}}', 'td_tab', 'fg', 'right', 1, below=3),
-          text('tab_range_u', 672 + vw + 3, 156, width('td_u19', '\u043a\u043c') + 3, '\u043a\u043c', 'td_u19', 'fg', 'left', 1, below=3)]
+    """SPEC-R3 3.1 / 3.3 (package B2): the tab bar's contents. Icons 36 px of ink (a 46 px box centred at y 147, the approved mockups'), text baseline
+    156 (Noto 34, cap 24). Tab 1: the pump's ink starts 18 px from the bar's left end (x 636), then the range and its unit. Tab 2: the
+    warning icon, white or in the severity colour (shared/twin_tabs.js). Tab 3: ONE live widget that paints the source icon and its text
+    centred as one group (icon only until the media probe has shown the field). Tab 4 / 5: the phone and navigation icons. No icon is
+    ever dimmed, the state is the icon's variant. A live icon's box is placed from its PLAIN icon's ink, so a variant never moves it."""
+    S, fr = ICON_BOX, _ink_fractions()
+    def tab_icon(id, name, cx, live, left=None):
+        f = fr.get(name, (0.5, 0.5, 0.0))
+        x = (left - f[2] * S) if left is not None else (cx - f[0] * S)
+        y = ICON_Y - S / 2.0
+        return {'id': id, 'type': 'icon', 'icon': name, 'z': 5, 'x': int(round(x)), 'y': int(round(y)), 'w': S, 'h': S, 'color': 'fg', 'conn': 1, 'tdLive': live}
+    W = [tab_icon('tab_range_i', 'td_fuel', None, 'fixed', left=636)]
+    # the range value, then its unit 3 px after the value's widest form ("888"). The value's box starts where the icon's box ends: two
+    # boxes that overlap cost the engine a sheet
+    vx = W[0]['x'] + S
+    vw = width(TAB_FONT, '888')
+    W += [text('tab_range_v', vx + vw, 156, vw, '{{td:rangeTab}}', TAB_FONT, 'fg', 'right', 1, below=3),
+          text('tab_range_u', vx + vw + 3, 156, width('td_u19', '\u043a\u043c') + 3, '\u043a\u043c', 'td_u19', 'fg', 'left', 1, below=3)]
     cell = lambda a, b: (a + b) / 2.0
-    W += [icon('tab_warn_i', 'cc_warn', cell(TAB['seps'][0], TAB['seps'][1]), 143, S, live='warn')]
-    # tab 3 (848-1168): one widget, 300 x 36 inside its cell; the media text's baseline 156 is the widget's own 31
-    mx = TAB['seps'][1] + 10
-    W += [{'id': 'tab_media', 'type': 'icon', 'icon': 'td_radio', 'z': 5, 'x': mx, 'y': 143 - S // 2, 'w': TAB['seps'][2] - TAB['seps'][1] - 20, 'h': S,
-           'color': 'fg', 'conn': 1, 'tdLive': 'media', 'font': 'td_tab', 'textBase': 156 - (143 - S // 2)},
-          icon('tab_phone_i', 'td_phone', cell(TAB['seps'][2], TAB['seps'][3]), 143, S, live='phone'),
-          icon('tab_nav_i', 'td_nav', cell(TAB['seps'][3], TAB['rect'][2]), 143, S, live='nav')]
+    W += [tab_icon('tab_warn_i', 'cc_warn', cell(TAB['seps'][0], TAB['seps'][1]), 'warn')]
+    # tab 3 (848-1168): one widget, 300 px wide inside its cell, as tall as an icon box; the media text's baseline is 156
+    mw = TAB['seps'][2] - TAB['seps'][1] - 20
+    my = int(round(ICON_Y - S / 2.0))
+    W += [{'id': 'tab_media', 'type': 'icon', 'icon': 'td_radio', 'z': 5, 'x': TAB['seps'][1] + 10, 'y': my, 'w': mw, 'h': S,
+           'color': 'fg', 'conn': 1, 'tdLive': 'media', 'font': TAB_FONT, 'textBase': 156 - my, 'iconBox': S},
+          tab_icon('tab_phone_i', 'td_phone', cell(TAB['seps'][2], TAB['seps'][3]), 'phone'),
+          tab_icon('tab_nav_i', 'td_nav', cell(TAB['seps'][3], TAB['rect'][2]), 'nav')]
     return W
 
 

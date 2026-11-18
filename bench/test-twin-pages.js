@@ -288,7 +288,7 @@ console.log('the tab bar\'s live icons');
     h.theme = { fg: [231, 231, 231, 255], grey: [61, 61, 61, 255], bg: [0, 0, 0, 255] };     // night
     twin.updateIcon(h, nav, 150, false);
     eq(painted.length, 2, 'a night change (new theme colours) repaints it');
-    eq(painted[0], 36 * 36 * 4, 'the pixels are the 36 x 36 RGBA of the widget');
+    eq(painted[0], 46 * 46 * 4, 'the pixels are the 46 x 46 RGBA of the widget (36 px of ink)');
     // the engine's own icon path is not taken for a widget with no tdLive, and _nightLive counts a live icon as live
     ok(L.widgets.filter((w) => w.type === 'icon').every((w) => w.tdLive), 'every icon of the layout is live (repainted by twin_tabs.js, so a night change needs no rebuild)');
 }
