@@ -1,0 +1,411 @@
+{
+ "_about": "research3/MK: every candidate field for the trip page and the odometer. ids / flags / types from the car catalogue (2026-11-15 snapshot); scaling = hypothesis (the catalogue states none); \"tell\" = the one reading on the car that settles it.",
+ "values": {
+  "average consumption": [
+   {
+    "service": 46363,
+    "getter": 2,
+    "notifier": 32770,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.KombiIF",
+    "field": "statusBordcomputerAverage",
+    "members": "consumptionAverage1BC1 / consumptionAverage2BC2",
+    "scaling": "0.1 l/100 km per bit (alt. 0.01, 1)",
+    "invalid": "4095, 65535",
+    "tell": "raw / shown: 68 for 6.8 -> 0.1; 680 -> 0.01; 7 -> 1. A unit enum statusUnitOfMeasurementConsumptionBC must read 1 (l/100 km)",
+    "mk": "kombi, default 0.1"
+   },
+   {
+    "service": 45134,
+    "getter": 7,
+    "notifier": 32775,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.resetlogic.ResetLogic3",
+    "field": "bcDataAll",
+    "members": "bcData3.consumptionCombustionAverageDigit (+ ...Scale)",
+    "scaling": "Digit = the shown number in 0.1 l/100 km; Scale = the bar position against maxValues (hypothesis)",
+    "invalid": "65535",
+    "tell": "Digit / shown = 10 -> 0.1; Scale moves with the bar, not the number",
+    "mk": "rl3 fallback, default 0.1"
+   },
+   {
+    "service": 45133,
+    "getter": 1,
+    "notifier": 32769,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.resetlogic.ResetLogic2",
+    "field": "bcDataAll",
+    "members": "bcData.consumptionCombustionAverageDigit (+ ...Scale)",
+    "scaling": "as ResetLogic3",
+    "invalid": "65535",
+    "tell": "as ResetLogic3",
+    "mk": "probe only (bc-all2)"
+   },
+   {
+    "service": 45128,
+    "getter": 1,
+    "notifier": 32769,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.resetlogic.ResetLogic",
+    "field": "bcDataAll",
+    "members": "bcData.consumptionAverage",
+    "scaling": "0.1 l/100 km per bit (hypothesis)",
+    "invalid": "65535",
+    "tell": "raw / shown",
+    "mk": "probe only (bc-all1)"
+   },
+   {
+    "service": 46392,
+    "getter": null,
+    "notifier": 32772,
+    "flags": "s",
+    "interface": "de.bmw.infotainment.lsc.LSCDataSink",
+    "field": "dataCombinedInstrumentCluster",
+    "members": "averageRangeConsumption",
+    "scaling": "unknown: the range computer's own average, not the trip's",
+    "invalid": "-",
+    "tell": "compare; likely differs from the trip page",
+    "mk": "probe only (lsc-cluster)"
+   },
+   {
+    "service": 45115,
+    "getter": 1,
+    "notifier": 32769,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.telematic.journeyhistory.BcPersonal",
+    "field": "driveSegment",
+    "members": "bcBeConsFuelVisible",
+    "scaling": "unknown (per drive segment)",
+    "invalid": "-",
+    "tell": "compare after one segment",
+    "mk": "probe only (bc-segment)"
+   }
+  ],
+  "average speed": [
+   {
+    "service": 46363,
+    "getter": 2,
+    "notifier": 32770,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.KombiIF",
+    "field": "statusBordcomputerAverage",
+    "members": "speedAverage1BC1 / speedAverage2BC2",
+    "scaling": "0.1 km/h per bit (alt. 1)",
+    "invalid": "4095, 65535",
+    "tell": "raw / shown: 410 for 41 -> 0.1; 41 -> 1. Cross-check in the log: distance / time vs this (ratio 1..3 fits, near 10 or 0.1 a factor is off)",
+    "mk": "kombi, default 0.1"
+   },
+   {
+    "service": 45134,
+    "getter": 7,
+    "notifier": 32775,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.resetlogic.ResetLogic3",
+    "field": "bcDataAll",
+    "members": "bcData3.speedAverage",
+    "scaling": "0.1 km/h per bit (alt. 1)",
+    "invalid": "65535",
+    "tell": "as above",
+    "mk": "rl3 fallback, default 0.1"
+   },
+   {
+    "service": 45133,
+    "getter": 1,
+    "notifier": 32769,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.resetlogic.ResetLogic2",
+    "field": "bcDataAll",
+    "members": "bcData.speedAverage",
+    "scaling": "as ResetLogic3",
+    "invalid": "65535",
+    "tell": "as above",
+    "mk": "probe only"
+   },
+   {
+    "service": 45128,
+    "getter": 1,
+    "notifier": 32769,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.resetlogic.ResetLogic",
+    "field": "bcDataAll",
+    "members": "bcData.speedAverage",
+    "scaling": "as ResetLogic3",
+    "invalid": "65535",
+    "tell": "as above",
+    "mk": "probe only"
+   },
+   {
+    "service": 46392,
+    "getter": null,
+    "notifier": 32772,
+    "flags": "s",
+    "interface": "de.bmw.infotainment.lsc.LSCDataSink",
+    "field": "dataCombinedInstrumentCluster",
+    "members": "averageSpeed",
+    "scaling": "unknown (the range prediction's speed)",
+    "invalid": "-",
+    "tell": "compare",
+    "mk": "probe only"
+   },
+   {
+    "service": 45115,
+    "getter": 1,
+    "notifier": 32769,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.telematic.journeyhistory.BcPersonal",
+    "field": "driveSegment",
+    "members": "bcBeSpeedAvgDrive / bcBeSpeedAvgMoving",
+    "scaling": "1 km/h (hypothesis)",
+    "invalid": "-",
+    "tell": "compare",
+    "mk": "probe only"
+   }
+  ],
+  "distance": [
+   {
+    "service": 46363,
+    "getter": 5,
+    "notifier": 32773,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.KombiIF",
+    "field": "statusBordcomputerTravelData",
+    "members": "wayPassed",
+    "scaling": "0.1 km per bit (alt. 1 km); UInt16 caps 0.1 km at 6553.5 km",
+    "invalid": "65535",
+    "tell": "raw / shown after >= 1 km: 124 for 12.4 -> 0.1; 12 -> 1",
+    "mk": "kombi, default 0.1"
+   },
+   {
+    "service": 45134,
+    "getter": 7,
+    "notifier": 32775,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.resetlogic.ResetLogic3",
+    "field": "bcDataAll",
+    "members": "bcData3.counterDistance (UInt32)",
+    "scaling": "0.1 km (alt. 1 m, 1 km): the widest type of the three, so metres are possible",
+    "invalid": "0xFFFFFFFF",
+    "tell": "raw / shown: 124 -> 0.1; 12400 -> 0.001 (metres); the log cross-check catches metres read as 0.1 km (ratio ~0.01)",
+    "mk": "rl3 fallback, default 0.1"
+   },
+   {
+    "service": 45115,
+    "getter": 1,
+    "notifier": 32769,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.telematic.journeyhistory.BcPersonal",
+    "field": "driveSegment",
+    "members": "bcBeTripDistanceKm",
+    "scaling": "1 km (its name)",
+    "invalid": "-",
+    "tell": "compare",
+    "mk": "probe only"
+   },
+   {
+    "service": 64282,
+    "getter": 10,
+    "notifier": 32778,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+    "field": "travelledDistance",
+    "members": "rawDistance (Double) + unit enum",
+    "scaling": "only while a route is guided",
+    "invalid": "-",
+    "tell": "not a trip computer",
+    "mk": "not used"
+   }
+  ],
+  "driving time": [
+   {
+    "service": 46363,
+    "getter": 5,
+    "notifier": 32773,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.KombiIF",
+    "field": "statusBordcomputerTravelData",
+    "members": "rideDurationHours (UInt16) + rideDurationMinutes (UInt8)",
+    "scaling": "plain h and min",
+    "invalid": "hours 4095 / 65535, minutes 255",
+    "tell": "shown h:mm equals; minutes above 59 would mean total minutes (the MK build carries them)",
+    "mk": "kombi"
+   },
+   {
+    "service": 45134,
+    "getter": 7,
+    "notifier": 32775,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.resetlogic.ResetLogic3",
+    "field": "bcDataAll",
+    "members": "bcData3.dateTimeTrip {day, hour, minute, second}",
+    "scaling": "plain d h m s",
+    "invalid": "hour / minute 255",
+    "tell": "shown h:mm equals day * 24 + hour : minute",
+    "mk": "rl3 fallback"
+   },
+   {
+    "service": 45115,
+    "getter": 1,
+    "notifier": 32769,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.telematic.journeyhistory.BcPersonal",
+    "field": "driveSegment",
+    "members": "bcBeDurationDrive / bcBeDurationMoving",
+    "scaling": "minutes (hypothesis)",
+    "invalid": "-",
+    "tell": "compare",
+    "mk": "probe only"
+   }
+  ],
+  "departure time": [
+   {
+    "service": 46363,
+    "getter": 6,
+    "notifier": 32774,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.KombiIF",
+    "field": "statusBordcomputerTravelStart",
+    "members": "hourDepartureBC / minuteDepartureBC (+ day, month, year)",
+    "scaling": "plain; local or UTC unknown",
+    "invalid": "255",
+    "tell": "shown \"since\" time equals -> local; off by the zone offset -> UTC (config.trip.departureUtc [\"kombi\"])",
+    "mk": "kombi"
+   },
+   {
+    "service": 45134,
+    "getter": 7,
+    "notifier": 32775,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.resetlogic.ResetLogic3",
+    "field": "bcDataAll",
+    "members": "bcData3.dateTimeReset {hour, minute} while resetOption = STARTOFDRIVING (4)",
+    "scaling": "plain; local or UTC unknown",
+    "invalid": "255",
+    "tell": "as above (config.trip.departureUtc [\"rl3\"]); any other reset option is not the trip's start",
+    "mk": "rl3 fallback"
+   }
+  ],
+  "which counter": [
+   {
+    "service": 46363,
+    "getter": 2,
+    "notifier": 32770,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.KombiIF",
+    "field": "statusBordcomputerAverage",
+    "members": "suffix 1 / 2 (BC1, BC2)",
+    "scaling": "which one is \"since start\"",
+    "invalid": "-",
+    "tell": "the iDrive trip page shows two counters; the one whose average matches speed1/cons1 or speed2/cons2 -> config.trip.factors.bc",
+    "mk": "default bc 1"
+   },
+   {
+    "service": 46363,
+    "getter": 4,
+    "notifier": 32772,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.KombiIF",
+    "field": "statusBordcomputerStatus2",
+    "members": "statusBC2BN2020 (BC2 running / stopped)",
+    "scaling": "enum",
+    "invalid": "SIGNAL_UNGUELTIG 3",
+    "tell": "probe only",
+    "mk": "probe only"
+   }
+  ],
+  "odometer": [
+   {
+    "service": 46363,
+    "getter": 29,
+    "notifier": 32797,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.KombiIF",
+    "field": "statusRangeTankStatus",
+    "members": "mileageKilometre (UInt32)",
+    "scaling": "1 km per bit",
+    "invalid": "0, >= 16777215",
+    "tell": "raw equals the cluster's odometer",
+    "mk": "first carrier, factor 1"
+   },
+   {
+    "service": 4125,
+    "getter": 1,
+    "notifier": 32769,
+    "flags": "rs",
+    "interface": "de.bmw.infrastructure.MileageSupreme",
+    "field": "mileageSupreme",
+    "members": "mileageSupreme (UInt32) + qualifierMileageSupreme",
+    "scaling": "1 km (hypothesis)",
+    "invalid": "qualifier not AVAILABLE / REDUCED",
+    "tell": "as above",
+    "mk": "second carrier"
+   },
+   {
+    "service": 5430,
+    "getter": null,
+    "notifier": 32770,
+    "flags": "s",
+    "interface": "de.bmw.infrastructure.VehicleInformation",
+    "field": "Range",
+    "members": "mileageKilometre (UInt32)",
+    "scaling": "1 km",
+    "invalid": "0, >= 16777215",
+    "tell": "as above",
+    "mk": "third carrier (notifier only)"
+   },
+   {
+    "service": 4138,
+    "getter": 1,
+    "notifier": 32769,
+    "flags": "rs",
+    "interface": "de.bmw.infrastructure.SecureMileage",
+    "field": "mileage",
+    "members": "currentMileage (UInt32)",
+    "scaling": "1 km (hypothesis)",
+    "invalid": "0, >= 16777215",
+    "tell": "as above",
+    "mk": "fourth carrier"
+   },
+   {
+    "service": 30000,
+    "getter": null,
+    "notifier": 32776,
+    "flags": "s",
+    "interface": "de.bmw.chassis.VehicleModel",
+    "field": "MileageVehicle",
+    "members": "mileageVehicle (UInt16, CRC / alive framed)",
+    "scaling": "a raw chassis frame; UInt16 cannot hold a real odometer at 1 km",
+    "invalid": "-",
+    "tell": "-",
+    "mk": "not used"
+   }
+  ],
+  "R1 (trip distance, else range)": [
+   {
+    "service": 46363,
+    "getter": 29,
+    "notifier": 32797,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.KombiIF",
+    "field": "statusRangeTankStatus",
+    "members": "range (UInt16)",
+    "scaling": "km (verified on this car: f30_cluster draws it)",
+    "invalid": "4095",
+    "tell": "-",
+    "mk": "R1 while no distance source delivers"
+   },
+   {
+    "service": 46363,
+    "getter": 48,
+    "notifier": 32804,
+    "flags": "rs",
+    "interface": "de.bmw.infotainment.KombiIF",
+    "field": "statusKombiExternalDisplay",
+    "members": "displayRange (UInt16)",
+    "scaling": "unknown",
+    "invalid": "-",
+    "tell": "probe P5",
+    "mk": "not used"
+   }
+  ]
+ }
+}

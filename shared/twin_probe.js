@@ -161,6 +161,25 @@ const TABLE = [
         ['resetY', ['bcData3', 'dateTimeReset', 'year'], 'n'], ['resetMo', ['bcData3', 'dateTimeReset', 'month'], 'n'],
         ['resetD', ['bcData3', 'dateTimeReset', 'day'], 'n'], ['resetH', ['bcData3', 'dateTimeReset', 'hour'], 'n'],
         ['resetMi', ['bcData3', 'dateTimeReset', 'minute'], 'n']] },
+    // research3/MK: the other trip carriers the catalogue search found (docs/research3/MK-REPORT.md section 2), the wide net
+    // for the case where KombiIF and ResetLogic3 both stay silent on the normal build
+    { p: 'P4', iface: 'de.bmw.infotainment.resetlogic.ResetLogic', field: 'bcDataAll', label: 'bc-all1', cols: [
+        ['option', ['bcData', 'resetOption'], 'e'], ['speedAvg', ['bcData', 'speedAverage'], 'n'], ['consAvg', ['bcData', 'consumptionAverage'], 'n'],
+        ['consNow', ['bcData', 'currentConsumption'], 'n'], ['tripDay', ['bcData', 'dateTimeTrip', 'day'], 'n'], ['tripH', ['bcData', 'dateTimeTrip', 'hour'], 'n'],
+        ['tripM', ['bcData', 'dateTimeTrip', 'minute'], 'n'], ['resetH', ['bcData', 'dateTimeReset', 'hour'], 'n'], ['resetMi', ['bcData', 'dateTimeReset', 'minute'], 'n'],
+        ['speedUnit', ['bcUnits', 'tachoDigital'], 'e'], ['consUnit', ['bcUnits', 'consumption'], 'e']] },
+    { p: 'P4', iface: 'de.bmw.infotainment.resetlogic.ResetLogic', field: 'averageConsumption', label: 'bc-avgcons1', cols: [
+        ['consNowScale', 'consumptionCombustionCurrentScale', 'n'], ['consNowDigit', 'consumptionCombustionCurrentDigit', 'n'], ['unit', 'combustionUnit', 'e']] },
+    { p: 'P4', iface: 'de.bmw.infotainment.resetlogic.ResetLogic2', field: 'bcDataAll', label: 'bc-all2', cols: [
+        ['option', ['bcData', 'resetOption'], 'e'], ['speedAvg', ['bcData', 'speedAverage'], 'n'],
+        ['consAvgScale', ['bcData', 'consumptionCombustionAverageScale'], 'n'], ['consAvgDigit', ['bcData', 'consumptionCombustionAverageDigit'], 'n'],
+        ['tripDay', ['bcData', 'dateTimeTrip', 'day'], 'n'], ['tripH', ['bcData', 'dateTimeTrip', 'hour'], 'n'], ['tripM', ['bcData', 'dateTimeTrip', 'minute'], 'n'],
+        ['resetH', ['bcData', 'dateTimeReset', 'hour'], 'n'], ['resetMi', ['bcData', 'dateTimeReset', 'minute'], 'n'], ['speedUnit', ['bcUnits', 'tachoDigital'], 'e']] },
+    { p: 'P4', iface: 'de.bmw.infotainment.telematic.journeyhistory.BcPersonal', field: 'driveSegment', label: 'bc-segment', cols: [
+        ['segment', 'bcBeSegmentId', 'n'], ['trigger', 'bcBeTriggerReason', 'e'], ['durDrive', 'bcBeDurationDrive', 'n'], ['durMoving', 'bcBeDurationMoving', 'n'],
+        ['distance', 'bcBeTripDistanceKm', 'n'], ['speedDrive', 'bcBeSpeedAvgDrive', 'n'], ['speedMoving', 'bcBeSpeedAvgMoving', 'n'], ['fuel', 'bcBeConsFuelVisible', 'n']] },
+    { p: 'P4', iface: 'de.bmw.infotainment.lsc.LSCDataSink', field: 'dataCombinedInstrumentCluster', label: 'lsc-cluster', cols: [
+        ['speedAvg', 'averageSpeed', 'n'], ['consAvg', 'averageRangeConsumption', 'n'], ['fuel', 'displayActualValueFuelTankFluidLevel', 'n']] },
     // ---- P5: units ----
     { p: 'P5', iface: 'de.bmw.infrastructure.EnvironmentalInformation', field: 'UnitBN2020', label: 'units', cols: [
         ['mileage', 'unitOfMeasurementMileage', 'e']] },

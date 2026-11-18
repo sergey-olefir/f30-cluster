@@ -30,7 +30,9 @@ const pad2 = (n) => (n < 10 ? '0' : '') + n;
 function fresh() {
     return {
         mileage: null, spareRaw: undefined, odoRaw: undefined,
-        avg: null, travel: null, start: null, tripRaw: {},
+        avg: null, travel: null, start: null,
+        rl3: null, odo: {},                          // research3/MK: ResetLogic3's trip, the odometer per source (km or null)
+        seen: {}, t0: 0, timers: [], summaries: 0,   // research3/MK: first arrival per source (ms since wire), the summary
         call: null, nav: null, units: null, mediaLen: null, media: null,
         page: 'clock', pageSince: 0, pageEval: 0, pageNow: 0,
         clock: null,                                 // tests: () => ms
@@ -76,8 +78,8 @@ function chain(hud, extra, iface, field, fn) {
 
 /**
  * The fields only twin_dial reads. Called from _setupVehicleData with `extra` (the engine's table of handlers), only
- * when app.json config.twin exists. Read only; every handler stores numbers, and the first raw value of the odometer
- * and of each trip field is logged once as numbers (probes P3 and P4).
+ * when app.json config.twin exists. Read only; every handler stores numbers. research3/MK: the first arrival of each
+ * trip and odometer source is one log line (raw numbers -> what is shown, UNVERIFIED), the summaries are scheduled here.
  */
 function wire(hud, extra) {
     const td = st(hud);
@@ -87,29 +89,86 @@ function wire(hud, extra) {
         nav: 'de.bmw.infotainment.navigation.navigationstatus.NavigationStatus',
         env: 'de.bmw.infrastructure.EnvironmentalInformation',
     };
+    td.t0 = now(hud);
+    td.handlers = {};
+    const keep = (key) => { const s = SOURCES[key], e = extra[s[0]]; if (e && e[s[1]]) td.handlers[key] = e[s[1]]; };
     // the odometer and the reserve flag ride on the struct the engine reads for the fuel and the range
     chain(hud, extra, KOMBI, 'statusRangeTankStatus', (v) => {
         const m = member(v, 'mileageKilometre');
-        td.mileage = isNum(m) && m >= 0 && m < 16777215 ? m : null;
-        if (m !== td.odoRaw) { td.odoRaw = m; log(hud, 'info', 'odometer raw (P3): ' + (isNum(m) ? m : 'none') + ' -> ' + (td.mileage === null ? 'no value' : td.mileage + ' km (factor 1 km)')); }
+        td.mileage = odoValue(m, odoFactor(hud, 'rangeTank'));
+        heard(hud, 'rangeTank');
+        if (m !== td.odoRaw) {
+            td.odoRaw = m;
+            const first = !td.logged.odoFirst;
+            td.logged.odoFirst = true;
+            log(hud, 'info', 'odometer raw (P3): ' + (isNum(m) ? m : 'none') + ' -> ' + (td.mileage === null ? 'no value' : td.mileage + ' km (factor ' + odoFactor(hud, 'rangeTank') + ' km)')
+                + (first ? ' [rangeTank, first at ' + secs(hud) + ' s' + (odoVerified(hud) ? '' : ', UNVERIFIED: compare with the cluster\'s odometer') + ']' : ''));
+        }
         // the reserve flag itself is read by the engine (package B: _raw('reserve')); only its raw value is logged here
         const s = member(v, 'statusFluidLevelFuelTankSpare');
         if (s !== td.spareRaw) { td.spareRaw = s; log(hud, 'info', 'fuel reserve raw: ' + String(s) + ' -> ' + (s === undefined || s === null ? 'unknown' : enumIs(s, ['AKTIV', 'ACTIVE'], [1]) ? 'reserve' : 'no reserve')); }
+    });
+    keep('rangeTank');
+    // research3/MK: the odometer's other carriers (config.odometer.order), each a fallback behind the range struct
+    odoOrder(hud).forEach((key) => {
+        if (key === 'rangeTank') return;
+        const s = SOURCES[key];
+        chain(hud, extra, s[0], s[1], (v) => {
+            const raw = ODO_MEMBER[key](v);
+            td.odo[key] = raw.ok ? odoValue(raw.km, 1) : null;          // raw; the factor is applied when it is read
+            arrive(hud, key, 'odometer', raw.text, () => (td.odo[key] === null ? 'no value' : td.odo[key] * odoFactor(hud, key) + ' km (factor ' + odoFactor(hud, key) + ' km)'), odoVerified(hud) ? '' : 'compare with the cluster\'s odometer');
+        });
+        keep(key);
     });
     chain(hud, extra, KOMBI, 'statusBordcomputerAverage', (v) => {
         td.avg = {
             speed1: member(v, 'speedAverage1BC1'), cons1: member(v, 'consumptionAverage1BC1'),
             speed2: member(v, 'speedAverage2BC2'), cons2: member(v, 'consumptionAverage2BC2'),
+            speedUnit: member(v, 'statusUnitOfMeasurementSpeedBC'), consUnit: member(v, 'statusUnitOfMeasurementConsumptionBC'),
         };
-        tripLine(hud, 'average', [td.avg.speed1, td.avg.cons1, td.avg.speed2, td.avg.cons2]);
+        const a = td.avg;
+        arrive(hud, 'average', 'trip', 'speed1=' + fN(a.speed1) + ' cons1=' + fN(a.cons1) + ' speed2=' + fN(a.speed2) + ' cons2=' + fN(a.cons2) + ' speedUnit=' + fE(a.speedUnit) + ' consUnit=' + fE(a.consUnit),
+            () => { const k = kombiTrip(td, factors(hud) || DEFAULT_FACTORS); return 'speed ' + fV(k.speed, 1) + ' km/h, cons ' + fV(k.cons, 1) + ' l/100 km (BC' + ((factors(hud) || DEFAULT_FACTORS).bc) + ')'; }, tripNote(hud));
     });
+    keep('average');
     chain(hud, extra, KOMBI, 'statusBordcomputerTravelData', (v) => {
         td.travel = { hours: member(v, 'rideDurationHours'), minutes: member(v, 'rideDurationMinutes'), way: member(v, 'wayPassed') };
-        tripLine(hud, 'travel', [td.travel.hours, td.travel.minutes, td.travel.way]);
+        arrive(hud, 'travel', 'trip', 'hours=' + fN(td.travel.hours) + ' minutes=' + fN(td.travel.minutes) + ' way=' + fN(td.travel.way),
+            () => { const k = kombiTrip(td, factors(hud) || DEFAULT_FACTORS); return 'distance ' + fV(k.way, 1) + ' km, time ' + fT(k.time); }, tripNote(hud));
     });
+    keep('travel');
     chain(hud, extra, KOMBI, 'statusBordcomputerTravelStart', (v) => {
         td.start = { h: member(v, 'hourDepartureBC'), m: member(v, 'minuteDepartureBC') };
-        tripLine(hud, 'departure', [td.start.h, td.start.m]);
+        arrive(hud, 'start', 'trip', 'hour=' + fN(td.start.h) + ' minute=' + fN(td.start.m),
+            () => { const k = kombiTrip(td, factors(hud) || DEFAULT_FACTORS); return 'departure ' + fT(k.from, true); }, 'compare with the car\'s trip page');
+    });
+    keep('start');
+    // research3/MK: the head unit's own trip computer (ResetLogic3), the fallback for every trip value (config.trip.order)
+    if (tripOrder(hud).indexOf('rl3') >= 0) {
+        chain(hud, extra, SOURCES.rl3[0], SOURCES.rl3[1], (v) => {
+            const d = member(v, 'bcData3'), u = member(v, 'bcUnits'), mx = member(v, 'maxValues');
+            const dt = member(d, 'dateTimeTrip'), dr = member(d, 'dateTimeReset');
+            td.rl3 = {
+                option: member(d, 'resetOption'), speed: member(d, 'speedAverage'),
+                consDigit: member(d, 'consumptionCombustionAverageDigit'), consScale: member(d, 'consumptionCombustionAverageScale'),
+                way: member(d, 'counterDistance'), tripDay: member(dt, 'day'), tripH: member(dt, 'hour'), tripM: member(dt, 'minute'),
+                resetH: member(dr, 'hour'), resetM: member(dr, 'minute'),
+            };
+            const r = td.rl3;
+            arrive(hud, 'rl3', 'trip', 'option=' + fE(r.option) + ' speedAvg=' + fN(r.speed) + ' consAvgDigit=' + fN(r.consDigit) + ' consAvgScale=' + fN(r.consScale)
+                + ' consAvgMax=' + fN(member(mx, 'maxValueAverageConsumptionCombustion')) + ' distance=' + fN(r.way) + ' trip=' + fN(r.tripDay) + 'd' + fN(r.tripH) + 'h' + fN(r.tripM) + 'm'
+                + ' reset=' + fN(r.resetH) + ':' + fN(r.resetM) + ' speedUnit=' + fE(member(u, 'tachoDigital')) + ' consUnit=' + fE(member(u, 'averageConsumptionCombustion')),
+                () => { const k = rl3Trip(td, factors(hud) || DEFAULT_FACTORS); return 'speed ' + fV(k.speed, 1) + ' km/h, cons ' + fV(k.cons, 1) + ' l/100 km, distance ' + fV(k.way, 1) + ' km, time ' + fT(k.time) + ', departure ' + fT(k.from, true); }, tripNote(hud));
+        });
+        keep('rl3');
+    }
+    // research3/MK: after summaryMs (2 and 10 minutes) one summary that names every silent source and what the page shows
+    const sm = Array.isArray(tripCfg(hud).summaryMs) ? tripCfg(hud).summaryMs : SUMMARY_MS;
+    td.timers.forEach((t) => clearTimeout(t));
+    td.timers = sm.filter(isNum).map((ms) => {
+        const t = setTimeout(() => { try { summary(hud); } catch (e) { log(hud, 'warn', 'trip summary: ' + (e && e.message || e)); } }, ms);
+        if (t && t.unref) t.unref();
+        return t;
     });
     // the car's own distance unit: logged only, round 2 keeps km (SPEC 12)
     chain(hud, extra, IF.env, 'UnitBN2020', (v) => {
@@ -139,12 +198,135 @@ function wire(hud, extra) {
     });
 }
 
-/** A trip field's first raw numbers, once per change (P4): numbers only. */
-function tripLine(hud, what, nums) {
-    const td = st(hud), key = nums.map((n) => (isNum(n) ? n : 'x')).join(',');
-    if (td.tripRaw[what] === key) return;
-    td.tripRaw[what] = key;
-    log(hud, 'info', 'trip ' + what + ' raw (P4): ' + key);
+/* ------------------------------------- research3/MK: the trip computer's and the odometer's sources -------------------- */
+/*
+ * The owner's decision of 2026-11-18: no dashes by design. The signals ARE the trip computer; a "factor" is only the unit
+ * of the raw integer, which the catalogue does not state. So the most likely factors are ON by default (DEFAULT_FACTORS,
+ * overridable key by key in config.trip.factors; `false` switches the page back to dashes), each value is marked
+ * UNVERIFIED once in the log (first arrival) until config.trip.verified / config.odometer.verified is set, and every
+ * source's first arrival is one log line (raw numbers -> what the page shows). After summaryMs (2 and 10 minutes) one
+ * summary names every SILENT source and asks the silent ones' getters once (read only), so the shipped build itself
+ * tells "the car does not send it" (silent, getter error / no answer) from "the unit is wrong" (arrives, wrong number).
+ * A value comes from the first source in config.trip.order (KombiIF, then ResetLogic3) that has a valid one; a dash is
+ * left only for a value no source delivers (silent) or whose every source carries its invalid marker.
+ */
+const RL3 = 'de.bmw.infotainment.resetlogic.ResetLogic3';
+/** key -> [interface, field, has a getter ("r")]. */
+const SOURCES = {
+    rangeTank: [KOMBI, 'statusRangeTankStatus', true],
+    supreme: ['de.bmw.infrastructure.MileageSupreme', 'mileageSupreme', true],
+    range: ['de.bmw.infrastructure.VehicleInformation', 'Range', false],          // notifier only ("s"): no getter to ask
+    secure: ['de.bmw.infrastructure.SecureMileage', 'mileage', true],
+    average: [KOMBI, 'statusBordcomputerAverage', true],
+    travel: [KOMBI, 'statusBordcomputerTravelData', true],
+    start: [KOMBI, 'statusBordcomputerTravelStart', true],
+    rl3: [RL3, 'bcDataAll', true],
+};
+const TRIP_KEYS = ['average', 'travel', 'start', 'rl3'];
+const DEFAULT_FACTORS = { bc: 1, speed: 0.1, cons: 0.1, way: 0.1, rl3: { speed: 0.1, cons: 0.1, way: 0.1 } };
+const TRIP_ORDER = ['kombi', 'rl3'];
+const ODO_ORDER = ['rangeTank', 'supreme', 'range', 'secure'];
+const SUMMARY_MS = [120000, 600000];
+const LOG_GAP_MS = 60000;            // a source's raw value is logged again at most this often (and only when it changed)
+const LOG_MAX = 30;                  // ... and at most this many times per source
+const ODO_BAD = 16777215;            // 0xFFFFFF and above: the unfilled odometer; 0: not initialised
+const AVG_BAD = [4095, 65535];       // KombiIF averages: 12-bit and 16-bit "unfilled"
+// the plausible range of each shown value: outside it the value is still shown, and the log says the factor is suspect
+const PLAUSIBLE = { speed: [0, 250], cons: [0, 99.9], way: [0, 99999], odo: [1, 2000000] };
+
+const fN = (x) => (isNum(x) ? String(x) : x === undefined || x === null ? '-' : '?');
+const fE = (x) => (isNum(x) ? String(x) : typeof x === 'string' && /^[A-Z][A-Z0-9_]{0,63}$/.test(x) ? x : x === undefined || x === null ? '-' : '?');
+const fV = (x, dec) => (isNum(x) ? x.toFixed(dec) : DASH);
+const fT = (t, clock) => (t ? (clock ? pad2(t.h) : String(t.h)) + ':' + pad2(t.m) : DASH);
+const secs = (hud) => { const td = st(hud); return ((now(hud) - td.t0) / 1000).toFixed(1); };
+
+const odoCfg = (hud) => (hud && hud.config && hud.config.odometer) || {};
+const odoVerified = (hud) => odoCfg(hud).verified === true;
+function odoFactor(hud, key) {
+    const f = odoCfg(hud).factors;
+    return f && isNum(f[key]) ? f[key] : 1;
+}
+const odoValue = (m, factor) => (isNum(m) && m > 0 && m < ODO_BAD ? m * factor : null);
+function odoOrder(hud) {
+    const o = odoCfg(hud).order;
+    return Array.isArray(o) ? o.filter((k) => ODO_ORDER.indexOf(k) >= 0) : ODO_ORDER;
+}
+function tripOrder(hud) {
+    const o = tripCfg(hud).order;
+    return Array.isArray(o) ? o.filter((k) => TRIP_ORDER.indexOf(k) >= 0) : TRIP_ORDER;
+}
+const tripNote = (hud) => (tripCfg(hud).verified === true ? '' : 'compare with the car\'s trip page');
+/** The odometer's other carriers: their raw number and whether its qualifier (if any) says it is valid. */
+const ODO_MEMBER = {
+    supreme: (v) => {
+        const m = member(v, 'mileageSupreme'), q = member(v, 'qualifierMileageSupreme');
+        const ok = q === undefined || enumIs(q, ['EVENT_DATA_AVAILABLE', 'EVENT_DATA_AVAILABLE_REDUCED'], [0, 1]);
+        return { km: m, ok, text: 'mileage=' + fN(m) + ' qualifier=' + fE(q) };
+    },
+    range: (v) => { const m = member(v, 'mileageKilometre'); return { km: m, ok: true, text: 'mileage=' + fN(m) }; },
+    secure: (v) => { const m = member(v, 'currentMileage'); return { km: m, ok: true, text: 'mileage=' + fN(m) + ' manipulation=' + fN(member(v, 'manipulationState')) }; },
+};
+
+/** A source has spoken: count it, remember when it first did. */
+function heard(hud, key) {
+    const td = st(hud), s = td.seen[key];
+    if (s) { s.n++; return s; }
+    return (td.seen[key] = { at: now(hud) - td.t0, n: 1, logAt: -Infinity, logs: 0, raw: null });
+}
+/**
+ * A source's value arrived: the first time one line "<what> <key> (<field>) first at T s: raw ... -> shown ... [UNVERIFIED:
+ * note]"; later, a changed raw value at most every LOG_GAP_MS and LOG_MAX times. Numbers and enum names only.
+ */
+function arrive(hud, key, what, raw, shown, note) {
+    const s = heard(hud, key), t = now(hud);
+    if (s.raw === raw) return;
+    const first = s.logs === 0;
+    if (!first && (t - s.logAt < LOG_GAP_MS || s.logs >= LOG_MAX)) return;
+    s.raw = raw; s.logAt = t; s.logs++;
+    let out = '';
+    try { out = shown(); } catch (e) { out = '?'; }
+    log(hud, 'info', what + ' ' + key + ' (' + SOURCES[key][1] + ') ' + (first ? 'first' : '#' + s.n) + ' at ' + secs(hud) + ' s: raw ' + raw + ' -> ' + out
+        + (first && note ? ' [UNVERIFIED: ' + note + ']' : '') + (s.logs === LOG_MAX ? ' (last raw line for this source)' : ''));
+}
+
+/** One trip value: raw x factor, or null for no number / an invalid marker. */
+const scaled = (raw, factor, invalid) => (isNum(raw) && isNum(factor) && invalid.indexOf(raw) < 0 ? raw * factor : null);
+/** A duration from whole hours and minutes (minutes above 59 carry), or null. */
+function duration(h, m, hBad, mBad) {
+    if (!isNum(h) || !isNum(m) || h < 0 || m < 0 || h >= hBad || m >= mBad) return null;
+    const total = h * 60 + m;
+    return { h: Math.floor(total / 60), m: total % 60 };
+}
+const clockOf = (h, m) => (isNum(h) && isNum(m) && h >= 0 && h < 24 && m >= 0 && m < 60 ? { h, m } : null);
+/** KombiIF's trip values: { speed, cons, way, time: {h, m}, from: {h, m} }, each null when silent or invalid. */
+function kombiTrip(td, f) {
+    const out = { speed: null, cons: null, way: null, time: null, from: null };
+    if (td.avg) {
+        out.speed = scaled(td.avg['speed' + f.bc], f.speed, AVG_BAD);
+        out.cons = scaled(td.avg['cons' + f.bc], f.cons, AVG_BAD);
+    }
+    if (td.travel) {
+        out.way = scaled(td.travel.way, f.way, [65535]);
+        out.time = duration(td.travel.hours, td.travel.minutes, 4095, 255);
+    }
+    if (td.start) out.from = clockOf(td.start.h, td.start.m);
+    return out;
+}
+/**
+ * ResetLogic3's trip values (the head unit's own board computer). speedAverage and the consumption's "Digit" are taken
+ * as the shown number in units of the factor (the "Scale" member is read as the bar position against maxValues, so it
+ * is logged, not shown); counterDistance x factor; the duration is days, hours, minutes; the departure is the reset time
+ * only while the reset option is "start of driving" (4): any other option's reset time is not this trip's start.
+ */
+function rl3Trip(td, f) {
+    const out = { speed: null, cons: null, way: null, time: null, from: null }, r = td.rl3;
+    if (!r) return out;
+    out.speed = scaled(r.speed, f.rl3.speed, [65535]);
+    out.cons = scaled(r.consDigit, f.rl3.cons, [65535]);
+    out.way = scaled(r.way, f.rl3.way, [4294967295]);
+    if (isNum(r.tripDay) && r.tripDay >= 0 && r.tripDay < 65535 && isNum(r.tripH) && r.tripH >= 0 && r.tripH < 24) out.time = duration(r.tripDay * 24 + r.tripH, r.tripM, Infinity, 255);
+    if (enumIs(r.option, ['STARTOFDRIVING'], [4])) out.from = clockOf(r.resetH, r.resetM);
+    return out;
 }
 
 /* ------------------------------------------------------------------ pages --------------------------------------- */
@@ -182,27 +364,125 @@ function grouped(n) {
     for (let i = 0; i < s.length; i++) { if (i && (s.length - i) % 3 === 0) out += THIN; out += s[i]; }
     return out;
 }
-/** The trip factors config.trip.factors, or null (P4 not done): { bc: 1|2, speed, cons, way, wayDecimals }. */
+/**
+ * The trip factors (research3/MK: on by default): config.trip.factors overrides DEFAULT_FACTORS key by key
+ * ({ bc: 1|2, speed, cons, way, rl3: { speed, cons, way } }); `false` switches them off (the page shows dashes).
+ */
 function factors(hud) {
     const f = tripCfg(hud).factors;
-    return f && typeof f === 'object' ? f : null;
+    if (f === false) return null;
+    const o = f && typeof f === 'object' ? f : {}, r = o.rl3 && typeof o.rl3 === 'object' ? o.rl3 : {}, D = DEFAULT_FACTORS;
+    const pick = (x, d) => (isNum(x) ? x : d);
+    return { bc: o.bc === 2 ? 2 : 1, speed: pick(o.speed, D.speed), cons: pick(o.cons, D.cons), way: pick(o.way, D.way),
+        rl3: { speed: pick(r.speed, D.rl3.speed), cons: pick(r.cons, D.rl3.cons), way: pick(r.way, D.rl3.way) } };
 }
-/** The three trip values the page shows, each a number or null: { cons, speed, way, hours, minutes, from: {h, m} | null }. */
+/**
+ * The trip values the page shows, each a number or null: { cons, speed, way, hours, minutes, from: {h, m} | null,
+ * src: { cons, speed, way, time, from } (the source each came from: 'kombi' | 'rl3' | null) }. Per value, the first
+ * source of config.trip.order with a valid value wins.
+ */
 function tripValues(hud) {
-    const td = st(hud), f = factors(hud), out = { cons: null, speed: null, way: null, hours: null, minutes: null, from: null };
+    const td = st(hud), f = factors(hud);
+    const out = { cons: null, speed: null, way: null, hours: null, minutes: null, from: null, src: { cons: null, speed: null, way: null, time: null, from: null } };
     if (!f) return out;
-    const bc = f.bc === 2 ? 2 : 1;
-    const num = (raw, factor, invalid) => (isNum(raw) && isNum(factor) && invalid.indexOf(raw) < 0 ? raw * factor : null);
-    if (td.avg) {
-        out.speed = num(td.avg['speed' + bc], f.speed, [4095, 65535]);
-        out.cons = num(td.avg['cons' + bc], f.cons, [4095, 65535]);
-    }
-    if (td.travel) {
-        out.way = num(td.travel.way, f.way, [65535]);
-        if (isNum(td.travel.hours) && td.travel.hours < 4095 && isNum(td.travel.minutes) && td.travel.minutes < 255) { out.hours = td.travel.hours; out.minutes = td.travel.minutes; }
-    }
-    if (td.start && isNum(td.start.h) && td.start.h < 24 && isNum(td.start.m) && td.start.m < 60) out.from = { h: td.start.h, m: td.start.m };
+    const got = bySource(hud, td, f);
+    ['cons', 'speed', 'way', 'time', 'from'].forEach((v) => {
+        const hit = got.find((g) => g[1][v] !== null && g[1][v] !== undefined);
+        if (!hit) return;
+        out.src[v] = hit[0];
+        if (v === 'time') { out.hours = hit[1].time.h; out.minutes = hit[1].time.m; } else out[v] = hit[1][v];
+    });
     return out;
+}
+/**
+ * Each source's values in config.trip.order: [[key, values]]. A source named in config.trip.departureUtc (e.g. ["rl3"])
+ * sends its departure in UTC: it is moved into the car's zone (hud._tzMinutes) or left out while no zone is known.
+ */
+function bySource(hud, td, f) {
+    const by = { kombi: () => kombiTrip(td, f), rl3: () => rl3Trip(td, f) };
+    const utc = Array.isArray(tripCfg(hud).departureUtc) ? tripCfg(hud).departureUtc : [];
+    return tripOrder(hud).map((k) => {
+        const v = by[k]();
+        if (v.from && utc.indexOf(k) >= 0) {
+            const off = hud._tzMinutes ? hud._tzMinutes() : null;
+            if (!isNum(off)) v.from = null;
+            else { const m = ((v.from.h * 60 + v.from.m + off) % 1440 + 1440) % 1440; v.from = { h: Math.floor(m / 60), m: m % 60 }; }
+        }
+        return [k, v];
+    });
+}
+/** The odometer in km: the first source of config.odometer.order with a valid value, or null. { km, src }. */
+function odometer(hud) {
+    const td = st(hud);
+    const order = odoOrder(hud);
+    for (let i = 0; i < order.length; i++) {
+        const v = order[i] === 'rangeTank' ? td.mileage : isNum(td.odo[order[i]]) ? td.odo[order[i]] * odoFactor(hud, order[i]) : null;
+        if (isNum(v)) return { km: v, src: order[i] };
+    }
+    return { km: null, src: null };
+}
+
+/**
+ * The summary (at summaryMs after wire, default 2 and 10 minutes): which source spoke (how often, first when) and which
+ * stayed SILENT; what each value on the page shows and from where (or why a dash: silent / invalid); a plausibility
+ * check (distance / time against the average speed); and, for each silent source with a getter, one read-only getter
+ * call whose outcome is logged (answered / error / no provider), so the log tells "not sent" from "wrong unit".
+ * Numbers, source keys and field names only. Returns the lines (tests) and a promise of the getter lines.
+ */
+function summary(hud) {
+    const td = st(hud), f = factors(hud), lines = [];
+    td.summaries++;
+    const at = secs(hud);
+    const watched = Object.keys(td.handlers || {});
+    const keys = Object.keys(SOURCES).filter((k) => watched.indexOf(k) >= 0 || td.seen[k]);
+    const spoke = keys.filter((k) => td.seen[k]), silent = keys.filter((k) => !td.seen[k]);
+    lines.push('trip summary #' + td.summaries + ' at ' + at + ' s: heard ' + (spoke.length ? spoke.map((k) => k + ' (#' + td.seen[k].n + ', first ' + (td.seen[k].at / 1000).toFixed(1) + ' s)').join(', ') : 'nothing')
+        + '; SILENT ' + (silent.length ? silent.join(', ') : 'none'));
+    const t = tripValues(hud), o = odometer(hud);
+    const why = (v, keysOf) => (t.src[v] ? t.src[v] : !f ? 'factors off' : keysOf.some((k) => td.seen[k]) ? 'invalid' : 'silent');
+    const kOf = { cons: ['average', 'rl3'], speed: ['average', 'rl3'], way: ['travel', 'rl3'], time: ['travel', 'rl3'], from: ['start', 'rl3'] };
+    const fl = f ? 'bc ' + f.bc + ' speed ' + f.speed + ' cons ' + f.cons + ' way ' + f.way + '; rl3 speed ' + f.rl3.speed + ' cons ' + f.rl3.cons + ' way ' + f.rl3.way : 'off';
+    lines.push('trip shows: cons ' + fV(t.cons, 1) + ' l/100 km [' + why('cons', kOf.cons) + '], speed ' + (isNum(t.speed) ? String(Math.round(t.speed)) : DASH) + ' km/h [' + why('speed', kOf.speed)
+        + '], distance ' + fV(t.way, 1) + ' km [' + why('way', kOf.way) + '], time ' + (isNum(t.hours) ? fT({ h: t.hours, m: t.minutes }) : DASH) + ' [' + why('time', kOf.time)
+        + '], departure ' + fT(t.from, true) + ' [' + why('from', kOf.from) + ']; odometer ' + (isNum(o.km) ? String(Math.round(o.km)) : DASH) + ' km ['
+        + (o.src || (odoOrder(hud).some((k) => td.seen[k]) ? 'invalid' : 'silent')) + ']; factors ' + fl + (tripCfg(hud).verified === true ? ' (verified)' : ' (UNVERIFIED)')
+        + ', odometer factor ' + odoFactor(hud, o.src || 'rangeTank') + (odoVerified(hud) ? ' (verified)' : ' (UNVERIFIED)'));
+    // plausibility: each shown value inside its range, and distance / time against the average speed
+    const odd = [];
+    [['speed', t.speed], ['cons', t.cons], ['way', t.way], ['odo', o.km]].forEach((p) => { if (isNum(p[1]) && (p[1] < PLAUSIBLE[p[0]][0] || p[1] > PLAUSIBLE[p[0]][1])) odd.push(p[0] + ' ' + p[1]); });
+    if (odd.length) lines.push('trip check: OUT OF RANGE ' + odd.join(', ') + ' (a factor 10x too big or the wrong member)');
+    // per source (a source's own distance, time and average speed belong together): distance / time against the average
+    if (f) bySource(hud, td, f).forEach((g) => {
+        const x = g[1], hrs = x.time ? x.time.h + x.time.m / 60 : null;
+        if (!isNum(x.way) || !isNum(x.speed) || !hrs || hrs < 0.05 || x.speed <= 0) return;
+        const v = x.way / hrs, ratio = x.speed / v;
+        lines.push('trip check [' + g[0] + ']: distance / time = ' + v.toFixed(1) + ' km/h, average speed ' + x.speed.toFixed(1) + ' km/h, ratio ' + ratio.toFixed(2)
+            + (ratio > 5 || ratio < 0.2 ? ' -> a factor is about 10x off' : ' -> consistent (above 1: standing time not counted)'));
+    });
+    lines.forEach((l) => log(hud, 'info', l));
+    return { lines, getters: askSilent(hud, silent) };
+}
+
+/** One read-only getter call per silent source that has a getter; each outcome one log line. Never rejects. */
+function askSilent(hud, silent) {
+    const td = st(hud), S = hud && hud.ctx && hud.ctx.signals;
+    const subs = (hud && hud.car && hud.car.subs) || [];
+    const jobs = silent.filter((k) => SOURCES[k][2]).map((k) => {
+        const iface = SOURCES[k][0], field = SOURCES[k][1], name = iface.split('.').pop() + '.' + field;
+        const sub = subs.find((s) => s && s.iface === iface);
+        const say = (what) => { log(hud, 'info', 'trip getter ' + k + ' (' + name + ', silent): ' + what); return what; };
+        if (!S || typeof S.get !== 'function') return Promise.resolve(say('no signals.get'));
+        if (!sub) return Promise.resolve(say('not subscribed'));
+        if (sub.error) return Promise.resolve(say('watch error: ' + String(sub.error).slice(0, 120)));
+        if (!sub.available) return Promise.resolve(say('provider not available (the interface itself never came up)'));
+        if (!sub.proxy) return Promise.resolve(say('no proxy'));
+        return Promise.resolve().then(() => S.get(sub.proxy, field, 3000)).then((v) => {
+            const h = td.handlers && td.handlers[k];
+            if (h) { try { h(v); } catch (e) { /* the engine's handler: logged by chain() for ours */ } }     // as a notification would
+            return say('answered (' + (v === null ? 'null' : typeof v) + '): the notifier is silent, the getter is not');
+        }, (e) => say('error or no answer: ' + String(e && e.message || e).slice(0, 120) + ' (the car does not send it)'));
+    });
+    return Promise.all(jobs).catch(() => []);
 }
 const fixed1 = (n) => (isNum(n) ? n.toFixed(1) : DASH);
 
@@ -265,9 +545,9 @@ function resolve(hud, name) {
         case 'tDistU': return onPage('trip', 'км');
         case 'tTimeU': return onPage('trip', 'год');
         // ---- bottom row
-        case 'odo': return isNum(td.mileage) ? grouped(td.mileage) : DASH;
+        case 'odo': { const o = odometer(hud); return isNum(o.km) ? grouped(o.km) : DASH; }     // research3/MK: the first valid carrier
         case 'clock': return clockText(local(hud));
-        case 'r1': {         // trip distance once P4 has proven the field, until then the range (SPEC 6.3)
+        case 'r1': {         // the trip distance whenever a source delivers one (research3/MK: factors on by default), else the range (SPEC 6.3)
             const t = tripValues(hud);
             if (isNum(t.way)) return fixed1(t.way);
             const v = hud._raw('range');
@@ -318,4 +598,5 @@ function updateIcon(hud, x, nowMs, force) {
     hud._blitDiff(x, paint(s.icon, x.w.w, x.w.h, col));
 }
 
-module.exports = { token, wire, page, updateIcon, iconState, program, ready, local, tripValues, grouped, DASH, THIN, WEEKDAYS, TITLES, fresh };
+module.exports = { token, wire, page, updateIcon, iconState, program, ready, local, tripValues, odometer, factors, summary, grouped, DASH, THIN, WEEKDAYS, TITLES, fresh,
+    SOURCES, DEFAULT_FACTORS };

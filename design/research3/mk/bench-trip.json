@@ -1,0 +1,46 @@
+{
+ "port": 8305,
+ "summaryMs": [
+  25000,
+  45000,
+  65000
+ ],
+ "phases": {
+  "A": [
+   "signal VehicleInformation subscribed",
+   "signal KombiIF subscribed",
+   "signal MileageSupreme subscribed",
+   "signal SecureMileage subscribed",
+   "signal ResetLogic3 subscribed",
+   "odometer raw (P3): 48215 -> 48215 km (factor 1 km) [rangeTank, first at 0.3 s, UNVERIFIED: compare with the cluster's odometer]",
+   "trip summary #1 at 25.0 s: heard rangeTank (#485, first 0.3 s); SILENT supreme, range, secure, average, travel, start, rl3",
+   "trip shows: cons – l/100 km [silent], speed – km/h [silent], distance – km [silent], time – [silent], departure – [silent]; odometer 48215 km [rangeTank]; factors bc 1 speed 0.1 cons 0.1 way 0.1; rl3 speed 0.1 cons 0.1 way 0.1 (UNVERIFIED), odometer factor 1 (UNVERIFIED)",
+   "trip getter supreme (MileageSupreme.mileageSupreme, silent): provider not available (the interface itself never came up)",
+   "trip getter secure (SecureMileage.mileage, silent): provider not available (the interface itself never came up)",
+   "trip getter average (KombiIF.statusBordcomputerAverage, silent): no proxy",
+   "trip getter travel (KombiIF.statusBordcomputerTravelData, silent): no proxy",
+   "trip getter start (KombiIF.statusBordcomputerTravelStart, silent): no proxy",
+   "trip getter rl3 (ResetLogic3.bcDataAll, silent): provider not available (the interface itself never came up)"
+  ],
+  "B": [
+   "trip average (statusBordcomputerAverage) first at 26.7 s: raw speed1=410 cons1=68 speed2=520 cons2=55 speedUnit=0 consUnit=0 -> speed 41.0 km/h, cons 6.8 l/100 km (BC1) [UNVERIFIED: compare with the car's trip page]",
+   "trip travel (statusBordcomputerTravelData) first at 26.7 s: raw hours=0 minutes=43 way=124 -> distance 12.4 km, time 0:43 [UNVERIFIED: compare with the car's trip page]",
+   "trip start (statusBordcomputerTravelStart) first at 26.7 s: raw hour=14 minute=0 -> departure 14:00 [UNVERIFIED: compare with the car's trip page]",
+   "trip summary #2 at 45.0 s: heard rangeTank (#879, first 0.3 s), average (#1, first 26.7 s), travel (#1, first 26.7 s), start (#1, first 26.7 s); SILENT supreme, range, secure, rl3",
+   "trip shows: cons 6.8 l/100 km [kombi], speed 41 km/h [kombi], distance 12.4 km [kombi], time 0:43 [kombi], departure 14:00 [kombi]; odometer 48215 km [rangeTank]; factors bc 1 speed 0.1 cons 0.1 way 0.1; rl3 speed 0.1 cons 0.1 way 0.1 (UNVERIFIED), odometer factor 1 (UNVERIFIED)",
+   "trip check [kombi]: distance / time = 17.3 km/h, average speed 41.0 km/h, ratio 2.37 -> consistent (above 1: standing time not counted)",
+   "trip getter supreme (MileageSupreme.mileageSupreme, silent): provider not available (the interface itself never came up)",
+   "trip getter secure (SecureMileage.mileage, silent): provider not available (the interface itself never came up)",
+   "trip getter rl3 (ResetLogic3.bcDataAll, silent): provider not available (the interface itself never came up)"
+  ],
+  "C": [
+   "trip summary #3 at 65.0 s: heard rangeTank (#1273, first 0.3 s), average (#2, first 26.7 s), travel (#2, first 26.7 s), start (#2, first 26.7 s); SILENT supreme, range, secure, rl3",
+   "trip shows: cons – l/100 km [invalid], speed – km/h [invalid], distance – km [invalid], time – [invalid], departure – [invalid]; odometer 48215 km [rangeTank]; factors bc 1 speed 0.1 cons 0.1 way 0.1; rl3 speed 0.1 cons 0.1 way 0.1 (UNVERIFIED), odometer factor 1 (UNVERIFIED)",
+   "trip getter supreme (MileageSupreme.mileageSupreme, silent): provider not available (the interface itself never came up)",
+   "trip getter secure (SecureMileage.mileage, silent): provider not available (the interface itself never came up)",
+   "trip getter rl3 (ResetLogic3.bcDataAll, silent): provider not available (the interface itself never came up)"
+  ]
+ },
+ "upAfterMs": 2114,
+ "uncaught": false
+}
