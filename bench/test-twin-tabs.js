@@ -519,7 +519,8 @@ console.log('6. in place');
 {
     const src = fs.readFileSync(path.join(H.ROOT, 'shared', 'hud.js'), 'utf8');
     ok(/const TW_TAB_KEYS = \['tab', 'tabLock', 'centre'\]/.test(src), 'the in-place keys: tab, tabLock, centre');
-    const i = src.indexOf("TW_TAB_KEYS.indexOf(key) >= 0 && this._twinTabsOn()) this._guard('twin tabs', () => this._twinTabsChanged())");
+    // integration (B7): B2's and B4's in-place hooks are ONE handler (the tab keys call _twinTabsChanged, the page keys twinPages.changed)
+    const i = src.indexOf("if (TW_TAB_KEYS.indexOf(key) >= 0 && this._twinTabsOn()) this._twinTabsChanged();");
     const j = src.indexOf("else if (key !== 'demo') this._rebuild();");
     ok(i > 0 && j > i, 'the settings handler routes them to _twinTabsChanged before its rebuild fallback');
     const h = mk();

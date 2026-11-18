@@ -301,23 +301,6 @@
       "_about": "SPEC-R3 4.1 / 10: tab 1's page: one page or in turn (cycle: 10 s a page while the car stands, held above 5 km/h). Technical data out of the choice and the cycle when \"techData\" is hide. Applied in place (shared/twin_pages.js)."
     },
     {
-      "key": "techData",
-      "label": "Технічні дані",
-      "type": "choice",
-      "default": "show",
-      "options": [
-        [
-          "show",
-          "Показувати"
-        ],
-        [
-          "hide",
-          "Сховати"
-        ]
-      ],
-      "_about": "SPEC-R3 4.1: hide = the technical page is out of tab 1's choice and the cycle (R4). Applied in place."
-    },
-    {
       "key": "tab",
       "label": "Таба",
       "type": "choice",
@@ -382,6 +365,23 @@
         ]
       ],
       "_about": "SPEC-R3 3.4: an automatic tab change (a call, guidance, the return to the driver's choice) waits until the car is at or below this speed; a message never waits, and the driver's own key is never locked"
+    },
+    {
+      "key": "techData",
+      "label": "Технічні дані",
+      "type": "choice",
+      "default": "show",
+      "options": [
+        [
+          "show",
+          "Показувати"
+        ],
+        [
+          "hide",
+          "Сховати"
+        ]
+      ],
+      "_about": "SPEC-R3 4.1: hide = the technical page is out of tab 1's choice and the cycle (R4). Applied in place."
     },
     {
       "key": "redline",
