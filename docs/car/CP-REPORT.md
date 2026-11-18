@@ -419,3 +419,20 @@ Other suites run unchanged on this branch: `test-twin-probe.js`, `test-twin-trip
 5. **One app or three** (section 7): one recommended; the split is mechanical.
 6. **`MediaPlayer` / `VoiceCall` extra instances** (section 6) if the title or a waiting call is wanted.
 7. **S12** (events): nothing declared until a named event is approved.
+
+## 12. v0.1.1: S13 "Знаки" (the lead, 2026-11-18, the owner at the car with a 30 on the cluster)
+
+Why: today's log showed `TrafficSignDisplayControl[1]` down, the FASuS sign getters timing out, the HUD feed empty and guidance from CarPlay, so the cluster's 30 comes from elsewhere.
+S13 (key `set13`, item P22, 10 entries on 5 interfaces) reads, read only:
+
+| Tag | Source | Kind | What is logged |
+|---|---|---|---|
+| `tsr` | `de.bmw.dass.TrafficSignRecognition[1]` event `TrafficSignRecognition` (event id 32769) | event | all 16 UInt8 outputs (present / next class and withdrawal, no-passing, country coding, text message, unit, street type, supplemental, trigger, NPI distance, SLI warning) |
+| `cam-signs` | `de.bmw.environmentalmodel.SignRecognitionFrontCamera[1]` event `TrafficSignRecognitionFrontCamera` | event | qualifiers, version, visibility, number of signs, unit, quality count; per sign: value, type, form, both supplementals, additional info, variable |
+| `cam-legacy`, `cam-legacy2` | `...SignRecognitionFrontCameraLegacy[1]` events `RecognitionTrafficSignCamera`, `recognitionTrafficSignCamera2` | event | id, type, add-ons, quality, value, unit, status / the same as `cam-signs` plus relevance |
+| `ccp-limit`, `ccp-unit`, `ccp-variable`, `ccp-builtup` | `...navigation.externalize.adasng.CCP[1]` events `effectiveSpeedLimit`, `speedLimitUnit`, `variableSpeedLimitSign`, `builtupAreaFlag` | event | the one output (bare or wrapped, the same line) |
+| `sli-text`, `sign-config` | `FASuS.statusSLITextMessage` (getter 8, notifier 32776), `FASuS.statusRoadSignConfigStatus` | field `rs` | text-message enum; country coding and unit |
+
+Never read: a sign's position (left / right / overhead), its location (x, y, z), the legacy camera's position X / Y / Z, any time stamp.
+Events are declared as `_broadcasts` (flags `b` in `fields.js`) on these four interfaces only; the test enforces it. They are subscribed through the same `watch` (the binding's `subscribe` takes an event name as it does a field's); an event has no getter, so the +120 s ask says `an event (no getter)`.
+`check_signals.py` passes (the eight events with their ids), and the firmware's generator accepts the manifest (88 configs). `bench/test-signal-probe.js`: 143 passed, 0 failed, with an injected value and its exact line for each S13 entry. Version 0.1.1.

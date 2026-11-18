@@ -60,12 +60,14 @@ function exportTable() {
         fieldsActive: FIELDS.TABLE.filter((f) => f.set === s.id || (f.also || []).indexOf(s.id) >= 0).length }));
     const fields = FIELDS.TABLE.map((f) => {
         const d = FIELDS.SET_DEFAULTS[f.set];
-        const c = cat && cat.interfaces[f.iface] && cat.interfaces[f.iface].fields[f.field];
-        const how = f.bits ? 'bits' : f.cols ? 'cols' : f.list ? 'list' : f.union ? 'union' : f.fmt;
+        const c = f.flags !== 'b' && cat && cat.interfaces[f.iface] && cat.interfaces[f.iface].fields[f.field];
+        const ev = f.flags === 'b' && cat && cat.interfaces[f.iface] && (cat.interfaces[f.iface].events || {})[f.field];
+        const how = f.bits ? 'bits' : f.cols ? 'cols' : f.list ? 'list' : f.union ? 'union' : f.one ? 'one' : f.fmt;
         const o = {
             set: f.set, item: f.p, tag: f.tag, interface: f.iface, field: f.field, instance: FIELDS.instOf(f), flags: f.flags,
             getterId: c && c.getter ? c.getter.id : null, notifierId: c && c.notifier ? c.notifier.id : null,
-            rootType: c ? kindOf(cat.datatypes, c.dataRef) : null,
+            eventId: ev ? ev.eventId : null,
+            rootType: c ? kindOf(cat.datatypes, c.dataRef) : ev ? 'event' : null,
             formatter: how, gapMs: f.gapMs !== undefined ? f.gapMs : d.gapMs, cap: f.cap || d.cap,
         };
         if (f.pollMs) o.pollMs = f.pollMs;
@@ -78,7 +80,7 @@ function exportTable() {
     });
     const ifaces = FIELDS.interfaces().map((e) => ({
         interface: e.iface, instancesRead: e.instances, manifestInstances: e.instances.length > 1 ? '*' : e.instances[0],
-        instancesInCatalogue: insts(e.iface), fields: Object.keys(e.fields).length,
+        instancesInCatalogue: insts(e.iface), fields: Object.keys(e.fields).length, events: e.events,
         sets: FIELDS.TABLE.filter((f) => f.iface === e.iface).map((f) => f.set).filter((x, i, a) => a.indexOf(x) === i),
     }));
     const out = {

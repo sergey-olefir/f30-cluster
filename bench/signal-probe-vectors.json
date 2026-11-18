@@ -2841,5 +2841,232 @@
    "drivingBehaviourECOCategorie3Status": "KEINE_AENDERUNG"
   },
   "body": "c1=3 c2=2 c3=1 c1s=BLINKEND c2s=NICHT_BLINKEND c3s=KEINE_AENDERUNG"
+ },
+ {
+  "set": "S13",
+  "p": "P22",
+  "tag": "tsr",
+  "iface": "de.bmw.dass.TrafficSignRecognition",
+  "field": "TrafficSignRecognition",
+  "instance": "1",
+  "value": {
+   "presentWithdrawalLimitSpeed": 0,
+   "recognitionNoPassing": 1,
+   "nextWithdrawalLimitSpeed": 2,
+   "presentClassLimitSpeed": 6,
+   "nextClassLimitSpeed": 4,
+   "countryCodingTrafficSign": 5,
+   "displayTextMessage": 6,
+   "unitOfMeasurementSpeedLimit": 7,
+   "displayTextMessageNpi": 8,
+   "statusDataMatchingCameraADAS": 9,
+   "statusStreetTyp": 10,
+   "evaluationStreetTyp": 11,
+   "displaySupplementalSign": 12,
+   "triggerPresentClassLimitSpeed": 13,
+   "displaySpeedNPIDistance": 14,
+   "controlSLIWarning": 15
+  },
+  "body": "presentWithdrawalLimitSpeed=0 recognitionNoPassing=1 nextWithdrawalLimitSpeed=2 presentClassLimitSpeed=6 nextClassLimitSpeed=4 countryCodingTrafficSign=5 displayTextMessage=6 unitOfMeasurementSpeedLimit=7 displayTextMessageNpi=8 statusDataMatchingCameraADAS=9 statusStreetTyp=10 evaluationStreetTyp=11 displaySupplementalSign=12 triggerPresentClassLimitSpeed=13 displaySpeedNPIDistance=14 controlSLIWarning=15"
+ },
+ {
+  "set": "S13",
+  "p": "P22",
+  "tag": "cam-signs",
+  "iface": "de.bmw.environmentalmodel.SignRecognitionFrontCamera",
+  "field": "TrafficSignRecognitionFrontCamera",
+  "instance": "1",
+  "value": {
+   "timestamp": 111,
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "trafficSignRecognition": {
+    "version": 2,
+    "visibilityCondition": "RAIN_SNOW",
+    "numberSigns": 1,
+    "speedLimitUnit": "KM_H"
+   },
+   "trafficSign": [
+    {
+     "timestamp": 123456,
+     "value": 30,
+     "type": "SPEED_LIMIT",
+     "trafficSignForm": "ROUND",
+     "position": {
+      "left": false,
+      "right": true,
+      "overhead": false
+     },
+     "firstSupplementalType": "SIGNAL_UNFILLED",
+     "secondSupplementalType": "SIGNAL_UNFILLED",
+     "additionalInfo": "NO_ADDITIONAL_RESTRICTION",
+     "variable": false,
+     "location": {
+      "locationInvalidFlags": 0,
+      "x": 12.5,
+      "y": -3.25,
+      "z": 1.75
+     },
+     "timestampSec": 98765
+    }
+   ],
+   "trafficSignRecognitionQuality": [
+    {
+     "qualityType": 1,
+     "qualityValue": 90,
+     "qualityFirstSupplementalType": 0,
+     "qualitySecondSupplementalType2": 0
+    }
+   ]
+  },
+  "body": "qualifier=EVENT_DATA_AVAILABLE extQualifier=BEGINNING_BLOCKAGE version=2 visibility=RAIN_SNOW numberSigns=1 unit=KM_H qualities=1 signs=1 [value=30 type=SPEED_LIMIT form=ROUND supp1=SIGNAL_UNFILLED supp2=SIGNAL_UNFILLED info=NO_ADDITIONAL_RESTRICTION variable=false]"
+ },
+ {
+  "set": "S13",
+  "p": "P22",
+  "tag": "cam-legacy",
+  "iface": "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy",
+  "field": "RecognitionTrafficSignCamera",
+  "instance": "1",
+  "value": {
+   "trafficSignID": 4,
+   "trafficSignType": 1,
+   "trafficSignAddOnType1": 63,
+   "trafficSignAddOnType2": 63,
+   "qualityRecognitionTrafficSign": 80,
+   "trafficSignValue": 30,
+   "speedLimitUnitOfMeasurement": 1,
+   "trafficSignPositionX": 201,
+   "trafficSignPositionY": 202,
+   "trafficSignPositionZ": 203,
+   "trafficSignStatus": 2
+  },
+  "body": "id=4 type=1 addOn1=63 addOn2=63 quality=80 value=30 unit=1 status=2"
+ },
+ {
+  "set": "S13",
+  "p": "P22",
+  "tag": "cam-legacy2",
+  "iface": "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy",
+  "field": "recognitionTrafficSignCamera2",
+  "instance": "1",
+  "value": {
+   "timestamp": 111,
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "trafficSignRecognition": {
+    "version": 2,
+    "visibilityCondition": "RAIN_SNOW",
+    "numberSigns": 1,
+    "speedLimitUnit": "KM_H"
+   },
+   "trafficSign": [
+    {
+     "timestamp": 123456,
+     "value": 30,
+     "type": "SPEED_LIMIT",
+     "trafficSignForm": "ROUND",
+     "position": {
+      "left": false,
+      "right": true,
+      "overhead": false
+     },
+     "firstSupplementalType": "SIGNAL_UNFILLED",
+     "secondSupplementalType": "SIGNAL_UNFILLED",
+     "additionalInfo": "NO_ADDITIONAL_RESTRICTION",
+     "variable": false,
+     "location": {
+      "locationInvalidFlags": 0,
+      "x": 12.5,
+      "y": -3.25,
+      "z": 1.75
+     },
+     "timestampSec": 98765,
+     "relevance": "KTRAFFICSIGNCHARACTERISTICS_EMBEDDED"
+    }
+   ],
+   "trafficSignRecognitionQuality": [
+    {
+     "qualityType": 1,
+     "qualityValue": 90,
+     "qualityFirstSupplementalType": 0,
+     "qualitySecondSupplementalType2": 0
+    }
+   ]
+  },
+  "body": "qualifier=EVENT_DATA_AVAILABLE extQualifier=BEGINNING_BLOCKAGE version=2 visibility=RAIN_SNOW numberSigns=1 unit=KM_H qualities=1 signs=1 [value=30 type=SPEED_LIMIT form=ROUND supp1=SIGNAL_UNFILLED supp2=SIGNAL_UNFILLED info=NO_ADDITIONAL_RESTRICTION relevance=KTRAFFICSIGNCHARACTERISTICS_EMBEDDED variable=false]"
+ },
+ {
+  "set": "S13",
+  "p": "P22",
+  "tag": "ccp-limit",
+  "iface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+  "field": "effectiveSpeedLimit",
+  "instance": "1",
+  "value": {
+   "speedLimit": 30
+  },
+  "body": "speedLimit=30"
+ },
+ {
+  "set": "S13",
+  "p": "P22",
+  "tag": "ccp-unit",
+  "iface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+  "field": "speedLimitUnit",
+  "instance": "1",
+  "value": {
+   "speedLimitUnit": "KMH"
+  },
+  "body": "speedLimitUnit=KMH"
+ },
+ {
+  "set": "S13",
+  "p": "P22",
+  "tag": "ccp-variable",
+  "iface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+  "field": "variableSpeedLimitSign",
+  "instance": "1",
+  "value": {
+   "variableSide": "OVERHEAD"
+  },
+  "body": "variableSide=OVERHEAD"
+ },
+ {
+  "set": "S13",
+  "p": "P22",
+  "tag": "ccp-builtup",
+  "iface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+  "field": "builtupAreaFlag",
+  "instance": "1",
+  "value": {
+   "isBuiltupArea": true
+  },
+  "body": "isBuiltupArea=true"
+ },
+ {
+  "set": "S13",
+  "p": "P22",
+  "tag": "sli-text",
+  "iface": "de.bmw.infotainment.fasus.FASuS",
+  "field": "statusSLITextMessage",
+  "instance": "1",
+  "value": {
+   "displayTextMessage": "SLI_TEXT_1"
+  },
+  "body": "text=SLI_TEXT_1"
+ },
+ {
+  "set": "S13",
+  "p": "P22",
+  "tag": "sign-config",
+  "iface": "de.bmw.infotainment.fasus.FASuS",
+  "field": "statusRoadSignConfigStatus",
+  "instance": "1",
+  "value": {
+   "countryCodingTrafficSign": "ECE_WEISS",
+   "unitOfMeasurementSpeedLimit": "KM_S_H"
+  },
+  "body": "country=ECE_WEISS unit=KM_S_H"
  }
 ]

@@ -2,7 +2,7 @@
   "id": "signal_probe",
   "title": "Signal Probe",
   "description": "Read-only, log-only: subscribes the car's signals set by set and logs what arrives (numbers, enum names, text lengths). Draws nothing on the cluster.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "vendor": "custom",
   "loggingId": "OASP",
   "iconGlyph": "SP",
@@ -289,7 +289,9 @@
       "_instances": "1",
       "displayDriverAssistenceSystemLongitudinalGuidance": "s",
       "statusNextSpeedLimitRecognition": "rs",
-      "statusOvertakeRecognition": "rs"
+      "statusOvertakeRecognition": "rs",
+      "statusRoadSignConfigStatus": "rs",
+      "statusSLITextMessage": "rs"
     },
     "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
       "_instances": "1",
@@ -351,6 +353,34 @@
     "de.bmw.infotainment.misc.MDrive": {
       "_instances": "1",
       "dataDisplayGearbox": "s"
+    },
+    "de.bmw.dass.TrafficSignRecognition": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognition"
+      ]
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognitionFrontCamera"
+      ]
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "RecognitionTrafficSignCamera",
+        "recognitionTrafficSignCamera2"
+      ]
+    },
+    "de.bmw.infotainment.navigation.externalize.adasng.CCP": {
+      "_instances": "1",
+      "_broadcasts": [
+        "builtupAreaFlag",
+        "effectiveSpeedLimit",
+        "speedLimitUnit",
+        "variableSpeedLimitSign"
+      ]
     }
   },
   "screens": [
@@ -413,6 +443,10 @@
         [
           "setting",
           "set11"
+        ],
+        [
+          "setting",
+          "set13"
         ],
         [
           "text",
@@ -486,6 +520,12 @@
     {
       "key": "set11",
       "label": "S11 Непідключені сигнали f30 (P19)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set13",
+      "label": "S13 Знаки (P22)",
       "type": "bool",
       "default": false
     }

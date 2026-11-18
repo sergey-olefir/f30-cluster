@@ -1,11 +1,11 @@
 {
   "_about": "The signal probe's field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier). Ids come from the car's catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of apps/signal_probe/format.js. Text members are logged as lengths only.",
   "logFormat": 1,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "counts": {
-    "sets": 11,
-    "fields": 160,
-    "interfaces": 62,
+    "sets": 12,
+    "fields": 170,
+    "interfaces": 66,
     "interfacesWithSeveralInstances": 1
   },
   "sets": [
@@ -137,6 +137,17 @@
       ],
       "fields": 9,
       "fieldsActive": 9
+    },
+    {
+      "id": "S13",
+      "settingsKey": "set13",
+      "name": "signs",
+      "uk": "Знаки",
+      "items": [
+        "P22"
+      ],
+      "fields": 10,
+      "fieldsActive": 10
     }
   ],
   "interfaces": [
@@ -150,6 +161,7 @@
         "1"
       ],
       "fields": 18,
+      "events": [],
       "sets": [
         "S1",
         "S2",
@@ -168,6 +180,7 @@
         "1"
       ],
       "fields": 6,
+      "events": [],
       "sets": [
         "S1",
         "S3",
@@ -186,6 +199,7 @@
         "1"
       ],
       "fields": 3,
+      "events": [],
       "sets": [
         "S1",
         "S9"
@@ -201,6 +215,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S1"
       ]
@@ -215,6 +230,7 @@
         "1"
       ],
       "fields": 2,
+      "events": [],
       "sets": [
         "S2",
         "S10"
@@ -230,6 +246,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S2"
       ]
@@ -244,6 +261,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S2"
       ]
@@ -258,6 +276,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S2"
       ]
@@ -272,6 +291,7 @@
         "1"
       ],
       "fields": 3,
+      "events": [],
       "sets": [
         "S2",
         "S9"
@@ -287,6 +307,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S2"
       ]
@@ -301,6 +322,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S2"
       ]
@@ -315,6 +337,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S2"
       ]
@@ -329,6 +352,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S2"
       ]
@@ -343,6 +367,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S2"
       ]
@@ -357,6 +382,7 @@
         "1"
       ],
       "fields": 2,
+      "events": [],
       "sets": [
         "S2",
         "S3"
@@ -372,6 +398,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S3"
       ]
@@ -386,6 +413,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S3"
       ]
@@ -400,6 +428,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S3"
       ]
@@ -414,6 +443,7 @@
         "Inst1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S3"
       ]
@@ -430,6 +460,7 @@
         "HMI_FoMo_Right"
       ],
       "fields": 4,
+      "events": [],
       "sets": [
         "S4"
       ]
@@ -444,6 +475,7 @@
         "1"
       ],
       "fields": 2,
+      "events": [],
       "sets": [
         "S4"
       ]
@@ -458,6 +490,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S4"
       ]
@@ -525,6 +558,7 @@
         "VideoWidgetFrontInterruptExclusive"
       ],
       "fields": 5,
+      "events": [],
       "sets": [
         "S4"
       ]
@@ -539,6 +573,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S4"
       ]
@@ -553,6 +588,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -567,6 +603,7 @@
         "CarPlayManagerInst1"
       ],
       "fields": 2,
+      "events": [],
       "sets": [
         "S5",
         "S7"
@@ -590,6 +627,7 @@
         "Call9"
       ],
       "fields": 8,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -604,6 +642,7 @@
         "1"
       ],
       "fields": 3,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -618,6 +657,7 @@
         "1"
       ],
       "fields": 2,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -632,6 +672,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -648,6 +689,7 @@
         "2"
       ],
       "fields": 4,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -662,6 +704,7 @@
         "TelematicsCallStatusInst1"
       ],
       "fields": 4,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -676,6 +719,7 @@
         "1"
       ],
       "fields": 2,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -690,6 +734,7 @@
         "EsimProxy_1"
       ],
       "fields": 3,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -704,6 +749,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -718,6 +764,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -732,6 +779,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S5"
       ]
@@ -748,6 +796,7 @@
         "HMI_FoMo_Right"
       ],
       "fields": 3,
+      "events": [],
       "sets": [
         "S5",
         "S6"
@@ -765,6 +814,7 @@
         "3"
       ],
       "fields": 2,
+      "events": [],
       "sets": [
         "S6"
       ]
@@ -779,6 +829,7 @@
         "1"
       ],
       "fields": 11,
+      "events": [],
       "sets": [
         "S6"
       ]
@@ -793,6 +844,7 @@
         "1"
       ],
       "fields": 2,
+      "events": [],
       "sets": [
         "S6"
       ]
@@ -807,6 +859,7 @@
         "1"
       ],
       "fields": 2,
+      "events": [],
       "sets": [
         "S6"
       ]
@@ -821,6 +874,7 @@
         "Front"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S6"
       ]
@@ -835,6 +889,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S7"
       ]
@@ -849,6 +904,7 @@
         "Main_Instance"
       ],
       "fields": 10,
+      "events": [],
       "sets": [
         "S7"
       ]
@@ -863,6 +919,7 @@
         "1"
       ],
       "fields": 2,
+      "events": [],
       "sets": [
         "S7"
       ]
@@ -877,6 +934,7 @@
         "AndroidAutoProjectedManagerInst1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S7"
       ]
@@ -891,6 +949,7 @@
         "1"
       ],
       "fields": 3,
+      "events": [],
       "sets": [
         "S8"
       ]
@@ -904,9 +963,11 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 3,
+      "fields": 5,
+      "events": [],
       "sets": [
-        "S8"
+        "S8",
+        "S13"
       ]
     },
     {
@@ -919,6 +980,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S8"
       ]
@@ -933,6 +995,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S8"
       ]
@@ -947,6 +1010,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S8"
       ]
@@ -961,6 +1025,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S8"
       ]
@@ -975,6 +1040,7 @@
         "1"
       ],
       "fields": 4,
+      "events": [],
       "sets": [
         "S9"
       ]
@@ -989,6 +1055,7 @@
         "1"
       ],
       "fields": 4,
+      "events": [],
       "sets": [
         "S9",
         "S11"
@@ -1004,6 +1071,7 @@
         "1"
       ],
       "fields": 4,
+      "events": [],
       "sets": [
         "S9",
         "S10"
@@ -1019,6 +1087,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S9"
       ]
@@ -1033,6 +1102,7 @@
         "Main_Instance"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S9"
       ]
@@ -1048,6 +1118,7 @@
         "DeadReckoning_internal"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S9"
       ]
@@ -1062,6 +1133,7 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S10"
       ]
@@ -1076,6 +1148,7 @@
         "HMISpeechHU"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S10"
       ]
@@ -1090,8 +1163,81 @@
         "1"
       ],
       "fields": 1,
+      "events": [],
       "sets": [
         "S10"
+      ]
+    },
+    {
+      "interface": "de.bmw.dass.TrafficSignRecognition",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "TrafficSignRecognition"
+      ],
+      "sets": [
+        "S13"
+      ]
+    },
+    {
+      "interface": "de.bmw.environmentalmodel.SignRecognitionFrontCamera",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "TrafficSignRecognitionFrontCamera"
+      ],
+      "sets": [
+        "S13"
+      ]
+    },
+    {
+      "interface": "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "RecognitionTrafficSignCamera",
+        "recognitionTrafficSignCamera2"
+      ],
+      "sets": [
+        "S13"
+      ]
+    },
+    {
+      "interface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "effectiveSpeedLimit",
+        "speedLimitUnit",
+        "variableSpeedLimitSign",
+        "builtupAreaFlag"
+      ],
+      "sets": [
+        "S13"
       ]
     }
   ],
@@ -1106,6 +1252,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -1128,6 +1275,7 @@
       "flags": "rs",
       "getterId": 61,
       "notifierId": 32829,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -1146,6 +1294,7 @@
       "flags": "rs",
       "getterId": 28,
       "notifierId": 32796,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -1168,6 +1317,7 @@
       "flags": "rs",
       "getterId": 7,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "union",
       "formatter": "list",
       "gapMs": 500,
@@ -1191,6 +1341,7 @@
       "flags": "rs",
       "getterId": 16,
       "notifierId": 32773,
+      "eventId": null,
       "rootType": "union",
       "formatter": "list",
       "gapMs": 500,
@@ -1213,6 +1364,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "list",
       "gapMs": 500,
@@ -1234,6 +1386,7 @@
       "flags": "rs",
       "getterId": 29,
       "notifierId": 32797,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1257,6 +1410,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1275,6 +1429,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1294,6 +1449,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1314,6 +1470,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1337,6 +1494,7 @@
       "flags": "rs",
       "getterId": 5,
       "notifierId": 32773,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1357,6 +1515,7 @@
       "flags": "rs",
       "getterId": 6,
       "notifierId": 32774,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1379,6 +1538,7 @@
       "flags": "rs",
       "getterId": 4,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1401,6 +1561,7 @@
       "flags": "rs",
       "getterId": 7,
       "notifierId": 32775,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1423,6 +1584,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1444,6 +1606,7 @@
       "flags": "rs",
       "getterId": 7,
       "notifierId": 32775,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1464,6 +1627,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1484,6 +1648,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1509,6 +1674,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1529,6 +1695,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1547,6 +1714,7 @@
       "flags": "rs",
       "getterId": 48,
       "notifierId": 32804,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1567,6 +1735,7 @@
       "flags": "rs",
       "getterId": 46,
       "notifierId": 32814,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1591,6 +1760,7 @@
       "flags": "rs",
       "getterId": 57,
       "notifierId": 32825,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1610,6 +1780,7 @@
       "flags": "rs",
       "getterId": 27,
       "notifierId": 32795,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "temps",
       "gapMs": 5000,
@@ -1625,6 +1796,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32774,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 250,
@@ -1652,6 +1824,7 @@
       "flags": "rs",
       "getterId": 3,
       "notifierId": 32771,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 250,
@@ -1670,6 +1843,7 @@
       "flags": "rs",
       "getterId": 85,
       "notifierId": 32853,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 250,
@@ -1690,6 +1864,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 5000,
@@ -1708,6 +1883,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 5000,
@@ -1727,6 +1903,7 @@
       "flags": "rs",
       "getterId": 5,
       "notifierId": 32773,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 250,
@@ -1745,6 +1922,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1771,6 +1949,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "text",
       "formatter": "activeSource",
       "gapMs": 1000,
@@ -1786,6 +1965,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "sources",
       "gapMs": 1000,
@@ -1801,6 +1981,7 @@
       "flags": "rs",
       "getterId": 3,
       "notifierId": 32771,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 10000,
@@ -1825,6 +2006,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1848,6 +2030,7 @@
       "flags": "rs",
       "getterId": 6,
       "notifierId": 32774,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "mediaMenu",
       "gapMs": 1000,
@@ -1863,6 +2046,7 @@
       "flags": "rs",
       "getterId": 9,
       "notifierId": 32777,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "station",
       "gapMs": 5000,
@@ -1878,6 +2062,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 1000,
@@ -1893,6 +2078,7 @@
       "flags": "rs",
       "getterId": 15,
       "notifierId": 32783,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 10000,
@@ -1912,6 +2098,7 @@
       "flags": "rs",
       "getterId": 8,
       "notifierId": 32776,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1931,6 +2118,7 @@
       "flags": "rs",
       "getterId": 10,
       "notifierId": 32778,
+      "eventId": null,
       "rootType": "array<struct>",
       "formatter": "metadata",
       "gapMs": 1000,
@@ -1946,6 +2134,7 @@
       "flags": "rs",
       "getterId": 19,
       "notifierId": 32787,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -1968,6 +2157,7 @@
       "flags": "rs",
       "getterId": 22,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "array<struct>",
       "formatter": "list",
       "gapMs": 1000,
@@ -1989,6 +2179,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 500,
@@ -2004,6 +2195,7 @@
       "flags": "rs",
       "getterId": 4,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 500,
@@ -2019,6 +2211,7 @@
       "flags": "rs",
       "getterId": 6,
       "notifierId": 32774,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 500,
@@ -2034,6 +2227,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "num",
       "formatter": "cols",
       "gapMs": 500,
@@ -2052,6 +2246,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "num",
       "formatter": "cols",
       "gapMs": 500,
@@ -2070,6 +2265,7 @@
       "flags": "rs",
       "getterId": 4,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 500,
@@ -2085,6 +2281,7 @@
       "flags": "rs",
       "getterId": 3,
       "notifierId": 32771,
+      "eventId": null,
       "rootType": "num",
       "formatter": "cols",
       "gapMs": 500,
@@ -2103,6 +2300,7 @@
       "flags": "rs",
       "getterId": 24,
       "notifierId": 32776,
+      "eventId": null,
       "rootType": "text",
       "formatter": "cols",
       "gapMs": 500,
@@ -2121,6 +2319,7 @@
       "flags": "rs",
       "getterId": 5,
       "notifierId": 32773,
+      "eventId": null,
       "rootType": "text",
       "formatter": "cols",
       "gapMs": 500,
@@ -2139,6 +2338,7 @@
       "flags": "rs",
       "getterId": 25,
       "notifierId": 32777,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2158,6 +2358,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 500,
@@ -2173,6 +2374,7 @@
       "flags": "rs",
       "getterId": 21,
       "notifierId": 32784,
+      "eventId": null,
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 500,
@@ -2188,6 +2390,7 @@
       "flags": "rs",
       "getterId": 19,
       "notifierId": 32781,
+      "eventId": null,
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 500,
@@ -2203,6 +2406,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "array<struct>",
       "formatter": "devices",
       "gapMs": 500,
@@ -2218,6 +2422,7 @@
       "flags": "rs",
       "getterId": 29,
       "notifierId": 32782,
+      "eventId": null,
       "rootType": "array<enum>",
       "formatter": "roles",
       "gapMs": 500,
@@ -2233,6 +2438,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "array<struct>",
       "formatter": "calllist",
       "gapMs": 500,
@@ -2248,6 +2454,7 @@
       "flags": "rs",
       "getterId": 6,
       "notifierId": 32774,
+      "eventId": null,
       "rootType": "union",
       "formatter": "list",
       "gapMs": 500,
@@ -2270,6 +2477,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "union",
       "formatter": "union",
       "gapMs": 500,
@@ -2289,6 +2497,7 @@
       "flags": "rs",
       "getterId": 4,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "union",
       "formatter": "union",
       "gapMs": 500,
@@ -2310,6 +2519,7 @@
       "flags": "rs",
       "getterId": 3,
       "notifierId": 32771,
+      "eventId": null,
       "rootType": "union",
       "formatter": "union",
       "gapMs": 500,
@@ -2329,6 +2539,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 500,
@@ -2344,6 +2555,7 @@
       "flags": "rs",
       "getterId": 3,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "num",
       "formatter": "cols",
       "gapMs": 500,
@@ -2362,6 +2574,7 @@
       "flags": "rs",
       "getterId": 5,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 500,
@@ -2377,6 +2590,7 @@
       "flags": "rs",
       "getterId": 4,
       "notifierId": 32771,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 500,
@@ -2392,6 +2606,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 500,
@@ -2407,6 +2622,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2428,6 +2644,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 500,
@@ -2443,6 +2660,7 @@
       "flags": "rs",
       "getterId": 7,
       "notifierId": 32773,
+      "eventId": null,
       "rootType": "num",
       "formatter": "cols",
       "gapMs": 500,
@@ -2461,6 +2679,7 @@
       "flags": "rs",
       "getterId": 8,
       "notifierId": 32774,
+      "eventId": null,
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 500,
@@ -2476,6 +2695,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2494,6 +2714,7 @@
       "flags": "rs",
       "getterId": 3,
       "notifierId": 32771,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2515,6 +2736,7 @@
       "flags": "rs",
       "getterId": 7,
       "notifierId": 32773,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2535,6 +2757,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 500,
@@ -2550,6 +2773,7 @@
       "flags": "rs",
       "getterId": 6,
       "notifierId": 32774,
+      "eventId": null,
       "rootType": "union",
       "formatter": "list",
       "gapMs": 500,
@@ -2572,6 +2796,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "union",
       "formatter": "union",
       "gapMs": 500,
@@ -2591,6 +2816,7 @@
       "flags": "rs",
       "getterId": 4,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "union",
       "formatter": "union",
       "gapMs": 500,
@@ -2612,6 +2838,7 @@
       "flags": "rs",
       "getterId": 3,
       "notifierId": 32771,
+      "eventId": null,
       "rootType": "union",
       "formatter": "union",
       "gapMs": 500,
@@ -2631,6 +2858,7 @@
       "flags": "rs",
       "getterId": 9,
       "notifierId": 32777,
+      "eventId": null,
       "rootType": "num",
       "formatter": "hex",
       "gapMs": 500,
@@ -2647,6 +2875,7 @@
       "flags": "rs",
       "getterId": 10,
       "notifierId": 32778,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2671,6 +2900,7 @@
       "flags": "rs",
       "getterId": 8,
       "notifierId": 32776,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2691,6 +2921,7 @@
       "flags": "rs",
       "getterId": 7,
       "notifierId": 32775,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2717,6 +2948,7 @@
       "flags": "rs",
       "getterId": 47,
       "notifierId": 32803,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2741,6 +2973,7 @@
       "flags": "rs",
       "getterId": 27,
       "notifierId": 32795,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2765,6 +2998,7 @@
       "flags": "rs",
       "getterId": 55,
       "notifierId": 32823,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2792,6 +3026,7 @@
       "flags": "rs",
       "getterId": 124,
       "notifierId": 32892,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -2814,6 +3049,7 @@
       "flags": "rs",
       "getterId": 5,
       "notifierId": 32773,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -2833,6 +3069,7 @@
       "flags": "rs",
       "getterId": 6,
       "notifierId": 32774,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -2852,6 +3089,7 @@
       "flags": "rs",
       "getterId": 9,
       "notifierId": 32777,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -2871,6 +3109,7 @@
       "flags": "rs",
       "getterId": 10,
       "notifierId": 32778,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -2890,6 +3129,7 @@
       "flags": "rs",
       "getterId": 7,
       "notifierId": 32775,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 100,
@@ -2909,6 +3149,7 @@
       "flags": "rs",
       "getterId": 8,
       "notifierId": 32776,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -2928,6 +3169,7 @@
       "flags": "rs",
       "getterId": 3,
       "notifierId": 32771,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -2947,6 +3189,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -2966,6 +3209,7 @@
       "flags": "rs",
       "getterId": 4,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -2985,6 +3229,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -3004,6 +3249,7 @@
       "flags": "rs",
       "getterId": 11,
       "notifierId": 32779,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -3023,6 +3269,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32773,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "bits",
       "gapMs": 0,
@@ -3040,6 +3287,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32776,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "bits",
       "gapMs": 0,
@@ -3060,6 +3308,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -3082,6 +3331,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 0,
@@ -3108,6 +3358,7 @@
       "flags": "rs",
       "getterId": 22,
       "notifierId": 32774,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 0,
@@ -3124,6 +3375,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 1000,
@@ -3139,6 +3391,7 @@
       "flags": "rs",
       "getterId": 9,
       "notifierId": 32777,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "intersection",
       "gapMs": 2000,
@@ -3154,6 +3407,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 1000,
@@ -3169,6 +3423,7 @@
       "flags": "rs",
       "getterId": 28,
       "notifierId": 32790,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "dart",
       "gapMs": 2000,
@@ -3184,6 +3439,7 @@
       "flags": "rs",
       "getterId": 25,
       "notifierId": 32787,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "lanes",
       "gapMs": 2000,
@@ -3199,6 +3455,7 @@
       "flags": "rs",
       "getterId": 4,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 2000,
@@ -3230,6 +3487,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "description",
       "gapMs": 2000,
@@ -3245,6 +3503,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 2000,
@@ -3274,6 +3533,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 2000,
@@ -3292,6 +3552,7 @@
       "flags": "rs",
       "getterId": 24,
       "notifierId": 32786,
+      "eventId": null,
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 1000,
@@ -3307,6 +3568,7 @@
       "flags": "rs",
       "getterId": 27,
       "notifierId": 32789,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 1000,
@@ -3322,6 +3584,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 1000,
@@ -3337,6 +3600,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 1000,
@@ -3352,6 +3616,7 @@
       "flags": "rs",
       "getterId": 37,
       "notifierId": 32795,
+      "eventId": null,
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 1000,
@@ -3370,6 +3635,7 @@
       "flags": "rs",
       "getterId": 35,
       "notifierId": 32794,
+      "eventId": null,
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 1000,
@@ -3388,6 +3654,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3413,6 +3680,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3442,6 +3710,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3464,6 +3733,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3490,6 +3760,7 @@
       "flags": "rs",
       "getterId": 4,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3509,6 +3780,7 @@
       "flags": "rs",
       "getterId": 6,
       "notifierId": 32774,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3527,6 +3799,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3554,6 +3827,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3581,6 +3855,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3605,6 +3880,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32770,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3625,6 +3901,7 @@
       "flags": "rs",
       "getterId": 7,
       "notifierId": 32775,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3647,6 +3924,7 @@
       "flags": "rs",
       "getterId": 9,
       "notifierId": 32777,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3669,6 +3947,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3691,6 +3970,7 @@
       "flags": "rs",
       "getterId": 10,
       "notifierId": 32778,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3713,6 +3993,7 @@
       "flags": "rs",
       "getterId": 47,
       "notifierId": 32815,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3734,6 +4015,7 @@
       "flags": "rs",
       "getterId": 40,
       "notifierId": 32808,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3753,6 +4035,7 @@
       "flags": "rs",
       "getterId": 39,
       "notifierId": 32807,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3775,6 +4058,7 @@
       "flags": "rs",
       "getterId": 3,
       "notifierId": 32771,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3794,6 +4078,7 @@
       "flags": "rs",
       "getterId": 40,
       "notifierId": 32808,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3813,6 +4098,7 @@
       "flags": "rs",
       "getterId": 5,
       "notifierId": 32773,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 5000,
@@ -3833,6 +4119,7 @@
       "flags": "rs",
       "getterId": 5,
       "notifierId": 32773,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 5000,
@@ -3856,6 +4143,7 @@
       "flags": "rs",
       "getterId": 1,
       "notifierId": 32769,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3875,6 +4163,7 @@
       "flags": "rs",
       "getterId": 2,
       "notifierId": 32772,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 1000,
@@ -3895,6 +4184,7 @@
       "flags": "rs",
       "getterId": 8,
       "notifierId": 32771,
+      "eventId": null,
       "rootType": "union",
       "formatter": "cbs",
       "gapMs": 1000,
@@ -3910,6 +4200,7 @@
       "flags": "rs",
       "getterId": 53,
       "notifierId": 32821,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -3933,6 +4224,7 @@
       "flags": "rs",
       "getterId": 32,
       "notifierId": 32800,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -3952,6 +4244,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32775,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -3978,6 +4271,7 @@
       "flags": "rs",
       "getterId": 22,
       "notifierId": 32779,
+      "eventId": null,
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 500,
@@ -3993,6 +4287,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32776,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -4014,6 +4309,7 @@
       "flags": "s",
       "getterId": null,
       "notifierId": 32785,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -4033,6 +4329,7 @@
       "flags": "rs",
       "getterId": 37,
       "notifierId": 32805,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -4057,6 +4354,7 @@
       "flags": "rs",
       "getterId": 39,
       "notifierId": 32807,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -4075,6 +4373,7 @@
       "flags": "rs",
       "getterId": 5,
       "notifierId": 32773,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -4097,6 +4396,7 @@
       "flags": "rs",
       "getterId": 57,
       "notifierId": 32825,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -4118,6 +4418,7 @@
       "flags": "rs",
       "getterId": 43,
       "notifierId": 32811,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -4141,6 +4442,7 @@
       "flags": "rs",
       "getterId": 20,
       "notifierId": 32788,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -4159,6 +4461,7 @@
       "flags": "rs",
       "getterId": 12,
       "notifierId": 32780,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 5000,
@@ -4180,6 +4483,7 @@
       "flags": "rs",
       "getterId": 9,
       "notifierId": 32777,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 5000,
@@ -4201,6 +4505,7 @@
       "flags": "rs",
       "getterId": 18,
       "notifierId": 32786,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 5000,
@@ -4219,6 +4524,7 @@
       "flags": "rs",
       "getterId": 17,
       "notifierId": 32785,
+      "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
       "gapMs": 500,
@@ -4230,6 +4536,219 @@
         "c1s:drivingBehaviourECOCategorie1Status:e",
         "c2s:drivingBehaviourECOCategorie2Status:e",
         "c3s:drivingBehaviourECOCategorie3Status:e"
+      ]
+    },
+    {
+      "set": "S13",
+      "item": "P22",
+      "tag": "tsr",
+      "interface": "de.bmw.dass.TrafficSignRecognition",
+      "field": "TrafficSignRecognition",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "cols",
+      "gapMs": 250,
+      "cap": 300,
+      "columns": [
+        "presentWithdrawalLimitSpeed:presentWithdrawalLimitSpeed:n",
+        "recognitionNoPassing:recognitionNoPassing:n",
+        "nextWithdrawalLimitSpeed:nextWithdrawalLimitSpeed:n",
+        "presentClassLimitSpeed:presentClassLimitSpeed:n",
+        "nextClassLimitSpeed:nextClassLimitSpeed:n",
+        "countryCodingTrafficSign:countryCodingTrafficSign:n",
+        "displayTextMessage:displayTextMessage:n",
+        "unitOfMeasurementSpeedLimit:unitOfMeasurementSpeedLimit:n",
+        "displayTextMessageNpi:displayTextMessageNpi:n",
+        "statusDataMatchingCameraADAS:statusDataMatchingCameraADAS:n",
+        "statusStreetTyp:statusStreetTyp:n",
+        "evaluationStreetTyp:evaluationStreetTyp:n",
+        "displaySupplementalSign:displaySupplementalSign:n",
+        "triggerPresentClassLimitSpeed:triggerPresentClassLimitSpeed:n",
+        "displaySpeedNPIDistance:displaySpeedNPIDistance:n",
+        "controlSLIWarning:controlSLIWarning:n"
+      ]
+    },
+    {
+      "set": "S13",
+      "item": "P22",
+      "tag": "cam-signs",
+      "interface": "de.bmw.environmentalmodel.SignRecognitionFrontCamera",
+      "field": "TrafficSignRecognitionFrontCamera",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "cols",
+      "gapMs": 250,
+      "cap": 300,
+      "columns": [
+        "qualifier:eventDataQualifier:e",
+        "extQualifier:extendedQualifier:e",
+        "version:trafficSignRecognition.version:n",
+        "visibility:trafficSignRecognition.visibilityCondition:e",
+        "numberSigns:trafficSignRecognition.numberSigns:n",
+        "unit:trafficSignRecognition.speedLimitUnit:e",
+        "qualities:trafficSignRecognitionQuality:t"
+      ]
+    },
+    {
+      "set": "S13",
+      "item": "P22",
+      "tag": "cam-legacy",
+      "interface": "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy",
+      "field": "RecognitionTrafficSignCamera",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "cols",
+      "gapMs": 250,
+      "cap": 300,
+      "columns": [
+        "id:trafficSignID:n",
+        "type:trafficSignType:n",
+        "addOn1:trafficSignAddOnType1:n",
+        "addOn2:trafficSignAddOnType2:n",
+        "quality:qualityRecognitionTrafficSign:n",
+        "value:trafficSignValue:n",
+        "unit:speedLimitUnitOfMeasurement:n",
+        "status:trafficSignStatus:n"
+      ]
+    },
+    {
+      "set": "S13",
+      "item": "P22",
+      "tag": "cam-legacy2",
+      "interface": "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy",
+      "field": "recognitionTrafficSignCamera2",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "rootType": "event",
+      "formatter": "cols",
+      "gapMs": 250,
+      "cap": 300,
+      "columns": [
+        "qualifier:eventDataQualifier:e",
+        "extQualifier:extendedQualifier:e",
+        "version:trafficSignRecognition.version:n",
+        "visibility:trafficSignRecognition.visibilityCondition:e",
+        "numberSigns:trafficSignRecognition.numberSigns:n",
+        "unit:trafficSignRecognition.speedLimitUnit:e",
+        "qualities:trafficSignRecognitionQuality:t"
+      ]
+    },
+    {
+      "set": "S13",
+      "item": "P22",
+      "tag": "ccp-limit",
+      "interface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+      "field": "effectiveSpeedLimit",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32779,
+      "rootType": "event",
+      "formatter": "one",
+      "gapMs": 250,
+      "cap": 300
+    },
+    {
+      "set": "S13",
+      "item": "P22",
+      "tag": "ccp-unit",
+      "interface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+      "field": "speedLimitUnit",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32777,
+      "rootType": "event",
+      "formatter": "one",
+      "gapMs": 250,
+      "cap": 300
+    },
+    {
+      "set": "S13",
+      "item": "P22",
+      "tag": "ccp-variable",
+      "interface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+      "field": "variableSpeedLimitSign",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32778,
+      "rootType": "event",
+      "formatter": "one",
+      "gapMs": 250,
+      "cap": 300
+    },
+    {
+      "set": "S13",
+      "item": "P22",
+      "tag": "ccp-builtup",
+      "interface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+      "field": "builtupAreaFlag",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32772,
+      "rootType": "event",
+      "formatter": "one",
+      "gapMs": 250,
+      "cap": 300
+    },
+    {
+      "set": "S13",
+      "item": "P22",
+      "tag": "sli-text",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "statusSLITextMessage",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 8,
+      "notifierId": 32776,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 250,
+      "cap": 300,
+      "columns": [
+        "text:displayTextMessage:e"
+      ]
+    },
+    {
+      "set": "S13",
+      "item": "P22",
+      "tag": "sign-config",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "statusRoadSignConfigStatus",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 7,
+      "notifierId": 32775,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 250,
+      "cap": 300,
+      "columns": [
+        "country:countryCodingTrafficSign:e",
+        "unit:unitOfMeasurementSpeedLimit:e"
       ]
     }
   ]
