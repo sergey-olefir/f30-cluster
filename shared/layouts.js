@@ -46,6 +46,7 @@ const TYPES = {
     tdial: ['kind', 'centre', 'R', 'face'],     // twin_dial (docs/twin-dial/ENGINE-CONTRACT.md)
     tdback: ['part'],
     ccplate: ['font'],      // twin_dial: our check-control plate sheet (shared/twin_cc.js)
+    tdsign: [], tdcru: [],  // twin_dial: the speed-limit sign and the cruise readout (shared/twin_limit.js)
 };
 const CLASSES = ['ambient', 'content', 'overlay', 'alert'];
 
@@ -115,8 +116,8 @@ class Layouts {
             if (w.exclusive) bad(at + ' sets exclusive, which would hide everything under it (the CarPlay / Android Auto map too)');
             if (w.conn !== undefined && !(Number.isInteger(w.conn) && w.conn >= 0 && w.conn <= 3)) bad(at + ' "conn" must be 0..3 (the connection to cluster-render)');
             // "own:<item>" (package F): on while that item of BMW's bottom row is ours (hud.js _own); "cc:none" (car3 G):
-            // on while the car says no check-control message shows; car3 H: "a&b" (hud.js _toggleOn): every part is a toggle of its own
-            if (w.toggle !== undefined && !String(w.toggle).split('&').every((p) => /^!?(own:[a-z]+|cc:[a-z]+|[a-zA-Z0-9_]+(=[a-zA-Z0-9_]+)?)$/.test(p))) bad(at + ' has a bad toggle "' + w.toggle + '"');
+            // on while the car says no check-control message shows; twin_dial: "tl:cruise" / "tl:cruise:C1" (shared/twin_limit.js toggle); car3 H: "a&b" (hud.js _toggleOn): every part is a toggle of its own
+            if (w.toggle !== undefined && !String(w.toggle).split('&').every((p) => /^!?(own:[a-z]+|cc:[a-z]+|tl:[a-zA-Z0-9]+(:[a-zA-Z0-9]+)?|[a-zA-Z0-9_]+(=[a-zA-Z0-9_]+)?)$/.test(p))) bad(at + ' has a bad toggle "' + w.toggle + '"');
             if (w.hole !== undefined && !(Array.isArray(w.hole) && w.hole.length === 4 && w.hole.every((n) => typeof n === 'number'))) bad(at + ' "hole" must be [x, y, w, h]');
             TYPES[w.type].forEach((k) => { if (w[k] === undefined) bad(at + ' (' + w.type + ') needs "' + k + '"'); });
         });

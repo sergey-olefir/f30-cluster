@@ -31,7 +31,8 @@
     "twin_tokens.js",
     "twin_cc.js",
     "twin_probe.js",
-    "mb_exp.js"
+    "mb_exp.js",
+    "twin_limit.js"
   ],
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {
@@ -112,6 +113,11 @@
     "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus": {
       "guidingState": "rs",
       "_about": "the navigation tab's icon: lit while a route is guided"
+    },
+    "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl": {
+      "displaySpeedLimitAndNoPassingRestriction": "s",
+      "displayDriverAssistanceLongitudinal": "s",
+      "_about": "SPEC-R3 8 and 9 (package B5). Both notifier only (32769 / 32772, no getter), flag s: nothing here is a getter, a setter or a method. displaySpeedLimitAndNoPassingRestriction: the sign (config.sign, copied from f30_cluster as it is). displayDriverAssistanceLongitudinal: the cruise / limiter's struct, UNSEEN on the car until the car session (SPEC 9); read and logged (numbers and enum names), drawn only while config.cruise is set. That the sign field arrives is not yet shown by a log line in the repository: the build logs 'limit:' lines (shared/twin_limit.js) and the car session confirms."
     }
   },
   "screens": [
@@ -494,6 +500,168 @@
       "hideModeRows": false,
       "hideRowUnlessG20": false,
       "comment": "shared/menu.js: twin_dial has neither the drive-mode rows nor the G20 toggle"
-    }
+    },
+    "sign": {
+      "iface": "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl",
+      "field": "displaySpeedLimitAndNoPassingRestriction",
+      "invalidPath": [
+        "invalidFlag"
+      ],
+      "invalidOn": [
+        1,
+        true
+      ],
+      "valuePath": [
+        "displaySpeedLimit"
+      ],
+      "factor": 1,
+      "min": 5,
+      "max": 250,
+      "unitPath": [
+        "displaySpeedLimitUnit"
+      ],
+      "mph": [
+        "MPH",
+        1
+      ],
+      "noUnit": [
+        "NICHT_VERFUEGBAR",
+        2
+      ],
+      "none": [],
+      "end": [
+        0
+      ],
+      "unknown": [
+        254,
+        255
+      ],
+      "_values": "The raw speed values follow the convention of the car's own FASuS NextClassLimitSpeed enum, which is the only one in the catalogue that spells them out: 0 = AUFHEBUNG_ALLES (the end of all restrictions, the derestriction sign), 254 = NICHT_VERFUEGBAR and 255 = SIGNAL_UNBEFUELLT (no limit known, BMW's empty sign). displaySpeedLimit itself is a plain UInt8 with no names, so this is reasoning, not proof: the 'sign:' log line on the car settles it. \"none\" is empty on purpose - the owner's cluster essentially always shows a sign (2026-11-15).",
+      "warnPath": [
+        "displaySpeedLimitWarning"
+      ],
+      "warnMap": {
+        "SLI_WARNUNG_NICHT_ANGEFORDERT": 0,
+        "0": 0,
+        "SLI_WARNUNG_ANGEFORDERT": 1,
+        "1": 1,
+        "SLI_WARNUNG_STUFE_2": 2,
+        "2": 2
+      },
+      "suppPath": [
+        "displaySpeedLimitSupplemental"
+      ],
+      "suppMap": {
+        "KEIN_ZUSATZZEICHEN": null,
+        "0": null,
+        "UHRZEIT": "time",
+        "1": "time",
+        "REGEN": "rain",
+        "2": "rain",
+        "SCHNEE": "snow",
+        "3": "snow",
+        "SCHNEE_REGEN": "snowRain",
+        "4": "snowRain",
+        "AUSFAHRT_LINKS": "exitL",
+        "5": "exitL",
+        "AUSFAHRT_RECHTS": "exitR",
+        "6": "exitR",
+        "DISTANZ_1": "dist1",
+        "7": "dist1",
+        "DISTANZ_2": "dist2",
+        "8": "dist2",
+        "NEBEL": "fog",
+        "9": "fog",
+        "RESTRIKTION": "restriction",
+        "10": "restriction",
+        "ANHAENGER": "trailer",
+        "11": "trailer",
+        "ZONE": "zone",
+        "12": "zone",
+        "SCHOOL": "school",
+        "13": "school",
+        "WORK_ZONE": "work",
+        "14": "work"
+      },
+      "stylePath": [
+        "displaySymbolStyle"
+      ],
+      "styleMap": {
+        "ECE": "ece",
+        "0": "ece",
+        "ECE_UNSURE": "ece",
+        "1": "ece",
+        "US": "us",
+        "2": "us",
+        "US_UNSURE": "us",
+        "3": "us",
+        "CHINA": "china",
+        "4": "china",
+        "CHINA_UNSURE": "china",
+        "5": "china",
+        "KOREA": "korea",
+        "6": "korea",
+        "KOREA_UNSURE": "korea",
+        "7": "korea",
+        "JAPAN": "japan",
+        "8": "japan",
+        "JAPAN_UNSURE": "japan",
+        "9": "japan"
+      },
+      "surePath": [
+        "displaySymbolStyle"
+      ],
+      "sureOn": [
+        "ECE",
+        0,
+        "US",
+        2,
+        "CHINA",
+        4,
+        "KOREA",
+        6,
+        "JAPAN",
+        8
+      ],
+      "npPath": [
+        "displayNoPassingRestriction"
+      ],
+      "npMap": {
+        "KEIN_UEBERHOLVERBOT_ERKANNT": "none",
+        "0": "none",
+        "UEBERHOLVERBOT_PKW": "car",
+        "1": "car",
+        "AUFHEBUNG_UEBERHOLVERBOT_PKW_ERKANNT": "endCar",
+        "2": "endCar",
+        "UEBERHOLVERBOT_PKW_MIT_ANHAENGER_ERKANNT": "trailer",
+        "3": "trailer",
+        "AUFHEBUNG_UEBERHOLVERBOT_PKW_MIT_ANHAENGER_ERKANNT": "endTrailer",
+        "4": "endTrailer",
+        "UEBERHOLVERBOT_LKW": "truck",
+        "5": "truck",
+        "AUFHEBUNG_UEBERHOLVERBOT_LKW": "endTruck",
+        "6": "endTruck",
+        "ANDERE_UEBERHOLVERBOTE": "other",
+        "7": "other",
+        "UEBERHOLVERBOT_LINKSVERKEHR": "left",
+        "8": "left"
+      },
+      "npDistPath": [
+        "displayRemainingDistanceNoPassingRestriction"
+      ],
+      "holdMs": 0,
+      "changeFlashMs": 3000,
+      "flashPeriodMs": 500,
+      "_hold": "The stock cluster animates the end of a limit and then shows the new one, and a sign is essentially always present (the owner, 2026-11-15), so there is no \"hide the sign\" state. holdMs keeps the last sign on while the car briefly says nothing; the animation itself lands in shared/hud.js _signShow().",
+      "_timings": "changeFlashMs / flashPeriodMs are docs/G20-DESIGN-SPEC.md's PLACEHOLDERS for the flash after a limit changes - there is no video in the reference set, so nothing was measured. They are parameters only; nothing acts on them yet.",
+      "_empty": "docs/G20-DESIGN-SPEC.md: BMW's empty sign is THREE DASHES, 8.8 x 4.4 at pitch 13, not a blank disc. That is WBSIGN's u_show state 3, which this package already drives; whether the shader draws dashes is the drawing package's to check.",
+      "_mph": "The unit is read and recorded ({{limitUnit}}, the 'sign:' log line) but changes nothing on screen: the sign stays the round one with the number, in every country (the owner, 2026-11-15)."
+    },
+    "limit": {
+      "strip": "L1",
+      "_about": "SPEC-R3 8 (b): the speedometer's tick strip red from the limit. 'L1' = red from the limit's angle to the scale's end, dim while the needle is below the limit and full when over (SPEC-R3 8, the lead's reading); 'L2' = red only between the limit and the needle, only while over; 'L3' = as L1 but always full; 'off' = the marker only. The owner's choice (docs/twin-dial/MOCKUP-SPEC-R3B.md) is this one line. Not f30_cluster's config.limit (no iface / field here: nothing is subscribed by it)."
+    },
+    "cruise": null,
+    "_cruise": "SPEC-R3 9, built DARK: null = nothing is drawn and the layout does not even build the readout's sheet. { place: 'C1' | 'C2' } switches it on (C1 = the hub's lower part, C2 = the coolant bar's place); further keys (funcMap, statusMap, speedPath, factor, unitPath, mphOn, icons ...) correct what the car's values mean once the car session has shown the struct (shared/twin_limit.js CRUISE_DEFAULT)."
   }
 }
