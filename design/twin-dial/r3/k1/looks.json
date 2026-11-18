@@ -1,0 +1,167 @@
+{
+  "_about": "Round 3, package K1: the dial looks the mockups draw (tools/twin-dial/mockup/mockup.py Look; dials_r3.py draws them). Lengths in R (the bezel's centre line), angles deg clockwise from 12 o'clock, colours sRGB codes on our black (0). A look lists only what differs from the look it 'extends' ('today' = 0.1.0 = the Look defaults). Status per value in '_src': verified = measured on a rectified reference; hypothesis = read by eye, a single reference, or awaiting package SD's numbers (pub/SD).",
+  "looks": {
+    "today": {
+      "_src": "0.1.0 as specified (SPEC rev 2, bake_face.py): band 0.580-0.940, law Y = 0.010 exp(7.5 (rho-0.6)) exp(0.85 (1-cos th)), tint 0.96/1/1.08, strip 137, rim 0.545 width 0.016 to +-150, bezel width 0.021 to +-144, wedge 6.5k to 125 deg (the scale's end)"
+    },
+    "r3_fixed": {
+      "_src": "SD's published numbers (pub/SD/rings_redzone.json, 2026-11-18; verified on rectified 06 and 02 to 0.15 deg): on every reference the three rings end on ONE radial line: 06 band cut 143.0, bezel 143.60, rim 143.55 (02: 142.8 / 143.65 / 143.49); ours band/bezel 143.9, rim 149.95. Band 06 0.5795-0.9375 R. Rim 0.544 R (06; 02 0.545), width <= 0.0072 R on 06, 0.009 on 02, ours 0.0156: SD proposes 0.008. Bezel width kept as today (02 0.0214, ours 0.0204; 06 reads 0.016). Red zone: SD's proposal_for_K1 (the owner's wish, 05's rule): wedge from the redline to the band's cut 143.0, rho 0.55-0.94; a red bezel arc (when drawn) to 143.6. The '8' (ours 119.0-131.5 deg) is then wholly inside. K1's own check on the same frames agreed (rim = bezel end on 06 +-144, 08 +-141.5; rim 0.544 R).",
+      "band_rho": [
+        0.5795,
+        0.9375
+      ],
+      "band_ang": 143.0,
+      "strip_rho": [
+        0.893,
+        0.9375
+      ],
+      "bezel_ang": 143.6,
+      "rim_rho": 0.544,
+      "rim_half": 0.004,
+      "rim_ang": 143.55,
+      "red_to": 143.0,
+      "arc_to": 143.6
+    },
+    "band_B": {
+      "extends": "r3_fixed",
+      "_src": "06's band (K1 fit on SD's rectified 06 after subtracting its black 20 in linear light; G channel, 58 % of band pixels kept after trimming numerals and lines, rms 0.10 in log): Y = 0.0188 exp(4.60 (rho-0.6)) exp(0.59 (1-cos th)) -> G 37 at the top inner edge, 74 top outer, 65 / 122 at the lit lower ends (ours 24 / 81 and 56 / 166). Tint R/G 0.76, B/G 1.064 (linear). Strip body (98, 109, 111). Matches the lead's §0 colours within a few codes. hypothesis until SD's band numbers.",
+      "band_law": [
+        0.0188,
+        4.6,
+        0.59
+      ],
+      "tint": [
+        0.76,
+        1.0,
+        1.064
+      ],
+      "strip": [
+        98,
+        109,
+        111
+      ]
+    },
+    "band_C": {
+      "extends": "r3_fixed",
+      "_src": "Between A (today) and B (06): the geometric mean of the law's constants, the mean of the tints and strip codes. Our choice, not a reference.",
+      "band_law": [
+        0.0137,
+        6.05,
+        0.72
+      ],
+      "tint": [
+        0.86,
+        1.0,
+        1.07
+      ],
+      "strip": [
+        117,
+        123,
+        126
+      ]
+    },
+    "red_arc": {
+      "extends": "r3_fixed",
+      "_src": "06: no wedge; the bezel is red over the zone (SD: 06 red arc 70.3 -> 125.2 deg = 6250 -> 8000 rpm, rho 0.990-1.010, core sRGB (210, 20, 21); white bezel and grey band continue to 143.6 after it), ticks and numerals 7, 8 red. Drawn to the bezel's end, 143.6 (SD's proposal; 05 runs its red arc to the end, 147).",
+      "red_style": "arc"
+    },
+    "red_both": {
+      "extends": "r3_fixed",
+      "_src": "The wedge (04 / 08) and the red bezel (06) together: no reference shows both.",
+      "red_style": "both"
+    },
+    "red_wedge_rim": {
+      "extends": "r3_fixed",
+      "_src": "08: the inner rim is red where it borders the wedge (by eye on rectified 08: hypothesis).",
+      "red_rim": true
+    },
+    "red_08_end": {
+      "extends": "r3_fixed",
+      "_src": "K1's compromise, no reference does it: the wedge ends 2 deg past the '8' numeral's ink (about 135 deg on ours) and the grey band goes on to the cut as on 06 / 08 (where the red stops at the scale's last mark: 06 125.2, 08 120.8, and the '8' overhangs it by 5.5 / 3.5 deg: SD).",
+      "red_to": "past8"
+    },
+    "rim_today": {
+      "extends": "r3_fixed",
+      "_src": "For comparison: the fixed look with today's rim (0.545 R, width 0.016, to +-150: SD measured 149.95 on our render, 6.4 deg past 06's).",
+      "rim_rho": 0.545,
+      "rim_half": 0.008,
+      "rim_ang": 150.0
+    },
+    "num_shadow": {
+      "extends": "r3_fixed",
+      "_src": "06's soft shadow under the numerals: down and slightly right of the ink, blurred, about half as dark as the band (by eye on 06 at 6x: offset (0.008, 0.020) R, sigma 0.009 R, strength 0.70: hypothesis until SD's §5).",
+      "num_shadow": [
+        0.008,
+        0.02,
+        0.009,
+        0.7
+      ]
+    },
+    "gear_centre": {
+      "extends": "r3_fixed",
+      "_src": "06 / 07 / 11: the gear in the hub's centre (06: 'P' centred on the dial centre, cap height about 0.22 R), the program under it (06: centre +0.217 R, cap height about 0.048 R). READY moves up to -0.29 R, the unit label down to +0.40 R (06 curves it outside the lower right: not drawn).",
+      "gear_pos": "centre"
+    },
+    "strip_line": {
+      "extends": "r3_fixed",
+      "_src": "06: the tick strip carries a brighter line at its outer edge (K1 on rectified 06: G 124 at 0.931 R against a strip body of 108; a fainter one at the inner edge, 119 at 0.898). Drawn 0.924-0.934 R (the strip ends at 0.9375), 1.17 x the strip. hypothesis until SD's §4.",
+      "strip_line": [
+        0.924,
+        0.934,
+        [
+          160,
+          162,
+          167
+        ]
+      ]
+    },
+    "needle_shadow": {
+      "extends": "r3_fixed",
+      "_src": "The engine's shadow as 0.1.0 already draws it on the car (shaders.js TDIAL, u_dim.w = 1 unless the layout says shadow false; this mockup drew it without until now): 0.05 R either side of the needle, 15 % darker, on the band only.",
+      "needle_shadow": true
+    },
+    "look_06": {
+      "extends": "band_B",
+      "_src": "All of 06 at once: band B, the red bezel instead of the wedge, the numerals' shadow, gear in the centre, the strip's bright line, the needle's shadow.",
+      "red_style": "arc",
+      "num_shadow": [
+        0.008,
+        0.02,
+        0.009,
+        0.7
+      ],
+      "gear_pos": "centre",
+      "strip_line": [
+        0.924,
+        0.934,
+        [
+          115,
+          124,
+          126
+        ]
+      ],
+      "needle_shadow": true
+    },
+    "look_C_both": {
+      "extends": "band_C",
+      "_src": "K1's middle proposal: band C, wedge and red bezel, the numerals' shadow, the strip's bright line, the needle's shadow, gear low as today.",
+      "red_style": "both",
+      "num_shadow": [
+        0.008,
+        0.02,
+        0.009,
+        0.7
+      ],
+      "strip_line": [
+        0.924,
+        0.934,
+        [
+          138,
+          144,
+          148
+        ]
+      ],
+      "needle_shadow": true
+    }
+  }
+}

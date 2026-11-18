@@ -1,0 +1,32 @@
+{
+ "_about": "Round 3b, package KA (MOCKUP-SPEC-R3B section 2): the base look of every round-3b picture = K1's look_06 with SPEC-R3 section 2's corrections. Same format and loader as design/twin-dial/r3/k1/looks.json (mockup.look_named reads both files; 'extends' may name a look of either). Lengths in R, angles deg clockwise from 12 o'clock, colours sRGB codes.",
+ "looks": {
+  "r3b_base": {
+   "extends": "look_06",
+   "_src": "look_06 (band B, red bezel arc, strip bright line (115, 124, 126), needle shadow, gear in the centre) with: major lines 0.010 R (SD major_lines, SPEC-R3 2.2); the red arc ink (210, 20, 21) at rho 0.990-1.010 (SD red_zone.06, SPEC-R3 2.5); the numerals' shadow = SD's measured model instead of K1's by-eye one (SPEC-R3 2.4: outline 0.008 R darkening 0.75, drop shadow offset (+0.010, +0.012) R, sigma 0.008 R, darkening 0.35); the hub of SPEC-R3 2.7 (gear at (0, 0) cap 0.222 R, program (0, +0.209) Saira 24, READY (0, -0.29), unit (0, +0.40)). The rings (143.6 / 143.0 / 143.55, rim 0.544 R x 0.008 R) and band B are look_06's own via r3_fixed / band_B. status: verified numbers (SD) / the lead's SPEC.",
+   "num_shadow": null,
+   "num_shadow_sd": [0.008, 0.75, 0.010, 0.012, 0.008, 0.35],
+   "major_w": 0.010,
+   "arc_color": [210, 20, 21],
+   "arc_half": 0.010,
+   "gear_pos": "centre2"
+  },
+  "r3b_k1shadow": {
+   "extends": "r3b_base",
+   "_src": "A04: the same look with K1's by-eye numeral shadow, the one the owner saw in picture 80: offset (0.008, 0.020) R, sigma 0.009 R, darkening 0.70, no outline.",
+   "num_shadow": [0.008, 0.02, 0.009, 0.7],
+   "num_shadow_sd": null
+  },
+  "r3b_noshadow": {
+   "extends": "r3b_base",
+   "_src": "A04: the same look with no numeral shadow.",
+   "num_shadow": null,
+   "num_shadow_sd": null
+  },
+  "r3b_night": {
+   "extends": "r3b_base",
+   "_src": "SPEC-R3 6 / SPEC rev 2 7.2 multipliers in linear light per material (hypotheses: there is no night reference).",
+   "night": true
+  }
+ }
+}
