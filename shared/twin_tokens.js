@@ -28,6 +28,7 @@ const isNum = (x) => typeof x === 'number' && isFinite(x);
 /** CallState (ConnectivityAggregator.aggregatedCallState, VoiceCall.state) as a number 0..4, or null for anything else. */
 const CALL = { DISCONNECTED: 0, INCOMING: 1, ACTIVE: 2, DIALING: 3, HELD: 4 };
 const callNum = (raw) => (isNum(raw) && raw >= 0 && raw <= 4 ? raw : typeof raw === 'string' && CALL.hasOwnProperty(raw) ? CALL[raw] : null);
+const pages = () => require('./twin_pages');      // round 3 (B4): required when first used (twin_pages requires this file too)
 const pad2 = (n) => (n < 10 ? '0' : '') + n;
 
 function fresh() {
@@ -200,6 +201,8 @@ function wire(hud, extra) {
         once(hud, 'media', 'media text (P8): first line ' + (la === null ? 'none' : la + ' characters') + ', second ' + (lb === null ? 'none' : lb + ' characters'));
         if (cfg(hud).media === true) td.media = typeof b === 'string' && b ? b : typeof a === 'string' ? a : null;
     });
+    // twin_dial round 3 (B4): the fields only the centre pages read (shared/twin_pages.js), chained behind the ones above
+    try { pages().wire(hud, extra); } catch (e) { log(hud, 'warn', 'twin pages: not wired (' + (e && e.message || e) + ')'); }
 }
 
 /* ------------------------------------- research3/MK: the trip computer's and the odometer's sources -------------------- */
@@ -578,7 +581,10 @@ function resolve(hud, name) {
             const r = Math.round(v * 10) / 10;
             return (r >= 0 ? '+' : '-') + Math.abs(r).toFixed(1);
         }
-        default: return '{{td:' + name + '}}';
+        default: {      // twin_dial round 3 (B4): the centre pages' tokens (shared/twin_pages.js token())
+            const r = name.indexOf('pg') === 0 ? pages().token(hud, name) : undefined;
+            return r === undefined ? '{{td:' + name + '}}' : r;
+        }
     }
 }
 

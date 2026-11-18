@@ -76,11 +76,11 @@
       },
       "rules": [
         {
-          "x0": 741,
-          "y0": 295.2,
-          "x1": 1180,
-          "y1": 296.7,
-          "role": "rule"
+          "x0": 739,
+          "y0": 295,
+          "x1": 1181,
+          "y1": 297.5,
+          "role": "title"
         },
         {
           "x0": 629,
@@ -356,186 +356,996 @@
       "tdLive": "nav"
     },
     {
-      "id": "c_title",
-      "type": "text",
+      "id": "c_page",
+      "type": "tdpage",
+      "class": "content",
       "z": 6,
-      "x": 740,
-      "y": 237,
-      "w": 440,
-      "h": 57,
-      "text": "{{td:cTitle}}",
-      "font": "td_title",
-      "color": "fg",
-      "align": "center",
-      "conn": 1
-    },
-    {
-      "id": "c_time",
-      "type": "text",
-      "z": 6,
-      "x": 780,
-      "y": 337,
-      "w": 360,
-      "h": 70,
-      "text": "{{td:cTime}}",
-      "font": "td_clock",
-      "color": "fg",
-      "align": "center",
-      "conn": 1
-    },
-    {
-      "id": "c_weekday",
-      "type": "text",
-      "z": 6,
-      "x": 810,
-      "y": 417,
-      "w": 300,
-      "h": 55,
-      "text": "{{td:cWeekday}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "center",
-      "conn": 1
-    },
-    {
-      "id": "c_date",
-      "type": "text",
-      "z": 6,
-      "x": 810,
-      "y": 476,
-      "w": 300,
-      "h": 46,
-      "text": "{{td:cDate}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "center",
-      "conn": 1
-    },
-    {
-      "id": "t1_a",
-      "type": "text",
-      "z": 6,
-      "x": 793,
-      "y": 319,
-      "w": 112,
-      "h": 46,
-      "text": "{{td:tConsAvg}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "right",
-      "conn": 1
-    },
-    {
-      "id": "t1_au",
-      "type": "text",
-      "z": 6,
-      "x": 911,
-      "y": 338,
-      "w": 92,
-      "h": 31,
-      "text": "{{td:tConsU}}",
-      "font": "td_u21",
-      "color": "fg",
-      "align": "left",
-      "conn": 1
-    },
-    {
-      "id": "t1_b",
-      "type": "text",
-      "z": 6,
-      "x": 1004,
-      "y": 319,
-      "w": 101,
-      "h": 46,
-      "text": "{{td:tSpeedAvg}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "right",
-      "conn": 1
-    },
-    {
-      "id": "t1_bu",
-      "type": "text",
-      "z": 6,
-      "x": 1111,
-      "y": 338,
-      "w": 75,
-      "h": 31,
-      "text": "{{td:tSpeedU}}",
-      "font": "td_u21",
-      "color": "fg",
-      "align": "left",
-      "conn": 1
-    },
-    {
-      "id": "t2_a",
-      "type": "text",
-      "z": 6,
-      "x": 805,
-      "y": 387,
-      "w": 100,
-      "h": 46,
-      "text": "{{td:tDist}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "right",
-      "conn": 1
-    },
-    {
-      "id": "t2_au",
-      "type": "text",
-      "z": 6,
-      "x": 911,
-      "y": 406,
-      "w": 30,
-      "h": 31,
-      "text": "{{td:tDistU}}",
-      "font": "td_u21",
-      "color": "fg",
-      "align": "left",
-      "conn": 1
-    },
-    {
-      "id": "t2_b",
-      "type": "text",
-      "z": 6,
-      "x": 1005,
-      "y": 387,
-      "w": 100,
-      "h": 46,
-      "text": "{{td:tTime}}",
-      "font": "td_val",
-      "color": "fg",
-      "align": "right",
-      "conn": 1
-    },
-    {
-      "id": "t2_bu",
-      "type": "text",
-      "z": 6,
-      "x": 1111,
-      "y": 406,
-      "w": 38,
-      "h": 31,
-      "text": "{{td:tTimeU}}",
-      "font": "td_u21",
-      "color": "fg",
-      "align": "left",
-      "conn": 1
-    },
-    {
-      "id": "t_from",
-      "type": "text",
-      "z": 6,
-      "x": 740,
-      "y": 495,
-      "w": 440,
-      "h": 42,
-      "text": "{{td:tFrom}}",
-      "font": "td_body",
-      "color": "dim",
-      "align": "center",
-      "conn": 1
+      "x": 729,
+      "y": 248,
+      "w": 462,
+      "h": 347,
+      "conn": 1,
+      "own": true,
+      "pages": {
+        "clock": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "time",
+              "x": 960,
+              "b": 404,
+              "f": "clock",
+              "s": "{{td:pgTime}}",
+              "c": "fg",
+              "al": "c"
+            },
+            {
+              "k": "t",
+              "id": "weekday",
+              "x": 960,
+              "b": 460,
+              "f": "n39",
+              "s": "{{td:pgWeekday}}",
+              "c": "fg",
+              "al": "c"
+            },
+            {
+              "k": "t",
+              "id": "date",
+              "x": 960,
+              "b": 519,
+              "f": "n39",
+              "s": "{{td:pgDate}}",
+              "c": "fg",
+              "al": "c"
+            }
+          ]
+        },
+        "trip": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "meta",
+              "x": 1190,
+              "b": 326,
+              "f": "n31",
+              "s": "{{td:pgTripMeta}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "i",
+              "id": "i1",
+              "n": "{{td:pgIconFuel}}",
+              "cx": 752,
+              "cy": 369,
+              "sz": 46,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "cons",
+              "x": 896,
+              "b": 384,
+              "f": "n42",
+              "s": "{{td:pgTripCons}}",
+              "c": "fg",
+              "al": "r"
+            },
+            {
+              "k": "frac",
+              "id": "cons_u",
+              "x": 906,
+              "b": 384,
+              "top": "л",
+              "bot": "100 км",
+              "dt": -17,
+              "dr": -14,
+              "db": 3,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "speed",
+              "x": 1109,
+              "b": 384,
+              "f": "n42",
+              "s": "{{td:pgTripSpeed}}",
+              "c": "fg",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "speed_u",
+              "x": 1116,
+              "b": 384,
+              "f": "u21",
+              "s": "км/год",
+              "c": "fg",
+              "al": "l"
+            },
+            {
+              "k": "i",
+              "id": "i2",
+              "n": "{{td:pgIconRoad}}",
+              "cx": 752,
+              "cy": 440,
+              "sz": 46,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "way",
+              "x": 896,
+              "b": 455,
+              "f": "n42",
+              "s": "{{td:pgTripWay}}",
+              "c": "fg",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "way_u",
+              "x": 906,
+              "b": 455,
+              "f": "u21",
+              "s": "км",
+              "c": "fg",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "foot",
+              "x": 960,
+              "b": 565,
+              "f": "n31",
+              "s": "{{td:pgTripFooter}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 440
+            }
+          ]
+        },
+        "tech": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "l0",
+              "x": 745,
+              "b": 352,
+              "f": "n31",
+              "s": "Олива",
+              "c": "dim",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "v0",
+              "x": 1150,
+              "b": 352,
+              "f": "n40",
+              "s": "{{td:pgTechV0}}",
+              "c": "{{td:pgTechC0}}",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "u0",
+              "x": 1156,
+              "b": 352,
+              "f": "u21",
+              "s": "{{td:pgTechU0}}",
+              "c": "{{td:pgTechC0}}",
+              "al": "l"
+            },
+            {
+              "k": "bar",
+              "id": "b0",
+              "x0": 745,
+              "x1": 1175,
+              "y": 364,
+              "h": 6,
+              "v": "{{td:pgTechF0}}",
+              "w": "{{td:pgTechW0}}",
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "l1",
+              "x": 745,
+              "b": 418,
+              "f": "n31",
+              "s": "Охолодження",
+              "c": "dim",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "v1",
+              "x": 1150,
+              "b": 418,
+              "f": "n40",
+              "s": "{{td:pgTechV1}}",
+              "c": "{{td:pgTechC1}}",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "u1",
+              "x": 1156,
+              "b": 418,
+              "f": "u21",
+              "s": "{{td:pgTechU1}}",
+              "c": "{{td:pgTechC1}}",
+              "al": "l"
+            },
+            {
+              "k": "bar",
+              "id": "b1",
+              "x0": 745,
+              "x1": 1175,
+              "y": 430,
+              "h": 6,
+              "v": "{{td:pgTechF1}}",
+              "w": "{{td:pgTechW1}}",
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "l2",
+              "x": 745,
+              "b": 484,
+              "f": "n31",
+              "s": "Наддув",
+              "c": "dim",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "v2",
+              "x": 1150,
+              "b": 484,
+              "f": "n40",
+              "s": "{{td:pgTechV2}}",
+              "c": "{{td:pgTechC2}}",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "u2",
+              "x": 1152,
+              "b": 484,
+              "f": "u21",
+              "s": "{{td:pgTechU2}}",
+              "c": "{{td:pgTechC2}}",
+              "al": "l"
+            },
+            {
+              "k": "bar",
+              "id": "b2",
+              "x0": 745,
+              "x1": 1175,
+              "y": 496,
+              "h": 6,
+              "v": "{{td:pgTechF2}}",
+              "w": "{{td:pgTechW2}}",
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "l3",
+              "x": 745,
+              "b": 550,
+              "f": "n31",
+              "s": "Зовні",
+              "c": "dim",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "v3",
+              "x": 1150,
+              "b": 550,
+              "f": "n40",
+              "s": "{{td:pgTechV3}}",
+              "c": "{{td:pgTechC3}}",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "u3",
+              "x": 1156,
+              "b": 550,
+              "f": "u21",
+              "s": "{{td:pgTechU3}}",
+              "c": "{{td:pgTechC3}}",
+              "al": "l"
+            }
+          ]
+        },
+        "tyres": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "car",
+              "id": "car",
+              "cx": 960,
+              "cy": 430,
+              "w": 110,
+              "h": 230,
+              "c": "dim"
+            },
+            {
+              "k": "g",
+              "id": "p0",
+              "cx": 800,
+              "b": 360,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgTyreP0}}",
+                  "f": "n40",
+                  "c": "{{td:pgTyreC0}}"
+                },
+                {
+                  "s": "бар",
+                  "f": "u21",
+                  "gap": 4,
+                  "c": "{{td:pgTyreC0}}"
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "t0",
+              "x": 800,
+              "b": 400,
+              "f": "n31",
+              "s": "{{td:pgTyreT0}}",
+              "c": "grey",
+              "al": "c"
+            },
+            {
+              "k": "g",
+              "id": "p1",
+              "cx": 1120,
+              "b": 360,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgTyreP1}}",
+                  "f": "n40",
+                  "c": "{{td:pgTyreC1}}"
+                },
+                {
+                  "s": "бар",
+                  "f": "u21",
+                  "gap": 4,
+                  "c": "{{td:pgTyreC1}}"
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "t1",
+              "x": 1120,
+              "b": 400,
+              "f": "n31",
+              "s": "{{td:pgTyreT1}}",
+              "c": "grey",
+              "al": "c"
+            },
+            {
+              "k": "g",
+              "id": "p2",
+              "cx": 800,
+              "b": 505,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgTyreP2}}",
+                  "f": "n40",
+                  "c": "{{td:pgTyreC2}}"
+                },
+                {
+                  "s": "бар",
+                  "f": "u21",
+                  "gap": 4,
+                  "c": "{{td:pgTyreC2}}"
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "t2",
+              "x": 800,
+              "b": 545,
+              "f": "n31",
+              "s": "{{td:pgTyreT2}}",
+              "c": "grey",
+              "al": "c"
+            },
+            {
+              "k": "g",
+              "id": "p3",
+              "cx": 1120,
+              "b": 505,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgTyreP3}}",
+                  "f": "n40",
+                  "c": "{{td:pgTyreC3}}"
+                },
+                {
+                  "s": "бар",
+                  "f": "u21",
+                  "gap": 4,
+                  "c": "{{td:pgTyreC3}}"
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "t3",
+              "x": 1120,
+              "b": 545,
+              "f": "n31",
+              "s": "{{td:pgTyreT3}}",
+              "c": "grey",
+              "al": "c"
+            }
+          ]
+        },
+        "msg": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            }
+          ]
+        },
+        "media": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "i",
+              "id": "src",
+              "n": "{{td:pgSrcIcon}}",
+              "cx": 960,
+              "cy": 392,
+              "sz": 66,
+              "c": "fg"
+            }
+          ]
+        },
+        "radio": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "meta",
+              "x": 1190,
+              "b": 326,
+              "f": "n31",
+              "s": "{{td:pgMediaMeta}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "i",
+              "id": "ic",
+              "n": "{{td:pgIconRadio}}",
+              "cx": 960,
+              "cy": 344,
+              "sz": 54,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "station",
+              "x": 960,
+              "b": 424,
+              "f": "title",
+              "s": "{{td:pgStation}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "text",
+              "x": 960,
+              "b": 471,
+              "f": "n29",
+              "s": "{{td:pgRadioText}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "foot",
+              "x": 960,
+              "b": 565,
+              "f": "n29",
+              "s": "{{td:pgRadioFoot}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            }
+          ]
+        },
+        "track": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "meta",
+              "x": 1190,
+              "b": 326,
+              "f": "n31",
+              "s": "{{td:pgMediaMeta}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "name",
+              "x": 960,
+              "b": 400,
+              "f": "title",
+              "s": "{{td:pgTrackTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "artist",
+              "x": 960,
+              "b": 444,
+              "f": "n31",
+              "s": "{{td:pgTrackArtist}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "prog",
+              "id": "prog",
+              "x0": 800,
+              "x1": 1120,
+              "y": 500,
+              "v": "{{td:pgTrackFrac}}"
+            },
+            {
+              "k": "t",
+              "id": "el",
+              "x": 800,
+              "b": 530,
+              "f": "u21",
+              "s": "{{td:pgTrackEl}}",
+              "c": "dim",
+              "al": "l"
+            },
+            {
+              "k": "t",
+              "id": "tot",
+              "x": 1120,
+              "b": 530,
+              "f": "u21",
+              "s": "{{td:pgTrackTot}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "t",
+              "id": "no",
+              "x": 960,
+              "b": 530,
+              "f": "u21",
+              "s": "{{td:pgTrackNo}}",
+              "c": "dim",
+              "al": "c"
+            },
+            {
+              "k": "i",
+              "id": "mute",
+              "n": "{{td:pgMute}}",
+              "cx": 960,
+              "cy": 560,
+              "sz": 26,
+              "c": "grey"
+            }
+          ]
+        },
+        "phone": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "i",
+              "id": "ic",
+              "n": "{{td:pgIconPhone}}",
+              "cx": 960,
+              "cy": 344,
+              "sz": 54,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "l1",
+              "x": 960,
+              "b": 424,
+              "f": "n39",
+              "s": "{{td:pgPhoneLine1}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "l2",
+              "x": 960,
+              "b": 471,
+              "f": "n29",
+              "s": "{{td:pgPhoneLine2}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            }
+          ]
+        },
+        "call": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "meta",
+              "x": 1190,
+              "b": 326,
+              "f": "n31",
+              "s": "{{td:pgCallPath}}",
+              "c": "dim",
+              "al": "r"
+            },
+            {
+              "k": "i",
+              "id": "ring",
+              "n": "{{td:pgCallIcon}}",
+              "cx": 960,
+              "cy": 372,
+              "sz": 66,
+              "c": "ready"
+            },
+            {
+              "k": "t",
+              "id": "timer",
+              "x": 960,
+              "b": 410,
+              "f": "s72",
+              "s": "{{td:pgCallTimer}}",
+              "c": "fg",
+              "al": "c"
+            },
+            {
+              "k": "t",
+              "id": "who",
+              "x": 960,
+              "b": 478,
+              "f": "n39",
+              "s": "{{td:pgCallWho}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "i",
+              "id": "mic",
+              "n": "{{td:pgCallMic}}",
+              "cx": 960,
+              "cy": 540,
+              "sz": 30,
+              "c": "grey"
+            }
+          ]
+        },
+        "map": {
+          "items": [
+            {
+              "k": "r",
+              "id": "bar",
+              "x0": 760,
+              "y0": 556,
+              "x1": 1160,
+              "y1": 594,
+              "c": "bg",
+              "a": 0.6,
+              "if": "{{td:pgRoadBar}}"
+            },
+            {
+              "k": "t",
+              "id": "road",
+              "x": 960,
+              "b": 588,
+              "f": "n31",
+              "s": "{{td:pgRoadBar}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 380
+            }
+          ]
+        },
+        "guide": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "i",
+              "id": "arrow",
+              "n": "{{td:pgGuideIcon}}",
+              "cx": 830,
+              "cy": 378,
+              "sz": 120,
+              "c": "fg"
+            },
+            {
+              "k": "t",
+              "id": "exit",
+              "x": 830,
+              "b": 386,
+              "f": "u21",
+              "s": "{{td:pgGuideExit}}",
+              "c": "fg",
+              "al": "c"
+            },
+            {
+              "k": "g",
+              "id": "dist",
+              "x": 915,
+              "al": "l",
+              "b": 410,
+              "c": "fg",
+              "parts": [
+                {
+                  "s": "{{td:pgGuideDist}}",
+                  "f": "s72"
+                },
+                {
+                  "s": "{{td:pgGuideUnit}}",
+                  "f": "n29",
+                  "gap": 8
+                }
+              ]
+            },
+            {
+              "k": "t",
+              "id": "road",
+              "x": 770,
+              "b": 480,
+              "f": "n33",
+              "s": "{{td:pgGuideRoad}}",
+              "c": "fg",
+              "al": "l",
+              "mw": 410
+            },
+            {
+              "k": "lanes",
+              "id": "lanes",
+              "cx": 960,
+              "cy": 515,
+              "pitch": 34,
+              "sz": 30
+            },
+            {
+              "k": "t",
+              "id": "foot",
+              "x": 960,
+              "b": 560,
+              "f": "n29",
+              "s": "{{td:pgGuideFoot}}",
+              "c": "dim",
+              "al": "c",
+              "mw": 436
+            }
+          ]
+        },
+        "calc": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "msg",
+              "x": 960,
+              "b": 400,
+              "f": "n33",
+              "s": "{{td:pgCalc}}",
+              "c": "fg",
+              "al": "c"
+            }
+          ]
+        },
+        "road": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "road",
+              "x": 960,
+              "b": 400,
+              "f": "title",
+              "s": "{{td:pgRoad}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 436
+            },
+            {
+              "k": "t",
+              "id": "sub",
+              "x": 960,
+              "b": 452,
+              "f": "n29",
+              "s": "{{td:pgNavSub}}",
+              "c": "dim",
+              "al": "c"
+            }
+          ]
+        },
+        "none": {
+          "items": [
+            {
+              "k": "t",
+              "id": "title",
+              "x": 960,
+              "b": 281,
+              "f": "title",
+              "s": "{{td:pgTitle}}",
+              "c": "fg",
+              "al": "c",
+              "mw": 440
+            },
+            {
+              "k": "t",
+              "id": "sub",
+              "x": 960,
+              "b": 400,
+              "f": "n29",
+              "s": "Маршрут не прокладено",
+              "c": "dim",
+              "al": "c"
+            }
+          ]
+        }
+      }
     },
     {
       "id": "ready",

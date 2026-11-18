@@ -112,9 +112,9 @@ console.log('the centre page: clock | trip | cycle');
     k._now_ms = T0 + 10020; const p1 = twin.page(k);
     k._now_ms = T0 + 10030; const p2 = twin.page(k);
     ok(p1 === p2, 'two widgets of one tick (30 ms apart) see the same page');
-    // the layout: both pages' texts exist all the time, in page order (the clock page first)
-    const ids = L.widgets.map((w) => w.id);
-    ok(ids.indexOf('c_time') < ids.indexOf('t1_a'), 'the layout carries both pages\' texts; the clock page\'s come first (the planner\'s sheet order)');
+    // twin_dial round 3 (B4): the layout carries every page in ONE layer (tdpage c_page, shared/twin_pages.js), clock page first
+    const pg = L.widgets.filter((w) => w.type === 'tdpage')[0];
+    ok(!!pg && Object.keys(pg.pages).indexOf('clock') === 0 && Object.keys(pg.pages).indexOf('trip') === 1, 'the layout carries every page in one layer (round 3 B4); the clock page first, then the trip');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

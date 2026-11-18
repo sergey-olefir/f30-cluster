@@ -29,6 +29,7 @@
     "gallery.js",
     "previews.js",
     "twin_tokens.js",
+    "twin_pages.js",
     "twin_cc.js",
     "twin_tabs.js",
     "twin_probe.js",
@@ -68,7 +69,9 @@
       "dataDisplayGearbox": "s"
     },
     "de.bmw.infotainment.drivingexcitement.FES": {
-      "statusFESVehicleDynamicSwitchHMI": "rs"
+      "statusFESVehicleDynamicSwitchHMI": "rs",
+      "statusSwitchDriveDynamicSport2": "rs",
+      "_about": "statusSwitchDriveDynamicSport2 (getter 39 / notifier 32807): displayBoostPressure, the technical page's boost row (round 3 B4; the engine already reads it: hud.js boostFes). Read only."
     },
     "de.bmw.infrastructure.VehicleCondition": {
       "VehicleCondition": "s",
@@ -91,7 +94,8 @@
       "statusShowTimeDate": "rs",
       "statusActiveCCMessage": "rs",
       "statusMenuCCMessage": "rs",
-      "_about": "statusRangeTankStatus: fuel litres, range km, spare (reserve) and mileageKilometre (the odometer, first carrier). The trip computer fields are unseen (P4); research3/MK: the most likely factors are on by default (config.trip), each value UNVERIFIED in the log until the first drive compares it with the car's trip page. statusActiveCCMessage / statusMenuCCMessage: READ ONLY (standardCCMessage / extendedCCMessage are setters and are never declared)."
+      "_about": "statusRangeTankStatus: fuel litres, range km, spare (reserve) and mileageKilometre (the odometer, first carrier). The trip computer fields are unseen (P4); research3/MK: the most likely factors are on by default (config.trip), each value UNVERIFIED in the log until the first drive compares it with the car's trip page. statusActiveCCMessage / statusMenuCCMessage: READ ONLY (standardCCMessage / extendedCCMessage are setters and are never declared).",
+      "statusConfigurationKombi5": "rs"
     },
     "de.bmw.infotainment.KombiInterface_2": {
       "ccList": "rs",
@@ -100,7 +104,9 @@
     "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
       "playerMetadata": "rs",
       "_instances": "HMI_CID",
-      "_about": "unseen (P8); the media text is never logged, lengths only"
+      "_about": "unseen (P8): playerMetadata, trackProgress, menu feed the tab-3 pages (config.pages.media, dark); the text is drawn, never logged (lengths only). coverArt is NOT declared (up to 850 kB a notification).",
+      "trackProgress": "rs",
+      "menu": "rs"
     },
     "de.bmw.infotainment.entertainment.mediasource.MediaSource": {
       "activeSourceId": "rs",
@@ -114,6 +120,46 @@
     "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus": {
       "guidingState": "rs",
       "_about": "the navigation tab's icon: lit while a route is guided"
+    },
+    "de.bmw.infotainment.tuner.fmamdab.tunerfmamdab.TunerFmAmDab": {
+      "currentStationFmDabAm": "rs",
+      "_about": "unseen (P8): the radio page (config.pages.media, dark). Read only."
+    },
+    "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer": {
+      "_instances": "CarPlayMedia",
+      "currentItemPosition": "rs",
+      "playerState": "rs",
+      "_about": "unseen (P8): CarPlay track n of m and play state, one instance per interface (SPEC-R3 4.3). Read only."
+    },
+    "de.bmw.infotainment.connectivity.telephony.VoiceCall": {
+      "_instances": "Call1",
+      "state": "rs",
+      "contactID": "rs",
+      "name": "rs",
+      "_about": "unseen (P9): the call card (config.pages.phone, dark). name is private: kept only while the setting \"callerName\" is on and the call lasts, never logged. Read only."
+    },
+    "de.bmw.infotainment.connectivity.telephony.VoiceCallManager": {
+      "micMuted": "rs",
+      "_about": "unseen (P9): the muted-microphone mark on the call card. Read only (its setter is never declared)."
+    },
+    "de.bmw.infotainment.devicemanager.devicepresentation.DevicePresentation": {
+      "deviceList": "rs",
+      "_about": "unseen (P9): the idle phone page (connected, path, battery, signal); friendlyName and persistentAttributes are never read. Read only."
+    },
+    "de.bmw.infotainment.navigation.guiding.Guidance": {
+      "_instances": "Main_Instance",
+      "currentRoad": "rs",
+      "conclusiveDart": "rs",
+      "currentLaneGuiding": "rs",
+      "nextDestinationInfo": "rs",
+      "visualizationInKombiNonNaviEnabled": "rs",
+      "_about": "unseen (P12): the road line, the guidance page (config.pages.guidance, dark) and the map window's presence rule (config.mapWindow). Road text is drawn, never logged; positions and bearings are never read. Read only."
+    },
+    "de.bmw.infotainment.vehicle.TPMS": {
+      "statusTyrePressure": "rs",
+      "statusTyreTemperature": "rs",
+      "statusTargetTyrePressure": "rs",
+      "_about": "the tyre page (config.pages.tyres, dark): the car never notifies TPMS, so the page reads the getters every 10 s while it shows (shared/twin_pages.js tpmsPoll). Read only."
     }
   },
   "screens": [
@@ -134,6 +180,10 @@
         [
           "setting",
           "tab"
+        ],
+        [
+          "setting",
+          "techData"
         ],
         [
           "text",
@@ -170,6 +220,7 @@
         "hudLayout",
         "centre",
         "tab",
+        "techData",
         "diagRelease",
         "diagMapWindow",
         "diagMapForce",
@@ -226,24 +277,45 @@
     },
     {
       "key": "centre",
-      "label": "Centre page",
+      "label": "Сторінка бортового комп'ютера",
       "type": "choice",
       "default": "cycle",
       "options": [
         [
           "clock",
-          "Date and clock"
+          "Годинник"
         ],
         [
           "trip",
-          "Trip computer"
+          "Поїздка"
+        ],
+        [
+          "tech",
+          "Технічні дані"
         ],
         [
           "cycle",
-          "Both, in turn"
+          "По колу"
         ]
       ],
-      "_about": "SPEC 6.2: cycle holds each page 10 s while the car stands and keeps the page it is on above 5 km/h"
+      "_about": "SPEC-R3 4.1 / 10: tab 1's page: one page or in turn (cycle: 10 s a page while the car stands, held above 5 km/h). Technical data out of the choice and the cycle when \"techData\" is hide. Applied in place (shared/twin_pages.js)."
+    },
+    {
+      "key": "techData",
+      "label": "Технічні дані",
+      "type": "choice",
+      "default": "show",
+      "options": [
+        [
+          "show",
+          "Показувати"
+        ],
+        [
+          "hide",
+          "Сховати"
+        ]
+      ],
+      "_about": "SPEC-R3 4.1: hide = the technical page is out of tab 1's choice and the cycle (R4). Applied in place."
     },
     {
       "key": "tab",
@@ -373,6 +445,23 @@
       ],
       "markDefault": true,
       "_about": "SPEC 7.1 / 17.2: the band and tick strip level, set from one photo on the car"
+    },
+    {
+      "key": "callerName",
+      "label": "Показувати ім'я абонента",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Ні"
+        ],
+        [
+          "on",
+          "Так"
+        ]
+      ],
+      "_about": "SPEC-R3 4.4: the call card shows the caller's name (private text: kept only while the call lasts, never logged). Off = \"Контакт\" or \"Номер\". Only has an effect once config.pages.phone is switched on."
     },
     {
       "key": "demo",
@@ -679,6 +768,19 @@
         "diagMapSlots": { "on": { "mapSlots": true } },
         "diagSilent": { "act": "silent" }
       }
-    }
+    },
+    "pages": {
+      "_about": "round 3 B4 (SPEC-R3 4): the pages built DARK, each switched on by the car session once its signal has been seen (docs/AGENT-BRIEF-car-signals.md). tyres: tab 1's tyre page joins the cycle (TPMS getters polled every 10 s while it shows); media: tab 3's radio and now-playing pages (P8); phone: tab 4's call card (P9); guidance: tab 5's guidance page (P12). false = the certain page or the fallback shows.",
+      "tyres": false,
+      "media": false,
+      "phone": false,
+      "guidance": false
+    },
+    "mapWindow": null,
+    "_mapWindow": "round 3 B4 (SPEC-R3 4.5), an EXPERIMENT: null = no map window; \"W1\" = the soft-edged window (zero box [750, 180, 1170, 564], fades 120 / 80 / 80, corner 24), \"W2\" = open wider so that BMW's own edge shows. It opens only while tab 5 is selected and BMW's map is believed present (mapSlots / the cluster's map-view setting) and closes at once on any doubt. Needs B1's u_map uniform in tdback.",
+    "mapSlots": false,
+    "_mapSlots": "true once the experiment has shown that cluster-render's status rows (slot 0x100 ... map 1) are readable: the window then follows them (S1); false = it follows the cluster's map-view setting and guidance (S2).",
+    "mapForce": false,
+    "mapShutMs": 8000
   }
 }
