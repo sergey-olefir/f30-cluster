@@ -1430,6 +1430,7 @@ class HudApp {
         // ccList entry whose id is that number (_ccListEval). Whether the numbering is ccList's is UNCONFIRMED.
         const ca = this.config.ccActive;
         this.ccAct = null; this.ccActAny = false; this.ccActLogged = undefined; this.ccNoMatchLogged = {};
+        this.ccActFirst = undefined; this.ccActLive = false;      // car-fix CF1: whether the number has ever changed (_ccActWitness)
         if (ca && ca.iface && ca.field) {
             watchOne(ca, (v) => {
                 const num = (p) => { const r = p ? pick(v, p) : undefined; return isNum(r) ? r : null; };
@@ -1439,10 +1440,19 @@ class HudApp {
                 if (line !== this.ccActLogged) { this.ccActLogged = line; this.log.info('active cc: ' + line); }
                 if (a.number === null) return;      // not a struct our paths fit: it decides nothing
                 this.ccAct = a;
+                // car-fix CF1: on the owner's car this number is 65535 the whole run (2026-11-18); it is a witness beside
+                // config.ccDisplayed only once it has CHANGED to a number outside ccActive.deadValues (default [65535])
+                if (this.ccActFirst === undefined) this.ccActFirst = a.number;
+                else if (!this.ccActLive && a.number !== this.ccActFirst && !inList(this._ccDeadValues(), a.number)) {
+                    this.ccActLive = true;
+                    if (this._ccDispSource()) this.log.info('active cc: it changed (' + this.ccActFirst + ' -> ' + a.number + ')' + (ca.dead === true ? ', but config.ccActive.dead: still no witness' : ': a witness again beside displayed cc'));
+                }
+                // ---- end car-fix CF1 ----
                 if (!this.ccActAny) {
                     const was = this._ccWired();
                     this.ccActAny = true;
-                    this.log.info('active cc: wired - from now on it alone says whether a message shows');
+                    // car-fix CF1: with config.ccActive.source "displayed" it is read and logged, it does not decide alone
+                    this.log.info('active cc: wired - ' + (this._ccDispSource() ? 'not the "shown now" source (config.ccActive.source displayed' + (ca.dead === true ? ', dead' : '') + ')' : 'from now on it alone says whether a message shows'));
                     if (!was && this.client && this.client.ready) this._rebuild();
                 }
                 this._ccListEval(Date.now(), false);
@@ -1470,7 +1480,8 @@ class HudApp {
                     if (!isNum(r)) return;
                     this.ccDisp = r;
                     if (r !== this.ccDispLogged) { this.ccDispLogged = r; this.log.info('displayed cc: number ' + r); }
-                    if (!this.ccDispAny) { this.ccDispAny = true; this.log.info('displayed cc: the second "shown now" witness has spoken'); }
+                    if (!this.ccDispAny) { this.ccDispAny = true; this.log.info('displayed cc: the ' + (this._ccDispSource() ? '"shown now" source' : 'second "shown now" witness') + ' has spoken'); }
+                    if (this._ccDispSource()) this._ccListEval(Date.now(), false);       // car-fix CF1: the list's verdict follows it too
                     this._ccPush();
                 });
             }
@@ -1486,11 +1497,15 @@ class HudApp {
                     if (!isNum(r)) return;
                     this.ccDisp = r;
                     if (r !== this.ccDispLogged) { this.ccDispLogged = r; this.log.info('displayed cc: number ' + r); }
+                    const src = this._ccDispSource();     // car-fix CF1: config.ccActive.source "displayed": it decides
                     if (!this.ccDispAny) {
+                        const was = this._ccWired();
                         this.ccDispAny = true;
-                        this.log.info('displayed cc: the second "shown now" witness has spoken' + (cd.use === true ? '' : ' (logged only)'));
+                        this.log.info(src ? 'displayed cc: the "shown now" source has spoken (config.ccActive.source displayed)'
+                            : 'displayed cc: the second "shown now" witness has spoken' + (cd.use === true ? '' : ' (logged only)'));
+                        if (src && !was && this.client && this.client.ready) this._rebuild();      // car-fix CF1: it can end the blind case
                     }
-                    if (cd.use === true) { this._ccListEval(Date.now(), false); this._ccPush(); }
+                    if (cd.use === true || src) { this._ccListEval(Date.now(), false); this._ccPush(); }
                 });
             }
         }
@@ -4239,19 +4254,52 @@ class HudApp {
         const before = this.ccListShown + '|' + this.ccListUnread + '|' + this.ccNoMatch + '|' + (this.ccItems || []).map((e) => e.key).join(',');
         let shown = this.ccListShown, items = this.ccItems || [], unread = 0, noMatch = null;
         this.ccFallbackLive = false;
+        // ---- car-fix CF1 (docs/car-fix/CF1-REPORT.md; the owner's car 2026-11-18): config.ccActive.source "displayed" -
+        // Vehicle2 statusDisplayedCCMessage (config.ccDisplayed) is the cluster's "shown now" once it has given a number:
+        // door opened -> ccList id 15 and displayed 15 in the same ~50 ms; closed -> the list at rest, displayed 0 ~0.2-0.7 s
+        // later; 285 / 926 / 927 / 184 shown with no ccList entry. 0 (noneValues): nothing shown, listed entries are stored
+        // ones; N with an entry: that entry; N with none: shown, BMW's panel stays open; 65535 (unknownValues): unknown,
+        // shown, BMW's panel stays open; a live active number (_ccActWitness) that disagrees: BMW's panel stays open. The
+        // release (below) is for the active number only and is not consulted here. Before displayed speaks: 0.7.20's path. ----
+        const dsrc = this._ccDispSource() && this.ccDispAny === true && isNum(this.ccDisp);
+        if (dsrc) {
+            const d = this.ccDisp, none = Array.isArray(ca.noneValues) ? ca.noneValues : [0];
+            const unk = Array.isArray(ca.unknownValues) ? ca.unknownValues : [65535];
+            const actW = this._ccActWitness(), an = actW ? this.ccAct.number : null;
+            const agree = !actW || (inList(none, an) ? inList(none, d) : an === d);
+            this.ccReleased = false; this.ccNoEntry = null;
+            items = [];
+            let why = null;
+            if (inList(unk, d)) { shown = true; noMatch = d; why = 'number ' + d + ' is unknown (config.ccActive.unknownValues)'; }
+            else if (!agree) { shown = true; noMatch = d; why = 'the active number ' + an + ' disagrees with ' + d; }
+            else if (inList(none, d)) shown = false;
+            else {
+                shown = true;
+                const e = (all || []).find((x) => x.id === d);
+                if (!e) { noMatch = d; why = 'no ccList entry for number ' + d; }
+                else if (e.name) items = [e];
+                else unread = 1;
+            }
+            if (why && !this.ccNoMatchLogged['d' + why]) {      // once per reason and number: numbers only
+                this.ccNoMatchLogged['d' + why] = true;
+                this.log.info('displayed cc: ' + why + ' - shown, BMW\'s panel stays open');
+            }
+        }
+        // ---- end car-fix CF1 (the displayed branch; 0.7.20's path follows, `rel` unused while displayed decides) ----
         // ---- research3/mc (docs/research3/MC-REPORT.md): config.ccActive.release, absent = 0.7.20 exactly. When the
         // "shown now" value is no verdict (_ccRelease), the list decides instead (release.then: "listed" - shown while
         // ccList lists any entry outside ignoreIds, the safe side; "heuristic" - the 0.7.20 fallback below)
-        const rel = this._ccRelease(now, all);
-        this.ccReleased = !!rel;      // twin_dial B3: _twinInputs hands the machine "not wired" while the "shown now" value is no verdict
-        if (rel === 'listed' && all) {
+        const rel = dsrc ? null : this._ccRelease(now, all);
+        if (!dsrc) this.ccReleased = !!rel;      // twin_dial B3: _twinInputs hands the machine "not wired" while the "shown now" value is no verdict
+        if (dsrc) { /* car-fix CF1: decided above */ }
+        else if (rel === 'listed' && all) {
             const live = all.filter((e) => !e.ignored);
             items = live.filter((e) => e.name).slice(0, 16);
             unread = live.length - items.length;
             shown = live.length > 0;
         } else if (rel === 'listed') {
             // no list recorded yet: nothing to decide from, the last verdict holds (the safe side while it was shown)
-        } else if (this.ccActAny && this.ccAct && !rel) {
+        } else if (this._ccActDecides() && !rel) {       // car-fix CF1: was `this.ccActAny && this.ccAct` (the same unless ccActive.dead)
             const n = this.ccAct.number, none = Array.isArray(ca.noneValues) ? ca.noneValues : [0];
             items = [];
             // research3/mc, release.witness: "shown now" says none but the second witness names a number: shown
@@ -4273,7 +4321,7 @@ class HudApp {
                 } else if (e.name) items = [e];
                 else unread = 1;
             }
-        } else if (all && (rel === 'heuristic' || !(this.ccActAny && this.ccAct))) {
+        } else if (all && (rel === 'heuristic' || !this._ccActDecides())) {
             const fb = ca.fallback || {};
             const on = !!ca.iface && fb.on !== false;
             const ms = isNum(fb.hideAfterMs) ? fb.hideAfterMs : isNum(this.config.ccm && this.config.ccm.autoHideMs) ? this.config.ccm.autoHideMs : 20000;
@@ -4316,7 +4364,7 @@ class HudApp {
      *  tick evaluates again when it ends. */
     _ccRelease(now, all) {
         const ca = this.config.ccActive || {}, r = ca.release;
-        if (!r || typeof r !== 'object' || !this.ccActAny || !this.ccAct) { this.ccNoEntry = null; return null; }
+        if (!r || typeof r !== 'object' || !this._ccActDecides()) { this.ccNoEntry = null; return null; }      // car-fix CF1: a dead active number has nothing to release
         const a = this.ccAct, n = a.number, none = Array.isArray(ca.noneValues) ? ca.noneValues : [0];
         const then = r.then === 'heuristic' ? 'heuristic' : 'listed';
         // every id the list has carried (outside ignoreIds) in this run, for leftList
@@ -4362,6 +4410,38 @@ class HudApp {
         return this.ccDisp;
     }
 
+    // ---- car-fix CF1 (docs/car-fix/CF1-REPORT.md): the "shown now" source ----
+    /** Whether config.ccActive.source is "displayed" and config.ccDisplayed names the field (Vehicle2 statusDisplayedCCMessage). */
+    _ccDispSource() {
+        const ca = this.config.ccActive || {}, cd = this.config.ccDisplayed;
+        return ca.source === 'displayed' && !!(cd && cd.iface && cd.field);
+    }
+
+    /** The active numbers that are no witness while the source is displayed (config.ccActive.deadValues, default [65535]). */
+    _ccDeadValues() {
+        const ca = this.config.ccActive || {};
+        return Array.isArray(ca.deadValues) ? ca.deadValues : [65535];
+    }
+
+    /** Whether statusActiveCCMessage is a "shown now" witness NOW. Source active (0.7.20): from its first number. Source
+     *  displayed: never with ccActive.dead true (the owner's car: 65535 the whole run); else only once it has changed in
+     *  this run (ccActLive) and while it does not read a dead value (65535): a field that never moves is no witness. */
+    _ccActWitness() {
+        const ca = this.config.ccActive || {};
+        if (!this.ccActAny || !this.ccAct) return false;
+        if (!this._ccDispSource()) return true;
+        if (ca.dead === true) return false;
+        return this.ccActLive === true && !inList(this._ccDeadValues(), this.ccAct.number);
+    }
+
+    /** Whether 0.7.20's path (before displayed has spoken) may take the active number as its verdict: as in 0.7.20, unless
+     *  the source is displayed and config.ccActive.dead is true (then the list's fallback decides until displayed speaks). */
+    _ccActDecides() {
+        const ca = this.config.ccActive || {};
+        return !!(this.ccActAny && this.ccAct) && !(this._ccDispSource() && ca.dead === true);
+    }
+    // ---- end car-fix CF1 ----
+
     /** Whether the car's own check-control message can be READ: one notification from config.ccm has carried
      *  something our paths found - a name, a description, a symbol, an id or a type. A struct whose paths fit the
      *  car carries its id and its type even with no message on, so this says "config.ccm fits this car", never "a
@@ -4372,7 +4452,9 @@ class HudApp {
     _ccWired() {
         // fix/cclist: or ccList has spoken once (a list config.ccList fits), which the owner's car does at once
         // fix/active-cc: or the cluster's "message shown now" has given a number once
-        return (this._ccNamed() && this.ccAny === true) || (this._ccListNamed() && this.ccListAny === true) || this.ccActAny === true;
+        // car-fix CF1: or displayed, the "shown now" source, has given a number once
+        return (this._ccNamed() && this.ccAny === true) || (this._ccListNamed() && this.ccListAny === true) || this.ccActAny === true ||
+            (this._ccDispSource() && this.ccDispAny === true);
     }
 
     /** Whether BMW's own check-control panel must be left see-through now ("cc:open"): the car says a message shows,
@@ -4442,10 +4524,15 @@ class HudApp {
         const ca = this.config.ccActive || {}, all = this.ccListAll || [];
         const wired = this._ccWired() || this.ccDispAny === true;
         const rel = this.ccReleased === true;        // the narrowed release (_ccRelease): the "shown now" value is no verdict, the list decides
+        // car-fix CF1: with config.ccActive.source "displayed" the active number is a witness only while _ccActWitness says so
+        // (never on the owner's car: 65535 the whole run), displayed is never released, and 65535 on it is "unknown"
+        const ds = this._ccDispSource(), actW = ds ? this._ccActWitness() : this.ccActAny === true;
         return {
             read: wired,
-            actWired: this.ccActAny === true && !rel, act: this.ccAct && !rel ? this.ccAct.number : null,
-            dispWired: this.ccDispAny === true && !rel, disp: rel ? null : this.ccDisp,
+            actWired: actW && !rel, act: this.ccAct && actW && !rel ? this.ccAct.number : null,
+            dispWired: this.ccDispAny === true && (ds || !rel), disp: rel && !ds ? null : this.ccDisp,
+            prefer: ds ? 'displayed' : 'active',
+            unknownValues: ds ? (Array.isArray(ca.unknownValues) ? ca.unknownValues : [65535]) : [],
             noneValues: Array.isArray(ca.noneValues) ? ca.noneValues : [0],
             find: (id) => all.find((e) => e.id === id) || null,
             shown: this.ccListShown, live: this.ccItems || [], heurEntry: (this.ccItems || [])[0] || null,

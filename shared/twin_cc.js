@@ -15,8 +15,10 @@
  *
  * THE SAFETY RULE (the owner, 2026-11-16, SPEC 8.4): a BMW warning is never hidden unless our own text for THAT message
  * is on the screen in the same frame. "ours" is a state the machine reaches only after
- *   - the car's own "message shown now" (KombiIF statusActiveCCMessage, second witness Vehicle2.statusDisplayedCCMessage)
- *     has named a number, and that number has a ccList entry with a name (the stored entries of ccList are never drawn as the card);
+ *   - the car's own "message shown now" has named a number, and that number has a ccList entry with a name (the stored
+ *     entries of ccList are never drawn as the card). car-fix CF1 (the owner's car 2026-11-18): the source is
+ *     Vehicle2.statusDisplayedCCMessage (config.ccActive.source "displayed"); KombiIF statusActiveCCMessage sat on 65535 the
+ *     whole run and is a witness only where it moves (hud.js _ccActWitness); 65535 on displayed is "unknown" (window);
  *   - the D7 latch (config.ccActive.strict) has fallen: the "shown now" number has once matched a ccList entry, and the
  *     message it matched has ended;
  *   - no latch (a glyph our font lacks, a throw while painting, our sheet refused) holds;
@@ -313,7 +315,7 @@ class TwinCC {
         const a = inp.actWired && typeof inp.act === 'number', d = inp.dispWired && typeof inp.disp === 'number';
         if (a && d) {
             const same = none(inp.act) ? none(inp.disp) : inp.act === inp.disp;
-            return { wired: true, n: inp.act, conflict: !same, from: 'both' };
+            return { wired: true, n: inp.prefer === 'displayed' ? inp.disp : inp.act, conflict: !same, from: 'both' };     // car-fix CF1: prefer
         }
         if (a) return { wired: true, n: inp.act, conflict: false, from: 'active' };
         if (d) return { wired: true, n: inp.disp, conflict: false, from: 'displayed' };
@@ -324,6 +326,8 @@ class TwinCC {
      * Re-decide. inp (hud.js _twinInputs):
      *   read        the car's messages can be read (hud _ccWired)
      *   actWired / act / dispWired / disp / noneValues    the two witnesses
+     *   prefer      'displayed' | 'active': whose number is THE number when both agree (car-fix CF1)
+     *   unknownValues  numbers that say "unknown" (car-fix CF1, displayed's 65535): window, severity from the list only
      *   find(id)    the ccList entry { id, name, color, symbol } with that id, or null
      *   shown       the heuristic's verdict while no witness has spoken (hud ccListShown: true | false | null)
      *   live        [{ id, name, color, symbol }] the entries the heuristic counts as showing
@@ -335,7 +339,7 @@ class TwinCC {
         const w = this._witness(inp);
         let shown = null, entry = null, state = 'window', reason = '', cand = null, conf = false;
         let shownNow = '-';
-        let sev = 0;
+        let sev = 0, unknown = false;
         this.needsTick = false;
         if (!inp.read) {
             reason = 'the car\'s check-control messages have not been read yet';
@@ -345,6 +349,11 @@ class TwinCC {
             const none = (inp.noneValues || [0]).indexOf(w.n) >= 0;
             if (w.conflict) {
                 shown = true; reason = 'the two "shown now" witnesses disagree';
+            } else if ((inp.unknownValues || []).indexOf(w.n) >= 0) {
+                // car-fix CF1: 65535 on displayed (after an app start, at the end of a drive on the owner's car) = unknown: BMW's
+                // panel open; the severity only from what the list holds, so a resting list pulls no tab (no known message)
+                shown = true; unknown = true; reason = 'the "shown now" number is unknown (' + w.n + ')';
+                (inp.entries || []).forEach((e) => { sev = Math.max(sev, severityOf(e.color)); });
             } else if (none) {
                 shown = false;
             } else {
@@ -413,7 +422,7 @@ class TwinCC {
         this.state = state; this.window = state === 'window'; this.reason = reason;
         this.candidate = cand;
         if (!cand) this.drawn = null;             // nothing to show: the stamp goes too
-        this.severity = state === 'none' ? 0 : (sev || (shown === true ? 1 : 0));
+        this.severity = state === 'none' ? 0 : unknown ? sev : (sev || (shown === true ? 1 : 0));     // car-fix CF1: unknown is no message of its own
         // the log line: one per change of what was decided (numbers and lengths only; the text never)
         const sig = [shownNow, entry ? entry.id : '-', entry ? entry.color : '-', entry && entry.name ? entry.name.length : 0, state, reason].join('|');
         if (sig !== this.sigLogged) {

@@ -221,7 +221,7 @@
         "inSport",
         "inEco",
         "diagRelease",
-        "diagDisplayed",
+        "diagShownNow",
         "diagSceneTex",
         "diagMbGap",
         "diagMbCover",
@@ -240,7 +240,7 @@
         ],
         [
           "setting",
-          "diagDisplayed"
+          "diagShownNow"
         ],
         [
           "setting",
@@ -633,25 +633,21 @@
       "_about": "B7, the Діагностика menu (shared/diag_settings.js; what each setting writes is config.diag, all off = the keys as app.json has them): research3/MC config.ccActive.release"
     },
     {
-      "key": "diagDisplayed",
-      "label": "Second 'shown now' witness (after restart)",
+      "key": "diagShownNow",
+      "label": "'Shown now' source",
       "type": "choice",
       "default": "off",
       "options": [
         [
           "off",
-          "Off"
+          "Displayed (car-verified)"
         ],
         [
-          "log",
-          "Log only"
-        ],
-        [
-          "use",
-          "Use it"
+          "active",
+          "Active (0.7.20)"
         ]
       ],
-      "_about": "research3/MC config.ccDisplayed: subscribed to at start only, so the choice takes effect after the app restarts"
+      "_about": "car-fix CF1: replaces research3/MC's diagDisplayed (off / log / use). Off = config.ccActive.source 'displayed', the car-verified 'shown now' (Vehicle2 statusDisplayedCCMessage); 'active' gives back 0.7.20's KombiIF statusActiveCCMessage path (stuck on 65535 on the owner's car). Applies in place."
     },
     {
       "key": "diagSceneTex",
@@ -1071,10 +1067,14 @@
       "noneValues": [0],
       "_fallback": "A HEURISTIC, used only while statusActiveCCMessage has never given a number: a ccList entry counts as showing for hideAfterMs (null: config.ccm.autoHideMs, 20000 - BMW's manual's ~20 s auto-hide) after it was first listed; an entry whose colour is in keepColors shows for as long as it is listed. An entry that leaves the list and comes back starts its clock again. on: false gives back 0.7.19 (every listed entry shows while listed).",
       "fallback": { "on": true, "hideAfterMs": null, "keepColors": ["red"] },
-      "_release": "research3/mc (docs/research3/MC-REPORT.md), OFF while absent: 0.7.20 exactly. When set, an object {deferValues, deferControls, leftList, noEntryMs, witness, then} that says when the 'shown now' value is NO VERDICT, and the list then decides - then 'listed' (default: shown while ccList lists any entry outside ignoreIds, never closes over a listed message) or 'heuristic' (the fallback above). The report's recommended value for the next install, after the log read: {\"deferValues\": [65535], \"leftList\": true}. noEntryMs can hide a message ccList never carries (case S5) and is not recommended. Every change logs 'active cc: released to the list (...)' once, numbers only. shared/hud.js _ccRelease."
+      "_release": "research3/mc (docs/research3/MC-REPORT.md), OFF while absent: 0.7.20 exactly. When set, an object {deferValues, deferControls, leftList, noEntryMs, witness, then} that says when the 'shown now' value is NO VERDICT, and the list then decides - then 'listed' (default: shown while ccList lists any entry outside ignoreIds, never closes over a listed message) or 'heuristic' (the fallback above). The report's recommended value for the next install, after the log read: {\"deferValues\": [65535], \"leftList\": true}. noEntryMs can hide a message ccList never carries (case S5) and is not recommended. Every change logs 'active cc: released to the list (...)' once, numbers only. shared/hud.js _ccRelease. car-fix CF1: it acts on the ACTIVE number only - obsolete with source displayed (Діагностика 'Release a stuck check-control message' still writes it; it acts only with the 'shown now' source setting on 'active').",
+      "source": "displayed",
+      "dead": true,
+      "unknownValues": [65535],
+      "_carfix": "car-fix CF1 (docs/car-fix/CF1-REPORT.md), the owner's car 2026-11-18 (signal_probe 0.1.1, twin_dial.log): statusActiveCCMessage sat on 65535 the whole run, also while a message showed - 0.7.20's stuck window (MC's A1). dead: true - it stays declared, subscribed and logged ('active cc: ...'), it decides nothing (without dead it would count as a witness only once it CHANGED to a number outside deadValues, default [65535]). source: displayed - Vehicle2.statusDisplayedCCMessage (config.ccDisplayed) is the 'shown now' once it has given a number: 0 = nothing shown (listed entries are stored ones: BMW's panel may be covered); N with a ccList entry = that entry (our text, BMW's panel covered after 150 ms where our row draws it); N with no entry = shown, BMW's panel open (285, 926, 927, 184 on the car); unknownValues (65535, after an app start or at the end of a drive) = shown, BMW's panel open. Before displayed has spoken, 0.7.20's path (with dead: the list's fallback). 'displayed cc: ...' lines, numbers only. the Діагностика setting 'Shown now' source = Active (0.7.20) gives back 0.7.20's path. shared/hud.js _ccListEval."
     },
-    "ccDisplayed": null,
-    "_ccDisplayed": "research3/mc, OFF (null): the second 'shown now' witness for f30, Vehicle2.statusDisplayedCCMessage (getter 61, declared under signals, the field Twin Dial already installs). {\"iface\": \"de.bmw.infotainment.vehicle.Vehicle2\", \"field\": \"statusDisplayedCCMessage\", \"numberPath\": [\"statusNumberCheckControlMessageDisplay\"], \"use\": false} logs 'displayed cc: number N' once per change and decides nothing; use true with config.ccActive.release.witness true lets 'displayed says none' release the active number to the list.",
+    "ccDisplayed": { "iface": "de.bmw.infotainment.vehicle.Vehicle2", "field": "statusDisplayedCCMessage", "numberPath": ["statusNumberCheckControlMessageDisplay"] },
+    "_ccDisplayed": "car-fix CF1: ON - the 'shown now' source (config.ccActive.source displayed), subscribed at start (getter 61, declared under signals). research3/mc's 'use' / release.witness pair is obsolete with it (use true still works with source active). Was null (research3/mc: the second witness, off).",
     "ccList": {
       "_about": "Several messages at once: the car cycles through this list, and ours steps through it on the same clock (the owner, 2026-11-15). Each element carries a short name and a colour; config.ccm.cycleMs is how long each one is shown. The stock order and timing are being measured in docs/G20-DESIGN-SPEC.md.",
       "iface": "de.bmw.infotainment.KombiInterface_2",
@@ -1159,18 +1159,10 @@
       ]
     },
     "diag": {
-      "_about": "B7, the Діагностика menu (screen DIAG, shared/diag_settings.js): each setting writes the config paths named here while it is ON (all OFF by default = the keys as this file has them, put back when a setting goes off). A path is dotted; a choice lists its options. diagDisplayed 'use' also sets ccActive.release.witness (the witness only decides through the release). The values are the ones the research3 reports and their test files name (tools/research3/mb/exp/f30-gap.json).",
+      "_about": "B7, the Діагностика menu (screen DIAG, shared/diag_settings.js): each setting writes the config paths named here while it is ON (all OFF by default = the keys as this file has them, put back when a setting goes off). A path is dotted; a choice lists its options. car-fix CF1: diagShownNow 'active' gives back 0.7.20's 'shown now' source (it replaced research3/MC's diagDisplayed, whose witness is the source now). The values are the ones the research3 reports and their test files name (tools/research3/mb/exp/f30-gap.json).",
       "settings": {
         "diagRelease": { "on": { "ccActive.release": { "deferValues": [65535], "leftList": true } } },
-        "diagDisplayed": {
-          "options": {
-            "log": { "ccDisplayed": { "iface": "de.bmw.infotainment.vehicle.Vehicle2", "field": "statusDisplayedCCMessage", "numberPath": ["statusNumberCheckControlMessageDisplay"], "use": false } },
-            "use": {
-              "ccDisplayed": { "iface": "de.bmw.infotainment.vehicle.Vehicle2", "field": "statusDisplayedCCMessage", "numberPath": ["statusNumberCheckControlMessageDisplay"], "use": true },
-              "ccActive.release.witness": true
-            }
-          }
-        },
+        "diagShownNow": { "options": { "active": { "ccActive.source": "active" } } },
         "diagSceneTex": { "options": { "r8": { "sceneTex": "r8" }, "etc2": { "sceneTex": "etc2" } } },
         "diagMbGap": { "on": { "mbGap": { "rect": [1380, 660, 1460, 720], "conn": { "row_b2": 3, "msa": 3, "oilt": 3 }, "z": { "oilt": 2 } } } },
         "diagMbCover": { "options": { "clear": { "mbCover": "clear" }, "black": { "mbCover": "black" }, "grey": { "mbCover": "grey" } } },

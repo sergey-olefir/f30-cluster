@@ -111,6 +111,10 @@ const FIXES = {
     'rec-w': (c) => { c.ccActive.release = { deferValues: [65535], leftList: true, witness: true }; if (c.ccm) c.ccm.clearIds = [65535]; c.ccDisplayed = Object.assign({ use: true }, WITNESS); },
     // rec-w with the heuristic (closes A5w; carries the 0.7.20 fallback's 20 s risk, S1)
     'rec-wh': (c) => { c.ccActive.release = { deferValues: [65535], leftList: true, witness: true, then: 'heuristic' }; if (c.ccm) c.ccm.clearIds = [65535]; c.ccDisplayed = Object.assign({ use: true }, WITNESS); },
+    // car-fix CF1 (with base "shipped"): the active number is not declared dead - it is a witness once it moves
+    'cf1-live': (c) => { c.ccActive.dead = false; },
+    // car-fix CF1: the shipped config plus the research3/MC release on (Діагностика): it must change nothing while displayed decides
+    'cf1-rel': (c) => { c.ccActive.release = { deferValues: [65535], leftList: true }; },
 };
 
 const VIEWS = [
@@ -120,11 +124,62 @@ const VIEWS = [
     { key: 'twin', app: 'twin_dial', kind: 'opaque', row: 'ours' },
 ];
 
-function runCase(cs, view, fixName) {
+// ---- car-fix CF1 (docs/car-fix/CF1-REPORT.md): the owner's car on 2026-11-18 (signal_probe 0.1.1 and twin_dial.log, numbers
+// only). KombiIF statusActiveCCMessage sat on 65535 (control 4095, frame 15/15) the whole run; Vehicle2.statusDisplayedCCMessage
+// is the "shown now": after an app start 0 (or 65535, unknown), the door -> ccList id 15 then displayed 15 within ~50 ms, closed ->
+// the list at rest, displayed 0 0.2-0.7 s later; 285 / 926 / 927 / 184 displayed for ~6 s with NO ccList entry; at 13:41 the
+// sequence below (2255 listed and shown, 285 shown over it, 19 joins and shows, the list empties, displayed 0, then the boot 14).
+// Each case runs on the SHIPPED config (base "shipped": ccActive.source "displayed", dead true). ----
+const DOOR14 = { id: 14, color: 'white', symbol: 2, len: 16 };
+const E2255 = { id: 2255, color: 'white', symbol: 5, len: 36 };
+const E19 = { id: 19, color: 'white', symbol: 2, len: 33 };
+const CAR = [
+    { id: 'K0', what: 'the car: an app start with displayed 65535 (unknown) and active 65535, then displayed 0 with the list at rest',
+        steps: [['msg', AD(), D(65535), L(REST)], ['msg', W(3000)], ['none', D(0)], ['none', W(30000)]] },
+    { id: 'K1', what: 'the car: the door - ccList 15 and displayed 15 together; closed - the list at rest, displayed 0 0.7 s later',
+        steps: [['none', D(0), AD(), L(REST)], ['msg', L(DOOR), D(15)], ['msg', W(1500)], ['msg', L(REST)], ['none', W(700), D(0)], ['none', W(30000)]] },
+    { id: 'K2', what: 'the car: displayed 285 for 6 s with no ccList entry (the list at rest): BMW\'s own message, never ours',
+        steps: [['none', D(0), AD(), L(REST)], ['msg', D(285)], ['msg', W(6000)], ['none', D(0)], ['none', W(30000)]] },
+    { id: 'K3', what: 'the car, 13:41: 2255 listed and shown, 285 shown over it, 19 joins and shows, the list empties, 0; then the boot (14)',
+        steps: [['none', D(0), AD(), L(REST)], ['msg', L(E2255), D(2255)], ['msg', W(3600), D(285)], ['msg', W(3000), L(E19, E2255), D(19)],
+            ['msg', W(850), L(E19)], ['msg', W(100), L(REST)], ['none', W(150), D(0)], ['msg', W(150), L(DOOR14), D(14)], ['msg', W(7000), L(REST)],
+            ['none', W(180), D(0)], ['none', W(30000)]] },
+    { id: 'K4', what: 'the stuck window of 0.7.20: active 65535 forever, displayed 0, the list at rest - must close',
+        steps: [['none', AD(), D(0), L(REST)], ['none', W(30000)]] },
+    { id: 'K5', what: 'a stored entry (987) stays listed, displayed 0: BMW shows nothing, the panel may be covered (MC\'s A5w / A17 closed by displayed)',
+        steps: [['none', AD(), D(0), L(REST)], ['msg', L(STORED), D(987)], ['msg', W(15000)], ['none', W(5000), D(0)], ['none', W(30000)]] },
+    { id: 'K6', what: 'a stored RED entry stays listed, displayed 0: closed (MC\'s A8 with displayed); shown while displayed names it',
+        steps: [['none', AD(), D(0), L(REST)], ['msg', L(STORED_RED), D(52)], ['msg', W(10000)], ['none', D(0)], ['none', W(30000)]] },
+    { id: 'K7', what: 'the end of a drive: displayed goes to 65535 (unknown) with the list at rest: BMW\'s panel opens',
+        steps: [['none', AD(), D(0), L(REST)], ['msg', D(65535)], ['msg', W(30000)]] },
+    { id: 'K8', what: 'displayed names a number the list carries only 2 s later (S3 on displayed): open until the entry is there',
+        steps: [['none', AD(), D(0), L(REST)], ['msg', D(15)], ['msg', W(2000)], ['msg', L(DOOR)], ['none', L(REST), D(0)], ['none', W(30000)]] },
+    { id: 'K9', what: 'BEFORE displayed speaks (dead active, the list\'s fallback): a door message, then displayed 0 - the panel open while listed',
+        steps: [['none', AD(), L(REST)], ['msg', L(DOOR)], ['none', L(REST)], ['none', D(0)], ['none', W(30000)]] },
+];
+// with config.ccActive.dead false: an active number that MOVES is a witness again beside displayed (a car where it works)
+const CAR_LIVE = [
+    { id: 'L1', what: 'active never moves (0 the whole run): no witness, displayed alone decides (the door becomes ours)',
+        steps: [['none', A(0), D(0), L(REST)], ['msg', L(DOOR), D(15)], ['msg', W(1000)], ['none', L(REST), D(0)], ['none', W(30000)]] },
+    { id: 'L2', what: 'active moves to 14 while displayed says 0: the witnesses disagree, BMW\'s panel open until they agree',
+        steps: [['none', A(0), D(0), L(REST)], ['msg', L(DOOR14), A(14)], ['msg', W(1000)], ['msg', D(14)], ['none', L(REST), A(0), D(0)], ['none', W(30000)]] },
+    { id: 'L3', what: 'active 65535 (dead value) after it moved: no witness at that moment',
+        steps: [['none', A(0), D(0), L(REST)], ['msg', L(DOOR), A(15), D(15)], ['none', L(REST), AD(), D(0)], ['none', W(30000)]] },
+];
+
+/** base "legacy" (the default: MC's documented matrix): the config as it was before car-fix CF1 - ccActive without
+ *  source / dead / unknownValues / confirmNow, f30 without ccDisplayed. base "shipped": app.json as it is now. */
+function legacy(c, app) {
+    if (c.ccActive) { delete c.ccActive.source; delete c.ccActive.dead; delete c.ccActive.unknownValues; delete c.ccActive.confirmNow; }
+    if (app === 'f30_cluster') c.ccDisplayed = null;
+}
+
+function runCase(cs, view, fixName, base) {
     E.useFakeClock(true);
     E.setNow(1700000000000);
     const fix = FIXES[fixName];
     const e = E.make(view.app, { kind: view.kind, row: view.row }, (c) => {
+        if (base !== 'shipped') legacy(c, view.app);      // car-fix CF1
         // the twin app's config gets the same fix where it applies (its own machine ignores release; listed for completeness)
         if (fix) fix(c);
     });
@@ -200,4 +255,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { CASES, FIXES, VIEWS, runCase };
+module.exports = { CASES, FIXES, VIEWS, runCase, CAR, CAR_LIVE };

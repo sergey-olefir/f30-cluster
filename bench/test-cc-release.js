@@ -30,13 +30,18 @@ const unsafeIn = (fix) => {
     return bad;
 };
 
-console.log('off by default: app.json carries no release and no f30 witness');
+// car-fix CF1: the sections below until "car-fix CF1" are MC's study of 0.7.20's ACTIVE-number path. They run on the config as
+// it was before CF1 (cases.js base "legacy": ccActive without source / dead, f30 without ccDisplayed); the shipped config is
+// tested at the end, with the car's own sequences of 2026-11-18.
+console.log('off by default: app.json carries no release (MC\'s legacy base: no f30 witness)');
 {
     const spec = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'app.json'), 'utf8'));
     ok(!spec.config.ccActive.release, 'f30_cluster config.ccActive.release is absent (0.7.20 behaviour)');
-    ok(!spec.config.ccDisplayed, 'f30_cluster config.ccDisplayed is null (nothing subscribed)');
+    // car-fix CF1: ccDisplayed is ON now, as the "shown now" source (was null: research3/MC's witness, off)
+    ok(spec.config.ccDisplayed && spec.config.ccDisplayed.field === 'statusDisplayedCCMessage' && spec.config.ccActive.source === 'displayed' && spec.config.ccActive.dead === true,
+        'f30_cluster config.ccDisplayed names Vehicle2 statusDisplayedCCMessage and config.ccActive.source is "displayed", dead true (car-fix CF1)');
     const r = run('A0', F30[0], 'none');
-    ok(!r.log.some((l) => /released to the list|displayed cc/.test(l)), 'the shipped config logs no release and no witness line');
+    ok(!r.log.some((l) => /released to the list|displayed cc/.test(l)), 'the legacy config logs no release and no witness line');
     ok(unsafeIn('none').length === 0, '0.7.20 itself: no safety case violated (' + unsafeIn('none').join(', ') + ')');
 }
 
@@ -96,10 +101,55 @@ console.log('Twin Dial: off by default, and with the release set it takes only t
     ok(a.endsOpen && !b.endsOpen && !b.unsafe && !a.unsafe, id + ': twin hangs without the release (as shipped) and closes with it, never unsafe (' + (a.endsOpen ? 'hangs' : 'closes') + ' -> ' + (b.endsOpen ? 'hangs' : 'closes') + ')');
 });
 
+// ---- car-fix CF1 (docs/car-fix/CF1-REPORT.md): the SHIPPED config (ccActive.source "displayed", dead true) on the car's own
+// sequences of 2026-11-18 (cases.js CAR), in every view: f30 opaque, f30 G20 with our row, f30 G20 with BMW's row, Twin Dial ----
+console.log('car-fix CF1: the shipped config, "shown now" from Vehicle2.statusDisplayedCCMessage, the car\'s sequences');
+{
+    const K = (id) => C.CAR.concat(C.CAR_LIVE).find((c) => c.id === id);
+    const runS = (id, view, fix) => C.runCase(K(id), view, fix || 'none', 'shipped');
+    const cell = (s) => (s.open ? 'O' : s.ours ? 'U' : 'S');
+    const trace = (id, view, fix) => runS(id, view, fix).steps.map(cell).join('');
+    const V = { op: C.VIEWS[0], ours: C.VIEWS[1], bmw: C.VIEWS[2], twin: C.VIEWS[3] };
+    const bad = [];
+    C.CAR.forEach((cs) => C.VIEWS.forEach((v) => { const r = runS(cs.id, v); if (r.unsafe || r.hang) bad.push(cs.id + ' ' + v.key + (r.unsafe ? ' UNSAFE x' + r.unsafe : '') + (r.hang ? ' open x' + r.hang : '')); }));
+    ok(bad.length === 0, 'every car case in every view: BMW\'s panel never covered without our text while BMW shows a message, never open when it shows none (' + C.CAR.length + ' cases x 4 views; ' + bad.join(', ') + ')');
+    // the stuck window: hangs on the config before CF1 (MC's A1, the car's 65535), closes now
+    const legacyHang = F30.every((v) => C.runCase(K('K4'), v, 'none').endsOpen) && C.runCase(K('K4'), V.twin, 'none').endsOpen;
+    ok(legacyHang && C.VIEWS.every((v) => !runS('K4', v).endsOpen && trace('K4', v) === 'SS'),
+        'K4, active 65535 forever + displayed 0 + the list at rest: the window HANGS on the pre-CF1 config in every view and is SHUT now (' + C.VIEWS.map((v) => trace('K4', v)).join(' ') + ')');
+    ok(C.VIEWS.every((v) => trace('K0', v) === 'OOSS'), 'K0, the start: displayed 65535 + active 65535 = unknown: BMW\'s panel open; displayed 0 with the list at rest: shut (' + C.VIEWS.map((v) => trace('K0', v)).join(' ') + ')');
+    ok(trace('K1', V.op) === 'SOOOSS' && trace('K1', V.bmw) === 'SOOOSS' && trace('K1', V.ours) === 'SUUOSS' && trace('K1', V.twin) === 'SUUOSS',
+        'K1, the door (list 15 + displayed 15 together): our text covers BMW\'s panel where ours draws it (G20 our row, Twin Dial - the FIRST match with confirmNow), open in the opaque themes; the list at rest with displayed still 15: open; displayed 0 0.7 s later: shut (' +
+        ['op', 'ours', 'bmw', 'twin'].map((k) => k + ' ' + trace('K1', V[k])).join(', ') + ')');
+    ok(C.VIEWS.every((v) => trace('K2', v) === 'SOOSS'), 'K2, displayed 285 with no ccList entry: BMW\'s panel open for the 6 s, never ours (' + C.VIEWS.map((v) => trace('K2', v)).join(' ') + ')');
+    ok(trace('K3', V.twin) === 'SUOUUOSUOSS' && trace('K3', V.ours) === 'SUOUUOSUOSS' && trace('K3', V.op) === 'SOOOOOSOOSS',
+        'K3, the 13:41 sequence: 285 shown over a listed 2255 opens the panel; 19 and 14 become ours; each end opens until displayed 0 (twin ' + trace('K3', V.twin) + ')');
+    ok(C.VIEWS.every((v) => /SS$/.test(trace('K5', v)) && /SS$/.test(trace('K6', v))), 'K5 / K6, a stored entry (white 987, red 52) stays listed with displayed 0: shut (MC\'s A5w / A8 close)');
+    ok(C.VIEWS.every((v) => trace('K7', v) === 'SOO'), 'K7, the end of a drive (displayed 65535): BMW\'s panel opens');
+    ok(trace('K8', V.twin) === 'SOOUSS' && trace('K8', V.ours) === 'SOOUSS', 'K8, displayed names 15 two seconds before the list carries it: open until the entry is there, then ours (' + trace('K8', V.twin) + ')');
+    ok(C.VIEWS.every((v) => !runS('K9', v).unsafe), 'K9, before displayed has spoken (dead active): the list\'s fallback, never unsafe');
+    // the log, numbers only
+    const lo = runS('K2', V.op).log.concat(runS('K0', V.op).log).concat(runS('K1', V.twin).log);
+    ok(lo.filter((l) => /displayed cc: no ccList entry for number 285 - shown, BMW's panel stays open/.test(l)).length === 1, 'logged once: "displayed cc: no ccList entry for number 285 - shown, BMW\'s panel stays open"');
+    ok(lo.some((l) => /displayed cc: number 65535 is unknown \(config\.ccActive\.unknownValues\)/.test(l)) && lo.some((l) => /active cc: wired - not the "shown now" source \(config\.ccActive\.source displayed, dead\)/.test(l)),
+        'logged: "displayed cc: number 65535 is unknown ..." and "active cc: wired - not the "shown now" source (..., dead)"');
+    ok(lo.some((l) => /cc: shown-now confirmed \(number 15 matched a ccList entry\)/.test(l)) && !lo.some((l) => /D7: this is the message that confirmed/.test(l)),
+        'Twin Dial: displayed 15 matching entry 15 confirms D7, and with confirmNow that message itself may be ours');
+    // a moving active number (ccActive.dead false): a witness again
+    ok(trace('L1', V.twin, 'cf1-live') === 'SUUSS' && trace('L1', V.ours, 'cf1-live') === 'SUUSS', 'dead false, the active number never moves (0): no witness, displayed alone decides (' + trace('L1', V.twin, 'cf1-live') + ')');
+    ok(C.VIEWS.every((v) => /^SOO/.test(trace('L2', v, 'cf1-live'))) && trace('L2', V.twin, 'cf1-live') === 'SOOUSS',
+        'dead false, the active number moves to 14 while displayed says 0: the witnesses disagree, BMW\'s panel open until displayed says 14 too (' + trace('L2', V.twin, 'cf1-live') + ')');
+    ok(C.VIEWS.every((v) => /SS$/.test(trace('L3', v, 'cf1-live')) && !runS('L3', v, 'cf1-live').unsafe), 'dead false, active back on 65535 (a dead value): no witness at that moment, the end closes');
+    ok(C.CAR_LIVE.every((cs) => C.VIEWS.every((v) => !runS(cs.id, v, 'cf1-live').unsafe)), 'dead false: never unsafe');
+    // research3/MC's release (Діагностика) changes nothing while displayed decides: it acts on the active number only (obsolete)
+    ok(C.CAR.every((cs) => C.VIEWS.every((v) => trace(cs.id, v) === trace(cs.id, v, 'cf1-rel'))), 'the release on (deferValues 65535, leftList): every car case the same, step for step (obsolete with displayed)');
+}
+
 console.log('privacy: numbers only');
 {
     const all = [];
     ['A12', 'A0', 'A1', 'A15'].forEach((id) => C.VIEWS.forEach((v) => ['none', 'rec-w'].forEach((f) => run(id, v, f).log.forEach((l) => all.push(l)))));
+    C.CAR.forEach((cs) => C.VIEWS.forEach((v) => C.runCase(cs, v, 'none', 'shipped').log.forEach((l) => all.push(l))));      // car-fix CF1
     ok(!all.some((l) => /Πόρτα|xxxx/.test(l)), 'no message text in any log line (' + all.length + ' lines)');
 }
 

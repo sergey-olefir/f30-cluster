@@ -401,8 +401,11 @@ function buildApp() {
     });
     const c = spec.config;
     c.ccm = null; c.ccMarker = null;
-    c.ccActive = Object.assign({}, c.ccActive, { strict: true, fallback: { on: true, hideAfterMs: 900, keepColors: ['red'] } });
-    c.ccDisplayed = { iface: 'de.bmw.infotainment.vehicle.Vehicle2', field: 'statusDisplayedCCMessage', numberPath: ['statusNumberCheckControlMessageDisplay'] };
+    // car-fix CF1: the message path's config is Twin Dial's own (ccActive.source "displayed", dead, unknownValues, confirmNow,
+    // strict), with a short fallback for the test's pace
+    const twinCfg = JSON.parse(fs.readFileSync(path.join(TWIN, 'app.json'), 'utf8')).config;
+    c.ccActive = Object.assign({}, twinCfg.ccActive, { strict: true, fallback: { on: true, hideAfterMs: 900, keepColors: ['red'] } });
+    c.ccDisplayed = Object.assign({}, twinCfg.ccDisplayed);
     fs.rmSync(APP_DIR, { recursive: true, force: true });
     fs.mkdirSync(path.join(APP_DIR, 'hud', 'fonts'), { recursive: true });
     fs.writeFileSync(path.join(APP_DIR, 'app.json'), JSON.stringify(spec, null, 1));
@@ -635,12 +638,11 @@ async function engineChecks() {
     const truth = (shown, may, entry) => { model.truth = { shown, may, expect: shown && entry ? [entry] : [] }; model.hadText = false; dirty(); };
     const none = () => { model.truth = { shown: false, may: false, expect: [] }; model.hadText = false; dirty(); };
     const feedList = (arr) => fakeSigns.control({ ccList: arr });
-    let both = false;               // once the second witness has spoken, the car sends both numbers together
     const feedDisp = (n) => hu.feed('de.bmw.infotainment.vehicle.Vehicle2', 'statusDisplayedCCMessage', { statusNumberCheckControlMessageDisplay: n });
-    const feedAct = (n, extra) => {
-        fakeSigns.control({ ccActive: Object.assign({ number: n, control: n ? 1 : 0, frame: 1, of: 1 }, extra || {}) });
-        if (both) feedDisp(n);
-    };
+    // car-fix CF1: KombiIF statusActiveCCMessage as the owner's car sends it (its catalogue default the whole run), or any number
+    const feedActive = (n, extra) => fakeSigns.control({ ccActive: Object.assign(n === 65535 ? { number: 65535, control: 4095, frame: 15, of: 15, utility: 16777215 } : { number: n, control: n ? 1 : 0, frame: 1, of: 1 }, extra || {}) });
+    // car-fix CF1: "the number the car says it shows now" is Vehicle2 statusDisplayedCCMessage (config.ccActive.source "displayed")
+    let feedAct = (n) => feedDisp(n);
     const feedFrame = (n, of, ids) => fakeSigns.control({ ccFrame: { frame: n, of, ids } });
     const press = (key, value) => {
         const s = hu.settings.item(key), comp = hu.ui.comp('SET_' + key.toUpperCase());
@@ -709,23 +711,52 @@ async function engineChecks() {
     noViolations('2d. never covered by a red entry');
     none(); feedList(L(E.rest)); await sleep(200);
 
-    // ---- case 3: the D7 latch, then ours in the centre ----------------------------------------------------------------
+    // ---- case 2e (car-fix CF1): the car's start (2026-11-18) - active 65535 the whole run (dead), displayed 65535 (unknown) -----
     clean();
-    model.truth = { shown: true, may: true, expect: [] };      // while D7 holds there is NO text of ours to be on the screen
-    feedList(L(E.door, { id: 987, name: 'Stored notice', color: 'white' }));
-    feedAct(15);
-    await sleep(500);
+    model.truth = { shown: false, may: true, expect: [] };     // unknown: BMW may show something, nothing of ours may cover it
+    feedActive(65535); feedDisp(65535);
+    await sleep(300);
     {
         const t = T0(), s = snapshot();
-        ok(t.confirmed && t.state === 'window' && s.covered === 0 && /confirmed/.test(t.reason) && t.tab === 2 && t.page.kind === 'pointer', '3a. the first "shown now" that matches an entry confirms D7 - and that very message stays BMW\'s: tab 2 shows the pointer page, no card (' + t.reason + ')');
-        ok(logs.some((l) => /cc: shown-now confirmed \(number 15 matched a ccList entry\)/.test(l)), '3a. the log says "cc: shown-now confirmed"');
-        noViolations('3a. the confirming message was never covered');
+        ok(t.state === 'window' && s.open && s.covered === 0 && s.rows === 0 && t.tab === 1 && hud.twinCc.severity === null && /unknown \(65535\)/.test(t.reason),
+            '2e. the car\'s start, active 65535 and displayed 65535: unknown - window open, the row aside, tab 1 (no pull: nothing is known to show) (' + t.reason + ')');
+        noViolations('2e. the start');
     }
-    await endMsg();
-    ok(T0().state === 'none' && snapshot().rows > 0, '3b. the message ends: none, the row is back');
+    none(); feedDisp(0);
+    await sleep(250);
+    ok(T0().state === 'none' && snapshot().rows > 0 && !snapshot().open && hud.ccAct && hud.ccAct.number === 65535,
+        '2f. displayed 0, the list at rest, active STILL 65535: none, the window shut, the row back (0.7.20 / 0.1.1 kept it open: the stuck window)');
+
+    // ---- case 3 (car-fix CF1): the car's door - ccList 15 and displayed 15 together; D7 falls on that first match and, with
+    // confirmNow (the numbering car-verified), that very message is ours after its 150 ms; the car's close ----------------------
+    clean();
+    const stored = { id: 987, name: 'Stored notice', color: 'white' };
+    truth(true, true, E.door);
+    feedList(L(E.door, stored)); feedDisp(15);
+    await sleep(40);
+    {
+        const t = T0(), s = snapshot();
+        ok(t.confirmed && t.state === 'window' && s.open && s.has === 'card' && s.rows === 0 && t.tab === 2,
+            '3a. the first number that matches an entry confirms D7; in that turn: tab 2, the window open, the card for exactly it on the sheet (' + t.reason + ')');
+        ok(logs.some((l) => /cc: shown-now confirmed \(number 15 matched a ccList entry\)/.test(l)), '3a. the log says "cc: shown-now confirmed"');
+    }
+    await until(() => T0().state === 'ours', 1500);
+    ok(T0().state === 'ours' && !snapshot().open && snapshot().has === 'card', '3a. after the settle the confirming message itself is ours (config.ccActive.confirmNow)');
+    noViolations('3a. the first match');
+    clean();
+    feedList(L(E.rest, stored));                     // the car: the list at rest first, displayed still 15
+    await sleep(120);
+    ok(T0().state === 'window' && snapshot().open && snapshot().rows === 0 && /no ccList entry for number 15/.test(T0().reason) && T0().tab === 2,
+        '3b. the car\'s close - the list at rest, displayed still 15: BMW\'s panel opens at once (' + T0().reason + ')');
+    await sleep(580);
+    none(); feedDisp(0);                             // ... and displayed 0 0.7 s after the list
+    await sleep(250);
+    ok(T0().state === 'none' && snapshot().rows > 0 && !snapshot().open && T0().tab === 1, '3b. displayed 0, 0.7 s later: none, the row back, tab 1 again');
+    noViolations('3b. the car\'s close');
     clean();
     const nTrace3 = model.trace.length;
     truth(true, true, E.door);
+    feedList(L(E.door, stored));
     feedAct(15);
     await sleep(40);
     {
@@ -876,19 +907,27 @@ async function engineChecks() {
     ok(T0().tab === 1 && snapshot().sheetBlank, '7c. back to tab 1: the sheet is empty');
 
     // ---- case 8: the second witness, the sheet refused, a layout without a sheet ---------------------------------------------
+    // car-fix CF1: the active number is a witness only where it moves and config.ccActive.dead is not set (the owner's car: dead)
     clean();
     feedList(L(E.door, E.boot));
-    truth(true, true, null);
-    feedDisp(14);
-    both = true;
+    none();
+    feedActive(14);
     await sleep(200);
-    ok(T0().state === 'window' && snapshot().covered === 0, '8a. the witnesses disagree (0 and 14): window, nothing of ours over BMW\'s panel');
+    ok(T0().state === 'none' && hud.ccActLive === true && !hud._ccActWitness() && snapshot().rows > 0,
+        '8a. config.ccActive.dead: the active number moves to 14 while displayed says 0 - no witness, none (displayed decides)');
+    hud.config.ccActive.dead = false;
+    truth(true, true, null);
+    hud._ccListEval(Date.now(), false); hud._ccPush();
+    await sleep(200);
+    ok(hud._ccActWitness() && T0().state === 'window' && snapshot().open && snapshot().covered === 0 && /disagree/.test(T0().reason),
+        '8a. dead false: an active number that has moved is a witness again - 14 against displayed 0: window, nothing of ours over BMW\'s panel (' + T0().reason + ')');
     truth(true, true, E.boot);
-    feedAct(14);
+    feedDisp(14);
     await until(() => T0().state === 'ours', 1500);
-    ok(T0().state === 'ours', '8a. both witnesses say 14: ours');
+    ok(T0().state === 'ours', '8a. both say 14: ours');
     noViolations('8a. two witnesses');
-    none(); feedAct(0); feedDisp(0); await sleep(250);
+    none(); feedActive(0); feedDisp(0); await sleep(250);
+    hud.config.ccActive.dead = true;
     knobs.refuse = (m) => m.kind === 'image' && m.w === SHEET_RECT[2] && m.h === SHEET_RECT[3];
     press('hudLayout', 'twin_cc_b');
     await until(() => hud.activeName === 'twin_cc_b' && st.refusals.length > 0, 3000);
@@ -949,6 +988,12 @@ async function engineChecks() {
     await endMsg();
 
     // ---- case 10: the narrowed release (config.ccActive.release, SPEC-R3 5.4.7; SC's S3b) -----------------------------------
+    // car-fix CF1: the release acts on the ACTIVE number only (obsolete while displayed is the source): these cases run with
+    // config.ccActive.source "active" and both numbers fed together, as before CF1
+    hud.config.ccActive.source = 'active';
+    const feedBoth = (n) => { feedActive(n); feedDisp(n); };
+    const feedAct0 = feedAct;
+    feedAct = feedBoth;
     const s3b = async (leftList) => {
         clean();
         hud.config.ccActive.release = { deferValues: [65535], leftList };
@@ -986,6 +1031,10 @@ async function engineChecks() {
         feedAct(0); await sleep(200);
     }
     ok(JSON.parse(fs.readFileSync(path.join(TWIN, 'app.json'), 'utf8')).config.ccActive.release === null, '10d. Twin Dial\'s app.json ships the release off (config.ccActive.release null)');
+    feedAct = feedAct0;
+    hud.config.ccActive.source = 'displayed';
+    hud._ccListEval(Date.now(), false); hud._ccPush();
+    await sleep(200);
 
     // ---- case 11: the audit itself ------------------------------------------------------------------------------------
     ok(model.frames >= 50, '11. the pixel audit ran on ' + model.frames + ' frames');
@@ -1063,7 +1112,10 @@ async function engineChecks() {
     ok(!/Driver door|Boot lid|Brake fault|tyre pressure|Washer fluid|Stored notice|Πόρτα/i.test(text.replace(/layer "[^"]*"/g, '')), 'no message text ever reached the log (' + logs.length + ' lines checked)');
     ok(/cc: centre ours, tab 2, page card \(our text for the shown message is on the screen\)/.test(text) && /cc: centre window, tab 1, page other \(the driver left tab 2/.test(text),
         'the log has the centre\'s own lines ("cc: centre ours, tab 2, page card ...", "... the driver left tab 2 ...")');
-    ok(/cc: id 15 colour white name len 16 shown-now 15 → window \(D7: this is the message that confirmed/.test(text), 'and the D7 one: "→ window (D7: this is the message that confirmed ...)"');
+    // car-fix CF1: (the D7 line "this is the message that confirmed" is gone with confirmNow) the unknown and the dead-active lines
+    ok(/cc: id 65535 colour - name len 0 shown-now 65535 → window \(the "shown now" number is unknown \(65535\)\)/.test(text) &&
+        /active cc: wired - not the "shown now" source \(config\.ccActive\.source displayed, dead\)/.test(text) && !/D7: this is the message that confirmed/.test(text),
+        'and the car-fix lines: "cc: id 65535 ... → window (the "shown now" number is unknown (65535))", "active cc: wired - not the "shown now" source (..., dead)"');
 
     hud.stop();
     server.close();

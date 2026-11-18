@@ -112,15 +112,18 @@ function unit() {
 
     // the exact values
     {
-        const spec = APPS.f30_cluster, cfg = deep(spec.config), vals = { diagDisplayed: 'use' };
+        // car-fix CF1: diagShownNow replaced research3/MC's diagDisplayed (the displayed witness is the "shown now" source now)
+        const spec = APPS.f30_cluster, cfg = deep(spec.config), vals = { diagShownNow: 'active' };
         const d = DS.Diag.create(cfg, fakeSettings(spec, vals), quiet);
-        ok(cfg.ccDisplayed.use === true && cfg.ccActive.release && cfg.ccActive.release.witness === true && !cfg.ccActive.release.deferValues, 'f30: diagDisplayed "use" sets ccDisplayed.use and only release.witness');
+        ok(cfg.ccActive.source === 'active' && cfg.ccDisplayed && cfg.ccDisplayed.field === 'statusDisplayedCCMessage' && !cfg.ccActive.release,
+            'f30: diagShownNow "active" sets only ccActive.source (0.7.20\'s path); ccDisplayed stays subscribed, nothing else changes');
         vals.diagRelease = true; d.apply();
-        ok(JSON.stringify(cfg.ccActive.release) === JSON.stringify({ deferValues: [65535], leftList: true, witness: true }), 'f30: with the release on too the witness stays in it: ' + JSON.stringify(cfg.ccActive.release));
-        vals.diagDisplayed = 'off'; d.apply();
-        ok(JSON.stringify(cfg.ccActive.release) === JSON.stringify({ deferValues: [65535], leftList: true }) && cfg.ccDisplayed === null, 'f30: the witness goes with its setting (ccDisplayed back to null)');
+        ok(JSON.stringify(cfg.ccActive.release) === JSON.stringify({ deferValues: [65535], leftList: true }) && cfg.ccActive.source === 'active', 'f30: with the release on too: ' + JSON.stringify(cfg.ccActive.release));
+        vals.diagShownNow = 'off'; d.apply();
+        ok(cfg.ccActive.source === 'displayed' && cfg.ccActive.dead === true, 'f30: off puts app.json\'s source back ("displayed", dead active)');
         vals.diagRelease = false; d.apply();
         ok(!('release' in cfg.ccActive), 'f30: release off removes the key app.json does not have');
+        ok(!spec.settings.some((s) => s.key === 'diagDisplayed') && !spec.config.diag.settings.diagDisplayed, 'f30: research3/MC\'s diagDisplayed is gone (replaced by diagShownNow)');
         // a baseline in app.json is kept while off
         const c3 = deep(spec.config); c3.mbCover = 'black';
         const v3 = {}, d3 = DS.Diag.create(c3, fakeSettings(spec, v3), quiet);
@@ -325,7 +328,7 @@ async function f30() {
     ok(p && p.ready && p.activeName === 'wb_comfort', 'the app runs, 6WB Comfort');
     await sleep(2000);
     ok(!/\bdiag: /.test(logText) && !/start-up: /.test(logText) && !/\bmb: /.test(logText), 'no "diag:", "start-up:" or "mb:" line with every setting off');
-    ok(['SET_DIAGRELEASE', 'SET_DIAGDISPLAYED', 'SET_DIAGSCENETEX', 'SET_DIAGMBGAP', 'SET_DIAGMBCOVER', 'SET_DIAGMBREBUILD'].every((n) => p.native[n]), 'the kit made the six diagnostics rows');
+    ok(['SET_DIAGRELEASE', 'SET_DIAGSHOWNNOW', 'SET_DIAGSCENETEX', 'SET_DIAGMBGAP', 'SET_DIAGMBCOVER', 'SET_DIAGMBREBUILD'].every((n) => p.native[n]), 'the kit made the six diagnostics rows');
     // in place
     let d0 = live(trace).drops;
     await click('SET_DIAGRELEASE');
@@ -333,6 +336,15 @@ async function f30() {
     await sleep(800);
     ok(/diag: diagRelease on/.test(logText) && live(trace).drops === d0, 'release: in place (no layer dropped)');
     await click('SET_DIAGRELEASE');
+    await sleep(500);
+    // car-fix CF1: the "shown now" source back to 0.7.20's active number, in place, and back to displayed
+    d0 = live(trace).drops;
+    await click('SET_DIAGSHOWNNOW', 1);
+    p = await until((q) => q.settings.diagShownNow === 'active', 4000);
+    await sleep(800);
+    ok(/diag: diagShownNow active/.test(logText) && live(trace).drops === d0, '"shown now" source "active": in place (no layer dropped)');
+    await click('SET_DIAGSHOWNNOW', 0);
+    p = await until((q) => q.settings.diagShownNow === 'off', 4000);
     await sleep(500);
     // the cover over the gear gap: a rebuild, a layer over the gap at z 1000, and gone again
     d0 = live(trace).drops;
