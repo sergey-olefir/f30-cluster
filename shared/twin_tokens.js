@@ -20,11 +20,14 @@
 const DASH = '–';            // en dash: "no value"
 const THIN = ' ';            // thousands separator
 const WEEKDAYS = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'];
-const TITLES = { clock: 'Дата і час', trip: 'Поїздка' };
+const TITLES = { clock: 'Дата і час', trip: 'Поїздка', msg: 'Повідомлення', nav: 'Навігація', tab3: 'Медіа', tab4: 'Телефон' };     // twin_dial: tabs (B2): the titles of tabs 2..5 (package B4 owns the pages' content)
 const KOMBI = 'de.bmw.infotainment.KombiIF';
 const COND_READY_TWIN = 10;       // VehicleCondition 10 = FAHREN (SPEC 5.1)
 const PAGE_EVAL_MS = 250;         // the page is decided at most this often, so every widget of one tick sees one page
 const isNum = (x) => typeof x === 'number' && isFinite(x);
+/** CallState (ConnectivityAggregator.aggregatedCallState, VoiceCall.state) as a number 0..4, or null for anything else. */
+const CALL = { DISCONNECTED: 0, INCOMING: 1, ACTIVE: 2, DIALING: 3, HELD: 4 };
+const callNum = (raw) => (isNum(raw) && raw >= 0 && raw <= 4 ? raw : typeof raw === 'string' && CALL.hasOwnProperty(raw) ? CALL[raw] : null);
 const pad2 = (n) => (n < 10 ? '0' : '') + n;
 
 function fresh() {
@@ -180,6 +183,7 @@ function wire(hud, extra) {
     chain(hud, extra, IF.phone, 'aggregatedCallState', (v) => {
         const raw = isNum(v) || typeof v === 'string' ? v : member(v, 'aggregatedCallState');
         td.call = raw === undefined ? null : !enumIs(raw, ['DISCONNECTED'], [0]);
+        td.callState = raw === undefined ? null : callNum(raw);        // twin_dial: tabs (B2): 0 none, 1 incoming, 2 active, 3 dialing, 4 held (rule 2, gated off)
         once(hud, 'call', 'phone state raw (P9): ' + String(raw));
     });
     // navigation: lit while a route is guided
@@ -331,8 +335,13 @@ function rl3Trip(td, f) {
 
 /* ------------------------------------------------------------------ pages --------------------------------------- */
 
-/** The page that shows now: 'clock' | 'trip'. Setting `centre` = clock | trip | cycle (SPEC 6.2). */
+/** The page that shows now: 'clock' | 'trip' (tab 1), or with live tabs 'msg' | 'tab3' | 'tab4' | 'nav'. Setting `centre` = clock | trip | cycle (SPEC 6.2). */
 function page(hud) {
+    // twin_dial: tabs (B2): with live tabs (config.tabs) the selected tab picks the page; tab 1 is the computer (clock / trip below)
+    if (hud._twinTabsOn && hud._twinTabsOn()) {
+        const tp = require('./twin_tabs').pageOf(hud);
+        if (tp !== 'computer') return tp;
+    }
     const td = st(hud), t = now(hud), mode = hud.setting ? hud.setting('centre') : 'cycle';
     if (mode === 'clock' || mode === 'trip') { td.page = mode; td.pageSince = t; return mode; }
     if (td.pageEval && t - td.pageEval < PAGE_EVAL_MS && t >= td.pageEval) return td.page;
@@ -503,12 +512,15 @@ function ready(hud) {
 
 /* ------------------------------------------------------------------ tokens -------------------------------------- */
 
+/** twin_dial: tabs (B2): the bottom row shows ONE line (every tab but 1, live tabs on). */
+const rowOne = (hud) => require('./twin_tabs').rowLines(hud) === 1;
+
 /**
  * {{td:<name>}} -> text. Never throws; an unknown name comes back as the token itself (as the engine does).
  *   hub:     speed gear program ready
  *   tabs:    rangeTab media
  *   centre:  cTitle cTime cWeekday cDate (clock page), tConsAvg tSpeedAvg tDist tTime tFrom (trip page)
- *   bottom:  odo clock r1 r1Unit ambient
+ *   bottom:  odo clock r1 r1Unit ambient; rowL1 rowL1u rowL2 rowR1 rowR1u rowR2 rowR2u (the row by tab: one line off tab 1)
  */
 function token(hud, tok) {
     try { return resolve(hud, tok.slice(3)); } catch (e) { log(hud, 'warn', 'twin token ' + tok + ': ' + (e && e.message || e)); return ''; }
@@ -544,7 +556,14 @@ function resolve(hud, name) {
         case 'tSpeedU': return onPage('trip', 'км/год');
         case 'tDistU': return onPage('trip', 'км');
         case 'tTimeU': return onPage('trip', 'год');
-        // ---- bottom row
+        // ---- bottom row: two lines on tab 1, one line (the clock left, the temperature right, on the upper baseline) on every other tab (SPEC-R3 3.5)
+        case 'rowL1': return rowOne(hud) ? clockText(local(hud)) : resolve(hud, 'odo');
+        case 'rowL1u': return rowOne(hud) ? '' : 'км';
+        case 'rowL2': return rowOne(hud) ? '' : resolve(hud, 'clock');
+        case 'rowR1': return rowOne(hud) ? resolve(hud, 'ambient') : resolve(hud, 'r1');
+        case 'rowR1u': return rowOne(hud) ? '°C' : 'км';
+        case 'rowR2': return rowOne(hud) ? '' : resolve(hud, 'ambient');
+        case 'rowR2u': return rowOne(hud) ? '' : '°C';
         case 'odo': { const o = odometer(hud); return isNum(o.km) ? grouped(o.km) : DASH; }     // research3/MK: the first valid carrier
         case 'clock': return clockText(local(hud));
         case 'r1': {         // the trip distance whenever a source delivers one (research3/MK: factors on by default), else the range (SPEC 6.3)
@@ -566,37 +585,14 @@ function resolve(hud, name) {
 /* --------------------------------------------------------------- live icons -------------------------------------- */
 
 /**
- * The state of a tab-bar icon (widget "tdLive": "warn" | "media" | "phone" | "nav" | "fixed"): { icon, role }.
- *   warn   always shown; white, black (role bg) on an amber highlight (SPEC 6.1; hud.twinCc.severity, package D)
- *   media  the radio's icon (the media cell is icon only until P8)
- *   phone  dim (theme role grey, the tab ramp's bottom: SPEC's "dim (0.5)") until a call state says otherwise
- *   nav    the same while no route is guided
+ * The state of a tab-bar icon (widget "tdLive": "fixed" | "warn" | "media" | "phone" | "nav"): { icon, color, tag }.
+ * twin_dial: tabs (B2): moved to shared/twin_tabs.js - no icon is dimmed any more (SPEC-R3 3.1), the state is the icon's variant;
+ * the warning icon is white, or red / amber while a message shows and tab 2 is not selected.
  */
-function iconState(hud, w) {
-    const td = st(hud);
-    switch (w.tdLive) {
-        case 'warn': {
-            const sev = hud.twinCc && hud.twinCc.severity;       // package D: 'red' | 'amber' | 'green' | 'grey' | null
-            return { icon: w.icon, role: sev === 'amber' ? 'bg' : 'fg' };
-        }
-        case 'phone': return { icon: w.icon, role: td.call === true ? 'fg' : 'grey' };
-        case 'nav': return { icon: w.icon, role: td.nav === true ? 'fg' : 'grey' };
-        default: return { icon: w.icon, role: w.color || 'fg' };
-    }
-}
+function iconState(hud, w) { return require('./twin_tabs').iconState(hud, w); }
 
-/**
- * Repaint a live icon when its name or its colour changed (also after a night change: the engine clears x.last).
- * Called from _updateOne for a widget with "tdLive".
- */
-function updateIcon(hud, x, nowMs, force) {
-    const s = iconState(hud, x.w), col = hud.theme[s.role] || hud.theme.fg;
-    const key = s.icon + '|' + col.join(',');
-    if (!force && key === x.last) return;
-    x.last = key;
-    const paint = require('./icons').paintIcon;
-    hud._blitDiff(x, paint(s.icon, x.w.w, x.w.h, col));
-}
+/** Repaint a live icon when its name, colour or text changed (also after a night change: the engine clears x.last). Called from _updateOne. */
+function updateIcon(hud, x, nowMs, force) { return require('./twin_tabs').updateIcon(hud, x, nowMs, force); }
 
 module.exports = { token, wire, page, updateIcon, iconState, program, ready, local, tripValues, odometer, factors, summary, grouped, DASH, THIN, WEEKDAYS, TITLES, fresh,
     SOURCES, DEFAULT_FACTORS };

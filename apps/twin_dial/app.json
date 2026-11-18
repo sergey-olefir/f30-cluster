@@ -30,6 +30,7 @@
     "previews.js",
     "twin_tokens.js",
     "twin_cc.js",
+    "twin_tabs.js",
     "twin_probe.js",
     "mb_exp.js",
     "diag_settings.js"
@@ -131,6 +132,10 @@
           "centre"
         ],
         [
+          "setting",
+          "tab"
+        ],
+        [
           "text",
           "STATUS",
           ""
@@ -164,6 +169,7 @@
       "skip": [
         "hudLayout",
         "centre",
+        "tab",
         "diagRelease",
         "diagMapWindow",
         "diagMapForce",
@@ -238,6 +244,72 @@
         ]
       ],
       "_about": "SPEC 6.2: cycle holds each page 10 s while the car stands and keeps the page it is on above 5 km/h"
+    },
+    {
+      "key": "tab",
+      "label": "Таба",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "авто"
+        ],
+        [
+          "1",
+          "1"
+        ],
+        [
+          "2",
+          "2"
+        ],
+        [
+          "3",
+          "3"
+        ],
+        [
+          "4",
+          "4"
+        ],
+        [
+          "5",
+          "5"
+        ]
+      ],
+      "_about": "SPEC-R3 3.4 (package B2, shared/twin_tabs.js): the selected tab, applied in place (no layout rebuild). auto = a message selects tab 2 until it ends, a call tab 4 (config.tabs.callSelects, off), guidance tab 5, else the driver's last choice (the key, config.tabKey; or this setting set to a number). 1 on-board computer, 2 messages, 3 media, 4 phone, 5 navigation"
+    },
+    {
+      "key": "tabLock",
+      "label": "Не перемикати таби вище",
+      "type": "choice",
+      "default": "5",
+      "options": [
+        [
+          "0",
+          "вимк."
+        ],
+        [
+          "5",
+          "5 км/год"
+        ],
+        [
+          "10",
+          "10 км/год"
+        ],
+        [
+          "20",
+          "20 км/год"
+        ],
+        [
+          "30",
+          "30 км/год"
+        ],
+        [
+          "50",
+          "50 км/год"
+        ]
+      ],
+      "_about": "SPEC-R3 3.4: an automatic tab change (a call, guidance, the return to the driver's choice) waits until the car is at or below this speed; a message never waits, and the driver's own key is never locked"
     },
     {
       "key": "redline",
@@ -395,6 +467,14 @@
       "cyclePageMs": 10000,
       "holdAboveKmh": 5
     },
+    "tabs": {
+      "_about": "SPEC-R3 3: live tabs on (shared/twin_tabs.js, package B2; the key absent = live tabs off, the round 2 look). lockAboveKmh: used while the app has no tabLock setting. messageTab false: a message does not select tab 2. callSelects: rule 2, a call rings or runs -> tab 4; OFF until the car session has shown the call state (probe P9)",
+      "lockAboveKmh": 5,
+      "messageTab": true,
+      "callSelects": false
+    },
+    "tabKey": null,
+    "_tabKey": "SPEC-R3 R9: the tab key source, null until the car session (docs/AGENT-BRIEF-car-signals.md, probe P13) finds a field that moves on one press. Forms: {\"iface\": \"...\", \"field\": \"...\", \"path\": [\"member\"], \"mask\": 64} (a bit), {..., \"press\": [1, \"TASTER_GEDRUECKT\"]} (a level; the rising edge counts), {..., \"counter\": true} (a step counter), {..., \"any\": true} (any change); optional \"instance\", \"dir\" (1 | -1), \"rateMs\". The field must also be in \"signals\" (rs / s): the key reads, it never writes. shared/twin_tabs.js",
     "trip": {
       "factors": {
         "bc": 1,

@@ -241,6 +241,9 @@ const DiagSettings = require('./diag_settings');     // b7: the Діагност
 // file, so for every other app it is simply absent (null) and none of the twin_dial hooks below does anything.
 let twin = null;
 try { twin = require('./twin_tokens'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_tokens') < 0) throw e; }
+// twin_dial: tabs (B2): the live tabs and the tab bar's pixels (shared/twin_tabs.js). Absent (null) for every app that does not pack it.
+let twinTabs = null;
+try { twinTabs = require('./twin_tabs'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_tabs') < 0) throw e; }
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
@@ -397,6 +400,8 @@ const TW_LIM_STRIP = { L1: 1, L2: 2, L3: 3 };       // twin_dial B1: config.limi
 function twinLin(c, i, k, noFloor) { const v = c / 255, l = v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); return (noFloor ? l : Math.max(0, (l - TW_FLOOR[i]) / (1 - TW_FLOOR[i]))) * k; }
 function twinEnc(l) { l = Math.max(0, Math.min(1, l)); return l <= 0.0031308 ? l * 12.92 : 1.055 * Math.pow(l, 1 / 2.4) - 0.055; }
 const TW_LIVE_KEYS = ['redline', 'bandGain'];       // settings the twin layers take in place (uniforms, no rebuild)
+// twin_dial: tabs (B2): the settings that move the selected tab or the centre page, in place (no layout rebuild; package B4 adds its own keys here)
+const TW_TAB_KEYS = ['tab', 'tabLock', 'centre'];
 const TW_PANEL = [694, 592, 536, 112];              // the fallback window's box (package A2's mask rect), used when the layout has no mask
 // 0.7.13, the KOMBI guard: when the cluster's display service goes away within KOMBI_GUARD_MS of our scene being shown,
 // KOMBI_STRIKES times within KOMBI_WINDOW_MS, the theme is turned off (every theme, so a drive-mode change doesn't try
@@ -910,6 +915,7 @@ class HudApp {
             if (LOOK_KEYS.indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
             if (PLACE_KEYS.indexOf(key) >= 0) this._guard('place', () => this._place());
             else if (this.twinLayout && TW_LIVE_KEYS.indexOf(key) >= 0) this._guard('twin live', () => this._twinLive());     // twin_dial: in place
+            else if (this.twinLayout && TW_TAB_KEYS.indexOf(key) >= 0 && this._twinTabsOn()) this._guard('twin tabs', () => this._twinTabsChanged());     // twin_dial: tabs (B2): in place
             else if (LIVE_KEYS.indexOf(key) >= 0 || ROW_KEYS.indexOf(key) >= 0) this.widgets.forEach((x) => { x.last = null; });
             else if (WB_LIVE_KEYS.indexOf(key) >= 0 && this._wbLive()) { /* package F: the uniforms are sent, no rebuild */ }
             else if (NIGHT_KEYS.indexOf(key) >= 0 && this._nightLive()) { /* 2026-11-14: the night colours changed in place */ }
@@ -1602,6 +1608,8 @@ class HudApp {
         // by _restFrac to tell READY from OFF on a rev dial. audit/features.
         // twin_dial: the fields only Twin Dial reads (config.twin), chained behind the handlers above; config.carGroups: its own list
         if (twin && this.config.twin) twin.wire(this, extra);
+        // twin_dial: tabs (B2): the tab key (config.tabKey, null until the car session names one), chained in front of the field's own handler
+        if (twinTabs && this.config.tabs) twinTabs.wire(this, extra, () => this._guard('twin tabs', () => this._twinTabsChanged()));
         this.car = new Car(this.ctx, this.config.carGroups || ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
         this.car.setRedline(this._redline());
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
@@ -2744,7 +2752,18 @@ class HudApp {
 
     /** D's entry (ENGINE-CONTRACT 2): this.twinCc changed. Resends what depends on it, nothing when nothing changed. */
     _twinSync() {
+        if (this._twinTabsOn()) this._guard('twin tabs', () => twinTabs.update(this));      // twin_dial: tabs (B2): the tab follows the message, guidance, the speed, the settings
         this.widgets.forEach((x) => { if (x.w && x.w.type === 'tdback' && x.ref) this._guard('twin sync', () => this._twinBackSend(x, false)); });
+    }
+
+    /** twin_dial: tabs (B2): live tabs are on (the module packed, config.tabs set, a twin layout shown). */
+    _twinTabsOn() { return !!(twinTabs && this.twinLayout && this.config && this.config.tabs); }
+
+    /** twin_dial: tabs (B2): a tab setting changed or the key was pressed: decide again, resend the backdrop; the centre's texts and the
+     *  bottom row follow (their tokens answer by tab, so the engine repaints what changed); nothing is rebuilt. */
+    _twinTabsChanged() {
+        if (this.td) this.td.pageEval = 0;
+        this._twinSync();
     }
 
     /** "redline" / "bandGain" changed: the dials' uniforms, in place. */
@@ -4852,6 +4871,7 @@ class HudApp {
             if (this.ccFallbackLive) this._guard('check-control', () => this._ccListEval(now, true));
             // twin_dial: our plate was sent a moment ago; once it has been on the screen long enough the window shuts
             if (this.twinMsg && this.twinMsg.needsTick) this._ccPush();
+            if (this._twinTabsOn()) this._twinSync();      // twin_dial: tabs (B2): guidance, speed and settings move the tab (nothing is sent when nothing changed)
             if (!this.client.ready) return;
             this._guard('bottom row', () => this._rowSync(now));     // package X: standby, the clock line, the row's owner
             // shift light: blink the whole bar at 8 Hz once the rpm reaches the redline

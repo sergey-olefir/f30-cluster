@@ -122,7 +122,9 @@ def tdial(kind):
 
 # --- the three background layers (ENGINE-CONTRACT 1.2) -------------------------------------------------------------------
 BG = {'L': [0, 0, 1380, 720], 'RT': [1380, 0, 1920, 660], 'RB': [1460, 660, 1920, 720]}
-TAB = {'rect': [618, 127, 1302, 172], 'seps': [744, 812, 1168, 1237], 'rule': [171.2, 172.7], 'ramp': [0.002, 0.16], 'highlight': [744, 812]}
+# SPEC-R3 3.1 (package B2): separators 780 / 848 / 1168 / 1237 (tab 1 = 618-780, tab 2 = 780-848, tab 3 = 848-1168, tab 4 = 1168-1237,
+# tab 5 = 1237-1302), the rule under the bar 3 px (y 170-173); "highlight" is tab 2's cell (the round 2 warning cell, used only while live tabs are off)
+TAB = {'rect': [618, 127, 1302, 172], 'seps': [780, 848, 1168, 1237], 'rule': [170, 173], 'ramp': [0.002, 0.16], 'highlight': [780, 848]}
 MASK = {'tex': 'panel_mask', 'x': 694, 'y': 592, 'w': 536, 'h': 112}           # package A2: 536 x 112 R8 at [694, 592, 1230, 704]
 RULES = [
     {'x0': 741, 'y0': 295.2, 'x1': 1180, 'y1': 296.7, 'role': 'rule'},         # SPEC 6.2: the centre title's rule, y 296
@@ -151,20 +153,54 @@ BASE = {'time': 404, 'weekday': 460, 'date': 519, 'footer': 528, 'speed': 441, '
         'gear': 432, 'program': 471, 'ready': 321}
 
 
+ICON_Y = 147           # the icon boxes' centre line: K2's approved mockups (ICON_Y 147: the pump's ink 133-167, the warning triangle's 126-165 in the bar 127-172). The spec's
+                       # "centred at y 143" is the round 2 box centre of a 38 px box; 36 px of ink centred on 143 would stand 1.5 px above the bar (reported)
+ICON_BOX = 46          # SPEC-R3 3.1 "icons 36 px" is the INK height (SF: the references' 36 px against ours 29, the ink of the 38-box drawings); the
+                       # drawings' ink is ~0.79 of their box, so the box is 46 (K2's mockup: ICON_BOX 46); B6's slot table says "tab 36" (a box): reported
+TAB_FONT = 'td_tabs' if os.path.exists(os.path.join(FONTS, 'td_tabs.json')) else 'td_tab'      # SPEC-R3 7: tab text Noto 34 (B6's td_tabs); Noto 33 (td_tab) until it is baked
+
+
+def _ink_fractions():
+    """{icon name: (cx, cy)}: the centre of each tab-slot icon's INK in its box, as a fraction of the box (apps/twin_dial/hud/icons/icons.json:
+    package A1 / B6's slot table), so an icon's ink - not its box - is what lands on the spec's centre."""
+    p = os.path.join(ROOT, 'apps', 'twin_dial', 'hud', 'icons', 'icons.json')
+    out = {}
+    if os.path.exists(p):
+        for it in json.load(open(p))['items']:
+            if it['slot'] == 'tab':
+                b = it['box']
+                out[it['name']] = ((b[0] + b[2]) / 2.0 / it['w'], (b[1] + b[3]) / 2.0 / it['h'], b[0] / float(it['w']))
+    return out
+
+
 def tabs():
-    """SPEC 6.1: the tab bar's contents. Icon 38 x 38 centred at y 143, text baseline 156."""
-    W = [icon('tab_range_i', 'td_fuel', 636, 143, 38)]
-    # the range value, then its unit 3 px after the value's widest form ("888"). The value's box starts at x 655, the icon
-    # box's right edge (the ink at 654 is the box's own padding): two boxes that overlap cost the engine a sheet
-    vw = width('td_body', '888')
-    W += [text('tab_range_v', 654 + vw, 156, vw - 1, '{{td:rangeTab}}', 'td_body', 'fg', 'right', 1, below=3),
-          text('tab_range_u', 654 + vw + 3, 156, width('td_u19', 'км') + 3, 'км', 'td_u19', 'fg', 'left', 1, below=3)]
-    W += [icon('tab_warn_i', 'cc_warn', 778, 143, 38, live='warn'),
-          icon('tab_media_i', 'td_radio', 905, 143, 38),
-          # SPEC 6.1: the media text from x 925, clipped at x 1160; empty (icon only) until probe P8 has shown the field
-          text('tab_media_t', 925, 156, 235, '{{td:media}}', 'td_tab', 'fg', 'left', 1),
-          icon('tab_phone_i', 'td_phone', 1202, 143, 38, live='phone'),
-          icon('tab_nav_i', 'td_nav', 1270, 143, 38, live='nav')]
+    """SPEC-R3 3.1 / 3.3 (package B2): the tab bar's contents. Icons 36 px of ink (a 46 px box centred at y 147, the approved mockups'), text baseline
+    156 (Noto 34, cap 24). Tab 1: the pump's ink starts 18 px from the bar's left end (x 636), then the range and its unit. Tab 2: the
+    warning icon, white or in the severity colour (shared/twin_tabs.js). Tab 3: ONE live widget that paints the source icon and its text
+    centred as one group (icon only until the media probe has shown the field). Tab 4 / 5: the phone and navigation icons. No icon is
+    ever dimmed, the state is the icon's variant. A live icon's box is placed from its PLAIN icon's ink, so a variant never moves it."""
+    S, fr = ICON_BOX, _ink_fractions()
+    def tab_icon(id, name, cx, live, left=None):
+        f = fr.get(name, (0.5, 0.5, 0.0))
+        x = (left - f[2] * S) if left is not None else (cx - f[0] * S)
+        y = ICON_Y - S / 2.0
+        return {'id': id, 'type': 'icon', 'icon': name, 'z': 5, 'x': int(round(x)), 'y': int(round(y)), 'w': S, 'h': S, 'color': 'fg', 'conn': 1, 'tdLive': live}
+    W = [tab_icon('tab_range_i', 'td_fuel', None, 'fixed', left=636)]
+    # the range value, then its unit 3 px after the value's widest form ("888"). The value's box starts where the icon's box ends: two
+    # boxes that overlap cost the engine a sheet
+    vx = W[0]['x'] + S
+    vw = width(TAB_FONT, '888')
+    W += [text('tab_range_v', vx + vw, 156, vw, '{{td:rangeTab}}', TAB_FONT, 'fg', 'right', 1, below=3),
+          text('tab_range_u', vx + vw + 3, 156, width('td_u19', '\u043a\u043c') + 3, '\u043a\u043c', 'td_u19', 'fg', 'left', 1, below=3)]
+    cell = lambda a, b: (a + b) / 2.0
+    W += [tab_icon('tab_warn_i', 'cc_warn', cell(TAB['seps'][0], TAB['seps'][1]), 'warn')]
+    # tab 3 (848-1168): one widget, 300 px wide inside its cell, as tall as an icon box; the media text's baseline is 156
+    mw = TAB['seps'][2] - TAB['seps'][1] - 20
+    my = int(round(ICON_Y - S / 2.0))
+    W += [{'id': 'tab_media', 'type': 'icon', 'icon': 'td_radio', 'z': 5, 'x': TAB['seps'][1] + 10, 'y': my, 'w': mw, 'h': S,
+           'color': 'fg', 'conn': 1, 'tdLive': 'media', 'font': TAB_FONT, 'textBase': 156 - my, 'iconBox': S},
+          tab_icon('tab_phone_i', 'td_phone', cell(TAB['seps'][2], TAB['seps'][3]), 'phone'),
+          tab_icon('tab_nav_i', 'td_nav', cell(TAB['seps'][3], TAB['rect'][2]), 'nav')]
     return W
 
 
@@ -207,20 +243,24 @@ def gpu_texts():
 
 
 def row():
-    """SPEC 6.3: the bottom row. Rule y 613 (a tdback rule), baselines 656 and 703, numbers Noto 40 right-aligned at x 846
+    """SPEC 6.3 / SPEC-R3 3.5: the bottom row. Rule y 613 (a tdback rule), baselines 656 and 703, numbers Noto 40 right-aligned at x 846
     and 1153, units Noto 21 five px after, on the number's baseline. A "cc:" layer: it steps aside while BMW's panel or
     our plate shows (package D's toggle "cc:rest": neither BMW's panel nor our plate). Slots: L1 the odometer, L2 the
-    clock, R1 the trip distance (the range until probe P4), R2 the outside temperature."""
+    clock, R1 the trip distance (the range until probe P4), R2 the outside temperature - on tab 1. On every other tab the row is ONE
+    line (package B2): the clock left and the temperature right on the upper baseline 656, the lower line empty (the sheet stays
+    opaque over BMW's panel footprint). The layout carries both; the tokens rowL1 .. rowR2u answer by tab (shared/twin_tokens.js)."""
     z, tg = 8, 'cc:rest'
     L, Rr = 846, 1153
     nw = lambda *worst: max(width('td_row', t) for t in worst) + 1          # a number's box: its worst text (the odometer "999 999")
-    W = [text('row_l1', L, 656, nw('999\u2009999'), '{{td:odo}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_l1u', L + 5, 656, width('td_u21', 'км') + 1, 'км', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg),
-         text('row_l2', L, 703, nw('––:––', '00:00'), '{{td:clock}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_r1', Rr, 656, nw('9999.9'), '{{td:r1}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_r1u', Rr + 5, 656, width('td_u21', 'км') + 1, 'км', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg),
-         text('row_r2', Rr, 703, nw('-30.5', '+88.8'), '{{td:ambient}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
-         text('row_r2u', Rr + 5, 703, width('td_u21', '°C') + 1, '°C', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg)]
+    uw = lambda *worst: max(width('td_u21', t) for t in worst) + 1
+    km, c = '\u043a\u043c', '\u00b0C'
+    W = [text('row_l1', L, 656, nw('999\u2009999', '00:00', '\u2013\u2013:\u2013\u2013'), '{{td:rowL1}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
+         text('row_l1u', L + 5, 656, uw(km), '{{td:rowL1u}}', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg),
+         text('row_l2', L, 703, nw('\u2013\u2013:\u2013\u2013', '00:00'), '{{td:rowL2}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
+         text('row_r1', Rr, 656, nw('9999.9', '-30.5', '+88.8'), '{{td:rowR1}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
+         text('row_r1u', Rr + 5, 656, uw(km, c), '{{td:rowR1u}}', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg),
+         text('row_r2', Rr, 703, nw('-30.5', '+88.8'), '{{td:rowR2}}', 'td_row', 'fg', 'right', 2, z, below=3, toggle=tg),
+         text('row_r2u', Rr + 5, 703, uw(c), '{{td:rowR2u}}', 'td_u21', 'fg', 'left', 2, z, below=3, toggle=tg)]
     return W
 
 
