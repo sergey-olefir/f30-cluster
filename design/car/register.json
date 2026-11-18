@@ -1,0 +1,2412 @@
+{
+ "_about": "Register of everything the car must answer (package CA of docs/AGENT-BRIEF-car-signals.md). Kinds: L = read a log the installed apps already write; P = a signal read by the probe; X = an experiment (a build or a setting, then a photo or a log); F = a photo or an observation. status: open | answered | partly-answered | needs-lead-decision | needs-owner-approval | out-of-session. evidence: arrives | arrives-other-app | not sent | unseen | n/a. in_brief: as-is | corrected | new (relative to §3 of the brief). fields: '<Interface>.<field>[@instance]' resolved against the catalogue by tools/car/check_register.py (design/car/register_fields.json). Numbers, enum names and lengths only; no text, no coordinate.",
+ "version": 1,
+ "date": "2026-11-18",
+ "sets": {
+  "S1": "messages",
+  "S2": "computer",
+  "S3": "body",
+  "S4": "media",
+  "S5": "phone",
+  "S6": "view and key",
+  "S7": "navigation",
+  "S8": "assistance",
+  "S9": "technical",
+  "S10": "black-box signals (new)",
+  "S11": "f30's unwired signals (new)",
+  "S12": "provider checks and events (new)"
+ },
+ "items": [
+  {
+   "id": "L1",
+   "kind": "L",
+   "title": "Why f30's window over BMW's panel stays open",
+   "question": "Which of cases A1-A17 holds on the car: does the window stay open after BMW's message has gone, and why.",
+   "fields": [],
+   "steps": "Read f30_cluster.log (+ .1) and settings.json (hudLayout, g20, bottomRow). grep -E 'active cc:|check-control (list|message|frames):|displayed cc:|bottom row:|probe: ccList'. Apply the 13-row table of MC §6. Trap: 'no ccList entry for number N' alone is written once per N and does not prove a hang (row 5).",
+   "decides": "which config.ccActive.release set (deferValues / leftList / witness) and ccm.clearIds to ship; whether the owner's hang was in an opaque theme or a G20 file with BMW's row (H5)",
+   "blocks": [
+    "f30 config.ccActive.release (X7)",
+    "SPEC-R3 §5.4 item 7 (Twin Dial release)"
+   ],
+   "source": [
+    "docs/research3/MC-REPORT.md:194-224",
+    "docs/research3/MC-REPORT.md:226-235",
+    "docs/AGENT-BRIEF-car-signals.md:38"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "L",
+   "note": "SC (branch twin-r3/sc, SC-REPORT.md §4.7, §8 item 5) narrows MC's leftList: do NOT switch on f30's 'rec' until _ccRelease carries the narrowing (C8). The log lines 'active cc: released to the list' exist only on main (not on the car). No f30 log later than 0.7.12 is saved on the Mac."
+  },
+  {
+   "id": "L2",
+   "kind": "L",
+   "title": "Does statusActiveCCMessage notify, and what does it rest on",
+   "question": "Does KombiIF.statusActiveCCMessage send anything on this car; its rest value (0, 65535 or the last number); does its number equal the ccList id; what 'control' and 'utility' carry.",
+   "fields": [
+    "KombiIF.statusActiveCCMessage",
+    "KombiInterface_2.ccList"
+   ],
+   "steps": "grep 'active cc: number'. The 0.7.20 line is 'active cc: number N control C frame F/G utility U', once per change. Compare N with the id on 'check-control list:' lines in the same minute.",
+   "decides": "Twin Dial D7 (lift strict); noneValues; MC H1; SPEC-R3 §5.4 'shown now'",
+   "blocks": [
+    "SPEC-R3 §5.4",
+    "SPEC §8.4 D7",
+    "MC H1"
+   ],
+   "source": [
+    "docs/research3/MC-REPORT.md:226-235",
+    "docs/twin-dial/VS-REPORT.md:78-84",
+    "docs/twin-dial/PROBE-PROTOCOL.md:79-99"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "L",
+   "note": "Declared since 0.7.20, 'not yet seen' (VS §2.3). Twin Dial 0.1.0 declares it too, so BOTH logs can answer. If L2 is answered from the logs, P1 reduces to the owner's presses (two doors, frame n of m)."
+  },
+  {
+   "id": "L3",
+   "kind": "L",
+   "title": "The clock's fallback: statusShowTimeDate",
+   "question": "Does KombiIF.statusShowTimeDate reach apps, and does it carry LOCAL time (zone = shown time minus UTC, rounded to 15 min).",
+   "fields": [
+    "KombiIF.statusShowTimeDate"
+   ],
+   "steps": "grep \"clock (local) raw|clock: ours shows|clock: the car's offset\" in both logs; compare 'ours shows HH:MM, UTC+hh:mm' with the clock the cluster shows.",
+   "decides": "whether config.clockLocal stays the clock's source (the owner retired the manual timeZone setting)",
+   "blocks": [
+    "f30 / Twin Dial clock",
+    "bottom row ownClock"
+   ],
+   "source": [
+    "apps/f30_cluster/app.json: config.clockLocal._about",
+    "apps/f30_cluster/app.json: config.clock._confirm",
+    "docs/BOTTOM-ROW-PACKAGE.md:396-411"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "L",
+   "note": "Brief's L3 is right; the PRIMARY source is answered separately (L16)."
+  },
+  {
+   "id": "L4",
+   "kind": "L",
+   "title": "Twin Dial's trip fields",
+   "question": "Do KombiIF.statusBordcomputerAverage / TravelData / TravelStart arrive on this car; raw values against iDrive's trip page.",
+   "fields": [
+    "KombiIF.statusBordcomputerAverage",
+    "KombiIF.statusBordcomputerTravelData",
+    "KombiIF.statusBordcomputerTravelStart"
+   ],
+   "steps": "0.1.0 (installed) writes 'trip average|travel|departure raw (P4): n,n,n' on every change. The MK build on main (not on the car) writes 'trip <source> (<field>) first at T s: raw ... [UNVERIFIED]' and 'trip summary #n ... SILENT ...' instead. grep both shapes. No P4 lines but 'signal KombiIF subscribed' = silent or refused.",
+   "decides": "MK §7 step 1: install MK build 1 or the probe build; trip.factors (bc, speed 0.1, cons 0.1, way 0.1), departureUtc, the ResetLogic3 fallback",
+   "blocks": [
+    "SPEC-R3 §4.1",
+    "config.trip",
+    "MK-PROTOCOL.md"
+   ],
+   "source": [
+    "docs/research3/MK-REPORT.md:195-207",
+    "docs/research3/MK-REPORT.md:178-193 (rows 7-9, 12)"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "corrected",
+   "set": "L",
+   "note": "CORRECTION: the grep in the brief matches 0.1.0's shape only; main's code writes different lines. The parser must read both. KombiIF is subscribed by the installed Twin Dial, so this needs no new build."
+  },
+  {
+   "id": "L5",
+   "kind": "L",
+   "title": "The odometer member",
+   "question": "Does KombiIF.statusRangeTankStatus.mileageKilometre carry the odometer in km (factor 1); what is its invalid value.",
+   "fields": [
+    "KombiIF.statusRangeTankStatus"
+   ],
+   "steps": "grep 'odometer raw (P3)' in twin_dial.log ('none' or 16777215 = no carrier); ask the owner whether the bottom-left number showed on 0.1.0 and what it read against the cluster's odometer.",
+   "decides": "config.odometer.factors.rangeTank (1), the verified flag; whether SecureMileage / MileageSupreme / VehicleInformation.Range carriers are needed",
+   "blocks": [
+    "SPEC-R3 §4.1 bottom row"
+   ],
+   "source": [
+    "docs/research3/MK-REPORT.md:195-207",
+    "docs/twin-dial/PROBE-PROTOCOL.md:120-134"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "L",
+   "note": "The struct statusRangeTankStatus ARRIVES (fuel, range verified, f30 and VS); only the mileage member was never read."
+  },
+  {
+   "id": "L6",
+   "kind": "L",
+   "title": "Phone state",
+   "question": "Does ConnectivityAggregator.aggregatedCallState arrive; which value does it hold at rest.",
+   "fields": [
+    "ConnectivityAggregator.aggregatedCallState"
+   ],
+   "steps": "grep 'phone state raw (P9)'. Twin Dial 0.1.0 writes it ONCE per run (once()), so it shows only the first value after start; changes are not logged.",
+   "decides": "r3/SP A1 (tab icon lit in a call + call card)",
+   "blocks": [
+    "SPEC-R3 §4.4"
+   ],
+   "source": [
+    "branch twin-r3/sp: docs/twin-dial/r3/SP-REPORT.md §0, §5.2"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "corrected",
+   "set": "L",
+   "note": "CORRECTION: the line is once per run, not per change. At rest it shows the first value (probably DISCONNECTED); the call states need P9."
+  },
+  {
+   "id": "L7",
+   "kind": "L",
+   "title": "Media",
+   "question": "Does HmiMediaState.playerMetadata (instance HMI_CID) / MediaSource arrive on Twin Dial 0.1.0.",
+   "fields": [
+    "HmiMediaState.playerMetadata@HMI_CID",
+    "MediaSource.activeSourceId",
+    "MediaSource.sources"
+   ],
+   "steps": "grep 'media text (P8)' ('first line N characters, second M characters', once per run) in twin_dial.log. No line = silent or no text yet.",
+   "decides": "r3/SM: tab 3 text and M1/M2",
+   "blocks": [
+    "SPEC-R3 §4.3"
+   ],
+   "source": [
+    "branch twin-r3/sm: docs/twin-dial/r3/SM-REPORT.md §3, §6"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "corrected",
+   "set": "L",
+   "note": "CORRECTION: the 0.1.0 line is 'media text (P8): first line N characters, second M characters' (lengths, once). 'playerMetadata' is not in the line."
+  },
+  {
+   "id": "L8",
+   "kind": "L",
+   "title": "The second witness",
+   "question": "Does Vehicle2.statusDisplayedCCMessage arrive on this car and return to 0.",
+   "fields": [
+    "Vehicle2.statusDisplayedCCMessage"
+   ],
+   "steps": "Twin Dial 0.1.0 declares it (config.ccDisplayed); f30 0.7.20 does NOT (main only). Read twin_dial.log: the cc line 'cc: id N colour C name len L shown-now S -> window (...)'.",
+   "decides": "MC H4 and F3 (witness release); D7",
+   "blocks": [
+    "f30 config.ccDisplayed",
+    "SPEC-R3 §5.4 item 7"
+   ],
+   "source": [
+    "docs/research3/MC-REPORT.md:226-235 (H4)",
+    "docs/twin-dial/R2-D-REPORT.md §6 item 2"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "corrected",
+   "set": "L",
+   "note": "CORRECTION: the brief names 'displayed cc: number N' in twin_dial.log. That exact line is f30's (main; config.ccDisplayed null). Twin Dial 0.1.0 shows the witness inside its cc/window lines."
+  },
+  {
+   "id": "L9",
+   "kind": "L",
+   "title": "Layout builds at start",
+   "question": "How many whole layout builds each app makes in the first 10 s (the bench predicts 3: first, time zone, ccList).",
+   "fields": [],
+   "steps": "Count 'layout \"<name>\": N widgets, ... whole-sheet writes' lines in the first 10 s after each app's start line.",
+   "decides": "whether the start-up fix (hold the first build until zone and ccList have answered, MP §7.4) is worth it",
+   "blocks": [
+    "research3/MP §7.4"
+   ],
+   "source": [
+    "docs/research3/MP-REPORT.md:249-252",
+    "docs/research3/MB-REPORT.md:17"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "L",
+   "note": "CONTRADICTION C2: MB §0 says Twin Dial rebuilds 'at start (twice)'; MP §6 and §8 measured 3 builds at start in 3 of 3 runs for both apps. The car's count settles both."
+  },
+  {
+   "id": "L10",
+   "kind": "L",
+   "title": "Upload accounting",
+   "question": "The real cost of a theme switch: cluster-render's upload cap steps, slow flushes, per-minute KB, 'goes whole ... KB'.",
+   "fields": [],
+   "steps": "cluster-render.log / status.txt around Comfort -> Sport -> Comfort: 'upload: cap N KB/s (ceiling, floor)', 'N writes, N KB, N failed', 'in the last 60 s ... KB'.",
+   "decides": "MP's 1.0-2.8 s incomplete screen back to Comfort; MT residency",
+   "blocks": [
+    "research3/MP §7",
+    "research3/MT §8 item 4"
+   ],
+   "source": [
+    "docs/research3/MP-REPORT.md:249-262",
+    "docs/research3/MT-REPORT.md:250-256"
+   ],
+   "status": "partly-answered",
+   "evidence": "arrives-other-app",
+   "in_brief": "as-is",
+   "answer": "reference/car/2026-11-15/cluster-render/cluster-render.log and oap/f30_cluster-0712.log carry cap and per-asset 'writes, KB, failed' lines for the 0.7.12 era (CL parses them). Nothing for 0.7.18+ or for Twin Dial.",
+   "set": "L"
+  },
+  {
+   "id": "L11",
+   "kind": "L",
+   "title": "The map slot under our panel",
+   "question": "Was BMW's map in slot 0x100 while our panel (0x10004f8 in 0x203) was up, including when no black box showed (theory H-M)?",
+   "fields": [],
+   "steps": "cluster-render status.txt / journal: rows 'slot 0x100 status N: 0x1000300 class 0 map M', 0x200 and 0x203 while Twin Dial's panel is shown; with the box up add E0's commands (L27).",
+   "decides": "H-M weakened or not; the presence rule S1 of the map window (SN §2.3)",
+   "blocks": [
+    "SPEC-R3 §4.5",
+    "research3/MB theories"
+   ],
+   "source": [
+    "branch boxes/br: docs/boxes/BR-REPORT.md §5 E0",
+    "branch twin-r3/sn: docs/twin-dial/r3/SN-REPORT.md §0.1, §1.2, §1.6"
+   ],
+   "status": "partly-answered",
+   "evidence": "arrives-other-app",
+   "in_brief": "as-is",
+   "answer": "SN §1.2 (verified): cluster-render journal 2026-11-13 11:46 to 11-14 19:13: BMW's map MAPPED_FOREGROUND in 0x100 for 7986 of the 8000 s our panel was shown with 0x100 enabled (f30's panel; 1404 s in one stretch on the panel's own id, cluster-render 0.5.9). The Twin Dial era has no journal.",
+   "set": "L"
+  },
+  {
+   "id": "L12",
+   "kind": "L",
+   "title": "cluster-render's version",
+   "question": "Is the running cluster-render >= 0.5.12 (ETC2 assets)?",
+   "fields": [],
+   "steps": "ls /var/opt/cluster-render/versions/; header of cluster-render.log; the status text.",
+   "decides": "the ETC2 prototype (X5)",
+   "blocks": [
+    "research3/MT §8 item 1"
+   ],
+   "source": [
+    "docs/research3/MT-REPORT.md:250-256",
+    "branch boxes/br: BR-REPORT.md §5 E8"
+   ],
+   "status": "answered",
+   "evidence": "arrives-other-app",
+   "in_brief": "as-is",
+   "answer": "reference/car/2026-11-15/cluster-render/cluster_render_client-0.5.12.js and component.json: the client saved from the car is 0.5.12 (2026-11-15). Confirm at the session that nothing was updated since: the Store offers 0.6.6 (BR E8).",
+   "set": "L",
+   "note": "Close the item for 2026-11-15; the session only has to confirm that the version is unchanged."
+  },
+  {
+   "id": "L13",
+   "kind": "L",
+   "title": "The 0.7.18 probes' results",
+   "question": "ccListRiskClass, CheckControlMaster.basicList and the requestDefaultSymbols reply: which marks a stored message; which symbol ids exist.",
+   "fields": [
+    "KombiInterface_2.ccListRiskClass",
+    "CheckControlMaster.basicList",
+    "KombiInterface_2.ccList"
+   ],
+   "steps": "grep 'probe: ccListRiskClass|probe: basicList|probe: ccList|probe: cc symbols' in the surviving f30 logs (0.7.18-0.7.20 era, up to 40 lines per field; the log rotates to .log.1).",
+   "decides": "config.ccMarker (BMW's stored-message marker 'i' / triangle); risk class as a sort key; the id-to-symbol table of design/twin-dial/vt/message_symbols.json",
+   "blocks": [
+    "SPEC rev 2 D7",
+    "strip P-REPORT 1.1",
+    "f30 config.ccMarker"
+   ],
+   "source": [
+    "docs/twin-dial/VS-REPORT.md:69-90",
+    "docs/strip/P-REPORT.md:19-25",
+    "design/twin-dial/vt/message_symbols.json: _about, by_symbol_id"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "note": "Read this log FIRST: the 0.7.18 run was 2026-11-17 and only commit notes survive (VS §2 item 6: result never recorded). VT writes 'symbol ids 0-6 seen so far', so a reply was read, but no id-to-name pairs are in the repository. See C3: this probe makes the requestDefaultSymbols method call that the brief forbids."
+  },
+  {
+   "id": "L14",
+   "kind": "L",
+   "title": "The speed-limit sign in f30",
+   "question": "Does TrafficSignDisplayControl.displaySpeedLimitAndNoPassingRestriction arrive; do the raw values follow 0 = end, 254 / 255 = no limit, unit NICHT_VERFUEGBAR = BMW's empty sign.",
+   "fields": [
+    "TrafficSignDisplayControl.displaySpeedLimitAndNoPassingRestriction"
+   ],
+   "steps": "grep ' sign: ' in f30_cluster.log: 'sign: <state> <value> <unit> <warn> <supplemental> <style> <sure> <no-passing> <distance>' (at most 24 lines); compare with BMW's sign in a photo.",
+   "decides": "config.sign values (end, unknown, noUnit, invalidPath); SPEC-R3 §8 (the sign restored in Twin Dial)",
+   "blocks": [
+    "SPEC-R3 §8",
+    "AGENT-BRIEF-twin-build-r3 B1"
+   ],
+   "source": [
+    "apps/f30_cluster/app.json: config.sign._values",
+    "docs/BOTTOM-ROW-PACKAGE.md:396-411 (guesses table)",
+    "docs/twin-dial/SPEC-R3.md:289"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "corrected",
+   "set": "L",
+   "note": "CORRECTION: the line is 'sign: ...' (hud.js:1283), not 'speed limit raw:' (that is config.limit, null). The same build declares six SettingsDriverAssistanceFunctions notifiers; see L20."
+  },
+  {
+   "id": "L15",
+   "kind": "L",
+   "title": "Day/night",
+   "question": "Does Vehicle.statusDayNightChangeOver arrive; what does 0 (KEINE_AENDERUNG) mean in practice; the car's verdict against the sun.",
+   "fields": [
+    "Vehicle.statusDayNightChangeOver"
+   ],
+   "steps": "grep 'day/night source:|day/night: the car says' in both logs; compare the transitions with sunset and with the cluster's own switch.",
+   "decides": "config.dayNight.map['0'] ('keep'); the night multipliers' trigger",
+   "blocks": [
+    "night looks",
+    "SPEC rev 2 §7.2"
+   ],
+   "source": [
+    "apps/f30_cluster/app.json: config.dayNight._from"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "L"
+  },
+  {
+   "id": "L16",
+   "kind": "L",
+   "title": "The clock's PRIMARY source: timeDateUTC offsets",
+   "question": "Does KombiIF.timeDateUTC carry a usable time-zone offset (timeZonesOffsetAutomaticallyUTC; the quarter-hour factor was a guess)?",
+   "fields": [
+    "KombiIF.timeDateUTC"
+   ],
+   "steps": "No new read: the struct is logged whole once per zone change (config.clock.logOn).",
+   "decides": "the clock source order",
+   "blocks": [
+    "f30 / Twin Dial clock"
+   ],
+   "source": [
+    "git commit 209a115 (0.7.19 message)",
+    "docs/FEATURE-AUDIT.md:213, 290-300"
+   ],
+   "status": "answered",
+   "evidence": "arrives",
+   "in_brief": "new",
+   "answer": "Commit 209a115, from the owner's 0.7.18 log of 2026-11-17: the struct arrives and its statusClockTimeDateUTC says 'offsets not available' - the offset member is not usable. The fallback (L3) is therefore the only live clock source.",
+   "set": "L"
+  },
+  {
+   "id": "L17",
+   "kind": "L",
+   "title": "Auto start/stop (statusConditionMSA) and READY/OFF",
+   "question": "Does Vehicle.statusMotorStartAuto notify (notifier-only); which raw values at a start/stop stop, with the MSA button off, with a cold engine; is VehicleCondition 10 (FAHREN) on during an MSA stop; does VehicleCondition subscribe.",
+   "fields": [
+    "Vehicle.statusMotorStartAuto",
+    "VehicleCondition.VehicleCondition",
+    "CDS.statusEngineStatus"
+   ],
+   "steps": "grep -E 'msa raw|engine:|signal VehicleCondition' in f30_cluster.log after a drive with a start/stop stop; a drive with the MSA button off; a cold start. Watch the rev needle at a stop.",
+   "decides": "whether the READY rest and the green (A) icon work (FEATURE-AUDIT gap 1: 'car-unverified'); msa.map",
+   "blocks": [
+    "6WB READY/OFF state machine",
+    "WBMSA"
+   ],
+   "source": [
+    "docs/FEATURE-AUDIT.md:165-179",
+    "docs/FEATURE-AUDIT.md:594-612 (checks 1-5)",
+    "apps/f30_cluster/app.json: config.msa._from"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "L",
+   "note": "Needs a drive with a stop; no probe app needed (f30 already declares the fields)."
+  },
+  {
+   "id": "L18",
+   "kind": "L",
+   "title": "Vehicle condition values (standby row, P with engine off)",
+   "question": "Which VehicleCondition value is BMW's standby row (hypothesis 5 = standby, 7 = P with engine off)?",
+   "fields": [
+    "VehicleCondition.VehicleCondition"
+   ],
+   "steps": "grep 'probe: vehicle condition N' and 'bottom row: vehicle condition N' in f30_cluster.log across ignition on / engine off / standby.",
+   "decides": "the COND_STANDBY constant of the bottom row; the standby look",
+   "blocks": [
+    "bottom row standby"
+   ],
+   "source": [
+    "docs/strip/X-REPORT.md:44-52",
+    "shared/hud.js: _probeTick"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "L"
+  },
+  {
+   "id": "L19",
+   "kind": "L",
+   "title": "Drive mode changes",
+   "question": "Does FES.statusFESVehicleDynamicSwitchHMI notify on a drive-mode change; do all modes map (COMFORT_PLUS arrives; SIGNAL_UNBEFUELLT and INITIALISIERUNG arrive at start).",
+   "fields": [
+    "FES.statusFESVehicleDynamicSwitchHMI"
+   ],
+   "steps": "grep 'drive mode' in f30_cluster.log around Comfort -> Sport -> Eco Pro -> Comfort; 'drive mode not recognised: \"X\"' lines name unmapped values.",
+   "decides": "byMode theme switching; the config.drive escape hatch; the MB X1 baseline",
+   "blocks": [
+    "f30 Change with the drive mode",
+    "MB experiments X1-X4"
+   ],
+   "source": [
+    "docs/FEATURE-AUDIT.md:552 (§7 Modes)",
+    "docs/CAR-SNAPSHOT-2026-11-15.md §4"
+   ],
+   "status": "partly-answered",
+   "evidence": "arrives",
+   "in_brief": "new",
+   "answer": "reference/car/2026-11-15/oap/f30_cluster-0712.log lines 151 and 1409: 'drive mode Comfort plus (COMFORT_PLUS)'; 'drive mode not recognised' SIGNAL_UNBEFUELLT and INITIALISIERUNG at start. A mode CHANGE was never seen in the saved logs; later builds ran with byMode, so the 0.7.20 log probably holds it.",
+   "set": "L"
+  },
+  {
+   "id": "L20",
+   "kind": "L",
+   "title": "The driver's speed-limit settings (notifier-only)",
+   "question": "Do the six SettingsDriverAssistanceFunctions notifiers (32789 and neighbours) arrive without a getter; with what values.",
+   "fields": [
+    "SettingsDriverAssistanceFunctions.settingSpeedLimitInfoPresentation",
+    "SettingsDriverAssistanceFunctions.settingSpeedLimitInfoWarning",
+    "SettingsDriverAssistanceFunctions.settingSpeedLimitWarningSecondLevel",
+    "SettingsDriverAssistanceFunctions.settingOffsetSpeed",
+    "SettingsDriverAssistanceFunctions.settingOffsetSpeedSlow",
+    "SettingsDriverAssistanceFunctions.settingOffsetSpeedSlowActivation"
+   ],
+   "steps": "grep 'speed-limit settings:' in f30_cluster.log (written on change); open the car's limit-warning setting in iDrive and change it once.",
+   "decides": "config.sla (the red arc follows the car's excess-speed display)",
+   "blocks": [
+    "f30 over-speed marking"
+   ],
+   "source": [
+    "apps/f30_cluster/app.json: signals ...SettingsDriverAssistanceFunctions._o and config.sla",
+    "git commit 7c405b6 (0.7.17)"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "L",
+   "note": "Getters are {id:0} on all six, so they can only be subscribed (memory: getter id 0 is no getter). Whether a notification arrives is the question."
+  },
+  {
+   "id": "L21",
+   "kind": "L",
+   "title": "Road label, navigation state, position",
+   "question": "Do currentRoad / isOnGuidableRoad / guidingState / nextDestinationInfo reach f30; the shape of the road label (parts, characters).",
+   "fields": [
+    "Guidance.currentRoad",
+    "Guidance.isOnGuidableRoad",
+    "NavigationStatus.guidingState",
+    "NavigationStatus.nextDestinationInfo"
+   ],
+   "steps": "grep 'road label:|navigation: guiding|navigation:' in f30_cluster.log (numbers, lengths only). Never read a street name; never log a position.",
+   "decides": "calibration of config.road / config.nav (config._bottomRow.calibrate)",
+   "blocks": [
+    "bottom row road label"
+   ],
+   "source": [
+    "apps/f30_cluster/app.json: config._bottomRow.calibrate",
+    "docs/twin-dial/VS-REPORT.md:66"
+   ],
+   "status": "partly-answered",
+   "evidence": "arrives",
+   "in_brief": "new",
+   "answer": "VS table: currentRoad and guidingState 'arrive in f30_cluster'. The shapes (maxLen, spacer kinds) are not in the repository.",
+   "set": "L"
+  },
+  {
+   "id": "L22",
+   "kind": "L",
+   "title": "Boost and intake air over UDS 0x22 (DME)",
+   "question": "Does the read-only UDS read of the DME give a plausible boost when the sport display sends none; which candidate wins; are the intake-air candidates right.",
+   "fields": [],
+   "steps": "grep 'engine unit boost|engine unit link not available|fuel level:' in f30_cluster.log (needs a boost or intake readout shown).",
+   "decides": "config.dme candidates",
+   "blocks": [
+    "f30 boost / intake readouts"
+   ],
+   "source": [
+    "apps/f30_cluster/app.json: config.dme.comment",
+    "shared/hud.js:1699-1744"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "L",
+   "note": "The read is a UDS request issued by the app (read only). It is not a subscription; the log line is the evidence."
+  },
+  {
+   "id": "L23",
+   "kind": "L",
+   "title": "Notification rates and CPU (opt-in perf log)",
+   "question": "How often does the car send rpm / speed ('rpm changes N/s (gap ms ...)'); how long does cluster-render take per flush (slow_flush_ms = 150 alarm); the app's CPU % against the bench's 2 %.",
+   "fields": [],
+   "steps": "Needs <data>/perf.json {\"log\": true} (a file in the app's data folder: the lead's decision); then read the 'perf:' lines after one drive; /proc/<pid>/stat for CPU.",
+   "decides": "the CPU factor (bench x 5-12); the needle-smoothness cause",
+   "blocks": [
+    "PERF-AUDIT §3.1",
+    "PERF-NEEDLE"
+   ],
+   "source": [
+    "docs/PERF-AUDIT.md:60-75",
+    "docs/PERF-NEEDLE-REPORT.md:183-198"
+   ],
+   "status": "needs-owner-approval",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "needs": [
+    "a settings file in the app data folder (a write on the car)"
+   ],
+   "set": "L"
+  },
+  {
+   "id": "L24",
+   "kind": "L",
+   "title": "KOMBI resets and the guard since 0.7.16",
+   "question": "Has the KOMBI reset (display service not available / strikes) with the restored night looks of 0.7.16+; has kombi-guard.json ever been written?",
+   "fields": [],
+   "steps": "cluster-render.log: strikes, 'display service not available', 'panel ... stays disabled'; the app's data folder: kombi-guard.json; f30_cluster.log '_kombiWatch' lines.",
+   "decides": "whether the shader-size fix of 0.7.13 holds with the night looks back (uniforms 29 of 32, WBDIAL STYLE 0 13 232 chars)",
+   "blocks": [
+    "night looks",
+    "X10 (Twin Dial shaders)"
+   ],
+   "source": [
+    "git commit 8819d3f (0.7.16)",
+    "docs/FEATURE-AUDIT.md:557 (guard untested on the car)",
+    "docs/CAR-SNAPSHOT-2026-11-15.md §0.1-0.4"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "L"
+  },
+  {
+   "id": "L25",
+   "kind": "L",
+   "title": "ccList pairs (id, symbol id, colour) for Twin Dial's symbol table",
+   "question": "Which (cCIdentifier, cCListSymbolID, colour) triples the car actually lists; does the community numbering (ids 14-19 doors, 40 pedal, 41 service ...) hold on this car?",
+   "fields": [
+    "KombiInterface_2.ccList"
+   ],
+   "steps": "grep 'check-control list:' (ids, colours, symbol ids, name lengths; 40 distinct shapes cap) over as many days of use as the logs hold. Fill by_symbol_id of design/twin-dial/vt/message_symbols.json from ids only.",
+   "decides": "Twin Dial's pictogram per message",
+   "blocks": [
+    "SPEC-R3 §5.2",
+    "message_symbols.json"
+   ],
+   "source": [
+    "design/twin-dial/vt/message_symbols.json: _key, _about",
+    "docs/twin-dial/VS-REPORT.md:66"
+   ],
+   "status": "partly-answered",
+   "evidence": "arrives",
+   "in_brief": "new",
+   "answer": "Seen on the car (2026-11-17 log, per commits 209a115 / 95892f5): resting id 0 GREEN symbol 6; door id 15 WHITE symbol 2; stored ready-to-drive id 987. MC §5's 'ids seen so far 0, 15, 40, 987' includes 40, which is a BENCH value (bench/test-bottom-row.js:1033), not a car reading (C7).",
+   "set": "L"
+  },
+  {
+   "id": "L26",
+   "kind": "L",
+   "title": "Message auto-hide and re-show timing",
+   "question": "Does BMW hide a message after ~20 s and show it again after ~8 s (the manual's values); how long does one frame of a cycling message dwell (ccFrameDwellMs is a guess)?",
+   "fields": [
+    "KombiIF.statusActiveCCMessage",
+    "KombiIF.statusMenuCCMessage"
+   ],
+   "steps": "Time stamps of consecutive 'active cc:' / 'check-control frames:' lines for one door message left open; compare with a photo or video clock.",
+   "decides": "config.ccm autoHideMs / reshowMs; the fallback heuristic (20 s)",
+   "blocks": [
+    "f30 config.ccActive.fallback",
+    "X8"
+   ],
+   "source": [
+    "apps/f30_cluster/app.json: config.ccm._timings",
+    "docs/strip/P-REPORT.md:37"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "L"
+  },
+  {
+   "id": "L27",
+   "kind": "L",
+   "title": "Black-box slot rows at the moment the box shows (BR E0)",
+   "question": "While the box is up: which id is in slot 0x203 (0x10004f8 or 0x1000400), is 0x323 occupied, what is 0x200's status, is 0x100 mapped?",
+   "fields": [],
+   "steps": "Read only: grep -e 'slot 0x20' -e 'slot 0x323' -e 'slot 0x33' -e target /run/cluster-render/status.txt, and the last 60 lines of cluster-render.log for 'falling back', 'slot 0x203', 'went away'. Do it at the moment the owner calls the box.",
+   "decides": "H1 (speech-dialog id) against 'the box is not the id'; links BR's slot work to the box",
+   "blocks": [
+    "research3/MB §5 item 1",
+    "boxes BR §6"
+   ],
+   "source": [
+    "branch boxes/br: docs/boxes/BR-REPORT.md §5 E0, §6",
+    "docs/research3/MB-REPORT.md:212-218",
+    "branch boxes/bc: docs/boxes/BC-REPORT.md §5 item 7"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "L"
+  },
+  {
+   "id": "L28",
+   "kind": "L",
+   "title": "Does the cluster-render status socket return status.txt's text?",
+   "question": "The map window's presence rule (S1) assumes the 'status' socket op returns the same text as status.txt.",
+   "fields": [],
+   "steps": "The client already asks 'status' 2 s after each rebuild (STATUS_ASK_MS); read the app-log line that shows the answer, or use SN's mapSlots log.",
+   "decides": "mapWindow presence rule S1 against S2+S3",
+   "blocks": [
+    "SPEC-R3 §4.5",
+    "SN X3"
+   ],
+   "source": [
+    "branch twin-r3/sn: docs/twin-dial/r3/SN-REPORT.md §2.3"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "L"
+  },
+  {
+   "id": "L29",
+   "kind": "L",
+   "title": "Does cluster-render upload a layer that was dropped before its upload finished?",
+   "question": "The torn-down start-up build: are its pixels still sent (wasted bytes)?",
+   "fields": [],
+   "steps": "status.txt 'asset N ... writes, KB' lines around a start; or cluster-render's source.",
+   "decides": "MP §8 item 5",
+   "blocks": [
+    "research3/MP §7.4"
+   ],
+   "source": [
+    "docs/research3/MP-REPORT.md:262"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "L"
+  },
+  {
+   "id": "L30",
+   "kind": "L",
+   "title": "Is newCCMessage ever sent?",
+   "question": "Does KombiInterface_2.newCCMessage notify on this car?",
+   "fields": [
+    "KombiInterface_2.newCCMessage"
+   ],
+   "steps": "None.",
+   "decides": "config.ccm as a source",
+   "blocks": [],
+   "source": [
+    "git commit 209a115",
+    "docs/twin-dial/VS-REPORT.md:71-72"
+   ],
+   "status": "answered",
+   "evidence": "not sent",
+   "in_brief": "new",
+   "answer": "Not sent: silent for 25 minutes with messages showing (owner's 0.7.18 log, 2026-11-17, recorded in commit 209a115 and VS §2.1). Keep as a known negative; f30 still declares it (rs) and MC A11 shows a stray getter answer can hang the window (ccm.clearIds).",
+   "set": "L"
+  },
+  {
+   "id": "L31",
+   "kind": "L",
+   "title": "Why did the Store update to 0.7.16 fail?",
+   "question": "UPDATE_FAILED on 0.7.16 four times.",
+   "fields": [],
+   "steps": "None.",
+   "decides": "the 'r' flag rule",
+   "blocks": [],
+   "source": [
+    "branch debug/update-failed: docs/UPDATE-FAILED-REPORT.md",
+    "git commit 7c405b6 (0.7.17)"
+   ],
+   "status": "answered",
+   "evidence": "n/a",
+   "in_brief": "new",
+   "answer": "Answered by the car (DLT line during an attempt): 'Requested read for settingOffsetSpeed but no getter available' - getter id 0 counts as no getter; 0.7.17 dropped the 'r' and installed. Rule now in tools/signals/check_signals.py.",
+   "set": "L"
+  },
+  {
+   "id": "P1",
+   "kind": "P",
+   "title": "Which message the cluster shows now",
+   "question": "Is KombiIF.statusActiveCCMessage's number the ccList id while a message shows, and 0 when BMW hides it; do statusDisplayedCCMessage and statusMenuCCMessage (frame n of m) agree; what does ccList hold at rest.",
+   "fields": [
+    "KombiIF.statusActiveCCMessage",
+    "Vehicle2.statusDisplayedCCMessage",
+    "KombiIF.statusMenuCCMessage",
+    "KombiInterface_2.ccList"
+   ],
+   "steps": "Engine on, ready, BMW's panel at rest. Open the driver's door; leave it open until BMW hides the message (about 20 s); close. Open the driver's door and a rear door together and wait for a full cycle (1/2, 2/2); close both. Repeat the first step once.",
+   "decides": "'shown now' = the list id; the rest value; the frame counter; D7 lift (config.ccActive.strict false = the owner's decision); f30 release",
+   "blocks": [
+    "SPEC-R3 §5.4",
+    "SPEC §8.4 D7",
+    "f30 X7",
+    "MC H1-H4"
+   ],
+   "source": [
+    "docs/twin-dial/PROBE-PROTOCOL.md:79-99",
+    "docs/twin-dial/VS-REPORT.md:113-117",
+    "docs/AGENT-BRIEF-car-signals.md:60"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S1",
+   "note": "Subscribed already by the installed Twin Dial 0.1.0 (statusActiveCCMessage, statusMenuCCMessage, statusDisplayedCCMessage, ccList) and by f30 0.7.20 (all but the witness). L1/L2/L8 read it from those logs first; P1 is then only needed for the paired presses (two doors) and a clean marker."
+  },
+  {
+   "id": "P2",
+   "kind": "P",
+   "title": "The stored-message marker, risk class",
+   "question": "Which signal marks BMW's small 'i' / triangle marker (stored messages): CheckControlMaster.basicList activeState / reason, or ccListRiskClass (RK10-RK900 as a severity sort key).",
+   "fields": [
+    "CheckControlMaster.basicList",
+    "KombiInterface_2.ccListRiskClass"
+   ],
+   "steps": "After reading the 0.7.18 lines (L13): repeat P1's door message and PHOTOGRAPH BMW's marker (visible / not) at the time of each log read; one photo with only a stored message (ready-to-drive) and one with a stored door warning.",
+   "decides": "config.ccMarker (iface CheckControlMaster, field basicList, the state value that means stored); optional severity from the risk class",
+   "blocks": [
+    "f30 config.ccMarker",
+    "strip P-REPORT item 6",
+    "SPEC §3.3 marker box [1240, 588, 1288, 630]"
+   ],
+   "source": [
+    "docs/twin-dial/PROBE-PROTOCOL.md:101-118",
+    "docs/strip/P-REPORT.md:19-25",
+    "docs/twin-dial/VS-REPORT.md:85-90"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S1",
+   "note": "Both fields are subscribed by f30 0.7.18-0.7.20 as log probes; the result was never recorded in the repository (L13)."
+  },
+  {
+   "id": "P3",
+   "kind": "P",
+   "title": "Odometer carriers",
+   "question": "Which carrier gives the odometer in km, what is its invalid value; factor 1?",
+   "fields": [
+    "KombiIF.statusRangeTankStatus",
+    "MileageSupreme.mileageSupreme",
+    "VehicleInformation.Range",
+    "SecureMileage.mileage"
+   ],
+   "steps": "Ignition on: read the cluster's odometer (photo of the cluster or iDrive's vehicle info page); engine off and on once more.",
+   "decides": "config.odometer.factors / order; whether the three extra carriers are needed",
+   "blocks": [
+    "SPEC-R3 §4.1 bottom row"
+   ],
+   "source": [
+    "docs/twin-dial/PROBE-PROTOCOL.md:120-134",
+    "docs/research3/MK-REPORT.md:195-207"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S2",
+   "note": "Answered first by L5 if mileageKilometre arrives (Twin Dial 0.1.0 already reads it)."
+  },
+  {
+   "id": "P4",
+   "kind": "P",
+   "title": "The trip computer",
+   "question": "Factors of speed / consumption / distance; which counter (BC1 or BC2) is 'since start'; the departure time and whether it is UTC or local; the ResetLogic generation behind iDrive's trip page.",
+   "fields": [
+    "KombiIF.statusBordcomputerAverage",
+    "KombiIF.statusBordcomputerTravelData",
+    "KombiIF.statusBordcomputerTravelStart",
+    "KombiIF.statusBordcomputerStatus2",
+    "ResetLogic3.bcDataAll",
+    "ResetLogic.bcDataAll",
+    "ResetLogic.averageConsumption",
+    "ResetLogic2.bcDataAll",
+    "BcPersonal.driveSegment",
+    "LSCDataSink.dataCombinedInstrumentCluster"
+   ],
+   "steps": "After a drive of at least 3 minutes and 2 km, parked, engine on: photograph iDrive's trip computer page (both counters); open Twin Dial's trip page (centre = trip); photograph it. Optionally reset the trip in iDrive and watch wayPassed fall (we never reset). MK-PROTOCOL.md is the five-minute version.",
+   "decides": "config.trip.factors (bc, speed, cons, way, rl3), departureUtc, order, verified",
+   "blocks": [
+    "SPEC-R3 §4.1",
+    "config.trip"
+   ],
+   "source": [
+    "docs/twin-dial/PROBE-PROTOCOL.md:136-162",
+    "docs/research3/MK-PROTOCOL.md",
+    "docs/research3/MK-REPORT.md:58-98"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S2",
+   "note": "Answered first by L4 for the three KombiIF fields."
+  },
+  {
+   "id": "P5",
+   "kind": "P",
+   "title": "Units",
+   "question": "Kilometres or miles, Celsius or Fahrenheit, bar or psi on this car; the scale of the cluster's outside temperature and range.",
+   "fields": [
+    "EnvironmentalInformation.UnitBN2020",
+    "KombiIF.statusKombiExternalDisplay",
+    "Vehicle.statusNewCurrentUnitsStatusExt"
+   ],
+   "steps": "Read once after ignition on; note what the cluster shows beside outside= / range= (the scale is read off the pair).",
+   "decides": "the mph / mile variant is or is not needed; temperature and pressure units",
+   "blocks": [
+    "SPEC rev 2 §12 (km only)",
+    "tyre page units"
+   ],
+   "source": [
+    "docs/twin-dial/PROBE-PROTOCOL.md:164-170",
+    "docs/twin-dial/r3/SV-REPORT.md §5 (branch twin-r3/sv)"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S2",
+   "note": "Also in 0.1.0's log: 'units raw (P5): mileage <value> (round 2 shows km)' (once). NOTE: the 0.7.12 f30 log shows the platform's own CurrentVehicleUnits failing ('envInfoProxy ... Cannot read property getValue/subscribe of undefined', f30_cluster-0712.log lines 19-24, 1241-1245) although f30 declares EnvironmentalInformation.ExteriorTemperature: that is the SDK's proxy, not evidence about UnitBN2020."
+  },
+  {
+   "id": "P6",
+   "kind": "P",
+   "title": "Coolant verdict",
+   "question": "The car's own COLD / OK / HOT / STRICHE verdict against the raw coolant temperature.",
+   "fields": [
+    "KombiIF.dataInstrumentPack",
+    "CDS.statusEngineTemperature"
+   ],
+   "steps": "Cold engine (parked for hours): ignition on, start, idle or drive gently 10-15 minutes; note the t of COLD -> OK and the coolant value either side.",
+   "decides": "config.coolant.coldC / hotC (bar empty point, red segment)",
+   "blocks": [
+    "SPEC §5.2 coolant bar"
+   ],
+   "source": [
+    "docs/twin-dial/PROBE-PROTOCOL.md:171-186"
+   ],
+   "status": "partly-answered",
+   "evidence": "arrives",
+   "in_brief": "as-is",
+   "answer": "The coolant RAW value arrives and decodes as raw - 48 C (car_vitals 'engine temperatures: [126,123]' -> 78 C; verified in f30). Only the car's own verdict (dataInstrumentPack) is unseen.",
+   "set": "S2",
+   "note": "The brief says 'the car's own coolant verdict'; the scale itself is answered."
+  },
+  {
+   "id": "P7",
+   "kind": "P",
+   "title": "Doors, boot, bonnet, central locking",
+   "question": "Do the notifier-only door fields notify at all; does any send once at subscribe (so the car picture can start from 'open' rather than 'unknown').",
+   "fields": [
+    "DoorsWindowsRoofMirrors.CentralLockingSystemAndPanelStatus2",
+    "A4A.statusA4ALids",
+    "Vehicle2.statusZVStatus"
+   ],
+   "steps": "Engine off, ignition on. Open and close ONE at a time, 3 s between each: driver, front passenger, rear left, rear right, boot, bonnet (a passenger does the bonnet).",
+   "decides": "the table door -> field -> open-value; whether the car picture (SV V2) is possible",
+   "blocks": [
+    "SPEC-R3 §4 V2 car picture"
+   ],
+   "source": [
+    "docs/twin-dial/PROBE-PROTOCOL.md:187-198",
+    "docs/twin-dial/VS-REPORT.md:43-50"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S3",
+   "note": "CentralLockingSystemAndPanelStatus2 is notifier-only ('s'): nothing arrives until something changes."
+  },
+  {
+   "id": "P8",
+   "kind": "P",
+   "title": "Media and radio",
+   "question": "Does HmiMediaState notify and which line is the title / artist / station; progress and its unit; the source's icon kind; the radio detail (band, RT+, preset); the CarPlay player; is the unit ticking.",
+   "fields": [
+    "HmiMediaState.playerMetadata@HMI_CID",
+    "HmiMediaState.trackProgress@HMI_CID",
+    "HmiMediaState.mainMenuMetadata@HMI_CID",
+    "HmiMediaState.menu@HMI_CID",
+    "MediaSource.activeSourceId",
+    "MediaSource.sources",
+    "TunerFmAmDab.currentStationFmDabAm",
+    "MediaPlayer.playerState@CarPlayMedia",
+    "MediaPlayer.currentItemTime@CarPlayMedia",
+    "MediaPlayer.currentItemPosition@CarPlayMedia",
+    "MediaPlayer.currentItemMetadata@CarPlayMedia",
+    "MediaPlayer.deviceInfo@CarPlayMedia",
+    "CommandControl.listOfMainConnections"
+   ],
+   "steps": "Engine on, parked, ~30 s per step: FM (then a second station; open the station list once); DAB; USB (play, pause 10 s, play, skip twice); Bluetooth audio (same); CarPlay (same, then open a playlist on the phone); change source with the wheel button through all sources; mute and unmute. For each step count the characters of the title and the artist shown on the centre screen.",
+   "decides": "config.media.titleLine / sourceTypes; M1 / M2 / M3; tab 3 text; the progress unit (10000 -> ms)",
+   "blocks": [
+    "SPEC-R3 §4.3",
+    "SPEC-R3 §3.3 tab 3"
+   ],
+   "source": [
+    "branch twin-r3/sm: docs/twin-dial/r3/SM-REPORT.md §6, §7",
+    "docs/twin-dial/PROBE-PROTOCOL.md:200-217"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S4",
+   "note": "13 fields: main has playerMetadata, activeSourceId, sources; SM adds 10 (trackProgress, mainMenuMetadata, menu, currentStationFmDabAm, five MediaPlayer, listOfMainConnections). If the owner uses Android Auto, MediaPlayer@CarPlayMedia is swapped for AndroidAutoProjectedMediaPlayer (SM §7.4, D5). Mute needs an event (P21)."
+  },
+  {
+   "id": "P9",
+   "kind": "P",
+   "title": "Phone",
+   "question": "States of a call (INCOMING / ACTIVE / DIALING / HELD / DISCONNECTED); per-call state, duration, whether a contact is known (and the name's length); device battery / signal / roles; missed calls; is `Telephone` the car's own modem (silent during a phone call); CarPlay calls; whether BMW's ringing pad stays visible with Twin Dial on.",
+   "fields": [
+    "ConnectivityAggregator.aggregatedCallState",
+    "VoiceCall.state@Call1",
+    "VoiceCall.duration@Call1",
+    "VoiceCall.contactID@Call1",
+    "VoiceCall.name@Call1",
+    "VoiceCall.number@Call1",
+    "VoiceCall.modem@Call1",
+    "VoiceCall.multiparty@Call1",
+    "VoiceCall.pictureSource@Call1",
+    "VoiceCallManager.micMuted",
+    "VoiceCallManager.hfpBlocked",
+    "VoiceCallManager.communicationBlocked",
+    "DevicePresentation.deviceList",
+    "DevicePresentation.activeRoles",
+    "CallList.callItemList",
+    "Telephone.callState",
+    "Telephone.registerState",
+    "Telephone.signalQuality",
+    "Telephone.currentNetworkOperator",
+    "CarPlayManager.projectedTelephonyActive@CarPlayManagerInst1",
+    "ConnTeleSync.callStatus@TelematicsCallStatusInst1",
+    "ConnTeleSync.gsmStrength@TelematicsCallStatusInst1",
+    "ConnTeleSync.lockState@TelematicsCallStatusInst1",
+    "ConnTeleSync.registerState@TelematicsCallStatusInst1",
+    "ACM.phoneState",
+    "ACM.dataConnectionStatus",
+    "AudioSystemInformation.muteTelState",
+    "EsimProxy.status@EsimProxy_1",
+    "EsimProxy.signalStrength@EsimProxy_1",
+    "EsimProxy.telephonyEnabled@EsimProxy_1",
+    "ComfortFunction.WCAStatus",
+    "WirelessChargingAdapter.wcaNfcFrontStatus",
+    "HMIContext.currentActiveApplication@HMI_CID"
+   ],
+   "steps": "SP §5.1, steps 0-7: no phone, then Bluetooth only; ring from a SAVED contact (10 s, answer, 40 s, mute and unmute, hang up) with a PHOTO of the cluster while it rings (Twin Dial on, then once with it off); ring from an UNSAVED number and do not answer (wait 30 s); dial out from iDrive's call list; open the phone menu and leave; the phone on the wireless tray 30 s; CarPlay (or Android Auto) repeat 2 and 3. Use a second phone to ring the car.",
+   "decides": "A1 (tab icon lit + call card with our own timer); the name setting; signal bars; whether Twin Dial hides BMW's call pop-up (raises the card's priority); a missed-call count",
+   "blocks": [
+    "SPEC-R3 §4.4",
+    "SPEC-R3 §10 name setting"
+   ],
+   "source": [
+    "branch twin-r3/sp: docs/twin-dial/r3/SP-REPORT.md §5.1, §5.2, §9",
+    "docs/twin-dial/PROBE-PROTOCOL.md:219-230"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "corrected",
+   "set": "S5",
+   "note": "CORRECTION: 33 fields = aggregatedCallState (main) + CarPlayManager.projectedTelephonyActive (main) + SP's 31 (the brief says 32). The brief's table omits two steps: the phone on the wireless tray (WCAStatus, wcaNfcFrontStatus) and opening the phone menu (HMIContext.currentActiveApplication). Telephone has two instances (1, 2); the probe watches the first; Call2 is not watched (SP §10)."
+  },
+  {
+   "id": "P10",
+   "kind": "P",
+   "title": "Battery voltage",
+   "question": "Is there a plausible 12-14.8 V reading; scale of the voltage member (hypothesis 0.01-0.05 V/bit) and of the head unit's supply (mV).",
+   "fields": [
+    "BasicDataSet.basicDataSet",
+    "LevelMonitor.systemVoltage@Inst1",
+    "CDS.statusBattery2"
+   ],
+   "steps": "Ignition on, engine off: read; start the engine: read; switch off: read. A voltmeter value for each state if available.",
+   "decides": "config.battery = {field, factor}; whether a battery readout exists",
+   "blocks": [
+    "a future battery readout"
+   ],
+   "source": [
+    "docs/twin-dial/PROBE-PROTOCOL.md:232-244",
+    "docs/twin-dial/VS-REPORT.md:58-62"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S3",
+   "note": "CDS.statusBattery2 is a charge-CONDITION byte, not a voltage. BasicDataSet is subscribed by car_vitals but its voltage member was never logged. The brief's wording 'the voltage member only' needs a custom formatter (CP)."
+  },
+  {
+   "id": "P11",
+   "kind": "P",
+   "title": "The cluster's view and the map-view setting",
+   "question": "Which field says the cluster is on map / tiles / car view (statusNavigationDisplayType), the widget the head unit puts into the cluster, and the M view; does anything move on a stalk press.",
+   "fields": [
+    "HMIContext.currentICWidget@HMI_CID",
+    "HMIContext.currentICGraphicalContext@HMI_CID",
+    "HMIContext2.currentICWidget@1",
+    "HMIContext2.currentICGraphicalContext@1",
+    "KombiIF.statusKombiSelection",
+    "KombiIF.statusKombiSelectionAvailability",
+    "KombiIF.statusConfigurationKombi5",
+    "Vehicle2.statusDisplayKombi"
+   ],
+   "steps": "Engine on. In iDrive change the instrument cluster's view (Standard / calm / Individual / Sport / M view where offered), then the centre display area (off / tile / map / surroundings) and back. Read every line with its t.",
+   "decides": "the cluster's map-view setting (S2 of the map window's presence rule); an indirect tab key; which of HMIContext / HMIContext2 this car serves",
+   "blocks": [
+    "SPEC-R3 §4.5 presence rule",
+    "SPEC-R3 §3.4 tab key"
+   ],
+   "source": [
+    "docs/twin-dial/PROBE-PROTOCOL.md:246-261",
+    "branch boxes/bs: docs/boxes/BS-REPORT.md §5.1 items 1-11",
+    "branch twin-r3/sn: SN-REPORT.md §1.4"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S6",
+   "note": "Overlaps BS's black-box probe (boxes: lines) - see P18."
+  },
+  {
+   "id": "P12",
+   "kind": "P",
+   "title": "Guidance manoeuvres",
+   "question": "Does Guidance.conclusiveDart carry the turn arrow (manoeuvre kind, direction, roundabout exit, lanes); the distance's unit and raw metres against the car's text; parse time.",
+   "fields": [
+    "NavigationStatus.guidingState",
+    "Guidance.guidanceState@Main_Instance",
+    "Guidance.nextIntersection@Main_Instance",
+    "Guidance.conclusiveDart@Main_Instance",
+    "Guidance.currentLaneGuiding@Main_Instance",
+    "Guidance.nextDestinationInfo@Main_Instance",
+    "Guidance.currentRoad@Main_Instance",
+    "Guidance.isOnGuidableRoad@Main_Instance",
+    "Guidance.guidingProvider@Main_Instance",
+    "LaneGuiding.laneGuiding",
+    "LaneGuiding.extendedLaneGuiding",
+    "CarPlayManager.projectedGuidanceActive@CarPlayManagerInst1",
+    "AndroidAutoProjectedManager.projectedGuidanceActive@AndroidAutoProjectedManagerInst1"
+   ],
+   "steps": "A passenger starts guidance to a destination 10-20 minutes away; drive the first turns (a roundabout and a fork if near); note box / arrow; at arrival; once with CarPlay guidance. The driver only drives.",
+   "decides": "the arrow and distance of the guidance page; lane row; rawDistance metres; phone guidance",
+   "blocks": [
+    "SPEC-R3 §4.5",
+    "SPEC-R3 §3.3 tab 5 turn arrow"
+   ],
+   "source": [
+    "docs/twin-dial/PROBE-PROTOCOL.md:262-278",
+    "branch twin-r3/sn: SN-REPORT.md §3.1"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S7",
+   "note": "Road names, positions and bearings are never read or logged (lengths only). The brief lists 7 fields; SN's branch adds 6 more."
+  },
+  {
+   "id": "P13",
+   "kind": "P",
+   "title": "The tab key: stalk, wheel and controller buttons",
+   "question": "Which signal carries the stalk's on-board-computer button (a bit of IndicatorSteeringColumn's operationColumnStalks byte), a spare wheel button, the thumbwheel (free when no BMW list is open?), or the controller.",
+   "fields": [
+    "Light.IndicatorSteeringColumn",
+    "Light.IndicatorSteeringColumnComplete",
+    "SteeringWheelPushButton.statusRotarySteps",
+    "SteeringWheelPushButton.statusRotaryPress",
+    "SteeringWheelPushButton.statusSpecialFunctionButton",
+    "SteeringWheelPushButton.statusSpecialFunctionButton2",
+    "SteeringWheelPushButton.operationSteerWheelFAV",
+    "SteeringWheelPushButton.operationSteerWheelFC",
+    "SteeringWheelPushButton.statusSteerWheelFCLED",
+    "SteeringWheelPushButton.statusSearchSwitch1",
+    "SteeringWheelPushButton.statusPTTButton1",
+    "SteeringWheelPushButton.statusTelephoneButton",
+    "SteeringWheelPushButton.statusAudioVolumeButton",
+    "FrontCCU.statusRotaryEncoderState",
+    "FrontCCU.statusPushButtonsState",
+    "Lifecycle.entertainmentModeTrigger@Front"
+   ],
+   "steps": "SB §3.2 (3 s between presses, say the step aloud or film): 1) stalk BC button short x3 (a long press may reset a trip page: skip it or choose a page whose reset is acceptable); 2) the stalk's other switches: tip left, tip right, hold left 3 s, high-beam flash; 3) thumbwheel up x3, down x3, press x2, with no BMW list open and then with the cluster's list open; 4) every other wheel button once (star/FAV, any unlabelled, skip left / right, voice then cancel, phone with no call, volume - and +); 5) controller with our centre screen closed: turn 2, press, tilt up; 6) with a message showing (driver's door): stalk x1 and one wheel click; 7) change the cluster view in iDrive and back; wait for the summary.",
+   "decides": "config.tabKey (SB §3.3 decision table: which bit moved on which step); the scroll key; or the setting-only fallback",
+   "blocks": [
+    "SPEC-R3 §3.4",
+    "SPEC-R3 §14 phase D",
+    "FEATURE-AUDIT §6.1-6.2"
+   ],
+   "source": [
+    "branch twin-r3/sb: docs/twin-dial/r3/SB-REPORT.md §3.1-3.3, §6",
+    "docs/FEATURE-AUDIT.md:452-546"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S6",
+   "note": "FEATURE-AUDIT §6.1 ('the head unit does not see the stalk BC button') is refuted as stated by SB (C4). Events InputRelay.onKeyInput and the RIC ric_sendEvents are not in this item (P21)."
+  },
+  {
+   "id": "P14",
+   "kind": "P",
+   "title": "When does BMW's map exist in the cluster?",
+   "question": "Does Guidance.visualizationInKombiNonNaviEnabled (map in the cluster without a route) and the 3-D junction setting predict BMW's map in slot 0x100?",
+   "fields": [
+    "Guidance.visualizationInKombiNonNaviEnabled@Main_Instance",
+    "Guidance.junction3dViewInKombiEnabled@Main_Instance",
+    "KombiIF.statusConfigurationKombi5"
+   ],
+   "steps": "Cluster view = map, with and without a route; compare the setting lines with the cluster-render slot 0x100 rows (L11, L28).",
+   "decides": "the map window's presence rule S3",
+   "blocks": [
+    "SPEC-R3 §4.5"
+   ],
+   "source": [
+    "branch twin-r3/sn: SN-REPORT.md §1.4, §2.3"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "S7"
+  },
+  {
+   "id": "P15",
+   "kind": "P",
+   "title": "The sign, cruise control and the speed limiter",
+   "question": "Which field carries the cruise / ACC / limiter set speed and the active function (SPEC-R3 §9); do the sign, foresight and no-passing fields arrive; the HUD feed's content.",
+   "fields": [
+    "TrafficSignDisplayControl.displaySpeedLimitAndNoPassingRestriction",
+    "TrafficSignDisplayControl.displayDriverAssistanceLongitudinal",
+    "TrafficSignDisplayControl.displayForesight",
+    "FASuS.statusNextSpeedLimitRecognition",
+    "FASuS.statusOvertakeRecognition",
+    "FASuS.displayDriverAssistenceSystemLongitudinalGuidance",
+    "DisplayDataServer.functionalLibraryData",
+    "DisplayDataServer2.functionalLibraryData",
+    "MultimodalControlDriverAssistance.functionAvailabilityDriverAssistance",
+    "GapVehicleAhead.DataFrontVehicle"
+   ],
+   "steps": "SV §5 P13: drive 10 minutes on roads with signs (a passenger notes the cluster's sign at a few changes). If the car has cruise / ACC / limiter: set 80, change the set speed, change the gap, switch to the limiter, cancel, resume. Pass a no-passing sign. No deliberate speeding.",
+   "decides": "the sign's values; the set speed and function (cruise symbol, green marker); whether any carrier exists",
+   "blocks": [
+    "SPEC-R3 §8, §9"
+   ],
+   "source": [
+    "branch twin-r3/sv: docs/twin-dial/r3/SV-REPORT.md §5, §6 rows 4, 8, 9",
+    "docs/twin-dial/SPEC-R3.md:296-304"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "corrected",
+   "set": "S8",
+   "note": "CORRECTION: the branch has 10 fields in this group (FASuS x3, TrafficSign x3, DisplayDataServer x2, assist-avail, front-vehicle), not the brief's 8; P17 then has 5, not 8 (see C9). The sign field is already subscribed by f30 0.7.20 (L14)."
+  },
+  {
+   "id": "P16",
+   "kind": "P",
+   "title": "Technical rows: boost, engine dynamics, oil, tyres",
+   "question": "Scales and arrival of boost (FES.statusSwitchDriveDynamicSport2.displayBoostPressure, 0.01 bar?), engine power/torque, oil injection volume and dipstick level, and the four TPMS fields (getters; the car never notifies, they are polled every 10 s).",
+   "fields": [
+    "FES.statusSwitchDriveDynamicSport2",
+    "FES.statusVehicleDynamicEngine",
+    "FES.statusVehicleDynamicEngineMaxValue",
+    "CDS2.statusInjectionVolume",
+    "Vehicle2.statusOilDipstick2",
+    "TPMS.statusTyrePressure",
+    "TPMS.statusTyreTemperature",
+    "TPMS.statusTargetTyrePressure",
+    "TPMS.statusTyresStatus"
+   ],
+   "steps": "At ignition compare one tyre line with iDrive's tyre page; cold start and drive 10 minutes under moderate load (a passenger notes the time of one hard acceleration); run iDrive's oil-level measurement page if offered.",
+   "decides": "the technical page's rows and scales (SPEC-R3 §4.1); the tyre page; whether the TPMS poll is needed only while the page shows",
+   "blocks": [
+    "SPEC-R3 §4.1 technical page, tyres page"
+   ],
+   "source": [
+    "branch twin-r3/sv: SV-REPORT.md §5 (P14), §6 rows 5-7",
+    "docs/twin-dial/SPEC-R3.md:176-185",
+    "docs/FEATURE-AUDIT.md:299-300"
+   ],
+   "status": "partly-answered",
+   "evidence": "arrives-other-app",
+   "in_brief": "as-is",
+   "answer": "car_vitals (reference/car/2026-11-15/logs/other-apps/car_vitals.log): tyre pressure raw [23,23,25,23] (units BAR reading 2.3-2.5), tyre temperature [43,43,43,42], target [22,22,26,26], 'FES boost: 0' arrive via getters on this car; the engine temperatures [126,123] (raw - 48 C) too. Scales of boost, injection volume and dipstick remain hypotheses; boost 'raw 0..11' only at rest.",
+   "set": "S9"
+  },
+  {
+   "id": "P17",
+   "kind": "P",
+   "title": "Other signals: consumption, heading, position extras, service due",
+   "question": "Do these arrive at all: the instantaneous consumption (ResetLogic.currentConsumption digit; ConsumptionHistory3), heading and altitude (Positioning, GPSData), the service-due list (cbsDataServiceList).",
+   "fields": [
+    "ResetLogic.currentConsumption",
+    "ConsumptionHistory3.consumptionHistoryFull",
+    "de.bmw.infotainment.navigation.positioning.Positioning.currentLocation@Main_Instance",
+    "GPSData.GPSPositionExtendedCAN",
+    "KombiInterface_2.cbsDataServiceList"
+   ],
+   "steps": "Drive: compare cons-now digit with any instantaneous consumption the car shows (digit / shown = 10 -> factor 0.1); drive north then east (heading); open iDrive's service page and count its entries.",
+   "decides": "V4 consumption, V6 heading, V8 service due",
+   "blocks": [
+    "SPEC-R3 §4.1 optional pages"
+   ],
+   "source": [
+    "branch twin-r3/sv: SV-REPORT.md §5 (P15)"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "corrected",
+   "set": "S9",
+   "note": "CORRECTION: five fields on the branch; the brief says 8 and names only heading, altitude, cbsDataServiceList. Position fields carry coordinates: formatters log a rounded heading/height only, never a coordinate."
+  },
+  {
+   "id": "P18",
+   "kind": "P",
+   "title": "Black-box signals (the KOMBI's display state)",
+   "question": "Does anything the head unit tells the KOMBI change at the moment the box appears or goes: the gear display data (Powertrain.dataDisplayGearboxSecure), the welcome animation, the cluster configuration, the speech dialog state.",
+   "fields": [
+    "KombiIF.statusConfigurationKombi5",
+    "KombiIF.statusKombiSelection",
+    "KombiIF.statusKombiSelectionAvailability",
+    "KombiIF.basicConfigKombi",
+    "KombiIF.statusWelcomeAnimation",
+    "Powertrain.dataDisplayGearboxSecure",
+    "HMIContext.currentICGraphicalContext@HMI_CID",
+    "HMIContext2.currentICGraphicalContext@1",
+    "Vehicle2.statusDisplayKombi",
+    "Guidance.visualizationInKombiNonNaviEnabled@Main_Instance",
+    "Guidance.junction3dViewInKombiEnabled@Main_Instance",
+    "Dialog.dialogState@HMISpeechHU",
+    "VehicleInformation.statusGearboxDrive",
+    "MDrive.dataDisplayGearbox",
+    "FES.statusFESVehicleDynamicSwitchHMI"
+   ],
+   "steps": "BS §5.3 with the box showing: start in P with the theme on (wait 30 s); switch layout; P -> D -> P with the brake held; drive mode Comfort -> Sport -> Comfort; BMW's map in the cluster on / off (thumbwheel or iDrive menu); open and close a door; with the box up another gear change (P -> R -> P); the centre / map display off and on in iDrive; start a voice command and cancel; theme off and on. The owner calls out box / no box.",
+   "decides": "H-G (gear indicator fallback), H-M (BMW's map), H1 (speech layout), 'a HmiMain3D cluster screen' as the trigger; which of HMIContext / HMIContext2 is served",
+   "blocks": [
+    "research3/MB theories a-e",
+    "SPEC-R3 §12 black box",
+    "boxes BS §7 ranked candidates"
+   ],
+   "source": [
+    "branch boxes/bs: docs/boxes/BS-REPORT.md §0, §5.1-5.3, §7",
+    "branch boxes/bc: BC-REPORT.md §5 items 1-2, 8"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "S10",
+   "note": "NOT in the brief. BS's diagnostic build (log prefix 'boxes:') was designed but never built or merged. Four fields are not in any of the five probe branches: KombiIF.basicConfigKombi, KombiIF.statusWelcomeAnimation, Powertrain.dataDisplayGearboxSecure (notifier-only, cyclic E2E frame: compare members only, never log per message), Dialog.dialogState (instance HMISpeechHU). The last three listed are already read by the apps and only need the same log format."
+  },
+  {
+   "id": "P19",
+   "kind": "P",
+   "title": "f30's unwired signals (indicators, belts, lights, consumption, Eco Pro, oil, dimmer)",
+   "question": "Do the signals that FEATURE-AUDIT ranked as gaps arrive, and with what values: turn indicators, belt contacts and seat occupancy, the lamp status (main beam, fog, position), the dimmer, the engine-oil display, instantaneous consumption (11 UInt16 per field), Eco Pro range bonus and the three driving-style bars.",
+   "fields": [
+    "CDS2.statusIndicate",
+    "CDS2.statusBeltContacts2",
+    "CDS2.statusSeatOccupancy",
+    "Vehicle2.statusLightStatus",
+    "Vehicle2.statusDimmer",
+    "KombiIF.statusConsumptionValueRegularA",
+    "KombiIF.statusConsumptionValueECOa",
+    "KombiIF.statusECORange",
+    "KombiIF.statusDrivingStyleDisplay"
+   ],
+   "steps": "One drive plus parked actions: indicators left / right / hazard; belt buckled / unbuckled per seat; main beam, fog, side lamps; dimmer wheel; in Eco Pro read the consumption lines while driving (which index is 'now'); compare the Eco range and the three bars with the stock Eco Pro page.",
+   "decides": "the READY/belt/indicator redraws that the overlay catalogue calls unresolved; config.cons; the Eco Pro dial fills",
+   "blocks": [
+    "FEATURE-AUDIT gaps 3, 12; BAKE-REPORT §5 item 5",
+    "bottom.belt_rear / bottom.airbag overlay unknowns"
+   ],
+   "source": [
+    "docs/FEATURE-AUDIT.md:206-231, 261-290, 579-590",
+    "docs/BAKE-REPORT.md:234-250 (open 5)"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "needs": [
+    "a probe set or a build that subscribes them"
+   ],
+   "set": "S11",
+   "note": "NOT in the brief. None of these fields appears in either app or any probe file (grep of apps, shared, tools, bench). Lower priority than S1-S9; they are the 'skipped' half of the audit. statusConsumptionValueRegularA is one of three (A..C) and ECOa one of three (a..c); the register names one of each."
+  },
+  {
+   "id": "P20",
+   "kind": "P",
+   "title": "Does the automatic-high-beam camera function have a live provider?",
+   "question": "Does any service offer RecogFrontCameraLightDetection (0xD089 = 53385) on this car? The catalogue is a shipped platform file and proves nothing.",
+   "fields": [],
+   "steps": "Not a field read: the interface has only two fields (acknowledgeObjectDataLeft / Right, getter id 0, no notifier) and its useful members are EVENTS (controlHighBeamAssistant, MainBeamAssistantDataObject11 / 12 / 15, mEObjectID1). It can only be tried as a named _broadcasts declaration, the lead's call (P21), and then only whether the interface becomes available.",
+   "decides": "whether the high-beam assistant research can proceed (the rest is coding + an FSC licence, not signals)",
+   "blocks": [
+    "HIGH-BEAM-ASSIST-REPORT §6 question 1"
+   ],
+   "source": [
+    "branch research/high-beam: docs/HIGH-BEAM-ASSIST-REPORT.md §6 row 1",
+    "catalogue check (tools/car/check_register.py): no readable field"
+   ],
+   "status": "needs-lead-decision",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "S12",
+   "note": "CATALOGUE CHECK: the first draft named the field RecogFrontCameraLightDetection.controlHighBeamAssistant; the checker proved it is an event, not a field. Questions 2-9 of that report need a diagnostic session, an FA read or photos (X21, F17)."
+  },
+  {
+   "id": "P21",
+   "kind": "P",
+   "title": "Events (_broadcasts) that would answer questions",
+   "question": "Which named events, if the lead allows them, answer something no field can: sinkMuteStateChanged (mute mark), InputRelay.onKeyInput (controller / voice keys), RICServiceList / RICServiceGuidance ric_sendEvent (the map / roadbook switch), DisplaySink.requestSinkSwitch, DevicePresentation connected / lost, VoiceCallManager and ModemManager events, CarPlay app-state, TunerFmAmDabMetadata.dataStationList.",
+   "fields": [],
+   "steps": "None until the lead names one event: 'events are not declared unless the lead says so for a named one' (brief §1).",
+   "decides": "each: mute mark (SM §7.3), the tab key's second route (SB §6d), the map / roadbook switch (SN), call-start witnesses (SP §10)",
+   "blocks": [
+    "SPEC-R3 §3.4",
+    "SPEC-R3 §4.3",
+    "SPEC-R3 §4.5"
+   ],
+   "source": [
+    "branch twin-r3/sm: SM-REPORT.md §7.3",
+    "branch twin-r3/sb: SB-REPORT.md §1.3, §6d",
+    "branch twin-r3/sp: SP-REPORT.md §10",
+    "branch boxes/bs: BS-REPORT.md §5.1 (DisplaySink)"
+   ],
+   "status": "needs-lead-decision",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "S12"
+  },
+  {
+   "id": "X1",
+   "kind": "X",
+   "title": "f30 with 'Change with the drive mode' off",
+   "question": "With f30 never rebuilding on a mode change, does the black box still come with gear and drive-mode changes? (MB's E5: a KOMBI event while the letter is covered, without our rebuild.)",
+   "fields": [],
+   "steps": "A setting, no build. Parked, engine running, brake held. Baseline first (MB §4.1 step 0): Twin Dial P -> D -> N -> R -> P, then the drive-mode button Comfort -> Sport -> Eco Pro -> Comfort (expect no box); then f30 6WB Comfort with the setting ON (same sequence). Then E5: the setting OFF, theme 6WB Comfort, the same sequence; then G20 on. One photo of the whole cluster per step plus a note: app, theme, G20, gear, mode, box yes/no.",
+   "decides": "whether (b) 'the rebuild' is needed for the box (MB §4.2); MB step 2 (does a theme change clear it, does P -> D -> P)",
+   "blocks": [
+    "research3/MB theories",
+    "SPEC-R3 §12"
+   ],
+   "source": [
+    "docs/research3/MB-REPORT.md:174-208",
+    "docs/AGENT-BRIEF-car-signals.md:84"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "X",
+   "note": "MB numbering: E0 baseline, E1 = brief X3 (mbGap), E2/E3 = X2 (mbCover), E4 = X4, E5 = X1. MB's cheapest order: 0 -> 1 -> (one install) E2 -> (one install) E1; E3 / E4 only if needed."
+  },
+  {
+   "id": "X2",
+   "kind": "X",
+   "title": "Twin Dial with a clear layer over the gear letter",
+   "question": "Does the KOMBI react to a layer RECTANGLE over BMW's gear letter (clear pixels) or to the PIXELS there (E2, then E3 black, then grey)?",
+   "fields": [],
+   "steps": "Twin Dial build with config.mbCover = 'clear', then 'black', then 'grey' (needs an install of a build that carries shared/mb_exp.js: it is on main, in neither installed app). The MB §4.1 gear / mode sequence; photograph the right dial's hub (box over the needle / speed digits?).",
+   "decides": "a1 (rectangle: only geometry helps) against a2 (pixels: black under the letter suffices, one rectangle would do)",
+   "blocks": [
+    "f30 strip mask design",
+    "SPEC-R3 §12"
+   ],
+   "source": [
+    "docs/research3/MB-REPORT.md:170-176",
+    "docs/research3/MB-REPORT.md:186-208"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "needs": [
+    "a build with config.mbCover (not installed)"
+   ],
+   "set": "X"
+  },
+  {
+   "id": "X3",
+   "kind": "X",
+   "title": "f30 with the gap cut out of its layer rectangles",
+   "question": "Does leaving no layer rectangle over x 1380-1460, y 660-720 keep the box away in every theme (E1)?",
+   "fields": [],
+   "steps": "f30 build with config.mbGap on (an 80 x 60 notch in Comfort's strip): the MB sequence in 6WB Comfort, Sport (mode switch) and with G20 on; photograph the box and the notch.",
+   "decides": "'cause found: our cover of the letter' (MB §4.2) and the look of the 80 x 60 window",
+   "blocks": [
+    "research3/MB",
+    "strip mask lanes"
+   ],
+   "source": [
+    "docs/research3/MB-REPORT.md:186-208",
+    "docs/research3/MB-REPORT.md:233-245"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "needs": [
+    "an f30 build with config.mbGap (main, not installed)"
+   ],
+   "set": "X"
+  },
+  {
+   "id": "X4",
+   "kind": "X",
+   "title": "Forced rebuilds",
+   "question": "Does rebuilding alone, with the letter free, bring the box (theory b; E4)?",
+   "fields": [],
+   "steps": "Twin Dial with config.mbRebuild {onMode: true} (or {everyMs: 30000}); the drive-mode sequence three times; photograph the box.",
+   "decides": "theory (b) 'our scene changing' and a fix in the rebuild",
+   "blocks": [
+    "research3/MB",
+    "MP §7 no-rebuild plan"
+   ],
+   "source": [
+    "docs/research3/MB-REPORT.md:170-176, 186-208"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "needs": [
+    "a build with config.mbRebuild (main, not installed)"
+   ],
+   "set": "X"
+  },
+  {
+   "id": "X5",
+   "kind": "X",
+   "title": "f30 scene textures: r8 and etc2",
+   "question": "Do R8 or ETC2 faces keep the picture quality, does the KOMBI draw etc2rgb on the panel target, and how much shorter is a switch back to Comfort (4.17-4.35 MB of scene textures re-sent today)?",
+   "fields": [],
+   "steps": "MT §8: (1) L12 first; (2) one install with config.sceneTex 'etc2': does Comfort draw its dials; cluster-render log must show 'asset ... etc2rgb 672x672' with no error state; if black, change 'format' to etc2rgba (one line in the bake); photograph the speedometer at 50 km/h beside a 0.7.20 photo (block error at the ticks); (3) 'r8': the rev counter's red zone clean? no KOMBI reset (guard lines)? (4) read 'goes whole ... KB charged' and the time from the mode change to the last asset's frame, three Sport -> Comfort switches each, 0.7.20 against the chosen prototype; (5) residency only after 2-4.",
+   "decides": "the faces' format; whether unsampled assets ride along on each 'goes whole' (residency)",
+   "blocks": [
+    "research3/MT §8",
+    "MP §7 items 2-3"
+   ],
+   "source": [
+    "docs/research3/MT-REPORT.md:250-256",
+    "docs/research3/MT-REPORT.md:224-248"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "needs": [
+    "a build with config.sceneTex (main, not installed)",
+    "cluster-render >= 0.5.12 (L12: yes)"
+   ],
+   "set": "X",
+   "note": "Related, car-answerable at the same time: BAKE-REPORT §5 item 20 (RGBA8 assets do not count toward the 8 layers; 4 samplers per effect work): partly answered, see F-item 'BAKE open [C]'."
+  },
+  {
+   "id": "X6",
+   "kind": "X",
+   "title": "The map window (BMW's map through our centre)",
+   "question": "Does BMW's map show through our panel on its own id (first photograph ever of that); its extent against photo 41's (10 % edge x 700-1217, y 138-594; full 794-1150 x 209-557); what else BMW draws there; can the app read the slot rows; box yes / no.",
+   "fields": [],
+   "steps": "SN §5: config.mapWindow 'W1' (and 'W2'), mapWindowForce, mapSlots (logs the 0x100-0x104 rows every 2 s on change). Photograph the whole cluster and a centre close-up: P and D, route on / off, day / night; and the centre with each cluster-view setting (off / tiles / map / surroundings) with mapWindowForce.",
+   "decides": "W1 against W2; the presence rule (S1 slot rows / S2 view setting / S3 map-without-route / guiding); the fallback page's content",
+   "blocks": [
+    "SPEC-R3 §4.5",
+    "SPEC-R3 §10 Діагностика menu"
+   ],
+   "source": [
+    "branch twin-r3/sn: docs/twin-dial/r3/SN-REPORT.md §1.4-1.6, §2.3, §5, §6"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "needs": [
+    "a Twin Dial build with mapWindow / mapSlots (not written: SN §5 \"not implemented this round\")"
+   ],
+   "set": "X",
+   "note": "SN's own labels: X1 = mapWindow, X2 = mapWindowForce, X3 = mapSlots. Not in the brief's table: the K2 mockups of W1 / W2 need the owner's choice first."
+  },
+  {
+   "id": "X7",
+   "kind": "X",
+   "title": "f30's message release",
+   "question": "Does config.ccActive.release close the window after a door message, a second message and a message that returns - and never over a listed message?",
+   "fields": [],
+   "steps": "After L1 names the case: install an f30 build with the SC-narrowed release; a door message, then two messages, then a message returning with its number before its list entry (SC's S3b case); photograph each.",
+   "decides": "the window closes and never covers a listed message",
+   "blocks": [
+    "f30 next version",
+    "Twin Dial release (SPEC-R3 §5.4 item 7)"
+   ],
+   "source": [
+    "docs/research3/MC-REPORT.md:155-192",
+    "branch twin-r3/sc: SC-REPORT.md §4.5-4.7, §8 item 5"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "needs": [
+    "L1 read first",
+    "an f30 build with the narrowed leftList (does not exist: main has MC's wider one)"
+   ],
+   "set": "X",
+   "note": "CONTRADICTION C8: MC recommends release {deferValues [65535], leftList true}; SC shows leftList unsafe in one case and narrows it (only a number that was set BEFORE its entry left the list is released)."
+  },
+  {
+   "id": "X8",
+   "kind": "X",
+   "title": "Message timing in Twin Dial's card",
+   "question": "Does 150 ms cover a 462 x 270 sheet's upload plus the panel's opening; does the service apply one turn's writes on several connections together?",
+   "fields": [],
+   "steps": "Slow-motion video (240 fps) of a message appearing and of leaving tab 2 on Twin Dial 0.1.1; the bottom-row sheet moved to connection 0; read cc lines for the 'settle' timing.",
+   "decides": "CC_SETTLE_MS; the connection plan of SPEC-R3 §5.5",
+   "blocks": [
+    "SPEC-R3 §5.4-5.5"
+   ],
+   "source": [
+    "docs/twin-dial/SPEC-R3.md:262-268",
+    "branch twin-r3/sc: SC-REPORT.md §7"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "needs": [
+    "Twin Dial 0.1.1 (not built: the build round B1-B7 has not run)"
+   ],
+   "set": "X"
+  },
+  {
+   "id": "X9",
+   "kind": "X",
+   "title": "The band's level and the night palette",
+   "question": "What band gain matches the car (references differ by about 2x), and are the night multipliers (band x 0.6 / 0.55 / 0.5, strip x 0.55, white x 0.8, red x 0.85, tab fills x 0.75, amber x 0.8) right?",
+   "fields": [],
+   "steps": "One fixed-exposure photo of the cluster (manual exposure; compare mid-tones only, whites clip) against the bench render, day and night.",
+   "decides": "config bandGain; SPEC rev 2 §7.2 / SPEC-R3 §6 night values",
+   "blocks": [
+    "SPEC-R3 §6",
+    "SPEC §7.2, §17.2"
+   ],
+   "source": [
+    "docs/twin-dial/SPEC-R3.md:270-274",
+    "docs/twin-dial/SPEC.md:568-575",
+    "docs/twin-dial/VC-REPORT.md:172-178"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "X",
+   "note": "Possible with Twin Dial 0.1.0 (the bandGain setting is in it). There is no night reference of the facelift at all (SPEC-R3 §6, §15)."
+  },
+  {
+   "id": "X10",
+   "kind": "X",
+   "title": "The KOMBI accepts the round-3 shaders",
+   "question": "No reset and no missing layer after start, a mode switch and day/night with the round-3 build (re-baked faces, the red arc, the cruise marker).",
+   "fields": [],
+   "steps": "After installing the round-3 build: watch the cluster after start, a mode switch and a day/night change; read the guard lines (L24).",
+   "decides": "the shader budget (tdial <= 8 KB, tdback <= 6 KB; the KOMBI reset seen above ~26.7 k chars)",
+   "blocks": [
+    "SPEC-R3 §12"
+   ],
+   "source": [
+    "docs/twin-dial/SPEC-R3.md:329-336",
+    "docs/twin-dial/MOCKUP-SPEC-R3B.md"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "needs": [
+    "Twin Dial 0.1.1 (not built)"
+   ],
+   "set": "X"
+  },
+  {
+   "id": "X11",
+   "kind": "X",
+   "title": "Switch-time film",
+   "question": "How long is the screen incomplete on a mode switch (predicted 0.14-0.4 s to Sport, 1.0-2.8 s back to Comfort, 0 for Twin Dial); do f30's needles step more than Twin Dial's at the same speed (GPU arithmetic ~3x)?",
+   "fields": [],
+   "steps": "60 fps phone video through Sport then Comfort on each app, counting frames from the press to complete dials; same road and speed for the needle comparison (MP §8.4). Read the cluster-render lines (L10) for the same switches.",
+   "decides": "MP's predictions; whether the no-rebuild redesign (MP §7.1-7.2) is worth it",
+   "blocks": [
+    "research3/MP §7"
+   ],
+   "source": [
+    "docs/research3/MP-REPORT.md:249-262"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "as-is",
+   "set": "X"
+  },
+  {
+   "id": "X12",
+   "kind": "X",
+   "title": "Deferred experiment D10: covering BMW's gear letter (gearCover)",
+   "question": "With our gear letter at BMW's place and the gap closed, does the box come? (Only together with the black-box experiments.)",
+   "fields": [],
+   "steps": "A setting gearCover (off by default; revert = off).",
+   "decides": "D10",
+   "blocks": [
+    "SPEC §17.3"
+   ],
+   "source": [
+    "docs/twin-dial/SPEC.md:576-583"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "needs": [
+    "a build with gearCover (the key exists only in SPEC.md; no code on main)"
+   ],
+   "set": "X"
+  },
+  {
+   "id": "X13",
+   "kind": "X",
+   "title": "Black box: re-mapping by hand and Waze's HUD map (BR E1, E2)",
+   "question": "Does a fresh mapping clear the box: our layout Off, wait >= 5 s, back on; a door open / close at standstill (a 0x203 lock -> re-map on 0.5.12)? Does keeping Waze's HUD map off change the box?",
+   "fields": [],
+   "steps": "With the box up: layout Off 5-6 s then back; separately open and close a door; then Waze 'Show on: cluster' off. Note which clears it. No build.",
+   "decides": "cheap remedies; the E5 'reseat on gear' idea",
+   "blocks": [
+    "research3/MB",
+    "boxes BR §5"
+   ],
+   "source": [
+    "branch boxes/br: docs/boxes/BR-REPORT.md §5 E1, E2, §6",
+    "branch boxes/bc: BC-REPORT.md §5 items 1-2"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "X"
+  },
+  {
+   "id": "X14",
+   "kind": "X",
+   "title": "Black box: slot-row logging build and reseat flag (BR E3-E5)",
+   "question": "Which KOMBI event comes with the box, and do 0x200 / 0x202 change then (E3); does a re-seat after a switch clear the box every time (E4: a data file car3k.json {\"slot\":\"reseat\"}, E5: re-seat on gear)?",
+   "fields": [],
+   "steps": "E3: a build that asks cluster-render 'status' 300 ms after each gear / mode / door / map-view / rebuild event and logs changed rows 0x200-0x203, 0x250, 0x323, 0x330. E4: echo the json into the app's data folder (a write on the car). The owner calls out the box.",
+   "decides": "the box's trigger; remedy E5",
+   "blocks": [
+    "research3/MB",
+    "boxes BR §5"
+   ],
+   "source": [
+    "branch boxes/br: docs/boxes/BR-REPORT.md §5 E3-E5",
+    "docs/CAR3-K-REPORT.md §5"
+   ],
+   "status": "needs-owner-approval",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "needs": [
+    "a build (E3)",
+    "a file written in the app data folder (E4)"
+   ],
+   "set": "X",
+   "note": "Overlaps X6's mapSlots key: one slot-logging implementation can serve both."
+  },
+  {
+   "id": "X15",
+   "kind": "X",
+   "title": "Black box: cluster-render configuration experiments (BR E6-E12)",
+   "question": "Effects of no fallback id (E6), guide_hold 0 (E7), cluster-render 0.6.6 (E8), panel_content_class 512 / 771 / 1024 (E9), another slot 0x200 (E10), another content id (E11), a system patch (E12).",
+   "fields": [],
+   "steps": "None in a read-only session: each is a write to cluster-render's local conf, a service restart or a Store update. BR ranks them and gives risks (E9-E11 can park the panel or restart the KOMBI).",
+   "decides": "only after X1-X4, X13, X14 and L27 point somewhere",
+   "blocks": [
+    "research3/MB"
+   ],
+   "source": [
+    "branch boxes/br: docs/boxes/BR-REPORT.md §5 E6-E12"
+   ],
+   "status": "needs-owner-approval",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "X",
+   "note": "Never during the signals session. cluster-render restarts blank our panel for seconds."
+  },
+  {
+   "id": "X16",
+   "kind": "X",
+   "title": "The diagnostic matte themes (what BMW draws over a theme)",
+   "question": "What does BMW draw over an opaque panel in each state: the telltale columns, belt and airbag group, OFF / MSA marks, the message panel and symbol, the marker 'i', dark pads under its over-items, glow profiles?",
+   "fields": [],
+   "steps": "The three layouts matte_magenta / matte_green / matte_black are on main (a pixel ruler at x = 10k). 'Change with the drive mode' must be OFF for a matte to show (the Theme setting is ignored while it is on). Photograph the engine-off, ignition-on lamp check (burst over the first 4 s), engine running, door open (message), belts unbuckled, MSA off.",
+   "decides": "the 9 'unknown' elements of design/overlay/g20_comfort.json: tt.brake, tt.tpms, tt.abs, tt.dsc, tt.steering, tt.auto_h, bottom.belt_rear, bottom.airbag, assist.off",
+   "blocks": [
+    "SPEC rev 2 §15 side lamps (6 of 7 unknown)",
+    "FEATURE-AUDIT gaps 4, 15",
+    "OVERLAY-PHOTO-PROTOCOL"
+   ],
+   "source": [
+    "docs/strip/D-REPORT.md:50-76",
+    "docs/OVERLAY-PHOTO-PROTOCOL.md:88-135",
+    "design/overlay/g20_comfort.json"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "X",
+   "note": "No matte photo is saved in reference/ (D's shot list says 'hypothesis until the car is photographed'). The brief's F4 is the same question for the side lamps. The catalogue still counts 9 'unknown' elements (23 under, 4 over, 3 gone)."
+  },
+  {
+   "id": "X17",
+   "kind": "X",
+   "title": "The Visible property on the centre screen's rows",
+   "question": "Does the HMI honour Visible on list rows (hideModeRows, hideRowUnlessG20)? It rejects Visible on buttons that lack property 2 (INVALID_MODELID, verified).",
+   "fields": [],
+   "steps": "Toggle 'Change with the drive mode' and the G20 switch in f30's menu and look at the Settings list: do the In Comfort / In Sport / In Eco Pro rows and 'Bottom row while G20 shows' hide?",
+   "decides": "config.menu.hideModeRows / hideRowUnlessG20 stay or go",
+   "blocks": [
+    "f30 native menu"
+   ],
+   "source": [
+    "docs/UI-NATIVE-REPORT.md:74",
+    "docs/ONE-SWITCH-DONE.md:274-282",
+    "docs/CAR-SNAPSHOT-2026-11-15.md §0.5"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "X"
+  },
+  {
+   "id": "X18",
+   "kind": "X",
+   "title": "Driver Profiles: the read-only checks",
+   "question": "Does MAIN list Guest (active), Valet and the two local profiles with the right names; are free slots hidden (Visible); do the dates, 'Guest's settings copied' and the PIA number read; does currentUserOnChange reach the app?",
+   "fields": [],
+   "steps": "DRIVER-PROFILES-APP §6 items 1-3 and 8 (ignition on, engine off, P). App log: oap_<uid>/data/driver_profiles.log.",
+   "decides": "Driver Profiles 0.2.2 is verified",
+   "blocks": [
+    "DRIVER-PROFILES-APP §6"
+   ],
+   "source": [
+    "docs/DRIVER-PROFILES-APP.md:202-230"
+   ],
+   "status": "open",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "X",
+   "note": "Driver Profiles 0.2.2 is on the car (brief §2) but no log or owner report of its first runs is saved. Outside the cluster-signals scope; kept so nothing is lost."
+  },
+  {
+   "id": "X19",
+   "kind": "X",
+   "title": "Driver Profiles: the write tests",
+   "question": "createUserAccount from an app (MAX_NUM_EXCEEDED?), rename, copy Guest's settings (only on a NEW test profile; it overwrites), delete (not for Guest / Valet / the active one; IS_PROTECTED_ACCOUNT with a key).",
+   "fields": [],
+   "steps": "DRIVER-PROFILES-APP §6 items 4-7: Add -> name -> Yes with the engine off in P; expect SUCCESS (code 0) and a new slot; then rename, copy, delete on that one test profile.",
+   "decides": "whether the app can manage profiles",
+   "blocks": [
+    "DRIVER-PROFILES-APP §6"
+   ],
+   "source": [
+    "docs/DRIVER-PROFILES-APP.md:213-230"
+   ],
+   "status": "needs-owner-approval",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "X",
+   "note": "These are writes: never in the read-only signals session."
+  },
+  {
+   "id": "X20",
+   "kind": "X",
+   "title": "Driver Profiles: the avatar's three unknowns",
+   "question": "What size persod accepts (guess 48 KB jpg), whether persod validates the data, and whether this car's HMI draws a custom avatar at all.",
+   "fields": [],
+   "steps": "DRIVER-PROFILES-APP §9.2 and §9.5: set an avatar and look at the centre screen.",
+   "decides": "config.avatarMaxKB; whether the avatar feature is useful",
+   "blocks": [
+    "Driver Profiles 0.2.x"
+   ],
+   "source": [
+    "docs/DRIVER-PROFILES-APP.md:299-330"
+   ],
+   "status": "needs-owner-approval",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "X"
+  },
+  {
+   "id": "X21",
+   "kind": "X",
+   "title": "High-beam assistant: diagnostic reads",
+   "question": "Is 5AC / 5AP in the vehicle order; does the KAFAS hold the HBA FSC and which AppID (432 or 0180/0181); the KAFAS fault of 2026-11-10; does the US ConnectedDrive store offer HBA; what is LMV_G11?",
+   "fields": [],
+   "steps": "An FA / FSC read in a diagnostic session (not an OAP app) and a look at the My BMW store entry. Not part of the signals session.",
+   "decides": "whether the automatic high beam is a coding + FSC job",
+   "blocks": [
+    "HIGH-BEAM-ASSIST-REPORT §6 rows 2-4, 7-9"
+   ],
+   "source": [
+    "branch research/high-beam: docs/HIGH-BEAM-ASSIST-REPORT.md §6"
+   ],
+   "status": "out-of-session",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "X",
+   "note": "Question 1 of that report (live provider) is P20. Questions 5 and 6 are photos (F17)."
+  },
+  {
+   "id": "X22",
+   "kind": "X",
+   "title": "Cluster coding read: GLOBAL_LAYOUT_VARIANTE",
+   "question": "What is the KOMBI's GLOBAL_LAYOUT_VARIANTE (DKOMBI4)? Public reports tie the black box to cluster coding.",
+   "fields": [],
+   "steps": "E-Sys read coding or a BimmerCode backup (no write); not an OAP read.",
+   "decides": "whether coding can remove the box",
+   "blocks": [
+    "research3/MB",
+    "boxes BC §3.3"
+   ],
+   "source": [
+    "branch boxes/bc: docs/boxes/BC-REPORT.md §5 item 5, §3.3"
+   ],
+   "status": "out-of-session",
+   "evidence": "unseen",
+   "in_brief": "new",
+   "set": "X"
+  },
+  {
+   "id": "F1",
+   "kind": "F",
+   "title": "Is BMW's own speed-limit sign visible anywhere with Twin Dial up?",
+   "question": "Twin Dial 0.1.0 draws no limit and covers BMW's sign at (538.45, 621.2) r 41 under its opaque background; does BMW still draw it anywhere?",
+   "fields": [],
+   "steps": "Twin Dial on, on a road with a sign: one photo of the whole cluster; the same with f30 'G20' (BMW's sign visible) for comparison.",
+   "decides": "urgency of SPEC-R3 §8 (the driver has no limit on the cluster with Twin Dial up)",
+   "blocks": [
+    "SPEC-R3 §8, §13"
+   ],
+   "source": [
+    "branch twin-r3/sv: SV-REPORT.md §0.1, §6 rows 1-2",
+    "docs/twin-dial/SPEC-R3.md:283-295"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "as-is",
+   "set": "F"
+  },
+  {
+   "id": "F2",
+   "kind": "F",
+   "title": "Side lamps and the belt lamp with Twin Dial up (the safety check before driving)",
+   "question": "With Twin Dial on, belt unbuckled and a door open: do BMW's belt lamp, the seven side lamps and the door message (ours or BMW's) show; after a layout and a drive-mode switch, no black box; day/night switch; the wedge / red arc does not read purple.",
+   "fields": [],
+   "steps": "SPEC rev 2 §17.2 first-install checks, parked: belt unbuckled, driver's door open; one photo each; then a layout switch and a drive-mode switch (photo); the day/night change.",
+   "decides": "Twin Dial may be driven with",
+   "blocks": [
+    "SPEC rev 2 §15, §17.2"
+   ],
+   "source": [
+    "docs/twin-dial/SPEC.md:527-575"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "corrected",
+   "set": "F",
+   "note": "The brief lists only the lamps; §17.2 also asks for the day/night switch, the post-switch box photo and the wedge colour. Twin Dial 0.1.0 has been on the car since 2026-11-17/18 but no photo or note of these checks is in the repository."
+  },
+  {
+   "id": "F3",
+   "kind": "F",
+   "title": "A close photo of a dial's lower ends",
+   "question": "Is the car's inner ring shorter than ours (the owner's finding), against SD's measurement that the references' ring ends with the band?",
+   "fields": [],
+   "steps": "Twin Dial on; a close, frontal photo of the tachometer's and the speedometer's lower ends.",
+   "decides": "the inner ring's end angle (SPEC-R3 §2.1)",
+   "blocks": [
+    "SPEC-R3 §2.1, §16 (SD / K1 override)"
+   ],
+   "source": [
+    "branch twin-r3/sd: SD-REPORT.md §8 item 1",
+    "docs/twin-dial/SPEC-R3.md:359-373"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "as-is",
+   "set": "F"
+  },
+  {
+   "id": "F4",
+   "kind": "F",
+   "title": "Which side lamps BMW draws over us ('photo 16')",
+   "question": "Of the seven side lamps, which are drawn over our theme (relation unknown for six), and the telltale column on the left.",
+   "fields": [],
+   "steps": "OVERLAY-PHOTO-PROTOCOL steps 15-17 (a burst over the first 4 s of ignition-on, engine off, with a diagnostic layout); steps 18-23 as fallbacks (rear belts, AUTO H, DSC/DTC, a message with the engine running, a cold engine next morning, stock repeats). The mattes of X16 replace the never-built diag_overlay layout.",
+   "decides": "holes vs redraws for the critical lamps; plan.safe.json",
+   "blocks": [
+    "SPEC rev 2 §15",
+    "FEATURE-AUDIT gap 4 (safety, unresolved)"
+   ],
+   "source": [
+    "docs/OVERLAY-PHOTO-PROTOCOL.md:88-200",
+    "docs/FEATURE-AUDIT.md:213-216",
+    "docs/twin-dial/VG-REPORT.md:88"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "corrected",
+   "set": "F",
+   "note": "CORRECTION: the layout 'diag_overlay' the protocol needs was never built (only matte_* / grid / mapcal exist). Merge with X16. The catalogue lists 9 unknown elements, not only lamps."
+  },
+  {
+   "id": "F5",
+   "kind": "F",
+   "title": "Does the HUD show the cruise set speed?",
+   "question": "Is the set speed on BMW's HUD (this car has one)?",
+   "fields": [],
+   "steps": "Cruise on and set, photograph the HUD.",
+   "decides": "how urgent SPEC-R3 §9 is",
+   "blocks": [
+    "SPEC-R3 §9"
+   ],
+   "source": [
+    "docs/AGENT-BRIEF-car-signals.md:104"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "as-is",
+   "set": "F"
+  },
+  {
+   "id": "F6",
+   "kind": "F",
+   "title": "The stock cluster's cruise and limiter display (Twin Dial off)",
+   "question": "How the stock cluster shows cruise / ACC / limiter states and set speed.",
+   "fields": [],
+   "steps": "Twin Dial and f30 off (stock); cruise set, adjusted, standby, limiter on; photos.",
+   "decides": "our symbols and states (SPEC-R3 §9)",
+   "blocks": [
+    "SPEC-R3 §9"
+   ],
+   "source": [
+    "docs/twin-dial/SPEC-R3.md:296-304"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "as-is",
+   "set": "F"
+  },
+  {
+   "id": "F7",
+   "kind": "F",
+   "title": "The stock cluster's media line, phone list and call pop-up (Twin Dial off)",
+   "question": "What the RIC services draw that apps cannot read: the media line / list, the phone list and the ringing pad.",
+   "fields": [],
+   "steps": "Stock cluster: play media (list open once), ring the car from the second phone; photos.",
+   "decides": "the shapes of tab 3 / tab 4 pages",
+   "blocks": [
+    "SPEC-R3 §4.3, §4.4"
+   ],
+   "source": [
+    "branch twin-r3/sm: SM-REPORT.md §1.2",
+    "branch twin-r3/sp: SP-REPORT.md §0.2, §3"
+   ],
+   "status": "partly-answered",
+   "evidence": "n/a",
+   "in_brief": "as-is",
+   "answer": "reference/g20/17_stock-media-list_door-open_2026-11-12 shows the stock media list (with a door message). No phone pad photo exists.",
+   "set": "F"
+  },
+  {
+   "id": "F8",
+   "kind": "F",
+   "title": "Ukrainian message names: the longest the car shows",
+   "question": "How long are the car's Ukrainian check-control names (the card's three lines)?",
+   "fields": [],
+   "steps": "Over time: the 'check-control list:' name lengths (L25) give the numbers; a photo of the longest one shows the wrapping.",
+   "decides": "the card's 3-line headline fit",
+   "blocks": [
+    "SPEC-R3 §5.2"
+   ],
+   "source": [
+    "branch twin-r3/sc: SC-REPORT.md §3.2"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "as-is",
+   "set": "F",
+   "note": "Lengths come from the log without a photo; the photo is only for the stock wrapping."
+  },
+  {
+   "id": "F9",
+   "kind": "F",
+   "title": "Baseline photos of what is installed now",
+   "question": "What do f30 0.7.20 (each theme, G20 on/off, bottom-row modes) and Twin Dial 0.1.0 look like on the car today?",
+   "fields": [],
+   "steps": "At the start of the session, before any install: one frontal photo per theme and app, day; the same at night if possible.",
+   "decides": "the reference that every later experiment is compared with",
+   "blocks": [
+    "X1-X11 comparisons",
+    "MT §8 (a 0.7.20 photo beside the prototype)"
+   ],
+   "source": [
+    "reference/ours/ (newest: 0.7.7, 2026-11-13)",
+    "reference/g20/60-68 (stock, 2026-11-16)"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "new",
+   "set": "F",
+   "note": "AUDIT FINDING: no photo of any of our builds after 0.7.7 is saved; every visual claim about 0.7.8-0.7.20 and Twin Dial 0.1.0 rests on the bench."
+  },
+  {
+   "id": "F10",
+   "kind": "F",
+   "title": "Stock G20 photo gaps (the G20 simulation's open points)",
+   "question": "Stock pointers in motion (~50 km/h, ~2000 rpm); a fixed-exposure night photo beside a day one; SPORT / ECO PRO frames; a three-digit limit; a negative temperature; a one-digit hour; other check-control messages (widest symbol); gear letters R / N / S; a cold engine in the stock layout; what lights the 'i' by the tacho.",
+   "fields": [],
+   "steps": "Stock cluster photos whenever the state occurs (some need a drive or a season).",
+   "decides": "weak / none entries of the G20 simulation and the strip measurements",
+   "blocks": [
+    "G20SIM",
+    "strip ZL / ZR anchors"
+   ],
+   "source": [
+    "docs/G20SIM-REPORT.md:226-240",
+    "docs/G20SIM-D-live.md:301-310",
+    "docs/G20SIM-C-icons-text.md:205-221",
+    "docs/strip/ZL-REPORT.md:88-89"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "new",
+   "set": "F"
+  },
+  {
+   "id": "F11",
+   "kind": "F",
+   "title": "Bottom-row guesses (BOTTOM-ROW-PACKAGE §12)",
+   "question": "A long street name cut with '...'; the widest stock symbol; both signs at once (limit and no-passing); the end-of-limit and 'unsure' symbols; a three-digit limit with a supplementary plate.",
+   "fields": [],
+   "steps": "Stock photos when these occur; the sign values themselves come from L14.",
+   "decides": "road_signs() placement, _fitText, WBSIGN states",
+   "blocks": [
+    "f30 bottom row"
+   ],
+   "source": [
+    "docs/BOTTOM-ROW-PACKAGE.md:396-411"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "new",
+   "set": "F"
+  },
+  {
+   "id": "F12",
+   "kind": "F",
+   "title": "Bake open questions that a car photo settles (BAKE-REPORT §5 [C])",
+   "question": "Sport band level (0.35 vs 0.48); window gain; Eco speed-arc end (130?); Eco tint strength; are Comfort's red zone / OFF arc hidden under Eco's CHARGE/POWER band; minis' pivot; tick-ring offsets (parallax or real); red-zone band inner or outer; do stock telltales and the panel draw over a theme; sampled RGBA8 assets outside the 8-layer count and 4 samplers per effect.",
+   "fields": [],
+   "steps": "Stock photos per mode (Sport, Eco Pro) plus theme photos (F9).",
+   "decides": "6WB bake parameters",
+   "blocks": [
+    "BAKE-REPORT §5 items 1, 3, 5, 7, 10, 11, 13, 14, 17, 20"
+   ],
+   "source": [
+    "docs/BAKE-REPORT.md:234-257"
+   ],
+   "status": "partly-answered",
+   "evidence": "n/a",
+   "in_brief": "new",
+   "answer": "Item 20 partly: 6WB Comfort runs 21 layers (7+7+7) on the car (PERF-NEEDLE-REPORT.md:146), so sampled assets do not count as layers; effects bind at most 3 samplers (CAR4-L §4), 4 untested. Item 17: the black area appears after a switch (AGENT-BRIEF-car3 §1); the telltale part is F4.",
+   "set": "F"
+  },
+  {
+   "id": "F13",
+   "kind": "F",
+   "title": "Pre-0.7.12 owner checks never reported back",
+   "question": "The owner checklists of CAR3-G §6, CAR3-H §7, CAR3-J §7, CAR4-L §6, POLISH-E §7-8, POLISH-F §7 (map window edges, row ownership, mode label, sign window stubs, gear tray, long mode names, hooks while a message shows, bigger message symbols near the cover, night brightness of our row).",
+   "fields": [],
+   "steps": "Check against F9's baseline photos; most were rebuilt by the strip round (0.7.18) and may be moot.",
+   "decides": "close or re-open each",
+   "blocks": [],
+   "source": [
+    "docs/CAR3-G-REPORT.md:104-118",
+    "docs/CAR3-H-REPORT.md:105-112",
+    "docs/CAR3-J-REPORT.md:83-99",
+    "docs/CAR4-L-REPORT.md:84-99",
+    "docs/POLISH-E-REPORT.md:140-187",
+    "docs/POLISH-F-REPORT.md:97-108"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "new",
+   "set": "F",
+   "note": "Status unknown rather than open: no report records the owner's answers. The lead decides which are superseded by 0.7.18."
+  },
+  {
+   "id": "F14",
+   "kind": "F",
+   "title": "Which facelift layout is the car's own (Twin Dial geometry)",
+   "question": "Does the car's stock tachometer use reference 02's D = 3.875 R or 04's 3.80 R; a sharp frontal frame of the stock cluster.",
+   "fields": [],
+   "steps": "Stock cluster, frontal, sharp, mid-tones exposed.",
+   "decides": "Twin Dial's dial geometry certainty below 0.01 R",
+   "blocks": [
+    "docs/twin-dial/VR-REPORT.md §6",
+    "VD open 1-2"
+   ],
+   "source": [
+    "docs/twin-dial/VR-REPORT.md:130-134",
+    "docs/twin-dial/VD-REPORT.md:58-65"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "new",
+   "set": "F"
+  },
+  {
+   "id": "F15",
+   "kind": "F",
+   "title": "Smooth needles on the car",
+   "question": "Do the needles sweep without steps with 'Smooth needles' on, and step with it off; the big digital speed unchanged in Sport (no flicker at 9->10, 99->100; '--' at start).",
+   "fields": [],
+   "steps": "120-240 fps video of the needles while accelerating and braking, setting on / off; 6WB Sport's digits.",
+   "decides": "PERF-NEEDLE verified on the car",
+   "blocks": [
+    "PERF-NEEDLE §4"
+   ],
+   "source": [
+    "docs/PERF-NEEDLE-REPORT.md:183-198"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "new",
+   "set": "F"
+  },
+  {
+   "id": "F16",
+   "kind": "F",
+   "title": "Digital Key: driver recognition for a local profile",
+   "question": "Does the HMI offer 'Driver recognition' for a local (offline) profile; after it, does UserAccount.protection list NFC?",
+   "fields": [],
+   "steps": "The owner's HMI steps (DIGITAL-KEY-PROFILE-REPORT §3a); a read-only look at protectionTypes later.",
+   "decides": "key -> profile linking",
+   "blocks": [],
+   "source": [
+    "docs/DIGITAL-KEY-PROFILE-REPORT.md:144-208 (untracked)",
+    "docs/OFFLINE-USER-REPORT.md:583-604 (untracked)"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "new",
+   "set": "F",
+   "note": "Outside the cluster scope; listed so nothing is lost. The OFFLINE-USER items needing UDS writes are out of session."
+  },
+  {
+   "id": "F17",
+   "kind": "F",
+   "title": "Black box in Sport and Eco Pro; the stalk and headlights (photos)",
+   "question": "Is the box in the same place in Sport and Eco Pro (x 1406-1597 or 1420-1611)? Does the left stalk have the HBA button; which headlights?",
+   "fields": [],
+   "steps": "One photo per mode with the box up; one photo of the stalk's end face; one of a headlight.",
+   "decides": "the box rectangle (C1); HIGH-BEAM questions 5-6",
+   "blocks": [
+    "SPEC-R3 §12",
+    "HIGH-BEAM §6 rows 5-6"
+   ],
+   "source": [
+    "branch boxes/bc: BC-REPORT.md §5 item 6",
+    "branch research/high-beam: HIGH-BEAM-ASSIST-REPORT.md §6"
+   ],
+   "status": "open",
+   "evidence": "n/a",
+   "in_brief": "new",
+   "set": "F"
+  }
+ ],
+ "contradictions": [
+  {
+   "id": "C1",
+   "about": "BMW's black rectangle",
+   "a": "[1420, 320, 1611, 440]: shared/visible.js BLACK_BOX, BAKE-C9-overlays.md:64-69, SPEC-R3 §12, FEATURE-AUDIT:431",
+   "b": "[1406, 342, 1597, 419]: MB-REPORT.md:99 (which wrongly cites visible.js), MB-UPSTREAM-DRAFT.md, SN-REPORT, K1; visible.js says this is the X3's box. A third value [1422, 320, 1612, 440] is the overlay catalogue's (cited by MB and BS).",
+   "resolution": "visible.js and SPEC-R3 §12 are the G20's (left and top edges measured, right and bottom good to about 15 px). MB's geometry replay used the X3's rectangle. A close photo of the box (F17) fixes the right and bottom edges.",
+   "items": [
+    "X1",
+    "X2",
+    "X3",
+    "F17"
+   ]
+  },
+  {
+   "id": "C2",
+   "about": "Builds at start",
+   "a": "MB-REPORT.md:17: Twin Dial rebuilds at start (twice)",
+   "b": "MP-REPORT.md:146, 228: 3 builds at start for both apps (3 of 3 runs, bench)",
+   "resolution": "open: the car counts them (L9)",
+   "items": [
+    "L9"
+   ]
+  },
+  {
+   "id": "C3",
+   "about": "requestDefaultSymbols",
+   "a": "AGENT-BRIEF-car-signals §1: never on the car, ever; BMW's bitmaps never requested",
+   "b": "f30_cluster 0.7.18-0.7.20 (installed) calls requestDefaultSymbols ONCE per run, 8 s after start (shared/hud.js _probeSymbols; app.json KombiInterface_2._methods; only twin_dial turns it off, _legacyProbesOff). Memory: a log-only symbol probe was approved after the strip round. app.json also declares requestCCMessage (never called).",
+   "resolution": "LEAD DECISION D1: the rule is about new work; the installed f30 already makes the call (reply dropped, only count / ids / formats / byte lengths logged). Either accept it as the approved probe or ship f30 with config.legacyProbes false.",
+   "items": [
+    "L13"
+   ]
+  },
+  {
+   "id": "C4",
+   "about": "The stalk button",
+   "a": "FEATURE-AUDIT §6.1: the head unit does not see the stalk BC button",
+   "b": "SB-REPORT §0.1: Light.IndicatorSteeringColumn carries the stalk as a raw byte (notifier only); FEATURE-AUDIT searched names, not members",
+   "resolution": "SB supersedes; P13 decides which bit",
+   "items": [
+    "P13"
+   ]
+  },
+  {
+   "id": "C5",
+   "about": "What the KOMBI disables when our panel is mapped",
+   "a": "twin-r3 brief, quoting boxes/br finding 1: the KOMBI disables BMW's map slot",
+   "b": "SN-REPORT §0.1: BR's finding is about slot 0x200 (content 0x1000500), not the map slot 0x100; BMW's map was foreground in 0x100 for 7986 of 8000 s",
+   "resolution": "SN supersedes (verified in the journal)",
+   "items": [
+    "L11",
+    "X6"
+   ]
+  },
+  {
+   "id": "C6",
+   "about": "Which scene id the photographed boxes had",
+   "a": "CAR3-K-REPORT H1 / CAR-SNAPSHOT §3: the panel fell back to the speech-dialog id 0x1000400 (HUD slot 0x323 mapping was BMW's speech dialog)",
+   "b": "BR-REPORT §7: the 0x1000400 mapping in 0x323 on 11-14 was Waze's HUD map; BR finding 2: every box photo was very likely taken on 0x1000400 (0.5.8 fallback)",
+   "resolution": "BR corrects the snapshot; the documents on main are not yet corrected. L27 reads the id at the next box.",
+   "items": [
+    "L27"
+   ]
+  },
+  {
+   "id": "C7",
+   "about": "Check-control ids \"seen so far\"",
+   "a": "MC-REPORT.md:166: ids seen so far are 0, 15, 40 and 987",
+   "b": "id 40 appears only in bench/test-bottom-row.js:1033 and MB's bench trace; the car showed 0 (rest), 15 (door), 987 (stored ready-to-drive)",
+   "resolution": "MC's 'seen' list is wrong by one id; F1's 'real message number 65535?' argument (H3) rests on 0, 15, 987",
+   "items": [
+    "L25",
+    "L1"
+   ]
+  },
+  {
+   "id": "C8",
+   "about": "MC's recommended release against SC's narrowing",
+   "a": "MC §0.3, §5: rec = deferValues [65535] + leftList true, 'breaks none of the nine safety cases'",
+   "b": "SC §4.7, §8 item 5 / SPEC-R3 §5.4 item 7: the wider leftList covered BMW's panel in one case (a door message returning with its number before its list entry); only a number set before its entry left is released",
+   "resolution": "SC supersedes for Twin Dial; f30's _ccRelease has the wider rule (main, off). Do not install 'rec' unchanged (X7).",
+   "items": [
+    "X7",
+    "L1"
+   ]
+  },
+  {
+   "id": "C9",
+   "about": "Probe field counts",
+   "a": "Brief §3.2: roughly 135 fields on about 45 interfaces; P15 = 8, P17 = 8; P9 = 32",
+   "b": "Union of main's probe.json and the five branches (computed by diffing the files): 140 fields, 59 interface names; new fields SM 10, SP 31, SN 13, SV 25, SB 16 (45 on main). No field appears in two branches. SV's three groups are 10 (assistance), 10 + units (technical) and 5 (consumption, heading, service); P9 is aggregatedCallState + 31.",
+   "resolution": "The register carries the corrected counts (P15 = 10, P17 = 5). The load estimate in CP should use 140 + BS's 4 = 144 fields.",
+   "items": [
+    "P9",
+    "P15",
+    "P17",
+    "P18"
+   ]
+  },
+  {
+   "id": "C10",
+   "about": "BMW's sign disc position and radius",
+   "a": "strip M-REPORT: centre (537.300, 621.300), r 42.499; strip O: r 41.4",
+   "b": "ZL / SPEC-R3 §8 / SV: (538.45, 621.2), r 41 (40.95); ZR/ZL: 'r 41.1-42.0 in every source'",
+   "resolution": "photo-resolution differences (objects of ~1 px); the sign window must be centred on the car, a close photo with the magenta matte settles it",
+   "items": [
+    "X16",
+    "F1"
+   ]
+  },
+  {
+   "id": "C11",
+   "about": "Where the 0.7.18 probe results are",
+   "a": "VS-REPORT §2 item 6: the results were never recorded in the repository",
+   "b": "VT message_symbols.json: 'symbol ids 0-6 seen so far'",
+   "resolution": "partial: ids 0-6 are noted, no id-to-name pairs; read the log (L13)",
+   "items": [
+    "L13"
+   ]
+  },
+  {
+   "id": "C12",
+   "about": "Fonts",
+   "a": "memory note: wb_cap / wb_capb Latin-only; strip/F branch: 'Ukrainian in wb_cap and wb_capb' (commit 9492061, unmerged)",
+   "b": "main: wb_cap and wb_capb have 0 Cyrillic glyphs; wb_msg and wb_road 76 (MC says 85 above U+0400)",
+   "resolution": "main is Latin-only for wb_cap / wb_capb; F8 and the card depend on wb_msg / Noto",
+   "items": [
+    "F8"
+   ]
+  },
+  {
+   "id": "C13",
+   "about": "Colliding item numbers",
+   "a": "SB, SM, SP, SV each call their addition P13 / P8 / P9 / P13-P15",
+   "b": "the brief's final numbering P1-P17",
+   "resolution": "collisions resolved by this register (P1-P21); CP renumbers",
+   "items": []
+  }
+ ],
+ "decisions": [
+  {
+   "id": "D1",
+   "text": "requestDefaultSymbols: f30 0.7.18-0.7.20 already calls it once per run (C3). Accept as the approved log-only probe, or ship with config.legacyProbes false?"
+  },
+  {
+   "id": "D2",
+   "text": "Events (_broadcasts): name any of P21 that should be declared (mute event, InputRelay.onKeyInput, the RIC events, DevicePresentation events)."
+  },
+  {
+   "id": "D3",
+   "text": "Add S10 (black-box signals, P18) and S11 (f30's unwired signals, P19) to the probe's sets? Both are not in the brief."
+  },
+  {
+   "id": "D4",
+   "text": "P20: a read-only subscribe attempt on the high-beam camera service (needs a catalogue-verified name; CP)."
+  },
+  {
+   "id": "D5",
+   "text": "CarPlay or Android Auto? SM's MediaPlayer instance is CarPlayMedia; the owner's phone decides (SM §7.4)."
+  },
+  {
+   "id": "D6",
+   "text": "L23 needs a perf.json file in an app's data folder, X14 (E4) a car3k.json: writes on the car (owner's approval)."
+  },
+  {
+   "id": "D7",
+   "text": "X7 needs an f30 build with SC's narrowed release; X8, X10 need Twin Dial 0.1.1; X2-X4 need builds carrying shared/mb_exp.js; X5 a build with sceneTex; X6 a build with mapWindow / mapSlots (not written). Which of these are built before the session?"
+  },
+  {
+   "id": "D8",
+   "text": "Which installed twin_dial build is on the car? 0.1.0 as of commit 82927e5 declares 27 fields; main (with MK) declares 31. Read the installed manifest (CL's collector records versions) before choosing L4 / L7 grep shapes."
+  },
+  {
+   "id": "D9",
+   "text": "Driver Profiles, Digital Key and the high-beam coding reads (X18-X22, F16) are outside the signals session: keep them in the register, run them separately."
+  }
+ ],
+ "installed": {
+  "_about": "What the apps on the car subscribe to, from git (not from the car): f30_cluster 0.7.20 = commit 95892f5, twin_dial 0.1.0 = commit 82927e5 (an assumption: the lead should confirm by the installed manifest). Fields of the probe union already subscribed by an installed app can be answered by reading logs (L items) before any new install."
+ }
+}

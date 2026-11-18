@@ -1,0 +1,2737 @@
+{
+ "_about": "Catalogue-resolved fields of design/car/register.json: names, ids and the flags a declaration may use (r = non-zero getter id, s = notifier). Made by tools/car/check_register.py.",
+ "fields": {
+  "A4A.statusA4ALids": {
+   "field": "statusA4ALids",
+   "flags": "rs",
+   "getter": 3,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.A4A",
+   "items": [
+    "P7"
+   ],
+   "notifier": 32771
+  },
+  "ACM.dataConnectionStatus": {
+   "field": "dataConnectionStatus",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.telematic.acm.ACM",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32770
+  },
+  "ACM.phoneState": {
+   "field": "phoneState",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.telematic.acm.ACM",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32769
+  },
+  "AndroidAutoProjectedManager.projectedGuidanceActive": {
+   "field": "projectedGuidanceActive",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "AndroidAutoProjectedManagerInst1": 128
+   },
+   "interface": "de.bmw.infotainment.sdi.aap.androidautoprojectedmanager.AndroidAutoProjectedManager",
+   "items": [
+    "P12"
+   ],
+   "notifier": 32770,
+   "used_instances": [
+    "AndroidAutoProjectedManagerInst1"
+   ]
+  },
+  "AudioSystemInformation.muteTelState": {
+   "field": "muteTelState",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.am.AudioSystemInformation",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32769
+  },
+  "BasicDataSet.basicDataSet": {
+   "field": "basicDataSet",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infrastructure.analytics.BasicDataSet",
+   "items": [
+    "P10"
+   ],
+   "notifier": 32769
+  },
+  "BcPersonal.driveSegment": {
+   "field": "driveSegment",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.telematic.journeyhistory.BcPersonal",
+   "items": [
+    "P4"
+   ],
+   "notifier": 32769
+  },
+  "CDS.statusBattery2": {
+   "field": "statusBattery2",
+   "flags": "rs",
+   "getter": 5,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.CDS",
+   "items": [
+    "P10"
+   ],
+   "notifier": 32773
+  },
+  "CDS.statusEngineStatus": {
+   "field": "statusEngineStatus",
+   "flags": "rs",
+   "getter": 26,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.CDS",
+   "items": [
+    "L17"
+   ],
+   "notifier": 32794
+  },
+  "CDS.statusEngineTemperature": {
+   "field": "statusEngineTemperature",
+   "flags": "rs",
+   "getter": 27,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.CDS",
+   "items": [
+    "P6"
+   ],
+   "notifier": 32795
+  },
+  "CDS2.statusBeltContacts2": {
+   "field": "statusBeltContacts2",
+   "flags": "rs",
+   "getter": 5,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.CDS2",
+   "items": [
+    "P19"
+   ],
+   "notifier": 32773
+  },
+  "CDS2.statusIndicate": {
+   "field": "statusIndicate",
+   "flags": "rs",
+   "getter": 39,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.CDS2",
+   "items": [
+    "P19"
+   ],
+   "notifier": 32807
+  },
+  "CDS2.statusInjectionVolume": {
+   "field": "statusInjectionVolume",
+   "flags": "rs",
+   "getter": 40,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.CDS2",
+   "items": [
+    "P16"
+   ],
+   "notifier": 32808
+  },
+  "CDS2.statusSeatOccupancy": {
+   "field": "statusSeatOccupancy",
+   "flags": "rs",
+   "getter": 57,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.CDS2",
+   "items": [
+    "P19"
+   ],
+   "notifier": 32825
+  },
+  "CallList.callItemList": {
+   "field": "callItemList",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.connectivity.calllist.CallList",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32769
+  },
+  "CarPlayManager.projectedGuidanceActive": {
+   "field": "projectedGuidanceActive",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "CarPlayManagerInst1": 128
+   },
+   "interface": "de.bmw.infotainment.a4a.carplay.CarPlayManager",
+   "items": [
+    "P12"
+   ],
+   "notifier": 32770,
+   "used_instances": [
+    "CarPlayManagerInst1"
+   ]
+  },
+  "CarPlayManager.projectedTelephonyActive": {
+   "field": "projectedTelephonyActive",
+   "flags": "rs",
+   "getter": 4,
+   "instances": {
+    "CarPlayManagerInst1": 128
+   },
+   "interface": "de.bmw.infotainment.a4a.carplay.CarPlayManager",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32772,
+   "used_instances": [
+    "CarPlayManagerInst1"
+   ]
+  },
+  "CheckControlMaster.basicList": {
+   "field": "basicList",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.checkcontrol.CheckControlMaster",
+   "items": [
+    "L13",
+    "P2"
+   ],
+   "notifier": 32769
+  },
+  "ComfortFunction.WCAStatus": {
+   "field": "WCAStatus",
+   "flags": "rs",
+   "getter": 7,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.body.ComfortFunction",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32773
+  },
+  "CommandControl.listOfMainConnections": {
+   "field": "listOfMainConnections",
+   "flags": "rs",
+   "getter": 22,
+   "instances": {
+    "1": 1
+   },
+   "interface": "org.genivi.am.commandinterface.CommandControl",
+   "items": [
+    "P8"
+   ],
+   "notifier": 32769
+  },
+  "ConnTeleSync.callStatus": {
+   "field": "callStatus",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "TelematicsCallStatusInst1": 128
+   },
+   "interface": "de.bmw.infotainment.connectivity.conntelematicssync.ConnTeleSync",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32769,
+   "used_instances": [
+    "TelematicsCallStatusInst1"
+   ]
+  },
+  "ConnTeleSync.gsmStrength": {
+   "field": "gsmStrength",
+   "flags": "rs",
+   "getter": 3,
+   "instances": {
+    "TelematicsCallStatusInst1": 128
+   },
+   "interface": "de.bmw.infotainment.connectivity.conntelematicssync.ConnTeleSync",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32770,
+   "used_instances": [
+    "TelematicsCallStatusInst1"
+   ]
+  },
+  "ConnTeleSync.lockState": {
+   "field": "lockState",
+   "flags": "rs",
+   "getter": 4,
+   "instances": {
+    "TelematicsCallStatusInst1": 128
+   },
+   "interface": "de.bmw.infotainment.connectivity.conntelematicssync.ConnTeleSync",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32771,
+   "used_instances": [
+    "TelematicsCallStatusInst1"
+   ]
+  },
+  "ConnTeleSync.registerState": {
+   "field": "registerState",
+   "flags": "rs",
+   "getter": 5,
+   "instances": {
+    "TelematicsCallStatusInst1": 128
+   },
+   "interface": "de.bmw.infotainment.connectivity.conntelematicssync.ConnTeleSync",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32772,
+   "used_instances": [
+    "TelematicsCallStatusInst1"
+   ]
+  },
+  "ConnectivityAggregator.aggregatedCallState": {
+   "field": "aggregatedCallState",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.ConnectivityAggregator",
+   "items": [
+    "L6",
+    "P9"
+   ],
+   "notifier": 32769
+  },
+  "ConsumptionHistory3.consumptionHistoryFull": {
+   "field": "consumptionHistoryFull",
+   "flags": "rs",
+   "getter": 5,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.ConsumptionHistory3",
+   "items": [
+    "P17"
+   ],
+   "notifier": 32773
+  },
+  "DevicePresentation.activeRoles": {
+   "field": "activeRoles",
+   "flags": "rs",
+   "getter": 29,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.devicemanager.devicepresentation.DevicePresentation",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32782
+  },
+  "DevicePresentation.deviceList": {
+   "field": "deviceList",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.devicemanager.devicepresentation.DevicePresentation",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32769
+  },
+  "Dialog.dialogState": {
+   "field": "dialogState",
+   "flags": "rs",
+   "getter": 22,
+   "instances": {
+    "HMISpeechHU": 128
+   },
+   "interface": "de.bmw.infotainment.speech.dialog.Dialog",
+   "items": [
+    "P18"
+   ],
+   "notifier": 32779,
+   "used_instances": [
+    "HMISpeechHU"
+   ]
+  },
+  "DisplayDataServer.functionalLibraryData": {
+   "field": "functionalLibraryData",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.displaydataserver.DisplayDataServer",
+   "items": [
+    "P15"
+   ],
+   "notifier": 32769
+  },
+  "DisplayDataServer2.functionalLibraryData": {
+   "field": "functionalLibraryData",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.displaydata.DisplayDataServer2",
+   "items": [
+    "P15"
+   ],
+   "notifier": 32769
+  },
+  "DoorsWindowsRoofMirrors.CentralLockingSystemAndPanelStatus2": {
+   "field": "CentralLockingSystemAndPanelStatus2",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.body.DoorsWindowsRoofMirrors",
+   "items": [
+    "P7"
+   ],
+   "notifier": 32774
+  },
+  "EnvironmentalInformation.UnitBN2020": {
+   "field": "UnitBN2020",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infrastructure.EnvironmentalInformation",
+   "items": [
+    "P5"
+   ],
+   "notifier": 32770
+  },
+  "EsimProxy.signalStrength": {
+   "field": "signalStrength",
+   "flags": "rs",
+   "getter": 7,
+   "instances": {
+    "EsimProxy_1": 128
+   },
+   "interface": "de.bmw.infotainment.telematic.esimproxy.EsimProxy",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32773,
+   "used_instances": [
+    "EsimProxy_1"
+   ]
+  },
+  "EsimProxy.status": {
+   "field": "status",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "EsimProxy_1": 128
+   },
+   "interface": "de.bmw.infotainment.telematic.esimproxy.EsimProxy",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32769,
+   "used_instances": [
+    "EsimProxy_1"
+   ]
+  },
+  "EsimProxy.telephonyEnabled": {
+   "field": "telephonyEnabled",
+   "flags": "rs",
+   "getter": 8,
+   "instances": {
+    "EsimProxy_1": 128
+   },
+   "interface": "de.bmw.infotainment.telematic.esimproxy.EsimProxy",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32774,
+   "used_instances": [
+    "EsimProxy_1"
+   ]
+  },
+  "FASuS.displayDriverAssistenceSystemLongitudinalGuidance": {
+   "field": "displayDriverAssistenceSystemLongitudinalGuidance",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.fasus.FASuS",
+   "items": [
+    "P15"
+   ],
+   "notifier": 32770
+  },
+  "FASuS.statusNextSpeedLimitRecognition": {
+   "field": "statusNextSpeedLimitRecognition",
+   "flags": "rs",
+   "getter": 4,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.fasus.FASuS",
+   "items": [
+    "P15"
+   ],
+   "notifier": 32772
+  },
+  "FASuS.statusOvertakeRecognition": {
+   "field": "statusOvertakeRecognition",
+   "flags": "rs",
+   "getter": 6,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.fasus.FASuS",
+   "items": [
+    "P15"
+   ],
+   "notifier": 32774
+  },
+  "FES.statusFESVehicleDynamicSwitchHMI": {
+   "field": "statusFESVehicleDynamicSwitchHMI",
+   "flags": "rs",
+   "getter": 37,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.drivingexcitement.FES",
+   "items": [
+    "L19",
+    "P18"
+   ],
+   "notifier": 32805
+  },
+  "FES.statusSwitchDriveDynamicSport2": {
+   "field": "statusSwitchDriveDynamicSport2",
+   "flags": "rs",
+   "getter": 39,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.drivingexcitement.FES",
+   "items": [
+    "P16"
+   ],
+   "notifier": 32807
+  },
+  "FES.statusVehicleDynamicEngine": {
+   "field": "statusVehicleDynamicEngine",
+   "flags": "rs",
+   "getter": 3,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.drivingexcitement.FES",
+   "items": [
+    "P16"
+   ],
+   "notifier": 32771
+  },
+  "FES.statusVehicleDynamicEngineMaxValue": {
+   "field": "statusVehicleDynamicEngineMaxValue",
+   "flags": "rs",
+   "getter": 40,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.drivingexcitement.FES",
+   "items": [
+    "P16"
+   ],
+   "notifier": 32808
+  },
+  "FrontCCU.statusPushButtonsState": {
+   "field": "statusPushButtonsState",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.FrontCCU",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32769
+  },
+  "FrontCCU.statusRotaryEncoderState": {
+   "field": "statusRotaryEncoderState",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.FrontCCU",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32770
+  },
+  "GPSData.GPSPositionExtendedCAN": {
+   "field": "GPSPositionExtendedCAN",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "1": 1,
+    "DeadReckoning_internal": 240
+   },
+   "interface": "de.bmw.infotainment.GPSData",
+   "items": [
+    "P17"
+   ],
+   "notifier": 32772
+  },
+  "GapVehicleAhead.DataFrontVehicle": {
+   "field": "DataFrontVehicle",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.dass.GapVehicleAhead",
+   "items": [
+    "P15"
+   ],
+   "notifier": 32770
+  },
+  "Guidance.conclusiveDart": {
+   "field": "conclusiveDart",
+   "flags": "rs",
+   "getter": 28,
+   "instances": {
+    "Main_Instance": 128
+   },
+   "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+   "items": [
+    "P12"
+   ],
+   "notifier": 32790,
+   "used_instances": [
+    "Main_Instance"
+   ]
+  },
+  "Guidance.currentLaneGuiding": {
+   "field": "currentLaneGuiding",
+   "flags": "rs",
+   "getter": 25,
+   "instances": {
+    "Main_Instance": 128
+   },
+   "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+   "items": [
+    "P12"
+   ],
+   "notifier": 32787,
+   "used_instances": [
+    "Main_Instance"
+   ]
+  },
+  "Guidance.currentRoad": {
+   "field": "currentRoad",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "Main_Instance": 128
+   },
+   "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+   "items": [
+    "L21",
+    "P12"
+   ],
+   "notifier": 32769,
+   "used_instances": [
+    "Main_Instance"
+   ]
+  },
+  "Guidance.guidanceState": {
+   "field": "guidanceState",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "Main_Instance": 128
+   },
+   "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+   "items": [
+    "P12"
+   ],
+   "notifier": 32770,
+   "used_instances": [
+    "Main_Instance"
+   ]
+  },
+  "Guidance.guidingProvider": {
+   "field": "guidingProvider",
+   "flags": "rs",
+   "getter": 27,
+   "instances": {
+    "Main_Instance": 128
+   },
+   "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+   "items": [
+    "P12"
+   ],
+   "notifier": 32789,
+   "used_instances": [
+    "Main_Instance"
+   ]
+  },
+  "Guidance.isOnGuidableRoad": {
+   "field": "isOnGuidableRoad",
+   "flags": "rs",
+   "getter": 24,
+   "instances": {
+    "Main_Instance": 128
+   },
+   "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+   "items": [
+    "L21",
+    "P12"
+   ],
+   "notifier": 32786,
+   "used_instances": [
+    "Main_Instance"
+   ]
+  },
+  "Guidance.junction3dViewInKombiEnabled": {
+   "field": "junction3dViewInKombiEnabled",
+   "flags": "rs",
+   "getter": 35,
+   "instances": {
+    "Main_Instance": 128
+   },
+   "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+   "items": [
+    "P14",
+    "P18"
+   ],
+   "notifier": 32794,
+   "used_instances": [
+    "Main_Instance"
+   ]
+  },
+  "Guidance.nextDestinationInfo": {
+   "field": "nextDestinationInfo",
+   "flags": "rs",
+   "getter": 4,
+   "instances": {
+    "Main_Instance": 128
+   },
+   "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+   "items": [
+    "P12"
+   ],
+   "notifier": 32772,
+   "used_instances": [
+    "Main_Instance"
+   ]
+  },
+  "Guidance.nextIntersection": {
+   "field": "nextIntersection",
+   "flags": "rs",
+   "getter": 9,
+   "instances": {
+    "Main_Instance": 128
+   },
+   "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+   "items": [
+    "P12"
+   ],
+   "notifier": 32777,
+   "used_instances": [
+    "Main_Instance"
+   ]
+  },
+  "Guidance.visualizationInKombiNonNaviEnabled": {
+   "field": "visualizationInKombiNonNaviEnabled",
+   "flags": "rs",
+   "getter": 37,
+   "instances": {
+    "Main_Instance": 128
+   },
+   "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+   "items": [
+    "P14",
+    "P18"
+   ],
+   "notifier": 32795,
+   "used_instances": [
+    "Main_Instance"
+   ]
+  },
+  "HMIContext.currentActiveApplication": {
+   "field": "currentActiveApplication",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "HMI_CID": 1,
+    "HMI_FoMo_Left": 2,
+    "HMI_FoMo_Right": 3
+   },
+   "interface": "de.bmw.infotainment.hmi.hmicontext.HMIContext",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32770,
+   "used_instances": [
+    "HMI_CID"
+   ]
+  },
+  "HMIContext.currentICGraphicalContext": {
+   "field": "currentICGraphicalContext",
+   "flags": "rs",
+   "getter": 10,
+   "instances": {
+    "HMI_CID": 1,
+    "HMI_FoMo_Left": 2,
+    "HMI_FoMo_Right": 3
+   },
+   "interface": "de.bmw.infotainment.hmi.hmicontext.HMIContext",
+   "items": [
+    "P11",
+    "P18"
+   ],
+   "notifier": 32778,
+   "used_instances": [
+    "HMI_CID"
+   ]
+  },
+  "HMIContext.currentICWidget": {
+   "field": "currentICWidget",
+   "flags": "rs",
+   "getter": 9,
+   "instances": {
+    "HMI_CID": 1,
+    "HMI_FoMo_Left": 2,
+    "HMI_FoMo_Right": 3
+   },
+   "interface": "de.bmw.infotainment.hmi.hmicontext.HMIContext",
+   "items": [
+    "P11"
+   ],
+   "notifier": 32777,
+   "used_instances": [
+    "HMI_CID"
+   ]
+  },
+  "HMIContext2.currentICGraphicalContext": {
+   "field": "currentICGraphicalContext",
+   "flags": "rs",
+   "getter": 7,
+   "instances": {
+    "1": 1,
+    "2": 2,
+    "3": 3
+   },
+   "interface": "de.bmw.infotainment.hmi.hmicontext2.HMIContext2",
+   "items": [
+    "P11",
+    "P18"
+   ],
+   "notifier": 32775,
+   "used_instances": [
+    "1"
+   ]
+  },
+  "HMIContext2.currentICWidget": {
+   "field": "currentICWidget",
+   "flags": "rs",
+   "getter": 8,
+   "instances": {
+    "1": 1,
+    "2": 2,
+    "3": 3
+   },
+   "interface": "de.bmw.infotainment.hmi.hmicontext2.HMIContext2",
+   "items": [
+    "P11"
+   ],
+   "notifier": 32776,
+   "used_instances": [
+    "1"
+   ]
+  },
+  "HmiMediaState.mainMenuMetadata": {
+   "field": "mainMenuMetadata",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "HMI_CID": 1,
+    "HMI_FoMo_Left": 2,
+    "HMI_FoMo_Right": 3
+   },
+   "interface": "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState",
+   "items": [
+    "P8"
+   ],
+   "notifier": 32769,
+   "used_instances": [
+    "HMI_CID"
+   ]
+  },
+  "HmiMediaState.menu": {
+   "field": "menu",
+   "flags": "rs",
+   "getter": 6,
+   "instances": {
+    "HMI_CID": 1,
+    "HMI_FoMo_Left": 2,
+    "HMI_FoMo_Right": 3
+   },
+   "interface": "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState",
+   "items": [
+    "P8"
+   ],
+   "notifier": 32774,
+   "used_instances": [
+    "HMI_CID"
+   ]
+  },
+  "HmiMediaState.playerMetadata": {
+   "field": "playerMetadata",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "HMI_CID": 1,
+    "HMI_FoMo_Left": 2,
+    "HMI_FoMo_Right": 3
+   },
+   "interface": "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState",
+   "items": [
+    "L7",
+    "P8"
+   ],
+   "notifier": 32770,
+   "used_instances": [
+    "HMI_CID"
+   ]
+  },
+  "HmiMediaState.trackProgress": {
+   "field": "trackProgress",
+   "flags": "rs",
+   "getter": 3,
+   "instances": {
+    "HMI_CID": 1,
+    "HMI_FoMo_Left": 2,
+    "HMI_FoMo_Right": 3
+   },
+   "interface": "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState",
+   "items": [
+    "P8"
+   ],
+   "notifier": 32771,
+   "used_instances": [
+    "HMI_CID"
+   ]
+  },
+  "KombiIF.basicConfigKombi": {
+   "field": "basicConfigKombi",
+   "flags": "rs",
+   "getter": 53,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P18"
+   ],
+   "notifier": 32821
+  },
+  "KombiIF.dataInstrumentPack": {
+   "field": "dataInstrumentPack",
+   "flags": "rs",
+   "getter": 57,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P6"
+   ],
+   "notifier": 32825
+  },
+  "KombiIF.statusActiveCCMessage": {
+   "field": "statusActiveCCMessage",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "L2",
+    "L26",
+    "P1"
+   ],
+   "notifier": 32769
+  },
+  "KombiIF.statusBordcomputerAverage": {
+   "field": "statusBordcomputerAverage",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "L4",
+    "P4"
+   ],
+   "notifier": 32770
+  },
+  "KombiIF.statusBordcomputerStatus2": {
+   "field": "statusBordcomputerStatus2",
+   "flags": "rs",
+   "getter": 4,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P4"
+   ],
+   "notifier": 32772
+  },
+  "KombiIF.statusBordcomputerTravelData": {
+   "field": "statusBordcomputerTravelData",
+   "flags": "rs",
+   "getter": 5,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "L4",
+    "P4"
+   ],
+   "notifier": 32773
+  },
+  "KombiIF.statusBordcomputerTravelStart": {
+   "field": "statusBordcomputerTravelStart",
+   "flags": "rs",
+   "getter": 6,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "L4",
+    "P4"
+   ],
+   "notifier": 32774
+  },
+  "KombiIF.statusConfigurationKombi5": {
+   "field": "statusConfigurationKombi5",
+   "flags": "rs",
+   "getter": 55,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P11",
+    "P14",
+    "P18"
+   ],
+   "notifier": 32823
+  },
+  "KombiIF.statusConsumptionValueECOa": {
+   "field": "statusConsumptionValueECOa",
+   "flags": "rs",
+   "getter": 9,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P19"
+   ],
+   "notifier": 32777
+  },
+  "KombiIF.statusConsumptionValueRegularA": {
+   "field": "statusConsumptionValueRegularA",
+   "flags": "rs",
+   "getter": 12,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P19"
+   ],
+   "notifier": 32780
+  },
+  "KombiIF.statusDrivingStyleDisplay": {
+   "field": "statusDrivingStyleDisplay",
+   "flags": "rs",
+   "getter": 17,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P19"
+   ],
+   "notifier": 32785
+  },
+  "KombiIF.statusECORange": {
+   "field": "statusECORange",
+   "flags": "rs",
+   "getter": 18,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P19"
+   ],
+   "notifier": 32786
+  },
+  "KombiIF.statusKombiExternalDisplay": {
+   "field": "statusKombiExternalDisplay",
+   "flags": "rs",
+   "getter": 48,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P5"
+   ],
+   "notifier": 32804
+  },
+  "KombiIF.statusKombiSelection": {
+   "field": "statusKombiSelection",
+   "flags": "rs",
+   "getter": 47,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P11",
+    "P18"
+   ],
+   "notifier": 32803
+  },
+  "KombiIF.statusKombiSelectionAvailability": {
+   "field": "statusKombiSelectionAvailability",
+   "flags": "rs",
+   "getter": 27,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P11",
+    "P18"
+   ],
+   "notifier": 32795
+  },
+  "KombiIF.statusMenuCCMessage": {
+   "field": "statusMenuCCMessage",
+   "flags": "rs",
+   "getter": 28,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "L26",
+    "P1"
+   ],
+   "notifier": 32796
+  },
+  "KombiIF.statusRangeTankStatus": {
+   "field": "statusRangeTankStatus",
+   "flags": "rs",
+   "getter": 29,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "L5",
+    "P3"
+   ],
+   "notifier": 32797
+  },
+  "KombiIF.statusShowTimeDate": {
+   "field": "statusShowTimeDate",
+   "flags": "rs",
+   "getter": 30,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "L3"
+   ],
+   "notifier": 32798
+  },
+  "KombiIF.statusWelcomeAnimation": {
+   "field": "statusWelcomeAnimation",
+   "flags": "rs",
+   "getter": 32,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "P18"
+   ],
+   "notifier": 32800
+  },
+  "KombiIF.timeDateUTC": {
+   "field": "timeDateUTC",
+   "flags": "rs",
+   "getter": 64,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiIF",
+   "items": [
+    "L16"
+   ],
+   "notifier": 32832
+  },
+  "KombiInterface_2.cbsDataServiceList": {
+   "field": "cbsDataServiceList",
+   "flags": "rs",
+   "getter": 8,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiInterface_2",
+   "items": [
+    "P17"
+   ],
+   "notifier": 32771
+  },
+  "KombiInterface_2.ccList": {
+   "field": "ccList",
+   "flags": "rs",
+   "getter": 7,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiInterface_2",
+   "items": [
+    "L2",
+    "L13",
+    "L25",
+    "P1"
+   ],
+   "notifier": 32770
+  },
+  "KombiInterface_2.ccListRiskClass": {
+   "field": "ccListRiskClass",
+   "flags": "rs",
+   "getter": 16,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiInterface_2",
+   "items": [
+    "L13",
+    "P2"
+   ],
+   "notifier": 32773
+  },
+  "KombiInterface_2.newCCMessage": {
+   "field": "newCCMessage",
+   "flags": "rs",
+   "getter": 6,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.KombiInterface_2",
+   "items": [
+    "L30"
+   ],
+   "notifier": 32769
+  },
+  "LSCDataSink.dataCombinedInstrumentCluster": {
+   "field": "dataCombinedInstrumentCluster",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.lsc.LSCDataSink",
+   "items": [
+    "P4"
+   ],
+   "notifier": 32772
+  },
+  "LaneGuiding.extendedLaneGuiding": {
+   "field": "extendedLaneGuiding",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.LaneGuiding",
+   "items": [
+    "P12"
+   ],
+   "notifier": 32770
+  },
+  "LaneGuiding.laneGuiding": {
+   "field": "laneGuiding",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.LaneGuiding",
+   "items": [
+    "P12"
+   ],
+   "notifier": 32769
+  },
+  "LevelMonitor.systemVoltage": {
+   "field": "systemVoltage",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "Inst1": 128
+   },
+   "interface": "com.harman.infotainment.systeminfrastructure.environment.levelmonitor.LevelMonitor",
+   "items": [
+    "P10"
+   ],
+   "notifier": 32769,
+   "used_instances": [
+    "Inst1"
+   ]
+  },
+  "Lifecycle.entertainmentModeTrigger": {
+   "field": "entertainmentModeTrigger",
+   "flags": "rs",
+   "getter": 22,
+   "instances": {
+    "Front": 1
+   },
+   "interface": "de.bmw.infotainment.lifecycle.lifecycle.Lifecycle",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32774,
+   "used_instances": [
+    "Front"
+   ]
+  },
+  "Light.IndicatorSteeringColumn": {
+   "field": "IndicatorSteeringColumn",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.body.Light",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32773
+  },
+  "Light.IndicatorSteeringColumnComplete": {
+   "field": "IndicatorSteeringColumnComplete",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.body.Light",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32776
+  },
+  "MDrive.dataDisplayGearbox": {
+   "field": "dataDisplayGearbox",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.misc.MDrive",
+   "items": [
+    "P18"
+   ],
+   "notifier": 32785
+  },
+  "MediaPlayer.currentItemMetadata": {
+   "field": "currentItemMetadata",
+   "flags": "rs",
+   "getter": 10,
+   "instances": {
+    "AlexaMedia": 62,
+    "AndroidAutoProjected": 41,
+    "AudioDemoModeMedia": 66,
+    "AudioVisualEffectsPlayer": 32,
+    "BrowserMedia": 60,
+    "BrowserTempLumMedia": 65,
+    "BrowserTempMedia": 61,
+    "CarLifeMedia": 37,
+    "CarPlayMedia": 10,
+    "DynamicInterrupt": 57,
+    "DynamicMedia": 55,
+    "DynamicOverlay": 56,
+    "DynamicTempLumMedia": 64,
+    "DynamicTempMedia": 58,
+    "ExternalDeviceBtA": 4,
+    "ExternalDeviceBtB": 5,
+    "ExternalDeviceUsbFrontA": 2,
+    "ExternalDeviceUsbFrontAInstanceRearL": 11,
+    "ExternalDeviceUsbFrontAInstanceRearR": 12,
+    "ExternalDeviceUsbFrontASingle": 33,
+    "ExternalDeviceUsbFrontB": 3,
+    "ExternalDeviceUsbFrontBInstanceRearL": 13,
+    "ExternalDeviceUsbFrontBInstanceRearR": 14,
+    "ExternalDeviceUsbFrontBSingle": 34,
+    "ExternalDeviceUsbRearA": 22,
+    "ExternalDeviceUsbRearAInstanceRearL": 25,
+    "ExternalDeviceUsbRearAInstanceRearR": 26,
+    "ExternalDeviceUsbRearASingle": 35,
+    "ExternalDeviceUsbRearB": 23,
+    "ExternalDeviceUsbRearBInstanceRearL": 27,
+    "ExternalDeviceUsbRearBInstanceRearR": 28,
+    "ExternalDeviceUsbRearBSingle": 36,
+    "HDMI": 24,
+    "IbaInstanceFront": 16,
+    "IbaInstanceRearL": 17,
+    "IbaInstanceRearR": 18,
+    "MiracastA": 19,
+    "MiracastB": 20,
+    "MiracastC": 15,
+    "MusicCollectionInstanceFront": 7,
+    "MusicCollectionInstanceRearL": 8,
+    "MusicCollectionInstanceRearR": 9,
+    "MyModesOverlay": 54,
+    "OapGenericInterrupt": 39,
+    "OapGenericMedia": 40,
+    "OapGenericOverlay": 38,
+    "OnlineEntertainmentComponent_1": 1,
+    "OpticalDriveFront": 6,
+    "OpticalDriveRear": 21,
+    "PanoramaDisplay": 50,
+    "TencentMppMedia": 53,
+    "TencentMppTempLumMedia": 63,
+    "TencentMppTempMedia": 59,
+    "VideoWidgetFrontInterruptExclusive": 29
+   },
+   "interface": "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer",
+   "items": [
+    "P8"
+   ],
+   "notifier": 32778,
+   "used_instances": [
+    "CarPlayMedia"
+   ]
+  },
+  "MediaPlayer.currentItemPosition": {
+   "field": "currentItemPosition",
+   "flags": "rs",
+   "getter": 8,
+   "instances": {
+    "AlexaMedia": 62,
+    "AndroidAutoProjected": 41,
+    "AudioDemoModeMedia": 66,
+    "AudioVisualEffectsPlayer": 32,
+    "BrowserMedia": 60,
+    "BrowserTempLumMedia": 65,
+    "BrowserTempMedia": 61,
+    "CarLifeMedia": 37,
+    "CarPlayMedia": 10,
+    "DynamicInterrupt": 57,
+    "DynamicMedia": 55,
+    "DynamicOverlay": 56,
+    "DynamicTempLumMedia": 64,
+    "DynamicTempMedia": 58,
+    "ExternalDeviceBtA": 4,
+    "ExternalDeviceBtB": 5,
+    "ExternalDeviceUsbFrontA": 2,
+    "ExternalDeviceUsbFrontAInstanceRearL": 11,
+    "ExternalDeviceUsbFrontAInstanceRearR": 12,
+    "ExternalDeviceUsbFrontASingle": 33,
+    "ExternalDeviceUsbFrontB": 3,
+    "ExternalDeviceUsbFrontBInstanceRearL": 13,
+    "ExternalDeviceUsbFrontBInstanceRearR": 14,
+    "ExternalDeviceUsbFrontBSingle": 34,
+    "ExternalDeviceUsbRearA": 22,
+    "ExternalDeviceUsbRearAInstanceRearL": 25,
+    "ExternalDeviceUsbRearAInstanceRearR": 26,
+    "ExternalDeviceUsbRearASingle": 35,
+    "ExternalDeviceUsbRearB": 23,
+    "ExternalDeviceUsbRearBInstanceRearL": 27,
+    "ExternalDeviceUsbRearBInstanceRearR": 28,
+    "ExternalDeviceUsbRearBSingle": 36,
+    "HDMI": 24,
+    "IbaInstanceFront": 16,
+    "IbaInstanceRearL": 17,
+    "IbaInstanceRearR": 18,
+    "MiracastA": 19,
+    "MiracastB": 20,
+    "MiracastC": 15,
+    "MusicCollectionInstanceFront": 7,
+    "MusicCollectionInstanceRearL": 8,
+    "MusicCollectionInstanceRearR": 9,
+    "MyModesOverlay": 54,
+    "OapGenericInterrupt": 39,
+    "OapGenericMedia": 40,
+    "OapGenericOverlay": 38,
+    "OnlineEntertainmentComponent_1": 1,
+    "OpticalDriveFront": 6,
+    "OpticalDriveRear": 21,
+    "PanoramaDisplay": 50,
+    "TencentMppMedia": 53,
+    "TencentMppTempLumMedia": 63,
+    "TencentMppTempMedia": 59,
+    "VideoWidgetFrontInterruptExclusive": 29
+   },
+   "interface": "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer",
+   "items": [
+    "P8"
+   ],
+   "notifier": 32776,
+   "used_instances": [
+    "CarPlayMedia"
+   ]
+  },
+  "MediaPlayer.currentItemTime": {
+   "field": "currentItemTime",
+   "flags": "rs",
+   "getter": 15,
+   "instances": {
+    "AlexaMedia": 62,
+    "AndroidAutoProjected": 41,
+    "AudioDemoModeMedia": 66,
+    "AudioVisualEffectsPlayer": 32,
+    "BrowserMedia": 60,
+    "BrowserTempLumMedia": 65,
+    "BrowserTempMedia": 61,
+    "CarLifeMedia": 37,
+    "CarPlayMedia": 10,
+    "DynamicInterrupt": 57,
+    "DynamicMedia": 55,
+    "DynamicOverlay": 56,
+    "DynamicTempLumMedia": 64,
+    "DynamicTempMedia": 58,
+    "ExternalDeviceBtA": 4,
+    "ExternalDeviceBtB": 5,
+    "ExternalDeviceUsbFrontA": 2,
+    "ExternalDeviceUsbFrontAInstanceRearL": 11,
+    "ExternalDeviceUsbFrontAInstanceRearR": 12,
+    "ExternalDeviceUsbFrontASingle": 33,
+    "ExternalDeviceUsbFrontB": 3,
+    "ExternalDeviceUsbFrontBInstanceRearL": 13,
+    "ExternalDeviceUsbFrontBInstanceRearR": 14,
+    "ExternalDeviceUsbFrontBSingle": 34,
+    "ExternalDeviceUsbRearA": 22,
+    "ExternalDeviceUsbRearAInstanceRearL": 25,
+    "ExternalDeviceUsbRearAInstanceRearR": 26,
+    "ExternalDeviceUsbRearASingle": 35,
+    "ExternalDeviceUsbRearB": 23,
+    "ExternalDeviceUsbRearBInstanceRearL": 27,
+    "ExternalDeviceUsbRearBInstanceRearR": 28,
+    "ExternalDeviceUsbRearBSingle": 36,
+    "HDMI": 24,
+    "IbaInstanceFront": 16,
+    "IbaInstanceRearL": 17,
+    "IbaInstanceRearR": 18,
+    "MiracastA": 19,
+    "MiracastB": 20,
+    "MiracastC": 15,
+    "MusicCollectionInstanceFront": 7,
+    "MusicCollectionInstanceRearL": 8,
+    "MusicCollectionInstanceRearR": 9,
+    "MyModesOverlay": 54,
+    "OapGenericInterrupt": 39,
+    "OapGenericMedia": 40,
+    "OapGenericOverlay": 38,
+    "OnlineEntertainmentComponent_1": 1,
+    "OpticalDriveFront": 6,
+    "OpticalDriveRear": 21,
+    "PanoramaDisplay": 50,
+    "TencentMppMedia": 53,
+    "TencentMppTempLumMedia": 63,
+    "TencentMppTempMedia": 59,
+    "VideoWidgetFrontInterruptExclusive": 29
+   },
+   "interface": "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer",
+   "items": [
+    "P8"
+   ],
+   "notifier": 32783,
+   "used_instances": [
+    "CarPlayMedia"
+   ]
+  },
+  "MediaPlayer.deviceInfo": {
+   "field": "deviceInfo",
+   "flags": "rs",
+   "getter": 19,
+   "instances": {
+    "AlexaMedia": 62,
+    "AndroidAutoProjected": 41,
+    "AudioDemoModeMedia": 66,
+    "AudioVisualEffectsPlayer": 32,
+    "BrowserMedia": 60,
+    "BrowserTempLumMedia": 65,
+    "BrowserTempMedia": 61,
+    "CarLifeMedia": 37,
+    "CarPlayMedia": 10,
+    "DynamicInterrupt": 57,
+    "DynamicMedia": 55,
+    "DynamicOverlay": 56,
+    "DynamicTempLumMedia": 64,
+    "DynamicTempMedia": 58,
+    "ExternalDeviceBtA": 4,
+    "ExternalDeviceBtB": 5,
+    "ExternalDeviceUsbFrontA": 2,
+    "ExternalDeviceUsbFrontAInstanceRearL": 11,
+    "ExternalDeviceUsbFrontAInstanceRearR": 12,
+    "ExternalDeviceUsbFrontASingle": 33,
+    "ExternalDeviceUsbFrontB": 3,
+    "ExternalDeviceUsbFrontBInstanceRearL": 13,
+    "ExternalDeviceUsbFrontBInstanceRearR": 14,
+    "ExternalDeviceUsbFrontBSingle": 34,
+    "ExternalDeviceUsbRearA": 22,
+    "ExternalDeviceUsbRearAInstanceRearL": 25,
+    "ExternalDeviceUsbRearAInstanceRearR": 26,
+    "ExternalDeviceUsbRearASingle": 35,
+    "ExternalDeviceUsbRearB": 23,
+    "ExternalDeviceUsbRearBInstanceRearL": 27,
+    "ExternalDeviceUsbRearBInstanceRearR": 28,
+    "ExternalDeviceUsbRearBSingle": 36,
+    "HDMI": 24,
+    "IbaInstanceFront": 16,
+    "IbaInstanceRearL": 17,
+    "IbaInstanceRearR": 18,
+    "MiracastA": 19,
+    "MiracastB": 20,
+    "MiracastC": 15,
+    "MusicCollectionInstanceFront": 7,
+    "MusicCollectionInstanceRearL": 8,
+    "MusicCollectionInstanceRearR": 9,
+    "MyModesOverlay": 54,
+    "OapGenericInterrupt": 39,
+    "OapGenericMedia": 40,
+    "OapGenericOverlay": 38,
+    "OnlineEntertainmentComponent_1": 1,
+    "OpticalDriveFront": 6,
+    "OpticalDriveRear": 21,
+    "PanoramaDisplay": 50,
+    "TencentMppMedia": 53,
+    "TencentMppTempLumMedia": 63,
+    "TencentMppTempMedia": 59,
+    "VideoWidgetFrontInterruptExclusive": 29
+   },
+   "interface": "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer",
+   "items": [
+    "P8"
+   ],
+   "notifier": 32787,
+   "used_instances": [
+    "CarPlayMedia"
+   ]
+  },
+  "MediaPlayer.playerState": {
+   "field": "playerState",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "AlexaMedia": 62,
+    "AndroidAutoProjected": 41,
+    "AudioDemoModeMedia": 66,
+    "AudioVisualEffectsPlayer": 32,
+    "BrowserMedia": 60,
+    "BrowserTempLumMedia": 65,
+    "BrowserTempMedia": 61,
+    "CarLifeMedia": 37,
+    "CarPlayMedia": 10,
+    "DynamicInterrupt": 57,
+    "DynamicMedia": 55,
+    "DynamicOverlay": 56,
+    "DynamicTempLumMedia": 64,
+    "DynamicTempMedia": 58,
+    "ExternalDeviceBtA": 4,
+    "ExternalDeviceBtB": 5,
+    "ExternalDeviceUsbFrontA": 2,
+    "ExternalDeviceUsbFrontAInstanceRearL": 11,
+    "ExternalDeviceUsbFrontAInstanceRearR": 12,
+    "ExternalDeviceUsbFrontASingle": 33,
+    "ExternalDeviceUsbFrontB": 3,
+    "ExternalDeviceUsbFrontBInstanceRearL": 13,
+    "ExternalDeviceUsbFrontBInstanceRearR": 14,
+    "ExternalDeviceUsbFrontBSingle": 34,
+    "ExternalDeviceUsbRearA": 22,
+    "ExternalDeviceUsbRearAInstanceRearL": 25,
+    "ExternalDeviceUsbRearAInstanceRearR": 26,
+    "ExternalDeviceUsbRearASingle": 35,
+    "ExternalDeviceUsbRearB": 23,
+    "ExternalDeviceUsbRearBInstanceRearL": 27,
+    "ExternalDeviceUsbRearBInstanceRearR": 28,
+    "ExternalDeviceUsbRearBSingle": 36,
+    "HDMI": 24,
+    "IbaInstanceFront": 16,
+    "IbaInstanceRearL": 17,
+    "IbaInstanceRearR": 18,
+    "MiracastA": 19,
+    "MiracastB": 20,
+    "MiracastC": 15,
+    "MusicCollectionInstanceFront": 7,
+    "MusicCollectionInstanceRearL": 8,
+    "MusicCollectionInstanceRearR": 9,
+    "MyModesOverlay": 54,
+    "OapGenericInterrupt": 39,
+    "OapGenericMedia": 40,
+    "OapGenericOverlay": 38,
+    "OnlineEntertainmentComponent_1": 1,
+    "OpticalDriveFront": 6,
+    "OpticalDriveRear": 21,
+    "PanoramaDisplay": 50,
+    "TencentMppMedia": 53,
+    "TencentMppTempLumMedia": 63,
+    "TencentMppTempMedia": 59,
+    "VideoWidgetFrontInterruptExclusive": 29
+   },
+   "interface": "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer",
+   "items": [
+    "P8"
+   ],
+   "notifier": 32769,
+   "used_instances": [
+    "CarPlayMedia"
+   ]
+  },
+  "MediaSource.activeSourceId": {
+   "field": "activeSourceId",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.entertainment.mediasource.MediaSource",
+   "items": [
+    "L7",
+    "P8"
+   ],
+   "notifier": 32770
+  },
+  "MediaSource.sources": {
+   "field": "sources",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.entertainment.mediasource.MediaSource",
+   "items": [
+    "L7",
+    "P8"
+   ],
+   "notifier": 32769
+  },
+  "MileageSupreme.mileageSupreme": {
+   "field": "mileageSupreme",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infrastructure.MileageSupreme",
+   "items": [
+    "P3"
+   ],
+   "notifier": 32769
+  },
+  "MultimodalControlDriverAssistance.functionAvailabilityDriverAssistance": {
+   "field": "functionAvailabilityDriverAssistance",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.dass.driverassistanceapplications.MultimodalControlDriverAssistance",
+   "items": [
+    "P15"
+   ],
+   "notifier": 32769
+  },
+  "NavigationStatus.guidingState": {
+   "field": "guidingState",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus",
+   "items": [
+    "L21",
+    "P12"
+   ],
+   "notifier": 32770
+  },
+  "NavigationStatus.nextDestinationInfo": {
+   "field": "nextDestinationInfo",
+   "flags": "rs",
+   "getter": 5,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus",
+   "items": [
+    "L21"
+   ],
+   "notifier": 32773
+  },
+  "Positioning.currentLocation": {
+   "field": "currentLocation",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "Main_Instance": 128
+   },
+   "interface": "de.bmw.infotainment.navigation.positioning.Positioning",
+   "items": [
+    "P17"
+   ],
+   "notifier": 32769,
+   "used_instances": [
+    "Main_Instance"
+   ]
+  },
+  "Powertrain.dataDisplayGearboxSecure": {
+   "field": "dataDisplayGearboxSecure",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.powertrain.Powertrain",
+   "items": [
+    "P18"
+   ],
+   "notifier": 32775
+  },
+  "ResetLogic.averageConsumption": {
+   "field": "averageConsumption",
+   "flags": "rs",
+   "getter": 7,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.resetlogic.ResetLogic",
+   "items": [
+    "P4"
+   ],
+   "notifier": 32775
+  },
+  "ResetLogic.bcDataAll": {
+   "field": "bcDataAll",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.resetlogic.ResetLogic",
+   "items": [
+    "P4"
+   ],
+   "notifier": 32769
+  },
+  "ResetLogic.currentConsumption": {
+   "field": "currentConsumption",
+   "flags": "rs",
+   "getter": 5,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.resetlogic.ResetLogic",
+   "items": [
+    "P17"
+   ],
+   "notifier": 32773
+  },
+  "ResetLogic2.bcDataAll": {
+   "field": "bcDataAll",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.resetlogic.ResetLogic2",
+   "items": [
+    "P4"
+   ],
+   "notifier": 32769
+  },
+  "ResetLogic3.bcDataAll": {
+   "field": "bcDataAll",
+   "flags": "rs",
+   "getter": 7,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.resetlogic.ResetLogic3",
+   "items": [
+    "P4"
+   ],
+   "notifier": 32775
+  },
+  "SecureMileage.mileage": {
+   "field": "mileage",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infrastructure.SecureMileage",
+   "items": [
+    "P3"
+   ],
+   "notifier": 32769
+  },
+  "SettingsDriverAssistanceFunctions.settingOffsetSpeed": {
+   "field": "settingOffsetSpeed",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+   "items": [
+    "L20"
+   ],
+   "notifier": 32789
+  },
+  "SettingsDriverAssistanceFunctions.settingOffsetSpeedSlow": {
+   "field": "settingOffsetSpeedSlow",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+   "items": [
+    "L20"
+   ],
+   "notifier": 32791
+  },
+  "SettingsDriverAssistanceFunctions.settingOffsetSpeedSlowActivation": {
+   "field": "settingOffsetSpeedSlowActivation",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+   "items": [
+    "L20"
+   ],
+   "notifier": 32790
+  },
+  "SettingsDriverAssistanceFunctions.settingSpeedLimitInfoPresentation": {
+   "field": "settingSpeedLimitInfoPresentation",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+   "items": [
+    "L20"
+   ],
+   "notifier": 32795
+  },
+  "SettingsDriverAssistanceFunctions.settingSpeedLimitInfoWarning": {
+   "field": "settingSpeedLimitInfoWarning",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+   "items": [
+    "L20"
+   ],
+   "notifier": 32794
+  },
+  "SettingsDriverAssistanceFunctions.settingSpeedLimitWarningSecondLevel": {
+   "field": "settingSpeedLimitWarningSecondLevel",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+   "items": [
+    "L20"
+   ],
+   "notifier": 32847
+  },
+  "SteeringWheelPushButton.operationSteerWheelFAV": {
+   "field": "operationSteerWheelFAV",
+   "flags": "rs",
+   "getter": 9,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32777
+  },
+  "SteeringWheelPushButton.operationSteerWheelFC": {
+   "field": "operationSteerWheelFC",
+   "flags": "rs",
+   "getter": 10,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32778
+  },
+  "SteeringWheelPushButton.statusAudioVolumeButton": {
+   "field": "statusAudioVolumeButton",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32770
+  },
+  "SteeringWheelPushButton.statusPTTButton1": {
+   "field": "statusPTTButton1",
+   "flags": "rs",
+   "getter": 4,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32772
+  },
+  "SteeringWheelPushButton.statusRotaryPress": {
+   "field": "statusRotaryPress",
+   "flags": "rs",
+   "getter": 8,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32776
+  },
+  "SteeringWheelPushButton.statusRotarySteps": {
+   "field": "statusRotarySteps",
+   "flags": "rs",
+   "getter": 7,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32775
+  },
+  "SteeringWheelPushButton.statusSearchSwitch1": {
+   "field": "statusSearchSwitch1",
+   "flags": "rs",
+   "getter": 3,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32771
+  },
+  "SteeringWheelPushButton.statusSpecialFunctionButton": {
+   "field": "statusSpecialFunctionButton",
+   "flags": "rs",
+   "getter": 5,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32773
+  },
+  "SteeringWheelPushButton.statusSpecialFunctionButton2": {
+   "field": "statusSpecialFunctionButton2",
+   "flags": "rs",
+   "getter": 6,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32774
+  },
+  "SteeringWheelPushButton.statusSteerWheelFCLED": {
+   "field": "statusSteerWheelFCLED",
+   "flags": "rs",
+   "getter": 11,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32779
+  },
+  "SteeringWheelPushButton.statusTelephoneButton": {
+   "field": "statusTelephoneButton",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+   "items": [
+    "P13"
+   ],
+   "notifier": 32769
+  },
+  "TPMS.statusTargetTyrePressure": {
+   "field": "statusTargetTyrePressure",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.TPMS",
+   "items": [
+    "P16"
+   ],
+   "notifier": 32769
+  },
+  "TPMS.statusTyrePressure": {
+   "field": "statusTyrePressure",
+   "flags": "rs",
+   "getter": 7,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.TPMS",
+   "items": [
+    "P16"
+   ],
+   "notifier": 32775
+  },
+  "TPMS.statusTyreTemperature": {
+   "field": "statusTyreTemperature",
+   "flags": "rs",
+   "getter": 9,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.TPMS",
+   "items": [
+    "P16"
+   ],
+   "notifier": 32777
+  },
+  "TPMS.statusTyresStatus": {
+   "field": "statusTyresStatus",
+   "flags": "rs",
+   "getter": 10,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.TPMS",
+   "items": [
+    "P16"
+   ],
+   "notifier": 32778
+  },
+  "Telephone.callState": {
+   "field": "callState",
+   "flags": "rs",
+   "getter": 6,
+   "instances": {
+    "1": 1,
+    "2": 2
+   },
+   "interface": "de.bmw.infotainment.Telephone",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32774
+  },
+  "Telephone.currentNetworkOperator": {
+   "field": "currentNetworkOperator",
+   "flags": "rs",
+   "getter": 3,
+   "instances": {
+    "1": 1,
+    "2": 2
+   },
+   "interface": "de.bmw.infotainment.Telephone",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32771
+  },
+  "Telephone.registerState": {
+   "field": "registerState",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "1": 1,
+    "2": 2
+   },
+   "interface": "de.bmw.infotainment.Telephone",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32769
+  },
+  "Telephone.signalQuality": {
+   "field": "signalQuality",
+   "flags": "rs",
+   "getter": 4,
+   "instances": {
+    "1": 1,
+    "2": 2
+   },
+   "interface": "de.bmw.infotainment.Telephone",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32772
+  },
+  "TrafficSignDisplayControl.displayDriverAssistanceLongitudinal": {
+   "field": "displayDriverAssistanceLongitudinal",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl",
+   "items": [
+    "P15"
+   ],
+   "notifier": 32772
+  },
+  "TrafficSignDisplayControl.displayForesight": {
+   "field": "displayForesight",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl",
+   "items": [
+    "P15"
+   ],
+   "notifier": 32770
+  },
+  "TrafficSignDisplayControl.displaySpeedLimitAndNoPassingRestriction": {
+   "field": "displaySpeedLimitAndNoPassingRestriction",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl",
+   "items": [
+    "L14",
+    "P15"
+   ],
+   "notifier": 32769
+  },
+  "TunerFmAmDab.currentStationFmDabAm": {
+   "field": "currentStationFmDabAm",
+   "flags": "rs",
+   "getter": 9,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.tuner.fmamdab.tunerfmamdab.TunerFmAmDab",
+   "items": [
+    "P8"
+   ],
+   "notifier": 32777
+  },
+  "Vehicle.statusDayNightChangeOver": {
+   "field": "statusDayNightChangeOver",
+   "flags": "rs",
+   "getter": 19,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.Vehicle",
+   "items": [
+    "L15"
+   ],
+   "notifier": 32787
+  },
+  "Vehicle.statusMotorStartAuto": {
+   "field": "statusMotorStartAuto",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.Vehicle",
+   "items": [
+    "L17"
+   ],
+   "notifier": 32853
+  },
+  "Vehicle.statusNewCurrentUnitsStatusExt": {
+   "field": "statusNewCurrentUnitsStatusExt",
+   "flags": "rs",
+   "getter": 46,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.Vehicle",
+   "items": [
+    "P5"
+   ],
+   "notifier": 32814
+  },
+  "Vehicle2.statusDimmer": {
+   "field": "statusDimmer",
+   "flags": "rs",
+   "getter": 20,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.Vehicle2",
+   "items": [
+    "P19"
+   ],
+   "notifier": 32788
+  },
+  "Vehicle2.statusDisplayKombi": {
+   "field": "statusDisplayKombi",
+   "flags": "rs",
+   "getter": 124,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.Vehicle2",
+   "items": [
+    "P11",
+    "P18"
+   ],
+   "notifier": 32892
+  },
+  "Vehicle2.statusDisplayedCCMessage": {
+   "field": "statusDisplayedCCMessage",
+   "flags": "rs",
+   "getter": 61,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.Vehicle2",
+   "items": [
+    "L8",
+    "P1"
+   ],
+   "notifier": 32829
+  },
+  "Vehicle2.statusLightStatus": {
+   "field": "statusLightStatus",
+   "flags": "rs",
+   "getter": 43,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.Vehicle2",
+   "items": [
+    "P19"
+   ],
+   "notifier": 32811
+  },
+  "Vehicle2.statusOilDipstick2": {
+   "field": "statusOilDipstick2",
+   "flags": "rs",
+   "getter": 47,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.Vehicle2",
+   "items": [
+    "P16"
+   ],
+   "notifier": 32815
+  },
+  "Vehicle2.statusZVStatus": {
+   "field": "statusZVStatus",
+   "flags": "rs",
+   "getter": 85,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.vehicle.Vehicle2",
+   "items": [
+    "P7"
+   ],
+   "notifier": 32853
+  },
+  "VehicleCondition.VehicleCondition": {
+   "field": "VehicleCondition",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infrastructure.VehicleCondition",
+   "items": [
+    "L17",
+    "L18"
+   ],
+   "notifier": 32769
+  },
+  "VehicleInformation.Range": {
+   "field": "Range",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infrastructure.VehicleInformation",
+   "items": [
+    "P3"
+   ],
+   "notifier": 32770
+  },
+  "VehicleInformation.statusGearboxDrive": {
+   "field": "statusGearboxDrive",
+   "flags": "s",
+   "getter": 0,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infrastructure.VehicleInformation",
+   "items": [
+    "P18"
+   ],
+   "notifier": 32776
+  },
+  "VoiceCall.contactID": {
+   "field": "contactID",
+   "flags": "rs",
+   "getter": 1,
+   "instances": {
+    "Call1": 1,
+    "Call2": 2,
+    "Call3": 3,
+    "Call4": 4,
+    "Call5": 5,
+    "Call6": 6,
+    "Call7": 7,
+    "Call8": 8,
+    "Call9": 9
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32769,
+   "used_instances": [
+    "Call1"
+   ]
+  },
+  "VoiceCall.duration": {
+   "field": "duration",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "Call1": 1,
+    "Call2": 2,
+    "Call3": 3,
+    "Call4": 4,
+    "Call5": 5,
+    "Call6": 6,
+    "Call7": 7,
+    "Call8": 8,
+    "Call9": 9
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32770,
+   "used_instances": [
+    "Call1"
+   ]
+  },
+  "VoiceCall.modem": {
+   "field": "modem",
+   "flags": "rs",
+   "getter": 3,
+   "instances": {
+    "Call1": 1,
+    "Call2": 2,
+    "Call3": 3,
+    "Call4": 4,
+    "Call5": 5,
+    "Call6": 6,
+    "Call7": 7,
+    "Call8": 8,
+    "Call9": 9
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32771,
+   "used_instances": [
+    "Call1"
+   ]
+  },
+  "VoiceCall.multiparty": {
+   "field": "multiparty",
+   "flags": "rs",
+   "getter": 4,
+   "instances": {
+    "Call1": 1,
+    "Call2": 2,
+    "Call3": 3,
+    "Call4": 4,
+    "Call5": 5,
+    "Call6": 6,
+    "Call7": 7,
+    "Call8": 8,
+    "Call9": 9
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32772,
+   "used_instances": [
+    "Call1"
+   ]
+  },
+  "VoiceCall.name": {
+   "field": "name",
+   "flags": "rs",
+   "getter": 24,
+   "instances": {
+    "Call1": 1,
+    "Call2": 2,
+    "Call3": 3,
+    "Call4": 4,
+    "Call5": 5,
+    "Call6": 6,
+    "Call7": 7,
+    "Call8": 8,
+    "Call9": 9
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32776,
+   "used_instances": [
+    "Call1"
+   ]
+  },
+  "VoiceCall.number": {
+   "field": "number",
+   "flags": "rs",
+   "getter": 5,
+   "instances": {
+    "Call1": 1,
+    "Call2": 2,
+    "Call3": 3,
+    "Call4": 4,
+    "Call5": 5,
+    "Call6": 6,
+    "Call7": 7,
+    "Call8": 8,
+    "Call9": 9
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32773,
+   "used_instances": [
+    "Call1"
+   ]
+  },
+  "VoiceCall.pictureSource": {
+   "field": "pictureSource",
+   "flags": "rs",
+   "getter": 25,
+   "instances": {
+    "Call1": 1,
+    "Call2": 2,
+    "Call3": 3,
+    "Call4": 4,
+    "Call5": 5,
+    "Call6": 6,
+    "Call7": 7,
+    "Call8": 8,
+    "Call9": 9
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32777,
+   "used_instances": [
+    "Call1"
+   ]
+  },
+  "VoiceCall.state": {
+   "field": "state",
+   "flags": "rs",
+   "getter": 6,
+   "instances": {
+    "Call1": 1,
+    "Call2": 2,
+    "Call3": 3,
+    "Call4": 4,
+    "Call5": 5,
+    "Call6": 6,
+    "Call7": 7,
+    "Call8": 8,
+    "Call9": 9
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32774,
+   "used_instances": [
+    "Call1"
+   ]
+  },
+  "VoiceCallManager.communicationBlocked": {
+   "field": "communicationBlocked",
+   "flags": "rs",
+   "getter": 19,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.VoiceCallManager",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32781
+  },
+  "VoiceCallManager.hfpBlocked": {
+   "field": "hfpBlocked",
+   "flags": "rs",
+   "getter": 21,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.VoiceCallManager",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32784
+  },
+  "VoiceCallManager.micMuted": {
+   "field": "micMuted",
+   "flags": "rs",
+   "getter": 2,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.connectivity.telephony.VoiceCallManager",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32770
+  },
+  "WirelessChargingAdapter.wcaNfcFrontStatus": {
+   "field": "wcaNfcFrontStatus",
+   "flags": "rs",
+   "getter": 3,
+   "instances": {
+    "1": 1
+   },
+   "interface": "de.bmw.infotainment.wca.WirelessChargingAdapter",
+   "items": [
+    "P9"
+   ],
+   "notifier": 32771
+  }
+ }
+}
