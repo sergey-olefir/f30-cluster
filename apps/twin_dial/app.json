@@ -525,7 +525,7 @@
       "label": "Журнал слотів карти",
       "type": "bool",
       "default": false,
-      "_about": "config.mapSlots: log cluster-render's slot rows (numbers only), the proof the app can read them"
+      "_about": "config.mapSlotLog (B4): log cluster-render's slot-0x100 rows (numbers only) once per state, asked every 2 s on tab 5 with a map window chosen: the proof the app can read them before config.mapSlots (S1) is trusted"
     },
     {
       "key": "diagSilent",
@@ -771,7 +771,7 @@
         },
         "diagMapWindow": { "options": { "W1": { "mapWindow": "W1" }, "W2": { "mapWindow": "W2" } } },
         "diagMapForce": { "on": { "mapForce": true } },
-        "diagMapSlots": { "on": { "mapSlots": true } },
+        "diagMapSlots": { "on": { "mapSlotLog": true } },
         "diagSilent": { "act": "silent" }
       }
     },

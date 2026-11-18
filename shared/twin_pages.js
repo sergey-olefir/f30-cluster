@@ -517,7 +517,7 @@ function onStatus(hud, text) {
         if (!s) return;
         const p = st(hud);
         p.slots = s; p.slotsAt = nowMs(hud);
-        if (cfgOf(hud).mapSlotLog === true) once(hud, 'slots', 'map slot 0x100: status ' + s.status + ', map ' + (s.mapped ? 'yes' : 'no'));
+        if (cfgOf(hud).mapSlotLog === true) once(hud, 'slots:' + s.status + ':' + s.mapped, 'map slot 0x100: status ' + s.status + ', map ' + (s.mapped ? 'yes' : 'no'));
     } catch (e) { /* never */ }
 }
 
@@ -962,7 +962,8 @@ function update(hud, x, now, force) {
         log(hud, 'info', 'map window ' + (open ? 'open (' + hud.twinMap + ')' : 'shut') + ' (' + mapState(hud, nowMs(hud)).why + ')');
     }
     // S1 asks cluster-render for its status while tab 5 is selected (every 2 s), once config.mapSlots says it can be read
-    if (cfgOf(hud).mapSlots === true && tabOf(hud) === 5 && mapVariant(hud) && nowMs(hud) - p.mapAskAt > 2000 && hud.client && typeof hud.client.status === 'function') {
+    // b7: the Діагностика slot log (config.mapSlotLog) asks too, on tab 5 with a map window chosen, so the rows can be read before S1 is trusted
+    if ((cfgOf(hud).mapSlots === true || cfgOf(hud).mapSlotLog === true) && tabOf(hud) === 5 && mapVariant(hud) && nowMs(hud) - p.mapAskAt > 2000 && hud.client && typeof hud.client.status === 'function') {
         p.mapAskAt = nowMs(hud);
         try { hud.client.status(); } catch (e) { /* never */ }
     }

@@ -139,7 +139,7 @@ function unit() {
     {
         const spec = APPS.twin_dial, cfg = deep(spec.config), vals = { diagMapWindow: 'W2', diagMapForce: true, diagMapSlots: true, diagRelease: true };
         DS.Diag.create(cfg, fakeSettings(spec, vals), quiet);
-        ok(cfg.mapWindow === 'W2' && cfg.mapForce === true && cfg.mapSlots === true && cfg.ccActive.release.leftList === true && cfg.ccActive.release.deferValues[0] === 65535, 'twin: the map window, the forced window, the slot log and the release write their keys');
+        ok(cfg.mapWindow === 'W2' && cfg.mapForce === true && cfg.mapSlotLog === true && cfg.mapSlots === false && cfg.ccActive.release.leftList === true && cfg.ccActive.release.deferValues[0] === 65535, 'twin: the map window, the forced window, the slot log and the release write their keys');
         ok(cfg.ccActive.strict === true && cfg.ccActive.noneValues[0] === 0, 'twin: the rest of ccActive is untouched');
     }
 
