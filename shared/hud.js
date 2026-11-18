@@ -250,6 +250,10 @@ try { twinPages = require('./twin_pages'); } catch (e) { if (e.code !== 'MODULE_
 // twin_dial: the speed limit's sign, its marker and the cruise readout (shared/twin_limit.js; same rule: absent for every other app)
 let twinLimit = null;
 try { twinLimit = require('./twin_limit'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_limit') < 0) throw e; }
+// car-fix CF2: the speed limit's real sources (shared/limit_src.js: the TrafficSignRecognition event, config.sign's field as
+// the fallback). Packed by twin_dial and f30_cluster; absent: config.sign's field alone, as before.
+let limitSrc = null;
+try { limitSrc = require('./limit_src'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('limit_src') < 0) throw e; }
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
@@ -1303,8 +1307,11 @@ class HudApp {
         // symbol style and the no-passing restriction (shape: signOf). It also feeds limitState / limitKmh / nopassOn,
         // so {{limit}}, the WBSIGN layer and the over-limit arc work as they did from config.limit.
         const sg = this.config.sign;
-        watchOne(sg, (v) => {
-            const s = signOf(sg, v);
+        // car-fix CF2: the owner's car never sends config.sign's field; the limit comes as the TrafficSignRecognition
+        // EVENT (class x 5 km/h). limit_src merges the two (the event first while it is live, the field as the fallback)
+        // and logs "limit:" lines (numbers and enum names only). Without limit_src: the field alone, as before.
+        this.limitSrc = limitSrc && sg ? limitSrc.create(sg, { log: this.log }) : null;
+        const applySign = (s) => {
             this.sign = s; this.signAt = Date.now();
             this.limitState = s.state; this.limitKmh = s.kmh;
             this.nopassOn = NP_ON.indexOf(s.np) >= 0;
@@ -1315,7 +1322,9 @@ class HudApp {
                 this.signShape = key; this.signLogs++;
                 this.log.info('sign: ' + key.split('|').join(' ') + ' (state value unit warn supplemental style sure no-passing distance)');
             }
-        });
+        };
+        watchOne(sg, (v) => { const s = signOf(sg, v); applySign(this.limitSrc ? this.limitSrc.field(s) : s); });     // car-fix CF2: through the merger
+        if (this.limitSrc) this.limitSrc.wire(extra, applySign);       // car-fix CF2: the events (read only; no getter, no method)
         // The check-control message (a union of two structs; shape: ccMsgOf). It also feeds ccShown, so "cc:shown" /
         // "cc:none" and the message window work whether config.ccm names this shape or the older flag / list one.
         const cm = this.config.ccm;

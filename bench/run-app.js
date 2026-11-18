@@ -419,7 +419,7 @@ process.on('message', (m) => {
         }
         else if (v.hook) benchHook(v.hook);      // package X: fault injection for the safety tests
         else if (v.feed && v.feed.iface && v.feed.field) hu.feed(v.feed.iface, v.feed.field, v.feed.value);     // twin_dial: package F, any raw field (bench/test-twin-probe.js)
-        else if (v.scene || v.sign || v.cc || v.ccList || v.ccActive || v.ccFrame || v.sla || v.road || v.nav || v.clock || v.clockLocal) fakeSigns.control(v);
+        else if (v.scene || v.sign || v.tsr || v.cc || v.ccList || v.ccActive || v.ccFrame || v.sla || v.road || v.nav || v.clock || v.clockLocal) fakeSigns.control(v);     // car-fix CF2: + tsr (the TrafficSignRecognition event)
         else if (v.ccRisk || v.ccBasic || v.symbols) fakeSigns.control(v);     // probes (0.7.18): bench/test-probes.js
         else if (v.dayNight !== undefined) fakeSigns.control(v);    // fix/colour-daynight: bench/test-daynight.js
         else if (fakePerso) fakePerso.control(v);

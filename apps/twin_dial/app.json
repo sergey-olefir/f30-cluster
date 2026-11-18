@@ -35,7 +35,8 @@
     "twin_probe.js",
     "mb_exp.js",
     "diag_settings.js",
-    "twin_limit.js"
+    "twin_limit.js",
+    "limit_src.js"
   ],
   "signals": {
     "de.bmw.body.Light": {
@@ -165,6 +166,25 @@
       "statusTyreTemperature": "rs",
       "statusTargetTyrePressure": "rs",
       "_about": "the tyre page (config.pages.tyres, dark): the car never notifies TPMS, so the page reads the getters every 10 s while it shows (shared/twin_pages.js tpmsPoll). Read only."
+    },
+    "de.bmw.dass.TrafficSignRecognition": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognition"
+      ],
+      "_about": "car-fix CF2: the speed limit as the owner's car sends it (2026-11-18, signal_probe set S13): an EVENT (eventId 32769, service 13632), so _broadcasts; no getter, no setter, no method. config.sign.tsr (shared/limit_src.js): presentClassLimitSpeed x 5 = km/h. TrafficSignDisplayControl below stays the fallback."
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognitionFrontCamera"
+      ],
+      "_about": "car-fix CF2: the front camera's own sign event, a second witness (config.sign.camera): logged as numbers ('limit: camera ...'), never drawn. Read only."
+    },
+    "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
+      "_instances": "1",
+      "functionalLibraryData": "rs",
+      "_about": "car-fix CF2: the cruise / limiter as the owner's car sends it (2026-11-18, the probe's hud-data, filled with the HUD off): cruiseCtrlSpeedHUD (set speed km/h, 65535 none), ldmSym (LDM_SYM_DCC cruise / LDM_SYM_SLD limiter / LDM_SYM_NONE), ldmSymColor (LDM_ACTIVE green, else grey). Getter 1 (NON-ZERO), notifier 32769, so rs. READ ONLY: this interface has no setter and no method; codingData is not declared."
     },
     "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl": {
       "displaySpeedLimitAndNoPassingRestriction": "s",
@@ -964,13 +984,61 @@
       "_hold": "The stock cluster animates the end of a limit and then shows the new one, and a sign is essentially always present (the owner, 2026-11-15), so there is no \"hide the sign\" state. holdMs keeps the last sign on while the car briefly says nothing; the animation itself lands in shared/hud.js _signShow().",
       "_timings": "changeFlashMs / flashPeriodMs are docs/G20-DESIGN-SPEC.md's PLACEHOLDERS for the flash after a limit changes - there is no video in the reference set, so nothing was measured. They are parameters only; nothing acts on them yet.",
       "_empty": "docs/G20-DESIGN-SPEC.md: BMW's empty sign is THREE DASHES, 8.8 x 4.4 at pitch 13, not a blank disc. That is WBSIGN's u_show state 3, which this package already drives; whether the shader draws dashes is the drawing package's to check.",
-      "_mph": "The unit is read and recorded ({{limitUnit}}, the 'sign:' log line) but changes nothing on screen: the sign stays the round one with the number, in every country (the owner, 2026-11-15)."
+      "_mph": "The unit is read and recorded ({{limitUnit}}, the 'sign:' log line) but changes nothing on screen: the sign stays the round one with the number, in every country (the owner, 2026-11-15).",
+      "tsr": {
+        "iface": "de.bmw.dass.TrafficSignRecognition",
+        "event": "TrafficSignRecognition",
+        "instance": "1",
+        "classPath": [
+          "presentClassLimitSpeed"
+        ],
+        "factor": 5,
+        "none": [
+          0,
+          29,
+          253,
+          254,
+          255
+        ],
+        "end": [],
+        "warnPath": [
+          "controlSLIWarning"
+        ],
+        "warnMap": {
+          "1": 1,
+          "2": 2
+        },
+        "unitPath": [
+          "unitOfMeasurementSpeedLimit"
+        ],
+        "mph": [
+          1,
+          "MPH"
+        ],
+        "withdrawalPath": [
+          "presentWithdrawalLimitSpeed"
+        ],
+        "endOn": [],
+        "staleMs": 3000
+      },
+      "camera": {
+        "iface": "de.bmw.environmentalmodel.SignRecognitionFrontCamera",
+        "event": "TrafficSignRecognitionFrontCamera",
+        "instance": "1"
+      },
+      "order": [
+        "tsr",
+        "field"
+      ],
+      "_tsr": "car-fix CF2 (the car session of 2026-11-18): the field above never arrives on the owner's car (its provider never comes up); the limit comes as the EVENT de.bmw.dass.TrafficSignRecognition.TrafficSignRecognition (service 13632, instance 1, about 2 a second): presentClassLimitSpeed x 5 = km/h (class 8 with a 40 sign, 6 with a 30, 10 = 50 in town). shared/limit_src.js reads it into the same sign shape; 'order' says which source speaks first while it is live (the event, then this field as the fallback; an event older than staleMs is not live). 'none' classes draw no sign: 0 (FASuS's AUFHEBUNG_ALLES), 29 (its chime request, not a speed), 253..255 (n/a, unfilled); warnMap: controlSLIWarning 0 / 1 seen, 1 = over the limit is a hypothesis; mph: unitOfMeasurementSpeedLimit 1 = MPH by FASuS's enum, anything else km/h; endOn (presentWithdrawalLimitSpeed values that mean the derestriction sign; 2 = AUFHEBUNG by the enum) is empty until the car shows one. 'camera' (the front camera's own event) is a witness: logged ('limit: camera ...'), never drawn."
     },
     "limit": {
       "strip": "L1",
       "_about": "SPEC-R3 8 (b): the speedometer's tick strip red from the limit. 'L1' = red from the limit's angle to the scale's end, dim while the needle is below the limit and full when over (SPEC-R3 8, the lead's reading); 'L2' = red only between the limit and the needle, only while over; 'L3' = as L1 but always full; 'off' = the marker only. The owner's choice (docs/twin-dial/MOCKUP-SPEC-R3B.md) is this one line. Not f30_cluster's config.limit (no iface / field here: nothing is subscribed by it)."
     },
-    "cruise": null,
-    "_cruise": "SPEC-R3 9, built DARK: null = nothing is drawn and the layout does not even build the readout's sheet. { place: 'C1' | 'C2' } switches it on (C1 = the hub's lower part, C2 = the coolant bar's place); further keys (funcMap, statusMap, speedPath, factor, unitPath, mphOn, icons ...) correct what the car's values mean once the car session has shown the struct (shared/twin_limit.js CRUISE_DEFAULT)."
+    "cruise": {
+      "place": "C1"
+    },
+    "_cruise": "SPEC-R3 9; car-fix CF2 switched it ON (the car session of 2026-11-18 showed the source): { place: 'C1' } = the readout in the speedometer hub's lower part (C2 = the coolant bar's place; null = dark, the sheet not even built). The source is DisplayDataServer.functionalLibraryData (shared/limit_src.js hudCruiseOf): cruiseCtrlSpeedHUD = the set speed in km/h (61 / 59 / 40 seen; 65535 = none: nothing drawn), ldmSym = the symbol (LDM_SYM_DCC cruise, LDM_SYM_SLD limiter, the ACC / assistant family adaptive; NONE / HDC / EDP nothing), ldmSymColor LDM_ACTIVE = green with the green marker on the scale (u_cru), any other colour = grey, no marker. Keys of limit_src.js HUD_CRUISE_DEFAULT (symMap, activeOn, hudInvalid, hudMph ...) correct the meanings; TrafficSignDisplayControl's longitudinal struct (shared/twin_limit.js CRUISE_DEFAULT: funcMap, statusMap, speedPath ...) stays the fallback until the HUD feed first arrives."
   }
 }

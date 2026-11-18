@@ -242,6 +242,38 @@ async function main() {
     }
     ok(npOk === nps.length, 'all ' + nps.length + ' no-passing values map (' + npOk + ' ok)');
 
+    // car-fix CF2: the owner's car never sends config.sign's field; the limit comes as the TrafficSignRecognition EVENT
+    // (class x 5 km/h). The same sign path (hud.sign, limitState / limitKmh) reads it; the field is the fallback.
+    console.log('car-fix CF2: the speed limit from the TrafficSignRecognition event (the car\'s values, 2026-11-18)');
+    ok(S(p).wired && S(p).wired.tsr === true && spec.config.sign.tsr && spec.config.sign.tsr.event === 'TrafficSignRecognition', 'app.json config.sign.tsr names the event');
+    const tsrCases = [
+        [{ cls: 8 }, (s) => s.src === 'tsr' && s.state === 'limit' && s.kmh === 40 && s.shown === 40 && s.unit === 'kmh' && s.warn === 0, 'class 8 (a 40 sign) -> 40 km/h'],
+        [{ cls: 6 }, (s) => s.src === 'tsr' && s.kmh === 30, 'class 6 (a 30 sign) -> 30'],
+        [{ cls: 10, warn: 1 }, (s) => s.src === 'tsr' && s.kmh === 50 && s.warn === 1, 'class 10 with controlSLIWarning 1 -> 50, warn 1'],
+        [{ cls: 12 }, (s) => s.src === 'tsr' && s.kmh === 60 && s.warn === 0, 'class 12 -> 60'],
+        [{ cls: 26, unit: 1 }, (s) => s.src === 'tsr' && s.unit === 'mph' && s.shown === 130 && Math.round(s.kmh) === 209, 'unit 1 (MPH): 130 shown, 209 km/h'],
+    ];
+    for (const c of tsrCases) {
+        await fake({ tsr: c[0] });
+        p = await until((q) => c[1](S(q).sign || {}), 4000);
+        ok(c[1](S(p).sign || {}), c[2] + ' -> ' + JSON.stringify(S(p).sign));
+    }
+    await fake({ tsr: { cls: 8 } });
+    p = await until((q) => (S(q).sign || {}).kmh === 40, 3000);
+    await fake({ sign: { state: 'limit', value: 90, unit: 'kmh' } });
+    await sleep(500);
+    p = await probe();
+    ok(S(p).sign.src === 'tsr' && S(p).sign.kmh === 40, 'the field says 90 while the event is live: the event\'s 40 stays (config.sign.order: tsr, field)');
+    await fake({ tsr: { cls: 255 } });
+    p = await until((q) => (S(q).sign || {}).src === 'field', 3000);
+    ok(S(p).sign.src === 'field' && S(p).sign.kmh === 90, 'the event says 255 (no limit known): the field\'s 90 (the fallback) is the sign');
+    await fake({ tsr: { cls: 0 } });
+    await sleep(300);
+    p = await probe();
+    ok(S(p).sign.src === 'field', 'class 0: still no limit from the event, the field stays');
+    ok(/limit: tsr class 8 -> limit 40 kmh warn 0 \(warn raw 0, withdrawal 1, unit raw 0, next class 254\)/.test(logText) && /limit: source tsr \(TrafficSignRecognition event\)/.test(logText) &&
+        /limit: source field \(TrafficSignDisplayControl\)/.test(logText), 'f30\'s log has the "limit: tsr ..." and "limit: source ..." lines (numbers and enum names)');
+
     console.log('the check-control message is read in every colour, and a long one');
     for (const c of ['cc-red', 'cc-yellow', 'cc-green', 'cc-orange', 'cc-white']) {
         await scene(c);
