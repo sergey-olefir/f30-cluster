@@ -13,8 +13,8 @@ Package CQ of `docs/AGENT-BRIEF-car-signals.md`. Branch `car/cq` (from `main` at
 | `tools/car/make_session.py` | Renders the step tables of SESSION.uk.md, the verify table and the checklist of RUNBOOK.md and both marker files from the plan; numbers the marks; `--check` fails when a document is stale, a register item is not covered, an expected line is not in CP's field table, or a step expects a field of a set its block does not switch on. |
 | `tools/car/verify_steps.py` | For the lead between blocks: per marked step, OK / MISSING / SILENT for every expected line between its mark and the next (S6 lines' `since=M<n>` wins over position); `--shift M:K` for a mark pressed too often or an app restart; `--silent` for pairs accepted as not sent. |
 | `tools/car/dry_run.js` | The bench dry run (§4). |
-| `tools/car/test_session.py` | 13 tests: the documents are current, the marks are 1..N, the stalk block comes first after the safety checks and covers stock / Twin Dial / f30, never more than two sets per block, and verify_steps on synthetic logs (OK, missing, silent, `since=` against position, a gap in the marks, two runs, the wrong sets at a mark, a double press with `--shift`, a restart with a negative shift, no marks at all). |
-| `docs/car/dry-run/` | The dry run's probe log (bench, invented values, numbers and lengths only), verify output, the parser's output. |
+| `tools/car/test_session.py` | 12 tests: the documents are current, the marks are 1..N, the stalk block comes first after the safety checks and covers stock / Twin Dial / f30, never more than two sets per block, and verify_steps on synthetic logs (OK, missing, silent, `since=` against position, a gap in the marks, two runs, the wrong sets at a mark, a double press with `--shift`, a restart with a negative shift, no marks at all). |
+| `docs/car/dry-run/` | The dry run's probe log (bench, invented values, numbers and lengths only), verify output, the parser's `answers.json` and printout. |
 | `bake/work/car/pub/CQ/` | `marks.json`, `session_marks.json`, `markers.json`, `NOTE-FOR-CL-CP.md` (findings for those packages), `READY`. |
 
 Commands: `python3 -I tools/car/make_session.py [--check]`, `python3 -I tools/car/test_session.py`, `node tools/car/dry_run.js [--until B6]` (in a checkout where `apps/signal_probe` and CL's `tools/car/parse_logs.py` are merged).
@@ -67,27 +67,28 @@ Estimates (minutes at the car; nothing here has been timed on this car). The lea
 
 `tools/car/dry_run.js` builds `signal_probe` with the kit, runs it in the kit's stub head unit (`bench/run-app.js`, no cluster-render, no network) and replays **every block of the plan** (the parked blocks 0-6 the brief asks for, and the drive blocks 7-8 as injected values): it switches the block's sets with the app's own checkboxes as the HMI presses them, presses the app's "Позначка" row before every marked step (106 presses), and feeds every expected (item, field) with a value **generated from the catalogue's own type** (structs by their members, enums by an item name, every text member a canary word of varying length, lists of two; the stalk byte with one invented bit per switch: the trip button 0x10, the indicators 0x01 / 0x02, flash 0x08). One field is never fed (P13 `sw-fav`: "the car does not send it"). Summaries were shortened to +3 / +8 / +20 s (`config.probe.summaryS`) so they appear within the run; gaps and caps are the app's own.
 
-Run on 2026-11-18 against CP's app as it stood in its worktree that afternoon (`signal_probe` 0.1.0, fmt 1, not yet committed by CP) and CL's working copy of the parser: **30 passed, 1 failed**.
+Final run on 2026-11-18 in a scratch merge of `car/cq` with the committed `car/cp` (7b9db74: `signal_probe` 0.1.0, fmt 1, S1-S11), `car/cl` (a40c271) and `car/ca` (a9e5375), which merged without a conflict: **34 passed, 0 failed**. The outputs are in `docs/car/dry-run/` (the probe's log in the car's file format, 404 lines; `verify.txt`, `verify-strict.txt`; the parser's `answers.json` and its printout `parser.txt`).
 
 | Check | Result |
 |---|---|
 | the app starts, never exits, no ERROR, no uncaught exception | ok |
-| every set switch gives its `sets on=` line, and every interface its `watch … ok` line (no `error`) | ok, all 9 sets |
+| every set switch gives its `sets on=` line, and every interface its `watch … ok` line (no `error`) | ok, all 11 sets the plan uses |
 | 106 marks pressed, M1..M106 in the log in order | ok |
-| no canary word anywhere in the app's output (every text member was a canary) | ok |
+| no canary word anywhere in the app's output (every text member was a canary); no home-directory path in the log | ok |
 | the S6 summary ("have spoken") and the never-fed pair named silent | ok |
 | `verify_steps.py`, strict: only the never-fed pair missing | ok (1 step: the FAV press) |
 | `verify_steps.py` with that pair accepted as silent: every required pair of every marked step found, marks contiguous, one run, the right sets on at each mark | **ok: 106 steps, 0 missing** |
-| CL's `parse_logs.py` on the dry run's session folder with `markers.json` | **failed**: it stops in its own `safe_value` on values it writes itself (`'0/8'`, `'de.bmw.body.Light'`, `'doors.bonnet'`) |
+| CL's `parse_logs.py` on the dry run's session folder with `design/car/markers.json` | ok (exit 0): 19 answered, 6 partial, 6 not yet, 24 no material (L items need the apps' and cluster-render's logs, which a probe-only dry run has not), 36 manual (photos, readings) |
+| the parser's P13 from the marker windows | **`tab_key = {kind: stalk-bit, bit: 4, mask: 16}`**, "bit 4 moved in bc-short windows and in no other stalk window", the bits of the indicators and the flash attributed to their own windows, and the Twin Dial / f30 repeats kept apart (`bc-short-twin`, `bc-short-f30`) |
 
-So the log carries what the step attribution needs for every step and the marks line up; whether the parser turns it into decisions could not be shown on CL's work-in-progress copy. When `car/cl` is merged, the lead re-runs `node tools/car/dry_run.js` (part 5 then checks that P13's answer is `stalk-bit` with the invented bit 4).
+So the log carries what the parser needs for every step, the marks line up, and the owner's priority question runs end to end from a press in the session to a `config.tabKey` value. An earlier run against CL's uncommitted copy stopped in its `safe_value`; CL's committed parser no longer does.
 
 Findings of the dry run (in `bake/work/car/pub/CQ/NOTE-FOR-CL-CP.md` for those packages):
 
 1. **A value that arrives before its interface's `watch … ok` line is lost.** The probe subscribes one interface at a time with a pause between them (S5+S4 is about 20 interfaces). The first dry run lost the first trip-button press and a tyre reading that way. The harness now waits for the last watch line, and RUNBOOK §2.4 tells the lead not to let the owner start a block before it.
 2. **CP: `P8 active-source` logs only the text's length and whether it matches a `sources` entry.** Two source ids of the same length with no entry matched print the same line, so a source change can be folded away (seen until the dry run's lengths differed). Worth a look before the media block.
-3. **CL: the privacy check flags CP's own fixed words** (`freq=other`, `heading=set`, `matches-source-entry=unknown`, instance names such as `AndroidAutoProjectedManagerInst1`) as free text or tokens, and the parser stops on its own evidence values (above).
-4. **CL's `steps.py` maps the plan's old step ids** (before block 1 grew); `design/car/markers.json` is generated from the plan and should replace that table.
+3. **CL: the privacy check flags CP's own fixed words.** On CL's working copy: `freq=other`, `heading=set`, `matches-source-entry=unknown` and instance names such as `AndroidAutoProjectedManagerInst1` as free text or tokens; on the committed copy 3 lines remain flagged as tokens (instance names). Harmless for the dry run, but the lead will see them on the car's log too.
+4. **CL's `steps.py` maps an older numbering of the plan's step ids**; the parser was run with `--markers design/car/markers.json`, which is generated from the plan and should be the one source of step classes.
 
 What the dry run cannot prove: anything about the car (which fields arrive, their values, the timing of the KOMBI, the subscription cost of 24-50 fields at once, the getters' answers: the bench has no getter, so every `ask` line says no answer); the owner's real pace (the bench presses a step every ~0.1-1 s); the photos.
 
@@ -107,4 +108,4 @@ What the dry run cannot prove: anything about the car (which fields arrive, thei
 3. Which pass-2 builds to make, and when (CA D7; RUNBOOK §4).
 4. `requestDefaultSymbols` in the installed f30 (CA D1).
 5. CarPlay or Android Auto (CA D5).
-6. Re-run the dry run after merging `car/cp` and `car/cl`; the parser part is not proven yet.
+6. Re-run `node tools/car/dry_run.js` after the final merge (it takes about 4 minutes) and `python3 -I tools/car/make_session.py --check` after any change to the plan, the register or the probe's sets.

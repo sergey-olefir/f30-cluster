@@ -1,0 +1,815 @@
+privacy check of the 1 file(s) the tables read: 3 flagged line(s) - token 3 (privacy_check.py <folder> lists them; --redact-to makes clean copies)
+{
+ "schema": 1,
+ "tool": "tools/car/parse_logs.py",
+ "generated": "2026-11-18",
+ "session": {
+  "folder": "../../../bake/work/car/CQ/dry-run/collection/2026-11-18-dry",
+  "date": "2026-11-18-dry",
+  "material": {
+   "signal_probe": {
+    "lines": 404,
+    "from": "2026-11-18T18:08:13Z",
+    "to": "2026-11-18T18:11:10Z",
+    "version_last": null,
+    "runs": 0,
+    "probe_lines": 124
+   },
+   "cluster_render_lines": 0
+  },
+  "readings": false,
+  "markers": 106,
+  "marker_map": true
+ },
+ "register": {
+  "path": "design/car/register.json"
+ },
+ "summary": {
+  "manual": 36,
+  "no-material": 24,
+  "answered": 19,
+  "not-yet": 6,
+  "partial": 6
+ },
+ "items": {
+  "F1": {
+   "id": "F1",
+   "title": "Twin Dial 0.1.0 draws no limit and covers BMW's sign at (538.45, 621.2) r 41 under its opaque background; does BMW still draw it anywhere?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a78, \u00a713"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F2": {
+   "id": "F2",
+   "title": "With Twin Dial on, belt unbuckled and a door open: do BMW's belt lamp, the seven side lamps and the door message (ours or BMW's) show; after a layout and a drive-mode switch, no black box; day/night s",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC rev 2 \u00a715, \u00a717.2"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F3": {
+   "id": "F3",
+   "title": "Is the car's inner ring shorter than ours (the owner's finding), against SD's measurement that the references' ring ends with the band?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a72.1, \u00a716 (SD / K1 override)"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F4": {
+   "id": "F4",
+   "title": "Of the seven side lamps, which are drawn over our theme (relation unknown for six), and the telltale column on the left.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC rev 2 \u00a715",
+    "FEATURE-AUDIT gap 4 (safety, unresolved)"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F5": {
+   "id": "F5",
+   "title": "Is the set speed on BMW's HUD (this car has one)?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a79"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F6": {
+   "id": "F6",
+   "title": "How the stock cluster shows cruise / ACC / limiter states and set speed.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a79"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F7": {
+   "id": "F7",
+   "title": "What the RIC services draw that apps cannot read: the media line / list, the phone list and the ringing pad.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.3, \u00a74.4"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "F8": {
+   "id": "F8",
+   "title": "How long are the car's Ukrainian check-control names (the card's three lines)?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a75.2"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F9": {
+   "id": "F9",
+   "title": "What do f30 0.7.20 (each theme, G20 on/off, bottom-row modes) and Twin Dial 0.1.0 look like on the car today?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "X1-X11 comparisons",
+    "MT \u00a78 (a 0.7.20 photo beside the prototype)"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F10": {
+   "id": "F10",
+   "title": "Stock pointers in motion (~50 km/h, ~2000 rpm); a fixed-exposure night photo beside a day one; SPORT / ECO PRO frames; a three-digit limit; a negative temperature; a one-digit hour; other check-contro",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "G20SIM",
+    "strip ZL / ZR anchors"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F11": {
+   "id": "F11",
+   "title": "A long street name cut with '...'; the widest stock symbol; both signs at once (limit and no-passing); the end-of-limit and 'unsure' symbols; a three-digit limit with a supplementary plate.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 bottom row"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F12": {
+   "id": "F12",
+   "title": "Sport band level (0.35 vs 0.48); window gain; Eco speed-arc end (130?); Eco tint strength; are Comfort's red zone / OFF arc hidden under Eco's CHARGE/POWER band; minis' pivot; tick-ring offsets (paral",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "BAKE-REPORT \u00a75 items 1, 3, 5, 7, 10, 11, 13, 14, 17, 20"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "F13": {
+   "id": "F13",
+   "title": "The owner checklists of CAR3-G \u00a76, CAR3-H \u00a77, CAR3-J \u00a77, CAR4-L \u00a76, POLISH-E \u00a77-8, POLISH-F \u00a77 (map window edges, row ownership, mode label, sign window stubs, gear tray, long mode names, hooks while ",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F14": {
+   "id": "F14",
+   "title": "Does the car's stock tachometer use reference 02's D = 3.875 R or 04's 3.80 R; a sharp frontal frame of the stock cluster.",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "docs/twin-dial/VR-REPORT.md \u00a76",
+    "VD open 1-2"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F15": {
+   "id": "F15",
+   "title": "Do the needles sweep without steps with 'Smooth needles' on, and step with it off; the big digital speed unchanged in Sport (no flicker at 9->10, 99->100; '--' at start).",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "PERF-NEEDLE \u00a74"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F16": {
+   "id": "F16",
+   "title": "Does the HMI offer 'Driver recognition' for a local (offline) profile; after it, does UserAccount.protection list NFC?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "F17": {
+   "id": "F17",
+   "title": "Is the box in the same place in Sport and Eco Pro (x 1406-1597 or 1420-1611)? Does the left stalk have the HBA button; which headlights?",
+   "status": "manual",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a photo / video / observation by the owner (SESSION.uk.md); the lead records the result"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a712",
+    "HIGH-BEAM \u00a76 rows 5-6"
+   ],
+   "kind": "F",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L1": {
+   "id": "L1",
+   "title": "why f30's window over BMW's panel stays open (MC section 6)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "f30_cluster.log (collect.sh), from build 0.7.19 or later"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 config.ccActive.release (X7)",
+    "SPEC-R3 \u00a75.4 item 7 (Twin Dial release)"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L2": {
+   "id": "L2",
+   "title": "does statusActiveCCMessage notify, what it rests on, is its number the ccList id",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "f30_cluster.log (collect.sh), from build 0.7.19 or later"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a75.4",
+    "SPEC \u00a78.4 D7",
+    "MC H1"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L3": {
+   "id": "L3",
+   "title": "the clock's fallback: statusShowTimeDate arrives and is local time",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "f30_cluster.log or twin_dial.log of 0.7.19+ / 0.1.0+"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 / Twin Dial clock",
+    "bottom row ownClock"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L4": {
+   "id": "L4",
+   "title": "Twin Dial's trip fields: arrive or not; raw values against iDrive's trip page",
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "arrived": {
+     "average": 1,
+     "travel": 2,
+     "start": 0,
+     "rl3": 0
+    },
+    "builds_with_summary": 0
+   },
+   "evidence": [
+    {
+     "file": "signal_probe.log",
+     "line": 128,
+     "ts": "2026-11-18T18:08:33Z",
+     "shape": "first average line (probe)",
+     "n": {
+      "speed1": 4,
+      "cons1": 4,
+      "speed2": 4,
+      "cons2": 4
+     }
+    },
+    {
+     "file": "signal_probe.log",
+     "line": 129,
+     "ts": "2026-11-18T18:08:34Z",
+     "shape": "first travel line (probe)",
+     "n": {
+      "hours": 4,
+      "minutes": 4,
+      "way": 4
+     }
+    }
+   ],
+   "evidence_total": 2,
+   "why": [
+    "raw numbers are in the evidence; the shown value needs a reading of iDrive's trip page (readings.json) to be compared"
+   ],
+   "needs": [],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.1",
+    "config.trip",
+    "MK-PROTOCOL.md"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L5": {
+   "id": "L5",
+   "title": "the odometer member arrives; factor 1 km",
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "carriers_arrived": [
+     "rangeTank"
+    ],
+    "rangeTank_arrived": true
+   },
+   "evidence": [
+    {
+     "file": "signal_probe.log",
+     "line": 119,
+     "ts": "2026-11-18T18:08:31Z",
+     "shape": "first odometer line (probe), raw 4",
+     "n": {
+      "mileage": 4
+     }
+    }
+   ],
+   "evidence_total": 1,
+   "why": [],
+   "needs": [],
+   "material": [
+    "signal_probe.log"
+   ],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.1 bottom row"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L6": {
+   "id": "L6",
+   "title": "phone state: aggregatedCallState arrives",
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "arrives": true,
+    "values": [
+     "ACTIVE",
+     "DIALING",
+     "DISCONNECTED",
+     "HELD",
+     "INCOMING"
+    ]
+   },
+   "evidence": [
+    {
+     "file": "signal_probe.log",
+     "line": 251,
+     "ts": "2026-11-18T18:10:12Z",
+     "shape": "probe call-state line",
+     "n": {
+      "state": "DISCONNECTED"
+     }
+    }
+   ],
+   "evidence_total": 1,
+   "why": [],
+   "needs": [],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.4"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L7": {
+   "id": "L7",
+   "title": "media: HmiMediaState on HMI_CID arrives (lengths only)",
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "arrives": true
+   },
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.3"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L8": {
+   "id": "L8",
+   "title": "the second witness: displayed cc arrives and returns to 0",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [
+    "no 'displayed cc:' line: either never sent or the build does not subscribe it"
+   ],
+   "needs": [
+    "a Twin Dial 0.1.0+ (or f30 with config.ccDisplayed) log with a door message in it"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "f30 config.ccDisplayed",
+    "SPEC-R3 \u00a75.4 item 7"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L9": {
+   "id": "L9",
+   "title": "layout builds in the first 10 s of a start (bench predicts 3; 1 means the getters beat cluster-render)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a log with an app start in it (collect.sh)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MP \u00a77.4"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L10": {
+   "id": "L10",
+   "title": "upload accounting: the cap, KB per minute, 'goes whole' KB (the real cost of a theme switch)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "cluster-render's log / journal and status text (collect.sh)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MP \u00a77",
+    "research3/MT \u00a78 item 4"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "L11": {
+   "id": "L11",
+   "title": "the map slot (0x100) while our panel is up: was BMW's map there when no black box showed (theory H-M)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "cluster-render's journal with 'dcsm: slot' lines while the app runs (collect.sh), then the same with Twin Dial up"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a74.5",
+    "research3/MB theories"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "partly-answered"
+  },
+  "L12": {
+   "id": "L12",
+   "title": "cluster-render's version (>= 0.5.12 for ETC2)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "cluster-render/component.json or a 'start: cluster-render' journal line"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "research3/MT \u00a78 item 1"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "answered"
+  },
+  "L13": {
+   "id": "L13",
+   "title": "the 0.7.18 probes' results: ccListRiskClass / basicList lines, which entry marks a stored message",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [
+    "the 0.7.18 lines were never recorded in the repository; the saved logs are 0.7.10 .. 0.7.12"
+   ],
+   "needs": [
+    "f30_cluster.log of 0.7.18 .. 0.7.20 (the lines 'probe: basicList:' / 'probe: ccListRiskClass:'), if still present on the car"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC rev 2 D7",
+    "strip P-REPORT 1.1",
+    "f30 config.ccMarker"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L14": {
+   "id": "L14",
+   "title": "the speed-limit sign in f30: TrafficSignDisplayControl arrives",
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "arrives": true,
+    "values": [
+     4
+    ]
+   },
+   "evidence": [
+    {
+     "file": "signal_probe.log",
+     "line": 388,
+     "ts": "2026-11-18T18:11:00Z",
+     "shape": "probe sign line",
+     "n": {
+      "value": 4
+     }
+    }
+   ],
+   "evidence_total": 1,
+   "why": [],
+   "needs": [],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "SPEC-R3 \u00a78",
+    "AGENT-BRIEF-twin-build-r3 B1"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L15": {
+   "id": "L15",
+   "title": "day/night: the car's value against the sun; the meaning of 0",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a log with 'day/night' lines (fix/colour-daynight, 0.7.x)"
+   ],
+   "material": [],
+   "dated": null,
+   "blocks": [
+    "night looks",
+    "SPEC rev 2 \u00a77.2"
+   ],
+   "kind": "L",
+   "in_register": true,
+   "register_status": "open"
+  },
+  "L16": {
+   "id": "L16",
+   "title": "the clock's primary source: timeDateUTC offsets (logged whole once per zone change)",
+   "status": "no-material",
+   "label": null,
+   "decided": {},
+   "evidence": [],
+   "evidence_total": 0,
+   "why": [],
+   "needs": [
+    "a log with a 'clock raw:' line (the car's first time zone)"
+   ],
+   "mate
+wrote ../../../bake/work/car/CQ/dry-run/answers.json: answered 19, manual 36, no-material 24, not-yet 6, partial 6
