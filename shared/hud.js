@@ -4591,6 +4591,7 @@ class HudApp {
         const sheets = this._twinSheets();
         t.sheetOn = sheets.length > 0;
         t.night = this.nightOn === true;
+        t.unlistedPullsTab = (this.config.ccActive || {}).unlistedPullsTab === true;     // car-fix CF1: read each turn (settable live)
         if (sheets.length) {      // the layout's own fonts (a stand-in layout may name others)
             const w = sheets[0].w;
             t.deps.fonts = { head: w.font, counter: w.counterFont || w.font, row: w.rowFont || w.font, text: w.textFont || w.font };

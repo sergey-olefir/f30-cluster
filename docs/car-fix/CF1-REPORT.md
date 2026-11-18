@@ -17,7 +17,7 @@ Labels: **car** = seen on the owner's car on 2026-11-18. **verified** = measured
    |---|---|---|
    | 0 (`noneValues`) | nothing shown; listed entries are stored ones (Twin Dial: rows on tab 2) | may be covered |
    | N, with a ccList entry | that entry | covered only after our text for it has been on screen 150 ms |
-   | N, with no ccList entry | shown, no text of ours | open |
+   | N, with no ccList entry | shown, no text of ours; Twin Dial pulls **no** tab (`unlistedPullsTab` false) | open |
    | 65535 (`unknownValues`) | unknown | open; Twin Dial pulls no tab unless the list holds a message |
    | not yet spoken | 0.7.20's path; with `dead` this is the list's fallback | as before |
    | a number that disagrees with a moving active number | disagreement | open |
@@ -112,7 +112,7 @@ Source: `reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1` (Twin
 | suite | before | after | what CF1 added / changed |
 |---|---|---|---|
 | `cc-release` | 57 | 75 | §"car-fix CF1": K0–K9 in all four views on the shipped config with no unsafe or hanging step (40 runs). K4 (the stuck window) **hangs on the pre-CF1 config in every view** and is shut now. Exact per-step traces for K0, K1, K2, K3, K7 and K8. The log lines. The live-active cases L1–L3. The release changes nothing step for step. MC's old sections run on the legacy base (one check reworded: `ccDisplayed` is on now). |
-| `twin-cc` | 249 (main 149) | 256 | Engine with the per-frame pixel audit (V1–V5). **2e/2f** the car's start: active 65535 + displayed 65535 = window, tab 1, no pull; displayed 0 = none with active still 65535. **3a** the door: list 15 + displayed 15 in one turn, the card on the sheet in that turn, ours after the settle (confirmNow). **3b** the car's close: list at rest → window in that turn ("no ccList entry for number 15"), displayed 0 0.7 s later → none, tab 1. **8a** rewritten: a moving active number ignored with `dead`, a witness with `dead: false` (disagree → window, agree → ours). **10** (the narrowed release) runs with `source: "active"`, because it is an active-number rule. The stand-in now takes Twin Dial's own `ccActive` / `ccDisplayed`; `feedAct` feeds displayed. |
+| `twin-cc` | 249 (main 149) | 266 (256 + case 12, the follow-up) | Engine with the per-frame pixel audit (V1–V5). **2e/2f** the car's start: active 65535 + displayed 65535 = window, tab 1, no pull; displayed 0 = none with active still 65535. **3a** the door: list 15 + displayed 15 in one turn, the card on the sheet in that turn, ours after the settle (confirmNow). **3b** the car's close: list at rest → window in that turn ("no ccList entry for number 15"), displayed 0 0.7 s later → none, tab 1. **8a** rewritten: a moving active number ignored with `dead`, a witness with `dead: false` (disagree → window, agree → ours). **10** (the narrowed release) runs with `source: "active"`, because it is an active-number rule. The stand-in now takes Twin Dial's own `ccActive` / `ccDisplayed`; `feedAct` feeds displayed. |
 | `bottom-row` | 254 | 272 | f30 on the bench. **Opaque** (wb_comfort): start 65535 open; `car-rest` shuts with active still 65535 and our row ink back; door open with no ink of ours in the panel; closing (list at rest, displayed 15) still open; displayed 0 shuts; 285 open; stored 987 with displayed 0 stays shut; the log lines. **all6WB**: start open; displayed 0 covered; the door: our line, BMW's panel open on every probe until ours is on screen; `clean()` audit 0 violations; closing opens with our line empty; 0 covers again; 285 open with the audit at 0 violations. The fix/active-cc no-entry log check reads displayed's line. |
 | `diag` | 98 | 100 | `diagShownNow` writes only `ccActive.source` and goes back to `app.json`'s value; `diagDisplayed` is gone; the native row `SET_DIAGSHOWNNOW`; on the bench it applies in place with no layer dropped. |
 
@@ -188,7 +188,9 @@ its A1 / A3 "hang" now closes - it documents 0.7.20, not this build.
 ## 7. Open (for the car)
 
 - **The window during each message's end** (decision 5): it opens for 0.15–0.7 s. Watch the owner's view of it on the next drive.
-- **The unlisted numbers** (285, 926, 927, 184, about 6 s each, several per drive): BMW's panel opens. On Twin Dial, tab 2 is
-  pulled with the pointer page for those 6 s (SPEC-R3 5.1). If the owner finds the pull too eager, the lever is TwinCentre's
-  `#nodraw` pull.
+- **The unlisted numbers** (285, 926, 927, 184, about 6 s each, several per drive): BMW's panel opens. Follow-up (the lead):
+  they pull **no** tab and show no pointer page by themselves - `config.ccActive.unlistedPullsTab` false (Twin Dial `app.json`;
+  `TwinCC.unlisted` gates TwinCentre's `#nodraw` pull). Only a number matching a list entry, or 65535 with a message in the list,
+  pulls tab 2; an unlisted number during a period that already pulled tab 2 shows the pointer page there. true gives back SPEC-R3
+  5.1's pull. test-twin-cc case 12 (a-d, audited) checks both ways: 256 -> 266.
 - **Whether displayed ever stays on N after BMW has hidden a stored message** (MC's A5 on displayed): the probe saw 0 every time.

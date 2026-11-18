@@ -1036,6 +1036,47 @@ async function engineChecks() {
     hud._ccListEval(Date.now(), false); hud._ccPush();
     await sleep(200);
 
+    // ---- case 12 (car-fix CF1, config.ccActive.unlistedPullsTab): a number with no ccList entry keeps BMW's panel open, pulls no tab ----
+    clean();
+    none(); feedList(L(E.rest)); feedAct(0); await sleep(200);
+    hud._twinTabChosen(1, 'driver'); await sleep(150);
+    truth(true, true, null);
+    feedAct(285);
+    await sleep(400);
+    {
+        const t = T0(), s = snapshot();
+        ok(hud.config.ccActive.unlistedPullsTab === false && t.state === 'window' && s.open && s.covered === 0 && s.rows === 0 && t.tab === 1 && t.page.kind === 'other',
+            '12a. displayed 285 with no ccList entry (unlistedPullsTab false, as shipped): BMW\'s panel open, the row aside, tab 1 stays - no pull, no pointer page (' + t.reason + ')');
+        noViolations('12a. an unlisted number');
+    }
+    await endMsg();
+    ok(T0().state === 'none' && T0().tab === 1 && !snapshot().open, '12a. displayed 0: none, still tab 1');
+    hud.config.ccActive.unlistedPullsTab = true;
+    clean();
+    truth(true, true, null);
+    feedAct(926);
+    await sleep(400);
+    ok(T0().state === 'window' && snapshot().open && T0().tab === 2 && T0().page.kind === 'pointer', '12b. unlistedPullsTab true: the same number pulls tab 2 with the pointer page (SPEC-R3 5.1)');
+    noViolations('12b. the pull on');
+    await endMsg();
+    hud.config.ccActive.unlistedPullsTab = false;
+    clean();
+    truth(true, true, null);
+    feedList(L(E.door)); feedAct(65535);
+    await sleep(400);
+    ok(T0().state === 'window' && snapshot().open && T0().tab === 2 && T0().page.kind === 'pointer', '12c. 65535 (unknown) with a message in the list still pulls tab 2 (the pointer page)');
+    noViolations('12c. unknown with a listed message');
+    none(); feedList(L(E.rest)); feedAct(0); await sleep(250);
+    clean();
+    truth(true, true, E.door); feedList(L(E.rest, E.door)); feedAct(15);
+    await until(() => T0().state === 'ours', 1500);
+    truth(true, true, null); feedAct(285);                  // the car at 13:41: an unlisted number over a listed one
+    await sleep(400);
+    ok(T0().state === 'window' && snapshot().open && T0().tab === 2 && T0().page.kind === 'pointer', '12d. 285 over a listed message that already pulled tab 2: the window opens, tab 2 stays (no new pull), the pointer page');
+    noViolations('12d. unlisted over listed');
+    none(); feedList(L(E.rest)); feedAct(0); await sleep(250);
+    ok(T0().state === 'none' && T0().tab === 1, '12d. the end: tab 1 again');
+
     // ---- case 11: the audit itself ------------------------------------------------------------------------------------
     ok(model.frames >= 50, '11. the pixel audit ran on ' + model.frames + ' frames');
     const seen = (re) => model.trace.some((x) => re.test(x.tr));

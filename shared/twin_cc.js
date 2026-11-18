@@ -340,6 +340,7 @@ class TwinCC {
         let shown = null, entry = null, state = 'window', reason = '', cand = null, conf = false;
         let shownNow = '-';
         let sev = 0, unknown = false;
+        this.unlisted = false;           // car-fix CF1: the car names a number no ccList entry carries (BMW's own message)
         this.needsTick = false;
         if (!inp.read) {
             reason = 'the car\'s check-control messages have not been read yet';
@@ -360,6 +361,7 @@ class TwinCC {
                 shown = true;
                 entry = inp.find ? inp.find(w.n) : null;
                 if (!entry) {
+                    this.unlisted = true;
                     reason = 'no ccList entry for number ' + w.n;
                     if (!this.noEntryLogged[w.n]) { this.noEntryLogged[w.n] = true; }
                 } else {
@@ -524,6 +526,9 @@ class TwinCentre {
         this.paint = typeof o.paint === 'function' ? o.paint : null;
         this.sheetOn = o.sheetOn !== false;
         this.mutant = o.mutant || null;
+        // car-fix CF1 (config.ccActive.unlistedPullsTab, default false): a number with no ccList entry (285, 926 ... on the owner's
+        // car, ~6 s each) keeps BMW's panel open but pulls no tab - the driver reads BMW's own panel
+        this.unlistedPullsTab = o.unlistedPullsTab === true;
         this.base = o.base || 1;                 // the tab without a message (the driver's last choice, or auto's)
         this.pulled = false;                     // a message has taken tab 2 for this period
         this.left = false;                       // the driver left tab 2 during this period
@@ -584,7 +589,7 @@ class TwinCentre {
             // a message pulls tab 2: a new drawable one (its card), or - once per period - one that shows but ours cannot be drawn (the pointer
             // page, SPEC-R3 5.1). NOT the blind keep-open (severity 0: nothing is known to show; package B2's convention: a window with
             // no severity is not a message)
-            const pullKey = cand ? cand.key : (shown && t.severity > 0 && !this.left ? '#nodraw' : null);
+            const pullKey = cand ? cand.key : (shown && t.severity > 0 && !this.left && (!t.unlisted || this.unlistedPullsTab) ? '#nodraw' : null);     // car-fix CF1: unlisted
             if (shown && pullKey && !this.periodKeys[pullKey]) { this.periodKeys[pullKey] = true; this.pulled = true; this.left = false; }
             this.tab = this.pulled ? 2 : this.base;
             buf = null; bufSig = null;
