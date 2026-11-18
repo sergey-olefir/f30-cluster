@@ -66,7 +66,9 @@ start; bytes transfer to the car, milliseconds do not). Twin Dial at `twin-b/b7`
 | f30, no hold | 3 | 8224 KB (8011 KB pixels) | 63 / 42 | 162 KB | +336 ms |
 | f30, `startupHold` 1000 (BENCH_CONFIG) | **1** | **5917 KB** | 21 / 0 | 54 KB | +473 ms |
 
-At the upload floor of 2000 KB/s that is about 2.07 s → 1.2 s of upload for Twin Dial and 4.0 s → 2.9 s for f30. The price:
+At the upload floor of 2000 KB/s that is about 2.07 s → 1.2 s of upload for Twin Dial and 4.0 s → 2.9 s for f30. On the
+**merged** Twin Dial 0.1.1 (`twin-b/integrate`): with the hold 1 build and 2802 KB, without it 3 builds and 5199 KB (1.4 s
+against 2.6 s at the floor); the peak of pixel memory is 4.75 MiB either way (R3B-INTEGRATION §7). The price:
 the first frame waits for the car's values, at most `ms`. On the bench with **no** message list at all (the plain bench server
 feeds none) the build waits the full 1000 ms and says so ("start-up: first build after 1001 ms, still waiting for the message
 list"): that is the case of a car whose list never arrives at subscribe. **Twin Dial: on** (`config.startupHold.ms 1000`);
@@ -99,7 +101,7 @@ node tools/research3/mp/measure.js twin_dial --quick       # the start-up bytes;
 
 ## 4. Tests
 
-`bench/test-diag.js` (59 unit + 41 bench on the integration branch): both apps' wiring; byte-for-byte restore after every
+`bench/test-diag.js` (98 checks on the integration branch: 59 without the bench, 39 on it): both apps' wiring; byte-for-byte restore after every
 option; exact values (release, witness, scene textures, map keys); a build's own baseline kept while off; the hold (waits,
 one timer, the limit, release, the blind state, which signals count); Node 8 syntax of the new file; the tab bridge
 (integration); on the bench: Twin Dial's five settings change nothing that drops a layer, log `diag: <key> on|off`, the
@@ -107,9 +109,17 @@ status line counts them, BTN_DIAG opens DIAG, a saved setting is in force from t
 0.1.0's builds; f30: inert while off, the cover and the gap cut rebuild and are undone, the scene textures re-made as R8 and
 back with no "pixel memory full", the release in place.
 
-Full-suite results: R3B-INTEGRATION §5.
+Full-suite results: R3B-INTEGRATION §5 — on `twin-b/integrate` 24 suites, 2503 checks, 0 failed, plus check_signals and the
+bake test. On `twin-b/b7` alone (before the merges): every suite at main's count; its one failure there (twin-sim's blind start)
+is what led to the hold's blind state (ab1fe8f), and twin-budget failed once only because two runs shared `bake/work`.
 
-## 5. Open problems and what is not verified
+## 5. The merge
+
+`twin-b/integrate` holds B1–B7; the conflicts, the integration fixes (a–k) and the budget are in `docs/twin-dial/R3B-INTEGRATION.md`.
+The integration also carried the lead's car-verified values of 2026-11-18 (the tab key, the trip distance factor, MileageSupreme
+in metres) and CP's ResetLogic3 array finding, each with a test.
+
+## 6. Open problems and what is not verified
 
 - Nothing on a car: whether the HMI shows a `menu` screen reached from a button the way the bench's stub does; Cyrillic
   labels go through the kit's StringId path (the kit supports it; not seen on this car's HMI).
