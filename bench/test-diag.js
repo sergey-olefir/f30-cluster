@@ -143,6 +143,20 @@ function unit() {
         ok(cfg.ccActive.strict === true && cfg.ccActive.noneValues[0] === 0, 'twin: the rest of ccActive is untouched');
     }
 
+    // integration (B7): the tab bar's inputs from B4's page model (shared/twin_pages.js tabBridge), gated by config.pages
+    {
+        const TP = require(path.join(require('./twin-harness').tree('twin_dial'), 'twin_pages.js'));     // the kit's layout (shared/*.js beside kit/)
+        const h = (pages, src, dev) => ({ config: { pages }, td: {}, tdp: { media: { src }, phone: { devSeen: dev !== undefined, dev: dev || null } } });
+        let x = h({ media: false, phone: false }, 'carplay', {});
+        TP.tabBridge(x);
+        ok(x.td.mediaSource === null && x.td.phoneConnected === null, 'tab bridge: pages dark (before probes P8 / P9): no source, no phone state (the plain icons)');
+        x = h({ media: true, phone: true }, 'carplay', {}); TP.tabBridge(x);
+        ok(x.td.mediaSource === 'projection' && x.td.phoneConnected === true, 'tab bridge: CarPlay -> projection icon, a connected device -> phone with bars');
+        x = h({ media: true, phone: true }, 'radio', null); TP.tabBridge(x);
+        ok(x.td.mediaSource === 'tuner' && x.td.phoneConnected === false, 'tab bridge: radio -> tuner icon, a list with none connected -> phone crossed out');
+        x = h({ media: true, phone: true }, 'usb'); TP.tabBridge(x);
+        ok(x.td.mediaSource === 'player' && x.td.phoneConnected === null, 'tab bridge: another source -> player icon; no device list yet -> plain phone');
+    }
     // the hold, with a fake engine
     {
         const log = []; const mk = (cfg, over) => Object.assign({ config: cfg, log: { info: (l) => log.push(l), warn: (l) => log.push(l) }, tzCar: null, tzLocal: null, _ccWired: () => false, _rebuild() { this.rebuilt = (this.rebuilt || 0) + 1; } }, over || {});

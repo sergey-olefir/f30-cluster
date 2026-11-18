@@ -221,6 +221,7 @@ function wire(hud, extra) {
         m.srcRaw = kind; m.src = kind && SOURCE_OF_KIND[kind] ? SOURCE_OF_KIND[kind] : kind ? 'other' : null;
         if (kind === 'FM' || kind === 'AM') m.band = kind;
         once(hud, 'mediaSrc', 'media page: source ' + String(kind));
+        tabBridge(hud);      // b7: tab 3's icon follows the source (B2 reads hud.td.mediaSource)
     }, 'HMI_CID');
     chain(hud, extra, IF.tuner, 'currentStationFmDabAm', (v) => {
         const m = p.media, e = pick(v, 'stationListEntry');
@@ -253,7 +254,7 @@ function wire(hud, extra) {
         p.phone.name = setting(hud, 'callerName') === 'on' ? str(v, 80) : null;
     }, 'Call1');
     chain(hud, extra, IF.callMgr, 'micMuted', (v) => { p.phone.mic = v === true || v === 1 ? true : v === false || v === 0 ? false : null; });
-    chain(hud, extra, IF.devices, 'deviceList', (v) => { p.phone.dev = deviceOf(v); p.phone.devSeen = true; once(hud, 'devices', 'phone page: devices ' + arr(v).length + (p.phone.dev ? ', one connected' : ', none connected')); });
+    chain(hud, extra, IF.devices, 'deviceList', (v) => { p.phone.dev = deviceOf(v); p.phone.devSeen = true; tabBridge(hud); once(hud, 'devices', 'phone page: devices ' + arr(v).length + (p.phone.dev ? ', one connected' : ', none connected')); });
     // ---- tyres: the car never notifies TPMS; the page asks (tpmsStart / tpmsPoll), these handlers take the answers
     chain(hud, extra, IF.tpms, 'statusTyrePressure', (v) => { p.tpms.p = corners(v, 'actualValuePressureTyre'); p.tpms.at = nowMs(hud); });
     chain(hud, extra, IF.tpms, 'statusTyreTemperature', (v) => { p.tpms.t = corners(v, 'actualValueTemperatureTyre'); p.tpms.at = nowMs(hud); });
@@ -336,6 +337,20 @@ function destOf(v) {
     const eta = isNum(h) && isNum(mi) && !inv && h >= 0 && h < 24 && mi >= 0 && mi < 60 ? { h: h, m: mi } : null;
     return { eta: eta, dist: metres(v.formattedDistance) };
 }
+/**
+ * b7 (integration): what the tab bar (shared/twin_tabs.js, B2) reads from this page model: hud.td.mediaSource ('tuner' | 'player' |
+ * 'projection') for tab 3's icon and hud.td.phoneConnected (true | false) for tab 4's. Each one only while its pages are switched on
+ * (config.pages.media / config.pages.phone: the car session's switch after probes P8 / P9); until then both stay null and the tabs show
+ * the plain icons (SPEC-R3 3.3). The media TEXT (hud.td.media) stays with twin_tokens.js (config.twin.media). Enums and booleans only.
+ */
+function tabBridge(hud) {
+    const td = hud && hud.td, p = st(hud);
+    if (!td || typeof td !== 'object') return;
+    const src = p.media.src;
+    td.mediaSource = pagesCfg(hud).media === true && src ? (src === 'radio' ? 'tuner' : src === 'carplay' ? 'projection' : 'player') : null;
+    td.phoneConnected = pagesCfg(hud).phone === true && p.phone.devSeen ? !!p.phone.dev : null;
+}
+
 /** The connected phone of a DevicePresentation list: { path, battery 0-100 | null, signal 0-4 | null }, or null. */
 function deviceOf(v) {
     const list = arr(v);
@@ -964,7 +979,7 @@ function update(hud, x, now, force) {
 /** The title rule hides while the map window is open (the backdrop asks). */
 function hideTitleRule(hud) { return st(hud).page === 'map'; }
 
-module.exports = { LAYER, FONTS, SAIRA, ICON, TITLES, TECH, IF, fontName, pickIcon,
+module.exports = { tabBridge, LAYER, FONTS, SAIRA, ICON, TITLES, TECH, IF, fontName, pickIcon,
     wire, token, update, init, changed, current, decide, tabOf, computerList, mapState, mapVariant, parseSlots, onStatus, hideTitleRule,
     resolveItems, paintItems, keyOf, fmtDist, maneuverIcon, tyreBar, callState, callLive, st, fresh,
     // for the tests
