@@ -46,6 +46,7 @@ const TYPES = {
     tdial: ['kind', 'centre', 'R', 'face'],     // twin_dial (docs/twin-dial/ENGINE-CONTRACT.md)
     tdback: ['part'],
     ccplate: ['font'],      // twin_dial: our check-control plate sheet (shared/twin_cc.js)
+    tdpage: ['pages'],      // twin_dial round 3 (B4): the centre pages' one layer (shared/twin_pages.js)
 };
 const CLASSES = ['ambient', 'content', 'overlay', 'alert'];
 

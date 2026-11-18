@@ -45,7 +45,7 @@ const VG = JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'twin-dial', 'vg
 const L = JSON.parse(fs.readFileSync(LAYOUT, 'utf8'));
 const W = L.widgets;
 const byId = {}; W.forEach((w) => { byId[w.id] = w; });
-const ink = W.filter((w) => w.type === 'text' || w.type === 'icon' || w.type === 'atext');   // what draws glyphs and pictograms
+const ink = W.filter((w) => w.type === 'text' || w.type === 'icon' || w.type === 'atext' || w.type === 'tdpage');   // what draws glyphs and pictograms (round 3: the centre pages' one layer)
 const FONTDIR = fs.existsSync(path.join(dir, 'hud', 'fonts', 'td_big.json')) ? path.join(dir, 'hud', 'fonts') : null;
 const snap = JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'twin-dial', 'c', 'font_metrics.json'), 'utf8')).fonts;
 const atlas = (n) => JSON.parse(fs.readFileSync(path.join(FONTDIR, n + '.json'), 'utf8'));
@@ -182,7 +182,8 @@ console.log('the dials and the background in the contract\'s fields (docs/twin-d
     ok(s.bar.y === 619 && s.bar.x0 === 1414 && s.bar.x1 === 1666 && s.bar.segs === 5 && s.bar.signal === 'coolant' && s.bar.min === 50 && s.bar.max === 130 && s.bar.hotAt === 120, 'speedometer bar: x 1414..1666 (the dial centre +-0.42 R; the contract text 1394..1646 is 20 px off the dial, a typo), coolant 50..130, red from 120 (SPEC 5.2)');
     const L0 = byId.bg_l;
     ok(JSON.stringify(L0.tab.rect) === '[618,127,1302,172]' && JSON.stringify(L0.tab.seps) === '[744,812,1168,1237]' && JSON.stringify(L0.tab.ramp) === '[0.002,0.16]' && JSON.stringify(L0.tab.highlight) === '[744,812]', 'tab bar [618, 127, 1302, 172], separators 744 812 1168 1237, ramp 0.002 .. 0.16, warning cell 744..812 (SPEC 6.1)');
-    ok(L0.rules.length === 2 && L0.rules[0].y0 === 295.2 && L0.rules[0].x0 === 741 && L0.rules[0].x1 === 1180 && L0.rules[1].y0 === 612.4 && L0.rules[1].x0 === 629 && L0.rules[1].x1 === 1292 && L0.rules[1].ours.y0 === 611 && L0.rules[1].ours.y1 === 615 && L0.rules[1].ours.role === 'severity', 'rules: the title rule y 296, the bottom rule y 613 (4 px in the severity colour while our plate shows) (SPEC 6.2, 6.3, 8.1)');
+    // round 3 B4 (SPEC-R3 4): the title rule is 2.5 px at y 295-297.5, x 739-1181, code 205 (role "title")
+    ok(L0.rules.length === 2 && L0.rules[0].y0 === 295 && L0.rules[0].y1 === 297.5 && L0.rules[0].x0 === 739 && L0.rules[0].x1 === 1181 && L0.rules[0].role === 'title' && L0.rules[1].y0 === 612.4 && L0.rules[1].x0 === 629 && L0.rules[1].x1 === 1292 && L0.rules[1].ours.y0 === 611 && L0.rules[1].ours.y1 === 615 && L0.rules[1].ours.role === 'severity', 'rules: the title rule 2.5 px at y 295-297.5 (SPEC-R3 4), the bottom rule y 613 (4 px in the severity colour while our plate shows) (SPEC 6.3, 8.1)');
     const m = L0.panelMask;
     ok(m.tex === 'panel_mask' && m.x === 694 && m.y === 592 && m.w === 536 && m.h === 112, 'panel mask panel_mask at [694, 592, 1230, 704] (package A2)');
     const plate = [694.5, 592, 1230, 720];
@@ -203,10 +204,6 @@ const SAIRA = ['td_big', 'td_clock', 'td_gear', 'td_label', 'td_tach', 'td_scale
     const spec = [
         ['speed', 441, 1540, 'td_big', 'fg'], ['gear', 539, 374, 'td_gear', 'fg'], ['ready', 348, 380, 'td_label', 'ready'], ['program', 576, 386, 'td_label', 'fg'],
         ['tab_range_u', 156, null, 'td_u19', 'fg'], ['tab_media_t', 156, 925, 'td_tab', 'fg'],
-        ['c_title', 282, 960, 'td_title', 'fg'], ['c_time', 404, 960, 'td_clock', 'fg'], ['c_weekday', 460, 960, 'td_val', 'fg'], ['c_date', 519, 960, 'td_val', 'fg'],
-        ['t1_a', 362, 905, 'td_val', 'fg'], ['t1_au', 362, 911, 'td_u21', 'fg'], ['t1_b', 362, 1105, 'td_val', 'fg'], ['t1_bu', 362, 1111, 'td_u21', 'fg'],
-        ['t2_a', 430, 905, 'td_val', 'fg'], ['t2_au', 430, 911, 'td_u21', 'fg'], ['t2_b', 430, 1105, 'td_val', 'fg'], ['t2_bu', 430, 1111, 'td_u21', 'fg'],
-        ['t_from', 528, 960, 'td_body', 'dim'],
         ['row_l1', 656, 846, 'td_row', 'fg'], ['row_l1u', 656, 851, 'td_u21', 'fg'], ['row_l2', 703, 846, 'td_row', 'fg'],
         ['row_r1', 656, 1153, 'td_row', 'fg'], ['row_r1u', 656, 1158, 'td_u21', 'fg'], ['row_r2', 703, 1153, 'td_row', 'fg'], ['row_r2u', 703, 1158, 'td_u21', 'fg'],
     ];
@@ -285,7 +282,7 @@ const SAIRA = ['td_big', 'td_clock', 'td_gear', 'td_label', 'td_tach', 'td_scale
     // two boxes of one sheet group may not overlap, but the two centre pages' widgets do (they are one sheet each, by design)
     const grp = {};
     W.filter((w) => w.type === 'text' || w.type === 'icon').forEach((w) => { const k = (w.conn || 0) + ':' + w.z; (grp[k] = grp[k] || []).push(w); });
-    const clock = ['c_time', 'c_weekday', 'c_date'], trip = W.filter((w) => /^t[12]_|^t_from$/.test(w.id)).map((w) => w.id);
+    const clock = [], trip = [];
     const bad = [];
     Object.keys(grp).forEach((k) => grp[k].forEach((a, i) => grp[k].slice(i + 1).forEach((b) => {
         const cross = (clock.indexOf(a.id) >= 0 && trip.indexOf(b.id) >= 0) || (clock.indexOf(b.id) >= 0 && trip.indexOf(a.id) >= 0);
@@ -313,8 +310,9 @@ console.log('the layer plan (the engine\'s own planner, shared/hud.js _plan)');
     const mib = px / 1048576;
     ok(mib <= 3.5, 'the text sheets cost ' + mib.toFixed(2) + ' MiB of pixel memory (each image counted twice; the SPEC budgets 6 MiB for everything)');
     console.log('       sheets: ' + sheets.map((s) => 'conn ' + s.conn + ' z ' + s.z + ' ' + s.w + 'x' + s.h + ' [' + s.members.length + ']').join(', '));
-    const centre = sheets.filter((s) => s.z === 6);
-    ok(centre.length === 2, 'the centre pages are two sheets (the clock page with the title, the trip page): a page change repaints text boxes, nothing is rebuilt');
+    const centre = plan.filter((e) => e.kind === 'layer' && e.w.type === 'tdpage');
+    ok(centre.length === 1 && sheets.filter((s) => s.z === 6).length === 0, 'the centre pages are ONE own image layer (tdpage), no sheet: a page change repaints it, nothing is rebuilt (round 3 B4)');
+    ok(centre.length === 1 && centre[0].conn === 1, 'the centre layer is on connection 1');
     ok(sheets.filter((s) => s.conn === 2).length === 2 && sheets.filter((s) => s.conn === 2).every((s) => s.z >= 8), 'connection 2: the bottom row\'s sheet and the plate\'s sheet, both "cc:" layers');
     const cc = W.filter((w) => w.conn === 2 && w.type === 'text');
     ok(cc.length > 0 && cc.every((w) => /cc:/.test(w.toggle || '')), 'every text on connection 2 is toggled by a "cc:" part, so it steps aside live (hud.js _ccLive)');
@@ -350,6 +348,81 @@ else {
     ok(outer + 4 <= 0.893 * R, 'every speedometer numeral stays 4 px inside the tick strip (outermost corner ' + outer.toFixed(1) + ' px, strip at ' + (0.893 * R).toFixed(1) + ')');
     const tach = [1, 2, 3, 4, 5, 6, 7, 8].map((k) => { const c = polar(-125 + 31.25 * k, 0.745 * R), b = inkBox('td_tach', String(k)); return [c[0] - b.w / 2, c[1] - b.h / 2, c[0] + b.w / 2, c[1] + b.h / 2]; });
     ok(Math.max.apply(null, tach.map(radial)) + 4 <= 0.893 * R, 'every tachometer numeral stays 4 px inside the tick strip (outermost ' + Math.max.apply(null, tach.map(radial)).toFixed(1) + ' px)');
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+console.log('the centre pages (round 3 B4, SPEC-R3 4): one layer, every page, every text inside its box');
+{
+    const S = require('./twin-centre-states');
+    const R = S.rig();
+    const P = byId.c_page;
+    ok(P && P.type === 'tdpage' && P.own === true && P.conn === 1 && P.z === 6 && JSON.stringify(box(P)) === '[729,248,1191,595]', 'c_page: a tdpage, its own layer, connection 1, z 6, rect [729, 248, 1191, 595]');
+    ok(!hit(box(P), BELT) && !hit(box(P), GAP) && !LAMPS.some((l) => hit(box(P), l)) && !hit(box(P), STRIP) && !hit(box(P), MARKER) && !hit(box(P), [1406, 342, 1597, 419]) && !hit(box(P), [1420, 320, 1611, 440]),
+        'the page layer keeps clear of the belt group, the gear gap, the lamps, the lamp strip, the stored-message marker and the black box');
+    ok(P.y >= 173 && P.y + P.h <= 595.75, 'the page layer is under the tab bar (y 173) and ends above BMW\'s panel (y 595.75): nothing of it can sit on the message panel');
+    ok(!bgs.some((b) => (b.holes || []).some((h) => hit(h, box(P)))), 'no see-through hole of the backdrop lies under the page layer (the map window is a uniform, not a hole)');
+    const need = ['clock', 'trip', 'tech', 'tyres', 'msg', 'media', 'radio', 'track', 'phone', 'call', 'map', 'guide', 'calc', 'road', 'none'];
+    ok(need.every((k) => P.pages[k] && Array.isArray(P.pages[k].items) && P.pages[k].items.length), 'every page of the spec has its items: ' + need.join(' '));
+    // the grammar: title baseline 281, meta line baseline 326 right edge 1190, footer baseline 565
+    const items = (page, id) => P.pages[page].items.filter((i) => i.id === id)[0];
+    const titled = need.filter((k) => k !== 'map');
+    ok(titled.every((k) => { const t = items(k, 'title'); return t && t.b === 281 && t.x === 960 && t.al === 'c' && t.f === 'title' && t.s === '{{td:pgTitle}}'; }), 'every page but the map has the title at baseline 281, centred, Noto 41');
+    ok(['trip', 'radio', 'track', 'call'].every((k) => { const m = items(k, 'meta'); return m && m.b === 326 && m.x === 1190 && m.al === 'r'; }), 'the meta line: baseline 326, right edge 1190');
+    ok(['trip', 'radio'].every((k) => items(k, 'foot').b === 565), 'the footer: baseline 565');
+    // SPEC-R3 4.1: the clock, the trip table, the technical rows
+    ok(items('clock', 'time').b === 404 && items('clock', 'weekday').b === 460 && items('clock', 'date').b === 519 && items('clock', 'time').f === 'clock', 'clock page: the time Saira 92 at baseline 404, weekday 460, date 519');
+    ok(items('trip', 'cons').x === 896 && items('trip', 'speed').x === 1109 && items('trip', 'way').x === 896 && items('trip', 'cons').b === 384 && items('trip', 'way').b === 455 && items('trip', 'i1').sz === 46, 'trip page: number columns right at 896 / 1109, rows at 384 / 455, the pictogram at x 729');
+    const techB = [352, 418, 484, 550];
+    ok([0, 1, 2, 3].every((i) => items('tech', 'l' + i).b === techB[i] && items('tech', 'l' + i).x === 745 && items('tech', 'v' + i).x === 1150 && items('tech', 'u' + i).x === (i === 2 ? 1152 : 1156) && (i === 3 ? !items('tech', 'b3') : (items('tech', 'b' + i).y === techB[i] + 12 && items('tech', 'b' + i).x0 === 745 && items('tech', 'b' + i).x1 === 1175 && items('tech', 'b' + i).h === 6))),
+        'technical data: labels at x 745, values right at 1150, units 6 px after ("бар" 2 px: the layer ends at 1191), baselines 352 / 418 / 484 / 550, bars x 745-1175 12 px under the baseline, 6 px thick, none under the outside temperature');
+    ok(P.pages.tech.items.filter((i) => i.k === 't' && /^l\d$/.test(i.id)).map((i) => i.s).join() === 'Олива,Охолодження,Наддув,Зовні', 'technical data: the labels Олива / Охолодження / Наддув / Зовні');
+    // SPEC-R3 4.3 / 4.4 / 4.5
+    ok(items('media', 'src').sz === 66 && items('media', 'src').cx === 960 && items('media', 'src').cy === 392, 'the certain media page: the source pictogram 66 px at (960, 392), nothing else but the title');
+    ok(items('radio', 'ic').sz === 54 && items('radio', 'ic').cy === 344 && items('radio', 'station').b === 424 && items('radio', 'text').b === 471, 'radio page: pictogram 54 px at y 344, station at 424, radio text at 471');
+    ok(items('track', 'name').b === 400 && items('track', 'artist').b === 444 && items('track', 'prog').x0 === 800 && items('track', 'prog').x1 === 1120 && items('track', 'prog').y === 500, 'now playing: title 400, artist 444, the progress line x 800-1120 at y 500');
+    ok(items('phone', 'ic').sz === 54 && items('phone', 'ic').cy === 344 && items('phone', 'l1').b === 424 && items('phone', 'l2').b === 471, 'idle phone page: pictogram 54 px at y 344, lines at 424 / 471');
+    ok(items('call', 'ring').sz === 66 && items('call', 'ring').cy === 372 && items('call', 'timer').b === 410 && items('call', 'timer').f === 's72' && items('call', 'who').b === 478, 'call card: the handset 66 px at (960, 372), the timer Saira 72 at 410, who at 478');
+    ok(items('guide', 'arrow').sz === 120 && items('guide', 'arrow').cx === 830 && items('guide', 'arrow').cy === 378 && items('guide', 'dist').x === 915 && items('guide', 'dist').b === 410 && items('guide', 'road').b === 480 && items('guide', 'lanes').pitch === 34 && items('guide', 'lanes').sz === 30 && items('guide', 'foot').b === 560,
+        'guidance page: arrow 120 px at [770, 318, 890, 438], distance at x 915 baseline 410, road 480, lanes 34 px pitch / 30 px arrows, footer 560');
+    ok(items('calc', 'msg').b === 400 && items('road', 'road').b === 400 && items('road', 'sub').b === 452, 'fallback pages: calculating at 400, the road at 400 with the grey line at 452');
+    ok(!P.pages.map.items.some((i) => i.id === 'title') && P.pages.map.items.every((i) => i.y1 === undefined || i.y1 <= 595), 'the map page has no title and only a road bar at the window\'s foot');
+    // renders: every state, no data and with data: ink inside the layer, inside the window's sides, bodies inside y 300-568
+    const SAIRA_KEYS = R.pages.SAIRA, cyr2 = /[Ѐ-ӿ]/;
+    const bad = [], badSaira = [], unresolved = [], missing = [];
+    Object.keys(S.STATES).forEach((id) => {
+        const h = S.make(R, id), r = S.render(R, h);
+        const spec = P.pages[r.page];
+        if (r.page !== S.STATES[id].page) bad.push(id + ' shows ' + r.page + ', wanted ' + S.STATES[id].page);
+        r.ink.forEach((i) => {
+            const b = i.box, isTitle = i.id === 'title', isBar = r.page === 'map';
+            if (b[0] < 729 || b[2] > 1191) bad.push(id + '/' + i.id + ' x ' + b[0] + '..' + b[2] + ' leaves the window\'s sides');
+            if (b[1] < 248 || b[3] > (isBar ? 595 : 575)) bad.push(id + '/' + i.id + ' y ' + b[1] + '..' + b[3]);
+            if (!isTitle && !isBar && b[1] < 300 && !/^meta/.test(i.id) && i.id !== 'cons_u.t' && i.id !== 'time') bad.push(id + '/' + i.id + ' above the body (y ' + b[1] + ')');
+            if (isTitle && (b[1] < 248 || b[3] > 296)) bad.push(id + '/title y ' + b[1] + '..' + b[3] + ' (the rule is at 295)');
+        });
+        // every answer: no token left over, no Cyrillic in a Saira item, every character in its font
+        const res = R.pages.resolveItems(h, spec.items);
+        res.forEach((q) => {
+            const it = q.it, strs = [q.s].concat((q.parts || []).map((x) => x.s)).filter((x) => typeof x === 'string');
+            const fonts = it.k === 't' ? [it.f] : (it.parts || []).map((x) => x.f);
+            strs.forEach((t, k) => {
+                if (/\{\{/.test(t)) unresolved.push(id + '/' + it.id + ' ' + t);
+                const f = it.k === 't' ? it.f : (it.parts || [])[k] && it.parts[k].f;
+                if (!f) return;
+                if (SAIRA_KEYS.indexOf(f) >= 0 && cyr2.test(t)) badSaira.push(id + '/' + it.id + ' ' + JSON.stringify(t));
+                const name = R.pages.fontName(f);
+                if (!name) { missing.push(id + '/' + it.id + ' font role ' + f + ' has no atlas'); return; }
+                const g = JSON.parse(fs.readFileSync(path.join(FONTDIR, name + '.json'), 'utf8')).glyphs;
+                Array.from(t).forEach((c) => { if (!g[c]) missing.push(id + '/' + it.id + ' needs ' + JSON.stringify(c) + ' in ' + name); });
+            });
+        });
+    });
+    ok(!bad.length, 'every state renders on its page, every ink box inside the layer and the window\'s sides, titles above the rule, bodies in y 300-575 (' + Object.keys(S.STATES).length + ' states)' + (bad.length ? ': ' + bad.slice(0, 6).join('; ') : ''));
+    ok(!unresolved.length, 'no token is left unanswered in any state' + (unresolved.length ? ': ' + unresolved.slice(0, 4).join('; ') : ''));
+    ok(!badSaira.length, 'no Cyrillic ever reaches a Saira item of a page (the clock, the call timer, the guidance distance)' + (badSaira.length ? ': ' + badSaira.join('; ') : ''));
+    ok(!missing.length, 'every character a page can draw is in its font (the atlases in the tree; a role without its own atlas uses its stand-in)' + (missing.length ? ': ' + Array.from(new Set(missing)).slice(0, 6).join('; ') : ''));
+    // the furniture rules: nothing of the page below y 657 (it ends at 595) and nothing in x 494..691 / 1377..1463
+    ok(P.x >= 729 && P.x + P.w <= 1191, 'the page layer lies between the dials\' bezels (x 729..1191; the bezel\'s inner edge at y 400 is 684 / 1236)');
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed, ' + skipped + ' skipped');

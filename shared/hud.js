@@ -240,11 +240,15 @@ const Runs = require('./runs');
 // file, so for every other app it is simply absent (null) and none of the twin_dial hooks below does anything.
 let twin = null;
 try { twin = require('./twin_tokens'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_tokens') < 0) throw e; }
+// twin_dial round 3 (package B4): the centre pages, one image layer (shared/twin_pages.js). Absent (null) for every app that does not pack it.
+let twinPages = null;
+try { twinPages = require('./twin_pages'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_pages') < 0) throw e; }
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
 const IMAGE_TYPES = { text: true, scale: true, stripe: true, gridlabels: true, icon: true, swatchimg: true,
-    ccplate: true };      // twin_dial: our check-control plate sheet (shared/twin_cc.js paintPlate)
+    ccplate: true,        // twin_dial: our check-control plate sheet (shared/twin_cc.js paintPlate)
+    tdpage: true };       // twin_dial round 3 (B4): the centre pages' one layer (shared/twin_pages.js)
 const STATUS_ASK_MS = 2000;      // after a rebuild: ask cluster-render for its own status text
 const LAYER_BUDGET = 8;          // cluster-render's limit per client connection (CompositorLimits.per_client; confirmed on the car Nov 5 2026)
 const MAX_CONN = 4;              // connections a layout may ask for ("conn"): 32 layers service-wide / 8 per connection
@@ -384,7 +388,8 @@ const TW_ROLE_NIGHT = { fg: 0.80, dim: 0.75, hot: 0.85, ready: 0.75, amber: 0.85
 // the message severity colours (sRGB codes, the SPEC 7.1 / 8.2 values with the G20's black floor taken out) and their night role
 const TW_SEV = { red: { c: [176, 7, 30], n: 'red' }, amber: { c: [240, 170, 10], n: 'amber' },
     green: { c: [59, 155, 26], n: 'green' }, grey: { c: [231, 231, 231], n: 'rule' } };
-const TW_RULE = { rule: [231, 231, 231], tab: [237, 237, 237] };     // flat rules (SPEC 7.1); both take the rules' night multiplier
+const TW_RULE = { rule: [231, 231, 231], tab: [237, 237, 237], title: [205, 205, 205] };     // flat rules (SPEC 7.1; SPEC-R3 4: the title rule is code 205); all take the rules' night multiplier
+const TW_PAGE_KEYS = ['centre', 'techData', 'callerName'];     // round 3 B4: the centre page's settings, applied in place (no rebuild)
 const TW_LIVE_KEYS = ['redline', 'bandGain'];       // settings the twin layers take in place (uniforms, no rebuild)
 const TW_PANEL = [694, 592, 536, 112];              // the fallback window's box (package A2's mask rect), used when the layout has no mask
 // 0.7.13, the KOMBI guard: when the cluster's display service goes away within KOMBI_GUARD_MS of our scene being shown,
@@ -895,6 +900,7 @@ class HudApp {
             if (LOOK_KEYS.indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
             if (PLACE_KEYS.indexOf(key) >= 0) this._guard('place', () => this._place());
             else if (this.twinLayout && TW_LIVE_KEYS.indexOf(key) >= 0) this._guard('twin live', () => this._twinLive());     // twin_dial: in place
+            else if (this.twinLayout && twinPages && TW_PAGE_KEYS.indexOf(key) >= 0) this._guard('twin pages', () => twinPages.changed(this));     // round 3 B4: in place
             else if (LIVE_KEYS.indexOf(key) >= 0 || ROW_KEYS.indexOf(key) >= 0) this.widgets.forEach((x) => { x.last = null; });
             else if (WB_LIVE_KEYS.indexOf(key) >= 0 && this._wbLive()) { /* package F: the uniforms are sent, no rebuild */ }
             else if (NIGHT_KEYS.indexOf(key) >= 0 && this._nightLive()) { /* 2026-11-14: the night colours changed in place */ }
@@ -1651,7 +1657,7 @@ class HudApp {
             this._statusSoon();
         });
         c.on('budget', (capKb, maxKb, reason) => this.log.info('budget' + tag + ' ' + capKb + '/' + maxKb + ' kb/s (' + reason + ')'));
-        c.on('status', (text) => this.log.info('cluster-render status: ' + text));
+        c.on('status', (text) => { this.log.info('cluster-render status: ' + text); if (twinPages && this.twinLayout) twinPages.onStatus(this, text); });     // round 3 B4: the map slot rows
     }
 
     start() {
@@ -2681,12 +2687,18 @@ class HudApp {
             let r = t.rules[i];
             if (!r) { rects.push(0, 0, 0, 0); cols.push(0, 0, 0, 1); continue; }
             if (cc.state === 'ours' && r.ours) r = Object.assign({}, r, r.ours);
+            if (r.role === 'title' && twinPages && twinPages.hideTitleRule(this)) { rects.push(0, 0, 0, 0); cols.push(0, 0, 0, 1); continue; }     // round 3 B4: no title over the map window
             rects.push(r.x0 - w.x, r.y0 - w.y, r.x1 - w.x, r.y1 - w.y);
             cols.push.apply(cols, r.role === 'severity' ? sevC || this._twinCode(TW_RULE.rule, 'rule') : this._twinCode(TW_RULE[r.role] || TW_RULE.rule, 'rule'));
         }
         c.uniform(ref, 'u_rule', rects, { type: 'vec4' });
         c.uniform(ref, 'u_ruleC', cols, { type: 'vec4' });
         c.uniform(ref, 'u_win', [cc.state === 'window' ? 1 : 0, t.mask && t.keep ? 1 : 0, t.mask ? 0 : 1, 0]);
+    }
+
+    /** Round 3 B4: resend every backdrop part now (the map window opened or shut: the title rule steps aside). */
+    _twinBackForce() {
+        this.widgets.forEach((x) => { if (x.w && x.w.type === 'tdback' && x.ref) this._guard('twin back', () => this._twinBackSend(x, true)); });
     }
 
     /** D's entry (ENGINE-CONTRACT 2): this.twinCc changed. Resends what depends on it, nothing when nothing changed. */
@@ -3517,6 +3529,7 @@ class HudApp {
         } else if (w.type === 'gridlabels') this._paintGridLabels(x);
         else if (w.type === 'icon') this._blit(x, null, paintIcon(w.icon, w.w, w.h, color(t, w.color || 'fg')));
         else if (w.type === 'ccplate') { x.px = Buffer.alloc(w.w * w.h * 4, 0); x.plateKey = ''; x.plateMsg = null; x.plateAt = 0; }     // twin_dial: empty until _twinPush paints it
+        else if (w.type === 'tdpage') { if (twinPages) twinPages.init(this, x); }     // twin_dial round 3 (B4): the centre pages, painted in one go
         else if (w.type === 'sdash') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_geo', w.geo);
@@ -5087,6 +5100,7 @@ class HudApp {
     _updateOne(x, now, force) {
         const w = x.w;
         if (twin && w.type === 'icon' && w.tdLive) return twin.updateIcon(this, x, now, force);       // twin_dial: a tab-bar icon that follows the car
+        if (w.type === 'tdpage') { if (twinPages) twinPages.update(this, x, now, force); return; }     // twin_dial round 3 (B4): the centre pages
         // twin_dial: the plate is painted only from _twinPush (a signal event, or here when what it shows has gone stale:
         // the counter, the night look); a tick in between has nothing to do
         if (w.type === 'ccplate') {
