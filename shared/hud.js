@@ -2813,6 +2813,15 @@ class HudApp {
     /** D's entry (ENGINE-CONTRACT 2): this.twinCc changed. Resends what depends on it, nothing when nothing changed. */
     _twinSync() {
         if (this._twinTabsOn()) this._guard('twin tabs', () => twinTabs.update(this));      // twin_dial: tabs (B2): the tab follows the message, guidance, the speed, the settings
+        // twin_dial 0.1.2: outside a message period the machine stands on the tab the rules selected. The machine learns of a tab only when
+        // it MOVES (_twinTabMoved), and a choice of tab 2 made during a period (a message on show, or BMW's panel kept open at the start
+        // before the messages are read) only takes the card back: its own base stayed where it was. So with "Таба = 2" saved, or with the
+        // key back on tab 2 before a message ended, the bar said tab 2 and the machine painted nothing (an empty page over stored messages).
+        const tm = this.twinMsg;
+        if (tm && this._twinTabsOn() && this.tabs && isNum(this.tabs.tab) && tm.state === 'none' && tm.base !== this.tabs.tab) {
+            tm.auto(this.tabs.tab);
+            this._guard('twin cc', () => this._twinPush());      // inside a turn this only asks for one more decision at its end (twinRepush)
+        }
         this.widgets.forEach((x) => { if (x.w && x.w.type === 'tdback' && x.ref) this._guard('twin sync', () => this._twinBackSend(x, false)); });
         // FIN: tab 2 came or went - the warning and media widgets repaint in the same turn as the backdrop's separators
         if (this._twinTabsOn() && typeof twinTabs.tab2Shown === 'function') {

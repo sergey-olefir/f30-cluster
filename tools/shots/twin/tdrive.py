@@ -72,7 +72,7 @@ class Driver:
         b.fake({'clock': {'minutes': SC.CLOCK_MINUTES, 'dst': False}})
         b.fake({'clockLocal': {'minutes': SC.CLOCK_MINUTES}})
         b.fake({'dayNight': 'night' if st['look'] == 'night' else 'day'})
-        b.fake({'twin': dict(SC.TWIN)})                         # nothing about messages here: a blind start stays blind (displayed is a message witness)
+        b.fake({'twin': dict(SC.TWIN, **(st.get('twin') or {}))})   # nothing about messages here: a blind start stays blind (displayed is a message witness)
 
     def feed_message(self, st):
         b = self.b
@@ -86,6 +86,13 @@ class Driver:
             return
         if msg == 'window':
             b.fake({'ccList': [target]})                        # a message may show; the cluster never said "shown now"
+            return
+        if msg == 'rows':                                       # round 3: stored messages, nothing shown by the cluster now -> the rows page
+            b.fake({'ccList': [CONFIRM], 'ccActive': {'number': CONFIRM['id'], 'control': 1, 'frame': 1, 'of': 1}})
+            b.fake({'twin': {'displayed': CONFIRM['id']}})
+            time.sleep(0.7)
+            b.fake({'ccList': st.get('messages') or [SC.DOOR, SC.TYRE], 'ccActive': {'number': 0}})
+            b.fake({'twin': {'displayed': 0}})
             return
         if msg == 'ours':
             b.fake({'ccList': [CONFIRM], 'ccActive': {'number': CONFIRM['id'], 'control': 1, 'frame': 1, 'of': 1}})
@@ -103,6 +110,12 @@ class Driver:
         self.put_settings(SC.want_settings(st))
         self.feed_common(st)
         self.feed_message(st)
+        for f in st.get('fakes') or []:                         # round 3: raw fields and events (scenes.py set E), in order
+            if 'sleep' in f:
+                time.sleep(f['sleep'])
+            else:
+                self.b.fake(f)
+                time.sleep(0.05)
 
     # ---- what the probe must show ----
     def check(self, job, p):

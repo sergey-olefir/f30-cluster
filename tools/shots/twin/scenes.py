@@ -103,10 +103,136 @@ def plan():
     groups[-1][0]['state']['settings'] = {'redline': 5000}
     groups.append([job('D', state(tag='bandgain_16', ), expect={})])
     groups[-1][0]['state']['settings'] = {'bandGain': 1.6}
+    groups += plan_r3()
     return groups
 
 
+# ---- E: round 3 (Twin Dial 0.1.1): live tabs, the centre pages, the speed limit, cruise / limiter ----
+# Raw fields go in through POST /fake {feed} in the shapes the car showed (bench/twin-centre-states.js, bench/test-twin-limit.js);
+# every text is invented and neutral, only the enums and the numbers' kind are the car's.
+IF_MEDIA = 'de.bmw.infotainment.hmi.hmimediastate.HmiMediaState'
+IF_TUNER = 'de.bmw.infotainment.tuner.fmamdab.tunerfmamdab.TunerFmAmDab'
+IF_PLAYER = 'de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer'
+IF_AGG = 'de.bmw.infotainment.connectivity.telephony.ConnectivityAggregator'
+IF_GUIDING = 'de.bmw.infotainment.navigation.navigationstatus.NavigationStatus'
+IF_GUIDANCE = 'de.bmw.infotainment.navigation.guiding.Guidance'
+IF_DDS = 'de.bmw.infotainment.displaydataserver.DisplayDataServer'
+IF_LIGHT = 'de.bmw.body.Light'
+
+
+def feed(iface, field, value):
+    return {'feed': {'iface': iface, 'field': field, 'value': value}}
+
+
+def i64(n):
+    return {'low': n, 'high': 0}
+
+
+def media_fakes(sel):
+    """The car's media set: the HMI's lines, the menu (sel 7 = CarPlay, 4 = FM), the tuner's station, the CarPlay player."""
+    menu = [['MUSIC_COLLECTION', 1], ['BLUETOOTH', 2], ['PRESETS', 3], ['FM', 4], ['AM', 5], ['MIRACAST', 6], ['CARPLAY', 7]]
+    return [
+        feed(IF_MEDIA, 'playerMetadata', {'sink': 'FRONT', 'uiType': 'TWO_LINES', 'menuEntry': i64(7), 'trackId': i64(1), 'firstLineType': 'ARTIST',
+                                          'firstLineText': 'Гурт Приклад', 'secondLineType': 'ALBUM', 'secondLineText': 'Альбом Приклад', 'threeRowText': ''}),
+        feed(IF_MEDIA, 'trackProgress', {'sink': 'FRONT', 'menuEntry': i64(7), 'trackId': i64(1), 'elapsed': '?', 'total': '?', 'hasProgress': True, 'isSeekable': False}),
+        feed(IF_MEDIA, 'menu', {'sink': 'FRONT', 'selectedEntryId': i64(sel),
+                                'menuEntries': [{'id': i64(e[1]), 'name': 'Пункт меню', 'iconKind': e[0], 'enabled': True, 'subentries': []} for e in menu]}),
+        feed(IF_TUNER, 'currentStationFmDabAm', {'stationListEntry': {'waveBand': 'WB_FM', 'receptionMode': 'ANALOG', 'frequencyKhz': 101700, 'positionNumber': 0,
+                                                                      'tp': 'TPS_NO_TP', 'stationShortName': 'Приклад', 'stationLongName': 'Радіо Приклад'},
+                                                 'radioTextName': "Новини о дев'ятій"}),
+        feed(IF_PLAYER, 'playerState', 'PLAYER_STATE_PLAY' if sel == 7 else 'PLAYER_STATE_PAUSE'),
+        feed(IF_PLAYER, 'currentItemPosition', {'position': 0, 'totalNumber': 0}),
+        feed(IF_PLAYER, 'currentItemMetadata', [{'key': 'ARTIST', 'value': {'stringValue': 'Гурт Приклад'}}, {'key': 'ALBUM', 'value': {'stringValue': 'Альбом Приклад'}},
+                                                {'key': 'TITLE', 'value': {'stringValue': 'Ранкова хвиля'}}]),
+        feed(IF_PLAYER, 'currentItemTime', {'elapsed': 25583, 'total': 184785}),
+    ]
+
+
+def route_fakes():
+    """A route led by CarPlay, as the car showed it: the provider, an empty manoeuvre, the destination block, a road."""
+    return [
+        feed(IF_GUIDING, 'guidingState', 'INACTIVE'),
+        feed(IF_GUIDANCE, 'guidingProvider', 'CAR_PLAY'),
+        feed(IF_GUIDANCE, 'conclusiveDart', {'maneuver': {'pointOfInterest': {}}, 'bargraphProgress': 0}),
+        feed(IF_GUIDANCE, 'currentLaneGuiding', {'rows': [], 'carPositionLaneIndex': 0}),
+        feed(IF_GUIDANCE, 'currentRoad', {'elements': [{'text': 'вулиця Тестова'}]}),
+        feed(IF_GUIDANCE, 'isOnGuidableRoad', True),
+        feed(IF_GUIDANCE, 'nextDestinationInfo', {'travelTime': 660, 'delayTime': 0, 'delayStatus': 'UNDEFINED',
+                                                  'formattedDistance': {'distance': '5.7', 'unit': 'KM', 'rawDistance': 5700},
+                                                  'distanceFromCurrentToFinalDestination': 0, 'isCheckeredFlag': True, 'stopOverNumber': 0,
+                                                  'estimatedArrivalTime': {'time': {'invalid': False, 'hour': 14, 'minute': 54},
+                                                                           'includedTimeOffset': {'valid': False, 'timeZoneOffset': 120}}}),
+    ]
+
+
+def hud_fake(sym, colour, kmh, speed, rpm=2400):
+    """DisplayDataServer.functionalLibraryData: the cruise / limiter set speed and its symbol (bench/test-twin-limit.js hudEv)."""
+    return feed(IF_DDS, 'functionalLibraryData', {
+        'speed': {'kmH': speed, 'mlsH': 0}, 'activeCruiseControl': {'symbolACC': 'LDM_CAR_OFF', 'accBarsHUD': 0, 'barsColorACC': 'LDM_OFF'},
+        'xSpeedLimitAssist': {'vSLISymbol': 'LDM_VZA_VSLI_NO_SYMBOL', 'vSLISpeedValue': 0}, 'system': {'modeHUD': 0, 'statusHUD': 'HUDSTATUS_OFF'},
+        'rpm': rpm, 'currentGear': 0, 'ldmSym': sym, 'ldmSymColor': colour, 'statusLimiter': 'STATUS_INACTIVE', 'cruiseCtrlSpeedHUD': kmh})
+
+
+def tsr(cls, warn=0):
+    return {'tsr': {'cls': cls, 'warn': warn}}
+
+
+def plan_r3():
+    def e(tag, fakes=None, settings=None, volatile=False, **kw):
+        st = state(tag=tag, **kw)
+        st['fakes'] = fakes or []
+        if settings:
+            st['settings'] = settings
+        return job('E', st, expect={'volatile': True} if volatile else {})
+
+    g = []
+    # tab 1: the on-board computer's pages, the technical data shown and hidden
+    g.append([e('tab1_clock', settings={'tab': '1'}), e('tab1_trip', settings={'tab': '1'}, centre='trip'),
+              e('tab1_tech', settings={'tab': '1', 'centre': 'tech'}), e('tab1_tech_hidden', settings={'tab': '1', 'centre': 'tech', 'techData': 'hide'})])
+    # tab 2: one message (the card), two stored messages (the rows)
+    one = e('tab2_card', msg='ours')
+    # the rows page two ways: the driver steps to tab 2 with the TRIP key (standing: the key is locked above 5 km/h), and the
+    # setting "Таба = 2"
+    key = e('tab2_rows_key', msg='rows', engine='ready',
+            fakes=[feed(IF_LIGHT, 'IndicatorSteeringColumn', {'operationColumnStalks': 0}), {'sleep': 0.3},
+                   feed(IF_LIGHT, 'IndicatorSteeringColumn', {'operationColumnStalks': 64}), {'sleep': 0.15},
+                   feed(IF_LIGHT, 'IndicatorSteeringColumn', {'operationColumnStalks': 0})])
+    rows = e('tab2_rows_setting', msg='rows', settings={'tab': '2'})
+    for j in (key, rows):
+        j['state']['messages'] = [DOOR, TYRE]
+    g.append([one])
+    g.append([key])
+    g.append([rows])
+    # tab 3: CarPlay playing, the radio
+    g.append([e('tab3_carplay', fakes=media_fakes(7), settings={'tab': '3'}, volatile=True)])
+    g.append([e('tab3_radio', fakes=media_fakes(4), settings={'tab': '3'})])
+    # tab 4: no call; a call (the rule selects the tab by itself)
+    g.append([e('tab4_phone', settings={'tab': '4'}),
+              e('tab4_call_auto', fakes=[feed(IF_AGG, 'aggregatedCallState', 'DIALING'), {'sleep': 0.6}, feed(IF_AGG, 'aggregatedCallState', 'ACTIVE')], volatile=True)])
+    # tab 5: nothing to show; a route led by CarPlay (fixed tab, then the rule's own choice)
+    g.append([e('tab5_none', settings={'tab': '5'}), e('tab5_route', fakes=route_fakes(), settings={'tab': '5'})])
+    g.append([e('tab5_route_auto', fakes=route_fakes())])
+    def L(tag, **kw):         # the limit and cruise scenes stand on tab 1 (a bench keeps the last tab over a restart)
+        return e(tag, settings={'tab': '1'}, **kw)
+
+    # the speed limit: the sign and the marker; the strip (L2) red between the limit and the needle while over
+    g.append([L('limit_50_under', fakes=[tsr(10)], sig={'speed': 47, 'rpm': 1600}), L('limit_50_over', fakes=[tsr(10)], sig={'speed': 63, 'rpm': 2000}),
+              L('limit_50_over_warn', fakes=[tsr(10, 1)], sig={'speed': 87}), L('limit_130', fakes=[tsr(26)], sig={'speed': 124, 'rpm': 2600}),
+              L('limit_none', fakes=[tsr(255)])])
+    # cruise and the limiter in the speedometer's hub (C1): active (green), not active (grey), the limiter; all of it with a limit
+    g.append([L('cruise_90', fakes=[hud_fake('LDM_SYM_DCC', 'LDM_ACTIVE', 90, 87)]), L('cruise_90_off', fakes=[hud_fake('LDM_SYM_DCC', 'LDM_OFF', 90, 87)]),
+              L('limiter_60', fakes=[hud_fake('LDM_SYM_SLD', 'LDM_ACTIVE', 60, 52)], sig={'speed': 52, 'rpm': 1700}),
+              L('limit_50_cruise_60', fakes=[tsr(10), hud_fake('LDM_SYM_DCC', 'LDM_ACTIVE', 60, 58)], sig={'speed': 58, 'rpm': 1900})])
+    # night: the same pages in the night look
+    g.append([L('night_limit_50_cruise_60', look='night', fakes=[tsr(10), hud_fake('LDM_SYM_DCC', 'LDM_ACTIVE', 60, 58)], sig={'speed': 58, 'rpm': 1900})])
+    g.append([e('night_tab3_carplay', look='night', fakes=media_fakes(7), settings={'tab': '3'}, volatile=True)])
+    g.append([e('night_tab5_route', look='night', fakes=route_fakes(), settings={'tab': '5'})])
+    return g
+
+
 def want_settings(st):
-    s = {'centre': st['centre'], 'nightLook': LOOKS[st['look']], 'demo': 'on' if st['demo'] else 'off'}
+    # round 3: the tab, the technical data and the navigation view go back to their defaults unless the scene sets them
+    s = {'centre': st['centre'], 'nightLook': LOOKS[st['look']], 'demo': 'on' if st['demo'] else 'off',
+         'tab': 'auto', 'techData': 'show', 'navView': 'auto', 'redline': 6500, 'bandGain': 1.0}     # D's two settings too: a bench keeps them over a restart
     s.update(st.get('settings') or {})
     return s

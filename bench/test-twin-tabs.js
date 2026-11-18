@@ -835,6 +835,42 @@ async function engineChecks() {
         eq([hud.tabs.tab, sepNow(), tabs.messagePresent(hud)], [1, [780, 1168, 1237, -10], false], 'displayed 65535 (unknown) with the list at rest: no pull, tab 1, tab 2 out of the bar');
         feedDisp(0); await sleep(300);
         eq([hud.tabs.tab, sepNow()], [1, [780, 1168, 1237, -10]], '... displayed 0: still out');
+        // twin_dial 0.1.2: the setting "Таба = 2" taken while a message holds tab 2. The tab does not MOVE, so the machine was never told
+        // (it kept its old base, tab 1): once the message ended, the bar said tab 2 and the machine painted nothing - an empty page with
+        // stored messages in the list (seen in the 0.1.1 state gallery). The machine's tab must follow the tab rules outside a message period.
+        const agree = () => [hud.tabs.tab, hud.twinMsg.tab];
+        eq(hud.twinMsg.tab, hud.tabs.tab, '0.1.2: after everything above (messages come and gone, tabs fixed and freed) the machine stands on the bar\'s tab (bar ' + hud.tabs.tab + ', machine ' + hud.twinMsg.tab + ')');
+        const toTab1 = async () => { press('tab', '3'); await sleep(120); press('tab', '1'); await sleep(120); press('tab', 'auto'); await sleep(200); };      // two real moves: both sides on tab 1, auto
+        await toTab1();
+        eq(agree(), [1, 1], '... both on tab 1, the setting auto');
+        feedList([REST, DOOR]); feedDisp(15); await sleep(400);
+        press('tab', '2'); await sleep(200);
+        feedList([REST, STORED]); await sleep(100); feedDisp(0); await sleep(600);
+        eq([hud.tabs.tab, hud.twinMsg.state, hud.twinMsg.tab, hud.twinMsg.page && hud.twinMsg.page.kind], [2, 'none', 2, 'list'],
+            '0.1.2: tab fixed to 2 during a message, the message ends with a stored entry left: the machine is on tab 2 too and paints the list page');
+        feedList([REST]); await sleep(300);
+        eq([hud.tabs.tab, hud.twinMsg.tab, hud.twinMsg.page && hud.twinMsg.page.kind], [2, 2, 'empty'], '... the list at rest: still tab 2 (the setting holds it), the empty page');
+        await toTab1();
+        // the gallery's own case (and every start of the app with "Таба = 2" saved): the setting is taken while the machine keeps BMW's panel
+        // open without a message (the "shown now" number unknown, 65535: a period with no severity). Then the car says 0 with a stored entry.
+        feedDisp(65535); await sleep(400);
+        const blind = hud.twinMsg.state, before = agree();
+        press('tab', '2'); await sleep(200);
+        feedList([REST, STORED]); await sleep(100); feedDisp(0); await sleep(600);
+        eq([blind, before, hud.tabs.tab, hud.twinMsg.state, hud.twinMsg.tab, hud.twinMsg.page && hud.twinMsg.page.kind], ['window', [1, 1], 2, 'none', 2, 'list'],
+            '0.1.2: tab fixed to 2 while the panel is kept open with nothing known (65535), then displayed 0 with a stored entry: tab 2 paints the list page');
+        feedList([REST]); await sleep(300);
+        await toTab1();
+        // the same with the key: the driver steps back to tab 2 while a message shows; at its end the rules keep the driver's choice (tab 2)
+        press('tabLock', '0'); await sleep(100);
+        feedList([REST, DOOR]); feedDisp(15); await sleep(400);
+        tabs.press(hud, 1); hud._twinTabsChanged(); await sleep(200);          // away from tab 2 (BMW's panel opens)
+        const away = hud.tabs.tab;
+        for (let i = 0; i < 5 && hud.tabs.tab !== 2; i++) { tabs.press(hud, 1); hud._twinTabsChanged(); await sleep(120); }      // ... and round to tab 2 again
+        feedList([REST, STORED]); await sleep(100); feedDisp(0); await sleep(600);
+        ok(away !== 2 && hud.twinMsg.tab === hud.tabs.tab && (hud.tabs.tab !== 2 || (hud.twinMsg.page && hud.twinMsg.page.kind) === 'list'),
+            '0.1.2: the key away from tab 2 and back during a message, then its end: the machine and the bar agree (bar ' + hud.tabs.tab + ', machine ' + hud.twinMsg.tab + ', page ' + (hud.twinMsg.page && hud.twinMsg.page.kind) + ')');
+        feedList([REST]); feedDisp(0); press('tabLock', '5'); await sleep(300);
         ok(!logs.some((l) => /^ERROR/.test(l)), 'no error in the engine\'s log' + (logs.filter((l) => /^ERROR/.test(l))[0] ? ': ' + logs.filter((l) => /^ERROR/.test(l))[0] : ''));
     } finally {
         Module._load = realLoad;

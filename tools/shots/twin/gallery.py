@@ -15,7 +15,8 @@ import compare as CP   # noqa: E402
 
 SET_NAME = {'A': 'A. The matrix: {day, night} x {no message, ours, window, blind} x {clock, trip} x {engine off, ready, driving}',
             'B': "B. The mockup's own scenes (M2 trip at speed, M3 door message); M1 and M4 are matrix cells",
-            'C': 'C. The dial laws: needle angle against SPEC 5.1 and 5.2', 'D': 'D. Settings: demo, redline, band level'}
+            'C': 'C. The dial laws: needle angle against SPEC 5.1 and 5.2', 'D': 'D. Settings: demo, redline, band level',
+            'E': 'E. Round 3: live tabs, the centre pages (media, phone, route), the speed limit, cruise and the limiter'}
 BAD_LOG = re.compile(r'too many|pixel memory is full|over the layer cap|uncaught|app exited|build failed|refus|ERROR|protocol', re.I)
 BENIGN_LOG = re.compile(r'emulator: no SOME/IP')
 

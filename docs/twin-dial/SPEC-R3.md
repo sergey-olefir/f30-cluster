@@ -371,3 +371,54 @@ The telltales at the top and a bottom that is wholly ours (R13, deferred); the b
 - **SV** recommended (a) + (b) → the owner adds the red strip from the limit; SV's assistance page (d) and the hub place (c) are not used for the sign (the hub's lower part goes to cruise, §9).
 - **SN:** no title on the map page (kept); the hub variant of 07 rejected.
 - **The round-3 brief:** the black box rectangle corrected (§12); "the sign signal arrives" downgraded to "not yet shown by a log line".
+
+## 17. As built in 0.1.1: the owner's final decisions and the car's real sources (2026-11-18)
+
+This section is newer than everything above and **wins where they differ**. Evidence: `docs/twin-dial/FIN-REPORT.md`,
+`docs/twin-dial/R3B-INTEGRATION.md`, `docs/car-fix/CF1-REPORT.md` … `CF3-REPORT.md`, `docs/car/CP-REPORT.md`,
+`design/car/answers.json`. Status words as at the top; **car** = seen in the car's log on 2026-11-18.
+
+### 17.1 The owner's decisions after the mockup round
+
+| Subject | Decision (owner) | Replaces |
+|---|---|---|
+| Numeral shadow | **None.** `SHADOW_MODEL = None` in `tools/twin-dial/bake_face.py`; faces re-baked. | §2.4 (SD's shadow model) |
+| Page dots | **None** (never drawn; asserted absent). | K2's dots |
+| Tab 2 | **Hidden while there is no message**: in the bar only while ccList holds an entry other than the resting id 0 (or while tab 2 is selected / held). Separators 780 / 848 / 1168 / 1237 with a message, 780 / 1168 / 1237 without; the media cell then is 780–1168. The TRIP cycle skips a hidden tab. | §3.1, §3.4 |
+| Red strip from the limit | **L2**: red only between the limit's marker and the needle, only while over (`config.limit.strip = "L2"`). | §8 (the lead's L1 reading) |
+| Cruise / limiter | Place **C1** (the speedometer hub's lower part); number, unit and symbol **green** while active, grey otherwise. | §9 |
+| Technical data | The setting "Технічні дані: сховати" hides **both** technical pages (engine data and tyres). | §4.1, §10 |
+| Navigation view | Setting **"Навігація" = авто / карта / стрілки** (settings only, no key). No lens: the map window, when on, is the wide **W2** box [700, 173, 1220, 600]. | §4.5 |
+| Map window | Still an experiment: off by default, switched in Діагностика ("Вікно карти": вимк. / W2 / W1). | §4.5 |
+| Assistance scales (front vehicle) | Not read, not drawn. | §9 |
+| Settings in the menu | `centre`, "Таба" (авто / 1–5), "Не перемикати таби вище" (default 5 км/год), "Технічні дані", "Навігація", caller name (off). | §10 |
+
+### 17.2 What the car really sends (replaces "after probe" above)
+
+| Feature | Source that works on the car | What does **not** work |
+|---|---|---|
+| Message "shown now" | `Vehicle2.statusDisplayedCCMessage.statusNumberCheckControlMessageDisplay` (car: door open → 15 with the ccList entry in the same ms; closed → 0 about 0.7 s after the list rests). 65535 = unknown → the window stays open. A number with no ccList entry opens the window and selects no tab. | `KombiIF.statusActiveCCMessage` reads 65535 all the time (`ccActive.dead: true`); `newCCMessage` never arrives; `ccListRiskClass`, `CheckControlMaster.basicList` time out. |
+| Tab key | Bit **0x40** of `de.bmw.body.Light` `IndicatorSteeringColumn.operationColumnStalks` (notifier only, declared `s`), rising edge = next tab (car: 17 presses, 17 clean pairs). The cluster still reacts to the key by itself. | — |
+| Speed limit | The **event** `de.bmw.dass.TrafficSignRecognition.TrafficSignRecognition`: `presentClassLimitSpeed` × 5 = km/h (car: class 8 with a 40 sign, 6 with 30, 10 in town); 0 / 253 / 254 / 255 = none; `controlSLIWarning` = over the limit (hypothesis). Second witness, logged only: `SignRecognitionFrontCamera`. Decoder: `shared/limit_src.js`. | `TrafficSignDisplayControl`: its provider never comes up (kept as a fallback for other cars). FASuS getters time out. |
+| Cruise / limiter | `DisplayDataServer.functionalLibraryData`: `cruiseCtrlSpeedHUD` = set speed in km/h (65535 = none), `ldmSym` `LDM_SYM_DCC` / `LDM_SYM_SLD` / `LDM_SYM_NONE`, `ldmSymColor` `LDM_ACTIVE` / `LDM_OFF` (car: filled with the head-up display off). | The FASuS-side set speed is encoded, not km/h. |
+| Trip computer | `statusBordcomputerAverage` speed × 0.1, consumption × 0.1; `statusBordcomputerTravelData` way × 1 km (car, checked against the car's own trip page). Odometer `mileageKilometre` × 1. | — |
+| Media (tab 3) | `HmiMediaState` (lines, menu's selected icon = the source), `TunerFmAmDab` station, `MediaPlayer` on `CarPlayMedia` (title, artist, time). On (`pages.media`). | — |
+| Phone (tab 4) | `ConnectivityAggregator.aggregatedCallState` → the call card with our own timer; a call selects tab 4 (`tabs.callSelects`). Device lines and call detail stay dark (unseen). | — |
+| Navigation (tab 5) | With CarPlay leading: `guidingProvider` = `CAR_PLAY`, `nextDestinationInfo` (`rawDistance` in metres, travel time, arrival), `currentRoad` → the "route" page without an arrow (`pages.route`). | `conclusiveDart`, `nextIntersection`, lanes stay empty with CarPlay; the arrow page (`pages.guidance`) stays dark until the car's own navigation is tried. |
+| Tyres | Dark (`pages.tyres: false`): not seen yet. | — |
+
+### 17.3 Budget as built
+
+14 layers in three connections (7 / 4 / 3), 4.83 MiB of pixel memory steady and at the peak; the start-up hold
+(`config.startupHold`) is on. Still for the car: the cluster's acceptance of the shaders, the map window W2, two messages
+at once on "shown now", the limit's warning flag and derestriction, the cruise colours while suspended, the arrow page with
+the car's own navigation.
+
+### 17.4 Fixed in 0.1.2: the machine's tab follows the tab rules
+
+Found in the 0.1.1 state gallery (`tools/shots/twin`, set E): with the setting "Таба = 2" saved (or with the key back on tab 2
+before a message ended) the bar showed tab 2 while the message machine still stood on its old tab, so tab 2's page stayed empty
+over stored messages. Cause: the machine learns of a tab only when it moves (`_twinTabMoved`), and a choice of tab 2 made during
+a period (a message on show, or BMW's panel kept open at the start before the messages are read) only takes the card back. Fix
+(`shared/hud.js` `_twinSync`): outside a message period the machine's base is set to the tab the rules selected. The safety
+machine itself (`shared/twin_cc.js`) is unchanged. Tests: `bench/test-twin-tabs.js` "0.1.2" (five checks that fail without it).

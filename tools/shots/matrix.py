@@ -47,7 +47,7 @@ MODES = {'comfort': 4, 'sport': 1, 'eco': 7}
 
 # ---- the fake scenes (bench/fake-signs.js), with what the probe must report for each ----
 LIMITS = ['limit-50', 'limit-80-rain', 'limit-130-warn1', 'limit-30-warn2-school', 'limit-55-mph', 'limit-end',
-          'limit-unknown', 'limit-none', 'limit-invalid', 'nopass-car', 'nopass-truck']
+          'limit-unknown', 'limit-none', 'limit-invalid', 'nopass-car', 'nopass-truck', 'limit-tsr-40']
 SIGN_WANT = {
     'limit-50': {'state': 'limit', 'shown': 50, 'np': 'none'},
     'limit-80-rain': {'state': 'limit', 'shown': 80, 'supp': 'rain'},
@@ -62,8 +62,11 @@ SIGN_WANT = {
     'nopass-truck': {'state': 'limit', 'shown': 60, 'np': 'truck'},
     # scenario C: a motorway 130 with the no-overtaking sign (the fake's own fields, no scene of that name)
     'limit-130-nopass': {'state': 'limit', 'shown': 130, 'np': 'car'},
+    # 0.7.21 (car-fix CF2): the limit as the owner's car sends it, the TrafficSignRecognition event, class 8 x 5 = 40 km/h
+    'limit-tsr-40': {'state': 'limit', 'shown': 40},
 }
-SIGN_PARTS = {'limit-130-nopass': {'sign': {'state': 'limit', 'value': 130, 'unit': 'kmh', 'np': 'car', 'npM': 800}}}
+SIGN_PARTS = {'limit-130-nopass': {'sign': {'state': 'limit', 'value': 130, 'unit': 'kmh', 'np': 'car', 'npM': 800}},
+              'limit-tsr-40': {'tsr': {'cls': 8}}}
 
 MESSAGES = ['cc-clear', 'cc-red', 'cc-yellow', 'cc-green', 'cc-orange', 'cc-white', 'cc-long', 'cc-long-name',
             'cc-three', 'cc-frame-2', 'cc-uk', 'cc-cyrillic', 'cc-greek', 'cc-unread', 'cc-unread-root']

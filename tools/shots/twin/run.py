@@ -15,7 +15,7 @@ blocks, so its comparison numbers mean nothing: the run says which app it used, 
 Output, in bake/work/twin-dial/r2/E/gallery/<YYYYMMDD-HHMM>/ (git-ignored):
   index.html (works from file://), results.json, summary.json, compare.md, failed.json, logs/, A/ B/ C/ D/ (the pictures)
 --only: set letters (A matrix, B mockup scenes, C dial laws, D settings) or a text found in a job's name
-(e.g. day_ours, night, law_speed). With --out pointing at an earlier run, the redone jobs replace theirs.
+(e.g. day_ours, night, law_speed); E = round 3 (tabs, pages, the speed limit, cruise). With --out pointing at an earlier run, the redone jobs replace theirs.
 """
 import json
 import multiprocessing as mp
@@ -59,7 +59,7 @@ def select(groups, only):
     if not only:
         return groups
     toks = [t for t in only.split(',') if t]
-    sets = [t for t in toks if t in ('A', 'B', 'C', 'D')]
+    sets = [t for t in toks if t in ('A', 'B', 'C', 'D', 'E')]
     texts = [t for t in toks if t not in sets]
 
     def ok(j):

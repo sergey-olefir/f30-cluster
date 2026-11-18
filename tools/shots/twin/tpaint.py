@@ -76,13 +76,17 @@ def content_checks(prem, st, probe_cc, real=False):
     box = prem[y0:y1, x0:x1]
     green = int(((box[..., 1] > 0.3) & (box[..., 1] > box[..., 0] * 1.5) & (box[..., 1] > box[..., 2] * 1.5)).sum())
     add('READY shown iff ready to drive', (green > 40) == ready, green, 'green px %s 40' % ('>' if ready else '<='), 'VehicleCondition %s' % sig.get('condition'))
-    # the warning tab (SPEC 6.1): flat severity colour while a message shows; day look, the amber message
-    if st['look'] == 'day' and st['msg'] in ('ours', 'window', 'none') and (st.get('message') or SC.TYRE)['color'] == 'yellow':
-        cell = prem[130:170, 746:757].reshape(-1, 3)
+    # the warning tab (SPEC-R3 3): tab 2 exists only while a message is in the list, and the tab rule selects it: its cell
+    # (x 780-848) is then filled red. With no message there is no tab 2 and the place is tab 3's left edge (neutral).
+    # Read on the cell's left margin, x 783-790 (between the separator and the icon's box 791-837); day look only; a
+    # scene that fixes another tab by the setting is not judged.
+    tabset = (st.get('settings') or {}).get('tab', 'auto')
+    if st['look'] == 'day' and st['msg'] in ('ours', 'window', 'rows', 'none') and tabset in ('auto', '2'):
+        cell = prem[130:165, 783:790].reshape(-1, 3)
         med = np.median(cell, axis=0) * 255
-        lit = (med.max() - med.min()) > 60
-        add('warning tab lit while a message shows' if st['msg'] != 'none' else 'warning tab not lit with no message',
-            lit == (st['msg'] != 'none'), [int(v) for v in med], 'saturated' if st['msg'] != 'none' else 'neutral', 'cell x 746-757 (SPEC 8.2: amber)')
+        lit = (med[0] - max(med[1], med[2])) > 60
+        add('warning tab lit while a message shows' if st['msg'] != 'none' else 'no warning tab with no message',
+            lit == (st['msg'] != 'none'), [int(v) for v in med], 'red' if st['msg'] != 'none' else 'neutral', 'tab 2 left margin x 783-790 (SPEC-R3 3: red, hidden with no message)')
     return out
 
 
