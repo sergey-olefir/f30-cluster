@@ -29,5 +29,5 @@ Changed on purpose: `test-twin-pages.js` section 7 (no dimmed icon, 46 px pixels
 - B1 changes `TW_RULE.tab`, TW_NIGHT etc. in hud.js; I removed my duplicates (my tests skip the cell-uniform checks when `hud.js` has no `twinTab`).
 
 ## Open
-- Final full-suite run on this branch (see the lead message).
+- Final run on a quiet machine, one suite at a time: bottom-row 254, night 48, scene-tex 54, driver-profiles 105 and every Twin suite above, 0 failures (the earlier failures were load flakes: the same bottom-row passes 254 on main and on this branch when nothing else runs). On a scratch merge of `twin-b/b2 + b6 + b1`: twin-tabs 189, twin-layout 62, twin-fonts 336, twin-budget 94 pass; twin-bake showed 2 failures in B1's own face-band checks (B1's, not touched here).
 - Nothing of this was seen on the car or in a browser.
