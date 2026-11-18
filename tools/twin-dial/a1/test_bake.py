@@ -68,7 +68,7 @@ ok(refused, 'baking a Cyrillic letter into a Saira atlas is refused')
 cm = TTFont(os.path.join(bf.SRC, bf.TD_SAIRA[0])).getBestCmap()
 ok(not [c for c in cm if 0x370 <= c <= 0x52F], 'the Saira file in tools/fonts-src has no Greek or Cyrillic glyph')
 sa = [s for s in bf.FONTS['twin_dial'] if s[1] == bf.TD_SAIRA[0]]
-ok(len(sa) == 12 and all(all(ord(c) in cm for c in s[3] if c != ' ') for s in sa), 'every character of the %d Saira atlases is in the file' % len(sa))
+ok(len(sa) == 11 and all(all(ord(c) in cm for c in s[3] if c != ' ') for s in sa), 'every character of the %d Saira atlases is in the file' % len(sa))
 ok(all(max(ord(c) for c in s[3]) < 0x250 or set(c for c in s[3] if ord(c) >= 0x250) <= {'–'} for s in sa), 'no Saira atlas lists a character beyond Latin, digits and the dash')
 for bad in ('Д', 'Ж'):
     for face in (bf.TD_SAIRA, bf.TD_SIGN2, bf.TD_SIGN3):

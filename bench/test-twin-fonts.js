@@ -60,7 +60,7 @@ function sairaViolations(layout, sairaNames, glyphsOf) {
 }
 
 console.log('every slot of SPEC 9 / SPEC-R3 7 has its atlas');
-const EXPECTED = ['td_scale_l', 'td_scale_s', 'td_tach', 'td_big', 'td_clock', 'td_gear', 'td_label', 'td_prog', 'td_cru', 'td_dist', 'td_sign', 'td_sign3',
+const EXPECTED = ['td_scale_l', 'td_scale_s', 'td_tach', 'td_big', 'td_clock', 'td_label', 'td_prog', 'td_cru', 'td_dist', 'td_sign', 'td_sign3',
     'td_title', 'td_val', 'td_body', 'td_row', 'td_tab', 'td_tabs', 'td_sub', 'td_u19', 'td_u20', 'td_u21', 'td_msg', 'td_cnt'];
 ok(atlases.length === EXPECTED.length && EXPECTED.every((n) => atlases.includes(n)), EXPECTED.length + ' atlases in the slot table: ' + EXPECTED.length + ' (td_big serves the digital speed and, from round 3, the gear; td_gear is 0.1.0\'s, superseded)');
 ok(fs.readdirSync(FONTS).filter((f) => /\.json$/.test(f)).length === EXPECTED.length, 'hud/fonts holds exactly those ' + EXPECTED.length + ' files');
@@ -127,7 +127,7 @@ console.log('round 3: the gear, the program, the set speed, the distance, the si
     ok(grid.pitch === 82 && grid.max === 2 && grid.cw === 41 && grid.groups.length === 1 && grid.figs.join('') === D, 'the engine\'s gpu grid for a gear widget (box 164, maxLen 2): pitch 82, cells of 41, one layer, the ten digits as figures');
     const cells = (t) => Math.ceil(t.split('').reduce((a, c) => a + g[c].advance, 0) / grid.cw) + 1;
     ok(gears.every((t) => cells(t) <= 6), 'every gear string needs at most 6 spare atlas cells (the engine has 6): worst "' + gears.slice().sort((a, b) => cells(b) - cells(a))[0] + '" ' + Math.max.apply(null, gears.map(cells)));
-    ok(slots.gear.atlas === 'td_big' && slots.gear_010.atlas === 'td_gear' && slots.gear_010.superseded === true, 'font_slots.json: "gear" is td_big, 0.1.0\'s td_gear is marked superseded');
+    ok(slots.gear.atlas === 'td_big' && !slots.gear_010 && !fs.existsSync(path.join(ROOT, 'apps', 'twin_dial', 'hud', 'fonts', 'td_gear.json')), 'font_slots.json: "gear" is td_big; 0.1.0\'s td_gear is gone (integration: B4\'s hub names td_big, ~69 KB freed)');
 }
 {
     const has = (n, chars) => chars.split('').every((c) => font(n).glyphs[c]);

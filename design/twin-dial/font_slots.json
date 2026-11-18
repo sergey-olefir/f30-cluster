@@ -7,7 +7,6 @@
   "digital_speed": { "atlas": "td_big", "face": "Saira", "px": 92, "note": "atext cells = widest advance (digit, 82 px)" },
   "clock_time": { "atlas": "td_clock", "face": "Saira", "px": 92, "note": "package C: proportional digits (td_big's tabular ones leave a '1' in a full cell, \"14:43\" looks gapped)" },
   "gear": { "atlas": "td_big", "face": "Saira", "px": 92, "note": "round 3 (B6, SPEC-R3 2.7): the gear in the tachometer's hub at the digital speed's size (cap 66 px): td_big carries D M N P R S beside its digits; the digit metrics, the cell (70) and the baseline (67) are those of 0.1.0. Measured against re-baking td_gear at 92: the same GPU atlas, +96 KB of pack instead of +123 KB, one atlas fewer" },
-  "gear_010": { "atlas": "td_gear", "face": "Saira", "px": 64, "note": "0.1.0's gear: SUPERSEDED by \"gear\" (td_big); kept only while design/gen_twin.py's gear widget names td_gear; delete the slot, the atlas and its TWIN_FONTS line when the layout moves to td_big", "superseded": true },
   "dial_labels": { "atlas": "td_label", "face": "Saira", "px": 22, "note": "READY, OFF, COMFORT, SPORT, SPORT+, ECO PRO, ADAPTIVE" },
   "program": { "atlas": "td_prog", "face": "Saira", "px": 24, "note": "round 3: the drive program under the gear, cap 17 px (SPEC-R3 2.7); READY stays on td_label (22)" },
   "cruise_speed": { "atlas": "td_cru", "face": "Saira", "px": 40, "note": "round 3: the cruise / limiter set speed, green, right-aligned at x 1536, baseline 540 (SPEC-R3 9); \"–\" = no value" },

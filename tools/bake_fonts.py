@@ -199,7 +199,6 @@ TWIN_FONTS = [
     _td(TD_SAIRA, 'td_tach', 57, DIGITS),                       # tachometer numerals
     _td(TD_SAIRA, 'td_big', 92, DIGITS + ':-–' + TD_GEAR),      # digital speed (atext), the clock page's time ("–" = no value) and, from round 3, the gear in the tachometer's hub (SPEC-R3 2.7, B6): the gear letters add a second row, the digits' metrics, the cell and the baseline are the 0.1.0 ones
     _td(TD_SAIRA, 'td_clock', 92, DIGITS + ':-–', tabular=False),   # package C: the clock page's time, proportional digits (td_big's tabular ones look gapped in "14:43"); the digital speed keeps td_big (the GPU text needs one pitch)
-    _td(TD_SAIRA, 'td_gear', 64, DIGITS + 'PRNDMS-–'),          # 0.1.0's gear (64 px, D3, M1..M8, S1..S8): SUPERSEDED by td_big at 92 px (SPEC-R3 2.7); stays only while the layout's gear widget names it (delete both when design/gen_twin.py moves the gear to td_big)
     _td(TD_SAIRA, 'td_label', 22, TD_LABELS),                   # READY, OFF, COMFORT / SPORT / SPORT+ / ECO PRO / ADAPTIVE
     # round 3 (package B6, SPEC-R3 7): the sizes the new pages and hubs need
     _td(TD_SAIRA, 'td_prog', 24, TD_LABELS),                    # the drive program under the gear (cap 17 px, SPEC-R3 2.7)
