@@ -181,7 +181,7 @@ console.log('the dials and the background in the contract\'s fields (docs/twin-d
     ok(t.bar.y === 619 && t.bar.x0 === 254 && t.bar.x1 === 506 && t.bar.segs === 5 && t.bar.gap === 4 && t.bar.signal === 'fuel' && t.bar.reserve === 'reserve', 'tachometer bar: y 619, x 254..506, 5 segments, fuel, reserve (SPEC 5.1)');
     ok(s.bar.y === 619 && s.bar.x0 === 1414 && s.bar.x1 === 1666 && s.bar.segs === 5 && s.bar.signal === 'coolant' && s.bar.min === 50 && s.bar.max === 130 && s.bar.hotAt === 120, 'speedometer bar: x 1414..1666 (the dial centre +-0.42 R; the contract text 1394..1646 is 20 px off the dial, a typo), coolant 50..130, red from 120 (SPEC 5.2)');
     const L0 = byId.bg_l;
-    ok(JSON.stringify(L0.tab.rect) === '[618,127,1302,172]' && JSON.stringify(L0.tab.seps) === '[744,812,1168,1237]' && JSON.stringify(L0.tab.ramp) === '[0.002,0.16]' && JSON.stringify(L0.tab.highlight) === '[744,812]', 'tab bar [618, 127, 1302, 172], separators 744 812 1168 1237, ramp 0.002 .. 0.16, warning cell 744..812 (SPEC 6.1)');
+    ok(JSON.stringify(L0.tab.rect) === '[618,127,1302,172]' && JSON.stringify(L0.tab.seps) === '[780,848,1168,1237]' && JSON.stringify(L0.tab.ramp) === '[0.002,0.16]' && JSON.stringify(L0.tab.highlight) === '[780,848]' && JSON.stringify(L0.tab.rule) === '[170,173]', 'tab bar [618, 127, 1302, 172], separators 780 848 1168 1237, ramp 0.002 .. 0.16, tab 2\'s cell 780..848, the rule 3 px (SPEC-R3 3.1)');
     ok(L0.rules.length === 2 && L0.rules[0].y0 === 295.2 && L0.rules[0].x0 === 741 && L0.rules[0].x1 === 1180 && L0.rules[1].y0 === 612.4 && L0.rules[1].x0 === 629 && L0.rules[1].x1 === 1292 && L0.rules[1].ours.y0 === 611 && L0.rules[1].ours.y1 === 615 && L0.rules[1].ours.role === 'severity', 'rules: the title rule y 296, the bottom rule y 613 (4 px in the severity colour while our plate shows) (SPEC 6.2, 6.3, 8.1)');
     const m = L0.panelMask;
     ok(m.tex === 'panel_mask' && m.x === 694 && m.y === 592 && m.w === 536 && m.h === 112, 'panel mask panel_mask at [694, 592, 1230, 704] (package A2)');
@@ -202,7 +202,7 @@ const SAIRA = ['td_big', 'td_clock', 'td_gear', 'td_label', 'td_tach', 'td_scale
     // [id, baseline, x of the text's anchor (centre / left / right edge by its align), font, role]
     const spec = [
         ['speed', 441, 1540, 'td_big', 'fg'], ['gear', 539, 374, 'td_gear', 'fg'], ['ready', 348, 380, 'td_label', 'ready'], ['program', 576, 386, 'td_label', 'fg'],
-        ['tab_range_u', 156, null, 'td_u19', 'fg'], ['tab_media_t', 156, 925, 'td_tab', 'fg'],
+        ['tab_range_u', 156, null, 'td_u19', 'fg'], ['tab_range_v', 156, null, 'td_tab', 'fg'],
         ['c_title', 282, 960, 'td_title', 'fg'], ['c_time', 404, 960, 'td_clock', 'fg'], ['c_weekday', 460, 960, 'td_val', 'fg'], ['c_date', 519, 960, 'td_val', 'fg'],
         ['t1_a', 362, 905, 'td_val', 'fg'], ['t1_au', 362, 911, 'td_u21', 'fg'], ['t1_b', 362, 1105, 'td_val', 'fg'], ['t1_bu', 362, 1111, 'td_u21', 'fg'],
         ['t2_a', 430, 905, 'td_val', 'fg'], ['t2_au', 430, 911, 'td_u21', 'fg'], ['t2_b', 430, 1105, 'td_val', 'fg'], ['t2_bu', 430, 1111, 'td_u21', 'fg'],
@@ -224,9 +224,10 @@ const SAIRA = ['td_big', 'td_clock', 'td_gear', 'td_label', 'td_tach', 'td_scale
     ok(W.filter((w) => w.type === 'text' || w.type === 'icon').every((w) => ROLES.indexOf(w.color) >= 0), 'every colour is a role of the theme "twin": ' + ROLES.join(' '));
     if (THEMES.twin) ok(ROLES.every((r) => Array.isArray(THEMES.twin[r])), 'the theme "twin" of shared/hud_themes.js has every one of those roles');
     else skip('the theme "twin" is not in shared/hud_themes.js yet (package B merges it)');
-    // the icons: SPEC 6.1, 38 x 38 centred at y 143
-    const icons = { tab_range_i: ['td_fuel', 636], tab_warn_i: ['cc_warn', 778], tab_media_i: ['td_radio', 905], tab_phone_i: ['td_phone', 1202], tab_nav_i: ['td_nav', 1270] };
-    ok(Object.keys(icons).every((id) => T(id) && T(id).icon === icons[id][0] && T(id).w === 38 && T(id).h === 38 && T(id).x + 19 === icons[id][1] && T(id).y + 19 === 143 && T(id).tdLive), 'tab bar pictograms: 38 x 38 at x 636 778 905 1202 1270, centre y 143, all live (night colours repaint them)');
+    // the icons: SPEC-R3 3.1, 36 x 36 centred at y 143; tab 3's cell is ONE live widget (icon + text as a group, 300 x 36)
+    const icons = { tab_range_i: ['td_fuel', 654], tab_warn_i: ['cc_warn', 814], tab_phone_i: ['td_phone', 1202], tab_nav_i: ['td_nav', 1270] };
+    ok(Object.keys(icons).every((id) => T(id) && T(id).icon === icons[id][0] && T(id).w === 36 && T(id).h === 36 && T(id).x + 18 === icons[id][1] && T(id).y + 18 === 143 && T(id).tdLive), 'tab bar pictograms: 36 x 36 at x 654 814 1202 1270 (centres), centre y 143, all live (night colours repaint them)');
+    ok(T('tab_media') && T('tab_media').tdLive === 'media' && T('tab_media').x === 858 && T('tab_media').w === 300 && T('tab_media').h === 36 && T('tab_media').y + 18 === 143, 'tab 3: one live widget [858, 125, 1158, 161] painting the source icon and its text as a centred group');
     // the speed and the gear are GPU texts of the right pitch (the atlas decides; the engine's own test)
     ok(T('speed').gpu === true && T('speed').maxLen === 3 && T('gear').gpu === true, 'the digital speed and the gear are GPU texts (hud.js "gpu")');
 }

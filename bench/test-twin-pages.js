@@ -268,6 +268,8 @@ console.log('the extra signals: chained behind the engine\'s own handlers, numbe
 // ---------------------------------------------------------------------------------------------------------------------
 console.log('the tab bar\'s live icons');
 {
+    // round 3 (package B2, SPEC-R3 3.1): NO icon is ever dimmed; the state is the icon's variant, the warning icon is white / red / amber.
+    // (the full set of checks is bench/test-twin-tabs.js)
     const h = mk();
     h.theme = { fg: [255, 255, 255, 255], grey: [111, 111, 110, 255], bg: [0, 0, 0, 255] };
     const painted = [];
@@ -275,22 +277,20 @@ console.log('the tab bar\'s live icons');
     const W = (id) => L.widgets.find((w) => w.id === id);
     const mkx = (id) => ({ w: W(id), last: null });
     const phone = mkx('tab_phone_i'), nav = mkx('tab_nav_i'), warn = mkx('tab_warn_i');
-    eq([twin.iconState(h, phone.w).role, twin.iconState(h, nav.w).role, twin.iconState(h, warn.w).role], ['grey', 'grey', 'fg'], 'phone and navigation are dim without a call or a route, the warning icon is white');
+    eq([twin.iconState(h, phone.w).color, twin.iconState(h, nav.w).color, twin.iconState(h, warn.w).color], [null, null, null], 'phone, navigation and the warning icon are white with nothing to say (none is dimmed any more)');
     h.td.call = true; h.td.nav = true; h.twinCc = { state: 'ours', severity: 'amber' };
-    eq([twin.iconState(h, phone.w).role, twin.iconState(h, nav.w).role, twin.iconState(h, warn.w).role], ['fg', 'fg', 'bg'], 'a call and a route light them; the warning icon is black on the amber cell');
+    eq([twin.iconState(h, phone.w).color, twin.iconState(h, nav.w).color, twin.iconState(h, warn.w).color], [null, null, 'amber'], 'a call and a route change no colour; an amber message colours the warning icon amber');
     h.twinCc = { state: 'ours', severity: 'red' };
-    eq(twin.iconState(h, warn.w).role, 'fg', 'white on red');
+    eq(twin.iconState(h, warn.w).color, 'red', 'a red message: the warning icon red');
     // repaint only when something changed
     twin.updateIcon(h, nav, 0, false); twin.updateIcon(h, nav, 50, false);
     eq(painted.length, 1, 'an unchanged icon is not painted again');
-    h.td.nav = false; twin.updateIcon(h, nav, 100, false);
-    eq(painted.length, 2, 'a changed state repaints it');
     h.theme = { fg: [231, 231, 231, 255], grey: [61, 61, 61, 255], bg: [0, 0, 0, 255] };     // night
     twin.updateIcon(h, nav, 150, false);
-    eq(painted.length, 3, 'a night change (new theme colours) repaints it');
-    eq(painted[0], 38 * 38 * 4, 'the pixels are the 38 x 38 RGBA of the widget');
+    eq(painted.length, 2, 'a night change (new theme colours) repaints it');
+    eq(painted[0], 36 * 36 * 4, 'the pixels are the 36 x 36 RGBA of the widget');
     // the engine's own icon path is not taken for a widget with no tdLive, and _nightLive counts a live icon as live
-    ok(L.widgets.filter((w) => w.type === 'icon').every((w) => w.tdLive), 'every icon of the layout is live (repainted by twin_tokens.js, so a night change needs no rebuild)');
+    ok(L.widgets.filter((w) => w.type === 'icon').every((w) => w.tdLive), 'every icon of the layout is live (repainted by twin_tabs.js, so a night change needs no rebuild)');
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
