@@ -3,48 +3,71 @@
  "tool": "tools/car/parse_logs.py",
  "generated": "2026-11-18",
  "session": {
-  "folder": "reference/car/2026-11-15",
-  "date": "2026-11-15",
+  "folder": "reference/car/2026-11-18-collect1",
+  "date": "2026-11-18-collect1",
   "material": {
    "f30_cluster": {
-    "lines": 3687,
-    "from": "2026-11-14T14:16:11Z",
-    "to": "2026-11-14T19:17:12Z",
+    "lines": 5866,
+    "from": "2026-11-17T08:12:12Z",
+    "to": "2026-11-18T18:34:59Z",
     "version_last": [
      0,
      7,
-     11
+     20
     ],
-    "runs": 5,
+    "runs": 7,
     "probe_lines": 0
    },
+   "twin_dial": {
+    "lines": 3477,
+    "from": "2026-11-17T15:31:27Z",
+    "to": "2026-11-18T18:35:26Z",
+    "version_last": [
+     0,
+     1,
+     0
+    ],
+    "runs": 2,
+    "probe_lines": 0
+   },
+   "signal_probe": {
+    "lines": 533,
+    "from": "2026-11-18T18:26:12Z",
+    "to": "2026-11-18T18:34:42Z",
+    "version_last": [
+     0,
+     1,
+     0
+    ],
+    "runs": 2,
+    "probe_lines": 226
+   },
    "car_vitals": {
-    "lines": 1877,
+    "lines": 1901,
     "from": "2026-11-09T17:02:11Z",
-    "to": "2026-11-14T14:21:21Z",
+    "to": "2026-11-17T15:01:28Z",
     "version_last": [
      2,
      27,
-     3
+     8
     ],
-    "runs": 8,
+    "runs": 11,
     "probe_lines": 0
    },
-   "cluster_render_lines": 8297
+   "cluster_render_lines": 10973
   },
   "readings": false,
-  "markers": 0,
+  "markers": 11,
   "marker_map": true
  },
  "register": {
-  "path": "bake/work/car/pub/CA/register.json"
+  "path": "design/car/register.json"
  },
  "summary": {
   "manual": 36,
-  "no-material": 25,
-  "not-yet": 17,
-  "answered": 6,
-  "partial": 7
+  "answered": 28,
+  "partial": 14,
+  "not-yet": 13
  },
  "items": {
   "F1": {
@@ -408,40 +431,90 @@
   "L1": {
    "id": "L1",
    "title": "why f30's window over BMW's panel stays open (MC section 6)",
-   "status": "no-material",
-   "label": null,
+   "status": "answered",
+   "label": "arrives",
    "decided": {
-    "builds_seen": [
-     [
-      0,
-      7,
-      10
-     ],
-     [
-      0,
-      7,
-      11
-     ]
+    "view": "g20-our-row",
+    "blind_runs": 2,
+    "hang_cases": [
+     "A1",
+     "A2"
     ],
-    "needs_build_at_least": [
-     0,
-     7,
-     19
-    ]
+    "rows": [
+     "1",
+     "2",
+     "9"
+    ],
+    "order_effects": 1,
+    "hang_total_s": 98410.2,
+    "release": {
+     "deferValues": [
+      65535
+     ]
+    },
+    "window_view": {
+     "view": "g20-our-row",
+     "hudLayout": "off",
+     "bottomRow": "all6WB"
+    }
    },
-   "evidence": [],
-   "evidence_total": 0,
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 2188,
+     "ts": "2026-11-17T15:14:22Z",
+     "shape": "active cc: number 65535 with no ccList entry for 6842 s at the start of a run (A1)",
+     "n": {
+      "number": 65535,
+      "dur_s": 6842.549,
+      "open_at_end": true
+     }
+    },
+    {
+     "file": "f30_cluster.log",
+     "line": 389,
+     "ts": "2026-11-17T17:08:28Z",
+     "shape": "active cc: number 65535 with no ccList entry for 313 s at the start of a run (A1)",
+     "n": {
+      "number": 65535,
+      "dur_s": 313.795,
+      "open_at_end": false
+     }
+    },
+    {
+     "file": "f30_cluster.log",
+     "line": 647,
+     "ts": "2026-11-17T17:13:43Z",
+     "shape": "active cc: number 65535 after a message, list at rest for 59367 s (A2)",
+     "n": {
+      "number": 65535,
+      "dur_s": 59367.186
+     }
+    },
+    {
+     "file": "f30_cluster.log",
+     "line": 762,
+     "ts": "2026-11-18T09:43:11Z",
+     "shape": "active cc: number 65535 after a message, list at rest for 11749 s (A2)",
+     "n": {
+      "number": 65535,
+      "dur_s": 11749.238
+     }
+    }
+   ],
+   "evidence_total": 4,
    "why": [
-    "the saved f30_cluster log is from build(s) 0.7.10, 0.7.11; the check-control lines were added in 0.7.19 (list) and 0.7.20 (active cc)"
+    "a number other than 0 with the list at rest for longer than 1 s is a hang; shorter is the order effect (row 5), not a hang",
+    "1 short 'number without a list entry' stretches (at most 1 s) were the order effect and are not counted as hangs"
    ],
-   "needs": [
-    "a log of f30_cluster 0.7.19+ with a door message in it (P1 steps 2-4)"
-   ],
+   "needs": [],
    "material": [
-    "reference/car/2026-11-15/oap/f30_cluster.log.1",
-    "reference/car/2026-11-15/oap/f30_cluster.log"
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log.1",
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log",
+    "f30_cluster.log.1",
+    "f30_cluster.log"
    ],
-   "dated": "2026-11-14",
+   "dated": "2026-11-18",
    "blocks": [
     "f30 config.ccActive.release (X7)",
     "SPEC-R3 \u00a75.4 item 7 (Twin Dial release)"
@@ -453,37 +526,47 @@
   "L2": {
    "id": "L2",
    "title": "does statusActiveCCMessage notify, what it rests on, is its number the ccList id",
-   "status": "no-material",
-   "label": null,
+   "status": "answered",
+   "label": "arrives",
    "decided": {
-    "builds_seen": [
-     [
-      0,
-      7,
-      10
-     ],
-     [
-      0,
-      7,
-      11
-     ]
+    "notifies": true,
+    "first_value": 65535,
+    "getter_at_start": true,
+    "rests_on": "65535",
+    "rest_samples": 4,
+    "number_is_ccList_id": null,
+    "number_matches": "0/0",
+    "noneValues": [
+     0
     ],
-    "needs_build_at_least": [
-     0,
-     7,
-     19
+    "deferValues": [
+     65535
     ]
    },
-   "evidence": [],
-   "evidence_total": 0,
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 2188,
+     "ts": "2026-11-17T15:14:22Z",
+     "shape": "first active cc line: number 65535, None s after the app start",
+     "n": {
+      "number": 65535
+     }
+    }
+   ],
+   "evidence_total": 1,
    "why": [
-    "the saved f30_cluster log is from build(s) 0.7.10, 0.7.11; the check-control lines were added in 0.7.19 (list) and 0.7.20 (active cc)"
+    "0 stays the only rest value: 65535 in noneValues would cover a listed message (MC F0, UNSAFE)",
+    "rests_on is measured on the value the field holds within 3 s after the list returns to rest"
    ],
-   "needs": [
-    "a log of f30_cluster 0.7.19+ with a door message in it (P1 steps 2-4)"
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log.1",
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log",
+    "f30_cluster.log.1",
+    "f30_cluster.log"
    ],
-   "material": [],
-   "dated": "2026-11-14",
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a75.4",
     "SPEC \u00a78.4 D7",
@@ -496,21 +579,49 @@
   "L3": {
    "id": "L3",
    "title": "the clock's fallback: statusShowTimeDate arrives and is local time",
-   "status": "not-yet",
-   "label": null,
+   "status": "answered",
+   "label": "arrives",
    "decided": {
-    "local_arrives": false,
-    "utc_clock_lines": 0
+    "local_arrives": true,
+    "utc_clock_lines": 78,
+    "offset_minutes": 120,
+    "displayed": [
+     10,
+     22
+    ],
+    "ours_offset_min": 120,
+    "ours_from": "shown"
    },
-   "evidence": [],
-   "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "a 0.7.19+ log: the 'clock (local) raw' line"
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 363,
+     "ts": "2026-11-17T08:23:43Z",
+     "shape": "clock (local) line: shown time 10:22, offset 120 min",
+     "n": {
+      "offset_min": 120,
+      "hour": 10,
+      "minute": 22
+     }
+    },
+    {
+     "file": "f30_cluster.log",
+     "line": 1789,
+     "ts": "2026-11-18T18:33:07Z",
+     "shape": "clock: ours shows 20:33 from the shown source",
+     "n": {
+      "offset_min": 120
+     }
+    }
    ],
+   "evidence_total": 2,
+   "why": [],
+   "needs": [],
    "material": [
-    "reference/car/2026-11-15/oap/f30_cluster.log",
-    "reference/car/2026-11-15/oap/f30_cluster.log.1"
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log",
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log.1",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
    ],
    "dated": null,
    "blocks": [
@@ -524,16 +635,75 @@
   "L4": {
    "id": "L4",
    "title": "Twin Dial's trip fields: arrive or not; raw values against iDrive's trip page",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "twin_dial.log of the build on the car (collect.sh finds its data folder)"
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "arrived": {
+     "average": 1194,
+     "travel": 116,
+     "start": 10,
+     "rl3": 1
+    },
+    "builds_with_summary": 0
+   },
+   "evidence": [
+    {
+     "file": "twin_dial.log.1",
+     "line": 1,
+     "ts": "2026-11-17T15:31:27Z",
+     "shape": "first average line (log0.1.0)",
+     "n": {
+      "speed1": 116.0,
+      "cons1": 187.0,
+      "speed2": 116.0,
+      "cons2": 187.0
+     }
+    },
+    {
+     "file": "twin_dial.log.1",
+     "line": 14,
+     "ts": "2026-11-17T15:31:57Z",
+     "shape": "first travel line (log0.1.0)",
+     "n": {
+      "hours": 0.0,
+      "minutes": 33.0,
+      "way": 6.0
+     }
+    },
+    {
+     "file": "twin_dial.log.1",
+     "line": 77,
+     "ts": "2026-11-17T17:00:49Z",
+     "shape": "first start line (log0.1.0)",
+     "n": {
+      "hour": 255.0,
+      "minute": 255.0
+     }
+    },
+    {
+     "file": "signal_probe.log",
+     "line": 178,
+     "ts": "2026-11-18T18:29:48Z",
+     "shape": "first rl3 line (probe)",
+     "n": {
+      "speed": 0,
+      "tripDay": 0,
+      "tripH": 0,
+      "tripM": 0,
+      "resetH": 0,
+      "resetM": 0
+     }
+    }
    ],
-   "material": [],
+   "evidence_total": 4,
+   "why": [
+    "raw numbers are in the evidence; the shown value needs a reading of iDrive's trip page (readings.json) to be compared"
+   ],
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
    "dated": null,
    "blocks": [
     "SPEC-R3 \u00a74.1",
@@ -547,16 +717,35 @@
   "L5": {
    "id": "L5",
    "title": "the odometer member arrives; factor 1 km",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "a Twin Dial log (odometer line) or the probe's P3 lines"
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "carriers_arrived": [
+     "rangeTank",
+     "supreme",
+     "range"
+    ],
+    "rangeTank_arrived": true
+   },
+   "evidence": [
+    {
+     "file": "twin_dial.log.1",
+     "line": 10,
+     "ts": "2026-11-17T15:31:52Z",
+     "shape": "first odometer line (log0.1.0), raw 114724",
+     "n": {
+      "mileage": 114724
+     }
+    }
    ],
-   "material": [],
+   "evidence_total": 1,
+   "why": [],
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1",
+    "signal_probe.log"
+   ],
    "dated": null,
    "blocks": [
     "SPEC-R3 \u00a74.1 bottom row"
@@ -568,17 +757,35 @@
   "L6": {
    "id": "L6",
    "title": "phone state: aggregatedCallState arrives",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "twin_dial.log"
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "arrives": true,
+    "values": [
+     "ACTIVE",
+     "DIALING",
+     "DISCONNECTED"
+    ]
+   },
+   "evidence": [
+    {
+     "file": "twin_dial.log.1",
+     "line": 1755,
+     "ts": "2026-11-18T13:00:05Z",
+     "shape": "phone state line, first value DISCONNECTED",
+     "n": {
+      "state": "DISCONNECTED"
+     }
+    }
    ],
-   "material": [],
-   "dated": null,
+   "evidence_total": 1,
+   "why": [],
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a74.4"
    ],
@@ -589,16 +796,19 @@
   "L7": {
    "id": "L7",
    "title": "media: HmiMediaState on HMI_CID arrives (lengths only)",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "arrives": true
+   },
    "evidence": [],
    "evidence_total": 0,
    "why": [],
-   "needs": [
-    "twin_dial.log"
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
    ],
-   "material": [],
    "dated": null,
    "blocks": [
     "SPEC-R3 \u00a74.3"
@@ -610,18 +820,58 @@
   "L8": {
    "id": "L8",
    "title": "the second witness: displayed cc arrives and returns to 0",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
-   "why": [
-    "no 'displayed cc:' line: either never sent or the build does not subscribe it"
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "arrives": true,
+    "returns_to_zero": true,
+    "values": [
+     0,
+     14,
+     15,
+     19,
+     184,
+     285,
+     926,
+     927
+    ],
+    "lines": 43
+   },
+   "evidence": [
+    {
+     "file": "twin_dial.log.1",
+     "line": 67,
+     "ts": "2026-11-17T15:34:21Z",
+     "shape": "displayed cc: number 65535",
+     "n": {
+      "number": 65535
+     }
+    },
+    {
+     "file": "twin_dial.log.1",
+     "line": 79,
+     "ts": "2026-11-17T17:00:49Z",
+     "shape": "displayed cc: number 0",
+     "n": {
+      "number": 0
+     }
+    },
+    {
+     "file": "twin_dial.log.1",
+     "line": 132,
+     "ts": "2026-11-17T17:01:12Z",
+     "shape": "displayed cc: number 285",
+     "n": {
+      "number": 285
+     }
+    }
    ],
-   "needs": [
-    "a Twin Dial 0.1.0+ (or f30 with config.ccDisplayed) log with a door message in it"
+   "evidence_total": 3,
+   "why": [],
+   "needs": [],
+   "material": [
+    "twin_dial.log.1"
    ],
-   "material": [],
    "dated": null,
    "blocks": [
     "f30 config.ccDisplayed",
@@ -643,59 +893,11 @@
       "version": [
        0,
        7,
-       10
+       19
       ],
       "builds_10s": 0,
-      "builds_30s": 0,
-      "first_build_s": null,
-      "snapshot": false
-     },
-     {
-      "app": "f30_cluster",
-      "version": [
-       0,
-       7,
-       10
-      ],
-      "builds_10s": 1,
-      "builds_30s": 1,
-      "first_build_s": 5.0,
-      "snapshot": false
-     },
-     {
-      "app": "f30_cluster",
-      "version": [
-       0,
-       7,
-       10
-      ],
-      "builds_10s": 1,
-      "builds_30s": 1,
-      "first_build_s": 5.5,
-      "snapshot": false
-     },
-     {
-      "app": "f30_cluster",
-      "version": [
-       0,
-       7,
-       11
-      ],
-      "builds_10s": 0,
-      "builds_30s": 0,
-      "first_build_s": null,
-      "snapshot": false
-     },
-     {
-      "app": "f30_cluster",
-      "version": [
-       0,
-       7,
-       11
-      ],
-      "builds_10s": 1,
       "builds_30s": 3,
-      "first_build_s": 3.8,
+      "first_build_s": 28.6,
       "snapshot": false
      },
      {
@@ -703,72 +905,132 @@
       "version": [
        0,
        7,
-       11
+       19
       ],
-      "builds_10s": 0,
-      "builds_30s": 2,
-      "first_build_s": 10.3,
-      "snapshot": true
+      "builds_10s": 3,
+      "builds_30s": 3,
+      "first_build_s": 3.2,
+      "snapshot": false
      },
      {
       "app": "f30_cluster",
       "version": [
        0,
        7,
-       12
+       20
       ],
       "builds_10s": 0,
       "builds_30s": 0,
       "first_build_s": null,
-      "snapshot": true
+      "snapshot": false
      },
      {
       "app": "f30_cluster",
       "version": [
        0,
        7,
-       12
+       20
+      ],
+      "builds_10s": 0,
+      "builds_30s": 1,
+      "first_build_s": 11.2,
+      "snapshot": false
+     },
+     {
+      "app": "f30_cluster",
+      "version": [
+       0,
+       7,
+       20
       ],
       "builds_10s": 1,
       "builds_30s": 1,
-      "first_build_s": 9.0,
-      "snapshot": true
+      "first_build_s": 9.8,
+      "snapshot": false
+     },
+     {
+      "app": "f30_cluster",
+      "version": [
+       0,
+       7,
+       20
+      ],
+      "builds_10s": 0,
+      "builds_30s": 1,
+      "first_build_s": 12.5,
+      "snapshot": false
+     },
+     {
+      "app": "f30_cluster",
+      "version": [
+       0,
+       7,
+       20
+      ],
+      "builds_10s": 0,
+      "builds_30s": 3,
+      "first_build_s": 10.1,
+      "snapshot": false
+     },
+     {
+      "app": "twin_dial",
+      "version": [
+       0,
+       1,
+       0
+      ],
+      "builds_10s": 3,
+      "builds_30s": 4,
+      "first_build_s": 3.3,
+      "snapshot": false
+     },
+     {
+      "app": "twin_dial",
+      "version": [
+       0,
+       1,
+       0
+      ],
+      "builds_10s": 3,
+      "builds_30s": 4,
+      "first_build_s": 3.1,
+      "snapshot": false
      }
     ],
-    "max_10s": 1,
+    "max_10s": 3,
     "min_10s": 0,
-    "max_30s": 3,
-    "runs_of_the_current_engine": 0,
-    "matches_bench_3": null
+    "max_30s": 4,
+    "runs_of_the_current_engine": 9,
+    "matches_bench_3": false
    },
    "evidence": [
     {
      "file": "f30_cluster.log.1",
-     "line": 108,
-     "ts": "2026-11-14T14:18:08Z",
-     "shape": "first layout build line within 10 s of the start, 1 builds in all",
+     "line": 197,
+     "ts": "2026-11-17T08:23:42Z",
+     "shape": "first layout build line within 10 s of the start, 3 builds in all",
      "n": {
-      "builds": 1,
+      "builds": 3,
       "version": [
        0,
        7,
-       10
+       19
       ]
      }
     }
    ],
    "evidence_total": 1,
    "why": [
-    "every run in this material is a build before 0.7.19: the time-zone and ccList rebuilds that make the bench's 3 did not exist yet, so these counts are not comparable; the first build line comes 5.0/5.5 s after the start (the cluster-render connection)",
     "a build line is `layout \"...\": N widgets ... whole-sheet writes ...`; only starts that the log shows from the first line are counted"
    ],
    "needs": [],
    "material": [
-    "reference/car/2026-11-15/oap/f30_cluster-0712.log",
-    "reference/car/2026-11-15/oap/f30_cluster.log",
-    "reference/car/2026-11-15/oap/f30_cluster.log.1"
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log",
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log.1",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
    ],
-   "dated": "2026-11-14",
+   "dated": "2026-11-18",
    "blocks": [
     "research3/MP \u00a77.4"
    ],
@@ -783,65 +1045,30 @@
    "label": "arrives",
    "decided": {
     "goes_whole_panel_KB": {
-     "n": 38,
+     "n": 51,
      "min": 0.0,
-     "median": 5526.0,
-     "max": 5952.0,
-     "p90": 5952.0
-    },
-    "goes_whole_map_KB": {
-     "n": 24,
-     "min": 1275.0,
-     "median": 1275.0,
-     "max": 1275.0,
-     "p90": 1275.0
-    },
-    "kb_per_minute_map": {
-     "n": 63,
-     "min": 0.0,
-     "median": 287330.0,
-     "max": 330688.0,
-     "p90": 327530.0
-    },
-    "budget_holds_per_minute_map": {
-     "n": 63,
-     "min": 0.0,
-     "median": 0.0,
-     "max": 365.0,
-     "p90": 180.0
-    },
-    "kb_per_minute_guide_auto": {
-     "n": 60,
-     "min": 0.0,
-     "median": 0.0,
-     "max": 0.0,
-     "p90": 0.0
-    },
-    "budget_holds_per_minute_guide_auto": {
-     "n": 60,
-     "min": 0.0,
-     "median": 0.0,
-     "max": 0.0,
-     "p90": 0.0
+     "median": 5844.0,
+     "max": 7756.0,
+     "p90": 6891.0
     },
     "kb_per_minute_panel": {
-     "n": 97,
+     "n": 261,
      "min": 0.0,
      "median": 24.0,
-     "max": 1662.0,
-     "p90": 1075.0
+     "max": 3144.0,
+     "p90": 1117.0
     },
     "budget_holds_per_minute_panel": {
-     "n": 97,
+     "n": 261,
      "min": 0.0,
      "median": 0.0,
-     "max": 742.0,
-     "p90": 32.0
+     "max": 459.0,
+     "p90": 0.0
     },
-    "kb_per_minute_hud": {
+    "kb_per_minute_map": {
      "n": 0
     },
-    "budget_holds_per_minute_hud": {
+    "budget_holds_per_minute_map": {
      "n": 0
     },
     "cap_KBps_seen": [
@@ -852,43 +1079,30 @@
     "cap_steps_below_ceiling": false,
     "cap_lines_in_journal": 0,
     "goes_whole_panel_values": {
-     "5526": 11,
-     "5561": 8,
-     "5952": 7,
-     "996": 2,
-     "5377": 2,
-     "2275": 2
+     "6891": 13,
+     "5844": 12,
+     "5526": 5,
+     "337": 2,
+     "7319": 2,
+     "742": 2
     },
-    "goes_whole_map_values": {
-     "1275": 24
-    },
-    "panel_whole_events": 38,
-    "map_whole_events": 24
+    "panel_whole_events": 51,
+    "map_whole_events": 0
    },
    "evidence": [
     {
      "file": "cluster-render.log.1",
-     "line": 44,
-     "ts": "2026-11-13T11:46:51Z",
-     "shape": "target panel goes whole: 5952 KB charged",
+     "line": 235,
+     "ts": "2026-11-14T19:41:45Z",
+     "shape": "target panel goes whole: 0 KB charged",
      "n": {
       "target": "panel",
-      "kb": 5952
+      "kb": 0
      }
     },
     {
-     "file": "cluster-render.log.1",
-     "line": 970,
-     "ts": "2026-11-13T12:00:19Z",
-     "shape": "target map goes whole: 1275 KB charged",
-     "n": {
-      "target": "map",
-      "kb": 1275
-     }
-    },
-    {
-     "file": "status-1.txt",
-     "line": 2,
+     "file": "status.txt",
+     "line": 1,
      "ts": null,
      "shape": "upload cap 5500 KB/s (ceiling 5500, floor 2000)",
      "n": {
@@ -898,23 +1112,18 @@
      }
     }
    ],
-   "evidence_total": 3,
+   "evidence_total": 2,
    "why": [
     "per-target numbers from every 'goes whole' and 'in the last N s' line; a 'goes whole' on the panel happens each time the KOMBI maps our content again"
    ],
    "needs": [],
    "material": [
-    "reference/car/2026-11-15/cluster-render/cluster-render.log",
-    "reference/car/2026-11-15/cluster-render/cluster-render.log.1",
-    "reference/car/2026-11-15/cluster-render/status-1.txt",
-    "reference/car/2026-11-15/cluster-render/status-samples-3x10s.txt",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.1",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.2",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.3",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.4"
+    "reference/car/2026-11-18-collect1/cluster-render/cluster-render.log",
+    "reference/car/2026-11-18-collect1/cluster-render/cluster-render.log.1",
+    "reference/car/2026-11-18-collect1/cluster-render/journal.txt",
+    "reference/car/2026-11-18-collect1/cluster-render/status.txt"
    ],
-   "dated": "2026-11-14",
+   "dated": "2026-11-18",
    "blocks": [
     "research3/MP \u00a77",
     "research3/MT \u00a78 item 4"
@@ -929,38 +1138,32 @@
    "status": "answered",
    "label": "arrives",
    "decided": {
-    "own_map_scene_mapped_s": 3346.7,
-    "bmw_scene_0x1000300_mapped_s": 1488.5,
-    "bmw_scene_0x1000300_unmapped_s": 1357.5,
-    "panel_up_intervals": 28,
-    "panel_up_seconds": 6788.9,
+    "own_map_scene_mapped_s": 0,
+    "bmw_scene_0x1000300_mapped_s": 13061.6,
+    "bmw_scene_0x1000300_unmapped_s": 4195.6,
+    "panel_up_intervals": 71,
+    "panel_up_seconds": 17486.9,
     "slot_0x100_content_seconds": {
-     "0x10004f0": {
-      "1": 3346.7,
-      "0": 340.1,
-      "3": 4.1
-     },
      "0x1000300": {
-      "3": 33.1,
-      "0": 1324.4,
-      "1": 1488.5
+      "1": 13061.6,
+      "0": 4195.6
      },
      "0x0": {
-      "0": 251.9
+      "0": 229.6
      }
     },
-    "slot_0x100_dominant": "0x10004f0",
+    "slot_0x100_dominant": "0x1000300",
     "slot_0x100_dominant_mapped": true,
     "panel_scene": "0x10004f8"
    },
    "evidence": [
     {
      "file": "cluster-render.log.1",
-     "line": 630,
-     "ts": "2026-11-13T11:50:39Z",
-     "shape": "slot 0x100 held 0x10004f0 while the panel was up",
+     "line": 48,
+     "ts": "2026-11-14T19:41:17Z",
+     "shape": "slot 0x100 held 0x1000300 while the panel was up",
      "n": {
-      "seconds": 3346.7
+      "seconds": 13061.6
      }
     }
    ],
@@ -973,15 +1176,11 @@
     "repeat with Twin Dial up (X6: mapSlots logging, or this table on the journal of that run)"
    ],
    "material": [
-    "reference/car/2026-11-15/cluster-render/cluster-render.log",
-    "reference/car/2026-11-15/cluster-render/cluster-render.log.1",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.1",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.2",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.3",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.4"
+    "reference/car/2026-11-18-collect1/cluster-render/cluster-render.log",
+    "reference/car/2026-11-18-collect1/cluster-render/cluster-render.log.1",
+    "reference/car/2026-11-18-collect1/cluster-render/journal.txt"
    ],
-   "dated": "2026-11-13",
+   "dated": "2026-11-14",
    "blocks": [
     "SPEC-R3 \u00a74.5",
     "research3/MB theories"
@@ -998,28 +1197,28 @@
    "decided": {
     "version": [
      0,
-     5,
-     12
+     6,
+     9
     ],
     "ge_0_5_12": true,
     "component_json": [
      0,
-     5,
-     12
+     6,
+     9
     ],
-    "starts_in_journal": 6
+    "starts_in_journal": 13
    },
    "evidence": [
     {
      "file": "cluster-render.log",
-     "line": 1413,
-     "ts": "2026-11-14T19:07:16Z",
-     "shape": "start: cluster-render 0.5.12",
+     "line": 3879,
+     "ts": "2026-11-18T13:01:46Z",
+     "shape": "start: cluster-render 0.6.9",
      "n": {
       "version": [
        0,
-       5,
-       12
+       6,
+       9
       ]
      }
     }
@@ -1028,16 +1227,12 @@
    "why": [],
    "needs": [],
    "material": [
-    "reference/car/2026-11-15/cluster-render/cluster-render.log",
-    "reference/car/2026-11-15/cluster-render/cluster-render.log.1",
-    "reference/car/2026-11-15/cluster-render/component.json",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.1",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.2",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.3",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.4"
+    "reference/car/2026-11-18-collect1/cluster-render/cluster-render.log",
+    "reference/car/2026-11-18-collect1/cluster-render/cluster-render.log.1",
+    "reference/car/2026-11-18-collect1/cluster-render/component.json",
+    "reference/car/2026-11-18-collect1/cluster-render/journal.txt"
    ],
-   "dated": "2026-11-14",
+   "dated": "2026-11-18",
    "blocks": [
     "research3/MT \u00a78 item 1"
    ],
@@ -1048,18 +1243,32 @@
   "L13": {
    "id": "L13",
    "title": "the 0.7.18 probes' results: ccListRiskClass / basicList lines, which entry marks a stored message",
-   "status": "not-yet",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "basicList_ids": 0,
+    "entries_that_change_state": {},
+    "symbols_requested": true
+   },
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 16,
+     "ts": "2026-11-17T08:12:20Z",
+     "shape": "0.7.18 list line for ccList with 1 entries",
+     "n": {
+      "entries": 1
+     }
+    }
+   ],
+   "evidence_total": 1,
    "why": [
-    "the 0.7.18 lines were never recorded in the repository; the saved logs are 0.7.10 .. 0.7.12"
+    "an entry whose state toggles is a candidate for the stored-message mark; the photo of BMW's marker decides (needs photo)"
    ],
-   "needs": [
-    "f30_cluster.log of 0.7.18 .. 0.7.20 (the lines 'probe: basicList:' / 'probe: ccListRiskClass:'), if still present on the car"
+   "needs": [],
+   "material": [
+    "f30_cluster.log.1"
    ],
-   "material": [],
    "dated": null,
    "blocks": [
     "SPEC rev 2 D7",
@@ -1085,8 +1294,8 @@
     "a drive past speed-limit signs with f30 0.7.x running (the 'sign:' line is written at each new combination)"
    ],
    "material": [
-    "reference/car/2026-11-15/oap/f30_cluster.log",
-    "reference/car/2026-11-15/oap/f30_cluster.log.1"
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log",
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log.1"
    ],
    "dated": null,
    "blocks": [
@@ -1100,17 +1309,51 @@
   "L15": {
    "id": "L15",
    "title": "day/night: the car's value against the sun; the meaning of 0",
-   "status": "not-yet",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "a log with 'day/night' lines (fix/colour-daynight, 0.7.x)"
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "source_seen": [
+     "car",
+     "sun"
+    ],
+    "codes": {
+     "1": [
+      "day"
+     ],
+     "2": [
+      "night"
+     ]
+    },
+    "car_value_arrives": true,
+    "code_0_means": null
+   },
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 325,
+     "ts": "2026-11-17T08:23:42Z",
+     "shape": "day/night line",
+     "n": {
+      "code": 1
+     }
+    },
+    {
+     "file": "f30_cluster.log.1",
+     "line": 1540,
+     "ts": "2026-11-17T14:56:40Z",
+     "shape": "day/night line",
+     "n": {
+      "code": 2
+     }
+    }
    ],
-   "material": [],
-   "dated": null,
+   "evidence_total": 2,
+   "why": [],
+   "needs": [],
+   "material": [
+    "f30_cluster.log.1"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "night looks",
     "SPEC rev 2 \u00a77.2"
@@ -1122,16 +1365,30 @@
   "L16": {
    "id": "L16",
    "title": "the clock's primary source: timeDateUTC offsets (logged whole once per zone change)",
-   "status": "not-yet",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "a log with a 'clock raw:' line (the car's first time zone)"
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "lines": 78,
+    "offsets_minutes": [],
+    "null_offset_seen": true
+   },
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 11,
+     "ts": "2026-11-17T08:12:19Z",
+     "shape": "clock raw line: no offset",
+     "n": {
+      "offset_min": null
+     }
+    }
    ],
-   "material": [],
+   "evidence_total": 1,
+   "why": [],
+   "needs": [],
+   "material": [
+    "f30_cluster.log.1"
+   ],
    "dated": null,
    "blocks": [
     "f30 / Twin Dial clock"
@@ -1150,13 +1407,10 @@
    "evidence_total": 0,
    "why": [],
    "needs": [
-    "f30_cluster.log of a drive with an auto start/stop stop"
+    "the table's output was refused by the evidence guard (ValueError): fix tools/car/tables_*.py"
    ],
-   "material": [
-    "reference/car/2026-11-15/oap/f30_cluster.log",
-    "reference/car/2026-11-15/oap/f30_cluster.log.1"
-   ],
-   "dated": "2026-11-14",
+   "material": [],
+   "dated": null,
    "blocks": [
     "6WB READY/OFF state machine",
     "WBMSA"
@@ -1168,20 +1422,40 @@
   "L18": {
    "id": "L18",
    "title": "vehicle condition values (standby row, P with engine off)",
-   "status": "not-yet",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
+   "status": "partial",
+   "label": "arrives",
+   "decided": {
+    "values_seen": [
+     10,
+     12,
+     3,
+     5,
+     7,
+     8
+    ],
+    "lines": 62
+   },
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 6,
+     "ts": "2026-11-17T08:12:19Z",
+     "shape": "first vehicle condition line",
+     "n": {
+      "condition": 10
+     }
+    }
+   ],
+   "evidence_total": 1,
    "why": [],
    "needs": [
-    "f30_cluster.log across ignition on / engine off / standby ('vehicle condition N')"
+    "which value is the standby row (5?) and P with the engine off (7?): the owner's marks across ignition on / engine off / standby"
    ],
    "material": [
-    "reference/car/2026-11-15/oap/f30_cluster.log",
-    "reference/car/2026-11-15/oap/f30_cluster.log.1"
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log",
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log.1"
    ],
-   "dated": "2026-11-14",
+   "dated": "2026-11-18",
    "blocks": [
     "bottom row standby"
    ],
@@ -1196,10 +1470,14 @@
    "label": "arrives",
    "decided": {
     "modes_seen": [
-     "COMFORT_PLUS"
+     "COMFORT",
+     "COMFORT_PLUS",
+     "SPORT_DYNAMIC",
+     "SPORT_EXPERT",
+     "SPORT_INDIVIDUAL"
     ],
-    "changes_logged": 3,
-    "unrecognised_lines": 6,
+    "changes_logged": 12,
+    "unrecognised_lines": 8,
     "unrecognised_values": [
      "INITIALISIERUNG",
      "SIGNAL_UNBEFUELLT"
@@ -1208,15 +1486,15 @@
    "evidence": [
     {
      "file": "f30_cluster.log.1",
-     "line": 311,
-     "ts": "2026-11-14T14:18:11Z",
+     "line": 354,
+     "ts": "2026-11-17T08:23:43Z",
      "shape": "first drive mode line",
      "n": {}
     },
     {
      "file": "f30_cluster.log.1",
-     "line": 1257,
-     "ts": "2026-11-14T14:39:51Z",
+     "line": 1524,
+     "ts": "2026-11-17T08:35:26Z",
      "shape": "a drive mode value the app does not map",
      "n": {}
     }
@@ -1225,10 +1503,10 @@
    "why": [],
    "needs": [],
    "material": [
-    "reference/car/2026-11-15/oap/f30_cluster.log",
-    "reference/car/2026-11-15/oap/f30_cluster.log.1"
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log",
+    "reference/car/2026-11-18-collect1/apps/f30_cluster/f30_cluster.log.1"
    ],
-   "dated": "2026-11-14",
+   "dated": "2026-11-18",
    "blocks": [
     "f30 Change with the drive mode",
     "MB experiments X1-X4"
@@ -1261,16 +1539,30 @@
   "L21": {
    "id": "L21",
    "title": "road label, navigation state, position: do they reach f30 (shapes only)",
-   "status": "not-yet",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
+   "status": "partial",
+   "label": "arrives",
+   "decided": {
+    "road_lines": 43,
+    "navigation_lines": 0,
+    "position_lines": 0
+   },
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 313,
+     "ts": "2026-11-17T08:23:42Z",
+     "shape": "first line of this kind (shape only; never read as text)",
+     "n": {}
+    }
+   ],
+   "evidence_total": 1,
    "why": [],
    "needs": [
-    "f30_cluster.log with a guided route (lines 'road label:' 'navigation:')"
+    "the calibration of config.road / config.nav against the car's own text (lengths, not the text)"
    ],
-   "material": [],
+   "material": [
+    "f30_cluster.log.1"
+   ],
    "dated": null,
    "blocks": [
     "bottom row road label"
@@ -1328,43 +1620,24 @@
    "status": "answered",
    "label": "arrives",
    "decided": {
-    "renderer_guard_disabled_events": 1,
-    "guard_events": [
-     {
-      "strike": 2,
-      "ms_after_mapping": 2287
-     }
-    ],
+    "renderer_guard_disabled_events": 0,
+    "guard_events": [],
     "app_kombi_guard_lines": 0,
     "kombi_guard_json_present": false,
-    "cluster_render_display_unavailable_lines": 2
+    "cluster_render_display_unavailable_lines": 0
    },
-   "evidence": [
-    {
-     "file": "cluster-render.log",
-     "line": 1410,
-     "ts": "2026-11-14T19:07:13Z",
-     "shape": "cluster-render guard disabled the panel after a strike",
-     "n": {
-      "strike": 2
-     }
-    }
-   ],
-   "evidence_total": 1,
+   "evidence": [],
+   "evidence_total": 0,
    "why": [
     "whether the 0.7.13 shader-size fix holds with the night looks back is read from the absence of these lines over the session's start / mode switch / day-night steps"
    ],
    "needs": [],
    "material": [
-    "reference/car/2026-11-15/cluster-render/cluster-render.log",
-    "reference/car/2026-11-15/cluster-render/cluster-render.log.1",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.1",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.2",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.3",
-    "reference/car/2026-11-15/logs/woc-journal/journal.log.4"
+    "reference/car/2026-11-18-collect1/cluster-render/cluster-render.log",
+    "reference/car/2026-11-18-collect1/cluster-render/cluster-render.log.1",
+    "reference/car/2026-11-18-collect1/cluster-render/journal.txt"
    ],
-   "dated": "2026-11-14",
+   "dated": "2026-11-18",
    "blocks": [
     "night looks",
     "X10 (Twin Dial shaders)"
@@ -1376,16 +1649,85 @@
   "L25": {
    "id": "L25",
    "title": "ccList pairs (id, symbol id, colour) the car lists",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
+   "status": "partial",
+   "label": "arrives",
+   "decided": {
+    "ids": {
+     "0": {
+      "colours": [
+       "green"
+      ],
+      "symbol_ids": [
+       6
+      ]
+     },
+     "14": {
+      "colours": [
+       "white"
+      ],
+      "symbol_ids": [
+       2
+      ]
+     },
+     "15": {
+      "colours": [
+       "white"
+      ],
+      "symbol_ids": [
+       2
+      ]
+     },
+     "19": {
+      "colours": [
+       "white"
+      ],
+      "symbol_ids": [
+       2
+      ]
+     },
+     "40": {
+      "colours": [
+       "white"
+      ],
+      "symbol_ids": [
+       5
+      ]
+     },
+     "987": {
+      "colours": [
+       "white"
+      ],
+      "symbol_ids": [
+       5
+      ]
+     },
+     "2255": {
+      "colours": [
+       "white"
+      ],
+      "symbol_ids": [
+       5
+      ]
+     }
+    }
+   },
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 2180,
+     "ts": "2026-11-17T15:14:22Z",
+     "shape": "ccList line with ids and colours (name lengths are not copied)",
+     "n": {}
+    }
+   ],
+   "evidence_total": 1,
    "why": [],
    "needs": [
-    "logs with 'check-control list:' lines over as many days of use as they hold"
+    "symbol ids come from the 0.7.18 probe lines or the signal_probe's ccList lines; fill by_symbol_id of message_symbols.json from ids only"
    ],
-   "material": [],
+   "material": [
+    "f30_cluster.log.1"
+   ],
    "dated": null,
    "blocks": [
     "SPEC-R3 \u00a75.2",
@@ -1398,14 +1740,27 @@
   "L26": {
    "id": "L26",
    "title": "message auto-hide and re-show timing; the frame dwell",
-   "status": "not-yet",
-   "label": null,
-   "decided": {},
+   "status": "partial",
+   "label": "arrives",
+   "decided": {
+    "episodes": 6,
+    "episode_seconds": [
+     1.1,
+     1.6,
+     7.0,
+     7.0,
+     7.7,
+     7.7
+    ],
+    "frame_dwell_seconds": []
+   },
    "evidence": [],
    "evidence_total": 0,
-   "why": [],
+   "why": [
+    "an episode is the time the list is not at rest; the manual's ~20 s hide and ~8 s re-show are read as: episode_seconds near 20 for a door left open, and a re-show shows as a second episode"
+   ],
    "needs": [
-    "a door message left open until BMW hides it (B3.3) in a log of 0.7.19+ / Twin Dial / the probe"
+    "the owner's clock times of the message appearing and disappearing (B3.3) to compare with these seconds"
    ],
    "material": [],
    "dated": null,
@@ -1442,7 +1797,7 @@
   "L28": {
    "id": "L28",
    "title": "does the cluster-render status socket return status.txt's text (map window presence rule S1)",
-   "status": "no-material",
+   "status": "not-yet",
    "label": null,
    "decided": {},
    "evidence": [],
@@ -1467,9 +1822,9 @@
    "status": "partial",
    "label": "arrives",
    "decided": {
-    "asset_rows": 8,
-    "assets_with_kb_above_0": 0,
-    "max_kb": 0
+    "asset_rows": 14,
+    "assets_with_kb_above_0": 13,
+    "max_kb": 1753
    },
    "evidence": [],
    "evidence_total": 0,
@@ -1489,14 +1844,27 @@
   "L30": {
    "id": "L30",
    "title": "is newCCMessage ever sent",
-   "status": "not-yet",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "arrives": true,
+    "lines": 3
+   },
+   "evidence": [
+    {
+     "file": "f30_cluster.log.1",
+     "line": 2165,
+     "ts": "2026-11-17T15:14:22Z",
+     "shape": "a check-control message line (newCCMessage) arrived",
+     "n": {}
+    }
+   ],
+   "evidence_total": 1,
    "why": [],
    "needs": [],
-   "material": [],
+   "material": [
+    "f30_cluster.log.1"
+   ],
    "dated": null,
    "blocks": [],
    "kind": "L",
@@ -1525,17 +1893,43 @@
   "P1": {
    "id": "P1",
    "title": "which message the cluster shows now (decides D7; the frame counter)",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "active_cc_arrives": true,
+    "displayed_cc_arrives": true,
+    "list_arrives": true,
+    "number_equals_ccList_id": "0/0",
+    "returns_to_zero": false,
+    "order_effects": 1,
+    "hang_stretches": [],
+    "strict_can_be_lifted": false,
+    "displayed_returns_to_zero": true,
+    "frame_counter_follows_cycle": false
+   },
+   "evidence": [
+    {
+     "file": "signal_probe.log",
+     "line": 131,
+     "ts": "2026-11-18T18:29:15Z",
+     "shape": "first active-cc line, number 65535",
+     "n": {
+      "number": 65535
+     }
+    }
    ],
-   "material": [],
-   "dated": null,
+   "evidence_total": 1,
+   "why": [
+    "D7 may be lifted (owner's decision) only when the number equals a ccList id during messages, returns to 0, and no hang stretch exists"
+   ],
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1",
+    "signal_probe.log"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a75.4",
     "SPEC \u00a78.4 D7",
@@ -1549,17 +1943,34 @@
   "P2": {
    "id": "P2",
    "title": "the stored-message mark: basicList / ccListRiskClass",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
+   "status": "answered",
+   "label": "not-sent",
+   "decided": {
+    "arrives": false,
+    "observed_minutes": 2.0,
+    "tags": [
+     "basicList",
+     "ccListRiskClass"
+    ],
+    "steps_done_that_expected_it": [],
+    "marks_pressed": 11,
+    "getter_outcome": {
+     "basicList": "provider-not-available",
+     "ccListRiskClass": "error"
+    }
+   },
    "evidence": [],
    "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   "why": [
+    "the probe's summary names every one of these fields silent after 2.0 minutes"
    ],
-   "material": [],
-   "dated": null,
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "f30 config.ccMarker",
     "strip P-REPORT item 6",
@@ -1572,16 +1983,73 @@
   "P3": {
    "id": "P3",
    "title": "odometer: carriers, factor, invalid values",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
+   "status": "partial",
+   "label": "arrives",
+   "decided": {
+    "rangeTank": {
+     "lines": 28,
+     "valid": 28,
+     "last": 114747,
+     "invalid_seen": []
+    },
+    "supreme": {
+     "lines": 1,
+     "valid": 0,
+     "last": null,
+     "invalid_seen": [
+      114747213
+     ]
+    },
+    "range": {
+     "lines": 1,
+     "valid": 1,
+     "last": 114747,
+     "invalid_seen": []
+    },
+    "plausible_without_reading": {
+     "rangeTank": true,
+     "range": true
+    }
+   },
+   "evidence": [
+    {
+     "file": "signal_probe.log",
+     "line": 246,
+     "ts": "2026-11-18T18:30:19Z",
+     "shape": "rangeTank raw 114747 (probe)",
+     "n": {
+      "mileage": 114747
+     }
+    },
+    {
+     "file": "signal_probe.log",
+     "line": 174,
+     "ts": "2026-11-18T18:29:48Z",
+     "shape": "supreme raw 114747213 (probe)",
+     "n": {
+      "mileage": 114747213
+     }
+    },
+    {
+     "file": "signal_probe.log",
+     "line": 172,
+     "ts": "2026-11-18T18:29:48Z",
+     "shape": "range raw 114747 (probe)",
+     "n": {
+      "mileage": 114747
+     }
+    }
+   ],
+   "evidence_total": 3,
    "why": [],
    "needs": [
-    "a Twin Dial log (odometer line) or the probe's P3 lines"
+    "the cluster's odometer in km (readings.json: odometer_km)"
    ],
-   "material": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1",
+    "signal_probe.log"
+   ],
    "dated": null,
    "blocks": [
     "SPEC-R3 \u00a74.1 bottom row"
@@ -1593,17 +2061,117 @@
   "P4": {
    "id": "P4",
    "title": "trip computer: factors, which counter is 'since start', the departure time, the cross-check",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "twin_dial.log of the build on the car (collect.sh finds its data folder)"
+   "status": "partial",
+   "label": "arrives",
+   "decided": {
+    "speedUnit": "KM_S_H__KM",
+    "consUnit": "VERBRAUCH_IN_L_S_100KM",
+    "cross_check_pairs": [
+     {
+      "bc": 1,
+      "way": 0.01,
+      "speed": 0.001,
+      "ratio": 1.05
+     },
+     {
+      "bc": 1,
+      "way": 0.1,
+      "speed": 0.01,
+      "ratio": 1.05
+     },
+     {
+      "bc": 1,
+      "way": 1,
+      "speed": 0.1,
+      "ratio": 1.05
+     },
+     {
+      "bc": 1,
+      "way": 10,
+      "speed": 1,
+      "ratio": 1.05
+     },
+     {
+      "bc": 2,
+      "way": 0.01,
+      "speed": 0.001,
+      "ratio": 1.05
+     },
+     {
+      "bc": 2,
+      "way": 0.1,
+      "speed": 0.01,
+      "ratio": 1.05
+     },
+     {
+      "bc": 2,
+      "way": 1,
+      "speed": 0.1,
+      "ratio": 1.05
+     },
+     {
+      "bc": 2,
+      "way": 10,
+      "speed": 1,
+      "ratio": 1.05
+     }
+    ],
+    "cross_check_ratio_fixed": [
+     10.0
+    ],
+    "unverified_default": {
+     "way": 0.1,
+     "speed": 0.1,
+     "cons": 0.1
+    }
+   },
+   "evidence": [
+    {
+     "file": "signal_probe.log",
+     "line": 287,
+     "ts": "2026-11-18T18:31:05Z",
+     "shape": "average raw speed1=143 cons1=152 speed2=143 cons2=152",
+     "n": {
+      "speed1": 143,
+      "cons1": 152,
+      "speed2": 143,
+      "cons2": 152
+     }
+    },
+    {
+     "file": "signal_probe.log",
+     "line": 253,
+     "ts": "2026-11-18T18:30:30Z",
+     "shape": "travel raw hours=1 minutes=24 way=19",
+     "n": {
+      "hours": 1,
+      "minutes": 24,
+      "way": 19
+     }
+    },
+    {
+     "file": "signal_probe.log",
+     "line": 160,
+     "ts": "2026-11-18T18:29:47Z",
+     "shape": "departure raw hour=9 minute=54",
+     "n": {
+      "hour": 9,
+      "minute": 54
+     }
+    }
    ],
-   "material": [],
-   "dated": null,
+   "evidence_total": 3,
+   "why": [
+    "the cross-check fixes the ratio way-factor / speed-factor, not their size: the size needs a reading or the plausible range"
+   ],
+   "needs": [
+    "the owner's reading of iDrive's trip page (readings.json: trip.since_start)"
+   ],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a74.1",
     "config.trip"
@@ -1615,34 +2183,58 @@
   "P5": {
    "id": "P5",
    "title": "units: km / miles, Celsius, bar",
-   "status": "partial",
-   "label": "arrives-other-app",
+   "status": "answered",
+   "label": "arrives",
    "decided": {
-    "pressure_unit": "BAR",
-    "temperature_unit": "C"
+    "mileage_unit": "KILOMETER",
+    "temp_unit": "C",
+    "ext_temp": "C",
+    "ext_speed": "MEILEN",
+    "ext_cons": "L_S_100KM",
+    "ext_fuel": "GALONEN__US",
+    "ext_pressure": "BAR",
+    "ext_power": "PS",
+    "ext_torque": "NM",
+    "km": true,
+    "miles_variant_needed": false
    },
    "evidence": [
     {
-     "file": "car_vitals.log",
-     "line": 29,
-     "ts": "2026-11-09T17:02:44Z",
-     "shape": "car_vitals 'car units' line (another app's log)",
+     "file": "twin_dial.log.1",
+     "line": 1782,
+     "ts": "2026-11-18T13:00:06Z",
+     "shape": "units line: mileage unit given",
      "n": {
-      "pressure": "BAR",
-      "temperature": "C"
+      "unit": "KILOMETER"
+     }
+    },
+    {
+     "file": "signal_probe.log",
+     "line": 162,
+     "ts": "2026-11-18T18:29:47Z",
+     "shape": "probe external-display line",
+     "n": {
+      "unit": "C"
+     }
+    },
+    {
+     "file": "signal_probe.log",
+     "line": 189,
+     "ts": "2026-11-18T18:29:49Z",
+     "shape": "probe units-ext line",
+     "n": {
+      "pressure": "BAR"
      }
     }
    ],
-   "evidence_total": 1,
+   "evidence_total": 3,
    "why": [],
-   "needs": [
-    "the distance unit (km / miles): Twin Dial's 'units raw (P5)' line or the probe's units line"
-   ],
+   "needs": [],
    "material": [
-    "reference/car/2026-11-15/logs/other-apps/car_vitals.log",
-    "car_vitals.log"
+    "twin_dial.log.1",
+    "signal_probe.log"
    ],
-   "dated": "2026-11-14",
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC rev 2 \u00a712 (km only)",
     "tyre page units"
@@ -1654,41 +2246,39 @@
   "P6": {
    "id": "P6",
    "title": "cold start to warm: the car's own coolant verdict against the temperature",
-   "status": "partial",
-   "label": "arrives-other-app",
+   "status": "answered",
+   "label": "arrives",
    "decided": {
-    "engine_temp_raw_range_1": [
-     111,
-     147
+    "verdicts_seen": [
+     "OK"
     ],
-    "engine_temp_raw_range_2": [
-     48,
-     153
-    ],
-    "engine_temp_minus_48_plausible": true
+    "temps_lines": 7,
+    "temp_min_max": [
+     71,
+     75
+    ]
    },
    "evidence": [
     {
-     "file": "car_vitals.log",
-     "line": 38,
-     "ts": "2026-11-09T17:02:44Z",
-     "shape": "car_vitals raw engine temperatures line (another app's log)",
-     "n": {}
+     "file": "signal_probe.log",
+     "line": 163,
+     "ts": "2026-11-18T18:29:48Z",
+     "shape": "first engine verdict OK",
+     "n": {
+      "verdict": "OK"
+     }
     }
    ],
    "evidence_total": 1,
-   "why": [
-    "the engine temperatures arrive (another app's log); the raw range is in the decided block (raw - 48 is the scale SV verified for the coolant); the car's own verdict (COLD / OK / HOT) is not in that log"
-   ],
-   "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session",
-    "the probe's engine-verdict through a cold start (P6)"
-   ],
+   "why": [],
+   "needs": [],
    "material": [
-    "reference/car/2026-11-15/logs/other-apps/car_vitals.log",
-    "car_vitals.log"
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1",
+    "signal_probe.log"
    ],
-   "dated": "2026-11-14",
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC \u00a75.2 coolant bar"
    ],
@@ -1699,17 +2289,32 @@
   "P7": {
    "id": "P7",
    "title": "doors, boot, bonnet, central locking: notifies at all; sends once at subscribe",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
+   "status": "partial",
+   "label": "arrives",
+   "decided": {
+    "once_at_subscribe": {
+     "zv-status": false,
+     "doors": false,
+     "lids": false
+    },
+    "fields_with_two_values": [],
+    "changed_to": {},
+    "notifies": false
+   },
    "evidence": [],
    "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   "why": [
+    "the car picture starts 'unknown', never 'closed', unless the first line comes at subscribe (once_at_subscribe)"
    ],
-   "material": [],
-   "dated": null,
+   "needs": [
+    "one door opened and closed in the log (P7 steps)"
+   ],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a74 V2 car picture"
    ],
@@ -1720,17 +2325,62 @@
   "P8": {
    "id": "P8",
    "title": "media: titles, progress, source icon, radio detail, CarPlay player",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "arrives": [
+     "cp-device",
+     "cp-item-metadata",
+     "cp-item-position",
+     "cp-item-time",
+     "cp-player-state",
+     "main-connections",
+     "main-menu-metadata",
+     "media-menu",
+     "player-metadata",
+     "station",
+     "track-progress"
+    ],
+    "selected_icons": [
+     "CARPLAY"
+    ],
+    "progress_arrives": true,
+    "radio_arrives": true,
+    "radio_bands": [
+     "WB_FM"
+    ],
+    "radio_text_len_seen": true,
+    "radio_freq_band_only": true,
+    "carplay_lines": 12,
+    "connection_states": [
+     "CS_CONNECTED"
+    ]
+   },
+   "evidence": [
+    {
+     "file": "signal_probe.log",
+     "line": 223,
+     "ts": "2026-11-18T18:30:10Z",
+     "shape": "first player-metadata line (lengths and enum names only)",
+     "n": {
+      "line1-len": 17,
+      "line2-len": 16,
+      "line3-len": 0
+     }
+    }
+   ],
+   "evidence_total": 1,
    "why": [],
    "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+    "the owner's counted title length per marker (readings.json media.<marker>.title_len) to pick the title line"
    ],
-   "material": [],
-   "dated": null,
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1",
+    "signal_probe.log"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a74.3",
     "SPEC-R3 \u00a73.3 tab 3"
@@ -1742,17 +2392,21 @@
   "P9": {
    "id": "P9",
    "title": "phone: the call's states, battery / signal, the car's own modem",
-   "status": "no-material",
-   "label": null,
+   "status": "not-yet",
+   "label": "unseen",
    "decided": {},
    "evidence": [],
    "evidence_total": 0,
    "why": [],
    "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+    "the probe build that carries these fields (they are not in its table / its summary)"
    ],
-   "material": [],
-   "dated": null,
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a74.4",
     "SPEC-R3 \u00a710 name setting"
@@ -1764,17 +2418,28 @@
   "P10": {
    "id": "P10",
    "title": "voltage: a plausible 12-14.8 V; the scale",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "lines": 5,
+    "scale_candidates": [
+     0.1
+    ],
+    "min_max_raw": [
+     132,
+     133
+    ]
+   },
    "evidence": [],
    "evidence_total": 0,
    "why": [],
-   "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
    ],
-   "material": [],
-   "dated": null,
+   "dated": "2026-11-18",
    "blocks": [
     "a future battery readout"
    ],
@@ -1785,17 +2450,45 @@
   "P11": {
    "id": "P11",
    "title": "the cluster's view setting (map view) and the indirect key",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "arrives": [
+     "display-kombi",
+     "ic-context",
+     "ic-widget",
+     "kombi-available",
+     "kombi-config",
+     "kombi-selection"
+    ],
+    "navDisplay_values": [
+     "ANZEIGE_RADIOBUTTON_KARTENANSICHT_AKTIV"
+    ],
+    "navDisplay_changes": false,
+    "display_kombi_views": [
+     "KEINE_AENDERUNG"
+    ],
+    "lines_by_tag": {
+     "ic-widget": 1,
+     "ic-context": 2,
+     "kombi-selection": 2,
+     "kombi-available": 2,
+     "kombi-config": 3,
+     "display-kombi": 2
+    }
+   },
    "evidence": [],
    "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   "why": [
+    "navDisplay changing with the owner's cluster-view steps means the map-view setting is readable (SN presence rule)"
    ],
-   "material": [],
-   "dated": null,
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a74.5 presence rule",
     "SPEC-R3 \u00a73.4 tab key"
@@ -1807,17 +2500,52 @@
   "P12": {
    "id": "P12",
    "title": "guided route: guidance state, the manoeuvre kind, the distance unit, lanes (SN 3.1)",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "guiding_states": [
+     "INACTIVE"
+    ],
+    "guiding_reaches_active": false,
+    "dart_arrives": true,
+    "dart_kinds": [
+     "other"
+    ],
+    "dart_directions": [],
+    "raw_falls_to_zero_at_a_turn": false,
+    "dart_units": [
+     "NONE"
+    ],
+    "destination_manoeuvre_seen": false,
+    "next_intersection_arrives": true,
+    "lanes_rows_ge1": false,
+    "bmw_shows_its_own_turn": true,
+    "guiding_providers": [
+     "CAR_PLAY"
+    ],
+    "carplay_guidance_active_seen": true
+   },
+   "evidence": [
+    {
+     "file": "signal_probe.log",
+     "line": 315,
+     "ts": "2026-11-18T18:31:18Z",
+     "shape": "first dart line, kind present, raw 0",
+     "n": {
+      "raw": 0
+     }
+    }
    ],
-   "material": [],
-   "dated": null,
+   "evidence_total": 1,
+   "why": [],
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1",
+    "signal_probe.log"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a74.5",
     "SPEC-R3 \u00a73.3 tab 5 turn arrow"
@@ -1829,17 +2557,52 @@
   "P13": {
    "id": "P13",
    "title": "the tab key: which button, which bit (SB 3.3)",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
+   "status": "partial",
+   "label": "arrives",
+   "decided": {
+    "lines_by_tag": {
+     "stalk": 34,
+     "stalk-complete": 33,
+     "sw-special1": 1,
+     "sw-special2": 1,
+     "sw-wheel-steps": 1,
+     "sw-wheel-press": 1,
+     "sw-skip": 1,
+     "sw-volume": 1,
+     "sw-voice": 1,
+     "sw-phone": 1,
+     "controller": 22,
+     "controller-keys": 1,
+     "hmi-shortcut": 1
+    },
+    "stalk_bit_windows": {
+     "6": {
+      "stalk-flash": [
+       10
+      ]
+     }
+    },
+    "stalk_row_private_bit": false,
+    "thumbwheel": {
+     "changes_without_list": false,
+     "changes_with_list": false
+    },
+    "controller_lines": 22,
+    "tab_key": null
+   },
    "evidence": [],
    "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   "why": [
+    "the stalk byte moved, but no bit is private to the bc-short steps",
+    "no candidate key: the setting (Tab = auto / 1 / 2 / 5) and the auto rules remain"
    ],
-   "material": [],
-   "dated": null,
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a73.4",
     "SPEC-R3 \u00a714 phase D",
@@ -1852,17 +2615,31 @@
   "P14": {
    "id": "P14",
    "title": "when BMW's map exists: map-without-route and junction-3d-in-kombi",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "map_without_route_values": [
+     "false"
+    ],
+    "junction_3d_in_kombi_values": [
+     "false"
+    ],
+    "navDisplay_seen": [
+     "ANZEIGE_RADIOBUTTON_KARTENANSICHT_AKTIV"
+    ]
+   },
    "evidence": [],
    "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   "why": [
+    "map-without-route false with no route predicts no map in slot 0x100 (S3); confirm against L11 / X6"
    ],
-   "material": [],
-   "dated": null,
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a74.5"
    ],
@@ -1873,17 +2650,40 @@
   "P15": {
    "id": "P15",
    "title": "the sign arrives; the cruise set speed and the active function (SPEC-R3 section 9)",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
+   "status": "answered",
+   "label": "arrives",
+   "decided": {
+    "sign_arrives": false,
+    "sign_values": [],
+    "sign_units": [],
+    "sign_special_values_seen": [],
+    "set_speed_sources": {
+     "ldm-guidance": [
+      0
+     ],
+     "hud-data": [
+      65535
+     ]
+    },
+    "active_function_values": [],
+    "longitudinal_arrives": false,
+    "acc_not_equipped": false,
+    "limiter_values": [
+     "STATUS_INACTIVE"
+    ]
+   },
    "evidence": [],
    "evidence_total": 0,
-   "why": [],
-   "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+   "why": [
+    "the sign never arrived: V3 and the sign drawing stay off"
    ],
-   "material": [],
-   "dated": null,
+   "needs": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a78, \u00a79"
    ],
@@ -1981,14 +2781,14 @@
     "tyre pressure: factor 0.1 is the only one that puts the raw values in 1.5-4 bar (car_vitals also logs the car's pressure unit BAR)"
    ],
    "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session",
+    "the probe build that carries these fields (they are not in its table / its summary)",
     "iDrive's tyre page read next to a probe line (readings.json: tyres), and a drive under load for boost (readings.json: boost_peak_bar)"
    ],
    "material": [
-    "reference/car/2026-11-15/logs/other-apps/car_vitals.log",
+    "reference/car/2026-11-18-collect1/apps/car_vitals/car_vitals.log",
     "car_vitals.log"
    ],
-   "dated": "2026-11-14",
+   "dated": "2026-11-17",
    "blocks": [
     "SPEC-R3 \u00a74.1 technical page, tyres page"
    ],
@@ -1999,17 +2799,21 @@
   "P17": {
    "id": "P17",
    "title": "others: heading, altitude, service due, instantaneous consumption: only whether they arrive",
-   "status": "no-material",
-   "label": null,
+   "status": "not-yet",
+   "label": "unseen",
    "decided": {},
    "evidence": [],
    "evidence_total": 0,
    "why": [],
    "needs": [
-    "the probe's log (signal_probe or Twin Dial's probe build) of the session"
+    "the probe build that carries these fields (they are not in its table / its summary)"
    ],
-   "material": [],
-   "dated": null,
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
+   "dated": "2026-11-18",
    "blocks": [
     "SPEC-R3 \u00a74.1 optional pages"
    ],
@@ -2020,16 +2824,49 @@
   "P18": {
    "id": "P18",
    "title": "Does anything the head unit tells the KOMBI change at the moment the box appears or goes: the gear display data (Powertrain.dataDisplayGearboxSecure), the welcome animation, the cluster configuration,",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
-   "evidence": [],
-   "evidence_total": 0,
+   "status": "partial",
+   "label": "arrives",
+   "decided": {
+    "arrives": [
+     "dialog-state",
+     "fes-switch",
+     "gearbox-display",
+     "kombi-basic",
+     "welcome-animation"
+    ],
+    "silent": [
+     "gearbox-secure",
+     "gearbox-status"
+    ],
+    "unseen": []
+   },
+   "evidence": [
+    {
+     "file": "signal_probe.log",
+     "line": 372,
+     "ts": "2026-11-18T18:32:51Z",
+     "shape": "first dialog-state line",
+     "n": {}
+    },
+    {
+     "file": "signal_probe.log",
+     "line": 376,
+     "ts": "2026-11-18T18:32:51Z",
+     "shape": "first fes-switch line",
+     "n": {}
+    }
+   ],
+   "evidence_total": 2,
    "why": [],
    "needs": [
-    "the signal_probe log of the session"
+    "a decision table for P18 is not written: the lines are in the log; the lead reads them against the register's steps"
    ],
-   "material": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1",
+    "signal_probe.log"
+   ],
    "dated": null,
    "blocks": [
     "research3/MB theories a-e",
@@ -2043,16 +2880,34 @@
   "P19": {
    "id": "P19",
    "title": "Do the signals that FEATURE-AUDIT ranked as gaps arrive, and with what values: turn indicators, belt contacts and seat occupancy, the lamp status (main beam, fog, position), the dimmer, the engine-oil",
-   "status": "no-material",
-   "label": null,
-   "decided": {},
+   "status": "not-yet",
+   "label": "unseen",
+   "decided": {
+    "arrives": [],
+    "silent": [],
+    "unseen": [
+     "belts",
+     "cons-eco",
+     "cons-regular",
+     "dimmer",
+     "driving-style",
+     "eco-range",
+     "indicate",
+     "lights",
+     "seats"
+    ]
+   },
    "evidence": [],
    "evidence_total": 0,
    "why": [],
    "needs": [
-    "the signal_probe log of the session"
+    "a decision table for P19 is not written: the lines are in the log; the lead reads them against the register's steps"
    ],
-   "material": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
    "dated": null,
    "blocks": [
     "FEATURE-AUDIT gaps 3, 12; BAKE-REPORT \u00a75 item 5",
@@ -2074,7 +2929,11 @@
    "needs": [
     "CP's probe_fields.json has no field for P20 yet"
    ],
-   "material": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
    "dated": null,
    "blocks": [
     "HIGH-BEAM-ASSIST-REPORT \u00a76 question 1"
@@ -2095,7 +2954,11 @@
    "needs": [
     "CP's probe_fields.json has no field for P21 yet"
    ],
-   "material": [],
+   "material": [
+    "reference/car/2026-11-18-collect1/apps/signal_probe/signal_probe.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log",
+    "reference/car/2026-11-18-collect1/apps/twin_dial/twin_dial.log.1"
+   ],
    "dated": null,
    "blocks": [
     "SPEC-R3 \u00a73.4",
@@ -2200,7 +3063,7 @@
    "status": "partial",
    "label": null,
    "decided": {
-    "goes_whole_events": 62
+    "goes_whole_events": 51
    },
    "evidence": [],
    "evidence_total": 0,
@@ -2311,37 +3174,20 @@
    "status": "partial",
    "label": "arrives",
    "decided": {
-    "guard_strikes": 1,
-    "guard_events": [
-     {
-      "strike": 2,
-      "ms_after_mapping": 2287
-     }
-    ],
-    "renderer_starts_in_journal": 6,
+    "guard_strikes": 0,
+    "guard_events": [],
+    "renderer_starts_in_journal": 13,
     "app_nonzero_exits": 0
    },
-   "evidence": [
-    {
-     "file": "cluster-render.log",
-     "line": 1410,
-     "ts": "2026-11-14T19:07:13Z",
-     "shape": "cluster-render guard disabled the panel scene after mapping it",
-     "n": {
-      "strike": 2
-     }
-    }
-   ],
-   "evidence_total": 1,
+   "evidence": [],
+   "evidence_total": 0,
    "why": [
-    "the guard switched the panel off after a strike; it is not asked for again until cluster-render's version changes (or guard-reset): after a guard line the owner's photo of the cluster means nothing until that is read"
+    "no guard strike and no abnormal app exit in the saved journal; whether the cluster itself reset is the owner's observation"
    ],
    "needs": [
     "the owner's observation: no cluster reset after start, a mode switch, day/night"
    ],
-   "material": [
-    "cluster-render.log"
-   ],
+   "material": [],
    "dated": null,
    "blocks": [
     "SPEC-R3 \u00a712"
