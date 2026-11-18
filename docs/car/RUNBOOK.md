@@ -32,13 +32,13 @@ The owner's first question is whether we can catch the press of the **trip / on-
 
 **The session as planned needs one install: signal_probe.** Everything the owner does in blocks 0-9 runs on the apps already on the car (f30 0.7.20, Twin Dial 0.1.0). The experiments that need a build are **pass 2** (section 4): they cannot ride on the probe session without several installs, each of which is a change to the car the owner must approve, so they are deliberately a separate sitting.
 
-If Twin Dial 0.1.1 is ready before the session, install it **before** the probe (so the probe's `starts` line is in the log of the final apps) and treat its normal behaviour as a new baseline: SESSION's Twin Dial steps then show 0.1.1, not 0.1.0; X8 and X10 move from pass 2 into block 6 (a note in the log of what you installed).
+If Twin Dial 0.1.1 is ready before the session, install it **before** the probe (so the probe's `probe: start` line follows the final apps) and treat its normal behaviour as a new baseline: SESSION's Twin Dial steps then show 0.1.1, not 0.1.0; X8 and X10 move from pass 2 into block 6 (a note in the log of what you installed).
 
 ### 1.2 Order of installs
 
 1. Merge the four branches (`car/ca`, `car/cp`, `car/cl`, `car/cq`) into a working branch; run `node bench/test-signal-probe.js`, the f30 and twin suites, `python3 -I tools/car/make_session.py --check`.
 2. Ask the owner to approve installing signal_probe; install it from the Store as in `docs/car/CP-REPORT.md` (the bench-built package; never a build made with the `BENCH_STUB` SDK).
-3. Check the app's start line in its log (`/var/opt/public/oap/oap_<uid>/data/<loggingId>.log`; the uid is assigned at install, find it with `collect.sh`'s version/uid listing).
+3. Check the app's start line (`probe: start signal_probe v=… fmt=1 sets=none …`) in `/var/opt/public/oap/oap_<uid>/data/signal_probe.log` (loggingId OASP; the uid is assigned at install: `collect.sh` lists the versions and uids). `settings.json` beside it holds `set1`..`set9`.
 4. Dry-run the owner's menu once with a mark ("Позначка", mark 1): the marker line must be in the log (SESSION B0.6).
 
 ### 1.3 Preconditions to confirm
@@ -66,7 +66,7 @@ Each full collection goes to a new dated folder under `reference/car/` (git-igno
 
 ### 2.2 Clock anchor
 
-The log's `t=` is seconds since the probe's start; the owner's paper has wall-clock times. At B0.6 (mark 1) write down the wall clock and the line's `t=`. The marks make the rest unambiguous; the anchor is only for the drives (blocks 7-8), where marks are pressed at stops and the passenger dictates the clock.
+Every log line starts with the kit's ISO time stamp (UTC: the head unit runs on UTC), and the probe's lines carry `t=` (seconds since the probe started) and, for S6, `tms=` and `since=M<n>+<ms>`. The owner's paper and the passenger's voice notes use the car's displayed clock (local time). At B0.6 (mark 1) note the car's displayed clock against the line's time stamp once: that offset turns every voice note of blocks 7-8 (marks only at stops) into a log time.
 
 ### 2.3 The verify table (what to see in the log before the owner moves on)
 
@@ -206,9 +206,16 @@ Cluster states in step order: `stock` = Twin Dial and f30 both Off; `twin` = Twi
 
 ### 2.4 Set switching
 
-Sets are one checkbox each (`set1`..`set9`) on the probe's own centre screen, switched by the owner. After each switch the log must carry `probe: sets on=… changed=…` (CP); 30 s later the `summary S<n> +30s` lines (which fields spoke, which are silent, which providers are down) and at +120 s one `ask` per silent field (a read-only getter); do not let the owner start a block before you have seen it. Per block: B1 S6; B2 S2+S3; B3 S1+S3; B4 S4; B5 S5+S4; B6 S1; B7 S7+S6; B8 S8+S9. Never more than two sets at once (the load of 135 fields on about 45 interfaces is untested on this car). If the car stutters (cluster freezes, the platform restarts an app): stop, switch every set off, read the platform's lines, tell the owner.
+Sets are one checkbox each (`set1`..`set9`) on the probe's own centre screen, switched by the owner. After each switch the log must carry `probe: sets on=… changed=…` (CP); 30 s later the `summary S<n> +30s` lines (which fields spoke, which are silent, which providers are down) and at +120 s one `ask` per silent field (a read-only getter); do not let the owner start a block before you have seen it **and** the last `probe: watch <Interface>[<instance>] set=S<n> … ok` line of the new sets (the probe subscribes one interface at a time with a pause between them; S5+S4 is about 20 interfaces, S6 eight). A value the car sends before its interface's watch line is lost; on the bench dry run exactly that cost a step (`docs/car/CQ-REPORT.md` §4). A `watch … error: …` line means that interface's items are silent this session: note it, go on. Per block: B1 S6; B2 S2+S3; B3 S1+S3; B4 S4; B5 S5+S4; B6 S1; B7 S7+S6; B8 S8+S9. Never more than two sets at once (the load of 135 fields on about 45 interfaces is untested on this car). If the car stutters (cluster freezes, the platform restarts an app): stop, switch every set off, read the platform's lines, tell the owner.
 
-### 2.5 Stop conditions
+### 2.5 The owner's slips with the marks
+
+The mark row counts up by itself ("Позначка N" shows the next number). The owner compares it with the table before each step:
+- a mark forgotten earlier: the owner presses until the numbers match (the empty marks are harmless: their windows hold nothing);
+- one press too many: the counter runs ahead. The owner writes it down and tells you; read the log with `verify_steps.py --shift M:K` (K extra presses from mark M on) and hand the parser a marker map shifted the same way (regenerate `design/car/markers.json` locally is NOT the fix: edit a copy, never the plan);
+- the app restarted (a second `probe: start` line): marks start again at M1 and the sets come back from `settings.json`. The owner goes on with the plan's next step regardless of the number on the row; you note the offset (plan number minus the row's number, say 49) and read the last run with `verify_steps.py --shift 1:-49` (it checks the last run of the log; the earlier run is read on its own the same way).
+
+### 2.6 Stop conditions
 
 - BMW's belt lamp or door message is not shown in block 0 or at B6.3: the session ends, nothing from our apps is allowed to drive.
 - The cluster resets (the KOMBI resets on too-big effect shaders; one look per layer source): note the step and the app, switch both apps Off.
@@ -216,7 +223,7 @@ Sets are one checkbox each (`set1`..`set9`) on the probe's own centre screen, sw
 
 ## 3. After the session
 
-1. Copy the final collection into `reference/car/<date>/`; run the privacy check; run the parser: `python3 -I tools/car/parse_logs.py <folder>` fills `design/car/answers.json`; run `make_patches.py` for the reviewable diffs of `app.json` (never applied automatically).
+1. Copy the final collection into `reference/car/<date>/`; run the privacy check; run the parser with the session's marker map: `python3 -I tools/car/parse_logs.py <folder> --markers design/car/markers.json` fills `design/car/answers.json` (the marker map is generated from the plan; without it the step-based tables, the tab key first, cannot attribute a bit to a press); run `make_patches.py` for the reviewable diffs of `app.json` (never applied automatically).
 2. Review each answer with the owner against the photos and the paper: every unit is a hypothesis until the displayed number matches. Mark each answer with its date and evidence label.
 3. Update `docs/twin-dial/SPEC-R3.md`: every **after probe** becomes verified, refuted or re-planned (table below).
 4. Write the result into memory: one file per durable fact (for example "stalk button: caught / not caught, which bit", "statusActiveCCMessage rest value", "the tab key", "tyre scale"), with the evidence label and the date, plus an index line. State plainly what remains unseen.

@@ -122,8 +122,8 @@ def main(argv):
         elif a == '--until':
             until = next(it)
         elif a == '--shift':
-            shift.append(tuple(int(x) for x in next(it).split(':')))
-    pos = [a for a in argv if not a.startswith('--') and a not in (block, silent, out, until) and not re.match(r'^\d+:\d+$', a)]
+            shift.append(tuple(int(x) for x in next(it).split(':', 1)))
+    pos = [a for a in argv if not a.startswith('--') and a not in (block, silent, out, until) and not re.match(r'^\d+:-?\d+$', a)]
     if len(pos) != 1:
         print(__doc__)
         return 2

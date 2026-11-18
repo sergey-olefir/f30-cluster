@@ -107,6 +107,15 @@ class Verify(unittest.TestCase):
         rows, _ = V.verify(runs, MARKS, only_block='B1')
         self.assertEqual([r for r in rows if r['step'] == 'B1.3'][0]['status'], 'ok')
 
+    def test_restart_negative_shift(self):
+        a = self.first('B1.3')
+        L = ['probe: start signal_probe v=0.1.0 fmt=1 sets=S6 fields=24 of 144'] + [mark(n) for n in range(1, a)]
+        L += ['probe: start signal_probe v=0.1.0 fmt=1 sets=S6 fields=24 of 144', mark(1),
+              'probe: P13 stalk #1 t=9.0: stalks=64(0x40) prev=0(0x0) up=0x40 down=0x0 tms=9000 since=M1+100']
+        rows, problems = V.verify(V.parse(log(L), shifts=[(1, -(a - 1))]), MARKS, only_block='B1')
+        self.assertEqual([r for r in rows if r['step'] == 'B1.3'][0]['status'], 'ok')
+        self.assertTrue(any('2 runs' in p for p in problems))
+
     def test_no_marks_at_all(self):
         rows, _ = self.run_log(['probe: start signal_probe v=0.1.0 fmt=1 sets=none fields=0 of 144'], only_block='B1')
         self.assertTrue(all(r['status'] == 'NO MARK' for r in rows))
