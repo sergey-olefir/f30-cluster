@@ -150,7 +150,7 @@ def ck_keepouts(img):
         if strong:
             ys, xs = np.nonzero(a >= FAINT)
             out[name]['at'] = [[int(x + r[0]), int(y + r[1])] for x, y in zip(xs[:4], ys[:4])]
-        if strong > CORNER_PX:
+        if strong > (CORNER_PX if name.startswith('hole') else 0):
             bad = True
         elif strong:
             corner = True
@@ -223,17 +223,18 @@ def ck_centre(img, ink, pid):
                 side_columns_checked=not mapp)
 
 
-def merge_items(boxes, hgap=12.0):
-    """A number and its unit (same row, < hgap apart) are one item."""
-    boxes = sorted(boxes, key=lambda b: (round(b[3] / 6), b[0]))
+def merge_items(items, hgap=12.0):
+    """items: (box, font size). A number and its unit (same row, < hgap apart, the unit's font at most 0.65 of the number's)
+    are one item."""
+    items = sorted(items, key=lambda it: (round(it[0][3] / 6), it[0][0]))
     out = []
-    for b in boxes:
-        if out and abs(out[-1][3] - b[3]) < 6 and b[0] - out[-1][2] < hgap and b[0] >= out[-1][0]:
-            o = out[-1]
-            out[-1] = (min(o[0], b[0]), min(o[1], b[1]), max(o[2], b[2]), max(o[3], b[3]))
+    for b, sz in items:
+        if out and abs(out[-1][0][3] - b[3]) < 6 and 0 <= b[0] - out[-1][0][2] < hgap and sz <= 0.65 * out[-1][1]:
+            o, osz = out[-1]
+            out[-1] = ((min(o[0], b[0]), min(o[1], b[1]), max(o[2], b[2]), max(o[3], b[3])), osz)
         else:
-            out.append(tuple(b))
-    return out
+            out.append((tuple(b), sz))
+    return [b for b, _ in out]
 
 
 def ck_dial_gaps(ink):
@@ -272,7 +273,7 @@ def ck_dial_gaps(ink):
 
 def ck_bottom_row(img, ink, sign):
     """>= 6 px between the items of the bottom row (a number and its unit count as one) and round the sign."""
-    boxes = [it['box'] for it in design_ink(ink)
+    boxes = [(it['box'], it.get('size', 0)) for it in design_ink(ink)
              if it['kind'] == 'text' and it['box'][1] >= 615 and 620 <= box_centre(it['box'])[0] <= 1295 and 'BMW' not in it['text']]
     items = merge_items(boxes)
     if sign:
@@ -454,6 +455,15 @@ def pictures(root, top_only=False):
     return sorted(out)
 
 
+def ck_naming(rel, m):
+    """MOCKUP-SPEC-R3B §1: a file name starts with the picture's id (the index entry's id)."""
+    base = os.path.basename(rel)
+    pid = m.get('id')
+    if not pid:
+        return dict(status='note', reason='no id in the index entry')
+    return dict(status='pass' if base.startswith(str(pid)) else 'fail', id=pid, file=base)
+
+
 def run_set(name):
     cfg = SETS[name]
     if not os.path.isdir(cfg['root']):
@@ -469,6 +479,12 @@ def run_set(name):
         img = np.asarray(Image.open(p).convert('RGB'))
         ink = ink_all.get(cfg['ink_prefix'] + rel)
         m = meta.get(rel) or meta.get(os.path.basename(p)) or meta.get(pid) or {}
+        if m.get('composite'):                       # a sheet of several frames: each frame is a picture of its own elsewhere
+            checks = {'composite': dict(status='skip', reason='composite picture (several frames): frame checks do not apply')}
+            if name != 'r3':
+                checks['naming'] = ck_naming(rel, m)
+            res[rel] = dict(id=pid, file=rel, composite=True, checks=checks, failed=[k for k, v in checks.items() if v['status'] == 'fail'])
+            continue
         checks = {'keepouts': ck_keepouts(img), 'window_open_nothing_ours': ck_window(img, ink or [])}
         sign_res, sign = ck_sign(img, ink or [])
         checks['sign_clearances'] = sign_res
@@ -481,6 +497,8 @@ def run_set(name):
         else:
             for k in ('cells', 'centre_page', 'dial_gaps', 'bottom_row_gaps'):
                 checks[k] = dict(status='skip', reason='no ink record for this picture (generator not recorded)')
+        if name != 'r3':
+            checks['naming'] = ck_naming(rel, m)
         checks['documentation'] = dict(status='pass' if (m.get('status') or m.get('data') or m.get('data_status')) else 'note',
                                        reason='index entry carries a data status' if (m.get('status') or m.get('data') or m.get('data_status')) else 'no data status in the index entry')
         res[rel] = dict(id=pid, file=rel, checks=checks, failed=[k for k, v in checks.items() if v['status'] == 'fail'])
