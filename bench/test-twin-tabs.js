@@ -425,7 +425,8 @@ console.log('4. the tab bar: geometry and icons');
     ok(Math.abs(mid('tab_warn_i') - 814) <= 1 && Math.abs(mid('tab_phone_i') - 1202.5) <= 1.5 && Math.abs(mid('tab_nav_i') - 1269.5) <= 1.5, 'the ink of tabs 2, 4 and 5 is centred in its cell (814 / 1202.5 / 1269.5): ' + ['tab_warn_i', 'tab_phone_i', 'tab_nav_i'].map((id) => mid(id).toFixed(1)).join(' / '));
     ok(IC('tab_warn_i').tdLive === 'warn' && IC('tab_phone_i').tdLive === 'phone' && IC('tab_nav_i').tdLive === 'nav' && IC('tab_media').tdLive === 'media', 'tabs 2..5 carry live icons (their variant follows the state)');
     ok(inCell(IC('tab_range_i'), 0) && inCell(IC('tab_range_v'), 0) && inCell(IC('tab_range_u'), 0), 'tab 1: the icon, the range value and its unit lie inside the cell (nothing across the separator at 780)');
-    ok(inCell(IC('tab_warn_i'), 1) && inCell(IC('tab_media'), 2) && inCell(IC('tab_phone_i'), 3) && inCell(IC('tab_nav_i'), 4), 'tabs 2..5: every widget lies inside its cell');
+    // FIN: the media widget's box spans the GROWN media cell (780-1168, tab 2 hidden) right of the warning icon's box; its ink stays in the cell it has now (section 8)
+    ok(inCell(IC('tab_warn_i'), 1) && IC('tab_media').x >= 780 && IC('tab_media').x + IC('tab_media').w <= 1168 && inCell(IC('tab_phone_i'), 3) && inCell(IC('tab_nav_i'), 4), 'tabs 2..5: every widget lies inside its cell (the media box inside the grown cell 780-1168)');
     const tw = IC('tab_range_u'); const unitInk = tw.x + (tw.w - 3);
     ok(unitInk <= 778, 'tab 1: the unit "км" ends at x ' + unitInk + ', inside the cell with room to the separator (780)');
     ok(boxesIn([IC('tab_range_i'), IC('tab_warn_i'), IC('tab_media'), IC('tab_phone_i'), IC('tab_nav_i')]), 'the icon boxes lie inside the bar\'s height band y 124..170 (the rule is y 170..173)');
@@ -435,11 +436,12 @@ console.log('4. the tab bar: geometry and icons');
     eq(overlaps, 0, 'no two tab-bar boxes overlap (an overlap costs the engine a sheet)');
     ok(['td_tab', 'td_tabs'].indexOf(byId.tab_range_v.font) >= 0, 'the range value is Noto 33 / 34 (' + byId.tab_range_v.font + ': td_tabs once B6\'s atlas is in the tree)');
     ok(!byId.tab_media_t, 'the old media text widget is gone: the media cell is one live widget');
-    ok(byId.tab_media.w === 300 && byId.tab_media.x === 858 && byId.tab_media.h === 46 && byId.tab_media.y === 124, 'the media widget fills its cell less 10 px each side, as tall as an icon box [858, 124, 1158, 170]');
+    ok(byId.tab_media.w === 321 && byId.tab_media.x === 837 && byId.tab_media.h === 46 && byId.tab_media.y === 124 && byId.tab_media.x === byId.tab_warn_i.x + byId.tab_warn_i.w && JSON.stringify(byId.tab_media.seps) === '[780,848,1168,1237]' && byId.tab_media.leftMost === byId.tab_warn_i.x,
+        'FIN: the media widget runs from the warning icon\'s box to the cell\'s end less 10 px, as tall as an icon box [837, 124, 1158, 170], and carries the separators');
 }
 {
-    // icons: no dimming, the variant is the state
-    const h = mk();
+    // icons: no dimming, the variant is the state (a stored message is listed: tab 2 is in the bar - FIN; section 8 covers the bar without it)
+    const h = mk(); h.ccListAll = [{ id: 987, ignored: false }];
     h.theme = { fg: [255, 255, 255, 255], grey: [111, 111, 110, 255], bg: [0, 0, 0, 255] };
     const painted = [];
     h._blitDiff = (x, buf) => painted.push(Buffer.from(buf));
@@ -491,8 +493,8 @@ console.log('4. the tab bar: geometry and icons');
     ok(rgbN && rgbN[0] < rgb[0], 'by night the severity colour takes the red multiplier');
 }
 {
-    // the media cell: icon + text centred as ONE group, clipped with an ellipsis
-    const h = mk();
+    // the media cell: icon + text centred as ONE group, clipped with an ellipsis (tab 2 in the bar: a stored message listed - FIN)
+    const h = mk(); h.ccListAll = [{ id: 987, ignored: false }];
     h.theme = { fg: [255, 255, 255, 255], bg: [0, 0, 0, 255] };
     const w = byId.tab_media;
     const box = (text) => {
@@ -501,7 +503,7 @@ console.log('4. the tab bar: geometry and icons');
         for (let y = 0; y < w.h; y++) for (let x = 0; x < w.w; x++) if (buf[(y * w.w + x) * 4 + 3] > 40) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
         return { x0, x1, y0, y1, buf };
     };
-    const cx = (w.x + w.w / 2);
+    const cx = 1008;                 // FIN: the cell 848-1168's middle (the widget's box is wider now: it reaches into the grown cell)
     const a = box('');
     ok(Math.abs((w.x + (a.x0 + a.x1 + 1) / 2) - 1008) <= 1.5, 'icon only (until the media probe): centred in the cell (middle ' + (w.x + (a.x0 + a.x1 + 1) / 2) + ', the cell\'s is 1008)');
     const b = box('Radio One');
@@ -509,7 +511,7 @@ console.log('4. the tab bar: geometry and icons');
     ok(b.x1 - b.x0 > a.x1 - a.x0 + 40, 'the text is beside the icon (the group is wider than the icon)');
     const longT = 'A very long station name that cannot fit in the cell at all, really';
     const c = box(longT);
-    ok(c.x0 >= 0 && c.x1 < w.w && c.x1 - c.x0 <= w.w, 'a long text is cut to the cell (' + (c.x1 - c.x0 + 1) + ' of ' + w.w + ' px)');
+    ok(c.x0 + w.x >= 858 && c.x1 + w.x < 1158 && c.x1 - c.x0 <= 300, 'a long text is cut to the cell less 10 px each side, 858-1158 (' + (c.x1 - c.x0 + 1) + ' of 300 px)');
     let ell = false;
     { const TR = require(path.join(dir, 'hud_text.js')); ell = TR.loadFont('td_tab').metrics.glyphs['…'] !== undefined; }
     ok(ell, 'td_tab has the ellipsis glyph (the cut text ends in "…")');
@@ -557,6 +559,7 @@ function backdrop(h) {
         console.log('  skip the cell\'s uniforms: this branch has no package B1 (shared/hud.js does not read this.twinTab yet); bench/test-twin-tabs.js repeats them after the merge');
     } else {
         // package B1's _twinBackSend is here: the selected cell [x0, x1, on], a colour per tab, never the message's severity
+        h.ccListAll = [{ id: 987, ignored: false }];      // FIN: a stored message listed - tab 2 in the bar (section 8: without it)
         const b = backdrop(h);
         const r = BACK_L.tab.rect, sp = BACK_L.tab.seps, X = BACK_L.x;
         const cells = [[r[0], sp[0]], [sp[0], sp[1]], [sp[1], sp[2]], [sp[2], sp[3]], [sp[3], r[2]]].map((c) => [c[0] - X, c[1] - X]);
@@ -592,6 +595,88 @@ console.log('6. in place');
     HudApp.prototype._twinTabsChanged.call(h);
     ok(h.tabs.tab === 5 && h.twinTab === 5 && rebuilt === 0, 'setting tab = 5: tab 5 selected (hud.twinTab 5), nothing rebuilt');
     ok(b.sent.slice(n0).every((e) => /^u_/.test(e[0])), 'the backdrop is told by uniforms only (no layer, no geometry)');
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+console.log('8. FIN: tab 2 is hidden while there is no message (the owner, 2026-11-18)');
+{
+    const live = (h) => { h._twinTabsOn = () => true; return h; };
+    // what counts as "a message"
+    let h = live(mk());
+    ok(!tabs.messagePresent(h) && !tabs.tab2Shown(h), 'nothing heard (no list, displayed not spoken): no message, tab 2 hidden');
+    h.ccListAll = [{ id: 0, ignored: true }]; h.ccDisp = 0; h.ccDispAny = true; h.config.ccActive = { noneValues: [0] };
+    ok(!tabs.messagePresent(h) && !tabs.tab2Shown(h), 'the car at rest (ccList only the resting id 0, displayed 0): hidden');
+    h.ccListAll = [{ id: 0, ignored: true }, { id: 987, ignored: false }];
+    ok(tabs.messagePresent(h) && tabs.tab2Shown(h), 'a stored entry listed (displayed 0): shown');
+    h.ccListAll = [{ id: 0, ignored: true }]; h.ccDisp = 285;
+    ok(tabs.messagePresent(h) && tabs.tab2Shown(h), 'displayed 285 with no list entry (BMW\'s unlisted message): shown');
+    h.ccDisp = 65535;
+    ok(tabs.tab2Shown(h), 'displayed 65535 (the end of a drive): shown (not 0)');
+    h.ccDisp = 0; h.twinCc = { state: 'window', severity: null };
+    ok(!tabs.tab2Shown(h), 'a window with no severity (the keep-open of a car not read yet) is no message: hidden');
+    h.twinCc = { state: 'none', severity: null }; h.tabs = tabs.fresh(); h.tabs.tab = 2;
+    ok(tabs.tab2Shown(h), 'tab 2 selected (the setting fixed to 2): shown - a selected tab never vanishes under its fill');
+    h.tabs.tab = 1; h.tabs.hold = 2;
+    ok(tabs.tab2Shown(h), 'tab 2 held (the open settle after leaving it): shown');
+    const off = mk(); off._twinTabsOn = () => false;
+    ok(tabs.tab2Shown(off), 'live tabs off (the round 2 look, a stand-in app): always shown');
+
+    // the bar's x positions
+    const g5 = tabs.barGeometry([780, 848, 1168, 1237], [618, 127, 1302, 172], true), g4 = tabs.barGeometry([780, 848, 1168, 1237], [618, 127, 1302, 172], false);
+    eq([g5.seps, g5.cells], [[780, 848, 1168, 1237], [[618, 780], [780, 848], [848, 1168], [1168, 1237], [1237, 1302]]], 'with tab 2: separators 780 / 848 / 1168 / 1237, cells 618-780 / 780-848 / 848-1168 / 1168-1237 / 1237-1302');
+    eq([g4.seps, g4.cells], [[780, 1168, 1237], [[618, 780], null, [780, 1168], [1168, 1237], [1237, 1302]]], 'without: separators 780 / 1168 / 1237; tab 1 keeps 618-780, the media cell grows to 780-1168, tabs 4 and 5 unchanged');
+
+    // the backdrop: the separators are uniforms (no shader change), the media cell's fill follows
+    h = live(mk()); sel(h);
+    const b = backdrop(h);
+    eq(b.last('u_sep'), [780, 1168, 1237, -10], 'no message: u_sep [780, 1168, 1237, off] - the separator at 848 is gone');
+    h._settings.tab = '3'; sel(h);
+    eq(b.last('u_hi').slice(0, 3), [780, 1168, 1], 'tab 3 selected without tab 2: its fill spans the grown cell 780-1168');
+    h.ccListAll = [{ id: 15, ignored: false }]; HudApp.prototype._twinSync.call(h);
+    eq([b.last('u_sep'), b.last('u_hi').slice(0, 3)], [[780, 848, 1168, 1237], [848, 1168, 1]], 'a message listed: the four separators again in the same sync, tab 3\'s fill 848-1168');
+    h.ccListAll = []; HudApp.prototype._twinSync.call(h);
+    eq(b.last('u_sep'), [780, 1168, 1237, -10], 'gone again: three separators');
+    h._settings.tab = 'auto'; sel(h);
+    msg(h, 'window', 'red'); sel(h);
+    eq([h.tabs.tab, b.last('u_sep'), b.last('u_hi').slice(0, 2)], [2, [780, 848, 1168, 1237], [780, 848]], 'a message shows: tab 2 appears in its place and is selected (rule 1), its cell 780-848');
+    msg(h, 'none'); sel(h);
+    eq([h.tabs.tab, b.last('u_sep'), b.last('u_hi').slice(0, 2)], [3, [780, 1168, 1237, -10], [780, 1168]], 'the message ends: back to the tab before it (3, the driver\'s choice), tab 2 hidden again, tab 3\'s fill 780-1168');
+    const sh = require(path.join(dir, 'shaders.js'));
+    ok(Buffer.byteLength(sh.tdbackFor('L'), 'utf8') <= 6144 && /uniform vec4 u_sep;/.test(sh.tdbackFor('L')), 'tdback part L is unchanged in kind: u_sep a uniform, ' + Buffer.byteLength(sh.tdbackFor('L'), 'utf8') + ' bytes after compact() (<= 6 KB)');
+
+    // the key skips the hidden tab
+    h = live(mk({ tabKey: null }));
+    sel(h);
+    const steps = []; for (let i = 0; i < 5; i++) { tabs.press(h, 1); steps.push(h.tabs.tab); }
+    eq(steps, [3, 4, 5, 1, 3], 'no message: the key steps 1 -> 3 -> 4 -> 5 -> 1 (tab 2 skipped)');
+    h.ccListAll = [{ id: 987, ignored: false }];
+    const steps2 = []; for (let i = 0; i < 5; i++) { h._now_ms += 1000; tabs.press(h, 1); steps2.push(h.tabs.tab); }
+    eq(steps2, [4, 5, 1, 2, 3], 'a stored message listed: tab 2 is in the cycle again');
+
+    // the icons: the warning widget paints no warning icon while hidden; the media group centres on the grown cell's middle (974)
+    h = live(mk()); sel(h);
+    h.theme = { fg: [255, 255, 255, 255], bg: [0, 0, 0, 255] };
+    const mw = byId.tab_media, ww = byId.tab_warn_i;
+    h.widgets = new Map([['tab_media', { w: mw, ref: 1 }], ['tab_warn_i', { w: ww, ref: 2 }]]);
+    const got = {};
+    h._blitDiff = (x, buf) => { got[x.w.id] = Buffer.from(buf); };
+    const inkX = (id, w) => { const p = got[id], o = []; if (!p) return o; for (let y = 0; y < w.h; y++) for (let x = 0; x < w.w; x++) if (p[(y * w.w + x) * 4 + 3] > 40) o.push(x + w.x); return o; };
+    const paintBoth = () => { twin.updateIcon(h, { w: ww, last: null }, 0, true); twin.updateIcon(h, { w: mw, last: null }, 0, true); };
+    const span = () => { const xs = inkX('tab_warn_i', ww).concat(inkX('tab_media', mw)); return xs.length ? [Math.min.apply(null, xs), Math.max.apply(null, xs) + 1] : null; };
+    paintBoth();
+    let sp = span();
+    ok(inkX('tab_warn_i', ww).length === 0 && sp && Math.abs((sp[0] + sp[1]) / 2 - 974) <= 1.5, 'tab 2 hidden, icon only: no warning icon; the media icon centred on the grown cell 780-1168 (middle ' + (sp && (sp[0] + sp[1]) / 2) + ')');
+    h.td.media = 'A long station name that runs well past three hundred pixels wide, surely';
+    paintBoth(); sp = span();
+    ok(sp && sp[0] >= 791 && sp[1] <= 1158 && sp[1] - sp[0] > 330 && inkX('tab_warn_i', ww).length > 0, 'a long text uses the grown cell (' + (sp && sp[0]) + '-' + (sp && sp[1]) + ', ' + (sp && sp[1] - sp[0]) + ' px > the 300 with tab 2): the warning widget paints its left slice');
+    h.ccListAll = [{ id: 15, ignored: false }]; h.td.media = '';
+    paintBoth(); sp = span();
+    const wi = inkX('tab_warn_i', ww), mi = inkX('tab_media', mw);
+    ok(wi.length > 0 && Math.abs((Math.min.apply(null, wi) + Math.max.apply(null, wi) + 1) / 2 - 814) <= 1.5 && mi.length && Math.abs((Math.min.apply(null, mi) + Math.max.apply(null, mi) + 1) / 2 - 1008) <= 1.5,
+        'a message listed: the warning icon back at 814, the media icon back on 1008 (the cell 848-1168)');
+    const ks = { w: ww, last: null }; h.ccListAll = []; twin.updateIcon(h, ks, 0, false); const k1 = ks.last;
+    h.ccListAll = [{ id: 15, ignored: false }]; twin.updateIcon(h, ks, 0, false);
+    ok(/^hidden\|/.test(k1) && !/^hidden\|/.test(ks.last), 'the warning widget\'s repaint key changes when tab 2 comes and goes');
 }
 
 async function engineChecks() {
@@ -712,6 +797,26 @@ async function engineChecks() {
         const twoLines = rowTexts();
         ok(oneLine.every((t) => t === '') && twoLines.every((t) => t !== ''), 'the bottom row: the lower line is empty off tab 1 and back on tab 1 (' + JSON.stringify(oneLine) + ' / ' + twoLines.length + ' texts)');
         eq(builds - b0, 0, 'the whole run: ' + (builds - b0) + ' layout builds after the first (the start itself built it ' + b0 + ' time(s))');
+        // FIN: tab 2 hidden with no message, on the real engine with the real machine (the car's ccList and displayed number). After the
+        // build count above: the first list ends the engine's blind case, which is one build of its own (hud.js, not this package)
+        const cl = APP.config.ccList, cd = APP.config.ccDisplayed;
+        const feedList = (es) => hu.feed(cl.iface, cl.field, es.map((e) => ({ cCListElement: { cCIdentifer: e.id, cCShortName: e.name, cCColor: e.color, cCListSymbolID: e.symbol } })));
+        const feedDisp = (n) => hu.feed(cd.iface, cd.field, { statusNumberCheckControlMessageDisplay: n });
+        const REST = { id: 0, name: '', color: 'GREEN', symbol: 6 }, DOOR = { id: 15, name: 'Driver door open', color: 'WHITE', symbol: 2 }, STORED = { id: 987, name: 'Ready to drive', color: 'GREEN', symbol: 6 };
+        const sepNow = () => { const x = hud.widgets.get('bg_l'), l = x && x.c.layers.get(x.ref), k = l && Object.keys(l.uniforms || {}).find((n) => /:u_sep$/.test(n)); return k ? String(l.uniforms[k].v).trim().split(/[\s,]+/).map(Number) : null; };
+        const warnKey = () => String((hud.widgets.get('tab_warn_i') || {}).last);
+        feedList([REST]); feedDisp(0); await sleep(250);
+        eq([hud.tabs.tab, sepNow()], [1, [780, 1168, 1237, -10]], 'the car at rest (ccList id 0, displayed 0): tab 2 not in the bar (u_sep 780 / 1168 / 1237)');
+        ok(/^hidden\|/.test(warnKey()), 'the warning widget paints no warning icon (' + warnKey().slice(0, 12) + ')');
+        feedList([REST, DOOR]); feedDisp(15); await sleep(400);
+        eq([hud.tabs.tab, sepNow()], [2, [780, 848, 1168, 1237]], 'the door message: tab 2 appears in its place and is selected (u_sep 780 / 848 / 1168 / 1237)');
+        ok(!/^hidden\|/.test(warnKey()), 'the warning icon is back');
+        feedList([REST]); await sleep(100); feedDisp(0); await sleep(500);
+        eq([hud.tabs.tab, sepNow()], [1, [780, 1168, 1237, -10]], 'the message ends (list at rest, then displayed 0): tab 1, tab 2 hidden again');
+        feedList([REST, STORED]); await sleep(250);
+        eq([hud.tabs.tab, sepNow()], [1, [780, 848, 1168, 1237]], 'a stored entry listed with displayed 0: tab 2 in the bar, not selected');
+        feedList([REST]); await sleep(250);
+        eq(sepNow(), [780, 1168, 1237, -10], '... and gone with it');
         ok(!logs.some((l) => /^ERROR/.test(l)), 'no error in the engine\'s log' + (logs.filter((l) => /^ERROR/.test(l))[0] ? ': ' + logs.filter((l) => /^ERROR/.test(l))[0] : ''));
     } finally {
         Module._load = realLoad;

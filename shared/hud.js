@@ -411,7 +411,7 @@ const TW_LIM_STRIP = { L1: 1, L2: 2, L3: 3 };       // twin_dial B1: config.limi
 // twin_dial B1: an sRGB code -> linear light, the black floor taken out, the night multiplier k applied; and back to a code
 function twinLin(c, i, k, noFloor) { const v = c / 255, l = v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); return (noFloor ? l : Math.max(0, (l - TW_FLOOR[i]) / (1 - TW_FLOOR[i]))) * k; }
 function twinEnc(l) { l = Math.max(0, Math.min(1, l)); return l <= 0.0031308 ? l * 12.92 : 1.055 * Math.pow(l, 1 / 2.4) - 0.055; }
-const TW_PAGE_KEYS = ['centre', 'techData', 'callerName'];     // round 3 B4: the centre page's settings, applied in place (no rebuild)
+const TW_PAGE_KEYS = ['centre', 'techData', 'callerName', 'navView'];     // round 3 B4: the centre page's settings, applied in place (no rebuild); FIN: navView ("Навігація")
 const TW_LIVE_KEYS = ['redline', 'bandGain'];       // settings the twin layers take in place (uniforms, no rebuild)
 // twin_dial: tabs (B2): the settings that move the selected tab or the centre page, in place (no layout rebuild; package B4 adds its own keys here)
 const TW_TAB_KEYS = ['tab', 'tabLock', 'centre'];
@@ -2737,7 +2737,8 @@ class HudApp {
         const sp = [0, 1, 2, 3].map((i) => (isNum((t.seps || [])[i]) ? t.seps[i] : r[2]));
         const cells = [[r[0], sp[0]], [sp[0], sp[1]], [sp[1], sp[2]], [sp[2], sp[3]], [sp[3], r[2]]].map((q) => [q[0] - w.x, q[1] - w.x]);
         Object.assign(x.tw, { rule: (Array.isArray(t.rule) ? t.rule : [0, 0]).map((v) => v - w.y), ramp: Array.isArray(t.ramp) ? t.ramp : [0.002, 0.16],
-            hi: [hl[0] - w.x, hl[1] - w.x], cells, rules: Array.isArray(w.rules) ? w.rules.slice(0, 4) : [], keep: w.maskKeep === true, mask: false });
+            hi: [hl[0] - w.x, hl[1] - w.x], cells, rules: Array.isArray(w.rules) ? w.rules.slice(0, 4) : [], keep: w.maskKeep === true, mask: false,
+            seps: sp, rect: r, t2: true });      // FIN: the bar's own numbers (panel px), for the bar without tab 2 (_twinBackSend)
         let mr = [TW_PANEL[0] - w.x, TW_PANEL[1] - w.y, TW_PANEL[2], TW_PANEL[3]];
         if (pm && pm.tex) {
             try {
@@ -2763,9 +2764,18 @@ class HudApp {
         // integration (B7): B2's tab (mirrored on twinTab) when live tabs run, else B3's machine's (an app without config.tabs)
         const tabSrc = this.tabs || !this.twinMsg ? this.twinTab : this.twinMsg.tab;
         const tab = Math.max(1, Math.min(5, Math.round(Number(tabSrc) || 1))), mapN = TW_MAP[this.twinMap] ? this.twinMap : null;
-        const key = cc.state + '|' + cc.severity + '|' + this.nightOn + '|' + tab + '|' + mapN;
+        // FIN (the owner, 2026-11-18): tab 2 is in the bar only while there is a message (shared/twin_tabs.js tab2Shown); without it the
+        // separator at 848 goes and tab 3's cell is 780-1168. The separators are uniforms already: no shader change.
+        const t2 = !(this._twinTabsOn() && twinTabs && typeof twinTabs.tab2Shown === 'function') || twinTabs.tab2Shown(this) || tab === 2;
+        const key = cc.state + '|' + cc.severity + '|' + this.nightOn + '|' + tab + '|' + mapN + '|' + t2;
         if (!force && key === x.twKey) return;
         x.twKey = key;
+        if (t.seps && t.rect && twinTabs && typeof twinTabs.barGeometry === 'function') {
+            const g = twinTabs.barGeometry(t.seps, t.rect, t2);
+            c.uniform(ref, 'u_sep', [0, 1, 2, 3].map((i) => (isNum(g.seps[i]) ? g.seps[i] - w.x : -10)));
+            t.cells = g.cells.map((q) => (q ? [q[0] - w.x, q[1] - w.x] : null));
+            t.t2 = t2;
+        }
         const sev = cc.state !== 'none' ? TW_SEV[cc.severity] : null, sevC = sev ? this._twinCode(sev.c, sev.n) : null;
         const rm = this.nightOn ? TW_NIGHT.ramp : 1;
         c.uniform(ref, 'u_tabR', [t.rule[0], t.rule[1], t.ramp[0] * rm, t.ramp[1] * rm]);
@@ -2773,7 +2783,7 @@ class HudApp {
         c.uniform(ref, 'u_ruleT', this._twinCode(TW_RULE.tab, 'rule'));
         // the selected tab's cell (SPEC-R3 3.2): the fill is the tab's colour in linear light (black floor out, night x 0.75) times the ramp's
         // shape in the shader; the rule under that cell is the fill's bottom colour + 0.15 x the white rule, in linear light
-        const cell = t.cells ? t.cells[tab - 1] : t.hi, tk = this.nightOn ? TW_NIGHT.tab : 1, rk = this.nightOn ? TW_NIGHT.rule : 1;
+        const cell = (t.cells && t.cells[tab - 1]) || t.hi, tk = this.nightOn ? TW_NIGHT.tab : 1, rk = this.nightOn ? TW_NIGHT.rule : 1;
         const fill = TW_TAB[tab].map((v, i) => twinLin(v, i, tk));
         c.uniform(ref, 'u_hi', [cell[0], cell[1], 1, 0]);
         c.uniform(ref, 'u_hiC', fill.concat([1]));
@@ -2804,6 +2814,11 @@ class HudApp {
     _twinSync() {
         if (this._twinTabsOn()) this._guard('twin tabs', () => twinTabs.update(this));      // twin_dial: tabs (B2): the tab follows the message, guidance, the speed, the settings
         this.widgets.forEach((x) => { if (x.w && x.w.type === 'tdback' && x.ref) this._guard('twin sync', () => this._twinBackSend(x, false)); });
+        // FIN: tab 2 came or went - the warning and media widgets repaint in the same turn as the backdrop's separators
+        if (this._twinTabsOn() && typeof twinTabs.tab2Shown === 'function') {
+            const t2 = twinTabs.tab2Shown(this);
+            if (t2 !== this.twinT2) { this.twinT2 = t2; this._guard('tab 2 shown', () => this._twinWarnIcons(Date.now())); }
+        }
     }
 
     /** twin_dial: tabs (B2): live tabs are on (the module packed, config.tabs set, a twin layout shown). */
@@ -4651,7 +4666,8 @@ class HudApp {
 
     /** The warning tab's icon, repainted at once (its colour follows the severity and the selected tab). */
     _twinWarnIcons(now) {
-        this.widgets.forEach((x) => { if (x.w && x.w.type === 'icon' && x.w.tdLive === 'warn' && x.ref && twin) twin.updateIcon(this, x, now, false); });
+        // FIN: the media cell too - it grows or shrinks with tab 2 in the same turn (shared/twin_tabs.js tab2Shown)
+        this.widgets.forEach((x) => { if (x.w && x.w.type === 'icon' && (x.w.tdLive === 'warn' || x.w.tdLive === 'media') && x.ref && twin) twin.updateIcon(this, x, now, false); });
     }
 
     /** Tab 2's sheet pixels for a page: the card, rows, pointer or empty page of shared/twin_cc.js, in ONE paint. Throws

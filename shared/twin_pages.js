@@ -559,10 +559,12 @@ function tabOf(hud) {
     return isNum(n) && n >= 1 && n <= 5 ? n : 1;
 }
 
-/** Tab 1's pages in the cycle's order: the clock, the trip, technical data (unless hidden), the tyres (config.pages.tyres). */
+/** Tab 1's pages in the cycle's order: the clock, the trip, technical data, the tyres (config.pages.tyres).
+ *  FIN (the owner, 2026-11-18): "Технічні дані: сховати" hides BOTH technical pages - the technical data and the tyres. */
 function computerList(hud) {
     const l = ['clock', 'trip'];
-    if (setting(hud, 'techData') !== 'hide') l.push('tech');
+    if (setting(hud, 'techData') === 'hide') return l;
+    l.push('tech');
     if (pagesCfg(hud).tyres === true) l.push('tyres');
     return l;
 }
@@ -602,10 +604,25 @@ function mapVariant(hud) {
  * setting AND (guidance active OR the "map without a route" setting). Any doubt closes it; a fresh panel mapping shuts it
  * for config.mapShutMs (8 s).
  */
+/**
+ * FIN (the owner, 2026-11-18): the setting "Навігація" (navView) = auto | map | arrows, applied in place. The map window itself
+ * stays the experiment behind config.mapWindow; this only says when tab 5 prefers it:
+ *   auto    the map when it is present, else the arrow / CarPlay-route page: presence is the strict rule below (S2: the cluster's
+ *           map view AND BMW's guidance or "map without a route"), so a CarPlay route with BMW's guidance idle shows our route page;
+ *   map     ("карта") the map window whenever BMW's map is present: S2 is the cluster's map view alone (with or without a route, a
+ *           CarPlay route included); otherwise the same fallback pages;
+ *   arrows  ("стрілки") never the map (not even forced): the arrow / route / fallback pages only.
+ * Anything else reads as auto. There is no key for it: the TRIP button stays the tab key only.
+ */
+const NAV_VIEWS = ['auto', 'map', 'arrows'];
+function navView(hud) { const v = setting(hud, 'navView'); return NAV_VIEWS.indexOf(v) >= 0 ? v : 'auto'; }
+
 function mapState(hud, t) {
     const p = st(hud), c = cfgOf(hud);
     if (!mapVariant(hud)) return { open: false, why: 'off' };
     if (tabOf(hud) !== 5) return { open: false, why: 'tab' };
+    const view = navView(hud);
+    if (view === 'arrows') return { open: false, why: 'setting arrows' };
     const shut = isNum(c.mapShutMs) ? c.mapShutMs : MAP_SHUT_MS;
     if (p.built && t - p.built < shut) return { open: false, why: 'shut after mapping' };
     if (c.mapForce === true) return { open: true, why: 'forced' };
@@ -615,6 +632,7 @@ function mapState(hud, t) {
     }
     const isMap = typeof p.navType === 'string' ? /KARTENANSICHT/.test(p.navType) : p.navType === 2;
     if (!isMap) return { open: false, why: 'cluster is not in map view' };
+    if (view === 'map') return { open: true, why: 'map view (setting map)' };
     if (p.guiding === 'ACTIVE' || p.nonNavi === true) return { open: true, why: 'setting' };
     return { open: false, why: 'no route and map-without-route off' };
 }
@@ -1143,7 +1161,7 @@ function update(hud, x, now, force) {
 function hideTitleRule(hud) { return st(hud).page === 'map'; }
 
 module.exports = { tabBridge, LAYER, FONTS, SAIRA, ICON, TITLES, TECH, IF, fontName, pickIcon,
-    wire, token, update, init, changed, current, decide, tabOf, computerList, mapState, mapVariant, parseSlots, onStatus, hideTitleRule,
+    wire, token, update, init, changed, current, decide, tabOf, computerList, mapState, mapVariant, parseSlots, onStatus, hideTitleRule, navView, NAV_VIEWS,
     resolveItems, paintItems, keyOf, fmtDist, maneuverIcon, tyreBar, callState, callLive, st, fresh,
     // for the tests
     descText, dartOf, lanesOf, destOf, deviceOf, tpmsPoll,

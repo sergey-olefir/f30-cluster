@@ -199,12 +199,18 @@ def tabs():
     W += [text('tab_range_v', vx + vw, 156, vw, '{{td:rangeTab}}', TAB_FONT, 'fg', 'right', 1, below=3),
           text('tab_range_u', vx + vw + 3, 156, width('td_u19', '\u043a\u043c') + 3, '\u043a\u043c', 'td_u19', 'fg', 'left', 1, below=3)]
     cell = lambda a, b: (a + b) / 2.0
-    W += [tab_icon('tab_warn_i', 'cc_warn', cell(TAB['seps'][0], TAB['seps'][1]), 'warn')]
-    # tab 3 (848-1168): one widget, 300 px wide inside its cell, as tall as an icon box; the media text's baseline is 156
-    mw = TAB['seps'][2] - TAB['seps'][1] - 20
+    warn = tab_icon('tab_warn_i', 'cc_warn', cell(TAB['seps'][0], TAB['seps'][1]), 'warn')
+    W += [warn]
+    # tab 3: one widget as tall as an icon box; the media text's baseline is 156. FIN (the owner, 2026-11-18): tab 2 is hidden while there is no
+    # message, and then the media cell grows to 780-1168 (tab 1 keeps its width). So the widget's box runs from the warning icon's box (791-837)
+    # to the cell's end less 10 px: [837, 1158); shared/twin_tabs.js lays the group out in the cell it has now (848-1168 with tab 2, the
+    # group within 858-1158 as before; 780-1168 without, within 791-1158) and the warning widget paints the group's slice left of 837 then.
     my = int(round(ICON_Y - S / 2.0))
-    W += [{'id': 'tab_media', 'type': 'icon', 'icon': 'td_radio', 'z': 5, 'x': TAB['seps'][1] + 10, 'y': my, 'w': mw, 'h': S,
-           'color': 'fg', 'conn': 1, 'tdLive': 'media', 'font': TAB_FONT, 'textBase': 156 - my, 'iconBox': S},
+    mx = warn['x'] + S
+    mw = TAB['seps'][2] - 10 - mx
+    W += [{'id': 'tab_media', 'type': 'icon', 'icon': 'td_radio', 'z': 5, 'x': mx, 'y': my, 'w': mw, 'h': S,
+           'color': 'fg', 'conn': 1, 'tdLive': 'media', 'font': TAB_FONT, 'textBase': 156 - my, 'iconBox': S,
+           'seps': TAB['seps'], 'leftMost': warn['x']},
           tab_icon('tab_phone_i', 'td_phone', cell(TAB['seps'][2], TAB['seps'][3]), 'phone'),
           tab_icon('tab_nav_i', 'td_nav', cell(TAB['seps'][3], TAB['rect'][2]), 'nav')]
     return W

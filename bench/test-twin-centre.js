@@ -103,6 +103,37 @@ console.log('tab 1: the cycle, the "centre" choice and the hide setting');
     h.config.pages = { tyres: false };
     step(h, x, 132000);
     ok(!pages.st(h).tpms.timer && pages.st(h).page !== 'tyres', 'config.pages.tyres off again: the page leaves the cycle and the poll stops (never polled while it does not show)');
+    // FIN (the owner, 2026-11-18): "Технічні дані: сховати" hides BOTH the technical page and the tyre page
+    h.config.pages = { tyres: true }; h._settings.techData = 'hide'; h._settings.centre = 'cycle'; pages.changed(h);
+    eq(pages.computerList(h).join(), 'clock,trip', 'techData = hide with config.pages.tyres on: the tyre page is hidden too (clock, trip)');
+    pages.st(h).cyc = 'tyres'; pages.st(h).cycSince = h._now_ms;
+    const seen2 = {};
+    for (let t = 140000; t < 200000; t += 1000) seen2[step(h, x, t)] = true;
+    eq(Object.keys(seen2).sort(), ['clock', 'trip'], '... the cycle (even one standing on the tyre page) never shows tech or tyres while hidden');
+    ok(!pages.st(h).tpms.timer, '... and the TPMS poll does not run');
+    h._settings.techData = 'show'; pages.changed(h);
+    eq(pages.computerList(h).join(), 'clock,trip,tech,tyres', 'techData = show again: both come back');
+    h.config.pages = { tyres: false }; h._settings.techData = 'show';
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+console.log('FIN: no page dots under the centre title (the owner, 2026-11-18)');
+{
+    // K2's mockup 1Kb drew four discs r 3.2, pitch 15 px, 7 px under the title rule (y 295-297.5), centred on x 960: the band
+    // [900, 1020] x [299, 311] must hold no ink of ours on any page, and no page spec has a dots item
+    const L = pages.LAYER;
+    const band = (buf) => { let n = 0; if (!buf) return -1; for (let y = 299 - L.y; y < 311 - L.y; y++) for (let x = 900 - L.x; x < 1020 - L.x; x++) if (buf[(y * L.w + x) * 4 + 3] > 0) n++; return n; };
+    const bad = [];
+    Object.keys(S.STATES).forEach((id) => { const r = S.render(R, S.make(R, id)); if (band(r.buf) !== 0) bad.push(id + ':' + band(r.buf)); });
+    ok(bad.length === 0, 'no ink under the title rule in the dots\' band on any of ' + Object.keys(S.STATES).length + ' page states' + (bad.length ? ' (' + bad.join(', ') + ')' : ''));
+    const kinds = {};
+    Object.keys(R.widget.pages).forEach((p) => (R.widget.pages[p].items || []).forEach((it) => { kinds[it.k] = true; }));
+    ok(!Object.keys(kinds).some((k) => /dot|pager/i.test(k)) && !/dots|pager/i.test(fs.readFileSync(path.join(ROOT, 'shared', 'twin_pages.js'), 'utf8').replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '')),
+        'no page item draws dots (item kinds: ' + Object.keys(kinds).sort().join(' ') + ')');
+    // the guard sees a dot: one disc of the mockup's size painted into a clock page's pixels
+    const r = S.render(R, S.make(R, 'clock')), b = Buffer.from(r.buf);
+    for (let y = -3; y <= 3; y++) for (let x = -3; x <= 3; x++) if (x * x + y * y <= 10) b[((305 + y - L.y) * L.w + (952 + x - L.x)) * 4 + 3] = 255;
+    ok(band(b) > 20, 'the check sees one mockup dot painted at (952, 305) (' + band(b) + ' px)');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -448,6 +479,43 @@ console.log('the map window (an experiment): presence rule');
     Object.assign(pages.st(h), { navType: 1 }); const x2 = { w: R.widget, ref: 1, sheet: null, px: null }; pages.st(h).mapSent = true; pages.update(h, x2, h._now_ms + 1000, true);
     ok(h.twinMap === null && pages.st(h).page !== 'map', '... the cluster leaves the map view: hud.twinMap null, the fallback page shows');
 }
+console.log('FIN: the setting "Навігація" (navView) = auto / карта / стрілки, in place');
+{
+    const T = S.T0 + 100000;
+    const mk = (view, cfg) => { const h = S.base(R, { tab: 5, settings: { navView: view }, config: Object.assign({ mapWindow: 'W2', mapShutMs: 8000, pages: S.CAR_PAGES }, cfg || {}) }); pages.st(h).built = 0; return h; };
+    const pg = (h) => { h._now_ms = T; return pages.decide(h, T); };
+    eq(pages.NAV_VIEWS, ['auto', 'map', 'arrows'], 'three values');
+    // the map view with BMW's guidance: present in every reading but "arrows"
+    const g = (v) => { const h = mk(v); const p = pages.st(h); p.navType = 2; p.guiding = 'ACTIVE'; return h; };
+    eq(['auto', 'map', 'arrows'].map((v) => pg(g(v))), ['map', 'map', 'none'], 'map view + BMW guidance: auto -> map, карта -> map, стрілки -> the fallback (never the map)');
+    // a CarPlay route with the cluster in map view and BMW's guidance idle: auto takes our route page, карта the map
+    const cp = (v) => { const h = mk(v); h._now_ms = T; S.STATES.car_route.setup(h, R); pages.st(h).navType = 2; pages.st(h).destAt = T - 1000; return h; };
+    eq(['auto', 'map', 'arrows'].map((v) => pg(cp(v))), ['route', 'map', 'route'], 'map view + a CarPlay route (BMW idle): auto -> the CarPlay-route page, карта -> the map, стрілки -> the route page');
+    // no map view: nobody gets the map
+    const nm = (v) => { const h = mk(v); pages.st(h).navType = 1; pages.st(h).guiding = 'ACTIVE'; pages.st(h).road = 'вулиця'; return h; };
+    eq(['auto', 'map', 'arrows'].map((v) => pg(nm(v))), ['road', 'road', 'road'], 'the cluster not in map view: the fallback in every reading (the map is not present)');
+    // стрілки wins over the forced window; the window stays behind config.mapWindow
+    eq(pg(mk('arrows', { mapForce: true })), 'none', 'стрілки: never the map, not even forced');
+    eq(pg(mk('map', { mapForce: true })), 'map', '... карта with the forced window: the map');
+    eq([pg((() => { const h = mk('map', { mapWindow: null }); pages.st(h).navType = 2; return h; })())], ['none'], 'карта with config.mapWindow off (the shipped default): no map window at all - still the experiment');
+    eq([pages.navView(mk('nonsense')), pages.navView(S.base(R, {}))], ['auto', 'auto'], 'an unknown value or none reads as auto');
+    // in place: a change goes through changed() and the next tick, the window shuts at once (no rebuild)
+    const h = g('auto'), x = newX(h);
+    h._now_ms = T; pages.update(h, x, T, true);
+    ok(pages.st(h).page === 'map' && h.twinMap === 'W2', 'auto: the map window open (W2)');
+    h._settings.navView = 'arrows'; pages.changed(h); pages.update(h, x, T + 10, false);
+    ok(pages.st(h).page !== 'map' && h.twinMap === null, 'set to стрілки: the next tick shuts the window and shows the fallback page (in place)');
+    h._settings.navView = 'map'; pages.changed(h); pages.update(h, x, T + 20, false);
+    ok(pages.st(h).page === 'map' && h.twinMap === 'W2', 'set to карта: open again');
+    // the menu
+    const app = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'twin_dial', 'app.json'), 'utf8'));
+    const nv = app.settings.filter((s) => s.key === 'navView')[0];
+    ok(nv && nv.label === 'Навігація' && nv.default === 'auto' && JSON.stringify(nv.options) === JSON.stringify([['auto', 'авто'], ['map', 'карта'], ['arrows', 'стрілки']]), 'app.json: "Навігація" = авто / карта / стрілки, default авто');
+    const main = app.screens.filter((s) => s.name === 'MAIN')[0], sett = app.screens.filter((s) => s.name === 'SETTINGS')[0];
+    ok(main.items.some((i) => i[0] === 'setting' && i[1] === 'navView') && sett.skip.indexOf('navView') >= 0, '... on the main screen (skipped in the list)');
+    const tk = app.config.tabKey;
+    ok(tk && !Array.isArray(tk) && tk.field === 'IndicatorSteeringColumn' && tk.mask === 64 && !/navView/.test(fs.readFileSync(path.join(ROOT, 'shared', 'twin_tabs.js'), 'utf8')), 'no key for it: config.tabKey is the TRIP bit alone and the tab module never touches navView');
+}
 {
     // B6's manoeuvre pictograms by name (stand-ins registered here: the drawings are B6's)
     const IC = require(path.join(R.dir, 'icons.js')).ICONS, f = () => 0.5;
@@ -490,7 +558,7 @@ console.log('repaint only on a change; a night change repaints; a setting is app
     eq([pages.st(h).page, writes], ['clock', 4], 'a change of "centre": the next tick shows the clock page, one repaint');
     const src = fs.readFileSync(path.join(ROOT, 'shared', 'hud.js'), 'utf8');
     // integration (B7): B2's tab keys and these page keys share ONE in-place handler in hud.js
-    ok(/TW_PAGE_KEYS = \['centre', 'techData', 'callerName'\]/.test(src) && /if \(twinPages && TW_PAGE_KEYS\.indexOf\(key\) >= 0\) twinPages\.changed\(this\)/.test(src), 'shared/hud.js applies centre / techData / callerName through twin_pages.changed (no _rebuild)');
+    ok(/TW_PAGE_KEYS = \['centre', 'techData', 'callerName', 'navView'\]/.test(src) && /if \(twinPages && TW_PAGE_KEYS\.indexOf\(key\) >= 0\) twinPages\.changed\(this\)/.test(src), 'shared/hud.js applies centre / techData / callerName / navView (FIN) through twin_pages.changed (no _rebuild)');
     ok(/w\.type === 'tdpage'\) \{ if \(twinPages\) twinPages\.update/.test(src) && /twinPages\.init\(this, x\)/.test(src), 'shared/hud.js builds and updates the tdpage layer through shared/twin_pages.js');
     ok(/tdpage: true/.test(src) && /tdpage: \['pages'\]/.test(fs.readFileSync(path.join(ROOT, 'shared', 'layouts.js'), 'utf8')), 'tdpage is an image type of the engine and a known type of the layout validator');
     // the engine loads without the file (f30_cluster does not pack it)

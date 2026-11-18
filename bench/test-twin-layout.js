@@ -224,7 +224,8 @@ const SAIRA = ['td_big', 'td_clock', 'td_label', 'td_prog', 'td_dist', 'td_cru',
     // the icons: SPEC-R3 3.1, 36 px of ink = a 46 px box on the centre line y 147 (the approved mockups); tab 3's cell is ONE live widget (icon + text as a group)
     const icons = { tab_range_i: 'td_fuel', tab_warn_i: 'cc_warn', tab_phone_i: 'td_phone', tab_nav_i: 'td_nav' };
     ok(Object.keys(icons).every((id) => T(id) && T(id).icon === icons[id] && T(id).w === 46 && T(id).h === 46 && T(id).y + 23 === 147 && T(id).tdLive), 'tab bar pictograms: 46 x 46 boxes (36 px of ink) on y 147, all live (night colours repaint them)');
-    ok(T('tab_media') && T('tab_media').tdLive === 'media' && T('tab_media').x === 858 && T('tab_media').w === 300 && T('tab_media').h === 46 && T('tab_media').y === 124, 'tab 3: one live widget [858, 124, 1158, 170] painting the source icon and its text as a centred group');
+    // FIN: the media widget reaches into the cell that grows when tab 2 is hidden (780-1168): from the warning icon's box to 1158
+    ok(T('tab_media') && T('tab_media').tdLive === 'media' && T('tab_media').x === 837 && T('tab_media').w === 321 && T('tab_media').h === 46 && T('tab_media').y === 124, 'tab 3: one live widget [837, 124, 1158, 170] painting the source icon and its text as a centred group (FIN: in the cell it has now)');
     // the speed and the gear are GPU texts of the right pitch (the atlas decides; the engine's own test)
     ok(T('speed').gpu === true && T('speed').maxLen === 3 && T('gear').gpu === true, 'the digital speed and the gear are GPU texts (hud.js "gpu")');
 }

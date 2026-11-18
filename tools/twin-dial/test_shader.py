@@ -177,6 +177,11 @@ def main():
     ok(sq[182, 752, 3] > 0.95 and sq[205, 775, 3] < 0.05 and sq[380, 960, 3] < 0.01, 'the zero box has rounded corners (radius 24): the corner px (752, 182) stays black (%.2f), (775, 205) is open (%.2f)' % (sq[182, 752, 3], sq[205, 775, 3]))
     w2 = rd.render_back(dict(u, u_map=[700, 173, 1220, 600], u_mapF=[1, 1, 1, 1]))
     ok(w2[300, 960, 3] < 0.01 and w2[300, 690, 3] == 1.0 and w2[300, 710, 3] < 0.05, 'map W2: a hard-edged open box [700, 173, 1220, 600]')
+    # FIN (the owner, 2026-11-18: W2, no fade inside, clipped above by the tab rule)
+    ok(max(w2[y, x, 3] for y in (200, 380, 590) for x in (702, 960, 1217)) < 0.05 and w2[598, 960, 3] < 0.05,
+       'map W2: open right up to its edges - no fade inside (2 px in from each side: %.2f %.2f; 2 px above the bottom: %.2f)' % (w2[380, 702, 3], w2[380, 1217, 3], w2[598, 960, 3]))
+    ok(all(w2[y, 960, 3] == 1.0 for y in (170, 171, 172)) and w2[175, 960, 3] < 0.05 and abs(int(round(w2[171, 700, 0] * 255)) - 230) <= 2,
+       'map W2: clipped above by the tab rule - the rule (y 170-173) stays drawn and opaque, open from y 174 (%.2f at y 175)' % w2[175, 960, 3])
     ok(np.array_equal(rd.render_back(dict(u, u_map=[0, 0, 0, 0]))[:, :, 3], bk[:, :, 3]), 'a closed window changes nothing')
     print('%d passed, %d failed' % (passed, failed))
     return 1 if failed else 0

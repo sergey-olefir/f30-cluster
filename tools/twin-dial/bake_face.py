@@ -74,7 +74,8 @@ UNIT_Y = 0.40                                          # the tachometer's "1/Ñ…Ð
 # (dials_v2.json numeral_shadow_06.model_for_drawing): a dark outline hugging the ink, 0.008 R wide at 0.75, and a soft drop
 # shadow, the ink moved by (+0.010, +0.012) R, blurred sigma 0.008 R, 0.35. 'K1' = K1's by-eye model of picture 80 (no outline;
 # (0.008, 0.020) R, sigma 0.009, 0.70). None: no shadow. One constant: the owner's choice after the mockup round is one word.
-SHADOW_MODEL = 'SD'
+# FIN (the owner, 2026-11-18): NO numeral shadow. The two models stay here (and in the tests) so the choice can be undone in one word.
+SHADOW_MODEL = None
 SHADOW_MODELS = {
     'SD': {'outline': (0.008, 0.75), 'drop': (0.010, 0.012, 0.008, 0.35)},
     'K1': {'outline': None, 'drop': (0.008, 0.020, 0.009, 0.70)},

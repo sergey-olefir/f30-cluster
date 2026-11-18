@@ -8,9 +8,9 @@
    "w": 616,
    "h": 560,
    "format": "r8",
-   "sha256_r8": "155a84dc10c91cf9280581630474193285b480b467f19e002ad5f59b269ac89c",
+   "sha256_r8": "a34c9470fd48b611850601a973570f66b51edbf7c0bbe37868e31695fd5fb282",
    "stretch_saira": 1.06,
-   "shadow_model": "SD",
+   "shadow_model": null,
    "fonts": {
     "Saira[wdth,wght].ttf": "9befb732277693ea2c997a2b94eb1c458033ac1e22414be72d6d36f57a9d9b99",
     "NotoSans[wdth,wght].ttf": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
@@ -29,9 +29,9 @@
    "w": 616,
    "h": 560,
    "format": "r8",
-   "sha256_r8": "f1fd7ffe12db70f2a1af50bf8917365545bab6a0b00a1da304b2c4b4b513aa39",
+   "sha256_r8": "c915abff62082f650d9ce84b9285dd789f30a1e65992fc4d3511c05eeaba5590",
    "stretch_saira": 1.06,
-   "shadow_model": "SD",
+   "shadow_model": null,
    "fonts": {
     "Saira[wdth,wght].ttf": "9befb732277693ea2c997a2b94eb1c458033ac1e22414be72d6d36f57a9d9b99",
     "NotoSans[wdth,wght].ttf": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"

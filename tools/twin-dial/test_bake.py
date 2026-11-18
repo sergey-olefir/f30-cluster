@@ -154,7 +154,9 @@ def test_decode_against_mockup():
         res = {k: cf.compare(k, 1.0, mock, t) for k in ('tach', 'speed')}
         for k, r in res.items():
             n = r['face']
-            ok(r['decoded_to_mockup']['beyond_2px'] <= 40 and r['mockup_to_decoded']['beyond_2px'] <= 60,
+            # FIN: 60, not 40 - the mockup (80_look_06) draws a numeral shadow the owner has since dropped; the shadow-free tachometer has
+            # 49 edge px beyond 2 px there (SD's model gave 16, K1's 56). A face moved by 3 px gives > 1000 (the guard below).
+            ok(r['decoded_to_mockup']['beyond_2px'] <= 60 and r['mockup_to_decoded']['beyond_2px'] <= 60,
                '%s: bright ink edges within 2 px of the mockup (beyond 2 px: %d / %d of %d)' % (n, r['decoded_to_mockup']['beyond_2px'], r['mockup_to_decoded']['beyond_2px'], r['decoded_to_mockup']['ink_px']))
             ok(r['mean_abs_diff_per_channel'] < 3.0 and r['px_over_96'] < 300,
                '%s: mean abs diff %.2f, px over 96: %d (the spec\'s wider major lines and its arc colour differ from the mockup by design)' % (n, r['mean_abs_diff_per_channel'], r['px_over_96']))
@@ -199,10 +201,16 @@ def test_r3_faces():
         ok(r['regions']['band']['tint_linear'] == [0.76, 1.0, 1.064] and r['regions']['band']['rho'] == [0.5795, 0.9375] and r['regions']['band']['theta_abs_max_deg'] == 143.0, '%s: regions JSON: band 0.5795-0.9375, to 143.0, tint 0.76 : 1 : 1.064' % name)
         ok('wedge' not in r and r['numeral_shadow']['model'] == bf.SHADOW_MODEL, '%s: regions JSON has no wedge and names the shadow model' % name)
         ok(a[217:403, 218:398].max() < 8 or kind == 'speed', '%s: the hub\'s centre (gear, program, READY) is free of ink' % name)
-    # the shadow darkens the band next to a numeral (and the strip is untouched); with no model nothing is darkened
-    fc_sd, *_ = bf.draw_face('tach', 1.0)
+    # FIN (the owner, 2026-11-18): no numeral shadow. The shipped constant is None, both regions JSONs and the manifest say so, and the
+    # shipped faces are a no-shadow bake: an 'SD' bake of the same face differs from it next to the numerals (and only on the band)
+    man = json.load(open(bc.MANIFEST))['files']
+    ok(bf.SHADOW_MODEL is None, 'SHADOW_MODEL is None: no numeral shadow (the owner, 2026-11-18)')
+    ok(all(regions(bf.NAMES[k])['numeral_shadow']['model'] is None and man[bf.NAMES[k]]['shadow_model'] is None for k in ('tach', 'speed')),
+       'both regions JSONs and the manifest name no shadow model')
     old = bf.SHADOW_MODEL
     try:
+        bf.SHADOW_MODEL = 'SD'
+        fc_sd, *_ = bf.draw_face('tach', 1.0)
         bf.SHADOW_MODEL = None
         fc_no, *_ = bf.draw_face('tach', 1.0)
     finally:
@@ -210,7 +218,18 @@ def test_r3_faces():
     a1, a0 = np.asarray(fc_sd.img).astype(int), np.asarray(fc_no.img).astype(int)
     ys, xs = np.mgrid[0:a1.shape[0], 0:a1.shape[1]]
     rr = np.hypot((xs + 0.5) / bf.SS - bf.CX, (ys + 0.5) / bf.SS - bf.CY) / bf.R
-    ok(((a1 < a0) & (rr > 0.6) & (rr < 0.85)).sum() > 20000 and not ((a1 != a0) & (rr >= 0.893)).any(), 'the numerals\' shadow darkens the band (%d px at 3x) and never the strip' % ((a1 < a0) & (rr > 0.6) & (rr < 0.85)).sum())
+    ok(((a1 < a0) & (rr > 0.6) & (rr < 0.85)).sum() > 20000 and not ((a1 != a0) & (rr >= 0.893)).any(), 'the "SD" model (kept, not shipped) would darken the band (%d px at 3x) and never the strip' % ((a1 < a0) & (rr > 0.6) & (rr < 0.85)).sum())
+    # the shipped face, reduced, against an 'SD' bake reduced: the numerals' surroundings differ (a guard that fails if the shadow is baked)
+    shipped = scene(bf.NAMES['tach'])[1].astype(int)
+    try:
+        bf.SHADOW_MODEL = 'SD'
+        sd_face = np.asarray(bf.reduce_face(bf.draw_face('tach', 1.06)[0])).astype(int)
+        bf.SHADOW_MODEL = None
+        no_face = np.asarray(bf.reduce_face(bf.draw_face('tach', 1.06)[0])).astype(int)
+    finally:
+        bf.SHADOW_MODEL = old
+    ok(np.array_equal(shipped, no_face) and int((sd_face < shipped - 2).sum()) > 2000,
+       'the shipped tachometer face is the no-shadow bake (an SD bake is darker at %d px)' % int((sd_face < shipped - 2).sum()))
     ok(bf.SHADOW_MODELS['SD']['outline'] == (0.008, 0.75) and bf.SHADOW_MODELS['SD']['drop'] == (0.010, 0.012, 0.008, 0.35), 'SHADOW_MODEL "SD" is SD\'s measured model (outline 0.008 R at 0.75; drop (+0.010, +0.012) R, sigma 0.008, 0.35)')
 
 

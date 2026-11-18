@@ -68,12 +68,50 @@ const clock = (hud) => (hud && hud.td && typeof hud.td.clock === 'function' ? hu
 /** Every tab a driver can fix with the setting (all five: tab 2 shows its empty page with no message). */
 function available() { return ORDER.slice(); }
 
-/** The tabs the driver's KEY steps through: tab 2 only while a message is listed (SPEC-R3 3.4). */
+/**
+ * FIN (the owner, 2026-11-18): is there a message at all? "No messages" = no ccList entry other than the resting id 0 (config.ccList.ignoreIds)
+ * AND the displayed number ("shown now", car-fix CF1) is 0 (config.ccActive.noneValues) or has not spoken yet. Any other displayed number (an
+ * unlisted 285, the end-of-drive 65535) counts as a message here: tab 2 shows (it pulls no tab: that is the machine's rule, unchanged).
+ */
+function messagePresent(hud) {
+    if (!hud) return false;
+    const ig = hud.config && hud.config.ccList && Array.isArray(hud.config.ccList.ignoreIds) ? hud.config.ccList.ignoreIds : [0];
+    const listed = (hud.ccListAll || []).some((e) => e && !e.ignored && ig.indexOf(e.id) < 0);
+    if (listed) return true;
+    const ca = (hud.config && hud.config.ccActive) || {}, none = Array.isArray(ca.noneValues) ? ca.noneValues : [0];
+    return hud.ccDispAny === true && isNum(hud.ccDisp) && none.indexOf(hud.ccDisp) < 0;
+}
+
+/**
+ * FIN: is tab 2 in the bar? With live tabs off (the round 2 look, a stand-in app) always. With live tabs: while a message is present
+ * (messagePresent), while the machine says one shows (window / ours with a severity: rule 1), and while tab 2 is selected or held
+ * (the fixed setting "2", the open settle of SPEC-R3 5.4.4) - a selected tab never vanishes under its own fill.
+ */
+function tab2Shown(hud) {
+    if (!(hud && typeof hud._twinTabsOn === 'function' && hud._twinTabsOn())) return true;
+    const s = hud.tabs || {}, cc = hud.twinCc || {};
+    if (s.tab === 2 || s.hold === 2 || s.msg === true) return true;
+    if ((cc.state === 'window' || cc.state === 'ours') && cc.severity !== null && cc.severity !== undefined) return true;
+    return messagePresent(hud);
+}
+
+/** The tabs the driver's KEY steps through: tab 2 only while it is in the bar (SPEC-R3 3.4; FIN: a hidden tab is skipped). */
 function keyTabs(hud) {
     const ig = hud && hud.config && hud.config.ccList && Array.isArray(hud.config.ccList.ignoreIds) ? hud.config.ccList.ignoreIds : [0];
     const listed = ((hud && hud.ccListAll) || []).some((e) => e && ig.indexOf(e.id) < 0);
     const msg = !!(hud && hud.tabs && hud.tabs.msg);
-    return ORDER.filter((t) => t !== 2 || listed || msg);
+    const on = hud && typeof hud._twinTabsOn === 'function' && hud._twinTabsOn() ? tab2Shown(hud) : (listed || msg);      // FIN: the bar's own rule when live tabs run
+    return ORDER.filter((t) => t !== 2 || on);
+}
+
+/**
+ * FIN: the bar's x positions now (panel px): the separators and the five cells (a hidden tab 2 has no cell: null). Tab 1 keeps its width;
+ * with tab 2 hidden the separator at 848 goes and the media cell grows to 780-1168 (`seps` of the layout: [780, 848, 1168, 1237]).
+ */
+function barGeometry(seps, rect, shown) {
+    const s = Array.isArray(seps) && seps.length === 4 ? seps : [780, 848, 1168, 1237], r = Array.isArray(rect) ? rect : [618, 127, 1302, 172];
+    if (shown) return { seps: s.slice(), cells: [[r[0], s[0]], [s[0], s[1]], [s[1], s[2]], [s[2], s[3]], [s[3], r[2]]] };
+    return { seps: [s[0], s[2], s[3]], cells: [[r[0], s[0]], null, [s[0], s[2]], [s[2], s[3]], [s[3], r[2]]] };
 }
 
 /** The setting "tab": 'auto' or a tab number 1..5. Anything else reads as auto. */
@@ -333,11 +371,51 @@ function colourOf(hud, s) {
     return th.fg || [255, 255, 255, 255];
 }
 
-/** The media cell's pixels: the source icon and the station / title text centred as ONE group (by the icon's INK, not its box), the text cut with an ellipsis. */
-function paintMedia(hud, w, name, col, text) {
+const MEDIA_PAD = 10;            // px kept free inside the media cell at each end (the layout's media box was its cell less 10 px each side)
+
+/**
+ * FIN: where the media group may lie now, in panel x: [x0, x1) and the centre it is centred on. A widget that carries the bar's separators
+ * ("seps", design/gen_twin.py) follows the bar: tab 2 shown -> the cell 848-1168 (the group within 858-1158, centred on 1008); tab 2 hidden ->
+ * the grown cell 780-1168 (within 791-1158: the warning widget's box starts at 791; centred on 974). A widget without "seps" (a stand-in)
+ * keeps its own box, centred in it.
+ */
+function mediaRegion(hud, w) {
+    if (!Array.isArray(w.seps) || w.seps.length !== 4) return { x0: w.x, x1: w.x + w.w, c: w.x + w.w / 2 };
+    const s = w.seps;
+    if (tab2Shown(hud)) return { x0: s[1] + MEDIA_PAD, x1: s[2] - MEDIA_PAD, c: (s[1] + s[2]) / 2 };
+    const left = isNum(w.leftMost) ? Math.max(s[0] + MEDIA_PAD, w.leftMost) : s[0] + MEDIA_PAD;
+    return { x0: left, x1: s[2] - MEDIA_PAD, c: (s[0] + s[2]) / 2 };
+}
+
+/**
+ * The media cell's pixels: the source icon and the station / title text centred as ONE group (by the icon's INK, not its box), the text cut
+ * with an ellipsis. FIN: laid out in the current media region (mediaRegion) and returned as the slice of widget `w`'s box - the media
+ * widget itself, or (tab 2 hidden) the warning widget, whose box lies in the grown cell's left part.
+ */
+function paintMedia(hud, w, name, col, text, mw) {
+    const m = mw || w;                                     // the media widget's own keys (font, icon box, baseline, seps)
+    const reg = mediaRegion(hud, m);
+    const strip = paintMediaStrip(m, name, col, text, reg);
+    const W = w.w, H = w.h, out = Buffer.alloc(W * H * 4, 0);
+    const RW = reg.x1 - reg.x0, dx = reg.x0 - w.x, dy = (m.y || 0) - (w.y || 0);
+    for (let y = 0; y < H; y++) {
+        const sy = y + dy;
+        if (sy < 0 || sy >= m.h) continue;
+        for (let x = 0; x < W; x++) {
+            const sx = x - dx;
+            if (sx < 0 || sx >= RW) continue;
+            const a = (sy * RW + sx) * 4, o = (y * W + x) * 4;
+            out[o] = strip[a]; out[o + 1] = strip[a + 1]; out[o + 2] = strip[a + 2]; out[o + 3] = strip[a + 3];
+        }
+    }
+    return out;
+}
+
+/** The group painted into a strip as wide as the region and as tall as the media widget (region px). */
+function paintMediaStrip(w, name, col, text, reg) {
     const paintIcon = require('./icons').paintIcon;
     const TR = require('./hud_text');
-    const W = w.w, H = w.h, S = isNum(w.iconBox) ? w.iconBox : Math.min(H, 46);
+    const W = Math.max(1, Math.round(reg.x1 - reg.x0)), H = w.h, S = isNum(w.iconBox) ? w.iconBox : Math.min(H, 46);
     const out = Buffer.alloc(W * H * 4, 0);
     const ic = paintIcon(name, S, S, col), iy = Math.round((H - S) / 2);
     let il = S, ir = -1;                                   // the icon's ink, left and right (alpha above a quarter)
@@ -359,7 +437,8 @@ function paintMedia(hud, w, name, col, text) {
         }
         tw = TR.measure(t, font, 0);
     }
-    const group = inkW + (tw ? MEDIA_GAP + tw : 0), left = Math.round((W - group) / 2), x0 = left - il;
+    // centred on the cell's middle (reg.c), kept inside the region
+    const group = inkW + (tw ? MEDIA_GAP + tw : 0), left = Math.max(0, Math.min(W - group, Math.round(reg.c - reg.x0 - group / 2))), x0 = left - il;
     for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
         const a = ((y * S + x) * 4), px = x + x0;
         if (px < 0 || px >= W || ic[a + 3] === 0) continue;
@@ -385,14 +464,36 @@ function paintMedia(hud, w, name, col, text) {
  * x.last). Called through twin_tokens.updateIcon for a widget with "tdLive".
  */
 function updateIcon(hud, x, nowMs, force) {
-    const w = x.w, s = iconState(hud, w), col = colourOf(hud, s);
+    const w = x.w;
+    // FIN: tab 2 hidden - the warning widget's box is the grown media cell's left part: it paints that slice of the media group (often nothing)
+    if (w.tdLive === 'warn' && !tab2Shown(hud)) {
+        const mw = mediaWidget(hud, w), ms = iconState(hud, { tdLive: 'media' }), mc = colourOf(hud, ms);
+        const mt = hud.td && hud.td.media ? String(hud.td.media) : '';
+        const key = 'hidden|' + (mw ? ms.icon + '|' + mc.join(',') + '|' + mt : '');
+        if (!force && key === x.last) return;
+        x.last = key;
+        hud._blitDiff(x, mw ? paintMedia(hud, w, ms.icon, mc, mt, mw) : Buffer.alloc(w.w * w.h * 4, 0));
+        return;
+    }
+    const s = iconState(hud, w), col = colourOf(hud, s);
     const text = w.tdLive === 'media' && hud.td && hud.td.media ? String(hud.td.media) : '';
-    const key = s.icon + '|' + col.join(',') + (w.tdLive === 'media' ? '|' + text : '');
+    const reg = w.tdLive === 'media' ? mediaRegion(hud, w) : null;
+    const key = s.icon + '|' + col.join(',') + (w.tdLive === 'media' ? '|' + text + '|' + reg.x0 + '-' + reg.x1 : '');
     if (!force && key === x.last) return;
     x.last = key;
     if (w.tdLive === 'media') { hud._blitDiff(x, paintMedia(hud, w, s.icon, col, text)); return; }
     hud._blitDiff(x, require('./icons').paintIcon(s.icon, w.w, w.h, col));
 }
 
+/** FIN: the layout's media widget (for the warning widget's slice), or null: from the engine's widgets, else a stand-in on the warning widget. */
+function mediaWidget(hud, w) {
+    let m = null;
+    if (hud && hud.widgets && typeof hud.widgets.forEach === 'function') hud.widgets.forEach((y) => { if (!m && y && y.w && y.w.type === 'icon' && y.w.tdLive === 'media') m = y.w; });
+    if (!m && w.media && typeof w.media === 'object') m = w.media;
+    return m && Array.isArray(m.seps) ? m : null;
+}
+
 module.exports = { update, press, wire, available, keyTabs, mode, lockKmh, pageOf, selected, floorCorrect, rowLines, iconState, updateIcon, paintMedia, resolve,
-    fresh, PAGES, ORDER, SEV_ICON, ICON, MEDIA_GAP };
+    fresh, PAGES, ORDER, SEV_ICON, ICON, MEDIA_GAP,
+    // FIN: tab 2 hidden with no message
+    messagePresent, tab2Shown, barGeometry, mediaRegion, MEDIA_PAD };

@@ -176,6 +176,9 @@ function pixelChecks() {
     const gi = ink(on, Wc, Hc, green);
     ok(on.length === Wc * Hc * 4 && gi.n > 300, 'active: the set speed, its unit and the symbol are green (' + gi.n + ' green px)');
     ok(ink(on, Wc, Hc, (p) => !green(p)).n < gi.n * 0.15, 'active: nothing but green (AA edges aside)');
+    // FIN (the owner, 2026-11-18: cruise C1 with a GREEN unit): the unit's own band (under the set speed's baseline 540, left of the symbol)
+    const unitBand = (p, pred) => { let n = 0; for (let y = 545 - C.y; y < 566 - C.y; y++) for (let x = 0; x < 1540 - C.x; x++) { const q = px(p, Wc, x, y); if (q[3] > 100 && pred(q)) n++; } return n; };
+    ok(unitBand(on, green) > 40 && unitBand(on, (q) => !green(q)) <= unitBand(on, green) * 0.1, 'C1 active: "км/год" under the set speed is green (' + unitBand(on, green) + ' green px in the unit\'s band y 545..566)');
     // the number: right edge at x 1536, its baseline at 540 (the digits sit above it)
     const numArea = ink(on, Wc, Hc, (p) => green(p) && p[3] > 200);
     ok(numArea.box[2] + C.x <= 1597 && numArea.box[0] + C.x >= 1456, 'the readout stays inside its sheet [1456 .. 1596]');
@@ -245,7 +248,7 @@ function geometryChecks() {
     ok(sigs && sigs.displaySpeedLimitAndNoPassingRestriction === 's' && sigs.displayDriverAssistanceLongitudinal === 's', 'app.json declares the sign and the longitudinal field, both notifier only ("s")');
     const f30 = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'app.json'), 'utf8'));
     ok(JSON.stringify(APP.config.sign) === JSON.stringify(f30.config.sign), 'config.sign is f30_cluster\'s, key for key');
-    ok(APP.config.cruise && APP.config.cruise.place === 'C1' && APP.config.limit && APP.config.limit.strip === 'L1' && !APP.config.limit.iface, 'config.cruise is { place: "C1" } (car-fix CF2: on), config.limit.strip is "L1" (and config.limit names no field of its own)');
+    ok(APP.config.cruise && APP.config.cruise.place === 'C1' && APP.config.limit && APP.config.limit.strip === 'L2' && !APP.config.limit.iface, 'config.cruise is { place: "C1" } (car-fix CF2: on), config.limit.strip is "L2" (FIN: the owner\'s choice; config.limit names no field of its own)');
     // car-fix CF2: the real sources' declarations
     const tsrD = APP.signals['de.bmw.dass.TrafficSignRecognition'], camD = APP.signals['de.bmw.environmentalmodel.SignRecognitionFrontCamera'], ddsD = APP.signals['de.bmw.infotainment.displaydataserver.DisplayDataServer'];
     const keysOf = (o) => Object.keys(o).filter((k) => k.charAt(0) !== '_' || k === '_methods' || k === '_broadcasts').sort().join();
@@ -778,6 +781,10 @@ async function engineChecks() {
         ok(!!ul && !!uc, 'the speedometer layer carries u_lim and u_cru (B1\'s shader is in this tree)');
         const dt = hud.widgets.get('dial_tach'), lt = dt.c.layers.get(dt.ref);
         ok(!lt.uniforms['0:u_lim'] || String(lt.uniforms['0:u_lim'].v).trim().split(/\s+/).map(Number).slice(0, 2).join() === '0,0', 'the tachometer never gets a marker');
+        // FIN (the owner, 2026-11-18): the red strip is L2 - red only between the limit and the needle, only while over (u_lim.w = 2)
+        feedSign({ displaySpeedLimit: 50 }); await settle();
+        const ulv = String(dl.c.layers.get(dl.ref).uniforms['0:u_lim'].v).trim().split(/\s+/).map(Number);
+        ok(hud.config.limit.strip === 'L2' && near(ulv[0], -62.5) && ulv[1] === 1 && ulv[3] === 2, 'app.json\'s strip "L2" reaches the speedometer: u_lim [' + ulv.join(', ') + '] (w = 2: red only between the limit and the needle, while over)');
     } else console.log('  skip the dial layer\'s u_lim / u_cru (the compiled tdial has no such uniform until B1\'s shader is merged: the contract is checked on hud.twinLim / hud.twinCru above)');
 
     // the log: numbers and enum names only

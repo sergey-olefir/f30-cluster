@@ -136,23 +136,9 @@
   "ink_alpha": "red numerals and ticks recolour ink only: the shader mixes the ink colour by the face byte (smoothstep(0.70, 0.85, g))"
  },
  "numeral_shadow": {
-  "model": "SD",
-  "params": {
-   "outline": [
-    0.008,
-    0.75
-   ],
-   "drop": [
-    0.01,
-    0.012,
-    0.008,
-    0.35
-   ]
-  },
-  "stats": {
-   "max_darkening": 0.811,
-   "mean_darkening_where_dark": 0.521
-  },
+  "model": null,
+  "params": null,
+  "stats": null,
   "what": "baked: the band's codes under and around each numeral are darkened in linear light, Y' = Y (1 - D)"
  },
  "numerals": [

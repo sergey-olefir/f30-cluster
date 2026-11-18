@@ -220,6 +220,10 @@
           "techData"
         ],
         [
+          "setting",
+          "navView"
+        ],
+        [
           "text",
           "STATUS",
           ""
@@ -255,6 +259,7 @@
         "centre",
         "tab",
         "techData",
+        "navView",
         "diagRelease",
         "diagMapWindow",
         "diagMapForce",
@@ -415,7 +420,28 @@
           "Сховати"
         ]
       ],
-      "_about": "SPEC-R3 4.1: hide = the technical page is out of tab 1's choice and the cycle (R4). Applied in place."
+      "_about": "SPEC-R3 4.1: hide = the technical page AND the tyre page are out of tab 1's choice and the cycle (R4; FIN, the owner 2026-11-18: both). Applied in place."
+    },
+    {
+      "key": "navView",
+      "label": "Навігація",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "авто"
+        ],
+        [
+          "map",
+          "карта"
+        ],
+        [
+          "arrows",
+          "стрілки"
+        ]
+      ],
+      "_about": "FIN (the owner, 2026-11-18): what tab 5 shows. auto = BMW's map when it is present (the map view with BMW's guidance or 'map without a route'), else the arrow / CarPlay-route page; map = the map window whenever BMW's map view is on (a CarPlay route included), else the same fallback; arrows = never the map. The map window itself stays the experiment config.mapWindow (Діагностика). Applied in place (shared/twin_pages.js navView). No key: the TRIP button stays the tab key only."
     },
     {
       "key": "redline",
@@ -531,15 +557,15 @@
           "вимк."
         ],
         [
-          "W1",
-          "W1"
-        ],
-        [
           "W2",
           "W2"
+        ],
+        [
+          "W1",
+          "W1"
         ]
       ],
-      "_about": "config.mapWindow (SPEC-R3 4.5): the map window on tab 5, an experiment"
+      "_about": "config.mapWindow (SPEC-R3 4.5): the map window on tab 5, an experiment. FIN (the owner, 2026-11-18): W2 is the window (the largest: open box [700, 173, 1220, 600], no fade, BMW's own edge shows, clipped above by the tab rule; no lens), so it is the FIRST option after off - switching the setting on gives W2; W1 stays one more press away"
     },
     {
       "key": "diagMapForce",
@@ -815,7 +841,7 @@
           "on": { "ccActive.release": { "deferValues": [65535], "leftList": true } },
           "_about": "the narrowed release of research3/MC for Twin Dial (SPEC-R3 5.4 step 7: only a number that was set before its entry left the list may be released; 65535 deferred): package B3 owns the engine side, this is the value the setting switches on"
         },
-        "diagMapWindow": { "options": { "W1": { "mapWindow": "W1" }, "W2": { "mapWindow": "W2" } } },
+        "diagMapWindow": { "options": { "W2": { "mapWindow": "W2" }, "W1": { "mapWindow": "W1" } } },
         "diagMapForce": { "on": { "mapForce": true } },
         "diagMapSlots": { "on": { "mapSlotLog": true } },
         "diagSilent": { "act": "silent" }
@@ -834,7 +860,7 @@
       "_carFix": "car-fix CF3 (2026-11-18, the car; docs/car-fix/CF3-REPORT.md): media ON (HmiMediaState, the tuner and the CarPlay player all arrive; CarPlay's title / artist / time from MediaPlayer on CarPlayMedia, the source from the HMI menu's selected icon); phone ON for what arrives (aggregatedCallState -> the call card, its title by state and our own timer); phoneDevices (DevicePresentation: the idle page's connection lines, tab 4's icon variant) and callDetail (VoiceCall contact / name, micMuted) stay OFF: never seen; route ON (tab 5 with CarPlay guiding: remaining distance, arrival and travel time, the road; no arrow; it also selects tab 5 by rule 3 like BMW's guidance; routeOffRoad: the \"Поза дорогою\" note from isOnGuidableRoad, OFF: it read false at the start of a CarPlay route, its meaning is unverified); guidance (BMW's own arrow page) stays OFF: untested."
     },
     "mapWindow": null,
-    "_mapWindow": "round 3 B4 (SPEC-R3 4.5), an EXPERIMENT: null = no map window; \"W1\" = the soft-edged window (zero box [750, 180, 1170, 564], fades 120 / 80 / 80, corner 24), \"W2\" = open wider so that BMW's own edge shows. It opens only while tab 5 is selected and BMW's map is believed present (mapSlots / the cluster's map-view setting) and closes at once on any doubt. Needs B1's u_map uniform in tdback.",
+    "_mapWindow": "round 3 B4 (SPEC-R3 4.5), an EXPERIMENT (FIN, the owner 2026-11-18: W2 is the chosen window and the Діагностика setting's first option; still off by default): null = no map window; \"W1\" = the soft-edged window (zero box [750, 180, 1170, 564], fades 120 / 80 / 80, corner 24), \"W2\" = open wider so that BMW's own edge shows. It opens only while tab 5 is selected and BMW's map is believed present (mapSlots / the cluster's map-view setting) and closes at once on any doubt. Needs B1's u_map uniform in tdback.",
     "mapSlots": false,
     "_mapSlots": "true once the experiment has shown that cluster-render's status rows (slot 0x100 ... map 1) are readable: the window then follows them (S1); false = it follows the cluster's map-view setting and guidance (S2).",
     "mapForce": false,
@@ -1042,8 +1068,8 @@
       "_tsr": "car-fix CF2 (the car session of 2026-11-18): the field above never arrives on the owner's car (its provider never comes up); the limit comes as the EVENT de.bmw.dass.TrafficSignRecognition.TrafficSignRecognition (service 13632, instance 1, about 2 a second): presentClassLimitSpeed x 5 = km/h (class 8 with a 40 sign, 6 with a 30, 10 = 50 in town). shared/limit_src.js reads it into the same sign shape; 'order' says which source speaks first while it is live (the event, then this field as the fallback; an event older than staleMs is not live). 'none' classes draw no sign: 0 (FASuS's AUFHEBUNG_ALLES), 29 (its chime request, not a speed), 253..255 (n/a, unfilled); warnMap: controlSLIWarning 0 / 1 seen, 1 = over the limit is a hypothesis; mph: unitOfMeasurementSpeedLimit 1 = MPH by FASuS's enum, anything else km/h; endOn (presentWithdrawalLimitSpeed values that mean the derestriction sign; 2 = AUFHEBUNG by the enum) is empty until the car shows one. 'camera' (the front camera's own event) is a witness: logged ('limit: camera ...'), never drawn."
     },
     "limit": {
-      "strip": "L1",
-      "_about": "SPEC-R3 8 (b): the speedometer's tick strip red from the limit. 'L1' = red from the limit's angle to the scale's end, dim while the needle is below the limit and full when over (SPEC-R3 8, the lead's reading); 'L2' = red only between the limit and the needle, only while over; 'L3' = as L1 but always full; 'off' = the marker only. The owner's choice (docs/twin-dial/MOCKUP-SPEC-R3B.md) is this one line. Not f30_cluster's config.limit (no iface / field here: nothing is subscribed by it)."
+      "strip": "L2",
+      "_about": "SPEC-R3 8 (b): the speedometer's tick strip red from the limit. 'L1' = red from the limit's angle to the scale's end, dim while the needle is below the limit and full when over (SPEC-R3 8, the lead's reading); 'L2' = red only between the limit and the needle, only while over; 'L3' = as L1 but always full; 'off' = the marker only. THE OWNER CHOSE L2 (2026-11-18, package FIN). Not f30_cluster's config.limit (no iface / field here: nothing is subscribed by it)."
     },
     "cruise": {
       "place": "C1"

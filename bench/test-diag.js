@@ -145,6 +145,17 @@ function unit() {
         ok(cfg.mapWindow === 'W2' && cfg.mapForce === true && cfg.mapSlotLog === true && cfg.mapSlots === false && cfg.ccActive.release.leftList === true && cfg.ccActive.release.deferValues[0] === 65535, 'twin: the map window, the forced window, the slot log and the release write their keys');
         ok(cfg.ccActive.strict === true && cfg.ccActive.noneValues[0] === 0, 'twin: the rest of ccActive is untouched');
     }
+    {
+        // FIN (the owner, 2026-11-18): the map window is W2; the Діагностика choice defaults to W2 when switched on (the menu's
+        // cycle from "off" lands on the first option after it), and app.json keeps the window off until then
+        const spec = APPS.twin_dial, s = spec.settings.filter((x) => x.key === 'diagMapWindow')[0];
+        const list = s.options.map((o) => o[0]), next = list[(list.indexOf(s.default) + 1) % list.length];
+        ok(s.default === 'off' && list.join() === 'off,W2,W1' && next === 'W2', 'twin: "Вікно карти" is off by default and switching it on gives W2 (options ' + list.join(' / ') + ')');
+        const cfg = deep(spec.config), vals = { diagMapWindow: next };
+        ok(spec.config.mapWindow === null, 'twin: app.json\'s config.mapWindow stays null (the window is still the experiment)');
+        DS.Diag.create(cfg, fakeSettings(spec, vals), quiet);
+        ok(cfg.mapWindow === 'W2', 'twin: switched on, config.mapWindow = "W2"');
+    }
 
     // integration (B7): the tab bar's inputs from B4's page model (shared/twin_pages.js tabBridge), gated by config.pages
     {
@@ -294,8 +305,8 @@ async function twin() {
     await click('SET_DIAGSILENT');
     p = await until((q) => q.settings.diagSilent === true, 4000);
     await sleep(800);
-    ok(p.settings.diagMapWindow === 'W1' && p.settings.diagMapForce === true && p.settings.diagMapSlots === true && p.settings.diagSilent === true, 'map window W1, forced window, slot log, silent log: all on');
-    ok(/diag: diagMapWindow W1/.test(logText) && /diag: diagMapForce on/.test(logText) && /diag: diagMapSlots on/.test(logText) && /diag: diagSilent on/.test(logText), 'each one is logged: its name and on / the option, nothing else');
+    ok(p.settings.diagMapWindow === 'W2' && p.settings.diagMapForce === true && p.settings.diagMapSlots === true && p.settings.diagSilent === true, 'map window W2 (FIN: the first row after off), forced window, slot log, silent log: all on');
+    ok(/diag: diagMapWindow W2/.test(logText) && /diag: diagMapForce on/.test(logText) && /diag: diagMapSlots on/.test(logText) && /diag: diagSilent on/.test(logText), 'each one is logged: its name and on / the option, nothing else');
     ok(/trip summary #\d+ at/.test(logText), 'the silent-fields summary ran when its setting went on');
     p = await until((q) => /Diagnostics on: 5/.test(txt(q, 'STATUS2') || ''), 4000);
     ok(/Diagnostics on: 5/.test(txt(p, 'STATUS2') || ''), 'the status line counts them: "' + (txt(p, 'STATUS2') || '').slice(-40) + '"');

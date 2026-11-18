@@ -318,16 +318,23 @@
       "type": "icon",
       "icon": "td_radio",
       "z": 5,
-      "x": 858,
+      "x": 837,
       "y": 124,
-      "w": 300,
+      "w": 321,
       "h": 46,
       "color": "fg",
       "conn": 1,
       "tdLive": "media",
       "font": "td_tabs",
       "textBase": 32,
-      "iconBox": 46
+      "iconBox": 46,
+      "seps": [
+        780,
+        848,
+        1168,
+        1237
+      ],
+      "leftMost": 791
     },
     {
       "id": "tab_phone_i",
