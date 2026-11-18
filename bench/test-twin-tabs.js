@@ -635,10 +635,14 @@ async function engineChecks() {
         hud.td.nav = true;
         await sleep(200);
         eq([hud.tabs.tab, builds - b0], [5, 0], 'guidance on: tab 5, no build');
+        // integration (B7): with B3's machine merged, hud.twinCc is rewritten by _twinPush from the car's (here: no) message; this checks B2's
+        // rule alone, so the machine's push is held while the state is injected (B3's own suite drives a real message to tab 2)
+        const push0 = hud._ccPush, push1 = hud._twinPush; hud._ccPush = () => {}; hud._twinPush = () => {};
         hud.twinCc = { state: 'window', severity: 'amber' };
         await sleep(200);
         ok(hud.tabs.tab === 2 && builds - b0 === 0, 'a message state: tab 2, no build');
         hud.twinCc = { state: 'none', severity: null };
+        hud._ccPush = push0; hud._twinPush = push1;
         hud.td.nav = false;
         await sleep(200);
         ok(hud.tabs.tab === 1 && builds - b0 === 0, 'both end: tab 1, no build');
