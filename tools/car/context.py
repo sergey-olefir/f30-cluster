@@ -124,7 +124,8 @@ class Ctx:
         for s in self.summaries():
             for _p, tag in s.get("silent", []):
                 best[tag] = max(best.get(tag, 0.0), s["t"] / 60.0)
-        return best
+        spoke = {p.tag for p in self.probe}
+        return {t: m for t, m in best.items() if t not in spoke}      # silent at +30 s but heard later is not silent
 
     def spoke_tags(self) -> set:
         return {p.tag for p in self.probe}

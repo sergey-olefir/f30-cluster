@@ -311,12 +311,22 @@ class TabKey(unittest.TestCase):
             L = ProbeLog().begin(0, "S6")
             L.mark(5)
             L.summary(35, "S6", [], [("P13", "stalk"), ("P13", "sw-fav")])
-            L.info(36, "probe: ask P13 stalk (silent at +120s): error or no answer: timeout (the car does not send it)")
+            L.summary(125, "S6", [], [("P13", "stalk"), ("P13", "sw-fav")], plus=120)
+            L.info(126, "probe: ask P13 stalk (silent at +120s): error or no answer: timeout (the car does not send it)")
             L.write(p)
         root = session({"apps/signal_probe/signal_probe.log": f})
         it = run(root, only=["P13"])["items"]["P13"]
         self.assertEqual((it["status"], it["label"]), ("answered", "not-sent"))
         self.assertEqual(it["decided"]["getter_outcome"], {"stalk": "error"})
+        self.assertEqual(it["decided"]["observed_minutes"], 2.0)
+
+    def test_silent_for_less_than_two_minutes_is_not_called_not_sent(self):
+        def f(p):
+            L = ProbeLog().begin(0, "S6")
+            L.summary(35, "S6", [], [("P13", "stalk")])
+            L.write(p)
+        it = run(session({"apps/signal_probe/signal_probe.log": f}), only=["P13"])["items"]["P13"]
+        self.assertEqual((it["status"], it["label"]), ("partial", None))
 
 
 class OtherTables(unittest.TestCase):

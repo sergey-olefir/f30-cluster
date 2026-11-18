@@ -57,10 +57,18 @@ def _mk(ctx: Ctx, aid: str, title: str, *tags: str) -> Tuple[Ans, Optional[str]]
         a.needs.append("the probe's log (signal_probe or Twin Dial's probe build) of the session")
         return a, "stop"
     if st == "silent":
-        a.status = "answered"
-        a.label = "not-sent"
-        a.decided = {"arrives": False, "observed_minutes": round(mins, 1), "tags": list(tags)}
+        # what was done meanwhile: the session steps whose marks were pressed and that expected one of these fields
+        done = []
+        for m in ctx.markers:
+            e = ctx.marker_map.get(str(m.n)) if isinstance(ctx.marker_map, dict) else None
+            if isinstance(e, dict) and any(len(x) == 2 and x[1] in tags for x in e.get("expect", [])) and e.get("step") and e["step"] not in done:
+                done.append(e["step"])
+        a.status = "answered" if mins >= 2.0 else "partial"
+        a.label = "not-sent" if mins >= 2.0 else None
+        a.decided = {"arrives": False, "observed_minutes": round(mins, 1), "tags": list(tags), "steps_done_that_expected_it": done[:12], "marks_pressed": len(ctx.markers)}
         a.why.append("the probe's summary names every one of these fields silent after %.1f minutes" % mins)
+        if mins < 2.0:
+            a.needs.append("at least 2 minutes of the set switched on after the action (the +120 s summary): too short to call it not sent")
         asks = {}
         for app in ("signal_probe", "twin_dial"):
             asks.update(cl.probe_asks(ctx.app_lines.get(app, [])))

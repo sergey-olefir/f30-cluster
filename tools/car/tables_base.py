@@ -59,7 +59,7 @@ def safe_value(v: Any) -> Any:
     if v is None or isinstance(v, (bool, int, float)):
         return v
     if isinstance(v, str):
-        if _ENUM.match(v) or v in SAFE_WORDS or v in _FIELD_WORDS or v in known_tags() or re.match(r"^(?:wb|g20)_[a-z0-9_]+$|^all[A-Za-z0-9]+$", v) or re.match(r"^-?\d+(?:\.\d+)?(?:/\d+)?$", v) or re.match(r"^0x[0-9a-fA-F]{1,8}$", v) or \
+        if _ENUM.match(v) or v in SAFE_WORDS or v in _FIELD_WORDS or v in known_tags() or re.match(r"^B\d+\.\d+$", v) or (v.split(".")[0] in known_tags() and re.match(r"^[a-z0-9-]+\.[A-Za-z0-9]+$", v)) or re.match(r"^(?:wb|g20)_[a-z0-9_]+$|^all[A-Za-z0-9]+$", v) or re.match(r"^-?\d+(?:\.\d+)?(?:/\d+)?$", v) or re.match(r"^0x[0-9a-fA-F]{1,8}$", v) or \
                 re.match(r"^de\.bmw\.[A-Za-z0-9_.]+$", v):
             return v
         raise ValueError("unsafe evidence value %r" % v[:40])

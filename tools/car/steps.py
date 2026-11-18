@@ -44,7 +44,7 @@ def load_marks(path: Optional[str]) -> Dict[str, dict]:
             cls = STEP_CLASS.get(step)
             if cls and tag in ("twin", "f30") and not cls.endswith(("-twin", "-f30")) and cls.startswith(("bc-", "stalk-", "thumb-", "wheel-", "controller", "msg-")):
                 cls = cls + "-" + tag
-            out[str(m.get("mark"))] = {"class": cls, "step": step, "tag": tag}
+            out[str(m.get("mark"))] = {"class": cls, "step": step, "tag": tag, "expect": [list(x) for x in (m.get("expect") or [])]}
     elif isinstance(d.get("markers"), dict):
         out = {str(k): (v if isinstance(v, dict) else {"class": v}) for k, v in d["markers"].items()}
     return out

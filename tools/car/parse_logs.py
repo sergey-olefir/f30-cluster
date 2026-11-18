@@ -275,7 +275,15 @@ def build(session_dir: str, readings_path: Optional[str], markers_path: Optional
                 a.needs.append("no decision table for this register item in tools/car (add one to tables_*.py)")
         if not a.title:
             a.title = info.get("q", "")
-        j = a.to_json()
+        try:
+            j = a.to_json()
+        except ValueError as e:
+            # the privacy guard refused something a table put in: keep the item, drop the content, say so (never crash, never leak)
+            sys.stderr.write("parse_logs: %s: %s\n" % (k, str(e)[:100]))
+            b = Ans(k, a.title)
+            b.status = "not-yet"
+            b.needs.append("the table's output was refused by the evidence guard (%s): fix tools/car/tables_*.py" % type(e).__name__)
+            j = b.to_json()
         j["kind"] = info.get("kind", k[0])
         if info.get("from_register"):
             j["in_register"] = True
