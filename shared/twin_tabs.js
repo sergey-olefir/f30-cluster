@@ -69,29 +69,25 @@ const clock = (hud) => (hud && hud.td && typeof hud.td.clock === 'function' ? hu
 function available() { return ORDER.slice(); }
 
 /**
- * FIN (the owner, 2026-11-18): is there a message at all? "No messages" = no ccList entry other than the resting id 0 (config.ccList.ignoreIds)
- * AND the displayed number ("shown now", car-fix CF1) is 0 (config.ccActive.noneValues) or has not spoken yet. Any other displayed number (an
- * unlisted 285, the end-of-drive 65535) counts as a message here: tab 2 shows (it pulls no tab: that is the machine's rule, unchanged).
+ * FIN (the owner, 2026-11-18; narrowed by the lead): is there a message for the bar? Only while ccList holds an entry other than the
+ * resting id 0 (config.ccList.ignoreIds). A displayed number with no entry (BMW's own unlisted messages, 285 type: BMW's panel shows
+ * them) and 65535 (unknown) do NOT bring tab 2 in: no flicker of the bar.
  */
 function messagePresent(hud) {
     if (!hud) return false;
     const ig = hud.config && hud.config.ccList && Array.isArray(hud.config.ccList.ignoreIds) ? hud.config.ccList.ignoreIds : [0];
-    const listed = (hud.ccListAll || []).some((e) => e && !e.ignored && ig.indexOf(e.id) < 0);
-    if (listed) return true;
-    const ca = (hud.config && hud.config.ccActive) || {}, none = Array.isArray(ca.noneValues) ? ca.noneValues : [0];
-    return hud.ccDispAny === true && isNum(hud.ccDisp) && none.indexOf(hud.ccDisp) < 0;
+    return (hud.ccListAll || []).some((e) => e && !e.ignored && ig.indexOf(e.id) < 0);
 }
 
 /**
- * FIN: is tab 2 in the bar? With live tabs off (the round 2 look, a stand-in app) always. With live tabs: while a message is present
- * (messagePresent), while the machine says one shows (window / ours with a severity: rule 1), and while tab 2 is selected or held
- * (the fixed setting "2", the open settle of SPEC-R3 5.4.4) - a selected tab never vanishes under its own fill.
+ * FIN: is tab 2 in the bar? With live tabs off (the round 2 look, a stand-in app) always. With live tabs: while ccList holds a
+ * non-resting entry (messagePresent), and while tab 2 is selected or held (the fixed setting "2", the open settle of SPEC-R3 5.4.4):
+ * a selected tab never vanishes under its own fill. The selection rules themselves are unchanged.
  */
 function tab2Shown(hud) {
     if (!(hud && typeof hud._twinTabsOn === 'function' && hud._twinTabsOn())) return true;
-    const s = hud.tabs || {}, cc = hud.twinCc || {};
-    if (s.tab === 2 || s.hold === 2 || s.msg === true) return true;
-    if ((cc.state === 'window' || cc.state === 'ours') && cc.severity !== null && cc.severity !== undefined) return true;
+    const s = hud.tabs || {};
+    if (s.tab === 2 || s.hold === 2) return true;
     return messagePresent(hud);
 }
 

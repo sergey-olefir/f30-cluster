@@ -609,10 +609,12 @@ console.log('8. FIN: tab 2 is hidden while there is no message (the owner, 2026-
     h.ccListAll = [{ id: 0, ignored: true }, { id: 987, ignored: false }];
     ok(tabs.messagePresent(h) && tabs.tab2Shown(h), 'a stored entry listed (displayed 0): shown');
     h.ccListAll = [{ id: 0, ignored: true }]; h.ccDisp = 285;
-    ok(tabs.messagePresent(h) && tabs.tab2Shown(h), 'displayed 285 with no list entry (BMW\'s unlisted message): shown');
+    ok(!tabs.messagePresent(h) && !tabs.tab2Shown(h), 'displayed 285 with no list entry (BMW\'s unlisted message, its own panel shows it): hidden - no flicker of the bar');
     h.ccDisp = 65535;
-    ok(tabs.tab2Shown(h), 'displayed 65535 (the end of a drive): shown (not 0)');
-    h.ccDisp = 0; h.twinCc = { state: 'window', severity: null };
+    ok(!tabs.tab2Shown(h), 'displayed 65535 (unknown, the end of a drive): hidden');
+    h.ccListAll = [{ id: 0, ignored: true }, { id: 15, ignored: false }];
+    ok(tabs.tab2Shown(h), '... 65535 with an entry listed: shown (the list decides)');
+    h.ccListAll = [{ id: 0, ignored: true }]; h.ccDisp = 0; h.twinCc = { state: 'window', severity: null };
     ok(!tabs.tab2Shown(h), 'a window with no severity (the keep-open of a car not read yet) is no message: hidden');
     h.twinCc = { state: 'none', severity: null }; h.tabs = tabs.fresh(); h.tabs.tab = 2;
     ok(tabs.tab2Shown(h), 'tab 2 selected (the setting fixed to 2): shown - a selected tab never vanishes under its fill');
@@ -817,6 +819,16 @@ async function engineChecks() {
         eq([hud.tabs.tab, sepNow()], [1, [780, 848, 1168, 1237]], 'a stored entry listed with displayed 0: tab 2 in the bar, not selected');
         feedList([REST]); await sleep(250);
         eq(sepNow(), [780, 1168, 1237, -10], '... and gone with it');
+        // the lead (FIN follow-up): an unlisted number does not bring tab 2 in by itself. NOTE, as the selection rules are kept: the machine gives an
+        // unlisted 285 the severity grey (twin_cc.js), so B2's rule 1 still SELECTS tab 2 for it, and a selected tab stays in the bar. This pins
+        // both halves: the bar's own rule says no (messagePresent false), the tab is there only because rule 1 selected it.
+        feedDisp(285); await sleep(300);
+        ok(!tabs.messagePresent(hud) && hud.tabs.tab === 2 && hud.tabs.reason === '1 message' && hud.twinCc.severity === 'grey',
+            'displayed 285 with no ccList entry: not a message for the bar (messagePresent false); B2\'s rule 1 selects tab 2 on the machine\'s grey severity (kept: a selection rule)');
+        feedDisp(65535); await sleep(400);
+        eq([hud.tabs.tab, sepNow(), tabs.messagePresent(hud)], [1, [780, 1168, 1237, -10], false], 'displayed 65535 (unknown) with the list at rest: no pull, tab 1, tab 2 out of the bar');
+        feedDisp(0); await sleep(300);
+        eq([hud.tabs.tab, sepNow()], [1, [780, 1168, 1237, -10]], '... displayed 0: still out');
         ok(!logs.some((l) => /^ERROR/.test(l)), 'no error in the engine\'s log' + (logs.filter((l) => /^ERROR/.test(l))[0] ? ': ' + logs.filter((l) => /^ERROR/.test(l))[0] : ''));
     } finally {
         Module._load = realLoad;

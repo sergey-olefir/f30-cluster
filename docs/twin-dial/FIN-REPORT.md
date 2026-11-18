@@ -21,11 +21,11 @@ Labels: **verified** = measured here (suites, bench, bake). **car** = only the c
 
 ## 2. Tab 2 hidden (item 8)
 
-**When is tab 2 in the bar** (`shared/twin_tabs.js tab2Shown`): with live tabs on, while a ccList entry other than the resting
-id 0 is listed, or the displayed number ("shown now", CF1) has spoken and is not 0 (`ccActive.noneValues`), or the machine
-says a message shows (window / ours with a severity), or tab 2 is selected or held (the fixed setting "2"; the open settle of
-SPEC-R3 5.4.4). Displayed not yet spoken counts as 0. An unlisted 285 or the end-of-drive 65535 is "not 0": tab 2 shows
-(it pulls no tab: the machine's rule, unchanged). Live tabs off (a stand-in app, the round-2 look): always shown.
+**When is tab 2 in the bar** (`shared/twin_tabs.js tab2Shown`; narrowed by the lead after the first commit): with live tabs
+on, **only while ccList holds an entry other than the resting id 0**, and while tab 2 is selected or held (the fixed setting
+"2"; the open settle of SPEC-R3 5.4.4: a selected tab never vanishes under its own fill). A displayed number with no ccList
+entry (285 type) and 65535 do not bring tab 2 in by themselves. Live tabs off (a stand-in app, the round-2 look): always shown.
+**But see §6 item 3:** the kept selection rule still selects tab 2 for an unlisted 285.
 
 **Exact x positions** (panel px; the bar is 618–1302):
 
@@ -65,7 +65,7 @@ check_signals ok (f30_cluster, driver_profiles, twin_dial) · bake-py 88 passed,
 ```
 
 Changed by FIN against `release/0.1.1` (base counts run on a clean checkout of it today): twin-centre 221 → 242, twin-tabs
-209 → 240, twin-limit 222 → 224, diag 101 → 104, bake-py 85 → 88 (and its byte-for-byte re-bake now passes on this Mac: the
+209 → 240 (244 after the follow-up), twin-limit 222 → 224, diag 101 → 104, bake-py 85 → 88 (and its byte-for-byte re-bake now passes on this Mac: the
 faces were baked here), `tools/twin-dial/test_shader.py` (GPU, not in run_all) 44 → 46. twin-layout stays 106 (one check
 rewritten). Every other count is release/0.1.1's. `check_signals.py` separately on every app in `apps/` (driver_profiles,
 f30_cluster, twin_dial): all declarations pass (catalogue `reference/car/2026-11-15`).
@@ -78,6 +78,9 @@ The safety machine: `test-twin-cc` 266 / 0, the same as release/0.1.1 — every 
 still break the audit. Its stand-in app has no live tabs (tab 2 always in the bar there); the real app's message path with the
 bar is in test-twin-tabs' engine block (the door message: tab 2 appears and is selected; its end: hidden again; a stored entry:
 shown, not selected).
+
+Follow-up (tab 2 only for a non-resting ccList entry), re-run alone on port 8960: twin-tabs 244 / 0, twin-cc 266 / 0,
+twin-centre 242 / 0, diag 104 / 0.
 
 ## 4. Budget
 
@@ -126,9 +129,13 @@ cruise readout have no gallery scene; the suites check them (u_lim.w 2 on the en
    switched on (Діагностика); the lead should confirm the reading.
 2. **"W2 when switched on"** is done by the option order вимк. / W2 / W1 (the menu cycles to the next value). If the lead
    meant a separate on/off plus a W1/W2 choice, that is two settings instead of one.
-3. **Tab 2's rule counts any displayed number other than 0** (the owner's words): an unlisted number (285, 926 …) or the
-   end-of-drive 65535 brings tab 2 into the bar for its few seconds, without selecting it (`unlistedPullsTab` false). If that
-   flicker is unwanted, `ccActive.unknownValues` (65535) could be excluded in `messagePresent` — one line.
+3. **An unlisted 285 still SELECTS tab 2 on the real app (existing behaviour, not changed: the selection rules were to be kept).**
+   The machine gives a shown number with no ccList entry the severity grey (`shared/twin_cc.js` line 427, `sev || 1`), and B2's
+   rule 1 (`twin_tabs.update`, `msgNow` = window / ours with any severity) selects tab 2 on it; CF1's `unlistedPullsTab: false`
+   gates only the machine's own tab, and CF1 tested it on the stand-in app without live tabs. So for each 285-type message
+   (about 6 s, several per drive) tab 2 appears selected with the pointer page, then goes back. Seen on the bench (test-twin-tabs'
+   engine block now pins it). Fix if wanted (one line, a selection-rule change): in `msgNow` ignore the machine's state while
+   `hud.twinMsg.unlisted` is true and `config.ccActive.unlistedPullsTab` is not. 65535 with the list at rest pulls nothing (severity 0).
 4. **Gallery checks out of date**: tools/shots/twin's "warning tab lit / not lit" read the round-2 cell x 746–757 (fails on
    release/0.1.1 too). Not changed here (outside the brief); they should read tab 2's icon (791–837) and accept its absence.
 5. **The car**: none of this has run on the car. To watch there: the bar switching between four and five tabs as messages
