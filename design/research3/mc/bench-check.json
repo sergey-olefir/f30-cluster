@@ -1,0 +1,176 @@
+{
+ "port": 8304,
+ "cases": {
+  "A0": {
+   "rows": [
+    {
+     "step": "rest",
+     "truth": "none",
+     "open": false,
+     "shown": false,
+     "noMatch": null,
+     "ucc": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "step": "door",
+     "truth": "msg",
+     "open": true,
+     "shown": true,
+     "noMatch": null,
+     "ucc": [
+      699,
+      600,
+      1223,
+      701
+     ]
+    },
+    {
+     "step": "shut",
+     "truth": "none",
+     "open": false,
+     "shown": false,
+     "noMatch": null,
+     "ucc": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "step": "+3 s",
+     "truth": "none",
+     "open": false,
+     "shown": false,
+     "noMatch": null,
+     "ucc": [
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ],
+   "lines": [
+    "check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "active cc: number 0 control 0 frame 0/0 utility 0",
+    "active cc: wired - from now on it alone says whether a message shows",
+    "check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "active cc: number 15 control 1 frame 1/1 utility 0",
+    "active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "active cc: number 0 control 0 frame 0/0 utility 0"
+   ],
+   "endsOpen": false
+  },
+  "A1": {
+   "rows": [
+    {
+     "step": "default",
+     "truth": "none",
+     "open": true,
+     "shown": true,
+     "noMatch": 65535,
+     "ucc": [
+      699,
+      600,
+      1223,
+      701
+     ]
+    },
+    {
+     "step": "+3 s",
+     "truth": "none",
+     "open": true,
+     "shown": true,
+     "noMatch": 65535,
+     "ucc": [
+      699,
+      600,
+      1223,
+      701
+     ]
+    }
+   ],
+   "lines": [
+    "check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "active cc: wired - from now on it alone says whether a message shows",
+    "active cc: no ccList entry for number 65535 - shown, BMW's panel stays open"
+   ],
+   "endsOpen": true
+  },
+  "A3": {
+   "rows": [
+    {
+     "step": "rest",
+     "truth": "none",
+     "open": false,
+     "shown": false,
+     "noMatch": null,
+     "ucc": [
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "step": "door",
+     "truth": "msg",
+     "open": true,
+     "shown": true,
+     "noMatch": null,
+     "ucc": [
+      699,
+      600,
+      1223,
+      701
+     ]
+    },
+    {
+     "step": "shut, number kept",
+     "truth": "none",
+     "open": true,
+     "shown": true,
+     "noMatch": 15,
+     "ucc": [
+      699,
+      600,
+      1223,
+      701
+     ]
+    },
+    {
+     "step": "+3 s",
+     "truth": "none",
+     "open": true,
+     "shown": true,
+     "noMatch": 15,
+     "ucc": [
+      699,
+      600,
+      1223,
+      701
+     ]
+    }
+   ],
+   "lines": [
+    "check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "active cc: number 0 control 0 frame 0/0 utility 0",
+    "active cc: wired - from now on it alone says whether a message shows",
+    "check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "active cc: number 15 control 1 frame 1/1 utility 0",
+    "active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "check-control list: 0 messages, name lengths ; listed none of 1 entries"
+   ],
+   "endsOpen": true
+  }
+ },
+ "layout": "wb_comfort"
+}
