@@ -1,0 +1,9594 @@
+{
+ "_about": "research3 MT (docs/research3/MT-REPORT.md): f30_cluster scene textures, every measurement. bytes = one whole upload (what cluster-render charges to the KOMBI link's budget); pixel_memory = cluster-render's accounting (uncompressed twice, ETC2 once; 16 MiB for every app); frame_diff = the rendered 1920x720 frame of that state against today's, premultiplied colour and coverage in 0..255 (max, pixels over 2 / 8 / 16, PSNR and mean inside the sampling layers' box). Bench (Mac GPU, fp32) renders: what transfers to the car is bytes, pixel memory and the decoded texels; not milliseconds.",
+ "textures": {
+  "bar": {
+   "name": "bar",
+   "w": 584,
+   "h": 79,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 184544,
+   "pixel_memory": 369088,
+   "bytes_package_json": 246091,
+   "zlib9": 9542,
+   "png": 6238,
+   "entropy_bits_per_byte": 1.192,
+   "uses": [
+    {
+     "layout": "wb_comfort",
+     "widget": "bg",
+     "sampler": "WBBACK u_t2 (the glass foot line)",
+     "when": "only with wbFoot \"glass\" (default \"hair\": never uploaded)"
+    }
+   ],
+   "note": "sampled only when the foot line is \"glass\"; the layouts ship \"hair\"",
+   "alpha": {
+    "empty": 0.8604,
+    "opaque": 0.0,
+    "soft": 0.1396,
+    "box": [
+     2,
+     0,
+     582,
+     12
+    ],
+    "box_area_frac": 0.1509
+   },
+   "colour": {
+    "visible_px": 6442,
+    "unique_rgb": 8,
+    "rgb_constant": false,
+    "rgb_value": null,
+    "chroma_p50": 12,
+    "chroma_p99": 12,
+    "chroma_max": 12,
+    "chroma_gt8_frac": 1.0,
+    "chroma_gt8_weighted": 1.0,
+    "tint": [
+     0.6456,
+     0.672,
+     0.69
+    ],
+    "r8_tint_err_max": 1.3,
+    "r8_tint_err_mean": 0.181,
+    "r8_tint_err_gt4_frac": 0.0
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 167
+    },
+    "g": {
+     "min": 0,
+     "max": 174
+    },
+    "b": {
+     "min": 0,
+     "max": 178
+    },
+    "a": {
+     "min": 0,
+     "max": 252
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 0.42,
+     "le4_frac": 1.0
+    },
+    "mirror_ud": {
+     "mean": 75.56,
+     "le4_frac": 0.1219
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 292,
+     "h": 40,
+     "bytes": 46720,
+     "pixel_memory": 93440,
+     "tex_err_upsampled": {
+      "max_rgb": 14.53,
+      "mean_rgb": 0.631,
+      "max_a": 20.0,
+      "mean_a": 0.932,
+      "psnr": 42.03
+     }
+    },
+    "scale_0.25": {
+     "w": 146,
+     "h": 20,
+     "bytes": 11680,
+     "pixel_memory": 23360,
+     "tex_err_upsampled": {
+      "max_rgb": 47.47,
+      "mean_rgb": 2.048,
+      "max_a": 68.0,
+      "mean_a": 3.025,
+      "psnr": 31.93
+     }
+    },
+    "r8_tint": {
+     "bytes": 46136,
+     "pixel_memory": 92272,
+     "tint": [
+      0.6456,
+      0.672,
+      0.69
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 46720,
+     "pixel_memory": 46720,
+     "tex_err": {
+      "max_rgb": 6.16,
+      "mean_rgb": 0.168,
+      "max_a": 8.0,
+      "mean_a": 0.245,
+      "psnr": 52.37
+     }
+    },
+    "etc2rgb": {
+     "bytes": 23360,
+     "pixel_memory": 23360,
+     "tex_err": {
+      "max_rgb": 183.0,
+      "mean_rgb": 51.025,
+      "max_a": 255.0,
+      "mean_a": 244.449,
+      "psnr": 9.07
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "comfort-glass"
+   ],
+   "options": {
+    "etc2rgba-bar": {
+     "group": "compression",
+     "desc": "bar as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "comfort-glass": {
+       "bytes": 46720,
+       "pixel_memory": 46720,
+       "bytes_before": 184544,
+       "pixel_memory_before": 369088,
+       "frame_diff": {
+        "max": 6.04,
+        "px_gt2": 1557,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.006,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 69.11,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-bar": {
+     "group": "resolution",
+     "desc": "bar at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "comfort-glass": {
+       "bytes": 46720,
+       "pixel_memory": 93440,
+       "bytes_before": 184544,
+       "pixel_memory_before": 369088,
+       "frame_diff": {
+        "max": 12.5,
+        "px_gt2": 4271,
+        "px_gt8": 697,
+        "px_gt16": 0,
+        "mean_in_rect": 0.018,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 59.82,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-bar": {
+     "group": "resolution",
+     "desc": "bar at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "comfort-glass": {
+       "bytes": 11680,
+       "pixel_memory": 23360,
+       "bytes_before": 184544,
+       "pixel_memory_before": 369088,
+       "frame_diff": {
+        "max": 39.57,
+        "px_gt2": 6485,
+        "px_gt8": 2957,
+        "px_gt16": 1201,
+        "mean_in_rect": 0.05,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 50.18,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "collar": {
+   "name": "collar",
+   "w": 480,
+   "h": 180,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 345600,
+   "pixel_memory": 691200,
+   "bytes_package_json": 460832,
+   "zlib9": 8095,
+   "png": 7872,
+   "entropy_bits_per_byte": 0.362,
+   "uses": [],
+   "note": "not sampled by any layout since package M (collar_r8 replaced it); still in the package",
+   "alpha": {
+    "empty": 0.86,
+    "opaque": 0.0776,
+    "soft": 0.0624,
+    "box": [
+     0,
+     4,
+     480,
+     180
+    ],
+    "box_area_frac": 0.9778
+   },
+   "colour": {
+    "visible_px": 12094,
+    "unique_rgb": 1,
+    "rgb_constant": true,
+    "rgb_value": [
+     0,
+     0,
+     0
+    ],
+    "chroma_p50": 0,
+    "chroma_p99": 0,
+    "chroma_max": 0,
+    "chroma_gt8_frac": 0.0,
+    "chroma_gt8_weighted": 0.0,
+    "tint": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "r8_tint_err_max": 0.0,
+    "r8_tint_err_mean": 0.0,
+    "r8_tint_err_gt4_frac": 0.0
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 0
+    },
+    "g": {
+     "min": 0,
+     "max": 0
+    },
+    "b": {
+     "min": 0,
+     "max": 0
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 53.5,
+     "le4_frac": 0.6992
+    },
+    "mirror_ud": {
+     "mean": 163.22,
+     "le4_frac": 0.1528
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 240,
+     "h": 90,
+     "bytes": 86400,
+     "pixel_memory": 172800,
+     "tex_err_upsampled": {
+      "max_rgb": 0.0,
+      "mean_rgb": 0.0,
+      "max_a": 139.0,
+      "mean_a": 1.611,
+      "psnr": null
+     }
+    },
+    "scale_0.25": {
+     "w": 120,
+     "h": 45,
+     "bytes": 21600,
+     "pixel_memory": 43200,
+     "tex_err_upsampled": {
+      "max_rgb": 0.0,
+      "mean_rgb": 0.0,
+      "max_a": 166.0,
+      "mean_a": 4.068,
+      "psnr": null
+     }
+    },
+    "r8_tint": {
+     "bytes": 86400,
+     "pixel_memory": 172800,
+     "tint": [
+      1.0,
+      0.0,
+      0.0
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 86400,
+     "pixel_memory": 86400,
+     "tex_err": {
+      "max_rgb": 2.0,
+      "mean_rgb": 0.099,
+      "max_a": 22.0,
+      "mean_a": 0.255,
+      "psnr": 55.15
+     }
+    },
+    "etc2rgb": {
+     "bytes": 43200,
+     "pixel_memory": 43200,
+     "tex_err": {
+      "max_rgb": 2.0,
+      "mean_rgb": 1.754,
+      "max_a": 255.0,
+      "mean_a": 228.233,
+      "psnr": 42.68
+     }
+    }
+   },
+   "uploaded_in_states": [],
+   "options": {}
+  },
+  "collar_r8": {
+   "name": "collar_r8",
+   "w": 480,
+   "h": 180,
+   "format": "r8",
+   "sampling": "bilinear",
+   "bytes_upload": 86400,
+   "pixel_memory": 172800,
+   "bytes_package_json": 115323,
+   "zlib9": 4851,
+   "png": 5114,
+   "entropy_bits_per_byte": 1.158,
+   "uses": [
+    {
+     "layout": "wb_dials",
+     "widget": "bg",
+     "sampler": "WBBACK u_t0 (collar coverage, R8)",
+     "when": "always"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.86,
+    "opaque": 0.0776,
+    "soft": 0.0624,
+    "box": [
+     0,
+     4,
+     480,
+     180
+    ],
+    "box_area_frac": 0.9778
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 55.0,
+     "le4_frac": 0.6955
+    },
+    "mirror_ud": {
+     "mean": 165.98,
+     "le4_frac": 0.1478
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 240,
+     "h": 90,
+     "bytes": 21600,
+     "pixel_memory": 43200,
+     "tex_err_upsampled": {
+      "max_rgb": 133.87,
+      "mean_rgb": 1.904,
+      "max_a": 139.0,
+      "mean_a": 1.611,
+      "psnr": 29.66
+     }
+    },
+    "scale_0.25": {
+     "w": 120,
+     "h": 45,
+     "bytes": 5400,
+     "pixel_memory": 10800,
+     "tex_err_upsampled": {
+      "max_rgb": 164.09,
+      "mean_rgb": 4.423,
+      "max_a": 166.0,
+      "mean_a": 4.068,
+      "psnr": 24.41
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "g20",
+    "g20-bmw"
+   ],
+   "options": {
+    "scale0.5-collar_r8": {
+     "group": "resolution",
+     "desc": "collar_r8 at 0.5 of its size",
+     "states": {
+      "g20": {
+       "bytes": 21600,
+       "pixel_memory": 43200,
+       "bytes_before": 86400,
+       "pixel_memory_before": 172800,
+       "frame_diff": {
+        "max": 87.0,
+        "px_gt2": 9206,
+        "px_gt8": 5639,
+        "px_gt16": 3317,
+        "mean_in_rect": 0.114,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 48.84,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgba-collar_r8": {
+     "group": "compression",
+     "desc": "collar_r8 (R8 mask) as etc2rgba, the mask in every channel",
+     "states": {
+      "g20": {
+       "bytes": 86400,
+       "pixel_memory": 86400,
+       "bytes_before": 86400,
+       "pixel_memory_before": 172800,
+       "frame_diff": {
+        "max": 15.5,
+        "px_gt2": 2831,
+        "px_gt8": 251,
+        "px_gt16": 0,
+        "mean_in_rect": 0.015,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 65.97,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "cover": {
+   "name": "cover",
+   "w": 736,
+   "h": 64,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 188416,
+   "pixel_memory": 376832,
+   "bytes_package_json": 251255,
+   "zlib9": 417,
+   "png": 533,
+   "entropy_bits_per_byte": 0.158,
+   "uses": [],
+   "note": "not sampled by any layout since package M (the strip mask draws that black); still in the package",
+   "alpha": {
+    "empty": 0.908,
+    "opaque": 0.092,
+    "soft": 0.0,
+    "box": [
+     0,
+     14,
+     736,
+     56
+    ],
+    "box_area_frac": 0.6562
+   },
+   "colour": {
+    "visible_px": 4334,
+    "unique_rgb": 1,
+    "rgb_constant": true,
+    "rgb_value": [
+     0,
+     0,
+     0
+    ],
+    "chroma_p50": 0,
+    "chroma_p99": 0,
+    "chroma_max": 0,
+    "chroma_gt8_frac": 0.0,
+    "chroma_gt8_weighted": 0.0,
+    "tint": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "r8_tint_err_max": 0.0,
+    "r8_tint_err_mean": 0.0,
+    "r8_tint_err_gt4_frac": 0.0
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 0
+    },
+    "g": {
+     "min": 0,
+     "max": 0
+    },
+    "b": {
+     "min": 0,
+     "max": 0
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 51.8,
+     "le4_frac": 0.7968
+    },
+    "mirror_ud": {
+     "mean": 249.78,
+     "le4_frac": 0.0205
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 368,
+     "h": 32,
+     "bytes": 47104,
+     "pixel_memory": 94208,
+     "tex_err_upsampled": {
+      "max_rgb": 0.0,
+      "mean_rgb": 0.0,
+      "max_a": 147.0,
+      "mean_a": 2.921,
+      "psnr": null
+     }
+    },
+    "scale_0.25": {
+     "w": 184,
+     "h": 16,
+     "bytes": 11776,
+     "pixel_memory": 23552,
+     "tex_err_upsampled": {
+      "max_rgb": 0.0,
+      "mean_rgb": 0.0,
+      "max_a": 179.0,
+      "mean_a": 5.683,
+      "psnr": null
+     }
+    },
+    "r8_tint": {
+     "bytes": 47104,
+     "pixel_memory": 94208,
+     "tint": [
+      1.0,
+      0.0,
+      0.0
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 47104,
+     "pixel_memory": 47104,
+     "tex_err": {
+      "max_rgb": 2.0,
+      "mean_rgb": 0.151,
+      "max_a": 2.0,
+      "mean_a": 0.033,
+      "psnr": 53.34
+     }
+    },
+    "etc2rgb": {
+     "bytes": 23552,
+     "pixel_memory": 23552,
+     "tex_err": {
+      "max_rgb": 2.0,
+      "mean_rgb": 1.92,
+      "max_a": 255.0,
+      "mean_a": 231.538,
+      "psnr": 42.29
+     }
+    }
+   },
+   "uploaded_in_states": [],
+   "options": {}
+  },
+  "ed_seg": {
+   "name": "ed_seg",
+   "w": 346,
+   "h": 70,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 96880,
+   "pixel_memory": 193760,
+   "bytes_package_json": 129207,
+   "zlib9": 5305,
+   "png": 5886,
+   "entropy_bits_per_byte": 0.916,
+   "uses": [
+    {
+     "layout": "wb_comfort",
+     "widget": "tacho",
+     "sampler": "WBDIAL u_deco (bottom arc segments, alpha only)",
+     "when": "always"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.843,
+    "opaque": 0.059,
+    "soft": 0.0979,
+    "box": [
+     1,
+     1,
+     345,
+     69
+    ],
+    "box_area_frac": 0.9658
+   },
+   "colour": {
+    "visible_px": 3802,
+    "unique_rgb": 1,
+    "rgb_constant": true,
+    "rgb_value": [
+     255,
+     255,
+     255
+    ],
+    "chroma_p50": 0,
+    "chroma_p99": 0,
+    "chroma_max": 0,
+    "chroma_gt8_frac": 0.0,
+    "chroma_gt8_weighted": 0.0,
+    "tint": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "r8_tint_err_max": 0.0,
+    "r8_tint_err_mean": 0.0,
+    "r8_tint_err_gt4_frac": 0.0
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 255
+    },
+    "g": {
+     "min": 0,
+     "max": 255
+    },
+    "b": {
+     "min": 0,
+     "max": 255
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 81.82,
+     "le4_frac": 0.2684
+    },
+    "mirror_ud": {
+     "mean": 165.08,
+     "le4_frac": 0.0663
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 173,
+     "h": 35,
+     "bytes": 24220,
+     "pixel_memory": 48440,
+     "tex_err_upsampled": {
+      "max_rgb": 108.0,
+      "mean_rgb": 6.955,
+      "max_a": 108.0,
+      "mean_a": 6.955,
+      "psnr": 23.24
+     }
+    },
+    "scale_0.25": {
+     "w": 86,
+     "h": 18,
+     "bytes": 6192,
+     "pixel_memory": 12384,
+     "tex_err_upsampled": {
+      "max_rgb": 169.0,
+      "mean_rgb": 16.014,
+      "max_a": 169.0,
+      "mean_a": 16.014,
+      "psnr": 17.18
+     }
+    },
+    "r8_tint": {
+     "bytes": 24220,
+     "pixel_memory": 48440,
+     "tint": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 25056,
+     "pixel_memory": 25056,
+     "tex_err": {
+      "max_rgb": 26.0,
+      "mean_rgb": 0.702,
+      "max_a": 26.0,
+      "mean_a": 0.702,
+      "psnr": 40.32
+     }
+    },
+    "etc2rgb": {
+     "bytes": 12528,
+     "pixel_memory": 12528,
+     "tex_err": {
+      "max_rgb": 255.0,
+      "mean_rgb": 85.428,
+      "max_a": 255.0,
+      "mean_a": 228.602,
+      "psnr": 4.96
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "comfort",
+    "comfort-glass",
+    "comfort-map",
+    "comfort-night",
+    "comfort-nopass"
+   ],
+   "options": {
+    "r8-segments": {
+     "group": "format",
+     "desc": "range_seg / ed_seg (white, alpha only) as R8: lossless, shader reads .r",
+     "states": {
+      "comfort": {
+       "bytes": 47748,
+       "pixel_memory": 95496,
+       "bytes_before": 190992,
+       "pixel_memory_before": 381984,
+       "frame_diff": {
+        "max": 0.0,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.0,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": null,
+        "rect": [
+         77,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgba-ed_seg": {
+     "group": "compression",
+     "desc": "ed_seg as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "comfort": {
+       "bytes": 25056,
+       "pixel_memory": 25056,
+       "bytes_before": 96880,
+       "pixel_memory_before": 193760,
+       "frame_diff": {
+        "max": 0.0,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.0,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": null,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-ed_seg": {
+     "group": "resolution",
+     "desc": "ed_seg at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 24220,
+       "pixel_memory": 48440,
+       "bytes_before": 96880,
+       "pixel_memory_before": 193760,
+       "frame_diff": {
+        "max": 0.0,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.0,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": null,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-ed_seg": {
+     "group": "resolution",
+     "desc": "ed_seg at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 6192,
+       "pixel_memory": 12384,
+       "bytes_before": 96880,
+       "pixel_memory_before": 193760,
+       "frame_diff": {
+        "max": 0.0,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.0,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": null,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "fuel": {
+   "name": "fuel",
+   "w": 144,
+   "h": 144,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 82944,
+   "pixel_memory": 165888,
+   "bytes_package_json": 110624,
+   "zlib9": 16150,
+   "png": 17379,
+   "entropy_bits_per_byte": 3.833,
+   "uses": [
+    {
+     "layout": "wb_comfort",
+     "widget": "fuel",
+     "sampler": "WBDIAL u_base (mini, kind 1)",
+     "when": "always"
+    },
+    {
+     "layout": "wb_dials",
+     "widget": "fuel",
+     "sampler": "WBDIAL u_base (mini, kind 1)",
+     "when": "always"
+    },
+    {
+     "layout": "wb_sport",
+     "widget": "fuel",
+     "sampler": "WBDIAL u_base (mini, kind 1)",
+     "when": "always"
+    },
+    {
+     "layout": "wb_eco",
+     "widget": "fuel",
+     "sampler": "WBDIAL u_base (mini, kind 1)",
+     "when": "always"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.2166,
+    "opaque": 0.6299,
+    "soft": 0.1535,
+    "box": [
+     0,
+     0,
+     141,
+     144
+    ],
+    "box_area_frac": 0.9792
+   },
+   "colour": {
+    "visible_px": 16245,
+    "unique_rgb": 1320,
+    "rgb_constant": false,
+    "rgb_value": null,
+    "chroma_p50": 1,
+    "chroma_p99": 21,
+    "chroma_max": 166,
+    "chroma_gt8_frac": 0.0134,
+    "chroma_gt8_weighted": 0.0122,
+    "tint": [
+     0.9777,
+     0.9042,
+     0.9067
+    ],
+    "r8_tint_err_max": 98.8,
+    "r8_tint_err_mean": 1.382,
+    "r8_tint_err_gt4_frac": 0.0757
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 255
+    },
+    "g": {
+     "min": 0,
+     "max": 255
+    },
+    "b": {
+     "min": 0,
+     "max": 255
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 23.97,
+     "le4_frac": 0.6671
+    },
+    "mirror_ud": {
+     "mean": 17.18,
+     "le4_frac": 0.7286
+    },
+    "radial": {
+     "le4_frac": 0.3857,
+     "mean": 19.67,
+     "profile_bytes_rgba8": 408
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 72,
+     "h": 72,
+     "bytes": 20736,
+     "pixel_memory": 41472,
+     "tex_err_upsampled": {
+      "max_rgb": 129.0,
+      "mean_rgb": 4.003,
+      "max_a": 25.0,
+      "mean_a": 1.401,
+      "psnr": 26.28
+     }
+    },
+    "scale_0.25": {
+     "w": 36,
+     "h": 36,
+     "bytes": 5184,
+     "pixel_memory": 10368,
+     "tex_err_upsampled": {
+      "max_rgb": 187.0,
+      "mean_rgb": 7.88,
+      "max_a": 76.0,
+      "mean_a": 4.308,
+      "psnr": 21.98
+     }
+    },
+    "r8_tint": {
+     "bytes": 20736,
+     "pixel_memory": 41472,
+     "tint": [
+      0.9777,
+      0.9042,
+      0.9067
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 20736,
+     "pixel_memory": 20736,
+     "tex_err": {
+      "max_rgb": 93.0,
+      "mean_rgb": 1.581,
+      "max_a": 22.0,
+      "mean_a": 0.53,
+      "psnr": 36.84
+     }
+    },
+    "etc2rgb": {
+     "bytes": 10368,
+     "pixel_memory": 10368,
+     "tex_err": {
+      "max_rgb": 255.0,
+      "mean_rgb": 32.866,
+      "max_a": 255.0,
+      "mean_a": 78.272,
+      "psnr": 10.13
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "comfort",
+    "comfort-glass",
+    "comfort-map",
+    "comfort-night",
+    "comfort-nopass",
+    "eco",
+    "g20",
+    "g20-bmw",
+    "sport"
+   ],
+   "options": {
+    "r8-fuel": {
+     "group": "format",
+     "desc": "fuel as R8 premultiplied luma x one tint",
+     "states": {
+      "comfort": {
+       "bytes": 20736,
+       "pixel_memory": 41472,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 98.78,
+        "px_gt2": 1684,
+        "px_gt8": 663,
+        "px_gt16": 161,
+        "mean_in_rect": 1.75,
+        "p99_in_rect": 12.32,
+        "psnr_in_rect": 34.05,
+        "rect": [
+         10,
+         538,
+         150,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgba-fuel": {
+     "group": "compression",
+     "desc": "fuel as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "comfort": {
+       "bytes": 20736,
+       "pixel_memory": 20736,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 93.0,
+        "px_gt2": 2678,
+        "px_gt8": 967,
+        "px_gt16": 270,
+        "mean_in_rect": 2.117,
+        "p99_in_rect": 19.0,
+        "psnr_in_rect": 38.09,
+        "rect": [
+         10,
+         538,
+         150,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgb-fuel": {
+     "group": "compression",
+     "desc": "fuel premultiplied, opaque, as etc2rgb (etcpak)",
+     "states": {
+      "comfort": {
+       "bytes": 10368,
+       "pixel_memory": 10368,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 93.0,
+        "px_gt2": 2655,
+        "px_gt8": 802,
+        "px_gt16": 243,
+        "mean_in_rect": 2.022,
+        "p99_in_rect": 19.0,
+        "psnr_in_rect": 38.53,
+        "rect": [
+         10,
+         538,
+         150,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "premul-fuel": {
+     "group": "format",
+     "desc": "fuel premultiplied opaque RGBA8 (the identity check for the etc2rgb path)",
+     "states": {
+      "comfort": {
+       "bytes": 82944,
+       "pixel_memory": 165888,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 0.49,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.017,
+        "p99_in_rect": 0.35,
+        "psnr_in_rect": 73.98,
+        "rect": [
+         10,
+         538,
+         150,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-fuel": {
+     "group": "resolution",
+     "desc": "fuel at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 20736,
+       "pixel_memory": 41472,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 128.5,
+        "px_gt2": 3976,
+        "px_gt8": 2567,
+        "px_gt16": 1606,
+        "mean_in_rect": 4.271,
+        "p99_in_rect": 65.63,
+        "psnr_in_rect": 27.46,
+        "rect": [
+         10,
+         538,
+         150,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-fuel": {
+     "group": "resolution",
+     "desc": "fuel at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 5184,
+       "pixel_memory": 10368,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 187.31,
+        "px_gt2": 6067,
+        "px_gt8": 4018,
+        "px_gt16": 2766,
+        "mean_in_rect": 7.773,
+        "p99_in_rect": 98.25,
+        "psnr_in_rect": 23.37,
+        "rect": [
+         10,
+         538,
+         150,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c4-fuel": {
+     "group": "format",
+     "desc": "fuel as R8 value (max channel, premultiplied) + its colour at 1/4 size (RGBA8): chroma subsampling",
+     "states": {
+      "comfort": {
+       "bytes": 25920,
+       "pixel_memory": 51840,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 38.73,
+        "px_gt2": 714,
+        "px_gt8": 244,
+        "px_gt16": 64,
+        "mean_in_rect": 0.579,
+        "p99_in_rect": 9.06,
+        "psnr_in_rect": 46.5,
+        "rect": [
+         10,
+         538,
+         150,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c8-fuel": {
+     "group": "format",
+     "desc": "fuel as R8 value (max channel, premultiplied) + its colour at 1/8 size (RGBA8): chroma subsampling",
+     "states": {
+      "comfort": {
+       "bytes": 22032,
+       "pixel_memory": 44064,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 64.81,
+        "px_gt2": 852,
+        "px_gt8": 305,
+        "px_gt16": 157,
+        "mean_in_rect": 0.8,
+        "p99_in_rect": 13.3,
+        "psnr_in_rect": 42.57,
+        "rect": [
+         10,
+         538,
+         150,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "horizon": {
+   "name": "horizon",
+   "w": 424,
+   "h": 10,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 16960,
+   "pixel_memory": 33920,
+   "bytes_package_json": 22647,
+   "zlib9": 1618,
+   "png": 2085,
+   "entropy_bits_per_byte": 3.497,
+   "uses": [
+    {
+     "layout": "wb_comfort",
+     "widget": "bg",
+     "sampler": "WBBACK u_t1 (the horizon line)",
+     "when": "while BMW's map is not shown in the window (stockMap off)"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.1083,
+    "opaque": 0.7778,
+    "soft": 0.1139,
+    "box": [
+     1,
+     0,
+     423,
+     9
+    ],
+    "box_area_frac": 0.8958
+   },
+   "colour": {
+    "visible_px": 3781,
+    "unique_rgb": 38,
+    "rgb_constant": false,
+    "rgb_value": null,
+    "chroma_p50": 9,
+    "chroma_p99": 11,
+    "chroma_max": 12,
+    "chroma_gt8_frac": 0.6654,
+    "chroma_gt8_weighted": 0.7049,
+    "tint": [
+     0.1678,
+     0.1949,
+     0.2096
+    ],
+    "r8_tint_err_max": 1.1,
+    "r8_tint_err_mean": 0.179,
+    "r8_tint_err_gt4_frac": 0.0
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 43
+    },
+    "g": {
+     "min": 0,
+     "max": 50
+    },
+    "b": {
+     "min": 0,
+     "max": 54
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 0.5,
+     "le4_frac": 1.0
+    },
+    "mirror_ud": {
+     "mean": 95.84,
+     "le4_frac": 0.1964
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 212,
+     "h": 5,
+     "bytes": 4240,
+     "pixel_memory": 8480,
+     "tex_err_upsampled": {
+      "max_rgb": 17.1,
+      "mean_rgb": 2.613,
+      "max_a": 65.0,
+      "mean_a": 12.895,
+      "psnr": 33.46
+     }
+    },
+    "scale_0.25": {
+     "w": 106,
+     "h": 2,
+     "bytes": 848,
+     "pixel_memory": 1696,
+     "tex_err_upsampled": {
+      "max_rgb": 31.92,
+      "mean_rgb": 9.669,
+      "max_a": 179.0,
+      "mean_a": 45.859,
+      "psnr": 26.45
+     }
+    },
+    "r8_tint": {
+     "bytes": 4240,
+     "pixel_memory": 8480,
+     "tint": [
+      0.1678,
+      0.1949,
+      0.2096
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 5088,
+     "pixel_memory": 5088,
+     "tex_err": {
+      "max_rgb": 7.42,
+      "mean_rgb": 1.015,
+      "max_a": 12.0,
+      "mean_a": 0.101,
+      "psnr": 41.91
+     }
+    },
+    "etc2rgb": {
+     "bytes": 2544,
+     "pixel_memory": 2544,
+     "tex_err": {
+      "max_rgb": 60.0,
+      "mean_rgb": 1.534,
+      "max_a": 255.0,
+      "mean_a": 42.276,
+      "psnr": 34.09
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "comfort",
+    "comfort-glass",
+    "comfort-night",
+    "comfort-nopass"
+   ],
+   "options": {
+    "etc2rgba-horizon": {
+     "group": "compression",
+     "desc": "horizon as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "comfort": {
+       "bytes": 5088,
+       "pixel_memory": 5088,
+       "bytes_before": 16960,
+       "pixel_memory_before": 33920,
+       "frame_diff": {
+        "max": 7.0,
+        "px_gt2": 793,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.005,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 68.84,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-horizon": {
+     "group": "resolution",
+     "desc": "horizon at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 4240,
+       "pixel_memory": 8480,
+       "bytes_before": 16960,
+       "pixel_memory_before": 33920,
+       "frame_diff": {
+        "max": 14.44,
+        "px_gt2": 828,
+        "px_gt8": 750,
+        "px_gt16": 0,
+        "mean_in_rect": 0.009,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 60.27,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-horizon": {
+     "group": "resolution",
+     "desc": "horizon at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 848,
+       "pixel_memory": 1696,
+       "bytes_before": 16960,
+       "pixel_memory_before": 33920,
+       "frame_diff": {
+        "max": 24.36,
+        "px_gt2": 3165,
+        "px_gt8": 2367,
+        "px_gt16": 723,
+        "mean_in_rect": 0.028,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 53.95,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "proc-window": {
+     "group": "procedural",
+     "desc": "window / horizon without textures (WBBACK draws its own comfort window)",
+     "states": {
+      "comfort": {
+       "bytes": 0,
+       "pixel_memory": 0,
+       "frame_diff": {
+        "max": 110.9,
+        "px_gt2": 90800,
+        "px_gt8": 77377,
+        "px_gt16": 66154,
+        "mean_in_rect": 2.374,
+        "p99_in_rect": 64.98,
+        "psnr_in_rect": 29.13,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "oil": {
+   "name": "oil",
+   "w": 144,
+   "h": 144,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 82944,
+   "pixel_memory": 165888,
+   "bytes_package_json": 110624,
+   "zlib9": 16438,
+   "png": 17755,
+   "entropy_bits_per_byte": 3.85,
+   "uses": [
+    {
+     "layout": "wb_comfort",
+     "widget": "oilt",
+     "sampler": "WBDIAL u_base (mini, kind 1)",
+     "when": "always"
+    },
+    {
+     "layout": "wb_dials",
+     "widget": "oilt",
+     "sampler": "WBDIAL u_base (mini, kind 1)",
+     "when": "always"
+    },
+    {
+     "layout": "wb_sport",
+     "widget": "oilt",
+     "sampler": "WBDIAL u_base (mini, kind 1)",
+     "when": "always"
+    },
+    {
+     "layout": "wb_eco",
+     "widget": "oilt",
+     "sampler": "WBDIAL u_base (mini, kind 1)",
+     "when": "always"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.2167,
+    "opaque": 0.6299,
+    "soft": 0.1534,
+    "box": [
+     3,
+     0,
+     144,
+     144
+    ],
+    "box_area_frac": 0.9792
+   },
+   "colour": {
+    "visible_px": 16242,
+    "unique_rgb": 1358,
+    "rgb_constant": false,
+    "rgb_value": null,
+    "chroma_p50": 1,
+    "chroma_p99": 164,
+    "chroma_max": 189,
+    "chroma_gt8_frac": 0.0245,
+    "chroma_gt8_weighted": 0.0242,
+    "tint": [
+     0.9127,
+     0.9099,
+     0.9675
+    ],
+    "r8_tint_err_max": 110.6,
+    "r8_tint_err_mean": 1.698,
+    "r8_tint_err_gt4_frac": 0.0486
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 255
+    },
+    "g": {
+     "min": 0,
+     "max": 255
+    },
+    "b": {
+     "min": 0,
+     "max": 255
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 24.25,
+     "le4_frac": 0.6653
+    },
+    "mirror_ud": {
+     "mean": 18.45,
+     "le4_frac": 0.7214
+    },
+    "radial": {
+     "le4_frac": 0.4328,
+     "mean": 19.39,
+     "profile_bytes_rgba8": 408
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 72,
+     "h": 72,
+     "bytes": 20736,
+     "pixel_memory": 41472,
+     "tex_err_upsampled": {
+      "max_rgb": 130.0,
+      "mean_rgb": 4.178,
+      "max_a": 25.0,
+      "mean_a": 1.401,
+      "psnr": 25.99
+     }
+    },
+    "scale_0.25": {
+     "w": 36,
+     "h": 36,
+     "bytes": 5184,
+     "pixel_memory": 10368,
+     "tex_err_upsampled": {
+      "max_rgb": 187.0,
+      "mean_rgb": 8.218,
+      "max_a": 76.0,
+      "mean_a": 4.308,
+      "psnr": 21.69
+     }
+    },
+    "r8_tint": {
+     "bytes": 20736,
+     "pixel_memory": 41472,
+     "tint": [
+      0.9127,
+      0.9099,
+      0.9675
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 20736,
+     "pixel_memory": 20736,
+     "tex_err": {
+      "max_rgb": 108.0,
+      "mean_rgb": 1.693,
+      "max_a": 22.0,
+      "mean_a": 0.535,
+      "psnr": 35.71
+     }
+    },
+    "etc2rgb": {
+     "bytes": 10368,
+     "pixel_memory": 10368,
+     "tex_err": {
+      "max_rgb": 255.0,
+      "mean_rgb": 32.699,
+      "max_a": 255.0,
+      "mean_a": 78.272,
+      "psnr": 10.19
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "comfort",
+    "comfort-glass",
+    "comfort-map",
+    "comfort-night",
+    "comfort-nopass",
+    "eco",
+    "g20",
+    "g20-bmw",
+    "sport"
+   ],
+   "options": {
+    "r8-oil": {
+     "group": "format",
+     "desc": "oil as R8 premultiplied luma x one tint",
+     "states": {
+      "comfort": {
+       "bytes": 20736,
+       "pixel_memory": 41472,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 110.57,
+        "px_gt2": 1079,
+        "px_gt8": 431,
+        "px_gt16": 312,
+        "mean_in_rect": 2.298,
+        "p99_in_rect": 96.17,
+        "psnr_in_rect": 30.85,
+        "rect": [
+         1770,
+         538,
+         1910,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgba-oil": {
+     "group": "compression",
+     "desc": "oil as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "comfort": {
+       "bytes": 20736,
+       "pixel_memory": 20736,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 108.0,
+        "px_gt2": 2863,
+        "px_gt8": 1106,
+        "px_gt16": 405,
+        "mean_in_rect": 2.332,
+        "p99_in_rect": 23.0,
+        "psnr_in_rect": 36.93,
+        "rect": [
+         1770,
+         538,
+         1910,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgb-oil": {
+     "group": "compression",
+     "desc": "oil premultiplied, opaque, as etc2rgb (etcpak)",
+     "states": {
+      "comfort": {
+       "bytes": 10368,
+       "pixel_memory": 10368,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 108.0,
+        "px_gt2": 2793,
+        "px_gt8": 962,
+        "px_gt16": 385,
+        "mean_in_rect": 2.24,
+        "p99_in_rect": 23.0,
+        "psnr_in_rect": 37.25,
+        "rect": [
+         1770,
+         538,
+         1910,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "premul-oil": {
+     "group": "format",
+     "desc": "oil premultiplied opaque RGBA8 (the identity check for the etc2rgb path)",
+     "states": {
+      "comfort": {
+       "bytes": 82944,
+       "pixel_memory": 165888,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 0.49,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.017,
+        "p99_in_rect": 0.35,
+        "psnr_in_rect": 73.96,
+        "rect": [
+         1770,
+         538,
+         1910,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-oil": {
+     "group": "resolution",
+     "desc": "oil at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 20736,
+       "pixel_memory": 41472,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 130.12,
+        "px_gt2": 4136,
+        "px_gt8": 2710,
+        "px_gt16": 1750,
+        "mean_in_rect": 4.681,
+        "p99_in_rect": 69.75,
+        "psnr_in_rect": 27.09,
+        "rect": [
+         1770,
+         538,
+         1910,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-oil": {
+     "group": "resolution",
+     "desc": "oil at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 5184,
+       "pixel_memory": 10368,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 187.31,
+        "px_gt2": 6257,
+        "px_gt8": 4234,
+        "px_gt16": 2987,
+        "mean_in_rect": 8.523,
+        "p99_in_rect": 108.94,
+        "psnr_in_rect": 23.03,
+        "rect": [
+         1770,
+         538,
+         1910,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c4-oil": {
+     "group": "format",
+     "desc": "oil as R8 value (max channel, premultiplied) + its colour at 1/4 size (RGBA8): chroma subsampling",
+     "states": {
+      "comfort": {
+       "bytes": 25920,
+       "pixel_memory": 51840,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 63.91,
+        "px_gt2": 757,
+        "px_gt8": 274,
+        "px_gt16": 90,
+        "mean_in_rect": 0.634,
+        "p99_in_rect": 9.43,
+        "psnr_in_rect": 44.97,
+        "rect": [
+         1770,
+         538,
+         1910,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c8-oil": {
+     "group": "format",
+     "desc": "oil as R8 value (max channel, premultiplied) + its colour at 1/8 size (RGBA8): chroma subsampling",
+     "states": {
+      "comfort": {
+       "bytes": 22032,
+       "pixel_memory": 44064,
+       "bytes_before": 82944,
+       "pixel_memory_before": 165888,
+       "frame_diff": {
+        "max": 64.01,
+        "px_gt2": 947,
+        "px_gt8": 368,
+        "px_gt16": 171,
+        "mean_in_rect": 0.895,
+        "p99_in_rect": 14.16,
+        "psnr_in_rect": 42.24,
+        "rect": [
+         1770,
+         538,
+         1910,
+         678
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "range_seg": {
+   "name": "range_seg",
+   "w": 346,
+   "h": 68,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 94112,
+   "pixel_memory": 188224,
+   "bytes_package_json": 125515,
+   "zlib9": 5652,
+   "png": 6448,
+   "entropy_bits_per_byte": 0.996,
+   "uses": [
+    {
+     "layout": "wb_comfort",
+     "widget": "speedo",
+     "sampler": "WBDIAL u_deco (bottom arc segments, alpha only)",
+     "when": "always"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.8234,
+    "opaque": 0.066,
+    "soft": 0.1106,
+    "box": [
+     1,
+     0,
+     345,
+     67
+    ],
+    "box_area_frac": 0.9796
+   },
+   "colour": {
+    "visible_px": 4156,
+    "unique_rgb": 1,
+    "rgb_constant": true,
+    "rgb_value": [
+     255,
+     255,
+     255
+    ],
+    "chroma_p50": 0,
+    "chroma_p99": 0,
+    "chroma_max": 0,
+    "chroma_gt8_frac": 0.0,
+    "chroma_gt8_weighted": 0.0,
+    "tint": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "r8_tint_err_max": 0.0,
+    "r8_tint_err_mean": 0.0,
+    "r8_tint_err_gt4_frac": 0.0
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 255
+    },
+    "g": {
+     "min": 0,
+     "max": 255
+    },
+    "b": {
+     "min": 0,
+     "max": 255
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 0.15,
+     "le4_frac": 1.0
+    },
+    "mirror_ud": {
+     "mean": 163.46,
+     "le4_frac": 0.069
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 173,
+     "h": 34,
+     "bytes": 23528,
+     "pixel_memory": 47056,
+     "tex_err_upsampled": {
+      "max_rgb": 105.0,
+      "mean_rgb": 7.942,
+      "max_a": 105.0,
+      "mean_a": 7.942,
+      "psnr": 22.58
+     }
+    },
+    "scale_0.25": {
+     "w": 86,
+     "h": 17,
+     "bytes": 5848,
+     "pixel_memory": 11696,
+     "tex_err_upsampled": {
+      "max_rgb": 158.0,
+      "mean_rgb": 17.824,
+      "max_a": 158.0,
+      "mean_a": 17.824,
+      "psnr": 16.61
+     }
+    },
+    "r8_tint": {
+     "bytes": 23528,
+     "pixel_memory": 47056,
+     "tint": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 23664,
+     "pixel_memory": 23664,
+     "tex_err": {
+      "max_rgb": 26.0,
+      "mean_rgb": 0.78,
+      "max_a": 26.0,
+      "mean_a": 0.78,
+      "psnr": 39.95
+     }
+    },
+    "etc2rgb": {
+     "bytes": 11832,
+     "pixel_memory": 11832,
+     "tex_err": {
+      "max_rgb": 255.0,
+      "mean_rgb": 89.947,
+      "max_a": 255.0,
+      "mean_a": 225.355,
+      "psnr": 4.74
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "comfort",
+    "comfort-glass",
+    "comfort-map",
+    "comfort-night",
+    "comfort-nopass"
+   ],
+   "options": {
+    "r8-segments": {
+     "group": "format",
+     "desc": "range_seg / ed_seg (white, alpha only) as R8: lossless, shader reads .r",
+     "states": {
+      "comfort": {
+       "bytes": 47748,
+       "pixel_memory": 95496,
+       "bytes_before": 190992,
+       "pixel_memory_before": 381984,
+       "frame_diff": {
+        "max": 0.0,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.0,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": null,
+        "rect": [
+         77,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgba-range_seg": {
+     "group": "compression",
+     "desc": "range_seg as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "comfort": {
+       "bytes": 23664,
+       "pixel_memory": 23664,
+       "bytes_before": 94112,
+       "pixel_memory_before": 188224,
+       "frame_diff": {
+        "max": 20.6,
+        "px_gt2": 1469,
+        "px_gt8": 248,
+        "px_gt16": 12,
+        "mean_in_rect": 0.02,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 58.29,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-range_seg": {
+     "group": "resolution",
+     "desc": "range_seg at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 23528,
+       "pixel_memory": 47056,
+       "bytes_before": 94112,
+       "pixel_memory_before": 188224,
+       "frame_diff": {
+        "max": 80.99,
+        "px_gt2": 3770,
+        "px_gt8": 3219,
+        "px_gt16": 2599,
+        "mean_in_rect": 0.221,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 40.52,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-range_seg": {
+     "group": "resolution",
+     "desc": "range_seg at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 5848,
+       "pixel_memory": 11696,
+       "bytes_before": 94112,
+       "pixel_memory_before": 188224,
+       "frame_diff": {
+        "max": 120.87,
+        "px_gt2": 4901,
+        "px_gt8": 4457,
+        "px_gt16": 3964,
+        "mean_in_rect": 0.493,
+        "p99_in_rect": 7.39,
+        "psnr_in_rect": 34.55,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "sign_limit": {
+   "name": "sign_limit",
+   "w": 88,
+   "h": 89,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 31328,
+   "pixel_memory": 62656,
+   "bytes_package_json": 41802,
+   "zlib9": 3393,
+   "png": 4519,
+   "entropy_bits_per_byte": 2.789,
+   "uses": [
+    {
+     "layout": "wb_comfort",
+     "widget": "signs",
+     "sampler": "WBSIGN u_s0",
+     "when": "always (shown while a limit is known)"
+    },
+    {
+     "layout": "wb_dials",
+     "widget": "signs",
+     "sampler": "WBSIGN u_s0",
+     "when": "always (shown while a limit is known)"
+    },
+    {
+     "layout": "wb_sport",
+     "widget": "signs",
+     "sampler": "WBSIGN u_s0",
+     "when": "always (shown while a limit is known)"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.2776,
+    "opaque": 0.6837,
+    "soft": 0.0387,
+    "box": [
+     2,
+     2,
+     86,
+     87
+    ],
+    "box_area_frac": 0.9116
+   },
+   "colour": {
+    "visible_px": 5658,
+    "unique_rgb": 162,
+    "rgb_constant": false,
+    "rgb_value": null,
+    "chroma_p50": 0,
+    "chroma_p99": 207,
+    "chroma_max": 207,
+    "chroma_gt8_frac": 0.3784,
+    "chroma_gt8_weighted": 0.3614,
+    "tint": [
+     1.0261,
+     0.8917,
+     0.8664
+    ],
+    "r8_tint_err_max": 110.3,
+    "r8_tint_err_mean": 36.81,
+    "r8_tint_err_gt4_frac": 0.992
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 238
+    },
+    "g": {
+     "min": 0,
+     "max": 238
+    },
+    "b": {
+     "min": 0,
+     "max": 238
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 2.83,
+     "le4_frac": 0.9077
+    },
+    "mirror_ud": {
+     "mean": 0.34,
+     "le4_frac": 1.0
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 44,
+     "h": 44,
+     "bytes": 7744,
+     "pixel_memory": 15488,
+     "tex_err_upsampled": {
+      "max_rgb": 89.0,
+      "mean_rgb": 4.373,
+      "max_a": 100.0,
+      "mean_a": 5.297,
+      "psnr": 25.75
+     }
+    },
+    "scale_0.25": {
+     "w": 22,
+     "h": 22,
+     "bytes": 1936,
+     "pixel_memory": 3872,
+     "tex_err_upsampled": {
+      "max_rgb": 111.0,
+      "mean_rgb": 9.988,
+      "max_a": 123.0,
+      "mean_a": 12.095,
+      "psnr": 21.06
+     }
+    },
+    "r8_tint": {
+     "bytes": 7832,
+     "pixel_memory": 15664,
+     "tint": [
+      1.0261,
+      0.8917,
+      0.8664
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 8096,
+     "pixel_memory": 8096,
+     "tex_err": {
+      "max_rgb": 92.0,
+      "mean_rgb": 2.324,
+      "max_a": 22.0,
+      "mean_a": 0.378,
+      "psnr": 32.38
+     }
+    },
+    "etc2rgb": {
+     "bytes": 4048,
+     "pixel_memory": 4048,
+     "tex_err": {
+      "max_rgb": 224.0,
+      "mean_rgb": 19.597,
+      "max_a": 255.0,
+      "mean_a": 75.684,
+      "psnr": 13.46
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "comfort",
+    "comfort-glass",
+    "comfort-map",
+    "comfort-night",
+    "comfort-nopass",
+    "g20",
+    "sport"
+   ],
+   "options": {
+    "etc2rgba-sign_limit": {
+     "group": "compression",
+     "desc": "sign_limit as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "comfort-nopass": {
+       "bytes": 8096,
+       "pixel_memory": 8096,
+       "bytes_before": 31328,
+       "pixel_memory_before": 62656,
+       "frame_diff": {
+        "max": 92.0,
+        "px_gt2": 2690,
+        "px_gt8": 778,
+        "px_gt16": 579,
+        "mean_in_rect": 1.491,
+        "p99_in_rect": 29.7,
+        "psnr_in_rect": 36.41,
+        "rect": [
+         305,
+         460,
+         519,
+         553
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-sign_limit": {
+     "group": "resolution",
+     "desc": "sign_limit at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "comfort-nopass": {
+       "bytes": 7744,
+       "pixel_memory": 15488,
+       "bytes_before": 31328,
+       "pixel_memory_before": 62656,
+       "frame_diff": {
+        "max": 95.31,
+        "px_gt2": 1981,
+        "px_gt8": 1580,
+        "px_gt16": 1287,
+        "mean_in_rect": 2.996,
+        "p99_in_rect": 62.17,
+        "psnr_in_rect": 31.38,
+        "rect": [
+         305,
+         460,
+         519,
+         553
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-sign_limit": {
+     "group": "resolution",
+     "desc": "sign_limit at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "comfort-nopass": {
+       "bytes": 1936,
+       "pixel_memory": 3872,
+       "bytes_before": 31328,
+       "pixel_memory_before": 62656,
+       "frame_diff": {
+        "max": 111.25,
+        "px_gt2": 3570,
+        "px_gt8": 3094,
+        "px_gt16": 2588,
+        "mean_in_rect": 7.053,
+        "p99_in_rect": 89.31,
+        "psnr_in_rect": 26.58,
+        "rect": [
+         305,
+         460,
+         519,
+         553
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "sign_nopass": {
+   "name": "sign_nopass",
+   "w": 88,
+   "h": 89,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 31328,
+   "pixel_memory": 62656,
+   "bytes_package_json": 41802,
+   "zlib9": 4450,
+   "png": 5744,
+   "entropy_bits_per_byte": 3.338,
+   "uses": [
+    {
+     "layout": "wb_comfort",
+     "widget": "signs",
+     "sampler": "WBSIGN u_s1",
+     "when": "always (shown while overtaking is banned)"
+    },
+    {
+     "layout": "wb_dials",
+     "widget": "signs",
+     "sampler": "WBSIGN u_s1",
+     "when": "always (shown while overtaking is banned)"
+    },
+    {
+     "layout": "wb_sport",
+     "widget": "signs",
+     "sampler": "WBSIGN u_s1",
+     "when": "always (shown while overtaking is banned)"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.2776,
+    "opaque": 0.6837,
+    "soft": 0.0387,
+    "box": [
+     2,
+     2,
+     86,
+     87
+    ],
+    "box_area_frac": 0.9116
+   },
+   "colour": {
+    "visible_px": 5658,
+    "unique_rgb": 331,
+    "rgb_constant": false,
+    "rgb_value": null,
+    "chroma_p50": 1,
+    "chroma_p99": 207,
+    "chroma_max": 207,
+    "chroma_gt8_frac": 0.4443,
+    "chroma_gt8_weighted": 0.4291,
+    "tint": [
+     1.0591,
+     0.871,
+     0.8393
+    ],
+    "r8_tint_err_max": 103.7,
+    "r8_tint_err_mean": 40.955,
+    "r8_tint_err_gt4_frac": 0.9487
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 238
+    },
+    "g": {
+     "min": 0,
+     "max": 238
+    },
+    "b": {
+     "min": 0,
+     "max": 238
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 23.05,
+     "le4_frac": 0.7706
+    },
+    "mirror_ud": {
+     "mean": 15.22,
+     "le4_frac": 0.8805
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 44,
+     "h": 44,
+     "bytes": 7744,
+     "pixel_memory": 15488,
+     "tex_err_upsampled": {
+      "max_rgb": 130.0,
+      "mean_rgb": 8.907,
+      "max_a": 100.0,
+      "mean_a": 5.296,
+      "psnr": 21.59
+     }
+    },
+    "scale_0.25": {
+     "w": 22,
+     "h": 22,
+     "bytes": 1936,
+     "pixel_memory": 3872,
+     "tex_err_upsampled": {
+      "max_rgb": 165.0,
+      "mean_rgb": 18.443,
+      "max_a": 123.0,
+      "mean_a": 12.097,
+      "psnr": 17.44
+     }
+    },
+    "r8_tint": {
+     "bytes": 7832,
+     "pixel_memory": 15664,
+     "tint": [
+      1.0591,
+      0.871,
+      0.8393
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 8096,
+     "pixel_memory": 8096,
+     "tex_err": {
+      "max_rgb": 92.0,
+      "mean_rgb": 3.088,
+      "max_a": 22.0,
+      "mean_a": 0.378,
+      "psnr": 30.34
+     }
+    },
+    "etc2rgb": {
+     "bytes": 4048,
+     "pixel_memory": 4048,
+     "tex_err": {
+      "max_rgb": 224.0,
+      "mean_rgb": 20.379,
+      "max_a": 255.0,
+      "mean_a": 75.684,
+      "psnr": 13.42
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "comfort",
+    "comfort-glass",
+    "comfort-map",
+    "comfort-night",
+    "comfort-nopass",
+    "g20",
+    "sport"
+   ],
+   "options": {
+    "etc2rgba-sign_nopass": {
+     "group": "compression",
+     "desc": "sign_nopass as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "comfort-nopass": {
+       "bytes": 8096,
+       "pixel_memory": 8096,
+       "bytes_before": 31328,
+       "pixel_memory_before": 62656,
+       "frame_diff": {
+        "max": 92.0,
+        "px_gt2": 2963,
+        "px_gt8": 1187,
+        "px_gt16": 803,
+        "mean_in_rect": 1.969,
+        "p99_in_rect": 36.0,
+        "psnr_in_rect": 34.92,
+        "rect": [
+         305,
+         460,
+         519,
+         553
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-sign_nopass": {
+     "group": "resolution",
+     "desc": "sign_nopass at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "comfort-nopass": {
+       "bytes": 7744,
+       "pixel_memory": 15488,
+       "bytes_before": 31328,
+       "pixel_memory_before": 62656,
+       "frame_diff": {
+        "max": 132.28,
+        "px_gt2": 2790,
+        "px_gt8": 2286,
+        "px_gt16": 1940,
+        "mean_in_rect": 5.443,
+        "p99_in_rect": 90.68,
+        "psnr_in_rect": 26.42,
+        "rect": [
+         305,
+         460,
+         519,
+         553
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-sign_nopass": {
+     "group": "resolution",
+     "desc": "sign_nopass at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "comfort-nopass": {
+       "bytes": 1936,
+       "pixel_memory": 3872,
+       "bytes_before": 31328,
+       "pixel_memory_before": 62656,
+       "frame_diff": {
+        "max": 165.06,
+        "px_gt2": 4790,
+        "px_gt8": 4216,
+        "px_gt16": 3588,
+        "mean_in_rect": 11.33,
+        "p99_in_rect": 129.25,
+        "psnr_in_rect": 22.37,
+        "rect": [
+         305,
+         460,
+         519,
+         553
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "speedo": {
+   "name": "speedo",
+   "w": 670,
+   "h": 670,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 1795600,
+   "pixel_memory": 3591200,
+   "bytes_package_json": 2394168,
+   "zlib9": 348055,
+   "png": 307783,
+   "entropy_bits_per_byte": 4.486,
+   "uses": [
+    {
+     "layout": "wb_comfort",
+     "widget": "speedo",
+     "sampler": "WBDIAL u_base (kind 3: the whole static dial)",
+     "when": "always"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.1968,
+    "opaque": 0.7755,
+    "soft": 0.0278,
+    "box": [
+     0,
+     0,
+     670,
+     670
+    ],
+    "box_area_frac": 1.0
+   },
+   "colour": {
+    "visible_px": 360575,
+    "unique_rgb": 5362,
+    "rgb_constant": false,
+    "rgb_value": null,
+    "chroma_p50": 4,
+    "chroma_p99": 13,
+    "chroma_max": 46,
+    "chroma_gt8_frac": 0.0749,
+    "chroma_gt8_weighted": 0.0762,
+    "tint": [
+     0.9032,
+     0.9234,
+     0.9716
+    ],
+    "r8_tint_err_max": 18.9,
+    "r8_tint_err_mean": 1.57,
+    "r8_tint_err_gt4_frac": 0.112
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 236
+    },
+    "g": {
+     "min": 0,
+     "max": 238
+    },
+    "b": {
+     "min": 0,
+     "max": 244
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 3.38,
+     "le4_frac": 0.9059
+    },
+    "mirror_ud": {
+     "mean": 10.98,
+     "le4_frac": 0.5069
+    },
+    "radial": {
+     "le4_frac": 0.4398,
+     "mean": 11.64,
+     "profile_bytes_rgba8": 1896
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 335,
+     "h": 335,
+     "bytes": 448900,
+     "pixel_memory": 897800,
+     "tex_err_upsampled": {
+      "max_rgb": 96.0,
+      "mean_rgb": 1.67,
+      "max_a": 47.0,
+      "mean_a": 0.358,
+      "psnr": 32.39
+     }
+    },
+    "scale_0.25": {
+     "w": 168,
+     "h": 168,
+     "bytes": 112896,
+     "pixel_memory": 225792,
+     "tex_err_upsampled": {
+      "max_rgb": 150.0,
+      "mean_rgb": 3.757,
+      "max_a": 99.0,
+      "mean_a": 1.045,
+      "psnr": 26.59
+     }
+    },
+    "r8_tint": {
+     "bytes": 448900,
+     "pixel_memory": 897800,
+     "tint": [
+      0.9032,
+      0.9234,
+      0.9716
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 451584,
+     "pixel_memory": 451584,
+     "tex_err": {
+      "max_rgb": 69.0,
+      "mean_rgb": 1.14,
+      "max_a": 22.0,
+      "mean_a": 0.116,
+      "psnr": 40.39
+     }
+    },
+    "etc2rgb": {
+     "bytes": 225792,
+     "pixel_memory": 225792,
+     "tex_err": {
+      "max_rgb": 233.0,
+      "mean_rgb": 3.032,
+      "max_a": 255.0,
+      "mean_a": 53.825,
+      "psnr": 27.45
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "comfort",
+    "comfort-glass",
+    "comfort-map",
+    "comfort-night",
+    "comfort-nopass"
+   ],
+   "options": {
+    "r8-speedo": {
+     "group": "format",
+     "desc": "speedo as R8 premultiplied luma x one tint",
+     "states": {
+      "comfort": {
+       "bytes": 448900,
+       "pixel_memory": 897800,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 18.86,
+        "px_gt2": 184844,
+        "px_gt8": 533,
+        "px_gt16": 152,
+        "mean_in_rect": 1.779,
+        "p99_in_rect": 6.65,
+        "psnr_in_rect": 44.25,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgba-speedo": {
+     "group": "compression",
+     "desc": "speedo as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "comfort": {
+       "bytes": 451584,
+       "pixel_memory": 451584,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 69.0,
+        "px_gt2": 80817,
+        "px_gt8": 10312,
+        "px_gt16": 2565,
+        "mean_in_rect": 1.643,
+        "p99_in_rect": 13.0,
+        "psnr_in_rect": 41.87,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgb-speedo": {
+     "group": "compression",
+     "desc": "speedo premultiplied, opaque, as etc2rgb (etcpak)",
+     "states": {
+      "comfort": {
+       "bytes": 225792,
+       "pixel_memory": 225792,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 69.0,
+        "px_gt2": 81022,
+        "px_gt8": 10444,
+        "px_gt16": 2609,
+        "mean_in_rect": 1.648,
+        "p99_in_rect": 13.0,
+        "psnr_in_rect": 41.84,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "premul-speedo": {
+     "group": "format",
+     "desc": "speedo premultiplied opaque RGBA8 (the identity check for the etc2rgb path)",
+     "states": {
+      "comfort": {
+       "bytes": 1795600,
+       "pixel_memory": 3591200,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 0.5,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.002,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 83.06,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-speedo": {
+     "group": "resolution",
+     "desc": "speedo at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 448900,
+       "pixel_memory": 897800,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 96.25,
+        "px_gt2": 60729,
+        "px_gt8": 21954,
+        "px_gt16": 11699,
+        "mean_in_rect": 1.785,
+        "p99_in_rect": 34.88,
+        "psnr_in_rect": 33.75,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-speedo": {
+     "group": "resolution",
+     "desc": "speedo at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 112896,
+       "pixel_memory": 225792,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 149.69,
+        "px_gt2": 91673,
+        "px_gt8": 48686,
+        "px_gt16": 27929,
+        "mean_in_rect": 3.73,
+        "p99_in_rect": 63.59,
+        "psnr_in_rect": 28.04,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "proc-dials": {
+     "group": "procedural",
+     "desc": "speedo / tacho without their baked base (WBDIAL draws its own comfort dial)",
+     "states": {
+      "comfort": {
+       "bytes": 0,
+       "pixel_memory": 0,
+       "frame_diff": {
+        "max": 252.19,
+        "px_gt2": 568059,
+        "px_gt8": 359587,
+        "px_gt16": 130136,
+        "mean_in_rect": 9.684,
+        "p99_in_rect": 142.44,
+        "psnr_in_rect": 21.59,
+        "rect": [
+         77,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c4-speedo": {
+     "group": "format",
+     "desc": "speedo as R8 value (max channel, premultiplied) + its colour at 1/4 size (RGBA8): chroma subsampling",
+     "states": {
+      "comfort": {
+       "bytes": 561796,
+       "pixel_memory": 1123592,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 17.05,
+        "px_gt2": 9979,
+        "px_gt8": 291,
+        "px_gt16": 2,
+        "mean_in_rect": 0.463,
+        "p99_in_rect": 2.73,
+        "psnr_in_rect": 55.06,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c8-speedo": {
+     "group": "format",
+     "desc": "speedo as R8 value (max channel, premultiplied) + its colour at 1/8 size (RGBA8): chroma subsampling",
+     "states": {
+      "comfort": {
+       "bytes": 477124,
+       "pixel_memory": 954248,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 24.24,
+        "px_gt2": 21304,
+        "px_gt8": 1192,
+        "px_gt16": 189,
+        "mean_in_rect": 0.617,
+        "p99_in_rect": 4.29,
+        "psnr_in_rect": 51.49,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "speedo_d": {
+   "name": "speedo_d",
+   "w": 670,
+   "h": 670,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 1795600,
+   "pixel_memory": 3591200,
+   "bytes_package_json": 2394168,
+   "zlib9": 342139,
+   "png": 300210,
+   "entropy_bits_per_byte": 4.469,
+   "uses": [
+    {
+     "layout": "wb_dials",
+     "widget": "speedo",
+     "sampler": "WBDIAL u_base (kind 3)",
+     "when": "always"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.1968,
+    "opaque": 0.7755,
+    "soft": 0.0278,
+    "box": [
+     0,
+     0,
+     670,
+     670
+    ],
+    "box_area_frac": 1.0
+   },
+   "colour": {
+    "visible_px": 360575,
+    "unique_rgb": 5214,
+    "rgb_constant": false,
+    "rgb_value": null,
+    "chroma_p50": 4,
+    "chroma_p99": 13,
+    "chroma_max": 46,
+    "chroma_gt8_frac": 0.0749,
+    "chroma_gt8_weighted": 0.0762,
+    "tint": [
+     0.9013,
+     0.923,
+     0.9737
+    ],
+    "r8_tint_err_max": 18.4,
+    "r8_tint_err_mean": 1.562,
+    "r8_tint_err_gt4_frac": 0.1115
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 236
+    },
+    "g": {
+     "min": 0,
+     "max": 238
+    },
+    "b": {
+     "min": 0,
+     "max": 244
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 3.38,
+     "le4_frac": 0.9059
+    },
+    "mirror_ud": {
+     "mean": 10.73,
+     "le4_frac": 0.5103
+    },
+    "radial": {
+     "le4_frac": 0.4403,
+     "mean": 11.26,
+     "profile_bytes_rgba8": 1896
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 335,
+     "h": 335,
+     "bytes": 448900,
+     "pixel_memory": 897800,
+     "tex_err_upsampled": {
+      "max_rgb": 96.0,
+      "mean_rgb": 1.584,
+      "max_a": 47.0,
+      "mean_a": 0.358,
+      "psnr": 32.66
+     }
+    },
+    "scale_0.25": {
+     "w": 168,
+     "h": 168,
+     "bytes": 112896,
+     "pixel_memory": 225792,
+     "tex_err_upsampled": {
+      "max_rgb": 150.0,
+      "mean_rgb": 3.547,
+      "max_a": 99.0,
+      "mean_a": 1.045,
+      "psnr": 26.9
+     }
+    },
+    "r8_tint": {
+     "bytes": 448900,
+     "pixel_memory": 897800,
+     "tint": [
+      0.9013,
+      0.923,
+      0.9737
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 451584,
+     "pixel_memory": 451584,
+     "tex_err": {
+      "max_rgb": 69.0,
+      "mean_rgb": 1.129,
+      "max_a": 22.0,
+      "mean_a": 0.116,
+      "psnr": 40.57
+     }
+    },
+    "etc2rgb": {
+     "bytes": 225792,
+     "pixel_memory": 225792,
+     "tex_err": {
+      "max_rgb": 233.0,
+      "mean_rgb": 3.022,
+      "max_a": 255.0,
+      "mean_a": 53.825,
+      "psnr": 27.46
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "g20",
+    "g20-bmw"
+   ],
+   "options": {
+    "r8-speedo_d": {
+     "group": "format",
+     "desc": "speedo_d as R8 premultiplied luma x one tint",
+     "states": {
+      "g20": {
+       "bytes": 448900,
+       "pixel_memory": 897800,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 18.41,
+        "px_gt2": 180752,
+        "px_gt8": 2055,
+        "px_gt16": 143,
+        "mean_in_rect": 1.71,
+        "p99_in_rect": 6.47,
+        "psnr_in_rect": 44.4,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgba-speedo_d": {
+     "group": "compression",
+     "desc": "speedo_d as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "g20": {
+       "bytes": 451584,
+       "pixel_memory": 451584,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 69.0,
+        "px_gt2": 74450,
+        "px_gt8": 9224,
+        "px_gt16": 2353,
+        "mean_in_rect": 1.523,
+        "p99_in_rect": 12.0,
+        "psnr_in_rect": 42.33,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgb-speedo_d": {
+     "group": "compression",
+     "desc": "speedo_d premultiplied, opaque, as etc2rgb (etcpak)",
+     "states": {
+      "g20": {
+       "bytes": 225792,
+       "pixel_memory": 225792,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 69.0,
+        "px_gt2": 74623,
+        "px_gt8": 9345,
+        "px_gt16": 2389,
+        "mean_in_rect": 1.527,
+        "p99_in_rect": 12.72,
+        "psnr_in_rect": 42.3,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "premul-speedo_d": {
+     "group": "format",
+     "desc": "speedo_d premultiplied opaque RGBA8 (the identity check for the etc2rgb path)",
+     "states": {
+      "g20": {
+       "bytes": 1795600,
+       "pixel_memory": 3591200,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 0.5,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.001,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 84.13,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-speedo_d": {
+     "group": "resolution",
+     "desc": "speedo_d at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "g20": {
+       "bytes": 448900,
+       "pixel_memory": 897800,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 95.75,
+        "px_gt2": 52010,
+        "px_gt8": 18899,
+        "px_gt16": 10634,
+        "mean_in_rect": 1.598,
+        "p99_in_rect": 33.0,
+        "psnr_in_rect": 34.14,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-speedo_d": {
+     "group": "resolution",
+     "desc": "speedo_d at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "g20": {
+       "bytes": 112896,
+       "pixel_memory": 225792,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 149.69,
+        "px_gt2": 79515,
+        "px_gt8": 42303,
+        "px_gt16": 23671,
+        "mean_in_rect": 3.271,
+        "p99_in_rect": 59.69,
+        "psnr_in_rect": 28.58,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c4-speedo_d": {
+     "group": "format",
+     "desc": "speedo_d as R8 value (max channel, premultiplied) + its colour at 1/4 size (RGBA8): chroma subsampling",
+     "states": {
+      "g20": {
+       "bytes": 561796,
+       "pixel_memory": 1123592,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 17.05,
+        "px_gt2": 8974,
+        "px_gt8": 245,
+        "px_gt16": 1,
+        "mean_in_rect": 0.429,
+        "p99_in_rect": 2.65,
+        "psnr_in_rect": 55.51,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c8-speedo_d": {
+     "group": "format",
+     "desc": "speedo_d as R8 value (max channel, premultiplied) + its colour at 1/8 size (RGBA8): chroma subsampling",
+     "states": {
+      "g20": {
+       "bytes": 477124,
+       "pixel_memory": 954248,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 24.24,
+        "px_gt2": 19086,
+        "px_gt8": 1080,
+        "px_gt16": 177,
+        "mean_in_rect": 0.571,
+        "p99_in_rect": 4.11,
+        "psnr_in_rect": 51.93,
+        "rect": [
+         77,
+         45,
+         747,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "strip_mask": {
+   "name": "strip_mask",
+   "w": 1908,
+   "h": 353,
+   "format": "r8",
+   "sampling": "nearest",
+   "bytes_upload": 673524,
+   "pixel_memory": 1347048,
+   "bytes_package_json": 898359,
+   "zlib9": 4621,
+   "png": 4062,
+   "entropy_bits_per_byte": 1.125,
+   "uses": [
+    {
+     "layout": "wb_dials",
+     "widget": "bg",
+     "sampler": "WBBACK u_t2 (strip mask lanes, R8, nearest)",
+     "when": "always"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.3914,
+    "opaque": 0.5959,
+    "soft": 0.0127,
+    "box": [
+     0,
+     0,
+     1906,
+     353
+    ],
+    "box_area_frac": 0.999
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 44.6,
+     "le4_frac": 0.8119
+    },
+    "mirror_ud": {
+     "mean": 191.52,
+     "le4_frac": 0.2399
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 954,
+     "h": 176,
+     "bytes": 167904,
+     "pixel_memory": 335808,
+     "tex_err_upsampled": {
+      "max_rgb": 172.0,
+      "mean_rgb": 1.495,
+      "max_a": 172.0,
+      "mean_a": 1.441,
+      "psnr": 27.98
+     }
+    },
+    "scale_0.25": {
+     "w": 477,
+     "h": 88,
+     "bytes": 41976,
+     "pixel_memory": 83952,
+     "tex_err_upsampled": {
+      "max_rgb": 192.47,
+      "mean_rgb": 3.194,
+      "max_a": 188.0,
+      "mean_a": 3.014,
+      "psnr": 24.56
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "g20",
+    "g20-bmw"
+   ],
+   "options": {
+    "etc2rgba-strip_mask": {
+     "group": "compression",
+     "desc": "strip_mask (R8 mask) as etc2rgba, the mask in every channel",
+     "states": {
+      "g20": {
+       "bytes": 679248,
+       "pixel_memory": 679248,
+       "bytes_before": 673524,
+       "pixel_memory_before": 1347048,
+       "frame_diff": {
+        "max": 2.0,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.001,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 80.86,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "tacho": {
+   "name": "tacho",
+   "w": 670,
+   "h": 670,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 1795600,
+   "pixel_memory": 3591200,
+   "bytes_package_json": 2394168,
+   "zlib9": 357623,
+   "png": 307026,
+   "entropy_bits_per_byte": 4.312,
+   "uses": [
+    {
+     "layout": "wb_comfort",
+     "widget": "tacho",
+     "sampler": "WBDIAL u_base (kind 3)",
+     "when": "always"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.1908,
+    "opaque": 0.7299,
+    "soft": 0.0793,
+    "box": [
+     0,
+     0,
+     670,
+     670
+    ],
+    "box_area_frac": 1.0
+   },
+   "colour": {
+    "visible_px": 363271,
+    "unique_rgb": 7293,
+    "rgb_constant": false,
+    "rgb_value": null,
+    "chroma_p50": 6,
+    "chroma_p99": 27,
+    "chroma_max": 221,
+    "chroma_gt8_frac": 0.3555,
+    "chroma_gt8_weighted": 0.3365,
+    "tint": [
+     0.9212,
+     0.8954,
+     0.9466
+    ],
+    "r8_tint_err_max": 144.6,
+    "r8_tint_err_mean": 2.553,
+    "r8_tint_err_gt4_frac": 0.392
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 235
+    },
+    "g": {
+     "min": 0,
+     "max": 235
+    },
+    "b": {
+     "min": 0,
+     "max": 235
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 12.7,
+     "le4_frac": 0.4605
+    },
+    "mirror_ud": {
+     "mean": 15.57,
+     "le4_frac": 0.3917
+    },
+    "radial": {
+     "le4_frac": 0.3577,
+     "mean": 11.59,
+     "profile_bytes_rgba8": 1896
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 335,
+     "h": 335,
+     "bytes": 448900,
+     "pixel_memory": 897800,
+     "tex_err_upsampled": {
+      "max_rgb": 121.0,
+      "mean_rgb": 1.738,
+      "max_a": 53.0,
+      "mean_a": 0.802,
+      "psnr": 31.21
+     }
+    },
+    "scale_0.25": {
+     "w": 168,
+     "h": 168,
+     "bytes": 112896,
+     "pixel_memory": 225792,
+     "tex_err_upsampled": {
+      "max_rgb": 174.0,
+      "mean_rgb": 3.944,
+      "max_a": 122.0,
+      "mean_a": 2.257,
+      "psnr": 25.69
+     }
+    },
+    "r8_tint": {
+     "bytes": 448900,
+     "pixel_memory": 897800,
+     "tint": [
+      0.9212,
+      0.8954,
+      0.9466
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 451584,
+     "pixel_memory": 451584,
+     "tex_err": {
+      "max_rgb": 130.0,
+      "mean_rgb": 1.078,
+      "max_a": 23.0,
+      "mean_a": 0.258,
+      "psnr": 39.39
+     }
+    },
+    "etc2rgb": {
+     "bytes": 225792,
+     "pixel_memory": 225792,
+     "tex_err": {
+      "max_rgb": 244.0,
+      "mean_rgb": 15.342,
+      "max_a": 255.0,
+      "mean_a": 60.135,
+      "psnr": 13.7
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "comfort",
+    "comfort-glass",
+    "comfort-map",
+    "comfort-night",
+    "comfort-nopass"
+   ],
+   "options": {
+    "r8-tacho": {
+     "group": "format",
+     "desc": "tacho as R8 luma x one tint",
+     "states": {
+      "comfort": {
+       "bytes": 448900,
+       "pixel_memory": 897800,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 144.56,
+        "px_gt2": 214465,
+        "px_gt8": 7207,
+        "px_gt16": 1721,
+        "mean_in_rect": 2.644,
+        "p99_in_rect": 8.95,
+        "psnr_in_rect": 36.77,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8x2-tacho": {
+     "group": "format",
+     "desc": "tacho as R8 luma x two tints, the red one where the shader knows the red zone is",
+     "states": {
+      "comfort": {
+       "bytes": 448900,
+       "pixel_memory": 897800,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 109.83,
+        "px_gt2": 212741,
+        "px_gt8": 7736,
+        "px_gt16": 2320,
+        "mean_in_rect": 2.583,
+        "p99_in_rect": 9.67,
+        "psnr_in_rect": 37.31,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgba-tacho": {
+     "group": "compression",
+     "desc": "tacho as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "comfort": {
+       "bytes": 451584,
+       "pixel_memory": 451584,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 130.0,
+        "px_gt2": 61117,
+        "px_gt8": 8564,
+        "px_gt16": 2065,
+        "mean_in_rect": 1.466,
+        "p99_in_rect": 11.37,
+        "psnr_in_rect": 42.17,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgb-tacho": {
+     "group": "compression",
+     "desc": "tacho premultiplied, opaque, as etc2rgb (etcpak)",
+     "states": {
+      "comfort": {
+       "bytes": 225792,
+       "pixel_memory": 225792,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 130.0,
+        "px_gt2": 62490,
+        "px_gt8": 11620,
+        "px_gt16": 2979,
+        "mean_in_rect": 1.551,
+        "p99_in_rect": 14.0,
+        "psnr_in_rect": 41.43,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "premul-tacho": {
+     "group": "format",
+     "desc": "tacho premultiplied opaque RGBA8 (the identity check for the etc2rgb path)",
+     "states": {
+      "comfort": {
+       "bytes": 1795600,
+       "pixel_memory": 3591200,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 0.49,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.01,
+        "p99_in_rect": 0.31,
+        "psnr_in_rect": 76.66,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-tacho": {
+     "group": "resolution",
+     "desc": "tacho at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 448900,
+       "pixel_memory": 897800,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 121.5,
+        "px_gt2": 47229,
+        "px_gt8": 24824,
+        "px_gt16": 15345,
+        "mean_in_rect": 1.873,
+        "p99_in_rect": 38.31,
+        "psnr_in_rect": 32.68,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-tacho": {
+     "group": "resolution",
+     "desc": "tacho at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 112896,
+       "pixel_memory": 225792,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 174.0,
+        "px_gt2": 81056,
+        "px_gt8": 43321,
+        "px_gt16": 28542,
+        "mean_in_rect": 3.983,
+        "p99_in_rect": 73.46,
+        "psnr_in_rect": 27.14,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "proc-dials": {
+     "group": "procedural",
+     "desc": "speedo / tacho without their baked base (WBDIAL draws its own comfort dial)",
+     "states": {
+      "comfort": {
+       "bytes": 0,
+       "pixel_memory": 0,
+       "frame_diff": {
+        "max": 252.19,
+        "px_gt2": 568059,
+        "px_gt8": 359587,
+        "px_gt16": 130136,
+        "mean_in_rect": 9.684,
+        "p99_in_rect": 142.44,
+        "psnr_in_rect": 21.59,
+        "rect": [
+         77,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c4-tacho": {
+     "group": "format",
+     "desc": "tacho as R8 value (max channel, premultiplied) + its colour at 1/4 size (RGBA8): chroma subsampling",
+     "states": {
+      "comfort": {
+       "bytes": 561796,
+       "pixel_memory": 1123592,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 104.22,
+        "px_gt2": 24074,
+        "px_gt8": 3269,
+        "px_gt16": 912,
+        "mean_in_rect": 0.625,
+        "p99_in_rect": 6.42,
+        "psnr_in_rect": 47.56,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c8-tacho": {
+     "group": "format",
+     "desc": "tacho as R8 value (max channel, premultiplied) + its colour at 1/8 size (RGBA8): chroma subsampling",
+     "states": {
+      "comfort": {
+       "bytes": 477124,
+       "pixel_memory": 954248,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 108.49,
+        "px_gt2": 39572,
+        "px_gt8": 6454,
+        "px_gt16": 3038,
+        "mean_in_rect": 0.911,
+        "p99_in_rect": 10.61,
+        "psnr_in_rect": 43.25,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c2-tacho": {
+     "group": "format",
+     "desc": "tacho as R8 value (max channel, premultiplied) + its colour at 1/2 size (RGBA8): chroma subsampling",
+     "states": {
+      "comfort": {
+       "bytes": 897800,
+       "pixel_memory": 1795600,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 74.67,
+        "px_gt2": 11867,
+        "px_gt8": 1367,
+        "px_gt16": 247,
+        "mean_in_rect": 0.378,
+        "p99_in_rect": 3.61,
+        "psnr_in_rect": 51.83,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "tacho_d": {
+   "name": "tacho_d",
+   "w": 670,
+   "h": 670,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 1795600,
+   "pixel_memory": 3591200,
+   "bytes_package_json": 2394168,
+   "zlib9": 350630,
+   "png": 297446,
+   "entropy_bits_per_byte": 4.278,
+   "uses": [
+    {
+     "layout": "wb_dials",
+     "widget": "tacho",
+     "sampler": "WBDIAL u_base (kind 3)",
+     "when": "always"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.1908,
+    "opaque": 0.7299,
+    "soft": 0.0793,
+    "box": [
+     0,
+     0,
+     670,
+     670
+    ],
+    "box_area_frac": 1.0
+   },
+   "colour": {
+    "visible_px": 363271,
+    "unique_rgb": 6621,
+    "rgb_constant": false,
+    "rgb_value": null,
+    "chroma_p50": 6,
+    "chroma_p99": 23,
+    "chroma_max": 221,
+    "chroma_gt8_frac": 0.3468,
+    "chroma_gt8_weighted": 0.3273,
+    "tint": [
+     0.927,
+     0.8931,
+     0.9432
+    ],
+    "r8_tint_err_max": 143.1,
+    "r8_tint_err_mean": 2.52,
+    "r8_tint_err_gt4_frac": 0.3843
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 235
+    },
+    "g": {
+     "min": 0,
+     "max": 235
+    },
+    "b": {
+     "min": 0,
+     "max": 235
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 11.2,
+     "le4_frac": 0.4796
+    },
+    "mirror_ud": {
+     "mean": 14.33,
+     "le4_frac": 0.3981
+    },
+    "radial": {
+     "le4_frac": 0.3628,
+     "mean": 10.66,
+     "profile_bytes_rgba8": 1896
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 335,
+     "h": 335,
+     "bytes": 448900,
+     "pixel_memory": 897800,
+     "tex_err_upsampled": {
+      "max_rgb": 121.0,
+      "mean_rgb": 1.561,
+      "max_a": 53.0,
+      "mean_a": 0.802,
+      "psnr": 31.77
+     }
+    },
+    "scale_0.25": {
+     "w": 168,
+     "h": 168,
+     "bytes": 112896,
+     "pixel_memory": 225792,
+     "tex_err_upsampled": {
+      "max_rgb": 169.0,
+      "mean_rgb": 3.543,
+      "max_a": 122.0,
+      "mean_a": 2.257,
+      "psnr": 26.25
+     }
+    },
+    "r8_tint": {
+     "bytes": 448900,
+     "pixel_memory": 897800,
+     "tint": [
+      0.927,
+      0.8931,
+      0.9432
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 451584,
+     "pixel_memory": 451584,
+     "tex_err": {
+      "max_rgb": 130.0,
+      "mean_rgb": 1.026,
+      "max_a": 23.0,
+      "mean_a": 0.258,
+      "psnr": 39.76
+     }
+    },
+    "etc2rgb": {
+     "bytes": 225792,
+     "pixel_memory": 225792,
+     "tex_err": {
+      "max_rgb": 244.0,
+      "mean_rgb": 15.29,
+      "max_a": 255.0,
+      "mean_a": 60.135,
+      "psnr": 13.7
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "g20",
+    "g20-bmw"
+   ],
+   "options": {
+    "r8-tacho_d": {
+     "group": "format",
+     "desc": "tacho_d as R8 luma x one tint",
+     "states": {
+      "g20": {
+       "bytes": 448900,
+       "pixel_memory": 897800,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 143.09,
+        "px_gt2": 206245,
+        "px_gt8": 5454,
+        "px_gt16": 1235,
+        "mean_in_rect": 2.524,
+        "p99_in_rect": 8.17,
+        "psnr_in_rect": 36.95,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8x2-tacho_d": {
+     "group": "format",
+     "desc": "tacho_d as R8 luma x two tints, the red one where the shader knows the red zone is",
+     "states": {
+      "g20": {
+       "bytes": 448900,
+       "pixel_memory": 897800,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 109.83,
+        "px_gt2": 204388,
+        "px_gt8": 4411,
+        "px_gt16": 1847,
+        "mean_in_rect": 2.465,
+        "p99_in_rect": 7.99,
+        "psnr_in_rect": 37.5,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgba-tacho_d": {
+     "group": "compression",
+     "desc": "tacho_d as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "g20": {
+       "bytes": 451584,
+       "pixel_memory": 451584,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 130.0,
+        "px_gt2": 50618,
+        "px_gt8": 6559,
+        "px_gt16": 1640,
+        "mean_in_rect": 1.302,
+        "p99_in_rect": 10.0,
+        "psnr_in_rect": 42.94,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgb-tacho_d": {
+     "group": "compression",
+     "desc": "tacho_d premultiplied, opaque, as etc2rgb (etcpak)",
+     "states": {
+      "g20": {
+       "bytes": 225792,
+       "pixel_memory": 225792,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 130.0,
+        "px_gt2": 51952,
+        "px_gt8": 8924,
+        "px_gt16": 2270,
+        "mean_in_rect": 1.368,
+        "p99_in_rect": 12.0,
+        "psnr_in_rect": 42.27,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "premul-tacho_d": {
+     "group": "format",
+     "desc": "tacho_d premultiplied opaque RGBA8 (the identity check for the etc2rgb path)",
+     "states": {
+      "g20": {
+       "bytes": 1795600,
+       "pixel_memory": 3591200,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 0.49,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.007,
+        "p99_in_rect": 0.28,
+        "psnr_in_rect": 77.87,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-tacho_d": {
+     "group": "resolution",
+     "desc": "tacho_d at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "g20": {
+       "bytes": 448900,
+       "pixel_memory": 897800,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 121.5,
+        "px_gt2": 37235,
+        "px_gt8": 19937,
+        "px_gt16": 12239,
+        "mean_in_rect": 1.54,
+        "p99_in_rect": 33.81,
+        "psnr_in_rect": 33.52,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-tacho_d": {
+     "group": "resolution",
+     "desc": "tacho_d at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "g20": {
+       "bytes": 112896,
+       "pixel_memory": 225792,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 169.0,
+        "px_gt2": 66258,
+        "px_gt8": 34044,
+        "px_gt16": 22883,
+        "mean_in_rect": 3.206,
+        "p99_in_rect": 64.98,
+        "psnr_in_rect": 28.17,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c4-tacho_d": {
+     "group": "format",
+     "desc": "tacho_d as R8 value (max channel, premultiplied) + its colour at 1/4 size (RGBA8): chroma subsampling",
+     "states": {
+      "g20": {
+       "bytes": 561796,
+       "pixel_memory": 1123592,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 104.22,
+        "px_gt2": 19782,
+        "px_gt8": 2960,
+        "px_gt16": 849,
+        "mean_in_rect": 0.562,
+        "p99_in_rect": 6.0,
+        "psnr_in_rect": 47.96,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c8-tacho_d": {
+     "group": "format",
+     "desc": "tacho_d as R8 value (max channel, premultiplied) + its colour at 1/8 size (RGBA8): chroma subsampling",
+     "states": {
+      "g20": {
+       "bytes": 477124,
+       "pixel_memory": 954248,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 108.49,
+        "px_gt2": 32732,
+        "px_gt8": 5714,
+        "px_gt16": 2804,
+        "mean_in_rect": 0.816,
+        "p99_in_rect": 9.52,
+        "psnr_in_rect": 43.6,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "r8c2-tacho_d": {
+     "group": "format",
+     "desc": "tacho_d as R8 value (max channel, premultiplied) + its colour at 1/2 size (RGBA8): chroma subsampling",
+     "states": {
+      "g20": {
+       "bytes": 897800,
+       "pixel_memory": 1795600,
+       "bytes_before": 1795600,
+       "pixel_memory_before": 3591200,
+       "frame_diff": {
+        "max": 74.67,
+        "px_gt2": 9971,
+        "px_gt8": 1194,
+        "px_gt16": 221,
+        "mean_in_rect": 0.339,
+        "p99_in_rect": 3.3,
+        "psnr_in_rect": 52.33,
+        "rect": [
+         1173,
+         45,
+         1843,
+         715
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  },
+  "window": {
+   "name": "window",
+   "w": 320,
+   "h": 286,
+   "format": "rgba8",
+   "sampling": "bilinear",
+   "bytes_upload": 366080,
+   "pixel_memory": 732160,
+   "bytes_package_json": 488140,
+   "zlib9": 30844,
+   "png": 25372,
+   "entropy_bits_per_byte": 2.75,
+   "uses": [
+    {
+     "layout": "wb_comfort",
+     "widget": "bg",
+     "sampler": "WBBACK u_t0 (the middle window and the bar under it, half size)",
+     "when": "while BMW's map is not shown in the window (stockMap off)"
+    }
+   ],
+   "note": null,
+   "alpha": {
+    "empty": 0.2434,
+    "opaque": 0.712,
+    "soft": 0.0447,
+    "box": [
+     0,
+     0,
+     320,
+     286
+    ],
+    "box_area_frac": 1.0
+   },
+   "colour": {
+    "visible_px": 69248,
+    "unique_rgb": 1120,
+    "rgb_constant": false,
+    "rgb_value": null,
+    "chroma_p50": 0,
+    "chroma_p99": 22,
+    "chroma_max": 28,
+    "chroma_gt8_frac": 0.1641,
+    "chroma_gt8_weighted": 0.1651,
+    "tint": [
+     0.4685,
+     0.5636,
+     0.5895
+    ],
+    "r8_tint_err_max": 3.0,
+    "r8_tint_err_mean": 0.169,
+    "r8_tint_err_gt4_frac": 0.0
+   },
+   "channels": {
+    "r": {
+     "min": 0,
+     "max": 122
+    },
+    "g": {
+     "min": 0,
+     "max": 143
+    },
+    "b": {
+     "min": 0,
+     "max": 149
+    },
+    "a": {
+     "min": 0,
+     "max": 255
+    }
+   },
+   "symmetry": {
+    "mirror_lr": {
+     "mean": 0.19,
+     "le4_frac": 1.0
+    },
+    "mirror_ud": {
+     "mean": 47.47,
+     "le4_frac": 0.2964
+    }
+   },
+   "variants": {
+    "scale_0.5": {
+     "w": 160,
+     "h": 143,
+     "bytes": 91520,
+     "pixel_memory": 183040,
+     "tex_err_upsampled": {
+      "max_rgb": 19.33,
+      "mean_rgb": 0.386,
+      "max_a": 58.0,
+      "mean_a": 1.148,
+      "psnr": 44.25
+     }
+    },
+    "scale_0.25": {
+     "w": 80,
+     "h": 72,
+     "bytes": 23040,
+     "pixel_memory": 46080,
+     "tex_err_upsampled": {
+      "max_rgb": 40.78,
+      "mean_rgb": 0.852,
+      "max_a": 144.0,
+      "mean_a": 3.177,
+      "psnr": 38.76
+     }
+    },
+    "r8_tint": {
+     "bytes": 91520,
+     "pixel_memory": 183040,
+     "tint": [
+      0.4685,
+      0.5636,
+      0.5895
+     ]
+    },
+    "etc2rgba": {
+     "bytes": 92160,
+     "pixel_memory": 92160,
+     "tex_err": {
+      "max_rgb": 16.0,
+      "mean_rgb": 1.237,
+      "max_a": 22.0,
+      "mean_a": 0.212,
+      "psnr": 43.59
+     }
+    },
+    "etc2rgb": {
+     "bytes": 46080,
+     "pixel_memory": 46080,
+     "tex_err": {
+      "max_rgb": 123.21,
+      "mean_rgb": 2.233,
+      "max_a": 255.0,
+      "mean_a": 66.687,
+      "psnr": 33.09
+     }
+    }
+   },
+   "uploaded_in_states": [
+    "comfort",
+    "comfort-glass",
+    "comfort-night",
+    "comfort-nopass"
+   ],
+   "options": {
+    "r8-window": {
+     "group": "format",
+     "desc": "window as R8 premultiplied luma x one tint (WBBACK u_t0)",
+     "states": {
+      "comfort": {
+       "bytes": 91520,
+       "pixel_memory": 183040,
+       "bytes_before": 366080,
+       "pixel_memory_before": 732160,
+       "frame_diff": {
+        "max": 2.68,
+        "px_gt2": 248,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.044,
+        "p99_in_rect": 1.06,
+        "psnr_in_rect": 66.67,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgba-window": {
+     "group": "compression",
+     "desc": "window as etc2rgba (etcpak), straight alpha",
+     "states": {
+      "comfort": {
+       "bytes": 92160,
+       "pixel_memory": 92160,
+       "bytes_before": 366080,
+       "pixel_memory_before": 732160,
+       "frame_diff": {
+        "max": 15.0,
+        "px_gt2": 22641,
+        "px_gt8": 786,
+        "px_gt16": 0,
+        "mean_in_rect": 0.336,
+        "p99_in_rect": 2.75,
+        "psnr_in_rect": 51.68,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "etc2rgb-window": {
+     "group": "compression",
+     "desc": "window premultiplied, opaque, as etc2rgb (etcpak)",
+     "states": {
+      "comfort": {
+       "bytes": 46080,
+       "pixel_memory": 46080,
+       "bytes_before": 366080,
+       "pixel_memory_before": 732160,
+       "frame_diff": {
+        "max": 15.0,
+        "px_gt2": 22771,
+        "px_gt8": 702,
+        "px_gt16": 0,
+        "mean_in_rect": 0.352,
+        "p99_in_rect": 2.75,
+        "psnr_in_rect": 51.49,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "premul-window": {
+     "group": "format",
+     "desc": "window premultiplied opaque RGBA8 (the identity check for the etc2rgb path)",
+     "states": {
+      "comfort": {
+       "bytes": 366080,
+       "pixel_memory": 732160,
+       "bytes_before": 366080,
+       "pixel_memory_before": 732160,
+       "frame_diff": {
+        "max": 0.62,
+        "px_gt2": 0,
+        "px_gt8": 0,
+        "px_gt16": 0,
+        "mean_in_rect": 0.001,
+        "p99_in_rect": 0.0,
+        "psnr_in_rect": 89.48,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.5-window": {
+     "group": "resolution",
+     "desc": "window at 0.5 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 91520,
+       "pixel_memory": 183040,
+       "bytes_before": 366080,
+       "pixel_memory_before": 732160,
+       "frame_diff": {
+        "max": 11.47,
+        "px_gt2": 11207,
+        "px_gt8": 485,
+        "px_gt16": 0,
+        "mean_in_rect": 0.064,
+        "p99_in_rect": 1.5,
+        "psnr_in_rect": 57.24,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "scale0.25-window": {
+     "group": "resolution",
+     "desc": "window at 0.25 of its size, bilinear up in the shader",
+     "states": {
+      "comfort": {
+       "bytes": 23040,
+       "pixel_memory": 46080,
+       "bytes_before": 366080,
+       "pixel_memory_before": 732160,
+       "frame_diff": {
+        "max": 26.44,
+        "px_gt2": 29468,
+        "px_gt8": 5876,
+        "px_gt16": 1864,
+        "mean_in_rect": 0.173,
+        "p99_in_rect": 4.41,
+        "psnr_in_rect": 49.04,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    },
+    "proc-window": {
+     "group": "procedural",
+     "desc": "window / horizon without textures (WBBACK draws its own comfort window)",
+     "states": {
+      "comfort": {
+       "bytes": 0,
+       "pixel_memory": 0,
+       "frame_diff": {
+        "max": 110.9,
+        "px_gt2": 90800,
+        "px_gt8": 77377,
+        "px_gt16": 66154,
+        "mean_in_rect": 2.374,
+        "p99_in_rect": 64.98,
+        "psnr_in_rect": 29.13,
+        "rect": [
+         0,
+         0,
+         1920,
+         720
+        ],
+        "not_drawn": null
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "pairs": [
+  {
+   "a": "speedo",
+   "b": "speedo_d",
+   "flipped": false,
+   "identical_frac": 0.9894,
+   "le4_frac": 0.9914,
+   "diff_box": [
+    154,
+    558,
+    516,
+    639
+   ],
+   "diff_box_area_frac": 0.0653
+  },
+  {
+   "a": "tacho",
+   "b": "tacho_d",
+   "flipped": false,
+   "identical_frac": 0.9884,
+   "le4_frac": 0.9898,
+   "diff_box": [
+    124,
+    542,
+    519,
+    637
+   ],
+   "diff_box_area_frac": 0.0836
+  },
+  {
+   "a": "fuel",
+   "b": "oil",
+   "flipped": false,
+   "identical_frac": 0.6728,
+   "le4_frac": 0.7154,
+   "diff_box": [
+    0,
+    0,
+    144,
+    144
+   ],
+   "diff_box_area_frac": 1.0
+  },
+  {
+   "a": "fuel",
+   "b": "oil",
+   "flipped": true,
+   "identical_frac": 0.5948,
+   "le4_frac": 0.9629,
+   "diff_box": [
+    0,
+    0,
+    141,
+    144
+   ],
+   "diff_box_area_frac": 0.9792
+  },
+  {
+   "a": "sign_limit",
+   "b": "sign_nopass",
+   "flipped": false,
+   "identical_frac": 0.8304,
+   "le4_frac": 0.8363,
+   "diff_box": [
+    2,
+    2,
+    86,
+    87
+   ],
+   "diff_box_area_frac": 0.9116
+  },
+  {
+   "a": "speedo",
+   "b": "tacho",
+   "flipped": false,
+   "identical_frac": 0.1932,
+   "le4_frac": 0.4841,
+   "diff_box": [
+    0,
+    0,
+    670,
+    670
+   ],
+   "diff_box_area_frac": 1.0
+  }
+ ],
+ "states": {
+  "comfort": {
+   "state": "comfort",
+   "layout": "wb_comfort",
+   "bench_pixels": 11963960,
+   "layers": 21,
+   "items": [
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "window",
+     "format": "rgba8",
+     "w": 320,
+     "h": 286,
+     "bytes": 366080,
+     "pixel_memory": 732160
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_limit",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_nopass",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "horizon",
+     "format": "rgba8",
+     "w": 424,
+     "h": 10,
+     "bytes": 16960,
+     "pixel_memory": 33920
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "blank",
+     "name": "1x1",
+     "format": "rgba8",
+     "w": 1,
+     "h": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "speedo",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "range_seg",
+     "format": "rgba8",
+     "w": 346,
+     "h": 68,
+     "bytes": 94112,
+     "pixel_memory": 188224
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "tacho",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "ed_seg",
+     "format": "rgba8",
+     "w": 346,
+     "h": 70,
+     "bytes": 96880,
+     "pixel_memory": 193760
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "fuel",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "oil",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "sheet",
+     "name": "380x33",
+     "format": "rgba8",
+     "w": 380,
+     "h": 33,
+     "bytes": 50160,
+     "pixel_memory": 100320
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "357x149",
+     "format": "rgba8",
+     "w": 357,
+     "h": 149,
+     "bytes": 212772,
+     "pixel_memory": 425544
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "279x118",
+     "format": "rgba8",
+     "w": 279,
+     "h": 118,
+     "bytes": 131688,
+     "pixel_memory": 263376
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "65x167",
+     "format": "rgba8",
+     "w": 65,
+     "h": 167,
+     "bytes": 43420,
+     "pixel_memory": 86840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "386x150",
+     "format": "rgba8",
+     "w": 386,
+     "h": 150,
+     "bytes": 231600,
+     "pixel_memory": 463200
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "60x31",
+     "format": "rgba8",
+     "w": 60,
+     "h": 31,
+     "bytes": 7440,
+     "pixel_memory": 14880
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "260x73",
+     "format": "rgba8",
+     "w": 260,
+     "h": 73,
+     "bytes": 75920,
+     "pixel_memory": 151840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "40x24",
+     "format": "rgba8",
+     "w": 40,
+     "h": 24,
+     "bytes": 3840,
+     "pixel_memory": 7680
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "80x61",
+     "format": "rgba8",
+     "w": 80,
+     "h": 61,
+     "bytes": 19520,
+     "pixel_memory": 39040
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "214x437",
+     "format": "rgba8",
+     "w": 214,
+     "h": 437,
+     "bytes": 374072,
+     "pixel_memory": 748144
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "349x183",
+     "format": "rgba8",
+     "w": 349,
+     "h": 183,
+     "bytes": 255468,
+     "pixel_memory": 510936
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "90x24",
+     "format": "rgba8",
+     "w": 90,
+     "h": 24,
+     "bytes": 8640,
+     "pixel_memory": 17280
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "175x233",
+     "format": "rgba8",
+     "w": 175,
+     "h": 233,
+     "bytes": 163100,
+     "pixel_memory": 326200
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "110x24",
+     "format": "rgba8",
+     "w": 110,
+     "h": 24,
+     "bytes": 10560,
+     "pixel_memory": 21120
+    }
+   ],
+   "by_kind": {
+    "scene": {
+     "n": 10,
+     "bytes": 4393776,
+     "pixel_memory": 8787552
+    },
+    "sheet": {
+     "n": 14,
+     "bytes": 1588200,
+     "pixel_memory": 3176400
+    },
+    "glyph atlas": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    },
+    "blank": {
+     "n": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    "asset?": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    }
+   },
+   "bytes": 5981980,
+   "pixel_memory": 11963960,
+   "seconds_whole": {
+    "2000": 2.92,
+    "5500": 1.06
+   }
+  },
+  "comfort-glass": {
+   "state": "comfort-glass",
+   "layout": "wb_comfort",
+   "bench_pixels": 12333048,
+   "layers": 21,
+   "items": [
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "blank",
+     "name": "1x1",
+     "format": "rgba8",
+     "w": 1,
+     "h": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_limit",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_nopass",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "speedo",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "range_seg",
+     "format": "rgba8",
+     "w": 346,
+     "h": 68,
+     "bytes": 94112,
+     "pixel_memory": 188224
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "tacho",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "ed_seg",
+     "format": "rgba8",
+     "w": 346,
+     "h": 70,
+     "bytes": 96880,
+     "pixel_memory": 193760
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "fuel",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "oil",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "window",
+     "format": "rgba8",
+     "w": 320,
+     "h": 286,
+     "bytes": 366080,
+     "pixel_memory": 732160
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "horizon",
+     "format": "rgba8",
+     "w": 424,
+     "h": 10,
+     "bytes": 16960,
+     "pixel_memory": 33920
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "bar",
+     "format": "rgba8",
+     "w": 584,
+     "h": 79,
+     "bytes": 184544,
+     "pixel_memory": 369088
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "sheet",
+     "name": "380x33",
+     "format": "rgba8",
+     "w": 380,
+     "h": 33,
+     "bytes": 50160,
+     "pixel_memory": 100320
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "357x149",
+     "format": "rgba8",
+     "w": 357,
+     "h": 149,
+     "bytes": 212772,
+     "pixel_memory": 425544
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "279x118",
+     "format": "rgba8",
+     "w": 279,
+     "h": 118,
+     "bytes": 131688,
+     "pixel_memory": 263376
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "65x167",
+     "format": "rgba8",
+     "w": 65,
+     "h": 167,
+     "bytes": 43420,
+     "pixel_memory": 86840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "386x150",
+     "format": "rgba8",
+     "w": 386,
+     "h": 150,
+     "bytes": 231600,
+     "pixel_memory": 463200
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "60x31",
+     "format": "rgba8",
+     "w": 60,
+     "h": 31,
+     "bytes": 7440,
+     "pixel_memory": 14880
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "260x73",
+     "format": "rgba8",
+     "w": 260,
+     "h": 73,
+     "bytes": 75920,
+     "pixel_memory": 151840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "40x24",
+     "format": "rgba8",
+     "w": 40,
+     "h": 24,
+     "bytes": 3840,
+     "pixel_memory": 7680
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "80x61",
+     "format": "rgba8",
+     "w": 80,
+     "h": 61,
+     "bytes": 19520,
+     "pixel_memory": 39040
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "214x437",
+     "format": "rgba8",
+     "w": 214,
+     "h": 437,
+     "bytes": 374072,
+     "pixel_memory": 748144
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "349x183",
+     "format": "rgba8",
+     "w": 349,
+     "h": 183,
+     "bytes": 255468,
+     "pixel_memory": 510936
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "90x24",
+     "format": "rgba8",
+     "w": 90,
+     "h": 24,
+     "bytes": 8640,
+     "pixel_memory": 17280
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "175x233",
+     "format": "rgba8",
+     "w": 175,
+     "h": 233,
+     "bytes": 163100,
+     "pixel_memory": 326200
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "110x24",
+     "format": "rgba8",
+     "w": 110,
+     "h": 24,
+     "bytes": 10560,
+     "pixel_memory": 21120
+    }
+   ],
+   "by_kind": {
+    "scene": {
+     "n": 11,
+     "bytes": 4578320,
+     "pixel_memory": 9156640
+    },
+    "sheet": {
+     "n": 14,
+     "bytes": 1588200,
+     "pixel_memory": 3176400
+    },
+    "glyph atlas": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    },
+    "blank": {
+     "n": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    "asset?": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    }
+   },
+   "bytes": 6166524,
+   "pixel_memory": 12333048,
+   "seconds_whole": {
+    "2000": 3.01,
+    "5500": 1.09
+   }
+  },
+  "comfort-map": {
+   "state": "comfort-map",
+   "layout": "wb_comfort",
+   "bench_pixels": 11197880,
+   "layers": 21,
+   "items": [
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_limit",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_nopass",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "blank",
+     "name": "1x1",
+     "format": "rgba8",
+     "w": 1,
+     "h": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "speedo",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "range_seg",
+     "format": "rgba8",
+     "w": 346,
+     "h": 68,
+     "bytes": 94112,
+     "pixel_memory": 188224
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "tacho",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "ed_seg",
+     "format": "rgba8",
+     "w": 346,
+     "h": 70,
+     "bytes": 96880,
+     "pixel_memory": 193760
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "fuel",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "oil",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "sheet",
+     "name": "380x33",
+     "format": "rgba8",
+     "w": 380,
+     "h": 33,
+     "bytes": 50160,
+     "pixel_memory": 100320
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "357x149",
+     "format": "rgba8",
+     "w": 357,
+     "h": 149,
+     "bytes": 212772,
+     "pixel_memory": 425544
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "279x118",
+     "format": "rgba8",
+     "w": 279,
+     "h": 118,
+     "bytes": 131688,
+     "pixel_memory": 263376
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "65x167",
+     "format": "rgba8",
+     "w": 65,
+     "h": 167,
+     "bytes": 43420,
+     "pixel_memory": 86840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "386x150",
+     "format": "rgba8",
+     "w": 386,
+     "h": 150,
+     "bytes": 231600,
+     "pixel_memory": 463200
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "60x31",
+     "format": "rgba8",
+     "w": 60,
+     "h": 31,
+     "bytes": 7440,
+     "pixel_memory": 14880
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "260x73",
+     "format": "rgba8",
+     "w": 260,
+     "h": 73,
+     "bytes": 75920,
+     "pixel_memory": 151840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "40x24",
+     "format": "rgba8",
+     "w": 40,
+     "h": 24,
+     "bytes": 3840,
+     "pixel_memory": 7680
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "80x61",
+     "format": "rgba8",
+     "w": 80,
+     "h": 61,
+     "bytes": 19520,
+     "pixel_memory": 39040
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "214x437",
+     "format": "rgba8",
+     "w": 214,
+     "h": 437,
+     "bytes": 374072,
+     "pixel_memory": 748144
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "349x183",
+     "format": "rgba8",
+     "w": 349,
+     "h": 183,
+     "bytes": 255468,
+     "pixel_memory": 510936
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "90x24",
+     "format": "rgba8",
+     "w": 90,
+     "h": 24,
+     "bytes": 8640,
+     "pixel_memory": 17280
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "175x233",
+     "format": "rgba8",
+     "w": 175,
+     "h": 233,
+     "bytes": 163100,
+     "pixel_memory": 326200
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "110x24",
+     "format": "rgba8",
+     "w": 110,
+     "h": 24,
+     "bytes": 10560,
+     "pixel_memory": 21120
+    }
+   ],
+   "by_kind": {
+    "scene": {
+     "n": 8,
+     "bytes": 4010736,
+     "pixel_memory": 8021472
+    },
+    "sheet": {
+     "n": 14,
+     "bytes": 1588200,
+     "pixel_memory": 3176400
+    },
+    "glyph atlas": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    },
+    "blank": {
+     "n": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    "asset?": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    }
+   },
+   "bytes": 5598940,
+   "pixel_memory": 11197880,
+   "seconds_whole": {
+    "2000": 2.73,
+    "5500": 0.99
+   }
+  },
+  "comfort-night": {
+   "state": "comfort-night",
+   "layout": "wb_comfort",
+   "bench_pixels": 11963960,
+   "layers": 21,
+   "items": [
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "window",
+     "format": "rgba8",
+     "w": 320,
+     "h": 286,
+     "bytes": 366080,
+     "pixel_memory": 732160
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_limit",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_nopass",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "horizon",
+     "format": "rgba8",
+     "w": 424,
+     "h": 10,
+     "bytes": 16960,
+     "pixel_memory": 33920
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "blank",
+     "name": "1x1",
+     "format": "rgba8",
+     "w": 1,
+     "h": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "speedo",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "range_seg",
+     "format": "rgba8",
+     "w": 346,
+     "h": 68,
+     "bytes": 94112,
+     "pixel_memory": 188224
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "tacho",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "ed_seg",
+     "format": "rgba8",
+     "w": 346,
+     "h": 70,
+     "bytes": 96880,
+     "pixel_memory": 193760
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "fuel",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "oil",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "sheet",
+     "name": "380x33",
+     "format": "rgba8",
+     "w": 380,
+     "h": 33,
+     "bytes": 50160,
+     "pixel_memory": 100320
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "357x149",
+     "format": "rgba8",
+     "w": 357,
+     "h": 149,
+     "bytes": 212772,
+     "pixel_memory": 425544
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "279x118",
+     "format": "rgba8",
+     "w": 279,
+     "h": 118,
+     "bytes": 131688,
+     "pixel_memory": 263376
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "65x167",
+     "format": "rgba8",
+     "w": 65,
+     "h": 167,
+     "bytes": 43420,
+     "pixel_memory": 86840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "386x150",
+     "format": "rgba8",
+     "w": 386,
+     "h": 150,
+     "bytes": 231600,
+     "pixel_memory": 463200
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "60x31",
+     "format": "rgba8",
+     "w": 60,
+     "h": 31,
+     "bytes": 7440,
+     "pixel_memory": 14880
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "260x73",
+     "format": "rgba8",
+     "w": 260,
+     "h": 73,
+     "bytes": 75920,
+     "pixel_memory": 151840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "40x24",
+     "format": "rgba8",
+     "w": 40,
+     "h": 24,
+     "bytes": 3840,
+     "pixel_memory": 7680
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "80x61",
+     "format": "rgba8",
+     "w": 80,
+     "h": 61,
+     "bytes": 19520,
+     "pixel_memory": 39040
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "214x437",
+     "format": "rgba8",
+     "w": 214,
+     "h": 437,
+     "bytes": 374072,
+     "pixel_memory": 748144
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "349x183",
+     "format": "rgba8",
+     "w": 349,
+     "h": 183,
+     "bytes": 255468,
+     "pixel_memory": 510936
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "90x24",
+     "format": "rgba8",
+     "w": 90,
+     "h": 24,
+     "bytes": 8640,
+     "pixel_memory": 17280
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "175x233",
+     "format": "rgba8",
+     "w": 175,
+     "h": 233,
+     "bytes": 163100,
+     "pixel_memory": 326200
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "110x24",
+     "format": "rgba8",
+     "w": 110,
+     "h": 24,
+     "bytes": 10560,
+     "pixel_memory": 21120
+    }
+   ],
+   "by_kind": {
+    "scene": {
+     "n": 10,
+     "bytes": 4393776,
+     "pixel_memory": 8787552
+    },
+    "sheet": {
+     "n": 14,
+     "bytes": 1588200,
+     "pixel_memory": 3176400
+    },
+    "glyph atlas": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    },
+    "blank": {
+     "n": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    "asset?": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    }
+   },
+   "bytes": 5981980,
+   "pixel_memory": 11963960,
+   "seconds_whole": {
+    "2000": 2.92,
+    "5500": 1.06
+   }
+  },
+  "comfort-nopass": {
+   "state": "comfort-nopass",
+   "layout": "wb_comfort",
+   "bench_pixels": 11963960,
+   "layers": 21,
+   "items": [
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "window",
+     "format": "rgba8",
+     "w": 320,
+     "h": 286,
+     "bytes": 366080,
+     "pixel_memory": 732160
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_limit",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_nopass",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "horizon",
+     "format": "rgba8",
+     "w": 424,
+     "h": 10,
+     "bytes": 16960,
+     "pixel_memory": 33920
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "speedo",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "range_seg",
+     "format": "rgba8",
+     "w": 346,
+     "h": 68,
+     "bytes": 94112,
+     "pixel_memory": 188224
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "tacho",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "ed_seg",
+     "format": "rgba8",
+     "w": 346,
+     "h": 70,
+     "bytes": 96880,
+     "pixel_memory": 193760
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "fuel",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "blank",
+     "name": "1x1",
+     "format": "rgba8",
+     "w": 1,
+     "h": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "oil",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "sheet",
+     "name": "380x33",
+     "format": "rgba8",
+     "w": 380,
+     "h": 33,
+     "bytes": 50160,
+     "pixel_memory": 100320
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "357x149",
+     "format": "rgba8",
+     "w": 357,
+     "h": 149,
+     "bytes": 212772,
+     "pixel_memory": 425544
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "279x118",
+     "format": "rgba8",
+     "w": 279,
+     "h": 118,
+     "bytes": 131688,
+     "pixel_memory": 263376
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "65x167",
+     "format": "rgba8",
+     "w": 65,
+     "h": 167,
+     "bytes": 43420,
+     "pixel_memory": 86840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "386x150",
+     "format": "rgba8",
+     "w": 386,
+     "h": 150,
+     "bytes": 231600,
+     "pixel_memory": 463200
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "60x31",
+     "format": "rgba8",
+     "w": 60,
+     "h": 31,
+     "bytes": 7440,
+     "pixel_memory": 14880
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "260x73",
+     "format": "rgba8",
+     "w": 260,
+     "h": 73,
+     "bytes": 75920,
+     "pixel_memory": 151840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "40x24",
+     "format": "rgba8",
+     "w": 40,
+     "h": 24,
+     "bytes": 3840,
+     "pixel_memory": 7680
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "80x61",
+     "format": "rgba8",
+     "w": 80,
+     "h": 61,
+     "bytes": 19520,
+     "pixel_memory": 39040
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "214x437",
+     "format": "rgba8",
+     "w": 214,
+     "h": 437,
+     "bytes": 374072,
+     "pixel_memory": 748144
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "349x183",
+     "format": "rgba8",
+     "w": 349,
+     "h": 183,
+     "bytes": 255468,
+     "pixel_memory": 510936
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "90x24",
+     "format": "rgba8",
+     "w": 90,
+     "h": 24,
+     "bytes": 8640,
+     "pixel_memory": 17280
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "175x233",
+     "format": "rgba8",
+     "w": 175,
+     "h": 233,
+     "bytes": 163100,
+     "pixel_memory": 326200
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "110x24",
+     "format": "rgba8",
+     "w": 110,
+     "h": 24,
+     "bytes": 10560,
+     "pixel_memory": 21120
+    }
+   ],
+   "by_kind": {
+    "scene": {
+     "n": 10,
+     "bytes": 4393776,
+     "pixel_memory": 8787552
+    },
+    "sheet": {
+     "n": 14,
+     "bytes": 1588200,
+     "pixel_memory": 3176400
+    },
+    "glyph atlas": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    },
+    "blank": {
+     "n": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    "asset?": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    }
+   },
+   "bytes": 5981980,
+   "pixel_memory": 11963960,
+   "seconds_whole": {
+    "2000": 2.92,
+    "5500": 1.06
+   }
+  },
+  "eco": {
+   "state": "eco",
+   "layout": "wb_eco",
+   "bench_pixels": 2459560,
+   "layers": 15,
+   "items": [
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "blank",
+     "name": "1x1",
+     "format": "rgba8",
+     "w": 1,
+     "h": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "fuel",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "oil",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "sheet",
+     "name": "380x33",
+     "format": "rgba8",
+     "w": 380,
+     "h": 33,
+     "bytes": 50160,
+     "pixel_memory": 100320
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "453x65",
+     "format": "rgba8",
+     "w": 453,
+     "h": 65,
+     "bytes": 117780,
+     "pixel_memory": 235560
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "214x385",
+     "format": "rgba8",
+     "w": 214,
+     "h": 385,
+     "bytes": 329560,
+     "pixel_memory": 659120
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "349x183",
+     "format": "rgba8",
+     "w": 349,
+     "h": 183,
+     "bytes": 255468,
+     "pixel_memory": 510936
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "90x24",
+     "format": "rgba8",
+     "w": 90,
+     "h": 24,
+     "bytes": 8640,
+     "pixel_memory": 17280
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "146x173",
+     "format": "rgba8",
+     "w": 146,
+     "h": 173,
+     "bytes": 101032,
+     "pixel_memory": 202064
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "22x26",
+     "format": "rgba8",
+     "w": 22,
+     "h": 26,
+     "bytes": 2288,
+     "pixel_memory": 4576
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "342x130",
+     "format": "rgba8",
+     "w": 342,
+     "h": 130,
+     "bytes": 177840,
+     "pixel_memory": 355680
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "240x22",
+     "format": "rgba8",
+     "w": 240,
+     "h": 22,
+     "bytes": 21120,
+     "pixel_memory": 42240
+    }
+   ],
+   "by_kind": {
+    "scene": {
+     "n": 2,
+     "bytes": 165888,
+     "pixel_memory": 331776
+    },
+    "sheet": {
+     "n": 9,
+     "bytes": 1063888,
+     "pixel_memory": 2127776
+    },
+    "glyph atlas": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    },
+    "blank": {
+     "n": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    "asset?": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    }
+   },
+   "bytes": 1229780,
+   "pixel_memory": 2459560,
+   "seconds_whole": {
+    "2000": 0.6,
+    "5500": 0.22
+   }
+  },
+  "g20": {
+   "state": "g20",
+   "layout": "wb_dials",
+   "bench_pixels": 14735320,
+   "layers": 19,
+   "items": [
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "blank",
+     "name": "1x1",
+     "format": "rgba8",
+     "w": 1,
+     "h": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "fuel",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "oil",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "collar_r8",
+     "format": "r8",
+     "w": 480,
+     "h": 180,
+     "bytes": 86400,
+     "pixel_memory": 172800
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "strip_mask",
+     "format": "r8",
+     "w": 1908,
+     "h": 353,
+     "bytes": 673524,
+     "pixel_memory": 1347048
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "speedo_d",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "tacho_d",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "1307x194",
+     "format": "rgba8",
+     "w": 1307,
+     "h": 194,
+     "bytes": 1014232,
+     "pixel_memory": 2028464
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "357x149",
+     "format": "rgba8",
+     "w": 357,
+     "h": 149,
+     "bytes": 212772,
+     "pixel_memory": 425544
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "279x118",
+     "format": "rgba8",
+     "w": 279,
+     "h": 118,
+     "bytes": 131688,
+     "pixel_memory": 263376
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "65x167",
+     "format": "rgba8",
+     "w": 65,
+     "h": 167,
+     "bytes": 43420,
+     "pixel_memory": 86840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "110x96",
+     "format": "rgba8",
+     "w": 110,
+     "h": 96,
+     "bytes": 42240,
+     "pixel_memory": 84480
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "162x37",
+     "format": "rgba8",
+     "w": 162,
+     "h": 37,
+     "bytes": 23976,
+     "pixel_memory": 47952
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_limit",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_nopass",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "1194x130",
+     "format": "rgba8",
+     "w": 1194,
+     "h": 130,
+     "bytes": 620880,
+     "pixel_memory": 1241760
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "214x385",
+     "format": "rgba8",
+     "w": 214,
+     "h": 385,
+     "bytes": 329560,
+     "pixel_memory": 659120
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "349x183",
+     "format": "rgba8",
+     "w": 349,
+     "h": 183,
+     "bytes": 255468,
+     "pixel_memory": 510936
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "90x24",
+     "format": "rgba8",
+     "w": 90,
+     "h": 24,
+     "bytes": 8640,
+     "pixel_memory": 17280
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "146x173",
+     "format": "rgba8",
+     "w": 146,
+     "h": 173,
+     "bytes": 101032,
+     "pixel_memory": 202064
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "sheet",
+     "name": "30x34",
+     "format": "rgba8",
+     "w": 30,
+     "h": 34,
+     "bytes": 4080,
+     "pixel_memory": 8160
+    }
+   ],
+   "by_kind": {
+    "scene": {
+     "n": 8,
+     "bytes": 4579668,
+     "pixel_memory": 9159336
+    },
+    "sheet": {
+     "n": 12,
+     "bytes": 2787988,
+     "pixel_memory": 5575976
+    },
+    "glyph atlas": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    },
+    "blank": {
+     "n": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    "asset?": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    }
+   },
+   "bytes": 7367660,
+   "pixel_memory": 14735320,
+   "seconds_whole": {
+    "2000": 3.6,
+    "5500": 1.31
+   }
+  },
+  "g20-bmw": {
+   "state": "g20-bmw",
+   "layout": "wb_dials",
+   "bench_pixels": 11701432,
+   "layers": 15,
+   "items": [
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "collar_r8",
+     "format": "r8",
+     "w": 480,
+     "h": 180,
+     "bytes": 86400,
+     "pixel_memory": 172800
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "strip_mask",
+     "format": "r8",
+     "w": 1908,
+     "h": 353,
+     "bytes": 673524,
+     "pixel_memory": 1347048
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "blank",
+     "name": "1x1",
+     "format": "rgba8",
+     "w": 1,
+     "h": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "speedo_d",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "tacho_d",
+     "format": "rgba8",
+     "w": 670,
+     "h": 670,
+     "bytes": 1795600,
+     "pixel_memory": 3591200
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "fuel",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "oil",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "357x149",
+     "format": "rgba8",
+     "w": 357,
+     "h": 149,
+     "bytes": 212772,
+     "pixel_memory": 425544
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "279x118",
+     "format": "rgba8",
+     "w": 279,
+     "h": 118,
+     "bytes": 131688,
+     "pixel_memory": 263376
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "65x167",
+     "format": "rgba8",
+     "w": 65,
+     "h": 167,
+     "bytes": 43420,
+     "pixel_memory": 86840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "386x150",
+     "format": "rgba8",
+     "w": 386,
+     "h": 150,
+     "bytes": 231600,
+     "pixel_memory": 463200
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "80x61",
+     "format": "rgba8",
+     "w": 80,
+     "h": 61,
+     "bytes": 19520,
+     "pixel_memory": 39040
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "214x385",
+     "format": "rgba8",
+     "w": 214,
+     "h": 385,
+     "bytes": 329560,
+     "pixel_memory": 659120
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "349x183",
+     "format": "rgba8",
+     "w": 349,
+     "h": 183,
+     "bytes": 255468,
+     "pixel_memory": 510936
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "90x24",
+     "format": "rgba8",
+     "w": 90,
+     "h": 24,
+     "bytes": 8640,
+     "pixel_memory": 17280
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "146x173",
+     "format": "rgba8",
+     "w": 146,
+     "h": 173,
+     "bytes": 101032,
+     "pixel_memory": 202064
+    }
+   ],
+   "by_kind": {
+    "scene": {
+     "n": 6,
+     "bytes": 4517012,
+     "pixel_memory": 9034024
+    },
+    "sheet": {
+     "n": 9,
+     "bytes": 1333700,
+     "pixel_memory": 2667400
+    },
+    "glyph atlas": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    },
+    "blank": {
+     "n": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    "asset?": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    }
+   },
+   "bytes": 5850716,
+   "pixel_memory": 11701432,
+   "seconds_whole": {
+    "2000": 2.86,
+    "5500": 1.04
+   }
+  },
+  "sport": {
+   "state": "sport",
+   "layout": "wb_sport",
+   "bench_pixels": 2203160,
+   "layers": 18,
+   "items": [
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "blank",
+     "name": "1x1",
+     "format": "rgba8",
+     "w": 1,
+     "h": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "fuel",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "scene",
+     "name": "oil",
+     "format": "rgba8",
+     "w": 144,
+     "h": 144,
+     "bytes": 82944,
+     "pixel_memory": 165888
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_limit",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "scene",
+     "name": "sign_nopass",
+     "format": "rgba8",
+     "w": 88,
+     "h": 89,
+     "bytes": 31328,
+     "pixel_memory": 62656
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "glyph atlas",
+     "name": "832x92",
+     "format": "r8",
+     "w": 832,
+     "h": 92,
+     "bytes": 76544,
+     "pixel_memory": 153088
+    },
+    {
+     "app": "f30_cluster",
+     "ci": 0,
+     "kind": "sheet",
+     "name": "380x33",
+     "format": "rgba8",
+     "w": 380,
+     "h": 33,
+     "bytes": 50160,
+     "pixel_memory": 100320
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "454x130",
+     "format": "rgba8",
+     "w": 454,
+     "h": 130,
+     "bytes": 236080,
+     "pixel_memory": 472160
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "100x24",
+     "format": "rgba8",
+     "w": 100,
+     "h": 24,
+     "bytes": 9600,
+     "pixel_memory": 19200
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "80x61",
+     "format": "rgba8",
+     "w": 80,
+     "h": 61,
+     "bytes": 19520,
+     "pixel_memory": 39040
+    },
+    {
+     "app": "f30_cluster_2",
+     "ci": 1,
+     "kind": "sheet",
+     "name": "22x26",
+     "format": "rgba8",
+     "w": 22,
+     "h": 26,
+     "bytes": 2288,
+     "pixel_memory": 4576
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "60x31",
+     "format": "rgba8",
+     "w": 60,
+     "h": 31,
+     "bytes": 7440,
+     "pixel_memory": 14880
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "357x149",
+     "format": "rgba8",
+     "w": 357,
+     "h": 149,
+     "bytes": 212772,
+     "pixel_memory": 425544
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "279x118",
+     "format": "rgba8",
+     "w": 279,
+     "h": 118,
+     "bytes": 131688,
+     "pixel_memory": 263376
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "65x167",
+     "format": "rgba8",
+     "w": 65,
+     "h": 167,
+     "bytes": 43420,
+     "pixel_memory": 86840
+    },
+    {
+     "app": "f30_cluster_3",
+     "ci": 2,
+     "kind": "sheet",
+     "name": "240x87",
+     "format": "rgba8",
+     "w": 240,
+     "h": 87,
+     "bytes": 83520,
+     "pixel_memory": 167040
+    }
+   ],
+   "by_kind": {
+    "scene": {
+     "n": 4,
+     "bytes": 228544,
+     "pixel_memory": 457088
+    },
+    "sheet": {
+     "n": 10,
+     "bytes": 796488,
+     "pixel_memory": 1592976
+    },
+    "glyph atlas": {
+     "n": 1,
+     "bytes": 76544,
+     "pixel_memory": 153088
+    },
+    "blank": {
+     "n": 1,
+     "bytes": 4,
+     "pixel_memory": 8
+    },
+    "asset?": {
+     "n": 0,
+     "bytes": 0,
+     "pixel_memory": 0
+    }
+   },
+   "bytes": 1101580,
+   "pixel_memory": 2203160,
+   "seconds_whole": {
+    "2000": 0.54,
+    "5500": 0.2
+   }
+  }
+ },
+ "switches_today": [
+  {
+   "from": "comfort",
+   "to": "g20",
+   "bytes_sent": 7139112,
+   "scene_bytes_sent": 4351124,
+   "scene_sent": [
+    "collar_r8",
+    "speedo_d",
+    "strip_mask",
+    "tacho_d"
+   ],
+   "scene_dropped": [
+    "ed_seg",
+    "horizon",
+    "range_seg",
+    "speedo",
+    "tacho",
+    "window"
+   ],
+   "pixel_memory_after": 14735320,
+   "pixel_memory_peak_est": 14735320,
+   "seconds": {
+    "2000": 3.49,
+    "5500": 1.27
+   }
+  },
+  {
+   "from": "comfort",
+   "to": "sport",
+   "bytes_sent": 873032,
+   "scene_bytes_sent": 0,
+   "scene_sent": [],
+   "scene_dropped": [
+    "ed_seg",
+    "horizon",
+    "range_seg",
+    "speedo",
+    "tacho",
+    "window"
+   ],
+   "pixel_memory_after": 2203160,
+   "pixel_memory_peak_est": 2203160,
+   "seconds": {
+    "2000": 0.43,
+    "5500": 0.16
+   }
+  },
+  {
+   "from": "comfort",
+   "to": "eco",
+   "bytes_sent": 1063888,
+   "scene_bytes_sent": 0,
+   "scene_sent": [],
+   "scene_dropped": [
+    "ed_seg",
+    "horizon",
+    "range_seg",
+    "sign_limit",
+    "sign_nopass",
+    "speedo",
+    "tacho",
+    "window"
+   ],
+   "pixel_memory_after": 2459560,
+   "pixel_memory_peak_est": 2459560,
+   "seconds": {
+    "2000": 0.52,
+    "5500": 0.19
+   }
+  },
+  {
+   "from": "g20",
+   "to": "comfort",
+   "bytes_sent": 5753432,
+   "scene_bytes_sent": 4165232,
+   "scene_sent": [
+    "ed_seg",
+    "horizon",
+    "range_seg",
+    "speedo",
+    "tacho",
+    "window"
+   ],
+   "scene_dropped": [
+    "collar_r8",
+    "speedo_d",
+    "strip_mask",
+    "tacho_d"
+   ],
+   "pixel_memory_after": 11963960,
+   "pixel_memory_peak_est": 11963960,
+   "seconds": {
+    "2000": 2.81,
+    "5500": 1.02
+   }
+  },
+  {
+   "from": "g20",
+   "to": "sport",
+   "bytes_sent": 873032,
+   "scene_bytes_sent": 0,
+   "scene_sent": [],
+   "scene_dropped": [
+    "collar_r8",
+    "speedo_d",
+    "strip_mask",
+    "tacho_d"
+   ],
+   "pixel_memory_after": 2203160,
+   "pixel_memory_peak_est": 2203160,
+   "seconds": {
+    "2000": 0.43,
+    "5500": 0.16
+   }
+  },
+  {
+   "from": "g20",
+   "to": "eco",
+   "bytes_sent": 1063888,
+   "scene_bytes_sent": 0,
+   "scene_sent": [],
+   "scene_dropped": [
+    "collar_r8",
+    "sign_limit",
+    "sign_nopass",
+    "speedo_d",
+    "strip_mask",
+    "tacho_d"
+   ],
+   "pixel_memory_after": 2459560,
+   "pixel_memory_peak_est": 2459560,
+   "seconds": {
+    "2000": 0.52,
+    "5500": 0.19
+   }
+  },
+  {
+   "from": "sport",
+   "to": "comfort",
+   "bytes_sent": 5753432,
+   "scene_bytes_sent": 4165232,
+   "scene_sent": [
+    "ed_seg",
+    "horizon",
+    "range_seg",
+    "speedo",
+    "tacho",
+    "window"
+   ],
+   "scene_dropped": [],
+   "pixel_memory_after": 11963960,
+   "pixel_memory_peak_est": 12117048,
+   "seconds": {
+    "2000": 2.81,
+    "5500": 1.02
+   }
+  },
+  {
+   "from": "sport",
+   "to": "g20",
+   "bytes_sent": 7139112,
+   "scene_bytes_sent": 4351124,
+   "scene_sent": [
+    "collar_r8",
+    "speedo_d",
+    "strip_mask",
+    "tacho_d"
+   ],
+   "scene_dropped": [],
+   "pixel_memory_after": 14735320,
+   "pixel_memory_peak_est": 14888408,
+   "seconds": {
+    "2000": 3.49,
+    "5500": 1.27
+   }
+  },
+  {
+   "from": "sport",
+   "to": "eco",
+   "bytes_sent": 1063888,
+   "scene_bytes_sent": 0,
+   "scene_sent": [],
+   "scene_dropped": [
+    "sign_limit",
+    "sign_nopass"
+   ],
+   "pixel_memory_after": 2459560,
+   "pixel_memory_peak_est": 2612648,
+   "seconds": {
+    "2000": 0.52,
+    "5500": 0.19
+   }
+  },
+  {
+   "from": "eco",
+   "to": "comfort",
+   "bytes_sent": 5816088,
+   "scene_bytes_sent": 4227888,
+   "scene_sent": [
+    "ed_seg",
+    "horizon",
+    "range_seg",
+    "sign_limit",
+    "sign_nopass",
+    "speedo",
+    "tacho",
+    "window"
+   ],
+   "scene_dropped": [],
+   "pixel_memory_after": 11963960,
+   "pixel_memory_peak_est": 11963960,
+   "seconds": {
+    "2000": 2.84,
+    "5500": 1.03
+   }
+  },
+  {
+   "from": "eco",
+   "to": "g20",
+   "bytes_sent": 7201768,
+   "scene_bytes_sent": 4413780,
+   "scene_sent": [
+    "collar_r8",
+    "sign_limit",
+    "sign_nopass",
+    "speedo_d",
+    "strip_mask",
+    "tacho_d"
+   ],
+   "scene_dropped": [],
+   "pixel_memory_after": 14735320,
+   "pixel_memory_peak_est": 14735320,
+   "seconds": {
+    "2000": 3.52,
+    "5500": 1.28
+   }
+  },
+  {
+   "from": "eco",
+   "to": "sport",
+   "bytes_sent": 935688,
+   "scene_bytes_sent": 62656,
+   "scene_sent": [
+    "sign_limit",
+    "sign_nopass"
+   ],
+   "scene_dropped": [],
+   "pixel_memory_after": 2203160,
+   "pixel_memory_peak_est": 2203160,
+   "seconds": {
+    "2000": 0.46,
+    "5500": 0.17
+   }
+  }
+ ],
+ "packages": {
+  "today": {
+   "states": {
+    "comfort": {
+     "bytes": 5981980,
+     "scene_bytes": 4393776,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 11963960,
+     "scene_pixel_memory": 8787552,
+     "seconds_whole": {
+      "2000": 2.92,
+      "5500": 1.06
+     }
+    },
+    "comfort-glass": {
+     "bytes": 6166524,
+     "scene_bytes": 4578320,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 12333048,
+     "scene_pixel_memory": 9156640,
+     "seconds_whole": {
+      "2000": 3.01,
+      "5500": 1.09
+     }
+    },
+    "comfort-map": {
+     "bytes": 5598940,
+     "scene_bytes": 4010736,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 11197880,
+     "scene_pixel_memory": 8021472,
+     "seconds_whole": {
+      "2000": 2.73,
+      "5500": 0.99
+     }
+    },
+    "comfort-night": {
+     "bytes": 5981980,
+     "scene_bytes": 4393776,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 11963960,
+     "scene_pixel_memory": 8787552,
+     "seconds_whole": {
+      "2000": 2.92,
+      "5500": 1.06
+     }
+    },
+    "comfort-nopass": {
+     "bytes": 5981980,
+     "scene_bytes": 4393776,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 11963960,
+     "scene_pixel_memory": 8787552,
+     "seconds_whole": {
+      "2000": 2.92,
+      "5500": 1.06
+     }
+    },
+    "eco": {
+     "bytes": 1229780,
+     "scene_bytes": 165888,
+     "sheet_bytes": 1063888,
+     "pixel_memory": 2459560,
+     "scene_pixel_memory": 331776,
+     "seconds_whole": {
+      "2000": 0.6,
+      "5500": 0.22
+     }
+    },
+    "g20": {
+     "bytes": 7367660,
+     "scene_bytes": 4579668,
+     "sheet_bytes": 2787988,
+     "pixel_memory": 14735320,
+     "scene_pixel_memory": 9159336,
+     "seconds_whole": {
+      "2000": 3.6,
+      "5500": 1.31
+     }
+    },
+    "g20-bmw": {
+     "bytes": 5850716,
+     "scene_bytes": 4517012,
+     "sheet_bytes": 1333700,
+     "pixel_memory": 11701432,
+     "scene_pixel_memory": 9034024,
+     "seconds_whole": {
+      "2000": 2.86,
+      "5500": 1.04
+     }
+    },
+    "sport": {
+     "bytes": 1101580,
+     "scene_bytes": 228544,
+     "sheet_bytes": 796488,
+     "pixel_memory": 2203160,
+     "scene_pixel_memory": 457088,
+     "seconds_whole": {
+      "2000": 0.54,
+      "5500": 0.2
+     }
+    }
+   },
+   "switches": [
+    {
+     "from": "comfort",
+     "to": "g20",
+     "bytes_sent": 7139112,
+     "scene_bytes_sent": 4351124,
+     "seconds": {
+      "2000": 3.49,
+      "5500": 1.27
+     }
+    },
+    {
+     "from": "comfort",
+     "to": "sport",
+     "bytes_sent": 873032,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.43,
+      "5500": 0.16
+     }
+    },
+    {
+     "from": "comfort",
+     "to": "eco",
+     "bytes_sent": 1063888,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "g20",
+     "to": "comfort",
+     "bytes_sent": 5753432,
+     "scene_bytes_sent": 4165232,
+     "seconds": {
+      "2000": 2.81,
+      "5500": 1.02
+     }
+    },
+    {
+     "from": "g20",
+     "to": "sport",
+     "bytes_sent": 873032,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.43,
+      "5500": 0.16
+     }
+    },
+    {
+     "from": "g20",
+     "to": "eco",
+     "bytes_sent": 1063888,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "sport",
+     "to": "comfort",
+     "bytes_sent": 5753432,
+     "scene_bytes_sent": 4165232,
+     "seconds": {
+      "2000": 2.81,
+      "5500": 1.02
+     }
+    },
+    {
+     "from": "sport",
+     "to": "g20",
+     "bytes_sent": 7139112,
+     "scene_bytes_sent": 4351124,
+     "seconds": {
+      "2000": 3.49,
+      "5500": 1.27
+     }
+    },
+    {
+     "from": "sport",
+     "to": "eco",
+     "bytes_sent": 1063888,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "eco",
+     "to": "comfort",
+     "bytes_sent": 5816088,
+     "scene_bytes_sent": 4227888,
+     "seconds": {
+      "2000": 2.84,
+      "5500": 1.03
+     }
+    },
+    {
+     "from": "eco",
+     "to": "g20",
+     "bytes_sent": 7201768,
+     "scene_bytes_sent": 4413780,
+     "seconds": {
+      "2000": 3.52,
+      "5500": 1.28
+     }
+    },
+    {
+     "from": "eco",
+     "to": "sport",
+     "bytes_sent": 935688,
+     "scene_bytes_sent": 62656,
+     "seconds": {
+      "2000": 0.46,
+      "5500": 0.17
+     }
+    }
+   ],
+   "resident_all_themes": {
+    "pixel_memory": 17489800,
+    "bytes": 8744900,
+    "fits_16MiB_with_every_layout": false,
+    "kept": false
+   },
+   "whole_scene_on_each_map": {
+    "comfort": {
+     "bytes": 5981980,
+     "seconds": {
+      "2000": 2.92,
+      "5500": 1.06
+     }
+    },
+    "g20": {
+     "bytes": 7367660,
+     "seconds": {
+      "2000": 3.6,
+      "5500": 1.31
+     }
+    },
+    "sport": {
+     "bytes": 1101580,
+     "seconds": {
+      "2000": 0.54,
+      "5500": 0.2
+     }
+    },
+    "eco": {
+     "bytes": 1229780,
+     "seconds": {
+      "2000": 0.6,
+      "5500": 0.22
+     }
+    }
+   },
+   "desc": "today's build (0.7.20)"
+  },
+  "A-safe": {
+   "states": {
+    "comfort": {
+     "bytes": 2982520,
+     "scene_bytes": 1394316,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 5965040,
+     "scene_pixel_memory": 2788632,
+     "seconds_whole": {
+      "2000": 1.46,
+      "5500": 0.53
+     }
+    },
+    "comfort-glass": {
+     "bytes": 3167064,
+     "scene_bytes": 1578860,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 6334128,
+     "scene_pixel_memory": 3157720,
+     "seconds_whole": {
+      "2000": 1.55,
+      "5500": 0.56
+     }
+    },
+    "comfort-map": {
+     "bytes": 2874040,
+     "scene_bytes": 1285836,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 5748080,
+     "scene_pixel_memory": 2571672,
+     "seconds_whole": {
+      "2000": 1.4,
+      "5500": 0.51
+     }
+    },
+    "comfort-night": {
+     "bytes": 2982520,
+     "scene_bytes": 1394316,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 5965040,
+     "scene_pixel_memory": 2788632,
+     "seconds_whole": {
+      "2000": 1.46,
+      "5500": 0.53
+     }
+    },
+    "comfort-nopass": {
+     "bytes": 2982520,
+     "scene_bytes": 1394316,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 5965040,
+     "scene_pixel_memory": 2788632,
+     "seconds_whole": {
+      "2000": 1.46,
+      "5500": 0.53
+     }
+    },
+    "eco": {
+     "bytes": 1115732,
+     "scene_bytes": 51840,
+     "sheet_bytes": 1063888,
+     "pixel_memory": 2231464,
+     "scene_pixel_memory": 103680,
+     "seconds_whole": {
+      "2000": 0.54,
+      "5500": 0.2
+     }
+    },
+    "g20": {
+     "bytes": 4786004,
+     "scene_bytes": 1998012,
+     "sheet_bytes": 2787988,
+     "pixel_memory": 9572008,
+     "scene_pixel_memory": 3996024,
+     "seconds_whole": {
+      "2000": 2.34,
+      "5500": 0.85
+     }
+    },
+    "g20-bmw": {
+     "bytes": 3269060,
+     "scene_bytes": 1935356,
+     "sheet_bytes": 1333700,
+     "pixel_memory": 6538120,
+     "scene_pixel_memory": 3870712,
+     "seconds_whole": {
+      "2000": 1.6,
+      "5500": 0.58
+     }
+    },
+    "sport": {
+     "bytes": 987532,
+     "scene_bytes": 114496,
+     "sheet_bytes": 796488,
+     "pixel_memory": 1975064,
+     "scene_pixel_memory": 228992,
+     "seconds_whole": {
+      "2000": 0.48,
+      "5500": 0.18
+     }
+    }
+   },
+   "switches": [
+    {
+     "from": "comfort",
+     "to": "g20",
+     "bytes_sent": 4671504,
+     "scene_bytes_sent": 1883516,
+     "seconds": {
+      "2000": 2.28,
+      "5500": 0.83
+     }
+    },
+    {
+     "from": "comfort",
+     "to": "sport",
+     "bytes_sent": 873032,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.43,
+      "5500": 0.16
+     }
+    },
+    {
+     "from": "comfort",
+     "to": "eco",
+     "bytes_sent": 1063888,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "g20",
+     "to": "comfort",
+     "bytes_sent": 2868020,
+     "scene_bytes_sent": 1279820,
+     "seconds": {
+      "2000": 1.4,
+      "5500": 0.51
+     }
+    },
+    {
+     "from": "g20",
+     "to": "sport",
+     "bytes_sent": 873032,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.43,
+      "5500": 0.16
+     }
+    },
+    {
+     "from": "g20",
+     "to": "eco",
+     "bytes_sent": 1063888,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "sport",
+     "to": "comfort",
+     "bytes_sent": 2868020,
+     "scene_bytes_sent": 1279820,
+     "seconds": {
+      "2000": 1.4,
+      "5500": 0.51
+     }
+    },
+    {
+     "from": "sport",
+     "to": "g20",
+     "bytes_sent": 4671504,
+     "scene_bytes_sent": 1883516,
+     "seconds": {
+      "2000": 2.28,
+      "5500": 0.83
+     }
+    },
+    {
+     "from": "sport",
+     "to": "eco",
+     "bytes_sent": 1063888,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "eco",
+     "to": "comfort",
+     "bytes_sent": 2930676,
+     "scene_bytes_sent": 1342476,
+     "seconds": {
+      "2000": 1.43,
+      "5500": 0.52
+     }
+    },
+    {
+     "from": "eco",
+     "to": "g20",
+     "bytes_sent": 4734160,
+     "scene_bytes_sent": 1946172,
+     "seconds": {
+      "2000": 2.31,
+      "5500": 0.84
+     }
+    },
+    {
+     "from": "eco",
+     "to": "sport",
+     "bytes_sent": 935688,
+     "scene_bytes_sent": 62656,
+     "seconds": {
+      "2000": 0.46,
+      "5500": 0.17
+     }
+    }
+   ],
+   "resident_all_themes": {
+    "pixel_memory": 6555664,
+    "bytes": 3277832,
+    "fits_16MiB_with_every_layout": true,
+    "kept": false
+   },
+   "whole_scene_on_each_map": {
+    "comfort": {
+     "bytes": 2982520,
+     "seconds": {
+      "2000": 1.46,
+      "5500": 0.53
+     }
+    },
+    "g20": {
+     "bytes": 4786004,
+     "seconds": {
+      "2000": 2.34,
+      "5500": 0.85
+     }
+    },
+    "sport": {
+     "bytes": 987532,
+     "seconds": {
+      "2000": 0.48,
+      "5500": 0.18
+     }
+    },
+    "eco": {
+     "bytes": 1115732,
+     "seconds": {
+      "2000": 0.54,
+      "5500": 0.2
+     }
+    }
+   },
+   "desc": "R8 everywhere it is (near) lossless, formats the car already draws: segments R8 alpha, window R8 x tint, the six dial textures R8 value + colour at 1/4 (prototype A, config.sceneTex \"r8\")",
+   "picture": {
+    "comfort": {
+     "max": 104.22,
+     "px_gt2": 35772,
+     "px_gt8": 4078,
+     "px_gt16": 1068,
+     "mean_in_rect": 0.414,
+     "p99_in_rect": 3.67,
+     "psnr_in_rect": 51.14,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "comfort-night": {
+     "max": 104.22,
+     "px_gt2": 35772,
+     "px_gt8": 4078,
+     "px_gt16": 1068,
+     "mean_in_rect": 0.414,
+     "p99_in_rect": 3.67,
+     "psnr_in_rect": 51.14,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "g20": {
+     "max": 104.22,
+     "px_gt2": 30227,
+     "px_gt8": 3723,
+     "px_gt16": 1004,
+     "mean_in_rect": 0.368,
+     "p99_in_rect": 3.57,
+     "psnr_in_rect": 51.27,
+     "rect": [
+      10,
+      45,
+      1910,
+      715
+     ],
+     "not_drawn": null
+    },
+    "sport": {
+     "max": 63.91,
+     "px_gt2": 1471,
+     "px_gt8": 518,
+     "px_gt16": 154,
+     "mean_in_rect": 0.089,
+     "p99_in_rect": 0.96,
+     "psnr_in_rect": 53.99,
+     "rect": [
+      10,
+      538,
+      1910,
+      678
+     ],
+     "not_drawn": null
+    },
+    "eco": {
+     "max": 63.91,
+     "px_gt2": 1471,
+     "px_gt8": 518,
+     "px_gt16": 154,
+     "mean_in_rect": 0.089,
+     "p99_in_rect": 0.96,
+     "psnr_in_rect": 53.99,
+     "rect": [
+      10,
+      538,
+      1910,
+      678
+     ],
+     "not_drawn": null
+    }
+   }
+  },
+  "B-best": {
+   "states": {
+    "comfort": {
+     "bytes": 2233968,
+     "scene_bytes": 645764,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 3949536,
+     "scene_pixel_memory": 773128,
+     "seconds_whole": {
+      "2000": 1.09,
+      "5500": 0.4
+     }
+    },
+    "comfort-glass": {
+     "bytes": 2418512,
+     "scene_bytes": 830308,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 4318624,
+     "scene_pixel_memory": 1142216,
+     "seconds_whole": {
+      "2000": 1.18,
+      "5500": 0.43
+     }
+    },
+    "comfort-map": {
+     "bytes": 2170928,
+     "scene_bytes": 582724,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 3869536,
+     "scene_pixel_memory": 693128,
+     "seconds_whole": {
+      "2000": 1.06,
+      "5500": 0.39
+     }
+    },
+    "comfort-night": {
+     "bytes": 2233968,
+     "scene_bytes": 645764,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 3949536,
+     "scene_pixel_memory": 773128,
+     "seconds_whole": {
+      "2000": 1.09,
+      "5500": 0.4
+     }
+    },
+    "comfort-nopass": {
+     "bytes": 2233968,
+     "scene_bytes": 645764,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 3949536,
+     "scene_pixel_memory": 773128,
+     "seconds_whole": {
+      "2000": 1.09,
+      "5500": 0.4
+     }
+    },
+    "eco": {
+     "bytes": 1084628,
+     "scene_bytes": 20736,
+     "sheet_bytes": 1063888,
+     "pixel_memory": 2148520,
+     "scene_pixel_memory": 20736,
+     "seconds_whole": {
+      "2000": 0.53,
+      "5500": 0.19
+     }
+    },
+    "g20": {
+     "bytes": 4082892,
+     "scene_bytes": 1294900,
+     "sheet_bytes": 2787988,
+     "pixel_memory": 7693464,
+     "scene_pixel_memory": 2117480,
+     "seconds_whole": {
+      "2000": 1.99,
+      "5500": 0.72
+     }
+    },
+    "g20-bmw": {
+     "bytes": 2565948,
+     "scene_bytes": 1232244,
+     "sheet_bytes": 1333700,
+     "pixel_memory": 4659576,
+     "scene_pixel_memory": 1992168,
+     "seconds_whole": {
+      "2000": 1.25,
+      "5500": 0.46
+     }
+    },
+    "sport": {
+     "bytes": 956428,
+     "scene_bytes": 83392,
+     "sheet_bytes": 796488,
+     "pixel_memory": 1892120,
+     "scene_pixel_memory": 146048,
+     "seconds_whole": {
+      "2000": 0.47,
+      "5500": 0.17
+     }
+    }
+   },
+   "switches": [
+    {
+     "from": "comfort",
+     "to": "g20",
+     "bytes_sent": 2787992,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 1.36,
+      "5500": 0.5
+     }
+    },
+    {
+     "from": "comfort",
+     "to": "sport",
+     "bytes_sent": 873036,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.43,
+      "5500": 0.16
+     }
+    },
+    {
+     "from": "comfort",
+     "to": "eco",
+     "bytes_sent": 1063892,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "g20",
+     "to": "comfort",
+     "bytes_sent": 1588204,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.78,
+      "5500": 0.28
+     }
+    },
+    {
+     "from": "g20",
+     "to": "sport",
+     "bytes_sent": 873036,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.43,
+      "5500": 0.16
+     }
+    },
+    {
+     "from": "g20",
+     "to": "eco",
+     "bytes_sent": 1063892,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "sport",
+     "to": "comfort",
+     "bytes_sent": 1588204,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.78,
+      "5500": 0.28
+     }
+    },
+    {
+     "from": "sport",
+     "to": "g20",
+     "bytes_sent": 2787992,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 1.36,
+      "5500": 0.5
+     }
+    },
+    {
+     "from": "sport",
+     "to": "eco",
+     "bytes_sent": 1063892,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "eco",
+     "to": "comfort",
+     "bytes_sent": 1588204,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.78,
+      "5500": 0.28
+     }
+    },
+    {
+     "from": "eco",
+     "to": "g20",
+     "bytes_sent": 2787992,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 1.36,
+      "5500": 0.5
+     }
+    },
+    {
+     "from": "eco",
+     "to": "sport",
+     "bytes_sent": 873036,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.43,
+      "5500": 0.16
+     }
+    }
+   ],
+   "resident_all_themes": {
+    "pixel_memory": 2744560,
+    "bytes": 1857272,
+    "fits_16MiB_with_every_layout": true,
+    "kept": true
+   },
+   "whole_scene_on_each_map": {
+    "comfort": {
+     "bytes": 3445476,
+     "seconds": {
+      "2000": 1.68,
+      "5500": 0.61
+     }
+    },
+    "g20": {
+     "bytes": 4645264,
+     "seconds": {
+      "2000": 2.27,
+      "5500": 0.82
+     }
+    },
+    "sport": {
+     "bytes": 2730308,
+     "seconds": {
+      "2000": 1.33,
+      "5500": 0.48
+     }
+    },
+    "eco": {
+     "bytes": 2921164,
+     "seconds": {
+      "2000": 1.43,
+      "5500": 0.52
+     }
+    }
+   },
+   "desc": "ETC2: the dials, minis and window premultiplied etc2rgb (prototype B, config.sceneTex \"etc2\"), segments R8; and, because the pixel memory then allows it, every theme's textures kept resident across switches",
+   "picture": {
+    "comfort": {
+     "max": 130.0,
+     "px_gt2": 175326,
+     "px_gt8": 25311,
+     "px_gt16": 6794,
+     "mean_in_rect": 1.478,
+     "p99_in_rect": 11.97,
+     "psnr_in_rect": 42.23,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "comfort-night": {
+     "max": 130.0,
+     "px_gt2": 175326,
+     "px_gt8": 25311,
+     "px_gt16": 6794,
+     "mean_in_rect": 1.478,
+     "p99_in_rect": 11.97,
+     "psnr_in_rect": 42.23,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "comfort-nopass": {
+     "max": 130.0,
+     "px_gt2": 178084,
+     "px_gt8": 26496,
+     "px_gt16": 7597,
+     "mean_in_rect": 1.5,
+     "p99_in_rect": 12.0,
+     "psnr_in_rect": 41.91,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "g20": {
+     "max": 130.0,
+     "px_gt2": 134825,
+     "px_gt8": 20814,
+     "px_gt16": 5865,
+     "mean_in_rect": 1.11,
+     "p99_in_rect": 11.0,
+     "psnr_in_rect": 42.98,
+     "rect": [
+      10,
+      45,
+      1910,
+      715
+     ],
+     "not_drawn": null
+    },
+    "sport": {
+     "max": 108.0,
+     "px_gt2": 8214,
+     "px_gt8": 2550,
+     "px_gt16": 1207,
+     "mean_in_rect": 0.274,
+     "p99_in_rect": 4.02,
+     "psnr_in_rect": 45.76,
+     "rect": [
+      10,
+      460,
+      1910,
+      678
+     ],
+     "not_drawn": null
+    },
+    "eco": {
+     "max": 108.0,
+     "px_gt2": 5412,
+     "px_gt8": 1764,
+     "px_gt16": 628,
+     "mean_in_rect": 0.314,
+     "p99_in_rect": 5.11,
+     "psnr_in_rect": 46.16,
+     "rect": [
+      10,
+      538,
+      1910,
+      678
+     ],
+     "not_drawn": null
+    }
+   }
+  },
+  "C-all": {
+   "states": {
+    "comfort": {
+     "bytes": 2209928,
+     "scene_bytes": 621724,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 3845880,
+     "scene_pixel_memory": 669472,
+     "seconds_whole": {
+      "2000": 1.08,
+      "5500": 0.39
+     }
+    },
+    "comfort-glass": {
+     "bytes": 2394472,
+     "scene_bytes": 806268,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 4214968,
+     "scene_pixel_memory": 1038560,
+     "seconds_whole": {
+      "2000": 1.17,
+      "5500": 0.43
+     }
+    },
+    "comfort-map": {
+     "bytes": 2158760,
+     "scene_bytes": 570556,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 3794712,
+     "scene_pixel_memory": 618304,
+     "seconds_whole": {
+      "2000": 1.05,
+      "5500": 0.38
+     }
+    },
+    "comfort-night": {
+     "bytes": 2209928,
+     "scene_bytes": 621724,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 3845880,
+     "scene_pixel_memory": 669472,
+     "seconds_whole": {
+      "2000": 1.08,
+      "5500": 0.39
+     }
+    },
+    "comfort-nopass": {
+     "bytes": 2209928,
+     "scene_bytes": 621724,
+     "sheet_bytes": 1588200,
+     "pixel_memory": 3845880,
+     "scene_pixel_memory": 669472,
+     "seconds_whole": {
+      "2000": 1.08,
+      "5500": 0.39
+     }
+    },
+    "eco": {
+     "bytes": 1084628,
+     "scene_bytes": 20736,
+     "sheet_bytes": 1063888,
+     "pixel_memory": 2148520,
+     "scene_pixel_memory": 20736,
+     "seconds_whole": {
+      "2000": 0.53,
+      "5500": 0.19
+     }
+    },
+    "g20": {
+     "bytes": 4042152,
+     "scene_bytes": 1254160,
+     "sheet_bytes": 2787988,
+     "pixel_memory": 6830144,
+     "scene_pixel_memory": 1254160,
+     "seconds_whole": {
+      "2000": 1.97,
+      "5500": 0.72
+     }
+    },
+    "g20-bmw": {
+     "bytes": 2571672,
+     "scene_bytes": 1237968,
+     "sheet_bytes": 1333700,
+     "pixel_memory": 3905376,
+     "scene_pixel_memory": 1237968,
+     "seconds_whole": {
+      "2000": 1.26,
+      "5500": 0.46
+     }
+    },
+    "sport": {
+     "bytes": 909964,
+     "scene_bytes": 36928,
+     "sheet_bytes": 796488,
+     "pixel_memory": 1783000,
+     "scene_pixel_memory": 36928,
+     "seconds_whole": {
+      "2000": 0.44,
+      "5500": 0.16
+     }
+    }
+   },
+   "switches": [
+    {
+     "from": "comfort",
+     "to": "g20",
+     "bytes_sent": 2787992,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 1.36,
+      "5500": 0.5
+     }
+    },
+    {
+     "from": "comfort",
+     "to": "sport",
+     "bytes_sent": 873036,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.43,
+      "5500": 0.16
+     }
+    },
+    {
+     "from": "comfort",
+     "to": "eco",
+     "bytes_sent": 1063892,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "g20",
+     "to": "comfort",
+     "bytes_sent": 1588204,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.78,
+      "5500": 0.28
+     }
+    },
+    {
+     "from": "g20",
+     "to": "sport",
+     "bytes_sent": 873036,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.43,
+      "5500": 0.16
+     }
+    },
+    {
+     "from": "g20",
+     "to": "eco",
+     "bytes_sent": 1063892,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "sport",
+     "to": "comfort",
+     "bytes_sent": 1588204,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.78,
+      "5500": 0.28
+     }
+    },
+    {
+     "from": "sport",
+     "to": "g20",
+     "bytes_sent": 2787992,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 1.36,
+      "5500": 0.5
+     }
+    },
+    {
+     "from": "sport",
+     "to": "eco",
+     "bytes_sent": 1063892,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.52,
+      "5500": 0.19
+     }
+    },
+    {
+     "from": "eco",
+     "to": "comfort",
+     "bytes_sent": 1588204,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.78,
+      "5500": 0.28
+     }
+    },
+    {
+     "from": "eco",
+     "to": "g20",
+     "bytes_sent": 2787992,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 1.36,
+      "5500": 0.5
+     }
+    },
+    {
+     "from": "eco",
+     "to": "sport",
+     "bytes_sent": 873036,
+     "scene_bytes_sent": 0,
+     "seconds": {
+      "2000": 0.43,
+      "5500": 0.16
+     }
+    }
+   ],
+   "resident_all_themes": {
+    "pixel_memory": 1435120,
+    "bytes": 1387372,
+    "fits_16MiB_with_every_layout": true,
+    "kept": true
+   },
+   "whole_scene_on_each_map": {
+    "comfort": {
+     "bytes": 2975576,
+     "seconds": {
+      "2000": 1.45,
+      "5500": 0.53
+     }
+    },
+    "g20": {
+     "bytes": 4175364,
+     "seconds": {
+      "2000": 2.04,
+      "5500": 0.74
+     }
+    },
+    "sport": {
+     "bytes": 2260408,
+     "seconds": {
+      "2000": 1.1,
+      "5500": 0.4
+     }
+    },
+    "eco": {
+     "bytes": 2451264,
+     "seconds": {
+      "2000": 1.2,
+      "5500": 0.44
+     }
+    }
+   },
+   "desc": "B plus horizon and signs etc2rgba, the G20 masks etc2rgba (pixel memory once), Comfort and Comfort + G20 sharing one dial texture (speedo_d / tacho_d + a bottom-arc patch), resident across switches",
+   "picture": {
+    "comfort": {
+     "max": 130.0,
+     "px_gt2": 175326,
+     "px_gt8": 25311,
+     "px_gt16": 6794,
+     "mean_in_rect": 1.478,
+     "p99_in_rect": 11.97,
+     "psnr_in_rect": 42.23,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "comfort-nopass": {
+     "max": 130.0,
+     "px_gt2": 178084,
+     "px_gt8": 26496,
+     "px_gt16": 7597,
+     "mean_in_rect": 1.5,
+     "p99_in_rect": 12.0,
+     "psnr_in_rect": 41.91,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "g20": {
+     "max": 130.0,
+     "px_gt2": 137624,
+     "px_gt8": 21065,
+     "px_gt16": 5865,
+     "mean_in_rect": 1.038,
+     "p99_in_rect": 10.82,
+     "psnr_in_rect": 43.32,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "g20-bmw": {
+     "max": 130.0,
+     "px_gt2": 137862,
+     "px_gt8": 20723,
+     "px_gt16": 5295,
+     "mean_in_rect": 1.035,
+     "p99_in_rect": 10.0,
+     "psnr_in_rect": 43.6,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "sport": {
+     "max": 108.0,
+     "px_gt2": 8214,
+     "px_gt8": 2550,
+     "px_gt16": 1207,
+     "mean_in_rect": 0.274,
+     "p99_in_rect": 4.02,
+     "psnr_in_rect": 45.76,
+     "rect": [
+      10,
+      460,
+      1910,
+      678
+     ],
+     "not_drawn": null
+    },
+    "eco": {
+     "max": 108.0,
+     "px_gt2": 5412,
+     "px_gt8": 1764,
+     "px_gt16": 628,
+     "mean_in_rect": 0.314,
+     "p99_in_rect": 5.11,
+     "psnr_in_rect": 46.16,
+     "rect": [
+      10,
+      538,
+      1910,
+      678
+     ],
+     "not_drawn": null
+    }
+   }
+  }
+ },
+ "prototypes": {
+  "r8": {
+   "comfort": {
+    "diff": {
+     "max": 100.66,
+     "px_gt2": 36403,
+     "px_gt8": 4172,
+     "px_gt16": 1329,
+     "mean_in_rect": 0.417,
+     "p99_in_rect": 3.67,
+     "psnr_in_rect": 50.49,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 5965040,
+    "bench_pixels_today": 11963960,
+    "asset_bytes": 1394320,
+    "asset_bytes_today": 4393780,
+    "assets": [
+     "r8 320x286",
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "rgba8 424x10",
+     "rgba8 1x1",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 346x68",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 346x70",
+     "r8 144x144",
+     "rgba8 36x36",
+     "r8 144x144",
+     "rgba8 36x36"
+    ]
+   },
+   "comfort-glass": {
+    "diff": {
+     "max": 100.66,
+     "px_gt2": 36403,
+     "px_gt8": 4172,
+     "px_gt16": 1329,
+     "mean_in_rect": 0.417,
+     "p99_in_rect": 3.67,
+     "psnr_in_rect": 50.49,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 6334128,
+    "bench_pixels_today": 12333048,
+    "asset_bytes": 1578864,
+    "asset_bytes_today": 4578324,
+    "assets": [
+     "rgba8 1x1",
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 346x68",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 346x70",
+     "r8 144x144",
+     "rgba8 36x36",
+     "r8 144x144",
+     "rgba8 36x36",
+     "r8 320x286",
+     "rgba8 424x10",
+     "rgba8 584x79"
+    ]
+   },
+   "comfort-map": {
+    "diff": {
+     "max": 100.66,
+     "px_gt2": 36155,
+     "px_gt8": 4172,
+     "px_gt16": 1329,
+     "mean_in_rect": 0.373,
+     "p99_in_rect": 3.67,
+     "psnr_in_rect": 50.6,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 5748080,
+    "bench_pixels_today": 11197880,
+    "asset_bytes": 1285840,
+    "asset_bytes_today": 4010740,
+    "assets": [
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "rgba8 1x1",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 346x68",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 346x70",
+     "r8 144x144",
+     "rgba8 36x36",
+     "r8 144x144",
+     "rgba8 36x36"
+    ]
+   },
+   "comfort-night": {
+    "diff": {
+     "max": 100.66,
+     "px_gt2": 36403,
+     "px_gt8": 4172,
+     "px_gt16": 1329,
+     "mean_in_rect": 0.417,
+     "p99_in_rect": 3.67,
+     "psnr_in_rect": 50.49,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 5965040,
+    "bench_pixels_today": 11963960,
+    "asset_bytes": 1394320,
+    "asset_bytes_today": 4393780,
+    "assets": [
+     "r8 320x286",
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "rgba8 424x10",
+     "rgba8 1x1",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 346x68",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 346x70",
+     "r8 144x144",
+     "rgba8 36x36",
+     "r8 144x144",
+     "rgba8 36x36"
+    ]
+   },
+   "comfort-nopass": {
+    "diff": {
+     "max": 100.66,
+     "px_gt2": 36403,
+     "px_gt8": 4172,
+     "px_gt16": 1329,
+     "mean_in_rect": 0.415,
+     "p99_in_rect": 3.67,
+     "psnr_in_rect": 50.5,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 5965040,
+    "bench_pixels_today": 11963960,
+    "asset_bytes": 1394320,
+    "asset_bytes_today": 4393780,
+    "assets": [
+     "r8 320x286",
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "rgba8 424x10",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 346x68",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 346x70",
+     "r8 144x144",
+     "rgba8 36x36",
+     "rgba8 1x1",
+     "r8 144x144",
+     "rgba8 36x36"
+    ]
+   },
+   "eco": {
+    "diff": {
+     "max": 63.91,
+     "px_gt2": 1471,
+     "px_gt8": 518,
+     "px_gt16": 154,
+     "mean_in_rect": 0.017,
+     "p99_in_rect": 0.42,
+     "psnr_in_rect": 61.14,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 2231464,
+    "bench_pixels_today": 2459560,
+    "asset_bytes": 51844,
+    "asset_bytes_today": 165892,
+    "assets": [
+     "rgba8 1x1",
+     "r8 144x144",
+     "rgba8 36x36",
+     "r8 144x144",
+     "rgba8 36x36"
+    ]
+   },
+   "g20": {
+    "diff": {
+     "max": 100.66,
+     "px_gt2": 30883,
+     "px_gt8": 3789,
+     "px_gt16": 1239,
+     "mean_in_rect": 0.343,
+     "p99_in_rect": 3.4,
+     "psnr_in_rect": 50.94,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 9572008,
+    "bench_pixels_today": 14735320,
+    "asset_bytes": 1998016,
+    "asset_bytes_today": 4579672,
+    "assets": [
+     "rgba8 1x1",
+     "r8 144x144",
+     "rgba8 36x36",
+     "r8 144x144",
+     "rgba8 36x36",
+     "r8 480x180",
+     "r8 1908x353",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 670x670",
+     "rgba8 168x168",
+     "rgba8 88x89",
+     "rgba8 88x89"
+    ]
+   },
+   "g20-bmw": {
+    "diff": {
+     "max": 100.66,
+     "px_gt2": 30752,
+     "px_gt8": 3789,
+     "px_gt16": 1239,
+     "mean_in_rect": 0.343,
+     "p99_in_rect": 3.4,
+     "psnr_in_rect": 50.94,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 6538120,
+    "bench_pixels_today": 11701432,
+    "asset_bytes": 1935360,
+    "asset_bytes_today": 4517016,
+    "assets": [
+     "r8 480x180",
+     "r8 1908x353",
+     "rgba8 1x1",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 670x670",
+     "rgba8 168x168",
+     "r8 144x144",
+     "rgba8 36x36",
+     "r8 144x144",
+     "rgba8 36x36"
+    ]
+   },
+   "sport": {
+    "diff": {
+     "max": 63.91,
+     "px_gt2": 1471,
+     "px_gt8": 518,
+     "px_gt16": 154,
+     "mean_in_rect": 0.017,
+     "p99_in_rect": 0.42,
+     "psnr_in_rect": 61.14,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 1975064,
+    "bench_pixels_today": 2203160,
+    "asset_bytes": 191044,
+    "asset_bytes_today": 305092,
+    "assets": [
+     "rgba8 1x1",
+     "r8 144x144",
+     "rgba8 36x36",
+     "r8 144x144",
+     "rgba8 36x36",
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "r8 832x92"
+    ]
+   }
+  },
+  "etc2": {
+   "comfort": {
+    "diff": {
+     "max": 130.0,
+     "px_gt2": 171302,
+     "px_gt8": 24479,
+     "px_gt16": 6207,
+     "mean_in_rect": 1.447,
+     "p99_in_rect": 11.0,
+     "psnr_in_rect": 42.5,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 3949536,
+    "bench_pixels_today": 11963960,
+    "asset_bytes": 645768,
+    "asset_bytes_today": 4393780,
+    "assets": [
+     "etc2rgb 320x288",
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "rgba8 424x10",
+     "rgba8 1x1",
+     "etc2rgb 672x672",
+     "r8 346x68",
+     "etc2rgb 672x672",
+     "r8 346x70",
+     "etc2rgb 144x144",
+     "etc2rgb 144x144"
+    ]
+   },
+   "comfort-glass": {
+    "diff": {
+     "max": 130.0,
+     "px_gt2": 170441,
+     "px_gt8": 24456,
+     "px_gt16": 6207,
+     "mean_in_rect": 1.446,
+     "p99_in_rect": 11.0,
+     "psnr_in_rect": 42.5,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 4318624,
+    "bench_pixels_today": 12333048,
+    "asset_bytes": 830312,
+    "asset_bytes_today": 4578324,
+    "assets": [
+     "rgba8 1x1",
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "etc2rgb 672x672",
+     "r8 346x68",
+     "etc2rgb 672x672",
+     "r8 346x70",
+     "etc2rgb 144x144",
+     "etc2rgb 144x144",
+     "etc2rgb 320x288",
+     "rgba8 424x10",
+     "rgba8 584x79"
+    ]
+   },
+   "comfort-map": {
+    "diff": {
+     "max": 130.0,
+     "px_gt2": 148531,
+     "px_gt8": 23777,
+     "px_gt16": 6207,
+     "mean_in_rect": 1.094,
+     "p99_in_rect": 11.0,
+     "psnr_in_rect": 43.09,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 3869536,
+    "bench_pixels_today": 11197880,
+    "asset_bytes": 582728,
+    "asset_bytes_today": 4010740,
+    "assets": [
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "rgba8 1x1",
+     "etc2rgb 672x672",
+     "r8 346x68",
+     "etc2rgb 672x672",
+     "r8 346x70",
+     "etc2rgb 144x144",
+     "etc2rgb 144x144"
+    ]
+   },
+   "comfort-night": {
+    "diff": {
+     "max": 130.0,
+     "px_gt2": 171302,
+     "px_gt8": 24479,
+     "px_gt16": 6207,
+     "mean_in_rect": 1.447,
+     "p99_in_rect": 11.0,
+     "psnr_in_rect": 42.5,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 3949536,
+    "bench_pixels_today": 11963960,
+    "asset_bytes": 645768,
+    "asset_bytes_today": 4393780,
+    "assets": [
+     "etc2rgb 320x288",
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "rgba8 424x10",
+     "rgba8 1x1",
+     "etc2rgb 672x672",
+     "r8 346x68",
+     "etc2rgb 672x672",
+     "r8 346x70",
+     "etc2rgb 144x144",
+     "etc2rgb 144x144"
+    ]
+   },
+   "comfort-nopass": {
+    "diff": {
+     "max": 130.0,
+     "px_gt2": 171207,
+     "px_gt8": 24479,
+     "px_gt16": 6207,
+     "mean_in_rect": 1.442,
+     "p99_in_rect": 11.0,
+     "psnr_in_rect": 42.5,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 3949536,
+    "bench_pixels_today": 11963960,
+    "asset_bytes": 645768,
+    "asset_bytes_today": 4393780,
+    "assets": [
+     "etc2rgb 320x288",
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "rgba8 424x10",
+     "etc2rgb 672x672",
+     "r8 346x68",
+     "etc2rgb 672x672",
+     "r8 346x70",
+     "etc2rgb 144x144",
+     "rgba8 1x1",
+     "etc2rgb 144x144"
+    ]
+   },
+   "eco": {
+    "diff": {
+     "max": 108.0,
+     "px_gt2": 5412,
+     "px_gt8": 1764,
+     "px_gt16": 628,
+     "mean_in_rect": 0.06,
+     "p99_in_rect": 2.0,
+     "psnr_in_rect": 53.32,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 2148520,
+    "bench_pixels_today": 2459560,
+    "asset_bytes": 20740,
+    "asset_bytes_today": 165892,
+    "assets": [
+     "rgba8 1x1",
+     "etc2rgb 144x144",
+     "etc2rgb 144x144"
+    ]
+   },
+   "g20": {
+    "diff": {
+     "max": 130.0,
+     "px_gt2": 132024,
+     "px_gt8": 20033,
+     "px_gt16": 5287,
+     "mean_in_rect": 1.0,
+     "p99_in_rect": 10.0,
+     "psnr_in_rect": 43.66,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 7693464,
+    "bench_pixels_today": 14735320,
+    "asset_bytes": 1294904,
+    "asset_bytes_today": 4579672,
+    "assets": [
+     "rgba8 1x1",
+     "etc2rgb 144x144",
+     "etc2rgb 144x144",
+     "r8 480x180",
+     "r8 1908x353",
+     "etc2rgb 672x672",
+     "etc2rgb 672x672",
+     "rgba8 88x89",
+     "rgba8 88x89"
+    ]
+   },
+   "g20-bmw": {
+    "diff": {
+     "max": 130.0,
+     "px_gt2": 131574,
+     "px_gt8": 20031,
+     "px_gt16": 5287,
+     "mean_in_rect": 1.001,
+     "p99_in_rect": 10.0,
+     "psnr_in_rect": 43.66,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 4659576,
+    "bench_pixels_today": 11701432,
+    "asset_bytes": 1232248,
+    "asset_bytes_today": 4517016,
+    "assets": [
+     "r8 480x180",
+     "r8 1908x353",
+     "rgba8 1x1",
+     "etc2rgb 672x672",
+     "etc2rgb 672x672",
+     "etc2rgb 144x144",
+     "etc2rgb 144x144"
+    ]
+   },
+   "sport": {
+    "diff": {
+     "max": 108.0,
+     "px_gt2": 5412,
+     "px_gt8": 1764,
+     "px_gt16": 628,
+     "mean_in_rect": 0.06,
+     "p99_in_rect": 2.0,
+     "psnr_in_rect": 53.32,
+     "rect": [
+      0,
+      0,
+      1920,
+      720
+     ],
+     "not_drawn": null
+    },
+    "bench_pixels": 1892120,
+    "bench_pixels_today": 2203160,
+    "asset_bytes": 159940,
+    "asset_bytes_today": 305092,
+    "assets": [
+     "rgba8 1x1",
+     "etc2rgb 144x144",
+     "etc2rgb 144x144",
+     "rgba8 88x89",
+     "rgba8 88x89",
+     "r8 832x92"
+    ]
+   }
+  }
+ }
+}
