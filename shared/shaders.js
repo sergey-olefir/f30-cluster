@@ -2679,4 +2679,33 @@ function compact(src, n, night) {
     return res;
 }
 
-module.exports = { /* twin_dial */ tdial: compact(TDIAL, -1), tdback: styled(TDBACK, -1), tdbackFor: (part) => styled(TDBACK, part === 'L' ? 0 : 1), wbdialFor: (style, night) => styled(WBDIAL, style, night), wbbackFor: (style, night) => styled(WBBACK, style, night), wbsignFor: (night) => compact(WBSIGN, -1, night) /* 2026-11-16: night false: none (6WB Sport / Eco Pro) */, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: styled(WBDIAL, -1), wbback: styled(WBBACK, -1), wbsign: compact(WBSIGN, -1), wbmsa: compact(WBMSA, -1) /* car3 I */, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, g20dial: G20DIAL };
+// --- research3 MT (docs/research3/MT-REPORT.md): app.json config.sceneTex, OFF by default ---
+// A 6WB shader for lighter scene textures, made from the shader as it is by exact edits of its sampling lines (each
+// anchor must be there, else this throws): o.base "v8" (WBDIAL u_base an R8 value and u_baseC its colour at a lower
+// size: premultiplied colour = value x colour), o.deco "a8" (u_deco an R8 coverage), o.t0 "tint" (WBBACK u_t0 an R8
+// over one tint, o.tint [r, g, b]). An ETC2 texture ("pm": premultiplied over black, opaque) needs no edit: the shaders
+// mix it over a black face. With none of them the source comes back unchanged, byte for byte.
+const R8A = 'float r8a(vec4 s) { return s.a < 0.999 ? s.a : s.r; }';
+function sceneTex(fs, o) {
+    let s = fs;
+    const swap = (a, b) => {
+        if (s.split(a).length !== 2) throw new Error('shaders.sceneTex: "' + a + '" is not in the source exactly once');
+        s = s.replace(a, b);
+    };
+    const r8a = () => { if (s.indexOf('float r8a(') < 0) swap('\nvoid main()', '\n' + R8A + '\nvoid main()'); };
+    if (o.base === 'v8') {
+        swap('uniform sampler2D u_base;', 'uniform sampler2D u_base;\nuniform sampler2D u_baseC;');
+        swap('bs = texture2D(u_base, bu);', 'bs = vec4(r8a(texture2D(u_base, bu)) * texture2D(u_baseC, bu).rgb, 1.0);');
+        r8a();
+    }
+    if (o.deco === 'a8') { swap('texture2D(u_deco, du).a', 'r8a(texture2D(u_deco, du))'); r8a(); }
+    if (o.t0 === 'tint') {
+        const t = (o.tint || [1, 1, 1]).map((v) => Number(v).toFixed(6)).join(', ');
+        swap('vec4 t = texture2D(u_t0, u0);', 'vec4 t = vec4(r8a(texture2D(u_t0, u0)) * vec3(' + t + '), 1.0);');
+        r8a();
+    }
+    return s;
+}
+// --- end research3 MT ---
+
+module.exports = { sceneTex /* research3 MT */, /* twin_dial */ tdial: compact(TDIAL, -1), tdback: styled(TDBACK, -1), tdbackFor: (part) => styled(TDBACK, part === 'L' ? 0 : 1), wbdialFor: (style, night) => styled(WBDIAL, style, night), wbbackFor: (style, night) => styled(WBBACK, style, night), wbsignFor: (night) => compact(WBSIGN, -1, night) /* 2026-11-16: night false: none (6WB Sport / Eco Pro) */, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, wbdial: styled(WBDIAL, -1), wbback: styled(WBBACK, -1), wbsign: compact(WBSIGN, -1), wbmsa: compact(WBMSA, -1) /* car3 I */, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, g20dial: G20DIAL };

@@ -399,6 +399,10 @@ const LOOK_KEYS = ['hudLayout', 'inComfort', 'inSport', 'inEco', 'byMode', 'g20'
 // drawn and no shader changes. Only Comfort has one: "6WB Sport + G20" was retired with the toggle and Eco Pro never
 // had a variant, so both stay opaque with the toggle on (the setting's label says Comfort).
 const G20_OF = { wb_comfort: 'wb_dials' };
+// research3 MT (docs/research3/MT-REPORT.md): app.json config.sceneTex, the lighter scene texture files tried in order
+// (null, the default: today's RGBA8 files), and the bytes of an ETC2 4x4 block (cluster-render PROTOCOL.md)
+const SCENE_TEX = { r8: ['r8'], etc2: ['etc2', 'r8'] };
+const SCENE_ETC2 = { etc2rgb: 8, etc2rgba: 16 };
 // the way back, for the names on screen: a see-through file -> its theme (wb_sport_dials is kept here, and its layout
 // file is kept, so a settings.json that still names it after a failed migration is still labelled and still drawn)
 const G20_THEME = { wb_dials: 'wb_comfort', wb_sport_dials: 'wb_sport' };
@@ -1765,26 +1769,71 @@ class HudApp {
         const key = ci + ':scene:' + name;
         if (this.sceneUsed) this.sceneUsed.add(key);
         if (this.atlases.has(key)) return this.atlases.get(key);
-        const j = data.json('scene/' + name + '.json');
-        const r8 = !!(j && j.format === 'r8' && j.r8), bpp = r8 ? 1 : 4;   // package M: an R8 one ("r8"), the strip mask
-        if (!j || !(r8 || j.rgba)) throw new Error('scene texture "' + name + '" is missing from hud/scene');
-        const buf = Buffer.from(r8 ? j.r8 : j.rgba, 'base64');
-        if (buf.length !== j.w * j.h * bpp) throw new Error('scene texture "' + name + '": size does not match');
+        const src = this._sceneSrc(name);           // research3 MT: config.sceneTex's file for it, else hud/scene/<name>.json
+        const j = data.json('scene/' + src.file + '.json');
+        // package M: an R8 one ("r8"), the strip mask; research3 MT: an ETC2 one ("etc2": its blocks, sent whole, once)
+        const fmt = !j ? null : j.format === 'r8' && j.r8 ? 'r8' : SCENE_ETC2[j.format] && j.etc2 ? j.format : j.rgba ? 'rgba8' : null;
+        if (!fmt) throw new Error('scene texture "' + name + '" is missing from hud/scene');
+        const buf = Buffer.from(fmt === 'r8' ? j.r8 : fmt === 'rgba8' ? j.rgba : j.etc2, 'base64');
+        const etc = SCENE_ETC2[fmt] || 0, n = etc ? Math.ceil(j.w / 4) * Math.ceil(j.h / 4) * etc : j.w * j.h * (fmt === 'r8' ? 1 : 4);
+        if (buf.length !== n) throw new Error('scene texture "' + name + '": size does not match');
         const c = this._clientAt(ci);
-        const ref = c.asset({ target: this.target, format: r8 ? 'r8' : 'rgba8', w: j.w, h: j.h, sampling: j.sampling === 'nearest' ? 'nearest' : 'bilinear' });
-        if (!ref) throw new Error('scene texture "' + name + '": asset refused (' + j.w + 'x' + j.h + ')');
+        const ref = c.asset({ target: this.target, format: fmt, w: j.w, h: j.h, sampling: j.sampling === 'nearest' ? 'nearest' : 'bilinear' });
+        if (!ref) throw new Error('scene texture "' + name + '": asset refused (' + j.w + 'x' + j.h + ' ' + fmt + ')');
         c.pixels(ref, null, buf);
-        const a = { ref, c, ci, w: j.w, h: j.h, bytes: j.w * j.h * bpp * 2, mask: j.mask || null };   // package M: its lane table
+        // cluster-render's pixel memory: an uncompressed asset twice its bytes, a compressed one once
+        const a = { ref, c, ci, w: j.w, h: j.h, bytes: etc ? n : n * 2, mask: j.mask || null,   // package M: its lane table
+            chroma: src.chroma, sx: src.sx, sy: src.sy };                                       // research3 MT
         this.atlases.set(key, a);
-        this.log.info('scene texture "' + name + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + j.w + 'x' + j.h + (r8 ? ' R8' : ' RGBA8') + ' asset, ' + mib(a.bytes) + ' of pixel memory');
+        this.log.info('scene texture "' + name + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + j.w + 'x' + j.h + ' ' +
+            (fmt === 'rgba8' ? 'RGBA8' : fmt === 'r8' ? 'R8' : fmt) + ' asset' + (src.file !== name ? ' (' + src.file + ')' : '') + ', ' + mib(a.bytes) + ' of pixel memory');
         return a;
+    }
+
+    /**
+     * research3 MT (docs/research3/MT-REPORT.md): which file holds the scene texture `name` under app.json config.sceneTex
+     * (null, the default: hud/scene/<name>.json as always). "r8": <name>@r8.json when there is one; "etc2": <name>@etc2.json,
+     * else <name>@r8.json. -> { file, enc ("a8" | "tint" | "v8" | "pm" | null), tint, chroma (the file of a "v8" value's
+     * colour), sx, sy (an ETC2 texture padded to whole blocks: how much its box uniform grows) }. Read once per name.
+     */
+    _sceneSrc(name) {
+        if (!this.sceneSrcs) this.sceneSrcs = new Map();
+        if (this.sceneSrcs.has(name)) return this.sceneSrcs.get(name);
+        let out = { file: name, enc: null, tint: null, chroma: null, sx: 1, sy: 1 };
+        for (const m of SCENE_TEX[this.config.sceneTex] || []) {
+            const j = data.json('scene/' + name + '@' + m + '.json');
+            if (!j || !j.w) continue;
+            const src = Array.isArray(j.src) && j.src.length === 2 ? j.src : [j.w, j.h];
+            out = { file: name + '@' + m, enc: j.enc || null, tint: Array.isArray(j.tint) ? j.tint : null, chroma: j.chroma || null,
+                sx: j.w / src[0], sy: j.h / src[1] };
+            break;
+        }
+        this.sceneSrcs.set(name, out);
+        return out;
+    }
+
+    /** research3 MT: a 6WB dial's or backdrop's shader for config.sceneTex (shaders.sceneTex); unchanged when off. */
+    _sceneFs(fs, w) {
+        if (!SCENE_TEX[this.config.sceneTex]) return fs;
+        const enc = (t) => (t && t.tex ? this._sceneSrc(t.tex) : { enc: null });
+        if (w.type === 'dial') return shaders.sceneTex(fs, { base: enc(w.base).enc, deco: enc(w.fill).enc });
+        if (w.type === 'wbback' && !w.collar && w.tex && w.tex.window) {
+            const s = enc(w.tex.window);
+            return shaders.sceneTex(fs, { t0: s.enc, tint: s.tint });
+        }
+        return fs;
     }
 
     /** The scene textures (keys as in this.atlases) the widgets will sample: the same choices _create makes. */
     _sceneNeeds(widgets) {
         const out = new Set();
         widgets.forEach((w) => {
-            const ci = this._connOf(w), add = (t) => { if (t && t.tex) out.add(ci + ':scene:' + t.tex); };
+            const ci = this._connOf(w), add = (t) => {
+                if (!(t && t.tex)) return;
+                out.add(ci + ':scene:' + t.tex);
+                const ch = SCENE_TEX[this.config.sceneTex] ? this._sceneSrc(t.tex).chroma : null;     // research3 MT
+                if (ch) out.add(ci + ':scene:' + ch);
+            };
             if (w.type === 'atext' && w.exact) out.add(this._exactKey(w, ci));        // 0.7.14: a "gpu" text's atlas
             else if (w.type === 'dial' && w.look === 'wb') { add(w.base); add(w.fill); }
             else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); add({ tex: w.fill }); }
@@ -3402,8 +3451,8 @@ class HudApp {
             else if (w.type === 'swatch') fs = calibration.SWATCH;
             // 0.7.13: a 6WB dial or backdrop gets only its own look's code (shaders.js styled): the KOMBI compiles every branch
             // 2026-11-16: in 6WB Sport / Eco Pro (_nightOk false) without the night look (shaders.js NIGHT 0)
-            else if (w.type === 'dial' && w.look === 'wb') fs = shaders.wbdialFor(WB_STYLE[w.style] || 0, this._nightOk());
-            else if (w.type === 'wbback') fs = shaders.wbbackFor(WB_STYLE[w.style] || 0, this._nightOk());
+            else if (w.type === 'dial' && w.look === 'wb') fs = this._sceneFs(shaders.wbdialFor(WB_STYLE[w.style] || 0, this._nightOk()), w);
+            else if (w.type === 'wbback') fs = this._sceneFs(shaders.wbbackFor(WB_STYLE[w.style] || 0, this._nightOk()), w);   // research3 MT
             else if (w.type === 'wbsign') fs = shaders.wbsignFor(this._nightOk());
             else if (w.type === 'tdback') fs = shaders.tdbackFor(w.part);                // twin_dial: part L has the tab bar and the window
             else fs = shaders[w.type];
@@ -3522,8 +3571,10 @@ class HudApp {
             this._wbColours(x);         // 2026-11-14: u_ring .. u_glow and the night look (u_nk0..2)
             x.wbKind = 0;
             if (w.base) {               // a baked base texture: "base": { tex, x, y, w, h (its box in the layer's px), kind 1 | 2 | 3 }
-                c.bind(ref, 'u_base', this._scene(w.base.tex, x.ci).ref);
-                c.uniform(ref, 'u_baseR', [w.base.x, w.base.y, w.base.w, w.base.h]);
+                const ba = this._scene(w.base.tex, x.ci);
+                c.bind(ref, 'u_base', ba.ref);
+                if (ba.chroma) c.bind(ref, 'u_baseC', this._scene(ba.chroma, x.ci).ref);      // research3 MT: a "v8" value's colour
+                c.uniform(ref, 'u_baseR', [w.base.x, w.base.y, w.base.w * (ba.sx || 1), w.base.h * (ba.sy || 1)]);
                 x.wbKind = w.base.kind || 1;
             }
             c.uniform(ref, 'u_decoR', [0, 0, 0, 0]);
@@ -3634,8 +3685,9 @@ class HudApp {
                 [['window', 'u_t0', 'u_r0'], ['horizon', 'u_t1', 'u_r1'], ['line', 'u_t2', 'u_r2']].forEach(([k, smp, rect]) => {
                     const t = w.tex[k];
                     if (!(k === 'line' ? u.line : u.window)) return;     // _bindBlanks gives the sampler a blank
-                    c.bind(ref, smp, this._scene(t.tex, x.ci).ref);
-                    c.uniform(ref, rect, [t.x, t.y, t.w, t.h]);
+                    const ta = this._scene(t.tex, x.ci);
+                    c.bind(ref, smp, ta.ref);
+                    c.uniform(ref, rect, [t.x, t.y, t.w * (ta.sx || 1), t.h * (ta.sy || 1)]);     // research3 MT: an ETC2 one's padding
                 });
                 c.uniform(ref, 'u_hasTex', [1]);     // u_win (the window's level): _wbColours below
             }
