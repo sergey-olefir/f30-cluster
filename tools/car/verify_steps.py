@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """verify_steps.py - did the owner's steps leave the lines the parser needs? (package CQ)
 
-    python3 -I tools/car/verify_steps.py <signal_probe.log> [--block B1] [--silent P13:sw-fav,...] [--shift M:K] [--json out.json]
+    python3 -I tools/car/verify_steps.py <signal_probe.log> [--block B1 | --until B6] [--silent P13:sw-fav,...] [--shift M:K] [--json out.json]
 
 Reads the probe's log (the kit's file; the probe's lines all contain 'probe: ') and design/car/session_marks.json (generated
 from the session plan) and, for every marked step, lists whether each expected line (item + field tag) appeared between that
@@ -64,7 +64,7 @@ def parse(path, shifts=()):
     return runs
 
 
-def verify(runs, marks, only_block=None, silent=()):
+def verify(runs, marks, only_block=None, silent=(), until=None):
     """-> rows [{mark, step, block, expect: [{item, tag, status}], status}], problems"""
     rows, problems = [], []
     if not runs:
@@ -80,6 +80,8 @@ def verify(runs, marks, only_block=None, silent=()):
         by_mark.setdefault(mk, set()).add((item, tag))
     for m in marks['marks']:
         if only_block and m['block'] != only_block:
+            continue
+        if until and int(m['block'][1:]) > int(until[1:]):
             continue
         n = m['mark']
         row = {'mark': n, 'step': m['step'], 'block': m['block'], 'tag': m['tag'], 'expect': [], 'status': 'ok'}
@@ -107,7 +109,7 @@ def verify(runs, marks, only_block=None, silent=()):
 
 
 def main(argv):
-    block = silent = out = None
+    block = silent = out = until = None
     shift = []
     it = iter(argv)
     for a in it:
@@ -117,14 +119,16 @@ def main(argv):
             silent = next(it)
         elif a == '--json':
             out = next(it)
+        elif a == '--until':
+            until = next(it)
         elif a == '--shift':
             shift.append(tuple(int(x) for x in next(it).split(':')))
-    pos = [a for a in argv if not a.startswith('--') and a not in (block, silent, out) and not re.match(r'^\d+:\d+$', a)]
+    pos = [a for a in argv if not a.startswith('--') and a not in (block, silent, out, until) and not re.match(r'^\d+:\d+$', a)]
     if len(pos) != 1:
         print(__doc__)
         return 2
     marks = json.load(open(MARKS, encoding='utf-8'))
-    rows, problems = verify(parse(pos[0], shift), marks, block, set((silent or '').split(',')) if silent else set())
+    rows, problems = verify(parse(pos[0], shift), marks, block, set((silent or '').split(',')) if silent else set(), until)
     for r in rows:
         ex = ', '.join('%s %s %s' % (e['item'], e['tag'], e['status']) for e in r['expect']) or '(nothing required)'
         print('%-4d %-6s %-16s %s' % (r['mark'], r['step'], r['status'], ex))

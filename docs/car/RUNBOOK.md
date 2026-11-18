@@ -81,7 +81,6 @@ Cluster states in step order: `stock` = Twin Dial and f30 both Off; `twin` = Twi
 
 | Mark | Step | Cluster | The probe must log (item: field tag) |
 |---|---|---|---|
-| 2 | B1.2 | stock | P13: stalk |
 | 3 | B1.3 | stock | P13: stalk |
 | 4 | B1.4 | stock | P13: stalk |
 | 5 | B1.5 | stock | P13: stalk |

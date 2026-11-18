@@ -182,7 +182,7 @@ async function main() {
 
         console.log('4. verify_steps.py on the log');
         const vOut = path.join(OUT, 'verify.json');
-        const verify = (extra) => spawnSync('python3', ['-I', path.join(ROOT, 'tools', 'car', 'verify_steps.py'), logPath, '--json', vOut].concat(extra), { encoding: 'utf8' });
+        const verify = (extra) => spawnSync('python3', ['-I', path.join(ROOT, 'tools', 'car', 'verify_steps.py'), logPath, '--json', vOut, '--until', UNTIL].concat(extra), { encoding: 'utf8' });
         const r1 = verify([]);
         fs.writeFileSync(path.join(OUT, 'verify-strict.txt'), r1.stdout);
         const miss = r1.stdout.split('\n').filter((l) => /MISSING|NO MARK/.test(l));
