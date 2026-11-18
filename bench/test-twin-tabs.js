@@ -95,12 +95,12 @@ console.log('1. the rules');
     eq(sel(h), 1, 'guidance ends: back to the driver\'s last choice (1)');
 }
 {
-    // rule 2: a call, built and gated off
-    const h = mk();
+    // rule 2: a call, gated by config.tabs.callSelects (car-fix CF3: on in app.json since the car showed the call state)
+    const h = mk({ tabs: Object.assign({}, APP.config.tabs, { callSelects: false }) });
     sel(h);
     h.td.callState = 1;
-    eq(sel(h), 1, 'a ringing call with config.tabs.callSelects off: tab 1 stays (the rule is built, switched off)');
-    const g = mk({ tabs: Object.assign({}, APP.config.tabs, { callSelects: true }) });
+    eq(sel(h), 1, 'a ringing call with config.tabs.callSelects off: tab 1 stays (the rule is switched off)');
+    const g = mk();
     sel(g);
     g.td.callState = 1;
     eq(sel(g), 4, 'callSelects on: a ringing call selects tab 4');
@@ -711,7 +711,8 @@ function hygiene() {
     ok(APP.config.tabKey && APP.config.tabKey.iface === 'de.bmw.body.Light' && APP.config.tabKey.field === 'IndicatorSteeringColumn' && APP.config.tabKey.mask === 64 &&
         JSON.stringify(APP.config.tabKey.path) === '["operationColumnStalks"]' && APP.signals['de.bmw.body.Light'].IndicatorSteeringColumn === 's',
         'config.tabKey is the car-verified TRIP button (bit 0x40 of de.bmw.body.Light IndicatorSteeringColumn, declared notifier-only "s")');
-    eq([APP.config.tabs.callSelects, APP.config.tabs.messageTab, APP.config.tabs.lockAboveKmh], [false, true, 5], 'config.tabs: callSelects off, a message selects tab 2, lock 5');
+    // car-fix CF3: the car showed the call state (aggregatedCallState DISCONNECTED / DIALING / ACTIVE, 2026-11-18): rule 2 is on
+    eq([APP.config.tabs.callSelects, APP.config.tabs.messageTab, APP.config.tabs.lockAboveKmh], [true, true, 5], 'config.tabs: callSelects on (car-fix CF3: the call state arrives), a message selects tab 2, lock 5');
     const F30 = JSON.parse(fs.readFileSync(path.join(H.ROOT, 'apps', 'f30_cluster', 'app.json'), 'utf8'));
     ok((F30.shared || []).indexOf('twin_tabs.js') < 0 && !F30.config.tabs, 'f30_cluster does not pack the module and has no config.tabs');
     const d2 = H.tree('f30_cluster', ['twin_tabs.js', 'twin_tokens.js', 'twin_cc.js', 'twin_probe.js']);

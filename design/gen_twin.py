@@ -299,6 +299,14 @@ def page_items():
                   T('road', 770, 480, 'n33', '{{td:pgGuideRoad}}', 'fg', 'l', 410),
                   {'k': 'lanes', 'id': 'lanes', 'cx': MID_X, 'cy': 515, 'pitch': 34, 'sz': 30},
                   T('foot', MID_X, 560, 'n29', '{{td:pgGuideFoot}}', 'dim', 'c', 436)]
+    # car-fix CF3: the route guided by CarPlay (BMW's arrow, manoeuvre and lanes stay empty then): the destination block, no arrow -
+    # the remaining distance Saira 72 + its unit centred as one group (the guidance page's sizes), the arrival time and the travel
+    # time Noto 33, the road the car is on Noto 31 grey, "Поза дорогою" in the footer when the car says it is off a known road
+    P['route'] = [title(), meta('{{td:pgRouteMeta}}'),
+                  {'k': 'g', 'id': 'dist', 'cx': MID_X, 'b': 410, 'c': 'fg', 'parts': [{'s': '{{td:pgRouteDist}}', 'f': 's72'}, {'s': '{{td:pgRouteUnit}}', 'f': 'n29', 'gap': 8}]},
+                  T('eta', MID_X, 466, 'n33', '{{td:pgRouteEta}}', 'fg', 'c', 436),
+                  T('road', MID_X, 512, 'n31', '{{td:pgRouteRoad}}', 'dim', 'c', 436),
+                  T('foot', MID_X, 565, 'n29', '{{td:pgRouteFoot}}', 'dim', 'c', 436)]
     P['calc'] = [title(), T('msg', MID_X, 400, 'n33', '{{td:pgCalc}}')]
     P['road'] = [title(), T('road', MID_X, 400, 'title', '{{td:pgRoad}}', 'fg', 'c', 436), T('sub', MID_X, 452, 'n29', '{{td:pgNavSub}}', 'dim')]
     P['none'] = [title(), T('sub', MID_X, 400, 'n29', 'Маршрут не прокладено', 'dim')]

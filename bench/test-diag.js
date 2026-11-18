@@ -150,11 +150,14 @@ function unit() {
         let x = h({ media: false, phone: false }, 'carplay', {});
         TP.tabBridge(x);
         ok(x.td.mediaSource === null && x.td.phoneConnected === null, 'tab bridge: pages dark (before probes P8 / P9): no source, no phone state (the plain icons)');
+        // car-fix CF3: the device list (DevicePresentation, never seen on the car) only with config.pages.phoneDevices
         x = h({ media: true, phone: true }, 'carplay', {}); TP.tabBridge(x);
+        ok(x.td.mediaSource === 'projection' && x.td.phoneConnected === null, 'tab bridge: CarPlay -> projection icon; phone on but phoneDevices off (car-fix CF3: unseen) -> the plain phone');
+        x = h({ media: true, phone: true, phoneDevices: true }, 'carplay', {}); TP.tabBridge(x);
         ok(x.td.mediaSource === 'projection' && x.td.phoneConnected === true, 'tab bridge: CarPlay -> projection icon, a connected device -> phone with bars');
-        x = h({ media: true, phone: true }, 'radio', null); TP.tabBridge(x);
+        x = h({ media: true, phone: true, phoneDevices: true }, 'radio', null); TP.tabBridge(x);
         ok(x.td.mediaSource === 'tuner' && x.td.phoneConnected === false, 'tab bridge: radio -> tuner icon, a list with none connected -> phone crossed out');
-        x = h({ media: true, phone: true }, 'usb'); TP.tabBridge(x);
+        x = h({ media: true, phone: true, phoneDevices: true }, 'usb'); TP.tabBridge(x);
         ok(x.td.mediaSource === 'player' && x.td.phoneConnected === null, 'tab bridge: another source -> player icon; no device list yet -> plain phone');
     }
     // the hold, with a fake engine

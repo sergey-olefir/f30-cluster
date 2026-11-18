@@ -174,7 +174,7 @@ console.log('every page: the empty state and the full state');
 // ---------------------------------------------------------------------------------------------------------------------
 console.log('built dark stays dark until its config key is set');
 {
-    [['radio', 'media'], ['track', 'media'], ['call_in', 'phone'], ['call_active', 'phone'], ['nav_guide', 'guidance']].forEach(([id, key]) => {
+    [['radio', 'media'], ['track', 'media'], ['call_in', 'phone'], ['call_active', 'phone'], ['nav_guide', 'guidance'], ['car_carplay', 'media'], ['car_radio', 'media'], ['car_call', 'phone'], ['car_route', 'route']].forEach(([id, key]) => {
         const h = S.make(R, id);
         const was = showing(h);
         h.config.pages = {};
@@ -182,7 +182,9 @@ console.log('built dark stays dark until its config key is set');
         ok(was !== off && ['media', 'phone', 'road', 'none', 'calc'].indexOf(off) >= 0, id + ': with config.pages.' + key + ' off the page is the certain or the fallback one (' + was + ' -> ' + off + ')');
     });
     const cfgJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'twin_dial', 'app.json'), 'utf8')).config;
-    eq(cfgJson.pages, Object.assign({}, cfgJson.pages, { tyres: false, media: false, phone: false, guidance: false }), 'app.json: config.pages.tyres / media / phone / guidance are all false');
+    // car-fix CF3: what the car sends is on (media, the call card, the CarPlay route); what it never sent stays dark
+    eq(cfgJson.pages, Object.assign({}, cfgJson.pages, { tyres: false, media: true, phone: true, phoneDevices: false, callDetail: false, guidance: false, route: true }),
+        'app.json (car-fix CF3): config.pages media / phone / route on; tyres / phoneDevices / callDetail / guidance (unseen or untested) off');
     ok(cfgJson.mapWindow === null && cfgJson.mapSlots === false && cfgJson.mapForce === false, 'app.json: config.mapWindow null, mapSlots / mapForce false (the map window is an experiment, off)');
 }
 
@@ -190,7 +192,7 @@ console.log('built dark stays dark until its config key is set');
 console.log('the wiring: every field\'s handler, the instances, the shapes');
 {
     const logs = [];
-    const h = S.base(R, { settings: { callerName: 'off' } });
+    const h = S.base(R, { settings: { callerName: 'off' }, config: { pages: S.FULL_PHONE } });      // the call card's whole drawing (car-fix CF3: callDetail)
     h.log = { info: (s) => logs.push(s), warn: (s) => logs.push(s), error: (s) => logs.push(s), debug() {} };
     const extra = {};
     pages.wire(h, extra);
@@ -212,8 +214,8 @@ console.log('the wiring: every field\'s handler, the instances, the shapes');
     extra[I.guidance].currentRoad({ elements: [] }); eq(P.road, null, '... an empty one is no road');
     extra[I.guidance].conclusiveDart({ maneuver: { intersection: { direction: 'RIGHT', formattedDistance: { rawDistance: 350, unit: 'METER' } } } });
     eq([P.dart.kind, P.dart.dist], ['right', 350], 'conclusiveDart: a right turn in 350 m');
-    extra[I.guidance].conclusiveDart({ maneuver: { intersection: { direction: 8, formattedDistance: { rawDistance: 0.5, unit: 'KM' } } } });
-    eq([P.dart.kind, P.dart.dist], ['uturn_right', 500], '... the direction by number (8 = U-turn right), kilometres converted');
+    extra[I.guidance].conclusiveDart({ maneuver: { intersection: { direction: 8, formattedDistance: { distance: '0.5', rawDistance: 500, unit: 'KM' } } } });
+    eq([P.dart.kind, P.dart.dist], ['uturn_right', 500], '... the direction by number (8 = U-turn right); rawDistance is metres whatever the unit (car-fix CF3: the car)');
     extra[I.guidance].conclusiveDart({ maneuver: { roundabout: { exitNumber: 2, driveDirection: 'RIGHT', formattedDistance: { rawDistance: 120 } } } });
     eq([P.dart.kind, P.dart.exit, P.dart.side], ['roundabout', 2, 'RIGHT'], '... a roundabout with its exit and side');
     extra[I.guidance].conclusiveDart({ maneuver: { branch: { branchType: 'HIGHWAY_OUT_RIGHT' } } }); eq(P.dart.kind, 'exit_right', '... a motorway exit');
@@ -278,6 +280,132 @@ console.log('the wiring: every field\'s handler, the instances, the shapes');
     const leaked = logs.filter((l) => canaries.some((c) => l.indexOf(c) >= 0));
     ok(!leaked.length, 'no log line holds a title, an artist, a station, a name or a road (' + logs.length + ' lines: ' + logs.slice(0, 3).join(' | ').slice(0, 160) + ' ...)' + (leaked.length ? ': ' + leaked[0] : ''));
     ok(logs.every((l) => !/[Ѐ-ӿ]/.test(l) || /^twin pages/.test(l) === false), 'the log lines are numbers and enum names (no Cyrillic text from the car)');
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+console.log('car-fix CF3: media with the car\'s shapes (CarPlay first; lengths and enums from the car, invented text)');
+{
+    const C = S.CAR, I = pages.IF;
+    const h = S.make(R, 'car_carplay'); showing(h);
+    const m = pages.st(h).media;
+    eq([pages.st(h).page, m.srcRaw, m.src], ['track', 'CARPLAY', 'carplay'], 'CarPlay playing: the menu\'s selected entry (Int64 ids as non-numbers) is CARPLAY, the now-playing page shows');
+    eq([m.title, m.artist, m.album], [null, C.artist, C.album], 'the HMI lines with CarPlay: ARTIST and ALBUM, no TITLE line (as the car sends them)');
+    eq([tok(h, 'pgTrackTitle'), tok(h, 'pgTrackArtist'), tok(h, 'pgMediaMeta')], [C.title, C.artist, 'CarPlay'], 'the title and the artist come from MediaPlayer on CarPlayMedia (TITLE / ARTIST keys); the meta line says CarPlay');
+    ok(tok(h, 'pgTrackTitle') !== C.album && tok(h, 'pgTrackTitle') !== C.artist, '... never the album or the artist drawn as the title');
+    eq([tok(h, 'pgTrackEl'), tok(h, 'pgTrackTot'), tok(h, 'pgTrackFrac'), tok(h, 'pgTrackNo')], ['00:25', '03:04', '0.1384', ''], 'the time from currentItemTime (25583 of 184785 ms): 00:25 / 03:04, the progress 0.1384; "0 of 0" is no track number');
+    eq([h.td.mediaSource, h.td.media], ['projection', C.title], 'tab 3: the projection icon and the title as its text (B2 cuts it with "…")');
+    ok(h.td.media !== C.album, '... not the second HMI line (the album: the old config.twin.media rule)');
+    // CarPlay without its own item: the certain page, never a guess
+    const e = h._extra;
+    e[I.player].currentItemMetadata([{ key: 'COVER_FILE', value: { stringValue: 'x' } }]);
+    pages.changed(h); eq([showing(h), h.td.media], ['media', null], 'CarPlay with no TITLE key: the certain page (source pictogram), no tab text');
+    e[I.player].currentItemMetadata([{ key: 3, value: { stringValue: 'Назва' } }, { key: 5, value: { stringValue: 'Виконавець' } }]);
+    eq([showing(h), tok(h, 'pgTrackTitle'), tok(h, 'pgTrackArtist')], ['track', 'Назва', 'Виконавець'], 'the metadata keys by number (3 TITLE, 5 ARTIST)');
+    e[I.player].currentItemTime({ elapsed: 999999, total: 1000 }); eq(tok(h, 'pgTrackFrac'), '1.0000', 'an elapsed time past the total is held at the end');
+    e[I.player].currentItemTime({ elapsed: 5, total: 0 }); eq([tok(h, 'pgTrackTot'), tok(h, 'pgTrackFrac')], ['', ''], 'a total of 0: no time, no progress line');
+    // the source follows the menu: radio, then back to CarPlay
+    e[I.media].menu(S.MENU(4)); pages.changed(h);
+    eq([showing(h), tok(h, 'pgStation'), tok(h, 'pgMediaMeta'), h.td.mediaSource, h.td.media], ['radio', C.station, 'FM', 'tuner', C.station], 'the menu selects FM: the radio page with the tuner\'s station, band FM, the tuner icon and the station as the tab text');
+    eq([tok(h, 'pgRadioText'), tok(h, 'pgRadioFoot')], [C.rt, '101.7'], '... the radio text, the frequency (kHz / 1000); preset 0 and TPS_NO_TP are not drawn');
+    e[I.media].menu(S.MENU(7)); pages.changed(h); eq(showing(h), 'track', 'the menu selects CARPLAY again: now playing');
+    // the old matching took the FIRST entry when neither had an id (undefined === undefined): MUSIC_COLLECTION. One match or none.
+    e[I.media].menu({ menuEntries: [{ iconKind: 'MUSIC_COLLECTION' }, { iconKind: 'CARPLAY' }] });
+    eq([pages.st(h).media.srcRaw, pages.st(h).media.src], [null, 'carplay'], 'no selected id: no source from the menu (never the first entry); the CarPlay player playing decides: carplay');
+    const same = { low: 1, high: 0 };
+    e[I.media].menu({ selectedEntryId: same, menuEntries: [{ id: same, iconKind: 'FM' }, { id: same, iconKind: 'CARPLAY' }] });
+    eq(pages.st(h).media.srcRaw, null, 'two entries with the same id: ambiguous, none taken');
+    e[I.player].playerState(3); eq([pages.st(h).media.cpState, pages.st(h).media.src], ['PLAYER_STATE_PAUSE', null], 'playerState by number (3 = PAUSE): with no menu source the CarPlay player paused names no source');
+    pages.changed(h); eq(showing(h), 'media', '... and the page is the certain one');
+    e[I.media].menu({ selectedEntryId: '7', menuEntries: [{ id: 4, iconKind: 'FM' }, { id: 7, iconKind: 'CARPLAY' }] });
+    eq(pages.st(h).media.srcRaw, 'CARPLAY', 'ids compared by value whatever their shape (a digit string against a number)');
+    // Int64 shapes
+    const b = Buffer.alloc(8); b.writeUInt32BE(0, 0); b.writeUInt32BE(184785, 4);
+    eq([pages.int64(25583), pages.int64('184785'), pages.int64({ low: 184785, high: 0 }), pages.int64({ low: 1, high: 1 }), pages.int64(b), pages.int64('?'), pages.int64({}), pages.int64(null)],
+        [25583, 184785, 184785, 4294967297, 184785, null, null, null], 'int64(): a number, a digit string, a {low, high} pair, an 8-byte buffer; "?" / {} / null are none');
+    e[I.media].trackProgress({ elapsed: '?', total: '?', hasProgress: true });
+    eq([pages.st(h).media.has, pages.st(h).media.tot], [false, null], 'the HMI progress as the car sent it ("?"): no progress (never a NaN on the page)');
+    e[I.media].trackProgress({ elapsed: { low: 61000, high: 0 }, total: { low: 215000, high: 0 }, hasProgress: true });
+    eq([pages.st(h).media.has, pages.st(h).media.el, pages.st(h).media.tot], [true, 61000, 215000], '... and as a {low, high} Int64: read');
+    // config.pages.media off: none of it reaches the tab bar
+    const off = S.make(R, 'car_carplay'); off.config.pages = Object.assign({}, S.CAR_PAGES, { media: false }); pages.tabBridge(off);
+    eq([off.td.mediaSource, showing(off)], [null, 'media'], 'config.pages.media off: the plain tab icon and the certain page');
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+console.log('car-fix CF3: phone - the call card from the call state the car sends; the unseen parts dark');
+{
+    const I = pages.IF;
+    const h = S.make(R, 'car_call');
+    eq([showing(h), tok(h, 'pgTitle'), tok(h, 'pgCallTimer')], ['call', 'Розмова', '01:23'], 'the car\'s DIALING -> ACTIVE: the call card, "Розмова", our own timer from the ACTIVE edge (83 s later: 01:23)');
+    eq([tok(h, 'pgCallWho'), tok(h, 'pgCallPath'), tok(h, 'pgCallMic'), tok(h, 'pgCallIcon')], ['', '', '', ''], 'callDetail / phoneDevices off: no contact line, no path, no microphone mark (VoiceCall, DevicePresentation never seen)');
+    const e = h._extra;
+    e[I.agg].aggregatedCallState('DIALING'); eq([tok(h, 'pgTitle'), tok(h, 'pgCallTimer')], ['Виклик…', ''], 'DIALING: "Виклик…", no timer yet');
+    e[I.agg].aggregatedCallState('DISCONNECTED'); pages.changed(h);
+    eq([showing(h), tok(h, 'pgPhoneLine1'), tok(h, 'pgPhoneLine2')], ['phone', 'Немає даних', ''], 'DISCONNECTED: the idle page, "Немає даних" (no device list is drawn)');
+    // VoiceCall alone (unseen) never opens the card while callDetail is off (a car where the aggregator never spoke)
+    pages.st(h).phone.agg = null;
+    e[I.call].state('ACTIVE'); pages.changed(h);
+    eq([pages.callState(h), showing(h)], [null, 'phone'], 'VoiceCall\'s state alone with callDetail off: no call');
+    h.config.pages = Object.assign({}, S.CAR_PAGES, { callDetail: true }); pages.changed(h);
+    eq(showing(h), 'call', '... with callDetail on: the card (the drawing exists, switched off)');
+    h.config.pages = Object.assign({}, S.CAR_PAGES);
+    // the device list arrives: drawn only with phoneDevices
+    e[I.devices].deviceList([{ connected: true, active: ['CARPLAY'], batteryState: 80, signalStrength: 3 }]);
+    eq([tok(h, 'pgPhoneLine1'), h.td.phoneConnected], ['Немає даних', null], 'a device list with phoneDevices off: not drawn, the plain tab icon');
+    h.config.pages = Object.assign({}, S.CAR_PAGES, { phoneDevices: true }); pages.tabBridge(h);
+    eq([tok(h, 'pgPhoneLine1'), h.td.phoneConnected], ['Підключено · CarPlay', true], '... with phoneDevices on: "Підключено · CarPlay" and the icon with bars');
+    // the caller's name: never kept without callDetail, even with the setting on
+    const n = S.make(R, 'car_call'); n._settings.callerName = 'on';
+    n._extra[I.call].name('Тестова Особа');
+    eq([pages.st(n).phone.name, tok(n, 'pgCallWho')], [null, ''], 'callerName on but callDetail off: the name is not even kept');
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+console.log('car-fix CF3: navigation - the route guided by CarPlay');
+{
+    const I = pages.IF;
+    const h = S.make(R, 'car_route');
+    eq([showing(h), tok(h, 'pgTitle'), tok(h, 'pgRouteMeta')], ['route', 'Навігація', 'CarPlay'], 'provider CAR_PLAY, BMW\'s guiding INACTIVE, a fresh destination: the route page, "Навігація", meta CarPlay');
+    eq([tok(h, 'pgRouteDist'), tok(h, 'pgRouteUnit'), tok(h, 'pgRouteEta')], ['5.7', 'км', 'прибуття 20:41 · 11 хв'], 'the car\'s 5700 (unit KM) is 5.7 км; the arrival 20:41 as sent (local); 660 s = 11 хв');
+    eq([tok(h, 'pgRouteRoad').length, tok(h, 'pgRouteFoot')], [14, 'Поза дорогою'], 'the road the car is on; isOnGuidableRoad false: "Поза дорогою"');
+    eq([pages.st(h).dest.dist, pages.metres({ rawDistance: 5700, unit: 'KM' }), pages.metres({ rawDistance: 5700, unit: 1 }), pages.metres({ rawDistance: 0, unit: 'NONE' })], [5700, 5700, 5700, null],
+        'rawDistance is METRES whatever the unit (5.7e6 m or 57 km in 660 s is impossible); 0 is no distance');
+    eq([pages.st(h).dart, pages.st(h).lanes], [{ kind: null, dist: null, exit: null, side: null }, null], 'the CarPlay route\'s empty manoeuvre and lanes: nothing to draw (no arrow page)');
+    const e = h._extra;
+    e[I.guidance].isOnGuidableRoad(true); eq(tok(h, 'pgRouteFoot'), '', 'on a guidable road: no footer');
+    // freshness, provider, BMW's own guidance, the switch
+    const x = newX(h);
+    eq(step(h, x, pages.ROUTE_FRESH_MS + 1000), 'road', 'no destination for more than a minute: the route page goes (the road page with the road)');
+    e[I.guidance].nextDestinationInfo({ travelTime: 600, formattedDistance: { rawDistance: 5200, unit: 'KM' }, estimatedArrivalTime: { time: { hour: 20, minute: 41, invalid: false } } });
+    eq([step(h, x, pages.ROUTE_FRESH_MS + 1500), tok(h, 'pgRouteDist')], ['route', '5.2'], 'a new destination: back, 5.2 км');
+    e[I.guidance].guidingProvider('NONE'); eq(step(h, x, pages.ROUTE_FRESH_MS + 2000), 'road', 'provider NONE: no route page');
+    e[I.guidance].guidingProvider(2); eq([pages.st(h).provider, step(h, x, pages.ROUTE_FRESH_MS + 2500)], ['ANDROID_AUTO', 'road'], '... Android Auto (2, never seen): no route page either');
+    e[I.guidance].guidingProvider(1); eq(step(h, x, pages.ROUTE_FRESH_MS + 3000), 'route', 'provider 1 = CAR_PLAY: the route page');
+    e[I.guiding].guidingState('ACTIVE'); eq(step(h, x, pages.ROUTE_FRESH_MS + 3500), 'road', 'BMW\'s own guidance active (its arrow page is off): no CarPlay route page over it');
+    e[I.guiding].guidingState('INACTIVE');
+    h.config.pages = Object.assign({}, S.CAR_PAGES, { route: false }); pages.changed(h); eq(step(h, x, pages.ROUTE_FRESH_MS + 4000), 'road', 'config.pages.route off: the fallback page');
+    h.config.pages = Object.assign({}, S.CAR_PAGES);
+    e[I.guidance].nextDestinationInfo({ travelTime: 0, formattedDistance: { rawDistance: 0, unit: 'NONE' }, estimatedArrivalTime: { time: { invalid: true } } });
+    eq([pages.st(h).dest, step(h, x, pages.ROUTE_FRESH_MS + 4500)], [null, 'road'], 'an empty destination (no distance, no time, invalid arrival) is none');
+    eq([pages.fmtTravel(660), pages.fmtTravel(3900), pages.fmtTravel(20), pages.fmtTravel(0), pages.fmtTravel(undefined)], ['11 хв', '1 год 05 хв', '1 хв', '', ''], 'travel time: minutes, hours and minutes, at least one minute, none for 0');
+    ok(R.widget.pages.route && R.layout.widgets.filter((w) => w.type === 'tdpage').length === 1, 'the route page is one more page of the ONE page layer (no new layer)');
+    ok(!R.widget.pages.route.items.some((i) => i.k === 'i' || i.k === 'lanes'), '... with no arrow and no lane row');
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+console.log('car-fix CF3: privacy - the car\'s texts and the trip never reach the log');
+{
+    const logs = [];
+    const keep = (h) => { h.log = { info: (s) => logs.push(s), warn: (s) => logs.push(s), error: (s) => logs.push(s), debug() {} }; return h; };
+    ['car_carplay', 'car_radio', 'car_call', 'car_route'].forEach((id) => {
+        const st0 = S.STATES[id], h = keep(S.base(R, Object.assign({ tab: st0.tab }, st0.over || {})));
+        st0.setup(h, R); showing(h);
+    });
+    const C = S.CAR, canaries = [C.title, C.artist, C.album, C.station, C.rt.slice(0, 12), 'вулиця', '5700', '5.7', '20:41', '660'];
+    const leaked = logs.filter((l) => canaries.some((c) => l.indexOf(c) >= 0));
+    ok(logs.length > 5 && !leaked.length, 'no log line holds a title, an artist, an album, a station, a radio text, a road, the distance, the travel or the arrival time (' + logs.length + ' lines)' + (leaked.length ? ': ' + leaked[0] : ''));
+    ok(logs.some((l) => /CarPlay item 4 keys, title 16 characters/.test(l)) && logs.some((l) => /guiding provider CAR_PLAY/.test(l)) && logs.some((l) => /destination distance yes, travel time yes, arrival yes/.test(l)),
+        'the log has the lengths and the enums (CarPlay item 4 keys, title 16 characters; provider CAR_PLAY; which destination parts came)');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
