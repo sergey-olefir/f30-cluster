@@ -451,6 +451,9 @@ process.on('message', (m) => {
                     // fix/active-cc: the cluster's "message shown now" as read, whether it decides, and a number no
                     // ccList entry carries
                     active: hud.ccAct, activeWired: !!hud.ccActAny, noMatch: hud.ccNoMatch === undefined ? null : hud.ccNoMatch,
+                    // car-fix CF1: the displayed number, whether it is the source, whether the active number is a witness now
+                    displayed: hud.ccDisp === undefined ? null : hud.ccDisp, source: typeof hud._ccDispSource === 'function' && hud._ccDispSource() ? 'displayed' : 'active',
+                    activeWitness: typeof hud._ccActWitness === 'function' ? hud._ccActWitness() : null,
                     now: (() => { const m = hud._ccNow() || {}; return { name: (m.name || '').length, color: m.color || null, id: m.id === undefined ? null : m.id, symbol: m.symbol === undefined ? null : m.symbol }; })(),
                 },
                 road: hud._roadText(), navState: hud.navState, navDist: hud.navDist, navEta: hud.navEta,

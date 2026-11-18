@@ -130,12 +130,13 @@ const CC_READY = { name: 'Ready to drive - press brake to start', color: 'white'
 const CC_STORED = { name: 'Stored notice, not on show.', color: 'white', id: 987, symbol: 5 };
 Object.assign(SCENES, {
     // the car after ~20 s: 987 is still listed, but the cluster shows nothing
-    'active-stored': { ccList: [CC_STORED], ccActive: { number: 0 } },
+    // (car-fix CF1: each also feeds the same number as Vehicle2 statusDisplayedCCMessage, the "shown now" source now)
+    'active-stored': { ccList: [CC_STORED], ccActive: { number: 0 }, ccDisplayed: 0 },
     // the cluster shows id 40, and the list carries it
-    'active-40': { ccList: [CC_READY, CC_STORED], ccActive: { number: 40, control: 1, frame: 1, of: 1 } },
+    'active-40': { ccList: [CC_READY, CC_STORED], ccActive: { number: 40, control: 1, frame: 1, of: 1 }, ccDisplayed: 40 },
     // the cluster shows a number no ccList entry carries (the numbering differs)
-    'active-nomatch': { ccList: [CC_STORED], ccActive: { number: 1234, control: 1 } },
-    'active-none': { ccActive: { number: 0 } },
+    'active-nomatch': { ccList: [CC_STORED], ccActive: { number: 1234, control: 1 }, ccDisplayed: 1234 },
+    'active-none': { ccActive: { number: 0 }, ccDisplayed: 0 },
     // the fallback (statusActiveCCMessage silent): a stored white entry, and a red one beside it
     'stored-white': { ccList: [CC_STORED] },
     'stored-white-red': { ccList: [CC_STORED, { name: 'Brake fault - stop', color: 'red', id: 50, symbol: 12 }] },
@@ -143,6 +144,21 @@ Object.assign(SCENES, {
     'cc-three-list': { ccList: SCENES['cc-frame-2'].ccList },
 });
 // ---- end fix/active-cc ----
+// ---- car-fix CF1 (docs/car-fix/CF1-REPORT.md): the owner's car on 2026-11-18, numbers as the probe and twin_dial.log saw them.
+// KombiIF statusActiveCCMessage sits on its catalogue default the whole run (65535, control 4095, frame 15/15, utility 16777215);
+// Vehicle2 statusDisplayedCCMessage is the "shown now": 65535 after a start (unknown), 0 at rest, the door: ccList 15 and then
+// displayed 15; closed: the list at rest first, displayed 0 0.2-0.7 s later; 285 shown with no ccList entry. Invented names. ---
+const ACT_DEFAULT = { number: 65535, control: 4095, frame: 15, of: 15, utility: 16777215 };
+Object.assign(SCENES, {
+    'car-start': { ccList: [CC_REST], ccActive: ACT_DEFAULT, ccDisplayed: 65535 },
+    'car-rest': { ccList: [CC_REST], ccActive: ACT_DEFAULT, ccDisplayed: 0 },
+    'car-door': { ccList: [CC_DOOR], ccDisplayed: 15 },
+    'car-door-closing': { ccList: [CC_REST] },
+    'car-door-closed': { ccDisplayed: 0 },
+    'car-285': { ccDisplayed: 285 },
+    'car-stored': { ccList: [CC_STORED], ccDisplayed: 0 },
+});
+// ---- end car-fix CF1 ----
 // --- package F (strip, 2026-11-16): the car's words in Ukrainian, as the owner's cluster runs. Made-up text, no real
 // place: the tallest and lowest capitals (Ї Й Ґ, Щ Ц Д), both apostrophes, guillemets, the dash and the number sign ---
 Object.assign(SCENES, {
@@ -266,6 +282,14 @@ function install(hu, config, log) {
         put(c.utilityPath, num(n.utility));
         last.ccActive = n;
         hu.feed(c.iface, c.field, out);
+    }
+
+    /** car-fix CF1: Vehicle2 statusDisplayedCCMessage (config.ccDisplayed), the number of the message the cluster displays. */
+    function feedCcDisplayed(n) {
+        const c = cfg.ccDisplayed;
+        if (!named(c)) return;
+        last.ccDisplayed = n;
+        hu.feed(c.iface, c.field, nest(c.numberPath || [], isFinite(Number(n)) ? Number(n) : 65535));
     }
 
     /** The driver's own speed-limit settings (read only on the car; here just fed). { warn, warn2, show,
@@ -432,6 +456,7 @@ function install(hu, config, log) {
         if (o.cc) feedCc(o.cc);
         if (o.ccList) feedCcList(o.ccList);
         if (o.ccActive) feedCcActive(o.ccActive);     // fix/active-cc: after the list, as the car's order is unknown
+        if (o.ccDisplayed !== undefined) feedCcDisplayed(o.ccDisplayed);     // car-fix CF1: after the list, as on the car
         if (o.ccFrame) feedCcFrame(o.ccFrame);
         if (o.sla) feedSla(o.sla);
         if (o.road) feedRoad(o.road);

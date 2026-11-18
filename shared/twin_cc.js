@@ -15,8 +15,10 @@
  *
  * THE SAFETY RULE (the owner, 2026-11-16, SPEC 8.4): a BMW warning is never hidden unless our own text for THAT message
  * is on the screen in the same frame. "ours" is a state the machine reaches only after
- *   - the car's own "message shown now" (KombiIF statusActiveCCMessage, second witness Vehicle2.statusDisplayedCCMessage)
- *     has named a number, and that number has a ccList entry with a name (the stored entries of ccList are never drawn as the card);
+ *   - the car's own "message shown now" has named a number, and that number has a ccList entry with a name (the stored
+ *     entries of ccList are never drawn as the card). car-fix CF1 (the owner's car 2026-11-18): the source is
+ *     Vehicle2.statusDisplayedCCMessage (config.ccActive.source "displayed"); KombiIF statusActiveCCMessage sat on 65535 the
+ *     whole run and is a witness only where it moves (hud.js _ccActWitness); 65535 on displayed is "unknown" (window);
  *   - the D7 latch (config.ccActive.strict) has fallen: the "shown now" number has once matched a ccList entry, and the
  *     message it matched has ended;
  *   - no latch (a glyph our font lacks, a throw while painting, our sheet refused) holds;
@@ -313,7 +315,7 @@ class TwinCC {
         const a = inp.actWired && typeof inp.act === 'number', d = inp.dispWired && typeof inp.disp === 'number';
         if (a && d) {
             const same = none(inp.act) ? none(inp.disp) : inp.act === inp.disp;
-            return { wired: true, n: inp.act, conflict: !same, from: 'both' };
+            return { wired: true, n: inp.prefer === 'displayed' ? inp.disp : inp.act, conflict: !same, from: 'both' };     // car-fix CF1: prefer
         }
         if (a) return { wired: true, n: inp.act, conflict: false, from: 'active' };
         if (d) return { wired: true, n: inp.disp, conflict: false, from: 'displayed' };
@@ -324,6 +326,8 @@ class TwinCC {
      * Re-decide. inp (hud.js _twinInputs):
      *   read        the car's messages can be read (hud _ccWired)
      *   actWired / act / dispWired / disp / noneValues    the two witnesses
+     *   prefer      'displayed' | 'active': whose number is THE number when both agree (car-fix CF1)
+     *   unknownValues  numbers that say "unknown" (car-fix CF1, displayed's 65535): window, severity from the list only
      *   find(id)    the ccList entry { id, name, color, symbol } with that id, or null
      *   shown       the heuristic's verdict while no witness has spoken (hud ccListShown: true | false | null)
      *   live        [{ id, name, color, symbol }] the entries the heuristic counts as showing
@@ -335,7 +339,8 @@ class TwinCC {
         const w = this._witness(inp);
         let shown = null, entry = null, state = 'window', reason = '', cand = null, conf = false;
         let shownNow = '-';
-        let sev = 0;
+        let sev = 0, unknown = false;
+        this.unlisted = false;           // car-fix CF1: the car names a number no ccList entry carries (BMW's own message)
         this.needsTick = false;
         if (!inp.read) {
             reason = 'the car\'s check-control messages have not been read yet';
@@ -345,12 +350,18 @@ class TwinCC {
             const none = (inp.noneValues || [0]).indexOf(w.n) >= 0;
             if (w.conflict) {
                 shown = true; reason = 'the two "shown now" witnesses disagree';
+            } else if ((inp.unknownValues || []).indexOf(w.n) >= 0) {
+                // car-fix CF1: 65535 on displayed (after an app start, at the end of a drive on the owner's car) = unknown: BMW's
+                // panel open; the severity only from what the list holds, so a resting list pulls no tab (no known message)
+                shown = true; unknown = true; reason = 'the "shown now" number is unknown (' + w.n + ')';
+                (inp.entries || []).forEach((e) => { sev = Math.max(sev, severityOf(e.color)); });
             } else if (none) {
                 shown = false;
             } else {
                 shown = true;
                 entry = inp.find ? inp.find(w.n) : null;
                 if (!entry) {
+                    this.unlisted = true;
                     reason = 'no ccList entry for number ' + w.n;
                     if (!this.noEntryLogged[w.n]) { this.noEntryLogged[w.n] = true; }
                 } else {
@@ -413,7 +424,7 @@ class TwinCC {
         this.state = state; this.window = state === 'window'; this.reason = reason;
         this.candidate = cand;
         if (!cand) this.drawn = null;             // nothing to show: the stamp goes too
-        this.severity = state === 'none' ? 0 : (sev || (shown === true ? 1 : 0));
+        this.severity = state === 'none' ? 0 : unknown ? sev : (sev || (shown === true ? 1 : 0));     // car-fix CF1: unknown is no message of its own
         // the log line: one per change of what was decided (numbers and lengths only; the text never)
         const sig = [shownNow, entry ? entry.id : '-', entry ? entry.color : '-', entry && entry.name ? entry.name.length : 0, state, reason].join('|');
         if (sig !== this.sigLogged) {
@@ -515,6 +526,9 @@ class TwinCentre {
         this.paint = typeof o.paint === 'function' ? o.paint : null;
         this.sheetOn = o.sheetOn !== false;
         this.mutant = o.mutant || null;
+        // car-fix CF1 (config.ccActive.unlistedPullsTab, default false): a number with no ccList entry (285, 926 ... on the owner's
+        // car, ~6 s each) keeps BMW's panel open but pulls no tab - the driver reads BMW's own panel
+        this.unlistedPullsTab = o.unlistedPullsTab === true;
         this.base = o.base || 1;                 // the tab without a message (the driver's last choice, or auto's)
         this.pulled = false;                     // a message has taken tab 2 for this period
         this.left = false;                       // the driver left tab 2 during this period
@@ -575,7 +589,7 @@ class TwinCentre {
             // a message pulls tab 2: a new drawable one (its card), or - once per period - one that shows but ours cannot be drawn (the pointer
             // page, SPEC-R3 5.1). NOT the blind keep-open (severity 0: nothing is known to show; package B2's convention: a window with
             // no severity is not a message)
-            const pullKey = cand ? cand.key : (shown && t.severity > 0 && !this.left ? '#nodraw' : null);
+            const pullKey = cand ? cand.key : (shown && t.severity > 0 && !this.left && (!t.unlisted || this.unlistedPullsTab) ? '#nodraw' : null);     // car-fix CF1: unlisted
             if (shown && pullKey && !this.periodKeys[pullKey]) { this.periodKeys[pullKey] = true; this.pulled = true; this.left = false; }
             this.tab = this.pulled ? 2 : this.base;
             buf = null; bufSig = null;
