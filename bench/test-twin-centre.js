@@ -357,7 +357,8 @@ console.log('repaint only on a change; a night change repaints; a setting is app
     at(h, 3500); pages.update(h, x, h._now_ms, false);
     eq([pages.st(h).page, writes], ['clock', 4], 'a change of "centre": the next tick shows the clock page, one repaint');
     const src = fs.readFileSync(path.join(ROOT, 'shared', 'hud.js'), 'utf8');
-    ok(/TW_PAGE_KEYS = \['centre', 'techData', 'callerName'\]/.test(src) && /TW_PAGE_KEYS\.indexOf\(key\) >= 0\) this\._guard\('twin pages'/.test(src), 'shared/hud.js applies centre / techData / callerName through twin_pages.changed (no _rebuild)');
+    // integration (B7): B2's tab keys and these page keys share ONE in-place handler in hud.js
+    ok(/TW_PAGE_KEYS = \['centre', 'techData', 'callerName'\]/.test(src) && /if \(twinPages && TW_PAGE_KEYS\.indexOf\(key\) >= 0\) twinPages\.changed\(this\)/.test(src), 'shared/hud.js applies centre / techData / callerName through twin_pages.changed (no _rebuild)');
     ok(/w\.type === 'tdpage'\) \{ if \(twinPages\) twinPages\.update/.test(src) && /twinPages\.init\(this, x\)/.test(src), 'shared/hud.js builds and updates the tdpage layer through shared/twin_pages.js');
     ok(/tdpage: true/.test(src) && /tdpage: \['pages'\]/.test(fs.readFileSync(path.join(ROOT, 'shared', 'layouts.js'), 'utf8')), 'tdpage is an image type of the engine and a known type of the layout validator');
     // the engine loads without the file (f30_cluster does not pack it)
