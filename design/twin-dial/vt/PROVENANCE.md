@@ -19,3 +19,14 @@ Package VT, 2026-11-17. Applies to every file in this folder and its subfolders.
 - No maker's font, logo, glyph outline or bitmap; no pixel of the references (glyph measurements are numbers only,
   and the photo crops stay under `bake/work/twin-dial/vt/`).
 - No check-control symbol bitmap from the car (`requestDefaultSymbols`): never saved, baked, logged or committed.
+
+## Round 3 additions (package B6, 2026-11-18)
+
+`pictograms.js` also holds, drawn by us from the same primitives: K2's 22 drawings of the round-3 mockups (moved from
+`tools/twin-dial/mockup/pictos_r3.py` on branch `twin-r3/k2`, unchanged but for the name `td_phone_off`), a projection icon
+(a display with the broadcast waves of a generic "cast" mark; not the logo of any projection system), the cruise control,
+adaptive cruise and limiter symbols (a speedometer with an arrow, the same over a car seen from behind, the letters LIM in a
+frame), the end-of-restrictions stripes, and the guidance set (turns, forks, exits, merges, flags, roundabouts by exit for
+both traffic sides, lane changes) made with a turtle (`route()`) and a centring step (`fit()`). Nothing was traced, sampled or
+measured from any maker's artwork, from the references (`reference/vc/`), from a photo or from the car; BMW's arrow artwork
+and its symbol bitmaps are never fetched. The roundabout exit angles are a drawing convention of ours.
