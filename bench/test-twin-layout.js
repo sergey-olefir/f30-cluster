@@ -197,12 +197,12 @@ const fontBase = (n) => (FONTDIR ? atlas(n).baseline : snap[n].baseline);
 const fontCell = (n) => (FONTDIR ? atlas(n).cellHeight : snap[n].cellHeight);
 const baseOf = (w) => w.y + fontBase(w.font);
 const centreX = (w) => w.x + w.w / 2;
-const SAIRA = ['td_big', 'td_clock', 'td_gear', 'td_label', 'td_tach', 'td_scale_l', 'td_scale_s'];
+const SAIRA = ['td_big', 'td_clock', 'td_gear', 'td_label', 'td_prog', 'td_dist', 'td_cru', 'td_sign', 'td_sign3', 'td_tach', 'td_scale_l', 'td_scale_s'];
 {
     const T = (id) => byId[id];
     // [id, baseline, x of the text's anchor (centre / left / right edge by its align), font, role]
     const spec = [
-        ['speed', 441, 1540, 'td_big', 'fg'], ['gear', 539, 374, 'td_gear', 'fg'], ['ready', 348, 380, 'td_label', 'ready'], ['program', 576, 386, 'td_label', 'fg'],
+        ['speed', 441, 1540, 'td_big', 'fg'], ['gear', 432, 380, 'td_big', 'fg'], ['ready', 321, 380, 'td_label', 'ready'], ['program', 471, 380, 'td_prog', 'fg'],
         ['tab_range_u', 156, null, 'td_u19', 'fg'], ['tab_media_t', 156, 925, 'td_tab', 'fg'],
         ['row_l1', 656, 846, 'td_row', 'fg'], ['row_l1u', 656, 851, 'td_u21', 'fg'], ['row_l2', 703, 846, 'td_row', 'fg'],
         ['row_r1', 656, 1153, 'td_row', 'fg'], ['row_r1u', 656, 1158, 'td_u21', 'fg'], ['row_r2', 703, 1153, 'td_row', 'fg'], ['row_r2u', 703, 1158, 'td_u21', 'fg'],
@@ -348,6 +348,53 @@ else {
     ok(outer + 4 <= 0.893 * R, 'every speedometer numeral stays 4 px inside the tick strip (outermost corner ' + outer.toFixed(1) + ' px, strip at ' + (0.893 * R).toFixed(1) + ')');
     const tach = [1, 2, 3, 4, 5, 6, 7, 8].map((k) => { const c = polar(-125 + 31.25 * k, 0.745 * R), b = inkBox('td_tach', String(k)); return [c[0] - b.w / 2, c[1] - b.h / 2, c[0] + b.w / 2, c[1] + b.h / 2]; });
     ok(Math.max.apply(null, tach.map(radial)) + 4 <= 0.893 * R, 'every tachometer numeral stays 4 px inside the tick strip (outermost ' + Math.max.apply(null, tach.map(radial)).toFixed(1) + ' px)');
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+console.log('the tachometer\'s hub (SPEC-R3 2.7): gear (0, 0) R, programme (0, +0.209) R, READY (0, -0.29) R');
+if (!FONTDIR) skip('the hub (no atlases in the tree)');
+else {
+    const textRaster = require(path.join(dir, 'hud_text.js'));
+    const C = VG.dials.tacho.centre, Rr = VG.R_px;
+    const inkOf = (font, s) => {       // the ink box of a text drawn on its baseline 0 at x 0 (centred): [x0, y0, x1, y1] relative to baseline and centre
+        const f = atlas(font), wd = Math.ceil(textRaster.measure(s, font)) + 8, m = textRaster.mask(wd, f.cellHeight, s, { font, x: 4 });
+        let x0 = wd, y0 = f.cellHeight, x1 = -1, y1 = -1;
+        for (let y = 0; y < f.cellHeight; y++) for (let x = 0; x < wd; x++) if (m[y * wd + x] > 127) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+        const w0 = textRaster.measure(s, font);
+        return [x0 - 4 - w0 / 2, y0 - f.baseline, x1 + 1 - 4 - w0 / 2, y1 + 1 - f.baseline];
+    };
+    const gear = byId.gear, prog = byId.program, rdy = byId.ready;
+    const centreOf = (w, s) => { const b = inkOf(w.font, s), base = w.y + atlas(w.font).baseline; return [(C[0] + (w.x + w.w / 2 - C[0]) + (b[0] + b[2]) / 2 - C[0]) , (base + (b[1] + b[3]) / 2 - C[1])]; };
+    // SPEC-R3 2.7: the centres of the gear (0, 0) R, the programme (0, +0.209) R, READY (0, -0.29) R, from the atlases' own ink
+    const gc = centreOf(gear, 'D3'), pc = centreOf(prog, 'COMFORT'), rc = centreOf(rdy, 'READY');
+    ok(Math.abs(gc[1]) <= 1.5 && Math.abs(gc[0]) <= 1.5, 'the gear\'s ink is centred on the dial centre (offset ' + gc.map((v) => v.toFixed(1)).join(', ') + ' px)');
+    ok(Math.abs(pc[1] - 0.209 * Rr) <= 1.5 && Math.abs(pc[0]) <= 1.5, 'the drive programme is centred at (0, +0.209) R (y ' + pc[1].toFixed(1) + ' of ' + (0.209 * Rr).toFixed(1) + ')');
+    ok(Math.abs(rc[1] + 0.29 * Rr) <= 1.5 && Math.abs(rc[0]) <= 1.5, 'READY is centred at (0, -0.29) R (y ' + rc[1].toFixed(1) + ' of ' + (-0.29 * Rr).toFixed(1) + ')');
+    const cap = inkOf('td_big', 'D')[3] - inkOf('td_big', 'D')[1], capSpeed = inkOf('td_big', '8')[3] - inkOf('td_big', '8')[1];
+    ok(Math.abs(cap - 0.222 * Rr) <= 4 && Math.abs(cap - capSpeed) <= 2, 'the gear\'s cap height is ' + cap + ' px (0.222 R = ' + (0.222 * Rr).toFixed(1) + '), the digital speed\'s: ' + capSpeed);
+    ok(gear.gpu === true && gear.maxLen === 2 && gear.w >= 164 && gear.font === 'td_big', 'the gear is a GPU text of td_big in a box >= 164 px (two figure pitches of 82)');
+    // every gear string: glyphs in td_big, the ink inside the box
+    const strs = ['P', 'R', 'N', 'D', '–'].concat([1, 2, 3, 4, 5, 6, 7, 8].map((n) => 'D' + n), [1, 2, 3, 4, 5, 6, 7, 8].map((n) => 'M' + n), [1, 2, 3, 4, 5, 6, 7, 8].map((n) => 'S' + n));
+    const miss = [], wide = [];
+    strs.forEach((t) => { Array.from(t).forEach((c) => { if (glyphsOf('td_big').indexOf(c) < 0) miss.push(t + ':' + c); }); const b = inkOf('td_big', t); if (b[2] - b[0] > gear.w + 4) wide.push(t + ' ' + (b[2] - b[0])); });
+    ok(!miss.length, 'every gear string is in td_big (D M N P R S, the figures, the dash)' + (miss.length ? ': ' + miss.join(', ') : ''));
+    ok(!wide.length, 'every gear string\'s ink fits the 164 px layer (the GPU text is four 41 px cells) to within 2 px a side (M4 is 166 px: the outer stems of the M may lose their last pixel; M8 is 164)' + (wide.length ? ': ' + wide.join(', ') : ''));
+    // the programme's worst text and READY inside their boxes; no Cyrillic in any of the three (Saira)
+    const progs = ['COMFORT', 'SPORT', 'SPORT+', 'ECO PRO', 'ADAPTIVE'];
+    ok(progs.every((t) => Array.from(t).every((c) => glyphsOf('td_prog').indexOf(c) >= 0) && textRaster.measure(t, 'td_prog') <= prog.w), 'every drive programme fits td_prog and its ' + prog.w + ' px box (the widest ' + Math.max.apply(null, progs.map((t) => textRaster.measure(t, 'td_prog'))) + ' px)');
+    ok(textRaster.measure('READY', 'td_label') <= rdy.w, 'READY fits its ' + rdy.w + ' px box');
+    ok([gear, prog, rdy].every((w) => SAIRA.indexOf(w.font) >= 0 && !/[Ѐ-ӿ]/.test(w.text)), 'the three hub widgets are Saira widgets whose templates carry no Cyrillic letter');
+    // the clearance to the inner ring: its outer edge 0.544 R + 0.004 R; every corner of each box (and of the ink) stays >= 4 px inside it
+    const ring = 0.548 * Rr;
+    [gear, prog, rdy].forEach((w) => {
+        const cs = [[w.x, w.y], [w.x + w.w, w.y], [w.x, w.y + w.h], [w.x + w.w, w.y + w.h]].map((p) => Math.hypot(p[0] - C[0], p[1] - C[1]));
+        ok(Math.max.apply(null, cs) + 4 <= ring, w.id + ': every corner of its box is >= 4 px inside the inner ring (farthest ' + Math.max.apply(null, cs).toFixed(1) + ' of ' + ring.toFixed(1) + ')');
+    });
+    // vertical room between the three: ink gaps
+    const ink = (w, s) => { const b = inkOf(w.font, s), base = w.y + atlas(w.font).baseline; return [base + b[1], base + b[3]]; };
+    const gi = ink(gear, 'D3'), pi = ink(prog, 'COMFORT'), ri = ink(rdy, 'READY');
+    ok(gi[0] - ri[1] >= 20 && pi[0] - gi[1] >= 12, 'READY, the gear and the programme keep clear of each other (gaps ' + (gi[0] - ri[1]).toFixed(0) + ' and ' + (pi[0] - gi[1]).toFixed(0) + ' px)');
+    ok(![gear, prog, rdy].some((w) => hit(box(w), BELT) || hit(box(w), GAP) || LAMPS.some((l) => hit(box(w), l))), 'the hub widgets keep clear of the belt group, the gear-letter gap and the lamps');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

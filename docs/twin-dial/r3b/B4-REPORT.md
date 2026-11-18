@@ -175,7 +175,7 @@ UV_CACHE_DIR=bake/work/.uvcache uv run -q --no-project --with numpy --with pillo
    - the first metadata line as the title when no type arrives
    - `navType` 2 / KARTENANSICHT as the map view
    - the slot row meaning `status ≠ 0 && map 1` (SN's rule)
-7. **Not done (not in B4's brief, but B6's note asks B4):** the gear in the hub's centre (`td_big`, a box ≥ 164 px wide), the program in `td_prog` and READY at (0, −0.29) R (SPEC-R3 §2.7). These are hub widgets in `gen_twin.py`, and `td_prog` does not exist on this branch. The lead or B7 should give them to whoever merges B6 (B6's note has the numbers).
+7. **The tachometer hub (SPEC-R3 §2.7) was added afterwards at the lead's request** and is done: see §8.
 8. There is no bench-server check that a `centre` change makes no layout build: the in-place path is tested at the function level and by source. B2's tab test counts builds on the bench.
 
 ## 7. Final run of every suite (this branch, one at a time, BENCH_PORT 8604)
@@ -186,3 +186,27 @@ scene-tex 54, strip-mask 40, twin-bake 35, twin-budget 75, twin-cc 149, **twin-c
 All green, and the f30_cluster suites keep main's counts.
 
 `test-night` failed 8 checks once, in the batch run right after another bench test on the same port. Run again alone it passed 48 of 48. I take that as a port or timing flake, not this change: B4 adds only inert hooks in the f30 path.
+
+## 8. The tachometer hub (follow-up, SPEC-R3 §2.7)
+
+`twin-b/b6` is **merged into `twin-b/b4`** (merge commit `ec82364`, clean), so the hub is built against B6's real atlases (`td_big` with the gear letters, `td_prog`). When the lead merges B6 first, nothing of it conflicts. B1's final `gen_twin.py` uses the same three baselines, so there is one hub, not two.
+
+| Item | Font / box | Baseline | Ink centre measured from the atlas | SPEC-R3 §2.7 | Result |
+|---|---|---|---|---|---|
+| gear | `td_big` (Saira 92), GPU text, `maxLen` 2, box 164 px (two pitches of 82), centred on x 380 | 432 | (−1.5, +0.5) px from the dial centre ("D3": the ink is not symmetric in its advance) | (0, 0) R | on target |
+| drive programme | `td_prog` (Saira 24), box 150 px, centred on x 380 | 471 | y +62.5 px | +0.209 R = +62.7 | on target |
+| READY | `td_label` (Saira 22), box 100 px, centred on x 380 | 321 | y −86.5 px | −0.29 R = −87.0 | on target |
+
+The unit label is B1's face bake at +0.40 R (not touched here).
+
+- **Gear cap height** measures 63 px on the "D" (65 on the speed's "8", which overshoots). SPEC says 0.222 R = 66.6 and "the digital speed's size": same face and size, so same size. The test allows 4 px against 66.6 and 2 px against the digital speed.
+- **Clearance to the inner ring:** the ring's outer edge is 0.548 R = 164.4 px. The farthest box corner is 110.0 px (READY), 105.4 (programme) and 89.2 (gear), so ≥ 54 px inside it, far over the 4 px asked. The ink gaps are 47 px (READY to gear) and 21 px (gear to programme).
+- **GPU fit:** the gear's GPU layer is four 41 px cells (164 px) whatever the box. The widest ink of any gear string is "M4", 166 px: 1 px of the M's outer stems may be clipped on each side (M8 is 164). This is a hypothesis until a photo; widening the box does not widen the layer (the engine's `_gpuGrid` fixes four cells for `maxLen` 2).
+- All 29 gear strings (P R N D –, D1–8, M1–8, S1–8) have their glyphs in `td_big`; every programme fits its box (widest "ADAPTIVE", 142 px); no Cyrillic reaches the three Saira widgets.
+- Layout planner after the change: connection 1 has the same number of layers; the left hub's label sheet is 150 × 172 (it was 140 × 250). `td_gear` is no longer used by the layout (B6: its `TWIN_FONTS` line can go).
+
+Files: `design/gen_twin.py` (`HUB` baselines, the two x terms, fonts), `apps/twin_dial/hud/layouts/twin.json`, `bench/test-twin-layout.js` (the three old text rows replaced; a hub section of 15 checks; Saira list extended with B6's names). Layout test: 102 passed.
+
+Merge note for B1's hunk: B1 keeps `title: 282` in `BASE`; B4 has 281 (SPEC-R3 §4 header). Keep 281. B1's `BASE` hub entries and mine are the same numbers; take B4's `HUB` block.
+
+Budget test: it failed twice mid-session with a kit-build error and a few highlight checks, then passed 75 of 75 on the next two runs with identical code. I believe other packages run the same test in the shared `bake/work/.../budget-root` at the same time. Rerun it alone at the end.
