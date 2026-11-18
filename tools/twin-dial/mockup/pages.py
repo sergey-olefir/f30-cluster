@@ -87,7 +87,7 @@ STATUS = {
     'guiding': ('arrives', 'guidingState'),
     'road': ('arrives', 'currentRoad (text never drawn from life: placeholder)'),
     'turn': ('unseen', 'Guidance.nextIntersection'),
-    'map': ('hypothesis', "BMW's map slot under our window (SN)"),
+    'map': ('hypothesis', "BMW's map: under the panel verified (slot table); visible on today's build: to photograph (SN X1)"),
     'limit': ('arrives', 'speed-limit struct (f30_cluster signOf)'),
     'oil': ('arrives', 'oil temperature'),
     'coolant': ('arrives', 'CDS.statusEngineTemperature'),
@@ -810,27 +810,45 @@ def map_standin(p, rect, seed=11):
     """A drawn map stand-in: procedural roads on a dark ground, a route and our position. No real place."""
     x0, y0, x1, y1 = rect
     w, h = int((x1 - x0) * SS), int((y1 - y0) * SS)
-    m = Image.new('RGB', (w, h), (34, 37, 36))
+    m = Image.new('RGB', (w, h), (20, 34, 66))   # SN: navy ground, grey-blue roads, blue route
     d = ImageDraw.Draw(m)
     rng = np.random.default_rng(seed)
-    d.polygon([(0, h * 0.15), (w * 0.22, h * 0.1), (w * 0.3, h * 0.38), (0, h * 0.45)], fill=(36, 52, 40))   # park
-    d.polygon([(w, h * 0.55), (w * 0.82, h * 0.62), (w * 0.86, h), (w, h)], fill=(30, 42, 60))              # water
+    d.polygon([(0, h * 0.15), (w * 0.22, h * 0.1), (w * 0.3, h * 0.38), (0, h * 0.45)], fill=(26, 44, 78))   # park
+    d.polygon([(w, h * 0.55), (w * 0.82, h * 0.62), (w * 0.86, h), (w, h)], fill=(16, 26, 54))              # water
     for k in range(9):                                 # a skewed street grid
         x = (k + rng.uniform(-0.3, 0.3)) * w / 8
-        d.line([(x, 0), (x + w * 0.12, h)], fill=(62, 66, 68), width=int(4 * SS))
+        d.line([(x, 0), (x + w * 0.12, h)], fill=(90, 108, 136), width=int(4 * SS))
     for k in range(6):
         y = (k + rng.uniform(-0.3, 0.3)) * h / 5
-        d.line([(0, y), (w, y - h * 0.08)], fill=(62, 66, 68), width=int(4 * SS))
+        d.line([(0, y), (w, y - h * 0.08)], fill=(90, 108, 136), width=int(4 * SS))
     pts = [(w * 0.52, h * 1.02), (w * 0.53, h * 0.7), (w * 0.56, h * 0.45), (w * 0.7, h * 0.3), (w * 1.02, h * 0.18)]
-    d.line(pts, fill=(98, 100, 96), width=int(16 * SS), joint='curve')                                     # main road
-    d.line(pts[:3] + [(w * 0.4, h * 0.3), (w * 0.2, h * 0.24), (-10, h * 0.22)], fill=(98, 100, 96), width=int(11 * SS), joint='curve')
-    d.line(pts[:3] + [(w * 0.4, h * 0.3), (w * 0.2, h * 0.24)], fill=(70, 160, 235), width=int(9 * SS), joint='curve')  # route
+    d.line(pts, fill=(120, 140, 170), width=int(16 * SS), joint='curve')                                     # main road
+    d.line(pts[:3] + [(w * 0.4, h * 0.3), (w * 0.2, h * 0.24), (-10, h * 0.22)], fill=(120, 140, 170), width=int(11 * SS), joint='curve')
+    d.line(pts[:3] + [(w * 0.4, h * 0.3), (w * 0.2, h * 0.24)], fill=(60, 120, 255), width=int(9 * SS), joint='curve')  # route
     cx, cy = w * 0.525, h * 0.84
     s = 16 * SS
     d.polygon([(cx, cy - s), (cx + s * 0.75, cy + s * 0.8), (cx, cy + s * 0.35), (cx - s * 0.75, cy + s * 0.8)], fill=(255, 255, 255))
     f = M.noto(19)
     d.text((10 * SS, 26 * SS), 'заглушка мапи: не реальне місце', font=f, fill=(150, 150, 150), anchor='ls')
     p.cv.img.paste(m, (int(x0 * SS), int(y0 * SS)))
+
+
+def pg_map_sn(p, variant='W1'):
+    """SN W1 (vignette: window zero box [750, 180, 1170, 564], fades top 120 / sides 80 / bottom 80) or W2 (BMW's own
+    edge: open box [700, 173, 1220, 600]); no title (01, 07, 11); road bar [760, 540, 1160, 584]."""
+    box = (700, 173, 1220, 600) if variant == 'W2' else (750, 180, 1170, 564)
+    map_standin(p, box)
+    if variant == 'W1':
+        x0, y0, x1, y1 = box
+        w, h = int((x1 - x0) * SS), int((y1 - y0) * SS)
+        yy, xx = np.mgrid[0:h, 0:w] / SS
+        a = np.minimum.reduce([np.clip(yy / 120, 0, 1), np.clip(xx / 80, 0, 1), np.clip((x1 - x0 - xx) / 80, 0, 1),
+                               np.clip((y1 - y0 - yy) / 80, 0, 1)])
+        reg = p.cv.img.crop((int(x0 * SS), int(y0 * SS), int(x0 * SS) + w, int(y0 * SS) + h))
+        arr = (np.asarray(reg).astype(float) * a[..., None]).astype(np.uint8)
+        p.cv.img.paste(Image.fromarray(arr), (int(x0 * SS), int(y0 * SS)))
+    p.rrect(760, 540, 1160, 584, 8, fill=(0, 0, 0))
+    p.text(960, 572, 'вулиця Тестова', M.noto(31), WHITE, 'c')
 
 
 def pg_map(p, with_title=True):
@@ -861,7 +879,7 @@ def pg_guidance(p):
 def pg_nav_idle(p):
     p.title('Навігація')
     p.icon('td_compass', 80, 960, 390, (170, 170, 170))
-    p.ctext((960, 480), 'Маршрут не задано', M.noto(39), GREY2)
+    p.ctext((960, 480), 'Маршрут не прокладено', M.noto(39), GREY2)
     p.ctext((960, 530), 'Назва дороги', M.noto(29), (150, 150, 150))
 
 
@@ -992,6 +1010,8 @@ def build():
     # tab 5
     shot('tab5', '5A_map_title', "BMW's map in the window, our title and rule over it", ['map', 'road'], 5, pg_map, bottom=1)
     shot('tab5', '5B_map_full', "BMW's map in the whole centre window, no title", ['map', 'road'], 5, lambda p: pg_map(p, False), bottom=1)
+    shot('tab5', '5A2_map_W1', 'SN W1: map vignette, no title, road bar', ['map', 'road'], 5, lambda p: pg_map_sn(p, 'W1'), bottom=1)
+    shot('tab5', '5A3_map_W2', "SN W2: BMW's own edge, no title, road bar", ['map', 'road'], 5, lambda p: pg_map_sn(p, 'W2'), bottom=1)
     shot('tab5', '5C_guidance', 'fallback guidance page: arrow, distance, road label', ['guiding', 'turn', 'road'], 5, pg_guidance, bottom=1)
     shot('tab5', '5D_not_guided', 'navigation tab, no route', ['guiding', 'road'], 5, pg_nav_idle, bottom=1)
 
