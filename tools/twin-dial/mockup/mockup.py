@@ -63,6 +63,7 @@ class Look:
     red_from: float = 6.5                 # x 1000 rpm: the redline setting
     red_to: float = None                  # deg where the zone ends; None = the scale's end, tach_angle(8) = 125 (0.1.0)
     red_style: str = 'wedge'              # 'wedge' (04 / 08), 'arc' (red bezel, 06), 'both'
+    arc_to: float = None                  # deg where the red bezel ends; None = the zone's end, at most the bezel's end
     wedge_rho: tuple = (0.550, 0.940)
     red_rim: bool = False                 # 08: the inner rim is red inside the zone
     # numerals: a soft shadow under the scale numerals (06): (dx, dy, sigma) in R, strength 0..1 (darkening)
@@ -343,7 +344,7 @@ class Canvas:
         self.sector(c, R - lk.bezel_half * R, R + lk.bezel_half * R, -lk.bezel_ang, lk.bezel_ang, WHITE)
         self.sector(c, lk.rim_rho * R - lk.rim_half * R, lk.rim_rho * R + lk.rim_half * R, -lk.rim_ang, lk.rim_ang, WHITE)
         if kind == 'tach' and lk.red_style in ('arc', 'both'):      # 06: the bezel is red over the zone
-            self.sector(c, R - lk.bezel_half * R, R + lk.bezel_half * R, red_a0, min(red_a1, lk.bezel_ang), RED)
+            self.sector(c, R - lk.bezel_half * R, R + lk.bezel_half * R, red_a0, min(red_a1 if lk.arc_to is None else lk.arc_to, lk.bezel_ang), RED)
         if kind == 'tach' and lk.red_rim:                          # 08: the rim is red over the zone
             self.sector(c, lk.rim_rho * R - lk.rim_half * R, lk.rim_rho * R + lk.rim_half * R, red_a0, min(red_a1, lk.rim_ang), RED)
         # needle: white, tapered, no cap
@@ -508,8 +509,9 @@ def render(speed=87.0, rpm=2.4, page='clock', message=None, look=None, gear='D3'
     return out
 
 
-def annotate(base):
-    """The same picture with every place that is BMW's or protected, drawn over it."""
+def annotate(base, black_box=False):
+    """The same picture with every place that is BMW's or protected, drawn over it. black_box (round 3): also the
+    KOMBI's black box, x 1406-1597, y 342-419 (brief r3 §1), when it appears."""
     img = base.convert('RGBA')
     ov = Image.new('RGBA', img.size, (0, 0, 0, 0))
     d = ImageDraw.Draw(ov)
@@ -534,13 +536,16 @@ def annotate(base):
                 d.rectangle([x0 - 3, y0 - 3, x1 + 3, y1 + 3], outline=(255, 0, 255, 255), width=2)
     except Exception as e:
         print('no catalogue:', e)
+    if black_box:
+        d.rectangle([1406, 342, 1597, 419], outline=(255, 255, 255, 255), width=2)
     img = Image.alpha_composite(img, ov).convert('RGB')
     dd = ImageDraw.Draw(img)
     lf = ImageFont.truetype(os.path.join(FONTS, 'notosans', 'NotoSans[wdth,wght].ttf'), 18)
     for i, (col, txt) in enumerate([((255, 40, 40), 'hood hides it'), ((0, 200, 255), "BMW's belt and airbag group (never covered)"),
                                     ((255, 150, 0), 'gap over the gear letter (layers split here)'),
                                     ((255, 255, 0), "BMW's gear letter (drawn over us)"), ((0, 255, 120), "fallback window over BMW's message panel"),
-                                    ((255, 0, 255), "BMW's own lamps (see-through holes)")]):
+                                    ((255, 0, 255), "BMW's own lamps (see-through holes)")]
+                                   + ([((255, 255, 255), "the KOMBI's black box, when it appears")] if black_box else [])):
         dd.rectangle([20, 20 + i * 26, 38, 38 + i * 26], fill=col)
         dd.text((46, 20 + i * 26), txt, font=lf, fill=(255, 255, 255))
     return img

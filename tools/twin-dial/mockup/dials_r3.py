@@ -26,7 +26,7 @@ BOX = (-1.08, -1.06, 1.08, 0.98)                       # the close-up in R about
 # (file stem, look, row, label, reference crops for the close-up, render keywords)
 VARIANTS = [
     ('00_today', 'today', 'Today and the fixes', 'Today (0.1.0 as specified)', ['06', '08'], {}),
-    ('01_fixed', 'r3_fixed', 'Today and the fixes', 'Fixed: red zone to the band end, rings as 06', ['06', '08'], {}),
+    ('01_fixed', 'r3_fixed', 'Today and the fixes', 'Fixed: red to the band cut (143), rings end together, thin rim', ['06', '08'], {}),
     ('10_band_A', 'r3_fixed', 'Band look', 'A: today\'s band (on the fixes)', ['02R', '06'], {}),
     ('11_band_B', 'band_B', 'Band look', 'B: 06 (flatter, lighter, cool)', ['06'], {}),
     ('12_band_C', 'band_C', 'Band look', 'C: between A and B', ['06', '02R'], {}),
@@ -34,8 +34,8 @@ VARIANTS = [
     ('21_red_arc', 'red_arc', 'Red zone', 'Red bezel arc (06), no wedge', ['06'], {}),
     ('22_red_both', 'red_both', 'Red zone', 'Wedge and red bezel', ['06', '08'], {}),
     ('23_red_wedge_rim', 'red_wedge_rim', 'Red zone', 'Wedge, rim red over it (08)', ['08'], {}),
-    ('24_red_08_end', 'red_08_end', 'Red zone', 'Wedge ends just past "8" (08)', ['08'], {}),
-    ('30_rim_fixed', 'r3_fixed', 'Inner rim', 'Rim thin, ends with the bezel (+-144)', ['06'], {}),
+    ('24_red_08_end', 'red_08_end', 'Red zone', 'Wedge ends just past the "8" (ours), grey after', ['08', '06'], {}),
+    ('30_rim_fixed', 'r3_fixed', 'Inner rim', 'Rim thin (0.008 R), ends with band and bezel (143.5)', ['06'], {}),
     ('31_rim_today', 'rim_today', 'Inner rim', 'Rim as today (0.016 R, +-150)', ['06'], {}),
     ('40_num_flat', 'r3_fixed', 'Numerals', 'Flat (today)', ['06'], {}),
     ('41_num_shadow', 'num_shadow', 'Numerals', 'Soft shadow (06)', ['06'], {}),
@@ -220,7 +220,7 @@ def main():
     print('wrote dials_sheet.png', sheet.size)
     for lname in ('r3_fixed', 'look_06', 'look_C_both'):
         img = Image.open(os.path.join(OUT, next(v[0] for v in VARIANTS if v[1] == lname) + '.png'))
-        M.annotate(img).save(os.path.join(OUT, 'protected_zones_%s.png' % lname))
+        M.annotate(img, black_box=True).save(os.path.join(OUT, 'protected_zones_%s.png' % lname))
     json.dump(report, open(os.path.join(OUT, 'checks.json'), 'w'), indent=1, ensure_ascii=False)
     for k, c in report['checks'].items():
         print(k, c['red_zone_deg'], '8 ink', c['eight_ink_deg'], 'inside' if c['eight_wholly_inside'] else 'NOT inside')
