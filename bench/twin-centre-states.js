@@ -47,7 +47,7 @@ const TRIP = { avg: { speed1: 410, cons1: 68, speed2: 1, cons2: 1 }, travel: { h
 const FACT = { trip: { factors: { bc: 1, speed: 0.1, cons: 0.1, way: 0.1 } } };
 
 const FULL_PHONE = { phone: true, phoneDevices: true, callDetail: true };       // the call card's whole drawing (car-fix CF3: the unseen parts too)
-const CAR_PAGES = { media: true, phone: true, phoneDevices: false, callDetail: false, guidance: false, route: true, tyres: false };    // app.json after car-fix CF3
+const CAR_PAGES = { media: true, phone: true, phoneDevices: false, callDetail: false, guidance: false, route: true, routeOffRoad: false, tyres: false };    // app.json after car-fix CF3
 
 /** The page model wired through the real handlers (shared/twin_pages.js wire): returns the handler table. */
 function wired(h, R) { const extra = {}; R.pages.wire(h, extra); h._extra = extra; return extra; }

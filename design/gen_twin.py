@@ -301,7 +301,7 @@ def page_items():
                   T('foot', MID_X, 560, 'n29', '{{td:pgGuideFoot}}', 'dim', 'c', 436)]
     # car-fix CF3: the route guided by CarPlay (BMW's arrow, manoeuvre and lanes stay empty then): the destination block, no arrow -
     # the remaining distance Saira 72 + its unit centred as one group (the guidance page's sizes), the arrival time and the travel
-    # time Noto 33, the road the car is on Noto 31 grey, "Поза дорогою" in the footer when the car says it is off a known road
+    # time Noto 33, the road the car is on Noto 31 grey, "Поза дорогою" in the footer when the car says it is off a known road (only with config.pages.routeOffRoad: unverified)
     P['route'] = [title(), meta('{{td:pgRouteMeta}}'),
                   {'k': 'g', 'id': 'dist', 'cx': MID_X, 'b': 410, 'c': 'fg', 'parts': [{'s': '{{td:pgRouteDist}}', 'f': 's72'}, {'s': '{{td:pgRouteUnit}}', 'f': 'n29', 'gap': 8}]},
                   T('eta', MID_X, 466, 'n33', '{{td:pgRouteEta}}', 'fg', 'c', 436),

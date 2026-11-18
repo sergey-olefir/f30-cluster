@@ -183,8 +183,8 @@ console.log('built dark stays dark until its config key is set');
     });
     const cfgJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'twin_dial', 'app.json'), 'utf8')).config;
     // car-fix CF3: what the car sends is on (media, the call card, the CarPlay route); what it never sent stays dark
-    eq(cfgJson.pages, Object.assign({}, cfgJson.pages, { tyres: false, media: true, phone: true, phoneDevices: false, callDetail: false, guidance: false, route: true }),
-        'app.json (car-fix CF3): config.pages media / phone / route on; tyres / phoneDevices / callDetail / guidance (unseen or untested) off');
+    eq(cfgJson.pages, Object.assign({}, cfgJson.pages, { tyres: false, media: true, phone: true, phoneDevices: false, callDetail: false, guidance: false, route: true, routeOffRoad: false }),
+        'app.json (car-fix CF3): config.pages media / phone / route on; tyres / phoneDevices / callDetail / guidance / routeOffRoad (unseen, untested or unverified) off');
     ok(cfgJson.mapWindow === null && cfgJson.mapSlots === false && cfgJson.mapForce === false, 'app.json: config.mapWindow null, mapSlots / mapForce false (the map window is an experiment, off)');
 }
 
@@ -367,7 +367,10 @@ console.log('car-fix CF3: navigation - the route guided by CarPlay');
     const h = S.make(R, 'car_route');
     eq([showing(h), tok(h, 'pgTitle'), tok(h, 'pgRouteMeta')], ['route', 'Навігація', 'CarPlay'], 'provider CAR_PLAY, BMW\'s guiding INACTIVE, a fresh destination: the route page, "Навігація", meta CarPlay');
     eq([tok(h, 'pgRouteDist'), tok(h, 'pgRouteUnit'), tok(h, 'pgRouteEta')], ['5.7', 'км', 'прибуття 20:41 · 11 хв'], 'the car\'s 5700 (unit KM) is 5.7 км; the arrival 20:41 as sent (local); 660 s = 11 хв');
-    eq([tok(h, 'pgRouteRoad').length, tok(h, 'pgRouteFoot')], [14, 'Поза дорогою'], 'the road the car is on; isOnGuidableRoad false: "Поза дорогою"');
+    eq([tok(h, 'pgRouteRoad').length, tok(h, 'pgRouteFoot')], [14, ''], 'the road the car is on; isOnGuidableRoad false but config.pages.routeOffRoad off (its meaning unverified): no footer');
+    h.config.pages = Object.assign({}, S.CAR_PAGES, { routeOffRoad: true });
+    eq(tok(h, 'pgRouteFoot'), 'Поза дорогою', '... with routeOffRoad on: "Поза дорогою"');
+    eq(h.td.route, true, 'tab rule 3: hud.td.route is true while the CarPlay route is live (shared/twin_tabs.js selects tab 5)');
     eq([pages.st(h).dest.dist, pages.metres({ rawDistance: 5700, unit: 'KM' }), pages.metres({ rawDistance: 5700, unit: 1 }), pages.metres({ rawDistance: 0, unit: 'NONE' })], [5700, 5700, 5700, null],
         'rawDistance is METRES whatever the unit (5.7e6 m or 57 km in 660 s is impossible); 0 is no distance');
     eq([pages.st(h).dart, pages.st(h).lanes], [{ kind: null, dist: null, exit: null, side: null }, null], 'the CarPlay route\'s empty manoeuvre and lanes: nothing to draw (no arrow page)');
@@ -375,10 +378,11 @@ console.log('car-fix CF3: navigation - the route guided by CarPlay');
     e[I.guidance].isOnGuidableRoad(true); eq(tok(h, 'pgRouteFoot'), '', 'on a guidable road: no footer');
     // freshness, provider, BMW's own guidance, the switch
     const x = newX(h);
-    eq(step(h, x, pages.ROUTE_FRESH_MS + 1000), 'road', 'no destination for more than a minute: the route page goes (the road page with the road)');
+    eq([step(h, x, pages.ROUTE_FRESH_MS + 1000), h.td.route], ['road', false], 'no destination for more than a minute: the route page goes (the road page with the road) and hud.td.route is false at that tick');
     e[I.guidance].nextDestinationInfo({ travelTime: 600, formattedDistance: { rawDistance: 5200, unit: 'KM' }, estimatedArrivalTime: { time: { hour: 20, minute: 41, invalid: false } } });
     eq([step(h, x, pages.ROUTE_FRESH_MS + 1500), tok(h, 'pgRouteDist')], ['route', '5.2'], 'a new destination: back, 5.2 км');
-    e[I.guidance].guidingProvider('NONE'); eq(step(h, x, pages.ROUTE_FRESH_MS + 2000), 'road', 'provider NONE: no route page');
+    eq(h.td.route, true, '... a new destination: hud.td.route true at once (from the handler)');
+    e[I.guidance].guidingProvider('NONE'); eq([h.td.route, step(h, x, pages.ROUTE_FRESH_MS + 2000)], [false, 'road'], 'provider NONE: no route page, no tab rule');
     e[I.guidance].guidingProvider(2); eq([pages.st(h).provider, step(h, x, pages.ROUTE_FRESH_MS + 2500)], ['ANDROID_AUTO', 'road'], '... Android Auto (2, never seen): no route page either');
     e[I.guidance].guidingProvider(1); eq(step(h, x, pages.ROUTE_FRESH_MS + 3000), 'route', 'provider 1 = CAR_PLAY: the route page');
     e[I.guiding].guidingState('ACTIVE'); eq(step(h, x, pages.ROUTE_FRESH_MS + 3500), 'road', 'BMW\'s own guidance active (its arrow page is off): no CarPlay route page over it');

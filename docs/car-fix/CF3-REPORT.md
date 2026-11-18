@@ -29,7 +29,13 @@ Also confirmed by a log line (B4's hypothesis in `docs/twin-dial/r3b/B4-REPORT.m
 8. **Navigation: a new page `route`** ("route by CarPlay", `config.pages.route`), shown on tab 5 when `guidingProvider` = CAR_PLAY, BMW's own guiding is neither ACTIVE nor CALCULATING_ROUTE, and a destination came within the last 60 s (`ROUTE_FRESH_MS`; the car sends it every few s). Title "Навігація", meta "CarPlay", the remaining distance Saira 72 + unit (the guidance page's sizes, centred), "прибуття 20:41 · 11 хв" Noto 33 at 466, the current road Noto 31 grey at 512, footer "Поза дорогою" when `isOnGuidableRoad` is false. No arrow, no lanes. Android Auto and the other providers have not been seen: no page. BMW's own guidance keeps the arrow page (`config.pages.guidance` false: untested).
 9. **Logs:** lengths, enums and "which parts came" only. The destination's distance, travel and arrival time are not logged (they say where the car goes): `nav page: destination distance yes, travel time yes, arrival yes`.
 
-Not done (out of scope, for the lead): tab 5's auto rule 3 still follows BMW's `guidingState` only, so a CarPlay route does not select tab 5 (a one-line rule on `routeLive` if wanted); `isOnGuidableRoad`'s meaning with CarPlay is a hypothesis ("on a road the navigation knows"; it read false at the start of a CarPlay route — the footer may then say "Поза дорогою" while CarPlay guides; watch it on the car).
+Open: `isOnGuidableRoad`'s meaning with CarPlay is a hypothesis ("on a road the navigation knows"; it read false at the start of a CarPlay route; the footer is therefore off, see below).
+
+## Follow-ups from the lead (second commit)
+
+- **Rule 3 for a CarPlay route:** `shared/twin_tabs.js` `navOn()` = BMW's guidance (`hud.td.nav`) **or** `hud.td.route`, which `shared/twin_pages.js` `routeBridge()` keeps equal to `routeLive()` (provider CAR_PLAY, BMW's guiding not running, a destination within 60 s, `pages.route` on) from the guidance / provider / destination handlers and every page tick (so a route that goes stale stops selecting tab 5 at the next tick). The same lock speed, message priority and call priority as BMW's guidance; the driver's key and the fixed-tab setting dismiss it the same way. Marked `// car-fix CF3:` in twin_tabs.js. test-twin-tabs +10 (route → 5, message over it and back, route end → choice, held at 60 km/h and released at 3, a call outranks it); removing the `td.route` term fails 4 of them.
+- **"Поза дорогою" not drawn:** behind `config.pages.routeOffRoad` (false). isOnGuidableRoad read false at the start of a CarPlay route; its meaning is unverified. `callSelects` stays true.
+- Re-run alone: test-twin-centre 221/0, test-twin-tabs 209/0, test-twin-layout 106/0.
 
 ## Declarations added (all read only, `check_signals.py` passes)
 

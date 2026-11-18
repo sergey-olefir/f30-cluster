@@ -222,6 +222,7 @@ function wire(hud, extra) {
     chain(hud, extra, IF.guiding, 'guidingState', (v) => {
         const raw = isNum(v) || typeof v === 'string' ? v : pick(v, 'guidingState');
         p.guiding = enumName(raw, GUIDING_STATES);
+        routeBridge(hud);          // car-fix CF3
         once(hud, 'guiding', 'nav page: guiding state ' + (p.guiding || 'none'));
     });
     chain(hud, extra, IF.guidance, 'currentRoad', (v) => {
@@ -231,7 +232,7 @@ function wire(hud, extra) {
     chain(hud, extra, IF.guidance, 'conclusiveDart', (v) => { p.dart = dartOf(v); once(hud, 'dart', 'nav page: manoeuvre ' + (p.dart ? p.dart.kind + (p.dart.dist !== null ? ' with a distance' : '') : 'none')); }, 'Main_Instance');
     chain(hud, extra, IF.guidance, 'currentLaneGuiding', (v) => { p.lanes = lanesOf(v); once(hud, 'lanes', 'nav page: lanes ' + (p.lanes ? p.lanes.length : 0)); }, 'Main_Instance');
     chain(hud, extra, IF.guidance, 'nextDestinationInfo', (v) => {
-        p.dest = destOf(v); p.destAt = nowMs(hud);
+        p.dest = destOf(v); p.destAt = nowMs(hud); routeBridge(hud);
         // car-fix CF3: which parts came, never their values (a distance or an arrival time says where the car goes); once per change of shape
         once(hud, 'dest', 'nav page: destination ' + (p.dest ? 'distance ' + (p.dest.dist !== null ? 'yes' : 'no') + ', travel time ' +
             (p.dest.travel !== null ? 'yes' : 'no') + ', arrival ' + (p.dest.eta ? 'yes' : 'no') : 'none'));
@@ -240,6 +241,7 @@ function wire(hud, extra) {
     chain(hud, extra, IF.guidance, 'guidingProvider', (v) => {
         p.provider = enumName(isNum(v) || typeof v === 'string' ? v : pick(v, 'guidingProvider'), PROVIDERS);
         once(hud, 'provider', 'nav page: guiding provider ' + String(p.provider));
+        routeBridge(hud);
     }, 'Main_Instance');
     chain(hud, extra, IF.guidance, 'isOnGuidableRoad', (v) => {
         p.onRoad = v === true || v === 1 ? true : v === false || v === 0 ? false : null;
@@ -648,6 +650,12 @@ function routeLive(hud, t) {
     return t - p.destAt <= ROUTE_FRESH_MS && t >= p.destAt;
 }
 
+/** car-fix CF3: tab rule 3 for a CarPlay route - hud.td.route (shared/twin_tabs.js navOn), kept current from the nav handlers and every page tick. */
+function routeBridge(hud) {
+    const td = hud && hud.td;
+    if (td && typeof td === 'object') td.route = routeLive(hud, nowMs(hud));
+}
+
 function navPage(hud, t) {
     const p = st(hud);
     if (mapState(hud, t).open) return 'map';
@@ -874,7 +882,9 @@ function resolveToken(hud, name) {
             return bits.join(' · ');
         }
         case 'pgRouteRoad': return p.road || '';
-        case 'pgRouteFoot': return p.onRoad === false ? 'Поза дорогою' : '';
+        // car-fix CF3 (the lead): isOnGuidableRoad read false at the start of a CarPlay route - its meaning is unverified, so the note
+        // is drawn only with config.pages.routeOffRoad (false)
+        case 'pgRouteFoot': return pagesCfg(hud).routeOffRoad === true && p.onRoad === false ? 'Поза дорогою' : '';
         default: break;
     }
     if ((m = /^pgLane([0-7])([IC])$/.exec(name))) {
@@ -1104,6 +1114,7 @@ function update(hud, x, now, force) {
     p.evalAt = now;
     const page = decide(hud, nowMs(hud));
     p.page = page;
+    routeBridge(hud);          // car-fix CF3: a route older than 60 s stops selecting tab 5 at the next tick
     tpmsSync(hud, page === 'tyres');
     // the map window follows the page; the backdrop's title rule steps aside while it is open
     const open = page === 'map';
@@ -1137,4 +1148,4 @@ module.exports = { tabBridge, LAYER, FONTS, SAIRA, ICON, TITLES, TECH, IF, fontN
     // for the tests
     descText, dartOf, lanesOf, destOf, deviceOf, tpmsPoll,
     // car-fix CF3
-    int64, idKey, srcOf, trackTitle, trackArtist, trackTime, routeLive, fmtTravel, metres, ROUTE_FRESH_MS };
+    int64, idKey, srcOf, trackTitle, trackArtist, trackTime, routeLive, routeBridge, fmtTravel, metres, ROUTE_FRESH_MS };

@@ -118,6 +118,34 @@ console.log('1. the rules');
     eq(sel(g), 1, 'guidance ends: the driver\'s choice');
 }
 {
+    // car-fix CF3: rule 3 for a CarPlay route (hud.td.route from shared/twin_pages.js: provider CAR_PLAY, a destination within 60 s),
+    // the same lock speed and message priority as BMW's guidance
+    const h = mk();
+    sel(h);
+    h.td.route = true;
+    eq(sel(h), 5, 'CF3: a CarPlay route starts (auto, standing): tab 5');
+    msg(h, 'window');
+    eq(sel(h), 2, 'CF3: a message during the CarPlay route: tab 2');
+    msg(h, 'none');
+    eq(sel(h), 5, 'CF3: the message ends: tab 5 again (the route still on)');
+    h.td.route = false;
+    eq(sel(h), 1, 'CF3: the route ends (no destination for 60 s): back to the driver\'s choice');
+    const g = mk();
+    sel(g);
+    g._d.speed = 60; g.td.route = true;
+    eq(sel(g), 1, 'CF3: a CarPlay route at 60 km/h with the lock at 5: the change waits');
+    msg(g, 'window');
+    eq(sel(g), 2, 'CF3: a message at speed is never held: tab 2');
+    msg(g, 'none');
+    eq(sel(g), 1, 'CF3: the message ends at speed: back to tab 1, the held route rule still waits');
+    g._d.speed = 3;
+    eq(sel(g), 5, 'CF3: slowed to 3 km/h: the held change happens (tab 5)');
+    g.td.callState = 2;
+    eq(sel(g), 4, 'CF3: a call during the CarPlay route outranks it (rule 2 before 3)');
+    g.td.callState = 0;
+    eq(sel(g), 5, 'CF3: the call ends: the route takes tab 5 back');
+}
+{
     // the lock speed
     const h = mk();
     sel(h);
