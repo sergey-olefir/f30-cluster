@@ -200,10 +200,8 @@ Cluster states in step order: `stock` = Twin Dial and f30 both Off; `twin` = Twi
 | 95 | B8.2 | stock | P16: tyre-pressure |
 | 96 | B8.3 | stock | P17: cbs-list |
 | 97 | B8.4 | stock | P15: sign |
-| 98 | B8.5 | stock | P15: longitudinal |
-| 99 | B8.6 | stock | P16: sport-display |
-| 100 | B8.7 | stock | P17: heading |
-| 102 | B8.9 | stock | P16: tyre-pressure |
+| 98 | B8.5 | stock | P15: longitudinal, P16: sport-display, P17: heading |
+| 100 | B8.7 | stock | P16: tyre-pressure |
 <!-- END:verify -->
 
 ### 2.4 Set switching
@@ -299,8 +297,8 @@ Tick when the answer has been read and recorded (answers.json carries the eviden
 | [ ] | P13 | P | steering-wheel buttons, turn-signal stalk, controller | B1.2 (mark 2); B1.3 (mark 3); B1.4 (mark 4); B1.5 (mark 5); B1.6 (mark 6); B1.7 (mark 7); B1.8 (mark 8); B1.9 (mark 9); B1.10 (mark 10); B1.11 (mark 11); B1.12 (mark 12); B1.13 (mark 13); B1.14 (mark 14); B1.15 (mark 15); B1.16 (mark 16); B1.17 (mark 17); B1.18 (mark 18); B1.19 (mark 19); B1.20 (mark 20); B1.21 (mark 21); B1.22 (mark 22); B1.23 (mark 23); B1.25 (mark 25); B1.26 (mark 26); B1.27 (mark 27); B1.28 (mark 28); B1.29 (mark 29); B1.30 (mark 30); B1.31 (mark 31); B1.32 (mark 32); B1.33 (mark 33); B1.34 (mark 34) | the tab key (SB 3.3) |
 | [ ] | P14 | P | map presence fields | B1.24 (mark 24); B7.2 (mark 90); B7.3 (mark 91); B7.6 (mark 94) | when BMW's map exists |
 | [ ] | P15 | P | speed-limit sign, longitudinal assistance, HUD feed | B8.4 (mark 97); B8.5 (mark 98) | the sign arrives; set speed and active function |
-| [ ] | P16 | P | boost, engine dynamics, oil, tyres | B8.2 (mark 95); B8.6 (mark 99); B8.9 (mark 102) | scales; whether the car notifies |
-| [ ] | P17 | P | heading, altitude, service due | B8.3 (mark 96); B8.7 (mark 100) | whether they arrive |
+| [ ] | P16 | P | boost, engine dynamics, oil, tyres | B8.2 (mark 95); B8.5 (mark 98); B8.7 (mark 100) | scales; whether the car notifies |
+| [ ] | P17 | P | heading, altitude, service due | B8.3 (mark 96); B8.5 (mark 98) | whether they arrive |
 | [ ] | X1 | X | f30 with 'Change with the drive mode' off | B6.8 (mark 81); B6.9 (mark 82); B6.11 (mark 84); B6.12 (mark 85); B6.13 (mark 86); B6.14 (mark 87) | whether the rebuild brings the black box |
 | [ ] | X2 | X | Twin Dial with a clear layer over the gear letter (mbCover) | pass 2 (a build) | rectangle versus pixels |
 | [ ] | X3 | X | f30 with the gap cut out of its layer rectangles (mbGap) | pass 2 (a build) | the fix |
@@ -310,9 +308,9 @@ Tick when the answer has been read and recorded (answers.json carries the eviden
 | [ ] | X7 | X | f30's message release (config.ccActive.release) | pass 2 (a build) | the window closes, never over a listed message |
 | [ ] | X8 | X | message timing: Twin Dial 0.1.1's card, slow-motion video | pass 2 (a build); B6.10 (mark 83) | 150 ms covers the upload |
 | [ ] | X9 | X | band level and night palette: one fixed-exposure photo against the bench render | B6.6 (mark 79); B6.7 (mark 80) | the level; night multipliers |
-| [ ] | X10 | X | the KOMBI accepts the round-3 shaders (0.1.1 installed) | pass 2 (a build); B8.8 (mark 101) | no reset; no missing layer |
+| [ ] | X10 | X | the KOMBI accepts the round-3 shaders (0.1.1 installed) | pass 2 (a build); B8.6 (mark 99) | no reset; no missing layer |
 | [ ] | X11 | X | switch-time film through a mode switch on each app | B6.9 (mark 82) | MP's predictions |
-| [ ] | F1 | F | Is BMW's own speed-limit sign visible with Twin Dial up | B8.8 (mark 101) | SV covers it |
+| [ ] | F1 | F | Is BMW's own speed-limit sign visible with Twin Dial up | B8.6 (mark 99) | SV covers it |
 | [ ] | F2 | F | Side lamps and belt lamp with Twin Dial up (belt unbuckled, a door open) | B0.3; B6.2 (mark 75); B6.3 (mark 76); B6.4 (mark 77) | safety check before driving |
 | [ ] | F3 | F | A close photo of a dial's lower ends | B6.5 (mark 78) | inner-ring finding |
 | [ ] | F4 | F | Photo 16 of OVERLAY-PHOTO-PROTOCOL: which side lamps BMW draws over us | not in this session: needs the diag_overlay build (OVERLAY-PHOTO-PROTOCOL photo 16), which was never built; B6.4 (mark 77) | six of seven lamps unknown |

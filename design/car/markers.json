@@ -904,49 +904,33 @@
    "items": [
     "P15",
     "F5",
-    "F6"
+    "F6",
+    "P16",
+    "P17"
    ],
    "step": "B8.5",
    "cluster": "stock"
   },
   "99": {
-   "class": "acceleration",
-   "item": "P16",
-   "items": [
-    "P16"
-   ],
-   "step": "B8.6",
-   "cluster": "stock"
-  },
-  "100": {
-   "class": "heading",
-   "item": "P17",
-   "items": [
-    "P17"
-   ],
-   "step": "B8.7",
-   "cluster": "stock"
-  },
-  "101": {
    "class": "drive-signs-twin",
    "item": "F1",
    "items": [
     "F1",
     "X10"
    ],
-   "step": "B8.8",
+   "step": "B8.6",
    "cluster": "twin"
   },
-  "102": {
+  "100": {
    "class": "tyre-page-warm",
    "item": "P16",
    "items": [
     "P16"
    ],
-   "step": "B8.9",
+   "step": "B8.7",
    "cluster": "stock"
   },
-  "103": {
+  "101": {
    "class": "end",
    "item": "",
    "items": [],

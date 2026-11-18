@@ -24,6 +24,7 @@ RUNBOOK = os.path.join(ROOT, 'docs', 'car', 'RUNBOOK.md')
 NOT_REGISTER = {'P0'}
 KEY_CLASSES = ('bc-', 'msg-bc-', 'stalk-', 'thumb-', 'wheel-', 'controller', 'cluster-view')  # the probe's own start line: checked by the lead, not a register item
 
+CLUSTER_UK = {'as-is': 'як зараз', 'stock': 'штатна BMW', 'stock+twin+f30': 'штатна, потім Twin Dial, потім f30_cluster', 'stock then twin': 'штатна, потім Twin Dial', 'twin then f30': 'Twin Dial, потім f30_cluster', 'as before': 'як було до сесії'}
 ENGINE_UK = {'off': 'двигун вимкнено', 'ign': 'запалювання ввімкнено, двигун НЕ запущено', 'on': 'двигун працює, авто стоїть', 'drive': 'у дорозі'}
 
 
@@ -139,7 +140,7 @@ def render_blocks(plan, reg):
     total = 0
     for b in plan['blocks']:
         total += b['minutes']
-        out.append('| %s | %s | %d | %s | %s | %s | %s |' % (b['id'][1:], b['title_uk'], b['minutes'], ENGINE_UK[b['engine']], b['cluster'],
+        out.append('| %s | %s | %d | %s | %s | %s | %s |' % (b['id'][1:], b['title_uk'], b['minutes'], ENGINE_UK[b['engine']], CLUSTER_UK.get(b['cluster'], b['cluster']),
                                                        ', '.join(b['sets']) or '-', 'так' if b['passenger'] else 'ні'))
     out.append('| | **Разом (оцінка)** | **%d** | | | | |' % total)
     out.append('')
@@ -147,7 +148,7 @@ def render_blocks(plan, reg):
         out.append('### Блок %s. %s' % (b['id'][1:], b['title_uk']))
         out.append('')
         out.append('*Приблизно %d хв. %s. Панель: %s. Набори: %s.%s*' % (
-            b['minutes'], ENGINE_UK[b['engine']].capitalize(), b['cluster'], ', '.join(b['sets']) or 'жодного',
+            b['minutes'], ENGINE_UK[b['engine']].capitalize(), CLUSTER_UK.get(b['cluster'], b['cluster']), ', '.join(b['sets']) or 'жодного',
             ' Потрібен пасажир.' if b['passenger'] else ''))
         out.append('')
         out.append(b['intro_uk'])
@@ -160,7 +161,7 @@ def render_blocks(plan, reg):
             if s.get('optional'):
                 do = '(за бажанням) ' + do
             if s.get('parked') is False:
-                do = '(у русі, робить пасажир, меню не чіпаємо) ' + do
+                do = '(позначку натискає пасажир на зупинці перед рушанням; у русі меню не чіпає ніхто) ' + do
             if s.get('warn_uk'):
                 do += ' **УВАГА: %s**' % md_escape(s['warn_uk'])
             out.append('| %s | %s | %s | %s |' % (mk, do, md_escape(s.get('wait_uk', '')), md_escape(s.get('shoot_uk', ''))))
