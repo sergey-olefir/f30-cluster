@@ -146,6 +146,38 @@ def main():
     ok(0.5 < ngt[0] / day[0] < 0.95, 'the red arc is dimmer by night: %s -> %s' % (day, ngt))
     mn = img('speed', **dict(spd(30), lim=(lim, 1, 0, 1), night=True))
     ok(at(mn, lim, 0.915)[0] < at(m1, lim, 0.915)[0] - 8, 'the limit marker is dimmer by night')
+
+    print('tdback part L on the GPU (the tab bar, the selected cell, the map window)')
+    def lin(c):
+        v = c / 255.0
+        return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+    FL = (0.0012, 0.0009, 0.0056)
+    fill = [max(0.0, (lin(c) - FL[i]) / (1 - FL[i])) for i, c in enumerate((240, 150, 10))]        # tab 3, amber
+    enc = lambda l: 255 * (l * 12.92 if l <= 0.0031308 else 1.055 * l ** (1 / 2.4) - 0.055)     # noqa: E731
+    ruleu = [enc(min(1.0, f + 0.15 * lin(230))) / 255.0 for f in fill]
+    u = {'u_geo': [1380, 720, 0, 0], 'u_tab': [618, 127, 1302, 172], 'u_tabR': [170, 173, 0.002, 0.16], 'u_sep': [780, 848, 1168, 1237],
+         'u_sepC': [84 / 255.0] * 3 + [1], 'u_ruleT': [230 / 255.0] * 3 + [1], 'u_hi': [848, 1168, 1, 0], 'u_hiC': fill + [1], 'u_hiR': ruleu + [1],
+         'u_rule': [741, 295.2, 1180, 296.7] + [0] * 12, 'u_ruleC': [231 / 255.0] * 3 + [1] + [0] * 12, 'u_win': [0, 0, 0, 0], 'u_maskR': [694, 592, 536, 112],
+         'u_map': [0, 0, 0, 0], 'u_mapF': [1, 1, 1, 1]}
+    bk = rd.render_back(u)
+    code = lambda x, y: tuple(int(round(v * 255)) for v in bk[y, x, :3])                         # noqa: E731
+    top, bot = code(1000, 127), code(1000, 169)
+    ok(bk[10, 10, 3] == 1.0 and bk[500, 500, 3] == 1.0, 'tdback L compiles and is opaque outside the holes')
+    ok(max(top) < 45 and abs(bot[0] - 240) <= 8 and abs(bot[1] - 150) <= 8, 'tab 3 selected: its cell is near black at the top %s and the amber at the rule %s' % (top, bot))
+    ok(code(700, 150) != code(1000, 150) and max(code(700, 168)) < 130 and abs(code(700, 168)[0] - code(700, 168)[2]) < 25, 'the other cells keep the cool grey ramp %s' % (code(700, 168),))
+    ok(code(779, 150) == (0, 0, 0) and code(780, 150) == (0, 0, 0) and 70 <= code(782, 150)[0] <= 95 and code(781, 150)[0] > 0, 'a separator: a 2 px dark column [x-1, x+1) then a light line at x + 2 (code 84): %s %s' % (code(780, 150), code(782, 150)))
+    ok(abs(code(1000, 171)[0] - round(ruleu[0] * 255)) <= 2 and code(700, 171) == (230, 230, 230) and code(700, 169) != (230, 230, 230), 'the rule is 3 px: lightened under the selected cell %s, white elsewhere %s' % (code(1000, 171), code(700, 171)))
+    ok(code(1000, 295)[0] > 150 and code(1000, 300)[0] < 150, 'the title rule is drawn (y 295.2-296.7): %s' % (code(1000, 295),))
+    um = dict(u, u_map=[750, 180, 1170, 564], u_mapF=[120, 80, 80, 24])
+    bm = rd.render_back(um)
+    a = lambda x, y: float(bm[y, x, 3])                                                          # noqa: E731
+    ok(a(960, 380) < 0.01 and a(960, 600) == 1.0 and a(700, 380) == 1.0, 'map W1: the window is transparent at its middle, our black outside the box')
+    ok(0.4 < a(960, 240) < 0.6 and 0.4 < a(790, 380) < 0.6 and 0.4 < a(960, 524) < 0.6, 'map W1: half-way at 60 px below the top, 40 px in from a side, 40 px up from the bottom (fades 120 / 80 / 80): %.2f %.2f %.2f' % (a(960, 240), a(790, 380), a(960, 524)))
+    sq = rd.render_back(dict(u, u_map=[750, 180, 1170, 564], u_mapF=[1, 1, 1, 24]))
+    ok(sq[182, 752, 3] > 0.95 and sq[205, 775, 3] < 0.05 and sq[380, 960, 3] < 0.01, 'the zero box has rounded corners (radius 24): the corner px (752, 182) stays black (%.2f), (775, 205) is open (%.2f)' % (sq[182, 752, 3], sq[205, 775, 3]))
+    w2 = rd.render_back(dict(u, u_map=[700, 173, 1220, 600], u_mapF=[1, 1, 1, 1]))
+    ok(w2[300, 960, 3] < 0.01 and w2[300, 690, 3] == 1.0 and w2[300, 710, 3] < 0.05, 'map W2: a hard-edged open box [700, 173, 1220, 600]')
+    ok(np.array_equal(rd.render_back(dict(u, u_map=[0, 0, 0, 0]))[:, :, 3], bk[:, :, 3]), 'a closed window changes nothing')
     print('%d passed, %d failed' % (passed, failed))
     return 1 if failed else 0
 
