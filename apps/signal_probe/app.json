@@ -1,0 +1,504 @@
+{
+  "id": "signal_probe",
+  "title": "Signal Probe",
+  "description": "Read-only, log-only: subscribes the car's signals set by set and logs what arrives (numbers, enum names, text lengths). Draws nothing on the cluster.",
+  "version": "0.1.0",
+  "vendor": "custom",
+  "loggingId": "OASP",
+  "iconGlyph": "SP",
+  "mguHmi": [
+    "ID7"
+  ],
+  "signals": {
+    "de.bmw.infotainment.KombiIF": {
+      "_instances": "1",
+      "basicConfigKombi": "rs",
+      "dataInstrumentPack": "rs",
+      "statusActiveCCMessage": "rs",
+      "statusBordcomputerAverage": "rs",
+      "statusBordcomputerStatus2": "rs",
+      "statusBordcomputerTravelData": "rs",
+      "statusBordcomputerTravelStart": "rs",
+      "statusConfigurationKombi5": "rs",
+      "statusConsumptionValueECOa": "rs",
+      "statusConsumptionValueRegularA": "rs",
+      "statusDrivingStyleDisplay": "rs",
+      "statusECORange": "rs",
+      "statusKombiExternalDisplay": "rs",
+      "statusKombiSelection": "rs",
+      "statusKombiSelectionAvailability": "rs",
+      "statusMenuCCMessage": "rs",
+      "statusRangeTankStatus": "rs",
+      "statusWelcomeAnimation": "rs"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "_instances": "1",
+      "statusDimmer": "rs",
+      "statusDisplayKombi": "rs",
+      "statusDisplayedCCMessage": "rs",
+      "statusLightStatus": "rs",
+      "statusOilDipstick2": "rs",
+      "statusZVStatus": "rs"
+    },
+    "de.bmw.infotainment.KombiInterface_2": {
+      "_instances": "1",
+      "cbsDataServiceList": "rs",
+      "ccList": "rs",
+      "ccListRiskClass": "rs"
+    },
+    "de.bmw.infotainment.checkcontrol.CheckControlMaster": {
+      "_instances": "1",
+      "basicList": "rs"
+    },
+    "de.bmw.infrastructure.VehicleInformation": {
+      "_instances": "1",
+      "Range": "s",
+      "statusGearboxDrive": "s"
+    },
+    "de.bmw.infrastructure.MileageSupreme": {
+      "_instances": "1",
+      "mileageSupreme": "rs"
+    },
+    "de.bmw.infrastructure.SecureMileage": {
+      "_instances": "1",
+      "mileage": "rs"
+    },
+    "de.bmw.infotainment.resetlogic.ResetLogic3": {
+      "_instances": "1",
+      "bcDataAll": "rs"
+    },
+    "de.bmw.infotainment.resetlogic.ResetLogic": {
+      "_instances": "1",
+      "averageConsumption": "rs",
+      "bcDataAll": "rs",
+      "currentConsumption": "rs"
+    },
+    "de.bmw.infotainment.resetlogic.ResetLogic2": {
+      "_instances": "1",
+      "bcDataAll": "rs"
+    },
+    "de.bmw.infotainment.telematic.journeyhistory.BcPersonal": {
+      "_instances": "1",
+      "driveSegment": "rs"
+    },
+    "de.bmw.infotainment.lsc.LSCDataSink": {
+      "_instances": "1",
+      "dataCombinedInstrumentCluster": "s"
+    },
+    "de.bmw.infrastructure.EnvironmentalInformation": {
+      "_instances": "1",
+      "UnitBN2020": "rs"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle": {
+      "_instances": "1",
+      "statusNewCurrentUnitsStatusExt": "rs"
+    },
+    "de.bmw.infotainment.vehicle.CDS": {
+      "_instances": "1",
+      "statusBattery2": "rs",
+      "statusEngineTemperature": "rs"
+    },
+    "de.bmw.body.DoorsWindowsRoofMirrors": {
+      "_instances": "1",
+      "CentralLockingSystemAndPanelStatus2": "s"
+    },
+    "de.bmw.infotainment.vehicle.A4A": {
+      "_instances": "1",
+      "statusA4ALids": "rs"
+    },
+    "de.bmw.infrastructure.analytics.BasicDataSet": {
+      "_instances": "1",
+      "basicDataSet": "s"
+    },
+    "com.harman.infotainment.systeminfrastructure.environment.levelmonitor.LevelMonitor": {
+      "_instances": "Inst1",
+      "systemVoltage": "rs"
+    },
+    "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
+      "_instances": "HMI_CID",
+      "mainMenuMetadata": "rs",
+      "menu": "rs",
+      "playerMetadata": "rs",
+      "trackProgress": "rs"
+    },
+    "de.bmw.infotainment.entertainment.mediasource.MediaSource": {
+      "_instances": "1",
+      "activeSourceId": "rs",
+      "sources": "rs"
+    },
+    "de.bmw.infotainment.tuner.fmamdab.tunerfmamdab.TunerFmAmDab": {
+      "_instances": "1",
+      "currentStationFmDabAm": "rs"
+    },
+    "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer": {
+      "_instances": "CarPlayMedia",
+      "currentItemMetadata": "rs",
+      "currentItemPosition": "rs",
+      "currentItemTime": "rs",
+      "deviceInfo": "rs",
+      "playerState": "rs"
+    },
+    "org.genivi.am.commandinterface.CommandControl": {
+      "_instances": "1",
+      "listOfMainConnections": "rs"
+    },
+    "de.bmw.infotainment.connectivity.telephony.ConnectivityAggregator": {
+      "_instances": "1",
+      "aggregatedCallState": "rs"
+    },
+    "de.bmw.infotainment.a4a.carplay.CarPlayManager": {
+      "_instances": "CarPlayManagerInst1",
+      "projectedGuidanceActive": "rs",
+      "projectedTelephonyActive": "rs"
+    },
+    "de.bmw.infotainment.connectivity.telephony.VoiceCall": {
+      "_instances": "Call1",
+      "contactID": "rs",
+      "duration": "rs",
+      "modem": "rs",
+      "multiparty": "rs",
+      "name": "rs",
+      "number": "rs",
+      "pictureSource": "rs",
+      "state": "rs"
+    },
+    "de.bmw.infotainment.connectivity.telephony.VoiceCallManager": {
+      "_instances": "1",
+      "communicationBlocked": "rs",
+      "hfpBlocked": "rs",
+      "micMuted": "rs"
+    },
+    "de.bmw.infotainment.devicemanager.devicepresentation.DevicePresentation": {
+      "_instances": "1",
+      "activeRoles": "rs",
+      "deviceList": "rs"
+    },
+    "de.bmw.infotainment.connectivity.calllist.CallList": {
+      "_instances": "1",
+      "callItemList": "rs"
+    },
+    "de.bmw.infotainment.Telephone": {
+      "_instances": "*",
+      "callState": "rs",
+      "currentNetworkOperator": "rs",
+      "registerState": "rs",
+      "signalQuality": "rs"
+    },
+    "de.bmw.infotainment.connectivity.conntelematicssync.ConnTeleSync": {
+      "_instances": "TelematicsCallStatusInst1",
+      "callStatus": "rs",
+      "gsmStrength": "rs",
+      "lockState": "rs",
+      "registerState": "rs"
+    },
+    "de.bmw.infotainment.telematic.acm.ACM": {
+      "_instances": "1",
+      "dataConnectionStatus": "rs",
+      "phoneState": "rs"
+    },
+    "de.bmw.infotainment.telematic.esimproxy.EsimProxy": {
+      "_instances": "EsimProxy_1",
+      "signalStrength": "rs",
+      "status": "rs",
+      "telephonyEnabled": "rs"
+    },
+    "de.bmw.infotainment.am.AudioSystemInformation": {
+      "_instances": "1",
+      "muteTelState": "rs"
+    },
+    "de.bmw.infotainment.wca.WirelessChargingAdapter": {
+      "_instances": "1",
+      "wcaNfcFrontStatus": "rs"
+    },
+    "de.bmw.body.ComfortFunction": {
+      "_instances": "1",
+      "WCAStatus": "rs"
+    },
+    "de.bmw.infotainment.hmi.hmicontext.HMIContext": {
+      "_instances": "HMI_CID",
+      "currentActiveApplication": "rs",
+      "currentICGraphicalContext": "rs",
+      "currentICWidget": "rs"
+    },
+    "de.bmw.infotainment.hmi.hmicontext2.HMIContext2": {
+      "_instances": "1",
+      "currentICGraphicalContext": "rs",
+      "currentICWidget": "rs"
+    },
+    "de.bmw.infotainment.controlelements.SteeringWheelPushButton": {
+      "_instances": "1",
+      "operationSteerWheelFAV": "rs",
+      "operationSteerWheelFC": "rs",
+      "statusAudioVolumeButton": "rs",
+      "statusPTTButton1": "rs",
+      "statusRotaryPress": "rs",
+      "statusRotarySteps": "rs",
+      "statusSearchSwitch1": "rs",
+      "statusSpecialFunctionButton": "rs",
+      "statusSpecialFunctionButton2": "rs",
+      "statusSteerWheelFCLED": "rs",
+      "statusTelephoneButton": "rs"
+    },
+    "de.bmw.body.Light": {
+      "_instances": "1",
+      "IndicatorSteeringColumn": "s",
+      "IndicatorSteeringColumnComplete": "s"
+    },
+    "de.bmw.infotainment.controlelements.FrontCCU": {
+      "_instances": "1",
+      "statusPushButtonsState": "rs",
+      "statusRotaryEncoderState": "rs"
+    },
+    "de.bmw.infotainment.lifecycle.lifecycle.Lifecycle": {
+      "_instances": "Front",
+      "entertainmentModeTrigger": "rs"
+    },
+    "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus": {
+      "_instances": "1",
+      "guidingState": "rs"
+    },
+    "de.bmw.infotainment.navigation.guiding.Guidance": {
+      "_instances": "Main_Instance",
+      "conclusiveDart": "rs",
+      "currentLaneGuiding": "rs",
+      "currentRoad": "rs",
+      "guidanceState": "rs",
+      "guidingProvider": "rs",
+      "isOnGuidableRoad": "rs",
+      "junction3dViewInKombiEnabled": "rs",
+      "nextDestinationInfo": "rs",
+      "nextIntersection": "rs",
+      "visualizationInKombiNonNaviEnabled": "rs"
+    },
+    "de.bmw.infotainment.LaneGuiding": {
+      "_instances": "1",
+      "extendedLaneGuiding": "rs",
+      "laneGuiding": "rs"
+    },
+    "de.bmw.infotainment.sdi.aap.androidautoprojectedmanager.AndroidAutoProjectedManager": {
+      "_instances": "AndroidAutoProjectedManagerInst1",
+      "projectedGuidanceActive": "rs"
+    },
+    "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl": {
+      "_instances": "1",
+      "displayDriverAssistanceLongitudinal": "s",
+      "displayForesight": "s",
+      "displaySpeedLimitAndNoPassingRestriction": "s"
+    },
+    "de.bmw.infotainment.fasus.FASuS": {
+      "_instances": "1",
+      "displayDriverAssistenceSystemLongitudinalGuidance": "s",
+      "statusNextSpeedLimitRecognition": "rs",
+      "statusOvertakeRecognition": "rs"
+    },
+    "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
+      "_instances": "1",
+      "functionalLibraryData": "rs"
+    },
+    "de.bmw.infotainment.displaydata.DisplayDataServer2": {
+      "_instances": "1",
+      "functionalLibraryData": "rs"
+    },
+    "de.bmw.dass.driverassistanceapplications.MultimodalControlDriverAssistance": {
+      "_instances": "1",
+      "functionAvailabilityDriverAssistance": "rs"
+    },
+    "de.bmw.dass.GapVehicleAhead": {
+      "_instances": "1",
+      "DataFrontVehicle": "s"
+    },
+    "de.bmw.infotainment.vehicle.TPMS": {
+      "_instances": "1",
+      "statusTargetTyrePressure": "rs",
+      "statusTyrePressure": "rs",
+      "statusTyreTemperature": "rs",
+      "statusTyresStatus": "rs"
+    },
+    "de.bmw.infotainment.vehicle.CDS2": {
+      "_instances": "1",
+      "statusBeltContacts2": "rs",
+      "statusIndicate": "rs",
+      "statusInjectionVolume": "rs",
+      "statusSeatOccupancy": "rs"
+    },
+    "de.bmw.infotainment.drivingexcitement.FES": {
+      "_instances": "1",
+      "statusFESVehicleDynamicSwitchHMI": "rs",
+      "statusSwitchDriveDynamicSport2": "rs",
+      "statusVehicleDynamicEngine": "rs",
+      "statusVehicleDynamicEngineMaxValue": "rs"
+    },
+    "de.bmw.infotainment.ConsumptionHistory3": {
+      "_instances": "1",
+      "consumptionHistoryFull": "rs"
+    },
+    "de.bmw.infotainment.navigation.positioning.Positioning": {
+      "_instances": "Main_Instance",
+      "currentLocation": "rs"
+    },
+    "de.bmw.infotainment.GPSData": {
+      "_instances": "1",
+      "GPSPositionExtendedCAN": "rs"
+    },
+    "de.bmw.powertrain.Powertrain": {
+      "_instances": "1",
+      "dataDisplayGearboxSecure": "s"
+    },
+    "de.bmw.infotainment.speech.dialog.Dialog": {
+      "_instances": "HMISpeechHU",
+      "dialogState": "rs"
+    },
+    "de.bmw.infotainment.misc.MDrive": {
+      "_instances": "1",
+      "dataDisplayGearbox": "s"
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "menu",
+      "title": "Signal Probe",
+      "settings": "placed",
+      "items": [
+        [
+          "text",
+          "STATUS",
+          ""
+        ],
+        [
+          "tworow",
+          "MARK",
+          "Позначка 1"
+        ],
+        [
+          "setting",
+          "set1"
+        ],
+        [
+          "setting",
+          "set2"
+        ],
+        [
+          "setting",
+          "set3"
+        ],
+        [
+          "setting",
+          "set4"
+        ],
+        [
+          "setting",
+          "set5"
+        ],
+        [
+          "setting",
+          "set6"
+        ],
+        [
+          "setting",
+          "set7"
+        ],
+        [
+          "setting",
+          "set8"
+        ],
+        [
+          "setting",
+          "set9"
+        ],
+        [
+          "setting",
+          "set10"
+        ],
+        [
+          "setting",
+          "set11"
+        ],
+        [
+          "text",
+          "STATUS2",
+          ""
+        ]
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "set1",
+      "label": "S1 Повідомлення (P1 P2)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set2",
+      "label": "S2 Комп’ютер, пробіг, одиниці (P3 P4 P5 P6)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set3",
+      "label": "S3 Кузов і напруга (P7 P10)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set4",
+      "label": "S4 Медіа і радіо (P8)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set5",
+      "label": "S5 Телефон (P9)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set6",
+      "label": "S6 Вид і кнопки (P11 P13)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set7",
+      "label": "S7 Навігація (P12 P14)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set8",
+      "label": "S8 Допоміжні системи (P15)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set9",
+      "label": "S9 Технічне (P16 P17)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set10",
+      "label": "S10 Чорна коробка (P18)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set11",
+      "label": "S11 Непідключені сигнали f30 (P19)",
+      "type": "bool",
+      "default": false
+    }
+  ],
+  "config": {
+    "probe": {
+      "summaryS": [
+        30,
+        120,
+        600
+      ],
+      "hubPauseMs": 120
+    },
+    "_about": "READ ONLY. config.probe.summaryS: seconds after a set is switched on at which its summary (and, at 120 s, one getter ask per silent field) is logged; hubPauseMs: the pause between two interfaces being subscribed."
+  }
+}
