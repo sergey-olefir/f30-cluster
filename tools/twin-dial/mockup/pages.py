@@ -6,7 +6,7 @@
 Writes bake/work/twin-dial/mockup/r3/ (git-ignored): one 1920 x 720 picture per state, a contact sheet per tab
 (tabs_sheet, tab1_sheet .. tab5_sheet, limit_sheet) and the overview pages_sheet.png, plus index.json (every picture
 with its data status). The dials come from mockup.py (package K1 owns that drawing; set K2_DIALS=<path to a mockup.py>
-to render with another copy of it, e.g. K1's worktree). No photo is read; every text is invented and neutral; the map
+to render with another copy of it, e.g. K1's worktree, and K2_LOOK=<look name> for one of its band looks). No photo is read; every text is invented and neutral; the map
 is a drawn stand-in that is no real place. Pictograms are the repository's own (shared/twin_icons.js) plus a few drawn
 here in the same step format (OWN below).
 
@@ -72,8 +72,18 @@ STATUS = {
     'trip': ('unseen', 'KombiIF.statusBordcomputerAverage / TravelData (P4)'),
     'cc': ('arrives', 'KombiInterface_2.ccList; shown-now number unseen (P1)'),
     'media': ('unseen', 'HmiMediaState.playerMetadata, MediaSource (P8)'),
-    'media_src': ('unseen', 'MediaSource active source (P8)'),
-    'phone': ('unseen', 'ConnectivityAggregator / Telephone (P9)'),
+    'media_src': ('unseen', 'HmiMediaState.menu iconKind / MediaSource.playerType, enum only (P8)'),
+    'media_icon': ('certain', 'our own pictogram, no signal'),
+    'progress': ('unseen', 'trackProgress elapsed / total (ms hypothesis); n of m and play state CarPlay only'),
+    'media_list': ('doubtful', 'TunerFmAmDabMetadata.dataStationList / HmiMediaState.tracks: sent on the head unit\'s request'),
+    'mute': ('unseen', 'CommandControl sinkMuteStateChanged (not in this probe)'),
+    'phone': ('unseen', 'DevicePresentation.deviceList: connected, roles, battery, signal (P9)'),
+    'phone_icon': ('certain', 'our own pictogram, no signal'),
+    'call': ('unseen', 'ConnectivityAggregator.aggregatedCallState (P9); CarPlayManager.projectedTelephonyActive'),
+    'contact_kind': ('unseen', 'contactID != 0 -> Контакт, else Номер; no text read'),
+    'caller_name': ('owner', 'private text, drawn only if the owner turns it on'),
+    'timer': ('certain', 'our own timer from the ACTIVE edge (once the call state arrives)'),
+    'mic': ('unseen', 'VoiceCallManager.micMuted'),
     'guiding': ('arrives', 'guidingState'),
     'road': ('arrives', 'currentRoad (text never drawn from life: placeholder)'),
     'turn': ('unseen', 'Guidance.nextIntersection'),
@@ -89,7 +99,7 @@ STATUS = {
     'consumption': ('unseen', 'instantaneous consumption'),
     'outside': ('arrives', 'ambient temperature'),
 }
-STATUS_COL = {'arrives': (60, 175, 60), 'unseen': (240, 170, 10), 'not sent': (225, 40, 50),
+STATUS_COL = {'arrives': (60, 175, 60), 'certain': (60, 175, 60), 'owner': (190, 120, 230), 'doubtful': (225, 110, 40), 'unseen': (240, 170, 10), 'not sent': (225, 40, 50),
               'hypothesis': (120, 160, 230), 'computed': (120, 160, 230), 'mixed': (200, 200, 200)}
 MODELS = {}
 
@@ -155,6 +165,11 @@ OWN = {   # our own drawings for this mockup (unit box, y down, angles clockwise
     'td_check': [_s('seg', 0.18, 0.52, 0.42, 0.76, 0.09), _s('seg', 0.42, 0.76, 0.84, 0.26, 0.09)],
     'td_compass': [_s('ring', 0.5, 0.5, 0.4, 0.06), _s('poly', [0.5, 0.18], [0.62, 0.52], [0.38, 0.52], r=0.0)],
     'td_dot': [_s('disc', 0.5, 0.5, 0.3)],
+    'td_phone_ring': [_s('boxo', 0.5, 0.55, 0.17, 0.32, 0.05, 0.065), _s('seg', 0.45, 0.3, 0.55, 0.3, 0.04),
+                      _s('arc', 0.5, 0.55, 0.31, 35, 75, 0.05), _s('arc', 0.5, 0.55, 0.42, 30, 80, 0.05),
+                      _s('arc', 0.5, 0.55, 0.31, 285, 325, 0.05), _s('arc', 0.5, 0.55, 0.42, 280, 330, 0.05)],
+    'td_mute': [_s('poly', [0.12, 0.38], [0.3, 0.38], [0.52, 0.16], [0.52, 0.84], [0.3, 0.62], [0.12, 0.62], r=0.02),
+                _s('seg', 0.66, 0.36, 0.9, 0.64, 0.07), _s('seg', 0.66, 0.64, 0.9, 0.36, 0.07)],
 }
 DRAW = {}
 
@@ -245,8 +260,11 @@ class Page:
         if key not in _BASE:
             cv = M.Canvas()
             cv.speed_digits = speed
-            cv.dial(CT, 'tach', rpm, gear) if gear != 'D3' else cv.dial(CT, 'tach', rpm)
-            cv.dial(CS, 'speed', speed)
+            kw = {}
+            if os.environ.get('K2_LOOK') and hasattr(M, 'look_named'):   # K1's band looks, when its mockup.py has them
+                kw['look'] = M.look_named(os.environ['K2_LOOK'])
+            cv.dial(CT, 'tach', rpm, gear, **kw)
+            cv.dial(CS, 'speed', speed, **kw)
             _BASE[key] = (cv.img.copy(), list(cv.icons))
         img, icons = _BASE[key]
         self.cv = M.Canvas.__new__(M.Canvas)
@@ -354,7 +372,7 @@ def draw_badge(img, label, status):
 def cells5():
     return [dict(id=1, x0=618, x1=744, icon='td_fuel', text='412', unit='км'),
             dict(id=2, x0=744, x1=812, icon='cc_warn'),
-            dict(id=3, x0=812, x1=1168, icon='td_radio', text='Станція Приклад'),
+            dict(id=3, x0=812, x1=1168, icon='td_radio', text='Радіо Приклад'),
             dict(id=4, x0=1168, x1=1237, icon='td_phone_bars'),
             dict(id=5, x0=1237, x1=1302, icon='td_nav')]
 
@@ -410,6 +428,8 @@ def tab_bar(p, cells, sel=None, style='fn', warn=None, warn_style='icon', no_msg
                 alpha = 0.4 if no_msg == 'dim' else 1.0
         if c.get('dim'):
             alpha = 0.45
+        if c.get('ink') and c['id'] != sel:
+            col = c['ink']
         text = c.get('text')
         if text:
             f, fu = (M.noto(31), M.noto(19)) if c['id'] == 1 else (M.noto(33), None)
@@ -420,14 +440,16 @@ def tab_bar(p, cells, sel=None, style='fn', warn=None, warn_style='icon', no_msg
                 p.text(gx + 18, 156, text, f, WHITE)
                 p.text(gx + 18 + p.width(text, f) + 3, 156, c['unit'], fu, WHITE)
             else:
-                maxw = c['x1'] - c['x0'] - 70
+                maxw = c['x1'] - c['x0'] - (110 if c.get('mark') else 70)
                 text = fit(p, text, f, maxw)
                 tw = 38 + 8 + p.width(text, f)
-                gx = (c['x0'] + c['x1']) / 2 - tw / 2
+                gx = (c['x0'] + c['x1'] - (44 if c.get('mark') else 0)) / 2 - tw / 2
                 p.icon(c['icon'], 38, gx + 19, 143, col, alpha)
                 p.text(gx + 46, 156, text, f, WHITE)
         else:
             p.icon(c['icon'], 38, (c['x0'] + c['x1']) / 2 + 1, 143, col, alpha)
+        if c.get('mark'):
+            p.icon(c['mark'], 28, c['x1'] - 22, 143, WHITE)
 
 
 # ---- the bottom row ---------------------------------------------------------------------------------------------------
@@ -497,16 +519,16 @@ def pg_clock(p, dots=True):
 
 def pg_trip(p, which=1, dots=True):
     if which == 1:
-        p.title('Поточна поїздка', '0:43 год')
-        rows = [('td_fuel', 'ø 6.8', 'л/100 км'), ('td_gauge', 'ø 41', 'км/год'), ('td_road', '12.4', 'км')]
+        p.title('Поточна поїздка')
+        rows = [('td_fuel', 'ø 6.8', 'л/100 км'), ('td_gauge', 'ø 41', 'км/год'), ('td_road', '12.4', 'км'), ('td_clock', '0:43', 'год')]
         foot = 'від початку поїздки, 14:00'
     else:
-        p.title('Тривалий період', '24:37 год')
-        rows = [('td_fuel', 'ø 7.4', 'л/100 км'), ('td_gauge', 'ø 52', 'км/год'), ('td_road', '1 284', 'км')]
+        p.title('Тривалий період')
+        rows = [('td_fuel', 'ø 7.4', 'л/100 км'), ('td_gauge', 'ø 52', 'км/год'), ('td_road', '1 284', 'км'), ('td_clock', '24:37', 'год')]
         foot = 'з 02.11.2026'
     for k, (ic, num, unit) in enumerate(rows):          # 02's grammar: an icon in front of each row
-        base = 362 + k * 62
-        p.icon(ic, 36, 838, base - 14)
+        base = 352 + k * 52
+        p.icon(ic, 34, 838, base - 13)
         p.text(1010, base, num, M.noto(39), WHITE, 'r')
         p.text(1017, base, unit, M.noto(21), WHITE, 'l')
     p.ctext((960, 553), foot, M.noto(29), GREY2)
@@ -589,68 +611,118 @@ def progress(p, x0, x1, y, frac, left, right):
 
 
 def pg_radio(p):
+    """SM M2 (unseen): band in the title, station name, radio text, small facts."""
     p.title('Радіо', 'FM')
-    p.icon('td_radio', 66, 960, 360)
-    p.ctext((960, 440), 'Станція Приклад', M.noto(42))
-    p.ctext((960, 490), '100.0 МГц', M.noto(33), GREY2)
-    p.ctext((960, 545), 'Текст станції (приклад)', M.noto(27), (170, 170, 170))
+    p.icon('td_radio', 66, 960, 362)
+    p.ctext((960, 445), 'Радіо Приклад', M.noto(42))
+    p.ctext((960, 495), "Новини о дев'ятій", M.noto(31), GREY2)
+    p.ctext((960, 548), 'P3  ·  101.7  ·  TP', M.noto(27), (170, 170, 170))
 
 
-def pg_track(p):
+def pg_track(p, cover=False):
+    """SM M1 (unseen): source in the title, title large, artist, progress with n of m; play state CarPlay only.
+    cover=True: the one alternative with a neutral cover place (SM: cover art possible later, not this round)."""
     p.title('Медіа', 'USB')
-    p.rrect(745, 322, 893, 470, 6, fill=(44, 46, 50))  # cover-art place: SM decides whether an image exists at all
-    p.icon('td_media', 66, 819, 396, (140, 140, 140))
-    f = M.noto(36)
-    p.text(911, 355, fit(p, 'Назва треку', f, 268), f, WHITE)
-    p.text(911, 405, fit(p, 'Виконавець', M.noto(31), 268), M.noto(31), GREY2)
-    p.text(911, 450, fit(p, 'Альбом', M.noto(27), 268), M.noto(27), (170, 170, 170))
-    progress(p, 745, 1176, 515, 0.43, '1:42', '3:58')
-    p.icon('td_play', 26, 960, 553 - 6)
+    x = 760
+    if cover:
+        p.rrect(745, 322, 885, 462, 6, fill=(44, 46, 50))
+        p.icon('td_media', 56, 815, 384, (140, 140, 140))
+        p.ctext((815, 446), 'обкладинка (пізніше)', M.noto(15), (150, 150, 150))
+        x = 905
+    f = M.noto(42 if not cover else 36)
+    if cover:
+        p.text(x, 372, fit(p, 'Ранкова хвиля', f, 1176 - x), f, WHITE)
+        p.text(x, 420, fit(p, 'Гурт Приклад', M.noto(31), 1176 - x), M.noto(31), GREY2)
+    else:
+        p.ctext((960, 372), 'Ранкова хвиля', f)
+        p.ctext((960, 428), 'Гурт Приклад', M.noto(33), GREY2)
+    progress(p, 745, 1176, 510, 0.28, '1:01', '3:35')
+    p.text(960, 542, '4 / 12', M.noto(25), (170, 170, 170), 'c')
+    p.icon('td_play', 24, 960, 578, (170, 170, 170))
 
 
 def pg_media_min(p):
+    """SM M3 (certain): our pictogram and the word; nothing that needs a signal."""
     p.title('Медіа')
-    p.icon('td_media', 96, 960, 382)
+    p.icon('td_media', 110, 960, 400)
+    p.ctext((960, 510), 'Медіа', M.noto(42))
+
+
+def pg_media_src(p):
+    """SM M3 + the optional source line (enum only, our own words)."""
+    p.title('Медіа')
+    p.icon('td_media', 96, 960, 385)
     p.ctext((960, 482), 'Bluetooth', M.noto(42))
-    p.icon('td_play', 30, 905, 535)
-    p.text(927, 547, 'відтворення', M.noto(31), GREY2)
+    p.ctext((960, 532), 'джерело (лише тип)', M.noto(25), (150, 150, 150))
 
 
-def pg_media_list(p):
-    p.title('Радіо · станції')
-    rows = ['Станція Приклад', 'Друга станція', 'Третя станція', 'Станція чотири', 'П\'ята станція']
+def pg_media_list(p, kind='stations'):
+    """SM: the station list (M2 list) or the track window (M4) - both unseen and doubtful."""
+    if kind == 'stations':
+        p.title('Радіо · станції', 'FM')
+        rows = [('Радіо Приклад', '101.7'), ('Друга станція', '91.7'), ('Третя станція', '95.4'), ('Станція чотири', '99.1'),
+                ("П'ята станція", '102.8')]
+    else:
+        p.title('Медіа · список', 'USB')
+        rows = [('Ранкова хвиля', '4'), ('Друга композиція', '5'), ('Третя композиція', '6'), ('Четверта композиція', '7'),
+                ("П'ята композиція", '8')]
     y = 334
-    for k, s in enumerate(rows):
+    for k, (s, r) in enumerate(rows):
         if k == 0:
             p.rrect(743, y - 24, 1170, y + 24, 6, fill=(52, 54, 58), outline=(220, 220, 220), width=1.5)
         p.text(770, y + 11, s, M.noto(31), WHITE if k == 0 else GREY2)
-        p.text(1160, y + 11, '%.1f' % (88.0 + 3.7 * k), M.noto(25), (170, 170, 170), 'r')
+        p.text(1160, y + 11, r, M.noto(25), (170, 170, 170), 'r')
         y += 52
     p.rect(1182, 312, 1184, 590, (70, 70, 70))
     p.rect(1181, 312, 1185, 400, (220, 220, 220))
 
 
-def pg_phone_idle(p):
+def pg_phone_idle(p, extras=True):
+    """SP P0 (unseen): connected + role, battery, signal; optional missed-call count and charging. No device name."""
     p.title('Телефон')
-    p.icon('td_phone', 80, 960, 380)
-    p.ctext((960, 470), 'Телефон 1', M.noto(39))
-    p.icon('td_bars', 30, 922, 525)
-    p.icon('cc_battery', 32, 998, 525)
-    p.text(1018, 535, '80 %', M.noto(25), GREY2)
+    p.icon('td_phone', 70, 960, 358)
+    p.ctext((960, 432), 'Підключено · CarPlay', M.noto(36))
+    p.icon('cc_battery', 30, 852, 482)
+    p.rect(876, 480, 976, 486, (60, 60, 60))
+    p.rect(876, 480, 956, 486, WHITE)
+    p.text(986, 492, '80 %', M.noto(25), GREY2)
+    p.icon('td_bars', 26, 1062, 482)
+    p.text(1080, 492, '3/4', M.noto(25), GREY2)
+    if extras:
+        p.ctext((960, 538), 'Пропущені: 2   ·   На зарядці', M.noto(27), (170, 170, 170))
 
 
-def pg_phone_call(p, state, name=True):
+def pg_phone_certain(p):
+    """SP P3 (certain): the pictogram and the word; nothing else."""
+    p.title('Телефон')
+    p.icon('td_phone', 110, 960, 400)
+    p.ctext((960, 510), 'Телефон', M.noto(42))
+
+
+def pg_phone_call(p, state, who='a'):
+    """SP P1 incoming / P2 active / P4 ended. who: (a) 'Контакт' / 'Номер' from contactID (no text read),
+    (b) the caller's name (owner setting, off by default), (c) nothing."""
+    line = {'a': 'Контакт', 'b': "Ім'я Прізвище", 'c': None}[who]
     if state == 'incoming':
         p.title('Вхідний дзвінок')
-        p.icon('td_handset', 80, 960, 370, (90, 200, 80))
-        p.ctext((960, 470), 'Абонент' if name else 'Вхідний дзвінок', M.noto(42))
-        p.ctext((960, 525), 'мобільний' if name else 'ім\'я не показуємо', M.noto(29), (170, 170, 170))
+        p.icon('td_phone_ring', 96, 960, 368, (90, 200, 80))
+        if line:
+            p.ctext((960, 470), line, M.noto(42))
+        p.ctext((960, 535 if line else 490), 'Прийняти: кнопка телефону на кермі', M.noto(25), (170, 170, 170))
+        p.rrect(1086, 310, 1176, 338, 6, outline=(150, 150, 150), width=1.2)
+        p.text(1131, 331, 'CarPlay', M.noto(19), (170, 170, 170), 'c')
+    elif state == 'active':
+        p.title('Розмова')
+        p.icon('td_handset', 70, 960, 350)
+        p.ctext((960, 440), '02:37', M.saira(64))
+        if line:
+            p.ctext((960, 510), line, M.noto(36), GREY2)
+        p.icon('td_mic_off', 30, 960, 563, (170, 170, 170))
     else:
-        p.title('Розмова', '02:15')
-        p.icon('td_handset', 80, 960, 370)
-        p.ctext((960, 470), 'Абонент' if name else 'Активний дзвінок', M.noto(42))
-        p.ctext((960, 525), '02:15', M.noto(33), GREY2)
-        p.icon('td_mic_off', 30, 1150, 540, (170, 170, 170))
+        p.title('Дзвінок завершено')
+        p.icon('td_handset', 70, 960, 380, (150, 150, 150))
+        p.ctext((960, 470), '02:41', M.saira(64), GREY2)
+        p.ctext((960, 535), 'повернення за 3 с', M.noto(25), (150, 150, 150))
 
 
 def hbar(p, y, label, icon, value, unit, frac, warn=False, status=None):
@@ -878,29 +950,44 @@ def build():
          pg_clock, warn='warn', fallback=True)
 
     # tab 3 / 4 candidates
-    shot('tab34', '3A_radio', 'media: radio (station, frequency, text)', ['media'], 3, pg_radio, bottom=1)
-    shot('tab34', '3B_track', 'media: track (title, artist, album, progress)', ['media'], 3, pg_track, bottom=1)
+    shot('tab3', '3A_radio', 'SM M2 radio: band, station, radio text, facts', ['media'], 3, pg_radio, bottom=1)
+    shot('tab3', '3B_track', 'SM M1 now playing: title, artist, progress, n of m', ['media', 'progress'], 3, pg_track, bottom=1)
+    shot('tab3', '3B2_track_cover', 'SM M1 with a cover place (cover art: later, not this round)', ['media', 'progress'], 3,
+         lambda p: pg_track(p, True), bottom=1)
+    c = cells5()
+    c[2].update(icon='td_media', text=None)
+    shot('tab3', '3C_media_certain', 'SM M3 only what is certain: pictogram, no text in the tab', ['media_icon'], 3, pg_media_min, cells=c, bottom=1)
     c = cells5()
     c[2].update(icon='td_media', text='Bluetooth')
-    shot('tab34', '3C_media_min', 'media: only the source and play state', ['media_src'], 3, pg_media_min, cells=c, bottom=1)
-    shot('tab34', '3D_station_list', 'media: station list (if a list field exists)', ['media'], 3, pg_media_list, bottom=1)
-    shot('tab34', '4A_phone_idle', 'phone: connected, signal, battery', ['phone'], 4, pg_phone_idle, bottom=1)
-    shot('tab34', '4B_phone_in', 'phone: incoming call (name placeholder)', ['phone'], 4, lambda p: pg_phone_call(p, 'incoming'), bottom=1)
-    shot('tab34', '4C_phone_in_noname', 'phone: incoming call, no name drawn', ['phone'], 4, lambda p: pg_phone_call(p, 'incoming', False), bottom=1)
-    shot('tab34', '4D_phone_call', 'phone: active call, timer, mic muted', ['phone'], 4, lambda p: pg_phone_call(p, 'active'), bottom=1)
+    shot('tab3', '3C2_media_source', 'SM M3 + source type (enum, our word)', ['media_src'], 3, pg_media_src, cells=c, bottom=1)
+    shot('tab3', '3D_station_list', 'SM M2 list: stations (doubtful)', ['media_list'], 3, pg_media_list, bottom=1)
+    shot('tab3', '3E_track_list', 'SM M4 track window (doubtful)', ['media_list'], 3, lambda p: pg_media_list(p, 'tracks'), bottom=1)
+    c = cells5()
+    c[2].update(mark='td_mute')
+    shot('tab3', '3F_tab_muted', 'tab 3 with the mute mark, tab 1 selected', ['media', 'mute'], 1, pg_clock, cells=c)
+    shot('tab4', '4A_phone_idle', 'SP P0 idle: connected, battery, signal, counts', ['phone'], 4, pg_phone_idle, bottom=1)
+    shot('tab4', '4A2_phone_certain', 'SP P3 only what is certain', ['phone_icon'], 4, pg_phone_certain, bottom=1)
+    c = cells5()
+    c[3].update(icon='td_phone', ink=(90, 200, 80))
+    shot('tab4', '4B_phone_in', 'SP P1 incoming, (a) Контакт (auto: tab 4 selected)', ['call', 'contact_kind'], 4, lambda p: pg_phone_call(p, 'incoming', 'a'), cells=c, bottom=1)
+    shot('tab4', '4B2_phone_in_name', "SP P1 incoming, (b) the caller's name: owner setting", ['call', 'caller_name'], 4, lambda p: pg_phone_call(p, 'incoming', 'b'), cells=c, bottom=1)
+    shot('tab4', '4B3_phone_in_none', 'SP P1 incoming, (c) no caller line', ['call'], 4, lambda p: pg_phone_call(p, 'incoming', 'c'), cells=c, bottom=1)
+    shot('tab4', '4C_phone_call', 'SP P2 active: our timer, Контакт, mic muted', ['call', 'timer', 'mic'], 4, lambda p: pg_phone_call(p, 'active'), cells=c, bottom=1)
+    shot('tab4', '4D_phone_ended', 'SP P4 call ended, 3 s then back', ['call'], 4, lambda p: pg_phone_call(p, 'ended'), bottom=1)
+    shot('tab4', '4E_tab_in_call', 'tab 4 lit (green icon) during a call, tab 1 selected', ['call', 'clock'], 1, pg_clock, cells=c)
     c = cells5()
     c[3].update(icon='td_gauge', fn='red')
-    shot('tab34', 'X1_tech', 'alternative: technical page', ['oil', 'coolant', 'voltage', 'boost'], 4, pg_tech, cells=c, bottom=1)
+    shot('tab4', 'X1_tech', 'alternative: technical page', ['oil', 'coolant', 'voltage', 'boost'], 4, pg_tech, cells=c, bottom=1)
     c = cells5()
     c[3].update(icon='td_car', fn='red')
-    shot('tab34', 'X2_car_door', 'alternative: car picture, driver door open', ['doors'], 4, pg_car, cells=c, bottom=1)
-    shot('tab34', 'X3_tyres', 'alternative: tyre pressures on the car picture', ['tyres'], 4, pg_tyres, cells=c, bottom=1)
+    shot('tab4', 'X2_car_door', 'alternative: car picture, driver door open', ['doors'], 4, pg_car, cells=c, bottom=1)
+    shot('tab4', 'X3_tyres', 'alternative: tyre pressures on the car picture', ['tyres'], 4, pg_tyres, cells=c, bottom=1)
     c = cells5()
     c[3].update(icon='td_limit', fn='red')
-    shot('tab34', 'X4_assist', 'alternative: driver assistance, limit large', ['limit', 'cruise'], 4, pg_assist, cells=c, bottom=1)
+    shot('tab4', 'X4_assist', 'alternative: driver assistance, limit large', ['limit', 'cruise'], 4, pg_assist, cells=c, bottom=1)
     c = cells5()
     c[3].update(icon='td_avg', fn='red')
-    shot('tab34', 'X5_consumption', 'alternative: consumption with our own history', ['consumption', 'range'], 4, pg_consumption, cells=c, bottom=1)
+    shot('tab4', 'X5_consumption', 'alternative: consumption with our own history', ['consumption', 'range'], 4, pg_consumption, cells=c, bottom=1)
 
     # tab 5
     shot('tab5', '5A_map_title', "BMW's map in the window, our title and rule over it", ['map', 'road'], 5, pg_map, bottom=1)
@@ -927,7 +1014,8 @@ SHEETS = {   # crop in panel px, scale, columns, title
     'tabs': ((606, 116, 1314, 182), 1.0, 2, 'Live tab bar: selection, the warning tab, four tabs, other icons'),
     'tab1': ((560, 100, 1360, 720), 0.5, 4, 'Tab 1: on-board computer'),
     'tab2': ((560, 100, 1360, 720), 0.5, 4, 'Tab 2: messages in the centre'),
-    'tab34': ((560, 100, 1360, 720), 0.5, 4, 'Tabs 3 / 4: media, phone and the alternatives'),
+    'tab3': ((560, 100, 1360, 720), 0.5, 4, 'Tab 3: radio and media (SM model: every media field unseen on this car)'),
+    'tab4': ((560, 100, 1360, 720), 0.5, 4, 'Tab 4: phone, and the alternatives for tab 3 or 4'),
     'tab5': ((560, 100, 1360, 720), 0.5, 4, 'Tab 5: navigation'),
     'limit': ((560, 60, 1920, 720), 0.4, 3, 'Speed limit: placements (a)-(d), alone and combined'),
 }
@@ -964,7 +1052,7 @@ def sheet(items, crop, scale, cols, title, path):
 
 def overview():
     pick = ['T1_sel1_clock', 'T2_sel2_card', 'T3_sel3_radio', 'T4_sel4_phone', 'T5_sel5_map', '1B_trip_now', '2_list',
-            '2_window_open', '3B_track', '4B_phone_in', 'X1_tech', 'X2_car_door', '5C_guidance', 'Labc_over']
+            '2_window_open', '3B_track', '4B_phone_in', '4C_phone_call', 'X1_tech', 'X2_car_door', '5C_guidance', 'Labc_over']
     items = [s for n in pick for s in SHOTS if os.path.basename(s['file'])[:-4] == n]
     sheet(items, (0, 0, 1920, 720), 0.3, 3, 'Twin Dial r3 (K2): tabs and pages, overview - every text invented', os.path.join(OUT, 'pages_sheet.png'))
 
