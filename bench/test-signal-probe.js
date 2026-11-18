@@ -1,0 +1,550 @@
+'use strict';
+/**
+ * test-signal-probe.js - the signal probe app (apps/signal_probe, docs/car/CP-REPORT.md): READ ONLY, LOG ONLY.
+ *
+ *   node bench/test-signal-probe.js            (BENCH_PORT, default 8502)
+ *
+ *   1. the source: no write of any kind (no setter, no method call, no requestDefaultSymbols, no message injection, no
+ *      cluster-render), Node 8 syntax only (the car runs 8.16), no home path.
+ *   2. the declarations: app.json "signals" is exactly what fields.js needs; only r / s flags; every r has a NON-ZERO getter
+ *      id and every s a notifier in the car's catalogue (skipped, and said so, without it); tools/signals/check_signals.py
+ *      passes; design/car/probe_fields.json is current; the interfaces / instances / items / sets are what the brief says.
+ *   3. the table against the catalogue: a value is made from the catalogue's own types for every field (every text member a
+ *      canary, every enum its first name, every list two entries, unions and inherited members included) and run through the
+ *      formatter: no canary reaches the log, no "?" (a kind that disagrees with the catalogue) and no "-" (a path that does not exist).
+ *   4. every field's line from an injected value, exact (bench/signal-probe-vectors.json: one per field), canaries in every text member.
+ *   5. the engine: once per change, gaps and folding, caps, the flood guard, sets switched on / off (lazy subscription, shared
+ *      interfaces, nothing logged while off), marks, the stalk's bits and its time after the mark, summaries, the one getter ask,
+ *      handlers that throw, hostile values, the volume line.
+ *   6. on the bench (the real app built by kit/tools/build.py, run in the stubbed head unit): starts with nothing injected, a set
+ *      switched in the centre-screen menu is subscribed, an injected field is logged, the mark row works, the choice survives a
+ *      restart, the app never exits.
+ * Mac only, Node 18 or newer. Never shipped.
+ */
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { spawn, spawnSync } = require('child_process');
+
+const ROOT = path.join(__dirname, '..');
+const APP_DIR = path.join(ROOT, 'apps', 'signal_probe');
+const CATALOGUE = path.join(ROOT, 'reference', 'car', '2026-11-15', 'someip', 'someip-interfaces.json');
+const CHECK = path.join(ROOT, 'tools', 'signals', 'check_signals.py');
+const TOOL = path.join(ROOT, 'tools', 'car', 'probe_fields.js');
+const FIELDS = require(path.join(APP_DIR, 'fields.js'));
+const FMT = require(path.join(APP_DIR, 'format.js'));
+const { Probe, VERSION, LOG_FORMAT } = require(path.join(APP_DIR, 'probe.js'));
+const VECTORS = JSON.parse(fs.readFileSync(path.join(__dirname, 'signal-probe-vectors.json'), 'utf8'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'signal-probe-'));
+const PORT = Number(process.env.BENCH_PORT) || 8502;
+
+let passed = 0, failed = 0;
+const ok = (cond, what) => { if (cond) { passed++; console.log('  ok   ' + what); } else { failed++; console.log('  FAIL ' + what); } };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
+const short = (i) => i.split('.').pop();
+const bodyOf = (line) => String(line).replace(/^probe: P\d+ \S+ #\d+ t=[0-9.]+: /, '').replace(/ tms=\d+ since=\S+$/, '');
+const CANARIES = /CANARY|Canary|ARTIST_|TITLE_|SRC_|STREET|URL_|RADIO_|DEVICE_|CALLER_|SERVICE_/;
+
+// ---- a probe on a fake clock and a fake signals object ---------------------------------------------------------------------------
+/**
+ * fake signals: watch() keeps the handlers (what hu-stub does) and a proxy per interface instance; on() adds a handler to a proxy
+ * (what a field added to a running interface needs); get() answers from `answers[field]` (or rejects). feed() calls the handler
+ * the way the car's notification would reach it: the watch's own handlers for the fields watch() was given, on()'s for the rest.
+ */
+function fakeSignals(opts) {
+    const o = opts || {};
+    const calls = [], subs = {};
+    const sig = {
+        calls, subs, answers: o.answers || {}, available: o.available !== false,
+        watch: (iface, inst, handlers, log, wopts) => {
+            const key = iface + '|' + inst;
+            calls.push({ op: 'watch', iface, inst, fields: Object.keys(handlers), poll: wopts && wopts.pollMs });
+            if (o.failWatch && o.failWatch.indexOf(short(iface)) >= 0) return Promise.resolve({ iface, available: false, proxy: null, error: 'Error: no such service', shutdown: () => Promise.resolve() });
+            const res = { iface, available: sig.available, proxy: { key }, error: null, shutdown: () => Promise.resolve() };
+            subs[key] = { handlers, initial: Object.keys(handlers), extra: {}, res };
+            return Promise.resolve(res);
+        },
+        on: (p, field, fn) => { calls.push({ op: 'on', key: p.key, field }); subs[p.key].extra[field] = fn; return Promise.resolve(); },
+        get: (p, field) => {
+            calls.push({ op: 'get', key: p.key, field });
+            return sig.answers[field] !== undefined ? Promise.resolve(sig.answers[field]) : Promise.reject(new Error('no answer'));
+        },
+        feed: (iface, inst, field, v) => {
+            const s = subs[iface + '|' + inst];
+            if (!s) throw new Error('not subscribed: ' + iface + '[' + inst + ']');
+            const fn = s.initial.indexOf(field) >= 0 ? s.handlers[field] : s.extra[field];
+            if (!fn) throw new Error('no handler on ' + iface + '.' + field);
+            fn(v);
+        },
+        count: (op) => calls.filter((c) => c.op === op).length,
+    };
+    return sig;
+}
+function mk(cfg, sigOpts, table) {
+    const lines = [], clock = { t: 1000000 };
+    const signals = fakeSignals(sigOpts);
+    const pr = new Probe({ log: { info: (s) => lines.push(s), warn: (s) => lines.push('WARN ' + s) }, signals, now: () => clock.t,
+        cfg: Object.assign({ hubPauseMs: 0 }, cfg || {}), table });
+    const fieldLines = () => lines.filter((l) => /^probe: P\d+ /.test(l));
+    return { lines, clock, signals, pr, fieldLines };
+}
+/** Feed through the field's own handler (a stand-in for the car's notification, no matter which set holds it). */
+const feedTag = (h, tag, v) => { const st = h.pr.fields.find((x) => x.f.tag === tag); st.handler(v); return st; };
+const settleOf = async (h) => { await h.pr.idle(); await sleep(5); await h.pr.idle(); };
+async function settle() { await sleep(1); }
+
+async function main() {
+    // ---------------------------------------------------------------------------------------------------------------
+    console.log('1. the source: no write, no cluster-render, Node 8 syntax');
+    const files = fs.readdirSync(APP_DIR).filter((f) => /\.js$/.test(f));
+    ok(files.indexOf('main.js') >= 0 && files.indexOf('fields.js') >= 0 && files.indexOf('probe.js') >= 0, 'apps/signal_probe has ' + files.join(', '));
+    const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/\s\/\/ .*$/gm, '');
+    files.forEach((f) => {
+        const code = strip(fs.readFileSync(path.join(APP_DIR, f), 'utf8'));
+        ok(!/setValue|callMethod|signals\.set\b|signals\.call\b|signals\.proxy\b|\.proxy\(|requestDefaultSymbols|standardCCMessage|extendedCCMessage|newCCMessage|A19B|operationBordcomputer|kombiSelection\b|\.send\(/.test(code),
+            f + ': no setter, no method call, no proxy(), no requestDefaultSymbols, no message injection');
+        ok(!/cluster_render|cluster-render|ctx\.display|ctx\.canvas|ctx\.loop|ui\.image|\.layer\(|hud\.js/.test(code), f + ': draws nothing (no cluster-render, no canvas, no layer)');
+        ok(!/\?\.|\?\?|catch\s*\{|\.\.\.\w|\bBigInt\(|\d+n\b|\.flat\(|\.flatMap\(|Object\.fromEntries|Object\.entries|Object\.values|\.padEnd|\.padStart|\bfor await\b|=>\s*\{\s*\}\s*\?/.test(code),
+            f + ': only what Node 8.16 has (no ?. ?? bigint literal, spread, optional catch binding, flat, entries, values, padStart)');
+        ok(!/\/Users\/|\/home\/|C:\\\\/.test(fs.readFileSync(path.join(APP_DIR, f), 'utf8')), f + ': no home-directory path');
+    });
+    const app = readJson(path.join(APP_DIR, 'app.json'));
+    ok(!app.shared && !(app.config && app.config.target) && !app.startWidget, 'app.json: no shared engine files, no config.target, no widget: nothing for the cluster');
+    ok(app.id === 'signal_probe' && app.title === 'Signal Probe' && app.loggingId === 'OASP' && /^\d+\.\d+\.\d+$/.test(app.version), 'app.json: id signal_probe, title, own loggingId OASP, version ' + app.version);
+    ok(app.version === VERSION, 'app.json version = probe.js VERSION (' + VERSION + ')');
+    ok(app.settings.length === 11 && app.settings.every((s) => s.type === 'bool' && s.default === false), 'eleven settings, one per set, all bool and off by default');
+    ok(FIELDS.SETS.every((s, i) => app.settings[i].key === s.key && new RegExp('^' + s.id + ' ').test(app.settings[i].label)), 'each setting is named for its set (S1..S11)');
+
+    // ---------------------------------------------------------------------------------------------------------------
+    console.log('2. the declarations');
+    const sigs = app.signals;
+    const decl = [];
+    Object.keys(sigs).forEach((i) => Object.keys(sigs[i]).filter((k) => k[0] !== '_').forEach((f) => decl.push(i + '.' + f + ':' + sigs[i][f])));
+    ok(decl.every((d) => /^(rs|s|r)$/.test(d.split(':')[1])), 'only r and s flags (' + decl.length + ' fields), no "w"');
+    ok(!Object.keys(sigs).some((i) => Object.keys(sigs[i]).some((k) => k === '_methods' || k === '_broadcasts')), 'no _methods, no _broadcasts');
+    const tableKeys = FIELDS.TABLE.map((f) => f.iface + '.' + f.field).filter((k, i, a) => a.indexOf(k) === i).sort(), declKeys = decl.map((d) => d.split(':')[0]).sort();
+    ok(JSON.stringify(tableKeys) === JSON.stringify(declKeys), 'every field the table reads is declared, and nothing else is (' + tableKeys.length + ' distinct fields, ' + Object.keys(sigs).length + ' interfaces)');
+    let r = spawnSync(process.execPath, [TOOL, 'check'], { encoding: 'utf8' });
+    ok(r.status === 0, 'tools/car/probe_fields.js check: ' + (r.stdout || r.stderr).trim());
+    const tags = FIELDS.TABLE.map((f) => f.tag);
+    ok(tags.length === 160 && new Set(tags).size === tags.length, 'the table: ' + tags.length + ' fields, every tag unique');
+    const keys3 = FIELDS.TABLE.map((f) => f.iface + '.' + f.field + '@' + FIELDS.instOf(f));
+    ok(new Set(keys3).size === keys3.length, 'no field is read twice on the same instance');
+    ok(FIELDS.TABLE.every((f) => /^S([1-9]|1[01])$/.test(f.set) && FIELDS.SETS.find((s) => s.id === f.set).items.indexOf(f.p) >= 0), 'every field is on an item (P1..P19) that belongs to its set');
+    ok(['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P18', 'P19'].every((p) => FIELDS.TABLE.some((f) => f.p === p)), 'every item P1..P19 has a field');
+    ok(FIELDS.SETS.every((s) => FIELDS.TABLE.some((f) => f.set === s.id)) && JSON.stringify(FIELDS.SETS.map((s) => s.id)) === '["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S11"]', 'the eleven sets S1..S11, each with fields');
+    ok(FIELDS.TABLE.every((f) => /^(r|rs|s)$/.test(f.flags)), 'every field has flags r / rs / s');
+    ok(FIELDS.TABLE.filter((f) => f.set === 'S6').every((f) => f.mark === true) && FIELDS.TABLE.filter((f) => f.p === 'P13').every((f) => f.gapMs <= 100 && f.cap >= 300),
+        'S6: every field carries the time after the mark; the buttons and the stalk are not folded (gap <= 100 ms, cap >= 300)');
+    const stalks = FIELDS.TABLE.filter((f) => f.field.indexOf('IndicatorSteeringColumn') === 0);
+    ok(stalks.length === 2 && stalks.every((f) => f.iface === 'de.bmw.body.Light' && f.gapMs === 0 && f.bits && f.bits.path === 'operationColumnStalks'),
+        'the stalk: Light.IndicatorSteeringColumn and ...Complete, gap 0, raw operationColumnStalks with its bit changes');
+    const s6 = FIELDS.TABLE.filter((f) => f.set === 'S6');
+    ok(FIELDS.interfaces().filter((e) => s6.some((f) => f.iface === e.iface)).length === 8 && s6.length === 24, 'S6 alone: ' + s6.length + ' fields on 8 interfaces');
+    const multi = FIELDS.interfaces().filter((e) => e.instances.length > 1);
+    ok(multi.length === 1 && short(multi[0].iface) === 'Telephone' && sigs[multi[0].iface]._instances === '*', 'only Telephone is read on two instances (1 and 2), declared "*"; every other interface names its one instance');
+    const bad = FIELDS.interfaces().filter((e) => e.instances.length === 1 && String(sigs[e.iface]._instances) !== e.instances[0]);
+    ok(bad.length === 0, 'the declared instance of every other interface is the one the table reads' + (bad.length ? ' - ' + bad.map((b) => short(b.iface)).join(', ') : ''));
+    ok(sigs['de.bmw.infotainment.vehicle.CDS']._instances === '1', 'CDS (several sets) is declared once, instance 1');
+    let cat = null;
+    if (fs.existsSync(CATALOGUE)) {
+        cat = readJson(CATALOGUE);
+        const wrong = [];
+        FIELDS.TABLE.forEach((f) => {
+            const c = cat.interfaces[f.iface] && cat.interfaces[f.iface].fields[f.field];
+            if (!c) { wrong.push(f.tag + ': not in the catalogue'); return; }
+            const wantFlags = (c.getter && c.getter.id ? 'r' : '') + (c.notifier && c.notifier.id ? 's' : '');
+            if (f.flags !== wantFlags) wrong.push(f.tag + ': flags ' + f.flags + ', the catalogue allows ' + wantFlags);
+            if (c.setter && sigs[f.iface][f.field].indexOf('w') >= 0) wrong.push(f.tag + ': w');
+            const known = cat.instanceIDs[f.iface] || {};
+            if (!(FIELDS.instOf(f) in known)) wrong.push(f.tag + ': instance ' + FIELDS.instOf(f) + ' not in ' + JSON.stringify(Object.keys(known)));
+        });
+        ok(wrong.length === 0, 'every field: r iff a non-zero getter id, s iff a notifier, only those; its instance is in the catalogue' + (wrong.length ? ' - ' + wrong.slice(0, 5).join('; ') : ''));
+        const o = spawnSync('python3', [CHECK, CATALOGUE, path.join(APP_DIR, 'app.json')], { encoding: 'utf8' });
+        const out = (o.stdout || '') + (o.stderr || '');
+        ok(o.status === 0 && /all declarations pass/.test(out), 'check_signals.py on apps/signal_probe/app.json: ' + out.trim().split('\n').pop());
+        const exported = spawnSync(process.execPath, [TOOL, 'export'], { encoding: 'utf8', cwd: ROOT });
+        const pf = readJson(path.join(ROOT, 'design', 'car', 'probe_fields.json'));
+        ok(exported.status === 0 && pf.counts.fields === FIELDS.TABLE.length && pf.fields.every((f) => f.getterId !== null || f.notifierId !== null), 'design/car/probe_fields.json is current (' + pf.counts.fields + ' fields, ids from the catalogue)');
+        const git = spawnSync('git', ['status', '--porcelain', 'design/car/probe_fields.json'], { encoding: 'utf8', cwd: ROOT });
+        ok(!/^ M/.test(git.stdout || ''), 'design/car/probe_fields.json: re-exporting changed nothing that is committed');
+    } else console.log('  skip: ' + path.relative(ROOT, CATALOGUE) + ' is not here (flags, instances, check_signals.py and the export need it)');
+
+    // ---------------------------------------------------------------------------------------------------------------
+    console.log('3. every field against the catalogue\'s own types (a value made from them)');
+    if (cat) {
+        const DT = cat.datatypes;
+        const base = (rf) => { let x = rf, n = 0; while (DT[x] && DT[x].type === 'typedef' && n++ < 8) x = DT[x].dataRef; return x; };
+        const allMembers = (t) => (t.extends && DT[t.extends] ? allMembers(DT[t.extends]) : []).concat(t.members || []);
+        const synth = (rf, opt, depth) => {
+            const x = base(rf), t = DT[x];
+            if (!t) {
+                if (/^Utf/.test(x)) return opt.text;
+                if (x === 'ByteBuffer') return Buffer.from(opt.text);
+                if (x === 'Bool') return true;
+                return 7;
+            }
+            if (t.type === 'enum') return Object.keys(t.items)[opt.pick % Object.keys(t.items).length];
+            if (t.type === 'array') return depth > 7 ? [] : [synth(t.dataRef || t.elementDataRef, opt, depth + 1), synth(t.dataRef || t.elementDataRef, opt, depth + 1)];
+            if (t.type === 'struct' || t.type === 'union') {
+                const o = {};
+                if (depth > 7) return o;
+                allMembers(t).forEach((m) => { const one = () => synth(m.dataRef, opt, depth + 1); o[m.name] = m.dimension ? (depth + 1 > 7 ? [] : [one(), one()]) : one(); });
+                return o;
+            }
+            return 7;
+        };
+        const problems = [];
+        let ran = 0;
+        [{ text: 'Canary text 123', pick: 0 }, { text: 'CANARY_UPPER_TEXT', pick: 1 }, { text: 'Canary text 123', pick: 3 }].forEach((opt) => {
+            FIELDS.TABLE.forEach((f) => {
+                const v = synth(cat.interfaces[f.iface].fields[f.field].dataRef, opt, 0);
+                const L = [];
+                const pr = new Probe({ log: { info: (s) => L.push(s), warn: (s) => L.push('WARN ' + s) }, now: () => 1e6, table: [f] });
+                pr.setSets([f.set], true);
+                pr.fields[0].handler(v);
+                ran++;
+                const line = L[0] || '(no line)', body = line.replace(/ tms=\d+ since=\S+$/, '').replace(/ prev=-$/, '').replace(/ prev=- /, ' ');
+                if (!L.length || /^WARN/.test(line)) problems.push(f.tag + ': ' + line.slice(0, 120));
+                else {
+                    if (CANARIES.test(line)) problems.push(f.tag + ': a canary reached the log: ' + line.slice(0, 200));
+                    if (/\?/.test(body.replace(/\?\?/, ''))) problems.push(f.tag + ': a "?" (a kind the catalogue does not have): ' + body.slice(0, 200));
+                    if (/=-( |$|\])/.test(body)) problems.push(f.tag + ': a "-" (a member that is not there): ' + body.slice(0, 200));
+                }
+            });
+        });
+        ok(problems.length === 0, ran + ' lines (' + FIELDS.TABLE.length + ' fields x 3 value sets): no canary, no "?", no "-"' + (problems.length ? '\n    ' + problems.slice(0, 12).join('\n    ') : ''));
+        // the kinds of every column against the catalogue's types (text only ever a length, a number a number, ...)
+        const want = { n: 'num', x: 'num', e: 'enum', b: 'bool', t: 'text', k: 'num', z: 'num', p: 'num' };
+        const kindOf = (rf) => { const x = base(rf), t = DT[x]; if (t) return t.type; if (/^Utf|^ByteBuffer/.test(x)) return 'text'; if (x === 'Bool') return 'bool'; return /^(U?Int\d+|Float|Double)$/.test(x) ? 'num' : 'unknown:' + x; };
+        const walk = (rf, p) => {
+            let cur = rf;
+            for (let i = 0; i < p.length; i++) {
+                let t = DT[base(cur)];
+                while (t && t.type === 'array') t = DT[base(t.dataRef || t.elementDataRef)];
+                if (!t || !t.members && !t.extends) return 'no members at ' + p[i];
+                const mem = allMembers(t).find((x) => x.name === p[i]);
+                if (!mem) return 'no member ' + p[i];
+                cur = mem.dataRef;
+            }
+            let t = DT[base(cur)];
+            while (t && t.type === 'array') { cur = t.dataRef || t.elementDataRef; t = DT[base(cur)]; }
+            return kindOf(cur);
+        };
+        const bad = [];
+        let nCols = 0;
+        FIELDS.TABLE.forEach((f) => {
+            const rf = cat.interfaces[f.iface].fields[f.field].dataRef;
+            const groups = [[f.cols, []], [f.list && f.list.cols, f.list && f.list.member ? [f.list.member] : []], [f.union && f.union.cols, f.union ? [f.union.member] : []],
+                [f.sub && f.sub.cols, f.sub ? [f.sub.path] : []]];
+            groups.forEach((g) => (g[0] || []).forEach((c) => {
+                nCols++;
+                const got = walk(rf, g[1].concat(Array.isArray(c[1]) ? c[1] : [c[1]]));
+                const kind = got === 'num' && c[2] === 'x' ? 'num' : got;
+                if (kind !== want[c[2]]) bad.push(f.tag + '.' + c[0] + ' (' + c[2] + '): the catalogue says ' + got);
+            }));
+            if (f.bits && walk(rf, [f.bits.path]) !== 'num') bad.push(f.tag + ' bits: ' + walk(rf, [f.bits.path]));
+            const wantRoot = { enum: 'enum', bool: 'bool', hex: 'num', activeSource: 'text', sources: 'struct', temps: 'struct', intersection: 'struct', description: 'struct', dart: 'struct',
+                lanes: 'struct', mediaMenu: 'struct', station: 'struct', metadata: 'array', roles: 'array', devices: 'array', calllist: 'array', cbs: 'union' }[f.fmt];
+            if (f.fmt && wantRoot && kindOf(rf) !== wantRoot && !(wantRoot === 'array' && kindOf(rf) === 'array') && !(wantRoot === 'union' && /array|union/.test(kindOf(rf)))) bad.push(f.tag + ' (' + f.fmt + '): the catalogue says ' + kindOf(rf));
+        });
+        ok(bad.length === 0, 'the table against the catalogue\'s types (' + nCols + ' columns): no text member is read as a number, enum or bool, and every path exists' + (bad.length ? '\n    ' + bad.slice(0, 12).join('\n    ') : ''));
+    } else console.log('  skip: the catalogue is not here');
+
+    // ---------------------------------------------------------------------------------------------------------------
+    console.log('4. every field\'s line from an injected value (fake clock, canary text in every text member)');
+    ok(VECTORS.length === FIELDS.TABLE.length && FIELDS.TABLE.every((f) => VECTORS.some((v) => v.tag === f.tag && v.iface === f.iface && v.field === f.field && v.instance === FIELDS.instOf(f))),
+        'a vector for every one of the ' + FIELDS.TABLE.length + ' fields');
+    const a = mk({});
+    a.pr.setSets(FIELDS.SETS.map((s) => s.id), false);
+    await settleOf(a);
+    ok(a.lines.some((l) => /^probe: sets on=S1\+S2\+S3\+S4\+S5\+S6\+S7\+S8\+S9\+S10\+S11 changed=\+S1,\+S2,\+S3,\+S4,\+S5,\+S6,\+S7,\+S8,\+S9,\+S10,\+S11 fields=160 \(first set on\)$/.test(l)), 'all eleven sets on: the log says so');
+    ok(a.signals.count('watch') === FIELDS.interfaces().reduce((n, e) => n + e.instances.length, 0) && a.signals.count('watch') === 63, 'one proxy per interface instance (' + a.signals.count('watch') + ' watch calls)');
+    let nOk = 0;
+    VECTORS.forEach((v) => {
+        a.clock.t += 15000;
+        const st = a.pr.fields.find((x) => x.f.tag === v.tag);
+        st.handler(v.value);
+        const got = a.fieldLines().filter((l) => new RegExp('^probe: ' + v.p + ' ' + v.tag + ' #1 ').test(l));
+        const body = got.length === 1 ? bodyOf(got[0]) : '(' + got.length + ' lines)';
+        const okk = got.length === 1 && (typeof v.body === 'string' ? body === v.body : new RegExp(v.body.re).test(body));
+        if (okk) nOk++; else ok(false, v.p + ' ' + v.tag + ': ' + body + (typeof v.body === 'string' ? '\n         wanted ' + v.body : ''));
+    });
+    ok(nOk === VECTORS.length, nOk + ' of ' + VECTORS.length + ' fields: the exact line');
+    ok(!CANARIES.test(a.lines.join('\n')), 'no text of a message, source, song, call, road, device or service in the log (canary words in every text member)');
+    ok(!/12000|STREET|A 9/.test(a.fieldLines().filter((l) => /next-intersection/.test(l)).join('').replace(/raw=12000\.5/, '')), 'the road text and the shield text of P12 are lengths only');
+    const st0 = a.pr.stats();
+    ok(st0.length === 160 && st0.every((s) => s.events === 1 && s.lines === 1 && s.active), 'stats(): 160 fields, one event and one line each');
+    ok(a.fieldLines().every((l) => /^probe: P\d+ [A-Za-z0-9-]+ #\d+ t=\d+(\.\d)?: /.test(l)), 'every field line has the documented shape "probe: P<n> <tag> #<k> t=<s>: ..."');
+    ok(a.fieldLines().filter((l) => /P(11|13) /.test(l)).every((l) => / tms=\d+ since=-$/.test(l)), 'S6 lines end with tms=<ms> since=- (no mark yet)');
+    ok(/heading=set/.test(a.fieldLines().filter((l) => / heading #1/.test(l))[0]) && !/27[0-9]\.25|135/.test(a.fieldLines().filter((l) => / (heading|gps-ext) #1/.test(l)).join('')), 'a bearing is never printed: only heading=set');
+    ok(!/4711|\+000|\b9\b.*contact/.test(a.fieldLines().filter((l) => /phone-call1-(contact|number)/.test(l)).join('')), 'a contact id and a number are never printed (known / unknown, a length)');
+    ok(a.fieldLines().filter((l) => /P8 station/.test(l)).every((l) => /freq=fm-range/.test(l) && !/101700/.test(l)), 'a frequency is printed only as its band');
+    ok(a.fieldLines().filter((l) => /P8 cp-device/.test(l)).every((l) => /device=known/.test(l)), 'a media device id is printed only as known');
+
+    // ---------------------------------------------------------------------------------------------------------------
+    console.log('5. the engine');
+    // once per change; gap folding; cap
+    const S1 = mk({}, {}, null);
+    S1.pr.setSets(['S1'], true); await settleOf(S1);
+    const act = VECTORS.find((v) => v.tag === 'active-cc');
+    const hs = (v) => feedTag(S1, 'active-cc', v);
+    hs(act.value); hs(JSON.parse(JSON.stringify(act.value))); hs(act.value);
+    ok(S1.fieldLines().length === 1, 'the same value three times: one line');
+    S1.clock.t += 600;
+    hs(Object.assign({}, act.value, { numberDisplayControlCheckControlMessage: 0 }));
+    S1.clock.t += 600;
+    hs(act.value);
+    ok(S1.fieldLines().length === 3 && /#3 /.test(S1.fieldLines()[2]) && /number=15/.test(S1.fieldLines()[2]), 'a change and back: two more lines, numbered #2 and #3');
+    // gap folding (S1 gap 500 ms): three changes inside one gap -> one line with the last value and "+2 folded"
+    const G = mk({}); G.pr.setSets(['S1'], true); await settleOf(G);
+    const dsp = (n) => ({ statusNumberCheckControlMessageDisplay: n });
+    G.clock.t += 5000; feedTag(G, 'displayed-cc', dsp(1));
+    G.clock.t += 100; feedTag(G, 'displayed-cc', dsp(2));
+    G.clock.t += 100; feedTag(G, 'displayed-cc', dsp(3));
+    G.clock.t += 100; feedTag(G, 'displayed-cc', dsp(4));
+    ok(G.fieldLines().length === 1, 'changes faster than the gap are held back (one line so far)');
+    G.clock.t += 600; G.pr.tick();
+    ok(G.fieldLines().length === 2 && /number=4 \(\+2 folded\)$/.test(G.fieldLines()[1]), 'the held line goes out at the next tick with the last value and "(+2 folded)" (two held values replaced): ' + G.fieldLines()[1]);
+    // a held value that goes back to the logged one is not a line at all
+    G.clock.t += 50; feedTag(G, 'displayed-cc', dsp(9)); G.clock.t += 50; feedTag(G, 'displayed-cc', dsp(4));
+    G.clock.t += 600; G.pr.tick();
+    ok(G.fieldLines().length === 2, 'a value that went away and came back inside the gap makes no line');
+    // cap
+    const C = mk({}); C.pr.setSets(['S1'], true); await settleOf(C);
+    for (let i = 0; i < 130; i++) { C.clock.t += 1000; feedTag(C, 'displayed-cc', dsp(i)); }
+    const cl = C.fieldLines().filter((l) => / displayed-cc /.test(l));
+    ok(cl.length === 100 && /\(the last line for this field\)$/.test(cl[99]), 'a field makes at most its cap of lines (100 in S1), the last one says so');
+    // flood guard: many fields change in one second
+    const FL = mk({}); FL.pr.setSets(['S2'], true); await settleOf(FL);
+    const s2 = FL.pr.fields.filter((x) => x.f.set === 'S2' && x.f.cols);
+    FL.clock.t += 5000;
+    for (let rep = 0; rep < 4; rep++) s2.forEach((x, i) => x.handler(Object.assign({}, VECTORS.find((v) => v.tag === x.f.tag).value, { fuel: rep * 3 + i })));
+    // (the values differ only through members that exist in some of them: what counts is that no more than 40 lines go out per second)
+    const burst = FL.fieldLines().length;
+    ok(burst <= 40, 'the flood guard: ' + burst + ' lines in one second (at most 40)');
+    // sets: lazy subscription, shared interfaces, nothing logged while off
+    const Z = mk({});
+    ok(Z.signals.calls.length === 0 && Z.pr.setsOn().length === 0, 'a new probe subscribes nothing');
+    Z.pr.setSets(['S3'], true); await settleOf(Z);
+    ok(Z.signals.count('watch') === 6 && Z.signals.calls.filter((c) => c.op === 'watch').every((c) => /DoorsWindows|A4A|Vehicle2|BasicDataSet|LevelMonitor|CDS/.test(c.iface)), 'switching S3 on subscribes exactly its interfaces: ' + Z.signals.calls.filter((c) => c.op === 'watch').map((c) => short(c.iface) + '[' + c.inst + ']').join(', '));
+    ok(Z.signals.calls.filter((c) => c.op === 'watch').every((c) => c.fields.every((f) => FIELDS.TABLE.some((t) => t.set === 'S3' && t.field === f && t.iface === c.iface))), 'only S3\'s fields were handed to watch');
+    ok(Z.signals.calls.filter((c) => c.op === 'watch').map((c) => c.poll).every((p) => p === undefined), 'no polling for S3');
+    // an off set logs nothing even if the car sends (handlers stay, muted)
+    Z.signals.feed('de.bmw.infotainment.vehicle.Vehicle2', '1', 'statusZVStatus', { statusCentralLockingSystem: 5 });
+    ok(Z.fieldLines().length === 1, 'an arrival on a field of a set that is on: a line');
+    Z.pr.setSets([], false);
+    Z.clock.t += 5000;
+    Z.signals.feed('de.bmw.infotainment.vehicle.Vehicle2', '1', 'statusZVStatus', { statusCentralLockingSystem: 9 });
+    ok(Z.fieldLines().length === 1 && /sets on=none changed=-S3/.test(Z.lines.join('\n')), 'S3 off: the same field now logs nothing, and the log says the set went off');
+    Z.pr.setSets(['S3'], false); await settleOf(Z);
+    ok(Z.signals.count('watch') === 6, 'S3 on again: no new proxies (they were kept)');
+    ok(Z.signals.count('get') === FIELDS.TABLE.filter((f) => f.set === 'S3' && f.flags.indexOf('r') >= 0).length && Z.signals.calls.filter((c) => c.op === 'get').every((c) => c.field !== undefined),
+        'S3 on again: one read-only getter ask for each of its r fields (no value arrives on its own)');
+    // shared interfaces: S1 then S6 both need KombiIF / Vehicle2: one proxy, the second set's fields via on() + one get
+    const SH = mk({}, { answers: { statusKombiSelection: { statusActivationInstrumentPackBC: 3 } } });
+    SH.pr.setSets(['S1'], true); await settleOf(SH);
+    const kw = () => SH.signals.calls.filter((c) => c.op === 'watch' && /KombiIF$/.test(c.iface));
+    ok(kw().length === 1 && kw()[0].fields.length === 2, 'S1: KombiIF watched once with S1\'s two fields (' + kw()[0].fields.join(', ') + ')');
+    SH.pr.setSets(['S1', 'S6'], true); await settleOf(SH);
+    ok(kw().length === 1, 'S6 on beside S1: KombiIF is NOT watched a second time');
+    const ons = SH.signals.calls.filter((c) => c.op === 'on' && /KombiIF\|1$/.test(c.key)).map((c) => c.field).sort();
+    ok(JSON.stringify(ons) === '["statusConfigurationKombi5","statusKombiSelection","statusKombiSelectionAvailability"]', 'S6\'s three KombiIF fields were added to the running proxy with on(): ' + ons.join(', '));
+    ok(SH.signals.calls.some((c) => c.op === 'get' && c.field === 'statusKombiSelection'), 'and their getters were read once');
+    SH.clock.t += 1000;
+    SH.signals.feed('de.bmw.infotainment.KombiIF', '1', 'statusKombiSelection', { statusActivationInstrumentPackBC: 7 });
+    SH.signals.feed('de.bmw.infotainment.KombiIF', '1', 'statusActiveCCMessage', act.value);
+    ok(SH.fieldLines().filter((l) => /kombi-selection|active-cc/.test(l)).length === 3, 'both sets\' fields on the shared interface log (three lines: the getter\'s answer, the arrival, the other set\'s arrival)');
+    // S10 shares eight fields with S6 / S7 (also: ['S10']): one subscription, one state, two holders
+    const X = mk({});
+    X.pr.setSets(['S10'], true); await settleOf(X);
+    const act10 = () => X.pr.stats().filter((q) => q.active).length;
+    ok(act10() === 15 && FIELDS.TABLE.filter((f) => f.set === 'S10').length === 7, 'S10 alone: its 7 fields and the 8 of S6 / S7 it needs are on (' + act10() + ')');
+    X.pr.setSets(['S10', 'S6'], true); await settleOf(X);
+    ok(act10() === 33, 'S10 + S6: the shared fields are not counted twice (33 fields)');
+    X.clock.t += 5000;
+    feedTag(X, 'kombi-selection', { statusActivationInstrumentPackBC: 5 });
+    X.pr.setSets(['S6'], true);
+    ok(act10() === 24 && X.pr.stats().find((q) => q.tag === 'kombi-selection').active, 'S10 off while S6 stays: the shared field stays on (24 fields), the other S10 fields go off');
+    X.clock.t += 5000;
+    feedTag(X, 'kombi-selection', { statusActivationInstrumentPackBC: 6 });
+    ok(X.fieldLines().filter((l) => / kombi-selection #/.test(l)).length === 2, 'and it keeps logging, numbered on (#1, #2)');
+    X.pr.setSets([], true);
+    ok(act10() === 0, 'every set off: nothing is on');
+    // the black box's own signals: a gearbox counter is never logged
+    const GB = mk({}); GB.pr.setSets(['S10'], true);
+    feedTag(GB, 'gearbox-secure', { cRC_DataDisplayGearbox: 123, aLIV_DataDisplayGearbox: 14, dummy4: 'D' });
+    ok(!/123|14\b/.test(bodyOf(GB.fieldLines()[0])), 'the alive and CRC counters of the gearbox display are not logged: ' + bodyOf(GB.fieldLines()[0]));
+    // a provider that does not come up
+    const BADW = mk({}, { failWatch: ['Light'] });
+    BADW.pr.setSets(['S6'], true); await settleOf(BADW);
+    ok(BADW.lines.some((l) => /^probe: watch Light\[1\] set=S6 fields=2 error: Error: no such service$/.test(l)), 'a watch that fails is logged and the others go on');
+    BADW.clock.t += 31000; BADW.pr.tick();
+    ok(BADW.lines.some((l) => /summary S6 \+30s: providers: up=7 down=1 error=1 down-list: Light\[1\]/.test(l)), 'the summary names the provider that is down');
+    // the start line and the sets line
+    const ST = mk({}); ST.pr.setSets(['S4', 'S6'], true); ST.pr.startLine();
+    ok(ST.lines.some((l) => /^probe: start signal_probe v=0\.1\.0 fmt=1 sets=S4\+S6 fields=37 of 160$/.test(l)) && !ST.lines.some((l) => /^probe: sets /.test(l)), 'the start line: version, log format and the sets on (quiet start: no "sets" line)');
+    ok(LOG_FORMAT === 1 && VERSION === app.version, 'log format 1');
+    ST.pr.setSets(['S4', 'S6', 'S7'], false);
+    ok(ST.lines.some((l) => /^probe: sets on=S4\+S6\+S7 changed=\+S7 fields=52$/.test(l)), 'the sets line at a change: ' + ST.lines[ST.lines.length - 1]);
+    // marks and the stalk
+    const M = mk({}); M.pr.setSets(['S6'], true); await settleOf(M);
+    const LIGHT = 'de.bmw.body.Light';
+    M.clock.t += 5000;
+    ok(M.pr.mark() === 1 && M.lines.some((l) => /^probe: mark M1 t=5 tms=5000 sets=S6$/.test(l)), 'a mark: one line with its number, the seconds, the ms and the sets');
+    M.clock.t += 2210; M.signals.feed(LIGHT, '1', 'IndicatorSteeringColumn', { operationColumnStalks: 0 });
+    M.clock.t += 140; M.signals.feed(LIGHT, '1', 'IndicatorSteeringColumn', { operationColumnStalks: 64 });
+    M.clock.t += 90; M.signals.feed(LIGHT, '1', 'IndicatorSteeringColumn', { operationColumnStalks: 0 });
+    M.clock.t += 10; M.signals.feed(LIGHT, '1', 'IndicatorSteeringColumnComplete', { operationColumnStalks: 66, statusPushButtonMainBeamAssistant: 'KEINE_BETAETIGUNG' });
+    M.clock.t += 10; M.signals.feed(LIGHT, '1', 'IndicatorSteeringColumnComplete', { operationColumnStalks: 2, statusPushButtonMainBeamAssistant: 'KEINE_BETAETIGUNG' });
+    const sl = M.fieldLines().filter((l) => /stalk/.test(l));
+    ok(sl.length === 5, 'the stalk: every change is a line, none folded, even 90 ms apart (' + sl.length + ' lines)');
+    ok(/stalks=0 prev=- tms=7210 since=M1\+2210$/.test(sl[0]) && /stalks=64\(0x40\) prev=0 up=0x40 down=0x0 tms=7350 since=M1\+2350$/.test(sl[1]) && /stalks=0 prev=64\(0x40\) up=0x0 down=0x40 tms=7440 since=M1\+2440$/.test(sl[2]),
+        'a press shows which bit moved and the time after the mark: ' + sl.slice(0, 3).map((l) => l.replace(/^probe: /, '')).join(' | '));
+    ok(/stalks=66\(0x42\) prev=- mainBeamAssist=KEINE_BETAETIGUNG tms=\d+ since=M1\+2450$/.test(sl[3]) && /stalks=2\(0x2\) prev=66\(0x42\) up=0x0 down=0x40 mainBeamAssist=/.test(sl[4]), 'the complete variant has its own previous value and the main-beam member');
+    M.clock.t += 20; M.pr.mark();
+    M.clock.t += 7; M.signals.feed(LIGHT, '1', 'IndicatorSteeringColumn', { operationColumnStalks: 128 });
+    ok(/since=M2\+7$/.test(M.fieldLines().filter((l) => /stalk #/.test(l)).pop()), 'a second mark starts the clock again (M2+7)');
+    ok(/no hold: .*/.test('no hold: ' + M.pr.fields.find((x) => x.f.tag === 'stalk').gap) && M.pr.fields.find((x) => x.f.tag === 'stalk').gap === 0 && M.pr.fields.find((x) => x.f.tag === 'stalk-complete').gap === 0, 'the two stalk fields have gap 0');
+    // a flood does not hold the stalk back
+    const FS = mk({}); FS.pr.setSets(['S6'], true); await settleOf(FS);
+    FS.clock.t += 5000;
+    for (let i = 0; i < 60; i++) { FS.clock.t += 1; FS.signals.feed(LIGHT, '1', 'IndicatorSteeringColumn', { operationColumnStalks: i }); }
+    ok(FS.fieldLines().filter((l) => /stalk #/.test(l)).length === 60, '60 stalk changes in 60 ms: 60 lines (urgent fields bypass the flood guard)');
+    // summaries: +30 s, +120 s (with the getter ask for silent r fields), +600 s; per set
+    const SU = mk({}, { answers: { statusMenuCCMessage: { numberCheckControlMessage1: 1 } } });
+    SU.pr.setSets(['S1'], true); await settleOf(SU);
+    SU.clock.t += 5000; feedTag(SU, 'active-cc', act.value); SU.signals.feed('de.bmw.infotainment.vehicle.Vehicle2', '1', 'statusDisplayedCCMessage', { statusNumberCheckControlMessageDisplay: 1 });
+    SU.clock.t += 26000; SU.pr.tick(); SU.pr.tick();
+    const sum = SU.lines.filter((l) => /summary S1 \+30s/.test(l));
+    ok(sum.length === 3 && /2 of 6 fields have spoken: P1 active-cc\(1 events, 1 lines\), P1 displayed-cc/.test(sum[0]) && /silent: P1 menu-cc, P1 ccList, P2 ccListRiskClass, P2 basicList/.test(sum[1]) && /providers: up=4 down=0 error=0/.test(sum[2]),
+        'the summary at +30 s: who spoke, who is silent, the providers (and only once)');
+    ok(!SU.lines.some((l) => /^probe: ask /.test(l)), 'no getter ask at +30 s');
+    SU.clock.t += 90000; SU.pr.tick(); await sleep(30);
+    ok(SU.lines.filter((l) => /summary S1 \+120s/.test(l)).length === 3, 'the next summary comes at +120 s');
+    const asks = SU.lines.filter((l) => /^probe: ask /.test(l));
+    ok(asks.length === 4 && asks.some((l) => /ask P1 menu-cc \(silent at \+120s\): answered \(object\)/.test(l)) && asks.some((l) => /ask P1 ccList \(silent at \+120s\): error or no answer: no answer \(the car does not send it\)/.test(l)),
+        'one getter ask per silent field at +120 s: answered / error or no answer (' + asks.length + ' lines)');
+    ok(SU.fieldLines().some((l) => / menu-cc #1 /.test(l)), 'the answer of an ask is logged as an ordinary field line');
+    SU.clock.t += 100000; SU.pr.tick(); await sleep(30);
+    ok(SU.signals.calls.filter((c) => c.op === 'get' && c.field === 'statusMenuCCMessage').length === 1, 'the same field is asked only once');
+    SU.clock.t += 500000; SU.pr.tick();
+    ok(SU.lines.filter((l) => /summary S1 \+600s/.test(l)).length === 3, 'and the summary at +600 s');
+    // a notifier-only field is not asked
+    const NO = mk({}); NO.pr.setSets(['S8'], true); await settleOf(NO);
+    NO.clock.t += 121000; NO.pr.tick(); await sleep(30);
+    ok(NO.lines.some((l) => /ask P15 sign \(silent at \+120s\): no getter \(notifier only\)/.test(l)) && NO.signals.count('get') === FIELDS.TABLE.filter((f) => f.set === 'S8' && f.flags.indexOf('r') >= 0).length,
+        'a notifier-only field (the sign) is not asked: "no getter (notifier only)"; the r fields are');
+    // TPMS polling
+    const TP = mk({}); TP.pr.setSets(['S9'], true); await settleOf(TP);
+    const tw = TP.signals.calls.filter((c) => c.op === 'watch' && /TPMS$/.test(c.iface));
+    ok(tw.length === 1 && tw[0].poll === 15000 && TP.signals.calls.filter((c) => c.op === 'watch' && c.poll).length === 1, 'TPMS (S9) is polled by getter every 15 s; nothing else is polled');
+    // two instances of Telephone
+    const TL = mk({}); TL.pr.setSets(['S5'], true); await settleOf(TL);
+    ok(TL.signals.calls.filter((c) => c.op === 'watch' && /Telephone$/.test(c.iface)).map((c) => c.inst).sort().join() === '1,2', 'Telephone is watched on instance 1 and on instance 2');
+    TL.signals.feed('de.bmw.infotainment.Telephone', '2', 'registerState', { registerStateStructure: { circuitSwitchedNetworkRegisterState: 'REGISTERED', packetSwitchedNetworkRegisterState: 'NOT_REGISTERED' } });
+    ok(TL.fieldLines().some((l) => /P9 nad2-register #1 .*shape=member cs=REGISTERED ps=NOT_REGISTERED/.test(l)) && !TL.fieldLines().some((l) => /nad-register/.test(l)), 'instance 2 logs as nad2-*, instance 1 stays silent');
+    // the app's handlers: throwing values, hostile values
+    const H = mk({}); H.pr.setSets(FIELDS.SETS.map((s) => s.id), true); await settleOf(H);
+    const nasty = { get numberDisplayControlCheckControlMessage() { throw new Error('getter boom'); } };
+    let threw = false;
+    try { feedTag(H, 'active-cc', nasty); } catch (e) { threw = true; }
+    ok(!threw && H.lines.some((l) => /^WARN probe: P1 active-cc: getter boom/.test(l)), 'a value that throws while it is read: one warning, no throw');
+    feedTag(H, 'active-cc', nasty);
+    ok(H.lines.filter((l) => /getter boom/.test(l)).length === 1, '... and the warning comes once per field');
+    const hostile = [null, undefined, 'Canary string', 42, [], [1, 2], { x: 'Canary obj', y: { z: 'Canary deep' } }, true, 'canary_lower', new Array(5000).fill('Canary'), Buffer.from('Canary'), { length: 3 }, 1e308, -1, NaN];
+    let hostileThrew = false;
+    const E = mk({}); E.pr.setSets(FIELDS.SETS.map((s) => s.id), true); await settleOf(E);
+    FIELDS.TABLE.forEach((f) => hostile.forEach((h) => { try { feedTag(E, f.tag, h); } catch (x) { hostileThrew = true; } E.clock.t += 20000; }));
+    ok(!hostileThrew, 'null, undefined, strings, numbers, arrays, buffers and objects where structs belong: no handler throws');
+    ok(!/canary/i.test(E.lines.join('\n')), 'and none of their text is logged');
+    const enumTrap = mk({}); enumTrap.pr.setSets(['S2'], true);
+    feedTag(enumTrap, 'range-tank', { fluidLevelFuelTank: 'ALL_CAPS_TEXT', mileageKilometre: 'MORE_TEXT', range: 412, statusFluidLevelFuelTankSpare: 'free text' });
+    ok(/fuel=\? fuelL=- fuelR=- spare=\? range=412 mileage=\?$/.test(bodyOf(enumTrap.fieldLines()[0])), 'a text where a number or an enum belongs prints "?": ' + bodyOf(enumTrap.fieldLines()[0]));
+    const big = mk({}); big.pr.setSets(['S1'], true);
+    const many = []; for (let i = 0; i < 40; i++) many.push({ cCListElement: { cCIdentifer: i, cCColor: 'RED', cCShortName: 'x' } });
+    feedTag(big, 'ccList', many);
+    ok(/entries=40 .* \+16 more$/.test(bodyOf(big.fieldLines()[0])) && (bodyOf(big.fieldLines()[0]).match(/\[id=/g) || []).length === 24, 'a list of 40: 24 entries and "+16 more"');
+    // volume line
+    const VL = mk({}); VL.pr.setSets(['S1'], true);
+    for (let i = 0; i < 3000 && !VL.lines.some((l) => /^probe: volume: /.test(l)); i++) { VL.clock.t += 600; feedTag(VL, 'ccList', [{ cCListElement: { cCIdentifer: 1000 + i } }].concat(many)); VL.pr.fields.find((x) => x.f.tag === 'ccList').n = 0; }
+    ok(VL.lines.some((l) => /^probe: volume: 15\d KB in \d+ lines since start: collect the logs/.test(l)), 'a volume line says when 150 KB have been logged: collect the logs');
+    // never throws without signals
+    const NS = new Probe({ log: { info() {}, warn() {} }, now: () => 1, cfg: { hubPauseMs: 0 } });
+    let ns = false; try { NS.setSets(['S1']); NS.tick(); NS.mark(); NS.stats(); NS.hubStats(); } catch (e) { ns = true; }
+    ok(!ns, 'without a signals object nothing throws (the sets just have no proxies)');
+    // a log that throws
+    const LG = new Probe({ log: { info() { throw new Error('log boom'); }, warn() { throw new Error('log boom'); } }, signals: fakeSignals(), now: () => 1, cfg: { hubPauseMs: 0 } });
+    let lg = false; try { LG.setSets(['S1']); LG.mark(); LG.startLine(); LG.tick(); } catch (e) { lg = true; }
+    ok(!lg, 'a log that throws does not take the probe down');
+
+    // ---------------------------------------------------------------------------------------------------------------
+    console.log('6. on the bench: the real app, built by the kit, in the stubbed head unit (port ' + PORT + ')');
+    const dataDir = path.join(tmp, 'data');
+    fs.mkdirSync(dataDir);
+    const base = 'http://127.0.0.1:' + PORT;
+    const req = async (method, url, body) => {
+        const rr = await fetch(base + url, { method, headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+        if (rr.status === 200) return rr.json();
+        if (rr.status !== 204) throw new Error(method + ' ' + url + ': ' + rr.status);
+        return null;
+    };
+    let out = '', exited = false, server = null;
+    const startServer = () => {
+        server = spawn(process.execPath, [path.join(__dirname, 'server.js'), 'signal_probe'], {
+            cwd: ROOT, env: Object.assign({}, process.env, { BENCH_PORT: String(PORT), BENCH_DATA_DIR: dataDir }), stdio: ['ignore', 'pipe', 'pipe'],
+        });
+        const keep = (d) => { out += d; if (/app exited/.test(String(d))) exited = true; };
+        server.stdout.on('data', keep); server.stderr.on('data', keep);
+    };
+    const until = async (fn, ms) => { const end = Date.now() + (ms || 8000); while (Date.now() < end) { if (fn()) return true; await sleep(100); } return fn(); };
+    const probeLines = () => out.split('\n').filter((l) => /\[signal_probe\] probe: /.test(l)).map((l) => l.replace(/^.*\[signal_probe\] /, ''));
+    const probeNative = async () => { try { return await req('GET', '/probe'); } catch (e) { return null; } };
+    try {
+        startServer();
+        ok(await until(() => /build: signal_probe/.test(out) && probeLines().some((l) => /^probe: start /.test(l)), 60000), 'the app builds with the kit and starts');
+        ok(probeLines().some((l) => /^probe: start signal_probe v=0\.1\.0 fmt=1 sets=none fields=0 of 160$/.test(l)), 'the start line: all sets off at the first start: ' + (probeLines()[0] || ''));
+        ok(!/Error|uncaught/i.test(out.split('\n').filter((l) => /\[signal_probe\]/.test(l)).join('\n')), 'nothing in the app\'s log says Error or uncaught');
+        let p = await probeNative();
+        ok(p && JSON.stringify(p.stack) === '["MAIN"]', 'the entry screen is the native menu MAIN');
+        ok(p && p.native.MARK && /^Позначка 1$/.test((p.native.MARK.cells || {}).Text1stRow || ''), 'the mark row says "Позначка 1": ' + JSON.stringify(p && p.native.MARK && p.native.MARK.cells));
+        ok(p && /жодного/.test((p.native.STATUS || {}).text || ''), 'the status line says no set is on: ' + ((p && p.native.STATUS) || {}).text);
+        ok(p && FIELDS.SETS.every((s) => p.native['SET_' + s.key.toUpperCase()] && p.native['SET_' + s.key.toUpperCase()].checked === false), 'nine checkboxes, all unchecked');
+        // S6 on
+        await req('POST', '/click', { id: 'SET_SET6' });
+        ok(await until(() => probeLines().some((l) => /^probe: sets on=S6 changed=\+S6 fields=24 \(first set on\)$/.test(l))), 'a press on the S6 checkbox: the log says S6 is on (24 fields)');
+        ok(await until(() => probeLines().filter((l) => /^probe: watch /.test(l)).length === 8, 10000), 'its 8 interfaces are subscribed (one at a time): ' + probeLines().filter((l) => /^probe: watch /.test(l)).map((l) => l.replace(/^probe: watch /, '').replace(/ set=.*$/, '')).join(', '));
+        await req('POST', '/click', { id: 'MARK' });
+        ok(await until(() => probeLines().some((l) => /^probe: mark M1 /.test(l))), 'a press on the mark row: one "mark M1" line');
+        await sleep(300);
+        await req('POST', '/fake', { feed: { iface: 'de.bmw.body.Light', field: 'IndicatorSteeringColumn', value: { operationColumnStalks: 8 } } });
+        ok(await until(() => probeLines().some((l) => /^probe: P13 stalk #1 t=[0-9.]+: stalks=8\(0x8\) prev=- tms=\d+ since=M1\+\d+$/.test(l))), 'an injected stalk byte is logged with its time after the mark: ' + (probeLines().filter((l) => /stalk #1/.test(l))[0] || ''));
+        await req('POST', '/fake', { feed: { iface: 'de.bmw.infotainment.vehicle.Vehicle2', field: 'statusDisplayKombi', value: { statusDisplayInstrumentPackM: 'STANDARD_VIEW' } } });
+        ok(await until(() => probeLines().some((l) => /P11 display-kombi #1 .*view=STANDARD_VIEW/.test(l))), 'a cluster-view field is logged too');
+        await req('POST', '/fake', { feed: { iface: 'de.bmw.infotainment.vehicle.Vehicle2', field: 'statusZVStatus', value: { statusCentralLockingSystem: 5 } } });
+        await sleep(400);
+        ok(!probeLines().some((l) => /zv-status/.test(l)), 'a field of a set that is off (S3) logs nothing');
+        p = await probeNative();
+        ok(p && /^Позначка 2$/.test((p.native.MARK.cells || {}).Text1stRow || '') && /остання: 1/.test((p.native.MARK.cells || {}).Text2ndRow || '') && /S6/.test((p.native.STATUS || {}).text || ''), 'the menu shows the next mark number, the last one, and S6 on: ' + JSON.stringify(p && p.native.MARK.cells));
+        const settingsFile = path.join(dataDir, 'signal_probe', 'settings.json');
+        const alt = path.join(dataDir, 'settings.json');
+        const sf = [settingsFile, alt].find((f) => fs.existsSync(f));
+        ok(sf && readJson(sf).set6 === true && readJson(sf).set1 === false, 'the choice is saved in settings.json (set6 true)');
+        // restart: the sets come back
+        const before = probeLines().length;
+        await req('POST', '/restart');
+        ok(await until(() => probeLines().slice(before).some((l) => /^probe: start signal_probe v=0\.1\.0 fmt=1 sets=S6 fields=24 of 160$/.test(l)), 15000), 'after a restart the start line says sets=S6 (the owner\'s choice is kept)');
+        ok(await until(() => probeLines().slice(before).filter((l) => /^probe: watch /.test(l)).length === 8, 10000), '... and S6\'s interfaces are subscribed again');
+        await req('POST', '/click', { id: 'SET_SET6' });
+        ok(await until(() => probeLines().some((l) => /^probe: sets on=none changed=-S6 /.test(l))), 'S6 off again: logged');
+        ok(!exited, 'the app never exited');
+    } catch (e) {
+        ok(false, 'bench run: ' + (e && e.stack || e));
+    } finally {
+        if (server) { server.kill('SIGTERM'); await sleep(300); }
+    }
+    console.log('\n' + passed + ' passed, ' + failed + ' failed');
+    process.exit(failed ? 1 : 0);
+}
+main().catch((e) => { console.error(e); process.exit(1); });

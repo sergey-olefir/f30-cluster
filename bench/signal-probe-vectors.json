@@ -1,0 +1,2845 @@
+[
+ {
+  "set": "S1",
+  "p": "P1",
+  "tag": "active-cc",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusActiveCCMessage",
+  "instance": "1",
+  "value": {
+   "numberDisplayControlCheckControlMessage": 15,
+   "displayControlCheckControlMessage": 1,
+   "numberFrameDisplayControlCheckControlMessage": 1,
+   "frameDisplayControlCheckControlMessage": 1,
+   "utilityDataDisplayControlCheckControlMessage": 4096
+  },
+  "body": "number=15 control=1 frameNumber=1 frame=1 utility=4096(0x1000)"
+ },
+ {
+  "set": "S1",
+  "p": "P1",
+  "tag": "displayed-cc",
+  "iface": "de.bmw.infotainment.vehicle.Vehicle2",
+  "field": "statusDisplayedCCMessage",
+  "instance": "1",
+  "value": {
+   "statusNumberCheckControlMessageDisplay": 15
+  },
+  "body": "number=15"
+ },
+ {
+  "set": "S1",
+  "p": "P1",
+  "tag": "menu-cc",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusMenuCCMessage",
+  "instance": "1",
+  "value": {
+   "numberFrameCheckControlMessageScroll": 1,
+   "quantityFrameCheckControlMessageScroll": 2,
+   "numberCheckControlMessage1": 15,
+   "numberCheckControlMessage2": 14,
+   "numberCheckControlMessage3": 0
+  },
+  "body": "frameNumber=1 frames=2 id1=15 id2=14 id3=0"
+ },
+ {
+  "set": "S1",
+  "p": "P1",
+  "tag": "ccList",
+  "iface": "de.bmw.infotainment.KombiInterface_2",
+  "field": "ccList",
+  "instance": "1",
+  "value": [
+   {
+    "cCListElement": {
+     "cCIdentifer": 15,
+     "cCShortName": "CANARY_NAME_ONE",
+     "cCColor": "WHITE",
+     "cCListSymbolID": 2,
+     "cCIndentation": "INDENT_LEVEL_0",
+     "ricResourceID": 7
+    }
+   },
+   {
+    "cCListElement": {
+     "cCIdentifer": 0,
+     "cCShortName": "CANARY",
+     "cCColor": "GREEN",
+     "cCListSymbolID": 6,
+     "cCIndentation": "INDENT_LEVEL_0",
+     "ricResourceID": 0
+    }
+   }
+  ],
+  "body": "entries=2 [id=15 colour=WHITE symbol=2 indent=INDENT_LEVEL_0 ric=7 name-len=15] [id=0 colour=GREEN symbol=6 indent=INDENT_LEVEL_0 ric=0 name-len=6]"
+ },
+ {
+  "set": "S1",
+  "p": "P2",
+  "tag": "ccListRiskClass",
+  "iface": "de.bmw.infotainment.KombiInterface_2",
+  "field": "ccListRiskClass",
+  "instance": "1",
+  "value": [
+   {
+    "cCListRiskClassElement": {
+     "cCIdentifer": 201,
+     "cCShortName": "CANARY_RISK",
+     "cCColor": "YELLOW",
+     "cCRiskClass": "RK30",
+     "cCListSymbolID": 44
+    }
+   }
+  ],
+  "body": "entries=1 [id=201 colour=YELLOW risk=RK30 symbol=44 name-len=11]"
+ },
+ {
+  "set": "S1",
+  "p": "P2",
+  "tag": "basicList",
+  "iface": "de.bmw.infotainment.checkcontrol.CheckControlMaster",
+  "field": "basicList",
+  "instance": "1",
+  "value": [
+   {
+    "ccmId": 301,
+    "reason": "CCM_SHOWN_BY_IC",
+    "requestorDiagAddr": 64,
+    "timeStamp_s": 1763300000,
+    "timeStamp_ms": 5,
+    "syncMethod": 0,
+    "filterInformation": "D0",
+    "activeState": "AKTIV"
+   },
+   {
+    "ccmId": 302,
+    "reason": 2,
+    "filterInformation": 1,
+    "activeState": 1
+   }
+  ],
+  "body": "entries=2 [id=301 reason=CCM_SHOWN_BY_IC state=AKTIV filter=D0] [id=302 reason=2 state=1 filter=1]"
+ },
+ {
+  "set": "S2",
+  "p": "P3",
+  "tag": "range-tank",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusRangeTankStatus",
+  "instance": "1",
+  "value": {
+   "fluidLevelFuelTank": 38,
+   "fluidLevelFuelTankLeftHand": 255,
+   "fluidLevelFuelTankRightHand": 255,
+   "statusFluidLevelFuelTankSpare": "NICHT_AKTIV",
+   "range": 412,
+   "mileageKilometre": 48215
+  },
+  "body": "fuel=38 fuelL=255 fuelR=255 spare=NICHT_AKTIV range=412 mileage=48215"
+ },
+ {
+  "set": "S2",
+  "p": "P3",
+  "tag": "range-alt",
+  "iface": "de.bmw.infrastructure.VehicleInformation",
+  "field": "Range",
+  "instance": "1",
+  "value": {
+   "mileageKilometre": 48215
+  },
+  "body": "mileage=48215"
+ },
+ {
+  "set": "S2",
+  "p": "P3",
+  "tag": "mileage-supreme",
+  "iface": "de.bmw.infrastructure.MileageSupreme",
+  "field": "mileageSupreme",
+  "instance": "1",
+  "value": {
+   "mileageSupreme": 48216,
+   "qualifierMileageSupreme": "EVENT_DATA_AVAILABLE"
+  },
+  "body": "mileage=48216 qualifier=EVENT_DATA_AVAILABLE"
+ },
+ {
+  "set": "S2",
+  "p": "P3",
+  "tag": "mileage-secure",
+  "iface": "de.bmw.infrastructure.SecureMileage",
+  "field": "mileage",
+  "instance": "1",
+  "value": {
+   "currentMileage": 48215,
+   "aliveCounter": 3,
+   "manipulationState": 0
+  },
+  "body": "mileage=48215 alive=3 manipulation=0"
+ },
+ {
+  "set": "S2",
+  "p": "P4",
+  "tag": "bc-average",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusBordcomputerAverage",
+  "instance": "1",
+  "value": {
+   "speedAverage1BC1": 412,
+   "consumptionAverage1BC1": 68,
+   "speedAverage2BC2": 65535,
+   "consumptionAverage2BC2": 65535,
+   "statusUnitOfMeasurementSpeedBC": "KM_S_H__KM",
+   "statusUnitOfMeasurementConsumptionBC": "VERBRAUCH_IN_L_S_100KM"
+  },
+  "body": "speed1=412 cons1=68 speed2=65535 cons2=65535 speedUnit=KM_S_H__KM consUnit=VERBRAUCH_IN_L_S_100KM"
+ },
+ {
+  "set": "S2",
+  "p": "P4",
+  "tag": "bc-travel",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusBordcomputerTravelData",
+  "instance": "1",
+  "value": {
+   "rideDurationHours": 0,
+   "rideDurationMinutes": 43,
+   "wayPassed": 124
+  },
+  "body": "hours=0 minutes=43 way=124"
+ },
+ {
+  "set": "S2",
+  "p": "P4",
+  "tag": "bc-start",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusBordcomputerTravelStart",
+  "instance": "1",
+  "value": {
+   "hourDepartureBC": 14,
+   "minuteDepartureBC": 0,
+   "dayDepartureBC": 17,
+   "monthDepartureBC": 11,
+   "yearDepartureBC": 2026
+  },
+  "body": "hour=14 minute=0 day=17 month=11 year=2026"
+ },
+ {
+  "set": "S2",
+  "p": "P4",
+  "tag": "bc-status2",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusBordcomputerStatus2",
+  "instance": "1",
+  "value": {
+   "statusBC2BN2020": "BC2_LAEUFT",
+   "statusResetBC2BN2020": "AUS",
+   "statusLimitBN2020": "KEINE_AKTION",
+   "boundaryLimitBN2020": 0,
+   "statusUnitOfMeasurementSpeedSpeedometerBN2020": "KM_S_H",
+   "warningMemoBN2020": "CANARY_MEMBER"
+  },
+  "body": "bc2=BC2_LAEUFT reset=AUS limit=KEINE_AKTION boundary=0 speedUnit=KM_S_H"
+ },
+ {
+  "set": "S2",
+  "p": "P4",
+  "tag": "bc-all3",
+  "iface": "de.bmw.infotainment.resetlogic.ResetLogic3",
+  "field": "bcDataAll",
+  "instance": "1",
+  "value": {
+   "bcUnits": {
+    "tachoDigital": "KILOMETERS",
+    "currentConsumptionCombustion": "CONSUMPTION_KM",
+    "averageConsumptionCombustion": "CONSUMPTION_KM"
+   },
+   "activeResetLogic": 1,
+   "availableResetLogic": 7,
+   "bcData3": [
+    {
+     "resetOption": "STARTOFDRIVING",
+     "dateTimeReset": {
+      "year": 26,
+      "month": 11,
+      "day": 17,
+      "hour": 14,
+      "minute": 0,
+      "second": 0
+     },
+     "dateTimeTrip": {
+      "day": 0,
+      "hour": 0,
+      "minute": 43,
+      "second": 12
+     },
+     "speedAverage": 412,
+     "consumptionCombustionCurrentScale": 1,
+     "consumptionCombustionCurrentDigit": 90,
+     "consumptionCombustionAverageScale": 1,
+     "consumptionCombustionAverageDigit": 68,
+     "counterDistance": 1240
+    },
+    {
+     "resetOption": "LONGTERM",
+     "dateTimeTrip": {
+      "day": 3,
+      "hour": 4,
+      "minute": 5,
+      "second": 6
+     },
+     "speedAverage": 455,
+     "counterDistance": 99999
+    }
+   ]
+  },
+  "body": "speedUnit=KILOMETERS consNowUnit=CONSUMPTION_KM consAvgUnit=CONSUMPTION_KM active=1 available=7(0x7) trips=2 [option=STARTOFDRIVING tripDay=0 tripH=0 tripM=43 tripS=12 speedAvg=412 consAvgScale=1 consAvgDigit=68 consNowScale=1 consNowDigit=90 distance=1240 resetY=26 resetMo=11 resetD=17 resetH=14 resetMi=0] [option=LONGTERM tripDay=3 tripH=4 tripM=5 tripS=6 speedAvg=455 consAvgScale=- consAvgDigit=- consNowScale=- consNowDigit=- distance=99999 resetY=- resetMo=- resetD=- resetH=- resetMi=-]"
+ },
+ {
+  "set": "S2",
+  "p": "P4",
+  "tag": "bc-all1",
+  "iface": "de.bmw.infotainment.resetlogic.ResetLogic",
+  "field": "bcDataAll",
+  "instance": "1",
+  "value": {
+   "bcUnits": {
+    "tachoDigital": "KILOMETERS",
+    "consumption": "CONSUMPTION_KM"
+   },
+   "activeResetLogic": 1,
+   "availableResetLogic": 7,
+   "bcData": [
+    {
+     "resetOption": "STARTOFDRIVING",
+     "consumptionAverage": 68,
+     "speedAverage": 412,
+     "currentConsumption": 90,
+     "dateTimeReset": {
+      "year": 26,
+      "month": 11,
+      "day": 17,
+      "hour": 14,
+      "minute": 0,
+      "second": 0
+     },
+     "dateTimeTrip": {
+      "day": 0,
+      "hour": 0,
+      "minute": 43,
+      "second": 12
+     }
+    },
+    {
+     "resetOption": "LONGTERM",
+     "consumptionAverage": 71,
+     "speedAverage": 455,
+     "currentConsumption": 90,
+     "dateTimeReset": {
+      "year": 26,
+      "month": 10,
+      "day": 1,
+      "hour": 8,
+      "minute": 30,
+      "second": 0
+     },
+     "dateTimeTrip": {
+      "day": 3,
+      "hour": 4,
+      "minute": 5,
+      "second": 0
+     }
+    }
+   ]
+  },
+  "body": "speedUnit=KILOMETERS consUnit=CONSUMPTION_KM active=1 available=7(0x7) trips=2 [option=STARTOFDRIVING speedAvg=412 consAvg=68 consNow=90 tripDay=0 tripH=0 tripM=43 resetH=14 resetMi=0] [option=LONGTERM speedAvg=455 consAvg=71 consNow=90 tripDay=3 tripH=4 tripM=5 resetH=8 resetMi=30]"
+ },
+ {
+  "set": "S2",
+  "p": "P4",
+  "tag": "bc-avgcons1",
+  "iface": "de.bmw.infotainment.resetlogic.ResetLogic",
+  "field": "averageConsumption",
+  "instance": "1",
+  "value": {
+   "consumptionCombustionCurrentScale": 3,
+   "consumptionCombustionCurrentDigit": 90,
+   "consumptionElectricCurrentScale": 0,
+   "consumptionElectricCurrentDigit": 0,
+   "combustionUnit": "CONSUMPTION_KM"
+  },
+  "body": "consNowScale=3 consNowDigit=90 unit=CONSUMPTION_KM"
+ },
+ {
+  "set": "S2",
+  "p": "P4",
+  "tag": "bc-all2",
+  "iface": "de.bmw.infotainment.resetlogic.ResetLogic2",
+  "field": "bcDataAll",
+  "instance": "1",
+  "value": {
+   "bcUnits": {
+    "tachoDigital": "KILOMETERS"
+   },
+   "activeResetLogic": 2,
+   "availableResetLogic": 3,
+   "bcData": [
+    {
+     "resetOption": "LONGTERM",
+     "speedAverage": 455,
+     "consumptionCombustionAverageScale": 2,
+     "consumptionCombustionAverageDigit": 71,
+     "dateTimeTrip": {
+      "day": 3,
+      "hour": 4,
+      "minute": 5,
+      "second": 0
+     },
+     "dateTimeReset": {
+      "year": 26,
+      "month": 10,
+      "day": 1,
+      "hour": 8,
+      "minute": 30,
+      "second": 0
+     }
+    }
+   ]
+  },
+  "body": "speedUnit=KILOMETERS active=2 available=3(0x3) trips=1 [option=LONGTERM speedAvg=455 consAvgScale=2 consAvgDigit=71 tripDay=3 tripH=4 tripM=5 resetH=8 resetMi=30]"
+ },
+ {
+  "set": "S2",
+  "p": "P4",
+  "tag": "bc-segment",
+  "iface": "de.bmw.infotainment.telematic.journeyhistory.BcPersonal",
+  "field": "driveSegment",
+  "instance": "1",
+  "value": {
+   "bcBeSegmentId": 2,
+   "bcBeTriggerReason": "INTERVALRUNNING",
+   "bcBeDurationDrive": 43,
+   "bcBeDurationMoving": 30,
+   "bcBeTripDistanceKm": 12,
+   "bcBeSpeedAvgDrive": 17,
+   "bcBeSpeedAvgMoving": 25,
+   "bcBeConsFuelVisible": 68,
+   "bcBeMileageStartKm": 48203,
+   "bcBeTime": {
+    "startLocal": 1,
+    "endLocal": 2,
+    "startUtc": 3,
+    "endUtc": 4
+   }
+  },
+  "body": "segment=2 trigger=INTERVALRUNNING durDrive=43 durMoving=30 distance=12 speedDrive=17 speedMoving=25 fuel=68"
+ },
+ {
+  "set": "S2",
+  "p": "P4",
+  "tag": "lsc-cluster",
+  "iface": "de.bmw.infotainment.lsc.LSCDataSink",
+  "field": "dataCombinedInstrumentCluster",
+  "instance": "1",
+  "value": {
+   "electricalRange": 0,
+   "displayActualValueFuelTankFluidLevel": 38,
+   "averageRangeConsumption": 70,
+   "presentAuxiliaryConsumerPower": 0,
+   "averageSpeed": 41
+  },
+  "body": "speedAvg=41 consAvg=70 fuel=38"
+ },
+ {
+  "set": "S2",
+  "p": "P5",
+  "tag": "units",
+  "iface": "de.bmw.infrastructure.EnvironmentalInformation",
+  "field": "UnitBN2020",
+  "instance": "1",
+  "value": {
+   "unitOfMeasurementMileage": "KILOMETER"
+  },
+  "body": "mileage=KILOMETER"
+ },
+ {
+  "set": "S2",
+  "p": "P5",
+  "tag": "external-display",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusKombiExternalDisplay",
+  "instance": "1",
+  "value": {
+   "displayTemperatureExterior": 75,
+   "displayRange": 412,
+   "statusUnitOfMeasurementTemperatureInstrumentPack": "C"
+  },
+  "body": "outside=75 range=412 tempUnit=C"
+ },
+ {
+  "set": "S2",
+  "p": "P5",
+  "tag": "units-ext",
+  "iface": "de.bmw.infotainment.vehicle.Vehicle",
+  "field": "statusNewCurrentUnitsStatusExt",
+  "instance": "1",
+  "value": {
+   "language": "ENGLISCH__UK",
+   "unitOfMeasurementTime": "_24_H",
+   "unitOfMeasurementTemperature": "C",
+   "unitOfMeasurementSpeedometerDigital": "KILOMETER",
+   "unitOfMeasurementConsumption": "L_S_100KM",
+   "unitOfMeasurementFuel": "LITER",
+   "unitOfMeasurementAirPressure": "BAR",
+   "unitOfMeasurementPowerSportMode": "KW",
+   "unitOfMeasurementTorqueSportMode": "NM"
+  },
+  "body": "temp=C speed=KILOMETER cons=L_S_100KM fuel=LITER pressure=BAR power=KW torque=NM"
+ },
+ {
+  "set": "S2",
+  "p": "P6",
+  "tag": "engine-verdict",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "dataInstrumentPack",
+  "instance": "1",
+  "value": {
+   "engineTemperatureEvaluated": "COLD",
+   "presentAuxiliaryConsumerPower": 3
+  },
+  "body": "verdict=COLD auxPower=3"
+ },
+ {
+  "set": "S2",
+  "p": "P6",
+  "tag": "coolant",
+  "iface": "de.bmw.infotainment.vehicle.CDS",
+  "field": "statusEngineTemperature",
+  "instance": "1",
+  "value": {
+   "temperatureEngineDrive": 126,
+   "temperatureEngineOilDrive": 255
+  },
+  "body": "coolant-raw=126 (78 C) oil-raw=255"
+ },
+ {
+  "set": "S3",
+  "p": "P7",
+  "tag": "doors",
+  "iface": "de.bmw.body.DoorsWindowsRoofMirrors",
+  "field": "CentralLockingSystemAndPanelStatus2",
+  "instance": "1",
+  "value": {
+   "statusCentralLockingSystem": 5,
+   "statusDoorSwitchDRD": "FAT_IST_OFFEN",
+   "statusDoorSwitchPSD": "BEIFAHRERTUER_IST_GESCHLOSSEN",
+   "statusDoorSwitchDRDR": 0,
+   "statusDoorSwitchPSDR": 0,
+   "statusContactBootLid": "HK_IST_GESCHLOSSEN",
+   "statusContactBonnet": "MOTORHAUBE_GESCHLOSSEN",
+   "statusHotelMode": "HOTELSTELLUNG_NICHT_AKTIV",
+   "statusContactSoftCloseAutomatic": "SCA_VORRASTE_GESCHLOSSEN",
+   "statusContactBootLid2": "KLAPPE_2_GESCHLOSSEN"
+  },
+  "body": "driver=FAT_IST_OFFEN passenger=BEIFAHRERTUER_IST_GESCHLOSSEN rearDriver=0 rearPassenger=0 boot=HK_IST_GESCHLOSSEN bonnet=MOTORHAUBE_GESCHLOSSEN boot2=KLAPPE_2_GESCHLOSSEN softClose=SCA_VORRASTE_GESCHLOSSEN locking=5 hotel=HOTELSTELLUNG_NICHT_AKTIV"
+ },
+ {
+  "set": "S3",
+  "p": "P7",
+  "tag": "lids",
+  "iface": "de.bmw.infotainment.vehicle.A4A",
+  "field": "statusA4ALids",
+  "instance": "1",
+  "value": {
+   "statusContactBonnet": "MOTORHAUBE_OFFEN"
+  },
+  "body": "bonnet=MOTORHAUBE_OFFEN"
+ },
+ {
+  "set": "S3",
+  "p": "P7",
+  "tag": "zv-status",
+  "iface": "de.bmw.infotainment.vehicle.Vehicle2",
+  "field": "statusZVStatus",
+  "instance": "1",
+  "value": {
+   "statusCentralLockingSystem": 5,
+   "statusCentralLockingSystemBootlid": "HECKKLAPPE_NICHT_LOGISCH_ENTRIEGELT",
+   "controlDWAPartial": 0
+  },
+  "body": "locking=5 bootUnlocked=HECKKLAPPE_NICHT_LOGISCH_ENTRIEGELT dwa=0"
+ },
+ {
+  "set": "S3",
+  "p": "P10",
+  "tag": "voltage-basic",
+  "iface": "de.bmw.infrastructure.analytics.BasicDataSet",
+  "field": "basicDataSet",
+  "instance": "1",
+  "value": {
+   "statusVoltageIntelligentBoardnetSensor": 1420,
+   "statusOtherCanary": "CANARY_Z"
+  },
+  "body": "voltage=1420"
+ },
+ {
+  "set": "S3",
+  "p": "P10",
+  "tag": "voltage-hu",
+  "iface": "com.harman.infotainment.systeminfrastructure.environment.levelmonitor.LevelMonitor",
+  "field": "systemVoltage",
+  "instance": "Inst1",
+  "value": {
+   "simuState": false,
+   "value": 12850
+  },
+  "body": "sim=false value=12850"
+ },
+ {
+  "set": "S3",
+  "p": "P10",
+  "tag": "battery-condition",
+  "iface": "de.bmw.infotainment.vehicle.CDS",
+  "field": "statusBattery2",
+  "instance": "1",
+  "value": {
+   "conditionBatteryChargingCondition": 2
+  },
+  "body": "condition=2"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "player-metadata",
+  "iface": "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState",
+  "field": "playerMetadata",
+  "instance": "HMI_CID",
+  "value": {
+   "sink": "FRONT",
+   "uiType": "TWO_LINES",
+   "menuEntry": 12345,
+   "trackId": 7,
+   "firstLineText": "ARTIST_CANARY",
+   "firstLineType": "ARTIST",
+   "secondLineText": "TITLE_CANARY_LONG",
+   "secondLineType": "TITLE",
+   "threeRowText": ""
+  },
+  "body": "sink=FRONT uiType=TWO_LINES menuEntry=12345 track=7 line1-type=ARTIST line1-len=13 line2-type=TITLE line2-len=17 line3-len=0"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "active-source",
+  "iface": "de.bmw.infotainment.entertainment.mediasource.MediaSource",
+  "field": "activeSourceId",
+  "instance": "1",
+  "value": "SRC_CANARY_B",
+  "body": "len=12 matches-source-entry=unknown"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "sources",
+  "iface": "de.bmw.infotainment.entertainment.mediasource.MediaSource",
+  "field": "sources",
+  "instance": "1",
+  "value": [
+   {
+    "sourceId": "SRC_CANARY_A",
+    "displayText": "RADIO_CANARY",
+    "iconPath": "ICON_CANARY",
+    "selectable": true,
+    "insertionOrder": 1,
+    "playerType": "TUNER_FM",
+    "instanceId": "1",
+    "keyValueMap": {
+     "key": "K",
+     "value": "CANARY_V"
+    }
+   },
+   {
+    "sourceId": "SRC_CANARY_B",
+    "displayText": "USB",
+    "selectable": true,
+    "insertionOrder": 2,
+    "playerType": "MEDIA_PLAYER",
+    "instanceId": "2"
+   }
+  ],
+  "body": "entries=2 [#0 type=TUNER_FM selectable=true order=1 id-len=12 text-len=12 instance-len=1] [#1 type=MEDIA_PLAYER selectable=true order=2 id-len=12 text-len=3 instance-len=1] active-is-entry=1"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "track-progress",
+  "iface": "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState",
+  "field": "trackProgress",
+  "instance": "HMI_CID",
+  "value": {
+   "sink": "FRONT",
+   "menuEntry": 12345,
+   "trackId": 7,
+   "elapsed": 61000,
+   "total": 215000,
+   "hasProgress": true,
+   "isSeekable": false
+  },
+  "body": "sink=FRONT menuEntry=12345 track=7 elapsed=61000 total=215000 hasProgress=true seekable=false"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "main-menu-metadata",
+  "iface": "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState",
+  "field": "mainMenuMetadata",
+  "instance": "HMI_CID",
+  "value": {
+   "sink": "FRONT",
+   "menuEntry": 12345,
+   "trackId": 7,
+   "firstLineText": "TITLE_CANARY",
+   "secondLineText": "ARTIST_CANARY",
+   "thirdLineText": ""
+  },
+  "body": "sink=FRONT menuEntry=12345 track=7 line1-len=12 line2-len=13 line3-len=0"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "media-menu",
+  "iface": "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState",
+  "field": "menu",
+  "instance": "HMI_CID",
+  "value": {
+   "sink": "FRONT",
+   "selectedEntryId": 22,
+   "menuEntries": [
+    {
+     "id": 21,
+     "name": "RADIO_CANARY",
+     "sid": "SRC_CANARY_S",
+     "iconKind": "FM",
+     "enabled": true,
+     "subentries": []
+    },
+    {
+     "id": 22,
+     "name": "CARPLAY_CANARY",
+     "sid": "SRC_CANARY_T",
+     "iconKind": "CARPLAY",
+     "enabled": true,
+     "subentries": [
+      {
+       "id": 1,
+       "name": "CANARY_SUB",
+       "sid": "SRC_CANARY_U",
+       "iconKind": "SEARCH",
+       "enabled": true
+      }
+     ]
+    }
+   ]
+  },
+  "body": "sink=FRONT selected=22 selected-icon=CARPLAY entries=2 [21 FM on=true name-len=12 subs=0] [22 CARPLAY on=true name-len=14 subs=1]"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "station",
+  "iface": "de.bmw.infotainment.tuner.fmamdab.tunerfmamdab.TunerFmAmDab",
+  "field": "currentStationFmDabAm",
+  "instance": "1",
+  "value": {
+   "stationListEntry": {
+    "isCurrentSelectedStation": "ON",
+    "dataBaseIdentifier": 99,
+    "positionNumber": 3,
+    "waveBand": "WB_FM",
+    "receptionMode": "ANALOG",
+    "stationShortName": "RADIO_CANARY",
+    "stationLongName": "",
+    "frequencyKhz": 101700,
+    "channelNumber": 0,
+    "id": 54321,
+    "epgDayViewsList": [],
+    "tp": "TPS_TP",
+    "stationIconPicture": {
+     "format": "DF_PICTURE_PNG",
+     "data": [
+      1,
+      2,
+      3,
+      4
+     ]
+    },
+    "albumCoverPicture": {
+     "format": "DF_RAW",
+     "data": []
+    },
+    "isFavorite": "OFF",
+    "subscriptionStatus": "SUS_FREE",
+    "categoryIdList": [],
+    "artistName": "ARTIST_CANARY",
+    "artistId": 0,
+    "titleName": "TITLE_CANARY_X",
+    "titleId": 0,
+    "composerName": "",
+    "pty": 10,
+    "ptyTableType": "PTT_RDS_DAB"
+   },
+   "dabEnsembleNameShort": "",
+   "dabEnsembleNameLong": "",
+   "dabEnsembleId": 0,
+   "radioTextName": "RADIO_CANARY_TEXT",
+   "radioTextPlusItemList": [
+    {
+     "itemNumber": "RTPINR_TITLE",
+     "itemTextName": "CANARY",
+     "contentTextName": "TITLE_CANARY"
+    }
+   ],
+   "pictureSlideShow": {
+    "format": "DF_RAW",
+    "data": []
+   },
+   "fieldStrengthDbuv": 40,
+   "audioQuality": 3
+  },
+  "body": "band=WB_FM reception=ANALOG freq=fm-range pos=3 current=ON fav=OFF tp=TPS_TP pty=10 short-len=12 long-len=0 artist-len=13 title-len=14 ens-len=0 rt-len=17 rtplus=1 [RTPINR_TITLE len=12] epg-days=0 icon=DF_PICTURE_PNG/4 cover=DF_RAW/0 slide=DF_RAW/0"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "cp-player-state",
+  "iface": "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer",
+  "field": "playerState",
+  "instance": "CarPlayMedia",
+  "value": "PLAYER_STATE_PLAY",
+  "body": "state=PLAYER_STATE_PLAY"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "cp-item-time",
+  "iface": "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer",
+  "field": "currentItemTime",
+  "instance": "CarPlayMedia",
+  "value": {
+   "elapsed": 61,
+   "total": 215
+  },
+  "body": "elapsed=61 total=215"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "cp-item-position",
+  "iface": "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer",
+  "field": "currentItemPosition",
+  "instance": "CarPlayMedia",
+  "value": {
+   "position": 4,
+   "totalNumber": 12
+  },
+  "body": "position=4 of=12"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "cp-item-metadata",
+  "iface": "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer",
+  "field": "currentItemMetadata",
+  "instance": "CarPlayMedia",
+  "value": [
+   {
+    "key": "TITLE",
+    "value": {
+     "stringValue": "TITLE_CANARY"
+    }
+   },
+   {
+    "key": "ARTIST",
+    "value": {
+     "stringValue": "ARTIST_CANARY"
+    }
+   },
+   {
+    "key": "TRACK_NUMBER",
+    "value": {
+     "numeric": 4
+    }
+   },
+   {
+    "key": "ITEM_ID",
+    "value": {
+     "id": [
+      1,
+      2,
+      3
+     ]
+    }
+   }
+  ],
+  "body": "keys=4 [TITLE len=12] [ARTIST len=13] [TRACK_NUMBER=4] [ITEM_ID id-len=3]"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "cp-device",
+  "iface": "de.bmw.infotainment.entertainment.mediaplayer.MediaPlayer",
+  "field": "deviceInfo",
+  "instance": "CarPlayMedia",
+  "value": {
+   "id": [
+    1
+   ],
+   "deviceId": 3,
+   "sourceId": 172,
+   "name": "CANARY_PHONE",
+   "type": "CARPLAY",
+   "status": 1
+  },
+  "body": "type=CARPLAY status=1 device=known source=172 name-len=12"
+ },
+ {
+  "set": "S4",
+  "p": "P8",
+  "tag": "main-connections",
+  "iface": "org.genivi.am.commandinterface.CommandControl",
+  "field": "listOfMainConnections",
+  "instance": "1",
+  "value": [
+   {
+    "mainConnectionID": 5,
+    "sourceID": 172,
+    "sinkID": 1,
+    "delay": 0,
+    "connectionState": "CS_CONNECTED"
+   }
+  ],
+  "body": "entries=1 [id=5 source=172 sink=1 state=CS_CONNECTED]"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "call-state",
+  "iface": "de.bmw.infotainment.connectivity.telephony.ConnectivityAggregator",
+  "field": "aggregatedCallState",
+  "instance": "1",
+  "value": "INCOMING",
+  "body": "state=INCOMING"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "carplay-call",
+  "iface": "de.bmw.infotainment.a4a.carplay.CarPlayManager",
+  "field": "projectedTelephonyActive",
+  "instance": "CarPlayManagerInst1",
+  "value": true,
+  "body": "active=true"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-call1-state",
+  "iface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+  "field": "state",
+  "instance": "Call1",
+  "value": "ACTIVE",
+  "body": "state=ACTIVE"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-call1-duration",
+  "iface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+  "field": "duration",
+  "instance": "Call1",
+  "value": 75,
+  "body": "value=75"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-call1-contact",
+  "iface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+  "field": "contactID",
+  "instance": "Call1",
+  "value": 4711,
+  "body": "contact=known"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-call1-multiparty",
+  "iface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+  "field": "multiparty",
+  "instance": "Call1",
+  "value": false,
+  "body": "active=false"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-call1-modem",
+  "iface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+  "field": "modem",
+  "instance": "Call1",
+  "value": 2,
+  "body": "value=2"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-call1-name",
+  "iface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+  "field": "name",
+  "instance": "Call1",
+  "value": "CALLER_CANARY",
+  "body": "len=13"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-call1-number",
+  "iface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+  "field": "number",
+  "instance": "Call1",
+  "value": "+000CANARY99",
+  "body": "len=12"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-call1-picture",
+  "iface": "de.bmw.infotainment.connectivity.telephony.VoiceCall",
+  "field": "pictureSource",
+  "instance": "Call1",
+  "value": {
+   "pictureURL": "URL_CANARY_PIC",
+   "initials": "CC"
+  },
+  "body": "url-len=14 initials-len=2"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-mic-muted",
+  "iface": "de.bmw.infotainment.connectivity.telephony.VoiceCallManager",
+  "field": "micMuted",
+  "instance": "1",
+  "value": true,
+  "body": "active=true"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-hfp-blocked",
+  "iface": "de.bmw.infotainment.connectivity.telephony.VoiceCallManager",
+  "field": "hfpBlocked",
+  "instance": "1",
+  "value": false,
+  "body": "active=false"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-comm-blocked",
+  "iface": "de.bmw.infotainment.connectivity.telephony.VoiceCallManager",
+  "field": "communicationBlocked",
+  "instance": "1",
+  "value": false,
+  "body": "active=false"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-devices",
+  "iface": "de.bmw.infotainment.devicemanager.devicepresentation.DevicePresentation",
+  "field": "deviceList",
+  "instance": "1",
+  "value": [
+   {
+    "uniqueID": 3,
+    "friendlyName": "DEVICE_CANARY",
+    "capabilities": [
+     "HANDS_FREE_PHONE",
+     "BT_AUDIO",
+     "CARPLAY"
+    ],
+    "configured": [
+     "HANDS_FREE_PHONE"
+    ],
+    "active": [
+     "HANDS_FREE_PHONE",
+     "BT_AUDIO"
+    ],
+    "visibleTechnologies": [
+     "BT"
+    ],
+    "pairedTechnologies": [
+     "BT"
+    ],
+    "connectedTechnologies": [
+     "BT"
+    ],
+    "connected": true,
+    "present": true,
+    "batteryState": 80,
+    "signalStrength": 4,
+    "persistentAttributes": {
+     "key": "CANARY_ATTR"
+    },
+    "personalizedMode": false,
+    "gsmStrength": 3,
+    "registerState": "ROAMING",
+    "lockState": "UNLOCKED"
+   },
+   {
+    "uniqueID": 5,
+    "friendlyName": "",
+    "capabilities": [],
+    "active": [],
+    "connectedTechnologies": [],
+    "connected": false,
+    "present": false,
+    "batteryState": 0,
+    "signalStrength": 0,
+    "gsmStrength": 0,
+    "registerState": 0,
+    "lockState": 0
+   }
+  ],
+  "body": "entries=2 [#0 connected=true present=true battery=80 signal=4 gsm=3 register=ROAMING lock=UNLOCKED personal=false active=HANDS_FREE_PHONE+BT_AUDIO connectedTech=BT caps=3 name-len=13] [#1 connected=false present=false battery=0 signal=0 gsm=0 register=0 lock=0 personal=- active=none connectedTech=none caps=0 name-len=0]"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-active-roles",
+  "iface": "de.bmw.infotainment.devicemanager.devicepresentation.DevicePresentation",
+  "field": "activeRoles",
+  "instance": "1",
+  "value": [
+   "HANDS_FREE_PHONE",
+   "BT_AUDIO",
+   "SIGNAL_STRENGTH",
+   "BATTERY_STATE"
+  ],
+  "body": "entries=4 roles=HANDS_FREE_PHONE+BT_AUDIO+SIGNAL_STRENGTH+BATTERY_STATE"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "phone-calllist",
+  "iface": "de.bmw.infotainment.connectivity.calllist.CallList",
+  "field": "callItemList",
+  "instance": "1",
+  "value": [
+   {
+    "name": "CANARY_A",
+    "contactID": 9,
+    "picture": {
+     "pictureURL": "URL_CANARY",
+     "initials": "CA"
+    },
+    "phoneNumber": "+000CANARY1",
+    "timestamp": {
+     "year": 2026,
+     "mon": 11,
+     "day": 18,
+     "hour": 9,
+     "min": 1,
+     "sec": 2
+    },
+    "callType": "MISSED",
+    "modemID": 1,
+    "count": 2
+   },
+   {
+    "name": "",
+    "contactID": 0,
+    "phoneNumber": "+000CANARY2",
+    "callType": 1,
+    "modemID": 1,
+    "count": 1
+   },
+   {
+    "name": "CANARY_B",
+    "contactID": 4,
+    "phoneNumber": "+000CANARY3",
+    "callType": "INCOMING",
+    "modemID": 1,
+    "count": 1
+   }
+  ],
+  "body": "entries=3 incoming=1 outgoing=1 missed=1 other=0 with-contact=2 with-name=2 max-count=2 first=MISSED last=INCOMING"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "nad-call",
+  "iface": "de.bmw.infotainment.Telephone",
+  "field": "callState",
+  "instance": "1",
+  "value": [
+   {
+    "callStateStructure": {
+     "id": 1,
+     "direction": "MOBILE_TERMINATED_CALL",
+     "state": "INCOMING",
+     "mode": "VOICE",
+     "multipartyCall": "NO_MULTI_PARTY_CALL"
+    }
+   },
+   {
+    "callStateStructure": {
+     "id": 2,
+     "direction": "MOBILE_ORIGINATED_CALL",
+     "state": "HELD",
+     "mode": "VOICE",
+     "multipartyCall": "NO_MULTI_PARTY_CALL"
+    }
+   }
+  ],
+  "body": "entries=2 [id=1 direction=MOBILE_TERMINATED_CALL state=INCOMING mode=VOICE multiparty=NO_MULTI_PARTY_CALL] [id=2 direction=MOBILE_ORIGINATED_CALL state=HELD mode=VOICE multiparty=NO_MULTI_PARTY_CALL]"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "nad-register",
+  "iface": "de.bmw.infotainment.Telephone",
+  "field": "registerState",
+  "instance": "1",
+  "value": {
+   "circuitSwitchedNetworkRegisterState": "REGISTERED",
+   "packetSwitchedNetworkRegisterState": "REGISTERED_AND_ROAMING"
+  },
+  "body": "shape=flat cs=REGISTERED ps=REGISTERED_AND_ROAMING"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "nad-signal",
+  "iface": "de.bmw.infotainment.Telephone",
+  "field": "signalQuality",
+  "instance": "1",
+  "value": {
+   "signalQualityStructure": {
+    "receivedSignalStrength": 21,
+    "bitErrorRate": 99,
+    "netCode": "00000",
+    "netName": "NET_CANARY"
+   }
+  },
+  "body": "shape=member rssi=21 ber=99 code-len=5 name-len=10"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "nad-operator",
+  "iface": "de.bmw.infotainment.Telephone",
+  "field": "currentNetworkOperator",
+  "instance": "1",
+  "value": {
+   "currentNetworkOperatorStructure": {
+    "mode": 0,
+    "accessTechnology": "E_UTRAN",
+    "networkOperator": {
+     "longAlphaNumeric": {
+      "datatypeRef": "NET_CANARY_LONG"
+     }
+    }
+   }
+  },
+  "body": "shape=member mode=0 tech=E_UTRAN"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "telesync-call",
+  "iface": "de.bmw.infotainment.connectivity.conntelematicssync.ConnTeleSync",
+  "field": "callStatus",
+  "instance": "TelematicsCallStatusInst1",
+  "value": "FREE",
+  "body": "state=FREE"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "telesync-gsm",
+  "iface": "de.bmw.infotainment.connectivity.conntelematicssync.ConnTeleSync",
+  "field": "gsmStrength",
+  "instance": "TelematicsCallStatusInst1",
+  "value": 4,
+  "body": "value=4"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "telesync-register",
+  "iface": "de.bmw.infotainment.connectivity.conntelematicssync.ConnTeleSync",
+  "field": "registerState",
+  "instance": "TelematicsCallStatusInst1",
+  "value": "REGISTERED",
+  "body": "state=REGISTERED"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "telesync-lock",
+  "iface": "de.bmw.infotainment.connectivity.conntelematicssync.ConnTeleSync",
+  "field": "lockState",
+  "instance": "TelematicsCallStatusInst1",
+  "value": "UNLOCKED",
+  "body": "state=UNLOCKED"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "acm-phone",
+  "iface": "de.bmw.infotainment.telematic.acm.ACM",
+  "field": "phoneState",
+  "instance": "1",
+  "value": "AVAILABLE",
+  "body": "state=AVAILABLE"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "acm-data",
+  "iface": "de.bmw.infotainment.telematic.acm.ACM",
+  "field": "dataConnectionStatus",
+  "instance": "1",
+  "value": {
+   "device": "BMW",
+   "status": "CONNECTED",
+   "technology": "LTE",
+   "voiceDataParallel": true
+  },
+  "body": "device=BMW status=CONNECTED tech=LTE voiceData=true"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "esim-status",
+  "iface": "de.bmw.infotainment.telematic.esimproxy.EsimProxy",
+  "field": "status",
+  "instance": "EsimProxy_1",
+  "value": "NO_PROFILE",
+  "body": "state=NO_PROFILE"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "esim-signal",
+  "iface": "de.bmw.infotainment.telematic.esimproxy.EsimProxy",
+  "field": "signalStrength",
+  "instance": "EsimProxy_1",
+  "value": -85,
+  "body": "value=-85"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "esim-telephony",
+  "iface": "de.bmw.infotainment.telematic.esimproxy.EsimProxy",
+  "field": "telephonyEnabled",
+  "instance": "EsimProxy_1",
+  "value": false,
+  "body": "active=false"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "audio-tel-mute",
+  "iface": "de.bmw.infotainment.am.AudioSystemInformation",
+  "field": "muteTelState",
+  "instance": "1",
+  "value": {
+   "controlMute": 1
+  },
+  "body": "mute=1"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "wca-front",
+  "iface": "de.bmw.infotainment.wca.WirelessChargingAdapter",
+  "field": "wcaNfcFrontStatus",
+  "instance": "1",
+  "value": {
+   "wcavTemperatureDevice": 70,
+   "wcavCoil": "SPULE_2_AKTIV",
+   "wcavStatus": "WCA_AKTIV_HANDY_ERKANNT_WIRD_GELADEN",
+   "wcavEfficiency": 60
+  },
+  "body": "status=WCA_AKTIV_HANDY_ERKANNT_WIRD_GELADEN coil=SPULE_2_AKTIV temp=70 efficiency=60"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "wca-body",
+  "iface": "de.bmw.body.ComfortFunction",
+  "field": "WCAStatus",
+  "instance": "1",
+  "value": {
+   "responseWCATemperatureDevice": 70,
+   "responseWCAAntenna": 0,
+   "statusWCA": 3,
+   "responseWCAEfficiency": 60
+  },
+  "body": "status=3 temp=70 efficiency=60"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "hmi-app",
+  "iface": "de.bmw.infotainment.hmi.hmicontext.HMIContext",
+  "field": "currentActiveApplication",
+  "instance": "HMI_CID",
+  "value": "COMMUNICATION",
+  "body": "state=COMMUNICATION"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "nad2-call",
+  "iface": "de.bmw.infotainment.Telephone",
+  "field": "callState",
+  "instance": "2",
+  "value": [
+   {
+    "callStateStructure": {
+     "id": 1,
+     "direction": "MOBILE_TERMINATED_CALL",
+     "state": "INCOMING",
+     "mode": "VOICE",
+     "multipartyCall": "NO_MULTI_PARTY_CALL"
+    }
+   },
+   {
+    "callStateStructure": {
+     "id": 2,
+     "direction": "MOBILE_ORIGINATED_CALL",
+     "state": "HELD",
+     "mode": "VOICE",
+     "multipartyCall": "NO_MULTI_PARTY_CALL"
+    }
+   }
+  ],
+  "body": "entries=2 [id=1 direction=MOBILE_TERMINATED_CALL state=INCOMING mode=VOICE multiparty=NO_MULTI_PARTY_CALL] [id=2 direction=MOBILE_ORIGINATED_CALL state=HELD mode=VOICE multiparty=NO_MULTI_PARTY_CALL]"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "nad2-register",
+  "iface": "de.bmw.infotainment.Telephone",
+  "field": "registerState",
+  "instance": "2",
+  "value": {
+   "circuitSwitchedNetworkRegisterState": "REGISTERED",
+   "packetSwitchedNetworkRegisterState": "REGISTERED_AND_ROAMING"
+  },
+  "body": "shape=flat cs=REGISTERED ps=REGISTERED_AND_ROAMING"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "nad2-signal",
+  "iface": "de.bmw.infotainment.Telephone",
+  "field": "signalQuality",
+  "instance": "2",
+  "value": {
+   "signalQualityStructure": {
+    "receivedSignalStrength": 21,
+    "bitErrorRate": 99,
+    "netCode": "00000",
+    "netName": "NET_CANARY"
+   }
+  },
+  "body": "shape=member rssi=21 ber=99 code-len=5 name-len=10"
+ },
+ {
+  "set": "S5",
+  "p": "P9",
+  "tag": "nad2-operator",
+  "iface": "de.bmw.infotainment.Telephone",
+  "field": "currentNetworkOperator",
+  "instance": "2",
+  "value": {
+   "currentNetworkOperatorStructure": {
+    "mode": 0,
+    "accessTechnology": "E_UTRAN",
+    "networkOperator": {
+     "longAlphaNumeric": {
+      "datatypeRef": "NET_CANARY_LONG"
+     }
+    }
+   }
+  },
+  "body": "shape=member mode=0 tech=E_UTRAN"
+ },
+ {
+  "set": "S6",
+  "p": "P11",
+  "tag": "ic-widget",
+  "iface": "de.bmw.infotainment.hmi.hmicontext.HMIContext",
+  "field": "currentICWidget",
+  "instance": "HMI_CID",
+  "value": 1234,
+  "body": "widget=1234(0x4d2)"
+ },
+ {
+  "set": "S6",
+  "p": "P11",
+  "tag": "ic-context",
+  "iface": "de.bmw.infotainment.hmi.hmicontext.HMIContext",
+  "field": "currentICGraphicalContext",
+  "instance": "HMI_CID",
+  "value": {
+   "focusIndex": 0,
+   "listIndex": -1,
+   "visibleContext": 65537
+  },
+  "body": "focus=0 list=-1 visible=65537(0x10001)"
+ },
+ {
+  "set": "S6",
+  "p": "P11",
+  "tag": "ic-widget2",
+  "iface": "de.bmw.infotainment.hmi.hmicontext2.HMIContext2",
+  "field": "currentICWidget",
+  "instance": "1",
+  "value": {
+   "StateID": 12,
+   "AppletID": 3
+  },
+  "body": "state=12 applet=3"
+ },
+ {
+  "set": "S6",
+  "p": "P11",
+  "tag": "ic-context2",
+  "iface": "de.bmw.infotainment.hmi.hmicontext2.HMIContext2",
+  "field": "currentICGraphicalContext",
+  "instance": "1",
+  "value": {
+   "VisualContext": {
+    "StateID": 12,
+    "AppletID": 3
+   },
+   "FocusIndex": {
+    "FocusIndex": 0,
+    "AppletID": 3
+   },
+   "ListIndex": -1
+  },
+  "body": "state=12 applet=3 focus=0 focusApplet=3 list=-1"
+ },
+ {
+  "set": "S6",
+  "p": "P11",
+  "tag": "kombi-selection",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusKombiSelection",
+  "instance": "1",
+  "value": {
+   "statusActivationInstrumentPackBC": 255,
+   "statusActivationInstrumentPackContent": 5,
+   "statusActivationPreselectInstrumentPack": "ANZEIGE_RADIOBUTTON__ALLES_EIN__AKTIV"
+  },
+  "body": "packBC=255(0xff) content=5(0x5) preselect=ANZEIGE_RADIOBUTTON__ALLES_EIN__AKTIV"
+ },
+ {
+  "set": "S6",
+  "p": "P11",
+  "tag": "kombi-available",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusKombiSelectionAvailability",
+  "instance": "1",
+  "value": {
+   "baseSetupInstrumentPackBC": 1023,
+   "baseSetupInstrumentPackContent": 3,
+   "baseSetupPreselectInstrumentPack": 0
+  },
+  "body": "packBC=1023(0x3ff) content=3(0x3) preselect=0"
+ },
+ {
+  "set": "S6",
+  "p": "P11",
+  "tag": "kombi-config",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusConfigurationKombi5",
+  "instance": "1",
+  "value": {
+   "statusActivationInstrumentPackContent2": 16,
+   "statusActivationPreselectInstrumentPack2": "ANZEIGE_RADIOBUTTON_STANDARD_AKTIV",
+   "statusNavigationDisplayType": "ANZEIGE_RADIOBUTTON_KARTENANSICHT_AKTIV",
+   "statusDZMorPowermeterDisplay": "BEDIENUNG_RADIOBUTTON_DZM_AKTIV",
+   "statusEntertainmentSTGDisplay": "ANZEIGE_RADIOBUTTON_KOMBI_AKTIV"
+  },
+  "body": "content2=16(0x10) preselect2=ANZEIGE_RADIOBUTTON_STANDARD_AKTIV navDisplay=ANZEIGE_RADIOBUTTON_KARTENANSICHT_AKTIV dzmOrPower=BEDIENUNG_RADIOBUTTON_DZM_AKTIV entertainment=ANZEIGE_RADIOBUTTON_KOMBI_AKTIV"
+ },
+ {
+  "set": "S6",
+  "p": "P11",
+  "tag": "display-kombi",
+  "iface": "de.bmw.infotainment.vehicle.Vehicle2",
+  "field": "statusDisplayKombi",
+  "instance": "1",
+  "value": {
+   "statusDisplayInstrumentPackM": "STANDARD_VIEW"
+  },
+  "body": "view=STANDARD_VIEW"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "sw-special1",
+  "iface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+  "field": "statusSpecialFunctionButton",
+  "instance": "1",
+  "value": {
+   "operationPushButtonSpecialFunction": "KURZ_GEDRUECKT"
+  },
+  "body": "press=KURZ_GEDRUECKT"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "sw-special2",
+  "iface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+  "field": "statusSpecialFunctionButton2",
+  "instance": "1",
+  "value": {
+   "operationPushButtonSpecialFunction2": "KURZ_GEDRUECKT"
+  },
+  "body": "press=KURZ_GEDRUECKT"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "sw-fav",
+  "iface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+  "field": "operationSteerWheelFAV",
+  "instance": "1",
+  "value": {
+   "operationSteerWheelFAV": "BERUEHRT"
+  },
+  "body": "press=BERUEHRT"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "sw-fc",
+  "iface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+  "field": "operationSteerWheelFC",
+  "instance": "1",
+  "value": {
+   "operationSteerWheelFC": "BERUEHRT"
+  },
+  "body": "press=BERUEHRT"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "sw-wheel-steps",
+  "iface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+  "field": "statusRotarySteps",
+  "instance": "1",
+  "value": {
+   "operationStepsKnurlSteeringWheel": 3
+  },
+  "body": "steps=3"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "sw-wheel-press",
+  "iface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+  "field": "statusRotaryPress",
+  "instance": "1",
+  "value": {
+   "operationPushButtonKnurlSteeringWheel": "KURZ_GEDRUECKT"
+  },
+  "body": "press=KURZ_GEDRUECKT"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "sw-skip",
+  "iface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+  "field": "statusSearchSwitch1",
+  "instance": "1",
+  "value": {
+   "operationPushButtonAudioAutomaticTuningSteeringWheel": "KEINE_AKTION"
+  },
+  "body": "skip=KEINE_AKTION"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "sw-volume",
+  "iface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+  "field": "statusAudioVolumeButton",
+  "instance": "1",
+  "value": {
+   "operationPushButtonAudioAudioVolumeSteeringWheel": "KEINE_AKTION"
+  },
+  "body": "volume=KEINE_AKTION"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "sw-voice",
+  "iface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+  "field": "statusPTTButton1",
+  "instance": "1",
+  "value": {
+   "operationPushButtonPTTSteeringWheel": "KEINE_AKTION"
+  },
+  "body": "press=KEINE_AKTION"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "sw-phone",
+  "iface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+  "field": "statusTelephoneButton",
+  "instance": "1",
+  "value": {
+   "operationPushButtonTelephoneSteeringWheel": "KEINE_AKTION"
+  },
+  "body": "press=KEINE_AKTION"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "sw-fc-led",
+  "iface": "de.bmw.infotainment.controlelements.SteeringWheelPushButton",
+  "field": "statusSteerWheelFCLED",
+  "instance": "1",
+  "value": {
+   "statusSteerWheelFCLED": "AUS"
+  },
+  "body": "led=AUS"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "stalk",
+  "iface": "de.bmw.body.Light",
+  "field": "IndicatorSteeringColumn",
+  "instance": "1",
+  "value": {
+   "operationColumnStalks": 64
+  },
+  "body": "stalks=64(0x40) prev=-"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "stalk-complete",
+  "iface": "de.bmw.body.Light",
+  "field": "IndicatorSteeringColumnComplete",
+  "instance": "1",
+  "value": {
+   "operationColumnStalks": 0,
+   "statusPushButtonMainBeamAssistant": "KEINE_BETAETIGUNG"
+  },
+  "body": "stalks=0 prev=- mainBeamAssist=KEINE_BETAETIGUNG"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "controller",
+  "iface": "de.bmw.infotainment.controlelements.FrontCCU",
+  "field": "statusRotaryEncoderState",
+  "instance": "1",
+  "value": {
+   "frontSequenceNumberOperatingElement": 12,
+   "frontRotaryEncoderOperation": -2,
+   "frontRotaryEncoderPushButton": "DREHGEBER_KURZ_GEDRUECKT",
+   "frontRotaryEncoderDeflection": "MITTELSTELLUNG"
+  },
+  "body": "seq=12 turn=-2 press=DREHGEBER_KURZ_GEDRUECKT tilt=MITTELSTELLUNG"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "controller-keys",
+  "iface": "de.bmw.infotainment.controlelements.FrontCCU",
+  "field": "statusPushButtonsState",
+  "instance": "1",
+  "value": {
+   "frontOperationButton1": "KEINE_BETAETIGUNG",
+   "frontOperationButton2": "KURZ_GEDRUECKT",
+   "frontOperationButton3": "KEINE_BETAETIGUNG",
+   "frontOperationButton4": "KEINE_BETAETIGUNG",
+   "frontOperationButton5": "KEINE_BETAETIGUNG",
+   "frontOperationButton6": "KEINE_BETAETIGUNG",
+   "frontOperationButton7": "KEINE_BETAETIGUNG",
+   "frontOperationButton8": "KEINE_BETAETIGUNG"
+  },
+  "body": "b1=KEINE_BETAETIGUNG b2=KURZ_GEDRUECKT b3=KEINE_BETAETIGUNG b4=KEINE_BETAETIGUNG b5=KEINE_BETAETIGUNG b6=KEINE_BETAETIGUNG b7=KEINE_BETAETIGUNG b8=KEINE_BETAETIGUNG"
+ },
+ {
+  "set": "S6",
+  "p": "P13",
+  "tag": "hmi-shortcut",
+  "iface": "de.bmw.infotainment.lifecycle.lifecycle.Lifecycle",
+  "field": "entertainmentModeTrigger",
+  "instance": "Front",
+  "value": "CD_SHORTCUT_ZBE",
+  "body": "state=CD_SHORTCUT_ZBE"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "guiding-state",
+  "iface": "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus",
+  "field": "guidingState",
+  "instance": "1",
+  "value": "ACTIVE",
+  "body": "state=ACTIVE"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "next-intersection",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "nextIntersection",
+  "instance": "Main_Instance",
+  "value": {
+   "intersection": {
+    "elements": [
+     {
+      "text": "STREET_CANARY"
+     },
+     {
+      "spacer": "SLASH"
+     },
+     {
+      "icon": {
+       "text": "A 9",
+       "iconHandle": {
+        "valid": true,
+        "id": "shield-A9",
+        "url": "URL_CANARY"
+       }
+      }
+     }
+    ]
+   },
+   "serviceIcons": [],
+   "distance": {
+    "distance": "12",
+    "unit": "KM",
+    "rawDistance": 12000.5
+   }
+  },
+  "body": {}
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "guidance-state",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "guidanceState",
+  "instance": "Main_Instance",
+  "value": "ACTIVE",
+  "body": "state=ACTIVE"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "dart",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "conclusiveDart",
+  "instance": "Main_Instance",
+  "value": {
+   "directionAbsolute": 271.5,
+   "timeStamp": {
+    "date": {
+     "year": 2026,
+     "month": 11,
+     "day": 18
+    },
+    "time": {
+     "hour": 9,
+     "minute": 7,
+     "seconds": 3
+    }
+   },
+   "bargraphProgress": 40,
+   "maneuver": {
+    "intersection": {
+     "direction": "SLIGHT_RIGHT",
+     "detailedGeometry": "TWO_WAY_FORK_TAKE_RIGHT",
+     "roadlinks": {
+      "value": {
+       "entryLink": {
+        "linkDescriptor": {
+         "linkId": 77
+        },
+        "startPointCoordinate": {
+         "coordinatesValid": true,
+         "latitude": 50.4321,
+         "longitude": 30.9876
+        }
+       },
+       "turningPoint": {
+        "coordinatesValid": true,
+        "latitude": 50.4321,
+        "longitude": 30.9876
+       }
+      }
+     },
+     "formattedDistance": {
+      "distance": "350",
+      "unit": "METER",
+      "rawDistance": 350
+     },
+     "description": {
+      "elements": [
+       {
+        "text": "STREET_CANARY"
+       }
+      ]
+     },
+     "guidingStep": "GS2",
+     "combinedManeuverType": "SINGLE",
+     "distanceToDestination": 12000,
+     "unreliable": false
+    }
+   }
+  },
+  "body": "kind=intersection bar=40 direction=SLIGHT_RIGHT geometry=TWO_WAY_FORK_TAKE_RIGHT dist-len=3 unit=METER raw=350 step=GS2 combined=SINGLE toDest=12000 unreliable=false desc-elements=1"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "lanes",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "currentLaneGuiding",
+  "instance": "Main_Instance",
+  "value": {
+   "carPositionLaneIndex": 1,
+   "rows": [
+    {
+     "recommendedCarPositionLaneIndex": 2,
+     "bargraphProgress": 60,
+     "laneMarkers": [
+      "SOLID",
+      "DASHED"
+     ],
+     "lanes": [
+      {
+       "directionToFollow": "LEFT",
+       "isHighlighted": false,
+       "additionalLaneInfo": "NONE",
+       "otherDirections": [],
+       "directionsToFollow": []
+      },
+      {
+       "directionToFollow": "STRAIGHT_ON",
+       "isHighlighted": true,
+       "additionalLaneInfo": "NONE",
+       "otherDirections": [
+        "RIGHT"
+       ],
+       "directionsToFollow": []
+      },
+      {
+       "directionToFollow": "RIGHT",
+       "isHighlighted": true,
+       "additionalLaneInfo": "BUS",
+       "otherDirections": [],
+       "directionsToFollow": []
+      }
+     ]
+    }
+   ]
+  },
+  "body": "rows=1 car=1 [lanes=3 rec=2 bar=60 LEFT,*STRAIGHT_ON,*RIGHT/BUS]"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "next-destination",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "nextDestinationInfo",
+  "instance": "Main_Instance",
+  "value": {
+   "delayTime": 120,
+   "delayStatus": "YELLOW",
+   "travelTime": 1500,
+   "estimatedArrivalTime": {
+    "includedTimeOffset": {
+     "valid": true,
+     "timeZoneOffset": 120,
+     "dayLightSavingTimeOffset": 0
+    },
+    "date": {
+     "year": 2026,
+     "month": 11,
+     "day": 18
+    },
+    "time": {
+     "invalid": false,
+     "hour": 9,
+     "minute": 32,
+     "seconds": 0
+    }
+   },
+   "formattedDistance": {
+    "distance": "14.2",
+    "unit": "KM",
+    "rawDistance": 14200
+   },
+   "directionToDestination": 33.3,
+   "position": {
+    "coordinatesValid": true,
+    "latitude": 50.4321,
+    "longitude": 30.9876
+   },
+   "isCheckeredFlag": true,
+   "stopOverNumber": 0,
+   "distanceFromCurrentToFinalDestination": 14200,
+   "isChargingStation": false
+  },
+  "body": "travel=1500 delay=120 delayStatus=YELLOW dist-len=4 unit=KM raw=14200 toFinal=14200 flag=true stopover=0 etaInvalid=false etaH=9 etaM=32 tzValid=true tz=120"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "road",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "currentRoad",
+  "instance": "Main_Instance",
+  "value": {
+   "elements": [
+    {
+     "text": "STREET_CANARY_ROAD"
+    },
+    {
+     "spacer": "BIG"
+    },
+    {
+     "icon": {
+      "text": "M06",
+      "iconHandle": {
+       "valid": true,
+       "id": "x",
+       "url": "URL_CANARY"
+      }
+     }
+    }
+   ]
+  },
+  "body": "elements=3 [text len=18] [spacer=BIG] [icon text-len=3]"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "kombi-lanes",
+  "iface": "de.bmw.infotainment.LaneGuiding",
+  "field": "laneGuiding",
+  "instance": "1",
+  "value": {
+   "currentGuidingHighlightedLanes": 6,
+   "currentGuidingBestLanes": 4,
+   "currentLane": 2,
+   "nextGuidingHighlightedLanes": 0,
+   "laneShift": -1,
+   "distanceNextGuiding": 12,
+   "distanceNextManeuver": 35,
+   "statusDisplayGuidingManeuver": "GUIDING_MANEUVER_DISPLAYED",
+   "statusDisplayGuidingLevel3": "GUIDING_LEVEL_3_NOT_DISPLAYED",
+   "statusDisplayJunctionView": "JUNCTION_VIEW_NOT_DISPLAYED",
+   "statusLaneGuiding": "LANEGUIDINGOKACTIVE",
+   "displayedManeuverID": "MANEUVERID_1"
+  },
+  "body": "highlighted=6(0x6) best=4(0x4) lane=2 nextHighlighted=0 shift=-1 distGuiding=12 distManeuver=35 maneuverShown=GUIDING_MANEUVER_DISPLAYED level3Shown=GUIDING_LEVEL_3_NOT_DISPLAYED junctionShown=JUNCTION_VIEW_NOT_DISPLAYED status=LANEGUIDINGOKACTIVE maneuverId=MANEUVERID_1"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "kombi-lanes-ext",
+  "iface": "de.bmw.infotainment.LaneGuiding",
+  "field": "extendedLaneGuiding",
+  "instance": "1",
+  "value": {
+   "extendedDistanceNextManeuver": 350
+  },
+  "body": "distManeuver=350"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "on-guidable-road",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "isOnGuidableRoad",
+  "instance": "Main_Instance",
+  "value": true,
+  "body": "active=true"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "guiding-provider",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "guidingProvider",
+  "instance": "Main_Instance",
+  "value": "NONE",
+  "body": "state=NONE"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "carplay-guidance",
+  "iface": "de.bmw.infotainment.a4a.carplay.CarPlayManager",
+  "field": "projectedGuidanceActive",
+  "instance": "CarPlayManagerInst1",
+  "value": false,
+  "body": "active=false"
+ },
+ {
+  "set": "S7",
+  "p": "P12",
+  "tag": "aa-guidance",
+  "iface": "de.bmw.infotainment.sdi.aap.androidautoprojectedmanager.AndroidAutoProjectedManager",
+  "field": "projectedGuidanceActive",
+  "instance": "AndroidAutoProjectedManagerInst1",
+  "value": false,
+  "body": "active=false"
+ },
+ {
+  "set": "S7",
+  "p": "P14",
+  "tag": "map-without-route",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "visualizationInKombiNonNaviEnabled",
+  "instance": "Main_Instance",
+  "value": true,
+  "body": "active=true"
+ },
+ {
+  "set": "S7",
+  "p": "P14",
+  "tag": "junction-3d-in-kombi",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "junction3dViewInKombiEnabled",
+  "instance": "Main_Instance",
+  "value": false,
+  "body": "active=false"
+ },
+ {
+  "set": "S8",
+  "p": "P15",
+  "tag": "sign",
+  "iface": "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl",
+  "field": "displaySpeedLimitAndNoPassingRestriction",
+  "instance": "1",
+  "value": {
+   "invalidFlag": 0,
+   "displaySymbolStyle": "ECE",
+   "displayNoPassingRestriction": "KEIN_UEBERHOLVERBOT_ERKANNT",
+   "displayRemainingDistanceNoPassingRestriction": 0,
+   "displaySpeedLimitSupplemental": "KEIN_ZUSATZZEICHEN",
+   "displaySpeedLimitUnit": "KM_H",
+   "displaySpeedLimit": 70,
+   "displaySpeedLimitWarning": "SLI_WARNUNG_NICHT_ANGEFORDERT"
+  },
+  "body": "invalid=0 value=70 unit=KM_H warn=SLI_WARNUNG_NICHT_ANGEFORDERT supp=KEIN_ZUSATZZEICHEN style=ECE np=KEIN_UEBERHOLVERBOT_ERKANNT npDist=0"
+ },
+ {
+  "set": "S8",
+  "p": "P15",
+  "tag": "longitudinal",
+  "iface": "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl",
+  "field": "displayDriverAssistanceLongitudinal",
+  "instance": "1",
+  "value": {
+   "length": 40,
+   "counter": 3,
+   "dataID": 77,
+   "cRC": 1234,
+   "invalidFlag": 0,
+   "dispXCC": {
+    "dispXCCStatus": "DISP_ACC",
+    "objectDetectedInNarrow": false,
+    "driverTakeOverRequest": false,
+    "acceleratorPedalPressed": false,
+    "brakeOnlyModeActive": false,
+    "pullOffAlert": false,
+    "objectDetected": true,
+    "functionActive": true
+   },
+   "activeFuncLongitudinal": "XCC_AKTIV",
+   "dispSLD": {
+    "dispLIMStatus": "LIM_WARNING_OFF",
+    "dispSLDStatus": "SLD_OFF"
+   },
+   "valueRequestedSpeed": 110,
+   "dispRequestedSpeed": {
+    "dispRequestedSpeedStatus": "DISP_OF_REQUESTED_SPEED_ACTIVE",
+    "triggerVariableDisplayOfRequestedSpeed": false,
+    "unitOfRequestedSpeedValue": false
+   },
+   "StatusSLA": "SLA_NICHT_AKTIV",
+   "DispHDC": "KEINE_HDC_ANZEIGE"
+  },
+  "body": "invalid=0 func=XCC_AKTIV xcc=DISP_ACC xccOn=true object=true sld=SLD_OFF lim=LIM_WARNING_OFF setSpeed=110 setState=DISP_OF_REQUESTED_SPEED_ACTIVE setUnit=false sla=SLA_NICHT_AKTIV hdc=KEINE_HDC_ANZEIGE"
+ },
+ {
+  "set": "S8",
+  "p": "P15",
+  "tag": "foresight",
+  "iface": "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl",
+  "field": "displayForesight",
+  "instance": "1",
+  "value": {
+   "invalidFlag": 0,
+   "dispSpeedForesight": "SPEED_50",
+   "dispSpeedForesightDistance": 300,
+   "dispForesightEvent": "GESCHWINDIGKEITSBEGRENZUNG",
+   "unitSpeedForesight": "EINHEIT_KMH"
+  },
+  "body": "invalid=0 speed=SPEED_50 dist=300 event=GESCHWINDIGKEITSBEGRENZUNG unit=EINHEIT_KMH"
+ },
+ {
+  "set": "S8",
+  "p": "P15",
+  "tag": "ldm-guidance",
+  "iface": "de.bmw.infotainment.fasus.FASuS",
+  "field": "displayDriverAssistenceSystemLongitudinalGuidance",
+  "instance": "1",
+  "value": {
+   "cRCDisplayDriverAssistenceSystemLongitudinalGuidance": 9,
+   "aliveDisplayDriverAssistenceSystemLongitudinalGuidance": 4,
+   "displayXCC": 513,
+   "activeFunctionDriverAssistenceSystemLDM": "XCC_AKTIV",
+   "displaySLD": 0,
+   "statusISA2": "ISA_NICHT_AKTIV",
+   "displayGapChoiceMode": "KEINE_ANFORDERUNG",
+   "displayGapInformation": "ANZEIGE_DER_AI",
+   "displayGapChoice": 3,
+   "displayRequestSpeed": 1,
+   "valueRequestSpeed": 110
+  },
+  "body": "xcc=513 func=XCC_AKTIV sld=0 isa=ISA_NICHT_AKTIV gapMode=KEINE_ANFORDERUNG gapInfo=ANZEIGE_DER_AI gap=3 reqDisp=1 setSpeed=110"
+ },
+ {
+  "set": "S8",
+  "p": "P15",
+  "tag": "next-limit",
+  "iface": "de.bmw.infotainment.fasus.FASuS",
+  "field": "statusNextSpeedLimitRecognition",
+  "instance": "1",
+  "value": {
+   "nextWithdrawalLimitSpeed": "BESCHRAENKUNG",
+   "nextClassLimitSpeed": "_80"
+  },
+  "body": "withdrawal=BESCHRAENKUNG class=_80"
+ },
+ {
+  "set": "S8",
+  "p": "P15",
+  "tag": "no-passing",
+  "iface": "de.bmw.infotainment.fasus.FASuS",
+  "field": "statusOvertakeRecognition",
+  "instance": "1",
+  "value": {
+   "recognitionNoPassing": "UEBERHOLVERBOT_PKW"
+  },
+  "body": "np=UEBERHOLVERBOT_PKW"
+ },
+ {
+  "set": "S8",
+  "p": "P15",
+  "tag": "hud-data",
+  "iface": "de.bmw.infotainment.displaydataserver.DisplayDataServer",
+  "field": "functionalLibraryData",
+  "instance": "1",
+  "value": {
+   "speed": {
+    "kmH": 72,
+    "mlsH": 45
+   },
+   "activeCruiseControl": {
+    "symbolACC": "LDM_CAR_NORMAL",
+    "barsColorACC": "LDM_ACTIVE",
+    "accBarsHUD": 3
+   },
+   "xSpeedLimitAssist": {
+    "vSLISymbol": "LDM_VZA_VSLI_NO_SYMBOL",
+    "vSLISpeedValue": 0
+   },
+   "ldmSym": "LDM_SYM_ACC",
+   "ldmSymColor": "LDM_ACTIVE",
+   "statusLimiter": "STATUS_INACTIVE",
+   "cruiseCtrlSpeedHUD": 110,
+   "system": {
+    "modeHUD": "PSM_ALL",
+    "statusHUD": "HUDSTATUS_OFF"
+   }
+  },
+  "body": "accSym=LDM_CAR_NORMAL accBars=3 accColour=LDM_ACTIVE vsli=LDM_VZA_VSLI_NO_SYMBOL vsliSpeed=0 ldm=LDM_SYM_ACC ldmColour=LDM_ACTIVE limiter=STATUS_INACTIVE cruise=110 hud=HUDSTATUS_OFF"
+ },
+ {
+  "set": "S8",
+  "p": "P15",
+  "tag": "hud-data2",
+  "iface": "de.bmw.infotainment.displaydata.DisplayDataServer2",
+  "field": "functionalLibraryData",
+  "instance": "1",
+  "value": {
+   "ldmSetSpeed": {
+    "ldmSetSpeedValue": 110,
+    "ldmSetSpeedColour": "ACTIVE_GREEN"
+   },
+   "ldmIconId": "ACC_WITH_TARGET_OBJECT",
+   "ldmIconState": "ACTIVE",
+   "ldmAccBars": "DISTANCE_3",
+   "xSpeedLimitAssist": {
+    "sliState": "ACTIVE_SPEED_LIMIT",
+    "sliValue": "LIMIT_70"
+   },
+   "npiData": {
+    "npiState": "NO_DISPLAY"
+   },
+   "speedWarning": {
+    "speedWarningIC": "NO_DISPLAY"
+   },
+   "system": {
+    "hudStatus": "HUDSTATUS_OFF"
+   }
+  },
+  "body": "setSpeed=110 setColour=ACTIVE_GREEN icon=ACC_WITH_TARGET_OBJECT iconState=ACTIVE bars=DISTANCE_3 sliState=ACTIVE_SPEED_LIMIT sliValue=LIMIT_70 npi=NO_DISPLAY warnIC=NO_DISPLAY hud=HUDSTATUS_OFF"
+ },
+ {
+  "set": "S8",
+  "p": "P15",
+  "tag": "assist-avail",
+  "iface": "de.bmw.dass.driverassistanceapplications.MultimodalControlDriverAssistance",
+  "field": "functionAvailabilityDriverAssistance",
+  "instance": "1",
+  "value": {
+   "proposalAvailabilityACC": "ACTIVE",
+   "proposalAvailabilitySLA": "NOT_EQUIPPED",
+   "proposalAvailabilitySLD": "AVAILABLE",
+   "proposalAvailabilityDCC": "AVAILABLE",
+   "valueSetSpeed": 110,
+   "infoSetSpeed": 1,
+   "proposalAssistFunction": "ACC"
+  },
+  "body": "acc=ACTIVE sla=NOT_EQUIPPED sld=AVAILABLE dcc=AVAILABLE setSpeed=110 setInfo=1 proposal=ACC"
+ },
+ {
+  "set": "S8",
+  "p": "P15",
+  "tag": "front-vehicle",
+  "iface": "de.bmw.dass.GapVehicleAhead",
+  "field": "DataFrontVehicle",
+  "instance": "1",
+  "value": {
+   "frontVehicleObjectID": 4,
+   "frontVehicleGapX": 3120,
+   "frontVehicleSpeedX": 2000,
+   "qualifierEventDataFunctionFrontVehicle": "EVENT_DATA_AVAILABLE"
+  },
+  "body": "gapX=3120 speedX=2000 qualifier=EVENT_DATA_AVAILABLE"
+ },
+ {
+  "set": "S9",
+  "p": "P16",
+  "tag": "tyre-pressure",
+  "iface": "de.bmw.infotainment.vehicle.TPMS",
+  "field": "statusTyrePressure",
+  "instance": "1",
+  "value": {
+   "actualValuePressureTyreFLH": 23,
+   "actualValuePressureTyreFRH": 24,
+   "actualValuePressureTyreRLH": 25,
+   "actualValuePressureTyreRRH": 24
+  },
+  "body": "fl=23 fr=24 rl=25 rr=24"
+ },
+ {
+  "set": "S9",
+  "p": "P16",
+  "tag": "tyre-temp",
+  "iface": "de.bmw.infotainment.vehicle.TPMS",
+  "field": "statusTyreTemperature",
+  "instance": "1",
+  "value": {
+   "actualValueTemperatureTyreFLH": 43,
+   "actualValueTemperatureTyreFRH": 43,
+   "actualValueTemperatureTyreRLH": 44,
+   "actualValueTemperatureTyreRRH": 42
+  },
+  "body": "fl=43 fr=43 rl=44 rr=42"
+ },
+ {
+  "set": "S9",
+  "p": "P16",
+  "tag": "tyre-target",
+  "iface": "de.bmw.infotainment.vehicle.TPMS",
+  "field": "statusTargetTyrePressure",
+  "instance": "1",
+  "value": {
+   "targetPressureTyreFLH": 22,
+   "targetPressureTyreFRH": 22,
+   "targetPressureTyreRLH": 26,
+   "targetPressureTyreRRH": 26
+  },
+  "body": "fl=22 fr=22 rl=26 rr=26"
+ },
+ {
+  "set": "S9",
+  "p": "P16",
+  "tag": "tyres-status",
+  "iface": "de.bmw.infotainment.vehicle.TPMS",
+  "field": "statusTyresStatus",
+  "instance": "1",
+  "value": {
+   "aliveStatusTyre": 5,
+   "qualifierFunctionTyreInformation": 1,
+   "qualifierTyrePressureLoss": 0,
+   "qualifierTyreFailure": 0
+  },
+  "body": "alive=5 info=1 loss=0 failure=0"
+ },
+ {
+  "set": "S9",
+  "p": "P16",
+  "tag": "oil-level",
+  "iface": "de.bmw.infotainment.vehicle.Vehicle2",
+  "field": "statusOilDipstick2",
+  "instance": "1",
+  "value": {
+   "statusOilLevelMeasurement1": 300,
+   "fluidLevelEngineOilRelative": "MOTOROELSTAND_4_4",
+   "statusOilLevelMeasurement2": 0,
+   "statusOilLevelMeasurementPossible": "DETAILMESSUNG_ERLAUBT"
+  },
+  "body": "m1=300 level=MOTOROELSTAND_4_4 m2=0 possible=DETAILMESSUNG_ERLAUBT"
+ },
+ {
+  "set": "S9",
+  "p": "P16",
+  "tag": "oil-temp2",
+  "iface": "de.bmw.infotainment.vehicle.CDS2",
+  "field": "statusInjectionVolume",
+  "instance": "1",
+  "value": {
+   "injectionVolumeFuelEngine": 1200,
+   "oilTemperature": 140
+  },
+  "body": "oil=140 injection=1200"
+ },
+ {
+  "set": "S9",
+  "p": "P16",
+  "tag": "sport-display",
+  "iface": "de.bmw.infotainment.drivingexcitement.FES",
+  "field": "statusSwitchDriveDynamicSport2",
+  "instance": "1",
+  "value": {
+   "displayLateralAcceleration": 200,
+   "displayLongitudinalAcceleration": 200,
+   "displayMaximumValueBoostPressure": 160,
+   "displayBoostPressure": 9,
+   "displaySportTempEMachine": 255,
+   "displaySportRpmEMachineMax": 0,
+   "reasonDegradationPowertrain": "KEINE"
+  },
+  "body": "boost=9 boostMax=160 lat=200 long=200 degradation=KEINE"
+ },
+ {
+  "set": "S9",
+  "p": "P16",
+  "tag": "power-torque",
+  "iface": "de.bmw.infotainment.drivingexcitement.FES",
+  "field": "statusVehicleDynamicEngine",
+  "instance": "1",
+  "value": {
+   "displaySportEngineTorque": 31,
+   "displaySportEnginePower": 12
+  },
+  "body": "power=12 torque=31"
+ },
+ {
+  "set": "S9",
+  "p": "P16",
+  "tag": "engine-max",
+  "iface": "de.bmw.infotainment.drivingexcitement.FES",
+  "field": "statusVehicleDynamicEngineMaxValue",
+  "instance": "1",
+  "value": {
+   "displayMaximumValuePower": 285,
+   "displayMaximumValueTorque": 500
+  },
+  "body": "power=285 torque=500"
+ },
+ {
+  "set": "S9",
+  "p": "P17",
+  "tag": "cons-now",
+  "iface": "de.bmw.infotainment.resetlogic.ResetLogic",
+  "field": "currentConsumption",
+  "instance": "1",
+  "value": {
+   "consumptionCombustionCurrentScale": 40,
+   "consumptionCombustionCurrentDigit": 87,
+   "consumptionElectricCurrentScale": 0,
+   "consumptionElectricCurrentDigit": 0,
+   "combustionUnit": "CONSUMPTION_KM",
+   "electricUnit": "DEFAULT"
+  },
+  "body": "scale=40 digit=87 unit=CONSUMPTION_KM"
+ },
+ {
+  "set": "S9",
+  "p": "P17",
+  "tag": "cons-history",
+  "iface": "de.bmw.infotainment.ConsumptionHistory3",
+  "field": "consumptionHistoryFull",
+  "instance": "1",
+  "value": {
+   "updateReason": 1,
+   "unitConsumptionHistoryConsumption": "L_100KM",
+   "maxConsumptionValueConsumption": 300,
+   "consumptionHistoryAverageValue": 79,
+   "consumptionHistoryHistoricValue": 82,
+   "counterDistance": 1500,
+   "consumptionHistoryTable": [
+    {
+     "barPosition": 4,
+     "totalBarNumberInSegmet": 30,
+     "consumptionHistoryValue": 91,
+     "barType": "CURRENT_VALUE_1"
+    },
+    {
+     "barPosition": 3,
+     "totalBarNumberInSegmet": 30,
+     "consumptionHistoryValue": 80,
+     "barType": "HISTORIC_VALUE"
+    }
+   ]
+  },
+  "body": "reason=1 unit=L_100KM max=300 avg=79 historic=82 distance=1500 bars=2 [bar=4 of=30 value=91 type=CURRENT_VALUE_1] [bar=3 of=30 value=80 type=HISTORIC_VALUE]"
+ },
+ {
+  "set": "S9",
+  "p": "P17",
+  "tag": "heading",
+  "iface": "de.bmw.infotainment.navigation.positioning.Positioning",
+  "field": "currentLocation",
+  "instance": "Main_Instance",
+  "value": {
+   "heading": 271.25,
+   "status": "ON_ROAD"
+  },
+  "body": "heading=set status=ON_ROAD"
+ },
+ {
+  "set": "S9",
+  "p": "P17",
+  "tag": "gps-ext",
+  "iface": "de.bmw.infotainment.GPSData",
+  "field": "GPSPositionExtendedCAN",
+  "instance": "1",
+  "value": {
+   "statusHeadingGPSCAN": 135,
+   "statusHeightGPSCAN": 1234,
+   "statusQualityPositionGPSCAN": 7,
+   "speedGPSCAN": 720
+  },
+  "body": "heading=set height=1200~ quality=7"
+ },
+ {
+  "set": "S9",
+  "p": "P17",
+  "tag": "cbs-list",
+  "iface": "de.bmw.infotainment.KombiInterface_2",
+  "field": "cbsDataServiceList",
+  "instance": "1",
+  "value": [
+   {
+    "cBSDataServiceWithSymbolID": {
+     "cBSDataService": {
+      "cBSIdentifier": 3,
+      "cBSColor": "GREEN",
+      "cBSServcieName": "SERVICE_CANARY",
+      "cBSServiceWay": "WAY_CANARY_9",
+      "cBSServiceDate": "DATE_CANARY_11",
+      "yearCBSDisplay": 27,
+      "monthCBSDisplay": 3
+     },
+     "cBSListSymbolID": 12,
+     "ricResourceID": 5,
+     "cBSAvail": 1,
+     "cBSServCount": 4,
+     "dayCBSDisplay": 9
+    }
+   },
+   {
+    "cBSDataServiceStruct": {
+     "cBSIdentifier": 4,
+     "cBSColor": "YELLOW",
+     "cBSServcieName": "X",
+     "cBSServiceWay": "",
+     "cBSServiceDate": "",
+     "yearCBSDisplay": 0,
+     "monthCBSDisplay": 0
+    }
+   }
+  ],
+  "body": "entries=2 [sym id=3 colour=GREEN name-len=14 way-len=12 date-len=14 year=27 month=3 symbol=12 avail=1 count=4 day=9] [plain id=4 colour=YELLOW name-len=1 way-len=0 date-len=0 year=0 month=0]"
+ },
+ {
+  "set": "S10",
+  "p": "P18",
+  "tag": "kombi-basic",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "basicConfigKombi",
+  "instance": "1",
+  "value": {
+   "baseSetupInstrumentPackContent2": 5,
+   "baseSetupPreselectInstrumentPack2": 1,
+   "displaySetupLinkHeadUnit": 0,
+   "baseSetupNavigationDisplayType": 2,
+   "baseSetupEntertainmentSTGDisplay": 1,
+   "baseSetupDZMorPowermeterDisplay": 0
+  },
+  "body": "content2=5(0x5) preselect2=1 linkHeadUnit=0 navType=2 entertainment=1 dzmOrPower=0"
+ },
+ {
+  "set": "S10",
+  "p": "P18",
+  "tag": "welcome-animation",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusWelcomeAnimation",
+  "instance": "1",
+  "value": {
+   "statusStagingMaster": "AUFSTART_MIT_INSZENIERUNG",
+   "triggerStagingHeadUnit": "KEINE_ANFORDERUNG"
+  },
+  "body": "staging=AUFSTART_MIT_INSZENIERUNG trigger=KEINE_ANFORDERUNG"
+ },
+ {
+  "set": "S10",
+  "p": "P18",
+  "tag": "gearbox-secure",
+  "iface": "de.bmw.powertrain.Powertrain",
+  "field": "dataDisplayGearboxSecure",
+  "instance": "1",
+  "value": {
+   "cRC_DataDisplayGearbox": 9,
+   "aLIV_DataDisplayGearbox": 3,
+   "dummy1": "_1_P_GANG",
+   "dummy2": "B_PROGRAMM",
+   "dummy3": "BLINKEN",
+   "dummy4": "D",
+   "dummy5": "NICHT_BLINKEN",
+   "dummy6": "AKTIV",
+   "dummy7": "RESERVIERT",
+   "dummy8": "_1",
+   "statusAvailabilityInterventionPowertrainGearbox": "GETRIEBEEINGRIFF_ERLAUBT"
+  },
+  "body": "d1=_1_P_GANG d2=B_PROGRAMM d3=BLINKEN d4=D d5=NICHT_BLINKEN d6=AKTIV d7=RESERVIERT d8=_1 intervention=GETRIEBEEINGRIFF_ERLAUBT"
+ },
+ {
+  "set": "S10",
+  "p": "P18",
+  "tag": "dialog-state",
+  "iface": "de.bmw.infotainment.speech.dialog.Dialog",
+  "field": "dialogState",
+  "instance": "HMISpeechHU",
+  "value": "RUNNING",
+  "body": "state=RUNNING"
+ },
+ {
+  "set": "S10",
+  "p": "P18",
+  "tag": "gearbox-status",
+  "iface": "de.bmw.infrastructure.VehicleInformation",
+  "field": "statusGearboxDrive",
+  "instance": "1",
+  "value": {
+   "cRCStatusGearboxDrive": 1,
+   "alivStatusGearboxDrive": 2,
+   "statusActualStageDrive": "D",
+   "statusActualGearDrive": "G3",
+   "statusTargetStageDrive": "D",
+   "qualifierStatusActualStageDrive": 0
+  },
+  "body": "stage=D gear=G3 target=D qualifier=0"
+ },
+ {
+  "set": "S10",
+  "p": "P18",
+  "tag": "gearbox-display",
+  "iface": "de.bmw.infotainment.misc.MDrive",
+  "field": "dataDisplayGearbox",
+  "instance": "1",
+  "value": {
+   "displayProgramGearbox": "B_PROGRAMM",
+   "displayDriveLogicGearbox": "_1"
+  },
+  "body": "program=B_PROGRAMM logic=_1"
+ },
+ {
+  "set": "S10",
+  "p": "P18",
+  "tag": "fes-switch",
+  "iface": "de.bmw.infotainment.drivingexcitement.FES",
+  "field": "statusFESVehicleDynamicSwitchHMI",
+  "instance": "1",
+  "value": {
+   "actualValueModeDrivingExperience": "SPORT",
+   "requestSwitchDrivingExperienceMMIDisplay": "INITIALISIERUNG",
+   "requestSwitchDrivingExperienceInstrumentPackDisplay": "KOMBI_LISTE_ANZEIGEN",
+   "statusSetupStartUpModusDrivingExperience": "SIGNAL_UNBEFUELLT",
+   "displayAvailibilityModeDrivingExperience": "KEIN_VERHINDERER_VORHANDEN",
+   "displayModeDrivingExperience": "SPORT",
+   "displayModeDrivingExperience2": "COMFORT"
+  },
+  "body": "mode=SPORT mmi=INITIALISIERUNG kombiList=KOMBI_LISTE_ANZEIGEN startup=SIGNAL_UNBEFUELLT availability=KEIN_VERHINDERER_VORHANDEN display=SPORT display2=COMFORT"
+ },
+ {
+  "set": "S11",
+  "p": "P19",
+  "tag": "indicate",
+  "iface": "de.bmw.infotainment.vehicle.CDS2",
+  "field": "statusIndicate",
+  "instance": "1",
+  "value": {
+   "statusIndicateDirection": 2
+  },
+  "body": "direction=2"
+ },
+ {
+  "set": "S11",
+  "p": "P19",
+  "tag": "belts",
+  "iface": "de.bmw.infotainment.vehicle.CDS2",
+  "field": "statusBeltContacts2",
+  "instance": "1",
+  "value": {
+   "statusBeltBuckleSwitchDR": "SCHALTER_GURTSCHLOSS_GESTECKT",
+   "statusBeltBuckleSwitchPS": "SCHALTER_GURTSCHLOSS_NICHT_GESTECKT",
+   "statusBeltBuckleSwitchRLH": "SCHALTER_GURTSCHLOSS_NICHT_VERBAUT",
+   "statusBeltBuckleSwitchRM": "SCHALTER_GURTSCHLOSS_NICHT_VERBAUT",
+   "statusBeltBuckleSwitchRRH": "SCHALTER_GURTSCHLOSS_GESTECKT"
+  },
+  "body": "driver=SCHALTER_GURTSCHLOSS_GESTECKT passenger=SCHALTER_GURTSCHLOSS_NICHT_GESTECKT rearLeft=SCHALTER_GURTSCHLOSS_NICHT_VERBAUT rearMiddle=SCHALTER_GURTSCHLOSS_NICHT_VERBAUT rearRight=SCHALTER_GURTSCHLOSS_GESTECKT"
+ },
+ {
+  "set": "S11",
+  "p": "P19",
+  "tag": "seats",
+  "iface": "de.bmw.infotainment.vehicle.CDS2",
+  "field": "statusSeatOccupancy",
+  "instance": "1",
+  "value": {
+   "statusSeatOccupyingDR": "SITZ_BELEGT",
+   "statusSeatOccupyingPS": "SIGNAL_UNGUELTIG",
+   "statusSeatOccupyingRLH": "ERKENNUNGSSYSTEM_NICHT_VORHANDEN",
+   "statusSeatOccupyingRRH": "ERKENNUNGSSYSTEM_NICHT_VORHANDEN"
+  },
+  "body": "driver=SITZ_BELEGT passenger=SIGNAL_UNGUELTIG rearLeft=ERKENNUNGSSYSTEM_NICHT_VORHANDEN rearRight=ERKENNUNGSSYSTEM_NICHT_VORHANDEN"
+ },
+ {
+  "set": "S11",
+  "p": "P19",
+  "tag": "lights",
+  "iface": "de.bmw.infotainment.vehicle.Vehicle2",
+  "field": "statusLightStatus",
+  "instance": "1",
+  "value": {
+   "statusMainBeam_headlightFlasher": "AUS",
+   "statusFrontFogLight": "AUS",
+   "statusRearFogLight": "EIN",
+   "statusPositionLight": "EIN",
+   "statusLightStatusError": "LAMPENZUSTANDS_MINUS_SIGNALE_SIND_IN_ORDNUNG",
+   "statusDippedBeam": "EIN"
+  },
+  "body": "mainBeam=AUS frontFog=AUS rearFog=EIN position=EIN dipped=EIN error=LAMPENZUSTANDS_MINUS_SIGNALE_SIND_IN_ORDNUNG"
+ },
+ {
+  "set": "S11",
+  "p": "P19",
+  "tag": "dimmer",
+  "iface": "de.bmw.infotainment.vehicle.Vehicle2",
+  "field": "statusDimmer",
+  "instance": "1",
+  "value": {
+   "controlIlluminationSwitch": 117
+  },
+  "body": "illumination=117"
+ },
+ {
+  "set": "S11",
+  "p": "P19",
+  "tag": "cons-regular",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusConsumptionValueRegularA",
+  "instance": "1",
+  "value": {
+   "consumptionValueRegular1": 68,
+   "consumptionValueRegular2": 72,
+   "consumptionValueRegular3": 65,
+   "consumptionValueRegular4": 70
+  },
+  "body": "v1=68 v2=72 v3=65 v4=70"
+ },
+ {
+  "set": "S11",
+  "p": "P19",
+  "tag": "cons-eco",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusConsumptionValueECOa",
+  "instance": "1",
+  "value": {
+   "consumptionValueECO1": 58,
+   "consumptionValueECO2": 60,
+   "consumptionValueECO3": 55,
+   "consumptionValueECO4": 61
+  },
+  "body": "v1=58 v2=60 v3=55 v4=61"
+ },
+ {
+  "set": "S11",
+  "p": "P19",
+  "tag": "eco-range",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusECORange",
+  "instance": "1",
+  "value": {
+   "displayRangeECO": 523
+  },
+  "body": "range=523"
+ },
+ {
+  "set": "S11",
+  "p": "P19",
+  "tag": "driving-style",
+  "iface": "de.bmw.infotainment.KombiIF",
+  "field": "statusDrivingStyleDisplay",
+  "instance": "1",
+  "value": {
+   "drivingBehaviourECOCategorie1": 3,
+   "drivingBehaviourECOCategorie2": 2,
+   "drivingBehaviourECOCategorie3": 1,
+   "drivingBehaviourECOCategorie1Status": "BLINKEND",
+   "drivingBehaviourECOCategorie2Status": "NICHT_BLINKEND",
+   "drivingBehaviourECOCategorie3Status": "KEINE_AENDERUNG"
+  },
+  "body": "c1=3 c2=2 c3=1 c1s=BLINKEND c2s=NICHT_BLINKEND c3s=KEINE_AENDERUNG"
+ }
+]
