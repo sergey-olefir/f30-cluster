@@ -349,9 +349,25 @@ def plate_seam():
              'font': 'td_msg', 'counterFont': 'td_cnt', 'conn': 2}]
 
 
+def limit_seam():
+    """SPEC-R3 8 / 9 (package B5; design/twin-dial/b5/limit.json): the speed-limit sign's sheet and the cruise readout's. The
+    sign is a "tdsign" image sheet on connection 2, painted by shared/twin_limit.js; it carries NO "cc:" toggle, so it
+    stays while BMW's fallback window is open. The readout is built only while config.cruise is set ("tl:cruise:<place>");
+    one widget per place, only the one named by config.cruise.place is made. Their own z each, so the engine never packs
+    them into a sheet with anything else (one sheet each: 0.03 MiB, 0.04 MiB)."""
+    B5 = json.load(open(os.path.join(HERE, 'twin-dial', 'b5', 'limit.json')))
+    s = B5['sign']
+    W = [{'id': 'limit_sign', 'type': 'tdsign', 'z': s['z'], 'x': s['sheet'][0], 'y': s['sheet'][1], 'w': s['sheet'][2], 'h': s['sheet'][3], 'conn': s['conn']}]
+    for place in ('C1', 'C2'):
+        c = B5['cruise'][place]
+        W.append({'id': 'cruise_' + place.lower(), 'type': 'tdcru', 'z': B5['cruise']['z'], 'x': c['sheet'][0], 'y': c['sheet'][1], 'w': c['sheet'][2], 'h': c['sheet'][3],
+                  'conn': B5['cruise']['conn'], 'place': place, 'toggle': 'tl:cruise:' + place})
+    return W
+
+
 def widgets():
     W = [tdback('L'), tdback('RT'), tdback('RB'), tdial('tach'), tdial('speed')]
-    W += gpu_texts() + tabs() + [pages_widget()] + hubs() + row() + plate_seam()
+    W += gpu_texts() + tabs() + [pages_widget()] + hubs() + row() + plate_seam() + limit_seam()
     return W
 
 

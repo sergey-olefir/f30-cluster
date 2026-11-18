@@ -247,12 +247,16 @@ try { twinTabs = require('./twin_tabs'); } catch (e) { if (e.code !== 'MODULE_NO
 // twin_dial round 3 (package B4): the centre pages, one image layer (shared/twin_pages.js). Absent (null) for every app that does not pack it.
 let twinPages = null;
 try { twinPages = require('./twin_pages'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_pages') < 0) throw e; }
+// twin_dial: the speed limit's sign, its marker and the cruise readout (shared/twin_limit.js; same rule: absent for every other app)
+let twinLimit = null;
+try { twinLimit = require('./twin_limit'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_limit') < 0) throw e; }
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
 const IMAGE_TYPES = { text: true, scale: true, stripe: true, gridlabels: true, icon: true, swatchimg: true,
     ccplate: true,        // twin_dial: our check-control plate sheet (shared/twin_cc.js paintPlate)
-    tdpage: true };       // twin_dial round 3 (B4): the centre pages' one layer (shared/twin_pages.js)
+    tdpage: true,       // twin_dial round 3 (B4): the centre pages' one layer (shared/twin_pages.js)
+    tdsign: true, tdcru: true };      // twin_dial: the speed-limit sign and the cruise readout (shared/twin_limit.js)
 const STATUS_ASK_MS = 2000;      // after a rebuild: ask cluster-render for its own status text
 const LAYER_BUDGET = 8;          // cluster-render's limit per client connection (CompositorLimits.per_client; confirmed on the car Nov 5 2026)
 const MAX_CONN = 4;              // connections a layout may ask for ("conn"): 32 layers service-wide / 8 per connection
@@ -1618,6 +1622,7 @@ class HudApp {
         if (twin && this.config.twin) twin.wire(this, extra);
         // twin_dial: tabs (B2): the tab key (config.tabKey, null until the car session names one), chained in front of the field's own handler
         if (twinTabs && this.config.tabs) twinTabs.wire(this, extra, () => this._guard('twin tabs', () => this._twinTabsChanged()));
+        if (twinLimit && this.config.twin) twinLimit.wire(this, extra);       // twin_dial: the sign (behind the engine's own watch of config.sign) and the cruise struct
         this.car = new Car(this.ctx, this.config.carGroups || ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
         this.car.setRedline(this._redline());
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
@@ -2667,6 +2672,7 @@ class HudApp {
 
     _twinDialUpdate(x, force) {
         const w = x.w, b = w.bar;
+        if (twinLimit) twinLimit.dial(this, x);        // twin_dial: the speedometer's u_lim / u_cru (limit and cruise markers), when they changed
         const deg = Math.round(this._twinDeg(x) * 50) / 50;
         let fill = 0, seg = -1;
         if (b) {
@@ -3560,6 +3566,7 @@ class HudApp {
             const on = (k === 'cc:none' && cc === false) || (k === 'cc:shown' && cc === true) || (k === 'cc:open' && this._ccOpen());
             return not ? !on : on;
         }
+        if (k.indexOf('tl:') === 0) { const on = twinLimit ? twinLimit.toggle(this, k.slice(3)) : false; return not ? !on : on; }     // twin_dial: "tl:cruise", "tl:cruise:C1"
         const on = eq > 0 ? String(this.setting(k.slice(0, eq))) === k.slice(eq + 1) : this.setting(k) !== false;
         return not ? !on : on;
     }
@@ -3605,6 +3612,8 @@ class HudApp {
         else if (w.type === 'icon') this._blit(x, null, paintIcon(w.icon, w.w, w.h, color(t, w.color || 'fg')));
         else if (w.type === 'ccplate') { x.px = Buffer.alloc(w.w * w.h * 4, 0); x.plateKey = ''; x.plateMsg = null; x.plateAt = 0; }     // twin_dial: empty until _twinPush paints it
         else if (w.type === 'tdpage') { if (twinPages) twinPages.init(this, x); }     // twin_dial round 3 (B4): the centre pages, painted in one go
+        else if (w.type === 'tdsign' && twinLimit) twinLimit.updateSign(this, x, Date.now(), true);      // twin_dial: the speed-limit sign, painted from what the car said
+        else if (w.type === 'tdcru' && twinLimit) twinLimit.updateCru(this, x, Date.now(), true);        // twin_dial: the cruise readout (built only while config.cruise is set)
         else if (w.type === 'sdash') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_geo', w.geo);
@@ -5184,6 +5193,8 @@ class HudApp {
             if (c && x.plateKey !== this._twinPlateKey(c)) this._ccPush();
             return;
         }
+        if (w.type === 'tdsign') { if (twinLimit) twinLimit.updateSign(this, x, now, force); return; }     // twin_dial: not a "cc:" widget: nothing of BMW's window touches it
+        if (w.type === 'tdcru') { if (twinLimit) twinLimit.updateCru(this, x, now, force); return; }       // twin_dial
         if (w.type === 'atext') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             const s = this._resolve(w.text);

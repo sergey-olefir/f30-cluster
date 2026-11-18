@@ -1,0 +1,9 @@
+{
+  "_about": "Twin Dial 0.1.1, package B5: the geometry of the speed-limit sign's sheet and of the cruise readout's sheets, panel px (1920 x 720, y down). SPEC-R3 8 (a) and 9; read by design/gen_twin.py; shared/twin_limit.js carries the same numbers (the car's code cannot read design/) and bench/test-twin-limit.js checks the two agree. Status: the sign's disc is SV's measured placement (design/twin-dial/r3/sv/placement.json on twin-r3/sv); C1 is SPEC-R3 9's reading; C2 is the mockup-round variant whose numbers are this package's hypothesis (the spec gives only the box: y 590-650, x 1470-1650).",
+  "sign": { "centre": [1300, 672], "outer_r": 33, "ring": 7.6, "sheet": [1252, 628, 96, 88], "z": 11, "conn": 2 },
+  "cruise": {
+    "z": 12, "conn": 2,
+    "C1": { "sheet": [1456, 500, 140, 70], "num_right": 1536, "num_base": 540, "unit_right": 1536, "unit_base": 560, "symbol": [1572, 528], "symbol_px": 36, "num_px": 40 },
+    "C2": { "sheet": [1466, 588, 188, 64], "num_right": 1594, "num_base": 632, "unit_right": 1650, "unit_base": 632, "symbol": [1490, 620], "symbol_px": 36, "num_px": 40 }
+  }
+}

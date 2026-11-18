@@ -1491,6 +1491,40 @@
       "font": "td_msg",
       "counterFont": "td_cnt",
       "conn": 2
+    },
+    {
+      "id": "limit_sign",
+      "type": "tdsign",
+      "z": 11,
+      "x": 1252,
+      "y": 628,
+      "w": 96,
+      "h": 88,
+      "conn": 2
+    },
+    {
+      "id": "cruise_c1",
+      "type": "tdcru",
+      "z": 12,
+      "x": 1456,
+      "y": 500,
+      "w": 140,
+      "h": 70,
+      "conn": 2,
+      "place": "C1",
+      "toggle": "tl:cruise:C1"
+    },
+    {
+      "id": "cruise_c2",
+      "type": "tdcru",
+      "z": 12,
+      "x": 1466,
+      "y": 588,
+      "w": 188,
+      "h": 64,
+      "conn": 2,
+      "place": "C2",
+      "toggle": "tl:cruise:C2"
     }
   ]
 }

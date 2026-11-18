@@ -314,7 +314,9 @@ console.log('the layer plan (the engine\'s own planner, shared/hud.js _plan)');
     const centre = plan.filter((e) => e.kind === 'layer' && e.w.type === 'tdpage');
     ok(centre.length === 1 && sheets.filter((s) => s.z === 6).length === 0, 'the centre pages are ONE own image layer (tdpage), no sheet: a page change repaints it, nothing is rebuilt (round 3 B4)');
     ok(centre.length === 1 && centre[0].conn === 1, 'the centre layer is on connection 1');
-    ok(sheets.filter((s) => s.conn === 2).length === 2 && sheets.filter((s) => s.conn === 2).every((s) => s.z >= 8), 'connection 2: the bottom row\'s sheet and the plate\'s sheet, both "cc:" layers');
+    // package B5: the speed-limit sign's sheet and the cruise readout's (z 11, 12) share connection 2 and are not "cc:" layers (bench/test-twin-limit.js checks them)
+    const ccSheets = sheets.filter((s) => s.conn === 2 && !s.members.every((m) => m.type === 'tdsign' || m.type === 'tdcru'));
+    ok(ccSheets.length === 2 && ccSheets.every((s) => s.z >= 8), 'connection 2: the bottom row\'s sheet and the plate\'s sheet, both "cc:" layers');
     const cc = W.filter((w) => w.conn === 2 && w.type === 'text');
     ok(cc.length > 0 && cc.every((w) => /cc:/.test(w.toggle || '')), 'every text on connection 2 is toggled by a "cc:" part, so it steps aside live (hud.js _ccLive)');
 }
