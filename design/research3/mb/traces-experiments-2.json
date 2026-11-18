@@ -1,0 +1,7939 @@
+[
+ {
+  "run": "f30_cluster-gap",
+  "apps": [
+   "f30_cluster",
+   "f30_cluster_2",
+   "f30_cluster_3",
+   "f30_cluster_4"
+  ],
+  "conns": 4,
+  "steps": [
+   {
+    "step": "pre",
+    "t0": 1794999042157,
+    "ops": {
+     "hello": 4,
+     "layer": 49,
+     "uniform": 457,
+     "asset": 12,
+     "bind": 44,
+     "frame": 34,
+     "drop": 25
+    },
+    "layers_made": 49,
+    "layers_dropped": 25,
+    "assets_made": 12,
+    "assets_dropped": 0,
+    "frame_bytes": 6734010,
+    "frames": 34,
+    "whole_frames": 31,
+    "first_drop": 1794999045242,
+    "last_make": 1794999045259,
+    "min_live": 0,
+    "no_layer_ms": 3,
+    "peak_px": 11916448,
+    "klass": {
+     "content": 49
+    },
+    "made": [
+     {
+      "conn": 1,
+      "ref": 1,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 1,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       116,
+       643
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 2,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       125,
+       164,
+       339,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 3,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       325,
+       130,
+       674,
+       313
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 4,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       409,
+       130,
+       499,
+       154
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 5,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       515,
+       368,
+       690,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 6,
+      "kind": "effect",
+      "class": "content",
+      "z": 3,
+      "rect": [
+       305,
+       460,
+       519,
+       553
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 3531,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 9,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       357,
+       624,
+       467,
+       648
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 1,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1251,
+       196,
+       1608,
+       345
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 2,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1434,
+       130,
+       1713,
+       248
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 3,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1705,
+       333,
+       1770,
+       500
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 4,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1242,
+       451,
+       1628,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 5,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       321,
+       491,
+       381,
+       522
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 6,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1453,
+       575,
+       1713,
+       648
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 7,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1414,
+       616,
+       1454,
+       640
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 1,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 2,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 4,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       860,
+       646,
+       1060,
+       679
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 5,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1373,
+       498,
+       1417,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 3,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 7,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13267,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 10,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 11,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 12,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 15,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 6,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 10,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       116,
+       643
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 8,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1251,
+       196,
+       1608,
+       345
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 7,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       860,
+       646,
+       1060,
+       679
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 17,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 18,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 11,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       125,
+       164,
+       339,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 19,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 8,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1373,
+       498,
+       1417,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 20,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13267,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 21,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 22,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 23,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 24,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 9,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1434,
+       130,
+       1713,
+       248
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 10,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1705,
+       333,
+       1770,
+       500
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 11,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1242,
+       451,
+       1628,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 12,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       321,
+       491,
+       381,
+       522
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 13,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1453,
+       575,
+       1713,
+       648
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 14,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1414,
+       616,
+       1454,
+       640
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 12,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       325,
+       130,
+       674,
+       313
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 13,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       409,
+       130,
+       499,
+       154
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 14,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       515,
+       368,
+       690,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 15,
+      "kind": "effect",
+      "class": "content",
+      "z": 3,
+      "rect": [
+       305,
+       460,
+       519,
+       553
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 3531,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "hello": 4,
+     "layer/shown": 60
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 200430,
+    "fs_new": 6,
+    "fs_new_bytes": 48147,
+    "targets": {
+     "panel": 49
+    },
+    "live_after": 24,
+    "px_after": 11895328,
+    "rebuild_ms": 17,
+    "dur_ms": 0
+   },
+   {
+    "step": "start",
+    "t0": 1794999042157,
+    "ops": {
+     "uniform": 64,
+     "bind": 2,
+     "layer": 1,
+     "frame": 12,
+     "status": 1
+    },
+    "layers_made": 1,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 813400,
+    "frames": 12,
+    "whole_frames": 9,
+    "first_drop": null,
+    "last_make": 1794999045260,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 11916448,
+    "klass": {
+     "content": 1
+    },
+    "made": [
+     {
+      "conn": 2,
+      "ref": 16,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       357,
+       624,
+       467,
+       648
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 2,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {
+     "panel": 1
+    },
+    "live_after": 25,
+    "px_after": 11916448,
+    "t1": 1794999051264,
+    "rebuild_ms": null,
+    "dur_ms": 9107
+   },
+   {
+    "step": "drive-comfort",
+    "t0": 1794999053977,
+    "ops": {
+     "frame": 1
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 5667,
+    "frames": 1,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 11916448,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 25,
+    "px_after": 11916448,
+    "t1": 1794999059984,
+    "rebuild_ms": null,
+    "dur_ms": 6007
+   },
+   {
+    "step": "drive-sport",
+    "t0": 1794999062791,
+    "ops": {
+     "drop": 31,
+     "layer": 22,
+     "uniform": 178,
+     "bind": 24,
+     "frame": 11,
+     "asset": 1,
+     "status": 1
+    },
+    "layers_made": 22,
+    "layers_dropped": 25,
+    "assets_made": 1,
+    "assets_dropped": 6,
+    "frame_bytes": 849481,
+    "frames": 11,
+    "whole_frames": 11,
+    "first_drop": 1794999062904,
+    "last_make": 1794999062925,
+    "min_live": 0,
+    "no_layer_ms": 7,
+    "peak_px": 11916448,
+    "klass": {
+     "content": 22
+    },
+    "made": [
+     {
+      "conn": 2,
+      "ref": 17,
+      "kind": "effect",
+      "class": "content",
+      "z": 3,
+      "rect": [
+       305,
+       460,
+       519,
+       553
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 3286,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 18,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       180,
+       517,
+       634,
+       647
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 15,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       321,
+       491,
+       381,
+       522
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 16,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1251,
+       196,
+       1608,
+       345
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 9,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1373,
+       498,
+       1417,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 10,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6990,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 11,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       860,
+       646,
+       1060,
+       679
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 25,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 26,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 27,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 28,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6565,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 29,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 6641,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 30,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6641,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 31,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6641,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 32,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6990,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 17,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1434,
+       130,
+       1713,
+       248
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 18,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1705,
+       333,
+       1770,
+       500
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 19,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1388,
+       514,
+       1628,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 19,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       316,
+       342,
+       508,
+       434
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1169,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 21,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       362,
+       233,
+       462,
+       257
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 22,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       116,
+       643
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 23,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       356,
+       623,
+       378,
+       649
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 23,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 71163,
+    "fs_new": 6,
+    "fs_new_bytes": 32830,
+    "targets": {
+     "panel": 22
+    },
+    "live_after": 22,
+    "px_after": 2155648,
+    "t1": 1794999068807,
+    "rebuild_ms": 21,
+    "dur_ms": 6016
+   },
+   {
+    "step": "drive-eco",
+    "t0": 1794999071547,
+    "ops": {
+     "drop": 25,
+     "layer": 19,
+     "uniform": 166,
+     "bind": 21,
+     "frame": 9,
+     "status": 1
+    },
+    "layers_made": 19,
+    "layers_dropped": 22,
+    "assets_made": 0,
+    "assets_dropped": 3,
+    "frame_bytes": 1040299,
+    "frames": 9,
+    "whole_frames": 9,
+    "first_drop": 1794999071913,
+    "last_make": 1794999071926,
+    "min_live": 0,
+    "no_layer_ms": 4,
+    "peak_px": 2412048,
+    "klass": {
+     "content": 19
+    },
+    "made": [
+     {
+      "conn": 4,
+      "ref": 12,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6990,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 24,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       489,
+       647
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 20,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1341,
+       127,
+       1683,
+       257
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 13,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       860,
+       646,
+       1060,
+       679
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 33,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 34,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 35,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 14,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1599,
+       498,
+       1643,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 36,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6381,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 37,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 6333,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 38,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6333,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 39,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6333,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 40,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6990,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 25,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       125,
+       164,
+       339,
+       549
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 26,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       325,
+       130,
+       674,
+       313
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 27,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       409,
+       130,
+       499,
+       154
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 28,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       544,
+       368,
+       690,
+       541
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 29,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       331,
+       623,
+       353,
+       649
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 21,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1388,
+       514,
+       1628,
+       536
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 19,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 65600,
+    "fs_new": 3,
+    "fs_new_bytes": 20893,
+    "targets": {
+     "panel": 19
+    },
+    "live_after": 19,
+    "px_after": 2412048,
+    "t1": 1794999077560,
+    "rebuild_ms": 13,
+    "dur_ms": 6013
+   },
+   {
+    "step": "drive-back",
+    "t0": 1794999080290,
+    "ops": {
+     "drop": 19,
+     "layer": 25,
+     "uniform": 231,
+     "bind": 23,
+     "asset": 8,
+     "frame": 22,
+     "status": 1
+    },
+    "layers_made": 25,
+    "layers_dropped": 19,
+    "assets_made": 8,
+    "assets_dropped": 0,
+    "frame_bytes": 5792746,
+    "frames": 22,
+    "whole_frames": 22,
+    "first_drop": 1794999080919,
+    "last_make": 1794999080949,
+    "min_live": 0,
+    "no_layer_ms": 18,
+    "peak_px": 11916448,
+    "klass": {
+     "content": 25
+    },
+    "made": [
+     {
+      "conn": 4,
+      "ref": 15,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 30,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       116,
+       643
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 22,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1251,
+       196,
+       1608,
+       345
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 16,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       860,
+       646,
+       1060,
+       679
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 41,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 42,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 43,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 31,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       125,
+       164,
+       339,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 17,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1373,
+       498,
+       1417,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 23,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1434,
+       130,
+       1713,
+       248
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 24,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1705,
+       333,
+       1770,
+       500
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 25,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1242,
+       451,
+       1628,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 26,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       321,
+       491,
+       381,
+       522
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 27,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1453,
+       575,
+       1713,
+       648
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 28,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1414,
+       616,
+       1454,
+       640
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 32,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       325,
+       130,
+       674,
+       313
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 33,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       409,
+       130,
+       499,
+       154
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 34,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       515,
+       368,
+       690,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 35,
+      "kind": "effect",
+      "class": "content",
+      "z": 3,
+      "rect": [
+       305,
+       460,
+       519,
+       553
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 3531,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 38,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       357,
+       624,
+       467,
+       648
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 46,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13267,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 49,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 50,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 51,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 54,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 33,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 100215,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {
+     "panel": 25
+    },
+    "live_after": 25,
+    "px_after": 11916448,
+    "t1": 1794999086298,
+    "rebuild_ms": 30,
+    "dur_ms": 6008
+   },
+   {
+    "step": "night",
+    "t0": 1794999089088,
+    "ops": {
+     "uniform": 91,
+     "frame": 35
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 99185,
+    "frames": 35,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 11916448,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 25,
+    "px_after": 11916448,
+    "t1": 1794999094095,
+    "rebuild_ms": null,
+    "dur_ms": 5007
+   },
+   {
+    "step": "day",
+    "t0": 1794999096867,
+    "ops": {
+     "uniform": 91,
+     "frame": 35
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 99185,
+    "frames": 35,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 11916448,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 25,
+    "px_after": 11916448,
+    "t1": 1794999101875,
+    "rebuild_ms": null,
+    "dur_ms": 5008
+   },
+   {
+    "step": "msg-on",
+    "t0": 1794999104652,
+    "ops": {
+     "drop": 25,
+     "layer": 25,
+     "uniform": 234,
+     "bind": 23,
+     "frame": 15,
+     "status": 1
+    },
+    "layers_made": 25,
+    "layers_dropped": 25,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 1578045,
+    "frames": 15,
+    "whole_frames": 14,
+    "first_drop": 1794999104654,
+    "last_make": 1794999104670,
+    "min_live": 0,
+    "no_layer_ms": 4,
+    "peak_px": 11916448,
+    "klass": {
+     "content": 25
+    },
+    "made": [
+     {
+      "conn": 4,
+      "ref": 18,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 39,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       116,
+       643
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 29,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1251,
+       196,
+       1608,
+       345
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 19,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       860,
+       646,
+       1060,
+       679
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 55,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 56,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 40,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       125,
+       164,
+       339,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 57,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 20,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1373,
+       498,
+       1417,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 58,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13267,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 59,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 60,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 61,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 62,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 30,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1434,
+       130,
+       1713,
+       248
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 31,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1705,
+       333,
+       1770,
+       500
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 32,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1242,
+       451,
+       1628,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 33,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       321,
+       491,
+       381,
+       522
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 34,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1453,
+       575,
+       1713,
+       648
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 35,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1414,
+       616,
+       1454,
+       640
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 41,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       325,
+       130,
+       674,
+       313
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 42,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       409,
+       130,
+       499,
+       154
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 43,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       515,
+       368,
+       690,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 44,
+      "kind": "effect",
+      "class": "content",
+      "z": 3,
+      "rect": [
+       305,
+       460,
+       519,
+       553
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 3531,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 45,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       357,
+       624,
+       467,
+       648
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 25,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 100215,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {
+     "panel": 25
+    },
+    "live_after": 25,
+    "px_after": 11916448,
+    "t1": 1794999110664,
+    "rebuild_ms": 16,
+    "dur_ms": 6012
+   },
+   {
+    "step": "msg-off",
+    "t0": 1794999113403,
+    "ops": {
+     "uniform": 3,
+     "frame": 1
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 13339,
+    "frames": 1,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 11916448,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 25,
+    "px_after": 11916448,
+    "t1": 1794999119427,
+    "rebuild_ms": null,
+    "dur_ms": 6024
+   },
+   {
+    "step": "idle",
+    "t0": 1794999122145,
+    "ops": {},
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 0,
+    "frames": 0,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 0,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "t1": 1794999132154,
+    "rebuild_ms": null,
+    "dur_ms": 10009
+   }
+  ],
+  "final_layers": [
+   {
+    "conn": 4,
+    "ref": 18,
+    "kind": "effect",
+    "rect": [
+     1770,
+     538,
+     1910,
+     678
+    ],
+    "klass": "content",
+    "z": 2,
+    "mem": 0
+   },
+   {
+    "conn": 2,
+    "ref": 39,
+    "kind": "image",
+    "rect": [
+     36,
+     582,
+     116,
+     643
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 39040
+   },
+   {
+    "conn": 3,
+    "ref": 29,
+    "kind": "image",
+    "rect": [
+     1251,
+     196,
+     1608,
+     345
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 425544
+   },
+   {
+    "conn": 4,
+    "ref": 19,
+    "kind": "image",
+    "rect": [
+     860,
+     646,
+     1060,
+     679
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 52800
+   },
+   {
+    "conn": 1,
+    "ref": 55,
+    "kind": "effect",
+    "rect": [
+     0,
+     0,
+     1920,
+     660
+    ],
+    "klass": "content",
+    "z": 0,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 56,
+    "kind": "effect",
+    "rect": [
+     0,
+     660,
+     1380,
+     720
+    ],
+    "klass": "content",
+    "z": 0,
+    "mem": 0
+   },
+   {
+    "conn": 2,
+    "ref": 40,
+    "kind": "image",
+    "rect": [
+     125,
+     164,
+     339,
+     601
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 748144
+   },
+   {
+    "conn": 1,
+    "ref": 57,
+    "kind": "effect",
+    "rect": [
+     1460,
+     660,
+     1920,
+     720
+    ],
+    "klass": "content",
+    "z": 0,
+    "mem": 0
+   },
+   {
+    "conn": 4,
+    "ref": 20,
+    "kind": "effect",
+    "rect": [
+     1373,
+     498,
+     1417,
+     542
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 58,
+    "kind": "effect",
+    "rect": [
+     77,
+     45,
+     747,
+     715
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 59,
+    "kind": "effect",
+    "rect": [
+     1173,
+     45,
+     1843,
+     660
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 60,
+    "kind": "effect",
+    "rect": [
+     1173,
+     660,
+     1380,
+     715
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 61,
+    "kind": "effect",
+    "rect": [
+     1460,
+     660,
+     1843,
+     715
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 62,
+    "kind": "effect",
+    "rect": [
+     10,
+     538,
+     150,
+     678
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 3,
+    "ref": 30,
+    "kind": "image",
+    "rect": [
+     1434,
+     130,
+     1713,
+     248
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 263376
+   },
+   {
+    "conn": 3,
+    "ref": 31,
+    "kind": "image",
+    "rect": [
+     1705,
+     333,
+     1770,
+     500
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 86840
+   },
+   {
+    "conn": 3,
+    "ref": 32,
+    "kind": "image",
+    "rect": [
+     1242,
+     451,
+     1628,
+     601
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 463200
+   },
+   {
+    "conn": 3,
+    "ref": 33,
+    "kind": "image",
+    "rect": [
+     321,
+     491,
+     381,
+     522
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 14880
+   },
+   {
+    "conn": 3,
+    "ref": 34,
+    "kind": "image",
+    "rect": [
+     1453,
+     575,
+     1713,
+     648
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 151840
+   },
+   {
+    "conn": 3,
+    "ref": 35,
+    "kind": "image",
+    "rect": [
+     1414,
+     616,
+     1454,
+     640
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 7680
+   },
+   {
+    "conn": 2,
+    "ref": 41,
+    "kind": "image",
+    "rect": [
+     325,
+     130,
+     674,
+     313
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 510936
+   },
+   {
+    "conn": 2,
+    "ref": 42,
+    "kind": "image",
+    "rect": [
+     409,
+     130,
+     499,
+     154
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 17280
+   },
+   {
+    "conn": 2,
+    "ref": 43,
+    "kind": "image",
+    "rect": [
+     515,
+     368,
+     690,
+     601
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 326200
+   },
+   {
+    "conn": 2,
+    "ref": 44,
+    "kind": "effect",
+    "rect": [
+     305,
+     460,
+     519,
+     553
+    ],
+    "klass": "content",
+    "z": 3,
+    "mem": 0
+   },
+   {
+    "conn": 2,
+    "ref": 45,
+    "kind": "image",
+    "rect": [
+     357,
+     624,
+     467,
+     648
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 21120
+   }
+  ]
+ },
+ {
+  "run": "f30_cluster-g20-gap",
+  "apps": [
+   "f30_cluster",
+   "f30_cluster_2",
+   "f30_cluster_3",
+   "f30_cluster_4"
+  ],
+  "conns": 4,
+  "steps": [
+   {
+    "step": "pre",
+    "t0": 1794999155647,
+    "ops": {
+     "hello": 4,
+     "layer": 35,
+     "uniform": 450,
+     "asset": 8,
+     "bind": 42,
+     "frame": 19,
+     "drop": 19
+    },
+    "layers_made": 35,
+    "layers_dropped": 19,
+    "assets_made": 8,
+    "assets_dropped": 0,
+    "frame_bytes": 6083373,
+    "frames": 19,
+    "whole_frames": 19,
+    "first_drop": 1794999159467,
+    "last_make": 1794999159480,
+    "min_live": 0,
+    "no_layer_ms": 3,
+    "peak_px": 11701440,
+    "klass": {
+     "content": 35
+    },
+    "made": [
+     {
+      "conn": 1,
+      "ref": 1,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 1,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       116,
+       643
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 2,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       125,
+       164,
+       339,
+       549
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 3,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       325,
+       130,
+       674,
+       313
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 4,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       409,
+       130,
+       499,
+       154
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 5,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       544,
+       368,
+       690,
+       541
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 1,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1251,
+       196,
+       1608,
+       345
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 2,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1434,
+       130,
+       1713,
+       248
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 3,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1705,
+       333,
+       1770,
+       500
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 4,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1242,
+       451,
+       1628,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 1,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 2,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 4,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1373,
+       498,
+       1417,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 3,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 7,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13267,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 9,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 10,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 11,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 13,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 5,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 6,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       116,
+       643
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 5,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1251,
+       196,
+       1608,
+       345
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 15,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 6,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1373,
+       498,
+       1417,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 16,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 7,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       125,
+       164,
+       339,
+       549
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 17,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 18,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13267,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 19,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 20,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 21,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 22,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 6,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1434,
+       130,
+       1713,
+       248
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 7,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1705,
+       333,
+       1770,
+       500
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 8,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1242,
+       451,
+       1628,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "hello": 4,
+     "layer/shown": 43
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 193368,
+    "fs_new": 5,
+    "fs_new_bytes": 44616,
+    "targets": {
+     "panel": 35
+    },
+    "live_after": 16,
+    "px_after": 10971160,
+    "rebuild_ms": 13,
+    "dur_ms": 0
+   },
+   {
+    "step": "start",
+    "t0": 1794999155647,
+    "ops": {
+     "frame": 8,
+     "layer": 3,
+     "uniform": 49,
+     "status": 1
+    },
+    "layers_made": 3,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 1107584,
+    "frames": 8,
+    "whole_frames": 7,
+    "first_drop": null,
+    "last_make": 1794999159481,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 11701440,
+    "klass": {
+     "content": 3
+    },
+    "made": [
+     {
+      "conn": 2,
+      "ref": 8,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       325,
+       130,
+       674,
+       313
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 9,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       409,
+       130,
+       499,
+       154
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 10,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       544,
+       368,
+       690,
+       541
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 3,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {
+     "panel": 3
+    },
+    "live_after": 19,
+    "px_after": 11701440,
+    "t1": 1794999165500,
+    "rebuild_ms": null,
+    "dur_ms": 9853
+   },
+   {
+    "step": "drive-comfort",
+    "t0": 1794999168182,
+    "ops": {
+     "frame": 1
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 5667,
+    "frames": 1,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 11701440,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 19,
+    "px_after": 11701440,
+    "t1": 1794999174207,
+    "rebuild_ms": null,
+    "dur_ms": 6025
+   },
+   {
+    "step": "drive-sport",
+    "t0": 1794999176936,
+    "ops": {
+     "drop": 23,
+     "layer": 22,
+     "uniform": 178,
+     "asset": 3,
+     "frame": 13,
+     "bind": 24,
+     "status": 1
+    },
+    "layers_made": 22,
+    "layers_dropped": 19,
+    "assets_made": 3,
+    "assets_dropped": 4,
+    "frame_bytes": 912175,
+    "frames": 13,
+    "whole_frames": 13,
+    "first_drop": 1794999177121,
+    "last_make": 1794999177147,
+    "min_live": 0,
+    "no_layer_ms": 7,
+    "peak_px": 11701440,
+    "klass": {
+     "content": 22
+    },
+    "made": [
+     {
+      "conn": 2,
+      "ref": 11,
+      "kind": "effect",
+      "class": "content",
+      "z": 3,
+      "rect": [
+       305,
+       460,
+       519,
+       553
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 3286,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 9,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       321,
+       491,
+       381,
+       522
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 10,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1251,
+       196,
+       1608,
+       345
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 7,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1373,
+       498,
+       1417,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 8,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6990,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 9,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       860,
+       646,
+       1060,
+       679
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 23,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 24,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 25,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 26,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6565,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 27,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 6641,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 28,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6641,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 29,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6641,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 14,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       180,
+       517,
+       634,
+       647
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 30,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6990,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 11,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1434,
+       130,
+       1713,
+       248
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 12,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1705,
+       333,
+       1770,
+       500
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 13,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1388,
+       514,
+       1628,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 15,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       316,
+       342,
+       508,
+       434
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1169,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 17,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       362,
+       233,
+       462,
+       257
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 18,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       116,
+       643
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 19,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       356,
+       623,
+       378,
+       649
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 25,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 71163,
+    "fs_new": 6,
+    "fs_new_bytes": 32830,
+    "targets": {
+     "panel": 22
+    },
+    "live_after": 22,
+    "px_after": 2155648,
+    "t1": 1794999182945,
+    "rebuild_ms": 26,
+    "dur_ms": 6009
+   },
+   {
+    "step": "drive-eco",
+    "t0": 1794999185710,
+    "ops": {
+     "drop": 25,
+     "layer": 19,
+     "uniform": 166,
+     "bind": 21,
+     "frame": 9,
+     "status": 1
+    },
+    "layers_made": 19,
+    "layers_dropped": 22,
+    "assets_made": 0,
+    "assets_dropped": 3,
+    "frame_bytes": 1040299,
+    "frames": 9,
+    "whole_frames": 9,
+    "first_drop": 1794999186141,
+    "last_make": 1794999186150,
+    "min_live": 0,
+    "no_layer_ms": 3,
+    "peak_px": 2412048,
+    "klass": {
+     "content": 19
+    },
+    "made": [
+     {
+      "conn": 4,
+      "ref": 10,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6990,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 20,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       489,
+       647
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 14,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1341,
+       127,
+       1683,
+       257
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 11,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       860,
+       646,
+       1060,
+       679
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 31,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 32,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 33,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 8179,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 34,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6381,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 12,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1599,
+       498,
+       1643,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 35,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 6333,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 36,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6333,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 37,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6333,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 38,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 6990,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 21,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       125,
+       164,
+       339,
+       549
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 22,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       325,
+       130,
+       674,
+       313
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 23,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       409,
+       130,
+       499,
+       154
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 24,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       544,
+       368,
+       690,
+       541
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 25,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       331,
+       623,
+       353,
+       649
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 15,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1388,
+       514,
+       1628,
+       536
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 19,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 65600,
+    "fs_new": 3,
+    "fs_new_bytes": 20893,
+    "targets": {
+     "panel": 19
+    },
+    "live_after": 19,
+    "px_after": 2412048,
+    "t1": 1794999191718,
+    "rebuild_ms": 9,
+    "dur_ms": 6008
+   },
+   {
+    "step": "drive-back",
+    "t0": 1794999194482,
+    "ops": {
+     "drop": 19,
+     "layer": 19,
+     "uniform": 225,
+     "bind": 21,
+     "asset": 4,
+     "frame": 13,
+     "status": 1
+    },
+    "layers_made": 19,
+    "layers_dropped": 19,
+    "assets_made": 4,
+    "assets_dropped": 0,
+    "frame_bytes": 5685071,
+    "frames": 13,
+    "whole_frames": 13,
+    "first_drop": 1794999195143,
+    "last_make": 1794999195181,
+    "min_live": 0,
+    "no_layer_ms": 20,
+    "peak_px": 11701440,
+    "klass": {
+     "content": 19
+    },
+    "made": [
+     {
+      "conn": 4,
+      "ref": 13,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 26,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       116,
+       643
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 14,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1373,
+       498,
+       1417,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 16,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1251,
+       196,
+       1608,
+       345
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 39,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 40,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 41,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 27,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       125,
+       164,
+       339,
+       549
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 44,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13267,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 46,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 47,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 48,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 50,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 17,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1434,
+       130,
+       1713,
+       248
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 18,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1705,
+       333,
+       1770,
+       500
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 19,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1242,
+       451,
+       1628,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 28,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       325,
+       130,
+       674,
+       313
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 29,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       409,
+       130,
+       499,
+       154
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 30,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       544,
+       368,
+       690,
+       541
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 23,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 96684,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {
+     "panel": 19
+    },
+    "live_after": 19,
+    "px_after": 11701440,
+    "t1": 1794999200487,
+    "rebuild_ms": 38,
+    "dur_ms": 6005
+   },
+   {
+    "step": "night",
+    "t0": 1794999203274,
+    "ops": {
+     "uniform": 84,
+     "frame": 29
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 87183,
+    "frames": 29,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 11701440,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 19,
+    "px_after": 11701440,
+    "t1": 1794999208280,
+    "rebuild_ms": null,
+    "dur_ms": 5006
+   },
+   {
+    "step": "day",
+    "t0": 1794999211075,
+    "ops": {
+     "uniform": 84,
+     "frame": 29
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 87183,
+    "frames": 29,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 11701440,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 19,
+    "px_after": 11701440,
+    "t1": 1794999216079,
+    "rebuild_ms": null,
+    "dur_ms": 5004
+   },
+   {
+    "step": "msg-on",
+    "t0": 1794999218815,
+    "ops": {
+     "drop": 19,
+     "layer": 19,
+     "uniform": 228,
+     "bind": 21,
+     "frame": 9,
+     "status": 1
+    },
+    "layers_made": 19,
+    "layers_dropped": 19,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 1333871,
+    "frames": 9,
+    "whole_frames": 9,
+    "first_drop": 1794999218817,
+    "last_make": 1794999218829,
+    "min_live": 0,
+    "no_layer_ms": 3,
+    "peak_px": 11701440,
+    "klass": {
+     "content": 19
+    },
+    "made": [
+     {
+      "conn": 4,
+      "ref": 15,
+      "kind": "effect",
+      "class": "content",
+      "z": 2,
+      "rect": [
+       1770,
+       538,
+       1910,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 31,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       36,
+       582,
+       116,
+       643
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 20,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1251,
+       196,
+       1608,
+       345
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 16,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1373,
+       498,
+       1417,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1703,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 51,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 52,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       660,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 32,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       125,
+       164,
+       339,
+       549
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 53,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 9078,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 54,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       77,
+       45,
+       747,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13267,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 55,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       45,
+       1843,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 56,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1173,
+       660,
+       1380,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 57,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1460,
+       660,
+       1843,
+       715
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 13344,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 58,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       10,
+       538,
+       150,
+       678
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 7224,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 21,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1434,
+       130,
+       1713,
+       248
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 22,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1705,
+       333,
+       1770,
+       500
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 23,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1242,
+       451,
+       1628,
+       601
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 33,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       325,
+       130,
+       674,
+       313
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 34,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       409,
+       130,
+       499,
+       154
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 35,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       544,
+       368,
+       690,
+       541
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 19,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 96684,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {
+     "panel": 19
+    },
+    "live_after": 19,
+    "px_after": 11701440,
+    "t1": 1794999224822,
+    "rebuild_ms": 12,
+    "dur_ms": 6007
+   },
+   {
+    "step": "msg-off",
+    "t0": 1794999227558,
+    "ops": {
+     "uniform": 6
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 0,
+    "frames": 0,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 11701440,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 19,
+    "px_after": 11701440,
+    "t1": 1794999233564,
+    "rebuild_ms": null,
+    "dur_ms": 6006
+   },
+   {
+    "step": "idle",
+    "t0": 1794999236348,
+    "ops": {},
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 0,
+    "frames": 0,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 0,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "t1": 1794999246356,
+    "rebuild_ms": null,
+    "dur_ms": 10008
+   }
+  ],
+  "final_layers": [
+   {
+    "conn": 4,
+    "ref": 15,
+    "kind": "effect",
+    "rect": [
+     1770,
+     538,
+     1910,
+     678
+    ],
+    "klass": "content",
+    "z": 2,
+    "mem": 0
+   },
+   {
+    "conn": 2,
+    "ref": 31,
+    "kind": "image",
+    "rect": [
+     36,
+     582,
+     116,
+     643
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 39040
+   },
+   {
+    "conn": 3,
+    "ref": 20,
+    "kind": "image",
+    "rect": [
+     1251,
+     196,
+     1608,
+     345
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 425544
+   },
+   {
+    "conn": 4,
+    "ref": 16,
+    "kind": "effect",
+    "rect": [
+     1373,
+     498,
+     1417,
+     542
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 51,
+    "kind": "effect",
+    "rect": [
+     0,
+     0,
+     1920,
+     660
+    ],
+    "klass": "content",
+    "z": 0,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 52,
+    "kind": "effect",
+    "rect": [
+     0,
+     660,
+     1380,
+     720
+    ],
+    "klass": "content",
+    "z": 0,
+    "mem": 0
+   },
+   {
+    "conn": 2,
+    "ref": 32,
+    "kind": "image",
+    "rect": [
+     125,
+     164,
+     339,
+     549
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 659120
+   },
+   {
+    "conn": 1,
+    "ref": 53,
+    "kind": "effect",
+    "rect": [
+     1460,
+     660,
+     1920,
+     720
+    ],
+    "klass": "content",
+    "z": 0,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 54,
+    "kind": "effect",
+    "rect": [
+     77,
+     45,
+     747,
+     715
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 55,
+    "kind": "effect",
+    "rect": [
+     1173,
+     45,
+     1843,
+     660
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 56,
+    "kind": "effect",
+    "rect": [
+     1173,
+     660,
+     1380,
+     715
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 57,
+    "kind": "effect",
+    "rect": [
+     1460,
+     660,
+     1843,
+     715
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 58,
+    "kind": "effect",
+    "rect": [
+     10,
+     538,
+     150,
+     678
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 3,
+    "ref": 21,
+    "kind": "image",
+    "rect": [
+     1434,
+     130,
+     1713,
+     248
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 263376
+   },
+   {
+    "conn": 3,
+    "ref": 22,
+    "kind": "image",
+    "rect": [
+     1705,
+     333,
+     1770,
+     500
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 86840
+   },
+   {
+    "conn": 3,
+    "ref": 23,
+    "kind": "image",
+    "rect": [
+     1242,
+     451,
+     1628,
+     601
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 463200
+   },
+   {
+    "conn": 2,
+    "ref": 33,
+    "kind": "image",
+    "rect": [
+     325,
+     130,
+     674,
+     313
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 510936
+   },
+   {
+    "conn": 2,
+    "ref": 34,
+    "kind": "image",
+    "rect": [
+     409,
+     130,
+     499,
+     154
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 17280
+   },
+   {
+    "conn": 2,
+    "ref": 35,
+    "kind": "image",
+    "rect": [
+     544,
+     368,
+     690,
+     541
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 202064
+   }
+  ]
+ },
+ {
+  "run": "twin_dial-cover-clear",
+  "apps": [
+   "twin_dial",
+   "twin_dial_2",
+   "twin_dial_3",
+   "twin_dial_4"
+  ],
+  "conns": 4,
+  "steps": [
+   {
+    "step": "pre",
+    "t0": 1794999246532,
+    "ops": {
+     "hello": 4,
+     "layer": 26,
+     "uniform": 124,
+     "asset": 5,
+     "bind": 12,
+     "frame": 12,
+     "drop": 15
+    },
+    "layers_made": 26,
+    "layers_dropped": 15,
+    "assets_made": 5,
+    "assets_dropped": 0,
+    "frame_bytes": 2482424,
+    "frames": 12,
+    "whole_frames": 11,
+    "first_drop": 1794999248684,
+    "last_make": 1794999248694,
+    "min_live": 0,
+    "no_layer_ms": 2,
+    "peak_px": 4955224,
+    "klass": {
+     "content": 26
+    },
+    "made": [
+     {
+      "conn": 1,
+      "ref": 1,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1995,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 1,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       346,
+       492,
+       403,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1169,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 3,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       317,
+       492,
+       431,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1169,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 4,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       617,
+       121,
+       1289,
+       166
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 5,
+      "kind": "image",
+      "class": "content",
+      "z": 6,
+      "rect": [
+       740,
+       237,
+       1180,
+       522
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 6,
+      "kind": "image",
+      "class": "content",
+      "z": 6,
+      "rect": [
+       740,
+       319,
+       1186,
+       537
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 7,
+      "kind": "image",
+      "class": "content",
+      "z": 7,
+      "rect": [
+       316,
+       329,
+       456,
+       579
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 1,
+      "kind": "image",
+      "class": "content",
+      "z": 8,
+      "rect": [
+       700,
+       613,
+       1188,
+       706
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 2,
+      "kind": "image",
+      "class": "content",
+      "z": 9,
+      "rect": [
+       694,
+       592,
+       1230,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 1,
+      "kind": "effect",
+      "class": "content",
+      "z": 1000,
+      "rect": [
+       1380,
+       660,
+       1460,
+       720
+      ],
+      "gear": true,
+      "gap": true,
+      "box": false,
+      "fsLen": 98,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 3,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1380,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 537,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 4,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 537,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 5,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       70,
+       90,
+       690,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 4461,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 7,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1230,
+       90,
+       1850,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 4461,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 9,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1417,
+       374,
+       1663,
+       444
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 1169,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 11,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1995,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 12,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1380,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 537,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 13,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 537,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 14,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       70,
+       90,
+       690,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 4461,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 15,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1230,
+       90,
+       1850,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 4461,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 16,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1417,
+       374,
+       1663,
+       444
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 1169,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 8,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       346,
+       492,
+       403,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1169,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 9,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       317,
+       492,
+       431,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1169,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 10,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       617,
+       121,
+       1289,
+       166
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 3,
+      "kind": "image",
+      "class": "content",
+      "z": 8,
+      "rect": [
+       700,
+       613,
+       1188,
+       706
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 2,
+      "kind": "effect",
+      "class": "content",
+      "z": 1000,
+      "rect": [
+       1380,
+       660,
+       1460,
+       720
+      ],
+      "gear": true,
+      "gap": true,
+      "box": false,
+      "fsLen": 98,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "hello": 4,
+     "layer/shown": 31
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 31192,
+    "fs_new": 5,
+    "fs_new_bytes": 8260,
+    "targets": {
+     "panel": 26
+    },
+    "live_after": 11,
+    "px_after": 2345336,
+    "rebuild_ms": 10,
+    "dur_ms": 0
+   },
+   {
+    "step": "start",
+    "t0": 1794999246532,
+    "ops": {
+     "frame": 9,
+     "layer": 4,
+     "uniform": 30,
+     "status": 1
+    },
+    "layers_made": 4,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 1618903,
+    "frames": 9,
+    "whole_frames": 6,
+    "first_drop": null,
+    "last_make": 1794999248697,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 4955224,
+    "klass": {
+     "content": 4
+    },
+    "made": [
+     {
+      "conn": 2,
+      "ref": 11,
+      "kind": "image",
+      "class": "content",
+      "z": 6,
+      "rect": [
+       740,
+       237,
+       1180,
+       522
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 12,
+      "kind": "image",
+      "class": "content",
+      "z": 6,
+      "rect": [
+       740,
+       319,
+       1186,
+       537
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 13,
+      "kind": "image",
+      "class": "content",
+      "z": 7,
+      "rect": [
+       316,
+       329,
+       456,
+       579
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 4,
+      "kind": "image",
+      "class": "content",
+      "z": 9,
+      "rect": [
+       694,
+       592,
+       1230,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 4,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {
+     "panel": 4
+    },
+    "live_after": 15,
+    "px_after": 4955224,
+    "t1": 1794999254702,
+    "rebuild_ms": null,
+    "dur_ms": 8170
+   },
+   {
+    "step": "drive-comfort",
+    "t0": 1794999257403,
+    "ops": {
+     "frame": 1
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 8595,
+    "frames": 1,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 4955224,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 15,
+    "px_after": 4955224,
+    "t1": 1794999263409,
+    "rebuild_ms": null,
+    "dur_ms": 6006
+   },
+   {
+    "step": "drive-sport",
+    "t0": 1794999266156,
+    "ops": {
+     "frame": 1
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 8595,
+    "frames": 1,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 4955224,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 15,
+    "px_after": 4955224,
+    "t1": 1794999272170,
+    "rebuild_ms": null,
+    "dur_ms": 6014
+   },
+   {
+    "step": "drive-eco",
+    "t0": 1794999274946,
+    "ops": {
+     "frame": 1
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 7371,
+    "frames": 1,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 4955224,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 15,
+    "px_after": 4955224,
+    "t1": 1794999280951,
+    "rebuild_ms": null,
+    "dur_ms": 6005
+   },
+   {
+    "step": "drive-back",
+    "t0": 1794999283680,
+    "ops": {
+     "frame": 1
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 8595,
+    "frames": 1,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 4955224,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 15,
+    "px_after": 4955224,
+    "t1": 1794999289691,
+    "rebuild_ms": null,
+    "dur_ms": 6011
+   },
+   {
+    "step": "night",
+    "t0": 1794999292442,
+    "ops": {
+     "uniform": 20,
+     "frame": 15
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 137377,
+    "frames": 15,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 4955224,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 15,
+    "px_after": 4955224,
+    "t1": 1794999297453,
+    "rebuild_ms": null,
+    "dur_ms": 5011
+   },
+   {
+    "step": "day",
+    "t0": 1794999300221,
+    "ops": {
+     "uniform": 20,
+     "frame": 15
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 137377,
+    "frames": 15,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 4955224,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 15,
+    "px_after": 4955224,
+    "t1": 1794999305228,
+    "rebuild_ms": null,
+    "dur_ms": 5007
+   },
+   {
+    "step": "msg-on",
+    "t0": 1794999307988,
+    "ops": {
+     "drop": 15,
+     "layer": 15,
+     "uniform": 55,
+     "bind": 6,
+     "frame": 6,
+     "status": 1
+    },
+    "layers_made": 15,
+    "layers_dropped": 15,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 1607554,
+    "frames": 6,
+    "whole_frames": 6,
+    "first_drop": 1794999307989,
+    "last_make": 1794999308001,
+    "min_live": 0,
+    "no_layer_ms": 2,
+    "peak_px": 4955224,
+    "klass": {
+     "content": 15
+    },
+    "made": [
+     {
+      "conn": 1,
+      "ref": 17,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       0,
+       0,
+       1380,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1995,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 18,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1380,
+       0,
+       1920,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 537,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 19,
+      "kind": "effect",
+      "class": "content",
+      "z": 0,
+      "rect": [
+       1460,
+       660,
+       1920,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 537,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 20,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       70,
+       90,
+       690,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 4461,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 21,
+      "kind": "effect",
+      "class": "content",
+      "z": 1,
+      "rect": [
+       1230,
+       90,
+       1850,
+       660
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 4461,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 1,
+      "ref": 22,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       1417,
+       374,
+       1663,
+       444
+      ],
+      "gear": false,
+      "gap": false,
+      "box": true,
+      "fsLen": 1169,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 14,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       346,
+       492,
+       403,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1169,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 15,
+      "kind": "effect",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       317,
+       492,
+       431,
+       542
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": 1169,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 16,
+      "kind": "image",
+      "class": "content",
+      "z": 5,
+      "rect": [
+       617,
+       121,
+       1289,
+       166
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 5,
+      "kind": "image",
+      "class": "content",
+      "z": 8,
+      "rect": [
+       700,
+       613,
+       1188,
+       706
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 4,
+      "ref": 3,
+      "kind": "effect",
+      "class": "content",
+      "z": 1000,
+      "rect": [
+       1380,
+       660,
+       1460,
+       720
+      ],
+      "gear": true,
+      "gap": true,
+      "box": false,
+      "fsLen": 98,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 17,
+      "kind": "image",
+      "class": "content",
+      "z": 6,
+      "rect": [
+       740,
+       237,
+       1180,
+       522
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 18,
+      "kind": "image",
+      "class": "content",
+      "z": 6,
+      "rect": [
+       740,
+       319,
+       1186,
+       537
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 2,
+      "ref": 19,
+      "kind": "image",
+      "class": "content",
+      "z": 7,
+      "rect": [
+       316,
+       329,
+       456,
+       579
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     },
+     {
+      "conn": 3,
+      "ref": 6,
+      "kind": "image",
+      "class": "content",
+      "z": 9,
+      "rect": [
+       694,
+       592,
+       1230,
+       720
+      ],
+      "gear": false,
+      "gap": false,
+      "box": false,
+      "fsLen": null,
+      "prewarm": 0,
+      "exclusive": 0
+     }
+    ],
+    "set_ops": 0,
+    "events": {
+     "layer/shown": 15,
+     "status": 1
+    },
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 15596,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {
+     "panel": 15
+    },
+    "live_after": 15,
+    "px_after": 4955224,
+    "t1": 1794999313999,
+    "rebuild_ms": 12,
+    "dur_ms": 6011
+   },
+   {
+    "step": "msg-off",
+    "t0": 1794999316778,
+    "ops": {
+     "uniform": 8,
+     "frame": 7
+    },
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 31769,
+    "frames": 7,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 4955224,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "live_after": 15,
+    "px_after": 4955224,
+    "t1": 1794999322786,
+    "rebuild_ms": null,
+    "dur_ms": 6008
+   },
+   {
+    "step": "idle",
+    "t0": 1794999325563,
+    "ops": {},
+    "layers_made": 0,
+    "layers_dropped": 0,
+    "assets_made": 0,
+    "assets_dropped": 0,
+    "frame_bytes": 0,
+    "frames": 0,
+    "whole_frames": 0,
+    "first_drop": null,
+    "last_make": null,
+    "min_live": null,
+    "no_layer_ms": 0,
+    "peak_px": 0,
+    "klass": {},
+    "made": [],
+    "set_ops": 0,
+    "events": {},
+    "prewarm": 0,
+    "exclusive": 0,
+    "fs_bytes": 0,
+    "fs_new": 0,
+    "fs_new_bytes": 0,
+    "targets": {},
+    "t1": 1794999335571,
+    "rebuild_ms": null,
+    "dur_ms": 10008
+   }
+  ],
+  "final_layers": [
+   {
+    "conn": 1,
+    "ref": 17,
+    "kind": "effect",
+    "rect": [
+     0,
+     0,
+     1380,
+     720
+    ],
+    "klass": "content",
+    "z": 0,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 18,
+    "kind": "effect",
+    "rect": [
+     1380,
+     0,
+     1920,
+     660
+    ],
+    "klass": "content",
+    "z": 0,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 19,
+    "kind": "effect",
+    "rect": [
+     1460,
+     660,
+     1920,
+     720
+    ],
+    "klass": "content",
+    "z": 0,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 20,
+    "kind": "effect",
+    "rect": [
+     70,
+     90,
+     690,
+     660
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 21,
+    "kind": "effect",
+    "rect": [
+     1230,
+     90,
+     1850,
+     660
+    ],
+    "klass": "content",
+    "z": 1,
+    "mem": 0
+   },
+   {
+    "conn": 1,
+    "ref": 22,
+    "kind": "effect",
+    "rect": [
+     1417,
+     374,
+     1663,
+     444
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 0
+   },
+   {
+    "conn": 2,
+    "ref": 14,
+    "kind": "effect",
+    "rect": [
+     346,
+     492,
+     403,
+     542
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 0
+   },
+   {
+    "conn": 2,
+    "ref": 15,
+    "kind": "effect",
+    "rect": [
+     317,
+     492,
+     431,
+     542
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 0
+   },
+   {
+    "conn": 2,
+    "ref": 16,
+    "kind": "image",
+    "rect": [
+     617,
+     121,
+     1289,
+     166
+    ],
+    "klass": "content",
+    "z": 5,
+    "mem": 241920
+   },
+   {
+    "conn": 3,
+    "ref": 5,
+    "kind": "image",
+    "rect": [
+     700,
+     613,
+     1188,
+     706
+    ],
+    "klass": "content",
+    "z": 8,
+    "mem": 363072
+   },
+   {
+    "conn": 4,
+    "ref": 3,
+    "kind": "effect",
+    "rect": [
+     1380,
+     660,
+     1460,
+     720
+    ],
+    "klass": "content",
+    "z": 1000,
+    "mem": 0
+   },
+   {
+    "conn": 2,
+    "ref": 17,
+    "kind": "image",
+    "rect": [
+     740,
+     237,
+     1180,
+     522
+    ],
+    "klass": "content",
+    "z": 6,
+    "mem": 1003200
+   },
+   {
+    "conn": 2,
+    "ref": 18,
+    "kind": "image",
+    "rect": [
+     740,
+     319,
+     1186,
+     537
+    ],
+    "klass": "content",
+    "z": 6,
+    "mem": 777824
+   },
+   {
+    "conn": 2,
+    "ref": 19,
+    "kind": "image",
+    "rect": [
+     316,
+     329,
+     456,
+     579
+    ],
+    "klass": "content",
+    "z": 7,
+    "mem": 280000
+   },
+   {
+    "conn": 3,
+    "ref": 6,
+    "kind": "image",
+    "rect": [
+     694,
+     592,
+     1230,
+     720
+    ],
+    "klass": "content",
+    "z": 9,
+    "mem": 548864
+   }
+  ]
+ }
+]

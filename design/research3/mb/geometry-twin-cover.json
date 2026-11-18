@@ -1,0 +1,11076 @@
+{
+ "twin_dial-cover-clear": {
+  "start": {
+   "label": "start",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "drive-comfort": {
+   "label": "drive-comfort",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "drive-sport": {
+   "label": "drive-sport",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "drive-eco": {
+   "label": "drive-eco",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "drive-back": {
+   "label": "drive-back",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "night": {
+   "label": "night",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      27.0,
+      22.0,
+      23.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "day": {
+   "label": "day",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "msg-on": {
+   "label": "msg-on",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:3",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:3",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:22",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:22",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:17",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:20",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:16",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:17",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:18",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:6",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:17",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:5",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:6",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:17",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:18",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:19",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:20",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:21",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:22",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:16",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:17",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:18",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:19",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:5",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:6",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:3",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "msg-off": {
+   "label": "msg-off",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:3",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 0.0,
+     "alpha_mean": 0.0,
+     "share_ge_0.5": 0.0,
+     "share_ge_0.98": 0.0,
+     "colour_where_opaque": null,
+     "layers": [
+      {
+       "key": "4:3",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:22",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:22",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      31.0,
+      27.0,
+      27.0
+     ],
+     "layers": [
+      {
+       "key": "1:17",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.982,
+       "note": null
+      },
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:20",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:16",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:17",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:18",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:6",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      16.0,
+      16.0,
+      16.0
+     ],
+     "layers": [
+      {
+       "key": "1:17",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "3:5",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.043,
+       "note": null
+      },
+      {
+       "key": "3:6",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:17",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:18",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:19",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:20",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:21",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:22",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:16",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:17",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:18",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:19",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:5",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:6",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:3",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  }
+ },
+ "twin_dial-cover-grey": {
+  "start": {
+   "label": "start",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "drive-comfort": {
+   "label": "drive-comfort",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "drive-sport": {
+   "label": "drive-sport",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "drive-eco": {
+   "label": "drive-eco",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "drive-back": {
+   "label": "drive-back",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "night": {
+   "label": "night",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      27.0,
+      22.0,
+      23.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "day": {
+   "label": "day",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:2",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:16",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:12",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:14",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:15",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:10",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:11",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:12",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:11",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:3",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:4",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:11",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:12",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:13",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:16",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:8",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:9",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:10",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:11",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:12",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:13",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:3",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:4",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:2",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "msg-on": {
+   "label": "msg-on",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:3",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:3",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:22",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:22",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.983,
+     "share_ge_0.5": 0.983,
+     "share_ge_0.98": 0.982,
+     "colour_where_opaque": [
+      32.0,
+      28.0,
+      28.0
+     ],
+     "layers": [
+      {
+       "key": "1:17",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.965,
+       "note": null
+      },
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:20",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:16",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:17",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:18",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:6",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 0.051,
+     "share_ge_0.5": 0.051,
+     "share_ge_0.98": 0.05,
+     "colour_where_opaque": [
+      2.0,
+      2.0,
+      2.0
+     ],
+     "layers": [
+      {
+       "key": "1:17",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.051,
+       "note": null
+      },
+      {
+       "key": "3:5",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:6",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:17",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:18",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:19",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:20",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:21",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:22",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:16",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:17",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:18",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:19",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:5",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:6",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:3",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  },
+  "msg-off": {
+   "label": "msg-off",
+   "activeName": null,
+   "layers_total": 15,
+   "regions": {
+    "gear": {
+     "rect": [
+      1398,
+      668,
+      1424,
+      703
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:3",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "gap": {
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ],
+     "layers_touching": 1,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      24.0,
+      24.0,
+      25.0
+     ],
+     "layers": [
+      {
+       "key": "4:3",
+       "kind": "effect",
+       "class": "content",
+       "z": 1000,
+       "rect": [
+        1380,
+        660,
+        1460,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      }
+     ]
+    },
+    "box": {
+     "rect": [
+      1406,
+      342,
+      1597,
+      419
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      35.0,
+      35.0,
+      35.0
+     ],
+     "layers": [
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:22",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.136,
+       "note": null
+      }
+     ]
+    },
+    "gear_centre": {
+     "rect": [
+      1496,
+      320,
+      1543,
+      395
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      18.0,
+      18.0,
+      18.0
+     ],
+     "layers": [
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "1:22",
+       "kind": "effect",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        1417,
+        374,
+        1663,
+        444
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.069,
+       "note": null
+      }
+     ]
+    },
+    "map": {
+     "rect": [
+      555,
+      155,
+      1395,
+      612
+     ],
+     "layers_touching": 8,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      31.0,
+      27.0,
+      27.0
+     ],
+     "layers": [
+      {
+       "key": "1:17",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.982,
+       "note": null
+      },
+      {
+       "key": "1:18",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        1380,
+        0,
+        1920,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.018,
+       "note": null
+      },
+      {
+       "key": "1:20",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        70,
+        90,
+        690,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.115,
+       "note": null
+      },
+      {
+       "key": "1:21",
+       "kind": "effect",
+       "class": "content",
+       "z": 1,
+       "rect": [
+        1230,
+        90,
+        1850,
+        660
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.15,
+       "note": null
+      },
+      {
+       "key": "2:16",
+       "kind": "image",
+       "class": "content",
+       "z": 5,
+       "rect": [
+        617,
+        121,
+        1289,
+        166
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.001,
+       "note": null
+      },
+      {
+       "key": "2:17",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        237,
+        1180,
+        522
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.009,
+       "note": null
+      },
+      {
+       "key": "2:18",
+       "kind": "image",
+       "class": "content",
+       "z": 6,
+       "rect": [
+        740,
+        319,
+        1186,
+        537
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      },
+      {
+       "key": "3:6",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": false,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    },
+    "cc_panel": {
+     "rect": [
+      699,
+      603,
+      1223,
+      700
+     ],
+     "layers_touching": 3,
+     "alpha_max": 1.0,
+     "alpha_mean": 1.0,
+     "share_ge_0.5": 1.0,
+     "share_ge_0.98": 1.0,
+     "colour_where_opaque": [
+      16.0,
+      16.0,
+      16.0
+     ],
+     "layers": [
+      {
+       "key": "1:17",
+       "kind": "effect",
+       "class": "content",
+       "z": 0,
+       "rect": [
+        0,
+        0,
+        1380,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 1.0,
+       "alpha_mean": 1.0,
+       "note": null
+      },
+      {
+       "key": "3:5",
+       "kind": "image",
+       "class": "content",
+       "z": 8,
+       "rect": [
+        700,
+        613,
+        1188,
+        706
+       ],
+       "covers_region": false,
+       "alpha_max": 1.0,
+       "alpha_mean": 0.043,
+       "note": null
+      },
+      {
+       "key": "3:6",
+       "kind": "image",
+       "class": "content",
+       "z": 9,
+       "rect": [
+        694,
+        592,
+        1230,
+        720
+       ],
+       "covers_region": true,
+       "alpha_max": 0.0,
+       "alpha_mean": 0.0,
+       "note": null
+      }
+     ]
+    }
+   },
+   "settings": {
+    "hudLayout": "twin",
+    "g20": null,
+    "byMode": null,
+    "bottomRow": null
+   },
+   "rects": [
+    {
+     "key": "1:17",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      0,
+      0,
+      1380,
+      720
+     ]
+    },
+    {
+     "key": "1:18",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1380,
+      0,
+      1920,
+      660
+     ]
+    },
+    {
+     "key": "1:19",
+     "kind": "effect",
+     "class": "content",
+     "z": 0,
+     "rect": [
+      1460,
+      660,
+      1920,
+      720
+     ]
+    },
+    {
+     "key": "1:20",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      70,
+      90,
+      690,
+      660
+     ]
+    },
+    {
+     "key": "1:21",
+     "kind": "effect",
+     "class": "content",
+     "z": 1,
+     "rect": [
+      1230,
+      90,
+      1850,
+      660
+     ]
+    },
+    {
+     "key": "1:22",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      1417,
+      374,
+      1663,
+      444
+     ]
+    },
+    {
+     "key": "2:14",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      346,
+      492,
+      403,
+      542
+     ]
+    },
+    {
+     "key": "2:15",
+     "kind": "effect",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      317,
+      492,
+      431,
+      542
+     ]
+    },
+    {
+     "key": "2:16",
+     "kind": "image",
+     "class": "content",
+     "z": 5,
+     "rect": [
+      617,
+      121,
+      1289,
+      166
+     ]
+    },
+    {
+     "key": "2:17",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      237,
+      1180,
+      522
+     ]
+    },
+    {
+     "key": "2:18",
+     "kind": "image",
+     "class": "content",
+     "z": 6,
+     "rect": [
+      740,
+      319,
+      1186,
+      537
+     ]
+    },
+    {
+     "key": "2:19",
+     "kind": "image",
+     "class": "content",
+     "z": 7,
+     "rect": [
+      316,
+      329,
+      456,
+      579
+     ]
+    },
+    {
+     "key": "3:5",
+     "kind": "image",
+     "class": "content",
+     "z": 8,
+     "rect": [
+      700,
+      613,
+      1188,
+      706
+     ]
+    },
+    {
+     "key": "3:6",
+     "kind": "image",
+     "class": "content",
+     "z": 9,
+     "rect": [
+      694,
+      592,
+      1230,
+      720
+     ]
+    },
+    {
+     "key": "4:3",
+     "kind": "effect",
+     "class": "content",
+     "z": 1000,
+     "rect": [
+      1380,
+      660,
+      1460,
+      720
+     ]
+    }
+   ]
+  }
+ }
+}

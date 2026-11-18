@@ -30,7 +30,8 @@
     "previews.js",
     "twin_tokens.js",
     "twin_cc.js",
-    "twin_probe.js"
+    "twin_probe.js",
+    "mb_exp.js"
   ],
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {
