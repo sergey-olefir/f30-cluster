@@ -47,7 +47,7 @@ def _load_mockup():
 M, DIALS_PATH = _load_mockup()
 W, H, SS = M.W, M.H, M.SS
 CT, CS, R = M.CT, M.CS, M.R
-OUT = os.path.join(WORK, 'mockup', 'r3b', 'kb')
+OUT = os.environ.get('KB_OUT') or os.path.join(WORK, 'mockup', 'r3b', 'kb')
 PUB = os.path.join(WORK, 'r3', 'pub')
 LOOK_NAME = os.environ.get('KB_LOOK', 'look_06')
 
@@ -700,9 +700,12 @@ def pg_empty(p):
 
 
 def pg_pointer(p, sev='amber'):
+    """SC pointer: the cell by the severity the machine knows (grey when none or unknown), the symbol generic by colour: cc_warn for red, amber
+    and unknown (D7 not confirmed), cc_info otherwise. Our fixed words, never the message's."""
     p.title('Повідомлення')
-    sev_cell(p, (922, 306, 998, 382), sev)
-    p.icon('cc_warn' if sev in ('red', 'amber') else 'cc_info', 54, 960, 344, SEV[sev]['sym'])
+    cell = 'grey' if sev == 'unknown' else sev
+    sev_cell(p, (922, 306, 998, 382), cell)
+    p.icon('cc_warn' if sev in ('red', 'amber', 'unknown') else 'cc_info', 54, 960, 344, SEV[cell]['sym'])
     p.text(960, 424, 'Повідомлення', M.noto(39), GREY2, 'c')
     p.text(960, 471, 'на панелі внизу', M.noto(39), GREY2, 'c')
 
@@ -1335,8 +1338,8 @@ def tab2_pages():
     cv = frames_composite('2S  the message sequence (state of the machine on each frame: none / window / ours)',
                           [('%s\n%s' % l, f) for l, f in zip(labs, (f1, f2, f3, f4, f5, f6))], (606, 118, 1314, 720), 3, 0.46, label_h=46)
     save_composite('tab2', '2S', 'sequence', 'the six frames of the message sequence', ['cc', 'cc_now'], cv, '§5.4')
-    shot('tab2', '2T', 'pointer_d7', 'D7 not yet confirmed (the first messages after an install): the pointer page, severity not known (grey), BMW panel open',
-         ['cc', 'cc_now'], 2, lambda p: pg_pointer(p, 'grey'), window=True, sec='§5.4 step 6', annotate=annotate_keepouts)
+    shot('tab2', '2T', 'pointer_d7', 'D7 not yet confirmed (the first messages after an install): the pointer page, severity not known (grey cell, generic warning symbol), BMW panel open',
+         ['cc', 'cc_now'], 2, lambda p: pg_pointer(p, 'unknown'), window=True, sec='§5.4 step 6', annotate=annotate_keepouts)
 
 
 CENTRE_C = (729, 290, 1191, 600)
