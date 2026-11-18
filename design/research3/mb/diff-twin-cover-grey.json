@@ -1,0 +1,84 @@
+{
+ "base": "twin_dial-default",
+ "exp": "twin_dial-cover-grey",
+ "rect": [
+  1380,
+  660,
+  1460,
+  720
+ ],
+ "steps": {
+  "day": {
+   "in_max": 255.0,
+   "in_px_gt2": 4800,
+   "in_px": 4800,
+   "out_max": 0.0,
+   "out_px_gt2": 0,
+   "out_bbox_gt2": null
+  },
+  "drive-back": {
+   "in_max": 255.0,
+   "in_px_gt2": 4800,
+   "in_px": 4800,
+   "out_max": 0.0,
+   "out_px_gt2": 0,
+   "out_bbox_gt2": null
+  },
+  "drive-comfort": {
+   "in_max": 255.0,
+   "in_px_gt2": 4800,
+   "in_px": 4800,
+   "out_max": 0.0,
+   "out_px_gt2": 0,
+   "out_bbox_gt2": null
+  },
+  "drive-eco": {
+   "in_max": 255.0,
+   "in_px_gt2": 4800,
+   "in_px": 4800,
+   "out_max": 0.0,
+   "out_px_gt2": 0,
+   "out_bbox_gt2": null
+  },
+  "drive-sport": {
+   "in_max": 255.0,
+   "in_px_gt2": 4800,
+   "in_px": 4800,
+   "out_max": 0.0,
+   "out_px_gt2": 0,
+   "out_bbox_gt2": null
+  },
+  "msg-off": {
+   "in_max": 255.0,
+   "in_px_gt2": 4800,
+   "in_px": 4800,
+   "out_max": 0.0,
+   "out_px_gt2": 0,
+   "out_bbox_gt2": null
+  },
+  "msg-on": {
+   "in_max": 255.0,
+   "in_px_gt2": 4800,
+   "in_px": 4800,
+   "out_max": 0.0,
+   "out_px_gt2": 0,
+   "out_bbox_gt2": null
+  },
+  "night": {
+   "in_max": 255.0,
+   "in_px_gt2": 4800,
+   "in_px": 4800,
+   "out_max": 0.0,
+   "out_px_gt2": 0,
+   "out_bbox_gt2": null
+  },
+  "start": {
+   "in_max": 255.0,
+   "in_px_gt2": 4800,
+   "in_px": 4800,
+   "out_max": 0.0,
+   "out_px_gt2": 0,
+   "out_bbox_gt2": null
+  }
+ }
+}

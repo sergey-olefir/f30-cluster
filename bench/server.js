@@ -71,6 +71,25 @@ function appView() {
     try { const t = JSON.parse(fs.readFileSync(path.join(APP_DIR, 'app.json'), 'utf8')).config.target; return TARGETS[t] ? t : 'hud'; } catch (e) { return 'hud'; }
 }
 
+// research3 MB: BENCH_TRACE=<file> writes one JSON line per message an app sends to the renderer and per event the
+// renderer sends back (t: wall-clock ms, so a driver script can add its own marks to the same file; shaders as length + hash, uniforms as name + count, pixels as
+// rects + bytes). Off unless set; tools/research3/mb/trace.py reads it.
+const TRACE = process.env.BENCH_TRACE ? fs.openSync(path.resolve(process.env.BENCH_TRACE), 'a') : null;
+function trace(obj) {
+    if (!TRACE) return;
+    try { fs.writeSync(TRACE, JSON.stringify(Object.assign({ t: Date.now() }, obj)) + '\n'); } catch (e) { /* tracing never stops the bench */ }
+}
+function traceIn(conn, app, m) {
+    if (!TRACE) return;
+    const o = { dir: 'in', conn, app };
+    Object.keys(m).forEach((k) => {
+        if (k === 'fs' || k === 'vs') { o[k + 'Len'] = String(m[k]).length; o[k + 'Hash'] = require('crypto').createHash('sha1').update(String(m[k])).digest('hex').slice(0, 10); }
+        else if (k === 'v') o.vCount = String(m.v).trim().split(/\s+/).length;
+        else o[k] = m[k];
+    });
+    trace(o);
+}
+
 /* ---------- browser side: Server-Sent Events out, small POSTs in ---------- */
 
 const clients = new Set();
@@ -149,6 +168,7 @@ function pixelRect(q) {
 }
 
 function writeEv(sock, obj) {
+    if (TRACE) trace(Object.assign({ dir: 'out', conn: sock.benchConn }, obj));
     const body = Buffer.from(JSON.stringify(obj), 'utf8');
     const m = Buffer.alloc(5 + body.length);
     m.writeUInt32LE(body.length + 1, 0);
@@ -162,6 +182,8 @@ const renderSocks = new Set();
 
 const renderServer = net.createServer((sock) => {
     const conn = nextConn++;
+    sock.benchConn = conn;
+    trace({ dir: 'open', conn });
     renderSocks.add(sock);
     const st = { conn, app: '?', hello: false, buf: Buffer.alloc(0) };
     const bad = (why) => { log('error', 'protocol [' + st.app + ']: ' + why); };
@@ -184,6 +206,7 @@ const renderServer = net.createServer((sock) => {
     sock.on('error', () => {});
     sock.on('close', () => {
         renderSocks.delete(sock);
+        trace({ dir: 'close', conn, app: st.app });
         let n = 0;
         layers.forEach((l, k) => { if (l.conn === conn) { layers.delete(k); n++; } });
         log('info', 'renderer: ' + st.app + ' disconnected, dropped its ' + n + ' layer(s)');
@@ -201,6 +224,7 @@ const renderServer = net.createServer((sock) => {
     function onJson(body) {
         let m;
         try { m = JSON.parse(body.toString('utf8')); } catch (e) { return bad('JSON message does not parse: ' + e.message); }
+        traceIn(conn, m.op === 'hello' ? (m.app || '?') : st.app, m);
         if (m.op === 'hello') {
             st.hello = true;
             st.app = m.app || '?';
@@ -347,6 +371,11 @@ const renderServer = net.createServer((sock) => {
         if (l.kind !== 'image' && l.kind !== 'asset') return bad('frame for a ' + l.kind + ' layer (ref ' + ref + ')');
         const head = 14 + n * 8, bpp = l.bpp || 4;
         const px = body.slice(head);
+        if (TRACE) {
+            const rs = [];
+            for (let i = 0; i < Math.min(n, 16); i++) rs.push([body.readUInt16LE(14 + i * 8), body.readUInt16LE(16 + i * 8), body.readUInt16LE(18 + i * 8), body.readUInt16LE(20 + i * 8)]);
+            trace({ dir: 'in', conn, app: st.app, op: 'frame', ref, kind: l.kind, whole: n === 0, rects: rs, bytes: body.length + 5 });
+        }
         if (n === 0) {
             if (px.length !== l.image.length) return bad('whole frame for ref ' + ref + ' is ' + px.length + ' bytes, layer needs ' + l.image.length);
             px.copy(l.image);

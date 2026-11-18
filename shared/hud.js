@@ -792,6 +792,13 @@ class HudApp {
         this.log = ctx.log;
         this._migrateComfortMap();
         this.config = (ctx.spec && ctx.spec.config) || {};
+        // ---- research3 MB: the black-box experiments (shared/mb_exp.js), inert unless app.json config names one ----
+        this.mbExp = null;
+        if (this.config.mbGap || this.config.mbCover || this.config.mbRebuild) {
+            try { this.mbExp = require('./mb_exp').create(this.config, this.log); } catch (e) { this.log.warn('mb: experiments not loaded: ' + (e && e.message || e)); }
+            if (this.mbExp) this.log.info('mb: experiment on: ' + this.mbExp.describe());
+        }
+        // ---- end research3 MB ----
         this.location = this.config.location || DEFAULT_LOCATION;
         // HUD_CLUSTER_SOCKET: the Mac bench's fake cluster-render; never set on the car
         this.socketPath = process.env.HUD_CLUSTER_SOCKET || this.config.socketPath || DEFAULT_PATH;
@@ -1068,7 +1075,9 @@ class HudApp {
                     if (m === this.driveMode && variant === this.driveVariant) return;
                     this.log.info('drive mode ' + MODE_NAME[m] + (variant ? ' ' + variant : '') + ' (' + raw + ')');
                     this.driveMode = m; this.driveVariant = variant;
-                    if (this._layoutName() !== this.activeName) this._rebuild(); else this._status();
+                    if (this._layoutName() !== this.activeName) this._rebuild();
+                    else if (this.mbExp && this.mbExp.rebuildOnMode) { this.log.info('mb: drive mode changed, the layout stays: rebuilding "' + this.activeName + '" (config.mbRebuild.onMode)'); this._rebuild(); }     // research3 MB
+                    else this._status();
                 },
             },
         };
@@ -1642,6 +1651,9 @@ class HudApp {
         this._perfStart();      // package P: off unless <data>/perf.json asks (see PERF below)
         this._guard('probes', () => this._probeSymbolsLater());     // probes, item 3: the symbol list, once (0.7.18)
         if (this.twinProbe) this._guard('twin probe', () => this.twinProbe.start());     // twin_dial: package F
+        if (this.mbExp && this.mbExp.rebuildEveryMs) {   // research3 MB: config.mbRebuild.everyMs
+            this.mbTimer = setInterval(() => this._guard('mb rebuild', () => { this.log.info('mb: rebuild (config.mbRebuild.everyMs ' + this.mbExp.rebuildEveryMs + ')'); this._rebuild(); }), this.mbExp.rebuildEveryMs);
+        }
     }
 
     /** Waze's map on the panel only while the setting is on and the theme shown has a map window. */
@@ -1714,6 +1726,7 @@ class HudApp {
         clearInterval(this.themeTimer);
         clearInterval(this.statusTimer);
         clearInterval(this.dmeTimer);
+        clearInterval(this.mbTimer);     // research3 MB
         this.needleHalt = true; this._guard('needles', () => this._needleApply());     // 0.7.14: the needle timer off
         this._perfStop();       // package P
         clearTimeout(this.probeSymT); this.probeSymT = null;        // probes, item 3 (0.7.18)
@@ -2221,7 +2234,8 @@ class HudApp {
 
     /** The connection a widget asks for ("conn", 0..3; 0 the app's own). */
     _connOf(w) {
-        const n = isNum(w.conn) ? Math.floor(w.conn) : 0;
+        let n = isNum(w.conn) ? Math.floor(w.conn) : 0;
+        if (this.mbExp) n = this.mbExp.connOf(w, n);     // research3 MB: config.mbGap.conn
         return Math.max(0, Math.min(MAX_CONN - 1, n));
     }
 
@@ -3176,6 +3190,7 @@ class HudApp {
         // so the new backdrop is born with BMW's window open if a message shows (_twinPush paints the plate at the end)
         if (this.twinMsg) this._guard('twin cc', () => { this.twinMsg.rebuilt(); this.twinMsg.update(this._twinInputs(), this.twin.mono()); });
         this._layerRefs().forEach((r) => r.c.drop(r.ref));
+        if (this.mbExp) this._guard('mb', () => this.mbExp.dropOwn());      // research3 MB: the cover layer
         this.placed = [];
         this.widgets.clear();
         this.sheets = [];
@@ -3271,6 +3286,7 @@ class HudApp {
             if (k > LAYER_BUDGET) this.log.warn('layout "' + layout.name + '" needs ' + k + ' layers on connection ' + (ci + 1) + ', cluster-render draws at most ' + LAYER_BUDGET + ' per connection');
         });
         if (px > PIXEL_BYTES) this.log.warn('layout "' + layout.name + '" needs ' + mib(px) + ' of pixel memory; cluster-render has 16 MiB for every app together (each image counts twice)');
+        if (this.mbExp) this._guard('mb', () => this.mbExp.afterBuild((i) => this._clientAt(i), this.target));     // research3 MB: config.mbCover
         this.statusAskT = setTimeout(() => { this.statusAskT = null; this._guard('status request', () => this.client.status()); }, STATUS_ASK_MS);
         if (this.twinMsg) this._guard('twin cc', () => this._twinPush(true));      // twin_dial: the new plate gets its pixels, the rows their state
     }
@@ -3317,6 +3333,7 @@ class HudApp {
     /** One image layer for a sheet: every member painted into a local buffer, then sent whole once. */
     _createSheet(s) {
         const c = this._clientAt(s.conn);
+        if (this.mbExp) this.mbExp.image(s.members[0], s);      // research3 MB: an image layer over the gap is only named
         const ref = c.image({ target: this.target, klass: s.klass, z: s.z, x: s.x, y: s.y, w: s.w, h: s.h, iw: s.w, ih: s.h });
         if (!ref) { this.log.warn('sheet ' + s.klass + '/' + s.z + ' at ' + s.x + ',' + s.y + ' ' + s.w + 'x' + s.h + ': layer refused'); return; }
         s.ref = ref; s.c = c; s.ci = s.conn;
@@ -3397,8 +3414,8 @@ class HudApp {
         if (sheet) { ref = sheet.ref; c = sheet.c; }
         else {
             c = this._clientAt(this._connOf(w));
-            const base = { target: this.target, klass: w.class || 'content', z: w.z || 0, x: w.x, y: w.y, w: w.w, h: w.h };
-            if (IMAGE_TYPES[w.type]) ref = c.image(Object.assign({ iw: w.w, ih: w.h }, base));
+            const base = { target: this.target, klass: w.class || 'content', z: this.mbExp ? this.mbExp.zOf(w, w.z || 0) : (w.z || 0), x: w.x, y: w.y, w: w.w, h: w.h };     // research3 MB: config.mbGap.z
+            if (IMAGE_TYPES[w.type]) { if (this.mbExp) this.mbExp.image(w, base); ref = c.image(Object.assign({ iw: w.w, ih: w.h }, base)); }
             else if (w.type === 'swatch') fs = calibration.SWATCH;
             // 0.7.13: a 6WB dial or backdrop gets only its own look's code (shaders.js styled): the KOMBI compiles every branch
             // 2026-11-16: in 6WB Sport / Eco Pro (_nightOk false) without the night look (shaders.js NIGHT 0)
@@ -3407,7 +3424,7 @@ class HudApp {
             else if (w.type === 'wbsign') fs = shaders.wbsignFor(this._nightOk());
             else if (w.type === 'tdback') fs = shaders.tdbackFor(w.part);                // twin_dial: part L has the tab bar and the window
             else fs = shaders[w.type];
-            if (fs) ref = c.effect(Object.assign({ fs }, base));
+            if (fs) ref = this.mbExp ? this.mbExp.effect(c, w, Object.assign({ fs }, base)) : c.effect(Object.assign({ fs }, base));     // research3 MB: config.mbGap
             if (!ref) { this.log.warn('widget "' + w.id + '": layer refused'); return; }
             this.placed.push({ c, ref, x: w.x, y: w.y, w: w.w, h: w.h });
         }

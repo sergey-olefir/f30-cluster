@@ -26,7 +26,8 @@
     "calibration.js",
     "menu.js",
     "gallery.js",
-    "previews.js"
+    "previews.js",
+    "mb_exp.js"
   ],
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {

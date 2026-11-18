@@ -40,6 +40,8 @@ The page draws whichever target the app's `app.json` `config.target` names. One 
 
 **Pixels:** the event stream carries only a notice per changed rect (`{t:'px', key, x, y, w, h}`); the page fetches the bytes from `GET /px?key=&x=&y=&w=&h=` (raw RGBA rows, the layer's current pixels). Pixels used to ride the stream as base64, and once the engine packed text into 1 MB sheets the page stalled on them (Nov 5 2026). The page reads the stream with `fetch` and a stream reader, not `EventSource`.
 
+**Trace (research3 MB):** `BENCH_TRACE=<file>` appends one JSON line per message an app sends to the renderer and per event sent back (`t` wall-clock ms; shaders as length + hash, uniforms as name + count, frames as rects + bytes). Off unless set. `tools/research3/mb/trace.py` drives a scripted session with it and `analyse.py` summarises it.
+
 **URL options:** `?clean=1` hides the layer outlines. `?only=1` shows just the display at 1:1, for screenshots. `?backdrop=1` starts with the backdrop on. `?car=0` starts with the car view off. `?dbg=1` prints the page's message, pixel-fetch and stream-read counters in the corner of the display (for chasing a stuck page).
 
 **Screenshots from headless Chrome:** a page that joins a running bench first fetches every layer's pixels, and with `--timeout=N` Chrome shot before those fetches landed, so static layers (the grid labels, the L row) came out blank while the layers table said shown. Use a virtual-time budget instead; it lets the fetches settle before the shot:
