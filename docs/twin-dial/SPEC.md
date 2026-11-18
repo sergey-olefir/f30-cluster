@@ -218,8 +218,11 @@ numeral's ink box keeps ≥ 4 px of black to every other numeral, tick and the n
   - row 2: "12.4 км" · "0:43 год" (distance, driving time);
   - footer (Noto 31, grey 227) at y 520: "від початку поїздки, 14:00" (departure time). No reset hint: we never reset.
   - Source: `statusBordcomputerAverage` / `TravelData` / `TravelStart` (**unseen**, probe P4). Which of BC1/BC2 is
-    "since start" and the factors come from P4. **Until P4 has proven the fields, the page shows "–" for each value
-    and the switch still offers it** (owner sees what is missing); after P4 the factors go into config, not code.
+    "since start" and the factors come from P4. ~~Until P4 has proven the fields, the page shows "–" for each value~~
+    **Changed by the owner on 2026-11-18 (research3/MK): no dashes by design.** The most likely factors are on by default
+    (`config.trip.factors`), each value is logged UNVERIFIED on its first arrival, a 2-minute summary names every silent
+    source, and ResetLogic3 is the fallback for each value KombiIF does not deliver. A dash is left only for a value no
+    source sends or whose every source carries its invalid marker (docs/research3/MK-REPORT.md).
 - **Switching** (D8 "switch as in mockups 1 and 2"): a setting `centre` = `clock` | `trip` | `cycle`. `cycle` (default)
   holds each page 10 s while the car stands and keeps the last page while driving (no page change above 5 km/h — a
   moving page is a distraction). The stalk button is not a signal we have (probe P11); if P11 finds one, it replaces
@@ -231,8 +234,8 @@ numeral's ink box keeps ≥ 4 px of black to every other numeral, tick and the n
 - Rule y 613 (x 629–1292, 2.2 px, 0.80). Two lines, baselines 656 and 703; numbers Noto 40, right-aligned; units Noto
   21, 5 px after the number, on its baseline.
 - Left column ends x 846: L1 **odometer** "48 215 км" (thin space as thousands separator); L2 **clock** "14:43".
-- Right column ends x 1153: R1 **trip distance** "412.6 км" (02's slot) once P4 proves the field, until then the
-  **range** (arrives); R2 **outside temperature** "+7.5 °C" (sign always shown, one decimal).
+- Right column ends x 1153: R1 **trip distance** "412.6 км" (02's slot) whenever a source delivers one (research3/MK:
+  the factors are on by default), otherwise the **range** (arrives); R2 **outside temperature** "+7.5 °C" (sign always shown, one decimal).
 - Odometer from `statusRangeTankStatus.mileageKilometre` (struct arrives, member unread — P3); until P3 confirms the
   factor, the odometer slot shows the value with the factor 1 km and the log line proves it on the first drive.
   Invalid → "–".

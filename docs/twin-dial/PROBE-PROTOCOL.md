@@ -54,8 +54,8 @@ which you see. Bit fields print as `N(0xH)`.
 Other lines:
 
 ```
-probe: twin_probe 1 on: 40 fields of P1..P12, read only; text only as lengths, never coordinates or bitmaps
-probe: summary t=30: 14 of 40 fields have spoken: P1 active-cc(2 events, 2 lines), ...
+probe: twin_probe 1 on: 45 fields of P1..P12, read only; text only as lengths, never coordinates or bitmaps
+probe: summary t=30: 14 of 45 fields have spoken: P1 active-cc(2 events, 2 lines), ...
 probe: summary t=30: silent: P7 doors, P8 player-metadata, ...
 ```
 
@@ -127,17 +127,19 @@ until a signal for it is confirmed.
 
 | Result | Becomes |
 |---|---|
-| `mileage=N` equals the displayed km | `config.odometer.factor = 1` (the SPEC's assumption), field `statusRangeTankStatus.mileageKilometre` |
-| `mileage` = 10 x or 1/10 of the display | `config.odometer.factor` = 0.1 or 10 |
-| `mileage=-` or constant 0 / 16777215 while an alternative matches | use the alternative that matches: `P3 mileage-supreme` / `range-alt` / `mileage-secure` |
-| an "invalid" value you saw at start (for example 16777215) | `config.odometer.invalid = [that value]` (the bottom row shows "–") |
+| `mileage=N` equals the displayed km | `config.odometer.factors.rangeTank = 1` (the default), field `statusRangeTankStatus.mileageKilometre` |
+| `mileage` = 10 x or 1/10 of the display | `config.odometer.factors.rangeTank` = 0.1 or 10 |
+| `mileage=-` or constant 0 / 16777215 while an alternative matches | the normal build already falls back to the next carrier (`config.odometer.order`: rangeTank, supreme, range, secure; research3/MK); set that carrier's factor |
+| an "invalid" value you saw at start (for example 16777215) | 0 and 16777215 or above are no value already (the bottom row shows "–") |
 | `P3 mileage-secure manipulation=` not 0 | note it and send the line; it is not used by the app |
 
 ### P4. The trip computer
 
 *Fields:* `P4 bc-average` (average speed and consumption, counters 1 and 2), `P4 bc-travel` (distance, time), `P4 bc-start` (departure),
-`P4 bc-status2`, alternative `P4 bc-all3` (the newer trip structure). *Why:* the trip page (SPEC 6.2) shows "–" until the factors and
-the counter are known.
+`P4 bc-status2`, alternative `P4 bc-all3` (the newer trip structure), and since research3/MK the wide net `P4 bc-all1`, `bc-avgcons1`,
+`bc-all2`, `bc-segment`, `lsc-cluster`. *Why:* since research3/MK the normal build shows the most likely factors by default and logs each
+UNVERIFIED (docs/research3/MK-PROTOCOL.md is the five-minute check); the probe is for the case where the normal build's summary names
+KombiIF and ResetLogic3 SILENT.
 
 1. Open the car's own trip computer page in iDrive (and, if you can, the cluster's own trip page). Write down for **both** counters
    (the car's names are, for example, "since start" and "since refuelling"): average consumption, average speed, distance, driving
@@ -147,15 +149,15 @@ the counter are known.
 
 | Observation | Becomes |
 |---|---|
-| `cons1=68` and the display says 6.8 l/100 km | `config.trip.factors.consumption = 0.1` (`consUnit` says litres per 100 km: `VERBRAUCH_IN_L_S_100KM` / 1) |
-| `speed1=41` and the display says 41 km/h | `config.trip.factors.speed = 1` (or 0.1 if `speed1=412` for 41.2) |
-| `way=124` and the display says 12.4 km | `config.trip.factors.distance = 0.1` (1 if the display says 124) |
+| `cons1=68` and the display says 6.8 l/100 km | `config.trip.factors.cons = 0.1` (the default; `consUnit` says litres per 100 km: `VERBRAUCH_IN_L_S_100KM` / 1) |
+| `speed1=41` and the display says 41 km/h | `config.trip.factors.speed = 1` (0.1, the default, if `speed1=412` for 41.2) |
+| `way=124` and the display says 12.4 km | `config.trip.factors.way = 0.1` (the default; 1 if the display says 124) |
 | `hours`, `minutes` match the driving time | plain, no factor |
-| the counter whose departure (`hour`, `minute` in `bc-start`) equals the departure shown for "since start" | `config.trip.counter` = 1 or 2 (the suffix 1 / 2 in `speed1` / `speed2`, `cons1` / `cons2`) |
+| the counter whose departure (`hour`, `minute` in `bc-start`) equals the departure shown for "since start" | `config.trip.factors.bc` = 1 or 2 (the suffix 1 / 2 in `speed1` / `speed2`, `cons1` / `cons2`) |
 | `speedUnit` / `consUnit` other than km/h and l/100 km | the app logs it and keeps km (SPEC 12); mph or mpg are a later variant |
 | `65535` where no trip exists | the "none" value: the page shows "–" |
 
-The three numbers go into `config.trip.factors` (SPEC 14.2, today `null`), the counter into `config.trip.counter`; no code changes. If
+The numbers go into `config.trip.factors` (research3/MK: on by default, a key overrides its default), the counter into `config.trip.factors.bc`; no code changes. If
 you reset the trip yourself on the car's own page (we never reset), watch `bc-travel` fall to `way=0` and `bc-start` change: that
 proves which counter it was.
 
@@ -281,8 +283,8 @@ Road names, street names and positions are never in the line (only counts and le
 |---|---|---|
 | P1, D7 | `config.ccActive.strict` (true until the owner decides), `ccDisplayed` | owner decision, lead edits `app.json` |
 | P2 | `config.ccMarker` (later round) | lead |
-| P3 | `config.odometer = { factor, invalid }` | lead / C (token reads it) |
-| P4 | `config.trip = { factors: { speed, consumption, distance }, counter }` | lead / C |
+| P3 | `config.odometer = { factors: { rangeTank, supreme, range, secure }, order, verified }` (research3/MK) | lead |
+| P4 | `config.trip = { factors: { bc, speed, cons, way, rl3: { speed, cons, way } }, order, departureUtc, verified }` (research3/MK) | lead |
 | P5 | none (km and km/h; log proves) | none |
 | P6 | `config.coolant = { coldC, hotC }` | lead / C |
 | P7, P10, P11, P12 | notes for later rounds | none in round 2 |

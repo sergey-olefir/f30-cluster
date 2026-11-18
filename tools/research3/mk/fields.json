@@ -1,0 +1,18 @@
+{"_about": "Research round 3, package MK: every catalogue field that may carry a trip-computer value or the odometer. Names only; run tools/twin-dial/vs/survey.py --fields on this file. Output (BMW names) goes to bake/work/research3/MK/.",
+ "groups": [
+  {"name": "trip-kombi", "why": "the cluster's own board computer (KombiIF), what twin_dial reads today",
+   "fields": [["de.bmw.infotainment.KombiIF", "statusBordcomputerAverage"], ["de.bmw.infotainment.KombiIF", "statusBordcomputerTravelData"],
+              ["de.bmw.infotainment.KombiIF", "statusBordcomputerTravelStart"], ["de.bmw.infotainment.KombiIF", "statusBordcomputerStatus2"],
+              ["de.bmw.infotainment.KombiIF", "statusBordcomputerElectricData"]]},
+  {"name": "trip-resetlogic", "why": "the head unit's reset-logic board computer (three generations)",
+   "fields": [["de.bmw.infotainment.resetlogic.ResetLogic3", "bcDataAll"], ["de.bmw.infotainment.resetlogic.ResetLogic2", "bcDataAll"],
+              ["de.bmw.infotainment.resetlogic.ResetLogic", "bcDataAll"], ["de.bmw.infotainment.resetlogic.ResetLogic", "averageConsumption"]]},
+  {"name": "trip-other", "why": "other trip carriers found by the catalogue search",
+   "fields": [["de.bmw.infotainment.lsc.LSCDataSink", "dataCombinedInstrumentCluster"], ["de.bmw.infotainment.telematic.journeyhistory.BcPersonal", "driveSegment"],
+              ["de.bmw.infotainment.ConsumptionHistory3", "consumptionHistoryFull"], ["de.bmw.infotainment.ConsumptionHistory2", "consumptionHistoryFull"],
+              ["de.bmw.infotainment.navigation.guiding.Guidance", "travelledDistance"], ["de.bmw.infotainment.navigation.guiding.Guidance", "travelledTime"]]},
+  {"name": "odometer", "why": "the odometer in the bottom row",
+   "fields": [["de.bmw.infotainment.KombiIF", "statusRangeTankStatus"], ["de.bmw.infrastructure.VehicleInformation", "Range"],
+              ["de.bmw.infrastructure.MileageSupreme", "mileageSupreme"], ["de.bmw.infrastructure.SecureMileage", "mileage"],
+              ["de.bmw.chassis.VehicleModel", "MileageVehicle"], ["de.bmw.infotainment.KombiIF", "statusKombiExternalDisplay"]]}
+ ]}

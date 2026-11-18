@@ -81,6 +81,25 @@ add('P4', KI, 'statusBordcomputerStatus2', 'bc-status2', {
     statusBC2BN2020: 'BC2_LAEUFT', statusResetBC2BN2020: 'AUS', statusLimitBN2020: 'KEINE_AKTION', boundaryLimitBN2020: 0,
     statusUnitOfMeasurementSpeedSpeedometerBN2020: 'KM_S_H', warningMemoBN2020: 'CANARY_MEMBER',
 }, 'bc2=BC2_LAEUFT reset=AUS limit=KEINE_AKTION boundary=0 speedUnit=KM_S_H');
+add('P4', 'de.bmw.infotainment.resetlogic.ResetLogic', 'bcDataAll', 'bc-all1', {
+    bcUnits: { tachoDigital: 'KILOMETERS', consumption: 'CONSUMPTION_KM' }, activeResetLogic: 1, availableResetLogic: 7,
+    bcData: { resetOption: 'STARTOFDRIVING', consumptionAverage: 68, consumptionElectricAverage: 0, speedAverage: 412, currentConsumption: 90,
+        dateTimeReset: { year: 26, month: 11, day: 17, hour: 14, minute: 0, second: 0 }, dateTimeTrip: { day: 0, hour: 0, minute: 43, second: 12 } },
+}, 'option=STARTOFDRIVING speedAvg=412 consAvg=68 consNow=90 tripDay=0 tripH=0 tripM=43 resetH=14 resetMi=0 speedUnit=KILOMETERS consUnit=CONSUMPTION_KM');
+add('P4', 'de.bmw.infotainment.resetlogic.ResetLogic', 'averageConsumption', 'bc-avgcons1', {
+    consumptionCombustionCurrentScale: 3, consumptionCombustionCurrentDigit: 90, consumptionElectricCurrentScale: 0, consumptionElectricCurrentDigit: 0, combustionUnit: 'CONSUMPTION_KM',
+}, 'consNowScale=3 consNowDigit=90 unit=CONSUMPTION_KM');
+add('P4', 'de.bmw.infotainment.resetlogic.ResetLogic2', 'bcDataAll', 'bc-all2', {
+    bcUnits: { tachoDigital: 'KILOMETERS' }, bcData: { resetOption: 'LONGTERM', speedAverage: 455, consumptionCombustionAverageScale: 2, consumptionCombustionAverageDigit: 71,
+        dateTimeTrip: { day: 3, hour: 4, minute: 5, second: 0 }, dateTimeReset: { year: 26, month: 10, day: 1, hour: 8, minute: 30, second: 0 } },
+}, 'option=LONGTERM speedAvg=455 consAvgScale=2 consAvgDigit=71 tripDay=3 tripH=4 tripM=5 resetH=8 resetMi=30 speedUnit=KILOMETERS');
+add('P4', 'de.bmw.infotainment.telematic.journeyhistory.BcPersonal', 'driveSegment', 'bc-segment', {
+    bcBeSegmentId: 2, bcBeTriggerReason: 'INTERVALRUNNING', bcBeDurationDrive: 43, bcBeDurationMoving: 30, bcBeTripDistanceKm: 12, bcBeSpeedAvgDrive: 17, bcBeSpeedAvgMoving: 25,
+    bcBeConsFuelVisible: 68, bcBeMileageStartKm: 48203, bcBeTime: { startLocal: 1, endLocal: 2, startUtc: 3, endUtc: 4 },
+}, 'segment=2 trigger=INTERVALRUNNING durDrive=43 durMoving=30 distance=12 speedDrive=17 speedMoving=25 fuel=68');
+add('P4', 'de.bmw.infotainment.lsc.LSCDataSink', 'dataCombinedInstrumentCluster', 'lsc-cluster', {
+    electricalRange: 0, displayActualValueFuelTankFluidLevel: 38, averageRangeConsumption: 70, presentAuxiliaryConsumerPower: 0, averageSpeed: 41,
+}, 'speedAvg=41 consAvg=70 fuel=38');
 add('P4', 'de.bmw.infotainment.resetlogic.ResetLogic3', 'bcDataAll', 'bc-all3', {
     bcUnits: { tachoDigital: 'KILOMETERS', currentConsumptionCombustion: 'CONSUMPTION_KM', averageConsumptionCombustion: 'CONSUMPTION_KM' },
     activeResetLogic: 1, availableResetLogic: 7,
@@ -298,7 +317,7 @@ async function main() {
     // ---------------------------------------------------------------------------------------------------------------
     console.log('3. every P-item\'s line from injected values (fake clock)');
     const a = mk({ minGapMs: 0 });
-    ok(a.lines.length === 1 && /^probe: twin_probe 1 on: 40 fields of P1\.\.P12, read only/.test(a.lines[0]), 'the intro line: ' + a.lines[0]);
+    ok(a.lines.length === 1 && /^probe: twin_probe 1 on: 45 fields of P1\.\.P12, read only/.test(a.lines[0]), 'the intro line: ' + a.lines[0]);
     V.forEach((v) => {
         a.clock.t += 1500;
         a.feed(v.iface, v.field, v.value);
@@ -309,7 +328,7 @@ async function main() {
     ok(!CANARIES.test(a.lines.join('\n')), 'no text of a message, source, song, road or address in the log (canary words in every text member, capitals too)');
     ok(!/12000|STREET|A 9/.test(a.lines.filter((l) => /next-intersection/.test(l)).join('') .replace(/raw=12000\.5/, '')), 'the road text and the shield text of P12 are lengths only');
     const st = a.pr.stats();
-    ok(st.length === 40 && st.every((s) => s.events === 1 && s.lines === 1), 'stats(): 40 fields, one event and one line each');
+    ok(st.length === 45 && st.every((s) => s.events === 1 && s.lines === 1), 'stats(): 45 fields, one event and one line each');
     ok(/t=1\.5:/.test(a.p()[0]) && /t=\d+\.\d:/.test(a.p()[10]), 't= counts seconds from the probe\'s start: ' + a.p()[0].replace(/^probe: /, ''));
 
     console.log('   once per change, the rest');
@@ -385,7 +404,7 @@ async function main() {
     h.feed(act.iface, act.field, act.value); h.feed(V[1].iface, V[1].field, V[1].value);
     h.clock.t += 31000; h.pr.tick(); h.pr.tick();
     const sum = h.lines.filter((l) => /summary t=30/.test(l));
-    ok(sum.length === 2 && /2 of 40 fields have spoken: P1 active-cc\(1 events, 1 lines\), P1 displayed-cc/.test(sum[0]) && /silent: .*P7 doors.*P12 next-intersection/.test(sum[1]),
+    ok(sum.length === 2 && /2 of 45 fields have spoken: P1 active-cc\(1 events, 1 lines\), P1 displayed-cc/.test(sum[0]) && /silent: .*P7 doors.*P12 next-intersection/.test(sum[1]),
         'the summary at 30 s says which fields spoke and which are silent (and only once)');
     h.clock.t += 100000; h.pr.tick();
     ok(h.lines.filter((l) => /summary t=120/.test(l)).length === 2, 'the next summary comes at its time');
@@ -459,7 +478,7 @@ async function main() {
     // B. config.probe on, the app is f30_cluster (so its own handlers exist: statusActiveCCMessage logs "active cc: ...")
     await runApp('on', { config: { probe: { minGapMs: 0, summaryS: [2] } } }, async (app) => {
         ok(!app.exited(), 'config.probe on: the app starts');
-        ok(app.lines(/probe: twin_probe 1 on: 40 fields/).length === 1, 'the intro line is in the app\'s log');
+        ok(app.lines(/probe: twin_probe 1 on: 45 fields/).length === 1, 'the intro line is in the app\'s log');
         await feedAll(app);
         const got = probeLines(app);
         const okAll = V.every((v) => {
@@ -472,7 +491,7 @@ async function main() {
         ok(!CANARIES.test(app.text().replace(/bench: [^\n]*/g, '')), 'no canary word anywhere in the app\'s output');
         ok(app.lines(/probe: ccListRiskClass:|probe: basicList:/).length >= 1, 'as f30_cluster the legacy 0.7.18 probes are still on (legacyProbes not set)');
         await sleep(2300);
-        ok(app.lines(/probe: summary t=2: 40 of 40 fields have spoken/).length === 1 && app.lines(/summary t=2: silent: none/).length === 1, 'the summary line comes from the app\'s own timer: all 40 fields have spoken');
+        ok(app.lines(/probe: summary t=2: 45 of 45 fields have spoken/).length === 1 && app.lines(/summary t=2: silent: none/).length === 1, 'the summary line comes from the app\'s own timer: all 45 fields have spoken');
     });
     // C and D together: as twin_dial. C: the old probes are off; D: legacyProbes true turns them back on (proof the gate is what holds them back)
     const symRe = /probe: cc symbols: /;

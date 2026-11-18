@@ -8,7 +8,7 @@
  * only inputs are the fields the tokens read, and the chained signal handlers of shared/twin_tokens.js wire(). It checks
  *   1. the page: clock | trip | cycle (10 s per page while the car stands, held above 5 km/h, the dwell starts at the stop);
  *      only the showing page's texts are non-empty, so a page change is a repaint of text boxes;
- *   2. the "-" fallbacks: no clock, no trip factors (P4), no odometer (P3), no range, no outside temperature, no speed;
+ *   2. the "-" fallbacks: no clock, no trip field (silent) or factors switched off, no odometer (P3), no range, no outside temperature, no speed;
  *   3. the values: local time and date from the car's zone, the weekday in Ukrainian, the odometer with a thin space, the
  *      trip page from the car's raw fields and config.trip.factors, the temperature's sign and one decimal;
  *   4. the hub: READY only at VehicleCondition 10, the drive programme's Latin labels, the gear, the speed;
@@ -142,10 +142,10 @@ console.log('the clock page');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-console.log('the trip page: dashes until P4, then the car\'s raw fields through config.trip.factors');
+console.log('the trip page: dashes while silent, then the car\'s raw fields through the factors (research3/MK: on by default)');
 {
     const h = mk({ settings: { centre: 'trip' } });
-    eq([tok(h, 'tConsAvg'), tok(h, 'tSpeedAvg'), tok(h, 'tDist'), tok(h, 'tTime')], ['ø ' + DASH, 'ø ' + DASH, DASH, DASH], 'no factors (P4 not done): every value is a dash');
+    eq([tok(h, 'tConsAvg'), tok(h, 'tSpeedAvg'), tok(h, 'tDist'), tok(h, 'tTime')], ['ø ' + DASH, 'ø ' + DASH, DASH, DASH], 'nothing arrived (silent): every value is a dash');
     eq(tok(h, 'tFrom'), 'від початку поїздки, ' + DASH, '... and the departure too');
     eq([tok(h, 'tConsU'), tok(h, 'tSpeedU'), tok(h, 'tDistU'), tok(h, 'tTimeU')], ['л/100 км', 'км/год', 'км', 'год'], 'the units are shown all the same (the owner sees what is missing)');
     // the car's raw fields arrive; still no factors
@@ -155,7 +155,9 @@ console.log('the trip page: dashes until P4, then the car\'s raw fields through 
     extra[KI].statusBordcomputerAverage({ speedAverage1BC1: 410, consumptionAverage1BC1: 68, speedAverage2BC2: 520, consumptionAverage2BC2: 55, statusUnitOfMeasurementSpeedBC: 1 });
     extra[KI].statusBordcomputerTravelData({ rideDurationHours: 0, rideDurationMinutes: 43, wayPassed: 124 });
     extra[KI].statusBordcomputerTravelStart({ hourDepartureBC: 14, minuteDepartureBC: 0 });
-    eq(tok(h, 'tDist'), DASH, 'the fields arrive but with no factors the page still shows dashes (no guessing)');
+    eq(tok(h, 'tDist'), '12.4', 'the fields arrive and no factors are configured: the default factors show the values (the owner, 2026-11-18: no dashes by design)');
+    h.config.trip = { factors: false };
+    eq(tok(h, 'tDist'), DASH, 'config.trip.factors = false switches them off: dashes again');
     h.config.trip = { factors: FACTORS };
     eq([tok(h, 'tConsAvg'), tok(h, 'tSpeedAvg'), tok(h, 'tDist'), tok(h, 'tTime'), tok(h, 'tFrom')],
         ['ø 6.8', 'ø 41', '12.4', '0:43', 'від початку поїздки, 14:00'], 'factors 0.1 / 0.1 / 0.1: "ø 6.8", "ø 41", "12.4", "0:43", "від початку поїздки, 14:00"');

@@ -59,6 +59,23 @@
       "bcDataAll": "rs",
       "_probe": "P4 bcDataAll"
     },
+    "de.bmw.infotainment.resetlogic.ResetLogic": {
+      "bcDataAll": "rs",
+      "averageConsumption": "rs",
+      "_probe": "P4 bcDataAll (getter 1), averageConsumption (getter 7): research3/MK, the older reset-logic trip computer"
+    },
+    "de.bmw.infotainment.resetlogic.ResetLogic2": {
+      "bcDataAll": "rs",
+      "_probe": "P4 bcDataAll (getter 1): research3/MK"
+    },
+    "de.bmw.infotainment.telematic.journeyhistory.BcPersonal": {
+      "driveSegment": "rs",
+      "_probe": "P4 driveSegment (getter 1): research3/MK; numbers only (no time stamps, no start odometer)"
+    },
+    "de.bmw.infotainment.lsc.LSCDataSink": {
+      "dataCombinedInstrumentCluster": "s",
+      "_probe": "P4 dataCombinedInstrumentCluster (notifier only): research3/MK"
+    },
     "de.bmw.infrastructure.EnvironmentalInformation": {
       "UnitBN2020": "rs",
       "_probe": "P5 UnitBN2020"

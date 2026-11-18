@@ -45,7 +45,21 @@
     },
     "de.bmw.infrastructure.VehicleInformation": {
       "statusGearboxDrive": "s",
-      "DataPowerTrain2": "s"
+      "DataPowerTrain2": "s",
+      "Range": "s",
+      "_about": "Range (notifier 32770, no getter): the odometer's third carrier (research3/MK, config.odometer.order)"
+    },
+    "de.bmw.infrastructure.MileageSupreme": {
+      "mileageSupreme": "rs",
+      "_about": "getter 1 / notifier 32769: the odometer's second carrier, with its qualifier (research3/MK, config.odometer.order). Read only."
+    },
+    "de.bmw.infrastructure.SecureMileage": {
+      "mileage": "rs",
+      "_about": "getter 1 / notifier 32769: the odometer's fourth carrier (research3/MK, config.odometer.order). Read only; manipulationState is logged as a number, never used."
+    },
+    "de.bmw.infotainment.resetlogic.ResetLogic3": {
+      "bcDataAll": "rs",
+      "_about": "getter 7 / notifier 32775: the head unit's own trip computer, the fallback for every trip value behind KombiIF (research3/MK, config.trip.order). Read only."
     },
     "de.bmw.infotainment.misc.MDrive": {
       "dataDisplayGearbox": "s"
@@ -74,7 +88,7 @@
       "statusShowTimeDate": "rs",
       "statusActiveCCMessage": "rs",
       "statusMenuCCMessage": "rs",
-      "_about": "statusRangeTankStatus: fuel litres, range km, spare (reserve) and mileageKilometre (the odometer, member unread until probe P3). The trip computer fields are unseen (P4): the page shows a dash until config.trip.factors is set. statusActiveCCMessage / statusMenuCCMessage: READ ONLY (standardCCMessage / extendedCCMessage are setters and are never declared)."
+      "_about": "statusRangeTankStatus: fuel litres, range km, spare (reserve) and mileageKilometre (the odometer, first carrier). The trip computer fields are unseen (P4); research3/MK: the most likely factors are on by default (config.trip), each value UNVERIFIED in the log until the first drive compares it with the car's trip page. statusActiveCCMessage / statusMenuCCMessage: READ ONLY (standardCCMessage / extendedCCMessage are setters and are never declared)."
     },
     "de.bmw.infotainment.KombiInterface_2": {
       "ccList": "rs",
@@ -274,7 +288,7 @@
       "lon": 30.52
     },
     "utcOffsetMinutes": null,
-    "_comment": "target panel: the whole 1920x720 instrument cluster (docs/twin-dial/SPEC.md 14). tankLitres: the fuel bar's full mark (the car sends litres, not the tank size; the owner confirms 59). carGroups: the signal groups hud.js asks the kit's Car for (no accel / torque: twin_dial declares neither). redline: the setting 'redline' wins. trip.factors: null until probe P4 has proven the fields (docs/twin-dial/PROBE-PROTOCOL.md): then {avgSpeed, avgCons, distance, hours...} go here, not into code.",
+    "_comment": "target panel: the whole 1920x720 instrument cluster (docs/twin-dial/SPEC.md 14). tankLitres: the fuel bar's full mark (the car sends litres, not the tank size; the owner confirms 59). carGroups: the signal groups hud.js asks the kit's Car for (no accel / torque: twin_dial declares neither). redline: the setting 'redline' wins. trip.factors / odometer.factors: on by default since research3/MK, corrected here (never in code) after the first drive (docs/research3/MK-PROTOCOL.md).",
     "tankLitres": 59,
     "carGroups": [
       "rpm",
@@ -293,8 +307,44 @@
       "holdAboveKmh": 5
     },
     "trip": {
-      "factors": null,
-      "_about": "SPEC 6.2 / probe P4: null = the trip page shows a dash for every value. Once P4 proves the fields: { bc: 1 (or 2: which board computer is 'since start'), speed: 0.1, cons: 0.1, way: 0.1 } (km/h per bit, l/100 km per bit, km per bit; the keys shared/twin_tokens.js tripValues reads), nothing else changes."
+      "factors": {
+        "bc": 1,
+        "speed": 0.1,
+        "cons": 0.1,
+        "way": 0.1,
+        "rl3": {
+          "speed": 0.1,
+          "cons": 0.1,
+          "way": 0.1
+        }
+      },
+      "order": [
+        "kombi",
+        "rl3"
+      ],
+      "departureUtc": [],
+      "verified": false,
+      "summaryMs": [
+        120000,
+        600000
+      ],
+      "_about": "research3/MK (the owner, 2026-11-18: no dashes by design). factors: the unit of each raw integer (km/h, l/100 km, km per bit; bc 1 or 2 = which KombiIF board computer), the most likely ones ON by default; a key left out takes the same default, false switches the page back to dashes. rl3: the same for ResetLogic3.bcDataAll (speedAverage, consumptionCombustionAverageDigit, counterDistance). order: per value, the first source with a valid value wins (kombi = KombiIF statusBordcomputerAverage / TravelData / TravelStart, rl3 = ResetLogic3). departureUtc: the sources whose departure time is UTC (e.g. ['rl3']) are moved into the car's zone. verified: false = the first arrival of each source is logged UNVERIFIED (compare with the car's own trip page, docs/research3/MK-PROTOCOL.md); set true once it matches. summaryMs: when the log names every silent source and asks its getter once. A wrong factor is this one line, nothing else changes."
+    },
+    "odometer": {
+      "factors": {
+        "rangeTank": 1,
+        "supreme": 1,
+        "range": 1,
+        "secure": 1
+      },
+      "order": [
+        "rangeTank",
+        "supreme",
+        "range",
+        "secure"
+      ],
+      "verified": false,
+      "_about": "research3/MK: the odometer (bottom row L1) from the first carrier with a valid value: rangeTank = KombiIF.statusRangeTankStatus.mileageKilometre, supreme = MileageSupreme.mileageSupreme (qualifier AVAILABLE / REDUCED only), range = VehicleInformation.Range.mileageKilometre, secure = SecureMileage.mileage.currentMileage. factors: km per bit (1 assumed). 0 and 16777215 or above = no value. verified: false = logged UNVERIFIED until compared with the cluster's own odometer."
     },
     "dayNight": {
       "iface": "de.bmw.infotainment.vehicle.Vehicle",
