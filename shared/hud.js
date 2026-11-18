@@ -1438,6 +1438,26 @@ class HudApp {
                 });
             }
         }
+        // ---- research3/mc: the same second witness for an app WITHOUT the twin machine (f30_cluster), config.ccDisplayed
+        // (null in app.json: nothing subscribed). Logged once per change, numbers only; it decides nothing unless
+        // config.ccDisplayed.use is true and config.ccActive.release.witness is true (_ccRelease, _ccWitness) ----
+        if (!this.twinMsg) {
+            const cd = this.config.ccDisplayed;
+            if (cd && cd.iface && cd.field) {
+                watchOne(cd, (v) => {
+                    const r = pick(v, cd.numberPath || []);
+                    if (!isNum(r)) return;
+                    this.ccDisp = r;
+                    if (r !== this.ccDispLogged) { this.ccDispLogged = r; this.log.info('displayed cc: number ' + r); }
+                    if (!this.ccDispAny) {
+                        this.ccDispAny = true;
+                        this.log.info('displayed cc: the second "shown now" witness has spoken' + (cd.use === true ? '' : ' (logged only)'));
+                    }
+                    if (cd.use === true) { this._ccListEval(Date.now(), false); this._ccPush(); }
+                });
+            }
+        }
+        // ---- end research3/mc (witness) ----
         // ---- end twin_dial (handler) ----
         // ---- end fix/cclist (handler) ----
         // Which frame of how many the stock cluster is showing (docs/G20-DESIGN-SPEC.md: it cycles numbered frames,
@@ -4115,10 +4135,27 @@ class HudApp {
         const before = this.ccListShown + '|' + this.ccListUnread + '|' + this.ccNoMatch + '|' + (this.ccItems || []).map((e) => e.key).join(',');
         let shown = this.ccListShown, items = this.ccItems || [], unread = 0, noMatch = null;
         this.ccFallbackLive = false;
-        if (this.ccActAny && this.ccAct) {
+        // ---- research3/mc (docs/research3/MC-REPORT.md): config.ccActive.release, absent = 0.7.20 exactly. When the
+        // "shown now" value is no verdict (_ccRelease), the list decides instead (release.then: "listed" - shown while
+        // ccList lists any entry outside ignoreIds, the safe side; "heuristic" - the 0.7.20 fallback below)
+        const rel = this._ccRelease(now, all);
+        if (rel === 'listed' && all) {
+            const live = all.filter((e) => !e.ignored);
+            items = live.filter((e) => e.name).slice(0, 16);
+            unread = live.length - items.length;
+            shown = live.length > 0;
+        } else if (rel === 'listed') {
+            // no list recorded yet: nothing to decide from, the last verdict holds (the safe side while it was shown)
+        } else if (this.ccActAny && this.ccAct && !rel) {
             const n = this.ccAct.number, none = Array.isArray(ca.noneValues) ? ca.noneValues : [0];
             items = [];
-            if (inList(none, n)) shown = false;
+            // research3/mc, release.witness: "shown now" says none but the second witness names a number: shown
+            const dn = this._ccWitness();
+            if (inList(none, n) && dn !== null && !inList(none, dn)) {
+                shown = true;
+                const e = (all || []).find((x) => x.id === dn);
+                if (!e) noMatch = dn; else if (e.name) items = [e]; else unread = 1;
+            } else if (inList(none, n)) shown = false;
             else {
                 shown = true;
                 const e = (all || []).find((x) => x.id === n);
@@ -4131,7 +4168,7 @@ class HudApp {
                 } else if (e.name) items = [e];
                 else unread = 1;
             }
-        } else if (all) {
+        } else if (all && (rel === 'heuristic' || !(this.ccActAny && this.ccAct))) {
             const fb = ca.fallback || {};
             const on = !!ca.iface && fb.on !== false;
             const ms = isNum(fb.hideAfterMs) ? fb.hideAfterMs : isNum(this.config.ccm && this.config.ccm.autoHideMs) ? this.config.ccm.autoHideMs : 20000;
@@ -4155,6 +4192,56 @@ class HudApp {
         const changed = before !== this.ccListShown + '|' + this.ccListUnread + '|' + this.ccNoMatch + '|' + items.map((e) => e.key).join(',');
         if (changed && push) this._ccPush();
         return changed;
+    }
+
+    /** research3/mc (docs/research3/MC-REPORT.md): whether the cluster's "shown now" value is NO VERDICT now, and so the
+     *  list decides - null (it decides, as in 0.7.20), else release.then ("listed" or "heuristic"). config.ccActive.release
+     *  (absent or null: never; every part is off unless set):
+     *    deferValues   [numbers]  numbers that mean "nothing filled in" (the catalogue's default is 65535)
+     *    deferControls [numbers]  values of displayControlCheckControlMessage that mean "nothing shown" (a number
+     *                             in noneValues is never deferred: it already says none)
+     *    leftList      true       the number had a ccList entry earlier in this run and the entry has left the list:
+     *                             the message ended (ccList holds the active AND the stored ones). A number the list
+     *                             never carried is not released by this (it may be a message the list does not hold)
+     *    noEntryMs     ms | null  a number with no ccList entry for this long, listed before or not. CAN HIDE a message
+     *                             the cluster shows that ccList never carries (MC-REPORT case S5): only with that ruled out
+     *    witness       true       the second witness (config.ccDisplayed, use: true) says none
+     *    then          "listed" (default) | "heuristic"
+     *  Each change of the reason is logged once, numbers only. Sets ccFallbackLive while a noEntryMs clock runs, so the
+     *  tick evaluates again when it ends. */
+    _ccRelease(now, all) {
+        const ca = this.config.ccActive || {}, r = ca.release;
+        if (!r || typeof r !== 'object' || !this.ccActAny || !this.ccAct) { this.ccNoEntry = null; return null; }
+        const a = this.ccAct, n = a.number, none = Array.isArray(ca.noneValues) ? ca.noneValues : [0];
+        const then = r.then === 'heuristic' ? 'heuristic' : 'listed';
+        // every id the list has carried (outside ignoreIds) in this run, for leftList
+        const ever = this.ccListEver = this.ccListEver || {};
+        (all || []).forEach((x) => { if (!x.ignored && x.id !== null) ever[x.id] = true; });
+        const listed = (all || []).some((x) => x.id === n);
+        let why = null;
+        if (inList(r.deferValues, n)) why = 'number ' + n + ' is in release.deferValues';
+        else if (a.control !== null && inList(r.deferControls, a.control) && !inList(none, n)) why = 'control ' + a.control + ' is in release.deferControls';
+        else if (r.leftList === true && !inList(none, n) && ever[n] && all && !listed) why = 'number ' + n + ' was listed and has left ccList';
+        else if (r.witness === true && this._ccWitness() !== null && inList(none, this._ccWitness()) && !inList(none, n)) why = 'displayed cc says ' + this._ccWitness();
+        else if (isNum(r.noEntryMs) && !inList(none, n) && !(all || []).some((x) => x.id === n)) {
+            if (!this.ccNoEntry || this.ccNoEntry.n !== n) this.ccNoEntry = { n, at: now };
+            if (now - this.ccNoEntry.at >= r.noEntryMs) why = 'number ' + n + ' has had no ccList entry for ' + r.noEntryMs + ' ms';
+            else this.ccFallbackLive = true;        // the tick comes back when the clock runs out
+        }
+        if (!(isNum(r.noEntryMs) && !inList(none, n) && !(all || []).some((x) => x.id === n))) this.ccNoEntry = null;
+        const line = why ? 'released to the list (' + then + '): ' + why : 'decides again';
+        if (line !== this.ccReleaseLogged && (why || this.ccReleaseLogged)) {
+            this.ccReleaseLogged = line;
+            this.log.info('active cc: ' + line);
+        }
+        return why ? then : null;
+    }
+
+    /** research3/mc: the second witness's number (config.ccDisplayed) when it is to be used (use: true), else null. */
+    _ccWitness() {
+        const cd = this.config.ccDisplayed;
+        if (this.twinMsg || !cd || cd.use !== true || !this.ccDispAny || !isNum(this.ccDisp)) return null;
+        return this.ccDisp;
     }
 
     /** Whether the car's own check-control message can be READ: one notification from config.ccm has carried

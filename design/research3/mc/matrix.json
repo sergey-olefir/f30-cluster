@@ -1,0 +1,2100 @@
+{
+ "views": [
+  "f30 opaque",
+  "f30 G20 row ours",
+  "f30 G20 row BMW",
+  "twin"
+ ],
+ "fixes": [
+  "none",
+  "none65535",
+  "defer",
+  "defer-h",
+  "noentry",
+  "witness",
+  "witness-h",
+  "leftlist",
+  "ccmclear",
+  "control",
+  "rec",
+  "rec-w",
+  "rec-wh"
+ ],
+ "cases": {
+  "A0": {
+   "what": "control: door opens and shuts, the active number goes 0 -> 15 -> 0, the list rest -> [15] -> rest",
+   "by": {
+    "none": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "ccmclear": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "control": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ]
+   }
+  },
+  "A0b": {
+   "what": "control, the other order on shutting: the active number 0 first, the list after it",
+   "by": {
+    "none": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "ccmclear": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "control": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ]
+   }
+  },
+  "A1": {
+   "what": "the getter answers the catalogue default (number 65535, control 4095, frame 15/15) and nothing ever shows",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ]
+   }
+  },
+  "A2": {
+   "what": "a message, and on its end the active number goes back to 65535 (unfilled), not 0",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ]
+   }
+  },
+  "A3": {
+   "what": "a message, and on its end the active number is never notified again (it keeps 15); the list returns to rest",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ]
+   }
+  },
+  "A4": {
+   "what": "as A3, but the control word changes (number kept 15, control 0)",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ]
+   }
+  },
+  "A5": {
+   "what": "a temporary message (ready-to-drive 987) is hidden by BMW after ~20 s and stays listed; the active number stays 987",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "noentry": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ]
+   }
+  },
+  "A5w": {
+   "what": "A5 with the second witness: displayed goes back to 0 when BMW hides 987, the active number stays 987",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "noentry": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ]
+   }
+  },
+  "A6": {
+   "what": "the active field never notifies (silent, getter fails); door opens and shuts",
+   "by": {
+    "none": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "ccmclear": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "control": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ]
+   }
+  },
+  "A7": {
+   "what": "the active field silent; a stored WHITE entry stays listed after BMW hid it (~20 s)",
+   "by": {
+    "none": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "ccmclear": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "control": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ]
+   }
+  },
+  "A8": {
+   "what": "the active field silent; a stored RED entry stays listed after BMW hid it",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "noentry": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ]
+   }
+  },
+  "A9": {
+   "what": "the active field silent; a red message, then a list our config.ccList does not fit (the old list is kept)",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "noentry": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ]
+   }
+  },
+  "A10": {
+   "what": "blind: neither ccList nor the active field ever arrives",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "noentry": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ]
+   }
+  },
+  "A11": {
+   "what": "newCCMessage answers its getter with an unreadable struct (no name, id 65535) once, never again",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "ok"
+    ],
+    "none65535": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "ok"
+    ],
+    "defer": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "ok"
+    ],
+    "defer-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "ok"
+    ],
+    "noentry": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "ok"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "ok"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "ok"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "ok"
+    ],
+    "ccmclear": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "ok"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ]
+   }
+  },
+  "A12": {
+   "what": "a message whose name our font cannot draw (Greek; wb_msg has Latin and Cyrillic): the row latches; the message then ends properly",
+   "by": {
+    "none": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "ccmclear": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "control": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ]
+   }
+  },
+  "A13": {
+   "what": "a listed message with an empty name (unread): latches; the message then ends properly",
+   "by": {
+    "none": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "ccmclear": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "control": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ]
+   }
+  },
+  "A14": {
+   "what": "the resting entry is not id 0 (id 1 GREEN) and the active field is silent",
+   "by": {
+    "none": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "ccmclear": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "control": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ]
+   }
+  },
+  "A15": {
+   "what": "A1 with the second witness: displayed says 0 while the active field is stuck on its default 65535",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ]
+   }
+  },
+  "A16": {
+   "what": "A3 with the second witness: displayed goes back to 0, the active number stays 15",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ]
+   }
+  },
+  "S1": {
+   "what": "safety: a message the list carries, while the active field is stuck on 65535 (it never names it)",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "ok UNSAFE x2",
+     "ok UNSAFE x2",
+     "ok UNSAFE x2",
+     "ok UNSAFE x2"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "ok UNSAFE x1",
+     "ok UNSAFE x1",
+     "ok UNSAFE x1",
+     "HANG window open"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "ok UNSAFE x1",
+     "ok UNSAFE x1",
+     "ok UNSAFE x1",
+     "HANG window open"
+    ]
+   }
+  },
+  "S2": {
+   "what": "safety: a RED message the list carries, the active field stuck on 65535 for a minute",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "ok UNSAFE x2",
+     "ok UNSAFE x2",
+     "ok UNSAFE x2",
+     "ok UNSAFE x2"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ]
+   }
+  },
+  "S3": {
+   "what": "safety: the active number arrives 2 s before the list carries it",
+   "by": {
+    "none": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "ccmclear": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "control": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ]
+   }
+  },
+  "S5": {
+   "what": "safety: a message the cluster shows under a number the list never carries, the list AT REST",
+   "by": {
+    "none": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "noentry": [
+     "ok UNSAFE x1",
+     "ok UNSAFE x1",
+     "ok UNSAFE x1",
+     "ok"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "ccmclear": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "control": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ]
+   }
+  },
+  "A17": {
+   "what": "the getter default 65535 while a stored WHITE entry (987) stays listed and BMW shows nothing",
+   "by": {
+    "none": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ],
+    "noentry": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "witness-h": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "leftlist": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "ccmclear": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "control": [
+     "HANG window open",
+     "HANG window open",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-w": [
+     "HANG window open",
+     "HANG our text",
+     "HANG window open",
+     "HANG window open"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "HANG window open"
+    ]
+   }
+  },
+  "S4": {
+   "what": "safety: a message the cluster shows under a number the list never carries, the list not at rest (stored 987)",
+   "by": {
+    "none": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "none65535": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "defer-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "noentry": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "witness-h": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "leftlist": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "ccmclear": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "control": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-w": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ],
+    "rec-wh": [
+     "ok",
+     "ok",
+     "ok",
+     "ok"
+    ]
+   }
+  }
+ }
+}

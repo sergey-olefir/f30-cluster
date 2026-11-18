@@ -1,0 +1,1726 @@
+{
+ "A0": {
+  "what": "control: door opens and shuts, the active number goes 0 -> 15 -> 0, the list rest -> [15] -> rest",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 0 control 0 frame 0/0 utility 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO cc: shown-now confirmed (number 15 matched a ccList entry)",
+    "+0.3s INFO cc: id 15 colour white name len 16 shown-now 15 → window (D7: this is the message that confirmed \"shown now\"; ours from the next one)",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.5s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)"
+   ]
+  }
+ },
+ "A0b": {
+  "what": "control, the other order on shutting: the active number 0 first, the list after it",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.2s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.3s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.2s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.3s INFO cc: shown-now confirmed (number 15 matched a ccList entry)",
+    "+0.3s INFO cc: id 15 colour white name len 16 shown-now 15 → window (D7: this is the message that confirmed \"shown now\"; ours from the next one)",
+    "+0.3s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.5s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)"
+   ]
+  }
+ },
+ "A1": {
+  "what": "the getter answers the catalogue default (number 65535, control 4095, frame 15/15) and nothing ever shows",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.3,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.3,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO cc: id 65535 colour - name len 0 shown-now 65535 → window (no ccList entry for number 65535)"
+   ]
+  }
+ },
+ "A2": {
+  "what": "a message, and on its end the active number goes back to 65535 (unfilled), not 0",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 65535 control 4095 frame 15/15 utility 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO cc: id 65535 colour - name len 0 shown-now 65535 → window (no ccList entry for number 65535)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO cc: shown-now confirmed (number 15 matched a ccList entry)",
+    "+0.3s INFO cc: id 15 colour white name len 16 shown-now 15 → window (D7: this is the message that confirmed \"shown now\"; ours from the next one)",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.5s INFO cc: id 65535 colour - name len 0 shown-now 65535 → window (no ccList entry for number 65535)"
+   ]
+  }
+ },
+ "A3": {
+  "what": "a message, and on its end the active number is never notified again (it keeps 15); the list returns to rest",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO cc: shown-now confirmed (number 15 matched a ccList entry)",
+    "+0.3s INFO cc: id 15 colour white name len 16 shown-now 15 → window (D7: this is the message that confirmed \"shown now\"; ours from the next one)",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.5s INFO cc: id 15 colour - name len 0 shown-now 15 → window (no ccList entry for number 15)"
+   ]
+  }
+ },
+ "A4": {
+  "what": "as A3, but the control word changes (number kept 15, control 0)",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 15 control 0 frame 1/1 utility 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO cc: shown-now confirmed (number 15 matched a ccList entry)",
+    "+0.3s INFO cc: id 15 colour white name len 16 shown-now 15 → window (D7: this is the message that confirmed \"shown now\"; ours from the next one)",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 15 control 0 frame 1/1 utility 0",
+    "+0.5s INFO cc: id 15 colour - name len 0 shown-now 15 → window (no ccList entry for number 15)"
+   ]
+  }
+ },
+ "A5": {
+  "what": "a temporary message (ready-to-drive 987) is hidden by BMW after ~20 s and stays listed; the active number stays 987",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 15.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 25.6,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 55.8,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO check-control list: 1 messages, name lengths 27; listed 987 white of 1 entries",
+    "+0.2s INFO active cc: number 987 control 1 frame 1/1 utility 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 15.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 25.6,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 55.8,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 27; listed 987 white of 1 entries",
+    "+0.2s INFO active cc: number 987 control 1 frame 1/1 utility 0",
+    "+0.3s INFO cc: shown-now confirmed (number 987 matched a ccList entry)",
+    "+0.3s INFO cc: id 987 colour white name len 27 shown-now 987 → window (D7: this is the message that confirmed \"shown now\"; ours from the next one)"
+   ]
+  }
+ },
+ "A5w": {
+  "what": "A5 with the second witness: displayed goes back to 0 when BMW hides 987, the active number stays 987",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 15.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 25.6,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 55.8,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO check-control list: 1 messages, name lengths 27; listed 987 white of 1 entries",
+    "+0.2s INFO active cc: number 987 control 1 frame 1/1 utility 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 15.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 25.6,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 55.8,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO displayed cc: number 0",
+    "+0.0s INFO displayed cc: the second \"shown now\" witness has spoken",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 27; listed 987 white of 1 entries",
+    "+0.2s INFO active cc: number 987 control 1 frame 1/1 utility 0",
+    "+0.2s INFO displayed cc: number 987",
+    "+0.3s INFO cc: shown-now confirmed (number 987 matched a ccList entry)",
+    "+0.3s INFO cc: id 987 colour white name len 27 shown-now 987 → window (D7: this is the message that confirmed \"shown now\"; ours from the next one)",
+    "+25.5s INFO displayed cc: number 0",
+    "+25.6s INFO cc: id 987 colour - name len 0 shown-now 987 → window (the two \"shown now\" witnesses disagree)"
+   ]
+  }
+ },
+ "A6": {
+  "what": "the active field never notifies (silent, getter fails); door opens and shuts",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO cc: id - colour - name len 0 shown-now - → none (no message shown)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.3s INFO cc: id - colour - name len 0 shown-now - → window (D7: the cluster's \"shown now\" has not matched a ccList entry yet)",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.5s INFO cc: id - colour - name len 0 shown-now - → none (no message shown)"
+   ]
+  }
+ },
+ "A7": {
+  "what": "the active field silent; a stored WHITE entry stays listed after BMW hid it (~20 s)",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 15.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 25.6,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 55.8,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO check-control list: 1 messages, name lengths 27; listed 987 white of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 15.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 25.6,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 55.8,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO cc: id - colour - name len 0 shown-now - → none (no message shown)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 27; listed 987 white of 1 entries",
+    "+0.3s INFO cc: id - colour - name len 0 shown-now - → window (D7: the cluster's \"shown now\" has not matched a ccList entry yet)",
+    "+25.6s INFO cc: id - colour - name len 0 shown-now - → none (no message shown)"
+   ]
+  }
+ },
+ "A8": {
+  "what": "the active field silent; a stored RED entry stays listed after BMW hid it",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 15.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 25.6,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 55.8,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO check-control list: 1 messages, name lengths 22; listed 52 red of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 15.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 25.6,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 55.8,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO cc: id - colour - name len 0 shown-now - → none (no message shown)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 22; listed 52 red of 1 entries",
+    "+0.3s INFO cc: id - colour - name len 0 shown-now - → window (D7: the cluster's \"shown now\" has not matched a ccList entry yet)"
+   ]
+  }
+ },
+ "A9": {
+  "what": "the active field silent; a red message, then a list our config.ccList does not fit (the old list is kept)",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO check-control list: 1 messages, name lengths 22; listed 52 red of 1 entries",
+    "+0.3s INFO check-control list: 0 messages, name lengths  (not a list config.ccList fits); listed none of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO cc: id - colour - name len 0 shown-now - → none (no message shown)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 22; listed 52 red of 1 entries",
+    "+0.3s INFO cc: id - colour - name len 0 shown-now - → window (D7: the cluster's \"shown now\" has not matched a ccList entry yet)",
+    "+0.3s INFO check-control list: 0 messages, name lengths  (not a list config.ccList fits); listed none of 1 entries"
+   ]
+  }
+ },
+ "A10": {
+  "what": "blind: neither ccList nor the active field ever arrives",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 1.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 31.3,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": []
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 1.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 31.3,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+1.2s INFO cc: id - colour - name len 0 shown-now - → window (the car's check-control messages have not been read yet)"
+   ]
+  }
+ },
+ "A11": {
+  "what": "newCCMessage answers its getter with an unreadable struct (no name, id 65535) once, never again",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.3,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s WARN bottom row: info is BMW's again (a check-control message arrived that app.json config.ccm cannot read (symbol 0, id 65535, no name or description))",
+    "+0.0s INFO check-control message: no name, no description, colour default, symbol 0, id 65535, type 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 30.3,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)"
+   ]
+  }
+ },
+ "A12": {
+  "what": "a message whose name our font cannot draw (Greek; wb_msg has Latin and Cyrillic): the row latches; the message then ends properly",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO check-control list: 1 messages, name lengths 20; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 0 control 0 frame 0/0 utility 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 20; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO cc: shown-now confirmed (number 15 matched a ccList entry)",
+    "+0.3s INFO cc: id 15 colour white name len 20 shown-now 15 → window (D7: this is the message that confirmed \"shown now\"; ours from the next one)",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.5s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)"
+   ]
+  }
+ },
+ "A13": {
+  "what": "a listed message with an empty name (unread): latches; the message then ends properly",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO check-control list: 0 messages, name lengths ; listed 15 white of 1 entries, 1 with no name",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.2s WARN bottom row: info is BMW's again (a check-control message arrived in ccList that app.json config.ccList cannot read (1 entry with no name))",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 0 control 0 frame 0/0 utility 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO check-control list: 0 messages, name lengths ; listed 15 white of 1 entries, 1 with no name",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.2s WARN bottom row: info is BMW's again (a check-control message arrived in ccList that app.json config.ccList cannot read (1 entry with no name))",
+    "+0.3s INFO cc: shown-now confirmed (number 15 matched a ccList entry)",
+    "+0.3s INFO cc: id 15 colour white name len 0 shown-now 15 → window (the ccList entry has no name)",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.5s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)"
+   ]
+  }
+ },
+ "A14": {
+  "what": "the resting entry is not id 0 (id 1 GREEN) and the active field is silent",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.3,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 1 messages, name lengths 14; listed 1 green of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.3,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 1 messages, name lengths 14; listed 1 green of 1 entries",
+    "+0.2s INFO cc: id - colour - name len 0 shown-now - → window (D7: the cluster's \"shown now\" has not matched a ccList entry yet)",
+    "+30.3s INFO cc: id - colour - name len 0 shown-now - → none (no message shown)"
+   ]
+  }
+ },
+ "A15": {
+  "what": "A1 with the second witness: displayed says 0 while the active field is stuck on its default 65535",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 65535 control 4095 frame 15/15 utility 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO displayed cc: number 0",
+    "+0.0s INFO displayed cc: the second \"shown now\" witness has spoken",
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO cc: id 65535 colour - name len 0 shown-now 65535 → window (the two \"shown now\" witnesses disagree)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.2s INFO displayed cc: number 15",
+    "+0.3s INFO cc: shown-now confirmed (number 15 matched a ccList entry)",
+    "+0.3s INFO cc: id 15 colour white name len 16 shown-now 15 → window (D7: this is the message that confirmed \"shown now\"; ours from the next one)",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.3s INFO displayed cc: number 0",
+    "+0.5s INFO cc: id 65535 colour - name len 0 shown-now 65535 → window (the two \"shown now\" witnesses disagree)"
+   ]
+  }
+ },
+ "A16": {
+  "what": "A3 with the second witness: displayed goes back to 0, the active number stays 15",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 0.5,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO displayed cc: number 0",
+    "+0.0s INFO displayed cc: the second \"shown now\" witness has spoken",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.2s INFO displayed cc: number 15",
+    "+0.3s INFO cc: shown-now confirmed (number 15 matched a ccList entry)",
+    "+0.3s INFO cc: id 15 colour white name len 16 shown-now 15 → window (D7: this is the message that confirmed \"shown now\"; ours from the next one)",
+    "+0.3s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.3s INFO displayed cc: number 0",
+    "+0.5s INFO cc: id 15 colour - name len 0 shown-now 15 → window (the two \"shown now\" witnesses disagree)"
+   ]
+  }
+ },
+ "S1": {
+  "what": "safety: a message the list carries, while the active field is stuck on 65535 (it never names it)",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 30.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 60.8,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+30.5s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 30.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 30.6,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 60.8,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO cc: id 65535 colour - name len 0 shown-now 65535 → window (no ccList entry for number 65535)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+30.5s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries"
+   ]
+  }
+ },
+ "S2": {
+  "what": "safety: a RED message the list carries, the active field stuck on 65535 for a minute",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.6,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 70.8,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO check-control list: 1 messages, name lengths 22; listed 52 red of 1 entries",
+    "+60.5s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.6,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 70.8,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.2s INFO cc: id 65535 colour - name len 0 shown-now 65535 → window (no ccList entry for number 65535)",
+    "+0.2s INFO check-control list: 1 messages, name lengths 22; listed 52 red of 1 entries",
+    "+60.5s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries"
+   ]
+  }
+ },
+ "S3": {
+  "what": "safety: the active number arrives 2 s before the list carries it",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 2.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 2.6,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 2.8,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.2s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+2.5s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+2.6s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+2.6s INFO active cc: number 0 control 0 frame 0/0 utility 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 2.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 2.6,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 2.8,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO active cc: number 15 control 1 frame 1/1 utility 0",
+    "+0.2s INFO active cc: no ccList entry for number 15 - shown, BMW's panel stays open",
+    "+0.3s INFO cc: id 15 colour - name len 0 shown-now 15 → window (no ccList entry for number 15)",
+    "+2.5s INFO check-control list: 1 messages, name lengths 16; listed 15 white of 1 entries",
+    "+2.6s INFO cc: shown-now confirmed (number 15 matched a ccList entry)",
+    "+2.6s INFO cc: id 15 colour white name len 16 shown-now 15 → window (D7: this is the message that confirmed \"shown now\"; ours from the next one)",
+    "+2.6s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+2.6s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+2.8s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)"
+   ]
+  }
+ },
+ "S5": {
+  "what": "safety: a message the cluster shows under a number the list never carries, the list AT REST",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.6,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 70.8,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO active cc: number 1234 control 1 frame 1/1 utility 0",
+    "+0.2s INFO active cc: no ccList entry for number 1234 - shown, BMW's panel stays open",
+    "+60.5s INFO active cc: number 0 control 0 frame 0/0 utility 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.6,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 70.8,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 0 messages, name lengths ; listed none of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO active cc: number 1234 control 1 frame 1/1 utility 0",
+    "+0.2s INFO active cc: no ccList entry for number 1234 - shown, BMW's panel stays open",
+    "+0.3s INFO cc: id 1234 colour - name len 0 shown-now 1234 → window (no ccList entry for number 1234)",
+    "+60.5s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+60.6s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)"
+   ]
+  }
+ },
+ "A17": {
+  "what": "the getter default 65535 while a stored WHITE entry (987) stays listed and BMW shows nothing",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.3,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO check-control list: 1 messages, name lengths 27; listed 987 white of 1 entries"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "open"
+    },
+    {
+     "t": 30.3,
+     "truth": "none",
+     "window": "open"
+    }
+   ],
+   "log": [
+    "+0.0s INFO active cc: number 65535 control 4095 frame 15/15 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.0s INFO active cc: no ccList entry for number 65535 - shown, BMW's panel stays open",
+    "+0.0s INFO check-control list: 1 messages, name lengths 27; listed 987 white of 1 entries",
+    "+0.2s INFO cc: id 65535 colour - name len 0 shown-now 65535 → window (no ccList entry for number 65535)"
+   ]
+  }
+ },
+ "S4": {
+  "what": "safety: a message the cluster shows under a number the list never carries, the list not at rest (stored 987)",
+  "f30 opaque": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.6,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 70.8,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 1 messages, name lengths 27; listed 987 white of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO active cc: number 1234 control 1 frame 1/1 utility 0",
+    "+0.2s INFO active cc: no ccList entry for number 1234 - shown, BMW's panel stays open",
+    "+60.5s INFO active cc: number 0 control 0 frame 0/0 utility 0"
+   ]
+  },
+  "twin": {
+   "steps": [
+    {
+     "t": 0.2,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 0.3,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.5,
+     "truth": "msg",
+     "window": "open"
+    },
+    {
+     "t": 60.6,
+     "truth": "none",
+     "window": "shut"
+    },
+    {
+     "t": 70.8,
+     "truth": "none",
+     "window": "shut"
+    }
+   ],
+   "log": [
+    "+0.0s INFO check-control list: 1 messages, name lengths 27; listed 987 white of 1 entries",
+    "+0.0s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+0.0s INFO active cc: wired - from now on it alone says whether a message shows",
+    "+0.2s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)",
+    "+0.2s INFO active cc: number 1234 control 1 frame 1/1 utility 0",
+    "+0.2s INFO active cc: no ccList entry for number 1234 - shown, BMW's panel stays open",
+    "+0.3s INFO cc: id 1234 colour - name len 0 shown-now 1234 → window (no ccList entry for number 1234)",
+    "+60.5s INFO active cc: number 0 control 0 frame 0/0 utility 0",
+    "+60.6s INFO cc: id 0 colour - name len 0 shown-now 0 → none (no message shown)"
+   ]
+  }
+ }
+}
