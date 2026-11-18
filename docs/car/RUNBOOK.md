@@ -89,118 +89,121 @@ Cluster states in step order: `stock` = Twin Dial and f30 both Off; `twin` = Twi
 | 8 | B1.8 | stock | P13: stalk |
 | 9 | B1.9 | stock | P13: stalk |
 | 10 | B1.10 | stock | P13: stalk |
-| 11 | B1.11 | stock | P13: stalk, P13: sw-wheel-steps |
+| 11 | B1.11 | stock | P13: sw-wheel-steps |
 | 12 | B1.12 | stock | P13: sw-wheel-steps |
-| 13 | B1.13 | stock | P13: sw-fav |
-| 14 | B1.14 (optional) | stock | P13: sw-special2 |
-| 15 | B1.15 | stock | P13: sw-skip |
-| 16 | B1.16 | stock | P13: sw-voice |
-| 17 | B1.17 | stock | P13: sw-phone |
-| 18 | B1.18 | stock | P13: sw-volume |
-| 19 | B1.19 | stock | P13: controller |
-| 20 | B1.20 | stock | P13: stalk |
-| 21 | B1.21 | stock | P11: kombi-config |
-| 22 | B1.22 | twin | P13: stalk |
-| 23 | B1.23 | twin | P13: stalk |
-| 24 | B1.24 | twin | P13: stalk |
+| 13 | B1.13 | stock | P13: sw-wheel-steps |
+| 14 | B1.14 | stock | P13: sw-wheel-steps |
+| 15 | B1.15 | stock | P13: sw-fav |
+| 16 | B1.16 (optional) | stock | P13: sw-special1 |
+| 17 | B1.17 (optional) | stock | P13: sw-special2 |
+| 18 | B1.18 | stock | P13: sw-skip |
+| 19 | B1.19 | stock | P13: sw-voice |
+| 20 | B1.20 | stock | P13: sw-phone |
+| 21 | B1.21 | stock | P13: sw-volume |
+| 22 | B1.22 | stock | P13: controller |
+| 23 | B1.23 | stock | P13: stalk |
+| 24 | B1.24 | stock | P11: kombi-config |
 | 25 | B1.25 | twin | P13: stalk |
-| 26 | B1.26 | twin | P13: sw-wheel-steps |
-| 27 | B1.27 | f30 | P13: stalk |
-| 28 | B1.28 | f30 | P13: stalk |
-| 29 | B1.29 | f30 | P13: stalk |
+| 26 | B1.26 | twin | P13: stalk |
+| 27 | B1.27 | twin | P13: stalk |
+| 28 | B1.28 | twin | P13: stalk |
+| 29 | B1.29 | twin | P13: sw-wheel-steps |
 | 30 | B1.30 | f30 | P13: stalk |
-| 31 | B1.31 | f30 | P13: sw-wheel-steps |
+| 31 | B1.31 | f30 | P13: stalk |
+| 32 | B1.32 | f30 | P13: stalk |
+| 33 | B1.33 | f30 | P13: stalk |
+| 34 | B1.34 | f30 | P13: sw-wheel-steps |
 
 **Block 2: Холодний запуск двигуна** (sets S2, S3)
 
 | Mark | Step | Cluster | The probe must log (item: field tag) |
 |---|---|---|---|
-| 32 | B2.2 | stock | P3: range-tank, P5: units |
-| 33 | B2.3 | stock | P4: bc-average, P4: bc-travel |
-| 34 | B2.4 | stock | P10: voltage-basic |
-| 35 | B2.5 | stock | P6: coolant, P10: voltage-basic |
-| 36 | B2.6 | stock | P6: engine-verdict |
-| 37 | B2.7 | stock | P10: voltage-basic |
-| 38 | B2.8 (optional) | stock | P5: units |
-| 39 | B2.9 (optional) | stock | P4: bc-travel |
+| 35 | B2.2 | stock | P3: range-tank, P5: units |
+| 36 | B2.3 | stock | P4: bc-average, P4: bc-travel |
+| 37 | B2.4 | stock | P10: voltage-basic |
+| 38 | B2.5 | stock | P6: coolant, P10: voltage-basic |
+| 39 | B2.6 | stock | P6: engine-verdict |
+| 40 | B2.7 | stock | P10: voltage-basic |
+| 41 | B2.8 (optional) | stock | P5: units |
+| 42 | B2.9 (optional) | stock | P4: bc-travel |
 
 **Block 3: Двері, повідомлення, напруга** (sets S1, S3)
 
 | Mark | Step | Cluster | The probe must log (item: field tag) |
 |---|---|---|---|
-| 40 | B3.2 | stock | P1: active-cc, P10: voltage-basic |
-| 41 | B3.3 | stock | P7: doors, P1: active-cc, P1: ccList |
-| 42 | B3.4 | stock | P7: doors |
-| 43 | B3.5 | stock | P7: doors |
-| 44 | B3.6 | stock | P7: doors |
-| 45 | B3.7 | stock | P7: doors |
-| 46 | B3.8 | stock | P7: lids |
-| 47 | B3.9 | stock | P1: menu-cc, P1: active-cc |
-| 48 | B3.10 | stock | P1: active-cc |
+| 43 | B3.2 | stock | P1: active-cc, P10: voltage-basic |
+| 44 | B3.3 | stock | P7: doors, P1: active-cc, P1: ccList |
+| 45 | B3.4 | stock | P7: doors |
+| 46 | B3.5 | stock | P7: doors |
+| 47 | B3.6 | stock | P7: doors |
+| 48 | B3.7 | stock | P7: doors |
+| 49 | B3.8 | stock | P7: lids |
+| 50 | B3.9 | stock | P1: menu-cc, P1: active-cc |
+| 51 | B3.10 | stock | P1: active-cc |
 
 **Block 4: Радіо та медіа** (sets S4)
 
 | Mark | Step | Cluster | The probe must log (item: field tag) |
 |---|---|---|---|
-| 49 | B4.2 | stock | P8: station, P8: active-source |
-| 50 | B4.3 | stock | P8: station |
-| 51 | B4.4 | stock | P8: media-menu |
-| 52 | B4.5 (optional) | stock | P8: station |
-| 53 | B4.6 | stock | P8: player-metadata, P8: active-source |
-| 54 | B4.7 | stock | P8: track-progress |
-| 55 | B4.8 | stock | P8: player-metadata |
-| 56 | B4.9 | stock | P8: player-metadata |
-| 57 | B4.10 | stock | P8: track-progress |
-| 58 | B4.11 | stock | P8: active-source |
-| 59 | B4.12 | stock | P8: player-metadata, P8: cp-player-state |
+| 52 | B4.2 | stock | P8: station, P8: active-source |
+| 53 | B4.3 | stock | P8: station |
+| 54 | B4.4 | stock | P8: media-menu |
+| 55 | B4.5 (optional) | stock | P8: station |
+| 56 | B4.6 | stock | P8: player-metadata, P8: active-source |
+| 57 | B4.7 | stock | P8: track-progress |
+| 58 | B4.8 | stock | P8: player-metadata |
+| 59 | B4.9 | stock | P8: player-metadata |
+| 60 | B4.10 | stock | P8: track-progress |
+| 61 | B4.11 | stock | P8: active-source |
+| 62 | B4.12 | stock | P8: player-metadata, P8: cp-player-state |
 
 **Block 5: Телефон і дзвінки** (sets S5, S4)
 
 | Mark | Step | Cluster | The probe must log (item: field tag) |
 |---|---|---|---|
-| 60 | B5.2 | stock | P9: phone-devices |
-| 61 | B5.3 | stock | P9: call-state |
-| 62 | B5.4 | stock | P9: call-state, P9: phone-call1-state |
-| 63 | B5.5 | twin | P9: call-state |
-| 64 | B5.6 | twin | P9: call-state, P9: phone-calllist |
-| 65 | B5.7 | twin | P9: call-state |
-| 66 | B5.8 | twin | P9: hmi-app |
-| 67 | B5.9 (optional) | twin | P9: wca-front |
-| 68 | B5.10 | twin | P8: player-metadata |
-| 69 | B5.11 | twin | P9: phone-devices |
-| 70 | B5.12 | twin | P9: call-state, P9: carplay-call |
-| 71 | B5.13 | twin | P9: call-state |
+| 63 | B5.2 | stock | P9: phone-devices |
+| 64 | B5.3 | stock | P9: call-state |
+| 65 | B5.4 | stock | P9: call-state, P9: phone-call1-state |
+| 66 | B5.5 | twin | P9: call-state |
+| 67 | B5.6 | twin | P9: call-state, P9: phone-calllist |
+| 68 | B5.7 | twin | P9: call-state |
+| 69 | B5.8 | twin | P9: hmi-app |
+| 70 | B5.9 (optional) | twin | P9: wca-front |
+| 71 | B5.10 | twin | P8: player-metadata |
+| 72 | B5.11 | twin | P9: phone-devices |
+| 73 | B5.12 | twin | P9: call-state, P9: carplay-call |
+| 74 | B5.13 | twin | P9: call-state |
 
 **Block 6: Панель із застосунками BMW-стилю, стоїмо** (sets S1)
 
 | Mark | Step | Cluster | The probe must log (item: field tag) |
 |---|---|---|---|
-| 72 | B6.2 | twin | P1: active-cc |
-| 73 | B6.3 | twin | P1: active-cc |
-| 80 | B6.10 | twin | P1: active-cc |
-| 85 | B6.15 | f30 | P1: active-cc |
+| 75 | B6.2 | twin | P1: active-cc |
+| 76 | B6.3 | twin | P1: active-cc |
+| 83 | B6.10 | twin | P1: active-cc |
+| 88 | B6.15 | f30 | P1: active-cc |
 
 **Block 7: Коротка поїздка з навігацією** (sets S7, S6)
 
 | Mark | Step | Cluster | The probe must log (item: field tag) |
 |---|---|---|---|
-| 87 | B7.2 | stock | P14: map-without-route, P11: kombi-config |
-| 88 | B7.3 | stock | P12: guiding-state |
-| 89 | B7.4 | stock | P12: next-intersection, P12: dart |
-| 90 | B7.5 | stock | P12: dart |
-| 91 | B7.6 | stock | P14: map-without-route |
+| 90 | B7.2 | stock | P14: map-without-route, P11: kombi-config |
+| 91 | B7.3 | stock | P12: guiding-state |
+| 92 | B7.4 | stock | P12: next-intersection, P12: dart |
+| 93 | B7.5 | stock | P12: dart |
+| 94 | B7.6 | stock | P14: map-without-route |
 
 **Block 8: Поїздка з круїз-контролем і дорожніми знаками** (sets S8, S9)
 
 | Mark | Step | Cluster | The probe must log (item: field tag) |
 |---|---|---|---|
-| 92 | B8.2 | stock | P16: tyre-pressure |
-| 93 | B8.3 | stock | P17: cbs-list |
-| 94 | B8.4 | stock | P15: sign |
-| 95 | B8.5 | stock | P15: longitudinal |
-| 96 | B8.6 | stock | P16: sport-display |
-| 97 | B8.7 | stock | P17: heading |
-| 99 | B8.9 | stock | P16: tyre-pressure |
+| 95 | B8.2 | stock | P16: tyre-pressure |
+| 96 | B8.3 | stock | P17: cbs-list |
+| 97 | B8.4 | stock | P15: sign |
+| 98 | B8.5 | stock | P15: longitudinal |
+| 99 | B8.6 | stock | P16: sport-display |
+| 100 | B8.7 | stock | P17: heading |
+| 102 | B8.9 | stock | P16: tyre-pressure |
 <!-- END:verify -->
 
 ### 2.4 Set switching
@@ -266,13 +269,13 @@ Tick when the answer has been read and recorded (answers.json carries the eviden
 <!-- BEGIN:checklist -->
 | Done | Id | Kind | Question | Answered by | Decides |
 |---|---|---|---|---|---|
-| [ ] | L1 | L | Why f30's window over BMW's panel stays open (cases A1-A16) | collection #0; collection #2; B6.10 (mark 80); B6.11 (mark 81); B6.15 (mark 85) | which release setting |
+| [ ] | L1 | L | Why f30's window over BMW's panel stays open (cases A1-A16) | collection #0; collection #2; B6.10 (mark 83); B6.11 (mark 84); B6.15 (mark 88) | which release setting |
 | [ ] | L2 | L | Does statusActiveCCMessage notify; what it rests on; does its number equal the ccList id | collection #0 | D7; noneValues |
 | [ ] | L3 | L | The clock fallback: statusShowTimeDate arrives and is local time | collection #0; collection #1 | 0.7.19 clock note |
 | [ ] | L4 | L | Twin Dial's trip fields arrive; raw values against iDrive's trip page | collection #0; collection #2 | trip factors |
-| [ ] | L5 | L | The odometer member arrives; factor 1 km; did the number show on 0.1.0 | collection #0; B6.2 (mark 72) | odometer |
+| [ ] | L5 | L | The odometer member arrives; factor 1 km; did the number show on 0.1.0 | collection #0; B6.2 (mark 75) | odometer |
 | [ ] | L6 | L | aggregatedCallState arrives (Twin Dial's phone state line) | collection #3 | phone card |
-| [ ] | L7 | L | HmiMediaState on HMI_CID arrives (Twin Dial's media lines) | collection #3; B5.10 (mark 68) | media tab |
+| [ ] | L7 | L | HmiMediaState on HMI_CID arrives (Twin Dial's media lines) | collection #3; B5.10 (mark 71) | media tab |
 | [ ] | L8 | L | Vehicle2.statusDisplayedCCMessage arrives and returns to 0 | collection #2 | second witness |
 | [ ] | L9 | L | Layout builds in the first 10 s of both apps (the bench predicts 3) | collection #1 | start-up fix |
 | [ ] | L10 | L | cluster-render's upload cap, per-minute KB, 'goes whole' lines | collection #0; collection #2 | cost of a switch |
@@ -281,40 +284,40 @@ Tick when the answer has been read and recorded (answers.json carries the eviden
 | [ ] | L13 | L | The 0.7.18 probes' results (ccListRiskClass, basicList) | collection #0 | stored-message mark |
 | [ ] | L14 | L | f30's speed-limit sign lines: TrafficSignDisplayControl arrives | collection #0; collection #3 | sign |
 | [ ] | L15 | L | day/night source: the car's value against the sun; the meaning of 0 | collection #0; collection #1 | day/night |
-| [ ] | P1 | P | statusActiveCCMessage, statusDisplayedCCMessage, statusMenuCCMessage, ccList | B1.20 (mark 20); B3.2 (mark 40); B3.3 (mark 41); B3.9 (mark 47); B3.10 (mark 48); B6.10 (mark 80); B6.15 (mark 85) | shown now = list id; rest value; frame counter |
-| [ ] | P2 | P | basicList, ccListRiskClass | B3.9 (mark 47) | stored-message mark; risk class |
-| [ ] | P3 | P | odometer carriers | B2.2 (mark 32) | factor; invalid value |
-| [ ] | P4 | P | trip computer fields | B2.3 (mark 33); B2.9 (mark 39) | factors; which computer is since start; departure |
-| [ ] | P5 | P | units | B2.2 (mark 32); B2.8 (mark 38) | km / miles, C, bar |
-| [ ] | P6 | P | engine temperature verdict and coolant | B2.5 (mark 35); B2.6 (mark 36) | the car's own coolant verdict |
-| [ ] | P7 | P | doors, boot, bonnet, central locking | B3.2 (mark 40); B3.3 (mark 41); B3.4 (mark 42); B3.5 (mark 43); B3.6 (mark 44); B3.7 (mark 45); B3.8 (mark 46) | notifies at all; sends once at subscribe |
-| [ ] | P8 | P | media state, sources, tuner, CarPlay player | B4.2 (mark 49); B4.3 (mark 50); B4.4 (mark 51); B4.5 (mark 52); B4.6 (mark 53); B4.7 (mark 54); B4.8 (mark 55); B4.9 (mark 56); B4.10 (mark 57); B4.11 (mark 58); B4.12 (mark 59); B5.10 (mark 68) | title line; progress; source icon kind |
-| [ ] | P9 | P | phone: VoiceCall, manager, aggregator, device list, Telephone | B5.2 (mark 60); B5.3 (mark 61); B5.4 (mark 62); B5.5 (mark 63); B5.6 (mark 64); B5.7 (mark 65); B5.8 (mark 66); B5.9 (mark 67); B5.11 (mark 69); B5.12 (mark 70); B5.13 (mark 71) | call states; battery and signal; modem or phone |
-| [ ] | P10 | P | voltage carriers | B2.4 (mark 34); B2.5 (mark 35); B2.7 (mark 37); B3.2 (mark 40) | a plausible 12-14.8 V |
-| [ ] | P11 | P | HMI context, cluster selection and configuration | B1.21 (mark 21); B7.2 (mark 87) | the cluster's map-view setting; an indirect key |
-| [ ] | P12 | P | navigation and guidance fields | B7.3 (mark 88); B7.4 (mark 89); B7.5 (mark 90) | manoeuvre kinds; distance unit |
-| [ ] | P13 | P | steering-wheel buttons, turn-signal stalk, controller | B1.2 (mark 2); B1.3 (mark 3); B1.4 (mark 4); B1.5 (mark 5); B1.6 (mark 6); B1.7 (mark 7); B1.8 (mark 8); B1.9 (mark 9); B1.10 (mark 10); B1.11 (mark 11); B1.12 (mark 12); B1.13 (mark 13); B1.14 (mark 14); B1.15 (mark 15); B1.16 (mark 16); B1.17 (mark 17); B1.18 (mark 18); B1.19 (mark 19); B1.20 (mark 20); B1.22 (mark 22); B1.23 (mark 23); B1.24 (mark 24); B1.25 (mark 25); B1.26 (mark 26); B1.27 (mark 27); B1.28 (mark 28); B1.29 (mark 29); B1.30 (mark 30); B1.31 (mark 31) | the tab key (SB 3.3) |
-| [ ] | P14 | P | map presence fields | B1.21 (mark 21); B7.2 (mark 87); B7.3 (mark 88); B7.6 (mark 91) | when BMW's map exists |
-| [ ] | P15 | P | speed-limit sign, longitudinal assistance, HUD feed | B8.4 (mark 94); B8.5 (mark 95) | the sign arrives; set speed and active function |
-| [ ] | P16 | P | boost, engine dynamics, oil, tyres | B8.2 (mark 92); B8.6 (mark 96); B8.9 (mark 99) | scales; whether the car notifies |
-| [ ] | P17 | P | heading, altitude, service due | B8.3 (mark 93); B8.7 (mark 97) | whether they arrive |
-| [ ] | X1 | X | f30 with 'Change with the drive mode' off | B6.8 (mark 78); B6.9 (mark 79); B6.11 (mark 81); B6.12 (mark 82); B6.13 (mark 83); B6.14 (mark 84) | whether the rebuild brings the black box |
+| [ ] | P1 | P | statusActiveCCMessage, statusDisplayedCCMessage, statusMenuCCMessage, ccList | B1.23 (mark 23); B3.2 (mark 43); B3.3 (mark 44); B3.9 (mark 50); B3.10 (mark 51); B6.10 (mark 83); B6.15 (mark 88) | shown now = list id; rest value; frame counter |
+| [ ] | P2 | P | basicList, ccListRiskClass | B3.9 (mark 50) | stored-message mark; risk class |
+| [ ] | P3 | P | odometer carriers | B2.2 (mark 35) | factor; invalid value |
+| [ ] | P4 | P | trip computer fields | B2.3 (mark 36); B2.9 (mark 42) | factors; which computer is since start; departure |
+| [ ] | P5 | P | units | B2.2 (mark 35); B2.8 (mark 41) | km / miles, C, bar |
+| [ ] | P6 | P | engine temperature verdict and coolant | B2.5 (mark 38); B2.6 (mark 39) | the car's own coolant verdict |
+| [ ] | P7 | P | doors, boot, bonnet, central locking | B3.2 (mark 43); B3.3 (mark 44); B3.4 (mark 45); B3.5 (mark 46); B3.6 (mark 47); B3.7 (mark 48); B3.8 (mark 49) | notifies at all; sends once at subscribe |
+| [ ] | P8 | P | media state, sources, tuner, CarPlay player | B4.2 (mark 52); B4.3 (mark 53); B4.4 (mark 54); B4.5 (mark 55); B4.6 (mark 56); B4.7 (mark 57); B4.8 (mark 58); B4.9 (mark 59); B4.10 (mark 60); B4.11 (mark 61); B4.12 (mark 62); B5.10 (mark 71) | title line; progress; source icon kind |
+| [ ] | P9 | P | phone: VoiceCall, manager, aggregator, device list, Telephone | B5.2 (mark 63); B5.3 (mark 64); B5.4 (mark 65); B5.5 (mark 66); B5.6 (mark 67); B5.7 (mark 68); B5.8 (mark 69); B5.9 (mark 70); B5.11 (mark 72); B5.12 (mark 73); B5.13 (mark 74) | call states; battery and signal; modem or phone |
+| [ ] | P10 | P | voltage carriers | B2.4 (mark 37); B2.5 (mark 38); B2.7 (mark 40); B3.2 (mark 43) | a plausible 12-14.8 V |
+| [ ] | P11 | P | HMI context, cluster selection and configuration | B1.24 (mark 24); B7.2 (mark 90) | the cluster's map-view setting; an indirect key |
+| [ ] | P12 | P | navigation and guidance fields | B7.3 (mark 91); B7.4 (mark 92); B7.5 (mark 93) | manoeuvre kinds; distance unit |
+| [ ] | P13 | P | steering-wheel buttons, turn-signal stalk, controller | B1.2 (mark 2); B1.3 (mark 3); B1.4 (mark 4); B1.5 (mark 5); B1.6 (mark 6); B1.7 (mark 7); B1.8 (mark 8); B1.9 (mark 9); B1.10 (mark 10); B1.11 (mark 11); B1.12 (mark 12); B1.13 (mark 13); B1.14 (mark 14); B1.15 (mark 15); B1.16 (mark 16); B1.17 (mark 17); B1.18 (mark 18); B1.19 (mark 19); B1.20 (mark 20); B1.21 (mark 21); B1.22 (mark 22); B1.23 (mark 23); B1.25 (mark 25); B1.26 (mark 26); B1.27 (mark 27); B1.28 (mark 28); B1.29 (mark 29); B1.30 (mark 30); B1.31 (mark 31); B1.32 (mark 32); B1.33 (mark 33); B1.34 (mark 34) | the tab key (SB 3.3) |
+| [ ] | P14 | P | map presence fields | B1.24 (mark 24); B7.2 (mark 90); B7.3 (mark 91); B7.6 (mark 94) | when BMW's map exists |
+| [ ] | P15 | P | speed-limit sign, longitudinal assistance, HUD feed | B8.4 (mark 97); B8.5 (mark 98) | the sign arrives; set speed and active function |
+| [ ] | P16 | P | boost, engine dynamics, oil, tyres | B8.2 (mark 95); B8.6 (mark 99); B8.9 (mark 102) | scales; whether the car notifies |
+| [ ] | P17 | P | heading, altitude, service due | B8.3 (mark 96); B8.7 (mark 100) | whether they arrive |
+| [ ] | X1 | X | f30 with 'Change with the drive mode' off | B6.8 (mark 81); B6.9 (mark 82); B6.11 (mark 84); B6.12 (mark 85); B6.13 (mark 86); B6.14 (mark 87) | whether the rebuild brings the black box |
 | [ ] | X2 | X | Twin Dial with a clear layer over the gear letter (mbCover) | pass 2 (a build) | rectangle versus pixels |
 | [ ] | X3 | X | f30 with the gap cut out of its layer rectangles (mbGap) | pass 2 (a build) | the fix |
 | [ ] | X4 | X | forced rebuilds (mbRebuild) | pass 2 (a build) | theory (b) |
 | [ ] | X5 | X | f30 textures sceneTex r8 then etc2 | pass 2 (a build) | picture quality; etc2rgb draws |
 | [ ] | X6 | X | the map window W1 / W2, mapWindowForce, mapSlots | pass 2 (a build) | BMW's map shows through on the panel's own id |
 | [ ] | X7 | X | f30's message release (config.ccActive.release) | pass 2 (a build) | the window closes, never over a listed message |
-| [ ] | X8 | X | message timing: Twin Dial 0.1.1's card, slow-motion video | pass 2 (a build); B6.10 (mark 80) | 150 ms covers the upload |
-| [ ] | X9 | X | band level and night palette: one fixed-exposure photo against the bench render | B6.6 (mark 76); B6.7 (mark 77) | the level; night multipliers |
-| [ ] | X10 | X | the KOMBI accepts the round-3 shaders (0.1.1 installed) | pass 2 (a build); B8.8 (mark 98) | no reset; no missing layer |
-| [ ] | X11 | X | switch-time film through a mode switch on each app | B6.9 (mark 79) | MP's predictions |
-| [ ] | F1 | F | Is BMW's own speed-limit sign visible with Twin Dial up | B8.8 (mark 98) | SV covers it |
-| [ ] | F2 | F | Side lamps and belt lamp with Twin Dial up (belt unbuckled, a door open) | B0.3; B6.2 (mark 72); B6.3 (mark 73); B6.4 (mark 74) | safety check before driving |
-| [ ] | F3 | F | A close photo of a dial's lower ends | B6.5 (mark 75) | inner-ring finding |
-| [ ] | F4 | F | Photo 16 of OVERLAY-PHOTO-PROTOCOL: which side lamps BMW draws over us | not in this session: needs the diag_overlay build (OVERLAY-PHOTO-PROTOCOL photo 16), which was never built; B6.4 (mark 74) | six of seven lamps unknown |
-| [ ] | F5 | F | Does the HUD show the cruise set speed | B8.4 (mark 94); B8.5 (mark 95) | urgency of SPEC-R3 9 |
-| [ ] | F6 | F | The stock cluster's own cruise and limiter display (Twin Dial off) | B8.4 (mark 94); B8.5 (mark 95) | model for our symbols |
-| [ ] | F7 | F | The stock cluster's media line, phone list and call pop-up (Twin Dial off) | B4.2 (mark 49); B4.6 (mark 53); B4.12 (mark 59); B5.3 (mark 61); B5.5 (mark 63) | what the RIC services draw |
-| [ ] | F8 | F | Ukrainian message names: the longest the car shows | B3.3 (mark 41) | the card's three lines |
+| [ ] | X8 | X | message timing: Twin Dial 0.1.1's card, slow-motion video | pass 2 (a build); B6.10 (mark 83) | 150 ms covers the upload |
+| [ ] | X9 | X | band level and night palette: one fixed-exposure photo against the bench render | B6.6 (mark 79); B6.7 (mark 80) | the level; night multipliers |
+| [ ] | X10 | X | the KOMBI accepts the round-3 shaders (0.1.1 installed) | pass 2 (a build); B8.8 (mark 101) | no reset; no missing layer |
+| [ ] | X11 | X | switch-time film through a mode switch on each app | B6.9 (mark 82) | MP's predictions |
+| [ ] | F1 | F | Is BMW's own speed-limit sign visible with Twin Dial up | B8.8 (mark 101) | SV covers it |
+| [ ] | F2 | F | Side lamps and belt lamp with Twin Dial up (belt unbuckled, a door open) | B0.3; B6.2 (mark 75); B6.3 (mark 76); B6.4 (mark 77) | safety check before driving |
+| [ ] | F3 | F | A close photo of a dial's lower ends | B6.5 (mark 78) | inner-ring finding |
+| [ ] | F4 | F | Photo 16 of OVERLAY-PHOTO-PROTOCOL: which side lamps BMW draws over us | not in this session: needs the diag_overlay build (OVERLAY-PHOTO-PROTOCOL photo 16), which was never built; B6.4 (mark 77) | six of seven lamps unknown |
+| [ ] | F5 | F | Does the HUD show the cruise set speed | B8.4 (mark 97); B8.5 (mark 98) | urgency of SPEC-R3 9 |
+| [ ] | F6 | F | The stock cluster's own cruise and limiter display (Twin Dial off) | B8.4 (mark 97); B8.5 (mark 98) | model for our symbols |
+| [ ] | F7 | F | The stock cluster's media line, phone list and call pop-up (Twin Dial off) | B4.2 (mark 52); B4.6 (mark 56); B4.12 (mark 62); B5.3 (mark 64); B5.5 (mark 66) | what the RIC services draw |
+| [ ] | F8 | F | Ukrainian message names: the longest the car shows | B3.3 (mark 44) | the card's three lines |
 <!-- END:checklist -->

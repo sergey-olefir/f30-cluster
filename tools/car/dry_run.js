@@ -66,10 +66,12 @@ function gen(ref, v, name, depth) {
     return null;
 }
 const fieldsFor = (item, tag) => TABLE.fields.filter((f) => f.item === item && f.tag === tag);
-function valuesFor(f, n) {
+// an invented stalk byte: one bit per switch (the car's real layout is the question; the dry run only needs one that is consistent)
+const CLASS_BIT = { 'bc-short': 0x10, 'bc-long': 0x10, 'msg-bc-short': 0x10, 'stalk-left': 0x01, 'stalk-right': 0x02, 'stalk-hold-left': 0x05, 'stalk-flash': 0x08 };
+function valuesFor(f, n, cls) {
     const ref = CAT.interfaces[f.interface].fields[f.field].dataRef;
     if (f.formatter === 'bits') {            // a stalk byte: a bit goes up, then down (one press), so two lines per press
-        const m = DT[base(ref)].members[0].name, bit = 1 << (n % 6 + 2);
+        const m = DT[base(ref)].members[0].name, bit = CLASS_BIT[cls] || 0x80;
         const o = (x) => { const y = {}; y[m] = x; return y; };
         return [o(bit), o(0)];
     }
@@ -152,7 +154,7 @@ async function main() {
                     const fs_ = fieldsFor(pair[0], pair[1]);
                     for (const f of fs_) {
                         feedCount[key] = (feedCount[key] || 0) + 1;
-                        const vals = valuesFor(f, feedCount[key]);
+                        const vals = valuesFor(f, feedCount[key], s.class);
                         for (const v of vals) {
                             send({ t: 'fake', v: { feed: { iface: f.interface, field: f.field, value: v } } });
                             linesHere++;
@@ -200,15 +202,30 @@ async function main() {
         console.log(r2.stdout.split('\n').slice(-3).join('\n'));
 
         console.log('5. the parser (package CL)');
-        const parser = path.join(ROOT, 'tools', 'car', 'parse_logs.py'), collect = path.join(OUT, 'collection');
-        if (fs.existsSync(parser) && fs.existsSync(path.join(__dirname, 'dry_run_layout.js'))) {
-            // a collection folder as collect.sh makes it (CL's README names the layout)
-            const layout = require('./dry_run_layout.js');
-            layout.make(collect, logPath, ROOT);
-            const p = spawnSync('python3', ['-I', parser, collect], { encoding: 'utf8', cwd: ROOT });
+        const parser = path.join(ROOT, 'tools', 'car', 'parse_logs.py');
+        if (fs.existsSync(parser)) {
+            // a session folder in the collector's layout (CL: reference/car/<date>/apps/<app>/<app>.log + settings.json, session.json)
+            const sess = path.join(OUT, 'collection', '2026-11-18-dry');
+            fs.mkdirSync(path.join(sess, 'apps', 'signal_probe'), { recursive: true });
+            fs.copyFileSync(logPath, path.join(sess, 'apps', 'signal_probe', 'signal_probe.log'));
+            const st = path.join(dataDir, 'settings.json');
+            if (fs.existsSync(st)) fs.copyFileSync(st, path.join(sess, 'apps', 'signal_probe', 'settings.json'));
+            fs.writeFileSync(path.join(sess, 'session.json'), JSON.stringify({ dryRun: true, apps: { signal_probe: { version: spec.version } } }, null, 1) + '\n');
+            const ans = path.join(OUT, 'answers.json');
+            const p = spawnSync('python3', ['-I', parser, sess, '--out', ans, '--markers', path.join(ROOT, 'design', 'car', 'markers.json'), '--print'], { encoding: 'utf8', cwd: ROOT });
             fs.writeFileSync(path.join(OUT, 'parser.txt'), p.stdout + p.stderr);
-            ok(p.status === 0, 'parse_logs.py ran on the dry-run collection (exit ' + p.status + ')');
-        } else console.log('  skip: the parser (tools/car/parse_logs.py, package CL) or its collection layout is not here');
+            ok(p.status === 0 && fs.existsSync(ans), 'parse_logs.py ran on the dry-run session folder with the marker map (exit ' + p.status + ')');
+            if (fs.existsSync(ans)) {
+                const A = JSON.parse(fs.readFileSync(ans, 'utf8'));
+                const items = A.items || A.answers || A;
+                const get = (id) => (Array.isArray(items) ? items.find((x) => x.id === id) : items[id]) || null;
+                const p13 = get('P13');
+                console.log('  parser P13: ' + JSON.stringify(p13 && (p13.decided || p13)).slice(0, 400));
+                ok(!!p13, 'the parser has a P13 answer');
+                const tk = p13 && p13.decided && p13.decided.tab_key;
+                ok(!!(tk && tk.kind === 'stalk-bit'), 'the parser finds the stalk bit from the bc-short windows (the dry run presses one bit per short press: ' + JSON.stringify(tk) + ')');
+            }
+        } else console.log('  skip: tools/car/parse_logs.py (package CL) is not here');
     } finally { try { child.kill('SIGKILL'); } catch (e) { /* gone */ } }
     console.log('\n' + passed + ' passed, ' + failed + ' failed');
     process.exit(failed ? 1 : 0);
