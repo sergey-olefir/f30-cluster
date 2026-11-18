@@ -200,7 +200,7 @@ def main():
     if a.dials and os.path.exists(a.dials):
         img = load(a.dials)
         for side, pid in (('tach', 'A02'), ('speed', 'A03')):
-            for rid in ('06', '02'):
+            for rid in ('06',):
                 m, o, r = compare_dial(img, rid, side)
                 m['deliberate'] = ['our needle and hub text differ (masked)', "06's red arc ends at 125.2 deg, ours at 143.6",
                                    'our numeral shadow is SD\'s measured model, 06\'s is the photograph', 'our small numerals 10 30 50 70 160 200 240 280 only']

@@ -326,7 +326,7 @@ def find_sign(img):
     """The speed-limit sign by its red ring near (1300, 672): the measured centre and outer radius, or None."""
     x0, y0, x1, y1 = 1230, 600, 1370, 720
     sub = img[y0:y1, x0:x1].astype(int)
-    red = (sub[..., 0] > 170) & (sub[..., 1] < 70) & (sub[..., 2] < 70)
+    red = np.abs(sub - np.array([214, 13, 18])).max(-1) <= 28           # the ring's red; the severity rule (176, 7, 30) is not it
     if red.sum() < 150:
         return None
     ys, xs = np.nonzero(red)
@@ -334,6 +334,54 @@ def find_sign(img):
     r = max(xs.max() - xs.min() + 1, ys.max() - ys.min() + 1) / 2.0
     box = (cx - r, cy - r, cx + r, cy + r)
     return dict(centre=(round(cx, 2), round(cy, 2)), r=round(r, 2), box=box)
+
+
+COOLANT_ICON = (1526, 579, 1554, 609)
+GREEN = (60, 155, 34)
+
+
+def nearest_ink(img, box, skip_boxes=(), reach=60, level=40):
+    """Distance (px) from `box` to the nearest non-black pixel of the picture outside `box` and `skip_boxes` (each grown by 2 px)."""
+    x0, y0 = int(max(0, box[0] - reach)), int(max(0, box[1] - reach))
+    x1, y1 = int(min(W, box[2] + reach)), int(min(H, box[3] + reach))
+    sub = img[y0:y1, x0:x1].max(-1) > level
+    ys, xs = np.mgrid[y0:y1, x0:x1]
+    px, py = xs + 0.5, ys + 0.5
+    for b in [box] + list(skip_boxes):
+        sub &= ~((px >= b[0] - 2) & (px <= b[2] + 2) & (py >= b[1] - 2) & (py <= b[3] + 2))
+    if not sub.any():
+        return None
+    dx = np.maximum(np.maximum(box[0] - px[sub], px[sub] - box[2]), 0)
+    dy = np.maximum(np.maximum(box[1] - py[sub], py[sub] - box[3]), 0)
+    return float(np.hypot(dx, dy).min())
+
+
+def ck_readout(img, ink):
+    """The cruise / limiter readout in the speedometer hub (SPEC-R3 §9): the green or grey set speed with its unit and the
+    function's symbol. Found by the recorded ink (text in green (60, 155, 34) or grey 227 at Saira 40 / Noto 19, the icon beside
+    it). Reports the union box, its clearance to the G20's black box, to the gear gap, and to the nearest ink of ours (pixels)."""
+    its = [it for it in design_ink(ink) if it['kind'] == 'text' and 1440 <= it['box'][0] <= 1660 and 480 <= it['box'][1] <= 660
+           and it.get('fill') in (list(GREEN), [227, 227, 227]) and it.get('size') in (40.0, 19.0)]
+    if not its:
+        return dict(status='skip', reason='no cruise / limiter readout in the picture')
+    num = max(its, key=lambda i: i['size'])
+    nb = num['box']
+    icons = [it for it in design_ink(ink) if it['kind'] == 'icon' and 1440 <= it['box'][0] <= 1660 and 480 <= it['box'][1] <= 660
+             and all(abs(a - b) > 3 for a, b in zip(it['box'], COOLANT_ICON)) and abs(box_centre(it['box'])[1] - box_centre(nb)[1]) <= 30]
+    boxes = [i['box'] for i in its] + [i['box'] for i in icons]
+    u = (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
+    others = [it for it in design_ink(ink) if it['box'] not in boxes and math.hypot(*(a - b for a, b in zip(box_centre(it['box']), CS))) <= R]
+    gaps = [(gap(u, o['box']), o.get('text') or o['kind']) for o in others]
+    g_ink, who = min(gaps)
+    near = nearest_ink(img, u, reach=50)
+    disc = (1540.0, 528.0, 45.0)
+    far = max(math.hypot(x - disc[0], y - disc[1]) for x in (u[0], u[2]) for y in (u[1], u[3]))
+    bad = g_ink < 4.0 or (near is not None and near < 4.0)
+    return dict(status='fail' if bad else 'note', readout_box=[round(v, 1) for v in u], items=[i.get('text') or 'symbol' for i in its] + ['symbol'] * len(icons),
+                to_black_box_px=round(gap(u, BLACK_BOX), 1), to_gear_gap_px=round(gap(u, GEAR_GAP), 1),
+                to_nearest_ink_box_px=round(g_ink, 1), nearest_ink_box=who, to_nearest_ink_pixel_px=None if near is None else round(near, 1),
+                farthest_corner_from_disc_centre_px=round(far, 1), disc_r_spec=45.0,
+                rule='>= 4 px to every other ink of the dial; the spec quotes 14 px (disc to ink) and 52 px (disc to the black box)')
 
 
 def ck_sign(img, ink):
@@ -410,12 +458,14 @@ def ck_markers(img, meta):
 
 
 # ---- driver ----------------------------------------------------------------------------------------------------------------
-ANNOTATED = re.compile(r'(_keepouts|protected_zones|_annot|_sheet|/close/|/v1/|/lookC/|/_work/|scratch|/pub/)')
+ANNOTATED = re.compile(r'(black_box|_annotated|clearances_annotated|_keepouts|protected_zones|_annot|_sheet|/close/|/v1/|/lookC/|/_work/|scratch|/pub/)')
 ID_OK = re.compile(r'^(A0\d|L\d\d|C0\d|C10|T\d\d|T\d+_|1[A-K]|2[A-K]|2S[1-6]|2T|3[A-G]|4[A-J]|5[A-K]|Z0[1-4]|C00|[0-8]\d_|Lab?|La|Lb|Lc|Ld|\d[A-M]_|V\d|S\d)')
 
 SETS = {
     'r3': dict(root=os.path.join(MOCK, 'r3'), ink=os.path.join(KC, '_work', 'ink_r3.json'), ink_prefix='r3/', index=os.path.join(MOCK, 'r3', 'index.json')),
     'ka': dict(root=os.path.join(MOCK, 'r3b', 'ka'), ink=os.path.join(KC, '_work', 'ink_ka.json'), ink_prefix='r3b/ka/', index=os.path.join(MOCK, 'r3b', 'ka', 'index.json')),
+    'kbf': dict(root=os.path.join(KC, 'kb_final'), ink=os.path.join(KC, '_work', 'ink_kbf.json'), ink_prefix='r3b/kb/', index=os.path.join(KC, 'kb_final', 'index.json')),
+    'z': dict(root=os.path.join(KC, 'z'), ink=os.path.join(KC, '_work', 'ink_z.json'), ink_prefix='r3b/kc/z/', index=os.path.join(KC, 'z', 'index.json')),
     'kb': dict(root=os.path.join(MOCK, 'r3b', 'kb'), ink=os.path.join(KC, '_work', 'ink_kb.json'), ink_prefix='r3b/kb/', index=os.path.join(MOCK, 'r3b', 'kb', 'index.json')),
 }
 
@@ -429,6 +479,16 @@ def index_meta(index_path):
             meta[it['file']] = it
         elif isinstance(it, dict) and 'id' in it:
             meta[it.get('file') or it['id']] = it
+    import re as _re
+    for k, v in meta.items():
+        base = os.path.basename(k)
+        ml, ms = _re.search(r'limit_?(\d+)', base), _re.search(r'set_?(\d+)', base)
+        if 'equals_limit' in base:
+            ml = ms = _re.search(r'(\d+)\.png', base)
+        if ml and v.get('limit') is None:
+            v['limit'] = int(ml.group(1))
+        if ms and v.get('set') is None:
+            v['set'] = int(ms.group(1))
     return meta
 
 
@@ -436,7 +496,7 @@ def pictures(root, top_only=False):
     out = []
     for dp, dn, fn in os.walk(root):
         rel = os.path.relpath(dp, root)
-        dn[:] = [d for d in dn if d not in ('v1', 'lookC', 'close', '_work', 'pub', 'sheets')]
+        dn[:] = [d for d in dn if d not in ('v1', 'lookC', 'close', 'closeup', 'annotated', '_work', 'pub', 'sheets')]
         if top_only and rel != '.':
             continue
         for f in sorted(fn):
@@ -489,6 +549,7 @@ def run_set(name):
         sign_res, sign = ck_sign(img, ink or [])
         checks['sign_clearances'] = sign_res
         checks['markers'] = ck_markers(img, m)
+        checks['readout'] = ck_readout(img, ink) if ink is not None else dict(status='skip', reason='no ink record')
         if ink is not None:
             checks['cells'] = ck_cells(img, ink)
             checks['centre_page'] = ck_centre(img, ink, pid)
