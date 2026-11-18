@@ -27,7 +27,8 @@
     "menu.js",
     "gallery.js",
     "previews.js",
-    "mb_exp.js"
+    "mb_exp.js",
+    "diag_settings.js"
   ],
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {
@@ -197,6 +198,11 @@
           "Settings"
         ],
         [
+          "button",
+          "BTN_DIAG",
+          "Діагностика"
+        ],
+        [
           "text",
           "STATUS_LOG",
           ""
@@ -213,7 +219,45 @@
         "g20",
         "inComfort",
         "inSport",
-        "inEco"
+        "inEco",
+        "diagRelease",
+        "diagDisplayed",
+        "diagSceneTex",
+        "diagMbGap",
+        "diagMbCover",
+        "diagMbRebuild"
+      ]
+    },
+    {
+      "name": "DIAG",
+      "kind": "menu",
+      "title": "Діагностика",
+      "settings": "placed",
+      "items": [
+        [
+          "setting",
+          "diagRelease"
+        ],
+        [
+          "setting",
+          "diagDisplayed"
+        ],
+        [
+          "setting",
+          "diagSceneTex"
+        ],
+        [
+          "setting",
+          "diagMbGap"
+        ],
+        [
+          "setting",
+          "diagMbCover"
+        ],
+        [
+          "setting",
+          "diagMbRebuild"
+        ]
       ]
     },
     {
@@ -580,6 +624,94 @@
           "Off"
         ]
       ]
+    },
+    {
+      "key": "diagRelease",
+      "label": "Release a stuck check-control message",
+      "type": "bool",
+      "default": false,
+      "_about": "B7, the Діагностика menu (shared/diag_settings.js; what each setting writes is config.diag, all off = the keys as app.json has them): research3/MC config.ccActive.release"
+    },
+    {
+      "key": "diagDisplayed",
+      "label": "Second 'shown now' witness (after restart)",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Off"
+        ],
+        [
+          "log",
+          "Log only"
+        ],
+        [
+          "use",
+          "Use it"
+        ]
+      ],
+      "_about": "research3/MC config.ccDisplayed: subscribed to at start only, so the choice takes effect after the app restarts"
+    },
+    {
+      "key": "diagSceneTex",
+      "label": "Lighter scene textures",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Off"
+        ],
+        [
+          "r8",
+          "R8"
+        ],
+        [
+          "etc2",
+          "ETC2"
+        ]
+      ],
+      "_about": "research3/MT config.sceneTex: the scene textures are dropped and the theme is built again when it changes"
+    },
+    {
+      "key": "diagMbGap",
+      "label": "No layer over the gear gap",
+      "type": "bool",
+      "default": false,
+      "_about": "research3/MB config.mbGap: every layer rectangle is cut round the gear letter's gap (the layout is built again)"
+    },
+    {
+      "key": "diagMbCover",
+      "label": "Cover over the gear gap",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Off"
+        ],
+        [
+          "clear",
+          "Clear"
+        ],
+        [
+          "black",
+          "Black"
+        ],
+        [
+          "grey",
+          "Grey"
+        ]
+      ],
+      "_about": "research3/MB config.mbCover: one more layer over the gear gap (the layout is built again)"
+    },
+    {
+      "key": "diagMbRebuild",
+      "label": "Rebuild on every drive-mode change",
+      "type": "bool",
+      "default": false,
+      "_about": "research3/MB config.mbRebuild.onMode"
     }
   ],
   "config": {
@@ -1025,6 +1157,25 @@
         "2. Navigation map data, only while a route runs: de.bmw.infotainment.navigation.guiding.GuidanceEventList queryContent, union members speedLimit / speedLimitAssist and speedLimitAssistInfo on each event (cauliflowermossgrape/idrive7-apps apps/redline/nav.js line 134, kit/tools/fixtures/redline-nav-carplay-2026-11-09.txt: speedLimitAssistInfo {nil: NO_VALUE} on a CarPlay route). Upcoming limits, not the sign in force; a method, not a field: not usable as config.limit as is.",
         "3. Unverified guess: a field of the cluster's or the HUD's own data (KombiIF / KombiInterface_2 already carry the cluster's range and check-control list). If the head unit draws BMW's HUD content (cluster-render's HUD target suggests it can), its catalogue must carry the sign; the name is unknown."
       ]
+    },
+    "diag": {
+      "_about": "B7, the Діагностика menu (screen DIAG, shared/diag_settings.js): each setting writes the config paths named here while it is ON (all OFF by default = the keys as this file has them, put back when a setting goes off). A path is dotted; a choice lists its options. diagDisplayed 'use' also sets ccActive.release.witness (the witness only decides through the release). The values are the ones the research3 reports and their test files name (tools/research3/mb/exp/f30-gap.json).",
+      "settings": {
+        "diagRelease": { "on": { "ccActive.release": { "deferValues": [65535], "leftList": true } } },
+        "diagDisplayed": {
+          "options": {
+            "log": { "ccDisplayed": { "iface": "de.bmw.infotainment.vehicle.Vehicle2", "field": "statusDisplayedCCMessage", "numberPath": ["statusNumberCheckControlMessageDisplay"], "use": false } },
+            "use": {
+              "ccDisplayed": { "iface": "de.bmw.infotainment.vehicle.Vehicle2", "field": "statusDisplayedCCMessage", "numberPath": ["statusNumberCheckControlMessageDisplay"], "use": true },
+              "ccActive.release.witness": true
+            }
+          }
+        },
+        "diagSceneTex": { "options": { "r8": { "sceneTex": "r8" }, "etc2": { "sceneTex": "etc2" } } },
+        "diagMbGap": { "on": { "mbGap": { "rect": [1380, 660, 1460, 720], "conn": { "row_b2": 3, "msa": 3, "oilt": 3 }, "z": { "oilt": 2 } } } },
+        "diagMbCover": { "options": { "clear": { "mbCover": "clear" }, "black": { "mbCover": "black" }, "grey": { "mbCover": "grey" } } },
+        "diagMbRebuild": { "on": { "mbRebuild": { "onMode": true } } }
+      }
     },
     "menu": {
       "hideModeRows": true,

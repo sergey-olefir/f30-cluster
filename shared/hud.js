@@ -236,6 +236,7 @@ const Car = require('./kit/car');
 const Waze = require('./waze');
 const Screen = require('./screen');
 const Runs = require('./runs');
+const DiagSettings = require('./diag_settings');     // b7: the Діагностика settings and the start-up hold
 // twin_dial: the {{td:...}} tokens, the centre pages' cycle, the extra signals (shared/twin_tokens.js). Only twin_dial packs the
 // file, so for every other app it is simply absent (null) and none of the twin_dial hooks below does anything.
 let twin = null;
@@ -796,6 +797,9 @@ class HudApp {
         this.log = ctx.log;
         this._migrateComfortMap();
         this.config = (ctx.spec && ctx.spec.config) || {};
+        // b7: the Діагностика settings (config.diag) overlay `config` here, before anything reads it; all off = app.json's own keys (shared/diag_settings.js)
+        this.diag = null;
+        try { this.diag = DiagSettings.Diag.create(this.config, ctx.settings, this.log); } catch (e) { this.log.warn('diag: settings overlay not applied: ' + (e && e.message || e)); }
         // ---- research3 MB: the black-box experiments (shared/mb_exp.js), inert unless app.json config names one ----
         this.mbExp = null;
         if (this.config.mbGap || this.config.mbCover || this.config.mbRebuild) {
@@ -890,6 +894,7 @@ class HudApp {
         this._setupVehicleData();
         this.layouts.onChange(() => { this.seeThru = {}; this._rebuild(); });
         ctx.settings.onChange((key) => {
+            if (this.diag && this.diag.has(key)) { this._guard('diag', () => this.diag.changed(this, key)); return; }     // b7: the Діагностика settings, in place or by their own rebuild
             if (LOOK_KEYS.indexOf(key) >= 0) this._kombiClear();      // 0.7.13: a theme picked: the guard lets it try again
             // a theme or layout picked anywhere (the page asks first, the kit's All settings list doesn't): no longer stepping aside
             if (LOOK_KEYS.indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
@@ -1751,6 +1756,7 @@ class HudApp {
         clearInterval(this.statusTimer);
         clearInterval(this.dmeTimer);
         clearInterval(this.mbTimer);     // research3 MB
+        DiagSettings.release(this);      // b7: the start-up hold's timer, the diagnostics' timers
         this.needleHalt = true; this._guard('needles', () => this._needleApply());     // 0.7.14: the needle timer off
         this._perfStop();       // package P
         clearTimeout(this.probeSymT); this.probeSymT = null;        // probes, item 3 (0.7.18)
@@ -3250,6 +3256,7 @@ class HudApp {
 
     _rebuildInner() {
         if (!this.client.ready) return; // the 'ready' handler calls us again
+        if (DiagSettings.hold(this)) return;     // b7: config.startupHold: the first build waits for the car's first time zone and message list (shared/diag_settings.js)
         this._rowCheck();               // bottom row: an element with no signal behind it goes back to BMW's
         // package X: who draws the row in the layout being built (_rowSync rebuilds when that changes), and nothing of
         // our message is on the screen until its new layer has been painted

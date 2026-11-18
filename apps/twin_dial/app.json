@@ -31,7 +31,8 @@
     "twin_tokens.js",
     "twin_cc.js",
     "twin_probe.js",
-    "mb_exp.js"
+    "mb_exp.js",
+    "diag_settings.js"
   ],
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {
@@ -145,6 +146,11 @@
           "Settings"
         ],
         [
+          "button",
+          "BTN_DIAG",
+          "Діагностика"
+        ],
+        [
           "text",
           "STATUS_LOG",
           ""
@@ -157,7 +163,40 @@
       "title": "Settings",
       "skip": [
         "hudLayout",
-        "centre"
+        "centre",
+        "diagRelease",
+        "diagMapWindow",
+        "diagMapForce",
+        "diagMapSlots",
+        "diagSilent"
+      ]
+    },
+    {
+      "name": "DIAG",
+      "kind": "menu",
+      "title": "Діагностика",
+      "settings": "placed",
+      "items": [
+        [
+          "setting",
+          "diagRelease"
+        ],
+        [
+          "setting",
+          "diagMapWindow"
+        ],
+        [
+          "setting",
+          "diagMapForce"
+        ],
+        [
+          "setting",
+          "diagMapSlots"
+        ],
+        [
+          "setting",
+          "diagSilent"
+        ]
       ]
     }
   ],
@@ -278,6 +317,55 @@
           "On"
         ]
       ]
+    },
+    {
+      "key": "diagRelease",
+      "label": "Закривати повідомлення, що застрягло",
+      "type": "bool",
+      "default": false,
+      "_about": "B7, the Діагностика menu (shared/diag_settings.js; what each one writes is config.diag): off = app.json's own key. Release of a stuck message: config.ccActive.release"
+    },
+    {
+      "key": "diagMapWindow",
+      "label": "Вікно карти",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "вимк."
+        ],
+        [
+          "W1",
+          "W1"
+        ],
+        [
+          "W2",
+          "W2"
+        ]
+      ],
+      "_about": "config.mapWindow (SPEC-R3 4.5): the map window on tab 5, an experiment"
+    },
+    {
+      "key": "diagMapForce",
+      "label": "Примусове вікно карти",
+      "type": "bool",
+      "default": false,
+      "_about": "config.mapForce: the map window opens on tab 5 whatever the presence rule says (for the photograph on the car)"
+    },
+    {
+      "key": "diagMapSlots",
+      "label": "Журнал слотів карти",
+      "type": "bool",
+      "default": false,
+      "_about": "config.mapSlots: log cluster-render's slot rows (numbers only), the proof the app can read them"
+    },
+    {
+      "key": "diagSilent",
+      "label": "Журнал полів, що мовчать",
+      "type": "bool",
+      "default": false,
+      "_about": "an action, no config key: the silent-fields summary of research3/MK once now and every 5 minutes while on"
     }
   ],
   "config": {
@@ -494,6 +582,23 @@
       "hideModeRows": false,
       "hideRowUnlessG20": false,
       "comment": "shared/menu.js: twin_dial has neither the drive-mode rows nor the G20 toggle"
+    },
+    "startupHold": {
+      "ms": 1000,
+      "_about": "B7 (research3/MP): the FIRST build waits until the car's first time zone and first message list are in, or ms after cluster-render is ready, whichever is first: one build at start instead of three (shared/diag_settings.js hold; the bytes before and after are in docs/twin-dial/R3B-INTEGRATION.md). Remove the key (or set false) for the three builds of 0.1.0."
+    },
+    "diag": {
+      "_about": "B7, the Діагностика menu (screen DIAG, shared/diag_settings.js): each setting writes the config paths named here while it is ON (every one is OFF by default = app.json's own key, put back when it goes off); a path is dotted; a choice lists its options. The changes apply in place (no layout rebuild).",
+      "settings": {
+        "diagRelease": {
+          "on": { "ccActive.release": { "deferValues": [65535], "leftList": true } },
+          "_about": "the narrowed release of research3/MC for Twin Dial (SPEC-R3 5.4 step 7: only a number that was set before its entry left the list may be released; 65535 deferred): package B3 owns the engine side, this is the value the setting switches on"
+        },
+        "diagMapWindow": { "options": { "W1": { "mapWindow": "W1" }, "W2": { "mapWindow": "W2" } } },
+        "diagMapForce": { "on": { "mapForce": true } },
+        "diagMapSlots": { "on": { "mapSlots": true } },
+        "diagSilent": { "act": "silent" }
+      }
     }
   }
 }
