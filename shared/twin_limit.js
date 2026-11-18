@@ -226,7 +226,7 @@ function fontOf(names) {
     return null;
 }
 /** Saira digits: the exact slot first (Saira 40 for the readout, if B6 bakes it), else a bigger one scaled down (crisp). */
-const SAIRA_DIGITS = [['td_tach', 57], ['td_gear', 64], ['td_big', 92]];
+const SAIRA_DIGITS = [['td_tach', 57], ['td_big', 92]];     // integration (B7): td_gear retired
 
 /**
  * The figure of the sign: `text` in Saira. B6's own atlases when they are there (td_sign: one or two digits, cap 23 px;

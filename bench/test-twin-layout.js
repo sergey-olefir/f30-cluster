@@ -197,7 +197,7 @@ const fontBase = (n) => (FONTDIR ? atlas(n).baseline : snap[n].baseline);
 const fontCell = (n) => (FONTDIR ? atlas(n).cellHeight : snap[n].cellHeight);
 const baseOf = (w) => w.y + fontBase(w.font);
 const centreX = (w) => w.x + w.w / 2;
-const SAIRA = ['td_big', 'td_clock', 'td_gear', 'td_label', 'td_prog', 'td_dist', 'td_cru', 'td_sign', 'td_sign3', 'td_tach', 'td_scale_l', 'td_scale_s'];
+const SAIRA = ['td_big', 'td_clock', 'td_label', 'td_prog', 'td_dist', 'td_cru', 'td_sign', 'td_sign3', 'td_tach', 'td_scale_l', 'td_scale_s'];
 {
     const T = (id) => byId[id];
     // [id, baseline, x of the text's anchor (centre / left / right edge by its align), font, role]
