@@ -20,20 +20,23 @@ name, the labels (caption, data status as coloured dots) are on the contact shee
 
 ## The dials
 
-The base look is `look_06` with SPEC-R3 §2's corrections. **Status of the dial drawing in these pictures:** K1's `look_06` from
-`mockup.py` (band B, red bezel arc to 143.6°, rings ending together, thin inner ring, strip line, needle shadow, gear in the hub's centre)
-with **SD's measured drop shadow** ((+0.010, +0.012) R, σ 0.008, 0.35) in place of K1's by-eye shadow. Not yet in this render, because they are
-KA's (package KA owns `mockup.py` in this round): SD's *outline* term of the numeral shadow (0.008 R at 0.75), the 0.010 R major lines across the band,
-the exact hub numbers (gear cap 0.222 R at (0, 0), program Saira 24 at +0.209 R). `pages.py` takes the dials through `KB_DIALS` / `KB_LOOK` and
-was tried against KA's working copy (`r3b_base`): same page code, no change needed. The final render is made with KA's published module (the
-READY note names it); see the line at the end of this report for which render the folder holds.
+**Final render: KA's dials.** All 72 entries were re-rendered with KA's committed `mockup.py` (branch `twin-r3b/ka`, commit `1805b14`, read from its
+worktree) and its look **`r3b_base`** (`KB_DIALS=<that mockup.py>`): look_06 with SPEC-R3 §2's corrections, SD's full numeral shadow (outline and
+drop), the 0.010 R major lines and the exact hub numbers (gear cap 0.222 R at (0, 0), program Saira 24 at +0.209 R). `pages.py` uses KA's look by default as soon
+as `mockup.py` has it (merged); with K1's `mockup.py` alone it falls back to `look_06` with SD's drop shadow only (provisional, the first render of this folder).
+Night (`r3b_night`) is KC's. `index.json` `dials` / `look` name what was used.
+
+**The speed-limit sign (a) is on every single frame**, drawn by KA's `draw_sign` (centre (1300, 672), r 33, limit 90 at 87 km/h, the same as KA's L07), on the
+bottom row's right end on every tab and kept when BMW's panel window is open (SPEC-R3 §8: it is not a "cc:" layer). The limit marker on the scale and the red
+strip are not drawn in KB's pictures (they are KA's L-series and KC's Z-series). The sign adds no pixel to a keep-out and no ink box nearer than 6 px (`index.json`).
+Data status `limit: unseen` is on every frame.
 
 ## What changed against K2's set (`r3/` → `r3b/kb/`)
 
 | Area | K2 | 3b |
 |---|---|---|
 | Numbering | `T1_sel1`, `1A_clock`, `2J_opening` … | the ids of MOCKUP-SPEC-R3B §4 (`T01`, `1B`, `2S2` …); `index.json` carries `k2_equivalent` for every picture that has one |
-| Dials | `r3_fixed` (wedge, flat numerals) | `look_06` with SD's shadow (above) |
+| Dials | `r3_fixed` (wedge, flat numerals) | KA's `r3b_base` (above); the speed-limit sign on every frame |
 | Tab 1's label | placed by the text's advance boxes: the unit sat 11 px further out, 3 px from the separator | placed by ink as SF's budget says (icon ink 18 px in, 36 px wide, 7 px, value, 6 px, unit, 14 px): "412 км" has 14.3 px to the separator; the unit is dropped when it would come nearer than 14 px (T07) |
 | Bottom row | one line on tab ≥ 2 | unchanged (clock 846, temperature 1153, baseline 655); the rule takes the severity colour while our card covers BMW's panel |
 | Technical data | tab-4 alternative V1 | page of tab 1 (1D–1G), the bar's fill red *from the warning value* (K2 painted the whole track tail); the tyres page 1H / 1I |
@@ -158,9 +161,9 @@ Overlap = how far ink goes past where it may be; every figure is read from the r
 7. **Tab 3's cell:** "Радіо Приклад" (245 px) fills the media cell to 10.2 px from the separator; the 320 px cell holds about 19 letters of Noto 34 before "…" (T09). Longer names are cut, as intended.
 8. **06's separators are not ours.** SF measured 06's at x 786.6 / 854.1 / 1165.2 / 1232.7 (u = −0.578, −0.353, 0.684, 0.909); the spec's 780 / 848 / 1168 / 1237 are 6.6, 6.1, 2.8 and 4.3 px away
    (06's tab 1 is 168.6 px wide, ours 162; the media cell 311 against 320). T06 draws our lines through the rectified 06 so this is visible. No change proposed: the 06 numbers belong to its own icon and text sizes.
-9. **One pixel of the dials inside a lamp hole.** (1774, 207), value 142, lies in the 3 px-dilated side-lamp rectangle [1774, 176, 1873, 208] in every picture (the speedometer's bezel at the rectangle's corner). The undilated hole is clear;
+9. **One pixel of the dials inside a lamp hole.** (1774, 207), value 142, lies in the 3 px-dilated side-lamp rectangle [1774, 176, 1873, 208] in every single frame, with KA's dials as with K1's (the speedometer's bezel at the rectangle's corner). The undilated hole is clear;
    the audit of `index.json` (`keepout_nonblack_px`) counts it. It is the dial drawing's, not a page's; KA / KC should decide whether the dilated rectangle is the test.
-   Belt group and gear gap: 0 non-black pixels in all 69 single frames.
+   Belt group and gear gap: 0 non-black pixels in every single frame, sign included.
 10. **Sequence frame 5 (back on tab 2) looks like frame 2.** At the moment the card is painted again the window is still open (it may close only 150 ms after our card is on screen), so the two frames are the same picture; the
     difference is the history (frame 4 before it). After 150 ms it is frame 3. Drawn as the spec lists it, labelled `window`.
 11. **The new pictograms are first drawings.** The roundabout by exit number (a fixed angle per exit 1…6: 90°, 45°, 0°, −45°, −90°, −135° counter-clockwise, my proposal, SN fixes none) has a visible join between the stem and the ring at 36 px; the
@@ -176,7 +179,7 @@ Overlap = how far ink goes past where it may be; every figure is read from the r
 
 ## Not done / limits
 
-- Day only; night is KC's. No picture draws the speed-limit sign, the limit marker, the red strip or cruise: they are KA's and meet the pages in KC's `Z01`–`Z04`.
+- Day only; night is KC's. No picture draws the limit marker, the red strip or cruise (only the sign): they are KA's and meet the pages in KC's `Z01`–`Z04`.
 - The map is a drawn stand-in (labelled "заглушка мапи: не реальне місце"), the texts are invented, the names neutral ("Абонент Приклад").
 - Reference pixels appear only in `T06_bar_measured.png` (rectified 06 under our bar, labelled "not ours"); the file is git-ignored.
-- Which dial render the folder holds: see the READY note in `bake/work/twin-dial/r3b/pub/KB/`.
+- The folder holds the render with KA's dials (`r3b_base`, commit `1805b14`) and the sign.

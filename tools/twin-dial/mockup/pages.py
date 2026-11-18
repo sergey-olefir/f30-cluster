@@ -49,7 +49,15 @@ W, H, SS = M.W, M.H, M.SS
 CT, CS, R = M.CT, M.CS, M.R
 OUT = os.environ.get('KB_OUT') or os.path.join(WORK, 'mockup', 'r3b', 'kb')
 PUB = os.path.join(WORK, 'r3', 'pub')
-LOOK_NAME = os.environ.get('KB_LOOK', 'look_06')
+def _default_look():
+    try:
+        M.look_named('r3b_base')                 # KA's base look (merged mockup.py): final dials
+        return 'r3b_base'
+    except Exception:
+        return 'look_06'                         # K1's look: provisional dials
+
+
+LOOK_NAME = os.environ.get('KB_LOOK') or _default_look()
 
 WHITE, GREEN = (255, 255, 255), (60, 155, 34)
 GREY2, GREY_DIM, GREY_MID = (227, 227, 227), (150, 150, 150), (170, 170, 170)
@@ -82,6 +90,7 @@ BROW = (629, 1291, 612.4, 614.6, 231)
 BASE1, BASE2 = 655, 702
 KOMBI_BOX_G20 = (1420, 320, 1611, 440)
 MAP_BOX10, MAP_BOX90 = (700, 138, 1217, 594), (794, 209, 1150, 557)
+SIGN_VALUE = 90                                  # the sign every frame carries (limit 90 at 87 km/h, as KA's L07); drawn by KA's mockup.draw_sign
 KEEP = {'belt_group': (497, 660, 688, 720), 'gear_gap': (1380, 660, 1460, 720)}
 
 SEV = {'red': dict(cell=(176, 7, 30), sym=WHITE, rule=(176, 7, 30), icon=(218, 16, 48)),
@@ -120,6 +129,7 @@ STATUS = {
     'road': ('arrives', 'Guidance.currentRoad (text drawn, never logged)'),
     'dart': ('after probe', 'Guidance.conclusiveDart, currentLaneGuiding, nextDestinationInfo (P12)'),
     'map': ('after probe', "BMW's map through our window: experiment mapWindow, not yet photographed on the panel's own id"),
+    'limit': ('unseen', 'TrafficSignDisplayControl.displaySpeedLimitAndNoPassingRestriction: declared, not yet shown by a log line (SPEC-R3 §8)'),
     'setting': ('certain', 'our own setting (Технічні дані / центр / таба)'),
 }
 STATUS_COL = {'arrives': (60, 175, 60), 'certain': (60, 175, 60), 'derived': (120, 160, 230), 'unseen': (240, 170, 10),
@@ -285,12 +295,14 @@ class Page:
                 cv.speed_digits = speed
                 cv.dial(CT, 'tach', rpm)
                 cv.dial(CS, 'speed', speed)
-            _BASE[key] = (cv.img.copy(), list(cv.icons))
-        img, icons = _BASE[key]
+            _BASE[key] = (cv.img.copy(), list(cv.icons), list(getattr(cv, 'sdf', [])), getattr(cv, 'night', False))
+        img, icons, dsdf, night = _BASE[key]
         self.cv = M.Canvas.__new__(M.Canvas)
         self.cv.img = img.copy()
         self.cv.d = ImageDraw.Draw(self.cv.img)
         self.cv.icons = list(icons)
+        self.cv.sdf = list(dsdf)                 # KA's Canvas: icons the dials queued from the step format
+        self.cv.night = night
         self.cv.speed_digits = speed
         self.speed = speed
         self.sdf = []
@@ -354,6 +366,11 @@ class Page:
     def finish(self):
         out = self.cv.img.resize((W, H), Image.LANCZOS)
         M.paste_icons(out, self.cv.icons)
+        if self.cv.sdf:                          # the dials' own SDF icons (KA's pictos_r3b)
+            sys.path.insert(0, os.path.dirname(DIALS_PATH))
+            import pictos_r3b
+            for name, size, cx, cy, color, alpha in self.cv.sdf:
+                pictos_r3b.paste_sdf(out, name, size, cx, cy, color, alpha)
         for name, size, cx, cy, color, alpha in self.sdf:
             paste_sdf(out, name, size, cx, cy, color, alpha)
         return out
@@ -952,7 +969,7 @@ def edges(p):
 
 
 def shot(folder, pid, name, caption, keys, sel=1, page=None, cs=None, warn=None, s2=False, bottom=None, sev_rule=None, window=False,
-         speed=87.0, rpm=2.4, extra=None, sel_colour=None, close=None, sec='', variant=None, t1mode='spec', annotate=None, save=True):
+         speed=87.0, rpm=2.4, extra=None, sel_colour=None, close=None, sec='', variant=None, t1mode='spec', annotate=None, save=True, sign=True):
     p = Page(speed, rpm)
     tab_bar(p, cs or cells(), sel, sel_colour, warn, s2, t1mode)
     if page:
@@ -965,6 +982,13 @@ def shot(folder, pid, name, caption, keys, sel=1, page=None, cs=None, warn=None,
         bottom_row(p, bottom or (2 if sel == 1 else 1), sev_rule if sev_rule not in (None, 'auto') else None)
     if extra:
         extra(p)
+    if sign and hasattr(M, 'draw_sign'):          # SPEC-R3 §8 (a): the sign sits at the bottom row's right end on every tab, window open or not
+        box = M.draw_sign(p.cv, M.Limit('limit', SIGN_VALUE))
+        p.g = 'sign'
+        if box:
+            p._rec('shape', 'speed-limit sign', box)
+        p.g = 'page'
+        keys = list(keys) + ['limit']
     img = p.finish()
     if not save:
         return img, p
