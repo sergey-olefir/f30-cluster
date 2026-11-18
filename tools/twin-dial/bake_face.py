@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Twin Dial baked dial faces (package R2-A2, SPEC §4, §5, §13.3).
+"""Twin Dial baked dial faces (package R2-A2, SPEC §4, §5, §13.3; re-baked for 0.1.1 by package B1 to SPEC-R3 §2).
 
     UV_CACHE_DIR=bake/work/.uvcache uv run -q --no-project --with numpy --with pillow python -I tools/twin-dial/bake_face.py
         [--stretch 1.06] [--out DIR] [--no-record] [--preview DIR]
@@ -11,13 +11,18 @@ from the numbers of design/twin-dial/{vd,vg} and SPEC §4-§5 (the mockup, tools
 numbers; no reference image or photo is an input). Fonts: Saira (scale numerals, OFF) and Noto Sans (unit labels, bar ends).
 
 What the face carries (one byte per pixel = the NEUTRAL sRGB code, i.e. the G channel of the picture):
-  the grey scale band with its two-way shading, the lighter tick strip (137), the near-black major lines (6), minor and major
-  ticks (255), the numerals (255), the bezel ring open at the bottom (255), the inner rim (255), "OFF" (tachometer), the static
-  hub labels (unit labels, 227 / 255), the five empty bar segments (47) with their end labels and the icon under the dial.
-What it does NOT carry (the shader draws it from uniforms): the red wedge from the redline, the red recolouring of the ticks
-and numerals past it, the bar fills, the needle, READY, gear, drive program, the digital speed.
+  the grey scale band, look B (SPEC-R3 §2.2: Y = 0.0188 exp(4.60 (rho - 0.60)) exp(0.59 (1 - cos th)), rho 0.5795-0.9375, to
+  143.0 deg), the numerals' outline and drop shadow (SD's measured model, SHADOW_MODEL, darkening the band in linear light),
+  the tick strip (G code 109) with its bright outer line (G 124, rho 0.924-0.934), the near-black major lines (6, width
+  0.010 R), minor and major ticks (255), the numerals (255), the bezel ring open at the bottom (255, to 143.6 deg), the thin
+  inner rim (255, rho 0.544, width 0.008, to 143.55 deg), "OFF" (tachometer), the static hub labels (unit labels, 227 / 255;
+  the tachometer's "1/хв x 1000" at +0.40 R), the five empty bar segments (47) with their end labels and the icon under the dial.
+What it does NOT carry (the shader draws it from uniforms): the red arc on the bezel from the redline (SPEC-R3 §2.5), the red
+recolouring of the ticks and numerals past it, the limit and cruise markers and the red tick strip (§8, §9), the bar fills, the
+needle, READY, gear (the hub's centre stays free of ink: the gear is GPU text), drive program, the digital speed.
 The colour is made by the shader from the region ranges in the regions JSON; tools/twin-dial/face_shade.py is the numpy
-reference of that decode (the tint rule is documented there and in the regions JSON "decode").
+reference of that decode (the tint rule is documented there and in the regions JSON "decode"). Band tint (linear light,
+applied by the shader on the neutral G code): 0.76 : 1 : 1.064 (TINT); the strip's own tint follows from its sRGB colour.
 
 Geometry (panel px): the face of a dial is the rectangle [cx - 308, 90, cx + 308, 650]; the dial centre is at face px
 (308, 310) = panel (cx, 400). R = 300 px.
@@ -43,11 +48,18 @@ RECT_Y0 = 90
 CENTRES = {'tach': 380.0, 'speed': 1540.0}             # panel x of the centres (y 400)
 NAMES = {'tach': 'face_tacho', 'speed': 'face_speedo'}
 SWEEP = 125.0
-BAND_RHO = (0.580, 0.940)
-STRIP_RHO = (0.893, 0.940)
-BAND_ANG = 144.0
-TINT = (0.96, 1.0, 1.08)                               # VC: the cool tint of the band (R, G, B) in linear light
-STRIP_CODE, LINE_CODE, FRAME_CODE, GREY_TEXT = 137, 6, 47, 227   # neutral (G) codes of palette §7.1, SPEC §5.1
+# SPEC-R3 §2.1-§2.4 (SD dials_v2.json, K1 looks.json look_06)
+BAND_RHO = (0.5795, 0.9375)                            # was 0.580-0.940
+STRIP_RHO = (0.893, 0.9375)
+BAND_ANG = 143.0                                       # the band's one radial cut (was 144.0)
+BEZEL_HALF, BEZEL_ANG = 0.0105, 143.6                  # the bezel ends 0.6 deg past the band, cut square
+BAND_LAW = (0.0188, 4.60, 0.59)                        # K1's fit on rectified 06: Y = k exp(a (rho - 0.60)) exp(b (1 - cos th)), linear light
+TINT = (0.76, 1.0, 1.064)                              # linear light R : G : B, applied by the shader (was 0.96 : 1 : 1.08)
+STRIP_RGB, LINE_RGB = (98, 109, 111), (115, 124, 126)  # sRGB: strip body and its bright outer line (SPEC-R3 §2.3)
+LINE_RHO = (0.924, 0.934)
+STRIP_CODE, LINE_CODE, FRAME_CODE, GREY_TEXT = STRIP_RGB[1], 6, 47, 227   # neutral (G) codes; LINE_CODE is the major lines'
+STRIP_LINE_CODE = LINE_RGB[1]
+MAJOR_W = 0.010                                        # major lines across the band, R (was 0.0075 in 0.1.0: 0.006 drawn)
 NEEDLE = [(0.465, 0.030), (0.56, 0.039), (0.68, 0.032), (0.77, 0.022), (0.86, 0.020), (0.89, 0.016), (0.99, 0.004)]
 TACH_REST = -135.0                                     # SPEC §4: "OFF" position
 SPD_LARGE = (0, 20, 40, 60, 80, 100, 140, 180, 220, 260, 300)
@@ -56,7 +68,17 @@ SPD_LARGE_PX, SPD_SMALL_PX = 28, 18
 SPD_LARGE_RHO, SPD_SMALL_RHO = 0.76, 0.78
 TACH_PX, TACH_RHO = 57, 0.745
 MIN_GAP = 4.0                                          # SPEC §5.3: px of black between a numeral and anything else
-RIM_RHO, RIM_HALF, RIM_OPEN = 0.545, 0.008, 150.0      # D2; the mockup leaves the rim open below +-150 deg
+RIM_RHO, RIM_HALF, RIM_ANG = 0.544, 0.004, 143.55      # SPEC-R3 §2.1: thin (0.008), ends with the band and the bezel
+UNIT_Y = 0.40                                          # the tachometer's "1/хв x 1000" (R, below the centre; was -0.04)
+# The numerals' shadow (SPEC-R3 §2.4): the band is darkened in LINEAR light, D = 1 - Y / Y_band. 'SD' = SD's measured model
+# (dials_v2.json numeral_shadow_06.model_for_drawing): a dark outline hugging the ink, 0.008 R wide at 0.75, and a soft drop
+# shadow, the ink moved by (+0.010, +0.012) R, blurred sigma 0.008 R, 0.35. 'K1' = K1's by-eye model of picture 80 (no outline;
+# (0.008, 0.020) R, sigma 0.009, 0.70). None: no shadow. One constant: the owner's choice after the mockup round is one word.
+SHADOW_MODEL = 'SD'
+SHADOW_MODELS = {
+    'SD': {'outline': (0.008, 0.75), 'drop': (0.010, 0.012, 0.008, 0.35)},
+    'K1': {'outline': None, 'drop': (0.008, 0.020, 0.009, 0.70)},
+}
 BAR = {'y': 0.73, 'x0': -0.42, 'x1': 0.42, 'half': 0.0125, 'segs': 5, 'gap': 4}
 
 
@@ -72,6 +94,17 @@ def tach_angle(k):
 def srgb(L):
     L = np.clip(L, 0, 1)
     return np.where(L <= 0.0031308, 12.92 * L, 1.055 * np.power(L, 1 / 2.4) - 0.055) * 255.0
+
+
+def lin1(c):                                           # sRGB code -> linear light
+    v = c / 255.0
+    return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+
+
+def tint_of(rgb):
+    """The linear-light R : G : B ratios of an sRGB colour against its own G (what the shader multiplies the neutral G code by)."""
+    g = lin1(rgb[1])
+    return (lin1(rgb[0]) / g, 1.0, lin1(rgb[2]) / g)
 
 
 def polar(a, r):                                       # face px of (angle deg cw from 12, radius px) about the centre
@@ -124,8 +157,9 @@ class Face:
             self.tick_d.polygon(self.P(pts), fill=255)
 
     def band(self):
-        """The grey band and the lighter tick strip: SPEC §7.1 Y = 0.010 exp(7.5 (rho - 0.60)) exp(-0.85 (cos th - 1)),
-        in the neutral (G) channel; the cool tint is the shader's (face_shade.py)."""
+        """The grey band and the lighter tick strip, SPEC-R3 §2.2-§2.3, in the neutral (G) channel: look B, Y = k exp(a (rho - 0.60))
+        exp(b (1 - cos th)) in linear light (BAND_LAW), the strip's body at G code 109 and its bright outer line at 124; the cool
+        tint (0.76 : 1 : 1.064) and the strip's own tint are the shader's (face_shade.py)."""
         n = int(2 * R * SS)
         x0, y0 = int(round((CX - R) * SS)), int(round((CY - R) * SS))
         ys, xs = np.mgrid[0:n, 0:n]
@@ -133,12 +167,60 @@ class Face:
         rr = np.hypot(X, Y) / R
         ang = np.degrees(np.arctan2(X, -Y))
         cosT = -Y / np.maximum(rr * R, 1e-6)
-        y = 0.010 * np.exp(7.5 * (rr - 0.60)) * np.exp(-0.85 * (cosT - 1.0))
+        k, la, lb = BAND_LAW
+        y = k * np.exp(la * (rr - 0.60)) * np.exp(lb * (1.0 - cosT))
         code = srgb(y)
         code[(rr >= STRIP_RHO[0]) & (rr <= STRIP_RHO[1])] = STRIP_CODE
+        code[(rr >= LINE_RHO[0]) & (rr <= LINE_RHO[1])] = STRIP_LINE_CODE
         m = (np.abs(ang) <= BAND_ANG) & (rr >= BAND_RHO[0]) & (rr <= BAND_RHO[1])
         self.img.paste(Image.fromarray(np.clip(np.round(code), 0, 255).astype(np.uint8)), (x0, y0),
                        Image.fromarray((m * 255).astype(np.uint8)))
+
+    def numeral_ink(self, items):
+        """The union of the numerals' ink at SS x as a float 0..1 array of the whole canvas (the same placement as ctext)."""
+        full = Image.new('L', (FW * SS, FH * SS), 0)
+        for xy, s, f, stretch in items:
+            m = self.text_mask(s, f, stretch)
+            x0 = int(round(xy[0] * SS - m.width / 2.0))
+            y0 = int(round(xy[1] * SS - m.height / 2.0))
+            full.paste(255, (x0, y0), m)
+        return np.asarray(full, np.float64) / 255.0
+
+    def shadow(self, ink, model):
+        """SPEC-R3 §2.4: darken the band around and under the numerals in LINEAR light, Y' = Y (1 - D), only on the band proper
+        (rho below the strip, inside the band's radii), never on ink. D = 1 - (1 - D_outline)(1 - D_drop)."""
+        if not model:
+            return
+        from PIL import ImageFilter
+        H, W = ink.shape
+        D = np.zeros((H, W))
+        ol = model.get('outline')
+        if ol:
+            r = ol[0] * R * SS                                     # px at SS x
+            ri = int(math.ceil(r)) + 1
+            yy, xx = np.mgrid[-ri:ri + 1, -ri:ri + 1]
+            disk = (np.hypot(xx, yy) <= r).astype(np.float64)
+            # the dilation of the ink by the disc: an FFT convolution, thresholded at half a px of overlap, then softened
+            fh, fw = H + 2 * ri + 1, W + 2 * ri + 1
+            conv = np.fft.irfft2(np.fft.rfft2(ink, (fh, fw)) * np.fft.rfft2(disk, (fh, fw)), (fh, fw))[ri:ri + H, ri:ri + W]
+            dil = Image.fromarray(((conv >= 0.5) * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.5 * SS))
+            D = 1.0 - (1.0 - D) * (1.0 - ol[1] * np.asarray(dil, np.float64) / 255.0)
+        dr = model.get('drop')
+        if dr:
+            dx, dy, sigma, strength = dr
+            sh = np.roll(np.roll(ink, int(round(dy * R * SS)), axis=0), int(round(dx * R * SS)), axis=1)
+            blur = Image.fromarray(np.clip(np.round(sh * 255), 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(sigma * R * SS))
+            D = 1.0 - (1.0 - D) * (1.0 - strength * np.asarray(blur, np.float64) / 255.0)
+        a = np.asarray(self.img, np.float64)
+        ys, xs = np.mgrid[0:H, 0:W]
+        rr = np.hypot((xs + 0.5) / SS - CX, (ys + 0.5) / SS - CY) / R
+        where = (rr >= BAND_RHO[0]) & (rr < STRIP_RHO[0]) & (ink < 0.5)
+        lin = np.where(a / 255.0 <= 0.04045, a / 255.0 / 12.92, np.power((a / 255.0 + 0.055) / 1.055, 2.4))
+        lin = lin * (1.0 - D)
+        out = np.where(where, np.clip(np.round(srgb(lin)), 0, 255), a)
+        self.img = Image.fromarray(out.astype(np.uint8))
+        self.d = ImageDraw.Draw(self.img)
+        self.shadow_stats = {'max_darkening': round(float(D[where].max()), 3), 'mean_darkening_where_dark': round(float(D[where][D[where] > 0.05].mean()), 3) if (D[where] > 0.05).any() else 0.0}
 
     def text_mask(self, s, f, stretch):
         """The ink of s as an 'L' mask at SS x, widened by stretch; its centre is the ink's centre."""
@@ -203,31 +285,35 @@ def draw_face(kind, stretch):
         minors = [spd_angle(v) for v in list(range(5, 100, 5)) + list(range(110, 300, 10))
                   if v not in (20, 40, 60, 80, 100, 140, 180, 220, 260)]
     for _, a in majors:                                # the near-black line across the band at each major mark
-        fc.poly(radial_pts(a, BAND_RHO[0] * R, STRIP_RHO[0] * R, 0.006 * R), LINE_CODE)
-    for a in minors:
-        fc.poly(radial_pts(a, 0.896 * R, 0.934 * R, 0.012 * R), 255, ticks=True)
-    for _, a in majors:
-        fc.poly(radial_pts(a, 0.896 * R, 0.934 * R, 0.018 * R), 255, ticks=True)
+        fc.poly(radial_pts(a, BAND_RHO[0] * R, STRIP_RHO[0] * R, MAJOR_W * R), LINE_CODE)
     dropped = []
     numerals = []
+    items = []                                         # (centre, text, font, label) of every scale numeral, drawn after the ticks
     if kind == 'tach':
         for k in range(1, 9):
-            xy = polar(tach_angle(k), TACH_RHO * R)
-            fc.ctext(xy, str(k), bc.font('saira', TACH_PX, SS), stretch=stretch, label=('numeral', k, tach_angle(k)))
+            items.append((polar(tach_angle(k), TACH_RHO * R), str(k), bc.font('saira', TACH_PX, SS), ('numeral', k, tach_angle(k))))
             numerals.append((k, tach_angle(k), TACH_RHO, TACH_PX))
     else:
         nums, dropped = speed_numerals(stretch)
         for v, xy, px, rho in nums:
-            fc.ctext(xy, str(v), bc.font('saira', px, SS), stretch=stretch, label=('numeral', v, spd_angle(v)))
+            items.append((xy, str(v), bc.font('saira', px, SS), ('numeral', v, spd_angle(v))))
             numerals.append((v, spd_angle(v), rho, px))
-    # the bezel ring, open at the bottom, and the inner disc's rim (open below +-150 deg, as the mockup)
-    fc.poly(sector_pts(R - 0.0105 * R, R + 0.0105 * R, -BAND_ANG, BAND_ANG), 255)
-    fc.poly(sector_pts(RIM_RHO * R - RIM_HALF * R, RIM_RHO * R + RIM_HALF * R, -RIM_OPEN, RIM_OPEN), 255)
+    # the numerals' outline and drop shadow darken the band (linear light) before any ink is drawn
+    fc.shadow(fc.numeral_ink([(xy, t, f, stretch) for xy, t, f, _ in items]), SHADOW_MODELS.get(SHADOW_MODEL))
+    for a in minors:
+        fc.poly(radial_pts(a, 0.896 * R, 0.934 * R, 0.012 * R), 255, ticks=True)
+    for _, a in majors:
+        fc.poly(radial_pts(a, 0.896 * R, 0.934 * R, 0.018 * R), 255, ticks=True)
+    for xy, t, f, lab in items:
+        fc.ctext(xy, t, f, stretch=stretch, label=lab)
+    # the bezel ring, open at the bottom, and the inner disc's rim: all three rings end on one radial line (SPEC-R3 §2.1)
+    fc.poly(sector_pts(R - BEZEL_HALF * R, R + BEZEL_HALF * R, -BEZEL_ANG, BEZEL_ANG), 255)
+    fc.poly(sector_pts(RIM_RHO * R - RIM_HALF * R, RIM_RHO * R + RIM_HALF * R, -RIM_ANG, RIM_ANG), 255)
     # static hub labels (SPEC §5.1 / §5.2); READY, gear, program and the digital speed are dynamic and NOT baked
     if kind == 'speed':
         fc.ctext((CX, CY + 0.24 * R), 'км/год', bc.font('notosans', 21, SS), 255)
     else:
-        fc.ctext((CX, CY - 0.04 * R), '1/хв × 1000', bc.font('notosans', 20, SS), GREY_TEXT)
+        fc.ctext((CX, CY + UNIT_Y * R), '1/хв × 1000', bc.font('notosans', 20, SS), GREY_TEXT)
         fc.ctext((CX - 0.56 * R, CY + 0.58 * R), 'OFF', bc.font('saira', 22, SS), 255, stretch=stretch, label=('label', 'OFF', None))
     # the bar under the dial: five empty segments (the fills are the shader's), end labels, the icon under the dial
     y = CY + BAR['y'] * R
@@ -378,22 +464,31 @@ def regions(kind, fc, numerals, dropped, segs, panel_x0, stretch, clear):
             'ink_code': 255, 'note': 'ticks, numerals, bezel, rim, OFF, end labels, icon: 255 (their antialiased edges blend with the band)'},
         'regions': {
             'band': {'rho': list(BAND_RHO), 'theta_abs_max_deg': BAND_ANG, 'tint_linear': list(TINT), 'tint_fade_g': [0.70, 0.80],
+                     'law': {'k': BAND_LAW[0], 'a': BAND_LAW[1], 'b': BAND_LAW[2], 'what': 'Y = k exp(a (rho - 0.60)) exp(b (1 - cos theta)), linear light, the G channel (look B)'},
                      'what': 'the grey scale band (ticks strip included). Only here the tint is applied.'},
-            'strip': {'rho': list(STRIP_RHO), 'code': STRIP_CODE, 'what': 'the tick strip, constant 137 inside band.theta_abs_max'},
+            'strip': {'rho': list(STRIP_RHO), 'code': STRIP_CODE, 'srgb': list(STRIP_RGB), 'tint_linear': [round(v, 4) for v in tint_of(STRIP_RGB)],
+                      'what': 'the tick strip, constant G code inside band.theta_abs_max; its own tint (the strip is not the band\'s)'},
+            'strip_line': {'rho': list(LINE_RHO), 'code': STRIP_LINE_CODE, 'srgb': list(LINE_RGB), 'tint_linear': [round(v, 4) for v in tint_of(LINE_RGB)],
+                           'what': 'the bright line at the strip\'s outer edge (+45 % over the strip in linear light)'},
+            'major_lines': {'rho': [BAND_RHO[0], STRIP_RHO[0]], 'width_R': MAJOR_W, 'code': LINE_CODE, 'what': 'near-black lines across the band at each major mark'},
             'ink_numerals': {'rho': [round(n_lo, 4), round(n_hi, 4)], 'what': 'every numeral ink pixel lies in this radius range'},
-            'ink_ticks': {'rho': [0.896, 0.934], 'what': 'ticks (the strip is 0.893-0.940)'},
-            'bezel': {'rho': [1.0 - 0.0105, 1.0 + 0.0105], 'theta_abs_max_deg': BAND_ANG, 'what': 'white ring, open at the bottom'},
-            'rim': {'rho': [RIM_RHO - RIM_HALF, RIM_RHO + RIM_HALF], 'theta_abs_max_deg': RIM_OPEN,
-                    'what': 'white inner rim (D2); open below +-150 deg as the mockup (SPEC §4 says a full circle: lead decides)'},
+            'ink_ticks': {'rho': [0.896, 0.934], 'what': 'ticks (the strip is 0.893-0.9375)'},
+            'bezel': {'rho': [1.0 - BEZEL_HALF, 1.0 + BEZEL_HALF], 'theta_abs_max_deg': BEZEL_ANG, 'what': 'white ring, open at the bottom, cut square at 143.6 (the tachometer\'s red arc recolours it from the redline)'},
+            'rim': {'rho': [RIM_RHO - RIM_HALF, RIM_RHO + RIM_HALF], 'theta_abs_max_deg': RIM_ANG,
+                    'what': 'white inner rim, width 0.008 R, ends with the band and the bezel (SPEC-R3 §2.1)'},
         },
         'decode': {
             'band_tint': 'inside regions.band: c_k = max(0, (k_k)^(1/2.4) * (g + 0.055) - 0.055), k = tint_linear * bandGain, '
                          'per channel; w = 1 - smoothstep(0.70, 0.80, g); rgb = mix(vec3(g), c, w). Outside the band rgb = g. '
-                         'Exact for sRGB(Y*k) while Y*k > 0.0031308 (everywhere in the band at bandGain >= 0.6).',
-            'night': 'multiply in linear light on top (SPEC §7.2), per material class: region + luma class',
-            'ink_alpha': 'for recolouring ink (red numerals/ticks, ink over the wedge): alpha = clamp((g - t0) / (1 - t0), 0, 1), '
-                         't0 = 0.54 for rho in ink_ticks (the strip is the constant 137/255, exact), t0 = see ink_alpha_t0_numerals',
+                         'On the strip the tint is regions.strip.tint_linear (and regions.strip_line.tint_linear on its bright line), '
+                         'not the band\'s. Exact for sRGB(Y*k) while Y*k > 0.0031308 (everywhere in the band at bandGain >= 0.6).',
+            'night': 'multiply in linear light on top (SPEC-R3 §6), per material class: region + luma class',
+            'red_arc': 'tachometer: the bezel ink (rho >= 0.975) from theta(redline) to red_arc.to_deg is sRGB (210, 20, 21); the band stays grey',
+            'ink_alpha': 'red numerals and ticks recolour ink only: the shader mixes the ink colour by the face byte (smoothstep(0.70, 0.85, g))',
         },
+        'numeral_shadow': {'model': SHADOW_MODEL, 'params': SHADOW_MODELS.get(SHADOW_MODEL),
+                           'stats': getattr(fc, 'shadow_stats', None),
+                           'what': 'baked: the band\'s codes under and around each numeral are darkened in linear light, Y\' = Y (1 - D)'},
         'numerals': nums, 'ticks': ticks,
         'bar': {'y_px': round(y_bar, 3), 'x0_px': round(CX + BAR['x0'] * R, 3), 'x1_px': round(CX + BAR['x1'] * R, 3),
                 'segments': BAR['segs'], 'gap_px': BAR['gap'], 'half_thickness_px': round(BAR['half'] * R, 3),
@@ -401,16 +496,19 @@ def regions(kind, fc, numerals, dropped, segs, panel_x0, stretch, clear):
                 'what': 'frames of the 5 segments are baked (47); the shader fills them (white; first segment red on reserve; last red when hot)'},
         'icons': [{'name': n, 'size': s, 'centre_panel_px': [round(cx, 2), round(cy, 2)]} for n, s, cx, cy, _ in fc.icons],
         'baked_text': (['км/год (unit, Noto 21, code 255)', 'C', 'H'] if kind == 'speed'
-                       else ['1/хв × 1000 (unit, Noto 20, code 227)', 'OFF (Saira 22)', '0', '1/1']),
-        'not_baked': ['needle', 'wedge', 'bar fills', 'READY', 'gear', 'drive program', 'digital speed'],
+                       else ['1/хв × 1000 (unit, Noto 20, code 227, centre (0, +%.2f) R)' % UNIT_Y, 'OFF (Saira 22)', '0', '1/1']),
+        'not_baked': ['needle', 'red arc', 'limit and cruise markers', 'red tick strip', 'bar fills', 'READY', 'gear', 'drive program',
+                      'digital speed', 'cruise readout'],
         'clearance': clear, 'dropped_small_numerals': [{'value': v, 'gap_px': g} for v, g in dropped],
     }
     if kind == 'tach':
         d['scale'] = {'law': '0..8 x 1000 rpm linear, 0 at -125 deg, 8 at +125 deg (31.25 deg per 1000)', 'sweep_deg': SWEEP,
                       'rest_deg': TACH_REST, 'rest_note': 'OFF position, engine not running'}
-        d['wedge'] = {'rho': [0.550, 0.940], 'from': 'redline rpm (setting)', 'to_deg': SWEEP, 'edges': 'radial',
-                      'fill_rgb': [78, 2, 11], 'outline_rgb': [218, 16, 48], 'outline_px': 3, 'edge_inset_deg': 0.9,
-                      'what': 'drawn by the shader; inside it the face band is replaced and only face INK is kept (alpha rule)'}
+        d['red_arc'] = {'rho': [0.990, 1.010], 'from': 'redline rpm (setting)', 'to_deg': BEZEL_ANG, 'srgb': [210, 20, 21],
+                        'what': 'drawn by the shader (u_red.x .. u_red.w) over the bezel ink; no wedge (SPEC-R3 §2.5)'}
+        d['hub'] = {'gear': {'centre_R': [0.0, 0.0], 'cap_R': 0.222, 'what': 'GPU text; the face keeps the centre free of ink'},
+                    'program': {'centre_R': [0.0, 0.209], 'cap_R': 0.058}, 'ready': {'centre_R': [0.0, -0.29]},
+                    'unit': {'centre_R': [0.0, UNIT_Y], 'baked': True}}
         d['red_rules'] = {'ticks': 'red when theta >= theta(redline) - 0.45 deg (half the width of a tick), rho in regions.ink_ticks',
                           'numerals': 'a numeral is red when its value >= redline rounded up to 1000: red when theta >= '
                                       'theta(ceil(redline/1000) - 0.5), rho in regions.ink_numerals',
@@ -428,21 +526,19 @@ def bake(kind, stretch, out_dir, record=True):
     data = np.asarray(img, dtype=np.uint8)
     clear = clearance(fc)
     reg = regions(kind, fc, numerals, dropped, segs, panel_x0, stretch, clear)
-    # t0 for numerals: above the band's own code under the numerals at the wedge angles (0.30-0.50), see face_shade.py
-    reg['decode']['ink_alpha_t0_numerals'] = 0.52
     name = NAMES[kind]
     entry = {'kind': 'face', 'face': kind, 'centre': [CX, CY], 'R': R, 'rect': reg['rect_panel'], 'regions': name + '.regions.json'}
     path = os.path.join(out_dir, name + '.json')
     sha = bc.r8_scene(path, FW, FH, data.tobytes(), 'bilinear', entry,
-                      'package R2-A2: %s, drawn from SPEC numbers by tools/twin-dial/bake_face.py (Saira stretch %.2f); '
-                      'region ranges in %s.regions.json' % (name, stretch, name))
+                      'package R2-A2 / B1: %s, drawn from SPEC-R3 numbers by tools/twin-dial/bake_face.py (Saira stretch %.2f, shadow %s); '
+                      'region ranges in %s.regions.json' % (name, stretch, SHADOW_MODEL, name))
     with open(os.path.join(out_dir, name + '.regions.json'), 'w') as f:
         json.dump(reg, f, indent=1)
         f.write('\n')
     if record and os.path.abspath(out_dir) == os.path.abspath(bc.SCENE):
         bc.record(name, {'file': 'apps/twin_dial/hud/scene/' + name + '.json', 'regions': 'apps/twin_dial/hud/scene/' + name + '.regions.json',
-                         'w': FW, 'h': FH, 'format': 'r8', 'sha256_r8': sha, 'stretch_saira': stretch, 'fonts': bc.font_inputs(),
-                         'inputs': ['docs/twin-dial/SPEC.md §4, §5 (the numbers; design/twin-dial/vd/dials.json is their evidence)', 'design/twin-dial/vt/pictograms/baked/*.png',
+                         'w': FW, 'h': FH, 'format': 'r8', 'sha256_r8': sha, 'stretch_saira': stretch, 'shadow_model': SHADOW_MODEL, 'fonts': bc.font_inputs(),
+                         'inputs': ['docs/twin-dial/SPEC-R3.md §2 (the numbers; SD dials_v2.json and K1 looks.json are their evidence)', 'docs/twin-dial/SPEC.md §4, §5', 'design/twin-dial/vt/pictograms/baked/*.png',
                                     'tools/twin-dial/bake_face.py'],
                          'pixel_memory_MiB_counted_twice': round(FW * FH * 2 / 1048576.0, 3)})
     return img, data, reg, clear, dropped

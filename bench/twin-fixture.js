@@ -113,7 +113,7 @@ function layout(name, extra) {
     const back = (id, part, rect) => ({ id, type: 'tdback', part, x: rect[0], y: rect[1], w: rect[2] - rect[0], h: rect[3] - rect[1], z: 0, conn: 0, holes: holesFor(rect) });
     const L = back('bg_l', 'L', [0, 0, 1380, 720]);
     Object.assign(L, {
-        tab: { rect: [618, 127, 1302, 172], seps: [744, 812, 1168, 1237], rule: [171.2, 172.7], ramp: [0.002, 0.16], highlight: [744, 812] },
+        tab: { rect: [618, 127, 1302, 172], seps: [780, 848, 1168, 1237], rule: [170, 173], ramp: [0.002, 0.16], highlight: [744, 812] },     // twin_dial B1: SPEC-R3 3.1
         rules: [{ x0: 741, y0: 295.2, x1: 1180, y1: 296.7, role: 'rule' },
             { x0: 629, y0: 612.4, x1: 1292, y1: 614.6, role: 'rule', ours: { y0: 611, y1: 615, x1: 1291, role: 'severity' } }],
         panelMask: { tex: 'panel_mask', x: 694, y: 592, w: 536, h: 112 },
@@ -145,7 +145,9 @@ function makeRoot(dir, opts) {
     const b = "if (h === 'ccHold') ccHeld = true;";
     if (src.indexOf(a) < 0 || src.indexOf(b) < 0) throw new Error('twin-fixture: bench/run-app.js changed; patch points not found');
     src = src.replace(a, a + " statusFluidLevelFuelTankSpare: Math.round(num('spare', 3)),");
-    src = src.replace(b, "if (h.indexOf('twinCc:') === 0) { const p = h.slice(7).split(','); hud.twinCc = { state: p[0], severity: p[1] || null }; hud._twinSync(); }\n    else " + b);
+    // twin_dial B1: hooks for the selected tab, the speed-limit / cruise markers and the map window (state the engine reads, then its own resend)
+    const b1 = "if (h.indexOf('twinTab:') === 0) { hud.twinTab = Number(h.slice(8)); hud._twinSync(); }\n    else if (h.indexOf('twinMap:') === 0) { hud.twinMap = h.slice(8) || null; hud._twinSync(); }\n    else if (h.indexOf('twinMarks:') === 0) { const p = h.slice(10).split(','); hud.config.limit = { strip: p[5] || 'L1' }; hud.twinLim = { deg: Number(p[0]), state: Number(p[1]), warn: Number(p[2]) }; hud.twinCru = { deg: Number(p[3]), state: Number(p[4]) }; hud._twinMarks(); }\n    else ";
+    src = src.replace(b, "if (h.indexOf('twinCc:') === 0) { const p = h.slice(7).split(','); hud.twinCc = { state: p[0], severity: p[1] || null }; hud._twinSync(); }\n    else " + b1 + b);
     fs.writeFileSync(ra, src);
     ['shared', 'kit'].forEach((d) => fs.symlinkSync(path.join(REPO, d), path.join(dir, d)));
     const sdk = path.join(dir, 'oap-sdk');
