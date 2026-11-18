@@ -150,6 +150,11 @@ function unit() {
         ok(DS.hold(mk({})) === false, 'hold: no config.startupHold: never waits');
         let h = mk(Object.assign({ startupHold: { ms: 60000 } }, cfgBase));
         ok(DS.hold(h) === true && DS.waiting(h).join() === 'the time zone,the message list', 'hold: waits for the time zone and the message list');
+        // while the first build waits the engine reports the blind state, never "none" (test-twin-sim: no moment of "ready and none")
+        const hm = mk(Object.assign({ startupHold: { ms: 60000 } }, cfgBase), { twinMsg: {}, twinCc: { state: 'none', severity: null } });
+        DS.hold(hm);
+        ok(hm.twinCc.state === 'window', 'hold: while it waits, an engine with the message machine reports "window", not "none"');
+        DS.release(hm);
         h.tzCar = 120;
         ok(DS.hold(h) === true && DS.waiting(h).join() === 'the message list', 'hold: still waits for the list once the zone is in');
         h._ccWired = () => true;
