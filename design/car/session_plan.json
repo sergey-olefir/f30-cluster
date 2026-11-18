@@ -1,0 +1,2696 @@
+{
+ "_about": "The session plan: single source for docs/car/SESSION.uk.md (the owner, Ukrainian), the tick-box part of docs/car/RUNBOOK.md (the lead) and the dry run (tools/car/dry_run.js). Rendered by tools/car/make_session.py; the marks are numbered there, in order, from this file. A step with mark:false is not marked. 'expect' lists [item, field tag] pairs the probe must log between this step's mark and the next one (the dry run proves it; the tags follow CP's probe_fields.json). 'items' are register ids (design/car/register.json from CA, or the brief's section 3 until it is there). 'parked' false = a step done while the car moves (a passenger only, never the menu).",
+ "schema": 1,
+ "date": "2026-11-18",
+ "blocks": [
+  {
+   "id": "B0",
+   "title_uk": "Підготовка і перевірки безпеки",
+   "minutes": 20,
+   "engine": "off",
+   "cluster": "as-is",
+   "sets": [],
+   "passenger": false,
+   "intro_uk": "Авто стоїть просто неба, на рівному місці. Двигун ще не запускаємо. Спершу ведучий забирає логи в тому стані, в якому вони є зараз: нічого не вимикайте, поки він не скаже «логи зібрані».",
+   "lead": "Collect #0 (all logs, settings.json, cluster-render journal and status, installed versions and uids) BEFORE the owner touches anything; then confirm the probe app is installed and its log has the start line.",
+   "steps": [
+    {
+     "id": "B0.1",
+     "mark": false,
+     "items": [],
+     "lead": "collect #0",
+     "uk": "Поставте авто на рівному місці під відкритим небом, селектор у P, ручне гальмо. Двигун не запускайте. Ведучий збирає логи (це лише читання). Чекайте його «логи зібрані».",
+     "wait_uk": "до 5 хв",
+     "shoot_uk": ""
+    },
+    {
+     "id": "B0.2",
+     "mark": false,
+     "items": [],
+     "lead": "",
+     "uk": "Розкладіть на сидінні: телефон-1 (ваш, з музикою, CarPlay), телефон-2 (для дзвінків на авто), флешка з музикою, кабель CarPlay. Телефон для фото закріпіть у тримачі або на штативі так, щоб панель приладів була повністю в кадрі з місця водія. Папір і ручка для часу й чисел.",
+     "wait_uk": "",
+     "shoot_uk": ""
+    },
+    {
+     "id": "B0.3",
+     "mark": false,
+     "items": [
+      "F2"
+     ],
+     "lead": "",
+     "uk": "Перевірка ременя й дверей, ПЕРШ ніж їхати будь-куди. Увімкніть запалювання (кнопка Start БЕЗ гальма), ремінь водія не пристібайте, двері водія відчиніть. На панелі мають світитися лампа ременя і з'явитися повідомлення про двері. Це перевіряємо з тією панеллю, що зараз (f30_cluster).",
+     "wait_uk": "20 с",
+     "shoot_uk": "Кадр усієї панелі: лампа ременя і повідомлення про двері видно. Якщо їх НЕМАЄ - зупиніться й скажіть ведучому, далі не йдемо.",
+     "warn_uk": "Якщо лампи ременя або повідомлення немає: нічого не продовжуємо, ведучий вимикає наш застосунок."
+    },
+    {
+     "id": "B0.4",
+     "mark": false,
+     "items": [],
+     "lead": "record the owner's settings",
+     "uk": "ЗАПИШІТЬ, як було: у меню f30_cluster - Theme, «BMW's G20…», «Change with the drive mode»; у меню Twin Dial - Cluster. Сфотографуйте ці екрани, щоб після сесії повернути все як було.",
+     "wait_uk": "",
+     "shoot_uk": "Екрани налаштувань обох застосунків (читається текст)."
+    },
+    {
+     "id": "B0.5",
+     "mark": false,
+     "items": [],
+     "lead": "",
+     "uk": "Перейдіть на штатну панель BMW: у f30_cluster Theme = «Off (BMW's own cluster)», у Twin Dial Cluster = «Off (BMW's own cluster)». Зачекайте, поки панель стане штатною.",
+     "wait_uk": "до 30 с",
+     "shoot_uk": "Кадр штатної панелі (довідковий).",
+     "warn_uk": "Якщо панель стала чорною або застрягла на 30 с - скажіть ведучому. Самі нічого не перезапускайте."
+    },
+    {
+     "id": "B0.6",
+     "mark": true,
+     "items": [
+      "P0"
+     ],
+     "lead": "check the start line of the probe (version, sets) and the marker line",
+     "uk": "Відкрийте Signal Probe в меню iDrive (центральний екран). Переконайтеся, що жоден прапорець набору не поставлений. Натисніть «Позначка»: це пробна позначка №1. Скажіть ведучому: він підтвердить, що рядок «mark M1» з'явився в логу.",
+     "wait_uk": "до 1 хв",
+     "shoot_uk": "",
+     "expect": [],
+     "class": "test-mark"
+    }
+   ]
+  },
+  {
+   "id": "B1",
+   "title_uk": "Кнопка бортового комп'ютера на важелі і решта кнопок",
+   "minutes": 40,
+   "engine": "ign",
+   "cluster": "stock+twin+f30",
+   "sets": [
+    "S6"
+   ],
+   "passenger": false,
+   "intro_uk": "ГОЛОВНЕ ЗАВДАННЯ СЕСІЇ: чи бачить авто натискання кнопки бортового комп'ютера (TRIP) на кінці важеля поворотів. Ми можемо лише СПОСТЕРІГАТИ натискання (читати сигнал); погасити реакцію BMW на нього ми не можемо. Запалювання ввімкнено, двигун НЕ запущено (холодний двигун потрібен нам далі для температури). Усі натискання коротко, з паузою 3 с, кожне після своєї позначки. Повторюємо важіль три рази: зі штатною панеллю, з Twin Dial, з f30_cluster. Запалювання без двигуна не тримайте довше за 45 хв до запуску: якщо ведучий бачить, що напруга падає, запускаємо двигун (холодний запуск тоді втрачається).",
+   "lead": "Turn on S6 only. After each cluster state verify in the log that P13 stalk and P11 lines exist. We can only OBSERVE the press (a notifier); BMW's own reaction cannot be suppressed.",
+   "steps": [
+    {
+     "id": "B1.1",
+     "mark": false,
+     "items": [
+      "P13",
+      "P11"
+     ],
+     "lead": "S6 on; read the 'sets on' line",
+     "uk": "",
+     "wait_uk": "до 1 хв",
+     "shoot_uk": "",
+     "sets_on": [
+      "S6"
+     ],
+     "sets_off": []
+    },
+    {
+     "id": "B1.2",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "ШТАТНА ПАНЕЛЬ. Тільки позначка, нічого не натискайте 10 с: це спокій (базове значення байта важеля).",
+     "wait_uk": "10 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "rest"
+    },
+    {
+     "id": "B1.3",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "Короткий натиск кнопки бортового комп'ютера на кінці важеля поворотів, РАЗ 1. Запишіть, яку сторінку показує панель після натиску (1, 2, 3...).",
+     "wait_uk": "3 с",
+     "shoot_uk": "Відео панелі: одне відео на всі три натиски.",
+     "tag": "stock",
+     "class": "bc-short"
+    },
+    {
+     "id": "B1.4",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "Короткий натиск тієї самої кнопки, РАЗ 2. Запишіть сторінку.",
+     "wait_uk": "3 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "bc-short"
+    },
+    {
+     "id": "B1.5",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "Короткий натиск тієї самої кнопки, РАЗ 3. Запишіть сторінку.",
+     "wait_uk": "3 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "bc-short"
+    },
+    {
+     "id": "B1.6",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "ДОВГИЙ натиск (2 с і довше) тієї кнопки. Робіть це ТІЛЬКИ коли на панелі сторінка, скидання якої вам не шкода. Довге натискання може обнулити лічильник поїздки. Якщо не впевнені: ПРОПУСТІТЬ цей крок і запишіть «пропущено».",
+     "wait_uk": "3 с",
+     "shoot_uk": "Що показала панель після натиску.",
+     "warn_uk": "Може скинути сторінку бортового комп'ютера.",
+     "optional": true,
+     "tag": "stock",
+     "class": "bc-long"
+    },
+    {
+     "id": "B1.7",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "Інші перемикачі важеля, щоб ми знали, які біти що означають: поворотник ВЛІВО (легкий дотик, лампа блимне 3 рази), потім пауза 3 с.",
+     "wait_uk": "3 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "stalk-left"
+    },
+    {
+     "id": "B1.8",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "Поворотник ВПРАВО (легкий дотик), пауза 3 с.",
+     "wait_uk": "3 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "stalk-right"
+    },
+    {
+     "id": "B1.9",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "Поворотник ВЛІВО з утриманням 3 с (до упору, тримати), потім відпустіть.",
+     "wait_uk": "3 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "stalk-hold-left"
+    },
+    {
+     "id": "B1.10",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "Блиск дальнім світлом (потягніть важіль на себе і відпустіть), один раз.",
+     "wait_uk": "3 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "stalk-flash"
+    },
+    {
+     "id": "B1.11",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-wheel-steps"
+      ]
+     ],
+     "lead": "",
+     "uk": "Коліщатко на кермі БЕЗ відкритого списку BMW: ВГОРУ 3 клацання (пауза 1 с між ними).",
+     "wait_uk": "5 с",
+     "shoot_uk": "Відео панелі: чи щось змінилося на ній.",
+     "tag": "stock",
+     "class": "thumb-up"
+    },
+    {
+     "id": "B1.12",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-wheel-steps"
+      ]
+     ],
+     "lead": "",
+     "uk": "Те саме коліщатко: ВНИЗ 3 клацання, потім натиснути коліщатко 2 рази.",
+     "wait_uk": "8 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "thumb-down"
+    },
+    {
+     "id": "B1.13",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-wheel-steps"
+      ]
+     ],
+     "lead": "",
+     "uk": "Відкрийте на панелі будь-який список BMW так, як ви це робите звично (коліщатком чи кнопкою на кермі). Потім коліщатко ВГОРУ 3 клацання.",
+     "wait_uk": "10 с",
+     "shoot_uk": "Відео панелі.",
+     "tag": "stock",
+     "class": "thumb-list-up"
+    },
+    {
+     "id": "B1.14",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-wheel-steps"
+      ]
+     ],
+     "lead": "",
+     "uk": "Зі списком: ВНИЗ 3 клацання, натиснути 2 рази. Потім закрийте список.",
+     "wait_uk": "10 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "thumb-list-down"
+    },
+    {
+     "id": "B1.15",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-fav"
+      ]
+     ],
+     "lead": "",
+     "uk": "Кнопка із зірочкою (FAV) на кермі: ОДИН короткий натиск. Спрацює ваша обрана функція (це нормально); поверніться на звичний екран.",
+     "wait_uk": "5 с",
+     "shoot_uk": "",
+     "warn_uk": "Обрана функція спрацює: не обирайте дію, яка щось відправляє.",
+     "tag": "stock",
+     "class": "wheel-fav"
+    },
+    {
+     "id": "B1.16",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-special1"
+      ]
+     ],
+     "lead": "",
+     "uk": "Кнопка на кермі без підпису або «додаткова», ПЕРША (якщо є): один натиск. Запишіть, яка саме і чи щось зробила.",
+     "wait_uk": "5 с",
+     "shoot_uk": "",
+     "optional": true,
+     "tag": "stock",
+     "class": "wheel-special1"
+    },
+    {
+     "id": "B1.17",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-special2"
+      ]
+     ],
+     "lead": "",
+     "uk": "ДРУГА така кнопка (якщо є): один натиск. Запишіть, яка і чи щось зробила.",
+     "wait_uk": "5 с",
+     "shoot_uk": "",
+     "optional": true,
+     "tag": "stock",
+     "class": "wheel-special2"
+    },
+    {
+     "id": "B1.18",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-skip"
+      ]
+     ],
+     "lead": "",
+     "uk": "Кнопки пропуску треку ліворуч і праворуч: по одному натиску (спочатку ліворуч, пауза 3 с, потім праворуч).",
+     "wait_uk": "8 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "wheel-skip"
+    },
+    {
+     "id": "B1.19",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-voice"
+      ]
+     ],
+     "lead": "",
+     "uk": "Кнопка голосу: коротко один раз, потім скажіть «Скасувати» або натисніть Назад.",
+     "wait_uk": "8 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "wheel-voice"
+    },
+    {
+     "id": "B1.20",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-phone"
+      ]
+     ],
+     "lead": "",
+     "uk": "Кнопка телефону: КОРОТКО один раз (дзвінка немає). Не тримайте: довгий натиск може набрати останній номер. Якщо відкрилося меню, закрийте його.",
+     "wait_uk": "5 с",
+     "shoot_uk": "",
+     "warn_uk": "Довго не тримати.",
+     "tag": "stock",
+     "class": "wheel-phone"
+    },
+    {
+     "id": "B1.21",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-volume"
+      ]
+     ],
+     "lead": "",
+     "uk": "Гучність − один раз, потім гучність + один раз.",
+     "wait_uk": "5 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "wheel-volume"
+    },
+    {
+     "id": "B1.22",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "controller"
+      ]
+     ],
+     "lead": "",
+     "uk": "Контролер iDrive на звичному екрані (не в меню Signal Probe): повернути на 2 клацання, натиснути, нахил угору. Поверніться на звичний екран.",
+     "wait_uk": "10 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "controller"
+    },
+    {
+     "id": "B1.23",
+     "mark": true,
+     "items": [
+      "P13",
+      "P1"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "З повідомленням на панелі: відчиніть двері водія (з'явиться повідомлення BMW). Поки воно висить: кнопка бортового комп'ютера один раз, коліщатко один раз. Потім зачиніть двері.",
+     "wait_uk": "20 с",
+     "shoot_uk": "Відео панелі: що BMW показує на кнопку, поки висить повідомлення.",
+     "tag": "stock",
+     "class": "msg-bc-short"
+    },
+    {
+     "id": "B1.24",
+     "mark": true,
+     "items": [
+      "P11",
+      "P14"
+     ],
+     "expect": [
+      [
+       "P11",
+       "kombi-config"
+      ]
+     ],
+     "lead": "",
+     "uk": "Вигляд панелі в iDrive: Налаштування → дисплеї/панель приладів. Змініть вигляд панелі один раз на інший і поверніть назад (пауза 3 с після кожної зміни). Якщо є налаштування карти на панелі: увімкніть, потім вимкніть.",
+     "wait_uk": "20 с",
+     "shoot_uk": "Екран налаштувань: які пункти є і як вони названі.",
+     "tag": "stock",
+     "class": "cluster-view"
+    },
+    {
+     "id": "B1.25",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "ДВИГУН І ПАНЕЛЬ ТІ САМІ, але тепер Twin Dial. У меню Twin Dial поставте Cluster = «Twin Dial», у f30_cluster лишається Off. Зачекайте, поки панель намалюється. Це початок повтору з Twin Dial.",
+     "wait_uk": "до 30 с",
+     "shoot_uk": "Кадр панелі з Twin Dial.",
+     "tag": "twin",
+     "class": "switch-to-twin"
+    },
+    {
+     "id": "B1.26",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "З Twin Dial: короткий натиск кнопки бортового комп'ютера, РАЗ 1. Запишіть, що змінилося на панелі (будь-що: наша вкладка, сторінка по центру, щось з BMW).",
+     "wait_uk": "3 с",
+     "shoot_uk": "Відео панелі: одне відео на три натиски.",
+     "tag": "twin",
+     "class": "bc-short"
+    },
+    {
+     "id": "B1.27",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "З Twin Dial: той самий натиск, РАЗ 2.",
+     "wait_uk": "3 с",
+     "shoot_uk": "",
+     "tag": "twin",
+     "class": "bc-short"
+    },
+    {
+     "id": "B1.28",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "З Twin Dial: той самий натиск, РАЗ 3.",
+     "wait_uk": "3 с",
+     "shoot_uk": "",
+     "tag": "twin",
+     "class": "bc-short"
+    },
+    {
+     "id": "B1.29",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-wheel-steps"
+      ]
+     ],
+     "lead": "",
+     "uk": "З Twin Dial: коліщатко на кермі вгору 3, вниз 3, натиснути 2 рази.",
+     "wait_uk": "10 с",
+     "shoot_uk": "Відео.",
+     "tag": "twin",
+     "class": "thumb-twin"
+    },
+    {
+     "id": "B1.30",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "f30_cluster. У Twin Dial поставте Cluster = Off, у f30_cluster Theme = «6WB Comfort» і ввімкніть «BMW's G20 round our dials» (тоді крізь наші циферблати видно власні елементи BMW). Зачекайте, поки панель намалюється.",
+     "wait_uk": "до 30 с",
+     "shoot_uk": "Кадр панелі з f30_cluster.",
+     "tag": "f30",
+     "class": "switch-to-f30"
+    },
+    {
+     "id": "B1.31",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "З f30_cluster: короткий натиск кнопки бортового комп'ютера, РАЗ 1. Запишіть, що змінилося на панелі, зокрема внизу і там, де видно власні елементи BMW: чи змінюється ЇЇ сторінка під нашою.",
+     "wait_uk": "3 с",
+     "shoot_uk": "Відео панелі: одне відео на три натиски.",
+     "tag": "f30",
+     "class": "bc-short"
+    },
+    {
+     "id": "B1.32",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "З f30_cluster: той самий натиск, РАЗ 2.",
+     "wait_uk": "3 с",
+     "shoot_uk": "",
+     "tag": "f30",
+     "class": "bc-short"
+    },
+    {
+     "id": "B1.33",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "stalk"
+      ]
+     ],
+     "lead": "",
+     "uk": "З f30_cluster: той самий натиск, РАЗ 3.",
+     "wait_uk": "3 с",
+     "shoot_uk": "",
+     "tag": "f30",
+     "class": "bc-short"
+    },
+    {
+     "id": "B1.34",
+     "mark": true,
+     "items": [
+      "P13"
+     ],
+     "expect": [
+      [
+       "P13",
+       "sw-wheel-steps"
+      ]
+     ],
+     "lead": "",
+     "uk": "З f30_cluster: коліщатко на кермі вгору 3, вниз 3, натиснути 2 рази.",
+     "wait_uk": "10 с",
+     "shoot_uk": "Відео.",
+     "tag": "f30",
+     "class": "thumb-f30"
+    },
+    {
+     "id": "B1.35",
+     "mark": false,
+     "items": [],
+     "lead": "read the summary line; verify stalk lines per tag",
+     "uk": "Чекайте 2 хв після останнього кроку. Ведучий читає підсумковий рядок («summary») і перевіряє, що рядки по важелю є для кожного з трьох станів панелі.",
+     "wait_uk": "2 хв",
+     "shoot_uk": ""
+    },
+    {
+     "id": "B1.36",
+     "mark": false,
+     "items": [],
+     "lead": "",
+     "uk": "Поверніться до штатної панелі: у f30_cluster Theme = «Off (BMW's own cluster)», Twin Dial Cluster = «Off (BMW's own cluster)».",
+     "wait_uk": "до 30 с",
+     "shoot_uk": "",
+     "sets_on": [],
+     "sets_off": [
+      "S6"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "B2",
+   "title_uk": "Холодний запуск двигуна",
+   "minutes": 28,
+   "engine": "on",
+   "cluster": "stock",
+   "sets": [
+    "S2",
+    "S3"
+   ],
+   "passenger": false,
+   "intro_uk": "Двигун не запускали кілька годин, тому це «холодний» запуск (його можна зробити лише раз). Авто просто неба, добре провітрюване місце. Штатна панель.",
+   "lead": "Collect #1 during the idle (L9, L15, L12 need the fresh start; L3-L5 from today's apps).",
+   "steps": [
+    {
+     "id": "B2.1",
+     "mark": false,
+     "items": [
+      "P3",
+      "P4",
+      "P5",
+      "P6"
+     ],
+     "lead": "S2+S3 on (S6 was switched off at the end of B1)",
+     "uk": "",
+     "wait_uk": "до 1 хв",
+     "shoot_uk": "",
+     "sets_on": [
+      "S2",
+      "S3"
+     ],
+     "sets_off": []
+    },
+    {
+     "id": "B2.2",
+     "mark": true,
+     "items": [
+      "P3",
+      "P5"
+     ],
+     "expect": [
+      [
+       "P3",
+       "range-tank"
+      ],
+      [
+       "P5",
+       "units"
+      ]
+     ],
+     "lead": "",
+     "uk": "Запалювання ввімкнено, двигун ще ні. Пробіг: прочитайте на панелі й на iDrive (Інформація про авто / сервіс).",
+     "wait_uk": "1 хв",
+     "shoot_uk": "Кадр панелі з пробігом; кадр екрана iDrive з пробігом. Запишіть число на папері.",
+     "tag": "stock",
+     "class": "odometer-units"
+    },
+    {
+     "id": "B2.3",
+     "mark": true,
+     "items": [
+      "P4"
+     ],
+     "expect": [
+      [
+       "P4",
+       "bc-average"
+      ],
+      [
+       "P4",
+       "bc-travel"
+      ]
+     ],
+     "lead": "",
+     "uk": "Бортовий комп'ютер в iDrive: сторінка поїздки. Для ОБОХ лічильників (напр. «від старту» і «від заправки») запишіть і сфотографуйте: середня витрата, середня швидкість, відстань, час у русі, час відправлення.",
+     "wait_uk": "2 хв",
+     "shoot_uk": "Екран бортового комп'ютера: обидві сторінки, цифри читаються.",
+     "tag": "stock",
+     "class": "trip-page"
+    },
+    {
+     "id": "B2.4",
+     "mark": true,
+     "items": [
+      "P10"
+     ],
+     "expect": [
+      [
+       "P10",
+       "voltage-basic"
+      ]
+     ],
+     "lead": "",
+     "uk": "Напруга при ВИМКНЕНОМУ двигуні (запалювання ввімкнено): нічого не робіть 30 с. Якщо авто десь показує напругу акумулятора - запишіть її.",
+     "wait_uk": "30 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "voltage-engine-off"
+    },
+    {
+     "id": "B2.5",
+     "mark": true,
+     "items": [
+      "X18"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "Driver Profiles (лише подивитися, нічого не змінювати): відкрийте застосунок Driver Profiles в iDrive. Чи є в списку Guest (активний), Valet і два ваші профілі з правильними іменами; чи сховані вільні місця; чи видно дати і номер PIA. Нічого не натискайте, крім «Назад».",
+     "wait_uk": "2 хв",
+     "shoot_uk": "Екран списку профілів (читається).",
+     "tag": "stock",
+     "class": "driver-profiles",
+     "optional": true
+    },
+    {
+     "id": "B2.6",
+     "mark": true,
+     "items": [
+      "P6",
+      "P10"
+     ],
+     "expect": [
+      [
+       "P6",
+       "coolant"
+      ],
+      [
+       "P10",
+       "voltage-basic"
+      ]
+     ],
+     "lead": "",
+     "uk": "ЗАПУСК двигуна, нога на гальмі, селектор P. Нічого не чіпайте. Запишіть час запуску.",
+     "wait_uk": "30 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "engine-start"
+    },
+    {
+     "id": "B2.7",
+     "mark": true,
+     "items": [
+      "P6"
+     ],
+     "expect": [
+      [
+       "P6",
+       "engine-verdict"
+      ]
+     ],
+     "lead": "collect #1 now",
+     "uk": "Двигун працює на холостих. Стежте за написом COLD (холодний двигун) або індикатором температури на панелі. Коли він ЗНИКНЕ, запишіть час і одразу переходьте до наступного кроку (його позначка відмітить цей момент). Це може тривати 10-15 хв.",
+     "wait_uk": "10-15 хв",
+     "shoot_uk": "Кадр панелі з COLD і кадр, коли він зник.",
+     "warn_uk": "Двигун працює: не в закритому гаражі.",
+     "tag": "stock",
+     "class": "cold-gone"
+    },
+    {
+     "id": "B2.8",
+     "mark": true,
+     "items": [
+      "P10"
+     ],
+     "expect": [
+      [
+       "P10",
+       "voltage-basic"
+      ]
+     ],
+     "lead": "",
+     "uk": "Напруга при ПРАЦЮЮЧОМУ двигуні: нічого не робіть 30 с. Запишіть, якщо авто десь її показує.",
+     "wait_uk": "30 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "voltage-engine-on"
+    },
+    {
+     "id": "B2.9",
+     "mark": true,
+     "items": [
+      "P5"
+     ],
+     "expect": [
+      [
+       "P5",
+       "units"
+      ]
+     ],
+     "lead": "",
+     "uk": "НЕОБОВ'ЯЗКОВО. Одиниці: в iDrive змініть відстань з км на милі і ЗАЗРАЗУ ПОВЕРНІТЬ НАЗАД на км. Перевіряємо, як авто повідомляє одиниці.",
+     "wait_uk": "20 с",
+     "shoot_uk": "Екран одиниць до і після (читається).",
+     "warn_uk": "Обов'язково поверніть км.",
+     "optional": true,
+     "tag": "stock",
+     "class": "units-miles"
+    },
+    {
+     "id": "B2.10",
+     "mark": true,
+     "items": [
+      "P4"
+     ],
+     "expect": [
+      [
+       "P4",
+       "bc-travel"
+      ]
+     ],
+     "lead": "",
+     "uk": "НЕОБОВ'ЯЗКОВО, лише якщо ви згодні втратити цей лічильник: скиньте ОДИН лічильник поїздки в iDrive (напр. «від старту»). Записуємо, який саме.",
+     "wait_uk": "10 с",
+     "shoot_uk": "Екран до і після.",
+     "warn_uk": "Скидання незворотне: його не скасувати.",
+     "optional": true,
+     "tag": "stock",
+     "class": "trip-reset"
+    }
+   ]
+  },
+  {
+   "id": "B3",
+   "title_uk": "Двері, повідомлення, напруга",
+   "minutes": 20,
+   "engine": "on",
+   "cluster": "stock",
+   "sets": [
+    "S1",
+    "S3"
+   ],
+   "passenger": false,
+   "intro_uk": "Двигун працює, селектор P, ручне гальмо. Штатна панель. Двері відчиняйте обережно.",
+   "lead": "Check P7 lines per door, P1 'shown now' number returning to its rest value.",
+   "steps": [
+    {
+     "id": "B3.1",
+     "mark": false,
+     "items": [
+      "P1",
+      "P7",
+      "P10"
+     ],
+     "lead": "S1+S3 on, S2 off",
+     "uk": "S3 лишається.",
+     "wait_uk": "до 1 хв",
+     "shoot_uk": "",
+     "sets_on": [
+      "S1"
+     ],
+     "sets_off": [
+      "S2"
+     ]
+    },
+    {
+     "id": "B3.2",
+     "mark": true,
+     "items": [
+      "P1",
+      "P7",
+      "P10"
+     ],
+     "expect": [
+      [
+       "P1",
+       "active-cc"
+      ],
+      [
+       "P10",
+       "voltage-basic"
+      ]
+     ],
+     "lead": "",
+     "uk": "Спокій: нічого не чіпайте 30 с, усі двері зачинені.",
+     "wait_uk": "30 с",
+     "shoot_uk": "Кадр штатної панелі.",
+     "tag": "stock",
+     "class": "rest"
+    },
+    {
+     "id": "B3.3",
+     "mark": true,
+     "items": [
+      "P1",
+      "P7",
+      "F8"
+     ],
+     "expect": [
+      [
+       "P7",
+       "doors"
+      ],
+      [
+       "P1",
+       "active-cc"
+      ],
+      [
+       "P1",
+       "ccList"
+      ]
+     ],
+     "lead": "",
+     "uk": "Відчиніть двері ВОДІЯ і залиште відчиненими. Запишіть час появи повідомлення BMW. Чекайте, поки BMW САМ його сховає (близько 20 с, не більше 40 с), і запишіть час зникнення. Потім зачиніть.",
+     "wait_uk": "до 40 с",
+     "shoot_uk": "Повідомлення на панелі, текст має читатися (потрібні назви повідомлень). Потім панель одразу після зникнення. Права частина панелі повідомлень: маркер збережених повідомлень видно чи ні.",
+     "tag": "stock",
+     "class": "door-driver"
+    },
+    {
+     "id": "B3.4",
+     "mark": true,
+     "items": [
+      "P7"
+     ],
+     "expect": [
+      [
+       "P7",
+       "doors"
+      ]
+     ],
+     "lead": "",
+     "uk": "Двері ПАСАЖИРА: відчинити на 10 с, зачинити, пауза 3 с.",
+     "wait_uk": "15 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "door-passenger"
+    },
+    {
+     "id": "B3.5",
+     "mark": true,
+     "items": [
+      "P7"
+     ],
+     "expect": [
+      [
+       "P7",
+       "doors"
+      ]
+     ],
+     "lead": "",
+     "uk": "Задні ЛІВІ двері: відчинити на 10 с, зачинити, пауза 3 с.",
+     "wait_uk": "15 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "door-rear-left"
+    },
+    {
+     "id": "B3.6",
+     "mark": true,
+     "items": [
+      "P7"
+     ],
+     "expect": [
+      [
+       "P7",
+       "doors"
+      ]
+     ],
+     "lead": "",
+     "uk": "Задні ПРАВІ двері: відчинити на 10 с, зачинити, пауза 3 с.",
+     "wait_uk": "15 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "door-rear-right"
+    },
+    {
+     "id": "B3.7",
+     "mark": true,
+     "items": [
+      "P7"
+     ],
+     "expect": [
+      [
+       "P7",
+       "doors"
+      ]
+     ],
+     "lead": "",
+     "uk": "БАГАЖНИК: відчинити на 10 с, зачинити, пауза 3 с.",
+     "wait_uk": "15 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "boot"
+    },
+    {
+     "id": "B3.8",
+     "mark": true,
+     "items": [
+      "P7"
+     ],
+     "expect": [
+      [
+       "P7",
+       "lids"
+      ]
+     ],
+     "lead": "",
+     "uk": "КАПОТ: потягніть важіль відкриття капота зсередини (капот підніметься на фіксаторі). Повністю НЕ піднімайте: двигун працює. Через 10 с опустіть і притисніть, щоб закрився. Пауза 3 с.",
+     "wait_uk": "20 с",
+     "shoot_uk": "",
+     "warn_uk": "Двигун працює: капот повністю не піднімати, руки подалі.",
+     "tag": "stock",
+     "class": "bonnet"
+    },
+    {
+     "id": "B3.9",
+     "mark": true,
+     "items": [
+      "P1",
+      "P2"
+     ],
+     "expect": [
+      [
+       "P1",
+       "menu-cc"
+      ],
+      [
+       "P1",
+       "active-cc"
+      ]
+     ],
+     "lead": "",
+     "uk": "ДВОЄ дверей разом: водія і заднього лівого. BMW може показувати два повідомлення по черзі (кадри 1/2, 2/2). Чекайте повного кола (до 40 с). Потім зачиніть обоє.",
+     "wait_uk": "до 40 с",
+     "shoot_uk": "Обидва кадри повідомлень (читається текст). Також маркер збережених повідомлень праворуч.",
+     "tag": "stock",
+     "class": "two-doors"
+    },
+    {
+     "id": "B3.10",
+     "mark": true,
+     "items": [
+      "P1"
+     ],
+     "expect": [
+      [
+       "P1",
+       "active-cc"
+      ]
+     ],
+     "lead": "",
+     "uk": "Повторіть двері ВОДІЯ, як у кроці «двері водія»: відчинити, чекати, поки BMW сховає, зачинити. Чи повертається те саме повідомлення?",
+     "wait_uk": "до 40 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "door-driver"
+    }
+   ]
+  },
+  {
+   "id": "B4",
+   "title_uk": "Радіо та медіа",
+   "minutes": 25,
+   "engine": "on",
+   "cluster": "stock",
+   "sets": [
+    "S4"
+   ],
+   "passenger": false,
+   "intro_uk": "Двигун працює, стоїмо, штатна панель. Рахувати літери не треба: ведучий порахує їх з фото. Фотографуйте так, щоб на одному кадрі були і панель, і центральний екран, і текст читався.",
+   "lead": "S2/S3 off, S4 on. Verify P8 lines per source; note which sources were silent.",
+   "steps": [
+    {
+     "id": "B4.1",
+     "mark": false,
+     "items": [
+      "P8"
+     ],
+     "lead": "S4 on",
+     "uk": "",
+     "wait_uk": "до 1 хв",
+     "shoot_uk": "",
+     "sets_on": [
+      "S4"
+     ],
+     "sets_off": [
+      "S1",
+      "S3"
+     ]
+    },
+    {
+     "id": "B4.2",
+     "mark": true,
+     "items": [
+      "P8",
+      "F7"
+     ],
+     "expect": [
+      [
+       "P8",
+       "station"
+      ],
+      [
+       "P8",
+       "active-source"
+      ]
+     ],
+     "lead": "",
+     "uk": "FM: оберіть радіостанцію A, дочекайтеся, поки з'явиться назва і радіотекст.",
+     "wait_uk": "30 с",
+     "shoot_uk": "Панель (медіа-рядок) і центральний екран в одному кадрі.",
+     "tag": "stock",
+     "class": "src-fm"
+    },
+    {
+     "id": "B4.3",
+     "mark": true,
+     "items": [
+      "P8"
+     ],
+     "expect": [
+      [
+       "P8",
+       "station"
+      ]
+     ],
+     "lead": "",
+     "uk": "FM: оберіть другу станцію B.",
+     "wait_uk": "30 с",
+     "shoot_uk": "Те саме.",
+     "tag": "stock",
+     "class": "src-fm"
+    },
+    {
+     "id": "B4.4",
+     "mark": true,
+     "items": [
+      "P8"
+     ],
+     "expect": [
+      [
+       "P8",
+       "media-menu"
+      ]
+     ],
+     "lead": "",
+     "uk": "Відкрийте на центральному екрані список станцій один раз і закрийте.",
+     "wait_uk": "15 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "station-list"
+    },
+    {
+     "id": "B4.5",
+     "mark": true,
+     "items": [
+      "P8"
+     ],
+     "expect": [
+      [
+       "P8",
+       "station"
+      ]
+     ],
+     "lead": "",
+     "uk": "DAB (якщо є): оберіть станцію DAB, чекайте, поки зміниться її текст (до 60 с).",
+     "wait_uk": "до 60 с",
+     "shoot_uk": "Панель і екран.",
+     "optional": true,
+     "tag": "stock",
+     "class": "src-dab"
+    },
+    {
+     "id": "B4.6",
+     "mark": true,
+     "items": [
+      "P8",
+      "F7"
+     ],
+     "expect": [
+      [
+       "P8",
+       "player-metadata"
+      ],
+      [
+       "P8",
+       "active-source"
+      ]
+     ],
+     "lead": "",
+     "uk": "USB: вставте флешку, увімкніть будь-який трек.",
+     "wait_uk": "30 с",
+     "shoot_uk": "Панель і екран.",
+     "tag": "stock",
+     "class": "src-usb"
+    },
+    {
+     "id": "B4.7",
+     "mark": true,
+     "items": [
+      "P8"
+     ],
+     "expect": [
+      [
+       "P8",
+       "track-progress"
+      ]
+     ],
+     "lead": "",
+     "uk": "USB: пауза 10 с, потім продовжити.",
+     "wait_uk": "20 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "src-usb"
+    },
+    {
+     "id": "B4.8",
+     "mark": true,
+     "items": [
+      "P8"
+     ],
+     "expect": [
+      [
+       "P8",
+       "player-metadata"
+      ]
+     ],
+     "lead": "",
+     "uk": "USB: наступний трек, і ще раз наступний (пауза 5 с між ними).",
+     "wait_uk": "15 с",
+     "shoot_uk": "Панель і екран.",
+     "tag": "stock",
+     "class": "src-usb"
+    },
+    {
+     "id": "B4.9",
+     "mark": true,
+     "items": [
+      "P8"
+     ],
+     "expect": [
+      [
+       "P8",
+       "player-metadata"
+      ]
+     ],
+     "lead": "",
+     "uk": "Bluetooth-аудіо: телефон-1 по Bluetooth (без кабелю), увімкніть трек на телефоні.",
+     "wait_uk": "40 с",
+     "shoot_uk": "Панель і екран.",
+     "tag": "stock",
+     "class": "src-bluetooth"
+    },
+    {
+     "id": "B4.10",
+     "mark": true,
+     "items": [
+      "P8"
+     ],
+     "expect": [
+      [
+       "P8",
+       "track-progress"
+      ]
+     ],
+     "lead": "",
+     "uk": "Bluetooth: пауза 10 с, продовжити, наступний трек двічі.",
+     "wait_uk": "40 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "src-bluetooth"
+    },
+    {
+     "id": "B4.11",
+     "mark": true,
+     "items": [
+      "P8"
+     ],
+     "expect": [
+      [
+       "P8",
+       "active-source"
+      ]
+     ],
+     "lead": "",
+     "uk": "Зміна джерела кнопкою джерела на кермі або на iDrive: пройдіть по всіх джерелах один раз, потім вимкніть і увімкніть звук (mute).",
+     "wait_uk": "40 с",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "source-cycle"
+    },
+    {
+     "id": "B4.12",
+     "mark": true,
+     "items": [
+      "P8",
+      "F7"
+     ],
+     "expect": [
+      [
+       "P8",
+       "player-metadata"
+      ],
+      [
+       "P8",
+       "cp-player-state"
+      ]
+     ],
+     "lead": "",
+     "uk": "CarPlay: вставте кабель CarPlay (телефон-1), дочекайтеся CarPlay. Увімкніть трек у CarPlay, потім пауза, продовжити, наступний. Потім у CarPlay на телефоні відкрийте список відтворення.",
+     "wait_uk": "1,5 хв",
+     "shoot_uk": "Панель і екран.",
+     "tag": "stock",
+     "class": "src-carplay"
+    }
+   ]
+  },
+  {
+   "id": "B5",
+   "title_uk": "Телефон і дзвінки",
+   "minutes": 35,
+   "engine": "on",
+   "cluster": "stock then twin",
+   "sets": [
+    "S5",
+    "S4"
+   ],
+   "passenger": false,
+   "intro_uk": "Телефон-2 дзвонить на авто. Використовуйте ТІЛЬКИ свої номери. Ім'я та номер у логи не потрапляють, але на фото вони видні: не публікуйте фото з іменами.",
+   "lead": "S5 on, S4 stays for the CarPlay part. The photo of the ringing pad with Twin Dial on and off is the key output of the block.",
+   "steps": [
+    {
+     "id": "B5.1",
+     "mark": false,
+     "items": [
+      "P9"
+     ],
+     "lead": "S5 on, then wait 2 min (no phone connected: the summary)",
+     "uk": "Телефон-1: вимкніть на ньому Bluetooth і від'єднайте кабель, щоб авто нікого не бачило. S4 лишається. Чекайте 2 хв.",
+     "wait_uk": "2 хв",
+     "shoot_uk": "",
+     "sets_on": [
+      "S5"
+     ],
+     "sets_off": []
+    },
+    {
+     "id": "B5.2",
+     "mark": true,
+     "items": [
+      "P9"
+     ],
+     "expect": [
+      [
+       "P9",
+       "phone-devices"
+      ]
+     ],
+     "lead": "",
+     "uk": "Підключіть телефон-1 по Bluetooth (CarPlay вимкнено).",
+     "wait_uk": "1 хв",
+     "shoot_uk": "",
+     "tag": "stock",
+     "class": "phone-connect"
+    },
+    {
+     "id": "B5.3",
+     "mark": true,
+     "items": [
+      "P9",
+      "F7"
+     ],
+     "expect": [
+      [
+       "P9",
+       "call-state"
+      ]
+     ],
+     "lead": "",
+     "uk": "ШТАТНА панель. З телефону-2 зателефонуйте на авто (контакт, збережений в телефоні-1). Нехай дзвонить 10 с.",
+     "wait_uk": "10 с",
+     "shoot_uk": "Панель, поки дзвонить (штатне вікно дзвінка BMW): кадр і відео.",
+     "tag": "stock",
+     "class": "call-phone"
+    },
+    {
+     "id": "B5.4",
+     "mark": true,
+     "items": [
+      "P9"
+     ],
+     "expect": [
+      [
+       "P9",
+       "call-state"
+      ],
+      [
+       "P9",
+       "phone-call1-state"
+      ]
+     ],
+     "lead": "",
+     "uk": "Відповісти на дзвінок. Говоріть 40 с. У iDrive вимкніть і увімкніть мікрофон. Завершіть кнопкою на кермі.",
+     "wait_uk": "1 хв",
+     "shoot_uk": "Панель під час розмови.",
+     "tag": "stock",
+     "class": "call-phone"
+    },
+    {
+     "id": "B5.5",
+     "mark": true,
+     "items": [
+      "P9",
+      "F7"
+     ],
+     "expect": [
+      [
+       "P9",
+       "call-state"
+      ]
+     ],
+     "lead": "",
+     "uk": "Тепер Twin Dial: у меню Twin Dial Cluster = «Twin Dial», f30_cluster Off. Зачекайте, поки панель намалюється. Зателефонуйте з телефону-2 ще раз (той самий збережений контакт). Нехай дзвонить 10 с, НЕ відповідайте, потім скиньте виклик з телефону-2.",
+     "wait_uk": "до 1 хв",
+     "shoot_uk": "Панель з Twin Dial, поки дзвонить: чи видно вікно дзвінка BMW поверх чи під нашою панеллю. Кадр і відео.",
+     "tag": "twin",
+     "class": "call-phone"
+    },
+    {
+     "id": "B5.6",
+     "mark": true,
+     "items": [
+      "P9"
+     ],
+     "expect": [
+      [
+       "P9",
+       "call-state"
+      ],
+      [
+       "P9",
+       "phone-calllist"
+      ]
+     ],
+     "lead": "",
+     "uk": "Дзвінок з НЕзбереженого номера (другий ваш номер, якого немає в контактах), не відповідайте. Чекайте 30 с після того, як дзвінок завершиться.",
+     "wait_uk": "50 с",
+     "shoot_uk": "",
+     "tag": "twin",
+     "class": "call-phone"
+    },
+    {
+     "id": "B5.7",
+     "mark": true,
+     "items": [
+      "P9"
+     ],
+     "expect": [
+      [
+       "P9",
+       "call-state"
+      ]
+     ],
+     "lead": "",
+     "uk": "Вихідний дзвінок: з iDrive набрати телефон-2 і скинути, поки йде виклик.",
+     "wait_uk": "30 с",
+     "shoot_uk": "",
+     "tag": "twin",
+     "class": "call-phone"
+    },
+    {
+     "id": "B5.8",
+     "mark": true,
+     "items": [
+      "P9"
+     ],
+     "expect": [
+      [
+       "P9",
+       "hmi-app"
+      ]
+     ],
+     "lead": "",
+     "uk": "Відкрийте меню «Телефон» на центральному екрані, а потім вийдіть з нього.",
+     "wait_uk": "10 с",
+     "shoot_uk": "",
+     "tag": "twin",
+     "class": "phone-menu"
+    },
+    {
+     "id": "B5.9",
+     "mark": true,
+     "items": [
+      "P9"
+     ],
+     "expect": [
+      [
+       "P9",
+       "wca-front"
+      ]
+     ],
+     "lead": "",
+     "uk": "НЕОБОВ'ЯЗКОВО, якщо є бездротова зарядка: покладіть телефон на неї на 30 с, зніміть.",
+     "wait_uk": "40 с",
+     "shoot_uk": "",
+     "optional": true,
+     "tag": "twin",
+     "class": "wireless-tray"
+    },
+    {
+     "id": "B5.10",
+     "mark": true,
+     "items": [
+      "L7",
+      "P8"
+     ],
+     "expect": [
+      [
+       "P8",
+       "player-metadata"
+      ]
+     ],
+     "lead": "read twin_dial.log media lines",
+     "uk": "Twin Dial лишається ввімкненим. Увімкніть будь-який трек на USB на 30 с, наступний трек, пауза.",
+     "wait_uk": "1 хв",
+     "shoot_uk": "Кадр панелі з Twin Dial і медіа.",
+     "tag": "twin",
+     "class": "media-with-twin"
+    },
+    {
+     "id": "B5.11",
+     "mark": true,
+     "items": [
+      "P9"
+     ],
+     "expect": [
+      [
+       "P9",
+       "phone-devices"
+      ]
+     ],
+     "lead": "",
+     "uk": "CarPlay: вставте кабель, дочекайтеся CarPlay (Bluetooth телефону-1 лишається). Чекайте 1 хв.",
+     "wait_uk": "1 хв",
+     "shoot_uk": "",
+     "tag": "twin",
+     "class": "carplay-connect"
+    },
+    {
+     "id": "B5.12",
+     "mark": true,
+     "items": [
+      "P9"
+     ],
+     "expect": [
+      [
+       "P9",
+       "call-state"
+      ],
+      [
+       "P9",
+       "carplay-call"
+      ]
+     ],
+     "lead": "",
+     "uk": "CarPlay: дзвінок з телефону-2 на збережений контакт; відповісти, 30 с розмови, завершити.",
+     "wait_uk": "1,5 хв",
+     "shoot_uk": "Панель під час дзвінка.",
+     "tag": "twin",
+     "class": "call-carplay"
+    },
+    {
+     "id": "B5.13",
+     "mark": true,
+     "items": [
+      "P9"
+     ],
+     "expect": [
+      [
+       "P9",
+       "call-state"
+      ]
+     ],
+     "lead": "",
+     "uk": "CarPlay: дзвінок з НЕзбереженого номера, не відповідайте; чекайте 30 с.",
+     "wait_uk": "50 с",
+     "shoot_uk": "",
+     "tag": "twin",
+     "class": "call-carplay"
+    },
+    {
+     "id": "B5.14",
+     "mark": false,
+     "items": [],
+     "lead": "verify the call-state sequence INCOMING -> ACTIVE -> DISCONNECTED in both Bluetooth and CarPlay; summary",
+     "uk": "Чекайте 2 хв. Ведучий читає підсумок. Потім у Twin Dial Cluster = «Off» (штатна панель).",
+     "wait_uk": "2 хв",
+     "shoot_uk": "",
+     "sets_off": [
+      "S5",
+      "S4"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "B6",
+   "title_uk": "Панель із застосунками BMW-стилю, стоїмо",
+   "minutes": 70,
+   "engine": "on",
+   "cluster": "twin then f30",
+   "sets": [
+    "S10",
+    "S11"
+   ],
+   "passenger": false,
+   "intro_uk": "Двигун працює, селектор P, ногу тримайте на гальмі там, де сказано. Тут фото і відео, здебільшого без сигналів.",
+   "lead": "S10+S11 on (the black-box signals during the gear and mode switches; f30's unwired signals for belts, lamps, MSA). Messages in this block are read from the apps' own logs (L1, L8). Collect #2 at the end (L8, L10, L11).",
+   "steps": [
+    {
+     "id": "B6.1",
+     "mark": false,
+     "items": [
+      "P1"
+     ],
+     "lead": "S1 on",
+     "uk": "",
+     "wait_uk": "до 1 хв",
+     "shoot_uk": "",
+     "sets_on": [
+      "S10",
+      "S11"
+     ],
+     "sets_off": [
+      "S4",
+      "S5"
+     ]
+    },
+    {
+     "id": "B6.2",
+     "mark": true,
+     "items": [
+      "F14",
+      "F12",
+      "F10",
+      "F17"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "ШТАТНА панель (обидва застосунки Off). Різкий фронтальний кадр усієї панелі. Потім кнопкою режимів: Sport - кадр, Eco Pro - кадр, назад Comfort. Нога на гальмі: R - кадр, N - кадр, P. Окремо сфотографуйте торець лівого важеля (кнопки на ньому) і одну фару ззовні.",
+     "wait_uk": "3 хв",
+     "shoot_uk": "Штатна панель: фронтально; Sport; Eco Pro; R; N. Торець важеля. Фара.",
+     "tag": "stock",
+     "class": "stock-photos"
+    },
+    {
+     "id": "B6.3",
+     "mark": true,
+     "items": [
+      "F2",
+      "L5",
+      "F9"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "Twin Dial ввімкнено (Cluster = Twin Dial), f30_cluster Off. Зачекайте, поки панель намалюється. Запишіть: чи видно число пробігу внизу ліворуч.",
+     "wait_uk": "до 30 с",
+     "shoot_uk": "Кадр усієї панелі (день), експозиція зафіксована: це «як є сьогодні» для Twin Dial 0.1.0.",
+     "tag": "twin",
+     "class": "twin-up"
+    },
+    {
+     "id": "B6.4",
+     "mark": true,
+     "items": [
+      "F2",
+      "P19"
+     ],
+     "expect": [
+      [
+       "P19",
+       "belts"
+      ]
+     ],
+     "lead": "",
+     "uk": "БЕЗПЕКА з Twin Dial: ремінь водія розстебнутий, двері водія відчинені. Чи видно лампу ременя і повідомлення про двері (наше або BMW)?",
+     "wait_uk": "20 с",
+     "shoot_uk": "Кадр панелі: лампа ременя, повідомлення.",
+     "warn_uk": "Якщо лампи ременя або повідомлення не видно, повідомте ведучого, їхати з цим застосунком не можна.",
+     "tag": "twin",
+     "class": "safety-belt-door"
+    },
+    {
+     "id": "B6.5",
+     "mark": true,
+     "items": [
+      "F2",
+      "F4",
+      "P19"
+     ],
+     "expect": [
+      [
+       "P19",
+       "lights"
+      ],
+      [
+       "P19",
+       "indicate"
+      ]
+     ],
+     "lead": "",
+     "uk": "Бічні лампи (сім малих значків): по черзі увімкніть лівий поворотник, правий поворотник, ближнє світло, туманні (якщо є), дальнє. Кожен тримайте 5 с.",
+     "wait_uk": "40 с",
+     "shoot_uk": "Кадр на кожну лампу: чи видно її поверх Twin Dial.",
+     "tag": "twin",
+     "class": "side-lamps"
+    },
+    {
+     "id": "B6.6",
+     "mark": true,
+     "items": [
+      "F3"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "Близький кадр нижніх країв циферблатів: телефон на 20-25 см від панелі, лише лівий циферблат, потім лише правий. Фокус по краю дуг.",
+     "wait_uk": "1 хв",
+     "shoot_uk": "Два близьких кадри (лівий, правий циферблат).",
+     "tag": "twin",
+     "class": "dial-ends-photo"
+    },
+    {
+     "id": "B6.7",
+     "mark": true,
+     "items": [
+      "X9"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "Рівень смуги за днем: ТОЙ САМИЙ кадр усієї панелі ще раз, експозиція ЗАФІКСОВАНА (торкніться екрана телефона на середньому тоні й утримайте AE/AF), компенсація -1; зі штатива чи з тримача. Dial band level не чіпайте (1.0).",
+     "wait_uk": "",
+     "shoot_uk": "Один кадр, день.",
+     "tag": "twin",
+     "class": "band-day"
+    },
+    {
+     "id": "B6.8",
+     "mark": true,
+     "items": [
+      "X9"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "Те саме вночі: Night look = «Always night» і той самий кадр з тією самою експозицією й положенням. Потім поверніть Night look = Auto.",
+     "wait_uk": "20 с",
+     "shoot_uk": "Один кадр, ніч.",
+     "tag": "twin",
+     "class": "band-night"
+    },
+    {
+     "id": "B6.9",
+     "mark": true,
+     "items": [
+      "X1",
+      "P18",
+      "L27",
+      "F17",
+      "L19"
+     ],
+     "expect": [
+      [
+       "P18",
+       "gearbox-display"
+      ]
+     ],
+     "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
+     "uk": "Чорний прямокутник: Twin Dial, нога на гальмі. Селектор P → D → N → R → P (по одному кроку, пауза 5 с). Після кожного кроку кадр правого циферблата і нижнього ряду.",
+     "wait_uk": "40 с",
+     "shoot_uk": "Чотири кадри: правий циферблат (чи є чорний прямокутник), нижній ряд.",
+     "tag": "twin",
+     "class": "gear-switch"
+    },
+    {
+     "id": "B6.10",
+     "mark": true,
+     "items": [
+      "X1",
+      "X11",
+      "P18",
+      "L27",
+      "F17",
+      "L19"
+     ],
+     "expect": [
+      [
+       "P18",
+       "fes-switch"
+      ]
+     ],
+     "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
+     "uk": "Twin Dial: кнопка режимів руху Comfort → Sport → Eco Pro → Comfort (пауза 8 с). ВІДЕО 60 кадрів/с на всю панель, що охоплює натиск і поки панель не стане повною. Запишіть час від натиску до повної панелі.",
+     "wait_uk": "1 хв",
+     "shoot_uk": "Відео 60 fps усієї панелі; після кожного режиму кадр правого циферблата.",
+     "tag": "twin",
+     "class": "mode-switch"
+    },
+    {
+     "id": "B6.11",
+     "mark": true,
+     "items": [
+      "L1",
+      "P1",
+      "X8"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "Повідомлення з Twin Dial: відчиніть двері водія, чекайте, поки BMW сам сховає (до 40 с), закрийте. ВІДЕО (краще сповільнене 240 fps) центру панелі від відчинення до зникнення.",
+     "wait_uk": "до 40 с",
+     "shoot_uk": "Відео.",
+     "tag": "twin",
+     "class": "msg-twin"
+    },
+    {
+     "id": "B6.12",
+     "mark": true,
+     "items": [
+      "L1",
+      "X1",
+      "F9",
+      "F13"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "f30_cluster: у Twin Dial Cluster = Off; у f30_cluster Theme = «6WB Comfort», «Change with the drive mode» УВІМКНЕНО (як є), G20 вимкнено. Зачекайте, поки панель намалюється.",
+     "wait_uk": "до 30 с",
+     "shoot_uk": "Кадр усієї панелі (6WB Comfort). Потім з G20 увімкненим: кадр з «Bottom row while G20 shows» = «All BMW's» і кадр з «All ours (6WB style)»; поверніть як було. Це фото «як є сьогодні».",
+     "tag": "f30",
+     "class": "f30-up"
+    },
+    {
+     "id": "B6.13",
+     "mark": true,
+     "items": [
+      "X1",
+      "P18",
+      "L27",
+      "F17",
+      "L19"
+     ],
+     "expect": [
+      [
+       "P18",
+       "fes-switch"
+      ]
+     ],
+     "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
+     "uk": "f30_cluster, нога на гальмі: P → D → N → R → P (по кроку, пауза 5 с) і режими Comfort → Sport → Eco Pro → Comfort. ВІДЕО 60 fps. Чи з'являється чорний прямокутник на правому циферблаті?",
+     "wait_uk": "1,5 хв",
+     "shoot_uk": "Відео 60 fps; кадр на кожен перехід.",
+     "tag": "f30",
+     "class": "mode-switch"
+    },
+    {
+     "id": "B6.14",
+     "mark": true,
+     "items": [
+      "X1",
+      "X17",
+      "P18",
+      "L27",
+      "F17",
+      "L19"
+     ],
+     "expect": [
+      [
+       "P18",
+       "fes-switch"
+      ]
+     ],
+     "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
+     "uk": "f30_cluster: вимкніть «Change with the drive mode» і повторіть ті самі P → D → N → R → P та режими. Записуйте: чорний прямокутник є чи ні. Перемикаючи це налаштування, подивіться на список налаштувань f30: чи зникають рядки «In Comfort / In Sport / In Eco Pro» - кадр списку до і після.",
+     "wait_uk": "1,5 хв",
+     "shoot_uk": "Кадри як у попередньому кроці.",
+     "tag": "f30",
+     "class": "mode-switch"
+    },
+    {
+     "id": "B6.15",
+     "mark": true,
+     "items": [
+      "X1",
+      "X17",
+      "P18",
+      "L27",
+      "F17",
+      "L19"
+     ],
+     "expect": [
+      [
+       "P18",
+       "fes-switch"
+      ]
+     ],
+     "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
+     "uk": "f30_cluster: ввімкніть G20 («BMW's G20 round our dials») і знову ті самі P → D → N → R → P та режими. Кадр списку налаштувань: чи з'явився рядок «Bottom row while G20 shows».",
+     "wait_uk": "1,5 хв",
+     "shoot_uk": "Кадри як вище.",
+     "tag": "f30",
+     "class": "mode-switch"
+    },
+    {
+     "id": "B6.16",
+     "mark": true,
+     "items": [
+      "L1",
+      "P1"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "Повідомлення з f30_cluster: двері водія відчинити, чекати, поки BMW сховає (до 40 с), зачинити. Чи вікно над панеллю BMW закрилося разом з повідомленням? ВІДЕО 60 fps.",
+     "wait_uk": "до 40 с",
+     "shoot_uk": "Відео; кадр через 5 с після зникнення повідомлення.",
+     "tag": "f30",
+     "class": "msg-f30"
+    },
+    {
+     "id": "B6.17",
+     "mark": true,
+     "items": [
+      "X13",
+      "L27"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "ТІЛЬКИ ЯКЩО в якомусь кроці вище з'явився чорний прямокутник і він ще є: (1) f30_cluster Theme = Off, чекайте 6 с, поверніть 6WB Comfort - чи зник? (2) Відчиніть і зачиніть двері на місці - чи зник? (3) Якщо Waze показує карту на панелі: у Waze вимкніть показ на панелі - чи зник? Після кожного кроку кадр. Кажіть ведучому вголос «прямокутник є» чи «немає».",
+     "wait_uk": "3 хв",
+     "shoot_uk": "Кадр правого циферблата після кожної дії.",
+     "tag": "f30",
+     "class": "box-remap",
+     "optional": true
+    },
+    {
+     "id": "B6.18",
+     "mark": true,
+     "items": [
+      "X16",
+      "F4",
+      "P19"
+     ],
+     "expect": [
+      [
+       "P19",
+       "belts"
+      ]
+     ],
+     "lead": "",
+     "uk": "Матові теми (що BMW малює поверх суцільної панелі): у f30_cluster вимкніть «Change with the drive mode» (інакше тема не зміниться), Theme = «Diagnostic matte: magenta». Двигун працює: кадр. Відчиніть двері водія: кадр. Розстебніть ремінь: кадр. Вимкніть автостоп (кнопка MSA): кадр, і ввімкніть назад.",
+     "wait_uk": "3 хв",
+     "shoot_uk": "Чотири кадри всієї панелі.",
+     "tag": "f30",
+     "class": "matte-running"
+    },
+    {
+     "id": "B6.19",
+     "mark": true,
+     "items": [
+      "X16",
+      "F4"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "Перевірка ламп при ввімкненні: заглушіть двигун кнопкою Start (P, ручник). Почекайте 5 с. Натисніть Start БЕЗ гальма (запалювання без двигуна) і знімайте ВІДЕО 60 fps з першої секунди: лампи світяться 2-4 с. Знімайте, доки знову не з'явиться пурпурова панель, потім ще 20 с (кадр із повідомленням «натисніть гальмо»). Потім заведіть двигун (нога на гальмі).",
+     "wait_uk": "1 хв",
+     "shoot_uk": "Відео з першої секунди + кадр через 10-20 с.",
+     "tag": "f30",
+     "class": "matte-lamp-check",
+     "warn_uk": "Заглушити й завести лише на місці, P, ручне гальмо."
+    },
+    {
+     "id": "B6.20",
+     "mark": true,
+     "items": [],
+     "expect": [],
+     "lead": "collect #2",
+     "uk": "Поверніть f30_cluster, як було записано в блоці 0 (тема, G20, «Change with the drive mode»). Ведучий збирає логи №2.",
+     "wait_uk": "до 5 хв",
+     "shoot_uk": "",
+     "tag": "f30",
+     "sets_off": [
+      "S10",
+      "S11"
+     ],
+     "class": "restore"
+    }
+   ]
+  },
+  {
+   "id": "B7",
+   "title_uk": "Коротка поїздка з навігацією",
+   "minutes": 35,
+   "engine": "drive",
+   "cluster": "stock",
+   "sets": [
+    "S7",
+    "S11"
+   ],
+   "passenger": true,
+   "intro_uk": "ПОТРІБЕН ПАСАЖИР: він керує навігацією, меню Signal Probe і фотографує. Водій тільки веде. Позначки натискаються тільки на стоянці.",
+   "lead": "S7+S11 on. The passenger notes clock times; the marks are pressed at stops.",
+   "steps": [
+    {
+     "id": "B7.1",
+     "mark": false,
+     "items": [
+      "P12",
+      "P14"
+     ],
+     "lead": "S7+S6 on",
+     "uk": "Штатна панель. Запишіть на папері час за годинником авто при першій позначці (для звірки з логом).",
+     "wait_uk": "1 хв",
+     "shoot_uk": "",
+     "parked": true,
+     "sets_on": [
+      "S7",
+      "S11"
+     ],
+     "sets_off": []
+    },
+    {
+     "id": "B7.2",
+     "mark": true,
+     "items": [
+      "P14"
+     ],
+     "expect": [
+      [
+       "P14",
+       "map-without-route"
+      ]
+     ],
+     "lead": "",
+     "uk": "Стоїмо, маршруту немає. Налаштуйте вигляд панелі на карту (за тим самим меню, що в блоці з кнопками). Чекайте 20 с.",
+     "wait_uk": "20 с",
+     "shoot_uk": "Панель: чи є карта посередині.",
+     "tag": "stock",
+     "parked": true,
+     "class": "cluster-view"
+    },
+    {
+     "id": "B7.3",
+     "mark": true,
+     "items": [
+      "P12",
+      "P14"
+     ],
+     "expect": [
+      [
+       "P12",
+       "guiding-state"
+      ]
+     ],
+     "lead": "",
+     "uk": "Пасажир запускає навігацію до місця за 10-20 хв їзди. Чекайте, поки маршрут порахується.",
+     "wait_uk": "до 2 хв",
+     "shoot_uk": "Панель з маршрутом.",
+     "tag": "stock",
+     "parked": true,
+     "class": "route-start"
+    },
+    {
+     "id": "B7.4",
+     "mark": true,
+     "items": [
+      "P12",
+      "F10",
+      "L21",
+      "P19"
+     ],
+     "expect": [
+      [
+       "P12",
+       "next-intersection"
+      ],
+      [
+       "P12",
+       "dart"
+      ],
+      [
+       "P19",
+       "cons-regular"
+      ]
+     ],
+     "lead": "",
+     "uk": "Ще на місці: позначка. Потім ЇДЬТЕ маршрутом. Пасажир голосом диктує на запис телефону час (за годинником авто) і подію («поворот ліворуч», «кільце», «розвилка») і фотографує панель на поворотах: стрілка, відстань, смуги. Частину шляху (5 хв) - у режимі Eco Pro (кнопка режимів, перемикає водій на зупинці або пасажир підказує); пасажир фотографує сторінку Eco Pro на центральному екрані.",
+     "wait_uk": "10-20 хв",
+     "shoot_uk": "Пасажир: панель на кількох поворотах і на розвилці чи кільці. Також: штатна панель у русі близько 50 км/год і близько 2000 об/хв (стрілки), один кадр.",
+     "tag": "stock",
+     "parked": false,
+     "class": "drive-guided"
+    },
+    {
+     "id": "B7.5",
+     "mark": true,
+     "items": [
+      "P12"
+     ],
+     "expect": [
+      [
+       "P12",
+       "dart"
+      ]
+     ],
+     "lead": "",
+     "uk": "ПРИБУЛИ (або зупинилися на безпечному місці): позначка. Чекайте 30 с.",
+     "wait_uk": "30 с",
+     "shoot_uk": "Панель: пункт призначення.",
+     "tag": "stock",
+     "parked": true,
+     "class": "arrival"
+    },
+    {
+     "id": "B7.6",
+     "mark": true,
+     "items": [
+      "P14"
+     ],
+     "expect": [
+      [
+       "P14",
+       "map-without-route"
+      ]
+     ],
+     "lead": "",
+     "uk": "Завершіть маршрут. Вигляд панелі = карта лишається. 20 с стоїмо. Потім вигляд панелі НЕ карта (будь-який інший). 20 с.",
+     "wait_uk": "1 хв",
+     "shoot_uk": "Панель із картою без маршруту та без карти.",
+     "tag": "stock",
+     "parked": true,
+     "class": "cluster-view"
+    }
+   ]
+  },
+  {
+   "id": "B8",
+   "title_uk": "Поїздка з круїз-контролем і дорожніми знаками",
+   "minutes": 45,
+   "engine": "drive",
+   "cluster": "stock then twin",
+   "sets": [
+    "S8",
+    "S9"
+   ],
+   "passenger": true,
+   "intro_uk": "ПОТРІБЕН ПАСАЖИР (позначки, фото, нотатки). Дорога зі знаками обмеження швидкості, де безпечно вмикати круїз. Не перевищуйте швидкість для тесту.",
+   "lead": "S8+S9 on. The passenger notes the clock at each event. Segment 8a stock cluster, then stop, switch to Twin Dial for 8b.",
+   "steps": [
+    {
+     "id": "B8.1",
+     "mark": false,
+     "items": [
+      "P15",
+      "P16",
+      "P17"
+     ],
+     "lead": "S8+S9 on",
+     "uk": "",
+     "wait_uk": "1 хв",
+     "shoot_uk": "",
+     "parked": true,
+     "sets_on": [
+      "S8",
+      "S9"
+     ],
+     "sets_off": [
+      "S7",
+      "S11"
+     ]
+    },
+    {
+     "id": "B8.2",
+     "mark": true,
+     "items": [
+      "P16"
+     ],
+     "expect": [
+      [
+       "P16",
+       "tyre-pressure"
+      ]
+     ],
+     "lead": "",
+     "uk": "Стоїмо. Шини: відкрийте в iDrive сторінку тиску в шинах. Сфотографуйте.",
+     "wait_uk": "1 хв",
+     "shoot_uk": "Екран шин: цифри читаються.",
+     "tag": "stock",
+     "parked": true,
+     "class": "tyre-page"
+    },
+    {
+     "id": "B8.3",
+     "mark": true,
+     "items": [
+      "P17"
+     ],
+     "expect": [
+      [
+       "P17",
+       "cbs-list"
+      ]
+     ],
+     "lead": "",
+     "uk": "Сторінка сервісу в iDrive (технічне обслуговування): відкрийте її, порахуйте пункти.",
+     "wait_uk": "1 хв",
+     "shoot_uk": "Екран сервісу.",
+     "tag": "stock",
+     "parked": true,
+     "class": "service-page"
+    },
+    {
+     "id": "B8.4",
+     "mark": true,
+     "items": [
+      "P15",
+      "F6",
+      "F5",
+      "F11",
+      "F10"
+     ],
+     "expect": [
+      [
+       "P15",
+       "sign"
+      ]
+     ],
+     "lead": "",
+     "uk": "Стоїмо: позначка. Потім ЇДЬТЕ 10 хв дорогою зі знаками. Пасажир записує час і число на знаку, яке показує панель, на кількох знаках; фотографує панель зі знаком.",
+     "wait_uk": "10 хв",
+     "shoot_uk": "Пасажир: панель зі знаком (кілька кадрів). Якщо трапиться: знак із трьома цифрами, обидва знаки разом (обмеження і обгін), кінець обмеження, довга назва вулиці.",
+     "tag": "stock",
+     "parked": false,
+     "class": "drive-signs"
+    },
+    {
+     "id": "B8.5",
+     "mark": true,
+     "items": [
+      "P15",
+      "F5",
+      "F6",
+      "P16",
+      "P17",
+      "L17"
+     ],
+     "expect": [
+      [
+       "P15",
+       "longitudinal"
+      ],
+      [
+       "P16",
+       "sport-display"
+      ],
+      [
+       "P17",
+       "heading"
+      ]
+     ],
+     "lead": "",
+     "uk": "СТОП (безпечне місце): позначка. Далі на прямій дорозі, де це безпечно, пасажир підказує, а водій робить: круїз увімкнути, задати швидкість (напр. 80), змінити + і -, змінити дистанцію (якщо адаптивний), вимкнути, відновити, перемкнути на обмежувач швидкості й назад. Потім одне помірне прискорення без перевищення. Потім кілька хвилин на північ і кілька на схід. Пасажир записує час кожної дії. Якщо в заторі чи на світлофорі двигун глушиться автостопом: пасажир записує час.",
+     "wait_uk": "15 хв",
+     "shoot_uk": "Пасажир: панель (штатний вигляд круїзу і обмежувача) і проекційний дисплей, якщо є (чи показує задану швидкість).",
+     "tag": "stock",
+     "parked": false,
+     "class": "cruise"
+    },
+    {
+     "id": "B8.6",
+     "mark": true,
+     "items": [
+      "F1",
+      "X10"
+     ],
+     "expect": [],
+     "lead": "",
+     "uk": "СТОП. Увімкніть Twin Dial (Cluster = Twin Dial), позначка. Їдьте ще 10 хв дорогою зі знаками. Пасажир фотографує: чи видно знак BMW де-небудь, коли Twin Dial увімкнено.",
+     "wait_uk": "10 хв",
+     "shoot_uk": "Пасажир: панель з Twin Dial і знаком.",
+     "tag": "twin",
+     "parked": false,
+     "class": "drive-signs-twin"
+    },
+    {
+     "id": "B8.7",
+     "mark": true,
+     "items": [
+      "P16"
+     ],
+     "expect": [
+      [
+       "P16",
+       "tyre-pressure"
+      ]
+     ],
+     "lead": "",
+     "uk": "СТОП на стоянці. Шини ще раз (теплі): сторінка тиску й температури в iDrive. Вимкніть Twin Dial (Cluster = Off).",
+     "wait_uk": "1 хв",
+     "shoot_uk": "Екран шин.",
+     "tag": "stock",
+     "parked": true,
+     "class": "tyre-page-warm"
+    }
+   ]
+  },
+  {
+   "id": "B9",
+   "title_uk": "Завершення",
+   "minutes": 15,
+   "engine": "on",
+   "cluster": "as before",
+   "sets": [],
+   "passenger": false,
+   "intro_uk": "Повертаємо все як було, ведучий забирає останні логи.",
+   "lead": "Collect #3 (final), read the summary, turn the probe sets off, restore the owner's settings, save a note to memory.",
+   "steps": [
+    {
+     "id": "B9.1",
+     "mark": true,
+     "items": [],
+     "expect": [],
+     "lead": "final marker",
+     "uk": "Позначка «кінець».",
+     "wait_uk": "1 хв",
+     "shoot_uk": "",
+     "sets_on": [],
+     "sets_off": [
+      "S8",
+      "S9"
+     ],
+     "class": "end"
+    },
+    {
+     "id": "B9.2",
+     "mark": false,
+     "items": [],
+     "lead": "collect #3",
+     "uk": "Верніть налаштування f30_cluster і Twin Dial, як було записано в блоці 0 (за фото). Ведучий збирає останні логи.",
+     "wait_uk": "до 5 хв",
+     "shoot_uk": ""
+    },
+    {
+     "id": "B9.3",
+     "mark": false,
+     "items": [],
+     "lead": "",
+     "uk": "Передайте ведучому: фото, відео, папір з часом і числами. Не публікуйте фото з іменами абонентів і назвами місць.",
+     "wait_uk": "",
+     "shoot_uk": ""
+    }
+   ]
+  }
+ ],
+ "coverage_extra": {
+  "_note": "register id -> answers that are not an owner step: 'lead:collect#N' (a log read at a collection), 'pass2' (needs an installed build: RUNBOOK part 2), or a reason it is not in this session. Everything else is computed from the steps' items.",
+  "L1": [
+   "lead:collect#0",
+   "lead:collect#2"
+  ],
+  "L2": [
+   "lead:collect#0"
+  ],
+  "L3": [
+   "lead:collect#0",
+   "lead:collect#1"
+  ],
+  "L4": [
+   "lead:collect#0",
+   "lead:collect#2"
+  ],
+  "L5": [
+   "lead:collect#0"
+  ],
+  "L6": [
+   "lead:collect#3"
+  ],
+  "L7": [
+   "lead:collect#3"
+  ],
+  "L8": [
+   "lead:collect#2"
+  ],
+  "L9": [
+   "lead:collect#1"
+  ],
+  "L10": [
+   "lead:collect#0",
+   "lead:collect#2"
+  ],
+  "L11": [
+   "lead:collect#2"
+  ],
+  "L12": [
+   "answered before the session (CA register); confirm at collection #0"
+  ],
+  "L13": [
+   "lead:collect#0"
+  ],
+  "L14": [
+   "lead:collect#0",
+   "lead:collect#3"
+  ],
+  "L15": [
+   "lead:collect#0",
+   "lead:collect#1"
+  ],
+  "X2": [
+   "pass2"
+  ],
+  "X3": [
+   "pass2"
+  ],
+  "X4": [
+   "pass2"
+  ],
+  "X5": [
+   "pass2"
+  ],
+  "X6": [
+   "pass2"
+  ],
+  "X7": [
+   "pass2"
+  ],
+  "X8": [
+   "pass2"
+  ],
+  "X10": [
+   "pass2"
+  ],
+  "L16": [
+   "answered before the session (CA register)"
+  ],
+  "L30": [
+   "answered before the session (CA register)"
+  ],
+  "L31": [
+   "answered before the session (CA register)"
+  ],
+  "L17": [
+   "lead:collect#3",
+   "only if f30_cluster's handlers log with Theme Off (check at collection #0); else a drive with f30 drawing"
+  ],
+  "L18": [
+   "lead:collect#1",
+   "lead:collect#3"
+  ],
+  "L19": [
+   "lead:collect#2"
+  ],
+  "L20": [
+   "lead:collect#0",
+   "not the change step: changing the car's limit-warning setting is a driver-assistance setting (the lead decides)"
+  ],
+  "L21": [
+   "lead:collect#3"
+  ],
+  "L22": [
+   "lead:collect#2",
+   "only if f30 showed a boost readout"
+  ],
+  "L23": [
+   "pass2",
+   "needs the owner's approval: perf.json is a write in the app's data folder (CA D6)"
+  ],
+  "L24": [
+   "lead:collect#0",
+   "lead:collect#3"
+  ],
+  "L25": [
+   "lead:collect#0",
+   "lead:collect#3"
+  ],
+  "L26": [
+   "lead:collect#2"
+  ],
+  "L27": [
+   "lead:collect#2"
+  ],
+  "L28": [
+   "lead:collect#2"
+  ],
+  "L29": [
+   "lead:collect#1"
+  ],
+  "P20": [
+   "lead decision (CA D4): a read-only subscribe attempt; no field to read"
+  ],
+  "P21": [
+   "lead decision (CA D2): named _broadcasts only; none declared"
+  ],
+  "X12": [
+   "pass2"
+  ],
+  "X14": [
+   "pass2",
+   "needs the owner's approval: a build and a data-file write (CA D6)"
+  ],
+  "X15": [
+   "not in this session: writes to cluster-render's configuration or a service restart (BR E6-E12)"
+  ],
+  "X19": [
+   "not in this session: Driver Profiles write tests (CA D9), a separate sitting with the owner's approval"
+  ],
+  "X20": [
+   "not in this session: Driver Profiles avatar (CA D9), a write"
+  ],
+  "X21": [
+   "not in this session: a diagnostic FA / FSC read, not an OAP read (CA)"
+  ],
+  "X22": [
+   "not in this session: an E-Sys / BimmerCode coding read (CA)"
+  ],
+  "F15": [
+   "not in this session: needs a drive with f30_cluster drawing (both drives run the stock cluster or Twin Dial); add an f30 segment to block 8 if the owner wants"
+  ],
+  "F16": [
+   "not in this session: the owner's own HMI steps for driver recognition (CA D9)"
+  ]
+ },
+ "sets_uk": {
+  "S1": "Повідомлення",
+  "S2": "Комп’ютер, пробіг, одиниці",
+  "S3": "Кузов і напруга",
+  "S4": "Медіа і радіо",
+  "S5": "Телефон",
+  "S6": "Вид і кнопки",
+  "S7": "Навігація",
+  "S8": "Допоміжні системи",
+  "S9": "Технічне",
+  "S10": "Чорна коробка",
+  "S11": "Непідключені сигнали f30"
+ },
+ "_sets_note": "The Ukrainian names are the checkbox labels of apps/signal_probe (CP, fields.js SETS); keep them equal."
+}
