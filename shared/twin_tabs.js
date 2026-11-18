@@ -163,7 +163,10 @@ function update(hud) {
     const s = st(hud), m = mode(hud), c = cfg(hud);
     const cc = hud.twinCc || {};
     // a message SHOWS when the machine says window / ours with a severity; a window with none is only the keep-open of a car that cannot be read yet
-    const msgNow = (cc.state === 'window' || cc.state === 'ours') && cc.severity !== null && cc.severity !== undefined;
+    // FIN (the lead / the owner, 2026-11-18): a number the car shows with no ccList entry (285 type: BMW's own panel shows it) selects no tab,
+    // unless config.ccActive.unlistedPullsTab says so - the same gate as the machine's own pull (car-fix CF1); the panel stays open regardless
+    const tm = hud.twinMsg, unlisted = !!(tm && tm.t && tm.t.unlisted === true && tm.unlistedPullsTab !== true);
+    const msgNow = (cc.state === 'window' || cc.state === 'ours') && cc.severity !== null && cc.severity !== undefined && !unlisted;
     const navNow = navOn(hud);      // car-fix CF3: BMW's guidance or a CarPlay route
     const callOn = callNow(hud);
     const lock = lockKmh(hud);

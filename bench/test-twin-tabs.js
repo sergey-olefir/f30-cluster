@@ -819,12 +819,18 @@ async function engineChecks() {
         eq([hud.tabs.tab, sepNow()], [1, [780, 848, 1168, 1237]], 'a stored entry listed with displayed 0: tab 2 in the bar, not selected');
         feedList([REST]); await sleep(250);
         eq(sepNow(), [780, 1168, 1237, -10], '... and gone with it');
-        // the lead (FIN follow-up): an unlisted number does not bring tab 2 in by itself. NOTE, as the selection rules are kept: the machine gives an
-        // unlisted 285 the severity grey (twin_cc.js), so B2's rule 1 still SELECTS tab 2 for it, and a selected tab stays in the bar. This pins
-        // both halves: the bar's own rule says no (messagePresent false), the tab is there only because rule 1 selected it.
-        feedDisp(285); await sleep(300);
-        ok(!tabs.messagePresent(hud) && hud.tabs.tab === 2 && hud.tabs.reason === '1 message' && hud.twinCc.severity === 'grey',
-            'displayed 285 with no ccList entry: not a message for the bar (messagePresent false); B2\'s rule 1 selects tab 2 on the machine\'s grey severity (kept: a selection rule)');
+        // FIN (the lead / the owner): an unlisted number (285 type, BMW's own panel shows it, ~6 s on the car) selects no tab and does not
+        // bring tab 2 into the bar; BMW's fallback window stays open the whole time (tdback u_win.x 1)
+        const winNow = () => { const x = hud.widgets.get('bg_l'), l = x && x.c.layers.get(x.ref), k = l && Object.keys(l.uniforms || {}).find((n) => /:u_win$/.test(n)); return k ? Number(String(l.uniforms[k].v).trim().split(/[\s,]+/)[0]) : null; };
+        const t285 = Date.now(), seen285 = { tabs: {}, seps: {}, win: {} }, log285 = logs.length;
+        feedDisp(285);
+        while (Date.now() - t285 < 6000) { await sleep(100); seen285.tabs[hud.tabs.tab] = 1; seen285.seps[JSON.stringify(sepNow())] = 1; seen285.win[winNow()] = 1; }
+        eq([Object.keys(seen285.tabs), Object.keys(seen285.seps), Object.keys(seen285.win)], [['1'], ['[780,1168,1237,-10]'], ['1']],
+            'displayed 285 with no ccList entry for 6 s: tab 1 the whole time (no selection), tab 2 never in the bar, BMW\'s window open throughout (u_win.x 1)');
+        ok(hud.twinCc.state === 'window' && hud.twinMsg.t.unlisted === true && !logs.slice(log285).some((l) => /tabs: tab \d -> /.test(l)),
+            '... the machine says window (unlisted); no tab move in the log');
+        feedDisp(0); await sleep(300);
+        eq([hud.tabs.tab, winNow()], [1, 0], '285 ends (displayed 0): tab 1, the window shut');
         feedDisp(65535); await sleep(400);
         eq([hud.tabs.tab, sepNow(), tabs.messagePresent(hud)], [1, [780, 1168, 1237, -10], false], 'displayed 65535 (unknown) with the list at rest: no pull, tab 1, tab 2 out of the bar');
         feedDisp(0); await sleep(300);
