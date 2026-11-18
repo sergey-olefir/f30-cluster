@@ -255,6 +255,9 @@ function hold(hud) {
         hud.log.info('start-up: first build after ' + (Date.now() - st.t0) + ' ms' + (waits.length ? ', still waiting for ' + waits.join(' and ') + ' (config.startupHold.ms ' + ms + ')' : ', every first value in'));
         return false;
     }
+    // nothing of ours is on the screen yet, but the state the engine reports is the blind one the machine starts in (SPEC 8.4 keep-open 1:
+    // "window" until the car's messages can be read), not the construction default "none": no moment of "ready and none"
+    if (hud.twinMsg && hud.twinCc && hud.twinCc.state === 'none') hud.twinCc = { state: 'window', severity: null };
     if (!st.timer) {
         st.timer = setTimeout(() => { st.timer = null; hud._rebuild(); }, left);
         if (st.timer.unref) st.timer.unref();
