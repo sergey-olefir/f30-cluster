@@ -392,7 +392,7 @@ function buildApp() {
     const spec = JSON.parse(JSON.stringify(f30));
     spec.id = APP_ID; spec.title = 'Twin CC test'; spec.description = 'test stand-in for twin_dial\'s message path (bench/test-twin-cc.js); never shipped';
     spec.version = '0.0.1'; spec.loggingId = 'OATC'; spec.iconGlyph = 'TC';
-    spec.shared = f30.shared.filter((f) => ['menu.js', 'gallery.js', 'previews.js'].indexOf(f) < 0).concat(['twin_cc.js', 'twin_tokens.js']);
+    spec.shared = f30.shared.filter((f) => ['menu.js', 'gallery.js', 'previews.js'].indexOf(f) < 0).concat(['twin_cc.js', 'twin_tokens.js', 'twin_tabs.js', 'twin_pages.js']);     // integration: twin_tokens' icon state lives in twin_tabs (B2)
     spec.settings.forEach((s) => {
         if (s.key === 'hudLayout') { s.options = s.options.concat([['twin_cc', 'Twin CC'], ['twin_cc_b', 'Twin CC b'], ['twin_cc_nosheet', 'Twin CC without a sheet'], ['twin_cc_c', 'Twin CC row on 2']]); s.default = 'twin_cc'; }
         if (s.key === 'byMode') s.default = false;
@@ -444,16 +444,20 @@ function tabFillChecks() {
     h.twinMsg = { tab: 1 };
     h._twinBackInit(x);
     const near = (a, b) => a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 0.003);
-    const TAB = { 1: [176 / 255, 10 / 255, 37 / 255, 1], 2: [176 / 255, 10 / 255, 37 / 255, 1], 3: [240 / 255, 150 / 255, 10 / 255, 1] };
-    ok(rec.u_hi[2] === 1 && rec.u_hi[0] === 618 - w.x && rec.u_hi[1] === 744 - w.x && near(rec.u_hiC, TAB[1]), 'tab 1 selected: its cell [618, 744] is filled in the tab\'s colour (176, 10, 37)');
+    // integration (B7): B1's fill (SPEC-R3 3.2: the tab's colour in LINEAR light, the black floor out) and the cells of the new separators
+    // (780 / 848 / 1168 / 1237); without live tabs the machine's tab is the selected one
+    const FLOOR = [0.0012, 0.0009, 0.0056], lin = (c) => { const v = c / 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    const fillOf = (rgb) => rgb.map((c, i) => Math.max(0, (lin(c) - FLOOR[i]) / (1 - FLOOR[i]))).concat([1]);
+    const TAB = { 1: fillOf([176, 10, 37]), 2: fillOf([176, 10, 37]), 3: fillOf([240, 150, 10]) };
+    ok(rec.u_hi[2] === 1 && rec.u_hi[0] === 618 - w.x && rec.u_hi[1] === 780 - w.x && near(rec.u_hiC, TAB[1]), 'tab 1 selected: its cell [618, 780] is filled in the tab\'s colour (176, 10, 37)');
     ['red', 'amber', 'green', 'grey'].forEach((sev) => {
         ['window', 'ours'].forEach((state) => {
             h.twinCc = { state, severity: sev }; h.twinMsg.tab = 2; h._twinBackSend(x, false);
-            ok(rec.u_hi[0] === 744 && rec.u_hi[1] === 812 && near(rec.u_hiC, TAB[2]), 'a ' + sev + ' message (' + state + '), tab 2 selected: the fill is the tab\'s own, never the severity');
+            ok(rec.u_hi[0] === 780 - w.x && rec.u_hi[1] === 848 - w.x && near(rec.u_hiC, TAB[2]), 'a ' + sev + ' message (' + state + '), tab 2 selected: the fill is the tab\'s own, never the severity');
         });
     });
     h.twinCc = { state: 'window', severity: 'amber' }; h.twinMsg.tab = 3; h._twinBackSend(x, false);
-    ok(rec.u_hi[0] === 812 && rec.u_hi[1] === 1168 && near(rec.u_hiC, TAB[3]), 'tab 3 selected with an amber message: tab 3\'s cell in amber-orange (its own colour), the severity nowhere in it');
+    ok(rec.u_hi[0] === 848 - w.x && rec.u_hi[1] === 1168 - w.x && near(rec.u_hiC, TAB[3]), 'tab 3 selected with an amber message: tab 3\'s cell in amber-orange (its own colour), the severity nowhere in it');
     h.twinCc = { state: 'ours', severity: 'red' }; h._twinBackSend(x, false);
     ok(rec.u_rule[4] === 629 && rec.u_rule[5] === 611 && rec.u_rule[7] === 615 && near(rec.u_ruleC.slice(4, 8), [176 / 255, 7 / 255, 30 / 255, 1]), 'the bottom rule is the severity colour only while our card covers BMW\'s panel (4 px, y 611..615)');
     h.twinCc = { state: 'window', severity: 'red' }; h._twinBackSend(x, false);
@@ -462,15 +466,16 @@ function tabFillChecks() {
     h.twinCc = { state: 'ours', severity: 'red' }; h.theme = { fg: [255, 255, 255, 255], bg: [0, 0, 0, 255] };
     const warn = Ld.widgets.find((q) => q.id === 'tab_warn_i');
     h.twinMsg.tab = 1;
-    ok(JSON.stringify(twinTok.iconState(h, warn).rgb) === '[218,16,48]', 'the warning icon is red (218, 16, 48) while a red message shows and tab 2 is not selected');
+    // integration: B2's icon state names the severity colour (color 'red' / 'amber'); the engine paints it as SPEC-R3 5.3's (218, 16, 48) / (240, 170, 10)
+    ok(twinTok.iconState(h, warn).color === 'red', 'the warning icon is red (218, 16, 48) while a red message shows and tab 2 is not selected');
     h.twinCc = { state: 'window', severity: 'amber' };
-    ok(JSON.stringify(twinTok.iconState(h, warn).rgb) === '[240,170,10]', 'amber (240, 170, 10) for an amber one');
+    ok(twinTok.iconState(h, warn).color === 'amber', 'amber (240, 170, 10) for an amber one');
     h.twinCc = { state: 'window', severity: 'grey' };
-    ok(twinTok.iconState(h, warn).rgb === null, 'white for a white / green / grey one');
+    ok(twinTok.iconState(h, warn).color === null, 'white for a white / green / grey one');
     h.twinCc = { state: 'ours', severity: 'red' }; h.twinMsg.tab = 2;
-    ok(twinTok.iconState(h, warn).rgb === null, 'white on the fill while tab 2 is selected');
+    ok(twinTok.iconState(h, warn).color === null, 'white on the fill while tab 2 is selected');
     h.twinCc = { state: 'none', severity: null }; h.twinMsg.tab = 1;
-    ok(twinTok.iconState(h, warn).rgb === null, 'white when nothing shows (never dimmed)');
+    ok(twinTok.iconState(h, warn).color === null, 'white when nothing shows (never dimmed)');
 }
 
 async function engineChecks() {

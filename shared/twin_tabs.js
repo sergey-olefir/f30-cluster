@@ -261,7 +261,8 @@ function wire(hud, extra, onChange) {
 const pageOf = (hud) => { const s = st(hud); return PAGES[s.hold !== null && PAGES[s.hold] ? s.hold : s.tab]; };
 
 /** The selected tab for the bar's fill (1..5), or 0 when live tabs are off. */
-const selected = (hud) => (hud && hud.tabs && isNum(hud.tabs.tab) ? hud.tabs.tab : 1);
+// integration (B7): without live tabs, B3's machine says which tab is selected (hud._twinTabNow)
+const selected = (hud) => (hud && hud.tabs && isNum(hud.tabs.tab) ? hud.tabs.tab : hud && typeof hud._twinTabNow === 'function' ? hud._twinTabNow() : 1);
 
 /** The G20 black-floor correction srgb((L - F) / (1 - F)), F = (0.12 %, 0.09 %, 0.56 %) (SPEC rev 2 7.1), on one sRGB code triple. */
 function floorCorrect(c) {

@@ -559,7 +559,8 @@ function resolve(hud, name) {
             return td.media.length > max ? td.media.slice(0, max - 1) + '\u2026' : td.media;
         }
         // ---- centre pages
-        case 'cTitle': return TITLES[page(hud)];      // integration: B2's (TITLES.msg is tab 2's title; B3's TAB2_TITLE superseded)
+        // integration: B2's (TITLES.msg is tab 2's title); without live tabs, B3's machine's tab 2 still titles the centre "Повідомлення"
+        case 'cTitle': return !(hud._twinTabsOn && hud._twinTabsOn()) && hud._twinTabNow && hud._twinTabNow() === 2 ? TITLES.msg : TITLES[page(hud)];
         case 'cTime': return onPage('clock', clockText(local(hud)));
         case 'cWeekday': { const L = local(hud); return onPage('clock', L ? WEEKDAYS[L.wd] : ''); }
         case 'cDate': { const L = local(hud); return onPage('clock', L ? pad2(L.d) + '.' + pad2(L.mo) + '.' + L.y : ''); }

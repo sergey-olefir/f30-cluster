@@ -2736,7 +2736,9 @@ class HudApp {
         if (!t || !t.L || !x.ref) return;
         const w = x.w, c = x.c, ref = x.ref, cc = this._twinCcNow();
         // twin_dial B1: the selected tab (this.twinTab, 1..5) and the map window (this.twinMap: null | 'W1' | 'W2') are part of the key
-        const tab = Math.max(1, Math.min(5, Math.round(Number(this.twinTab) || 1))), mapN = TW_MAP[this.twinMap] ? this.twinMap : null;
+        // integration (B7): B2's tab (mirrored on twinTab) when live tabs run, else B3's machine's (an app without config.tabs)
+        const tabSrc = this.tabs || !this.twinMsg ? this.twinTab : this.twinMsg.tab;
+        const tab = Math.max(1, Math.min(5, Math.round(Number(tabSrc) || 1))), mapN = TW_MAP[this.twinMap] ? this.twinMap : null;
         const key = cc.state + '|' + cc.severity + '|' + this.nightOn + '|' + tab + '|' + mapN;
         if (!force && key === x.twKey) return;
         x.twKey = key;
