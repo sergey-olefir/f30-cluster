@@ -25,7 +25,7 @@ The lead's note of 2026-11-18 (the owner's priority): **the trip / on-board-comp
 
 Block 1 runs with the ignition on and the engine off, so the engine stays cold for block 2 (the coolant verdict needs the day's cold start). The rest is ordered by the brief's rule, fewest installs and least driving: stalk and buttons (ignition) -> cold start (S2+S3) -> doors and messages (S1+S3) -> media (S4) -> phone (S5+S4) -> our apps parked: photos, the black box, the mattes, the lamp check (S1) -> a short guided drive (S7+S6) -> a drive with cruise and signs (S8+S9) -> restore. The whole plan needs **one install: signal_probe**; everything else runs on f30 0.7.20 and Twin Dial 0.1.0 as installed.
 
-Sets follow CP's app (S1-S9, the checkbox labels of `apps/signal_probe`), never more than two at once (S6 alone for the stalk, the least load: 8 interfaces, 24 fields). Marks follow CP's menu: one row "Позначка N" that counts up by itself, so the owner checks the number on the row against the table before each step (SESSION §4 says what to do when they differ).
+Sets follow CP's app (S1-S11, the checkbox labels of `apps/signal_probe`), never more than two at once (S6 alone for the stalk, the least load: 8 interfaces, 24 fields). Marks follow CP's menu: one row "Позначка N" that counts up by itself, so the owner checks the number on the row against the table before each step (SESSION §4 says what to do when they differ).
 
 ## 2. Time budget per block
 
@@ -39,8 +39,8 @@ Estimates (minutes at the car; nothing here has been timed on this car). The lea
 | 3 | rest, each door, boot, bonnet, two doors, the door again | 20 | on | S1+S3 | no |
 | 4 | FM, DAB, USB, Bluetooth, source cycle, CarPlay | 25 | on | S4 | no |
 | 5 | phone: connect, ring (stock photo), answer, ring with Twin Dial (photo), unsaved, outgoing, menu, tray, media with Twin Dial, CarPlay calls | 35 | on | S5+S4 | no |
-| 6 | stock photos; Twin Dial: baseline, safety, lamps, dial ends, band day / night, gears, modes (60 fps), message; f30: baseline, gears and modes (setting on / off, G20), message, box re-map if a box, mattes, lamp check; restore | 70 | on (one stop / start) | S1 | no |
-| 7 | short guided drive | 35 | drive | S7+S6 | **yes** |
+| 6 | stock photos; Twin Dial: baseline, safety, lamps, dial ends, band day / night, gears, modes (60 fps), message; f30: baseline, gears and modes (setting on / off, G20), message, box re-map if a box, mattes, lamp check; restore | 70 | on (one stop / start) | S10+S11 | no |
+| 7 | short guided drive (part in Eco Pro) | 35 | drive | S7+S11 | **yes** |
 | 8 | tyre and service pages; signs (stock); cruise, limiter, acceleration, heading; signs with Twin Dial; tyres warm | 45 | drive | S8+S9 | **yes** |
 | 9 | end mark, restore, final collection | 15 | on | - | no |
 | | **Total** | **333 (about 5.5 h)** | | | |
@@ -55,7 +55,6 @@ Estimates (minutes at the car; nothing here has been timed on this car). The lea
 | L23 (perf.json), X14 (slot-row logging build, reseat flag) | writes into an app's data folder or a new build | pass 2 with the owner's approval (CA D6) |
 | X15 (cluster-render configuration, E6-E12) | writes to cluster-render's configuration or service restarts; BR rates some as able to park the panel or restart the KOMBI | not in this plan |
 | X19, X20 (Driver Profiles writes), X21, X22 (diagnostic and coding reads), F16 (driver recognition) | other kinds of work (CA D9) | separate sittings |
-| P18, P19 (the black-box and f30's unwired signals) | CA's register puts them in sets S10 and S11, which CP's app does not have (S1-S9) | the lead decides (RUNBOOK §1.4 Q2); the steps that would answer them are already in the plan (B6 gears and modes, B1 indicators, B6 belts and lamps) |
 | P20, P21 (events, the high-beam camera service) | events are declared only when the lead names one | the lead (CA D2, D4) |
 | L20's change step | changing the car's speed-limit warning setting is a driver-assistance setting | read only what the logs hold |
 | F15 (smooth needles in motion) | needs a drive with f30_cluster drawing; both drives run the stock cluster or Twin Dial | an f30 segment in block 8 if the owner wants it |
@@ -96,7 +95,7 @@ What the dry run cannot prove: anything about the car (which fields arrive, thei
 
 | | A | B | The plan |
 |---|---|---|---|
-| Sets | CA's register: S1-S12, P1-P21 | CP's app: S1-S9, P1-P17 | follows the app; P18-P21 to the lead (RUNBOOK §1.4 Q2, Q3) |
+| Sets | CA's register: S1-S12, P1-P21 (S10-S12 proposed) | CP's app: S1-S11 (S10, S11 added late), P1-P19 | follows the app: S10+S11 in block 6, S11 in block 7; P20, P21 (S12, events) to the lead (RUNBOOK §1.4 Q3) |
 | `requestDefaultSymbols` | the brief: never on the car | f30 0.7.18-0.7.20 calls it once per run (CA C3) | f30 runs as installed, no restart; the lead decides before any reinstall (Q4) |
 | Engine state for the doors (P7) | PROBE-PROTOCOL: ignition on, engine off | the cold start must come before any engine run, and the stalk block must come first | doors with the engine running (block 3); the engine-off voltage is read in block 2 before the start |
 | The step classes | CL's `steps.py` (its own table on old ids) | the plan | `markers.json` generated from the plan |
@@ -104,7 +103,7 @@ What the dry run cannot prove: anything about the car (which fields arrive, thei
 ## 6. What the lead must decide
 
 1. One sitting or two (recommended: two; §2).
-2. S10 / S11 in the probe, events, the high-beam service (CA D2-D4).
+2. Events and the high-beam service (CA D2, D4); S10 / S11 are used as CP built them (RUNBOOK §1.4 Q2).
 3. Which pass-2 builds to make, and when (CA D7; RUNBOOK §4).
 4. `requestDefaultSymbols` in the installed f30 (CA D1).
 5. CarPlay or Android Auto (CA D5).

@@ -54,7 +54,7 @@ If Twin Dial 0.1.1 is ready before the session, install it **before** the probe 
 | # | Decision | Default in this plan | Source |
 |---|---|---|---|
 | Q1 | One sitting or two. The plan is about 5.5 h with the lead's checks (CQ-REPORT §2). | **Two sittings**: A = blocks 0-5 on a cold morning (about 3 h; the cold start of block 2 happens once a day); B = blocks 6-9 (about 2.75 h, with the passenger). Block 0's collection and safety check open each sitting. | CQ |
-| Q2 | Sets S10 (black-box signals, P18) and S11 (f30's unwired signals, P19): CA's register has them, CP's app has S1-S9 only. | Not in the session; the steps that would answer them are marked in the checklist (B6 gear / mode switches, lamps, belts). If CP adds them, B6 runs S1+S10, and B1's stalk steps can run S6+S11. | CA D3 |
+| Q2 | Sets S10 (black-box signals, P18) and S11 (f30's unwired signals, P19): in CA's register as a proposal (D3); CP's app now has them (S1-S11). | Used: block 6 runs S10+S11 (the gear and mode switches, belts, lamps, MSA; the messages of that block come from the apps' own logs), block 7 runs S7+S11 (consumption and the Eco Pro bonus while driving). | CA D3, CP |
 | Q3 | Events (`_broadcasts`, P21) and the high-beam camera service (P20). | None declared. | CA D2, D4 |
 | Q4 | f30_cluster 0.7.18-0.7.20 already calls `requestDefaultSymbols` once per run (an earlier approved log-only probe), which the brief forbids. The session runs f30 in B0, B1 and B6 but restarts no app, so the call is not repeated during the session unless the car restarts the app. | Run f30 as installed; decide before any f30 reinstall (`config.legacyProbes`). | CA C3, D1 |
 | Q5 | CarPlay or Android Auto (the probe reads `MediaPlayer` on `CarPlayMedia`). | CarPlay (SESSION B4, B5). | CA D5 |
@@ -187,22 +187,26 @@ Cluster states in step order: `stock` = Twin Dial and f30 both Off; `twin` = Twi
 | 74 | B5.12 | twin | P9: call-state, P9: carplay-call |
 | 75 | B5.13 | twin | P9: call-state |
 
-**Block 6: Панель із застосунками BMW-стилю, стоїмо** (sets S1)
+**Block 6: Панель із застосунками BMW-стилю, стоїмо** (sets S10, S11)
 
 | Mark | Step | Cluster | The probe must log (item: field tag) |
 |---|---|---|---|
-| 77 | B6.3 | twin | P1: active-cc |
-| 78 | B6.4 | twin | P1: active-cc |
-| 85 | B6.11 | twin | P1: active-cc |
-| 90 | B6.16 | f30 | P1: active-cc |
+| 78 | B6.4 | twin | P19: belts |
+| 79 | B6.5 | twin | P19: lights, P19: indicate |
+| 83 | B6.9 | twin | P18: gearbox-display |
+| 84 | B6.10 | twin | P18: fes-switch |
+| 87 | B6.13 | f30 | P18: fes-switch |
+| 88 | B6.14 | f30 | P18: fes-switch |
+| 89 | B6.15 | f30 | P18: fes-switch |
+| 92 | B6.18 | f30 | P19: belts |
 
-**Block 7: Коротка поїздка з навігацією** (sets S7, S6)
+**Block 7: Коротка поїздка з навігацією** (sets S7, S11)
 
 | Mark | Step | Cluster | The probe must log (item: field tag) |
 |---|---|---|---|
-| 95 | B7.2 | stock | P14: map-without-route, P11: kombi-config |
+| 95 | B7.2 | stock | P14: map-without-route |
 | 96 | B7.3 | stock | P12: guiding-state |
-| 97 | B7.4 | stock | P12: next-intersection, P12: dart |
+| 97 | B7.4 | stock | P12: next-intersection, P12: dart, P19: cons-regular |
 | 98 | B7.5 | stock | P12: dart |
 | 99 | B7.6 | stock | P14: map-without-route |
 
@@ -219,7 +223,7 @@ Cluster states in step order: `stock` = Twin Dial and f30 both Off; `twin` = Twi
 
 ### 2.4 Set switching
 
-Sets are one checkbox each (`set1`..`set9`) on the probe's own centre screen, switched by the owner. After each switch the log must carry `probe: sets on=… changed=…` (CP); 30 s later the `summary S<n> +30s` lines (which fields spoke, which are silent, which providers are down) and at +120 s one `ask` per silent field (a read-only getter); do not let the owner start a block before you have seen it **and** the last `probe: watch <Interface>[<instance>] set=S<n> … ok` line of the new sets (the probe subscribes one interface at a time with a pause between them; S5+S4 is about 20 interfaces, S6 eight). A value the car sends before its interface's watch line is lost; on the bench dry run exactly that cost a step (`docs/car/CQ-REPORT.md` §4). A `watch … error: …` line means that interface's items are silent this session: note it, go on. Per block: B1 S6; B2 S2+S3; B3 S1+S3; B4 S4; B5 S5+S4; B6 S1; B7 S7+S6; B8 S8+S9. Never more than two sets at once (the load of 135 fields on about 45 interfaces is untested on this car). If the car stutters (cluster freezes, the platform restarts an app): stop, switch every set off, read the platform's lines, tell the owner.
+Sets are one checkbox each (`set1`..`set11`) on the probe's own centre screen, switched by the owner. After each switch the log must carry `probe: sets on=… changed=…` (CP); 30 s later the `summary S<n> +30s` lines (which fields spoke, which are silent, which providers are down) and at +120 s one `ask` per silent field (a read-only getter); do not let the owner start a block before you have seen it **and** the last `probe: watch <Interface>[<instance>] set=S<n> … ok` line of the new sets (the probe subscribes one interface at a time with a pause between them; S5+S4 is about 20 interfaces, S6 eight). A value the car sends before its interface's watch line is lost; on the bench dry run exactly that cost a step (`docs/car/CQ-REPORT.md` §4). A `watch … error: …` line means that interface's items are silent this session: note it, go on. Per block: B1 S6; B2 S2+S3; B3 S1+S3; B4 S4; B5 S5+S4; B6 S10+S11; B7 S7+S11; B8 S8+S9. Never more than two sets at once (the load of 135 fields on about 45 interfaces is untested on this car). If the car stutters (cluster freezes, the platform restarts an app): stop, switch every set off, read the platform's lines, tell the owner.
 
 ### 2.5 The owner's slips with the marks
 
@@ -338,15 +342,15 @@ Tick when the answer has been read and recorded (answers.json carries the eviden
 | [ ] | P8 | P | Media and radio | B4.2 (mark 53); B4.3 (mark 54); B4.4 (mark 55); B4.5 (mark 56); B4.6 (mark 57); B4.7 (mark 58); B4.8 (mark 59); B4.9 (mark 60); B4.10 (mark 61); B4.11 (mark 62); B4.12 (mark 63); B5.10 (mark 72) | config.media.titleLine / sourceTypes; M1 / M2 / M3; tab 3 text; the progress unit (10000 -> ms) |
 | [ ] | P9 | P | Phone | B5.2 (mark 64); B5.3 (mark 65); B5.4 (mark 66); B5.5 (mark 67); B5.6 (mark 68); B5.7 (mark 69); B5.8 (mark 70); B5.9 (mark 71); B5.11 (mark 73); B5.12 (mark 74); B5.13 (mark 75) | A1 (tab icon lit + call card with our own timer); the name setting; signal bars; whether Twin Dial hides BMW's call pop-up (raises the card's priority); a missed-call count |
 | [ ] | P10 | P | Battery voltage | B2.4 (mark 37); B2.6 (mark 39); B2.8 (mark 41); B3.2 (mark 44) | config.battery = {field, factor}; whether a battery readout exists |
-| [ ] | P11 | P | The cluster's view and the map-view setting | B1.24 (mark 24); B7.2 (mark 95) | the cluster's map-view setting (S2 of the map window's presence rule); an indirect tab key; which of HMIContext / HMIContext2 this car serves |
+| [ ] | P11 | P | The cluster's view and the map-view setting | B1.24 (mark 24) | the cluster's map-view setting (S2 of the map window's presence rule); an indirect tab key; which of HMIContext / HMIContext2 this car serves |
 | [ ] | P12 | P | Guidance manoeuvres | B7.3 (mark 96); B7.4 (mark 97); B7.5 (mark 98) | the arrow and distance of the guidance page; lane row; rawDistance metres; phone guidance |
 | [ ] | P13 | P | The tab key: stalk, wheel and controller buttons | B1.2 (mark 2); B1.3 (mark 3); B1.4 (mark 4); B1.5 (mark 5); B1.6 (mark 6); B1.7 (mark 7); B1.8 (mark 8); B1.9 (mark 9); B1.10 (mark 10); B1.11 (mark 11); B1.12 (mark 12); B1.13 (mark 13); B1.14 (mark 14); B1.15 (mark 15); B1.16 (mark 16); B1.17 (mark 17); B1.18 (mark 18); B1.19 (mark 19); B1.20 (mark 20); B1.21 (mark 21); B1.22 (mark 22); B1.23 (mark 23); B1.25 (mark 25); B1.26 (mark 26); B1.27 (mark 27); B1.28 (mark 28); B1.29 (mark 29); B1.30 (mark 30); B1.31 (mark 31); B1.32 (mark 32); B1.33 (mark 33); B1.34 (mark 34) | config.tabKey (SB §3.3 decision table: which bit moved on which step); the scroll key; or the setting-only fallback |
 | [ ] | P14 | P | When does BMW's map exist in the cluster? | B1.24 (mark 24); B7.2 (mark 95); B7.3 (mark 96); B7.6 (mark 99) | the map window's presence rule S3 |
 | [ ] | P15 | P | The sign, cruise control and the speed limiter | B8.4 (mark 102); B8.5 (mark 103) | the sign's values; the set speed and function (cruise symbol, green marker); whether any carrier exists |
 | [ ] | P16 | P | Technical rows: boost, engine dynamics, oil, tyres | B8.2 (mark 100); B8.5 (mark 103); B8.7 (mark 105) | the technical page's rows and scales (SPEC-R3 §4.1); the tyre page; whether the TPMS poll is needed only while the page shows |
 | [ ] | P17 | P | Other signals: consumption, heading, position extras, service due | B8.3 (mark 101); B8.5 (mark 103) | V4 consumption, V6 heading, V8 service due |
-| [ ] | P18 | P | Black-box signals (the KOMBI's display state) | needs set S10 in signal_probe (CA D3: not in CP's S1-S9); the steps that would answer it are listed; B6.9 (mark 83); B6.10 (mark 84); B6.13 (mark 87); B6.14 (mark 88); B6.15 (mark 89) | H-G (gear indicator fallback), H-M (BMW's map), H1 (speech layout), 'a HmiMain3D cluster screen' as the trigger; which of HMIContext / HMIContext2 is served |
-| [ ] | P19 | P | f30's unwired signals (indicators, belts, lights, consumption, Eco Pro, oil, dimmer) | needs set S11 in signal_probe (CA D3: not in CP's S1-S9); the steps that would answer it are listed; B6.4 (mark 78); B6.5 (mark 79); B6.18 (mark 92) | the READY/belt/indicator redraws that the overlay catalogue calls unresolved; config.cons; the Eco Pro dial fills |
+| [ ] | P18 | P | Black-box signals (the KOMBI's display state) | B6.9 (mark 83); B6.10 (mark 84); B6.13 (mark 87); B6.14 (mark 88); B6.15 (mark 89) | H-G (gear indicator fallback), H-M (BMW's map), H1 (speech layout), 'a HmiMain3D cluster screen' as the trigger; which of HMIContext / HMIContext2 is served |
+| [ ] | P19 | P | f30's unwired signals (indicators, belts, lights, consumption, Eco Pro, oil, dimmer) | B6.4 (mark 78); B6.5 (mark 79); B6.18 (mark 92); B7.4 (mark 97) | the READY/belt/indicator redraws that the overlay catalogue calls unresolved; config.cons; the Eco Pro dial fills |
 | [ ] | P20 | P | Does the automatic-high-beam camera function have a live provider? | lead decision (CA D4): a read-only subscribe attempt; no field to read | whether the high-beam assistant research can proceed (the rest is coding + an FSC licence, not signals) |
 | [ ] | P21 | P | Events (_broadcasts) that would answer questions | lead decision (CA D2): named _broadcasts only; none declared | each: mute mark (SM §7.3), the tab key's second route (SB §6d), the map / roadbook switch (SN), call-start witnesses (SP §10) |
 | [ ] | X1 | X | f30 with 'Change with the drive mode' off | B6.9 (mark 83); B6.10 (mark 84); B6.12 (mark 86); B6.13 (mark 87); B6.14 (mark 88); B6.15 (mark 89) | whether (b) 'the rebuild' is needed for the box (MB §4.2); MB step 2 (does a theme change clear it, does P -> D -> P) |

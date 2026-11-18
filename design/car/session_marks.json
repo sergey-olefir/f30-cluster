@@ -1672,7 +1672,8 @@
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "stock-photos"
   },
@@ -1685,17 +1686,13 @@
     "L5",
     "F9"
    ],
-   "expect": [
-    [
-     "P1",
-     "active-cc"
-    ]
-   ],
+   "expect": [],
    "tag": "twin",
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "twin-up"
   },
@@ -1709,15 +1706,16 @@
    ],
    "expect": [
     [
-     "P1",
-     "active-cc"
+     "P19",
+     "belts"
     ]
    ],
    "tag": "twin",
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "safety-belt-door"
   },
@@ -1730,12 +1728,22 @@
     "F4",
     "P19"
    ],
-   "expect": [],
+   "expect": [
+    [
+     "P19",
+     "lights"
+    ],
+    [
+     "P19",
+     "indicate"
+    ]
+   ],
    "tag": "twin",
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "side-lamps"
   },
@@ -1751,7 +1759,8 @@
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "dial-ends-photo"
   },
@@ -1767,7 +1776,8 @@
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "band-day"
   },
@@ -1783,7 +1793,8 @@
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "band-night"
   },
@@ -1798,12 +1809,18 @@
     "F17",
     "L19"
    ],
-   "expect": [],
+   "expect": [
+    [
+     "P18",
+     "gearbox-display"
+    ]
+   ],
    "tag": "twin",
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "gear-switch"
   },
@@ -1819,12 +1836,18 @@
     "F17",
     "L19"
    ],
-   "expect": [],
+   "expect": [
+    [
+     "P18",
+     "fes-switch"
+    ]
+   ],
    "tag": "twin",
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "mode-switch"
   },
@@ -1837,17 +1860,13 @@
     "P1",
     "X8"
    ],
-   "expect": [
-    [
-     "P1",
-     "active-cc"
-    ]
-   ],
+   "expect": [],
    "tag": "twin",
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "msg-twin"
   },
@@ -1866,7 +1885,8 @@
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "f30-up"
   },
@@ -1881,12 +1901,18 @@
     "F17",
     "L19"
    ],
-   "expect": [],
+   "expect": [
+    [
+     "P18",
+     "fes-switch"
+    ]
+   ],
    "tag": "f30",
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "mode-switch"
   },
@@ -1902,12 +1928,18 @@
     "F17",
     "L19"
    ],
-   "expect": [],
+   "expect": [
+    [
+     "P18",
+     "fes-switch"
+    ]
+   ],
    "tag": "f30",
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "mode-switch"
   },
@@ -1923,12 +1955,18 @@
     "F17",
     "L19"
    ],
-   "expect": [],
+   "expect": [
+    [
+     "P18",
+     "fes-switch"
+    ]
+   ],
    "tag": "f30",
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "mode-switch"
   },
@@ -1940,17 +1978,13 @@
     "L1",
     "P1"
    ],
-   "expect": [
-    [
-     "P1",
-     "active-cc"
-    ]
-   ],
+   "expect": [],
    "tag": "f30",
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "msg-f30"
   },
@@ -1967,7 +2001,8 @@
    "parked": true,
    "optional": true,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "box-remap"
   },
@@ -1980,12 +2015,18 @@
     "F4",
     "P19"
    ],
-   "expect": [],
+   "expect": [
+    [
+     "P19",
+     "belts"
+    ]
+   ],
    "tag": "f30",
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "matte-running"
   },
@@ -2002,7 +2043,8 @@
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "matte-lamp-check"
   },
@@ -2016,7 +2058,8 @@
    "parked": true,
    "optional": false,
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "class": "restore"
   },
@@ -2025,17 +2068,12 @@
    "step": "B7.2",
    "block": "B7",
    "items": [
-    "P14",
-    "P11"
+    "P14"
    ],
    "expect": [
     [
      "P14",
      "map-without-route"
-    ],
-    [
-     "P11",
-     "kombi-config"
     ]
    ],
    "tag": "stock",
@@ -2043,7 +2081,7 @@
    "optional": false,
    "sets": [
     "S7",
-    "S6"
+    "S11"
    ],
    "class": "cluster-view"
   },
@@ -2066,7 +2104,7 @@
    "optional": false,
    "sets": [
     "S7",
-    "S6"
+    "S11"
    ],
    "class": "route-start"
   },
@@ -2077,7 +2115,8 @@
    "items": [
     "P12",
     "F10",
-    "L21"
+    "L21",
+    "P19"
    ],
    "expect": [
     [
@@ -2087,6 +2126,10 @@
     [
      "P12",
      "dart"
+    ],
+    [
+     "P19",
+     "cons-regular"
     ]
    ],
    "tag": "stock",
@@ -2094,7 +2137,7 @@
    "optional": false,
    "sets": [
     "S7",
-    "S6"
+    "S11"
    ],
    "class": "drive-guided"
   },
@@ -2116,7 +2159,7 @@
    "optional": false,
    "sets": [
     "S7",
-    "S6"
+    "S11"
    ],
    "class": "arrival"
   },
@@ -2138,7 +2181,7 @@
    "optional": false,
    "sets": [
     "S7",
-    "S6"
+    "S11"
    ],
    "class": "cluster-view"
   },

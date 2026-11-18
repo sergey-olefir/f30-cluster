@@ -1763,11 +1763,12 @@
    "engine": "on",
    "cluster": "twin then f30",
    "sets": [
-    "S1"
+    "S10",
+    "S11"
    ],
    "passenger": false,
    "intro_uk": "Двигун працює, селектор P, ногу тримайте на гальмі там, де сказано. Тут фото і відео, здебільшого без сигналів.",
-   "lead": "S1 on. Collect #2 at the end (L8, L10, L11). Photos are the output of the block; remind the owner to keep one exposure and the same camera position for the X9 pair.",
+   "lead": "S10+S11 on (the black-box signals during the gear and mode switches; f30's unwired signals for belts, lamps, MSA). Messages in this block are read from the apps' own logs (L1, L8). Collect #2 at the end (L8, L10, L11).",
    "steps": [
     {
      "id": "B6.1",
@@ -1780,7 +1781,8 @@
      "wait_uk": "до 1 хв",
      "shoot_uk": "",
      "sets_on": [
-      "S1"
+      "S10",
+      "S11"
      ],
      "sets_off": [
       "S4",
@@ -1812,12 +1814,7 @@
       "L5",
       "F9"
      ],
-     "expect": [
-      [
-       "P1",
-       "active-cc"
-      ]
-     ],
+     "expect": [],
      "lead": "",
      "uk": "Twin Dial ввімкнено (Cluster = Twin Dial), f30_cluster Off. Зачекайте, поки панель намалюється. Запишіть: чи видно число пробігу внизу ліворуч.",
      "wait_uk": "до 30 с",
@@ -1834,8 +1831,8 @@
      ],
      "expect": [
       [
-       "P1",
-       "active-cc"
+       "P19",
+       "belts"
       ]
      ],
      "lead": "",
@@ -1854,7 +1851,16 @@
       "F4",
       "P19"
      ],
-     "expect": [],
+     "expect": [
+      [
+       "P19",
+       "lights"
+      ],
+      [
+       "P19",
+       "indicate"
+      ]
+     ],
      "lead": "",
      "uk": "Бічні лампи (сім малих значків): по черзі увімкніть лівий поворотник, правий поворотник, ближнє світло, туманні (якщо є), дальнє. Кожен тримайте 5 с.",
      "wait_uk": "40 с",
@@ -1914,7 +1920,12 @@
       "F17",
       "L19"
      ],
-     "expect": [],
+     "expect": [
+      [
+       "P18",
+       "gearbox-display"
+      ]
+     ],
      "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
      "uk": "Чорний прямокутник: Twin Dial, нога на гальмі. Селектор P → D → N → R → P (по одному кроку, пауза 5 с). Після кожного кроку кадр правого циферблата і нижнього ряду.",
      "wait_uk": "40 с",
@@ -1933,7 +1944,12 @@
       "F17",
       "L19"
      ],
-     "expect": [],
+     "expect": [
+      [
+       "P18",
+       "fes-switch"
+      ]
+     ],
      "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
      "uk": "Twin Dial: кнопка режимів руху Comfort → Sport → Eco Pro → Comfort (пауза 8 с). ВІДЕО 60 кадрів/с на всю панель, що охоплює натиск і поки панель не стане повною. Запишіть час від натиску до повної панелі.",
      "wait_uk": "1 хв",
@@ -1949,12 +1965,7 @@
       "P1",
       "X8"
      ],
-     "expect": [
-      [
-       "P1",
-       "active-cc"
-      ]
-     ],
+     "expect": [],
      "lead": "",
      "uk": "Повідомлення з Twin Dial: відчиніть двері водія, чекайте, поки BMW сам сховає (до 40 с), закрийте. ВІДЕО (краще сповільнене 240 fps) центру панелі від відчинення до зникнення.",
      "wait_uk": "до 40 с",
@@ -1989,7 +2000,12 @@
       "F17",
       "L19"
      ],
-     "expect": [],
+     "expect": [
+      [
+       "P18",
+       "fes-switch"
+      ]
+     ],
      "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
      "uk": "f30_cluster, нога на гальмі: P → D → N → R → P (по кроку, пауза 5 с) і режими Comfort → Sport → Eco Pro → Comfort. ВІДЕО 60 fps. Чи з'являється чорний прямокутник на правому циферблаті?",
      "wait_uk": "1,5 хв",
@@ -2008,7 +2024,12 @@
       "F17",
       "L19"
      ],
-     "expect": [],
+     "expect": [
+      [
+       "P18",
+       "fes-switch"
+      ]
+     ],
      "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
      "uk": "f30_cluster: вимкніть «Change with the drive mode» і повторіть ті самі P → D → N → R → P та режими. Записуйте: чорний прямокутник є чи ні. Перемикаючи це налаштування, подивіться на список налаштувань f30: чи зникають рядки «In Comfort / In Sport / In Eco Pro» - кадр списку до і після.",
      "wait_uk": "1,5 хв",
@@ -2027,7 +2048,12 @@
       "F17",
       "L19"
      ],
-     "expect": [],
+     "expect": [
+      [
+       "P18",
+       "fes-switch"
+      ]
+     ],
      "lead": "if the owner calls a box: read status.txt slot rows now (L27, BR E0)",
      "uk": "f30_cluster: ввімкніть G20 («BMW's G20 round our dials») і знову ті самі P → D → N → R → P та режими. Кадр списку налаштувань: чи з'явився рядок «Bottom row while G20 shows».",
      "wait_uk": "1,5 хв",
@@ -2042,12 +2068,7 @@
       "L1",
       "P1"
      ],
-     "expect": [
-      [
-       "P1",
-       "active-cc"
-      ]
-     ],
+     "expect": [],
      "lead": "",
      "uk": "Повідомлення з f30_cluster: двері водія відчинити, чекати, поки BMW сховає (до 40 с), зачинити. Чи вікно над панеллю BMW закрилося разом з повідомленням? ВІДЕО 60 fps.",
      "wait_uk": "до 40 с",
@@ -2079,7 +2100,12 @@
       "F4",
       "P19"
      ],
-     "expect": [],
+     "expect": [
+      [
+       "P19",
+       "belts"
+      ]
+     ],
      "lead": "",
      "uk": "Матові теми (що BMW малює поверх суцільної панелі): у f30_cluster вимкніть «Change with the drive mode» (інакше тема не зміниться), Theme = «Diagnostic matte: magenta». Двигун працює: кадр. Відчиніть двері водія: кадр. Розстебніть ремінь: кадр. Вимкніть автостоп (кнопка MSA): кадр, і ввімкніть назад.",
      "wait_uk": "3 хв",
@@ -2114,7 +2140,8 @@
      "shoot_uk": "",
      "tag": "f30",
      "sets_off": [
-      "S1"
+      "S10",
+      "S11"
      ],
      "class": "restore"
     }
@@ -2128,11 +2155,11 @@
    "cluster": "stock",
    "sets": [
     "S7",
-    "S6"
+    "S11"
    ],
    "passenger": true,
-   "intro_uk": "ПОТРІБЕН ПАСАЖИР: він керує навігацією, меню Signal Probe і фотографує. Водій тільки веде. Позначки натискаються тільки на стоянці. Перед виїздом ввімкніть S7 «Навігація» і S6 «Вигляд і кнопки».",
-   "lead": "S7+S6 on. The passenger notes clock times; the marks are pressed at stops. Give the owner the clock-to-t anchor: the stop mark and the clock.",
+   "intro_uk": "ПОТРІБЕН ПАСАЖИР: він керує навігацією, меню Signal Probe і фотографує. Водій тільки веде. Позначки натискаються тільки на стоянці.",
+   "lead": "S7+S11 on. The passenger notes clock times; the marks are pressed at stops.",
    "steps": [
     {
      "id": "B7.1",
@@ -2148,27 +2175,20 @@
      "parked": true,
      "sets_on": [
       "S7",
-      "S6"
+      "S11"
      ],
-     "sets_off": [
-      "S1"
-     ]
+     "sets_off": []
     },
     {
      "id": "B7.2",
      "mark": true,
      "items": [
-      "P14",
-      "P11"
+      "P14"
      ],
      "expect": [
       [
        "P14",
        "map-without-route"
-      ],
-      [
-       "P11",
-       "kombi-config"
       ]
      ],
      "lead": "",
@@ -2206,7 +2226,8 @@
      "items": [
       "P12",
       "F10",
-      "L21"
+      "L21",
+      "P19"
      ],
      "expect": [
       [
@@ -2216,10 +2237,14 @@
       [
        "P12",
        "dart"
+      ],
+      [
+       "P19",
+       "cons-regular"
       ]
      ],
      "lead": "",
-     "uk": "Ще на місці: позначка. Потім ЇДЬТЕ маршрутом. Пасажир голосом диктує на запис телефону час (за годинником авто) і подію («поворот ліворуч», «кільце», «розвилка») і фотографує панель на поворотах: стрілка, відстань, смуги.",
+     "uk": "Ще на місці: позначка. Потім ЇДЬТЕ маршрутом. Пасажир голосом диктує на запис телефону час (за годинником авто) і подію («поворот ліворуч», «кільце», «розвилка») і фотографує панель на поворотах: стрілка, відстань, смуги. Частину шляху (5 хв) - у режимі Eco Pro (кнопка режимів, перемикає водій на зупинці або пасажир підказує); пасажир фотографує сторінку Eco Pro на центральному екрані.",
      "wait_uk": "10-20 хв",
      "shoot_uk": "Пасажир: панель на кількох поворотах і на розвилці чи кільці. Також: штатна панель у русі близько 50 км/год і близько 2000 об/хв (стрілки), один кадр.",
      "tag": "stock",
@@ -2301,7 +2326,7 @@
      ],
      "sets_off": [
       "S7",
-      "S6"
+      "S11"
      ]
     },
     {
@@ -2619,12 +2644,6 @@
   "L29": [
    "lead:collect#1"
   ],
-  "P18": [
-   "needs set S10 in signal_probe (CA D3: not in CP's S1-S9); the steps that would answer it are listed"
-  ],
-  "P19": [
-   "needs set S11 in signal_probe (CA D3: not in CP's S1-S9); the steps that would answer it are listed"
-  ],
   "P20": [
    "lead decision (CA D4): a read-only subscribe attempt; no field to read"
   ],
@@ -2669,7 +2688,9 @@
   "S6": "Вид і кнопки",
   "S7": "Навігація",
   "S8": "Допоміжні системи",
-  "S9": "Технічне"
+  "S9": "Технічне",
+  "S10": "Чорна коробка",
+  "S11": "Непідключені сигнали f30"
  },
  "_sets_note": "The Ukrainian names are the checkbox labels of apps/signal_probe (CP, fields.js SETS); keep them equal."
 }

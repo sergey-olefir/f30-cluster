@@ -905,8 +905,7 @@
    "class": "cluster-view",
    "item": "P14",
    "items": [
-    "P14",
-    "P11"
+    "P14"
    ],
    "step": "B7.2",
    "cluster": "stock"
@@ -927,7 +926,8 @@
    "items": [
     "P12",
     "F10",
-    "L21"
+    "L21",
+    "P19"
    ],
    "step": "B7.4",
    "cluster": "stock"
