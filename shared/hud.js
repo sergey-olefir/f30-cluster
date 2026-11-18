@@ -379,12 +379,22 @@ const DAY_ONLY_THEMES = ['wb_sport', 'wb_eco'];
 // (SPEC 7.2, hypothesis: no night reference), applied on the GPU to the dial faces (tdial u_n0..u_n2) and to the tab bar's
 // colours (tdback, computed here), and to the text roles by twinNightTheme(). By day every multiplier is 1.
 const TW_NIGHT = { white: 0.80, bezel: 0.70, tick: 0.75, strip: 0.55, bandIn: 0.60, bandOut: 0.55, bandEnd: 0.50, red: 0.85,
-    wedge: 0.80, green: 0.75, ramp: 0.55, rule: 0.70, amber: 0.85, grey: 0.55 };
-const TW_ROLE_NIGHT = { fg: 0.80, dim: 0.75, hot: 0.85, ready: 0.75, amber: 0.85, grey: 0.55, rule: 0.70 };
+    wedge: 0.80, green: 0.75, ramp: 0.55, rule: 0.70, amber: 0.80 /* twin_dial B1: SPEC-R3 6 */, grey: 0.55, tab: 0.75 /* twin_dial B1: the selected tab's fill */ };
+const TW_ROLE_NIGHT = { fg: 0.80, dim: 0.75, hot: 0.85, ready: 0.75, amber: 0.80, grey: 0.55, rule: 0.70 };
 // the message severity colours (sRGB codes, the SPEC 7.1 / 8.2 values with the G20's black floor taken out) and their night role
 const TW_SEV = { red: { c: [176, 7, 30], n: 'red' }, amber: { c: [240, 170, 10], n: 'amber' },
     green: { c: [59, 155, 26], n: 'green' }, grey: { c: [231, 231, 231], n: 'rule' } };
-const TW_RULE = { rule: [231, 231, 231], tab: [237, 237, 237] };     // flat rules (SPEC 7.1); both take the rules' night multiplier
+const TW_RULE = { rule: [231, 231, 231], tab: [230, 230, 230] };     // flat rules (SPEC 7.1; the tab bar's is 3 px, code 230: SPEC-R3 3.1); both take the rules' night multiplier
+// twin_dial B1 (SPEC-R3 3.2): the selected tab's fill colour, sRGB before the G20 black floor (the engine takes the floor out: twinFloor),
+// the fill law is colour_linear x ramp(y) / 0.16. State: this.twinTab (1..5), written by shared/twin_tabs.js.
+const TW_TAB = { 1: [176, 10, 37], 2: [176, 10, 37], 3: [240, 150, 10], 4: [60, 155, 34], 5: [30, 150, 200] };
+const TW_FLOOR = [0.0012, 0.0009, 0.0056];          // the G20 panel's black floor (R, G, B) in linear light: SPEC rev 2 7.1
+const TW_ARC_END = 143.6;                           // twin_dial B1: where the tachometer's red arc on the bezel ends (SPEC-R3 2.5)
+const TW_MAP = { W1: { box: [750, 180, 1170, 564], fade: [120, 80, 80], r: 24 }, W2: { box: [700, 173, 1220, 600], fade: [1, 1, 1], r: 1 } };   // twin_dial B1: SPEC-R3 4.5
+const TW_LIM_STRIP = { L1: 1, L2: 2, L3: 3 };       // twin_dial B1: config.limit.strip -> u_lim.w
+// twin_dial B1: an sRGB code -> linear light, the black floor taken out, the night multiplier k applied; and back to a code
+function twinLin(c, i, k, noFloor) { const v = c / 255, l = v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); return (noFloor ? l : Math.max(0, (l - TW_FLOOR[i]) / (1 - TW_FLOOR[i]))) * k; }
+function twinEnc(l) { l = Math.max(0, Math.min(1, l)); return l <= 0.0031308 ? l * 12.92 : 1.055 * Math.pow(l, 1 / 2.4) - 0.055; }
 const TW_LIVE_KEYS = ['redline', 'bandGain'];       // settings the twin layers take in place (uniforms, no rebuild)
 const TW_PANEL = [694, 592, 536, 112];              // the fallback window's box (package A2's mask rect), used when the layout has no mask
 // 0.7.13, the KOMBI guard: when the cluster's display service goes away within KOMBI_GUARD_MS of our scene being shown,
@@ -2581,13 +2591,37 @@ class HudApp {
             if (isNum(rl) && rl > 0 && rl < t.max) {
                 // a numeral is red from the redline rounded up to a thousand (half a step before its centre), a tick from the redline itself
                 const ang = (r) => -t.sweep + 2 * t.sweep * r / t.max, step = 2 * t.sweep / (t.max / 1000);
-                red = [ang(rl), ang(Math.ceil(rl / 1000) * 1000) - step / 2, ang(rl) - 0.6, t.sweep];
+                red = [ang(rl), ang(Math.ceil(rl / 1000) * 1000) - step / 2, ang(rl) - 0.6, TW_ARC_END /* twin_dial B1: the arc on the bezel ends with it */];
             }
         }
         c.uniform(ref, 'u_red', red);
         const n = this._twinMults();
         c.uniform(ref, 'u_n0', n[0]); c.uniform(ref, 'u_n1', n[1]); c.uniform(ref, 'u_n2', n[2]);
+        this._twinMarks(x);        // twin_dial B1
         x.last = null;
+    }
+
+    /** twin_dial B1 (SPEC-R3 8, 9): the speed-limit marker with the red strip (u_lim) and the cruise marker (u_cru) of the speedometer.
+     *  this.twinLim = { deg, state, warn } (state 0 none, 1 limit, 2 conditional: hollow, 3 hollow with the red strip), this.twinCru = { deg,
+     *  state } (1 active) are written by shared/twin_limit.js, which then calls this with no argument (every dial, nothing else is sent);
+     *  config.limit.strip = "L1" | "L2" | "L3" picks the strip's reading. The tachometer always gets zeros. */
+    _twinMarks(x) {
+        if (!x) { this.widgets.forEach((y) => { if (y.w && y.w.type === 'tdial' && y.ref) this._twinMarks(y); }); return; }
+        const w = x.w, c = x.c, ref = x.ref;
+        let lim = [0, 0, 0, 0], cru = [0, 0, 0, 0];
+        if (w.kind === 'speed') {
+            lim = [0, 0, 0, 1];
+            const l = this.twinLim || {}, k = this.twinCru || {}, cfg = this.config.limit || {};
+            const num = (v) => (isNum(v) ? v : 0);
+            const mode = TW_LIM_STRIP[cfg.strip] || 1;
+            if (isNum(l.deg) && (l.state === 1 || l.state === 2 || l.state === 3)) lim = [Math.max(-125, Math.min(125, l.deg)), l.state, num(l.warn), mode];
+            if (isNum(k.deg) && k.state === 1) cru = [Math.max(-125, Math.min(125, k.deg)), 1, 0, 0];
+        }
+        const key = lim.join() + '|' + cru.join();
+        if (key === x.twMarks) return;
+        x.twMarks = key;
+        c.uniform(ref, 'u_lim', lim);
+        c.uniform(ref, 'u_cru', cru);
     }
 
     /** The needle's angle, degrees clockwise from 12 o'clock (SPEC 4, 5.1, 5.2). */
@@ -2643,8 +2677,11 @@ class HudApp {
         c.uniform(ref, 'u_tab', [r[0] - w.x, r[1] - w.y, r[2] - w.x, r[3] - w.y]);
         c.uniform(ref, 'u_sep', [0, 1, 2, 3].map((i) => isNum((t.seps || [])[i]) ? t.seps[i] - w.x : -10));
         const hl = Array.isArray(t.highlight) ? t.highlight : [0, 0];
+        // twin_dial B1: the five tab cells, each between its separators (the bar's ends for the first and the last): the selected one is filled
+        const sp = [0, 1, 2, 3].map((i) => (isNum((t.seps || [])[i]) ? t.seps[i] : r[2]));
+        const cells = [[r[0], sp[0]], [sp[0], sp[1]], [sp[1], sp[2]], [sp[2], sp[3]], [sp[3], r[2]]].map((q) => [q[0] - w.x, q[1] - w.x]);
         Object.assign(x.tw, { rule: (Array.isArray(t.rule) ? t.rule : [0, 0]).map((v) => v - w.y), ramp: Array.isArray(t.ramp) ? t.ramp : [0.002, 0.16],
-            hi: [hl[0] - w.x, hl[1] - w.x], rules: Array.isArray(w.rules) ? w.rules.slice(0, 4) : [], keep: w.maskKeep === true, mask: false });
+            hi: [hl[0] - w.x, hl[1] - w.x], cells, rules: Array.isArray(w.rules) ? w.rules.slice(0, 4) : [], keep: w.maskKeep === true, mask: false });
         let mr = [TW_PANEL[0] - w.x, TW_PANEL[1] - w.y, TW_PANEL[2], TW_PANEL[3]];
         if (pm && pm.tex) {
             try {
@@ -2666,16 +2703,26 @@ class HudApp {
         const t = x.tw;
         if (!t || !t.L || !x.ref) return;
         const w = x.w, c = x.c, ref = x.ref, cc = this._twinCcNow();
-        const key = cc.state + '|' + cc.severity + '|' + this.nightOn;
+        // twin_dial B1: the selected tab (this.twinTab, 1..5) and the map window (this.twinMap: null | 'W1' | 'W2') are part of the key
+        const tab = Math.max(1, Math.min(5, Math.round(Number(this.twinTab) || 1))), mapN = TW_MAP[this.twinMap] ? this.twinMap : null;
+        const key = cc.state + '|' + cc.severity + '|' + this.nightOn + '|' + tab + '|' + mapN;
         if (!force && key === x.twKey) return;
         x.twKey = key;
         const sev = cc.state !== 'none' ? TW_SEV[cc.severity] : null, sevC = sev ? this._twinCode(sev.c, sev.n) : null;
         const rm = this.nightOn ? TW_NIGHT.ramp : 1;
         c.uniform(ref, 'u_tabR', [t.rule[0], t.rule[1], t.ramp[0] * rm, t.ramp[1] * rm]);
-        c.uniform(ref, 'u_sepC', this._twinCode([96, 96, 96], 'ramp'));
+        c.uniform(ref, 'u_sepC', this._twinCode([84, 84, 84], 'ramp'));
         c.uniform(ref, 'u_ruleT', this._twinCode(TW_RULE.tab, 'rule'));
-        c.uniform(ref, 'u_hi', [t.hi[0], t.hi[1], sev ? 1 : 0, 0]);
-        c.uniform(ref, 'u_hiC', sevC || [0, 0, 0, 1]);
+        // the selected tab's cell (SPEC-R3 3.2): the fill is the tab's colour in linear light (black floor out, night x 0.75) times the ramp's
+        // shape in the shader; the rule under that cell is the fill's bottom colour + 0.15 x the white rule, in linear light
+        const cell = t.cells ? t.cells[tab - 1] : t.hi, tk = this.nightOn ? TW_NIGHT.tab : 1, rk = this.nightOn ? TW_NIGHT.rule : 1;
+        const fill = TW_TAB[tab].map((v, i) => twinLin(v, i, tk));
+        c.uniform(ref, 'u_hi', [cell[0], cell[1], 1, 0]);
+        c.uniform(ref, 'u_hiC', fill.concat([1]));
+        c.uniform(ref, 'u_hiR', fill.map((v, i) => twinEnc(v + 0.15 * twinLin(TW_RULE.tab[i], i, rk, true))).concat([1]));
+        const mp = mapN ? TW_MAP[mapN] : null;
+        c.uniform(ref, 'u_map', mp ? [mp.box[0] - w.x, mp.box[1] - w.y, mp.box[2] - w.x, mp.box[3] - w.y] : [0, 0, 0, 0]);
+        c.uniform(ref, 'u_mapF', mp ? [mp.fade[0], mp.fade[1], mp.fade[2], mp.r] : [1, 1, 1, 1]);
         const rects = [], cols = [];
         for (let i = 0; i < 4; i++) {
             let r = t.rules[i];
