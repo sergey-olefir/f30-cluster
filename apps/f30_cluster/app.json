@@ -2,7 +2,7 @@
   "id": "f30_cluster",
   "title": "F30 Cluster",
   "description": "Instrument cluster themes after the F-series 6WB look: Comfort, Sport and Eco Pro, following the drive mode",
-  "version": "0.7.21",
+  "version": "0.7.22",
   "vendor": "custom",
   "loggingId": "OAF3",
   "iconGlyph": "F30",
@@ -675,15 +675,11 @@
           "Off"
         ],
         [
-          "r8",
-          "R8"
-        ],
-        [
           "etc2",
           "ETC2"
         ]
       ],
-      "_about": "research3/MT config.sceneTex: the scene textures are dropped and the theme is built again when it changes"
+      "_about": "research3/MT config.sceneTex: the scene textures are dropped and the theme is built again when it changes. car-issues (the owner, 2026-11-19): 'R8' is gone - its 670 / 346-wide R8 textures have rows that are not whole 4-byte rows and the car shears them; ETC2 takes the files it has no @etc2 for (the two arcs) from their own RGBA files, as Off does. A saved 'r8' reads as Off"
     },
     {
       "key": "diagMbGap",
@@ -1201,7 +1197,7 @@
       "settings": {
         "diagRelease": { "on": { "ccActive.release": { "deferValues": [65535], "leftList": true } } },
         "diagShownNow": { "options": { "active": { "ccActive.source": "active" } } },
-        "diagSceneTex": { "options": { "r8": { "sceneTex": "r8" }, "etc2": { "sceneTex": "etc2" } } },
+        "diagSceneTex": { "options": { "etc2": { "sceneTex": "etc2" } } },
         "diagMbGap": { "on": { "mbGap": { "rect": [1380, 660, 1460, 720], "conn": { "row_b2": 3, "msa": 3, "oilt": 3 }, "z": { "oilt": 2 } } } },
         "diagMbCover": { "options": { "clear": { "mbCover": "clear" }, "black": { "mbCover": "black" }, "grey": { "mbCover": "grey" } } },
         "diagMbRebuild": { "on": { "mbRebuild": { "onMode": true } } }

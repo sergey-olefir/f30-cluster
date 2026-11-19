@@ -33,7 +33,7 @@
 const F = require('./format');
 const FIELDS = require('./fields');
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 const LOG_FORMAT = 1;
 const SUMMARY_S = [30, 120, 600];
 const ASK_AT_S = 120;                 // the silent fields' getters are asked once, at this summary

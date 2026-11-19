@@ -395,15 +395,16 @@ async function f30() {
     await sleep(3000);
     s = live(trace);
     ok(s.layers.filter((l) => touches(l.rect, GAP)).length > 0, 'gap off: the layers are whole again');
-    // the lighter scene textures: dropped and made again as R8, then as the files of 0.7.20
-    const textures = () => (logText.match(/scene texture "[^"]+"[^\n]*(RGBA8|R8) asset/g) || []);
+    // the lighter scene textures: dropped and made again as ETC2 (car-issues: "r8" is gone; ETC2 is option 1 now), then as the files of 0.7.20
+    const textures = () => (logText.match(/scene texture "[^"]+"[^\n]*(RGBA8|R8|etc2rgb) asset/g) || []);
     const before = textures().length;
-    await click('SET_DIAGSCENETEX', 1);        // r8
-    p = await until((q) => q.settings.diagSceneTex === 'r8', 4000);
+    await click('SET_DIAGSCENETEX', 1);        // etc2
+    p = await until((q) => q.settings.diagSceneTex === 'etc2', 4000);
     await sleep(4000);
     const made = textures().slice(before);
-    // the two dial faces have an R8 file (MT: tacho@r8, speedo@r8); a texture with no variant stays as it was
-    ok(made.length > 0 && made.some((l) => /scene texture "speedo"[^\n]* R8 asset/.test(l)) && made.some((l) => /scene texture "tacho"[^\n]* R8 asset/.test(l)), 'scene textures "r8": made again, the two dial faces as R8 (' + made.length + ' made)');
+    // the two dial faces have an ETC2 file (MT: tacho@etc2, speedo@etc2); the two arcs have none and stay RGBA8 (no @r8 fallback any more)
+    ok(made.length > 0 && made.some((l) => /scene texture "speedo"[^\n]* etc2rgb asset/.test(l)) && made.some((l) => /scene texture "tacho"[^\n]* etc2rgb asset/.test(l)), 'scene textures "etc2": made again, the two dial faces as ETC2 (' + made.length + ' made)');
+    ok(!made.some((l) => / R8 asset/.test(l) && !/collar_r8|strip_mask/.test(l)), 'scene textures "etc2": no R8 variant made (the arcs take their RGBA8 files)');
     ok(p.activeName === 'wb_comfort', 'Comfort is still drawn');
     const before2 = textures().length;
     await click('SET_DIAGSCENETEX', 0);

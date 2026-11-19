@@ -444,6 +444,7 @@ const TW_PANEL = [694, 592, 536, 112];              // the fallback window's box
 // 6 to 13 resets in a row, with the driver-assistance warnings, until the theme was turned off by hand.
 const KOMBI_GUARD_MS = 8000, KOMBI_WINDOW_MS = 120000, KOMBI_STRIKES = 2, KOMBI_FILE = 'kombi-guard.json';
 const LOOK_KEYS = ['hudLayout', 'inComfort', 'inSport', 'inEco', 'byMode', 'g20'];
+const LOAD_OPS = ['layer', 'asset', 'bind'];         // car-issues: the refusals that leave a theme half built (the load guard)
 // "+ G20" (the owner, 2026-11-15; docs/ONE-SWITCH-DONE.md): the see-through look is the "g20" setting, not a theme of
 // its own. A theme name maps to its see-through FILE while the toggle is on - the files are untouched, nothing new is
 // drawn and no shader changes. Only Comfort has one: "6WB Sport + G20" was retired with the toggle and Eco Pro never
@@ -451,7 +452,9 @@ const LOOK_KEYS = ['hudLayout', 'inComfort', 'inSport', 'inEco', 'byMode', 'g20'
 const G20_OF = { wb_comfort: 'wb_dials' };
 // research3 MT (docs/research3/MT-REPORT.md): app.json config.sceneTex, the lighter scene texture files tried in order
 // (null, the default: today's RGBA8 files), and the bytes of an ETC2 4x4 block (cluster-render PROTOCOL.md)
-const SCENE_TEX = { r8: ['r8'], etc2: ['etc2', 'r8'] };
+// car-issues (the owner, 2026-11-19): "r8" is gone (its 670 / 346-wide R8 rows are not whole 4-byte rows: the car shears them), and
+// "etc2" no longer falls back to <name>@r8 (range_seg / ed_seg, 346 wide): what has no @etc2 file uses its own RGBA file, as off does
+const SCENE_TEX = { etc2: ['etc2'] };
 const SCENE_ETC2 = { etc2rgb: 8, etc2rgba: 16 };
 // the way back, for the names on screen: a see-through file -> its theme (wb_sport_dials is kept here, and its layout
 // file is kept, so a settings.json that still names it after a failed migration is still labelled and still drawn)
@@ -915,6 +918,9 @@ class HudApp {
         try { const t = JSON.parse(fs.readFileSync(this.kombiFile, 'utf8')); if (t && t.layout) this.kombiTrip = t; } catch (e) { /* none */ }
         this.kombiStrikes = [];
         this.kombiShownAt = 0;
+        // car-issues: the load guard (_loadFail): { layout, what, at } while a refused layer / asset / bind has turned the theme off.
+        // Not saved: a restart or a theme picked lets the theme try again.
+        this.loadTrip = null;
         this.kombiPrev = null;
         this.statusListeners = [];
         this.lastStatus = null;
@@ -944,7 +950,7 @@ class HudApp {
         this.layouts.onChange(() => { this.seeThru = {}; this._rebuild(); });
         ctx.settings.onChange((key) => {
             if (this.diag && this.diag.has(key)) { this._guard('diag', () => this.diag.changed(this, key)); return; }     // b7: the Діагностика settings, in place or by their own rebuild
-            if (LOOK_KEYS.indexOf(key) >= 0) this._kombiClear();      // 0.7.13: a theme picked: the guard lets it try again
+            if (LOOK_KEYS.indexOf(key) >= 0) { this._kombiClear(); this._loadClear(); }      // 0.7.13: a theme picked: the guards let it try again
             // a theme or layout picked anywhere (the page asks first, the kit's All settings list doesn't): no longer stepping aside
             if (LOOK_KEYS.indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
             if (PLACE_KEYS.indexOf(key) >= 0) this._guard('place', () => this._place());
@@ -1733,6 +1739,13 @@ class HudApp {
             const w = this._widgetOf(ci, ref);
             this.log.warn('refused ' + op + ' on ' + ref + tag + (w ? ' (' + w + ')' : '') + ': ' + reason);
             if (!this.refused) this.refused = (w || op) + ': ' + reason;   // the first one, until the next rebuild
+            // car-issues: a layer, an asset or a bind refused leaves a theme with parts missing (an effect with a sampler unbound is not
+            // drawn on the car): BMW's own cluster instead. Twin Dial's tab-2 sheet is the safety machine's own case (BMW's panel stays open).
+            let sheet = false;
+            if (this.twinMsg) this.widgets.forEach((x) => { if (x.ci === ci && x.ref === ref && x.w && x.w.type === 'ccsheet') sheet = true; });
+            // a refused asset never existed on the service: forget it, or the next build binds a ref the service does not know
+            if (op === 'asset') this.atlases.forEach((a, k) => { if (a && a.ci === ci && a.ref === ref) this.atlases.delete(k); });
+            if (LOAD_OPS.indexOf(op) >= 0 && !sheet) this._guard('load guard', () => this._loadFail(op + (w ? ' (' + w + ')' : '') + ': ' + reason));
             this._statusSoon();
         });
         c.on('budget', (capKb, maxKb, reason) => this.log.info('budget' + tag + ' ' + capKb + '/' + maxKb + ' kb/s (' + reason + ')'));
@@ -1914,8 +1927,8 @@ class HudApp {
 
     /**
      * research3 MT (docs/research3/MT-REPORT.md): which file holds the scene texture `name` under app.json config.sceneTex
-     * (null, the default: hud/scene/<name>.json as always). "r8": <name>@r8.json when there is one; "etc2": <name>@etc2.json,
-     * else <name>@r8.json. -> { file, enc ("a8" | "tint" | "v8" | "pm" | null), tint, chroma (the file of a "v8" value's
+     * (null, the default: hud/scene/<name>.json as always). "etc2": <name>@etc2.json when there is one, else
+     * hud/scene/<name>.json (car-issues: no @r8 fallback, "r8" removed). -> { file, enc ("a8" | "tint" | "v8" | "pm" | null), tint, chroma (the file of a "v8" value's
      * colour), sx, sy (an ETC2 texture padded to whole blocks: how much its box uniform grows) }. Read once per name.
      */
     _sceneSrc(name) {
@@ -2365,6 +2378,34 @@ class HudApp {
         this._rebuild();
     }
 
+    /** car-issues, the load guard: the service refused something the theme needs (a layer, an asset, a bind; or a refusal the
+     *  client met before sending, thrown as "... refused"). The theme goes off at once (BMW's own cluster, readable) instead of
+     *  staying half built; one log line says why. Not saved: a restart or a theme picked lets it try again. */
+    _loadFail(what) {
+        if (this.loadTrip || !this.activeName || this.activeName === 'off') return;
+        this.loadTrip = { layout: this.activeName, what: String(what), at: new Date().toISOString() };
+        this.log.warn('load guard: theme turned off ("' + this.loadTrip.layout + '"): ' + this.loadTrip.what +
+            '; BMW\'s own cluster shows until a theme is picked again or the app restarts');
+        setTimeout(() => this._rebuild(), 0);     // not inside the build that met the refusal
+    }
+
+    /** A theme was picked: the load guard lets the theme try again. */
+    _loadClear() {
+        if (!this.loadTrip) return;
+        this.log.info('load guard: a theme was picked, themes may show again (was off since ' + this.loadTrip.at + ')');
+        this.loadTrip = null;
+    }
+
+    /** A widget or sheet made inside a guard; a "refused" error (the client refused it before sending) trips the load guard. */
+    _createGuarded(w, sheet) {
+        this._guard('widget ' + w.id, () => {
+            try { this._create(w, sheet); } catch (e) {
+                if (/refused/.test(e && e.message)) this._guard('load guard', () => this._loadFail('widget ' + w.id + ': ' + e.message));
+                throw e;
+            }
+        });
+    }
+
     /** A theme was picked: the guard lets the themes try again. */
     _kombiClear() {
         this.kombiStrikes = [];
@@ -2382,7 +2423,7 @@ class HudApp {
     /** The layout name to show now: per drive mode when that's on and known, else the plain setting; the see-through
      *  file of either while the "g20" toggle is on (_g20Of). */
     _layoutName() {
-        if (this.kombiTrip) return 'off';          // 0.7.13: the KOMBI guard tripped
+        if (this.kombiTrip || this.loadTrip) return 'off';          // 0.7.13: the KOMBI guard tripped; car-issues: the load guard
         if (this.screen && this.screen.yielded) return 'off';
         if (this.setting('byMode') === true && this.driveMode && MODE_KEY[this.driveMode]) {
             const v = this.setting(MODE_KEY[this.driveMode]);
@@ -2485,6 +2526,7 @@ class HudApp {
             return there ? this.label + ': connecting to cluster-render' : this.label + ' off: cluster-render is not installed or not running';
         }
         if (this.kombiTrip) return this.label + ' off: the cluster reset twice right after ' + this._layoutLabel(this.kombiTrip.layout) + ' was shown. Pick a theme to try again';
+        if (this.loadTrip) return this.label + ' off: the cluster could not take ' + this._layoutLabel(this.loadTrip.layout) + ' (' + this.loadTrip.what + '). Pick a theme to try again';
         if (this.problem) return this.label + ': ' + this.problem;
         const byMode = this.setting('byMode') === true;
         const mode = byMode ? (this.driveRaw ? ' (drive mode not recognised: the car sends ' + this.driveRaw + ')'
@@ -3551,7 +3593,7 @@ class HudApp {
             if (e.kind === 'sheet') { sheets++; bytes += e.w * e.h * 4; px += e.w * e.h * 8; this._guard('sheet ' + e.members[0].id, () => this._createSheet(e)); }
             else {
                 if (IMAGE_TYPES[e.w.type]) { own++; px += e.w.w * e.w.h * 8; } else effects++;
-                this._guard('widget ' + e.w.id, () => this._create(e.w, null));
+                this._createGuarded(e.w, null);     // car-issues: a refusal trips the load guard
             }
         });
         if (this._offset().x || this._offset().y || this._scale() !== 1) this._place();
@@ -3625,12 +3667,17 @@ class HudApp {
         const c = this._clientAt(s.conn);
         if (this.mbExp) this.mbExp.image(s.members[0], s);      // research3 MB: an image layer over the gap is only named
         const ref = c.image({ target: this.target, klass: s.klass, z: s.z, x: s.x, y: s.y, w: s.w, h: s.h, iw: s.w, ih: s.h });
-        if (!ref) { this.log.warn('sheet ' + s.klass + '/' + s.z + ' at ' + s.x + ',' + s.y + ' ' + s.w + 'x' + s.h + ': layer refused'); return; }
+        if (!ref) {
+            this.log.warn('sheet ' + s.klass + '/' + s.z + ' at ' + s.x + ',' + s.y + ' ' + s.w + 'x' + s.h + ': layer refused');
+            // car-issues: the load guard, except Twin Dial's tab-2 sheet (the safety machine keeps BMW's panel open for it)
+            if (!s.members.some((w) => w.type === 'ccsheet')) this._loadFail('sheet ' + s.members[0].id + ': layer refused');
+            return;
+        }
         s.ref = ref; s.c = c; s.ci = s.conn;
         this.placed.push({ c, ref, x: s.x, y: s.y, w: s.w, h: s.h });
         s.buf = Buffer.alloc(s.w * s.h * 4, 0);
         this.sheets.push(s);
-        s.members.forEach((w) => this._guard('widget ' + w.id, () => this._create(w, s)));
+        s.members.forEach((w) => this._createGuarded(w, s));     // car-issues: a refusal trips the load guard
         const buf = s.buf;
         s.buf = null;                    // from here on _blit sends dirty rects
         c.pixels(ref, null, buf);

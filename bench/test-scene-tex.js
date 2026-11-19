@@ -10,12 +10,12 @@
  *   2. the variant files (tools/research3/mt/bake_variants.py) are what they claim: sizes, formats, ETC2 dimensions in
  *      whole blocks, and their pixels against today's RGBA8 file: the R8 coverages exact, the window within 3 / 255,
  *      value x colour and the ETC2 blocks (decoded by bench/etc2.js) within the bounds measured in the report.
- * With the bench (its own, on BENCH_PORT), once per mode (off, "r8", "etc2" through BENCH_CONFIG):
+ * With the bench (its own, on BENCH_PORT), once per mode (off, "etc2" through BENCH_CONFIG; car-issues: "r8" is gone):
  *   3. 6WB Comfort, then 6WB Sport, Comfort + G20 and Comfort again: each layout builds with nothing refused and no
  *      layer left unbound; the scene textures go up in the mode's formats; the service's pixel memory is the sum the
- *      report gives (off: today's 11 963 960 bytes in Comfort); "r8" and "etc2" use less, and every texture is made
+ *      report gives (off: today's 11 963 960 bytes in Comfort); "etc2" uses less, and every texture is made
  *      once per layout (none sent twice).
- *   4. car-issues TX: the Діагностика setting switched live, off -> r8 -> etc2 -> off -> r8, a theme change and back: nothing
+ *   4. car-issues TX: the Діагностика setting switched live, off -> etc2 -> off -> etc2, a theme change and back: nothing
  *      refused, nothing left behind, every sampler bound, the pixel memory each time the cold start's of that mode.
  * Mac only, Node 18 or newer (fetch). Never shipped.
  */
@@ -70,39 +70,13 @@ function offline() {
     ok(threw, 'an edit whose anchor is missing throws instead of drawing something else');
 
     console.log('2. the variant files');
-    ['range_seg', 'ed_seg'].forEach((n) => {
-        const j = scene(n + '@r8'), o = premul(n), a = Buffer.from(j.r8, 'base64');
-        let same = a.length === o.w * o.h;
-        for (let i = 0; same && i < a.length; i++) same = a[i] === o.rgba[i * 4 + 3];
-        ok(j.format === 'r8' && j.enc === 'a8' && j.w === o.w && j.h === o.h && same, n + '@r8: R8, its alpha byte for byte');
-    });
-    {
-        const j = scene('window@r8'), o = premul('window'), a = Buffer.from(j.r8, 'base64'), e = [];
-        for (let i = 0; i < o.w * o.h; i++) for (let c = 0; c < 3; c++) e.push(Math.abs(a[i] / 255 * j.tint[c] * 255 - o.pm[i * 3 + c]));
-        const s = stats(e);
-        ok(j.format === 'r8' && j.enc === 'tint' && j.tint.length === 3 && s.max <= 3, 'window@r8: R8 x tint, max error ' + s.max + ' / 255 (<= 3)');
-    }
-    DIALS.forEach((n) => {
-        const j = scene(n + '@r8'), c = scene(j.chroma), o = premul(n), V = Buffer.from(j.r8, 'base64'), C = Buffer.from(c.rgba, 'base64'), e = [];
-        // the GPU's bilinear lookup of the colour map at this texel's uv (clamp to edge)
-        for (let y = 0; y < o.h; y++) {
-            for (let x = 0; x < o.w; x++) {
-                const u = (x + 0.5) / o.w * c.w - 0.5, vv = (y + 0.5) / o.h * c.h - 0.5;
-                const x0 = Math.max(0, Math.min(c.w - 1, Math.floor(u))), y0 = Math.max(0, Math.min(c.h - 1, Math.floor(vv)));
-                const x1 = Math.min(c.w - 1, x0 + 1), y1 = Math.min(c.h - 1, y0 + 1);
-                const fx = Math.max(0, Math.min(1, u - x0)), fy = Math.max(0, Math.min(1, vv - y0));
-                for (let k = 0; k < 3; k++) {
-                    const s = (xx, yy) => C[(yy * c.w + xx) * 4 + k];
-                    const col = (s(x0, y0) * (1 - fx) + s(x1, y0) * fx) * (1 - fy) + (s(x0, y1) * (1 - fx) + s(x1, y1) * fx) * fy;
-                    e.push(Math.abs(V[y * o.w + x] * col / 255 - o.pm[(y * o.w + x) * 3 + k]));
-                }
-            }
-        }
-        const s = stats(e);
-        const bound = n.indexOf('tacho') === 0 ? 120 : 70;
-        ok(j.format === 'r8' && j.enc === 'v8' && c.w === Math.ceil(o.w / 4) && s.max <= bound && s.mean < 1.0,
-            n + '@r8: R8 value x colour at 1/4 (' + c.w + 'x' + c.h + '): max ' + s.max + ', mean ' + s.mean + ', ' + s.over16 + ' texel channels over 16');
-    });
+    // car-issues (the owner, 2026-11-19): "r8" is gone; no @r8 / @r8c variant is left in the package, and every R8 file there has
+    // rows that are whole 4-byte rows (the car shears an R8 texture whose width is not a multiple of 4)
+    const SCENE_DIR = path.join(APP, 'hud', 'scene');
+    const files = fs.readdirSync(SCENE_DIR).filter((f) => /\.json$/.test(f) && !/\.regions\.json$/.test(f));
+    ok(!files.some((f) => /@r8c?\.json$/.test(f)), 'no @r8 / @r8c variant file is left (' + files.filter((f) => /@r8/.test(f)).join(', ') + ')');
+    const badRows = files.map((f) => { const j = JSON.parse(fs.readFileSync(path.join(SCENE_DIR, f), 'utf8')); return j && j.format === 'r8' && j.w % 4 ? f + ' ' + j.w : null; }).filter(Boolean);
+    ok(!badRows.length, 'every R8 scene file of f30_cluster has a width that is a multiple of 4' + (badRows.length ? ' (not: ' + badRows.join(', ') + ')' : ''));
     DIALS.concat(['window']).forEach((n) => {
         const j = scene(n + '@etc2'), o = premul(n), d = etc2.decode(j.format, Buffer.from(j.etc2, 'base64'), j.w, j.h), e = [];
         for (let y = 0; y < o.h; y++) for (let x = 0; x < o.w; x++) for (let k = 0; k < 3; k++) e.push(Math.abs(d[(y * j.w + x) * 4 + k] - o.pm[(y * o.w + x) * 3 + k]));
@@ -174,8 +148,7 @@ async function settled() {
 
 const EXPECT = {      // per mode: the formats of Comfort's scene textures (by size) and Comfort's pixel memory
     off: { comfort: 11963960, formats: { '670x670': 'rgba8', '320x286': 'rgba8', '346x68': 'rgba8', '144x144': 'rgba8' } },
-    r8: { formats: { '670x670': 'r8', '168x168': 'rgba8', '320x286': 'r8', '346x68': 'r8', '144x144': 'r8', '36x36': 'rgba8' } },
-    etc2: { formats: { '672x672': 'etc2rgb', '320x288': 'etc2rgb', '346x68': 'r8', '144x144': 'etc2rgb' } },
+    etc2: { formats: { '672x672': 'etc2rgb', '320x288': 'etc2rgb', '346x68': 'rgba8', '144x144': 'etc2rgb' } },     // car-issues: the arcs as off, no @r8
 };
 
 async function bench(mode) {
@@ -228,7 +201,7 @@ async function bench(mode) {
         const refused = /refus|pixel memory is full|too many assets|is sent once|takes no rects|scene texture .* (missing|does not match)/i.exec(logText);
         ok(!refused, mode + ': nothing refused by the service or the engine' + (refused ? ' (' + refused[0] + ')' : ''));
         ok(!exited && !/uncaught|app exited/.test(logText), mode + ': the app never exited');
-        if (mode !== 'off') ok(new RegExp('scene texture "speedo": 6[67][02]x6[67][02] ' + (mode === 'r8' ? 'R8' : 'etc2rgb') + ' asset \\(speedo@' + mode + '\\)').test(logText),
+        if (mode !== 'off') ok(new RegExp('scene texture "speedo": 6[67][02]x6[67][02] ' + 'etc2rgb' + ' asset \\(speedo@' + mode + '\\)').test(logText),
             mode + ': the log names the variant file ("scene texture "speedo": ... (speedo@' + mode + ')")');
     } finally {
         server.kill('SIGTERM');
@@ -261,7 +234,7 @@ async function live(cold) {
         if (!p || !p.ready) return;
         await setting('byMode', false); await setting('g20', false); await setting('hudLayout', 'wb_comfort');
         await until((q) => q.activeName === 'wb_comfort', 20000);
-        const steps = [['off'], ['r8'], ['etc2'], ['off'], ['r8'], ['r8', 'wb_sport'], ['r8', 'wb_comfort'], ['etc2']];
+        const steps = [['off'], ['etc2'], ['off'], ['etc2'], ['etc2', 'wb_sport'], ['etc2', 'wb_comfort'], ['off']];
         let mode = 'off';
         for (let i = 0; i < steps.length; i++) {
             const [m, lay] = steps[i];
@@ -299,15 +272,15 @@ async function live(cold) {
 async function main() {
     offline();
     const r = {};
-    for (const mode of ['off', 'r8', 'etc2']) r[mode] = await bench(mode);
+    for (const mode of ['off', 'etc2']) r[mode] = await bench(mode);
     const cold = {};
-    ['off', 'r8', 'etc2'].forEach((m) => { if (r[m] && r[m].wb_comfort) cold[m] = r[m].wb_comfort.pixels; });
+    ['off', 'etc2'].forEach((m) => { if (r[m] && r[m].wb_comfort) cold[m] = r[m].wb_comfort.pixels; });
     await live(cold);
     const pc = (m) => r[m] && r[m].wb_comfort && r[m].wb_comfort.pixels;
-    if (pc('off') && pc('r8') && pc('etc2')) {
-        ok(pc('r8') < pc('off') && pc('etc2') < pc('r8'), 'Comfort pixel memory: off ' + pc('off') + ' > r8 ' + pc('r8') + ' > etc2 ' + pc('etc2'));
-        ok(r.r8['wb_comfort#2'] && r.r8['wb_comfort#2'].pixels === pc('r8') && r.etc2['wb_comfort#2'] && r.etc2['wb_comfort#2'].pixels === pc('etc2'),
-            'Comfort again after Sport and the G20 toggle: the same pixel memory in both modes (nothing left behind)');
+    if (pc('off') && pc('etc2')) {
+        ok(pc('etc2') < pc('off'), 'Comfort pixel memory: off ' + pc('off') + ' > etc2 ' + pc('etc2'));
+        ok(r.etc2['wb_comfort#2'] && r.etc2['wb_comfort#2'].pixels === pc('etc2'),
+            'Comfort again after Sport and the G20 toggle: the same pixel memory in etc2 (nothing left behind)');
     }
     console.log('  RESULT ' + JSON.stringify(r));
 }
