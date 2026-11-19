@@ -24,7 +24,8 @@
  *    date: IN PLACE for the keys the engine reads at the moment of use (ccActive.release, mapWindow ...), by a drop of the scene
  *    textures and a rebuild for `sceneTex` (the textures come from another file), by a new MbExp and a rebuild for the MB
  *    experiments (the layers are made from it), and not at all for a key that is subscribed to only at start (ccDisplayed: the
- *    log says so, and the setting's label says "(after restart)"). Twin Dial's own settings change nothing that needs a rebuild.
+ *    log says so, and the setting's label says "(after restart)"). Twin Dial's own settings change nothing that needs a rebuild,
+ *    but for car-issues GL's diagGpuText (`gpuText`: the glyph atlases are made again, a rebuild).
  *
  * 2. THE START-UP HOLD (hold, config.startupHold). The layout used to be built three times at start: the first time the car's
  *    time zone and the first message list each make the bottom row's clock / info field "ours", and those widgets exist only at a
@@ -185,6 +186,9 @@ class Diag {
             }
             rebuild = true;
         }
+        // car-issues GL: config.gpuText (diagGpuText) changes how the "gpu" texts are made: a rebuild, which drops the old atlas
+        // after the layers that sample it (never before: a sampled asset is refused "asset in use")
+        if (roots.indexOf('gpuText') >= 0) rebuild = true;
         if (roots.indexOf('ccDisplayed') >= 0) hud.log.info('diag: config.ccDisplayed is subscribed to at start only: it takes effect after the app restarts');
         // the check-control state is decided from the keys under ccActive each time the lists or the number change: decide it now
         if (roots.indexOf('ccActive') >= 0 && !rebuild) {
