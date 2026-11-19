@@ -14,7 +14,7 @@
  *
  * Definitions worth knowing (all from the TRUE series, never the measured ones):
  *  - a CRITICAL moment: the true gap below nearMissGap_m, the true TTC below ttcCritical_s, the true time gap below
- *    timeGapCritical_s, or contact;
+ *    timeGapCritical_s while not opening (a faster car cutting in close is not one), or contact;
  *  - its LAST MOMENT: the latest time at which a driver who starts braking at driverBrake_mps2 (no reaction time) still keeps
  *    nearMissGap_m to the same lead, the lead doing what it really did;
  *  - warnLeadTime_s: last moment minus the warning's onset (min over the critical moments); missedWarning: a critical moment
@@ -234,7 +234,7 @@ function compute(result, config) {
     var cur = null;
     for (i = 0; i < n; i++) {
       var c = fin(gap[i]) && (gap[i] < th.nearMissGap_m || ttcOf(i) < th.ttcCritical_s ||
-        (egoV && egoV[i] > 1 && gap[i] / egoV[i] < th.timeGapCritical_s));
+        (egoV && egoV[i] > 1 && gap[i] / egoV[i] < th.timeGapCritical_s && !(vrel && vrel[i] > 0)));   // not while opening
       if (c) { if (cur && t[i] - t[cur.i1 - 1] <= 1.0) cur.i1 = i + 1; else { cur = { i0: i, i1: i + 1 }; crit.push(cur); } }
     }
   }

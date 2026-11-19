@@ -221,3 +221,11 @@ test('driver interventions: one per braking the driver starts himself; reactions
   const m = M.compute(result(40, () => ({ 'ego.v': 20 }), ev), cfg({ events: [{ t: 5, kind: 'driverBrake', level_ms2: 2 }] }));
   assert.strictEqual(m.driverInterventions, 2);
 });
+
+test('a short time gap to a car that pulls away (a faster cut-in) is not critical', () => {
+  const r = result(20, t => ({ 'ego.v': 30, 'lead.v': 33, 'gap.true': 5 + 3 * t, 'vrel.true': 3, 'lead.id': 1, warn: 0 }));
+  const m = M.compute(r, cfg({ reaction: 'none' }));
+  assert.strictEqual(m.missedWarning, false);
+  const closing = result(20, t => ({ 'ego.v': 30, 'lead.v': 29, 'gap.true': 8 - 0.2 * t, 'vrel.true': -1, 'lead.id': 1, warn: 0 }));
+  assert.strictEqual(M.compute(closing, cfg({ reaction: 'none' })).missedWarning, true);
+});
