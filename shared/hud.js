@@ -1966,6 +1966,26 @@ class HudApp {
      *  The glyph atlases of "atext" widgets stay while the connection lives. */
     _dropsUnused(key) { return key.indexOf(':scene:') >= 0 || key.indexOf(':exact:') >= 0; }
 
+    /**
+     * car-issues TX: drop every asset a connection still holds that this.atlases no longer names and no layer samples (one
+     * forgotten while a layer bound it: the service refuses such a drop with "asset in use" and the client keeps it, so it would
+     * stay for the life of the connection, count to the 16 assets a client may have and ride along on every whole-scene
+     * re-send). Called once the old layers are dropped, so the peak stays the larger layout's. -> how many were dropped.
+     */
+    _dropOrphans() {
+        let n = 0;
+        this.clients.forEach((c) => {
+            if (!c.layers) return;
+            const kept = new Set(), bound = new Set(), gone = [];
+            this.atlases.forEach((a) => { if (a.c === c) kept.add(a.ref); });
+            c.layers.forEach((l) => Object.keys(l.binds || {}).forEach((k) => bound.add(l.binds[k].asset)));
+            c.layers.forEach((l, ref) => { if (l.kind === 'asset' && !kept.has(ref) && !bound.has(ref)) gone.push(ref); });
+            gone.forEach((ref) => { c.drop(ref); n++; });
+        });
+        if (n) this.log.info('assets: dropped ' + n + ' that nothing uses any more');
+        return n;
+    }
+
     _atlasBytes() {
         let n = 0;
         this.atlases.forEach((a) => { n += a.bytes; });
@@ -3450,6 +3470,7 @@ class HudApp {
         if (this.twinMsg) this._guard('twin cc', () => { const born = this.twinMsg.rebuild(); this._twinCcAssign(born.window ? 'window' : 'none'); });
         this._layerRefs().forEach((r) => r.c.drop(r.ref));
         if (this.mbExp) this._guard('mb', () => this.mbExp.dropOwn());      // research3 MB: the cover layer
+        this._guard('orphan assets', () => this._dropOrphans());       // car-issues TX: before anything new is made
         this.placed = [];
         this.widgets.clear();
         this.sheets = [];

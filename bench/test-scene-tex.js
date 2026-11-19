@@ -15,6 +15,8 @@
  *      layer left unbound; the scene textures go up in the mode's formats; the service's pixel memory is the sum the
  *      report gives (off: today's 11 963 960 bytes in Comfort); "r8" and "etc2" use less, and every texture is made
  *      once per layout (none sent twice).
+ *   4. car-issues TX: the Діагностика setting switched live, off -> r8 -> etc2 -> off -> r8, a theme change and back: nothing
+ *      refused, nothing left behind, every sampler bound, the pixel memory each time the cold start's of that mode.
  * Mac only, Node 18 or newer (fetch). Never shipped.
  */
 const fs = require('fs');
@@ -236,10 +238,71 @@ async function bench(mode) {
     return res;
 }
 
+/**
+ * 4. car-issues TX: the Діагностика setting switched LIVE (off -> r8 -> etc2 -> off -> r8, then a theme change and back), as the
+ * owner does on the car. Before the fix every switch dropped the scene textures while the old layers still bound them: the service
+ * refused ("asset in use"), the client kept them, connection 1 reached its 16 assets and the new set was refused ("too many
+ * assets"), layers were left with an unbound sampler. Now: nothing refused, no asset that nothing samples, every sampler bound,
+ * and after each switch the pixel memory is the cold start's of that mode (`cold`: Comfort from 3., by mode).
+ */
+async function live(cold) {
+    console.log('4. the setting switched live (diagSceneTex), Comfort');
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'scenetex-live-'));
+    const dataDir = path.join(tmp, 'data'), screenDir = path.join(tmp, 'screen');
+    fs.mkdirSync(dataDir); fs.mkdirSync(screenDir);
+    const env = Object.assign({}, process.env, { BENCH_PORT: String(PORT), BENCH_DATA_DIR: dataDir, SCREEN_DIR: screenDir });
+    delete env.BENCH_CONFIG;
+    let logText = '';
+    const server = spawn(process.execPath, [path.join(__dirname, 'server.js'), 'f30_cluster'], { cwd: ROOT, env, stdio: ['ignore', 'pipe', 'pipe'] });
+    server.stdout.on('data', (d) => { logText += d; }); server.stderr.on('data', (d) => { logText += d; });
+    try {
+        let p = await until((q) => q && q.ready && q.activeName, 90000);
+        ok(p && p.ready, 'live: the app runs');
+        if (!p || !p.ready) return;
+        await setting('byMode', false); await setting('g20', false); await setting('hudLayout', 'wb_comfort');
+        await until((q) => q.activeName === 'wb_comfort', 20000);
+        const steps = [['off'], ['r8'], ['etc2'], ['off'], ['r8'], ['r8', 'wb_sport'], ['r8', 'wb_comfort'], ['etc2']];
+        let mode = 'off';
+        for (let i = 0; i < steps.length; i++) {
+            const [m, lay] = steps[i];
+            if (lay) { await setting('hudLayout', lay); await until((q) => q.activeName === lay, 20000); }
+            else if (i > 0) { await setting('diagSceneTex', m); await until((q) => q.settings && q.settings.diagSceneTex === m, 4000); }
+            mode = m;
+            await sleep(1500);
+            const s = await settled();
+            const name = 'live #' + i + ' ' + m + (lay ? ' ' + lay : '');
+            if (!s) { ok(false, name + ': no scene'); continue; }
+            const assets = s.layers.filter((l) => l.kind === 'asset');
+            const bound = new Set();
+            s.layers.forEach((l) => Object.keys(l.binds || {}).forEach((k) => bound.add(l.binds[k])));
+            // the 1x1 blank stays while the connection lives (hud.js _blank); every other asset is sampled by a layer
+            const orphans = assets.filter((a) => !bound.has(a.key) && !(a.iw === 1 && a.ih === 1));
+            const effects = s.layers.filter((l) => l.kind === 'effect' && l.visible);
+            const unbound = effects.filter((l) => ((l.fs || '').match(/uniform\s+sampler2D\s+(\w+)\s*;/g) || []).some((d) => !(l.binds || {})[d.replace(/uniform\s+sampler2D\s+|\s*;/g, '')]));
+            ok(!orphans.length && !unbound.length, name + ': ' + assets.length + ' assets, none left behind, every sampler bound' +
+                (orphans.length ? ' (left behind: ' + orphans.map((a) => a.format + ' ' + a.iw + 'x' + a.ih).join(', ') + ')' : '') + (unbound.length ? ' (unbound in ' + unbound.map((l) => l.key).join(', ') + ')' : ''));
+            if (!lay || lay === 'wb_comfort') {
+                const want = cold[mode];
+                if (want) ok(s.pixels === want, name + ': pixel memory ' + s.pixels + ' = the cold start\'s in "' + mode + '" (' + want + ')');
+            }
+        }
+        const refused = logText.match(/refused [^\n]*|pixel memory is full|too many assets/g) || [];
+        ok(!refused.length, 'live: the service refused nothing (' + (refused.length ? refused.length + ', first: ' + refused[0] : 'no "refused" line') + ')');
+        ok(!/uncaught|app exited/.test(logText), 'live: the app never exited');
+    } finally {
+        server.kill('SIGTERM');
+        await sleep(800);
+        try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (e) { /* left in tmp */ }
+    }
+}
+
 async function main() {
     offline();
     const r = {};
     for (const mode of ['off', 'r8', 'etc2']) r[mode] = await bench(mode);
+    const cold = {};
+    ['off', 'r8', 'etc2'].forEach((m) => { if (r[m] && r[m].wb_comfort) cold[m] = r[m].wb_comfort.pixels; });
+    await live(cold);
     const pc = (m) => r[m] && r[m].wb_comfort && r[m].wb_comfort.pixels;
     if (pc('off') && pc('r8') && pc('etc2')) {
         ok(pc('r8') < pc('off') && pc('etc2') < pc('r8'), 'Comfort pixel memory: off ' + pc('off') + ' > r8 ' + pc('r8') + ' > etc2 ' + pc('etc2'));

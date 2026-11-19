@@ -171,8 +171,11 @@ class Diag {
         r.paths.forEach((p) => { const root = p.split('.')[0]; if (roots.indexOf(root) < 0) roots.push(root); });
         let rebuild = false;
         if (roots.indexOf('sceneTex') >= 0) {
-            // the textures are keyed by name, not by file: drop them all so the new set is the one made (and the old and the new never sit together)
-            hud.atlases.forEach((a, k) => { if (k.indexOf(':scene:') >= 0) { try { a.c.drop(a.ref); } catch (e) { /* the connection is gone */ } hud.atlases.delete(k); } });
+            // the textures are keyed by name, not by file: forget them all so the new set is the one made (and the old and the new never sit together)
+            // car-issues TX: forget, do not drop here: the old layers still bind them, so the service refuses the drop ("asset in use"), the
+            // client keeps them and nothing ever dropped them again (bench: 10 assets leaked per switch, the 16-asset cap, layers left
+            // unbound). HudApp._rebuildInner drops every asset it no longer tracks once the old layers are gone, before the new set is made.
+            hud.atlases.forEach((a, k) => { if (k.indexOf(':scene:') >= 0) hud.atlases.delete(k); });
             hud.sceneSrcs = null;
             rebuild = true;
         }
