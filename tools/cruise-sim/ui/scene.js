@@ -248,6 +248,7 @@
             const x = X(m);
             if (x < x0 || x > x1) continue;
             line(x, rulerY - 3, x, rulerY + 3, th.faint, 1);
+            if (x < x0 + 12 || x > x1 - 14) continue;                 // no label cut by the edge
             text((m > 0 ? '+' : '') + m + (m === 0 ? ' m' : ''), x, rulerY + 14, 9, th.muted, 'center');
         }
 
