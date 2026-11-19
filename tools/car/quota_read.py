@@ -91,7 +91,7 @@ def apps_of(folder):
             continue
         name = pj.get('name')
         if isinstance(name, str) and name.replace('_', '').replace('-', '').isalnum():
-            mdu = pj.get('maxDiskUsage')
+            mdu = (pj.get('oapAppSettings') or {}).get('maxDiskUsage', pj.get('maxDiskUsage'))      # the kit writes it under oapAppSettings
             res[int(u)] = {'name': name, 'maxDiskUsage': mdu if isinstance(mdu, int) else None}
     return res
 

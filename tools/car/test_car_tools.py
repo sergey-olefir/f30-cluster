@@ -568,7 +568,7 @@ class Collector(unittest.TestCase):
         sp = os.path.join(car, "var/opt/public/oap/oap_12220")
         os.makedirs(os.path.join(sp, "data/rec/sub"))
         os.makedirs(os.path.join(sp, "source"))
-        open(os.path.join(sp, "source/package.json"), "w").write('{"name": "signal_probe", "version": "0.4.0", "maxDiskUsage": 83886080}')
+        open(os.path.join(sp, "source/package.json"), "w").write('{"name": "signal_probe", "version": "0.4.0", "oapAppSettings": {"maxDiskUsage": 83886080}}')
         import gzip as _gz
         self.rec = {"rec-20261120-101500-001.csv.gz": _gz.compress(b"#rec,1,0.4.0,20261120-101500,1,x,0,S17\n" + bytes(range(256)) * 300),
                     "rec-20261120-101500-002.csv.gz": _gz.compress(b"#end,5,samples=1\n")}
