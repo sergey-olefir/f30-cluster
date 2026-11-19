@@ -14,3 +14,7 @@ __pycache__/
 # matches only a real directory, never a symlink, so the photos would show as untracked there.
 reference
 bake/work
+
+# The documentation lives outside the repository (the Store refuses a repository archive over 64 MiB).
+# No trailing slash, as above: agent worktrees symlink it from the main checkout.
+docs

@@ -28,7 +28,8 @@ apps/f30_cluster/   the app: app.json, main.js, hud/ (layouts, fonts, previews)
 design/             gen_6wb.py writes the three layouts (edit it, not the JSON); gen_f30.py the basic one
 shared/             the drawing engine (shaders.js has the 6WB dial and backdrop)
 kit/                the MGU App Kit runtime and build tools
-docs/twin-dial/     the Twin Dial specification, reports and probe protocol
+docs/               not in the repository (git-ignored): specifications and reports, kept locally. The Store
+                    refuses a repository archive over 64 MiB, so nothing big is tracked
 bench/              cluster bench: node bench/server.js f30_cluster
 tools/              bake_fonts.py, previews.py
 ```
