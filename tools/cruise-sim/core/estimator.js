@@ -202,7 +202,8 @@
       if (meas) {
         var seqKnown = meas.seq !== undefined && meas.seq !== null;
         var tmKnown = meas.tMeas !== undefined && meas.tMeas !== null;
-        var repeated = (seqKnown || tmKnown) && (!seqKnown || meas.seq === S.lastSeq) && (!tmKnown || meas.tMeas === S.lastTMeas);
+        // the same message again: the sequence number decides when there is one, else the message time
+        var repeated = seqKnown ? meas.seq === S.lastSeq : (tmKnown && meas.tMeas === S.lastTMeas);
         if (repeated) S.repeat++;
         else { S.repeat = 0; S.tLastMsg = t; }
         S.lastSeq = seqKnown ? meas.seq : null; S.lastTMeas = tmKnown ? meas.tMeas : null;

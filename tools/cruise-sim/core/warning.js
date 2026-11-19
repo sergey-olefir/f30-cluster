@@ -10,7 +10,12 @@
  * after) following — "stale input = no target and a warning"; the camera blind = the driver is told.
  * An off-delay keeps the warning from flickering.
  *
- * step({ t, est, egoV, aMin }) -> { warn, reason ('distance'|'ttc'|'distance+ttc'|'sensor'|null), dNeeded, ttc, raw }
+ * step({ t, est, egoV, aMin, aCmdMax? }) -> { warn, reason, dNeeded, ttc, raw, aUsed }
+ *   reason: 'distance' | 'ttc' | 'distance+ttc' | 'sensor' | null
+ *   aCmdMax (m/s², optional): the deceleration the loop itself can ask for — the controller's down rate limit
+ *   (3 km/h/s = 0.83 m/s²). The cruise cannot slow faster than its set speed falls, so with limitByLoop the
+ *   warning uses min(|a_min|, aCmdMax). Without it a cruise that could brake at 1.8 m/s² is credited with that
+ *   while the loop only ever asks for 0.83, and the warning comes too late (found on the SC1 engine, demo.approach).
  * ttc is Infinity when not closing; dNeeded is null without a valid target.
  */
 (function () {
@@ -20,12 +25,14 @@
     { key: 'd0', label: 'Standstill gap d0', unit: 'm', default: 5, min: 3, max: 8, step: 0.5, group: 'warning', help: 'The gap the warning protects (same start value as the controller).' },
     { key: 'ttcWarn_s', label: 'TTC_warn', unit: 's', default: 3, min: 2, max: 4, step: 0.1, group: 'warning', help: 'Tuning table: 3 s, sweep 2–4.' },
     { key: 'tDead_s', label: 'Dead time in d_needed', unit: 's', default: 0, min: 0, max: 3, step: 0.1, group: 'warning', help: 'Not in the parent formula: adds v_closing x T_dead (the cruise reacts late). 0 = the parent formula.' },
+    { key: 'limitByLoop', label: 'Limit a_min by the loop', unit: '', default: true, options: [true, false], group: 'warning', help: 'd_needed uses min(|a_min|, aCmdMax) when the engine passes aCmdMax (the controller\'s down rate limit). false = the parent formula.' },
     { key: 'margin', label: 'Distance margin', unit: '', default: 1.0, min: 0.5, max: 2, step: 0.05, group: 'warning', help: 'warn if d < margin x d_needed.' },
     { key: 'aMinFloor_mps2', label: 'Smallest a_min used', unit: 'm/s²', default: 0.1, min: 0.01, max: 1, step: 0.01, group: 'warning', help: 'Guards the division when a plant has (almost) no braking.' },
     { key: 'onDelay_s', label: 'On delay', unit: 's', default: 0, min: 0, max: 1, step: 0.05, group: 'warning', help: 'The condition must hold this long before the warning comes on.' },
     { key: 'offDelay_s', label: 'Off delay', unit: 's', default: 1.0, min: 0, max: 5, step: 0.1, group: 'warning', help: 'The warning stays on this long after the condition clears.' },
     { key: 'vMinWarn_kmh', label: 'No warning below', unit: 'km/h', default: 10, min: 0, max: 40, step: 1, group: 'warning', help: '' },
     { key: 'warnOnSensorFault', label: 'Warn on a sensor fault', unit: '', default: true, options: [true, false], group: 'warning', help: 'Stale or blind input while following = a warning.' },
+    { key: 'sensorWarnAfter_s', label: 'Sensor fault persists', unit: 's', default: 1.0, min: 0, max: 5, step: 0.1, group: 'warning', help: 'A sensor fault warns only after lasting this long: the controller already holds the set speed at once, and short dropouts would otherwise be nuisance warnings.' },
     { key: 'sensorWarnWindow_s', label: 'Sensor warning window', unit: 's', default: 5, min: 0, max: 30, step: 0.5, group: 'warning', help: 'A sensor fault warns if a target was held within this time (the driver must know the following is off).' }
   ];
 
@@ -47,13 +54,15 @@
 
   function create(params) {
     var p = fill(params);
-    var S = { warn: false, condSince: null, clearSince: null, reason: null, lastTargetT: null };
+    var S = { warn: false, condSince: null, clearSince: null, reason: null, lastTargetT: null, faultSince: null };
 
     function step(inp) {
       var t = inp.t;
       var est = inp.est;
       var egoV = inp.egoV;
-      var aMin = Math.max(Math.abs(inp.aMin === undefined || inp.aMin === null ? 0 : inp.aMin), p.aMinFloor_mps2);
+      var aMin = Math.abs(inp.aMin === undefined || inp.aMin === null ? 0 : inp.aMin);
+      if (p.limitByLoop && inp.aCmdMax > 0 && inp.aCmdMax < aMin) aMin = inp.aCmdMax;
+      aMin = Math.max(aMin, p.aMinFloor_mps2);
       var valid = !!(est && est.valid && !est.stale);
       var dNeeded = null; var ttc = Infinity;
       var condD = false; var condT = false; var condS = false;
@@ -66,8 +75,11 @@
         ttc = ttcOf(est.gap, vc);
         condD = moving && est.gap < p.margin * dNeeded;
         condT = moving && ttc < p.ttcWarn_s;
-      } else if (p.warnOnSensorFault && est && (est.stale || est.sensorFault) && S.lastTargetT !== null &&
-                 t - S.lastTargetT <= p.sensorWarnWindow_s) {
+      }
+      var fault = !valid && !!(est && (est.stale || est.sensorFault));
+      if (!fault) S.faultSince = null; else if (S.faultSince === null) S.faultSince = t;
+      if (fault && p.warnOnSensorFault && S.lastTargetT !== null && S.faultSince - S.lastTargetT <= p.sensorWarnWindow_s &&
+          t - S.faultSince >= p.sensorWarnAfter_s - 1e-9) {
         condS = moving;
       }
       var raw = condD || condT || condS;
@@ -85,7 +97,7 @@
           if (t - S.clearSince >= p.offDelay_s - 1e-9) { S.warn = false; S.reason = null; S.clearSince = null; }
         }
       }
-      return { warn: S.warn, reason: S.warn ? S.reason : null, dNeeded: dNeeded, ttc: ttc, raw: raw };
+      return { warn: S.warn, reason: S.warn ? S.reason : null, dNeeded: dNeeded, ttc: ttc, raw: raw, aUsed: aMin };
     }
 
     return { params: p, step: step };

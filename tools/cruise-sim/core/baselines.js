@@ -17,9 +17,11 @@
 (function () {
   'use strict';
 
-  var sensor = typeof require !== 'undefined' ? require('./sensor') : self.CS.sensor;
-  var estimator = typeof require !== 'undefined' ? require('./estimator') : self.CS.estimator;
-  var geom = sensor.geom;
+  // siblings resolved when first used: in the page the files load in any order
+  function sib(name) { return typeof require !== 'undefined' ? require('./' + name) : self.CS[name]; }
+  var geom = {
+    trueLead: function (world) { return sib('sensor').geom.trueLead(world); }
+  };
 
   var SCHEMA = [
     // ideal ACC
@@ -64,8 +66,8 @@
   // ---------------- ideal ACC ----------------
   function createIdealAcc(params) {
     var p = fill(params);
-    var est = p.acc_useTruth ? null : estimator.create({});
-    var S = { aCmd: 0, aAct: 0, lastT: null, nextCtl: null, dDes: null, reason: 'free' };
+    var est = p.acc_useTruth ? null : sib('estimator').create({});
+    var S = { aCmd: 0, aAct: 0, lastT: null, nextCtl: null, dDes: null, reason: 'free', lastMeas: null };
 
     function control(world, t, meas) {
       var ego = world.ego;
@@ -74,7 +76,10 @@
         var L = geom.trueLead(world);
         if (L) lead = { gap: L.gap, vrel: L.vrel, alead: L.alead };
       } else {
-        var e = est.update(meas, t, { egoV: ego.v, egoA: ego.a || 0 });
+        // the engine hands over the last delivered message on every tick: pass each one once
+        var fresh = meas && meas !== S.lastMeas ? meas : null;
+        if (meas) S.lastMeas = meas;
+        var e = est.update(fresh, t, { egoV: ego.v, egoA: ego.a || 0 });
         if (e.valid) lead = { gap: e.gap, vrel: e.vrel, alead: e.alead || 0 };
       }
       var aFree = p.acc_kFree * (vMaxOf(world) - ego.v);
@@ -111,7 +116,7 @@
 
   function createHuman(params, rng) {
     var p = fill(params);
-    var R = sensor._stream(rng, 'baseline.human', 606);
+    var R = sib('sensor')._stream(rng, 'baseline.human', 606);
     var q = { a: p.hum_a, b: p.hum_b, T: p.hum_T, s0: p.hum_s0, delta: p.hum_delta };
     var S = { es: R.n(), ev: R.n(), buf: [], nextT: null, lastT: null, a: 0, dDes: null };
 

@@ -16,6 +16,7 @@ function suite(name) {
         try { c.fn(); pass++; } catch (e) { fail++; console.log('  FAIL ' + name + ' :: ' + c.title + '\n    ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join('\n    ') : e)); }
       });
       console.log((fail ? 'FAIL ' : 'ok   ') + name + ': ' + pass + ' passed, ' + fail + ' failed');
+      console.log('# pass ' + pass); console.log('# fail ' + fail);   // the counts test.js (SC1) reads
       api.result = { pass: pass, fail: fail };
       if (fail) { process.exitCode = 1; throw new Error(name + ': ' + fail + ' failed'); }
       return api.result;

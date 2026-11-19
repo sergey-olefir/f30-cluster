@@ -85,15 +85,24 @@ S.test('off-delay holds the warning for offDelay_s, on-delay waits', function ()
 });
 
 S.test('a stale or blind input while following warns "sensor"; long after the target, it does not', function () {
-  var w = W.create({ sensorWarnWindow_s: 5 });
+  var w = W.create({ sensorWarnWindow_s: 5, sensorWarnAfter_s: 1.0 });
   w.step({ t: 0, est: est(60, 30), egoV: 30, aMin: -1 });
   var r = w.step({ t: 1, est: { valid: false, stale: true, sensorFault: true }, egoV: 30, aMin: -1 });
+  assert.strictEqual(r.warn, false, 'a fault shorter than sensorWarnAfter_s is not a warning');
+  r = w.step({ t: 1.9, est: { valid: false, stale: true, sensorFault: true }, egoV: 30, aMin: -1 });
+  assert.strictEqual(r.warn, false);
+  r = w.step({ t: 2.0, est: { valid: false, stale: true, sensorFault: true }, egoV: 30, aMin: -1 });
   assert.strictEqual(r.warn, true); assert.strictEqual(r.reason, 'sensor');
-  var w2 = W.create({ sensorWarnWindow_s: 5, offDelay_s: 0 });
+  // a fault that clears before sensorWarnAfter_s never warns
+  var wq = W.create({ sensorWarnAfter_s: 1.0 });
+  wq.step({ t: 0, est: est(60, 30), egoV: 30, aMin: -1 });
+  wq.step({ t: 0.1, est: { valid: false, stale: true, sensorFault: true }, egoV: 30, aMin: -1 });
+  assert.strictEqual(wq.step({ t: 0.9, est: est(60, 30), egoV: 30, aMin: -1 }).warn, false);
+  var w2 = W.create({ sensorWarnWindow_s: 5, offDelay_s: 0, sensorWarnAfter_s: 0 });
   w2.step({ t: 0, est: est(60, 30), egoV: 30, aMin: -1 });
   r = w2.step({ t: 6, est: { valid: false, stale: true, sensorFault: true }, egoV: 30, aMin: -1 });
   assert.strictEqual(r.warn, false, 'outside the window');
-  var w3 = W.create({ warnOnSensorFault: false });
+  var w3 = W.create({ warnOnSensorFault: false, sensorWarnAfter_s: 0 });
   w3.step({ t: 0, est: est(60, 30), egoV: 30, aMin: -1 });
   assert.strictEqual(w3.step({ t: 1, est: { valid: false, stale: true }, egoV: 30, aMin: -1 }).warn, false);
   // a plain "no target" is not a sensor fault
@@ -107,6 +116,18 @@ S.test('below vMinWarn nothing warns; a_min of zero is floored', function () {
   assert.strictEqual(r.warn, false);
   r = W.create({}).step({ t: 0, est: est(100, 20), egoV: 21, aMin: 0 });
   near(r.dNeeded, 5 + 1 / (2 * 0.1), 1e-9);
+});
+
+S.test('the loop limit: d_needed uses min(|a_min|, aCmdMax) when given', function () {
+  // a cruise that brakes at 1.8 m/s^2, a loop whose set speed falls at 3 km/h/s = 0.833 m/s^2
+  var r = W.create({}).step({ t: 0, est: est(60, 20), egoV: 30, aMin: -1.8, aCmdMax: 3 / 3.6 });
+  near(r.aUsed, 3 / 3.6, 1e-12); near(r.dNeeded, 5 + 100 / (2 * 3 / 3.6), 1e-9); assert.strictEqual(r.warn, true);
+  r = W.create({ limitByLoop: false }).step({ t: 0, est: est(60, 20), egoV: 30, aMin: -1.8, aCmdMax: 3 / 3.6 });
+  near(r.dNeeded, 5 + 100 / 3.6, 1e-9); assert.strictEqual(r.warn, false);
+  r = W.create({}).step({ t: 0, est: est(60, 20), egoV: 30, aMin: -0.7, aCmdMax: 3 / 3.6 });
+  near(r.aUsed, 0.7, 1e-12, 'a weaker cruise stays the limit');
+  r = W.create({}).step({ t: 0, est: est(60, 20), egoV: 30, aMin: -1.8 });
+  near(r.aUsed, 1.8, 1e-12, 'no aCmdMax: the parent formula');
 });
 
 S.test('pure: the same inputs give the same outputs in two instances', function () {

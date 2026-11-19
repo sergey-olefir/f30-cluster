@@ -24,7 +24,6 @@
   var LANE_W_DEFAULT = 3.5;
 
   var SCHEMA = [
-    { key: 'preset', label: 'Preset', unit: '', default: 'clear', options: ['ideal', 'clear', 'rain', 'lowSun', 'fog', 'night', 'slow2Hz', 'poor'], group: 'sensor', help: 'A named starting point; the other settings override it.' },
     // timing
     { key: 'rateHz', label: 'Native sample rate', unit: 'Hz', default: 10, min: 2, max: 25, step: 1, group: 'timing', help: 'How often the camera sends the front-vehicle message. Unknown on the car; TrafficSignRecognition arrives at about 2 Hz.' },
     { key: 'latency_s', label: 'Latency', unit: 's', default: 0.15, min: 0, max: 1.0, step: 0.01, group: 'timing', help: 'From the camera frame to the app receiving the value (camera processing + gateway + SOME/IP).' },
@@ -48,8 +47,8 @@
     { key: 'vrelQuant_mps', label: 'Relative-speed resolution', unit: 'm/s', default: 0.1, min: 0, max: 1, step: 0.05, group: 'speed', help: '0 = none.' },
     // faults
     { key: 'dropProb', label: 'Dropout probability', unit: '1/sample', default: 0.02, min: 0, max: 0.5, step: 0.01, group: 'faults', help: 'A single message lost.' },
-    { key: 'burstProb', label: 'Burst start probability', unit: '1/sample', default: 0.002, min: 0, max: 0.05, step: 0.001, group: 'faults', help: 'A run of lost messages starts.' },
-    { key: 'burstMean_s', label: 'Burst mean length', unit: 's', default: 1.0, min: 0.1, max: 10, step: 0.1, group: 'faults', help: 'Exponentially distributed.' },
+    { key: 'burstProb', label: 'Burst start probability', unit: '1/sample', default: 0.0005, min: 0, max: 0.05, step: 0.001, group: 'faults', help: 'A run of lost messages starts.' },
+    { key: 'burstMean_s', label: 'Burst mean length', unit: 's', default: 0.5, min: 0.1, max: 10, step: 0.1, group: 'faults', help: 'Exponentially distributed.' },
     { key: 'outlierProb', label: 'Outlier probability', unit: '1/sample', default: 0.005, min: 0, max: 0.1, step: 0.001, group: 'faults', help: 'A gap value off by up to the outlier size.' },
     { key: 'outlierRel', label: 'Outlier size', unit: '', default: 0.3, min: 0, max: 1, step: 0.05, group: 'faults', help: 'Uniform relative error, +/- this fraction of the gap.' },
     { key: 'ghostRatePerMin', label: 'Ghost targets', unit: '1/min', default: 0, min: 0, max: 10, step: 0.1, group: 'faults', help: 'Random ghosts (bridges, shadows). The fault flag world.faults.ghost forces one.' },
@@ -98,6 +97,8 @@
 
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 
+  // defaults <- PRESETS[params.preset] <- params. (The engine applies the preset itself through schema.withPreset
+  // and passes merged params; `preset` is therefore not a SCHEMA key.)
   function fill(params) {
     var p = {};
     var i, k;
