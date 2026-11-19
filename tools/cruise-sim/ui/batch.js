@@ -66,7 +66,7 @@
       name: r.name || (scenObj && scenObj.name) || '', variant: variant, label: label || '(base)', reaction: reaction,
       params: params || {}, metrics: r.metrics || {}, verdict: verdict, decide: r.decide || (scenObj && scenObj.decide) || (verdict && verdict.failed) || [],
       scope: r.scope || (scenObj && scenObj.scope) || 'in', study: study, set: r.set, side: r.side, param: r.param, factor: r.factor,
-      config: r.config || null, concrete: scenObj, result: r.result || null,
+      config: r.config || null, concrete: scenObj, result: r.result || null, gi: r.gi, groupKey: r.groupKey || null, error: r.error || null,
     };
   }
 
@@ -93,16 +93,81 @@
       runs: runs, plant: plant, presets: (j && j.presets) || null, base: (j && (j.base || j.config)) || null,
       created: (j && j.created) || null, plan: (j && j.plan) || null, studies: studies, warnings: warnings,
       thresholds: (j && j.thresholds) || (j && j.base && j.base.thresholds) || null,
-      catalogue: (j && j.catalogue) || null,
+      catalogue: (j && j.catalogue) || null, summary: (j && j.summary) || null, runsKept: (j && j.runsKept) || 'all',
     };
   }
 
   /** The runs of one study; when no run is tagged with any study, every run serves every view. */
+  // SC3's sweep.js tags grid runs 'map' (a plan with a map) or 'matrix', and ±30 % runs 'tornado'.
+  const STUDY_ALIASES = { sensitivity: ['sensitivity', 'tornado'], tornado: ['sensitivity', 'tornado'], matrix: ['matrix', 'map'], map: ['map', 'matrix'], tuning: ['tuning', 'matrix', 'map'] };
   function studyRuns(batch, study) {
-    const tagged = batch.runs.filter(function (r) { return r.study === study; });
-    if (tagged.length) return tagged;
+    const names = STUDY_ALIASES[study] || [study];
+    for (let i = 0; i < names.length; i++) {
+      const tagged = batch.runs.filter(function (r) { return r.study === names[i]; });
+      if (tagged.length) return tagged;
+    }
     const anyTag = batch.runs.some(function (r) { return r.study; });
     return anyTag ? batch.runs.filter(function (r) { return !r.study; }) : batch.runs.slice();
+  }
+
+  /** The key of a run's grid point: sweep.js's point index, else its swept parameters. */
+  function pointKey(r) {
+    if (r.gi !== undefined && r.gi !== null) return 'gi' + r.gi;
+    const ks = Object.keys(r.params || {}).filter(function (k) { return /\./.test(k) && !/^(params|scenario|vehicles|ego|road|events)\b/.test(k); }).sort();
+    return ks.map(function (k) { return k + '=' + JSON.stringify(r.params[k]); }).join('&');
+  }
+
+  function samePoint(params, preset) {
+    const ks = Object.keys(preset || {});
+    return ks.length > 0 && ks.every(function (k) { const a = params[k], b = preset[k]; return a === b || (typeof a === 'number' && typeof b === 'number' && Math.abs(a - b) < 1e-9); });
+  }
+
+  /**
+   * The grid points of a batch (each a whole catalogue at one parameter set) for the matrix's point
+   * selector: [{ key, label, params, runs, preset, pass, total }], preset points first.
+   */
+  function matrixPoints(runs, presets) {
+    const by = {}, order = [];
+    runs.forEach(function (r) { const k = pointKey(r); if (!by[k]) { by[k] = []; order.push(k); } by[k].push(r); });
+    const out = order.map(function (k) {
+      const rs = by[k];
+      const params = {};
+      Object.keys(rs[0].params || {}).forEach(function (pk) { if (rs.every(function (r) { return r.params && JSON.stringify(r.params[pk]) === JSON.stringify(rs[0].params[pk]); })) params[pk] = rs[0].params[pk]; });
+      const preset = Object.keys(presets || {}).filter(function (n) { return samePoint(params, presets[n]); })[0] || null;
+      const pass = rs.filter(function (r) { return r.verdict && r.verdict.pass; }).length;
+      const txt = Object.keys(params).filter(function (pk) { return /\./.test(pk) && !/^params\./.test(pk); }).map(function (pk) { return shortKey(pk) + ' ' + (typeof params[pk] === 'number' ? fmtShort(params[pk]) : params[pk]); }).join(', ');
+      return { key: k, label: (preset ? preset + ': ' : '') + (txt || 'base'), params: params, runs: rs, preset: preset, pass: pass, total: rs.length };
+    });
+    return out.sort(function (a, b) { return (b.preset ? 1 : 0) - (a.preset ? 1 : 0); });
+  }
+
+  /** sweep.js's precomputed maps (summary.maps) as heat-map grids; `family` picks a family's own shares. */
+  function summaryGrids(batch, family) {
+    const maps = batch && batch.summary && batch.summary.maps;
+    if (!Array.isArray(maps)) return [];
+    return maps.map(function (m) {
+      const src = family && m.families && m.families[family] ? m.families[family] : m.cells;
+      const ax = makeAxis(m.x, m.xs, 1e9), ay = makeAxis(m.y, m.ys, 1e9);
+      const cells = (src || []).map(function (row) { return (row || []).map(function (v) { return { value: v === null || v === undefined ? null : v, n: v === null || v === undefined ? 0 : 1, pass: 0, runs: [] }; }); });
+      const presets = {};
+      Object.keys(m.presets || {}).forEach(function (n) { presets[n] = {}; presets[n][m.x] = m.presets[n].x; presets[n][m.y] = m.presets[n].y; });
+      return { x: ax, y: ay, cells: cells, min: 0, max: 1, value: { kind: 'passShare' }, op: '>=', used: null, skipped: 0, presets: presets,
+        split: m.split, splitValue: m.splitValue, families: Object.keys(m.families || {}).sort(), summary: true };
+    });
+  }
+
+  /** sweep.js's precomputed tornado (summary.tornado) as a tornado model (no per-variant verdict counts). */
+  function summaryTornado(batch) {
+    const rows = batch && batch.summary && batch.summary.tornado;
+    if (!Array.isArray(rows) || !rows.length) return null;
+    const bars = rows.map(function (r) {
+      const lo = r.low === undefined ? NaN : r.low, hi = r.high === undefined ? NaN : r.high;
+      return { param: r.param, base: r.base, low: lo, high: hi, lowValue: r.lowValue, highValue: r.highValue,
+        delta: r.swing !== undefined ? r.swing : Math.max(isFinite(lo) ? Math.abs(lo - r.base) : 0, isFinite(hi) ? Math.abs(hi - r.base) : 0),
+        flipsLow: isFinite(lo) && lo !== r.base, flipsHigh: isFinite(hi) && hi !== r.base, changedLow: null, changedHigh: null,
+        lowFailing: r.lowFailing, highFailing: r.highFailing };
+    }).sort(function (a, b) { return b.delta - a.delta; });
+    return { base: rows[0].base, bars: bars, spec: { kind: 'passShare' }, summary: true };
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -769,7 +834,7 @@
     el.innerHTML = '';
     const tip = h('div', { class: 'su2-tip', hidden: true });
     document.body.appendChild(tip);
-    const state = { tab: 'matrix', mapX: null, mapY: null, mapValue: 'passShare', mapAgg: 'worst', target: 1, tornado: 'passShare', job: null };
+    const state = { tab: 'matrix', point: null, mapSource: null, mapFamily: '', mapX: null, mapY: null, mapValue: 'passShare', mapAgg: 'worst', target: 1, tornado: 'passShare', job: null };
     function modules() { return opts.modules || (typeof self !== 'undefined' && self.CS) || {}; }
     function batch() { return getCurrent(); }
 
@@ -865,7 +930,18 @@
 
     function renderMatrix(b) {
       const thr = b.thresholds || (app.config && app.config.thresholds);
-      const mm = matrixModel(studyRuns(b, 'matrix'), { thresholds: thr, modules: modules() });
+      const pts = matrixPoints(studyRuns(b, 'matrix'), b.presets);
+      if (!pts.length) { view.appendChild(h('div', { class: 'su2-empty' }, ['No matrix runs in this batch.'])); return; }
+      if (!state.point || !pts.some(function (p) { return p.key === state.point; })) state.point = pts[0].key;
+      if (pts.length > 1) {
+        const sel = h('select', { 'aria-label': 'Parameter set' });
+        pts.forEach(function (p) { sel.appendChild(h('option', { value: p.key, text: p.label + ' — ' + p.pass + ' / ' + p.total + ' pass' })); });
+        sel.value = state.point;
+        sel.addEventListener('change', function () { state.point = sel.value; render(); });
+        view.appendChild(h('div', { class: 'su2-form' }, [h('label', null, ['parameter set ', sel]), h('span', { class: 'su2-note', text: pts.length + ' sets in this batch' + (b.runsKept === 'presets' ? ' (the file keeps the runs at the preset points only)' : '') })]));
+      }
+      const point = pts.filter(function (p) { return p.key === state.point; })[0];
+      const mm = matrixModel(point.runs, { thresholds: thr, modules: modules() });
       view.appendChild(h('div', { class: 'su2-note', style: { margin: '0 0 8px' } }, [
         mm.pass + ' of ' + mm.total + ' runs pass' + (mm.na ? ', ' + mm.na + ' without a verdict' : '') + '. ✓ pass · ✗ fail · dashed: scored on the warning only / out of the envelope. Each cell shows the deciding metric; click to open the run.',
       ]));
@@ -901,7 +977,56 @@
 
     function svgInto(container, svg) { container.innerHTML = svg; return container.firstChild; }
 
+    function drawGrid(grid, marks, title) {
+      const w = Math.max(420, Math.min(900, (view.clientWidth || 760) - 16));
+      const hh = Math.max(260, Math.min(520, 60 + grid.y.n * 34));
+      const lay = layoutHeatmap(grid, { box: { x: 0, y: 0, w: w, h: hh }, marks: marks, target: state.target });
+      const wrap = h('div', { class: 'su2-svgwrap' });
+      const svg = svgInto(wrap, charts.renderSvg(lay.ops, w, hh, title));
+      svg.addEventListener('mousemove', function (e) {
+        const rc = svg.getBoundingClientRect();
+        const hit = lay.cellAt((e.clientX - rc.left) * w / rc.width, (e.clientY - rc.top) * hh / rc.height);
+        if (!hit || hit.cell.value === null) { hideTip(); return; }
+        const c = hit.cell;
+        const failing = {};
+        c.runs.forEach(function (r) { if (r.verdict && !r.verdict.pass) failing[r.scenario] = (failing[r.scenario] || 0) + 1; });
+        const fl = Object.keys(failing).sort(function (a, b2) { return failing[b2] - failing[a]; }).slice(0, 6);
+        showTip(e, '<b>' + charts.esc(grid.x.key) + ' = ' + charts.esc(grid.x.labels[hit.i]) + '<br>' + charts.esc(grid.y.key) + ' = ' + charts.esc(grid.y.labels[hit.j]) + '</b><br>' +
+          (grid.value.kind === 'passShare' ? (c.runs.length ? c.pass + ' of ' + c.n + ' runs pass (' + Math.round(c.value * 100) + '%)' : Math.round(c.value * 100) + '% pass') : charts.esc(grid.value.name) + ' ' + fmt(c.value) + ' (' + c.n + ' runs)') +
+          (fl.length ? '<br>failing: ' + fl.map(function (s2) { return charts.esc(s2) + ' ×' + failing[s2]; }).join(', ') : ''));
+      });
+      svg.addEventListener('mouseleave', hideTip);
+      view.appendChild(wrap);
+    }
+
+    function targetInput() {
+      const targetIn = h('input', { type: 'text', value: String(state.target), size: 5, title: 'Draw the frontier where the cell value reaches this' });
+      targetIn.addEventListener('change', function () { const v = parseFloat(targetIn.value); state.target = isFinite(v) ? v : NaN; render(); });
+      return targetIn;
+    }
+
     function renderMap(b) {
+      const sg = summaryGrids(b, state.mapFamily);
+      if (sg.length && state.mapSource !== 'runs') {
+        const idx = Math.max(0, Math.min(sg.length - 1, +state.mapSource || 0));
+        const grid = sg[idx];
+        const src = h('select', { 'aria-label': 'Map' });
+        sg.forEach(function (g, i) { src.appendChild(h('option', { value: String(i), text: g.x.key + ' × ' + g.y.key + (g.split ? ' at ' + g.split + ' = ' + g.splitValue : '') + ' (sweep summary)' })); });
+        src.appendChild(h('option', { value: 'runs', text: 'from the runs: any two parameters, any metric' }));
+        src.value = String(idx);
+        src.addEventListener('change', function () { state.mapSource = src.value; render(); });
+        const fam = h('select', { 'aria-label': 'Family' });
+        fam.appendChild(h('option', { value: '', text: 'the whole catalogue' }));
+        (grid.families || []).forEach(function (f) { fam.appendChild(h('option', { value: f, text: 'family ' + f })); });
+        fam.value = state.mapFamily;
+        fam.addEventListener('change', function () { state.mapFamily = fam.value; render(); });
+        view.appendChild(h('div', { class: 'su2-form' }, [h('label', null, ['map ', src]), h('label', null, ['share of ', fam]), h('label', null, ['frontier at ', targetInput()])]));
+        const marks = presetMarks(grid, Object.keys(grid.presets).length ? grid.presets : presetPoints(b, modules()));
+        drawGrid(grid, marks, 'Feasibility map: ' + grid.x.key + ' × ' + grid.y.key);
+        const assumed = !b.plant || b.plant.assumed !== false;
+        view.appendChild(h('div', { class: 'su2-note', style: { marginTop: '6px' } }, ['Each cell: the share of ' + (state.mapFamily ? 'family ' + state.mapFamily : 'the catalogue') + ' that passes at that point. Diamonds: the plant presets. ' + (assumed ? 'With an assumed plant: this shows what the car must measure, not a verdict.' : '')]));
+        return;
+      }
       const runs = studyRuns(b, 'map');
       const axes = paramAxes(runs);
       if (axes.length < 2) {
@@ -922,37 +1047,18 @@
       }
       const axisOpts = axes.map(function (a) { return [a.key, a.key + ' (' + a.values.length + ')']; });
       const valueOpts = [['passShare', 'share of runs that pass']].concat(Object.keys(metricNames).sort().map(function (k) { return [k, k]; }));
-      const targetIn = h('input', { type: 'text', value: String(state.target), size: 5, title: 'Draw the frontier where the cell value reaches this' });
-      targetIn.addEventListener('change', function () { const v = parseFloat(targetIn.value); state.target = isFinite(v) ? v : NaN; render(); });
-      view.appendChild(h('div', { class: 'su2-form' }, [
+      const back = summaryGrids(b, '').length ? h('button', { type: 'button', onclick: function () { state.mapSource = '0'; render(); } }, ['← sweep summary maps']) : null;
+      view.appendChild(h('div', { class: 'su2-form' }, [back,
         h('label', null, ['x ', sel(state.mapX, axisOpts, function (v) { state.mapX = v; })]),
         h('label', null, ['y ', sel(state.mapY, axisOpts, function (v) { state.mapY = v; })]),
         h('label', null, ['cell ', sel(state.mapValue, valueOpts, function (v) { state.mapValue = v; if (v === 'passShare') state.target = 1; else state.target = NaN; })]),
         state.mapValue !== 'passShare' ? h('label', null, ['over the runs ', sel(state.mapAgg, [['worst', 'worst'], ['mean', 'mean'], ['min', 'min'], ['max', 'max']], function (v) { state.mapAgg = v; })]) : null,
-        h('label', null, ['frontier at ', targetIn]),
+        h('label', null, ['frontier at ', targetInput()]),
       ]));
       const value = state.mapValue === 'passShare' ? { kind: 'passShare' } : { kind: 'metric', name: state.mapValue, agg: state.mapAgg };
       const grid = heatGrid(runs, state.mapX, state.mapY, value, { modules: modules() });
       const marks = presetMarks(grid, presetPoints(b, modules()));
-      const w = Math.max(420, Math.min(900, (view.clientWidth || 760) - 16));
-      const hh = Math.max(260, Math.min(520, 60 + grid.y.n * 34));
-      const lay = layoutHeatmap(grid, { box: { x: 0, y: 0, w: w, h: hh }, marks: marks, target: state.target });
-      const wrap = h('div', { class: 'su2-svgwrap' });
-      const svg = svgInto(wrap, charts.renderSvg(lay.ops, w, hh, 'Feasibility map: ' + state.mapX + ' × ' + state.mapY));
-      svg.addEventListener('mousemove', function (e) {
-        const rc = svg.getBoundingClientRect();
-        const hit = lay.cellAt((e.clientX - rc.left) * w / rc.width, (e.clientY - rc.top) * hh / rc.height);
-        if (!hit || !hit.cell.n) { hideTip(); return; }
-        const c = hit.cell;
-        const failing = {};
-        c.runs.forEach(function (r) { if (r.verdict && !r.verdict.pass) failing[r.scenario] = (failing[r.scenario] || 0) + 1; });
-        const fl = Object.keys(failing).sort(function (a, b2) { return failing[b2] - failing[a]; }).slice(0, 6);
-        showTip(e, '<b>' + charts.esc(state.mapX) + ' = ' + charts.esc(grid.x.labels[hit.i]) + '<br>' + charts.esc(state.mapY) + ' = ' + charts.esc(grid.y.labels[hit.j]) + '</b><br>' +
-          (value.kind === 'passShare' ? c.pass + ' of ' + c.n + ' runs pass (' + Math.round(c.value * 100) + '%)' : charts.esc(value.name) + ' ' + fmt(c.value) + ' (' + c.n + ' runs)') +
-          (fl.length ? '<br>failing: ' + fl.map(function (s) { return charts.esc(s) + ' ×' + failing[s]; }).join(', ') : ''));
-      });
-      svg.addEventListener('mouseleave', hideTip);
-      view.appendChild(wrap);
+      drawGrid(grid, marks, 'Feasibility map: ' + state.mapX + ' × ' + state.mapY);
       const assumed = b.plant && b.plant.assumed !== false;
       view.appendChild(h('div', { class: 'su2-note', style: { marginTop: '6px' } }, [
         grid.used + ' runs on the map' + (grid.skipped ? ' (' + grid.skipped + ' without both parameters left out)' : '') + (grid.x.binned || grid.y.binned ? '; many values: binned' : '') +
@@ -985,6 +1091,16 @@
 
     function renderSens(b) {
       const runs = studyRuns(b, 'sensitivity').filter(function (r) { return r.side; });
+      const pre = summaryTornado(b);
+      if (!runs.length && pre) {
+        const w0 = Math.max(420, Math.min(900, (view.clientWidth || 760) - 16));
+        const lay0 = layoutTornado(pre, { box: { w: w0 } });
+        const wrap0 = h('div', { class: 'su2-svgwrap' });
+        svgInto(wrap0, charts.renderSvg(lay0.ops, lay0.w, lay0.h, 'Sensitivity: each parameter at −30 % and +30 %'));
+        view.appendChild(wrap0);
+        view.appendChild(h('div', { class: 'su2-note', style: { marginTop: '6px' } }, ['From the batch\'s summary (its runs are not in the file): share of the tornado scenarios that pass. Largest swing: ' + pre.bars.slice(0, 3).map(function (x) { return x.param; }).join(', ') + '.']));
+        return;
+      }
       if (!runs.length) {
         view.appendChild(h('div', { class: 'su2-empty' }, ['No sensitivity runs in this batch (runs with param and side low / base / high). sweep.js makes them; or run one here:']));
         view.appendChild(sensRunForm());
@@ -1044,7 +1160,9 @@
     }
 
     function renderTune(b) {
-      const runs = studyRuns(b, 'tuning');
+      const labels = {};
+      matrixPoints(studyRuns(b, 'tuning'), b.presets).forEach(function (p) { labels[p.key] = p.preset || p.key.replace(/^gi/, '#'); });
+      const runs = studyRuns(b, 'tuning').map(function (r) { return r.set !== undefined ? r : Object.assign({}, r, { set: labels[pointKey(r)] }); });
       const tt = tuningTable(runs, { thresholds: b.thresholds, modules: modules() });
       if (!tt.rows.length) { view.appendChild(h('div', { class: 'su2-empty' }, ['No tuning runs in this batch.'])); return; }
       if (tt.fixed.length) view.appendChild(h('div', { class: 'su2-note', style: { margin: '0 0 6px' } }, ['Fixed in every set: ' + tt.fixed.map(function (f) { return f.key + ' = ' + f.value; }).join(', ')]));
@@ -1134,6 +1252,7 @@
     presetMarks: presetMarks, presetPoints: presetPoints, frontier: frontier, frontierText: frontierText, layoutHeatmap: layoutHeatmap,
     tornadoModel: tornadoModel, layoutTornado: layoutTornado, tuningTable: tuningTable, paramsPatch: paramsPatch, runConfig: runConfig,
     parseValues: parseValues, fmtShort: fmtShort, planJobs: planJobs, runPlan: runPlan, effectiveValue: effectiveValue, shortMetric: shortMetric,
+    pointKey: pointKey, matrixPoints: matrixPoints, summaryGrids: summaryGrids, summaryTornado: summaryTornado,
     current: getCurrent, setCurrent: setCurrent, onCurrent: onCurrent, mount: mount,
   };
   if (typeof module !== 'undefined') module.exports = batch; else (self.CS = self.CS || {})['batch'] = batch;

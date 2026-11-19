@@ -48,15 +48,21 @@
    * change of the score), mapped to what the drive must measure. Car-independent parameters
    * (controller, warning, estimator, driver) are listed after the car ones.
    */
-  function measureFirst(tornado) {
+  function measureFirst(tornado, ranking) {
     let list;
     if (tornado && tornado.bars && tornado.bars.length) {
-      list = tornado.bars.map(function (b) { return { param: b.param, changed: (b.changedLow || 0) + (b.changedHigh || 0), delta: b.delta, low: b.low, high: b.high, base: b.base }; });
-      list.sort(function (a, b) { return (b.changed - a.changed) || (b.delta - a.delta); });
-    } else list = DEFAULT_MEASURE.map(function (p) { return { param: p, changed: null, delta: null }; });
+      list = tornado.bars.map(function (b) {
+        const counted = b.changedLow !== null && b.changedLow !== undefined;
+        return { param: b.param, changed: counted ? (b.changedLow || 0) + (b.changedHigh || 0) : null, delta: b.delta, low: b.low, high: b.high, base: b.base, source: 'tornado' };
+      });
+      list.sort(function (a, b) { return ((b.changed || 0) - (a.changed || 0)) || (b.delta - a.delta); });
+    } else if (ranking && ranking.length) {
+      // sweep.js's ranking: how far the pass share moves across each grid axis
+      list = ranking.map(function (r) { return { param: r.param, changed: null, delta: r.spread, source: 'ranking' }; });
+    } else list = DEFAULT_MEASURE.map(function (p) { return { param: p, changed: null, delta: null, source: 'default' }; });
     const car = function (p) { return /^(plant|sensor|command)\./.test(p); };
     list.sort(function (a, b) { return (car(b.param) - car(a.param)); });
-    return list.map(function (x, i) { const m = measureFor(x.param); return Object.assign({ rank: i + 1, en: m.en, uk: m.uk, fromSensitivity: x.changed !== null }, x); });
+    return list.map(function (x, i) { const m = measureFor(x.param); return Object.assign({ rank: i + 1, en: m.en, uk: m.uk, fromSensitivity: x.source !== 'default' }, x); });
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -131,19 +137,23 @@
 
   /** Maps for the first pairs of swept parameters (pass share), each with its frontier sentence. */
   function mapsHtml(batch, modules, max) {
-    const runs = batchLib.studyRuns(batch, 'map');
-    const axes = batchLib.paramAxes(runs);
-    if (axes.length < 2) return { html: '<p class="note">This batch varies fewer than two parameters: no feasibility map.</p>', headline: null };
-    const pairs = [];
-    for (let i = 0; i < axes.length && pairs.length < (max || 1); i++) for (let j = i + 1; j < axes.length && pairs.length < (max || 1); j++) pairs.push([axes[i].key, axes[j].key]);
-    let html = '', headline = null;
     const presets = batchLib.presetPoints(batch, modules);
-    pairs.forEach(function (p) {
-      const g = batchLib.heatGrid(runs, p[0], p[1], { kind: 'passShare' }, { modules: modules });
-      const marks = batchLib.presetMarks(g, presets);
+    let grids = batchLib.summaryGrids(batch).slice(0, max || 2);   // sweep.js's own maps cover every grid point
+    if (!grids.length) {
+      const runs = batchLib.studyRuns(batch, 'map');
+      const axes = batchLib.paramAxes(runs);
+      if (axes.length < 2) return { html: '<p class="note">This batch varies fewer than two parameters: no feasibility map.</p>', headline: null };
+      const pairs = [];
+      for (let i = 0; i < axes.length && pairs.length < (max || 1); i++) for (let j = i + 1; j < axes.length && pairs.length < (max || 1); j++) pairs.push([axes[i].key, axes[j].key]);
+      grids = pairs.map(function (p) { return batchLib.heatGrid(runs, p[0], p[1], { kind: 'passShare' }, { modules: modules }); });
+    }
+    let html = '', headline = null;
+    grids.forEach(function (g) {
+      const p = [g.x.key, g.y.key];
+      const marks = batchLib.presetMarks(g, g.presets && Object.keys(g.presets).length ? g.presets : presets);
       const w = 760, hh = Math.max(280, Math.min(520, 70 + g.y.n * 34));
       const lay = batchLib.layoutHeatmap(g, { box: { x: 0, y: 0, w: w, h: hh }, marks: marks, target: 1 });
-      html += '<figure>' + charts.renderSvg(lay.ops, w, hh, 'Feasibility map: ' + p[0] + ' × ' + p[1]) + '<figcaption>Share of the catalogue that passes over ' + esc(p[0]) + ' × ' + esc(p[1]) + '; the thick line is the 100 % frontier; diamonds are the plant presets.</figcaption></figure>';
+      html += '<figure>' + charts.renderSvg(lay.ops, w, hh, 'Feasibility map: ' + p[0] + ' × ' + p[1]) + '<figcaption>Share of the catalogue that passes over ' + esc(p[0]) + ' × ' + esc(p[1]) + (g.split ? ' at ' + esc(g.split) + ' = ' + esc(String(g.splitValue)) : '') + '; the thick line is the 100 % frontier; diamonds are the plant presets.</figcaption></figure>';
       // the presets' cells, in words
       const lines = marks.map(function (m) {
         const i = Math.round(Math.max(0, Math.min(g.x.n - 1, m.fx))), j = Math.round(Math.max(0, Math.min(g.y.n - 1, m.fy)));
@@ -255,8 +265,8 @@
         ukParts.push('Карта здійсненності ' + maps.headline.x + ' × ' + maps.headline.y + ' (модель круїзу припущена): у пресетах проходить ' + maps.headline.presets.join(', ') + ' каталогу.');
       }
       const sensRuns = batchLib.studyRuns(batch, 'sensitivity').filter(function (r) { return r.side; });
-      if (sensRuns.length) {
-        tornado = batchLib.tornadoModel(sensRuns, { kind: 'passShare' }, modules);
+      if (sensRuns.length || batchLib.summaryTornado(batch)) {
+        tornado = sensRuns.length ? batchLib.tornadoModel(sensRuns, { kind: 'passShare' }, modules) : batchLib.summaryTornado(batch);
         const lay = batchLib.layoutTornado(tornado, { box: { w: 760 } });
         sensPart = '<h2>Sensitivity (±30 %)</h2><figure>' + charts.renderSvg(lay.ops, lay.w, lay.h, 'Sensitivity tornado') + '<figcaption>Share of the catalogue that passes with each parameter at −30 % and +30 % of its base value; ⚑n = n scenario variants whose verdict changes.</figcaption></figure>';
       }
@@ -276,13 +286,17 @@
     }
 
     // ---- measure first
-    const mf = measureFirst(tornado);
+    const mf = measureFirst(tornado, batch && batch.summary && batch.summary.ranking);
     const top = mf.slice(0, 3).map(function (x) { return x.param; });
-    enSummary.push('Measure first on the car' + (tornado ? ' (the verdict turns on these)' : ' (no sensitivity study in this report: the parent brief\'s order)') + ': ' + top.join(', ') + '.');
-    ukParts.push('Що виміряти на авто першим' + (tornado ? ' (від цього залежить вердикт)' : ' (дослідження чутливості немає: порядок із батьківського брифу)') + ': ' + top.join(', ') + '.');
+    const fromStudy = mf.length && mf[0].source !== 'default';
+    enSummary.push('Measure first on the car' + (fromStudy ? ' (the verdict turns on these)' : ' (no sensitivity study in this report: the parent brief\'s order)') + ': ' + top.join(', ') + '.');
+    ukParts.push('Що виміряти на авто першим' + (fromStudy ? ' (від цього залежить вердикт)' : ' (дослідження чутливості немає: порядок із батьківського брифу)') + ': ' + top.join(', ') + '.');
     let measurePart = '<h2>Measure this first on the car, because the verdict turns on it</h2><ol class="measure">';
     mf.forEach(function (x) {
-      measurePart += '<li><b>' + esc(x.param) + '</b>' + (x.fromSensitivity ? ' <span class="note">— ' + x.changed + ' variant verdict(s) change at ±30 %; pass share ' + Math.round(x.low * 100) + ' % / ' + Math.round(x.high * 100) + ' % against ' + Math.round(x.base * 100) + ' %</span>' : '') + '<br>' + esc(x.en) + '<span class="uk">' + esc(x.uk) + '</span></li>';
+      let why = '';
+      if (x.source === 'tornado') why = (x.changed !== null ? x.changed + ' variant verdict(s) change at ±30 %; ' : '') + 'pass share ' + pct(x.low) + ' / ' + pct(x.high) + ' at −30 % / +30 % against ' + pct(x.base);
+      else if (x.source === 'ranking') why = 'the pass share moves by ' + pct(x.delta) + ' across the swept values';
+      measurePart += '<li><b>' + esc(x.param) + '</b>' + (why ? ' <span class="note">— ' + esc(why) + '</span>' : '') + '<br>' + esc(x.en) + '<span class="uk">' + esc(x.uk) + '</span></li>';
     });
     measurePart += '</ol>';
 
@@ -306,6 +320,8 @@
     return '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
       '<title>Cruise sim report</title><style>\n' + charts.themeCss('.su2') + REPORT_CSS + '\n</style></head><body class="su2"><main>' + body + '</main></body></html>\n';
   }
+
+  function pct(v) { return typeof v === 'number' && isFinite(v) ? Math.round(v * 100) + ' %' : '–'; }
 
   function reportFileName(d) {
     d = d || new Date();
