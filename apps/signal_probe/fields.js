@@ -6,14 +6,17 @@
  *
  * Unified from the five round-3 branches (twin-r3/sm, sp, sn, sv, sb) on top of main's shared/twin_probe.js and renumbered to
  * the car-signals brief's P1..P17 / sets S1..S9 (docs/car/CP-REPORT.md section 3). READ ONLY: flags r (a NON-ZERO getter id) and
- * s (a notifier) - never w, never a method, never a broadcast; no KombiIF standardCCMessage / extendedCCMessage / newCCMessage,
- * no A19B, no requestDefaultSymbols, no setter of any kind.
+ * s (a notifier) - never w; events only in S13..S16; ONE method, a read the owner approved (2026-11-19, car issues CT):
+ * GuidanceEventList.queryContent, polled by shared/carplay_turns.js (flags "m"); no KombiIF standardCCMessage / extendedCCMessage /
+ * newCCMessage, no A19B, no requestDefaultSymbols, no setter of any kind.
  *
  * An entry:
  *   set, p, tag      the set (S1..S9), the item (P1..P17), the field's tag in the log line ("probe: P3 range-tank #2 ...")
  *   also             [set ids]: the field is also read while one of these sets is on (S10 needs eight fields of S6 / S7)
  *   iface, field     the interface and the field; flags "r" / "s" / "rs" as the catalogue allows (checked by the test), or "b": an EVENT,
- *                    declared under "_broadcasts" (S13..S16: the lead's decision of 2026-11-18, the owner's requests of 2026-11-19)
+ *                    declared under "_broadcasts" (S13..S16: the lead's decision of 2026-11-18, the owner's requests of 2026-11-19), or
+ *                    "m": a METHOD polled for its reply (declared under "_methods"; only S16's queryContent, car issues CT: the owner's
+ *                    approval of 2026-11-19; shared/carplay_turns.js makes the call, only while the phone guides)
  *   one              [member, kind]: an event with one output, handed over as { member: v } or as v itself
  *   instance         the instance it is read on (default "1"); an interface with several instances is declared "*" in the manifest
  *   gapMs, cap       minimum ms between two lines of this field (the last value wins, "+k folded") and the most lines; per-set defaults below
@@ -24,7 +27,7 @@
  *   list / union     { member, cols }: an array of entries (member = the union member holding each) / a single-member union
  *   bits             { path, label }: a raw byte with its previous value and the bits that went up / down
  *   fmt              a named formatter of format.js (enum bool hex temps intersection dart lanes description mediaMenu station metadata
- *                    roles devices calllist cbs activeSource sources tree; S16: views rendered stream)
+ *                    roles devices calllist cbs activeSource sources tree; S16: views rendered stream turns)
  */
 const I = {
     KombiIF: 'de.bmw.infotainment.KombiIF',
@@ -415,6 +418,10 @@ const TABLE = [
     { set: 'S16', p: 'P25', tag: 'display-sink', iface: I.DisplaySink, field: 'requestSinkSwitch', flags: 'b', gapMs: 250, cap: 100, fmt: 'tree' },
     { set: 'S16', p: 'P25', tag: 'nav-can', iface: I.NavigationCAN, field: 'calculationDataNavigation', flags: 'rs', gapMs: 10000, cols: [['dist','statusDistanceDestinationNavigation','n'],['unit','statusDistanceDestinationNavigationUnitOfMeasurement','e'],['etaH','statusArrivalTimeHour','n'],['etaM','statusArrivalTimeMinute','n'],['ampm','statusTimeAMPM','e'],['day','statusDayFlag','e']] },
     { set: 'S16', p: 'P25', tag: 'lane-feedback', iface: I.FeedbackLaneGuiding, field: 'correctionDataLaneGuiding', flags: 'b', gapMs: 5000, fmt: 'tree' },
+    // car issues CT (the owner, 2026-11-19: queryContent approved, a read): CarPlay's next turns AS DATA, asked every 2 s while the phone
+    // guides (Guidance.guidingProvider CAR_PLAY / ANDROID_AUTO, read here through S7's guiding-provider); a line only when the reply changed,
+    // with the count of unchanged ones; texts as lengths, no road link, no source id
+    { set: 'S16', p: 'P25', tag: 'next-turn', iface: I.GuidanceEventList, field: 'queryContent', flags: 'm', instance: 'Main_Instance', gapMs: 2000, fmt: 'turns' },
 ];
 
 // ---- the sets: each one switchable on its own in the app's centre-screen menu (settings key set1..set9), default all off ----
@@ -447,9 +454,9 @@ const instOf = (f) => f.instance || '1';
 function interfaces() {
     const m = {};
     TABLE.forEach((f) => {
-        const e = m[f.iface] = m[f.iface] || { iface: f.iface, instances: [], fields: {}, events: [] };
+        const e = m[f.iface] = m[f.iface] || { iface: f.iface, instances: [], fields: {}, events: [], methods: [] };
         if (e.instances.indexOf(instOf(f)) < 0) e.instances.push(instOf(f));
-        if (f.flags === 'b') { if (e.events.indexOf(f.field) < 0) e.events.push(f.field); } else e.fields[f.field] = f.flags;
+        if (f.flags === 'b') { if (e.events.indexOf(f.field) < 0) e.events.push(f.field); } else if (f.flags === 'm') { if (e.methods.indexOf(f.field) < 0) e.methods.push(f.field); } else e.fields[f.field] = f.flags;
     });
     return Object.keys(m).map((k) => m[k]);
 }
@@ -461,6 +468,7 @@ function manifestSignals() {
         o._instances = e.instances.length > 1 ? '*' : e.instances[0];
         Object.keys(e.fields).sort().forEach((k) => { o[k] = e.fields[k]; });
         if (e.events.length) o._broadcasts = e.events.slice().sort();
+        if (e.methods.length) o._methods = e.methods.slice().sort();
         out[e.iface] = o;
     });
     return out;

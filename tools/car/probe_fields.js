@@ -8,7 +8,8 @@
  *   node tools/car/probe_fields.js export   write design/car/probe_fields.json (the field table with getter / notifier ids from the
  *                                           car's catalogue when reference/car/2026-11-15/someip/someip-interfaces.json is here)
  *
- * Read only everywhere: only r and s flags, no _methods, no _broadcasts, no setter. The catalogue (git-ignored) is only read.
+ * Read only everywhere: r and s flags, events as _broadcasts (S13..S16), one method the owner approved as a read (S16 next-turn:
+ * GuidanceEventList.queryContent, car issues CT) as _methods; no setter. The catalogue (git-ignored) is only read.
  * Node 8 compatible syntax is not needed here (Mac only), but the output files are plain JSON.
  */
 const fs = require('fs');
@@ -60,16 +61,18 @@ function exportTable() {
         fieldsActive: FIELDS.TABLE.filter((f) => f.set === s.id || (f.also || []).indexOf(s.id) >= 0).length }));
     const fields = FIELDS.TABLE.map((f) => {
         const d = FIELDS.SET_DEFAULTS[f.set];
-        const c = f.flags !== 'b' && cat && cat.interfaces[f.iface] && cat.interfaces[f.iface].fields[f.field];
+        const c = f.flags !== 'b' && f.flags !== 'm' && cat && cat.interfaces[f.iface] && cat.interfaces[f.iface].fields[f.field];
         const ev = f.flags === 'b' && cat && cat.interfaces[f.iface] && (cat.interfaces[f.iface].events || {})[f.field];
+        const me = f.flags === 'm' && cat && cat.interfaces[f.iface] && (cat.interfaces[f.iface].methods || {})[f.field];
         const how = f.bits ? 'bits' : f.cols ? 'cols' : f.list ? 'list' : f.union ? 'union' : f.one ? 'one' : f.fmt;
         const o = {
             set: f.set, item: f.p, tag: f.tag, interface: f.iface, field: f.field, instance: FIELDS.instOf(f), flags: f.flags,
             getterId: c && c.getter ? c.getter.id : null, notifierId: c && c.notifier ? c.notifier.id : null,
             eventId: ev ? ev.eventId : null,
-            rootType: c ? kindOf(cat.datatypes, c.dataRef) : ev ? 'event' : null,
+            rootType: c ? kindOf(cat.datatypes, c.dataRef) : ev ? 'event' : me ? 'method' : null,
             formatter: how, gapMs: f.gapMs !== undefined ? f.gapMs : d.gapMs, cap: f.cap || d.cap,
         };
+        if (me) o.methodId = me.methodId;
         if (f.pollMs) o.pollMs = f.pollMs;
         if (f.also) o.also = f.also;
         if (f.mark) o.markTimed = true;
@@ -80,11 +83,11 @@ function exportTable() {
     });
     const ifaces = FIELDS.interfaces().map((e) => ({
         interface: e.iface, instancesRead: e.instances, manifestInstances: e.instances.length > 1 ? '*' : e.instances[0],
-        instancesInCatalogue: insts(e.iface), fields: Object.keys(e.fields).length, events: e.events,
+        instancesInCatalogue: insts(e.iface), fields: Object.keys(e.fields).length, events: e.events, methods: e.methods,
         sets: FIELDS.TABLE.filter((f) => f.iface === e.iface).map((f) => f.set).filter((x, i, a) => a.indexOf(x) === i),
     }));
     const out = {
-        _about: 'The signal probe\'s field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier). Ids come from the car\'s catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of apps/signal_probe/format.js. Text members are logged as lengths only.',
+        _about: 'The signal probe\'s field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier), b (an event), m (S16 next-turn: GuidanceEventList.queryContent, a read the owner approved, polled while the phone guides; methodId from the catalogue). Ids come from the car\'s catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of apps/signal_probe/format.js. Text members are logged as lengths only.',
         logFormat: P.LOG_FORMAT, version: P.VERSION,
         counts: { sets: sets.length, fields: fields.length, interfaces: ifaces.length, interfacesWithSeveralInstances: ifaces.filter((i) => i.instancesRead.length > 1).length },
         sets, interfaces: ifaces, fields,

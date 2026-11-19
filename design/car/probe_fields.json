@@ -1,10 +1,10 @@
 {
-  "_about": "The signal probe's field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier). Ids come from the car's catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of apps/signal_probe/format.js. Text members are logged as lengths only.",
+  "_about": "The signal probe's field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier), b (an event), m (S16 next-turn: GuidanceEventList.queryContent, a read the owner approved, polled while the phone guides; methodId from the catalogue). Ids come from the car's catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of apps/signal_probe/format.js. Text members are logged as lengths only.",
   "logFormat": 1,
   "version": "0.3.0",
   "counts": {
     "sets": 15,
-    "fields": 250,
+    "fields": 251,
     "interfaces": 94,
     "interfacesWithSeveralInstances": 1
   },
@@ -179,8 +179,8 @@
       "items": [
         "P25"
       ],
-      "fields": 22,
-      "fieldsActive": 39
+      "fields": 23,
+      "fieldsActive": 40
     }
   ],
   "interfaces": [
@@ -195,6 +195,7 @@
       ],
       "fields": 18,
       "events": [],
+      "methods": [],
       "sets": [
         "S1",
         "S2",
@@ -214,6 +215,7 @@
       ],
       "fields": 6,
       "events": [],
+      "methods": [],
       "sets": [
         "S1",
         "S3",
@@ -233,6 +235,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S1",
         "S9"
@@ -249,6 +252,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S1"
       ]
@@ -264,6 +268,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S2",
         "S10"
@@ -280,6 +285,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -295,6 +301,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -310,6 +317,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -325,6 +333,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S2",
         "S9"
@@ -341,6 +350,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -356,6 +366,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -371,6 +382,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -386,6 +398,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -401,6 +414,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -416,6 +430,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S2",
         "S3"
@@ -432,6 +447,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S3"
       ]
@@ -447,6 +463,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S3"
       ]
@@ -462,6 +479,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S3"
       ]
@@ -477,6 +495,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S3"
       ]
@@ -494,6 +513,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S4"
       ]
@@ -509,6 +529,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S4"
       ]
@@ -524,6 +545,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S4"
       ]
@@ -592,6 +614,7 @@
       ],
       "fields": 5,
       "events": [],
+      "methods": [],
       "sets": [
         "S4"
       ]
@@ -607,6 +630,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S4"
       ]
@@ -622,6 +646,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -639,6 +664,7 @@
       "events": [
         "onScreenChange"
       ],
+      "methods": [],
       "sets": [
         "S5",
         "S7",
@@ -664,6 +690,7 @@
       ],
       "fields": 8,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -679,6 +706,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -694,6 +722,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -709,6 +738,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -726,6 +756,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -741,6 +772,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -756,6 +788,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -771,6 +804,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -786,6 +820,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -801,6 +836,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -816,6 +852,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -833,6 +870,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S5",
         "S6"
@@ -851,6 +889,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S6"
       ]
@@ -866,6 +905,7 @@
       ],
       "fields": 11,
       "events": [],
+      "methods": [],
       "sets": [
         "S6"
       ]
@@ -881,6 +921,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S6"
       ]
@@ -896,6 +937,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S6"
       ]
@@ -911,6 +953,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S6"
       ]
@@ -926,6 +969,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S7"
       ]
@@ -944,6 +988,7 @@
         "streamStatusChanged",
         "activeRouteChanged"
       ],
+      "methods": [],
       "sets": [
         "S7",
         "S16"
@@ -960,6 +1005,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S7"
       ]
@@ -975,6 +1021,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S7",
         "S16"
@@ -991,6 +1038,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S8"
       ]
@@ -1006,6 +1054,7 @@
       ],
       "fields": 10,
       "events": [],
+      "methods": [],
       "sets": [
         "S8",
         "S13",
@@ -1023,6 +1072,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S8"
       ]
@@ -1038,6 +1088,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S8"
       ]
@@ -1053,6 +1104,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S8"
       ]
@@ -1068,6 +1120,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S8",
         "S14"
@@ -1084,6 +1137,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S9"
       ]
@@ -1099,6 +1153,7 @@
       ],
       "fields": 6,
       "events": [],
+      "methods": [],
       "sets": [
         "S9",
         "S11",
@@ -1116,6 +1171,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S9",
         "S10"
@@ -1132,6 +1188,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S9"
       ]
@@ -1147,6 +1204,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S9"
       ]
@@ -1163,6 +1221,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S9"
       ]
@@ -1178,6 +1237,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S10"
       ]
@@ -1193,6 +1253,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S10"
       ]
@@ -1208,6 +1269,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S10"
       ]
@@ -1225,6 +1287,7 @@
       "events": [
         "TrafficSignRecognition"
       ],
+      "methods": [],
       "sets": [
         "S13"
       ]
@@ -1242,6 +1305,7 @@
       "events": [
         "TrafficSignRecognitionFrontCamera"
       ],
+      "methods": [],
       "sets": [
         "S13"
       ]
@@ -1260,6 +1324,7 @@
         "RecognitionTrafficSignCamera",
         "recognitionTrafficSignCamera2"
       ],
+      "methods": [],
       "sets": [
         "S13"
       ]
@@ -1280,6 +1345,7 @@
         "variableSpeedLimitSign",
         "builtupAreaFlag"
       ],
+      "methods": [],
       "sets": [
         "S13"
       ]
@@ -1299,6 +1365,7 @@
         "keepDistanceObjects2",
         "keepDistanceParameters"
       ],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1316,6 +1383,7 @@
       "events": [
         "assistedDrivingViewFunctionInputIbVip"
       ],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1331,6 +1399,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1347,6 +1416,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1362,6 +1432,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1377,6 +1448,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1392,6 +1464,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1407,6 +1480,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1422,6 +1496,7 @@
       ],
       "fields": 7,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1441,6 +1516,7 @@
         "accelerationLateralCog",
         "vehicleAccelerationLongitudinalEstimated"
       ],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1458,6 +1534,7 @@
       "events": [
         "yawRate"
       ],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1475,6 +1552,7 @@
       "events": [
         "longitudinalGradientSurface"
       ],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1493,6 +1571,7 @@
         "pitchRateCog",
         "rollRateCog"
       ],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1514,6 +1593,7 @@
         "ObjectProbability",
         "ObjectSensorSpecificFrontCamera"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1536,6 +1616,7 @@
         "ObjectProbability",
         "ObjectSensorSpecificFrontCamera"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1553,6 +1634,7 @@
       "events": [
         "objects"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1574,6 +1656,7 @@
         "ObjectAssignment",
         "FASView"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1591,6 +1674,7 @@
       "events": [
         "suAARObjectList"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1609,6 +1693,7 @@
         "egomotionCameraCartesian",
         "egomotionCameraRotation"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1626,6 +1711,7 @@
       "events": [
         "ProperMotionVehicle"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1643,6 +1729,7 @@
       "events": [
         "streamCommandChanged"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1659,6 +1746,9 @@
       "fields": 1,
       "events": [
         "viewsChanged"
+      ],
+      "methods": [
+        "queryContent"
       ],
       "sets": [
         "S16"
@@ -1677,6 +1767,7 @@
       "events": [
         "viewContentChanged"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1694,6 +1785,7 @@
       "events": [
         "changeModes"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1711,6 +1803,7 @@
       "events": [
         "ric_sendEvent"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1728,6 +1821,7 @@
       "events": [
         "requestSinkSwitch"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1743,6 +1837,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1760,6 +1855,7 @@
       "events": [
         "correctionDataLaneGuiding"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -6748,6 +6844,23 @@
       "formatter": "tree",
       "gapMs": 5000,
       "cap": 400
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "next-turn",
+      "interface": "de.bmw.infotainment.navigation.guiding.GuidanceEventList",
+      "field": "queryContent",
+      "instance": "Main_Instance",
+      "flags": "m",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": null,
+      "rootType": "method",
+      "formatter": "turns",
+      "gapMs": 2000,
+      "cap": 400,
+      "methodId": 4
     }
   ]
 }
