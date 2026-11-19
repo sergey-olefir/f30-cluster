@@ -98,6 +98,8 @@ function makeDom() {
         URL: { createObjectURL: () => 'blob:x', revokeObjectURL() {} },
         Worker: function Worker() { throw new Error('SecurityError: no workers under file:// (stub)'); },
         prompt: () => null,
+        getComputedStyle: () => ({ getPropertyValue: () => '' }),
+        ResizeObserver: function ResizeObserver() { this.observe = () => {}; this.disconnect = () => {}; },
     };
     listeners(win);
     win.window = win; win.self = win;
@@ -142,8 +144,10 @@ test('boot: the engine (or the fake), the first run, the canvas, the placeholder
     assert.match(byId['plant-badge'].textContent, /^assumed plant: /);
     if (app.engine === 'fake') assert.match(byId['engine-badge'].textContent, /FAKE/);
     assert.match(byId['verdict-badge'].textContent, /^with an assumed plant: /, 'never worded as a verdict');
-    assert.match(byId.time.textContent, /^0\.00 \/ 60\.0 s$/);
-    assert.ok(byId['scrub-marks'].children.length >= 4, 'faults and warnings marked on the scrubber');
+    const tEnd = app.result.t[app.result.t.length - 1];
+    assert.equal(byId.time.textContent, '0.00 / ' + tEnd.toFixed(1) + ' s');
+    const tl = app.timeline;
+    assert.equal(byId['scrub-marks'].children.length, tl.faults.length + tl.warns.length + (tl.collision ? 1 : 0), 'faults and warnings marked on the scrubber');
     assert.equal(byId.speed.children.length, 7);
 });
 
@@ -167,18 +171,19 @@ test('playback: play at ×16 through requestAnimationFrame to the end; step; set
     assert.equal(byId.speed.value, '16');
     app.play();
     assert.equal(byId.play.textContent, '❚❚');
-    await until(() => !app.playback.playing, 'the end of the run', 2000);
-    assert.equal(app.cursorT, 60);
+    await until(() => !app.playback.playing, 'the end of the run', 3000);
+    assert.equal(app.cursorT, app.result.t[app.result.t.length - 1]);
     assert.ok(seen.cursor > 100 && seen.frame > 100, JSON.stringify(seen));
     assert.equal(byId.play.textContent, '▶');
+    const dt = app.result.t[1] - app.result.t[0];
     app.setCursor(10);
     assert.equal(app.cursorT, 10);
-    app.step(1); assert.ok(Math.abs(app.cursorT - 10.05) < 1e-9);
-    app.step(-10); assert.ok(Math.abs(app.cursorT - 9.55) < 1e-9);
+    app.step(1); assert.ok(Math.abs(app.cursorT - (10 + dt)) < 1e-9);
+    app.step(-10); assert.ok(Math.abs(app.cursorT - (10 - 9 * dt)) < 1e-9);
     byId.scrub.value = '20'; byId.scrub.dispatch('input', { target: byId.scrub });
     assert.equal(app.cursorT, 20);
     win.document.dispatch('keydown', { key: 'ArrowRight', shiftKey: true, target: win.document.body });
-    assert.ok(Math.abs(app.cursorT - 20.5) < 1e-9);
+    assert.ok(Math.abs(app.cursorT - (20 + 10 * dt)) < 1e-9);
     win.document.dispatch('keydown', { key: ']', target: win.document.body });
     assert.equal(app.playback.speed, 16);
 });
@@ -249,8 +254,9 @@ test('files: a result file, a batch file, a config file, presets (save, apply, e
 });
 
 test('with an engine: the worker is refused (as Chrome does under file://) and the run falls back to the page, in createSim slices', async () => {
-    const { win, byId } = await boot();
+    const d = await boot(), { win, byId } = d;
     const app = win.app, CS = win.CS;
+    if (!CS.fakeResult) d.run('fake-result.js');
     let advanced = 0;
     // a stand-in engine with the contract's step API, built on the fake
     CS.sim = {

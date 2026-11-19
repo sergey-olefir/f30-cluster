@@ -17,6 +17,16 @@
     /** core/*.js in dependency order: each file reads its siblings from self.CS when it loads. */
     const CORE_FILES = ['rng', 'schema', 'road', 'vehicles', 'plant', 'driver', 'command', 'failures',
         'sensor', 'estimator', 'controller', 'warning', 'baselines', 'metrics', 'scenario', 'mixed', 'sim'];
+    /**
+     * The scripts the page (and the worker, both in ui/) load, in order: core/*.js as sim.LOAD_ORDER (SC1) and, just
+     * before core/scenario.js, ui/scenarios.bundle.js (SC3's catalogue as a script: file:// cannot fetch JSON;
+     * made by `node tools/cruise-sim/core/scenario.js --bundle > tools/cruise-sim/ui/scenarios.bundle.js`).
+     */
+    function scriptList(order) {
+        const out = [];
+        (order || CORE_FILES).forEach((f) => { if (f === 'scenario') out.push('scenarios.bundle.js'); out.push('../core/' + f + '.js'); });
+        return out;
+    }
     /** SU2's views: [mount id, file, CS key]. */
     const VIEWS = [['charts', 'charts.js', 'charts'], ['settings', 'settings.js', 'settings'],
         ['batch', 'batch.js', 'batch'], ['report', 'report-view.js', 'reportView']];
@@ -260,7 +270,9 @@
             if (finite(s['meas.id'])) targetId = idName(s['meas.id']);
             else { const ev = tl.targetAt(x); targetId = ev === undefined ? leadId : ev; }
         }
-        const wrong = valid && targetId != null && (leadId == null || String(targetId) !== String(leadId));
+        // the engine's own flag when it records one (SC2's meas._truth.wrong as a series), else the ids disagree
+        const wrong = finite(s['meas.wrong']) ? valid && s['meas.wrong'] > 0.5
+            : valid && targetId != null && (leadId == null || String(targetId) !== String(leadId));
         const recent = [];
         for (const e of r.events) { if (e.t > x) break; if (e.t > x - 3) recent.push(e); }
         const warnIv = tl.warnAt(x);
@@ -339,7 +351,7 @@
         return out;
     }
 
-    const PURE = { SPEEDS, CORE_FILES, VIEWS, BASE_CONFIG, DISCRETE, clone, deepMerge, diffConfig, b64urlEncode, b64urlDecode,
+    const PURE = { SPEEDS, CORE_FILES, scriptList, VIEWS, BASE_CONFIG, DISCRETE, clone, deepMerge, diffConfig, b64urlEncode, b64urlDecode,
         encodeState, decodeState, normalizeResult, serializeResult, classifyFile, indexAt, sampleAt, buildTimeline, frameAt,
         Playback, estimateMs, sensorSamples };
 
@@ -545,7 +557,7 @@
             try { worker.terminate(); } catch (e) { /* gone */ }
             worker = null;
         };
-        worker.postMessage({ type: 'init', files: CORE_FILES.map((f) => '../core/' + f + '.js') });
+        worker.postMessage({ type: 'init', files: scriptList(CS.sim && CS.sim.LOAD_ORDER) });
         return worker;
     }
 
@@ -873,7 +885,10 @@
         pendingCursor = st.t;
         status('Loading the engine…');
         let loaded = 0;
-        for (const f of CORE_FILES) if (await loadScript('../core/' + f + '.js')) loaded++;
+        for (const f of scriptList()) if (await loadScript(f)) loaded++;
+        // core files the engine lists beyond ours (sim.LOAD_ORDER, SC1) come after
+        const extra = CS.sim && Array.isArray(CS.sim.LOAD_ORDER) ? CS.sim.LOAD_ORDER.filter((f) => CORE_FILES.indexOf(f) < 0) : [];
+        for (const f of extra) if (await loadScript('../core/' + f + '.js')) loaded++;
         if (!(CS.sim && CS.sim.run)) await loadScript('fake-result.js');
         app.engine = engineName();
         try { app.defaults = CS.sim && typeof CS.sim.defaultConfig === 'function' ? CS.sim.defaultConfig() : null; } catch (e) { app.defaults = null; }

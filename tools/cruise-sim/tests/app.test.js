@@ -262,3 +262,21 @@ test('SC1-shaped result: ids as indices into meta.enums.id, y for the lane, warn
     assert.equal(f1.appAlive, false);
     assert.equal(f1.curvature, 0.002);
 });
+
+test('script order: core files as sim.LOAD_ORDER, the scenario bundle just before core/scenario.js', () => {
+    const l = A.scriptList();
+    assert.equal(l[0], '../core/rng.js');
+    assert.equal(l[l.length - 1], '../core/sim.js');
+    assert.equal(l.indexOf('scenarios.bundle.js') + 1, l.indexOf('../core/scenario.js'));
+    const SIM = path.join(__dirname, '..', 'core', 'sim.js');
+    if (fs.existsSync(SIM) && require(SIM).LOAD_ORDER) assert.deepEqual(A.CORE_FILES, require(SIM).LOAD_ORDER, 'the page loads what the engine lists');
+});
+
+// The page opened from the disk cannot fetch the scenario JSON files: it reads ui/scenarios.bundle.js. Keep it in step.
+const SCN = path.join(__dirname, '..', 'core', 'scenario.js');
+test('ui/scenarios.bundle.js matches the scenario files', { skip: !fs.existsSync(SCN) && 'core/scenario.js not in this checkout' }, () => {
+    const want = require(SCN).bundleJs();
+    const file = path.join(__dirname, '..', 'ui', 'scenarios.bundle.js');
+    const have = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
+    assert.ok(have === want, 'regenerate: node tools/cruise-sim/core/scenario.js --bundle > tools/cruise-sim/ui/scenarios.bundle.js');
+});
