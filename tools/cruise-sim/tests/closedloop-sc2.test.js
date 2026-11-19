@@ -94,6 +94,38 @@ if (!fs.existsSync(SIM)) {
     assert.strictEqual(r.meta.core.collision, false);
   });
 
+  S.test('target lost in a curve: the set speed is held through the curve, not raised (needs the engine to pass curvature)', function () {
+    // ego 90 km/h behind a 90 km/h lead; a 1/400 m curve from 1000 to 2000 m (a_lat 1.6 m/s^2);
+    // the camera's path prediction misses 90 % of it -> the lead at 55 m looks 3.4 m off: lost
+    var s = scen({ duration: 100, road: { lanes: 2, curvature: [[0, 0], [999, 0], [1000, 1 / 400], [2000, 1 / 400], [2001, 0]] },
+      ego: { v0_kmh: 90, vMax_kmh: 120, lane: 0 }, vehicles: [{ id: 'lead', kind: 'car', lane: 0, x0: 55, v0_kmh: 90 }] });
+    var r = run(s, { sensor: { curvePredErr: 0.9 } });
+    var lost = ev(r, 'target.lost').filter(function (e) { return e.t > 30 && e.t < 50; });
+    assert.ok(lost.length >= 1, 'lost in the curve');
+    var tLost = lost[0].t;
+    var inCurve = idx(r, tLost, 1990 / 25);
+    var set0 = r.series['set.cmd'][inCurve[0]];
+    if (r.series.curvature && !isNaN(r.series.curvature[inCurve[0]])) {
+      inCurve.forEach(function (i) { if (r.series.curvature[i] > 0) assert.ok(r.series['set.cmd'][i] <= set0 + 1e-9, 'raised in the curve at ' + r.t[i].toFixed(1)); });
+    }
+    assert.strictEqual(r.meta.core.collision, false);
+  });
+
+  S.test('a lost decrease is sent again (resend) once the cruise is seen holding the old value', function () {
+    // free road; the driver lowers the maximum 100 -> 90 km/h at 5 s (applied) and 90 -> 80 at 10 s; the second
+    // decrease is lost (SC1's commandLost loses the first decrease after `at`, relative to the previous command)
+    var s = scen({ duration: 20, ego: { v0_kmh: 100, vMax_kmh: 100, lane: 0 },
+      events: [{ t: 5, kind: 'driverVmax', vMax_kmh: 90 }, { t: 10, kind: 'driverVmax', vMax_kmh: 80 }] });
+    var r = run(s, { failures: [{ kind: 'commandLost', at: 9 }] });
+    var dropped = ev(r, 'cmd.dropped').filter(function (e) { return e.reason === 'fault'; });
+    assert.strictEqual(dropped.length, 1, 'one decrease lost');
+    var to80 = ev(r, 'cmd.sent').filter(function (e) { return Math.abs(e.vSet / KMH - 80) < 1e-6; });
+    assert.ok(to80.length >= 2, 'sent again: ' + to80.map(function (e) { return e.t.toFixed(1); }).join(', '));
+    assert.ok(to80[1].t - to80[0].t < 1.5, 'within resendAfter_s + a period');
+    var k = idx(r, 14, 14.05)[0];
+    near(r.series['set.held'][k] / KMH, 80, 1e-6, 'the cruise holds 80 in the end');
+  });
+
   S.test('both baselines drive the same scenario without contact', function () {
     var s = scen({ duration: 60, ego: { v0_kmh: 120, vMax_kmh: 120, lane: 0 }, vehicles: [{ id: 'lead', kind: 'car', lane: 0, x0: 150, v0_kmh: 80 }] });
     ['idealAcc', 'human'].forEach(function (m) {
