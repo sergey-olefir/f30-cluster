@@ -622,7 +622,11 @@
       "color": "fg",
       "align": "center",
       "conn": 1,
-      "toggle": "own:nav"
+      "toggle": "own:nav",
+      "shields": {
+        "font": "wb_shield",
+        "top": 11
+      }
     },
     {
       "id": "cc_line",

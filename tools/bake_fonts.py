@@ -152,6 +152,10 @@ F30_FONTS = [
     ('wb_msg', 'Roboto-wdth-wght.subset.ttf', 35, LOWER + UPPER + DIGITS + ' ./:+-°' + CAR_TEXT, 0, [450, 87.5], CAR_SUBS),     # our message line: BMW cap 24.6-25.0, x 18.3-19.2; one line at baseline 669.23
     ('wb_rowu', 'Roboto-wdth-wght.subset.ttf', 34, 'kmiCF°l/h', 0, [300, 87.5]),                # the row's units (km, mi, °C, °F; T's set plus the i of mi): BMW's are smaller and lighter than wb_val (C 24.25 against 26)
     ('wb_lim', 'Roboto-wdth-wght.subset.ttf', 38, DIGITS, 0, [450, 87.5]),                      # our sign's limit (optional): BMW's digits 26.75 tall, stem 3.94 (wb_val: 26, 4.8)
+    # r1120 F1: the road-number shield's number (docs/ROAD-SHIELDS.md 2.2: cap 20.6 in a 40 px plate, bold). Only the
+    # normalised number is drawn in it (shared/road_shields.js folds the car's Cyrillic М Н Р Т Е to these Latin twins),
+    # never the car's own text: Latin capitals of the five categories, digits, hyphen, space
+    ('wb_shield', 'Roboto-wdth-wght.subset.ttf', 29, 'EHMPT' + DIGITS + '- ', 0, [700, 100]),
     # --- end strip package F ---
     # G20 Comfort: Roboto (SIL OFL, tools/fonts-src/Roboto-OFL.txt) semi-condensed, the bench simulation's face (docs/G20SIM-REPORT.md)
     ('g20_spd', 'Roboto-wdth-wght.subset.ttf', 105, DIGITS, 0, [700, 87.5]),             # the digital speed

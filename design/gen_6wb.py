@@ -462,6 +462,8 @@ def road_signs(own=False):
     ]
 LIMIT_BASE = 520
 
+SHIELD_TOP = 669     # r1120 F1: BMW's street row y 669-709 (docs/ROAD-SHIELDS.md 2.1): the plate's 40 px
+
 def nav_row():
     """Our road label on BMW's bottom-centre street line, over a black bar; only while the navigation label is ours.
     The bar's hole lets BMW's own check-control text through while the message is BMW's (hud.js _hole, live)."""
@@ -469,12 +471,15 @@ def nav_row():
     # whole of BMW's road label and message panel (x 690-1250, y 596 down: package ZC's cover), and BMW's panel opens
     # through the mask's "msg" hole lane (hud.js _maskLanes, the safety rule), so the bar and its hole only doubled
     # that - one effect layer fewer on connection 1 (bench/test-strip-mask.js checks the coverage).
+    nav = text("nav", NAV_CX, base_at("wb_road", NAV_BASE), NAV_W, "{{road}}", "wb_road", conn=1, toggle="own:nav")
+    # r1120 F1: a road number at the start of the label is drawn on its plate (shared/road_shields.js, docs/ROAD-SHIELDS.md):
+    # "shields" names the number's font and the plate's top in the box (BMW's street row starts at y 669, 40 px high)
     return [
         # strip integration: the car's own words in wb_road (package T: BMW's cap 29.8, x 21.9, stem 3.0; wb_cap's cap
         # was 15), which carries the full set the car may send (Ukrainian, Russian and Belarusian, the Latin accents of
         # European street names: tools/bake_fonts.py CAR_TEXT); a character still outside it hands the row back to
         # BMW (shared/hud.js _missingGlyphs), never a box. Centred on x 960.6 (packages T and ZC), baseline 700
-        text("nav", NAV_CX, base_at("wb_road", NAV_BASE), NAV_W, "{{road}}", "wb_road", conn=1, toggle="own:nav"),
+        dict(nav, shields={"font": "wb_shield", "top": SHIELD_TOP - nav["y"]}),
     ]
 
 def cc_row():
