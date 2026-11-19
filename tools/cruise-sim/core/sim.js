@@ -37,6 +37,9 @@ function load(name) {
 }
 
 const OWN = ['rng', 'schema', 'road', 'vehicles', 'plant', 'driver', 'command', 'failures'];
+// The order the page loads core/*.js in (a file may resolve a sibling at load time, so siblings it needs come first)
+const LOAD_ORDER = ['rng', 'schema', 'road', 'vehicles', 'plant', 'driver', 'command', 'failures',
+  'sensor', 'estimator', 'controller', 'warning', 'baselines', 'metrics', 'scenario', 'mixed', 'sim'];
 const OTHERS = ['sensor', 'estimator', 'controller', 'warning', 'baselines', 'metrics', 'scenario'];
 
 // ---- stubs for the modules of SC2 / SC3 until they exist ------------------------------------------------------------
@@ -668,6 +671,6 @@ function hashResult(res) {
   return (h >>> 0).toString(16).padStart(8, '0');
 }
 
-const sim = { VERSION, SERIES, BUILTIN, STUBS, run, runOnce, createSim, defaultConfig, schemas, hashResult, normalize, resolveScenario, deepMerge };
+const sim = { VERSION, SERIES, LOAD_ORDER, BUILTIN, STUBS, run, runOnce, createSim, defaultConfig, schemas, hashResult, normalize, resolveScenario, deepMerge };
 if (typeof module !== 'undefined') module.exports = sim; else (self.CS = self.CS || {})['sim'] = sim;
 })();

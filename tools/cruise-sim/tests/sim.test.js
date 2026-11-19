@@ -153,13 +153,20 @@ test('sim: the browser path (no require, files loaded as scripts into self.CS) g
   const dir = path.join(__dirname, '..', 'core');
   // the page loads every core file; here: SC1's files plus whatever SC2 / SC3 files exist
   const ctx = vm.createContext({ self: {}, console, Float64Array, Uint8Array, Math, JSON, Date, Object, Array, String, Number, Error, Set, Map, Infinity, NaN, isFinite });
-  for (const f of fs.readdirSync(dir).filter(f => /\.js$/.test(f)).sort()) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), ctx, { filename: f });
+  // in sim.LOAD_ORDER (what the page uses), then any other core file
+  const present = fs.readdirSync(dir).filter(f => /\.js$/.test(f)).map(f => f.replace(/\.js$/, ''));
+  const order = sim.LOAD_ORDER.filter(n => present.indexOf(n) >= 0).concat(present.filter(n => sim.LOAD_ORDER.indexOf(n) < 0).sort());
+  for (const n of order) vm.runInContext(fs.readFileSync(path.join(dir, n + '.js'), 'utf8'), ctx, { filename: n + '.js' });
   const CS = ctx.self.CS;
   assert.ok(CS.sim && CS.plant && CS.vehicles && CS.rng);
   const cfg = JSON.parse(JSON.stringify(busy));
   const browserRes = CS.sim.run(cfg, Object.assign({}, require('./stubs/sc2').pinned));
   const nodeRes = sim.run(cfg, deps());
   assert.strictEqual(CS.sim.hashResult(browserRes), sim.hashResult(nodeRes));
+  // and with whatever real modules exist (SC2's, SC3's once merged), no injection
+  const b2 = CS.sim.run(cfg), n2 = sim.run(cfg);
+  assert.strictEqual(JSON.stringify(b2.meta.modules), JSON.stringify(n2.meta.modules));
+  assert.strictEqual(CS.sim.hashResult(b2), sim.hashResult(n2), 'modules: ' + JSON.stringify(n2.meta.modules));
 });
 
 test('sim: speed — an hour of driving runs in seconds', () => {
