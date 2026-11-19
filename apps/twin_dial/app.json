@@ -561,11 +561,15 @@
           "W2"
         ],
         [
+          "W3",
+          "W3"
+        ],
+        [
           "W1",
           "W1"
         ]
       ],
-      "_about": "config.mapWindow (SPEC-R3 4.5): the map window on tab 5, an experiment. FIN (the owner, 2026-11-18): W2 is the window (the largest: open box [700, 173, 1220, 600], no fade, BMW's own edge shows, clipped above by the tab rule; no lens), so it is the FIRST option after off - switching the setting on gives W2; W1 stays one more press away"
+      "_about": "config.mapWindow (SPEC-R3 4.5): the map window on tab 5, an experiment. FIN (the owner, 2026-11-18): W2 is the window (the largest: open box [700, 173, 1220, 600], no fade, BMW's own edge shows, clipped above by the tab rule; no lens), so it is the FIRST option after off - switching the setting on gives W2; W1 stays one more press away. car-issues MW (2026-11-19): W3 is the next press after W2 - the whole free space between the dials (box [618, 173, 1302, 588] minus the discs of radius 310 round the dials' centres), for the owner to compare with W2 on the car"
     },
     {
       "key": "diagMapForce",
@@ -841,7 +845,7 @@
           "on": { "ccActive.release": { "deferValues": [65535], "leftList": true } },
           "_about": "the narrowed release of research3/MC for Twin Dial (SPEC-R3 5.4 step 7: only a number that was set before its entry left the list may be released; 65535 deferred): package B3 owns the engine side, this is the value the setting switches on"
         },
-        "diagMapWindow": { "options": { "W2": { "mapWindow": "W2" }, "W1": { "mapWindow": "W1" } } },
+        "diagMapWindow": { "options": { "W2": { "mapWindow": "W2" }, "W3": { "mapWindow": "W3" }, "W1": { "mapWindow": "W1" } }, "_carIssuesMW": "car-issues MW (2026-11-19): + W3, the whole free space between the dials (sides along the bezels), for the owner to compare with W2 on the car" },
         "diagMapForce": { "on": { "mapForce": true } },
         "diagMapSlots": { "on": { "mapSlotLog": true } },
         "diagSilent": { "act": "silent" }
@@ -860,7 +864,7 @@
       "_carFix": "car-fix CF3 (2026-11-18, the car; docs/car-fix/CF3-REPORT.md): media ON (HmiMediaState, the tuner and the CarPlay player all arrive; CarPlay's title / artist / time from MediaPlayer on CarPlayMedia, the source from the HMI menu's selected icon); phone ON for what arrives (aggregatedCallState -> the call card, its title by state and our own timer); phoneDevices (DevicePresentation: the idle page's connection lines, tab 4's icon variant) and callDetail (VoiceCall contact / name, micMuted) stay OFF: never seen; route ON (tab 5 with CarPlay guiding: remaining distance, arrival and travel time, the road; no arrow; it also selects tab 5 by rule 3 like BMW's guidance; routeOffRoad: the \"Поза дорогою\" note from isOnGuidableRoad, OFF: it read false at the start of a CarPlay route, its meaning is unverified); guidance (BMW's own arrow page) stays OFF: untested."
     },
     "mapWindow": null,
-    "_mapWindow": "round 3 B4 (SPEC-R3 4.5), an EXPERIMENT (FIN, the owner 2026-11-18: W2 is the chosen window and the Діагностика setting's first option; still off by default): null = no map window; \"W1\" = the soft-edged window (zero box [750, 180, 1170, 564], fades 120 / 80 / 80, corner 24), \"W2\" = open wider so that BMW's own edge shows. It opens only while tab 5 is selected and BMW's map is believed present (mapSlots / the cluster's map-view setting) and closes at once on any doubt. Needs B1's u_map uniform in tdback.",
+    "_mapWindow": "round 3 B4 (SPEC-R3 4.5), an EXPERIMENT (FIN, the owner 2026-11-18: W2 is the chosen window and the Діагностика setting's first option; still off by default): null = no map window; \"W1\" = the soft-edged window (zero box [750, 180, 1170, 564], fades 120 / 80 / 80, corner 24), \"W2\" = open wider so that BMW's own edge shows. car-issues MW: \"W3\" = the whole free space between the dials: its sides follow the bezels (6 px black ring), top at the tab rule, foot at y 588 (above BMW's stored-message marker). It opens only while tab 5 is selected and BMW's map is believed present (mapSlots / the cluster's map-view setting) and closes at once on any doubt. Needs B1's u_map uniform in tdback.",
     "mapSlots": false,
     "_mapSlots": "true once the experiment has shown that cluster-render's status rows (slot 0x100 ... map 1) are readable: the window then follows them (S1); false = it follows the cluster's map-view setting and guidance (S2).",
     "mapForce": false,

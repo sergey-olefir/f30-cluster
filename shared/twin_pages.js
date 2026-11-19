@@ -592,11 +592,11 @@ function mediaPage(hud) {
 }
 function phonePage(hud) { return pagesCfg(hud).phone === true && callLive(hud) ? 'call' : 'phone'; }
 
-/** The map window's variant: "W1" | "W2" | null (config.mapWindow). */
+/** The map window's variant: "W1" | "W2" | "W3" | null (config.mapWindow). */
 function mapVariant(hud) {
     const w = cfgOf(hud).mapWindow;
     const v = w && typeof w === 'object' ? w.variant : w;
-    return v === 'W1' || v === 'W2' ? v : null;
+    return v === 'W1' || v === 'W2' || v === 'W3' ? v : null;      // car-issues MW: + W3 (the free space between the dials)
 }
 /**
  * Is BMW's map believed to be under the window (SPEC 4.5)? { open, why } - why is a word for the log and the tests.
