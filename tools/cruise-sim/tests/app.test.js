@@ -160,7 +160,7 @@ test('frameAt: vehicles, the lead, the sensor target (right / wrong / none), war
     assert.equal(fw.plant.assumed, true);
 });
 
-test('frameAt without veh.* series: the lead from gap.true, the follower from follower.gap; target from events', () => {
+test('frameAt without veh.* series: the lead from gap.true, the follower from follower.gap; the sensor id from events', () => {
     const r = A.normalizeResult({
         t: [0, 1], series: { 'ego.x': [100, 120], 'gap.true': [30, 28], 'lead.id': [5, 5], 'lead.v': [20, 20], 'follower.gap': [12, 12], 'gap.meas': [31, 29], 'meas.valid': [1, 1] },
         events: [{ t: 0, kind: 'target.acquired', id: 7 }],
@@ -169,8 +169,9 @@ test('frameAt without veh.* series: the lead from gap.true, the follower from fo
     const lead = fr.vehicles.find((v) => v.role === 'lead'), fol = fr.vehicles.find((v) => v.id === 'follower');
     assert.equal(lead.x - lead.length - fr.ego.x, 30, 'rear of the lead = ego front + true gap');
     assert.equal(fr.ego.x - fr.ego.length - fol.x, 12);
-    assert.equal(fr.sensor.targetId, 7);
-    assert.equal(fr.sensor.wrong, true, 'the sensor holds #7, the true lead is #5');
+    assert.equal(fr.sensor.sensorId, 7, 'the sensor\'s own id, from target.acquired');
+    assert.equal(fr.sensor.targetId, 5, '#7 names no vehicle: the target is the car at the measured gap, the lead');
+    assert.equal(fr.sensor.wrong, false);
 });
 
 test('Playback: speed, end of run, loop, frame-gap cap, sample steps', () => {
@@ -238,6 +239,29 @@ test('the tracked fixture loads as a result and matches what the generator write
     const gen = F.makeFakeResult({ seed: 1, duration: 60, out: { dt: 0.2 } });
     gen.meta.ms = 0;
     assert.equal(JSON.stringify(A.serializeResult(gen, 2)) + '\n', txt, 'regenerate: node tools/cruise-sim/ui/fake-result.js 60 0.2 > tools/cruise-sim/tests/fixtures/su1-fake-result.json');
+});
+
+test('the sensor\'s target: truth link meas.veh, else ids that name a vehicle, else the vehicle at the measured gap', () => {
+    const base = {
+        meta: { enums: { id: ['lead', 1, 'adj'] }, vehicles: [{ id: 'lead', length: 4 }, { id: 'adj', length: 4 }] },
+        t: [0, 1],
+        series: { 'ego.x': [0, 0], 'lead.id': [0, 0], 'meas.valid': [1, 1], 'meas.id': [1, 1], 'gap.meas': [36, 61],
+            'veh.lead.x': [40, 40], 'veh.lead.y': [0, 0], 'veh.adj.x': [64, 64], 'veh.adj.y': [3.5, 3.5] },
+    };
+    let r = A.normalizeResult(base), tl = A.buildTimeline(r);
+    let f = A.frameAt(r, tl, 0);
+    assert.deepEqual([f.sensor.sensorId, f.sensor.targetId, f.sensor.targetBy, f.sensor.wrong], [1, 'lead', 'gap', false], 'track id 1 is no vehicle: matched by gap');
+    f = A.frameAt(r, tl, 1);
+    assert.deepEqual([f.sensor.targetId, f.sensor.wrong], ['adj', true], 'the measured 61 m is the next-lane car, not the lead at 36 m');
+    r = A.normalizeResult(Object.assign({}, base, { series: Object.assign({}, base.series, { 'veh.adj.x': [42, 42], 'gap.meas': [37.5, 37.5] }) }));
+    f = A.frameAt(r, A.buildTimeline(r), 0);
+    assert.deepEqual([f.sensor.targetId, f.sensor.wrong], ['lead', false], 'two cars at a similar distance: the lead, never a guessed wrong target');
+    r = A.normalizeResult(Object.assign({}, base, { series: Object.assign({}, base.series, { 'gap.meas': [500, 500] }) }));
+    f = A.frameAt(r, A.buildTimeline(r), 0);
+    assert.deepEqual([f.sensor.valid, f.sensor.targetId, f.sensor.wrong], [true, null, false], 'nothing near the measured gap: a ghost, no bracket, not called wrong');
+    r = A.normalizeResult(Object.assign({}, base, { series: Object.assign({}, base.series, { 'meas.veh': [2, 2], 'meas.wrong': [1, 1] }) }));
+    f = A.frameAt(r, A.buildTimeline(r), 0);
+    assert.deepEqual([f.sensor.targetId, f.sensor.targetBy, f.sensor.wrong], ['adj', 'truth', true], 'the engine\'s truth link wins');
 });
 
 test('SC1-shaped result: ids as indices into meta.enums.id, y for the lane, warn.reason as an enum, app.alive', () => {

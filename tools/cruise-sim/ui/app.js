@@ -265,10 +265,29 @@
         }
         for (const v of vehicles) v.role = leadId != null && String(v.id) === String(leadId) ? 'lead' : (v.id === 'lead' ? 'lead' : 'other');
         const valid = finite(s['meas.valid']) ? s['meas.valid'] > 0.5 : finite(s['gap.meas']);
-        let targetId = null;
+        // Which vehicle the sensor holds. The sensor's own id is a track id (SC2), not a vehicle id, so in order:
+        // 1. the engine's truth link, series meas.veh (index into meta.enums.id);  2. meas.id / target.* event ids when
+        // they name a vehicle of this run (SU1's fake);  3. the vehicle whose true gap matches the measured gap.
+        let targetId = null, targetBy = null, sensorId = null;
+        const vehIds = vehicles.map((v) => String(v.id));
         if (valid) {
-            if (finite(s['meas.id'])) targetId = idName(s['meas.id']);
-            else { const ev = tl.targetAt(x); targetId = ev === undefined ? leadId : ev; }
+            const ev = tl.targetAt(x);
+            sensorId = finite(s['meas.id']) ? idName(s['meas.id']) : ev === undefined ? null : ev;
+            if (finite(s['meas.veh'])) { targetId = idName(s['meas.veh']); targetBy = 'truth'; }
+            else if (sensorId != null && vehIds.indexOf(String(sensorId)) >= 0) { targetId = sensorId; targetBy = 'id'; }
+            else if (finite(s['gap.meas'])) {
+                // benefit of the doubt: the true lead whenever the measurement fits it; another car only when it fits
+                // that car and clearly not the lead (two cars at a similar distance never make a "wrong target")
+                const gm = s['gap.meas'], tol = 2 + 0.1 * gm;
+                const errOf = (v) => { const g = v.x - v.length - s['ego.x']; return g > -1 ? Math.abs(g - gm) : Infinity; };
+                const lead = vehicles.find((v) => v.role === 'lead');
+                if (lead && errOf(lead) <= tol) { targetId = lead.id; targetBy = 'gap'; }
+                else {
+                    let best = null, bestErr = Infinity;
+                    for (const v of vehicles) { const e = errOf(v); if (e < bestErr) { bestErr = e; best = v; } }
+                    if (best && bestErr <= tol) { targetId = best.id; targetBy = 'gap'; }
+                }
+            }
         }
         // the engine's own flag when it records one (SC2's meas._truth.wrong as a series), else the ids disagree
         const wrong = finite(s['meas.wrong']) ? valid && s['meas.wrong'] > 0.5
@@ -286,7 +305,7 @@
             ego: { x: s['ego.x'], v: s['ego.v'], a: s['ego.a'], length: egoLen, width: (meta.ego && meta.ego.width) || 1.8,
                 lane: finite(s['ego.y']) ? s['ego.y'] / LW : finite(s['ego.lane']) ? s['ego.lane'] : (meta.ego && meta.ego.lane) || 0,
                 lat: finite(s['ego.lat']) ? s['ego.lat'] : 0 },
-            sensor: { valid, targetId, wrong, none: !valid },
+            sensor: { valid, targetId, targetBy, sensorId, wrong, none: !valid },
             warn: finite(s.warn) ? s.warn > 0.5 : !!warnIv, warnReason,
             faults: tl.faultsAt(x), recent, cruiseState, appAlive: finite(s['app.alive']) ? s['app.alive'] > 0.5 : true,
             curvature: finite(s.curvature) ? s.curvature : 0,
