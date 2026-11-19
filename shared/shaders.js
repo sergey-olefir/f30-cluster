@@ -2622,6 +2622,7 @@ uniform sampler2D u_mask;
 uniform vec4 u_maskR;     // its box in layer px: x, y, w, h
 uniform vec4 u_map;       // the map window's zero box x0, y0, x1, y1 (layer px; x1 <= x0: closed)
 uniform vec4 u_mapF;      // its fades: top, sides, bottom (px); the corner radius (px)
+uniform vec4 u_mapA;      // car-issues MW: W3's sides, two arcs: the dials' centres x (left, right), their y, the radius kept shut (px; 0: none)
 const vec3 RT = vec3(0.96, 1.0, 1.08);   // the ramp's cool tint (SPEC-R3 3.1, with the band look B)
 float r8a(vec4 s) { return s.a < 0.999 ? s.a : s.r; }
 vec3 enc3(vec3 l) {
@@ -2666,6 +2667,10 @@ void main() {
         vec2 q = max(abs(p - (u_map.xy + u_map.zw) * 0.5) - ((u_map.zw - u_map.xy) * 0.5 - R), 0.0) / R;
         float h = min(min(clamp((p.y - u_map.y) / u_mapF.x, 0.0, 1.0), clamp((u_map.w - p.y) / u_mapF.z, 0.0, 1.0)), min(clamp((p.x - u_map.x) / u_mapF.y, 0.0, 1.0), clamp((u_map.z - p.x) / u_mapF.y, 0.0, 1.0)));
         h *= clamp(R + 0.5 - sqrt(dot(q, q)) * R, 0.0, 1.0);
+        if (u_mapA.w > 0.0) {                        // car-issues MW: shut inside either disc; offsets normalised by the radius (fp16)
+            vec2 l = (p - u_mapA.xz) / u_mapA.w, r = (p - u_mapA.yz) / u_mapA.w;
+            h *= clamp((sqrt(dot(l, l)) - 1.0) * u_mapA.w + 0.5, 0.0, 1.0) * clamp((sqrt(dot(r, r)) - 1.0) * u_mapA.w + 0.5, 0.0, 1.0);
+        }
         a *= 1.0 - h;
     }
 #endif

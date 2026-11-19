@@ -489,5 +489,59 @@ console.log('the centre pages (round 3 B4, SPEC-R3 4): one layer, every page, ev
     ok(P.x >= 729 && P.x + P.w <= 1191, 'the page layer lies between the dials\' bezels (x 729..1191; the bezel\'s inner edge at y 400 is 684 / 1236)');
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+console.log('car-issues MW: the map window W3 (the whole free space between the dials) against the layout');
+{
+    const M = HudApp.TW_MAP || {}, W3 = M.W3, W2 = M.W2;
+    ok(!!(W3 && W3.arc && W2 && !W2.arc && !(M.W1 || {}).arc), 'W3 exists with arcs; W1 and W2 have none (they are as before)');
+    if (W3 && W3.arc) {
+        const [b0, b1, b2, b3] = W3.box, [lx, rx, cy, rr] = W3.arc;
+        const T = byId.dial_tach, S = byId.dial_speed;
+        ok(T.centre[0] === lx && S.centre[0] === rx && T.centre[1] === cy && S.centre[1] === cy, 'its arcs are round the dials\' own centres (' + T.centre + ' / ' + S.centre + ')');
+        // tdial draws alpha 1 inside 1.0128 R and fades to 0 at 1.0128 R + 0.5 (shaders.js TDIAL): the black ring between is the backdrop's
+        const edge = 1.0128 * Math.max(T.R, S.R) + 0.5;
+        ok(rr - edge >= 5 && rr - edge <= 24, 'a black ring of ' + (rr - edge).toFixed(1) + ' px between the bezel\'s outer edge (' + edge.toFixed(1) + ' px) and the window (' + rr + ' px): 5..24');
+        ok(Math.abs(lx + rr - W2.box[0]) <= 6 && Math.abs(rx - rr - W2.box[2]) <= 6, 'at mid-height (y 400) its sides are within 6 px of W2\'s (' + (lx + rr) + ' / ' + (rx - rr) + ' against ' + W2.box[0] + ' / ' + W2.box[2] + ')');
+        const tab = byId.bg_l.tab;
+        ok(b0 === tab.rect[0] && b2 === tab.rect[2] && b1 === tab.rule[1], 'the box\'s sides end where the tab bar ends (' + b0 + ' / ' + b2 + ') and its top is the tab rule\'s foot (y ' + b1 + ')');
+        const rule = byId.bg_l.rules.filter((r) => r.role === 'rule')[0];
+        ok(b3 <= MARKER[1] && b3 < rule.y0 && b3 < 611, 'its foot (y ' + b3 + ') is above BMW\'s stored-message marker (from y ' + MARKER[1] + ') and the bottom row\'s rule (y ' + rule.y0 + ', ' + (rule.ours || {}).y0 + ' with our message)');
+        // the see-through region, pixel by pixel (centres): in the box, outside both discs
+        const open = (x, y) => x >= b0 && x < b2 && y >= b1 && y < b3 && Math.hypot(x - lx, y - cy) > rr && Math.hypot(x - rx, y - cy) > rr;
+        const inR = (x, y, r) => x >= r[0] && x < r[2] && y >= r[1] && y < r[3];
+        const meets = (r) => { for (let y = Math.max(r[1], b1); y < Math.min(r[3], b3); y++) for (let x = Math.max(r[0], b0); x < Math.min(r[2], b2); x++) if (open(x + 0.5, y + 0.5)) return true; return false; };
+        ok(!meets(BELT) && !meets(GAP) && !LAMPS.some((l) => meets(l)) && !meets(STRIP) && !meets(MARKER), 'the hole never meets BMW\'s belt group, the gear gap, the seven side lamps, the lamp strip or the stored-message marker');
+        // BMW's stock layout is drawn under a theme (photo 14): at mid-height its items come nearest the gap, measured on the rectified
+        // stock photos 08 / 09 / 39 / 61 / 68 (+-1 px): the rule under its digital speed ends at x 694 (y 412-415); its drive-mode label and
+        // the rule under it start at x 1223 (y 337-415). W2 keeps them out; so must W3
+        const STOCK_L = [600, 405, 695, 420], STOCK_R = [1223, 335, 1400, 420];
+        ok(!meets(STOCK_L) && !meets(STOCK_R), 'the hole never meets BMW\'s stock mid-height items (the speed rule\'s end ' + JSON.stringify(STOCK_L) + ', the drive-mode label and rule ' + JSON.stringify(STOCK_R) + ')');
+        const mw2 = (r) => { for (let y = r[1]; y < r[3]; y++) for (let x = r[0]; x < r[2]; x++) if (x + 0.5 >= W2.box[0] && x + 0.5 < W2.box[2] && y + 0.5 >= W2.box[1] && y + 0.5 < W2.box[3]) return true; return false; };
+        ok(!mw2(STOCK_L) && !mw2(STOCK_R), '... (W2 does not either: the same keep-outs hold for the window the car has shown)');
+        ok(!meets(tab.rect.slice(0, 3).concat([173])) && !meets([0, 612, 1920, 720]), 'the tab bar and its rule (y < 173) and the bottom row (y >= 612) stay opaque');
+        const panel = [696, 595.75, 1226, 704];
+        ok(!meets(panel.map(Math.floor)), 'it never reaches BMW\'s message panel ' + JSON.stringify(panel) + ' (W2 does, by its rows y 595..599)');
+        // which of our layers lie where W3 opens and W2 did not: they must be see-through there (the dials outside their disc), or
+        // a sheet with nothing of its members there; nothing of ours sits over the new part of the map
+        const fake = { _connOf: (w) => w.conn || 0 };
+        const eng = W.map((w) => (w.type === 'text' && w.gpu ? Object.assign({}, w, { type: 'atext' }) : w));
+        const plan = HudApp.prototype._plan.call(fake, eng, Math.floor(1920 * 720 / 4), L.packWaste);
+        const w2 = W2.box, extra = (x, y) => open(x, y) && !(x >= w2[0] && x < w2[2] && y >= w2[1] && y < w2[3]);
+        const meetsExtra = (r) => { for (let y = Math.max(Math.floor(r[1]), b1); y < Math.min(Math.ceil(r[3]), b3); y++) for (let x = Math.max(Math.floor(r[0]), b0); x < Math.min(Math.ceil(r[2]), b2); x++) if (extra(x + 0.5, y + 0.5)) return true; return false; };
+        const over = [], why = [];
+        plan.forEach((e) => {
+            const r = e.kind === 'sheet' ? [e.x, e.y, e.x + e.w, e.y + e.h] : box(e.w);
+            if (!meetsExtra(r)) return;
+            if (e.kind === 'layer' && e.w.type === 'tdback') { why.push(e.w.id + ' (the backdrop: the window is its hole)'); return; }
+            if (e.kind === 'layer' && e.w.type === 'tdial' && 1.0128 * e.w.R + 0.5 < rr) { why.push(e.w.id + ' (alpha 0 outside ' + (1.0128 * e.w.R + 0.5).toFixed(1) + ' px)'); return; }
+            if (e.kind === 'sheet' && !e.members.some((m) => meetsExtra(box(m)))) { why.push('a sheet, none of its members there'); return; }
+            over.push((e.kind === 'sheet' ? 'sheet ' + e.members.map((m) => m.id).join('+') : e.w.id) + ' ' + JSON.stringify(r));
+        });
+        ok(!over.length, 'nothing of ours draws where W3 opens beyond W2 (' + why.join('; ') + ')' + (over.length ? ': ' + over.join('; ') : ''));
+        const roadBar = (byId.c_page.pages.map.items || []).filter((i) => i.y1 !== undefined);
+        ok(roadBar.length > 0 && roadBar.every((i) => !meetsExtra([i.x0 !== undefined ? i.x0 : 729, i.y0 !== undefined ? i.y0 : 248, i.x1 !== undefined ? i.x1 : 1191, i.y1])), 'the road bar stays where it is (inside W2: W3 leaves it as it is)');
+    }
+}
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed, ' + skipped + ' skipped');
 process.exit(failed ? 1 : 0);

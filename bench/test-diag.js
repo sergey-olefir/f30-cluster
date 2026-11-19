@@ -150,11 +150,20 @@ function unit() {
         // cycle from "off" lands on the first option after it), and app.json keeps the window off until then
         const spec = APPS.twin_dial, s = spec.settings.filter((x) => x.key === 'diagMapWindow')[0];
         const list = s.options.map((o) => o[0]), next = list[(list.indexOf(s.default) + 1) % list.length];
-        ok(s.default === 'off' && list.join() === 'off,W2,W1' && next === 'W2', 'twin: "Вікно карти" is off by default and switching it on gives W2 (options ' + list.join(' / ') + ')');
+        ok(s.default === 'off' && list.join() === 'off,W2,W3,W1' && next === 'W2', 'twin: "Вікно карти" is off by default and switching it on gives W2 (options ' + list.join(' / ') + ')');
         const cfg = deep(spec.config), vals = { diagMapWindow: next };
         ok(spec.config.mapWindow === null, 'twin: app.json\'s config.mapWindow stays null (the window is still the experiment)');
         DS.Diag.create(cfg, fakeSettings(spec, vals), quiet);
         ok(cfg.mapWindow === 'W2', 'twin: switched on, config.mapWindow = "W2"');
+    }
+    {
+        // car-issues MW: W3 (the free space between the dials) is the press after W2, so the owner compares the two on the car
+        const spec = APPS.twin_dial, s = spec.settings.filter((x) => x.key === 'diagMapWindow')[0];
+        const list = s.options.map((o) => o[0]);
+        ok(list.indexOf('W3') === list.indexOf('W2') + 1, 'twin: car-issues MW: "Вікно карти" offers W3 right after W2 (' + list.join(' / ') + ')');
+        const cfg = deep(spec.config);
+        DS.Diag.create(cfg, fakeSettings(spec, { diagMapWindow: 'W3' }), quiet);
+        ok(cfg.mapWindow === 'W3', 'twin: car-issues MW: W3 chosen, config.mapWindow = "W3"');
     }
 
     // integration (B7): the tab bar's inputs from B4's page model (shared/twin_pages.js tabBridge), gated by config.pages
