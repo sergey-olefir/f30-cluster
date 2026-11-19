@@ -403,7 +403,8 @@ async function f30() {
     const made2 = textures().slice(before2);
     ok(made2.length > 0 && made2.some((l) => /RGBA8 asset/.test(l)), 'scene textures off: the RGBA8 files again (' + made2.length + ' made)');
     ok(!/error|exception/i.test(logText.split('\n').filter((l) => /\bdiag\b|mb:/.test(l)).join('\n')), 'no error in the diagnostics lines');
-    ok(!/pixel memory is full|asset refused|layer refused/i.test(logText), 'the service never said its pixel memory was full, nor refused an asset or a layer (the old and the new scene textures never sat together)');
+    // car-issues TX: "refused <op> on <ref>" too (the engine's line for a service refusal: "refused drop on 12: asset in use" was missed)
+    ok(!/pixel memory is full|asset refused|layer refused|refused \w+ on \d+/i.test(logText),'the service never said its pixel memory was full, nor refused an asset or a layer (the old and the new scene textures never sat together)');
     p = await probe();
     ok(p && p.ready, 'the app is still up');
     await stop();
