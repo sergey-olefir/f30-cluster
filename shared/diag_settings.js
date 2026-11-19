@@ -192,6 +192,9 @@ class Diag {
         // car-issues GL: config.gpuText (diagGpuText) changes how the "gpu" texts are made: a rebuild, which drops the old atlas
         // after the layers that sample it (never before: a sampled asset is refused "asset in use")
         if (roots.indexOf('gpuText') >= 0) rebuild = true;
+        // front-vehicle FV: config.frontVehicle (diagFrontVehicle) starts or stops the test (a late watch of the field when it was off at
+        // the start) and makes or drops the pictogram's layer ("fv:on"): a rebuild
+        if (roots.indexOf('frontVehicle') >= 0) { if (typeof hud._fvDiag === 'function') hud._fvDiag(); rebuild = true; }
         if (roots.indexOf('ccDisplayed') >= 0) hud.log.info('diag: config.ccDisplayed is subscribed to at start only: it takes effect after the app restarts');
         // the check-control state is decided from the keys under ccActive each time the lists or the number change: decide it now
         if (roots.indexOf('ccActive') >= 0 && !rebuild) {

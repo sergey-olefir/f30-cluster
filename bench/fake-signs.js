@@ -167,6 +167,16 @@ Object.assign(SCENES, {
     'cc-greek': { cc: { name: 'Χαμηλή πίεση', desc: 'Ελέγξτε την πίεση.', color: 'yellow', symbol: 44 } },
 });
 // --- end package F ---
+// --- front-vehicle FV (docs/twin-dial/FV-SPEC.md): GapVehicleAhead.DataFrontVehicle in the car's raw numbers. gap 4093 = the parked
+// "no target" the car sent; the others are inside the 57..1736 seen while driving (the unit is unknown: 0.1 m is the design's
+// assumption). speed 1500 = the "same speed" the car showed. Made-up object ids. ---
+Object.assign(SCENES, {
+    'fv-none': { front: { gap: 4093, speed: 4093, obj: 255, qual: 2 } },
+    'fv-far': { front: { gap: 900, speed: 1500, obj: 7 } },
+    'fv-mid': { front: { gap: 420, speed: 1500, obj: 7 } },
+    'fv-near': { front: { gap: 150, speed: 1500, obj: 7 } },
+});
+// --- end front-vehicle FV ---
 
 function install(hu, config, log) {
     const cfg = config || {};
@@ -461,6 +471,26 @@ function install(hu, config, log) {
     }
     // ---- end fix/colour-daynight ----
 
+    // ---- front-vehicle FV: DataFrontVehicle (a field with a notifier, fed as the car notifies it), through config.frontVehicle's paths
+    // when it names them. v: { gap, speed, speedY, gapY, obj, qual, qualExt } raw numbers (absent members: the catalogue's defaults) ----
+    function feedFront(v) {
+        const c = cfg.frontVehicle && typeof cfg.frontVehicle === 'object' ? cfg.frontVehicle : {};
+        const n = v || {}, num = (x, d) => (isFinite(Number(x)) && x !== null && x !== undefined ? Number(x) : d);
+        const out = { frontVehicleObjectID: 255, frontVehicleSpeedX: 4095, frontVehicleSpeedY: 4095, frontVehicleGapX: 4095, frontVehicleGapY: 4095,
+            qualifierEventDataFunctionFrontVehicle: 15, qualifierExtendedFunctionFrontVehicle: 15 };
+        const put = (path, dflt, val) => merge(out, nest(Array.isArray(path) ? path : dflt, val));
+        put(c.gapPath, ['frontVehicleGapX'], num(n.gap, 4095));
+        put(c.speedPath, ['frontVehicleSpeedX'], num(n.speed, 4095));
+        put(c.objPath, ['frontVehicleObjectID'], num(n.obj, 255));
+        put(c.qualPath, ['qualifierEventDataFunctionFrontVehicle'], num(n.qual, 0));
+        put(c.qualExtPath, ['qualifierExtendedFunctionFrontVehicle'], num(n.qualExt, 0));
+        out.frontVehicleGapY = num(n.gapY, out.frontVehicleGapY);
+        out.frontVehicleSpeedY = num(n.speedY, out.frontVehicleSpeedY);
+        last.front = n;
+        hu.feed(c.iface || 'de.bmw.dass.GapVehicleAhead', c.field || 'DataFrontVehicle', out);
+    }
+    // ---- end front-vehicle FV ----
+
     function control(v) {
         const o = v || {};
         if (o.scene) {
@@ -487,6 +517,7 @@ function install(hu, config, log) {
         if (o.ccBasic) feedCcBasic(o.ccBasic);      // probes
         if (o.symbols) setSymbols(o.symbols);       // probes
         if (o.dayNight !== undefined) feedDayNight(o.dayNight);     // fix/colour-daynight
+        if (o.front) feedFront(o.front);            // front-vehicle FV
     }
 
     return {
@@ -497,6 +528,7 @@ function install(hu, config, log) {
             wired: { tsr: !!(cfg.sign && cfg.sign.tsr && cfg.sign.tsr.iface), sign: named(cfg.sign), ccm: named(cfg.ccm) && cfg.ccm.kind === 'message', road: named(cfg.road), nav: !!(cfg.nav && cfg.nav.iface) },
             symbols: { mode: sym.mode, calls: sym.calls, params: sym.params.slice() },     // probes (0.7.18)
             dayNight: last.dayNight === undefined ? null : last.dayNight,                  // fix/colour-daynight
+            front: last.front || null,                                                     // front-vehicle FV
             last: { sign: last.sign, cc: last.cc ? { name: (last.cc.name || '').length, desc: (last.cc.desc || '').length, color: last.cc.color } : null, scene: last.scene },
         }),
     };

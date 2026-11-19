@@ -39,6 +39,10 @@ const F30 = path.join(ROOT, 'apps', 'f30_cluster');
 const TWIN = path.join(ROOT, 'apps', 'twin_dial');
 const APP_ID = 'twin_cc_test';
 const APP_DIR = path.join(ROOT, 'apps', APP_ID), STAGE = path.join(ROOT, 'dist', APP_ID);
+// front-vehicle FV: TWIN_CC_FV=1 runs every case with the test mode of the vehicle ahead ON (config.frontVehicle.on; the page on
+// connection 1, the pictogram on connection 2, a target fed all along): bench/test-front-vehicle.js runs this file with and without it
+// and compares the audit's traces (TWIN_CC_TRACE) - the message machine's frames must be the same
+const FV_ON = process.env.TWIN_CC_FV === '1';
 
 let passed = 0, failed = 0;
 const ok = (cond, what) => { if (cond) { passed++; console.log('  ok   ' + what); } else { failed++; console.log('  FAIL ' + what); } };
@@ -340,6 +344,9 @@ const LAY = (name, extra) => {
     ];
     if (!(extra && extra.noSheet)) widgets.push({ id: 'msg_sheet', type: 'ccsheet', class: 'content', z: 9, x: SHEET_RECT[0], y: SHEET_RECT[1], w: SHEET_RECT[2], h: SHEET_RECT[3],
         font: 'td_msg', counterFont: 'td_cnt', rowFont: 'td_tab', textFont: 'td_val', conn: 2 });
+    // front-vehicle FV: the centre page's layer (tab 1 shows the test page) and the pictogram, as design/gen_twin.py lays them
+    if (FV_ON) widgets.push({ id: 'c_page', type: 'tdpage', class: 'content', z: 6, x: 729, y: 248, w: 462, h: 347, conn: 1, pages: {} },
+        { id: 'fv_icon', type: 'tdfv', class: 'content', z: 13, x: 1504, y: 250, w: 64, h: 68, conn: 2, toggle: 'fv:on' });
     return { schemaVersion: 2, name: name, theme: 'wb_comfort', widgets };
 };
 
@@ -393,6 +400,7 @@ function buildApp() {
     spec.id = APP_ID; spec.title = 'Twin CC test'; spec.description = 'test stand-in for twin_dial\'s message path (bench/test-twin-cc.js); never shipped';
     spec.version = '0.0.1'; spec.loggingId = 'OATC'; spec.iconGlyph = 'TC';
     spec.shared = f30.shared.filter((f) => ['menu.js', 'gallery.js', 'previews.js'].indexOf(f) < 0).concat(['twin_cc.js', 'twin_tokens.js', 'twin_tabs.js', 'twin_pages.js']);     // integration: twin_tokens' icon state lives in twin_tabs (B2)
+    if (FV_ON) spec.shared = spec.shared.concat(['front_vehicle.js', 'twin_front.js']);      // front-vehicle FV
     spec.settings.forEach((s) => {
         if (s.key === 'hudLayout') { s.options = s.options.concat([['twin_cc', 'Twin CC'], ['twin_cc_b', 'Twin CC b'], ['twin_cc_nosheet', 'Twin CC without a sheet'], ['twin_cc_c', 'Twin CC row on 2']]); s.default = 'twin_cc'; }
         if (s.key === 'byMode') s.default = false;
@@ -406,13 +414,14 @@ function buildApp() {
     const twinCfg = JSON.parse(fs.readFileSync(path.join(TWIN, 'app.json'), 'utf8')).config;
     c.ccActive = Object.assign({}, twinCfg.ccActive, { strict: true, fallback: { on: true, hideAfterMs: 900, keepColors: ['red'] } });
     c.ccDisplayed = Object.assign({}, twinCfg.ccDisplayed);
+    if (FV_ON) c.frontVehicle = Object.assign({}, twinCfg.frontVehicle, { on: true, staleMs: 600000 });      // front-vehicle FV: the test on from the start
     fs.rmSync(APP_DIR, { recursive: true, force: true });
     fs.mkdirSync(path.join(APP_DIR, 'hud', 'fonts'), { recursive: true });
     fs.writeFileSync(path.join(APP_DIR, 'app.json'), JSON.stringify(spec, null, 1));
     fs.writeFileSync(path.join(APP_DIR, 'main.js'), [
         "'use strict';", "const mgu = require('./kit/mgu');", "const HudApp = require('./hud');",
         "mgu.run({ start(ctx) { const hud = new HudApp(ctx); hud.start(); process.on('exit', () => { try { hud.stop(); } catch (e) { /* exiting */ } }); } });", ''].join('\n'));
-    ['td_msg', 'td_cnt', 'td_tab', 'td_val', 'td_row'].forEach((f) => fs.copyFileSync(path.join(TWIN, 'hud', 'fonts', f + '.json'), path.join(APP_DIR, 'hud', 'fonts', f + '.json')));
+    ['td_msg', 'td_cnt', 'td_tab', 'td_val', 'td_row'].concat(FV_ON ? ['td_title', 'td_body'] : []).forEach((f) => fs.copyFileSync(path.join(TWIN, 'hud', 'fonts', f + '.json'), path.join(APP_DIR, 'hud', 'fonts', f + '.json')));
     const sdk = path.join(ROOT, 'oap-sdk');
     if (!fs.existsSync(path.join(sdk, 'index.js'))) {
         fs.mkdirSync(sdk, { recursive: true });
@@ -675,6 +684,17 @@ async function engineChecks() {
     const started = await until(() => hud && hud.client && hud.client.ready && hud.widgets.size >= 5 && hud.twinMsg, 8000);
     ok(started, 'the engine is up with ' + (hud ? hud.widgets.size : 0) + ' widgets on the stand-in layout and a TwinCentre (config.ccActive.strict)');
     if (!started) { console.log(logs.slice(-20).join('\n')); throw new Error('engine did not start'); }
+    // front-vehicle FV: a car ahead all along, its gap wandering through every level and closing now and then (10 values a second)
+    let fvTimer = null, fvN = 0;
+    if (FV_ON) {
+        fvTimer = setInterval(() => {
+            fvN++;
+            const gap = Math.round(500 + 380 * Math.sin(fvN / 23) + 12 * Math.sin(fvN * 1.7));
+            hu.feed('de.bmw.dass.GapVehicleAhead', 'DataFrontVehicle', { frontVehicleObjectID: 7, frontVehicleSpeedX: 1500, frontVehicleSpeedY: 4095, frontVehicleGapX: gap,
+                frontVehicleGapY: 4095, qualifierEventDataFunctionFrontVehicle: 0, qualifierExtendedFunctionFrontVehicle: 0 });
+        }, 100);
+        if (fvTimer.unref) fvTimer.unref();
+    }
     await sleep(400);
     truth(false, true);
     await sleep(300);
@@ -1158,6 +1178,13 @@ async function engineChecks() {
         /active cc: wired - not the "shown now" source \(config\.ccActive\.source displayed, dead\)/.test(text) && !/D7: this is the message that confirmed/.test(text),
         'and the car-fix lines: "cc: id 65535 ... → window (the "shown now" number is unknown (65535))", "active cc: wired - not the "shown now" source (..., dead)"');
 
+    // front-vehicle FV: the mode really ran (values in, the page and the pictogram painted) while every case above was audited
+    if (FV_ON) {
+        clearInterval(fvTimer);
+        const fs2 = hud.fv && hud.fv.tracker ? hud.fv.tracker.state() : {};
+        ok(fs2.running && fs2.got > 50 && hud.widgets.has('fv_icon') && hud.widgets.has('c_page') && /fv: seen|fv: near|fv: closing|fv: fast/.test(logs.join('\n')),
+            'front-vehicle FV: the test mode ran through the whole audit (' + fvN + ' values fed, ' + fs2.got + ' taken; the page and the pictogram built)');
+    }
     hud.stop();
     server.close();
     try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (e) { /* tmp */ }

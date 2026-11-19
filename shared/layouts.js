@@ -48,6 +48,7 @@ const TYPES = {
     ccsheet: ['font'],      // twin_dial: tab 2's sheet (shared/twin_cc.js)
     tdpage: ['pages'],      // twin_dial round 3 (B4): the centre pages' one layer (shared/twin_pages.js)
     tdsign: [], tdcru: [],  // twin_dial: the speed-limit sign and the cruise readout (shared/twin_limit.js)
+    tdfv: [],   // front-vehicle FV: the pictogram of the vehicle ahead (shared/twin_front.js), built only while the test is on
 };
 const CLASSES = ['ambient', 'content', 'overlay', 'alert'];
 
@@ -118,7 +119,8 @@ class Layouts {
             if (w.conn !== undefined && !(Number.isInteger(w.conn) && w.conn >= 0 && w.conn <= 3)) bad(at + ' "conn" must be 0..3 (the connection to cluster-render)');
             // "own:<item>" (package F): on while that item of BMW's bottom row is ours (hud.js _own); "cc:none" (car3 G):
             // on while the car says no check-control message shows; twin_dial: "tl:cruise" / "tl:cruise:C1" (shared/twin_limit.js toggle); car3 H: "a&b" (hud.js _toggleOn): every part is a toggle of its own
-            if (w.toggle !== undefined && !String(w.toggle).split('&').every((p) => /^!?(own:[a-z]+|cc:[a-z]+|tl:[a-zA-Z0-9]+(:[a-zA-Z0-9]+)?|[a-zA-Z0-9_]+(=[a-zA-Z0-9_]+)?)$/.test(p))) bad(at + ' has a bad toggle "' + w.toggle + '"');
+            // front-vehicle FV: + "fv:on" (shared/twin_front.js toggle)
+            if (w.toggle !== undefined && !String(w.toggle).split('&').every((p) => /^!?(own:[a-z]+|cc:[a-z]+|tl:[a-zA-Z0-9]+(:[a-zA-Z0-9]+)?|fv:[a-z]+|[a-zA-Z0-9_]+(=[a-zA-Z0-9_]+)?)$/.test(p))) bad(at + ' has a bad toggle "' + w.toggle + '"');
             if (w.hole !== undefined && !(Array.isArray(w.hole) && w.hole.length === 4 && w.hole.every((n) => typeof n === 'number'))) bad(at + ' "hole" must be [x, y, w, h]');
             TYPES[w.type].forEach((k) => { if (w[k] === undefined) bad(at + ' (' + w.type + ') needs "' + k + '"'); });
         });

@@ -324,7 +324,8 @@ console.log('the layer plan (the engine\'s own planner, shared/hud.js _plan)');
     ok(centre.length === 1 && centre[0].conn === 1, 'the centre layer is on connection 1');
     // B3 (SPEC-R3 5.1, 5.5): the bottom plate is gone; tab 2's ONE sheet is the only "cc:" sheet on connection 2, the bottom row's sheet is on
     // connection 0 with the window; B5's sign sheet (and the cruise readout's, built only with config.cruise) share connection 2 and are not "cc:" (integration)
-    const ccSheets = sheets.filter((s) => s.conn === 2 && !s.members.every((m) => m.type === 'tdsign' || m.type === 'tdcru'));
+    // front-vehicle FV: the pictogram's sheet (tdfv, built only while the test is on) is not "cc:" either
+    const ccSheets = sheets.filter((s) => s.conn === 2 && !s.members.every((m) => m.type === 'tdsign' || m.type === 'tdcru' || m.type === 'tdfv'));
     ok(ccSheets.length === 1 && ccSheets.every((s) => s.z === 9 && s.members.length === 1 && s.members[0].type === 'ccsheet' &&
         s.x === 729 && s.y === 298 && s.w === 462 && s.h === 270), 'connection 2: tab 2\'s sheet [729, 298, 462 x 270], a "ccsheet", the only "cc:" sheet there (the old bottom plate is gone)');
     ok(!W.some((w) => w.type === 'ccplate'), 'no "ccplate" widget in the layout (the code path is gone)');

@@ -1609,6 +1609,17 @@
       "conn": 2,
       "place": "C2",
       "toggle": "tl:cruise:C2"
+    },
+    {
+      "id": "fv_icon",
+      "type": "tdfv",
+      "z": 13,
+      "x": 1504,
+      "y": 250,
+      "w": 64,
+      "h": 68,
+      "conn": 2,
+      "toggle": "fv:on"
     }
   ]
 }
