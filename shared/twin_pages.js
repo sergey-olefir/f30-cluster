@@ -51,6 +51,9 @@ function turnsMod() {
     if (turnsLib === undefined) { try { turnsLib = require('./carplay_turns'); } catch (e) { turnsLib = null; } }
     return turnsLib;
 }
+// front-vehicle FV: the test page "front" on tab 1 (shared/twin_front.js paints it itself). Absent: never.
+let twinFront = null;
+try { twinFront = require('./twin_front'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_front') < 0) throw e; }
 
 const isNum = (x) => typeof x === 'number' && isFinite(x);
 const pad2 = (n) => (n < 10 ? '0' : '') + n;
@@ -769,7 +772,7 @@ function decide(hud, t) {
         case 3: return mediaPage(hud);
         case 4: return phonePage(hud);
         case 5: return navPage(hud, t);
-        default: return computerPage(hud, t);
+        default: return twinFront && twinFront.takesTab1(hud) ? 'front' : computerPage(hud, t);     // front-vehicle FV: the test takes tab 1
     }
 }
 function current(hud) { const p = st(hud); return p.page; }
@@ -1229,6 +1232,8 @@ function update(hud, x, now, force) {
         p.mapAskAt = nowMs(hud);
         try { hud.client.status(); } catch (e) { /* never */ }
     }
+    // front-vehicle FV: the test page paints itself (no layout items); a page painted in between is repainted whole on return
+    if (page === 'front' && twinFront) { twinFront.updatePage(hud, x, now, force || x.pgKey !== '#front'); x.pgKey = '#front'; return; }
     const spec = x.w.pages && x.w.pages[page];
     const resolved = resolveItems(hud, spec ? spec.items : []);
     const key = keyOf(page, resolved, hud.theme);

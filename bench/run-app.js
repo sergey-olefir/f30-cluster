@@ -438,6 +438,7 @@ process.on('message', (m) => {
         else if (v.scene || v.sign || v.tsr || v.cc || v.ccList || v.ccActive || v.ccFrame || v.sla || v.road || v.nav || v.clock || v.clockLocal) fakeSigns.control(v);     // car-fix CF2: + tsr (the TrafficSignRecognition event)
         else if (v.ccRisk || v.ccBasic || v.symbols) fakeSigns.control(v);     // probes (0.7.18): bench/test-probes.js
         else if (v.dayNight !== undefined) fakeSigns.control(v);    // fix/colour-daynight: bench/test-daynight.js
+        else if (v.front) fakeSigns.control(v);     // front-vehicle FV: DataFrontVehicle (bench/test-front-vehicle.js)
         else if (fakePerso) fakePerso.control(v);
     }
     else if (m.t === 'probe') {
@@ -451,6 +452,9 @@ process.on('message', (m) => {
             // car issues CT: the calls the GuidanceEventList stand-in answered (method names only)
             carplayTurns: fakeTurns ? { calls: fakeTurns.calls.length, methods: fakeTurns.calls.map((c) => c.method).filter((x, i, a) => a.indexOf(x) === i) } : null,
             twin: twinSim ? twinSim.state(hud) : null,      // twin_dial: ledger, coverage, the engine's message state
+            // front-vehicle FV: the test mode's state (numbers and our own words only)
+            fv: (() => { try { return hud && hud.fv && hud.fv.tracker ? { on: !!(hud.config.frontVehicle && hud.config.frontVehicle.on), subscribed: hud.fv.subscribed,
+                view: hud.fv.view, tracker: hud.fv.tracker.state(), page: hud.tdp ? hud.tdp.page : null, icon: hud.widgets.has('fv_icon') } : null; } catch (e) { return { error: String(e && e.message || e) }; } })(),
             // fix/colour-daynight: the car's day/night as the engine took it, the source in use, night now, and what
             // the sun alone would say (bench/test-daynight.js)
             dayNight: hud ? dayNightProbe() : null,
