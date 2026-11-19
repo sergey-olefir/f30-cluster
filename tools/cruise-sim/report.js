@@ -342,18 +342,34 @@ function mapHeadline(map) {
   // per row (y), the weakest x where the share reaches 80 % of the best cell
   var best = 0;
   map.cells.forEach(function (row) { row.forEach(function (v) { if (v !== null && v > best) best = v; }); });
-  var target = Math.max(0.5, best - 0.05), rows = [];
+  var target = Math.max(0.5, best - 0.02), rows = [];   // within 2 points of the best cell
   map.ys.forEach(function (y, j) {
     var xsOk = map.xs.filter(function (x, i) { return map.cells[j][i] !== null && map.cells[j][i] >= target; });
     rows.push({ y: y, x: xsOk.length ? xsOk.reduce(function (a, b) { return Math.abs(b) < Math.abs(a) ? b : a; }) : null });
   });
   return { best: best, target: target, rows: rows };
 }
+function mean(a) { var v = a.filter(function (x) { return x !== null && x !== undefined; }); return v.length ? v.reduce(function (p, q) { return p + q; }, 0) / v.length : null; }
+function spread(a) { var v = a.filter(function (x) { return x !== null; }); return v.length ? Math.max.apply(null, v) - Math.min.apply(null, v) : 0; }
 function measureList(runs) {
-  var score = {};
+  var score = {}, fromMaps = {};
+  runs.forEach(function (run) {
+    // a map's axes: the spread of the column / row means of the safety share, within each split; the best split counts
+    (run.summary.maps || []).forEach(function (m) {
+      var c = m.safeCells || m.cells;
+      var sx = spread(m.xs.map(function (_, i) { return mean(c.map(function (row) { return row[i]; })); }));
+      var sy = spread(m.ys.map(function (_, j) { return mean(c[j]); }));
+      score[m.x] = Math.max(score[m.x] || 0, sx); score[m.y] = Math.max(score[m.y] || 0, sy);
+      fromMaps[m.x] = fromMaps[m.y] = true;
+      if (m.split) fromMaps[m.split] = true;
+    });
+  });
   runs.forEach(function (run) {
     (run.summary.tornado || []).forEach(function (r) { score[r.param] = Math.max(score[r.param] || 0, r.swing, r.safeSwing || 0); });
-    (run.summary.ranking || []).forEach(function (r) { if (!/preset/.test(r.param)) score[r.param] = Math.max(score[r.param] || 0, r.spread, r.safeSpread || 0); });
+    (run.summary.ranking || []).forEach(function (r) {
+      if (/preset/.test(r.param) || fromMaps[r.param] || r.param === 'plant.brakeMax_ms2') return;   // brake authority moves with aMin on the map
+      score[r.param] = Math.max(score[r.param] || 0, r.spread, r.safeSpread || 0);
+    });
   });
   return Object.keys(score).filter(function (k) { return !/^(controller|warning|thresholds)\./.test(k); })
     .sort(function (a, b) { return score[b] - score[a]; })

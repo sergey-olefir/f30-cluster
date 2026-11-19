@@ -115,10 +115,11 @@ test('end to end with a fake engine on 2 workers: records, time lost, files, the
   assert.ok(out.measure[0].param === 'plant.aMin_ms2');
 });
 
-test('the map headline finds the weakest passing value per row', () => {
-  const hl = report.mapHeadline({ xs: [-0.7, -1.8, -2.8], ys: [0.5, 1.5], cells: [[0.4, 0.9, 0.95], [0.3, 0.6, 0.92]] });
+test('the map headline finds, per row, the weakest value within 2 points of the best cell', () => {
+  const hl = report.mapHeadline({ xs: [-0.7, -1.8, -2.8], ys: [0.5, 1.5], cells: [[0.4, 0.94, 0.95], [0.3, 0.6, 0.92]] });
   near(hl.best, 0.95, 1e-12);
-  assert.deepStrictEqual(hl.rows.map(r => r.x), [-1.8, -2.8]);
+  near(hl.target, 0.93, 1e-12);
+  assert.deepStrictEqual(hl.rows.map(r => r.x), [-1.8, null]);
 });
 
 test('a real batch on the engine, if core/sim.js is present (6 runs)', async () => {
