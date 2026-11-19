@@ -260,6 +260,9 @@ class Probe {
             case 'calllist': return F.fmtCallList(v);
             case 'cbs': return F.fmtCbs(v);
             case 'tree': return F.fmtTree(v, f.tree);
+            case 'views': return F.fmtViews(v);             // S16 (car issues NV)
+            case 'rendered': return F.fmtRendered(v);
+            case 'stream': return F.fmtStream(v);
             case 'activeSource': {
                 this.media.active = typeof v === 'string' ? v : null;       // kept in memory for the match below, never logged
                 return 'len=' + F.fLen(v) + ' matches-source-entry=' + this._mediaMatch();
@@ -319,7 +322,8 @@ class Probe {
         }
         // a long whole value (fmt tree: S14 / S15 object lists) goes out in parts of at most PART_CHARS, cut between two tokens: the longest line
         // seen in the car's log was ~800 characters, and a logger that cuts long lines must not lose the end of a list
-        const parts = f.fmt === 'tree' ? splitBody(body) : [body];      // only the S14 / S15 whole values: every older line stays one line
+        // only the S14 / S15 whole values and S16's event lists (up to 4 views x 3 events): every older line stays one line
+        const parts = f.fmt === 'tree' || f.fmt === 'views' ? splitBody(body) : [body];
         this._info(f.p + ' ' + f.tag + ' #' + st.n + ' t=' + this._t() + ': ' + parts[0] + (parts.length > 1 ? ' (part 1/' + parts.length + ')' : '') + tail +
             (st.skipped ? ' (+' + st.skipped + ' folded)' : '') + (st.n >= st.cap ? ' (the last line for this field)' : ''));
         for (let i = 1; i < parts.length; i++) this._info(f.p + ' ' + f.tag + ' #' + st.n + ' part ' + (i + 1) + '/' + parts.length + ': ' + parts[i]);

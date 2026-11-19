@@ -149,7 +149,11 @@
     "de.bmw.infotainment.a4a.carplay.CarPlayManager": {
       "_instances": "CarPlayManagerInst1",
       "projectedGuidanceActive": "rs",
-      "projectedTelephonyActive": "rs"
+      "projectedGuidanceMetadataAvailable": "rs",
+      "projectedTelephonyActive": "rs",
+      "_broadcasts": [
+        "onScreenChange"
+      ]
     },
     "de.bmw.infotainment.connectivity.telephony.VoiceCall": {
       "_instances": "Call1",
@@ -262,13 +266,18 @@
       "conclusiveDart": "rs",
       "currentLaneGuiding": "rs",
       "currentRoad": "rs",
+      "currentRoute": "rs",
       "guidanceState": "rs",
       "guidingProvider": "rs",
       "isOnGuidableRoad": "rs",
       "junction3dViewInKombiEnabled": "rs",
       "nextDestinationInfo": "rs",
       "nextIntersection": "rs",
-      "visualizationInKombiNonNaviEnabled": "rs"
+      "visualizationInKombiNonNaviEnabled": "rs",
+      "_broadcasts": [
+        "activeRouteChanged",
+        "streamStatusChanged"
+      ]
     },
     "de.bmw.infotainment.LaneGuiding": {
       "_instances": "1",
@@ -277,7 +286,10 @@
     },
     "de.bmw.infotainment.sdi.aap.androidautoprojectedmanager.AndroidAutoProjectedManager": {
       "_instances": "AndroidAutoProjectedManagerInst1",
-      "projectedGuidanceActive": "rs"
+      "featureConfiguration": "rs",
+      "isVideoStreaming": "rs",
+      "projectedGuidanceActive": "rs",
+      "projectedGuidanceMetadataAvailable": "rs"
     },
     "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl": {
       "_instances": "1",
@@ -525,6 +537,58 @@
       "_broadcasts": [
         "ProperMotionVehicle"
       ]
+    },
+    "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding": {
+      "_instances": "Main_Instance",
+      "activeRouteChange": "rs",
+      "currentLaneGuiding": "rs",
+      "currentRoad": "rs",
+      "waypoints": "rs",
+      "_broadcasts": [
+        "streamCommandChanged"
+      ]
+    },
+    "de.bmw.infotainment.navigation.guiding.GuidanceEventList": {
+      "_instances": "Main_Instance",
+      "registeredViews": "rs",
+      "_broadcasts": [
+        "viewsChanged"
+      ]
+    },
+    "de.bmw.infotainment.navigation.guiding.GuidanceRenderedContent": {
+      "_instances": "Main_Instance",
+      "registeredViews": "rs",
+      "_broadcasts": [
+        "viewContentChanged"
+      ]
+    },
+    "de.bmw.infotainment.am.carplay.CarPlay": {
+      "_instances": "CarPlayAMInst1",
+      "_broadcasts": [
+        "changeModes"
+      ]
+    },
+    "de.bmw.infotainment.remoteinstrumentcluster.RICServiceGuidance": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ric_sendEvent"
+      ]
+    },
+    "de.bmw.infotainment.remoteinstrumentcluster.DisplaySink": {
+      "_instances": "1",
+      "_broadcasts": [
+        "requestSinkSwitch"
+      ]
+    },
+    "de.bmw.infotainment.navigation.NavigationCAN": {
+      "_instances": "1",
+      "calculationDataNavigation": "rs"
+    },
+    "de.bmw.infotainment.FeedbackLaneGuiding": {
+      "_instances": "1",
+      "_broadcasts": [
+        "correctionDataLaneGuiding"
+      ]
     }
   },
   "screens": [
@@ -599,6 +663,10 @@
         [
           "setting",
           "set15"
+        ],
+        [
+          "setting",
+          "set16"
         ],
         [
           "text",
@@ -690,6 +758,12 @@
     {
       "key": "set15",
       "label": "S15 Об’єкти камери (P24)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set16",
+      "label": "S16 Наступний поворот (P25)",
       "type": "bool",
       "default": false
     }
