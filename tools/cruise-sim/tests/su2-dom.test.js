@@ -1,19 +1,19 @@
 'use strict';
-// SU2: the four views mounted on a minimal DOM (tests/stubs/mini-dom.js) with SU2's fake shell: they
+// SU2: the four views mounted on a minimal DOM (tests/stubs/su2-mini-dom.js) with SU2's fake shell: they
 // build, follow app events, and call the app the way CONTRACT.md / SU1's shell expect.
 // Not a browser: what it cannot show (pixels, real events) is described for the owner in SU2-REPORT.md.
 //   node tools/cruise-sim/tests/su2-dom.test.js
 const { test, assert } = require('./stubs/su2-harness');
-const dom = require('./stubs/mini-dom').makeDom();
-require('./stubs/mini-dom').install(dom);
-const M = require('./stubs/fake-modules.js');
+const dom = require('./stubs/su2-mini-dom').makeDom();
+require('./stubs/su2-mini-dom').install(dom);
+const M = require('./stubs/su2-fake-modules.js');
 const fx = require('./fixtures/su2-fixture.js');
 global.self = { CS: Object.assign({ su2fixture: fx }, M) };
 const C = require('../ui/charts.js');
 const S = require('../ui/settings.js');
 const B = require('../ui/batch.js');
 const R = require('../ui/report-view.js');
-const { createApp } = require('./stubs/fake-app.js');
+const { createApp } = require('./stubs/su2-fake-app.js');
 
 const document = dom.document;
 function host(id) { const e = document.createElement('div'); e.setAttribute('id', id); document.body.appendChild(e); return e; }
@@ -59,6 +59,22 @@ test('charts: empty state, then panels with canvases after a run; legend toggles
   assert.strictEqual(el.children.length, 0);
 });
 
+test('charts: a baseline run of the same config becomes B', () => {
+  const el = host('charts3');
+  const seen = [];
+  self.CS.sim = { run: (cfg) => { seen.push(cfg); return fx.makeResult({ duration: 60, preset: 'firm' }); } };
+  const v = C.mount(el, app);
+  const sel = qa(el, 'select').find((x) => x.attrs['aria-label'] === 'Baseline');
+  sel.value = 'human'; sel.selectedIndex = 1; sel.options = [{ text: 'ideal ACC' }, { text: 'human driver' }];
+  byText(el, 'button', 'Baseline as B').click();
+  assert.strictEqual(seen[0].ego.mode, 'human');
+  assert.strictEqual(seen[0].scenario.id, app.config.scenario.id);
+  assert.ok(app.resultB && /baseline: human driver/.test(el.textContent));
+  app.setCompare(null);
+  delete self.CS.sim;
+  v.destroy();
+});
+
 test('charts: cursor, scrub, wheel zoom, double-click fit, follow during playback', () => {
   const el = host('charts2');
   const v = C.mount(el, app);
@@ -88,7 +104,7 @@ test('settings: generated groups, an edit writes a compact module and lets the s
   const el = host('settings');
   const v = S.mount(el, app, { modules: M, storage: null });
   const groups = qa(el, 'details.su2-group').map((d) => d.getAttribute('data-group'));
-  assert.deepStrictEqual(groups, ['scenario', 'plant', 'sensor', 'estimator', 'control', 'command', 'driver', 'failures', 'thresholds']);
+  assert.deepStrictEqual(groups, ['scenario', 'plant', 'sensor', 'estimator', 'control', 'command', 'driver', 'failures', 'baselines', 'thresholds']);
   const row = q(el, '[data-id="plant.aMin_ms2"]');
   assert.ok(/default −0\.700/.test(row.textContent) || /default -0.7/.test(row.textContent), row.textContent);
   const input = qa(row, 'input').find((i) => i.attrs.type === 'text');

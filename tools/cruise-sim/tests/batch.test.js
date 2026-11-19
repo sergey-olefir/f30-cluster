@@ -6,7 +6,7 @@ const { test, assert, near } = require('./stubs/su2-harness');
 const B = require('../ui/batch.js');
 const C = require('../ui/charts.js');
 const fx = require('./fixtures/su2-fixture.js');
-const M = require('./stubs/fake-modules.js');
+const M = require('./stubs/su2-fake-modules.js');
 
 function run(o) { return Object.assign({ scenario: 'D.x', family: 'D', params: {}, metrics: {}, verdict: { pass: true, failed: [] } }, o); }
 

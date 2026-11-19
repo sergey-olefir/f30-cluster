@@ -4,7 +4,7 @@
 //   node tools/cruise-sim/tests/settings.test.js
 const { test, assert } = require('./stubs/su2-harness');
 const S = require('../ui/settings.js');
-const M = require('./stubs/fake-modules.js');
+const M = require('./stubs/su2-fake-modules.js');
 
 function mods() { return S.findModules(M); }
 function ctl(model, id) {
@@ -18,13 +18,13 @@ function ctl(model, id) {
 
 test('findModules picks the model modules and the scenario catalogue', () => {
   const m = mods();
-  assert.deepStrictEqual(Object.keys(m).sort(), ['command', 'controller', 'driver', 'estimator', 'failures', 'metrics', 'plant', 'scenario', 'sensor', 'warning']);
+  assert.deepStrictEqual(Object.keys(m).sort(), ['baselines', 'command', 'controller', 'driver', 'estimator', 'failures', 'metrics', 'plant', 'scenario', 'sensor', 'warning']);
   assert.deepStrictEqual(Object.keys(S.findModules({ rng: {}, plant: M.plant })), ['plant']);
 });
 
 test('the model follows the brief\'s groups, in order', () => {
   const model = S.buildModel(mods(), {});
-  assert.deepStrictEqual(model.groups.map((g) => g.id), ['scenario', 'plant', 'sensor', 'estimator', 'control', 'command', 'driver', 'failures', 'thresholds']);
+  assert.deepStrictEqual(model.groups.map((g) => g.id), ['scenario', 'plant', 'sensor', 'estimator', 'control', 'command', 'driver', 'failures', 'baselines', 'thresholds']);
   const control = model.groups.find((g) => g.id === 'control');
   assert.deepStrictEqual(control.sections.map((s) => s.title), ['Controller · Loop', 'Controller · Law', 'Controller · Limits', 'Warning']);
   const missing = S.buildModel({ plant: M.plant }, {}).groups.find((g) => g.id === 'sensor');
@@ -63,6 +63,7 @@ test('control types from SCHEMA fields', () => {
   assert.strictEqual(S.sectionTitle('plant.dynamics', 'plant', 'plant'), 'Dynamics');
   assert.strictEqual(S.sectionTitle('plant', 'plant', 'plant'), '');
   assert.strictEqual(S.sectionTitle('thresholds.catalogue', 'metrics', 'thresholds'), 'Catalogue');
+  assert.strictEqual(S.sectionTitle('alphaBeta', 'estimator', 'estimator'), 'Alpha beta');
 });
 
 test('changed marks compare against the selected preset, not only the SCHEMA', () => {
@@ -163,6 +164,23 @@ test('scenario: the catalogue grouped by family, its concrete variants, the run 
   model = S.buildModel(m, { scenario: { id: 'Z.unknown' } });
   assert.ok(/not in the catalogue/.test(ctl(model, 'scenario.id').options[0].label));
   assert.strictEqual(S.baseId('D.brake#a=1/none'), 'D.brake');
+});
+
+test('baselines: SC2\'s SCHEMA under config.ego.params, compact, reset without touching ego.mode', () => {
+  const m = mods();
+  const cfg = { ego: { mode: 'idealAcc', params: { acc_h: 2.5 } } };
+  const model = S.buildModel(m, cfg);
+  const g = model.groups.find((x) => x.id === 'baselines');
+  assert.deepStrictEqual(g.sections.map((s) => s.title), ['Ideal acc', 'Human']);
+  const h = ctl(model, 'ego.params.acc_h');
+  assert.strictEqual(h.value, 2.5);
+  assert.strictEqual(h.changed, true);
+  assert.strictEqual(g.changed, 1);
+  assert.deepStrictEqual(S.patchFor(m, cfg, ctl(model, 'ego.params.hum_T'), 1.0), { ego: { mode: 'idealAcc', params: { acc_h: 2.5, hum_T: 1.0 } } });
+  assert.deepStrictEqual(S.patchFor(m, cfg, h, 2), { ego: { mode: 'idealAcc' } });            // back to the default: params go
+  assert.deepStrictEqual(S.resetPatch(m, cfg, 'baselines'), { ego: { mode: 'idealAcc' } });
+  assert.deepStrictEqual(S.resetPatch(m, { ego: { params: { acc_h: 3 } } }, 'baselines'), { ego: undefined });
+  assert.deepStrictEqual(S.patchFor(m, cfg, ctl(model, 'ego.mode'), 'human'), { ego: { mode: 'human', params: { acc_h: 2.5 } } });
 });
 
 test('failures: a list editor from the KINDS table when the SCHEMA is empty', () => {

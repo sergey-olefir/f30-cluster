@@ -4,7 +4,7 @@
 const { test, assert, near } = require('./stubs/su2-harness');
 const C = require('../ui/charts.js');
 const fx = require('./fixtures/su2-fixture.js');
-const M = require('./stubs/fake-modules.js');
+const M = require('./stubs/su2-fake-modules.js');
 
 test('linear scale maps and inverts', () => {
   const s = C.linear(10, 20, 100, 300);

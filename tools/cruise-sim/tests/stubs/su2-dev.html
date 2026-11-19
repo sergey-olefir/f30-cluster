@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cruise sim SU2 views</title>
 <!--
-  SU2's dev page: the four SU2 views on a fake shell (tests/stubs/fake-app.js), so they can be checked
+  SU2's dev page: the four SU2 views on a fake shell (tests/stubs/su2-fake-app.js), so they can be checked
   by eye before SU1's page exists. Open this file from the disk (file://); no server, no network.
   If ../../core/*.js exist in this checkout (after a merge) they are used; otherwise the fakes stand in.
 -->
@@ -48,8 +48,11 @@
   const CORE = ['rng', 'schema', 'road', 'vehicles', 'plant', 'driver', 'command', 'failures', 'sensor', 'estimator', 'controller', 'warning', 'baselines', 'metrics', 'scenario', 'mixed', 'sim'];
   function load(src) { return new Promise(function (ok) { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ok; document.head.appendChild(s); }); }
   (async function () {
-    for (const f of CORE) await load('../../core/' + f + '.js');
-    for (const f of ['fake-modules.js', 'fake-app.js', '../fixtures/su2-fixture.js']) await load(f);
+    for (const f of CORE) {
+      if (f === 'scenario') await load('../../ui/scenarios.bundle.js');   // the catalogue for file:// (SC3 / SU1), if built
+      await load('../../core/' + f + '.js');
+    }
+    for (const f of ['su2-fake-modules.js', 'su2-fake-app.js', '../fixtures/su2-fixture.js']) await load(f);
     for (const f of ['charts', 'settings', 'batch', 'report-view']) await load('../../ui/' + f + '.js');
     const fakes = Object.keys(CS).filter(function (k) { return CS[k] && CS[k].__fake; });
     document.getElementById('status').textContent = fakes.length ? 'fake modules: ' + fakes.join(', ') : 'all modules real';

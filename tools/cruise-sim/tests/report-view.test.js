@@ -5,7 +5,7 @@ const { test, assert } = require('./stubs/su2-harness');
 const R = require('../ui/report-view.js');
 const B = require('../ui/batch.js');
 const fx = require('./fixtures/su2-fixture.js');
-const M = require('./stubs/fake-modules.js');
+const M = require('./stubs/su2-fake-modules.js');
 
 const result = fx.makeResult({ duration: 40 });
 const batch = fx.makeBatch();

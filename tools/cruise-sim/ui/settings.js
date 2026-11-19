@@ -25,10 +25,15 @@
     { id: 'command', title: 'Command path', modules: ['command'] },
     { id: 'driver', title: 'Driver', modules: ['driver'] },
     { id: 'failures', title: 'Failures', modules: ['failures'], list: true },
+    { id: 'baselines', title: 'Baselines (ideal ACC, human driver)', modules: ['baselines'] },
     { id: 'thresholds', title: 'Pass thresholds', modules: ['metrics'] },
   ];
   const MODULE_NAMES = ['plant', 'sensor', 'estimator', 'controller', 'warning', 'command', 'driver', 'failures', 'metrics'];
   const CONFIG_KEY_FALLBACK = { metrics: 'thresholds' };
+  // Modules whose parameters live elsewhere than config[NAME]: SC2's baselines are read from config.ego.params.
+  const HOME = { baselines: ['ego', 'params'] };
+  const EXTRA_MODULES = ['baselines'];
+  function homeOf(name, mod) { return HOME[name] || [configKey(mod, name)]; }
 
   // Fields of the run itself (not of a model): the scenario group shows them.
   const RUN_SCHEMA = [
@@ -50,7 +55,7 @@
   function findModules(src) {
     src = src || (typeof self !== 'undefined' && self.CS) || {};
     const out = {};
-    MODULE_NAMES.forEach(function (n) { if (src[n] && (src[n].SCHEMA || src[n].PRESETS)) out[n] = src[n]; });
+    MODULE_NAMES.concat(EXTRA_MODULES).forEach(function (n) { if (src[n] && (src[n].SCHEMA || src[n].PRESETS)) out[n] = src[n]; });
     if (src.scenario) out.scenario = src.scenario;
     return out;
   }
@@ -90,6 +95,7 @@
   function sectionTitle(group, name, NAME) {
     let g = String(group || '');
     [name, NAME].forEach(function (p) { if (p && g.indexOf(p + '.') === 0) g = g.slice(p.length + 1); else if (g === p) g = ''; });
+    g = g.replace(/([a-z])([A-Z])/g, function (m, a, b) { return a + ' ' + b.toLowerCase(); });   // alphaBeta -> alpha beta
     return g ? g.charAt(0).toUpperCase() + g.slice(1) : '';
   }
 
@@ -151,7 +157,8 @@
   /** The controls of one module part of the config. */
   function moduleControls(name, mod, config) {
     const NAME = configKey(mod, name);
-    const part = (config && config[NAME]) || {};
+    const home = homeOf(name, mod);
+    const part = getPath(config, home) || {};
     const preset = presetOf(mod, part);
     const defs = baseDefaults(mod, preset);
     const out = [];
@@ -159,13 +166,13 @@
     if (mod.PRESETS && !schemaHas(mod, 'preset')) {
       const cur = matchPreset(mod, part);
       out.push(control({ key: 'preset', label: 'Preset', unit: '', options: [{ value: '', label: '(custom)' }].concat(Object.keys(mod.PRESETS).map(function (k) { return { value: k, label: k }; })), group: '', help: 'Sets every parameter of this group to the preset\'s values' },
-        [NAME, '#preset'], cur, cur, { selector: true, synthetic: true }));
+        home.concat(['#preset']), cur, cur, { selector: true, synthetic: true, module: name }));
     }
     (mod.SCHEMA || []).forEach(function (s) {
       if (hiddenKey(name, s)) return;
       const sel = s.key === 'preset' || s.key === 'model';
       const def = s.key === 'preset' ? s.default : defs[s.key];
-      out.push(control(Object.assign({}, s, { group: sectionTitle(s.group, name, NAME) }), [NAME, s.key], part[s.key], def, { selector: sel }));
+      out.push(control(Object.assign({}, s, { group: sectionTitle(s.group, name, NAME) }), home.concat([s.key]), part[s.key], def, { selector: sel, module: name }));
     });
     return out;
   }
@@ -387,6 +394,12 @@
       }
       return p;
     }
+    if (c.module && HOME[c.module]) {
+      const home = HOME[c.module], mod = modules[c.module];
+      const part = Object.assign({}, getPath(config, home) || {});
+      part[c.key] = value;
+      return nestPatch(config, home, fullModule(mod, c.module, part).value);
+    }
     const name = moduleNameOfKey(modules, head);
     if (!name) {
       // a run field (seed, duration, ego.mode, out.dt)
@@ -419,6 +432,17 @@
     part[c.key] = value;
     const fm = fullModule(mod, name, part);
     const p = {}; p[fm.key] = fm.value; return p;
+  }
+
+  /** The patch that puts `value` at config[path[0]][path[1]]... (the top-level object rebuilt; {} or undefined drops the key). */
+  function nestPatch(config, path, value) {
+    const top = clone((config && config[path[0]]) || {}) || {};
+    let o = top;
+    for (let i = 1; i < path.length - 1; i++) { if (!isPlain(o[path[i]])) o[path[i]] = {}; o = o[path[i]]; }
+    const last = path[path.length - 1];
+    if (value === undefined || (isPlain(value) && !Object.keys(value).length)) delete o[last]; else o[last] = value;
+    const p = {}; p[path[0]] = Object.keys(top).length ? top : undefined;
+    return p;
   }
 
   /** The part without its SCHEMA parameters (keepExtra) — what survives a preset switch or reset. */
@@ -460,6 +484,7 @@
       const mod = modules[n];
       if (!mod) return;
       if (g.list) { p[configKey(mod, n)] = []; return; }
+      if (HOME[n]) { Object.assign(p, nestPatch(config, HOME[n], undefined)); return; }
       const part = (config && config[configKey(mod, n)]) || {};
       const keep = filterKeys(part, mod, true);
       const fm = fullModule(mod, n, keep, presetOf(mod, part));
@@ -929,7 +954,7 @@
   }
 
   const settings = {
-    GROUPS: GROUPS, RUN_SCHEMA: RUN_SCHEMA, AUTO_RUN_MAX_S: AUTO_RUN_MAX_S, STORE_KEY: STORE_KEY,
+    GROUPS: GROUPS, RUN_SCHEMA: RUN_SCHEMA, HOME: HOME, nestPatch: nestPatch, AUTO_RUN_MAX_S: AUTO_RUN_MAX_S, STORE_KEY: STORE_KEY,
     findModules: findModules, buildModel: buildModel, baseDefaults: baseDefaults, parseInput: parseInput, rangeText: rangeText,
     patchFor: patchFor, resetPatch: resetPatch, fullModule: fullModule, applyPatch: applyPatch, baseId: baseId, variantsOf: variantsOf, variantPatch: variantPatch, typeOf: typeOf, sectionTitle: sectionTitle, matchPreset: matchPreset, failureSchema: failureSchema, snapshot: snapshot, applySnapshotPatch: applySnapshotPatch,
     cleanSnapshot: cleanSnapshot, exportPresets: exportPresets, importPresets: importPresets, makeStore: makeStore,

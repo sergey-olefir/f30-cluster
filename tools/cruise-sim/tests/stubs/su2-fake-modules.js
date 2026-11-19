@@ -174,7 +174,15 @@
     },
     toConfig: function (c, base) { const cfg = JSON.parse(JSON.stringify(base || {})); cfg.scenario = { id: c.id, inline: c }; return cfg; },
   };
-  const all = { plant: plant, sensor: sensor, estimator: estimator, controller: controller, warning: warning, command: command, driver: driver, failures: failures, metrics: metrics, scenario: scenario };
+  const baselines = {
+    NAME: 'baselines',
+    SCHEMA: [
+      { key: 'acc_h', label: 'Time gap', unit: 's', default: 2, min: 0.8, max: 3, step: 0.1, group: 'idealAcc' },
+      { key: 'acc_aMin_ms2', label: 'Max deceleration', unit: 'm/s²', default: -3.5, min: -8, max: -0.5, step: 0.1, group: 'idealAcc' },
+      { key: 'hum_T', label: 'Time headway', unit: 's', default: 1.4, min: 0.6, max: 3, step: 0.1, group: 'human' },
+    ],
+  };
+  const all = { baselines: baselines, plant: plant, sensor: sensor, estimator: estimator, controller: controller, warning: warning, command: command, driver: driver, failures: failures, metrics: metrics, scenario: scenario };
   if (typeof module !== 'undefined') module.exports = all;
   else {
     self.CS = self.CS || {};

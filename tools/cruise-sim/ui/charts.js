@@ -1170,6 +1170,17 @@
       panelChips.appendChild(h('label', { class: 'su2-chip' }, [cb, p.title]));
       panelChips.appendChild(document.createTextNode(' '));
     });
+    // our controller against a baseline (SC2's ideal ACC / human driver) on the same config, as B
+    const coreSim = function () { const CS = typeof self !== 'undefined' && self.CS; return CS && CS.sim && typeof CS.sim.run === 'function' && !CS.sim.__fake ? CS.sim : null; };
+    const baseSel = h('select', { 'aria-label': 'Baseline' }, [h('option', { value: 'idealAcc', text: 'ideal ACC' }), h('option', { value: 'human', text: 'human driver' })]);
+    const baseBtn = h('button', { type: 'button', title: 'Run the same config with the baseline driving our car, and overlay it as B', disabled: !coreSim(), onclick: function () {
+      const sim = coreSim();
+      if (!sim) { bInfo.textContent = 'The core is not loaded in this page: no baseline run here.'; return; }
+      const cfg = JSON.parse(JSON.stringify(app.config || {}));
+      cfg.ego = Object.assign({}, cfg.ego, { mode: baseSel.value });
+      try { setB(sim.run(cfg), 'B = baseline: ' + baseSel.options[baseSel.selectedIndex].text); }
+      catch (e) { bInfo.textContent = 'Baseline run failed: ' + e.message; }
+    } }, ['Baseline as B']);
     const followBtn = h('button', { type: 'button', 'aria-pressed': 'true', title: 'Keep the cursor in view during playback', onclick: function () { state.follow = !state.follow; followBtn.setAttribute('aria-pressed', String(state.follow)); } }, ['Follow cursor']);
     const bInfo = h('span', { class: 'su2-note' });
     const clearB = h('button', { type: 'button', disabled: true, onclick: function () { setB(null, ''); } }, ['Clear B']);
@@ -1184,6 +1195,7 @@
       h('button', { type: 'button', title: 'Keep the current run as B and overlay it under the next runs', onclick: pinB }, ['Pin as B']),
       h('button', { type: 'button', title: 'Load a result JSON as B', onclick: loadB }, ['Load B…']),
       clearB,
+      baseSel, baseBtn,
       bInfo,
     ]);
     const banner = h('div', { class: 'su2-note', style: { margin: '0 0 6px' } });
