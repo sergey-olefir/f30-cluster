@@ -1,4 +1,6 @@
+(function () {
 'use strict';
+// (wrapped in a function: the page loads core/*.js as classic scripts, which share one global scope)
 // Settings-schema helpers (SC1). Every model module exports SCHEMA: an array of fields
 //   { key, label, unit, default, min, max, step, group, help, options?, type?, nullable? }
 // `type` is inferred from `default` when absent: number, bool (boolean), string, enum (when `options` is given),
@@ -104,3 +106,4 @@ function withPreset(SCHEMA, PRESETS, name, partial, opts) {
 
 const schema = { defaults, merge, validate, check, field, withPreset, typeOf, optionValues, clone, KMH };
 if (typeof module !== 'undefined') module.exports = schema; else (self.CS = self.CS || {})['schema'] = schema;
+})();

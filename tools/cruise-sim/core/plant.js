@@ -1,4 +1,6 @@
+(function () {
 'use strict';
+// (wrapped in a function: the page loads core/*.js as classic scripts, which share one global scope)
 // The stock cruise as a plant (SC1): BMW's Dynamic Cruise Control is a black box; these are assumed models of it
 // until Phase 2 identifies one from the car's logs (then it is loaded from a JSON file and marked assumed: false).
 //
@@ -254,3 +256,4 @@ function create(p, rng, ctx) {
 
 const plant = { NAME: 'plant', SCHEMA, PRESETS, STATES, create, params };
 if (typeof module !== 'undefined') module.exports = plant; else (self.CS = self.CS || {})['plant'] = plant;
+})();

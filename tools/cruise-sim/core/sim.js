@@ -1,4 +1,6 @@
+(function () {
 'use strict';
+// (wrapped in a function: the page loads core/*.js as classic scripts, which share one global scope)
 // The simulation engine (SC1): one config in, one result out; the same model stepped in real time for the page.
 //
 //   run(config[, deps])       -> { meta, t, series, events, metrics, verdict }      (CONTRACT.md "The result")
@@ -274,7 +276,7 @@ function createSim(config, deps) {
   const duration = cfg.duration !== undefined ? cfg.duration : (scen.duration !== undefined ? scen.duration : 120);
   const nTicks = Math.round(duration / dt);
   const outEvery = Math.max(1, Math.round(cfg.out.dt / dt));
-  const ctrlEvery = Math.max(1, Math.round(1 / (cfg.controller.rateHz * dt)));
+  const ctrlPeriod = 1 / cfg.controller.rateHz;   // the app's clock: due at 0, P, 2P, ... on the first tick at or after
   const root = M.rng.create(cfg.seed);
   const events = [];
   const mode = cfg.ego.mode || 'ours';
@@ -335,7 +337,7 @@ function createSim(config, deps) {
   const series = {};
   for (const n of SERIES) series[n] = new Float64Array(nRows).fill(NaN);
   const vehSeries = {};
-  for (const o of world.others) for (const f of ['x', 'v', 'a', 'y', 'lane']) {
+  for (const o of world.others) for (const f of ['x', 'v', 'a', 'lane', 'lat', 'y']) {
     const n = 'veh.' + o.id + '.' + f;
     vehSeries[n] = [o, f];
     series[n] = new Float64Array(nRows).fill(NaN);
@@ -351,7 +353,7 @@ function createSim(config, deps) {
   let row = 0;
 
   // run state
-  let k = 0, done = false;
+  let k = 0, done = false, ctrlNext = 0, lastT = 0;
   let lastMeas = null, pendingMeas = null, frozenMeas = null, lastEst = null, lastOut = null, lastW = null;
   let lastSent = null, prevTarget = null, warnOn = false, lastJerkA = 0;
   let lead = null, fol = null;
@@ -412,7 +414,9 @@ function createSim(config, deps) {
 
     // 4. the app, on its clock
     const stalled = faults.stalled || command.stalled(t);
-    if (mode === 'ours' && world.app.alive && !stalled && k % ctrlEvery === 0) {
+    const due = t >= ctrlNext - 1e-9;
+    if (due) while (ctrlNext <= t + 1e-9) ctrlNext += ctrlPeriod;
+    if (mode === 'ours' && world.app.alive && !stalled && due) {
       const egoIn = { egoV: ego.v, egoA: ego.a };
       lastEst = app.estimator.update(pendingMeas, t, egoIn);
       pendingMeas = null;
@@ -529,6 +533,9 @@ function createSim(config, deps) {
       for (const n in vehSeries) { const [o, f] = vehSeries[n]; S[n][i] = f === 'lane' ? o.lane : o[f]; }
     }
 
+    lastT = t;
+    if (k >= nTicks) { done = true; return; }   // the state at t = duration is recorded; nothing moves past it
+
     // 9. advance to t + dt
     vehs.step(world, dt);
     let v1 = ego.v + a * dt;
@@ -551,7 +558,6 @@ function createSim(config, deps) {
         break;
       }
     }
-    if (k >= nTicks) done = true;
   }
 
   function num(v) { return v === null || v === undefined ? NaN : v; }
@@ -562,7 +568,9 @@ function createSim(config, deps) {
     const out = {};
     for (const name in series) out[name] = series[name].subarray(0, n);
     core.accelRms = nA ? Math.sqrt(sumA2 / nA) : 0;
-    core.duration = k * dt;
+    core.driverBrakes = events.filter(e => e.kind === 'driver.brake' && e.level > 0).length;
+    core.driverReactions = events.filter(e => e.kind === 'driver.react').length;
+    core.duration = lastT;
     core.cmdPerMin = core.duration > 0 ? core.cmdSent / (core.duration / 60) : 0;
     const res = {
       meta: {
@@ -570,13 +578,21 @@ function createSim(config, deps) {
         plant: { name: plantP.name, assumed: plantP.assumed, modified: plantP.modified || false },
         scenario: { id: scen.id, family: scen.family, name: scen.name, scope: scen.scope, decide: scen.decide },
         duration, dt, outDt: outEvery * dt, modules: src, params, enums: clone(enums), core: finiteOrNull(core),
+        ego: { length: world.ego.length, width: world.ego.width, lane: world.ego.lane },
+        vehicles: world.others.map(o => ({ id: o.id, kind: o.kind, length: o.length, width: o.width })),
+        road: { lanes: road.lanes, laneWidth: road.laneWidth },
         ms: Date.now() - t0wall,
       },
       t: tArr.subarray(0, n), series: out, events: events.slice(), metrics: {}, verdict: { pass: false, failed: [] },
     };
+    // SC3's metrics.js: compute(result, config) -> { name: value }, verdict(metrics, thresholds, decide) -> { pass, failed, unknown }
+    // (the stub returns { metrics, verdict } at once)
     const mr = M.metrics.compute(res, cfg);
-    if (mr && mr.metrics) { res.metrics = mr.metrics; res.verdict = mr.verdict || res.verdict; }
-    else if (mr) { res.metrics = mr; if (typeof M.metrics.verdict === 'function') res.verdict = M.metrics.verdict(mr, cfg, res); }
+    if (mr && mr.metrics && mr.verdict) { res.metrics = mr.metrics; res.verdict = mr.verdict; }
+    else if (mr) {
+      res.metrics = mr;
+      if (typeof M.metrics.verdict === 'function') res.verdict = M.metrics.verdict(mr, cfg.thresholds || {}, scen.decide || []);
+    }
     return res;
   }
 
@@ -654,3 +670,4 @@ function hashResult(res) {
 
 const sim = { VERSION, SERIES, BUILTIN, STUBS, run, runOnce, createSim, defaultConfig, schemas, hashResult, normalize, resolveScenario, deepMerge };
 if (typeof module !== 'undefined') module.exports = sim; else (self.CS = self.CS || {})['sim'] = sim;
+})();

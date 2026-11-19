@@ -1,4 +1,6 @@
+(function () {
 'use strict';
+// (wrapped in a function: the page loads core/*.js as classic scripts, which share one global scope)
 // Failure injection (SC1), at a given time or at the worst time.
 //
 //   failures.create(list, rng, ctx) -> { apply(world, t) -> faults, consume(kind, t), list }
@@ -18,8 +20,14 @@
 //   setStuck       the cruise ignores every new set speed, silently                 default: to the end
 //   cruiseDropout  the cruise switches itself off (once, at `at`; the driver may resume it)
 //   stall          the head unit pauses (the app does not run, nothing is delivered) default 1 s
+//   ghost          a ghost target (faults.ghost)                                    default 2 s      } carried out by
+//   rangeCut       { range_m: 40 } the sensor's range cut (faults.sensorRangeCut)   default 10 s     } SC2's sensor.js,
+//   latencySpike   { extra_s: 0.5 } extra sensor latency (faults.latencyExtra)      default 3 s      } which reads these
+//   dropBurst      a burst of dropped samples (faults.dropBurst)                    default 2 s      } keys
+//   degraded       { mode: 'rain'|'lowSun'|'fog' } (faults.sensorDegraded)          default: to the end
 // world.faults = { appDead, restart, sensorBlind, blindMode, gapFrozen, commandsLost, setStuck, cruiseDropout, stalled,
-//                  active: [kinds] }; fault.on / fault.off events carry { fault, id, ... }.
+//                  ghost, sensorRangeCut, latencyExtra, dropBurst, sensorDegraded, active: [kinds] };
+// fault.on / fault.off events carry { fault, id, ... }.
 //
 // 'worst': a search over the injection time for the worst outcome, not one hand-picked moment. A coarse pass over
 // [window[0], window[1]] (default [1, duration - 1]) every searchStep_s (default 1 s), then a fine pass of searchStep_s / 5
@@ -36,6 +44,12 @@ const KINDS = {
   setStuck: { duration: Infinity },
   cruiseDropout: { duration: 0 },
   stall: { duration: 1 },
+  // sensor faults, carried out by SC2's sensor.js (it reads these world.faults keys)
+  ghost: { duration: 2 },
+  rangeCut: { duration: 10 },
+  latencySpike: { duration: 3 },
+  dropBurst: { duration: 2 },
+  degraded: { duration: Infinity },
 };
 
 function normalize(list, scenEvents) {
@@ -73,7 +87,8 @@ function create(list, rng, ctx) {
 
   function apply(world, t) {
     const faults = { appDead: false, restart: false, sensorBlind: false, blindMode: null, gapFrozen: false, commandsLost: null,
-      setStuck: false, cruiseDropout: false, stalled: false, active: [] };
+      setStuck: false, cruiseDropout: false, stalled: false,
+      ghost: false, sensorRangeCut: null, latencyExtra: 0, dropBurst: false, sensorDegraded: null, active: [] };
     for (const f of fs) {
       let on = t >= f.t0 - 1e-9 && (t < f.t1 - 1e-9 || (f.dur === 0 && !f.pulsed));
       if (f.kind === 'commandLost' && (f.mode || 'nextDecrease') === 'nextDecrease' && f.used) on = false;
@@ -94,6 +109,11 @@ function create(list, rng, ctx) {
         case 'setStuck': faults.setStuck = true; break;
         case 'cruiseDropout': faults.cruiseDropout = true; break;
         case 'stall': faults.stalled = true; break;
+        case 'ghost': faults.ghost = true; break;
+        case 'rangeCut': faults.sensorRangeCut = f.range_m === undefined ? 40 : f.range_m; break;
+        case 'latencySpike': faults.latencyExtra += f.extra_s === undefined ? 0.5 : f.extra_s; break;
+        case 'dropBurst': faults.dropBurst = true; break;
+        case 'degraded': faults.sensorDegraded = f.mode || 'rain'; break;
       }
     }
     return faults;
@@ -155,3 +175,4 @@ function searchWorst(config, runOnce, opts) {
 
 const failures = { NAME: 'failures', SCHEMA: [], KINDS, create, normalize, searchWorst, severity };
 if (typeof module !== 'undefined') module.exports = failures; else (self.CS = self.CS || {})['failures'] = failures;
+})();

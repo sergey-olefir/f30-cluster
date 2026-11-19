@@ -1,4 +1,6 @@
+(function () {
 'use strict';
+// (wrapped in a function: the page loads core/*.js as classic scripts, which share one global scope)
 // The road (SC1): grade, curvature, lanes and speed limits along the path x (m, ego's start = 0).
 //
 //   road.create(spec) -> { grade(x) fraction (+ uphill), curvature(x) 1/m, lanes, laneWidth, speedLimit(x) m/s|null,
@@ -83,3 +85,4 @@ function create(spec) {
 
 const road = { NAME: 'road', SCHEMA: [], create };
 if (typeof module !== 'undefined') module.exports = road; else (self.CS = self.CS || {})['road'] = road;
+})();
