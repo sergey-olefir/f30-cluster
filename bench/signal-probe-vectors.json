@@ -7032,5 +7032,18 @@
    "dummy2": 9
   },
   "body": "grade=4 gradeFast=8 qualifier=INITIALISIERUNG transverse=6 transverseQ=RESERVED"
+ },
+ {
+  "set": "S17",
+  "p": "P26",
+  "tag": "steering",
+  "iface": "de.bmw.infotainment.drivingexcitement.XView",
+  "field": "statusSteeringAngleDriver",
+  "instance": "1",
+  "value": {
+   "actualValueSteeringAngleDriver": 32790,
+   "qualifierActualValueSteeringAngleDriver": "INITIALISIERUNG"
+  },
+  "body": "angle=32790 qualifier=INITIALISIERUNG"
  }
 ]

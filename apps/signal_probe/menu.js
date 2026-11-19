@@ -11,7 +11,9 @@ const FIELDS = require('./fields');
 const hhmmss = (d) => ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2);
 
 // cruise RC: the recording rows (recorder.js): the sets a press on "REC" records, one choice per press of "RECSET"
-const REC_CHOICES = [['S14'], ['S14', 'S15'], ['S13']];
+const REC_CHOICES = [['S17'], ['S14'], ['S14', 'S15'], ['S13']];     // r1120 AC: ACC (S17) first
+/** r1120 AC: a recording's sets as the rows say them: a set's label where it has one (S17 = "ACC"), else its id. */
+const recName = (ids) => ids.map((id) => { const s = FIELDS.SETS.find((x) => x.id === id); return (s && s.label) || id; }).join('+');
 const mb = (b) => (Math.round(b / 104857.6) / 10).toFixed(1).replace('.', ',') + ' МБ';
 const grp = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
@@ -56,7 +58,7 @@ class Menu {
         this.refresh();
     }
     // ---- cruise RC: recording -------------------------------------------------------------------------------------------------
-    /** The sets the next recording takes (settings key recSet, "S14" or "S14+S15"; the first choice when unset or unknown). */
+    /** The sets the next recording takes (settings key recSet, "S17" or "S14+S15"; the first choice when unset or unknown). */
     recSets() {
         const v = this.ctx.settings.get('recSet');
         const c = this.recChoices.find((x) => x.join('+') === v);
@@ -85,9 +87,9 @@ class Menu {
         if (!rec) return { a: 'Запис недоступний', b: '' };
         const s = rec.status();
         const free = 'вільно ' + mb(s.room);
-        if (s.on) return { a: 'Запис ' + s.sets.join('+') + ' іде, ' + Math.floor(s.seconds / 60) + ':' + ('0' + (s.seconds % 60)).slice(-2) + '. Натисніть: стоп',
+        if (s.on) return { a: 'Запис ' + recName(s.sets) + ' іде, ' + Math.floor(s.seconds / 60) + ':' + ('0' + (s.seconds % 60)).slice(-2) + '. Натисніть: стоп',
             b: grp(s.samples) + ' зразків, ' + mb(s.bytes) + ', ' + free + (s.dropped ? ', втрачено ' + grp(s.dropped) : '') };
-        return { a: 'Почати запис ' + this.recSets().join('+'),
+        return { a: 'Почати запис ' + recName(this.recSets()),
             b: (s.error ? 'ЗУПИНЕНО: ' + s.error + '. ' : s.session ? 'останній: ' + grp(s.samples) + ' зразків. ' : '') + free + ' з ' + mb(s.quota) };
     }
 
@@ -119,7 +121,7 @@ class Menu {
             // cruise RC: the recording rows
             const r = this.recText();
             this.cells('REC', { Text1stRow: r.a, Text2ndRow: r.b });
-            this.cells('RECSET', { Text1stRow: 'Набір для запису: ' + this.recSets().join('+'), Text2ndRow: this.rec && this.rec.on ? 'зміниться після стопу' : 'натисніть, щоб змінити' });
+            this.cells('RECSET', { Text1stRow: 'Набір для запису: ' + recName(this.recSets()), Text2ndRow: this.rec && this.rec.on ? 'зміниться після стопу' : 'натисніть, щоб змінити' });
             this.text('STATUS2', 'Не користуйтеся меню під час руху. Журнал: журнал застосунку signal_probe; запис: data/rec.');
         });
     }

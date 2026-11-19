@@ -3,8 +3,8 @@
   "logFormat": 1,
   "version": "0.4.0",
   "counts": {
-    "sets": 15,
-    "fields": 264,
+    "sets": 16,
+    "fields": 265,
     "interfaces": 99,
     "interfacesWithSeveralInstances": 1
   },
@@ -181,6 +181,17 @@
       ],
       "fields": 23,
       "fieldsActive": 40
+    },
+    {
+      "id": "S17",
+      "settingsKey": "set17",
+      "name": "ACC",
+      "uk": "ACC: усе для адаптивного круїзу",
+      "items": [
+        "P26"
+      ],
+      "fields": 1,
+      "fieldsActive": 74
     }
   ],
   "interfaces": [
@@ -1641,11 +1652,12 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 1,
+      "fields": 2,
       "events": [],
       "methods": [],
       "sets": [
-        "S14"
+        "S14",
+        "S17"
       ]
     },
     {
@@ -4437,7 +4449,8 @@
       "gapMs": 1000,
       "cap": 200,
       "also": [
-        "S14"
+        "S14",
+        "S17"
       ],
       "columns": [
         "invalid:invalidFlag:n",
@@ -4470,7 +4483,8 @@
       "gapMs": 1000,
       "cap": 200,
       "also": [
-        "S14"
+        "S14",
+        "S17"
       ],
       "columns": [
         "invalid:invalidFlag:n",
@@ -4496,7 +4510,8 @@
       "gapMs": 1000,
       "cap": 200,
       "also": [
-        "S14"
+        "S14",
+        "S17"
       ],
       "columns": [
         "xcc:displayXCC:n",
@@ -4565,7 +4580,8 @@
       "gapMs": 1000,
       "cap": 200,
       "also": [
-        "S14"
+        "S14",
+        "S17"
       ],
       "columns": [
         "accSym:activeCruiseControl.symbolACC:e",
@@ -4596,7 +4612,8 @@
       "gapMs": 1000,
       "cap": 200,
       "also": [
-        "S14"
+        "S14",
+        "S17"
       ],
       "columns": [
         "setSpeed:ldmSetSpeed.ldmSetSpeedValue:n",
@@ -4627,7 +4644,8 @@
       "gapMs": 1000,
       "cap": 200,
       "also": [
-        "S14"
+        "S14",
+        "S17"
       ],
       "columns": [
         "acc:proposalAvailabilityACC:e",
@@ -4655,7 +4673,8 @@
       "gapMs": 1000,
       "cap": 200,
       "also": [
-        "S14"
+        "S14",
+        "S17"
       ],
       "columns": [
         "object:frontVehicleObjectID:n",
@@ -5069,7 +5088,8 @@
       "gapMs": 500,
       "cap": 100,
       "also": [
-        "S14"
+        "S14",
+        "S17"
       ],
       "columns": [
         "stage:statusActualStageDrive:e",
@@ -5093,6 +5113,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 100,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "program:displayProgramGearbox:e",
         "logic:displayDriveLogicGearbox:e"
@@ -5113,6 +5136,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 100,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "mode:actualValueModeDrivingExperience:e",
         "mmi:requestSwitchDrivingExperienceMMIDisplay:e",
@@ -5138,6 +5164,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 100,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "direction:statusIndicateDirection:n"
       ]
@@ -5202,6 +5231,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 100,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "mainBeam:statusMainBeam_headlightFlasher:e",
         "frontFog:statusFrontFogLight:e",
@@ -5332,6 +5364,9 @@
       "formatter": "cols",
       "gapMs": 250,
       "cap": 300,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "presentWithdrawalLimitSpeed:presentWithdrawalLimitSpeed:n",
         "recognitionNoPassing:recognitionNoPassing:n",
@@ -5545,6 +5580,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "object:frontVehicleExtendedObjectID:n",
         "type:frontVehicleExtendedObjectType:e",
@@ -5567,6 +5605,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "qualifier:qualifierFunctionVehicleDrivingAhead:e",
         "measurement:statusMeasurementVehicleDrivingAhead:e",
@@ -5589,7 +5630,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -5605,7 +5649,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -5621,7 +5668,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -5637,7 +5687,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -5654,6 +5707,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "value:displayedValueSpeed:n",
         "unit:unitSpeed:e"
@@ -5673,7 +5729,10 @@
       "rootType": "struct",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -5690,6 +5749,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "velocity:displayedVelocity:n",
         "colour:displayedVelocityColor:e",
@@ -5711,6 +5773,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "unlock:unlockRequested:b"
       ]
@@ -5729,7 +5794,10 @@
       "rootType": "struct",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -5746,6 +5814,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "state:statusAutonomousDriving:e",
         "crash:brcCtrSafeCrash:e"
@@ -5766,6 +5837,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "id:coordinatedExtendedMessageDriverAssistanceID:n",
         "value:coordinatedExtendedMessageDriverAssistanceValue:n",
@@ -5787,6 +5861,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "value:value:e",
         "availability:availability:e",
@@ -5808,6 +5885,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "value:value:e",
         "availability:availability:e"
@@ -5828,6 +5908,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "function:statusForesightFunction:e",
         "sub:statusForesightSubfunctions:x"
@@ -5847,7 +5930,10 @@
       "rootType": "struct",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -5863,7 +5949,10 @@
       "rootType": "struct",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -5879,7 +5968,10 @@
       "rootType": "struct",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -5895,7 +5987,10 @@
       "rootType": "struct",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -5911,7 +6006,10 @@
       "rootType": "struct",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -5928,6 +6026,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "standstill:statusSpeedVehicleNearStandstill:e",
         "speed:speedVehicleCentreOfGravity:n",
@@ -5949,6 +6050,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "confirmed:drivingDirectionConfirmed:e",
         "unconfirmed:drivingDirectionUnconfirmed:e"
@@ -5969,6 +6073,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "accel:longitudinalAccelerationCentreOfGravity:n",
         "error:longitudinalAccelerationCentreOfGravityErrorAmplitude:n",
@@ -5990,6 +6097,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "accel:lateralAccelerationCentreOfGravity:n",
         "error:lateralAccelerationCentreOfGravityErrorAmplitude:n",
@@ -6011,6 +6121,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "yaw:yawVelocityVehicle:n",
         "error:yawVelocityVehicleErrorAmplitude:n",
@@ -6032,6 +6145,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "accel:longitudinalAccelerationDrivingDirection2:n",
         "accelQ:qualifierLongitudinalAccelerationDrivingDirection2:e",
@@ -6055,6 +6171,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "speed:characteristicSpeed:n",
         "error:characteristicSpeedErrorAmplitude:n",
@@ -6075,7 +6194,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 500,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -6091,7 +6213,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 500,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -6107,7 +6232,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 500,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -6123,7 +6251,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 500,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -6139,7 +6270,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -6155,7 +6289,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -6171,7 +6308,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 1000,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -6188,6 +6328,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "accel:longitudinalAccelerationCentreOfGravity:n"
       ]
@@ -6207,6 +6350,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "accel:lateralAccelerationCentreOfGravity:n"
       ]
@@ -6226,6 +6372,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "angle:actualValueAngleAcceleratorPedal:n",
         "virtual:actualValueAngleAcceleratorPedalVirtual:n",
@@ -6250,6 +6399,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "braking:statusBrakingDriver:n",
         "brakingMSA:statusBrakingMSA:n",
@@ -6274,6 +6426,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "braking:statusBrakingDriver:n",
         "fdr:qualifierFunctionFDR:n"
@@ -6294,6 +6449,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "bls:dummy2:e",
         "clutch:dummy3:e",
@@ -6315,6 +6473,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "brakeLight:controlFunctionBrakeLight:e",
         "brakeForce:controlFunctionBrakeForceDisplay:e"
@@ -6335,6 +6496,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "vsAssist:statusInterfaceDriverAssistenceSystemTargetLimit:e",
         "direction:statusDrivingDirectionDriversChoice:e",
@@ -6358,6 +6522,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "fl:actualValueRPMWheelFLH:n",
         "fr:actualValueRPMwheelFRH:n",
@@ -6382,7 +6549,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 500,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -6398,7 +6568,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 500,
-      "cap": 1200
+      "cap": 1200,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S14",
@@ -6415,6 +6588,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "speed:speedVehicleCentreOfGravity:n"
       ]
@@ -6434,6 +6610,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "rpm:actualValueRPMEngineCrankshaft:n"
       ]
@@ -6453,6 +6632,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "grade:actualValueLongitudinalGradientRoadway:n",
         "qualifier:qualifierActualValueLongitudinalGradientRoadway:e"
@@ -6473,6 +6655,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 1200,
+      "also": [
+        "S17"
+      ],
       "columns": [
         "grade:actualValueLongitudinalGradientRoadway:n",
         "gradeFast:actualValueLongitudinalGradientRoadwayFast:n",
@@ -6495,7 +6680,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 2000,
-      "cap": 300
+      "cap": 300,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S15",
@@ -6511,7 +6699,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 2000,
-      "cap": 300
+      "cap": 300,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S15",
@@ -6527,7 +6718,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 2000,
-      "cap": 300
+      "cap": 300,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S15",
@@ -6575,7 +6769,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 2000,
-      "cap": 300
+      "cap": 300,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S15",
@@ -6591,7 +6788,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 2000,
-      "cap": 300
+      "cap": 300,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S15",
@@ -6607,7 +6807,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 2000,
-      "cap": 300
+      "cap": 300,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S15",
@@ -6623,7 +6826,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 2000,
-      "cap": 300
+      "cap": 300,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S15",
@@ -6735,7 +6941,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 2000,
-      "cap": 300
+      "cap": 300,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S15",
@@ -6751,7 +6960,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 2000,
-      "cap": 300
+      "cap": 300,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S15",
@@ -6815,7 +7027,10 @@
       "rootType": "event",
       "formatter": "tree",
       "gapMs": 2000,
-      "cap": 300
+      "cap": 300,
+      "also": [
+        "S17"
+      ]
     },
     {
       "set": "S16",
@@ -7222,6 +7437,26 @@
       "gapMs": 2000,
       "cap": 400,
       "methodId": 4
+    },
+    {
+      "set": "S17",
+      "item": "P26",
+      "tag": "steering",
+      "interface": "de.bmw.infotainment.drivingexcitement.XView",
+      "field": "statusSteeringAngleDriver",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 3,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "angle:actualValueSteeringAngleDriver:n",
+        "qualifier:qualifierActualValueSteeringAngleDriver:e"
+      ]
     }
   ]
 }

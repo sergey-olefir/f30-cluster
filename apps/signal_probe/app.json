@@ -509,7 +509,8 @@
     },
     "de.bmw.infotainment.drivingexcitement.XView": {
       "_instances": "1",
-      "statusGradientRoadway": "rs"
+      "statusGradientRoadway": "rs",
+      "statusSteeringAngleDriver": "rs"
     },
     "de.bmw.chassis.VehicleModel": {
       "_instances": "1",
@@ -715,6 +716,10 @@
           "set16"
         ],
         [
+          "setting",
+          "set17"
+        ],
+        [
           "text",
           "STATUS2",
           ""
@@ -812,6 +817,12 @@
       "label": "S16 Наступний поворот (P25)",
       "type": "bool",
       "default": false
+    },
+    {
+      "key": "set17",
+      "label": "S17 ACC: усе для адаптивного круїзу (P26)",
+      "type": "bool",
+      "default": false
     }
   ],
   "config": {
@@ -834,6 +845,9 @@
       "quietLog": true,
       "choices": [
         [
+          "S17"
+        ],
+        [
           "S14"
         ],
         [
@@ -844,7 +858,7 @@
           "S13"
         ]
       ],
-      "_about": "cruise RC: the recording mode (recorder.js). Every value of the chosen sets' fields, unthrottled, in data/rec/rec-<session>-<n>.csv.gz; a file is cut at fileRawKB of text, the oldest files go past quotaMB (the app's disk limit is 20 MiB with its log); flushMs between two writes; maxQueueKB of text waiting before samples are dropped (counted); maxEntries of a list; quietLog: the recorded fields' throttled log lines are left out while recording; choices: what the menu row RECSET cycles through."
+      "_about": "cruise RC: the recording mode (recorder.js). Every value of the chosen sets' fields, unthrottled, in data/rec/rec-<session>-<n>.csv.gz; a file is cut at fileRawKB of text, the oldest files go past quotaMB (the app's disk limit is 20 MiB with its log); flushMs between two writes; maxQueueKB of text waiting before samples are dropped (counted); maxEntries of a list; quietLog: the recorded fields' throttled log lines are left out while recording; choices: what the menu row RECSET cycles through (r1120 AC: S17 = ACC, the adaptive-cruise set, first)."
     }
   }
 }
