@@ -55,7 +55,10 @@ world = {
 
 ## The pipeline per tick (sim.js calls these in this order)
 
-1. `vehicles.step(world, dt)` — moves the others (scripts, IDM, replay, lane changes).
+(SC1, as built: the state of everything is at t through steps 2–7; the others and ego move to t + dt after recording,
+so the sensor, the driver and the plant see one instant. Step 1 is therefore done last, together with step 8.)
+
+1. `vehicles.step(world, dt)` — moves the others (scripts, IDM, replay, lane changes). **Runs after step 7.**
 2. `failures.apply(world, t)` — sets flags read below (`world.faults = { sensorBlind, gapFrozen, appDead, commandsLost, ... }`).
 3. `sensor.sample(world, t) -> meas | null` — null when it is not a sample time. `meas = { t /* delivery time */, tMeas /* when measured */, valid, id /* target id or null */, gap /* m or null */, vrel /* m/s, + = lead faster, or null */, lat, kind }`. Latency, jitter, noise, dropouts, outliers, wrong / ghost targets, curve loss are inside the sensor.
 4. On the controller's clock (`config.controller.rateHz`), if `world.app.alive`:
@@ -64,8 +67,10 @@ world = {
    - `w = warning.step({ t, est, egoV, aMin: <plant's decel limit as configured> }) -> { warn, reason, dNeeded, ttc }`
    - `command.send(t, out.vSet)` when `vSet` changed.
 5. `command.deliver(t) -> [ { tSent, tApplied, vSet, status: 'applied'|'dropped'|'rejected' } ]` — delay, jitter, rate limit, drops, stalls.
+   (SC1: `plant.request(t, vSet, faults)` is called for every 'applied' arrival; a refusal turns it into `cmd.rejected`.)
 6. `driver.step(world, t, { warn: w }) -> world.driver` — reaction model (delay, braking level), overrides, maximum changes.
-7. `plant.step(dt, { setHeld, grade, driver: world.driver }, world.ego) -> { a, cruiseState }` — then `sim.js` integrates ego.
+7. `plant.step(dt, { t, grade, driver: world.driver, faults }, world.ego) -> { a, cruiseState, setHeld, setEff, aDemand }` — the
+   plant keeps the set speed itself (`world.cruise` is its object); then `sim.js` integrates ego.
 8. Collisions, metrics hooks, series recording (decimated to `config.out.dt`).
 
 `baselines.js` (SC2) offers `idealAcc` and `human` as drop-in replacements of steps 4–7 for ego: `create(params) -> { step(world, t, meas) -> { a } }`.
@@ -121,3 +126,49 @@ createSim(config) -> { step() /* one dt */, advance(seconds), state() /* world +
 ## The page
 
 `ui/index.html` loads `core/*.js` by `<script>` and `ui/*.js`. The shell (SU1) owns the state object and the run; SU2's views are mounted into elements with these ids: `#charts`, `#settings`, `#batch`, `#report`; they receive `app` (SU1) with `app.config`, `app.result`, `app.cursorT`, `app.on('result'|'cursor'|'config', fn)`, `app.setConfig(partial)`, `app.run()`, `app.loadResultFile(json)`. Long runs go to a Web Worker (`ui/worker.js`, SU1) that loads the same `core/*.js`.
+
+## SC1 additions and changes (2026-11-19, all announced in bake/work/cruise-sim/pub/NOTES.md)
+
+- **Loading in the browser.** Every `core/*.js` is wrapped in `(function () { 'use strict'; ... })();` — classic scripts
+  share one global scope. The page loads them in `sim.LOAD_ORDER`: `rng schema road vehicles plant driver command failures
+  sensor estimator controller warning baselines metrics scenario mixed sim`, then any other core file.
+- **`create(params, rng, ctx)`.** SC1 passes a third argument `ctx` (`{ emit(kind, detail, t?), road, dt, ... }`); modules may
+  ignore it. Params are the module's SCHEMA defaults merged with the config object (`schema.merge`, unknown keys throw;
+  `rateHz` and `preset` are let through when the SCHEMA lacks them; `config.<module>.preset` applies `PRESETS[preset]`).
+- **`run(config, deps)` / `createSim(config, deps)`.** `deps = { <module>: module }` replaces a module. A missing module of
+  SC2 / SC3 is replaced by a stand-in (`sim.STUBS`); `meta.modules` names the source of each (`'x.js'`, `'stub'`, `'injected'`).
+- **Clock.** The controller is due at 0, 1/rate, 2/rate, … on the first 10 ms tick at or after (the mean rate is exact); it
+  does not run while `world.app.alive` is false or the head unit is stalled. The state at t = duration is recorded
+  (`t.length = duration / out.dt + 1`). A collision ends the run (`config.stopOnCollision`, default true).
+- **Geometry.** Every x is the FRONT bumper. `vehicles.gap(behind, ahead) = ahead.x - ahead.length - behind.x`;
+  `vehicles.trueLead(world)` (nearest ahead in ego's lane), `vehicles.follower(world)`, `vehicles.leaderOf(world, veh)`.
+  Each other vehicle also carries `y = lane * road.laneWidth + lat` (m, + = left; lane + = left; curvature + = left).
+  A scenario vehicle's `x0` is its bumper-to-bumper gap (x0 < 0: its front |x0| behind our rear); `xFront_m` (front
+  relative to ego's front) places a car alongside. Ego: length 4.7 m, width 1.85 m.
+- **world.cruise** = `{ state, setHeld, setEff /* the set speed in effect after the dead time */, vMinActive, vMaxActive }`.
+  `world.faults` = `{ appDead, restart, sensorBlind, blindMode, gapFrozen, commandsLost, setStuck, cruiseDropout, stalled,
+  ghost, sensorRangeCut, latencyExtra, dropBurst, sensorDegraded, active }`; sim.js itself enforces gapFreeze and
+  sensorBlind on whatever the sensor returns.
+- **Warning input** `aMin` = `plant.params.aMin_ms2` (negative, the configured deceleration limit).
+- **Metrics.** At the end sim.js calls `metrics.compute(result, config)` (a plain object back) and
+  `metrics.verdict(metrics, config.thresholds, scenario.decide)`. Before that, `result.meta.core` holds SC1's exact (10 ms)
+  numbers: `minGap minTimeGap minTTC collision collisionWith collisionT collisionFrom impactSpeed peakDecel peakAccel
+  peakJerk accelRms cmdSent cmdApplied cmdDropped cmdRejected cmdPerMin warnCount warnTime driverBrakes driverReactions
+  followerMinTimeGap followerPeakDecel timeNotActive minSpeed duration` (Infinity -> null).
+- **Result meta, added.** `duration dt outDt modules params /* every module's merged params */ enums core ego vehicles road
+  scenario { id family name scope decide }`, and `worst` after a worst-time search. Enums: `cruise.state` (the plant's
+  STATES), `id` (vehicle / target ids, for `lead.id meas.id est.id`), `warn.reason`.
+- **Series, added.** `set.eff meas.id est.id warn.reason warn.ttc app.alive curvature elevation follower.v a.demand`, and per
+  vehicle `veh.<id>.x|v|a|lane|lat|y`. `timegap` and `ttc` are the TRUE ones (truth gap and speeds); the warning's own TTC
+  is `warn.ttc`.
+- **Events, added.** `vehicle.lane { id, phase: 'start'|'end', change, from, to }`, `driver.cancel`; `collision` carries
+  `{ with, from: 'ahead'|'behind'|'side', impactSpeed }`; `fault.on/off` carry `{ fault, id }`; `cmd.*` carry
+  `{ id, tSent, vSet, reason?, silent?, dup? }`; `cruise.state` carries `{ from, to, reason }`; `driver.react`
+  `{ cause, rt, brakes }`; `driver.brake { level, cause }` (level 0, cause 'release' when let go).
+- **Scenario events SC1 consumes.** `cutIn | cutOut | laneChange { vehicle, toLane?, duration_s: 3, gap_m?, v_kmh? | dv_kmh?,
+  whenGap_m? }`, `driverVmax { vMax_kmh }`, `driverBrake { level_ms2, duration_s }`, `driverOverride { accel, duration_s }`,
+  `driverResume`, `driverCancel`, `fault { fault: <kind>, at | t, duration?, ...options }`. Scenario `ego` may also carry
+  `cruise: 'off'` and `set_kmh`. Profile types: `const piecewise accel steps sine stopgo idm replay static`.
+- **Failures.** Kinds `appStop huRestart gapFreeze sensorBlind commandLost setStuck cruiseDropout stall ghost rangeCut
+  latencySpike dropBurst degraded`; `at: 'worst'` (one per run) is resolved by `run()` through `failures.searchWorst`.
+- **Driver keys** (for reaction cases): `driver.reactionCase: 'nominal'|'late'|'none'` ('normal' = 'nominal').
