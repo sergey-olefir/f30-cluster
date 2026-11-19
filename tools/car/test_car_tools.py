@@ -22,6 +22,7 @@ import car_logs as cl            # noqa: E402
 import make_patches as mp        # noqa: E402
 import parse_logs as pl          # noqa: E402
 import privacy_check as pc       # noqa: E402
+import quota_read as qr          # noqa: E402  r1120 AC
 import synth                     # noqa: E402
 import tables_base               # noqa: E402
 from synth import Log, ProbeLog  # noqa: E402
@@ -486,6 +487,61 @@ class Privacy(unittest.TestCase):
         self.assertEqual(sorted(r for _w, r in bad), ["coordinate", "non-ascii-text"])
 
 
+def quota_file(entries: dict, magic: int = 0xD9C01F11) -> bytes:
+    """r1120 AC: a vfsv1 quota file like the kernel writes: {uid: (hard KiB, soft KiB, used bytes, files)} -> bytes."""
+    import struct
+    blocks = [bytearray(1024) for _ in range(2)]
+    struct.pack_into("<II", blocks[0], 0, magic, 1)
+    struct.pack_into("<IIIIII", blocks[0], 8, 604800, 604800, 0, 0, 0, 0)
+
+    def new():
+        blocks.append(bytearray(1024))
+        return len(blocks) - 1
+    leaves = {}
+    for uid in sorted(entries):
+        node = 1
+        for depth in range(3):
+            i = (uid >> ((3 - depth) * 8)) & 0xFF
+            ref = struct.unpack_from("<I", blocks[node], i * 4)[0]
+            if not ref:
+                ref = new()
+                struct.pack_into("<I", blocks[node], i * 4, ref)
+            node = ref
+        i = uid & 0xFF
+        ref = struct.unpack_from("<I", blocks[node], i * 4)[0]
+        if not ref:
+            ref = leaves.get(node) or new()
+            leaves[node] = ref
+            struct.pack_into("<I", blocks[node], i * 4, ref)
+        n = struct.unpack_from("<H", blocks[ref], 8)[0]
+        hard, soft, used, files = entries[uid]
+        struct.pack_into("<IIQQQQQQQQ", blocks[ref], 16 + n * 72, uid, 0, 0, 0, files, hard, soft, used, 0, 1 if uid == 0 else 0)
+        struct.pack_into("<H", blocks[ref], 8, n + 1)
+    return b"".join(bytes(b) for b in blocks)
+
+
+class Quota(unittest.TestCase):
+    """r1120 AC: quota_read.py on quota files made like the kernel's."""
+
+    def test_reads_every_entry(self):
+        kind, e = qr.parse(quota_file({12211: (20480, 20480, 1000, 3), 12220: (81920, 0, 5, 1), 70000: (1, 1, 1, 1)}))
+        self.assertEqual(kind, "user")
+        self.assertEqual(e[12211]["hard_bytes"], 20480 * 1024)
+        self.assertEqual(e[12220]["hard_bytes"], 83886080)
+        self.assertEqual(e[12220]["soft_bytes"], 0)
+        self.assertEqual(e[70000]["used_bytes"], 1)
+        self.assertEqual(qr.parse(quota_file({5: (1, 1, 1, 1)}, 0xD9C01927))[0], "group")
+
+    def test_refuses_what_is_not_one(self):
+        for bad in (b"", b"x" * 4096, quota_file({1: (1, 1, 1, 1)})[:1500]):
+            with self.assertRaises(qr.QuotaError):
+                qr.parse(bad)
+        broken = bytearray(quota_file({1: (1, 1, 1, 1)}))
+        broken[1024:1028] = (999999).to_bytes(4, "little")       # the root points outside the file
+        with self.assertRaises(qr.QuotaError):
+            qr.parse(bytes(broken))
+
+
 class Collector(unittest.TestCase):
     """collect.sh against a fake ssh that serves a fake car from a folder; and its refusals."""
 
@@ -508,6 +564,18 @@ class Collector(unittest.TestCase):
         open(os.path.join(car, "var/opt/cluster-render/log/cluster-render.log"), "w").write("2026-11-18 10:00:00.000 I start: cluster-render 0.5.12, pid 1\n")
         open(os.path.join(car, "var/opt/cluster-render/versions/0.5.12/component.json"), "w").write('{"version": "0.5.12"}')
         open(os.path.join(car, "run/cluster-render/status.txt"), "w").write("upload: cap 5500 KB/s (ceiling 5500, floor 2000): ceiling\n")
+        # r1120 AC: Signal Probe with two recordings (binary gzip), a file that is not one, and the quota file of /var/opt
+        sp = os.path.join(car, "var/opt/public/oap/oap_12220")
+        os.makedirs(os.path.join(sp, "data/rec/sub"))
+        os.makedirs(os.path.join(sp, "source"))
+        open(os.path.join(sp, "source/package.json"), "w").write('{"name": "signal_probe", "version": "0.4.0", "maxDiskUsage": 83886080}')
+        import gzip as _gz
+        self.rec = {"rec-20261120-101500-001.csv.gz": _gz.compress(b"#rec,1,0.4.0,20261120-101500,1,x,0,S17\n" + bytes(range(256)) * 300),
+                    "rec-20261120-101500-002.csv.gz": _gz.compress(b"#end,5,samples=1\n")}
+        for n, b in self.rec.items():
+            open(os.path.join(sp, "data/rec", n), "wb").write(b)
+        open(os.path.join(sp, "data/rec/notes.txt"), "w").write("not a recording\n")
+        open(os.path.join(car, "var/opt/aquota.user"), "wb").write(quota_file({12211: (20480, 20480, 512000, 7), 12220: (81920, 81920, 3 * 1048576, 9), 0: (0, 0, 1, 1)}))
         bindir = os.path.join(self.tmp, "bin")
         os.makedirs(bindir)
         # the fake ssh: the LAST argument is the remote command; it is run against the fake car with a tiny interpreter; it records every command
@@ -519,12 +587,14 @@ cmd = sys.argv[-1]
 open(os.path.join(car, "..", "commands.log"), "a").write(cmd + "\\n")
 parts = cmd.split()
 def p(x): return os.path.join(car, x.lstrip("/"))
-if parts[0] == "cat": sys.stdout.write(open(p(parts[1])).read())
+if parts[0] == "cat": sys.stdout.buffer.write(open(p(parts[1]), "rb").read())
 elif parts[0] == "ls":
     paths = [x for x in parts[1:] if not x.startswith("-")]
     long_ = "-l" in parts[1:2] or "-ld" in parts[1:2]
     d = p(paths[0])
-    for n in sorted(os.listdir(d)): print(("drwxr-xr-x 2 root root 4096 Nov 14 19:07 " if long_ else "") + n)
+    for n in sorted(os.listdir(d)):
+        q = os.path.join(d, n)
+        print(("{} 1 12220 12220 {} Nov 20 10:15 ".format("drwxr-xr-x" if os.path.isdir(q) else "-rw-r--r--", 4096 if os.path.isdir(q) else os.path.getsize(q)) if long_ else "") + n)
 elif parts[0] == "tail": sys.stdout.write(open(p(parts[3])).read()[-int(parts[2]):])
 elif parts[0] == "date": print("2026-11-18T10:05:00Z")
 elif parts[0] == "uname": print("Linux car 4.14 armv7l")
@@ -567,6 +637,59 @@ else: sys.exit(3)
         a = pl.build(self.out, None, None, None, ["L12"])
         self.assertEqual(a["items"]["L12"]["decided"]["version"], [0, 5, 12])
         self.assertEqual(a["session"]["date"], os.path.basename(self.out))
+
+    # r1120 AC: Signal Probe's recordings and the quota files
+    def test_recordings_and_quota(self):
+        r = self.run_collect("--label", "2", "--apps", "signal_probe")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        app = os.path.join(self.out, "apps/signal_probe")
+        for n, b in self.rec.items():
+            self.assertEqual(open(os.path.join(app, "rec", n), "rb").read(), b, n + ": copied byte for byte")
+        self.assertEqual(sorted(os.listdir(os.path.join(app, "rec"))), sorted(self.rec), "only the recording files, not the note or the folder")
+        lines = open(os.path.join(app, "rec-copied.txt")).read().split("\n")
+        self.assertEqual(len([x for x in lines if x.endswith(" ok")]), 2, lines)
+        self.assertIn("rec: 2 file(s)", r.stderr)
+        self.assertIn("0 size(s) differ", r.stderr)
+        q = json.load(open(os.path.join(self.out, "system/quota.json")))
+        self.assertEqual(q["apps"]["signal_probe"]["user"]["hard_bytes"], 83886080)
+        self.assertTrue(q["apps"]["signal_probe"]["hard_limit_is_maxDiskUsage"])
+        self.assertEqual(q["apps"]["signal_probe"]["user"]["used_bytes"], 3 * 1048576)
+        self.assertIn("signal_probe (uid 12220): limit 80.0 MiB", r.stderr)
+        cmds = [c for c in open(os.path.join(self.tmp, "commands.log")).read().split("\n") if c]
+        self.assertIn("ls -l /var/opt/public/oap/oap_12220/data/rec/", cmds)
+        self.assertIn("cat /var/opt/aquota.user", cmds)
+        for c in cmds:
+            self.assertRegex(c, r"^(cat|ls|tail -c \d+|date -u|uname -a|journalctl -u cluster-render)\b", c)
+        meta = json.load(open(os.path.join(self.out, "session.json")))
+        self.assertEqual(meta["files"]["apps/signal_probe/rec/rec-20261120-101500-001.csv.gz"], len(self.rec["rec-20261120-101500-001.csv.gz"]))
+        self.assertEqual(pc.main([os.path.join(self.out, "apps"), os.path.join(self.out, "system"), "--quiet"]), 0, "nothing the privacy scan flags")
+
+    def test_recording_that_grows_is_flagged(self):
+        # the car's listing says one size, the copy has another (a recording still running)
+        open(os.path.join(self.tmp, "bin", "sizes"), "w").write("")
+        ssh = os.path.join(self.tmp, "bin", "ssh")
+        src = open(ssh).read().replace('if parts[0] == "cat": sys.stdout.buffer.write(open(p(parts[1]), "rb").read())',
+                                       'if parts[0] == "cat": sys.stdout.buffer.write(open(p(parts[1]), "rb").read() + (b"more" if "/rec/" in parts[1] else b""))')
+        open(ssh, "w").write(src)
+        r = self.run_collect("--apps", "signal_probe")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("2 size(s) differ", r.stderr)
+        self.assertIn("SIZE-DIFFERS", open(os.path.join(self.out, "apps/signal_probe/rec-copied.txt")).read())
+
+    def test_no_rec(self):
+        r = self.run_collect("--apps", "signal_probe", "--no-rec")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertFalse(os.path.exists(os.path.join(self.out, "apps/signal_probe/rec")))
+        cmds = open(os.path.join(self.tmp, "commands.log")).read()
+        self.assertNotIn("/data/rec", cmds)
+        self.assertNotIn("aquota", cmds)
+
+    def test_dry_run_names_the_recordings(self):
+        r = self.run_collect("--dry-run")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertFalse(os.path.exists(os.path.join(self.tmp, "commands.log")))
+        self.assertIn("ls -l /var/opt/public/oap/oap_<uid of signal_probe>/data/rec/", r.stderr)
+        self.assertIn("cat /var/opt/aquota.user", r.stderr)
 
     def test_all_apps_flag_copies_the_other_one(self):
         r = self.run_collect("--all-apps")
