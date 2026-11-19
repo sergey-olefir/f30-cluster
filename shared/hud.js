@@ -271,6 +271,19 @@ const TEXT_MS = 200;             // text re-draws at most 5 times a second (what
 const NEEDLE_MS = 33;            // 0.7.14: the speed and rev needles' own timer while "needleSmooth" is on (30 a second)
 const PERF_LOG_MS = 10000;       // package P (opt-in only, see PERF in the class): the perf log's period
 const EXACT_SPARE = 6;           // 0.7.14: spare cells in a "gpu" text's atlas, for cells the figures don't fill ("--")
+// car-issues GL (docs/car-issues/GL-REPORT.md): a glyph atlas's rows, and every rect written into one, are a multiple of 4
+// bytes (R8: 4 texels). On the car an R8 texture with rows 2 bytes off (Twin Dial 0.1.3's td_big atlas, 1066 wide) was drawn
+// as if its rows were 4-byte aligned (1068): slanted pieces of glyphs in the gear. app.json config.gpuText: "legacy" = the
+// 0.1.3 layout (for the car test), "pixels" = every "gpu" text drawn as an image; anything else = aligned.
+function gcd(a, b) { return b ? gcd(b, a % b) : a; }
+/** car-issues GL: n cells of cw texels in rows of at most maxCols cells, each row cols * cw a multiple of 4 -> { n, cols, rows }
+ *  (one row: a few more cells, the extra ones spare; more rows: fewer columns). null when no such row fits. */
+function alignedGrid(cw, n, maxCols) {
+    const q = 4 / gcd(cw, 4), one = Math.ceil(n / q) * q;
+    if (one <= maxCols) return { n: one, cols: one, rows: 1 };
+    const cols = Math.floor(maxCols / q) * q;
+    return cols >= q ? { n, cols, rows: Math.ceil(n / cols) } : null;
+}
 const DEFAULT_LOCATION = { lat: 35.2271, lon: -80.8431 }; // Charlotte, NC: for the Auto theme's sunset
 const TARGET_SIZES = { hud: [800, 480], panel: [1920, 720] };
 const MODE_KEY = { comfort: 'inComfort', sport: 'inSport', eco: 'inEco' };
@@ -407,6 +420,14 @@ const TW_TAB = { 1: [176, 10, 37], 2: [176, 10, 37], 3: [240, 150, 10], 4: [60, 
 const TW_FLOOR = [0.0012, 0.0009, 0.0056];          // the G20 panel's black floor (R, G, B) in linear light: SPEC rev 2 7.1
 const TW_ARC_END = 143.6;                           // twin_dial B1: where the tachometer's red arc on the bezel ends (SPEC-R3 2.5)
 const TW_MAP = { W1: { box: [750, 180, 1170, 564], fade: [120, 80, 80], r: 24 }, W2: { box: [700, 173, 1220, 600], fade: [1, 1, 1], r: 1 } };   // twin_dial B1: SPEC-R3 4.5
+// car-issues MW: W3, the whole free space between the dials: the box [618, 173, 1302, 588] (the tab bar's ends, the tab rule, and a
+// foot 12 px above W2's: at y 588..600 the box would reach BMW's stored-message marker [1243, 591, 1285, 628], which W2 never meets)
+// minus the two discs of radius 324 round the dials' centres (380, 400) and (1540, 400): the sides follow the bezels (their outer edge
+// at 304.3 px, tdial's alpha) with a 20 px black ring. Not less: BMW's own stock layout, drawn under a theme (photo 14), has items at
+// mid-height that end at x 694 (the rule under its digital speed, y 412-415) and start at x 1223 (its drive-mode label and rule,
+// y 337-415; rectified photos 08, 09, 39, 61, 68): 324 keeps both under our black by 1.5 px, W2 (700 / 1220) kept them by 6 / 3.
+// arc = [left centre x, right centre x, centre y, radius] (panel px).
+TW_MAP.W3 = { box: [618, 173, 1302, 588], fade: [1, 1, 1], r: 1, arc: [380, 1540, 400, 324] };
 const TW_LIM_STRIP = { L1: 1, L2: 2, L3: 3 };       // twin_dial B1: config.limit.strip -> u_lim.w
 // twin_dial B1: an sRGB code -> linear light, the black floor taken out, the night multiplier k applied; and back to a code
 function twinLin(c, i, k, noFloor) { const v = c / 255, l = v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); return (noFloor ? l : Math.max(0, (l - TW_FLOOR[i]) / (1 - TW_FLOOR[i]))) * k; }
@@ -423,6 +444,7 @@ const TW_PANEL = [694, 592, 536, 112];              // the fallback window's box
 // 6 to 13 resets in a row, with the driver-assistance warnings, until the theme was turned off by hand.
 const KOMBI_GUARD_MS = 8000, KOMBI_WINDOW_MS = 120000, KOMBI_STRIKES = 2, KOMBI_FILE = 'kombi-guard.json';
 const LOOK_KEYS = ['hudLayout', 'inComfort', 'inSport', 'inEco', 'byMode', 'g20'];
+const LOAD_OPS = ['layer', 'asset', 'bind'];         // car-issues: the refusals that leave a theme half built (the load guard)
 // "+ G20" (the owner, 2026-11-15; docs/ONE-SWITCH-DONE.md): the see-through look is the "g20" setting, not a theme of
 // its own. A theme name maps to its see-through FILE while the toggle is on - the files are untouched, nothing new is
 // drawn and no shader changes. Only Comfort has one: "6WB Sport + G20" was retired with the toggle and Eco Pro never
@@ -430,7 +452,9 @@ const LOOK_KEYS = ['hudLayout', 'inComfort', 'inSport', 'inEco', 'byMode', 'g20'
 const G20_OF = { wb_comfort: 'wb_dials' };
 // research3 MT (docs/research3/MT-REPORT.md): app.json config.sceneTex, the lighter scene texture files tried in order
 // (null, the default: today's RGBA8 files), and the bytes of an ETC2 4x4 block (cluster-render PROTOCOL.md)
-const SCENE_TEX = { r8: ['r8'], etc2: ['etc2', 'r8'] };
+// car-issues (the owner, 2026-11-19): "r8" is gone (its 670 / 346-wide R8 rows are not whole 4-byte rows: the car shears them), and
+// "etc2" no longer falls back to <name>@r8 (range_seg / ed_seg, 346 wide): what has no @etc2 file uses its own RGBA file, as off does
+const SCENE_TEX = { etc2: ['etc2'] };
 const SCENE_ETC2 = { etc2rgb: 8, etc2rgba: 16 };
 // the way back, for the names on screen: a see-through file -> its theme (wb_sport_dials is kept here, and its layout
 // file is kept, so a settings.json that still names it after a failed migration is still labelled and still drawn)
@@ -894,6 +918,9 @@ class HudApp {
         try { const t = JSON.parse(fs.readFileSync(this.kombiFile, 'utf8')); if (t && t.layout) this.kombiTrip = t; } catch (e) { /* none */ }
         this.kombiStrikes = [];
         this.kombiShownAt = 0;
+        // car-issues: the load guard (_loadFail): { layout, what, at } while a refused layer / asset / bind has turned the theme off.
+        // Not saved: a restart or a theme picked lets the theme try again.
+        this.loadTrip = null;
         this.kombiPrev = null;
         this.statusListeners = [];
         this.lastStatus = null;
@@ -923,7 +950,7 @@ class HudApp {
         this.layouts.onChange(() => { this.seeThru = {}; this._rebuild(); });
         ctx.settings.onChange((key) => {
             if (this.diag && this.diag.has(key)) { this._guard('diag', () => this.diag.changed(this, key)); return; }     // b7: the Діагностика settings, in place or by their own rebuild
-            if (LOOK_KEYS.indexOf(key) >= 0) this._kombiClear();      // 0.7.13: a theme picked: the guard lets it try again
+            if (LOOK_KEYS.indexOf(key) >= 0) { this._kombiClear(); this._loadClear(); }      // 0.7.13: a theme picked: the guards let it try again
             // a theme or layout picked anywhere (the page asks first, the kit's All settings list doesn't): no longer stepping aside
             if (LOOK_KEYS.indexOf(key) >= 0 && this.screen.yielded) this.screen.release();
             if (PLACE_KEYS.indexOf(key) >= 0) this._guard('place', () => this._place());
@@ -1712,6 +1739,13 @@ class HudApp {
             const w = this._widgetOf(ci, ref);
             this.log.warn('refused ' + op + ' on ' + ref + tag + (w ? ' (' + w + ')' : '') + ': ' + reason);
             if (!this.refused) this.refused = (w || op) + ': ' + reason;   // the first one, until the next rebuild
+            // car-issues: a layer, an asset or a bind refused leaves a theme with parts missing (an effect with a sampler unbound is not
+            // drawn on the car): BMW's own cluster instead. Twin Dial's tab-2 sheet is the safety machine's own case (BMW's panel stays open).
+            let sheet = false;
+            if (this.twinMsg) this.widgets.forEach((x) => { if (x.ci === ci && x.ref === ref && x.w && x.w.type === 'ccsheet') sheet = true; });
+            // a refused asset never existed on the service: forget it, or the next build binds a ref the service does not know
+            if (op === 'asset') this.atlases.forEach((a, k) => { if (a && a.ci === ci && a.ref === ref) this.atlases.delete(k); });
+            if (LOAD_OPS.indexOf(op) >= 0 && !sheet) this._guard('load guard', () => this._loadFail(op + (w ? ' (' + w + ')' : '') + ': ' + reason));
             this._statusSoon();
         });
         c.on('budget', (capKb, maxKb, reason) => this.log.info('budget' + tag + ' ' + capKb + '/' + maxKb + ' kb/s (' + reason + ')'));
@@ -1840,7 +1874,10 @@ class HudApp {
         if (!chars.length) throw new Error('font "' + fontName + '" has no printable glyphs for an atlas');
         const cellW = Math.max(1, Math.ceil(Math.max.apply(null, chars.map((ch) => glyphs[ch].advance)))) + 2;
         const cellH = font.metrics.cellHeight;
-        const cols = Math.max(1, Math.min(16, Math.floor(2048 / cellW))), rows = Math.ceil(chars.length / cols);
+        let cols = Math.max(1, Math.min(16, Math.floor(2048 / cellW)));
+        // car-issues GL: rows a multiple of 4 bytes (16 columns always are; a cell over 128 px wide gets fewer, still aligned)
+        if (this.config.gpuText !== 'legacy' && (cols * cellW) % 4 && cols >= 4 / gcd(cellW, 4)) cols -= cols % (4 / gcd(cellW, 4));
+        const rows = Math.ceil(chars.length / cols);
         const w = cols * cellW, h = rows * cellH;
         const buf = Buffer.alloc(w * h, 0);
         chars.forEach((ch, i) => {
@@ -1890,8 +1927,8 @@ class HudApp {
 
     /**
      * research3 MT (docs/research3/MT-REPORT.md): which file holds the scene texture `name` under app.json config.sceneTex
-     * (null, the default: hud/scene/<name>.json as always). "r8": <name>@r8.json when there is one; "etc2": <name>@etc2.json,
-     * else <name>@r8.json. -> { file, enc ("a8" | "tint" | "v8" | "pm" | null), tint, chroma (the file of a "v8" value's
+     * (null, the default: hud/scene/<name>.json as always). "etc2": <name>@etc2.json when there is one, else
+     * hud/scene/<name>.json (car-issues: no @r8 fallback, "r8" removed). -> { file, enc ("a8" | "tint" | "v8" | "pm" | null), tint, chroma (the file of a "v8" value's
      * colour), sx, sy (an ETC2 texture padded to whole blocks: how much its box uniform grows) }. Read once per name.
      */
     _sceneSrc(name) {
@@ -1950,6 +1987,26 @@ class HudApp {
      *  The glyph atlases of "atext" widgets stay while the connection lives. */
     _dropsUnused(key) { return key.indexOf(':scene:') >= 0 || key.indexOf(':exact:') >= 0; }
 
+    /**
+     * car-issues TX: drop every asset a connection still holds that this.atlases no longer names and no layer samples (one
+     * forgotten while a layer bound it: the service refuses such a drop with "asset in use" and the client keeps it, so it would
+     * stay for the life of the connection, count to the 16 assets a client may have and ride along on every whole-scene
+     * re-send). Called once the old layers are dropped, so the peak stays the larger layout's. -> how many were dropped.
+     */
+    _dropOrphans() {
+        let n = 0;
+        this.clients.forEach((c) => {
+            if (!c.layers) return;
+            const kept = new Set(), bound = new Set(), gone = [];
+            this.atlases.forEach((a) => { if (a.c === c) kept.add(a.ref); });
+            c.layers.forEach((l) => Object.keys(l.binds || {}).forEach((k) => bound.add(l.binds[k].asset)));
+            c.layers.forEach((l, ref) => { if (l.kind === 'asset' && !kept.has(ref) && !bound.has(ref)) gone.push(ref); });
+            gone.forEach((ref) => { c.drop(ref); n++; });
+        });
+        if (n) this.log.info('assets: dropped ' + n + ' that nothing uses any more');
+        return n;
+    }
+
     _atlasBytes() {
         let n = 0;
         this.atlases.forEach((a) => { n += a.bytes; });
@@ -1997,8 +2054,10 @@ class HudApp {
      * colour rules / slot; anything else stays an image text (logged). */
     _gpuTexts(list) {
         const out = [];
+        const pixels = this.config.gpuText === 'pixels';       // car-issues GL: the Діагностика switch "as pixels"
         list.forEach((w) => {
             if (w.type !== 'text' || !w.gpu) { out.push(w); return; }
+            if (pixels) { this.log.info('widget "' + w.id + '": "gpu" set aside (config.gpuText "pixels"), drawn as an image'); out.push(w); return; }
             let why = null, g = null;
             try { why = this._gpuTextWhy(w); if (!why) g = this._gpuGrid(w); } catch (e) { why = String(e && e.message || e); }
             if (why) { this.log.warn('widget "' + w.id + '": "gpu" ignored (' + why + '), drawn as an image'); out.push(w); return; }
@@ -2057,7 +2116,8 @@ class HudApp {
         return { pitch, cw, h, max, figs: figs.sort(), groups };
     }
 
-    _exactKey(w, ci) { return ci + ':exact:' + w.font + ':' + w.exact.pitch + '/' + w.exact.cw + 'x' + w.exact.h + ':' + (w.spacing || 0); }
+    // car-issues GL: ":legacy" while config.gpuText is "legacy", so a switch of it makes the atlas again
+    _exactKey(w, ci) { return ci + ':exact:' + w.font + ':' + w.exact.pitch + '/' + w.exact.cw + 'x' + w.exact.h + ':' + (w.spacing || 0) + (this.config.gpuText === 'legacy' ? ':legacy' : ''); }
 
     /** The atlas of a "gpu" text on a connection: R8, each figure as mask lays it out at a pen on a cell's left edge (in
      *  pitch / cw cells), plus spare cells; sampled "nearest" (each screen pixel is one atlas texel). Shared by the
@@ -2068,12 +2128,16 @@ class HudApp {
         if (this.atlases.has(key)) return this.atlases.get(key);
         const P = E.pitch, cw = E.cw, k = P / cw, h = E.h, fixed = E.figs.length * k, row = Math.floor(2048 / cw);
         // the spare cells: EXACT_SPARE, or the rest of the first row when that keeps the atlas one row high
-        const spare = fixed + EXACT_SPARE > row && row - fixed >= 3 ? row - fixed : EXACT_SPARE, n = fixed + spare;
-        const cols = Math.max(1, Math.min(n, row)), rows = Math.ceil(n / cols);
+        let spare = fixed + EXACT_SPARE > row && row - fixed >= 3 ? row - fixed : EXACT_SPARE, n = fixed + spare;
+        let cols = Math.max(1, Math.min(n, row)), rows = Math.ceil(n / cols);
+        // car-issues GL: rows of a multiple of 4 bytes (td_big: 26 cells of 41 = 1066 -> 28 cells, 1148); "legacy": as 0.1.3
+        const legacy = this.config.gpuText === 'legacy', g = legacy ? null : alignedGrid(cw, n, row);
+        if (g) { spare += g.n - n; n = g.n; cols = g.cols; rows = g.rows; }
         const W = cols * cw, H = rows * h;
         if (H > 2048) throw new Error('font "' + w.font + '": a ' + W + 'x' + H + ' atlas is too big');
         const buf = Buffer.alloc(W * H, 0);
-        const a = { key, cols, rows, cellW: cw, cellH: h, bytes: W * H * 2, exact: true, byKey: new Map(), fig: {}, slots: [], use: 0 };
+        const a = { key, cols, rows, cellW: cw, cellH: h, bytes: W * H * 2, exact: true, byKey: new Map(), fig: {}, slots: [], use: 0,
+            W, H, buf, legacy, font: w.font, puts: 0 };       // car-issues GL: its texels kept, for 4-aligned rects
         E.figs.forEach((ch) => {
             const m = textRaster.mask(P, h, ch, { font: w.font });
             a.fig[ch] = [];
@@ -2095,7 +2159,8 @@ class HudApp {
         a.ref = ref; a.c = c; a.ci = ci;
         this.atlases.set(key, a);
         this.log.info('gpu text atlas "' + w.font + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + E.figs.length + ' figures in ' + fixed +
-            ' cells and ' + spare + ' spare cells of ' + cw + 'x' + h + ', ' + W + 'x' + H + ' R8 asset, ' + mib(a.bytes) + ' of pixel memory');
+            ' cells and ' + spare + ' spare cells of ' + cw + 'x' + h + ', ' + W + 'x' + H + ' R8 asset, ' + mib(a.bytes) + ' of pixel memory' +
+            (W % 4 ? ', rows ' + W + ' bytes: NOT a multiple of 4' + (legacy ? ' (config.gpuText "legacy")' : '') : ''));      // car-issues GL
         return a;
     }
 
@@ -2149,7 +2214,26 @@ class HudApp {
         if (t.key) a.byKey.delete(t.key);
         t.key = key;
         a.byKey.set(key, best);
-        a.c.pixels(a.ref, [{ x: (best % a.cols) * a.cellW, y: Math.floor(best / a.cols) * a.cellH, w: a.cellW, h: a.cellH }], sl);
+        // car-issues GL: the cell into the kept texels, then a rect of whole 4-texel columns around it (x and w multiples of 4,
+        // its neighbours' texels as they are); "legacy": the cell's own rect, as 0.1.3 (41 px wide in td_big)
+        const cx = (best % a.cols) * a.cellW, cy = Math.floor(best / a.cols) * a.cellH;
+        for (let y = 0; y < a.cellH; y++) sl.copy(a.buf, (cy + y) * a.W + cx, y * a.cellW, (y + 1) * a.cellW);
+        let r = { x: cx, y: cy, w: a.cellW, h: a.cellH }, px = sl;
+        if (!a.legacy) {
+            const x0 = cx - cx % 4, x1 = Math.min(a.W, Math.ceil((cx + a.cellW) / 4) * 4);
+            if (x0 !== cx || x1 !== cx + a.cellW) {
+                r = { x: x0, y: cy, w: x1 - x0, h: a.cellH };
+                px = Buffer.alloc(r.w * r.h);
+                for (let y = 0; y < r.h; y++) a.buf.copy(px, y * r.w, (cy + y) * a.W + x0, (cy + y) * a.W + x1);
+            }
+        }
+        a.c.pixels(a.ref, [r], px);
+        // car-issues GL: each write in place, numbers only (the first 20, then every 50th): the car test reads these
+        a.puts++;
+        if (a.puts <= 20 || a.puts % 50 === 0) {
+            this.log.info('gpu text atlas "' + a.font + '"' + (a.ci ? ' on connection ' + (a.ci + 1) : '') + ': cell ' + best + ' written in place, rect ' +
+                r.x + ',' + r.y + ' ' + r.w + 'x' + r.h + (r.w % 4 ? ' (NOT a multiple of 4)' : '') + ', write ' + a.puts);
+        }
         return best;
     }
 
@@ -2294,6 +2378,34 @@ class HudApp {
         this._rebuild();
     }
 
+    /** car-issues, the load guard: the service refused something the theme needs (a layer, an asset, a bind; or a refusal the
+     *  client met before sending, thrown as "... refused"). The theme goes off at once (BMW's own cluster, readable) instead of
+     *  staying half built; one log line says why. Not saved: a restart or a theme picked lets it try again. */
+    _loadFail(what) {
+        if (this.loadTrip || !this.activeName || this.activeName === 'off') return;
+        this.loadTrip = { layout: this.activeName, what: String(what), at: new Date().toISOString() };
+        this.log.warn('load guard: theme turned off ("' + this.loadTrip.layout + '"): ' + this.loadTrip.what +
+            '; BMW\'s own cluster shows until a theme is picked again or the app restarts');
+        setTimeout(() => this._rebuild(), 0);     // not inside the build that met the refusal
+    }
+
+    /** A theme was picked: the load guard lets the theme try again. */
+    _loadClear() {
+        if (!this.loadTrip) return;
+        this.log.info('load guard: a theme was picked, themes may show again (was off since ' + this.loadTrip.at + ')');
+        this.loadTrip = null;
+    }
+
+    /** A widget or sheet made inside a guard; a "refused" error (the client refused it before sending) trips the load guard. */
+    _createGuarded(w, sheet) {
+        this._guard('widget ' + w.id, () => {
+            try { this._create(w, sheet); } catch (e) {
+                if (/refused/.test(e && e.message)) this._guard('load guard', () => this._loadFail('widget ' + w.id + ': ' + e.message));
+                throw e;
+            }
+        });
+    }
+
     /** A theme was picked: the guard lets the themes try again. */
     _kombiClear() {
         this.kombiStrikes = [];
@@ -2311,7 +2423,7 @@ class HudApp {
     /** The layout name to show now: per drive mode when that's on and known, else the plain setting; the see-through
      *  file of either while the "g20" toggle is on (_g20Of). */
     _layoutName() {
-        if (this.kombiTrip) return 'off';          // 0.7.13: the KOMBI guard tripped
+        if (this.kombiTrip || this.loadTrip) return 'off';          // 0.7.13: the KOMBI guard tripped; car-issues: the load guard
         if (this.screen && this.screen.yielded) return 'off';
         if (this.setting('byMode') === true && this.driveMode && MODE_KEY[this.driveMode]) {
             const v = this.setting(MODE_KEY[this.driveMode]);
@@ -2414,6 +2526,7 @@ class HudApp {
             return there ? this.label + ': connecting to cluster-render' : this.label + ' off: cluster-render is not installed or not running';
         }
         if (this.kombiTrip) return this.label + ' off: the cluster reset twice right after ' + this._layoutLabel(this.kombiTrip.layout) + ' was shown. Pick a theme to try again';
+        if (this.loadTrip) return this.label + ' off: the cluster could not take ' + this._layoutLabel(this.loadTrip.layout) + ' (' + this.loadTrip.what + '). Pick a theme to try again';
         if (this.problem) return this.label + ': ' + this.problem;
         const byMode = this.setting('byMode') === true;
         const mode = byMode ? (this.driveRaw ? ' (drive mode not recognised: the car sends ' + this.driveRaw + ')'
@@ -2791,6 +2904,8 @@ class HudApp {
         const mp = mapN ? TW_MAP[mapN] : null;
         c.uniform(ref, 'u_map', mp ? [mp.box[0] - w.x, mp.box[1] - w.y, mp.box[2] - w.x, mp.box[3] - w.y] : [0, 0, 0, 0]);
         c.uniform(ref, 'u_mapF', mp ? [mp.fade[0], mp.fade[1], mp.fade[2], mp.r] : [1, 1, 1, 1]);
+        // car-issues MW: W3's arcs (layer px; radius 0 = no arcs: W1, W2 and a shut window are as before)
+        c.uniform(ref, 'u_mapA', mp && mp.arc ? [mp.arc[0] - w.x, mp.arc[1] - w.x, mp.arc[2] - w.y, mp.arc[3]] : [0, 0, 0, 0]);
         const rects = [], cols = [];
         for (let i = 0; i < 4; i++) {
             let r = t.rules[i];
@@ -3407,6 +3522,7 @@ class HudApp {
         if (this.twinMsg) this._guard('twin cc', () => { const born = this.twinMsg.rebuild(); this._twinCcAssign(born.window ? 'window' : 'none'); });
         this._layerRefs().forEach((r) => r.c.drop(r.ref));
         if (this.mbExp) this._guard('mb', () => this.mbExp.dropOwn());      // research3 MB: the cover layer
+        this._guard('orphan assets', () => this._dropOrphans());       // car-issues TX: before anything new is made
         this.placed = [];
         this.widgets.clear();
         this.sheets = [];
@@ -3477,7 +3593,7 @@ class HudApp {
             if (e.kind === 'sheet') { sheets++; bytes += e.w * e.h * 4; px += e.w * e.h * 8; this._guard('sheet ' + e.members[0].id, () => this._createSheet(e)); }
             else {
                 if (IMAGE_TYPES[e.w.type]) { own++; px += e.w.w * e.w.h * 8; } else effects++;
-                this._guard('widget ' + e.w.id, () => this._create(e.w, null));
+                this._createGuarded(e.w, null);     // car-issues: a refusal trips the load guard
             }
         });
         if (this._offset().x || this._offset().y || this._scale() !== 1) this._place();
@@ -3551,12 +3667,17 @@ class HudApp {
         const c = this._clientAt(s.conn);
         if (this.mbExp) this.mbExp.image(s.members[0], s);      // research3 MB: an image layer over the gap is only named
         const ref = c.image({ target: this.target, klass: s.klass, z: s.z, x: s.x, y: s.y, w: s.w, h: s.h, iw: s.w, ih: s.h });
-        if (!ref) { this.log.warn('sheet ' + s.klass + '/' + s.z + ' at ' + s.x + ',' + s.y + ' ' + s.w + 'x' + s.h + ': layer refused'); return; }
+        if (!ref) {
+            this.log.warn('sheet ' + s.klass + '/' + s.z + ' at ' + s.x + ',' + s.y + ' ' + s.w + 'x' + s.h + ': layer refused');
+            // car-issues: the load guard, except Twin Dial's tab-2 sheet (the safety machine keeps BMW's panel open for it)
+            if (!s.members.some((w) => w.type === 'ccsheet')) this._loadFail('sheet ' + s.members[0].id + ': layer refused');
+            return;
+        }
         s.ref = ref; s.c = c; s.ci = s.conn;
         this.placed.push({ c, ref, x: s.x, y: s.y, w: s.w, h: s.h });
         s.buf = Buffer.alloc(s.w * s.h * 4, 0);
         this.sheets.push(s);
-        s.members.forEach((w) => this._guard('widget ' + w.id, () => this._create(w, s)));
+        s.members.forEach((w) => this._createGuarded(w, s));     // car-issues: a refusal trips the load guard
         const buf = s.buf;
         s.buf = null;                    // from here on _blit sends dirty rects
         c.pixels(ref, null, buf);
@@ -5926,5 +6047,6 @@ HudApp.themeOf = (name) => G20_THEME[name] || name;
 HudApp.ROW_KEY = ROW_KEY;
 HudApp.ROW_OURS = ROW_OURS;
 HudApp.ROW_BMW = ROW_BMW;
+HudApp.TW_MAP = TW_MAP;        // car-issues MW: the map windows' geometry, for bench/test-twin-layout.js
 
 module.exports = HudApp;

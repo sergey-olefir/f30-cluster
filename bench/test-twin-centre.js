@@ -478,6 +478,23 @@ console.log('the map window (an experiment): presence rule');
     eq(h.twinMap, 'W1', '... the engine is told through hud.twinMap = "W1" (B1: _twinBackSend sends u_map / u_mapF from it)');
     Object.assign(pages.st(h), { navType: 1 }); const x2 = { w: R.widget, ref: 1, sheet: null, px: null }; pages.st(h).mapSent = true; pages.update(h, x2, h._now_ms + 1000, true);
     ok(h.twinMap === null && pages.st(h).page !== 'map', '... the cluster leaves the map view: hud.twinMap null, the fallback page shows');
+    // car-issues MW: W3 goes through the same rule (open only on tab 5 with the map believed present), told to the engine by name
+    h = mk({ mapWindow: 'W3', mapShutMs: 0 }, 5); Object.assign(pages.st(h), { navType: 2, guiding: 'ACTIVE' });
+    eq(showing(h), 'map', 'car-issues MW: config.mapWindow "W3": the map page shows under the same rule');
+    eq(h.twinMap, 'W3', '... and hud.twinMap = "W3" (hud.js TW_MAP.W3: the box and the arcs)');
+    Object.assign(pages.st(h), { navType: 1 }); const x3 = { w: R.widget, ref: 1, sheet: null, px: null }; pages.st(h).mapSent = true; pages.update(h, x3, h._now_ms + 1000, true);
+    ok(h.twinMap === null && pages.st(h).page !== 'map', '... and W3 shuts like W2 when the cluster leaves the map view');
+    // car-issues MW (found on the bench): the variant chosen in Діагностика while the window is open reaches the engine at the next tick;
+    // before, hud.twinMap was sent only when the window opened or shut, so a W2 -> W3 switch on tab 5 changed nothing on the panel
+    h = mk({ mapWindow: 'W2', mapShutMs: 0 }, 5); Object.assign(pages.st(h), { navType: 2, guiding: 'ACTIVE' });
+    eq(showing(h), 'map', 'car-issues MW: W2 open');
+    eq(h.twinMap, 'W2', '... hud.twinMap = "W2"');
+    h.config.mapWindow = 'W3'; const x4 = { w: R.widget, ref: 1, sheet: null, px: null }; pages.update(h, x4, h._now_ms + 1000, true);
+    ok(pages.st(h).page === 'map' && h.twinMap === 'W3', 'car-issues MW: switched to W3 while open: the next tick sends W3 (hud.twinMap ' + h.twinMap + ')');
+    h.config.mapWindow = 'W1'; pages.update(h, x4, h._now_ms + 2000, true);
+    ok(h.twinMap === 'W1', 'car-issues MW: ... and W1 the same way (hud.twinMap ' + h.twinMap + ')');
+    h = mk({ mapWindow: 'W4', mapForce: true, mapShutMs: 8000 }, 5);
+    ok(!st(h).open, 'car-issues MW: an unknown variant ("W4") is no window, forced or not (' + st(h).why + ')');
 }
 console.log('FIN: the setting "Навігація" (navView) = auto / карта / стрілки, in place');
 {

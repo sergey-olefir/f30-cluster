@@ -150,11 +150,20 @@ function unit() {
         // cycle from "off" lands on the first option after it), and app.json keeps the window off until then
         const spec = APPS.twin_dial, s = spec.settings.filter((x) => x.key === 'diagMapWindow')[0];
         const list = s.options.map((o) => o[0]), next = list[(list.indexOf(s.default) + 1) % list.length];
-        ok(s.default === 'off' && list.join() === 'off,W2,W1' && next === 'W2', 'twin: "Вікно карти" is off by default and switching it on gives W2 (options ' + list.join(' / ') + ')');
+        ok(s.default === 'off' && list.join() === 'off,W2,W3,W1' && next === 'W2', 'twin: "Вікно карти" is off by default and switching it on gives W2 (options ' + list.join(' / ') + ')');
         const cfg = deep(spec.config), vals = { diagMapWindow: next };
         ok(spec.config.mapWindow === null, 'twin: app.json\'s config.mapWindow stays null (the window is still the experiment)');
         DS.Diag.create(cfg, fakeSettings(spec, vals), quiet);
         ok(cfg.mapWindow === 'W2', 'twin: switched on, config.mapWindow = "W2"');
+    }
+    {
+        // car-issues MW: W3 (the free space between the dials) is the press after W2, so the owner compares the two on the car
+        const spec = APPS.twin_dial, s = spec.settings.filter((x) => x.key === 'diagMapWindow')[0];
+        const list = s.options.map((o) => o[0]);
+        ok(list.indexOf('W3') === list.indexOf('W2') + 1, 'twin: car-issues MW: "Вікно карти" offers W3 right after W2 (' + list.join(' / ') + ')');
+        const cfg = deep(spec.config);
+        DS.Diag.create(cfg, fakeSettings(spec, { diagMapWindow: 'W3' }), quiet);
+        ok(cfg.mapWindow === 'W3', 'twin: car-issues MW: W3 chosen, config.mapWindow = "W3"');
     }
 
     // integration (B7): the tab bar's inputs from B4's page model (shared/twin_pages.js tabBridge), gated by config.pages
@@ -386,15 +395,16 @@ async function f30() {
     await sleep(3000);
     s = live(trace);
     ok(s.layers.filter((l) => touches(l.rect, GAP)).length > 0, 'gap off: the layers are whole again');
-    // the lighter scene textures: dropped and made again as R8, then as the files of 0.7.20
-    const textures = () => (logText.match(/scene texture "[^"]+"[^\n]*(RGBA8|R8) asset/g) || []);
+    // the lighter scene textures: dropped and made again as ETC2 (car-issues: "r8" is gone; ETC2 is option 1 now), then as the files of 0.7.20
+    const textures = () => (logText.match(/scene texture "[^"]+"[^\n]*(RGBA8|R8|etc2rgb) asset/g) || []);
     const before = textures().length;
-    await click('SET_DIAGSCENETEX', 1);        // r8
-    p = await until((q) => q.settings.diagSceneTex === 'r8', 4000);
+    await click('SET_DIAGSCENETEX', 1);        // etc2
+    p = await until((q) => q.settings.diagSceneTex === 'etc2', 4000);
     await sleep(4000);
     const made = textures().slice(before);
-    // the two dial faces have an R8 file (MT: tacho@r8, speedo@r8); a texture with no variant stays as it was
-    ok(made.length > 0 && made.some((l) => /scene texture "speedo"[^\n]* R8 asset/.test(l)) && made.some((l) => /scene texture "tacho"[^\n]* R8 asset/.test(l)), 'scene textures "r8": made again, the two dial faces as R8 (' + made.length + ' made)');
+    // the two dial faces have an ETC2 file (MT: tacho@etc2, speedo@etc2); the two arcs have none and stay RGBA8 (no @r8 fallback any more)
+    ok(made.length > 0 && made.some((l) => /scene texture "speedo"[^\n]* etc2rgb asset/.test(l)) && made.some((l) => /scene texture "tacho"[^\n]* etc2rgb asset/.test(l)), 'scene textures "etc2": made again, the two dial faces as ETC2 (' + made.length + ' made)');
+    ok(!made.some((l) => / R8 asset/.test(l) && !/collar_r8|strip_mask/.test(l)), 'scene textures "etc2": no R8 variant made (the arcs take their RGBA8 files)');
     ok(p.activeName === 'wb_comfort', 'Comfort is still drawn');
     const before2 = textures().length;
     await click('SET_DIAGSCENETEX', 0);
@@ -403,7 +413,8 @@ async function f30() {
     const made2 = textures().slice(before2);
     ok(made2.length > 0 && made2.some((l) => /RGBA8 asset/.test(l)), 'scene textures off: the RGBA8 files again (' + made2.length + ' made)');
     ok(!/error|exception/i.test(logText.split('\n').filter((l) => /\bdiag\b|mb:/.test(l)).join('\n')), 'no error in the diagnostics lines');
-    ok(!/pixel memory is full|asset refused|layer refused/i.test(logText), 'the service never said its pixel memory was full, nor refused an asset or a layer (the old and the new scene textures never sat together)');
+    // car-issues TX: "refused <op> on <ref>" too (the engine's line for a service refusal: "refused drop on 12: asset in use" was missed)
+    ok(!/pixel memory is full|asset refused|layer refused|refused \w+ on \d+/i.test(logText),'the service never said its pixel memory was full, nor refused an asset or a layer (the old and the new scene textures never sat together)');
     p = await probe();
     ok(p && p.ready, 'the app is still up');
     await stop();

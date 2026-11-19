@@ -5832,5 +5832,670 @@
    "counterSyncProperMotionVehicle": 13
   },
   "body": "extendedQualifierProperMotionVehicle=1 eventDataQualifierProperMotionVehicle=2 pitchAngleProperMotionVehicle=6 xPositionDeltaProperMotionVehicle=7 yPositionDeltaProperMotionVehicle=8 zPositionDeltaProperMotionVehicle=9 yawAngleDeltaProperMotionVehicle=10 rollAngleDeltaProperMotionVehicle=11 pitchAngleDeltaProperMotionVehicle=12"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "pm-road",
+  "iface": "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding",
+  "field": "currentRoad",
+  "instance": "Main_Instance",
+  "value": {
+   "elements": [
+    {
+     "text": "STREET_CANARY"
+    },
+    {
+     "spacer": "SLASH"
+    },
+    {
+     "icon": {
+      "text": "A 9 CANARY",
+      "iconHandle": 12
+     }
+    }
+   ]
+  },
+  "body": "elements=3 [text len=13] [spacer=SLASH] [icon text-len=10]"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "pm-waypoints",
+  "iface": "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding",
+  "field": "waypoints",
+  "instance": "Main_Instance",
+  "value": {
+   "delayTime": 60,
+   "delayStatus": "GREEN",
+   "travelTime": 660,
+   "estimatedArrivalTime": {
+    "includedTimeOffset": {
+     "valid": true,
+     "timeZoneOffset": 120
+    },
+    "date": {
+     "year": 2026,
+     "month": 11,
+     "day": 19
+    },
+    "time": {
+     "invalid": false,
+     "hour": 14,
+     "minute": 41,
+     "seconds": 0
+    }
+   },
+   "formattedDistance": {
+    "distance": "5.7",
+    "unit": "KM",
+    "rawDistance": 5700
+   },
+   "directionToDestination": 33.3,
+   "position": {
+    "coordinatesValid": true,
+    "latitude": 50.4321,
+    "longitude": 30.9876
+   },
+   "isCheckeredFlag": true,
+   "stopOverNumber": 0,
+   "destinationId": {
+    "waypointId": 1
+   },
+   "distanceFromCurrentToFinalDestination": 5700,
+   "isChargingStation": false
+  },
+  "body": "travel=660 delay=60 delayStatus=GREEN dist-len=3 unit=KM raw=5700 toFinal=5700 flag=true stopover=0 charging=false etaInvalid=false etaH=14 etaM=41"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "pm-lanes",
+  "iface": "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding",
+  "field": "currentLaneGuiding",
+  "instance": "Main_Instance",
+  "value": {
+   "rows": [
+    {
+     "uid": 5,
+     "distanceToDestination": 9000,
+     "unreliable": false,
+     "length": 200,
+     "lanes": [
+      {
+       "directionToFollow": "LEFT",
+       "otherDirections": [],
+       "isHighlighted": true,
+       "additionalLaneInfo": "NONE",
+       "directionsToFollow": [
+        "LEFT"
+       ]
+      },
+      {
+       "directionToFollow": "STRAIGHT_ON",
+       "otherDirections": [
+        "RIGHT"
+       ],
+       "isHighlighted": false,
+       "additionalLaneInfo": "BUS",
+       "directionsToFollow": [
+        "STRAIGHT_ON"
+       ]
+      }
+     ],
+     "laneMarkers": [
+      "DASHED"
+     ],
+     "recommendedCarPositionLaneIndex": 0,
+     "bargraphProgress": 30
+    }
+   ],
+   "carPositionLaneIndex": 1
+  },
+  "body": "rows=1 car=1 [lanes=2 rec=0 bar=30 *LEFT,STRAIGHT_ON/BUS]"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "pm-route-change",
+  "iface": "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding",
+  "field": "activeRouteChange",
+  "instance": "Main_Instance",
+  "value": "DEVIATION",
+  "body": "state=DEVIATION"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "pm-stream",
+  "iface": "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding",
+  "field": "streamCommandChanged",
+  "instance": "Main_Instance",
+  "value": {
+   "streamCommand": {
+    "requestStream": {
+     "config": {
+      "renderSize": {
+       "horizontalSize": 1088,
+       "verticalSize": 480
+      },
+      "categoryRect": {
+       "left": 0,
+       "top": 0,
+       "width": 1088,
+       "height": 480
+      },
+      "safeArea": {
+       "rect": {
+        "left": 40,
+        "top": 20,
+        "width": 1008,
+        "height": 440
+       }
+      }
+     }
+    }
+   }
+  },
+  "body": "command=requestStream size=1088x480 rect=0,0+1088x480 safe=rect 40,20+1008x440"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "stream-status",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "streamStatusChanged",
+  "instance": "Main_Instance",
+  "value": {
+   "streamStatus": "STREAMING"
+  },
+  "body": "streamStatus=STREAMING"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "route-changed",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "activeRouteChanged",
+  "instance": "Main_Instance",
+  "value": "DESTINATION_CHANGED",
+  "body": "routeChangeCause=DESTINATION_CHANGED"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "current-route",
+  "iface": "de.bmw.infotainment.navigation.guiding.Guidance",
+  "field": "currentRoute",
+  "instance": "Main_Instance",
+  "value": {
+   "sessionID": 3,
+   "routeHandle": 17
+  },
+  "body": "session=3 handle=17"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "list-views",
+  "iface": "de.bmw.infotainment.navigation.guiding.GuidanceEventList",
+  "field": "registeredViews",
+  "instance": "Main_Instance",
+  "value": "KOMBI_CANARY,HUD_CANARY",
+  "body": "len=23"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "event-list",
+  "iface": "de.bmw.infotainment.navigation.guiding.GuidanceEventList",
+  "field": "viewsChanged",
+  "instance": "Main_Instance",
+  "value": {
+   "content": {
+    "viewsContent": {
+     "CANARY_VIEW_KOMBI": {
+      "configSequenceId": 4,
+      "indexedPosition": {
+       "valid": true,
+       "ccpOffset": 0,
+       "totalElementCount": 7
+      },
+      "eventsInView": [
+       {
+        "intersection": {
+         "uid": 9007199254740,
+         "distanceToDestination": 12000,
+         "unreliable": false,
+         "sourceId": {
+          "simpleId": {
+           "id": 4711
+          }
+         },
+         "formattedDistance": {
+          "distance": "350",
+          "unit": "METER",
+          "rawDistance": 350
+         },
+         "description": {
+          "elements": [
+           {
+            "text": "STREET_CANARY"
+           },
+           {
+            "spacer": "SMALL"
+           }
+          ]
+         },
+         "travelTime": 40,
+         "travelTimeDelay": 0,
+         "guidingStep": "GS2",
+         "combinedManeuverType": "SINGLE",
+         "maneuverRestriction": "NONE",
+         "direction": "LEFT",
+         "detailedGeometry": "TWO_WAY_FORK_TAKE_LEFT",
+         "roadlinks": {
+          "value": {
+           "turningPoint": {
+            "coordinatesValid": true,
+            "latitude": 50.4321,
+            "longitude": 30.9876
+           }
+          }
+         }
+        }
+       },
+       {
+        "roundabout": {
+         "uid": 9007199254740,
+         "distanceToDestination": 12000,
+         "unreliable": false,
+         "sourceId": {
+          "simpleId": {
+           "id": 4711
+          }
+         },
+         "formattedDistance": {
+          "distance": "1.2",
+          "unit": "KM",
+          "rawDistance": 1200
+         },
+         "description": {
+          "elements": [
+           {
+            "text": "STREET_CANARY"
+           },
+           {
+            "spacer": "SMALL"
+           }
+          ]
+         },
+         "travelTime": 40,
+         "travelTimeDelay": 0,
+         "guidingStep": "GS0",
+         "combinedManeuverType": "SINGLE",
+         "maneuverRestriction": "NONE",
+         "exitAngle": 270,
+         "exitNumber": 2,
+         "driveDirection": "RIGHT",
+         "roadlinks": {
+          "value": {
+           "turningPoint": {
+            "coordinatesValid": true,
+            "latitude": 50.4321,
+            "longitude": 30.9876
+           }
+          }
+         }
+        }
+       },
+       {
+        "branch": {
+         "uid": 9007199254740,
+         "distanceToDestination": 12000,
+         "unreliable": false,
+         "sourceId": {
+          "simpleId": {
+           "id": 4711
+          }
+         },
+         "formattedDistance": {
+          "distance": "350",
+          "unit": "METER",
+          "rawDistance": 350
+         },
+         "description": {
+          "elements": [
+           {
+            "text": "STREET_CANARY"
+           },
+           {
+            "spacer": "SMALL"
+           }
+          ]
+         },
+         "travelTime": 40,
+         "travelTimeDelay": 0,
+         "guidingStep": "GS2",
+         "combinedManeuverType": "SINGLE",
+         "maneuverRestriction": "NONE",
+         "branchType": "HIGHWAY_OUT_RIGHT",
+         "detailedGeometry": "EXIT_RIGHT_TAKE_RIGHT",
+         "roadlinks": {
+          "value": {
+           "turningPoint": {
+            "coordinatesValid": true,
+            "latitude": 50.4321,
+            "longitude": 30.9876
+           }
+          }
+         }
+        }
+       },
+       {
+        "destinationManeuver": {
+         "uid": 9007199254740,
+         "distanceToDestination": 12000,
+         "unreliable": false,
+         "sourceId": {
+          "simpleId": {
+           "id": 4711
+          }
+         },
+         "formattedDistance": {
+          "distance": "350",
+          "unit": "METER",
+          "rawDistance": 350
+         },
+         "description": {
+          "elements": [
+           {
+            "text": "STREET_CANARY"
+           },
+           {
+            "spacer": "SMALL"
+           }
+          ]
+         },
+         "travelTime": 40,
+         "travelTimeDelay": 0,
+         "guidingStep": "GS2",
+         "combinedManeuverType": "SINGLE",
+         "maneuverRestriction": "NONE",
+         "position": "RIGHT",
+         "isCheckeredFlag": true,
+         "stopOverNumber": 0,
+         "roadlinks": {
+          "value": {
+           "turningPoint": {
+            "coordinatesValid": true,
+            "latitude": 50.4321,
+            "longitude": 30.9876
+           }
+          }
+         }
+        }
+       }
+      ]
+     }
+    },
+    "currentDistances": {
+     "carDistanceToFinalDestination": 5700,
+     "carDistanceToNextDestination": 5700,
+     "travelledDistanceSinceTripStart": 1250,
+     "travelledDistanceSinceLastDestination": 1250
+    }
+   }
+  },
+  "body": "views=1 shape=object [id-len=17 seq=4 valid=true offset=0 total=7 events=4 {intersection direction=LEFT geometry=TWO_WAY_FORK_TAKE_LEFT dist-len=3 unit=METER raw=350 step=GS2 combined=SINGLE toDest=12000 unreliable=false desc-elements=2} {roundabout exit=2 angle=270 side=RIGHT dist-len=3 unit=KM raw=1200 step=GS0 combined=SINGLE toDest=12000 unreliable=false desc-elements=2} {branch branch=HIGHWAY_OUT_RIGHT geometry=EXIT_RIGHT_TAKE_RIGHT dist-len=3 unit=METER raw=350 step=GS2 combined=SINGLE toDest=12000 unreliable=false desc-elements=2} +1 more] toFinal=5700 toNext=5700 travelled=1250 sinceDest=1250"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "rendered-views",
+  "iface": "de.bmw.infotainment.navigation.guiding.GuidanceRenderedContent",
+  "field": "registeredViews",
+  "instance": "Main_Instance",
+  "value": "KOMBI_CANARY",
+  "body": "len=12"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "rendered",
+  "iface": "de.bmw.infotainment.navigation.guiding.GuidanceRenderedContent",
+  "field": "viewContentChanged",
+  "instance": "Main_Instance",
+  "value": {
+   "viewId": "CANARY_VIEW_KOMBI",
+   "viewContent": {
+    "ramsesSceneId": 4097,
+    "occurrenceId": 12,
+    "configSequenceId": 4,
+    "type": {
+     "contentType": "HIGH_GUIDING",
+     "options": [
+      "ALWAYS_ON",
+      "BAR_GRAPH"
+     ]
+    },
+    "associatedEvent": {
+     "intersection": {
+      "uid": 9007199254740,
+      "distanceToDestination": 12000,
+      "unreliable": false,
+      "sourceId": {
+       "simpleId": {
+        "id": 4711
+       }
+      },
+      "formattedDistance": {
+       "distance": "350",
+       "unit": "METER",
+       "rawDistance": 350
+      },
+      "description": {
+       "elements": [
+        {
+         "text": "STREET_CANARY"
+        },
+        {
+         "spacer": "SMALL"
+        }
+       ]
+      },
+      "travelTime": 40,
+      "travelTimeDelay": 0,
+      "guidingStep": "GS2",
+      "combinedManeuverType": "SINGLE",
+      "maneuverRestriction": "NONE",
+      "direction": "RIGHT",
+      "detailedGeometry": "TWO_WAY_FORK_TAKE_RIGHT",
+      "roadlinks": {
+       "value": {
+        "turningPoint": {
+         "coordinatesValid": true,
+         "latitude": 50.4321,
+         "longitude": 30.9876
+        }
+       }
+      }
+     }
+    },
+    "bargraphProgress": 60,
+    "miniLabelPlacement": "LEFT",
+    "sceneVersionTags": [
+     1,
+     2,
+     3
+    ]
+   }
+  },
+  "body": "view-len=17 scene=4097(0x1001) occurrence=12 seq=4 type=HIGH_GUIDING options=ALWAYS_ON+BAR_GRAPH bar=60 labels=LEFT tags=3 event={intersection direction=RIGHT geometry=TWO_WAY_FORK_TAKE_RIGHT dist-len=3 unit=METER raw=350 step=GS2 combined=SINGLE toDest=12000 unreliable=false desc-elements=2}"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "cp-metadata",
+  "iface": "de.bmw.infotainment.a4a.carplay.CarPlayManager",
+  "field": "projectedGuidanceMetadataAvailable",
+  "instance": "CarPlayManagerInst1",
+  "value": true,
+  "body": "active=true"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "cp-screen",
+  "iface": "de.bmw.infotainment.a4a.carplay.CarPlayManager",
+  "field": "onScreenChange",
+  "instance": "CarPlayManagerInst1",
+  "value": {
+   "screenOwner": "PROJECTED"
+  },
+  "body": "screenOwner=PROJECTED"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "cp-modes",
+  "iface": "de.bmw.infotainment.am.carplay.CarPlay",
+  "field": "changeModes",
+  "instance": "CarPlayAMInst1",
+  "value": {
+   "reasonStr": "Canary reason text",
+   "appStates": [
+    {
+     "appStateID": "AS_TURN_BY_TURN",
+     "stateFlag": true,
+     "speechMode": "SM_NONE"
+    }
+   ],
+   "resources": [
+    {
+     "resourceID": "RS_MAIN_DISPLAY",
+     "transferType": "TT_TAKE",
+     "transferPriority": "TP_USER_INITIATED",
+     "takeConstraint": "RC_ANY_TIME",
+     "borrowConstraint": "RC_NOT_SET",
+     "unborrowConstraint": "RC_NOT_SET"
+    }
+   ]
+  },
+  "body": "appStates=1 [appStateID=AS_TURN_BY_TURN stateFlag=true speechMode=SM_NONE] resources=1 [resourceID=RS_MAIN_DISPLAY transferType=TT_TAKE transferPriority=TP_USER_INITIATED takeConstraint=RC_ANY_TIME borrowConstraint=RC_NOT_SET unborrowConstraint=RC_NOT_SET]"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "aa-metadata",
+  "iface": "de.bmw.infotainment.sdi.aap.androidautoprojectedmanager.AndroidAutoProjectedManager",
+  "field": "projectedGuidanceMetadataAvailable",
+  "instance": "AndroidAutoProjectedManagerInst1",
+  "value": false,
+  "body": "active=false"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "aa-video",
+  "iface": "de.bmw.infotainment.sdi.aap.androidautoprojectedmanager.AndroidAutoProjectedManager",
+  "field": "isVideoStreaming",
+  "instance": "AndroidAutoProjectedManagerInst1",
+  "value": false,
+  "body": "active=false"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "aa-features",
+  "iface": "de.bmw.infotainment.sdi.aap.androidautoprojectedmanager.AndroidAutoProjectedManager",
+  "field": "featureConfiguration",
+  "instance": "AndroidAutoProjectedManagerInst1",
+  "value": {
+   "guidingMetadataEnabled": true,
+   "vehicleStatusEnabled": false
+  },
+  "body": "metadata=true vehicleStatus=false"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "ric-guidance",
+  "iface": "de.bmw.infotainment.remoteinstrumentcluster.RICServiceGuidance",
+  "field": "ric_sendEvent",
+  "instance": "1",
+  "value": {
+   "handle": 3,
+   "eventID": 21,
+   "eventType": "Event_DisplaySwitchEvent",
+   "eventData": {
+    "displaySwitchEvent": {
+     "eventID": 21,
+     "eventType": "Event_DisplaySwitchEvent",
+     "referredModelID": 5,
+     "referredModelType": "Model",
+     "activeDisplay": "HMI_GUIDING_LABELS_MAP"
+    }
+   }
+  },
+  "body": "handle=3 eventID=21 eventType=Event_DisplaySwitchEvent eventID=21 eventType=Event_DisplaySwitchEvent referredModelID=5 referredModelType=Model activeDisplay=HMI_GUIDING_LABELS_MAP"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "display-sink",
+  "iface": "de.bmw.infotainment.remoteinstrumentcluster.DisplaySink",
+  "field": "requestSinkSwitch",
+  "instance": "1",
+  "value": {
+   "pixelAspectRatio": 1,
+   "resolution": {
+    "dimension": [
+     1088,
+     480
+    ]
+   },
+   "displaySelection": 2
+  },
+  "body": "pixelAspectRatio=1 dimension=2 [1088] [480] displaySelection=2"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "nav-can",
+  "iface": "de.bmw.infotainment.navigation.NavigationCAN",
+  "field": "calculationDataNavigation",
+  "instance": "1",
+  "value": {
+   "statusDistanceDestinationNavigation": 5700,
+   "statusDistanceDestinationNavigationUnitOfMeasurement": "KILOMETER__METER",
+   "statusArrivalTimeHour": 14,
+   "statusArrivalTimeMinute": 41,
+   "statusTimeAMPM": "NICHT_VERWENDET",
+   "statusDayFlag": "DAUER_IST_WENIGER_24H"
+  },
+  "body": "dist=5700 unit=KILOMETER__METER etaH=14 etaM=41 ampm=NICHT_VERWENDET day=DAUER_IST_WENIGER_24H"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "lane-feedback",
+  "iface": "de.bmw.infotainment.FeedbackLaneGuiding",
+  "field": "correctionDataLaneGuiding",
+  "instance": "1",
+  "value": {
+   "currentGuidingBestLanes": 2,
+   "currentNumberOfLanes": 3,
+   "nextGuidingBestLanes": 1,
+   "nextNumberOfLanes": 2,
+   "currentLane": 2,
+   "laneShift": -1,
+   "distanceNextGuiding": 150,
+   "distanceNextManeuver": 350,
+   "useXPadData": "DATA_VALID",
+   "currentGuidingHighlightedLanes": 2,
+   "nextGuidingHighlightedLanes": 1
+  },
+  "body": "currentGuidingBestLanes=2 currentNumberOfLanes=3 nextGuidingBestLanes=1 nextNumberOfLanes=2 currentLane=2 laneShift=-1 distanceNextGuiding=150 distanceNextManeuver=350 useXPadData=DATA_VALID currentGuidingHighlightedLanes=2 nextGuidingHighlightedLanes=1"
  }
 ]

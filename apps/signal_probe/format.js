@@ -178,9 +178,18 @@ const DART_KINDS = ['intersection', 'branch', 'roundabout', 'destinationManeuver
 function fmtDart(v) {
     if (!v || typeof v !== 'object') return notA('a struct', v);
     const m = v.maneuver && typeof v.maneuver === 'object' ? v.maneuver : null;
-    const kind = m ? DART_KINDS.filter((k) => m[k] !== undefined && m[k] !== null)[0] : undefined;
+    const x = eventParts(m);
+    return 'kind=' + (x.kind || (m ? '?' : '-')) + ' bar=' + fNum(v.bargraphProgress) + x.details;
+}
+/**
+ * One guidance event (a GuidanceEventUnion: the manoeuvre of conclusiveDart, an entry of an event list, the event a rendered
+ * guidance box shows): { kind, details }, details = " direction=... dist-len=... raw=... step=..." (enums and numbers only).
+ * NEVER its road links (coordinates), its description text (only how many elements) or a time stamp.
+ */
+function eventParts(m) {
+    const kind = m && typeof m === 'object' ? DART_KINDS.filter((k) => m[k] !== undefined && m[k] !== null)[0] : undefined;
     const e = kind && typeof m[kind] === 'object' ? m[kind] : null;
-    let out = 'kind=' + (kind || (m ? '?' : '-')) + ' bar=' + fNum(v.bargraphProgress);
+    let out = '';
     if (e) {
         if (kind === 'intersection') out += ' direction=' + fEnum(e.direction) + ' geometry=' + fEnum(e.detailedGeometry);
         if (kind === 'branch') out += ' branch=' + fEnum(e.branchType) + ' geometry=' + fEnum(e.detailedGeometry);
@@ -191,6 +200,91 @@ function fmtDart(v) {
         out += ' dist-len=' + fLen(dig(e, ['formattedDistance', 'distance'])) + ' unit=' + fEnum(dig(e, ['formattedDistance', 'unit'])) +
             ' raw=' + fNum(dig(e, ['formattedDistance', 'rawDistance'])) + ' step=' + fEnum(e.guidingStep) + ' combined=' + fEnum(e.combinedManeuverType) +
             ' toDest=' + fNum(e.distanceToDestination) + ' unreliable=' + fBool(e.unreliable) + ' desc-elements=' + (Array.isArray(de) ? de.length : '-');
+    }
+    return { kind: kind, details: out };
+}
+const eventBrace = (m) => { const x = eventParts(m && typeof m === 'object' ? m : null); return '{' + (x.kind || (m ? '?' : '-')) + x.details + '}'; };
+
+// ---- P25 (S16, car issues NV 2026-11-19): where the cluster's next turn comes from while CarPlay guides -----------------------
+/**
+ * A map as the binding may hand it over: a Map, an array of [key, value] / { key, value } / { first, second }, or a plain object
+ * keyed by the map's keys. -> { shape, list: [[key, value], ...] }, or null. The keys of S16's maps are view names: only their LENGTH
+ * is ever printed.
+ */
+function mapEntries(m) {
+    if (m && typeof m === 'object' && !Array.isArray(m) && typeof m.forEach === 'function' && typeof m.get === 'function') {
+        const l = [];
+        m.forEach((v, k) => { l.push([k, v]); });
+        return { shape: 'map', list: l };
+    }
+    if (Array.isArray(m)) {
+        return { shape: 'pairs', list: m.map((e) => {
+            if (Array.isArray(e) && e.length === 2) return [e[0], e[1]];
+            if (e && typeof e === 'object' && ('key' in e || 'value' in e)) return [e.key, e.value];
+            if (e && typeof e === 'object' && 'first' in e) return [e.first, e.second];
+            return [undefined, e];
+        }) };
+    }
+    if (m && typeof m === 'object' && !isBuf(m)) return { shape: 'object', list: Object.keys(m).map((k) => [k, m[k]]) };
+    return null;
+}
+const VIEWS_MAX = 4, VIEW_EVENTS_MAX = 3;
+/**
+ * GuidanceEventList.viewsChanged ({ content: ViewsUpdate }): per registered view (the map's key = the view's name, as a LENGTH)
+ * its sequence number, its indexed position, how many events it holds and the first three of them (kind, direction / exit /
+ * branch, distance, guiding step); then the car's distances (to the final and the next destination, travelled). At most 4 views.
+ */
+function fmtViews(v) {
+    const c = v && typeof v === 'object' && v.content && typeof v.content === 'object' ? v.content : v;
+    if (!c || typeof c !== 'object' || Array.isArray(c)) return notA('a struct', v);
+    const views = mapEntries(c.viewsContent);
+    const d = c.currentDistances && typeof c.currentDistances === 'object' ? c.currentDistances : {};
+    let out = 'views=' + (views ? views.list.length + ' shape=' + views.shape : '-');
+    if (views) {
+        views.list.slice(0, VIEWS_MAX).forEach((kv) => {
+            const vc = kv[1] && typeof kv[1] === 'object' ? kv[1] : {};
+            const ip = vc.indexedPosition && typeof vc.indexedPosition === 'object' ? vc.indexedPosition : {};
+            const evs = Array.isArray(vc.eventsInView) ? vc.eventsInView : null;
+            out += ' [id-len=' + fLen(kv[0]) + ' seq=' + fNum(vc.configSequenceId) + ' valid=' + fBool(ip.valid) + ' offset=' + fNum(ip.ccpOffset) +
+                ' total=' + fNum(ip.totalElementCount) + ' events=' + (evs ? evs.length : '-') +
+                (evs ? evs.slice(0, VIEW_EVENTS_MAX).map((e) => ' ' + eventBrace(e)).join('') : '') +
+                (evs && evs.length > VIEW_EVENTS_MAX ? ' +' + (evs.length - VIEW_EVENTS_MAX) + ' more' : '') + ']';
+        });
+        if (views.list.length > VIEWS_MAX) out += ' +' + (views.list.length - VIEWS_MAX) + ' more';
+    }
+    return out + ' toFinal=' + fNum(d.carDistanceToFinalDestination) + ' toNext=' + fNum(d.carDistanceToNextDestination) +
+        ' travelled=' + fNum(d.travelledDistanceSinceTripStart) + ' sinceDest=' + fNum(d.travelledDistanceSinceLastDestination);
+}
+/**
+ * GuidanceRenderedContent.viewContentChanged ({ viewId, viewContent }): which view (its name as a LENGTH), the RAMSES scene id (also
+ * in hex, to compare with cluster-render's DCSM content ids), the occurrence and sequence numbers, the content type (HIGH_GUIDING,
+ * JUNCTION_VIEW, ...) and its options, the bar graph, the label side, how many scene version tags, and the event it shows.
+ */
+function fmtRendered(v) {
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return notA('a struct', v);
+    const c = v.viewContent && typeof v.viewContent === 'object' ? v.viewContent : v;
+    const t = c.type && typeof c.type === 'object' ? c.type : {};
+    return 'view-len=' + fLen(v.viewId) + ' scene=' + fHex(c.ramsesSceneId) + ' occurrence=' + fNum(c.occurrenceId) + ' seq=' + fNum(c.configSequenceId) +
+        ' type=' + fEnum(t.contentType) + ' options=' + enumList(t.options) + ' bar=' + fNum(c.bargraphProgress) + ' labels=' + fEnum(c.miniLabelPlacement) +
+        ' tags=' + (Array.isArray(c.sceneVersionTags) ? c.sceneVersionTags.length : '-') + ' event=' + eventBrace(c.associatedEvent);
+}
+/**
+ * ProjectedModeGuiding.streamCommandChanged ({ streamCommand: union }): the guidance engine asking the projected mode (CarPlay) for
+ * a video stream: request / resize / stop, the render size, the category rectangle and the safe area, in screen pixels.
+ */
+function fmtStream(v) {
+    const u = v && typeof v === 'object' && v.streamCommand && typeof v.streamCommand === 'object' ? v.streamCommand : v;
+    if (!u || typeof u !== 'object' || Array.isArray(u)) return notA('a struct', v);
+    const kind = ['requestStream', 'resizeStream', 'stopStream'].filter((k) => u[k] !== undefined && u[k] !== null)[0];
+    const cfg = kind && u[kind] && typeof u[kind] === 'object' && u[kind].config && typeof u[kind].config === 'object' ? u[kind].config : null;
+    const rect = (r) => (r && typeof r === 'object' ? fNum(r.left) + ',' + fNum(r.top) + '+' + fNum(r.width) + 'x' + fNum(r.height) : '-');
+    let out = 'command=' + (kind || '?');
+    if (cfg) {
+        const rs = cfg.renderSize && typeof cfg.renderSize === 'object' ? cfg.renderSize : {};
+        const sa = cfg.safeArea && typeof cfg.safeArea === 'object' ? cfg.safeArea : {};
+        const pts = sa.polygon && typeof sa.polygon === 'object' && Array.isArray(sa.polygon.pointList) ? sa.polygon.pointList : null;
+        out += ' size=' + fNum(rs.horizontalSize) + 'x' + fNum(rs.verticalSize) + ' rect=' + rect(cfg.categoryRect) +
+            ' safe=' + (sa.rect && typeof sa.rect === 'object' ? 'rect ' + rect(sa.rect) : pts ? 'polygon points=' + pts.length : '-');
     }
     return out;
 }
@@ -325,6 +419,7 @@ const isBuf = (x) => !!x && typeof x === 'object' && ((typeof Buffer !== 'undefi
 function fmtTree(v, opts) {
     const o = opts || {};
     const maxEntries = o.entries || TREE_ENTRIES, maxLen = o.max || TREE_MAX, skip = o.skip || [], strip = o.strip || [];
+    const names = typeof o.enumNames === 'string' ? new RegExp(o.enumNames) : null;
     const short = (k) => { for (let i = 0; i < strip.length; i++) if (k.indexOf(strip[i]) === 0 && k.length > strip[i].length) return k.slice(strip[i].length); return k; };
     const out = [];
     let len = 0, cut = false;
@@ -336,7 +431,9 @@ function fmtTree(v, opts) {
     const leaf = (name, x) => {
         if (typeof x === 'boolean') return name + '=' + fBool(x);
         if (typeof x === 'number' || typeof x === 'bigint') return name + '=' + fNum(x);
-        if (typeof x === 'string') return /^[A-Z_][A-Z0-9_]{0,95}$/.test(x) ? name + '=' + x : name + '.len=' + x.length;
+        // an enum name; `enumNames` (S16 ric-guidance: the remote cluster's enums are "Event_DisplaySwitchEvent", "Model_...") is a field's own
+        // pattern for mixed-case enum names (the test checks it against every enum name the type can carry, and that it lets no free text in)
+        if (typeof x === 'string') return /^[A-Z_][A-Z0-9_]{0,95}$/.test(x) || (names && x.length <= 96 && names.test(x)) ? name + '=' + x : name + '.len=' + x.length;
         if (isBuf(x)) return name + '.len=' + x.length;     // a buffer
         return none(x) ? name + '=-' : null;
     };
@@ -377,4 +474,5 @@ module.exports = {
     fNum, fEnum, fBool, fHex, fLen, fCoarse, fKnown, fPresent, fBand, fPic, enumList,
     fmtBits, fmtCbs, fmtTemps, fmtIntersection, fmtDescription, fmtDart, fmtLanes, fmtMediaMenu, fmtStation, fmtMetadata,
     fmtRoles, fmtDevices, fmtCallList, fmtTree, TREE_SKIP,
+    eventParts, mapEntries, fmtViews, fmtRendered, fmtStream,
 };

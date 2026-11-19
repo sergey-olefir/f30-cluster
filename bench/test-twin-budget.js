@@ -66,6 +66,56 @@ function staticChecks() {
     const smp = (s) => uniformsOf(s).filter((u) => u.type === 'sampler2D').map((u) => u.name);
     ok(smp(dial).join() === 'u_face', 'tdial samples one asset, u_face');
     ok(smp(L).join() === 'u_mask' && smp(RT).length === 0, 'tdback L samples one asset, u_mask; RT and RB none');
+    fp16Arcs(L);
+}
+
+/* car-issues MW: the map window W3's arcs at the car's mediump (fp16), modelled op by op. The arcs are circle distances far over
+ * 256 px: the shader asks for highp, and where only mediump exists it divides the offsets by the radius before squaring them. */
+function half(x) {            // the nearest IEEE half (binary16) value; past 65504 it is infinite, as on the GPU
+    if (!isFinite(x)) return x;
+    const a = Math.abs(x);
+    if (a >= 65520) return x > 0 ? Infinity : -Infinity;
+    const step = a < 6.103515625e-05 ? 5.960464477539063e-08 : Math.pow(2, Math.floor(Math.log2(a)) - 10);
+    return Math.round(x / step) * step;
+}
+const clamp01 = (v) => (v !== v ? NaN : Math.max(0, Math.min(1, v)));
+/** The W3 arc factor of one disc (TDBACK's u_mapA block) for the pixel centre px, py: exact (f = Number) or at fp16 (f = half). */
+function arcCov(px, py, cx, cy, R, f, naive) {
+    const x = f(px), y = f(py);
+    if (naive) {             // what the shader must NOT do: the length of a px offset, squared in px
+        const dx = f(x - cx), dy = f(y - cy), d = f(Math.sqrt(f(f(dx * dx) + f(dy * dy))));
+        return clamp01(f(f(d - R) + 0.5));
+    }
+    const lx = f(f(x - cx) / R), ly = f(f(y - cy) / R);
+    const s = f(Math.sqrt(f(f(lx * lx) + f(ly * ly))));
+    return clamp01(f(f(f(s - 1) * R) + 0.5));
+}
+function fp16Arcs(L) {
+    const blk = /if \(u_mapA\.w > 0\.0\) \{([^}]*)\}/.exec(L);
+    ok(!!blk && /\(p - u_mapA\.xz\) \/ u_mapA\.w/.test(blk[1]) && /\(p - u_mapA\.yz\) \/ u_mapA\.w/.test(blk[1]) && !/length\(/.test(blk[1]),
+        'car-issues MW: tdback L\'s W3 arcs divide both offsets by the radius before they are squared (no length() of a px offset)');
+    // every pixel centre of W3's box and 4 px round it, both discs, at the car's fp16 against exact arithmetic
+    const C = [[380, 400], [1540, 400]], R = 324;
+    let worst = 0, bad = 0, n = 0, naiveOpen = 0, shut = 0;
+    for (let y = 169; y < 592; y++) {
+        for (let x = 614; x < 1306; x++) {
+            const px = x + 0.5, py = y + 0.5;
+            C.forEach((c) => {
+                const e = arcCov(px, py, c[0], c[1], R, Number), h = arcCov(px, py, c[0], c[1], R, half);
+                n++;
+                if (!(h === h)) { bad++; return; }
+                worst = Math.max(worst, Math.abs(e - h));
+                const inside = Math.hypot(px - c[0], py - c[1]) < R - 1.5;
+                if (inside && h > 0) shut++;
+                if (inside && arcCov(px, py, c[0], c[1], R, half, true) > 0) naiveOpen++;
+            });
+        }
+    }
+    ok(bad === 0 && worst <= 1.0 && shut === 0, 'car-issues MW: W3\'s arcs at fp16 (' + n + ' pixel-disc pairs): no NaN, nothing more than 1.5 px inside a disc opens, ' +
+        'the edge\'s coverage within ' + worst.toFixed(3) + ' of exact (<= 1.0: the x of a pixel centre past 1024 is itself a whole px at fp16)');
+    // the model bites: the same circle measured in px (an unnormalised length) overflows at fp16 past 256 px, so pixels INSIDE a
+    // dial's disc would open and BMW's map would show over our bezel
+    ok(naiveOpen > 1000, 'car-issues MW: the fp16 model notices an unnormalised distance: in px it would open ' + naiveOpen + ' pixels inside the discs (offsets over 256 px square past 65504)');
 }
 
 /* ---------------- the bench ---------------- */
@@ -317,9 +367,18 @@ async function benchChecks(keep) {
     await hook('twinMap:W2');
     await sleep(400);
     ok(near(uni(bl(), 'u_map'), [700, 173, 1220, 600], 0), 'twinMap W2: the open box [700, 173, 1220, 600]');
+    ok(near(uni(bl(), 'u_mapA'), [0, 0, 0, 0], 0), 'car-issues MW: twinMap W2 has no arcs (u_mapA zeros)');
+    // car-issues MW: W3, the free space between the dials: the box [618, 173, 1302, 588] minus the discs of 324 px round the dials
+    await hook('twinMap:W3');
+    await sleep(400);
+    ok(near(uni(bl(), 'u_map'), [618, 173, 1302, 588], 0) && near(uni(bl(), 'u_mapF'), [1, 1, 1, 1], 0) && near(uni(bl(), 'u_mapA'), [380, 1540, 400, 324], 0),
+        'car-issues MW: twinMap W3: the box [618, 173, 1302, 588], hard edges, arcs round (380, 400) and (1540, 400) at 324 px: u_mapA ' + fmt(uni(bl(), 'u_mapA')));
+    await hook('twinMap:W2');
+    await sleep(400);
+    ok(near(uni(bl(), 'u_map'), [700, 173, 1220, 600], 0) && near(uni(bl(), 'u_mapA'), [0, 0, 0, 0], 0), 'car-issues MW: back to W2: its box again and the arcs off');
     await hook('twinMap:');
     await sleep(400);
-    ok(near(uni(bl(), 'u_map'), [0, 0, 0, 0], 0), 'twinMap null: closed again');
+    ok(near(uni(bl(), 'u_map'), [0, 0, 0, 0], 0) && near(uni(bl(), 'u_mapA'), [0, 0, 0, 0], 0), 'twinMap null: closed again (and no arcs)');
     ok(keys(w.last) === before && logCount() === builds, 'the map window came in place: no layer made again');
 
     // ---- the holes ----

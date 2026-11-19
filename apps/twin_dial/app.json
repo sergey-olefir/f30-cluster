@@ -2,7 +2,7 @@
   "id": "twin_dial",
   "title": "Twin Dial",
   "description": "A twin round-dial instrument cluster for the G20 panel: tachometer left, speedometer right, our own centre pages and check-control message",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "vendor": "custom",
   "loggingId": "OATD",
   "iconGlyph": "TD",
@@ -264,7 +264,8 @@
         "diagMapWindow",
         "diagMapForce",
         "diagMapSlots",
-        "diagSilent"
+        "diagSilent",
+        "diagGpuText"
       ]
     },
     {
@@ -292,6 +293,10 @@
         [
           "setting",
           "diagSilent"
+        ],
+        [
+          "setting",
+          "diagGpuText"
         ]
       ]
     }
@@ -561,11 +566,15 @@
           "W2"
         ],
         [
+          "W3",
+          "W3"
+        ],
+        [
           "W1",
           "W1"
         ]
       ],
-      "_about": "config.mapWindow (SPEC-R3 4.5): the map window on tab 5, an experiment. FIN (the owner, 2026-11-18): W2 is the window (the largest: open box [700, 173, 1220, 600], no fade, BMW's own edge shows, clipped above by the tab rule; no lens), so it is the FIRST option after off - switching the setting on gives W2; W1 stays one more press away"
+      "_about": "config.mapWindow (SPEC-R3 4.5): the map window on tab 5, an experiment. FIN (the owner, 2026-11-18): W2 is the window (the largest: open box [700, 173, 1220, 600], no fade, BMW's own edge shows, clipped above by the tab rule; no lens), so it is the FIRST option after off - switching the setting on gives W2; W1 stays one more press away. car-issues MW (2026-11-19): W3 is the next press after W2 - the whole free space between the dials (box [618, 173, 1302, 588] minus the discs of radius 324 round the dials' centres), for the owner to compare with W2 on the car"
     },
     {
       "key": "diagMapForce",
@@ -587,6 +596,14 @@
       "type": "bool",
       "default": false,
       "_about": "an action, no config key: the silent-fields summary of research3/MK once now and every 5 minutes while on"
+    },
+    {
+      "key": "diagGpuText",
+      "label": "Цифри на GPU (тест)",
+      "type": "choice",
+      "default": "off",
+      "options": [["off", "вимк."], ["legacy", "атлас 0.1.3"], ["pixels", "пікселями"]],
+      "_about": "car-issues GL: config.gpuText for the car test of docs/car-issues/GL-REPORT.md. off = the glyph atlases with rows of a multiple of 4 bytes (the fix); legacy = Twin Dial 0.1.3's td_big atlas (1066 bytes a row, 41 px cells written in place); pixels = the speed and the gear drawn as image text. Each change rebuilds the layout"
     }
   ],
   "config": {
@@ -835,16 +852,17 @@
       "_about": "B7 (research3/MP): the FIRST build waits until the car's first time zone and first message list are in, or ms after cluster-render is ready, whichever is first: one build at start instead of three (shared/diag_settings.js hold; the bytes before and after are in docs/twin-dial/R3B-INTEGRATION.md). Remove the key (or set false) for the three builds of 0.1.0."
     },
     "diag": {
-      "_about": "B7, the Діагностика menu (screen DIAG, shared/diag_settings.js): each setting writes the config paths named here while it is ON (every one is OFF by default = app.json's own key, put back when it goes off); a path is dotted; a choice lists its options. The changes apply in place (no layout rebuild).",
+      "_about": "B7, the Діагностика menu (screen DIAG, shared/diag_settings.js): each setting writes the config paths named here while it is ON (every one is OFF by default = app.json's own key, put back when it goes off); a path is dotted; a choice lists its options. The changes apply in place (no layout rebuild), but for diagGpuText (car-issues GL: a rebuild).",
       "settings": {
         "diagRelease": {
           "on": { "ccActive.release": { "deferValues": [65535], "leftList": true } },
           "_about": "the narrowed release of research3/MC for Twin Dial (SPEC-R3 5.4 step 7: only a number that was set before its entry left the list may be released; 65535 deferred): package B3 owns the engine side, this is the value the setting switches on"
         },
-        "diagMapWindow": { "options": { "W2": { "mapWindow": "W2" }, "W1": { "mapWindow": "W1" } } },
+        "diagMapWindow": { "options": { "W2": { "mapWindow": "W2" }, "W3": { "mapWindow": "W3" }, "W1": { "mapWindow": "W1" } }, "_carIssuesMW": "car-issues MW (2026-11-19): + W3, the whole free space between the dials (sides along the bezels), for the owner to compare with W2 on the car" },
         "diagMapForce": { "on": { "mapForce": true } },
         "diagMapSlots": { "on": { "mapSlotLog": true } },
-        "diagSilent": { "act": "silent" }
+        "diagSilent": { "act": "silent" },
+        "diagGpuText": { "options": { "legacy": { "gpuText": "legacy" }, "pixels": { "gpuText": "pixels" } }, "_about": "car-issues GL: the glyph atlases' row layout or image text, a rebuild on each change (shared/diag_settings.js)" }
       }
     },
     "pages": {
@@ -860,7 +878,7 @@
       "_carFix": "car-fix CF3 (2026-11-18, the car; docs/car-fix/CF3-REPORT.md): media ON (HmiMediaState, the tuner and the CarPlay player all arrive; CarPlay's title / artist / time from MediaPlayer on CarPlayMedia, the source from the HMI menu's selected icon); phone ON for what arrives (aggregatedCallState -> the call card, its title by state and our own timer); phoneDevices (DevicePresentation: the idle page's connection lines, tab 4's icon variant) and callDetail (VoiceCall contact / name, micMuted) stay OFF: never seen; route ON (tab 5 with CarPlay guiding: remaining distance, arrival and travel time, the road; no arrow; it also selects tab 5 by rule 3 like BMW's guidance; routeOffRoad: the \"Поза дорогою\" note from isOnGuidableRoad, OFF: it read false at the start of a CarPlay route, its meaning is unverified); guidance (BMW's own arrow page) stays OFF: untested."
     },
     "mapWindow": null,
-    "_mapWindow": "round 3 B4 (SPEC-R3 4.5), an EXPERIMENT (FIN, the owner 2026-11-18: W2 is the chosen window and the Діагностика setting's first option; still off by default): null = no map window; \"W1\" = the soft-edged window (zero box [750, 180, 1170, 564], fades 120 / 80 / 80, corner 24), \"W2\" = open wider so that BMW's own edge shows. It opens only while tab 5 is selected and BMW's map is believed present (mapSlots / the cluster's map-view setting) and closes at once on any doubt. Needs B1's u_map uniform in tdback.",
+    "_mapWindow": "round 3 B4 (SPEC-R3 4.5), an EXPERIMENT (FIN, the owner 2026-11-18: W2 is the chosen window and the Діагностика setting's first option; still off by default): null = no map window; \"W1\" = the soft-edged window (zero box [750, 180, 1170, 564], fades 120 / 80 / 80, corner 24), \"W2\" = open wider so that BMW's own edge shows. car-issues MW: \"W3\" = the whole free space between the dials: its sides follow the bezels (arcs of 324 px round the dials' centres: a 20 px black ring that keeps BMW's own mid-height stock items covered), top at the tab rule, foot at y 588 (above BMW's stored-message marker). It opens only while tab 5 is selected and BMW's map is believed present (mapSlots / the cluster's map-view setting) and closes at once on any doubt. Needs B1's u_map uniform in tdback.",
     "mapSlots": false,
     "_mapSlots": "true once the experiment has shown that cluster-render's status rows (slot 0x100 ... map 1) are readable: the window then follows them (S1); false = it follows the cluster's map-view setting and guidance (S2).",
     "mapForce": false,

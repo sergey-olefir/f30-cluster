@@ -13,7 +13,7 @@
  *   set, p, tag      the set (S1..S9), the item (P1..P17), the field's tag in the log line ("probe: P3 range-tank #2 ...")
  *   also             [set ids]: the field is also read while one of these sets is on (S10 needs eight fields of S6 / S7)
  *   iface, field     the interface and the field; flags "r" / "s" / "rs" as the catalogue allows (checked by the test), or "b": an EVENT,
- *                    declared under "_broadcasts" (S13 only, the lead's decision of 2026-11-18)
+ *                    declared under "_broadcasts" (S13..S16: the lead's decision of 2026-11-18, the owner's requests of 2026-11-19)
  *   one              [member, kind]: an event with one output, handed over as { member: v } or as v itself
  *   instance         the instance it is read on (default "1"); an interface with several instances is declared "*" in the manifest
  *   gapMs, cap       minimum ms between two lines of this field (the last value wins, "+k folded") and the most lines; per-set defaults below
@@ -24,7 +24,7 @@
  *   list / union     { member, cols }: an array of entries (member = the union member holding each) / a single-member union
  *   bits             { path, label }: a raw byte with its previous value and the bits that went up / down
  *   fmt              a named formatter of format.js (enum bool hex temps intersection dart lanes description mediaMenu station metadata
- *                    roles devices calllist cbs activeSource sources)
+ *                    roles devices calllist cbs activeSource sources tree; S16: views rendered stream)
  */
 const I = {
     KombiIF: 'de.bmw.infotainment.KombiIF',
@@ -114,6 +114,15 @@ const I = {
     FusedSensorDetection: 'de.bmw.environmentalmodel.FusedSensorDetectionData',
     DAADataServer: 'de.bmw.environmentalmodel.DAADataServer',
     ObjectListSuAAR: 'de.bmw.dass.pad.communication.ObjectListSuAAR',
+    // S16 (car issues NV, 2026-11-19: the owner saw the next turns on the cluster in the place of the map while CarPlay guided)
+    ProjectedModeGuiding: 'de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding',
+    GuidanceEventList: 'de.bmw.infotainment.navigation.guiding.GuidanceEventList',
+    GuidanceRenderedContent: 'de.bmw.infotainment.navigation.guiding.GuidanceRenderedContent',
+    CarPlayAM: 'de.bmw.infotainment.am.carplay.CarPlay',
+    RICServiceGuidance: 'de.bmw.infotainment.remoteinstrumentcluster.RICServiceGuidance',
+    DisplaySink: 'de.bmw.infotainment.remoteinstrumentcluster.DisplaySink',
+    NavigationCAN: 'de.bmw.infotainment.navigation.NavigationCAN',
+    FeedbackLaneGuiding: 'de.bmw.infotainment.FeedbackLaneGuiding',
 };
 const TABLE = [
     // ---- S1 P1 ----
@@ -217,8 +226,8 @@ const TABLE = [
     { set: 'S6', p: 'P11', tag: 'ic-context2', iface: I.HMIContext2, field: 'currentICGraphicalContext', also: ['S10'], flags: 'rs', instance: '1', mark: true, cols: [['state',['VisualContext','StateID'],'n'],['applet',['VisualContext','AppletID'],'n'],['focus',['FocusIndex','FocusIndex'],'n'],['focusApplet',['FocusIndex','AppletID'],'n'],['list','ListIndex','n']] },
     { set: 'S6', p: 'P11', tag: 'kombi-selection', iface: I.KombiIF, field: 'statusKombiSelection', also: ['S10'], flags: 'rs', mark: true, cols: [['packBC','statusActivationInstrumentPackBC','x'],['content','statusActivationInstrumentPackContent','x'],['preselect','statusActivationPreselectInstrumentPack','e']] },
     { set: 'S6', p: 'P11', tag: 'kombi-available', iface: I.KombiIF, field: 'statusKombiSelectionAvailability', also: ['S10'], flags: 'rs', mark: true, cols: [['packBC','baseSetupInstrumentPackBC','x'],['content','baseSetupInstrumentPackContent','x'],['preselect','baseSetupPreselectInstrumentPack','n']] },
-    { set: 'S6', p: 'P11', tag: 'kombi-config', iface: I.KombiIF, field: 'statusConfigurationKombi5', also: ['S7', 'S10'], flags: 'rs', mark: true, cols: [['content2','statusActivationInstrumentPackContent2','x'],['preselect2','statusActivationPreselectInstrumentPack2','e'],['navDisplay','statusNavigationDisplayType','e'],['dzmOrPower','statusDZMorPowermeterDisplay','e'],['entertainment','statusEntertainmentSTGDisplay','e']] },
-    { set: 'S6', p: 'P11', tag: 'display-kombi', iface: I.Vehicle2, field: 'statusDisplayKombi', also: ['S10'], flags: 'rs', mark: true, cols: [['view','statusDisplayInstrumentPackM','e']] },
+    { set: 'S6', p: 'P11', tag: 'kombi-config', iface: I.KombiIF, field: 'statusConfigurationKombi5', also: ['S7', 'S10', 'S16'], flags: 'rs', mark: true, cols: [['content2','statusActivationInstrumentPackContent2','x'],['preselect2','statusActivationPreselectInstrumentPack2','e'],['navDisplay','statusNavigationDisplayType','e'],['dzmOrPower','statusDZMorPowermeterDisplay','e'],['entertainment','statusEntertainmentSTGDisplay','e']] },
+    { set: 'S6', p: 'P11', tag: 'display-kombi', iface: I.Vehicle2, field: 'statusDisplayKombi', also: ['S10', 'S16'], flags: 'rs', mark: true, cols: [['view','statusDisplayInstrumentPackM','e']] },
     // ---- S6 P13 ----
     { set: 'S6', p: 'P13', tag: 'sw-special1', iface: I.SteeringWheelPushButton, field: 'statusSpecialFunctionButton', flags: 'rs', gapMs: 0, cap: 300, mark: true, cols: [['press','operationPushButtonSpecialFunction','e']] },
     { set: 'S6', p: 'P13', tag: 'sw-special2', iface: I.SteeringWheelPushButton, field: 'statusSpecialFunctionButton2', flags: 'rs', gapMs: 0, cap: 300, mark: true, cols: [['press','operationPushButtonSpecialFunction2','e']] },
@@ -237,22 +246,22 @@ const TABLE = [
     { set: 'S6', p: 'P13', tag: 'controller-keys', iface: I.FrontCCU, field: 'statusPushButtonsState', flags: 'rs', gapMs: 0, cap: 300, mark: true, cols: [['b1','frontOperationButton1','e'],['b2','frontOperationButton2','e'],['b3','frontOperationButton3','e'],['b4','frontOperationButton4','e'],['b5','frontOperationButton5','e'],['b6','frontOperationButton6','e'],['b7','frontOperationButton7','e'],['b8','frontOperationButton8','e']] },
     { set: 'S6', p: 'P13', tag: 'hmi-shortcut', iface: I.Lifecycle, field: 'entertainmentModeTrigger', flags: 'rs', instance: 'Front', gapMs: 0, cap: 300, fmt: 'enum', mark: true },
     // ---- S7 P12 ----
-    { set: 'S7', p: 'P12', tag: 'guiding-state', iface: I.NavigationStatus, field: 'guidingState', flags: 'rs', fmt: 'enum' },
-    { set: 'S7', p: 'P12', tag: 'next-intersection', iface: I.Guidance, field: 'nextIntersection', flags: 'rs', instance: 'Main_Instance', gapMs: 2000, fmt: 'intersection' },
-    { set: 'S7', p: 'P12', tag: 'guidance-state', iface: I.Guidance, field: 'guidanceState', flags: 'rs', instance: 'Main_Instance', fmt: 'enum' },
-    { set: 'S7', p: 'P12', tag: 'dart', iface: I.Guidance, field: 'conclusiveDart', flags: 'rs', instance: 'Main_Instance', gapMs: 2000, fmt: 'dart' },
-    { set: 'S7', p: 'P12', tag: 'lanes', iface: I.Guidance, field: 'currentLaneGuiding', flags: 'rs', instance: 'Main_Instance', gapMs: 2000, fmt: 'lanes' },
-    { set: 'S7', p: 'P12', tag: 'next-destination', iface: I.Guidance, field: 'nextDestinationInfo', flags: 'rs', instance: 'Main_Instance', gapMs: 2000, cols: [['travel','travelTime','n'],['delay','delayTime','n'],['delayStatus','delayStatus','e'],['dist-len',['formattedDistance','distance'],'t'],['unit',['formattedDistance','unit'],'e'],['raw',['formattedDistance','rawDistance'],'n'],['toFinal','distanceFromCurrentToFinalDestination','n'],['flag','isCheckeredFlag','b'],['stopover','stopOverNumber','n'],['etaInvalid',['estimatedArrivalTime','time','invalid'],'b'],['etaH',['estimatedArrivalTime','time','hour'],'n'],['etaM',['estimatedArrivalTime','time','minute'],'n'],['tzValid',['estimatedArrivalTime','includedTimeOffset','valid'],'b'],['tz',['estimatedArrivalTime','includedTimeOffset','timeZoneOffset'],'n']] },
-    { set: 'S7', p: 'P12', tag: 'road', iface: I.Guidance, field: 'currentRoad', flags: 'rs', instance: 'Main_Instance', gapMs: 2000, fmt: 'description' },
-    { set: 'S7', p: 'P12', tag: 'kombi-lanes', iface: I.LaneGuiding, field: 'laneGuiding', flags: 'rs', gapMs: 2000, cols: [['highlighted','currentGuidingHighlightedLanes','x'],['best','currentGuidingBestLanes','x'],['lane','currentLane','n'],['nextHighlighted','nextGuidingHighlightedLanes','x'],['shift','laneShift','n'],['distGuiding','distanceNextGuiding','n'],['distManeuver','distanceNextManeuver','n'],['maneuverShown','statusDisplayGuidingManeuver','e'],['level3Shown','statusDisplayGuidingLevel3','e'],['junctionShown','statusDisplayJunctionView','e'],['status','statusLaneGuiding','e'],['maneuverId','displayedManeuverID','e']] },
-    { set: 'S7', p: 'P12', tag: 'kombi-lanes-ext', iface: I.LaneGuiding, field: 'extendedLaneGuiding', flags: 'rs', gapMs: 2000, cols: [['distManeuver','extendedDistanceNextManeuver','n']] },
+    { set: 'S7', p: 'P12', tag: 'guiding-state', also: ['S16'], iface: I.NavigationStatus, field: 'guidingState', flags: 'rs', fmt: 'enum' },
+    { set: 'S7', p: 'P12', tag: 'next-intersection', also: ['S16'], iface: I.Guidance, field: 'nextIntersection', flags: 'rs', instance: 'Main_Instance', gapMs: 2000, fmt: 'intersection' },
+    { set: 'S7', p: 'P12', tag: 'guidance-state', also: ['S16'], iface: I.Guidance, field: 'guidanceState', flags: 'rs', instance: 'Main_Instance', fmt: 'enum' },
+    { set: 'S7', p: 'P12', tag: 'dart', also: ['S16'], iface: I.Guidance, field: 'conclusiveDart', flags: 'rs', instance: 'Main_Instance', gapMs: 2000, fmt: 'dart' },
+    { set: 'S7', p: 'P12', tag: 'lanes', also: ['S16'], iface: I.Guidance, field: 'currentLaneGuiding', flags: 'rs', instance: 'Main_Instance', gapMs: 2000, fmt: 'lanes' },
+    { set: 'S7', p: 'P12', tag: 'next-destination', also: ['S16'], iface: I.Guidance, field: 'nextDestinationInfo', flags: 'rs', instance: 'Main_Instance', gapMs: 2000, cols: [['travel','travelTime','n'],['delay','delayTime','n'],['delayStatus','delayStatus','e'],['dist-len',['formattedDistance','distance'],'t'],['unit',['formattedDistance','unit'],'e'],['raw',['formattedDistance','rawDistance'],'n'],['toFinal','distanceFromCurrentToFinalDestination','n'],['flag','isCheckeredFlag','b'],['stopover','stopOverNumber','n'],['etaInvalid',['estimatedArrivalTime','time','invalid'],'b'],['etaH',['estimatedArrivalTime','time','hour'],'n'],['etaM',['estimatedArrivalTime','time','minute'],'n'],['tzValid',['estimatedArrivalTime','includedTimeOffset','valid'],'b'],['tz',['estimatedArrivalTime','includedTimeOffset','timeZoneOffset'],'n']] },
+    { set: 'S7', p: 'P12', tag: 'road', also: ['S16'], iface: I.Guidance, field: 'currentRoad', flags: 'rs', instance: 'Main_Instance', gapMs: 2000, fmt: 'description' },
+    { set: 'S7', p: 'P12', tag: 'kombi-lanes', also: ['S16'], iface: I.LaneGuiding, field: 'laneGuiding', flags: 'rs', gapMs: 2000, cols: [['highlighted','currentGuidingHighlightedLanes','x'],['best','currentGuidingBestLanes','x'],['lane','currentLane','n'],['nextHighlighted','nextGuidingHighlightedLanes','x'],['shift','laneShift','n'],['distGuiding','distanceNextGuiding','n'],['distManeuver','distanceNextManeuver','n'],['maneuverShown','statusDisplayGuidingManeuver','e'],['level3Shown','statusDisplayGuidingLevel3','e'],['junctionShown','statusDisplayJunctionView','e'],['status','statusLaneGuiding','e'],['maneuverId','displayedManeuverID','e']] },
+    { set: 'S7', p: 'P12', tag: 'kombi-lanes-ext', also: ['S16'], iface: I.LaneGuiding, field: 'extendedLaneGuiding', flags: 'rs', gapMs: 2000, cols: [['distManeuver','extendedDistanceNextManeuver','n']] },
     // ---- S7 P14 ----
-    { set: 'S7', p: 'P12', tag: 'on-guidable-road', iface: I.Guidance, field: 'isOnGuidableRoad', flags: 'rs', instance: 'Main_Instance', fmt: 'bool' },
-    { set: 'S7', p: 'P12', tag: 'guiding-provider', iface: I.Guidance, field: 'guidingProvider', flags: 'rs', instance: 'Main_Instance', fmt: 'enum' },
-    { set: 'S7', p: 'P12', tag: 'carplay-guidance', iface: I.CarPlayManager, field: 'projectedGuidanceActive', flags: 'rs', instance: 'CarPlayManagerInst1', fmt: 'bool' },
-    { set: 'S7', p: 'P12', tag: 'aa-guidance', iface: I.AndroidAutoProjectedManager, field: 'projectedGuidanceActive', flags: 'rs', instance: 'AndroidAutoProjectedManagerInst1', fmt: 'bool' },
-    { set: 'S7', p: 'P14', tag: 'map-without-route', iface: I.Guidance, field: 'visualizationInKombiNonNaviEnabled', also: ['S10'], flags: 'rs', instance: 'Main_Instance', fmt: 'bool' },
-    { set: 'S7', p: 'P14', tag: 'junction-3d-in-kombi', iface: I.Guidance, field: 'junction3dViewInKombiEnabled', also: ['S10'], flags: 'rs', instance: 'Main_Instance', fmt: 'bool' },
+    { set: 'S7', p: 'P12', tag: 'on-guidable-road', also: ['S16'], iface: I.Guidance, field: 'isOnGuidableRoad', flags: 'rs', instance: 'Main_Instance', fmt: 'bool' },
+    { set: 'S7', p: 'P12', tag: 'guiding-provider', also: ['S16'], iface: I.Guidance, field: 'guidingProvider', flags: 'rs', instance: 'Main_Instance', fmt: 'enum' },
+    { set: 'S7', p: 'P12', tag: 'carplay-guidance', also: ['S16'], iface: I.CarPlayManager, field: 'projectedGuidanceActive', flags: 'rs', instance: 'CarPlayManagerInst1', fmt: 'bool' },
+    { set: 'S7', p: 'P12', tag: 'aa-guidance', also: ['S16'], iface: I.AndroidAutoProjectedManager, field: 'projectedGuidanceActive', flags: 'rs', instance: 'AndroidAutoProjectedManagerInst1', fmt: 'bool' },
+    { set: 'S7', p: 'P14', tag: 'map-without-route', iface: I.Guidance, field: 'visualizationInKombiNonNaviEnabled', also: ['S10', 'S16'], flags: 'rs', instance: 'Main_Instance', fmt: 'bool' },
+    { set: 'S7', p: 'P14', tag: 'junction-3d-in-kombi', iface: I.Guidance, field: 'junction3dViewInKombiEnabled', also: ['S10', 'S16'], flags: 'rs', instance: 'Main_Instance', fmt: 'bool' },
     // ---- S8 P15 ----
     { set: 'S8', p: 'P15', tag: 'sign', iface: I.TrafficSignDisplayControl, field: 'displaySpeedLimitAndNoPassingRestriction', flags: 's', cols: [['invalid','invalidFlag','n'],['value','displaySpeedLimit','n'],['unit','displaySpeedLimitUnit','e'],['warn','displaySpeedLimitWarning','e'],['supp','displaySpeedLimitSupplemental','e'],['style','displaySymbolStyle','e'],['np','displayNoPassingRestriction','e'],['npDist','displayRemainingDistanceNoPassingRestriction','n']] },
     { set: 'S8', p: 'P15', tag: 'longitudinal', also: ['S14'], iface: I.TrafficSignDisplayControl, field: 'displayDriverAssistanceLongitudinal', flags: 's', cols: [['invalid','invalidFlag','n'],['func','activeFuncLongitudinal','e'],['xcc',['dispXCC','dispXCCStatus'],'e'],['xccOn',['dispXCC','functionActive'],'b'],['object',['dispXCC','objectDetected'],'b'],['sld',['dispSLD','dispSLDStatus'],'e'],['lim',['dispSLD','dispLIMStatus'],'e'],['setSpeed','valueRequestedSpeed','n'],['setState',['dispRequestedSpeed','dispRequestedSpeedStatus'],'e'],['setUnit',['dispRequestedSpeed','unitOfRequestedSpeedValue'],'b'],['sla','StatusSLA','e'],['hdc','DispHDC','e']] },
@@ -378,6 +387,34 @@ const TABLE = [
     { set: 'S15', p: 'P24', tag: 'ego-cam-motion', iface: I.EgomotionCamera, field: 'egomotionCameraCartesian', flags: 'b', fmt: 'tree', tree: { skip: ['posXEgoCam', 'posYEgoCam', 'posZEgoCam'] } },
     { set: 'S15', p: 'P24', tag: 'ego-cam-rotation', iface: I.EgomotionCamera, field: 'egomotionCameraRotation', flags: 'b', fmt: 'tree' },
     { set: 'S15', p: 'P24', tag: 'ego-motion', iface: I.EgoMotionLegacy, field: 'ProperMotionVehicle', flags: 'b', fmt: 'tree', tree: { skip: ['xPositionProperMotionVehicle', 'yPositionProperMotionVehicle', 'yawAngleProperMotionVehicle'] } },
+    // ---- S16 P25 "Наступний поворот" (car issues NV, 2026-11-19): the owner saw the next turns on the cluster, in the place of the map,
+    //      while CarPlay guided, and BMW's own manoeuvre fields (S7) stayed empty. Every place the catalogue offers for a projected
+    //      manoeuvre or for the cluster's guidance box: the projected-mode guiding service CarPlay feeds (its fields and its stream
+    //      command), the guidance engine's event lists and rendered contents (the box's scene id and the event it shows), the stream
+    //      status, CarPlay's own turn-by-turn mode, the remote-cluster guidance events, the old CAN feed to the cluster. All of S7 and the
+    //      cluster's view fields carry also: ['S16']. Road, instruction and view names only as lengths; positions and bearings never.
+    { set: 'S16', p: 'P25', tag: 'pm-road', iface: I.ProjectedModeGuiding, field: 'currentRoad', flags: 'rs', instance: 'Main_Instance', fmt: 'description' },
+    { set: 'S16', p: 'P25', tag: 'pm-waypoints', iface: I.ProjectedModeGuiding, field: 'waypoints', flags: 'rs', instance: 'Main_Instance', gapMs: 5000, cols: [['travel','travelTime','n'],['delay','delayTime','n'],['delayStatus','delayStatus','e'],['dist-len',['formattedDistance','distance'],'t'],['unit',['formattedDistance','unit'],'e'],['raw',['formattedDistance','rawDistance'],'n'],['toFinal','distanceFromCurrentToFinalDestination','n'],['flag','isCheckeredFlag','b'],['stopover','stopOverNumber','n'],['charging','isChargingStation','b'],['etaInvalid',['estimatedArrivalTime','time','invalid'],'b'],['etaH',['estimatedArrivalTime','time','hour'],'n'],['etaM',['estimatedArrivalTime','time','minute'],'n']] },
+    { set: 'S16', p: 'P25', tag: 'pm-lanes', iface: I.ProjectedModeGuiding, field: 'currentLaneGuiding', flags: 'rs', instance: 'Main_Instance', fmt: 'lanes' },
+    { set: 'S16', p: 'P25', tag: 'pm-route-change', iface: I.ProjectedModeGuiding, field: 'activeRouteChange', flags: 'rs', instance: 'Main_Instance', fmt: 'enum' },
+    { set: 'S16', p: 'P25', tag: 'pm-stream', iface: I.ProjectedModeGuiding, field: 'streamCommandChanged', flags: 'b', instance: 'Main_Instance', gapMs: 250, cap: 100, fmt: 'stream' },
+    { set: 'S16', p: 'P25', tag: 'stream-status', iface: I.Guidance, field: 'streamStatusChanged', flags: 'b', instance: 'Main_Instance', gapMs: 250, cap: 100, one: ['streamStatus', 'e'] },
+    { set: 'S16', p: 'P25', tag: 'route-changed', iface: I.Guidance, field: 'activeRouteChanged', flags: 'b', instance: 'Main_Instance', gapMs: 250, cap: 100, one: ['routeChangeCause', 'e'] },
+    { set: 'S16', p: 'P25', tag: 'current-route', iface: I.Guidance, field: 'currentRoute', flags: 'rs', instance: 'Main_Instance', cols: [['session','sessionID','n'],['handle','routeHandle','n']] },
+    { set: 'S16', p: 'P25', tag: 'list-views', iface: I.GuidanceEventList, field: 'registeredViews', flags: 'rs', instance: 'Main_Instance', cols: [['len',[],'t']] },
+    { set: 'S16', p: 'P25', tag: 'event-list', iface: I.GuidanceEventList, field: 'viewsChanged', flags: 'b', instance: 'Main_Instance', gapMs: 5000, cap: 300, fmt: 'views' },
+    { set: 'S16', p: 'P25', tag: 'rendered-views', iface: I.GuidanceRenderedContent, field: 'registeredViews', flags: 'rs', instance: 'Main_Instance', cols: [['len',[],'t']] },
+    { set: 'S16', p: 'P25', tag: 'rendered', iface: I.GuidanceRenderedContent, field: 'viewContentChanged', flags: 'b', instance: 'Main_Instance', gapMs: 2000, fmt: 'rendered' },
+    { set: 'S16', p: 'P25', tag: 'cp-metadata', iface: I.CarPlayManager, field: 'projectedGuidanceMetadataAvailable', flags: 'rs', instance: 'CarPlayManagerInst1', fmt: 'bool' },
+    { set: 'S16', p: 'P25', tag: 'cp-screen', iface: I.CarPlayManager, field: 'onScreenChange', flags: 'b', instance: 'CarPlayManagerInst1', gapMs: 250, one: ['screenOwner', 'e'] },
+    { set: 'S16', p: 'P25', tag: 'cp-modes', iface: I.CarPlayAM, field: 'changeModes', flags: 'b', instance: 'CarPlayAMInst1', gapMs: 500, cap: 200, fmt: 'tree', tree: { skip: ['reasonStr'] } },
+    { set: 'S16', p: 'P25', tag: 'aa-metadata', iface: I.AndroidAutoProjectedManager, field: 'projectedGuidanceMetadataAvailable', flags: 'rs', instance: 'AndroidAutoProjectedManagerInst1', fmt: 'bool' },
+    { set: 'S16', p: 'P25', tag: 'aa-video', iface: I.AndroidAutoProjectedManager, field: 'isVideoStreaming', flags: 'rs', instance: 'AndroidAutoProjectedManagerInst1', fmt: 'bool' },
+    { set: 'S16', p: 'P25', tag: 'aa-features', iface: I.AndroidAutoProjectedManager, field: 'featureConfiguration', flags: 'rs', instance: 'AndroidAutoProjectedManagerInst1', cols: [['metadata','guidingMetadataEnabled','b'],['vehicleStatus','vehicleStatusEnabled','b']] },
+    { set: 'S16', p: 'P25', tag: 'ric-guidance', iface: I.RICServiceGuidance, field: 'ric_sendEvent', flags: 'b', gapMs: 500, cap: 200, fmt: 'tree', tree: { enumNames: '^(Event|Model)(_[A-Za-z0-9]+)*$' } },
+    { set: 'S16', p: 'P25', tag: 'display-sink', iface: I.DisplaySink, field: 'requestSinkSwitch', flags: 'b', gapMs: 250, cap: 100, fmt: 'tree' },
+    { set: 'S16', p: 'P25', tag: 'nav-can', iface: I.NavigationCAN, field: 'calculationDataNavigation', flags: 'rs', gapMs: 10000, cols: [['dist','statusDistanceDestinationNavigation','n'],['unit','statusDistanceDestinationNavigationUnitOfMeasurement','e'],['etaH','statusArrivalTimeHour','n'],['etaM','statusArrivalTimeMinute','n'],['ampm','statusTimeAMPM','e'],['day','statusDayFlag','e']] },
+    { set: 'S16', p: 'P25', tag: 'lane-feedback', iface: I.FeedbackLaneGuiding, field: 'correctionDataLaneGuiding', flags: 'b', gapMs: 5000, fmt: 'tree' },
 ];
 
 // ---- the sets: each one switchable on its own in the app's centre-screen menu (settings key set1..set9), default all off ----
@@ -396,11 +433,13 @@ const SETS = [
     { id: 'S13', key: 'set13', name: 'signs', uk: 'Знаки', items: ['P22'] },
     { id: 'S14', key: 'set14', name: 'distance and cruise', uk: 'Круїз і дистанція', items: ['P23'] },
     { id: 'S15', key: 'set15', name: 'camera objects', uk: 'Об’єкти камери', items: ['P24'] },
+    { id: 'S16', key: 'set16', name: 'next turn', uk: 'Наступний поворот', items: ['P25'] },
 ];
 // per-set defaults (a field's own gapMs / cap win): messages and doors are events, the drive sets are long
 const SET_DEFAULTS = {
     S1: { gapMs: 500, cap: 100 }, S2: { gapMs: 1000, cap: 60 }, S3: { gapMs: 250, cap: 100 }, S4: { gapMs: 1000, cap: 100 },
     S5: { gapMs: 500, cap: 100 }, S6: { gapMs: 500, cap: 150 }, S7: { gapMs: 1000, cap: 200 }, S8: { gapMs: 1000, cap: 200 }, S9: { gapMs: 1000, cap: 200 }, S10: { gapMs: 500, cap: 100 }, S11: { gapMs: 500, cap: 100 }, S13: { gapMs: 250, cap: 300 }, S14: { gapMs: 1000, cap: 1200 }, S15: { gapMs: 2000, cap: 300 },
+    S16: { gapMs: 2000, cap: 400 },
 };
 
 const instOf = (f) => f.instance || '1';
