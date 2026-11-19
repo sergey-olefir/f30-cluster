@@ -113,7 +113,7 @@ async function main() {
     ok(!app.shared && !(app.config && app.config.target) && !app.startWidget, 'app.json: no shared engine files, no config.target, no widget: nothing for the cluster');
     ok(app.id === 'signal_probe' && app.title === 'Signal Probe' && app.loggingId === 'OASP' && /^\d+\.\d+\.\d+$/.test(app.version), 'app.json: id signal_probe, title, own loggingId OASP, version ' + app.version);
     ok(app.version === VERSION, 'app.json version = probe.js VERSION (' + VERSION + ')');
-    ok(app.settings.length === 12 && app.settings.every((s) => s.type === 'bool' && s.default === false), 'twelve settings, one per set (S1..S11, S13), all bool and off by default');
+    ok(app.settings.length === 14 && app.settings.every((s) => s.type === 'bool' && s.default === false), 'fourteen settings, one per set (S1..S11, S13..S15), all bool and off by default');
     ok(FIELDS.SETS.every((s, i) => app.settings[i].key === s.key && new RegExp('^' + s.id + ' ').test(app.settings[i].label)), 'each setting is named for its set');
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -122,24 +122,25 @@ async function main() {
     const decl = [];
     Object.keys(sigs).forEach((i) => Object.keys(sigs[i]).filter((k) => k[0] !== '_').forEach((f) => decl.push(i + '.' + f + ':' + sigs[i][f])));
     ok(decl.every((d) => /^(rs|s|r)$/.test(d.split(':')[1])), 'only r and s flags (' + decl.length + ' fields), no "w"');
+    const EVSETS = ['S13', 'S14', 'S15'];
     const S13I = FIELDS.TABLE.filter((f) => f.flags === 'b').map((f) => f.iface);
     const evDecl = [];
     Object.keys(sigs).forEach((i) => (sigs[i]._broadcasts || []).forEach((e) => evDecl.push(i + '.' + e)));
-    ok(Object.keys(sigs).filter((i) => sigs[i]._broadcasts).every((i) => S13I.indexOf(i) >= 0) && FIELDS.TABLE.filter((f) => f.flags === 'b').every((f) => f.set === 'S13'),
-        'events (_broadcasts) only on the S13 interfaces, by the lead\'s decision (' + evDecl.length + ' events)');
+    ok(Object.keys(sigs).filter((i) => sigs[i]._broadcasts).every((i) => S13I.indexOf(i) >= 0) && FIELDS.TABLE.filter((f) => f.flags === 'b').every((f) => EVSETS.indexOf(f.set) >= 0),
+        'events (_broadcasts) only on the S13 / S14 / S15 interfaces (the lead\'s decision of 2026-11-18, the owner\'s request of 2026-11-19) (' + evDecl.length + ' events)');
     ok(!Object.keys(sigs).some((i) => Object.keys(sigs[i]).some((k) => k === '_methods')), 'no _methods');
     const tableKeys = FIELDS.TABLE.filter((f) => f.flags !== 'b').map((f) => f.iface + '.' + f.field).filter((k, i, a) => a.indexOf(k) === i).sort(), declKeys = decl.map((d) => d.split(':')[0]).sort();
     ok(JSON.stringify(tableKeys) === JSON.stringify(declKeys) && JSON.stringify(FIELDS.TABLE.filter((f) => f.flags === 'b').map((f) => f.iface + '.' + f.field).sort()) === JSON.stringify(evDecl.sort()), 'every field and event the table reads is declared, and nothing else is (' + tableKeys.length + ' distinct fields, ' + evDecl.length + ' events, ' + Object.keys(sigs).length + ' interfaces)');
     let r = spawnSync(process.execPath, [TOOL, 'check'], { encoding: 'utf8' });
     ok(r.status === 0, 'tools/car/probe_fields.js check: ' + (r.stdout || r.stderr).trim());
     const tags = FIELDS.TABLE.map((f) => f.tag);
-    ok(tags.length === 170 && new Set(tags).size === tags.length, 'the table: ' + tags.length + ' fields, every tag unique');
+    ok(tags.length === 228 && new Set(tags).size === tags.length, 'the table: ' + tags.length + ' fields, every tag unique');
     const keys3 = FIELDS.TABLE.map((f) => f.iface + '.' + f.field + '@' + FIELDS.instOf(f));
     ok(new Set(keys3).size === keys3.length, 'no field is read twice on the same instance');
-    ok(FIELDS.TABLE.every((f) => /^S([1-9]|1[013])$/.test(f.set) && FIELDS.SETS.find((s) => s.id === f.set).items.indexOf(f.p) >= 0), 'every field is on an item (P1..P19) that belongs to its set');
-    ok(['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P18', 'P19', 'P22'].every((p) => FIELDS.TABLE.some((f) => f.p === p)), 'every item P1..P19 and P22 has a field');
-    ok(FIELDS.SETS.every((s) => FIELDS.TABLE.some((f) => f.set === s.id)) && JSON.stringify(FIELDS.SETS.map((s) => s.id)) === '["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S11","S13"]', 'the twelve sets S1..S11 and S13, each with fields');
-    ok(FIELDS.TABLE.every((f) => /^(r|rs|s)$/.test(f.flags) || (f.flags === 'b' && f.set === 'S13')), 'every field has flags r / rs / s; b (an event) only in S13');
+    ok(FIELDS.TABLE.every((f) => /^S([1-9]|1[01345])$/.test(f.set) && FIELDS.SETS.find((s) => s.id === f.set).items.indexOf(f.p) >= 0), 'every field is on an item (P1..P19) that belongs to its set');
+    ok(['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P18', 'P19', 'P22', 'P23', 'P24'].every((p) => FIELDS.TABLE.some((f) => f.p === p)), 'every item P1..P19 and P22..P24 has a field');
+    ok(FIELDS.SETS.every((s) => FIELDS.TABLE.some((f) => f.set === s.id)) && JSON.stringify(FIELDS.SETS.map((s) => s.id)) === '["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S11","S13","S14","S15"]', 'the fourteen sets S1..S11 and S13..S15, each with fields');
+    ok(FIELDS.TABLE.every((f) => /^(r|rs|s)$/.test(f.flags) || (f.flags === 'b' && EVSETS.indexOf(f.set) >= 0)), 'every field has flags r / rs / s; b (an event) only in S13..S15');
     ok(FIELDS.TABLE.filter((f) => f.set === 'S6').every((f) => f.mark === true) && FIELDS.TABLE.filter((f) => f.p === 'P13').every((f) => f.gapMs <= 100 && f.cap >= 300),
         'S6: every field carries the time after the mark; the buttons and the stalk are not folded (gap <= 100 ms, cap >= 300)');
     const stalks = FIELDS.TABLE.filter((f) => f.field.indexOf('IndicatorSteeringColumn') === 0);
@@ -272,25 +273,40 @@ async function main() {
                 lanes: 'struct', mediaMenu: 'struct', station: 'struct', metadata: 'array', roles: 'array', devices: 'array', calllist: 'array', cbs: 'union' }[f.fmt];
             if (f.fmt && wantRoot && kindOf(rf) !== wantRoot && !(wantRoot === 'array' && kindOf(rf) === 'array') && !(wantRoot === 'union' && /array|union/.test(kindOf(rf)))) bad.push(f.tag + ' (' + f.fmt + '): the catalogue says ' + kindOf(rf));
         });
+        // a whole value (fmt tree) prints every upper-case string as an enum name: its type must have no text member at all
+        const texts = [];
+        const hasText = (rf, depth, seen, skip) => {
+            const x = base(rf), t = DT[x];
+            if (!t) return /^Utf|^ByteBuffer/.test(x);
+            if (depth > 12 || seen.indexOf(x) >= 0) return false;
+            if (t.type === 'array') return hasText(t.dataRef || t.elementDataRef, depth + 1, seen.concat([x]), skip);
+            if (t.type === 'struct' || t.type === 'union') return allMembers(t).some((m) => skip.indexOf(m.name) < 0 && hasText(m.dataRef, depth + 1, seen.concat([x]), skip));
+            return false;
+        };
+        const trees = FIELDS.TABLE.filter((f) => f.fmt === 'tree');
+        trees.forEach((f) => { if (hasText(refOf(f), 0, [], (f.tree && f.tree.skip) || [])) texts.push(f.tag); });
+        ok(trees.length === 39 && texts.length === 0, 'the ' + trees.length + ' whole values (tree) have no text member in the catalogue (a member they skip aside: the fused list\'s frame name), so an upper-case string is an enum name' + (texts.length ? ': ' + texts.join(', ') : ''));
         ok(bad.length === 0, 'the table against the catalogue\'s types (' + nCols + ' columns): no text member is read as a number, enum or bool, and every path exists' + (bad.length ? '\n    ' + bad.slice(0, 12).join('\n    ') : ''));
     } else console.log('  skip: the catalogue is not here');
 
     // ---------------------------------------------------------------------------------------------------------------
     console.log('4. every field\'s line from an injected value (fake clock, canary text in every text member)');
-    ok(VECTORS.length === FIELDS.TABLE.length && VECTORS.length === 170 && FIELDS.TABLE.every((f) => VECTORS.some((v) => v.tag === f.tag && v.iface === f.iface && v.field === f.field && v.instance === FIELDS.instOf(f))),
+    ok(VECTORS.length === FIELDS.TABLE.length && VECTORS.length === 228 && FIELDS.TABLE.every((f) => VECTORS.some((v) => v.tag === f.tag && v.iface === f.iface && v.field === f.field && v.instance === FIELDS.instOf(f))),
         'a vector for every one of the ' + FIELDS.TABLE.length + ' fields');
     const a = mk({});
     a.pr.setSets(FIELDS.SETS.map((s) => s.id), false);
     await settleOf(a);
-    ok(a.lines.some((l) => /^probe: sets on=S1\+S2\+S3\+S4\+S5\+S6\+S7\+S8\+S9\+S10\+S11\+S13 changed=\+S1,\+S2,\+S3,\+S4,\+S5,\+S6,\+S7,\+S8,\+S9,\+S10,\+S11,\+S13 fields=170 \(first set on\)$/.test(l)), 'all twelve sets on: the log says so');
-    ok(a.signals.count('watch') === FIELDS.interfaces().reduce((n, e) => n + e.instances.length, 0) && a.signals.count('watch') === 67, 'one proxy per interface instance (' + a.signals.count('watch') + ' watch calls)');
+    ok(a.lines.some((l) => /^probe: sets on=S1\+S2\+S3\+S4\+S5\+S6\+S7\+S8\+S9\+S10\+S11\+S13\+S14\+S15 changed=\+S1,\+S2,\+S3,\+S4,\+S5,\+S6,\+S7,\+S8,\+S9,\+S10,\+S11,\+S13,\+S14,\+S15 fields=228 \(first set on\)$/.test(l)), 'all fourteen sets on: the log says so');
+    ok(a.signals.count('watch') === FIELDS.interfaces().reduce((n, e) => n + e.instances.length, 0) && a.signals.count('watch') === 87, 'one proxy per interface instance (' + a.signals.count('watch') + ' watch calls)');
     let nOk = 0;
     VECTORS.forEach((v) => {
         a.clock.t += 15000;
         const st = a.pr.fields.find((x) => x.f.tag === v.tag);
         st.handler(v.value);
-        const got = a.fieldLines().filter((l) => new RegExp('^probe: ' + v.p + ' ' + v.tag + ' #1 ').test(l));
-        const body = got.length === 1 ? bodyOf(got[0]) : '(' + got.length + ' lines)';
+        const got = a.fieldLines().filter((l) => new RegExp('^probe: ' + v.p + ' ' + v.tag + ' #1 t=').test(l));
+        // a long body comes in parts ("(part 1/N)" on the first line, then "#1 part k/N: ..."): joined, it is the whole body
+        const more = a.fieldLines().filter((l) => new RegExp('^probe: ' + v.p + ' ' + v.tag + ' #1 part ').test(l)).map((l) => l.replace(/^probe: P\d+ \S+ #1 part \d+\/\d+: /, ''));
+        const body = got.length === 1 ? [bodyOf(got[0]).replace(/ \(part 1\/\d+\)$/, '')].concat(more).join(' ') : '(' + got.length + ' lines)';
         const okk = got.length === 1 && (typeof v.body === 'string' ? body === v.body : new RegExp(v.body.re).test(body));
         if (okk) nOk++; else ok(false, v.p + ' ' + v.tag + ': ' + body + (typeof v.body === 'string' ? '\n         wanted ' + v.body : ''));
     });
@@ -298,8 +314,8 @@ async function main() {
     ok(!CANARIES.test(a.lines.join('\n')), 'no text of a message, source, song, call, road, device or service in the log (canary words in every text member)');
     ok(!/12000|STREET|A 9/.test(a.fieldLines().filter((l) => /next-intersection/.test(l)).join('').replace(/raw=12000\.5/, '')), 'the road text and the shield text of P12 are lengths only');
     const st0 = a.pr.stats();
-    ok(st0.length === 170 && st0.every((s) => s.events === 1 && s.lines === 1 && s.active), 'stats(): 170 fields, one event and one line each');
-    ok(a.fieldLines().every((l) => /^probe: P\d+ [A-Za-z0-9-]+ #\d+ t=\d+(\.\d)?: /.test(l)), 'every field line has the documented shape "probe: P<n> <tag> #<k> t=<s>: ..."');
+    ok(st0.length === 228 && st0.every((s) => s.events === 1 && s.lines === 1 && s.active), 'stats(): 228 fields, one event and one line each');
+    ok(a.fieldLines().every((l) => /^probe: P\d+ [A-Za-z0-9-]+ #\d+ (t=\d+(\.\d)?|part \d+\/\d+): /.test(l)), 'every field line has the documented shape "probe: P<n> <tag> #<k> t=<s>: ..." (a whole value\'s later parts: "#<k> part i/N: ...")');
     ok(a.fieldLines().filter((l) => /P(11|13) /.test(l)).every((l) => / tms=\d+ since=-$/.test(l)), 'S6 lines end with tms=<ms> since=- (no mark yet)');
     ok(/heading=set/.test(a.fieldLines().filter((l) => / heading #1/.test(l))[0]) && !/27[0-9]\.25|135/.test(a.fieldLines().filter((l) => / (heading|gps-ext) #1/.test(l)).join('')), 'a bearing is never printed: only heading=set');
     ok(!/4711|\+000|\b9\b.*contact/.test(a.fieldLines().filter((l) => /phone-call1-(contact|number)/.test(l)).join('')), 'a contact id and a number are never printed (known / unknown, a length)');
@@ -415,6 +431,38 @@ async function main() {
     EV.clock.t += 121000; EV.pr.tick(); await sleep(30);
     ok(EV.lines.some((l) => /ask P22 tsr \(silent at \+120s\): an event \(no getter\)/.test(l)) && EV.signals.calls.filter((c) => c.op === 'get').every((c) => /statusSLITextMessage|statusRoadSignConfigStatus/.test(c.field)),
         'a silent event is not asked (no getter); only the two FASuS fields are');
+    // S14 / S15 (the owner, 2026-11-19): every metric of the distance control, the camera's objects, the car's own motion
+    const S14 = mk({}); S14.pr.setSets(['S14'], true); await settleOf(S14);
+    const on14 = S14.pr.fields.filter((st) => st.active).map((st) => st.f.tag);
+    ok(['front-vehicle', 'ldm-guidance', 'longitudinal', 'hud-data', 'hud-data2', 'assist-avail', 'foresight', 'keep-dist-1', 'gap-ahead', 'speed', 'accel-long-cog'].every((t) => on14.indexOf(t) >= 0) &&
+        on14.length === FIELDS.TABLE.filter((f) => f.set === 'S14').length + 7, 'S14 alone also reads the seven assistance fields of S8 (front vehicle, ldm guidance, hud, ...): ' + on14.length + ' fields');
+    ok(FIELDS.TABLE.filter((f) => f.set === 'S14' || f.set === 'S15').every((f) => f.flags !== 'b' || f.fmt === 'tree' || f.cols), 'every S14 / S15 event is read whole (tree) or by columns');
+    const T = FMT.fmtTree;
+    const e2e = { length: 40, counter: 7, dataID: 123456, cRC: 98765, timestamp: { nanoseconds: 5, seconds: 1700000000, sync_state: 'SYNC' }, eventDataQualifier: 'EVENT_DATA_AVAILABLE',
+        numberOfObjects: 3, objects: [{ id: 1, positionX: 25.5, length: 4.5, invalidFlag: false }, { id: 2, positionX: 40, length: 12, invalidFlag: true }, { id: 3, positionX: 60, length: 4.2, invalidFlag: false }],
+        latitudeWgs: 50.45, longitude: 30.52, aliveCounter: 9, cRcSomething: 3, counterSyncX: 4, dummy: 0, speed: { speed: 21.5, invalidFlag: false } };
+    const tl = T(e2e);
+    ok(tl === 'eventDataQualifier=EVENT_DATA_AVAILABLE numberOfObjects=3 objects=3 [id=1 positionX=25.5 length=4.5] [id=2 positionX=40 length=12 objects.invalidFlag=true] [id=3 positionX=60 length=4.2] speed=21.5',
+        'tree: numbers and enum names; no end-to-end header (crc, data id, counters), time stamp, alive counter, dummy or coordinate on the globe; an object\'s own length stays; an invalid flag only when set: ' + tl);
+    ok(T(e2e, { entries: 2 }).indexOf('[id=3') < 0 && / \+1 more /.test(T(e2e, { entries: 2 })), 'tree: at most `entries` elements of a list, then "+N more"');
+    ok(/ \+cut$/.test(T(e2e, { max: 60 })) && T(e2e, { max: 60 }).length <= 66, 'tree: the line stops at `max` characters with "+cut"');
+    ok(T({ posX: 1, vx: 2 }, { skip: ['posX'] }) === 'vx=2' && T({ KeepDistObjSpeed0: 3 }, { strip: ['KeepDistObj'] }) === 'Speed0=3', 'tree: a field\'s own skip list and name prefixes');
+    ok(T({ raw: Buffer.from('Canary text') }) === 'raw.len=11' && T({ text: 'Canary text' }) === 'text.len=11' && T({ e: 'SOME_ENUM' }) === 'e=SOME_ENUM', 'tree: a buffer or a non-enum text only as its length');
+    const P = require(path.join(APP_DIR, 'probe.js'));
+    const longBody = Array.from({ length: 300 }, (x, i) => 'k' + i + '=' + (i * 1.25)).join(' ');
+    const parts = P.splitBody(longBody);
+    ok(parts.length > 1 && parts.every((x) => x.length <= P.PART_CHARS && x[0] !== ' ') && parts.join(' ') === longBody, 'a long whole value in ' + parts.length + ' parts of at most ' + P.PART_CHARS + ' characters, cut between tokens, nothing lost');
+    const S15 = mk({}); S15.pr.setSets(['S15'], true); await settleOf(S15);
+    feedTag(S15, 'ego-motion', { extendedQualifierProperMotionVehicle: 1, eventDataQualifierProperMotionVehicle: 2, xPositionProperMotionVehicle: 31337, yPositionProperMotionVehicle: 31338, yawAngleProperMotionVehicle: 31339, xPositionDeltaProperMotionVehicle: 12, counterSyncProperMotionVehicle: 31340 });
+    const egoL = S15.fieldLines().filter((l) => /ego-motion/.test(l)).join(' ');
+    ok(/xPositionDeltaProperMotionVehicle=12/.test(egoL) && !/3133[789]|31340/.test(egoL), 'the car\'s own dead-reckoned position, heading and sync counter are never logged; its motion deltas are: ' + bodyOf(egoL));
+    const objs = []; for (let i = 0; i < 8; i++) objs.push({ objectID: i, positionX: 10 + i * 7.5, positionY: -1.75 + i, existenceProbability: 90 + i, classificationType: 'CAR_WITH_OR_WITHOUT_TRAILER', statusMovement: 'MOVING' });
+    S15.clock.t += 5000;
+    feedTag(S15, 'object-info1', { eventDataQualifier: 'EVENT_DATA_AVAILABLE', objectRecognition: { numberOfObjects: 8, objectRecognitionInfo: objs } });
+    const oi = S15.fieldLines().filter((l) => / object-info1 #1 /.test(l));
+    const joined = [bodyOf(oi[0]).replace(/ \(part 1\/\d+\)$/, '')].concat(oi.slice(1).map((l) => l.replace(/^probe: P\d+ \S+ #1 part \d+\/\d+: /, ''))).join(' ');
+    ok(oi.length >= 2 && /\(part 1\/\d+\)$/.test(oi[0]) && /#1 part 2\/\d+: /.test(oi[1]) && joined === S15.pr._body(S15.pr.fields.find((st) => st.f.tag === 'object-info1'), { eventDataQualifier: 'EVENT_DATA_AVAILABLE', objectRecognition: { numberOfObjects: 8, objectRecognitionInfo: objs } }),
+        'eight camera objects: one value in ' + oi.length + ' lines ("part i/N"), joined it is the whole line');
     // a provider that does not come up
     const BADW = mk({}, { failWatch: ['Light'] });
     BADW.pr.setSets(['S6'], true); await settleOf(BADW);
@@ -423,7 +471,7 @@ async function main() {
     ok(BADW.lines.some((l) => /summary S6 \+30s: providers: up=7 down=1 error=1 down-list: Light\[1\]/.test(l)), 'the summary names the provider that is down');
     // the start line and the sets line
     const ST = mk({}); ST.pr.setSets(['S4', 'S6'], true); ST.pr.startLine();
-    ok(ST.lines.some((l) => /^probe: start signal_probe v=0\.1\.1 fmt=1 sets=S4\+S6 fields=37 of 170$/.test(l)) && !ST.lines.some((l) => /^probe: sets /.test(l)), 'the start line: version, log format and the sets on (quiet start: no "sets" line)');
+    ok(ST.lines.some((l) => /^probe: start signal_probe v=0\.2\.0 fmt=1 sets=S4\+S6 fields=37 of 228$/.test(l)) && !ST.lines.some((l) => /^probe: sets /.test(l)), 'the start line: version, log format and the sets on (quiet start: no "sets" line)');
     ok(LOG_FORMAT === 1 && VERSION === app.version, 'log format 1');
     ST.pr.setSets(['S4', 'S6', 'S7'], false);
     ok(ST.lines.some((l) => /^probe: sets on=S4\+S6\+S7 changed=\+S7 fields=52$/.test(l)), 'the sets line at a change: ' + ST.lines[ST.lines.length - 1]);
@@ -543,13 +591,13 @@ async function main() {
     try {
         startServer();
         ok(await until(() => /build: signal_probe/.test(out) && probeLines().some((l) => /^probe: start /.test(l)), 60000), 'the app builds with the kit and starts');
-        ok(probeLines().some((l) => /^probe: start signal_probe v=0\.1\.1 fmt=1 sets=none fields=0 of 170$/.test(l)), 'the start line: all sets off at the first start: ' + (probeLines()[0] || ''));
+        ok(probeLines().some((l) => /^probe: start signal_probe v=0\.2\.0 fmt=1 sets=none fields=0 of 228$/.test(l)), 'the start line: all sets off at the first start: ' + (probeLines()[0] || ''));
         ok(!/Error|uncaught/i.test(out.split('\n').filter((l) => /\[signal_probe\]/.test(l)).join('\n')), 'nothing in the app\'s log says Error or uncaught');
         let p = await probeNative();
         ok(p && JSON.stringify(p.stack) === '["MAIN"]', 'the entry screen is the native menu MAIN');
         ok(p && p.native.MARK && /^Позначка 1$/.test((p.native.MARK.cells || {}).Text1stRow || ''), 'the mark row says "Позначка 1": ' + JSON.stringify(p && p.native.MARK && p.native.MARK.cells));
         ok(p && /жодного/.test((p.native.STATUS || {}).text || ''), 'the status line says no set is on: ' + ((p && p.native.STATUS) || {}).text);
-        ok(p && FIELDS.SETS.every((s) => p.native['SET_' + s.key.toUpperCase()] && p.native['SET_' + s.key.toUpperCase()].checked === false), 'a checkbox per set (S1..S11, S13), all unchecked');
+        ok(p && FIELDS.SETS.every((s) => p.native['SET_' + s.key.toUpperCase()] && p.native['SET_' + s.key.toUpperCase()].checked === false), 'a checkbox per set (S1..S11, S13..S15), all unchecked');
         // S6 on
         await req('POST', '/click', { id: 'SET_SET6' });
         ok(await until(() => probeLines().some((l) => /^probe: sets on=S6 changed=\+S6 fields=24 \(first set on\)$/.test(l))), 'a press on the S6 checkbox: the log says S6 is on (24 fields)');
@@ -573,7 +621,7 @@ async function main() {
         // restart: the sets come back
         const before = probeLines().length;
         await req('POST', '/restart');
-        ok(await until(() => probeLines().slice(before).some((l) => /^probe: start signal_probe v=0\.1\.1 fmt=1 sets=S6 fields=24 of 170$/.test(l)), 15000), 'after a restart the start line says sets=S6 (the owner\'s choice is kept)');
+        ok(await until(() => probeLines().slice(before).some((l) => /^probe: start signal_probe v=0\.2\.0 fmt=1 sets=S6 fields=24 of 228$/.test(l)), 15000), 'after a restart the start line says sets=S6 (the owner\'s choice is kept)');
         ok(await until(() => probeLines().slice(before).filter((l) => /^probe: watch /.test(l)).length === 8, 10000), '... and S6\'s interfaces are subscribed again');
         await req('POST', '/click', { id: 'SET_SET6' });
         ok(await until(() => probeLines().some((l) => /^probe: sets on=none changed=-S6 /.test(l))), 'S6 off again: logged');

@@ -1,11 +1,11 @@
 {
   "_about": "The signal probe's field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier). Ids come from the car's catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of apps/signal_probe/format.js. Text members are logged as lengths only.",
   "logFormat": 1,
-  "version": "0.1.1",
+  "version": "0.2.0",
   "counts": {
-    "sets": 12,
-    "fields": 170,
-    "interfaces": 66,
+    "sets": 14,
+    "fields": 228,
+    "interfaces": 86,
     "interfacesWithSeveralInstances": 1
   },
   "sets": [
@@ -148,6 +148,28 @@
       ],
       "fields": 10,
       "fieldsActive": 10
+    },
+    {
+      "id": "S14",
+      "settingsKey": "set14",
+      "name": "distance and cruise",
+      "uk": "Круїз і дистанція",
+      "items": [
+        "P23"
+      ],
+      "fields": 37,
+      "fieldsActive": 44
+    },
+    {
+      "id": "S15",
+      "settingsKey": "set15",
+      "name": "camera objects",
+      "uk": "Об’єкти камери",
+      "items": [
+        "P24"
+      ],
+      "fields": 21,
+      "fieldsActive": 21
     }
   ],
   "interfaces": [
@@ -963,11 +985,12 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 5,
+      "fields": 10,
       "events": [],
       "sets": [
         "S8",
-        "S13"
+        "S13",
+        "S14"
       ]
     },
     {
@@ -1024,10 +1047,11 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 1,
+      "fields": 3,
       "events": [],
       "sets": [
-        "S8"
+        "S8",
+        "S14"
       ]
     },
     {
@@ -1054,11 +1078,12 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 4,
+      "fields": 6,
       "events": [],
       "sets": [
         "S9",
-        "S11"
+        "S11",
+        "S14"
       ]
     },
     {
@@ -1238,6 +1263,352 @@
       ],
       "sets": [
         "S13"
+      ]
+    },
+    {
+      "interface": "de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "keepDistanceObjects1",
+        "keepDistanceObjects2",
+        "keepDistanceParameters"
+      ],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.dass.AssistedDrivingViewFunctionInput",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "assistedDrivingViewFunctionInputIbVip"
+      ],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.dass.driverassistanceapplications.StatusDisplayXADAndSpeed",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 2,
+      "events": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.dass.HMIControlAD",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1",
+        "2"
+      ],
+      "fields": 3,
+      "events": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.dass.StateAutonomousDrivingLegacy",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 1,
+      "events": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.dass.driverassistanceapplications.DriverAssistanceExtendedMessages",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 1,
+      "events": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 2,
+      "events": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.dass.StatusDriverAssistanceFunctions",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 1,
+      "events": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.chassis.SpeedAcceleration",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 7,
+      "events": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.chassis.AccelerationLongitudinalLateralProvision",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "accelerationLongitudinalCog",
+        "accelerationLateralCog",
+        "vehicleAccelerationLongitudinalEstimated"
+      ],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.chassis.YawRateProvision",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "yawRate"
+      ],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.chassis.SurfaceInformationProvision",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "longitudinalGradientSurface"
+      ],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.chassis.RollPitchRateAccelerationVerticalProvision",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "pitchRateCog",
+        "rollRateCog"
+      ],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "ObjectRecognition",
+        "ObjectPosition",
+        "ObjectMovement",
+        "ObjectProbability",
+        "ObjectSensorSpecificFrontCamera"
+      ],
+      "sets": [
+        "S15"
+      ]
+    },
+    {
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "ObjectRecognition",
+        "ObjectPosition",
+        "ObjectMovement",
+        "ObjectPolarCoordinates",
+        "ObjectProbability",
+        "ObjectSensorSpecificFrontCamera"
+      ],
+      "sets": [
+        "S15"
+      ]
+    },
+    {
+      "interface": "de.bmw.environmentalmodel.FusedSensorDetectionData",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "objects"
+      ],
+      "sets": [
+        "S15"
+      ]
+    },
+    {
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "ObjectListMerged",
+        "ObjectInformation1",
+        "ObjectInformation2",
+        "ObjectAssignment",
+        "FASView"
+      ],
+      "sets": [
+        "S15"
+      ]
+    },
+    {
+      "interface": "de.bmw.dass.pad.communication.ObjectListSuAAR",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "suAARObjectList"
+      ],
+      "sets": [
+        "S15"
+      ]
+    },
+    {
+      "interface": "de.bmw.chassis.EgomotionCamera",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "egomotionCameraCartesian",
+        "egomotionCameraRotation"
+      ],
+      "sets": [
+        "S15"
+      ]
+    },
+    {
+      "interface": "de.bmw.environmentalmodel.EgoMotionLegacy",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "ProperMotionVehicle"
+      ],
+      "sets": [
+        "S15"
       ]
     }
   ],
@@ -3685,6 +4056,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 200,
+      "also": [
+        "S14"
+      ],
       "columns": [
         "invalid:invalidFlag:n",
         "func:activeFuncLongitudinal:e",
@@ -3715,6 +4089,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 200,
+      "also": [
+        "S14"
+      ],
       "columns": [
         "invalid:invalidFlag:n",
         "speed:dispSpeedForesight:e",
@@ -3738,6 +4115,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 200,
+      "also": [
+        "S14"
+      ],
       "columns": [
         "xcc:displayXCC:n",
         "func:activeFunctionDriverAssistenceSystemLDM:e",
@@ -3804,6 +4184,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 200,
+      "also": [
+        "S14"
+      ],
       "columns": [
         "accSym:activeCruiseControl.symbolACC:e",
         "accBars:activeCruiseControl.accBarsHUD:n",
@@ -3832,6 +4215,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 200,
+      "also": [
+        "S14"
+      ],
       "columns": [
         "setSpeed:ldmSetSpeed.ldmSetSpeedValue:n",
         "setColour:ldmSetSpeed.ldmSetSpeedColour:e",
@@ -3860,6 +4246,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 200,
+      "also": [
+        "S14"
+      ],
       "columns": [
         "acc:proposalAvailabilityACC:e",
         "sla:proposalAvailabilitySLA:e",
@@ -3885,10 +4274,17 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 200,
+      "also": [
+        "S14"
+      ],
       "columns": [
+        "object:frontVehicleObjectID:n",
         "gapX:frontVehicleGapX:n",
+        "gapY:frontVehicleGapY:n",
         "speedX:frontVehicleSpeedX:n",
-        "qualifier:qualifierEventDataFunctionFrontVehicle:e"
+        "speedY:frontVehicleSpeedY:n",
+        "qualifier:qualifierEventDataFunctionFrontVehicle:e",
+        "qualifierExt:qualifierExtendedFunctionFrontVehicle:e"
       ]
     },
     {
@@ -4750,6 +5146,1023 @@
         "country:countryCodingTrafficSign:e",
         "unit:unitOfMeasurementSpeedLimit:e"
       ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "front-vehicle-ext",
+      "interface": "de.bmw.dass.GapVehicleAhead",
+      "field": "DataFrontVehicleExtended",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "object:frontVehicleExtendedObjectID:n",
+        "type:frontVehicleExtendedObjectType:e",
+        "move:frontVehicleExtendedStatusMove:e",
+        "width:frontVehicleExtendedWidth:n"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "gap-ahead",
+      "interface": "de.bmw.dass.GapVehicleAhead",
+      "field": "GapVehicleDrivingAhead",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "qualifier:qualifierFunctionVehicleDrivingAhead:e",
+        "measurement:statusMeasurementVehicleDrivingAhead:e",
+        "gap:gapVehicleDrivingAhead:n",
+        "type:vehicleTypeVehicleDrivingAhead:e",
+        "lamps:lampStatusVehicleDrivingAhead:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "keep-dist-1",
+      "interface": "de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy",
+      "field": "keepDistanceObjects1",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "keep-dist-2",
+      "interface": "de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy",
+      "field": "keepDistanceObjects2",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "keep-dist-params",
+      "interface": "de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy",
+      "field": "keepDistanceParameters",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32771,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "view-input",
+      "interface": "de.bmw.dass.AssistedDrivingViewFunctionInput",
+      "field": "assistedDrivingViewFunctionInputIbVip",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "display-speed",
+      "interface": "de.bmw.dass.driverassistanceapplications.StatusDisplayXADAndSpeed",
+      "field": "statusDisplaySpeed",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "value:displayedValueSpeed:n",
+        "unit:unitSpeed:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "display-xad",
+      "interface": "de.bmw.dass.driverassistanceapplications.StatusDisplayXADAndSpeed",
+      "field": "statusDisplayXAD",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32770,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "ad-velocity",
+      "interface": "de.bmw.dass.HMIControlAD",
+      "field": "desiredDisplayedVelocity",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32770,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "velocity:displayedVelocity:n",
+        "colour:displayedVelocityColor:e",
+        "icon:displayedVelocityIcon:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "ad-speed-lock",
+      "interface": "de.bmw.dass.HMIControlAD",
+      "field": "controlSpeedLock",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "unlock:unlockRequested:b"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "ad-state",
+      "interface": "de.bmw.dass.HMIControlAD",
+      "field": "stateAD",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "ad-state-legacy",
+      "interface": "de.bmw.dass.StateAutonomousDrivingLegacy",
+      "field": "stateAutonomousDriving",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "state:statusAutonomousDriving:e",
+        "crash:brcCtrSafeCrash:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "assist-message",
+      "interface": "de.bmw.dass.driverassistanceapplications.DriverAssistanceExtendedMessages",
+      "field": "coordinatedExtendedMessageDriverAssistance",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "id:coordinatedExtendedMessageDriverAssistanceID:n",
+        "value:coordinatedExtendedMessageDriverAssistanceValue:n",
+        "info:coordinatedExtendedMessageDriverAssistanceInformation:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "fcw-setting",
+      "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "field": "settingFrontCollisionWarning",
+      "instance": "1",
+      "flags": "s",
+      "getterId": 0,
+      "notifierId": 32778,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "value:value:e",
+        "availability:availability:e",
+        "deactivated:availabilityDeactivated:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "fcw-sound",
+      "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "field": "settingFrontCollisionWarningSound",
+      "instance": "1",
+      "flags": "s",
+      "getterId": 0,
+      "notifierId": 32833,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "value:value:e",
+        "availability:availability:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "foresight-status",
+      "interface": "de.bmw.dass.StatusDriverAssistanceFunctions",
+      "field": "statusForesight",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "function:statusForesightFunction:e",
+        "sub:statusForesightSubfunctions:x"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "warn-brake",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "requestWarnBrakeCoordinatorDisplay",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 65,
+      "notifierId": 32833,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "status-fas",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "statusFAS",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32835,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "fas-mode",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "displayDrivingAssistentSystemsMode",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32836,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "trajectory",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "statusStateDrivingTrajectory",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 50,
+      "notifierId": 32818,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "foresight2",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "displayForesight2",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 66,
+      "notifierId": 32834,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "speed",
+      "interface": "de.bmw.chassis.SpeedAcceleration",
+      "field": "vehicleSpeed",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 2,
+      "notifierId": 32783,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "standstill:statusSpeedVehicleNearStandstill:e",
+        "speed:speedVehicleCentreOfGravity:n",
+        "qualifier:qualifierSpeedVehicleCentreOfGravity:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "direction",
+      "interface": "de.bmw.chassis.SpeedAcceleration",
+      "field": "drivingDirection",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32782,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "confirmed:drivingDirectionConfirmed:e",
+        "unconfirmed:drivingDirectionUnconfirmed:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "accel-long",
+      "interface": "de.bmw.chassis.SpeedAcceleration",
+      "field": "LongitudinalAccelerationCentreOfGravity",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "accel:longitudinalAccelerationCentreOfGravity:n",
+        "error:longitudinalAccelerationCentreOfGravityErrorAmplitude:n",
+        "qualifier:qualifierLongitudinalAccelerationCentreOfGravity:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "accel-lat",
+      "interface": "de.bmw.chassis.SpeedAcceleration",
+      "field": "LateralAccelerationCenterOfGravity",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32770,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "accel:lateralAccelerationCentreOfGravity:n",
+        "error:lateralAccelerationCentreOfGravityErrorAmplitude:n",
+        "qualifier:qualifierLateralAccelerationCentreOfGravity:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "yaw-speed",
+      "interface": "de.bmw.chassis.SpeedAcceleration",
+      "field": "YawSpeedVehicle",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32777,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "yaw:yawVelocityVehicle:n",
+        "error:yawVelocityVehicleErrorAmplitude:n",
+        "qualifier:qualifierYawVelocityVehicle:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "dynamics-long",
+      "interface": "de.bmw.chassis.SpeedAcceleration",
+      "field": "VehicleDynamicDataLongitudinalAndMassVehicle",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32781,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "accel:longitudinalAccelerationDrivingDirection2:n",
+        "accelQ:qualifierLongitudinalAccelerationDrivingDirection2:e",
+        "speed:vehicleSpeedLongitudinal:n",
+        "speedQ:qualifierVehicleSpeedLongitudinal:e",
+        "mass:emptyMassVehicle:n"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "characteristic-speed",
+      "interface": "de.bmw.chassis.SpeedAcceleration",
+      "field": "CharacteristicSpeed",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "speed:characteristicSpeed:n",
+        "error:characteristicSpeedErrorAmplitude:n",
+        "qualifier:qualifierCharacteristicSpeed:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "accel-long-cog",
+      "interface": "de.bmw.chassis.AccelerationLongitudinalLateralProvision",
+      "field": "accelerationLongitudinalCog",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32774,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 500,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "accel-lat-cog",
+      "interface": "de.bmw.chassis.AccelerationLongitudinalLateralProvision",
+      "field": "accelerationLateralCog",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32773,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 500,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "accel-long-est",
+      "interface": "de.bmw.chassis.AccelerationLongitudinalLateralProvision",
+      "field": "vehicleAccelerationLongitudinalEstimated",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32795,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 500,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "yaw-rate",
+      "interface": "de.bmw.chassis.YawRateProvision",
+      "field": "yawRate",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32791,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 500,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "gradient",
+      "interface": "de.bmw.chassis.SurfaceInformationProvision",
+      "field": "longitudinalGradientSurface",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32794,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "pitch-rate",
+      "interface": "de.bmw.chassis.RollPitchRateAccelerationVerticalProvision",
+      "field": "pitchRateCog",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32785,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "roll-rate",
+      "interface": "de.bmw.chassis.RollPitchRateAccelerationVerticalProvision",
+      "field": "rollRateCog",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32786,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 1000,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "cds-accel-long",
+      "interface": "de.bmw.infotainment.vehicle.CDS2",
+      "field": "statusLongitudinalAccelerationMassCenter",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 43,
+      "notifierId": 32811,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "accel:longitudinalAccelerationCentreOfGravity:n"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "cds-accel-lat",
+      "interface": "de.bmw.infotainment.vehicle.CDS2",
+      "field": "statusLateralAccelerationMassCenter",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 42,
+      "notifierId": 32810,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "accel:lateralAccelerationCentreOfGravity:n"
+      ]
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "cam-objects",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+      "field": "ObjectRecognition",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "cam-position",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+      "field": "ObjectPosition",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "cam-movement",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+      "field": "ObjectMovement",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32771,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "cam-probability",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+      "field": "ObjectProbability",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32775,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "cam-specific",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+      "field": "ObjectSensorSpecificFrontCamera",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32777,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "cam2-objects",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+      "field": "ObjectRecognition",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "cam2-position",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+      "field": "ObjectPosition",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "cam2-movement",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+      "field": "ObjectMovement",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32771,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "cam2-polar",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+      "field": "ObjectPolarCoordinates",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32772,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "cam2-probability",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+      "field": "ObjectProbability",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32775,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "cam2-specific",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+      "field": "ObjectSensorSpecificFrontCamera",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32777,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "fused-objects",
+      "interface": "de.bmw.environmentalmodel.FusedSensorDetectionData",
+      "field": "objects",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "merged-objects",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "ObjectListMerged",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32774,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "object-info1",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "ObjectInformation1",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "object-info2",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "ObjectInformation2",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "object-lanes",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "ObjectAssignment",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32771,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "fas-view",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "FASView",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32775,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "suaar-objects",
+      "interface": "de.bmw.dass.pad.communication.ObjectListSuAAR",
+      "field": "suAARObjectList",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "ego-cam-motion",
+      "interface": "de.bmw.chassis.EgomotionCamera",
+      "field": "egomotionCameraCartesian",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32806,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "ego-cam-rotation",
+      "interface": "de.bmw.chassis.EgomotionCamera",
+      "field": "egomotionCameraRotation",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32805,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
+    },
+    {
+      "set": "S15",
+      "item": "P24",
+      "tag": "ego-motion",
+      "interface": "de.bmw.environmentalmodel.EgoMotionLegacy",
+      "field": "ProperMotionVehicle",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 300
     }
   ]
 }

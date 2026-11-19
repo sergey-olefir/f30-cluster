@@ -2346,12 +2346,15 @@
   "field": "DataFrontVehicle",
   "instance": "1",
   "value": {
-   "frontVehicleObjectID": 4,
-   "frontVehicleGapX": 3120,
-   "frontVehicleSpeedX": 2000,
-   "qualifierEventDataFunctionFrontVehicle": "EVENT_DATA_AVAILABLE"
+   "frontVehicleObjectID": 1,
+   "frontVehicleSpeedX": 2,
+   "frontVehicleSpeedY": 3,
+   "frontVehicleGapX": 4,
+   "frontVehicleGapY": 5,
+   "qualifierEventDataFunctionFrontVehicle": "EVENT_DATA_AVAILABLE_REDUCED",
+   "qualifierExtendedFunctionFrontVehicle": "BEGINNING_BLOCKAGE"
   },
-  "body": "gapX=3120 speedX=2000 qualifier=EVENT_DATA_AVAILABLE"
+  "body": "object=1 gapX=4 gapY=5 speedX=2 speedY=3 qualifier=EVENT_DATA_AVAILABLE_REDUCED qualifierExt=BEGINNING_BLOCKAGE"
  },
  {
   "set": "S9",
@@ -3068,5 +3071,2766 @@
    "unitOfMeasurementSpeedLimit": "KM_S_H"
   },
   "body": "country=ECE_WEISS unit=KM_S_H"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "front-vehicle-ext",
+  "iface": "de.bmw.dass.GapVehicleAhead",
+  "field": "DataFrontVehicleExtended",
+  "instance": "1",
+  "value": {
+   "frontVehicleExtendedObjectID": 1,
+   "frontVehicleExtendedObjectType": "BRIDGE",
+   "frontVehicleExtendedStatusMove": "FUNKTION_MELDET_FEHLER",
+   "frontVehicleExtendedWidth": 2
+  },
+  "body": "object=1 type=BRIDGE move=FUNKTION_MELDET_FEHLER width=2"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "gap-ahead",
+  "iface": "de.bmw.dass.GapVehicleAhead",
+  "field": "GapVehicleDrivingAhead",
+  "instance": "1",
+  "value": {
+   "qualifierFunctionVehicleDrivingAhead": "FUNKTION_NICHT_VERFUEGBAR",
+   "statusMeasurementVehicleDrivingAhead": "ELEMENT__GEMESSEN",
+   "gapVehicleDrivingAhead": 1,
+   "vehicleTypeVehicleDrivingAhead": "SIGNAL_UNGUELTIG",
+   "lampStatusVehicleDrivingAhead": "LICHT_AUS"
+  },
+  "body": "qualifier=FUNKTION_NICHT_VERFUEGBAR measurement=ELEMENT__GEMESSEN gap=1 type=SIGNAL_UNGUELTIG lamps=LICHT_AUS"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "keep-dist-1",
+  "iface": "de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy",
+  "field": "keepDistanceObjects1",
+  "instance": "1",
+  "value": {
+   "keepDistObjects1": {
+    "KeepDistObjAccelerationLongitudinalAbsolute0": 1,
+    "KeepDistObjAccelerationLongitudinalAbsolute1": 2,
+    "KeepDistObjAccelerationLongitudinalAbsolute2": 3,
+    "KeepDistObjVelocityLongitudinalAbsolute0": 4,
+    "KeepDistObjVelocityLongitudinalAbsolute1": 5,
+    "KeepDistObjVelocityLongitudinalAbsolute2": 6,
+    "KeepDistObjVelocityLateralAbsolute0": 7,
+    "KeepDistObjVelocityLateralAbsolute1": 8,
+    "KeepDistObjVelocityLateralAbsolute2": 9,
+    "KeepDistObjDistanceLongitudinal0": 10,
+    "KeepDistObjDistanceLongitudinal1": 11,
+    "KeepDistObjDistanceLongitudinal2": 12,
+    "KeepDistObjDistanceLateral0": 13,
+    "KeepDistObjDistanceLateral1": 14,
+    "KeepDistObjDistanceLateral2": 15,
+    "KeepDistObjHeading0": 16,
+    "KeepDistObjHeading1": 17,
+    "KeepDistObjHeading2": 18,
+    "KeepDistObjType0": 19,
+    "KeepDistObjType1": 20,
+    "KeepDistObjType2": 21,
+    "KeepDistObjWidth0": 22,
+    "KeepDistObjWidth1": 23,
+    "KeepDistObjWidth2": 24,
+    "KeepDistObjLength0": 25,
+    "KeepDistObjLength1": 26,
+    "KeepDistObjLength2": 27,
+    "KeepDistObjId0": 28,
+    "KeepDistObjId1": 29,
+    "KeepDistObjId2": 30,
+    "KeepDistObjMovementDirection0": 31,
+    "KeepDistObjMovementDirection1": 32,
+    "KeepDistObjMovementDirection2": 33,
+    "KeepDistObjMovementStatus0": 34,
+    "KeepDistObjMovementStatus1": 35,
+    "KeepDistObjMovementStatus2": 36,
+    "KeepDistObjLaneChangeInformation0": 37,
+    "KeepDistObjLaneChangeInformation1": 38,
+    "KeepDistObjLaneChangeInformation2": 39,
+    "KeepDistObjLaneAssignmentPercentage0": 40,
+    "KeepDistObjLaneAssignmentPercentage1": 41,
+    "KeepDistObjLaneAssignmentPercentage2": 42,
+    "KeepDistObjDrivingTubeMapping0": 43,
+    "KeepDistObjDrivingTubeMapping1": 44,
+    "KeepDistObjDrivingTubeMapping2": 45,
+    "KeepDistObjLaneAssignment0": 46,
+    "KeepDistObjLaneAssignment1": 47,
+    "KeepDistObjLaneAssignment2": 48,
+    "KeepDistObjDTMProbability0": 49,
+    "KeepDistObjDTMProbability1": 50,
+    "KeepDistObjDTMProbability2": 51,
+    "KeepDistObjFusionStatus0": 52,
+    "KeepDistObjFusionStatus1": 53,
+    "KeepDistObjFusionStatus2": 54,
+    "KeepDistObjExtendedInfo0": 55,
+    "KeepDistObjExtendedInfo1": 56,
+    "KeepDistObjExtendedInfo2": 57,
+    "KeepDistObjReferencePoint0": 58,
+    "KeepDistObjReferencePoint1": 59,
+    "KeepDistObjReferencePoint2": 60,
+    "Qualifier_Extended_KeepDistSensorStatusUss": 61,
+    "Qualifier_Extended_KeepDistSensorStatusCamera": 62,
+    "Qualifier_Extended_KeepDistSensorStatusRadar": 63,
+    "Qualifier_Extended_KeepDistSensorStatusLidar": 64,
+    "Qualifier_Extended_KeepDistSensorStatusSRR": 65,
+    "keepDistanceObject1SyncCounter": 66
+   }
+  },
+  "body": "AccelerationLongitudinalAbsolute0=1 AccelerationLongitudinalAbsolute1=2 AccelerationLongitudinalAbsolute2=3 VelocityLongitudinalAbsolute0=4 VelocityLongitudinalAbsolute1=5 VelocityLongitudinalAbsolute2=6 VelocityLateralAbsolute0=7 VelocityLateralAbsolute1=8 VelocityLateralAbsolute2=9 DistanceLongitudinal0=10 DistanceLongitudinal1=11 DistanceLongitudinal2=12 DistanceLateral0=13 DistanceLateral1=14 DistanceLateral2=15 Heading0=16 Heading1=17 Heading2=18 Type0=19 Type1=20 Type2=21 Width0=22 Width1=23 Width2=24 Length0=25 Length1=26 Length2=27 Id0=28 Id1=29 Id2=30 MovementDirection0=31 MovementDirection1=32 MovementDirection2=33 MovementStatus0=34 MovementStatus1=35 MovementStatus2=36 LaneChangeInformation0=37 LaneChangeInformation1=38 LaneChangeInformation2=39 LaneAssignmentPercentage0=40 LaneAssignmentPercentage1=41 LaneAssignmentPercentage2=42 DrivingTubeMapping0=43 DrivingTubeMapping1=44 DrivingTubeMapping2=45 LaneAssignment0=46 LaneAssignment1=47 LaneAssignment2=48 DTMProbability0=49 DTMProbability1=50 DTMProbability2=51 FusionStatus0=52 FusionStatus1=53 FusionStatus2=54 ExtendedInfo0=55 ExtendedInfo1=56 ExtendedInfo2=57 ReferencePoint0=58 ReferencePoint1=59 ReferencePoint2=60 Qualifier_Extended_KeepDistSensorStatusUss=61 Qualifier_Extended_KeepDistSensorStatusCamera=62 Qualifier_Extended_KeepDistSensorStatusRadar=63 Qualifier_Extended_KeepDistSensorStatusLidar=64 Qualifier_Extended_KeepDistSensorStatusSRR=65"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "keep-dist-2",
+  "iface": "de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy",
+  "field": "keepDistanceObjects2",
+  "instance": "1",
+  "value": {
+   "keepDistObjects2": {
+    "KeepDistObjAccelerationLongitudinalAbsolute3": 1,
+    "KeepDistObjAccelerationLongitudinalAbsolute4": 2,
+    "KeepDistObjAccelerationLongitudinalAbsolute5": 3,
+    "KeepDistObjVelocityLongitudinalAbsolute3": 4,
+    "KeepDistObjVelocityLongitudinalAbsolute4": 5,
+    "KeepDistObjVelocityLongitudinalAbsolute5": 6,
+    "KeepDistObjVelocityLateralAbsolute3": 7,
+    "KeepDistObjVelocityLateralAbsolute4": 8,
+    "KeepDistObjVelocityLateralAbsolute5": 9,
+    "KeepDistObjDistanceLongitudinal3": 10,
+    "KeepDistObjDistanceLongitudinal4": 11,
+    "KeepDistObjDistanceLongitudinal5": 12,
+    "KeepDistObjDistanceLateral3": 13,
+    "KeepDistObjDistanceLateral4": 14,
+    "KeepDistObjDistanceLateral5": 15,
+    "KeepDistObjHeading3": 16,
+    "KeepDistObjHeading4": 17,
+    "KeepDistObjHeading5": 18,
+    "KeepDistObjType3": 19,
+    "KeepDistObjType4": 20,
+    "KeepDistObjType5": 21,
+    "KeepDistObjWidth3": 22,
+    "KeepDistObjWidth4": 23,
+    "KeepDistObjWidth5": 24,
+    "KeepDistObjLength3": 25,
+    "KeepDistObjLength4": 26,
+    "KeepDistObjLength5": 27,
+    "KeepDistObjId3": 28,
+    "KeepDistObjId4": 29,
+    "KeepDistObjId5": 30,
+    "KeepDistObjMovementDirection3": 31,
+    "KeepDistObjMovementDirection4": 32,
+    "KeepDistObjMovementDirection5": 33,
+    "KeepDistObjMovementStatus3": 34,
+    "KeepDistObjMovementStatus4": 35,
+    "KeepDistObjMovementStatus5": 36,
+    "KeepDistObjLaneChangeInformation3": 37,
+    "KeepDistObjLaneChangeInformation4": 38,
+    "KeepDistObjLaneChangeInformation5": 39,
+    "KeepDistObjLaneAssignmentPercentage3": 40,
+    "KeepDistObjLaneAssignmentPercentage4": 41,
+    "KeepDistObjLaneAssignmentPercentage5": 42,
+    "KeepDistObjDrivingTubeMapping3": 43,
+    "KeepDistObjDrivingTubeMapping4": 44,
+    "KeepDistObjDrivingTubeMapping5": 45,
+    "KeepDistObjLaneAssignment3": 46,
+    "KeepDistObjLaneAssignment4": 47,
+    "KeepDistObjLaneAssignment5": 48,
+    "KeepDistObjDTMProbability3": 49,
+    "KeepDistObjDTMProbability4": 50,
+    "KeepDistObjDTMProbability5": 51,
+    "KeepDistObjFusionStatus3": 52,
+    "KeepDistObjFusionStatus4": 53,
+    "KeepDistObjFusionStatus5": 54,
+    "KeepDistObjExtendedInfo3": 55,
+    "KeepDistObjExtendedInfo4": 56,
+    "KeepDistObjExtendedInfo5": 57,
+    "KeepDistObjReferencePoint3": 58,
+    "KeepDistObjReferencePoint4": 59,
+    "KeepDistObjReferencePoint5": 60,
+    "KeepDistLaneChangeDetected": 61,
+    "KeepDistFollowResumeStatus": 62,
+    "KeepDistTrafficFlowDirection": 63,
+    "QualifierEventDataKeepDistSensorStatus": 64,
+    "QualifierExtendedKeepDistStatusDTM": 65,
+    "keepDistanceObject2SyncCounter": 66
+   }
+  },
+  "body": "AccelerationLongitudinalAbsolute3=1 AccelerationLongitudinalAbsolute4=2 AccelerationLongitudinalAbsolute5=3 VelocityLongitudinalAbsolute3=4 VelocityLongitudinalAbsolute4=5 VelocityLongitudinalAbsolute5=6 VelocityLateralAbsolute3=7 VelocityLateralAbsolute4=8 VelocityLateralAbsolute5=9 DistanceLongitudinal3=10 DistanceLongitudinal4=11 DistanceLongitudinal5=12 DistanceLateral3=13 DistanceLateral4=14 DistanceLateral5=15 Heading3=16 Heading4=17 Heading5=18 Type3=19 Type4=20 Type5=21 Width3=22 Width4=23 Width5=24 Length3=25 Length4=26 Length5=27 Id3=28 Id4=29 Id5=30 MovementDirection3=31 MovementDirection4=32 MovementDirection5=33 MovementStatus3=34 MovementStatus4=35 MovementStatus5=36 LaneChangeInformation3=37 LaneChangeInformation4=38 LaneChangeInformation5=39 LaneAssignmentPercentage3=40 LaneAssignmentPercentage4=41 LaneAssignmentPercentage5=42 DrivingTubeMapping3=43 DrivingTubeMapping4=44 DrivingTubeMapping5=45 LaneAssignment3=46 LaneAssignment4=47 LaneAssignment5=48 DTMProbability3=49 DTMProbability4=50 DTMProbability5=51 FusionStatus3=52 FusionStatus4=53 FusionStatus5=54 ExtendedInfo3=55 ExtendedInfo4=56 ExtendedInfo5=57 ReferencePoint3=58 ReferencePoint4=59 ReferencePoint5=60 LaneChangeDetected=61 FollowResumeStatus=62 TrafficFlowDirection=63 QualifierEventDataKeepDistSensorStatus=64 QualifierExtendedKeepDistStatusDTM=65"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "keep-dist-params",
+  "iface": "de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy",
+  "field": "keepDistanceParameters",
+  "instance": "1",
+  "value": {
+   "keepDistParameters": {
+    "KeepDistCollectiveVelocityNextLaneLeft": 1,
+    "KeepDistCollectiveVelocityNextLaneRight": 2,
+    "KeepDistBlockedNextLaneStatic": 3,
+    "KeepDistBlockedNextLaneDynamic": 4,
+    "KeepDistTrafficJamProbability": 5,
+    "KeepDistTrafficDensity": 6,
+    "KeepDistTargetObjTurnOut": 7,
+    "KeepDistYSegment2": 8,
+    "KeepDistXSegment2": 9,
+    "KeepDistObjNanoseconds": 10,
+    "KeepDistObjSeconds": 11,
+    "keepDistWidthSegment2Left": 12,
+    "keepDistWidthSegment2Right": 13,
+    "keepDistCurvatureSegment0": 14,
+    "keepDistCurvatureGradientSegment0": 15,
+    "keepDistWidthSegment0Left": 16,
+    "keepDistWidthSegment0Right": 17,
+    "keepDistXSegment0": 18,
+    "keepDistYSegment0": 19,
+    "keepDistHeadingSegment0": 20,
+    "keepDistXSegment1": 21,
+    "keepDistYSegment1": 22,
+    "keepDistHeadingSegment1": 23,
+    "keepDistCurvatureSegment1": 24,
+    "keepDistCurvatureGradientSegment1": 25,
+    "keepDistWidthSegment1Left": 26,
+    "keepDistWidthSegment1Right": 27,
+    "keepDistTimeSync": 28,
+    "keepDistanceParameterSyncCounter": 29
+   }
+  },
+  "body": "CollectiveVelocityNextLaneLeft=1 CollectiveVelocityNextLaneRight=2 BlockedNextLaneStatic=3 BlockedNextLaneDynamic=4 TrafficJamProbability=5 TrafficDensity=6 TargetObjTurnOut=7 YSegment2=8 XSegment2=9 WidthSegment2Left=12 WidthSegment2Right=13 CurvatureSegment0=14 CurvatureGradientSegment0=15 WidthSegment0Left=16 WidthSegment0Right=17 XSegment0=18 YSegment0=19 HeadingSegment0=20 XSegment1=21 YSegment1=22 HeadingSegment1=23 CurvatureSegment1=24 CurvatureGradientSegment1=25 WidthSegment1Left=26 WidthSegment1Right=27"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "view-input",
+  "iface": "de.bmw.dass.AssistedDrivingViewFunctionInput",
+  "field": "assistedDrivingViewFunctionInputIbVip",
+  "instance": "1",
+  "value": {
+   "assistedDrivingViewStateXcc": 1,
+   "assistedDrivingViewSubStateXcc": 2,
+   "assistedDrivingViewACCTargetObjectId": 3,
+   "assistedDrivingViewMultiControlObjectType": 4,
+   "assistedDrivingViewOvertakingPreventionState": 5,
+   "assistedDrivingViewMultiControlObjectId": 6,
+   "assistedDrivingViewOvertakingPreventionObjectId": 7,
+   "assistedDrivingViewACCPrioObjectId": 8,
+   "assistedDrivingViewACCTargetDistance": 9,
+   "assistedDrivingViewDispXcc": 10,
+   "assistedDrivingViewDispGapChoice": 11,
+   "assistedDrivingViewDispGapChoiceMode": 12,
+   "assistedDrivingViewStdTimestampNanoseconds": 13,
+   "assistedDrivingViewStdTimestampSeconds": 14,
+   "assistedDrivingViewStdTimestampSyncState": 15,
+   "assistedDrivingViewDispSLD": 16
+  },
+  "body": "StateXcc=1 SubStateXcc=2 ACCTargetObjectId=3 MultiControlObjectType=4 OvertakingPreventionState=5 MultiControlObjectId=6 OvertakingPreventionObjectId=7 ACCPrioObjectId=8 ACCTargetDistance=9 DispXcc=10 DispGapChoice=11 DispGapChoiceMode=12 DispSLD=16"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "display-speed",
+  "iface": "de.bmw.dass.driverassistanceapplications.StatusDisplayXADAndSpeed",
+  "field": "statusDisplaySpeed",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "displayedValueSpeed": 6.25,
+   "unitSpeed": "UNIT_MPH"
+  },
+  "body": "value=6.25 unit=UNIT_MPH"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "display-xad",
+  "iface": "de.bmw.dass.driverassistanceapplications.StatusDisplayXADAndSpeed",
+  "field": "statusDisplayXAD",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "statusDisplayGapInformation": "GAP_AVAILABLE",
+   "statusDisplayDriverAssistanceLateral": "LATERAL_DISPLAY_NOT_AVAILABLE",
+   "statusDisplayHighwayPilot": "HIGHWAYPILOT_DISPLAY_NOT_AVAILABLE",
+   "statusDisplayHandOffOption": "HANDSOFFOPTION_DISPLAY_NOT_AVAILABLE",
+   "statusDisplayCheckControlXAD": "CHECKCONTROLDISPLAY_NOT_AVAILABLE",
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED"
+  },
+  "body": "statusDisplayGapInformation=GAP_AVAILABLE statusDisplayDriverAssistanceLateral=LATERAL_DISPLAY_NOT_AVAILABLE statusDisplayHighwayPilot=HIGHWAYPILOT_DISPLAY_NOT_AVAILABLE statusDisplayHandOffOption=HANDSOFFOPTION_DISPLAY_NOT_AVAILABLE statusDisplayCheckControlXAD=CHECKCONTROLDISPLAY_NOT_AVAILABLE eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "ad-velocity",
+  "iface": "de.bmw.dass.HMIControlAD",
+  "field": "desiredDisplayedVelocity",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "displayedVelocity": 5,
+   "displayedVelocityColor": "COLOR_SAE_LEVEL3",
+   "displayedVelocityIcon": "DANGER"
+  },
+  "body": "velocity=5 colour=COLOR_SAE_LEVEL3 icon=DANGER"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "ad-speed-lock",
+  "iface": "de.bmw.dass.HMIControlAD",
+  "field": "controlSpeedLock",
+  "instance": "1",
+  "value": {
+   "unlockRequested": false
+  },
+  "body": "unlock=false"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "ad-state",
+  "iface": "de.bmw.dass.HMIControlAD",
+  "field": "stateAD",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "state": "ACTIVATION_PHASE2",
+   "stateAttributes": {
+    "Attribute_1": 5,
+    "Attribute_2": 6,
+    "Attribute_3": 7,
+    "Attribute_4": 8,
+    "Attribute_5": 9,
+    "Attribute_6": 10,
+    "Attribute_7": 11,
+    "Attribute_8": 12,
+    "Attribute_9": 13,
+    "Attribute_10": 14,
+    "Attribute_11": 15,
+    "Attribute_12": 16,
+    "Attribute_13": 17,
+    "Attribute_14": 18,
+    "Attribute_15": 19,
+    "invalidFlag": true
+   },
+   "remainingPercentageOfState": 21,
+   "remainingTimeOfState": 22,
+   "remainingDistanceOfState": 23
+  },
+  "body": "state=ACTIVATION_PHASE2 Attribute_1=5 Attribute_2=6 Attribute_3=7 Attribute_4=8 Attribute_5=9 Attribute_6=10 Attribute_7=11 Attribute_8=12 Attribute_9=13 Attribute_10=14 Attribute_11=15 Attribute_12=16 Attribute_13=17 Attribute_14=18 Attribute_15=19 stateAttributes.invalidFlag=true remainingPercentageOfState=21 remainingTimeOfState=22 remainingDistanceOfState=23"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "ad-state-legacy",
+  "iface": "de.bmw.dass.StateAutonomousDrivingLegacy",
+  "field": "stateAutonomousDriving",
+  "instance": "1",
+  "value": {
+   "cRCStateAutonomousDriving": 1,
+   "aLIVStateAutonomousDriving": 2,
+   "cHLStateAutonomousDriving": 3,
+   "statusAutonomousDriving": "FUNKTIONSSCHNITTSTELLE_IST_NICHT_VERFUEGBAR",
+   "brcCtrSafeCrash": "CRASH1",
+   "dummy": 4
+  },
+  "body": "state=FUNKTIONSSCHNITTSTELLE_IST_NICHT_VERFUEGBAR crash=CRASH1"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "assist-message",
+  "iface": "de.bmw.dass.driverassistanceapplications.DriverAssistanceExtendedMessages",
+  "field": "coordinatedExtendedMessageDriverAssistance",
+  "instance": "1",
+  "value": {
+   "coordinatedExtendedMessageDriverAssistanceID": 1,
+   "coordinatedExtendedMessageDriverAssistanceValue": 2,
+   "coordinatedExtendedMessageDriverAssistanceInformation": "RESERVIERT_NICHT_VERFUEGBAR"
+  },
+  "body": "id=1 value=2 info=RESERVIERT_NICHT_VERFUEGBAR"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "fcw-setting",
+  "iface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+  "field": "settingFrontCollisionWarning",
+  "instance": "1",
+  "value": {
+   "value": "EARLY",
+   "availability": "NOT_OPERABLE",
+   "availabilityDeactivated": "NOT_OPERABLE"
+  },
+  "body": "value=EARLY availability=NOT_OPERABLE deactivated=NOT_OPERABLE"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "fcw-sound",
+  "iface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+  "field": "settingFrontCollisionWarningSound",
+  "instance": "1",
+  "value": {
+   "value": "DEACTIVATED",
+   "availability": "NOT_OPERABLE"
+  },
+  "body": "value=DEACTIVATED availability=NOT_OPERABLE"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "foresight-status",
+  "iface": "de.bmw.dass.StatusDriverAssistanceFunctions",
+  "field": "statusForesight",
+  "instance": "1",
+  "value": {
+   "statusForesightFunction": "FUNCTION_ERROR",
+   "statusForesightSubfunctions": 1
+  },
+  "body": "function=FUNCTION_ERROR sub=1(0x1)"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "warn-brake",
+  "iface": "de.bmw.infotainment.fasus.FASuS",
+  "field": "requestWarnBrakeCoordinatorDisplay",
+  "instance": "1",
+  "value": {
+   "cRcRequestWarnBrakeCoordinatorDisplay": 1,
+   "aliveRequestWarnBrakeCoordinatorDisplay": 2,
+   "cHLRequestWarnBrakeCoordinatorDisplay": 3,
+   "requestDisplaySymbol": "AUFFAHRWARNUNG___FAHRZEUG",
+   "requestSymbolAttribute": 4,
+   "dummy": 5,
+   "dummy2": 6
+  },
+  "body": "requestDisplaySymbol=AUFFAHRWARNUNG___FAHRZEUG requestSymbolAttribute=4"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "status-fas",
+  "iface": "de.bmw.infotainment.fasus.FASuS",
+  "field": "statusFAS",
+  "instance": "1",
+  "value": {
+   "statusForesight": 1
+  },
+  "body": "statusForesight=1"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "fas-mode",
+  "iface": "de.bmw.infotainment.fasus.FASuS",
+  "field": "displayDrivingAssistentSystemsMode",
+  "instance": "1",
+  "value": {
+   "dispFasModMnu": 1,
+   "dispFasModCurs": "MODUS_1",
+   "dispFasMod1": 2,
+   "dispFasMod2": 3,
+   "dispFasMod3": 4,
+   "dispFasMod4": 5,
+   "dispFasMod5": 6,
+   "dispFasMod6": 7,
+   "dispVlOffsVLim": 8
+  },
+  "body": "dispFasModMnu=1 dispFasModCurs=MODUS_1 dispFasMod1=2 dispFasMod2=3 dispFasMod3=4 dispFasMod4=5 dispFasMod5=6 dispFasMod6=7 dispVlOffsVLim=8"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "trajectory",
+  "iface": "de.bmw.infotainment.fasus.FASuS",
+  "field": "statusStateDrivingTrajectory",
+  "instance": "1",
+  "value": {
+   "radiusDrivingTubeRightHand": 1,
+   "radiusDrivingTubeLeftHand": 2,
+   "coordinatesXCenterOfCircleDrivingTube": 3,
+   "coordinatesYCenterOfCircleDrivingTube": 4,
+   "displayDrivingTubeActive": "FAHRSCHLAUCH_VORNE"
+  },
+  "body": "radiusDrivingTubeRightHand=1 radiusDrivingTubeLeftHand=2 coordinatesXCenterOfCircleDrivingTube=3 coordinatesYCenterOfCircleDrivingTube=4 displayDrivingTubeActive=FAHRSCHLAUCH_VORNE"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "foresight2",
+  "iface": "de.bmw.infotainment.fasus.FASuS",
+  "field": "displayForesight2",
+  "instance": "1",
+  "value": {
+   "targetTypeReasonDeceleration3": "AMPEL_GELB",
+   "laneGuidingManeuverID": 1,
+   "displayUCCPriority": "ANZEIGE_UNTERDRUECKEN",
+   "displayEmergencyLane": 2
+  },
+  "body": "targetTypeReasonDeceleration3=AMPEL_GELB laneGuidingManeuverID=1 displayUCCPriority=ANZEIGE_UNTERDRUECKEN displayEmergencyLane=2"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "speed",
+  "iface": "de.bmw.chassis.SpeedAcceleration",
+  "field": "vehicleSpeed",
+  "instance": "1",
+  "value": {
+   "aliveSpeedVehicle": 1,
+   "statusSpeedVehicleNearStandstill": "FAHRZEUG_NICHT_IM_STILLSTANDSNAHEN_BEREICH",
+   "speedVehicleCentreOfGravity": 2,
+   "qualifierSpeedVehicleCentreOfGravity": "RESERVED"
+  },
+  "body": "standstill=FAHRZEUG_NICHT_IM_STILLSTANDSNAHEN_BEREICH speed=2 qualifier=RESERVED"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "direction",
+  "iface": "de.bmw.chassis.SpeedAcceleration",
+  "field": "drivingDirection",
+  "instance": "1",
+  "value": {
+   "drivingDirectionConfirmed": "FAHRZEUG_FAEHRT_RUECKWAERTS",
+   "drivingDirectionUnconfirmed": "FAHRZEUG_FAEHRT_RUECKWAERTS",
+   "dummy": 1
+  },
+  "body": "confirmed=FAHRZEUG_FAEHRT_RUECKWAERTS unconfirmed=FAHRZEUG_FAEHRT_RUECKWAERTS"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "accel-long",
+  "iface": "de.bmw.chassis.SpeedAcceleration",
+  "field": "LongitudinalAccelerationCentreOfGravity",
+  "instance": "1",
+  "value": {
+   "cRCLongitudinalAccelerationCentreOfGravity": 1,
+   "aliveLongitudinalAccelerationCentreOfGravity": 2,
+   "dummy": 3,
+   "longitudinalAccelerationCentreOfGravity": 4,
+   "longitudinalAccelerationCentreOfGravityErrorAmplitude": 5,
+   "qualifierLongitudinalAccelerationCentreOfGravity": "INITIALISIERUNG"
+  },
+  "body": "accel=4 error=5 qualifier=INITIALISIERUNG"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "accel-lat",
+  "iface": "de.bmw.chassis.SpeedAcceleration",
+  "field": "LateralAccelerationCenterOfGravity",
+  "instance": "1",
+  "value": {
+   "cRCLongitudinalAccelerationCentreOfGravity": 1,
+   "aliveLongitudinalAccelerationCentreOfGravity": 2,
+   "dummy": 3,
+   "lateralAccelerationCentreOfGravity": 4,
+   "lateralAccelerationCentreOfGravityErrorAmplitude": 5,
+   "qualifierLateralAccelerationCentreOfGravity": "INITIALISIERUNG"
+  },
+  "body": "accel=4 error=5 qualifier=INITIALISIERUNG"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "yaw-speed",
+  "iface": "de.bmw.chassis.SpeedAcceleration",
+  "field": "YawSpeedVehicle",
+  "instance": "1",
+  "value": {
+   "cRCYawVelocityVehicle": 1,
+   "aliveYawVelocityVehicle": 2,
+   "dummy": 3,
+   "yawVelocityVehicle": 4,
+   "yawVelocityVehicleErrorAmplitude": 5,
+   "qualifierYawVelocityVehicle": "INITIALISIERUNG"
+  },
+  "body": "yaw=4 error=5 qualifier=INITIALISIERUNG"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "dynamics-long",
+  "iface": "de.bmw.chassis.SpeedAcceleration",
+  "field": "VehicleDynamicDataLongitudinalAndMassVehicle",
+  "instance": "1",
+  "value": {
+   "cRCVehicleDynamicsDataLongitudinal1": 1,
+   "aliveVehicleDynamicsDataLongitudinal1": 2,
+   "qualifierLongitudinalAccelerationDrivingDirection2": "RESERVED",
+   "longitudinalAccelerationDrivingDirection2": 3,
+   "vehicleSpeedLongitudinal": 4,
+   "qualifierVehicleSpeedLongitudinal": "SIGNALQUALITAET_BZW_P__UEBERWACHUNG_EINGESCHRAENKT__ZUSTAND_S_STATUS_TEMPORAER",
+   "emptyMassVehicle": 5,
+   "dummy": 6
+  },
+  "body": "accel=3 accelQ=RESERVED speed=4 speedQ=SIGNALQUALITAET_BZW_P__UEBERWACHUNG_EINGESCHRAENKT__ZUSTAND_S_STATUS_TEMPORAER mass=5"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "characteristic-speed",
+  "iface": "de.bmw.chassis.SpeedAcceleration",
+  "field": "CharacteristicSpeed",
+  "instance": "1",
+  "value": {
+   "characteristicSpeed": 1,
+   "characteristicSpeedErrorAmplitude": 2,
+   "qualifierCharacteristicSpeed": "INITIALISIERUNG"
+  },
+  "body": "speed=1 error=2 qualifier=INITIALISIERUNG"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "accel-long-cog",
+  "iface": "de.bmw.chassis.AccelerationLongitudinalLateralProvision",
+  "field": "accelerationLongitudinalCog",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "accelerationLongitudinalCog": {
+    "accelerationLongitudinalCentreOfGravity": 6.25,
+    "invalidFlag": true
+   },
+   "accelerationLongitudinalCogErrAmp": {
+    "accelerationLongitudinalCentreOfGravityErrorAmplitude": 8.75,
+    "invalidFlag": true
+   },
+   "qualifierAccelerationLongitudinalCog": "ERSATZWERT",
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED"
+  },
+  "body": "accelerationLongitudinalCentreOfGravity=6.25 accelerationLongitudinalCog.invalidFlag=true accelerationLongitudinalCentreOfGravityErrorAmplitude=8.75 accelerationLongitudinalCogErrAmp.invalidFlag=true qualifierAccelerationLongitudinalCog=ERSATZWERT eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "accel-lat-cog",
+  "iface": "de.bmw.chassis.AccelerationLongitudinalLateralProvision",
+  "field": "accelerationLateralCog",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "accelerationLateralCog": {
+    "accelerationLateralCentreOfGravity": 6.25,
+    "invalidFlag": true
+   },
+   "accelerationLateralCogErrAmp": {
+    "accelerationLateralCentreOfGravityErrorAmplitude": 8.75,
+    "invalidFlag": true
+   },
+   "qualifierAccelerationLateralCog": "ERSATZWERT",
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED"
+  },
+  "body": "accelerationLateralCentreOfGravity=6.25 accelerationLateralCog.invalidFlag=true accelerationLateralCentreOfGravityErrorAmplitude=8.75 accelerationLateralCogErrAmp.invalidFlag=true qualifierAccelerationLateralCog=ERSATZWERT eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "accel-long-est",
+  "iface": "de.bmw.chassis.AccelerationLongitudinalLateralProvision",
+  "field": "vehicleAccelerationLongitudinalEstimated",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "vehicleAccelerationLongitudinalEstimated": {
+    "VehicleAccelerationLongitudinalEstimated": 6.25,
+    "invalidFlag": true
+   },
+   "qualifierVehicleAccelerationLongitudinalEstimated": "SIGNALWERT",
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED"
+  },
+  "body": "VehicleAccelerationLongitudinalEstimated=6.25 vehicleAccelerationLongitudinalEstimated.invalidFlag=true qualifierVehicleAccelerationLongitudinalEstimated=SIGNALWERT eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "yaw-rate",
+  "iface": "de.bmw.chassis.YawRateProvision",
+  "field": "yawRate",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "yawRate": {
+    "yawRate": 6.25,
+    "invalidFlag": true
+   },
+   "yawRateErrAmp": {
+    "yawRateErrAmp": 8.75,
+    "invalidFlag": true
+   },
+   "qualifierYawRate": "INITIALISIERUNG",
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED"
+  },
+  "body": "yawRate=6.25 yawRate.invalidFlag=true yawRateErrAmp=8.75 yawRateErrAmp.invalidFlag=true qualifierYawRate=INITIALISIERUNG eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "gradient",
+  "iface": "de.bmw.chassis.SurfaceInformationProvision",
+  "field": "longitudinalGradientSurface",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "longitudinalGradientSurface": {
+    "longitudinalGradientSurface": 6.25,
+    "invalidFlag": true
+   },
+   "qualifierLongitudinalGradientSurface": "ERSATZWERT",
+   "longitudinalGradientSurfaceFast": {
+    "longitudinalGradientSurfaceFast": 8.75,
+    "invalidFlag": true
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED"
+  },
+  "body": "longitudinalGradientSurface=6.25 longitudinalGradientSurface.invalidFlag=true qualifierLongitudinalGradientSurface=ERSATZWERT longitudinalGradientSurfaceFast=8.75 longitudinalGradientSurfaceFast.invalidFlag=true eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "pitch-rate",
+  "iface": "de.bmw.chassis.RollPitchRateAccelerationVerticalProvision",
+  "field": "pitchRateCog",
+  "instance": "1",
+  "value": {
+   "qualifierPitchRateCog": "ERSATZWERT",
+   "pitchRateCog": {
+    "PitchRateCog": 1.25,
+    "invalidFlag": true
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED"
+  },
+  "body": "qualifierPitchRateCog=ERSATZWERT PitchRateCog=1.25 pitchRateCog.invalidFlag=true eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "roll-rate",
+  "iface": "de.bmw.chassis.RollPitchRateAccelerationVerticalProvision",
+  "field": "rollRateCog",
+  "instance": "1",
+  "value": {
+   "qualifierRollRateCog": "ERSATZWERT",
+   "rollRateCog": {
+    "RollRateCog": 1.25,
+    "invalidFlag": true
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED"
+  },
+  "body": "qualifierRollRateCog=ERSATZWERT RollRateCog=1.25 rollRateCog.invalidFlag=true eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "cds-accel-long",
+  "iface": "de.bmw.infotainment.vehicle.CDS2",
+  "field": "statusLongitudinalAccelerationMassCenter",
+  "instance": "1",
+  "value": {
+   "longitudinalAccelerationCentreOfGravity": 1
+  },
+  "body": "accel=1"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "cds-accel-lat",
+  "iface": "de.bmw.infotainment.vehicle.CDS2",
+  "field": "statusLateralAccelerationMassCenter",
+  "instance": "1",
+  "value": {
+   "lateralAccelerationCentreOfGravity": 1
+  },
+  "body": "accel=1"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "cam-objects",
+  "iface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+  "field": "ObjectRecognition",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestamp": 5,
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "numberOfCars": 6,
+   "numberOfPedestrians": 7,
+   "numberOfCyclists": 8,
+   "numberOfBikes": 9,
+   "numberOfTrucks": 10,
+   "numberOfOtherVehicles": 11,
+   "numberOfRoadBoundaries": 12,
+   "timestampQualifier": "NOT_IN_SYNC",
+   "numberOfUnknownObjects": 13,
+   "numberOfObjects": 14,
+   "objectRecognitionInfo": [
+    {
+     "statusMeasurement": "ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW",
+     "statusMovement": "MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING",
+     "classificationType": "BRIDGE",
+     "modeLateral": "CUTTING_IN_FROM_RIGHT",
+     "drivingTubeMapping": "OBJECT_IN_EGO_LANE",
+     "objectID": 15
+    },
+    {
+     "statusMeasurement": "ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW",
+     "statusMovement": "MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING",
+     "classificationType": "BRIDGE",
+     "modeLateral": "CUTTING_IN_FROM_RIGHT",
+     "drivingTubeMapping": "OBJECT_IN_EGO_LANE",
+     "objectID": 16
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfCars=6 numberOfPedestrians=7 numberOfCyclists=8 numberOfBikes=9 numberOfTrucks=10 numberOfOtherVehicles=11 numberOfRoadBoundaries=12 numberOfUnknownObjects=13 numberOfObjects=14 objectRecognitionInfo=2 [statusMeasurement=ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW statusMovement=MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING classificationType=BRIDGE modeLateral=CUTTING_IN_FROM_RIGHT drivingTubeMapping=OBJECT_IN_EGO_LANE objectID=15] [statusMeasurement=ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW statusMovement=MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING classificationType=BRIDGE modeLateral=CUTTING_IN_FROM_RIGHT drivingTubeMapping=OBJECT_IN_EGO_LANE objectID=16]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "cam-position",
+  "iface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+  "field": "ObjectPosition",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestamp": 5,
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "numberOfObjects": 6,
+   "objectPositionInfo": [
+    {
+     "objectPositionInfoInvalidFlags": 7,
+     "referencePoint": "CORNER_FRONT_RIGHT",
+     "positionX": 10,
+     "positionY": 11.25,
+     "positionZ": 12.5
+    },
+    {
+     "objectPositionInfoInvalidFlags": 11,
+     "referencePoint": "CORNER_FRONT_RIGHT",
+     "positionX": 15,
+     "positionY": 16.25,
+     "positionZ": 17.5
+    }
+   ],
+   "objectDimensionInfo": [
+    {
+     "objectDimensionInfoInvalidFlags": 15,
+     "length": 20,
+     "width": 21.25,
+     "heigth": 22.5
+    },
+    {
+     "objectDimensionInfoInvalidFlags": 19,
+     "length": 25,
+     "width": 26.25,
+     "heigth": 27.5
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfObjects=6 objectPositionInfo=2 [objectPositionInfoInvalidFlags=7 referencePoint=CORNER_FRONT_RIGHT positionX=10 positionY=11.25 positionZ=12.5] [objectPositionInfoInvalidFlags=11 referencePoint=CORNER_FRONT_RIGHT positionX=15 positionY=16.25 positionZ=17.5] objectDimensionInfo=2 [objectDimensionInfoInvalidFlags=15 length=20 width=21.25 heigth=22.5] [objectDimensionInfoInvalidFlags=19 length=25 width=26.25 heigth=27.5]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "cam-movement",
+  "iface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+  "field": "ObjectMovement",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestamp": 5,
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "numberOfObjects": 6,
+   "objectMovementInfo": [
+    {
+     "objectMovementInfoInvalidFlags": 7,
+     "speedAbsoluteX": 10,
+     "speedAbsoluteY": 11.25,
+     "accelerationAbsoluteX": 12.5,
+     "accelerationAbsoluteY": 13.75,
+     "yawAngle": 15,
+     "yawSpeed": 16.25
+    },
+    {
+     "objectMovementInfoInvalidFlags": 14,
+     "speedAbsoluteX": 18.75,
+     "speedAbsoluteY": 20,
+     "accelerationAbsoluteX": 21.25,
+     "accelerationAbsoluteY": 22.5,
+     "yawAngle": 23.75,
+     "yawSpeed": 25
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfObjects=6 objectMovementInfo=2 [objectMovementInfoInvalidFlags=7 speedAbsoluteX=10 speedAbsoluteY=11.25 accelerationAbsoluteX=12.5 accelerationAbsoluteY=13.75 yawAngle=15 yawSpeed=16.25] [objectMovementInfoInvalidFlags=14 speedAbsoluteX=18.75 speedAbsoluteY=20 accelerationAbsoluteX=21.25 accelerationAbsoluteY=22.5 yawAngle=23.75 yawSpeed=25]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "cam-probability",
+  "iface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+  "field": "ObjectProbability",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestamp": 5,
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "numberOfObjects": 6,
+   "objectProbabilityInfo": [
+    {
+     "existenceProbability": 7,
+     "probabilityPedestrian": 8,
+     "probabilityCyclist": 9,
+     "probabilityBike": 10,
+     "probabilityCar": 11,
+     "probabilityTruck": 12,
+     "probabilityOtherVehicles": 13,
+     "probabilityRoadBoundary": 14,
+     "probabilityBridge": 15,
+     "probabilityUnknown": 16
+    },
+    {
+     "existenceProbability": 17,
+     "probabilityPedestrian": 18,
+     "probabilityCyclist": 19,
+     "probabilityBike": 20,
+     "probabilityCar": 21,
+     "probabilityTruck": 22,
+     "probabilityOtherVehicles": 23,
+     "probabilityRoadBoundary": 24,
+     "probabilityBridge": 25,
+     "probabilityUnknown": 26
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfObjects=6 objectProbabilityInfo=2 [existenceProbability=7 probabilityPedestrian=8 probabilityCyclist=9 probabilityBike=10 probabilityCar=11 probabilityTruck=12 probabilityOtherVehicles=13 probabilityRoadBoundary=14 probabilityBridge=15 probabilityUnknown=16] [existenceProbability=17 probabilityPedestrian=18 probabilityCyclist=19 probabilityBike=20 probabilityCar=21 probabilityTruck=22 probabilityOtherVehicles=23 probabilityRoadBoundary=24 probabilityBridge=25 probabilityUnknown=26]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "cam-specific",
+  "iface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+  "field": "ObjectSensorSpecificFrontCamera",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestamp": 5,
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "numberOfObjects": 6,
+   "objectFrontCameraInfo": [
+    {
+     "statusFlashlight": "FLASHING_RIGHT",
+     "statusBrakingLight": "INITIALIZATION_STATUS_UNKNOWN",
+     "percentageOwnDrivingLane": 7,
+     "percentageSideDrivingLaneLeft": 8,
+     "percentageSideDrivingLaneRight": 9
+    },
+    {
+     "statusFlashlight": "FLASHING_RIGHT",
+     "statusBrakingLight": "INITIALIZATION_STATUS_UNKNOWN",
+     "percentageOwnDrivingLane": 10,
+     "percentageSideDrivingLaneLeft": 11,
+     "percentageSideDrivingLaneRight": 12
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfObjects=6 objectFrontCameraInfo=2 [statusFlashlight=FLASHING_RIGHT statusBrakingLight=INITIALIZATION_STATUS_UNKNOWN percentageOwnDrivingLane=7 percentageSideDrivingLaneLeft=8 percentageSideDrivingLaneRight=9] [statusFlashlight=FLASHING_RIGHT statusBrakingLight=INITIALIZATION_STATUS_UNKNOWN percentageOwnDrivingLane=10 percentageSideDrivingLaneLeft=11 percentageSideDrivingLaneRight=12]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "cam2-objects",
+  "iface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+  "field": "ObjectRecognition",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestamp": {
+    "nanoseconds": 5,
+    "seconds": 6,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "numberOfObjects": 7,
+   "objectRecognitionInfo": [
+    {
+     "statusMeasurement": "ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW",
+     "statusMovement": "MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING",
+     "classificationType": "CAR_WITH_OR_WITHOUT_TRAILER",
+     "modeLateral": "CUTTING_IN_FROM_RIGHT",
+     "drivingTubeMapping": "OBJECT_IN_EGO_LANE",
+     "objectID": 8,
+     "referencePoint": "CORNER_FRONT_RIGHT"
+    },
+    {
+     "statusMeasurement": "ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW",
+     "statusMovement": "MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING",
+     "classificationType": "CAR_WITH_OR_WITHOUT_TRAILER",
+     "modeLateral": "CUTTING_IN_FROM_RIGHT",
+     "drivingTubeMapping": "OBJECT_IN_EGO_LANE",
+     "objectID": 9,
+     "referencePoint": "CORNER_FRONT_RIGHT"
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfObjects=7 objectRecognitionInfo=2 [statusMeasurement=ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW statusMovement=MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING classificationType=CAR_WITH_OR_WITHOUT_TRAILER modeLateral=CUTTING_IN_FROM_RIGHT drivingTubeMapping=OBJECT_IN_EGO_LANE objectID=8 referencePoint=CORNER_FRONT_RIGHT] [statusMeasurement=ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW statusMovement=MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING classificationType=CAR_WITH_OR_WITHOUT_TRAILER modeLateral=CUTTING_IN_FROM_RIGHT drivingTubeMapping=OBJECT_IN_EGO_LANE objectID=9 referencePoint=CORNER_FRONT_RIGHT]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "cam2-position",
+  "iface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+  "field": "ObjectPosition",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestamp": {
+    "nanoseconds": 5,
+    "seconds": 6,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "numberOfObjects": 7,
+   "objectPositionInfo": [
+    {
+     "objectPositionInfoInvalidFlags": 8,
+     "positionX": 11.25,
+     "positionY": 12.5
+    },
+    {
+     "objectPositionInfoInvalidFlags": 11,
+     "positionX": 15,
+     "positionY": 16.25
+    }
+   ],
+   "objectDimensionInfo": [
+    {
+     "objectDimensionInfoInvalidFlags": 14,
+     "length": 18.75,
+     "width": 20,
+     "heigth": 21.25
+    },
+    {
+     "objectDimensionInfoInvalidFlags": 18,
+     "length": 23.75,
+     "width": 25,
+     "heigth": 26.25
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED numberOfObjects=7 objectPositionInfo=2 [objectPositionInfoInvalidFlags=8 positionX=11.25 positionY=12.5] [objectPositionInfoInvalidFlags=11 positionX=15 positionY=16.25] objectDimensionInfo=2 [objectDimensionInfoInvalidFlags=14 length=18.75 width=20 heigth=21.25] [objectDimensionInfoInvalidFlags=18 length=23.75 width=25 heigth=26.25]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "cam2-movement",
+  "iface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+  "field": "ObjectMovement",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestamp": {
+    "nanoseconds": 5,
+    "seconds": 6,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "numberOfObjects": 7,
+   "objectMovementInfo": [
+    {
+     "objectMovementInfoInvalidFlags": 8,
+     "speedAbsoluteX": 11.25,
+     "speedAbsoluteY": 12.5,
+     "accelerationAbsoluteX": 13.75,
+     "accelerationAbsoluteY": 15,
+     "yawAngle": 16.25,
+     "yawSpeed": 17.5
+    },
+    {
+     "objectMovementInfoInvalidFlags": 15,
+     "speedAbsoluteX": 20,
+     "speedAbsoluteY": 21.25,
+     "accelerationAbsoluteX": 22.5,
+     "accelerationAbsoluteY": 23.75,
+     "yawAngle": 25,
+     "yawSpeed": 26.25
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED numberOfObjects=7 objectMovementInfo=2 [objectMovementInfoInvalidFlags=8 speedAbsoluteX=11.25 speedAbsoluteY=12.5 accelerationAbsoluteX=13.75 accelerationAbsoluteY=15 yawAngle=16.25 yawSpeed=17.5] [objectMovementInfoInvalidFlags=15 speedAbsoluteX=20 speedAbsoluteY=21.25 accelerationAbsoluteX=22.5 accelerationAbsoluteY=23.75 yawAngle=25 yawSpeed=26.25]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "cam2-polar",
+  "iface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+  "field": "ObjectPolarCoordinates",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestamp": {
+    "nanoseconds": 5,
+    "seconds": 6,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extrinsics": {
+    "invalid_flags": 7,
+    "x": 10,
+    "y": 11.25,
+    "z": 12.5,
+    "roll": 13.75,
+    "pitch": 15,
+    "yaw": 16.25
+   },
+   "numberOfObjects": 14,
+   "polarCoordinates": [
+    {
+     "invalid_flags": 15,
+     "distance": 20,
+     "stdDevDistance": 21.25,
+     "distanceRate": 22.5,
+     "stdDevDistanceRate": 23.75,
+     "angle": 25,
+     "stdDevAngle": 26.25,
+     "angularRate": 27.5,
+     "stdDevAngularRate": 28.75
+    },
+    {
+     "invalid_flags": 24,
+     "distance": 31.25,
+     "stdDevDistance": 32.5,
+     "distanceRate": 33.75,
+     "stdDevDistanceRate": 35,
+     "angle": 36.25,
+     "stdDevAngle": 37.5,
+     "angularRate": 38.75,
+     "stdDevAngularRate": 40
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extrinsics.invalid_flags=7 extrinsics.x=10 extrinsics.y=11.25 extrinsics.z=12.5 extrinsics.roll=13.75 extrinsics.pitch=15 extrinsics.yaw=16.25 numberOfObjects=14 polarCoordinates=2 [polarCoordinates.invalid_flags=15 polarCoordinates.distance=20 stdDevDistance=21.25 distanceRate=22.5 stdDevDistanceRate=23.75 polarCoordinates.angle=25 stdDevAngle=26.25 angularRate=27.5 stdDevAngularRate=28.75] [polarCoordinates.invalid_flags=24 polarCoordinates.distance=31.25 stdDevDistance=32.5 distanceRate=33.75 stdDevDistanceRate=35 polarCoordinates.angle=36.25 stdDevAngle=37.5 angularRate=38.75 stdDevAngularRate=40]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "cam2-probability",
+  "iface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+  "field": "ObjectProbability",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestamp": {
+    "nanoseconds": 5,
+    "seconds": 6,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "numberOfObjects": 7,
+   "objectProbabilityInfo": [
+    {
+     "existenceProbability": 8,
+     "probabilityPedestrian": 9,
+     "probabilityCyclist": 10,
+     "probabilityBike": 11,
+     "probabilityCar": 12,
+     "probabilityTruck": 13,
+     "probabilityOtherVehicles": 14,
+     "probabilityUnknown": 15
+    },
+    {
+     "existenceProbability": 16,
+     "probabilityPedestrian": 17,
+     "probabilityCyclist": 18,
+     "probabilityBike": 19,
+     "probabilityCar": 20,
+     "probabilityTruck": 21,
+     "probabilityOtherVehicles": 22,
+     "probabilityUnknown": 23
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED numberOfObjects=7 objectProbabilityInfo=2 [existenceProbability=8 probabilityPedestrian=9 probabilityCyclist=10 probabilityBike=11 probabilityCar=12 probabilityTruck=13 probabilityOtherVehicles=14 probabilityUnknown=15] [existenceProbability=16 probabilityPedestrian=17 probabilityCyclist=18 probabilityBike=19 probabilityCar=20 probabilityTruck=21 probabilityOtherVehicles=22 probabilityUnknown=23]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "cam2-specific",
+  "iface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+  "field": "ObjectSensorSpecificFrontCamera",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestamp": {
+    "nanoseconds": 5,
+    "seconds": 6,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "numberOfObjects": 7,
+   "objectFrontCameraInfo": [
+    {
+     "statusFlashlight": "FLASHING_RIGHT",
+     "statusBrakingLight": "INITIALIZATION_STATUS_UNKNOWN",
+     "percentageOwnDrivingLane": 8,
+     "percentageSideDrivingLaneLeft": 9,
+     "percentageSideDrivingLaneRight": 10,
+     "iTTC": 13.75,
+     "angleRightEdgeToLeftLane": 15,
+     "angleLeftEdgeToRightLane": 16.25,
+     "invalid_flags": 14,
+     "statusCollision": "ASIL_QM_INTEGRITY"
+    },
+    {
+     "statusFlashlight": "FLASHING_RIGHT",
+     "statusBrakingLight": "INITIALIZATION_STATUS_UNKNOWN",
+     "percentageOwnDrivingLane": 15,
+     "percentageSideDrivingLaneLeft": 16,
+     "percentageSideDrivingLaneRight": 17,
+     "iTTC": 22.5,
+     "angleRightEdgeToLeftLane": 23.75,
+     "angleLeftEdgeToRightLane": 25,
+     "invalid_flags": 21,
+     "statusCollision": "ASIL_QM_INTEGRITY"
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED numberOfObjects=7 objectFrontCameraInfo=2 [statusFlashlight=FLASHING_RIGHT statusBrakingLight=INITIALIZATION_STATUS_UNKNOWN percentageOwnDrivingLane=8 percentageSideDrivingLaneLeft=9 percentageSideDrivingLaneRight=10 iTTC=13.75 angleRightEdgeToLeftLane=15 angleLeftEdgeToRightLane=16.25 objectFrontCameraInfo.invalid_flags=14 statusCollision=ASIL_QM_INTEGRITY] [statusFlashlight=FLASHING_RIGHT statusBrakingLight=INITIALIZATION_STATUS_UNKNOWN percentageOwnDrivingLane=15 percentageSideDrivingLaneLeft=16 percentageSideDrivingLaneRight=17 iTTC=22.5 angleRightEdgeToLeftLane=23.75 angleLeftEdgeToRightLane=25 objectFrontCameraInfo.invalid_flags=21 statusCollision=ASIL_QM_INTEGRITY]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "fused-objects",
+  "iface": "de.bmw.environmentalmodel.FusedSensorDetectionData",
+  "field": "objects",
+  "instance": "1",
+  "value": {
+   "ObjectPredictionList": {
+    "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+    "extendedQualifier": "KPREDICTIONEXTENDEDQUALIFIER_INPUTNOTAVAILABLE",
+    "timeStamp": {
+     "nanoseconds": 1,
+     "seconds": 2,
+     "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+    },
+    "predicted_objects": [
+     {
+      "object": {
+       "invalidFlags": 3,
+       "id": 4,
+       "statusSensors": 5,
+       "existence": 7.5,
+       "age": 8.75,
+       "measurementStatus": "KMEASUREMENTSTATUS_MEASURED",
+       "referencePoint": "FRONT_LEFT",
+       "position_x": {
+        "invalid_flags": 8,
+        "mean": 11.25,
+        "std_dev": 12.5
+       },
+       "position_y": {
+        "invalid_flags": 11,
+        "mean": 15,
+        "std_dev": 16.25
+       },
+       "velocity_x": {
+        "invalid_flags": 14,
+        "mean": 18.75,
+        "std_dev": 20
+       },
+       "velocity_y": {
+        "invalid_flags": 17,
+        "mean": 22.5,
+        "std_dev": 23.75
+       },
+       "velocity_relative_x": {
+        "invalid_flags": 20,
+        "mean": 26.25,
+        "std_dev": 27.5
+       },
+       "velocity_relative_y": {
+        "invalid_flags": 23,
+        "mean": 30,
+        "std_dev": 31.25
+       },
+       "acceleration_x": {
+        "invalid_flags": 26,
+        "mean": 33.75,
+        "std_dev": 35
+       },
+       "acceleration_y": {
+        "invalid_flags": 29,
+        "mean": 37.5,
+        "std_dev": 38.75
+       },
+       "orientation": {
+        "invalid_flags": 32,
+        "mean": 41.25,
+        "std_dev": 42.5
+       },
+       "orientation_rate": {
+        "invalid_flags": 35,
+        "mean": 45,
+        "std_dev": 46.25
+       },
+       "width": {
+        "invalid_flags": 38,
+        "mean": 48.75,
+        "std_dev": 50
+       },
+       "length": {
+        "invalid_flags": 41,
+        "mean": 52.5,
+        "std_dev": 53.75
+       },
+       "height": {
+        "invalid_flags": 44,
+        "mean": 56.25,
+        "std_dev": 57.5
+       },
+       "classification": {
+        "invalidFlags": 47,
+        "classCar": 60,
+        "classTruck": 61.25,
+        "classMotorcycle": 62.5,
+        "classOtherVvehicle": 63.75,
+        "classBicycle": 65,
+        "classPedestrian": 66.25,
+        "classStationary": 67.5,
+        "classUnknown": 68.75
+       },
+       "status_flash_light": "KFLASHLIGHTSTATUS_INVALID",
+       "statusBrakeLight": "OFF",
+       "statusMovement": "KMOVEMENTSTATUS_MOVED"
+      },
+      "currentPosition": {
+       "timestamp": {
+        "nanoseconds": 56,
+        "seconds": 57,
+        "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+       },
+       "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+       "extendedQualifier": "BEGINNING_BLOCKAGE",
+       "numberOfObjects": 58,
+       "objectPositionInfo": [
+        {
+         "objectPositionInfoInvalidFlags": 59,
+         "positionX": 75,
+         "positionY": 76.25
+        },
+        {
+         "objectPositionInfoInvalidFlags": 62,
+         "positionX": 78.75,
+         "positionY": 80
+        }
+       ],
+       "objectDimensionInfo": [
+        {
+         "objectDimensionInfoInvalidFlags": 65,
+         "length": 82.5,
+         "width": 83.75,
+         "heigth": 85
+        },
+        {
+         "objectDimensionInfoInvalidFlags": 69,
+         "length": 87.5,
+         "width": 88.75,
+         "heigth": 90
+        }
+       ]
+      },
+      "predictedManeuvers": [
+       {
+        "invalidFlags": "KMANEUVERINVALIDFLAGS_SIGNALUNFILLED",
+        "maneuverType": "KMANEUVERTYPE_GENERIC",
+        "maneuverProbability": 91.25,
+        "validPrediction": true,
+        "probLaneKeepConstant": 93.75,
+        "probLaneKeepAccelerate": 95,
+        "probLaneKeepBrake": 96.25,
+        "probLaneChangeLeftConstant": 97.5,
+        "probLaneChangeLeftAccelerate": 98.75,
+        "probLaneChangeLeftNrake": 100,
+        "probLaneChangeRightConstant": 101.25,
+        "probLaneChangeRightAccelerate": 102.5,
+        "probLaneChangeRightBrake": 103.75,
+        "predictedTrajectory": {
+         "invalidFlags": "KTRAJECTORYINVALIDFLAGS_ACCELERATIONLONGITUDINAL",
+         "coordinateSystem": "KTRAJECTORYCOORDINATESYSTEM_INVALID",
+         "positionLongitudinal": {
+          "polynomials": {
+           "invalidFlags": 84,
+           "coefficients": 106.25
+          },
+          "stdTimestamp": {
+           "nanoseconds": 86,
+           "seconds": 87,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "position_lateral": {
+          "polynomials": {
+           "invalidFlags": 88,
+           "coefficients": 111.25
+          },
+          "stdTimestamp": {
+           "nanoseconds": 90,
+           "seconds": 91,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "heading": {
+          "polynomials": {
+           "invalidFlags": 92,
+           "coefficients": 116.25
+          },
+          "stdTimestamp": {
+           "nanoseconds": 94,
+           "seconds": 95,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "velocity_longitudinal": {
+          "polynomials": {
+           "invalidFlags": 96,
+           "coefficients": [
+            121.25,
+            122.5
+           ]
+          },
+          "samplingPoints": {
+           "nanoseconds": 99,
+           "seconds": 100,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "velocity_lateral": {
+          "polynomials": {
+           "invalidFlags": 101,
+           "coefficients": [
+            127.5,
+            128.75
+           ]
+          },
+          "samplingPoints": {
+           "nanoseconds": 104,
+           "seconds": 105,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "acceleration_longitudinal": {
+          "polynomials": {
+           "invalidFlags": 106,
+           "coefficients": [
+            133.75,
+            135
+           ]
+          },
+          "sampling_points": {
+           "nanoseconds": 109,
+           "seconds": 110,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "acceleration_lateral": {
+          "polynomials": {
+           "invalidFlags": 111,
+           "coefficients": [
+            140,
+            141.25
+           ]
+          },
+          "sampling_points": {
+           "nanoseconds": 114,
+           "seconds": 115,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "predicted_lane_assignment": {
+          "laneAssignment": [
+           "KLANEASSIGNMENT_NOTRECOGNIZED",
+           "KLANEASSIGNMENT_NOTRECOGNIZED"
+          ],
+          "sampling_points": [
+           {
+            "nanoseconds": 116,
+            "seconds": 117,
+            "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+           },
+           {
+            "nanoseconds": 118,
+            "seconds": 119,
+            "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+           }
+          ]
+         },
+         "trajectory_probability": 150
+        }
+       },
+       {
+        "invalidFlags": "KMANEUVERINVALIDFLAGS_SIGNALUNFILLED",
+        "maneuverType": "KMANEUVERTYPE_GENERIC",
+        "maneuverProbability": 151.25,
+        "validPrediction": true,
+        "probLaneKeepConstant": 153.75,
+        "probLaneKeepAccelerate": 155,
+        "probLaneKeepBrake": 156.25,
+        "probLaneChangeLeftConstant": 157.5,
+        "probLaneChangeLeftAccelerate": 158.75,
+        "probLaneChangeLeftNrake": 160,
+        "probLaneChangeRightConstant": 161.25,
+        "probLaneChangeRightAccelerate": 162.5,
+        "probLaneChangeRightBrake": 163.75,
+        "predictedTrajectory": {
+         "invalidFlags": "KTRAJECTORYINVALIDFLAGS_ACCELERATIONLONGITUDINAL",
+         "coordinateSystem": "KTRAJECTORYCOORDINATESYSTEM_INVALID",
+         "positionLongitudinal": {
+          "polynomials": {
+           "invalidFlags": 132,
+           "coefficients": 166.25
+          },
+          "stdTimestamp": {
+           "nanoseconds": 134,
+           "seconds": 135,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "position_lateral": {
+          "polynomials": {
+           "invalidFlags": 136,
+           "coefficients": 171.25
+          },
+          "stdTimestamp": {
+           "nanoseconds": 138,
+           "seconds": 139,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "heading": {
+          "polynomials": {
+           "invalidFlags": 140,
+           "coefficients": 176.25
+          },
+          "stdTimestamp": {
+           "nanoseconds": 142,
+           "seconds": 143,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "velocity_longitudinal": {
+          "polynomials": {
+           "invalidFlags": 144,
+           "coefficients": [
+            181.25,
+            182.5
+           ]
+          },
+          "samplingPoints": {
+           "nanoseconds": 147,
+           "seconds": 148,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "velocity_lateral": {
+          "polynomials": {
+           "invalidFlags": 149,
+           "coefficients": [
+            187.5,
+            188.75
+           ]
+          },
+          "samplingPoints": {
+           "nanoseconds": 152,
+           "seconds": 153,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "acceleration_longitudinal": {
+          "polynomials": {
+           "invalidFlags": 154,
+           "coefficients": [
+            193.75,
+            195
+           ]
+          },
+          "sampling_points": {
+           "nanoseconds": 157,
+           "seconds": 158,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "acceleration_lateral": {
+          "polynomials": {
+           "invalidFlags": 159,
+           "coefficients": [
+            200,
+            201.25
+           ]
+          },
+          "sampling_points": {
+           "nanoseconds": 162,
+           "seconds": 163,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "predicted_lane_assignment": {
+          "laneAssignment": [
+           "KLANEASSIGNMENT_NOTRECOGNIZED",
+           "KLANEASSIGNMENT_NOTRECOGNIZED"
+          ],
+          "sampling_points": [
+           {
+            "nanoseconds": 164,
+            "seconds": 165,
+            "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+           },
+           {
+            "nanoseconds": 166,
+            "seconds": 167,
+            "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+           }
+          ]
+         },
+         "trajectory_probability": 210
+        }
+       }
+      ]
+     },
+     {
+      "object": {
+       "invalidFlags": 169,
+       "id": 170,
+       "statusSensors": 171,
+       "existence": 215,
+       "age": 216.25,
+       "measurementStatus": "KMEASUREMENTSTATUS_MEASURED",
+       "referencePoint": "FRONT_LEFT",
+       "position_x": {
+        "invalid_flags": 174,
+        "mean": 218.75,
+        "std_dev": 220
+       },
+       "position_y": {
+        "invalid_flags": 177,
+        "mean": 222.5,
+        "std_dev": 223.75
+       },
+       "velocity_x": {
+        "invalid_flags": 180,
+        "mean": 226.25,
+        "std_dev": 227.5
+       },
+       "velocity_y": {
+        "invalid_flags": 183,
+        "mean": 230,
+        "std_dev": 231.25
+       },
+       "velocity_relative_x": {
+        "invalid_flags": 186,
+        "mean": 233.75,
+        "std_dev": 235
+       },
+       "velocity_relative_y": {
+        "invalid_flags": 189,
+        "mean": 237.5,
+        "std_dev": 238.75
+       },
+       "acceleration_x": {
+        "invalid_flags": 192,
+        "mean": 241.25,
+        "std_dev": 242.5
+       },
+       "acceleration_y": {
+        "invalid_flags": 195,
+        "mean": 245,
+        "std_dev": 246.25
+       },
+       "orientation": {
+        "invalid_flags": 198,
+        "mean": 248.75,
+        "std_dev": 250
+       },
+       "orientation_rate": {
+        "invalid_flags": 201,
+        "mean": 252.5,
+        "std_dev": 253.75
+       },
+       "width": {
+        "invalid_flags": 204,
+        "mean": 256.25,
+        "std_dev": 257.5
+       },
+       "length": {
+        "invalid_flags": 207,
+        "mean": 260,
+        "std_dev": 261.25
+       },
+       "height": {
+        "invalid_flags": 210,
+        "mean": 263.75,
+        "std_dev": 265
+       },
+       "classification": {
+        "invalidFlags": 213,
+        "classCar": 267.5,
+        "classTruck": 268.75,
+        "classMotorcycle": 270,
+        "classOtherVvehicle": 271.25,
+        "classBicycle": 272.5,
+        "classPedestrian": 273.75,
+        "classStationary": 275,
+        "classUnknown": 276.25
+       },
+       "status_flash_light": "KFLASHLIGHTSTATUS_INVALID",
+       "statusBrakeLight": "OFF",
+       "statusMovement": "KMOVEMENTSTATUS_MOVED"
+      },
+      "currentPosition": {
+       "timestamp": {
+        "nanoseconds": 222,
+        "seconds": 223,
+        "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+       },
+       "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+       "extendedQualifier": "BEGINNING_BLOCKAGE",
+       "numberOfObjects": 224,
+       "objectPositionInfo": [
+        {
+         "objectPositionInfoInvalidFlags": 225,
+         "positionX": 282.5,
+         "positionY": 283.75
+        },
+        {
+         "objectPositionInfoInvalidFlags": 228,
+         "positionX": 286.25,
+         "positionY": 287.5
+        }
+       ],
+       "objectDimensionInfo": [
+        {
+         "objectDimensionInfoInvalidFlags": 231,
+         "length": 290,
+         "width": 291.25,
+         "heigth": 292.5
+        },
+        {
+         "objectDimensionInfoInvalidFlags": 235,
+         "length": 295,
+         "width": 296.25,
+         "heigth": 297.5
+        }
+       ]
+      },
+      "predictedManeuvers": [
+       {
+        "invalidFlags": "KMANEUVERINVALIDFLAGS_SIGNALUNFILLED",
+        "maneuverType": "KMANEUVERTYPE_GENERIC",
+        "maneuverProbability": 298.75,
+        "validPrediction": true,
+        "probLaneKeepConstant": 301.25,
+        "probLaneKeepAccelerate": 302.5,
+        "probLaneKeepBrake": 303.75,
+        "probLaneChangeLeftConstant": 305,
+        "probLaneChangeLeftAccelerate": 306.25,
+        "probLaneChangeLeftNrake": 307.5,
+        "probLaneChangeRightConstant": 308.75,
+        "probLaneChangeRightAccelerate": 310,
+        "probLaneChangeRightBrake": 311.25,
+        "predictedTrajectory": {
+         "invalidFlags": "KTRAJECTORYINVALIDFLAGS_ACCELERATIONLONGITUDINAL",
+         "coordinateSystem": "KTRAJECTORYCOORDINATESYSTEM_INVALID",
+         "positionLongitudinal": {
+          "polynomials": {
+           "invalidFlags": 250,
+           "coefficients": 313.75
+          },
+          "stdTimestamp": {
+           "nanoseconds": 252,
+           "seconds": 253,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "position_lateral": {
+          "polynomials": {
+           "invalidFlags": 254,
+           "coefficients": 318.75
+          },
+          "stdTimestamp": {
+           "nanoseconds": 256,
+           "seconds": 257,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "heading": {
+          "polynomials": {
+           "invalidFlags": 258,
+           "coefficients": 323.75
+          },
+          "stdTimestamp": {
+           "nanoseconds": 260,
+           "seconds": 261,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "velocity_longitudinal": {
+          "polynomials": {
+           "invalidFlags": 262,
+           "coefficients": [
+            328.75,
+            330
+           ]
+          },
+          "samplingPoints": {
+           "nanoseconds": 265,
+           "seconds": 266,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "velocity_lateral": {
+          "polynomials": {
+           "invalidFlags": 267,
+           "coefficients": [
+            335,
+            336.25
+           ]
+          },
+          "samplingPoints": {
+           "nanoseconds": 270,
+           "seconds": 271,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "acceleration_longitudinal": {
+          "polynomials": {
+           "invalidFlags": 272,
+           "coefficients": [
+            341.25,
+            342.5
+           ]
+          },
+          "sampling_points": {
+           "nanoseconds": 275,
+           "seconds": 276,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "acceleration_lateral": {
+          "polynomials": {
+           "invalidFlags": 277,
+           "coefficients": [
+            347.5,
+            348.75
+           ]
+          },
+          "sampling_points": {
+           "nanoseconds": 280,
+           "seconds": 281,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "predicted_lane_assignment": {
+          "laneAssignment": [
+           "KLANEASSIGNMENT_NOTRECOGNIZED",
+           "KLANEASSIGNMENT_NOTRECOGNIZED"
+          ],
+          "sampling_points": [
+           {
+            "nanoseconds": 282,
+            "seconds": 283,
+            "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+           },
+           {
+            "nanoseconds": 284,
+            "seconds": 285,
+            "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+           }
+          ]
+         },
+         "trajectory_probability": 357.5
+        }
+       },
+       {
+        "invalidFlags": "KMANEUVERINVALIDFLAGS_SIGNALUNFILLED",
+        "maneuverType": "KMANEUVERTYPE_GENERIC",
+        "maneuverProbability": 358.75,
+        "validPrediction": true,
+        "probLaneKeepConstant": 361.25,
+        "probLaneKeepAccelerate": 362.5,
+        "probLaneKeepBrake": 363.75,
+        "probLaneChangeLeftConstant": 365,
+        "probLaneChangeLeftAccelerate": 366.25,
+        "probLaneChangeLeftNrake": 367.5,
+        "probLaneChangeRightConstant": 368.75,
+        "probLaneChangeRightAccelerate": 370,
+        "probLaneChangeRightBrake": 371.25,
+        "predictedTrajectory": {
+         "invalidFlags": "KTRAJECTORYINVALIDFLAGS_ACCELERATIONLONGITUDINAL",
+         "coordinateSystem": "KTRAJECTORYCOORDINATESYSTEM_INVALID",
+         "positionLongitudinal": {
+          "polynomials": {
+           "invalidFlags": 298,
+           "coefficients": 373.75
+          },
+          "stdTimestamp": {
+           "nanoseconds": 300,
+           "seconds": 301,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "position_lateral": {
+          "polynomials": {
+           "invalidFlags": 302,
+           "coefficients": 378.75
+          },
+          "stdTimestamp": {
+           "nanoseconds": 304,
+           "seconds": 305,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "heading": {
+          "polynomials": {
+           "invalidFlags": 306,
+           "coefficients": 383.75
+          },
+          "stdTimestamp": {
+           "nanoseconds": 308,
+           "seconds": 309,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "velocity_longitudinal": {
+          "polynomials": {
+           "invalidFlags": 310,
+           "coefficients": [
+            388.75,
+            390
+           ]
+          },
+          "samplingPoints": {
+           "nanoseconds": 313,
+           "seconds": 314,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "velocity_lateral": {
+          "polynomials": {
+           "invalidFlags": 315,
+           "coefficients": [
+            395,
+            396.25
+           ]
+          },
+          "samplingPoints": {
+           "nanoseconds": 318,
+           "seconds": 319,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "acceleration_longitudinal": {
+          "polynomials": {
+           "invalidFlags": 320,
+           "coefficients": [
+            401.25,
+            402.5
+           ]
+          },
+          "sampling_points": {
+           "nanoseconds": 323,
+           "seconds": 324,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "acceleration_lateral": {
+          "polynomials": {
+           "invalidFlags": 325,
+           "coefficients": [
+            407.5,
+            408.75
+           ]
+          },
+          "sampling_points": {
+           "nanoseconds": 328,
+           "seconds": 329,
+           "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+          }
+         },
+         "predicted_lane_assignment": {
+          "laneAssignment": [
+           "KLANEASSIGNMENT_NOTRECOGNIZED",
+           "KLANEASSIGNMENT_NOTRECOGNIZED"
+          ],
+          "sampling_points": [
+           {
+            "nanoseconds": 330,
+            "seconds": 331,
+            "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+           },
+           {
+            "nanoseconds": 332,
+            "seconds": 333,
+            "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+           }
+          ]
+         },
+         "trajectory_probability": 417.5
+        }
+       }
+      ]
+     }
+    ],
+    "frameId": "Canary text"
+   }
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=KPREDICTIONEXTENDEDQUALIFIER_INPUTNOTAVAILABLE predicted_objects=2 [object.invalidFlags=3 id=4 statusSensors=5 existence=7.5 age=8.75 measurementStatus=KMEASUREMENTSTATUS_MEASURED referencePoint=FRONT_LEFT position_x.invalid_flags=8 position_x.mean=11.25 position_y.invalid_flags=11 position_y.mean=15 velocity_x.invalid_flags=14 velocity_x.mean=18.75 velocity_y.invalid_flags=17 velocity_y.mean=22.5 velocity_relative_x.invalid_flags=20 velocity_relative_x.mean=26.25 velocity_relative_y.invalid_flags=23 velocity_relative_y.mean=30 acceleration_x.invalid_flags=26 acceleration_x.mean=33.75 acceleration_y.invalid_flags=29 acceleration_y.mean=37.5 orientation.invalid_flags=32 orientation.mean=41.25 orientation_rate.invalid_flags=35 orientation_rate.mean=45 width.invalid_flags=38 width.mean=48.75 length.invalid_flags=41 length.mean=52.5 height.invalid_flags=44 height.mean=56.25 classification.invalidFlags=47 classCar=60 classTruck=61.25 classMotorcycle=62.5 classOtherVvehicle=63.75 classBicycle=65 classPedestrian=66.25 classStationary=67.5 classUnknown=68.75 status_flash_light=KFLASHLIGHTSTATUS_INVALID statusBrakeLight=OFF statusMovement=KMOVEMENTSTATUS_MOVED eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfObjects=58 objectPositionInfo=2 [objectPositionInfoInvalidFlags=59 positionX=75 positionY=76.25] [objectPositionInfoInvalidFlags=62 positionX=78.75 positionY=80] objectDimensionInfo=2 [objectDimensionInfoInvalidFlags=65 length=82.5 width=83.75 heigth=85] [objectDimensionInfoInvalidFlags=69 length=87.5 width=88.75 heigth=90] predictedManeuvers=2 [predictedManeuvers.invalidFlags=KMANEUVERINVALIDFLAGS_SIGNALUNFILLED maneuverType=KMANEUVERTYPE_GENERIC maneuverProbability=91.25 validPrediction=true probLaneKeepConstant=93.75 probLaneKeepAccelerate=95 probLaneKeepBrake=96.25 probLaneChangeLeftConstant=97.5 probLaneChangeLeftAccelerate=98.75 probLaneChangeLeftNrake=100 probLaneChangeRightConstant=101.25 probLaneChangeRightAccelerate=102.5 probLaneChangeRightBrake=103.75 predictedTrajectory.invalidFlags=KTRAJECTORYINVALIDFLAGS_ACCELERATIONLONGITUDINAL coordinateSystem=KTRAJECTORYCOORDINATESYSTEM_INVALID polynomials.invalidFlags=84 coefficients=106.25 polynomials.invalidFlags=88 coefficients=111.25 polynomials.invalidFlags=92 coefficients=116.25 polynomials.invalidFlags=96 coefficients=2 [121.25] [122.5] polynomials.invalidFlags=101 coefficients=2 [127.5] [128.75] polynomials.invalidFlags=106 coefficients=2 [133.75] [135] polynomials.invalidFlags=111 coefficients=2 [140] [141.25] laneAssignment=2 [KLANEASSIGNMENT_NOTRECOGNIZED] [KLANEASSIGNMENT_NOTRECOGNIZED] sampling_points=2 [] [] trajectory_probability=150] [predictedManeuvers.invalidFlags=KMANEUVERINVALIDFLAGS_SIGNALUNFILLED maneuverType=KMANEUVERTYPE_GENERIC maneuverProbability=151.25 validPrediction=true probLaneKeepConstant=153.75 probLaneKeepAccelerate=155 probLaneKeepBrake=156.25 probLaneChangeLeftConstant=157.5 probLaneChangeLeftAccelerate=158.75 probLaneChangeLeftNrake=160 probLaneChangeRightConstant=161.25 probLaneChangeRightAccelerate=162.5 probLaneChangeRightBrake=163.75 predictedTrajectory.invalidFlags=KTRAJECTORYINVALIDFLAGS_ACCELERATIONLONGITUDINAL coordinateSystem=KTRAJECTORYCOORDINATESYSTEM_INVALID polynomials.invalidFlags=132 coefficients=166.25 polynomials.invalidFlags=136 coefficients=171.25 polynomials.invalidFlags=140 coefficients=176.25 polynomials.invalidFlags=144 coefficients=2 [181.25] [182.5] polynomials.invalidFlags=149 coefficients=2 [187.5] [188.75] polynomials.invalidFlags=154 coefficients=2 [193.75] [195] polynomials.invalidFlags=159 coefficients=2 [200] [201.25] laneAssignment=2 [KLANEASSIGNMENT_NOTRECOGNIZED] [KLANEASSIGNMENT_NOTRECOGNIZED] sampling_points=2 [] [] trajectory_probability=210]] [object.invalidFlags=169 id=170 statusSensors=171 existence=215 age=216.25 measurementStatus=KMEASUREMENTSTATUS_MEASURED referencePoint=FRONT_LEFT position_x.invalid_flags=174 position_x.mean=218.75 position_y.invalid_flags=177 position_y.mean=222.5 velocity_x.invalid_flags=180 velocity_x.mean=226.25 velocity_y.invalid_flags=183 velocity_y.mean=230 velocity_relative_x.invalid_flags=186 velocity_relative_x.mean=233.75 velocity_relative_y.invalid_flags=189 velocity_relative_y.mean=237.5 acceleration_x.invalid_flags=192 acceleration_x.mean=241.25 acceleration_y.invalid_flags=195 acceleration_y.mean=245 orientation.invalid_flags=198 orientation.mean=248.75 orientation_rate.invalid_flags=201 orientation_rate.mean=252.5 width.invalid_flags=204 width.mean=256.25 length.invalid_flags=207 length.mean=260 height.invalid_flags=210 height.mean=263.75 classification.invalidFlags=213 classCar=267.5 classTruck=268.75 classMotorcycle=270 classOtherVvehicle=271.25 classBicycle=272.5 classPedestrian=273.75 classStationary=275 classUnknown=276.25 status_flash_light=KFLASHLIGHTSTATUS_INVALID statusBrakeLight=OFF statusMovement=KMOVEMENTSTATUS_MOVED eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfObjects=224 objectPositionInfo=2 [objectPositionInfoInvalidFlags=225 positionX=282.5 positionY=283.75] [objectPositionInfoInvalidFlags=228 positionX=286.25 positionY=287.5] objectDimensionInfo=2 [objectDimensionInfoInvalidFlags=231 length=290 width=291.25 heigth=292.5] [objectDimensionInfoInvalidFlags=235 length=295 width=296.25 heigth=297.5] predictedManeuvers=2 [predictedManeuvers.invalidFlags=KMANEUVERINVALIDFLAGS_SIGNALUNFILLED maneuverType=KMANEUVERTYPE_GENERIC maneuverProbability=298.75 validPrediction=true probLaneKeepConstant=301.25 probLaneKeepAccelerate=302.5 probLaneKeepBrake=303.75 probLaneChangeLeftConstant=305 probLaneChangeLeftAccelerate=306.25 probLaneChangeLeftNrake=307.5 probLaneChangeRightConstant=308.75 probLaneChangeRightAccelerate=310 probLaneChangeRightBrake=311.25 predictedTrajectory.invalidFlags=KTRAJECTORYINVALIDFLAGS_ACCELERATIONLONGITUDINAL coordinateSystem=KTRAJECTORYCOORDINATESYSTEM_INVALID polynomials.invalidFlags=250 coefficients=313.75 polynomials.invalidFlags=254 coefficients=318.75 polynomials.invalidFlags=258 coefficients=323.75 polynomials.invalidFlags=262 coefficients=2 [328.75] [330] polynomials.invalidFlags=267 coefficients=2 [335] [336.25] polynomials.invalidFlags=272 coefficients=2 [341.25] [342.5] polynomials.invalidFlags=277 coefficients=2 [347.5] [348.75] laneAssignment=2 [KLANEASSIGNMENT_NOTRECOGNIZED] [KLANEASSIGNMENT_NOTRECOGNIZED] sampling_points=2 [] [] trajectory_probability=357.5] [predictedManeuvers.invalidFlags=KMANEUVERINVALIDFLAGS_SIGNALUNFILLED maneuverType=KMANEUVERTYPE_GENERIC maneuverProbability=358.75 validPrediction=true probLaneKeepConstant=361.25 probLaneKeepAccelerate=362.5 probLaneKeepBrake=363.75 probLaneChangeLeftConstant=365 probLaneChangeLeftAccelerate=366.25 probLaneChangeLeftNrake=367.5 probLaneChangeRightConstant=368.75 probLaneChangeRightAccelerate=370 probLaneChangeRightBrake=371.25 predictedTrajectory.invalidFlags=KTRAJECTORYINVALIDFLAGS_ACCELERATIONLONGITUDINAL coordinateSystem=KTRAJECTORYCOORDINATESYSTEM_INVALID polynomials.invalidFlags=298 coefficients=373.75 polynomials.invalidFlags=302 coefficients=378.75 polynomials.invalidFlags=306 coefficients=383.75 polynomials.invalidFlags=310 coefficients=2 [388.75] [390] polynomials.invalidFlags=315 coefficients=2 [395] [396.25] polynomials.invalidFlags=320 coefficients=2 [401.25] [402.5] polynomials.invalidFlags=325 coefficients=2 [407.5] [408.75] laneAssignment=2 [KLANEASSIGNMENT_NOTRECOGNIZED] [KLANEASSIGNMENT_NOTRECOGNIZED] sampling_points=2 [] [] trajectory_probability=417.5]]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "merged-objects",
+  "iface": "de.bmw.environmentalmodel.DAADataServer",
+  "field": "ObjectListMerged",
+  "instance": "1",
+  "value": {
+   "timestamp": {
+    "nanoseconds": 1,
+    "seconds": 2,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "objectListMergedArrayInfo": [
+    {
+     "stBitFieldReduced": 3,
+     "stBitFieldCoordinated": 4,
+     "stBitFieldPrioCoordinated": 5,
+     "objId": 6,
+     "objHeading": 8.75,
+     "objCurvature": 10,
+     "objLength": 11.25,
+     "objWidth": 12.5,
+     "objRange": 13.75,
+     "width": 15,
+     "maneuverType": 13,
+     "maneuverProbability": 17.5,
+     "objFusStat": 15,
+     "objStat": 16,
+     "objMovStat": 17,
+     "objMovDirection": "KEMOBJECTFUSIONOBJECTMOVEMENTSTATUSMOVINGDIRECTION_INVALID",
+     "objType": 18,
+     "objLaneFrr": 19,
+     "objLaneLine": 20,
+     "secGap": {
+      "secGap": [
+       26.25,
+       27.5
+      ],
+      "speed": [
+       28.75,
+       30
+      ],
+      "stSigQualifiedSecondsGapCharacteristicCurve": 25
+     },
+     "secGapRefEgoSpeed": {
+      "value": 32.5,
+      "stSigValue": 27
+     },
+     "stopGap": 35,
+     "timestamp": {
+      "nanoseconds": 29,
+      "seconds": 30,
+      "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+     },
+     "statusFlashlight": 31,
+     "stSigObjList": 32
+    },
+    {
+     "stBitFieldReduced": 33,
+     "stBitFieldCoordinated": 34,
+     "stBitFieldPrioCoordinated": 35,
+     "objId": 36,
+     "objHeading": 46.25,
+     "objCurvature": 47.5,
+     "objLength": 48.75,
+     "objWidth": 50,
+     "objRange": 51.25,
+     "width": 52.5,
+     "maneuverType": 43,
+     "maneuverProbability": 55,
+     "objFusStat": 45,
+     "objStat": 46,
+     "objMovStat": 47,
+     "objMovDirection": "KEMOBJECTFUSIONOBJECTMOVEMENTSTATUSMOVINGDIRECTION_INVALID",
+     "objType": 48,
+     "objLaneFrr": 49,
+     "objLaneLine": 50,
+     "secGap": {
+      "secGap": [
+       63.75,
+       65
+      ],
+      "speed": [
+       66.25,
+       67.5
+      ],
+      "stSigQualifiedSecondsGapCharacteristicCurve": 55
+     },
+     "secGapRefEgoSpeed": {
+      "value": 70,
+      "stSigValue": 57
+     },
+     "stopGap": 72.5,
+     "timestamp": {
+      "nanoseconds": 59,
+      "seconds": 60,
+      "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+     },
+     "statusFlashlight": 61,
+     "stSigObjList": 62
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE objectListMergedArrayInfo=2 [stBitFieldReduced=3 stBitFieldCoordinated=4 stBitFieldPrioCoordinated=5 objId=6 objHeading=8.75 objCurvature=10 objLength=11.25 objWidth=12.5 objRange=13.75 width=15 maneuverType=13 maneuverProbability=17.5 objFusStat=15 objStat=16 objMovStat=17 objMovDirection=KEMOBJECTFUSIONOBJECTMOVEMENTSTATUSMOVINGDIRECTION_INVALID objType=18 objLaneFrr=19 objLaneLine=20 secGap=2 [26.25] [27.5] speed=2 [28.75] [30] stSigQualifiedSecondsGapCharacteristicCurve=25 secGapRefEgoSpeed.value=32.5 stSigValue=27 stopGap=35 statusFlashlight=31 stSigObjList=32] [stBitFieldReduced=33 stBitFieldCoordinated=34 stBitFieldPrioCoordinated=35 objId=36 objHeading=46.25 objCurvature=47.5 objLength=48.75 objWidth=50 objRange=51.25 width=52.5 maneuverType=43 maneuverProbability=55 objFusStat=45 objStat=46 objMovStat=47 objMovDirection=KEMOBJECTFUSIONOBJECTMOVEMENTSTATUSMOVINGDIRECTION_INVALID objType=48 objLaneFrr=49 objLaneLine=50 secGap=2 [63.75] [65] speed=2 [66.25] [67.5] stSigQualifiedSecondsGapCharacteristicCurve=55 secGapRefEgoSpeed.value=70 stSigValue=57 stopGap=72.5 statusFlashlight=61 stSigObjList=62]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "object-info1",
+  "iface": "de.bmw.environmentalmodel.DAADataServer",
+  "field": "ObjectInformation1",
+  "instance": "1",
+  "value": {
+   "timestamp": {
+    "nanoseconds": 1,
+    "seconds": 2,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "objectRecognition": {
+    "timestamp": {
+     "nanoseconds": 3,
+     "seconds": 4,
+     "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+    },
+    "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+    "extendedQualifier": "BEGINNING_BLOCKAGE",
+    "numberOfObjects": 5,
+    "objectRecognitionInfo": [
+     {
+      "statusMeasurement": "ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW",
+      "statusMovement": "MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING",
+      "statusMovementMovingDirection": "KEMOBJECTFUSIONOBJECTMOVEMENTSTATUSMOVINGDIRECTION_INVALID",
+      "classificationType": "CAR_WITH_OR_WITHOUT_TRAILER",
+      "modeLateral": "CUTTING_IN_FROM_RIGHT",
+      "drivingTubeMapping": "OBJECT_IN_EGO_LANE",
+      "objectID": 6,
+      "existenceProbability": 7,
+      "referencePoint": "CORNER_FRONT_RIGHT"
+     },
+     {
+      "statusMeasurement": "ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW",
+      "statusMovement": "MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING",
+      "statusMovementMovingDirection": "KEMOBJECTFUSIONOBJECTMOVEMENTSTATUSMOVINGDIRECTION_INVALID",
+      "classificationType": "CAR_WITH_OR_WITHOUT_TRAILER",
+      "modeLateral": "CUTTING_IN_FROM_RIGHT",
+      "drivingTubeMapping": "OBJECT_IN_EGO_LANE",
+      "objectID": 8,
+      "existenceProbability": 9,
+      "referencePoint": "CORNER_FRONT_RIGHT"
+     }
+    ]
+   },
+   "objectPosition": {
+    "timestamp": {
+     "nanoseconds": 10,
+     "seconds": 11,
+     "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+    },
+    "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+    "extendedQualifier": "BEGINNING_BLOCKAGE",
+    "numberOfObjects": 12,
+    "objectPositionInfo": [
+     {
+      "objectPositionInfoInvalidFlags": 13,
+      "positionX": 17.5,
+      "positionY": 18.75
+     },
+     {
+      "objectPositionInfoInvalidFlags": 16,
+      "positionX": 21.25,
+      "positionY": 22.5
+     }
+    ],
+    "objectDimensionInfo": [
+     {
+      "objectDimensionInfoInvalidFlags": 19,
+      "length": 25,
+      "width": 26.25,
+      "heigth": 27.5
+     },
+     {
+      "objectDimensionInfoInvalidFlags": 23,
+      "length": 30,
+      "width": 31.25,
+      "heigth": 32.5
+     }
+    ]
+   },
+   "objectMovementRelative": {
+    "timestamp": {
+     "nanoseconds": 27,
+     "seconds": 28,
+     "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+    },
+    "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+    "extendedQualifier": "BEGINNING_BLOCKAGE",
+    "numberOfObjects": 29,
+    "objectMovementRelativeInfo": [
+     {
+      "objectMovementRelativeInfoInvalidFlags": 30,
+      "speedRelativeX": 38.75,
+      "speedRelativeY": 40,
+      "accelerationRelativeX": 41.25,
+      "accelerationRelativeY": 42.5
+     },
+     {
+      "objectMovementRelativeInfoInvalidFlags": 35,
+      "speedRelativeX": 45,
+      "speedRelativeY": 46.25,
+      "accelerationRelativeX": 47.5,
+      "accelerationRelativeY": 48.75
+     }
+    ]
+   }
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfObjects=5 objectRecognitionInfo=2 [statusMeasurement=ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW statusMovement=MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING statusMovementMovingDirection=KEMOBJECTFUSIONOBJECTMOVEMENTSTATUSMOVINGDIRECTION_INVALID classificationType=CAR_WITH_OR_WITHOUT_TRAILER modeLateral=CUTTING_IN_FROM_RIGHT drivingTubeMapping=OBJECT_IN_EGO_LANE objectID=6 existenceProbability=7 referencePoint=CORNER_FRONT_RIGHT] [statusMeasurement=ELEMENT_MEASURED_FIRST_TIME_ELEMENT_NEW statusMovement=MOVING_OBJECT_MOVEMENT_DIRECTION_ONCOMMING statusMovementMovingDirection=KEMOBJECTFUSIONOBJECTMOVEMENTSTATUSMOVINGDIRECTION_INVALID classificationType=CAR_WITH_OR_WITHOUT_TRAILER modeLateral=CUTTING_IN_FROM_RIGHT drivingTubeMapping=OBJECT_IN_EGO_LANE objectID=8 existenceProbability=9 referencePoint=CORNER_FRONT_RIGHT] eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfObjects=12 objectPositionInfo=2 [objectPositionInfoInvalidFlags=13 positionX=17.5 positionY=18.75] [objectPositionInfoInvalidFlags=16 positionX=21.25 positionY=22.5] objectDimensionInfo=2 [objectDimensionInfoInvalidFlags=19 length=25 width=26.25 heigth=27.5] [objectDimensionInfoInvalidFlags=23 length=30 width=31.25 heigth=32.5] eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfObjects=29 objectMovementRelativeInfo=2 [objectMovementRelativeInfoInvalidFlags=30 speedRelativeX=38.75 speedRelativeY=40 accelerationRelativeX=41.25 accelerationRelativeY=42.5] [objectMovementRelativeInfoInvalidFlags=35 speedRelativeX=45 speedRelativeY=46.25 accelerationRelativeX=47.5 accelerationRelativeY=48.75]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "object-info2",
+  "iface": "de.bmw.environmentalmodel.DAADataServer",
+  "field": "ObjectInformation2",
+  "instance": "1",
+  "value": {
+   "timestamp": {
+    "nanoseconds": 1,
+    "seconds": 2,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "numberOfObjects": 3,
+   "objectMovementInfo": [
+    {
+     "objectMovementInfoInvalidFlags": 4,
+     "speedAbsoluteX": 6.25,
+     "speedAbsoluteY": 7.5,
+     "accelerationAbsoluteX": 8.75,
+     "accelerationAbsoluteY": 10,
+     "yawAngle": 11.25,
+     "yawSpeed": 12.5
+    },
+    {
+     "objectMovementInfoInvalidFlags": 11,
+     "speedAbsoluteX": 15,
+     "speedAbsoluteY": 16.25,
+     "accelerationAbsoluteX": 17.5,
+     "accelerationAbsoluteY": 18.75,
+     "yawAngle": 20,
+     "yawSpeed": 21.25
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE numberOfObjects=3 objectMovementInfo=2 [objectMovementInfoInvalidFlags=4 speedAbsoluteX=6.25 speedAbsoluteY=7.5 accelerationAbsoluteX=8.75 accelerationAbsoluteY=10 yawAngle=11.25 yawSpeed=12.5] [objectMovementInfoInvalidFlags=11 speedAbsoluteX=15 speedAbsoluteY=16.25 accelerationAbsoluteX=17.5 accelerationAbsoluteY=18.75 yawAngle=20 yawSpeed=21.25]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "object-lanes",
+  "iface": "de.bmw.environmentalmodel.DAADataServer",
+  "field": "ObjectAssignment",
+  "instance": "1",
+  "value": {
+   "timestamp": {
+    "nanoseconds": 1,
+    "seconds": 2,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "overallAssignmentType": 3,
+   "numberOfObjects": 4,
+   "assignedObjectInfo": [
+    {
+     "assignmentType": 5,
+     "assignment": {
+      "assignedLanes": 6,
+      "assignedConfidence": 7
+     },
+     "distanceToBoundaries": {
+      "invalidFlags": 8,
+      "left": 11.25,
+      "standardDeviationLeft": 12.5,
+      "own": 13.75,
+      "standardDeviationOwn": 15,
+      "right": 16.25,
+      "standardDeviationRight": 17.5
+     },
+     "frenetPosition": {
+      "invalidFlags": 15,
+      "headingOnRoad": 20,
+      "positionLateral": 21.25,
+      "positionLongitudinal": 22.5
+     },
+     "absoluteFrenetSpeed": {
+      "invalidFlags": 19,
+      "speedLateral": 25,
+      "speedLongitudinal": 26.25
+     },
+     "relativeFrenetSpeed": {
+      "invalidFlags": 22,
+      "speedLateral": 28.75,
+      "speedLongitudinal": 30
+     }
+    },
+    {
+     "assignmentType": 25,
+     "assignment": {
+      "assignedLanes": 26,
+      "assignedConfidence": 27
+     },
+     "distanceToBoundaries": {
+      "invalidFlags": 28,
+      "left": 36.25,
+      "standardDeviationLeft": 37.5,
+      "own": 38.75,
+      "standardDeviationOwn": 40,
+      "right": 41.25,
+      "standardDeviationRight": 42.5
+     },
+     "frenetPosition": {
+      "invalidFlags": 35,
+      "headingOnRoad": 45,
+      "positionLateral": 46.25,
+      "positionLongitudinal": 47.5
+     },
+     "absoluteFrenetSpeed": {
+      "invalidFlags": 39,
+      "speedLateral": 50,
+      "speedLongitudinal": 51.25
+     },
+     "relativeFrenetSpeed": {
+      "invalidFlags": 42,
+      "speedLateral": 53.75,
+      "speedLongitudinal": 55
+     }
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE overallAssignmentType=3 numberOfObjects=4 assignedObjectInfo=2 [assignmentType=5 assignedLanes=6 assignedConfidence=7 distanceToBoundaries.invalidFlags=8 distanceToBoundaries.left=11.25 standardDeviationLeft=12.5 distanceToBoundaries.own=13.75 standardDeviationOwn=15 distanceToBoundaries.right=16.25 standardDeviationRight=17.5 frenetPosition.invalidFlags=15 headingOnRoad=20 positionLateral=21.25 positionLongitudinal=22.5 absoluteFrenetSpeed.invalidFlags=19 speedLateral=25 speedLongitudinal=26.25 relativeFrenetSpeed.invalidFlags=22 speedLateral=28.75 speedLongitudinal=30] [assignmentType=25 assignedLanes=26 assignedConfidence=27 distanceToBoundaries.invalidFlags=28 distanceToBoundaries.left=36.25 standardDeviationLeft=37.5 distanceToBoundaries.own=38.75 standardDeviationOwn=40 distanceToBoundaries.right=41.25 standardDeviationRight=42.5 frenetPosition.invalidFlags=35 headingOnRoad=45 positionLateral=46.25 positionLongitudinal=47.5 absoluteFrenetSpeed.invalidFlags=39 speedLateral=50 speedLongitudinal=51.25 relativeFrenetSpeed.invalidFlags=42 speedLateral=53.75 speedLongitudinal=55]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "fas-view",
+  "iface": "de.bmw.environmentalmodel.DAADataServer",
+  "field": "FASView",
+  "instance": "1",
+  "value": {
+   "timestamp": {
+    "nanoseconds": 1,
+    "seconds": 2,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE",
+   "content": [
+    3,
+    4
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE content=2 [3] [4]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "suaar-objects",
+  "iface": "de.bmw.dass.pad.communication.ObjectListSuAAR",
+  "field": "suAARObjectList",
+  "instance": "1",
+  "value": {
+   "stdTimestamp": {
+    "nanoseconds": 1,
+    "seconds": 2,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifierObjectList": "BEGINNING_BLOCKAGE",
+   "detectionRange": 3,
+   "numberOfObjects": 4,
+   "objectList": [
+    {
+     "objectID": 5,
+     "existenceProbability": 6,
+     "fusionStatus": {
+      "fusionStatus": 7,
+      "invalidFlag": true
+     },
+     "objectPosition": {
+      "x": 9,
+      "xStdDeviation": 10,
+      "y": 11,
+      "yStdDeviation": 12,
+      "z": 13,
+      "zStdDeviation": 14,
+      "heading": 15,
+      "headingStdDeviation": 16,
+      "referencePoint": "KOBJECTREFERENCEPOINT_FRONTLEFT"
+     },
+     "objectMovement": {
+      "vX": 17,
+      "vXStdDeviation": 18,
+      "vY": 19,
+      "vYStdDeviation": 20,
+      "aX": 21,
+      "aY": 22,
+      "movementStatus": "STANDSTILL_SINCE_DETECTION",
+      "movementDirection": "MOVING_SAME_DIRECTION"
+     },
+     "objectDimension": {
+      "length": 23,
+      "lengthStdDeviation": 24,
+      "width": 25,
+      "widthStdDeviation": 26,
+      "height": 27,
+      "heightStdDeviation": 28
+     },
+     "objectProperties": {
+      "classification": {
+       "classCar": 29,
+       "classTruck": 30,
+       "classMotorcycle": 31,
+       "classOtherVehicle": 32,
+       "classBicycle": 33,
+       "classPedestrian": 34,
+       "classStationary": 35,
+       "classUnknown": 36
+      },
+      "brakeLight": "KBRAKELIGHTSTATUS_OFF",
+      "indicator": "KFLASHLIGHTSTATUS_INVALID"
+     },
+     "objectPrediction": {
+      "drivingTubeMapping": "LEFT_OF_DRIVING_TUBE",
+      "laneAssignment": "EGO_LEFT",
+      "cutinProbability": 37,
+      "cutoutProbability": 38,
+      "laneAssignmentPercentage": 39
+     }
+    },
+    {
+     "objectID": 40,
+     "existenceProbability": 41,
+     "fusionStatus": {
+      "fusionStatus": 42,
+      "invalidFlag": false
+     },
+     "objectPosition": {
+      "x": 44,
+      "xStdDeviation": 45,
+      "y": 46,
+      "yStdDeviation": 47,
+      "z": 48,
+      "zStdDeviation": 49,
+      "heading": 50,
+      "headingStdDeviation": 51,
+      "referencePoint": "KOBJECTREFERENCEPOINT_FRONTLEFT"
+     },
+     "objectMovement": {
+      "vX": 52,
+      "vXStdDeviation": 53,
+      "vY": 54,
+      "vYStdDeviation": 55,
+      "aX": 56,
+      "aY": 57,
+      "movementStatus": "STANDSTILL_SINCE_DETECTION",
+      "movementDirection": "MOVING_SAME_DIRECTION"
+     },
+     "objectDimension": {
+      "length": 58,
+      "lengthStdDeviation": 59,
+      "width": 60,
+      "widthStdDeviation": 61,
+      "height": 62,
+      "heightStdDeviation": 63
+     },
+     "objectProperties": {
+      "classification": {
+       "classCar": 64,
+       "classTruck": 65,
+       "classMotorcycle": 66,
+       "classOtherVehicle": 67,
+       "classBicycle": 68,
+       "classPedestrian": 69,
+       "classStationary": 70,
+       "classUnknown": 71
+      },
+      "brakeLight": "KBRAKELIGHTSTATUS_OFF",
+      "indicator": "KFLASHLIGHTSTATUS_INVALID"
+     },
+     "objectPrediction": {
+      "drivingTubeMapping": "LEFT_OF_DRIVING_TUBE",
+      "laneAssignment": "EGO_LEFT",
+      "cutinProbability": 72,
+      "cutoutProbability": 73,
+      "laneAssignmentPercentage": 74
+     }
+    }
+   ]
+  },
+  "body": "eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifierObjectList=BEGINNING_BLOCKAGE detectionRange=3 numberOfObjects=4 objectList=2 [objectID=5 existenceProbability=6 fusionStatus=7 fusionStatus.invalidFlag=true objectPosition.x=9 xStdDeviation=10 objectPosition.y=11 yStdDeviation=12 objectPosition.z=13 zStdDeviation=14 heading=15 headingStdDeviation=16 referencePoint=KOBJECTREFERENCEPOINT_FRONTLEFT vX=17 vXStdDeviation=18 vY=19 vYStdDeviation=20 aX=21 aY=22 movementStatus=STANDSTILL_SINCE_DETECTION movementDirection=MOVING_SAME_DIRECTION length=23 lengthStdDeviation=24 width=25 widthStdDeviation=26 height=27 heightStdDeviation=28 classCar=29 classTruck=30 classMotorcycle=31 classOtherVehicle=32 classBicycle=33 classPedestrian=34 classStationary=35 classUnknown=36 brakeLight=KBRAKELIGHTSTATUS_OFF indicator=KFLASHLIGHTSTATUS_INVALID drivingTubeMapping=LEFT_OF_DRIVING_TUBE laneAssignment=EGO_LEFT cutinProbability=37 cutoutProbability=38 laneAssignmentPercentage=39] [objectID=40 existenceProbability=41 fusionStatus=42 objectPosition.x=44 xStdDeviation=45 objectPosition.y=46 yStdDeviation=47 objectPosition.z=48 zStdDeviation=49 heading=50 headingStdDeviation=51 referencePoint=KOBJECTREFERENCEPOINT_FRONTLEFT vX=52 vXStdDeviation=53 vY=54 vYStdDeviation=55 aX=56 aY=57 movementStatus=STANDSTILL_SINCE_DETECTION movementDirection=MOVING_SAME_DIRECTION length=58 lengthStdDeviation=59 width=60 widthStdDeviation=61 height=62 heightStdDeviation=63 classCar=64 classTruck=65 classMotorcycle=66 classOtherVehicle=67 classBicycle=68 classPedestrian=69 classStationary=70 classUnknown=71 brakeLight=KBRAKELIGHTSTATUS_OFF indicator=KFLASHLIGHTSTATUS_INVALID drivingTubeMapping=LEFT_OF_DRIVING_TUBE laneAssignment=EGO_LEFT cutinProbability=72 cutoutProbability=73 laneAssignmentPercentage=74]"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "ego-cam-motion",
+  "iface": "de.bmw.chassis.EgomotionCamera",
+  "field": "egomotionCameraCartesian",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestampEgoCam": {
+    "nanoseconds": 5,
+    "seconds": 6,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "vxEgoCam": {
+    "vxEgoCam": 8.75,
+    "invalidFlag": true
+   },
+   "vyEgoCam": {
+    "vyEgoCam": 11.25,
+    "invalidFlag": true
+   },
+   "vzEgoCam": {
+    "vzEgoCam": 13.75,
+    "invalidFlag": true
+   },
+   "vxToleranceEgoCam": {
+    "vxToleranceEgoCam": 16.25,
+    "invalidFlag": true
+   },
+   "vyToleranceEgoCam": {
+    "vyToleranceEgoCam": 18.75,
+    "invalidFlag": true
+   },
+   "vzToleranceEgoCam": {
+    "vzToleranceEgoCam": 21.25,
+    "invalidFlag": true
+   },
+   "posXEgoCam": {
+    "posXEgoCam": 23.75,
+    "invalidFlag": true
+   },
+   "posYEgoCam": {
+    "posYEgoCam": 26.25,
+    "invalidFlag": true
+   },
+   "posZEgoCam": {
+    "posZEgoCam": 28.75,
+    "invalidFlag": true
+   },
+   "posXToleranceEgoCam": {
+    "posXToleranceEgoCam": 31.25,
+    "invalidFlag": true
+   },
+   "posYToleranceEgoCam": {
+    "posYToleranceEgoCam": 33.75,
+    "invalidFlag": true
+   },
+   "posZToleranceEgoCam": {
+    "posZToleranceEgoCam": 36.25,
+    "invalidFlag": true
+   },
+   "frameNumber": 31,
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE"
+  },
+  "body": "vxEgoCam=8.75 vxEgoCam.invalidFlag=true vyEgoCam=11.25 vyEgoCam.invalidFlag=true vzEgoCam=13.75 vzEgoCam.invalidFlag=true vxToleranceEgoCam=16.25 vxToleranceEgoCam.invalidFlag=true vyToleranceEgoCam=18.75 vyToleranceEgoCam.invalidFlag=true vzToleranceEgoCam=21.25 vzToleranceEgoCam.invalidFlag=true posXToleranceEgoCam=31.25 posXToleranceEgoCam.invalidFlag=true posYToleranceEgoCam=33.75 posYToleranceEgoCam.invalidFlag=true posZToleranceEgoCam=36.25 posZToleranceEgoCam.invalidFlag=true frameNumber=31 eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "ego-cam-rotation",
+  "iface": "de.bmw.chassis.EgomotionCamera",
+  "field": "egomotionCameraRotation",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "timestampEgoCam": {
+    "nanoseconds": 5,
+    "seconds": 6,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INVALID"
+   },
+   "anglePitchEgoCam": {
+    "anglePitchEgoCam": 8.75,
+    "invalidFlag": true
+   },
+   "angleRollEgoCam": {
+    "angleRollEgoCam": 11.25,
+    "invalidFlag": true
+   },
+   "angleYawEgoCam": {
+    "angleYawEgoCam": 13.75,
+    "invalidFlag": true
+   },
+   "ratePitchEgoCam": {
+    "ratePitchEgoCam": 16.25,
+    "invalidFlag": true
+   },
+   "rateRollEgoCam": {
+    "rateRollEgoCam": 18.75,
+    "invalidFlag": true
+   },
+   "rateYawEgoCam": {
+    "rateYawEgoCam": 21.25,
+    "invalidFlag": true
+   },
+   "angleYawToleranceEgoCam": {
+    "angleYawToleranceEgoCam": 23.75,
+    "invalidFlag": true
+   },
+   "angleRollToleranceEgoCam": {
+    "angleRollToleranceEgoCam": 26.25,
+    "invalidFlag": true
+   },
+   "anglePitchToleranceEgoCam": {
+    "anglePitchToleranceEgoCam": 28.75,
+    "invalidFlag": true
+   },
+   "rateYawToleranceEgoCam": {
+    "rateYawToleranceEgoCam": 31.25,
+    "invalidFlag": true
+   },
+   "rateRollToleranceEgoCam": {
+    "rateRollToleranceEgoCam": 33.75,
+    "invalidFlag": true
+   },
+   "ratePitchToleranceEgoCam": {
+    "ratePitchToleranceEgoCam": 36.25,
+    "invalidFlag": true
+   },
+   "frameNumber": 31,
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED",
+   "extendedQualifier": "BEGINNING_BLOCKAGE"
+  },
+  "body": "anglePitchEgoCam=8.75 anglePitchEgoCam.invalidFlag=true angleRollEgoCam=11.25 angleRollEgoCam.invalidFlag=true angleYawEgoCam=13.75 angleYawEgoCam.invalidFlag=true ratePitchEgoCam=16.25 ratePitchEgoCam.invalidFlag=true rateRollEgoCam=18.75 rateRollEgoCam.invalidFlag=true rateYawEgoCam=21.25 rateYawEgoCam.invalidFlag=true angleYawToleranceEgoCam=23.75 angleYawToleranceEgoCam.invalidFlag=true angleRollToleranceEgoCam=26.25 angleRollToleranceEgoCam.invalidFlag=true anglePitchToleranceEgoCam=28.75 anglePitchToleranceEgoCam.invalidFlag=true rateYawToleranceEgoCam=31.25 rateYawToleranceEgoCam.invalidFlag=true rateRollToleranceEgoCam=33.75 rateRollToleranceEgoCam.invalidFlag=true ratePitchToleranceEgoCam=36.25 ratePitchToleranceEgoCam.invalidFlag=true frameNumber=31 eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED extendedQualifier=BEGINNING_BLOCKAGE"
+ },
+ {
+  "set": "S15",
+  "p": "P24",
+  "tag": "ego-motion",
+  "iface": "de.bmw.environmentalmodel.EgoMotionLegacy",
+  "field": "ProperMotionVehicle",
+  "instance": "1",
+  "value": {
+   "extendedQualifierProperMotionVehicle": 1,
+   "eventDataQualifierProperMotionVehicle": 2,
+   "xPositionProperMotionVehicle": 3,
+   "yPositionProperMotionVehicle": 4,
+   "yawAngleProperMotionVehicle": 5,
+   "pitchAngleProperMotionVehicle": 6,
+   "xPositionDeltaProperMotionVehicle": 7,
+   "yPositionDeltaProperMotionVehicle": 8,
+   "zPositionDeltaProperMotionVehicle": 9,
+   "yawAngleDeltaProperMotionVehicle": 10,
+   "rollAngleDeltaProperMotionVehicle": 11,
+   "pitchAngleDeltaProperMotionVehicle": 12,
+   "counterSyncProperMotionVehicle": 13
+  },
+  "body": "extendedQualifierProperMotionVehicle=1 eventDataQualifierProperMotionVehicle=2 pitchAngleProperMotionVehicle=6 xPositionDeltaProperMotionVehicle=7 yPositionDeltaProperMotionVehicle=8 zPositionDeltaProperMotionVehicle=9 yawAngleDeltaProperMotionVehicle=10 rollAngleDeltaProperMotionVehicle=11 pitchAngleDeltaProperMotionVehicle=12"
  }
 ]

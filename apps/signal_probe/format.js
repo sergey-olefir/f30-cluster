@@ -310,9 +310,71 @@ function fmtCallList(v) {
         (v.length ? ' first=' + typeOf(v[0]) + ' last=' + typeOf(v[v.length - 1]) : '');
 }
 
+// ---- a whole value, generically (S14 / S15, the owner's request of 2026-11-19: every metric of the distance control, the camera's
+//      objects and the car's own motion). Only for types with NO text member (bench/test-signal-probe.js checks every such field
+//      against the catalogue), so an upper-case string can only be an enum name. Numbers, enum names and booleans are printed;
+//      a buffer only as its length. Never printed: the end-to-end header (crc, data id, counters, alive counters, the top-level
+//      length), dummies, every time stamp and sync value, and anything named like a coordinate on the globe; a field can name
+//      more members to leave out (`skip`, e.g. the car's own dead-reckoned position or heading) and name prefixes to drop (`strip`). Arrays: the count, then at most
+//      `entries` elements; the line stops at `max` characters ("+cut").
+const TREE_SKIP = /^(crc\w*|dataID|counter\w*|alive\w*|aliv\w*|chl\w*|dummy\d*|\w*SyncCounter|\w*timestamp\w*|nanoseconds|seconds|sync_state|\w*TimeSync|\w*Nanoseconds|\w*Seconds|\w*SyncState|\w*latitude\w*|\w*longitude\w*|\w*wgs\w*)$/i;
+const TREE_GENERIC = /^(x|y|z|mean|std_dev|stdDev|value|own|left|right|roll|pitch|yaw|distance|angle|availability|invalid_flags|invalidFlag|invalidFlags)$/;
+const TREE_INVALID = /^(invalid_flags|invalidFlag|invalidFlags|\w+InvalidFlags)$/;
+const TREE_MAX = 4000, TREE_ENTRIES = 8;
+const isBuf = (x) => !!x && typeof x === 'object' && ((typeof Buffer !== 'undefined' && Buffer.isBuffer(x)) || ArrayBuffer.isView(x));
+function fmtTree(v, opts) {
+    const o = opts || {};
+    const maxEntries = o.entries || TREE_ENTRIES, maxLen = o.max || TREE_MAX, skip = o.skip || [], strip = o.strip || [];
+    const short = (k) => { for (let i = 0; i < strip.length; i++) if (k.indexOf(strip[i]) === 0 && k.length > strip[i].length) return k.slice(strip[i].length); return k; };
+    const out = [];
+    let len = 0, cut = false;
+    const push = (s) => {
+        if (cut) return;
+        if (len + s.length + 1 > maxLen) { cut = true; return; }
+        out.push(s); len += s.length + 1;
+    };
+    const leaf = (name, x) => {
+        if (typeof x === 'boolean') return name + '=' + fBool(x);
+        if (typeof x === 'number' || typeof x === 'bigint') return name + '=' + fNum(x);
+        if (typeof x === 'string') return /^[A-Z_][A-Z0-9_]{0,95}$/.test(x) ? name + '=' + x : name + '.len=' + x.length;
+        if (isBuf(x)) return name + '.len=' + x.length;     // a buffer
+        return none(x) ? name + '=-' : null;
+    };
+    const walk = (x, key, parent, depth) => {
+        if (cut) return;
+        const name = parent && TREE_GENERIC.test(key) ? short(parent) + '.' + key : short(key);
+        if (Array.isArray(x)) {
+            push(name + '=' + x.length);
+            x.slice(0, maxEntries).forEach((el) => {
+                if (cut) return;
+                if (el === null || typeof el !== 'object' || isBuf(el)) { const l = leaf('', el); push('[' + (l === null ? '?' : l.slice(1)) + ']'); return; }
+                const start = out.length;
+                Object.keys(el).forEach((k) => { if (!TREE_SKIP.test(k) && skip.indexOf(k) < 0) walk(el[k], k, key, depth + 1); });
+                if (out.length > start) { out[start] = '[' + out[start]; out[out.length - 1] += ']'; } else push('[]');
+            });
+            if (x.length > maxEntries) push('+' + (x.length - maxEntries) + ' more');
+            return;
+        }
+        if (x !== null && typeof x === 'object' && !isBuf(x)) {
+            if (depth > 8) { push(name + '={..}'); return; }
+            Object.keys(x).forEach((k) => {
+                if (TREE_SKIP.test(k) || skip.indexOf(k) >= 0 || (depth === 0 && k === 'length')) return;
+                walk(x[k], k, key, depth + 1);
+            });
+            return;
+        }
+        if (TREE_INVALID.test(key) && !x) return;        // an invalid flag only when it is set
+        const l = leaf(name, x);
+        push(l === null ? name + '=?' : l);
+    };
+    if (v === null || typeof v !== 'object') { const l = leaf('value', v); return l === null ? 'value=?' : l; }
+    walk(v, '', '', 0);
+    return (out.length ? out.join(' ') : 'empty') + (cut ? ' +cut' : '');
+}
+
 module.exports = {
     MAX_ENTRIES, isNum, none, KIND, dig, cols, listLine, unionLine, notA,
     fNum, fEnum, fBool, fHex, fLen, fCoarse, fKnown, fPresent, fBand, fPic, enumList,
     fmtBits, fmtCbs, fmtTemps, fmtIntersection, fmtDescription, fmtDart, fmtLanes, fmtMediaMenu, fmtStation, fmtMetadata,
-    fmtRoles, fmtDevices, fmtCallList,
+    fmtRoles, fmtDevices, fmtCallList, fmtTree, TREE_SKIP,
 };

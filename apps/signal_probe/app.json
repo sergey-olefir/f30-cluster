@@ -2,7 +2,7 @@
   "id": "signal_probe",
   "title": "Signal Probe",
   "description": "Read-only, log-only: subscribes the car's signals set by set and logs what arrives (numbers, enum names, text lengths). Draws nothing on the cluster.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "vendor": "custom",
   "loggingId": "OASP",
   "iconGlyph": "SP",
@@ -288,10 +288,15 @@
     "de.bmw.infotainment.fasus.FASuS": {
       "_instances": "1",
       "displayDriverAssistenceSystemLongitudinalGuidance": "s",
+      "displayDrivingAssistentSystemsMode": "s",
+      "displayForesight2": "rs",
+      "requestWarnBrakeCoordinatorDisplay": "rs",
+      "statusFAS": "s",
       "statusNextSpeedLimitRecognition": "rs",
       "statusOvertakeRecognition": "rs",
       "statusRoadSignConfigStatus": "rs",
-      "statusSLITextMessage": "rs"
+      "statusSLITextMessage": "rs",
+      "statusStateDrivingTrajectory": "rs"
     },
     "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
       "_instances": "1",
@@ -307,7 +312,9 @@
     },
     "de.bmw.dass.GapVehicleAhead": {
       "_instances": "1",
-      "DataFrontVehicle": "s"
+      "DataFrontVehicle": "s",
+      "DataFrontVehicleExtended": "s",
+      "GapVehicleDrivingAhead": "s"
     },
     "de.bmw.infotainment.vehicle.TPMS": {
       "_instances": "1",
@@ -321,6 +328,8 @@
       "statusBeltContacts2": "rs",
       "statusIndicate": "rs",
       "statusInjectionVolume": "rs",
+      "statusLateralAccelerationMassCenter": "rs",
+      "statusLongitudinalAccelerationMassCenter": "rs",
       "statusSeatOccupancy": "rs"
     },
     "de.bmw.infotainment.drivingexcitement.FES": {
@@ -380,6 +389,141 @@
         "effectiveSpeedLimit",
         "speedLimitUnit",
         "variableSpeedLimitSign"
+      ]
+    },
+    "de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "keepDistanceObjects1",
+        "keepDistanceObjects2",
+        "keepDistanceParameters"
+      ]
+    },
+    "de.bmw.dass.AssistedDrivingViewFunctionInput": {
+      "_instances": "1",
+      "_broadcasts": [
+        "assistedDrivingViewFunctionInputIbVip"
+      ]
+    },
+    "de.bmw.dass.driverassistanceapplications.StatusDisplayXADAndSpeed": {
+      "_instances": "1",
+      "statusDisplaySpeed": "s",
+      "statusDisplayXAD": "s"
+    },
+    "de.bmw.dass.HMIControlAD": {
+      "_instances": "1",
+      "controlSpeedLock": "s",
+      "desiredDisplayedVelocity": "s",
+      "stateAD": "s"
+    },
+    "de.bmw.dass.StateAutonomousDrivingLegacy": {
+      "_instances": "1",
+      "stateAutonomousDriving": "s"
+    },
+    "de.bmw.dass.driverassistanceapplications.DriverAssistanceExtendedMessages": {
+      "_instances": "1",
+      "coordinatedExtendedMessageDriverAssistance": "rs"
+    },
+    "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions": {
+      "_instances": "1",
+      "settingFrontCollisionWarning": "s",
+      "settingFrontCollisionWarningSound": "s"
+    },
+    "de.bmw.dass.StatusDriverAssistanceFunctions": {
+      "_instances": "1",
+      "statusForesight": "s"
+    },
+    "de.bmw.chassis.SpeedAcceleration": {
+      "_instances": "1",
+      "CharacteristicSpeed": "s",
+      "LateralAccelerationCenterOfGravity": "s",
+      "LongitudinalAccelerationCentreOfGravity": "s",
+      "VehicleDynamicDataLongitudinalAndMassVehicle": "s",
+      "YawSpeedVehicle": "s",
+      "drivingDirection": "rs",
+      "vehicleSpeed": "rs"
+    },
+    "de.bmw.chassis.AccelerationLongitudinalLateralProvision": {
+      "_instances": "1",
+      "_broadcasts": [
+        "accelerationLateralCog",
+        "accelerationLongitudinalCog",
+        "vehicleAccelerationLongitudinalEstimated"
+      ]
+    },
+    "de.bmw.chassis.YawRateProvision": {
+      "_instances": "1",
+      "_broadcasts": [
+        "yawRate"
+      ]
+    },
+    "de.bmw.chassis.SurfaceInformationProvision": {
+      "_instances": "1",
+      "_broadcasts": [
+        "longitudinalGradientSurface"
+      ]
+    },
+    "de.bmw.chassis.RollPitchRateAccelerationVerticalProvision": {
+      "_instances": "1",
+      "_broadcasts": [
+        "pitchRateCog",
+        "rollRateCog"
+      ]
+    },
+    "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ObjectMovement",
+        "ObjectPosition",
+        "ObjectProbability",
+        "ObjectRecognition",
+        "ObjectSensorSpecificFrontCamera"
+      ]
+    },
+    "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ObjectMovement",
+        "ObjectPolarCoordinates",
+        "ObjectPosition",
+        "ObjectProbability",
+        "ObjectRecognition",
+        "ObjectSensorSpecificFrontCamera"
+      ]
+    },
+    "de.bmw.environmentalmodel.FusedSensorDetectionData": {
+      "_instances": "1",
+      "_broadcasts": [
+        "objects"
+      ]
+    },
+    "de.bmw.environmentalmodel.DAADataServer": {
+      "_instances": "1",
+      "_broadcasts": [
+        "FASView",
+        "ObjectAssignment",
+        "ObjectInformation1",
+        "ObjectInformation2",
+        "ObjectListMerged"
+      ]
+    },
+    "de.bmw.dass.pad.communication.ObjectListSuAAR": {
+      "_instances": "1",
+      "_broadcasts": [
+        "suAARObjectList"
+      ]
+    },
+    "de.bmw.chassis.EgomotionCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "egomotionCameraCartesian",
+        "egomotionCameraRotation"
+      ]
+    },
+    "de.bmw.environmentalmodel.EgoMotionLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ProperMotionVehicle"
       ]
     }
   },
@@ -447,6 +591,14 @@
         [
           "setting",
           "set13"
+        ],
+        [
+          "setting",
+          "set14"
+        ],
+        [
+          "setting",
+          "set15"
         ],
         [
           "text",
@@ -526,6 +678,18 @@
     {
       "key": "set13",
       "label": "S13 Знаки (P22)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set14",
+      "label": "S14 Круїз і дистанція (P23)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "set15",
+      "label": "S15 Об’єкти камери (P24)",
       "type": "bool",
       "default": false
     }

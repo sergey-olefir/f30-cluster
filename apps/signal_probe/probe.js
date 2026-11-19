@@ -33,7 +33,7 @@
 const F = require('./format');
 const FIELDS = require('./fields');
 
-const VERSION = '0.1.1';
+const VERSION = '0.2.0';
 const LOG_FORMAT = 1;
 const SUMMARY_S = [30, 120, 600];
 const ASK_AT_S = 120;                 // the silent fields' getters are asked once, at this summary
@@ -41,6 +41,20 @@ const HUB_PAUSE_MS = 120;             // between two interfaces' proxies being b
 const FLOOD_PER_S = 40;
 const VOLUME_WARN_BYTES = 150 * 1024;
 
+const PART_CHARS = 1000;
+/** A line body in parts of at most PART_CHARS characters, each cut at a space (a token longer than that is cut where it must). */
+function splitBody(body) {
+    const parts = [];
+    let rest = body;
+    while (rest.length > PART_CHARS) {
+        let at = rest.lastIndexOf(' ', PART_CHARS);
+        if (at <= 0) at = PART_CHARS;
+        parts.push(rest.slice(0, at));
+        rest = rest.slice(at).replace(/^ /, '');
+    }
+    parts.push(rest);
+    return parts;
+}
 const sleep = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
 const short = (iface) => String(iface).split('.').pop();
 const msg = (e) => String(e && e.message || e).replace(/[^\x20-\x7e]/g, '?').slice(0, 120);
@@ -245,6 +259,7 @@ class Probe {
             case 'devices': return F.fmtDevices(v);
             case 'calllist': return F.fmtCallList(v);
             case 'cbs': return F.fmtCbs(v);
+            case 'tree': return F.fmtTree(v, f.tree);
             case 'activeSource': {
                 this.media.active = typeof v === 'string' ? v : null;       // kept in memory for the match below, never logged
                 return 'len=' + F.fLen(v) + ' matches-source-entry=' + this._mediaMatch();
@@ -302,8 +317,12 @@ class Probe {
             const ms = Math.round(seenAt - this.t0);
             tail = ' tms=' + ms + ' since=' + (this.lastMark ? 'M' + this.lastMark.n + '+' + Math.max(0, Math.round(seenAt - this.lastMark.at)) : '-');
         }
-        this._info(f.p + ' ' + f.tag + ' #' + st.n + ' t=' + this._t() + ': ' + body + tail +
+        // a long whole value (fmt tree: S14 / S15 object lists) goes out in parts of at most PART_CHARS, cut between two tokens: the longest line
+        // seen in the car's log was ~800 characters, and a logger that cuts long lines must not lose the end of a list
+        const parts = f.fmt === 'tree' ? splitBody(body) : [body];      // only the S14 / S15 whole values: every older line stays one line
+        this._info(f.p + ' ' + f.tag + ' #' + st.n + ' t=' + this._t() + ': ' + parts[0] + (parts.length > 1 ? ' (part 1/' + parts.length + ')' : '') + tail +
             (st.skipped ? ' (+' + st.skipped + ' folded)' : '') + (st.n >= st.cap ? ' (the last line for this field)' : ''));
+        for (let i = 1; i < parts.length; i++) this._info(f.p + ' ' + f.tag + ' #' + st.n + ' part ' + (i + 1) + '/' + parts.length + ': ' + parts[i]);
         st.last = key; st.lastAt = t; st.pending = null; st.skipped = 0;
     }
 
@@ -382,4 +401,4 @@ class Probe {
     }
 }
 
-module.exports = { Probe, VERSION, LOG_FORMAT, SUMMARY_S, ASK_AT_S, FLOOD_PER_S };
+module.exports = { Probe, VERSION, LOG_FORMAT, SUMMARY_S, ASK_AT_S, FLOOD_PER_S, PART_CHARS, splitBody };
