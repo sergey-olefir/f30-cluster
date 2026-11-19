@@ -112,6 +112,21 @@ function part1() {
     const cut = V.cut(b, V.W, r);
     ok(cut.length === r.w * r.h * 4 && cut.readUInt32LE(0) === b.readUInt32LE((r.y * V.W + r.x) * 4), 'cut: the rectangle\'s rows packed');
     ok(P.bg.join() === '0,0,0', 'black background (the map slot under a theme window)');
+
+    // direction E's effect shaders (app/acc_view/shaders): small, one look, GLSL ES 1.00, highp asked for, no sampler
+    const SH = path.join(APPDIR, 'shaders');
+    const shipped = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').split('\n').map((l) => l.replace(/[ \t]+/g, ' ').trim()).filter(Boolean).join('\n') + '\n';
+    const files = fs.readdirSync(SH).filter((f) => /\.glsl$/.test(f));
+    ok(files.length === 2, 'two effect shaders (lane, car)');
+    files.forEach((f) => {
+        const src = fs.readFileSync(path.join(SH, f), 'utf8'), shp = shipped(src);
+        ok(Buffer.byteLength(shp) < 8000, f + ': ' + Buffer.byteLength(shp) + ' B shipped, far under the KOMBI reset seen at 26.7 k (our car-proven shaders: 2.7-13 k)');
+        ok(/#ifdef GL_FRAGMENT_PRECISION_HIGH\s*\nprecision highp float;/.test(shp), f + ': asks for highp (px distances over 256 overflow fp16)');
+        ok(!/sampler2D|texture2D/.test(shp), f + ': no sampler (nothing to leave unbound)');
+        ok(!/^#if(?!def GL_FRAGMENT_PRECISION_HIGH)|#else(?!\nprecision mediump)/m.test(shp.replace('#else\nprecision mediump float;', '')), f + ': no #if looks (one look per layer source)');
+        ok(/varying vec2 v_uv;/.test(shp) && /gl_FragColor/.test(shp) && !/^\s*(in|out)\s/m.test(shp) && !/\btexture\(/.test(shp), f + ': GLSL ES 1.00 (varying, gl_FragColor)');
+        ok(!/\b(all|any|not)\s*=/.test(shp), f + ': no built-in names reused as variables');
+    });
 }
 
 /* ------------------------------------------------------------------------------------------------ part 2: the bench */

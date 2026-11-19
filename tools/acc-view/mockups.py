@@ -1,13 +1,16 @@
 """tools/acc-view: the park of mockups for the adaptive-cruise view (round 1120, package AA; the spec is docs/r1120/AA-SPEC.md).
 
-    UV_CACHE_DIR=$F30/bake/work/.uvcache uv run -q --no-project --with pillow python -I tools/acc-view/mockups.py [--out <dir>]
+    UV_CACHE_DIR=$F30/bake/work/.uvcache uv run -q --no-project --with pillow --with numpy --with moderngl \
+        python -I tools/acc-view/mockups.py [--out <dir>] [--only E:map]
 
-Four visual directions x three placements x every state x day / night, drawn from geometry only (our own generic car shapes,
+Five visual directions x three placements x every state x day / night (E, the owner's lane view, through our own effect
+shaders run on the Mac's GPU by lane_gl.py), drawn from geometry only (our own generic car shapes,
 the repository's own OFL fonts: Noto Sans for words, Saira for figures), then contact sheets per direction and per placement,
 a few pictures of the `map` target seen through Twin Dial's and f30_cluster's map windows (their own bench renders, read from
 bake/work if they are there), and an index.html that shows them all with the state names.
 
     directions  A lane (perspective)   B ladder (flat, 6WB floor stripes)   C arc (a round instrument)   D top view (plan)
+                E lane view (two coloured lane lines, a shaded car ahead, the set speed in a ring with -/+, the limit, a pill)
     placements  map (1088 x 480, slot 0x100)   hud (800 x 480)   centre (the centre screen's 1600 x 520 canvas)
 
 Default out: bake/work/r1120/pub/AA/ (git-ignored). Nothing here is another maker's artwork; the reference photos are not read.
@@ -57,6 +60,7 @@ DIRECTIONS = [
     ('B', 'ladder', 'Шкала: flat floor stripes (the 6WB floor), the car ahead on its stripe, a set-speed capsule'),
     ('C', 'arc', 'Дуга: a round instrument, the gap on a ring from near to far, the set speed in the hub'),
     ('D', 'top', 'Згори: a plan of the lane, our car and the car ahead with the gap bracket between them'),
+    ('E', 'laneview', 'Смуга з авто (the owner\'s lead): two coloured lane lines to the horizon, a shaded car ahead (our shader), the set speed in a ring with -/+, the limit, a status pill'),
 ]
 
 PLACEMENTS = [
@@ -125,9 +129,9 @@ def font(kind, size):
 
 
 class Cv:
-    def __init__(self, w, h, bg):
+    def __init__(self, w, h, bg, base=None):
         self.w, self.h, self.bg = w, h, bg
-        self.im = Image.new('RGB', (w * S, h * S), bg)
+        self.im = base.resize((w * S, h * S), Image.BICUBIC) if base is not None else Image.new('RGB', (w * S, h * S), bg)
         self.d = ImageDraw.Draw(self.im)
 
     def _p(self, pts):
@@ -165,6 +169,11 @@ class Cv:
         while size > 10 and self.tw(s, kind, size) > maxw:
             size -= 1
         return size
+
+    def bgc(self, x, y):
+        """The colour under (x, y) now (a plate behind a word keeps the picture's own ground)."""
+        v = self.im.getpixel((int(min(self.w - 1, max(0, x)) * S), int(min(self.h - 1, max(0, y)) * S)))
+        return v if isinstance(v, tuple) else (v, v, v)
 
     def out(self):
         return self.im.resize((self.w, self.h), Image.LANCZOS)
@@ -720,13 +729,177 @@ def centre_frame(c, P, st):
     c.line([(800, 76), (800, H - 40)], mix(P['ink'], 0.10, P['bg']), 1.0)
 
 
-LAYOUTS = {'A': lane_layout, 'B': ladder_layout, 'C': arc_layout, 'D': top_layout}
+# ------------------------------------------------------------------------------------------------ E: the lane view (the owner's direction, 2026-11-19)
+# Two effect layers drawn by our own shaders (tools/acc-view/app/acc_view/shaders: acc_lane, acc_car; run on the Mac's GPU by
+# lane_gl.py, so these pictures ARE the shaders) and one text sheet (the set speed in its ring, the -/+ marks, the limit, the
+# status pill). The car ahead is a separate layer the app moves and scales: a glide costs no pixels.
+E_Z = {1: 0.05, 2: 0.14, 3: 0.27, 4: 0.45, 5: 0.70}          # the car ahead's depth per level (0 = our foot, 1 = the far end)
+E_TFAR = 0.10                                                # the lane's scale at the far end (1 at the foot)
+E_HZ = 0.04                                                  # the horizon, a share of the lane layer's height
+E_LIMIT = {'10': 110, '11': 110, '14': 110}                  # the speed limit read from the road (TrafficSignRecognition); 90 else
+E_NB = {'middle': [(-1, 0.27, 0.45), (1, 0.42, 0.45)], 'closing': [(1, 0.27, 0.45)], 'active': [(-1, 0.32, 0.45)],
+        'advice': [(-1, 0.27, 0.45), (1, 0.40, 0.45)]}      # neighbours ONLY where the data would have them (unproven: AA-SPEC 5)
+# per placement: the lane layer [x, y, w, h], half the lane at its foot, the line width, the ring (cx, cy, r), the limit plate
+# [x, y, w, h], the suggestion's place (cx, cy), the pill [x, y, w, h], the word size
+E_GEO = {
+    'map': dict(lane=(334, 158, 420, 258), hw=176, lw=5.0, ring=(544, 98, 40), plate=(680, 64, 66, 70), adv=(398, 98),
+                pill=(374, 362, 340, 44), word=18, fig=40),
+    'hud': dict(lane=(124, 186, 477, 192), hw=170, lw=6.5, ring=(362, 140, 34), plate=(526, 110, 66, 64), adv=(204, 140),
+                pill=(178, 330, 368, 40), word=17, fig=36),
+    'centre': dict(lane=(50, 196, 700, 324), hw=300, lw=7.0, ring=(400, 116, 50), plate=(608, 74, 96, 84), adv=(196, 116),
+                   pill=(150, 444, 500, 52), word=22, fig=52),
+}
+_GL = [None]
+
+
+def _gl():
+    if _GL[0] is None:
+        sys.path.insert(0, HERE)
+        from lane_gl import GL
+        _GL[0] = GL()
+    return _GL[0]
+
+
+def e_tz(z):
+    return 1.0 / (1.0 + z * (1.0 / E_TFAR - 1.0))
+
+
+def e_colours(night):
+    m = 0.78 if night else 1.0
+    return dict(line=tuple(c * m for c in (0.38, 0.60, 0.92)), ground=tuple(c * (0.7 if night else 1.0) for c in (0.13, 0.14, 0.16)),
+                body=tuple(c * (0.75 if night else 1.0) for c in (0.76, 0.79, 0.83)), amber=tuple(c * (0.8 if night else 1.0) for c in (0.94, 0.67, 0.04)),
+                gap=tuple(c * m for c in (0.90, 0.92, 0.95)))
+
+
+def e_car_rect(g, z):
+    """The car ahead's layer (x, y, w, h) on the target for depth z: its tyres stand on the lane at that depth."""
+    lx, ly, lw, lh = g['lane']
+    hy = ly + E_HZ * lh
+    t = e_tz(z)
+    wy = hy + (ly + lh - hy) * t
+    cw = 2 * g['hw'] * t * 0.60                    # the body is 60 % of the lane wide
+    qh = cw / 1.40
+    qw = qh * 1.70
+    return (lx + lw / 2.0 - qw / 2.0, wy - 0.955 * qh, qw, qh)
+
+
+def e_base(placement, st, key, night, bg):
+    """The two shaders' pixels over the background: a PIL image of the placement's size."""
+    import numpy as np
+    pw, ph = [(p[1], p[2]) for p in PLACEMENTS if p[0] == placement][0]
+    g = E_GEO[placement]
+    col = e_colours(night)
+    out = np.zeros((ph, pw, 3), np.float32) + np.array(bg, np.float32) / 255.0
+
+    def put(img, x, y):
+        h, w = img.shape[:2]
+        x0, y0 = max(0, x), max(0, y)
+        x1, y1 = min(pw, x + w), min(ph, y + h)
+        if x1 <= x0 or y1 <= y0:
+            return
+        sub = img[y0 - y:y1 - y, x0 - x:x1 - x]
+        a = sub[..., 3:4]
+        out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a) + sub[..., :3] * a
+    lx, ly, lw, lh = g['lane']
+    z = st['z'] if st.get('z') else (E_Z[st['tgt']] if st['tgt'] else 0.0)     # 'z': a glide's in-between depth
+    nb = [(n[0], n[1], n[2], 0.0) for n in E_NB.get(key, [])] if st['data'] == 'ok' else []
+    dim_all = st['data'] != 'ok'
+    lane = _gl().render('acc_lane', lw, lh, {
+        'u_geo': (E_HZ, g['hw'], E_TFAR, g['lw']), 'u_line': tuple(c * (0.55 if dim_all else 1.0) for c in col['line']),
+        'u_ground': (0.0, 0.0, 0.0) if placement == 'hud' else col['ground'], 'u_gap': (z, st['clo'], 0.13 if st['clo'] == 2 else 0.08, 0.0),
+        'u_gapc': col['amber'] if st['clo'] == 2 else col['gap'], 'u_nb': nb or [(0, 0, 0, 0)]})
+    put(lane, lx, ly)
+    if st['tgt']:
+        x, y, w, h = e_car_rect(g, z)
+        W, H = max(8, int(round(w))), max(5, int(round(h)))
+        body = tuple(0.35 * b + 0.65 * a for a, b in zip(col['amber'], col['body'])) if st['clo'] == 2 else col['body']
+        car = _gl().render('acc_car', W, H, {'u_body': body, 'u_dim': (0.0, 0.0)}, ss=4)
+        put(car, int(round(x)), int(round(y)))
+    return Image.fromarray((np.clip(out, 0, 1) * 255 + 0.5).astype('uint8'))
+
+
+def e_pill(st):
+    """The status pill's words and kind, or None (our own wording; events only)."""
+    if st['warn']:
+        return 'Увага: попередження автомобіля', 'warn'
+    if st['data'] == 'absent':
+        return 'Немає даних камери', 'info'
+    if st['data'] == 'stale':
+        return 'Дані камери застаріли', 'info'
+    if st['data'] == 'none':
+        return 'Авто попереду не видно', 'info'
+    if st['clo'] == 2:
+        return 'Швидке наближення', 'fast'
+    if st['cru'] and st['cru'][1] == 'standby':
+        return 'Круїз призупинено', 'info'
+    return None
+
+
+def lane_view_layout(c, P, st, placement):
+    g = E_GEO[placement]
+    if placement == 'centre':
+        centre_frame(c, P, st)
+    cx, cy, r = g['ring']
+    cb = cruise_bits(st, P)
+    col = cb[2] if cb else P['faint']
+    c.ellipse(cx, cy, r, r, outline=col, width=3.0)
+    if cb:
+        fs = c.fit(cb[0], 'fig', g['fig'], r * 1.45)
+        c.text(cx, cy + fs * 0.34, cb[0], 'fig', fs, col, anchor='ms')
+        word = {'круїз': 'КРУЇЗ', 'обмежувач': 'ОБМЕЖ.', 'круїз чекає': 'ПАУЗА'}[cb[1]]
+    else:
+        c.text(cx, cy + g['fig'] * 0.34, '–', 'fig', g['fig'], P['faint'], anchor='ms')
+        word = 'ВИМК.'
+    wcol = cb[2] if cb else P['dim']
+    c.rrect(cx - c.tw(word, 'wordb', g['word']) / 2 - 6, cy + r - g['word'] * 0.55, cx + c.tw(word, 'wordb', g['word']) / 2 + 6, cy + r + g['word'] * 0.6, r=4, fill=P['bg'])
+    c.text(cx, cy + r + g['word'] * 0.42, word, 'wordb', g['word'], wcol, anchor='ms')
+    # the -/+ marks: information only (they say the wheel's buttons move it; nothing here is a button)
+    mcol = mix(P['ink'], 0.45, P['bg'])
+    for sx in (-1, 1):
+        mx = cx + sx * (r + 30)
+        c.line([(mx - 9, cy), (mx + 9, cy)], mcol, 2.6)
+        if sx > 0:
+            c.line([(mx, cy - 9), (mx, cy + 9)], mcol, 2.6)
+    # the limit read from the road: a neutral plate (no red anywhere), our word "ліміт"
+    px, py, pw_, ph_ = g['plate']
+    lim = E_LIMIT.get(st.get('n', ''), 90)
+    c.rrect(px, py, px + pw_, py + ph_, r=8, outline=mix(P['ink'], 0.75, P['bg']), width=2.0)
+    c.text(px + pw_ / 2, py + ph_ * 0.30, 'ліміт', 'word', ph_ * 0.21, P['dim'], anchor='ms')
+    c.text(px + pw_ / 2, py + ph_ * 0.84, str(lim), 'fig', c.fit(str(lim), 'fig', ph_ * 0.50, pw_ * 0.8), P['ink'], anchor='ms')
+    # the loop's suggestion: a cyan outline beside the ring, the word "порада"
+    if st['adv']:
+        ax, ay = g['adv']
+        s = str(st['adv'])
+        fs = g['fig'] * 0.62
+        tw = c.tw(s, 'fig', fs)
+        c.rrect(ax - tw / 2 - 12, ay - fs * 0.62, ax + tw / 2 + 12, ay + fs * 0.50, r=fs * 0.56, outline=P['cyan'], width=2.0)
+        c.text(ax, ay + fs * 0.33, s, 'fig', fs, P['cyan'], anchor='ms')
+        c.text(ax, ay + fs * 0.50 + g['word'] * 1.05, 'порада', 'word', g['word'] * 0.9, P['cyan'], anchor='ms')
+    # the status pill (events only)
+    pl = e_pill(st)
+    if pl:
+        s, kind = pl
+        x, y, w, h = g['pill']
+        fill = mix(P['panel'], 1.0, P['bg']) if placement != 'hud' else (0, 0, 0)
+        edge = P['amber'] if kind == 'fast' else (P['ink'] if kind == 'warn' else mix(P['ink'], 0.30, P['bg']))
+        c.rrect(x, y, x + w, y + h, r=h / 2, fill=fill, outline=edge, width=2.0)
+        tcol = P['amber'] if kind == 'fast' else (P['ink'] if kind == 'warn' else P['ink'])
+        size = c.fit(s, 'wordb' if kind == 'warn' else 'word', h * 0.48, w - h)
+        c.text(x + w / 2, y + h * 0.66, s, 'wordb' if kind == 'warn' else 'word', size, tcol, anchor='ms')
+
+
+LAYOUTS = {'A': lane_layout, 'B': ladder_layout, 'C': arc_layout, 'D': top_layout, 'E': lane_view_layout}
 
 
 def render(direction, placement, st, night):
     pw, ph = [(p[1], p[2]) for p in PLACEMENTS if p[0] == placement][0]
     P = palette(placement, night)
-    c = Cv(pw, ph, P['bg'])
+    if direction == 'E':
+        n = [x[0] for x in STATES if x[4] is st]
+        st = dict(st, n=n[0] if n else '')
+        c = Cv(pw, ph, P['bg'], base=e_base(placement, st, [x[1] for x in STATES if x[0] == st['n']][0] if st['n'] else '', night, P['bg']))
+    else:
+        c = Cv(pw, ph, P['bg'])
     LAYOUTS[direction](c, P, st, placement)
     im = c.out()
     if st['warn']:
@@ -986,6 +1159,16 @@ def main():
         rel = 'sheets/guides_%s.png' % p
         guides(p).save(os.path.join(out, rel), optimize=True)
         man['sheets'].append(dict(file=rel, title='guides %s' % p))
+    # E: the glide (the car ahead moving from level 5 to level 1 in even steps of depth: the layer only moves and scales)
+    gl_cells = []
+    base_st = [x for x in STATES if x[1] == 'middle'][0][4]
+    zs = [E_Z[5] + (E_Z[1] - E_Z[5]) * i / 8.0 for i in range(9)]
+    for i, zz in enumerate(zs):
+        im = render('E', 'map', dict(base_st, z=zz), False)
+        gl_cells.append((im, 'step %d  depth %.2f' % (i, zz)))
+    im = sheet(gl_cells, 3, 'Direction E, map: the car ahead glides from level 5 to level 1 (layer move + scale only, no pixels)', 360)
+    im.save(os.path.join(out, 'sheets', 'E_glide.png'), optimize=True)
+    man['sheets'].append(dict(file='sheets/E_glide.png', title='E glide'))
     # the map target in context: two states per direction, through Twin Dial's W2 (day / night) and f30's window (day / night)
     cd = os.path.join(out, 'context')
     os.makedirs(cd, exist_ok=True)
