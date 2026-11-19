@@ -145,7 +145,7 @@ def main():
                     car = prem + base * (1.0 - A[..., None])
                     car = BD.over(car, 'P')
                     what = {'W2': 'W2: the open box [700, 173, 1220, 600] (as on the car, photo A)',
-                            'W3': 'W3: the free space between the dials - sides along the bezels (6 px black ring), top at the tab rule, foot y 588'}[v]
+                            'W3': 'W3: the free space between the dials - sides along the bezels (arcs r 324: 20 px black ring), top at the tab rule, foot y 588'}[v]
                     under_s = {'slot': 'stand-in map over the whole map slot', 'box': 'stand-in map inside BMW\'s own box of photo 41'}[kind]
                     rows.append(label(car, '%s   |   %s, %s, %s' % (what, look, 'road bar' if road == 'road' else 'no road', under_s)))
                     mids.append(label(car[100:640, 420:1500], v + ' (' + look + ')'))

@@ -500,7 +500,8 @@ console.log('car-issues MW: the map window W3 (the whole free space between the 
         ok(T.centre[0] === lx && S.centre[0] === rx && T.centre[1] === cy && S.centre[1] === cy, 'its arcs are round the dials\' own centres (' + T.centre + ' / ' + S.centre + ')');
         // tdial draws alpha 1 inside 1.0128 R and fades to 0 at 1.0128 R + 0.5 (shaders.js TDIAL): the black ring between is the backdrop's
         const edge = 1.0128 * Math.max(T.R, S.R) + 0.5;
-        ok(rr - edge >= 5 && rr - edge <= 8, 'a black ring of ' + (rr - edge).toFixed(1) + ' px between the bezel\'s outer edge (' + edge.toFixed(1) + ' px) and the window (' + rr + ' px): 5..8');
+        ok(rr - edge >= 5 && rr - edge <= 24, 'a black ring of ' + (rr - edge).toFixed(1) + ' px between the bezel\'s outer edge (' + edge.toFixed(1) + ' px) and the window (' + rr + ' px): 5..24');
+        ok(Math.abs(lx + rr - W2.box[0]) <= 6 && Math.abs(rx - rr - W2.box[2]) <= 6, 'at mid-height (y 400) its sides are within 6 px of W2\'s (' + (lx + rr) + ' / ' + (rx - rr) + ' against ' + W2.box[0] + ' / ' + W2.box[2] + ')');
         const tab = byId.bg_l.tab;
         ok(b0 === tab.rect[0] && b2 === tab.rect[2] && b1 === tab.rule[1], 'the box\'s sides end where the tab bar ends (' + b0 + ' / ' + b2 + ') and its top is the tab rule\'s foot (y ' + b1 + ')');
         const rule = byId.bg_l.rules.filter((r) => r.role === 'rule')[0];
@@ -510,6 +511,13 @@ console.log('car-issues MW: the map window W3 (the whole free space between the 
         const inR = (x, y, r) => x >= r[0] && x < r[2] && y >= r[1] && y < r[3];
         const meets = (r) => { for (let y = Math.max(r[1], b1); y < Math.min(r[3], b3); y++) for (let x = Math.max(r[0], b0); x < Math.min(r[2], b2); x++) if (open(x + 0.5, y + 0.5)) return true; return false; };
         ok(!meets(BELT) && !meets(GAP) && !LAMPS.some((l) => meets(l)) && !meets(STRIP) && !meets(MARKER), 'the hole never meets BMW\'s belt group, the gear gap, the seven side lamps, the lamp strip or the stored-message marker');
+        // BMW's stock layout is drawn under a theme (photo 14): at mid-height its items come nearest the gap, measured on the rectified
+        // stock photos 08 / 09 / 39 / 61 / 68 (+-1 px): the rule under its digital speed ends at x 694 (y 412-415); its drive-mode label and
+        // the rule under it start at x 1223 (y 337-415). W2 keeps them out; so must W3
+        const STOCK_L = [600, 405, 695, 420], STOCK_R = [1223, 335, 1400, 420];
+        ok(!meets(STOCK_L) && !meets(STOCK_R), 'the hole never meets BMW\'s stock mid-height items (the speed rule\'s end ' + JSON.stringify(STOCK_L) + ', the drive-mode label and rule ' + JSON.stringify(STOCK_R) + ')');
+        const mw2 = (r) => { for (let y = r[1]; y < r[3]; y++) for (let x = r[0]; x < r[2]; x++) if (x + 0.5 >= W2.box[0] && x + 0.5 < W2.box[2] && y + 0.5 >= W2.box[1] && y + 0.5 < W2.box[3]) return true; return false; };
+        ok(!mw2(STOCK_L) && !mw2(STOCK_R), '... (W2 does not either: the same keep-outs hold for the window the car has shown)');
         ok(!meets(tab.rect.slice(0, 3).concat([173])) && !meets([0, 612, 1920, 720]), 'the tab bar and its rule (y < 173) and the bottom row (y >= 612) stay opaque');
         const panel = [696, 595.75, 1226, 704];
         ok(!meets(panel.map(Math.floor)), 'it never reaches BMW\'s message panel ' + JSON.stringify(panel) + ' (W2 does, by its rows y 595..599)');

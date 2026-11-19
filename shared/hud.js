@@ -409,9 +409,12 @@ const TW_ARC_END = 143.6;                           // twin_dial B1: where the t
 const TW_MAP = { W1: { box: [750, 180, 1170, 564], fade: [120, 80, 80], r: 24 }, W2: { box: [700, 173, 1220, 600], fade: [1, 1, 1], r: 1 } };   // twin_dial B1: SPEC-R3 4.5
 // car-issues MW: W3, the whole free space between the dials: the box [618, 173, 1302, 588] (the tab bar's ends, the tab rule, and a
 // foot 12 px above W2's: at y 588..600 the box would reach BMW's stored-message marker [1243, 591, 1285, 628], which W2 never meets)
-// minus the two discs of radius 310 round the dials' centres (380, 400) and (1540, 400): the sides follow the bezels (their outer edge
-// at 303.8 px, tdial's alpha) with a 6 px black ring left round each. arc = [left centre x, right centre x, centre y, radius] (panel px).
-TW_MAP.W3 = { box: [618, 173, 1302, 588], fade: [1, 1, 1], r: 1, arc: [380, 1540, 400, 310] };
+// minus the two discs of radius 324 round the dials' centres (380, 400) and (1540, 400): the sides follow the bezels (their outer edge
+// at 304.3 px, tdial's alpha) with a 20 px black ring. Not less: BMW's own stock layout, drawn under a theme (photo 14), has items at
+// mid-height that end at x 694 (the rule under its digital speed, y 412-415) and start at x 1223 (its drive-mode label and rule,
+// y 337-415; rectified photos 08, 09, 39, 61, 68): 324 keeps both under our black by 1.5 px, W2 (700 / 1220) kept them by 6 / 3.
+// arc = [left centre x, right centre x, centre y, radius] (panel px).
+TW_MAP.W3 = { box: [618, 173, 1302, 588], fade: [1, 1, 1], r: 1, arc: [380, 1540, 400, 324] };
 const TW_LIM_STRIP = { L1: 1, L2: 2, L3: 3 };       // twin_dial B1: config.limit.strip -> u_lim.w
 // twin_dial B1: an sRGB code -> linear light, the black floor taken out, the night multiplier k applied; and back to a code
 function twinLin(c, i, k, noFloor) { const v = c / 255, l = v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); return (noFloor ? l : Math.max(0, (l - TW_FLOOR[i]) / (1 - TW_FLOOR[i]))) * k; }

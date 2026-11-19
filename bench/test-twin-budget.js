@@ -95,7 +95,7 @@ function fp16Arcs(L) {
     ok(!!blk && /\(p - u_mapA\.xz\) \/ u_mapA\.w/.test(blk[1]) && /\(p - u_mapA\.yz\) \/ u_mapA\.w/.test(blk[1]) && !/length\(/.test(blk[1]),
         'car-issues MW: tdback L\'s W3 arcs divide both offsets by the radius before they are squared (no length() of a px offset)');
     // every pixel centre of W3's box and 4 px round it, both discs, at the car's fp16 against exact arithmetic
-    const C = [[380, 400], [1540, 400]], R = 310;
+    const C = [[380, 400], [1540, 400]], R = 324;
     let worst = 0, bad = 0, n = 0, naiveOpen = 0, shut = 0;
     for (let y = 169; y < 592; y++) {
         for (let x = 614; x < 1306; x++) {
@@ -368,11 +368,11 @@ async function benchChecks(keep) {
     await sleep(400);
     ok(near(uni(bl(), 'u_map'), [700, 173, 1220, 600], 0), 'twinMap W2: the open box [700, 173, 1220, 600]');
     ok(near(uni(bl(), 'u_mapA'), [0, 0, 0, 0], 0), 'car-issues MW: twinMap W2 has no arcs (u_mapA zeros)');
-    // car-issues MW: W3, the free space between the dials: the box [618, 173, 1302, 588] minus the discs of 310 px round the dials
+    // car-issues MW: W3, the free space between the dials: the box [618, 173, 1302, 588] minus the discs of 324 px round the dials
     await hook('twinMap:W3');
     await sleep(400);
-    ok(near(uni(bl(), 'u_map'), [618, 173, 1302, 588], 0) && near(uni(bl(), 'u_mapF'), [1, 1, 1, 1], 0) && near(uni(bl(), 'u_mapA'), [380, 1540, 400, 310], 0),
-        'car-issues MW: twinMap W3: the box [618, 173, 1302, 588], hard edges, arcs round (380, 400) and (1540, 400) at 310 px: u_mapA ' + fmt(uni(bl(), 'u_mapA')));
+    ok(near(uni(bl(), 'u_map'), [618, 173, 1302, 588], 0) && near(uni(bl(), 'u_mapF'), [1, 1, 1, 1], 0) && near(uni(bl(), 'u_mapA'), [380, 1540, 400, 324], 0),
+        'car-issues MW: twinMap W3: the box [618, 173, 1302, 588], hard edges, arcs round (380, 400) and (1540, 400) at 324 px: u_mapA ' + fmt(uni(bl(), 'u_mapA')));
     await hook('twinMap:W2');
     await sleep(400);
     ok(near(uni(bl(), 'u_map'), [700, 173, 1220, 600], 0) && near(uni(bl(), 'u_mapA'), [0, 0, 0, 0], 0), 'car-issues MW: back to W2: its box again and the arcs off');

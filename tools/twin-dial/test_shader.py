@@ -185,22 +185,22 @@ def main():
     ok(np.array_equal(rd.render_back(dict(u, u_map=[0, 0, 0, 0]))[:, :, 3], bk[:, :, 3]), 'a closed window changes nothing')
     ok(np.array_equal(rd.render_back(dict(u, u_map=[700, 173, 1220, 600], u_mapF=[1, 1, 1, 1], u_mapA=[0, 0, 0, 0]))[:, :, 3], w2[:, :, 3]),
        'car-issues MW: u_mapA zeros (W1, W2) change nothing')
-    # car-issues MW: W3, the whole free space between the dials (the box [618, 173, 1302, 588] minus the discs of 310 px)
-    w3 = rd.render_back(dict(u, u_map=[618, 173, 1302, 588], u_mapF=[1, 1, 1, 1], u_mapA=[380, 1540, 400, 310]))
+    # car-issues MW: W3, the whole free space between the dials (the box [618, 173, 1302, 588] minus the discs of 324 px)
+    w3 = rd.render_back(dict(u, u_map=[618, 173, 1302, 588], u_mapF=[1, 1, 1, 1], u_mapA=[380, 1540, 400, 324]))
     a3 = lambda x, y: float(w3[y, x, 3])                                                         # noqa: E731
 
     def at_r(cx, r, deg):        # the pixel whose centre is nearest to radius r at deg (0 = towards the other dial, + = up)
         t = math.radians(deg)
         s = 1 if cx < 960 else -1
         return int(math.floor(cx + s * r * math.cos(t))), int(math.floor(400 - r * math.sin(t)))
-    ring = [(cx, r, d) for cx in (380, 1540) for d in (-30, -15, 0, 15, 30, 40) for r in (305.5, 308.5)]
-    ok(all(a3(*at_r(*q)) > 0.95 for q in ring), 'W3: a black ring 6 px wide stays round each bezel (r 305.5 / 308.5 from the centre at -30..40 deg): %s' % [round(a3(*at_r(*q)), 2) for q in ring[:4]])
-    opn = [(cx, 312.5, d) for cx in (380, 1540) for d in (-30, -15, 0, 15, 30, 40)]
-    ok(all(a3(*at_r(*q)) < 0.05 for q in opn), 'W3: open from 2 px past the 310 px arc, along both bezels: %s' % [round(a3(*at_r(*q)), 2) for q in opn[:6]])
-    ok(a3(650, 190) < 0.05 and a3(1270, 190) < 0.05 and a3(650, 580) < 0.05 and a3(1270, 580) < 0.05 and w2[190, 650, 3] == 1.0,
-       'W3 opens the corners W2 keeps black: (650, 190) %.2f (W2 %.2f), (1270, 190), (650, 580), (1270, 580)' % (a3(650, 190), w2[190, 650, 3]))
-    ok(a3(692, 400) < 0.05 and a3(1227, 400) < 0.05 and a3(688, 400) == 1.0 and a3(1231, 400) == 1.0,
-       'W3 at mid-height: open x 690..1230 (W2: 700..1220): %.2f %.2f, shut at 688 / 1231: %.2f %.2f' % (a3(692, 400), a3(1227, 400), a3(688, 400), a3(1231, 400)))
+    ring = [(cx, r, d) for cx in (380, 1540) for d in (-30, -15, 0, 15, 30, 40) for r in (305.5, 314.5, 322.5)]
+    ok(all(a3(*at_r(*q)) > 0.95 for q in ring), 'W3: a black ring stays round each bezel (r 305.5 / 314.5 / 322.5 from the centre at -30..40 deg): %s' % [round(a3(*at_r(*q)), 2) for q in ring[:4]])
+    opn = [(cx, 326.5, d) for cx in (380, 1540) for d in (-30, -15, 0, 15, 30, 40)]
+    ok(all(a3(*at_r(*q)) < 0.05 for q in opn), 'W3: open from 2 px past the 324 px arc, along both bezels: %s' % [round(a3(*at_r(*q)), 2) for q in opn[:6]])
+    ok(a3(650, 190) < 0.05 and a3(1270, 190) < 0.05 and a3(660, 575) < 0.05 and a3(1260, 575) < 0.05 and w2[190, 650, 3] == 1.0,
+       'W3 opens the corners W2 keeps black: (650, 190) %.2f (W2 %.2f), (1270, 190), (660, 575), (1260, 575)' % (a3(650, 190), w2[190, 650, 3]))
+    ok(a3(706, 400) < 0.05 and a3(1213, 400) < 0.05 and a3(702, 400) == 1.0 and a3(1217, 400) == 1.0,
+       'W3 at mid-height: open x 704..1216 (W2: 700..1220): %.2f %.2f, shut at 702 / 1217: %.2f %.2f' % (a3(706, 400), a3(1213, 400), a3(702, 400), a3(1217, 400)))
     ok(all(w3[y, x, 3] == 1.0 for y in (170, 171, 172) for x in (620, 960, 1300)) and a3(960, 175) < 0.05 and abs(int(round(w3[171, 960, 0] * 255)) - round(ruleu[0] * 255)) <= 2,
        'W3: the tab rule (y 170-173) stays drawn and opaque across its width, open from y 174')
     ok(all(w3[y, x, 3] == 1.0 for y in (588, 592, 600, 612, 640, 700) for x in (620, 960, 1260, 1300)) and a3(960, 586) < 0.05,
@@ -210,7 +210,7 @@ def main():
     ys, xs = np.where(sh)
     ok(xs.min() >= 618 and xs.max() <= 1301 and ys.min() >= 173 and ys.max() <= 587, 'W3: every see-through pixel inside [618, 173, 1302, 588]: x %d..%d, y %d..%d' % (xs.min(), xs.max(), ys.min(), ys.max()))
     dd = np.minimum(np.hypot(xs + 0.5 - 380, ys + 0.5 - 400), np.hypot(xs + 0.5 - 1540, ys + 0.5 - 400))
-    ok(dd.min() >= 309.0, 'W3: no see-through pixel nearer than 309 px to a dial\'s centre (the bezel ends at 303.8): %.2f' % dd.min())
+    ok(dd.min() >= 323.0, 'W3: no see-through pixel nearer than 323 px to a dial\'s centre (the bezel ends at 304.3): %.2f' % dd.min())
     print('%d passed, %d failed' % (passed, failed))
     return 1 if failed else 0
 
