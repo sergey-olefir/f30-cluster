@@ -352,8 +352,8 @@ function mapHeadline(map) {
 function measureList(runs) {
   var score = {};
   runs.forEach(function (run) {
-    (run.summary.tornado || []).forEach(function (r) { score[r.param] = Math.max(score[r.param] || 0, r.swing); });
-    (run.summary.ranking || []).forEach(function (r) { if (!/preset/.test(r.param)) score[r.param] = Math.max(score[r.param] || 0, r.spread); });
+    (run.summary.tornado || []).forEach(function (r) { score[r.param] = Math.max(score[r.param] || 0, r.swing, r.safeSwing || 0); });
+    (run.summary.ranking || []).forEach(function (r) { if (!/preset/.test(r.param)) score[r.param] = Math.max(score[r.param] || 0, r.spread, r.safeSpread || 0); });
   });
   return Object.keys(score).filter(function (k) { return !/^(controller|warning|thresholds)\./.test(k); })
     .sort(function (a, b) { return score[b] - score[a]; })
@@ -416,10 +416,10 @@ function build(runs, opts) {
   }
   mapRuns.forEach(function (r) {
     r.summary.maps.forEach(function (m) {
-      var hl = mapHeadline(m);
+      var hl = mapHeadline(m.safeCells ? { xs: m.xs, ys: m.ys, cells: m.safeCells } : m);
       var rowTxt = hl.rows.map(function (row) { return m.y + ' ' + row.y + ': ' + (row.x === null ? 'never' : m.x + ' ' + row.x); }).join('; ');
-      sumEn.push('Map ' + r.name + (m.split ? ' (' + m.split + ' = ' + m.splitValue + ')' : '') + ', ' + plantWord + ': the best cell passes ' + pct(hl.best) + '; reaching ' + pct(hl.target) + ' needs — ' + rowTxt + '.');
-      sumUk.push('Карта ' + r.name + (m.split ? ' (' + m.split + ' = ' + m.splitValue + ')' : '') + ', з припущеною моделлю круїзу: найкраща клітинка — ' + pct(hl.best) + '; щоб досягти ' + pct(hl.target) + ', потрібно — ' + rowTxt.replace(/never/g, 'недосяжно') + '.');
+      sumEn.push('Map ' + r.name + (m.split ? ' (' + m.split + ' = ' + m.splitValue + ')' : '') + ', ' + plantWord + ': the best cell is safe in ' + pct(hl.best) + ' of the groups; reaching ' + pct(hl.target) + ' needs — ' + rowTxt + '.');
+      sumUk.push('Карта ' + r.name + (m.split ? ' (' + m.split + ' = ' + m.splitValue + ')' : '') + ', з припущеною моделлю круїзу: найкраща клітинка безпечна в ' + pct(hl.best) + ' груп' + '; щоб досягти ' + pct(hl.target) + ', потрібно — ' + rowTxt.replace(/never/g, 'недосяжно') + '.');
     });
   });
   if (measure.length) {
@@ -447,7 +447,10 @@ function build(runs, opts) {
   mapRuns.forEach(function (r) {
     h += '<h2>Feasibility map: ' + esc(r.name) + '</h2><p class="muted">' + esc(r.plan.description || '') + ' Each cell: the share of the variant groups that pass (all reaction cases and worst times of a group must pass). Framed: the presets.</p>';
     r.summary.maps.forEach(function (m) {
-      h += '<div class="scroll">' + (m.split ? '<h3>' + esc(m.split + ' = ' + m.splitValue) + '</h3>' : '') + heatmap(m, r.name) + '</div>';
+      h += '<div class="scroll">' + (m.split ? '<h3>' + esc(m.split + ' = ' + m.splitValue) + '</h3>' : '') +
+        '<div style="display:flex;flex-wrap:wrap;gap:16px"><div><h4>pass share</h4>' + heatmap(m, r.name) + '</div>' +
+        (m.safeCells ? '<div><h4>safety share (failures only in comfort, chatter, nuisance count as safe)</h4>' + heatmap({ x: m.x, y: m.y, xs: m.xs, ys: m.ys, cells: m.safeCells, presets: m.presets }, r.name + ' safety') + '</div>' : '') +
+        '</div></div>';
       var fams = Object.keys(m.families || {}).filter(function (f) { return 'BCDEFG'.indexOf(f) >= 0; });
       if (fams.length) {
         h += '<details><summary>per family</summary><div class="scroll" style="display:flex;flex-wrap:wrap;gap:12px">';
