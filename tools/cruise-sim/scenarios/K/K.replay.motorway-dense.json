@@ -1,0 +1,47 @@
+{
+ "id": "K.replay.motorway-dense",
+ "family": "K",
+ "name": "Replay: motorway-dense (synthetic, recorded-like)",
+ "description": "The lead follows the recorded-like trace fixtures/traces/motorway-dense.json (synthetic until the car's logs exist). Parent S8.",
+ "scope": "in",
+ "duration": "=dur",
+ "params": {
+  "dur": 300
+ },
+ "ego": {
+  "v0_kmh": 95,
+  "vMax_kmh": 140,
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*95/3.6",
+   "profile": {
+    "type": "replay",
+    "file": "fixtures/traces/motorway-dense.json",
+    "t0": 0
+   }
+  }
+ ],
+ "sweep": {
+  "cond.sensing": [
+   "clear",
+   "rain"
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "setpointChangesPerMin",
+  "gapErrRmsRel",
+  "nuisanceWarnings",
+  "warnCount"
+ ],
+ "tags": [
+  "core"
+ ]
+}

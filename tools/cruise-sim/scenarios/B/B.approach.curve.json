@@ -1,0 +1,57 @@
+{
+ "id": "B.approach.curve",
+ "family": "B",
+ "name": "Approach in a long curve (added)",
+ "description": "The slower lead is in a long curve of radius R: the camera acquires it later than on a straight.",
+ "scope": "in",
+ "duration": "=max(60, (g0-5-2*(v-dv)/3.6)/(dv/3.6) + 45)",
+ "params": {
+  "v": 100,
+  "dv": 30,
+  "g0": 250,
+  "R": 400
+ },
+ "road": {
+  "curvature": [
+   [
+    0,
+    "=1/R"
+   ],
+   [
+    100000,
+    "=1/R"
+   ]
+  ]
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=g0",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "sweep": {
+  "v": [
+   80,
+   100
+  ],
+  "dv": [
+   20,
+   30
+  ],
+  "R": [
+   300,
+   600
+  ]
+ }
+}

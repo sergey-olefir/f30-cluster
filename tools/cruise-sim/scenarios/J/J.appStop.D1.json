@@ -1,0 +1,47 @@
+{
+ "id": "J.appStop.D1",
+ "family": "J",
+ "extends": "D.brake",
+ "name": "appStop during D.brake, at the worst time",
+ "description": "D.brake (v=120, dv=40, a=-1.5, tb=20) and the app stops (no command, no warning from it); the injection time is swept and the worst outcome counts.",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "a": -1.5,
+  "tb": 20,
+  "tf": 14
+ },
+ "events+": [
+  {
+   "t": "=tf",
+   "kind": "fault",
+   "fault": "appStop"
+  }
+ ],
+ "sweep": {
+  "tf": [
+   14,
+   16,
+   18,
+   19,
+   20,
+   21,
+   22,
+   24
+  ],
+  "v": [
+   90,
+   120
+  ]
+ },
+ "where": "=v-dv >= 30",
+ "worstOver": [
+  "tf"
+ ],
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s"
+ ]
+}

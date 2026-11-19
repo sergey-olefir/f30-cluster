@@ -1,0 +1,53 @@
+{
+ "id": "H.ego.lanechange",
+ "family": "H",
+ "name": "We change lane in behind a slower car (added)",
+ "description": "Our driver changes into the next lane where a car drives 10 / 30 km/h slower at 20 / 40 m: a cut-in caused by us.",
+ "scope": "warnOnly",
+ "duration": 50,
+ "params": {
+  "v": 120,
+  "g": 30,
+  "dv": 10
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "slow",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=g+dv/3.6*10",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "events": [
+  {
+   "t": 10,
+   "kind": "laneChange",
+   "vehicle": "ego",
+   "toLane": 1,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "v": [
+   100,
+   130
+  ],
+  "g": [
+   20,
+   40
+  ],
+  "dv": [
+   10,
+   30
+  ]
+ }
+}

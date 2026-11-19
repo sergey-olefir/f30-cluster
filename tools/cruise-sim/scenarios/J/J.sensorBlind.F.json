@@ -1,0 +1,48 @@
+{
+ "id": "J.sensorBlind.F",
+ "family": "J",
+ "extends": "F.reveal.slower",
+ "name": "sensorBlind during F.reveal.slower, at the worst time",
+ "description": "F.reveal.slower (v=120, dv=40, gh=30, tco=15) and the sensor goes blind for 5 s; the injection time is swept and the worst outcome counts.",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "gh": 30,
+  "tco": 15,
+  "tf": 10
+ },
+ "events+": [
+  {
+   "t": "=tf",
+   "kind": "fault",
+   "fault": "sensorBlind",
+   "duration": 5
+  }
+ ],
+ "sweep": {
+  "tf": [
+   10,
+   12,
+   14,
+   15,
+   16,
+   17,
+   19,
+   21
+  ],
+  "v": [
+   90,
+   120
+  ]
+ },
+ "worstOver": [
+  "tf"
+ ],
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s",
+  "faultDetectDelay_s"
+ ]
+}

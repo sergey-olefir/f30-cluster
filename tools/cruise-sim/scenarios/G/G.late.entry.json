@@ -1,0 +1,45 @@
+{
+ "id": "G.late.entry",
+ "family": "G",
+ "name": "The lead beyond range, entering it at a large speed difference",
+ "description": "Range 80 m; the lead is 40 … 80 km/h slower and appears at the edge of the range.",
+ "scope": "warnOnly",
+ "duration": "=max(60, (g0-5-2*(v-dv)/3.6)/(dv/3.6) + 45)",
+ "params": {
+  "v": 130,
+  "dv": 60,
+  "g0": 250
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=g0",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "sweep": {
+  "v": [
+   120,
+   150
+  ],
+  "dv": [
+   40,
+   60,
+   80
+  ],
+  "config.sensor.range_m": [
+   80
+  ]
+ },
+ "where": "=v-dv >= 30"
+}

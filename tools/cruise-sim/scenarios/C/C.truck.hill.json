@@ -1,0 +1,96 @@
+{
+ "id": "C.truck.hill",
+ "family": "C",
+ "name": "Following a truck over a hill (added)",
+ "description": "A truck slows from 85 to 60 km/h on a 6 % climb and speeds up to 90 downhill: slow, large speed changes with grade on both cars.",
+ "scope": "in",
+ "duration": 150,
+ "params": {
+  "v": 85
+ },
+ "road": {
+  "grade": [
+   [
+    0,
+    0
+   ],
+   [
+    600,
+    0
+   ],
+   [
+    650,
+    0.06
+   ],
+   [
+    1500,
+    0.06
+   ],
+   [
+    1550,
+    -0.05
+   ],
+   [
+    2500,
+    -0.05
+   ],
+   [
+    2550,
+    0
+   ]
+  ]
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": 110,
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "truck",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      25,
+      "=v"
+     ],
+     [
+      45,
+      60
+     ],
+     [
+      70,
+      60
+     ],
+     [
+      85,
+      90
+     ],
+     [
+      150,
+      90
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   85
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "setpointChangesPerMin"
+ ]
+}

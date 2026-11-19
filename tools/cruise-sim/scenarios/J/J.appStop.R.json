@@ -1,0 +1,43 @@
+{
+ "id": "J.appStop.R",
+ "family": "J",
+ "extends": "F.reveal.none",
+ "name": "appStop during F.reveal.none, at the worst time",
+ "description": "F.reveal.none (v=90, tco=15) and the app stops (no command, no warning from it); the injection time is swept and the worst outcome counts.",
+ "scope": "warnOnly",
+ "params": {
+  "v": 90,
+  "tco": 15,
+  "tf": 15
+ },
+ "events+": [
+  {
+   "t": "=tf",
+   "kind": "fault",
+   "fault": "appStop"
+  }
+ ],
+ "sweep": {
+  "tf": [
+   15,
+   16,
+   17,
+   18,
+   20,
+   22,
+   25
+  ],
+  "v": [
+   90,
+   120
+  ]
+ },
+ "worstOver": [
+  "tf"
+ ],
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s"
+ ]
+}

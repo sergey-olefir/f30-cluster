@@ -1,0 +1,53 @@
+{
+ "id": "H.junction",
+ "family": "H",
+ "name": "A roundabout or junction behind a lead (the lead stops)",
+ "description": "The lead slows to a stop at a junction at −1.5 / −2.5 m/s². Below the cruise minimum: warning and envelope exit only.",
+ "scope": "outOfEnvelope",
+ "duration": "=15+v/3.6/abs(a)+25",
+ "params": {
+  "v": 70,
+  "a": -1.5
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+10",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      15,
+      "=v"
+     ],
+     [
+      "=15+v/3.6/abs(a)",
+      0
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   50,
+   70,
+   90
+  ],
+  "a": [
+   -1.5,
+   -2.5
+  ]
+ }
+}

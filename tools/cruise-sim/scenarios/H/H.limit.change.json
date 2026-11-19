@@ -1,0 +1,53 @@
+{
+ "id": "H.limit.change",
+ "family": "H",
+ "name": "The driver lowers the maximum behind a faster lead",
+ "description": "A speed-limit sign: the driver lowers the maximum by 20 / 30 / 50 km/h while the lead drives faster. We fall back smoothly.",
+ "scope": "in",
+ "duration": 60,
+ "params": {
+  "v": 120,
+  "d": 30
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v+10"
+  }
+ ],
+ "events": [
+  {
+   "t": 15,
+   "kind": "driverVmax",
+   "vMax_kmh": "=v-d"
+  }
+ ],
+ "sweep": {
+  "v": [
+   100,
+   130
+  ],
+  "d": [
+   20,
+   30,
+   50
+  ]
+ },
+ "decide": [
+  "peakDecel_mps2",
+  "setpointChangesPerMin",
+  "warnCount",
+  "collision"
+ ]
+}

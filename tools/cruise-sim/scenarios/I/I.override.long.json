@@ -1,0 +1,55 @@
+{
+ "id": "I.override.long",
+ "family": "I",
+ "name": "Long override while the lead brakes (added)",
+ "description": "The driver overrides for 20 s; during it the lead brakes at −2 m/s². The system cannot act; it must still warn.",
+ "scope": "warnOnly",
+ "duration": 70,
+ "params": {
+  "v": 100
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      35,
+      "=v"
+     ],
+     [
+      "=35+30/3.6/2",
+      "=v-30"
+     ]
+    ]
+   }
+  }
+ ],
+ "events": [
+  {
+   "t": 30,
+   "kind": "driverOverride",
+   "accel": 0.15,
+   "duration_s": 20
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ]
+ }
+}

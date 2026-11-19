@@ -1,0 +1,47 @@
+{
+ "id": "A.setstep.up",
+ "family": "A",
+ "name": "The driver raises the maximum (+1 … +40 km/h)",
+ "description": "Free road; at 10 s the driver raises the maximum. The loop passes it to the cruise; the cruise's own step response shows (overshoot, settle time). Phase 1 scenario 2 in simulation.",
+ "scope": "in",
+ "duration": 60,
+ "params": {
+  "v": 90,
+  "step": 10
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [],
+ "events": [
+  {
+   "t": 10,
+   "kind": "driverVmax",
+   "vMax_kmh": "=v+step"
+  }
+ ],
+ "sweep": {
+  "v": [
+   40,
+   60,
+   90,
+   120,
+   150
+  ],
+  "step": [
+   1,
+   5,
+   10,
+   20,
+   40
+  ]
+ },
+ "where": "=v+step <= 180",
+ "decide": [
+  "overspeed_kmh",
+  "setpointChangesPerMin",
+  "warnCount"
+ ]
+}

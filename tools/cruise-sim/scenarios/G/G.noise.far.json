@@ -1,0 +1,56 @@
+{
+ "id": "G.noise.far",
+ "family": "G",
+ "name": "Range noise at long gaps (added)",
+ "description": "Following at 3 s at 120 … 180 km/h (100–150 m): camera range noise grows with the square of the distance. Chatter and nuisance.",
+ "scope": "in",
+ "duration": 150,
+ "params": {
+  "v": 150
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+3*v/3.6",
+   "v0_kmh": "=v",
+   "profile": {
+    "type": "idm",
+    "params": {
+     "v0_kmh": "=v",
+     "T_s": 1.4,
+     "s0_m": 2,
+     "a_ms2": 1.2,
+     "b_ms2": 2,
+     "delta": 4,
+     "noise_ms2": 0.15,
+     "reaction_s": 0.8
+    }
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   120,
+   150,
+   180
+  ],
+  "cond.sensing": [
+   "clear",
+   "rain"
+  ]
+ },
+ "decide": [
+  "collision",
+  "setpointChangesPerMin",
+  "nuisanceWarnings",
+  "accelRms_mps2",
+  "estVrelErrRms_mps"
+ ]
+}

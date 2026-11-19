@@ -1,0 +1,47 @@
+{
+ "id": "K.replay.motorway-flow",
+ "family": "K",
+ "name": "Replay: motorway-flow (synthetic, recorded-like)",
+ "description": "The lead follows the recorded-like trace fixtures/traces/motorway-flow.csv (synthetic until the car's logs exist). Parent S8.",
+ "scope": "in",
+ "duration": "=dur",
+ "params": {
+  "dur": 300
+ },
+ "ego": {
+  "v0_kmh": 125,
+  "vMax_kmh": 150,
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*125/3.6",
+   "profile": {
+    "type": "replay",
+    "file": "fixtures/traces/motorway-flow.csv",
+    "t0": 0
+   }
+  }
+ ],
+ "sweep": {
+  "cond.sensing": [
+   "clear",
+   "rain"
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "setpointChangesPerMin",
+  "gapErrRmsRel",
+  "nuisanceWarnings",
+  "warnCount"
+ ],
+ "tags": [
+  "core"
+ ]
+}

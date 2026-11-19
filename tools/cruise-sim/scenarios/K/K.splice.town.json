@@ -1,0 +1,45 @@
+{
+ "id": "K.splice.town",
+ "family": "K",
+ "extends": "K.replay.town",
+ "name": "Replay: town with a cut-in spliced in",
+ "description": "K.replay.town with a car that rides the same trace beside us, at 40 % of our gap, and cuts in at 60 / 150 s.",
+ "scope": "warnOnly",
+ "params": {
+  "dur": 300,
+  "tc": 60
+ },
+ "vehicles+": [
+  {
+   "id": "cutter",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=0.4*(5+2*45/3.6)",
+   "profile": {
+    "type": "replay",
+    "file": "fixtures/traces/town.json",
+    "t0": 0
+   }
+  }
+ ],
+ "events+": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "tc": [
+   60,
+   150
+  ]
+ },
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s"
+ ]
+}

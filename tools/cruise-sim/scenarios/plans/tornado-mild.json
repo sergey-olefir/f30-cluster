@@ -1,0 +1,38 @@
+{
+ "name": "tornado-mild",
+ "description": "Robustness and sensitivity: every plant, sensor and command-path number moved by -30 % and +30 % around the mild preset, one at a time, with the downward rate limit opened (12 km/h/s) so the car's numbers, not our rate limit, bound the result.",
+ "scenarios": [
+  "*"
+ ],
+ "exclude": [
+  "L"
+ ],
+ "perScenarioMax": 8,
+ "base": {
+  "plant": {
+   "preset": "mild"
+  },
+  "controller": {
+   "rateDown_kmhps": 12
+  }
+ },
+ "tornado": {
+  "at": {},
+  "params": {
+   "plant.deadTime_s": 0.5,
+   "plant.tau_s": 2.0,
+   "plant.aMin_ms2": -1.8,
+   "plant.brakeMax_ms2": 2.0,
+   "plant.aMax_ms2": 1.5,
+   "sensor.latency_s": 0.15,
+   "sensor.rateHz": 10,
+   "sensor.gapSd100_m": 3.0,
+   "sensor.range_m": 120,
+   "sensor.acqDelay_s": 0.5,
+   "command.delay_s": 0.2,
+   "command.jitter_s": 0.1
+  },
+  "factor": 0.3
+ },
+ "seed": 1
+}

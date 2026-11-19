@@ -1,0 +1,89 @@
+{
+ "name": "map-authority-deadtime",
+ "description": "The feasibility map: the cruise's deceleration authority (with the brake authority it implies) against its dead time; one map with the parent brief's downward rate limit (3 km/h/s) and one with it opened to 12 km/h/s. Up to 12 variant groups per scenario file, family L excluded.",
+ "scenarios": [
+  "*"
+ ],
+ "exclude": [
+  "L"
+ ],
+ "perScenarioMax": 12,
+ "base": {
+  "plant": {
+   "preset": "mild"
+  }
+ },
+ "grid": {
+  "plant.deadTime_s": [
+   0.2,
+   0.5,
+   1.0,
+   1.5,
+   2.5
+  ],
+  "controller.rateDown_kmhps": [
+   3,
+   12
+  ]
+ },
+ "gridCases": [
+  {
+   "plant.aMin_ms2": -0.5,
+   "plant.brakeMax_ms2": 0
+  },
+  {
+   "plant.aMin_ms2": -0.7,
+   "plant.brakeMax_ms2": 0
+  },
+  {
+   "plant.aMin_ms2": -1.0,
+   "plant.brakeMax_ms2": 1.2
+  },
+  {
+   "plant.aMin_ms2": -1.4,
+   "plant.brakeMax_ms2": 1.6
+  },
+  {
+   "plant.aMin_ms2": -1.8,
+   "plant.brakeMax_ms2": 2.0
+  },
+  {
+   "plant.aMin_ms2": -2.3,
+   "plant.brakeMax_ms2": 2.7
+  },
+  {
+   "plant.aMin_ms2": -2.8,
+   "plant.brakeMax_ms2": 3.5
+  },
+  {
+   "plant.aMin_ms2": -3.5,
+   "plant.brakeMax_ms2": 4.2
+  }
+ ],
+ "map": {
+  "x": "plant.aMin_ms2",
+  "y": "plant.deadTime_s",
+  "split": "controller.rateDown_kmhps"
+ },
+ "presets": {
+  "liftoff": {
+   "plant.aMin_ms2": -0.7,
+   "plant.brakeMax_ms2": 0,
+   "plant.deadTime_s": 0.5,
+   "controller.rateDown_kmhps": 12
+  },
+  "mild": {
+   "plant.aMin_ms2": -1.8,
+   "plant.brakeMax_ms2": 2.0,
+   "plant.deadTime_s": 0.5,
+   "controller.rateDown_kmhps": 12
+  },
+  "firm": {
+   "plant.aMin_ms2": -2.8,
+   "plant.brakeMax_ms2": 3.5,
+   "plant.deadTime_s": 0.5,
+   "controller.rateDown_kmhps": 12
+  }
+ },
+ "seed": 1
+}

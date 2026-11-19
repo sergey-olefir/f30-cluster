@@ -1,0 +1,63 @@
+{
+ "id": "E.cutin.faster",
+ "family": "E",
+ "name": "A faster car cuts in",
+ "description": "The cutting car is 10 / 20 km/h faster: it pulls away. We should not brake for it.",
+ "scope": "in",
+ "duration": "=tc + 50",
+ "params": {
+  "v": 90,
+  "g": 10,
+  "dv": -10,
+  "tc": 10
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "cutter",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=g+dv/3.6*tc",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "events": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "g": [
+   5,
+   10,
+   20,
+   40
+  ],
+  "dv": [
+   -10,
+   -20
+  ]
+ },
+ "decide": [
+  "collision",
+  "nuisanceWarnings",
+  "peakDecel_mps2",
+  "setpointChangesPerMin"
+ ]
+}

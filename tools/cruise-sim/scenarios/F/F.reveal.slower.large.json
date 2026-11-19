@@ -1,0 +1,67 @@
+{
+ "id": "F.reveal.slower.large",
+ "family": "F",
+ "name": "A cut-out reveals a much slower car (50 … 80 km/h)",
+ "description": "As F.reveal.slower with Δv 50 … 80 km/h: scored on the warning.",
+ "scope": "warnOnly",
+ "duration": "=tco+50",
+ "params": {
+  "v": 120,
+  "dv": 60,
+  "gh": 30,
+  "tco": 15
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v"
+  },
+  {
+   "id": "hidden",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6+4.6+gh+(v-(v-dv))/3.6*tco",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "events": [
+  {
+   "t": "=tco",
+   "kind": "cutOut",
+   "vehicle": "lead",
+   "toLane": 1,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120,
+   150
+  ],
+  "dv": [
+   50,
+   60,
+   80
+  ],
+  "gh": [
+   20,
+   40
+  ]
+ },
+ "where": "=v-dv >= 30"
+}

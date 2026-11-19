@@ -1,0 +1,63 @@
+{
+ "id": "D.slowdown",
+ "family": "D",
+ "name": "The lead slows down and speeds back up (added)",
+ "description": "The lead slows by 30 km/h at −1 / −1.5 m/s² and immediately accelerates back at 1 m/s²: the ordinary accordion.",
+ "scope": "in",
+ "duration": 90,
+ "params": {
+  "v": 110,
+  "a": -1
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      20,
+      "=v"
+     ],
+     [
+      "=20+30/3.6/abs(a)",
+      "=v-30"
+     ],
+     [
+      "=20+30/3.6/abs(a)+30/3.6",
+      "=v"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "a": [
+   -1,
+   -1.5
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "warnCount",
+  "setpointChangesPerMin"
+ ]
+}

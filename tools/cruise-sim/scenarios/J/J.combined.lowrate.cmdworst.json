@@ -1,0 +1,33 @@
+{
+ "id": "J.combined.lowrate.cmdworst",
+ "family": "J",
+ "extends": "D.brake",
+ "name": "A 2 Hz sensor and the worst command path, lead braking",
+ "description": "D.brake (−1.5 m/s², 40 km/h) with the sensor at 2 Hz and the command path at its worst: the stacked delays.",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "a": -1.5,
+  "tb": 20
+ },
+ "sweep": {
+  "cond.command": [
+   "worst"
+  ],
+  "config.sensor.rateHz": [
+   2
+  ],
+  "v": [
+   90,
+   120
+  ]
+ },
+ "where": "=v-dv >= 30",
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s",
+  "minTimeGap_s"
+ ]
+}

@@ -1,0 +1,23 @@
+{
+ "id": "L.commute",
+ "family": "L",
+ "name": "Mixed driving: a commute (50 % motorway, 35 % rural, 15 % town)",
+ "description": "The owner's likely mix, for the headline per-hour numbers.",
+ "scope": "in",
+ "generator": {
+  "hours": 10,
+  "shares": {
+   "motorway": 0.5,
+   "rural": 0.35,
+   "town": 0.15
+  },
+  "density": "mid",
+  "seed": 1,
+  "fillerSegment_s": 300,
+  "fillerSamples": 6
+ },
+ "decide": [],
+ "tags": [
+  "perHour"
+ ]
+}

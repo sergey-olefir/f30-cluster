@@ -1,0 +1,45 @@
+{
+ "id": "J.setStuck.B",
+ "family": "J",
+ "extends": "B.approach",
+ "name": "setStuck during B.approach, at the worst time",
+ "description": "B.approach (v=120, dv=40, g0=250) and the set speed sticks for 20 s (the cruise ignores commands); the injection time is swept and the worst outcome counts.",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "g0": 250,
+  "tf": 5
+ },
+ "events+": [
+  {
+   "t": "=tf",
+   "kind": "fault",
+   "fault": "setStuck",
+   "duration": 20
+  }
+ ],
+ "sweep": {
+  "tf": [
+   5,
+   10,
+   15,
+   20,
+   25,
+   30,
+   35
+  ],
+  "v": [
+   90,
+   120
+  ]
+ },
+ "worstOver": [
+  "tf"
+ ],
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s"
+ ]
+}

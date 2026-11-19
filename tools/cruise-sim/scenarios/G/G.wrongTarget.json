@@ -1,0 +1,79 @@
+{
+ "id": "G.wrongTarget",
+ "family": "G",
+ "name": "Lost and replaced by the next-lane car",
+ "description": "In a 300 m curve the camera's path prediction misses part of the curve (30 / 60 / 90 %) and takes the slower car in the next lane for the lead.",
+ "scope": "in",
+ "duration": 70,
+ "params": {
+  "v": 100
+ },
+ "road": {
+  "curvature": [
+   [
+    0,
+    0
+   ],
+   [
+    "=max(1, v/3.6*25-100)",
+    0
+   ],
+   [
+    "=max(2, v/3.6*25-99)",
+    "=1/300"
+   ],
+   [
+    "=v/3.6*(25+15+10)",
+    "=1/300"
+   ],
+   [
+    "=v/3.6*(25+15+10)+1",
+    0
+   ]
+  ]
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v"
+  },
+  {
+   "id": "adj",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=0.5*(5+2*v/3.6)+20/3.6*25",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-20"
+  }
+ ],
+ "sweep": {
+  "v": [
+   80,
+   100
+  ],
+  "config.sensor.curvePredErr": [
+   0.3,
+   0.6,
+   0.9
+  ]
+ },
+ "decide": [
+  "collision",
+  "nuisanceWarnings",
+  "peakDecel_mps2",
+  "minTimeGap_s"
+ ]
+}

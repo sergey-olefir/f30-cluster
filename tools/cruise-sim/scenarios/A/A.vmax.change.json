@@ -1,0 +1,51 @@
+{
+ "id": "A.vmax.change",
+ "family": "A",
+ "name": "The driver changes the maximum several times while free",
+ "description": "+20 at 10 s, −30 at 40 s, +10 at 70 s, −5 at 90 s. No chatter, no overspeed beyond the cruise's own.",
+ "scope": "in",
+ "duration": 120,
+ "params": {
+  "v": 90
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [],
+ "events": [
+  {
+   "t": 10,
+   "kind": "driverVmax",
+   "vMax_kmh": "=v+20"
+  },
+  {
+   "t": 40,
+   "kind": "driverVmax",
+   "vMax_kmh": "=v-10"
+  },
+  {
+   "t": 70,
+   "kind": "driverVmax",
+   "vMax_kmh": "=v"
+  },
+  {
+   "t": 90,
+   "kind": "driverVmax",
+   "vMax_kmh": "=v-5"
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ]
+ },
+ "decide": [
+  "overspeed_kmh",
+  "setpointChangesPerMin",
+  "warnCount"
+ ]
+}

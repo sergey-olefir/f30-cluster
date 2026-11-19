@@ -1,0 +1,80 @@
+{
+ "id": "C.follower",
+ "family": "C",
+ "name": "A car behind us following closely",
+ "description": "A car follows us at 0.6 / 1.0 / 1.5 s; our lead brakes −2 m/s² by 30 km/h. What our braking (through the cruise) does to the car behind.",
+ "scope": "in",
+ "duration": 80,
+ "params": {
+  "v": 90,
+  "T": 1
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      30,
+      "=v"
+     ],
+     [
+      "=30+30/3.6/2",
+      "=v-30"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "follower",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=-(4.7+4.6+2+T*v/3.6)",
+   "v0_kmh": "=v",
+   "profile": {
+    "type": "idm",
+    "params": {
+     "v0_kmh": "=v+20",
+     "T_s": "=T",
+     "s0_m": 2,
+     "a_ms2": 1.2,
+     "b_ms2": 2,
+     "delta": 4,
+     "noise_ms2": 0.1,
+     "reaction_s": 0.8
+    }
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "T": [
+   0.6,
+   1,
+   1.5
+  ]
+ },
+ "decide": [
+  "collision",
+  "followerCollision",
+  "followerMinTimeGap_s",
+  "followerPeakDecel_mps2"
+ ]
+}

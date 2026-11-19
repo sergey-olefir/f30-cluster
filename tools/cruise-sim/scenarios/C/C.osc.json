@@ -1,0 +1,65 @@
+{
+ "id": "C.osc",
+ "family": "C",
+ "name": "The lead's speed oscillates (string stability)",
+ "description": "The lead's speed is a sine of amplitude 2 … 15 km/h and period 5 … 60 s. The oscillation gain (ours over the lead's) must stay ≤ 1. Parent S2.",
+ "scope": "in",
+ "duration": "=max(180, 30+8*P)",
+ "params": {
+  "v": 90,
+  "amp": 5,
+  "P": 20
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+30",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "sine",
+    "mean_kmh": "=v",
+    "amp_kmh": "=amp",
+    "period_s": "=P",
+    "t0": 10,
+    "phase_deg": 0
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "amp": [
+   2,
+   5,
+   10,
+   15
+  ],
+  "P": [
+   5,
+   10,
+   20,
+   30,
+   60
+  ]
+ },
+ "where": "=v-amp >= 35",
+ "decide": [
+  "collision",
+  "oscGain",
+  "minTimeGap_s",
+  "minTTC_s",
+  "setpointChangesPerMin"
+ ],
+ "tags": [
+  "core"
+ ]
+}

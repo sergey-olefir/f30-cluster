@@ -1,0 +1,62 @@
+{
+ "id": "C.human",
+ "family": "C",
+ "name": "A human-like lead (IDM with noise)",
+ "description": "The lead is a noisy human-like driver around v. Gap error, chatter, nuisance warnings.",
+ "scope": "in",
+ "duration": 300,
+ "params": {
+  "v": 90
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "v0_kmh": "=v",
+   "profile": {
+    "type": "idm",
+    "params": {
+     "v0_kmh": "=v",
+     "T_s": 1.4,
+     "s0_m": 2,
+     "a_ms2": 1.2,
+     "b_ms2": 2,
+     "delta": 4,
+     "noise_ms2": 0.3,
+     "reaction_s": 0.8
+    }
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   40,
+   60,
+   90,
+   120,
+   150
+  ],
+  "cond.sensing": [
+   "clear",
+   "rain"
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "gapErrRmsRel",
+  "setpointChangesPerMin",
+  "nuisanceWarnings"
+ ],
+ "tags": [
+  "core"
+ ]
+}

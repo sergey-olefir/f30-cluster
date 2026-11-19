@@ -1,0 +1,48 @@
+{
+ "id": "A.free.adjacent",
+ "family": "A",
+ "name": "Overtaking a slower car in the next lane (added)",
+ "description": "We drive in the left lane and pass a car 30 km/h slower in the right lane. It must never become our target on a straight road.",
+ "scope": "in",
+ "duration": 60,
+ "params": {
+  "v": 120,
+  "dv": 30
+ },
+ "road": {
+  "lanes": 2
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 1
+ },
+ "vehicles": [
+  {
+   "id": "adj",
+   "kind": "car",
+   "lane": 0,
+   "x0": 150,
+   "v0_kmh": "=v-dv",
+   "profile": {
+    "type": "const"
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120,
+   150
+  ],
+  "dv": [
+   20,
+   40
+  ]
+ },
+ "decide": [
+  "warnCount",
+  "peakDecel_mps2",
+  "setpointChangesPerMin"
+ ]
+}

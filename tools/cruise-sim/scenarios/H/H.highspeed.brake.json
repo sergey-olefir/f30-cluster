@@ -1,0 +1,55 @@
+{
+ "id": "H.highspeed.brake",
+ "family": "H",
+ "name": "The lead brakes hard at 150 … 180 km/h (added)",
+ "description": "As H.highspeed at −2 / −3 m/s²: the warning case at very high speed.",
+ "scope": "warnOnly",
+ "duration": "=tb + dv/3.6/abs(a) + 40",
+ "params": {
+  "v": 165,
+  "dv": 50,
+  "a": -2,
+  "tb": 30
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+10",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      "=tb",
+      "=v"
+     ],
+     [
+      "=tb+(dv)/3.6/abs(a)",
+      "=v-(dv)"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   150,
+   165,
+   180
+  ],
+  "a": [
+   -2,
+   -3
+  ]
+ }
+}

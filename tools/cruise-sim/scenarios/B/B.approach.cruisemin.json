@@ -1,0 +1,42 @@
+{
+ "id": "B.approach.cruisemin",
+ "family": "B",
+ "name": "A lead at the cruise's minimum speed",
+ "description": "The lead drives at 30 km/h (the assumed cruise minimum). We can follow it only with the set speed at the minimum.",
+ "scope": "in",
+ "duration": "=max(60, (g0-65)/((v-30)/3.6) + 45)",
+ "params": {
+  "v": 90,
+  "g0": 250
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=g0",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": 30
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "nuisanceWarnings"
+ ]
+}

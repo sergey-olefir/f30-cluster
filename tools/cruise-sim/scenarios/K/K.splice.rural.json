@@ -1,0 +1,45 @@
+{
+ "id": "K.splice.rural",
+ "family": "K",
+ "extends": "K.replay.rural",
+ "name": "Replay: rural with a cut-in spliced in",
+ "description": "K.replay.rural with a car that rides the same trace beside us, at 40 % of our gap, and cuts in at 60 / 150 s.",
+ "scope": "warnOnly",
+ "params": {
+  "dur": 300,
+  "tc": 60
+ },
+ "vehicles+": [
+  {
+   "id": "cutter",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=0.4*(5+2*85/3.6)",
+   "profile": {
+    "type": "replay",
+    "file": "fixtures/traces/rural.json",
+    "t0": 0
+   }
+  }
+ ],
+ "events+": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "tc": [
+   60,
+   150
+  ]
+ },
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s"
+ ]
+}

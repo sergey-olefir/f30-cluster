@@ -1,0 +1,62 @@
+{
+ "id": "D.closing",
+ "family": "D",
+ "name": "The lead brakes while we are still closing",
+ "description": "We approach 15 / 30 km/h faster; when the gap is 40 / 80 m the lead brakes at −2 / −3 m/s².",
+ "scope": "warnOnly",
+ "duration": 60,
+ "params": {
+  "v": 120,
+  "dv": 15,
+  "g": 60,
+  "a": -2
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=g+dv/3.6*10",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v-dv"
+     ],
+     [
+      10,
+      "=v-dv"
+     ],
+     [
+      "=10+30/3.6/abs(a)",
+      "=v-dv-30"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "dv": [
+   15,
+   30
+  ],
+  "g": [
+   40,
+   80
+  ],
+  "a": [
+   -2,
+   -3
+  ]
+ }
+}

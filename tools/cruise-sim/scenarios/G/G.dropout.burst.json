@@ -1,0 +1,72 @@
+{
+ "id": "G.dropout.burst",
+ "family": "G",
+ "name": "Dropout bursts",
+ "description": "Bursts of 0.5 / 1 / 3 s with no sample, every 10 s for a minute, while the lead brakes at −1.5 m/s² at 40 s.",
+ "scope": "in",
+ "duration": 90,
+ "params": {
+  "v": 110,
+  "b": 1
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      40,
+      "=v"
+     ],
+     [
+      "=40+30/3.6/1.5",
+      "=v-30"
+     ]
+    ]
+   }
+  }
+ ],
+ "events": [
+  {
+   "$repeat": 6,
+   "$as": "k",
+   "item": {
+    "t": "=15+10*k",
+    "kind": "fault",
+    "fault": "dropBurst",
+    "duration": "=b"
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "b": [
+   0.5,
+   1,
+   3
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "nuisanceWarnings",
+  "setpointChangesPerMin"
+ ]
+}

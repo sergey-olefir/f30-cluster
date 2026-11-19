@@ -1,0 +1,68 @@
+{
+ "id": "E.cutin.brake",
+ "family": "E",
+ "name": "Cut-in, then brake",
+ "description": "A car 10 km/h slower cuts in at 20 / 30 m and brakes at −2 / −3 m/s² 3 s after its lane change.",
+ "scope": "warnOnly",
+ "duration": "=tc + 50",
+ "params": {
+  "v": 110,
+  "g": 20,
+  "dv": 10,
+  "tc": 10,
+  "a": -2
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "cutter",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=g+dv/3.6*tc",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v-dv"
+     ],
+     [
+      "=tc+6",
+      "=v-dv"
+     ],
+     [
+      "=tc+6+30/3.6/abs(a)",
+      "=v-dv-30"
+     ]
+    ]
+   }
+  }
+ ],
+ "events": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "g": [
+   20,
+   30
+  ],
+  "a": [
+   -2,
+   -3
+  ]
+ }
+}

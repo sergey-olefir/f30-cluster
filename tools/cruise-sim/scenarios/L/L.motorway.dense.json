@@ -1,0 +1,23 @@
+{
+ "id": "L.motorway.dense",
+ "family": "L",
+ "name": "Mixed driving: dense motorway",
+ "description": "As L.motorway at high traffic density (rates ×1.8, more following time).",
+ "scope": "in",
+ "generator": {
+  "hours": 10,
+  "shares": {
+   "motorway": 1,
+   "rural": 0,
+   "town": 0
+  },
+  "density": "high",
+  "seed": 1,
+  "fillerSegment_s": 300,
+  "fillerSamples": 6
+ },
+ "decide": [],
+ "tags": [
+  "perHour"
+ ]
+}

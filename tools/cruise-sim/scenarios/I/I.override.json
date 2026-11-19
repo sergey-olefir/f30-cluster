@@ -1,0 +1,58 @@
+{
+ "id": "I.override",
+ "family": "I",
+ "name": "Accelerator override while following",
+ "description": "The driver presses the accelerator (30 / 60 %) for 4 / 8 s, closing on the lead, then releases. No nuisance during it; a smooth recovery after.",
+ "scope": "in",
+ "duration": 70,
+ "params": {
+  "v": 90,
+  "p": 0.3,
+  "d": 4
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v"
+  }
+ ],
+ "events": [
+  {
+   "t": 30,
+   "kind": "driverOverride",
+   "accel": "=p",
+   "duration_s": "=d"
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "p": [
+   0.3,
+   0.6
+  ],
+  "d": [
+   4,
+   8
+  ]
+ },
+ "decide": [
+  "collision",
+  "nuisanceWarnings",
+  "peakDecel_mps2"
+ ]
+}

@@ -1,0 +1,74 @@
+{
+ "id": "C.osc.follower",
+ "family": "C",
+ "name": "Oscillating lead with a car behind us (added)",
+ "description": "C.osc with an IDM car behind us at 1.0 s: does the wave grow as it passes through us to the car behind?",
+ "scope": "in",
+ "duration": "=max(180, 30+8*P)",
+ "params": {
+  "v": 90,
+  "amp": 5,
+  "P": 20
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+30",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "sine",
+    "mean_kmh": "=v",
+    "amp_kmh": "=amp",
+    "period_s": "=P",
+    "t0": 10,
+    "phase_deg": 0
+   }
+  },
+  {
+   "id": "follower",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=-(4.7+4.6+2+1.0*v/3.6)",
+   "v0_kmh": "=v",
+   "profile": {
+    "type": "idm",
+    "params": {
+     "v0_kmh": "=v+20",
+     "T_s": 1,
+     "s0_m": 2,
+     "a_ms2": 1.2,
+     "b_ms2": 2,
+     "delta": 4,
+     "noise_ms2": 0.1,
+     "reaction_s": 0.8
+    }
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   90
+  ],
+  "amp": [
+   5,
+   10
+  ],
+  "P": [
+   10,
+   20,
+   30
+  ]
+ },
+ "decide": [
+  "collision",
+  "oscGain",
+  "followerOscGain",
+  "followerMinTimeGap_s"
+ ]
+}

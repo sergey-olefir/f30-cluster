@@ -1,0 +1,45 @@
+{
+ "id": "J.combined.blind.rain",
+ "family": "J",
+ "extends": "B.approach",
+ "name": "The sensor goes blind during a rainy approach, at the worst time",
+ "description": "B.approach (Δv 40 at 120) in rain with a 5 s blind sensor injected at the worst time.",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "g0": 250,
+  "tf": 10
+ },
+ "events+": [
+  {
+   "t": "=tf",
+   "kind": "fault",
+   "fault": "sensorBlind",
+   "duration": 5
+  }
+ ],
+ "sweep": {
+  "tf": [
+   5,
+   10,
+   15,
+   20,
+   25,
+   30,
+   35
+  ],
+  "cond.sensing": [
+   "rain"
+  ]
+ },
+ "worstOver": [
+  "tf"
+ ],
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s",
+  "faultDetectDelay_s"
+ ]
+}

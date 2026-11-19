@@ -1,0 +1,77 @@
+{
+ "id": "G.frozen",
+ "family": "G",
+ "name": "The gap freezes at its last value",
+ "description": "The measured gap repeats its last sample for 2 … 30 s while the lead holds, or brakes at −1 / −2 m/s². A staleness check must catch it and warn.",
+ "scope": "warnOnly",
+ "duration": "=30+d+30",
+ "params": {
+  "v": 110,
+  "d": 5,
+  "lb": -1
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      31,
+      "=v"
+     ],
+     [
+      "=31+(lb<0 ? 30/3.6/abs(lb) : 1)",
+      "=lb<0 ? v-30 : v"
+     ]
+    ]
+   }
+  }
+ ],
+ "events": [
+  {
+   "t": 30,
+   "kind": "fault",
+   "fault": "gapFreeze",
+   "duration": "=d"
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "d": [
+   2,
+   5,
+   10,
+   30
+  ],
+  "lb": [
+   0,
+   -1,
+   -2
+  ]
+ },
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s",
+  "faultDetectDelay_s"
+ ],
+ "tags": [
+  "core"
+ ]
+}

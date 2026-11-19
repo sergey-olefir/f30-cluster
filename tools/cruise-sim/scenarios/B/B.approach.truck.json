@@ -1,0 +1,40 @@
+{
+ "id": "B.approach.truck",
+ "family": "B",
+ "name": "Approach a slow truck (acquired early) (added)",
+ "description": "A truck at v − Δv: big and tall, the camera acquires it early.",
+ "scope": "in",
+ "duration": "=max(60, (g0-5-2*(v-dv)/3.6)/(dv/3.6) + 45)",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "g0": 250
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "truck",
+   "lane": 0,
+   "x0": "=g0",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "dv": [
+   20,
+   40
+  ]
+ }
+}

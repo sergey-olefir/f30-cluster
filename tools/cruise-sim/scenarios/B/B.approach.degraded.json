@@ -1,0 +1,44 @@
+{
+ "id": "B.approach.degraded",
+ "family": "B",
+ "name": "Approach in low sun and at night (added)",
+ "description": "B.approach with the sensor in its low-sun and night presets.",
+ "scope": "in",
+ "duration": "=max(60, (g0-5-2*(v-dv)/3.6)/(dv/3.6) + 45)",
+ "params": {
+  "v": 120,
+  "dv": 30,
+  "g0": 250
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=g0",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "dv": [
+   30,
+   50
+  ],
+  "cond.sensing": [
+   "lowSun",
+   "night"
+  ]
+ }
+}
