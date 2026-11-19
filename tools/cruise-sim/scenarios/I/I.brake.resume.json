@@ -1,0 +1,58 @@
+{
+ "id": "I.brake.resume",
+ "family": "I",
+ "name": "Brake and resume",
+ "description": "The driver brakes (−2 m/s², 2 s): the cruise suspends; the driver resumes after 5 or 15 s. The loop is silent while suspended and sensible after.",
+ "scope": "in",
+ "duration": 80,
+ "params": {
+  "v": 90,
+  "r": 5
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v"
+  }
+ ],
+ "events": [
+  {
+   "t": 30,
+   "kind": "driverBrake",
+   "level_ms2": 2,
+   "duration_s": 2
+  },
+  {
+   "t": "=32+r",
+   "kind": "driverResume"
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "r": [
+   5,
+   15
+  ]
+ },
+ "decide": [
+  "collision",
+  "cmdWhileInactive",
+  "peakAccel_mps2",
+  "nuisanceWarnings"
+ ]
+}

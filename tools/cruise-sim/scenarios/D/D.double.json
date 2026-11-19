@@ -1,0 +1,68 @@
+{
+ "id": "D.double",
+ "family": "D",
+ "name": "Two brake events in a row",
+ "description": "The lead brakes by 20 km/h, holds 3 or 8 s, and brakes by 20 km/h again.",
+ "scope": "warnOnly",
+ "duration": 80,
+ "params": {
+  "v": 120,
+  "h": 3,
+  "a": -2
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      20,
+      "=v"
+     ],
+     [
+      "=20+20/3.6/abs(a)",
+      "=v-20"
+     ],
+     [
+      "=20+20/3.6/abs(a)+h",
+      "=v-20"
+     ],
+     [
+      "=20+40/3.6/abs(a)+h",
+      "=v-40"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120,
+   150
+  ],
+  "h": [
+   3,
+   8
+  ],
+  "a": [
+   -1.5,
+   -2,
+   -3
+  ]
+ },
+ "where": "=v-40 >= 30"
+}

@@ -1,0 +1,54 @@
+{
+ "id": "E.cutin.duringaccel",
+ "family": "E",
+ "name": "A cut-in while we accelerate back to the maximum",
+ "description": "We are 30 km/h below our maximum and accelerating (the lead just left) when a car at our starting speed cuts in at 15 / 30 m.",
+ "scope": "warnOnly",
+ "duration": 50,
+ "params": {
+  "v": 80,
+  "g": 20,
+  "tc": 4,
+  "dv": 0
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+30",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "cutter",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=g",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v"
+  }
+ ],
+ "events": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90
+  ],
+  "g": [
+   15,
+   30
+  ],
+  "tc": [
+   3,
+   6
+  ]
+ }
+}

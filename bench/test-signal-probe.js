@@ -4,8 +4,9 @@
  *
  *   node bench/test-signal-probe.js            (BENCH_PORT, default 8502)
  *
- *   1. the source: no write of any kind (no setter, no method call, no requestDefaultSymbols, no message injection, no
- *      cluster-render), Node 8 syntax only (the car runs 8.16), no home path.
+ *   1. the source: no write of any kind (no setter, no requestDefaultSymbols, no message injection, no cluster-render), Node 8
+ *      syntax only (the car runs 8.16), no home path; ONE method call, the owner's approved read GuidanceEventList.queryContent,
+ *      and only in shared/carplay_turns.js (packed with the app), never in the app's own files.
  *   2. the declarations: app.json "signals" is exactly what fields.js needs; only r / s flags; every r has a NON-ZERO getter
  *      id and every s a notifier in the car's catalogue (skipped, and said so, without it); tools/signals/check_signals.py
  *      passes; design/car/probe_fields.json is current; the interfaces / instances / items / sets are what the brief says.
@@ -15,7 +16,8 @@
  *   4. every field's line from an injected value, exact (bench/signal-probe-vectors.json: one per field), canaries in every text member.
  *   5. the engine: once per change, gaps and folding, caps, the flood guard, sets switched on / off (lazy subscription, shared
  *      interfaces, nothing logged while off), marks, the stalk's bits and its time after the mark, summaries, the one getter ask,
- *      handlers that throw, hostile values, the volume line.
+ *      handlers that throw, hostile values, the volume line; S16's next-turn poll (car issues CT): only while the phone guides,
+ *      one call in flight, every 2 s, the outcome of the first call, errors and timeouts, a line only when the reply changed.
  *   6. on the bench (the real app built by kit/tools/build.py, run in the stubbed head unit): starts with nothing injected, a set
  *      switched in the centre-screen menu is subscribed, an injected field is logged, the mark row works, the choice survives a
  *      restart, the app never exits.
@@ -34,6 +36,9 @@ const TOOL = path.join(ROOT, 'tools', 'car', 'probe_fields.js');
 const FIELDS = require(path.join(APP_DIR, 'fields.js'));
 const FMT = require(path.join(APP_DIR, 'format.js'));
 const { Probe, VERSION, LOG_FORMAT } = require(path.join(APP_DIR, 'probe.js'));
+const TURNS = require(path.join(ROOT, 'shared', 'carplay_turns.js'));
+const FX = require('./carplay-turns-fixture');
+const NTABLE = 264;               // fields.js entries (S16 next-turn, car issues CT: + 1; cruise RC: + 13 S14 fields)
 const VECTORS = JSON.parse(fs.readFileSync(path.join(__dirname, 'signal-probe-vectors.json'), 'utf8'));
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'signal-probe-'));
 const PORT = Number(process.env.BENCH_PORT) || 8502;
@@ -66,6 +71,13 @@ function fakeSignals(opts) {
             return Promise.resolve(res);
         },
         on: (p, field, fn) => { calls.push({ op: 'on', key: p.key, field }); subs[p.key].extra[field] = fn; return Promise.resolve(); },
+        // car issues CT: the one method; `replies` answers it (a function (params, n) -> a reply / a promise; a throw rejects), else it rejects
+        call: (p, method, params, ms) => {
+            calls.push({ op: 'call', key: p && p.key, method, params, ms });
+            if (typeof o.replies !== 'function') return Promise.reject(new Error('no answer'));
+            return Promise.resolve().then(() => o.replies(params, calls.filter((c) => c.op === 'call').length));
+        },
+        proxy: (iface, inst) => { calls.push({ op: 'proxy', iface, inst }); return o.noProxy ? Promise.reject(new Error('no proxy')) : Promise.resolve({ key: iface + '|' + inst + '|own' }); },
         get: (p, field) => {
             calls.push({ op: 'get', key: p.key, field });
             return sig.answers[field] !== undefined ? Promise.resolve(sig.answers[field]) : Promise.reject(new Error('no answer'));
@@ -110,7 +122,17 @@ async function main() {
         ok(!/\/Users\/|\/home\/|C:\\\\/.test(fs.readFileSync(path.join(APP_DIR, f), 'utf8')), f + ': no home-directory path');
     });
     const app = readJson(path.join(APP_DIR, 'app.json'));
-    ok(!app.shared && !(app.config && app.config.target) && !app.startWidget, 'app.json: no shared engine files, no config.target, no widget: nothing for the cluster');
+    ok(JSON.stringify(app.shared) === '["carplay_turns.js"]' && !(app.config && app.config.target) && !app.startWidget, 'app.json: one shared file (carplay_turns.js, the decoder Twin Dial uses too), no config.target, no widget: nothing for the cluster');
+    {
+        // car issues CT: the one method call lives in shared/carplay_turns.js, and it is queryContent on GuidanceEventList, nothing else
+        const tc = strip(fs.readFileSync(path.join(ROOT, 'shared', 'carplay_turns.js'), 'utf8'));
+        const callSites = tc.match(/\bS\.call\(|\.call\(p,|callMethod|setValue|\.set\(|signals\.set\b/g) || [];
+        ok(callSites.length === 1 && /S\.call\(p, METHOD, request\(\), TIMEOUT_MS\)/.test(tc) && /const METHOD = 'queryContent';/.test(tc) && /const IFACE = 'de\.bmw\.infotainment\.navigation\.guiding\.GuidanceEventList';/.test(tc) &&
+            !/setViewConfig|setViewportConfig|registeredViews|getViewContent|getViewConfig|getViewportConfig/.test(tc),
+            'shared/carplay_turns.js: ONE call site, signals.call(proxy, "queryContent", ...) on GuidanceEventList; no setter, no other method of it');
+        ok(!/\?\.|\?\?|catch\s*\{|\.\.\.\w|\bBigInt\(|\d+n\b|\.flat\(|\.flatMap\(|Object\.fromEntries|Object\.entries|Object\.values|\.padEnd|\.padStart|\bfor await\b/.test(tc), 'shared/carplay_turns.js: only what Node 8.16 has');
+        ok(TURNS.METHOD === 'queryContent' && TURNS.POLL_MS === 2000 && TURNS.TIMEOUT_MS === 3000 && TURNS.FRESH_MS === 6000, 'the poll: every 2 s, a timeout of 3 s; a turn is fresh for 6 s (the owner)');
+    }
     ok(app.id === 'signal_probe' && app.title === 'Signal Probe' && app.loggingId === 'OASP' && /^\d+\.\d+\.\d+$/.test(app.version), 'app.json: id signal_probe, title, own loggingId OASP, version ' + app.version);
     ok(app.version === VERSION, 'app.json version = probe.js VERSION (' + VERSION + ')');
     ok(app.settings.length === 15 && app.settings.every((s) => s.type === 'bool' && s.default === false), 'fifteen settings, one per set (S1..S11, S13..S16), all bool and off by default');
@@ -128,19 +150,23 @@ async function main() {
     Object.keys(sigs).forEach((i) => (sigs[i]._broadcasts || []).forEach((e) => evDecl.push(i + '.' + e)));
     ok(Object.keys(sigs).filter((i) => sigs[i]._broadcasts).every((i) => S13I.indexOf(i) >= 0) && FIELDS.TABLE.filter((f) => f.flags === 'b').every((f) => EVSETS.indexOf(f.set) >= 0),
         'events (_broadcasts) only on the S13 / S14 / S15 / S16 interfaces (the lead\'s decision of 2026-11-18, the owner\'s requests of 2026-11-19) (' + evDecl.length + ' events)');
-    ok(!Object.keys(sigs).some((i) => Object.keys(sigs[i]).some((k) => k === '_methods')), 'no _methods');
-    const tableKeys = FIELDS.TABLE.filter((f) => f.flags !== 'b').map((f) => f.iface + '.' + f.field).filter((k, i, a) => a.indexOf(k) === i).sort(), declKeys = decl.map((d) => d.split(':')[0]).sort();
+    const withMethods = Object.keys(sigs).filter((i) => Object.keys(sigs[i]).some((k) => k === '_methods'));
+    ok(withMethods.length === 1 && withMethods[0] === TURNS.IFACE && JSON.stringify(sigs[TURNS.IFACE]._methods) === '["queryContent"]' && sigs[TURNS.IFACE]._instances === 'Main_Instance',
+        '_methods: only GuidanceEventList (Main_Instance) declares one, queryContent (car issues CT: the owner\'s approved read)');
+    const tableKeys = FIELDS.TABLE.filter((f) => f.flags !== 'b' && f.flags !== 'm').map((f) => f.iface + '.' + f.field).filter((k, i, a) => a.indexOf(k) === i).sort(), declKeys = decl.map((d) => d.split(':')[0]).sort();
     ok(JSON.stringify(tableKeys) === JSON.stringify(declKeys) && JSON.stringify(FIELDS.TABLE.filter((f) => f.flags === 'b').map((f) => f.iface + '.' + f.field).sort()) === JSON.stringify(evDecl.sort()), 'every field and event the table reads is declared, and nothing else is (' + tableKeys.length + ' distinct fields, ' + evDecl.length + ' events, ' + Object.keys(sigs).length + ' interfaces)');
     let r = spawnSync(process.execPath, [TOOL, 'check'], { encoding: 'utf8' });
     ok(r.status === 0, 'tools/car/probe_fields.js check: ' + (r.stdout || r.stderr).trim());
     const tags = FIELDS.TABLE.map((f) => f.tag);
-    ok(tags.length === 250 && new Set(tags).size === tags.length, 'the table: ' + tags.length + ' fields, every tag unique');
+    ok(tags.length === NTABLE && new Set(tags).size === tags.length, 'the table: ' + tags.length + ' fields, every tag unique');
     const keys3 = FIELDS.TABLE.map((f) => f.iface + '.' + f.field + '@' + FIELDS.instOf(f));
     ok(new Set(keys3).size === keys3.length, 'no field is read twice on the same instance');
     ok(FIELDS.TABLE.every((f) => /^S([1-9]|1[013456])$/.test(f.set) && FIELDS.SETS.find((s) => s.id === f.set).items.indexOf(f.p) >= 0), 'every field is on an item (P1..P19) that belongs to its set');
     ok(['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P18', 'P19', 'P22', 'P23', 'P24', 'P25'].every((p) => FIELDS.TABLE.some((f) => f.p === p)), 'every item P1..P19 and P22..P25 has a field');
     ok(FIELDS.SETS.every((s) => FIELDS.TABLE.some((f) => f.set === s.id)) && JSON.stringify(FIELDS.SETS.map((s) => s.id)) === '["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S11","S13","S14","S15","S16"]', 'the fifteen sets S1..S11 and S13..S16, each with fields');
-    ok(FIELDS.TABLE.every((f) => /^(r|rs|s)$/.test(f.flags) || (f.flags === 'b' && EVSETS.indexOf(f.set) >= 0)), 'every field has flags r / rs / s; b (an event) only in S13..S16');
+    ok(FIELDS.TABLE.every((f) => /^(r|rs|s)$/.test(f.flags) || (f.flags === 'b' && EVSETS.indexOf(f.set) >= 0) || (f.flags === 'm' && f.set === 'S16' && f.tag === 'next-turn')), 'every field has flags r / rs / s; b (an event) only in S13..S16; m (a polled method) only S16\'s next-turn');
+    const mt = FIELDS.TABLE.filter((f) => f.flags === 'm');
+    ok(mt.length === 1 && mt[0].iface === TURNS.IFACE && mt[0].field === 'queryContent' && FIELDS.instOf(mt[0]) === 'Main_Instance' && mt[0].fmt === 'turns', 'the one polled method: S16 next-turn = GuidanceEventList.queryContent on Main_Instance');
     ok(FIELDS.TABLE.filter((f) => f.set === 'S6').every((f) => f.mark === true) && FIELDS.TABLE.filter((f) => f.p === 'P13').every((f) => f.gapMs <= 100 && f.cap >= 300),
         'S6: every field carries the time after the mark; the buttons and the stalk are not folded (gap <= 100 ms, cap >= 300)');
     const stalks = FIELDS.TABLE.filter((f) => f.field.indexOf('IndicatorSteeringColumn') === 0);
@@ -158,6 +184,12 @@ async function main() {
         cat = readJson(CATALOGUE);
         const wrong = [];
         FIELDS.TABLE.forEach((f) => {
+            if (f.flags === 'm') {
+                const me = cat.interfaces[f.iface] && (cat.interfaces[f.iface].methods || {})[f.field];
+                if (!me || me.methodId !== 4) wrong.push(f.tag + ': not method 4');
+                if (!(FIELDS.instOf(f) in (cat.instanceIDs[f.iface] || {}))) wrong.push(f.tag + ': instance');
+                return;
+            }
             if (f.flags === 'b') {
                 const ev = cat.interfaces[f.iface] && (cat.interfaces[f.iface].events || {})[f.field];
                 if (!ev || !ev.eventId) wrong.push(f.tag + ': no such event');
@@ -178,7 +210,7 @@ async function main() {
         ok(o.status === 0 && /all declarations pass/.test(out), 'check_signals.py on apps/signal_probe/app.json: ' + out.trim().split('\n').pop());
         const exported = spawnSync(process.execPath, [TOOL, 'export'], { encoding: 'utf8', cwd: ROOT });
         const pf = readJson(path.join(ROOT, 'design', 'car', 'probe_fields.json'));
-        ok(exported.status === 0 && pf.counts.fields === FIELDS.TABLE.length && pf.fields.every((f) => f.getterId !== null || f.notifierId !== null || f.eventId !== null), 'design/car/probe_fields.json is current (' + pf.counts.fields + ' fields, ids from the catalogue)');
+        ok(exported.status === 0 && pf.counts.fields === FIELDS.TABLE.length && pf.fields.every((f) => f.getterId !== null || f.notifierId !== null || f.eventId !== null || f.methodId === 4), 'design/car/probe_fields.json is current (' + pf.counts.fields + ' fields, ids from the catalogue)');
         const git = spawnSync('git', ['status', '--porcelain', 'design/car/probe_fields.json'], { encoding: 'utf8', cwd: ROOT });
         ok(!/^ M/.test(git.stdout || ''), 'design/car/probe_fields.json: re-exporting changed nothing that is committed');
     } else console.log('  skip: ' + path.relative(ROOT, CATALOGUE) + ' is not here (flags, instances, check_signals.py and the export need it)');
@@ -211,6 +243,12 @@ async function main() {
         };
         /** A field's type, or for an event a struct made of its outputs (the binding hands an event over as { output: value }). */
         const refOf = (f) => {
+            if (f.flags === 'm') {
+                // a polled method: its reply, a struct of its outputs (the binding resolves call() with { output: value })
+                const mk = '__method:' + f.iface + '.' + f.field;
+                if (!DT[mk]) DT[mk] = { type: 'struct', members: cat.interfaces[f.iface].methods[f.field].outputs.map((o) => ({ name: o.name, dataRef: o.dataRef, dimension: o.dimension })) };
+                return mk;
+            }
             if (f.flags !== 'b') return cat.interfaces[f.iface].fields[f.field].dataRef;
             const key = '__event:' + f.iface + '.' + f.field;
             if (!DT[key]) DT[key] = { type: 'struct', members: cat.interfaces[f.iface].events[f.field].outputs.map((o) => ({ name: o.name, dataRef: o.dataRef, dimension: o.dimension })) };
@@ -221,6 +259,13 @@ async function main() {
         [{ text: 'Canary text 123', pick: 0 }, { text: 'CANARY_UPPER_TEXT', pick: 1 }, { text: 'Canary text 123', pick: 3 }].forEach((opt) => {
             FIELDS.TABLE.forEach((f) => {
                 const v = synth(refOf(f), opt, 0);
+                if (f.flags === 'm') {
+                    // the error enum's own item is INVALID_VIEW_PARAMS: the events are what is checked; and a union arrives as ONE member
+                    // (synth fills them all), so each event keeps one, a turn kind or another in turn
+                    v.GuidanceEventListError = 'NO_ERROR';
+                    const ks = ['intersection', 'roundabout', 'branch', 'destinationManeuver', 'alongMainRoad', 'laneChange', 'tunnel', 'pointOfInterest'];
+                    v.viewContent.forEach((vc) => { vc.eventsInView = vc.eventsInView.map((e, i) => { const k = ks[(i + opt.pick * 2) % ks.length], o = {}; o[k] = e[k]; return o; }); });
+                }
                 const L = [];
                 const pr = new Probe({ log: { info: (s) => L.push(s), warn: (s) => L.push('WARN ' + s) }, now: () => 1e6, table: [f] });
                 pr.setSets([f.set], true);
@@ -273,7 +318,7 @@ async function main() {
             if (f.bits && walk(rf, [f.bits.path]) !== 'num') bad.push(f.tag + ' bits: ' + walk(rf, [f.bits.path]));
             const wantRoot = { enum: 'enum', bool: 'bool', hex: 'num', activeSource: 'text', sources: 'struct', temps: 'struct', intersection: 'struct', description: 'struct', dart: 'struct',
                 lanes: 'struct', mediaMenu: 'struct', station: 'struct', metadata: 'array', roles: 'array', devices: 'array', calllist: 'array', cbs: 'union',
-                views: 'struct', rendered: 'struct', stream: 'struct' }[f.fmt];
+                views: 'struct', rendered: 'struct', stream: 'struct', turns: 'struct' }[f.fmt];
             if (f.fmt && wantRoot && kindOf(rf) !== wantRoot && !(wantRoot === 'array' && kindOf(rf) === 'array') && !(wantRoot === 'union' && /array|union/.test(kindOf(rf)))) bad.push(f.tag + ' (' + f.fmt + '): the catalogue says ' + kindOf(rf));
         });
         // a whole value (fmt tree) prints every upper-case string as an enum name: its type must have no text member at all
@@ -305,19 +350,19 @@ async function main() {
             ['canary_lower', 'Canary', 'Main', 'Event street', 'Modelstreet', 'Event_'].forEach((k) => { if (re.test(k)) enumBad.push(f.tag + ' lets "' + k + '" through'); });
         });
         ok(named.length === 1 && enumBad.length === 0, 'a tree\'s own enum-name pattern (' + named.map((f) => f.tag).join(', ') + ') matches every enum name of its type in the catalogue and no free text' + (enumBad.length ? ': ' + enumBad.slice(0, 5).join('; ') : ''));
-        ok(trees.length === 43 && texts.length === 0, 'the ' + trees.length + ' whole values (tree) have no text member in the catalogue (a member they skip aside: the fused list\'s frame name), so an upper-case string is an enum name' + (texts.length ? ': ' + texts.join(', ') : ''));
+        ok(trees.length === 45 && texts.length === 0, 'the ' + trees.length + ' whole values (tree) have no text member in the catalogue (a member they skip aside: the fused list\'s frame name), so an upper-case string is an enum name' + (texts.length ? ': ' + texts.join(', ') : ''));     // cruise RC: 13 S14 fields (pedals, brake, wheels, speeds, grade)
         ok(bad.length === 0, 'the table against the catalogue\'s types (' + nCols + ' columns): no text member is read as a number, enum or bool, and every path exists' + (bad.length ? '\n    ' + bad.slice(0, 12).join('\n    ') : ''));
     } else console.log('  skip: the catalogue is not here');
 
     // ---------------------------------------------------------------------------------------------------------------
     console.log('4. every field\'s line from an injected value (fake clock, canary text in every text member)');
-    ok(VECTORS.length === FIELDS.TABLE.length && VECTORS.length === 250 && FIELDS.TABLE.every((f) => VECTORS.some((v) => v.tag === f.tag && v.iface === f.iface && v.field === f.field && v.instance === FIELDS.instOf(f))),
+    ok(VECTORS.length === FIELDS.TABLE.length && VECTORS.length === NTABLE && FIELDS.TABLE.every((f) => VECTORS.some((v) => v.tag === f.tag && v.iface === f.iface && v.field === f.field && v.instance === FIELDS.instOf(f))),
         'a vector for every one of the ' + FIELDS.TABLE.length + ' fields');
     const a = mk({});
     a.pr.setSets(FIELDS.SETS.map((s) => s.id), false);
     await settleOf(a);
-    ok(a.lines.some((l) => /^probe: sets on=S1\+S2\+S3\+S4\+S5\+S6\+S7\+S8\+S9\+S10\+S11\+S13\+S14\+S15\+S16 changed=\+S1,\+S2,\+S3,\+S4,\+S5,\+S6,\+S7,\+S8,\+S9,\+S10,\+S11,\+S13,\+S14,\+S15,\+S16 fields=250 \(first set on\)$/.test(l)), 'all fifteen sets on: the log says so');
-    ok(a.signals.count('watch') === FIELDS.interfaces().reduce((n, e) => n + e.instances.length, 0) && a.signals.count('watch') === 95, 'one proxy per interface instance (' + a.signals.count('watch') + ' watch calls)');
+    ok(a.lines.some((l) => /^probe: sets on=S1\+S2\+S3\+S4\+S5\+S6\+S7\+S8\+S9\+S10\+S11\+S13\+S14\+S15\+S16 changed=\+S1,\+S2,\+S3,\+S4,\+S5,\+S6,\+S7,\+S8,\+S9,\+S10,\+S11,\+S13,\+S14,\+S15,\+S16 fields=264 \(first set on\)$/.test(l)), 'all fifteen sets on: the log says so');
+    ok(a.signals.count('watch') === FIELDS.interfaces().reduce((n, e) => n + e.instances.length, 0) && a.signals.count('watch') === 100, 'one proxy per interface instance (' + a.signals.count('watch') + ' watch calls)');
     let nOk = 0;
     VECTORS.forEach((v) => {
         a.clock.t += 15000;
@@ -334,7 +379,7 @@ async function main() {
     ok(!CANARIES.test(a.lines.join('\n')), 'no text of a message, source, song, call, road, device or service in the log (canary words in every text member)');
     ok(!/12000|STREET|A 9/.test(a.fieldLines().filter((l) => /next-intersection/.test(l)).join('').replace(/raw=12000\.5/, '')), 'the road text and the shield text of P12 are lengths only');
     const st0 = a.pr.stats();
-    ok(st0.length === 250 && st0.every((s) => s.events === 1 && s.lines === 1 && s.active), 'stats(): 250 fields, one event and one line each');
+    ok(st0.length === NTABLE && st0.every((s) => s.events === 1 && s.lines === 1 && s.active), 'stats(): ' + NTABLE + ' fields, one event and one line each');
     ok(a.fieldLines().every((l) => /^probe: P\d+ [A-Za-z0-9-]+ #\d+ (t=\d+(\.\d)?|part \d+\/\d+): /.test(l)), 'every field line has the documented shape "probe: P<n> <tag> #<k> t=<s>: ..." (a whole value\'s later parts: "#<k> part i/N: ...")');
     ok(a.fieldLines().filter((l) => /P(11|13) /.test(l)).every((l) => / tms=\d+ since=-$/.test(l)), 'S6 lines end with tms=<ms> since=- (no mark yet)');
     ok(/heading=set/.test(a.fieldLines().filter((l) => / heading #1/.test(l))[0]) && !/27[0-9]\.25|135/.test(a.fieldLines().filter((l) => / (heading|gps-ext) #1/.test(l)).join('')), 'a bearing is never printed: only heading=set');
@@ -455,7 +500,7 @@ async function main() {
     const S14 = mk({}); S14.pr.setSets(['S14'], true); await settleOf(S14);
     const on14 = S14.pr.fields.filter((st) => st.active).map((st) => st.f.tag);
     ok(['front-vehicle', 'ldm-guidance', 'longitudinal', 'hud-data', 'hud-data2', 'assist-avail', 'foresight', 'keep-dist-1', 'gap-ahead', 'speed', 'accel-long-cog'].every((t) => on14.indexOf(t) >= 0) &&
-        on14.length === FIELDS.TABLE.filter((f) => f.set === 'S14').length + 7, 'S14 alone also reads the seven assistance fields of S8 (front vehicle, ldm guidance, hud, ...): ' + on14.length + ' fields');
+        on14.length === FIELDS.TABLE.filter((f) => f.set === 'S14').length + 8, 'S14 alone also reads the seven assistance fields of S8 (front vehicle, ldm guidance, hud, ...) and the gear of S10: ' + on14.length + ' fields');     // cruise RC: + the gear
     ok(FIELDS.TABLE.filter((f) => f.set === 'S14' || f.set === 'S15').every((f) => f.flags !== 'b' || f.fmt === 'tree' || f.cols), 'every S14 / S15 event is read whole (tree) or by columns');
     const T = FMT.fmtTree;
     const e2e = { length: 40, counter: 7, dataID: 123456, cRC: 98765, timestamp: { nanoseconds: 5, seconds: 1700000000, sync_state: 'SYNC' }, eventDataQualifier: 'EVENT_DATA_AVAILABLE',
@@ -541,6 +586,92 @@ async function main() {
     S16.clock.t += 121000; S16.pr.tick(); await sleep(30);
     ok(S16.lines.some((l) => /ask P25 ric-guidance \(silent at \+120s\): an event \(no getter\)/.test(l)) && S16.lines.some((l) => /ask P25 pm-road \(silent at \+120s\): /.test(l)),
         'at +120 s a silent S16 event is not asked, a silent S16 field is (read-only getter)');
+    ok(S16.lines.some((l) => /ask P25 next-turn \(silent at \+120s\): a polled method \(no getter\): never called \(the phone has not guided\)/.test(l)) && S16.signals.count('call') === 0,
+        '... and the polled method is not asked either: no provider was read, so no call was ever made');
+
+    // car issues CT: S16 next-turn - GuidanceEventList.queryContent, asked only while the phone guides, one call in flight, every 2 s
+    {
+        const GU = 'de.bmw.infotainment.navigation.guiding.Guidance', GI = 'Main_Instance';
+        const rig = (replies, cfg) => { const r = mk({}, Object.assign({ replies }, cfg || {})); r.pr.setSets(['S16'], true); return r; };
+        const callsOf = (r) => r.signals.calls.filter((c) => c.op === 'call');
+        const ntOf = (r) => r.fieldLines().filter((l) => / next-turn #/.test(l));
+        const pollOf = (r) => r.lines.filter((l) => /^probe: poll P25 next-turn: /.test(l));
+        const step = async (r, ms, n) => { for (let i = 0; i < (n || 1); i++) { r.clock.t += ms; r.pr.tick(); await sleep(1); await sleep(1); } };
+        const prov = (r, v) => r.signals.feed(GU, GI, 'guidingProvider', v);
+
+        let k = 0;
+        const R = rig(() => FX.ROUTE[Math.min(k++, FX.ROUTE.length - 1)].reply);
+        await settleOf(R);
+        await step(R, 1000, 5);
+        ok(callsOf(R).length === 0 && pollOf(R).length === 0, 'S16 on, no provider read yet: no call');
+        prov(R, 'NONE'); await step(R, 1000, 5);
+        ok(callsOf(R).length === 0, 'BMW\'s own navigation (provider NONE): no call');
+        prov(R, 'CAR_PLAY'); await step(R, 1000);
+        const c0 = callsOf(R)[0] || {};
+        ok(callsOf(R).length === 1 && c0.method === 'queryContent' && c0.key === TURNS.IFACE + '|' + GI && c0.ms === 3000 && R.signals.count('proxy') === 0,
+            'provider CAR_PLAY: one call at the next tick, queryContent on the watch\'s own GuidanceEventList proxy (no second proxy), the binding\'s timeout 3000 ms');
+        const vp = c0.params && c0.params.viewConfigs && c0.params.viewConfigs[0];
+        ok(vp && c0.params.viewConfigs.length === 1 && JSON.stringify(vp.viewport.startPoint) === '{"anchorPoint":{"standardReferencePoint":"CCP"},"offsets":[]}' && vp.viewport.maxElementCount === 4 &&
+            JSON.stringify(vp.viewport.endPoints) === '[]' && vp.viewport.includedTypes.join() === 'INCLUDE_ACTIVE_MANEUVERS,INCLUDE_DESTINATIONS,INCLUDE_TUNNELS,INCLUDE_ALONG_MAIN_ROAD' &&
+            JSON.stringify(vp.options) === '[]' && vp.minimumUpdateIntervalMs === 0 && vp.segmentItemRasterLength === 0 && Object.keys(c0.params).join() === 'viewConfigs',
+            'the request: one view from CCP, no offsets, 4 events, no end points, active manoeuvres + destinations + tunnels + along the main road; no options, interval 0, raster 0');
+        ok(pollOf(R).some((l) => /: on \(every 2 s, timeout 3 s\)$/.test(l)) && pollOf(R).some((l) => /: first call: answered, 2 events \(calls 1, answered 1, errors 0, timeouts 0\)$/.test(l)),
+            'the log: the poll is on, and the first call\'s outcome (answered, 2 events)');
+        ok(ntOf(R).length === 1 && /^answered events=2 total=2 \[intersection direction=LEFT geometry=UNDEFINED dist=400 unit=METER raw=1 uid=set toDest=2400 step=GS2 desc=1\/14\] \[destinationManeuver position=RIGHT flag=true stopover=0 dist-len=1 unit=NONE raw=500 uid=set toDest=2400 step=GS1 desc=1\/10\] next=0 toFinal=0 toNext=-1$/.test(bodyOf(ntOf(R)[0])),
+            'the reply\'s line: kind, direction, the phone\'s distance and unit, raw, uid, step, the description as counts; next=0: ' + bodyOf(ntOf(R)[0] || ''));
+        await step(R, 1000);
+        ok(callsOf(R).length === 1, '1 s later: no call (every 2 s)');
+        await step(R, 1000);
+        ok(callsOf(R).length === 2, '2 s later: the second call');
+        await step(R, 1000, 16);
+        ok(callsOf(R).length === 10 && ntOf(R).length === 10 && /dist=1\.2 unit=KM/.test(ntOf(R)[3]) && /\[roundabout exit=2 angle=180 side=RIGHT dist=200 unit=METER/.test(ntOf(R)[6]) && /^answered events=0 total=0 next=none toFinal=0 toNext=-1$/.test(bodyOf(ntOf(R)[9])),
+            'the route (three turns and a roundabout, then none): one call every 2 s, each changed reply a line ("1,2" KM prints as 1.2; the roundabout\'s exit; no event: next=none)');
+        await step(R, 1000, 8);
+        ok(callsOf(R).length === 14 && ntOf(R).length === 10, 'the same reply four times more: no line');
+        k = 3; await step(R, 1000, 2);
+        ok(ntOf(R).length === 11 && / \(\+4 unchanged\)$/.test(ntOf(R)[10]), 'the next changed reply\'s line counts the unchanged ones: "(+4 unchanged)"');
+        ok(!/вулиця|проспект|площа|Приклад/.test(R.lines.join('\n')), 'no road name in any line (lengths only)');
+        prov(R, 'NONE'); await step(R, 1000, 4);
+        const nCalls = callsOf(R).length;
+        ok(pollOf(R).some((l) => /: off \(off\) \(calls \d+, answered \d+, errors 0, timeouts 0\)$/.test(l)), 'the provider goes back (NONE): the poll is off, logged with its counts');
+        await step(R, 1000, 6);
+        ok(callsOf(R).length === nCalls, '... and no call is made any more');
+        prov(R, 2); await step(R, 1000, 2);
+        ok(callsOf(R).length === nCalls + 1, 'Android Auto (provider 2, by number): polled too');
+        R.pr.setSets([], true); await step(R, 1000, 6);
+        ok(callsOf(R).length === nCalls + 1 && pollOf(R).filter((l) => /: off /.test(l)).length === 2, 'S16 off: the poll stops');
+
+        // one call in flight: a call that never answers holds the next one back; logged once after 15 s
+        const H1 = rig(() => new Promise(() => {}));
+        await settleOf(H1); prov(H1, 'CAR_PLAY'); await step(H1, 1000, 20);
+        ok(callsOf(H1).length === 1 && pollOf(H1).some((l) => /a call has had no answer for 15 s \(the next waits for it\)/.test(l)), 'a call with no answer: no second call while it is in flight (20 s), one line after 15 s');
+
+        // errors: the car's ACL may refuse; the text is logged (ASCII, cut), the poll goes on, slower after five failures in a row
+        const E1 = rig(() => { throw new Error('Access denied: not allowed for this client é'); });
+        await settleOf(E1); prov(E1, 'CAR_PLAY'); await step(E1, 1000, 10);
+        ok(ntOf(E1).length === 1 && /^error: Access denied: not allowed for this client \?$/.test(bodyOf(ntOf(E1)[0])) && pollOf(E1).some((l) => /: first call: error: Access denied/.test(l)),
+            'a refused call: one line "error: <the binding\'s text>" (once: the same error makes no new line), and the poll\'s first-call line');
+        const at5 = callsOf(E1).length;
+        await step(E1, 1000, 20);
+        ok(at5 === 5 && callsOf(E1).length === 7 && pollOf(E1).some((l) => /every 10 s now/.test(l)), 'five failures in a row: one call every 10 s from then on (never faster than the poll)');
+        const TO = rig(() => { throw new Error('Request timed out'); });
+        await settleOf(TO); prov(TO, 'CAR_PLAY'); await step(TO, 1000, 2);
+        ok(ntOf(TO).length === 1 && bodyOf(ntOf(TO)[0]) === 'timeout: Request timed out' && TO.pr.fields.find((st) => st.f.tag === 'next-turn').poller.stats().timeouts === 1, 'the binding\'s timeout: "timeout: <text>", counted as a timeout');
+        const ER = rig(() => FX.reply([], { error: 'INVALID_VIEW_PARAMS' }));
+        await settleOf(ER); prov(ER, 'CAR_PLAY'); await step(ER, 1000, 2);
+        ok(bodyOf(ntOf(ER)[0] || '') === 'answered error=INVALID_VIEW_PARAMS views=1' && pollOf(ER).some((l) => /first call: answered \(INVALID_VIEW_PARAMS\)/.test(l)), 'an error reply: its enum name, and the views count');
+        // the bench's case: the watch gives no proxy - one of its own, once
+        const NP = mk({}, { replies: () => FX.ROUTE[0].reply }); NP.pr.setSets(['S16'], true); await settleOf(NP);
+        Object.keys(NP.signals.subs).forEach((key) => { if (/GuidanceEventList/.test(key)) NP.signals.subs[key].res.proxy = null; });
+        prov(NP, 'CAR_PLAY'); await step(NP, 1000, 6);
+        ok(NP.signals.count('proxy') === 1 && callsOf(NP).length === 3 && /\|own$/.test(callsOf(NP)[0].key), 'a watch with no proxy (the bench): one proxy of its own (signals.proxy), once; the first call at the next tick, then every 2 s (' + callsOf(NP).length + ' calls in 6 s)');
+        // the real guard: a call the binding never times out is noted as a timeout after 3.5 s (wall clock), and still holds the next one
+        const G1 = rig(() => new Promise(() => {}));
+        await settleOf(G1); prov(G1, 'CAR_PLAY'); await step(G1, 1000);
+        await sleep(TURNS.TIMEOUT_MS + TURNS.GUARD_MS + 200);
+        await step(G1, 1000, 3);
+        ok(bodyOf(ntOf(G1)[0] || '') === 'timeout' && callsOf(G1).length === 1, 'no answer and no timeout from the binding: our guard says "timeout" after ' + (TURNS.TIMEOUT_MS + TURNS.GUARD_MS) + ' ms; still one call in flight');
+    }
     // a provider that does not come up
     const BADW = mk({}, { failWatch: ['Light'] });
     BADW.pr.setSets(['S6'], true); await settleOf(BADW);
@@ -549,7 +680,7 @@ async function main() {
     ok(BADW.lines.some((l) => /summary S6 \+30s: providers: up=7 down=1 error=1 down-list: Light\[1\]/.test(l)), 'the summary names the provider that is down');
     // the start line and the sets line
     const ST = mk({}); ST.pr.setSets(['S4', 'S6'], true); ST.pr.startLine();
-    ok(ST.lines.some((l) => /^probe: start signal_probe v=0\.3\.0 fmt=1 sets=S4\+S6 fields=37 of 250$/.test(l)) && !ST.lines.some((l) => /^probe: sets /.test(l)), 'the start line: version, log format and the sets on (quiet start: no "sets" line)');
+    ok(ST.lines.some((l) => /^probe: start signal_probe v=0\.4\.0 fmt=1 sets=S4\+S6 fields=37 of 264$/.test(l)) && !ST.lines.some((l) => /^probe: sets /.test(l)), 'the start line: version, log format and the sets on (quiet start: no "sets" line)');
     ok(LOG_FORMAT === 1 && VERSION === app.version, 'log format 1');
     ST.pr.setSets(['S4', 'S6', 'S7'], false);
     ok(ST.lines.some((l) => /^probe: sets on=S4\+S6\+S7 changed=\+S7 fields=52$/.test(l)), 'the sets line at a change: ' + ST.lines[ST.lines.length - 1]);
@@ -669,7 +800,7 @@ async function main() {
     try {
         startServer();
         ok(await until(() => /build: signal_probe/.test(out) && probeLines().some((l) => /^probe: start /.test(l)), 60000), 'the app builds with the kit and starts');
-        ok(probeLines().some((l) => /^probe: start signal_probe v=0\.3\.0 fmt=1 sets=none fields=0 of 250$/.test(l)), 'the start line: all sets off at the first start: ' + (probeLines()[0] || ''));
+        ok(probeLines().some((l) => /^probe: start signal_probe v=0\.4\.0 fmt=1 sets=none fields=0 of 264$/.test(l)), 'the start line: all sets off at the first start: ' + (probeLines()[0] || ''));
         ok(!/Error|uncaught/i.test(out.split('\n').filter((l) => /\[signal_probe\]/.test(l)).join('\n')), 'nothing in the app\'s log says Error or uncaught');
         let p = await probeNative();
         ok(p && JSON.stringify(p.stack) === '["MAIN"]', 'the entry screen is the native menu MAIN');
@@ -699,16 +830,24 @@ async function main() {
         // restart: the sets come back
         const before = probeLines().length;
         await req('POST', '/restart');
-        ok(await until(() => probeLines().slice(before).some((l) => /^probe: start signal_probe v=0\.3\.0 fmt=1 sets=S6 fields=24 of 250$/.test(l)), 15000), 'after a restart the start line says sets=S6 (the owner\'s choice is kept)');
+        ok(await until(() => probeLines().slice(before).some((l) => /^probe: start signal_probe v=0\.4\.0 fmt=1 sets=S6 fields=24 of 264$/.test(l)), 15000), 'after a restart the start line says sets=S6 (the owner\'s choice is kept)');
         ok(await until(() => probeLines().slice(before).filter((l) => /^probe: watch /.test(l)).length === 8, 10000), '... and S6\'s interfaces are subscribed again');
         await req('POST', '/click', { id: 'SET_SET6' });
         ok(await until(() => probeLines().some((l) => /^probe: sets on=none changed=-S6 /.test(l))), 'S6 off again: logged');
         // S16 (car issues NV): its checkbox in the real build, its proxies, an injected CarPlay stream status
         const w0 = probeLines().filter((l) => /^probe: watch /.test(l)).length;
         await req('POST', '/click', { id: 'SET_SET16' });
-        ok(await until(() => probeLines().some((l) => /^probe: sets on=S16 changed=\+S16 fields=39( \(first set on\))?$/.test(l))), 'a press on the S16 checkbox ("Наступний поворот"): the log says S16 is on (39 fields)');
+        ok(await until(() => probeLines().some((l) => /^probe: sets on=S16 changed=\+S16 fields=40( \(first set on\))?$/.test(l))), 'a press on the S16 checkbox ("Наступний поворот"): the log says S16 is on (40 fields)');
         ok(await until(() => probeLines().filter((l) => /^probe: watch /.test(l)).length - w0 >= 12, 15000), 'its new interfaces are subscribed (the six it shares with S6 were kept): ' +
             probeLines().filter((l) => /^probe: watch /.test(l)).slice(w0).map((l) => l.replace(/^probe: watch /, '').replace(/ set=.*$/, '')).join(', '));
+        // car issues CT: the phone guides -> the real build's next-turn entry calls queryContent through the kit (hu-stub's signals.call)
+        await req('POST', '/fake', { feed: { iface: 'de.bmw.infotainment.navigation.guiding.Guidance', field: 'guidingProvider', value: 'CAR_PLAY' } });
+        ok(await until(() => probeLines().some((l) => /^probe: P25 next-turn #1 t=[0-9.]+: answered events=2 total=2 \[intersection direction=LEFT /.test(l)), 15000),
+            'provider CAR_PLAY: the built app asks queryContent (shared/carplay_turns.js packed beside it) and logs the reply: ' + (probeLines().filter((l) => /next-turn #1/.test(l))[0] || ''));
+        p = await probeNative();
+        ok(p && p.carplayTurns && p.carplayTurns.calls >= 1 && JSON.stringify(p.carplayTurns.methods) === '["queryContent"]', 'the stand-in saw only queryContent (' + JSON.stringify(p && p.carplayTurns) + ')');
+        await req('POST', '/fake', { feed: { iface: 'de.bmw.infotainment.navigation.guiding.Guidance', field: 'guidingProvider', value: 'NONE' } });
+        ok(await until(() => probeLines().some((l) => /^probe: poll P25 next-turn: off /.test(l)), 8000), 'provider NONE: the poll is off');
         await req('POST', '/click', { id: 'SET_SET16' });
         ok(await until(() => probeLines().some((l) => /^probe: sets on=none changed=-S16 /.test(l))), 'S16 off again: logged');
         ok(!exited, 'the app never exited');

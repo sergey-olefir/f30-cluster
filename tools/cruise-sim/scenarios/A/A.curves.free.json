@@ -1,0 +1,82 @@
+{
+ "id": "A.curves.free",
+ "family": "A",
+ "name": "Winding road, no target (added)",
+ "description": "Alternating curves of radius R with no vehicle. No warning, no command; checks that curve logic does not slow us on its own.",
+ "scope": "in",
+ "duration": 90,
+ "params": {
+  "v": 80,
+  "R": 250
+ },
+ "road": {
+  "curvature": [
+   [
+    0,
+    0
+   ],
+   [
+    300,
+    0
+   ],
+   [
+    301,
+    "=1/R"
+   ],
+   [
+    600,
+    "=1/R"
+   ],
+   [
+    601,
+    "=-1/R"
+   ],
+   [
+    900,
+    "=-1/R"
+   ],
+   [
+    901,
+    0
+   ],
+   [
+    1200,
+    0
+   ],
+   [
+    1201,
+    "=1/R"
+   ],
+   [
+    1500,
+    "=1/R"
+   ],
+   [
+    1501,
+    0
+   ]
+  ]
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [],
+ "sweep": {
+  "v": [
+   60,
+   90
+  ],
+  "R": [
+   150,
+   250,
+   500
+  ]
+ },
+ "decide": [
+  "warnCount",
+  "setpointChangesPerMin",
+  "overspeed_kmh"
+ ]
+}

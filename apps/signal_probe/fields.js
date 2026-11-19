@@ -6,14 +6,17 @@
  *
  * Unified from the five round-3 branches (twin-r3/sm, sp, sn, sv, sb) on top of main's shared/twin_probe.js and renumbered to
  * the car-signals brief's P1..P17 / sets S1..S9 (docs/car/CP-REPORT.md section 3). READ ONLY: flags r (a NON-ZERO getter id) and
- * s (a notifier) - never w, never a method, never a broadcast; no KombiIF standardCCMessage / extendedCCMessage / newCCMessage,
- * no A19B, no requestDefaultSymbols, no setter of any kind.
+ * s (a notifier) - never w; events only in S13..S16; ONE method, a read the owner approved (2026-11-19, car issues CT):
+ * GuidanceEventList.queryContent, polled by shared/carplay_turns.js (flags "m"); no KombiIF standardCCMessage / extendedCCMessage /
+ * newCCMessage, no A19B, no requestDefaultSymbols, no setter of any kind.
  *
  * An entry:
  *   set, p, tag      the set (S1..S9), the item (P1..P17), the field's tag in the log line ("probe: P3 range-tank #2 ...")
  *   also             [set ids]: the field is also read while one of these sets is on (S10 needs eight fields of S6 / S7)
  *   iface, field     the interface and the field; flags "r" / "s" / "rs" as the catalogue allows (checked by the test), or "b": an EVENT,
- *                    declared under "_broadcasts" (S13..S16: the lead's decision of 2026-11-18, the owner's requests of 2026-11-19)
+ *                    declared under "_broadcasts" (S13..S16: the lead's decision of 2026-11-18, the owner's requests of 2026-11-19), or
+ *                    "m": a METHOD polled for its reply (declared under "_methods"; only S16's queryContent, car issues CT: the owner's
+ *                    approval of 2026-11-19; shared/carplay_turns.js makes the call, only while the phone guides)
  *   one              [member, kind]: an event with one output, handed over as { member: v } or as v itself
  *   instance         the instance it is read on (default "1"); an interface with several instances is declared "*" in the manifest
  *   gapMs, cap       minimum ms between two lines of this field (the last value wins, "+k folded") and the most lines; per-set defaults below
@@ -24,7 +27,7 @@
  *   list / union     { member, cols }: an array of entries (member = the union member holding each) / a single-member union
  *   bits             { path, label }: a raw byte with its previous value and the bits that went up / down
  *   fmt              a named formatter of format.js (enum bool hex temps intersection dart lanes description mediaMenu station metadata
- *                    roles devices calllist cbs activeSource sources tree; S16: views rendered stream)
+ *                    roles devices calllist cbs activeSource sources tree; S16: views rendered stream turns)
  */
 const I = {
     KombiIF: 'de.bmw.infotainment.KombiIF',
@@ -114,6 +117,12 @@ const I = {
     FusedSensorDetection: 'de.bmw.environmentalmodel.FusedSensorDetectionData',
     DAADataServer: 'de.bmw.environmentalmodel.DAADataServer',
     ObjectListSuAAR: 'de.bmw.dass.pad.communication.ObjectListSuAAR',
+    // cruise RC: the pedals, the brake, the wheel speeds, more ego-speed and grade sources for the cruise brief (S14)
+    AcceleratorPedal: 'de.bmw.powertrain.AcceleratorPedal',
+    VehicleStabilization: 'de.bmw.chassis.VehicleStabilizationManagement',
+    VelocityProvision: 'de.bmw.powertrain.vehicledynamics.VelocityAndVehicleConditionProvision',
+    XView: 'de.bmw.infotainment.drivingexcitement.XView',
+    VehicleModel: 'de.bmw.chassis.VehicleModel',
     // S16 (car issues NV, 2026-11-19: the owner saw the next turns on the cluster in the place of the map while CarPlay guided)
     ProjectedModeGuiding: 'de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding',
     GuidanceEventList: 'de.bmw.infotainment.navigation.guiding.GuidanceEventList',
@@ -295,7 +304,8 @@ const TABLE = [
     { set: 'S10', p: 'P18', tag: 'welcome-animation', iface: I.KombiIF, field: 'statusWelcomeAnimation', flags: 'rs', cols: [['staging', 'statusStagingMaster', 'e'], ['trigger', 'triggerStagingHeadUnit', 'e']] },
     { set: 'S10', p: 'P18', tag: 'gearbox-secure', iface: I.Powertrain, field: 'dataDisplayGearboxSecure', flags: 's', cols: [['d1', 'dummy1', 'e'], ['d2', 'dummy2', 'e'], ['d3', 'dummy3', 'e'], ['d4', 'dummy4', 'e'], ['d5', 'dummy5', 'e'], ['d6', 'dummy6', 'e'], ['d7', 'dummy7', 'e'], ['d8', 'dummy8', 'e'], ['intervention', 'statusAvailabilityInterventionPowertrainGearbox', 'e']] },
     { set: 'S10', p: 'P18', tag: 'dialog-state', iface: I.Dialog, field: 'dialogState', flags: 'rs', instance: 'HMISpeechHU', fmt: 'enum' },
-    { set: 'S10', p: 'P18', tag: 'gearbox-status', iface: I.VehicleInformation, field: 'statusGearboxDrive', flags: 's', cols: [['stage', 'statusActualStageDrive', 'e'], ['gear', 'statusActualGearDrive', 'e'], ['target', 'statusTargetStageDrive', 'e'], ['qualifier', 'qualifierStatusActualStageDrive', 'n']] },
+    // cruise RC: the gear is also read with S14 (downshifts while the cruise slows the car)
+    { set: 'S10', p: 'P18', tag: 'gearbox-status', also: ['S14'], iface: I.VehicleInformation, field: 'statusGearboxDrive', flags: 's', cols: [['stage', 'statusActualStageDrive', 'e'], ['gear', 'statusActualGearDrive', 'e'], ['target', 'statusTargetStageDrive', 'e'], ['qualifier', 'qualifierStatusActualStageDrive', 'n']] },
     { set: 'S10', p: 'P18', tag: 'gearbox-display', iface: I.MDrive, field: 'dataDisplayGearbox', flags: 's', cols: [['program', 'displayProgramGearbox', 'e'], ['logic', 'displayDriveLogicGearbox', 'e']] },
     { set: 'S10', p: 'P18', tag: 'fes-switch', iface: I.FES, field: 'statusFESVehicleDynamicSwitchHMI', flags: 'rs', cols: [['mode', 'actualValueModeDrivingExperience', 'e'], ['mmi', 'requestSwitchDrivingExperienceMMIDisplay', 'e'], ['kombiList', 'requestSwitchDrivingExperienceInstrumentPackDisplay', 'e'], ['startup', 'statusSetupStartUpModusDrivingExperience', 'e'], ['availability', 'displayAvailibilityModeDrivingExperience', 'e'], ['display', 'displayModeDrivingExperience', 'e'], ['display2', 'displayModeDrivingExperience2', 'e']] },
     // ---- S11 P19: f30's unwired signals: indicators, belts, seats, lights, dimmer, the consumption lines, the Eco Pro range and bars ----
@@ -363,6 +373,23 @@ const TABLE = [
     { set: 'S14', p: 'P23', tag: 'roll-rate', iface: I.RollPitchRate, field: 'rollRateCog', flags: 'b', fmt: 'tree' },
     { set: 'S14', p: 'P23', tag: 'cds-accel-long', iface: I.CDS2, field: 'statusLongitudinalAccelerationMassCenter', flags: 'rs', gapMs: 500, cols: [['accel', 'longitudinalAccelerationCentreOfGravity', 'n']] },
     { set: 'S14', p: 'P23', tag: 'cds-accel-lat', iface: I.CDS2, field: 'statusLateralAccelerationMassCenter', flags: 'rs', gapMs: 500, cols: [['accel', 'lateralAccelerationCentreOfGravity', 'n']] },
+    // cruise RC: (docs/cruise-set-speed-brief.md, Phase 1 "the signal map"): the driver's pedals (to cut the overrides out of the plant
+    //      identification), the brake, the four wheel speeds, the infotainment speed the cluster apps already read on the car, two more
+    //      ego-speed events and two more grade sources, the engine speed and (also: S14 on S10's line) the gear. Read only: s, rs, b.
+    //      The cruise BUTTONS are not in the catalogue: they go from the wheel to the DSC, the head unit only sees the set speed change.
+    { set: 'S14', p: 'P23', tag: 'accel-pedal', iface: I.AcceleratorPedal, field: 'AngleAcceleratorPedal', flags: 's', gapMs: 500, cols: [['angle', 'actualValueAngleAcceleratorPedal', 'n'], ['virtual', 'actualValueAngleAcceleratorPedalVirtual', 'n'], ['gradient', 'gradientActualValueAngleAcceleratorPedal', 'n'], ['qualifier', 'qualifierActualValueAngleAcceleratorPedal', 'e'], ['vsAssist', 'dummy2', 'e'], ['eco', 'dummy3', 'e']] },
+    { set: 'S14', p: 'P23', tag: 'brake-driver', iface: I.VehicleStabilization, field: 'StabilizationManagement', flags: 's', gapMs: 500, cols: [['braking', 'statusBrakingDriver', 'n'], ['brakingMSA', 'statusBrakingMSA', 'n'], ['fdr', 'qualifierFunctionFDR', 'n'], ['abs', 'qualifierFunctionABS', 'n'], ['asc', 'qualifierFunctionASC', 'n'], ['dscUnit', 'statusUnitRunDSC', 'e']] },
+    { set: 'S14', p: 'P23', tag: 'brake-driver-hu', iface: I.A4A, field: 'statusA4AFDRControl', flags: 'rs', gapMs: 500, cols: [['braking', 'statusBrakingDriver', 'n'], ['fdr', 'qualifierFunctionFDR', 'n']] },
+    { set: 'S14', p: 'P23', tag: 'brake-switch', iface: I.Powertrain, field: 'InformationVehicleDrive', flags: 's', cols: [['bls', 'dummy2', 'e'], ['clutch', 'dummy3', 'e'], ['msaButton', 'dummy4', 'e']] },
+    { set: 'S14', p: 'P23', tag: 'brake-light', iface: I.Light, field: 'LampExterior', flags: 's', cols: [['brakeLight', 'controlFunctionBrakeLight', 'e'], ['brakeForce', 'controlFunctionBrakeForceDisplay', 'e']] },
+    { set: 'S14', p: 'P23', tag: 'drive-torque', iface: I.Powertrain, field: 'WheelMomentDrive4', flags: 's', gapMs: 500, cols: [['vsAssist', 'statusInterfaceDriverAssistenceSystemTargetLimit', 'e'], ['direction', 'statusDrivingDirectionDriversChoice', 'e'], ['engaged', 'statusPositiveEngagementPowerTrain', 'e'], ['rearAxleRpm', 'actualValueRPMBackAxleRedundant', 'n'], ['rearAxleQ', 'qualifierActualValueRPMBackAxleRedundant', 'e']] },
+    { set: 'S14', p: 'P23', tag: 'wheel-rpm', iface: I.Powertrain, field: 'ActualValueRPMWheel', flags: 's', gapMs: 500, cols: [['fl', 'actualValueRPMWheelFLH', 'n'], ['fr', 'actualValueRPMwheelFRH', 'n'], ['rl', 'actualValueRPMWheelRLH', 'n'], ['rr', 'actualValueRPMWheelRRH', 'n'], ['qFL', 'qualifierActualValueRPMWheelFLH', 'e'], ['qRL', 'qualifierActualValueRPMWheelRLH', 'e'], ['source', 'dummy', 'e']] },
+    { set: 'S14', p: 'P23', tag: 'velocity', iface: I.VelocityProvision, field: 'velocityVehicle', flags: 'b', fmt: 'tree', gapMs: 500 },
+    { set: 'S14', p: 'P23', tag: 'velocity-long', iface: I.VelocityProvision, field: 'velocityVehicleLongitudinal', flags: 'b', fmt: 'tree', gapMs: 500 },
+    { set: 'S14', p: 'P23', tag: 'car-speed2', iface: I.Vehicle2, field: 'statusCarSpeed2', flags: 'rs', gapMs: 500, cols: [['speed', 'speedVehicleCentreOfGravity', 'n']] },
+    { set: 'S14', p: 'P23', tag: 'engine-rpm', iface: I.CDS, field: 'statusEngineSpeed2', flags: 'rs', gapMs: 500, cols: [['rpm', 'actualValueRPMEngineCrankshaft', 'n']] },
+    { set: 'S14', p: 'P23', tag: 'grade-xview', iface: I.XView, field: 'statusGradientRoadway', flags: 'rs', cols: [['grade', 'actualValueLongitudinalGradientRoadway', 'n'], ['qualifier', 'qualifierActualValueLongitudinalGradientRoadway', 'e']] },
+    { set: 'S14', p: 'P23', tag: 'lane-slope', iface: I.VehicleModel, field: 'LaneSlope', flags: 's', cols: [['grade', 'actualValueLongitudinalGradientRoadway', 'n'], ['gradeFast', 'actualValueLongitudinalGradientRoadwayFast', 'n'], ['qualifier', 'qualifierActualValueLongitudinalGradientRoadway', 'e'], ['transverse', 'actualValueTransverseGradientRoadway', 'n'], ['transverseQ', 'qualifierActualValueTransverseGradientRoadway', 'e']] },
     // ---- S15 P24 "Об'єкти камери": the camera's and the fused object lists and the car's own motion as the camera sees it. Heavy
     //      events: a line at most every 2 s per event, 300 lines each. Positions are RELATIVE to the car (metres ahead / aside);
     //      the car's own dead-reckoned position and heading are left out (skip), like every time stamp.
@@ -415,6 +442,10 @@ const TABLE = [
     { set: 'S16', p: 'P25', tag: 'display-sink', iface: I.DisplaySink, field: 'requestSinkSwitch', flags: 'b', gapMs: 250, cap: 100, fmt: 'tree' },
     { set: 'S16', p: 'P25', tag: 'nav-can', iface: I.NavigationCAN, field: 'calculationDataNavigation', flags: 'rs', gapMs: 10000, cols: [['dist','statusDistanceDestinationNavigation','n'],['unit','statusDistanceDestinationNavigationUnitOfMeasurement','e'],['etaH','statusArrivalTimeHour','n'],['etaM','statusArrivalTimeMinute','n'],['ampm','statusTimeAMPM','e'],['day','statusDayFlag','e']] },
     { set: 'S16', p: 'P25', tag: 'lane-feedback', iface: I.FeedbackLaneGuiding, field: 'correctionDataLaneGuiding', flags: 'b', gapMs: 5000, fmt: 'tree' },
+    // car issues CT (the owner, 2026-11-19: queryContent approved, a read): CarPlay's next turns AS DATA, asked every 2 s while the phone
+    // guides (Guidance.guidingProvider CAR_PLAY / ANDROID_AUTO, read here through S7's guiding-provider); a line only when the reply changed,
+    // with the count of unchanged ones; texts as lengths, no road link, no source id
+    { set: 'S16', p: 'P25', tag: 'next-turn', iface: I.GuidanceEventList, field: 'queryContent', flags: 'm', instance: 'Main_Instance', gapMs: 2000, fmt: 'turns' },
 ];
 
 // ---- the sets: each one switchable on its own in the app's centre-screen menu (settings key set1..set9), default all off ----
@@ -447,9 +478,9 @@ const instOf = (f) => f.instance || '1';
 function interfaces() {
     const m = {};
     TABLE.forEach((f) => {
-        const e = m[f.iface] = m[f.iface] || { iface: f.iface, instances: [], fields: {}, events: [] };
+        const e = m[f.iface] = m[f.iface] || { iface: f.iface, instances: [], fields: {}, events: [], methods: [] };
         if (e.instances.indexOf(instOf(f)) < 0) e.instances.push(instOf(f));
-        if (f.flags === 'b') { if (e.events.indexOf(f.field) < 0) e.events.push(f.field); } else e.fields[f.field] = f.flags;
+        if (f.flags === 'b') { if (e.events.indexOf(f.field) < 0) e.events.push(f.field); } else if (f.flags === 'm') { if (e.methods.indexOf(f.field) < 0) e.methods.push(f.field); } else e.fields[f.field] = f.flags;
     });
     return Object.keys(m).map((k) => m[k]);
 }
@@ -461,6 +492,7 @@ function manifestSignals() {
         o._instances = e.instances.length > 1 ? '*' : e.instances[0];
         Object.keys(e.fields).sort().forEach((k) => { o[k] = e.fields[k]; });
         if (e.events.length) o._broadcasts = e.events.slice().sort();
+        if (e.methods.length) o._methods = e.methods.slice().sort();
         out[e.iface] = o;
     });
     return out;

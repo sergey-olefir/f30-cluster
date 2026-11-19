@@ -1,0 +1,43 @@
+{
+ "id": "B.queue",
+ "family": "B",
+ "name": "A standing obstacle / the tail of a motorway queue",
+ "description": "A standing vehicle 300 m ahead at 90 / 120 / 150 km/h. Out of the concept's reach (no cruise brakes that hard): scored on the warning only.",
+ "scope": "warnOnly",
+ "duration": "=g0/(v/3.6) + 20",
+ "params": {
+  "v": 120,
+  "g0": 300
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "static",
+   "lane": 0,
+   "x0": "=g0",
+   "v0_kmh": 0,
+   "profile": {
+    "type": "const"
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120,
+   150
+  ],
+  "cond.sensing": [
+   "clear",
+   "rain"
+  ]
+ },
+ "tags": [
+  "core"
+ ]
+}

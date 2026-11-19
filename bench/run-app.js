@@ -82,6 +82,22 @@ try {
     }
 } catch (e) { log.warn('bench: fake persod not installed: ' + e.message); }
 
+// car issues CT: an app that declares GuidanceEventList's queryContent (signal_probe's S16 next-turn, twin_dial's "Повороти CarPlay
+// (тест)") gets a stand-in provider: each call answers the next reply of a short CarPlay route (bench/carplay-turns-fixture.js: three
+// turns and a roundabout, neutral road names), then the last one again. It answers only queryContent; GET /probe reports the calls.
+let fakeTurns = null;
+try {
+    const FX = require('./carplay-turns-fixture');
+    const manifest = JSON.parse(fs.readFileSync(path.join(stage, 'source', 'manifest.json'), 'utf8'));
+    const decl = (manifest.proxies || {})[FX.IFACE];
+    if (decl && (decl.methods || []).indexOf('queryContent') >= 0) {
+        fakeTurns = FX.fakeProvider((params, n) => FX.ROUTE[Math.min(n - 1, FX.ROUTE.length - 1)].reply);
+        hu.fakes = hu.fakes || {};
+        hu.fakes[FX.IFACE] = fakeTurns;
+        log.info('bench: GuidanceEventList stand-in (queryContent: a CarPlay route of ' + FX.ROUTE.length + ' replies)');
+    }
+} catch (e) { log.warn('bench: GuidanceEventList stand-in not installed: ' + e.message); }
+
 // the app's HudApp instance, for the values the page shows (hud.js is loaded by the app's main.js)
 let hud = null;
 const realLoad = Module._load;
@@ -422,6 +438,7 @@ process.on('message', (m) => {
         else if (v.scene || v.sign || v.tsr || v.cc || v.ccList || v.ccActive || v.ccFrame || v.sla || v.road || v.nav || v.clock || v.clockLocal) fakeSigns.control(v);     // car-fix CF2: + tsr (the TrafficSignRecognition event)
         else if (v.ccRisk || v.ccBasic || v.symbols) fakeSigns.control(v);     // probes (0.7.18): bench/test-probes.js
         else if (v.dayNight !== undefined) fakeSigns.control(v);    // fix/colour-daynight: bench/test-daynight.js
+        else if (v.front) fakeSigns.control(v);     // front-vehicle FV: DataFrontVehicle (bench/test-front-vehicle.js)
         else if (fakePerso) fakePerso.control(v);
     }
     else if (m.t === 'probe') {
@@ -432,7 +449,12 @@ process.on('message', (m) => {
             activeName: hud ? hud.activeName : null, layoutName, yielded, driveMode: hud ? hud.driveMode : null,
             ready: !!(hud && hud.client && hud.client.ready),
             perso: fakePerso ? fakePerso.state() : null,
+            // car issues CT: the calls the GuidanceEventList stand-in answered (method names only)
+            carplayTurns: fakeTurns ? { calls: fakeTurns.calls.length, methods: fakeTurns.calls.map((c) => c.method).filter((x, i, a) => a.indexOf(x) === i) } : null,
             twin: twinSim ? twinSim.state(hud) : null,      // twin_dial: ledger, coverage, the engine's message state
+            // front-vehicle FV: the test mode's state (numbers and our own words only)
+            fv: (() => { try { return hud && hud.fv && hud.fv.tracker ? { on: !!(hud.config.frontVehicle && hud.config.frontVehicle.on), subscribed: hud.fv.subscribed,
+                view: hud.fv.view, tracker: hud.fv.tracker.state(), page: hud.tdp ? hud.tdp.page : null, icon: hud.widgets.has('fv_icon') } : null; } catch (e) { return { error: String(e && e.message || e) }; } })(),
             // fix/colour-daynight: the car's day/night as the engine took it, the source in use, night now, and what
             // the sun alone would say (bench/test-daynight.js)
             dayNight: hud ? dayNightProbe() : null,

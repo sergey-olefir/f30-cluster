@@ -1,0 +1,41 @@
+{
+ "id": "B.approach.belowmin",
+ "family": "B",
+ "name": "A lead slower than the cruise minimum (tractor, bicycle)",
+ "description": "The lead drives at 10 or 20 km/h: the cruise cannot go that slow. The system must say it leaves its envelope, early.",
+ "scope": "outOfEnvelope",
+ "duration": "=max(60, (g0-30)/((v-vl)/3.6) + 30)",
+ "params": {
+  "v": 90,
+  "vl": 20,
+  "g0": 250
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=g0",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=vl"
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "vl": [
+   10,
+   20
+  ]
+ }
+}

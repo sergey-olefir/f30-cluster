@@ -11,8 +11,8 @@
  *   tab 2  the messages: only the title here (the card, the rows, the pointer page are shared/twin_cc.js's sheet)
  *   tab 3  media: "media" (the certain-only page) | "radio" | "track"            (the last two: config.pages.media)
  *   tab 4  phone: "phone" (idle) | "call"                                         (the call card: config.pages.phone)
- *   tab 5  navigation: "map" (the map window, config.mapWindow) | "guide" (config.pages.guidance, dark) | "route" (config.pages.route)
- *          | "calc" | "road" | "none"
+ *   tab 5  navigation: "map" (the map window, config.mapWindow) | "guide" (config.pages.guidance, dark; or CarPlay's next turn, the
+ *          test mode config.carplayTurns) | "route" (config.pages.route) | "calc" | "road" | "none"
  *
  * Built dark = the drawing and its model exist and are tested; a config key switches them on once the car has shown the
  * signal (docs/AGENT-BRIEF-car-signals.md). Every page has an empty state (a dash, "Немає даних", the certain page).
@@ -32,12 +32,28 @@
  *   settings handler       changed(hud): a page setting changed, decided again at once (no rebuild)
  *   wire                   wire(hud, extra): the fields only the pages read (read only; never a setter or a method)
  *
+ * car issues CT (the owner, 2026-11-19): with the Діагностика test mode "Повороти CarPlay (тест)" (diagCarplayTurns ->
+ * config.carplayTurns, off by default) and the phone guiding (guidingProvider CAR_PLAY / ANDROID_AUTO), the arrow page ("guide") is
+ * fed from GuidanceEventList.queryContent - the one method call, a read, made by shared/carplay_turns.js every 2 s (cpSync) - instead
+ * of conclusiveDart: the arrow for the event's kind and direction, the phone's own distance (formattedDistance's text and unit), the
+ * road name the event carries. The CarPlay route page stays the fallback whenever the call fails, finds no turn, or its turn is older
+ * than 6 s. Off: no poll, no call, nothing changes.
+ *
  * Privacy: titles, artists, station names, a caller's name and road names are DRAWN, never logged (lengths, enum numbers,
  * counts only), and a caller's name is kept only while the call lasts and only while the setting is on.
  * Plain Node 8 (the car's 8.16.2): no ?. / ?? / object spread / Object.fromEntries / flat. Nothing here throws into the engine.
  */
 const textRaster = require('./hud_text');
 const iconsMod = require('./icons');
+/** car issues CT: shared/carplay_turns.js (Twin Dial packs it); null in an app that does not. */
+let turnsLib;
+function turnsMod() {
+    if (turnsLib === undefined) { try { turnsLib = require('./carplay_turns'); } catch (e) { turnsLib = null; } }
+    return turnsLib;
+}
+// front-vehicle FV: the test page "front" on tab 1 (shared/twin_front.js paints it itself). Absent: never.
+let twinFront = null;
+try { twinFront = require('./twin_front'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_front') < 0) throw e; }
 
 const isNum = (x) => typeof x === 'number' && isFinite(x);
 const pad2 = (n) => (n < 10 ? '0' : '') + n;
@@ -116,6 +132,8 @@ function fresh() {
         // navigation
         guiding: null, road: null, dart: null, lanes: null, dest: null, destAt: 0, nextRoad: null, navType: null, nonNavi: null,
         provider: null, onRoad: null,      // car-fix CF3: Guidance.guidingProvider (CAR_PLAY ...), isOnGuidableRoad
+        // car issues CT: CarPlay's next turn (the test mode): the poll, the last turn read and when; guideSrc: what the arrow page shows
+        cp: { poller: null, turn: null, at: 0, kind: undefined }, guideSrc: 'bmw',
         slots: null, slotsAt: 0, mapSent: null, mapNote: '', mapAskAt: 0,
         // media (cp*: MediaPlayer on CarPlayMedia, car-fix CF3)
         media: { title: null, artist: null, album: null, three: null, el: null, tot: null, has: false, src: null, srcRaw: null,
@@ -674,10 +692,74 @@ function routeBridge(hud) {
     if (td && typeof td === 'object') td.route = routeLive(hud, nowMs(hud));
 }
 
+/* ---------------------------------------------------- car issues CT: CarPlay's next turn ------------------------- */
+
+const cpOn = (hud) => cfgOf(hud).carplayTurns === true;
+const phoneGuides = (hud) => { const T = turnsMod(); return !!(T && T.isPhone(st(hud).provider)); };
+const CP_UNITS = { METER: 'м', KM: 'км', MILE_UK: 'mi', MILE_US: 'mi', YARD: 'yd', FEET: 'ft' };
+
+/** A decoded event (shared/carplay_turns.js) -> the arrow page's model: { kind (our pictogram key, as dartOf), exit, side, dist (m), num, unit, road }. */
+function cpModel(e) {
+    let d;
+    if (e.kind === 'alongMainRoad') d = { kind: e.mainDir === 'LEFT' ? 'slight_left' : e.mainDir === 'RIGHT' ? 'slight_right' : 'straight', exit: null, side: null };
+    else { const m = {}; m[e.kind] = e.body; d = dartOf({ maneuver: m }) || { kind: null, exit: null, side: null }; }
+    return { kind: d.kind, exit: d.exit, side: d.side, dist: e.dist.metres, num: e.dist.num, unit: e.dist.unit, road: e.road || null, src: e.kind };
+}
+
+/**
+ * The poll (from update(), every evaluation): shared/carplay_turns.js's Poller asks queryContent every 2 s while the test mode is on
+ * and the phone guides; it stops (no call) when either goes. A reply's next turn is kept with its time; a failed call drops it.
+ * The log: the poll on / off, the first call's outcome and every change of it (shared/carplay_turns.js), and the KIND of the turn
+ * shown once per change - never its road, never its distance.
+ */
+function cpSync(hud, t) {
+    const p = st(hud), c = p.cp, T = turnsMod();
+    if (!T) return;
+    if (!c.poller) {
+        if (!cpOn(hud)) return;
+        c.poller = new T.Poller({
+            signals: hud && hud.ctx && hud.ctx.signals, now: () => nowMs(hud),
+            log: (s) => log(hud, 'info', s),
+            wanted: () => cpOn(hud) && phoneGuides(hud),
+            onReply: (reply, d, at) => {
+                const e = T.nextTurn(d);
+                c.turn = e ? cpModel(e) : null; c.at = at;
+                const kind = c.turn ? c.turn.src + ' ' + String(c.turn.kind) : null;
+                if (kind !== c.kind) { c.kind = kind; log(hud, 'info', 'carplay turns: ' + (kind ? 'turn ' + kind + (c.turn.road ? ', a road of ' + c.turn.road.length + ' characters' : '') : 'no turn in the reply (' + d.count + ' events)')); }
+            },
+            onFail: () => { c.turn = null; c.kind = undefined; },
+        });
+    }
+    c.poller.tick(t);
+    if (!c.poller.on) { c.turn = null; c.kind = undefined; }
+}
+/** The arrow page from CarPlay's turn: the test mode, the phone guiding, BMW's own guidance idle, a turn read within 6 s. */
+function cpLive(hud, t) {
+    const p = st(hud), c = p.cp, T = turnsMod();
+    if (!T || !cpOn(hud) || !c.turn || !phoneGuides(hud)) return false;
+    if (p.guiding === 'ACTIVE' || p.guiding === 'CALCULATING_ROUTE') return false;
+    return t - c.at <= T.FRESH_MS && t >= c.at;
+}
+/** The phone's own distance for the page: { n, u } (its number with a "." and its unit), else our metres format, else null. */
+function cpDist(turn) {
+    if (!turn) return null;
+    if (typeof turn.num === 'string' && /^\d{1,6}(\.\d{1,3})?$/.test(turn.num) && CP_UNITS[turn.unit]) return { n: turn.num, u: CP_UNITS[turn.unit] };
+    return fmtDist(turn.dist);
+}
+/** What the arrow page draws: CarPlay's turn when navPage chose it, else BMW's manoeuvre. */
+const guideOf = (p) => (p.guideSrc === 'cp' && p.cp.turn ? p.cp.turn : p.dart);
+
+/**
+ * tab 5. car issues CT - navView ("Навігація") and the CarPlay turn: "карта" with the map window open: the map wins (mapState first);
+ * "стрілки": never the map, so the CarPlay arrow page whenever it is live; "авто": the map only by its strict rule (with a CarPlay
+ * route BMW's guidance is INACTIVE, so normally shut), else the CarPlay arrow page, else the CarPlay route page.
+ */
 function navPage(hud, t) {
     const p = st(hud);
     if (mapState(hud, t).open) return 'map';
-    if (p.guiding === 'ACTIVE' && pagesCfg(hud).guidance === true) return 'guide';
+    if (p.guiding === 'ACTIVE' && pagesCfg(hud).guidance === true) { p.guideSrc = 'bmw'; return 'guide'; }
+    if (cpLive(hud, t)) { p.guideSrc = 'cp'; return 'guide'; }
+    p.guideSrc = 'bmw';
     if (routeLive(hud, t)) return 'route';
     if (p.guiding === 'CALCULATING_ROUTE') return 'calc';
     return p.road ? 'road' : 'none';
@@ -690,7 +772,7 @@ function decide(hud, t) {
         case 3: return mediaPage(hud);
         case 4: return phonePage(hud);
         case 5: return navPage(hud, t);
-        default: return computerPage(hud, t);
+        default: return twinFront && twinFront.takesTab1(hud) ? 'front' : computerPage(hud, t);     // front-vehicle FV: the test takes tab 1
     }
 }
 function current(hud) { const p = st(hud); return p.page; }
@@ -876,11 +958,12 @@ function resolveToken(hud, name) {
         case 'pgRoad': return p.road || '';
         case 'pgNavSub': return p.guiding === 'ACTIVE' ? 'Маршрут прокладено' : 'Маршрут не прокладено';
         case 'pgCalc': return 'Розрахунок маршруту…';
-        case 'pgGuideIcon': return maneuverIcon(p.dart);
-        case 'pgGuideExit': return p.dart && p.dart.kind === 'roundabout' && isNum(p.dart.exit) && p.dart.exit > 0 && p.dart.exit < 100 ? String(p.dart.exit) : '';
-        case 'pgGuideDist': { const d = p.dart ? fmtDist(p.dart.dist) : null; return d ? d.n : DASH; }
-        case 'pgGuideUnit': { const d = p.dart ? fmtDist(p.dart.dist) : null; return d ? d.u : ''; }
-        case 'pgGuideRoad': return p.road || '';
+        // car issues CT: guideOf(p) is CarPlay's turn when the page shows it (the test mode), else BMW's manoeuvre
+        case 'pgGuideIcon': return maneuverIcon(guideOf(p));
+        case 'pgGuideExit': { const g = guideOf(p); return g && g.kind === 'roundabout' && isNum(g.exit) && g.exit > 0 && g.exit < 100 ? String(g.exit) : ''; }
+        case 'pgGuideDist': { const g = guideOf(p), d = g ? (g === p.cp.turn ? cpDist(g) : fmtDist(g.dist)) : null; return d ? d.n : DASH; }
+        case 'pgGuideUnit': { const g = guideOf(p), d = g ? (g === p.cp.turn ? cpDist(g) : fmtDist(g.dist)) : null; return d ? d.u : ''; }
+        case 'pgGuideRoad': { const g = guideOf(p); return g && g === p.cp.turn ? g.road || '' : p.road || ''; }
         case 'pgGuideFoot': {
             const d = p.dest, bits = [];
             if (d && d.eta) bits.push('прибуття ' + pad2(d.eta.h) + ':' + pad2(d.eta.m));
@@ -1130,6 +1213,7 @@ function update(hud, x, now, force) {
     const p = st(hud);
     if (!force && now - p.evalAt < EVAL_MS && now >= p.evalAt) return;
     p.evalAt = now;
+    try { cpSync(hud, nowMs(hud)); } catch (e) { log(hud, 'warn', 'carplay turns: ' + (e && e.message || e)); }     // car issues CT: the test mode's poll
     const page = decide(hud, nowMs(hud));
     p.page = page;
     routeBridge(hud);          // car-fix CF3: a route older than 60 s stops selecting tab 5 at the next tick
@@ -1148,6 +1232,8 @@ function update(hud, x, now, force) {
         p.mapAskAt = nowMs(hud);
         try { hud.client.status(); } catch (e) { /* never */ }
     }
+    // front-vehicle FV: the test page paints itself (no layout items); a page painted in between is repainted whole on return
+    if (page === 'front' && twinFront) { twinFront.updatePage(hud, x, now, force || x.pgKey !== '#front'); x.pgKey = '#front'; return; }
     const spec = x.w.pages && x.w.pages[page];
     const resolved = resolveItems(hud, spec ? spec.items : []);
     const key = keyOf(page, resolved, hud.theme);
@@ -1167,4 +1253,6 @@ module.exports = { tabBridge, LAYER, FONTS, SAIRA, ICON, TITLES, TECH, IF, fontN
     // for the tests
     descText, dartOf, lanesOf, destOf, deviceOf, tpmsPoll,
     // car-fix CF3
-    int64, idKey, srcOf, trackTitle, trackArtist, trackTime, routeLive, routeBridge, fmtTravel, metres, ROUTE_FRESH_MS };
+    int64, idKey, srcOf, trackTitle, trackArtist, trackTime, routeLive, routeBridge, fmtTravel, metres, ROUTE_FRESH_MS,
+    // car issues CT
+    cpSync, cpLive, cpModel, cpDist, CP_UNITS, turnsMod };

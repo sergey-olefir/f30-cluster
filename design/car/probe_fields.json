@@ -1,11 +1,11 @@
 {
-  "_about": "The signal probe's field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier). Ids come from the car's catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of apps/signal_probe/format.js. Text members are logged as lengths only.",
+  "_about": "The signal probe's field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier), b (an event), m (S16 next-turn: GuidanceEventList.queryContent, a read the owner approved, polled while the phone guides; methodId from the catalogue). Ids come from the car's catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of apps/signal_probe/format.js. Text members are logged as lengths only.",
   "logFormat": 1,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "counts": {
     "sets": 15,
-    "fields": 250,
-    "interfaces": 94,
+    "fields": 264,
+    "interfaces": 99,
     "interfacesWithSeveralInstances": 1
   },
   "sets": [
@@ -157,8 +157,8 @@
       "items": [
         "P23"
       ],
-      "fields": 37,
-      "fieldsActive": 44
+      "fields": 50,
+      "fieldsActive": 58
     },
     {
       "id": "S15",
@@ -179,8 +179,8 @@
       "items": [
         "P25"
       ],
-      "fields": 22,
-      "fieldsActive": 39
+      "fields": 23,
+      "fieldsActive": 40
     }
   ],
   "interfaces": [
@@ -195,6 +195,7 @@
       ],
       "fields": 18,
       "events": [],
+      "methods": [],
       "sets": [
         "S1",
         "S2",
@@ -212,14 +213,16 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 6,
+      "fields": 7,
       "events": [],
+      "methods": [],
       "sets": [
         "S1",
         "S3",
         "S6",
         "S9",
-        "S11"
+        "S11",
+        "S14"
       ]
     },
     {
@@ -233,6 +236,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S1",
         "S9"
@@ -249,6 +253,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S1"
       ]
@@ -264,6 +269,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S2",
         "S10"
@@ -280,6 +286,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -295,6 +302,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -310,6 +318,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -325,6 +334,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S2",
         "S9"
@@ -341,6 +351,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -356,6 +367,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -371,6 +383,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -386,6 +399,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -401,6 +415,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S2"
       ]
@@ -414,11 +429,13 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 2,
+      "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S2",
-        "S3"
+        "S3",
+        "S14"
       ]
     },
     {
@@ -432,6 +449,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S3"
       ]
@@ -445,10 +463,12 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 1,
+      "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
-        "S3"
+        "S3",
+        "S14"
       ]
     },
     {
@@ -462,6 +482,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S3"
       ]
@@ -477,6 +498,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S3"
       ]
@@ -494,6 +516,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S4"
       ]
@@ -509,6 +532,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S4"
       ]
@@ -524,6 +548,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S4"
       ]
@@ -592,6 +617,7 @@
       ],
       "fields": 5,
       "events": [],
+      "methods": [],
       "sets": [
         "S4"
       ]
@@ -607,6 +633,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S4"
       ]
@@ -622,6 +649,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -639,6 +667,7 @@
       "events": [
         "onScreenChange"
       ],
+      "methods": [],
       "sets": [
         "S5",
         "S7",
@@ -664,6 +693,7 @@
       ],
       "fields": 8,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -679,6 +709,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -694,6 +725,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -709,6 +741,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -726,6 +759,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -741,6 +775,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -756,6 +791,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -771,6 +807,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -786,6 +823,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -801,6 +839,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -816,6 +855,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S5"
       ]
@@ -833,6 +873,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S5",
         "S6"
@@ -851,6 +892,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S6"
       ]
@@ -866,6 +908,7 @@
       ],
       "fields": 11,
       "events": [],
+      "methods": [],
       "sets": [
         "S6"
       ]
@@ -879,10 +922,12 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 2,
+      "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
-        "S6"
+        "S6",
+        "S14"
       ]
     },
     {
@@ -896,6 +941,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S6"
       ]
@@ -911,6 +957,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S6"
       ]
@@ -926,6 +973,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S7"
       ]
@@ -944,6 +992,7 @@
         "streamStatusChanged",
         "activeRouteChanged"
       ],
+      "methods": [],
       "sets": [
         "S7",
         "S16"
@@ -960,6 +1009,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S7"
       ]
@@ -975,6 +1025,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S7",
         "S16"
@@ -991,6 +1042,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S8"
       ]
@@ -1006,6 +1058,7 @@
       ],
       "fields": 10,
       "events": [],
+      "methods": [],
       "sets": [
         "S8",
         "S13",
@@ -1023,6 +1076,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S8"
       ]
@@ -1038,6 +1092,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S8"
       ]
@@ -1053,6 +1108,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S8"
       ]
@@ -1068,6 +1124,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S8",
         "S14"
@@ -1084,6 +1141,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S9"
       ]
@@ -1099,6 +1157,7 @@
       ],
       "fields": 6,
       "events": [],
+      "methods": [],
       "sets": [
         "S9",
         "S11",
@@ -1116,6 +1175,7 @@
       ],
       "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
         "S9",
         "S10"
@@ -1132,6 +1192,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S9"
       ]
@@ -1147,6 +1208,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S9"
       ]
@@ -1163,6 +1225,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S9"
       ]
@@ -1176,10 +1239,12 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 1,
+      "fields": 4,
       "events": [],
+      "methods": [],
       "sets": [
-        "S10"
+        "S10",
+        "S14"
       ]
     },
     {
@@ -1193,6 +1258,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S10"
       ]
@@ -1208,6 +1274,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S10"
       ]
@@ -1225,6 +1292,7 @@
       "events": [
         "TrafficSignRecognition"
       ],
+      "methods": [],
       "sets": [
         "S13"
       ]
@@ -1242,6 +1310,7 @@
       "events": [
         "TrafficSignRecognitionFrontCamera"
       ],
+      "methods": [],
       "sets": [
         "S13"
       ]
@@ -1260,6 +1329,7 @@
         "RecognitionTrafficSignCamera",
         "recognitionTrafficSignCamera2"
       ],
+      "methods": [],
       "sets": [
         "S13"
       ]
@@ -1280,6 +1350,7 @@
         "variableSpeedLimitSign",
         "builtupAreaFlag"
       ],
+      "methods": [],
       "sets": [
         "S13"
       ]
@@ -1299,6 +1370,7 @@
         "keepDistanceObjects2",
         "keepDistanceParameters"
       ],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1316,6 +1388,7 @@
       "events": [
         "assistedDrivingViewFunctionInputIbVip"
       ],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1331,6 +1404,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1347,6 +1421,7 @@
       ],
       "fields": 3,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1362,6 +1437,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1377,6 +1453,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1392,6 +1469,7 @@
       ],
       "fields": 2,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1407,6 +1485,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1422,6 +1501,7 @@
       ],
       "fields": 7,
       "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1441,6 +1521,7 @@
         "accelerationLateralCog",
         "vehicleAccelerationLongitudinalEstimated"
       ],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1458,6 +1539,7 @@
       "events": [
         "yawRate"
       ],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1475,6 +1557,7 @@
       "events": [
         "longitudinalGradientSurface"
       ],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1493,6 +1576,90 @@
         "pitchRateCog",
         "rollRateCog"
       ],
+      "methods": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.powertrain.AcceleratorPedal",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 1,
+      "events": [],
+      "methods": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.chassis.VehicleStabilizationManagement",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 1,
+      "events": [],
+      "methods": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.powertrain.vehicledynamics.VelocityAndVehicleConditionProvision",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "velocityVehicle",
+        "velocityVehicleLongitudinal"
+      ],
+      "methods": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.infotainment.drivingexcitement.XView",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 1,
+      "events": [],
+      "methods": [],
+      "sets": [
+        "S14"
+      ]
+    },
+    {
+      "interface": "de.bmw.chassis.VehicleModel",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 1,
+      "events": [],
+      "methods": [],
       "sets": [
         "S14"
       ]
@@ -1514,6 +1681,7 @@
         "ObjectProbability",
         "ObjectSensorSpecificFrontCamera"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1536,6 +1704,7 @@
         "ObjectProbability",
         "ObjectSensorSpecificFrontCamera"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1553,6 +1722,7 @@
       "events": [
         "objects"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1574,6 +1744,7 @@
         "ObjectAssignment",
         "FASView"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1591,6 +1762,7 @@
       "events": [
         "suAARObjectList"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1609,6 +1781,7 @@
         "egomotionCameraCartesian",
         "egomotionCameraRotation"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1626,6 +1799,7 @@
       "events": [
         "ProperMotionVehicle"
       ],
+      "methods": [],
       "sets": [
         "S15"
       ]
@@ -1643,6 +1817,7 @@
       "events": [
         "streamCommandChanged"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1659,6 +1834,9 @@
       "fields": 1,
       "events": [
         "viewsChanged"
+      ],
+      "methods": [
+        "queryContent"
       ],
       "sets": [
         "S16"
@@ -1677,6 +1855,7 @@
       "events": [
         "viewContentChanged"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1694,6 +1873,7 @@
       "events": [
         "changeModes"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1711,6 +1891,7 @@
       "events": [
         "ric_sendEvent"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1728,6 +1909,7 @@
       "events": [
         "requestSinkSwitch"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1743,6 +1925,7 @@
       ],
       "fields": 1,
       "events": [],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -1760,6 +1943,7 @@
       "events": [
         "correctionDataLaneGuiding"
       ],
+      "methods": [],
       "sets": [
         "S16"
       ]
@@ -4884,6 +5068,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 100,
+      "also": [
+        "S14"
+      ],
       "columns": [
         "stage:statusActualStageDrive:e",
         "gear:statusActualGearDrive:e",
@@ -6025,6 +6212,276 @@
       ]
     },
     {
+      "set": "S14",
+      "item": "P23",
+      "tag": "accel-pedal",
+      "interface": "de.bmw.powertrain.AcceleratorPedal",
+      "field": "AngleAcceleratorPedal",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "angle:actualValueAngleAcceleratorPedal:n",
+        "virtual:actualValueAngleAcceleratorPedalVirtual:n",
+        "gradient:gradientActualValueAngleAcceleratorPedal:n",
+        "qualifier:qualifierActualValueAngleAcceleratorPedal:e",
+        "vsAssist:dummy2:e",
+        "eco:dummy3:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "brake-driver",
+      "interface": "de.bmw.chassis.VehicleStabilizationManagement",
+      "field": "StabilizationManagement",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "braking:statusBrakingDriver:n",
+        "brakingMSA:statusBrakingMSA:n",
+        "fdr:qualifierFunctionFDR:n",
+        "abs:qualifierFunctionABS:n",
+        "asc:qualifierFunctionASC:n",
+        "dscUnit:statusUnitRunDSC:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "brake-driver-hu",
+      "interface": "de.bmw.infotainment.vehicle.A4A",
+      "field": "statusA4AFDRControl",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "braking:statusBrakingDriver:n",
+        "fdr:qualifierFunctionFDR:n"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "brake-switch",
+      "interface": "de.bmw.powertrain.Powertrain",
+      "field": "InformationVehicleDrive",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32773,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "bls:dummy2:e",
+        "clutch:dummy3:e",
+        "msaButton:dummy4:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "brake-light",
+      "interface": "de.bmw.body.Light",
+      "field": "LampExterior",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32770,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "brakeLight:controlFunctionBrakeLight:e",
+        "brakeForce:controlFunctionBrakeForceDisplay:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "drive-torque",
+      "interface": "de.bmw.powertrain.Powertrain",
+      "field": "WheelMomentDrive4",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "vsAssist:statusInterfaceDriverAssistenceSystemTargetLimit:e",
+        "direction:statusDrivingDirectionDriversChoice:e",
+        "engaged:statusPositiveEngagementPowerTrain:e",
+        "rearAxleRpm:actualValueRPMBackAxleRedundant:n",
+        "rearAxleQ:qualifierActualValueRPMBackAxleRedundant:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "wheel-rpm",
+      "interface": "de.bmw.powertrain.Powertrain",
+      "field": "ActualValueRPMWheel",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32770,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "fl:actualValueRPMWheelFLH:n",
+        "fr:actualValueRPMwheelFRH:n",
+        "rl:actualValueRPMWheelRLH:n",
+        "rr:actualValueRPMWheelRRH:n",
+        "qFL:qualifierActualValueRPMWheelFLH:e",
+        "qRL:qualifierActualValueRPMWheelRLH:e",
+        "source:dummy:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "velocity",
+      "interface": "de.bmw.powertrain.vehicledynamics.VelocityAndVehicleConditionProvision",
+      "field": "velocityVehicle",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32792,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 500,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "velocity-long",
+      "interface": "de.bmw.powertrain.vehicledynamics.VelocityAndVehicleConditionProvision",
+      "field": "velocityVehicleLongitudinal",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32794,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 500,
+      "cap": 1200
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "car-speed2",
+      "interface": "de.bmw.infotainment.vehicle.Vehicle2",
+      "field": "statusCarSpeed2",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 8,
+      "notifierId": 32776,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "speed:speedVehicleCentreOfGravity:n"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "engine-rpm",
+      "interface": "de.bmw.infotainment.vehicle.CDS",
+      "field": "statusEngineSpeed2",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 25,
+      "notifierId": 32793,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 500,
+      "cap": 1200,
+      "columns": [
+        "rpm:actualValueRPMEngineCrankshaft:n"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "grade-xview",
+      "interface": "de.bmw.infotainment.drivingexcitement.XView",
+      "field": "statusGradientRoadway",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 2,
+      "notifierId": 32770,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "grade:actualValueLongitudinalGradientRoadway:n",
+        "qualifier:qualifierActualValueLongitudinalGradientRoadway:e"
+      ]
+    },
+    {
+      "set": "S14",
+      "item": "P23",
+      "tag": "lane-slope",
+      "interface": "de.bmw.chassis.VehicleModel",
+      "field": "LaneSlope",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32777,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 1200,
+      "columns": [
+        "grade:actualValueLongitudinalGradientRoadway:n",
+        "gradeFast:actualValueLongitudinalGradientRoadwayFast:n",
+        "qualifier:qualifierActualValueLongitudinalGradientRoadway:e",
+        "transverse:actualValueTransverseGradientRoadway:n",
+        "transverseQ:qualifierActualValueTransverseGradientRoadway:e"
+      ]
+    },
+    {
       "set": "S15",
       "item": "P24",
       "tag": "cam-objects",
@@ -6748,6 +7205,23 @@
       "formatter": "tree",
       "gapMs": 5000,
       "cap": 400
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "next-turn",
+      "interface": "de.bmw.infotainment.navigation.guiding.GuidanceEventList",
+      "field": "queryContent",
+      "instance": "Main_Instance",
+      "flags": "m",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": null,
+      "rootType": "method",
+      "formatter": "turns",
+      "gapMs": 2000,
+      "cap": 400,
+      "methodId": 4
     }
   ]
 }

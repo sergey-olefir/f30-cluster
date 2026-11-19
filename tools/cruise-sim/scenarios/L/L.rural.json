@@ -1,0 +1,23 @@
+{
+ "id": "L.rural",
+ "family": "L",
+ "name": "Mixed driving: rural roads",
+ "description": "Hours of rural driving: curves, junctions, slow vehicles.",
+ "scope": "in",
+ "generator": {
+  "hours": 10,
+  "shares": {
+   "motorway": 0,
+   "rural": 1,
+   "town": 0
+  },
+  "density": "mid",
+  "seed": 1,
+  "fillerSegment_s": 300,
+  "fillerSamples": 6
+ },
+ "decide": [],
+ "tags": [
+  "perHour"
+ ]
+}

@@ -1,0 +1,36 @@
+{
+ "id": "B.queue.crawl",
+ "family": "B",
+ "name": "The tail of a crawling queue (10 km/h) (added)",
+ "description": "As B.queue, the tail moving at 10 km/h (below the cruise minimum).",
+ "scope": "warnOnly",
+ "duration": "=g0/((v-10)/3.6) + 20",
+ "params": {
+  "v": 120,
+  "g0": 300
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=g0",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": 10
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120,
+   150
+  ]
+ }
+}

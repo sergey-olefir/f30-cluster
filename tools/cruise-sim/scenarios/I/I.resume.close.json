@@ -1,0 +1,64 @@
+{
+ "id": "I.resume.close",
+ "family": "I",
+ "name": "Resume with the lead much closer than at suspension",
+ "description": "The driver brakes and lets the car coast; the lead slows by 20 / 40 km/h meanwhile; the resume comes 15 s later with the lead close and slow.",
+ "scope": "warnOnly",
+ "duration": 80,
+ "params": {
+  "v": 110,
+  "dv": 20
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      32,
+      "=v"
+     ],
+     [
+      "=32+dv/3.6/1",
+      "=v-dv"
+     ]
+    ]
+   }
+  }
+ ],
+ "events": [
+  {
+   "t": 30,
+   "kind": "driverBrake",
+   "level_ms2": 1,
+   "duration_s": 2
+  },
+  {
+   "t": 47,
+   "kind": "driverResume"
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "dv": [
+   20,
+   40
+  ]
+ }
+}

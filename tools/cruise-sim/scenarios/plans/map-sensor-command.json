@@ -1,0 +1,51 @@
+{
+ "name": "map-sensor-command",
+ "description": "The second map: the camera's native rate against the command path's delay, at the mild preset with the downward rate limit opened (12 km/h/s), one map per sensor latency.",
+ "scenarios": [
+  "*"
+ ],
+ "exclude": [
+  "L"
+ ],
+ "perScenarioMax": 8,
+ "base": {
+  "plant": {
+   "preset": "mild"
+  },
+  "controller": {
+   "rateDown_kmhps": 12
+  }
+ },
+ "grid": {
+  "sensor.rateHz": [
+   2,
+   5,
+   10,
+   25
+  ],
+  "command.delay_s": [
+   0,
+   0.2,
+   0.5,
+   1.0,
+   2.0
+  ],
+  "sensor.latency_s": [
+   0.15,
+   0.5
+  ]
+ },
+ "map": {
+  "x": "sensor.rateHz",
+  "y": "command.delay_s",
+  "split": "sensor.latency_s"
+ },
+ "presets": {
+  "assumed": {
+   "sensor.rateHz": 10,
+   "command.delay_s": 0.2,
+   "sensor.latency_s": 0.15
+  }
+ },
+ "seed": 1
+}

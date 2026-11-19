@@ -1,0 +1,83 @@
+{
+ "id": "C.square",
+ "family": "C",
+ "name": "The lead steps its speed up and down (added)",
+ "description": "The lead alternates between v and v − Δv every half period with 1.5 m/s² ramps: an accordion with sharp edges.",
+ "scope": "in",
+ "duration": "=10+6*P",
+ "params": {
+  "v": 90,
+  "dv": 10,
+  "P": 40
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+30",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      10,
+      "=v"
+     ],
+     {
+      "$repeat": 3,
+      "$as": "k",
+      "items": [
+       [
+        "=10+k*P",
+        "=v"
+       ],
+       [
+        "=10+k*P+dv/3.6/1.5",
+        "=v-dv"
+       ],
+       [
+        "=10+k*P+P/2",
+        "=v-dv"
+       ],
+       [
+        "=10+k*P+P/2+dv/3.6/1.5",
+        "=v"
+       ]
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "dv": [
+   5,
+   10
+  ],
+  "P": [
+   20,
+   40
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "setpointChangesPerMin",
+  "peakDecel_mps2"
+ ]
+}

@@ -393,9 +393,18 @@ def limit_seam():
     return W
 
 
+def front_vehicle():
+    """front-vehicle FV (docs/twin-dial/FV-SPEC.md, placement B): the pictogram of the vehicle ahead in the speedometer's hub, above
+    the digital speed and clear of the KOMBI's black-box area [1420, 320, 1611, 440] (2 px). A "tdfv" image sheet 64 x 68 on
+    connection 2 (its own z: never packed with anything), painted by shared/twin_front.js; built only while the test mode is on
+    ("fv:on", the Діагностика setting diagFrontVehicle)."""
+    return [{'id': 'fv_icon', 'type': 'tdfv', 'z': 13, 'x': 1504, 'y': 250, 'w': 64, 'h': 68, 'conn': 2, 'toggle': 'fv:on'}]
+
+
 def widgets():
     W = [tdback('L'), tdback('RT'), tdback('RB'), tdial('tach'), tdial('speed')]
     W += gpu_texts() + tabs() + [pages_widget()] + hubs() + row() + tab2_sheet() + limit_seam()
+    W += front_vehicle()      # front-vehicle FV
     return W
 
 

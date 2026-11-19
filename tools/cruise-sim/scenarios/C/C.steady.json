@@ -1,0 +1,56 @@
+{
+ "id": "C.steady",
+ "family": "C",
+ "name": "Steady following, starting at each time gap",
+ "description": "The lead holds our speed; we start at a time gap of 0.6 … 3.0 s and must settle at the desired gap quietly (gap error, chatter).",
+ "scope": "in",
+ "duration": 120,
+ "params": {
+  "v": 90,
+  "h0": 2
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+h0*v/3.6",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v"
+  }
+ ],
+ "sweep": {
+  "v": [
+   40,
+   60,
+   90,
+   120,
+   150
+  ],
+  "h0": [
+   0.6,
+   1,
+   1.5,
+   2,
+   2.5,
+   3
+  ]
+ },
+ "decide": [
+  "collision",
+  "gapErrRmsRel",
+  "setpointChangesPerMin",
+  "nuisanceWarnings",
+  "peakDecel_mps2"
+ ],
+ "tags": [
+  "core"
+ ]
+}

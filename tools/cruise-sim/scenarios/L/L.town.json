@@ -1,0 +1,23 @@
+{
+ "id": "L.town",
+ "family": "L",
+ "name": "Mixed driving: town",
+ "description": "Town driving near and below the cruise minimum: mostly outside the envelope; how often is it said?",
+ "scope": "in",
+ "generator": {
+  "hours": 10,
+  "shares": {
+   "motorway": 0,
+   "rural": 0,
+   "town": 1
+  },
+  "density": "mid",
+  "seed": 1,
+  "fillerSegment_s": 300,
+  "fillerSamples": 6
+ },
+ "decide": [],
+ "tags": [
+  "perHour"
+ ]
+}

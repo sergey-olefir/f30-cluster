@@ -2,7 +2,7 @@
   "id": "twin_dial",
   "title": "Twin Dial",
   "description": "A twin round-dial instrument cluster for the G20 panel: tachometer left, speedometer right, our own centre pages and check-control message",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "vendor": "custom",
   "loggingId": "OATD",
   "iconGlyph": "TD",
@@ -36,7 +36,10 @@
     "mb_exp.js",
     "diag_settings.js",
     "twin_limit.js",
-    "limit_src.js"
+    "limit_src.js",
+    "carplay_turns.js",
+    "front_vehicle.js",
+    "twin_front.js"
   ],
   "signals": {
     "de.bmw.body.Light": {
@@ -165,6 +168,11 @@
       "isOnGuidableRoad": "rs",
       "_about": "P12 on the car (2026-11-18, a route by CarPlay): guidingProvider CAR_PLAY, nextDestinationInfo (rawDistance in metres, travelTime s, the arrival time local), currentRoad and isOnGuidableRoad arrive - the CarPlay route page (config.pages.route, car-fix CF3); conclusiveDart and the lanes stay empty with CarPlay (the guidance page, config.pages.guidance, stays dark: BMW's own guidance is untested). The map window's presence rule (config.mapWindow). Road text is drawn, never logged; positions and bearings are never read. Read only."
     },
+    "de.bmw.infotainment.navigation.guiding.GuidanceEventList": {
+      "_instances": "Main_Instance",
+      "_methods": ["queryContent"],
+      "_about": "car issues CT (the owner, 2026-11-19): the ONE method, a read - queryContent (methodId 4), CarPlay's next turns as data for tab 5's arrow page. Called only by shared/carplay_turns.js, only with Діагностика \"Повороти CarPlay (тест)\" on (config.carplayTurns) and the phone guiding (guidingProvider CAR_PLAY / ANDROID_AUTO): every 2 s, one call in flight, timeout 3 s. Never setViewConfig, setViewportConfig, the registeredViews setter or any other method. Whether the car's ACL lets an OAP app call it is unknown: the first call's outcome is logged. Road names are drawn, never logged."
+    },
     "de.bmw.infotainment.vehicle.TPMS": {
       "statusTyrePressure": "rs",
       "statusTyreTemperature": "rs",
@@ -177,6 +185,11 @@
         "TrafficSignRecognition"
       ],
       "_about": "car-fix CF2: the speed limit as the owner's car sends it (2026-11-18, signal_probe set S13): an EVENT (eventId 32769, service 13632), so _broadcasts; no getter, no setter, no method. config.sign.tsr (shared/limit_src.js): presentClassLimitSpeed x 5 = km/h. TrafficSignDisplayControl below stays the fallback."
+    },
+    "de.bmw.dass.GapVehicleAhead": {
+      "_instances": "1",
+      "DataFrontVehicle": "s",
+      "_about": "front-vehicle FV (docs/twin-dial/FV-SPEC.md): the vehicle ahead as the front camera reports it. A FIELD with a notifier only (32770, eventgroup 2; no getter, no setter), declared 's' exactly as signal_probe does. Watched ONLY while the test mode is on (Діагностика 'Авто попереду (тест)', config.frontVehicle.on): off at the start = no subscription at all. Read only."
     },
     "de.bmw.environmentalmodel.SignRecognitionFrontCamera": {
       "_instances": "1",
@@ -265,7 +278,9 @@
         "diagMapForce",
         "diagMapSlots",
         "diagSilent",
-        "diagGpuText"
+        "diagGpuText",
+        "diagCarplayTurns",
+        "diagFrontVehicle"
       ]
     },
     {
@@ -297,6 +312,14 @@
         [
           "setting",
           "diagGpuText"
+        ],
+        [
+          "setting",
+          "diagCarplayTurns"
+        ],
+        [
+          "setting",
+          "diagFrontVehicle"
         ]
       ]
     }
@@ -604,6 +627,20 @@
       "default": "off",
       "options": [["off", "вимк."], ["legacy", "атлас 0.1.3"], ["pixels", "пікселями"]],
       "_about": "car-issues GL: config.gpuText for the car test of docs/car-issues/GL-REPORT.md. off = the glyph atlases with rows of a multiple of 4 bytes (the fix); legacy = Twin Dial 0.1.3's td_big atlas (1066 bytes a row, 41 px cells written in place); pixels = the speed and the gear drawn as image text. Each change rebuilds the layout"
+    },
+    {
+      "key": "diagCarplayTurns",
+      "label": "Повороти CarPlay (тест)",
+      "type": "bool",
+      "default": false,
+      "_about": "car issues CT: config.carplayTurns - with the phone guiding, tab 5 shows the arrow page fed from GuidanceEventList.queryContent (the one method call, a read the owner approved on 2026-11-19; shared/carplay_turns.js) instead of conclusiveDart: the arrow, the phone's own distance, the road the turn names; the CarPlay route page stays the fallback when the call fails, finds no turn or its turn is older than 6 s. Off (the default): no call, nothing changes. Applied in place"
+    },
+    {
+      "key": "diagFrontVehicle",
+      "label": "Авто попереду (тест)",
+      "type": "bool",
+      "default": false,
+      "_about": "front-vehicle FV (docs/twin-dial/FV-SPEC.md): config.frontVehicle.on. On = DataFrontVehicle is watched (late, if it was off at the start), tab 1 shows the page 'Авто попереду' and the speedometer's hub the pictogram of the car ahead; one 'fv:' log line per state change (numbers only) for the calibration. Off = nothing subscribed (from the start), nothing drawn, nothing changed. Each change rebuilds the layout once (the pictogram's own layer)."
     }
   ],
   "config": {
@@ -862,7 +899,9 @@
         "diagMapForce": { "on": { "mapForce": true } },
         "diagMapSlots": { "on": { "mapSlotLog": true } },
         "diagSilent": { "act": "silent" },
-        "diagGpuText": { "options": { "legacy": { "gpuText": "legacy" }, "pixels": { "gpuText": "pixels" } }, "_about": "car-issues GL: the glyph atlases' row layout or image text, a rebuild on each change (shared/diag_settings.js)" }
+        "diagGpuText": { "options": { "legacy": { "gpuText": "legacy" }, "pixels": { "gpuText": "pixels" } }, "_about": "car-issues GL: the glyph atlases' row layout or image text, a rebuild on each change (shared/diag_settings.js)" },
+        "diagCarplayTurns": { "on": { "carplayTurns": true }, "_about": "car issues CT: the test mode of CarPlay's next turn on tab 5 (shared/twin_pages.js cpSync / cpLive), read at the moment of use: applied in place" },
+        "diagFrontVehicle": { "on": { "frontVehicle.on": true }, "_about": "front-vehicle FV: the test mode of the vehicle ahead (shared/twin_front.js); a rebuild on each change (the pictogram's layer)" }
       }
     },
     "pages": {
@@ -883,6 +922,8 @@
     "_mapSlots": "true once the experiment has shown that cluster-render's status rows (slot 0x100 ... map 1) are readable: the window then follows them (S1); false = it follows the cluster's map-view setting and guidance (S2).",
     "mapForce": false,
     "mapShutMs": 8000,
+    "carplayTurns": false,
+    "_carplayTurns": "car issues CT (2026-11-19): false = tab 5 as before (the CarPlay route page with a phone route). true (Діагностика \"Повороти CarPlay (тест)\") = with the phone guiding, the arrow page from GuidanceEventList.queryContent, asked every 2 s (shared/carplay_turns.js); the route page whenever the call fails, finds no turn, or its turn is older than 6 s. navView: \"карта\" with the map window open keeps the map; \"стрілки\" and \"авто\" show the CarPlay arrow page (in \"авто\" the map's strict rule normally keeps the window shut on a CarPlay route).",
     "sign": {
       "iface": "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl",
       "field": "displaySpeedLimitAndNoPassingRestriction",
@@ -1091,6 +1132,20 @@
     },
     "cruise": {
       "place": "C1"
+    },
+    "frontVehicle": {
+      "on": false,
+      "none": [4093, 4094, 4095],
+      "qualNone": [2, "EVENT_DATA_NOT_AVAILABLE"],
+      "nearer": "smaller",
+      "scale": null,
+      "assumeScale": 0.1,
+      "levels": { "timeGap": [0.9, 1.4, 2.0, 3.0], "metres": [8, 15, 30, 60], "minKmh": 20 },
+      "hyst": 0.12,
+      "closing": { "windowMs": 1500, "minMs": 600, "rate": 1.0, "fastRate": 4.0, "fastTtc": 4.0, "release": 0.6 },
+      "staleMs": 2000,
+      "absentMs": 10000,
+      "_about": "front-vehicle FV (docs/twin-dial/FV-SPEC.md; shared/front_vehicle.js DEFAULT has every key). on: the test mode, written by the Діагностика setting diagFrontVehicle (false here: nothing subscribed). DataFrontVehicle.frontVehicleGapX is a RAW number (57..1736 seen while driving, 4093 parked): its unit is unknown, so scale stays null and no number is ever shown; assumeScale (0.1 m a unit, a HYPOTHESIS) only places the gap among five levels by the time gap at our speed (timeGap, s; below minKmh by distance, metres); nearer 'smaller' (a smaller raw gap = nearer) is an ASSUMPTION to confirm in the log. After the calibration drive: scale = metres per raw unit, and the page shows the time gap in seconds. Closing = the gap's slope over windowMs, never frontVehicleSpeedX (not understood yet). staleMs: no value for this long = no target (never a frozen car); absentMs: nothing at all since the start = 'Немає даних'."
     },
     "_cruise": "SPEC-R3 9; car-fix CF2 switched it ON (the car session of 2026-11-18 showed the source): { place: 'C1' } = the readout in the speedometer hub's lower part (C2 = the coolant bar's place; null = dark, the sheet not even built). The source is DisplayDataServer.functionalLibraryData (shared/limit_src.js hudCruiseOf): cruiseCtrlSpeedHUD = the set speed in km/h (61 / 59 / 40 seen; 65535 = none: nothing drawn), ldmSym = the symbol (LDM_SYM_DCC cruise, LDM_SYM_SLD limiter, the ACC / assistant family adaptive; NONE / HDC / EDP nothing), ldmSymColor LDM_ACTIVE = green with the green marker on the scale (u_cru), any other colour = grey, no marker. Keys of limit_src.js HUD_CRUISE_DEFAULT (symMap, activeOn, hudInvalid, hudMph ...) correct the meanings; TrafficSignDisplayControl's longitudinal struct (shared/twin_limit.js CRUISE_DEFAULT: funcMap, statusMap, speedPath ...) stays the fallback until the HUD feed first arrives."
   }

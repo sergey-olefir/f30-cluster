@@ -1,0 +1,71 @@
+{
+ "id": "E.cutin.double",
+ "family": "E",
+ "name": "Two cut-ins in a row",
+ "description": "A first car cuts in at 30 / 40 m; 5 / 10 s later a second cuts in at half that gap.",
+ "scope": "warnOnly",
+ "duration": 70,
+ "params": {
+  "v": 110,
+  "g": 30,
+  "t2": 5,
+  "tc": 10
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "cutter",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=g+10/3.6*tc",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-10"
+  },
+  {
+   "id": "cutter2",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=g/2+10/3.6*(tc+t2)",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-10"
+  }
+ ],
+ "events": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 3
+  },
+  {
+   "t": "=tc+t2",
+   "kind": "cutIn",
+   "vehicle": "cutter2",
+   "toLane": 0,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "g": [
+   30,
+   40
+  ],
+  "t2": [
+   5,
+   10
+  ]
+ }
+}

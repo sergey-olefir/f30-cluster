@@ -1,0 +1,71 @@
+{
+ "id": "H.onramp",
+ "family": "H",
+ "name": "Merging traffic at an on-ramp",
+ "description": "A car from the ramp (60 / 80 km/h) merges in front of us at 15 … 50 m while we drive 100 / 120 km/h.",
+ "scope": "warnOnly",
+ "duration": 50,
+ "params": {
+  "v": 110,
+  "m": 80,
+  "g": 30,
+  "tc": 8
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "cutter",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=g+(v-m)/3.6*tc",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=m"
+     ],
+     [
+      "=tc+3",
+      "=m"
+     ],
+     [
+      "=tc+3+(v-10-m)/3.6/1.5",
+      "=v-10"
+     ]
+    ]
+   }
+  }
+ ],
+ "events": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 4
+  }
+ ],
+ "sweep": {
+  "v": [
+   100,
+   120
+  ],
+  "m": [
+   60,
+   80
+  ],
+  "g": [
+   15,
+   30,
+   50
+  ]
+ },
+ "tags": [
+  "core"
+ ]
+}

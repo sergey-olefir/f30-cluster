@@ -1,0 +1,58 @@
+{
+ "id": "H.highspeed",
+ "family": "H",
+ "name": "Following at 150 … 180 km/h",
+ "description": "Steady following at very high speed; the lead slows gently (−1 m/s² by 30 km/h). Range and noise at long gaps.",
+ "scope": "in",
+ "duration": "=tb + dv/3.6/abs(a) + 40",
+ "params": {
+  "v": 165,
+  "dv": 30,
+  "a": -1,
+  "tb": 30
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+10",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      "=tb",
+      "=v"
+     ],
+     [
+      "=tb+(dv)/3.6/abs(a)",
+      "=v-(dv)"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   150,
+   165,
+   180
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "warnCount",
+  "setpointChangesPerMin"
+ ]
+}

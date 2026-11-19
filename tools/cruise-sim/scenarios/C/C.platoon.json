@@ -1,0 +1,116 @@
+{
+ "id": "C.platoon",
+ "family": "C",
+ "name": "A platoon of 3–8 human-like cars with a braking wave",
+ "description": "n IDM cars ahead; the front one brakes at −3 m/s² by 30 km/h and recovers. The wave runs back through the platoon and reaches us amplified or damped.",
+ "scope": "in",
+ "duration": 120,
+ "params": {
+  "v": 90,
+  "n": 5,
+  "sp": "=2+1.4*v/3.6+4.6"
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "v0_kmh": "=v",
+   "profile": {
+    "type": "idm",
+    "params": {
+     "v0_kmh": "=v+10",
+     "T_s": 1.4,
+     "s0_m": 2,
+     "a_ms2": 1.2,
+     "b_ms2": 2,
+     "delta": 4,
+     "noise_ms2": 0.15,
+     "reaction_s": 0.8
+    }
+   }
+  },
+  {
+   "$repeat": "=n-2",
+   "$as": "k",
+   "item": {
+    "id": "p{k+1}",
+    "kind": "car",
+    "lane": 0,
+    "x0": "=5+2*v/3.6+(k+1)*sp",
+    "v0_kmh": "=v",
+    "profile": {
+     "type": "idm",
+     "params": {
+      "v0_kmh": "=v+10",
+      "T_s": 1.4,
+      "s0_m": 2,
+      "a_ms2": 1.2,
+      "b_ms2": 2,
+      "delta": 4,
+      "noise_ms2": 0.15,
+      "reaction_s": 0.8
+     }
+    }
+   }
+  },
+  {
+   "id": "p{n-1}",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6+(n-1)*sp",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      40,
+      "=v"
+     ],
+     [
+      "=40+30/3.6/3",
+      "=v-30"
+     ],
+     [
+      "=50+30/3.6/3",
+      "=v-30"
+     ],
+     [
+      "=50+30/3.6/3+30/3.6/1",
+      "=v"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "n": [
+   3,
+   5,
+   8
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "nuisanceWarnings"
+ ],
+ "tags": [
+  "core"
+ ]
+}

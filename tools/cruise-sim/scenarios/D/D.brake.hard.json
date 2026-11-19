@@ -1,0 +1,66 @@
+{
+ "id": "D.brake.hard",
+ "family": "D",
+ "name": "The lead brakes hard (−2 … −6 m/s²)",
+ "description": "As D.brake at −2, −3, −4, −6 m/s²: beyond a cruise's likely authority. Scored on the warning with the three driver reactions.",
+ "scope": "warnOnly",
+ "duration": "=tb + dv/3.6/abs(a) + 40",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "a": -3,
+  "tb": 20
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      "=tb",
+      "=v"
+     ],
+     [
+      "=tb+(dv)/3.6/abs(a)",
+      "=v-(dv)"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120,
+   150
+  ],
+  "dv": [
+   20,
+   40
+  ],
+  "a": [
+   -2,
+   -3,
+   -4,
+   -6
+  ]
+ },
+ "where": "=v-dv >= 30",
+ "tags": [
+  "core"
+ ]
+}

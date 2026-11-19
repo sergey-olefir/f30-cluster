@@ -1,0 +1,55 @@
+{
+ "id": "G.lowrate.follow",
+ "family": "G",
+ "name": "Low native rate (2 / 5 Hz), human-like lead",
+ "description": "C.human with the sensor delivering at 2 or 5 Hz.",
+ "scope": "in",
+ "duration": 200,
+ "params": {
+  "v": 110
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "v0_kmh": "=v",
+   "profile": {
+    "type": "idm",
+    "params": {
+     "v0_kmh": "=v",
+     "T_s": 1.4,
+     "s0_m": 2,
+     "a_ms2": 1.2,
+     "b_ms2": 2,
+     "delta": 4,
+     "noise_ms2": 0.3,
+     "reaction_s": 0.8
+    }
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "config.sensor.rateHz": [
+   2,
+   5
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "gapErrRmsRel",
+  "setpointChangesPerMin",
+  "nuisanceWarnings"
+ ]
+}

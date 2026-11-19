@@ -1,0 +1,48 @@
+{
+ "id": "J.huRestart.F",
+ "family": "J",
+ "extends": "F.reveal.slower",
+ "name": "huRestart during F.reveal.slower, at the worst time",
+ "description": "F.reveal.slower (v=120, dv=40, gh=30, tco=15) and the head unit restarts (45 s of nothing); the injection time is swept and the worst outcome counts.",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "gh": 30,
+  "tco": 15,
+  "tf": 10
+ },
+ "events+": [
+  {
+   "t": "=tf",
+   "kind": "fault",
+   "fault": "huRestart",
+   "duration": 45
+  }
+ ],
+ "sweep": {
+  "tf": [
+   10,
+   12,
+   14,
+   15,
+   16,
+   17,
+   19,
+   21
+  ],
+  "v": [
+   90,
+   120
+  ]
+ },
+ "worstOver": [
+  "tf"
+ ],
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s",
+  "faultDetectDelay_s"
+ ]
+}

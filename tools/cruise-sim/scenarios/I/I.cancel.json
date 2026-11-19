@@ -1,0 +1,64 @@
+{
+ "id": "I.cancel",
+ "family": "I",
+ "name": "The driver cancels the cruise",
+ "description": "Cancel while following; the lead brakes 10 s later and the driver brakes himself. The loop must send nothing while the cruise is off.",
+ "scope": "in",
+ "duration": 60,
+ "params": {
+  "v": 90
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      40,
+      "=v"
+     ],
+     [
+      "=40+20/3.6/1",
+      "=v-20"
+     ]
+    ]
+   }
+  }
+ ],
+ "events": [
+  {
+   "t": 30,
+   "kind": "driverCancel"
+  },
+  {
+   "t": 41,
+   "kind": "driverBrake",
+   "level_ms2": 1.5,
+   "duration_s": 4
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ]
+ },
+ "decide": [
+  "collision",
+  "cmdWhileInactive"
+ ]
+}

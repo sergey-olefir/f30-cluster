@@ -1,0 +1,29 @@
+{
+ "id": "J.cmdworst.F",
+ "family": "J",
+ "extends": "F.reveal.slower",
+ "name": "The command path at its worst settings during F.reveal.slower",
+ "description": "F.reveal.slower with the command path's worst preset (long delay, jitter, drops, stalls, low accepted rate).",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "gh": 30,
+  "tco": 15
+ },
+ "sweep": {
+  "cond.command": [
+   "worst"
+  ],
+  "v": [
+   90,
+   120
+  ]
+ },
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s",
+  "minTimeGap_s"
+ ]
+}

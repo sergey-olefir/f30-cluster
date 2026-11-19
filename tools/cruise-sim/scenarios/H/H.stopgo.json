@@ -1,0 +1,61 @@
+{
+ "id": "H.stopgo",
+ "family": "H",
+ "name": "Stop-and-go traffic (out of scope)",
+ "description": "The lead goes 40 → 0 → 40 km/h in 30 / 60 s cycles. How does the system leave its envelope, and does it say so?",
+ "scope": "outOfEnvelope",
+ "duration": "=10+3*P",
+ "params": {
+  "P": 30
+ },
+ "ego": {
+  "v0_kmh": 45,
+  "vMax_kmh": 60,
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*45/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      45
+     ],
+     [
+      10,
+      40
+     ],
+     {
+      "$repeat": 3,
+      "$as": "k",
+      "items": [
+       [
+        "=10+k*P+P/3",
+        0
+       ],
+       [
+        "=10+k*P+P/2",
+        0
+       ],
+       [
+        "=10+k*P+P",
+        40
+       ]
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "P": [
+   30,
+   60
+  ]
+ }
+}

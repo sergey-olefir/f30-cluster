@@ -1,0 +1,63 @@
+{
+ "id": "G.lowrate.brake",
+ "family": "G",
+ "name": "Low native rate (2 / 5 Hz), lead braking",
+ "description": "D.brake at −1.5 m/s² with the sensor delivering at 2 or 5 Hz.",
+ "scope": "in",
+ "duration": "=tb + dv/3.6/abs(a) + 40",
+ "params": {
+  "v": 110,
+  "dv": 30,
+  "a": -1.5,
+  "tb": 20
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      "=tb",
+      "=v"
+     ],
+     [
+      "=tb+(dv)/3.6/abs(a)",
+      "=v-(dv)"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "config.sensor.rateHz": [
+   2,
+   5
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "warnCount"
+ ],
+ "tags": [
+  "core"
+ ]
+}

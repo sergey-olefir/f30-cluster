@@ -6,8 +6,15 @@
  * signals.watch (one proxy per interface instance, built only when a set needs it, one hub at a time with a short pause so the
  * start of a set is not a burst), and logs every field's value ONCE PER CHANGE as numbers, enum names and text LENGTHS. It never
  * reads, logs or keeps the text of a message, a song, a call, a road or an address; never a coordinate or a bearing; never a byte
- * of a picture. It calls no setter and no method: the only call it ever makes on the car is signals.get (a field's getter) - for
- * a field that stayed silent at +2 min, and once when a set is switched on again.
+ * of a picture. It calls no setter: the calls it makes on the car are signals.get (a field's getter) - for a field that stayed
+ * silent at +2 min, and once when a set is switched on again - and ONE method the owner approved as a read (car issues CT,
+ * 2026-11-19): GuidanceEventList.queryContent, S16's "next-turn" entry (flags "m"), asked every 2 s only while S16 is on and the
+ * phone guides (Guidance.guidingProvider CAR_PLAY / ANDROID_AUTO). The call itself is made by shared/carplay_turns.js (packed
+ * with the app: app.json "shared"), the decoder Twin Dial uses too; its line is printed only when the reply changed:
+ *
+ *   probe: P25 next-turn #3 t=61.2: answered events=2 total=2 [intersection direction=LEFT geometry=UNDEFINED dist=250 unit=METER raw=1
+ *          uid=set toDest=8985 step=GS2 desc=1/12] [destinationManeuver ...] next=0 toFinal=0 toNext=-1 (+4 unchanged)
+ *   probe: poll P25 next-turn: first call: answered, 2 events (calls 1, answered 1, errors 0, timeouts 0)
  *
  * Log lines (one per change; "t" = seconds since the probe started, "#" = how many lines this field has made):
  *
@@ -33,7 +40,13 @@
 const F = require('./format');
 const FIELDS = require('./fields');
 
-const VERSION = '0.3.0';
+/** shared/carplay_turns.js: beside this file in the built app (app.json "shared"), in shared/ of the repository (tests); null without it. */
+function loadTurns() {
+    try { return require('./carplay_turns'); } catch (e) { /* the repository's layout */ }
+    try { return require('../../shared/carplay_turns'); } catch (e) { return null; }
+}
+
+const VERSION = '0.4.0';
 const LOG_FORMAT = 1;
 const SUMMARY_S = [30, 120, 600];
 const ASK_AT_S = 120;                 // the silent fields' getters are asked once, at this summary
@@ -74,6 +87,8 @@ class Probe {
         this.hubPause = F.isNum(cfg.hubPauseMs) ? cfg.hubPauseMs : HUB_PAUSE_MS;
         this.version = o.version || VERSION;
         this.table = o.table || FIELDS.TABLE;
+        this.turns = o.turns !== undefined ? o.turns : loadTurns();
+        this.provider = null;             // Guidance.guidingProvider's name (S7 / S16 guiding-provider): S16's next-turn polls only for the phone
         this.t0 = this.now();
         this.timer = null;
         this.markN = 0;
@@ -85,14 +100,31 @@ class Probe {
         this.queue = Promise.resolve();
         this.hubs = {};
         this.fields = this.table.map((f) => this._field(f));
+        this.recorder = null; this.recQuiet = false;      // cruise RC: set by setRecorder()
+    }
+
+    // ---- cruise RC: the recording mode (recorder.js) -------------------------------------------------------------------------------
+    /** The recorder the fields of `recordSets` go to; quiet: their throttled log lines are left out while it records. */
+    setRecorder(rec, quiet) { this.recorder = rec || null; this.recQuiet = !!quiet; }
+    /** Mark the fields of these sets (and the fields other sets share with them through `also`) as recorded. */
+    recordSets(ids) {
+        const want = ids || [];
+        this.fields.forEach((st) => { st.rec = st.sets.some((id) => want.indexOf(id) >= 0); });
+        return this.fields.filter((st) => st.rec).length;
     }
 
     _field(f) {
         const d = FIELDS.SET_DEFAULTS[f.set] || { gapMs: 1000, cap: 60 };
         const st = { f, sets: [f.set].concat(f.also || []), holders: 0, active: false, n: 0, events: 0, last: undefined, lastAt: -Infinity, pending: null, skipped: 0, warned: false, parseUs: 0, prevNum: undefined,
-            cap: f.cap || d.cap, gap: F.isNum(f.gapMs) ? f.gapMs : d.gapMs, onAt: 0, asked: false, hub: null };
+            cap: f.cap || d.cap, gap: F.isNum(f.gapMs) ? f.gapMs : d.gapMs, onAt: 0, asked: false, hub: null, same: 0, poller: null };
         st.handler = (v) => {
             if (!st.active) return;
+            // cruise RC: the recorder takes EVERY value of the fields it records (unthrottled, recorder.js); while it records, those
+            // fields' throttled log lines are left out (config.recorder.quietLog), so the log keeps the marks, the summaries, the status
+            if (st.rec && this.recorder && this.recorder.on) {
+                try { this.recorder.sample(st, v); } catch (err) { /* the recorder guards itself */ }
+                if (this.recQuiet) { st.events++; return; }
+            }
             try { this._value(st, v); } catch (err) {
                 if (!st.warned) { st.warned = true; this._warn(f.p + ' ' + f.tag + ': ' + msg(err)); }
             }
@@ -156,6 +188,7 @@ class Probe {
         fresh.forEach((x) => {
             const h = this._hub(x.st);
             if (hubs.indexOf(h) < 0) hubs.push(h);
+            if (x.st.f.flags === 'm') return;          // a polled method: its interface's proxy is all it needs (_poll)
             h.handlers[x.st.f.field] = x.st.handler;
             if (h.callStarted && !x.again) h.later.push(x.st);
         });
@@ -168,7 +201,7 @@ class Probe {
         this.fields.forEach((st) => {
             if (st.sets.indexOf(id) < 0) return;
             st.holders = Math.max(0, st.holders - 1);
-            if (st.holders === 0) { st.active = false; st.pending = null; }
+            if (st.holders === 0) { st.active = false; st.pending = null; if (st.poller) st.poller.tick(this.now()); }
         });
         delete this.on[id];
     }
@@ -218,6 +251,7 @@ class Probe {
         const f = st.f, h = st.hub;
         const say = (what) => { this._info('ask ' + f.p + ' ' + f.tag + ' (' + why + '): ' + what); return what; };
         if (f.flags === 'b') return Promise.resolve(say('an event (no getter)'));
+        if (f.flags === 'm') return Promise.resolve(say('a polled method (no getter): ' + (st.poller && st.poller.stats().calls ? st.poller.stats().calls + ' calls so far' : 'never called (the phone has not guided)')));
         if (f.flags.indexOf('r') < 0) return Promise.resolve(say('no getter (notifier only)'));
         if (!this.signals || typeof this.signals.get !== 'function') return Promise.resolve(say('no signals.get'));
         if (!h || !h.sub) return Promise.resolve(say('not subscribed'));
@@ -263,6 +297,11 @@ class Probe {
             case 'views': return F.fmtViews(v);             // S16 (car issues NV)
             case 'rendered': return F.fmtRendered(v);
             case 'stream': return F.fmtStream(v);
+            case 'turns': {                                  // S16 next-turn (car issues CT): a queryContent reply, decoded by shared/carplay_turns.js
+                if (!this.turns) return 'no decoder';
+                const d = this.turns.decode(v);
+                return F.fmtTurns(d, this.turns.nextIndex(d));
+            }
             case 'activeSource': {
                 this.media.active = typeof v === 'string' ? v : null;       // kept in memory for the match below, never logged
                 return 'len=' + F.fLen(v) + ' matches-source-entry=' + this._mediaMatch();
@@ -292,10 +331,16 @@ class Probe {
 
     _value(st, v) {
         st.events++;
-        const body = this._body(st, v);
+        // car issues CT: who guides, kept for S16's next-turn (it polls only while the phone does)
+        if (st.f.field === 'guidingProvider' && this.turns && st.f.iface === this.turns.GUIDANCE) this.provider = this.turns.providerName(v);
+        this._take(st, this._body(st, v));
+    }
+
+    /** A line body: logged once per change, at most once per gap (the last one wins), at most `cap` lines. */
+    _take(st, body) {
         // the parse time in a P12 line changes with every call: compare what the car said, not how long it took
         const key = st.f.fmt === 'intersection' ? body.replace(/ parse<=[0-9.]+ms$/, '') : body;
-        if (key === st.last) { st.pending = null; return; }
+        if (key === st.last) { st.pending = null; if (st.f.flags === 'm') st.same++; return; }
         if (st.n >= st.cap) return;
         const t = this.now();
         if (t - st.lastAt < st.gap) { if (st.pending !== null) st.skipped++; st.pending = { body, key, at: t }; return; }
@@ -324,6 +369,9 @@ class Probe {
         // seen in the car's log was ~800 characters, and a logger that cuts long lines must not lose the end of a list
         // only the S14 / S15 whole values and S16's event lists (up to 4 views x 3 events): every older line stays one line
         const parts = f.fmt === 'tree' || f.fmt === 'views' ? splitBody(body) : [body];
+        // a polled method: how many replies were the same as the line before this one (they make no line of their own)
+        if (f.flags === 'm' && st.same) tail += ' (+' + st.same + ' unchanged)';
+        st.same = 0;
         this._info(f.p + ' ' + f.tag + ' #' + st.n + ' t=' + this._t() + ': ' + parts[0] + (parts.length > 1 ? ' (part 1/' + parts.length + ')' : '') + tail +
             (st.skipped ? ' (+' + st.skipped + ' folded)' : '') + (st.n >= st.cap ? ' (the last line for this field)' : ''));
         for (let i = 1; i < parts.length; i++) this._info(f.p + ' ' + f.tag + ' #' + st.n + ' part ' + (i + 1) + '/' + parts.length + ': ' + parts[i]);
@@ -337,13 +385,37 @@ class Probe {
         this.markN++;
         this.lastMark = { n: this.markN, at: t };
         this._info('mark M' + this.markN + ' t=' + this._t() + ' tms=' + Math.round(t - this.t0) + ' sets=' + this.setsText());
+        if (this.recorder) { try { this.recorder.mark(this.markN); } catch (e) { /* cruise RC: the recorder guards itself */ } }
         return this.markN;
     }
 
     // ---- the clock: held-back lines, summaries ---------------------------------------------------------------------------------------
+    // ---- S16 next-turn (car issues CT): the one method, polled ------------------------------------------------------------------------
+    /** The phone guides (CAR_PLAY / ANDROID_AUTO), as S7's guiding-provider last said. */
+    phoneGuides() { return !!(this.turns && this.provider && this.turns.isPhone(this.provider)); }
+
+    /** One step of a polled method's clock (from tick()): shared/carplay_turns.js's Poller decides whether a call is due. */
+    _poll(st, t) {
+        const f = st.f, T = this.turns;
+        if (!T || !this.signals) return;
+        if (!st.poller) {
+            st.poller = new T.Poller({
+                signals: this.signals, now: this.now,
+                log: (s) => this._info('poll ' + f.p + ' ' + f.tag + ': ' + String(s).replace(/^carplay turns: /, '')),
+                wanted: () => st.active && this.phoneGuides(),
+                // the watch's own proxy of the same interface (S16 watches GuidanceEventList's view list); none from it (the bench): one of its own
+                proxy: () => { const h = st.hub; if (!h || !h.callStarted || (!h.sub && !h.error)) return undefined; return h.sub && h.sub.proxy ? h.sub.proxy : null; },
+                onReply: (reply) => st.handler(reply),
+                onFail: (kind, text) => { if (!st.active) return; st.events++; this._take(st, kind + (text ? ': ' + String(text).replace(/[^\x20-\x7e]/g, '?').slice(0, 120) : '')); },
+            });
+        }
+        st.poller.tick(t);
+    }
+
     /** Called about once a second. */
     tick() {
         const t = this.now();
+        this.fields.forEach((st) => { if (st.f.flags === 'm' && (st.active || st.poller)) { try { this._poll(st, t); } catch (e) { this._warn(st.f.p + ' ' + st.f.tag + ': ' + msg(e)); } } });
         this.fields.forEach((st) => {
             if (!st.active || !st.pending || st.pending.key === st.last || st.n >= st.cap || t - st.lastAt < st.gap) return;
             if (!this._floodOk(st.gap === 0)) return;

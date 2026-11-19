@@ -1,0 +1,66 @@
+{
+ "id": "G.blind.long",
+ "family": "G",
+ "name": "The camera is blind for 30 / 60 s (low sun, dirt) (added)",
+ "description": "The sensor reports nothing for a long time while the lead slowly slows (−0.5 m/s² by 20 km/h). Announce it; hold; never accelerate blind.",
+ "scope": "warnOnly",
+ "duration": "=20+d+30",
+ "params": {
+  "v": 110,
+  "d": 30
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      25,
+      "=v"
+     ],
+     [
+      "=25+20/3.6/0.5",
+      "=v-20"
+     ]
+    ]
+   }
+  }
+ ],
+ "events": [
+  {
+   "t": 20,
+   "kind": "fault",
+   "fault": "sensorBlind",
+   "duration": "=d"
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "d": [
+   30,
+   60
+  ]
+ },
+ "decide": [
+  "collision",
+  "missedWarning",
+  "faultDetectDelay_s",
+  "lostTargetSpeedGain_kmh"
+ ]
+}

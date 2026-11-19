@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cruise Set-Speed Simulator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!--
+  The cruise set-speed simulator page (docs/AGENT-BRIEF-cruise-sim.md §4). Offline, no library:
+  open this file from the disk, or serve tools/cruise-sim/ with any static server.
+  The shell (app.js, SU1) loads ../core/*.js, then SU2's views into #charts #settings #batch #report.
+-->
+<header class="top">
+  <div class="title">
+    <h1>Cruise set-speed simulator</h1>
+    <span id="source" class="muted">no run yet</span>
+  </div>
+  <div class="badges">
+    <span id="plant-badge" class="badge warn">assumed plant</span>
+    <span id="engine-badge" class="badge muted">loading…</span>
+    <span id="verdict-badge" class="badge" hidden></span>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button class="tab" data-tab="run" role="tab" aria-selected="true">Run</button>
+    <button class="tab" data-tab="batch" role="tab" aria-selected="false">Batch</button>
+    <button class="tab" data-tab="report" role="tab" aria-selected="false">Report</button>
+  </nav>
+</header>
+
+<div class="toolbar">
+  <div class="group">
+    <button id="run" class="primary" title="Run the current config (R)">Run</button>
+    <label class="check shell-autorun" title="Re-run at once after a change when the run is short (under ~0.4 s)"><input type="checkbox" id="autorun" checked> re-run on change</label>
+    <select id="runmode" title="Where a run is computed">
+      <option value="auto">run: auto</option>
+      <option value="page">run: in the page</option>
+      <option value="worker">run: in a worker</option>
+    </select>
+  </div>
+  <div class="group">
+    <button id="open" title="Open a config, preset, result or batch file (or drop it on the page)">Open file…</button>
+    <input type="file" id="file" accept=".json,application/json" multiple hidden>
+    <button id="export-config">Export config</button>
+    <button id="save-result" title="Save the current run as a result file">Save result</button>
+    <button id="keep-b" class="shell-b" title="Keep the current run as B: the charts overlay it on the next runs (A / B)">Keep as B</button>
+    <button id="clear-b" class="shell-b" title="Drop the B run" hidden>Clear B</button>
+    <button id="copy-link" title="The whole config (and the cursor) are in the link">Copy link</button>
+  </div>
+  <div class="group shell-presets">
+    <select id="preset" aria-label="Presets"></select>
+    <input id="preset-name" placeholder="preset name" size="12" aria-label="New preset name">
+    <button id="preset-save">Save preset</button>
+    <button id="preset-del" title="Delete the selected preset">Delete</button>
+    <button id="preset-export">Export presets</button>
+  </div>
+  <div class="group">
+    <select id="theme" aria-label="Theme">
+      <option value="auto">theme: auto</option>
+      <option value="light">theme: light</option>
+      <option value="dark">theme: dark</option>
+    </select>
+  </div>
+</div>
+
+<div class="statusbar"><span id="status" role="status"></span><progress id="progress" max="1" hidden></progress></div>
+
+<main>
+  <section class="run-view" data-view="run">
+    <div class="left">
+      <div class="scene-wrap">
+        <canvas id="scene" aria-label="The road seen from above, scrolling with our car, with the elevation profile and a readout"></canvas>
+      </div>
+      <div class="playbar">
+        <div class="controls">
+          <button id="start" title="To the start (Home)" aria-label="To the start">⏮</button>
+          <button id="back" title="One sample back (←, shift: 10)" aria-label="Step back">◀︎</button>
+          <button id="play" class="primary" title="Play (space)" aria-label="Play or pause">▶</button>
+          <button id="fwd" title="One sample forward (→, shift: 10)" aria-label="Step forward">▶︎|</button>
+          <button id="end" title="To the end (End)" aria-label="To the end">⏭</button>
+          <select id="speed" title="Playback speed ([ and ])" aria-label="Playback speed"></select>
+          <span id="time" class="time">— / — s</span>
+          <label class="check"><input type="checkbox" id="loop"> loop</label>
+          <select id="zoom" title="Road range ahead of our car" aria-label="Zoom">
+            <option value="fit">range: fit run</option>
+            <option value="50">50 m</option>
+            <option value="100">100 m</option>
+            <option value="200">200 m</option>
+            <option value="300">300 m</option>
+          </select>
+        </div>
+        <div class="scrub-wrap">
+          <input type="range" id="scrub" min="0" max="1" step="0.05" value="0" aria-label="Time">
+          <div id="scrub-marks" aria-hidden="true"></div>
+        </div>
+        <div class="legend">
+          <span><i class="sw ego"></i>our car</span><span><i class="sw lead"></i>true lead</span><span><i class="sw other"></i>other</span>
+          <span><i class="sw meas"></i>sensor (measured gap, target)</span><span><i class="sw est"></i>estimate</span>
+          <span><i class="sw des"></i>desired gap ±10 %</span><span><i class="sw need"></i>needed distance (warning)</span>
+          <span><i class="sw markw"></i>warning</span><span><i class="sw markf"></i>fault</span>
+        </div>
+      </div>
+      <!-- the optional cluster preview of brief §4.1: only the hook. A module CS.clusterPreview = { mount(el, app) } fills it. -->
+      <div id="cluster-preview" class="mount" hidden></div>
+      <section id="charts" class="mount" aria-label="Time charts"></section>
+    </div>
+    <aside id="settings" class="mount side" aria-label="Settings"></aside>
+  </section>
+  <section data-view="batch" hidden><div id="batch" class="mount" aria-label="Batch views"></div></section>
+  <section data-view="report" hidden><div id="report" class="mount" aria-label="Report"></div></section>
+</main>
+
+<footer class="muted">Keys: space play / pause · ← → step (shift ×10) · [ ] speed · Home / End · R run. Offline; nothing here talks to a car.</footer>
+
+<script src="scene.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

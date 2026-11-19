@@ -1,0 +1,61 @@
+{
+ "id": "A.grade.up",
+ "family": "A",
+ "name": "Uphill 3 / 6 / 10 %",
+ "description": "1.5 km climb with no target. The cruise fights the grade with finite authority (underspeed is informative).",
+ "scope": "in",
+ "duration": "=max(60, 2300/(v/3.6))",
+ "params": {
+  "v": 90,
+  "g": 0.06
+ },
+ "road": {
+  "grade": [
+   [
+    0,
+    0
+   ],
+   [
+    200,
+    0
+   ],
+   [
+    250,
+    "=g"
+   ],
+   [
+    1700,
+    "=g"
+   ],
+   [
+    1750,
+    0
+   ]
+  ]
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [],
+ "sweep": {
+  "v": [
+   40,
+   60,
+   90,
+   120,
+   150
+  ],
+  "g": [
+   0.03,
+   0.06,
+   0.1
+  ]
+ },
+ "decide": [
+  "overspeed_kmh",
+  "warnCount",
+  "setpointChangesPerMin"
+ ]
+}

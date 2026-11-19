@@ -1,0 +1,100 @@
+/* style.css (SU1) - the page shell. SU2's views bring their own styles (su2-*). */
+:root {
+  --bg: #f4f5f7; --panel: #ffffff; --line: #d5d9e0; --text: #1b2130; --muted: #5d6676; --faint: #8a93a3;
+  --accent: #2f6fde; --accent-fg: #ffffff; --ok: #23994f; --ok-bg: #e3f5ea; --warn: #b87800; --warn-bg: #fff3d6;
+  --bad: #d93036; --bad-bg: #fde4e4; --chip: #eceef2;
+  --ego: #2f6fde; --lead: #e07b1a; --other: #9aa1ad; --meas: #0b9c8c; --est: #7a4fd6; --des: #23994f; --need: #e5484d;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14171c; --panel: #1c2027; --line: #2f3540; --text: #e6e9ef; --muted: #a2abba; --faint: #6f7888;
+    --accent: #5b93ff; --accent-fg: #0d1220; --ok: #3fcf74; --ok-bg: #173322; --warn: #f0b429; --warn-bg: #3a2f12;
+    --bad: #ff5a5f; --bad-bg: #3d1a1c; --chip: #262b33;
+    --ego: #5b93ff; --lead: #ff9a3c; --other: #7c8494; --meas: #2dd4bf; --est: #b18cff; --des: #3fcf74; --need: #ff6369;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14171c; --panel: #1c2027; --line: #2f3540; --text: #e6e9ef; --muted: #a2abba; --faint: #6f7888;
+  --accent: #5b93ff; --accent-fg: #0d1220; --ok: #3fcf74; --ok-bg: #173322; --warn: #f0b429; --warn-bg: #3a2f12;
+  --bad: #ff5a5f; --bad-bg: #3d1a1c; --chip: #262b33;
+  --ego: #5b93ff; --lead: #ff9a3c; --other: #7c8494; --meas: #2dd4bf; --est: #b18cff; --des: #3fcf74; --need: #ff6369;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  min-width: 320px;
+}
+body.drop { outline: 3px dashed var(--accent); outline-offset: -6px; }
+.muted { color: var(--muted); }
+button, select, input { font: inherit; color: inherit; }
+button, select {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; cursor: pointer;
+}
+button:hover, select:hover { border-color: var(--faint); }
+button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+input[type="text"], input:not([type]) { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+label.check { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); white-space: nowrap; }
+
+header.top {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px;
+  padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel);
+}
+.title { display: flex; flex-direction: column; min-width: 0; }
+.title h1 { font-size: 17px; margin: 0; }
+#source { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60ch; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--chip); color: var(--muted); }
+.badge.ok { background: var(--ok-bg); color: var(--ok); }
+.badge.warn { background: var(--warn-bg); color: var(--warn); }
+.badge.bad { background: var(--bad-bg); color: var(--bad); }
+.tabs { margin-left: auto; display: flex; gap: 4px; }
+.tab { border-radius: 6px 6px 0 0; }
+.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 8px 16px; border-bottom: 1px solid var(--line); }
+.toolbar .group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.statusbar { display: flex; align-items: center; gap: 12px; padding: 4px 16px; min-height: 26px; font-size: 12px; color: var(--muted); }
+#status.err { color: var(--bad); }
+#progress { width: 160px; height: 8px; }
+
+main { padding: 12px 16px 24px; }
+.run-view { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 14px; align-items: start; }
+@media (max-width: 1100px) { .run-view { grid-template-columns: minmax(0, 1fr); } }
+.left { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.scene-wrap { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+#scene { display: block; width: 100%; height: 340px; }
+
+.playbar { display: flex; flex-direction: column; gap: 6px; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.controls button { min-width: 36px; }
+.time { font-variant-numeric: tabular-nums; min-width: 12ch; color: var(--muted); }
+.scrub-wrap { position: relative; padding-bottom: 8px; }
+#scrub { width: 100%; margin: 0; accent-color: var(--accent); }
+#scrub-marks { position: absolute; left: 8px; right: 8px; bottom: 0; height: 6px; pointer-events: none; }
+#scrub-marks .mark { position: absolute; top: 0; height: 6px; border-radius: 2px; min-width: 2px; }
+#scrub-marks .mark.warn { background: var(--bad); }
+#scrub-marks .mark.fault { background: var(--warn); top: 0; height: 3px; }
+#scrub-marks .mark.collision { background: var(--text); width: 3px !important; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
+.legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.sw.ego { background: var(--ego); } .sw.lead { background: var(--lead); } .sw.other { background: var(--other); }
+.sw.meas { background: var(--meas); } .sw.est { background: var(--est); } .sw.des { background: var(--des); }
+.sw.need { background: var(--need); } .sw.markw { background: var(--bad); } .sw.markf { background: var(--warn); }
+
+.mount { min-width: 0; }
+.side { position: sticky; top: 8px; max-height: calc(100vh - 16px); overflow: auto; }
+.placeholder {
+  border: 1px dashed var(--line); border-radius: 8px; padding: 18px; color: var(--muted); background: var(--panel); font-size: 13px;
+}
+.placeholder strong { color: var(--text); }
+#cluster-preview { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+/* the shell's own presets, auto-run and B controls are fallbacks: hidden once SU2's settings / charts carry them */
+body.has-settings .shell-presets, body.has-settings .shell-autorun, body.has-charts .shell-b { display: none; }
+footer { padding: 8px 16px 16px; font-size: 12px; }

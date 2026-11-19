@@ -254,13 +254,18 @@ try { twinLimit = require('./twin_limit'); } catch (e) { if (e.code !== 'MODULE_
 // the fallback). Packed by twin_dial and f30_cluster; absent: config.sign's field alone, as before.
 let limitSrc = null;
 try { limitSrc = require('./limit_src'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('limit_src') < 0) throw e; }
+// front-vehicle FV: the vehicle ahead, a test mode behind the Діагностика setting diagFrontVehicle (shared/twin_front.js: the page on
+// tab 1 and the "tdfv" pictogram; shared/front_vehicle.js: the decoder). Absent (null) for every app that does not pack it.
+let twinFront = null;
+try { twinFront = require('./twin_front'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_front') < 0) throw e; }
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
 const IMAGE_TYPES = { text: true, scale: true, stripe: true, gridlabels: true, icon: true, swatchimg: true,
     ccsheet: true,        // twin_dial: tab 2's sheet, the check-control card in the centre (shared/twin_cc.js paintSheet; B3: the plate is gone)
     tdpage: true,       // twin_dial round 3 (B4): the centre pages' one layer (shared/twin_pages.js)
-    tdsign: true, tdcru: true };      // twin_dial: the speed-limit sign and the cruise readout (shared/twin_limit.js)
+    tdsign: true, tdcru: true,       // twin_dial: the speed-limit sign and the cruise readout (shared/twin_limit.js)
+    tdfv: true };       // front-vehicle FV: the pictogram of the vehicle ahead (shared/twin_front.js), built only while the test is on
 const STATUS_ASK_MS = 2000;      // after a rebuild: ask cluster-render for its own status text
 const LAYER_BUDGET = 8;          // cluster-render's limit per client connection (CompositorLimits.per_client; confirmed on the car Nov 5 2026)
 const MAX_CONN = 4;              // connections a layout may ask for ("conn"): 32 layers service-wide / 8 per connection
@@ -1678,6 +1683,7 @@ class HudApp {
         // twin_dial: tabs (B2): the tab key (config.tabKey, null until the car session names one), chained in front of the field's own handler
         if (twinTabs && this.config.tabs) twinTabs.wire(this, extra, () => this._guard('twin tabs', () => this._twinTabsChanged()));
         if (twinLimit && this.config.twin) twinLimit.wire(this, extra);       // twin_dial: the sign (behind the engine's own watch of config.sign) and the cruise struct
+        if (twinFront) twinFront.wire(this, extra);       // front-vehicle FV: DataFrontVehicle, only while the test is on at the start (off: no subscription)
         this.car = new Car(this.ctx, this.config.carGroups || ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
         this.car.setRedline(this._redline());
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
@@ -3716,6 +3722,10 @@ class HudApp {
         if (c) this._blit(x, [c.rect], c.px);
     }
 
+    /** front-vehicle FV: the Діагностика setting diagFrontVehicle changed config.frontVehicle (shared/diag_settings.js calls this
+     *  before its rebuild, which makes or drops the pictogram's layer): start or stop the test, and watch the field late if needed. */
+    _fvDiag() { if (twinFront) twinFront.diag(this); }
+
     /** "key" is on while that bool setting is on; "!key" while it is off. */
     _toggleOn(t) {
         // car3 H: "a&b" is on while every part is (6WB Comfort's row: "own:clock&!cc:shown")
@@ -3743,6 +3753,7 @@ class HudApp {
             return not ? !on : on;
         }
         if (k.indexOf('tl:') === 0) { const on = twinLimit ? twinLimit.toggle(this, k.slice(3)) : false; return not ? !on : on; }     // twin_dial: "tl:cruise", "tl:cruise:C1"
+        if (k.indexOf('fv:') === 0) { const on = twinFront ? twinFront.toggle(this, k.slice(3)) : false; return not ? !on : on; }     // front-vehicle FV: "fv:on"
         const on = eq > 0 ? String(this.setting(k.slice(0, eq))) === k.slice(eq + 1) : this.setting(k) !== false;
         return not ? !on : on;
     }
@@ -3790,6 +3801,7 @@ class HudApp {
         else if (w.type === 'tdpage') { if (twinPages) twinPages.init(this, x); }     // twin_dial round 3 (B4): the centre pages, painted in one go
         else if (w.type === 'tdsign' && twinLimit) twinLimit.updateSign(this, x, Date.now(), true);      // twin_dial: the speed-limit sign, painted from what the car said
         else if (w.type === 'tdcru' && twinLimit) twinLimit.updateCru(this, x, Date.now(), true);        // twin_dial: the cruise readout (built only while config.cruise is set)
+        else if (w.type === 'tdfv' && twinFront) twinFront.updateIcon(this, x, Date.now(), true);        // front-vehicle FV: the pictogram (built only while the test is on)
         else if (w.type === 'sdash') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_geo', w.geo);
@@ -5503,6 +5515,7 @@ class HudApp {
         }
         if (w.type === 'tdsign') { if (twinLimit) twinLimit.updateSign(this, x, now, force); return; }     // twin_dial: not a "cc:" widget: nothing of BMW's window touches it
         if (w.type === 'tdcru') { if (twinLimit) twinLimit.updateCru(this, x, now, force); return; }       // twin_dial
+        if (w.type === 'tdfv') { if (twinFront) twinFront.updateIcon(this, x, now, force); return; }       // front-vehicle FV
         if (w.type === 'atext') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             const s = this._resolve(w.text);
