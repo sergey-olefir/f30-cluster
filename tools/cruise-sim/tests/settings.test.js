@@ -139,24 +139,30 @@ test('a module with PRESETS but no preset key (the command path) gets a selector
   assert.strictEqual(ctl(model, 'command.#preset').value, '');    // custom
 });
 
-test('scenario: the catalogue grouped by family, its sweep as variations, the run fields', () => {
+test('scenario: the catalogue grouped by family, its concrete variants, the run fields', () => {
   const m = mods();
-  let model = S.buildModel(m, { scenario: { id: 'D.brake', overrides: { 'params.a_mps2': -3 } } });
+  let model = S.buildModel(m, { scenario: { id: 'D.brake#a=-2,v0=90/react' }, driver: { brakeLevel_ms2: 7 } });
   const id = ctl(model, 'scenario.id');
-  assert.strictEqual(id.value, 'D.brake');
+  assert.strictEqual(id.value, 'D.brake');                         // the file, without the variant
   assert.ok(id.options.every((o) => o.family));
-  const v = ctl(model, 'scenario.overrides.params.a_mps2');
-  assert.strictEqual(v.value, -3);
+  const v = ctl(model, 'scenario.#variant');
+  assert.strictEqual(v.value, 'D.brake#a=-2,v0=90/react');
+  assert.strictEqual(v.options.length, 1 + 3 * 2 * 2);            // the default + sweep x reactions
+  assert.ok(v.options.some((o) => /a=-3,v0=60 · driver react/.test(o.label)));
   assert.strictEqual(v.changed, true);
   assert.strictEqual(ctl(model, 'duration').default, 60);          // the scenario's own duration
-  // changing the scenario clears its variations
-  assert.deepStrictEqual(S.patchFor(m, { scenario: { id: 'D.brake', overrides: { x: 1 } } }, id, 'B.approach'), { scenario: { id: 'B.approach', overrides: {} } });
-  // clearing a variation deletes the key
-  const p = S.patchFor(m, { scenario: { id: 'D.brake', overrides: { 'params.a_mps2': -3, 'ego.v0_kmh': 90 } } }, v, '');
-  assert.deepStrictEqual(p, { scenario: { id: 'D.brake', overrides: { 'ego.v0_kmh': 90 } } });
+  // a variant brings its config patch, merged into the module it touches
+  const p = S.patchFor(m, { scenario: { id: 'D.brake' }, driver: { brakeLevel_ms2: 7 } }, v, 'D.brake#a=-3,v0=60/react');
+  assert.deepStrictEqual(p, { scenario: { id: 'D.brake#a=-3,v0=60/react' }, driver: { brakeLevel_ms2: 7, reactionCase: 'nominal' } });
+  // a new scenario: just its id (its default variant)
+  assert.deepStrictEqual(S.patchFor(m, { scenario: { id: 'D.brake#a=-1,v0=60/none' } }, id, 'B.approach'), { scenario: { id: 'B.approach' } });
+  // a scenario without a sweep has no variant control
+  model = S.buildModel(m, { scenario: { id: 'C.follow.steady' } });
+  assert.strictEqual(ctl(model, 'scenario.#variant'), null);
   // an id not in the catalogue is still shown
   model = S.buildModel(m, { scenario: { id: 'Z.unknown' } });
   assert.ok(/not in the catalogue/.test(ctl(model, 'scenario.id').options[0].label));
+  assert.strictEqual(S.baseId('D.brake#a=1/none'), 'D.brake');
 });
 
 test('failures: a list editor from the KINDS table when the SCHEMA is empty', () => {
@@ -176,13 +182,13 @@ test('failures: a list editor from the KINDS table when the SCHEMA is empty', ()
 test('reset group: the preset stays, every override goes; scenario reset keeps the scenario', () => {
   const m = mods();
   const cfg = { plant: { preset: 'firm', model: 'P3', aMin_ms2: -1, tau_s: 4 }, controller: { h: 3 }, failures: [{ kind: 'stall', at: 3 }],
-    scenario: { id: 'D.brake', overrides: { a: 1 } }, seed: 9, duration: 33, ego: { mode: 'human' }, out: { dt: 0.1 } };
+    scenario: { id: 'D.brake#a=-1,v0=60/none' }, seed: 9, duration: 33, ego: { mode: 'human' }, out: { dt: 0.1 } };
   assert.deepStrictEqual(S.resetPatch(m, cfg, 'plant'), { plant: { preset: 'firm', model: 'P3' } });
   assert.deepStrictEqual(S.resetPatch(m, cfg, 'control'), { controller: {}, warning: {} });
   assert.deepStrictEqual(S.resetPatch(m, cfg, 'failures'), { failures: [] });
   const sp = S.resetPatch(m, cfg, 'scenario');
   const next = S.applyPatch(cfg, sp);
-  assert.deepStrictEqual(next.scenario, { id: 'D.brake', overrides: {} });
+  assert.deepStrictEqual(next.scenario, { id: 'D.brake' });         // the default variant of the same file
   assert.strictEqual(next.seed, 1);
   assert.ok(!('duration' in next) && !('ego' in next) && !('out' in next));
 });
@@ -250,6 +256,8 @@ test('the DOM is rebuilt only when the set of controls changes', () => {
   const b = S.signature(S.buildModel(m, { plant: { preset: 'firm', aMin_ms2: -2 } }));
   const c = S.signature(S.buildModel(m, { failures: [{ kind: 'stall', at: 1 }] }));
   const d = S.signature(S.buildModel(m, { scenario: { id: 'D.brake' } }));
+  const e = S.signature(S.buildModel(m, { scenario: { id: 'B.approach' } }));
+  assert.notStrictEqual(d, e, 'another scenario has other variants');
   assert.strictEqual(a, b);
   assert.notStrictEqual(a, c);
   assert.notStrictEqual(a, d);

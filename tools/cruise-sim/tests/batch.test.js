@@ -235,15 +235,17 @@ test('paramsPatch writes dotted paths into whole module objects, keeping their o
   assert.deepStrictEqual(p, { controller: { h: 2.5, d0: 5 }, plant: { preset: 'mild', aMin_ms2: -1 }, seed: 3, a: { b: { c: 1 } } });
 });
 
-test('runConfig: the run\'s own config, else the scenario + its variant over the batch base', () => {
-  const b = B.normalizeBatch({ base: { seed: 5, plant: { preset: 'firm' } }, runs: [
+test('runConfig: the run\'s own config, else base + grid point + the variant\'s patch with the concrete id', () => {
+  const b = B.normalizeBatch({ base: { seed: 5, plant: { preset: 'firm' }, driver: { brakeLevel_ms2: 7 } }, runs: [
     run({ id: 'r1', config: { scenario: { id: 'D.brake' }, seed: 2 } }),
-    run({ id: 'r2', scenario: 'B.approach', variant: { 'params.dv': 30 }, params: { 'plant.aMin_ms2': -1.5, 'params.dv': 30 } }),
+    run({ id: 'D.brake#a=-2,v0=90/react', scenario: 'D.brake', params: { 'plant.aMin_ms2': -1.5 } }),
+    run({ id: 'X.custom#k=1', scenario: 'X.custom', params: { 'plant.aMin_ms2': -1 } }),
   ] });
-  assert.deepStrictEqual(B.runConfig(b.runs[0], b, {}), { scenario: { id: 'D.brake' }, seed: 2 });
-  const c = B.runConfig(b.runs[1], b, {});
-  assert.deepStrictEqual(c, { seed: 5, plant: { preset: 'firm', aMin_ms2: -1.5 }, scenario: { id: 'B.approach', overrides: { 'params.dv': 30 } } });
-  const viaToConfig = B.runConfig(B.normalizeRun({ scenario: { base: 'E.cut', variant: {} } }, 0), b, { scenario: { toConfig: (s, base) => ({ scenario: { inline: s }, seed: base.seed }) } });
+  assert.deepStrictEqual(B.runConfig(b.runs[0], b, M), { scenario: { id: 'D.brake' }, seed: 2 });
+  assert.deepStrictEqual(B.runConfig(b.runs[1], b, M), { seed: 5, plant: { preset: 'firm', aMin_ms2: -1.5 }, driver: { brakeLevel_ms2: 7, reactionCase: 'nominal' }, scenario: { id: 'D.brake#a=-2,v0=90/react' } });
+  // a scenario the catalogue cannot load: its id as given, over base + grid point
+  assert.deepStrictEqual(B.runConfig(b.runs[2], b, M), { seed: 5, plant: { preset: 'firm', aMin_ms2: -1 }, driver: { brakeLevel_ms2: 7 }, scenario: { id: 'X.custom#k=1' } });
+  const viaToConfig = B.runConfig(B.normalizeRun({ scenario: { base: 'E.cut', variant: {} } }, 0), b, { scenario: { toConfig: (sc, base) => ({ scenario: { inline: sc }, seed: base.seed }) } });
   assert.strictEqual(viaToConfig.seed, 5);
   assert.strictEqual(viaToConfig.scenario.inline.base, 'E.cut');
 });

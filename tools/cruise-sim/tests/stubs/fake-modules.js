@@ -137,16 +137,42 @@
     { id: 'E.cutin', family: 'E', name: 'Cut-in at short gap' },
     { id: 'L.mixed.hour', family: 'L', name: 'Mixed driving, one hour' },
   ];
+  // like SC3's core/scenario.js: list(), template(id), expand(id) -> concrete variants with ids
+  // 'D.brake#a=-2,v0=90/react', load(id) -> a runnable concrete (a file id: its default variant), toConfig()
+  const SWEEPS = { 'D.brake': { a: [-1, -2, -3], v0: [60, 90] }, 'B.approach': { dv: [10, 30, 50, 80] } };
+  const REACTIONS = { 'D.brake': ['none', 'react'] };
+  function cross(sw) {
+    let out = [{}];
+    Object.keys(sw || {}).forEach(function (k) { const n = []; out.forEach(function (o) { sw[k].forEach(function (v) { const c = Object.assign({}, o); c[k] = v; n.push(c); }); }); out = n; });
+    return out;
+  }
   const scenario = {
     list: function () { return scenarioList.slice(); },
-    load: function (id) {
+    template: function (id) {
       const s = scenarioList.filter(function (x) { return x.id === id; })[0];
       if (!s) throw new Error('unknown scenario ' + id);
-      const out = Object.assign({ duration: id.charAt(0) === 'L' ? 3600 : 60 }, s);
-      if (id === 'D.brake') out.sweep = { 'params.a_mps2': [-1, -2, -3, -4], 'ego.v0_kmh': [60, 90, 120] };
-      if (id === 'B.approach') out.sweep = { 'params.dv_kmh': [10, 30, 50, 80] };
+      return Object.assign({ duration: id.charAt(0) === 'L' ? 3600 : 60, sweep: SWEEPS[id] || null, reactions: REACTIONS[id] || ['none'] }, s);
+    },
+    expand: function (id) {
+      const t = scenario.template(String(id).split('#')[0]);
+      const out = [];
+      cross(t.sweep).forEach(function (v) {
+        const label = Object.keys(v).map(function (k) { return k + '=' + v[k]; }).join(',');
+        t.reactions.forEach(function (r) {
+          out.push({ id: t.id + (label ? '#' + label : '') + (t.reactions.length > 1 ? '/' + r : ''), base: t.id, family: t.family, label: label, variant: v, reaction: r,
+            duration: t.duration, configPatch: { driver: { reactionCase: r === 'react' ? 'nominal' : 'none' } }, decide: ['minTimeGap_s', 'collision'] });
+        });
+      });
       return out;
     },
+    load: function (id) {
+      const all = scenario.expand(id);
+      const hit = all.filter(function (c) { return c.id === id; })[0];
+      if (hit) return hit;
+      if (String(id).indexOf('#') < 0) return all[0];
+      throw new Error('unknown scenario ' + id);
+    },
+    toConfig: function (c, base) { const cfg = JSON.parse(JSON.stringify(base || {})); cfg.scenario = { id: c.id, inline: c }; return cfg; },
   };
   const all = { plant: plant, sensor: sensor, estimator: estimator, controller: controller, warning: warning, command: command, driver: driver, failures: failures, metrics: metrics, scenario: scenario };
   if (typeof module !== 'undefined') module.exports = all;

@@ -689,18 +689,41 @@
     return patch;
   }
 
-  /** The config that reproduces one run of a batch (null when the batch does not say enough). */
+  function deepMergeCfg(a, b) {
+    const out = JSON.parse(JSON.stringify(a || {}));
+    Object.keys(b || {}).forEach(function (k) { out[k] = isObj(b[k]) && isObj(out[k]) ? deepMergeCfg(out[k], b[k]) : JSON.parse(JSON.stringify(b[k])); });
+    return out;
+  }
+  function swept(params) {
+    return Object.keys(params || {}).reduce(function (o, k) { if (k.indexOf('.') > 0 && !/^(params|scenario|vehicles|ego|road|events)\b/.test(k)) o[k] = params[k]; return o; }, {});
+  }
+
+  /**
+   * The config that reproduces one run of a batch, as sweep.js built it: the batch's base, then the
+   * grid point, then the scenario variant's own patch (its driver reaction case, a sensor preset), with
+   * the scenario given by its concrete id ('D.brake#v=90,dv=20,a=-1/none'), which core/scenario.js loads.
+   * Null when the batch does not say enough.
+   */
   function runConfig(run, batch, modules) {
     if (run.config && run.config.scenario) return run.config;
     const sc = (modules && modules.scenario) || (typeof self !== 'undefined' && self.CS && self.CS.scenario);
     const base = (batch && batch.base) || {};
+    let cfg = deepMergeCfg(base, paramsPatch({}, swept(run.params)));
+    if (sc && typeof sc.load === 'function' && run.id) {
+      let conc = null;
+      try { conc = sc.load(run.id); } catch (e) { conc = null; }
+      if (conc) {
+        cfg = deepMergeCfg(cfg, conc.configPatch || {});
+        cfg.scenario = { id: run.id };
+        if (run.config) Object.assign(cfg, run.config);
+        return cfg;
+      }
+    }
     if (run.concrete && sc && typeof sc.toConfig === 'function') {
-      try { return sc.toConfig(run.concrete, base); } catch (e) { /* fall through */ }
+      try { return sc.toConfig(run.concrete, cfg); } catch (e) { /* fall through */ }
     }
     if (!run.scenario) return null;
-    const cfg = JSON.parse(JSON.stringify(base));
-    Object.assign(cfg, paramsPatch(cfg, Object.keys(run.params || {}).reduce(function (o, k) { if (k.indexOf('.') > 0 && !/^(params|scenario|vehicles|ego|road|events)\b/.test(k)) o[k] = run.params[k]; return o; }, {})));
-    cfg.scenario = { id: run.scenario, overrides: isObj(run.variant) ? run.variant : {} };
+    cfg.scenario = { id: run.id && run.id.indexOf('#') > 0 ? run.id : run.scenario };
     if (run.config) Object.assign(cfg, run.config);
     return cfg;
   }

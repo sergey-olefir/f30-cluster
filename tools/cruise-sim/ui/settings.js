@@ -182,45 +182,65 @@
   }
 
   /** Scenario group: the scenario, its variations (from its sweep), then the run fields. */
+  /** A scenario id without its variant and reaction: 'D.brake#v=90,a=-1/none' -> 'D.brake'. */
+  function baseId(id) { return String(id || '').split('#')[0].split('/')[0]; }
+
+  /** The concrete variants of a catalogue scenario (SC3's scenario.expand), or [] when the catalogue cannot say. */
+  function variantsOf(sc, id) {
+    if (!sc || typeof sc.expand !== 'function' || !id) return [];
+    try { return sc.expand(id) || []; } catch (e) { return []; }
+  }
+
+  /**
+   * Scenario group: the scenario (the catalogue, by family), its variant (every concrete case of its
+   * sweep and reaction cases, as the batch runs them), then the run fields. A variant is selected by
+   * its concrete id ('D.brake#v=90,dv=20,a=-1/none'), which core/scenario.js loads as it is.
+   */
   function scenarioControls(modules, config) {
     const out = [];
     const sc = modules.scenario;
     const cur = config && config.scenario || {};
     let list = [];
     try { list = sc && sc.list ? sc.list() : []; } catch (e) { list = []; }
-    const id = cur.id || (cur.inline && cur.inline.id) || (list[0] && list[0].id) || '';
+    const id = cur.id || (cur.inline && cur.inline.id) || '';
+    const base = baseId(id) || (list[0] && list[0].id) || '';
     if (list.length) {
       const opts = list.map(function (s) { return { value: s.id, label: s.id + (s.name ? ' — ' + s.name : ''), family: s.family || String(s.id).charAt(0) }; });
-      if (id && !list.some(function (s) { return s.id === id; })) opts.unshift({ value: id, label: id + ' (not in the catalogue)', family: '?' });
-      out.push(Object.assign(control({ key: 'id', label: 'Scenario', unit: '', options: opts, group: 'Scenario' }, ['scenario', 'id'], id, list[0].id), { options: opts, changed: false, selector: true }));
+      if (base && !list.some(function (s) { return s.id === base; })) opts.unshift({ value: base, label: base + ' (not in the catalogue)', family: '?' });
+      out.push(Object.assign(control({ key: 'id', label: 'Scenario', unit: '', options: opts, group: 'Scenario' }, ['scenario', 'id'], base, list[0].id), { options: opts, changed: false, selector: true }));
     } else {
       out.push(control({ key: 'id', label: 'Scenario id', unit: '', default: '', group: 'Scenario', help: 'The scenario catalogue (core/scenario.js) is not loaded' }, ['scenario', 'id'], id, ''));
     }
-    let scen = null;
-    try { scen = sc && sc.load && id ? sc.load(id) : null; } catch (e) { scen = null; }
-    const overrides = cur.overrides || {};
-    if (scen && scen.sweep) {
-      Object.keys(scen.sweep).forEach(function (p) {
-        const vals = scen.sweep[p];
-        if (!Array.isArray(vals)) return;
-        const opts = [{ value: '', label: '(scenario value)' }].concat(vals.map(function (v) { return { value: v, label: String(v) }; }));
-        out.push(Object.assign(control({ key: p, label: variationLabel(p), unit: '', options: opts, group: 'Variation', help: 'Swept path: ' + p }, ['scenario', 'overrides', p], overrides[p] !== undefined ? overrides[p] : '', ''), { variation: true }));
-      });
+    const variants = variantsOf(sc, base);
+    if (variants.length > 1) {
+      const opts = [{ value: base, label: '(the default variant)' }].concat(variants.map(function (v) {
+        return { value: v.id, label: (v.label || v.id.split('#')[1] || v.id) + (v.reaction && v.reaction !== 'none' ? ' · driver ' + v.reaction : v.reaction === 'none' && variants.some(function (x) { return x.reaction && x.reaction !== 'none'; }) ? ' · no reaction' : '') };
+      }));
+      if (id && id !== base && !variants.some(function (v) { return v.id === id; })) opts.push({ value: id, label: id + ' (not a variant of the catalogue)' });
+      out.push(Object.assign(control({ key: 'variant', label: 'Variant', unit: '', options: opts, group: 'Scenario', help: variants.length + ' concrete cases: the sweep of the scenario file crossed with its driver reaction cases' }, ['scenario', '#variant'], id || base, base), { variation: true }));
     }
+    let scen = null;
+    try { scen = sc && sc.load && (id || base) ? sc.load(id || base) : null; } catch (e) { scen = null; }
     RUN_SCHEMA.forEach(function (s) {
       let def = s.default;
-      if (s.key === 'duration' && scen && scen.duration) def = scen.duration;
+      if (s.key === 'duration' && scen && typeof scen.duration === 'number') def = scen.duration;
       out.push(control(Object.assign({}, s, { group: 'Run' }), s.path, getPath(config, s.path), def));
     });
     return { controls: out, scenario: scen };
   }
 
-  function variationLabel(p) {
-    const m = /([A-Za-z0-9_]+)(\]?)$/.exec(p.replace(/\[(\d+)\]/g, '.$1'));
-    if (/v0_kmh$/.test(p)) return 'Ego start speed (km/h)';
-    if (/points\[\d+\]\[1\]$/.test(p)) return 'Profile value ' + p.replace(/^.*?\[(\w+)\].*$/, '($1)');
-    return m ? m[1] : p;
+  /** Merge a scenario variant's configPatch ({ driver: { reactionCase } }, a sensor preset ...) into the config's modules. */
+  function variantPatch(config, patch) {
+    const out = {};
+    Object.keys(patch || {}).forEach(function (k) {
+      const v = patch[k];
+      if (isPlain(v) && isPlain(config && config[k])) out[k] = deepAssign(clone(config[k]), v);
+      else out[k] = clone(v);
+    });
+    return out;
   }
+  function isPlain(x) { return x !== null && typeof x === 'object' && !Array.isArray(x); }
+  function deepAssign(a, b) { Object.keys(b).forEach(function (k) { a[k] = isPlain(a[k]) && isPlain(b[k]) ? deepAssign(a[k], b[k]) : clone(b[k]); }); return a; }
 
   /** The fields of one failure: the module's SCHEMA, or (empty SCHEMA) kind / at / duration from its KINDS. */
   function failureSchema(mod) {
@@ -358,14 +378,14 @@
   function patchFor(modules, config, c, value) {
     const head = c.path[0];
     if (head === 'scenario') {
-      const sc = clone((config && config.scenario) || {});
-      if (c.path[1] === 'id') {
-        // a new scenario starts from its own values: its variations are cleared
-        return { scenario: { id: value, overrides: {} } };
+      // a new scenario, or one of its variants: the id says which; the variant brings its own config patch
+      const p = { scenario: { id: value } };
+      if (c.path[1] === '#variant' && modules.scenario && typeof modules.scenario.load === 'function' && value !== baseId(value)) {
+        let conc = null;
+        try { conc = modules.scenario.load(value); } catch (e) { conc = null; }
+        if (conc && conc.configPatch) Object.assign(p, variantPatch(config, conc.configPatch));
       }
-      sc.overrides = sc.overrides || {};
-      if (value === '' || value === undefined) delete sc.overrides[c.path[2]]; else sc.overrides[c.path[2]] = value;
-      return { scenario: sc };
+      return p;
     }
     const name = moduleNameOfKey(modules, head);
     if (!name) {
@@ -424,7 +444,7 @@
     if (!g) return {};
     if (g.scenario) {
       // the scenario stays, its variations and the run fields go back to the engine's / scenario's own
-      const p = { scenario: { id: config && config.scenario && config.scenario.id, overrides: {} } };
+      const p = { scenario: { id: baseId(config && config.scenario && config.scenario.id) } };
       RUN_SCHEMA.forEach(function (s) {
         if (s.path.length === 1) p[s.path[0]] = s.key === 'seed' ? s.default : undefined;
         else {
@@ -583,7 +603,9 @@
   /** A control's controls signature: the DOM is rebuilt only when the set of controls changes. */
   function signature(model) {
     return model.groups.map(function (g) {
-      return g.id + ':' + (g.list ? 'n' + g.items.length : g.sections.map(function (s) { return s.controls.map(function (c) { return c.id; }).join(','); }).join('|')) + (g.missing ? '!' : '') + (g.file ? 'F' : '');
+      return g.id + ':' + (g.list ? 'n' + g.items.length : g.sections.map(function (s) {
+        return s.controls.map(function (c) { return c.id + (c.variation ? '[' + c.options.length + ':' + (c.options[1] && c.options[1].value) + ']' : ''); }).join(',');
+      }).join('|')) + (g.missing ? '!' : '') + (g.file ? 'F' : '');
     }).join(';');
   }
 
@@ -909,7 +931,7 @@
   const settings = {
     GROUPS: GROUPS, RUN_SCHEMA: RUN_SCHEMA, AUTO_RUN_MAX_S: AUTO_RUN_MAX_S, STORE_KEY: STORE_KEY,
     findModules: findModules, buildModel: buildModel, baseDefaults: baseDefaults, parseInput: parseInput, rangeText: rangeText,
-    patchFor: patchFor, resetPatch: resetPatch, fullModule: fullModule, applyPatch: applyPatch, typeOf: typeOf, sectionTitle: sectionTitle, matchPreset: matchPreset, failureSchema: failureSchema, snapshot: snapshot, applySnapshotPatch: applySnapshotPatch,
+    patchFor: patchFor, resetPatch: resetPatch, fullModule: fullModule, applyPatch: applyPatch, baseId: baseId, variantsOf: variantsOf, variantPatch: variantPatch, typeOf: typeOf, sectionTitle: sectionTitle, matchPreset: matchPreset, failureSchema: failureSchema, snapshot: snapshot, applySnapshotPatch: applySnapshotPatch,
     cleanSnapshot: cleanSnapshot, exportPresets: exportPresets, importPresets: importPresets, makeStore: makeStore,
     isShortRun: isShortRun, signature: signature, mount: mount,
   };
