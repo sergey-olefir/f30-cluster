@@ -264,7 +264,8 @@
         "diagMapWindow",
         "diagMapForce",
         "diagMapSlots",
-        "diagSilent"
+        "diagSilent",
+        "diagGpuText"
       ]
     },
     {
@@ -292,6 +293,10 @@
         [
           "setting",
           "diagSilent"
+        ],
+        [
+          "setting",
+          "diagGpuText"
         ]
       ]
     }
@@ -587,6 +592,14 @@
       "type": "bool",
       "default": false,
       "_about": "an action, no config key: the silent-fields summary of research3/MK once now and every 5 minutes while on"
+    },
+    {
+      "key": "diagGpuText",
+      "label": "Цифри на GPU (тест)",
+      "type": "choice",
+      "default": "off",
+      "options": [["off", "вимк."], ["legacy", "атлас 0.1.3"], ["pixels", "пікселями"]],
+      "_about": "car-issues GL: config.gpuText for the car test of docs/car-issues/GL-REPORT.md. off = the glyph atlases with rows of a multiple of 4 bytes (the fix); legacy = Twin Dial 0.1.3's td_big atlas (1066 bytes a row, 41 px cells written in place); pixels = the speed and the gear drawn as image text. Each change rebuilds the layout"
     }
   ],
   "config": {
@@ -835,7 +848,7 @@
       "_about": "B7 (research3/MP): the FIRST build waits until the car's first time zone and first message list are in, or ms after cluster-render is ready, whichever is first: one build at start instead of three (shared/diag_settings.js hold; the bytes before and after are in docs/twin-dial/R3B-INTEGRATION.md). Remove the key (or set false) for the three builds of 0.1.0."
     },
     "diag": {
-      "_about": "B7, the Діагностика menu (screen DIAG, shared/diag_settings.js): each setting writes the config paths named here while it is ON (every one is OFF by default = app.json's own key, put back when it goes off); a path is dotted; a choice lists its options. The changes apply in place (no layout rebuild).",
+      "_about": "B7, the Діагностика menu (screen DIAG, shared/diag_settings.js): each setting writes the config paths named here while it is ON (every one is OFF by default = app.json's own key, put back when it goes off); a path is dotted; a choice lists its options. The changes apply in place (no layout rebuild), but for diagGpuText (car-issues GL: a rebuild).",
       "settings": {
         "diagRelease": {
           "on": { "ccActive.release": { "deferValues": [65535], "leftList": true } },
@@ -844,7 +857,8 @@
         "diagMapWindow": { "options": { "W2": { "mapWindow": "W2" }, "W1": { "mapWindow": "W1" } } },
         "diagMapForce": { "on": { "mapForce": true } },
         "diagMapSlots": { "on": { "mapSlotLog": true } },
-        "diagSilent": { "act": "silent" }
+        "diagSilent": { "act": "silent" },
+        "diagGpuText": { "options": { "legacy": { "gpuText": "legacy" }, "pixels": { "gpuText": "pixels" } }, "_about": "car-issues GL: the glyph atlases' row layout or image text, a rebuild on each change (shared/diag_settings.js)" }
       }
     },
     "pages": {

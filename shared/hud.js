@@ -271,6 +271,19 @@ const TEXT_MS = 200;             // text re-draws at most 5 times a second (what
 const NEEDLE_MS = 33;            // 0.7.14: the speed and rev needles' own timer while "needleSmooth" is on (30 a second)
 const PERF_LOG_MS = 10000;       // package P (opt-in only, see PERF in the class): the perf log's period
 const EXACT_SPARE = 6;           // 0.7.14: spare cells in a "gpu" text's atlas, for cells the figures don't fill ("--")
+// car-issues GL (docs/car-issues/GL-REPORT.md): a glyph atlas's rows, and every rect written into one, are a multiple of 4
+// bytes (R8: 4 texels). On the car an R8 texture with rows 2 bytes off (Twin Dial 0.1.3's td_big atlas, 1066 wide) was drawn
+// as if its rows were 4-byte aligned (1068): slanted pieces of glyphs in the gear. app.json config.gpuText: "legacy" = the
+// 0.1.3 layout (for the car test), "pixels" = every "gpu" text drawn as an image; anything else = aligned.
+function gcd(a, b) { return b ? gcd(b, a % b) : a; }
+/** car-issues GL: n cells of cw texels in rows of at most maxCols cells, each row cols * cw a multiple of 4 -> { n, cols, rows }
+ *  (one row: a few more cells, the extra ones spare; more rows: fewer columns). null when no such row fits. */
+function alignedGrid(cw, n, maxCols) {
+    const q = 4 / gcd(cw, 4), one = Math.ceil(n / q) * q;
+    if (one <= maxCols) return { n: one, cols: one, rows: 1 };
+    const cols = Math.floor(maxCols / q) * q;
+    return cols >= q ? { n, cols, rows: Math.ceil(n / cols) } : null;
+}
 const DEFAULT_LOCATION = { lat: 35.2271, lon: -80.8431 }; // Charlotte, NC: for the Auto theme's sunset
 const TARGET_SIZES = { hud: [800, 480], panel: [1920, 720] };
 const MODE_KEY = { comfort: 'inComfort', sport: 'inSport', eco: 'inEco' };
@@ -1840,7 +1853,10 @@ class HudApp {
         if (!chars.length) throw new Error('font "' + fontName + '" has no printable glyphs for an atlas');
         const cellW = Math.max(1, Math.ceil(Math.max.apply(null, chars.map((ch) => glyphs[ch].advance)))) + 2;
         const cellH = font.metrics.cellHeight;
-        const cols = Math.max(1, Math.min(16, Math.floor(2048 / cellW))), rows = Math.ceil(chars.length / cols);
+        let cols = Math.max(1, Math.min(16, Math.floor(2048 / cellW)));
+        // car-issues GL: rows a multiple of 4 bytes (16 columns always are; a cell over 128 px wide gets fewer, still aligned)
+        if (this.config.gpuText !== 'legacy' && (cols * cellW) % 4 && cols >= 4 / gcd(cellW, 4)) cols -= cols % (4 / gcd(cellW, 4));
+        const rows = Math.ceil(chars.length / cols);
         const w = cols * cellW, h = rows * cellH;
         const buf = Buffer.alloc(w * h, 0);
         chars.forEach((ch, i) => {
@@ -1997,8 +2013,10 @@ class HudApp {
      * colour rules / slot; anything else stays an image text (logged). */
     _gpuTexts(list) {
         const out = [];
+        const pixels = this.config.gpuText === 'pixels';       // car-issues GL: the Діагностика switch "as pixels"
         list.forEach((w) => {
             if (w.type !== 'text' || !w.gpu) { out.push(w); return; }
+            if (pixels) { this.log.info('widget "' + w.id + '": "gpu" set aside (config.gpuText "pixels"), drawn as an image'); out.push(w); return; }
             let why = null, g = null;
             try { why = this._gpuTextWhy(w); if (!why) g = this._gpuGrid(w); } catch (e) { why = String(e && e.message || e); }
             if (why) { this.log.warn('widget "' + w.id + '": "gpu" ignored (' + why + '), drawn as an image'); out.push(w); return; }
@@ -2057,7 +2075,8 @@ class HudApp {
         return { pitch, cw, h, max, figs: figs.sort(), groups };
     }
 
-    _exactKey(w, ci) { return ci + ':exact:' + w.font + ':' + w.exact.pitch + '/' + w.exact.cw + 'x' + w.exact.h + ':' + (w.spacing || 0); }
+    // car-issues GL: ":legacy" while config.gpuText is "legacy", so a switch of it makes the atlas again
+    _exactKey(w, ci) { return ci + ':exact:' + w.font + ':' + w.exact.pitch + '/' + w.exact.cw + 'x' + w.exact.h + ':' + (w.spacing || 0) + (this.config.gpuText === 'legacy' ? ':legacy' : ''); }
 
     /** The atlas of a "gpu" text on a connection: R8, each figure as mask lays it out at a pen on a cell's left edge (in
      *  pitch / cw cells), plus spare cells; sampled "nearest" (each screen pixel is one atlas texel). Shared by the
@@ -2068,12 +2087,16 @@ class HudApp {
         if (this.atlases.has(key)) return this.atlases.get(key);
         const P = E.pitch, cw = E.cw, k = P / cw, h = E.h, fixed = E.figs.length * k, row = Math.floor(2048 / cw);
         // the spare cells: EXACT_SPARE, or the rest of the first row when that keeps the atlas one row high
-        const spare = fixed + EXACT_SPARE > row && row - fixed >= 3 ? row - fixed : EXACT_SPARE, n = fixed + spare;
-        const cols = Math.max(1, Math.min(n, row)), rows = Math.ceil(n / cols);
+        let spare = fixed + EXACT_SPARE > row && row - fixed >= 3 ? row - fixed : EXACT_SPARE, n = fixed + spare;
+        let cols = Math.max(1, Math.min(n, row)), rows = Math.ceil(n / cols);
+        // car-issues GL: rows of a multiple of 4 bytes (td_big: 26 cells of 41 = 1066 -> 28 cells, 1148); "legacy": as 0.1.3
+        const legacy = this.config.gpuText === 'legacy', g = legacy ? null : alignedGrid(cw, n, row);
+        if (g) { spare += g.n - n; n = g.n; cols = g.cols; rows = g.rows; }
         const W = cols * cw, H = rows * h;
         if (H > 2048) throw new Error('font "' + w.font + '": a ' + W + 'x' + H + ' atlas is too big');
         const buf = Buffer.alloc(W * H, 0);
-        const a = { key, cols, rows, cellW: cw, cellH: h, bytes: W * H * 2, exact: true, byKey: new Map(), fig: {}, slots: [], use: 0 };
+        const a = { key, cols, rows, cellW: cw, cellH: h, bytes: W * H * 2, exact: true, byKey: new Map(), fig: {}, slots: [], use: 0,
+            W, H, buf, legacy, font: w.font, puts: 0 };       // car-issues GL: its texels kept, for 4-aligned rects
         E.figs.forEach((ch) => {
             const m = textRaster.mask(P, h, ch, { font: w.font });
             a.fig[ch] = [];
@@ -2095,7 +2118,8 @@ class HudApp {
         a.ref = ref; a.c = c; a.ci = ci;
         this.atlases.set(key, a);
         this.log.info('gpu text atlas "' + w.font + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + E.figs.length + ' figures in ' + fixed +
-            ' cells and ' + spare + ' spare cells of ' + cw + 'x' + h + ', ' + W + 'x' + H + ' R8 asset, ' + mib(a.bytes) + ' of pixel memory');
+            ' cells and ' + spare + ' spare cells of ' + cw + 'x' + h + ', ' + W + 'x' + H + ' R8 asset, ' + mib(a.bytes) + ' of pixel memory' +
+            (W % 4 ? ', rows ' + W + ' bytes: NOT a multiple of 4' + (legacy ? ' (config.gpuText "legacy")' : '') : ''));      // car-issues GL
         return a;
     }
 
@@ -2149,7 +2173,26 @@ class HudApp {
         if (t.key) a.byKey.delete(t.key);
         t.key = key;
         a.byKey.set(key, best);
-        a.c.pixels(a.ref, [{ x: (best % a.cols) * a.cellW, y: Math.floor(best / a.cols) * a.cellH, w: a.cellW, h: a.cellH }], sl);
+        // car-issues GL: the cell into the kept texels, then a rect of whole 4-texel columns around it (x and w multiples of 4,
+        // its neighbours' texels as they are); "legacy": the cell's own rect, as 0.1.3 (41 px wide in td_big)
+        const cx = (best % a.cols) * a.cellW, cy = Math.floor(best / a.cols) * a.cellH;
+        for (let y = 0; y < a.cellH; y++) sl.copy(a.buf, (cy + y) * a.W + cx, y * a.cellW, (y + 1) * a.cellW);
+        let r = { x: cx, y: cy, w: a.cellW, h: a.cellH }, px = sl;
+        if (!a.legacy) {
+            const x0 = cx - cx % 4, x1 = Math.min(a.W, Math.ceil((cx + a.cellW) / 4) * 4);
+            if (x0 !== cx || x1 !== cx + a.cellW) {
+                r = { x: x0, y: cy, w: x1 - x0, h: a.cellH };
+                px = Buffer.alloc(r.w * r.h);
+                for (let y = 0; y < r.h; y++) a.buf.copy(px, y * r.w, (cy + y) * a.W + x0, (cy + y) * a.W + x1);
+            }
+        }
+        a.c.pixels(a.ref, [r], px);
+        // car-issues GL: each write in place, numbers only (the first 20, then every 50th): the car test reads these
+        a.puts++;
+        if (a.puts <= 20 || a.puts % 50 === 0) {
+            this.log.info('gpu text atlas "' + a.font + '"' + (a.ci ? ' on connection ' + (a.ci + 1) : '') + ': cell ' + best + ' written in place, rect ' +
+                r.x + ',' + r.y + ' ' + r.w + 'x' + r.h + (r.w % 4 ? ' (NOT a multiple of 4)' : '') + ', write ' + a.puts);
+        }
         return best;
     }
 
