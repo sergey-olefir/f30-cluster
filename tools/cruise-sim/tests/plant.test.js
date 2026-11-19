@@ -230,7 +230,7 @@ test('plant: the step-size nonlinearity answers large errors harder, small ones 
     const { inst } = make({ preset: 'firm', largeStep_kmh: 3, largeStepGain: gain, aMax_ms2: 4 });
     return drive(inst, 80 * KMH, 3, (t, e, p) => { if (t === 0) p.request(t, (80 + step) * KMH); });
   };
-  const aOf = o => o[60].a;   // after the 0.5 s dead time
+  const aOf = o => o[50].a;   // the first tick after the 0.5 s dead time: the same error in both runs
   near(aOf(run(2, 2)), aOf(run(1, 2)), 1e-12, 'a 2 km/h step is below the threshold');
   near(aOf(run(2, 8)), 2 * aOf(run(1, 8)), 1e-9, 'an 8 km/h step is answered twice as hard (within the power limit)');
 });
