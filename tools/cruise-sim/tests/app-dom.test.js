@@ -39,6 +39,8 @@ function makeDom() {
         e.appendChild = (c) => { e.children.push(c); c.parentNode = e; if (e === doc.head && c.tagName === 'SCRIPT') loadScript(c); return c; };
         e.remove = () => { if (e.parentNode) e.parentNode.children = e.parentNode.children.filter((x) => x !== e); };
         e.querySelector = (sel) => find(e, sel);
+        e.querySelectorAll = () => [];
+        e.getBoundingClientRect = () => ({ left: 0, top: 0, width: e.clientWidth || 800, height: e.clientHeight || 300, right: e.clientWidth || 800, bottom: e.clientHeight || 300 });
         e.click = () => e.dispatch('click');
         e.focus = () => { doc.activeElement = e; };
         if (e.tagName === 'CANVAS') {

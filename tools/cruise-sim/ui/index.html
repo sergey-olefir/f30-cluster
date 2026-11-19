@@ -32,7 +32,7 @@
 <div class="toolbar">
   <div class="group">
     <button id="run" class="primary" title="Run the current config (R)">Run</button>
-    <label class="check" title="Re-run at once after a change when the run is short (under ~0.4 s)"><input type="checkbox" id="autorun" checked> re-run on change</label>
+    <label class="check shell-autorun" title="Re-run at once after a change when the run is short (under ~0.4 s)"><input type="checkbox" id="autorun" checked> re-run on change</label>
     <select id="runmode" title="Where a run is computed">
       <option value="auto">run: auto</option>
       <option value="page">run: in the page</option>
@@ -44,11 +44,11 @@
     <input type="file" id="file" accept=".json,application/json" multiple hidden>
     <button id="export-config">Export config</button>
     <button id="save-result" title="Save the current run as a result file">Save result</button>
-    <button id="keep-b" title="Keep the current run as B: the charts overlay it on the next runs (A / B)">Keep as B</button>
-    <button id="clear-b" title="Drop the B run" hidden>Clear B</button>
+    <button id="keep-b" class="shell-b" title="Keep the current run as B: the charts overlay it on the next runs (A / B)">Keep as B</button>
+    <button id="clear-b" class="shell-b" title="Drop the B run" hidden>Clear B</button>
     <button id="copy-link" title="The whole config (and the cursor) are in the link">Copy link</button>
   </div>
-  <div class="group">
+  <div class="group shell-presets">
     <select id="preset" aria-label="Presets"></select>
     <input id="preset-name" placeholder="preset name" size="12" aria-label="New preset name">
     <button id="preset-save">Save preset</button>

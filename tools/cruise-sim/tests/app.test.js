@@ -92,6 +92,7 @@ test('classifyFile tells results, batches, configs and presets apart', () => {
     assert.equal(A.classifyFile({ kind: 'cs-config', config: { seed: 2 } }), 'config');
     assert.equal(A.classifyFile({ seed: 3, plant: {} }), 'config');
     assert.equal(A.classifyFile({ kind: 'cs-presets', presets: { a: {} } }), 'presets');
+    assert.equal(A.classifyFile({ kind: 'cs-settings-presets', version: 1, presets: { a: { saved: 'x', config: {} } } }), 'presets');
     assert.equal(A.classifyFile({ hello: 1 }), 'unknown');
     assert.equal(A.classifyFile(null), 'unknown');
 });

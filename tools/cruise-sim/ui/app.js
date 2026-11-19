@@ -168,7 +168,7 @@
         if (!isObj(obj)) return 'unknown';
         if (obj.kind === 'cs-batch' || Array.isArray(obj.runs)) return 'batch';
         if (obj.t && obj.series) return 'result';
-        if (obj.kind === 'cs-presets' || (isObj(obj.presets) && !obj.series)) return 'presets';
+        if (obj.kind === 'cs-presets' || obj.kind === 'cs-settings-presets' || (isObj(obj.presets) && !obj.series)) return 'presets';
         if (obj.kind === 'cs-config' && isObj(obj.config)) return 'config';
         if ('scenario' in obj || 'plant' in obj || 'controller' in obj || 'seed' in obj || 'duration' in obj) return 'config';
         return 'unknown';
@@ -655,7 +655,10 @@
         const add = obj.presets || {};
         const p = readPresets();
         let n = 0;
-        for (const k of Object.keys(add)) if (isObj(add[k])) { p[k] = add[k]; sessionPresets[k] = add[k]; n++; }
+        for (const k of Object.keys(add)) {
+            const c = isObj(add[k]) && isObj(add[k].config) ? add[k].config : add[k];      // SU2's entries are { saved, config }
+            if (isObj(c)) { p[k] = c; sessionPresets[k] = c; n++; }
+        }
         writePresets(p); fillPresetSelect('');
         status(n + ' preset' + (n === 1 ? '' : 's') + ' imported.');
     }
@@ -665,7 +668,10 @@
     function openFileObject(obj, name) {
         const kind = classifyFile(obj);
         if (kind === 'result' || kind === 'batch') { app.loadResultFile(obj, name); if (kind === 'batch') showView('batch'); return; }
-        if (kind === 'presets') { importPresets(obj); return; }
+        if (kind === 'presets') {
+            if (document.body.classList.contains('has-settings')) { status(name + ' is a presets file: import it in Settings (Import…), which keeps the presets.'); return; }
+            importPresets(obj); return;
+        }
         if (kind === 'config') { app.setConfig(obj.kind === 'cs-config' ? obj.config : obj, { replace: true, run: true }); status('Config loaded from ' + name + '.'); return; }
         status(name + ': not a config, preset, result or batch file.', true);
     }
@@ -787,7 +793,7 @@
             const mod = CS[key];
             if (ok && mod && typeof mod.mount === 'function') {
                 host.textContent = '';
-                try { mod.mount(host, app); }
+                try { mod.mount(host, app); document.body.classList.add('has-' + id); }
                 catch (e) { console.error(e); placeholder(id, file); host.querySelector('.placeholder span').textContent = ' — ui/' + file + ' failed to mount: ' + e.message; }
             }
         }
