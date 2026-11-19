@@ -394,7 +394,7 @@ const TABLE = [
     //      status, CarPlay's own turn-by-turn mode, the remote-cluster guidance events, the old CAN feed to the cluster. All of S7 and the
     //      cluster's view fields carry also: ['S16']. Road, instruction and view names only as lengths; positions and bearings never.
     { set: 'S16', p: 'P25', tag: 'pm-road', iface: I.ProjectedModeGuiding, field: 'currentRoad', flags: 'rs', instance: 'Main_Instance', fmt: 'description' },
-    { set: 'S16', p: 'P25', tag: 'pm-waypoints', iface: I.ProjectedModeGuiding, field: 'waypoints', flags: 'rs', instance: 'Main_Instance', cols: [['travel','travelTime','n'],['delay','delayTime','n'],['delayStatus','delayStatus','e'],['dist-len',['formattedDistance','distance'],'t'],['unit',['formattedDistance','unit'],'e'],['raw',['formattedDistance','rawDistance'],'n'],['toFinal','distanceFromCurrentToFinalDestination','n'],['flag','isCheckeredFlag','b'],['stopover','stopOverNumber','n'],['charging','isChargingStation','b'],['etaInvalid',['estimatedArrivalTime','time','invalid'],'b'],['etaH',['estimatedArrivalTime','time','hour'],'n'],['etaM',['estimatedArrivalTime','time','minute'],'n']] },
+    { set: 'S16', p: 'P25', tag: 'pm-waypoints', iface: I.ProjectedModeGuiding, field: 'waypoints', flags: 'rs', instance: 'Main_Instance', gapMs: 5000, cols: [['travel','travelTime','n'],['delay','delayTime','n'],['delayStatus','delayStatus','e'],['dist-len',['formattedDistance','distance'],'t'],['unit',['formattedDistance','unit'],'e'],['raw',['formattedDistance','rawDistance'],'n'],['toFinal','distanceFromCurrentToFinalDestination','n'],['flag','isCheckeredFlag','b'],['stopover','stopOverNumber','n'],['charging','isChargingStation','b'],['etaInvalid',['estimatedArrivalTime','time','invalid'],'b'],['etaH',['estimatedArrivalTime','time','hour'],'n'],['etaM',['estimatedArrivalTime','time','minute'],'n']] },
     { set: 'S16', p: 'P25', tag: 'pm-lanes', iface: I.ProjectedModeGuiding, field: 'currentLaneGuiding', flags: 'rs', instance: 'Main_Instance', fmt: 'lanes' },
     { set: 'S16', p: 'P25', tag: 'pm-route-change', iface: I.ProjectedModeGuiding, field: 'activeRouteChange', flags: 'rs', instance: 'Main_Instance', fmt: 'enum' },
     { set: 'S16', p: 'P25', tag: 'pm-stream', iface: I.ProjectedModeGuiding, field: 'streamCommandChanged', flags: 'b', instance: 'Main_Instance', gapMs: 250, cap: 100, fmt: 'stream' },
@@ -402,9 +402,9 @@ const TABLE = [
     { set: 'S16', p: 'P25', tag: 'route-changed', iface: I.Guidance, field: 'activeRouteChanged', flags: 'b', instance: 'Main_Instance', gapMs: 250, cap: 100, one: ['routeChangeCause', 'e'] },
     { set: 'S16', p: 'P25', tag: 'current-route', iface: I.Guidance, field: 'currentRoute', flags: 'rs', instance: 'Main_Instance', cols: [['session','sessionID','n'],['handle','routeHandle','n']] },
     { set: 'S16', p: 'P25', tag: 'list-views', iface: I.GuidanceEventList, field: 'registeredViews', flags: 'rs', instance: 'Main_Instance', cols: [['len',[],'t']] },
-    { set: 'S16', p: 'P25', tag: 'event-list', iface: I.GuidanceEventList, field: 'viewsChanged', flags: 'b', instance: 'Main_Instance', gapMs: 3000, fmt: 'views' },
+    { set: 'S16', p: 'P25', tag: 'event-list', iface: I.GuidanceEventList, field: 'viewsChanged', flags: 'b', instance: 'Main_Instance', gapMs: 5000, cap: 300, fmt: 'views' },
     { set: 'S16', p: 'P25', tag: 'rendered-views', iface: I.GuidanceRenderedContent, field: 'registeredViews', flags: 'rs', instance: 'Main_Instance', cols: [['len',[],'t']] },
-    { set: 'S16', p: 'P25', tag: 'rendered', iface: I.GuidanceRenderedContent, field: 'viewContentChanged', flags: 'b', instance: 'Main_Instance', gapMs: 1000, fmt: 'rendered' },
+    { set: 'S16', p: 'P25', tag: 'rendered', iface: I.GuidanceRenderedContent, field: 'viewContentChanged', flags: 'b', instance: 'Main_Instance', gapMs: 2000, fmt: 'rendered' },
     { set: 'S16', p: 'P25', tag: 'cp-metadata', iface: I.CarPlayManager, field: 'projectedGuidanceMetadataAvailable', flags: 'rs', instance: 'CarPlayManagerInst1', fmt: 'bool' },
     { set: 'S16', p: 'P25', tag: 'cp-screen', iface: I.CarPlayManager, field: 'onScreenChange', flags: 'b', instance: 'CarPlayManagerInst1', gapMs: 250, one: ['screenOwner', 'e'] },
     { set: 'S16', p: 'P25', tag: 'cp-modes', iface: I.CarPlayAM, field: 'changeModes', flags: 'b', instance: 'CarPlayAMInst1', gapMs: 500, cap: 200, fmt: 'tree', tree: { skip: ['reasonStr'] } },
@@ -413,8 +413,8 @@ const TABLE = [
     { set: 'S16', p: 'P25', tag: 'aa-features', iface: I.AndroidAutoProjectedManager, field: 'featureConfiguration', flags: 'rs', instance: 'AndroidAutoProjectedManagerInst1', cols: [['metadata','guidingMetadataEnabled','b'],['vehicleStatus','vehicleStatusEnabled','b']] },
     { set: 'S16', p: 'P25', tag: 'ric-guidance', iface: I.RICServiceGuidance, field: 'ric_sendEvent', flags: 'b', gapMs: 500, cap: 200, fmt: 'tree', tree: { enumNames: '^(Event|Model)(_[A-Za-z0-9]+)*$' } },
     { set: 'S16', p: 'P25', tag: 'display-sink', iface: I.DisplaySink, field: 'requestSinkSwitch', flags: 'b', gapMs: 250, cap: 100, fmt: 'tree' },
-    { set: 'S16', p: 'P25', tag: 'nav-can', iface: I.NavigationCAN, field: 'calculationDataNavigation', flags: 'rs', gapMs: 5000, cols: [['dist','statusDistanceDestinationNavigation','n'],['unit','statusDistanceDestinationNavigationUnitOfMeasurement','e'],['etaH','statusArrivalTimeHour','n'],['etaM','statusArrivalTimeMinute','n'],['ampm','statusTimeAMPM','e'],['day','statusDayFlag','e']] },
-    { set: 'S16', p: 'P25', tag: 'lane-feedback', iface: I.FeedbackLaneGuiding, field: 'correctionDataLaneGuiding', flags: 'b', fmt: 'tree' },
+    { set: 'S16', p: 'P25', tag: 'nav-can', iface: I.NavigationCAN, field: 'calculationDataNavigation', flags: 'rs', gapMs: 10000, cols: [['dist','statusDistanceDestinationNavigation','n'],['unit','statusDistanceDestinationNavigationUnitOfMeasurement','e'],['etaH','statusArrivalTimeHour','n'],['etaM','statusArrivalTimeMinute','n'],['ampm','statusTimeAMPM','e'],['day','statusDayFlag','e']] },
+    { set: 'S16', p: 'P25', tag: 'lane-feedback', iface: I.FeedbackLaneGuiding, field: 'correctionDataLaneGuiding', flags: 'b', gapMs: 5000, fmt: 'tree' },
 ];
 
 // ---- the sets: each one switchable on its own in the app's centre-screen menu (settings key set1..set9), default all off ----

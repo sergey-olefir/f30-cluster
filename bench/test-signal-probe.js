@@ -493,6 +493,10 @@ async function main() {
     ok(['ProjectedModeGuiding[Main_Instance]', 'GuidanceEventList[Main_Instance]', 'GuidanceRenderedContent[Main_Instance]', 'CarPlay[CarPlayAMInst1]', 'RICServiceGuidance[1]', 'DisplaySink[1]',
         'NavigationCAN[1]', 'FeedbackLaneGuiding[1]', 'Guidance[Main_Instance]', 'CarPlayManager[CarPlayManagerInst1]', 'LaneGuiding[1]', 'KombiIF[1]', 'Vehicle2[1]'].every((x) => w16.indexOf(x) >= 0) && w16.length === 15,
         'S16 subscribes 15 interface instances, one proxy each: ' + w16.join(', '));
+    const g16 = (tag) => S16.pr.fields.find((st) => st.f.tag === tag);
+    ok(g16('event-list').gap === 5000 && g16('event-list').cap === 300 && g16('rendered').gap === 2000 && g16('pm-waypoints').gap === 5000 && g16('lane-feedback').gap === 5000 && g16('nav-can').gap === 10000 &&
+        FIELDS.TABLE.filter((f) => f.set === 'S16').every((f) => g16(f.tag).gap >= 250 && g16(f.tag).cap <= 400),
+        'S16\'s volume (the kit log turns over at 256 KB): the moving distances at most every 2 to 10 s, the rare events every 250 ms, at most 400 lines a field');
     const gw = S16.signals.calls.filter((c) => c.op === 'watch' && /guiding\.Guidance$/.test(c.iface))[0];
     ok(gw && gw.fields.indexOf('streamStatusChanged') >= 0 && gw.fields.indexOf('activeRouteChanged') >= 0 && gw.fields.indexOf('conclusiveDart') >= 0, 'Guidance: the two events go to the same watch as its fields (one proxy)');
     const B16 = (tag) => bodyOf(S16.fieldLines().filter((l) => new RegExp(' ' + tag + ' #').test(l)).pop() || '');

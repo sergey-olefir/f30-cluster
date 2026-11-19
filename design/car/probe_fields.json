@@ -6389,7 +6389,7 @@
       "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
-      "gapMs": 2000,
+      "gapMs": 5000,
       "cap": 400,
       "columns": [
         "travel:travelTime:n",
@@ -6539,8 +6539,8 @@
       "eventId": 32770,
       "rootType": "event",
       "formatter": "views",
-      "gapMs": 3000,
-      "cap": 400
+      "gapMs": 5000,
+      "cap": 300
     },
     {
       "set": "S16",
@@ -6574,7 +6574,7 @@
       "eventId": 32770,
       "rootType": "event",
       "formatter": "rendered",
-      "gapMs": 1000,
+      "gapMs": 2000,
       "cap": 400
     },
     {
@@ -6722,7 +6722,7 @@
       "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
-      "gapMs": 5000,
+      "gapMs": 10000,
       "cap": 400,
       "columns": [
         "dist:statusDistanceDestinationNavigation:n",
@@ -6746,7 +6746,7 @@
       "eventId": 32769,
       "rootType": "event",
       "formatter": "tree",
-      "gapMs": 2000,
+      "gapMs": 5000,
       "cap": 400
     }
   ]
