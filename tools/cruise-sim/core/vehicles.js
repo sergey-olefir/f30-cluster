@@ -1,4 +1,6 @@
+(function () {
 'use strict';
+// (wrapped in a function: the page loads core/*.js as classic scripts, which share one global scope)
 // The other vehicles (SC1): scripted profiles, the Intelligent Driver Model, replayed traces, lane changes.
 //
 //   vehicles.create(specs, events, ctx) -> { list /* = world.others */, step(world, dt), byId(id) }
@@ -339,3 +341,4 @@ function create(specs, events, ctx) {
 
 const vehicles = { NAME: 'vehicles', SCHEMA: [], KIND, EGO_DEFAULT, IDM_DEFAULTS, create, gap, trueLead, follower, leaderOf, parseTrace, loadTrace };
 if (typeof module !== 'undefined') module.exports = vehicles; else (self.CS = self.CS || {})['vehicles'] = vehicles;
+})();

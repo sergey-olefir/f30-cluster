@@ -1,4 +1,6 @@
+(function () {
 'use strict';
+// (wrapped in a function: the page loads core/*.js as classic scripts, which share one global scope)
 // The driver of our car (SC1): sets and changes the maximum speed, overrides with the accelerator, brakes (the cruise
 // suspends) and resumes, and reacts to the warning.
 //
@@ -26,7 +28,7 @@ function S(key, label, unit, def, min, max, step, help, extra) {
 }
 
 const SCHEMA = [
-  S('reactionCase', 'Reaction case', '', 'nominal', undefined, undefined, undefined, 'nominal: drawn; late: the longest; none: never reacts', { options: ['nominal', 'late', 'none'] }),
+  S('reactionCase', 'Reaction case', '', 'nominal', undefined, undefined, undefined, 'nominal: drawn; late: the longest; none: never reacts', { options: ['nominal', 'late', 'none', 'normal'] }),
   S('reactionMedian_s', 'Reaction time, median', 's', 1.2, 0.3, 3, 0.05, 'Of the lognormal draw'),
   S('reactionSigma', 'Reaction time, spread', '', 0.35, 0, 1, 0.05, 'Lognormal sigma'),
   S('reactionMin_s', 'Reaction time, shortest', 's', 0.8, 0.1, 3, 0.05, ''),
@@ -65,7 +67,7 @@ function create(p, rng, ctx) {
   let cruisePrev = null;
 
   function drawReaction() {
-    if (p.reactionCase === 'none') return null;
+    if (p.reactionCase === 'none') return null;   // 'normal' is an alias of 'nominal'
     if (p.reactionCase === 'late') return p.reactionMax_s;
     const x = rng.lognormal(p.reactionMedian_s, p.reactionSigma);
     return Math.max(p.reactionMin_s, Math.min(p.reactionMax_s, x));
@@ -182,3 +184,4 @@ function create(p, rng, ctx) {
 
 const driver = { NAME: 'driver', SCHEMA, create };
 if (typeof module !== 'undefined') module.exports = driver; else (self.CS = self.CS || {})['driver'] = driver;
+})();

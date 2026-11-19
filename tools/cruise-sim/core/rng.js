@@ -1,4 +1,6 @@
+(function () {
 'use strict';
+// (wrapped in a function: the page loads core/*.js as classic scripts, which share one global scope)
 // The one seeded random generator of the simulator (SC1). Nothing in core/ calls Math.random.
 //
 //   rng.create(seed) -> { next() [0,1), normal(mean, sd), int(lo, hi) inclusive, pick(arr), fork(label),
@@ -91,3 +93,4 @@ function create(seed) {
 
 const rng = { create: create, hashString: hashString };
 if (typeof module !== 'undefined') module.exports = rng; else (self.CS = self.CS || {})['rng'] = rng;
+})();

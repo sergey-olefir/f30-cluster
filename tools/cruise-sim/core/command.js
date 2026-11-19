@@ -1,4 +1,6 @@
+(function () {
 'use strict';
+// (wrapped in a function: the page loads core/*.js as classic scripts, which share one global scope)
 // The command path (SC1): how a set speed would travel from the app to the cruise. Nothing of it is known on the car
 // (parent brief, "The command path"), so every term is a setting and is swept.
 //
@@ -125,3 +127,4 @@ function create(p, rng, ctx) {
 
 const command = { NAME: 'command', SCHEMA, PRESETS, create };
 if (typeof module !== 'undefined') module.exports = command; else (self.CS = self.CS || {})['command'] = command;
+})();
