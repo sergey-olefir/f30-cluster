@@ -9,7 +9,9 @@
 //
 // Geometry: every x (ego's and the others') is the FRONT bumper, m along the road; gap(behind, ahead) =
 // ahead.x - ahead.length - behind.x (bumper to bumper). A scenario's x0 is that gap at t = 0: x0 > 0 puts the car's rear
-// x0 m ahead of ego's front, x0 < 0 puts its front |x0| m behind ego's rear (a follower). y = lane * laneWidth + lat.
+// x0 m ahead of ego's front, x0 < 0 puts its front |x0| m behind ego's rear (a follower). Alongside (partly overlapping
+// ego) is out of x0's reach: xFront_m (front bumper relative to ego's front bumper, + = ahead) overrides x0 for that.
+// y = lane * laneWidth + lat.
 //
 // Profiles (vehicle.profile.type):
 //   const      { } constant v0_kmh (the default; 'static' kind -> v = 0)
@@ -259,7 +261,7 @@ function create(specs, events, ctx) {
     if (byIdMap[id]) throw new Error('vehicle id ' + id + ' used twice');
     const length = s.length || dims.length, width = s.width || dims.width;
     const x0 = s.x0 === undefined ? 50 : s.x0;
-    const x = x0 >= 0 ? ego.x + x0 + length : ego.x - ego.length + x0;
+    const x = s.xFront_m !== undefined ? ego.x + s.xFront_m : (x0 >= 0 ? ego.x + x0 + length : ego.x - ego.length + x0);
     const lane = s.lane === undefined ? ego.lane : s.lane;
     let v = kind === 'static' ? 0 : (s.v0_kmh !== undefined ? s.v0_kmh * KMH : ego.v);
     if (s.profile && s.profile.type === 'piecewise' && s.v0_kmh === undefined && s.profile.points && s.profile.points.length) v = s.profile.points[0][1] * KMH;

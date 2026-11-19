@@ -60,6 +60,15 @@ test('sim: a collision with a standing car ends the run with the impact speed', 
   assert.strictEqual(r.verdict.pass, false);
 });
 
+test('sim: a car changing lanes into us while alongside is a side collision', () => {
+  const r = sim.run({ duration: 10, scenario: { inline: scen([{ id: 'c', lane: 1, xFront_m: 1, v0_kmh: 100 }], [{ t: 1, kind: 'cutIn', vehicle: 'c', duration_s: 2 }]) } },
+    deps({ controller: holdController, warning: noWarning }));
+  const c = r.events.find(e => e.kind === 'collision');
+  assert.ok(c && c.from === 'side' && c.with === 'c', JSON.stringify(c));
+  near(c.impactSpeed, 0, 1e-9);
+  assert.strictEqual(r.meta.core.collisionFrom, 'side');
+});
+
 test('sim: the controller runs at its own rate', () => {
   let calls = 0;
   const counting = { NAME: 'controller', SCHEMA: [], LENIENT: true, create: () => ({ step: () => { calls++; return { vSet: null }; } }) };

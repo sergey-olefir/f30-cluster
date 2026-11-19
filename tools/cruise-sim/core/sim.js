@@ -360,7 +360,7 @@ function createSim(config, deps) {
   let lastMeas = null, pendingMeas = null, frozenMeas = null, lastEst = null, lastOut = null, lastW = null;
   let lastSent = null, prevTarget = null, warnOn = false, lastJerkA = 0;
   let lead = null, fol = null;
-  const core = { minGap: Infinity, minTimeGap: Infinity, minTTC: Infinity, collision: false, collisionWith: null, collisionT: null,
+  const core = { minGap: Infinity, minTimeGap: Infinity, minTTC: Infinity, collision: false, collisionWith: null, collisionT: null, collisionFrom: null,
     impactSpeed: 0, peakDecel: 0, peakAccel: 0, peakJerk: 0, accelRms: 0, cmdSent: 0, cmdApplied: 0, cmdDropped: 0, cmdRejected: 0,
     cmdPerMin: 0, warnCount: 0, warnTime: 0, driverBrakes: 0, followerMinTimeGap: Infinity, followerPeakDecel: 0,
     timeNotActive: 0, minSpeed: Infinity, duration: 0 };
@@ -537,6 +537,8 @@ function createSim(config, deps) {
     }
 
     lastT = t;
+    // which others overlap us longitudinally now (a collision that begins with a lateral move is a side impact)
+    const longiBefore = world.others.map(o => o.x - o.length < ego.x && ego.x - ego.length < o.x);
     if (k >= nTicks) { done = true; return; }   // the state at t = duration is recorded; nothing moves past it
 
     // 9. advance to t + dt
@@ -548,15 +550,20 @@ function createSim(config, deps) {
     k++;
     world.t = k * dt;
 
-    // collisions at t + dt: longitudinal and lateral overlap with anyone
-    for (const o of world.others) {
+    // collisions at t + dt: longitudinal and lateral overlap with anyone. from: 'ahead' (we ran into it), 'behind' (it ran
+    // into us), 'side' (it moved sideways into us while alongside: a lane change into an occupied space); impactSpeed is
+    // the longitudinal closing speed (for 'side', the absolute speed difference)
+    for (let oi = 0; oi < world.others.length; oi++) {
+      const o = world.others[oi];
       const longi = o.x - o.length < ego.x && ego.x - ego.length < o.x;
       const lat = Math.abs(o.y - ego.y) < (o.width + ego.width) / 2;
       if (longi && lat) {
         const behind = o.x < ego.x;
-        const impact = behind ? o.v - ego.v : ego.v - o.v;
-        core.collision = true; core.collisionWith = o.id; core.collisionT = world.t; core.impactSpeed = Math.max(0, impact);
-        emit('collision', { with: o.id, from: behind ? 'behind' : 'ahead', impactSpeed: Math.max(0, impact) });
+        const side = longiBefore[oi];
+        const impact = side ? Math.abs(o.v - ego.v) : Math.max(0, behind ? o.v - ego.v : ego.v - o.v);
+        core.collision = true; core.collisionWith = o.id; core.collisionT = world.t; core.impactSpeed = impact;
+        core.collisionFrom = side ? 'side' : (behind ? 'behind' : 'ahead');
+        emit('collision', { with: o.id, from: core.collisionFrom, impactSpeed: impact });
         if (cfg.stopOnCollision) done = true;
         break;
       }
