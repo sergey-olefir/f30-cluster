@@ -219,7 +219,7 @@ function decode(reply) {
     if (out.error !== null && out.error !== 'NO_ERROR') return out;
     const v = vc && isObj(vc[0]) ? vc[0] : null;
     const evs = v && Array.isArray(v.eventsInView) ? v.eventsInView : null;
-    if (!evs) { out.error = out.error || 'no view'; return out; }
+    if (!evs) { out.error = 'no view'; return out; }
     out.ok = true;
     if (isObj(v.indexedPosition) && isNum(v.indexedPosition.totalElementCount)) out.total = v.indexedPosition.totalElementCount;
     out.count = evs.length;
@@ -311,7 +311,7 @@ class Poller {
                 this.proxyAsking = false;
                 if (gen !== this.gen) return;
                 if (!px) { this._outcome('proxy', 'no proxy', this.now()); return; }
-                this.proxy = px;
+                this.proxy = px; this.lastAt = -Infinity;        // the first call at the next tick
             }, (e) => { this.proxyAsking = false; if (gen === this.gen) this._outcome('proxy', msgOf(e), this.now()); }).catch(() => {});
             return false;
         }
