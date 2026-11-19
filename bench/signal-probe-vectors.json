@@ -6497,5 +6497,296 @@
    "nextGuidingHighlightedLanes": 1
   },
   "body": "currentGuidingBestLanes=2 currentNumberOfLanes=3 nextGuidingBestLanes=1 nextNumberOfLanes=2 currentLane=2 laneShift=-1 distanceNextGuiding=150 distanceNextManeuver=350 useXPadData=DATA_VALID currentGuidingHighlightedLanes=2 nextGuidingHighlightedLanes=1"
+ },
+ {
+  "set": "S16",
+  "p": "P25",
+  "tag": "next-turn",
+  "iface": "de.bmw.infotainment.navigation.guiding.GuidanceEventList",
+  "field": "queryContent",
+  "instance": "Main_Instance",
+  "value": {
+   "GuidanceEventListError": "NO_ERROR",
+   "viewContent": [
+    {
+     "configSequenceId": 4294967295,
+     "indexedPosition": {
+      "valid": false,
+      "ccpOffset": 0,
+      "totalElementCount": 5
+     },
+     "eventsInView": [
+      {
+       "pointOfInterest": {
+        "uid": "0",
+        "distanceToDestination": 8985,
+        "unreliable": false,
+        "sourceId": {
+         "simpleId": {
+          "id": "4711"
+         }
+        },
+        "formattedDistance": {
+         "distance": " ",
+         "unit": "NONE",
+         "rawDistance": 500
+        },
+        "description": {
+         "elements": [
+          {
+           "text": "STREET_CANARY"
+          },
+          {
+           "spacer": "SMALL"
+          }
+         ]
+        },
+        "travelTime": 0,
+        "travelTimeDelay": 0,
+        "trafficSegmentsInfo": {
+         "overview": [],
+         "segments": []
+        },
+        "guidingStep": "GS1",
+        "speedLimitAssistInfo": {
+         "nil": "NO_VALUE"
+        },
+        "combinedManeuverType": "SINGLE",
+        "maneuverRestriction": "NONE",
+        "poiId": "4711",
+        "category": "ALERT",
+        "serviceIconHandles": []
+       }
+      },
+      {
+       "intersection": {
+        "uid": "3",
+        "distanceToDestination": 8985,
+        "unreliable": false,
+        "sourceId": {
+         "simpleId": {
+          "id": "4711"
+         }
+        },
+        "formattedDistance": {
+         "distance": "250",
+         "unit": "METER",
+         "rawDistance": 1
+        },
+        "description": {
+         "elements": [
+          {
+           "text": "STREET_CANARY"
+          },
+          {
+           "spacer": "SMALL"
+          }
+         ]
+        },
+        "travelTime": 0,
+        "travelTimeDelay": 0,
+        "trafficSegmentsInfo": {
+         "overview": [],
+         "segments": []
+        },
+        "guidingStep": "GS2",
+        "speedLimitAssistInfo": {
+         "nil": "NO_VALUE"
+        },
+        "combinedManeuverType": "SINGLE",
+        "maneuverRestriction": "NONE",
+        "direction": "LEFT",
+        "roadlinks": {
+         "value": {
+          "entryLink": {
+           "linkDescriptor": {
+            "tileDescriptor": {
+             "productId": 1,
+             "tileId": 4711,
+             "updateRegionId": 2
+            },
+            "linkId": 4711
+           },
+           "startPointCoordinate": {
+            "coordinatesValid": true,
+            "heightValid": false,
+            "longitude": 30.9876,
+            "latitude": 50.4321,
+            "height": {
+             "unit": "METER",
+             "displayLength": 0,
+             "rawLengthMeter": 0
+            }
+           }
+          },
+          "turningPoint": {
+           "coordinatesValid": true,
+           "heightValid": false,
+           "longitude": 30.9876,
+           "latitude": 50.4321,
+           "height": {
+            "unit": "METER",
+            "displayLength": 0,
+            "rawLengthMeter": 0
+           }
+          }
+         }
+        },
+        "detailedGeometry": "UNDEFINED"
+       }
+      },
+      {
+       "roundabout": {
+        "uid": "4",
+        "distanceToDestination": 8985,
+        "unreliable": false,
+        "sourceId": {
+         "simpleId": {
+          "id": "4711"
+         }
+        },
+        "formattedDistance": {
+         "distance": " ",
+         "unit": "NONE",
+         "rawDistance": 500
+        },
+        "description": {
+         "elements": [
+          {
+           "text": "STREET_CANARY"
+          },
+          {
+           "spacer": "SMALL"
+          }
+         ]
+        },
+        "travelTime": 0,
+        "travelTimeDelay": 0,
+        "trafficSegmentsInfo": {
+         "overview": [],
+         "segments": []
+        },
+        "guidingStep": "GS1",
+        "speedLimitAssistInfo": {
+         "nil": "NO_VALUE"
+        },
+        "combinedManeuverType": "SINGLE",
+        "maneuverRestriction": "NONE",
+        "exitAngle": 270,
+        "exitNumber": 2,
+        "driveDirection": "RIGHT",
+        "roadlinks": {
+         "nil": "NO_VALUE"
+        }
+       }
+      },
+      {
+       "tunnel": {
+        "uid": "0",
+        "distanceToDestination": 8985,
+        "unreliable": false,
+        "sourceId": {
+         "simpleId": {
+          "id": "4711"
+         }
+        },
+        "formattedDistance": {
+         "distance": "CANARY_TEXT",
+         "unit": "KM",
+         "rawDistance": 1
+        },
+        "description": {
+         "elements": [
+          {
+           "text": "STREET_CANARY"
+          },
+          {
+           "spacer": "SMALL"
+          }
+         ]
+        },
+        "travelTime": 0,
+        "travelTimeDelay": 0,
+        "trafficSegmentsInfo": {
+         "overview": [],
+         "segments": []
+        },
+        "guidingStep": "GS1",
+        "speedLimitAssistInfo": {
+         "nil": "NO_VALUE"
+        },
+        "combinedManeuverType": "SINGLE",
+        "maneuverRestriction": "NONE",
+        "length": 420,
+        "formattedLength": {
+         "distance": "420",
+         "unit": "METER",
+         "rawDistance": 420
+        },
+        "isInsideEvent": false
+       }
+      },
+      {
+       "destinationManeuver": {
+        "uid": "5",
+        "distanceToDestination": 8985,
+        "unreliable": false,
+        "sourceId": {
+         "simpleId": {
+          "id": "4711"
+         }
+        },
+        "formattedDistance": {
+         "distance": " ",
+         "unit": "NONE",
+         "rawDistance": 500
+        },
+        "description": {
+         "elements": [
+          {
+           "text": "STREET_CANARY"
+          },
+          {
+           "spacer": "SMALL"
+          }
+         ]
+        },
+        "travelTime": 0,
+        "travelTimeDelay": 0,
+        "trafficSegmentsInfo": {
+         "overview": [],
+         "segments": []
+        },
+        "guidingStep": "GS1",
+        "speedLimitAssistInfo": {
+         "nil": "NO_VALUE"
+        },
+        "combinedManeuverType": "SINGLE",
+        "maneuverRestriction": "NONE",
+        "position": "LEFT",
+        "isCheckeredFlag": true,
+        "stopOverNumber": 0,
+        "roadlinks": {
+         "nil": "NO_VALUE"
+        },
+        "chargingInfo": {
+         "nil": "NO_VALUE"
+        },
+        "poi": {
+         "nil": "NO_VALUE"
+        }
+       }
+      }
+     ]
+    }
+   ],
+   "currentDistances": {
+    "carDistanceToFinalDestination": 8985,
+    "carDistanceToNextDestination": -1,
+    "travelledDistanceSinceTripStart": -1,
+    "travelledDistanceSinceLastDestination": -1
+   }
+  },
+  "body": "answered events=5 total=5 [pointOfInterest dist-len=1 unit=NONE raw=500 uid=zero toDest=8985 step=GS1 desc=2/13] [intersection direction=LEFT geometry=UNDEFINED dist=250 unit=METER raw=1 uid=set toDest=8985 step=GS2 desc=2/13] [roundabout exit=2 angle=270 side=RIGHT dist-len=1 unit=NONE raw=500 uid=set toDest=8985 step=GS1 desc=2/13] [tunnel length=420 dist-len=11 unit=KM raw=1 uid=zero toDest=8985 step=GS1 desc=2/13] +1 more next=1 toFinal=8985 toNext=-1"
  }
 ]

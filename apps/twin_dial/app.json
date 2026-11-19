@@ -36,7 +36,8 @@
     "mb_exp.js",
     "diag_settings.js",
     "twin_limit.js",
-    "limit_src.js"
+    "limit_src.js",
+    "carplay_turns.js"
   ],
   "signals": {
     "de.bmw.body.Light": {
@@ -165,6 +166,11 @@
       "isOnGuidableRoad": "rs",
       "_about": "P12 on the car (2026-11-18, a route by CarPlay): guidingProvider CAR_PLAY, nextDestinationInfo (rawDistance in metres, travelTime s, the arrival time local), currentRoad and isOnGuidableRoad arrive - the CarPlay route page (config.pages.route, car-fix CF3); conclusiveDart and the lanes stay empty with CarPlay (the guidance page, config.pages.guidance, stays dark: BMW's own guidance is untested). The map window's presence rule (config.mapWindow). Road text is drawn, never logged; positions and bearings are never read. Read only."
     },
+    "de.bmw.infotainment.navigation.guiding.GuidanceEventList": {
+      "_instances": "Main_Instance",
+      "_methods": ["queryContent"],
+      "_about": "car issues CT (the owner, 2026-11-19): the ONE method, a read - queryContent (methodId 4), CarPlay's next turns as data for tab 5's arrow page. Called only by shared/carplay_turns.js, only with Діагностика \"Повороти CarPlay (тест)\" on (config.carplayTurns) and the phone guiding (guidingProvider CAR_PLAY / ANDROID_AUTO): every 2 s, one call in flight, timeout 3 s. Never setViewConfig, setViewportConfig, the registeredViews setter or any other method. Whether the car's ACL lets an OAP app call it is unknown: the first call's outcome is logged. Road names are drawn, never logged."
+    },
     "de.bmw.infotainment.vehicle.TPMS": {
       "statusTyrePressure": "rs",
       "statusTyreTemperature": "rs",
@@ -265,7 +271,8 @@
         "diagMapForce",
         "diagMapSlots",
         "diagSilent",
-        "diagGpuText"
+        "diagGpuText",
+        "diagCarplayTurns"
       ]
     },
     {
@@ -297,6 +304,10 @@
         [
           "setting",
           "diagGpuText"
+        ],
+        [
+          "setting",
+          "diagCarplayTurns"
         ]
       ]
     }
@@ -604,6 +615,13 @@
       "default": "off",
       "options": [["off", "вимк."], ["legacy", "атлас 0.1.3"], ["pixels", "пікселями"]],
       "_about": "car-issues GL: config.gpuText for the car test of docs/car-issues/GL-REPORT.md. off = the glyph atlases with rows of a multiple of 4 bytes (the fix); legacy = Twin Dial 0.1.3's td_big atlas (1066 bytes a row, 41 px cells written in place); pixels = the speed and the gear drawn as image text. Each change rebuilds the layout"
+    },
+    {
+      "key": "diagCarplayTurns",
+      "label": "Повороти CarPlay (тест)",
+      "type": "bool",
+      "default": false,
+      "_about": "car issues CT: config.carplayTurns - with the phone guiding, tab 5 shows the arrow page fed from GuidanceEventList.queryContent (the one method call, a read the owner approved on 2026-11-19; shared/carplay_turns.js) instead of conclusiveDart: the arrow, the phone's own distance, the road the turn names; the CarPlay route page stays the fallback when the call fails, finds no turn or its turn is older than 6 s. Off (the default): no call, nothing changes. Applied in place"
     }
   ],
   "config": {
@@ -862,7 +880,8 @@
         "diagMapForce": { "on": { "mapForce": true } },
         "diagMapSlots": { "on": { "mapSlotLog": true } },
         "diagSilent": { "act": "silent" },
-        "diagGpuText": { "options": { "legacy": { "gpuText": "legacy" }, "pixels": { "gpuText": "pixels" } }, "_about": "car-issues GL: the glyph atlases' row layout or image text, a rebuild on each change (shared/diag_settings.js)" }
+        "diagGpuText": { "options": { "legacy": { "gpuText": "legacy" }, "pixels": { "gpuText": "pixels" } }, "_about": "car-issues GL: the glyph atlases' row layout or image text, a rebuild on each change (shared/diag_settings.js)" },
+        "diagCarplayTurns": { "on": { "carplayTurns": true }, "_about": "car issues CT: the test mode of CarPlay's next turn on tab 5 (shared/twin_pages.js cpSync / cpLive), read at the moment of use: applied in place" }
       }
     },
     "pages": {
@@ -883,6 +902,8 @@
     "_mapSlots": "true once the experiment has shown that cluster-render's status rows (slot 0x100 ... map 1) are readable: the window then follows them (S1); false = it follows the cluster's map-view setting and guidance (S2).",
     "mapForce": false,
     "mapShutMs": 8000,
+    "carplayTurns": false,
+    "_carplayTurns": "car issues CT (2026-11-19): false = tab 5 as before (the CarPlay route page with a phone route). true (Діагностика \"Повороти CarPlay (тест)\") = with the phone guiding, the arrow page from GuidanceEventList.queryContent, asked every 2 s (shared/carplay_turns.js); the route page whenever the call fails, finds no turn, or its turn is older than 6 s. navView: \"карта\" with the map window open keeps the map; \"стрілки\" and \"авто\" show the CarPlay arrow page (in \"авто\" the map's strict rule normally keeps the window shut on a CarPlay route).",
     "sign": {
       "iface": "de.bmw.dass.driverassistanceapplications.TrafficSignDisplayControl",
       "field": "displaySpeedLimitAndNoPassingRestriction",

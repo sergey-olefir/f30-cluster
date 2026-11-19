@@ -9,6 +9,9 @@
   "mguHmi": [
     "ID7"
   ],
+  "shared": [
+    "carplay_turns.js"
+  ],
   "signals": {
     "de.bmw.infotainment.KombiIF": {
       "_instances": "1",
@@ -553,6 +556,9 @@
       "registeredViews": "rs",
       "_broadcasts": [
         "viewsChanged"
+      ],
+      "_methods": [
+        "queryContent"
       ]
     },
     "de.bmw.infotainment.navigation.guiding.GuidanceRenderedContent": {

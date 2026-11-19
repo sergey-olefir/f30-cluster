@@ -288,6 +288,39 @@ function fmtStream(v) {
     }
     return out;
 }
+/**
+ * S16 next-turn (car issues CT): a queryContent reply as shared/carplay_turns.js decode() reads it (`d`; `next` = nextIndex(d)).
+ * "answered events=N [..] x4" with, per event, its kind and what the arrow needs (direction / branch / exit and side / position and
+ * flag / main-road direction / lane side / a tunnel's length), the phone's distance (its number when the text is a number, else the
+ * text's LENGTH) and unit, rawDistance, whether a uid is set, the distance to the destination, the guiding step, the description as
+ * element count and character count; then which event the cluster page would draw (next=), the car's two distances. Never a text,
+ * a road link (coordinates) or a source id.
+ */
+function fmtTurns(d, next) {
+    if (!d || typeof d !== 'object') return notA('a struct', d);
+    if (!d.ok) return 'answered error=' + (d.error && /^[A-Za-z0-9_ ]{1,40}$/.test(d.error) ? d.error.replace(/ /g, '-') : '?') + ' views=' + fNum(d.views);
+    const one = (e) => {
+        if (!e || !e.kind) return '[?]';
+        let s = '[' + e.kind;
+        if (e.kind === 'intersection') s += ' direction=' + fEnum(e.dir) + ' geometry=' + fEnum(e.geometry);
+        else if (e.kind === 'branch') s += ' branch=' + fEnum(e.branch) + ' geometry=' + fEnum(e.geometry);
+        else if (e.kind === 'roundabout') s += ' exit=' + fNum(e.exit) + ' angle=' + fNum(e.angle) + ' side=' + fEnum(e.side);
+        else if (e.kind === 'destinationManeuver') s += ' position=' + fEnum(e.position) + ' flag=' + fBool(e.flag) + ' stopover=' + fNum(e.stopover);
+        else if (e.kind === 'alongMainRoad') s += ' main=' + fEnum(e.mainDir);
+        else if (e.kind === 'laneChange') s += ' side=' + fEnum(e.side);
+        else if (e.kind === 'tunnel') s += ' length=' + fNum(e.length);
+        const di = e.dist || {};
+        s += (di.num !== null && di.num !== undefined && /^\d{1,7}(\.\d{1,3})?$/.test(di.num) ? ' dist=' + di.num : ' dist-len=' + fLen(di.text)) + ' unit=' + fEnum(di.unit) +
+            ' raw=' + fNum(e.raw) + ' uid=' + (e.uid === 'set' || e.uid === 'zero' ? e.uid : '-') + (isNum(e.toDest) ? ' toDest=' + fNum(e.toDest) : '') +
+            ' step=' + fEnum(e.step) + (e.unreliable ? ' unreliable' : '') + ' desc=' + fNum(e.descElements) + '/' + fNum(e.descChars) + ']';
+        return s;
+    };
+    const dist = d.distances || {};
+    return 'answered events=' + d.count + (isNum(d.total) ? ' total=' + d.total : '') + (d.events.length ? ' ' + d.events.map(one).join(' ') : '') +
+        (d.more ? ' +' + d.more + ' more' : '') + ' next=' + (isNum(next) && next >= 0 ? next : 'none') +
+        ' toFinal=' + fNum(dist.toFinal) + ' toNext=' + fNum(dist.toNext);
+}
+
 /** Lane guidance (Guidance.currentLaneGuiding): per row the lanes as direction enums, '*' for a highlighted lane. */
 function fmtLanes(v) {
     if (!v || typeof v !== 'object') return notA('a struct', v);
@@ -474,5 +507,5 @@ module.exports = {
     fNum, fEnum, fBool, fHex, fLen, fCoarse, fKnown, fPresent, fBand, fPic, enumList,
     fmtBits, fmtCbs, fmtTemps, fmtIntersection, fmtDescription, fmtDart, fmtLanes, fmtMediaMenu, fmtStation, fmtMetadata,
     fmtRoles, fmtDevices, fmtCallList, fmtTree, TREE_SKIP,
-    eventParts, mapEntries, fmtViews, fmtRendered, fmtStream,
+    eventParts, mapEntries, fmtViews, fmtRendered, fmtStream, fmtTurns,
 };
