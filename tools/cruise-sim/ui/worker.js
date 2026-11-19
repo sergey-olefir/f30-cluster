@@ -11,6 +11,7 @@
  * A missing core file is skipped (the page then knows the module is absent); a run without core/sim.js
  * answers an error and the page runs in place. Chrome refuses workers under file://: the page falls back.
  */
+(function () {      // own scope: importScripts shares the worker's global lexical scope with every core file
 self.CS = self.CS || {};
 let loaded = false;
 
@@ -59,3 +60,4 @@ self.onmessage = (ev) => {
         self.postMessage({ type: 'error', id: m.id, message: e && e.message ? e.message : String(e) });
     }
 };
+})();
