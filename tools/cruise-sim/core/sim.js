@@ -267,7 +267,7 @@ const SERIES = ['ego.x', 'ego.v', 'ego.a', 'ego.jerk', 'lead.x', 'lead.v', 'lead
   'v.driverMax', 'd.des', 'd.needed', 'v.ref', 'timegap', 'ttc', 'warn', 'cruise.state', 'driver.brake', 'driver.accel',
   'grade', 'follower.gap', 'follower.a',
   // additions (CONTRACT.md lists them as SC1's extras)
-  'set.eff', 'meas.id', 'est.id', 'warn.reason', 'warn.ttc', 'app.alive', 'curvature', 'elevation', 'follower.v', 'a.demand'];
+  'set.eff', 'meas.id', 'meas.wrong', 'est.id', 'warn.reason', 'warn.ttc', 'app.alive', 'curvature', 'elevation', 'follower.v', 'a.demand', 'ego.lane', 'ego.y'];
 
 function createSim(config, deps) {
   const t0wall = Date.now();
@@ -324,6 +324,8 @@ function createSim(config, deps) {
     };
   }
   let app = mode === 'ours' ? makeApp() : null;
+  // the fastest the loop lets its set speed fall (SC2's controller key), for the warning; undefined when not configured
+  const aCmdMax = typeof params.controller.rateDown_kmhps === 'number' ? params.controller.rateDown_kmhps * KMH : undefined;
   let baseline = null;
   if (mode !== 'ours') {
     const B = M.baselines[mode];
@@ -423,9 +425,14 @@ function createSim(config, deps) {
       const egoIn = { egoV: ego.v, egoA: ego.a };
       lastEst = app.estimator.update(pendingMeas, t, egoIn);
       pendingMeas = null;
-      lastOut = app.controller.step({ t, est: lastEst, egoV: ego.v, egoA: ego.a, vDriver: world.driver.vMax, cruise: world.cruise });
-      lastW = app.warning.step({ t, est: lastEst, egoV: ego.v, aMin: plant.aMinConfigured });
-      if (lastOut && lastOut.vSet !== null && lastOut.vSet !== undefined && lastOut.vSet !== lastSent) {
+      const curv = road.curvature(ego.x);
+      lastOut = app.controller.step({ t, est: lastEst, egoV: ego.v, egoA: ego.a, vDriver: world.driver.vMax, cruise: world.cruise,
+        curvature: curv, yawRate: ego.v * curv });
+      lastW = app.warning.step({ t, est: lastEst, egoV: ego.v, aMin: plant.aMinConfigured, aCmdMax });
+      // send when the controller says so (out.send: a change or a resend), else when vSet changed
+      const wantSend = lastOut && lastOut.vSet !== null && lastOut.vSet !== undefined &&
+        (lastOut.send === true || (lastOut.send === undefined && lastOut.vSet !== lastSent));
+      if (wantSend) {
         const s = command.send(t, lastOut.vSet, faults);
         lastSent = lastOut.vSet;
         core.cmdSent++;
@@ -501,6 +508,7 @@ function createSim(config, deps) {
       const i = row++;
       tArr[i] = t;
       const S = series;
+      S['ego.lane'][i] = ego.lane; S['ego.y'][i] = ego.y;
       S['ego.x'][i] = ego.x; S['ego.v'][i] = ego.v; S['ego.a'][i] = a; S['ego.jerk'][i] = k > 0 ? ego.jerk : 0;
       if (lead) {
         S['lead.x'][i] = lead.x; S['lead.v'][i] = lead.v; S['lead.a'][i] = lead.a; S['lead.id'][i] = enumIdx('id', lead.id);
@@ -511,6 +519,8 @@ function createSim(config, deps) {
         S['gap.meas'][i] = lastMeas.gap === null || lastMeas.gap === undefined ? NaN : lastMeas.gap;
         S['vrel.meas'][i] = lastMeas.vrel === null || lastMeas.vrel === undefined ? NaN : lastMeas.vrel;
         S['meas.id'][i] = enumIdx('id', lastMeas.id);
+        const tr = lastMeas._truth;   // SC2's debug truth of a sample: a wrong or ghost target
+        if (tr) S['meas.wrong'][i] = (tr.wrong || tr.ghost) ? 1 : 0;
       }
       if (lastEst) {
         S['est.valid'][i] = lastEst.valid ? 1 : 0;

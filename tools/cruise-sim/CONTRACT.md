@@ -149,7 +149,10 @@ createSim(config) -> { step() /* one dt */, advance(seconds), state() /* world +
   `world.faults` = `{ appDead, restart, sensorBlind, blindMode, gapFrozen, commandsLost, setStuck, cruiseDropout, stalled,
   ghost, sensorRangeCut, latencyExtra, dropBurst, sensorDegraded, active }`; sim.js itself enforces gapFreeze and
   sensorBlind on whatever the sensor returns.
-- **Warning input** `aMin` = `plant.params.aMin_ms2` (negative, the configured deceleration limit).
+- **Warning input** `aMin` = `plant.params.aMin_ms2` (negative, the configured deceleration limit), and `aCmdMax` =
+  `controller.rateDown_kmhps / 3.6` (m/s², positive) when the controller has that key.
+- **Controller input, added** `curvature` (1/m at ego's x, + = left) and `yawRate` (= v · curvature). **Output** `send`:
+  true = send vSet now (a change or a resend), false = do not; undefined = send when vSet changed.
 - **Metrics.** At the end sim.js calls `metrics.compute(result, config)` (a plain object back) and
   `metrics.verdict(metrics, config.thresholds, scenario.decide)`. Before that, `result.meta.core` holds SC1's exact (10 ms)
   numbers: `minGap minTimeGap minTTC collision collisionWith collisionT collisionFrom impactSpeed peakDecel peakAccel
@@ -158,14 +161,15 @@ createSim(config) -> { step() /* one dt */, advance(seconds), state() /* world +
 - **Result meta, added.** `duration dt outDt modules params /* every module's merged params */ enums core ego vehicles road
   scenario { id family name scope decide }`, and `worst` after a worst-time search. Enums: `cruise.state` (the plant's
   STATES), `id` (vehicle / target ids, for `lead.id meas.id est.id`), `warn.reason`.
-- **Series, added.** `set.eff meas.id est.id warn.reason warn.ttc app.alive curvature elevation follower.v a.demand`, and per
+- **Series, added.** `set.eff meas.id meas.wrong est.id warn.reason warn.ttc app.alive curvature elevation follower.v a.demand
+  ego.lane ego.y`, and per
   vehicle `veh.<id>.x|v|a|lane|lat|y`. `timegap` and `ttc` are the TRUE ones (truth gap and speeds); the warning's own TTC
   is `warn.ttc`.
 - **Events, added.** `vehicle.lane { id, phase: 'start'|'end', change, from, to }`, `driver.cancel`; `collision` carries
   `{ with, from: 'ahead'|'behind'|'side', impactSpeed }`; `fault.on/off` carry `{ fault, id }`; `cmd.*` carry
   `{ id, tSent, vSet, reason?, silent?, dup? }`; `cruise.state` carries `{ from, to, reason }`; `driver.react`
   `{ cause, rt, brakes }`; `driver.brake { level, cause }` (level 0, cause 'release' when let go).
-- **Scenario events SC1 consumes.** `cutIn | cutOut | laneChange { vehicle, toLane?, duration_s: 3, gap_m?, v_kmh? | dv_kmh?,
+- **Scenario events SC1 consumes.** `cutIn | cutOut | laneChange { vehicle /* or 'ego' for our own lane change */, toLane?, duration_s: 3, gap_m?, v_kmh? | dv_kmh?,
   whenGap_m? }`, `driverVmax { vMax_kmh }`, `driverBrake { level_ms2, duration_s }`, `driverOverride { accel, duration_s }`,
   `driverResume`, `driverCancel`, `fault { fault: <kind>, at | t, duration?, ...options }`. Scenario `ego` may also carry
   `cruise: 'off'` and `set_kmh`. Profile types: `const piecewise accel steps sine stopgo idm replay static`.

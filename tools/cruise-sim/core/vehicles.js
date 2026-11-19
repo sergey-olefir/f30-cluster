@@ -27,7 +27,7 @@
 //   gap_m? (place the car this gap ahead of ego when the change starts), v_kmh? | dv_kmh? (set its speed then, for
 //   const / steps / accel / idm), whenGap_m? (start only once its gap to ego is at most this) }.
 //   cutIn defaults toLane to ego's lane, cutOut to the neighbouring lane. y moves on a cosine over duration_s; the lane
-//   number switches at the midpoint.
+//   number switches at the midpoint. vehicle: 'ego' moves our own car (laneChange only; toLane defaults to the neighbour).
 
 const KMH = 1 / 3.6;
 const EGO_DEFAULT = { length: 4.7, width: 1.85 };
@@ -275,12 +275,20 @@ function create(specs, events, ctx) {
   const lcEvents = (events || []).filter(e => e.kind === 'cutIn' || e.kind === 'cutOut' || e.kind === 'laneChange')
     .map(e => {
       const id = String(e.vehicle !== undefined ? e.vehicle : e.id);
-      if (!byIdMap[id]) throw new Error(e.kind + ' event: no vehicle ' + id);
+      if (!byIdMap[id] && id !== 'ego') throw new Error(e.kind + ' event: no vehicle ' + id);
       return Object.assign({ fired: false }, e, { vehicle: id });
     });
 
   function startLaneChange(e, world, t) {
-    const veh = byIdMap[e.vehicle];
+    const isEgo = e.vehicle === 'ego';
+    const veh = isEgo ? world.ego : byIdMap[e.vehicle];
+    if (isEgo) {   // our own lane change: only the lateral move (gap_m / v_kmh do not apply)
+      const to = e.toLane !== undefined ? e.toLane : (e.lane !== undefined ? e.lane : (veh.lane + 1 < road.lanes ? veh.lane + 1 : veh.lane - 1));
+      const dur = e.duration_s !== undefined ? e.duration_s : 3;
+      veh.lc = { t0: t, dur: Math.max(dur, 1e-6), y0: veh.y, y1: to * laneW, from: veh.lane, to, kind: e.kind };
+      ctx.emit('vehicle.lane', { id: 'ego', phase: 'start', change: e.kind, from: veh.lane, to, duration: dur });
+      return;
+    }
     let to = e.toLane !== undefined ? e.toLane : e.lane;
     if (to === undefined) {
       if (e.kind === 'cutIn') to = world.ego.lane;
@@ -299,7 +307,7 @@ function create(specs, events, ctx) {
     for (const e of lcEvents) {
       if (e.fired) continue;
       if (e.t !== undefined && t + 1e-9 < e.t) continue;
-      if (e.whenGap_m !== undefined) {
+      if (e.whenGap_m !== undefined && e.vehicle !== 'ego') {
         const g = gap(world.ego, byIdMap[e.vehicle]);
         if (!(g <= e.whenGap_m)) continue;
       }
@@ -324,17 +332,21 @@ function create(specs, events, ctx) {
       vh.x += (vh.v + v1) / 2 * dt;
       vh.a = a;
       vh.v = v1;
-      if (vh.lc) {
-        const p = Math.min(1, (t + dt - vh.lc.t0) / vh.lc.dur);
-        vh.y = vh.lc.y0 + (vh.lc.y1 - vh.lc.y0) * (1 - Math.cos(Math.PI * p)) / 2;
-        vh.lane = Math.round(vh.y / laneW);
-        vh.lat = vh.y - vh.lane * laneW;
-        if (p >= 1) {
-          vh.lane = vh.lc.to; vh.y = vh.lc.y1; vh.lat = 0;
-          ctx.emit('vehicle.lane', { id: vh.id, phase: 'end', change: vh.lc.kind, lane: vh.lane }, t + dt);
-          vh.lc = null;
-        }
-      }
+      lateral(vh, t, dt);
+    }
+    if (world.ego.lc) lateral(world.ego, t, dt);
+  }
+
+  function lateral(vh, t, dt) {
+    if (!vh.lc) return;
+    const p = Math.min(1, (t + dt - vh.lc.t0) / vh.lc.dur);
+    vh.y = vh.lc.y0 + (vh.lc.y1 - vh.lc.y0) * (1 - Math.cos(Math.PI * p)) / 2;
+    vh.lane = Math.round(vh.y / laneW);
+    vh.lat = vh.y - vh.lane * laneW;
+    if (p >= 1) {
+      vh.lane = vh.lc.to; vh.y = vh.lc.y1; vh.lat = 0;
+      ctx.emit('vehicle.lane', { id: vh.id, phase: 'end', change: vh.lc.kind, lane: vh.lane }, t + dt);
+      vh.lc = null;
     }
   }
 

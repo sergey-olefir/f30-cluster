@@ -69,6 +69,36 @@ test('sim: a car changing lanes into us while alongside is a side collision', ()
   assert.strictEqual(r.meta.core.collisionFrom, 'side');
 });
 
+test('sim: controller inputs (curvature, yawRate) and outputs (send: resend / suppress) as SC2 asked', () => {
+  const seen = [];
+  const c = { NAME: 'controller', SCHEMA: [], LENIENT: true, create: () => ({ step: inp => {
+    seen.push([inp.t, inp.curvature, inp.yawRate]);
+    return { vSet: 27, send: inp.t >= 1 && inp.t < 1.35 ? true : (inp.t >= 2 ? undefined : false) };
+  } }) };
+  const s = scen([], [], { road: { lanes: 2, curvature: 0.002 } });
+  const r = sim.run({ duration: 3, scenario: { inline: s }, controller: { rateHz: 10 } }, deps({ controller: c, warning: noWarning }));
+  near(seen[0][1], 0.002, 1e-15); near(seen[0][2], 100 * KMH * 0.002, 1e-12);
+  const sent = r.events.filter(e => e.kind === 'cmd.sent').map(e => Math.round(e.t * 10) / 10);
+  assert.deepStrictEqual(sent, [1, 1.1, 1.2, 1.3], 'send: true resends the same value; false suppresses; undefined = only on a change');
+  let wIn = null;
+  const w = { NAME: 'warning', SCHEMA: [], LENIENT: true, create: () => ({ step: inp => { wIn = inp; return { warn: false }; } }) };
+  sim.run({ duration: 1, scenario: { inline: s }, controller: { rateDown_kmhps: 3.6 } }, deps({ warning: w }));
+  near(wIn.aCmdMax, 1, 1e-12);
+  assert.ok(wIn.aMin < 0);
+});
+
+test('sim: our own lane change (laneChange of vehicle "ego") moves the ego and changes the true lead', () => {
+  const s = scen([{ id: 'slow', lane: 0, x0: 60, v0_kmh: 60 }, { id: 'far', lane: 1, x0: 120, v0_kmh: 100 }],
+    [{ t: 2, kind: 'laneChange', vehicle: 'ego', toLane: 1, duration_s: 4 }]);
+  const r = sim.run({ duration: 8, scenario: { inline: s } }, deps({ controller: holdController, warning: noWarning }));
+  const ids = r.meta.enums.id;
+  const at = t => r.t.findIndex(x => Math.abs(x - t) < 1e-9);
+  assert.strictEqual(ids[r.series['lead.id'][at(1)]], 'slow');
+  assert.strictEqual(ids[r.series['lead.id'][at(7)]], 'far');
+  const e = r.events.filter(x => x.kind === 'vehicle.lane' && x.id === 'ego').map(x => [x.phase, Math.round(x.t * 100) / 100]);
+  assert.deepStrictEqual(e, [['start', 2], ['end', 6]]);
+});
+
 test('sim: the controller runs at its own rate', () => {
   let calls = 0;
   const counting = { NAME: 'controller', SCHEMA: [], LENIENT: true, create: () => ({ step: () => { calls++; return { vSet: null }; } }) };
