@@ -646,7 +646,8 @@
   /** values "a:b:n" or "a, b, c" -> numbers. */
   function parseValues(text) {
     const s = String(text || '').trim();
-    const m = /^(-?[\d.]+)\s*(?:\.\.|:|…)\s*(-?[\d.]+)\s*(?:[:x×/]\s*(\d+))?$/.exec(s);
+    const N = '([-−]?(?:\\d+(?:\\.\\d*)?|\\.\\d+))';
+    const m = new RegExp('^' + N + '\\s*(?:\\.\\.|…)\\s*' + N + '\\s*(?:[:x×/]\\s*(\\d+))?$').exec(s.replace(/−/g, '-'));
     if (m) {
       const a = +m[1], b = +m[2], n = Math.max(2, Math.min(50, +(m[3] || 5)));
       const out = [];
@@ -840,8 +841,12 @@
       if (run.result && typeof app.loadResultFile === 'function') { app.loadResultFile(run.result); return; }
       const cfg = runConfig(run, batch(), modules());
       if (!cfg) { info.textContent = 'This run does not carry its config: cannot open it.'; return; }
-      if (typeof app.setConfig === 'function') app.setConfig(cfg);
-      if (typeof app.run === 'function') app.run();
+      if (typeof app.openRun === 'function') app.openRun(cfg);          // SU1: replace the config, run, show the scene
+      else {
+        if (typeof app.setConfig === 'function') app.setConfig(cfg, { replace: true, run: false });
+        if (typeof app.run === 'function') app.run();
+      }
+      if (typeof app.showView === 'function') app.showView('run');
       info.textContent = 'Opened ' + run.id + ' in the scene.';
     }
 
@@ -1058,7 +1063,7 @@
         tr.addEventListener('click', function () {
           const params = {};
           tt.varying.concat(tt.fixed.map(function (f) { return f.key; })).forEach(function (k) { if (k.indexOf('.') > 0) params[k] = r.params[k]; });
-          if (typeof app.setConfig === 'function') app.setConfig(paramsPatch(app.config || {}, params));
+          if (typeof app.setConfig === 'function') app.setConfig(paramsPatch(app.config || {}, params), { run: false });
           info.textContent = 'Applied set ' + r.set + ' to the settings.';
         });
         tb.appendChild(tr);

@@ -1170,7 +1170,7 @@
     });
     const followBtn = h('button', { type: 'button', 'aria-pressed': 'true', title: 'Keep the cursor in view during playback', onclick: function () { state.follow = !state.follow; followBtn.setAttribute('aria-pressed', String(state.follow)); } }, ['Follow cursor']);
     const bInfo = h('span', { class: 'su2-note' });
-    const clearB = h('button', { type: 'button', disabled: true, onclick: function () { state.B = null; state.bLabel = ''; refreshB(); rebuild(); } }, ['Clear B']);
+    const clearB = h('button', { type: 'button', disabled: true, onclick: function () { setB(null, ''); } }, ['Clear B']);
     const toolbar = h('div', { class: 'su2-toolbar' }, [
       panelChips,
       h('span', { class: 'su2-sep' }),
@@ -1196,25 +1196,35 @@
 
     function results() { return [app.result || null, state.B]; }
 
-    function pinB() {
-      if (!app.result) return;
-      state.B = app.result;
-      const m = app.result.meta || {};
-      state.bLabel = 'B = ' + ((m.config && m.config.scenario && (m.config.scenario.id || (m.config.scenario.inline && m.config.scenario.inline.id))) || 'run') + (m.config && m.config.ego && m.config.ego.mode && m.config.ego.mode !== 'ours' ? ' (' + m.config.ego.mode + ')' : '') + ', pinned';
+    function labelOf(r, how) {
+      const m = (r && r.meta) || {};
+      const c = m.config || {};
+      return 'B = ' + ((c.scenario && (c.scenario.id || (c.scenario.inline && c.scenario.inline.id))) || 'run') + (c.ego && c.ego.mode && c.ego.mode !== 'ours' ? ' (' + c.ego.mode + ')' : '') + (how ? ', ' + how : '');
+    }
+    // B lives in the shell when it keeps one (SU1: app.resultB, setCompare, 'compare'); else here
+    function setB(r, label) {
+      state.bLabel = label;
+      if (typeof app.setCompare === 'function') { app.setCompare(r); return; }   // comes back as 'compare'
+      state.B = r;
       refreshB();
       rebuild();
     }
+    function pinB() { if (app.result) setB(app.result, labelOf(app.result, 'pinned')); }
     function loadB() {
       pickFile().then(function (f) {
         if (!f) return;
         return readFileJson(f).then(function (j) {
           if (!j || !j.t || !j.series) throw new Error('not a run result (needs t and series)');
-          state.B = j;
-          state.bLabel = 'B = ' + f.name;
-          refreshB();
-          rebuild();
+          setB(j, 'B = ' + f.name);
         });
       }).catch(function (e) { bInfo.textContent = 'Could not load B: ' + e.message; });
+    }
+    function onCompare(r) {
+      state.B = r || app.resultB || null;
+      if (!state.B) state.bLabel = '';
+      else if (!state.bLabel) state.bLabel = labelOf(state.B, '');
+      refreshB();
+      rebuild();
     }
     function refreshB() {
       bInfo.textContent = state.B ? state.bLabel + ' (drawn faint under A)' : 'A only';
@@ -1319,7 +1329,8 @@
       const ids = Object.keys(panelEls);
       ids.forEach(function (id, i) {
         const pe = panelEls[id];
-        const w = Math.max(200, pe.wrap.clientWidth || el.clientWidth || 800);
+        if (!pe.wrap.clientWidth) return;   // hidden (another view is shown): drawn on 'view' / resize
+        const w = Math.max(200, pe.wrap.clientWidth);
         const hh = pe.panel.events ? eventLaneHeight(rs) : 140;
         const ctx = sizeCanvas(pe.base, w, hh);
         sizeCanvas(pe.over, w, hh);
@@ -1473,6 +1484,8 @@
       listen(app, 'result', onResult),
       listen(app, 'cursor', onCursor),
       listen(app, 'config', onConfig),
+      listen(app, 'compare', onCompare),
+      listen(app, 'view', function () { drawAll(); }),
       onThemeChange(function () { drawAll(); }),
     ];
     let ro = null;
@@ -1481,6 +1494,7 @@
       ro = new ResizeObserver(function () { const w = el.clientWidth; if (w !== lastW) { lastW = w; drawAll(); } });
       ro.observe(el);
     }
+    if (app.resultB) state.B = app.resultB;
     refreshB();
     if (app.result) onResult(); else rebuild();
 
@@ -1491,7 +1505,7 @@
         tip.remove();
         el.innerHTML = '';
       },
-      setB: function (r, label) { state.B = r; state.bLabel = label || 'B'; refreshB(); rebuild(); },
+      setB: function (r, label) { setB(r, label || 'B'); },
       getView: function () { return state.view; },
       setView: function (v) { state.view = clampView(v, state.bounds); drawAll(); },
     };

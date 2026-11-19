@@ -326,6 +326,11 @@
   }
 
   /** The whole module object with every SCHEMA key explicit (what setConfig receives for a group). */
+  /**
+   * A module's config object, compact: only what differs from its defaults (the SCHEMA's, overlaid by
+   * the selected preset), plus the preset and model when they were chosen. The engine fills the rest,
+   * so links stay short and keep their meaning when a default changes.
+   */
   function fullModule(mod, name, part, presetOverride) {
     const NAME = configKey(mod, name);
     part = part || {};
@@ -333,12 +338,20 @@
     const defs = baseDefaults(mod, preset);
     const out = {};
     // keys outside the SCHEMA are carried over (the shell or the core may use them)
-    Object.keys(part).forEach(function (k) { if (!schemaHas(mod, k)) out[k] = clone(part[k]); });
+    Object.keys(part).forEach(function (k) { if (!schemaHas(mod, k) && part[k] !== undefined) out[k] = clone(part[k]); });
     (mod.SCHEMA || []).forEach(function (s) {
-      if (s.key === 'preset' && preset !== undefined) { out.preset = preset; return; }
-      out[s.key] = part[s.key] !== undefined ? clone(part[s.key]) : defs[s.key];
+      if (s.key === 'preset') { if (preset !== undefined && (presetOverride !== undefined || part.preset !== undefined)) out.preset = preset; return; }
+      if (part[s.key] === undefined) return;
+      if (s.key === 'model' || !same(part[s.key], defs[s.key])) out[s.key] = clone(part[s.key]);
     });
     return { key: NAME, value: out };
+  }
+
+  /** Apply a settings patch: each top-level key replaces the config's whole value; undefined deletes it. */
+  function applyPatch(config, patch) {
+    const next = clone(config || {}) || {};
+    Object.keys(patch || {}).forEach(function (k) { if (patch[k] === undefined) delete next[k]; else next[k] = clone(patch[k]); });
+    return next;
   }
 
   /** The config patch for one control's new value. */
@@ -391,7 +404,8 @@
   /** The part without its SCHEMA parameters (keepExtra) — what survives a preset switch or reset. */
   function filterKeys(part, mod, keepExtra) {
     const out = {};
-    Object.keys(part || {}).forEach(function (k) { if (keepExtra && !schemaHas(mod, k) && k !== 'preset') out[k] = part[k]; });
+    const hidden = HIDDEN[mod.NAME] || [];
+    Object.keys(part || {}).forEach(function (k) { if (keepExtra && ((!schemaHas(mod, k) && k !== 'preset') || hidden.indexOf(k) >= 0)) out[k] = part[k]; });
     if (part && part.model !== undefined && schemaHas(mod, 'model')) out.model = part.model;
     return out;
   }
@@ -409,15 +423,16 @@
     const g = GROUPS.filter(function (x) { return x.id === groupId; })[0];
     if (!g) return {};
     if (g.scenario) {
+      // the scenario stays, its variations and the run fields go back to the engine's / scenario's own
       const p = { scenario: { id: config && config.scenario && config.scenario.id, overrides: {} } };
       RUN_SCHEMA.forEach(function (s) {
-        if (s.key === 'duration') { p.duration = undefined; return; }
-        if (s.path.length === 1) p[s.path[0]] = s.default;
-        else { p[s.path[0]] = Object.assign({}, (config && config[s.path[0]]) || {}, p[s.path[0]] || {}); p[s.path[0]][s.path[1]] = s.default; }
+        if (s.path.length === 1) p[s.path[0]] = s.key === 'seed' ? s.default : undefined;
+        else {
+          const rest = Object.assign({}, (config && config[s.path[0]]) || {}, p[s.path[0]] || {});
+          delete rest[s.path[1]];
+          p[s.path[0]] = Object.keys(rest).length ? rest : undefined;
+        }
       });
-      let scen = null;
-      try { scen = modules.scenario && modules.scenario.load ? modules.scenario.load(p.scenario.id) : null; } catch (e) { scen = null; }
-      p.duration = scen && scen.duration ? scen.duration : RUN_SCHEMA[1].default;
       return p;
     }
     const p = {};
@@ -626,7 +641,8 @@
     let runTimer = 0;
 
     const search = h('input', { type: 'search', placeholder: 'Find a setting…', 'aria-label': 'Find a setting', oninput: applyFilter });
-    const autoCb = h('input', { type: 'checkbox', checked: true, onchange: function () { autoRun = autoCb.checked; } });
+    if (typeof app.autoRun === 'boolean') autoRun = app.autoRun;
+    const autoCb = h('input', { type: 'checkbox', checked: autoRun, onchange: function () { autoRun = autoCb.checked; if (typeof app.autoRun === 'boolean') app.autoRun = autoRun; } });
     const runBtn = h('button', { type: 'button', class: 'su2-primary', onclick: function () { dirty = false; showDirty(); if (app.run) app.run(); } }, ['Run']);
     const dirtyNote = h('span', { class: 'su2-dirty su2-hidden', text: 'changed since the last run' });
     const top = h('div', { class: 'su2-top' }, [search, h('label', { class: 'su2-chip', title: 'Re-run at once after a change when the run is at most ' + AUTO_RUN_MAX_S + ' s of simulated time' }, [autoCb, 'Re-run on change (short runs)']), runBtn, dirtyNote]);
@@ -695,9 +711,13 @@
     }
 
     function commit(patch) {
-      if (typeof app.setConfig === 'function') app.setConfig(patch);
+      const next = applyPatch(cfg(), patch);
+      // SU1's shell (it has isShort) re-runs a short run itself: we only say whether it may
+      const shellRuns = typeof app.isShort === 'function';
+      if (typeof app.setConfig === 'function') app.setConfig(next, { replace: true, run: shellRuns ? (autoRun ? 'auto' : false) : false });
+      if (shellRuns) { dirty = !(autoRun && app.isShort()); showDirty(); return; }
       const m = model && model.groups[0] && model.groups[0].scenario;
-      if (autoRun && isShortRun(Object.assign({}, cfg(), patch), m)) {
+      if (autoRun && isShortRun(next, m)) {
         clearTimeout(runTimer);
         runTimer = setTimeout(function () { dirty = false; showDirty(); if (app.run) app.run(); }, 250);
       } else { dirty = true; showDirty(); }
@@ -889,7 +909,7 @@
   const settings = {
     GROUPS: GROUPS, RUN_SCHEMA: RUN_SCHEMA, AUTO_RUN_MAX_S: AUTO_RUN_MAX_S, STORE_KEY: STORE_KEY,
     findModules: findModules, buildModel: buildModel, baseDefaults: baseDefaults, parseInput: parseInput, rangeText: rangeText,
-    patchFor: patchFor, resetPatch: resetPatch, fullModule: fullModule, snapshot: snapshot, applySnapshotPatch: applySnapshotPatch,
+    patchFor: patchFor, resetPatch: resetPatch, fullModule: fullModule, applyPatch: applyPatch, typeOf: typeOf, sectionTitle: sectionTitle, matchPreset: matchPreset, failureSchema: failureSchema, snapshot: snapshot, applySnapshotPatch: applySnapshotPatch,
     cleanSnapshot: cleanSnapshot, exportPresets: exportPresets, importPresets: importPresets, makeStore: makeStore,
     isShortRun: isShortRun, signature: signature, mount: mount,
   };
