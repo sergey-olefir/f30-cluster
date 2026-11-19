@@ -37,6 +37,9 @@ function load(name) {
 }
 
 const OWN = ['rng', 'schema', 'road', 'vehicles', 'plant', 'driver', 'command', 'failures'];
+// The order the page loads core/*.js in (a file may resolve a sibling at load time, so siblings it needs come first)
+const LOAD_ORDER = ['rng', 'schema', 'road', 'vehicles', 'plant', 'driver', 'command', 'failures',
+  'sensor', 'estimator', 'controller', 'warning', 'baselines', 'metrics', 'scenario', 'mixed', 'sim'];
 const OTHERS = ['sensor', 'estimator', 'controller', 'warning', 'baselines', 'metrics', 'scenario'];
 
 // ---- stubs for the modules of SC2 / SC3 until they exist ------------------------------------------------------------
@@ -264,7 +267,7 @@ const SERIES = ['ego.x', 'ego.v', 'ego.a', 'ego.jerk', 'lead.x', 'lead.v', 'lead
   'v.driverMax', 'd.des', 'd.needed', 'v.ref', 'timegap', 'ttc', 'warn', 'cruise.state', 'driver.brake', 'driver.accel',
   'grade', 'follower.gap', 'follower.a',
   // additions (CONTRACT.md lists them as SC1's extras)
-  'set.eff', 'meas.id', 'est.id', 'warn.reason', 'warn.ttc', 'app.alive', 'curvature', 'elevation', 'follower.v', 'a.demand'];
+  'set.eff', 'meas.id', 'meas.wrong', 'est.id', 'warn.reason', 'warn.ttc', 'app.alive', 'curvature', 'elevation', 'follower.v', 'a.demand', 'ego.lane', 'ego.y'];
 
 function createSim(config, deps) {
   const t0wall = Date.now();
@@ -321,6 +324,8 @@ function createSim(config, deps) {
     };
   }
   let app = mode === 'ours' ? makeApp() : null;
+  // the fastest the loop lets its set speed fall (SC2's controller key), for the warning; undefined when not configured
+  const aCmdMax = typeof params.controller.rateDown_kmhps === 'number' ? params.controller.rateDown_kmhps * KMH : undefined;
   let baseline = null;
   if (mode !== 'ours') {
     const B = M.baselines[mode];
@@ -357,7 +362,7 @@ function createSim(config, deps) {
   let lastMeas = null, pendingMeas = null, frozenMeas = null, lastEst = null, lastOut = null, lastW = null;
   let lastSent = null, prevTarget = null, warnOn = false, lastJerkA = 0;
   let lead = null, fol = null;
-  const core = { minGap: Infinity, minTimeGap: Infinity, minTTC: Infinity, collision: false, collisionWith: null, collisionT: null,
+  const core = { minGap: Infinity, minTimeGap: Infinity, minTTC: Infinity, collision: false, collisionWith: null, collisionT: null, collisionFrom: null,
     impactSpeed: 0, peakDecel: 0, peakAccel: 0, peakJerk: 0, accelRms: 0, cmdSent: 0, cmdApplied: 0, cmdDropped: 0, cmdRejected: 0,
     cmdPerMin: 0, warnCount: 0, warnTime: 0, driverBrakes: 0, followerMinTimeGap: Infinity, followerPeakDecel: 0,
     timeNotActive: 0, minSpeed: Infinity, duration: 0 };
@@ -420,9 +425,14 @@ function createSim(config, deps) {
       const egoIn = { egoV: ego.v, egoA: ego.a };
       lastEst = app.estimator.update(pendingMeas, t, egoIn);
       pendingMeas = null;
-      lastOut = app.controller.step({ t, est: lastEst, egoV: ego.v, egoA: ego.a, vDriver: world.driver.vMax, cruise: world.cruise });
-      lastW = app.warning.step({ t, est: lastEst, egoV: ego.v, aMin: plant.aMinConfigured });
-      if (lastOut && lastOut.vSet !== null && lastOut.vSet !== undefined && lastOut.vSet !== lastSent) {
+      const curv = road.curvature(ego.x);
+      lastOut = app.controller.step({ t, est: lastEst, egoV: ego.v, egoA: ego.a, vDriver: world.driver.vMax, cruise: world.cruise,
+        curvature: curv, yawRate: ego.v * curv });
+      lastW = app.warning.step({ t, est: lastEst, egoV: ego.v, aMin: plant.aMinConfigured, aCmdMax });
+      // send when the controller says so (out.send: a change or a resend), else when vSet changed
+      const wantSend = lastOut && lastOut.vSet !== null && lastOut.vSet !== undefined &&
+        (lastOut.send === true || (lastOut.send === undefined && lastOut.vSet !== lastSent));
+      if (wantSend) {
         const s = command.send(t, lastOut.vSet, faults);
         lastSent = lastOut.vSet;
         core.cmdSent++;
@@ -498,6 +508,7 @@ function createSim(config, deps) {
       const i = row++;
       tArr[i] = t;
       const S = series;
+      S['ego.lane'][i] = ego.lane; S['ego.y'][i] = ego.y;
       S['ego.x'][i] = ego.x; S['ego.v'][i] = ego.v; S['ego.a'][i] = a; S['ego.jerk'][i] = k > 0 ? ego.jerk : 0;
       if (lead) {
         S['lead.x'][i] = lead.x; S['lead.v'][i] = lead.v; S['lead.a'][i] = lead.a; S['lead.id'][i] = enumIdx('id', lead.id);
@@ -508,6 +519,8 @@ function createSim(config, deps) {
         S['gap.meas'][i] = lastMeas.gap === null || lastMeas.gap === undefined ? NaN : lastMeas.gap;
         S['vrel.meas'][i] = lastMeas.vrel === null || lastMeas.vrel === undefined ? NaN : lastMeas.vrel;
         S['meas.id'][i] = enumIdx('id', lastMeas.id);
+        const tr = lastMeas._truth;   // SC2's debug truth of a sample: a wrong or ghost target
+        if (tr) S['meas.wrong'][i] = (tr.wrong || tr.ghost) ? 1 : 0;
       }
       if (lastEst) {
         S['est.valid'][i] = lastEst.valid ? 1 : 0;
@@ -534,6 +547,8 @@ function createSim(config, deps) {
     }
 
     lastT = t;
+    // which others overlap us longitudinally now (a collision that begins with a lateral move is a side impact)
+    const longiBefore = world.others.map(o => o.x - o.length < ego.x && ego.x - ego.length < o.x);
     if (k >= nTicks) { done = true; return; }   // the state at t = duration is recorded; nothing moves past it
 
     // 9. advance to t + dt
@@ -545,15 +560,20 @@ function createSim(config, deps) {
     k++;
     world.t = k * dt;
 
-    // collisions at t + dt: longitudinal and lateral overlap with anyone
-    for (const o of world.others) {
+    // collisions at t + dt: longitudinal and lateral overlap with anyone. from: 'ahead' (we ran into it), 'behind' (it ran
+    // into us), 'side' (it moved sideways into us while alongside: a lane change into an occupied space); impactSpeed is
+    // the longitudinal closing speed (for 'side', the absolute speed difference)
+    for (let oi = 0; oi < world.others.length; oi++) {
+      const o = world.others[oi];
       const longi = o.x - o.length < ego.x && ego.x - ego.length < o.x;
       const lat = Math.abs(o.y - ego.y) < (o.width + ego.width) / 2;
       if (longi && lat) {
         const behind = o.x < ego.x;
-        const impact = behind ? o.v - ego.v : ego.v - o.v;
-        core.collision = true; core.collisionWith = o.id; core.collisionT = world.t; core.impactSpeed = Math.max(0, impact);
-        emit('collision', { with: o.id, from: behind ? 'behind' : 'ahead', impactSpeed: Math.max(0, impact) });
+        const side = longiBefore[oi];
+        const impact = side ? Math.abs(o.v - ego.v) : Math.max(0, behind ? o.v - ego.v : ego.v - o.v);
+        core.collision = true; core.collisionWith = o.id; core.collisionT = world.t; core.impactSpeed = impact;
+        core.collisionFrom = side ? 'side' : (behind ? 'behind' : 'ahead');
+        emit('collision', { with: o.id, from: core.collisionFrom, impactSpeed: impact });
         if (cfg.stopOnCollision) done = true;
         break;
       }
@@ -668,6 +688,6 @@ function hashResult(res) {
   return (h >>> 0).toString(16).padStart(8, '0');
 }
 
-const sim = { VERSION, SERIES, BUILTIN, STUBS, run, runOnce, createSim, defaultConfig, schemas, hashResult, normalize, resolveScenario, deepMerge };
+const sim = { VERSION, SERIES, LOAD_ORDER, BUILTIN, STUBS, run, runOnce, createSim, defaultConfig, schemas, hashResult, normalize, resolveScenario, deepMerge };
 if (typeof module !== 'undefined') module.exports = sim; else (self.CS = self.CS || {})['sim'] = sim;
 })();

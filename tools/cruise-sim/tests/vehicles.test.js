@@ -33,7 +33,9 @@ test('vehicles: x0 is the bumper-to-bumper gap, ahead and behind; trueLead / fol
     { id: 'far', lane: 0, x0: 90, v0_kmh: 80, kind: 'truck' },
     { id: 'side', lane: 1, x0: 10, v0_kmh: 80 },
     { id: 'back', lane: 0, x0: -15, v0_kmh: 80 },
+    { id: 'along', lane: 1, xFront_m: 1.5, x0: 99, v0_kmh: 80 },
   ]);
+  near(set.byId('along').x - w.ego.x, 1.5, 1e-12, 'xFront_m overrides x0');
   near(V.gap(w.ego, set.byId('lead')), 40, 1e-12);
   near(V.gap(w.ego, set.byId('far')), 90, 1e-12);
   near(V.gap(set.byId('back'), w.ego), 15, 1e-12);

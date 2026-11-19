@@ -60,6 +60,45 @@ test('sim: a collision with a standing car ends the run with the impact speed', 
   assert.strictEqual(r.verdict.pass, false);
 });
 
+test('sim: a car changing lanes into us while alongside is a side collision', () => {
+  const r = sim.run({ duration: 10, scenario: { inline: scen([{ id: 'c', lane: 1, xFront_m: 1, v0_kmh: 100 }], [{ t: 1, kind: 'cutIn', vehicle: 'c', duration_s: 2 }]) } },
+    deps({ controller: holdController, warning: noWarning }));
+  const c = r.events.find(e => e.kind === 'collision');
+  assert.ok(c && c.from === 'side' && c.with === 'c', JSON.stringify(c));
+  near(c.impactSpeed, 0, 1e-9);
+  assert.strictEqual(r.meta.core.collisionFrom, 'side');
+});
+
+test('sim: controller inputs (curvature, yawRate) and outputs (send: resend / suppress) as SC2 asked', () => {
+  const seen = [];
+  const c = { NAME: 'controller', SCHEMA: [], LENIENT: true, create: () => ({ step: inp => {
+    seen.push([inp.t, inp.curvature, inp.yawRate]);
+    return { vSet: 27, send: inp.t >= 1 && inp.t < 1.35 ? true : (inp.t >= 2 ? undefined : false) };
+  } }) };
+  const s = scen([], [], { road: { lanes: 2, curvature: 0.002 } });
+  const r = sim.run({ duration: 3, scenario: { inline: s }, controller: { rateHz: 10 } }, deps({ controller: c, warning: noWarning }));
+  near(seen[0][1], 0.002, 1e-15); near(seen[0][2], 100 * KMH * 0.002, 1e-12);
+  const sent = r.events.filter(e => e.kind === 'cmd.sent').map(e => Math.round(e.t * 10) / 10);
+  assert.deepStrictEqual(sent, [1, 1.1, 1.2, 1.3], 'send: true resends the same value; false suppresses; undefined = only on a change');
+  let wIn = null;
+  const w = { NAME: 'warning', SCHEMA: [], LENIENT: true, create: () => ({ step: inp => { wIn = inp; return { warn: false }; } }) };
+  sim.run({ duration: 1, scenario: { inline: s }, controller: { rateDown_kmhps: 3.6 } }, deps({ warning: w }));
+  near(wIn.aCmdMax, 1, 1e-12);
+  assert.ok(wIn.aMin < 0);
+});
+
+test('sim: our own lane change (laneChange of vehicle "ego") moves the ego and changes the true lead', () => {
+  const s = scen([{ id: 'slow', lane: 0, x0: 60, v0_kmh: 60 }, { id: 'far', lane: 1, x0: 120, v0_kmh: 100 }],
+    [{ t: 2, kind: 'laneChange', vehicle: 'ego', toLane: 1, duration_s: 4 }]);
+  const r = sim.run({ duration: 8, scenario: { inline: s } }, deps({ controller: holdController, warning: noWarning }));
+  const ids = r.meta.enums.id;
+  const at = t => r.t.findIndex(x => Math.abs(x - t) < 1e-9);
+  assert.strictEqual(ids[r.series['lead.id'][at(1)]], 'slow');
+  assert.strictEqual(ids[r.series['lead.id'][at(7)]], 'far');
+  const e = r.events.filter(x => x.kind === 'vehicle.lane' && x.id === 'ego').map(x => [x.phase, Math.round(x.t * 100) / 100]);
+  assert.deepStrictEqual(e, [['start', 2], ['end', 6]]);
+});
+
 test('sim: the controller runs at its own rate', () => {
   let calls = 0;
   const counting = { NAME: 'controller', SCHEMA: [], LENIENT: true, create: () => ({ step: () => { calls++; return { vSet: null }; } }) };
@@ -153,13 +192,20 @@ test('sim: the browser path (no require, files loaded as scripts into self.CS) g
   const dir = path.join(__dirname, '..', 'core');
   // the page loads every core file; here: SC1's files plus whatever SC2 / SC3 files exist
   const ctx = vm.createContext({ self: {}, console, Float64Array, Uint8Array, Math, JSON, Date, Object, Array, String, Number, Error, Set, Map, Infinity, NaN, isFinite });
-  for (const f of fs.readdirSync(dir).filter(f => /\.js$/.test(f)).sort()) vm.runInContext(fs.readFileSync(path.join(dir, f), 'utf8'), ctx, { filename: f });
+  // in sim.LOAD_ORDER (what the page uses), then any other core file
+  const present = fs.readdirSync(dir).filter(f => /\.js$/.test(f)).map(f => f.replace(/\.js$/, ''));
+  const order = sim.LOAD_ORDER.filter(n => present.indexOf(n) >= 0).concat(present.filter(n => sim.LOAD_ORDER.indexOf(n) < 0).sort());
+  for (const n of order) vm.runInContext(fs.readFileSync(path.join(dir, n + '.js'), 'utf8'), ctx, { filename: n + '.js' });
   const CS = ctx.self.CS;
   assert.ok(CS.sim && CS.plant && CS.vehicles && CS.rng);
   const cfg = JSON.parse(JSON.stringify(busy));
   const browserRes = CS.sim.run(cfg, Object.assign({}, require('./stubs/sc2').pinned));
   const nodeRes = sim.run(cfg, deps());
   assert.strictEqual(CS.sim.hashResult(browserRes), sim.hashResult(nodeRes));
+  // and with whatever real modules exist (SC2's, SC3's once merged), no injection
+  const b2 = CS.sim.run(cfg), n2 = sim.run(cfg);
+  assert.strictEqual(JSON.stringify(b2.meta.modules), JSON.stringify(n2.meta.modules));
+  assert.strictEqual(CS.sim.hashResult(b2), sim.hashResult(n2), 'modules: ' + JSON.stringify(n2.meta.modules));
 });
 
 test('sim: speed — an hour of driving runs in seconds', () => {
