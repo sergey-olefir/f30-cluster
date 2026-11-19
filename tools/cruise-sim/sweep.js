@@ -231,6 +231,11 @@ function makeRecords(plan, B, raw) {
 function nonNull(o) { var r = {}; Object.keys(o).forEach(function (k) { if (o[k] !== null && o[k] !== undefined) r[k] = o[k]; }); return r; }
 function pathObj(point) { var o = {}; Object.keys(point).forEach(function (k) { scenario.setPath(o, k, point[k]); }); return o; }
 
+// the metrics that make a failure a SAFETY failure; the others are comfort, chatter, nuisance, efficiency
+var SAFETY = ['collision', 'impactSpeed_kmh', 'minGap_m', 'minTimeGap_s', 'minTTC_s', 'missedWarning', 'warnLeadTime_s',
+  'followerCollision', 'followerMinTimeGap_s', 'envelopeExitAnnounced', 'faultDetectDelay_s', 'lostTargetSpeedGain_kmh',
+  'curveLostSpeedGain_kmh', 'cmdWhileInactive', 'error'];
+
 function severity(m) {
   // higher = worse: a collision (by impact speed) first, then a missed warning, then the smallest time gap
   if (m.collision) return 1000 + (m.impactSpeed_kmh || 0);
@@ -247,7 +252,7 @@ function summarizePoint(recs) {
     if (!g) { g = groups[r.groupKey] = { groupKey: r.groupKey, scenario: r.scenario, family: r.family, scope: r.scope, runs: [] }; order.push(r.groupKey); }
     g.runs.push(r);
   });
-  var fam = {}, scopes = {}, failing = [], nPass = 0;
+  var fam = {}, scopes = {}, failing = [], nPass = 0, nSafe = 0;
   order.forEach(function (k) {
     var g = groups[k], failed = {}, worst = null, worstSev = -1, cases = {};
     g.runs.forEach(function (r) {
@@ -259,15 +264,17 @@ function summarizePoint(recs) {
       if (r.metrics.collision) { cs.collision = true; cs.impactSpeed_kmh = Math.max(cs.impactSpeed_kmh, r.metrics.impactSpeed_kmh || 0); }
     });
     var pass = g.runs.every(function (r) { return r.verdict.pass; });
+    var safe = !Object.keys(failed).some(function (f) { return SAFETY.indexOf(f) >= 0; });
     if (pass) nPass++;
-    var F = fam[g.family] || (fam[g.family] = { groups: 0, pass: 0 });
-    F.groups++; if (pass) F.pass++;
+    if (safe) nSafe++;
+    var F = fam[g.family] || (fam[g.family] = { groups: 0, pass: 0, safe: 0 });
+    F.groups++; if (pass) F.pass++; if (safe) F.safe++;
     var Sc = scopes[g.scope] || (scopes[g.scope] = { groups: 0, pass: 0 });
     Sc.groups++; if (pass) Sc.pass++;
-    if (!pass) failing.push({ groupKey: k, scenario: g.scenario, family: g.family, scope: g.scope, failed: Object.keys(failed),
+    if (!pass) failing.push({ groupKey: k, scenario: g.scenario, family: g.family, scope: g.scope, failed: Object.keys(failed), safe: safe,
       worstRun: worst.id, severity: worstSev, cases: cases, worst: pick(worst.metrics) });
   });
-  Object.keys(fam).forEach(function (f) { fam[f].share = fam[f].pass / fam[f].groups; });
+  Object.keys(fam).forEach(function (f) { fam[f].share = fam[f].pass / fam[f].groups; fam[f].safeShare = fam[f].safe / fam[f].groups; });
   Object.keys(scopes).forEach(function (f) { scopes[f].share = scopes[f].pass / scopes[f].groups; });
   failing.sort(function (a, b) { return b.severity - a.severity; });
   // family L
@@ -288,6 +295,7 @@ function summarizePoint(recs) {
     cost: cost,
     runs: recs.length, runsPass: recs.filter(function (r) { return r.verdict.pass; }).length,
     groups: order.length, groupsPass: nPass, passShare: order.length ? nPass / order.length : null,
+    groupsSafe: nSafe, safeShare: order.length ? nSafe / order.length : null,
     families: fam, scopes: scopes, failing: failing.slice(0, 40), failingCount: failing.length,
     leadBrakeHandled_mps2: leadBrakeHandled(recs), perHour: perHour,
     errors: recs.filter(function (r) { return r.error; }).slice(0, 5).map(function (r) { return r.id + ': ' + r.error; })
@@ -350,13 +358,16 @@ function maps(plan, pts) {
   return splits.map(function (sv) {
     var sel = pts.filter(function (p) { return !Sp || p.point[Sp] === sv; });
     var xs = uniq(sel.map(function (p) { return p.point[X]; })), ys = uniq(sel.map(function (p) { return p.point[Y]; }));
-    var cells = ys.map(function (y) {
-      return xs.map(function (x) {
-        var c = sel.filter(function (p) { return p.point[X] === x && p.point[Y] === y; });
-        if (!c.length) return null;
-        return c.reduce(function (a, p) { return a + p.passShare; }, 0) / c.length;
+    function grid(key) {
+      return ys.map(function (y) {
+        return xs.map(function (x) {
+          var c = sel.filter(function (p) { return p.point[X] === x && p.point[Y] === y; });
+          if (!c.length) return null;
+          return c.reduce(function (a, p) { return a + p[key]; }, 0) / c.length;
+        });
       });
-    });
+    }
+    var cells = grid('passShare'), safeCells = grid('safeShare');
     var fams = {};
     sel.forEach(function (p) {
       Object.keys(p.families).forEach(function (f) {
@@ -372,7 +383,7 @@ function maps(plan, pts) {
       var pp = plan.presets[n];
       if (pp[X] !== undefined && pp[Y] !== undefined) marks[n] = { x: pp[X], y: pp[Y] };
     });
-    return { x: X, y: Y, split: Sp || null, splitValue: sv, xs: xs, ys: ys, cells: cells, families: fams, presets: marks };
+    return { x: X, y: Y, split: Sp || null, splitValue: sv, xs: xs, ys: ys, cells: cells, safeCells: safeCells, families: fams, presets: marks };
   });
 }
 function ranking(plan, pts) {
@@ -380,11 +391,13 @@ function ranking(plan, pts) {
     var vals = uniq(pts.map(function (p) { return p.point[ax]; })).filter(function (v) { return v !== undefined; });
     var means = vals.map(function (v) {
       var sel = pts.filter(function (p) { return p.point[ax] === v; });
-      return { value: v, share: sel.reduce(function (a, p) { return a + p.passShare; }, 0) / sel.length };
+      return { value: v, share: sel.reduce(function (a, p) { return a + p.passShare; }, 0) / sel.length,
+        safeShare: sel.reduce(function (a, p) { return a + p.safeShare; }, 0) / sel.length };
     });
-    var sh = means.map(function (m) { return m.share; });
-    return { param: ax, spread: sh.length ? Math.max.apply(null, sh) - Math.min.apply(null, sh) : 0, byValue: means };
-  }).filter(function (r) { return r.byValue.length > 1; }).sort(function (a, b) { return b.spread - a.spread; });
+    var sh = means.map(function (m) { return m.share; }), ss = means.map(function (m) { return m.safeShare; });
+    var spread = sh.length ? Math.max.apply(null, sh) - Math.min.apply(null, sh) : 0, safeSpread = ss.length ? Math.max.apply(null, ss) - Math.min.apply(null, ss) : 0;
+    return { param: ax, spread: spread, safeSpread: safeSpread, byValue: means };
+  }).filter(function (r) { return r.byValue.length > 1; }).sort(function (a, b) { return Math.max(b.spread, b.safeSpread) - Math.max(a.spread, a.safeSpread); });
 }
 function tornado(byPoint) {
   var base = byPoint.filter(function (p) { return p.study === 'tornado' && p.side === 'base'; })[0];
@@ -392,17 +405,19 @@ function tornado(byPoint) {
   var rows = {};
   byPoint.forEach(function (p) {
     if (p.study !== 'tornado' || p.side === 'base') return;
-    var r = rows[p.param] || (rows[p.param] = { param: p.param, base: base.passShare });
+    var r = rows[p.param] || (rows[p.param] = { param: p.param, base: base.passShare, safeBase: base.safeShare });
     r[p.side] = p.passShare;
+    r[p.side + 'Safe'] = p.safeShare;
     r[p.side + 'Value'] = p.point[p.param];
     r[p.side + 'Failing'] = p.failing.slice(0, 5).map(function (f) { return f.groupKey; });
   });
   return Object.keys(rows).map(function (k) {
     var r = rows[k];
     r.swing = Math.max(Math.abs((r.low || 0) - r.base), Math.abs((r.high || 0) - r.base));
+    r.safeSwing = Math.max(Math.abs((r.lowSafe || 0) - r.safeBase), Math.abs((r.highSafe || 0) - r.safeBase));
     r.flips = (r.low !== undefined && r.low !== r.base) || (r.high !== undefined && r.high !== r.base);
     return r;
-  }).sort(function (a, b) { return b.swing - a.swing; });
+  }).sort(function (a, b) { return Math.max(b.swing, b.safeSwing) - Math.max(a.swing, a.safeSwing); });
 }
 
 // ------------------------------------------------------------------ files
@@ -438,7 +453,7 @@ function headline(plan, summary) {
   summary.byPoint.forEach(function (p) {
     if (p.study === 'tornado' && p.side !== 'base') return;
     lines.push('  ' + (p.preset ? '[' + p.preset + '] ' : '') + p.label + ': ' + p.groupsPass + ' / ' + p.groups + ' groups pass (' +
-      (p.passShare === null ? '-' : (100 * p.passShare).toFixed(0)) + ' %)' +
+      (p.passShare === null ? '-' : (100 * p.passShare).toFixed(0)) + ' %; safe ' + (p.safeShare === null ? '-' : (100 * p.safeShare).toFixed(0)) + ' %)' +
       (p.leadBrakeHandled_mps2 !== null ? ', lead braking handled without a warning up to ' + p.leadBrakeHandled_mps2 + ' m/s²' : ''));
   });
   if (summary.ranking.length) lines.push('  the verdict moves most with: ' + summary.ranking.slice(0, 5).map(function (r) { return r.param + ' (±' + (100 * r.spread).toFixed(0) + ' pts)'; }).join(', '));
@@ -490,7 +505,7 @@ function main() {
 module.exports = {
   selectScenarios: selectScenarios, buildPoints: buildPoints, buildJobs: buildJobs, jobConfig: jobConfig, configFor: configFor,
   runJobs: runJobs, runOne: runOne, makeRecords: makeRecords, summarize: summarize, summarizePoint: summarizePoint,
-  leadBrakeHandled: leadBrakeHandled, writeOutputs: writeOutputs, headline: headline, severity: severity, thin: thin, OUT_ROOT: OUT_ROOT
+  leadBrakeHandled: leadBrakeHandled, SAFETY: SAFETY, writeOutputs: writeOutputs, headline: headline, severity: severity, thin: thin, OUT_ROOT: OUT_ROOT
 };
 if (require.main === module) {
   if (process.argv[2] === '--worker') workerMain(); else main();

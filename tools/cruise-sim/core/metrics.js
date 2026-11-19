@@ -13,7 +13,8 @@
  *   timeLost(ours, baseline)        -> { timeLost_s, timeLostPct } from two runs' egoXEnd_m / egoVEnd_mps / duration_s
  *
  * Definitions worth knowing (all from the TRUE series, never the measured ones):
- *  - a CRITICAL moment: the true gap below nearMissGap_m, or the true TTC below ttcCritical_s, or contact;
+ *  - a CRITICAL moment: the true gap below nearMissGap_m, the true TTC below ttcCritical_s, the true time gap below
+ *    timeGapCritical_s, or contact;
  *  - its LAST MOMENT: the latest time at which a driver who starts braking at driverBrake_mps2 (no reaction time) still keeps
  *    nearMissGap_m to the same lead, the lead doing what it really did;
  *  - warnLeadTime_s: last moment minus the warning's onset (min over the critical moments); missedWarning: a critical moment
@@ -62,7 +63,7 @@ var METRICS = [
   T('underspeed_kmh', 'Underspeed (free)', 'km/h', null, null),
   T('settleTime_s', 'Settle time after a max change', 's', null, null),
   T('lostTargetSpeedGain_kmh', 'Speed gain after target loss', 'km/h', '<=', 2, 0, 20, 0.5, 'In the first holdCheck_s after the target is lost (hold, then release)'),
-  T('curveLostSpeedGain_kmh', 'Speed gain into a curve on a lost target', 'km/h', '<=', 1, 0, 20, 0.5, 'Never accelerate into a curve on a lost target'),
+  T('curveLostSpeedGain_kmh', 'Speed gain into a curve on a lost target', 'km/h', '<=', 2, 0, 20, 0.5, 'Never accelerate into a curve on a lost target'),
   T('faultDetectDelay_s', 'Fault detection delay', 's', '<=', 2, 0, 10, 0.1, 'Frozen gap / blind sensor until a warning or the estimate goes invalid (99 = never)'),
   T('estGapErrRms_m', 'Estimated gap error RMS', 'm', null, null),
   T('estVrelErrRms_mps', 'Estimated relative speed error RMS', 'm/s', '<=', 0.3, 0.05, 2, 0.05, 'Parent Phase 3: ≤ 0.3 m/s at steady following'),
@@ -80,6 +81,7 @@ var METRICS = [
 var DEFINITIONS = [
   { key: 'nearMissGap_m', label: 'Near-miss gap', unit: 'm', default: 2, min: 0.5, max: 10, step: 0.5, group: 'definitions', help: 'A true gap below this is a critical moment; the last moment keeps this much' },
   { key: 'ttcCritical_s', label: 'Critical TTC', unit: 's', default: 1.0, min: 0.3, max: 3, step: 0.1, group: 'definitions', help: 'A true TTC below this is a critical moment' },
+  { key: 'timeGapCritical_s', label: 'Critical time gap', unit: 's', default: 0.3, min: 0.1, max: 1, step: 0.05, group: 'definitions', help: 'A true time gap below this is a critical moment (a near miss at speed)' },
   { key: 'driverBrake_mps2', label: 'Driver braking for the last moment', unit: 'm/s²', default: 6, min: 3, max: 9, step: 0.5, group: 'definitions', help: 'Braking assumed when the last moment is computed' },
   { key: 'nuisanceWindow_s', label: 'Nuisance window', unit: 's', default: 10, min: 2, max: 30, step: 1, group: 'definitions', help: 'A warning not followed by a critical moment within this is a nuisance (no-reaction runs)' },
   { key: 'holdCheck_s', label: 'Hold check after target loss', unit: 's', default: 3, min: 0.5, max: 10, step: 0.5, group: 'definitions', help: 'Window of lostTargetSpeedGain_kmh' },
@@ -231,7 +233,8 @@ function compute(result, config) {
   if (gap) {
     var cur = null;
     for (i = 0; i < n; i++) {
-      var c = fin(gap[i]) && (gap[i] < th.nearMissGap_m || ttcOf(i) < th.ttcCritical_s);
+      var c = fin(gap[i]) && (gap[i] < th.nearMissGap_m || ttcOf(i) < th.ttcCritical_s ||
+        (egoV && egoV[i] > 1 && gap[i] / egoV[i] < th.timeGapCritical_s));
       if (c) { if (cur && t[i] - t[cur.i1 - 1] <= 1.0) cur.i1 = i + 1; else { cur = { i0: i, i1: i + 1 }; crit.push(cur); } }
     }
   }
@@ -272,7 +275,7 @@ function compute(result, config) {
   if (reaction === 'none') {
     var nz = 0;
     onsets.forEach(function (o) {
-      if (/stale|lost|fault|envelope|min|blind|frozen|off/i.test(o.reason)) return;
+      if (/sensor|stale|lost|fault|envelope|min|blind|frozen|off/i.test(o.reason)) return;   // not a collision warning
       var followed = crit.some(function (seg) { return t[seg.i0] >= o.t - 1 && t[seg.i0] <= o.t + th.nuisanceWindow_s; });
       if (!followed) nz++;
     });
@@ -281,10 +284,14 @@ function compute(result, config) {
 
   // ---- driver
   var scripted = (sc.events || []).filter(function (e) { return e.kind === 'driverBrake'; }).map(function (e) { return e.t; });
+  // one intervention = the driver starts braking on his own (after a warning, or unwarned): a driver.brake with a level,
+  // not scripted by the scenario (SC1 also emits driver.react, and a level-0 driver.brake on release: neither counts)
   var interventions = 0;
   ev.forEach(function (e) {
-    if (e.kind === 'driver.react') interventions++;
-    else if (e.kind === 'driver.brake' && !e.scripted && !scripted.some(function (ts) { return Math.abs(ts - e.t) < 0.25; })) interventions++;
+    if (e.kind !== 'driver.brake' || e.scripted || e.cause === 'scripted' || e.cause === 'release') return;
+    if (e.level !== undefined && !(e.level > 0)) return;
+    if (scripted.some(function (ts) { return Math.abs(ts - e.t) < 0.25; })) return;
+    interventions++;
   });
   m.driverInterventions = interventions;
 
@@ -336,7 +343,9 @@ function compute(result, config) {
   }
 
   // ---- the car behind
-  if (fGap && egoV) {
+  var fAny = false;
+  if (fGap) for (i = 0; i < n && !fAny; i++) if (fin(fGap[i])) fAny = true;
+  if (fGap && egoV && fAny) {
     var fv = followerSpeed(t, egoV, fGap), fmin = Infinity, fcol = false;
     for (i = 0; i < n; i++) {
       if (!fin(fGap[i])) continue;

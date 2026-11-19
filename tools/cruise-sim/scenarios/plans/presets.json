@@ -1,0 +1,36 @@
+{
+ "name": "presets",
+ "description": "The scenario matrix: the whole catalogue (families A-L, every variant) at the three assumed plant presets, each with SC2's controller at the parent brief's start values, with the worst command path, and with the downward rate limit opened to 12 km/h/s (so the cruise, not our rate limit, bounds the braking); ideal-ACC baseline for the time lost.",
+ "scenarios": [
+  "*"
+ ],
+ "grid": {
+  "plant.preset": [
+   "liftoff",
+   "mild",
+   "firm"
+  ]
+ },
+ "gridCases": [
+  {},
+  {
+   "command.preset": "worst"
+  },
+  {
+   "controller.rateDown_kmhps": 12
+  }
+ ],
+ "presets": {
+  "liftoff": {
+   "plant.preset": "liftoff"
+  },
+  "mild": {
+   "plant.preset": "mild"
+  },
+  "firm": {
+   "plant.preset": "firm"
+  }
+ },
+ "baseline": true,
+ "seed": 1
+}

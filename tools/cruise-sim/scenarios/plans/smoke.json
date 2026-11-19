@@ -1,0 +1,28 @@
+{
+ "name": "smoke",
+ "description": "A quick check of the whole pipeline: the representative scenarios (tag core), three variant groups each, at the three assumed plant presets.",
+ "scenarios": [
+  "tag:core"
+ ],
+ "perScenarioMax": 3,
+ "grid": {
+  "plant.preset": [
+   "liftoff",
+   "mild",
+   "firm"
+  ]
+ },
+ "presets": {
+  "liftoff": {
+   "plant.preset": "liftoff"
+  },
+  "mild": {
+   "plant.preset": "mild"
+  },
+  "firm": {
+   "plant.preset": "firm"
+  }
+ },
+ "baseline": true,
+ "seed": 1
+}

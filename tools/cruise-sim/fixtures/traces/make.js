@@ -30,8 +30,8 @@ function synth(opts) {
     wob += -wob * dt / 4 + opts.wobble * Math.sqrt(dt) * normal(r);
     v = Math.max(0, v + (a + wob * 0.15) * dt);
     if (tgt === 0 && v < 0.3) { v = 0; a = 0; }
-    out.push(Math.round((v + 0.03 * normal(r)) * 100) / 100);   // reconstruction noise (v + v_rel), 0.03 m/s
-    if (out[i] < 0) out[i] = 0;
+    var x = Math.round((v + 0.03 * normal(r)) * 100) / 100;     // reconstruction noise (v + v_rel), 0.03 m/s
+    out.push(x > 0 ? x : 0);                                       // (never -0: JSON would not keep it)
   }
   return { dt: dt, v: out };
 }
