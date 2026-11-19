@@ -159,17 +159,19 @@ const STUBS = {
   },
   metrics: {
     NAME: 'metrics', STUB: true,
+    // SC3's names for the three it judges (the parent brief's thresholds: time gap >= 1 s, TTC >= 4 s, no collision)
     compute(result) {
       const c = result.meta.core;
-      const m = Object.assign({}, c);
-      const decide = (result.meta.scenario && result.meta.scenario.decide) || ['minTimeGap', 'minTTC', 'collision'];
-      const failed = [];
+      const m = Object.assign({}, c, { minTimeGap_s: c.minTimeGap, minTTC_s: c.minTTC, minGap_m: c.minGap });
+      const decide = (result.meta.scenario && result.meta.scenario.decide) || ['collision', 'minTimeGap_s', 'minTTC_s'];
+      const failed = [], unknown = [];
       for (const k of decide) {
-        if (k === 'collision' && c.collision) failed.push(k);
-        if (k === 'minTimeGap' && c.minTimeGap < 1.0) failed.push(k);
-        if (k === 'minTTC' && c.minTTC < 4) failed.push(k);
+        if (k === 'collision') { if (c.collision) failed.push(k); }
+        else if (k === 'minTimeGap_s') { if (c.minTimeGap !== null && c.minTimeGap < 1.0) failed.push(k); }
+        else if (k === 'minTTC_s') { if (c.minTTC !== null && c.minTTC < 4) failed.push(k); }
+        else unknown.push(k);
       }
-      return { metrics: m, verdict: { pass: failed.length === 0, failed } };
+      return { metrics: m, verdict: { pass: failed.length === 0, failed, unknown } };
     },
   },
 };
@@ -185,7 +187,7 @@ const BUILTIN = {
     ego: { v0_kmh: 120, vMax_kmh: 120, lane: 0 },
     vehicles: [{ id: 'lead', kind: 'car', lane: 0, x0: 150, v0_kmh: 80, profile: { type: 'piecewise', points: [[0, 80], [40, 80], [45, 60], [90, 60]] } }],
     events: [],
-    decide: ['minTimeGap', 'minTTC', 'collision'], scope: 'in',
+    decide: ['collision', 'minTimeGap_s', 'minTTC_s'], scope: 'in',
   },
   'demo.free': {
     id: 'demo.free', family: 'A', name: 'No target, steady speed (built-in)', duration: 30,

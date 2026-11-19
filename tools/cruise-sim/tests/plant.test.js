@@ -224,3 +224,19 @@ test('plant presets: lift-off < mild < firm in braking authority, all P1 by defa
   assert.ok(a('liftoff').aMin_ms2 > a('mild').aMin_ms2 && a('mild').aMin_ms2 > a('firm').aMin_ms2);
   for (const n of ['liftoff', 'mild', 'firm']) assert.strictEqual(a(n).model, 'P1');
 });
+
+test('plant: the step-size nonlinearity answers large errors harder, small ones as before', () => {
+  const run = (gain, step) => {
+    const { inst } = make({ preset: 'firm', largeStep_kmh: 10, largeStepGain: gain, aMax_ms2: 4 });
+    return drive(inst, 80 * KMH, 3, (t, e, p) => { if (t === 0) p.request(t, (80 + step) * KMH); });
+  };
+  const aOf = o => o[60].a;   // after the 0.5 s dead time
+  near(aOf(run(2, 5)), aOf(run(1, 5)), 1e-12, 'a 5 km/h step is below the threshold');
+  near(aOf(run(2, 20)), 2 * aOf(run(1, 20)), 1e-9, 'a 20 km/h step is answered twice as hard');
+});
+
+test('plant: a 5 km/h resolution rounds every set speed to the nearest 5', () => {
+  const { inst } = make({ resolution_kmh: 5 });
+  inst.init({ v: 25 }, {});
+  for (const [ask, want] of [[87.4, 85], [87.6, 90], [92.5, 95]]) near(inst.request(10 * want, ask * KMH).held / KMH, want, 1e-9, String(ask));
+});
