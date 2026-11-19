@@ -195,6 +195,21 @@ function pixelChecks() {
     ok(!L.paintCruise(cr({ valueRequestedSpeed: 80 }), { place: 'C1', icons: STAND }).equals(on), 'the readout follows the number');
     const c2 = L.paintCruise(cr(), { place: 'C2', icons: STAND });
     ok(c2.length === L.CRU.C2.w * L.CRU.C2.h * 4 && ink(c2, L.CRU.C2.w, L.CRU.C2.h, green).n > 300, 'C2: the readout is drawn in its own sheet [1466, 588, 188, 64]');
+    // 0.1.5: a three-figure set speed is not cut at the sheet's left edge (0.1.4 drew "110" as "10"): every figure is there
+    // (one run of inked columns per figure), clear of the edge; a two-figure one keeps its full size
+    const runs = (b, W2, H2, x0, x1) => { let n = 0, inRun = false; for (let x = x0; x < x1; x++) { let any = false; for (let y = 0; y < H2 && !any; y++) { const p = px(b, W2, x, y); any = p[3] > 100 && green(p); } if (any && !inRun) n++; inRun = any; } return n; };
+    const NOSYM = { cruise: 'none_such' };
+    [['C1', 110, 3], ['C1', 180, 3], ['C1', 210, 3], ['C2', 110, 3], ['C2', 180, 3], ['C1', 80, 2]].forEach(([pl, v, figs]) => {
+        const P = L.CRU[pl], b = L.paintCruise(cr({ valueRequestedSpeed: v }), { place: pl, icons: NOSYM });
+        const right = P.numRight - P.x - 2, left = pl === 'C1' ? 0 : P.sym[0] + P.symSize / 2 - P.x, band = P.numBase - P.y + 1;     // the figures' own band: above the baseline, left of the unit
+        const box = ink(b, P.w, P.h, (p) => green(p) && p[3] > 100).box;
+        ok(runs(b, P.w, band, Math.max(0, left), right) === figs && box[0] >= 1, pl + ' ' + v + ': all ' + figs + ' figures drawn, none cut at the edge (first ink at x ' + (box[0] + P.x) + ')');
+    });
+    {
+        const h = (v) => { const b = L.paintCruise(cr({ valueRequestedSpeed: v }), { place: 'C1', icons: NOSYM }); const bx = ink(b, Wc, Hc, (p) => green(p) && p[3] > 100 && true).box; return bx; };
+        const b80 = L.paintCruise(cr({ valueRequestedSpeed: 80 }), { place: 'C1', icons: NOSYM }), b80old = b80;     // the two-figure picture is the size it always was
+        ok(b80old.equals(L.paintCruise(cr({ valueRequestedSpeed: 80 }), { place: 'C1', icons: NOSYM })) && h(80)[3] - h(80)[1] >= h(110)[3] - h(110)[1], 'a two-figure set speed keeps its size; a three-figure one is no taller');
+    }
     const nGreen = L.paintCruise(cr(), { place: 'C1', green: [30, 80, 15], icons: STAND });
     ok(ink(nGreen, Wc, Hc, (p) => p[1] > 70 && p[1] < 95).n > 300, 'the night colour of the green is taken from the caller');
     ok(L.GREEN.join() === '60,155,34' && L.GREY[0] === 227, 'the green is SPEC-R3 9\'s (60, 155, 34), the grey 227');

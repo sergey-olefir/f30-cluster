@@ -367,8 +367,11 @@ function paintCruise(c, opts) {
     // the set speed: Saira at numPx, the slot's own atlas when there is one, else a bigger one reduced
     const f = fontOf([['td_cru', P.numPx]].concat(SAIRA_DIGITS));
     if (f) {
-        const s = P.numPx / f.size;
         const adv = textRaster.measure(text, f.name, 0), bw = adv + 6, bh = Math.ceil(f.size * 1.3) + 4;
+        // 0.1.5: a three-figure set speed (110, 180 ...) is wider than the slot at numPx: it was cut at the sheet's left edge
+        // ("110" read "10"). The number shrinks to the room left of numRight (C1: the sheet's edge; C2: the symbol's right side).
+        const roomLeft = P.row ? P.sym[0] + P.symSize / 2 + 4 : P.x + 2;
+        const s = Math.min(P.numPx / f.size, (P.numRight - roomLeft) / (3 + adv));
         const m = textRaster.mask(bw, bh, text, { font: f.name, x: 3 });
         const meta = textRaster.loadFont(f.name).metrics;
         const sc = s === 1 ? { w: bw, h: bh, a: m } : scaleMask(m, bw, bh, s, s);

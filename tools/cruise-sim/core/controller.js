@@ -34,7 +34,7 @@
     { key: 'd0', label: 'Standstill gap d0', unit: 'm', default: 5, min: 3, max: 8, step: 0.5, group: 'law', help: 'Tuning table: 5 m, sweep 3–8.' },
     { key: 'h', label: 'Time gap h', unit: 's', default: 2.0, min: 1.5, max: 3.0, step: 0.1, group: 'law', help: 'Tuning table: 2.0 s, sweep 1.5–3.0.' },
     { key: 'tau', label: 'Gap-closing time tau', unit: 's', default: 4, min: 2, max: 8, step: 0.5, group: 'law', help: 'Tuning table: 4 s, sweep 2–8; must exceed the cruise tau_c + T_d.' },
-    { key: 'rateDown_kmhps', label: 'Rate limit down', unit: 'km/h/s', default: 3, min: 1, max: 5, step: 0.5, group: 'limits', help: 'Tuning table: 3, sweep 1–5.' },
+    { key: 'rateDown_kmhps', label: 'Rate limit down', unit: 'km/h/s', default: 12, min: 1, max: 15, step: 0.5, group: 'limits', help: 'Tuning table: 12, sweep 1–15 (the owner, 2026-11-19: widened from 3 / 1–5, which capped the loop at 0.83 m/s²).' },
     { key: 'rateUp_kmhps', label: 'Rate limit up', unit: 'km/h/s', default: 1, min: 0.5, max: 2, step: 0.1, group: 'limits', help: 'Tuning table: 1, sweep 0.5–2.' },
     { key: 'step_kmh', label: 'Cruise step', unit: 'km/h', default: 1, min: 1, max: 10, step: 1, group: 'quantisation', help: 'The set-speed resolution the cruise accepts (1, maybe 5 or 10).' },
     { key: 'hystSteps', label: 'Hysteresis', unit: 'steps', default: 1, min: 0.5, max: 3, step: 0.1, group: 'quantisation', help: 'A new step is commanded only when the unquantised value is this many steps from the current one (0.5 = plain rounding).' },

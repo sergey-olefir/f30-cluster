@@ -25,7 +25,7 @@ S.test('SCHEMA carries the parent tuning table with its start values and sweep r
   var by = {}; C.SCHEMA.forEach(function (s) { by[s.key] = s; assert.ok(s.label && typeof s.unit === 'string', s.key); });
   function chk(k, def, lo, hi) { assert.strictEqual(by[k].default, def, k); assert.strictEqual(by[k].min, lo, k + ' min'); assert.strictEqual(by[k].max, hi, k + ' max'); }
   chk('d0', 5, 3, 8); chk('h', 2.0, 1.5, 3.0); chk('tau', 4, 2, 8);
-  chk('rateDown_kmhps', 3, 1, 5); chk('rateUp_kmhps', 1, 0.5, 2);
+  chk('rateDown_kmhps', 12, 1, 15);     // widened by the owner 2026-11-19 (was 3, 1–5) chk('rateUp_kmhps', 1, 0.5, 2);
   assert.strictEqual(by.rateHz.default, 10);
 });
 
@@ -54,7 +54,7 @@ S.test('no target: v_set rises to the driver maximum at the up rate limit (1 km/
 });
 
 S.test('down rate limit 3 km/h/s toward a slow lead', function () {
-  var c = C.create({ maxBelowEgo_kmh: 100 });
+  var c = C.create({ maxBelowEgo_kmh: 100, rateDown_kmhps: 3 });
   // lead 50 km/h at d_des: v_ref = 50 km/h, from 100 km/h held
   var out = drive(c, 0, 4, function (t) { return { t: t, est: est(5 + 2 * 100 * KMH, 50 * KMH), egoV: 100 * KMH, vDriver: 130 * KMH, cruise: active(100 * KMH) }; });
   near(out[10].y, 97 * KMH, 1e-9, '1 s');
@@ -192,7 +192,7 @@ S.test('cruise not active: command nothing; on resume re-sync from the held set 
 });
 
 S.test('resume with an old, high held set speed behind a slower lead: lowered at once to our speed, then rate-limited', function () {
-  var c = C.create({});
+  var c = C.create({ rateDown_kmhps: 3 });
   var v = 66 * KMH;
   // resumed at 66 km/h; the cruise still holds 90; the lead 50 km/h at d_des of 66 km/h
   var r = c.step({ t: 0, est: est(5 + 2 * v, 50 * KMH), egoV: v, vDriver: 120 * KMH, cruise: active(90 * KMH) });

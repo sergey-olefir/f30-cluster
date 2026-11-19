@@ -61,8 +61,9 @@ if (!fs.existsSync(SIM)) {
 
   S.test('a slower lead from far with a braking cruise: the loop-limited warning comes in time (parent formula: none)', function () {
     var s = scen({ duration: 60, ego: { v0_kmh: 120, vMax_kmh: 120, lane: 0 }, vehicles: [{ id: 'lead', kind: 'car', lane: 0, x0: 150, v0_kmh: 80 }] });
-    var parent = run(s, { plant: { preset: 'mild' }, warning: { limitByLoop: false } });
-    var loop = run(s, { plant: { preset: 'mild' } }, { warning: warnLoop });
+    // the parent's down limit of 3 km/h/s (0.83 m/s²): the case where the loop, not the cruise, limits the braking
+    var parent = run(s, { plant: { preset: 'mild' }, controller: { rateDown_kmhps: 3 }, warning: { limitByLoop: false } });
+    var loop = run(s, { plant: { preset: 'mild' }, controller: { rateDown_kmhps: 3 } }, { warning: warnLoop });
     assert.ok(loop.meta.core.warnCount >= 1, 'warned');
     assert.ok(loop.meta.core.minTimeGap > parent.meta.core.minTimeGap + 0.3, 'min time gap ' + parent.meta.core.minTimeGap.toFixed(2) + ' -> ' + loop.meta.core.minTimeGap.toFixed(2));
   });
