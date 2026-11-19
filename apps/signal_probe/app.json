@@ -33,6 +33,7 @@
     },
     "de.bmw.infotainment.vehicle.Vehicle2": {
       "_instances": "1",
+      "statusCarSpeed2": "rs",
       "statusDimmer": "rs",
       "statusDisplayKombi": "rs",
       "statusDisplayedCCMessage": "rs",
@@ -96,6 +97,7 @@
     "de.bmw.infotainment.vehicle.CDS": {
       "_instances": "1",
       "statusBattery2": "rs",
+      "statusEngineSpeed2": "rs",
       "statusEngineTemperature": "rs"
     },
     "de.bmw.body.DoorsWindowsRoofMirrors": {
@@ -104,6 +106,7 @@
     },
     "de.bmw.infotainment.vehicle.A4A": {
       "_instances": "1",
+      "statusA4AFDRControl": "rs",
       "statusA4ALids": "rs"
     },
     "de.bmw.infrastructure.analytics.BasicDataSet": {
@@ -246,7 +249,8 @@
     "de.bmw.body.Light": {
       "_instances": "1",
       "IndicatorSteeringColumn": "s",
-      "IndicatorSteeringColumnComplete": "s"
+      "IndicatorSteeringColumnComplete": "s",
+      "LampExterior": "s"
     },
     "de.bmw.infotainment.controlelements.FrontCCU": {
       "_instances": "1",
@@ -365,6 +369,9 @@
     },
     "de.bmw.powertrain.Powertrain": {
       "_instances": "1",
+      "ActualValueRPMWheel": "s",
+      "InformationVehicleDrive": "s",
+      "WheelMomentDrive4": "s",
       "dataDisplayGearboxSecure": "s"
     },
     "de.bmw.infotainment.speech.dialog.Dialog": {
@@ -481,6 +488,29 @@
         "pitchRateCog",
         "rollRateCog"
       ]
+    },
+    "de.bmw.powertrain.AcceleratorPedal": {
+      "_instances": "1",
+      "AngleAcceleratorPedal": "s"
+    },
+    "de.bmw.chassis.VehicleStabilizationManagement": {
+      "_instances": "1",
+      "StabilizationManagement": "s"
+    },
+    "de.bmw.powertrain.vehicledynamics.VelocityAndVehicleConditionProvision": {
+      "_instances": "1",
+      "_broadcasts": [
+        "velocityVehicle",
+        "velocityVehicleLongitudinal"
+      ]
+    },
+    "de.bmw.infotainment.drivingexcitement.XView": {
+      "_instances": "1",
+      "statusGradientRoadway": "rs"
+    },
+    "de.bmw.chassis.VehicleModel": {
+      "_instances": "1",
+      "LaneSlope": "s"
     },
     "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera": {
       "_instances": "1",
@@ -607,6 +637,16 @@
           "tworow",
           "MARK",
           "Позначка 1"
+        ],
+        [
+          "tworow",
+          "REC",
+          "Запис"
+        ],
+        [
+          "tworow",
+          "RECSET",
+          "Набір для запису"
         ],
         [
           "setting",
@@ -777,6 +817,28 @@
       ],
       "hubPauseMs": 120
     },
-    "_about": "READ ONLY. config.probe.summaryS: seconds after a set is switched on at which its summary (and, at 120 s, one getter ask per silent field) is logged; hubPauseMs: the pause between two interfaces being subscribed."
+    "_about": "READ ONLY. config.probe.summaryS: seconds after a set is switched on at which its summary (and, at 120 s, one getter ask per silent field) is logged; hubPauseMs: the pause between two interfaces being subscribed.",
+    "recorder": {
+      "fileRawKB": 4096,
+      "quotaMB": 15,
+      "flushMs": 1000,
+      "maxQueueKB": 2048,
+      "gzip": true,
+      "maxEntries": 16,
+      "quietLog": true,
+      "choices": [
+        [
+          "S14"
+        ],
+        [
+          "S14",
+          "S15"
+        ],
+        [
+          "S13"
+        ]
+      ],
+      "_about": "cruise RC: the recording mode (recorder.js). Every value of the chosen sets' fields, unthrottled, in data/rec/rec-<session>-<n>.csv.gz; a file is cut at fileRawKB of text, the oldest files go past quotaMB (the app's disk limit is 20 MiB with its log); flushMs between two writes; maxQueueKB of text waiting before samples are dropped (counted); maxEntries of a list; quietLog: the recorded fields' throttled log lines are left out while recording; choices: what the menu row RECSET cycles through."
+    }
   }
 }

@@ -85,6 +85,17 @@ class Probe {
         this.queue = Promise.resolve();
         this.hubs = {};
         this.fields = this.table.map((f) => this._field(f));
+        this.recorder = null; this.recQuiet = false;      // cruise RC: set by setRecorder()
+    }
+
+    // ---- cruise RC: the recording mode (recorder.js) -------------------------------------------------------------------------------
+    /** The recorder the fields of `recordSets` go to; quiet: their throttled log lines are left out while it records. */
+    setRecorder(rec, quiet) { this.recorder = rec || null; this.recQuiet = !!quiet; }
+    /** Mark the fields of these sets (and the fields other sets share with them through `also`) as recorded. */
+    recordSets(ids) {
+        const want = ids || [];
+        this.fields.forEach((st) => { st.rec = st.sets.some((id) => want.indexOf(id) >= 0); });
+        return this.fields.filter((st) => st.rec).length;
     }
 
     _field(f) {
@@ -93,6 +104,12 @@ class Probe {
             cap: f.cap || d.cap, gap: F.isNum(f.gapMs) ? f.gapMs : d.gapMs, onAt: 0, asked: false, hub: null };
         st.handler = (v) => {
             if (!st.active) return;
+            // cruise RC: the recorder takes EVERY value of the fields it records (unthrottled, recorder.js); while it records, those
+            // fields' throttled log lines are left out (config.recorder.quietLog), so the log keeps the marks, the summaries, the status
+            if (st.rec && this.recorder && this.recorder.on) {
+                try { this.recorder.sample(st, v); } catch (err) { /* the recorder guards itself */ }
+                if (this.recQuiet) { st.events++; return; }
+            }
             try { this._value(st, v); } catch (err) {
                 if (!st.warned) { st.warned = true; this._warn(f.p + ' ' + f.tag + ': ' + msg(err)); }
             }
@@ -337,6 +354,7 @@ class Probe {
         this.markN++;
         this.lastMark = { n: this.markN, at: t };
         this._info('mark M' + this.markN + ' t=' + this._t() + ' tms=' + Math.round(t - this.t0) + ' sets=' + this.setsText());
+        if (this.recorder) { try { this.recorder.mark(this.markN); } catch (e) { /* cruise RC: the recorder guards itself */ } }
         return this.markN;
     }
 

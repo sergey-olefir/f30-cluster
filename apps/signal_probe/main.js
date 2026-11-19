@@ -15,6 +15,8 @@ const mgu = require('./kit/mgu');
 const { Probe, VERSION } = require('./probe');
 const FIELDS = require('./fields');
 const Menu = require('./menu');
+const { Recorder } = require('./recorder');      // cruise RC
+const path = require('path');
 
 mgu.run({
     start(ctx) {
@@ -31,7 +33,17 @@ mgu.run({
             ctx.log.error('Signal Probe failed to start: ' + (e && e.stack || e));
             return;
         }
-        try { new Menu(ctx, probe).start(); } catch (e) { ctx.log.error('menu failed to start: ' + (e && e.stack || e)); }
-        process.on('exit', () => { try { probe.stop(); } catch (e) { /* exiting anyway */ } });
+        // cruise RC: the recording mode (recorder.js): files in data/rec, started and stopped from the menu; a failure here leaves it out
+        let rec = null, recCfg = {};
+        try {
+            recCfg = (ctx.spec.config && ctx.spec.config.recorder) || {};
+            rec = new Recorder({ dir: path.join(ctx.dataDir || '.', 'rec'), log: ctx.log, cfg: recCfg, version: (ctx.spec && ctx.spec.version) || VERSION });
+            probe.setRecorder(rec, recCfg.quietLog !== false);
+        } catch (e) { rec = null; ctx.log.error('recorder failed to start: ' + (e && e.stack || e)); }
+        try { new Menu(ctx, probe, rec, recCfg).start(); } catch (e) { ctx.log.error('menu failed to start: ' + (e && e.stack || e)); }
+        process.on('exit', () => {
+            try { probe.stop(); } catch (e) { /* exiting anyway */ }
+            try { if (rec) rec.stop(true); } catch (e) { /* cruise RC: exiting anyway */ }
+        });
     },
 });
