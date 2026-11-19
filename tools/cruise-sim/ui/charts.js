@@ -609,7 +609,8 @@
     yt.forEach(function (v) {
       const y = sy(v);
       ops.push({ op: 'line', x1: pb.x, y1: y, x2: pb.x + pb.w, y2: y, stroke: v === 0 ? 'axis' : 'grid', width: 1 });
-      ops.push({ op: 'text', x: pb.x - 5, y: y, text: fmt(v, ydec), fill: 'muted', align: 'right', baseline: 'middle', size: 10 });
+      const capped = panel.yCap !== undefined && Math.abs(v - panel.yCap) < 1e-9;
+      ops.push({ op: 'text', x: pb.x - 5, y: y, text: (capped ? '≥ ' : '') + fmt(v, ydec), fill: 'muted', align: 'right', baseline: 'middle', size: 10 });
     });
     xTicksOps(ops, pb, sx, view, opts.xLabels);
     ops.push({ op: 'text', x: box.x + 4, y: pb.y, text: panel.unit, fill: 'muted', align: 'left', baseline: 'top', size: 10 });
@@ -947,7 +948,8 @@
         let lx = 4 + p.title.length * 7 + 14;
         p.series.forEach(function (s) {
           if (!s.visible) return;
-          ops.push({ op: 'line', x1: lx, y1: y + 9, x2: lx + 14, y2: y + 9, stroke: s.color, width: s.dots ? 3 : s.w, dash: s.dash });
+          if (s.dots) [lx + 2, lx + 7, lx + 12].forEach(function (dx) { ops.push({ op: 'marker', shape: 'circle', x: dx, y: y + 9, size: 1.8, fill: s.color }); });
+          else ops.push({ op: 'line', x1: lx, y1: y + 9, x2: lx + 14, y2: y + 9, stroke: s.color, width: s.w, dash: s.dash });
           ops.push({ op: 'text', x: lx + 18, y: y + 13, text: s.label, fill: 'ink2', size: 10 });
           lx += 18 + s.label.length * 5.6 + 12;
         });

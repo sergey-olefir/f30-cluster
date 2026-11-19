@@ -489,11 +489,13 @@
     ops.push({ op: 'text', x: pb.x + pb.w / 2, y: pb.y + pb.h + 22, text: opts.xLabel || grid.x.key, fill: 'ink2', align: 'center', baseline: 'top', size: 11 });
     ops.push({ op: 'text', x: box.x + 4, y: pb.y - 8, text: '↑ ' + (opts.yLabel || grid.y.key), fill: 'ink2', align: 'left', baseline: 'bottom', size: 11 });
     // preset marks: a ring with a surface halo, and the name
+    // (shifted left of the cell's centre so the cell's value stays readable)
+    const shift = showText ? Math.min(cw * 0.32, 28) : 0;
     (opts.marks || []).forEach(function (m) {
-      const x = cx(Math.max(-0.5, Math.min(grid.x.n - 0.5, m.fx))), y = cy(Math.max(-0.5, Math.min(grid.y.n - 0.5, m.fy)));
+      const x = cx(Math.max(-0.5, Math.min(grid.x.n - 0.5, m.fx))) - shift, y = cy(Math.max(-0.5, Math.min(grid.y.n - 0.5, m.fy)));
       ops.push({ op: 'marker', shape: 'circle', x: x, y: y, size: 7.5, fill: 'surface' });
       ops.push({ op: 'marker', shape: 'diamond', x: x, y: y, size: 5.5, fill: 's1' });
-      ops.push({ op: 'text', x: x + 8, y: y - 6, text: m.name + (m.outside ? ' (off the map)' : ''), fill: 'ink', size: 11, weight: 600, halo: true });
+      ops.push({ op: 'text', x: x, y: y - 9, text: m.name + (m.outside ? ' (off the map)' : ''), fill: 'ink', align: 'center', baseline: 'bottom', size: 11, weight: 600, halo: true });
     });
     // legend: the ramp
     const lx = pb.x + pb.w + 18, lw = 14, lh = Math.min(pb.h, 180);
