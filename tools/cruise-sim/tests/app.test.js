@@ -29,7 +29,10 @@ test('diffConfig is the minimal partial and deepMerge(base, diff) restores the c
     assert.equal(A.diffConfig(base, A.clone(base)), undefined);
     const cfg = A.deepMerge(base, { seed: 7, plant: { preset: 'firm', aMin: -2.5 }, failures: [{ kind: 'appDead', at: 'worst' }], sensor: {} });
     const d = A.diffConfig(base, cfg);
-    assert.deepEqual(d, { seed: 7, plant: { preset: 'firm', aMin: -2.5 }, failures: [{ kind: 'appDead', at: 'worst' }] });
+    assert.deepEqual(d, { seed: 7, plant: { preset: 'firm', aMin: -2.5 }, failures: [{ kind: 'appDead', at: 'worst' }], sensor: {} });
+    assert.deepEqual(A.diffConfig({ a: { b: 1, c: 2 } }, { a: { b: 1, c: 3 } }), { a: { c: 3 } });
+    assert.equal(A.diffConfig({ a: { b: 1 } }, { a: { b: 1 } }), undefined);
+    assert.deepEqual(A.BASE_CONFIG, { version: 1, seed: 1 }, 'sparse: the engine fills its own defaults');
     assert.deepEqual(A.deepMerge(base, d), cfg);
 });
 
@@ -234,4 +237,28 @@ test('the tracked fixture loads as a result and matches what the generator write
     const gen = F.makeFakeResult({ seed: 1, duration: 60, out: { dt: 0.2 } });
     gen.meta.ms = 0;
     assert.equal(JSON.stringify(A.serializeResult(gen, 2)) + '\n', txt, 'regenerate: node tools/cruise-sim/ui/fake-result.js 60 0.2 > tools/cruise-sim/tests/fixtures/su1-fake-result.json');
+});
+
+test('SC1-shaped result: ids as indices into meta.enums.id, y for the lane, warn.reason as an enum, app.alive', () => {
+    const r = A.normalizeResult({
+        meta: { enums: { id: ['lead', 'cutter'], 'warn.reason': ['distance', 'ttc'] }, vehicles: [{ id: 'lead', kind: 'car', length: 4.5, width: 1.8 }, { id: 'cutter', kind: 'truck', length: 12, width: 2.5 }] },
+        t: [0, 1],
+        series: {
+            'ego.x': [0, 20], 'lead.id': [0, 1], 'meas.id': [0, 0], 'meas.valid': [1, 1], 'gap.meas': [40, 30], 'warn': [0, 1], 'warn.reason': [null, 1], 'app.alive': [1, 0],
+            'veh.lead.x': [50, 70], 'veh.lead.y': [0, 0], 'veh.cutter.x': [30, 45], 'veh.cutter.y': [3.5, 1.75], 'curvature': [0, 0.002],
+        },
+    });
+    const tl = A.buildTimeline(r);
+    const f0 = A.frameAt(r, tl, 0), f1 = A.frameAt(r, tl, 1);
+    assert.equal(f0.leadId, 'lead');
+    assert.equal(f0.sensor.targetId, 'lead');
+    assert.equal(f0.sensor.wrong, false);
+    assert.deepEqual(f0.vehicles.map((v) => [v.id, v.role, v.lane]), [['lead', 'lead', 0], ['cutter', 'other', 1]]);
+    assert.equal(f0.appAlive, true);
+    assert.equal(f1.leadId, 'cutter');
+    assert.equal(f1.sensor.wrong, true, 'the sensor still holds the old lead');
+    assert.equal(f1.vehicles[1].lane, 0.5, 'half way through the lane change');
+    assert.equal(f1.warnReason, 'ttc');
+    assert.equal(f1.appAlive, false);
+    assert.equal(f1.curvature, 0.002);
 });

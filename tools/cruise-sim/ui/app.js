@@ -22,16 +22,12 @@
         ['batch', 'batch.js', 'batch'], ['report', 'report-view.js', 'reportView']];
     const VIEW_LABEL = { charts: 'Time charts', settings: 'Settings', batch: 'Batch views', report: 'Report' };
 
-    /** The run config when nothing is set (CONTRACT "The config"); modules fill their own defaults from SCHEMA. */
-    const BASE_CONFIG = {
-        version: 1, seed: 1, dt: 0.01, duration: 60, out: { dt: 0.05 },
-        scenario: { id: null, overrides: {} },
-        plant: { preset: 'mild', model: 'P1', file: null },
-        sensor: {}, estimator: {}, controller: { rateHz: 10 }, warning: {},
-        command: {}, driver: {}, failures: [],
-        ego: { mode: 'ours' },
-        thresholds: {},
-    };
+    /**
+     * The config when nothing is set. Deliberately sparse: the engine fills every default (core/sim.js
+     * defaultConfig, each module's SCHEMA), so the page never overrides a scenario's duration or a preset.
+     * Links carry the difference to this fixed base, so they keep their meaning when engine defaults change.
+     */
+    const BASE_CONFIG = { version: 1, seed: 1 };
 
     /** Series shown as a step (sample and hold), not interpolated. */
     const DISCRETE = /^(lead\.id|meas\.(id|valid)|gap\.meas|vrel\.meas|est\.valid|warn|cruise\.state|set\.(cmd|held)|v\.driverMax|driver\.(brake|accel)|veh\..+\.lane)$/;
@@ -226,7 +222,11 @@
         const smp = sampleAt(r, x), s = smp.s;
         const meta = r.meta || {};
         const vehicles = [];
-        const leadId = finite(s['lead.id']) ? s['lead.id'] : null;
+        const enums = Object.assign({}, DEFAULT_ENUMS, meta.enums || {});
+        // ids in series are numbers: indices into meta.enums.id when the engine names its vehicles (SC1), else the ids
+        const idName = (v) => { if (!finite(v)) return null; const n = Array.isArray(enums.id) ? enums.id[Math.round(v)] : undefined; return n === undefined ? v : n; };
+        const leadId = idName(s['lead.id']);
+        const LW = (meta.road && meta.road.laneWidth) || (meta.params && meta.params.road && meta.params.road.laneWidth) || 3.5;
         const metaVeh = Array.isArray(meta.vehicles) ? meta.vehicles : [];
         const ids = metaVeh.length ? metaVeh.map((v) => v.id)
             : Array.from(new Set(Object.keys(r.series).map((n) => (n.match(/^veh\.([^.]+)\.x$/) || [])[1]).filter(Boolean)));
@@ -234,11 +234,13 @@
             const m = metaVeh.find((v) => String(v.id) === String(id)) || {};
             const vx = s['veh.' + id + '.x'];
             if (!finite(vx)) continue;
+            const vy = s['veh.' + id + '.y'];
             vehicles.push({
                 id: typeof m.id === 'number' ? m.id : (isNaN(+id) ? id : +id), kind: m.kind || 'car',
                 length: m.length || (m.kind === 'truck' ? 12 : m.kind === 'moto' ? 2.2 : 4.5), width: m.width || (m.kind === 'moto' ? 0.8 : 1.8),
                 x: vx, v: s['veh.' + id + '.v'], a: s['veh.' + id + '.a'],
-                lane: finite(s['veh.' + id + '.lane']) ? s['veh.' + id + '.lane'] : 0, lat: finite(s['veh.' + id + '.lat']) ? s['veh.' + id + '.lat'] : 0,
+                lane: finite(vy) ? vy / LW : finite(s['veh.' + id + '.lane']) ? s['veh.' + id + '.lane'] : 0,
+                lat: finite(vy) ? 0 : finite(s['veh.' + id + '.lat']) ? s['veh.' + id + '.lat'] : 0,
             });
         }
         const egoLen = (meta.ego && meta.ego.length) || 4.7;
@@ -255,23 +257,27 @@
         const valid = finite(s['meas.valid']) ? s['meas.valid'] > 0.5 : finite(s['gap.meas']);
         let targetId = null;
         if (valid) {
-            if (finite(s['meas.id'])) targetId = s['meas.id'];
+            if (finite(s['meas.id'])) targetId = idName(s['meas.id']);
             else { const ev = tl.targetAt(x); targetId = ev === undefined ? leadId : ev; }
         }
         const wrong = valid && targetId != null && (leadId == null || String(targetId) !== String(leadId));
         const recent = [];
         for (const e of r.events) { if (e.t > x) break; if (e.t > x - 3) recent.push(e); }
         const warnIv = tl.warnAt(x);
-        const enums = meta.enums || DEFAULT_ENUMS;
+        const wr = s['warn.reason'];
+        const warnReason = finite(wr) && Array.isArray(enums['warn.reason']) && enums['warn.reason'][Math.round(wr)] !== undefined
+            ? String(enums['warn.reason'][Math.round(wr)]) : warnIv ? warnIv.reason : '';
         const cs = s['cruise.state'];
         const cruiseState = finite(cs) ? ((enums['cruise.state'] || [])[Math.round(cs)] || String(cs)) : null;
         return {
             t: x, i: smp.i, s, vehicles, leadId,
             ego: { x: s['ego.x'], v: s['ego.v'], a: s['ego.a'], length: egoLen, width: (meta.ego && meta.ego.width) || 1.8,
-                lane: finite(s['ego.lane']) ? s['ego.lane'] : 0, lat: finite(s['ego.lat']) ? s['ego.lat'] : 0 },
+                lane: finite(s['ego.y']) ? s['ego.y'] / LW : finite(s['ego.lane']) ? s['ego.lane'] : (meta.ego && meta.ego.lane) || 0,
+                lat: finite(s['ego.lat']) ? s['ego.lat'] : 0 },
             sensor: { valid, targetId, wrong, none: !valid },
-            warn: finite(s.warn) ? s.warn > 0.5 : !!warnIv, warnReason: warnIv ? warnIv.reason : '',
-            faults: tl.faultsAt(x), recent, cruiseState,
+            warn: finite(s.warn) ? s.warn > 0.5 : !!warnIv, warnReason,
+            faults: tl.faultsAt(x), recent, cruiseState, appAlive: finite(s['app.alive']) ? s['app.alive'] > 0.5 : true,
+            curvature: finite(s.curvature) ? s.curvature : 0,
             collision: tl.collision && tl.collision.t <= x ? tl.collision : null,
             plant: meta.plant || { name: '?', assumed: true }, fake: !!meta.fake,
         };
@@ -421,6 +427,9 @@
         setResult: (r) => setResult(normalizeResult(r)),
         /** A second run for A / B overlays (SU2's charts); null clears it. */
         setCompare(r) { app.resultB = r ? normalizeResult(r) : null; app.emit('compare', app.resultB); },
+        /** The engine's full default config (core/sim.js defaultConfig) or null; app.config holds only what differs. */
+        defaults: null,
+        seek(t) { app.setCursor(t); },
         setCursor(t, opts) {
             app.cursorT = app.playback.seek(t);
             if (!(opts && opts.keepPlaying)) app.playback.pause();
@@ -500,6 +509,7 @@
             let sim;
             try { sim = CS.sim.createSim(cfg); } catch (e) { reject(e); return; }
             const dur = +cfg.duration || 60;
+            let lastT = -1, still = 0;
             const slice = () => {
                 if (token !== runToken) { resolve(null); return; }
                 try {
@@ -507,6 +517,8 @@
                     while (!sim.done && performance.now() < until) sim.advance(0.5);
                     const st = sim.state && sim.state();
                     progress(st && finite(st.t) ? st.t / dur : null);
+                    if (st && finite(st.t)) { still = st.t > lastT ? 0 : still + 1; lastT = st.t; }
+                    if (still > 50) throw new Error('the engine stopped advancing at t = ' + lastT + ' s');
                     if (sim.done) resolve(sim.result()); else setTimeout(slice, 0);
                 } catch (e) { reject(e); }
             };
@@ -678,8 +690,11 @@
         pb.className = 'badge ' + (plant.assumed !== false ? 'warn' : 'ok');
         const eb = $('#engine-badge');
         const eng = r && r.meta.fake ? 'fake' : engineName();
-        eb.textContent = eng === 'core' ? 'engine: core/sim.js' : eng === 'fake' ? 'FAKE result (SU1 stand-in, not the simulator)' : 'no engine';
-        eb.className = 'badge ' + (eng === 'core' ? 'muted' : 'bad');
+        const stubs = r && r.meta.modules ? Object.keys(r.meta.modules).filter((k) => /stub|none/.test(String(r.meta.modules[k]))) : [];
+        eb.textContent = eng === 'core' ? 'engine: core/sim.js' + (stubs.length ? ' · stubs: ' + stubs.join(', ') : '')
+            : eng === 'fake' ? 'FAKE result (SU1 stand-in, not the simulator)' : 'no engine';
+        eb.title = stubs.length ? 'These modules are not in this build yet; the engine uses a stand-in for each.' : '';
+        eb.className = 'badge ' + (eng === 'core' ? (stubs.length ? 'warn' : 'muted') : 'bad');
         const vb = $('#verdict-badge');
         if (r && r.verdict) {
             const failed = r.verdict.failed || [];
@@ -784,6 +799,13 @@
         $('#loop').addEventListener('change', (e) => { app.playback.loop = e.target.checked; });
         $('#zoom').addEventListener('change', (e) => { if (scene) { scene.setZoom(e.target.value); drawScene(); } });
         $('#export-config').addEventListener('click', () => app.exportConfig());
+        $('#keep-b').addEventListener('click', () => {
+            if (!app.result) return;
+            app.setCompare(app.result);
+            status('This run is kept as B; the charts overlay it on the next runs.');
+        });
+        $('#clear-b').addEventListener('click', () => { app.setCompare(null); status('B dropped.'); });
+        app.on('compare', (b) => { $('#clear-b').hidden = !b; });
         $('#save-result').addEventListener('click', () => app.exportResult());
         $('#open').addEventListener('click', () => $('#file').click());
         $('#file').addEventListener('change', (e) => { Array.from(e.target.files || []).forEach(readFile); e.target.value = ''; });
@@ -854,6 +876,7 @@
         for (const f of CORE_FILES) if (await loadScript('../core/' + f + '.js')) loaded++;
         if (!(CS.sim && CS.sim.run)) await loadScript('fake-result.js');
         app.engine = engineName();
+        try { app.defaults = CS.sim && typeof CS.sim.defaultConfig === 'function' ? CS.sim.defaultConfig() : null; } catch (e) { app.defaults = null; }
         if (CS.scene && CS.scene.createScene) {
             scene = CS.scene.createScene($('#scene'), app);
             window.addEventListener('resize', () => { scene.resize(); drawScene(); });

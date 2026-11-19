@@ -103,3 +103,22 @@ test('the PNG player renders a frame', () => {
     assert.deepEqual([...png.slice(0, 8)], [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     assert.ok(png.length > 2000);
 });
+
+// The real engine, when core/sim.js is in this checkout (SC1's branch merged): every frame of its run draws cleanly.
+const fs = require('fs');
+const path = require('path');
+const SIM = path.join(__dirname, '..', 'core', 'sim.js');
+test('the engine\'s own run (core/sim.js) draws: finite ops on every frame, the lead and the sensor', { skip: !fs.existsSync(SIM) && 'core/sim.js not in this checkout' }, () => {
+    const res = A.normalizeResult(require(SIM).run({ seed: 1 }));
+    const tl2 = A.buildTimeline(res);
+    const o = { width: 1000, height: 340, aheadM: S.fitRange(res), profile: S.elevationProfile(res), lanes: S.lanesOf(res) };
+    let leads = 0;
+    for (let i = 0; i < res.t.length; i += 10) {
+        const fr = A.frameAt(res, tl2, res.t[i]);
+        if (fr.vehicles.some((v) => v.role === 'lead')) leads++;
+        const out = S.buildScene(fr, o);
+        for (const op of out.ops) for (const k of NUM[op.k] || []) assert.ok(Number.isFinite(op[k]), 't=' + res.t[i] + ' ' + op.k + '.' + k);
+        assert.ok(!texts(out).some((t) => /NaN|undefined/.test(t)), 't=' + res.t[i]);
+    }
+    assert.ok(leads > 0, 'the true lead is found by its id');
+});

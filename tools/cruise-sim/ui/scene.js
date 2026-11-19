@@ -43,6 +43,7 @@
     const clamp = (x, a, b) => (x < a ? a : x > b ? b : x);
     /** Rough text width for layout (the list must be pure; the browser's measureText is not used). */
     const textW = (s, size, bold) => String(s).length * size * (bold ? 0.6 : 0.56);
+    const idTxt = (id) => (typeof id === 'number' ? '#' + id : String(id));
 
     /* ------------------------------------------------------------------ per-result helpers */
 
@@ -60,7 +61,12 @@
 
     /** Height profile of the road from the run: z(x) from the grade our car drove over (trapezoids along ego.x). */
     function elevationProfile(r) {
-        const X = r.series['ego.x'], G = r.series.grade;
+        const X = r.series['ego.x'], G = r.series.grade, E = r.series.elevation;
+        if (X && E && E.some((v) => v === v && v !== 0)) {          // the engine's own elevation (SC1) when it has one
+            const xs = [], zs = [];
+            for (let i = 0; i < X.length; i++) if (X[i] === X[i] && E[i] === E[i] && (!xs.length || X[i] > xs[xs.length - 1] + 1e-6)) { xs.push(X[i]); zs.push(E[i]); }
+            if (xs.length > 1) return { xs, zs, any: true };
+        }
         if (!X || !G) return null;
         const xs = [], zs = [];
         let z = 0, any = false, gPrev = 0;
@@ -89,7 +95,7 @@
     function lanesOf(r) {
         let n = (r && r.meta && r.meta.lanes) || 0;
         if (r) for (const k of Object.keys(r.series)) if (/^veh\..+\.lane$/.test(k)) for (const v of r.series[k]) if (v === v && v + 1 > n) n = v + 1;
-        return clamp(Math.round(n) || 2, 1, 5);
+        return clamp(Math.ceil(n - 1e-9), 2, 5);
     }
 
     /* ------------------------------------------------------------------ the display list */
@@ -175,7 +181,7 @@
             if (finite(v.a) && v.a < -1 && xr >= x0) {
                 rect(xr - 1, yc - wPx / 2 + 1, 3, 4, th.brake); rect(xr - 1, yc + wPx / 2 - 5, 3, 4, th.brake);
             }
-            if (label) text(label, (a + b) / 2, yc + 4, 10, '#ffffff', 'center', true);
+            if (label && textW(label, 10, true) < b - a - 4) text(label, (a + b) / 2, yc + 4, 10, '#ffffff', 'center', true);
             return { x: xr, y: yc - wPx / 2, w: xf - xr, h: wPx, rel };
         };
 
@@ -183,11 +189,11 @@
         let leadOff = null;
         for (const v of fr.vehicles) {
             const isLead = v.role === 'lead';
-            const b = drawCar(v, isLead ? th.lead : th.other, (v.length * ppm > 22 && typeof v.id === 'number') ? '#' + v.id : '');
+            const b = drawCar(v, isLead ? th.lead : th.other, idTxt(v.id));
             boxes[String(v.id)] = b;
             if (isLead && b.off === 'ahead') leadOff = b;
         }
-        const egoBox = drawCar({ x: egoX, length: ego.length, width: ego.width, lane: ego.lane, lat: ego.lat, a: ego.a }, th.ego, ego.length * ppm > 22 ? 'EGO' : '');
+        const egoBox = drawCar({ x: egoX, length: ego.length, width: ego.width, lane: ego.lane, lat: ego.lat, a: ego.a }, th.ego, 'EGO');
         if (leadOff) {
             const y = laneY(0);
             poly([[x1 - 2, y], [x1 - 12, y - 7], [x1 - 12, y + 7]], th.lead);
@@ -282,8 +288,9 @@
         const chips = [];
         if (fr.collision) chips.push({ s: 'COLLISION' + (finite(fr.collision.impact) ? ' · ' + fmt(Math.abs(fr.collision.impact) * KMH, 0) + ' km/h' : ''), fg: '#ffffff', bg: th.warn });
         if (fr.warn) chips.push({ s: 'WARNING' + (fr.warnReason ? ' · ' + fr.warnReason : '') + (finite(s.ttc) ? ' · TTC ' + fmt(s.ttc, 1) + ' s' : ''), fg: '#ffffff', bg: th.warn });
+        if (fr.appAlive === false) chips.push({ s: 'APP NOT RUNNING · no commands, no warning', fg: '#ffffff', bg: th.fault });
         for (const f of fr.faults) chips.push({ s: 'FAULT · ' + f.name + ' · ' + fmt(fr.t - f.t0, 1) + ' s', fg: th.fault, bg: th.faultBg });
-        if (fr.sensor.wrong) chips.push({ s: 'SENSOR · wrong target #' + fr.sensor.targetId, fg: th.warn, bg: th.warnBg });
+        if (fr.sensor.wrong) chips.push({ s: 'SENSOR · wrong target ' + idTxt(fr.sensor.targetId), fg: th.warn, bg: th.warnBg });
         else if (fr.sensor.none) chips.push({ s: 'SENSOR · no target', fg: th.muted, bg: th.chipBg });
         if (finite(s['driver.brake']) && s['driver.brake'] > 0) chips.push({ s: 'DRIVER BRAKES · ' + fmt(s['driver.brake'], 1) + ' m/s²', fg: '#ffffff', bg: th.info });
         if (finite(s['driver.accel']) && s['driver.accel'] > 0) chips.push({ s: 'DRIVER ACCELERATOR · ' + fmt(s['driver.accel'] * 100, 0) + ' %', fg: '#ffffff', bg: th.info });
@@ -299,10 +306,11 @@
             else if (e.kind === 'driver.vmax' && age < 2.5) chips.push({ s: 'driver max → ' + fmt((e.vMax || e.v || NaN) * KMH, 0) + ' km/h', fg: th.info, bg: th.infoBg });
             else if (e.kind === 'cmd.dropped' && age < 1.5) chips.push({ s: 'command dropped' + (finite(e.vSet) ? ' (' + fmt(e.vSet * KMH, 0) + ')' : ''), fg: th.fault, bg: th.faultBg });
             else if (e.kind === 'cmd.rejected' && age < 1.5) chips.push({ s: 'command rejected', fg: th.fault, bg: th.faultBg });
-            else if (e.kind === 'target.changed' && age < 1.5) chips.push({ s: 'target changed → #' + e.id, fg: th.meas, bg: th.chipBg });
-            else if (e.kind === 'target.acquired' && age < 1.5) chips.push({ s: 'target acquired #' + e.id, fg: th.meas, bg: th.chipBg });
+            else if (e.kind === 'target.changed' && age < 1.5) chips.push({ s: 'target changed → ' + idTxt(e.id), fg: th.meas, bg: th.chipBg });
+            else if (e.kind === 'target.acquired' && age < 1.5) chips.push({ s: 'target acquired ' + idTxt(e.id), fg: th.meas, bg: th.chipBg });
             else if (e.kind === 'target.lost' && age < 1.5) chips.push({ s: 'target lost', fg: th.muted, bg: th.chipBg });
         }
+        if (finite(fr.curvature) && Math.abs(fr.curvature) > 1 / 3000) chips.push({ s: 'curve R ' + fmt(1 / Math.abs(fr.curvature), 0) + ' m ' + (fr.curvature > 0 ? 'left' : 'right'), fg: th.muted, bg: th.chipBg });
         let cx = x0;
         for (const c of chips) {
             const w = textW(c.s, 11, true) + 14;
@@ -311,7 +319,7 @@
             text(c.s, cx + 7, chipY + 15, 11, c.fg, 'left', true);
             cx += w + 6;
         }
-        if (!chips.length) text('following normally' , x0 + 2, chipY + 15, 11, th.muted);
+        if (!chips.length) text('no event', x0 + 2, chipY + 15, 11, th.muted);
 
         if (fr.warn) srect(x0 + 1, roadTop - 5, x1 - x0 - 2, lanes * laneH + 10, th.warn, 3);
         if (fr.collision) text('COLLISION', (x0 + x1) / 2, roadTop + lanes * laneH / 2 + 6, 18, th.warn, 'center', true);

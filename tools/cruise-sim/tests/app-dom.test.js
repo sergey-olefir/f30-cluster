@@ -15,7 +15,7 @@ const UI = path.join(__dirname, '..', 'ui');
 const HTML = fs.readFileSync(path.join(UI, 'index.html'), 'utf8');
 
 function makeDom() {
-    const byId = {}, all = [], log = { hash: [], draws: 0, blobs: 0, rafs: 0 };
+    const byId = {}, all = [], log = { hash: [], draws: 0, blobs: 0, rafs: 0, scriptErrors: [] };
     let now = 0;
     const listeners = (o) => { o._l = {}; o.addEventListener = (k, fn) => { (o._l[k] = o._l[k] || []).push(fn); }; o.removeEventListener = () => {}; o.dispatch = (k, ev) => (o._l[k] || []).forEach((fn) => fn(Object.assign({ preventDefault() {}, target: o }, ev || {}))); };
     function Elem(tag, attrs) {
@@ -106,7 +106,9 @@ function makeDom() {
         const file = path.resolve(UI, s.src || s.attrs.src);
         setTimeout(() => {
             if (!fs.existsSync(file)) { (s.onerror || (() => {}))(); return; }
-            vm.runInContext(fs.readFileSync(file, 'utf8'), ctx, { filename: file });
+            // as a browser does: an error in a classic script is reported (window.onerror) and the load event still fires
+            try { vm.runInContext(fs.readFileSync(file, 'utf8'), ctx, { filename: file }); }
+            catch (e) { log.scriptErrors.push(path.relative(UI, file) + ': ' + e.message); }
             (s.onload || (() => {}))();
         }, 0);
     }
@@ -145,6 +147,17 @@ test('boot: the engine (or the fake), the first run, the canvas, the placeholder
     assert.equal(byId.speed.children.length, 7);
 });
 
+test('boot reports which core files loaded; a core file that throws does not stop the page', async () => {
+    const { win, log, byId } = await boot();
+    const coreErrors = log.scriptErrors.filter((e) => e.startsWith('../core/'));
+    if (win.app.engine === 'core') assert.deepEqual(coreErrors, [], 'every core file loads in one shared global scope');
+    else {
+        assert.equal(win.app.engine, 'fake');
+        assert.match(byId.status.textContent + ' ' + byId['engine-badge'].textContent, /FAKE/);
+        if (coreErrors.length) console.log('# core files that fail as browser scripts (SC1 / SC2 / SC3):\n#   ' + coreErrors.join('\n#   '));
+    }
+});
+
 test('playback: play at ×16 through requestAnimationFrame to the end; step; setCursor; events', async () => {
     const { win, byId } = await boot();
     const app = win.app, seen = { cursor: 0, frame: 0 };
@@ -175,9 +188,10 @@ test('config: setConfig merges, emits, writes the hash; a link restores it; repl
     const app = win.app;
     let got = null;
     app.on('config', (c) => { got = c; });
+    app.setConfig({ controller: { rateHz: 5 } }, { run: false });
     app.setConfig({ controller: { h: 1.5 } }, { run: false });
     assert.equal(got.controller.h, 1.5);
-    assert.equal(got.controller.rateHz, 10, 'merged, not replaced');
+    assert.equal(got.controller.rateHz, 5, 'merged, not replaced');
     await tick(350);
     const h = log.hash[log.hash.length - 1];
     assert.match(h, /^c=/);
@@ -190,7 +204,7 @@ test('config: setConfig merges, emits, writes the hash; a link restores it; repl
     await until(() => d2.win.app && d2.win.app.result, 'run of the linked page');
     assert.equal(d2.win.app.config.controller.h, 1.5);
     app.setConfig({ seed: 5 }, { replace: true, run: false });
-    assert.equal(app.config.controller.h, undefined);
+    assert.equal(app.config.controller, undefined, 'replace drops the old partial');
     assert.equal(app.config.seed, 5);
     const r = await app.openRun({ seed: 9, duration: 20 });
     assert.equal(r.t[r.t.length - 1], 20);
@@ -217,6 +231,16 @@ test('files: a result file, a batch file, a config file, presets (save, apply, e
     app.setConfig({ seed: 1 }, { run: false });
     assert.equal(app.presets.apply('my set'), true);
     assert.equal(app.config.seed, 42);
+    // A / B: keep the current run as B, then drop it
+    let cmp;
+    app.on('compare', (x) => { cmp = x; });
+    win.document.getElementById('keep-b').click();
+    assert.equal(cmp.t.length, app.result.t.length);
+    assert.equal(app.resultB, cmp);
+    assert.equal(win.document.getElementById('clear-b').hidden, false);
+    win.document.getElementById('clear-b').click();
+    assert.equal(app.resultB, null);
+    assert.equal(win.document.getElementById('clear-b').hidden, true);
     const blobs = log.blobs;
     win.document.getElementById('preset-export').click();
     app.exportConfig();
@@ -232,11 +256,11 @@ test('with an engine: the worker is refused (as Chrome does under file://) and t
     CS.sim = {
         run: (cfg) => CS.fakeResult.makeFakeResult(cfg),
         createSim(cfg) {
-            const full = CS.fakeResult.makeFakeResult(cfg);
+            const full = CS.fakeResult.makeFakeResult(cfg), dur = cfg.duration || 60;
             let t = 0;
             return {
-                get done() { return t >= cfg.duration; },
-                advance(s) { t = Math.min(cfg.duration, t + s); advanced++; },
+                get done() { return t >= dur; },
+                advance(s) { t = Math.min(dur, t + s); advanced++; },
                 state: () => ({ t }), result: () => full,
             };
         },
