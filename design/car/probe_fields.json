@@ -3,9 +3,9 @@
   "logFormat": 1,
   "version": "0.2.0",
   "counts": {
-    "sets": 14,
-    "fields": 228,
-    "interfaces": 86,
+    "sets": 15,
+    "fields": 250,
+    "interfaces": 94,
     "interfacesWithSeveralInstances": 1
   },
   "sets": [
@@ -170,6 +170,17 @@
       ],
       "fields": 21,
       "fieldsActive": 21
+    },
+    {
+      "id": "S16",
+      "settingsKey": "set16",
+      "name": "next turn",
+      "uk": "Наступний поворот",
+      "items": [
+        "P25"
+      ],
+      "fields": 22,
+      "fieldsActive": 39
     }
   ],
   "interfaces": [
@@ -624,11 +635,14 @@
       "instancesInCatalogue": [
         "CarPlayManagerInst1"
       ],
-      "fields": 2,
-      "events": [],
+      "fields": 3,
+      "events": [
+        "onScreenChange"
+      ],
       "sets": [
         "S5",
-        "S7"
+        "S7",
+        "S16"
       ]
     },
     {
@@ -925,10 +939,14 @@
       "instancesInCatalogue": [
         "Main_Instance"
       ],
-      "fields": 10,
-      "events": [],
+      "fields": 11,
+      "events": [
+        "streamStatusChanged",
+        "activeRouteChanged"
+      ],
       "sets": [
-        "S7"
+        "S7",
+        "S16"
       ]
     },
     {
@@ -955,10 +973,11 @@
       "instancesInCatalogue": [
         "AndroidAutoProjectedManagerInst1"
       ],
-      "fields": 1,
+      "fields": 4,
       "events": [],
       "sets": [
-        "S7"
+        "S7",
+        "S16"
       ]
     },
     {
@@ -1609,6 +1628,140 @@
       ],
       "sets": [
         "S15"
+      ]
+    },
+    {
+      "interface": "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding",
+      "instancesRead": [
+        "Main_Instance"
+      ],
+      "manifestInstances": "Main_Instance",
+      "instancesInCatalogue": [
+        "Main_Instance"
+      ],
+      "fields": 4,
+      "events": [
+        "streamCommandChanged"
+      ],
+      "sets": [
+        "S16"
+      ]
+    },
+    {
+      "interface": "de.bmw.infotainment.navigation.guiding.GuidanceEventList",
+      "instancesRead": [
+        "Main_Instance"
+      ],
+      "manifestInstances": "Main_Instance",
+      "instancesInCatalogue": [
+        "Main_Instance"
+      ],
+      "fields": 1,
+      "events": [
+        "viewsChanged"
+      ],
+      "sets": [
+        "S16"
+      ]
+    },
+    {
+      "interface": "de.bmw.infotainment.navigation.guiding.GuidanceRenderedContent",
+      "instancesRead": [
+        "Main_Instance"
+      ],
+      "manifestInstances": "Main_Instance",
+      "instancesInCatalogue": [
+        "Main_Instance"
+      ],
+      "fields": 1,
+      "events": [
+        "viewContentChanged"
+      ],
+      "sets": [
+        "S16"
+      ]
+    },
+    {
+      "interface": "de.bmw.infotainment.am.carplay.CarPlay",
+      "instancesRead": [
+        "CarPlayAMInst1"
+      ],
+      "manifestInstances": "CarPlayAMInst1",
+      "instancesInCatalogue": [
+        "CarPlayAMInst1"
+      ],
+      "fields": 0,
+      "events": [
+        "changeModes"
+      ],
+      "sets": [
+        "S16"
+      ]
+    },
+    {
+      "interface": "de.bmw.infotainment.remoteinstrumentcluster.RICServiceGuidance",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "ric_sendEvent"
+      ],
+      "sets": [
+        "S16"
+      ]
+    },
+    {
+      "interface": "de.bmw.infotainment.remoteinstrumentcluster.DisplaySink",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "requestSinkSwitch"
+      ],
+      "sets": [
+        "S16"
+      ]
+    },
+    {
+      "interface": "de.bmw.infotainment.navigation.NavigationCAN",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 1,
+      "events": [],
+      "sets": [
+        "S16"
+      ]
+    },
+    {
+      "interface": "de.bmw.infotainment.FeedbackLaneGuiding",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "correctionDataLaneGuiding"
+      ],
+      "sets": [
+        "S16"
       ]
     }
   ],
@@ -3376,7 +3529,8 @@
       "cap": 150,
       "also": [
         "S7",
-        "S10"
+        "S10",
+        "S16"
       ],
       "markTimed": true,
       "columns": [
@@ -3403,7 +3557,8 @@
       "gapMs": 500,
       "cap": 150,
       "also": [
-        "S10"
+        "S10",
+        "S16"
       ],
       "markTimed": true,
       "columns": [
@@ -3750,7 +3905,10 @@
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 1000,
-      "cap": 200
+      "cap": 200,
+      "also": [
+        "S16"
+      ]
     },
     {
       "set": "S7",
@@ -3766,7 +3924,10 @@
       "rootType": "struct",
       "formatter": "intersection",
       "gapMs": 2000,
-      "cap": 200
+      "cap": 200,
+      "also": [
+        "S16"
+      ]
     },
     {
       "set": "S7",
@@ -3782,7 +3943,10 @@
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 1000,
-      "cap": 200
+      "cap": 200,
+      "also": [
+        "S16"
+      ]
     },
     {
       "set": "S7",
@@ -3798,7 +3962,10 @@
       "rootType": "struct",
       "formatter": "dart",
       "gapMs": 2000,
-      "cap": 200
+      "cap": 200,
+      "also": [
+        "S16"
+      ]
     },
     {
       "set": "S7",
@@ -3814,7 +3981,10 @@
       "rootType": "struct",
       "formatter": "lanes",
       "gapMs": 2000,
-      "cap": 200
+      "cap": 200,
+      "also": [
+        "S16"
+      ]
     },
     {
       "set": "S7",
@@ -3831,6 +4001,9 @@
       "formatter": "cols",
       "gapMs": 2000,
       "cap": 200,
+      "also": [
+        "S16"
+      ],
       "columns": [
         "travel:travelTime:n",
         "delay:delayTime:n",
@@ -3862,7 +4035,10 @@
       "rootType": "struct",
       "formatter": "description",
       "gapMs": 2000,
-      "cap": 200
+      "cap": 200,
+      "also": [
+        "S16"
+      ]
     },
     {
       "set": "S7",
@@ -3879,6 +4055,9 @@
       "formatter": "cols",
       "gapMs": 2000,
       "cap": 200,
+      "also": [
+        "S16"
+      ],
       "columns": [
         "highlighted:currentGuidingHighlightedLanes:x",
         "best:currentGuidingBestLanes:x",
@@ -3909,6 +4088,9 @@
       "formatter": "cols",
       "gapMs": 2000,
       "cap": 200,
+      "also": [
+        "S16"
+      ],
       "columns": [
         "distManeuver:extendedDistanceNextManeuver:n"
       ]
@@ -3927,7 +4109,10 @@
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 1000,
-      "cap": 200
+      "cap": 200,
+      "also": [
+        "S16"
+      ]
     },
     {
       "set": "S7",
@@ -3943,7 +4128,10 @@
       "rootType": "enum",
       "formatter": "enum",
       "gapMs": 1000,
-      "cap": 200
+      "cap": 200,
+      "also": [
+        "S16"
+      ]
     },
     {
       "set": "S7",
@@ -3959,7 +4147,10 @@
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 1000,
-      "cap": 200
+      "cap": 200,
+      "also": [
+        "S16"
+      ]
     },
     {
       "set": "S7",
@@ -3975,7 +4166,10 @@
       "rootType": "bool",
       "formatter": "bool",
       "gapMs": 1000,
-      "cap": 200
+      "cap": 200,
+      "also": [
+        "S16"
+      ]
     },
     {
       "set": "S7",
@@ -3993,7 +4187,8 @@
       "gapMs": 1000,
       "cap": 200,
       "also": [
-        "S10"
+        "S10",
+        "S16"
       ]
     },
     {
@@ -4012,7 +4207,8 @@
       "gapMs": 1000,
       "cap": 200,
       "also": [
-        "S10"
+        "S10",
+        "S16"
       ]
     },
     {
@@ -6163,6 +6359,395 @@
       "formatter": "tree",
       "gapMs": 2000,
       "cap": 300
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "pm-road",
+      "interface": "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding",
+      "field": "currentRoad",
+      "instance": "Main_Instance",
+      "flags": "rs",
+      "getterId": 3,
+      "notifierId": 32770,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "description",
+      "gapMs": 2000,
+      "cap": 400
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "pm-waypoints",
+      "interface": "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding",
+      "field": "waypoints",
+      "instance": "Main_Instance",
+      "flags": "rs",
+      "getterId": 5,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 400,
+      "columns": [
+        "travel:travelTime:n",
+        "delay:delayTime:n",
+        "delayStatus:delayStatus:e",
+        "dist-len:formattedDistance.distance:t",
+        "unit:formattedDistance.unit:e",
+        "raw:formattedDistance.rawDistance:n",
+        "toFinal:distanceFromCurrentToFinalDestination:n",
+        "flag:isCheckeredFlag:b",
+        "stopover:stopOverNumber:n",
+        "charging:isChargingStation:b",
+        "etaInvalid:estimatedArrivalTime.time.invalid:b",
+        "etaH:estimatedArrivalTime.time.hour:n",
+        "etaM:estimatedArrivalTime.time.minute:n"
+      ]
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "pm-lanes",
+      "interface": "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding",
+      "field": "currentLaneGuiding",
+      "instance": "Main_Instance",
+      "flags": "rs",
+      "getterId": 7,
+      "notifierId": 32772,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "lanes",
+      "gapMs": 2000,
+      "cap": 400
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "pm-route-change",
+      "interface": "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding",
+      "field": "activeRouteChange",
+      "instance": "Main_Instance",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "enum",
+      "formatter": "enum",
+      "gapMs": 2000,
+      "cap": 400
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "pm-stream",
+      "interface": "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding",
+      "field": "streamCommandChanged",
+      "instance": "Main_Instance",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32773,
+      "rootType": "event",
+      "formatter": "stream",
+      "gapMs": 250,
+      "cap": 100
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "stream-status",
+      "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+      "field": "streamStatusChanged",
+      "instance": "Main_Instance",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32801,
+      "rootType": "event",
+      "formatter": "one",
+      "gapMs": 250,
+      "cap": 100
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "route-changed",
+      "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+      "field": "activeRouteChanged",
+      "instance": "Main_Instance",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32800,
+      "rootType": "event",
+      "formatter": "one",
+      "gapMs": 250,
+      "cap": 100
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "current-route",
+      "interface": "de.bmw.infotainment.navigation.guiding.Guidance",
+      "field": "currentRoute",
+      "instance": "Main_Instance",
+      "flags": "rs",
+      "getterId": 8,
+      "notifierId": 32776,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 400,
+      "columns": [
+        "session:sessionID:n",
+        "handle:routeHandle:n"
+      ]
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "list-views",
+      "interface": "de.bmw.infotainment.navigation.guiding.GuidanceEventList",
+      "field": "registeredViews",
+      "instance": "Main_Instance",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "text",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 400,
+      "columns": [
+        "len:(value):t"
+      ]
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "event-list",
+      "interface": "de.bmw.infotainment.navigation.guiding.GuidanceEventList",
+      "field": "viewsChanged",
+      "instance": "Main_Instance",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "rootType": "event",
+      "formatter": "views",
+      "gapMs": 3000,
+      "cap": 400
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "rendered-views",
+      "interface": "de.bmw.infotainment.navigation.guiding.GuidanceRenderedContent",
+      "field": "registeredViews",
+      "instance": "Main_Instance",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "text",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 400,
+      "columns": [
+        "len:(value):t"
+      ]
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "rendered",
+      "interface": "de.bmw.infotainment.navigation.guiding.GuidanceRenderedContent",
+      "field": "viewContentChanged",
+      "instance": "Main_Instance",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "rootType": "event",
+      "formatter": "rendered",
+      "gapMs": 1000,
+      "cap": 400
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "cp-metadata",
+      "interface": "de.bmw.infotainment.a4a.carplay.CarPlayManager",
+      "field": "projectedGuidanceMetadataAvailable",
+      "instance": "CarPlayManagerInst1",
+      "flags": "rs",
+      "getterId": 10,
+      "notifierId": 32775,
+      "eventId": null,
+      "rootType": "bool",
+      "formatter": "bool",
+      "gapMs": 2000,
+      "cap": 400
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "cp-screen",
+      "interface": "de.bmw.infotainment.a4a.carplay.CarPlayManager",
+      "field": "onScreenChange",
+      "instance": "CarPlayManagerInst1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32773,
+      "rootType": "event",
+      "formatter": "one",
+      "gapMs": 250,
+      "cap": 400
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "cp-modes",
+      "interface": "de.bmw.infotainment.am.carplay.CarPlay",
+      "field": "changeModes",
+      "instance": "CarPlayAMInst1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 500,
+      "cap": 200
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "aa-metadata",
+      "interface": "de.bmw.infotainment.sdi.aap.androidautoprojectedmanager.AndroidAutoProjectedManager",
+      "field": "projectedGuidanceMetadataAvailable",
+      "instance": "AndroidAutoProjectedManagerInst1",
+      "flags": "rs",
+      "getterId": 3,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "bool",
+      "formatter": "bool",
+      "gapMs": 2000,
+      "cap": 400
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "aa-video",
+      "interface": "de.bmw.infotainment.sdi.aap.androidautoprojectedmanager.AndroidAutoProjectedManager",
+      "field": "isVideoStreaming",
+      "instance": "AndroidAutoProjectedManagerInst1",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "bool",
+      "formatter": "bool",
+      "gapMs": 2000,
+      "cap": 400
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "aa-features",
+      "interface": "de.bmw.infotainment.sdi.aap.androidautoprojectedmanager.AndroidAutoProjectedManager",
+      "field": "featureConfiguration",
+      "instance": "AndroidAutoProjectedManagerInst1",
+      "flags": "rs",
+      "getterId": 7,
+      "notifierId": 32775,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 400,
+      "columns": [
+        "metadata:guidingMetadataEnabled:b",
+        "vehicleStatus:vehicleStatusEnabled:b"
+      ]
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "ric-guidance",
+      "interface": "de.bmw.infotainment.remoteinstrumentcluster.RICServiceGuidance",
+      "field": "ric_sendEvent",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 500,
+      "cap": 200
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "display-sink",
+      "interface": "de.bmw.infotainment.remoteinstrumentcluster.DisplaySink",
+      "field": "requestSinkSwitch",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 250,
+      "cap": 100
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "nav-can",
+      "interface": "de.bmw.infotainment.navigation.NavigationCAN",
+      "field": "calculationDataNavigation",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 5000,
+      "cap": 400,
+      "columns": [
+        "dist:statusDistanceDestinationNavigation:n",
+        "unit:statusDistanceDestinationNavigationUnitOfMeasurement:e",
+        "etaH:statusArrivalTimeHour:n",
+        "etaM:statusArrivalTimeMinute:n",
+        "ampm:statusTimeAMPM:e",
+        "day:statusDayFlag:e"
+      ]
+    },
+    {
+      "set": "S16",
+      "item": "P25",
+      "tag": "lane-feedback",
+      "interface": "de.bmw.infotainment.FeedbackLaneGuiding",
+      "field": "correctionDataLaneGuiding",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "tree",
+      "gapMs": 2000,
+      "cap": 400
     }
   ]
 }
