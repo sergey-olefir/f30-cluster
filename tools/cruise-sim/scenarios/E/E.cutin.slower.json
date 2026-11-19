@@ -1,0 +1,66 @@
+{
+ "id": "E.cutin.slower",
+ "family": "E",
+ "name": "A slower car cuts in (gap 5 … 60 m)",
+ "description": "A car Δv slower cuts in from the next lane at a gap of 5 … 60 m (3 s lane change). Parent S4.",
+ "scope": "warnOnly",
+ "duration": "=tc + 50",
+ "params": {
+  "v": 90,
+  "g": 20,
+  "dv": 10,
+  "tc": 10
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "cutter",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=g+dv/3.6*tc",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "events": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "g": [
+   5,
+   10,
+   15,
+   20,
+   30,
+   40,
+   60
+  ],
+  "dv": [
+   5,
+   10,
+   20,
+   30
+  ]
+ },
+ "where": "=v-dv >= 30",
+ "tags": [
+  "core"
+ ]
+}

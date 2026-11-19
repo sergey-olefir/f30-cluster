@@ -1,0 +1,56 @@
+{
+ "id": "E.cutin.equal",
+ "family": "E",
+ "name": "A car at our speed cuts in",
+ "description": "The cutting car drives at our speed; only the gap is short.",
+ "scope": "warnOnly",
+ "duration": "=tc + 50",
+ "params": {
+  "v": 90,
+  "g": 20,
+  "dv": 0,
+  "tc": 10
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "cutter",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=g+dv/3.6*tc",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "events": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "g": [
+   5,
+   10,
+   15,
+   20,
+   30,
+   40,
+   60
+  ]
+ }
+}

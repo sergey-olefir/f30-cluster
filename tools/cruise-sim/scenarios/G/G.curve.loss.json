@@ -1,0 +1,102 @@
+{
+ "id": "G.curve.loss",
+ "family": "G",
+ "name": "Target lost on a curve for 1 … 10 s, then back",
+ "description": "Following through a 300 m curve; the camera loses the lead for L s (the lead holds or slows at −1 m/s²). Hold the set speed; never accelerate into the curve. Parent S6.",
+ "scope": "in",
+ "duration": "=30+L+30",
+ "params": {
+  "v": 90,
+  "L": 3,
+  "lb": 0
+ },
+ "road": {
+  "curvature": [
+   [
+    0,
+    0
+   ],
+   [
+    "=max(1, v/3.6*30-100)",
+    0
+   ],
+   [
+    "=max(2, v/3.6*30-99)",
+    "=1/300"
+   ],
+   [
+    "=v/3.6*(30+L+10)",
+    "=1/300"
+   ],
+   [
+    "=v/3.6*(30+L+10)+1",
+    0
+   ]
+  ]
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      30,
+      "=v"
+     ],
+     [
+      "=30+L",
+      "=v+lb*L*3.6"
+     ]
+    ]
+   }
+  }
+ ],
+ "events": [
+  {
+   "t": 30,
+   "kind": "fault",
+   "fault": "sensorBlind",
+   "duration": "=L"
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "L": [
+   1,
+   2,
+   3,
+   5,
+   10
+  ],
+  "lb": [
+   0,
+   -1
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "lostTargetSpeedGain_kmh",
+  "curveLostSpeedGain_kmh"
+ ],
+ "tags": [
+  "core"
+ ]
+}

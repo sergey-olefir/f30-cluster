@@ -1,0 +1,66 @@
+{
+ "id": "F.reveal.faster",
+ "family": "F",
+ "name": "A cut-out reveals a faster car",
+ "description": "The revealed car is 10 / 20 km/h faster than our lead: do we accelerate too eagerly toward it?",
+ "scope": "in",
+ "duration": "=tco+40",
+ "params": {
+  "v": 100,
+  "dv": -10,
+  "gh": 40,
+  "tco": 15
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+30",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v"
+  },
+  {
+   "id": "hidden",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6+4.6+gh",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "events": [
+  {
+   "t": "=tco",
+   "kind": "cutOut",
+   "vehicle": "lead",
+   "toLane": 1,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "dv": [
+   -10,
+   -20
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "peakAccel_mps2",
+  "setpointChangesPerMin"
+ ]
+}

@@ -1,0 +1,52 @@
+{
+ "id": "H.cruise.dropout",
+ "family": "H",
+ "name": "The lead slows below the minimum; the cruise drops out (added)",
+ "description": "On a rural road the lead slows to 25 km/h; our set speed reaches the cruise minimum and the cruise drops out: the car coasts. Is it said? Do we stop commanding?",
+ "scope": "outOfEnvelope",
+ "duration": 60,
+ "params": {
+  "v": 60
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      15,
+      "=v"
+     ],
+     [
+      "=15+(v-25)/3.6/1",
+      25
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   50,
+   60
+  ]
+ },
+ "decide": [
+  "collision",
+  "envelopeExitAnnounced",
+  "cmdWhileInactive"
+ ]
+}

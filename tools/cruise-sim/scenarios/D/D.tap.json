@@ -1,0 +1,65 @@
+{
+ "id": "D.tap",
+ "family": "D",
+ "name": "A brake tap and release",
+ "description": "The lead taps the brake at −3 m/s² for 0.5 / 1 / 1.5 s and speeds back up at 1.5 m/s². No warning should be needed.",
+ "scope": "in",
+ "duration": 60,
+ "params": {
+  "v": 90,
+  "d": 1
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      20,
+      "=v"
+     ],
+     [
+      "=20+d",
+      "=v-3*d*3.6"
+     ],
+     [
+      "=20+d+3*d/1.5",
+      "=v"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "d": [
+   0.5,
+   1,
+   1.5
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "nuisanceWarnings",
+  "warnCount",
+  "peakDecel_mps2"
+ ]
+}

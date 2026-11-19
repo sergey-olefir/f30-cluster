@@ -1,0 +1,39 @@
+{
+ "id": "A.free.steady",
+ "family": "A",
+ "name": "No target at a steady speed",
+ "description": "Free road, the cruise holds the driver's maximum. Nothing should be commanded, no warning, no overspeed. Clear and rain (rain matters for ghost-free behaviour only).",
+ "scope": "in",
+ "duration": 60,
+ "params": {
+  "v": 90
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [],
+ "sweep": {
+  "v": [
+   40,
+   60,
+   90,
+   120,
+   150
+  ],
+  "cond.sensing": [
+   "clear",
+   "rain"
+  ]
+ },
+ "decide": [
+  "warnCount",
+  "overspeed_kmh",
+  "setpointChangesPerMin",
+  "collision"
+ ],
+ "tags": [
+  "core"
+ ]
+}

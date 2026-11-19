@@ -1,0 +1,47 @@
+{
+ "id": "J.combined.frozen.rain",
+ "family": "J",
+ "extends": "D.brake",
+ "name": "The gap freezes during rain, the lead braking, at the worst time",
+ "description": "D.brake (−1.5 m/s², 40 km/h) in rain with a 10 s frozen gap injected at the worst time.",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "a": -1.5,
+  "tb": 20,
+  "tf": 18
+ },
+ "events+": [
+  {
+   "t": "=tf",
+   "kind": "fault",
+   "fault": "gapFreeze",
+   "duration": 10
+  }
+ ],
+ "sweep": {
+  "tf": [
+   14,
+   16,
+   18,
+   19,
+   20,
+   21,
+   22,
+   24
+  ],
+  "cond.sensing": [
+   "rain"
+  ]
+ },
+ "worstOver": [
+  "tf"
+ ],
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s",
+  "faultDetectDelay_s"
+ ]
+}

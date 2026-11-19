@@ -1,0 +1,65 @@
+{
+ "id": "A.crest",
+ "family": "A",
+ "name": "Crest (up, then down)",
+ "description": "A hill crest: 300 m up, 300 m down. Overspeed after the top; the camera sees less beyond a crest (no target here).",
+ "scope": "in",
+ "duration": "=max(60, 1400/(v/3.6))",
+ "params": {
+  "v": 90,
+  "g": 0.06
+ },
+ "road": {
+  "grade": [
+   [
+    0,
+    0
+   ],
+   [
+    200,
+    0
+   ],
+   [
+    250,
+    "=g"
+   ],
+   [
+    500,
+    "=g"
+   ],
+   [
+    600,
+    "=-g"
+   ],
+   [
+    850,
+    "=-g"
+   ],
+   [
+    900,
+    0
+   ]
+  ]
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "g": [
+   0.04,
+   0.08
+  ]
+ },
+ "decide": [
+  "overspeed_kmh",
+  "warnCount"
+ ]
+}

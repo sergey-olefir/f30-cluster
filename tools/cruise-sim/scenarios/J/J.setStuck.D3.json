@@ -1,0 +1,48 @@
+{
+ "id": "J.setStuck.D3",
+ "family": "J",
+ "extends": "D.brake.hard",
+ "name": "setStuck during D.brake.hard, at the worst time",
+ "description": "D.brake.hard (v=120, dv=40, a=-3, tb=20) and the set speed sticks for 20 s (the cruise ignores commands); the injection time is swept and the worst outcome counts.",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "a": -3,
+  "tb": 20,
+  "tf": 14
+ },
+ "events+": [
+  {
+   "t": "=tf",
+   "kind": "fault",
+   "fault": "setStuck",
+   "duration": 20
+  }
+ ],
+ "sweep": {
+  "tf": [
+   14,
+   16,
+   18,
+   19,
+   20,
+   21,
+   22,
+   24
+  ],
+  "v": [
+   90,
+   120
+  ]
+ },
+ "where": "=v-dv >= 30",
+ "worstOver": [
+  "tf"
+ ],
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s"
+ ]
+}

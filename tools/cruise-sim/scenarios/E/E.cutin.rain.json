@@ -1,0 +1,57 @@
+{
+ "id": "E.cutin.rain",
+ "family": "E",
+ "name": "A cut-in in rain (added)",
+ "description": "E.cutin.slower with the sensor in its rain preset.",
+ "scope": "warnOnly",
+ "duration": "=tc + 50",
+ "params": {
+  "v": 110,
+  "g": 20,
+  "dv": 10,
+  "tc": 10
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "cutter",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=g+dv/3.6*tc",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "events": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "g": [
+   15,
+   30
+  ],
+  "dv": [
+   10,
+   20
+  ],
+  "cond.sensing": [
+   "rain"
+  ]
+ }
+}

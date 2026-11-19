@@ -1,0 +1,71 @@
+{
+ "id": "I.reaction.sweep",
+ "family": "I",
+ "name": "Hard braking ahead, the driver's reaction time and braking swept",
+ "description": "The lead brakes at −4 m/s² by 40 km/h at 120 km/h; the driver reacts after 0.8 … 2.5 s and brakes at 4 … 8 m/s². Where does the warning stop being enough?",
+ "scope": "warnOnly",
+ "duration": 60,
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "a": -4,
+  "tb": 20
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      "=tb",
+      "=v"
+     ],
+     [
+      "=tb+(dv)/3.6/abs(a)",
+      "=v-(dv)"
+     ]
+    ]
+   }
+  }
+ ],
+ "config": {
+  "driver": {
+   "reactionSigma": 0,
+   "reactionMin_s": 0.1,
+   "reactionMax_s": 5
+  }
+ },
+ "sweep": {
+  "config.driver.reactionMedian_s": [
+   0.8,
+   1.2,
+   1.6,
+   2,
+   2.5
+  ],
+  "config.driver.brakeLevel_ms2": [
+   4,
+   6,
+   8
+  ]
+ },
+ "reactions": [
+  "react"
+ ],
+ "decide": [
+  "collision"
+ ]
+}

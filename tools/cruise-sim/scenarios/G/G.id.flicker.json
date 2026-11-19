@@ -1,0 +1,51 @@
+{
+ "id": "G.id.flicker",
+ "family": "G",
+ "name": "The target id flickers (same car) (added)",
+ "description": "The sensor forgets its track on every dropped message (10 / 30 % dropped), so the same lead gets a new id again and again: the estimator re-initialises each time. No braking, no chatter.",
+ "scope": "in",
+ "duration": 80,
+ "params": {
+  "v": 110,
+  "q": 0.1
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v"
+  }
+ ],
+ "config": {
+  "sensor": {
+   "forget_s": 0,
+   "dropProb": "=q"
+  }
+ },
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "q": [
+   0.1,
+   0.3
+  ]
+ },
+ "decide": [
+  "collision",
+  "nuisanceWarnings",
+  "peakDecel_mps2",
+  "setpointChangesPerMin"
+ ]
+}

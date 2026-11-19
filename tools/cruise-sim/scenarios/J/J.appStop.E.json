@@ -1,0 +1,46 @@
+{
+ "id": "J.appStop.E",
+ "family": "J",
+ "extends": "E.cutin.slower",
+ "name": "appStop during E.cutin.slower, at the worst time",
+ "description": "E.cutin.slower (v=120, g=30, dv=20, tc=10) and the app stops (no command, no warning from it); the injection time is swept and the worst outcome counts.",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "g": 30,
+  "dv": 20,
+  "tc": 10,
+  "tf": 5
+ },
+ "events+": [
+  {
+   "t": "=tf",
+   "kind": "fault",
+   "fault": "appStop"
+  }
+ ],
+ "sweep": {
+  "tf": [
+   5,
+   7,
+   9,
+   10,
+   11,
+   12,
+   14,
+   16
+  ],
+  "v": [
+   90,
+   120
+  ]
+ },
+ "worstOver": [
+  "tf"
+ ],
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s"
+ ]
+}

@@ -1,0 +1,71 @@
+{
+ "id": "D.brake",
+ "family": "D",
+ "name": "The lead brakes to a lower speed (−0.5 … −1.5 m/s²)",
+ "description": "From steady following the lead brakes by 20 or 40 km/h. Up to 1.5 m/s² this must be handled with no warning (parent S3 threshold).",
+ "scope": "in",
+ "duration": "=tb + dv/3.6/abs(a) + 40",
+ "params": {
+  "v": 120,
+  "dv": 20,
+  "a": -1,
+  "tb": 20
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      "=tb",
+      "=v"
+     ],
+     [
+      "=tb+(dv)/3.6/abs(a)",
+      "=v-(dv)"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120,
+   150
+  ],
+  "dv": [
+   20,
+   40
+  ],
+  "a": [
+   -0.5,
+   -1,
+   -1.5
+  ]
+ },
+ "where": "=v-dv >= 30",
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "warnCount"
+ ],
+ "tags": [
+  "core"
+ ]
+}

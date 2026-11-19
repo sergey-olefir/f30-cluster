@@ -1,0 +1,41 @@
+{
+ "id": "K.replay.town",
+ "family": "K",
+ "name": "Replay: town (synthetic, recorded-like)",
+ "description": "The lead follows the recorded-like trace fixtures/traces/town.json (synthetic until the car's logs exist). Parent S8.",
+ "scope": "outOfEnvelope",
+ "duration": "=dur",
+ "params": {
+  "dur": 300
+ },
+ "ego": {
+  "v0_kmh": 45,
+  "vMax_kmh": 60,
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*45/3.6",
+   "profile": {
+    "type": "replay",
+    "file": "fixtures/traces/town.json",
+    "t0": 0
+   }
+  }
+ ],
+ "sweep": {
+  "cond.sensing": [
+   "clear",
+   "rain"
+  ]
+ },
+ "decide": [
+  "collision",
+  "envelopeExitAnnounced",
+  "missedWarning"
+ ],
+ "tags": []
+}

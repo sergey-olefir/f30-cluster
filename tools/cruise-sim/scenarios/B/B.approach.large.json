@@ -1,0 +1,46 @@
+{
+ "id": "B.approach.large",
+ "family": "B",
+ "name": "A much slower lead from far (Δv 60 … 80 km/h)",
+ "description": "As B.approach with Δv 60–80 km/h: needs more deceleration than a cruise is likely to have; scored on the warning.",
+ "scope": "warnOnly",
+ "duration": "=max(60, (g0-5-2*(v-dv)/3.6)/(dv/3.6) + 45)",
+ "params": {
+  "v": 120,
+  "dv": 60,
+  "g0": 250
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=g0",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120,
+   150
+  ],
+  "dv": [
+   60,
+   70,
+   80
+  ]
+ },
+ "where": "=v-dv >= 30",
+ "tags": [
+  "core"
+ ]
+}

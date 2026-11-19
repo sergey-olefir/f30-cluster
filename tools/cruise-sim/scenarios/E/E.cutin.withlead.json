@@ -1,0 +1,65 @@
+{
+ "id": "E.cutin.withlead",
+ "family": "E",
+ "name": "A car cuts into our gap while we follow (added)",
+ "description": "The realistic motorway case: we follow a lead at the desired gap and a car cuts in at 30 / 50 / 70 % of that gap.",
+ "scope": "warnOnly",
+ "duration": 60,
+ "params": {
+  "v": 110,
+  "f": 0.5,
+  "dv": 0,
+  "tc": 10
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v"
+  },
+  {
+   "id": "cutter",
+   "kind": "car",
+   "lane": 1,
+   "x0": "=f*(5+2*v/3.6)+dv/3.6*tc",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "events": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 3
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "f": [
+   0.3,
+   0.5,
+   0.7
+  ],
+  "dv": [
+   0,
+   10
+  ]
+ }
+}

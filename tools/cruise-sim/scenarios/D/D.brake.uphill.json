@@ -1,0 +1,67 @@
+{
+ "id": "D.brake.uphill",
+ "family": "D",
+ "name": "The lead brakes on an uphill (added)",
+ "description": "D.brake on a +5 % grade: the counterpart of the downhill case.",
+ "scope": "warnOnly",
+ "duration": "=tb + dv/3.6/abs(a) + 40",
+ "params": {
+  "v": 110,
+  "dv": 30,
+  "a": -1.5,
+  "tb": 20,
+  "g": 0.05
+ },
+ "road": {
+  "grade": [
+   [
+    0,
+    "=g"
+   ],
+   [
+    100000,
+    "=g"
+   ]
+  ]
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      "=tb",
+      "=v"
+     ],
+     [
+      "=tb+(dv)/3.6/abs(a)",
+      "=v-(dv)"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   90,
+   120
+  ],
+  "a": [
+   -1.5,
+   -3
+  ]
+ }
+}

@@ -1,0 +1,30 @@
+{
+ "id": "J.cmdworst.D3",
+ "family": "J",
+ "extends": "D.brake.hard",
+ "name": "The command path at its worst settings during D.brake.hard",
+ "description": "D.brake.hard with the command path's worst preset (long delay, jitter, drops, stalls, low accepted rate).",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "a": -3,
+  "tb": 20
+ },
+ "sweep": {
+  "cond.command": [
+   "worst"
+  ],
+  "v": [
+   90,
+   120
+  ]
+ },
+ "where": "=v-dv >= 30",
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s",
+  "minTimeGap_s"
+ ]
+}

@@ -1,0 +1,55 @@
+{
+ "id": "E.cutin.truck",
+ "family": "E",
+ "name": "A truck cuts in (acquired early)",
+ "description": "A truck at 80–90 km/h pulls out in front of us at 15 … 50 m (6 s lane change).",
+ "scope": "warnOnly",
+ "duration": "=tc + 50",
+ "params": {
+  "v": 120,
+  "g": 30,
+  "dv": 30,
+  "tc": 10
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "cutter",
+   "kind": "truck",
+   "lane": 1,
+   "x0": "=g+dv/3.6*tc",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "events": [
+  {
+   "t": "=tc",
+   "kind": "cutIn",
+   "vehicle": "cutter",
+   "toLane": 0,
+   "duration_s": 6
+  }
+ ],
+ "sweep": {
+  "v": [
+   110,
+   130
+  ],
+  "g": [
+   15,
+   30,
+   50
+  ],
+  "dv": [
+   20,
+   40
+  ]
+ }
+}

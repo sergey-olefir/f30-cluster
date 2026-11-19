@@ -1,0 +1,56 @@
+{
+ "id": "B.approach",
+ "family": "B",
+ "name": "A slower lead from far (Δv 10 … 50 km/h)",
+ "description": "The lead drives at v − Δv, 250 m ahead (beyond the camera range at first). We must slow to its speed and settle at the desired gap without a warning. Parent S1.",
+ "scope": "in",
+ "duration": "=max(60, (g0-5-2*(v-dv)/3.6)/(dv/3.6) + 45)",
+ "params": {
+  "v": 120,
+  "dv": 30,
+  "g0": 250
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=g0",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v-dv"
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120,
+   150
+  ],
+  "dv": [
+   10,
+   20,
+   30,
+   40,
+   50
+  ]
+ },
+ "where": "=v-dv >= 30",
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "minTTC_s",
+  "nuisanceWarnings",
+  "warnCount"
+ ],
+ "tags": [
+  "core"
+ ]
+}

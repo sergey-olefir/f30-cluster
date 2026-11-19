@@ -1,0 +1,44 @@
+{
+ "id": "J.appStop.B",
+ "family": "J",
+ "extends": "B.approach",
+ "name": "appStop during B.approach, at the worst time",
+ "description": "B.approach (v=120, dv=40, g0=250) and the app stops (no command, no warning from it); the injection time is swept and the worst outcome counts.",
+ "scope": "warnOnly",
+ "params": {
+  "v": 120,
+  "dv": 40,
+  "g0": 250,
+  "tf": 5
+ },
+ "events+": [
+  {
+   "t": "=tf",
+   "kind": "fault",
+   "fault": "appStop"
+  }
+ ],
+ "sweep": {
+  "tf": [
+   5,
+   10,
+   15,
+   20,
+   25,
+   30,
+   35
+  ],
+  "v": [
+   90,
+   120
+  ]
+ },
+ "worstOver": [
+  "tf"
+ ],
+ "decide": [
+  "collision",
+  "missedWarning",
+  "warnLeadTime_s"
+ ]
+}

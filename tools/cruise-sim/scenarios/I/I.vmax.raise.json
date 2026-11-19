@@ -1,0 +1,48 @@
+{
+ "id": "I.vmax.raise",
+ "family": "I",
+ "name": "The maximum raised by 30 km/h behind a slow lead",
+ "description": "Behind a lead at v, the driver raises the maximum by 30 km/h: nothing should change while the lead is there.",
+ "scope": "in",
+ "duration": 60,
+ "params": {
+  "v": 90
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+5",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v"
+  }
+ ],
+ "events": [
+  {
+   "t": 20,
+   "kind": "driverVmax",
+   "vMax_kmh": "=v+35"
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "peakAccel_mps2",
+  "setpointChangesPerMin"
+ ]
+}

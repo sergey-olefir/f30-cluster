@@ -1,0 +1,23 @@
+{
+ "id": "L.motorway",
+ "family": "L",
+ "name": "Mixed driving: motorway",
+ "description": "Hours of motorway driving strung from families B–K with realistic event rates (core/mixed.js), for warnings and driver interventions per hour.",
+ "scope": "in",
+ "generator": {
+  "hours": 10,
+  "shares": {
+   "motorway": 1,
+   "rural": 0,
+   "town": 0
+  },
+  "density": "mid",
+  "seed": 1,
+  "fillerSegment_s": 300,
+  "fillerSamples": 6
+ },
+ "decide": [],
+ "tags": [
+  "perHour"
+ ]
+}

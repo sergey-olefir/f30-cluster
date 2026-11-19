@@ -1,0 +1,55 @@
+{
+ "id": "H.zone30",
+ "family": "H",
+ "name": "30 km/h zone (near the cruise minimum)",
+ "description": "Behind a lead at 35 km/h that slows to 25 / 20 km/h in a 30 zone: below the cruise minimum.",
+ "scope": "outOfEnvelope",
+ "duration": 60,
+ "params": {
+  "vl": 25
+ },
+ "road": {
+  "speedLimit": [
+   [
+    0,
+    30
+   ]
+  ]
+ },
+ "ego": {
+  "v0_kmh": 35,
+  "vMax_kmh": 40,
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*35/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      35
+     ],
+     [
+      15,
+      35
+     ],
+     [
+      "=15+(35-vl)/3.6/1",
+      "=vl"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "vl": [
+   25,
+   20
+  ]
+ }
+}

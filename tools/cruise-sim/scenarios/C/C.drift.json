@@ -1,0 +1,59 @@
+{
+ "id": "C.drift",
+ "family": "C",
+ "name": "The lead drifts slowly",
+ "description": "The lead's speed drifts ±10 km/h over 2 minutes: the loop should follow without stepping the set speed back and forth.",
+ "scope": "in",
+ "duration": 200,
+ "params": {
+  "v": 90,
+  "s": 1
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      30,
+      "=v"
+     ],
+     [
+      150,
+      "=v+10*s"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "s": [
+   -1,
+   1
+  ]
+ },
+ "decide": [
+  "gapErrRmsRel",
+  "setpointChangesPerMin",
+  "nuisanceWarnings",
+  "collision"
+ ]
+}

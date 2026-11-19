@@ -1,0 +1,64 @@
+{
+ "id": "C.steady.grade",
+ "family": "C",
+ "name": "Steady following on a grade (added)",
+ "description": "The lead holds its speed on a ±3 / ±6 % grade; we hold the gap with the cruise fighting the grade.",
+ "scope": "in",
+ "duration": 120,
+ "params": {
+  "v": 90,
+  "g": -0.06
+ },
+ "road": {
+  "grade": [
+   [
+    0,
+    0
+   ],
+   [
+    100,
+    "=g"
+   ],
+   [
+    100000,
+    "=g"
+   ]
+  ]
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "const"
+   },
+   "v0_kmh": "=v"
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "g": [
+   -0.06,
+   -0.03,
+   0.03,
+   0.06
+  ]
+ },
+ "decide": [
+  "collision",
+  "minTimeGap_s",
+  "gapErrRmsRel",
+  "setpointChangesPerMin"
+ ]
+}

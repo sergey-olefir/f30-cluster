@@ -1,0 +1,61 @@
+{
+ "id": "D.brake.stop",
+ "family": "D",
+ "name": "The lead brakes to a standstill or a crawl",
+ "description": "The lead brakes to 0, 10 or 20 km/h: below the cruise minimum. The system must warn and say it leaves its envelope.",
+ "scope": "outOfEnvelope",
+ "duration": "=tb + (v-vt)/3.6/abs(a) + 30",
+ "params": {
+  "v": 90,
+  "vt": 0,
+  "a": -3,
+  "tb": 20
+ },
+ "ego": {
+  "v0_kmh": "=v",
+  "vMax_kmh": "=v+20",
+  "lane": 0
+ },
+ "vehicles": [
+  {
+   "id": "lead",
+   "kind": "car",
+   "lane": 0,
+   "x0": "=5+2*v/3.6",
+   "profile": {
+    "type": "piecewise",
+    "points": [
+     [
+      0,
+      "=v"
+     ],
+     [
+      "=tb",
+      "=v"
+     ],
+     [
+      "=tb+(v-vt)/3.6/abs(a)",
+      "=vt"
+     ]
+    ]
+   }
+  }
+ ],
+ "sweep": {
+  "v": [
+   60,
+   90,
+   120
+  ],
+  "vt": [
+   0,
+   10,
+   20
+  ],
+  "a": [
+   -2,
+   -3,
+   -4
+  ]
+ }
+}
