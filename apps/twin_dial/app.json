@@ -315,7 +315,10 @@
         ],
         [
           "setting",
-          "diagCarplayTurns",
+          "diagCarplayTurns"
+        ],
+        [
+          "setting",
           "diagFrontVehicle"
         ]
       ]
