@@ -132,4 +132,9 @@ test('failures: at "worst" searches the injection time and returns the worst run
   assert.strictEqual(r2.meta.worst.by, 'minTimeGap');
   assert.ok(r2.meta.worst.scored.length > 10);
   assert.throws(() => sim.run(Object.assign({}, cfg, { failures: [cfg.failures[0], cfg.failures[0]] }), deps()), /only one/);
+  // the page's step API resolves the search the same way and then plays the worst run
+  const st = sim.createSim(cfg, deps());
+  while (!st.done) st.advance(10);
+  assert.strictEqual(sim.hashResult(st.result()), sim.hashResult(r));
+  assert.strictEqual(st.meta.worst.at, w.at);
 });

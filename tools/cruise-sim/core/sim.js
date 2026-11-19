@@ -272,6 +272,24 @@ const SERIES = ['ego.x', 'ego.v', 'ego.a', 'ego.jerk', 'lead.x', 'lead.v', 'lead
   'set.eff', 'meas.id', 'meas.wrong', 'est.id', 'warn.reason', 'warn.ttc', 'app.alive', 'curvature', 'elevation', 'follower.v', 'a.demand', 'ego.lane', 'ego.y'];
 
 function createSim(config, deps) {
+  // a failure at 'worst': search first (as run() does), then step the worst run
+  if (hasWorst(config, deps)) {
+    const worst = run(config, deps);
+    const s = createSim(worst.meta.config, deps);
+    s.meta.worst = worst.meta.worst;
+    return s;
+  }
+  return createPlain(config, deps);
+}
+
+function hasWorst(config, deps) {
+  const cfg = normalize(config);
+  if (cfg.failures.some(f => f.at === 'worst')) return true;
+  const { M } = modules(deps);
+  return (resolveScenario(cfg, M).events || []).some(e => e.kind === 'fault' && e.at === 'worst');
+}
+
+function createPlain(config, deps) {
   const t0wall = Date.now();
   const { M, src } = modules(deps);
   const schema = M.schema;
@@ -629,7 +647,7 @@ function createSim(config, deps) {
 }
 
 function runOnce(config, deps) {
-  const s = createSim(config, deps);
+  const s = createPlain(config, deps);
   while (!s.done) s.step();
   return s.result();
 }
