@@ -445,7 +445,7 @@ function createSim(config, deps) {
     }
 
     // 5. the command path
-    for (const d of command.deliver(t)) onDelivered(d);
+    if (!faults.stalled) for (const d of command.deliver(t)) onDelivered(d);   // command.deliver knows its own random stalls
 
     // 6. the driver
     world.driver = driver.step(world, t, { warn: lastW });
