@@ -6788,5 +6788,249 @@
    }
   },
   "body": "answered events=5 total=5 [pointOfInterest dist-len=1 unit=NONE raw=500 uid=zero toDest=8985 step=GS1 desc=2/13] [intersection direction=LEFT geometry=UNDEFINED dist=250 unit=METER raw=1 uid=set toDest=8985 step=GS2 desc=2/13] [roundabout exit=2 angle=270 side=RIGHT dist-len=1 unit=NONE raw=500 uid=set toDest=8985 step=GS1 desc=2/13] [tunnel length=420 dist-len=11 unit=KM raw=1 uid=zero toDest=8985 step=GS1 desc=2/13] +1 more next=1 toFinal=8985 toNext=-1"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "accel-pedal",
+  "iface": "de.bmw.powertrain.AcceleratorPedal",
+  "field": "AngleAcceleratorPedal",
+  "instance": "1",
+  "value": {
+   "cRCAngleAcceleratorPedal": 1,
+   "aliveAngleAcceleratorPedal": 2,
+   "dummy": "ZUSTAND_DIAGNOSE",
+   "actualValueAngleAcceleratorPedal": 4,
+   "qualifierActualValueAngleAcceleratorPedal": "INITIALISIERUNG",
+   "actualValueAngleAcceleratorPedalVirtual": 6,
+   "gradientActualValueAngleAcceleratorPedal": 7,
+   "dummy2": "FAHRPEDAL_MINUS__FAHRER_MINUS___ANFORDERUNG_KLEINER_FAS_MINUS_ANFORDERUNG",
+   "dummy3": "LASTANFORDERUNG_IM_EFFIZIENTEN_ANTRIEBSBEREICH",
+   "dummy4": 10
+  },
+  "body": "angle=4 virtual=6 gradient=7 qualifier=INITIALISIERUNG vsAssist=FAHRPEDAL_MINUS__FAHRER_MINUS___ANFORDERUNG_KLEINER_FAS_MINUS_ANFORDERUNG eco=LASTANFORDERUNG_IM_EFFIZIENTEN_ANTRIEBSBEREICH"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "brake-driver",
+  "iface": "de.bmw.chassis.VehicleStabilizationManagement",
+  "field": "StabilizationManagement",
+  "instance": "1",
+  "value": {
+   "cRCStatusStabilisationDSC": 1,
+   "aliveStatusStabilisationDSC": 2,
+   "dummy": "RESERVIERT_1",
+   "qualifierFunctionFDR": 4,
+   "qualifierFunctionABS": 5,
+   "qualifierFunctionASC": 6,
+   "statusBrakingMSA": 7,
+   "statusBrakingDriver": 8,
+   "statusUnitRunDSC": "DSC_MINUS_AGGREGAT_IM_SOFTANLAUF_ODER_IM_STATIONAEREN_BETRIEB_MIT_NIEDRIGER_DYNAMIK"
+  },
+  "body": "braking=8 brakingMSA=7 fdr=4 abs=5 asc=6 dscUnit=DSC_MINUS_AGGREGAT_IM_SOFTANLAUF_ODER_IM_STATIONAEREN_BETRIEB_MIT_NIEDRIGER_DYNAMIK"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "brake-driver-hu",
+  "iface": "de.bmw.infotainment.vehicle.A4A",
+  "field": "statusA4AFDRControl",
+  "instance": "1",
+  "value": {
+   "qualifierFunctionFDR": 1,
+   "statusBrakingDriver": 2
+  },
+  "body": "braking=2 fdr=1"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "brake-switch",
+  "iface": "de.bmw.powertrain.Powertrain",
+  "field": "InformationVehicleDrive",
+  "instance": "1",
+  "value": {
+   "cRCInformationVehicleDrive": 1,
+   "aliveInformationVehicleDrive": 2,
+   "cHLInformationVehicleDrive": 3,
+   "dummy1": "ANFORDERUNG_FAHRBEREITSCHAFT_BEENDEN_FUER_RCP_ODER_AFW",
+   "dummy2": "BLS_MINUS_BETAETIGUNG",
+   "dummy3": "KUPPLUNG_90_PERCENT__BETAETIGT",
+   "dummy4": "MSA_TASTER_NICHT_GEDRUECKT",
+   "statusOperationStartStopPushbutton": "KEIN_SST_MINUS_SENSOR_ERKANNT",
+   "dummy5": "STARTER_NICHT_BESTROMT",
+   "dummy6": 10,
+   "dummy7": 11
+  },
+  "body": "bls=BLS_MINUS_BETAETIGUNG clutch=KUPPLUNG_90_PERCENT__BETAETIGT msaButton=MSA_TASTER_NICHT_GEDRUECKT"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "brake-light",
+  "iface": "de.bmw.body.Light",
+  "field": "LampExterior",
+  "instance": "1",
+  "value": {
+   "cRCControlLampExterior": 1,
+   "aliveControlLampExterior": 2,
+   "controlBrightnessLevelLampExterior": 3,
+   "controlFunctionWelcomeLight": "OFF_WELL",
+   "controlFunctionRearFogLamp": "OFF_RFLI_OFF_TRM",
+   "controlFunctionPositionLight": "OFF_POLI",
+   "controlFunctionParkingLight": "OFF_PLI",
+   "controlFunctionReversingLamp": "OFF",
+   "controlFunctionBrakeForceDisplay": "BFD_MODE_2",
+   "controlFunctionDaytimeRunningLight": "DRL_L_ERR_R_ON",
+   "controlFunctionBrakeLight": "OFF_BL",
+   "controlFunctionFollowMeHome": "OFF_FMH",
+   "controlFunctionRemoteLight": "OFF_REMOTE_MINUS_LIGHT",
+   "controlFunctionGoodbyeLight": "INIT",
+   "dummy2": 15
+  },
+  "body": "brakeLight=OFF_BL brakeForce=BFD_MODE_2"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "drive-torque",
+  "iface": "de.bmw.powertrain.Powertrain",
+  "field": "WheelMomentDrive4",
+  "instance": "1",
+  "value": {
+   "cRCWheelMomentDrive4": 1,
+   "aliveWheelMomentDrive4": 2,
+   "statusInterfaceDriverAssistenceSystemTargetLimit": "FAHRPEDAL_GETRETEN__FAHRERANFORDERUNG_KLEINER_FAS_MINUS_SOLLMOMENT_MINUS_TAR",
+   "statusDrivingDirectionDriversChoice": "FAHRTRICHTUNGSWUNSCH_VORWAERTS",
+   "qualifierActualValueRPMBackAxleRedundant": "SENSOR_NICHT_VORHANDEN",
+   "actualValueRPMBackAxleRedundant": 6,
+   "statusPositiveEngagementPowerTrain": "KEINE_KRAFTSCHLUSSINFO_ERMITTELBAR",
+   "statusAvailibilityInterventionPowerTrainDRS": "EINGRIFF_NICHT_ERLAUBT",
+   "dummy1": "POWER_HOP_AKTIV__MINUS__ANFORDERUNG_BREMSUNTERSTUETZUNG_SCHWELLE_2"
+  },
+  "body": "vsAssist=FAHRPEDAL_GETRETEN__FAHRERANFORDERUNG_KLEINER_FAS_MINUS_SOLLMOMENT_MINUS_TAR direction=FAHRTRICHTUNGSWUNSCH_VORWAERTS engaged=KEINE_KRAFTSCHLUSSINFO_ERMITTELBAR rearAxleRpm=6 rearAxleQ=SENSOR_NICHT_VORHANDEN"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "wheel-rpm",
+  "iface": "de.bmw.powertrain.Powertrain",
+  "field": "ActualValueRPMWheel",
+  "instance": "1",
+  "value": {
+   "CRCActualValueRPMWheel": 1,
+   "aliveActualValueRPMWheel": 2,
+   "dummy": "FUNKTION_MELDET_FEHLER",
+   "actualValueRPMWheelRLH": 4,
+   "actualValueRPMWheelRRH": 5,
+   "actualValueRPMWheelFLH": 6,
+   "actualValueRPMwheelFRH": 7,
+   "qualifierActualValueRPMWheelRLH": "ERSATZWERT_IST_IM_NUTZSIGNAL_GESETZT_ZUSTAND__S__STATUS_TEMPORAER",
+   "qualifierActualValueRPMWheelRRH": "ERSATZWERT_IST_IM_NUTZSIGNAL_GESETZT_ZUSTAND__S__STATUS_TEMPORAER",
+   "qualifierActualValueRPMWheelFLH": "ERSATZWERT_IST_IM_NUTZSIGNAL_GESETZT_ZUSTAND__S__STATUS_TEMPORAER",
+   "qualifierActualValueRPMWheelFRH": "ERSATZWERT_IST_IM_NUTZSIGNAL_GESETZT_ZUSTAND__S__STATUS_TEMPORAER"
+  },
+  "body": "fl=6 fr=7 rl=4 rr=5 qFL=ERSATZWERT_IST_IM_NUTZSIGNAL_GESETZT_ZUSTAND__S__STATUS_TEMPORAER qRL=ERSATZWERT_IST_IM_NUTZSIGNAL_GESETZT_ZUSTAND__S__STATUS_TEMPORAER source=FUNKTION_MELDET_FEHLER"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "velocity",
+  "iface": "de.bmw.powertrain.vehicledynamics.VelocityAndVehicleConditionProvision",
+  "field": "velocityVehicle",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "statusVelocityNearStandstill": "STILLSTANDNAHEN_BEREICH",
+   "velocityVehicleCog": {
+    "velocityVehicleCog": 7.5,
+    "invalidFlag": true
+   },
+   "qualifierVelocityVehicleCog": "ERSATZWERT",
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED"
+  },
+  "body": "statusVelocityNearStandstill=STILLSTANDNAHEN_BEREICH velocityVehicleCog=7.5 velocityVehicleCog.invalidFlag=true qualifierVelocityVehicleCog=ERSATZWERT eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "velocity-long",
+  "iface": "de.bmw.powertrain.vehicledynamics.VelocityAndVehicleConditionProvision",
+  "field": "velocityVehicleLongitudinal",
+  "instance": "1",
+  "value": {
+   "length": 1,
+   "counter": 2,
+   "dataID": 3,
+   "cRC": 4,
+   "velocityVehicleLongitudinal": {
+    "velocityVehicleLongitudinal": 6.25,
+    "invalidFlag": true
+   },
+   "qualifierVelocityVehicleLongitudinal": "SIGNALQUALITAET_EINGESCHRAENKT",
+   "eventDataQualifier": "EVENT_DATA_AVAILABLE_REDUCED"
+  },
+  "body": "velocityVehicleLongitudinal=6.25 velocityVehicleLongitudinal.invalidFlag=true qualifierVelocityVehicleLongitudinal=SIGNALQUALITAET_EINGESCHRAENKT eventDataQualifier=EVENT_DATA_AVAILABLE_REDUCED"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "car-speed2",
+  "iface": "de.bmw.infotainment.vehicle.Vehicle2",
+  "field": "statusCarSpeed2",
+  "instance": "1",
+  "value": {
+   "speedVehicleCentreOfGravity": 1
+  },
+  "body": "speed=1"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "engine-rpm",
+  "iface": "de.bmw.infotainment.vehicle.CDS",
+  "field": "statusEngineSpeed2",
+  "instance": "1",
+  "value": {
+   "actualValueRPMEngineCrankshaft": 1
+  },
+  "body": "rpm=1"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "grade-xview",
+  "iface": "de.bmw.infotainment.drivingexcitement.XView",
+  "field": "statusGradientRoadway",
+  "instance": "1",
+  "value": {
+   "qualifierActualValueLongitudinalGradientRoadway": "INITIALISIERUNG",
+   "actualValueLongitudinalGradientRoadway": 2
+  },
+  "body": "grade=2 qualifier=INITIALISIERUNG"
+ },
+ {
+  "set": "S14",
+  "p": "P23",
+  "tag": "lane-slope",
+  "iface": "de.bmw.chassis.VehicleModel",
+  "field": "LaneSlope",
+  "instance": "1",
+  "value": {
+   "cRCTiltRoadway": 1,
+   "aliveTiltRoadway": 2,
+   "dummy1": 3,
+   "actualValueLongitudinalGradientRoadway": 4,
+   "qualifierActualValueLongitudinalGradientRoadway": "INITIALISIERUNG",
+   "actualValueTransverseGradientRoadway": 6,
+   "qualifierActualValueTransverseGradientRoadway": "RESERVED",
+   "actualValueLongitudinalGradientRoadwayFast": 8,
+   "dummy2": 9
+  },
+  "body": "grade=4 gradeFast=8 qualifier=INITIALISIERUNG transverse=6 transverseQ=RESERVED"
  }
 ]
