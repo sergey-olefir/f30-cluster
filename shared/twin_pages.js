@@ -1136,7 +1136,8 @@ function update(hud, x, now, force) {
     tpmsSync(hud, page === 'tyres');
     // the map window follows the page; the backdrop's title rule steps aside while it is open
     const open = page === 'map';
-    if (open !== p.mapSent) {
+    // car-issues MW: also when the variant changed while open (Діагностика W2 -> W3 on tab 5): it was sent only on open / shut
+    if (open !== p.mapSent || (open && hud.twinMap !== mapVariant(hud))) {
         p.mapSent = open;
         mapSend(hud, open);
         log(hud, 'info', 'map window ' + (open ? 'open (' + hud.twinMap + ')' : 'shut') + ' (' + mapState(hud, nowMs(hud)).why + ')');
