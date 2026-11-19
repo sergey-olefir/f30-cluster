@@ -422,3 +422,14 @@ over stored messages. Cause: the machine learns of a tab only when it moves (`_t
 a period (a message on show, or BMW's panel kept open at the start before the messages are read) only takes the card back. Fix
 (`shared/hud.js` `_twinSync`): outside a message period the machine's base is set to the tab the rules selected. The safety
 machine itself (`shared/twin_cc.js`) is unchanged. Tests: `bench/test-twin-tabs.js` "0.1.2" (five checks that fail without it).
+
+### 17.5 Fixed in 0.1.3: BMW's own speed-limit sign no longer shows through the belt hole
+
+Seen on the car (photo of 2026-11-19, parked, Comfort): a short red sliver above the rear-belt lamp. It is the bottom of
+BMW's own speed-limit sign's ring (ink box [497.5, 580.2, 579.4, 662.2], its black moat to y 663.7; `docs/G20-DESIGN-SPEC.md`),
+seen through our background's belt hole, which started at y 660 across the whole group [497, 660, 688, 720]. Fix
+(`design/gen_twin.py` `BELT_HOLES`): the hole is two rects, [497, 666, 586, 720] over the rear belts (top 677.75) and
+[586, 660, 688, 720] over the driver belt (from x 590.0, y 664.5) and the airbag lamp (y 664.25), so all three lamps stay
+see-through and the sign stays under our black. `bg_l` now has six holes (the shader takes eight); the keep-out for our own
+content is still the whole group. Tests: `bench/test-twin-layout.js` (each lamp has a hole, no hole meets BMW's sign, the holes
+stay inside the group). Still for the car: no red left above the rear belts; all three lamps still light at the start-up check.

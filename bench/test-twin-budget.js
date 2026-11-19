@@ -324,7 +324,7 @@ async function benchChecks(keep) {
 
     // ---- the holes ----
     const hl = (l) => uni(l, 'u_hole');
-    ok(hl(bl()).join().indexOf('497,660,688,720') >= 0, 'part L holds the belt group hole [497, 660, 688, 720] and the four left lamps');
+    ok(hl(bl()).join().indexOf('497,666,586,720,586,660,688,720') >= 0, 'part L holds the belt group holes [497, 666, 586, 720] + [586, 660, 688, 720] (BMW\'s own sign stays covered) and the four left lamps');
     const rt = byW(w.last, (l) => isBack(l) && l.x === 1380)[0], rb = byW(w.last, (l) => isBack(l) && l.x === 1460)[0];
     ok(hl(rt).join().indexOf('394,176,493,208') >= 0, 'part RT holds the right-hand lamps (layer px): ' + fmt(hl(rt).slice(0, 12)));
     ok(hl(rb).every((v) => v === 0), 'part RB: no hole');

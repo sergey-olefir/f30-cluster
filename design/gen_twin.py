@@ -69,6 +69,12 @@ CS = tuple(VG['dials']['speedo']['centre'])
 MID = 960
 HOLES = VG['keep_outs']['telltales_holes']['rects_plus_3px']
 BELT = VG['keep_outs']['belt_group']['rect']
+# The see-through hole for the belt group is two rects, not BELT itself (0.1.3, the car photo of 2026-11-19): BMW's own
+# speed-limit sign sits above the rear-belt lamps and its red ring reaches y 662.2 (ring ink box [497.5, 580.2, 579.4, 662.2],
+# its black moat to r 42.45 = y 663.7; docs/G20-DESIGN-SPEC.md), so a hole from y 660 showed a red sliver of it under our
+# black. Left part (rear belts, top 677.75): from y 666; right part (driver belt from x 590.0 / y 664.5, airbag from
+# y 664.25): x 586 on, from y 660 as before. BELT stays the keep-out for our own content.
+BELT_HOLES = [[BELT[0], 666, 586, BELT[3]], [586, BELT[1], BELT[2], BELT[3]]]
 GEAR_GAP = VG['keep_outs']['gear_gap']['rect']
 
 
@@ -138,7 +144,7 @@ RULES = [
 
 def tdback(part):
     r = BG[part]
-    holes = [list(h) for h in HOLES + [BELT] if hit(h, r)]
+    holes = [list(h) for h in HOLES + BELT_HOLES if hit(h, r)]
     d = {'id': {'L': 'bg_l', 'RT': 'bg_rt', 'RB': 'bg_rb'}[part], 'type': 'tdback', 'class': 'content', 'z': 0, 'part': part,
          'x': r[0], 'y': r[1], 'w': r[2] - r[0], 'h': r[3] - r[1], 'conn': 0, 'holes': holes}
     if part == 'L':

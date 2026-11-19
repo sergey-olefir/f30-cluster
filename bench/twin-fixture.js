@@ -25,6 +25,7 @@ const FACE = { w: 616, h: 560, cx: 308, cy: 310 };      // the face's pixels; th
 const HOLES = [[22, 211, 88, 258], [21, 264, 80, 317], [11, 324, 76, 372], [16, 378, 66, 432], [1774, 176, 1873, 208],
     [1835, 214, 1903, 263], [1844, 262, 1908, 318]];       // design/twin-dial/vg/layout.json keep_outs.telltales_holes.rects_plus_3px
 const BELT = [497, 660, 688, 720];
+const BELT_HOLES = [[497, 666, 586, 720], [586, 660, 688, 720]];     // design/gen_twin.py BELT_HOLES: BMW's own speed-limit sign stays covered
 const SEV = 'twin';
 let t_faces = '';
 
@@ -100,7 +101,7 @@ const sceneJson = (w, h, buf) => JSON.stringify({ w, h, format: 'r8', r8: buf.to
 
 function holesFor(rect) {
     const [x0, y0, x1, y1] = rect;
-    return HOLES.concat([BELT]).filter((h) => h[2] > x0 && h[0] < x1 && h[3] > y0 && h[1] < y1);
+    return HOLES.concat(BELT_HOLES).filter((h) => h[2] > x0 && h[0] < x1 && h[3] > y0 && h[1] < y1);
 }
 
 /** The hand-written layout (the contract's section 1; positions from SPEC 3 and 13.2) with C's sheets as place-holders. */

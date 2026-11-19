@@ -144,10 +144,17 @@ ok(!ink.some((w) => w.conn !== 2 && hit(box(w), MARKER)), "BMW's stored-message 
     const sq = (p) => box(parts[p]);
     ok(JSON.stringify(sq('L')) === '[0,0,1380,720]' && JSON.stringify(sq('RT')) === '[1380,0,1920,660]' && JSON.stringify(sq('RB')) === '[1460,660,1920,720]', 'the three background rects of SPEC 13.2');
     const covers = (r) => bgs.some((b) => hit(box(b), r) && (b.holes || []).some((h) => h[0] <= r[0] && h[1] <= r[1] && h[2] >= r[2] && h[3] >= r[3]));
-    ok(covers(BELT), 'the belt + airbag group has a see-through hole in the background');
+    // the three lamps of the belt group (docs/G20-DESIGN-SPEC.md 2, ZL's boxes) are see-through; BMW's own speed-limit sign
+    // above the rear belts (ring ink box [497.5, 580.2, 579.4, 662.2], moat to y 663.7) is not: the car photo of 2026-11-19
+    // showed its red ring through a hole that started at y 660
+    const BELT_LAMPS = [[500.5, 677.75, 580.25, 715.25], [590.0, 664.5, 628.75, 715.25], [632.75, 664.25, 684.25, 715.5]];
+    const BMW_SIGN = [497.5 - 1.5, 580.2 - 1.5, 579.4 + 1.5, 662.2 + 1.5];
+    ok(BELT_LAMPS.every(covers), 'the rear belts, the driver belt and the airbag lamp each have a see-through hole in the background');
+    ok(!bgs.some((b) => (b.holes || []).some((h) => hit(h, BMW_SIGN))), "no hole meets BMW's own speed-limit sign (its ring and moat " + JSON.stringify(BMW_SIGN) + ')');
+    ok(bgs.every((b) => (b.holes || []).filter((h) => hit(h, BELT)).every((h) => h[0] >= BELT[0] && h[1] >= BELT[1] && h[2] <= BELT[2] && h[3] <= BELT[3])), 'the belt holes stay inside the belt group ' + JSON.stringify(BELT));
     ok(LAMPS.every(covers), 'every one of the seven side lamps (box + 3 px) has a see-through hole in the background');
     ok(bgs.every((b) => (b.holes || []).length <= 8 && (b.holes || []).every((h) => hit(h, box(b)))), 'at most 8 holes per layer, each inside its own part (ENGINE-CONTRACT 1.2)');
-    ok(!parts.RB.holes.length && parts.RT.holes.length === 3 && parts.L.holes.length === 5, 'holes: L belt + 4 left lamps, RT the 3 right lamps, RB none');
+    ok(!parts.RB.holes.length && parts.RT.holes.length === 3 && parts.L.holes.length === 6, 'holes: L the belt group (two rects) + 4 left lamps, RT the 3 right lamps, RB none');
     ok(!parts.RT.tab && !parts.RT.panelMask && !parts.RB.tab && !parts.RB.rules && parts.L.tab && parts.L.panelMask && parts.L.rules, 'only L carries the tab bar, the rules and the panel mask');
 }
 {
