@@ -2,7 +2,7 @@
  "id": "H.ego.lanechange",
  "family": "H",
  "name": "We change lane in behind a slower car (added)",
- "description": "Our driver changes into the next lane where a car drives 10 / 30 km/h slower at 20 / 40 m: a cut-in caused by us (modelled as that car moving into our lane: the engine has no ego lane change yet).",
+ "description": "Our driver changes into the next lane where a car drives 10 / 30 km/h slower at 20 / 40 m: a cut-in caused by us.",
  "scope": "warnOnly",
  "duration": 50,
  "params": {
@@ -30,9 +30,9 @@
  "events": [
   {
    "t": 10,
-   "kind": "cutIn",
-   "vehicle": "slow",
-   "toLane": 0,
+   "kind": "laneChange",
+   "vehicle": "ego",
+   "toLane": 1,
    "duration_s": 3
   }
  ],
