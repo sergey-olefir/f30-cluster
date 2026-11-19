@@ -130,6 +130,38 @@ S.test('the loop limit: d_needed uses min(|a_min|, aCmdMax) when given', functio
   near(r.aUsed, 1.8, 1e-12, 'no aCmdMax: the parent formula');
 });
 
+S.test('maxClosing: the parent formula without lead braking; the integrated two-car stop with it', function () {
+  near(W.maxClosing(30, 20, 1, 0, 0), 50, 1e-9, 'vc^2 / (2 a)');
+  near(W.maxClosing(30, 20, 2, 0, 1.5), 15 + 25, 1e-9, 'vc tDead + vc^2 / (2 a)');
+  near(W.maxClosing(20, 25, 1, 0, 0), 0, 1e-12, 'opening');
+  // integrate: ego 30 m/s slowing at 0.83 after 0.5 s, lead 25 m/s braking at 2 to a stop
+  function brute(v, vL, aE, bL, td) {
+    var dt = 1e-4, xe = 0, xl = 0, best = 0, ve = v, vl = vL;
+    for (var t = 0; t < 80; t += dt) {
+      var ae = t < td ? 0 : (ve > 0 ? aE : 0); var al = vl > 0 ? bL : 0;
+      xe += ve * dt - ae * dt * dt / 2; xl += vl * dt - al * dt * dt / 2;
+      ve = Math.max(0, ve - ae * dt); vl = Math.max(0, vl - al * dt);
+      best = Math.max(best, xe - xl);
+    }
+    return best;
+  }
+  [[30, 25, 0.83, 2, 0.5], [30, 30, 1.5, 3, 0], [25, 20, 2.8, 1, 1], [33, 15, 1, 4, 0.3], [20, 22, 0.8, 1.5, 0]].forEach(function (c) {
+    near(W.maxClosing(c[0], c[1], c[2], c[3], c[4]), brute(c[0], c[1], c[2], c[3], c[4]), 0.02, JSON.stringify(c));
+  });
+});
+
+S.test('leadBraking "estimate": a braking lead raises d_needed; "ignore" keeps the parent formula', function () {
+  var e = { valid: true, stale: false, gap: 60, vlead: 25, vrel: -5, alead: -2 };
+  var ign = W.create({}).step({ t: 0, est: e, egoV: 30, aMin: -0.83 });
+  near(ign.dNeeded, W.needed(5, 5, 0.83), 1e-9);
+  var est2 = W.create({ leadBraking: 'estimate' }).step({ t: 0, est: e, egoV: 30, aMin: -0.83 });
+  near(est2.dNeeded, 5 + W.maxClosing(30, 25, 0.83, 2, 0), 1e-9);
+  assert.ok(est2.dNeeded > ign.dNeeded + 100, 'much more: ' + est2.dNeeded.toFixed(0) + ' vs ' + ign.dNeeded.toFixed(0));
+  assert.strictEqual(est2.warn, true); assert.strictEqual(ign.warn, false);
+  var small = W.create({ leadBraking: 'estimate' }).step({ t: 0, est: { valid: true, stale: false, gap: 60, vlead: 25, alead: -0.3 }, egoV: 30, aMin: -0.83 });
+  near(small.dNeeded, ign.dNeeded, 1e-9, 'below the threshold a_lead is noise');
+});
+
 S.test('pure: the same inputs give the same outputs in two instances', function () {
   var a = W.create({}); var b = W.create({});
   for (var i = 0; i < 50; i++) {

@@ -191,6 +191,20 @@ S.test('cruise not active: command nothing; on resume re-sync from the held set 
   assert.ok(r.vSet !== null, 'commands during override by default');
 });
 
+S.test('resume with an old, high held set speed behind a slower lead: lowered at once to our speed, then rate-limited', function () {
+  var c = C.create({});
+  var v = 66 * KMH;
+  // resumed at 66 km/h; the cruise still holds 90; the lead 50 km/h at d_des of 66 km/h
+  var r = c.step({ t: 0, est: est(5 + 2 * v, 50 * KMH), egoV: v, vDriver: 120 * KMH, cruise: active(90 * KMH) });
+  near(r.y / KMH, 68, 1e-9, 'capped at our speed + 2 km/h'); near(r.vSet / KMH, 68, 1e-9); assert.strictEqual(r.send, true);
+  r = c.step({ t: 1, est: est(5 + 2 * v, 50 * KMH), egoV: v, vDriver: 120 * KMH, cruise: active(68 * KMH) });
+  near(r.y / KMH, 65, 1e-9, 'then down at 3 km/h/s');
+  // free road: no cap (the target is above our speed)
+  var f = C.create({});
+  r = f.step({ t: 0, est: NONE, egoV: v, vDriver: 120 * KMH, cruise: active(90 * KMH) });
+  near(r.y / KMH, 90, 1e-9);
+});
+
 S.test('resend when the cruise keeps holding another set speed (a lost command)', function () {
   var c = C.create({ resendAfter_s: 1 });
   var v = 25;

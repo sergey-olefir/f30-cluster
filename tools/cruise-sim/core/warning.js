@@ -26,6 +26,8 @@
     { key: 'ttcWarn_s', label: 'TTC_warn', unit: 's', default: 3, min: 2, max: 4, step: 0.1, group: 'warning', help: 'Tuning table: 3 s, sweep 2–4.' },
     { key: 'tDead_s', label: 'Dead time in d_needed', unit: 's', default: 0, min: 0, max: 3, step: 0.1, group: 'warning', help: 'Not in the parent formula: adds v_closing x T_dead (the cruise reacts late). 0 = the parent formula.' },
     { key: 'limitByLoop', label: 'Limit a_min by the loop', unit: '', default: true, options: [true, false], group: 'warning', help: 'd_needed uses min(|a_min|, aCmdMax) when the engine passes aCmdMax (the controller\'s down rate limit). false = the parent formula.' },
+    { key: 'leadBraking', label: 'Lead braking in d_needed', unit: '', default: 'ignore', options: ['ignore', 'estimate'], group: 'warning', help: '"ignore": the parent formula (the lead holds its speed). "estimate": the lead keeps braking at the estimated a_lead to a stop; d_needed = d0 + the largest closing distance. Under sustained lead braking the parent formula warns late.' },
+    { key: 'aLeadMin_mps2', label: 'Lead braking threshold', unit: 'm/s²', default: 0.5, min: 0, max: 3, step: 0.1, group: 'warning', help: '"estimate" uses a_lead only when it is below minus this (noise).' },
     { key: 'margin', label: 'Distance margin', unit: '', default: 1.0, min: 0.5, max: 2, step: 0.05, group: 'warning', help: 'warn if d < margin x d_needed.' },
     { key: 'aMinFloor_mps2', label: 'Smallest a_min used', unit: 'm/s²', default: 0.1, min: 0.01, max: 1, step: 0.01, group: 'warning', help: 'Guards the division when a plant has (almost) no braking.' },
     { key: 'onDelay_s', label: 'On delay', unit: 's', default: 0, min: 0, max: 1, step: 0.05, group: 'warning', help: 'The condition must hold this long before the warning comes on.' },
@@ -50,6 +52,44 @@
     var a = Math.abs(aMin);
     return d0 + (vc > 0 ? vc * vc / (2 * a) + vc * (tDead || 0) : 0);
   }
+
+  // The largest closing distance (how much the gap shrinks at most) when we hold v for tDead and then slow at aE
+  // (> 0) to a stop, while the lead slows from vL at bL (> 0) to a stop. Closed form: the relative speed
+  // v_e(t) - v_l(t) is piecewise linear, and the gap is smallest where it first reaches zero (or when we stop).
+  // With bL = 0 it is the parent's vc tDead + vc^2 / (2 aE).
+  function maxClosing(v, vL, aE, bL, tDead) {
+    var td = tDead || 0;
+    function ve(t) { return t <= td ? v : Math.max(0, v - aE * (t - td)); }
+    function vl(t) { return bL > 0 ? Math.max(0, vL - bL * t) : vL; }
+    function xe(t) {
+      if (t <= td) return v * t;
+      var tb = Math.min(t - td, v / aE);
+      return v * td + v * tb - aE * tb * tb / 2;
+    }
+    function xl(t) {
+      if (!(bL > 0)) return vL * t;
+      var tb = Math.min(t, vL / bL);
+      return vL * tb - bL * tb * tb / 2;
+    }
+    // breakpoints of the relative speed; the zero crossing lies in one of the linear pieces between them
+    var tStopE = td + v / aE;
+    var pts = [0, td, tStopE];
+    if (bL > 0) pts.push(vL / bL);
+    pts = pts.filter(function (x) { return x >= 0; }).sort(function (a, b) { return a - b; });
+    var best = 0;
+    for (var i = 0; i < pts.length; i++) {
+      var a = pts[i]; var b = i + 1 < pts.length ? pts[i + 1] : a;
+      var ra = ve(a) - vl(a); var rb = ve(b) - vl(b);
+      best = Math.max(best, xe(a) - xl(a));
+      if (ra > 0 && rb <= 0 && b > a) {
+        var tz = a + ra / (ra - rb) * (b - a);
+        best = Math.max(best, xe(tz) - xl(tz));
+      }
+      best = Math.max(best, xe(b) - xl(b));
+    }
+    // after both stop (or we stop and the lead goes on) nothing closes further
+    return best;
+  }
   function ttcOf(gap, vc) { return vc > 1e-6 ? gap / vc : Infinity; }
 
   function create(params) {
@@ -71,7 +111,12 @@
         S.lastTargetT = t;
         var vlead = est.vlead !== null && est.vlead !== undefined ? est.vlead : egoV + est.vrel;
         var vc = egoV - vlead;
-        dNeeded = needed(p.d0, vc, aMin, p.tDead_s);
+        var aL = est.alead !== null && est.alead !== undefined ? est.alead : 0;
+        if (p.leadBraking === 'estimate' && aL < -p.aLeadMin_mps2) {
+          dNeeded = p.d0 + maxClosing(egoV, Math.max(0, vlead), aMin, -aL, p.tDead_s);
+        } else {
+          dNeeded = needed(p.d0, vc, aMin, p.tDead_s);
+        }
         ttc = ttcOf(est.gap, vc);
         condD = moving && est.gap < p.margin * dNeeded;
         condT = moving && ttc < p.ttcWarn_s;
@@ -103,6 +148,6 @@
     return { params: p, step: step };
   }
 
-  var X = { NAME: 'warning', SCHEMA: SCHEMA, defaults: function () { return fill(null); }, fill: fill, create: create, needed: needed, ttc: ttcOf };
+  var X = { NAME: 'warning', SCHEMA: SCHEMA, defaults: function () { return fill(null); }, fill: fill, create: create, needed: needed, ttc: ttcOf, maxClosing: maxClosing };
   if (typeof module !== 'undefined') module.exports = X; else (self.CS = self.CS || {})['warning'] = X;
 })();

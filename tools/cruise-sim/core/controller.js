@@ -12,7 +12,9 @@
  *  - target lost or input stale: HOLD the set speed (never raise it) for holdAfterLoss_s, then release;
  *  - never accelerate into a curve on a lost target: while the lateral acceleration v^2 |kappa| is above
  *    aLatHold (or was, within holdAfterCurve_s), a lost target keeps the hold;
- *  - rate limits, faster down than up; the driver lowering the maximum acts at once;
+ *  - rate limits, faster down than up; the driver lowering the maximum acts at once; a set speed above our
+ *    own speed is lowered at once when the target is below it (it would only accelerate us: after a resume the
+ *    cruise holds the old set speed);
  *  - quantised to the cruise step with hysteresis (change only when the unquantised value is a full
  *    hysteresis away), and at most maxChangeHz changes per second;
  *  - the cruise not active (suspended, off, dropped out): command nothing (vSet = null) and re-sync from the
@@ -41,6 +43,7 @@
     { key: 'vMinCruise_kmh', label: 'Cruise minimum', unit: 'km/h', default: 30, min: 20, max: 60, step: 1, group: 'limits', help: 'v_cc,min: the set speed is never below it.' },
     { key: 'vMaxCruise_kmh', label: 'Cruise maximum', unit: 'km/h', default: 210, min: 120, max: 250, step: 5, group: 'limits', help: '' },
     { key: 'maxBelowEgo_kmh', label: 'Max below our speed', unit: 'km/h', default: 30, min: 5, max: 100, step: 1, group: 'limits', help: 'The set speed is kept at most this far below our current speed (the cruise brakes no harder for a lower one; limits the rebound).' },
+    { key: 'capAboveEgo_kmh', label: 'Cap above our speed', unit: 'km/h', default: 2, min: 0, max: 20, step: 0.5, group: 'limits', help: 'When the target is below our speed, a set speed more than this above our speed is lowered at once: it would only accelerate us. The down rate limit applies below our speed. Matters on resume (the cruise holds the old set speed).' },
     { key: 'ffEnable', label: 'Lead-acceleration feed-forward', unit: '', default: false, options: [false, true], group: 'law', help: 'a_lead x T_lag; only if a_lead is clean enough.' },
     { key: 'tLag_s', label: 'T_lag', unit: 's', default: 1.0, min: 0, max: 3, step: 0.1, group: 'law', help: 'Identified dead time + estimator delay.' },
     { key: 'ffMax_mps', label: 'Feed-forward limit', unit: 'm/s', default: 3, min: 0, max: 10, step: 0.5, group: 'law', help: '' },
@@ -136,6 +139,8 @@
       var up = p.rateUp_kmhps * KMH * dt; var down = p.rateDown_kmhps * KMH * dt;
       var d = target - S.y;
       S.y += d > up ? up : (d < -down ? -down : d);
+      // a set speed above our speed only accelerates us: lower it at once (resume with an old, high held set speed)
+      if (target < egoV) S.y = Math.min(S.y, Math.max(target, egoV + p.capAboveEgo_kmh * KMH));
       S.y = Math.max(S.y, egoV - p.maxBelowEgo_kmh * KMH, vMin);
       S.y = Math.min(S.y, vDriver);
 
