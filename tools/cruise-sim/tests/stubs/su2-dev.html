@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cruise sim SU2 views</title>
+<!--
+  SU2's dev page: the four SU2 views on a fake shell (tests/stubs/su2-fake-app.js), so they can be checked
+  by eye before SU1's page exists. Open this file from the disk (file://); no server, no network.
+  If ../../core/*.js exist in this checkout (after a merge) they are used; otherwise the fakes stand in.
+-->
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; background: #f9f9f7; color: #0b0b0b; }
+  :root[data-theme="dark"] body { background: #0d0d0d; color: #f0efec; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body { background: #0d0d0d; color: #f0efec; } }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 16px; border-bottom: 1px solid rgba(128,128,128,.3); }
+  header button { font: inherit; }
+  nav button[aria-pressed="true"] { font-weight: 700; }
+  main { padding: 12px 16px; }
+  .two { display: grid; grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr); gap: 16px; align-items: start; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <b>SU2 views (fake shell)</b>
+  <nav>
+    <button data-v="run" aria-pressed="true">Run: charts + settings</button>
+    <button data-v="batch">Batch views</button>
+    <button data-v="report">Report</button>
+  </nav>
+  <button id="play">Play</button><button id="pause">Pause</button>
+  <button id="loadBatch" title="SU2's synthetic batch fixture">Load fixture batch</button>
+  <button id="theme">Theme: auto</button>
+  <span id="status"></span>
+</header>
+<main>
+  <section data-view="run" class="two">
+    <div id="charts"></div>
+    <div id="settings"></div>
+  </section>
+  <section data-view="batch" hidden><div id="batch"></div></section>
+  <section data-view="report" hidden><div id="report"></div></section>
+</main>
+<script>
+  // the core, when this checkout has it (each file registers itself in self.CS); missing files are skipped
+  const CORE = ['rng', 'schema', 'road', 'vehicles', 'plant', 'driver', 'command', 'failures', 'sensor', 'estimator', 'controller', 'warning', 'baselines', 'metrics', 'scenario', 'mixed', 'sim'];
+  function load(src) { return new Promise(function (ok) { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ok; document.head.appendChild(s); }); }
+  (async function () {
+    for (const f of CORE) {
+      if (f === 'scenario') await load('../../ui/scenarios.bundle.js');   // the catalogue for file:// (SC3 / SU1), if built
+      await load('../../core/' + f + '.js');
+    }
+    for (const f of ['su2-fake-modules.js', 'su2-fake-app.js', '../fixtures/su2-fixture.js']) await load(f);
+    for (const f of ['charts', 'settings', 'batch', 'report-view']) await load('../../ui/' + f + '.js');
+    const fakes = Object.keys(CS).filter(function (k) { return CS[k] && CS[k].__fake; });
+    document.getElementById('status').textContent = fakes.length ? 'fake modules: ' + fakes.join(', ') : 'all modules real';
+    const app = CS.su2fakeApp.createApp();
+    window.app = app;
+    CS.charts.mount(document.getElementById('charts'), app);
+    CS.settings.mount(document.getElementById('settings'), app);
+    CS.batch.mount(document.getElementById('batch'), app);
+    CS.reportView.mount(document.getElementById('report'), app);
+    document.querySelectorAll('nav button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        document.querySelectorAll('nav button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        document.querySelectorAll('[data-view]').forEach(function (s) { s.hidden = s.getAttribute('data-view') !== b.dataset.v; });
+        app.showView(b.dataset.v);
+      });
+    });
+    document.getElementById('play').onclick = function () { app.play(); };
+    document.getElementById('pause').onclick = function () { app.pause(); };
+    document.getElementById('loadBatch').onclick = function () { app.loadResultFile(CS.su2fixture.makeBatch()); };
+    const modes = ['auto', 'light', 'dark'];
+    document.getElementById('theme').onclick = function (e) {
+      const cur = document.documentElement.getAttribute('data-theme') || 'auto';
+      const next = modes[(modes.indexOf(cur) + 1) % modes.length];
+      if (next === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', next);
+      e.target.textContent = 'Theme: ' + next;
+    };
+    app.run();
+  })();
+</script>
+</body>
+</html>
