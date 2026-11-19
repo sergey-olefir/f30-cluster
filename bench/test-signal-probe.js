@@ -664,7 +664,7 @@ async function main() {
         const NP = mk({}, { replies: () => FX.ROUTE[0].reply }); NP.pr.setSets(['S16'], true); await settleOf(NP);
         Object.keys(NP.signals.subs).forEach((key) => { if (/GuidanceEventList/.test(key)) NP.signals.subs[key].res.proxy = null; });
         prov(NP, 'CAR_PLAY'); await step(NP, 1000, 6);
-        ok(NP.signals.count('proxy') === 1 && callsOf(NP).length === 2 && /\|own$/.test(callsOf(NP)[0].key), 'a watch with no proxy (the bench): one proxy of its own (signals.proxy), once; then the calls');
+        ok(NP.signals.count('proxy') === 1 && callsOf(NP).length === 3 && /\|own$/.test(callsOf(NP)[0].key), 'a watch with no proxy (the bench): one proxy of its own (signals.proxy), once; the first call at the next tick, then every 2 s (' + callsOf(NP).length + ' calls in 6 s)');
         // the real guard: a call the binding never times out is noted as a timeout after 3.5 s (wall clock), and still holds the next one
         const G1 = rig(() => new Promise(() => {}));
         await settleOf(G1); prov(G1, 'CAR_PLAY'); await step(G1, 1000);
