@@ -107,11 +107,20 @@ APPS.forEach((a) => { specs[a] = JSON.parse(fs.readFileSync(path.join(ROOT, 'app
         if (a === 'signal_probe') ok(!hc || !hc.currentDisplayLanguage, a + ': declares only its probe table\'s fields: Авто from --currentLanguage alone (no HMIContext.currentDisplayLanguage)');
         else ok(hc && hc._instances === 'HMI_CID' && hc.currentDisplayLanguage === 'rs', a + ': reads HMIContext.currentDisplayLanguage (rs, HMI_CID; getter 3, notifier 32771)');
     });
+    // round "Auto Beam" (HD): auto_beam's app.json words are keyed by their place too (its code's words are named in
+    // apps/auto_beam/words.js, scanned below); the app is not in APPS (parts E and H build and run the four older apps)
+    ['auto_beam'].forEach((a) => {
+        const s2 = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', a, 'app.json'), 'utf8'));
+        s2.id = s2.id || a;
+        const miss = [];
+        I.specKeys(s2).map((k) => k[0]).forEach((k) => { used.add(k); LANGS.forEach((L) => { if (!Object.prototype.hasOwnProperty.call(T[L], k)) miss.push(L + ':' + k); }); });
+        ok(!miss.length && s2.i18n === true, a + ': every app.json text has its words in every table' + (miss.length ? ': ' + miss.slice(0, 8).join(', ') : ''));
+    });
     ['kit.lang', 'kit.lang.auto', 'kit.lang.uk', 'kit.lang.en', 'kit.default'].forEach((k) => used.add(k));
     // every key the code names (a quoted key of a known family), and the families built at run time
     const CODE = codeFiles();
     const named = new Set(), prefixes = new Set();
-    const FAM = /^(kit|menu|gallery|probe|dp|twin|fv|f30|wb|ps|signal_probe|driver_profiles|twin_dial|f30_cluster)\.[A-Za-z0-9_.]*$/;     // r1120 PS: + wb (the 6WB's printing), ps (the profile line)
+    const FAM = /^(kit|menu|gallery|probe|dp|twin|fv|f30|wb|ps|signal_probe|driver_profiles|twin_dial|f30_cluster|beam|auto_beam)\.[A-Za-z0-9_.]*$/;     // + beam (Auto Beam, HD)     // r1120 PS: + wb (the 6WB's printing), ps (the profile line)
     CODE.forEach((f) => {
         const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
         literals(src).forEach((l) => { if (FAM.test(l.v)) { if (/\.$/.test(l.v)) prefixes.add(l.v); else named.add(l.v); } });
@@ -132,7 +141,8 @@ function codeFiles() {
         'apps/f30_cluster/main.js', 'apps/twin_dial/main.js', 'apps/signal_probe/main.js', 'apps/signal_probe/menu.js', 'apps/signal_probe/fields.js',
         'apps/signal_probe/probe.js', 'apps/signal_probe/recorder.js', 'apps/driver_profiles/main.js', 'apps/driver_profiles/screens.js',
         'apps/driver_profiles/format.js', 'apps/driver_profiles/avatars.js', 'apps/driver_profiles/profiles.js',
-        'shared/profile_settings.js', 'shared/units.js'];      // r1120 PS
+        'shared/profile_settings.js', 'shared/units.js',      // r1120 PS
+        'apps/auto_beam/words.js', 'apps/auto_beam/paint.js', 'apps/auto_beam/main.js', 'apps/auto_beam/contract.js'];      // Auto Beam (HD)
 }
 
 /**

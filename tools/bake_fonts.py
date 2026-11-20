@@ -247,7 +247,18 @@ ACC_FONTS = [
     _td(TD_SAIRA, 'av_f40', 40, DIGITS + '-–', tabular=False),   # the set speed and the limit on the map
     _td(TD_SAIRA, 'av_f56', 56, DIGITS + '-–', tabular=False),   # the set speed and the limit on the centre page
 ]
-FONTS = {'idrive_hud_widgets': HUD_FONTS, 'cluster_themes': CLUSTER_FONTS, 'f30_cluster': F30_FONTS, 'twin_dial': TWIN_FONTS, 'acc_view': ACC_FONTS}
+# Auto Beam (round "Auto Beam", package HD): the same Noto as ACC View, every character of the app's words in both
+# languages (shared/i18n beam.* / auto_beam.*) plus plain ASCII for the raw values the centre page's table shows. Drawn in
+# JavaScript into the app's own image sheets and its centre page: never uploaded to the cluster as an atlas.
+AB_TEXT = AV_TEXT + '«»'
+AB_FONTS = [
+    _td(TD_NOTO, 'ab_t16', 16, AB_TEXT),        # the centre page's footer, the map's lamps line
+    _td(TD_NOTO, 'ab_t21', 21, AB_TEXT),        # the table's labels, the map's reason
+    _td(TD_NOTO, 'ab_t26', 26, AB_TEXT),        # the table's values, the centre page's reason
+    _td(TD_NOTO_B, 'ab_b22', 22, AB_TEXT),      # the map's advice line
+    _td(TD_NOTO_B, 'ab_b34', 34, AB_TEXT),      # the centre page's advice line
+]
+FONTS = {'idrive_hud_widgets': HUD_FONTS, 'cluster_themes': CLUSTER_FONTS, 'f30_cluster': F30_FONTS, 'twin_dial': TWIN_FONTS, 'acc_view': ACC_FONTS, 'auto_beam': AB_FONTS}
 PAD = 2
 ATLAS_W = 1024
 SS = 4            # stretch: glyphs are drawn this many times larger and reduced by area (package A1)

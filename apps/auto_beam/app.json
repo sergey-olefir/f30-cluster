@@ -1,0 +1,386 @@
+{
+  "id": "auto_beam",
+  "title": "Auto Beam",
+  "description": "An ADVISOR for the high beam: reads the front camera's light objects, the lamps, the stalk, the brightness and the speed (read only), decides with shared/beam_logic.js and shows 'high beam now' or 'dip now' with the reason, the lights ahead and the driver's own lamps, and scores itself against what the driver did. It never switches a lamp and writes nothing to the car.",
+  "version": "0.1.0",
+  "vendor": "custom",
+  "loggingId": "OABM",
+  "iconGlyph": "AB",
+  "i18n": true,
+  "mguHmi": [
+    "ID7"
+  ],
+  "shared": [
+    "beam_logic.js",
+    "lang.js",
+    "profile_settings.js",
+    "cluster_render_client.js",
+    "sun.js",
+    "limit_src.js"
+  ],
+  "signals": {
+    "de.bmw.sensors.objects.RecogFrontCameraLightDetection": {
+      "_instances": "1",
+      "_broadcasts": [
+        "mainBeamAssistantDataObject1",
+        "mainBeamAssistantDataObject2",
+        "mainBeamAssistantDataObject3",
+        "mainBeamAssistantDataObject4",
+        "mainBeamAssistantDataObject5",
+        "mainBeamAssistantDataObject6",
+        "mainBeamAssistantDataObject7",
+        "mainBeamAssistantDataObject8",
+        "mainBeamAssistantDataObject9",
+        "mainBeamAssistantDataObject10",
+        "MainBeamAssistantDataObject11",
+        "MainBeamAssistantDataObject12",
+        "mainBeamAssistantDataObject13",
+        "mainBeamAssistantDataObject14",
+        "MainBeamAssistantDataObject15",
+        "controlHighBeamAssistant"
+      ],
+      "_about": "Auto Beam (HD): the front camera's light objects (15 events, 10 UInt8 each, units UNKNOWN: config.inputs.lights / config.algo.lights) and its own verdict (controlHighBeamAssistant). EVENTS only, as broadcasts: no getter, no setter, no method. acknowledgeObjectDataLeft / Right (setter, no getter) are NOT declared and never will be. Whether this car (no option 5AC) sends any of it is unknown: the log's 'beam: src lights first' line answers it."
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraObjectlist": {
+      "_instances": "1",
+      "_broadcasts": [
+        "objectlistTCP"
+      ],
+      "_about": "Auto Beam (HD): THE FALLBACK while the light stream is silent (HR: likely on a car without the licence): the camera's object list, up to 20, metres and m/s, per object head-lamp and rear-lamp ON / OFF (event 32770). Read only."
+    },
+    "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ObjectRecognition",
+        "ObjectPosition"
+      ],
+      "_about": "Auto Beam (HD): the second fallback: the camera's object list with statusMovement ONCOMING / SAME_AS_EGO (40 slots; events 32769, 32770), joined slot by slot with the positions. Read only."
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognitionFrontCamera"
+      ],
+      "_about": "Auto Beam (HD): the built-up area from the camera's own town-entry / town-exit signs (TrafficSignType CITY_LIMIT_START_OF 55, CITY_LIMIT_END_OF 56, CITY_LIMIT_START_END_OF 57; event 32769; seen on the car as the themes' sign source). Navigation is CarPlay: there is no map flag. Read only."
+    },
+    "de.bmw.body.Light": {
+      "_instances": "1",
+      "LowBeam": "rs",
+      "LampExterior2": "s",
+      "IndicatorSteeringColumn": "s",
+      "_about": "Auto Beam (HD): the low beam on / off and its brightness (LowBeam, getter 1, notifier 32771); the lamps' commands (LampExterior2, notifier 32772: controlFunctionMainBeam = the high beam lit, ASSUMED; controlFunctionFrontFogLight = the fog lamps); the stalk's bits (IndicatorSteeringColumn, notifier 32773: push / pull ASSUMED 0x20 / 0x10, ROUND.md 1a). Read only: this interface has no setter at all."
+    },
+    "de.bmw.body.Environment": {
+      "_instances": "1",
+      "StatusBrightnessEnvironment": "s",
+      "_about": "Auto Beam (HD): the ambient brightness (raw UInt8, unit unknown), notifier 32770. Read only."
+    },
+    "de.bmw.body.Wiper": {
+      "_instances": "1",
+      "rainSensorWiperSpeed": "s",
+      "_about": "Auto Beam (HD): the rain intensity (raw), notifier 32771. Read only."
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "statusCarSpeed2": "rs",
+      "statusDisplayedCCMessage": "rs",
+      "statusLightStatus": "rs",
+      "_about": "Auto Beam (HD): our speed (raw x 0.015625 km/h, getter 8; seen on the car); the number of the car's message shown now (getter 61; seen 2026-11-18: 0 none): while one shows, our cluster picture yields; statusLightStatus (getter 43, notifier 32811): statusMainBeam_headlightFlasher, HR's best candidate for 'the high beam is lit' (unseen yet; trusted only while statusLightStatusError says the signals are in order). Read only."
+    },
+    "de.bmw.infotainment.vehicle.Vehicle": {
+      "statusDayNightChangeOver": "rs",
+      "_about": "Auto Beam (HD): the car's own day / night (getter 19, notifier 32787), the sun's stand-in in the algorithm and the night look. Read only."
+    },
+    "de.bmw.chassis.YawRateProvision": {
+      "_instances": "1",
+      "_broadcasts": [
+        "yawRate"
+      ],
+      "_about": "Auto Beam (HD): the yaw rate (event 32791; scale ASSUMED) as the curve proxy. Read only."
+    },
+    "de.bmw.dass.TrafficSignRecognition": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognition"
+      ],
+      "_about": "Auto Beam (HD): the speed limit (presentClassLimitSpeed x 5, seen on the car 2026-11-18): a limit of 50 km/h or less counts as a built-up area. Read only."
+    },
+    "de.bmw.infotainment.hmi.hmicontext.HMIContext": {
+      "_instances": "HMI_CID",
+      "currentDisplayLanguage": "rs",
+      "_about": "the head unit's language for \"Авто\" (shared/lang.js; getter 3, notifier 32771). Read only."
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "Auto Beam",
+      "buttons": [
+        [
+          "BTN_SETTINGS",
+          "Settings"
+        ]
+      ],
+      "_about": "the app's own page: the scene (both beams on the road, the lights ahead) and the advice on the left, the data table on the right. Nothing on it can be pressed; the only button is the kit's Settings."
+    },
+    {
+      "name": "SETTINGS",
+      "kind": "menu",
+      "settings": true,
+      "title": "Settings",
+      "items": [
+        [
+          "text",
+          "STATUS"
+        ],
+        [
+          "setting",
+          "show"
+        ],
+        [
+          "setting",
+          "demoCycle"
+        ],
+        [
+          "setting",
+          "sens"
+        ],
+        [
+          "setting",
+          "follow"
+        ],
+        [
+          "setting",
+          "lang"
+        ],
+        [
+          "setting",
+          "profileSets"
+        ]
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "show",
+      "label": "Показувати на щитку",
+      "type": "bool",
+      "default": false,
+      "_about": "the glance view on the cluster's map target (3 layers on the app's own connection), off by default. contend false, guide_hold 0."
+    },
+    {
+      "key": "demoCycle",
+      "label": "Демо",
+      "type": "bool",
+      "default": false,
+      "_about": "the 18 drawn states in turn, then four moving scenes played through the real algorithm (no car signals)"
+    },
+    {
+      "key": "sens",
+      "label": "Чутливість",
+      "type": "choice",
+      "default": "normal",
+      "options": [
+        [
+          "early",
+          "Раніше ближнє"
+        ],
+        [
+          "normal",
+          "Звичайна"
+        ],
+        [
+          "late",
+          "Пізніше ближнє"
+        ]
+      ],
+      "_about": "per driver profile: the dip zones and the return times x config.sens[value]"
+    },
+    {
+      "key": "follow",
+      "label": "Стежити за рішенням камери",
+      "type": "choice",
+      "default": "follow",
+      "options": [
+        [
+          "follow",
+          "Стежити"
+        ],
+        [
+          "ignore",
+          "Не зважати"
+        ]
+      ],
+      "_about": "whether the camera's own verdict (controlHighBeamAssistant) counts as a dip trigger; it is always shown and logged"
+    },
+    {
+      "key": "lang",
+      "label": "Мова / Language",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Авто"
+        ],
+        [
+          "uk",
+          "Українська"
+        ],
+        [
+          "en",
+          "English"
+        ]
+      ]
+    },
+    {
+      "key": "profileSets",
+      "label": "Налаштування для кожного профілю",
+      "type": "bool",
+      "default": true
+    }
+  ],
+  "config": {
+    "target": "map",
+    "layer": {
+      "target": "map",
+      "klass": "content",
+      "contend": false,
+      "guideHold": 0,
+      "_about": "the map target's core x 334..754, y 44..416: ab_road effect 420 x 260 at (334, 156), ab_lights effect (the same box), text sheet 420 x 112 at (334, 44). contend false: it waits while BMW's map holds the slot. guideHold 0: BMW's CarPlay manoeuvre box is never held back for us."
+    },
+    "tickMs": 100,
+    "demoMs": 4000,
+    "yieldUnknown": false,
+    "_yieldUnknown": "statusDisplayedCCMessage 65535 (unknown, seen after a start) does not make our picture yield; any other non-zero number does",
+    "inputs": {
+      "lights": {
+        "none": {
+          "x": 255,
+          "dist": 127,
+          "cls": 15,
+          "status": 7,
+          "id": 15
+        },
+        "staleMs": 600,
+        "assumed": true
+      },
+      "lamps": {
+        "highSources": [
+          "lightStatus",
+          "lampExterior2"
+        ],
+        "lightStatusOk": [
+          "LAMPENZUSTANDS_MINUS_SIGNALE_SIND_IN_ORDNUNG",
+          0
+        ],
+        "on": [
+          "EIN",
+          1
+        ],
+        "off": [
+          "AUS",
+          0
+        ],
+        "lowOn": [
+          "FAHRLICHT_EINSCHALTEN",
+          1
+        ],
+        "lowOff": [
+          "FAHRLICHT_AUSSCHALTEN",
+          0
+        ],
+        "highOn": [
+          "ON_MAB_MODE_1",
+          "ON_MAB_MODE_2",
+          "ON_MAB_MODE_3",
+          "ON_MAB_MODE_4",
+          2,
+          5,
+          6,
+          7
+        ],
+        "highOff": [
+          "OFF_MAB",
+          1
+        ],
+        "fogOn": [
+          "NSW_ON",
+          2
+        ],
+        "fogOff": [
+          "NSW__OFF",
+          1,
+          "INIT",
+          0
+        ],
+        "assumed": true
+      },
+      "stalk": {
+        "pull": 16,
+        "push": 32,
+        "assumed": true
+      },
+      "objects": {
+        "staleMs": 600,
+        "minProb": 0,
+        "ySign": 1,
+        "classes": {
+          "car": 1,
+          "truck": 2,
+          "moto": 3,
+          "bike": 4,
+          "ped": 5,
+          "other": 0
+        },
+        "assumed": true
+      },
+      "env": {
+        "wiperPath": "speedWiper",
+        "wiperMax": 3,
+        "assumed": true
+      },
+      "town": {
+        "start": [
+          "CITY_LIMIT_START_OF",
+          55,
+          "CITY_LIMIT_START_END_OF",
+          57
+        ],
+        "end": [
+          "CITY_LIMIT_END_OF",
+          56
+        ],
+        "maxMs": 900000,
+        "assumed": true
+      },
+      "car": {
+        "speedScale": 0.015625,
+        "speedNone": 65535,
+        "yawScale": 1,
+        "yawPath": [
+          "yawRate"
+        ],
+        "staleMs": 1000,
+        "assumedYaw": true
+      },
+      "_about": "inputs.js: the catalogue's defaults mean 'no object'; everything marked assumed is a HYPOTHESIS until a night drive (HS's recorder) settles it: which member says the high beam is lit (highSources: statusLightStatus first, LampExterior2 second, as HR suggests), which stalk bit is the flash pull, the object lists' lateral sign, the wiper level, the yaw rate's scale, how long a town lasts without its exit sign."
+    },
+    "algo": {
+      "objects": {
+        "use": "fallback"
+      },
+      "_about": "a partial config for shared/beam_logic.js (docs/highbeam/CONTRACT.md section 4), merged over its DEFAULTS; the sensitivity setting merges B.PRESETS[early | normal | late] over it; 'Стежити за рішенням камери' sets verdict.use follow / log. objects.use fallback: the camera's object lists stand in while the light stream is silent (HR: likely on this car). Every scale of the light objects is the module's own (assumed until a drive)."
+    },
+    "location": {
+      "lat": 50.45,
+      "lon": 30.52
+    },
+    "sign": {
+      "tsr": {}
+    },
+    "night": "auto",
+    "_night": "'auto': the car's day / night, else the sun; 'day' / 'night': a fixed look (the bench)",
+    "lang": "auto"
+  }
+}
