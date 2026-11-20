@@ -585,7 +585,9 @@ const HB = {
     tags: ['stalk', 'stalk-complete', 'brake-light', 'lights', 'dimmer', 'indicate', 'car-speed2', 'yaw-rate', 'steering', 'gearbox-status',
         'external-display', 'tsr', 'ccp-builtup', 'front-vehicle', 'cam-objects', 'cam-position', 'cam2-objects', 'cam2-position',
         // after HR-REPORT Part E: the followed car's lamp state (gap-ahead), the camera's signs (a town entry), the objects' flash / brake lamps
-        'gap-ahead', 'cam-signs', 'cam-specific', 'cam2-specific'],
+        'gap-ahead', 'cam-signs', 'cam-specific', 'cam2-specific',
+        // the owner, 2026-11-20: navigation is CarPlay (no map built-up flag): the town comes from the signs, so every sign stream
+        'cam-legacy', 'cam-legacy2'],
     recLog: ['stalk', 'stalk-complete', 'lights'],
 };
 const HB_ENTRIES = 4;
@@ -615,6 +617,10 @@ function interfaces() {
     });
     return Object.keys(m).map((k) => m[k]);
 }
+// beam HS: the HB set's READ-ONLY diagnostic reads (apps/signal_probe/beam_diag.js, the owner's decision of 2026-11-20): the head
+// unit's diagnostic transport, used only through kit/runtime/readonly-diag.js (0x22 only) and beam_diag.js's allow-list. Not a field
+// of the table (the probe never subscribes it): declared beside it, as f30_cluster declares it.
+const DIAG_MANIFEST = { 'com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu': { _instances: 'SystemFunctionsInternalTasuInst1', _methods: ['sendTasuRequest'], _broadcasts: ['sendTasuResponse'] } };
 /** The "signals" block of app.json that this table needs (flags merged per field; "*" where several instances are read). */
 function manifestSignals() {
     const out = {};
@@ -626,7 +632,8 @@ function manifestSignals() {
         if (e.methods.length) o._methods = e.methods.slice().sort();
         out[e.iface] = o;
     });
+    Object.keys(DIAG_MANIFEST).forEach((k) => { out[k] = JSON.parse(JSON.stringify(DIAG_MANIFEST[k])); });
     return out;
 }
 
-module.exports = { I, TABLE, SETS, SET_DEFAULTS, instOf, interfaces, manifestSignals, ACC, ACC_ENTRIES, HB, HB_ENTRIES };
+module.exports = { I, TABLE, SETS, SET_DEFAULTS, instOf, interfaces, manifestSignals, ACC, ACC_ENTRIES, HB, HB_ENTRIES, DIAG_MANIFEST };

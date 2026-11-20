@@ -102,11 +102,14 @@ class Probe {
         this.hubs = {};
         this.fields = this.table.map((f) => this._field(f));
         this.recorder = null; this.recQuiet = false;      // cruise RC: set by setRecorder()
+        this.taps = {};                   // beam HS: tag -> fn(value), e.g. the HB diagnostic reads' speed gate (tap())
     }
 
     // ---- cruise RC: the recording mode (recorder.js) -------------------------------------------------------------------------------
     /** The recorder the fields of `recordSets` go to; quiet: their throttled log lines are left out while it records. */
     setRecorder(rec, quiet) { this.recorder = rec || null; this.recQuiet = !!quiet; }
+    /** beam HS: fn(value) sees every value of the field `tag` while its set is on (guarded: a throw there changes nothing). */
+    tap(tag, fn) { if (typeof fn === 'function') this.taps[tag] = fn; }
     /** Mark the fields of these sets (and the fields other sets share with them through `also`) as recorded. */
     recordSets(ids) {
         const want = ids || [];
@@ -120,6 +123,7 @@ class Probe {
             cap: f.cap || d.cap, gap: F.isNum(f.gapMs) ? f.gapMs : d.gapMs, onAt: 0, asked: false, hub: null, same: 0, poller: null };
         st.handler = (v) => {
             if (!st.active) return;
+            if (this.taps[f.tag]) { try { this.taps[f.tag](v); } catch (err) { /* beam HS: a tap never breaks the field */ } }
             // cruise RC: the recorder takes EVERY value of the fields it records (unthrottled, recorder.js); while it records, those
             // fields' throttled log lines are left out (config.recorder.quietLog), so the log keeps the marks, the summaries, the status
             if (st.rec && this.recorder && this.recorder.on) {

@@ -691,6 +691,15 @@
     "de.bmw.environmentalmodel.environmentalconditions.Weather": {
       "_instances": "1",
       "RecognitionWeather": "s"
+    },
+    "com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu": {
+      "_instances": "SystemFunctionsInternalTasuInst1",
+      "_methods": [
+        "sendTasuRequest"
+      ],
+      "_broadcasts": [
+        "sendTasuResponse"
+      ]
     }
   },
   "screens": [
@@ -787,6 +796,10 @@
         [
           "setting",
           "set18"
+        ],
+        [
+          "setting",
+          "hbdiag"
         ],
         [
           "setting",
@@ -904,6 +917,12 @@
       "default": false
     },
     {
+      "key": "hbdiag",
+      "label": "S18 HB: діагностичні читання (лише 0x22, лише на стоянці)",
+      "type": "bool",
+      "default": false
+    },
+    {
       "key": "lang",
       "label": "Мова / Language",
       "type": "choice",
@@ -962,6 +981,10 @@
         ]
       ],
       "_about": "cruise RC: the recording mode (recorder.js). Every value of the chosen sets' fields, unthrottled, in data/rec/rec-<session>-<n>.csv.gz; a file is cut at fileRawKB of text, the oldest files go past quotaMB (the app's disk limit is 20 MiB with its log); flushMs between two writes; maxQueueKB of text waiting before samples are dropped (counted); maxEntries of a list; quietLog: the recorded fields' throttled log lines are left out while recording; choices: what the menu row RECSET cycles through (r1120 AC: S17 = ACC, the adaptive-cruise set, first; beam HS: S18 = HB, the headlight set for the night drives, second). beam HS: a field with recSame folds its repeats (\"#s\" lines in the file, folded= in #end)."
+    },
+    "hbdiag": {
+      "whileMoving": false,
+      "_about": "beam HS: the HB set's read-only diagnostic reads (beam_diag.js): off unless the setting hbdiag is on AND set S18 is on; only 0x22 through kit/runtime/readonly-diag.js, only the allow-listed identifiers (BDC 0x40: F186 D542 D57E E3B8; FLM 0x43 / 0x44: F186 D7A7), at most one read a second per unit, back-off after a refusal. whileMoving false: a read leaves only while the recorded speed is under 0.5 km/h (HC-REPORT: the transport refuses in bursts while driving); it stays false until the parked session shows the reads are harmless."
     }
   }
 }

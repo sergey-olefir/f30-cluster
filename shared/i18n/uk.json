@@ -459,6 +459,7 @@
  "signal_probe.item.RECSET": "Набір для запису",
  "signal_probe.screen.MAIN": "Signal Probe",
  "signal_probe.screen.SETTINGS": "Налаштування",
+ "signal_probe.set.hbdiag": "S18 HB: діагностичні читання (лише 0x22, лише на стоянці)",
  "signal_probe.set.set1": "S1 Повідомлення (P1 P2)",
  "signal_probe.set.set10": "S10 Чорна коробка (P18)",
  "signal_probe.set.set11": "S11 Непідключені сигнали f30 (P19)",

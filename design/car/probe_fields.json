@@ -202,7 +202,7 @@
         "P27"
       ],
       "fields": 41,
-      "fieldsActive": 63
+      "fieldsActive": 65
     }
   ],
   "interfaces": [
@@ -5583,6 +5583,9 @@
       "formatter": "cols",
       "gapMs": 250,
       "cap": 300,
+      "also": [
+        "S18"
+      ],
       "columns": [
         "id:trafficSignID:n",
         "type:trafficSignType:n",
@@ -5609,6 +5612,9 @@
       "formatter": "cols",
       "gapMs": 250,
       "cap": 300,
+      "also": [
+        "S18"
+      ],
       "columns": [
         "qualifier:eventDataQualifier:e",
         "extQualifier:extendedQualifier:e",

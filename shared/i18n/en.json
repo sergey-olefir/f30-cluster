@@ -459,6 +459,7 @@
  "signal_probe.item.RECSET": "Set to record",
  "signal_probe.screen.MAIN": "Signal Probe",
  "signal_probe.screen.SETTINGS": "Settings",
+ "signal_probe.set.hbdiag": "S18 HB: diagnostic reads (0x22 only, only standing)",
  "signal_probe.set.set1": "S1 Messages (P1 P2)",
  "signal_probe.set.set10": "S10 Black box (P18)",
  "signal_probe.set.set11": "S11 Unwired f30 signals (P19)",

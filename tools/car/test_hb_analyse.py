@@ -164,6 +164,33 @@ class HbAnalyse(unittest.TestCase):
         rows = rtext(os.path.join(self.out, 'events.csv')).strip().split('\n')
         self.assertEqual(len(rows) - 1, sum(len(self.r(x)['labelled']) for x in ('A', 'B', 'C')))
 
+    def test_town_from_the_signs(self):
+        # the owner navigates with CarPlay: no map flag; the town comes from the camera's town signs (and the limit as a weaker cue)
+        a, tr = self.r('A'), self.truth['sessions']['A']
+        self.assertNotIn('ccp-builtup', [f['tag'] for f in a['fields']])
+        signs = [x for x in a['town'] if x['src'] == 'cam-signs']
+        self.assertEqual([x['kind'] for x in signs], ['town_in', 'town_out'])
+        self.near(signs[0]['t_s'], tr['town'][0], 0.6, 'town in')
+        self.near(signs[1]['t_s'], tr['town'][1], 0.6, 'town out')
+        self.assertEqual([x['kind'] for x in a['town'] if x['src'] == 'tsr'], ['limit_50_or_less', 'limit_over_50'])
+        md = rtext(os.path.join(self.out, 'report.md'))
+        self.assertIn('town_in (cam-signs)', md)
+        full = [json.loads(x) for x in rtext(os.path.join(self.out, 'scenarios', 'R.%s.jsonl' % a['session'])).split('\n') if x]
+        mid_town = next(f for f in full if f['t'] >= (tr['town'][0] + 10) * 1000)
+        self.assertTrue(mid_town['env']['v']['urban'])
+        self.assertFalse(next(f for f in full if f['t'] >= (tr['town'][1] + 10) * 1000)['env']['v']['urban'])
+
+    def test_diagnostic_reads_in_the_parked_check(self):
+        dg = self.r('A')['diag']
+        self.assertEqual(sorted(dg['reads']), ['diag-bdc-d542', 'diag-bdc-e3b8'])
+        rows = {e['step']: e for e in dg['parked']}
+        c = self.truth['diagContact']
+        for step, bit in (('push', 0x10), ('pull', 0x20), ('left_full', 0x08), ('right_tip', 0x01)):
+            self.assertIn('%02X 00' % c[str(bit)], rows[step]['diag-bdc-e3b8'], step)
+        self.assertIn('01 00', rows['push']['diag-bdc-d542'])
+        self.assertEqual(rows['pull']['diag-bdc-d542'], ['00 00'])
+        self.assertEqual(self.r('B')['diag'], {'reads': {}, 'parked': []})
+
     def test_high_kept_with_objects(self):
         k = self.r('A')['kept_high']
         want = self.truth['sessions']['A']['keepHighWithObjects']

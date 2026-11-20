@@ -137,9 +137,11 @@ async function main() {
     ok(app.id === 'signal_probe' && app.title === 'Signal Probe' && app.loggingId === 'OASP' && /^\d+\.\d+\.\d+$/.test(app.version), 'app.json: id signal_probe, title, own loggingId OASP, version ' + app.version);
     ok(app.version === VERSION, 'app.json version = probe.js VERSION (' + VERSION + ')');
     // r1120 LN: + the language row ("lang", auto | uk | en), the last setting; the sixteen set rows as before
-    const setRows = app.settings.filter((s) => s.key !== 'lang'), langRow = app.settings.filter((s) => s.key === 'lang');
+    const setRows = app.settings.filter((s) => s.key !== 'lang' && s.key !== 'hbdiag'), langRow = app.settings.filter((s) => s.key === 'lang');     // beam HS: + hbdiag, not a set
+    const diagRow = app.settings.filter((s) => s.key === 'hbdiag');
+    ok(diagRow.length === 1 && diagRow[0].type === 'bool' && diagRow[0].default === false && app.settings[17] === diagRow[0], 'beam HS: the HB diagnostic reads have their own row (hbdiag) right after S18, bool, OFF by default');
     ok(setRows.length === 17 && setRows.every((s) => s.type === 'bool' && s.default === false), 'seventeen set settings, one per set (S1..S11, S13..S18), all bool and off by default');     // r1120 AC: + S17; beam HS: + S18
-    ok(app.settings.length === 18 && langRow.length === 1 && app.settings[17] === langRow[0] && langRow[0].type === 'choice' && langRow[0].default === 'auto', 'and the language row last (Мова / Language: auto by default)');
+    ok(app.settings.length === 19 && langRow.length === 1 && app.settings[18] === langRow[0] && langRow[0].type === 'choice' && langRow[0].default === 'auto', 'and the language row last (Мова / Language: auto by default)');
     ok(FIELDS.SETS.every((s, i) => app.settings[i].key === s.key && new RegExp('^' + s.id + ' ').test(app.settings[i].label)), 'each setting is named for its set');
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -151,12 +153,17 @@ async function main() {
     const EVSETS = ['S13', 'S14', 'S15', 'S16', 'S18'];     // beam HS: + S18 (the camera's light detection)
     const S13I = FIELDS.TABLE.filter((f) => f.flags === 'b').map((f) => f.iface);
     const evDecl = [];
-    Object.keys(sigs).forEach((i) => (sigs[i]._broadcasts || []).forEach((e) => evDecl.push(i + '.' + e)));
-    ok(Object.keys(sigs).filter((i) => sigs[i]._broadcasts).every((i) => S13I.indexOf(i) >= 0) && FIELDS.TABLE.filter((f) => f.flags === 'b').every((f) => EVSETS.indexOf(f.set) >= 0),
+    const DIAGI = Object.keys(FIELDS.DIAG_MANIFEST);     // beam HS: the diagnostic transport's reply broadcast, checked on its own below
+    Object.keys(sigs).filter((i) => DIAGI.indexOf(i) < 0).forEach((i) => (sigs[i]._broadcasts || []).forEach((e) => evDecl.push(i + '.' + e)));
+    ok(Object.keys(sigs).filter((i) => sigs[i]._broadcasts && DIAGI.indexOf(i) < 0).every((i) => S13I.indexOf(i) >= 0) && FIELDS.TABLE.filter((f) => f.flags === 'b').every((f) => EVSETS.indexOf(f.set) >= 0),
         'events (_broadcasts) only on the S13 / S14 / S15 / S16 / S18 interfaces (the lead\'s decision of 2026-11-18, the owner\'s requests of 2026-11-19, the Auto Beam round of 2026-11-20) (' + evDecl.length + ' events)');
     const withMethods = Object.keys(sigs).filter((i) => Object.keys(sigs[i]).some((k) => k === '_methods'));
-    ok(withMethods.length === 1 && withMethods[0] === TURNS.IFACE && JSON.stringify(sigs[TURNS.IFACE]._methods) === '["queryContent"]' && sigs[TURNS.IFACE]._instances === 'Main_Instance',
-        '_methods: only GuidanceEventList (Main_Instance) declares one, queryContent (car issues CT: the owner\'s approved read)');
+    // beam HS: + the diagnostic transport (InternalTasu.sendTasuRequest), the owner's decision of 2026-11-20: only through kit/runtime/readonly-diag.js
+    const TASU = 'com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu';
+    ok(JSON.stringify(FIELDS.DIAG_MANIFEST) === JSON.stringify({ [TASU]: { _instances: 'SystemFunctionsInternalTasuInst1', _methods: ['sendTasuRequest'], _broadcasts: ['sendTasuResponse'] } }) &&
+        JSON.stringify(sigs[TASU]) === JSON.stringify(FIELDS.DIAG_MANIFEST[TASU]), 'beam HS: the diagnostic transport is declared exactly as fields.js DIAG_MANIFEST says (sendTasuRequest, its reply broadcast), nothing more');
+    ok(withMethods.length === 2 && withMethods.indexOf(TURNS.IFACE) >= 0 && withMethods.indexOf(TASU) >= 0 && JSON.stringify(sigs[TURNS.IFACE]._methods) === '["queryContent"]' && sigs[TURNS.IFACE]._instances === 'Main_Instance',
+        '_methods: GuidanceEventList (Main_Instance) declares queryContent (car issues CT: the owner\'s approved read), and the diagnostic transport sendTasuRequest (beam HS, read only through readonly-diag); nothing else');
     const tableKeys = FIELDS.TABLE.filter((f) => f.flags !== 'b' && f.flags !== 'm').map((f) => f.iface + '.' + f.field).filter((k, i, a) => a.indexOf(k) === i).sort(), declKeys = decl.map((d) => d.split(':')[0]).sort();
     ok(JSON.stringify(tableKeys) === JSON.stringify(declKeys) && JSON.stringify(FIELDS.TABLE.filter((f) => f.flags === 'b').map((f) => f.iface + '.' + f.field).sort()) === JSON.stringify(evDecl.sort()), 'every field and event the table reads is declared, and nothing else is (' + tableKeys.length + ' distinct fields, ' + evDecl.length + ' events, ' + Object.keys(sigs).length + ' interfaces)');
     let r = spawnSync(process.execPath, [TOOL, 'check'], { encoding: 'utf8' });

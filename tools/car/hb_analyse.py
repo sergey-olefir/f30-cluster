@@ -646,6 +646,64 @@ def tracks_in(s, t0, t1, empty_status):
     return out
 
 
+SIGN_TAGS = ['cam-signs', 'cam-legacy2']
+TOWN_IN, TOWN_OUT = ('CITY_LIMIT_START_OF', 'CITY_LIMIT_START_END_OF'), ('CITY_LIMIT_END_OF',)
+
+
+def town_events(s):
+    """The town in / out from the camera's town signs (the owner navigates with CarPlay, so the map's built-up flag is absent): a
+    CITY_LIMIT_START_OF (or START_END_OF) sign = in, CITY_LIMIT_END_OF = out, each counted when it first shows after 5 s without it;
+    and the recognised limit crossing 50 km/h (TrafficSignRecognition presentClassLimitSpeed x 5) as a weaker cue.
+    [{t, kind: 'town_in' | 'town_out' | 'limit_50_or_less' | 'limit_over_50', src}] sorted by t; s.town_cache keeps it."""
+    if getattr(s, 'town_cache', None) is not None:
+        return s.town_cache
+    out = []
+    for tag in SIGN_TAGS:
+        f = s.f(tag)
+        if not f:
+            continue
+        last = {'in': -1e12, 'out': -1e12}
+        for t, row in zip(f.t, f.rows):
+            types = set(v for k, v in row.items() if k.endswith('.type') and isinstance(v, str))
+            for kind, names in (('in', TOWN_IN), ('out', TOWN_OUT)):
+                if types & set(names):
+                    if t - last[kind] > 5000:
+                        out.append({'t': t, 'kind': 'town_' + kind, 'src': tag})
+                    last[kind] = t
+    f = s.f('tsr')
+    if f:
+        ts, vs = f.col('presentClassLimitSpeed')
+        prev = None
+        for t, v in zip(ts, vs):
+            if not isinstance(v, (int, float)) or not 0 < v * 5 <= 300:
+                continue
+            town = v * 5 <= 50
+            if prev is not None and town != prev:
+                out.append({'t': t, 'kind': 'limit_50_or_less' if town else 'limit_over_50', 'src': 'tsr'})
+            prev = town
+    out.sort(key=lambda e: e['t'])
+    s.town_cache = out
+    return out
+
+
+def urban_at(s, t):
+    """The map's built-up flag if it came (BMW navigation), else the town signs: in after a town_in, out after a town_out, None before."""
+    f = s.f('ccp-builtup')
+    if f:
+        row, age = f.at(t)
+        if row is not None and row.get('isBuiltupArea') is not None:
+            return bool(row.get('isBuiltupArea'))
+    st = None
+    for e in town_events(s):
+        if e['t'] > t:
+            break
+        if e['kind'] == 'town_in':
+            st = True
+        elif e['kind'] == 'town_out':
+            st = False
+    return st
+
+
 def context_at(s, t):
     """Speed, brightness, wipers, the limit, the built-up flag, the vehicle ahead and the fallback objects at t (raw)."""
     def get(tag, col, max_age=5000):
@@ -664,7 +722,7 @@ def context_at(s, t):
     return {'speed_kmh': r3(speed_at(s, t)), 'brightness': get('hb-brightness', 'valueBrightnessEnvironment'), 'prefield': get('hb-prefield', 'valueBrightnessPrefield'),
             'ambient_lowbeam': get('hb-low-beam', 'ambientBrightnessLowBeam'), 'rain': get('hb-rain', 'intensityRain'), 'wiper_speed': get('hb-rain', 'speedWiper'),
             'wiper_blade': get('hb-wiper', 'positionWiperBlade'), 'limit_kmh': lim * 5 if isinstance(lim, (int, float)) and 0 < lim * 5 <= 300 else None,
-            'urban': (lambda v: None if v is None else bool(v))(get('ccp-builtup', 'isBuiltupArea', 600000)),
+            'urban': urban_at(s, t),
             'following': bool(fv_q == 'EVENT_DATA_AVAILABLE' and isinstance(fv_gap, (int, float)) and fv_gap > 0) if fv_q is not None else None,
             'ahead_lamps': lamps_ahead,
             'fallback': [{k: o.get(k) for k in ('src', 'cls', 'mov', 'lane', 'x', 'vx_abs', 'head', 'rear') if o.get(k) is not None} for o in (cam or [])]}
@@ -1009,7 +1067,6 @@ def frame_at(s, t, prev_t, high_src, periods, events, flash_max_ms, empty_status
     env, ages = {}, []
     for tag, key, fn, max_age in (('hb-brightness', 'brightness', lambda r: r.get('valueBrightnessEnvironment'), None),
                                   ('tsr', 'limit_kmh', lambda r: r.get('presentClassLimitSpeed') * 5 if isinstance(r.get('presentClassLimitSpeed'), (int, float)) and 0 < r.get('presentClassLimitSpeed') * 5 <= 300 else None, None),
-                                  ('ccp-builtup', 'urban', lambda r: None if r.get('isBuiltupArea') is None else bool(r.get('isBuiltupArea')), None),
                                   ('hb-rain', 'rain_raw', lambda r: r.get('intensityRain'), None),
                                   ('hb-rain', 'wiper_raw', lambda r: r.get('speedWiper'), None)):
         ff = s.f(tag)
@@ -1020,6 +1077,8 @@ def frame_at(s, t, prev_t, high_src, periods, events, flash_max_ms, empty_status
             continue
         env[key] = fn(row)
         ages.append(age)
+    if s.f('ccp-builtup') or town_events(s):
+        env['urban'] = urban_at(s, t)
     if env:
         env.setdefault('sun', None)
         env.setdefault('wiper', None)                  # the wiper's level mapping is not known yet: raw beside
@@ -1086,6 +1145,43 @@ def scenarios(s, out, res, flash_max_ms, empty_status, before_ms, after_ms):
     return [os.path.basename(p) for p in files]
 
 
+def diag_report(s, parked):
+    """The HB diagnostic reads (beam_diag.js, read only, while standing): per unit and identifier the replies, the refusals by NRC,
+    the distinct payloads; and in the parked check, the payloads of the stalk contacts (BDC E3B8) and the lamp functions (BDC D542)
+    during each hold: the ground truth for the stalk bits."""
+    out = {}
+    for tag in sorted(t for t in s.fields if t.startswith('diag-')):
+        f = s.fields[tag]
+        ok_rows = [r for r in f.rows if r.get('ok') == 1]
+        nrc = {}
+        for r in f.rows:
+            if r.get('ok') == 0:
+                k = '0x%02x' % int(r.get('nrc') or 0)
+                nrc[k] = nrc.get(k, 0) + 1
+        pay = {}
+        for r in ok_rows:
+            k = payload(r)
+            pay[k] = pay.get(k, 0) + 1
+        out[tag] = {'replies': len(ok_rows), 'refusals': nrc, 'payloads': pay}
+    rows = []
+    if parked:
+        for row in parked['rows']:
+            t0 = row['t_s'] * 1000
+            t1 = t0 + row['held_s'] * 1000
+            e = {'step': row['step'], 'bits': row['bits']}
+            for tag in ('diag-bdc-e3b8', 'diag-bdc-d542'):
+                f = s.f(tag)
+                if f:
+                    e[tag] = sorted(set(payload(r) for t, r in zip(f.t, f.rows) if t0 <= t <= t1 + 1000 and r.get('ok') == 1))
+            rows.append(e)
+    return {'reads': out, 'parked': rows}
+
+
+def payload(r):
+    n = int(r.get('n') or 0)
+    return ' '.join('%02X' % int(r.get('b%02d' % i, 0)) for i in range(min(n, 64)))
+
+
 # ---- one recording ---------------------------------------------------------------------------------------------------------------
 def analyse(s, a, tags):
     empty = set(a.empty_status or [])
@@ -1117,7 +1213,8 @@ def analyse(s, a, tags):
            'high_source': high_src, 'high_sources_seen': [t + '.' + c for t, c in HIGH_SOURCES if s.f(t)],
            'timeline': events, '_periods': [[p[0], p[1]] for p in periods],
            'counts': {k: sum(1 for e in events if e['kind'] == k and not e['parked']) for k in ('high_on', 'high_off', 'flash')},
-           'labelled': labelled, 'kept_high': kept}
+           'labelled': labelled, 'kept_high': kept,
+           'town': [{'t_s': r3(e['t'] / 1000.0), 'kind': e['kind'], 'src': e['src']} for e in town_events(s)], 'diag': diag_report(s, parked)}
     res['verdict'] = verdict_report(s, periods, events, fl, parked)
     res['decode'] = decode_helpers(s, labelled, events, holds, periods, fl, empty)
     res['stalk_holds'] = [{'t_s': r3(h['t0'] / 1000.0), 'held_s': r3((h['t1'] - h['t0']) / 1000.0), 'bits': '0x%02x' % h['main']} for h in holds]
@@ -1172,9 +1269,24 @@ def report_md(results):
             for i, row in enumerate(pc['rows']):
                 L.append('| %d | %s | %s | %s | %s |' % (i + 1, row['label'], row['bits'], row['held_s'], '; '.join('%s %s' % (c['member'], '->'.join(str(x) for x in c['path'])) for c in row['changes']) or '-'))
             L += ['', 'Push = %s, pull = %s, flash = %s. Members that follow the high beam: %s.' % (pc['push'], pc['pull'], pc['flash'], ', '.join(pc['highMembers']) or 'none found'), '']
+        dg = r['diag']
+        L += ['### The diagnostic reads (read only, standing)', '']
+        if not dg['reads']:
+            L += ['None in this recording (the checkbox was off, or the car was moving).', '']
+        else:
+            L += ['| Read | Replies | Refusals (NRC) | Payloads (data bytes after 62 <id>) |', '|---|---|---|---|']
+            for k, x in dg['reads'].items():
+                L.append('| %s | %d | %s | %s |' % (k, x['replies'], json.dumps(x['refusals'], sort_keys=True), '; '.join('%s (%d)' % kv for kv in sorted(x['payloads'].items())[:12])))
+            if dg['parked']:
+                L += ['', 'During the parked check (the stalk contacts by name are the ground truth for the bits):', '', '| Step | Bit | BDC E3B8 stalk contacts | BDC D542 lamp functions |', '|---|---|---|---|']
+                for e in dg['parked']:
+                    L.append('| %s | %s | %s | %s |' % (e['step'], e['bits'], ' / '.join(e.get('diag-bdc-e3b8', [])) or '-', ' / '.join(e.get('diag-bdc-d542', [])) or '-'))
+            L.append('')
         L += ['### The driver', '', 'High-beam state from: %s (members present: %s).' % (r['high_source'] or 'nothing', ', '.join(r['high_sources_seen']) or 'none'),
               'On the road: %d switch(es) to high, %d dip(s), %d flash(es).' % (r['counts']['high_on'], r['counts']['high_off'], r['counts']['flash']), '']
-        L += ['| t s | Action | Parked check |', '|---|---|---|'] + ['| %s | %s | %s |' % (fmt(e['t'] / 1000.0), e['kind'], 'yes' if e['parked'] else '') for e in r['timeline']] + ['']
+        marks = [(e['t'], e['kind'], 'yes' if e['parked'] else '') for e in r['timeline']] + [(x['t_s'] * 1000, x['kind'] + ' (' + x['src'] + ')', '') for x in r['town']]
+        L += ['The town in / out comes from the camera\'s town signs (CITY_LIMIT_*) and the recognised limit crossing 50 km/h.', '',
+              '| t s | Action / town | Parked check |', '|---|---|---|'] + ['| %s | %s | %s |' % (fmt(t / 1000.0), k, pk) for t, k, pk in sorted(marks, key=lambda m: m[0])] + ['']
         v = r['verdict']
         L += ['### The camera\'s verdict against the driver', '']
         if not v['present']:

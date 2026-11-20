@@ -35,6 +35,7 @@ const { Recorder } = require(path.join(ROOT, 'apps', 'signal_probe', 'recorder.j
 const BITS = { push: 0x10, pull: 0x20, leftFull: 0x08, rightFull: 0x02, leftTip: 0x04, rightTip: 0x01 };
 const CLS = { head: 1, tail: 2, street: 3 };
 const STATUS_VALID = 1;
+const DIAG_CONTACT = { 0x10: 0x04, 0x20: 0x08, 0x08: 0x01, 0x02: 0x02, 0x04: 0x10, 0x01: 0x20 };     // stalk bit -> an invented E3B8 byte
 const ALLOW = 1, DENY = 0;
 const LAMP_DELAY = 0.15;                          // s from the stalk to the lamp's command
 const CAM_LEAD_DIP = 1.2, CAM_LEAD_HIGH = 1.5;    // s the camera's verdict changes before the driver
@@ -121,7 +122,7 @@ function sessionA(extraMin) {
     for (let t = D + 150; t < D + 170; t += 4) for (let s = 3; s <= 4; s++) objects.push({ slot: s, id: (id++) % 15, cls: CLS.street, t0: t + (s - 3) * 2, t1: t + (s - 3) * 2 + 4, dist: [90, 25], x: [140, 200], y: 160, w: [1, 4], what: 'street light' });
     for (let t = D + 199; t < D + 260; t += 4) for (let s = 3; s <= 6; s++) objects.push({ slot: s, id: (id++) % 15, cls: CLS.street, t0: t + (s - 3), t1: t + (s - 3) + 4, dist: [80, 20], x: [150, 210], y: 165, w: [1, 4], what: 'town light' });
     const end = D + 330 + 60 * (extraMin || 0);
-    return { name: 'A', mark: P0 - 2, parked: P0, drive: D, end, camera: true, actions, verdict, objects, town: [D + 199, D + 260], following: [D + 80, D + 120],
+    return { name: 'A', mark: P0 - 2, parked: P0, drive: D, end, camera: true, noMap: true, diag: true, actions, verdict, objects, town: [D + 199, D + 260], following: [D + 80, D + 120],
         townLimitClass: 10, roadLimitClass: 18, brightness: { dark: 5, town: 150 }, oncomingFallback: null,
         keepHighWithObjects: [[D + 150, D + 172]] };
 }
@@ -188,6 +189,15 @@ function values(W, t, k, r) {
             displayTextMessage: 0, unitOfMeasurementSpeedLimit: 0, displayTextMessageNpi: 0, statusDataMatchingCameraADAS: 0, statusStreetTyp: town ? 1 : 2, evaluationStreetTyp: 0, displaySupplementalSign: 0,
             triggerPresentClassLimitSpeed: 0, displaySpeedNPIDistance: 0, controlSLIWarning: 0 },
         'ccp-builtup': { isBuiltupArea: town },
+        'cam-signs': (() => {
+            // the camera's sign stream: the town sign for 3 s as the car passes it (in at the town's start, out at its end), else a limit sign
+            const at = (x) => s.town && t >= x && t < x + 3;
+            const type = s.town && at(s.town[0]) ? 'CITY_LIMIT_START_OF' : s.town && at(s.town[1]) ? 'CITY_LIMIT_END_OF' : 'SPEED_LIMIT';
+            const sign = { timestamp: 0, value: type === 'SPEED_LIMIT' ? (town ? 50 : 90) : 0, type, trafficSignForm: 'UNKNOWN', position: { left: false, right: true, overhead: false },
+                firstSupplementalType: 'NONE', secondSupplementalType: 'NONE', additionalInfo: 'NONE', variable: false, location: { locationInvalidFlags: 0, x: 30, y: -4, z: 2 }, timestampSec: 0 };
+            return { timestamp: { seconds: 0, nanoseconds: 0 }, eventDataQualifier: 'EVENT_DATA_AVAILABLE', extendedQualifier: 'NORMAL_OPERATION_MODE',
+                trafficSignRecognition: { version: 1, visibilityCondition: 'GOOD', numberSigns: 1, speedLimitUnit: 'KMH' }, trafficSign: [sign], trafficSignRecognitionQuality: [] };
+        })(),
         'hb-objlist': { eventDataQualifier: 'KEVENTDATAQUALIFIER_EVENTDATAAVAILABLE', extendedQualifier: 'KOBJECTLISTEXTENDEDQUALIFIER_NORMALOPERATION',
             timestamp: { seconds: Math.floor(t), nanoseconds: Math.round((t % 1) * 1e9), sync_state: 'KSTDTIMESTAMPSYNCSTATE_INSYNC' }, numberOfObjects: camList.length,
             objectListSmall: camList.map((c) => ({ summary: { id: 1000 + c.id, age: 5, status_measurement: 'KMEASUREMENTSTATUS_MEASURED', status_movement: 'KMOVEMENTSTATUS_MOVED' },
@@ -226,13 +236,17 @@ function writeSession(W, outDir, wall, seed) {
     // periodic sources: [tag, hz, the camera's?]
     const periodic = [['hb-control', HZ.control, true], ['hb-meid1', HZ.meid, true], ['hb-meid2', HZ.meid, true], ['hb-lamps', HZ.lamps], ['brake-light', HZ.lamp1], ['hb-low-beam', HZ.low],
         ['hb-brightness', HZ.brightness], ['hb-prefield', HZ.brightness], ['hb-wiper', HZ.wiper], ['hb-rain', HZ.rain], ['hb-indicators', HZ.indicators], ['car-speed2', HZ.speed], ['yaw-rate', HZ.yaw],
-        ['steering', HZ.steering], ['gearbox-status', HZ.gear], ['external-display', HZ.temp], ['tsr', HZ.tsr], ['front-vehicle', HZ.front], ['cam-objects', HZ.cam], ['cam-position', HZ.cam], ['hb-objlist', HZ.cam], ['gap-ahead', HZ.gap],
+        ['steering', HZ.steering], ['gearbox-status', HZ.gear], ['external-display', HZ.temp], ['tsr', HZ.tsr], ['cam-signs', HZ.tsr], ['front-vehicle', HZ.front], ['cam-objects', HZ.cam], ['cam-position', HZ.cam], ['hb-objlist', HZ.cam], ['gap-ahead', HZ.gap],
         ['dimmer', HZ.dimmer], ['indicate', HZ.indicate]];
     for (let n = 1; n <= 15; n++) periodic.push(['hb-obj' + n, HZ.obj, true, n]);
     const plan = periodic.filter((p) => (s.camera || !p[2]) && !(s.noLamps2 && p[0] === 'hb-lamps')).map((p, i) => ({ f: T(p[0]), tag: p[0], hz: p[1], slot: p[3] || 0, next: 0.003 * (i % 30), k: 0 }));
     // on-change sources: the stalk (both fields), the head unit's lamp status, the switches, the built-up flag
-    const onChange = ['stalk', 'stalk-complete', 'lights', 'hb-switch', 'hb-lightswitch', 'hb-fog-front', 'hb-fog-rear', 'ccp-builtup'].filter((tag) => !(s.noLights && tag === 'lights')).map((tag) => ({ f: T(tag), tag, last: null }));
+    const onChange = ['stalk', 'stalk-complete', 'lights', 'hb-switch', 'hb-lightswitch', 'hb-fog-front', 'hb-fog-rear', 'ccp-builtup'].filter((tag) => !(s.noLights && tag === 'lights') && !(s.noMap && tag === 'ccp-builtup')).map((tag) => ({ f: T(tag), tag, last: null }));
     const marks = s.mark !== null ? [s.mark] : [];
+    // the read-only diagnostic reads while standing (beam_diag.js writes them so): BDC E3B8 (stalk contacts) and D542 (lamp
+    // functions) alternating, one a second; INVENTED payloads: E3B8 byte 0 = the contact bits of DIAG_CONTACT, D542 byte 0 = 1 high on
+    const dE3 = { tag: 'diag-bdc-e3b8', iface: 'uds.BDC', field: 'E3B8', p: 'P27' }, dD5 = { tag: 'diag-bdc-d542', iface: 'uds.BDC', field: 'D542', p: 'P27' };
+    let nextDiag = s.diag ? 0.5 : Infinity, diagK = 0;
     const DT = 0.005;
     let n = 0;
     for (let t = 0; t <= s.end; t = Math.round((t + DT) * 1000) / 1000) {
@@ -249,6 +263,11 @@ function writeSession(W, outDir, wall, seed) {
             else if (s.camera === 'defaults' && DEFAULTS[p.tag]) R.sample({ f: p.f }, DEFAULTS[p.tag]);
             else R.sample({ f: p.f }, v[p.tag]);
         });
+        if (t >= nextDiag && W.speedAt(t) < 0.5) {
+            nextDiag += 1;
+            if (diagK++ % 2 === 0) R.sample({ f: dE3 }, { ok: 1, nrc: -1, n: 2, b00: DIAG_CONTACT[W.stalkAt(t)] || 0, b01: 0 });
+            else R.sample({ f: dD5 }, { ok: 1, nrc: -1, n: 2, b00: W.highAt(t) ? 1 : 0, b01: 0 });
+        }
         onChange.forEach((c) => {
             const v = get()[c.tag], key = JSON.stringify(v);
             if (key === c.last) return;
@@ -269,7 +288,7 @@ function main(argv) {
     fs.mkdirSync(recDir, { recursive: true });
     const truth = { _about: 'hb_synth.js: INVENTED numbers for testing tools/car/hb_analyse.py; not car facts', seed,
         encodings: { classes: CLS, statusValid: STATUS_VALID, controlHighBeam: { allow: ALLOW, deny: DENY }, lampDelay_s: LAMP_DELAY },
-        stalk: BITS, highMembers: ['hb-lamps.controlFunctionMainBeam', 'lights.statusMainBeam_headlightFlasher'],
+        stalk: BITS, diagContact: DIAG_CONTACT, highMembers: ['hb-lamps.controlFunctionMainBeam', 'lights.statusMainBeam_headlightFlasher'],
         cameraLead_s: { high_off: CAM_LEAD_DIP, high_on: CAM_LEAD_HIGH },
         // the analysis times a switch by the lamp's command (LAMP_DELAY after the stalk), so the lead it measures is this
         expectedLead_s: { high_off: CAM_LEAD_DIP + LAMP_DELAY, high_on: CAM_LEAD_HIGH + LAMP_DELAY }, sessions: {} };
