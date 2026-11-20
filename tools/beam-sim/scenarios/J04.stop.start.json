@@ -1,0 +1,57 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "J04.stop.start",
+ "family": "J",
+ "name": "A stop and a start",
+ "purpose": "stopping at a junction: standby, then high again after the start",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     80
+    ],
+    [
+     20,
+     80
+    ],
+    [
+     28,
+     0
+    ],
+    [
+     36,
+     0
+    ],
+    [
+     46,
+     80
+    ]
+   ]
+  },
+  "users": []
+ },
+ "expect": {
+  "mustReason": [
+   "slow"
+  ],
+  "finalWant": "high",
+  "maxSwitches": 3
+ }
+}

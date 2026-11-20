@@ -1,0 +1,75 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "H10.verdict.follow",
+ "family": "H",
+ "name": "The camera's verdict, followed",
+ "purpose": "the camera's own verdict is present and followed: it may only add dips",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "config": {
+  "verdict": {
+   "use": "follow"
+  }
+ },
+ "sim": {
+  "sensor": {
+   "verdict": "present"
+  }
+ },
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "c1",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2200,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "c2",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2700,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "mustReason": [
+   "camera_verdict"
+  ],
+  "maxGlareW": 0.3
+ }
+}

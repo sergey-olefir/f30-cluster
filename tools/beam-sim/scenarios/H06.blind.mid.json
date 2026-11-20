@@ -1,0 +1,60 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "H06.blind.mid",
+ "family": "H",
+ "name": "The camera goes blind",
+ "purpose": "blind from 30 s (reported by the object list): low at once",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "c1",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 3200,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   }
+  ],
+  "faults": [
+   {
+    "kind": "blind",
+    "t0_s": 30,
+    "reported": true
+   }
+  ]
+ },
+ "expect": {
+  "mustReason": [
+   "camera"
+  ],
+  "finalWant": "low"
+ }
+}

@@ -1,0 +1,51 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "J01.dusk",
+ "family": "J",
+ "name": "Dusk",
+ "purpose": "brightness falls slowly through the threshold: high beam only once it is dark and has stayed dark",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "env": {
+   "brightness_lux": [
+    [
+     0,
+     300
+    ],
+    [
+     50,
+     2
+    ]
+   ],
+   "sun": "night"
+  }
+ },
+ "expect": {
+  "maxSwitches": 1,
+  "finalWant": "high"
+ }
+}

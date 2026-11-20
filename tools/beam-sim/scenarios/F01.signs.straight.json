@@ -1,0 +1,100 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "F01.signs.straight",
+ "family": "F",
+ "name": "Reflective signs on a straight",
+ "purpose": "signs light up in our own beam; they must not keep dipping it",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "statics": [
+   {
+    "kind": "sign",
+    "s_m": 400,
+    "d_m": -5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 520,
+    "d_m": -5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 640,
+    "d_m": -5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 760,
+    "d_m": -5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 880,
+    "d_m": -5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 1000,
+    "d_m": -5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 1120,
+    "d_m": -5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 1240,
+    "d_m": -5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 1360,
+    "d_m": -5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 1480,
+    "d_m": -5,
+    "height_m": 2
+   }
+  ]
+ },
+ "expect": {
+  "maxSwitches": 6,
+  "minHighFrac": 0.8
+ }
+}

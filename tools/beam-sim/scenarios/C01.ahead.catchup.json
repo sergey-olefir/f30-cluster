@@ -1,0 +1,54 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "C01.ahead.catchup",
+ "family": "C",
+ "name": "Catching up with a car",
+ "purpose": "a slower car 700 m ahead: dip when its tail lamps come within the zone, stay low behind it",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 70,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "a1",
+    "kind": "car",
+    "dir": 1,
+    "ahead_m": 700,
+    "speed": [
+     [
+      0,
+      60
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "maxGlareW": 0.5,
+  "mustReason": [
+   "preceding"
+  ],
+  "maxSwitches": 3
+ }
+}

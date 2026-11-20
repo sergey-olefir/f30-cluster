@@ -1,0 +1,55 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "B01.oncoming.single",
+ "family": "B",
+ "name": "One oncoming car",
+ "purpose": "a single oncoming car on a straight: dipped before it is inside the high beam's reach",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "c1",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2200,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "maxGlareW": 0.1,
+  "mustReason": [
+   "oncoming"
+  ],
+  "maxSwitches": 3,
+  "minHighFrac": 0.9
+ }
+}

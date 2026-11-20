@@ -1,0 +1,52 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "G04.cyclist.unlit",
+ "family": "G",
+ "name": "An unlit cyclist ahead",
+ "purpose": "a cyclist without lamps is invisible to a light camera: glare is expected (a limit, documented)",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     70
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "b1",
+    "kind": "bike",
+    "dir": 1,
+    "ahead_m": 700,
+    "speed": [
+     [
+      0,
+      18
+     ]
+    ],
+    "lamps": "off",
+    "d_m": -3
+   }
+  ]
+ },
+ "expect": {
+  "maxSwitches": 1
+ }
+}

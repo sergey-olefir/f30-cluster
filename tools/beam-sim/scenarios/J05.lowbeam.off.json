@@ -1,0 +1,42 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "J05.lowbeam.off",
+ "family": "J",
+ "name": "Headlights off",
+ "purpose": "without dipped beam there is no high beam advice",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "env": {
+   "lowBeam": false
+  }
+ },
+ "expect": {
+  "neverState": [
+   "HIGH"
+  ]
+ }
+}

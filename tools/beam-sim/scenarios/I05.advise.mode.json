@@ -1,0 +1,80 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "I05.advise.mode",
+ "family": "I",
+ "name": "Advise mode against the reference driver",
+ "purpose": "advise mode: the reference driver owns the lamps; our advice agrees with it most of the time",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 90,
+ "seed": 1,
+ "config": {
+  "mode": "advise"
+ },
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "c1",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2200,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "c2",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 3300,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "a1",
+    "kind": "car",
+    "dir": 1,
+    "ahead_m": 1500,
+    "speed": [
+     [
+      0,
+      50
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "neverState": [
+   "OVERRIDE"
+  ],
+  "minAgreeRef": 0.8
+ }
+}

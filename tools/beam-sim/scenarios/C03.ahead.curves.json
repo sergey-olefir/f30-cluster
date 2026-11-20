@@ -1,0 +1,67 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "C03.ahead.curves",
+ "family": "C",
+ "name": "Following through curves",
+ "purpose": "following a car at about 100 m through curves: never high on it",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 500
+    },
+    {
+     "len_m": 300,
+     "curve_r": 300
+    },
+    {
+     "len_m": 200
+    },
+    {
+     "len_m": 300,
+     "curve_r": -300
+    },
+    {
+     "len_m": 3000
+    }
+   ],
+   "sight_m": 10
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     70
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "a1",
+    "kind": "car",
+    "dir": 1,
+    "ahead_m": 100,
+    "speed": [
+     [
+      0,
+      70
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "maxGlareW": 0.5,
+  "neverState": [
+   "HIGH"
+  ]
+ }
+}

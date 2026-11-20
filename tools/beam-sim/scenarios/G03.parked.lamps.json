@@ -1,0 +1,47 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "G03.parked.lamps",
+ "family": "G",
+ "name": "A parked car with its lamps on",
+ "purpose": "a parked car faces us with its lamps on: dip, then high once past it",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "p1",
+    "kind": "parked",
+    "dir": 0,
+    "s0_m": 1100,
+    "d_m": 5.2,
+    "faces": 1
+   }
+  ]
+ },
+ "expect": {
+  "maxSwitches": 3,
+  "finalWant": "high"
+ }
+}

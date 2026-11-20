@@ -1,0 +1,135 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "K03.oncoming.platoon",
+ "family": "K",
+ "name": "An irregular oncoming platoon",
+ "purpose": "eight oncoming cars at 4–20 s gaps: a bounded switching rate",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 100,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "c1",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2000,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "c2",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2250,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "c3",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2800,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "c4",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2950,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "c5",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 3600,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "c6",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 3800,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "c7",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 4500,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "c8",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 4650,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "maxGlareW": 0.5,
+  "maxSwitches": 9
+ }
+}

@@ -74,7 +74,7 @@ const SCHEMA = [
     ['scale.h.gain', 'num', 0.02, 'deg/raw', 0, 1, 0.005, A, 'assumption', 'angular height per raw step'],
     ['scale.dist.gain', 'num', 4, 'm/raw', 0.1, 50, 0.1, A, 'assumption', 'Distance is 7 bits (0..126): 4 m/step reaches 504 m'],
     ['scale.dist.offset', 'num', 0, 'm', -100, 100, 1, A, 'assumption', 'distance offset'],
-    ['scale.dist.max', 'num', 500, 'm', 50, 2000, 10, A, 'assumption', 'a distance at or beyond this means "far, unknown"'],
+    ['scale.dist.max', 'num', 500, 'm', 50, 2000, 10, A, 'assumption', 'a distance at or beyond this is "far" (clipped here, outside every zone)'],
     ['scale.ang.center', 'num', 127, 'raw', 0, 255, 1, A, 'assumption', 'AngularSpeed at zero'],
     ['scale.ang.gain', 'num', 0.25, 'deg/s/raw', -5, 5, 0.05, A, 'assumption', 'angular speed per raw step, + = moving right'],
     ['scale.none.x', 'num', 255, 'raw', 0, 65535, 1, false, 'catalogue', 'XPosition default = no object'],
@@ -109,6 +109,7 @@ const SCHEMA = [
     ['zone.other_m', 'num', 200, 'm', 0, 600, 10, A, 'tuning', 'an unclassified light dips within this'],
     ['zone.core_deg', 'num', 4, 'deg', 0, 30, 0.5, A, 'tuning', 'within this azimuth the zone has its full length'],
     ['zone.edge_deg', 'num', 18, 'deg', 1, 45, 0.5, A, 'tuning', 'beyond this azimuth nothing dips (the high beam\'s useful spread)'],
+    ['zone.returnMargin', 'num', 1.3, 'x', 1, 3, 0.05, A, 'tuning', 'while low, a light holds the dip out to this times the zone (distance hysteresis: no flicker between two oncoming cars)'],
     ['zone.noDist', 'enum', 'in', '', null, null, null, false, 'brief', 'a light without a distance: in the zone (fail-safe) or out', ['in', 'out']],
     ['zone.reflector', 'enum', 'ignore', '', null, null, null, A, 'tuning', 'reflectors (signs, posts): ignore, or treat as an unclassified light', ['ignore', 'other']],
 
@@ -304,12 +305,13 @@ function create(partial) {
         const strong = isNum(o.status) && inList(cfg.status.strong, o.status);
         const az = isNum(o.x) && o.x !== sc.none.x ? (o.x - sc.x.center) * sc.x.gain : null;
         const el = isNum(o.y) && o.y !== 255 ? (o.y - sc.y.center) * sc.y.gain : null;
-        let dist = null;
+        let dist = null, far = false;
         if (isNum(o.dist) && o.dist !== sc.none.dist) {
             dist = o.dist * sc.dist.gain + sc.dist.offset;
-            if (dist >= sc.dist.max || dist < 0) dist = null;
+            if (dist < 0) dist = null;                                       // nonsense: unknown (zone.noDist decides)
+            else if (dist >= sc.dist.max) { dist = sc.dist.max; far = true; }   // the top of the scale: far, not unknown
         }
-        return { id: isNum(o.id) ? o.id : -1, kind: kind, strong: strong, az_deg: az, el_deg: el, dist_m: dist, src: 'light' };
+        return { id: isNum(o.id) ? o.id : -1, kind: kind, strong: strong, az_deg: az, el_deg: el, dist_m: dist, far: far, src: 'light' };
     }
 
     /** One fallback object -> interpreted as a light-like source. */
@@ -345,9 +347,9 @@ function create(partial) {
         const f = z.edge_deg > z.core_deg ? (a - z.core_deg) / (z.edge_deg - z.core_deg) : 1;
         return full + (side - full) * f;
     }
-    function inZone(L) {
-        const len = zoneLen(L.kind, L.az_deg);
-        if (len <= 0) return false;
+    function inZone(L, margin) {
+        const len = zoneLen(L.kind, L.az_deg) * margin;
+        if (len <= 0 || L.far) return false;                                 // beyond the scale's top: outside every zone
         if (L.dist_m === null) return cfg.zone.noDist === 'in';
         return L.dist_m <= len;
     }
@@ -491,6 +493,7 @@ function create(partial) {
         S.tracks = tracks;
         let best = null;
         const lightsOut = [];
+        const margin = S.state === 'HIGH' ? 1 : cfg.zone.returnMargin;      // the zone is longer while low (hysteresis)
         seen.forEach((L) => {
             counts[L.kind]++;
             if (L.kind === 'street') {
@@ -499,7 +502,7 @@ function create(partial) {
             } else if (L.kind === 'reflector' && cfg.zone.reflector === 'ignore') {
                 L.inZone = false;
             } else {
-                L.inZone = inZone(L);
+                L.inZone = inZone(L, margin);
                 const need = 1 + (L.strong ? cfg.confirm.strongFrames : cfg.confirm.weakFrames);
                 if (L.inZone && L.frames >= need) {
                     const reason = KIND_REASON[L.kind] || 'light';

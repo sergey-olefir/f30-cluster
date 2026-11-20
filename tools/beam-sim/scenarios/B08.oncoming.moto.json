@@ -1,0 +1,54 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "B08.oncoming.moto",
+ "family": "B",
+ "name": "An oncoming motorcycle",
+ "purpose": "one narrow lamp is an oncoming vehicle too",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "m1",
+    "kind": "moto",
+    "dir": -1,
+    "s0_m": 2200,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "maxGlareW": 0.3,
+  "mustReason": [
+   "oncoming"
+  ],
+  "maxSwitches": 3
+ }
+}

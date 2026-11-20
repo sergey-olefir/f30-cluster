@@ -185,7 +185,7 @@ sources are in `docs/highbeam/HA-REPORT.md`; the table here is the **shape** (de
 | `objects` | `use: 'off' \| 'fallback' \| 'both'`, `qualOk: [raw…]`, `qualReduced: [raw…]`, `reducedMeans: 'camera' \| 'ok'`, `oncomingMargin_kmh`. A present `objects.qual` outside both lists = camera blind |
 | `objScale` | `x: { gain, offset }`, `y: { gain, offset }`, `vx: { gain, offset }` |
 | `objClasses` | `{ '<raw cls>': 'car' \| 'truck' \| 'moto' \| 'bike' \| 'ped' \| 'other' }` |
-| `zone` | `head_m`, `headSide_m`, `tail_m`, `tailSide_m`, `bike_m`, `other_m`, `core_deg`, `edge_deg`, `noDist` (`'in'` \| `'out'`), `reflector` (`'ignore'` \| `'other'`) |
+| `zone` | `head_m`, `headSide_m`, `tail_m`, `tailSide_m`, `bike_m`, `other_m`, `core_deg`, `edge_deg`, `returnMargin` (while low a light holds the dip out to this × the zone), `noDist` (`'in'` \| `'out'`), `reflector` (`'ignore'` \| `'other'`) |
 | `confirm` | `weakFrames` (extra consecutive frames a weak object needs), `strongFrames` |
 | `street` | `window_ms`, `count`, `minEl_deg` |
 | `dark` | `on_lux`, `off_lux`, `onHold_ms`, `offHold_ms`, `useSun` (`'agree'` \| `'fallback'` \| `'off'`) |

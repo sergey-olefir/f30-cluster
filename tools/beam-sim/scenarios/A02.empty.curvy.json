@@ -1,0 +1,59 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "A02.empty.curvy",
+ "family": "A",
+ "name": "Empty winding road",
+ "purpose": "curves alone delay nothing into a dip: high beam stays on an empty winding road",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 300
+    },
+    {
+     "len_m": 250,
+     "curve_r": 250
+    },
+    {
+     "len_m": 150
+    },
+    {
+     "len_m": 250,
+     "curve_r": -250
+    },
+    {
+     "len_m": 200
+    },
+    {
+     "len_m": 300,
+     "curve_r": 300
+    },
+    {
+     "len_m": 2000
+    }
+   ],
+   "sight_m": 8
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     80
+    ]
+   ]
+  },
+  "users": []
+ },
+ "expect": {
+  "minHighFrac": 0.95,
+  "maxSwitches": 1
+ }
+}

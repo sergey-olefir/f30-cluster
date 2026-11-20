@@ -1,0 +1,76 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "E01.town.entry_exit",
+ "family": "E",
+ "name": "Town entry and exit",
+ "purpose": "a lit town with a 50 km/h limit: standby inside, high beam again after the exit",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 120,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ],
+    [
+     36,
+     90
+    ],
+    [
+     42,
+     50
+    ],
+    [
+     84,
+     50
+    ],
+    [
+     92,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "lit": [
+   {
+    "s0_m": 950,
+    "s1_m": 1650,
+    "spacing_m": 35,
+    "side": 1,
+    "height_m": 8
+   }
+  ],
+  "env": {
+   "towns": [
+    {
+     "s0_m": 1000,
+     "s1_m": 1600,
+     "limit_kmh": 50
+    }
+   ]
+  }
+ },
+ "expect": {
+  "mustReason": [
+   "town"
+  ],
+  "minHighFrac": 0.9,
+  "maxSwitches": 4,
+  "finalWant": "high"
+ }
+}

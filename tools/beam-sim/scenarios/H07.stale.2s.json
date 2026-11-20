@@ -1,0 +1,48 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "H07.stale.2s",
+ "family": "H",
+ "name": "Stale data for two seconds",
+ "purpose": "the light stream stops for 2 s: no data, low, then high again after a pause",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "faults": [
+   {
+    "kind": "stale",
+    "t0_s": 25,
+    "t1_s": 27
+   }
+  ]
+ },
+ "expect": {
+  "mustReason": [
+   "nodata"
+  ],
+  "maxSwitches": 3,
+  "finalWant": "high"
+ }
+}

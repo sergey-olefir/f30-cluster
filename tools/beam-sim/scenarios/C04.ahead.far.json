@@ -1,0 +1,53 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "C04.ahead.far",
+ "family": "C",
+ "name": "A car far ahead",
+ "purpose": "a car holds 350 m ahead on a straight: its mirrors are out of reach, high beam may stay",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "a1",
+    "kind": "car",
+    "dir": 1,
+    "ahead_m": 350,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "minHighFrac": 0.95,
+  "neverReason": [
+   "preceding"
+  ]
+ }
+}
