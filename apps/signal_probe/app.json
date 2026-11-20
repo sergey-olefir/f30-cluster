@@ -39,9 +39,11 @@
     "de.bmw.infotainment.vehicle.Vehicle2": {
       "_instances": "1",
       "statusCarSpeed2": "rs",
+      "statusConfigLM2": "rs",
       "statusDimmer": "rs",
       "statusDisplayKombi": "rs",
       "statusDisplayedCCMessage": "rs",
+      "statusExteriorLightDynamic": "s",
       "statusLightStatus": "rs",
       "statusOilDipstick2": "rs",
       "statusZVStatus": "rs"
@@ -93,10 +95,12 @@
     },
     "de.bmw.infrastructure.EnvironmentalInformation": {
       "_instances": "1",
+      "ExteriorTemperature": "s",
       "UnitBN2020": "rs"
     },
     "de.bmw.infotainment.vehicle.Vehicle": {
       "_instances": "1",
+      "statusDayNightChangeOver": "rs",
       "statusNewCurrentUnitsStatusExt": "rs"
     },
     "de.bmw.infotainment.vehicle.CDS": {
@@ -356,7 +360,8 @@
       "statusInjectionVolume": "rs",
       "statusLateralAccelerationMassCenter": "rs",
       "statusLongitudinalAccelerationMassCenter": "rs",
-      "statusSeatOccupancy": "rs"
+      "statusSeatOccupancy": "rs",
+      "statusYawVelocityVehicle": "rs"
     },
     "de.bmw.infotainment.drivingexcitement.FES": {
       "_instances": "1",
@@ -416,7 +421,10 @@
       "_broadcasts": [
         "builtupAreaFlag",
         "effectiveSpeedLimit",
+        "roadClass",
         "speedLimitUnit",
+        "trafficSide",
+        "urbanFlag",
         "variableSpeedLimitSign"
       ]
     },
@@ -673,6 +681,16 @@
       "foglightFront": "rs",
       "foglightRear": "rs",
       "mainLightswitchState": "rs"
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraObjectlist": {
+      "_instances": "1",
+      "_broadcasts": [
+        "objectlistTCP"
+      ]
+    },
+    "de.bmw.environmentalmodel.environmentalconditions.Weather": {
+      "_instances": "1",
+      "RecognitionWeather": "s"
     }
   },
   "screens": [

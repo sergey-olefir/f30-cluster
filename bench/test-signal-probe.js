@@ -38,7 +38,7 @@ const FMT = require(path.join(APP_DIR, 'format.js'));
 const { Probe, VERSION, LOG_FORMAT } = require(path.join(APP_DIR, 'probe.js'));
 const TURNS = require(path.join(ROOT, 'shared', 'carplay_turns.js'));
 const FX = require('./carplay-turns-fixture');
-const NTABLE = 296;               // fields.js entries (S16 next-turn, car issues CT: + 1; cruise RC: + 13 S14 fields; r1120 AC: + S17's steering; beam HS: + 31 of S18)
+const NTABLE = 306;               // fields.js entries (S16 next-turn, car issues CT: + 1; cruise RC: + 13 S14 fields; r1120 AC: + S17's steering; beam HS: + 41 of S18)
 const VECTORS = JSON.parse(fs.readFileSync(path.join(__dirname, 'signal-probe-vectors.json'), 'utf8'));
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'signal-probe-'));
 const PORT = Number(process.env.BENCH_PORT) || 8502;
@@ -355,7 +355,7 @@ async function main() {
             ['canary_lower', 'Canary', 'Main', 'Event street', 'Modelstreet', 'Event_'].forEach((k) => { if (re.test(k)) enumBad.push(f.tag + ' lets "' + k + '" through'); });
         });
         ok(named.length === 1 && enumBad.length === 0, 'a tree\'s own enum-name pattern (' + named.map((f) => f.tag).join(', ') + ') matches every enum name of its type in the catalogue and no free text' + (enumBad.length ? ': ' + enumBad.slice(0, 5).join('; ') : ''));
-        ok(trees.length === 45 && texts.length === 0, 'the ' + trees.length + ' whole values (tree) have no text member in the catalogue (a member they skip aside: the fused list\'s frame name), so an upper-case string is an enum name' + (texts.length ? ': ' + texts.join(', ') : ''));     // cruise RC: 13 S14 fields (pedals, brake, wheels, speeds, grade)
+        ok(trees.length === 46 && texts.length === 0, 'the ' + trees.length + ' whole values (tree) have no text member in the catalogue (a member they skip aside: the fused list\'s frame name), so an upper-case string is an enum name' + (texts.length ? ': ' + texts.join(', ') : ''));     // cruise RC: 13 S14 fields (pedals, brake, wheels, speeds, grade)
         ok(bad.length === 0, 'the table against the catalogue\'s types (' + nCols + ' columns): no text member is read as a number, enum or bool, and every path exists' + (bad.length ? '\n    ' + bad.slice(0, 12).join('\n    ') : ''));
     } else console.log('  skip: the catalogue is not here');
 
@@ -366,8 +366,8 @@ async function main() {
     const a = mk({});
     a.pr.setSets(FIELDS.SETS.map((s) => s.id), false);
     await settleOf(a);
-    ok(a.lines.some((l) => /^probe: sets on=S1\+S2\+S3\+S4\+S5\+S6\+S7\+S8\+S9\+S10\+S11\+S13\+S14\+S15\+S16\+S17\+S18 changed=\+S1,\+S2,\+S3,\+S4,\+S5,\+S6,\+S7,\+S8,\+S9,\+S10,\+S11,\+S13,\+S14,\+S15,\+S16,\+S17,\+S18 fields=296 \(first set on\)$/.test(l)), 'all seventeen sets on: the log says so');     // r1120 AC: + S17; beam HS: + S18
-    ok(a.signals.count('watch') === FIELDS.interfaces().reduce((n, e) => n + e.instances.length, 0) && a.signals.count('watch') === 104, 'one proxy per interface instance (' + a.signals.count('watch') + ' watch calls)');     // beam HS: + 4 (S18)
+    ok(a.lines.some((l) => /^probe: sets on=S1\+S2\+S3\+S4\+S5\+S6\+S7\+S8\+S9\+S10\+S11\+S13\+S14\+S15\+S16\+S17\+S18 changed=\+S1,\+S2,\+S3,\+S4,\+S5,\+S6,\+S7,\+S8,\+S9,\+S10,\+S11,\+S13,\+S14,\+S15,\+S16,\+S17,\+S18 fields=306 \(first set on\)$/.test(l)), 'all seventeen sets on: the log says so');     // r1120 AC: + S17; beam HS: + S18
+    ok(a.signals.count('watch') === FIELDS.interfaces().reduce((n, e) => n + e.instances.length, 0) && a.signals.count('watch') === 106, 'one proxy per interface instance (' + a.signals.count('watch') + ' watch calls)');     // beam HS: + 6 (S18)
     let nOk = 0;
     VECTORS.forEach((v) => {
         a.clock.t += 15000;
@@ -685,7 +685,7 @@ async function main() {
     ok(BADW.lines.some((l) => /summary S6 \+30s: providers: up=7 down=1 error=1 down-list: Light\[1\]/.test(l)), 'the summary names the provider that is down');
     // the start line and the sets line
     const ST = mk({}); ST.pr.setSets(['S4', 'S6'], true); ST.pr.startLine();
-    ok(ST.lines.some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=S4\+S6 fields=37 of 296$/.test(l)) && !ST.lines.some((l) => /^probe: sets /.test(l)), 'the start line: version, log format and the sets on (quiet start: no "sets" line)');
+    ok(ST.lines.some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=S4\+S6 fields=37 of 306$/.test(l)) && !ST.lines.some((l) => /^probe: sets /.test(l)), 'the start line: version, log format and the sets on (quiet start: no "sets" line)');
     ok(LOG_FORMAT === 1 && VERSION === app.version, 'log format 1');
     ST.pr.setSets(['S4', 'S6', 'S7'], false);
     ok(ST.lines.some((l) => /^probe: sets on=S4\+S6\+S7 changed=\+S7 fields=52$/.test(l)), 'the sets line at a change: ' + ST.lines[ST.lines.length - 1]);
@@ -805,7 +805,7 @@ async function main() {
     try {
         startServer();
         ok(await until(() => /build: signal_probe/.test(out) && probeLines().some((l) => /^probe: start /.test(l)), 60000), 'the app builds with the kit and starts');
-        ok(probeLines().some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=none fields=0 of 296$/.test(l)), 'the start line: all sets off at the first start: ' + (probeLines()[0] || ''));
+        ok(probeLines().some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=none fields=0 of 306$/.test(l)), 'the start line: all sets off at the first start: ' + (probeLines()[0] || ''));
         ok(!/Error|uncaught/i.test(out.split('\n').filter((l) => /\[signal_probe\]/.test(l)).join('\n')), 'nothing in the app\'s log says Error or uncaught');
         let p = await probeNative();
         ok(p && JSON.stringify(p.stack) === '["MAIN"]', 'the entry screen is the native menu MAIN');
@@ -835,7 +835,7 @@ async function main() {
         // restart: the sets come back
         const before = probeLines().length;
         await req('POST', '/restart');
-        ok(await until(() => probeLines().slice(before).some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=S6 fields=24 of 296$/.test(l)), 15000), 'after a restart the start line says sets=S6 (the owner\'s choice is kept)');
+        ok(await until(() => probeLines().slice(before).some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=S6 fields=24 of 306$/.test(l)), 15000), 'after a restart the start line says sets=S6 (the owner\'s choice is kept)');
         ok(await until(() => probeLines().slice(before).filter((l) => /^probe: watch /.test(l)).length === 8, 10000), '... and S6\'s interfaces are subscribed again');
         await req('POST', '/click', { id: 'SET_SET6' });
         ok(await until(() => probeLines().some((l) => /^probe: sets on=none changed=-S6 /.test(l))), 'S6 off again: logged');

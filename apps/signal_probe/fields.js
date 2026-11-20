@@ -154,6 +154,10 @@ const I = {
     Environment: 'de.bmw.body.Environment',
     Wiper: 'de.bmw.body.Wiper',
     LightswitchOperation: 'de.bmw.body.drivinglight.LightswitchOperation',
+    // beam HS, after docs/highbeam/HR-REPORT.md Part E: the camera's own object list with the head / rear lamp state per object (the
+    // primary fallback if the light objects stay silent) and the camera's weather and range of sight
+    ObjectlistTCP: 'de.bmw.sensors.objects.RecogFrontCameraObjectlist',
+    Weather: 'de.bmw.environmentalmodel.environmentalconditions.Weather',
 };
 const TABLE = [
     // ---- S1 P1 ----
@@ -509,6 +513,25 @@ const TABLE = [
     { set: 'S18', p: 'P27', tag: 'hb-lightswitch', iface: I.LightswitchOperation, field: 'mainLightswitchState', flags: 'rs', gapMs: 0, recLog: true, fmt: 'enum' },
     { set: 'S18', p: 'P27', tag: 'hb-fog-front', iface: I.LightswitchOperation, field: 'foglightFront', flags: 'rs', gapMs: 0, recLog: true, fmt: 'bool' },
     { set: 'S18', p: 'P27', tag: 'hb-fog-rear', iface: I.LightswitchOperation, field: 'foglightRear', flags: 'rs', gapMs: 0, recLog: true, fmt: 'bool' },
+    // after HR-REPORT Part E (2026-11-20): the fallback object list with each object's head / rear / brake lamp state (a TCP event, up
+    // to 20 objects: 6 kept, the standard deviations, the covariances, the existence, the acceleration and the shape left out), the
+    // camera's weather and range of sight, the day / night switch, the exterior temperature, the yaw rate the head unit reads, the
+    // traffic side and the assistant's settings status, the map's urban flag, road class and traffic side
+    { set: 'S18', p: 'P27', tag: 'hb-objlist', iface: I.ObjectlistTCP, field: 'objectlistTCP', flags: 'b', fmt: 'tree', gapMs: 2000, cap: 100, recEntries: 6,
+      tree: { skip: ['existence', 'x_std_dev', 'y_std_dev', 'z_std_dev', 'orientation_std_dev', 'covariance_xy', 'acceleration_absolute', 'shape'], entries: 6 } },
+    { set: 'S18', p: 'P27', tag: 'hb-weather', iface: I.Weather, field: 'RecognitionWeather', flags: 's', gapMs: 2000,
+      cols: [['weather', 'statusWeatherCamera', 'e'], ['intensity', 'statusWeatherIntensityCamera', 'n'], ['sight', 'rangeOfSightCamera', 'e']] },
+    { set: 'S18', p: 'P27', tag: 'hb-daynight', iface: I.Vehicle, field: 'statusDayNightChangeOver', flags: 'rs', gapMs: 2000,
+      cols: [['dayNight', 'dayNightChangeOver', 'e'], ['lcd', 'destinationLCDLuminance', 'n'], ['damping', 'dampingLCDLuminance', 'n']] },
+    { set: 'S18', p: 'P27', tag: 'hb-exterior-temp', iface: I.EnvironmentalInformation, field: 'ExteriorTemperature', flags: 's', gapMs: 10000, cols: [['temp', 'temperatureExterior', 'n']] },
+    { set: 'S18', p: 'P27', tag: 'hb-yaw-hu', iface: I.CDS2, field: 'statusYawVelocityVehicle', flags: 'rs', gapMs: 2000, cols: [['yaw', 'yawVelocityVehicle', 'n']] },
+    { set: 'S18', p: 'P27', tag: 'hb-light-dynamic', iface: I.Vehicle2, field: 'statusExteriorLightDynamic', flags: 's', recLog: true, cols: [['tourist', 'statusTouristMode', 'e'], ['banner', 'statusTouristModeBanner', 'e']] },
+    { set: 'S18', p: 'P27', tag: 'hb-config-lm', iface: I.Vehicle2, field: 'statusConfigLM2', flags: 'rs', recLog: true,
+      cols: [['highBeamAssist', 'statusLampHighBeamAssistCKM', 'e'], ['mainBeamAssist', 'statusLampMainBeamAssistantCKM', 'n'], ['adaptive', 'statusLampAdaptiveHeadLampsCKM', 'n'],
+          ['cornering', 'statusLampCorneringLightCKM', 'n'], ['tourist', 'statusLampTouristSolutionCKM', 'e']] },
+    { set: 'S18', p: 'P27', tag: 'hb-ccp-urban', iface: I.CCP, field: 'urbanFlag', flags: 'b', one: ['isUrban', 'b'] },
+    { set: 'S18', p: 'P27', tag: 'hb-ccp-road', iface: I.CCP, field: 'roadClass', flags: 'b', cols: [['functional', 'functional', 'n'], ['administrative', 'administrative', 'n']] },
+    { set: 'S18', p: 'P27', tag: 'hb-ccp-side', iface: I.CCP, field: 'trafficSide', flags: 'b', one: ['direction', 'e'] },
 ];
 // beam HS: the camera's 15 light objects, one event each (three of the names start with a capital M in the catalogue: 11, 12, 15).
 // One compact line per object (fmt beamObj, raw numbers); in a recording an object that repeats itself is folded (recSame).
@@ -560,7 +583,9 @@ TABLE.forEach((f) => {
 // (S15: the fallback if the light objects stay silent) cut to HB_ENTRIES objects. recLog: these keep their log lines while recorded.
 const HB = {
     tags: ['stalk', 'stalk-complete', 'brake-light', 'lights', 'dimmer', 'indicate', 'car-speed2', 'yaw-rate', 'steering', 'gearbox-status',
-        'external-display', 'tsr', 'ccp-builtup', 'front-vehicle', 'cam-objects', 'cam-position', 'cam2-objects', 'cam2-position'],
+        'external-display', 'tsr', 'ccp-builtup', 'front-vehicle', 'cam-objects', 'cam-position', 'cam2-objects', 'cam2-position',
+        // after HR-REPORT Part E: the followed car's lamp state (gap-ahead), the camera's signs (a town entry), the objects' flash / brake lamps
+        'gap-ahead', 'cam-signs', 'cam-specific', 'cam2-specific'],
     recLog: ['stalk', 'stalk-complete', 'lights'],
 };
 const HB_ENTRIES = 4;

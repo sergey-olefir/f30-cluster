@@ -7598,5 +7598,257 @@
    "StatusObject15": 7
   },
   "body": "slot=15 id=15 class=15 status=7 x=255 y=255 w=255 h=63 dist=127 asl=255 asr=255 defaults"
+ },
+ {
+  "set": "S18",
+  "p": "P27",
+  "tag": "hb-objlist",
+  "iface": "de.bmw.sensors.objects.RecogFrontCameraObjectlist",
+  "field": "objectlistTCP",
+  "instance": "1",
+  "value": {
+   "eventDataQualifier": "KEVENTDATAQUALIFIER_EVENTDATAAVAILABLE",
+   "extendedQualifier": "KOBJECTLISTEXTENDEDQUALIFIER_NORMALOPERATION",
+   "timestamp": {
+    "seconds": 100,
+    "nanoseconds": 5,
+    "sync_state": "KSTDTIMESTAMPSYNCSTATE_INSYNC"
+   },
+   "numberOfObjects": 1,
+   "objectListSmall": [
+    {
+     "summary": {
+      "id": 7,
+      "age": 12,
+      "status_measurement": "KMEASUREMENTSTATUS_MEASURED",
+      "status_movement": "KMOVEMENTSTATUS_MOVED"
+     },
+     "existence": {
+      "invalid_flags": 0,
+      "existence_probability": 0.9,
+      "existence_ppv": 0.8
+     },
+     "status_sensors": 3,
+     "position": {
+      "invalid_flags": 0,
+      "reference_point": "MIDDLE_FRONT",
+      "x": {
+       "value": 85.5
+      },
+      "x_std_dev": {
+       "value": 0.5
+      },
+      "y": {
+       "value": -3.25
+      },
+      "y_std_dev": {
+       "value": 0.2
+      },
+      "z": {
+       "value": 0.5
+      },
+      "z_std_dev": {
+       "value": 0.1
+      },
+      "covariance_xy": 0.01,
+      "orientation": {
+       "value": 3.1
+      },
+      "orientation_std_dev": {
+       "value": 0.1
+      }
+     },
+     "dynamics": {
+      "velocity_absolute": {
+       "invalid_flags": 0,
+       "x": {
+        "value": -22.5
+       },
+       "x_std_dev": {
+        "value": 0.3
+       },
+       "y": {
+        "value": 0.1
+       },
+       "y_std_dev": {
+        "value": 0.1
+       },
+       "covariance_xy": 0
+      },
+      "acceleration_absolute": {
+       "invalid_flags": 0,
+       "x": {
+        "value": 0
+       },
+       "x_std_dev": {
+        "value": 0
+       },
+       "y": {
+        "value": 0
+       },
+       "y_std_dev": {
+        "value": 0
+       },
+       "covariance_xy": 0
+      }
+     },
+     "shape": {
+      "length": {
+       "status": "KEDGEVISIBILITYSTATUS_COMPLETELYVISIBLE",
+       "edge": {
+        "invalid_flags": 0,
+        "mean": 4.5,
+        "std_dev": 0.1
+       }
+      }
+     },
+     "classification": {
+      "class_car": 90,
+      "class_truck": 5,
+      "class_motorcycle": 0,
+      "class_bicycle": 0,
+      "class_pedestrian": 0,
+      "class_animal": 0,
+      "class_hazard": 0,
+      "class_unknown": 5,
+      "class_overdrivable": 0,
+      "class_underdrivable": 0
+     },
+     "lights": {
+      "status_flash_light": "KFLASHLIGHTSTATUS_NONE",
+      "status_head_light": "KHEADLIGHTSTATUS_ON",
+      "status_rear_light": "KREARLIGHTSTATUS_UNKNOWN",
+      "status_reverse_light": "KREVERSELIGHTSTATUS_OFF",
+      "status_emergency_light": "KEMERGENCYLIGHTSTATUS_OFF",
+      "status_brake_light": "KBRAKELIGHTSTATUS_OFF"
+     }
+    }
+   ],
+   "frameNumber": 4711
+  },
+  "body": {
+   "re": "^eventDataQualifier=KEVENTDATAQUALIFIER_EVENTDATAAVAILABLE .*objectListSmall=1 \\[.*status_head_light=KHEADLIGHTSTATUS_ON status_rear_light=KREARLIGHTSTATUS_UNKNOWN.*\\] frameNumber=4711$"
+  }
+ },
+ {
+  "set": "S18",
+  "p": "P27",
+  "tag": "hb-weather",
+  "iface": "de.bmw.environmentalmodel.environmentalconditions.Weather",
+  "field": "RecognitionWeather",
+  "instance": "1",
+  "value": {
+   "rangeOfSightCamera": "SIGHT_150_TO_300",
+   "statusWeatherCamera": "FOG",
+   "statusWeatherIntensityCamera": 2
+  },
+  "body": "weather=FOG intensity=2 sight=SIGHT_150_TO_300"
+ },
+ {
+  "set": "S18",
+  "p": "P27",
+  "tag": "hb-daynight",
+  "iface": "de.bmw.infotainment.vehicle.Vehicle",
+  "field": "statusDayNightChangeOver",
+  "instance": "1",
+  "value": {
+   "dayNightChangeOver": "NACHT",
+   "destinationLCDLuminance": 40,
+   "dampingLCDLuminance": 3
+  },
+  "body": "dayNight=NACHT lcd=40 damping=3"
+ },
+ {
+  "set": "S18",
+  "p": "P27",
+  "tag": "hb-exterior-temp",
+  "iface": "de.bmw.infrastructure.EnvironmentalInformation",
+  "field": "ExteriorTemperature",
+  "instance": "1",
+  "value": {
+   "temperatureExterior": 87
+  },
+  "body": "temp=87"
+ },
+ {
+  "set": "S18",
+  "p": "P27",
+  "tag": "hb-yaw-hu",
+  "iface": "de.bmw.infotainment.vehicle.CDS2",
+  "field": "statusYawVelocityVehicle",
+  "instance": "1",
+  "value": {
+   "yawVelocityVehicle": 32790
+  },
+  "body": "yaw=32790"
+ },
+ {
+  "set": "S18",
+  "p": "P27",
+  "tag": "hb-light-dynamic",
+  "iface": "de.bmw.infotainment.vehicle.Vehicle2",
+  "field": "statusExteriorLightDynamic",
+  "instance": "1",
+  "value": {
+   "statusTouristMode": "AUTOMATISCH_RECHTSVERKEHR",
+   "statusTouristModeBanner": "NO_SUPPORT"
+  },
+  "body": "tourist=AUTOMATISCH_RECHTSVERKEHR banner=NO_SUPPORT"
+ },
+ {
+  "set": "S18",
+  "p": "P27",
+  "tag": "hb-config-lm",
+  "iface": "de.bmw.infotainment.vehicle.Vehicle2",
+  "field": "statusConfigLM2",
+  "instance": "1",
+  "value": {
+   "statusLampCorneringLightCKM": 1,
+   "statusLampWelcomeLightCKM": "AKTIV",
+   "statusLampMainBeamAssistantCKM": 0,
+   "statusLampTouristSolutionCKM": "NICHT_AKTIV",
+   "statusLampAdaptiveHeadLampsCKM": 2,
+   "statusLampOVTCKM": "OVT_AUS",
+   "statusLampLightcarpetCKM": "KEINE_ANGABE",
+   "statusLampHighBeamAssistCKM": "KEINE_ANGABE"
+  },
+  "body": "highBeamAssist=KEINE_ANGABE mainBeamAssist=0 adaptive=2 cornering=1 tourist=NICHT_AKTIV"
+ },
+ {
+  "set": "S18",
+  "p": "P27",
+  "tag": "hb-ccp-urban",
+  "iface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+  "field": "urbanFlag",
+  "instance": "1",
+  "value": {
+   "isUrban": true
+  },
+  "body": "isUrban=true"
+ },
+ {
+  "set": "S18",
+  "p": "P27",
+  "tag": "hb-ccp-road",
+  "iface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+  "field": "roadClass",
+  "instance": "1",
+  "value": {
+   "functional": 3,
+   "administrative": 2
+  },
+  "body": "functional=3 administrative=2"
+ },
+ {
+  "set": "S18",
+  "p": "P27",
+  "tag": "hb-ccp-side",
+  "iface": "de.bmw.infotainment.navigation.externalize.adasng.CCP",
+  "field": "trafficSide",
+  "instance": "1",
+  "value": {
+   "direction": "RIGHT_HAND_SIDE"
+  },
+  "body": "direction=RIGHT_HAND_SIDE"
  }
 ]

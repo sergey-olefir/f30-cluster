@@ -16,10 +16,11 @@
  *   #f,<id>,<tag>,<Interface.member>,<col>,<col>,...          a field's columns, before its first line in a file (again if its shape changes)
  *   #n,<code>,<ENUM_NAME>                                        an enum name's code, before its first use in a file
  *   #m,<t>,<n>                                                   the owner's "Позначка n"
- *   #s,<t>,<id>,<n>                                              beam HS: n samples of field <id> were folded since its line before
- *                                                                (a field with recSame: the same values again, less than recSame ms
- *                                                                after its last written line; they take no seq); ids hold for the
- *                                                                whole recording; at the stop, one per field with folds left
+ *   #s,<t>,<id>,<n>,<t_last>                                     beam HS: n samples of field <id> were folded since its line before,
+ *                                                                the last of them at t_last (a field with recSame: the same values
+ *                                                                again, less than recSame ms after its last written line; they take
+ *                                                                no seq); ids hold for the whole recording; at the stop, one per
+ *                                                                field with folds left
  *   #end,<t>,samples=..,dropped=..,errors=..,texts=..,folded=..  the last line of a recording (missing: the app or the head unit stopped)
  *   <t>,<id>,<seq>,<ctr>,<pts>,<v1>,<v2>,...                     a sample; "=" for the values: the same values as this field's line before
  *
@@ -165,7 +166,7 @@ class Recorder {
         try {
             // beam HS: the folds since each field's last line, then the last line
             const t = this._t(), seg = this._seg();
-            Object.keys(this.fields).forEach((k) => { const fr = this.fields[k]; if (fr.folded) { this._line(seg, '#s,' + t + ',' + fr.id + ',' + fr.folded); fr.folded = 0; } });
+            Object.keys(this.fields).forEach((k) => { const fr = this.fields[k]; if (fr.folded) { this._line(seg, '#s,' + t + ',' + fr.id + ',' + fr.folded + ',' + fr.foldAt); fr.folded = 0; } });
             this._line(seg, '#end,' + t + ',samples=' + this.samples + ',dropped=' + this.dropped + ',errors=' + this.errors + ',texts=' + this.texts + ',folded=' + this.folded);
         } catch (e) { /* the queue is full or broken: stop anyway */ }
         this.on = false;
@@ -189,14 +190,14 @@ class Recorder {
         try {
             const f = st.f;
             let fr = this.fields[f.tag];
-            if (!fr) fr = this.fields[f.tag] = { id: ++this.nIds, seq: 0, name: f.iface.split('.').pop() + '.' + f.field, same: null, sameAt: 0, folded: 0 };
+            if (!fr) fr = this.fields[f.tag] = { id: ++this.nIds, seq: 0, name: f.iface.split('.').pop() + '.' + f.field, same: null, sameAt: 0, folded: 0, foldAt: 0 };
             const t = this._t();
             let fl = null, key = null;
             // beam HS: recSame - the same values again soon after the field's last written line are folded (counted, no seq)
             if (f.recSame > 0) {
                 fl = flatten(v, f.tree && f.tree.skip, this._entries(f));
                 key = fl.keys.join(',') + '|' + fl.vals.join(',');
-                if (key === fr.same && t - fr.sameAt < f.recSame) { fr.folded++; this.folded++; return; }
+                if (key === fr.same && t - fr.sameAt < f.recSame) { fr.folded++; fr.foldAt = t; this.folded++; return; }
             }
             fr.seq++;
             if (this.queued > this.maxQueue) { this.dropped++; return; }
@@ -211,7 +212,7 @@ class Recorder {
             for (let i = 0; i < fl.vals.length; i++) vals[i] = this._val(seg, fl.vals[i]);
             const body = vals.join(',');
             const pts = fl.ptsS === null ? '' : String(fl.ptsS) + '.' + (fl.ptsNs === null ? '000000000' : nine(fl.ptsNs));
-            if (fr.folded) { this._line(seg, '#s,' + t + ',' + fr.id + ',' + fr.folded); fr.folded = 0; }
+            if (fr.folded) { this._line(seg, '#s,' + t + ',' + fr.id + ',' + fr.folded + ',' + fr.foldAt); fr.folded = 0; }
             this._line(seg, t + ',' + fr.id + ',' + fr.seq + ',' + (fl.ctr === null ? '' : fl.ctr) + ',' + pts + ',' + (seg.prev[fr.id] === body ? '=' : body));
             seg.prev[fr.id] = body;
             if (key !== null) { fr.same = key; fr.sameAt = t; }
