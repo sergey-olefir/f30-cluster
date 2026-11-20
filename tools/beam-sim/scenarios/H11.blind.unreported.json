@@ -8,7 +8,8 @@
  "source": "hand",
  "meta": {
   "created": "2026-11-20",
-  "tool": "beam-sim"
+  "tool": "beam-sim",
+  "limit": "a blind camera that does not say so looks like an empty road"
  },
  "duration_s": 60,
  "seed": 1,
@@ -53,5 +54,6 @@
  },
  "expect": {
   "maxSwitches": 1
- }
+ },
+ "limit": true
 }

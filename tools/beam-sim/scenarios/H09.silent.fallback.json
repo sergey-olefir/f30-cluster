@@ -8,7 +8,8 @@
  "source": "hand",
  "meta": {
   "created": "2026-11-20",
-  "tool": "beam-sim"
+  "tool": "beam-sim",
+  "limit": "the object list reaches about 120 m at night"
  },
  "duration_s": 70,
  "seed": 1,
@@ -73,5 +74,6 @@
    "preceding"
   ],
   "maxGlareW": 25
- }
+ },
+ "limit": true
 }

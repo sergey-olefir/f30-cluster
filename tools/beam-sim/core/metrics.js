@@ -1,7 +1,7 @@
 'use strict';
 // The metrics of the beam simulator, from a run's series (sim.js) — per scenario; totals are summed by sweep / report.
 //
-// Glare: seconds during which another road user (a driver: car, truck, motorbike, bicycle) was inside our high beam
+// Glare: seconds during which (outside OVERRIDE: the driver's own choice is overrideGlareW) another road user (a driver: car, truck, motorbike, bicycle) was inside our high beam
 //   (its cone and reach, with a line of sight), and the same weighted by distance: w = min(4, (200 m / d)^2), so a
 //   second at 200 m counts 1, at 400 m 0.25, at 100 m and closer 4. The worst single event (one user, one exposure).
 //   Reaction: per exposure that began with the beam high, the time from the user's first exposure (it could be glared
@@ -27,12 +27,13 @@
     const m = {};
     const dt = n > 1 ? S.t[1] - S.t[0] : 0.1;
     let glare = 0, glareW = 0, missed = 0, allowed = 0, allowedHigh = 0, highT = 0;
-    let agreeRef = 0, refN = 0, agreeDrv = 0, drvN = 0, refGlare = 0, refGlareW = 0, refMissed = 0;
+    let agreeRef = 0, refN = 0, agreeDrv = 0, drvN = 0, refGlare = 0, refGlareW = 0, refMissed = 0, drvGlareW = 0;
     const sw = [];
     for (let i = 0; i < n; i++) {
       const high = S.want[i] === 1;
       if (high) highT += dt;
-      if (high && S.glareN[i] > 0) { glare += dt; glareW += S.glareW[i] * dt; }
+      const manual = S.state && S.state[i] === ctx.overrideState;          // the driver's own choice (auto mode): not the advice's glare
+      if (high && S.glareN[i] > 0) { if (manual) drvGlareW += S.glareW[i] * dt; else { glare += dt; glareW += S.glareW[i] * dt; } }
       if (S.allowed[i] === 1) { allowed += dt; if (high) allowedHigh += dt; else missed += dt; }
       if (S.ref && !isNaN(S.ref[i])) {
         refN++; if ((S.ref[i] === 1) === high) agreeRef++;
@@ -56,6 +57,7 @@
     m.high_s = r3(highT);
     m.glare_s = r3(glare);
     m.glareW = r3(glareW);
+    m.overrideGlareW = r3(drvGlareW);
     m.worstEventW = r3(worst);
     m.worstEventUser = worstId;
     m.exposures = ex.length;

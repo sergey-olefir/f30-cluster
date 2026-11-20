@@ -8,7 +8,8 @@
  "source": "hand",
  "meta": {
   "created": "2026-11-20",
-  "tool": "beam-sim"
+  "tool": "beam-sim",
+  "limit": "a weak bicycle lamp is seen at about 90 m, inside the 400 m reach of our high beam"
  },
  "duration_s": 60,
  "seed": 1,
@@ -50,5 +51,6 @@
    "cyclist"
   ],
   "maxGlareW": 20
- }
+ },
+ "limit": true
 }

@@ -129,14 +129,15 @@
       return { ego: ego, env: env, exposed: exposed, seen: seen, street: street, ok: ok, allowed: allowed };
     }
 
-    function trackExposures(t, exposed, high) {
+    function trackExposures(t, exposed, high, manual) {
       const now = {};
       exposed.forEach((e) => {
         now[e.uid] = true;
         let x = expo[e.uid];
         if (!x) { x = expo[e.uid] = { uid: e.uid, t0: t, t1: t, wInt: 0, highAtStart: high, reaction_ms: null, dist0: Math.round(e.dist) }; exposures.push(x); }
         x.t1 = t;
-        if (high) x.wInt += e.w * tick / 1000;
+        if (high && !manual) x.wInt += e.w * tick / 1000;
+        if (manual && x.t0 === t) x.manual = true;
         if (x.highAtStart && x.reaction_ms === null && !high) x.reaction_ms = t - x.t0;
       });
       Object.keys(expo).forEach((k) => {
@@ -206,7 +207,7 @@
         S.s.push(0);
         S.speed.push(frame && frame.car && frame.car.v && typeof frame.car.v.speed_kmh === 'number' ? frame.car.v.speed_kmh : NaN);
       } else {
-        trackExposures(t, truth.exposed, beamHigh);
+        trackExposures(t, truth.exposed, beamHigh, out.state === 'OVERRIDE');
         let gw = 0;
         truth.exposed.forEach((e) => { gw += e.w; });
         const warm = t < warmup * 1000;            // the darkness hold at the start: not counted as missed light or disagreement
@@ -227,7 +228,7 @@
     }
 
     function result() {
-      const ctx = { exposures: exposures, inv: inv, driver: replay ? S.driver : null };
+      const ctx = { exposures: exposures.filter((x) => !x.manual), inv: inv, driver: replay ? S.driver : null, overrideState: B.STATES.indexOf('OVERRIDE') };
       const metrics = MET.compute(S, ctx);
       // lead / lag against the recorded driver (replay) or the reference driver: each driver switch matched with the
       // nearest switch of the advice in the same direction within 10 s; + = the advice was later

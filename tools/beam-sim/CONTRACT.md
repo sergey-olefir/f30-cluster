@@ -230,8 +230,9 @@ One format for hand-written scenarios, the simulator's generated ones and record
   truth: [ { t, glare: [ { id, kind, dist_m } ], allowHigh: bool } ],      // what was really ahead (simulator / annotation)
   driver: [ { t, kind: 'high_on' | 'high_off' | 'flash' } ],               // what the driver did (else from frames' stalk)
   labels: [ { t0, t1, kind, note } ],                                       // HS's labelled events (kind: a reason code)
-  expect: { ... }                       // optional pass limits (§5.3)
-}
+  expect: { ... },                      // optional pass limits (§5.3)
+  limit: false                          // optional: true = the scenario documents a known limit of a light camera
+}                                       //   (an unlit cyclist, a silently blind camera); kept out of the core totals
 ```
 
 A recorded drive needs only `format`, `version`, `id`, `source: 'recorded'`, `frames` (or `framesFile`) and, when
