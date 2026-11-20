@@ -1,7 +1,7 @@
 {
   "id": "acc_view",
   "title": "ACC View",
-  "description": "Read-only: the vehicle ahead as a gap level, closing, the cruise / limiter set speed and the limit, drawn as a lane view on the centre screen and, as a test, on the cluster's map target. Writes nothing to the car.",
+  "description": "Read-only: what the car's sensors see (the lanes and their markings, the road users: cars, trucks, two-wheelers, pedestrians, cyclists; the vehicle ahead) with the cruise / limiter and the limit, drawn as a lane view on the centre screen and, as a test, on the cluster's map target. Writes nothing to the car.",
   "version": "0.1.0",
   "vendor": "custom",
   "loggingId": "OAAV",
@@ -19,7 +19,8 @@
     "de.bmw.dass.GapVehicleAhead": {
       "_instances": "1",
       "DataFrontVehicle": "s",
-      "_about": "r1120 AA: the vehicle ahead as the front camera reports it (a FIELD with a notifier only, 32770; no getter, no setter), declared 's' as Signal Probe and Twin Dial do. Watched only while 'show' is on. Read only."
+      "_about": "r1120 AA: the vehicle ahead as the front camera reports it (a FIELD with a notifier only, 32770; no getter, no setter), declared 's' as Signal Probe and Twin Dial do. Watched only while 'show' is on. Read only. r1120 AA2: DataFrontVehicleExtended (notifier 32771, no getter): the car ahead's class (FrontVehicleExtendedObjectType), 's' as Signal Probe.",
+      "DataFrontVehicleExtended": "s"
     },
     "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
       "_instances": "1",
@@ -45,6 +46,42 @@
     "de.bmw.infotainment.vehicle.Vehicle": {
       "statusDayNightChangeOver": "rs",
       "_about": "r1120 AA2: the car's own day / night, Twin Dial's source (config.dayNight). Getter 19 (non-zero), notifier 32787. Read only."
+    },
+    "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ObjectRecognition",
+        "ObjectPosition"
+      ],
+      "_about": "r1120 AA2 (the owner's FOCUS 2026-11-20): the front camera's objects, 40 slots each: class (ObjectType: PEDESTRIAN, CYCLIST, BIKE, CAR, TRUCK ...), lane mapping and id (32769); x / y / length / width as Float (32770; metres and y-left are hypotheses: config.world.objects). Events: no getter, no setter, no method. Signal Probe S15 declares them; never yet read on the car."
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraObjectlist": {
+      "_instances": "1",
+      "_broadcasts": [
+        "objectlistTCP"
+      ],
+      "_about": "r1120 AA2: the camera's object list, up to 20 (EmMeter x / y, class percentages); event 32770. Read only."
+    },
+    "de.bmw.environmentalmodel.LaneBoundaries": {
+      "_instances": "1",
+      "_broadcasts": [
+        "LaneBoundaries"
+      ],
+      "_about": "r1120 AA2: 4 front lane boundaries as clothoids (offset, angle, curvature, curvature change, valid length) with their type (SOLID, DASHED, DOUBLE, ROAD_EDGE ...); event 32771. Read only."
+    },
+    "de.bmw.environmentalmodel.Lanes": {
+      "_instances": "1",
+      "_broadcasts": [
+        "LanesDetection"
+      ],
+      "_about": "r1120 AA2: the lanes' kinds left / ego / right (LaneType); event 32769. Logged only."
+    },
+    "de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "keepDistanceObjects1"
+      ],
+      "_about": "r1120 AA2: three distance-control objects (raw UInt16 distances, scale unknown); event 32769. Logged only (counts and raw ranges): may not be sent without adaptive cruise."
     }
   },
   "screens": [
@@ -169,6 +206,37 @@
       "tsr": {},
       "_about": "shared/limit_src.js tsrCfg defaults (the event TrafficSignRecognition, presentClassLimitSpeed x 5, stale after 3 s)"
     },
-    "cruise": {}
+    "cruise": {},
+    "world": {
+      "range": 100,
+      "objects": {
+        "scale": 1,
+        "ySign": 1,
+        "xMin": 1,
+        "xMax": 95,
+        "yMax": 12,
+        "glideMs": 250,
+        "lostMs": 500,
+        "fadeMs": 600,
+        "max": 16,
+        "minProb": 0
+      },
+      "lanes": {
+        "scale": 1,
+        "ySign": 1,
+        "minProb": 0.3,
+        "staleMs": 1500,
+        "maxLen": 120
+      },
+      "sources": {
+        "cam": true,
+        "tcp": true,
+        "lanes": true,
+        "lanesDetection": true,
+        "keepDistance": true,
+        "frontExtended": true
+      },
+      "_about": "r1120 AA2, the owner's FOCUS (2026-11-20; apps/acc_view/world.js): HYPOTHESES until a drive's log says otherwise: the events' x / y are metres (scale 1) with y to the LEFT (ySign 1; -1 flips); the camera's ObjectRecognition and ObjectPosition slots are the same objects index by index. range: the drawn lane's far end (m). sources: switch a subscription off (each is read only)."
+    }
   }
 }

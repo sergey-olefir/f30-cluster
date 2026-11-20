@@ -41,7 +41,7 @@ def uni(u):
     for k, v in u.items():
         if k == 'u_size':
             continue
-        out[k] = [tuple(v[i:i + 4]) for i in range(0, len(v), 4)] if k == 'u_nb' else tuple(v)
+        out[k] = [tuple(v[i:i + 4]) for i in range(0, len(v), 4)] if len(v) > 4 else tuple(v)
     return out
 
 
@@ -54,6 +54,7 @@ def main():
         img = np.zeros((480, 1088, 3), np.float32)
         x, y, w, h = d['lane']['rect']
         over(img, gl.render('acc_lane', w, h, uni(d['lane']['u']), ss=3), x, y)
+        over(img, gl.render('acc_obj', w, h, uni(d['obj']['u']), ss=3), x, y)
         if d['car']:
             x, y, w, h = d['car']['rect']
             over(img, gl.render('acc_car', w, h, uni(d['car']['u']), ss=4), x, y)
@@ -70,7 +71,7 @@ def main():
     W, RH = 40 + 2 * (cw + 16) + 2 * (mw + 16), ch + 36
     sheet = Image.new('RGB', (W, 60 + RH * len(states)), (40, 42, 46))
     dr = ImageDraw.Draw(sheet)
-    dr.text((20, 16), 'ACC View 0.1.0 - direction E: centre page day / night, map target core day / night (14 demo states)', fill=(230, 230, 230), font=font)
+    dr.text((20, 16), 'ACC View 0.1.0 - direction E: centre page day / night, map target core day / night (14 states, 7 scenes)', fill=(230, 230, 230), font=font)
     for i, st in enumerate(states):
         y = 60 + i * RH
         dr.text((20, y), st, fill=(200, 200, 200), font=font)

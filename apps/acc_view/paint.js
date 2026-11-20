@@ -107,33 +107,35 @@ function pillSheet(s, night, lang) {
 /* ------------------------------------------------------------------------------------------------ the lane (acc_lane in JS) */
 
 const sstep = (a, b, x) => { const t = R.clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+const fract = (x) => x - Math.floor(x);
 
 /**
- * acc_lane.glsl's maths, pixel for pixel, into the canvas (the lane box g.lane); z the car's depth (0 = none).
+ * acc_lane.glsl's maths, pixel for pixel, into the canvas (the lane box g.lane); z the car ahead's depth (0 = none).
  * gapOnly: only the pixels the lit gap and the chevrons can touch (below the car, |X| < 0.92), each reset to bg and
- * computed whole again: over a cached lane without a car this gives exactly the full computation, at a fraction of its cost.
+ * computed whole again: over the same lanes drawn without a car this gives exactly the full computation, at a fraction of
+ * its cost.
  */
 function lane(cv, g, s, z, P, dim, gapOnly) {
+    const U = M.laneUniforms(g, s, z, false);
     const lx = g.lane[0], ly = g.lane[1], W = g.lane[2], H = g.lane[3];
-    const hy = M.HZ * H, kf = 1 / M.TFAR - 1, hw0 = g.hw, lw0 = g.lw;
-    const zc = s.tgt ? z : 0, clo = s.tgt ? s.clo : 0, fast = s.clo === 2;
-    const gs = fast ? 0.13 : 0.08;
-    const gapc = (fast ? P.amberF : P.gap), line = P.line, ground = P.ground;
+    const hy = U.u_view[0] * H, pxm = U.u_view[1], kf = U.u_view[2], range = U.u_view[3];
+    const ego = U.u_ego, zc = U.u_gap[0], clo = U.u_gap[1], gs = U.u_gap[2];
+    const fast = s.clo === 2, gapc = fast ? P.amberF : P.gap, line = P.line, ground = P.ground;
+    const edgeCol = line.map((c) => c * 0.5 + 0.14);
+    const lines = [];
+    for (let i = 0; i < 4; i++) if (U.u_ln[i * 4 + 3] > 0.5) lines.push({ y0: U.u_ln[i * 4], a: U.u_ln[i * 4 + 1], c: U.u_ln[i * 4 + 2], ty: U.u_ln[i * 4 + 3], len: U.u_lp[i * 4], str: U.u_lp[i * 4 + 1], mw: U.u_lp[i * 4 + 2] });
     const dm = 1 - 0.65 * (dim || 0);
     const col = [0, 0, 0];
-    const chev = [];
-    for (let i = 0; i < 2; i++) {
-        const tc = 1 / (1 + zc * (0.45 + 0.22 * i) * kf);
-        chev.push({ tc, yc: hy + (H - hy) * tc });
-    }
+    const chev = [0, 1].map((i) => { const tc = 1 / (1 + zc * (0.45 + 0.22 * i) * kf); return { tc, yc: hy + (H - hy) * tc }; });
     for (let y = Math.max(0, Math.floor(ly + hy)); y < Math.min(cv.h, ly + H); y++) {
         const py = y + 0.5 - ly, t = (py - hy) / (H - hy);
         if (t <= 0) continue;
-        const zz = (1 / t - 1) / kf, hw = hw0 * t, fade = 1 - sstep(0.55, 1, zz);
-        const lwt = Math.max(1.2, lw0 * t);
+        const zz = (1 / t - 1) / kf, xm = zz * range, k = pxm * t, fade = 1 - sstep(0.55, 1, zz);
         if (gapOnly && !(zc > 0 && zz < zc)) continue;
+        const ce = ego[0] + xm * (ego[1] + 0.5 * ego[2] * xm);
+        const ly2 = lines.map((l) => (xm < l.len ? l.y0 + xm * (l.a + 0.5 * l.c * xm) : null));
         for (let x = Math.max(0, lx); x < Math.min(cv.w, lx + W); x++) {
-            const px = x + 0.5 - lx, X = (px - 0.5 * W) / hw, aX = Math.abs(X);
+            const px = x + 0.5 - lx, ym = (0.5 * W - px) / k, aX = Math.abs(ym - ce) / ego[3];
             if (gapOnly) {
                 if (aX >= 0.92) continue;
                 const j = (y * cv.w + x) * 4;
@@ -141,31 +143,86 @@ function lane(cv, g, s, z, P, dim, gapOnly) {
             }
             const edge = sstep(0, 48, Math.min(px, W - px)) * sstep(0, 16, H - py);
             let r = ground[0], gg = ground[1], b = ground[2];
-            let a = (0.30 + 0.70 * R.clamp01(1 - zz)) * (1 - sstep(1.4, 3.4, aX)) * edge * fade;
+            let a = (0.30 + 0.70 * R.clamp01(1 - zz)) * (1 - sstep(2.6, 5.5, aX)) * edge * fade;
             if (zc > 0 && zz < zc) {
-                const k = gs * (1 - sstep(0.72, 0.92, aX)) * sstep(0, 0.04, zc - zz);
-                r += (gapc[0] - r) * k; gg += (gapc[1] - gg) * k; b += (gapc[2] - b) * k;
-                a = Math.max(a, k * fade);
-                if (clo > 0.5) {
-                    for (let i = 0; i < 2; i++) {
-                        const c = chev[i];
-                        const d = (py - c.yc - aX * hw0 * c.tc * 0.28) / (lw0 * c.tc * 0.9 + 0.8);
-                        const on = (1 - sstep(0.6, 1, Math.abs(d))) * (1 - sstep(0.42, 0.52, aX));
-                        if (i < clo) { r += (gapc[0] - r) * on; gg += (gapc[1] - gg) * on; b += (gapc[2] - b) * on; a = Math.max(a, on * fade); }
-                    }
+                const kg = gs * (1 - sstep(0.72, 0.92, aX)) * sstep(0, 0.04, zc - zz);
+                r += (gapc[0] - r) * kg; gg += (gapc[1] - gg) * kg; b += (gapc[2] - b) * kg;
+                a = Math.max(a, kg * fade);
+                for (let i = 0; i < 2; i++) {
+                    const c = chev[i];
+                    const d = (py - c.yc - aX * ego[3] * pxm * c.tc * 0.28) / (0.1 * pxm * c.tc * 0.9 + 0.8);
+                    const on = (1 - sstep(0.6, 1, Math.abs(d))) * (1 - sstep(0.42, 0.52, aX)) * (i + 0.5 < clo ? 1 : 0);
+                    r += (gapc[0] - r) * on; gg += (gapc[1] - gg) * on; b += (gapc[2] - b) * on; a = Math.max(a, on * fade);
                 }
             }
-            const dx = (aX - 1) * hw, adx = Math.abs(dx);
-            const ln = (1 - sstep(lwt * 0.5 - 0.7, lwt * 0.5 + 0.7, adx)) * fade;
-            const glow = (1 - sstep(0, lwt * 2.5 + 2, adx)) * 0.25 * fade;
-            const kl = Math.max(ln, glow);
-            r += (line[0] - r) * kl; gg += (line[1] - gg) * kl; b += (line[2] - b) * kl;
-            a = Math.max(a, kl);
+            for (let i = 0; i < lines.length; i++) {
+                if (ly2[i] === null) continue;
+                const l = lines[i];
+                let d = Math.abs(ym - ly2[i]) * k;
+                const lw = Math.max(1.2, l.mw * k);
+                if (d > lw * 4 + 4) continue;
+                if (l.ty > 2.5 && l.ty < 3.5) d = Math.abs(d - 1.4 * lw);
+                const on = 1 - sstep(lw * 0.5 - 0.7, lw * 0.5 + 0.7, d);
+                const glow = (1 - sstep(0, lw * 2.5 + 2, d)) * 0.25;
+                const dash = l.ty > 1.5 && l.ty < 2.5 ? (fract(xm / 12) < 0.5 ? 1 : 0) : 1;
+                const kk = Math.max(on, glow) * dash * fade * l.str * (1 - sstep(l.len - 8, l.len, xm));
+                const lc = l.ty > 3.5 ? edgeCol : line;
+                r += (lc[0] - r) * kk; gg += (lc[1] - gg) * kk; b += (lc[2] - b) * kk;
+                a = Math.max(a, kk);
+            }
             if (a <= 0.002) continue;
             col[0] = R.clamp01(r * dm) * 255; col[1] = R.clamp01(gg * dm) * 255; col[2] = R.clamp01(b * dm) * 255;
             cv.put((y * cv.w + x) * 4, col, a);
         }
     }
+}
+
+/* ------------------------------------------------------------------------------------------------ the road users (acc_obj in JS) */
+
+function box(qx, qy, cx, cy, bx, by, r) {
+    const ex = Math.abs(qx - cx) - bx + r, ey = Math.abs(qy - cy) - by + r;
+    const ox = Math.max(ex, 0), oy = Math.max(ey, 0);
+    return Math.sqrt(ox * ox + oy * oy) + Math.min(Math.max(ex, ey), 0) - r;
+}
+const circ = (qx, qy, cx, cy, r) => Math.sqrt((qx - cx) * (qx - cx) + (qy - cy) * (qy - cy)) - r;
+
+/** acc_obj.glsl's shape(): the signed distance (in box heights) to our generic shape of class k (1..6), aspect a = w / h. */
+function shape(qx, qy, k, a) {
+    if (k < 1.5) return Math.min(box(qx, qy, 0, 0.64, 0.48 * a, 0.27, 0.10), box(qx, qy, 0, 0.30, 0.33 * a, 0.17, 0.07));
+    if (k < 2.5) return Math.min(box(qx, qy, 0, 0.52, 0.48 * a, 0.47, 0.04), box(qx, qy, 0, 0.96, 0.40 * a, 0.04, 0.02));
+    if (k < 3.5) return Math.min(Math.min(box(qx, qy, 0, 0.46, 0.12, 0.27, 0.09), circ(qx, qy, 0, 0.11, 0.09)), box(qx, qy, 0, 0.85, 0.05, 0.15, 0.04));
+    const body = Math.min(circ(qx, qy, 0, 0.08, 0.075), box(qx, qy, 0, 0.34, 0.13, 0.19, 0.07));
+    if (k < 4.5) return Math.min(body, box(Math.abs(qx), qy, 0.06, 0.76, 0.045, 0.23, 0.04));
+    if (k < 5.5) return Math.min(body, Math.abs(circ(qx, qy, 0, 0.79, 0.18)) - 0.03);
+    return Math.abs((Math.abs(qx) + Math.abs(qy - 0.5)) * 0.7071 - 0.3) - 0.035;
+}
+
+/** The road users of state s (far first), each in its own box: acc_obj's look. */
+function users(cv, g, s, fill, dim) {
+    const lx = g.lane[0], ly = g.lane[1];
+    const dm = 1 - 0.65 * (dim || 0), col = [0, 0, 0], black = [0, 0, 0];
+    M.objectBoxes(g, s).forEach((b) => {
+        if (b.h <= 1) return;
+        const a = b.w / b.h, aa = 1 / b.h;
+        const x0 = Math.max(lx, Math.floor(lx + b.cx - 0.6 * b.w - 3)), x1 = Math.min(lx + g.lane[2], Math.ceil(lx + b.cx + 0.6 * b.w + 3));
+        const y0 = Math.max(ly, Math.floor(ly + b.fy - b.h - 2)), y1 = Math.min(ly + g.lane[3], Math.ceil(ly + b.fy + 0.12 * b.h + 2));
+        for (let y = y0; y < y1; y++) {
+            for (let x = x0; x < x1; x++) {
+                const qx = (x + 0.5 - lx - b.cx) / b.h, qy = (y + 0.5 - ly - (b.fy - b.h)) / b.h;
+                const sx = qx / (0.5 * a + 0.08), sy = (qy - 1) / 0.06;
+                const sh = (1 - sstep(0.3, 1, sx * sx + sy * sy)) * 0.45;
+                const d = shape(qx, qy, b.cls, a);
+                const k = 1 - sstep(-aa, aa, d);
+                const i = (y * cv.w + x) * 4;
+                if (sh * (1 - k) > 0.002) cv.put(i, black, sh * (1 - k) * b.alpha);
+                if (k > 0.002) {
+                    const lit = (0.78 + 0.22 * (1 - qy)) * (0.72 + 0.28 * sstep(-0.06, -0.015, d)) * dm;
+                    col[0] = R.clamp01(fill[0] * lit) * 255; col[1] = R.clamp01(fill[1] * lit) * 255; col[2] = R.clamp01(fill[2] * lit) * 255;
+                    cv.put(i, col, k * b.alpha);
+                }
+            }
+        }
+    });
 }
 
 /* ------------------------------------------------------------------------------------------------ the centre page */
@@ -188,11 +245,18 @@ function rows(s, o, lang) {
     if (s.warn) out.push(['rowWarn', W('warnActive'), 'ink', true]);
     else out.push(['rowWarn', info.warn ? String(info.warn) : W('warnNone'), info.warn ? 'ink' : 'dim']);
     out.push(['rowAdvice', s.adv ? s.adv + ' ' + W('kmh') : '—', s.adv ? 'cyan' : 'dim']);
+    // what the sensors see (the owner's FOCUS): the road users by class, the lanes measured or our symbol
+    const objs = (s.world && s.world.objects) || [], cnt = {};
+    objs.forEach((u) => { if ((u.alpha === undefined ? 1 : u.alpha) > 0.5) cnt[u.cls] = (cnt[u.cls] || 0) + 1; });
+    const parts = ['car', 'truck', 'two', 'ped', 'cyc', 'unk'].filter((c) => cnt[c]).map((c) => W('cls_' + c) + ' ' + cnt[c]);
+    out.push(['rowUsers', parts.length ? parts.join(' · ') : '—', parts.length ? 'ink' : 'dim']);
+    const ln = s.world && s.world.lanes;
+    out.push(['rowLanes', ln ? W('lanesMeasured') + ' · ' + ln.lines.length : W('lanesFixed'), ln ? 'ink' : 'dim']);
     return out;
 }
 
-const ROW0 = 112, ROW_STEP = 48;
-const BASE = { px: null, night: null };      // the page's background with the empty lane (one look kept: ~3 MB)
+const ROW0 = 106, ROW_STEP = 40;
+const BASE = { px: null, key: null };      // the page's background with the lanes and no car (one kept: ~3 MB)
 
 /** -> { px, words: [{ key, str, x, w, maxW }] } (words: what was drawn where, for the tests' "inside its box"). */
 function centre(s, o) {
@@ -200,19 +264,22 @@ function centre(s, o) {
     const lang = Wd.langOf(opt.lang), night = !!opt.night;
     const P = M.colours('centre', night), g = M.GEO.centre;
     const words = [];
-    const z = typeof opt.z === 'number' ? opt.z : s.tgt ? M.depthOf(s.tgt) : 0;
-    // E: the lane (the background with the empty lane is cached per day / night; the gap is computed over it), the car
-    // ahead at its depth, the ring, the limit, the suggestion
-    if (!BASE.px || BASE.night !== night) {
+    const lead = M.leadOf(s);
+    const z = typeof opt.z === 'number' ? opt.z : lead ? lead.x / M.RANGE : 0;
+    // E: the lanes (the background with the lanes and no car is cached per day / night and lane picture; the gap is computed
+    // over it), the road users, the car ahead highlighted (the acc_car shader's own sprite), the ring, the limit, the suggestion
+    const bk = night + '|' + M.worldKey({ world: s.world ? { lanes: s.world.lanes, objects: [] } : null });
+    if (!BASE.px || BASE.key !== bk) {
         const b = new R.Canvas(PAGE_W, PAGE_H, P.bg);
-        lane(b, g, { tgt: null, clo: 0 }, 0, P, 0);
-        BASE.px = b.px; BASE.night = night;
+        lane(b, g, { tgt: null, clo: 0, world: s.world ? { lanes: s.world.lanes } : null }, 0, P, 0);
+        BASE.px = b.px; BASE.key = bk;
     }
     const cv = new R.Canvas(PAGE_W, PAGE_H, null);
     BASE.px.copy(cv.px);
-    if (s.tgt) lane(cv, g, s, z, P, 0, true);
-    if (s.tgt) {
-        const r = M.carRect(g, z);
+    if (lead) lane(cv, g, s, z, P, 0, true);
+    users(cv, g, s, P.fill, 0);
+    if (lead) {
+        const r = M.carRect(g, z, lead.y);
         cv.sprite(R.sprite(s.clo === 2 ? 'carFast' : 'car'), r[0], r[1], r[2], r[3], night ? (s.clo === 2 ? 0.78 : 0.75) : 1, 1);
     }
     ring(cv, P, s, g.ring[0], g.ring[1], g.ring[2], 'av_f56', g.fig, 'av_b26', g.word, lang, 3.5);
@@ -248,4 +315,4 @@ function centre(s, o) {
     return { px: cv.px, words };
 }
 
-module.exports = { textSheet, pillSheet, centre, lane, rows, TEXT_W, TEXT_H, PILL_W, PILL_H, PAGE_W, PAGE_H, truncate };
+module.exports = { textSheet, pillSheet, centre, lane, users, shape, rows, TEXT_W, TEXT_H, PILL_W, PILL_H, PAGE_W, PAGE_H, truncate };

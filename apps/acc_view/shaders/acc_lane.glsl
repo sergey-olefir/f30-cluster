@@ -1,6 +1,7 @@
-// ACC View, direction E (round 1120 AA; docs/r1120/AA-SPEC.md 3.1): the ground, our lane's two lines running to the horizon,
-// the measured gap lit on the road with chevrons while closing, and faint outlines of neighbouring vehicles. One look.
-// Layer px in u_size; every px distance is formed from small terms (no length() of a large offset), highp where available.
+// ACC View, direction E (round 1120 AA2; docs/r1120/AA-SPEC.md 3.1, the owner's FOCUS of 2026-11-20): the ground, the lane
+// boundaries the camera measures (clothoids: offset, heading, curvature; solid / dashed / double / road edge, up to four, so
+// our lane and the next ones) or AA's fixed symbol, the measured gap lit on our lane, chevrons while closing. One look.
+// Layer px in u_size; lateral distances in metres times px-per-metre (small terms), highp where available.
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
@@ -8,66 +9,57 @@ precision mediump float;
 #endif
 varying vec2 v_uv;
 uniform vec2 u_size;     // the layer, px
-uniform vec4 u_geo;      // horizon (v), half lane width at the foot (px), the far end's scale t (0..1), line width at the foot (px)
-uniform vec3 u_line;     // the lane lines' colour
+uniform vec4 u_view;     // horizon (share of the height), px per metre at the foot, kf (1 / far scale - 1), range (m)
+uniform vec4 u_ln[4];    // boundaries: offset at 0 m (m, left +), heading (rad), curvature (1/m), type (0 none 1 solid 2 dashed 3 double 4 edge)
+uniform vec4 u_lp[4];    // boundaries: valid length (m), strength (0..1), marking width (m), 0
+uniform vec4 u_ego;      // our lane's centre: offset (m), heading, curvature, half width (m)
+uniform vec3 u_line;     // the lines' colour (a fixed, neutral symbol: never with any state)
 uniform vec3 u_ground;   // the ground's colour at the foot
 uniform vec4 u_gap;      // the car ahead's depth z (0..1; 0 = none), closing (0, 1, 2), the lit gap's strength, dim (0..1)
 uniform vec3 u_gapc;     // the lit gap's and the chevrons' colour
-uniform vec4 u_nb[4];    // neighbours: lane (-1 / +1; 0 = none), depth z, strength, 0
-
-float tOf(float z, float kf) { return 1.0 / (1.0 + z * kf); }
 
 void main() {
     vec2 p = v_uv * u_size;
-    float hy = u_geo.x * u_size.y;
+    float hy = u_view.x * u_size.y;
     float t = (p.y - hy) / (u_size.y - hy);
     vec4 c = vec4(0.0);
     if (t > 0.0) {
-        float kf = 1.0 / u_geo.z - 1.0;
-        float z = (1.0 / t - 1.0) / kf;
-        float hw = u_geo.y * t;
-        float X = (p.x - 0.5 * u_size.x) / hw;
+        float z = (1.0 / t - 1.0) / u_view.z;
+        float xm = z * u_view.w;
+        float k = u_view.y * t;
+        float ym = (0.5 * u_size.x - p.x) / k;
         float fade = 1.0 - smoothstep(0.55, 1.0, z);
+        float ce = u_ego.x + xm * (u_ego.y + 0.5 * u_ego.z * xm);
+        float aX = abs(ym - ce) / u_ego.w;
         float edge = smoothstep(0.0, 48.0, min(p.x, u_size.x - p.x)) * smoothstep(0.0, 16.0, u_size.y - p.y);
-        float ground = (0.30 + 0.70 * clamp(1.0 - z, 0.0, 1.0)) * (1.0 - smoothstep(1.4, 3.4, abs(X))) * edge;
+        float ground = (0.30 + 0.70 * clamp(1.0 - z, 0.0, 1.0)) * (1.0 - smoothstep(2.6, 5.5, aX)) * edge;
         c = vec4(u_ground, ground * fade);
         if (u_gap.x > 0.0 && z < u_gap.x) {
-            float k = u_gap.z * (1.0 - smoothstep(0.72, 0.92, abs(X))) * smoothstep(0.0, 0.04, u_gap.x - z);
-            c.rgb = mix(c.rgb, u_gapc, k);
-            c.a = max(c.a, k * fade);
-            if (u_gap.y > 0.5) {
-                for (int i = 0; i < 2; i++) {
-                    float tc = tOf(u_gap.x * (0.45 + 0.22 * float(i)), kf);
-                    float yc = hy + (u_size.y - hy) * tc;
-                    float d = (p.y - yc - abs(X) * u_geo.y * tc * 0.28) / (u_geo.w * tc * 0.9 + 0.8);
-                    float on = (1.0 - smoothstep(0.6, 1.0, abs(d))) * (1.0 - smoothstep(0.42, 0.52, abs(X)));
-                    if (float(i) < u_gap.y) { c.rgb = mix(c.rgb, u_gapc, on); c.a = max(c.a, on * fade); }
-                }
+            float g = u_gap.z * (1.0 - smoothstep(0.72, 0.92, aX)) * smoothstep(0.0, 0.04, u_gap.x - z);
+            c.rgb = mix(c.rgb, u_gapc, g);
+            c.a = max(c.a, g * fade);
+            for (int i = 0; i < 2; i++) {
+                float tc = 1.0 / (1.0 + u_gap.x * (0.45 + 0.22 * float(i)) * u_view.z);
+                float yc = hy + (u_size.y - hy) * tc;
+                float d = (p.y - yc - aX * u_ego.w * u_view.y * tc * 0.28) / (0.1 * u_view.y * tc * 0.9 + 0.8);
+                float on = (1.0 - smoothstep(0.6, 1.0, abs(d))) * (1.0 - smoothstep(0.42, 0.52, aX)) * step(float(i) + 0.5, u_gap.y);
+                c.rgb = mix(c.rgb, u_gapc, on);
+                c.a = max(c.a, on * fade);
             }
         }
-        float lw = max(1.2, u_geo.w * t);
-        float dx = (abs(X) - 1.0) * hw;
-        float line = (1.0 - smoothstep(lw * 0.5 - 0.7, lw * 0.5 + 0.7, abs(dx))) * fade;
-        float glow = (1.0 - smoothstep(0.0, lw * 2.5 + 2.0, abs(dx))) * 0.25 * fade;
-        c.rgb = mix(c.rgb, u_line, max(line, glow));
-        c.a = max(c.a, max(line, glow));
         for (int i = 0; i < 4; i++) {
-            vec4 n = u_nb[i];
-            if (abs(n.x) > 0.5) {
-                float tn = tOf(n.y, kf);
-                float wy = hy + (u_size.y - hy) * tn;
-                float bw = u_geo.y * tn * 0.62;
-                float bh = bw * 0.62;
-                vec2 q = vec2(p.x - (0.5 * u_size.x + n.x * 2.0 * u_geo.y * tn), p.y - (wy - bh));
-                if (abs(q.x) < bw + 4.0 && abs(q.y) < bh + 4.0) {
-                    vec2 e = abs(q - vec2(0.0, bh * 0.35)) - vec2(bw, bh * 0.62) + vec2(bh * 0.2);
-                    float sd = length(max(e, 0.0) / bh) * bh + min(max(e.x, e.y), 0.0) - bh * 0.2;
-                    e = abs(q + vec2(0.0, bh * 0.45)) - vec2(bw * 0.68, bh * 0.45) + vec2(bh * 0.2);
-                    sd = min(sd, length(max(e, 0.0) / bh) * bh + min(max(e.x, e.y), 0.0) - bh * 0.2);
-                    float o = (1.0 - smoothstep(0.6, 1.6, abs(sd))) * n.z;
-                    c.rgb = mix(c.rgb, u_line * 0.5 + vec3(0.5), o);
-                    c.a = max(c.a, o);
-                }
+            vec4 l = u_ln[i];
+            vec4 q = u_lp[i];
+            if (l.w > 0.5 && xm < q.x) {
+                float d = abs(ym - (l.x + xm * (l.y + 0.5 * l.z * xm))) * k;
+                float lw = max(1.2, q.z * k);
+                if (l.w > 2.5 && l.w < 3.5) d = abs(d - 1.4 * lw);
+                float on = 1.0 - smoothstep(lw * 0.5 - 0.7, lw * 0.5 + 0.7, d);
+                float glow = (1.0 - smoothstep(0.0, lw * 2.5 + 2.0, d)) * 0.25;
+                float dash = (l.w > 1.5 && l.w < 2.5) ? step(fract(xm / 12.0), 0.5) : 1.0;
+                float kk = max(on, glow) * dash * fade * q.y * (1.0 - smoothstep(q.x - 8.0, q.x, xm));
+                c.rgb = mix(c.rgb, l.w > 3.5 ? u_line * 0.5 + vec3(0.14) : u_line, kk);
+                c.a = max(c.a, kk);
             }
         }
     }

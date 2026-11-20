@@ -9,15 +9,17 @@
  * Part 1 (pure): the manifest (read-only flags, non-zero getters by tools/signals/check_signals.py, off by default, the map
  * target without contend or guide hold, in the Store's "apps/*"), Node 8 syntax, no Cyrillic literal in the drawing code, the
  * words table (both languages, the atlases cover them), the shaders (shipped = hud/shaders.json, small, highp, no sampler,
- * one look, GLSL ES 1.00), the model, E on the map target through a recording stand-in of cluster_render_client (4 layers,
- * sizes, places, pixel memory, NO pixels while the car glides), the map sheets and the centre page in every demo state day
+ * one look, GLSL ES 1.00), the model, what the sensors see (the decoders on the catalogue's shapes, the tracker's glide and
+ * fade, the lead, the log lines, the 7 scenes), E on the map target through a recording stand-in of cluster_render_client (5
+ * layers, sizes, places, pixel memory, NO pixels while the car glides or traffic moves, the 16-object budget), the map sheets and the centre page in every demo state day
  * and night (no red; amber only while closing fast; cyan only with a suggestion; green only with an active cruise), every
  * word inside its box in uk and en, the Cyrillic drawn, no pressable control, diffRect / cut.
  * Part 2 (the bench, port 8941): the app built by the kit and run against the fake cluster-render: the centre page pushed
  * (1600 x 520) and equal to the painter's; off = no map layer; on = the 4 layers; the car's raw values fed (POST /fake) and its
  * picture read back (GET /px) equal to the painter's; the level changing = the car layer moved, 0 pixel updates; the limit
- * event, the day / night signal, closing fast (amber), stale (the car goes); off again = the layers gone.
- * Part 3 (WebGL): both shaders compiled and drawn by headless Chrome's WebGL 1 (GLSL ES 1.00, ANGLE / SwiftShader): the first
+ * event, the day / night signal, the camera's objects and lane boundaries fed as events (drawn, logged, faded when silent),
+ * closing fast (amber), stale (the car goes); off again = the layers gone.
+ * Part 3 (WebGL): the three shaders compiled and drawn by headless Chrome's WebGL 1 (GLSL ES 1.00, ANGLE / SwiftShader): the first
  * ES compile they get before the car. Skipped (not failed) when Chrome is not installed.
  */
 const fs = require('fs');
@@ -41,6 +43,7 @@ const P = require(path.join(APPDIR, 'paint.js'));
 const R = require(path.join(APPDIR, 'raster.js'));
 const Wd = require(path.join(APPDIR, 'words.js'));
 const MapView = require(path.join(APPDIR, 'mapview.js'));
+const Wo = require(path.join(APPDIR, 'world.js'));
 const FV = require(path.join(ROOT, 'shared', 'front_vehicle.js'));
 const SRC = require(path.join(ROOT, 'shared', 'limit_src.js'));
 
@@ -88,8 +91,8 @@ function part1() {
         else if (f === '_methods') methods++;
         else if (f === '_broadcasts') broadcasts += app.signals[i][f].length;
     }));
-    ok(flags.length === 5 && flags.every((x) => x === 's' || x === 'rs'), 'five fields, read-only flags only (s / rs), no setter');
-    ok(methods === 0 && broadcasts === 1, 'no method; one event (the limit)');
+    ok(flags.length === 6 && flags.every((x) => x === 's' || x === 'rs'), 'six fields, read-only flags only (s / rs), no setter');
+    ok(methods === 0 && broadcasts === 7, 'no method; seven events (the limit, the camera objects x2, the object list, the lane boundaries, the lanes, the distance objects)');
     ok(app.config.target === 'map' && app.config.layer.target === 'map' && app.config.layer.contend === false && app.config.layer.guideHold === 0, 'the map target, no contend, no guide hold');
     ok(app.settings.length === 2 && app.settings.every((s) => s.default === false), 'two settings, both off by default');
     ok(app.settings[0].key === 'show' && app.settings[0].label === 'Показувати на щитку', 'the setting "Показувати на щитку"');
@@ -115,7 +118,7 @@ function part1() {
 
     // the code: Node 8 syntax; read only; no Cyrillic literal in the drawing code; no pressable control
     const js = fs.readdirSync(APPDIR).filter((f) => /\.js$/.test(f));
-    ok(js.sort().join() === 'main.js,mapview.js,model.js,paint.js,raster.js,words.js', 'the app\'s modules');
+    ok(js.sort().join() === 'main.js,mapview.js,model.js,paint.js,raster.js,words.js,world.js', 'the app\'s modules');
     js.forEach((f) => {
         const s = stripComments(fs.readFileSync(path.join(APPDIR, f), 'utf8'));
         ok(!/\?\.|\?\?|\{\s*\.\.\.|,\s*\.\.\.\w+\s*\}|\.flat\(|\.flatMap\(|Object\.fromEntries|\.padEnd\(|\.trimStart\(/.test(s), f + ': Node 8 syntax (no ?. ?? object spread .flat)');
@@ -123,7 +126,7 @@ function part1() {
         if (f !== 'words.js') ok(!CYR.test(s), f + ': no Cyrillic string in the code (every word comes from words.js)');
     });
     const mainSrc = stripComments(fs.readFileSync(path.join(APPDIR, 'main.js'), 'utf8'));
-    ok(!/onClick|onTap|onTab|\.target\(|\.button\(|\.frame\(|controller\.grab/.test(mainSrc), 'main.js: no tap target, no click handler, no tab strip, no controller grab');
+    ok(!/onClick|onTap|onTab|\.target\(|\.button\(|\bG\.frame\(|GA\.frame\(|controller\.grab/.test(mainSrc), 'main.js: no tap target, no click handler, no tab strip, no controller grab');
     const Rec = require(path.join(ROOT, 'kit', 'runtime', 'record.js'));
     const rc = new Rec.Recorder(1600, 520);
     Rec.setImage(0x41560001, P.PAGE_W, P.PAGE_H, Buffer.alloc(P.PAGE_W * P.PAGE_H * 4));
@@ -147,7 +150,7 @@ function part1() {
     const shipped = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').split('\n').map((l) => l.replace(/[ \t]+/g, ' ').trim()).filter(Boolean).join('\n') + '\n';
     const files = fs.readdirSync(SH).filter((f) => /\.glsl$/.test(f));
     const sj = JSON.parse(fs.readFileSync(path.join(APPDIR, 'hud', 'shaders.json'), 'utf8'));
-    ok(files.length === 2 && Object.keys(sj).sort().join() === 'acc_car,acc_lane', 'two effect shaders (lane, car), both shipped');
+    ok(files.length === 3 && Object.keys(sj).sort().join() === 'acc_car,acc_lane,acc_obj', 'three effect shaders (lane, road users, car ahead), all shipped');
     let total = 0;
     files.forEach((f) => {
         const src = fs.readFileSync(path.join(SH, f), 'utf8'), shp = shipped(src);
@@ -160,7 +163,8 @@ function part1() {
         ok(/varying vec2 v_uv;/.test(shp) && /gl_FragColor/.test(shp) && !/^\s*(in|out)\s/m.test(shp) && !/\btexture\(/.test(shp), f + ': GLSL ES 1.00 (varying, gl_FragColor)');
         ok(!/\b(all|any|not)\s*=/.test(shp), f + ': no built-in names reused as variables');
     });
-    ok(total === 4871, 'both shaders ship 4 871 B together (' + total + ')');
+    ok(total < 7000, 'the three shaders ship ' + total + ' B together (the KOMBI reset near 26.7 k)');
+    console.log('shaders shipped: ' + Object.keys(sj).map((k) => k + ' ' + Buffer.byteLength(sj[k]) + ' B').join(', ') + ', total ' + total + ' B');
 
     // the model (carried over)
     const fvc = FV.cfgOf(Object.assign({}, app.config.frontVehicle, { on: true }));
@@ -186,7 +190,8 @@ function part1() {
     ok(M.stateOf(null, SRC.hudCruiseOf(hc, dds({})), false).cru === null, '65535 / NONE: cruise off');
     const tc = SRC.tsrCfg({ tsr: {} });
     ok(M.stateOf(null, null, false, SRC.tsrOf(tc, { presentClassLimitSpeed: 8 }).kmh).lim === 40 && M.stateOf(null, null, false, null).lim === null, 'the limit: class 8 -> 40 km/h; none -> no figure');
-    ok(M.DEMO.length === 14 && M.DEMO.map((d) => d[0]).join() === M.STATES.join(), 'the 14 demo states');
+    ok(M.DEMO.length === 21 && M.DEMO.map((d) => d[0]).join() === M.STATES.join(), 'the 14 demo states and the 7 scenes');
+    ok(M.DEMO.slice(14).map((d) => d[2].scene).join() === Wo.SCENES.join() && Wo.SCENES.join() === 'busy,crossing,cyclist,cutin,lanechange,curve,nolanes', 'the scenes: busy, crossing, cyclist, cut-in, lane change, curve, no lanes');
 
     // E on the map target: 4 layers, sizes, places, pixel memory; no pixels while the car glides
     const fake = new FakeCR();
@@ -194,10 +199,11 @@ function part1() {
     mv.cr = null;
     mv.CR = { ClusterRender: function () { return fake; } };
     mv.open();
-    ok(fake.layers.length === 4 && fake.layers.map((l) => l.kind).join() === 'effect,effect,image,image', 'E on the map: 4 layers (lane effect, car effect, text sheet, pill sheet)');
+    ok(fake.layers.length === 5 && fake.layers.map((l) => l.kind).join() === 'effect,effect,effect,image,image', 'E on the map: 5 layers (lane, road users, car ahead: effects; text and pill sheets)');
     ok(fake.layers.every((l) => l.o.target === 'map' && l.o.contend === false && l.o.guide_hold === 0), 'every layer on map, no contend, guide_hold 0');
-    ok(fake.layers.map((l) => l.o.z).join() === '0,1,2,3', 'z order: lane, car, text, pill');
-    const L = fake.layers.map((l) => l.o);
+    ok(fake.layers.map((l) => l.o.z).join() === '0,1,2,3,4', 'z order: lane, road users, car, text, pill');
+    const L0 = fake.layers.map((l) => l.o), L = [L0[0], L0[2], L0[3], L0[4]];
+    ok(L0[1].x === 334 && L0[1].y === 158 && L0[1].w === 420 && L0[1].h === 258 && L0[1].fs === sj.acc_obj, 'road users effect: the lane\'s box, the shipped acc_obj');
     ok(L[0].x === 334 && L[0].y === 158 && L[0].w === 420 && L[0].h === 258 && L[0].fs === sj.acc_lane, 'lane effect 420 x 258 at (334, 158), the shipped acc_lane');
     ok(L[1].fs === sj.acc_car && L[1].visible === false, 'car effect: the shipped acc_car, hidden until there is a car');
     ok(L[2].x === 368 && L[2].y === 54 && L[2].w === 380 && L[2].h === 96 && L[2].iw === 380, 'text sheet 380 x 96 at (368, 54)');
@@ -208,7 +214,7 @@ function part1() {
         ok(b[0] >= 334 && b[0] + b[2] <= 754 && b[1] >= 44 && b[1] + b[3] <= 416, 'the car at level ' + lv + ' inside the core (' + b.join(' ') + ')');
     }
     const b1 = M.carBox(M.GEO.map, M.depthOf(1)), b5 = M.carBox(M.GEO.map, M.depthOf(5));
-    ok(b1[2] === 177 && b1[3] === 104 && b5[2] === 35 && b5[3] === 21, 'the car 177 x 104 at level 1 .. 35 x 21 at level 5 (AA-SPEC 3.1)');
+    ok(b1[2] === 103 && b1[3] === 61 && b5[2] === 21 && b5[3] === 12, 'the car ahead 103 x 61 at level 1 (5 m) .. 21 x 12 at level 5 (70 m): a 1.8 m body on a 3.5 m lane');
     ok(MapView.PIXEL_MEMORY === 411520 && L[2].w % 4 === 0 && L[3].w % 4 === 0, 'pixel memory (380 x 96 + 340 x 44) x 8 = 411 520 B; widths % 4 == 0');
     ok(fake.layers.filter((l) => l.kind === 'image').length * 1 <= 8 && fake.layers.length <= 8, 'under the 8-layer cap of a connection');
     const st3 = M.DEMO[3][2];
@@ -230,6 +236,18 @@ function part1() {
     const per = glide.reduce((a, m) => a + m.bytes, 0) / Math.max(1, glide.filter((m) => m.op === 'set').length);
     ok(per < 600, 'a glide step costs a few hundred bytes of messages (' + Math.round(per) + ' B)');
     ok(glide.filter((m) => m.op === 'uniform' && m.name === 'u_line').length === 0, 'the lane lines never change while the car moves');
+    // the road users moving: a busy scene over 3 s at the 150 ms tick: uniforms only, no pixels; the budget
+    const k0 = fake.msgs.length;
+    for (let ms = 0; ms <= 3000; ms += 150) mv.update(M.withScene(M.DEMO[14][2], ms), M.depthOf(3), false, 'uk');
+    const moving = fake.msgs.slice(k0);
+    ok(moving.filter((m) => m.op === 'pixels').length === 0, 'busy traffic moving for 3 s: 0 pixel uploads');
+    const ob = moving.filter((m) => m.name === 'u_ob');
+    ok(ob.length >= 10 && ob.every((m) => m.type === 'vec4' && m.v.length === 64), 'the road users: u_ob as 16 vec4 a tick (' + ob.length + ' updates)');
+    const perTick = moving.reduce((a, m) => a + m.bytes, 0) / 21;
+    console.log('map: busy traffic ' + Math.round(perTick) + ' B of messages a 150 ms tick (' + Math.round(perTick / 0.15) + ' B/s), no pixels');
+    ok(perTick < 3000, 'busy traffic: under 3 KB of messages a tick (' + Math.round(perTick) + ' B)');
+    const u16 = M.objUniforms(M.GEO.map, { world: { objects: Array.apply(null, Array(20)).map((x, i) => ({ id: i, cls: Wo.CLS[i % 6], x: 8 + i * 4, y: (i % 3 - 1) * 3.5 })) } }, false);
+    ok(u16.u_ob.length === 64 && u16.u_ob.filter((v, i) => i % 4 === 3 && v > 0).length === 16, '20 road users reported: the 16 nearest drawn (the shader\'s budget)');
     // costs per event (for the report)
     const costs = {};
     const cost = (name, a, b, nb) => { mv.update(a, a.tgt ? M.depthOf(a.tgt) : 0, false, 'uk'); const k1 = fake.msgs.length; mv.update(b, b.tgt ? M.depthOf(b.tgt) : 0, !!nb, 'uk'); costs[name] = fake.msgs.slice(k1).filter((m) => m.op === 'pixels').reduce((x, m) => x + m.bytes, 0); };
@@ -252,15 +270,16 @@ function part1() {
     // the map's uniforms: the lane lines a fixed symbol; amber only while closing fast
     [false, true].forEach((night) => {
         const lines = {}, gapc = {};
-        M.DEMO.forEach((d) => { const u = M.laneUniforms(M.GEO.map, d[2], M.depthOf(d[2].tgt), night); lines[u.u_line.join()] = 1; gapc[d[0]] = u.u_gapc; });
-        ok(Object.keys(lines).length === 1, 'map ' + (night ? 'night' : 'day') + ': the lane lines one colour in all 14 states');
+        M.DEMO.forEach((d) => { const u = M.laneUniforms(M.GEO.map, M.withScene(d[2], 3000), M.depthOf(d[2].tgt), night); lines[u.u_line.join()] = 1; gapc[d[0]] = u.u_gapc; });
+        ok(Object.keys(lines).length === 1, 'map ' + (night ? 'night' : 'day') + ': the lane lines one colour in all 21 states and scenes');
         const amb = M.colours('map', night).amberF.map((c) => Math.round(c * 1e4) / 1e4).join();
         ok(M.DEMO.every((d) => (gapc[d[0]].join() === amb) === (d[2].clo === 2)), 'map ' + (night ? 'night' : 'day') + ': the gap and chevrons amber only while closing fast');
         ok(M.DEMO.every((d) => { const u = M.carUniforms(d[2], night, 100, 60); return (u.u_body[2] < 0.5 * u.u_body[0]) === (d[2].clo === 2); }), 'map ' + (night ? 'night' : 'day') + ': the car amber-tinted only while closing fast');
     });
 
     // the sheets and the centre page in every state, day and night, both languages
-    M.DEMO.forEach((d) => {
+    M.DEMO.forEach((d0) => {
+        const d = [d0[0], d0[1], M.withScene(d0[2], 3000)];
         [false, true].forEach((night) => {
             const tag = d[0] + ' ' + d[1] + (night ? ' night' : ' day');
             const Qm = M.colours('map', night), Qc = M.colours('centre', night);
@@ -292,9 +311,11 @@ function part1() {
         });
     });
     // the lane line is the same pixel in every state (a fixed symbol), and the ring's word on the map fits in both languages
-    const linePx = (s) => { const p = P.centre(s, { night: false, lang: 'uk' }).px; const i = (470 * 1600 + 106) * 4; return p.slice(i, i + 3).join(); };
+    const gC = M.GEO.centre, rowY = gC.lane[1] + gC.lane[3] - 12;
+    const pr = (() => { const H = gC.lane[3], hy = M.HZ * H, t = (rowY + 0.5 - gC.lane[1] - hy) / (H - hy); return Math.round(gC.lane[0] + gC.lane[2] / 2 + 1.75 * gC.pxm * t - 0.5); })();
+    const linePx = (s) => { const p = P.centre(s, { night: false, lang: 'uk' }).px; const i = (rowY * 1600 + pr) * 4; return p.slice(i, i + 3).join(); };
     const ref = linePx(M.DEMO[2][2]);
-    ok(['03', '05', '07', '08', '12', '14'].every((n) => linePx(M.DEMO[Number(n) - 1][2]) === ref), 'the centre page\'s lane line: the same colour in every state (' + ref + ')');
+    ok(['03', '05', '07', '08', '12', '14'].every((n) => linePx(M.DEMO[Number(n) - 1][2]) === ref) && ref.split(',')[2] > 150, 'the centre page\'s lane line (no lane data: the symbol): the same colour in every state (' + ref + ')');
     ['ringCruise', 'ringPause', 'ringLimiter', 'ringOff', 'limit', 'advice'].forEach((k) => ['uk', 'en'].forEach((l) => {
         const w = Wd.word(l, k), f = k.indexOf('ring') === 0 ? 'av_b18' : 'av_t16';
         ok(R.textWidth(w, f, R.fit(w, f, k.indexOf('ring') === 0 ? 18 : 16, k === 'limit' ? 58 : 104)) <= (k === 'limit' ? 58 : 104), 'map: "' + w + '" fits its place');
@@ -312,17 +333,65 @@ function part1() {
     ok(uk.words.some((w) => CYR.test(w.str)) && !en.words.some((w) => CYR.test(w.str)) && R.diffRect(uk.px, en.px, 1600, 482) !== null, 'the page in uk draws Cyrillic, in en none');
     // the cached empty lane + the gap computed over it = the whole lane computed at once, in every state
     let lm = 0;
-    M.DEMO.forEach((d) => [false, true].forEach((night) => {
+    M.DEMO.forEach((d0) => [false, true].forEach((night) => {
+        const s = M.withScene(d0[2], 3000), ld = M.leadOf(s), z = ld ? ld.x / M.RANGE : 0;
         const Pc = M.colours('centre', night), g = M.GEO.centre;
-        const a = new R.Canvas(1600, 482, Pc.bg); P.lane(a, g, d[2], M.depthOf(d[2].tgt), Pc, 0);
-        const b = new R.Canvas(1600, 482, Pc.bg); P.lane(b, g, { tgt: null, clo: 0 }, 0, Pc, 0);
-        if (d[2].tgt) P.lane(b, g, d[2], M.depthOf(d[2].tgt), Pc, 0, true);
+        const a = new R.Canvas(1600, 482, Pc.bg); P.lane(a, g, s, z, Pc, 0);
+        const b = new R.Canvas(1600, 482, Pc.bg); P.lane(b, g, { tgt: null, clo: 0, world: s.world ? { lanes: s.world.lanes } : null }, 0, Pc, 0);
+        if (ld) P.lane(b, g, s, z, Pc, 0, true);
         if (R.diffRect(a.px, b.px, 1600, 482)) lm++;
     }));
-    ok(lm === 0, 'the centre lane: cached empty lane + gap = the whole computation, all 28 pictures (' + lm + ' differ)');
+    ok(lm === 0, 'the centre lane: cached lanes + gap = the whole computation, all 42 pictures (' + lm + ' differ)');
     const t0 = Date.now();
     for (let i = 0; i < 5; i++) P.centre(M.DEMO[i + 2][2], { lang: 'uk' });
     console.log('centre page paint: ' + Math.round((Date.now() - t0) / 5) + ' ms on this Mac (Node ' + process.version + ')');
+
+    // what the sensors see: the decoders (the catalogue's shapes), the tracker, the lead, the log
+    const wc = Wo.cfgOf({});
+    const slot = (n, f) => Array.apply(null, Array(40)).map((x, i) => (i < n ? f(i) : {}));
+    const rec = { numberOfObjects: 3, objectRecognitionInfo: slot(3, (i) => ({ classificationType: ['CAR_WITH_OR_WITHOUT_TRAILER', 'PEDESTRIAN', 'ROAD_BOUNDARY'][i], objectID: 10 + i, drivingTubeMapping: 'OBJECT_IN_EGO_LANE' })) };
+    const pos = { numberOfObjects: 3, objectPositionInfo: slot(3, (i) => ({ positionX: [25.5, 12, 30][i], positionY: [0.2, -3, 4][i] })), objectDimensionInfo: slot(3, () => ({ width: 1.9 })) };
+    const co = Wo.camObjects(wc, rec, pos);
+    ok(co.length === 2 && co[0].cls === 'car' && co[0].x === 25.5 && co[0].wid === 1.9 && co[1].cls === 'ped' && co[1].id === 'c11', 'camera objects: class, place, width, id; a road boundary is not a road user');
+    ok(Wo.camObjects(Wo.cfgOf({ objects: { ySign: -1 } }), rec, pos)[1].y === 3, 'config.world.objects.ySign flips the side (a hypothesis until a drive)');
+    ok(Wo.camObjects(wc, rec, { numberOfObjects: 1, objectPositionInfo: [{ positionX: 300, positionY: 0 }] }).length === 0 && Wo.camObjects(wc, null, null).length === 0, 'out of range or nothing: no object, no exception');
+    const tcp = Wo.tcpObjects(wc, { numberOfObjects: 1, objectListSmall: [{ summary: { id: 4 }, position: { x: { value: 18 }, y: { value: -3.4 } }, classification: { class_car: 10, class_bicycle: 80 } }] });
+    ok(tcp.length === 1 && tcp[0].cls === 'cyc' && tcp[0].x === 18 && tcp[0].id === 't4', 'the object list (EmMeter, class percentages): the likeliest class');
+    const lb = { laneRecognitionFront: { widthEgoLane: 3.6 }, laneBoundaryFront: [
+        { modelQualifier: 'LANE_BOUNDARY_MODEL_AVAILABLE', existenceProbability: 0.9, pointSegment1: { y: -1.8 }, baseSegment1: { angle: 0.01, curvature: 0.002 }, parametersSegment1: { validLength: 60, curvatureChange: 0 }, parametersSegment2: { validLength: 20 } },
+        { modelQualifier: 'LANE_BOUNDARY_MODEL_AVAILABLE', existenceProbability: 0.9, pointSegment1: { y: 1.7 }, baseSegment1: { angle: 0.01, curvature: 0.002 }, parametersSegment1: { validLength: 60 } },
+        { modelQualifier: 'LANE_BOUNDARY_MODEL_NOT_AVAILABLE', pointSegment1: { y: 5 } },
+        { modelQualifier: 'LANE_BOUNDARY_MODEL_AVAILABLE', existenceProbability: 0.1, pointSegment1: { y: -5 } }],
+        laneBoundaryPropertiesFront: [{ typeInfo: { type: 'DASHED' } }, { typeInfo: { type: 'SOLID' } }, {}, {}] };
+    const lm2 = Wo.laneModel(wc, lb);
+    ok(lm2 && lm2.lines.length === 2 && lm2.lines[0].y0 === 1.7 && lm2.lines[0].type === 'solid' && lm2.lines[1].type === 'dashed' && lm2.lines[1].len === 80 && lm2.lines[1].c === 0.002, 'lane boundaries: usable ones only, left to right, type, curvature, valid length');
+    ok(Wo.laneModel(wc, {}) === null && Wo.egoOf(null).half === 1.75 && Math.abs(Wo.egoOf(lm2).y0 + 0.05) < 1e-9, 'no lane model: the fixed symbol; the ego lane between the nearest lines');
+    const tk = new Wo.Tracker(wc, ['cam']);
+    tk.update('cam', [{ id: 'a', cls: 'car', x: 30, y: 0 }], 0);
+    tk.update('cam', [{ id: 'a', cls: 'car', x: 20, y: 0 }], 100);
+    const f1 = tk.frame(200);
+    ok(f1.length === 1 && f1[0].x < 30 && f1[0].x > 20 && f1[0].alpha === 1, 'the tracker: an object glides toward its new place');
+    const f2 = tk.frame(100 + wc.objects.lostMs + wc.objects.fadeMs / 2);
+    ok(f2.length === 1 && f2[0].alpha > 0.3 && f2[0].alpha < 0.7, 'lost: it fades (alpha ' + (f2[0] && f2[0].alpha.toFixed(2)) + ')');
+    ok(tk.frame(100 + wc.objects.lostMs + wc.objects.fadeMs + 50).length === 0, 'then it is gone: never a frozen object');
+    ok(Wo.leadOf([{ cls: 'car', x: 40, y: 3.5 }, { cls: 'car', x: 30, y: 0.3 }, { cls: 'ped', x: 10, y: 0 }], null).x === 30, 'the lead: the nearest vehicle in our lane (a pedestrian is never the lead)');
+    const lg = new Wo.SourceLog('cam', 10000);
+    lg.add(co, 'EVENT_DATA_AVAILABLE');
+    const line = lg.line(0) || '';
+    ok(/^acc: src cam first n 1 rate -\/s objs 2\.\.2 cls car 1 ped 1 x 12\.0\.\.25\.5 m y -3\.0\.\.0\.2 m q EVENT_DATA_AVAILABLE 1$/.test(line), 'the log: counts, classes, relative metres, qualifiers (numbers and enum names only)');
+    lg.add(co, null); lg.add(co, null);
+    ok(lg.line(5000) === null && /n 2 rate 0\.2\/s/.test(lg.line(10000) || ''), 'then one summary per 10 s with the rate');
+    // the scenes: each one moves, has road users or lanes, the budget holds
+    Wo.SCENES.forEach((n) => {
+        const a1 = Wo.scene(n, 1000), a2 = Wo.scene(n, 6000);
+        ok(a1.objects.length >= 1 && a1.objects.length <= 16 && JSON.stringify(a1) !== JSON.stringify(a2), 'scene ' + n + ': ' + a1.objects.length + ' road users, moving');
+    });
+    ok(Wo.scene('busy', 0).objects.length >= 8 && Wo.scene('busy', 0).lanes.lines.length === 4, 'busy: 8+ road users on both sides, 4 lane boundaries');
+    ok(Wo.scene('crossing', 2000).objects.filter((o) => o.cls === 'ped').length === 2 && Wo.scene('cyclist', 0).objects.some((o) => o.cls === 'cyc'), 'crossing: pedestrians; cyclist: a cyclist alongside');
+    ok(Wo.scene('cutin', 1000).lead.x === 60 && Math.abs(Wo.scene('cutin', 7000).lead.y) < 1.4, 'cut-in: the car from the right lane becomes the car ahead');
+    ok(Wo.scene('curve', 2500).lanes.lines[0].c !== 0 && Wo.scene('nolanes', 0).lanes === null, 'curve: curved boundaries; no lanes: the fixed symbol');
+    const lc = [Wo.scene('lanechange', 0).lanes.lines[1].y0, Wo.scene('lanechange', 9000).lanes.lines[1].y0];
+    ok(lc[0] === 1.75 && Math.abs(lc[1] + 1.75) < 1e-6, 'lane change: the lines move across by one lane');
 
     // diffRect / cut (carried over)
     const a = P.textSheet(M.DEMO[3][2], false, 'uk'), b = P.textSheet(M.DEMO[8][2], false, 'uk');
@@ -429,7 +498,7 @@ async function part2() {
         await request('POST', '/fake', { feed: { iface: DDS, field: 'functionalLibraryData', value: { ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', statusLimiter: 'STATUS_INACTIVE', cruiseCtrlSpeedHUD: 90 } } });
         ok(await waitFor(/acc: day\/night 1 -> day/, 4000), 'the car\'s day / night read (1 -> day)');
         await request('POST', '/setting', { key: 'show', value: true });
-        ok(await waitFor(/acc: map layers 4 .* on map \(waits for the slot\), pixel memory 411520/, 8000), 'show on: 4 layers asked for, waiting for the slot (no contend)');
+        ok(await waitFor(/acc: map layers 5 .* on map \(waits for the slot\), pixel memory 411520/, 8000), 'show on: 5 layers asked for, waiting for the slot (no contend)');
         const feedGap = async (g0, g1, ms) => {
             const n = Math.round(ms / 100);
             for (let i = 0; i <= n; i++) { await request('POST', '/fake', { front: { gap: Math.round(g0 + (g1 - g0) * i / n), speed: 1500, obj: 7, qual: 0, qualExt: 0 } }); await sleep(100); }
@@ -437,38 +506,66 @@ async function part2() {
         await feedGap(420, 420, 1800);
         await sleep(1500);
         let ls = mine(es.scene);
-        ok(ls.length === 4 && ls.map((l) => l.kind).join() === 'effect,effect,image,image' && ls.every((l) => l.target === 'map'), 'the scene: 4 layers on map (effect, effect, image, image)');
+        ok(ls.length === 5 && ls.map((l) => l.kind).join() === 'effect,effect,effect,image,image' && ls.every((l) => l.target === 'map'), 'the scene: 5 layers on map (3 effects, 2 images)');
         const byZ = (k) => ls.filter((l) => l.z === k)[0] || {};
         const want3 = M.carBox(M.GEO.map, M.depthOf(3));
-        ok(byZ(1).visible === 1 && byZ(1).x === want3[0] && byZ(1).y === want3[1] && byZ(1).w === want3[2] && byZ(1).h === want3[3], 'raw 420 at 90 km/h: the car layer at level 3\'s box (' + [byZ(1).x, byZ(1).y, byZ(1).w, byZ(1).h].join(' ') + ')');
-        ok(byZ(0).x === 334 && byZ(0).y === 158 && byZ(2).x === 368 && byZ(3).y === 362, 'the lane, text and pill layers in place');
+        ok(byZ(2).visible === 1 && byZ(2).x === want3[0] && byZ(2).y === want3[1] && byZ(2).w === want3[2] && byZ(2).h === want3[3], 'raw 420 at 90 km/h: the car layer at level 3\'s box (' + [byZ(2).x, byZ(2).y, byZ(2).w, byZ(2).h].join(' ') + ')');
+        ok(byZ(0).x === 334 && byZ(0).y === 158 && byZ(1).x === 334 && byZ(1).w === 420 && byZ(3).x === 368 && byZ(4).y === 362, 'the lane, road users, text and pill layers in place');
         const grab = async (l) => (await request('GET', '/px?key=' + encodeURIComponent(l.key) + '&x=0&y=0&w=' + l.w + '&h=' + l.h)).body;
         const same = (px, want, what) => { let diff = 0; for (let i = 0; i < want.length; i++) if (Math.abs(want[i] - px[i]) > 1) diff++; ok(px.length === want.length && diff === 0, what + ' (' + diff + ' bytes differ)'); };
         const s3 = { tgt: 3, clo: 0, data: 'ok', cru: ['cruise', 'active', 90], warn: false, adv: null, lim: null };
-        same(await grab(byZ(2)), P.textSheet(s3, false, 'uk'), 'the text sheet read back = the painter\'s (cruise 90, no limit)');
-        same(await grab(byZ(3)), P.pillSheet(s3, false, 'uk'), 'the pill sheet read back = the painter\'s (no event: empty)');
+        same(await grab(byZ(3)), P.textSheet(s3, false, 'uk'), 'the text sheet read back = the painter\'s (cruise 90, no limit)');
+        same(await grab(byZ(4)), P.pillSheet(s3, false, 'uk'), 'the pill sheet read back = the painter\'s (no event: empty)');
         // the level changes (the gap grows: not closing): the car moves, no pixels
-        const pxBefore = es.px.filter((m) => m.key === byZ(2).key || m.key === byZ(3).key).length;
+        const pxBefore = es.px.filter((m) => m.key === byZ(3).key || m.key === byZ(4).key).length;
         await feedGap(420, 900, 3000);
         await feedGap(900, 900, 1500);
         await sleep(1200);
         ls = mine(es.scene);
-        const car = ls.filter((l) => l.z === 1)[0] || {};
+        const car = ls.filter((l) => l.z === 2)[0] || {};
         const want5 = M.carBox(M.GEO.map, M.depthOf(5));
         ok(car.w === want5[2] && car.h === want5[3], 'the gap grown to raw 900: the car layer resized to level 5 (' + car.w + 'x' + car.h + ')');
-        ok(es.px.filter((m) => m.key === byZ(2).key || m.key === byZ(3).key).length === pxBefore, 'level 3 -> 5: no pixel update (the car moved, nothing re-uploaded)');
+        ok(es.px.filter((m) => m.key === byZ(3).key || m.key === byZ(4).key).length === pxBefore, 'level 3 -> 5: no pixel update (the car moved, nothing re-uploaded)');
+        // what the sensors see: the camera's objects and the lane boundaries, as the catalogue shapes them (events)
+        const CAM = 'de.bmw.environmentalmodel.ObjectRecognitionFrontCamera';
+        const slots = (k, f) => Array.apply(null, Array(40)).map((x, i) => (i < k ? f(i) : {}));
+        const rec = { eventDataQualifier: 'EVENT_DATA_AVAILABLE', numberOfObjects: 3, objectRecognitionInfo: slots(3, (i) => ({ classificationType: ['CAR_WITH_OR_WITHOUT_TRAILER', 'PEDESTRIAN', 'TRUCK_BUS_VAN'][i], objectID: 20 + i })) };
+        const pos = { eventDataQualifier: 'EVENT_DATA_AVAILABLE', numberOfObjects: 3, objectPositionInfo: slots(3, (i) => ({ positionX: [24, 14, 40][i], positionY: [3.5, -3.2, -3.5][i] })), objectDimensionInfo: slots(3, () => ({})) };
+        const lanes = { eventDataQualifier: 'EVENT_DATA_AVAILABLE', laneBoundaryFront: [-1.75, 1.75, 5.25].map((y) => ({ modelQualifier: 'LANE_BOUNDARY_MODEL_AVAILABLE', existenceProbability: 0.9, pointSegment1: { y }, baseSegment1: { angle: 0, curvature: 0.003 }, parametersSegment1: { validLength: 70 } })),
+            laneBoundaryPropertiesFront: [{ typeInfo: { type: 'SOLID' } }, { typeInfo: { type: 'DASHED' } }, { typeInfo: { type: 'ROAD_EDGE' } }] };
+        for (let i = 0; i < 6; i++) {
+            await request('POST', '/fake', { feed: { iface: CAM, field: 'ObjectRecognition', value: rec } });
+            await request('POST', '/fake', { feed: { iface: CAM, field: 'ObjectPosition', value: pos } });
+            await request('POST', '/fake', { feed: { iface: 'de.bmw.environmentalmodel.LaneBoundaries', field: 'LaneBoundaries', value: lanes } });
+            await request('POST', '/fake', { front: { gap: 900, speed: 1500, obj: 7, qual: 0, qualExt: 0 } });
+            await sleep(150);
+        }
+        await sleep(400);
+        ls = mine(es.scene);
+        const uo = ((ls.filter((l) => l.z === 1)[0] || {}).uniforms || {}).u_ob, ul = ((ls.filter((l) => l.z === 0)[0] || {}).uniforms || {}).u_ln;
+        const drawn = uo ? uo.v.filter((v, i) => i % 4 === 3 && v > 0).length : 0;
+        ok(drawn === 3, 'the camera\'s 3 objects: 3 road users on the cluster (' + drawn + ')');
+        const oc = ((ls.filter((l) => l.z === 1)[0] || {}).uniforms || {}).u_oc;
+        ok(oc && oc.v.slice(0, 12).filter((v, i) => i % 4 === 0).sort().join() === '1,2,4', 'their classes: car, truck, pedestrian');
+        ok(ul && ul.v[3] === 4 && ul.v[7] === 2 && ul.v[11] === 1 && ul.v[2] === 0.003, 'the measured boundaries on the cluster: edge, dashed, solid, curving (' + (ul && ul.v.slice(0, 12).join(' ')) + ')');
+        ok(/acc: src cam first n \d+ rate -\/s objs 3\.\.3 cls car 1 ped 1 truck 1 x 14\.0\.\.40\.0 m y -3\.5\.\.3\.5 m q EVENT_DATA_AVAILABLE/.test(out), 'the log says what arrived: counts, classes, relative metres, qualifier');
+        ok(/acc: src lanes first n \d+ .*cls dashed 1 edge 1 solid 1/.test(out), 'the log: the lane boundaries\' types');
+        await sleep(1500);
+        ls = mine(es.scene);
+        const uo2 = ((ls.filter((l) => l.z === 1)[0] || {}).uniforms || {}).u_ob;
+        ok(uo2 && uo2.v.filter((v, i) => i % 4 === 3 && v > 0).length === 0, 'the camera silent 1.5 s: the road users faded out (never frozen)');
         // the limit (the event) and the night (the car's day / night)
         await request('POST', '/fake', { feed: { iface: 'de.bmw.dass.TrafficSignRecognition', field: 'TrafficSignRecognition', value: { presentClassLimitSpeed: 22, controlSLIWarning: 0, presentWithdrawalLimitSpeed: 1 } } });
         await sleep(600);
-        same(await grab(byZ(2)), P.textSheet(Object.assign({}, s3, { tgt: 5, lim: 110 }), false, 'uk'), 'the limit event (class 22): the plate says 110');
+        same(await grab(byZ(3)), P.textSheet(Object.assign({}, s3, { tgt: 5, lim: 110 }), false, 'uk'), 'the limit event (class 22): the plate says 110');
         await request('POST', '/fake', { feed: { iface: 'de.bmw.dass.TrafficSignRecognition', field: 'TrafficSignRecognition', value: { presentClassLimitSpeed: 22, controlSLIWarning: 0, presentWithdrawalLimitSpeed: 1 } } });
         await request('POST', '/fake', { feed: { iface: 'de.bmw.infotainment.vehicle.Vehicle', field: 'statusDayNightChangeOver', value: { dayNightChangeOver: 2 } } });
         await feedGap(900, 900, 600);
-        same(await grab(byZ(2)), P.textSheet(Object.assign({}, s3, { tgt: 5, lim: 110 }), true, 'uk'), 'the car says night (2): the night colours');
+        same(await grab(byZ(3)), P.textSheet(Object.assign({}, s3, { tgt: 5, lim: 110 }), true, 'uk'), 'the car says night (2): the night colours');
         await request('POST', '/fake', { feed: { iface: 'de.bmw.infotainment.vehicle.Vehicle', field: 'statusDayNightChangeOver', value: { dayNightChangeOver: 1 } } });
         // closing fast: amber
         await feedGap(900, 250, 2400);
-        const pill = await grab(byZ(3));
+        const pill = await grab(byZ(4));
         const Q = M.colours('map', false);
         let amber = 0;
         for (let i = 0; i < pill.length; i += 4) if (pill[i + 3] > 200 && near(pill[i], pill[i + 1], pill[i + 2], Q.amber, 6)) amber++;
@@ -476,8 +573,8 @@ async function part2() {
         // stale: the car goes
         await sleep(2800);
         ls = mine(es.scene);
-        ok((ls.filter((l) => l.z === 1)[0] || {}).visible === 0, 'silence for 2.8 s: stale, the car layer hidden (never a frozen car)');
-        same(await grab(byZ(3)), P.pillSheet({ tgt: null, clo: 0, data: 'stale', cru: s3.cru, warn: false, adv: null, lim: null }, false, 'uk'), 'stale: the pill says so');
+        ok((ls.filter((l) => l.z === 2)[0] || {}).visible === 0, 'silence for 2.8 s: stale, the car layer hidden (never a frozen car)');
+        same(await grab(byZ(4)), P.pillSheet({ tgt: null, clo: 0, data: 'stale', cru: s3.cru, warn: false, adv: null, lim: null }, false, 'uk'), 'stale: the pill says so');
         // the centre page as the HMI got it: E's half equals the painter's (the table's age row moves on its own)
         await sleep(1500);
         const png = path.join(imgDir, 'main_gfx.png');
@@ -507,6 +604,13 @@ async function part2() {
 }
 
 /* ------------------------------------------------------------------------------------------------ part 3: WebGL */
+/** The three shaders' uniforms as the app sends them (the busy scene; the car's box), for the WebGL check (canvas 177 x 104). */
+function glUniforms() {
+    const s = M.withScene(M.DEMO[14][2], 3000), g = Object.assign({}, M.GEO.map, { lane: [0, 0, 177, 104], pxm: 50 / 1.75 });
+    const out = { acc_lane: M.laneUniforms(g, s, 0.26, false), acc_obj: M.objUniforms(g, s, false), acc_car: M.carUniforms(s, false, 177, 104) };
+    return out;
+}
+
 function part3() {
     if (!fs.existsSync(CHROME)) { console.log('part 3: skipped (no Chrome at ' + CHROME + ')'); return; }
     const sj = JSON.parse(fs.readFileSync(path.join(APPDIR, 'hud', 'shaders.json'), 'utf8'));
@@ -516,13 +620,13 @@ function part3() {
         'const VS = "attribute vec2 a_pos; varying vec2 v_uv; void main(){ v_uv = vec2(a_pos.x * 0.5 + 0.5, 0.5 - a_pos.y * 0.5); gl_Position = vec4(a_pos, 0.0, 1.0); }";\n' +
         'const out = []; const c = document.createElement("canvas"); c.width = 177; c.height = 104; const gl = c.getContext("webgl");\n' +
         'out.push("webgl " + (gl ? gl.getParameter(gl.SHADING_LANGUAGE_VERSION) : "none"));\n' +
-        'const U = { acc_lane: { u_size: [177, 104], u_geo: [0.04, 70, 0.1, 3], u_line: [0.38, 0.6, 0.92], u_ground: [0.13, 0.14, 0.16], u_gap: [0.27, 2, 0.13, 0], u_gapc: [0.94, 0.67, 0.04] }, acc_car: { u_size: [177, 104], u_body: [0.76, 0.79, 0.83], u_dim: [0, 0] } };\n' +
+        'const U = ' + JSON.stringify(glUniforms()) + ';\n' +
         'for (const n of Object.keys(SH)) { const mk = (t, s) => { const x = gl.createShader(t); gl.shaderSource(x, s); gl.compileShader(x); return x; };\n' +
         ' const v = mk(gl.VERTEX_SHADER, VS), f = mk(gl.FRAGMENT_SHADER, SH[n]); const okc = gl.getShaderParameter(f, gl.COMPILE_STATUS);\n' +
         ' const p = gl.createProgram(); gl.attachShader(p, v); gl.attachShader(p, f); gl.linkProgram(p); const okl = gl.getProgramParameter(p, gl.LINK_STATUS);\n' +
         ' let lit = 0; if (okc && okl) { gl.useProgram(p); const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);\n' +
         '  const l = gl.getAttribLocation(p, "a_pos"); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, 2, gl.FLOAT, false, 0, 0);\n' +
-        '  for (const k of Object.keys(U[n])) { const u = gl.getUniformLocation(p, k); const a = U[n][k]; if (u) gl["uniform" + a.length + "fv"](u, new Float32Array(a)); }\n' +
+        '  for (const k of Object.keys(U[n])) { const a = U[n][k]; const u = gl.getUniformLocation(p, k) || gl.getUniformLocation(p, k + "[0]"); if (u) gl["uniform" + (a.length > 4 ? 4 : a.length) + "fv"](u, new Float32Array(a)); }\n' +
         '  gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); const px = new Uint8Array(177 * 104 * 4); gl.readPixels(0, 0, 177, 104, gl.RGBA, gl.UNSIGNED_BYTE, px); for (let i = 3; i < px.length; i += 4) if (px[i] > 128) lit++; }\n' +
         ' out.push(n + " compile " + okc + " link " + okl + " lit " + lit + " log " + JSON.stringify(gl.getShaderInfoLog(f) || "")); }\n' +
         'document.getElementById("o").textContent = out.join("\\n");\n</script>';
@@ -532,7 +636,7 @@ function part3() {
     const dom = (r.stdout || '').replace(/&quot;/g, '"');
     console.log('webgl: ' + ((dom.match(/<pre id="o">([\s\S]*?)<\/pre>/) || [])[1] || 'no output').replace(/\n/g, ' | '));
     ok(/webgl WebGL GLSL ES 1\.0/.test(dom), 'headless Chrome has WebGL 1 (GLSL ES 1.00)');
-    ['acc_lane', 'acc_car'].forEach((n) => {
+    ['acc_lane', 'acc_obj', 'acc_car'].forEach((n) => {
         const m = new RegExp(n + ' compile (\\w+) link (\\w+) lit (\\d+)').exec(dom);
         ok(m && m[1] === 'true' && m[2] === 'true', n + ': compiles and links as GLSL ES 1.00 in WebGL');
         ok(m && Number(m[3]) > 200, n + ': draws (' + (m ? m[3] : 0) + ' opaque px)');

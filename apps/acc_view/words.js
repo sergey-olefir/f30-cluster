@@ -66,6 +66,17 @@ const WORDS = {
     warnActive: { uk: 'активне', en: 'active' },
     warnUnread: { uk: 'не розібране', en: 'not decoded' },
     noLimit: { uk: 'невідоме', en: 'unknown' },
+    // what the sensors see (the owner's FOCUS, 2026-11-20)
+    rowUsers: { uk: 'Учасники руху', en: 'Road users' },
+    rowLanes: { uk: 'Смуги', en: 'Lanes' },
+    cls_car: { uk: 'авто', en: 'cars' },
+    cls_truck: { uk: 'вантажні', en: 'trucks' },
+    cls_two: { uk: 'мото', en: 'motorbikes' },
+    cls_ped: { uk: 'пішоходи', en: 'pedestrians' },
+    cls_cyc: { uk: 'велосипеди', en: 'cyclists' },
+    cls_unk: { uk: 'інше', en: 'other' },
+    lanesMeasured: { uk: 'виміряні', en: 'measured' },
+    lanesFixed: { uk: 'символ: даних немає', en: 'symbol: no data' },
 };
 
 /** The language to draw in: 'uk' or 'en' (anything else, 'auto' included, is Ukrainian until LN's module decides). */

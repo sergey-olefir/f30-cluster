@@ -1,8 +1,11 @@
 'use strict';
 /**
  * ACC View 0.1.0 (round 1120 AA2; docs/AGENT-BRIEF-acc-app.md, design docs/r1120/AA-SPEC.md 3.1): a separate, READ-ONLY app
- * that shows direction E, the lane view: our lane to the horizon, the car ahead at its measured level, the cruise / limiter
- * set speed in a ring, the limit read from the road, an event pill. It reads and draws; it writes nothing to the car.
+ * that shows direction E, the lane view, as a view of what the car's sensors see (the owner's FOCUS, 2026-11-20): the lane
+ * boundaries the camera measures (or our fixed symbol), the road users by class at their measured places (world.js), the car
+ * ahead highlighted at its level, and, secondary, the cruise / limiter set speed in a ring, the limit, an event pill. It
+ * reads and draws; it writes nothing to the car. Each source of objects and lanes is logged (counts, classes, rates, ranges
+ * in relative metres) so the first drive shows which ones this car sends.
  *
  * Two placements:
  *   - The centre screen, the app's own page (screen MAIN, a canvas): the main view, drawn whenever the page is open. E on the
@@ -28,9 +31,17 @@ const P = require('./paint');
 const R = require('./raster');
 const Wd = require('./words');
 const MapView = require('./mapview');
+const Wo = require('./world');
 
 const SPEED_IF = 'de.bmw.infotainment.vehicle.Vehicle2';
 const FASUS_IF = 'de.bmw.infotainment.fasus.FASuS';
+// what the car's sensors see (the owner's FOCUS, 2026-11-20; world.js has the members): every one an EVENT, read only
+const CAM_IF = 'de.bmw.environmentalmodel.ObjectRecognitionFrontCamera';
+const TCP_IF = 'de.bmw.sensors.objects.RecogFrontCameraObjectlist';
+const LANE_IF = 'de.bmw.environmentalmodel.LaneBoundaries';
+const LANES_IF = 'de.bmw.environmentalmodel.Lanes';
+const KDO_IF = 'de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy';
+const WORLD_MS = 100;               // the sources are decoded at most this often (they may come at 20-30 a second)
 const TICK_MS = 150;
 const PAGE_FPS = 4;
 const GLIDE_MS = 260;               // the glide's time constant: about a second from one level to the next
@@ -54,13 +65,19 @@ mgu.run({
         const loc = cfg.location || { lat: 50.45, lon: 30.52 };
         const demoMs = typeof cfg.demoMs === 'number' && cfg.demoMs >= 500 ? cfg.demoMs : 4000;
         const shaders = R.hudJson('shaders.json');
+        const wcfg = Wo.cfgOf(cfg.world);
+        const srcOn = Object.assign({ cam: true, tcp: true, lanes: true, lanesDetection: true, keepDistance: true, frontExtended: true }, (cfg.world && cfg.world.sources) || {});
 
         const st = {
             show: false, demo: false, subscribed: false, tracker: null, kmh: null, cru: null, warn: false, warnRaw: null, warnLines: 0,
             lim: null, limAt: 0, fvAt: 0, dn: null, dnCode: undefined, demoAt: 0, demoI: 0, z: 0, zAt: 0, s: null, key: '', lineAt: 0,
             timer: null, mv: null, mapBytes: 0,
             page: { key: '', at: 0, loopAt: 0, force: true, paints: 0, ms: 0 },
+            // the world: the newest raw values (decoded in step(), at most every WORLD_MS), the tracker, the lane model, the logs
+            raw: { rec: null, pos: null, posAt: 0, tcp: null, tcpAt: 0, lanes: null, lanesAt: 0 }, worldAt: 0, laneModel: null, laneAt: 0,
+            tracker2: new Wo.Tracker(wcfg, ['cam', 'tcp']), logs: {}, leadCls: null,
         };
+        const slog = (name) => st.logs[name] || (st.logs[name] = new Wo.SourceLog(name, 10000));
         const guard = (what, fn) => function () { try { return fn.apply(null, arguments); } catch (e) { log.error('acc: ' + what + ': ' + (e && e.stack || e)); return undefined; } };
         const lang = () => Wd.langOf(cfg.lang);
 
@@ -123,6 +140,62 @@ mgu.run({
                     if (st.warnLines < 40) { st.warnLines++; log.info('acc: warn ' + SRC.rawWord(x) + ' -> ' + (st.warn ? 'active' : 'none')); }
                 }
             }) });
+            // what the sensors see: each handler only keeps the newest value (and counts it); step() decodes. A source this car
+            // never sends costs one idle subscription.
+            const q = (v) => (v && typeof v === 'object' ? SRC.rawWord(v.eventDataQualifier) : '-');
+            if (srcOn.cam) w(CAM_IF, '1', {
+                ObjectRecognition: guard('cam rec', (v) => { st.raw.rec = v; }),
+                ObjectPosition: guard('cam pos', (v) => { st.raw.pos = v; st.raw.posAt = Date.now(); st.raw.posQ = q(v); }),
+            });
+            if (srcOn.tcp) w(TCP_IF, '1', { objectlistTCP: guard('tcp', (v) => { st.raw.tcp = v; st.raw.tcpAt = Date.now(); }) });
+            if (srcOn.lanes) w(LANE_IF, '1', { LaneBoundaries: guard('lanes', (v) => { st.raw.lanes = v; st.raw.lanesAt = Date.now(); st.raw.lanesQ = q(v); }) });
+            if (srcOn.lanesDetection) w(LANES_IF, '1', { LanesDetection: guard('lanes det', (v) => {
+                const kinds = ['laneLeft', 'laneEgo', 'laneRight', 'laneLeftNext', 'laneRightNext'].map((k) => ({ cls: v && v[k] ? SRC.rawWord(v[k].laneType) : '-' }));
+                slog('lanesDetection').add(kinds, q(v));
+            }) });
+            if (srcOn.keepDistance) w(KDO_IF, '1', { keepDistanceObjects1: guard('kdo', (v) => {
+                const o = v && v.keepDistObjects1 ? v.keepDistObjects1 : v || {};
+                const objs = [0, 1, 2].map((i) => ({ cls: 'type' + SRC.rawWord(o['KeepDistObjType' + i]), x: typeof o['KeepDistObjDistanceLongitudinal' + i] === 'number' ? o['KeepDistObjDistanceLongitudinal' + i] : null, y: typeof o['KeepDistObjDistanceLateral' + i] === 'number' ? o['KeepDistObjDistanceLateral' + i] : null }));
+                slog('keepDistance raw').add(objs, null);
+            }) });
+            if (srcOn.frontExtended) w(fvC.iface, fvC.instance || '1', { DataFrontVehicleExtended: guard('front ext', (v) => {
+                const t = v && typeof v === 'object' ? v.frontVehicleExtendedObjectType : null;
+                st.leadCls = Object.prototype.hasOwnProperty.call(Wo.OBJECT_TYPE, String(t)) ? Wo.OBJECT_TYPE[String(t)] : null;
+                slog('frontExtended').add([{ cls: SRC.rawWord(t) }], SRC.rawWord(v && v.frontVehicleExtendedStatusMove));
+            }) });
+        }
+
+        /** Decode the newest raw values into the tracker and the lane model (at most every WORLD_MS); log a summary per source. */
+        function world(now) {
+            if (now - st.worldAt >= WORLD_MS) {
+                st.worldAt = now;
+                const r = st.raw;
+                if (r.pos) {
+                    const list = Wo.camObjects(wcfg, r.rec, r.pos);
+                    st.tracker2.update('cam', list, r.posAt);
+                    slog('cam').add(list, r.posQ);
+                    r.pos = null;
+                }
+                if (r.tcp) {
+                    const list = Wo.tcpObjects(wcfg, r.tcp);
+                    st.tracker2.update('tcp', list, r.tcpAt);
+                    slog('tcp').add(list, null);
+                    r.tcp = null;
+                }
+                if (r.lanes) {
+                    const m = Wo.laneModel(wcfg, r.lanes);
+                    if (m) { st.laneModel = m; st.laneAt = r.lanesAt; }
+                    slog('lanes').add(m ? m.lines.map((l) => ({ cls: l.type, x: l.len, y: l.y0 })) : [], r.lanesQ);
+                    r.lanes = null;
+                }
+                Object.keys(st.logs).forEach((k) => { const ln = st.logs[k].line(now); if (ln) log.info(ln); });
+            }
+            const lanes = st.laneModel && now - st.laneAt < wcfg.lanes.staleMs ? st.laneModel : null;
+            const objs = st.tracker2.frame(now);
+            const src = st.tracker2.sourceNow(now);
+            if (!lanes && !src) return null;
+            const lead = Wo.leadOf(objs, lanes);
+            return { lanes, objects: objs.filter((o) => o !== lead), lead: lead ? { x: lead.x, y: lead.y, cls: lead.cls } : null, src: src || 'lanes' };
         }
 
         // ---- the state now, and the car's glide (shared by both placements) ----
@@ -130,14 +203,25 @@ mgu.run({
             let s;
             if (st.demo) {
                 if (!st.demoAt) st.demoAt = now;
-                if (now - st.demoAt >= demoMs) { st.demoAt = now; st.demoI = (st.demoI + 1) % M.DEMO.length; }
-                s = M.DEMO[st.demoI][2];
+                const hold = M.DEMO[st.demoI][2].scene ? Math.max(demoMs, Wo.SCENE_MS) : demoMs;
+                if (now - st.demoAt >= hold) { st.demoAt = now; st.demoI = (st.demoI + 1) % M.DEMO.length; }
+                s = M.withScene(M.DEMO[st.demoI][2], now - st.demoAt);
             } else {
                 const lim = st.lim !== null && now - st.limAt < ((tsrCfg && tsrCfg.staleMs) || 3000) ? st.lim : null;
                 s = M.stateOf(st.tracker ? st.tracker.view(st.kmh) : null, st.cru, st.warn, lim);
+                const wd = world(now);
+                if (wd) {
+                    if (wd.lead && st.leadCls) wd.lead.cls = st.leadCls;
+                    if (!s.tgt && wd.lead) {                     // highlighted only while the gap says there is a car ahead
+                        wd.objects = wd.objects.concat([{ id: 'lead', cls: wd.lead.cls, x: wd.lead.x, y: wd.lead.y, alpha: 1 }]).sort((a, b) => b.x - a.x);
+                        wd.lead = null;
+                    }
+                    s.world = wd;
+                }
             }
-            const zt = s.tgt ? M.depthOf(s.tgt) : 0;
-            if (!s.tgt || !st.s || !st.s.tgt || !st.zAt) st.z = zt;                          // a car appears where it is
+            const lead = M.leadOf(s);
+            const zt = lead ? lead.x / M.RANGE : 0;
+            if (!lead || !st.s || !M.leadOf(st.s) || !st.zAt) st.z = zt;                       // a car appears where it is
             else {
                 const k = 1 - Math.exp(-Math.max(0, now - st.zAt) / GLIDE_MS);
                 st.z += (zt - st.z) * k;
@@ -168,7 +252,7 @@ mgu.run({
             cr.on('layer', guard('layer', (ref, state) => log.info('acc: layer ' + ref + ' ' + state)));
             cr.on('target', guard('target', (name, state) => { if (name === layerCfg.target) log.info('acc: target ' + name + ' ' + state); }));
             cr.on('error', guard('socket', (e) => log.warn('acc: cluster-render ' + (e && e.code || 'error'))));
-            log.info('acc: map layers 4 (lane, car, text 380x96, pill 340x44) on ' + layerCfg.target + (layerCfg.contend ? ' (contend)' : ' (waits for the slot)') +
+            log.info('acc: map layers 5 (lane, users, car, text 380x96, pill 340x44) on ' + layerCfg.target + (layerCfg.contend ? ' (contend)' : ' (waits for the slot)') +
                 ', pixel memory ' + MapView.PIXEL_MEMORY);
         }
         function mapClose() {
@@ -190,10 +274,10 @@ mgu.run({
             const ageWord = typeof age === 'number' ? (age < 1 ? 0 : Math.min(99, Math.floor(age))) : -1;
             const info = { age: typeof age === 'number' ? (age < 1 ? 0.5 : ageWord) : null, warn: st.demo ? null : st.warnRaw };
             const demo = st.demo ? M.DEMO[st.demoI][0] : null;
-            const key = M.keyOf(s) + '|' + nt + '|' + ln + '|' + ageWord + '|' + (info.warn || '') + '|' + (demo || '');
+            const key = M.keyOf(s) + '|' + M.worldKey(s) + '|' + nt + '|' + ln + '|' + ageWord + '|' + (info.warn || '') + '|' + (demo || '');
             if (key !== pg.key) {
                 const t0 = Date.now();
-                const r = P.centre(s, { night: nt, lang: ln, info, demo });     // the car at its level: the page repaints per change only, no glide
+                const r = P.centre(s, { night: nt, lang: ln, info, demo });     // the car at its place: the page repaints per change only (<= 4 a second)
                 pg.ms += Date.now() - t0; pg.paints++;
                 if (REC) REC.setImage(IMG_ID, P.PAGE_W, P.PAGE_H, r.px);
                 pg.key = key; pg.force = true;
