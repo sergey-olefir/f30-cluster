@@ -2287,7 +2287,7 @@
     "statusHUD": "HUDSTATUS_OFF"
    }
   },
-  "body": "accSym=LDM_CAR_NORMAL accBars=3 accColour=LDM_ACTIVE vsli=LDM_VZA_VSLI_NO_SYMBOL vsliSpeed=0 ldm=LDM_SYM_ACC ldmColour=LDM_ACTIVE limiter=STATUS_INACTIVE cruise=110 hud=HUDSTATUS_OFF"
+  "body": "accSym=LDM_CAR_NORMAL accBars=3 accColour=LDM_ACTIVE vsli=LDM_VZA_VSLI_NO_SYMBOL vsliSpeed=0 ldm=LDM_SYM_ACC ldmColour=LDM_ACTIVE limiter=STATUS_INACTIVE cruise=110 hud=HUDSTATUS_OFF vsliDist=-"
  },
  {
   "set": "S8",
@@ -2306,7 +2306,10 @@
    "ldmAccBars": "DISTANCE_3",
    "xSpeedLimitAssist": {
     "sliState": "ACTIVE_SPEED_LIMIT",
-    "sliValue": "LIMIT_70"
+    "sliValue": "LIMIT_70",
+    "vsliSign": "TRAFFIC_LIGHT_RED",
+    "vsliValue": "NO_DISPLAY",
+    "vsliDistance": "VSLI_DIST_50_M"
    },
    "npiData": {
     "npiState": "NO_DISPLAY"
@@ -2318,7 +2321,7 @@
     "hudStatus": "HUDSTATUS_OFF"
    }
   },
-  "body": "setSpeed=110 setColour=ACTIVE_GREEN icon=ACC_WITH_TARGET_OBJECT iconState=ACTIVE bars=DISTANCE_3 sliState=ACTIVE_SPEED_LIMIT sliValue=LIMIT_70 npi=NO_DISPLAY warnIC=NO_DISPLAY hud=HUDSTATUS_OFF"
+  "body": "setSpeed=110 setColour=ACTIVE_GREEN icon=ACC_WITH_TARGET_OBJECT iconState=ACTIVE bars=DISTANCE_3 sliState=ACTIVE_SPEED_LIMIT sliValue=LIMIT_70 npi=NO_DISPLAY warnIC=NO_DISPLAY hud=HUDSTATUS_OFF vsliSign=TRAFFIC_LIGHT_RED vsliValue=NO_DISPLAY vsliDist=VSLI_DIST_50_M wbk=-"
  },
  {
   "set": "S8",

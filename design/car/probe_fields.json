@@ -4593,7 +4593,8 @@
         "ldmColour:ldmSymColor:e",
         "limiter:statusLimiter:e",
         "cruise:cruiseCtrlSpeedHUD:n",
-        "hud:system.statusHUD:e"
+        "hud:system.statusHUD:e",
+        "vsliDist:xSpeedLimitAssist.vSLIDistanceValues:e"
       ]
     },
     {
@@ -4625,7 +4626,11 @@
         "sliValue:xSpeedLimitAssist.sliValue:e",
         "npi:npiData.npiState:e",
         "warnIC:speedWarning.speedWarningIC:e",
-        "hud:system.hudStatus:e"
+        "hud:system.hudStatus:e",
+        "vsliSign:xSpeedLimitAssist.vsliSign:e",
+        "vsliValue:xSpeedLimitAssist.vsliValue:e",
+        "vsliDist:xSpeedLimitAssist.vsliDistance:e",
+        "wbk:warnBrakeCoordinator.wbkSym:e"
       ]
     },
     {
