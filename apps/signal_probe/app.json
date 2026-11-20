@@ -255,7 +255,12 @@
       "_instances": "1",
       "IndicatorSteeringColumn": "s",
       "IndicatorSteeringColumnComplete": "s",
-      "LampExterior": "s"
+      "LampExterior": "s",
+      "LampExterior2": "s",
+      "LowBeam": "rs",
+      "StatusFunctionsIndicators": "s",
+      "StatusFunctionsIndicators2": "s",
+      "statusOperationLightExterior": "s"
     },
     "de.bmw.infotainment.controlelements.FrontCCU": {
       "_instances": "1",
@@ -628,6 +633,46 @@
       "_broadcasts": [
         "correctionDataLaneGuiding"
       ]
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraLightDetection": {
+      "_instances": "1",
+      "_broadcasts": [
+        "MainBeamAssistantDataObject11",
+        "MainBeamAssistantDataObject12",
+        "MainBeamAssistantDataObject15",
+        "controlHighBeamAssistant",
+        "mEObjectID1",
+        "mEObjectID2",
+        "mainBeamAssistantDataObject1",
+        "mainBeamAssistantDataObject10",
+        "mainBeamAssistantDataObject13",
+        "mainBeamAssistantDataObject14",
+        "mainBeamAssistantDataObject2",
+        "mainBeamAssistantDataObject3",
+        "mainBeamAssistantDataObject4",
+        "mainBeamAssistantDataObject5",
+        "mainBeamAssistantDataObject6",
+        "mainBeamAssistantDataObject7",
+        "mainBeamAssistantDataObject8",
+        "mainBeamAssistantDataObject9"
+      ]
+    },
+    "de.bmw.body.Environment": {
+      "_instances": "1",
+      "StatusBrightnessEnvironment": "s",
+      "statusBrightnessPrefield": "s"
+    },
+    "de.bmw.body.Wiper": {
+      "_instances": "1",
+      "rainSensorWiperSpeed": "s",
+      "wiper": "s",
+      "wiperSteeringColumn": "s"
+    },
+    "de.bmw.body.drivinglight.LightswitchOperation": {
+      "_instances": "1",
+      "foglightFront": "rs",
+      "foglightRear": "rs",
+      "mainLightswitchState": "rs"
     }
   },
   "screens": [
@@ -720,6 +765,10 @@
         [
           "setting",
           "set17"
+        ],
+        [
+          "setting",
+          "set18"
         ],
         [
           "setting",
@@ -831,6 +880,12 @@
       "default": false
     },
     {
+      "key": "set18",
+      "label": "S18 HB: фари і дальнє світло (P27)",
+      "type": "bool",
+      "default": false
+    },
+    {
       "key": "lang",
       "label": "Мова / Language",
       "type": "choice",
@@ -875,6 +930,9 @@
           "S17"
         ],
         [
+          "S18"
+        ],
+        [
           "S14"
         ],
         [
@@ -885,7 +943,7 @@
           "S13"
         ]
       ],
-      "_about": "cruise RC: the recording mode (recorder.js). Every value of the chosen sets' fields, unthrottled, in data/rec/rec-<session>-<n>.csv.gz; a file is cut at fileRawKB of text, the oldest files go past quotaMB (the app's disk limit is 20 MiB with its log); flushMs between two writes; maxQueueKB of text waiting before samples are dropped (counted); maxEntries of a list; quietLog: the recorded fields' throttled log lines are left out while recording; choices: what the menu row RECSET cycles through (r1120 AC: S17 = ACC, the adaptive-cruise set, first)."
+      "_about": "cruise RC: the recording mode (recorder.js). Every value of the chosen sets' fields, unthrottled, in data/rec/rec-<session>-<n>.csv.gz; a file is cut at fileRawKB of text, the oldest files go past quotaMB (the app's disk limit is 20 MiB with its log); flushMs between two writes; maxQueueKB of text waiting before samples are dropped (counted); maxEntries of a list; quietLog: the recorded fields' throttled log lines are left out while recording; choices: what the menu row RECSET cycles through (r1120 AC: S17 = ACC, the adaptive-cruise set, first; beam HS: S18 = HB, the headlight set for the night drives, second). beam HS: a field with recSame folds its repeats (\"#s\" lines in the file, folded= in #end)."
     }
   }
 }

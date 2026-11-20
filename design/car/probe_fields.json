@@ -3,9 +3,9 @@
   "logFormat": 1,
   "version": "0.5.1",
   "counts": {
-    "sets": 16,
-    "fields": 265,
-    "interfaces": 99,
+    "sets": 17,
+    "fields": 296,
+    "interfaces": 103,
     "interfacesWithSeveralInstances": 1
   },
   "sets": [
@@ -192,6 +192,17 @@
       ],
       "fields": 1,
       "fieldsActive": 74
+    },
+    {
+      "id": "S18",
+      "settingsKey": "set18",
+      "name": "HB",
+      "uk": "HB: фари і дальнє світло",
+      "items": [
+        "P27"
+      ],
+      "fields": 31,
+      "fieldsActive": 49
     }
   ],
   "interfaces": [
@@ -933,12 +944,13 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 3,
+      "fields": 8,
       "events": [],
       "methods": [],
       "sets": [
         "S6",
-        "S14"
+        "S14",
+        "S18"
       ]
     },
     {
@@ -1959,6 +1971,89 @@
       "sets": [
         "S16"
       ]
+    },
+    {
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 0,
+      "events": [
+        "controlHighBeamAssistant",
+        "mEObjectID1",
+        "mEObjectID2",
+        "mainBeamAssistantDataObject1",
+        "mainBeamAssistantDataObject2",
+        "mainBeamAssistantDataObject3",
+        "mainBeamAssistantDataObject4",
+        "mainBeamAssistantDataObject5",
+        "mainBeamAssistantDataObject6",
+        "mainBeamAssistantDataObject7",
+        "mainBeamAssistantDataObject8",
+        "mainBeamAssistantDataObject9",
+        "mainBeamAssistantDataObject10",
+        "MainBeamAssistantDataObject11",
+        "MainBeamAssistantDataObject12",
+        "mainBeamAssistantDataObject13",
+        "mainBeamAssistantDataObject14",
+        "MainBeamAssistantDataObject15"
+      ],
+      "methods": [],
+      "sets": [
+        "S18"
+      ]
+    },
+    {
+      "interface": "de.bmw.body.Environment",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 2,
+      "events": [],
+      "methods": [],
+      "sets": [
+        "S18"
+      ]
+    },
+    {
+      "interface": "de.bmw.body.Wiper",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 3,
+      "events": [],
+      "methods": [],
+      "sets": [
+        "S18"
+      ]
+    },
+    {
+      "interface": "de.bmw.body.drivinglight.LightswitchOperation",
+      "instancesRead": [
+        "1"
+      ],
+      "manifestInstances": "1",
+      "instancesInCatalogue": [
+        "1"
+      ],
+      "fields": 3,
+      "events": [],
+      "methods": [],
+      "sets": [
+        "S18"
+      ]
     }
   ],
   "fields": [
@@ -2439,6 +2534,9 @@
       "formatter": "cols",
       "gapMs": 1000,
       "cap": 60,
+      "also": [
+        "S18"
+      ],
       "columns": [
         "outside:displayTemperatureExterior:n",
         "range:displayRange:n",
@@ -3996,6 +4094,9 @@
       "formatter": "bits",
       "gapMs": 0,
       "cap": 300,
+      "also": [
+        "S18"
+      ],
       "markTimed": true,
       "bits": "operationColumnStalks"
     },
@@ -4014,6 +4115,9 @@
       "formatter": "bits",
       "gapMs": 0,
       "cap": 300,
+      "also": [
+        "S18"
+      ],
       "markTimed": true,
       "bits": "operationColumnStalks",
       "columns": [
@@ -4674,7 +4778,8 @@
       "cap": 200,
       "also": [
         "S14",
-        "S17"
+        "S17",
+        "S18"
       ],
       "columns": [
         "object:frontVehicleObjectID:n",
@@ -5089,7 +5194,8 @@
       "cap": 100,
       "also": [
         "S14",
-        "S17"
+        "S17",
+        "S18"
       ],
       "columns": [
         "stage:statusActualStageDrive:e",
@@ -5165,7 +5271,8 @@
       "gapMs": 500,
       "cap": 100,
       "also": [
-        "S17"
+        "S17",
+        "S18"
       ],
       "columns": [
         "direction:statusIndicateDirection:n"
@@ -5232,7 +5339,8 @@
       "gapMs": 500,
       "cap": 100,
       "also": [
-        "S17"
+        "S17",
+        "S18"
       ],
       "columns": [
         "mainBeam:statusMainBeam_headlightFlasher:e",
@@ -5258,6 +5366,9 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 100,
+      "also": [
+        "S18"
+      ],
       "columns": [
         "illumination:controlIlluminationSwitch:n"
       ]
@@ -5365,7 +5476,8 @@
       "gapMs": 250,
       "cap": 300,
       "also": [
-        "S17"
+        "S17",
+        "S18"
       ],
       "columns": [
         "presentWithdrawalLimitSpeed:presentWithdrawalLimitSpeed:n",
@@ -5524,7 +5636,10 @@
       "rootType": "event",
       "formatter": "one",
       "gapMs": 250,
-      "cap": 300
+      "cap": 300,
+      "also": [
+        "S18"
+      ]
     },
     {
       "set": "S13",
@@ -6253,7 +6368,8 @@
       "gapMs": 500,
       "cap": 1200,
       "also": [
-        "S17"
+        "S17",
+        "S18"
       ]
     },
     {
@@ -6474,7 +6590,8 @@
       "gapMs": 1000,
       "cap": 1200,
       "also": [
-        "S17"
+        "S17",
+        "S18"
       ],
       "columns": [
         "brakeLight:controlFunctionBrakeLight:e",
@@ -6589,7 +6706,8 @@
       "gapMs": 500,
       "cap": 1200,
       "also": [
-        "S17"
+        "S17",
+        "S18"
       ],
       "columns": [
         "speed:speedVehicleCentreOfGravity:n"
@@ -6682,7 +6800,8 @@
       "gapMs": 2000,
       "cap": 300,
       "also": [
-        "S17"
+        "S17",
+        "S18"
       ]
     },
     {
@@ -6701,7 +6820,8 @@
       "gapMs": 2000,
       "cap": 300,
       "also": [
-        "S17"
+        "S17",
+        "S18"
       ]
     },
     {
@@ -6771,7 +6891,8 @@
       "gapMs": 2000,
       "cap": 300,
       "also": [
-        "S17"
+        "S17",
+        "S18"
       ]
     },
     {
@@ -6790,7 +6911,8 @@
       "gapMs": 2000,
       "cap": 300,
       "also": [
-        "S17"
+        "S17",
+        "S18"
       ]
     },
     {
@@ -7453,10 +7575,594 @@
       "formatter": "cols",
       "gapMs": 500,
       "cap": 1200,
+      "also": [
+        "S18"
+      ],
       "columns": [
         "angle:actualValueSteeringAngleDriver:n",
         "qualifier:qualifierActualValueSteeringAngleDriver:e"
       ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-control",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "controlHighBeamAssistant",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32790,
+      "rootType": "event",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 400,
+      "columns": [
+        "control:controlHighBeam:n",
+        "reason:reasonSwitchOffHighBeam:x",
+        "vehicles:numberVehicles:n",
+        "signs:numberRoadSigns:n",
+        "pedestrians:numberPedestrians:n",
+        "calib:statusCameraCalibration:n",
+        "offH:cameraCalibrationOffsetHorizontal:n",
+        "offV:cameraCalibrationOffsetVertical:n",
+        "q:qualifierDataControlHighBeamAssistant:n",
+        "qExt:qualifierExtendedControlHighBeamAsstistant:n",
+        "sync:syncSignal:n"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-meid1",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mEObjectID1",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32791,
+      "rootType": "event",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 100,
+      "columns": [
+        "id1:MEIDObject1:n",
+        "id2:MEIDObject2:n",
+        "id3:MEIDObject3:n",
+        "id4:MEIDObject4:n",
+        "id5:MEIDObject5:n",
+        "id6:MEIDObject6:n",
+        "id7:MEIDObject7:n",
+        "id8:MEIDObject8:n"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-meid2",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mEObjectID2",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32792,
+      "rootType": "event",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 100,
+      "columns": [
+        "id9:MEIDObject9:n",
+        "id10:MEIDObject10:n",
+        "id11:MEIDObject11:n",
+        "id12:MEIDObject12:n",
+        "id13:MEIDObject13:n",
+        "id14:MEIDObject14:n",
+        "id15:MEIDObject15:n"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-lamps",
+      "interface": "de.bmw.body.Light",
+      "field": "LampExterior2",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32772,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 0,
+      "cap": 400,
+      "columns": [
+        "mainBeam:controlFunctionMainBeam:e",
+        "dipL:controlFunctionDippedBeamLeftHand:e",
+        "dipR:controlFunctionDippedBeamRightHand:e",
+        "distL:controlLightDistributionLowBeamLeftHand:e",
+        "distR:controlLightDistributionLowBeamRightHand:e",
+        "laserL:controlFunctionLaserLeftHand:e",
+        "laserR:controlFunctionLaserRightHand:e",
+        "cornerL:controlFunctionCorneringLightLeftHand:e",
+        "cornerR:controlFunctionCorneringLightRightHand:e",
+        "frontFog:controlFunctionFrontFogLight:e",
+        "flashMode:controlModeFunctionSpecialFlashing:e"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-low-beam",
+      "interface": "de.bmw.body.Light",
+      "field": "LowBeam",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 300,
+      "columns": [
+        "lowBeam:statusLowBeam:e",
+        "sensor:statusSensorLowBeam:e",
+        "ambient:ambientBrightnessLowBeam:n",
+        "reason:statusLowBeamReason:n",
+        "value:statusValueLowBeam:n",
+        "mb3:stateValueDrivingLightMB3:n",
+        "mb3State:stateMB3:e"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-switch",
+      "interface": "de.bmw.body.Light",
+      "field": "statusOperationLightExterior",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32775,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 0,
+      "cap": 300,
+      "columns": [
+        "switch:statusLampSwitch:e",
+        "event:recognitionEventLampSwitch:e"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-indicators",
+      "interface": "de.bmw.body.Light",
+      "field": "StatusFunctionsIndicators",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32774,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 300,
+      "columns": [
+        "direction:controlIndicateDirection:e",
+        "function:activeFunctionIndicateDirection:e"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-indicators2",
+      "interface": "de.bmw.body.Light",
+      "field": "StatusFunctionsIndicators2",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32777,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 1000,
+      "cap": 300,
+      "columns": [
+        "direction:controlIndicateDirection:e",
+        "function:activeFunctionIndicateDirection:e",
+        "overlay:overlayFunctionIndicateDirection:e"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-brightness",
+      "interface": "de.bmw.body.Environment",
+      "field": "StatusBrightnessEnvironment",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32770,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 300,
+      "columns": [
+        "brightness:valueBrightnessEnvironment:n"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-prefield",
+      "interface": "de.bmw.body.Environment",
+      "field": "statusBrightnessPrefield",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 300,
+      "columns": [
+        "prefield:valueBrightnessPrefield:n"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-wiper",
+      "interface": "de.bmw.body.Wiper",
+      "field": "wiper",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 300,
+      "columns": [
+        "blade:positionWiperBlade:e"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-rain",
+      "interface": "de.bmw.body.Wiper",
+      "field": "rainSensorWiperSpeed",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 2000,
+      "cap": 300,
+      "columns": [
+        "rain:intensityRain:n",
+        "speed:speedWiper:n",
+        "sensor:statusRainSensor:n"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-wiper-stalk",
+      "interface": "de.bmw.body.Wiper",
+      "field": "wiperSteeringColumn",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32770,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "bits",
+      "gapMs": 0,
+      "cap": 300,
+      "bits": "operationWiperSwitch",
+      "columns": [
+        "pot:operationWiperPotentiometer:e"
+      ]
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-lightswitch",
+      "interface": "de.bmw.body.drivinglight.LightswitchOperation",
+      "field": "mainLightswitchState",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 3,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "enum",
+      "formatter": "enum",
+      "gapMs": 0,
+      "cap": 300
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-fog-front",
+      "interface": "de.bmw.body.drivinglight.LightswitchOperation",
+      "field": "foglightFront",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32769,
+      "eventId": null,
+      "rootType": "bool",
+      "formatter": "bool",
+      "gapMs": 0,
+      "cap": 300
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-fog-rear",
+      "interface": "de.bmw.body.drivinglight.LightswitchOperation",
+      "field": "foglightRear",
+      "instance": "1",
+      "flags": "rs",
+      "getterId": 2,
+      "notifierId": 32770,
+      "eventId": null,
+      "rootType": "bool",
+      "formatter": "bool",
+      "gapMs": 0,
+      "cap": 300
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj1",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject1",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj2",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject2",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj3",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject3",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32771,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj4",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject4",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32772,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj5",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject5",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32773,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj6",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject6",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32774,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj7",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject7",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32775,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj8",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject8",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32776,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj9",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject9",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32777,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj10",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject10",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32784,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj11",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "MainBeamAssistantDataObject11",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32785,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj12",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "MainBeamAssistantDataObject12",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32786,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj13",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject13",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32787,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj14",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "mainBeamAssistantDataObject14",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32788,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
+    },
+    {
+      "set": "S18",
+      "item": "P27",
+      "tag": "hb-obj15",
+      "interface": "de.bmw.sensors.objects.RecogFrontCameraLightDetection",
+      "field": "MainBeamAssistantDataObject15",
+      "instance": "1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32789,
+      "rootType": "event",
+      "formatter": "beamObj",
+      "gapMs": 2000,
+      "cap": 100
     }
   ]
 }

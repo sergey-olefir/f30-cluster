@@ -53,6 +53,7 @@ const ASK_AT_S = 120;                 // the silent fields' getters are asked on
 const HUB_PAUSE_MS = 120;             // between two interfaces' proxies being built
 const FLOOD_PER_S = 40;
 const VOLUME_WARN_BYTES = 150 * 1024;
+const FIRST_CHARS = 900;              // beam HS: a recorded field's first-value line (raw members) stays one line
 
 const PART_CHARS = 1000;
 /** A line body in parts of at most PART_CHARS characters, each cut at a space (a token longer than that is cut where it must). */
@@ -109,7 +110,7 @@ class Probe {
     /** Mark the fields of these sets (and the fields other sets share with them through `also`) as recorded. */
     recordSets(ids) {
         const want = ids || [];
-        this.fields.forEach((st) => { st.rec = st.sets.some((id) => want.indexOf(id) >= 0); });
+        this.fields.forEach((st) => { st.rec = st.sets.some((id) => want.indexOf(id) >= 0); st.firstRec = false; });
         return this.fields.filter((st) => st.rec).length;
     }
 
@@ -123,7 +124,13 @@ class Probe {
             // fields' throttled log lines are left out (config.recorder.quietLog), so the log keeps the marks, the summaries, the status
             if (st.rec && this.recorder && this.recorder.on) {
                 try { this.recorder.sample(st, v); } catch (err) { /* the recorder guards itself */ }
-                if (this.recQuiet) { st.events++; return; }
+                // beam HS: a field marked recLog (the lamps, the stalk, the switches) keeps its lines; every other one says its FIRST
+                // value of the recording once, with its raw members ("does the car send it" from the log alone), then stays quiet
+                if (this.recQuiet && !f.recLog) {
+                    st.events++;
+                    if (!st.firstRec) { st.firstRec = true; this._first(st, v); }
+                    return;
+                }
             }
             try { this._value(st, v); } catch (err) {
                 if (!st.warned) { st.warned = true; this._warn(f.p + ' ' + f.tag + ': ' + msg(err)); }
@@ -265,6 +272,14 @@ class Probe {
         }, (e) => say('error or no answer: ' + msg(e) + ' (the car does not send it)')).catch(() => null);
     }
 
+    /** beam HS: "first P27 hb-obj3 t=12.3: <raw members>" - a recorded field's first value of the recording, one line, never thrown. */
+    _first(st, v) {
+        const f = st.f;
+        try {
+            this._info('first ' + f.p + ' ' + f.tag + ' t=' + this._t() + ': ' + F.fmtTree(v, { max: FIRST_CHARS, entries: 4, skip: (f.tree && f.tree.skip) || [] }));
+        } catch (e) { if (!st.warned) { st.warned = true; this._warn(f.p + ' ' + f.tag + ' first: ' + msg(e)); } }
+    }
+
     // ---- values -> lines -------------------------------------------------------------------------------------------------------
     _body(st, v) {
         const f = st.f;
@@ -297,6 +312,7 @@ class Probe {
             case 'views': return F.fmtViews(v);             // S16 (car issues NV)
             case 'rendered': return F.fmtRendered(v);
             case 'stream': return F.fmtStream(v);
+            case 'beamObj': return F.fmtBeamObj(v, f.slot);   // beam HS: one light object of the camera, raw numbers
             case 'turns': {                                  // S16 next-turn (car issues CT): a queryContent reply, decoded by shared/carplay_turns.js
                 if (!this.turns) return 'no decoder';
                 const d = this.turns.decode(v);

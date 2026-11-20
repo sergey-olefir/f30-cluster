@@ -16,7 +16,11 @@
  *   #f,<id>,<tag>,<Interface.member>,<col>,<col>,...          a field's columns, before its first line in a file (again if its shape changes)
  *   #n,<code>,<ENUM_NAME>                                        an enum name's code, before its first use in a file
  *   #m,<t>,<n>                                                   the owner's "Позначка n"
- *   #end,<t>,samples=..,dropped=..,errors=..                     the last line of a recording (missing: the app or the head unit stopped)
+ *   #s,<t>,<id>,<n>                                              beam HS: n samples of field <id> were folded since its line before
+ *                                                                (a field with recSame: the same values again, less than recSame ms
+ *                                                                after its last written line; they take no seq); ids hold for the
+ *                                                                whole recording; at the stop, one per field with folds left
+ *   #end,<t>,samples=..,dropped=..,errors=..,texts=..,folded=..  the last line of a recording (missing: the app or the head unit stopped)
  *   <t>,<id>,<seq>,<ctr>,<pts>,<v1>,<v2>,...                     a sample; "=" for the values: the same values as this field's line before
  *
  *   t    monotonic receive time, ms since the recording started (process.hrtime, not the wall clock)
@@ -121,7 +125,7 @@ class Recorder {
         this.cur = null;              // the file being written: { name, bytes }
         this.fields = {};             // tag -> { id, seq }
         this.nIds = 0; this.fileNo = 0; this.t0 = 0;
-        this.samples = 0; this.dropped = 0; this.errors = 0; this.texts = 0; this.written = 0;
+        this.samples = 0; this.dropped = 0; this.errors = 0; this.texts = 0; this.written = 0; this.folded = 0;
         this.error = null; this.warned = false;
     }
 
@@ -137,7 +141,7 @@ class Recorder {
             this.sets = (sets || []).slice();
             this.t0 = this.mono();
             this.fields = {}; this.nIds = 0; this.fileNo = 0;
-            this.samples = 0; this.dropped = 0; this.errors = 0; this.texts = 0; this.written = 0; this.queued = 0;
+            this.samples = 0; this.dropped = 0; this.errors = 0; this.texts = 0; this.written = 0; this.queued = 0; this.folded = 0;
             this.error = null; this.warned = false;
             this.segs = [];
             this.on = true;
@@ -159,7 +163,10 @@ class Recorder {
     stop(sync) {
         if (!this.on) return;
         try {
-            this._line(this._seg(), '#end,' + this._t() + ',samples=' + this.samples + ',dropped=' + this.dropped + ',errors=' + this.errors + ',texts=' + this.texts);
+            // beam HS: the folds since each field's last line, then the last line
+            const t = this._t(), seg = this._seg();
+            Object.keys(this.fields).forEach((k) => { const fr = this.fields[k]; if (fr.folded) { this._line(seg, '#s,' + t + ',' + fr.id + ',' + fr.folded); fr.folded = 0; } });
+            this._line(seg, '#end,' + t + ',samples=' + this.samples + ',dropped=' + this.dropped + ',errors=' + this.errors + ',texts=' + this.texts + ',folded=' + this.folded);
         } catch (e) { /* the queue is full or broken: stop anyway */ }
         this.on = false;
         clearInterval(this.timer); this.timer = null;
@@ -182,11 +189,18 @@ class Recorder {
         try {
             const f = st.f;
             let fr = this.fields[f.tag];
-            if (!fr) fr = this.fields[f.tag] = { id: ++this.nIds, seq: 0, name: f.iface.split('.').pop() + '.' + f.field };
+            if (!fr) fr = this.fields[f.tag] = { id: ++this.nIds, seq: 0, name: f.iface.split('.').pop() + '.' + f.field, same: null, sameAt: 0, folded: 0 };
+            const t = this._t();
+            let fl = null, key = null;
+            // beam HS: recSame - the same values again soon after the field's last written line are folded (counted, no seq)
+            if (f.recSame > 0) {
+                fl = flatten(v, f.tree && f.tree.skip, this._entries(f));
+                key = fl.keys.join(',') + '|' + fl.vals.join(',');
+                if (key === fr.same && t - fr.sameAt < f.recSame) { fr.folded++; this.folded++; return; }
+            }
             fr.seq++;
             if (this.queued > this.maxQueue) { this.dropped++; return; }
-            const t = this._t();
-            const fl = flatten(v, f.tree && f.tree.skip, f.recEntries > 0 && f.recEntries < this.maxEntries ? f.recEntries : this.maxEntries);     // r1120 AC: a field's own cap
+            if (!fl) fl = flatten(v, f.tree && f.tree.skip, this._entries(f));
             const seg = this._seg();
             const sig = fl.keys.join(',');
             if (seg.hdr[fr.id] !== sig) {
@@ -197,8 +211,10 @@ class Recorder {
             for (let i = 0; i < fl.vals.length; i++) vals[i] = this._val(seg, fl.vals[i]);
             const body = vals.join(',');
             const pts = fl.ptsS === null ? '' : String(fl.ptsS) + '.' + (fl.ptsNs === null ? '000000000' : nine(fl.ptsNs));
+            if (fr.folded) { this._line(seg, '#s,' + t + ',' + fr.id + ',' + fr.folded); fr.folded = 0; }
             this._line(seg, t + ',' + fr.id + ',' + fr.seq + ',' + (fl.ctr === null ? '' : fl.ctr) + ',' + pts + ',' + (seg.prev[fr.id] === body ? '=' : body));
             seg.prev[fr.id] = body;
+            if (key !== null) { fr.same = key; fr.sameAt = t; }
             this.samples++;
         } catch (e) {
             this.errors++;
@@ -219,6 +235,15 @@ class Recorder {
     }
 
     _t() { return Math.round(this.mono() - this.t0); }
+
+    /** A list's entries in a file: the field's cap for one of the recorded sets (beam HS: recEntriesBy), its own cap (r1120 AC), the recorder's. */
+    _entries(f) {
+        const by = f.recEntriesBy;
+        if (by && typeof by === 'object') {
+            for (let i = 0; i < this.sets.length; i++) { const n = by[this.sets[i]]; if (n > 0 && n < this.maxEntries) return n; }
+        }
+        return f.recEntries > 0 && f.recEntries < this.maxEntries ? f.recEntries : this.maxEntries;
+    }
 
     // ---- segments: one per file, queued text ------------------------------------------------------------------------------------
     _newSeg() {
@@ -351,7 +376,7 @@ class Recorder {
         const used = this.used();
         return { on: this.on, sets: this.sets.slice(), session: this.session, samples: this.samples, bytes: this.written, queued: this.queued, used,
             room: Math.max(0, this.quota - used), quota: this.quota, files: this.files.length + (this.cur ? 1 : 0), dropped: this.dropped, errors: this.errors, texts: this.texts,
-            error: this.error, seconds: this.on ? Math.round(this._t() / 1000) : 0 };
+            folded: this.folded, error: this.error, seconds: this.on ? Math.round(this._t() / 1000) : 0 };
     }
     _say(s) { try { this.log.info('probe: ' + s); } catch (e) { /* a failing log */ } }
 }

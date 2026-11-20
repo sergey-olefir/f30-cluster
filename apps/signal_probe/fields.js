@@ -29,9 +29,21 @@
  *   fmt              a named formatter of format.js (enum bool hex temps intersection dart lanes description mediaMenu station metadata
  *                    roles devices calllist cbs activeSource sources tree; S16: views rendered stream turns)
  *   recEntries       r1120 AC: in a recording, a list of this field keeps at most this many entries (the recorder's own cap is 16)
+ *   recEntriesBy     beam HS: { set: n }: the same, only while that set is recorded (S18 keeps 4 camera objects where S17 keeps 8)
+ *   recSame          beam HS: ms; in a recording, a sample with the same values as the field's last written line, less than this
+ *                    after it, is folded (not written, counted: "#s" in the file); one line at least every recSame ms (recorder.js)
+ *   recLog           beam HS: the field keeps its log lines while it is recorded (rare changes the log alone should show)
+ *   slot             beam HS: the light object's slot (1..15) of a mainBeamAssistantDataObject event (fmt beamObj)
  *
  * r1120 AC: S17 "ACC" is the one recording set for the adaptive-cruise drives: its own field plus, through `also` (applied once at
  * the end of this file from ACC), every field of S14 and the ones of S10 / S11 / S13 / S15 an adaptive cruise needs.
+ *
+ * beam HS: S18 "HB" is the recording set for the night drives of the Auto Beam round (docs/highbeam/BRIEF-HS-signals.md): its own
+ * fields (the camera's light objects and its own high-beam verdict, the lamps, the light switch, the brightness, the wipers) plus,
+ * through `also` (applied once at the end of this file from HB), the stalk, the lamps of S14, the speed, yaw and steering, the gear,
+ * the indicator, the outside temperature, the dimmer, the limit and the built-up flag, the vehicle ahead and the camera's object
+ * lists cut to HB_ENTRIES objects. READ ONLY like every set: never RecogFrontCameraLightDetection.acknowledgeObjectData* (setters
+ * without a getter: not declared at all), never a LightswitchOperation method or setter (its three fields are read with "rs").
  */
 const I = {
     KombiIF: 'de.bmw.infotainment.KombiIF',
@@ -136,6 +148,12 @@ const I = {
     DisplaySink: 'de.bmw.infotainment.remoteinstrumentcluster.DisplaySink',
     NavigationCAN: 'de.bmw.infotainment.navigation.NavigationCAN',
     FeedbackLaneGuiding: 'de.bmw.infotainment.FeedbackLaneGuiding',
+    // beam HS: S18 "HB" (docs/highbeam/BRIEF-HS-signals.md): the camera's light detection, the ambient brightness, the wipers, the
+    // light switch screen's state. Four interfaces new to the manifest (Light is already read by S6 / S14)
+    RecogLight: 'de.bmw.sensors.objects.RecogFrontCameraLightDetection',
+    Environment: 'de.bmw.body.Environment',
+    Wiper: 'de.bmw.body.Wiper',
+    LightswitchOperation: 'de.bmw.body.drivinglight.LightswitchOperation',
 };
 const TABLE = [
     // ---- S1 P1 ----
@@ -456,7 +474,48 @@ const TABLE = [
     //      object lists and the lane assignment (S15, at most ACC_ENTRIES objects each in a recording) - all through `also` (see
     //      ACC below) - and its own field, the driver's steering angle (curves, target loss; XView is already read for the grade).
     { set: 'S17', p: 'P26', tag: 'steering', iface: I.XView, field: 'statusSteeringAngleDriver', flags: 'rs', gapMs: 500, cols: [['angle', 'actualValueSteeringAngleDriver', 'n'], ['qualifier', 'qualifierActualValueSteeringAngleDriver', 'e']] },
+    // beam HS: ---- S18 P27 "HB" (the Auto Beam round, 2026-11-20): does this car's camera send its light objects and its own high-beam
+    //      verdict (it has no high-beam option), and what did the driver do with the beam. The 15 light objects are added below the
+    //      table (hb-obj1..15). Every value raw: the units are unknown, nothing is scaled or named by a unit. Events ('b') and
+    //      notifier-only fields ('s'); LowBeam and the light switch screen's three fields have a getter ('rs'). The changes of the lamps
+    //      and the switches stay in the log while recording (recLog): the log alone then shows the driver's timeline.
+    { set: 'S18', p: 'P27', tag: 'hb-control', iface: I.RecogLight, field: 'controlHighBeamAssistant', flags: 'b', gapMs: 1000, cap: 400,
+      cols: [['control', 'controlHighBeam', 'n'], ['reason', 'reasonSwitchOffHighBeam', 'x'], ['vehicles', 'numberVehicles', 'n'], ['signs', 'numberRoadSigns', 'n'], ['pedestrians', 'numberPedestrians', 'n'],
+          ['calib', 'statusCameraCalibration', 'n'], ['offH', 'cameraCalibrationOffsetHorizontal', 'n'], ['offV', 'cameraCalibrationOffsetVertical', 'n'], ['q', 'qualifierDataControlHighBeamAssistant', 'n'],
+          ['qExt', 'qualifierExtendedControlHighBeamAsstistant', 'n'], ['sync', 'syncSignal', 'n']] },
+    { set: 'S18', p: 'P27', tag: 'hb-meid1', iface: I.RecogLight, field: 'mEObjectID1', flags: 'b', gapMs: 2000, cap: 100, recSame: 1000,
+      cols: [['id1', 'MEIDObject1', 'n'], ['id2', 'MEIDObject2', 'n'], ['id3', 'MEIDObject3', 'n'], ['id4', 'MEIDObject4', 'n'], ['id5', 'MEIDObject5', 'n'], ['id6', 'MEIDObject6', 'n'], ['id7', 'MEIDObject7', 'n'], ['id8', 'MEIDObject8', 'n']] },
+    { set: 'S18', p: 'P27', tag: 'hb-meid2', iface: I.RecogLight, field: 'mEObjectID2', flags: 'b', gapMs: 2000, cap: 100, recSame: 1000,
+      cols: [['id9', 'MEIDObject9', 'n'], ['id10', 'MEIDObject10', 'n'], ['id11', 'MEIDObject11', 'n'], ['id12', 'MEIDObject12', 'n'], ['id13', 'MEIDObject13', 'n'], ['id14', 'MEIDObject14', 'n'], ['id15', 'MEIDObject15', 'n']] },
+    { set: 'S18', p: 'P27', tag: 'hb-lamps', iface: I.Light, field: 'LampExterior2', flags: 's', gapMs: 0, cap: 400, recLog: true,
+      cols: [['mainBeam', 'controlFunctionMainBeam', 'e'], ['dipL', 'controlFunctionDippedBeamLeftHand', 'e'], ['dipR', 'controlFunctionDippedBeamRightHand', 'e'],
+          ['distL', 'controlLightDistributionLowBeamLeftHand', 'e'], ['distR', 'controlLightDistributionLowBeamRightHand', 'e'], ['laserL', 'controlFunctionLaserLeftHand', 'e'],
+          ['laserR', 'controlFunctionLaserRightHand', 'e'], ['cornerL', 'controlFunctionCorneringLightLeftHand', 'e'], ['cornerR', 'controlFunctionCorneringLightRightHand', 'e'],
+          ['frontFog', 'controlFunctionFrontFogLight', 'e'], ['flashMode', 'controlModeFunctionSpecialFlashing', 'e']] },
+    { set: 'S18', p: 'P27', tag: 'hb-low-beam', iface: I.Light, field: 'LowBeam', flags: 'rs', gapMs: 2000,
+      cols: [['lowBeam', 'statusLowBeam', 'e'], ['sensor', 'statusSensorLowBeam', 'e'], ['ambient', 'ambientBrightnessLowBeam', 'n'], ['reason', 'statusLowBeamReason', 'n'],
+          ['value', 'statusValueLowBeam', 'n'], ['mb3', 'stateValueDrivingLightMB3', 'n'], ['mb3State', 'stateMB3', 'e']] },
+    { set: 'S18', p: 'P27', tag: 'hb-switch', iface: I.Light, field: 'statusOperationLightExterior', flags: 's', gapMs: 0, recLog: true,
+      cols: [['switch', 'statusLampSwitch', 'e'], ['event', 'recognitionEventLampSwitch', 'e']] },
+    { set: 'S18', p: 'P27', tag: 'hb-indicators', iface: I.Light, field: 'StatusFunctionsIndicators', flags: 's',
+      cols: [['direction', 'controlIndicateDirection', 'e'], ['function', 'activeFunctionIndicateDirection', 'e']] },
+    { set: 'S18', p: 'P27', tag: 'hb-indicators2', iface: I.Light, field: 'StatusFunctionsIndicators2', flags: 's',
+      cols: [['direction', 'controlIndicateDirection', 'e'], ['function', 'activeFunctionIndicateDirection', 'e'], ['overlay', 'overlayFunctionIndicateDirection', 'e']] },
+    { set: 'S18', p: 'P27', tag: 'hb-brightness', iface: I.Environment, field: 'StatusBrightnessEnvironment', flags: 's', gapMs: 2000, cols: [['brightness', 'valueBrightnessEnvironment', 'n']] },
+    { set: 'S18', p: 'P27', tag: 'hb-prefield', iface: I.Environment, field: 'statusBrightnessPrefield', flags: 's', gapMs: 2000, cols: [['prefield', 'valueBrightnessPrefield', 'n']] },
+    { set: 'S18', p: 'P27', tag: 'hb-wiper', iface: I.Wiper, field: 'wiper', flags: 's', gapMs: 2000, cols: [['blade', 'positionWiperBlade', 'e']] },
+    { set: 'S18', p: 'P27', tag: 'hb-rain', iface: I.Wiper, field: 'rainSensorWiperSpeed', flags: 's', gapMs: 2000, cols: [['rain', 'intensityRain', 'n'], ['speed', 'speedWiper', 'n'], ['sensor', 'statusRainSensor', 'n']] },
+    { set: 'S18', p: 'P27', tag: 'hb-wiper-stalk', iface: I.Wiper, field: 'wiperSteeringColumn', flags: 's', gapMs: 0, recLog: true, bits: { path: 'operationWiperSwitch', label: 'switch' }, cols: [['pot', 'operationWiperPotentiometer', 'e']] },
+    { set: 'S18', p: 'P27', tag: 'hb-lightswitch', iface: I.LightswitchOperation, field: 'mainLightswitchState', flags: 'rs', gapMs: 0, recLog: true, fmt: 'enum' },
+    { set: 'S18', p: 'P27', tag: 'hb-fog-front', iface: I.LightswitchOperation, field: 'foglightFront', flags: 'rs', gapMs: 0, recLog: true, fmt: 'bool' },
+    { set: 'S18', p: 'P27', tag: 'hb-fog-rear', iface: I.LightswitchOperation, field: 'foglightRear', flags: 'rs', gapMs: 0, recLog: true, fmt: 'bool' },
 ];
+// beam HS: the camera's 15 light objects, one event each (three of the names start with a capital M in the catalogue: 11, 12, 15).
+// One compact line per object (fmt beamObj, raw numbers); in a recording an object that repeats itself is folded (recSame).
+const HB_OBJECT_EVENT = (n) => (n === 11 || n === 12 || n === 15 ? 'M' : 'm') + 'ainBeamAssistantDataObject' + n;
+for (let n = 1; n <= 15; n++) {
+    TABLE.push({ set: 'S18', p: 'P27', tag: 'hb-obj' + n, iface: I.RecogLight, field: HB_OBJECT_EVENT(n), flags: 'b', slot: n, fmt: 'beamObj', gapMs: 2000, cap: 100, recSame: 1000 });
+}
 
 // ---- the sets: each one switchable on its own in the app's centre-screen menu (settings key set1..set9), default all off ----
 const SETS = [
@@ -476,6 +535,7 @@ const SETS = [
     { id: 'S15', key: 'set15', name: 'camera objects', uk: 'Об’єкти камери', items: ['P24'] },
     { id: 'S16', key: 'set16', name: 'next turn', uk: 'Наступний поворот', items: ['P25'] },
     { id: 'S17', key: 'set17', name: 'ACC', uk: 'ACC: усе для адаптивного круїзу', items: ['P26'], label: 'ACC' },      // r1120 AC
+    { id: 'S18', key: 'set18', name: 'HB', uk: 'HB: фари і дальнє світло', items: ['P27'], label: 'HB' },              // beam HS
 ];
 
 // r1120 AC: what the ACC set (S17) reads besides its own field: every field of these sets (and what they share through `also`), and
@@ -493,12 +553,30 @@ TABLE.forEach((f) => {
     f.also = (f.also || []).concat(['S17']);
     if (f.set === 'S15') f.recEntries = ACC_ENTRIES;
 });
+// beam HS: what the HB set (S18) reads besides its own fields, by tag: the stalk (both fields: the bits and the button's line), the
+// lamps' commands of S14 (LampExterior), the head unit's own high-beam lamp (S11 lights) and the dimmer, the indicator, the speed
+// (Vehicle2, km/h x 1/64), the yaw rate, the steering angle, the gear, the outside temperature (S2), the limit and the nav's built-up
+// flag (S13: the town question), the vehicle ahead (S8), and the camera's object lists with the class and the direction of movement
+// (S15: the fallback if the light objects stay silent) cut to HB_ENTRIES objects. recLog: these keep their log lines while recorded.
+const HB = {
+    tags: ['stalk', 'stalk-complete', 'brake-light', 'lights', 'dimmer', 'indicate', 'car-speed2', 'yaw-rate', 'steering', 'gearbox-status',
+        'external-display', 'tsr', 'ccp-builtup', 'front-vehicle', 'cam-objects', 'cam-position', 'cam2-objects', 'cam2-position'],
+    recLog: ['stalk', 'stalk-complete', 'lights'],
+};
+const HB_ENTRIES = 4;
+TABLE.forEach((f) => {
+    if (f.set === 'S18' || HB.tags.indexOf(f.tag) < 0) return;
+    f.also = (f.also || []).concat(['S18']);
+    if (f.set === 'S15') f.recEntriesBy = { S18: HB_ENTRIES };
+    if (HB.recLog.indexOf(f.tag) >= 0) f.recLog = true;
+});
 // per-set defaults (a field's own gapMs / cap win): messages and doors are events, the drive sets are long
 const SET_DEFAULTS = {
     S1: { gapMs: 500, cap: 100 }, S2: { gapMs: 1000, cap: 60 }, S3: { gapMs: 250, cap: 100 }, S4: { gapMs: 1000, cap: 100 },
     S5: { gapMs: 500, cap: 100 }, S6: { gapMs: 500, cap: 150 }, S7: { gapMs: 1000, cap: 200 }, S8: { gapMs: 1000, cap: 200 }, S9: { gapMs: 1000, cap: 200 }, S10: { gapMs: 500, cap: 100 }, S11: { gapMs: 500, cap: 100 }, S13: { gapMs: 250, cap: 300 }, S14: { gapMs: 1000, cap: 1200 }, S15: { gapMs: 2000, cap: 300 },
     S16: { gapMs: 2000, cap: 400 },
     S17: { gapMs: 1000, cap: 1200 },     // r1120 AC: as S14
+    S18: { gapMs: 1000, cap: 300 },      // beam HS: the objects and the slow values carry their own gap
 };
 
 const instOf = (f) => f.instance || '1';
@@ -526,4 +604,4 @@ function manifestSignals() {
     return out;
 }
 
-module.exports = { I, TABLE, SETS, SET_DEFAULTS, instOf, interfaces, manifestSignals, ACC, ACC_ENTRIES };
+module.exports = { I, TABLE, SETS, SET_DEFAULTS, instOf, interfaces, manifestSignals, ACC, ACC_ENTRIES, HB, HB_ENTRIES };

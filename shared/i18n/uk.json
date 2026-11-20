@@ -467,6 +467,7 @@
  "signal_probe.set.set15": "S15 Об’єкти камери (P24)",
  "signal_probe.set.set16": "S16 Наступний поворот (P25)",
  "signal_probe.set.set17": "S17 ACC: усе для адаптивного круїзу (P26)",
+ "signal_probe.set.set18": "S18 HB: фари і дальнє світло (P27)",
  "signal_probe.set.set2": "S2 Комп’ютер, пробіг, одиниці (P3 P4 P5 P6)",
  "signal_probe.set.set3": "S3 Кузов і напруга (P7 P10)",
  "signal_probe.set.set4": "S4 Медіа і радіо (P8)",

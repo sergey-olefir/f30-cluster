@@ -108,6 +108,29 @@ function fmtBits(v, spec, st) {
     return out;
 }
 
+// ---- beam HS: one light object of the camera (RecogFrontCameraLightDetection.mainBeamAssistantDataObjectN) ----------------------
+// Ten UInt8 outputs named <Member>Object<N>. Raw numbers only: their units and encodings are unknown, so nothing is scaled or named
+// by a unit. " defaults" when every member holds the catalogue's default value (the value a slot is filled with when unset).
+const BEAM_OBJ = [['id', 'Id'], ['class', 'Class'], ['status', 'Status'], ['x', 'XPosition'], ['y', 'YPosition'], ['w', 'Width'], ['h', 'Height'],
+    ['dist', 'Distance'], ['asl', 'AngularSpeedLeft'], ['asr', 'AngularSpeedRight']];
+const BEAM_OBJ_DEFAULT = { Id: 15, Class: 15, Status: 7, XPosition: 255, YPosition: 255, Width: 255, Height: 63, Distance: 127, AngularSpeedLeft: 255, AngularSpeedRight: 255 };
+const BEAM_OBJ_RE = BEAM_OBJ.map((m) => new RegExp('^' + m[1] + 'Object\\d+$'));
+/** "slot=3 id=5 class=2 status=1 x=120 y=80 w=4 h=2 dist=60 asl=128 asr=127" from one object event (keys by their prefix). */
+function fmtBeamObj(v, slot) {
+    const head = 'slot=' + (isNum(slot) ? slot : '-');
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return head + ' ' + notA('a struct', v);
+    const keys = Object.keys(v);
+    let defaults = true;
+    const parts = BEAM_OBJ.map((m, i) => {
+        let k = null;
+        for (let j = 0; j < keys.length; j++) if (BEAM_OBJ_RE[i].test(keys[j])) { k = keys[j]; break; }
+        const x = k === null ? undefined : v[k];
+        if (x !== BEAM_OBJ_DEFAULT[m[1]]) defaults = false;
+        return m[0] + '=' + fNum(x);
+    });
+    return head + ' ' + parts.join(' ') + (defaults ? ' defaults' : '');
+}
+
 // ---- P1 / P2 / P17: the check-control and service lists -----------------------------------------------------------------
 /** KombiInterface_2.cbsDataServiceList: a union of two structs per entry; names, ways and dates only as lengths. */
 function fmtCbs(v) {
@@ -508,4 +531,5 @@ module.exports = {
     fmtBits, fmtCbs, fmtTemps, fmtIntersection, fmtDescription, fmtDart, fmtLanes, fmtMediaMenu, fmtStation, fmtMetadata,
     fmtRoles, fmtDevices, fmtCallList, fmtTree, TREE_SKIP,
     eventParts, mapEntries, fmtViews, fmtRendered, fmtStream, fmtTurns,
+    fmtBeamObj, BEAM_OBJ, BEAM_OBJ_DEFAULT,
 };

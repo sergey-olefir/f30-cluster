@@ -43,7 +43,7 @@ let passed = 0, failed = 0;
 const ok = (cond, what) => { if (cond) { passed++; console.log('  ok   ' + what); } else { failed++; console.log('  FAIL ' + what); } };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const CANARY = /CANARY|Canary/;
-const RECORDABLE = ['S13', 'S14', 'S15', 'S17'];     // r1120 AC: + S17 (ACC)
+const RECORDABLE = ['S13', 'S14', 'S15', 'S17', 'S18'];     // r1120 AC: + S17 (ACC); beam HS: + S18 (HB)
 const inSets = (f, ids) => [f.set].concat(f.also || []).some((s) => ids.indexOf(s) >= 0);
 
 /** Every file of a folder, decoded: { files: [names], text (all of them, in order), lines }. */
@@ -143,16 +143,16 @@ async function main() {
     const items = app.screens[0].items.map((x) => x[1]);
     ok(items.indexOf('REC') === items.indexOf('MARK') + 1 && items.indexOf('RECSET') === items.indexOf('REC') + 1, 'the menu: REC and RECSET right after the mark row');
     ok(app.config.recorder && app.config.recorder.quotaMB <= 15 && app.config.recorder.gzip === true && app.config.recorder.quietLog === true, 'config.recorder: quota ' + app.config.recorder.quotaMB + ' MB (the app\'s disk limit is 20 MiB with its log), gzip, quiet log');
-    ok(app.config.recorder.choices.every((c) => c.every((id) => RECORDABLE.indexOf(id) >= 0)), 'the recordable sets are S13 / S14 / S15 / S17 only (numbers and enum names, no text member)');
+    ok(app.config.recorder.choices.every((c) => c.every((id) => RECORDABLE.indexOf(id) >= 0)), 'the recordable sets are S13 / S14 / S15 / S17 / S18 only (numbers and enum names, no text member)');
     ok(fmtNum(0.1 + 0.2) === '0.3' && fmtNum(9.806650161743164) === '9.80665' && fmtNum(-0) === '0' && fmtNum(65535) === '65535' && fmtNum(1e-7) === '1e-7' && fmtNum(NaN) === '', 'numbers: integers as they are, floats to 7 significant digits');
 
     if (!cat) { console.log('  skip 2..4: the catalogue is not here'); } else {
         // ---------------------------------------------------------------------------------------------------------------
-        console.log('2. every field of S13 / S14 / S15 / S17 from the catalogue\'s own types: no text, no coordinate');
+        console.log('2. every field of S13 / S14 / S15 / S17 / S18 from the catalogue\'s own types: no text, no coordinate');
         const dir2 = path.join(tmp, 'rec2');
         let t = 0;
         const R2 = new Recorder({ dir: dir2, mono: () => t, version: 'test', cfg: { fileRawKB: 64 } });
-        ok(R2.start(['S13', 'S14', 'S15', 'S17']) === true, 'start');
+        ok(R2.start(['S13', 'S14', 'S15', 'S17', 'S18']) === true, 'start');
         const recF = FIELDS.TABLE.filter((f) => inSets(f, RECORDABLE));
         recF.forEach((f, k) => {
             for (let j = 0; j < 3; j++) {
@@ -404,9 +404,13 @@ async function main() {
         server.stdout.on('data', keep); server.stderr.on('data', keep);
         ok(await until(() => probeLines().some((l) => /^probe: start /.test(l)), 60000), 'the app builds with the kit and starts');
         let p = await req('GET', '/probe');
-        // r1120 AC: ACC (S17) is the first choice; S14 one press further
+        // r1120 AC: ACC (S17) is the first choice; beam HS: HB (S18) one press further, S14 two
         ok(p && p.native.REC && /^Почати запис ACC$/.test(p.native.REC.cells.Text1stRow) && /вільно 15,0 МБ з 15,0 МБ/.test(p.native.REC.cells.Text2ndRow), 'the REC row: "Почати запис ACC", the room in the quota: ' + JSON.stringify(p && p.native.REC && p.native.REC.cells));
         ok(p && /^Набір для запису: ACC$/.test(p.native.RECSET.cells.Text1stRow), 'the RECSET row: ACC');
+        await req('POST', '/click', { id: 'RECSET' });
+        await sleep(300);
+        p = await req('GET', '/probe');
+        ok(/: HB$/.test(p.native.RECSET.cells.Text1stRow) && /^Почати запис HB$/.test(p.native.REC.cells.Text1stRow), 'a press on RECSET: the next choice, HB');     // beam HS
         await req('POST', '/click', { id: 'RECSET' });
         await sleep(300);
         p = await req('GET', '/probe');
@@ -415,10 +419,10 @@ async function main() {
         await sleep(300);
         p = await req('GET', '/probe');
         ok(/S14\+S15$/.test(p.native.RECSET.cells.Text1stRow) && /S14\+S15$/.test(p.native.REC.cells.Text1stRow), 'a press on RECSET: the next choice, S14+S15');
-        await req('POST', '/click', { id: 'RECSET' }); await req('POST', '/click', { id: 'RECSET' }); await req('POST', '/click', { id: 'RECSET' });
+        await req('POST', '/click', { id: 'RECSET' }); await req('POST', '/click', { id: 'RECSET' }); await req('POST', '/click', { id: 'RECSET' }); await req('POST', '/click', { id: 'RECSET' });
         await sleep(300);
         p = await req('GET', '/probe');
-        ok(/: S14$/.test(p.native.RECSET.cells.Text1stRow), 'three more presses (S13, ACC): back to S14');
+        ok(/: S14$/.test(p.native.RECSET.cells.Text1stRow), 'four more presses (S13, ACC, HB): back to S14');     // beam HS: + HB
         // start
         await req('POST', '/click', { id: 'REC' });
         ok(await until(() => probeLines().some((l) => /^probe: rec: start session=\d{8}-\d{6} sets=S14 dir=data\/rec file=4096KB quota=15MB gzip=1$/.test(l))), 'a press on REC: the recording starts: ' + (probeLines().filter((l) => /rec: start/.test(l))[0] || ''));

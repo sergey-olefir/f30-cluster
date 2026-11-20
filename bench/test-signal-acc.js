@@ -150,7 +150,9 @@ async function main() {
     });
     ok(ACC.every((f) => /^(r|rs|s|b)$/.test(f.flags)), 'every one of the ' + ACC.length + ' fields is read only (r / rs / s or an event; no method)');
     ok(FIELDS.TABLE.filter((f) => f.set === 'S17').length === 1 && FIELDS.TABLE.filter((f) => f.set === 'S17')[0].tag === 'steering', 'S17\'s own field: the steering angle (XView, already read for the grade)');
-    ok(FIELDS.interfaces().length === 99, 'no new interface in the manifest (99, as before)');
+    // beam HS: S18 (HB) later added four interfaces (103); ACC reads none of them, so ACC alone still needs the 99 it was built on
+    const HB_NEW = [FIELDS.I.RecogLight, FIELDS.I.Environment, FIELDS.I.Wiper, FIELDS.I.LightswitchOperation];
+    ok(FIELDS.interfaces().length === 103 && !ACC.some((f) => HB_NEW.indexOf(f.iface) >= 0), 'no new interface for ACC (the manifest\'s 103 = the 99 ACC was built on + the 4 of HB, none of which ACC reads)');
     const s14 = FIELDS.TABLE.filter((f) => inSets(f, ['S14']));
     ok(s14.every((f) => inSets(f, ['S17'])), 'all of S14 (' + s14.length + ' fields with what it shares) is in S17');
     const cams = ACC.filter(CAMERA);
