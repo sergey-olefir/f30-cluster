@@ -1515,6 +1515,7 @@ class HudApp {
             // twin_dial B3 (SPEC-R3 5): the centre machine (tab 2's card, the window, the rows, the tab); its text measure is the
             // engine's own atlases, its fonts the tab-2 sheet widget's (_twinPush sets them), its paint the sheet's pixels
             this.twinMsg = new this.twin.TwinCentre({ strict: ca.strict, confirmNow: ca.confirmNow === true,
+                show: ca.centreShow !== false, hold: ca.centreHold !== false,      // r1120 T1: the shown card in the centre (twin_cc.js _shown)
                 settleMs: CC_SETTLE_MS, openSettleMs: CC_SETTLE_MS, log: (l) => this.log.info(l),
                 deps: { measure: (f, str) => textRaster.measure(str, f, 0), has: (f, ch) => !!textRaster.loadFont(f).metrics.glyphs[ch], fonts: this.twin.FONTS },
                 paint: (page) => this._twinSheetBuf(page) });

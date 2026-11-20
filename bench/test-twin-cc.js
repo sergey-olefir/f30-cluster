@@ -43,6 +43,9 @@ const APP_DIR = path.join(ROOT, 'apps', APP_ID), STAGE = path.join(ROOT, 'dist',
 // connection 1, the pictogram on connection 2, a target fed all along): bench/test-front-vehicle.js runs this file with and without it
 // and compares the audit's traces (TWIN_CC_TRACE) - the message machine's frames must be the same
 const FV_ON = process.env.TWIN_CC_FV === '1';
+// r1120 T1: TWIN_CC_SHOW=0 runs the engine with the shown card off (config.ccActive.centreShow false: 0.1.5's pages);
+// bench/test-twin-cc-show.js runs this file both ways and compares the audit's traces of BMW's panel, the row and the window
+const SHOW_ON = process.env.TWIN_CC_SHOW !== '0';
 
 let passed = 0, failed = 0;
 const ok = (cond, what) => { if (cond) { passed++; console.log('  ok   ' + what); } else { failed++; console.log('  FAIL ' + what); } };
@@ -163,6 +166,23 @@ function unitChecks() {
     try { T.paintSheet(deps, one, { fonts: { head: 'no_such_font', counter: 'td_cnt', row: 'td_tab', text: 'td_val' } }); } catch (e) { thrown = true; }
     ok(thrown, 'a font that will not load throws (the engine latches that: window stays open)');
     ok(T.missingChars(layDeps, FONTS.head, 'Πόρτα').length === 5 && T.missingChars(layDeps, FONTS.head, 'Двері') === '', 'missingChars names the characters a font lacks (Greek)');
+
+    // ---- r1120 T1: the shown card and the pointer's "why" line -------------------------------------------------------------
+    const two2 = lay(mkc(42, 'Несправність гальм: зупиніться в безпечному місці', 'red'), [], { headLines: 2 });
+    ok(two2.card.lines.length === 2 && two2.card.cut && /…$/.test(two2.card.lines[1]) && lay(mkc(42, 'Несправність гальм: зупиніться в безпечному місці', 'red')).card.lines.length === 3,
+        'r1120 T1: headLines 2 caps a three-line headline at two, the second ending in "…" (the default stays 3)');
+    const ptr = lay(null, [], { shown: true, sev: 3 }), ptrWhy = lay(null, [], { shown: true, sev: 3, why: T.WHY.texts.unlisted });
+    const ptrRows = lay(null, [{ id: 15, name: 'Двері відчинено', color: 'white' }], { shown: true, sev: 3, why: T.WHY.texts.unlisted });
+    ok(ptrWhy.kind === 'pointer' && ptrWhy.card.why === T.WHY.texts.unlisted && !ptr.card.why && ptr.sig !== ptrWhy.sig && !ptrRows.card.why && ptrRows.rows.length === 1 &&
+        ptr.sig === JSON.stringify(['pointer', null, T.POINTER.lines, '', 3, 'cc_warn', [], 0, false]),
+        'r1120 T1: the pointer\'s "why" line only when no row is drawn under it; without one the sig is byte for byte the old one');
+    const whyOk = Object.keys(T.WHY.texts).every((k) => { const s = T.WHY.texts[k]; return layDeps.measure(FONTS.row, s) <= T.HEAD.maxW && !T.missingChars(layDeps, FONTS.row, s); });
+    ok(whyOk, 'r1120 T1: every "why" line fits 436 px in td_tab and every letter is in the font (' + Object.keys(T.WHY.texts).length + ' reasons)');
+    const pw = T.paintSheet(deps, ptrWhy, {}), pn = T.paintSheet(deps, ptr, {});
+    ok(inkBox(pw.buf, 735, 488, 1185, 530, 60)[3] > 0 && inkBox(pn.buf, 735, 488, 1185, 530, 60)[3] < 0, 'r1120 T1: the "why" line paints under the pointer\'s two lines (baseline ' + T.WHY.base + '); none without it');
+    ok(T.paintSheet(deps, Object.assign({}, one, { kind: 'show' }), {}).buf.equals(P.buf), 'r1120 T1: a shown card (kind "show") paints exactly as the card');
+    ok(T.showName('Капот від\u00adчинено') === 'Капот відчинено' && T.showName('Тиск\u00a0у шинах\u200b') === 'Тиск у шинах' && T.showName('A\u2011B\u0000') === 'A-B' && T.showName('  Двері  ') === 'Двері',
+        'r1120 T1: showName drops what draws nothing (soft hyphen, zero width, NUL), maps look-alikes (U+2011 to "-"), one space');
 }
 
 // ---- the state machine alone, with an injected clock --------------------------------------------------------------------
@@ -311,6 +331,30 @@ function machineChecks() {
         t.update(inp({ actWired: true, act: 15, find: f, frame: { n: 1, of: 2, ids: [] } }), now + 200);
         ok(t.state === 'ours' && t.candidate.counter === '1/2', 'a counter change does not reopen the window (the stamp is the headline\'s)');
     }
+    {   // r1120 T1: `show` (what the centre may show) and `why` (the reason's enum) - additions that decide nothing
+        const { t } = mk();
+        const f = finder(E.door, E.noname, E.greek);
+        t.update(inp({ dispWired: true, disp: 15, find: f }), now);
+        ok(t.candidate === null && t.state === 'window' && t.why === 'd7confirm' && t.show && t.show.id === 15 && t.shownNum === 15,
+            'r1120 T1: the message that confirmed D7: no candidate (BMW\'s panel stays open), but `show` names it for the centre (why ' + t.why + ')');
+        t.update(inp({ dispWired: true, disp: 16, find: f }), now);
+        ok(t.show === null && t.why === 'noname', 'r1120 T1: an entry with no name: nothing to show (why noname)');
+        t.update(inp({ dispWired: true, disp: 285, find: f }), now);
+        ok(t.show === null && t.why === 'unlisted' && t.shownNum === 285, 'r1120 T1: a number with no entry: nothing to show (why unlisted)');
+        t.update(inp({ dispWired: true, disp: 65535, unknownValues: [65535], find: f }), now);
+        ok(t.show === null && t.why === 'unknown', 'r1120 T1: 65535: nothing to show (why unknown)');
+        t.update(inp({ dispWired: true, disp: 0, find: f }), now);
+        t.update(inp({ dispWired: true, disp: 17, find: f }), now);
+        t.fail('glyph', t.candidate.key, '5 characters');
+        t.update(inp({ dispWired: true, disp: 17, find: f }), now);
+        ok(t.candidate === null && t.why === 'glyph' && t.show && t.show.id === 17, 'r1120 T1: a glyph latch keeps the candidate away, not `show` (the centre checks its own letters)');
+        t.fail('throw', '*', 'x');
+        t.update(inp({ dispWired: true, disp: 17, find: f }), now);
+        ok(t.show === null && t.why === 'throw', 'r1120 T1: a throw latch: nothing to show either (why throw)');
+        const { t: h } = mk();
+        h.update(inp({ shown: true, live: list(E.door), heurEntry: E.door }), now);
+        ok(h.show === null && h.why === 'd7', 'r1120 T1: the heuristic alone (no "shown now"): nothing to show - the list does not say which message BMW shows');
+    }
 }
 
 // =====================================================================================================================
@@ -321,6 +365,136 @@ function modelChecks() {
     const M = require(path.join(ROOT, 'tools', 'twin-dial', 'r3', 'sc', 'test.js'));
     const r = M.main();
     passed += r.passed; failed += r.failed;
+}
+
+// =====================================================================================================================
+// Part 2b (r1120 T1): the shown card never moves BMW's panel. The machine as shipped (show on) against the same machine with the
+// shown card off (opts.show false: the pages of 0.1.5), fed the SAME inputs, turn by turn: every decision the window, the rows
+// and the tab follow must be identical - the state, the tab, every non-page op, the stamps, the open settle, the settle tick.
+// Only the page ops may differ. And in every turn the shown page carries every key the verdict page counts.
+// =====================================================================================================================
+function showDiffChecks() {
+    console.log('r1120 T1: the machine with the shown card against the machine without it, turn by turn');
+    const SC = path.join(ROOT, 'tools', 'twin-dial', 'r3', 'sc');
+    const M = require(path.join(SC, 'centre_cc.js'));
+    const { CASES } = require(path.join(SC, 'cases.js'));
+    const opsTxt = (ops) => ops.filter((op) => op.op !== 'page').map((op) => op.op + (op.open !== undefined ? (op.open ? '+' : '-') : op.on !== undefined ? (op.on ? '+' : '-') : op.op === 'tab' ? op.tab : ':' + op.look)).join(' ');
+    const pick = (m, r) => JSON.stringify([r.state, r.tab, opsTxt(r.ops), r.deferred, m.needsTick, m.window, m.severity, m.candidate && m.candidate.key, m.reason,
+        m.onScreen, m.openedAt, m.applied.window, m.applied.rows, m.applied.tab, m.applied.warn, m.pulled, m.left, m.t.latch && m.t.latch.why, m.t.dead, m.t.sheetLatch]);
+    const stat = { turns: 0, diff: 0, first: null, show: 0, held: 0, why: 0, contain: 0, showThrow: 0, periods: 0 };
+    // TWIN_CC_DIFF_BASE=<a twin_cc.js>: the "off" machine is that module's TwinCentre instead (e.g. main's file, to compare against
+    // the machine as it was before r1120 rather than this one with the shown card off)
+    const BASE = process.env.TWIN_CC_DIFF_BASE ? require(path.resolve(process.env.TWIN_CC_DIFF_BASE)) : T;
+    if (BASE !== T) console.log('  info the "off" machine is ' + path.basename(process.env.TWIN_CC_DIFF_BASE) + '\'s TwinCentre');
+    const pair = (o, lines) => {
+        const mk = (show) => {
+            const m = new (show ? T : BASE).TwinCentre(Object.assign({ deps: M.deps, show, log: show ? (l) => lines.push(l) : () => {},
+                paint: (page) => {
+                    if (page.card && page.card.id === 666) throw new Error('bench: a page that never paints');      // by content: the shown card throws too
+                    if (m.throwNext && page.kind !== 'show' && !page.whyCode) { m.throwNext = false; throw new Error('bench: injected'); }
+                    return null;
+                } }, o));
+            m.throwNext = false;
+            return m;
+        };
+        return { off: mk(false), on: mk(true) };
+    };
+    const step = (p, inp, now, where) => {
+        const a = p.off.update(inp, now), b = p.on.update(inp, now);
+        stat.turns++;
+        const x = pick(p.off, a), y = pick(p.on, b);
+        if (x !== y) { stat.diff++; if (!stat.first) stat.first = where + ': ' + x + ' / ' + y; }
+        const vk = p.on.vpage ? p.on.vpage.keys : [], sk = p.on.page ? p.on.page.keys : [];
+        if (!vk.every((k) => sk.indexOf(k) >= 0)) stat.contain++;
+        if (b.page && b.page.kind === 'show') { stat.show++; if (b.page.held) stat.held++; }
+        if (b.page && b.page.whyCode) stat.why++;
+    };
+    // ---- SC's cases (the model's car), every machine option ----
+    const REC = { deferValues: [65535], leftList: true };
+    const optsList = [];
+    [false, true].forEach((confirmNow) => [false, true].forEach((unl) => [null, REC].forEach((rel) => optsList.push({ o: { strict: true, confirmNow, unlistedPullsTab: unl }, rel }))));
+    optsList.push({ o: { strict: false }, rel: null });
+    optsList.forEach((oc) => CASES.forEach((cs) => {
+        const lines = [];
+        const car = new M.CarSim({ release: oc.rel });
+        const p = pair(oc.o, lines);
+        let now = 0;
+        const turn = (ev) => step(p, car.inputs(now), now, cs.id + ' ' + ev + ' @' + now);
+        turn('start');
+        cs.steps.forEach((st) => {
+            let dwell = 1000;
+            st.slice(1).forEach((ev) => {
+                const k = ev[0], v = ev[1];
+                if (k === 'wait') { dwell = v; return; }
+                if (k === 'list' || k === 'listRaw') car.setList(v, now);
+                else if (k === 'active') car.setAct(v, now);
+                else if (k === 'displayed') car.disp = v;
+                else if (k === 'frame') car.frame = v;
+                else if (k === 'driver') { p.off.driver(v); p.on.driver(v); }
+                else if (k === 'auto') { p.off.auto(v); p.on.auto(v); }
+                else if (k === 'night') { p.off.night = v; p.on.night = v; }
+                else if (k === 'throw') { p.off.throwNext = true; p.on.throwNext = true; return; }
+                else if (k === 'refuse') { p.off.sheetRefused(); p.on.sheetRefused(); }
+                else if (k === 'rebuild') { const a = p.off.rebuild(), b = p.on.rebuild(); if (JSON.stringify(a) !== JSON.stringify(b)) stat.diff++; }
+                turn(k);
+            });
+            for (let t = 10; t <= dwell; t += 10) { now += 10; if (now % 50 === 0) turn('tick'); }
+        });
+        stat.periods += lines.filter((l) => /^cc: period \d+, /.test(l)).length;
+    }));
+    const scTurns = stat.turns;
+    // ---- random drives: the owner's car's shapes (displayed as the source, 65535, numbers with no entry, an empty name, Greek,
+    // a soft hyphen, a page that never paints, long names), the driver's key, guidance, night, rebuilds, refusals, injected throws ----
+    const POOL = [
+        { id: 15, name: 'Двері відчинено', color: 'white' }, { id: 19, name: 'Багажник відчинено', color: 'white' },
+        { id: 50, name: 'Тиск у шинах: перевірте', color: 'yellow' }, { id: 42, name: 'Гальма: зупиніться в безпечному місці', color: 'red' },
+        { id: 41, name: 'Потрібне сервісне обслуговування найближчим часом', color: 'white' },
+        { id: 2255, name: 'Повідомлення про сервіс, яке не вміщається в один рядок картки', color: 'white' },
+        { id: 16, name: '', color: 'red' }, { id: 17, name: 'Πόρτα ανοιχτή', color: 'white' }, { id: 18, name: 'Капот від\u00adчинено', color: 'white' },
+        { id: 666, name: 'Сторінка, що не малюється', color: 'red' }, { id: 987, name: 'Готовність до руху', color: 'white' },
+    ];
+    const NUMS = [0, 0, 0, 0, 15, 19, 50, 42, 41, 2255, 16, 17, 18, 666, 987, 285, 926, 184, 65535];
+    const DT = [0, 0, 10, 40, 50, 100, 149, 150, 151, 200, 300, 700, 1500];
+    for (let seed = 1; seed <= 160; seed++) {
+        let s = seed * 2654435761 >>> 0;
+        const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+        const pickOf = (a) => a[Math.floor(rnd() * a.length)];
+        const o = { strict: rnd() < 0.9, confirmNow: rnd() < 0.6, unlistedPullsTab: rnd() < 0.3 };
+        const lines = [];
+        const p = pair(o, lines);
+        const st = { list: [{ id: 0, name: 'Усе гаразд', color: 'green' }], disp: null, hshown: null, frame: { n: null, of: null, ids: [] } };
+        let now = 0;
+        const inp = () => {
+            const live = st.list.filter((e) => e.id !== 0);
+            return { read: true, actWired: false, act: null, dispWired: st.disp !== null, disp: st.disp, prefer: 'displayed', unknownValues: [65535], noneValues: [0],
+                find: (id) => st.list.find((e) => e.id === id) || null, shown: st.hshown, live: live.filter((e) => e.name), heurEntry: live.filter((e) => e.name)[0] || null,
+                frame: st.frame, entries: live.filter((e) => e.name).map((e) => ({ id: e.id, name: e.name, color: e.color })), released: false };
+        };
+        for (let i = 0; i < 260; i++) {
+            const r = rnd();
+            if (r < 0.28) { const n = Math.floor(rnd() * 4); const l = [{ id: 0, name: 'Усе гаразд', color: 'green' }]; for (let k = 0; k < n; k++) { const e = pickOf(POOL); if (!l.some((x) => x.id === e.id)) l.push(e); } st.list = l; }
+            else if (r < 0.58) st.disp = pickOf(NUMS);
+            else if (r < 0.64) { const n = 1 + Math.floor(rnd() * 5); p.off.driver(n); p.on.driver(n); }
+            else if (r < 0.67) { const n = pickOf([1, 5]); p.off.auto(n); p.on.auto(n); }
+            else if (r < 0.70) { const v = rnd() < 0.5; p.off.night = v; p.on.night = v; }
+            else if (r < 0.72) { const a = p.off.rebuild(), b = p.on.rebuild(); if (JSON.stringify(a) !== JSON.stringify(b)) stat.diff++; }
+            else if (r < 0.73) { p.off.sheetRefused(); p.on.sheetRefused(); }
+            else if (r < 0.745) { p.off.throwNext = true; p.on.throwNext = true; }
+            else if (r < 0.78) { st.disp = null; st.hshown = pickOf([true, false, null]); }
+            else if (r < 0.81) { const ids = st.list.filter((e) => e.id).map((e) => e.id); st.frame = ids.length > 1 ? { n: 1 + Math.floor(rnd() * ids.length), of: ids.length, ids } : { n: null, of: null, ids: [] }; }
+            step(p, inp(), now, 'seed ' + seed + ' step ' + i + ' @' + now);
+            now += pickOf(DT);
+            step(p, inp(), now, 'seed ' + seed + ' tick ' + i + ' @' + now);
+        }
+        stat.periods += lines.filter((l) => /^cc: period \d+, /.test(l)).length;
+        if (lines.some((l) => /could not be painted/.test(l))) stat.showThrow++;
+    }
+    ok(stat.diff === 0, 'r1120 T1: BMW\'s panel, the bottom row and the tab decided identically with and without the shown card: ' + stat.turns + ' turns (' + scTurns + ' on SC\'s ' + CASES.length +
+        ' cases x ' + optsList.length + ' machine options, the rest on 160 random drives), ' + stat.diff + ' differences' + (stat.first ? ' (first: ' + stat.first.slice(0, 400) + ')' : ''));
+    ok(stat.contain === 0, 'r1120 T1: in every turn the shown page carries every message key the verdict page counts as our text (' + stat.contain + ' turns where it did not)');
+    ok(stat.show > 100 && stat.held > 10 && stat.why > 100 && stat.showThrow > 0, 'r1120 T1: the comparison exercised the new pages: ' + stat.show + ' turns with a shown card (' + stat.held + ' held), ' + stat.why +
+        ' with the pointer\'s "why" line, ' + stat.showThrow + ' drives where a shown card failed to paint');
+    ok(stat.periods > 50, 'r1120 T1: the per-period log line was written ' + stat.periods + ' times');
 }
 
 // =====================================================================================================================
@@ -413,6 +587,7 @@ function buildApp() {
     // strict), with a short fallback for the test's pace
     const twinCfg = JSON.parse(fs.readFileSync(path.join(TWIN, 'app.json'), 'utf8')).config;
     c.ccActive = Object.assign({}, twinCfg.ccActive, { strict: true, fallback: { on: true, hideAfterMs: 900, keepColors: ['red'] } });
+    if (!SHOW_ON) c.ccActive.centreShow = false;      // r1120 T1
     c.ccDisplayed = Object.assign({}, twinCfg.ccDisplayed);
     if (FV_ON) c.frontVehicle = Object.assign({}, twinCfg.frontVehicle, { on: true, staleMs: 600000 });      // front-vehicle FV: the test on from the start
     fs.rmSync(APP_DIR, { recursive: true, force: true });
@@ -892,7 +1067,10 @@ async function engineChecks() {
     await turn();
     ok(T0().state === 'window' && snapshot().open && snapshot().covered === 0, '6c. N -> a message with no entry: the window opens in the very turn');
     await sleep(300);
-    ok(T0().page && T0().page.kind === 'pointer' && !snapshot().has, '6c. tab 2 shows the pointer page ("Повідомлення / на панелі внизу"), never a card');
+    // r1120 T1: the brake message (this period's, still listed) stays in the centre as the HELD shown card; BMW's panel stays open
+    if (SHOW_ON) ok(T0().page && T0().page.kind === 'show' && T0().page.held && textOf(snapshot().sheet, E.brake) === 'card' && T0().state === 'window' && snapshot().open && snapshot().covered === 0,
+        '6c. r1120 T1: tab 2 keeps the period\'s brake card as a shown card (held) while BMW\'s panel stays open for the unnamed number - never covered');
+    else ok(T0().page && T0().page.kind === 'pointer' && !snapshot().has, '6c. tab 2 shows the pointer page ("Повідомлення / на панелі внизу"), never a card');
     noViolations('6c. N -> unnamed');
     truth(true, true, E.tyre);
     feedFrame(2, 3, [14, 50, 15]);
@@ -1092,10 +1270,52 @@ async function engineChecks() {
     await until(() => T0().state === 'ours', 1500);
     truth(true, true, null); feedAct(285);                  // the car at 13:41: an unlisted number over a listed one
     await sleep(400);
-    ok(T0().state === 'window' && snapshot().open && T0().tab === 2 && T0().page.kind === 'pointer', '12d. 285 over a listed message that already pulled tab 2: the window opens, tab 2 stays (no new pull), the pointer page');
+    if (SHOW_ON) ok(T0().state === 'window' && snapshot().open && snapshot().covered === 0 && T0().tab === 2 && T0().page.kind === 'show' && T0().page.held && textOf(snapshot().sheet, E.door) === 'card',
+        '12d. r1120 T1: 285 over a listed message that already pulled tab 2: the window opens, tab 2 stays, and the centre keeps that message\'s card (held, shown only)');
+    else ok(T0().state === 'window' && snapshot().open && T0().tab === 2 && T0().page.kind === 'pointer', '12d. 285 over a listed message that already pulled tab 2: the window opens, tab 2 stays (no new pull), the pointer page');
     noViolations('12d. unlisted over listed');
+    feedList(L(E.rest));                                     // r1120 T1: the held message leaves the list, 285 stays: nothing of ours to show
+    await sleep(250);
+    ok(T0().state === 'window' && snapshot().open && T0().page.kind === 'pointer' && (SHOW_ON ? T0().page.whyCode === 'unlisted' && T0().page.card.why === T.WHY.texts.unlisted : !T0().page.card.why),
+        '12d. r1120 T1: the listed message leaves the list, 285 stays: the pointer' + (SHOW_ON ? ', with its one line why ("' + T.WHY.texts.unlisted + '")' : ' (no "why" line with the shown card off)'));
+    noViolations('12d. the listed message goes');
     none(); feedList(L(E.rest)); feedAct(0); await sleep(250);
     ok(T0().state === 'none' && T0().tab === 1, '12d. the end: tab 1 again');
+
+    // ---- case 13 (r1120 T1): the centre shows what it can read; BMW's panel is decided as before ----------------------------
+    // 13a. a soft hyphen in the name (our fonts have no glyph for it): the covering card latches exactly as before (BMW's panel stays
+    // open); the centre shows the message's card with the soft hyphen dropped
+    clean();
+    const soft = { id: 18, name: 'Bonnet\u00adopen', color: 'white' }, softShown = { id: 18, name: 'Bonnetopen', color: 'white' };
+    truth(true, true, soft);
+    feedList(L(E.rest, soft)); feedAct(18);
+    await sleep(450);
+    {
+        const t = T0(), s = snapshot();
+        ok(t.state === 'window' && s.open && s.covered === 0 && s.rows === 0 && t.tab === 2 && /missing from our font/.test(t.reason),
+            '13a. a soft hyphen in the name: the covering card latches as before - BMW\'s panel open, nothing of ours over it (' + t.reason + ')');
+        if (SHOW_ON) ok(t.page.kind === 'show' && !t.page.held && textOf(s.sheet, softShown) === 'card', '13a. r1120 T1: and the centre shows that message\'s card (the soft hyphen dropped), kind "show"');
+        else ok(t.page.kind === 'pointer', '13a. (shown card off) the pointer page');
+        noViolations('13a. a shown card never lets BMW\'s panel shut');
+    }
+    await endMsg(); feedList(L(E.rest)); await sleep(150);
+    // 13b. an entry with no name: nothing of ours to show - the pointer, and why
+    clean();
+    truth(true, true, null);
+    feedList(L(E.rest, E.noname)); feedAct(16);
+    await sleep(400);
+    ok(T0().state === 'window' && snapshot().open && snapshot().covered === 0 && T0().tab === 2 && T0().page.kind === 'pointer' &&
+        (SHOW_ON ? T0().page.whyCode === 'noname' && T0().page.card.why === T.WHY.texts.noname : !T0().page.card.why),
+        '13b. an entry with no name pulls tab 2 with the pointer' + (SHOW_ON ? ' and its one line why ("' + T.WHY.texts.noname + '")' : ''));
+    noViolations('13b. no name');
+    await endMsg(); feedList(L(E.rest)); await sleep(150);
+    // 13c. one log line per message period: its numbers, how long BMW's panel was open and why, how long ours covered it, the centre
+    {
+        const per = logs.filter((l) => /^cc: period \d+, \d+\.\d s, numbers [\d\/-]+: BMW's panel open \d+\.\d s/.test(l));
+        ok(per.length >= 10 && per.some((l) => /numbers 15\/285: .*\(.*unlisted \d/.test(l) && /ours \d+\.\d s/.test(l)) && per.some((l) => /numbers 16: .*noname/.test(l)) &&
+            (!SHOW_ON || per.some((l) => /show:held \d/.test(l) && /pointer:unlisted \d/.test(l))),
+            '13c. r1120 T1: one "cc: period" line per message period (' + per.length + '), numbers and enums only, e.g. "' + (per.filter((l) => /15\/285/.test(l))[0] || '-') + '"');
+    }
 
     // ---- case 11: the audit itself ------------------------------------------------------------------------------------
     ok(model.frames >= 50, '11. the pixel audit ran on ' + model.frames + ' frames');
@@ -1196,6 +1416,7 @@ async function engineChecks() {
         unitChecks();
         machineChecks();
         modelChecks();
+        showDiffChecks();       // r1120 T1
         tabFillChecks();
         await engineChecks();
     } catch (e) {

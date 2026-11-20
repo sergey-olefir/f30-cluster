@@ -89,6 +89,13 @@ const COUNTER = { right: 1180, base: 326 };                 // "n/m" Noto 29 gre
 const ROWS = { pitch: 44, symX: 741, symSize: 32, symDy: 6, nameX: 781, maxW: 399, nameDy: 33, top: 300, bottom: 564, below: 26,
     scroll: { x: 1188, w: 3, y0: 300, y1: 564, track: 40, thumb: 180 } };
 const POINTER = { lines: ['Повідомлення', 'на панелі внизу'], bases: [424, 471] };       // our fixed words: never a message's
+// r1120 T1: the pointer's one short line saying WHY nothing of ours is in the centre (our fixed words, td_tab grey, only when
+// no row is drawn under the pointer). Keys are TwinCC's `why` codes.
+const WHY = { base: 516, texts: {
+    unlisted: 'Текст лише на панелі', noname: 'Текст лише на панелі',          // the car gives no text of it to apps
+    unknown: 'Номер невідомий', d7: 'Номер ще невідомий', noverdict: 'Номер ще невідомий', heuristic: 'Номер ще невідомий',
+    conflict: 'Номери не збігаються', glyph: 'Шрифт без цих літер',
+    throw: 'Помилка малювання', dead: 'Помилка малювання', sheet: 'Помилка малювання', room: 'Помилка малювання' } };
 const EMPTY = { icon: 'cc_info', size: 66, cx: 960, cy: 392, text: 'Немає повідомлень', base: 478 };
 const FONTS = { head: 'td_msg', counter: 'td_cnt', row: 'td_tab', text: 'td_val' };      // Noto 42 / 29 / 33 / 39
 const SHEET_RECT = [SHEET.x, SHEET.y, SHEET.x + SHEET.w, SHEET.y + SHEET.h];
@@ -104,6 +111,15 @@ function missingChars(deps, font, s) {
         if (!ok) out += ch;
     });
     return out;
+}
+
+// r1120 T1: a name as the SHOWN card draws it (TwinCentre._shown; never the covering card's, whose rule is unchanged): what
+// draws nothing removed (soft hyphen, zero-width and direction marks, control characters), typographic look-alikes our fonts
+// lack mapped to ones they have, white space as one space
+const LOOKALIKE = { '\u2010': '-', '\u2011': '-', '\u2012': '\u2013', '\u00b4': '\'', '\u2032': '\'', '\u2033': '"', '\u02b9': '\u02bc' };
+function showName(s) {
+    return String(s).replace(/[\u0000-\u0008\u000e-\u001f\u007f-\u009f\u00ad\u200b-\u200f\u202a-\u202e\u2060-\u2064\ufeff]/g, '')
+        .replace(/[\u2010\u2011\u2012\u00b4\u2032\u2033\u02b9]/g, (c) => LOOKALIKE[c]).replace(/\s+/g, ' ').trim();
 }
 
 /** Greedy word wrap into lines of widths[i] px (the last width repeats), at most widths.length lines; what is left ends the
@@ -156,7 +172,9 @@ function layoutTab2(s, deps) {
     const out = { kind: 'empty', card: null, rows: [], more: 0, total: 0, keys: [] };
     let top = ROWS.top;
     if (s.cand) {
-        const w = wrapWords(s.cand.name, (t) => deps.measure(F.head, t), [HEAD.maxW, HEAD.maxW, HEAD.maxW]);
+        // r1120 T1: s.headLines (1..3, default 3) caps the headline's lines (a shown-only card that must leave room for a row)
+        const nl = s.headLines >= 1 && s.headLines <= 3 ? s.headLines : 3;
+        const w = wrapWords(s.cand.name, (t) => deps.measure(F.head, t), [HEAD.maxW, HEAD.maxW, HEAD.maxW].slice(0, nl));
         const bases = HEAD.bases[String(w.lines.length)];
         out.kind = 'card';
         out.card = { key: s.cand.key, id: s.cand.id, sev: severityOf(s.cand.color), symbol: symbolFor(s.cand.id, s.cand.color),
@@ -184,8 +202,11 @@ function layoutTab2(s, deps) {
     out.more = others.length - out.rows.length;        // the scroll line shows that more exist
     out.total = others.length;
     if (out.kind === 'empty' && out.rows.length + out.more > 0) out.kind = 'list';
+    // r1120 T1: the pointer's "why" line (s.why: our own words), only when no row is drawn under the pointer
+    const why = out.kind === 'pointer' && s.why && !others.length ? String(s.why) : '';
+    if (why) out.card.why = why;
     out.sig = JSON.stringify([out.kind, out.card && out.card.key, out.card && out.card.lines, out.card && out.card.counter, out.card && out.card.sev,
-        out.card && out.card.symbol, out.rows.map((r) => [r.key, r.sev, r.text]), out.more, !!s.night]);
+        out.card && out.card.symbol, out.rows.map((r) => [r.key, r.sev, r.text]), out.more, !!s.night].concat(why ? [why] : []));     // (no why: the sig as before)
     return out;
 }
 
@@ -237,7 +258,8 @@ function paintSheet(deps, page, o) {
     };
     const nt = (rgb, k) => (night ? nightRgb(rgb, k) : rgb);
     let symbolDrawn = null;
-    if (page.kind === 'card' || page.kind === 'pointer') {
+    const isCard = page.kind === 'card' || page.kind === 'show';      // r1120 T1: 'show' is a card the window stays open under
+    if (isCard || page.kind === 'pointer') {
         const c = page.card, sev = SEVERITY[c.sev] || SEVERITY[1];
         // the symbol cell: flat in the severity colour, the grey one a tab-ramp gradient (linear light, top to bottom)
         const cx0 = CELL.x0 - SHEET.x, cx1 = CELL.x1 - SHEET.x, cy0 = CELL.y0 - SHEET.y, cy1 = CELL.y1 - SHEET.y;
@@ -249,7 +271,8 @@ function paintSheet(deps, page, o) {
         const sRgb = night ? nightRgb(sev.symbol, 0.8) : sev.symbol;
         symbolDrawn = icon(c.symbol, SYMBOL.size, SYMBOL.cx, SYMBOL.cy, sRgb) || icon(sev.idx >= 3 ? 'cc_warn' : 'cc_info', SYMBOL.size, SYMBOL.cx, SYMBOL.cy, sRgb);
         const white = nt([255, 255, 255], 0.8), grey = nt([227, 227, 227], 0.75);
-        c.lines.forEach((ln, i) => { if (ln) text(ln, page.kind === 'card' ? F.head : F.text, c.bases[i], page.kind === 'card' ? white : grey, { align: 'center' }); });
+        c.lines.forEach((ln, i) => { if (ln) text(ln, isCard ? F.head : F.text, c.bases[i], isCard ? white : grey, { align: 'center' }); });
+        if (page.kind === 'pointer' && c.why) text(c.why, F.row, WHY.base, nt([150, 150, 150], 0.75), { align: 'center' });     // r1120 T1
         if (c.counter) {
             const cw = T.measure(c.counter, F.counter, 0);
             text(c.counter, F.counter, COUNTER.base, grey, { x: COUNTER.right - SHEET.x - cw });
@@ -340,20 +363,21 @@ class TwinCC {
         let shown = null, entry = null, state = 'window', reason = '', cand = null, conf = false;
         let shownNow = '-';
         let sev = 0, unknown = false;
+        let code = '';                   // r1120 T1: the reason as an enum (why), set beside every reason; it decides nothing
         this.unlisted = false;           // car-fix CF1: the car names a number no ccList entry carries (BMW's own message)
         this.needsTick = false;
         if (!inp.read) {
-            reason = 'the car\'s check-control messages have not been read yet';
+            reason = 'the car\'s check-control messages have not been read yet'; code = 'blind';
             shown = null;
         } else if (w.wired) {
             shownNow = w.n === null ? '-' : String(w.n);
             const none = (inp.noneValues || [0]).indexOf(w.n) >= 0;
             if (w.conflict) {
-                shown = true; reason = 'the two "shown now" witnesses disagree';
+                shown = true; reason = 'the two "shown now" witnesses disagree'; code = 'conflict';
             } else if ((inp.unknownValues || []).indexOf(w.n) >= 0) {
                 // car-fix CF1: 65535 on displayed (after an app start, at the end of a drive on the owner's car) = unknown: BMW's
                 // panel open; the severity only from what the list holds, so a resting list pulls no tab (no known message)
-                shown = true; unknown = true; reason = 'the "shown now" number is unknown (' + w.n + ')';
+                shown = true; unknown = true; reason = 'the "shown now" number is unknown (' + w.n + ')'; code = 'unknown';
                 (inp.entries || []).forEach((e) => { sev = Math.max(sev, severityOf(e.color)); });
             } else if (none) {
                 shown = false;
@@ -362,7 +386,7 @@ class TwinCC {
                 entry = inp.find ? inp.find(w.n) : null;
                 if (!entry) {
                     this.unlisted = true;
-                    reason = 'no ccList entry for number ' + w.n;
+                    reason = 'no ccList entry for number ' + w.n; code = 'unlisted';
                     if (!this.noEntryLogged[w.n]) { this.noEntryLogged[w.n] = true; }
                 } else {
                     sev = severityOf(entry.color);
@@ -370,7 +394,7 @@ class TwinCC {
                         this.confirmed = true; this.confirmEpisode = this._episodeFor(w.n);
                         conf = true;
                     }
-                    if (!entry.name) reason = 'the ccList entry has no name';
+                    if (!entry.name) { reason = 'the ccList entry has no name'; code = 'noname'; }
                 }
             }
         } else if (inp.shown === true) {
@@ -378,13 +402,13 @@ class TwinCC {
             const live = inp.live || [];
             live.forEach((e) => { sev = Math.max(sev, severityOf(e.color)); });
             shownNow = '-';
-            if (this.strict) reason = 'D7: the cluster\'s "shown now" has not matched a ccList entry yet';
+            if (this.strict) { reason = 'D7: the cluster\'s "shown now" has not matched a ccList entry yet'; code = 'd7'; }
             else if (inp.heurEntry && inp.heurEntry.name) entry = inp.heurEntry;      // strict off: 0.7.20's heuristic may draw
-            else reason = 'no "shown now" from the car and no named entry in the list';
+            else { reason = 'no "shown now" from the car and no named entry in the list'; code = 'heuristic'; }
         } else if (inp.shown === false) {
             shown = false;
         } else {
-            reason = 'no message verdict yet';
+            reason = 'no message verdict yet'; code = 'noverdict';
         }
         // the episode: one message from its first moment to the next change of the witness's number (0 ends it)
         this._episode(w.wired ? (shown ? String(w.n) : '0') : shown ? 'h' : '0');
@@ -392,27 +416,28 @@ class TwinCC {
         if (shown === false) {
             // the message ended: latches go (they held until now), the card with it
             this.latch = null;
-            state = 'none'; reason = 'no message shown';
+            state = 'none'; reason = 'no message shown'; code = 'none';
         } else if (shown === true && entry && entry.name && !reason) {
             const key = String(entry.id) + '\u0001' + entry.name;
             // can this message be ours at all?
             let why = '';
-            if (this.dead) why = 'drawing the card threw ' + this.throws + ' times: ours is off until the app restarts';
-            else if (this.sheetLatch) why = 'our tab-2 sheet was refused (pixel memory or an asset)';
-            else if (this.latch && this.latch.key === key) why = this.latch.why;
-            else if (this.latch && this.latch.key === '*') why = this.latch.why;
-            else if (this.strict && !this.confirmed) why = 'D7: not confirmed';
-            else if (this.strict && !this.confirmNow && this.episode === this.confirmEpisode) why = 'D7: this is the message that confirmed "shown now"; ours from the next one';
+            if (this.dead) { why = 'drawing the card threw ' + this.throws + ' times: ours is off until the app restarts'; code = 'dead'; }
+            else if (this.sheetLatch) { why = 'our tab-2 sheet was refused (pixel memory or an asset)'; code = 'sheet'; }
+            else if (this.latch && this.latch.key === key) { why = this.latch.why; code = this.latch.code || 'glyph'; }
+            else if (this.latch && this.latch.key === '*') { why = this.latch.why; code = this.latch.code || 'throw'; }
+            else if (this.strict && !this.confirmed) { why = 'D7: not confirmed'; code = 'd7'; }
+            else if (this.strict && !this.confirmNow && this.episode === this.confirmEpisode) { why = 'D7: this is the message that confirmed "shown now"; ours from the next one'; code = 'd7confirm'; }
             if (why) { reason = why; sev = severityOf(entry.color); }
             else {
                 const counter = this._counter(inp.frame, entry.id);
                 cand = { key, id: entry.id, name: String(entry.name).replace(/\s+/g, ' ').trim(), color: entry.color || null,
                     symbol: symbolFor(entry.id, entry.color), counter };
                 sev = severityOf(entry.color);
-                if (this.drawn && this.drawn.key === key && now - this.drawn.at >= this.settleMs) { state = 'ours'; reason = 'our card is on the screen'; }
+                if (this.drawn && this.drawn.key === key && now - this.drawn.at >= this.settleMs) { state = 'ours'; reason = 'our card is on the screen'; code = 'ours'; }
                 else {
                     state = 'window';
                     reason = this.drawn && this.drawn.key === key ? 'our card was just sent (waiting ' + this.settleMs + ' ms)' : 'our card is not on the screen yet';
+                    code = 'settle';
                     this.needsTick = true;
                 }
             }
@@ -423,6 +448,18 @@ class TwinCC {
         }
         this.state = state; this.window = state === 'window'; this.reason = reason;
         this.candidate = cand;
+        // ---- r1120 T1: what tab 2 may SHOW in the centre while BMW's panel stays open. It never decides the window: only `cand`
+        // above may cover BMW's panel. `show` is the entry the car itself names as shown now, with a name, whenever a card can be
+        // painted at all (not after three throws, a refused sheet or a throw latched for this message); the reasons that keep
+        // `cand` from it (D7, a glyph latch) do not keep it from the centre. `why` is the enum of the reason, `shownNum` the number.
+        this.why = code || (state === 'window' ? 'window' : state);
+        this.shownNum = w.wired && typeof w.n === 'number' ? w.n : null;
+        this.show = cand;
+        if (!cand && shown === true && entry && entry.name && !this.dead && !this.sheetLatch && !(this.latch && this.latch.key === '*')) {
+            this.show = { key: String(entry.id) + '\u0001' + entry.name, id: entry.id, name: String(entry.name).replace(/\s+/g, ' ').trim(),
+                color: entry.color || null, symbol: symbolFor(entry.id, entry.color), counter: this._counter(inp.frame, entry.id) };
+        }
+        // ---- end r1120 T1 ----
         if (!cand) this.drawn = null;             // nothing to show: the stamp goes too
         this.severity = state === 'none' ? 0 : unknown ? sev : (sev || (shown === true ? 1 : 0));     // car-fix CF1: unknown is no message of its own
         // the log line: one per change of what was decided (numbers and lengths only; the text never)
@@ -471,8 +508,8 @@ class TwinCC {
         if (kind === 'throw') {
             this.throws++;
             if (this.throws >= MAX_THROWS) this.dead = true;
-            this.latch = { key: '*', why: 'drawing the card threw' + (why ? ' (' + why + ')' : '') };
-        } else this.latch = { key, why: kind === 'glyph' ? 'a character of the name is missing from our font' + (why ? ' (' + why + ')' : '') : why };
+            this.latch = { key: '*', why: 'drawing the card threw' + (why ? ' (' + why + ')' : ''), code: 'throw' };       // r1120 T1: code
+        } else this.latch = { key, why: kind === 'glyph' ? 'a character of the name is missing from our font' + (why ? ' (' + why + ')' : '') : why, code: kind === 'glyph' ? 'glyph' : 'latch' };
         this.drawn = null;
         this.logFn('cc: card latched until the message ends: ' + this.latch.why);
     }
@@ -540,6 +577,23 @@ class TwinCentre {
         this.window = true; this.severity = 0; this.tab = this.base; this.page = null; this.candidate = null;
         this.needsTick = false; this.night = false; this.deferred = false; this.mutKey = null; this.paintFailed = false;
         this.sigLogged = null; this.logs = 0;
+        // ---- r1120 T1 (the owner, 2026-11-19: "why point at the bottom if we can show it in the centre?"). Two pages per turn:
+        // the VERDICT page (`vpage`: exactly the page this machine decided before r1120 - every stamp, the open settle and so the
+        // window and the rows are decided on it alone, unchanged) and the SHOWN page (`page`: what the sheet carries). They differ
+        // only where the verdict page is the pointer: the shown page is then our card for the message the car names (kind
+        // 'show': BMW's panel stays open under it, it is never counted as our text for the cover), or the pointer with one line
+        // saying why. The shown page always carries every key the verdict page counts (checked each turn), so the stamps stay
+        // true. opts.show false (config.ccActive.centreShow false) gives back the pointer; opts.hold false (centreHold false)
+        // drops the held card (below).
+        this.showOn = o.show !== false;
+        this.hold = o.hold !== false;            // a number with no entry (285 ...) over this period's named message still listed: its card stays
+        this.vpage = null;                       // the verdict page of the last turn
+        this.vSig = null;                        // its sig as the old machine's applied.sig (when to paint it)
+        this.vBuf = null;                        // { sig, buf }: its last pixels (the shown page may fall back to it)
+        this.showBad = null;                     // a shown page's sig whose paint threw: not tried again until a rebuild
+        this.heldKey = null;                     // the message this period's centre last showed by the car's own number
+        this.per = null; this.periods = 0; this.perLogs = 0;      // the per-period log line
+        // ---- end r1120 T1 ----
     }
 
     // ---- what the engine reads of the verdict (so hud.js asks the same questions as before) ----
@@ -567,6 +621,7 @@ class TwinCentre {
         this.applied = { window: shown, rows: !shown, tab: null, sig: null, warn: null };
         this.page = null; this.openedAt = shown ? -Infinity : null;     // born open: open since the layer exists
         this.paintFailed = false;
+        this.vpage = null; this.vSig = null; this.vBuf = null; this.showBad = null;      // r1120 T1
         return { window: shown, rows: !shown };
     }
 
@@ -606,7 +661,7 @@ class TwinCentre {
                 const miss = missingChars(deps, F.head, cand.name) + missingChars(deps, F.counter, cand.counter || '');
                 if (miss) { t.fail('glyph', cand.key, miss.length + ' characters'); continue; }
             }
-            if (this.paint && page.sig !== this.applied.sig) {
+            if (this.paint && page.sig !== this.vSig) {      // r1120 T1: vSig is what applied.sig was before r1120 (the verdict page's)
                 try { buf = this.paint(page); bufSig = page.sig; }
                 catch (e) {
                     if (cand) t.fail('throw', cand.key, String(e && e.message || e).slice(0, 80));
@@ -623,10 +678,10 @@ class TwinCentre {
         const openFor = this.openedAt === null || this.applied.window !== true ? -1 : now - this.openedAt;
         const noDefer = this.mutant === 'windowLast' || this.mutant === 'ignoreTab' || this.openSettleMs <= 0;
         let deferred = false;
-        if (!noDefer && shownNow && relied.length && this.page && this.page.sig !== page.sig && openFor < this.openSettleMs) {
+        if (!noDefer && shownNow && relied.length && this.vpage && this.vpage.sig !== page.sig && openFor < this.openSettleMs) {     // r1120 T1: vpage (was page)
             const at0 = cand ? this.onScreen[cand.key] : undefined;
             const wouldBeOurs = cand && at0 !== undefined && now - at0 >= this.settleMs && this.tab === 2 && page.keys.indexOf(cand.key) >= 0;
-            if (!wouldBeOurs) { page = this.page; deferred = true; buf = null; }
+            if (!wouldBeOurs) { page = this.vpage; deferred = true; buf = null; }
         }
         // which messages' text the sheet will carry whole after this turn, and since when (continuous presence)
         const sent = page.keys.slice();     // what the pixels carry whole (the op); `keys` are what the machine stamps
@@ -642,28 +697,123 @@ class TwinCentre {
         const at = cand ? this.onScreen[cand.key] : undefined;
         const settled = at !== undefined && (this.mutant === 'noSettle' || now - at >= this.settleMs);
         const tabOk = (this.tab === 2 && !deferred) || this.mutant === 'ignoreTab';
-        let state, reason;
-        if (!shown) { state = 'none'; reason = t.reason; }
-        else if (cand && settled && tabOk) { state = 'ours'; reason = 'our text for the shown message is on the screen'; }
-        else if (cand && !this.sheetOn) { state = 'window'; reason = 'the layout has no tab-2 sheet'; }
-        else if (cand && this.tab !== 2) { state = 'window'; reason = this.left ? 'the driver left tab 2: our text is not on the screen' : 'tab 2 is not shown'; }
-        else if (cand) { state = 'window'; reason = 'our card was just sent (waiting ' + this.settleMs + ' ms)'; }
-        else { state = 'window'; reason = inp.released ? 'released to the list: ' + t.reason : t.reason; }
-        this.state = state; this.reason = reason; this.severity = t.severity; this.page = page; this.candidate = cand;
+        let state, reason, openWhy;      // r1120 T1: openWhy, the enum of the reason (the per-period log); it decides nothing
+        if (!shown) { state = 'none'; reason = t.reason; openWhy = 'none'; }
+        else if (cand && settled && tabOk) { state = 'ours'; reason = 'our text for the shown message is on the screen'; openWhy = 'ours'; }
+        else if (cand && !this.sheetOn) { state = 'window'; reason = 'the layout has no tab-2 sheet'; openWhy = 'nosheet'; }
+        else if (cand && this.tab !== 2) { state = 'window'; reason = this.left ? 'the driver left tab 2: our text is not on the screen' : 'tab 2 is not shown'; openWhy = this.left ? 'left' : 'tab'; }
+        else if (cand) { state = 'window'; reason = 'our card was just sent (waiting ' + this.settleMs + ' ms)'; openWhy = deferred ? 'opensettle' : 'settle'; }
+        else { state = 'window'; reason = inp.released ? 'released to the list: ' + t.reason : t.reason; openWhy = t.why; }
+        this.state = state; this.reason = reason; this.severity = t.severity; this.vpage = page; this.candidate = cand;     // r1120 T1: vpage (was page)
         this.window = state === 'window';
-        const sig = state + '|' + this.tab + '|' + reason + '|' + page.kind;
+        // ---- r1120 T1: the SHOWN page. Nothing above reads it: the window, the rows, the tab and every stamp were decided on the
+        // verdict page `page`. The shown page differs only where the verdict page is the pointer, and it always carries the keys the
+        // verdict page counts (_shown checks), so what the stamps say is on the sheet is on the sheet. ----
+        let disp = page, dbuf = null;
+        if (deferred) disp = this.page || page;                     // the open settle holds the shown page with the verdict page
+        else if (this.showOn && !this.mutant && page.kind === 'pointer' && deps) disp = this._shown(page, inp);
+        if (disp !== page && disp.sig !== this.applied.sig && this.paint && !deferred) {
+            try { dbuf = this.paint(disp); }
+            catch (e) {
+                this.showBad = disp.sig; disp = page;
+                t.logFn('cc: the centre card could not be painted: the pointer instead (until the next rebuild)');
+            }
+        }
+        if (shown && t.show) this.heldKey = t.show.key; else if (!shown) this.heldKey = null;
+        this.page = disp;
+        this._perStep(now, shown, state, openWhy, disp.kind === 'pointer' ? 'pointer:' + (disp.whyCode || t.why) : disp.kind + (disp.held ? ':held' : ''));
+        // ---- end r1120 T1 ----
+        const sig = state + '|' + this.tab + '|' + reason + '|' + disp.kind;
         if (sig !== this.sigLogged && this.logs < 400) {       // one line per change; numbers and our own words only, never a message's
             this.sigLogged = sig; this.logs++;
-            t.logFn('cc: centre ' + state + ', tab ' + this.tab + ', page ' + page.kind + ' (' + reason + ')');
+            t.logFn('cc: centre ' + state + ', tab ' + this.tab + ', page ' + disp.kind + ' (' + reason + ')');
         }
         this.needsTick = !!(shown && cand && this.sheetOn && this.tab === 2 && state !== 'ours') || deferred;
         this.deferred = deferred;
         const warn = this.tab === 2 ? 'W3' : shown ? 'W2' : (inp.entries || []).length ? 'W1' : 'W0';
-        const ops = this._plan({ window: state === 'window', rows: state !== 'window', tab: this.tab, sig: page.sig, keys: sent, kind: page.kind, warn });
+        const ops = this._plan({ window: state === 'window', rows: state !== 'window', tab: this.tab, sig: disp.sig, keys: disp === page ? sent : disp.keys.slice(), kind: disp.kind, warn });
         ops.forEach((op) => { if (op.op === 'window') this.openedAt = op.open ? now : null; });
+        this.vSig = page.sig;           // r1120 T1: what applied.sig was before r1120
         const doPage = ops.some((op) => op.op === 'page');
-        return { ops, state, tab: this.tab, page, deferred, buf: doPage && buf && bufSig === page.sig ? buf : null };
+        // r1120 T1: the pixels of the page op - the shown page's, or the verdict page's (painted in the loop; or painted again here
+        // when the sheet goes back from a shown page to an unchanged verdict page, which painted fine when it was new)
+        let out = null;
+        if (doPage && disp !== page) out = dbuf;
+        else if (doPage && buf && bufSig === page.sig) out = buf;
+        else if (doPage && this.paint && page.kind !== 'other' && page.kind !== 'blank') {
+            try { out = this.paint(page); } catch (e) { out = null; t.logFn('cc: the sheet could not be painted again'); }
+        }
+        return { ops, state, tab: this.tab, page: disp, deferred, buf: out };
     }
+
+    // ---- r1120 T1 ---------------------------------------------------------------------------------------------------------------
+    /** The shown page for a verdict pointer page P: our card for the message the car names as shown now (TwinCC.show), or - while
+     *  the car names a number with no entry (285 ...) or an unknown one (65535) - for the message this period's centre last showed
+     *  by the car's own number if the list still carries it (the held card); else the pointer with one line saying why. Kind
+     *  'show': BMW's panel stays open under it. Never a page that drops a key P counts (the stamps); else P itself. */
+    _shown(P, inp) {
+        const t = this.t, deps = this.deps, F = deps.fonts || FONTS;
+        let sc = t.show, why = t.why;
+        if (!sc && this.hold && this.heldKey && (why === 'unlisted' || why === 'unknown')) {
+            const e = (inp.entries || []).filter((x) => x && x.name && keyOf(x) === this.heldKey)[0];
+            if (e) sc = { key: this.heldKey, id: e.id, name: e.name, color: e.color || null, symbol: symbolFor(e.id, e.color), counter: '', held: true };
+        }
+        if (sc) {
+            const name = showName(sc.name);
+            const miss = name ? missingChars(deps, F.head, name) + missingChars(deps, F.counter, sc.counter || '') : '?';
+            if (miss) why = 'glyph';
+            else {
+                for (let nl = 3; nl >= 2; nl--) {
+                    const D = layoutTab2({ cand: Object.assign({}, sc, { name }), shown: true, sev: t.severity, entries: inp.entries, night: this.night, headLines: nl }, deps);
+                    if (!P.keys.every((k) => D.keys.indexOf(k) >= 0)) { why = 'room'; continue; }
+                    D.kind = 'show'; D.held = !!sc.held; D.sig = 'show' + (sc.held ? '+held' : '') + D.sig;
+                    if (D.sig === this.showBad) { why = 'throw'; break; }
+                    return D;
+                }
+            }
+        }
+        const text = WHY.texts[why];
+        if (!text || P.rows.length || P.more) return P;
+        const D = layoutTab2({ cand: null, shown: true, sev: t.severity, entries: inp.entries, night: this.night, why: text }, deps);
+        if (D.kind !== 'pointer' || D.sig === this.showBad || !P.keys.every((k) => D.keys.indexOf(k) >= 0)) return P;
+        D.whyCode = why;
+        return D;
+    }
+
+    /** The per-period log line (the brief's "one line per message period with the reason the panel was kept open"): from the
+     *  first turn a message shows (or may show) to the turn none is decided - its numbers, how long BMW's panel was open and
+     *  why (TwinCC's / the centre's enums), how long ours covered it, and what the centre showed. Numbers and enums only. */
+    _perStep(now, shown, state, why, kind) {
+        const p = this.per;
+        if (p) {
+            const dt = Math.max(0, now - p.last), c = p.cur;
+            if (c) {
+                if (c.open) p.open[c.why] = (p.open[c.why] || 0) + dt; else p.ours += dt;
+                p.kinds[c.kind] = (p.kinds[c.kind] || 0) + dt;
+            }
+            p.last = now;
+        }
+        if (!shown) {
+            if (p) { this._perLog(now); this.per = null; }
+            return;
+        }
+        if (!p) { this.periods++; this.per = { n: this.periods, t0: now, last: now, nums: [], open: {}, ours: 0, kinds: {}, cur: null }; }
+        const q = this.per, n = this.t.shownNum;
+        if (typeof n === 'number' && q.nums.indexOf(n) < 0 && q.nums.length < 8) q.nums.push(n);
+        q.cur = { open: state === 'window', why: why || 'window', kind: kind || '-' };
+    }
+
+    _perLog(now) {
+        const p = this.per;
+        if (!p || this.perLogs >= 200) return;
+        this.perLogs++;
+        const s = (ms) => (Math.round(ms / 100) / 10).toFixed(1);
+        const list = (o) => Object.keys(o).sort((a, b) => o[b] - o[a]).map((k) => k + ' ' + s(o[k])).join(', ');
+        const open = Object.keys(p.open).reduce((a, k) => a + p.open[k], 0);
+        this.t.logFn('cc: period ' + p.n + ', ' + s(now - p.t0) + ' s, numbers ' + (p.nums.length ? p.nums.join('/') : '-') +
+            ': BMW\'s panel open ' + s(open) + ' s' + (open ? ' (' + list(p.open) + ')' : '') + ', ours ' + s(p.ours) + ' s; centre ' + (list(p.kinds) || '-'));
+    }
+    // ---- end r1120 T1 ----
 
     /** The ordered operations from what the service has to what is wanted. Opening (rows aside, window open) first, the
      *  centre next, closing (window shut, rows back) last: under any partial application the panel is open before our
@@ -693,4 +843,5 @@ class TwinCentre {
 }
 
 module.exports = { TwinCC, TwinCentre, layoutTab2, paintSheet, wrapWords, missingChars, keyOf, severityOf, symbolFor, nightRgb, mono, SEV_NAMES, SEVERITY,
-    SYMBOL_BY_ID, GENERIC, SHEET, SHEET_RECT, CELL, SYMBOL, HEAD, COUNTER, ROWS, POINTER, EMPTY, FONTS, SETTLE_MS, GREY_RAMP };
+    SYMBOL_BY_ID, GENERIC, SHEET, SHEET_RECT, CELL, SYMBOL, HEAD, COUNTER, ROWS, POINTER, EMPTY, FONTS, SETTLE_MS, GREY_RAMP,
+    WHY, showName };      // r1120 T1: WHY, showName
