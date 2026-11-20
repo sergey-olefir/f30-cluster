@@ -272,6 +272,10 @@ try { twinFront = require('./twin_front'); } catch (e) { if (e.code !== 'MODULE_
 // absent (null) for every app that does not pack it: the label stays plain text.
 let roadShields = null;
 try { roadShields = require('./road_shields'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('road_shields') < 0) throw e; }
+// road TD: Road View, the test modes behind the Діагностика settings diagRoadLight / diagRoadSigns / diagRoadScene (shared/road_ui.js;
+// the decoder shared/road_view.js). Every hook below is inert while those settings are off. Absent (null) for an app that does not pack it.
+let roadUi = null;
+try { roadUi = require('./road_ui'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('road_ui') < 0) throw e; }
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
@@ -1795,6 +1799,7 @@ class HudApp {
         if (twinTabs && this.config.tabs) twinTabs.wire(this, extra, () => this._guard('twin tabs', () => this._twinTabsChanged()));
         if (twinLimit && this.config.twin) twinLimit.wire(this, extra);       // twin_dial: the sign (behind the engine's own watch of config.sign) and the cruise struct
         if (twinFront) twinFront.wire(this, extra);       // front-vehicle FV: DataFrontVehicle, only while the test is on at the start (off: no subscription)
+        if (roadUi) roadUi.wire(this, extra);             // road TD: the taps on the two sign events already received (inert while off); the new sources only while a test is on
         this.car = new Car(this.ctx, this.config.carGroups || ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
         this.car.setRedline(this._redline());
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
@@ -1974,6 +1979,7 @@ class HudApp {
         this._perfStop();       // package P
         clearTimeout(this.probeSymT); this.probeSymT = null;        // probes, item 3 (0.7.18)
         if (this.twinProbe) this._guard('twin probe stop', () => this.twinProbe.stop());     // twin_dial: package F
+        if (roadUi) this._guard('road stop', () => roadUi.release(this));     // road TD: the replay's timer
         clearTimeout(this.statusAskT);
         if (this.waze) this._guard('waze stop', () => this.waze.stop());
         this._guard('screen stop', () => this.screen.stop());
@@ -2099,6 +2105,7 @@ class HudApp {
             else if (w.type === 'tdial') add(w.face && w.face.tex ? { tex: this._faceFor(w.face.tex) } : w.face);     // twin_dial: the dial's R8 face (r1120 PS: in the language and unit in use)
             else if (w.type === 'tdback') add(w.panelMask);                            // twin_dial: the fallback window's R8 mask
             else if (w.type === 'wbsign' && w.tex) { add(w.tex.limit); add(w.tex.nopass); }
+            else if (roadUi && roadUi.owns(w)) roadUi.needs(this, w, out, ci);      // road TD: the sign atlas
             else if (w.type === 'wbback') {
                 if (w.collar) { add(w.collar); add(w.mask); }       // package M: "mask", the strip mask
                 else if (w.tex) { const u = this._wbUses(w); if (u.window) { add(w.tex.window); add(w.tex.horizon); } if (u.line) add(w.tex.line); }
@@ -3931,6 +3938,7 @@ class HudApp {
             return;
         }
         this.problem = null;
+        if (roadUi) layout = roadUi.extend(this, layout);      // road TD: + the Road View layers while a test is on (the same layout object while off)
         this.mapLayout = layout.widgets.some((w) => w.holeWhen === 'mapUp');
         this._wazeWant();
         this.layoutSlots = layout.slots || [];
@@ -4103,6 +4111,9 @@ class HudApp {
      *  before its rebuild, which makes or drops the pictogram's layer): start or stop the test, and watch the field late if needed. */
     _fvDiag() { if (twinFront) twinFront.diag(this); }
 
+    /** road TD: a Road View setting changed config.roadView (shared/diag_settings.js calls this before its rebuild). */
+    _rvDiag() { if (roadUi) roadUi.diag(this); }
+
     /** "key" is on while that bool setting is on; "!key" while it is off. */
     _toggleOn(t) {
         // car3 H: "a&b" is on while every part is (6WB Comfort's row: "own:clock&!cc:shown")
@@ -4151,6 +4162,7 @@ class HudApp {
             else if (w.type === 'wbback') fs = this._sceneFs(shaders.wbbackFor(WB_STYLE[w.style] || 0, this._nightOk()), w);   // research3 MT
             else if (w.type === 'wbsign') fs = shaders.wbsignFor(this._nightOk());
             else if (w.type === 'tdback') fs = shaders.tdbackFor(w.part);                // twin_dial: part L has the tab bar and the window
+            else if (roadUi && roadUi.owns(w)) fs = roadUi.shader(w);                    // road TD: shared/road_shaders.js, one look per source
             else fs = shaders[w.type];
             if (fs) ref = this.mbExp ? this.mbExp.effect(c, w, Object.assign({ fs }, base)) : c.effect(Object.assign({ fs }, base));     // research3 MB: config.mbGap
             if (!ref) { this.log.warn('widget "' + w.id + '": layer refused'); return; }
@@ -4180,6 +4192,7 @@ class HudApp {
         else if (w.type === 'tdsign' && twinLimit) twinLimit.updateSign(this, x, Date.now(), true);      // twin_dial: the speed-limit sign, painted from what the car said
         else if (w.type === 'tdcru' && twinLimit) twinLimit.updateCru(this, x, Date.now(), true);        // twin_dial: the cruise readout (built only while config.cruise is set)
         else if (w.type === 'tdfv' && twinFront) twinFront.updateIcon(this, x, Date.now(), true);        // front-vehicle FV: the pictogram (built only while the test is on)
+        else if (roadUi && roadUi.owns(w)) roadUi.create(this, x);       // road TD: the atlas bound, the first uniforms
         else if (w.type === 'sdash') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_geo', w.geo);
@@ -5294,6 +5307,9 @@ class HudApp {
         if (a === 0) {
             if (hold > 0 && this.signLast && Date.now() - (this.signLastAt || 0) < hold) a = this.signLast;
         } else { this.signLast = a; this.signLastAt = Date.now(); }
+        // road TD: while the Road View strip holds the 6WB's second place (a light, or a sign of the camera's), the theme's own
+        // no-overtaking sign steps aside (the strip draws it in the third place instead)
+        if (b && roadUi && roadUi.holdsB(this, a > 0)) b = 0;
         return [a, b];
     }
 
@@ -5905,6 +5921,7 @@ class HudApp {
         if (w.type === 'tdsign') { if (twinLimit) twinLimit.updateSign(this, x, now, force); return; }     // twin_dial: not a "cc:" widget: nothing of BMW's window touches it
         if (w.type === 'tdcru') { if (twinLimit) twinLimit.updateCru(this, x, now, force); return; }       // twin_dial
         if (w.type === 'tdfv') { if (twinFront) twinFront.updateIcon(this, x, now, force); return; }       // front-vehicle FV
+        if (roadUi && roadUi.owns(w)) { roadUi.update(this, x, now, force); return; }                 // road TD
         if (w.type === 'atext') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             const s = this._resolve(w.text);

@@ -195,6 +195,9 @@ class Diag {
         // front-vehicle FV: config.frontVehicle (diagFrontVehicle) starts or stops the test (a late watch of the field when it was off at
         // the start) and makes or drops the pictogram's layer ("fv:on"): a rebuild
         if (roots.indexOf('frontVehicle') >= 0) { if (typeof hud._fvDiag === 'function') hud._fvDiag(); rebuild = true; }
+        // road TD: config.roadView (diagRoadLight / diagRoadSigns / diagRoadScene) starts or stops a test (late watches when it was off
+        // at the start) and adds or drops its layers: a rebuild
+        if (roots.indexOf('roadView') >= 0) { if (typeof hud._rvDiag === 'function') hud._rvDiag(); rebuild = true; }
         if (roots.indexOf('ccDisplayed') >= 0) hud.log.info('diag: config.ccDisplayed is subscribed to at start only: it takes effect after the app restarts');
         // the check-control state is decided from the keys under ccActive each time the lists or the number change: decide it now
         if (roots.indexOf('ccActive') >= 0 && !rebuild) {

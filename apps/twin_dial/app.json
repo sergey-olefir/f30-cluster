@@ -43,7 +43,11 @@
     "limit_src.js",
     "carplay_turns.js",
     "front_vehicle.js",
-    "twin_front.js"
+    "twin_front.js",
+    "road_view.js",
+    "road_signs.js",
+    "road_shaders.js",
+    "road_ui.js"
   ],
   "signals": {
     "de.bmw.infotainment.hmi.hmicontext.HMIContext": {
@@ -208,6 +212,48 @@
       ],
       "_about": "car-fix CF2: the front camera's own sign event, a second witness (config.sign.camera): logged as numbers ('limit: camera ...'), never drawn. Read only."
     },
+    "de.bmw.environmentalmodel.TrafficLightRecognitionFrontCameraLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "RecognitionTrafficLightCamera"
+      ],
+      "_about": "road TD (docs/traffic/TD-REPORT.md): the camera's traffic light, one light a message (event 32769, service 54582; UInt8 members with no enum table: every meaning is a key of config.roadView.lightCfg.cam, ASSUMED). Watched ONLY while 'Тест: світлофор' is on with 'дані авто'. No getter, no setter, no method. Read only."
+    },
+    "de.bmw.infotainment.displaydata.DisplayDataServer2": {
+      "_instances": "1",
+      "functionalLibraryData": "rs",
+      "_about": "road TD: the head-up display's newer feed (service 45222): xSpeedLimitAssist.vsliSign (VSLISign: TRAFFIC_LIGHT_RED ... STOP, CROSSWALK). Getter 1 (NON-ZERO), notifier 32769, so rs. Watched only while a Road View test is on with 'дані авто'. This interface has no setter and no method. Read only."
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "RecognitionTrafficSignCamera",
+        "recognitionTrafficSignCamera2"
+      ],
+      "_about": "road TD: the camera's legacy sign events (54580: 32769 one raw sign, 32770 the sign list with its relevance bits). Watched only while 'Тест: знаки' is on with 'дані авто'. Read only."
+    },
+    "de.bmw.environmentalmodel.LaneBoundaries": {
+      "_instances": "1",
+      "_broadcasts": [
+        "LaneBoundaries"
+      ],
+      "_about": "road TD: the road scene's lane lines (ACC View's source, apps/acc_view/world.js). Watched only while 'Тест: сцена дороги' is on with 'дані авто'. Read only."
+    },
+    "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ObjectRecognition",
+        "ObjectPosition"
+      ],
+      "_about": "road TD: the road scene's road users (ACC View's source; x / y metres, y to the left: hypotheses, config.roadView.sceneCfg.objects). Watched only while 'Тест: сцена дороги' is on with 'дані авто'. Read only."
+    },
+    "de.bmw.dass.driverassistanceapplications.AssistedDrivingViewLateralCollisionAvoidance": {
+      "_instances": "1",
+      "_broadcasts": [
+        "assistedDrivingViewLcaInput"
+      ],
+      "_about": "road TD (TR-REPORT D.3): the rear radars' lane-change warning, 3 object ids a side: a neutral vehicle beside / behind us in the scene, never a warning of ours. Watched only while 'Тест: сцена дороги' is on with 'дані авто'. Read only."
+    },
     "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
       "_instances": "1",
       "functionalLibraryData": "rs",
@@ -301,7 +347,10 @@
         "diagGpuText",
         "diagR8Mark",
         "diagCarplayTurns",
-        "diagFrontVehicle"
+        "diagFrontVehicle",
+        "diagRoadLight",
+        "diagRoadSigns",
+        "diagRoadScene"
       ]
     },
     {
@@ -345,6 +394,18 @@
         [
           "setting",
           "diagFrontVehicle"
+        ],
+        [
+          "setting",
+          "diagRoadLight"
+        ],
+        [
+          "setting",
+          "diagRoadSigns"
+        ],
+        [
+          "setting",
+          "diagRoadScene"
         ]
       ]
     }
@@ -675,6 +736,30 @@
       "_about": "front-vehicle FV (docs/twin-dial/FV-SPEC.md): config.frontVehicle.on. On = DataFrontVehicle is watched (late, if it was off at the start), tab 1 shows the page 'Авто попереду' and the speedometer's hub the pictogram of the car ahead; one 'fv:' log line per state change (numbers only) for the calibration. Off = nothing subscribed (from the start), nothing drawn, nothing changed. Each change rebuilds the layout once (the pictogram's own layer)."
     },
     {
+      "key": "diagRoadLight",
+      "label": "Тест: світлофор",
+      "type": "choice",
+      "default": "off",
+      "options": [["off", "вимк."], ["car", "дані авто"], ["demo", "демо"], ["replay", "запис"]],
+      "_about": "road TD (docs/traffic/TD-REPORT.md): config.roadView.light. The traffic light beside the speed-limit sign (shared/road_ui.js). 'car' = RecognitionTrafficLightCamera and DisplayDataServer2 are watched (late, if off at the start) and logged ('road: first ...', 'road: light ...', numbers and enum names only); 'demo' = every state in turn, nothing subscribed; 'replay' = config.roadView.replay from the app's data folder. Off (the default) = nothing subscribed, nothing drawn, the layout as without it. Each change rebuilds the layout once"
+    },
+    {
+      "key": "diagRoadSigns",
+      "label": "Тест: знаки",
+      "type": "choice",
+      "default": "off",
+      "options": [["off", "вимк."], ["car", "дані авто"], ["demo", "демо"], ["replay", "запис"]],
+      "_about": "road TD: config.roadView.signs. No overtaking (TrafficSignRecognition.recognitionNoPassing, the event the limit comes from) and the camera's sign list, beside the limit; 'car' / 'demo' / 'replay' as for the light. Off = nothing drawn. Each change rebuilds the layout once"
+    },
+    {
+      "key": "diagRoadScene",
+      "label": "Тест: сцена дороги",
+      "type": "choice",
+      "default": "off",
+      "options": [["off", "вимк."], ["car", "дані авто"], ["demo", "демо"], ["replay", "запис"]],
+      "_about": "road TD: config.roadView.scene. The road scene (lanes, road users, the rear radars' neighbours, the light far ahead): Twin Dial tab 1, f30 6WB Comfort's centre window while BMW's map is not shown there; 'car' / 'demo' / 'replay' as for the light. Off = nothing drawn. Each change rebuilds the layout once"
+    },
+    {
       "key": "units",
       "label": "Одиниці",
       "type": "choice",
@@ -971,7 +1056,10 @@
         "diagGpuText": { "options": { "legacy": { "gpuText": "legacy" }, "pixels": { "gpuText": "pixels" } }, "_about": "car-issues GL: the glyph atlases' row layout or image text, a rebuild on each change (shared/diag_settings.js)" },
         "diagR8Mark": { "act": "r8mark", "_about": "r1120 T2: an action, no key: one mark in the log per change (HudApp._r8Mark)" },
         "diagCarplayTurns": { "on": { "carplayTurns": true }, "_about": "car issues CT: the test mode of CarPlay's next turn on tab 5 (shared/twin_pages.js cpSync / cpLive), read at the moment of use: applied in place" },
-        "diagFrontVehicle": { "on": { "frontVehicle.on": true }, "_about": "front-vehicle FV: the test mode of the vehicle ahead (shared/twin_front.js); a rebuild on each change (the pictogram's layer)" }
+        "diagFrontVehicle": { "on": { "frontVehicle.on": true }, "_about": "front-vehicle FV: the test mode of the vehicle ahead (shared/twin_front.js); a rebuild on each change (the pictogram's layer)" },
+        "diagRoadLight": { "options": { "car": { "roadView.light": "car" }, "demo": { "roadView.light": "demo" }, "replay": { "roadView.light": "replay" } }, "_about": "road TD: the traffic light's test mode (shared/road_ui.js); a rebuild on each change" },
+        "diagRoadSigns": { "options": { "car": { "roadView.signs": "car" }, "demo": { "roadView.signs": "demo" }, "replay": { "roadView.signs": "replay" } }, "_about": "road TD: the signs' test mode" },
+        "diagRoadScene": { "options": { "car": { "roadView.scene": "car" }, "demo": { "roadView.scene": "demo" }, "replay": { "roadView.scene": "replay" } }, "_about": "road TD: the road scene's test mode" }
       }
     },
     "pages": {
@@ -1202,6 +1290,14 @@
     },
     "cruise": {
       "place": "C1"
+    },
+    "roadView": {
+      "look": "td",
+      "light": "off",
+      "signs": "off",
+      "scene": "off",
+      "replay": "road_replay.jsonl",
+      "_about": "road TD (docs/traffic/TD-REPORT.md; shared/road_view.js DEFAULT has every key and its note). light / signs / scene: the test modes, written ONLY by the Діагностика settings diagRoadLight / diagRoadSigns / diagRoadScene ('off' here: nothing subscribed, no layer added). Every encoding of the traffic-light, sign-list and scene events is ASSUMED (lightCfg, signsCfg, sceneCfg override road_view.js DEFAULT key by key once a city drive's log shows the car's own values). replay: a file in the app's data folder, one JSON line a message { t, iface, event, value }."
     },
     "frontVehicle": {
       "on": false,
