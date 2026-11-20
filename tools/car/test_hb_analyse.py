@@ -179,6 +179,8 @@ class HbAnalyse(unittest.TestCase):
         mid_town = next(f for f in full if f['t'] >= (tr['town'][0] + 10) * 1000)
         self.assertTrue(mid_town['env']['v']['urban'])
         self.assertFalse(next(f for f in full if f['t'] >= (tr['town'][1] + 10) * 1000)['env']['v']['urban'])
+        signs = [e for f in full for e in f['signs']['v']]
+        self.assertEqual([e['kind'] for e in signs], ['town_in', 'town_out'])      # CONTRACT 2.5, once each
 
     def test_diagnostic_reads_in_the_parked_check(self):
         dg = self.r('A')['diag']
@@ -256,7 +258,9 @@ class HbAnalyse(unittest.TestCase):
             else:
                 self.assertFalse(any('lights' in f or 'verdict' in f for f in frames))
                 onc = [o for f in frames for o in f.get('objects', {}).get('v', []) if o.get('src') == 'objlist']
-                self.assertTrue(onc and all(o['head'] == 'KHEADLIGHTSTATUS_ON' and o['vx_abs'] < 0 for o in onc))
+                self.assertTrue(onc and all(o['head'] == 'on' and o['vabs'] < 0 and 'rear' not in o for o in onc))      # CONTRACT 2.3: on / off / (unknown: absent)
+                cam = [o for f in frames for o in f.get('objects', {}).get('v', []) if o.get('src') == 'cam']
+                self.assertTrue(cam and all(o['move'] == 'oncoming' for o in cam))
             for e in r['labelled']:
                 n = 'R.%s.e%02d.%s.json' % (sid, e['n'], e['kind'])
                 sc = jload(os.path.join(sdir, n))

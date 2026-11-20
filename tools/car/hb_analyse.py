@@ -962,6 +962,32 @@ def group(v, age, ok=True, qual=None):
     return g
 
 
+SIGHT_M = {'SIGHT_0': 0, 'SIGHT_1_TO_50': 1, 'SIGHT_50_TO_100': 50, 'SIGHT_100_TO_150': 100, 'SIGHT_150_TO_300': 150, 'SIGHT_GREATER_THAN_300': 300}
+MOVE = [('STOPPED_OBJECT_MOVEMENT_DIRECTION_WAS_ONCOMING', 'stopped_oncoming'), ('ONCOMMING', 'oncoming'), ('ONCOMING', 'oncoming'), ('SAME_AS_EGO', 'same'),
+        ('STATIONARY', 'stationary'), ('CROSSING', 'crossing')]
+
+
+def contract_object(o):
+    """One fallback object in CONTRACT.md 2.3's words: { id, cls, x, y, lane, move, head, rear, vabs } (raw where the contract says
+    raw; vx, a RELATIVE speed, is not given: the lists carry an absolute one, vabs). src (the list it came from) is an added key."""
+    out = {k: o.get(k) for k in ('id', 'cls', 'x', 'y', 'lane', 'src') if o.get(k) is not None}
+    m = str(o.get('mov') or '')
+    move = next((w for k, w in MOVE if k in m), None)
+    if move is None and m.startswith('KMOVEMENTSTATUS_'):
+        move = 'stationary' if m.endswith('STATIONARY') else None
+    if move is not None:
+        out['move'] = move
+    for k in ('head', 'rear'):
+        v = str(o.get(k) or '')
+        if v.endswith('_ON'):
+            out[k] = 'on'
+        elif v.endswith('_OFF'):
+            out[k] = 'off'
+    if isinstance(o.get('vx_abs'), (int, float)):
+        out['vabs'] = o['vx_abs']
+    return out
+
+
 def frame_at(s, t, prev_t, high_src, periods, events, flash_max_ms, empty_status):
     """One input frame of the contract (section 2) at t: raw values, each group { v, age, ok }; a source never heard is no group."""
     fr = {'t': int(t)}
@@ -1004,7 +1030,7 @@ def frame_at(s, t, prev_t, high_src, periods, events, flash_max_ms, empty_status
         # the contract's { id, cls, x, y, vx, lane } raw; vx is RELATIVE in the contract and the lists give an absolute speed, so it is
         # handed over as vx_abs (an added key), with the lamp states head / rear and the list it came from (src)
         objs = fallback_objects(s, t) or []
-        fr['objects'] = group([{k: o.get(k) for k in ('id', 'cls', 'x', 'y', 'lane', 'mov', 'vx_abs', 'head', 'rear', 'src') if o.get(k) is not None} for o in objs], min(ages), qual=qual)
+        fr['objects'] = group([contract_object(o) for o in objs], min(ages), qual=qual)
     car, ages = {}, []
     for tag, key, fn in (('car-speed2', 'speed_kmh', lambda r: r.get('speedVehicleCentreOfGravity') / 64.0 if r.get('speedVehicleCentreOfGravity') is not None else None),
                          ('gearbox-status', 'gear', lambda r: r.get('statusActualStageDrive') if r.get('statusActualStageDrive') in ('P', 'R', 'N', 'D') else None),
@@ -1079,6 +1105,20 @@ def frame_at(s, t, prev_t, high_src, periods, events, flash_max_ms, empty_status
         ages.append(age)
     if s.f('ccp-builtup') or town_events(s):
         env['urban'] = urban_at(s, t)
+    # CONTRACT.md 2.4 additions of 2026-11-20: the car's day / night, the camera's weather and range of sight
+    for tag, key, fn in (('hb-daynight', 'dayNight', lambda r: {'TAG': 'day', 'NACHT': 'night'}.get(r.get('dayNightChangeOver'))),
+                         ('hb-weather', 'camWeather', lambda r: r.get('statusWeatherCamera') if r.get('statusWeatherCamera') in ('CLEAR', 'RAIN', 'SNOW', 'FOG', 'GLARE') else None),
+                         ('hb-weather', 'sight_m', lambda r: SIGHT_M.get(r.get('rangeOfSightCamera')))):
+        ff = s.f(tag)
+        if not ff:
+            continue
+        row, age = ff.at(t)
+        if row is not None:
+            env[key] = fn(row)
+            ages.append(age)
+    # CONTRACT.md 2.5: the town signs passed since the previous frame
+    if any(s.f(x) for x in SIGN_TAGS):
+        fr['signs'] = group([{'t': int(e['t']), 'kind': e['kind']} for e in town_events(s) if e['kind'] in ('town_in', 'town_out') and prev_t < e['t'] <= t], 0)
     if env:
         env.setdefault('sun', None)
         env.setdefault('wiper', None)                  # the wiper's level mapping is not known yet: raw beside
