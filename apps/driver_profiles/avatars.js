@@ -25,6 +25,9 @@
  */
 const fs = require('fs');
 const path = require('path');
+const I = require('./lang');          // r1120 LN: the words from shared/i18n/<lang>.json
+/** A refusal of encode(): the reason in the app's language (why) and in English for the log (whyEn). */
+const fail = (key, vars) => ({ ok: false, why: I.t(key, vars), whyEn: I.tl('en', key, vars) });
 
 const TYPES = ['DEFAULT', 'AVATAR1', 'AVATAR2', 'AVATAR3', 'AVATAR4', 'AVATAR5', 'AVATAR6', 'AVATAR7', 'AVATAR8',
     'AVATAR9', 'AVATAR10', 'AVATAR11', 'AVATAR12', 'AVATAR13', 'AVATAR14', 'AVATAR15', 'INDIVIDUAL', 'UNSPECIFIED'];
@@ -75,26 +78,26 @@ function typeName(v) {
 /** "Avatar 7", "Default", "Custom picture", "Not set". */
 function typeLabel(v) {
     const t = typeName(v);
-    if (t === null) return 'Not known';
-    if (t === 'DEFAULT') return 'Default';
-    if (t === 'INDIVIDUAL') return 'Custom picture';
-    if (t === 'UNSPECIFIED') return 'Not set';
-    if (typeof t === 'string' && /^AVATAR\d+$/.test(t)) return 'Avatar ' + t.slice(6);
-    return 'code ' + t;
+    if (t === null) return I.t('dp.notKnownC');
+    if (t === 'DEFAULT') return I.t('dp.av.default');
+    if (t === 'INDIVIDUAL') return I.t('dp.av.custom');
+    if (t === 'UNSPECIFIED') return I.t('dp.av.notSet');
+    if (typeof t === 'string' && /^AVATAR\d+$/.test(t)) return I.t('dp.av.n', { n: t.slice(6) });
+    return I.t('dp.code', { n: t });
 }
 /**
  * The avatar row of the profile screen: the type by name, and for INDIVIDUAL how large the stored picture is.
  * st.avatarBytes is the decoded size the app worked out while reading; the picture itself is never kept.
  */
 function avatarText(st) {
-    if (!st) return 'Not known';
+    if (!st) return I.t('dp.notKnownC');
     const t = typeName(st.avatarType);
-    if (t === null) return 'Not known' + (st.avatarErr ? ' (' + st.avatarErr + ')' : '');
+    if (t === null) return I.t('dp.notKnownC') + (st.avatarErr ? ' (' + st.avatarErr + ')' : '');
     const label = typeLabel(t) + ' (' + t + ')';
     if (t !== 'INDIVIDUAL') return label;
-    if (typeof st.avatarBytes !== 'number') return label + ', its size is not readable' + (st.avatarErr ? ' (' + st.avatarErr + ')' : '');
-    if (!st.avatarBytes) return label + ', but no picture is stored';
-    return label + ' is set, ' + kb(st.avatarBytes) + ' of jpg';
+    if (typeof st.avatarBytes !== 'number') return I.t('dp.av.sizeUnknown', { label: label }) + (st.avatarErr ? ' (' + st.avatarErr + ')' : '');
+    if (!st.avatarBytes) return I.t('dp.av.noPicture', { label: label });
+    return I.t('dp.av.isSet', { label: label, kb: kb(st.avatarBytes) });
 }
 
 /**
@@ -138,20 +141,20 @@ function list(dataDir, cfg) {
 function encode(dataDir, index, cfg) {
     const l = list(dataDir, cfg);
     const f = l.files[index];
-    if (!f) return { ok: false, why: l.exists ? 'that file is not in the folder any more' : 'the avatars folder is not there' };
-    if (f.empty) return { ok: false, why: 'the file is empty' };
-    if (f.tooBig) return { ok: false, why: 'the file is ' + f.kb + ': over the ' + l.max + ' KB limit' };
+    if (!f) return fail(l.exists ? 'dp.enc.gone' : 'dp.enc.noFolder');
+    if (f.empty) return fail('dp.enc.empty');
+    if (f.tooBig) return fail('dp.enc.tooBig', { kb: f.kb, max: l.max });
     const full = path.join(l.dir, f.name);
     let stat, buf;
     // check again right before the read: the same guards, on the file as it is now
-    try { stat = fs.lstatSync(full); } catch (e) { return { ok: false, why: 'the file cannot be read any more' }; }
-    if (!stat.isFile()) return { ok: false, why: 'not a plain file' };
-    if (stat.size > l.max * 1024) return { ok: false, why: 'the file grew past the ' + l.max + ' KB limit' };
-    if (!stat.size) return { ok: false, why: 'the file is empty' };
-    try { buf = fs.readFileSync(full); } catch (e) { return { ok: false, why: 'the file cannot be read: ' + String(e && e.code || e).slice(0, 40) }; }
-    if (buf.length > l.max * 1024) return { ok: false, why: 'the file is over the ' + l.max + ' KB limit' };
+    try { stat = fs.lstatSync(full); } catch (e) { return fail('dp.enc.unreadable'); }
+    if (!stat.isFile()) return fail('dp.enc.notFile');
+    if (stat.size > l.max * 1024) return fail('dp.enc.grew', { max: l.max });
+    if (!stat.size) return fail('dp.enc.empty');
+    try { buf = fs.readFileSync(full); } catch (e) { return fail('dp.enc.readErr', { code: String(e && e.code || e).slice(0, 40) }); }
+    if (buf.length > l.max * 1024) return fail('dp.enc.over', { max: l.max });
     // persod's schema says jpg; a png or a renamed something else would be stored and never drawn
-    if (buf.length < 4 || buf[0] !== 0xff || buf[1] !== 0xd8 || buf[2] !== 0xff) return { ok: false, why: 'not a jpg (its first bytes are not a JPEG header)' };
+    if (buf.length < 4 || buf[0] !== 0xff || buf[1] !== 0xd8 || buf[2] !== 0xff) return fail('dp.enc.notJpg');
     const data = buf.toString('base64');
     return { ok: true, index: f.index, name: f.name, bytes: buf.length, chars: data.length, kb: kb(buf.length), data, sum: sum(data) };
 }

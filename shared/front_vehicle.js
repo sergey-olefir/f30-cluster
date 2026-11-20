@@ -37,6 +37,7 @@
  * Plain Node 8 (the car's 8.16.2): no ?. / ?? / object spread. Nothing here throws.
  */
 
+const I = require('./lang');          // r1120 LN: the gap's words (WORDS)
 const isNum = (x) => typeof x === 'number' && isFinite(x);
 const pick = (v, path) => { let r = v; (Array.isArray(path) ? path : []).forEach((k) => { r = r === null || r === undefined || typeof r !== 'object' ? undefined : r[k]; }); return r; };
 const inList = (a, x) => Array.isArray(a) && a.indexOf(x) >= 0;
@@ -159,7 +160,8 @@ function slopeOf(pts, minMs) {
 }
 
 /** The word for a level, our own (Noto has every letter): 1-2 near, 3 middle, 4-5 far. */
-const WORDS = { 1: 'близько', 2: 'близько', 3: 'середньо', 4: 'далеко', 5: 'далеко' };
+// r1120 LN: the gap in words: table keys (shared/i18n/<lang>.json), read in the language in use when a view is made
+const WORDS = { 1: 'fv.near', 2: 'fv.near', 3: 'fv.mid', 4: 'fv.far', 5: 'fv.far' };
 
 /**
  * The tracker. feed(v, kmh) takes every value of the field; view(kmh) is the state now (call it as often as the picture wants:
@@ -239,7 +241,7 @@ function create(cfgIn, o) {
             if (st.gaps.length) reset();
         } else if (r && r.ok && st.lv && st.lv.level) {
             out.present = true; out.level = st.lv.level; out.closing = st.closing; out.rate = st.rate;
-            out.word = WORDS[out.level] || '';
+            out.word = WORDS[out.level] ? I.t(WORDS[out.level]) : '';
             const mc = metresOf(cfg, median(st.gaps), true);
             if (isNum(mc)) { out.metres = mc; out.timeGap = isNum(kmh) && kmh >= cfg.levels.minKmh ? mc / (kmh / 3.6) : null; }
             out.state = st.closing === 2 ? 'fast' : st.closing === 1 ? 'closing' : out.level === 1 ? 'near' : 'seen';

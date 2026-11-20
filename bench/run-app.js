@@ -42,6 +42,11 @@ if (process.env.BENCH_NOW) {
 }
 // end twin_dial
 
+// r1120 LN: BENCH_HMI_LANG=<uk_UA | en_GB | de_DE ...>: the head unit's language as MainApp hands it to every app on the car
+// (--currentLanguage, seen in the car's process table 2026-11-14); unset = unknown, as an app started by hand. The app's
+// shared/lang.js reads it from process.argv when it loads. Bench only.
+if (process.env.BENCH_HMI_LANG) process.argv.push('--currentLanguage', process.env.BENCH_HMI_LANG);
+
 const send = (m) => { if (process.connected) process.send(m); };
 const fmt = (a) => a.map((x) => (x && x.stack) ? x.stack : (typeof x === 'object' ? JSON.stringify(x) : String(x))).join(' ');
 const tag = '[' + path.basename(stage) + '] ';
@@ -58,6 +63,22 @@ try { fs.mkdirSync(dataDir); } catch (e) { /* there */ }
 const { headUnit } = require(path.join(__dirname, '..', 'kit', 'tools', 'hu-stub.js'));
 const hu = headUnit(stage, { live: true, dataDir, log, image: (name, cv) => { if (hu.onImage) hu.onImage(name, cv); return Promise.resolve(); } });
 const { spec, settings, ui } = hu;
+
+// r1120 LN: the RHMI string bundle as the app sees it on the car (component.getStringBundle().setStrings, state.updateResources):
+// what the app wrote is kept for GET /probe (rhmi: { strings, writes, updates }); the HMI's own drawing is not modelled.
+const rhmiBundle = { strings: {}, writes: 0, updates: 0 };
+{
+    const bundle = { setStrings: (o) => { rhmiBundle.writes++; Object.assign(rhmiBundle.strings, o || {}); return Promise.resolve(); } };
+    const getByName = ui.rhmi.getByName;
+    ui.rhmi.getByName = function (n) {
+        const c = getByName.apply(this, arguments);
+        if (c && !c.getStringBundle) {
+            c.getStringBundle = () => bundle;
+            c.updateResources = () => { rhmiBundle.updates++; return Promise.resolve(); };
+        }
+        return c;
+    };
+}
 
 // twin_dial: BENCH_CONFIG=<JSON, inline or a file path>: merged over app.json "config" before the app starts (a trip
 // factor, the tank, a switch) so a scripted run can set what the car's owner would set in the config. Bench only.
@@ -446,6 +467,8 @@ process.on('message', (m) => {
         try { layoutName = hud ? hud._layoutName() : null; yielded = hud && hud.screen ? hud.screen.yielded : null; } catch (e) { /* not up yet */ }
         send({
             t: 'probe', n: m.n, native, images, stack: hu.stack.slice(), settings: Object.assign({}, settings.values), status,
+            rhmi: rhmiBundle, i18n: (() => { try { return require(path.join(stage, 'source', 'javascript', 'lang.js')).info(); } catch (e) { return null; } })(),
+            spec: { settings: (spec.settings || []).map((x) => ({ key: x.key, label: x.label, options: x.options })) },
             activeName: hud ? hud.activeName : null, layoutName, yielded, driveMode: hud ? hud.driveMode : null,
             ready: !!(hud && hud.client && hud.client.ready),
             perso: fakePerso ? fakePerso.state() : null,

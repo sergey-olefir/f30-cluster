@@ -440,7 +440,10 @@ console.log('the centre pages (round 3 B4, SPEC-R3 4): one layer, every page, ev
     const techB = [352, 418, 484, 550];
     ok([0, 1, 2, 3].every((i) => items('tech', 'l' + i).b === techB[i] && items('tech', 'l' + i).x === 745 && items('tech', 'v' + i).x === 1150 && items('tech', 'u' + i).x === (i === 2 ? 1152 : 1156) && (i === 3 ? !items('tech', 'b3') : (items('tech', 'b' + i).y === techB[i] + 12 && items('tech', 'b' + i).x0 === 745 && items('tech', 'b' + i).x1 === 1175 && items('tech', 'b' + i).h === 6))),
         'technical data: labels at x 745, values right at 1150, units 6 px after ("бар" 2 px: the layer ends at 1191), baselines 352 / 418 / 484 / 550, bars x 745-1175 12 px under the baseline, 6 px thick, none under the outside temperature');
-    ok(P.pages.tech.items.filter((i) => i.k === 't' && /^l\d$/.test(i.id)).map((i) => i.s).join() === 'Олива,Охолодження,Наддув,Зовні', 'technical data: the labels Олива / Охолодження / Наддув / Зовні');
+    // r1120 LN: the labels are words of the tables ({{word:...}}): in Ukrainian they read as before, in English as the en table says
+    const techLabels = (lng) => P.pages.tech.items.filter((i) => i.k === 't' && /^l\d$/.test(i.id)).map((i) => String(i.s).replace(/^\{\{word:(.+)\}\}$/, (m, k) => R.i18n.tl(lng, k))).join();
+    ok(techLabels('uk') === 'Олива,Охолодження,Наддув,Зовні', 'technical data: the labels Олива / Охолодження / Наддув / Зовні');
+    ok(techLabels('en') === 'Oil,Coolant,Boost,Outside', 'technical data in English: Oil / Coolant / Boost / Outside (r1120 LN)');
     // SPEC-R3 4.3 / 4.4 / 4.5
     ok(items('media', 'src').sz === 66 && items('media', 'src').cx === 960 && items('media', 'src').cy === 392, 'the certain media page: the source pictogram 66 px at (960, 392), nothing else but the title');
     ok(items('radio', 'ic').sz === 54 && items('radio', 'ic').cy === 344 && items('radio', 'station').b === 424 && items('radio', 'text').b === 471, 'radio page: pictogram 54 px at y 344, station at 424, radio text at 471');

@@ -6,8 +6,14 @@
   "vendor": "custom",
   "loggingId": "OADP",
   "iconGlyph": "DP",
+  "i18n": true,
+  "shared": ["lang.js"],
   "mguHmi": ["ID7"],
   "signals": {
+    "de.bmw.infotainment.hmi.hmicontext.HMIContext": {
+      "_instances": "HMI_CID",
+      "currentDisplayLanguage": "rs"
+    },
     "de.bmw.infotainment.personalization.UserAccountManager": {
       "_instances": "de.bmw.infotainment.personalization.UserAccountManager",
       "_methods": ["createUserAccount", "removeUserAccount", "copyGuestData"]
@@ -58,6 +64,7 @@
       "name": "MAIN",
       "kind": "menu",
       "title": "Driver Profiles",
+      "settings": true,
       "items": [
         ["text", "STATUS", ""],
         ["tworow", "P_GUEST", "Guest"],
@@ -72,6 +79,7 @@
         ["button", "BTN_ADD", "Add a local profile"],
         ["button", "BTN_SETTINGS_VIEW", "Active profile: what the car shows"],
         ["button", "BTN_REFRESH", "Read the profiles again"],
+        ["setting", "lang"],
         ["text", "MSG", ""]
       ]
     },
@@ -186,6 +194,16 @@
         ["text", "S_NOTE2", ""],
         ["text", "S_NOTE3", ""]
       ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "lang",
+      "label": "Мова / Language",
+      "type": "choice",
+      "default": "auto",
+      "options": [["auto", "Авто"], ["uk", "Українська"], ["en", "English"]],
+      "_about": "r1120 LN: the app's language (shared/lang.js). auto = the head unit's (--currentLanguage at start, HMIContext.currentDisplayLanguage while running) when it is uk or en, else Ukrainian."
     }
   ],
   "config": {

@@ -24,6 +24,7 @@
  */
 const textRaster = require('./hud_text');
 const FV = require('./front_vehicle');
+const I = require('./lang');          // r1120 LN: the page's words from shared/i18n/<lang>.json
 
 const isNum = (x) => typeof x === 'number' && isFinite(x);
 const log = (hud, level, s) => { try { if (hud && hud.log && hud.log[level]) hud.log[level](s); } catch (e) { /* never */ } };
@@ -147,22 +148,26 @@ function fontName(key) {
     if (found) fontCache[key] = found;
     return found;
 }
-/** Every string the page or the pictogram can show (the font test checks each against the atlases). */
-const STRINGS = ['Авто попереду', 'Авто не видно', 'Немає даних', 'близько', 'середньо', 'далеко', 'круїз', 'обмежувач', 'км/год', 'миль/год', '0123456789.', ' с', ' · '];
+/** The keys of every word the page or the pictogram can show (r1120 LN: shared/i18n/<lang>.json). */
+const WORD_KEYS = ['fv.title', 'fv.notSeen', 'twin.noData', 'fv.near', 'fv.mid', 'fv.far', 'fv.cruise', 'fv.limiter', 'twin.u.kmh', 'fv.mph', 'fv.s'];
+/** Every string the page or the pictogram can show, in every language (the font test checks each against the atlases). */
+const STRINGS = [];
+I.LANGS.forEach((L) => WORD_KEYS.forEach((k) => STRINGS.push(I.tl(L, k))));
+STRINGS.push('0123456789.', ' · ');
 
 /** The cruise / limiter the car reports (shared/twin_limit.js cruiseNow), as the meta line's text and colour role, or null. */
 function cruiseText(hud) {
     let c = null;
     try { const L = require('./twin_limit'); c = L.cruiseNow(hud); } catch (e) { return null; }
     if (!c || !c.kind || c.status === 'off' || !isNum(c.shown)) return null;
-    return { s: (c.kind === 'limiter' ? 'обмежувач ' : 'круїз ') + Math.round(c.shown) + (c.unit === 'mph' ? ' миль/год' : ' км/год'), c: c.status === 'active' ? 'ready' : 'dim' };
+    return { s: I.t(c.kind === 'limiter' ? 'fv.limiter' : 'fv.cruise') + ' ' + Math.round(c.shown) + ' ' + I.t(c.unit === 'mph' ? 'fv.mph' : 'twin.u.kmh'), c: c.status === 'active' ? 'ready' : 'dim' };
 }
 /** The gap in words, or the time gap once the scale is calibrated ("1.8 с"), or the no-target words. */
 function gapText(v) {
     if (!v) return { s: '', c: 'dim' };
     if (v.state === 'absent') return { s: '', c: 'dim' };
     if (!v.present) return { s: '', c: 'dim' };          // the lane says "Авто не видно" (the meta line keeps clear of the cruise text)
-    if (isNum(v.timeGap)) return { s: v.timeGap.toFixed(1) + ' с · ' + v.word, c: v.closing === 2 ? 'amber' : 'fg' };
+    if (isNum(v.timeGap)) return { s: v.timeGap.toFixed(1) + ' ' + I.t('fv.s') + ' · ' + v.word, c: v.closing === 2 ? 'amber' : 'fg' };
     return { s: v.word, c: v.closing === 2 ? 'amber' : 'fg' };
 }
 
@@ -311,14 +316,14 @@ function paintPage(layer, theme, v, p, cruise) {
     const absent = !!(v && v.state === 'absent');
     const lane = absent ? 0.35 : 1;
     // the title (the backdrop's title rule is under it, as on every page)
-    add('title', text(c, 'title', 'Авто попереду', PAGE.title.x, PAGE.title.b, 'c', fg, 1));
+    add('title', text(c, 'title', I.t('fv.title'), PAGE.title.x, PAGE.title.b, 'c', fg, 1));
     // the lane's two edges, fading into the distance
     [-1, 1].forEach((s) => edge(c, s, fg, lane));
     add('lane', [960 - PAGE.footHalf - 2, PAGE.laneTop, 960 + PAGE.footHalf + 2, PAGE.foot]);
     // our own car at the foot: an outline, so it never reads as the car ahead
     add('ego', car(c, PAGE.ego.cx, PAGE.ego.bottom, PAGE.ego.w, dim, INK, absent ? 0.35 : 0.7, true, PAGE.ego.h));
-    if (absent) add('none', label(c, 'Немає даних', PAGE.none, dim, 1));
-    else if (!v || !v.present) add('note', label(c, 'Авто не видно', PAGE.note, dim, 0.8));
+    if (absent) add('none', label(c, I.t('twin.noData'), PAGE.none, dim, 1));
+    else if (!v || !v.present) add('note', label(c, I.t('fv.notSeen'), PAGE.note, dim, 0.8));
     if (v && v.present && isNum(p)) {
         const fast = v.closing === 2;
         const rungCol = fast ? amber : fg, rungA = fast ? 0.95 : v.closing === 1 ? 0.8 : 0.5;
@@ -349,7 +354,8 @@ function paintPage(layer, theme, v, p, cruise) {
     if (cruise && cruise.s) {
         // the two never touch: a long one ("обмежувач 110 км/год" beside "середньо") drops its unit
         const nm = fontName('n31'), wOf = (t) => (nm && t ? textRaster.measure(t, nm, 0) : 0);
-        const cs = PAGE.metaR.x - wOf(cruise.s) - 16 < PAGE.metaL.x + wOf(g.s) ? cruise.s.replace(/ (км|миль)\/год$/, '') : cruise.s;
+        const unit = [I.t('twin.u.kmh'), I.t('fv.mph')].filter((u) => cruise.s.slice(-u.length - 1) === ' ' + u)[0];
+        const cs = PAGE.metaR.x - wOf(cruise.s) - 16 < PAGE.metaL.x + wOf(g.s) && unit ? cruise.s.slice(0, -unit.length - 1) : cruise.s;
         add('cruise', text(c, 'n31', cs, PAGE.metaR.x, PAGE.metaR.b, 'r', rgbOf(theme, cruise.c), 1));
     }
     return { buf: c.buf, ink };
@@ -375,7 +381,7 @@ function updatePage(hud, x, now, force) {
     const p = glide(s, v, now);
     const cr = cruiseText(hud);
     const th = ['fg', 'dim', 'grey', 'amber', 'ready'].map((r) => rgbOf(hud.theme, r).join(',')).join('|');
-    const key = [v.state, v.present ? Math.round(slotY(p) * 2) : -1, v.closing || 0, gapText(v).s, cr ? cr.s + cr.c : '', th].join('#');
+    const key = [v.state, v.present ? Math.round(slotY(p) * 2) : -1, v.closing || 0, gapText(v).s, cr ? cr.s + cr.c : '', th, I.lang()].join('#');
     if (!force && key === s.pageKey && x.px) return;
     s.pageKey = key;
     const out = paintPage(x.w, hud.theme, v, p, cr);

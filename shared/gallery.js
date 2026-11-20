@@ -14,6 +14,7 @@ const G = require('./kit/gauges');
 const themes = require('./kit/themes');
 const previews = require('./previews');
 const Menu = require('./menu');
+const I = require('./lang');          // r1120 LN: the words from shared/i18n/<lang>.json (Cyrillic through the kit's cyrillic atlas)
 
 const W = 1600, H = 520;
 const A = G.withAlpha;
@@ -22,7 +23,7 @@ const C = {
     blue: '#2b7fff', blueHi: '#5aa2ff', blueDeep: '#1c69d4',
 };
 const X0 = 24, X1 = W - 24;
-const MODES = [['inComfort', 'Comfort'], ['inSport', 'Sport'], ['inEco', 'Eco Pro']];
+const MODES = [['inComfort', 'Comfort'], ['inSport', 'Sport'], ['inEco', 'Eco Pro']];     // BMW's mode names, the same in every language
 
 // the kit's own chrome (header, bar) in BMW blue, to match
 Object.assign(themes.THEMES.m_tricolour, { sel: C.blue, selText: '#ffffff', accent2: C.blueHi, bg: C.bg });
@@ -42,6 +43,7 @@ class Gallery {
         const ctx = this.ctx;
         this.loop = ctx.loop('GALLERY', 10, () => this.render());
         ctx.settings.onChange(() => this.kick());
+        I.onChange(() => this.kick());
         ctx.onLayout(() => this.kick());
         this.hud.onStatus(() => this.kick());
         ctx.ui.onClick('BTN_NEXT_THEME', () => this.guard('next', () => this.next()));
@@ -51,7 +53,11 @@ class Gallery {
 
     get(k) { return this.hud.setting(k); }
     name(v) { return Menu.layoutName(this.ctx.settings, v); }
-    tag(v) { return v === 'off' ? 'stock cluster' : (this.cfg.tags || {})[v] || ''; }
+    tag(v) {
+        if (v === 'off') return I.t('menu.tag.stock');
+        const k = (this.cfg.tags || {})[v];
+        return k ? (I.has(k) ? I.t(k) : String(k)) : '';
+    }
     /** the themes a card can show (not the calibration ones): the drive-mode settings' choices */
     looks() { return ((this.ctx.settings.item('inSport') || {}).options || []).map((o) => o[0]); }
 
@@ -83,16 +89,16 @@ class Gallery {
         const on = hud.activeName && hud.activeName !== 'off';
         const demo = hud.car && hud.car.data().demo;
         G.frame(cv, this.ctx.theme(), [], -1, [
-            demo ? { text: 'DEMO DATA', color: '#ffb020' } : null,
-            { text: on ? 'ON THE CLUSTER' : 'CLUSTER OFF', color: on ? '#3ddc84' : C.dim },
+            demo ? { text: I.t('gallery.demo'), color: '#ffb020' } : null,
+            { text: I.t(on ? 'gallery.on' : 'gallery.off'), color: on ? '#3ddc84' : C.dim },
         ]);
         // the cards are themes, so a see-through file showing ("+ G20", the g20 toggle) selects its own theme's card
         const key = Menu.lookKey(hud), shown = Menu.themeOf(Menu.shownName(hud)), byMode = this.get('byMode') === true;
         const where = key === 'hudLayout'
-            ? (byMode ? 'Tap a theme: it shows until the car sends its drive mode (Theme)' : 'Tap a theme to show it in every drive mode')
-            : 'Tap a theme to show it in ' + Menu.MODE_NAME[hud.driveMode] + ' (the drive mode now)';
+            ? I.t(byMode ? 'gallery.tap.wait' : 'gallery.tap.every')
+            : I.t('gallery.tap.mode', { mode: Menu.MODE_NAME[hud.driveMode] });
         const scr = hud.screen;
-        const note = scr && scr.yielded ? 'Off: ' + scr.otherName + ' has the screen. Tap a theme to take it back' : where;
+        const note = scr && scr.yielded ? I.t('gallery.yielded', { app: scr.otherName }) : where;
         label(cv, X0, 70, note, scr && scr.yielded ? '#e0a340' : C.label);
         // the cards, two rows
         const looks = this.looks(), cols = Math.max(4, Math.ceil(looks.length / 2)), gap = 14, y0 = 86;
@@ -107,7 +113,7 @@ class Gallery {
             cv.text(this.tag(v), x + cw - 14, ty, 13, C.dim, { align: 'right', literal: true });
             // the drive modes that show it
             const modes = byMode ? MODES.filter((m) => this.get(m[0]) === v).map((m) => m[1]) : [];
-            const sub = byMode ? (modes.length ? 'In ' + modes.join(', ') : '') : (this.get('hudLayout') === v ? 'In every drive mode' : '');
+            const sub = byMode ? (modes.length ? I.t('gallery.in', { modes: modes.join(', ') }) : '') : (this.get('hudLayout') === v ? I.t('gallery.inEvery') : '');
             if (sub) cv.text(sub, x + 14, ty + 24, 14, C.blueHi, { literal: true });
             cv.target(x, y, cw, ch, () => this.guard('pick', () => this.choose(v)), 'look:' + v, 16);
         });

@@ -112,7 +112,10 @@ function unitChecks() {
         'rows: 2 under a one-line card, 1 under two lines, none under three; 6 on the list page (pitch 44, y 300 to 564)');
     const lst = lay(null, rowsE);
     ok(lst.kind === 'list' && lst.rows[0].sev === 4 && lst.rows[1].sev === 3 && lst.more === 3 && lst.rows.every((r, i) => r.top === 300 + 44 * i), 'the list: red first, then amber, then the car\'s order; the rest is counted for the scroll line (' + lst.more + ' more)');
-    ok(lay(null, []).kind === 'empty' && lay(null, [], { shown: true, sev: 4 }).kind === 'pointer' && lay(null, [], { shown: true }).card.lines.join('|') === 'Повідомлення|на панелі внизу', 'the empty page and the pointer page ("Повідомлення / на панелі внизу")');
+    // r1120 LN: the pointer's words are the language's (shared/i18n/<lang>.json); in Ukrainian exactly as before
+    const LN = require(path.join(ROOT, 'shared', 'lang.js')), ptrWords = LN.t('twin.cc.pointer1') + '|' + LN.t('twin.cc.pointer2');
+    ok(LN.lang() !== 'uk' || ptrWords === 'Повідомлення|на панелі внизу', 'the pointer\'s words in Ukrainian are "Повідомлення / на панелі внизу"');
+    ok(lay(null, []).kind === 'empty' && lay(null, [], { shown: true, sev: 4 }).kind === 'pointer' && lay(null, [], { shown: true }).card.lines.join('|') === ptrWords, 'the empty page and the pointer page ("' + ptrWords.replace('|', ' / ') + '")');
     const longRow = lay(null, [{ id: 41, name: 'Потрібне сервісне обслуговування найближчим часом', color: 'white' }, { id: 15, name: 'Двері відчинено', color: 'white' }]);
     ok(longRow.rows[0].cut && !longRow.rows[1].cut && longRow.keys.indexOf(longRow.rows[0].key) < 0 && longRow.keys.indexOf(longRow.rows[1].key) >= 0,
         'a row counts as our text for its message only when its WHOLE name fits (the cut one does not)');
@@ -958,7 +961,8 @@ async function engineChecks() {
         const s = snapshot(), t = T0();
         ok(t.state === 'window' && s.open && s.has === 'card' && s.rows === 0 && t.tab === 2 && hud.twinCc.state === 'window',
             '3c. in the turn the number arrives: tab 2, window open AND our card for exactly that message on the sheet, the row gone (' + t.reason + ')');
-        ok(hud._token('td:cTitle') === 'Повідомлення', '3c. the centre\'s title is "Повідомлення" on tab 2');
+        const LNt = require(path.join(STAGE, 'source', 'javascript', 'lang.js'));      // r1120 LN: the title in the language in use ("Повідомлення" in Ukrainian)
+        ok(hud._token('td:cTitle') === LNt.t('twin.tab.msg') && (LNt.lang() !== 'uk' || LNt.t('twin.tab.msg') === 'Повідомлення'), '3c. the centre\'s title is "' + LNt.t('twin.tab.msg') + '" on tab 2');
     }
     await until(() => T0().state === 'ours', 1500);
     await sleep(60);

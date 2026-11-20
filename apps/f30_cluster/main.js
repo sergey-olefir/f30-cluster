@@ -9,13 +9,15 @@
  * stay up in the background), so the screen is only needed for changes.
  */
 const mgu = require('./kit/mgu');
+const I18N = require('./lang');
 const HudApp = require('./hud');
 const Menu = require('./menu');
 const Gallery = require('./gallery');
 
+// r1120 LN: the tag lines are keys of shared/i18n/<lang>.json
 const TAGS = {
-    wb_comfort: 'white dials', wb_dials: 'white dials, G20 round them',
-    wb_sport: 'red glow', wb_sport_dials: 'red glow, G20 round them', wb_eco: 'blue glow',
+    wb_comfort: 'f30.tag.wb_comfort', wb_dials: 'f30.tag.wb_dials',
+    wb_sport: 'f30.tag.wb_sport', wb_sport_dials: 'f30.tag.wb_sport_dials', wb_eco: 'f30.tag.wb_eco',
 };
 
 // ---- one switch (docs/ONE-SWITCH-DONE.md): moving the settings saved by 0.7.15 and before, ONCE ------------------
@@ -59,6 +61,8 @@ function migrate(ctx) {
 
 mgu.run({
     start(ctx) {
+        // r1120 LN: the language (setting "Мова / Language", the head unit's): first, so every word below is in it
+        try { I18N.attach(ctx); } catch (e) { ctx.log.error('lang: ' + (e && e.stack || e)); }
         // never let this stop the app: a failure here leaves the old values in place, which still draw
         try { migrate(ctx); } catch (e) { ctx.log.error('settings migration: ' + (e && e.stack || e)); }
         let hud;

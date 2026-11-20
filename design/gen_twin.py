@@ -41,6 +41,13 @@ FONTS = _fonts_dir or os.path.join(ROOT, 'apps', 'twin_dial', 'hud', 'fonts')
 _SNAP = json.load(open(os.path.join(HERE, 'twin-dial', 'c', 'font_metrics.json')))['fonts']
 _font = {}
 SOURCE = {}
+# r1120 LN: the words in every language (shared/i18n/<lang>.json), for the boxes that must fit all of them
+_I18N = {f[:-5]: json.load(open(os.path.join(ROOT, 'shared', 'i18n', f), encoding='utf-8'))
+         for f in sorted(os.listdir(os.path.join(ROOT, 'shared', 'i18n'))) if f.endswith('.json')}
+
+
+def WORDS(key):
+    return [t[key] for t in _I18N.values() if key in t]
 
 
 def font(name):
@@ -203,7 +210,8 @@ def tabs():
     vx = W[0]['x'] + S
     vw = width(TAB_FONT, '888')
     W += [text('tab_range_v', vx + vw, 156, vw, '{{td:rangeTab}}', TAB_FONT, 'fg', 'right', 1, below=3),
-          text('tab_range_u', vx + vw + 3, 156, width('td_u19', '\u043a\u043c') + 3, '\u043a\u043c', 'td_u19', 'fg', 'left', 1, below=3)]
+          # r1120 LN: the unit follows the language ({{td:uKm}}: "км" / "km"), the box fits the widest of shared/i18n's
+          text('tab_range_u', vx + vw + 3, 156, max(width('td_u19', w) for w in WORDS('twin.u.km')) + 3, '{{td:uKm}}', 'td_u19', 'fg', 'left', 1, below=3)]
     cell = lambda a, b: (a + b) / 2.0
     warn = tab_icon('tab_warn_i', 'cc_warn', cell(TAB['seps'][0], TAB['seps'][1]), 'warn')
     W += [warn]
@@ -264,15 +272,15 @@ def page_items():
     r1, r2 = 384, 455
     P['trip'] = [title(), meta('{{td:pgTripMeta}}'),
                  I('i1', '{{td:pgIconFuel}}', 752, r1 - 15, 46), T('cons', 896, r1, 'n42', '{{td:pgTripCons}}', 'fg', 'r'),
-                 {'k': 'frac', 'id': 'cons_u', 'x': 906, 'b': r1, 'top': 'л', 'bot': '100 км', 'dt': -17, 'dr': -14, 'db': 3, 'c': 'fg'},
-                 T('speed', 1109, r1, 'n42', '{{td:pgTripSpeed}}', 'fg', 'r'), T('speed_u', 1116, r1, 'u21', 'км/год', 'fg', 'l'),
-                 I('i2', '{{td:pgIconRoad}}', 752, r2 - 15, 46), T('way', 896, r2, 'n42', '{{td:pgTripWay}}', 'fg', 'r'), T('way_u', 906, r2, 'u21', 'км', 'fg', 'l'),
+                 {'k': 'frac', 'id': 'cons_u', 'x': 906, 'b': r1, 'top': '{{word:twin.u.l}}', 'bot': '{{word:twin.u.per100}}', 'dt': -17, 'dr': -14, 'db': 3, 'c': 'fg'},
+                 T('speed', 1109, r1, 'n42', '{{td:pgTripSpeed}}', 'fg', 'r'), T('speed_u', 1116, r1, 'u21', '{{word:twin.u.kmh}}', 'fg', 'l'),
+                 I('i2', '{{td:pgIconRoad}}', 752, r2 - 15, 46), T('way', 896, r2, 'n42', '{{td:pgTripWay}}', 'fg', 'r'), T('way_u', 906, r2, 'u21', '{{word:twin.u.km}}', 'fg', 'l'),
                  T('foot', MID_X, 565, 'n31', '{{td:pgTripFooter}}', 'dim', 'c', 440)]
     # technical data (SV V1): four rows, label Noto 31 at x 745, value Noto 40 right at 1150, the unit 6 px after, a bar x 745-1175
     # 12 px under the baseline (6 px thick); the outside temperature has no bar. "бар" (37 px) starts 2 px after the value instead of 6
     # (x 1152): the layer ends at x 1191, and SPEC-R3's 6 px would clip its last letter
     tech = [title()]
-    for i, (base, label) in enumerate(zip((352, 418, 484, 550), ('Олива', 'Охолодження', 'Наддув', 'Зовні'))):
+    for i, (base, label) in enumerate(zip((352, 418, 484, 550), ('{{word:twin.tech.oil}}', '{{word:twin.tech.coolant}}', '{{word:twin.tech.boost}}', '{{word:twin.tech.outside}}'))):
         tech += [T('l%d' % i, 745, base, 'n31', label, 'dim', 'l'), T('v%d' % i, 1150, base, 'n40', '{{td:pgTechV%d}}' % i, '{{td:pgTechC%d}}' % i, 'r'),
                  T('u%d' % i, 1156 if i != 2 else 1152, base, 'u21', '{{td:pgTechU%d}}' % i, '{{td:pgTechC%d}}' % i, 'l')]
         if i < 3:
@@ -282,7 +290,7 @@ def page_items():
     ty = [title(), {'k': 'car', 'id': 'car', 'cx': 960, 'cy': 430, 'w': 110, 'h': 230, 'c': 'dim'}]
     for i, (cx, cy) in enumerate(((800, 360), (1120, 360), (800, 505), (1120, 505))):
         ty += [{'k': 'g', 'id': 'p%d' % i, 'cx': cx, 'b': cy, 'c': 'fg', 'parts': [{'s': '{{td:pgTyreP%d}}' % i, 'f': 'n40', 'c': '{{td:pgTyreC%d}}' % i},
-                                                                                    {'s': 'бар', 'f': 'u21', 'gap': 4, 'c': '{{td:pgTyreC%d}}' % i}]},
+                                                                                    {'s': '{{word:twin.u.bar}}', 'f': 'u21', 'gap': 4, 'c': '{{td:pgTyreC%d}}' % i}]},
                T('t%d' % i, cx, cy + 40, 'n31', '{{td:pgTyreT%d}}' % i, 'grey', 'c')]
     P['tyres'] = ty
     # tab 2: the title only (the card, the rows and the pointer page are twin_cc.js's sheet)
@@ -321,7 +329,7 @@ def page_items():
                   T('foot', MID_X, 565, 'n29', '{{td:pgRouteFoot}}', 'dim', 'c', 436)]
     P['calc'] = [title(), T('msg', MID_X, 400, 'n33', '{{td:pgCalc}}')]
     P['road'] = [title(), T('road', MID_X, 400, 'title', '{{td:pgRoad}}', 'fg', 'c', 436), T('sub', MID_X, 452, 'n29', '{{td:pgNavSub}}', 'dim')]
-    P['none'] = [title(), T('sub', MID_X, 400, 'n29', 'Маршрут не прокладено', 'dim')]
+    P['none'] = [title(), T('sub', MID_X, 400, 'n29', '{{word:twin.nav.noRoute}}', 'dim')]
     return P
 
 
@@ -357,12 +365,12 @@ def row():
     L, Rr = 846, 1153
     nw = lambda *worst: max(width('td_row', t) for t in worst) + 1          # a number's box: its worst text (the odometer "999 999")
     uw = lambda *worst: max(width('td_u21', t) for t in worst) + 1
-    km, c = '\u043a\u043c', '\u00b0C'
+    km, c = WORDS('twin.u.km'), '\u00b0C'          # r1120 LN: the unit in every language (shared/i18n), the box fits the widest
     W = [text('row_l1', L, 656, nw('999\u2009999', '00:00', '\u2013\u2013:\u2013\u2013'), '{{td:rowL1}}', 'td_row', 'fg', 'right', 0, z, below=3, toggle=tg),
-         text('row_l1u', L + 5, 656, uw(km), '{{td:rowL1u}}', 'td_u21', 'fg', 'left', 0, z, below=3, toggle=tg),
+         text('row_l1u', L + 5, 656, uw(*km), '{{td:rowL1u}}', 'td_u21', 'fg', 'left', 0, z, below=3, toggle=tg),
          text('row_l2', L, 703, nw('\u2013\u2013:\u2013\u2013', '00:00'), '{{td:rowL2}}', 'td_row', 'fg', 'right', 0, z, below=3, toggle=tg),
          text('row_r1', Rr, 656, nw('9999.9', '-30.5', '+88.8'), '{{td:rowR1}}', 'td_row', 'fg', 'right', 0, z, below=3, toggle=tg),
-         text('row_r1u', Rr + 5, 656, uw(km, c), '{{td:rowR1u}}', 'td_u21', 'fg', 'left', 0, z, below=3, toggle=tg),
+         text('row_r1u', Rr + 5, 656, uw(*(km + [c])), '{{td:rowR1u}}', 'td_u21', 'fg', 'left', 0, z, below=3, toggle=tg),
          text('row_r2', Rr, 703, nw('-30.5', '+88.8'), '{{td:rowR2}}', 'td_row', 'fg', 'right', 0, z, below=3, toggle=tg),
          text('row_r2u', Rr + 5, 703, uw(c), '{{td:rowR2u}}', 'td_u21', 'fg', 'left', 0, z, below=3, toggle=tg)]
     return W

@@ -15,6 +15,8 @@ function tree(app, omit) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'twin-js-'));
     fs.readdirSync(path.join(ROOT, 'shared')).filter((f) => /\.js$/.test(f) && (omit || []).indexOf(f) < 0).forEach((f) => fs.copyFileSync(path.join(ROOT, 'shared', f), path.join(dir, f)));
     fs.symlinkSync(path.join(ROOT, 'kit', 'runtime'), path.join(dir, 'kit'));
+    // r1120 LN: the string tables, where the build puts them beside the code (javascript/i18n/<lang>.json)
+    if (fs.existsSync(path.join(ROOT, 'shared', 'i18n'))) fs.symlinkSync(path.join(ROOT, 'shared', 'i18n'), path.join(dir, 'i18n'));
     // hud/: the app's own folder, entry by entry; a missing fonts/ (package A1's bake, not merged yet) or scene/ (A2's) can be
     // lent by TWIN_FONTS / TWIN_SCENE (a folder of td_*.json / of the scene textures), so the tests run before the merge
     const hud = path.join(dir, 'hud'), own = path.join(ROOT, 'apps', app || 'twin_dial', 'hud');

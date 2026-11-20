@@ -21,7 +21,8 @@ function rig() {
     require(path.join(dir, 'twin_icons.js'));
     const layout = JSON.parse(fs.readFileSync(path.join(H.ROOT, 'apps', 'twin_dial', 'hud', 'layouts', 'twin.json'), 'utf8'));
     const widget = layout.widgets.filter((w) => w.type === 'tdpage')[0];
-    return { H, HudApp, twin, pages, THEMES, layout, widget, dir };
+    const i18n = require(path.join(dir, 'lang.js'));       // r1120 LN: the tree's own language module (the one the pages use)
+    return { H, HudApp, twin, pages, THEMES, layout, widget, dir, i18n };
 }
 
 const T0 = Date.UTC(2026, 10, 17, 12, 43, 20);        // a Tuesday, 12:43 UTC; the car's zone UTC+2

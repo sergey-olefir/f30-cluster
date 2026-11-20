@@ -35,6 +35,7 @@
 // ---- severity (SPEC 8.2): 0 none, 1 grey, 2 green, 3 amber, 4 red ------------------------------------------------------
 // colours: the black-floor-corrected codes B's tdback uses for the rule (ENGINE-CONTRACT 1.2); cell = the card's symbol cell,
 // icon = a row's symbol and the warning tab's icon (SPEC-R3 5.3). Severity is never in the selected tab's fill.
+const I = require('./lang');      // r1120 LN: our fixed words (pointer, why, empty) from shared/i18n/<lang>.json; a message's own text is the car's
 const SEV_NAMES = ['none', 'grey', 'green', 'amber', 'red'];
 const SEVERITY = [
     null,
@@ -88,15 +89,13 @@ const HEAD = { cx: 960, maxW: 436, lines: 3, bases: { 1: [424], 2: [424, 471], 3
 const COUNTER = { right: 1180, base: 326 };                 // "n/m" Noto 29 grey, top right, only when the car gives a frame count
 const ROWS = { pitch: 44, symX: 741, symSize: 32, symDy: 6, nameX: 781, maxW: 399, nameDy: 33, top: 300, bottom: 564, below: 26,
     scroll: { x: 1188, w: 3, y0: 300, y1: 564, track: 40, thumb: 180 } };
-const POINTER = { lines: ['Повідомлення', 'на панелі внизу'], bases: [424, 471] };       // our fixed words: never a message's
+// our fixed words: never a message's (the pointer card has no key: it never counts as the cover of any message, in any language)
+const POINTER = { get lines() { return [I.t('twin.cc.pointer1'), I.t('twin.cc.pointer2')]; }, bases: [424, 471] };
 // r1120 T1: the pointer's one short line saying WHY nothing of ours is in the centre (our fixed words, td_tab grey, only when
 // no row is drawn under the pointer). Keys are TwinCC's `why` codes.
-const WHY = { base: 516, texts: {
-    unlisted: 'Текст лише на панелі', noname: 'Текст лише на панелі',          // the car gives no text of it to apps
-    unknown: 'Номер невідомий', d7: 'Номер ще невідомий', noverdict: 'Номер ще невідомий', heuristic: 'Номер ще невідомий',
-    conflict: 'Номери не збігаються', glyph: 'Шрифт без цих літер',
-    throw: 'Помилка малювання', dead: 'Помилка малювання', sheet: 'Помилка малювання', room: 'Помилка малювання' } };
-const EMPTY = { icon: 'cc_info', size: 66, cx: 960, cy: 392, text: 'Немає повідомлень', base: 478 };
+// (unlisted / noname: the car gives no text of it to apps; d7 / noverdict / heuristic: the number not known yet; the drawing ones one line)
+const WHY = { base: 516, texts: I.words('twin.cc.why.', ['unlisted', 'noname', 'unknown', 'd7', 'noverdict', 'heuristic', 'conflict', 'glyph', 'throw', 'dead', 'sheet', 'room']) };
+const EMPTY = { icon: 'cc_info', size: 66, cx: 960, cy: 392, get text() { return I.t('twin.cc.empty'); }, base: 478 };
 const FONTS = { head: 'td_msg', counter: 'td_cnt', row: 'td_tab', text: 'td_val' };      // Noto 42 / 29 / 33 / 39
 const SHEET_RECT = [SHEET.x, SHEET.y, SHEET.x + SHEET.w, SHEET.y + SHEET.h];
 
@@ -206,7 +205,8 @@ function layoutTab2(s, deps) {
     const why = out.kind === 'pointer' && s.why && !others.length ? String(s.why) : '';
     if (why) out.card.why = why;
     out.sig = JSON.stringify([out.kind, out.card && out.card.key, out.card && out.card.lines, out.card && out.card.counter, out.card && out.card.sev,
-        out.card && out.card.symbol, out.rows.map((r) => [r.key, r.sev, r.text]), out.more, !!s.night].concat(why ? [why] : []));     // (no why: the sig as before)
+        out.card && out.card.symbol, out.rows.map((r) => [r.key, r.sev, r.text]), out.more, !!s.night].concat(why ? [why] : [])
+        .concat(out.kind === 'empty' ? [EMPTY.text] : []));     // (no why: the sig as before; r1120 LN: the empty sheet's words, so a new language repaints it)
     return out;
 }
 

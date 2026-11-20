@@ -24,6 +24,7 @@ const fs = require('fs');
 const path = require('path');
 const F = require('./format');
 const A = require('./avatars');
+const I = require('./lang');          // r1120 LN: the words on the screen from shared/i18n/<lang>.json; the log stays English
 
 const PERS = F.PERS;
 const IF = {
@@ -253,92 +254,96 @@ class Profiles {
     /** The PIA profile number of a slot: Guest's is fixed (10); the others as seen while they were active. */
     piaOf(st) {
         if (!st || !st.exists) return { n: null, how: '' };
-        if (st.type === 'GUEST') return { n: 10, how: 'Guest' };
-        if (st.slot === this.current && typeof this.car.pia === 'number') return { n: this.car.pia, how: 'active now' };
-        if (st.id && typeof this.piaSeen[st.id] === 'number') return { n: this.piaSeen[st.id], how: 'seen while it was active' };
-        return { n: null, how: 'not known yet: it shows once this profile has been active' };
+        if (st.type === 'GUEST') return { n: 10, how: I.t('dp.type.GUEST') };
+        if (st.slot === this.current && typeof this.car.pia === 'number') return { n: this.car.pia, how: I.t('dp.pia.now') };
+        if (st.id && typeof this.piaSeen[st.id] === 'number') return { n: this.piaSeen[st.id], how: I.t('dp.pia.seen') };
+        return { n: null, how: I.t('dp.pia.unknown') };
     }
 
     /* ---------------- checks (run again right before every write) ---------------- */
 
-    /** The car parked: engine off, P, no PIA job running. [] when fine, else why not. */
-    parkedProblems() {
+    /** The car parked: engine off, P, no PIA job running. [] when fine, else why not.
+     *  parkedKeys: what keeps a write from running now, as table keys (dp.park.*). */
+    parkedKeys() {
         if (!this.requireParked) return [];
         const out = [], c = this.car;
-        if (c.rpmRaw === null || c.rpmRaw === undefined || c.rpmRaw === 65535) out.push('engine state not known');
-        else if (c.rpmRaw !== 0) out.push('the engine is running');
-        if (!c.gear) out.push('gear not known');
-        else if (c.gear !== 'P') out.push('not in P');
-        if (c.piaTx === 'BEGINTRANSACTION') out.push('a PIA job is running');
+        if (c.rpmRaw === null || c.rpmRaw === undefined || c.rpmRaw === 65535) out.push('dp.park.engineUnknown');
+        else if (c.rpmRaw !== 0) out.push('dp.park.engineOn');
+        if (!c.gear) out.push('dp.park.gearUnknown');
+        else if (c.gear !== 'P') out.push('dp.park.notP');
+        if (c.piaTx === 'BEGINTRANSACTION') out.push('dp.park.pia');
         return out;
     }
+    parkedProblems() { return this.parkedKeys().map((k) => I.t(k)); }
 
     /**
      * Whether op may run now: { ok, why: [..] }. op: 'create' | 'rename' | 'copy' | 'delete'. For rename / copy /
      * delete, snap is what the confirm screen showed ({ id, name }): the slot must still hold that profile.
      */
     check(op, slot, arg, snap, sending) {
-        const why = [];
-        if (this.busy && !sending) why.push('another change is running (' + this.busy + ')');
-        if (!this.um) why.push('the profile service is not reachable' + (this.errors[IF.uam] ? ': ' + this.errors[IF.uam] : ''));
+        const why = [], whyEn = [], whyKeys = [];
+        // each reason: on the screen in the app's language, in the log in English, and its key (screens.js tests one)
+        const add = (key, vars) => { why.push(I.t(key, vars)); whyEn.push(I.tl('en', key, vars)); whyKeys.push(key); };
+        if (this.busy && !sending) add('dp.why.busy', { op: this.busy });
+        if (!this.um) add(this.errors[IF.uam] ? 'dp.why.noServiceErr' : 'dp.why.noService', { err: this.errors[IF.uam] });
         const st = slot ? this.slots[slot] : null;
         if (op === 'create') {
             const name = String(arg || '').trim();
-            if (!name) why.push('no name');
-            if (this.names().map((n) => n.toLowerCase()).indexOf(name.toLowerCase()) >= 0) why.push('a profile is already called that');
-            if (!this.freeSlot()) why.push('no free slot (' + this.users().length + ' of ' + MAX_USERS + ' in use)');
+            if (!name) add('dp.why.noName');
+            if (this.names().map((n) => n.toLowerCase()).indexOf(name.toLowerCase()) >= 0) add('dp.why.nameTaken');
+            if (!this.freeSlot()) add('dp.why.noSlot', { used: this.users().length, max: MAX_USERS });
         } else {
-            if (!st || !st.exists) why.push('the profile is not there any more');
+            if (!st || !st.exists) add('dp.why.gone');
             else {
-                if (snap && (st.id !== snap.id || st.name !== snap.name)) why.push('the profile changed meanwhile: look again');
+                if (snap && (st.id !== snap.id || st.name !== snap.name)) add('dp.why.changed');
                 if (op === 'rename') {
-                    if (st.type !== 'USER') why.push('only personal profiles are renamed here');
-                    else if (!F.isLocal(st)) why.push('a BMW ID profile: its name comes from the BMW ID');
+                    if (st.type !== 'USER') add('dp.why.renamePersonal');
+                    else if (!F.isLocal(st)) add('dp.why.renameBmwId');
                     const name = String(arg || '').trim();
-                    if (!name) why.push('no name');
-                    else if (name === st.name) why.push('it already has that name');
-                    else if (this.names().map((n) => n.toLowerCase()).indexOf(name.toLowerCase()) >= 0) why.push('a profile is already called that');
+                    if (!name) add('dp.why.noName');
+                    else if (name === st.name) add('dp.why.sameName');
+                    else if (this.names().map((n) => n.toLowerCase()).indexOf(name.toLowerCase()) >= 0) add('dp.why.nameTaken');
                 }
                 if (op === 'copy') {
-                    if (st.type !== 'USER') why.push('only into a personal profile');
-                    if (this.current !== 'guest') why.push(this.current ? 'Guest is not the active profile' : 'the active profile is not known');
+                    if (st.type !== 'USER') add('dp.why.copyPersonal');
+                    if (this.current !== 'guest') add(this.current ? 'dp.why.guestNotActive' : 'dp.why.activeUnknown');
                     const prot = F.protectionList(st.protection);
-                    if (prot === null) why.push('its protection is not known');
-                    else if (prot.length) why.push('it is protected (' + F.protectionText(st.protection) + '): copying needs an unprotected profile');
+                    if (prot === null) add('dp.why.protUnknown');
+                    else if (prot.length) add('dp.why.protected', { prot: F.protectionText(st.protection) });
                 }
                 if (op === 'avatar') {
                     // the avatar is cosmetic and belongs to every kind of profile, so no type or protection rule
                     // here; what matters is that the choice is still a real one
                     const ch = arg || {};
                     if (ch.kind === 'preset') {
-                        if (!A.presetOf(ch.type)) why.push('that is not one of the avatars the car has');
+                        if (!A.presetOf(ch.type)) add('dp.why.noSuchAvatar');
                     } else if (ch.kind === 'file') {
                         const l = A.list(this.dataDir, this.cfg);
                         const f = l.files[ch.index];
-                        if (!f) why.push('that picture is not in the avatars folder any more');
-                        else if (f.empty) why.push('that file is empty');
-                        else if (f.tooBig) why.push('that file is ' + f.kb + ': over the ' + l.max + ' KB limit');
-                    } else why.push('no avatar chosen');
+                        if (!f) add('dp.why.pictureGone');
+                        else if (f.empty) add('dp.why.fileEmpty');
+                        else if (f.tooBig) add('dp.why.fileBig', { kb: f.kb, max: l.max });
+                    } else add('dp.why.noAvatar');
                 }
                 if (op === 'delete') {
-                    if (st.type === 'GUEST' || st.type === 'VALET' || slot === 'guest' || slot === 'valet') why.push('Guest and Valet are never deleted');
-                    else if (st.type !== 'USER') why.push('only personal profiles');
-                    if (!this.current) why.push('the active profile is not known');
-                    else if (slot === this.current) why.push('it is the active profile');
-                    if (!F.isLocal(st)) why.push('a BMW ID profile: remove it in BMW\'s own profile menu');
+                    if (st.type === 'GUEST' || st.type === 'VALET' || slot === 'guest' || slot === 'valet') add('dp.why.keepGuest');
+                    else if (st.type !== 'USER') add('dp.why.onlyPersonal');
+                    if (!this.current) add('dp.why.activeUnknown');
+                    else if (slot === this.current) add('dp.why.isActive');
+                    if (!F.isLocal(st)) add('dp.why.deleteBmwId');
                 }
             }
         }
         // every write: persod hands each of them on to pomd (PIA), which cancels its jobs on engine start
-        this.parkedProblems().forEach((p) => why.push(p));
-        return { ok: why.length === 0, why };
+        this.parkedKeys().forEach((k) => add(k));
+        return { ok: why.length === 0, why, whyEn, whyKeys };
     }
 
     /* ---------------- the writes ---------------- */
 
     /** Runs one write after a fresh read and check. Returns { ok, text, detail }. */
     async write(op, slot, arg, snap) {
-        if (this.busy) return { ok: false, text: 'Not sent: another change is running (' + this.busy + ')' };
+        if (this.busy) return { ok: false, text: I.t('dp.notSent', { why: I.t('dp.why.busy', { op: this.busy }) }) };
         this.busy = op;
         try {
             // read again right before: the checks run on what the car says now
@@ -346,19 +351,19 @@ class Profiles {
             if (slot) await this.readOne(slot);
             if (op === 'create') await Promise.all(F.USER_SLOTS.map((s) => this.readOne(s)));
             const c = this.check(op, slot, arg, snap, true);
-            if (!c.ok) { this.log.info(op + ' ' + (slot || '') + ' not sent: ' + c.why.join('; ')); return { ok: false, text: 'Not sent: ' + c.why.join('; ') }; }
+            if (!c.ok) { this.log.info(op + ' ' + (slot || '') + ' not sent: ' + c.whyEn.join('; ')); return { ok: false, text: I.t('dp.notSent', { why: c.why.join('; ') }) }; }
             let res;
             if (op === 'create') res = await this.create(String(arg).trim());
             else if (op === 'rename') res = await this.rename(slot, String(arg).trim());
             else if (op === 'avatar') res = await this.avatar(slot, arg || {});
             else if (op === 'copy') res = await this.copy(slot);
             else if (op === 'delete') res = await this.remove(slot);
-            else res = { ok: false, text: 'unknown operation' };
+            else res = { ok: false, text: I.t('dp.unknownOp') };
             this.calls.push({ op, slot: res.slot || slot, result: res.code || res.text });
             return res;
         } catch (e) {
             this.log.error(op + ' ' + (slot || '') + ': ' + msg(e));
-            return { ok: false, text: 'Error: ' + msg(e) };
+            return { ok: false, text: I.t('dp.error', { what: msg(e) }) };
         } finally {
             this.busy = null;
             this.refresh('after ' + op);
@@ -379,12 +384,12 @@ class Profiles {
             if (s) {
                 if (!this.avail[s]) delete this.avail[s];      // a new instance: give it the first-time wait
                 const st = await this.readOne(s);
-                detail = st.exists ? 'Now in ' + F.slotLabel(s).toLowerCase() + (st.name === name ? ', name as chosen' : ', name reads back differently') : 'The new slot ' + s + ' does not answer yet';
+                detail = st.exists ? I.t(st.name === name ? 'dp.res.createdAs' : 'dp.res.createdOther', { slot: F.slotLabel(s).toLowerCase() }) : I.t('dp.res.slotSilent', { slot: s });
             }
-            return { ok: true, code: F.code(result, F.ENUM.create), text: 'Result: ' + F.code(result, F.ENUM.create), detail, slot: s };
+            return { ok: true, code: F.code(result, F.ENUM.create), text: I.t('dp.result', { what: F.codeUi(result, F.ENUM.create) }), detail, slot: s };
         }
-        if (result === 'MAX_NUM_EXCEEDED') detail = 'The car allows no more profiles (its provisioned limit)';
-        return { ok: false, code: F.code(result, F.ENUM.create), text: 'Result: ' + F.code(result, F.ENUM.create), detail };
+        if (result === 'MAX_NUM_EXCEEDED') detail = I.t('dp.res.max');
+        return { ok: false, code: F.code(result, F.ENUM.create), text: I.t('dp.result', { what: F.codeUi(result, F.ENUM.create) }), detail };
     }
 
     async rename(slot, name) {
@@ -394,7 +399,7 @@ class Profiles {
         const st = await this.readOne(slot);
         const ok = st.name === name;
         this.log.info('name setter ' + slot + ' -> ' + (r === name ? 'took the new name' : 'answered differently') + '; read back ' + (ok ? 'matches' : 'does not match'));
-        return { ok, code: ok ? 'accepted' : 'not taken', text: 'Result: ' + (ok ? 'name set (the service took it and reads it back)' : 'the name did not change'), detail: ok ? '' : 'The service answered, but reads back the old name' };
+        return { ok, code: ok ? 'accepted' : 'not taken', text: I.t('dp.result', { what: I.t(ok ? 'dp.res.nameSet' : 'dp.res.nameSame') }), detail: ok ? '' : I.t('dp.res.oldName') };
     }
 
     /**
@@ -423,10 +428,10 @@ class Profiles {
      * choice: { kind: 'preset', type: 'DEFAULT' | 'AVATARn' } or { kind: 'file', index }; anything else is not sent.
      */
     async avatar(slot, choice) {
-        if (!this.ua[slot]) return { ok: false, text: 'Not sent: the profile service is not reachable' };
+        if (!this.ua[slot]) return { ok: false, text: I.t('dp.notSent', { why: I.t('dp.why.noService') }) };
         if (choice && choice.kind === 'preset') return this.avatarPreset(slot, choice.type);
         if (choice && choice.kind === 'file') return this.avatarFile(slot, choice.index);
-        return { ok: false, text: 'Not sent: no avatar chosen' };
+        return { ok: false, text: I.t('dp.notSent', { why: I.t('dp.why.noAvatar') }) };
     }
 
     async avatarPreset(slot, type) {
@@ -437,11 +442,11 @@ class Profiles {
         const ok = got === type;
         this.log.info('avatarType ' + slot + ' -> ' + (s.form === 'name' ? 'took the name' : 'took the number') + '; reads back ' + (ok ? type : String(got)));
         const extra = type === 'DEFAULT' || type === 'UNSPECIFIED'
-            ? 'Any picture you sent before stays stored, unused: nothing else was written' : 'Nothing else was written';
+            ? I.t('dp.res.keptPicture') : I.t('dp.res.nothingElse');
         return {
             ok, code: ok ? 'accepted' : 'not taken',
-            text: 'Result: ' + (ok ? 'avatarType is now ' + type + ' (' + A.typeLabel(type) + ')' : 'avatarType still reads ' + A.typeLabel(got) + ' (' + got + ')'),
-            detail: ok ? extra : 'The service answered, but reads back the old value',
+            text: I.t('dp.result', { what: ok ? I.t('dp.res.typeNow', { type: type, label: A.typeLabel(type) }) : I.t('dp.res.typeStill', { label: A.typeLabel(got), type: got }) }),
+            detail: ok ? extra : I.t('dp.res.oldValue'),
         };
     }
 
@@ -449,7 +454,7 @@ class Profiles {
         // read and encode here, right before sending: the size guard and the folder check run on the file as it is
         const where = 'own picture';
         const enc = A.encode(this.dataDir, index, this.cfg);
-        if (!enc.ok) { this.log.info('avatar ' + where + ' #' + index + ' not sent: ' + enc.why); return { ok: false, text: 'Not sent: ' + enc.why }; }
+        if (!enc.ok) { this.log.info('avatar ' + where + ' #' + index + ' not sent: ' + (enc.whyEn || enc.why)); return { ok: false, text: I.t('dp.notSent', { why: enc.why }) }; }
         const before = this.slots[slot] || {};
         this.log.info('SET ' + slot + '.avatar <- ' + where + ' #' + index + ', ' + enc.bytes + ' bytes of jpg, ' + enc.chars + ' Base64 chars (name and data not logged)');
         let data = enc.data;
@@ -466,18 +471,20 @@ class Profiles {
         if (!picture.ok) {
             return {
                 ok: false, code: 'avatar refused',
-                text: 'Result: the car refused the picture: ' + picture.why,
-                detail: 'avatarType was left alone, so nothing about the profile changed',
+                text: I.t('dp.result', { what: I.t('dp.res.pictureRefused', { why: picture.why }) }),
+                detail: I.t('dp.res.typeLeft'),
             };
         }
         // did it keep it? the size and checksum of what it reads back, never its content
         const mid = { avatarType: 'INDIVIDUAL' };
         await this.readAvatarSize(slot, mid);
-        const stored = mid.avatarSum === enc.sum ? 'the same picture reads back'
-            : mid.avatarBytes === enc.bytes ? 'a picture of the same size reads back'
-                : typeof mid.avatarBytes === 'number' ? 'it reads back ' + A.kb(mid.avatarBytes) + ', not ' + enc.kb
-                    : 'it could not be read back' + (mid.avatarErr ? ' (' + mid.avatarErr + ')' : '');
-        this.log.info('avatar ' + slot + ' stored: ' + stored);
+        // the same words for the screen and, in English, for the log
+        const storedKey = mid.avatarSum === enc.sum ? ['dp.res.storedSame', {}]
+            : mid.avatarBytes === enc.bytes ? ['dp.res.storedSize', {}]
+                : typeof mid.avatarBytes === 'number' ? ['dp.res.storedOther', { kb: A.kb(mid.avatarBytes), sent: enc.kb }]
+                    : ['dp.res.storedUnread', { err: mid.avatarErr ? ' (' + mid.avatarErr + ')' : '' }];
+        const stored = I.t(storedKey[0], storedKey[1]);
+        this.log.info('avatar ' + slot + ' stored: ' + I.tl('en', storedKey[0], storedKey[1]));
         let typeRes;
         try {
             const s = await this.setEnum(slot, 'avatarType', 'INDIVIDUAL', CALL_MS.avatarType);
@@ -490,17 +497,16 @@ class Profiles {
         if (!typeRes.ok || !typeOk) {
             return {
                 ok: false, code: 'avatarType refused',
-                text: 'Result: the picture was stored (' + enc.kb + '), but avatarType is still ' + A.typeLabel(got)
-                    + (typeRes.ok ? '' : ': ' + typeRes.why),
-                detail: 'The car will keep showing the old avatar. Nothing else was written',
+                text: I.t('dp.result', { what: I.t('dp.res.storedTypeOld', { kb: enc.kb, label: A.typeLabel(got) }) + (typeRes.ok ? '' : ': ' + typeRes.why) }),
+                detail: I.t('dp.res.oldAvatar'),
             };
         }
         const name = before.name;
         return {
             ok: true, code: 'accepted',
-            text: 'Result: picture sent (' + enc.kb + ' of jpg) and avatarType set to INDIVIDUAL',
-            detail: stored.charAt(0).toUpperCase() + stored.slice(1) + '. Only those two fields were written'
-                + (st.name === name ? '' : '; the name reads differently now'),
+            text: I.t('dp.result', { what: I.t('dp.res.pictureSent', { kb: enc.kb }) }),
+            detail: I.t('dp.res.twoFields', { stored: stored.charAt(0).toUpperCase() + stored.slice(1) })
+                + (st.name === name ? '' : I.t('dp.res.nameOther')),
         };
     }
 
@@ -510,8 +516,8 @@ class Profiles {
         const result = F.en(F.resultOf(r, 'CopyGuestDataResult'), F.ENUM.copy);
         this.log.info('copyGuestData ' + slot + ' -> ' + F.code(result, F.ENUM.copy));
         const st = await this.readOne(slot);
-        const detail = result === 'SUCCESS' ? 'Copied at ' + F.date(st.copyTs, 'a time not readable') : result === 'IS_PROTECTED_ACCOUNT' ? 'The profile is protected (key, PIN or NFC)' : '';
-        return { ok: result === 'SUCCESS', code: F.code(result, F.ENUM.copy), text: 'Result: ' + F.code(result, F.ENUM.copy), detail };
+        const detail = result === 'SUCCESS' ? I.t('dp.res.copiedAt', { at: F.date(st.copyTs, I.t('dp.res.timeUnread')) }) : result === 'IS_PROTECTED_ACCOUNT' ? I.t('dp.res.protected') : '';
+        return { ok: result === 'SUCCESS', code: F.code(result, F.ENUM.copy), text: I.t('dp.result', { what: F.codeUi(result, F.ENUM.copy) }), detail };
     }
 
     async remove(slot) {
@@ -521,8 +527,8 @@ class Profiles {
         this.log.info('removeUserAccount ' + slot + ' -> ' + F.code(result, F.ENUM.remove));
         await sleep(500);
         const st = await this.readOne(slot);
-        const detail = result === 'SUCCESS' ? (st.exists ? 'The slot still answers: look again in a moment' : 'The slot is free now') : result === 'IS_PROTECTED_ACCOUNT' ? 'The profile is protected (key, PIN or NFC)' : '';
-        return { ok: result === 'SUCCESS', code: F.code(result, F.ENUM.remove), text: 'Result: ' + F.code(result, F.ENUM.remove), detail };
+        const detail = result === 'SUCCESS' ? I.t(st.exists ? 'dp.res.stillThere' : 'dp.res.free') : result === 'IS_PROTECTED_ACCOUNT' ? I.t('dp.res.protected') : '';
+        return { ok: result === 'SUCCESS', code: F.code(result, F.ENUM.remove), text: I.t('dp.result', { what: F.codeUi(result, F.ENUM.remove) }), detail };
     }
 }
 

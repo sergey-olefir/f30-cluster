@@ -7,6 +7,7 @@
  * unexpected exit uninstalls it.
  */
 const FIELDS = require('./fields');
+const I = require('./lang');          // r1120 LN: the words from shared/i18n/<lang>.json
 
 const hhmmss = (d) => ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2);
 
@@ -14,7 +15,7 @@ const hhmmss = (d) => ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes
 const REC_CHOICES = [['S17'], ['S14'], ['S14', 'S15'], ['S13']];     // r1120 AC: ACC (S17) first
 /** r1120 AC: a recording's sets as the rows say them: a set's label where it has one (S17 = "ACC"), else its id. */
 const recName = (ids) => ids.map((id) => { const s = FIELDS.SETS.find((x) => x.id === id); return (s && s.label) || id; }).join('+');
-const mb = (b) => (Math.round(b / 104857.6) / 10).toFixed(1).replace('.', ',') + ' МБ';
+const mb = (b) => I.t('probe.mb', { v: (Math.round(b / 104857.6) / 10).toFixed(1).replace('.', I.t('kit.decimal')) });
 const grp = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
 class Menu {
@@ -43,6 +44,7 @@ class Menu {
         ui.onClick('MARK', () => this.guard('mark', () => { this.probe.mark(); this.soon(0); return null; }));
         ui.onClick('REC', () => this.guard('rec', () => { this.toggleRec(); this.soon(0); return null; }));          // cruise RC
         ui.onClick('RECSET', () => this.guard('recset', () => { this.nextRecSet(); this.soon(0); return null; }));   // cruise RC
+        I.onChange(() => this.guard('language', () => { this.sent = Object.create(null); this.soon(0); }));
         settings.onChange((key) => this.guard('setting ' + key, () => {
             if (!FIELDS.SETS.some((s) => s.key === key)) return;
             this.probe.setSets(this.wanted());
@@ -84,13 +86,13 @@ class Menu {
     }
     recText() {
         const rec = this.rec;
-        if (!rec) return { a: 'Запис недоступний', b: '' };
+        if (!rec) return { a: I.t('probe.rec.none'), b: '' };
         const s = rec.status();
-        const free = 'вільно ' + mb(s.room);
-        if (s.on) return { a: 'Запис ' + recName(s.sets) + ' іде, ' + Math.floor(s.seconds / 60) + ':' + ('0' + (s.seconds % 60)).slice(-2) + '. Натисніть: стоп',
-            b: grp(s.samples) + ' зразків, ' + mb(s.bytes) + ', ' + free + (s.dropped ? ', втрачено ' + grp(s.dropped) : '') };
-        return { a: 'Почати запис ' + recName(this.recSets()),
-            b: (s.error ? 'ЗУПИНЕНО: ' + s.error + '. ' : s.session ? 'останній: ' + grp(s.samples) + ' зразків. ' : '') + free + ' з ' + mb(s.quota) };
+        const free = I.t('probe.rec.free', { mb: mb(s.room) });
+        if (s.on) return { a: I.t('probe.rec.on', { sets: recName(s.sets), time: Math.floor(s.seconds / 60) + ':' + ('0' + (s.seconds % 60)).slice(-2) }),
+            b: I.plural('probe.rec.samples', s.samples, { n: grp(s.samples) }) + ', ' + mb(s.bytes) + ', ' + free + (s.dropped ? ', ' + I.t('probe.rec.lost', { n: grp(s.dropped) }) : '') };
+        return { a: I.t('probe.rec.start', { sets: recName(this.recSets()) }),
+            b: (s.error ? I.t('probe.rec.stopped', { why: s.error }) + ' ' : s.session ? I.t('probe.rec.last', { samples: I.plural('probe.rec.samples', s.samples, { n: grp(s.samples) }) }) + ' ' : '') + I.t('probe.rec.of', { free: free, quota: mb(s.quota) }) };
     }
 
     soon(ms) {
@@ -112,17 +114,17 @@ class Menu {
     refresh() {
         this.guard('refresh', () => {
             const p = this.probe, h = p.hubStats(), on = p.setsOn();
-            this.text('STATUS', 'Набори: ' + (on.join(' ') || 'жодного') + '. Інтерфейсів: ' + h.up + ' з ' + h.built + (h.error ? ', помилок ' + h.error : '') +
-                '. Рядків у журналі: ' + p.lines + ' (' + Math.round(p.bytes / 1024) + ' КБ)');
+            this.text('STATUS', I.t('probe.status', { sets: on.join(' ') || I.t('probe.status.none'), up: h.up, built: h.built,
+                errors: h.error ? I.t('probe.status.errors', { n: h.error }) : '', lines: p.lines, kb: Math.round(p.bytes / 1024) }));
             this.cells('MARK', {
-                Text1stRow: 'Позначка ' + (p.markN + 1),
-                Text2ndRow: p.lastMark ? 'остання: ' + p.lastMark.n + ' о ' + hhmmss(new Date(p.lastMark.at)) : 'ще не було. Натисніть у момент дії',
+                Text1stRow: I.t('probe.mark', { n: p.markN + 1 }),
+                Text2ndRow: p.lastMark ? I.t('probe.mark.last', { n: p.lastMark.n, at: hhmmss(new Date(p.lastMark.at)) }) : I.t('probe.mark.none'),
             });
             // cruise RC: the recording rows
             const r = this.recText();
             this.cells('REC', { Text1stRow: r.a, Text2ndRow: r.b });
-            this.cells('RECSET', { Text1stRow: 'Набір для запису: ' + recName(this.recSets()), Text2ndRow: this.rec && this.rec.on ? 'зміниться після стопу' : 'натисніть, щоб змінити' });
-            this.text('STATUS2', 'Не користуйтеся меню під час руху. Журнал: журнал застосунку signal_probe; запис: data/rec.');
+            this.cells('RECSET', { Text1stRow: I.t('probe.recset', { sets: recName(this.recSets()) }), Text2ndRow: I.t(this.rec && this.rec.on ? 'probe.recset.after' : 'probe.recset.press') });
+            this.text('STATUS2', I.t('probe.status2'));
         });
     }
 }

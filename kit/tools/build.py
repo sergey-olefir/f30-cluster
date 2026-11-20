@@ -18,6 +18,7 @@ from xml.sax.saxutils import escape
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pack_data  # noqa: E402
 from localize import unicode_resources, localize_spec, load_locale, languages, credit, credit_name
+import app_i18n  # noqa: E402  (bimmer-lab r1120 LN: app.json "i18n": true, per-HMI-language bundles)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
@@ -224,7 +225,8 @@ def build_ui(spec, language='en'):
                 continue
             g = s.get('group')
             if g and g != group:
-                name = 'GRP_' + re.sub(r'[^A-Z0-9]+', '_', g.upper()).strip('_')
+                # (r1120 LN: "groupName", set by app_i18n.localize, keeps the component's name the same in every language)
+                name = 'GRP_' + re.sub(r'[^A-Z0-9]+', '_', (s.get('groupName') or g).upper()).strip('_')
                 items.append(comp('header', name, rows=[text_row(name, g)]))
             group = g
             setting_item(s, items)
@@ -441,6 +443,20 @@ def build(app_id, language='en'):
     spec = json.load(open(os.path.join(APPS, app_id, 'app.json'), encoding='utf-8'))
     spec = localize_spec(spec, language)
     spec.setdefault('id', app_id)
+    # bimmer-lab r1120 LN: an app with "i18n": true is built in every language of shared/i18n/ (the default table's words
+    # are the package's own; kit/tools/app_i18n.py). Only the default build: --language ru / zh-CN stay as they were.
+    i18n = None
+    if language == 'en' and app_i18n.enabled(spec):
+        tbls = app_i18n.tables()
+        app_i18n.augment(spec)
+        specs, gaps = {}, {}
+        for lng in tbls:
+            specs[lng], gaps[lng] = app_i18n.localize(spec, lng, tbls)
+        for lng in sorted(gaps):
+            if gaps[lng]:
+                print('  i18n: %d app.json text(s) with no "%s" word, the default used: %s' % (len(gaps[lng]), lng, ', '.join(gaps[lng][:6])))
+        i18n = {'tables': tbls, 'specs': specs}
+        spec = specs[app_i18n.DEFAULT]
     ver = spec['version']
     stage = os.path.join(DIST, app_id)
     shutil.rmtree(stage, ignore_errors=True)
@@ -454,6 +470,21 @@ def build(app_id, language='en'):
     unicode_resources(uidesc, strings, language)
     for lang, tbl in spec.get('strings', {}).items():
         strings.update(tbl)
+    per_lang = None
+    if i18n:
+        # the same layout in every language (only the words differ): each language's StringIds line up with the default's
+        per_lang = {}
+        for lng, sp in i18n['specs'].items():
+            x2, u2, s2, _ = build_ui(sp, language)
+            unicode_resources(u2, s2, language)
+            if x2 != xml or u2 != uidesc:
+                raise SystemExit('%s: i18n: the layout in "%s" differs from the default one' % (app_id, lng))
+            for lang, tbl in spec.get('strings', {}).items():
+                s2.update(tbl)
+            app_i18n.finish_strings(s2, lng, i18n['tables'])
+            per_lang[lng] = s2
+        strings = per_lang[app_i18n.DEFAULT]
+    bundle_of = (lambda hmi: per_lang[app_i18n.bundle_lang(hmi, per_lang)]) if per_lang else (lambda hmi: strings)
 
     # --- source/ (the npm package) ---
     pkg = {
@@ -543,6 +574,16 @@ def build(app_id, language='en'):
     rt_spec = {k: spec.get(k) for k in ('id', 'title', 'version', 'screens', 'settings', 'config', 'startWidget')}
     rt_spec['stateIds'] = state_ids
     json.dump(rt_spec, open(os.path.join(src, 'javascript', 'kit', 'app-spec.json'), 'w', encoding='utf-8', newline='\n'), indent=1)
+    if i18n:
+        # the tables (shared/lang.js reads javascript/i18n/<lang>.json) and the RHMI words of each language, which the app
+        # writes into its bundle when the language chosen is not the head unit's (the dynamic slots stay the app's own)
+        idir = os.path.join(src, 'javascript', 'i18n')
+        os.makedirs(idir, exist_ok=True)
+        for f in sorted(os.listdir(app_i18n.TABLE_DIR)):
+            if f.endswith('.json'):
+                shutil.copy(os.path.join(app_i18n.TABLE_DIR, f), os.path.join(idir, f))
+        rhmi = {lng: {k: v for k, v in s2.items() if not k.startswith('SID_CN_DYNAMIC_')} for lng, s2 in per_lang.items()}
+        json.dump(rhmi, open(os.path.join(idir, 'rhmi.json'), 'w', encoding='utf-8', newline='\n'), ensure_ascii=False, separators=(',', ':'))
     locale = {'language': language, 'strings': load_locale(language)}
     if credit(language):
         locale['credit'] = credit(language)['corner']
@@ -579,7 +620,7 @@ def build(app_id, language='en'):
     open(os.path.join(pr, 'uiDescriptions', 'ID7', 'application.xml'), 'w', encoding='utf-8', newline='\n').write(xml)
     json.dump(uidesc, open(os.path.join(pr, 'uiDescriptions', 'ID7', 'uiDescription.json'), 'w', encoding='utf-8', newline='\n'), indent=1)
     for lang in LANGS:
-        json.dump(strings, open(os.path.join(pr, 'variantGroups', 'Common', 'texts', lang + '.json'), 'w', encoding='utf-8', newline='\n'), ensure_ascii=False)
+        json.dump(bundle_of(lang), open(os.path.join(pr, 'variantGroups', 'Common', 'texts', lang + '.json'), 'w', encoding='utf-8', newline='\n'), ensure_ascii=False)
     make_icon(spec, os.path.join(pr, 'variantGroups', 'Common', 'images', icon))
 
     ir = os.path.join(stage, 'rhmiData')
@@ -596,7 +637,7 @@ def build(app_id, language='en'):
     open(os.path.join(ir, 'uiDescription', 'application.xml'), 'w', encoding='utf-8', newline='\n').write(xml)
     json.dump(uidesc, open(os.path.join(ir, 'uiDescription', 'uiDescription.json'), 'w', encoding='utf-8', newline='\n'), indent=1)
     for lang in LANGS:
-        json.dump(strings, open(os.path.join(ir, 'strings', lang + '.json'), 'w', encoding='utf-8', newline='\n'), ensure_ascii=False)
+        json.dump(bundle_of(lang), open(os.path.join(ir, 'strings', lang + '.json'), 'w', encoding='utf-8', newline='\n'), ensure_ascii=False)
     shutil.copy(os.path.join(pr, 'variantGroups', 'Common', 'images', icon), os.path.join(ir, 'resources', icon))
     if spec.get('startWidget'):
         info = build_start_widget(spec, app_id, os.path.join(ir, 'resources', icon), os.path.join(stage, 'rhmiDataStartWidget'),

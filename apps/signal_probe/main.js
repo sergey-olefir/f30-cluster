@@ -12,6 +12,7 @@
  * Never lets an exception escape: a failed start logs and stays up (an OAP app that exits twice is uninstalled by the platform).
  */
 const mgu = require('./kit/mgu');
+const I18N = require('./lang');
 const { Probe, VERSION } = require('./probe');
 const FIELDS = require('./fields');
 const Menu = require('./menu');
@@ -20,6 +21,8 @@ const path = require('path');
 
 mgu.run({
     start(ctx) {
+        // r1120 LN: the language (setting "Мова / Language", the head unit's): first, so every word below is in it
+        try { I18N.attach(ctx, { hmi: false }); } catch (e) { ctx.log.error('lang: ' + (e && e.stack || e)); }
         let probe;
         try {
             const cfg = (ctx.spec.config && ctx.spec.config.probe) || {};

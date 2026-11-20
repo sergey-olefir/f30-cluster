@@ -122,7 +122,8 @@ async function main() {
         ok(!/\/Users\/|\/home\/|C:\\\\/.test(fs.readFileSync(path.join(APP_DIR, f), 'utf8')), f + ': no home-directory path');
     });
     const app = readJson(path.join(APP_DIR, 'app.json'));
-    ok(JSON.stringify(app.shared) === '["carplay_turns.js"]' && !(app.config && app.config.target) && !app.startWidget, 'app.json: one shared file (carplay_turns.js, the decoder Twin Dial uses too), no config.target, no widget: nothing for the cluster');
+    // r1120 LN: + shared/lang.js, the apps' languages (it draws nothing either)
+    ok(JSON.stringify(app.shared) === '["lang.js","carplay_turns.js"]' && !(app.config && app.config.target) && !app.startWidget, 'app.json: two shared files (lang.js, the languages; carplay_turns.js, the decoder Twin Dial uses too), no config.target, no widget: nothing for the cluster');
     {
         // car issues CT: the one method call lives in shared/carplay_turns.js, and it is queryContent on GuidanceEventList, nothing else
         const tc = strip(fs.readFileSync(path.join(ROOT, 'shared', 'carplay_turns.js'), 'utf8'));
@@ -135,7 +136,10 @@ async function main() {
     }
     ok(app.id === 'signal_probe' && app.title === 'Signal Probe' && app.loggingId === 'OASP' && /^\d+\.\d+\.\d+$/.test(app.version), 'app.json: id signal_probe, title, own loggingId OASP, version ' + app.version);
     ok(app.version === VERSION, 'app.json version = probe.js VERSION (' + VERSION + ')');
-    ok(app.settings.length === 16 && app.settings.every((s) => s.type === 'bool' && s.default === false), 'sixteen settings, one per set (S1..S11, S13..S17), all bool and off by default');     // r1120 AC: + S17
+    // r1120 LN: + the language row ("lang", auto | uk | en), the last setting; the sixteen set rows as before
+    const setRows = app.settings.filter((s) => s.key !== 'lang'), langRow = app.settings.filter((s) => s.key === 'lang');
+    ok(setRows.length === 16 && setRows.every((s) => s.type === 'bool' && s.default === false), 'sixteen set settings, one per set (S1..S11, S13..S17), all bool and off by default');     // r1120 AC: + S17
+    ok(app.settings.length === 17 && langRow.length === 1 && app.settings[16] === langRow[0] && langRow[0].type === 'choice' && langRow[0].default === 'auto', 'and the language row last (Мова / Language: auto by default)');
     ok(FIELDS.SETS.every((s, i) => app.settings[i].key === s.key && new RegExp('^' + s.id + ' ').test(app.settings[i].label)), 'each setting is named for its set');
 
     // ---------------------------------------------------------------------------------------------------------------

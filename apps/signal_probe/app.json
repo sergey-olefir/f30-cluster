@@ -9,7 +9,9 @@
   "mguHmi": [
     "ID7"
   ],
+  "i18n": true,
   "shared": [
+    "lang.js",
     "carplay_turns.js"
   ],
   "signals": {
@@ -720,6 +722,10 @@
           "set17"
         ],
         [
+          "setting",
+          "lang"
+        ],
+        [
           "text",
           "STATUS2",
           ""
@@ -823,6 +829,27 @@
       "label": "S17 ACC: усе для адаптивного круїзу (P26)",
       "type": "bool",
       "default": false
+    },
+    {
+      "key": "lang",
+      "label": "Мова / Language",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Авто"
+        ],
+        [
+          "uk",
+          "Українська"
+        ],
+        [
+          "en",
+          "English"
+        ]
+      ],
+      "_about": "r1120 LN: the app's language (shared/lang.js). auto = the head unit's (--currentLanguage at start) when it is uk or en, else Ukrainian. Signal Probe declares exactly the fields of its probe table, so it does not follow HMIContext.currentDisplayLanguage while running (the cluster apps and Driver Profiles do)."
     }
   ],
   "config": {

@@ -12,11 +12,14 @@
  * unexpected exit counts as a crash, and the car's crash handler uninstalls an app after its second one.
  */
 const mgu = require('./kit/mgu');
+const I18N = require('./lang');
 const Profiles = require('./profiles');
 const Screens = require('./screens');
 
 mgu.run({
     start(ctx) {
+        // r1120 LN: the language (setting "Мова / Language", the head unit's): first, so every word below is in it
+        try { I18N.attach(ctx); } catch (e) { ctx.log.error('lang: ' + (e && e.stack || e)); }
         let profiles, screens;
         try {
             profiles = new Profiles(ctx);

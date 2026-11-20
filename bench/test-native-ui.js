@@ -68,7 +68,9 @@ const readOurs = () => { try { return JSON.parse(fs.readFileSync(path.join(scree
 async function main() {
     console.log('bench on ' + BASE + ', data in ' + tmp);
     server = spawn(process.execPath, [path.join(__dirname, 'server.js'), 'f30_cluster'], {
-        cwd: ROOT, env: Object.assign({}, process.env, { BENCH_PORT: String(PORT), BENCH_DATA_DIR: dataDir, SCREEN_DIR: screenDir }),
+        cwd: ROOT, env: Object.assign({}, process.env, {
+            // r1120 LN: this suite reads the English words: the head unit in English (Авто), as MainApp would start the app
+            BENCH_HMI_LANG: process.env.BENCH_HMI_LANG || 'en_GB', BENCH_PORT: String(PORT), BENCH_DATA_DIR: dataDir, SCREEN_DIR: screenDir }),
         stdio: ['ignore', 'pipe', 'pipe'],
     });
     const keep = (d) => { logText += d; if (/app exited/.test(String(d))) exited = true; };

@@ -257,7 +257,8 @@ async function bench(app, config, settings) {
     fs.mkdirSync(data);
     if (settings) fs.writeFileSync(path.join(data, 'settings.json'), JSON.stringify(settings));
     const trace = path.join(tmp, 'trace.jsonl');
-    const env = Object.assign({}, process.env, { BENCH_PORT: String(PORT), BENCH_DATA_DIR: data, BENCH_TRACE: trace, BENCH_LAYER_CAP: '8', SCREEN_DIR: path.join(tmp, 'screen') });
+    // r1120 LN: this suite reads the status line's English words: the head unit in English (Авто), as MainApp would start the app
+    const env = Object.assign({}, process.env, { BENCH_HMI_LANG: process.env.BENCH_HMI_LANG || 'en_GB', BENCH_PORT: String(PORT), BENCH_DATA_DIR: data, BENCH_TRACE: trace, BENCH_LAYER_CAP: '8', SCREEN_DIR: path.join(tmp, 'screen') });
     if (config) env.BENCH_CONFIG = config; else delete env.BENCH_CONFIG;
     logText = '';
     server = spawn(process.execPath, [path.join(__dirname, 'server.js'), app], { cwd: ROOT, env, stdio: ['ignore', 'pipe', 'pipe'] });
