@@ -132,7 +132,7 @@ ok(tdSpeed.cl.writes.filter((x) => !x.whole).length === 2, 'the speed only for i
 const tdLegacy = run('twin_dial', 'twin.json', 'gear', GEAR, { gpuText: 'legacy' });
 const la = Array.from(tdLegacy.cl.assets.values())[0];
 ok(la.w === 1066 && la.h === 70 && tdLegacy.cl.writes.filter((x) => !x.whole).every((x) => x.w === 41), '"legacy" is 0.1.3\'s layout: 1066x70, 41 px rects (the car test\'s other half)');
-ok(tdLegacy.logs.some((m) => /rows 1066 bytes: NOT a multiple of 4 \(config\.gpuText "legacy"\)/.test(m)) && tdLegacy.logs.some((m) => /cell \d+ written in place, rect \d+,0 41x70 \(NOT a multiple of 4\), write 1$/.test(m)),
+ok(tdLegacy.logs.some((m) => /rows 1066 bytes: NOT a multiple of 4 \(config\.gpuText "legacy"\)/.test(m)) && tdLegacy.logs.some((m) => /cell \d+ written in place, rect \d+,0 41x70 \(NOT a multiple of 4\), write 1\b/.test(m)),     // r1120 T2: the line goes on (asset, widget, ...)
     'its log says so: the atlas\'s rows and each write in place, numbers only');
 ok(tdGear.logs.some((m) => /gpu text atlas "td_big": 10 figures in 20 cells and 8 spare cells of 41x70, 1148x70 R8 asset/.test(m)) && !tdGear.logs.some((m) => /NOT a multiple/.test(m)),
     'aligned: 20 figure cells and 8 spare (2 more than 0.1.3), 1148x70, nothing logged as unaligned');

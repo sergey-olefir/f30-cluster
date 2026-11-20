@@ -212,6 +212,12 @@ class Diag {
 
     /** The actions a setting can stand for. */
     act(hud, name, on) {
+        // r1120 T2: "r8mark", the driver saw figures drift: every change of the setting (on or off) is one mark in the log (HudApp._r8Mark)
+        if (name === 'r8mark') {
+            if (typeof hud._r8Mark === 'function') hud._r8Mark();
+            else hud.log.info('diag: no R8 mark in this app');
+            return;
+        }
         if (name === 'silent') {
             // the silent-fields summary of research3/MK (shared/twin_tokens.js summary()) on demand: once now, then every 5 minutes while on
             clearInterval(this.timers.silent); this.timers.silent = null;

@@ -293,6 +293,22 @@ function alignedGrid(cw, n, maxCols) {
     const cols = Math.floor(maxCols / q) * q;
     return cols >= q ? { n, cols, rows: Math.ceil(n / cols) } : null;
 }
+// r1120 T2 (docs/r1120/T2-REPORT.md): the R8 guard. Every connection's asset() and pixels() go through HudApp._r8Wrap: an R8 asset
+// whose rows are not whole 4-byte rows, or an R8 rect whose x or width is not a multiple of 4 texels, is an assertion on the bench
+// (HUD_CLUSTER_SOCKET set, or config.r8Guard "assert") and on the car one log line and a pad: the asset gets zero columns up to the
+// next multiple of 4 (a scene texture's box uniform grows to match, as for an ETC2 one), the rect gets whole 4-texel columns with
+// its neighbours' texels as they are. config.gpuText "legacy" (GL's car test) is the one exemption, logged. The diagnosis for the
+// car: one line per R8 asset made (build, target state), GL's in-place write line with the widget, the socket and the time, a
+// line when a "gpu" text starts or stops showing cells written in place, a digest of cluster-render's own counts after in-place
+// writes, and the Діагностика mark (diagR8Mark): a snapshot of all of it. Numbers, our own asset names and widget ids only.
+const R8_LOG_FIRST = 20;         // guard lines: the first 20 of a session, then every R8_LOG_EVERY-th
+const R8_LOG_EVERY = 100;
+const R8_DIGEST_MS = 3000;       // cluster-render's status asked this long after an in-place write ...
+const R8_DIGEST_GAP_MS = 60000;  // ... at most once a minute
+const R8_CODES_FIRST = 200;      // a "gpu" text layer's cell lines: the first 200, then every 20th
+const R8_CODES_EVERY = 20;
+const r8Secs = (ms) => (Math.max(0, ms) / 1000).toFixed(1) + ' s';
+// end r1120 T2
 const DEFAULT_LOCATION = { lat: 35.2271, lon: -80.8431 }; // Charlotte, NC: for the Auto theme's sunset
 const TARGET_SIZES = { hud: [800, 480], panel: [1920, 720] };
 const MODE_KEY = { comfort: 'inComfort', sport: 'inSport', eco: 'inEco' };
@@ -1713,6 +1729,7 @@ class HudApp {
             const ci = this.clients.length;
             const c = new ClusterRender(ci ? this.ctx.spec.id + '_' + (ci + 1) : this.ctx.spec.id, this.socketPath);
             this.clients.push(c);
+            this._r8Wrap(c, ci);         // r1120 T2: the R8 guard on every connection
             this._wireClientEvents(c, ci);
             if (this.started) { this.log.info('connection ' + (ci + 1) + ' to cluster-render'); c.connect(); }
         }
@@ -1760,7 +1777,8 @@ class HudApp {
             this._statusSoon();
         });
         c.on('budget', (capKb, maxKb, reason) => this.log.info('budget' + tag + ' ' + capKb + '/' + maxKb + ' kb/s (' + reason + ')'));
-        c.on('status', (text) => { this.log.info('cluster-render status: ' + text); if (twinPages && this.twinLayout) twinPages.onStatus(this, text); });     // round 3 B4: the map slot rows
+        // r1120 T2: a status asked for the R8 digest is logged as that digest only (its asset lines against ours), any other one whole
+        c.on('status', (text) => { if (this._r8StatusKind(c) === 'digest') this._guard('r8 digest', () => this._r8Digest(text)); else this.log.info('cluster-render status: ' + text); if (twinPages && this.twinLayout) twinPages.onStatus(this, text); });     // round 3 B4: the map slot rows
     }
 
     start() {
@@ -1883,11 +1901,13 @@ class HudApp {
         const font = textRaster.loadFont(fontName), glyphs = font.metrics.glyphs;
         const chars = Object.keys(glyphs).filter((ch) => ch.length === 1 && ch >= ' ' && ch <= '~').sort().slice(0, 64);
         if (!chars.length) throw new Error('font "' + fontName + '" has no printable glyphs for an atlas');
-        const cellW = Math.max(1, Math.ceil(Math.max.apply(null, chars.map((ch) => glyphs[ch].advance)))) + 2;
+        let cellW = Math.max(1, Math.ceil(Math.max.apply(null, chars.map((ch) => glyphs[ch].advance)))) + 2;     // r1120 T2: let (below)
         const cellH = font.metrics.cellHeight;
         let cols = Math.max(1, Math.min(16, Math.floor(2048 / cellW)));
         // car-issues GL: rows a multiple of 4 bytes (16 columns always are; a cell over 128 px wide gets fewer, still aligned)
         if (this.config.gpuText !== 'legacy' && (cols * cellW) % 4 && cols >= 4 / gcd(cellW, 4)) cols -= cols % (4 / gcd(cellW, 4));
+        // r1120 T2: and when fewer columns cannot do it (a cell over 512 px wide: no font of ours), a wider cell (the glyph stays centred)
+        if (this.config.gpuText !== 'legacy') while ((cols * cellW) % 4) cellW++;
         const rows = Math.ceil(chars.length / cols);
         const w = cols * cellW, h = rows * cellH;
         const buf = Buffer.alloc(w * h, 0);
@@ -1897,7 +1917,7 @@ class HudApp {
             for (let y = 0; y < cellH; y++) cell.copy(buf, (cy + y) * w + cx, y * cellW, (y + 1) * cellW);
         });
         const c = this._clientAt(ci);
-        const ref = c.asset({ target: this.target, format: 'r8', w, h, sampling: 'bilinear' });
+        const ref = c.asset({ target: this.target, format: 'r8', w, h, sampling: 'bilinear', r8Name: 'glyph atlas ' + fontName });     // r1120 T2: r8Name
         if (!ref) throw new Error('font "' + fontName + '": atlas asset refused (' + w + 'x' + h + ')');
         c.pixels(ref, null, buf);
         const a = { ref, c, ci, cols, rows, cellW, cellH, chars, bytes: w * h * 2 };
@@ -1924,12 +1944,14 @@ class HudApp {
         const etc = SCENE_ETC2[fmt] || 0, n = etc ? Math.ceil(j.w / 4) * Math.ceil(j.h / 4) * etc : j.w * j.h * (fmt === 'r8' ? 1 : 4);
         if (buf.length !== n) throw new Error('scene texture "' + name + '": size does not match');
         const c = this._clientAt(ci);
-        const ref = c.asset({ target: this.target, format: fmt, w: j.w, h: j.h, sampling: j.sampling === 'nearest' ? 'nearest' : 'bilinear' });
+        const ref = c.asset({ target: this.target, format: fmt, w: j.w, h: j.h, sampling: j.sampling === 'nearest' ? 'nearest' : 'bilinear', r8Name: 'scene ' + name });     // r1120 T2: r8Name
         if (!ref) throw new Error('scene texture "' + name + '": asset refused (' + j.w + 'x' + j.h + ' ' + fmt + ')');
         c.pixels(ref, null, buf);
+        // r1120 T2: an R8 one the guard padded to whole 4-byte rows (none of ours is): its box uniform grows as an ETC2 one's does
+        const pad = c.r8 && c.r8.pad.get(ref), padX = pad ? pad.W / pad.w : 1;
         // cluster-render's pixel memory: an uncompressed asset twice its bytes, a compressed one once
-        const a = { ref, c, ci, w: j.w, h: j.h, bytes: etc ? n : n * 2, mask: j.mask || null,   // package M: its lane table
-            chroma: src.chroma, sx: src.sx, sy: src.sy };                                       // research3 MT
+        const a = { ref, c, ci, w: j.w, h: j.h, bytes: etc ? n : (pad ? pad.W * j.h : n) * 2, mask: j.mask || null,   // package M: its lane table
+            chroma: src.chroma, sx: pad ? (src.sx || 1) * padX : src.sx, sy: src.sy };              // research3 MT; r1120 T2: padX
         this.atlases.set(key, a);
         this.log.info('scene texture "' + name + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + j.w + 'x' + j.h + ' ' +
             (fmt === 'rgba8' ? 'RGBA8' : fmt === 'r8' ? 'R8' : fmt) + ' asset' + (src.file !== name ? ' (' + src.file + ')' : '') + ', ' + mib(a.bytes) + ' of pixel memory');
@@ -2071,6 +2093,8 @@ class HudApp {
             if (pixels) { this.log.info('widget "' + w.id + '": "gpu" set aside (config.gpuText "pixels"), drawn as an image'); out.push(w); return; }
             let why = null, g = null;
             try { why = this._gpuTextWhy(w); if (!why) g = this._gpuGrid(w); } catch (e) { why = String(e && e.message || e); }
+            // r1120 T2: no atlas of whole 4-byte rows on its grid (a cell over 512 px: no font of ours) -> an image text, never an unaligned atlas
+            if (!why && this.config.gpuText !== 'legacy' && !alignedGrid(g.cw, 1, Math.floor(2048 / g.cw))) why = 'no atlas row of whole 4 bytes for ' + g.cw + ' px cells';
             if (why) { this.log.warn('widget "' + w.id + '": "gpu" ignored (' + why + '), drawn as an image'); out.push(w); return; }
             g.groups.forEach((gr, i) => {
                 const a = Object.assign({}, w, { id: i ? w.id + '#' + (i + 1) : w.id, type: 'atext', x: w.x + gr.x0, w: gr.cells * g.cw, h: g.h, cells: gr.cells });
@@ -2164,10 +2188,12 @@ class HudApp {
         });
         for (let i = 0; i < spare; i++) a.slots.push({ fixed: false, key: null, at: 0 });
         const c = this._clientAt(ci);
-        const ref = c.asset({ target: this.target, format: 'r8', w: W, h: H, sampling: 'nearest' });
+        // r1120 T2: r8Name; r8Legacy: the 0.1.3 layout of GL's car test is the guard's one exemption (logged, never padded)
+        const ref = c.asset({ target: this.target, format: 'r8', w: W, h: H, sampling: 'nearest', r8Name: 'gpu text atlas ' + w.font, r8Legacy: legacy });
         if (!ref) throw new Error('font "' + w.font + '": atlas asset refused (' + W + 'x' + H + ')');
         c.pixels(ref, null, buf);
         a.ref = ref; a.c = c; a.ci = ci;
+        a.made = Date.now(); a.cellPut = {};        // r1120 T2: when it was made; cell -> { write, at } for each cell written in place
         this.atlases.set(key, a);
         this.log.info('gpu text atlas "' + w.font + '"' + (ci ? ' on connection ' + (ci + 1) : '') + ': ' + E.figs.length + ' figures in ' + fixed +
             ' cells and ' + spare + ' spare cells of ' + cw + 'x' + h + ', ' + W + 'x' + H + ' R8 asset, ' + mib(a.bytes) + ' of pixel memory' +
@@ -2198,6 +2224,7 @@ class HudApp {
         }
         // anything else: the text laid out in the box as the image text would be, cut into the cells
         const m = textRaster.mask(E.boxW, h, s, { font: w.font, align: w.align, spacing: w.spacing });
+        a.by = w.id;        // r1120 T2: which widget an in-place write is for (its log line)
         const inUse = new Set();
         this.widgets.forEach((o) => { if (o !== x && o.atlas === a && o.codes) o.codes.forEach((c) => inUse.add(c)); });
         for (let c = 0; c < x.cells; c++) {
@@ -2241,12 +2268,238 @@ class HudApp {
         a.c.pixels(a.ref, [r], px);
         // car-issues GL: each write in place, numbers only (the first 20, then every 50th): the car test reads these
         a.puts++;
+        if (a.cellPut) a.cellPut[best] = { write: a.puts, at: Date.now() };        // r1120 T2: the mark's and the cell lines' "write N, s ago"
         if (a.puts <= 20 || a.puts % 50 === 0) {
+            // r1120 T2: + the asset, the widget, the time since the atlas was made, the target's state, and whether the socket is busy (then
+            // these texels wait for it while the layer's new cell numbers have gone already: the old cell shows until they arrive)
             this.log.info('gpu text atlas "' + a.font + '"' + (a.ci ? ' on connection ' + (a.ci + 1) : '') + ': cell ' + best + ' written in place, rect ' +
-                r.x + ',' + r.y + ' ' + r.w + 'x' + r.h + (r.w % 4 ? ' (NOT a multiple of 4)' : '') + ', write ' + a.puts);
+                r.x + ',' + r.y + ' ' + r.w + 'x' + r.h + (r.w % 4 ? ' (NOT a multiple of 4)' : '') + ', write ' + a.puts + this._r8PutNote(a));
         }
+        this._r8DigestSoon();       // r1120 T2: cluster-render's own count of this asset's writes, a few seconds later
         return best;
     }
+
+    /* ---- r1120 T2: the R8 guard, and the car's diagnosis of drifting figures (see R8_LOG_FIRST above) --------------------------- */
+
+    /** Whether a fault of the guard is an assertion (the bench: HUD_CLUSTER_SOCKET; or config.r8Guard "assert") or a logged pad (the car). */
+    _r8Assert() {
+        const g = this.config && this.config.r8Guard;
+        return g === 'assert' || (g !== 'pad' && !!process.env.HUD_CLUSTER_SOCKET);
+    }
+
+    /**
+     * The guard round one connection's asset() and pixels(), as the instance's own methods (cluster_render_client.js is upstream's and
+     * stays as it is). An R8 asset is registered (name, size, build, writes) for the log, the digest and the mark; an image layer's
+     * writes are counted. opts.r8Name names an asset for the log; opts.r8Legacy: the 0.1.3 layout of GL's car test, the one exemption.
+     */
+    _r8Wrap(c, ci) {
+        const hud = this, asset = c.asset, pixels = c.pixels, status = c.status, drop = c.drop;
+        const r8 = c.r8 = { ci, pad: new Map(), exempt: new Set(), assets: new Map(), images: new Map(), target: null, statusQ: [] };
+        c.drop = function (ref) {         // what the client forgets, the guard forgets
+            const out = drop.apply(c, arguments);
+            if (!c.layers.has(ref)) { r8.pad.delete(ref); r8.exempt.delete(ref); r8.assets.delete(ref); r8.images.delete(ref); }
+            return out;
+        };
+        c.on('target', (name, state) => { if (name === hud.target) r8.target = state; });
+        c.on('ready', () => { r8.statusQ = []; });
+        c.on('disconnected', () => { r8.statusQ = []; });
+        // which status reply is the digest's: replies come in the order asked, on this connection
+        c.status = function () { const k = hud._r8Want || 'full'; hud._r8Want = null; if (c.ready) r8.statusQ.push(k); return status.apply(c, arguments); };
+        c.asset = function (opts) {
+            const o = Object.assign({}, opts), name = o.r8Name || null, legacy = o.r8Legacy === true;
+            delete o.r8Name; delete o.r8Legacy;
+            if (o.format !== 'r8') return asset.call(c, o);
+            const w = o.w;
+            let how = null;
+            if (w % 4) {
+                if (legacy) how = 'exempt';
+                else {
+                    hud._r8Fault(ci, 'asset' + (name ? ' (' + name + ')' : '') + ' ' + w + 'x' + o.h + ', rows of ' + w + ' bytes');      // throws on the bench
+                    how = 'padded';
+                    o.w = w + 4 - w % 4;
+                }
+            }
+            const ref = asset.call(c, o);
+            if (!ref) return ref;
+            if (how === 'exempt') r8.exempt.add(ref);
+            if (how === 'padded') r8.pad.set(ref, { w, W: o.w });
+            r8.assets.set(ref, { name, w, W: o.w, h: o.h, how, made: Date.now(), build: hud.r8Builds || 0, writes: 0, rects: 0, last: 0 });
+            hud._r8Made(c, ref);
+            return ref;
+        };
+        c.pixels = function (ref, rects, px) {
+            const l = c.layers.get(ref), e = r8.assets.get(ref), some = !!(rects && rects.length);
+            if (l && l.kind === 'image') hud._r8Count(r8.images.get(ref) || r8.images.set(ref, { writes: 0, rects: 0, last: 0, odd: 0 }).get(ref), rects);
+            if (!l || !e || l.kind !== 'asset' || r8.exempt.has(ref)) { if (e) hud._r8Count(e, rects); return pixels.call(c, ref, rects, px); }
+            const p = r8.pad.get(ref);
+            if (!some) {
+                let buf = px;
+                if (p && px && px.length === p.w * e.h) {         // a padded asset's whole write: its rows into the wider ones
+                    buf = Buffer.alloc(p.W * e.h, 0);
+                    for (let y = 0; y < e.h; y++) px.copy(buf, y * p.W, y * p.w, (y + 1) * p.w);
+                }
+                hud._r8Count(e, null);
+                return pixels.call(c, ref, null, buf);
+            }
+            const inside = (r) => r.w > 0 && r.h > 0 && r.x >= 0 && r.y >= 0 && r.x + r.w <= l.iw && r.y + r.h <= l.ih;
+            if (!rects.every(inside) || !px || rects.reduce((n, r) => n + r.w * r.h, 0) !== px.length) return pixels.call(c, ref, rects, px);      // the client refuses it as it always did
+            const bad = rects.filter((r) => r.x % 4 || r.w % 4);
+            if (!bad.length) { hud._r8Count(e, rects); return pixels.call(c, ref, rects, px); }
+            hud._r8Fault(ci, 'rect ' + bad[0].x + ',' + bad[0].y + ' ' + bad[0].w + 'x' + bad[0].h + ' into asset ' + ref + (e.name ? ' (' + e.name + ')' : ''));     // throws on the bench
+            // each rect widened to whole 4-texel columns with its neighbours' texels as they are; one call per rect, so a widened rect
+            // reads the texels the one before it has just written
+            let off = 0, done = true;
+            rects.forEach((r) => {
+                const n = r.w * r.h, part = px.slice(off, off + n);
+                off += n;
+                const x0 = r.x - r.x % 4, x1 = Math.min(l.iw, Math.ceil((r.x + r.w) / 4) * 4);
+                if (x0 === r.x && x1 === r.x + r.w) { done = pixels.call(c, ref, [r], part) && done; return; }
+                const R = { x: x0, y: r.y, w: x1 - x0, h: r.h }, buf = Buffer.alloc(R.w * R.h);
+                for (let y = 0; y < R.h; y++) {
+                    l.image.copy(buf, y * R.w, (R.y + y) * l.iw + x0, (R.y + y) * l.iw + x1);
+                    part.copy(buf, y * R.w + (r.x - x0), y * r.w, (y + 1) * r.w);
+                }
+                done = pixels.call(c, ref, [R], buf) && done;
+            });
+            hud._r8Count(e, rects);
+            return done;
+        };
+    }
+
+    /** One write into an R8 asset or an image layer: its count, the rects' count, the time; "odd": rects not on 4-texel columns. */
+    _r8Count(e, rects) {
+        e.writes++;
+        if (rects && rects.length) { e.rects++; if (e.odd !== undefined && rects.some((r) => r.x % 4 || r.w % 4)) e.odd++; }
+        e.last = Date.now();
+    }
+
+    /** A fault of the guard: an assertion on the bench (throws, nothing is sent), else one log line (the first 20, then every 100th). */
+    _r8Fault(ci, what) {
+        const msg = 'R8 guard' + (ci ? ' [connection ' + (ci + 1) + ']' : '') + ': ' + what + ': not whole 4-byte rows';
+        if (this._r8Assert()) { this.log.warn(msg + ' (an assertion on the bench)'); throw new Error(msg); }
+        this.r8Faults = (this.r8Faults || 0) + 1;
+        if (this.r8Faults <= R8_LOG_FIRST || this.r8Faults % R8_LOG_EVERY === 0) this.log.warn(msg + ', padded to whole 4-texel columns (fault ' + this.r8Faults + ')');
+    }
+
+    /** The line of an R8 asset made: its size and rows, the build it belongs to and when in it, and the target's state then. */
+    _r8Made(c, ref) {
+        const e = c.r8.assets.get(ref), ci = c.r8.ci;
+        this.log.info('r8 asset ' + ref + (ci ? ' on connection ' + (ci + 1) : '') + (e.name ? ' (' + e.name + ')' : '') + ': ' + e.W + 'x' + e.h + ', ' +
+            (e.how === 'padded' ? 'padded from ' + e.w + ' (rows of ' + e.w + ' bytes)' : e.how === 'exempt' ? 'rows of ' + e.w + ' bytes, NOT whole 4-byte rows (config.gpuText "legacy": the car test)' : 'whole 4-byte rows') +
+            ', build ' + e.build + ' +' + Math.max(0, e.made - (this.r8BuildAt || e.made)) + ' ms, target ' + (c.r8.target || 'not said yet'));
+    }
+
+    /** GL's in-place write line, continued: the asset, the widget, the time since the atlas was made, the build, the target, the socket. */
+    _r8PutNote(a) {
+        const c = a.c, r8 = c && c.r8, l = c && c.layers && c.layers.get(a.ref);
+        const waiting = !!(l && (l.whole || (l.dirty && l.dirty.length)));
+        return ', asset ' + a.ref + (a.by ? ' for "' + a.by + '"' : '') + (a.made ? ', ' + r8Secs(Date.now() - a.made) + ' after the atlas was made' : '') +
+            ', build ' + (this.r8Builds || 0) + ', target ' + ((r8 && r8.target) || 'not said yet') + (waiting ? ', its texels wait for the socket (the new cell numbers have gone)' : ', its texels sent');
+    }
+
+    /** A "gpu" text layer's line each time the set of cells it shows that were written in place changes (none -> none: no line). */
+    _r8Codes(x, codes) {
+        const a = x.atlas;
+        if (!a || !a.slots || !a.cellPut) return;
+        const spare = [];
+        let shown = 0;
+        codes.forEach((k) => { if (k < 0) return; shown++; if (a.slots[k] && !a.slots[k].fixed && spare.indexOf(k) < 0) spare.push(k); });
+        const sig = spare.join(',');
+        if (sig === (x.r8Spare || '')) return;
+        x.r8Spare = sig;
+        x.r8Lines = (x.r8Lines || 0) + 1;
+        if (x.r8Lines > R8_CODES_FIRST && x.r8Lines % R8_CODES_EVERY) return;
+        this.log.info('gpu text "' + x.w.id + '"' + (x.ci ? ' on connection ' + (x.ci + 1) : '') + ': shows ' + shown + ' cells, ' +
+            (spare.length ? spare.length + ' written in place: ' + this._r8Cells(a, spare) : 'none written in place') + ' (line ' + x.r8Lines + ')');
+    }
+
+    /** "26 (write 3, 4.0 s ago), 27 (write 4, 4.0 s ago)" */
+    _r8Cells(a, cells) {
+        const now = Date.now();
+        return cells.map((k) => { const p = a.cellPut && a.cellPut[k]; return k + (p ? ' (write ' + p.write + ', ' + r8Secs(now - p.at) + ' ago)' : ''); }).join(', ');
+    }
+
+    /** cluster-render's status, asked R8_DIGEST_MS after an in-place write and at most once in R8_DIGEST_GAP_MS, logged as _r8Digest. */
+    _r8DigestSoon() {
+        if (this.r8DigestT || !this.client || typeof setTimeout !== 'function') return;
+        const now = Date.now(), at = Math.max(now + R8_DIGEST_MS, (this.r8DigestAt || 0) + R8_DIGEST_GAP_MS);
+        this.r8DigestT = setTimeout(() => {
+            this.r8DigestT = null;
+            this.r8DigestAt = Date.now();
+            this._guard('r8 digest', () => { this._r8Want = 'digest'; this.client.status(); this._r8Want = null; });
+        }, at - now);
+        if (this.r8DigestT.unref) this.r8DigestT.unref();
+    }
+
+    /** Which kind of status reply comes next on connection c: "digest" or "full". */
+    _r8StatusKind(c) { return c && c.r8 && c.r8.statusQ.length ? c.r8.statusQ.shift() : 'full'; }
+
+    /** The digest of a status reply: the target's state, and each R8 asset of ours as the service counts it (writes, failed) beside
+     *  our own count. A write the service failed, or fewer writes than ours, is what an in-place fault would leave. */
+    _r8Digest(text) {
+        const lines = String(text || '').split('\n'), byName = new Map(), used = new Set(), out = [];
+        this.clients.forEach((c) => byName.set(c.app, c));
+        let target = null, failed = 0;
+        lines.forEach((raw) => {
+            const ln = raw.trim();
+            const t = /^target (\S+): .*: (\w+)/.exec(ln);
+            if (t && t[1] === this.target) target = t[2];
+            const m = /^asset (\d+) (\S+) (\d+)x(\d+) of (\S+) on \S+: (\d+) writes, \d+ KB, (\d+) failed/.exec(ln);
+            if (!m || m[2] !== 'r8' || !byName.has(m[5])) return;
+            const c = byName.get(m[5]), W = +m[3], H = +m[4];
+            let mine = null;
+            if (c.r8) c.r8.assets.forEach((e, ref) => { if (!mine && e.W === W && e.h === H && c.layers.has(ref) && !used.has(c.app + ':' + ref)) mine = { ref, e }; });
+            if (mine) used.add(c.app + ':' + mine.ref);
+            failed += +m[7];
+            out.push('asset ' + m[1] + ' r8 ' + W + 'x' + H + ' of ' + m[5] + ': the service ' + m[6] + ' writes, ' + m[7] + ' failed; ours ' +
+                (mine ? 'asset ' + mine.ref + (mine.e.name ? ' (' + mine.e.name + ')' : '') + ', ' + mine.e.writes + ' writes (' + mine.e.rects + ' in place)' : 'none of that size'));
+        });
+        this.log.info('r8 check: target ' + (target || 'not in the status') + ', ' + out.length + ' R8 asset' + (out.length === 1 ? '' : 's') + ' of ours in cluster-render\'s status' +
+            (out.length ? '' : ' (' + lines.length + ' lines)'));
+        out.forEach((s) => this.log.info('r8 check: ' + s));
+        if (failed) this.log.warn('r8 check: cluster-render failed ' + failed + ' write' + (failed === 1 ? '' : 's') + ' into our R8 assets');
+    }
+
+    /**
+     * The Діагностика mark (diagR8Mark; shared/diag_settings.js act "r8mark"): the driver saw figures drift. Everything the lead needs
+     * to say which text and why, now: the build, the targets, each R8 asset (made when, written how often and when last, texels still
+     * waiting for the socket), each "gpu" text's cells on screen and which of them were written in place, each image layer's writes,
+     * then cluster-render's whole status. Numbers, our asset names and widget ids only.
+     */
+    _r8Mark() {
+        const n = this.r8Marks = (this.r8Marks || 0) + 1, now = Date.now(), tag = 'r8 mark ' + n + ': ';
+        this.log.info(tag + 'build ' + (this.r8Builds || 0) + ', ' + r8Secs(now - (this.r8BuildAt || now)) + ' after it; target ' +
+            this.clients.map((c, i) => (i + 1) + ' ' + ((c.r8 && c.r8.target) || 'not said yet')).join(', ') + '; R8 guard faults ' + (this.r8Faults || 0));
+        this.clients.forEach((c, i) => {
+            if (!c.r8) return;
+            const on = i ? ' on connection ' + (i + 1) : '';
+            c.r8.assets.forEach((e, ref) => {
+                const l = c.layers.get(ref);
+                if (!l) return;          // dropped
+                const waiting = !!(l.whole || (l.dirty && l.dirty.length));
+                this.log.info(tag + 'asset ' + ref + on + (e.name ? ' (' + e.name + ')' : '') + ': ' + e.W + 'x' + e.h + (e.how ? ' ' + e.how : '') + ', made in build ' + e.build + ' ' +
+                    r8Secs(now - e.made) + ' ago, ' + e.writes + ' writes (' + e.rects + ' in place' + (e.rects ? ', the last ' + r8Secs(now - e.last) + ' ago' : '') + ')' +
+                    (waiting ? ', texels waiting for the socket' : ''));
+            });
+            c.r8.images.forEach((e, ref) => {
+                if (!c.layers.get(ref)) return;
+                let ids = [];
+                this.sheets.forEach((s) => { if (s.c === c && s.ref === ref) ids = s.members.map((w) => w.id); });
+                this.widgets.forEach((x) => { if (!x.sheet && x.c === c && x.ref === ref) ids = [x.w.id]; });
+                this.log.info(tag + 'image ' + ref + on + (ids.length ? ' (' + ids.slice(0, 8).join(' ') + (ids.length > 8 ? ' +' + (ids.length - 8) : '') + ')' : '') + ': ' + e.writes + ' writes (' + e.rects +
+                    ' of rects' + (e.odd ? ', ' + e.odd + ' with a rect off 4-texel columns' : '') + '), the last ' + r8Secs(now - e.last) + ' ago');
+            });
+        });
+        this.widgets.forEach((x) => {
+            if (!x.w || x.w.type !== 'atext' || !x.w.exact || !x.atlas) return;
+            const a = x.atlas, cells = (x.codes || []).filter((k) => k >= 0);
+            const inPlace = cells.filter((k, j) => a.slots[k] && !a.slots[k].fixed && cells.indexOf(k) === j);
+            this.log.info(tag + 'gpu text "' + x.w.id + '"' + (x.ci ? ' on connection ' + (x.ci + 1) : '') + ', layer ' + x.ref + ', atlas asset ' + a.ref + ': cells ' +
+                (cells.length ? cells.join(',') : 'none') + (inPlace.length ? '; written in place: ' + this._r8Cells(a, inPlace) : '') + '; atlas writes in place ' + (a.puts || 0));
+        });
+        this._guard('r8 mark status', () => this.client.status());         // logged whole: the service's own counts of every asset and layer
+    }
+    /* ---- end r1120 T2 ---- */
 
     /* ---- probes (0.7.18 diagnostics: READ ONLY, LOG ONLY; see "probes" above HudApp) ------------------------------- */
 
@@ -3523,7 +3776,8 @@ class HudApp {
     _rebuildInner() {
         if (!this.client.ready) return; // the 'ready' handler calls us again
         if (DiagSettings.hold(this)) return;     // b7: config.startupHold: the first build waits for the car's first time zone and message list (shared/diag_settings.js)
-        this._rowCheck();               // bottom row: an element with no signal behind it goes back to BMW's
+        this.r8Builds = (this.r8Builds || 0) + 1; this.r8BuildAt = Date.now();      // r1120 T2: the build an R8 asset was made in (its log line, the mark)
+        this._rowCheck();             // bottom row: an element with no signal behind it goes back to BMW's
         // package X: who draws the row in the layout being built (_rowSync rebuilds when that changes), and nothing of
         // our message is on the screen until its new layer has been painted
         this.rowBuiltOurs = this._rowWhy() === null;
@@ -5537,6 +5791,7 @@ class HudApp {
                 if (!force && key === x.lastCodes) return;
                 x.lastCodes = key;
                 x.c.uniform(x.ref, 'u_text', codes, { type: 'vec4' });
+                this._r8Codes(x, codes);        // r1120 T2: a line when the cells it shows written in place change
                 return;
             }
             x.c.uniform(x.ref, 'u_text', this._atlasCodes(x, s), { type: 'vec4' });

@@ -279,6 +279,7 @@
         "diagMapSlots",
         "diagSilent",
         "diagGpuText",
+        "diagR8Mark",
         "diagCarplayTurns",
         "diagFrontVehicle"
       ]
@@ -312,6 +313,10 @@
         [
           "setting",
           "diagGpuText"
+        ],
+        [
+          "setting",
+          "diagR8Mark"
         ],
         [
           "setting",
@@ -629,6 +634,13 @@
       "_about": "car-issues GL: config.gpuText for the car test of docs/car-issues/GL-REPORT.md. off = the glyph atlases with rows of a multiple of 4 bytes (the fix); legacy = Twin Dial 0.1.3's td_big atlas (1066 bytes a row, 41 px cells written in place); pixels = the speed and the gear drawn as image text. Each change rebuilds the layout"
     },
     {
+      "key": "diagR8Mark",
+      "label": "Цифри поїхали: позначка",
+      "type": "bool",
+      "default": false,
+      "_about": "r1120 T2 (docs/r1120/T2-REPORT.md): an action, no config key. Every change of it (on or off) writes one mark into the log: the build, the targets, each R8 asset (made when, written how often, the last write when), each gpu text's cells on screen and which were written in place, each image layer's writes, then cluster-render's whole status. Numbers, our own asset names and widget ids only. Flip it when the figures look wrong, then photograph the cluster with its clock"
+    },
+    {
       "key": "diagCarplayTurns",
       "label": "Повороти CarPlay (тест)",
       "type": "bool",
@@ -903,6 +915,7 @@
         "diagMapSlots": { "on": { "mapSlotLog": true } },
         "diagSilent": { "act": "silent" },
         "diagGpuText": { "options": { "legacy": { "gpuText": "legacy" }, "pixels": { "gpuText": "pixels" } }, "_about": "car-issues GL: the glyph atlases' row layout or image text, a rebuild on each change (shared/diag_settings.js)" },
+        "diagR8Mark": { "act": "r8mark", "_about": "r1120 T2: an action, no key: one mark in the log per change (HudApp._r8Mark)" },
         "diagCarplayTurns": { "on": { "carplayTurns": true }, "_about": "car issues CT: the test mode of CarPlay's next turn on tab 5 (shared/twin_pages.js cpSync / cpLive), read at the moment of use: applied in place" },
         "diagFrontVehicle": { "on": { "frontVehicle.on": true }, "_about": "front-vehicle FV: the test mode of the vehicle ahead (shared/twin_front.js); a rebuild on each change (the pictogram's layer)" }
       }
