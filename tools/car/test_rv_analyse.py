@@ -13,6 +13,7 @@ import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
 SYNTH = os.path.join(HERE, 'rv_synth.js')
 ANALYSE = os.path.join(HERE, 'rv_analyse.py')
 
@@ -183,6 +184,11 @@ class RvAnalyse(unittest.TestCase):
         sid = self.sid['B']
         with open(notes, 'w') as fh:
             fh.write('%s M1 red-first near the Bakerystreet corner\n%s M2: red-first\n%s M3 green-pass\nM4 light-change quickly\nM9 something-else Canarytext\n' % (sid, sid, sid))
+        import rv_analyse as ra
+        got = ra.read_notes(notes)
+        self.assertEqual(got[(sid, 1)], 'red-first')
+        self.assertEqual(got[(None, 4)], 'light-change')
+        self.assertNotIn((None, 9), got, 'a word outside the labels is dropped')
         out = os.path.join(self.tmp, 'out-txt')
         files = [os.path.join(self.rec, n) for n in os.listdir(self.rec) if sid in n]
         r = analyse(files, out, notes)

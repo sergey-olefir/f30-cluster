@@ -43,7 +43,8 @@ RV_FIELDS = os.path.join(REPO, 'design', 'car', 'rv_fields.json')
 # the passenger's labels (docs/traffic/DRIVE-PROTOCOL.md) and what each says about a light or a sign
 LABELS = ['red-first', 'green-pass', 'light-change', 'green-arrow', 'flashing-amber', 'pedestrian-light', 'stop-sign', 'give-way', 'priority-road',
           'no-entry', 'town-entry', 'town-exit', 'zebra', 'children', 'road-works', 'no-overtaking', 'no-overtaking-end', 'variable-limit',
-          'limit-plate', 'roundabout', 'multi-lane']
+          'limit-plate', 'roundabout', 'multi-lane', 'light-right', 'light-overhead', 'nav-start', 'nav-end', 'low-sun', 'rain']
+LIGHT_MARKS = ('red-first', 'green-pass', 'light-change', 'green-arrow', 'flashing-amber', 'pedestrian-light', 'light-right', 'light-overhead')
 LIGHT_LABELS = {'red-first': 'red', 'green-pass': 'green', 'green-arrow': 'green'}
 SIGN_LABELS = {
     'stop-sign': ['STOP_SIGN'], 'give-way': ['GIVE_WAY', 'DS_GIVE_WAY_ROUNDABOUT'], 'priority-road': ['PRIORITY_ROAD_START_OF'],
@@ -348,7 +349,7 @@ def light_report(sessions, notes):
             lab = label_of(notes, sid, n)
             t = sec(t_ms)
             e = {'session': sid, 'mark': n, 't': rnd(t), 'what': lab}
-            if lab not in ('red-first', 'green-pass', 'light-change', 'green-arrow', 'flashing-amber', 'pedestrian-light'):
+            if lab not in LIGHT_MARKS:
                 continue
             if lab == 'flashing-amber':
                 hit = track_at(tracks, t, before=3.0, after=1.0, flashing=True)
