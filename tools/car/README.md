@@ -32,6 +32,12 @@ tools/car/collect.sh <car-address> --label 2 --apps f30_cluster,twin_dial,signal
   for the renderer, `cluster-render/cluster-render.log(.1)`, `status.txt`, `versions-ls.txt`, `component.json`, `journal.txt`; and
   `session.json` (apps, versions, uids, the car's clock at the copy, file sizes).
 * The probe app's log rotates at 256 KB: collect after every block (the runbook says when). The default read is the last 3 000 000 bytes.
+* r1120 AC: when `signal_probe` is collected, its **recordings** too: `ls -l .../data/rec/` (saved as `apps/signal_probe/rec-ls.txt`), then
+  each `rec-<session>-<n>.csv[.gz]` of that listing by `cat` into `apps/signal_probe/rec/`, its size checked against the listing
+  (`rec-copied.txt`: `ok` or `SIZE-DIFFERS`: a recording still running grows, stop it first). And the quota files of `/var/opt`
+  (`cat /var/opt/aquota.user`, `aquota.group`), read locally by `quota_read.py` into `system/quota.json`: each app's disk limit as the
+  head unit applies it, its use, and whether the limit equals the package's `maxDiskUsage`. `--no-rec` leaves both out. The recordings are
+  numbers only (the recorder writes no text); convert and analyse them with `acc_analyse.py`.
 * After the copy it runs the privacy scan; flagged lines are listed and redacted copies go to `<folder>/redacted/`. The originals stay: the folder is
   git-ignored. **Nothing from a collected folder is ever committed; only `design/car/answers.json` (numbers) is.**
 

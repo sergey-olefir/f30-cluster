@@ -28,6 +28,10 @@
  *   bits             { path, label }: a raw byte with its previous value and the bits that went up / down
  *   fmt              a named formatter of format.js (enum bool hex temps intersection dart lanes description mediaMenu station metadata
  *                    roles devices calllist cbs activeSource sources tree; S16: views rendered stream turns)
+ *   recEntries       r1120 AC: in a recording, a list of this field keeps at most this many entries (the recorder's own cap is 16)
+ *
+ * r1120 AC: S17 "ACC" is the one recording set for the adaptive-cruise drives: its own field plus, through `also` (applied once at
+ * the end of this file from ACC), every field of S14 and the ones of S10 / S11 / S13 / S15 an adaptive cruise needs.
  */
 const I = {
     KombiIF: 'de.bmw.infotainment.KombiIF',
@@ -446,6 +450,12 @@ const TABLE = [
     // guides (Guidance.guidingProvider CAR_PLAY / ANDROID_AUTO, read here through S7's guiding-provider); a line only when the reply changed,
     // with the count of unchanged ones; texts as lengths, no road link, no source id
     { set: 'S16', p: 'P25', tag: 'next-turn', iface: I.GuidanceEventList, field: 'queryContent', flags: 'm', instance: 'Main_Instance', gapMs: 2000, fmt: 'turns' },
+    // r1120 AC: ---- S17 P26 "ACC" (the owner, 2026-11-19: every metric an adaptive cruise needs, captured on the next drives). ONE
+    //      recording set: S14 whole (with what it shares: S8's assistance fields, S10's gear), the drive mode and the gearbox programme
+    //      (S10), the indicator and the lights (S11: a lane change, night), the traffic-sign event (S13: the limit), the camera's own
+    //      object lists and the lane assignment (S15, at most ACC_ENTRIES objects each in a recording) - all through `also` (see
+    //      ACC below) - and its own field, the driver's steering angle (curves, target loss; XView is already read for the grade).
+    { set: 'S17', p: 'P26', tag: 'steering', iface: I.XView, field: 'statusSteeringAngleDriver', flags: 'rs', gapMs: 500, cols: [['angle', 'actualValueSteeringAngleDriver', 'n'], ['qualifier', 'qualifierActualValueSteeringAngleDriver', 'e']] },
 ];
 
 // ---- the sets: each one switchable on its own in the app's centre-screen menu (settings key set1..set9), default all off ----
@@ -465,12 +475,30 @@ const SETS = [
     { id: 'S14', key: 'set14', name: 'distance and cruise', uk: 'Круїз і дистанція', items: ['P23'] },
     { id: 'S15', key: 'set15', name: 'camera objects', uk: 'Об’єкти камери', items: ['P24'] },
     { id: 'S16', key: 'set16', name: 'next turn', uk: 'Наступний поворот', items: ['P25'] },
+    { id: 'S17', key: 'set17', name: 'ACC', uk: 'ACC: усе для адаптивного круїзу', items: ['P26'], label: 'ACC' },      // r1120 AC
 ];
+
+// r1120 AC: what the ACC set (S17) reads besides its own field: every field of these sets (and what they share through `also`), and
+// these fields of other sets. A camera object list is cut to ACC_ENTRIES objects in a recording (recEntries; the recorder's own cap
+// is 16): the budget of docs/r1120/AC-REPORT.md. Applied once, here: the probe, the recorder and the tests only see `also`.
+const ACC = {
+    sets: ['S14'],
+    tags: ['fes-switch', 'gearbox-display', 'indicate', 'lights', 'tsr',
+        'cam-objects', 'cam-position', 'cam-movement', 'cam2-objects', 'cam2-position', 'cam2-movement', 'cam2-polar', 'object-lanes', 'fas-view', 'ego-motion'],
+};
+const ACC_ENTRIES = 8;
+TABLE.forEach((f) => {
+    const sets = [f.set].concat(f.also || []);
+    if (f.set === 'S17' || !(ACC.tags.indexOf(f.tag) >= 0 || ACC.sets.some((id) => sets.indexOf(id) >= 0))) return;
+    f.also = (f.also || []).concat(['S17']);
+    if (f.set === 'S15') f.recEntries = ACC_ENTRIES;
+});
 // per-set defaults (a field's own gapMs / cap win): messages and doors are events, the drive sets are long
 const SET_DEFAULTS = {
     S1: { gapMs: 500, cap: 100 }, S2: { gapMs: 1000, cap: 60 }, S3: { gapMs: 250, cap: 100 }, S4: { gapMs: 1000, cap: 100 },
     S5: { gapMs: 500, cap: 100 }, S6: { gapMs: 500, cap: 150 }, S7: { gapMs: 1000, cap: 200 }, S8: { gapMs: 1000, cap: 200 }, S9: { gapMs: 1000, cap: 200 }, S10: { gapMs: 500, cap: 100 }, S11: { gapMs: 500, cap: 100 }, S13: { gapMs: 250, cap: 300 }, S14: { gapMs: 1000, cap: 1200 }, S15: { gapMs: 2000, cap: 300 },
     S16: { gapMs: 2000, cap: 400 },
+    S17: { gapMs: 1000, cap: 1200 },     // r1120 AC: as S14
 };
 
 const instOf = (f) => f.instance || '1';
@@ -498,4 +526,4 @@ function manifestSignals() {
     return out;
 }
 
-module.exports = { I, TABLE, SETS, SET_DEFAULTS, instOf, interfaces, manifestSignals };
+module.exports = { I, TABLE, SETS, SET_DEFAULTS, instOf, interfaces, manifestSignals, ACC, ACC_ENTRIES };

@@ -186,7 +186,7 @@ class Recorder {
             fr.seq++;
             if (this.queued > this.maxQueue) { this.dropped++; return; }
             const t = this._t();
-            const fl = flatten(v, f.tree && f.tree.skip, this.maxEntries);
+            const fl = flatten(v, f.tree && f.tree.skip, f.recEntries > 0 && f.recEntries < this.maxEntries ? f.recEntries : this.maxEntries);     // r1120 AC: a field's own cap
             const seg = this._seg();
             const sig = fl.keys.join(',');
             if (seg.hdr[fr.id] !== sig) {
