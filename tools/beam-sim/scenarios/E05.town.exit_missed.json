@@ -1,0 +1,77 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "E05.town.exit_missed",
+ "family": "E",
+ "name": "A town whose exit sign is missed",
+ "purpose": "entry sign seen, exit sign missed, the sign recognition keeps showing 50: the speed rule ends the town",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 130,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ],
+    [
+     36,
+     90
+    ],
+    [
+     42,
+     50
+    ],
+    [
+     80,
+     50
+    ],
+    [
+     88,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "lit": [
+   {
+    "s0_m": 1050,
+    "s1_m": 1450,
+    "spacing_m": 35,
+    "side": 1,
+    "height_m": 8
+   }
+  ],
+  "env": {
+   "towns": [
+    {
+     "s0_m": 1000,
+     "s1_m": 1500,
+     "limit_kmh": 50,
+     "signOut": false,
+     "limitAfter_kmh": null
+    }
+   ]
+  }
+ },
+ "expect": {
+  "mustReason": [
+   "town"
+  ],
+  "finalWant": "high",
+  "maxSwitches": 4
+ }
+}

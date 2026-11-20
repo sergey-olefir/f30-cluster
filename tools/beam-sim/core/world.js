@@ -193,9 +193,17 @@
     function envAt(t, s) {
       const weather = weatherAt(t);
       let town = false, limit = stepAt(env.limits, s, null);
+      // a town: { s0_m, s1_m, limit_kmh (null = the sign recognition shows none), signIn / signOut (false = the camera
+      // misses that sign), limitAfter_kmh (the limit after the exit, posted limitAfterAt_m past it; null = none posted:
+      // the sign recognition keeps showing the town's limit) }
       towns.forEach(function (tw) {
-        if (s >= tw.s0_m && s <= tw.s1_m) { town = true; limit = tw.limit_kmh || 50; }
-        else if (s > tw.s1_m && s < tw.s1_m + 2000 && (limit === null || limit <= (tw.limit_kmh || 50))) limit = env.openLimit_kmh || 90;
+        const tl = tw.limit_kmh === null ? null : (tw.limit_kmh || 50);
+        if (s >= tw.s0_m && s <= tw.s1_m) { town = true; if (tl !== null) limit = tl; }
+        else if (s > tw.s1_m && s < tw.s1_m + 3000) {
+          const after = tw.limitAfter_kmh === undefined ? (env.openLimit_kmh || 90) : tw.limitAfter_kmh;
+          if (after !== null && s >= tw.s1_m + (tw.limitAfterAt_m || 0)) limit = after;
+          else if (tl !== null) limit = tl;
+        }
       });
       const wiperDef = weather === 'rain' ? 1 : weather === 'heavy' ? 3 : weather === 'snow' ? 2 : 0;
       return {
@@ -203,7 +211,9 @@
         sun: prof(env.sun, t, 'night'),
         wiper: env.wiper !== undefined ? prof(env.wiper, t, 0) : wiperDef,
         fog: env.fog !== undefined ? !!prof(env.fog, t, false) : weather === 'fog',
-        limit_kmh: limit, town: town, weather: weather, wet: !!env.wet || weather === 'rain' || weather === 'heavy',
+        limit_kmh: limit, town: town, weather: weather, towns: towns,
+        camWeather: weather === 'fog' ? 'FOG' : weather === 'snow' ? 'SNOW' : weather === 'rain' || weather === 'heavy' ? 'RAIN' : 'CLEAR',
+        sight_m: weather === 'fog' ? 50 : weather === 'heavy' || weather === 'snow' ? 100 : weather === 'rain' ? 150 : 300, wet: !!env.wet || weather === 'rain' || weather === 'heavy',
         lowBeam: env.lowBeam === undefined ? true : !!prof(env.lowBeam, t, true),
       };
     }

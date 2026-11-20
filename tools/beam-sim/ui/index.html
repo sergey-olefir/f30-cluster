@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beam Simulator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Beam simulator</h1>
+  <nav>
+    <button data-tab="run" class="tab on">Run</button>
+    <button data-tab="batch" class="tab">Batch</button>
+  </nav>
+</header>
+
+<main>
+<section id="tab-run" class="tabpane on">
+  <div class="bar">
+    <label>Scenario <select id="scn"></select></label>
+    <label>Seed <input id="seed" type="number" value="1" min="1" max="9999" step="1"></label>
+    <button id="play">Play</button>
+    <button id="step">Step</button>
+    <button id="restart">Restart</button>
+    <label>Speed <select id="speed"><option>1</option><option selected>2</option><option>5</option><option>10</option></select>×</label>
+    <label>View <select id="zoom"><option value="150">150 m</option><option value="300" selected>300 m</option><option value="500">500 m</option></select></label>
+  </div>
+  <p id="purpose" class="mut"></p>
+  <div class="grid">
+    <div class="views">
+      <canvas id="top" width="520" height="520" aria-label="top view"></canvas>
+      <canvas id="side" width="520" height="120" aria-label="side view"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--head)"></i>oncoming lamps</span><span><i style="background:var(--tail)"></i>tail lamps</span>
+        <span><i style="background:var(--street)"></i>street light</span><span><i style="background:var(--refl)"></i>reflector</span>
+        <span><i style="background:var(--bike)"></i>bicycle</span><span><i style="background:var(--other)"></i>unclassified</span>
+        <span><i class="ring"></i>the cause of a dip</span>
+      </div>
+    </div>
+    <div class="side">
+      <div id="status" class="status"></div>
+      <h3>This run</h3>
+      <div id="metrics" class="metrics"></div>
+    </div>
+  </div>
+  <div id="timeline" class="timeline-box" title="click to seek"></div>
+  <details>
+    <summary>Settings: the algorithm, the sensor, the run</summary>
+    <div class="bar">
+      <label>Mode <select id="mode"><option value="">scenario's</option><option value="auto">auto</option><option value="advise">advise</option></select></label>
+      <label>Camera verdict <select id="verdict"><option value="">scenario's</option><option value="silent">silent</option><option value="present">present</option></select></label>
+      <label>Weather <select id="weather"><option value="">scenario's</option><option>clear</option><option>rain</option><option>heavy</option><option>fog</option><option>snow</option></select></label>
+      <label>Sensitivity <select id="preset"><option value="normal">normal</option><option value="early">earlier dip</option><option value="late">later dip</option></select></label>
+      <button id="resetcfg">Defaults</button>
+    </div>
+    <div id="sensorset" class="settings"></div>
+    <div id="logicset" class="settings"></div>
+  </details>
+</section>
+
+<section id="tab-batch" class="tabpane">
+  <div class="bar">
+    <label>Seeds <input id="bseeds" value="1,2,3"></label>
+    <button id="brun">Run all scenarios</button>
+    <span id="bprog" class="mut"></span>
+  </div>
+  <p class="mut">With the settings of the Run tab. "core" leaves out the scenarios that document a known limit of a light camera.</p>
+  <div id="btotals"></div>
+  <div id="btable" class="wrap"></div>
+</section>
+</main>
+
+<script src="../../../shared/beam_logic.js"></script>
+<script src="../core/rng.js"></script>
+<script src="../core/road.js"></script>
+<script src="../core/world.js"></script>
+<script src="../core/sensor.js"></script>
+<script src="../core/driver.js"></script>
+<script src="../core/metrics.js"></script>
+<script src="../core/sim.js"></script>
+<script src="../core/scenario.js"></script>
+<script src="../core/batch.js"></script>
+<script src="timeline.js"></script>
+<script src="scenarios.bundle.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

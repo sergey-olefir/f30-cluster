@@ -52,7 +52,8 @@ frame = {
   car:     { v: { speed_kmh, yaw_dps, steer_deg, gear }, age: 20, ok: true },
   lamps:   { v: { low, high, fog, switch }, age: 100, ok: true },
   stalk:   { v: [ { t, kind } ], age: 0, ok: true },  // the driver's stalk EVENTS since the previous frame
-  env:     { v: { brightness, sun, wiper, limit_kmh, urban }, age: 500, ok: true },
+  env:     { v: { brightness, sun, dayNight, wiper, limit_kmh, urban, camWeather, sight_m }, age: 500, ok: true },
+  signs:   { v: [ { t, kind } ], age: 0, ok: true },   // the camera's town signs passed since the previous frame (§2.5)
   app:     { v: { rearm: false } }                     // optional: the app's own controls
 }
 ```
@@ -101,10 +102,21 @@ How the logic uses it: `config.verdict` (§4): `use: 'log'` by default (shown, c
 ### 2.3 `objects.v[]` — the fallback object list (the general camera list)
 
 ```js
-{ id, cls, x, y, vx, lane }      // raw; x = longitudinal distance, y = lateral offset (+ left), vx = relative speed
+{ id, cls, x, y, vx, lane,       // raw; x = longitudinal distance, y = lateral offset (+ left), vx = relative speed
+  move, head, rear, vabs }       // added 2026-11-20 (HR §3.2), all optional:
 ```
-Scaled by `config.objScale` (defaults: gain 1 = the adapter already hands metres and m/s, assumed) and classified by
-`config.objClasses`. Used only when `config.objects.use` is `'fallback'` (lights silent) or `'both'`. `objects.qual` is
+- `move`: `'oncoming'` | `'same'` | `'stopped_oncoming'` | `'stationary'` | `'crossing'` | null — the list's movement status
+  (`ObjectRecognitionFrontCamera.statusMovement` ONCOMMING 4 / SAME_AS_EGOVEHICLE 5 / STOPPED_…_WAS_ONCOMING 1 /
+  CROSSING 7; `…2` adds STATIONARY_OR_PARKING_OBJECT_*). The adapter maps the enum to these words.
+- `head`, `rear`: `'on'` | `'off'` | null — `objectlistTCP` `lights.status_head_light` / `status_rear_light`
+  (UNKNOWN → null).
+- `vabs`: absolute longitudinal speed, m/s (`velocity_absolute.x`), when the list has it.
+
+How the logic reads an object (conservative, as HR §3.2 advises): `move` oncoming / stopped_oncoming → oncoming; `move`
+same → a vehicle ahead; else by `vx` (closing faster than own speed + `objects.oncomingMargin_kmh` → oncoming);
+else `head` on → oncoming; else an unclassified light. A `stationary` object with neither lamp on is ignored (a parked
+car); a pedestrian class is ignored. Scaled by `config.objScale` (defaults: gain 1 = the adapter already hands metres
+and m/s, assumed) and classified by `config.objClasses`. Used only when `config.objects.use` is `'fallback'` (lights silent) or `'both'`. `objects.qual` is
 the list's qualifier (raw), judged by `config.objects.qualOk` / `qualReduced`.
 
 ### 2.4 `car.v`, `lamps.v`, `stalk.v`, `env.v`, `app.v`
@@ -123,9 +135,22 @@ the list's qualifier (raw), judged by `config.objects.qualOk` / `qualReduced`.
 | env | `brightness` | number \| null | raw ambient brightness; lux = `brightness × config.brightness.gain + offset` |
 | env | `sun` | `'day' 'night'` \| null | the app's `shared/sun.js` verdict, null without a position or clock |
 | env | `wiper` | number \| null | wiper level: 0 off, 1 intermittent / rain-sensor slow, 2 continuous slow, 3 fast (the adapter maps the car's enum) |
-| env | `limit_kmh` | number \| null | the speed limit in force (TrafficSignRecognition) |
-| env | `urban` | bool \| null | a built-up-area flag if any source gives one |
+| env | `limit_kmh` | number \| null | the speed limit in force (TrafficSignRecognition `presentClassLimitSpeed` × 5) |
+| env | `urban` | bool \| null | a built-up-area flag if any source gives one (none on this car: navigation is CarPlay) |
+| env | `dayNight` | `'day' 'night'` \| null | the car's `Vehicle.statusDayNightChangeOver` (1 day, 2 night, else null); used like `sun` when `sun` is null |
+| env | `camWeather` | `'CLEAR' 'RAIN' 'SNOW' 'FOG' 'GLARE'` \| null | the camera's `RecognitionWeather` enum name |
+| env | `sight_m` | number \| null | the camera's `rangeOfSightCamera` bucket as its lower bound in metres (0, 1, 50, 100, 150, 300) |
 | app | `rearm` | bool | the driver asked automatic operation back (an on-screen action); one tick |
+
+### 2.5 `signs.v` — the camera's town signs (owner, 2026-11-20)
+
+```js
+[ { t, kind: 'town_in' | 'town_out' } ]     // events since the previous frame; t = when the adapter received it
+```
+From `de.bmw.dass.TrafficSignRecognition` (and `SignRecognitionFrontCamera`) `TrafficSignType`: `CITY_LIMIT_START_OF` →
+`town_in`; `CITY_LIMIT_END_OF` → `town_out`; `CITY_LIMIT_START_END_OF` → `town_in` (hypothesis: the back-to-back sign
+"end of one place, start of the next", so still built-up). Report a sign once (the logic ignores an event whose `t` it
+has already seen). A missing group means "no sign source"; the limit and the street lights still work.
 
 ## 3. The output
 
@@ -150,7 +175,8 @@ the list's qualifier (raw), judged by `config.objects.qualOk` / `qualReduced`.
     switchesPerMin: n, dips: n,       // in the last minute / the flicker window
     override: null | 'high' | 'low',  // auto mode only
     verdict: null | { allow: true | false | null, use: 'log' | 'follow' | 'ignore', agrees: bool | null },
-    driver: null | 'high' | 'low'     // lamps.high as seen this tick (the label in advise mode)
+    driver: null | 'high' | 'low',    // lamps.high as seen this tick (the label in advise mode)
+    urban: { on, src: null | 'sign' | 'limit' | 'lights' | 'flag', since, evidence_ms }   // §7a; details.town = urban.on
   }
 }
 ```
@@ -191,8 +217,8 @@ sources are in `docs/highbeam/HA-REPORT.md`; the table here is the **shape** (de
 | `dark` | `on_lux`, `off_lux`, `onHold_ms`, `offHold_ms`, `useSun` (`'agree'` \| `'fallback'` \| `'off'`) |
 | `brightness` | `gain`, `offset` |
 | `speed` | `on_kmh`, `off_kmh` |
-| `town` | `limit_kmh`, `clear_ms` |
-| `weather` | `wiperLow` (level ≥ this means "heavy"), `wiperClear_ms`, `fog` (bool: fog lamps mean low) |
+| `town` | `signs` (bool), `limit_kmh`, `limitHold_ms`, `clear_ms`, `litHold_ms`, `exitSpeed_kmh`, `exitSpeed_ms`, `maxNoEvidence_ms` (§7a) |
+| `weather` | `wiperLow` (level ≥ this means "heavy"), `wiperClear_ms`, `fog` (bool: fog lamps mean low), `camFog` (bool: the camera's FOG means low), `minSight_m` (the camera's range of sight below this means low) |
 | `curve` | `yaw_dps`, `steer_deg`, `mode` (`'delay'` \| `'dip'` \| `'off'`), `hold_ms` |
 | `verdict` | `use: 'log' \| 'follow' \| 'ignore'`, `allow: [raw…]`, `deny: [raw…]`, `calibBad: [raw…]`, `qualBad: [raw…]` |
 | `timing` | `clearHead_ms`, `clearTail_ms`, `clearBike_ms`, `clearOther_ms`, `clearStreet_ms`, `clearVerdict_ms`, `enter_ms`, `minLow_ms`, `flickerWindow_ms`, `flickerDips`, `flickerExtra_ms`, `maxPerMin`, `rateHold_ms`, `unavailableHold_ms` |
@@ -323,6 +349,29 @@ The precedence when several reasons hold at once (the first wins): `error` › `
 - A `high_off` while the logic is already `DIPPED` / `STANDBY` / `UNAVAILABLE` is not an override: the driver agrees
   with the logic.
 
+## 7a. The built-up area (owner, 2026-11-20: no map flag, the camera's signs instead)
+
+The logic keeps one small state, `details.urban = { on, src, since, evidence_ms }`. The sources:
+
+| Source | Starts the town | Counts as evidence while |
+|---|---|---|
+| `sign` | a `town_in` event, at once | — (a sign needs no evidence; it is ended by the rules below) |
+| `limit` | `limit_kmh` ≤ `town.limit_kmh` (60) standing `town.limitHold_ms` (3 s), so one misread does not | the low limit stands |
+| `lights` | street lights (`street.count` in the window) for `town.litHold_ms` (15 s) | the street lights continue |
+| `flag` | `env.urban` true (kept for another source; none on this car) | the flag is true |
+
+How it ends (the first that applies):
+1. a `town_out` event ends it at once, whatever the source;
+2. a `limit`, `lights` or `flag` town ends `town.clear_ms` (3 s) after its last evidence;
+3. a `sign` town ends when a limit **above** `town.limit_kmh` is first seen after the entry (a country limit sign);
+4. **the missed exit sign:** any town ends after `town.exitSpeed_ms` (20 s) at or above `town.exitSpeed_kmh` (70 km/h)
+   with no street lights in view (nobody drives that through a town for 20 s legally);
+5. the backstop: a `sign` town with no evidence at all ends after `town.maxNoEvidence_ms` (5 min).
+
+When a town ends, the limit value then shown is **spent**: it cannot start a town again until the shown limit changes. So
+a sign recognition that keeps showing "50" after a missed exit does not hold the high beam off for ever. The reason
+shown while in a town is `town` (state `STANDBY`).
+
 ## 8. Safety invariants (the simulator's must-be-zero counters; the app may assert them too)
 - `highStale`: `want: 'high'` from automatic operation (state `HIGH`) while lights, car or lamps data is stale or missing.
 - `highSlow`: state `HIGH` while `speed_kmh < speed.off_kmh`.
@@ -332,3 +381,8 @@ The precedence when several reasons hold at once (the first wins): `error` › `
 
 ## 9. Change log
 - 2026-11-20 HA: first version.
+- 2026-11-20 HA, additions after the owner's decisions and HR-REPORT: `signs` group (§2.5); `env.dayNight`,
+  `env.camWeather`, `env.sight_m`; fallback objects' `move`, `head`, `rear`, `vabs` (§2.3); `details.urban` and §7a;
+  config keys `town.*`, `weather.camFog`, `weather.minSight_m`, `zone.returnMargin`, `confirm.jump_deg`,
+  `confirm.jumpFrac`, `objects.reducedMeans`; scenario `limit`. Defaults from HR: `speed.on_kmh` 50, `speed.off_kmh`
+  38. Nothing renamed or removed.

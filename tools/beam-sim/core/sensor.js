@@ -70,6 +70,7 @@
     const queue = [];           // { at, kind: 'lights'|'verdict'|'objects', v, qual }
     const adapter = { lights: null, lightsT: null, verdict: null, verdictT: null, objects: null, objectsT: null, objQual: null };
     let lastList = null;
+    let lastS = null;
     let ghostN = 0;
     const api = { lastDetections: [], params: P };
 
@@ -178,7 +179,11 @@
             if (!world.sight(camPt, { s: u.s, d: u.d, hgt: 0.8 }, tc / 1000, u.id)) return;
             const vx = (u.dir * u.v_kmh - ego.v_kmh) / 3.6;
             const a = -lk.az * Math.PI / 180;
-            objs.push({ id: objs.length, cls: OBJ_CODE[u.kind] || 1, x: Math.round(lk.horiz * Math.cos(a) * 10) / 10, y: Math.round(lk.horiz * Math.sin(a) * 10) / 10, vx: Math.round(vx * 10) / 10, lane: 0 });
+            // HR §3.2: the lists' movement status and the per-object lamp states
+            const lit = u.lamps !== 'off';
+            const faceUs = u.dir < 0 || (u.dir === 0 && u.faces > 0);
+            objs.push({ id: objs.length, cls: OBJ_CODE[u.kind] || 1, x: Math.round(lk.horiz * Math.cos(a) * 10) / 10, y: Math.round(lk.horiz * Math.sin(a) * 10) / 10, vx: Math.round(vx * 10) / 10, lane: 0,
+              move: u.dir < 0 ? 'oncoming' : u.dir > 0 ? 'same' : 'stationary', head: u.kind === 'ped' ? null : lit && faceUs ? 'on' : 'off', rear: u.kind === 'ped' ? null : lit && !faceUs ? 'on' : 'off' });
           });
         }
         const qual = blind && blind.reported !== false ? 2 : dirty && dirty.reported !== false ? 1 : 0;
@@ -221,7 +226,17 @@
       f.car = { v: { speed_kmh: Math.round(ego.v_kmh * 10) / 10, yaw_dps: Math.round(ego.yaw_dps * 100) / 100, steer_deg: null, gear: 'D' }, age: 10, ok: true };
       f.lamps = { v: { low: env.lowBeam, high: io && typeof io.lampsHigh === 'boolean' ? io.lampsHigh : null, fog: env.fog, switch: 'auto' }, age: 50, ok: true };
       f.env = { v: { brightness: Math.round(env.lux * 10) / 10, sun: env.sun === 'day' || env.sun === 'night' ? env.sun : null, wiper: env.wiper,
-        limit_kmh: env.limit_kmh, urban: null }, age: 100, ok: true };
+        limit_kmh: env.limit_kmh, urban: null, camWeather: env.camWeather, sight_m: env.sight_m }, age: 100, ok: true };
+      // the camera's town signs as the ego passes them (a sign with signIn / signOut false is missed)
+      const ev = [];
+      if (lastS !== null) {
+        env.towns.forEach(function (tw) {
+          if (tw.signIn !== false && lastS < tw.s0_m && ego.s >= tw.s0_m) ev.push({ t: Math.round(t), kind: 'town_in' });
+          if (tw.signOut !== false && lastS < tw.s1_m && ego.s >= tw.s1_m) ev.push({ t: Math.round(t), kind: 'town_out' });
+        });
+      }
+      lastS = ego.s;
+      f.signs = { v: ev, age: 0, ok: true };
       f.stalk = { v: io && io.stalk ? io.stalk : [], age: 0, ok: true };
       if (io && io.rearm) f.app = { v: { rearm: true } };
       return f;

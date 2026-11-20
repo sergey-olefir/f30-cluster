@@ -102,11 +102,11 @@
         ['objScale.vx.offset', 'num', 0, 'm/s', -1000, 1000, 1, A, 'assumption', ''],
         ['objClasses', 'map', { '1': 'car', '2': 'truck', '3': 'moto', '4': 'bike', '5': 'ped' }, '', null, null, null, A, 'assumption', 'raw object class -> kind', OBJ_KINDS],
 
-        ['zone.head_m', 'num', 400, 'm', 50, 1000, 10, A, 'research', 'oncoming headlamps dip within this straight ahead (UN R48 Annex 12 asks detection at 400 m; HR to confirm)'],
+        ['zone.head_m', 'num', 400, 'm', 50, 1000, 10, A, 'research', 'oncoming headlamps dip within this straight ahead (HR §A.2: R48 detection >= 400 m; UA rule 19.2 dip >= 250 m; BMW ~400 m)'],
         ['zone.headSide_m', 'num', 80, 'm', 0, 1000, 10, A, 'tuning', 'oncoming zone length at the zone edge'],
-        ['zone.tail_m', 'num', 200, 'm', 30, 600, 10, A, 'research', 'tail lamps ahead dip within this (R48 Annex 12: 100 m minimum; doubled for mirror glare)'],
+        ['zone.tail_m', 'num', 200, 'm', 30, 600, 10, A, 'research', 'tail lamps ahead dip within this (HR §A.2: R48 >= 100 m; UA 19.2 also for traffic ahead; doubled for mirror glare)'],
         ['zone.tailSide_m', 'num', 80, 'm', 0, 600, 10, A, 'tuning', 'tail zone length at the zone edge'],
-        ['zone.bike_m', 'num', 100, 'm', 20, 400, 5, A, 'research', 'a bicycle lamp dips within this (R48 Annex 12: 75 m)'],
+        ['zone.bike_m', 'num', 100, 'm', 20, 400, 5, A, 'research', 'a bicycle lamp dips within this (HR §A.2: R48 >= 75 m, a 150 cd lamp)'],
         ['zone.other_m', 'num', 200, 'm', 0, 600, 10, A, 'tuning', 'an unclassified light dips within this'],
         ['zone.core_deg', 'num', 4, 'deg', 0, 30, 0.5, A, 'tuning', 'within this azimuth the zone has its full length'],
         ['zone.edge_deg', 'num', 18, 'deg', 1, 45, 0.5, A, 'tuning', 'beyond this azimuth nothing dips (the high beam\'s useful spread)'],
@@ -124,22 +124,30 @@
         ['street.minEl_deg', 'num', 2, 'deg', -10, 30, 0.5, A, 'assumption', 'a street light is at least this far above the horizon'],
 
         ['dark.on_lux', 'num', 20, 'lux', 0, 5000, 1, A, 'assumption', 'below this it is dark (unit of the car\'s brightness unknown)'],
-        ['dark.off_lux', 'num', 60, 'lux', 0, 10000, 1, A, 'assumption', 'above this it is light'],
+        ['dark.off_lux', 'num', 60, 'lux', 0, 7000, 1, A, 'assumption', 'above this it is light (HR §A.2: R48 forbids high beam above 7 000 lx; the ceiling of this key)'],
         ['dark.onHold_ms', 'num', 8000, 'ms', 0, 120000, 500, A, 'assumption', 'dark must hold this long'],
         ['dark.offHold_ms', 'num', 2000, 'ms', 0, 120000, 500, A, 'assumption', 'light must hold this long (short: fail low)'],
         ['dark.useSun', 'enum', 'agree', '', null, null, null, false, 'brief', 'agree: sun "day" vetoes dark; fallback: sun only without brightness; off', ['agree', 'fallback', 'off']],
         ['brightness.gain', 'num', 1, 'lux/raw', 0, 1000, 0.1, A, 'assumption', 'raw brightness -> lux'],
         ['brightness.offset', 'num', 0, 'lux', -1000, 1000, 1, A, 'assumption', ''],
 
-        ['speed.on_kmh', 'num', 40, 'km/h', 0, 150, 1, A, 'assumption', 'high beam allowed from this speed (brief default; HR to confirm)'],
-        ['speed.off_kmh', 'num', 30, 'km/h', 0, 150, 1, A, 'assumption', 'below this: dip (hysteresis 10 km/h)'],
+        ['speed.on_kmh', 'num', 50, 'km/h', 0, 150, 1, A, 'research', 'high beam allowed from this speed (HR §A.1: BMW F01/G11 manual ~50 km/h)'],
+        ['speed.off_kmh', 'num', 38, 'km/h', 0, 150, 1, A, 'research', 'below this: dip (HR §A.1: BMW FLA training 38 km/h, manual 39)'],
 
+        ['town.signs', 'bool', true, '', null, null, null, false, 'owner', 'use the camera\'s town entry / exit signs (owner 2026-11-20: CarPlay, no map flag)'],
         ['town.limit_kmh', 'num', 60, 'km/h', 0, 150, 5, A, 'assumption', 'a limit at or below this = built-up area (UA towns 50 km/h)'],
-        ['town.clear_ms', 'num', 3000, 'ms', 0, 60000, 500, A, 'tuning', 'a town ends this long after the last sign of it'],
+        ['town.limitHold_ms', 'num', 3000, 'ms', 0, 60000, 500, A, 'tuning', 'a low limit must stand this long before it means a town (a misread does not)'],
+        ['town.clear_ms', 'num', 3000, 'ms', 0, 60000, 500, A, 'tuning', 'a limit- / lights- / flag-based town ends this long after its last evidence'],
+        ['town.litHold_ms', 'num', 15000, 'ms', 0, 300000, 1000, A, 'tuning', 'a lit road this long (street lights in the window) becomes a town'],
+        ['town.exitSpeed_kmh', 'num', 70, 'km/h', 30, 150, 5, A, 'tuning', 'a missed exit sign: the town ends after driving at or above this ...'],
+        ['town.exitSpeed_ms', 'num', 20000, 'ms', 0, 600000, 1000, A, 'tuning', '... for this long with no street lights'],
+        ['town.maxNoEvidence_ms', 'num', 300000, 'ms', 0, 3600000, 10000, A, 'tuning', 'a sign-based town without any other evidence ends after this (the backstop; 0 = never)'],
 
         ['weather.wiperLow', 'num', 3, 'level', 1, 9, 1, A, 'tuning', 'wipers at or above this level = heavy rain / spray: low'],
         ['weather.wiperClear_ms', 'num', 20000, 'ms', 0, 300000, 1000, A, 'tuning', 'wipers below the level this long before high is allowed again'],
         ['weather.fog', 'bool', true, '', null, null, null, false, 'brief', 'fog lamps on = low'],
+        ['weather.camFog', 'bool', true, '', null, null, null, false, 'research', 'the camera\'s weather FOG = low (HR §4 row 14, RecognitionWeather)'],
+        ['weather.minSight_m', 'num', 100, 'm', 0, 1000, 10, A, 'research', 'the camera\'s range of sight below this = low (HR §4 row 14, rangeOfSightCamera)'],
 
         ['curve.yaw_dps', 'num', 6, 'deg/s', 0, 90, 0.5, A, 'tuning', 'a curve: yaw rate at or above this (80 km/h -> radius about 210 m)'],
         ['curve.steer_deg', 'num', 60, 'deg', 0, 720, 5, A, 'assumption', 'a curve: steering-wheel angle at or above this'],
@@ -152,7 +160,7 @@
         ['verdict.calibBad', 'list', [1, 2], '', null, null, null, A, 'assumption', 'statusCameraCalibration values meaning "not calibrated" (3 = default: unknown, ignored)'],
         ['verdict.qualBad', 'list', [2], '', null, null, null, A, 'assumption', 'verdict qualifier values meaning "no data / blind"'],
 
-        ['timing.clearHead_ms', 'num', 1500, 'ms', 0, 20000, 100, A, 'tuning', 'return after an oncoming light left the zone'],
+        ['timing.clearHead_ms', 'num', 1500, 'ms', 0, 20000, 100, A, 'tuning', 'return after an oncoming light left the zone (HR §A.2: FMVSS 108 asks a return within 2 s)'],
         ['timing.clearTail_ms', 'num', 2500, 'ms', 0, 20000, 100, A, 'tuning', 'return after a vehicle ahead left the zone'],
         ['timing.clearBike_ms', 'num', 2000, 'ms', 0, 20000, 100, A, 'tuning', 'return after a cyclist'],
         ['timing.clearOther_ms', 'num', 1500, 'ms', 0, 20000, 100, A, 'tuning', 'return after an unclassified light'],
@@ -168,7 +176,7 @@
         ['timing.unavailableHold_ms', 'num', 2000, 'ms', 0, 60000, 100, A, 'tuning', 'after bad data: good data this long before high'],
 
         ['override.resume', 'enum', 'dip', '', null, null, null, false, 'research', 'dip: the driver\'s own dip after a manual high resumes auto; rearm: only app.rearm', ['dip', 'rearm']],
-        ['override.lowHold_ms', 'num', 0, 'ms', 0, 3600000, 1000, false, 'brief', 'a manual low ends after this (0 = only on rearm / next push / a context change)'],
+        ['override.lowHold_ms', 'num', 0, 'ms', 0, 3600000, 1000, false, 'research', 'a manual low ends after this (0 = only on rearm / next push / a context change; BMW: until re-armed; Mobileye 8: 12 s; HR §A.1)'],
         ['override.highMax_ms', 'num', 0, 'ms', 0, 3600000, 1000, false, 'brief', 'a manual high ends after this (0 = when the driver dips)'],
         ['override.flashMax_ms', 'num', 700, 'ms', 0, 5000, 50, A, 'assumption', 'high_on then high_off within this = a flash, not an override'],
     ];
@@ -270,7 +278,9 @@
                 cause: null, holdUntil: null,
                 // hysteresis memories
                 speedOk: false, dark: false, darkCand: null, darkCandT: null,
-                town: false, townLastT: null,
+                town: false, townLastT: null, streetCount: 0,
+                urban: { on: false, src: null, since: null, lastEv: null, limitVal: null, limitSince: null, spent: null, signT: null },
+                fastSince: null, litSince: null,
                 heavy: false, heavyLastT: null,
                 // dips and switches
                 lastTrig: null,        // { t, reason, cause }
@@ -328,10 +338,19 @@
             let ok = isNum(o.cls) ? cfg.objClasses[String(o.cls)] : undefined;
             if (!inList(OBJ_KINDS, ok)) ok = 'other';
             if (ok === 'ped') return null;                                       // no lamp to glare
+            // HR §3.2: the lists carry a movement status (ONCOMING / SAME_AS_EGO / stopped / stationary / crossing) and per-object
+            // head- and rear-lamp states. Conservative: any oncoming class or lit head lamps not moving our way = oncoming; any other
+            // moving object ahead = a vehicle ahead; a stationary object with no lamp on is ignored (parked cars).
+            const mv = typeof o.move === 'string' ? o.move : null;
+            const headOn = o.head === 'on', rearOn = o.rear === 'on';
+            if (mv === 'stationary' && !headOn && !rearOn) return null;
             let kind;
             if (ok === 'bike') kind = 'bike';
-            else if (vx === null) kind = 'other';
-            else kind = (-vx * 3.6 > speed + cfg.objects.oncomingMargin_kmh) ? 'head' : 'tail';
+            else if (mv === 'oncoming' || mv === 'stopped_oncoming') kind = 'head';
+            else if (mv === 'same') kind = 'tail';
+            else if (vx !== null) kind = (-vx * 3.6 > speed + cfg.objects.oncomingMargin_kmh) ? 'head' : 'tail';
+            else if (headOn) kind = 'head';
+            else kind = 'other';
             return { id: isNum(o.id) ? o.id : -1, kind: kind, strong: true, az_deg: -Math.atan2(y, x) * 180 / Math.PI, el_deg: null, dist_m: x, src: 'object' };
         }
 
@@ -446,7 +465,8 @@
             // darkness
             let cand = null;                                   // 'dark' | 'light' | null (between the thresholds)
             const lux = isNum(env.brightness) ? env.brightness * cfg.brightness.gain + cfg.brightness.offset : null;
-            const sun = env.sun === 'day' || env.sun === 'night' ? env.sun : null;
+            // the sun's verdict: shared/sun.js, else the car's own day / night change-over (HR §4 row 10, seen on the car)
+            const sun = env.sun === 'day' || env.sun === 'night' ? env.sun : env.dayNight === 'day' || env.dayNight === 'night' ? env.dayNight : null;
             if (lux !== null) {
                 if (lux < cfg.dark.on_lux) cand = 'dark';
                 else if (lux > cfg.dark.off_lux) cand = 'light';
@@ -457,13 +477,43 @@
             if (cand !== S.darkCand) { S.darkCand = cand; S.darkCandT = t; }
             if (cand === 'dark' && !S.dark && t - S.darkCandT >= cfg.dark.onHold_ms) S.dark = true;
             if (cand === 'light' && S.dark && t - S.darkCandT >= cfg.dark.offHold_ms) S.dark = false;
-            // town
-            const townNow = env.urban === true || (isNum(env.limit_kmh) && env.limit_kmh > 0 && env.limit_kmh <= cfg.town.limit_kmh);
-            if (townNow) { S.town = true; S.townLastT = t; }
-            else if (S.town && t - S.townLastT >= cfg.town.clear_ms) S.town = false;
+            // ---- the built-up area: a small state with its source (CONTRACT §7a) ----
+            const U = S.urban;
+            const endTown = () => { U.on = false; U.src = null; U.since = t; U.spent = U.limitVal; S.litSince = null; S.fastSince = null; };
+            if (cfg.town.signs && isObj(frame.signs) && Array.isArray(frame.signs.v)) {
+                frame.signs.v.forEach((e) => {
+                    if (!isObj(e) || (isNum(e.t) && U.signT !== null && e.t <= U.signT)) return;
+                    if (isNum(e.t)) U.signT = e.t;
+                    if (e.kind === 'town_in') { if (!U.on || U.src !== 'sign') U.since = t; U.on = true; U.src = 'sign'; U.lastEv = t; U.spent = null; }
+                    else if (e.kind === 'town_out') endTown();
+                });
+            }
+            const lim = isNum(env.limit_kmh) && env.limit_kmh > 0 ? env.limit_kmh : null;
+            if (lim !== U.limitVal) { U.limitVal = lim; U.limitSince = t; U.spent = null; }
+            const limitLow = lim !== null && lim <= cfg.town.limit_kmh && lim !== U.spent && t - U.limitSince >= cfg.town.limitHold_ms;
+            const limitHigh = lim !== null && lim > cfg.town.limit_kmh;
+            // street lights: the count of the previous tick (this tick's is computed below, from the same window)
+            const litNow = S.streetCount >= cfg.street.count;
+            if (litNow) { if (S.litSince === null) S.litSince = t; } else S.litSince = null;
+            const litTown = S.litSince !== null && t - S.litSince >= cfg.town.litHold_ms;
+            const flag = env.urban === true;
+            const evidence = flag || limitLow || litTown;
+            if (evidence) {
+                if (!U.on) { U.on = true; U.src = flag ? 'flag' : limitLow ? 'limit' : 'lights'; U.since = t; }
+                U.lastEv = t;
+            }
+            if (isNum(speed) && speed >= cfg.town.exitSpeed_kmh && !litNow) { if (S.fastSince === null) S.fastSince = t; } else S.fastSince = null;
+            if (U.on) {
+                if (U.src !== 'sign' && t - U.lastEv >= cfg.town.clear_ms) endTown();                 // its evidence is gone
+                else if (U.src === 'sign' && limitHigh && U.limitSince > U.since) endTown();          // a country limit after the entry
+                else if (S.fastSince !== null && t - S.fastSince >= cfg.town.exitSpeed_ms) endTown(); // a missed exit sign: fast, unlit
+                else if (U.src === 'sign' && cfg.town.maxNoEvidence_ms > 0 && t - U.lastEv >= cfg.town.maxNoEvidence_ms) endTown();
+            }
+            S.town = U.on;
             // weather
             const fogOn = cfg.weather.fog && lamps.fog === true;
-            const heavyNow = isNum(env.wiper) && env.wiper >= cfg.weather.wiperLow;
+            const heavyNow = (isNum(env.wiper) && env.wiper >= cfg.weather.wiperLow) ||
+                (cfg.weather.camFog && env.camWeather === 'FOG') || (isNum(env.sight_m) && env.sight_m < cfg.weather.minSight_m);
             if (heavyNow) { S.heavy = true; S.heavyLastT = t; }
             else if (S.heavy && t - S.heavyLastT >= cfg.weather.wiperClear_ms) S.heavy = false;
             const lowBeam = lamps.low === true && lamps.switch !== 'off' && lamps.switch !== 'park';
@@ -525,6 +575,7 @@
             let nearestStreet = null;
             S.streets.forEach((s) => { ids[s.id] = true; if (!nearestStreet || (s.L.dist_m || 1e9) < (nearestStreet.dist_m || 1e9)) nearestStreet = s.L; });
             const streetCount = Object.keys(ids).length;
+            S.streetCount = streetCount;
             if (streetCount >= cfg.street.count && (!best || REASONS.streetlights.rank < REASONS[best.reason].rank)) best = { reason: 'streetlights', L: nearestStreet };
             // the camera's own verdict
             let verdictOut = null;
@@ -543,6 +594,7 @@
                 lowBeam: lowBeam, curve: curveNow, stale: stale, lights: lightsOut.slice(0, 15), counts: counts, street: streetCount,
                 switchesPerMin: S.changes.length, dips: S.dips.length, override: S.override, verdict: verdictOut, driver: driverLamp,
                 reduced: reduced,
+                urban: { on: U.on, src: U.src, since: U.since, evidence_ms: U.lastEv === null ? null : t - U.lastEv },
             };
             const causeOf = (b) => (b && b.L ? { src: b.L.src, id: b.L.id, kind: b.L.kind, dist_m: b.L.dist_m, az_deg: b.L.az_deg }
                 : b && b.reason === 'camera_verdict' ? { src: 'verdict', id: null, kind: null, dist_m: null, az_deg: null } : null);

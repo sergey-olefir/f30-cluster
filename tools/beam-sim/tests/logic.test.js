@@ -71,7 +71,7 @@ test('SCHEMA: every key has a unit or options, a default, a source and an assume
   B.SCHEMA.forEach((r) => {
     assert.ok(typeof r.key === 'string' && r.key, 'key');
     assert.ok(typeof r.assumed === 'boolean', r.key + ' assumed');
-    assert.ok(['catalogue', 'research', 'assumption', 'tuning', 'brief'].indexOf(r.source) >= 0, r.key + ' source ' + r.source);
+    assert.ok(['catalogue', 'research', 'assumption', 'tuning', 'brief', 'owner'].indexOf(r.source) >= 0, r.key + ' source ' + r.source);
     assert.deepStrictEqual(B.getPath(B.DEFAULTS, r.key), r.def, r.key);
     if (r.type === 'num') { assert.ok(r.def >= r.min && r.def <= r.max, r.key + ' default within limits'); assert.ok(typeof r.unit === 'string'); }
     if (r.type === 'enum') assert.ok(r.options.indexOf(r.def) >= 0, r.key);
@@ -84,7 +84,7 @@ test('config: bad values fall back to defaults and are listed; unknown keys are 
   const i = B.create({ zone: { head_m: NaN, tail_m: 150 }, speed: { on_kmh: -5 }, mode: 'drive', classes: { '1': 'spaceship' }, status: { strong: ['a'] }, extra: 7 });
   assert.strictEqual(i.config.zone.head_m, 400);
   assert.strictEqual(i.config.zone.tail_m, 150);
-  assert.strictEqual(i.config.speed.on_kmh, 40);
+  assert.strictEqual(i.config.speed.on_kmh, 50);
   assert.strictEqual(i.config.mode, 'advise');
   assert.strictEqual(i.config.classes['1'], 'head');
   assert.deepStrictEqual(i.config.status.strong, [2, 3]);
@@ -165,14 +165,14 @@ test('low beam off, or the switch at park: lights_off', () => {
   assert.strictEqual(j.step(f).reason, 'lights_off');
 });
 
-test('speed hysteresis: on at 40, kept at 35, off below 30; gear R is slow', () => {
+test('speed hysteresis (HR: BMW 50 on / 38 off): on at 50, kept at 45, off below 38; gear R is slow', () => {
   const i = B.create({});
-  assert.strictEqual(run(i, 0, 10000, (t) => fr(t, { speed: 38 })).last.reason, 'slow');
+  assert.strictEqual(run(i, 0, 10000, (t) => fr(t, { speed: 48 })).last.reason, 'slow');
   const j = high();
-  assert.strictEqual(run(j, 10100, 12000, (t) => fr(t, { speed: 35 })).last.state, 'HIGH');
-  const o = j.step(fr(12100, { speed: 29 }));
+  assert.strictEqual(run(j, 10100, 12000, (t) => fr(t, { speed: 39 })).last.state, 'HIGH');
+  const o = j.step(fr(12100, { speed: 37 }));
   assert.strictEqual(o.state, 'STANDBY'); assert.strictEqual(o.reason, 'slow'); assert.strictEqual(o.want, 'low');
-  assert.strictEqual(run(j, 12200, 13000, (t) => fr(t, { speed: 39 })).last.reason, 'slow');
+  assert.strictEqual(run(j, 12200, 13000, (t) => fr(t, { speed: 49 })).last.reason, 'slow');
   assert.strictEqual(high().step(fr(10100, { gear: 'R' })).reason, 'slow');
 });
 
@@ -195,11 +195,14 @@ test('darkness: the sun says day -> never dark (a tunnel by day); without bright
   assert.strictEqual(run(B.create({ dark: { useSun: 'off' } }), 0, 10000, (t) => fr(t, { lux: 2, sun: 'day' })).last.state, 'HIGH');
 });
 
-test('town: a limit at or below 60, or the urban flag, at once; the town ends 3 s after its last sign', () => {
+test('town by limit: a limit at or below 60 standing 3 s, or the urban flag at once; it ends 3 s after its evidence', () => {
   const i = high();
-  assert.strictEqual(i.step(fr(10100, { limit: 50 })).reason, 'town');
-  const r = run(i, 10200, 14000, (t) => fr(t, { limit: 90 }));
-  assert.strictEqual(firstAt(r.outs, (o) => o.reason !== 'town'), 13100);
+  const r0 = run(i, 10100, 14000, (t) => fr(t, { limit: 50 }));
+  assert.strictEqual(firstAt(r0.outs, (o) => o.reason === 'town'), 13100);
+  assert.strictEqual(r0.last.details.urban.src, 'limit');
+  const r = run(i, 14100, 18000, (t) => fr(t, { limit: 90 }));
+  assert.strictEqual(firstAt(r.outs, (o) => o.reason !== 'town'), 17000, 'last evidence 14.0 s + 3 s');
+  assert.strictEqual(run(high(), 10100, 12000, (t) => fr(t, { limit: t < 11000 ? 50 : 90 })).outs.every((o) => o.reason !== 'town'), true, 'a 1 s misread');
   assert.strictEqual(high().step(fr(10100, { urban: true })).reason, 'town');
   assert.strictEqual(high().step(fr(10100, { limit: 70 })).state, 'HIGH');
 });
@@ -442,7 +445,7 @@ test('override to low: the driver dips while high; low until re-armed, the next 
   const r = run(i, 60100, 62000, (t) => fr(t, { rearm: t === 60100 }));
   assert.strictEqual(r.outs[0].reason, 'settle'); assert.strictEqual(r.last.state, 'HIGH');
   const j = auto(); j.step(fr(10100, ev(10100, 'high_off')));
-  j.step(fr(10200, { limit: 50 }));
+  j.step(fr(10200, { urban: true }));
   assert.strictEqual(run(j, 10300, 30000, (t) => fr(t)).last.state, 'HIGH', 'a town ended the manual low');
   const k = auto(); k.step(fr(10100, ev(10100, 'high_off')));
   assert.strictEqual(k.step(fr(12000, ev(12000, 'high_on'))).details.override, 'high');
@@ -518,4 +521,79 @@ test('a reused id that jumps in azimuth or distance starts its confirmation over
   const j = high();
   j.step(fr(10100, { lights: [L(1, 0, 100, -8, { status: 1 })] }));
   assert.strictEqual(j.step(fr(10200, { lights: [L(1, 0, 100, 2, { status: 1 })] })).want, 'high', 'an azimuth jump');
+});
+
+
+// ---------------------------------------------------------------- the built-up area from signs (owner 2026-11-20)
+const sign = (t, kind) => ({ t: t, kind: kind });
+function frS(t, o, signs) { const f = fr(t, o); if (signs) f.signs = { v: signs, age: 0, ok: true }; return f; }
+
+test('town signs: entry dips at once (source sign); exit ends it at once; town.signs = false ignores them', () => {
+  const i = high();
+  const o = i.step(frS(10100, {}, [sign(10100, 'town_in')]));
+  assert.strictEqual(o.reason, 'town'); assert.strictEqual(o.details.urban.src, 'sign');
+  assert.strictEqual(run(i, 10200, 60000, (t) => fr(t, { speed: 50 })).last.reason, 'town', 'no evidence needed while signed in');
+  const x = i.step(frS(60100, { speed: 55 }, [sign(60100, 'town_out')]));
+  assert.strictEqual(x.details.urban.on, false);
+  assert.strictEqual(run(i, 60200, 63000, (t) => fr(t, { speed: 60 })).last.state, 'HIGH');
+  assert.strictEqual(high({ town: { signs: false } }).step(frS(10100, {}, [sign(10100, 'town_in')])).state, 'HIGH');
+  const j = high(); j.step(frS(10100, {}, [sign(10100, 'town_in')]));
+  assert.strictEqual(j.step(frS(10200, {}, [sign(10100, 'town_out')])).reason, 'town', 'an event already seen (same t) is not applied again');
+});
+
+test('a missed exit sign: a country limit after the entry ends the town; so does 20 s at 70+ km/h without street lights', () => {
+  const i = high(); i.step(frS(10100, { limit: 50 }, [sign(10100, 'town_in')]));
+  run(i, 10200, 40000, (t) => fr(t, { limit: 50, speed: 50 }));
+  const r = run(i, 40100, 44000, (t) => fr(t, { limit: 90, speed: 60 }));
+  assert.strictEqual(r.last.state, 'HIGH');
+  const j = high(); j.step(frS(10100, { limit: 50 }, [sign(10100, 'town_in')]));
+  run(j, 10200, 40000, (t) => fr(t, { limit: 50, speed: 50 }));
+  const r2 = run(j, 40100, 65000, (t) => fr(t, { limit: 50, speed: 85 }));
+  const back = firstAt(r2.outs, (o) => o.reason !== 'town');
+  assert.strictEqual(back, 60100, 'the speed rule: 20 s at 70+');
+  assert.strictEqual(r2.last.state, 'HIGH', 'the stale 50 of the sign recognition does not bring the town back');
+  const k = high(); k.step(frS(10100, {}, [sign(10100, 'town_in')]));
+  const st = []; for (let n = 0; n < 4; n++) st.push(L(n + 1, 3, 60 + n * 20, 4, { y: 90 }));
+  assert.strictEqual(run(k, 10200, 40000, (t) => fr(t, { speed: 85, lights: st })).last.reason, 'town', 'street lights keep a fast town');
+});
+
+test('the backstop: a signed-in town with no evidence at all ends after 5 minutes', () => {
+  const i = high(); i.step(frS(10100, { speed: 50 }, [sign(10100, 'town_in')]));
+  const r = run(i, 10200, 320000, (t) => fr(t, { speed: 50 }));
+  assert.strictEqual(firstAt(r.outs, (o) => o.reason !== 'town'), 310100);
+});
+
+test('a lit road for 15 s becomes a town (source lights), and ends with the lights', () => {
+  const i = high();
+  const st = []; for (let n = 0; n < 4; n++) st.push(L(n + 1, 3, 60 + n * 20, 4, { y: 90 }));
+  const r = run(i, 10100, 30000, (t) => fr(t, { lights: st }));
+  assert.strictEqual(r.outs[0].reason, 'streetlights');
+  const tt = firstAt(r.outs, (o) => o.reason === 'town');
+  assert.ok(tt >= 25000 && tt <= 25300, 'town after 15 s of lights: ' + tt);
+  assert.strictEqual(r.last.details.urban.src, 'lights');
+  const r2 = run(i, 30100, 45000, (t) => fr(t));
+  assert.strictEqual(r2.last.state, 'HIGH');
+});
+
+test('fallback objects: movement status and lamp states (HR §3.2)', () => {
+  const cfg = { objects: { use: 'fallback' } };
+  const go = (obj) => { const i = B.create(cfg); run(i, 0, 10000, (t) => fr(t, { no_lights: true, objects: [] })); return i.step(fr(10100, { no_lights: true, objects: [obj] })); };
+  assert.strictEqual(go({ id: 1, cls: 1, x: 100, y: 3, move: 'oncoming' }).reason, 'oncoming');
+  assert.strictEqual(go({ id: 1, cls: 1, x: 100, y: 3, move: 'stopped_oncoming', head: 'on' }).reason, 'oncoming');
+  assert.strictEqual(go({ id: 1, cls: 1, x: 100, y: 0, move: 'same' }).reason, 'preceding');
+  assert.strictEqual(go({ id: 1, cls: 1, x: 80, y: 5, move: 'stationary' }).state, 'HIGH', 'a parked unlit car');
+  assert.strictEqual(go({ id: 1, cls: 1, x: 80, y: 5, move: 'stationary', head: 'on' }).reason, 'oncoming');
+  assert.strictEqual(go({ id: 1, cls: 1, x: 80, y: 1, head: 'on' }).reason, 'oncoming');
+  assert.strictEqual(go({ id: 1, cls: 9, x: 80, y: 1 }).reason, 'light', 'unknown and unmoving: still a dip');
+});
+
+test('the camera\'s weather and range of sight; the car\'s day / night', () => {
+  const f = fr(10100); f.env.v.camWeather = 'FOG';
+  assert.strictEqual(high().step(f).reason, 'weather');
+  const g = fr(10100); g.env.v.sight_m = 50;
+  assert.strictEqual(high().step(g).reason, 'weather');
+  const h = fr(10100); h.env.v.camWeather = 'RAIN'; h.env.v.sight_m = 150;
+  assert.strictEqual(high().step(h).state, 'HIGH');
+  assert.strictEqual(run(B.create({}), 0, 20000, (t) => { const x = fr(t, { lux: 3, sun: null }); x.env.v.dayNight = 'day'; return x; }).last.reason, 'daylight');
+  assert.strictEqual(run(B.create({}), 0, 10000, (t) => { const x = fr(t, { lux: null, sun: null }); x.env.v.dayNight = 'night'; return x; }).last.state, 'HIGH');
 });
