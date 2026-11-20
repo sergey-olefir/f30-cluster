@@ -2,7 +2,7 @@
 # Read-only collector for the car session (package CL).  Run ONLY by the lead, with the owner's word, on a car that is online.
 #
 #   tools/car/collect.sh <car-address> [--user root] [--label N] [--date YYYY-MM-DD] [--out DIR]
-#                        [--apps f30_cluster,twin_dial,signal_probe,car_vitals] [--all-apps]
+#                        [--apps f30_cluster,twin_dial,signal_probe,car_vitals,rv_recorder] [--all-apps]
 #                        [--since "1 day ago"] [--max-bytes 3000000] [--ssh-opt OPT]... [--no-rec] [--dry-run]
 #
 # What it does: copies ONLY the apps' log files, their settings.json (and package.json for name / version / uid), cluster-render's
@@ -13,6 +13,7 @@
 # r1120 AC: when signal_probe is collected, its recordings too (data/rec/rec-<session>-<n>.csv.gz, listed with `ls -l`, each copied
 # with `cat`, its size checked against the listing: apps/signal_probe/rec/ and rec-copied.txt), and the quota files of /var/opt
 # (`cat`, read by quota_read.py into system/quota.json: each app's disk limit as the head unit applies it).  --no-rec: neither.
+# road TS: the RV recorder (rv_recorder, round "Road View") writes the same files in its own data/rec/: collected the same way.
 # After the copy it runs the privacy scan (local): anything flagged is listed and a redacted copy is made under <folder>/redacted/.
 set -u
 
@@ -23,7 +24,7 @@ REPO="$(cd "$HERE/../.." && pwd)"
 
 [ $# -ge 1 ] || { sed -n '2,19p' "$0"; exit 2; }
 ADDR="$1"; shift
-USER_="root"; LABEL=""; DATE_="$(date -u +%Y-%m-%d)"; OUT=""; APPS="f30_cluster,twin_dial,signal_probe,car_vitals"; ALL=0
+USER_="root"; LABEL=""; DATE_="$(date -u +%Y-%m-%d)"; OUT=""; APPS="f30_cluster,twin_dial,signal_probe,car_vitals,rv_recorder"; ALL=0
 SINCE="1 day ago"; MAXB=3000000; DRY=0; SSH_OPTS=""; REC=1
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -109,7 +110,7 @@ if [ "$DRY" = 1 ]; then
   for a in $(echo "$APPS" | tr ',' ' '); do
     for s in .log .log.1; do echo "+ $SSH 'tail -c $MAXB /var/opt/public/oap/oap_<uid of $a>/data/$a$s'  > apps/$a/$a$s" >&2; done
     echo "+ $SSH 'cat /var/opt/public/oap/oap_<uid of $a>/data/settings.json'  > apps/$a/settings.json" >&2
-    if [ "$a" = signal_probe ] && [ "$REC" = 1 ]; then                                                      # r1120 AC
+    if { [ "$a" = signal_probe ] || [ "$a" = rv_recorder ]; } && [ "$REC" = 1 ]; then                      # r1120 AC; road TS
       echo "+ $SSH 'ls -l /var/opt/public/oap/oap_<uid of $a>/data/rec/'  > apps/$a/rec-ls.txt" >&2
       echo "+ $SSH 'cat /var/opt/public/oap/oap_<uid of $a>/data/rec/<each rec-<session>-<n>.csv.gz of the listing>'  > apps/$a/rec/<the same name>" >&2
     fi
@@ -129,7 +130,7 @@ else
     done
     rd "$OUT/apps/$name/settings.json" cat "/var/opt/public/oap/oap_$u/data/settings.json"
     [ -s "$OUT/apps/$name/settings.json" ] || rm -f "$OUT/apps/$name/settings.json"
-    [ "$name" = signal_probe ] && [ "$REC" = 1 ] && copy_rec "$u" "$OUT/apps/$name"     # r1120 AC
+    { [ "$name" = signal_probe ] || [ "$name" = rv_recorder ]; } && [ "$REC" = 1 ] && copy_rec "$u" "$OUT/apps/$name"     # r1120 AC; road TS
   done
 fi
 
