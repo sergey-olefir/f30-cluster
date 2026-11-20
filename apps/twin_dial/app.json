@@ -9,6 +9,8 @@
   "i18n": true,
   "shared": [
     "lang.js",
+    "units.js",
+    "profile_settings.js",
     "hud.js",
     "hud_text.js",
     "hud_data.js",
@@ -98,7 +100,9 @@
       "_about": "UnitBN2020.unitOfMeasurementMileage (getter 1): unseen (P5); round 2 only logs it and keeps km"
     },
     "de.bmw.infotainment.vehicle.Vehicle": {
-      "statusDayNightChangeOver": "rs"
+      "statusDayNightChangeOver": "rs",
+      "statusNewCurrentUnitsStatusExt": "rs",
+      "_units": "r1120 PS: the car's own units for the active driver profile (shared/units.js; the setting \"units\" Авто follows them). Catalogue: getter 46 (NON-ZERO), notifier 32814. READ ONLY: its setter newCurrentUnitsConfigExt is never declared. This app's own Vehicle entry replaces the kit's platform grant of the same field, so it is named here"
     },
     "de.bmw.infotainment.KombiIF": {
       "statusRangeTankStatus": "rs",
@@ -262,6 +266,10 @@
           "lang"
         ],
         [
+          "setting",
+          "profileSets"
+        ],
+        [
           "button",
           "BTN_DIAG",
           "Діагностика"
@@ -279,6 +287,7 @@
       "title": "Settings",
       "skip": [
         "lang",
+        "profileSets",
         "hudLayout",
         "centre",
         "tab",
@@ -664,6 +673,32 @@
       "type": "bool",
       "default": false,
       "_about": "front-vehicle FV (docs/twin-dial/FV-SPEC.md): config.frontVehicle.on. On = DataFrontVehicle is watched (late, if it was off at the start), tab 1 shows the page 'Авто попереду' and the speedometer's hub the pictogram of the car ahead; one 'fv:' log line per state change (numbers only) for the calibration. Off = nothing subscribed (from the start), nothing drawn, nothing changed. Each change rebuilds the layout once (the pictogram's own layer)."
+    },
+    {
+      "key": "units",
+      "label": "Одиниці",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Авто (як в авто)"
+        ],
+        [
+          "km",
+          "км, км/год"
+        ],
+        [
+          "mi",
+          "милі, mph"
+        ]
+      ]
+    },
+    {
+      "key": "profileSets",
+      "label": "Налаштування для кожного профілю",
+      "type": "bool",
+      "default": true
     },
     {
       "key": "lang",

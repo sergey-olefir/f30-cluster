@@ -96,10 +96,14 @@ if (process.env.BENCH_CONFIG) {
 // 2026-11-15 (apps/driver_profiles): an app whose manifest asks for persod's UserAccountManager gets the bench's fake
 // persod (bench/fake-personalization.js); POST /fake steers it, GET /probe reports its accounts and every call made
 let fakePerso = null;
+let benchUnits = {};      // r1120 PS: the car's units as POST /fake { carUnits } set them (fed with the bench's own units struct)
 try {
     const manifest = JSON.parse(fs.readFileSync(path.join(stage, 'source', 'manifest.json'), 'utf8'));
     if (manifest.proxies && manifest.proxies['de.bmw.infotainment.personalization.UserAccountManager']) {
         fakePerso = require('./fake-personalization').install(hu);
+    } else if (fs.existsSync(path.join(stage, 'source', 'javascript', 'profile_settings.js')) && process.env.BENCH_PERSO !== 'off') {
+        // r1120 PS: the active driver profile for shared/profile_settings.js (SessionManager, UserAccount ids; nothing fed)
+        fakePerso = require('./fake-personalization').install(hu, { light: true });
     }
 } catch (e) { log.warn('bench: fake persod not installed: ' + e.message); }
 
@@ -310,7 +314,7 @@ setInterval(() => {
     hu.feed('de.bmw.infrastructure.VehicleCondition', 'VehicleCondition', { statusConditionVehicle: Math.round(num('condition', 10)) });
     hu.feed('de.bmw.infrastructure.EnvironmentalInformation', 'ExteriorTemperature', { temperatureExterior: Math.round((num('ambient', 22) + 40) / 0.5) });
     // the car's display units (bar, C), so the tyre values below read as 0.1 bar and C + 40; the shifter programme from `program` (S / M)
-    hu.feed('de.bmw.infotainment.vehicle.Vehicle', 'statusNewCurrentUnitsStatusExt', { unitOfMeasurementAirPressure: 1, unitOfMeasurementTemperature: 1 });
+    hu.feed('de.bmw.infotainment.vehicle.Vehicle', 'statusNewCurrentUnitsStatusExt', Object.assign({ unitOfMeasurementAirPressure: 1, unitOfMeasurementTemperature: 1 }, benchUnits));     // r1120 PS: + POST /fake { carUnits }
     hu.feed('de.bmw.infotainment.misc.MDrive', 'dataDisplayGearbox', { displayProgramGearbox: manual.program === 'S' ? 'S_MINUS_PROGRAMM' : manual.program === 'M' ? 'M_MINUS_PROGRAMM' : 'D_PROGRAMM' });
     // tyres (TPMS, the fields the car answers a read with): pressure in 0.1 bar, temperature raw - 40 C; the rear pair a notch higher
     const tp = Math.round(num('tyreP', 2.3) * 10), tt = Math.round(num('tyreT', 24) + 40);
@@ -460,6 +464,12 @@ process.on('message', (m) => {
         else if (v.ccRisk || v.ccBasic || v.symbols) fakeSigns.control(v);     // probes (0.7.18): bench/test-probes.js
         else if (v.dayNight !== undefined) fakeSigns.control(v);    // fix/colour-daynight: bench/test-daynight.js
         else if (v.front) fakeSigns.control(v);     // front-vehicle FV: DataFrontVehicle (bench/test-front-vehicle.js)
+        else if (v.carUnits) {          // r1120 PS: the car's own unit setting for the active profile ({ speed: 'MEILEN', cons: 'MPG__UK' } or numbers)
+            benchUnits = {};
+            if (v.carUnits.speed !== undefined) benchUnits.unitOfMeasurementSpeedometerDigital = v.carUnits.speed;
+            if (v.carUnits.cons !== undefined) benchUnits.unitOfMeasurementConsumption = v.carUnits.cons;
+            hu.feed('de.bmw.infotainment.vehicle.Vehicle', 'statusNewCurrentUnitsStatusExt', Object.assign({ unitOfMeasurementAirPressure: 1, unitOfMeasurementTemperature: 1 }, benchUnits));
+        }
         else if (fakePerso) fakePerso.control(v);
     }
     else if (m.t === 'probe') {
@@ -472,6 +482,13 @@ process.on('message', (m) => {
             activeName: hud ? hud.activeName : null, layoutName, yielded, driveMode: hud ? hud.driveMode : null,
             ready: !!(hud && hud.client && hud.client.ready),
             perso: fakePerso ? fakePerso.state() : null,
+            // r1120 PS: the per-profile settings, the units in use, the texts the layout shows now (resolved) and the scene textures held
+            ps: (() => { try { const m = require(path.join(stage, 'source', 'javascript', 'profile_settings.js')); return m.current ? Object.assign(m.current.info(), { applies: m.current.applies }) : null; } catch (e) { return null; } })(),
+            units: (() => { try { return hud && typeof hud._units === 'function' ? Object.assign({}, hud._units(), { car: hud.unitCar }) : null; } catch (e) { return null; } })(),
+            texts: (() => { try { const o = {}; if (hud) hud.widgets.forEach((x, id) => { if (x.w && x.w.type === 'text' && typeof x.w.text === 'string') o[id] = { text: hud._resolve(x.w.text), font: x.w.font, w: x.w.w, align: x.w.align }; }); return o; } catch (e) { return null; } })(),
+            scenes: (() => { try { const o = []; if (hud) hud.atlases.forEach((a, k) => { if (k.indexOf(':scene:') >= 0) o.push(k.split(':scene:')[1]); }); return o; } catch (e) { return null; } })(),
+            dials: (() => { try { const o = {}; if (hud) hud.widgets.forEach((x, id) => { if (x.w && (x.w.type === 'dial' || x.w.type === 'tdial') && (x.w.measure === 'speed' || x.w.kind === 'speed')) o[id] = { scale: x.w.type === 'dial' ? hud._dialScale(x.w) : null, mi: x.tw ? !!x.tw.mi : null, deg: x.tw ? hud._twinDeg(x) : null }; }); return o; } catch (e) { return null; } })(),
+            pixelBytes: hud ? hud.pixelBytes : null,
             // car issues CT: the calls the GuidanceEventList stand-in answered (method names only)
             carplayTurns: fakeTurns ? { calls: fakeTurns.calls.length, methods: fakeTurns.calls.map((c) => c.method).filter((x, i, a) => a.indexOf(x) === i) } : null,
             twin: twinSim ? twinSim.state(hud) : null,      // twin_dial: ledger, coverage, the engine's message state

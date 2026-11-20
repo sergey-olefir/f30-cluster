@@ -69,9 +69,13 @@ const GREY = [227, 227, 227];
 /* ---------------------------------------------------------------- the laws ---------------------------------------- */
 
 /** SPEC 5.2 / 8: the speedometer's angle at `kmh` (degrees clockwise from 12 o'clock): -125 + 1.25 a km/h up to 100, + 0.625 a km/h above. */
-function angleOf(kmh) {
+function angleOf(kmh, mi) {
     if (!isNum(kmh)) return null;
     const v = Math.max(0, kmh);
+    if (mi) {           // r1120 PS: the mph face (tools/twin-dial/bake_face.py MPH): 0..60 mph to 12 o'clock, then 60..180 to +125
+        const m = v * 0.621371;
+        return Math.min(125, m <= 60 ? -125 + 125 * m / 60 : 125 * (m - 60) / 120);
+    }
     return Math.min(125, v <= 100 ? -125 + 1.25 * v : 0.625 * (v - 100));
 }
 
@@ -100,18 +104,18 @@ function displayOf(s) {
 }
 
 /** u_lim for a display: [angle in degrees, state, warn level, strip mode]. No limit: [0, 0, 0, mode]. */
-function limUniform(d, strip) {
+function limUniform(d, strip, mi) {
     const mode = STRIP.hasOwnProperty(strip) ? STRIP[strip] : STRIP.L1;
     if (!d || d.kind !== 'limit') return [0, LIM_STATE.none, 0, mode];
-    const a = angleOf(d.kmh);
+    const a = angleOf(d.kmh, mi);
     if (a === null) return [0, LIM_STATE.none, 0, mode];
     return [Math.round(a * 100) / 100, d.cond ? LIM_STATE.conditional : LIM_STATE.limit, d.warn, mode];
 }
 
 /** u_cru for a cruise reading: [angle, state, 0, 0]. Only an active function with a valid speed has a marker (SPEC 9: standby none). */
-function cruUniform(c) {
+function cruUniform(c, mi) {
     if (!c || c.status !== 'active' || !isNum(c.kmh)) return [0, CRU_STATE.none, 0, 0];
-    const a = angleOf(c.kmh);
+    const a = angleOf(c.kmh, mi);
     return a === null ? [0, CRU_STATE.none, 0, 0] : [Math.round(a * 100) / 100, CRU_STATE.active, 0, 0];
 }
 
@@ -549,7 +553,7 @@ function shaderReady(src) {
  */
 function dial(hud, x, shaderSrc) {
     if (!x || !x.tw || !x.ref) return;
-    const t = st(hud), lim = limUniform(displayNow(hud), limCfg(hud).strip), cru = cruUniform(cruiseNow(hud));
+    const t = st(hud), lim = limUniform(displayNow(hud), limCfg(hud).strip, hud.twinMi), cru = cruUniform(cruiseNow(hud), hud.twinMi);     // r1120 PS: the face's own law
     const key = lim.join(',') + '|' + cru.join(',');
     if (typeof hud._twinMarks === 'function') {
         if (key === t.marksKey) return;

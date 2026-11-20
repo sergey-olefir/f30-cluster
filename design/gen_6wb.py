@@ -136,6 +136,15 @@ def ring_label(id, c, deg, rmax, t, font, adv, conn, w=90, color="fg"):
     ext = abs(math.sin(a)) * adv * len(t) / 2.0 + abs(math.cos(a)) * cell(font) / 2.0
     return label(id, c, deg, rmax - ext - 3, t, font, conn, w=w, color=color)
 
+# r1120 PS (docs/r1120/PS-REPORT.md): the words and the speed scale follow the language and the units. The speed dials take
+# the same 13 steps in mph, 10 mph a step (0..130; the baked Comfort face's ticks stay where they are); a scale number is
+# placed by its km/h text (never shorter than its mph one) and drawn from the token {{wb:spd:<i>}} (shared/hud.js _wbWord)
+MPH_SCALE = {"max": 130, "ticks": 13}
+
+def spd_token(d, i):
+    d["text"] = "{{wb:spd:%d}}" % i
+    return d
+
 def icon(id, name, cx, cy, conn, color="dim", w=22, h=26):
     return {"id": id, "type": "icon", "icon": name, "z": 5, "x": int(round(cx - w / 2.0)), "y": int(round(cy - h / 2.0)),
             "w": w, "h": h, "color": color, "conn": conn}
@@ -198,7 +207,7 @@ def comfort():
          "window": WINDOW, "fade": FADE, "foot": FOOT, "footLine": FOOT_LINE,
          "mapWindow": MAP_WINDOW, "mapFade": MAP_FADE},             # car3 H: the window while BMW's map shows
         dial("speedo", SP, "comfort", ringW=10, base=base("speedo", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
-             fill=arc_fill("range_seg", SP, 239, 614, 346, 68, 216.0, 144.0, "fuel", 1, [210, 209, 205]), measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
+             fill=arc_fill("range_seg", SP, 239, 614, 346, 68, 216.0, 144.0, "fuel", 1, [210, 209, 205]), measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, mph=MPH_SCALE, minor=10,
              start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "comfort", ringW=10, base=base("tacho", RV, R, RV[0] - R, RV[1] - R, 2 * R, 3),
              fill=arc_fill("ed_seg", RV, 1338, 612, 346, 70, 196.5, 143.3, "cons", 20, [114, 66, 70]), measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0}, minor=10,
@@ -207,14 +216,14 @@ def comfort():
     # the scale numbers: the box ends at 0.78 R, inside the ticks' inner ends (0.82 R)
     for i in range(14):
         n = 20 * i
-        W.append(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1))
+        W.append(spd_token(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1), i))
     for i in range(1, 8):
         W.append(ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 24.5, 2, w=40))
     W += [
-        text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "km/h", "wb_cap", conn=1),
-        text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "1/min x 1000", "wb_cap", conn=2),
-        text("ready", RV[0] - 0.63 * R, RV[1] + 0.25 * R, 110, "READY", "wb_capb", conn=2),
-        text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "OFF", "wb_cap", "dim", conn=2),
+        text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "{{wb:speedU}}", "wb_cap", conn=1),
+        text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "{{wb:rpmCap}}", "wb_cap", conn=2),
+        text("ready", RV[0] - 0.63 * R, RV[1] + 0.25 * R, 110, "{{wb:ready}}", "wb_capb", conn=2),
+        text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "{{wb:off}}", "wb_cap", "dim", conn=2),
     ]
     # the road signs under the speed dial's hub: the limit (its figure is text on the sign, a 2-digit box 37 x 30
     # centred 351, 505; BAKE C7) and no overtaking. Always ours here: our backdrop covers BMW's own sign
@@ -231,8 +240,8 @@ def comfort():
     # the range under the road signs (its pictogram is baked into the speed dial), the instant consumption under the rev dial
     # ref 12: the range arc reads "0" at its left end, "km" at its right end and the range in the middle above it;
     # the EfficientDynamics arc the same way with the instant consumption (0 at 196.5 deg, 20 l/100 km at 143.3 deg)
-    for id_, c, a0, a1, lab0, lab1, tok, conn in (("range", SP, 216.0, 144.0, "0", "km", "{{range}}", 1),
-                                                  ("cons", RV, 196.5, 143.3, "0", "l/100 km", "{{cons}}", 2)):
+    for id_, c, a0, a1, lab0, lab1, tok, conn in (("range", SP, 216.0, 144.0, "0", "{{wb:distU}}", "{{range}}", 1),
+                                                  ("cons", RV, 196.5, 143.3, "0", "{{wb:consU}}", "{{cons}}", 2)):
         W.append(text(id_ + "_v", c[0], c[1] + 0.765 * R, 110, tok, "wb_spd", conn=conn))
         x0, y0 = at(c, a0, 0.775 * R)
         x1, y1 = at(c, a1, 0.775 * R)
@@ -572,7 +581,7 @@ def dials():
         dials_bg("comfort"),
         dial("speedo", SP, "comfort", ringW=10, base=base("speedo_d", SP, R, SP[0] - R, SP[1] - R, 2 * R, 3),
              cut={"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": SIGN_SOFT, "cover": "limit"},
-             measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10, start=SPD_START, sweep=SPD_SWEEP),
+             measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, mph=MPH_SCALE, minor=10, start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "comfort", ringW=10, base=base("tacho_d", RV, R, RV[0] - R, RV[1] - R, 2 * R, 3),
              # package X: the box window over BMW's marker again (shut on 2026-11-13); its cost: WBDIAL blacks this
              # dial's bezel below the window's top on its left half (u_cut mode 2), so the rim ends at the marker.
@@ -584,14 +593,14 @@ def dials():
     W += minis()
     for i in range(14):
         n = 20 * i
-        W.append(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1))
+        W.append(spd_token(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1), i))
     for i in range(1, 8):
         W.append(ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 24.5, 2, w=40))
     W += [
-        text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "km/h", "wb_cap", conn=1),
-        text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "1/min x 1000", "wb_cap", conn=2),
-        text("ready", RV[0] - 0.63 * R, RV[1] + 0.25 * R, 110, "READY", "wb_capb", conn=2),
-        text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "OFF", "wb_cap", "dim", conn=2),
+        text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "{{wb:speedU}}", "wb_cap", conn=1),
+        text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "{{wb:rpmCap}}", "wb_cap", conn=2),
+        text("ready", RV[0] - 0.63 * R, RV[1] + 0.25 * R, 110, "{{wb:ready}}", "wb_capb", conn=2),
+        text("off", RV[0] - 0.575 * R, RV[1] + 0.465 * R, 70, "{{wb:off}}", "wb_cap", "dim", conn=2),
     ]
     W += own_row()                   # package F: the bottom row's items ours
     W += nav_row() + cc_row()        # bottom row: the road label and the check-control text, each while it is ours
@@ -614,7 +623,7 @@ def sport_face(cut=False):
     under it, the mode label and gear (tray_row) and the MSA sign. cut: the open bottoms of 6WB Dials + G20 (CUT_Y,
     the round window over BMW's sign), for 6WB Sport + G20."""
     W = [
-        dial("speedo", SP, "sport", hub=SPORT_HUB, ringW=6, measure="speed", kmh=True, scale={"max": 260, "ticks": 13},
+        dial("speedo", SP, "sport", hub=SPORT_HUB, ringW=6, measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, mph=MPH_SCALE,
              minor=10, start=SPD_START, sweep=SPD_SWEEP,
              **({"cut": {"y": CUT_Y, "fade": CUT_FADE, "round": SIGN_WIN, "soft": SIGN_SOFT, "cover": "limit"}} if cut else {})),
         dial("tacho", RV, "sport", hub=SPORT_HUB, ringW=6, measure="rpm", scale={"max": RPM_MAX, "ticks": RPM_MAX / 1000.0},
@@ -623,14 +632,14 @@ def sport_face(cut=False):
     # (cut): only while the sign is ours, else BMW's own shows through it (bottom row package)
     ] + road_signs(own=cut)
     # Sport's scale: the speed dial's ends only, every 1000 rpm; placed as Comfort's (in the band's inner half here)
-    W += [ring_label("spd0", SP, SPD_START, 0.78 * R, "0", "wb_spd", 16.7, 1),
-          ring_label("spd13", SP, SPD_START + SPD_SWEEP, 0.78 * R, "260", "wb_spd", 16.7, 1)]
+    W += [spd_token(ring_label("spd0", SP, SPD_START, 0.78 * R, "0", "wb_spd", 16.7, 1), 0),
+          spd_token(ring_label("spd13", SP, SPD_START + SPD_SWEEP, 0.78 * R, "260", "wb_spd", 16.7, 1), 13)]
     W += [ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 24.5, 2, w=40) for i in range(1, 8)]
     # 0.7.14 (docs/PERF-NEEDLE-REPORT.md): the big speed is drawn by the GPU from a glyph atlas ("gpu"), so a new
     # value is one uniform message instead of a 260 x 90 pixel upload; "maxLen" is the longest value shown
     W += [text("speed", SP[0], SP[1] + 0.02 * R, 260, "{{speed}}", "wb_big", conn=1, gpu=True, maxLen=3),
-          text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "km/h", "wb_cap", conn=1),
-          text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "1/min x 1000", "wb_cap", conn=2)]
+          text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "{{wb:speedU}}", "wb_cap", conn=1),
+          text("rpm_cap", RV[0], RV[1] - 0.40 * R, 200, "{{wb:rpmCap}}", "wb_cap", conn=2)]
     W += tray_row("accent")          # the mode label (red, Sport's) and our gear at Comfort's places
     W.append(msa_sign(RV[0] + MSA_AT[0] * R, RV[1] + MSA_AT[1] * R))      # car3 I, where Comfort has it
     return W
@@ -645,7 +654,7 @@ def sport():
     W += sport_face() + minis()        # 2026-11-14: Comfort's baked minis
     # the range at the speed dial's foot (Comfort's range figure is there, on its bottom arc), in the scale's gap
     W += [icon("range_icon", "fuel", SP[0] - 45, SP[1] + 0.765 * R, 1, "fg"),
-          text("range_in", SP[0] - 25, SP[1] + 0.765 * R, 130, "{{range}} km", "wb_cap", align="left", conn=1)]
+          text("range_in", SP[0] - 25, SP[1] + 0.765 * R, 130, "{{range}} {{wb:distU}}", "wb_cap", align="left", conn=1)]
     # the row under the shelf's base line, as 6WB Comfort's (baked) row: the clock only while it is right ("own:clock"),
     # the temperature in BMW's 0.5 degree steps, none of it while BMW's message shows
     W += [text("row_b0", 800, 662, 150, "{{time}}", "wb_val", align="left", toggle="own:clock&!cc:open"),
@@ -681,7 +690,7 @@ def eco():
         {"id": "bg", "type": "wbback", "class": "content", "z": 0, "x": 0, "y": 0, "w": 1920, "h": 720,
          "dl": [SP[0], SP[1], R], "dr": [RV[0], RV[1], R], "style": "eco", "color": "accent",
          **CC_PANEL},                        # BMW's message shows through, as in Comfort (fix/opaque-cc)
-        dial("speedo", SP, "eco", hub=hub, ringW=6, measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, minor=10,
+        dial("speedo", SP, "eco", hub=hub, ringW=6, measure="speed", kmh=True, scale={"max": 260, "ticks": 13}, mph=MPH_SCALE, minor=10,
              start=SPD_START, sweep=SPD_SWEEP),
         dial("tacho", RV, "eff", hub=hub, ringW=6, measure="signal", signal="torquePct", scale={"max": 100, "ticks": 10},
              minor=1, start=225, sweep=235),
@@ -689,16 +698,16 @@ def eco():
     # the scale numbers where Comfort's are (0.78 R), Eco's colours: white to 120, then dim
     for i in range(14):
         n = 20 * i
-        W.append(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1,
-                            color="fg" if i <= 6 else "dim"))
+        W.append(spd_token(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1,
+                                      color="fg" if i <= 6 else "dim"), i))
     W += [label("charge", RV, -23, 0.78 * R, "CHARGE", "wb_capb", 2, w=130),
           label("power", RV, 25, 0.78 * R, "POWER", "wb_capb", 2, w=130),
           # the captions 0.40 R above the centres, as Comfort's "km/h" and "1/min x 1000"
-          text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "km/h", "wb_cap", conn=1),
+          text("speed_unit", SP[0], SP[1] - 0.40 * R, 100, "{{wb:speedU}}", "wb_cap", conn=1),
           text("effdyn", RV[0], RV[1] - 0.40 * R, 240, "EfficientDynamics", "wb_cap", "accent", conn=2),
           # the range at the speedo's foot, at the height of Comfort's range figure (0.765 R)
           icon("range_icon", "fuel", SP[0] - 70, SP[1] + 0.765 * R, 1, "fg"),
-          text("range_in", SP[0] + 12, SP[1] + 0.765 * R, 130, "{{range}} km", "wb_cap", conn=1),
+          text("range_in", SP[0] + 12, SP[1] + 0.765 * R, 130, "{{range}} {{wb:distU}}", "wb_cap", conn=1),
           # the mode where Comfort's mode label is (no tray under it: Eco Pro prints its mode itself)
           text("mode", MODE_C[0], MODE_C[1], 240, "{{mode}}", "wb_capb", conn=2)]
     # the info row as Comfort's (baked) row: the clock while it is right, the outside temperature; none of ours while

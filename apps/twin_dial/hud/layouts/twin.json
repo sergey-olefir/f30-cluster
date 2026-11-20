@@ -472,8 +472,8 @@
               "id": "cons_u",
               "x": 906,
               "b": 384,
-              "top": "{{word:twin.u.l}}",
-              "bot": "{{word:twin.u.per100}}",
+              "top": "{{td:uConsTop}}",
+              "bot": "{{td:uConsBot}}",
               "dt": -17,
               "dr": -14,
               "db": 3,
@@ -495,7 +495,7 @@
               "x": 1116,
               "b": 384,
               "f": "u21",
-              "s": "{{word:twin.u.kmh}}",
+              "s": "{{td:uSpeed}}",
               "c": "fg",
               "al": "l"
             },
@@ -524,7 +524,7 @@
               "x": 906,
               "b": 455,
               "f": "u21",
-              "s": "{{word:twin.u.km}}",
+              "s": "{{td:uDist}}",
               "c": "fg",
               "al": "l"
             },
