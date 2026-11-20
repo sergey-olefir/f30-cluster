@@ -1,0 +1,126 @@
+{
+  "id": "acc_view",
+  "title": "ACC View",
+  "description": "Read-only: the vehicle ahead (a gap level, closing), the cruise / limiter and later the outer loop's suggested set speed, drawn on the cluster's map target. Writes nothing to the car. A skeleton, off by default.",
+  "version": "0.0.1",
+  "vendor": "custom",
+  "loggingId": "OAAV",
+  "iconGlyph": "AV",
+  "mguHmi": [
+    "ID7"
+  ],
+  "shared": [
+    "cluster_render_client.js",
+    "front_vehicle.js",
+    "limit_src.js"
+  ],
+  "signals": {
+    "de.bmw.dass.GapVehicleAhead": {
+      "_instances": "1",
+      "DataFrontVehicle": "s",
+      "_about": "r1120 AA: the vehicle ahead as the front camera reports it (a FIELD with a notifier only, 32770; no getter, no setter), declared 's' as Signal Probe and Twin Dial do. Watched only while 'show' is on. Read only."
+    },
+    "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
+      "_instances": "1",
+      "functionalLibraryData": "rs",
+      "_about": "r1120 AA: cruise / limiter (ldmSym, ldmSymColor, cruiseCtrlSpeedHUD), seen on the car 2026-11-18. Getter 1 (non-zero), notifier 32769. Read only."
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "statusCarSpeed2": "rs",
+      "_about": "r1120 AA: our own speed (raw x 0.015625 km/h), for the time-gap levels. Read only."
+    },
+    "de.bmw.infotainment.fasus.FASuS": {
+      "_instances": "1",
+      "requestWarnBrakeCoordinatorDisplay": "rs",
+      "_about": "r1120 AA: the car's own collision-warning request, declared in Signal Probe (S14), never seen with a value: logged only; drawn (our picture dimmed) only when config.warn names its path and active values. Read only."
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "menu",
+      "title": "ACC View",
+      "settings": true,
+      "items": [
+        [
+          "text",
+          "STATUS",
+          ""
+        ]
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "show",
+      "label": "Показувати на щитку (тест)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "demo",
+      "label": "Демо: стани по колу",
+      "type": "bool",
+      "default": false
+    }
+  ],
+  "config": {
+    "target": "map",
+    "layer": {
+      "target": "map",
+      "klass": "content",
+      "z": 0,
+      "contend": false,
+      "guideHold": 0,
+      "night": false,
+      "_about": "r1120 AA (docs/r1120/AA-SPEC.md 2 and 7): one image layer 420 x 372 at (334, 44) of the map target. contend false: it waits until BMW's map leaves the slot and never pushes it aside (true = take the slot, the owner's decision). guideHold 0: BMW's CarPlay manoeuvre box is never held back for us."
+    },
+    "frontVehicle": {
+      "on": false,
+      "none": [
+        4093,
+        4094,
+        4095
+      ],
+      "qualNone": [
+        2,
+        "EVENT_DATA_NOT_AVAILABLE"
+      ],
+      "nearer": "smaller",
+      "scale": null,
+      "assumeScale": 0.1,
+      "levels": {
+        "timeGap": [
+          0.9,
+          1.4,
+          2.0,
+          3.0
+        ],
+        "metres": [
+          8,
+          15,
+          30,
+          60
+        ],
+        "minKmh": 20
+      },
+      "hyst": 0.12,
+      "closing": {
+        "windowMs": 1500,
+        "minMs": 600,
+        "rate": 1.0,
+        "fastRate": 4.0,
+        "fastTtc": 4.0,
+        "release": 0.6
+      },
+      "staleMs": 2000,
+      "absentMs": 10000
+    },
+    "cruise": {},
+    "warn": {
+      "path": null,
+      "active": null,
+      "_about": "unknown until the car shows the struct: e.g. path ['someMember'], active ['SOME_ENUM']. Null: never drawn."
+    }
+  }
+}
