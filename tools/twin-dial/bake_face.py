@@ -84,10 +84,12 @@ BAR = {'y': 0.73, 'x0': -0.42, 'x1': 0.42, 'half': 0.0125, 'segs': 5, 'gap': 4}
 
 
 # r1120 PS (docs/r1120/PS-REPORT.md): the faces per language and unit. The words are the only change between languages; the mph
-# face has its own numerals and ticks on the same angles' structure: 0..60 mph to 12 o'clock (as 0..100 km/h), then 60..180 mph
-# to +125 deg (shared/hud.js _twinDeg and shared/twin_limit.js angleOf use the same law). Nothing else differs.
-MPH_LARGE = (0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 140, 160, 180)
-MPH_SMALL = (70, 90, 110, 130, 150, 170)
+# face has its own numerals and ticks on the same angles' structure: 0..60 mph to 12 o'clock (60 mph is 97 km/h, where the km/h
+# face has 100), then 60..160 mph to +125 deg, 20 mph a large numeral at 25 deg as the km/h face's 40 km/h above 100 (r1120 PS2,
+# the owner: US style, 0..160; shared/hud.js _twinDeg and shared/twin_limit.js angleOf use the same law). Nothing else differs.
+MPH_MAX = 160
+MPH_LARGE = (0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 140, 160)
+MPH_SMALL = (70, 90, 110, 130, 150)
 SPEED_WORD = {('uk', 'kmh'): 'км/год', ('en', 'kmh'): 'km/h', ('uk', 'mph'): 'миль/год', ('en', 'mph'): 'mph'}
 TACH_WORD = {'uk': '1/хв × 1000', 'en': '1/min × 1000'}
 VARIANTS = [('tach', 'uk', 'kmh'), ('speed', 'uk', 'kmh'), ('tach', 'en', 'kmh'), ('speed', 'en', 'kmh'), ('speed', 'uk', 'mph'), ('speed', 'en', 'mph')]
@@ -100,14 +102,14 @@ def face_name(kind, lang='uk', unit='kmh'):
 # ------------------------------------------------------------------------------------------------- scale laws
 def spd_angle(v, unit='kmh'):
     if unit == 'mph':
-        return -SWEEP + SWEEP * v / 60.0 if v <= 60 else SWEEP * (v - 60) / 120.0
+        return -SWEEP + SWEEP * v / 60.0 if v <= 60 else SWEEP * (v - 60) / (MPH_MAX - 60.0)
     return -SWEEP + 25.0 * (v / 20.0) if v <= 100 else 25.0 * (v - 100) / 40.0
 
 
 def spd_sets(unit):
     """(large numerals, small numerals, minor tick values) of a speed face."""
     if unit == 'mph':
-        return MPH_LARGE, MPH_SMALL, [v for v in list(range(5, 60, 5)) + list(range(70, 180, 10)) if v not in MPH_LARGE]
+        return MPH_LARGE, MPH_SMALL, [v for v in list(range(5, 60, 5)) + list(range(70, MPH_MAX, 10)) if v not in MPH_LARGE]
     return SPD_LARGE, SPD_SMALL, [v for v in list(range(5, 100, 5)) + list(range(110, 300, 10)) if v not in (20, 40, 60, 80, 100, 140, 180, 220, 260)]
 
 
@@ -542,7 +544,7 @@ def regions(kind, fc, numerals, dropped, segs, panel_x0, stretch, clear, lang='u
     else:
         d['scale'] = ({'law': '0 at -125 deg, 100 at 0, 300 at +125; 20 km/h per major to 100, 40 above (piecewise linear)',
                        'sweep_deg': SWEEP, 'rest_deg': spd_angle(0)} if unit == 'kmh' else
-                      {'law': '0 at -125 deg, 60 mph at 0, 180 mph at +125; 10 mph per major to 60, 20 above (piecewise linear)',
+                      {'law': '0 at -125 deg, 60 mph at 0, 160 mph at +125; 10 mph per major to 60, 20 above (piecewise linear)',
                        'sweep_deg': SWEEP, 'rest_deg': spd_angle(0, unit)})
     return d
 

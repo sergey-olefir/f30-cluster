@@ -46,7 +46,16 @@
   "row_v2": {"font": "wb_val", "baseline": 663, "box": [1048, 634, 170, 33], "ink": [1049, 637, 1177, 663], "boxBefore": [1048, 634, 170, 32], "inkBefore": [1049, 637, 1177, 663]},
   "mode": {"font": "wb_capb", "baseline": 531, "box": [1388, 514, 240, 22], "ink": [1461, 516, 1555, 531], "boxBefore": [1388, 514, 240, 25], "inkBefore": [1461, 516, 1555, 531]},
   "gear": {"font": "wb_gear", "baseline": 599, "box": [1448, 565, 120, 36], "ink": [1485, 567, 1533, 599], "boxBefore": [1448, 565, 120, 36], "inkBefore": [1485, 567, 1533, 599]},
-  "gear_l": {"font": "wb_gear", "baseline": 599, "box": [1448, 565, 120, 36], "ink": [1497, 567, 1521, 599], "boxBefore": [1448, 565, 120, 36], "inkBefore": [1497, 567, 1521, 599]}
+  "gear_l": {"font": "wb_gear", "baseline": 599, "box": [1448, 565, 120, 36], "ink": [1497, 567, 1521, 599], "boxBefore": [1448, 565, 120, 36], "inkBefore": [1497, 567, 1521, 599]},
+  "mph0": {"font": "wb_spd", "baseline": 547, "box": [180, 525, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph20": {"font": "wb_spd", "baseline": 421, "box": [129, 399, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph40": {"font": "wb_spd", "baseline": 289, "box": [151, 267, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph60": {"font": "wb_spd", "baseline": 188, "box": [238, 166, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph80": {"font": "wb_spd", "baseline": 144, "box": [367, 122, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph100": {"font": "wb_spd", "baseline": 192, "box": [493, 170, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph120": {"font": "wb_spd", "baseline": 293, "box": [576, 271, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph140": {"font": "wb_spd", "baseline": 420, "box": [597, 398, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph160": {"font": "wb_spd", "baseline": 539, "box": [544, 517, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"}
  },
  "wb_dials": {
   "limit": {"font": "wb_lim", "baseline": 520, "box": [321, 491, 60, 31], "ink": [333, 493, 370, 520], "boxBefore": [321, 490, 60, 32], "inkBefore": [333, 493, 369, 519]},
@@ -86,7 +95,16 @@
   "cc_line": {"font": "wb_msg", "baseline": 671, "box": [690, 627, 557, 58], "ink": [868, 646, 1068, 678], "inkCar": [826, 639, 1109, 677], "missingCar": 0, "boxBefore": null, "inkBefore": null},
   "mode": {"font": "wb_capb", "baseline": 531, "box": [1388, 514, 240, 22], "ink": [1461, 516, 1555, 531], "boxBefore": [1388, 514, 240, 25], "inkBefore": [1461, 516, 1555, 531]},
   "gear": {"font": "wb_gear", "baseline": 599, "box": [1448, 565, 120, 36], "ink": [1485, 567, 1533, 599], "boxBefore": [1448, 565, 120, 36], "inkBefore": [1485, 567, 1533, 599]},
-  "gear_l": {"font": "wb_gear", "baseline": 599, "box": [1448, 565, 120, 36], "ink": [1497, 567, 1521, 599], "boxBefore": [1448, 565, 120, 36], "inkBefore": [1497, 567, 1521, 599]}
+  "gear_l": {"font": "wb_gear", "baseline": 599, "box": [1448, 565, 120, 36], "ink": [1497, 567, 1521, 599], "boxBefore": [1448, 565, 120, 36], "inkBefore": [1497, 567, 1521, 599]},
+  "mph0": {"font": "wb_spd", "baseline": 547, "box": [180, 525, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph20": {"font": "wb_spd", "baseline": 421, "box": [129, 399, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph40": {"font": "wb_spd", "baseline": 289, "box": [151, 267, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph60": {"font": "wb_spd", "baseline": 188, "box": [238, 166, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph80": {"font": "wb_spd", "baseline": 144, "box": [367, 122, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph100": {"font": "wb_spd", "baseline": 192, "box": [493, 170, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph120": {"font": "wb_spd", "baseline": 293, "box": [576, 271, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph140": {"font": "wb_spd", "baseline": 420, "box": [597, 398, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph160": {"font": "wb_spd", "baseline": 539, "box": [544, 517, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"}
  },
  "wb_sport": {
   "limit": {"font": "wb_lim", "baseline": 520, "box": [321, 491, 60, 31], "ink": [333, 493, 370, 520], "boxBefore": [321, 490, 60, 32], "inkBefore": [333, 493, 369, 519]},
@@ -110,7 +128,8 @@
   "range_in": {"font": "wb_cap", "baseline": 641, "box": [387, 623, 130, 24], "ink": [387, 625, 452, 641], "boxBefore": [387, 623, 130, 26], "inkBefore": [387, 625, 452, 641]},
   "row_b0": {"font": "wb_val", "baseline": 675, "box": [800, 646, 150, 33], "ink": [801, 649, 885, 675], "boxBefore": [800, 646, 150, 32], "inkBefore": [801, 649, 885, 675]},
   "row_b1": {"font": "wb_val", "baseline": 675, "box": [1010, 646, 170, 33], "ink": [1011, 649, 1139, 675], "boxBefore": [1010, 646, 170, 32], "inkBefore": [1011, 649, 1139, 675]},
-  "row_b2": {"font": "wb_val", "baseline": 675, "box": [860, 646, 200, 33], "ink": [896, 649, 1024, 675], "boxBefore": [860, 646, 200, 32], "inkBefore": [896, 649, 1024, 675]}
+  "row_b2": {"font": "wb_val", "baseline": 675, "box": [860, 646, 200, 33], "ink": [896, 649, 1024, 675], "boxBefore": [860, 646, 200, 32], "inkBefore": [896, 649, 1024, 675]},
+  "mph160": {"font": "wb_spd", "baseline": 539, "box": [544, 517, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"}
  },
  "wb_sport_dials": {
   "limit": {"font": "wb_lim", "baseline": 520, "box": [321, 491, 60, 31], "ink": [333, 493, 370, 520], "boxBefore": [321, 490, 60, 32], "inkBefore": [333, 493, 369, 519]},
@@ -137,7 +156,8 @@
   "own_temp": {"font": "wb_row", "baseline": 698, "box": [1513, 665, 110, 35], "ink": [1516, 667, 1622, 698], "boxBefore": [1505, 664, 110, 35], "inkBefore": [1513, 666, 1614, 697]},
   "own_temp_u": {"font": "wb_rowu", "baseline": 698, "box": [1629, 670, 46, 32], "ink": [1631, 674, 1661, 698], "boxBefore": [1619, 668, 46, 32], "inkBefore": [1621, 671, 1654, 697]},
   "nav": {"font": "wb_road", "baseline": 700, "box": [691, 658, 539, 54], "ink": [845, 670, 1078, 709], "inkCar": [865, 663, 1056, 709], "missingCar": 0, "boxBefore": [690, 682, 540, 26], "inkBefore": [901, 685, 1020, 704]},
-  "cc_line": {"font": "wb_msg", "baseline": 671, "box": [690, 627, 557, 58], "ink": [868, 646, 1068, 678], "inkCar": [826, 639, 1109, 677], "missingCar": 0, "boxBefore": null, "inkBefore": null}
+  "cc_line": {"font": "wb_msg", "baseline": 671, "box": [690, 627, 557, 58], "ink": [868, 646, 1068, 678], "inkCar": [826, 639, 1109, 677], "missingCar": 0, "boxBefore": null, "inkBefore": null},
+  "mph160": {"font": "wb_spd", "baseline": 539, "box": [544, 517, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"}
  },
  "wb_eco": {
   "fuel_full": {"font": "wb_mini", "baseline": 594, "box": [36, 582, 30, 15], "ink": [42, 584, 60, 595], "boxBefore": [36, 582, 30, 15], "inkBefore": [42, 584, 60, 595]},
@@ -164,6 +184,15 @@
   "mode": {"font": "wb_capb", "baseline": 531, "box": [1388, 514, 240, 22], "ink": [1461, 516, 1555, 531], "boxBefore": [1388, 514, 240, 25], "inkBefore": [1461, 516, 1555, 531]},
   "row_b0": {"font": "wb_val", "baseline": 675, "box": [800, 646, 150, 33], "ink": [801, 649, 885, 675], "boxBefore": [800, 646, 150, 32], "inkBefore": [801, 649, 885, 675]},
   "row_b1": {"font": "wb_val", "baseline": 675, "box": [1010, 646, 170, 33], "ink": [1011, 649, 1139, 675], "boxBefore": [1010, 646, 170, 32], "inkBefore": [1011, 649, 1139, 675]},
-  "row_b2": {"font": "wb_val", "baseline": 675, "box": [860, 646, 200, 33], "ink": [896, 649, 1024, 675], "boxBefore": [860, 646, 200, 32], "inkBefore": [896, 649, 1024, 675]}
+  "row_b2": {"font": "wb_val", "baseline": 675, "box": [860, 646, 200, 33], "ink": [896, 649, 1024, 675], "boxBefore": [860, 646, 200, 32], "inkBefore": [896, 649, 1024, 675]},
+  "mph0": {"font": "wb_spd", "baseline": 547, "box": [180, 525, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph20": {"font": "wb_spd", "baseline": 421, "box": [129, 399, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph40": {"font": "wb_spd", "baseline": 289, "box": [151, 267, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph60": {"font": "wb_spd", "baseline": 188, "box": [238, 166, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph80": {"font": "wb_spd", "baseline": 144, "box": [367, 122, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph100": {"font": "wb_spd", "baseline": 192, "box": [493, 170, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph120": {"font": "wb_spd", "baseline": 293, "box": [576, 271, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph140": {"font": "wb_spd", "baseline": 420, "box": [597, 398, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"},
+  "mph160": {"font": "wb_spd", "baseline": 539, "box": [544, 517, 90, 24], "note": "r1120 PS2: the mph scale number, recorded as design/gen_6wb.py first placed it"}
  }
 }

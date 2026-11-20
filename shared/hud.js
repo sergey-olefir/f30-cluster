@@ -242,9 +242,11 @@ const I18N = require('./lang');                      // r1120 LN: {{word:key}} i
 // shared/units.js shows km, km/h and l/100 km, as before.
 let Units = null;
 try { Units = require('./units'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('units') < 0) throw e; }
-const UNITS_KM = { mi: false, cons: 'l100', src: 'default' };
+const UNITS_KM = { mi: false, cons: 'l100', temp: 'C', src: 'default' };
 // r1120 PS: Twin Dial's baked faces per language and unit (tools/twin-dial/bake_face.py): face_speedo[_en][_mph], face_tacho[_en]
 const TW_FACES = ['face_speedo', 'face_tacho'];
+// r1120 PS2: the 6WB's baked speed faces in mph (tools/bake_6wb_mph.py): speedo -> speedo_mph, speedo_d -> speedo_d_mph
+const WB_MPH_FACES = ['speedo', 'speedo_d'];
 // twin_dial: the {{td:...}} tokens, the centre pages' cycle, the extra signals (shared/twin_tokens.js). Only twin_dial packs the
 // file, so for every other app it is simply absent (null) and none of the twin_dial hooks below does anything.
 let twin = null;
@@ -1107,7 +1109,7 @@ class HudApp {
     _units() {
         if (!Units) return UNITS_KM;
         const p = this.ctx.settings.item('units') ? this.setting('units') : 'auto', c = this.unitCar || {};
-        const k = p + '|' + c.speed + '|' + c.cons;           // asked for every token of every tick: worked out once a change
+        const k = p + '|' + c.speed + '|' + c.cons + '|' + c.temp;           // asked for every token of every tick: worked out once a change
         if (k !== this.unitsKey) { this.unitsKey = k; this.unitsNow = Units.resolve(p, c); }
         return this.unitsNow;
     }
@@ -1116,8 +1118,9 @@ class HudApp {
     /** The baked face a Twin Dial layout's face texture stands for in the language and unit in use: face_speedo[_en][_mph],
      *  face_tacho[_en]; the file missing (an older package): the base face. Other textures are their own name. */
     _faceFor(name) {
-        if (TW_FACES.indexOf(name) < 0) return name;
-        const want = name + (I18N.lang() === 'en' ? '_en' : '') + (name === 'face_speedo' && this._mi() ? '_mph' : '');
+        const wb = WB_MPH_FACES.indexOf(name) >= 0;
+        if (TW_FACES.indexOf(name) < 0 && !wb) return name;
+        const want = wb ? name + (this._mi() ? '_mph' : '') : name + (I18N.lang() === 'en' ? '_en' : '') + (name === 'face_speedo' && this._mi() ? '_mph' : '');
         if (want === name) return name;
         if (!this.faceHave) this.faceHave = {};
         if (this.faceHave[want] === undefined) { try { this.faceHave[want] = !!data.has('scene/' + want + '.json'); } catch (e) { this.faceHave[want] = false; } }
@@ -1140,7 +1143,6 @@ class HudApp {
     /** {{wb:<name>}}: the 6WB's printed words in the language and units in use (design/gen_6wb.py). */
     _wbWord(name) {
         const u = this._units();
-        if (name.indexOf('spd:') === 0) { const i = Number(name.slice(4)); return isNum(i) ? String(i * (u.mi ? 10 : 20)) : ''; }
         switch (name) {
             case 'speedU': return I18N.t(u.mi ? 'wb.u.mph' : 'wb.u.kmh');
             case 'distU': return I18N.t(u.mi ? 'wb.u.mi' : 'wb.u.km');
@@ -1346,16 +1348,16 @@ class HudApp {
         }
         // ---- r1120 PS: the car's own units for the active profile (Vehicle.statusNewCurrentUnitsStatusExt, getter 46, READ ONLY;
         // its setter newCurrentUnitsConfigExt is never declared). The "units" setting's Авто follows it (shared/units.js).
-        this.unitCar = { speed: null, cons: null };
+        this.unitCar = { speed: null, cons: null, temp: null };
         this.builtKey = null;
         if (Units) {
             const VEH = 'de.bmw.infotainment.vehicle.Vehicle';
             extra[VEH] = Object.assign(extra[VEH] || {}, {
                 statusNewCurrentUnitsStatusExt: (v) => {
                     const c = Units.carOf(v);
-                    if (c.speed === this.unitCar.speed && c.cons === this.unitCar.cons) return;
+                    if (c.speed === this.unitCar.speed && c.cons === this.unitCar.cons && c.temp === this.unitCar.temp) return;
                     this.unitCar = c;
-                    this.log.info('units: the car says speed ' + (c.speed || 'not set') + ', consumption ' + (c.cons || 'not set'));
+                    this.log.info('units: the car says speed ' + (c.speed || 'not set') + ', consumption ' + (c.cons || 'not set') + ', temperature ' + (c.temp || 'not set'));
                     if (this.started) this._guard('units', () => this._wordsChanged('car units'));
                 },
             });
@@ -2092,7 +2094,7 @@ class HudApp {
                 if (ch) out.add(ci + ':scene:' + ch);
             };
             if (w.type === 'atext' && w.exact) out.add(this._exactKey(w, ci));        // 0.7.14: a "gpu" text's atlas
-            else if (w.type === 'dial' && w.look === 'wb') { add(w.base); add(w.fill); }
+            else if (w.type === 'dial' && w.look === 'wb') { add(w.base && w.base.tex ? { tex: this._faceFor(w.base.tex) } : w.base); add(w.fill); }     // r1120 PS2: the mph face
             else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); add({ tex: w.fill }); }
             else if (w.type === 'tdial') add(w.face && w.face.tex ? { tex: this._faceFor(w.face.tex) } : w.face);     // twin_dial: the dial's R8 face (r1120 PS: in the language and unit in use)
             else if (w.type === 'tdback') add(w.panelMask);                            // twin_dial: the fallback window's R8 mask
@@ -3170,9 +3172,9 @@ class HudApp {
         } else {
             const v = this._raw('speed');
             if (!isNum(v)) return -sw;
-            if (t.mi) {          // r1120 PS: the mph face (tools/twin-dial/bake_face.py MPH): 0..60 mph to 12 o'clock, 60..180 above
+            if (t.mi) {          // r1120 PS2: the mph face (tools/twin-dial/bake_face.py MPH_*): 0..60 mph to 12 o'clock, 60..160 above
                 const m = v * 0.621371;
-                deg = m <= 60 ? -sw + sw * m / 60 : sw * (m - 60) / 120;
+                deg = m <= 60 ? -sw + sw * m / 60 : sw * (m - 60) / 100;
             } else deg = v <= 100 ? -sw + sw / 5 * v / 20 : sw / 5 * (v - 100) / 40;
         }
         return Math.max(-sw, Math.min(sw, deg));
@@ -3638,6 +3640,7 @@ class HudApp {
     _token(tok) {
         const us = this.setting('units') === 'us';
         const U = this._units(), mi = U.mi === true;      // r1120 PS: speed, distance and consumption follow the units in use
+        const tf = us || U.temp === 'F';                 // r1120 PS2: every temperature in °F while the units say so (shared/units.js)
         const fix = (v, n) => (isNum(v) ? v.toFixed(n) : '--');
         if (tok.indexOf('slot') === 0 && tok.indexOf(':') > 0) {
             const kind = tok.slice(0, tok.indexOf(':')), sn = this.slotSensor(this.activeName, tok.slice(kind.length + 1), this.layoutSlots);
@@ -3649,14 +3652,14 @@ class HudApp {
             if (kind === 'slotSuffix') return sn && sn.suffix ? sn.suffix : '';
         }
         if (tok.indexOf('tyreP:') === 0) { const v = this._tyre('p', tok.slice(6)); return isNum(v) ? (us ? fix(v * 14.5038, 0) : fix(v, 1)) : '--'; }
-        if (tok.indexOf('tyreT:') === 0) { const v = this._tyre('t', tok.slice(6)); return isNum(v) ? String(Math.round(us ? v * 9 / 5 + 32 : v)) : '--'; }
+        if (tok.indexOf('tyreT:') === 0) { const v = this._tyre('t', tok.slice(6)); return isNum(v) ? String(Math.round(tf ? v * 9 / 5 + 32 : v)) : '--'; }
         if (tok.indexOf('dial:speed:') === 0) {     // a speed dial's label i ({{dial:speed:<i>}}): DIAL_SPEED's steps
             const D = DIAL_SPEED[us || mi ? 'us' : 'metric'];
             return String(Math.round(D.max / D.ticks * Number(tok.slice(11))));
         }
         switch (tok) {
             case 'u:pressure': return us ? 'psi' : 'bar';
-            case 'intake': { const v = this._raw('intake'); return fix(isNum(v) ? (us ? v * 9 / 5 + 32 : v) : v, 0); }
+            case 'intake': { const v = this._raw('intake'); return fix(isNum(v) ? (tf ? v * 9 / 5 + 32 : v) : v, 0); }
             case 'boostPeak': { const v = this.boostPeak; return us ? fix(isNum(v) ? v * 14.5038 : v, 1) : fix(v, 2); }
             case 'run': { const v = this.runs.shown(Date.now()); return isNum(v) ? v.toFixed(this.runs.state === 'run' ? 1 : 2) : '0.00'; }
             case 'runBest': { const v = this.runs.best[us ? 'us' : 'metric']; return v > 0 ? v.toFixed(2) : '-.--'; }
@@ -3665,10 +3668,10 @@ class HudApp {
             case 'warm': { const o = this._raw('oil'); return isNum(o) ? (o < 80 ? 'WARMING UP' : 'ENGINE WARM') : ''; }
             case 'speed': { const v = this._raw('speed'); return fix(isNum(v) ? (us || mi ? v * 0.621371 : v) : v, 0); }
             case 'u:speed': return us || mi ? 'MPH' : 'KM/H';
-            case 'oil': case 'coolant': { const v = this._raw(tok); return fix(isNum(v) ? (us ? v * 9 / 5 + 32 : v) : v, 0); }
+            case 'oil': case 'coolant': { const v = this._raw(tok); return fix(isNum(v) ? (tf ? v * 9 / 5 + 32 : v) : v, 0); }
             case 'boost': { const v = this._raw('boost'); return us ? fix(isNum(v) ? v * 14.5038 : v, 1) : fix(v, 2); }
             case 'u:boost': return us ? 'PSI' : 'BAR';
-            case 'u:temp': return us ? '°F' : '°C';
+            case 'u:temp': return tf ? '°F' : '°C';
             case 'u:speedLc': return us || mi ? 'mph' : 'km/h';
             case 'u:distLc': return us || mi ? 'mi' : 'km';
             case 'u:dist': return us || mi ? 'MI' : 'KM';
@@ -3703,7 +3706,7 @@ class HudApp {
             case 'ambient': {
                 const v = this._raw('ambient');
                 if (!isNum(v)) return '--';
-                const n = Math.round(us ? v * 9 / 5 + 32 : v);
+                const n = Math.round(tf ? v * 9 / 5 + 32 : v);
                 return (n > 0 ? '+' : '') + n;
             }
             case 'u:torque': return us ? 'lb-ft' : 'Nm';
@@ -3718,11 +3721,11 @@ class HudApp {
             case 'ambient1': {       // package F: as BMW's bottom row shows it, "+3.5" (the car sends 0.5 °C steps); °F whole
                 const v = this._raw('ambient');
                 if (!isNum(v)) return '--';
-                if (us) { const n = Math.round(v * 9 / 5 + 32); return (n > 0 ? '+' : '') + n; }
+                if (tf) { const n = Math.round(v * 9 / 5 + 32); return (n > 0 ? '+' : '') + n; }
                 const h = Math.round(v * 2) / 2;
                 return (h > 0 ? '+' : '') + (h === 0 ? 0 : h).toFixed(1);
             }
-            case 'ambientN': { const v = this._raw('ambient'); return isNum(v) ? String(Math.round(us ? v * 9 / 5 + 32 : v)) : '--'; }
+            case 'ambientN': { const v = this._raw('ambient'); return isNum(v) ? String(Math.round(tf ? v * 9 / 5 + 32 : v)) : '--'; }
             case 'torque': { const v = this._raw('torque'); return fix(isNum(v) ? (us ? v * 0.737562 : v) : v, 0); }
             case 'torquePct': case 'powerPct': { const v = this._raw(tok); return isNum(v) ? String(Math.min(100, Math.round(v))) : '--'; }
             case 'boostHi': return us ? '20' : '1.4';
@@ -3795,7 +3798,7 @@ class HudApp {
                 if (tok.indexOf('word:') === 0) return I18N.t(tok.slice(5));                 // r1120 LN: a word of shared/i18n/<lang>.json
                 if (tok.indexOf('wb:') === 0) return this._wbWord(tok.slice(3));              // r1120 PS: the 6WB's printing in the language and units in use
                 if (tok.indexOf('spd:') === 0) { const v = SPEED_SCALE[us ? 'us' : 'metric'][Number(tok.slice(4))]; return v === undefined ? '' : String(v); }   // speed scale labels
-                if (tok.indexOf('temp:') === 0) { const c = Number(tok.slice(5)); return isNum(c) ? String(us ? Math.round((c * 9 / 5 + 32) / 10) * 10 : Math.round(c)) : '--'; }   // gauge labels: °F to the 10
+                if (tok.indexOf('temp:') === 0) { const c = Number(tok.slice(5)); return isNum(c) ? String(tf ? Math.round((c * 9 / 5 + 32) / 10) * 10 : Math.round(c)) : '--'; }   // gauge labels: °F to the 10
                 if (tok.indexOf('setup:') === 0) { const s = this._setup(); return s ? s[tok.slice(6)] || '' : '--'; }
                 if (tok.indexOf('signal:') === 0) { const v = this._raw(tok.slice(7)); return isNum(v) ? (Math.round(v * 10) / 10).toString() : '--'; }
                 return '{{' + tok + '}}';
@@ -4108,6 +4111,7 @@ class HudApp {
         const k = not ? t.slice(1) : t, eq = k.indexOf('=');
         // package F: "own:<item>" is on while that item of BMW's bottom row is ours (_own: the "bottomRow" setting)
         if (k.indexOf('own:') === 0) return not ? !this._own(k.slice(4)) : this._own(k.slice(4));
+        if (k === 'u:mi') { const on = this._mi(); return not ? !on : on; }      // r1120 PS2: the units in use are miles (the mph scale's numbers)
         // car3 G: "cc:none" is on only while the car says no check-control message shows (this.ccShown === false);
         // while that is not known (no signal wired yet: package I) it is off
         // 2026-11-13: "cc:shown" is on only while the car says a message shows (unknown: off, so ours stays drawn)
@@ -4267,7 +4271,7 @@ class HudApp {
             this._wbColours(x);         // 2026-11-14: u_ring .. u_glow and the night look (u_nk0..2)
             x.wbKind = 0;
             if (w.base) {               // a baked base texture: "base": { tex, x, y, w, h (its box in the layer's px), kind 1 | 2 | 3 }
-                const ba = this._scene(w.base.tex, x.ci);
+                const ba = this._scene(this._faceFor(w.base.tex), x.ci);       // r1120 PS2: speedo_mph while the units are miles
                 c.bind(ref, 'u_base', ba.ref);
                 if (ba.chroma) c.bind(ref, 'u_baseC', this._scene(ba.chroma, x.ci).ref);      // research3 MT: a "v8" value's colour
                 c.uniform(ref, 'u_baseR', [w.base.x, w.base.y, w.base.w * (ba.sx || 1), w.base.h * (ba.sy || 1)]);

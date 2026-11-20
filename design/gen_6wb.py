@@ -136,14 +136,20 @@ def ring_label(id, c, deg, rmax, t, font, adv, conn, w=90, color="fg"):
     ext = abs(math.sin(a)) * adv * len(t) / 2.0 + abs(math.cos(a)) * cell(font) / 2.0
     return label(id, c, deg, rmax - ext - 3, t, font, conn, w=w, color=color)
 
-# r1120 PS (docs/r1120/PS-REPORT.md): the words and the speed scale follow the language and the units. The speed dials take
-# the same 13 steps in mph, 10 mph a step (0..130; the baked Comfort face's ticks stay where they are); a scale number is
-# placed by its km/h text (never shorter than its mph one) and drawn from the token {{wb:spd:<i>}} (shared/hud.js _wbWord)
-MPH_SCALE = {"max": 130, "ticks": 13}
+# r1120 PS / PS2 (docs/r1120/PS-REPORT.md): the words and the speed scale follow the language and the units. In mph the speed
+# dials read US style (the owner, PS2): 0..160 mph on the same 260 degrees (1.625 deg a mph), a number every 20 mph, ticks every
+# 2 / 10 / 20 (Comfort's baked face: hud/scene/speedo_mph, tools/bake_6wb_mph.py). The km/h numbers carry the toggle "!u:mi",
+# the mph ones "u:mi" (shared/hud.js _toggleOn: the units in use; a change of them rebuilds).
+MPH_SCALE = {"max": 160, "ticks": 8}
+MPH_DEG = 260.0 / 160.0
 
-def spd_token(d, i):
-    d["text"] = "{{wb:spd:%d}}" % i
+def km_only(d):
+    d["toggle"] = "!u:mi"
     return d
+
+def mph_labels(vals, color=lambda v: "fg"):
+    return [dict(ring_label("mph%d" % v, SP, SPD_START + MPH_DEG * v, 0.78 * R, str(v), "wb_spd", 16.7, 1, color=color(v)), toggle="u:mi")
+            for v in vals]
 
 def icon(id, name, cx, cy, conn, color="dim", w=22, h=26):
     return {"id": id, "type": "icon", "icon": name, "z": 5, "x": int(round(cx - w / 2.0)), "y": int(round(cy - h / 2.0)),
@@ -216,7 +222,8 @@ def comfort():
     # the scale numbers: the box ends at 0.78 R, inside the ticks' inner ends (0.82 R)
     for i in range(14):
         n = 20 * i
-        W.append(spd_token(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1), i))
+        W.append(km_only(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1)))
+    W += mph_labels(range(0, 161, 20))          # r1120 PS2: the mph numbers over speedo_mph's ticks
     for i in range(1, 8):
         W.append(ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 24.5, 2, w=40))
     W += [
@@ -593,7 +600,8 @@ def dials():
     W += minis()
     for i in range(14):
         n = 20 * i
-        W.append(spd_token(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1), i))
+        W.append(km_only(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1)))
+    W += mph_labels(range(0, 161, 20))          # r1120 PS2: the mph numbers over speedo_mph's ticks
     for i in range(1, 8):
         W.append(ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 24.5, 2, w=40))
     W += [
@@ -632,8 +640,8 @@ def sport_face(cut=False):
     # (cut): only while the sign is ours, else BMW's own shows through it (bottom row package)
     ] + road_signs(own=cut)
     # Sport's scale: the speed dial's ends only, every 1000 rpm; placed as Comfort's (in the band's inner half here)
-    W += [spd_token(ring_label("spd0", SP, SPD_START, 0.78 * R, "0", "wb_spd", 16.7, 1), 0),
-          spd_token(ring_label("spd13", SP, SPD_START + SPD_SWEEP, 0.78 * R, "260", "wb_spd", 16.7, 1), 13)]
+    W += [ring_label("spd0", SP, SPD_START, 0.78 * R, "0", "wb_spd", 16.7, 1),
+          km_only(ring_label("spd13", SP, SPD_START + SPD_SWEEP, 0.78 * R, "260", "wb_spd", 16.7, 1))] + mph_labels([160])
     W += [ring_label("rpm%d" % i, RV, RPM_START + RPM_PER * i, 0.78 * R, str(i), "wb_rpm", 24.5, 2, w=40) for i in range(1, 8)]
     # 0.7.14 (docs/PERF-NEEDLE-REPORT.md): the big speed is drawn by the GPU from a glyph atlas ("gpu"), so a new
     # value is one uniform message instead of a 260 x 90 pixel upload; "maxLen" is the longest value shown
@@ -698,8 +706,9 @@ def eco():
     # the scale numbers where Comfort's are (0.78 R), Eco's colours: white to 120, then dim
     for i in range(14):
         n = 20 * i
-        W.append(spd_token(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1,
-                                      color="fg" if i <= 6 else "dim"), i))
+        W.append(km_only(ring_label("spd%d" % i, SP, SPD_START + n, 0.78 * R, str(n), "wb_spd", 16.7, 1,
+                                    color="fg" if i <= 6 else "dim")))
+    W += mph_labels(range(0, 161, 20), lambda v: "fg" if v <= 80 else "dim")     # r1120 PS2: Eco's white to 120 km/h, 80 mph
     W += [label("charge", RV, -23, 0.78 * R, "CHARGE", "wb_capb", 2, w=130),
           label("power", RV, 25, 0.78 * R, "POWER", "wb_capb", 2, w=130),
           # the captions 0.40 R above the centres, as Comfort's "km/h" and "1/min x 1000"

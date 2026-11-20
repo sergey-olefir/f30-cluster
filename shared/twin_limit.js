@@ -72,9 +72,9 @@ const GREY = [227, 227, 227];
 function angleOf(kmh, mi) {
     if (!isNum(kmh)) return null;
     const v = Math.max(0, kmh);
-    if (mi) {           // r1120 PS: the mph face (tools/twin-dial/bake_face.py MPH): 0..60 mph to 12 o'clock, then 60..180 to +125
+    if (mi) {           // r1120 PS2: the mph face (tools/twin-dial/bake_face.py MPH_*): 0..60 mph to 12 o'clock, then 60..160 to +125
         const m = v * 0.621371;
-        return Math.min(125, m <= 60 ? -125 + 125 * m / 60 : 125 * (m - 60) / 120);
+        return Math.min(125, m <= 60 ? -125 + 125 * m / 60 : 125 * (m - 60) / 100);
     }
     return Math.min(125, v <= 100 ? -125 + 1.25 * v : 0.625 * (v - 100));
 }
