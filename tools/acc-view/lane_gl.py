@@ -110,6 +110,7 @@ class GL:
 SPRITE = (304, 179)                                  # the car ahead at level 1 on the centre page (AA-SPEC 3.1: ~304 x 180)
 BODY = (0.76, 0.79, 0.83)                            # silver (mockups.py e_colours, day)
 AMBER = (0.94, 0.67, 0.04)
+EGO = (0.93, 0.94, 0.95)                             # our own car: light (the owner's car is white; model.js colours().ego)
 BODY_FAST = tuple(0.35 * b + 0.65 * a for a, b in zip(AMBER, BODY))     # amber-tinted while closing fast (the app's u_body too)
 
 
@@ -126,13 +127,13 @@ def bake_app():
     gl = GL()
     w, h = SPRITE
     sp = {}
-    for name, body in (('car', BODY), ('carFast', BODY_FAST)):
+    for name, body in (('car', BODY), ('carFast', BODY_FAST), ('ego', EGO)):
         a = gl.render('acc_car', w, h, {'u_body': body, 'u_dim': (0.0, 0.0)}, ss=4)
         px = (np.clip(a, 0, 1) * 255 + 0.5).astype('uint8').tobytes()
         sp[name] = {'w': w, 'h': h, 'z': base64.b64encode(zlib.compress(px, 9)).decode('ascii')}
     with open(os.path.join(out, 'sprites.json'), 'w') as f:
         json.dump({'_about': 'the acc_car shader (apps/acc_view/shaders/acc_car.glsl) rendered by tools/acc-view/lane_gl.py --bake: '
-                   'straight RGBA rows, zlib, base64; u_body silver / amber-tinted', 'car': sp['car'], 'carFast': sp['carFast']}, f)
+                   'straight RGBA rows, zlib, base64; u_body silver / amber-tinted / our own light car', 'car': sp['car'], 'carFast': sp['carFast'], 'ego': sp['ego']}, f)
         f.write('\n')
     print('shaders.json: ' + ', '.join('%s %d B' % (k, len(v.encode())) for k, v in sh.items()))
     print('sprites.json: %d x %d, %s' % (w, h, ', '.join('%s %d B' % (k, len(v['z'])) for k, v in sp.items())))

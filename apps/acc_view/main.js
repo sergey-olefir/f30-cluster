@@ -31,6 +31,7 @@ const P = require('./paint');
 const R = require('./raster');
 const Wd = require('./words');
 const MapView = require('./mapview');
+const GP = require('./gpu');
 const Wo = require('./world');
 
 const SPEED_IF = 'de.bmw.infotainment.vehicle.Vehicle2';
@@ -42,11 +43,14 @@ const LANE_IF = 'de.bmw.environmentalmodel.LaneBoundaries';
 const LANES_IF = 'de.bmw.environmentalmodel.Lanes';
 const KDO_IF = 'de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy';
 const WORLD_MS = 100;
-const WORLD_PAINT_MS = 500;        // the centre page follows moving traffic at most twice a second               // the sources are decoded at most this often (they may come at 20-30 a second)
+const WORLD_PAINT_MS = 500;
+const CAM_MS = 400;                 // the view's sideways glide        // the centre page follows moving traffic at most twice a second               // the sources are decoded at most this often (they may come at 20-30 a second)
 const TICK_MS = 150;
 const PAGE_FPS = 4;
 const GLIDE_MS = 260;               // the glide's time constant: about a second from one level to the next
-const IMG_ID = 0x41560001;          // our pixel image's id in the kit's renderer ('AV' + 1): clear of the kit's own
+const IMG_ID = 0x41560001;          // our pixel images' ids in the kit's renderer ('AV' + n): clear of the kit's own
+const IMG_BAND = 0x41560002, IMG_TABLE = 0x41560003, IMG_SPRITE = 0x41560010;
+const GPU_MIN_MS = 33;              // the GPU path: at most ~30 frames a second, and only while something moves
 
 function req(name) { try { return require('./' + name); } catch (e) { return null; } }
 
@@ -73,7 +77,7 @@ mgu.run({
             show: false, demo: false, subscribed: false, tracker: null, kmh: null, cru: null, warn: false, warnRaw: null, warnLines: 0,
             lim: null, limAt: 0, fvAt: 0, dn: null, dnCode: undefined, demoAt: 0, demoI: 0, z: 0, zAt: 0, s: null, key: '', lineAt: 0,
             timer: null, mv: null, mapBytes: 0,
-            page: { key: '', sk: '', paintAt: 0, at: 0, loopAt: 0, force: true, paints: 0, ms: 0 },
+            page: { key: '', sk: '', paintAt: 0, at: 0, loopAt: 0, force: true, paints: 0, ms: 0, gpuAt: 0, lastWords: null, bandKey: '', tableKey: '', frames: 0, gpuMs: 0, uploads: 0, statAt: 0 },
             // the world: the newest raw values (decoded in step(), at most every WORLD_MS), the tracker, the lane model, the logs
             raw: { rec: null, pos: null, posAt: 0, tcp: null, tcpAt: 0, lanes: null, lanesAt: 0 }, worldAt: 0, laneModel: null, laneAt: 0,
             tracker2: new Wo.Tracker(wcfg, ['cam', 'tcp']), logs: {}, leadCls: null,
@@ -220,8 +224,13 @@ mgu.run({
                     s.world = wd;
                 }
             }
+            // the view's sideways place glides too (a lane change moves our car across, it never jumps)
+            const ct = M.camOf(s), kc = st.zAt ? 1 - Math.exp(-Math.max(0, now - st.zAt) / CAM_MS) : 1;
+            st.camY = typeof st.camY === 'number' ? st.camY + (ct - st.camY) * kc : ct;
+            if (Math.abs(ct - st.camY) < 0.01) st.camY = ct;
+            s = Object.assign({}, s, { camY: st.camY });
             const lead = M.leadOf(s);
-            const zt = lead ? lead.x / M.RANGE : 0;
+            const zt = lead ? M.zOf(lead.x) : 0;
             if (!lead || !st.s || !M.leadOf(st.s) || !st.zAt) st.z = zt;                       // a car appears where it is
             else {
                 const k = 1 - Math.exp(-Math.max(0, now - st.zAt) / GLIDE_MS);
@@ -253,7 +262,7 @@ mgu.run({
             cr.on('layer', guard('layer', (ref, state) => log.info('acc: layer ' + ref + ' ' + state)));
             cr.on('target', guard('target', (name, state) => { if (name === layerCfg.target) log.info('acc: target ' + name + ' ' + state); }));
             cr.on('error', guard('socket', (e) => log.warn('acc: cluster-render ' + (e && e.code || 'error'))));
-            log.info('acc: map layers 5 (lane, users, car, text 380x96, pill 340x44) on ' + layerCfg.target + (layerCfg.contend ? ' (contend)' : ' (waits for the slot)') +
+            log.info('acc: map layers 6 (lane, users, car, ego, text 380x96, pill 340x44) on ' + layerCfg.target + (layerCfg.contend ? ' (contend)' : ' (waits for the slot)') +
                 ', pixel memory ' + MapView.PIXEL_MEMORY);
         }
         function mapClose() {
@@ -269,12 +278,15 @@ mgu.run({
             if (now - pg.loopAt > 700) pg.force = true;              // the page was shown again: draw at once
             pg.loopAt = now;
             if (!st.subscribed) subscribe();
-            const s = st.show ? st.s || step(now) : step(now);
+            const gpu = !!(REC && ctx.display && typeof ctx.display.active === 'function' && ctx.display.active('MAIN'));
+            const s = st.show && !gpu ? st.s || step(now) : step(now);
             const nt = night(), ln = lang();
             const age = st.demo ? (s.data === 'ok' ? 0.3 : s.data === 'stale' ? 2.6 : null) : (st.fvAt ? (now - st.fvAt) / 1000 : null);
             const ageWord = typeof age === 'number' ? (age < 1 ? 0 : Math.min(99, Math.floor(age))) : -1;
             const info = { age: typeof age === 'number' ? (age < 1 ? 0.5 : ageWord) : null, warn: st.demo ? null : st.warnRaw };
             const demo = st.demo ? M.DEMO[st.demoI][0] : null;
+            if (gpu) return gpuFrame(s, now, nt, ln, info, demo, ageWord);
+            pg.lastWords = null;
             const sk = M.keyOf(s) + '|' + nt + '|' + ln + '|' + ageWord + '|' + (info.warn || '') + '|' + (demo || '');
             const key = sk + '|' + M.worldKey(s);
             // a change of the state repaints at once; the world alone moving (traffic, lanes) at most every WORLD_PAINT_MS: a
@@ -298,6 +310,47 @@ mgu.run({
             cv.image(IMG_ID, 0, 520 - P.PAGE_H, P.PAGE_W, P.PAGE_H);
             return ctx.ui.image('MAIN_GFX', cv);
         });
+
+        // ---- the centre page on the GPU renderer (gpu.js): shapes each frame, images only for what changed ----
+        const sprites = {};
+        function spriteIds() {
+            if (sprites.done) return sprites.ids;
+            const ids = {};
+            GP.SPRITES.forEach((name, i) => {
+                const sp = R.sprite(name);
+                if (!sp) return;
+                const nightPx = Buffer.from(sp.px), mul = name === 'carFast' ? 0.78 : 0.75;
+                for (let k = 0; k < nightPx.length; k += 4) { nightPx[k] = Math.round(nightPx[k] * mul); nightPx[k + 1] = Math.round(nightPx[k + 1] * mul); nightPx[k + 2] = Math.round(nightPx[k + 2] * mul); }
+                REC.setImage(IMG_SPRITE + i * 2, sp.w, sp.h, sp.px);
+                REC.setImage(IMG_SPRITE + i * 2 + 1, sp.w, sp.h, nightPx);
+                ids[name] = [IMG_SPRITE + i * 2, IMG_SPRITE + i * 2 + 1];
+            });
+            sprites.done = true; sprites.ids = ids;
+            return ids;
+        }
+        function gpuFrame(s, now, nt, ln, info, demo, ageWord) {
+            const pg = st.page;
+            if (!pg.force && now - pg.gpuAt < GPU_MIN_MS) return undefined;
+            const opt = { night: nt, lang: ln, info, demo, z: st.z };
+            const bk = M.keyOf(s) + '|' + nt + '|' + ln;
+            if (bk !== pg.bandKey) { const b = P.band(s, opt); REC.setImage(IMG_BAND, b.w, b.h, b.px); pg.bandKey = bk; pg.uploads++; }
+            const tk = bk + '|' + (demo || '') + '|' + ageWord + '|' + JSON.stringify(P.rows(s, opt, ln));
+            if (tk !== pg.tableKey) { const t = P.table(s, opt); REC.setImage(IMG_TABLE, t.w, t.h, t.px); pg.tableKey = tk; pg.uploads++; }
+            const cv = ctx.canvas(1600, 520);
+            const t0 = Date.now();
+            GP.draw(cv, s, opt, { band: IMG_BAND, table: IMG_TABLE, sprites: spriteIds() });
+            const w = cv.words();
+            let same = !pg.force && !!pg.lastWords && pg.lastWords.length === w.length;
+            for (let i = 0; same && i < w.length; i++) if (w[i] !== pg.lastWords[i]) same = false;
+            if (same) return undefined;                                // nothing moved: no frame
+            pg.lastWords = new Uint32Array(w);
+            pg.force = false; pg.gpuAt = now; pg.frames++; pg.gpuMs += Date.now() - t0;
+            if (now - pg.statAt >= 10000) {
+                log.info('acc: gpu page ' + Math.round(pg.frames * 1000 / Math.max(1, now - pg.statAt)) + ' frames/s, ' + (pg.gpuMs / Math.max(1, pg.frames)).toFixed(1) + ' ms to record, ' + w.length + ' words, ' + pg.uploads + ' image uploads, rss ' + Math.round(process.memoryUsage().rss / 1048576) + ' MB');
+                pg.statAt = now; pg.frames = 0; pg.gpuMs = 0; pg.uploads = 0;
+            }
+            return ctx.ui.image('MAIN_GFX', cv);
+        }
 
         const apply = guard('apply', () => {
             st.show = ctx.settings.get('show') === true;

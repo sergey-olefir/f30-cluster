@@ -40,13 +40,14 @@ M.DEMO.forEach((d) => {
         const cv = new Canvas(1600, 520);
         Rec.play(rc.words(), cv);
         fs.writeFileSync(path.join(OUT, 'centre', name + '.png'), cv.png(6));
-        const lead = M.leadOf(s), z = lead ? lead.x / M.RANGE : 0;
-        const g = M.GEO.map, box = M.carBox(g, z, lead ? lead.y : 0);
+        const lead = M.leadPlace(s), z = lead ? lead.z : 0;
+        const g = M.GEO.map, box = M.carBox(g, z, lead ? lead.y : 0), eb = M.egoBox(g, s);
         fs.writeFileSync(path.join(OUT, 'map', name + '.json'), JSON.stringify({
             state: d[0], name: d[1], night,
             lane: { rect: g.lane, u: M.laneUniforms(g, s, z, night) },
             obj: { rect: g.lane, u: M.objUniforms(g, s, night) },
             car: lead ? { rect: box, u: M.carUniforms(s, night, box[2], box[3]) } : null,
+            ego: { rect: eb, u: M.egoUniforms(s, night, eb[2], eb[3]) },
             text: { rect: g.text, px: P.textSheet(s, night, lang).toString('base64') },
             pill: { rect: g.pill, px: P.pillSheet(s, night, lang).toString('base64') },
         }));

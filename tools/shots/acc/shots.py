@@ -58,6 +58,8 @@ def main():
         if d['car']:
             x, y, w, h = d['car']['rect']
             over(img, gl.render('acc_car', w, h, uni(d['car']['u']), ss=4), x, y)
+        x, y, w, h = d['ego']['rect']
+        over(img, gl.render('acc_car', w, h, uni(d['ego']['u']), ss=4), x, y)
         for k in ('text', 'pill'):
             x, y, w, h = d[k]['rect']
             px = np.frombuffer(base64.b64decode(d[k]['px']), np.uint8).reshape(h, w, 4).astype(np.float32) / 255.0

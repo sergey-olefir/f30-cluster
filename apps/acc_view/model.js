@@ -96,7 +96,17 @@ function withScene(s, ms) {
 /** The lead to draw: the world's measured one, else the level's depth straight ahead; null without a target. */
 function leadOf(s) {
     if (s.world && s.world.lead) return s.world.lead;
-    return s.tgt ? { x: depthOf(s.tgt) * RANGE, y: 0, cls: 'car' } : null;
+    return s.tgt ? { x: DEPTH[s.tgt] * RANGE, y: 0, cls: 'car' } : null;
+}
+
+/**
+ * The view's sideways place (m, left +): the ego lane's centre at our front, so OUR car shifts in its lane when we drift or
+ * change lanes (the owner, 2026-11-20); 0 without lane data (centred). s.camY (main.js glides it) overrides.
+ */
+function camOf(s) {
+    if (typeof s.camY === 'number') return s.camY;
+    const l = s.world && s.world.lanes;
+    return l ? Wo.egoOf(l).y0 : 0;
 }
 
 function keyOf(s) {
@@ -107,11 +117,11 @@ const q = (v, k) => Math.round(v / k);
 /** The world's picture key (lanes to 5 cm / 1e-4 1/m, objects to 25 cm, their fade in tenths): a change repaints the page. */
 function worldKey(s) {
     const w = s.world;
-    if (!w) return '-';
+    if (!w) return typeof s.camY === 'number' ? 'c' + q(s.camY, 0.05) : '-';
     const L = w.lanes ? w.lanes.lines.map((l) => q(l.y0, 0.05) + ':' + q(l.a, 0.002) + ':' + q(l.c, 0.0001) + ':' + l.type).join(',') : 'fixed';
     const O = (w.objects || []).map((o) => o.cls + q(o.x, 0.25) + ':' + q(o.y, 0.25) + ':' + q(o.alpha === undefined ? 1 : o.alpha, 0.1)).join(',');
     const ld = w.lead ? q(w.lead.x, 0.25) + ':' + q(w.lead.y, 0.25) : '-';
-    return L + '/' + O + '/' + ld;
+    return L + '/' + O + '/' + ld + '/' + q(camOf(s), 0.05);
 }
 
 /* ------------------------------------------------------------------------------------------------ colours */
@@ -137,6 +147,7 @@ function colours(placement, night) {
     p.amberF = [0.94, 0.67, 0.04].map((c) => c * (night ? 0.8 : 1));
     p.gap = [0.90, 0.92, 0.95].map((c) => c * m);
     p.fill = [0.60, 0.63, 0.68].map((c) => c * (night ? 0.75 : 1));      // the road users' neutral grey
+    p.ego = [0.93, 0.94, 0.95].map((c) => c * (night ? 0.75 : 1));       // our own car: light (the owner's car is white)
     return p;
 }
 
@@ -147,7 +158,11 @@ const mix = (c, a, bg) => [0, 1, 2].map((i) => Math.round(bg[i] + (c[i] - bg[i])
 const HZ = Wo.HZ;           // the horizon, a share of the lane layer's height
 const TFAR = Wo.TFAR;       // the lane's scale at the far end (1 at the foot)
 const RANGE = Wo.DEFAULT.range;                                        // m: the far end
-const DEPTH = { 1: 0.05, 2: 0.14, 3: 0.27, 4: 0.45, 5: 0.70 };      // the car ahead's depth per level (x = depth x RANGE)
+const DEPTH = { 1: 0.05, 2: 0.14, 3: 0.27, 4: 0.45, 5: 0.70 };      // the car ahead per level: x = DEPTH x RANGE m ahead of our front
+// The view's foot is EGO_X m behind our front bumper: our own car (the scene's anchor, the owner 2026-11-20) stands at the
+// foot, the road ahead of it. Every depth z is (x + EGO_X) / RANGE, x measured from our front as the sensors report it.
+const EGO_X = 6.5;
+const EGO_REAR = 1.0;       // our car's rear: 1 m in front of the view's foot (its box stands on the lane there)
 
 /**
  * map: target px of the map target (1088 x 480); every element inside the core x 334..754, y 44..416 (AA-SPEC 2.1).
@@ -157,20 +172,21 @@ const DEPTH = { 1: 0.05, 2: 0.14, 3: 0.27, 4: 0.45, 5: 0.70 };      // the car a
  */
 const GEO = {
     map: {
-        lane: [334, 158, 420, 258], pxm: 120 / 1.75, mw: 0.08,
+        lane: [334, 198, 420, 218], pxm: 90 / 1.75, mw: 0.08,
         text: [368, 54, 380, 96], ring: [544, 98, 40], plate: [680, 64, 66, 70], adv: [398, 98], word: 18, fig: 40,
-        pill: [374, 362, 340, 44],
+        pill: [374, 150, 340, 44],
     },
     centre: {
         w: 1600, h: 482,
-        lane: [50, 158, 700, 324], pxm: 200 / 1.75, mw: 0.08,
+        lane: [50, 206, 700, 276], pxm: 150 / 1.75, mw: 0.08,
         ring: [400, 78, 50], plate: [608, 36, 96, 84], adv: [196, 78], word: 22, fig: 52,
-        pill: [150, 406, 500, 52],
+        pill: [150, 150, 500, 50],
         table: [860, 1552], divider: 800,
     },
 };
 
-function depthOf(level) { return DEPTH[level] || 0; }
+function zOf(x) { return (x + EGO_X) / RANGE; }
+function depthOf(level) { return DEPTH[level] ? zOf(DEPTH[level] * RANGE) : 0; }
 function tOf(z) { return 1 / (1 + z * (1 / TFAR - 1)); }
 
 /** The car ahead's box (x, y, w, h; floats) standing x m ahead, y m left: a 1.8 m wide body (the acc_car box is 1.7 x its
@@ -187,6 +203,16 @@ function carBox(g, z, y) {
     return [Math.round(r[0]), Math.round(r[1]), Math.max(8, Math.round(r[2])), Math.max(5, Math.round(r[3]))];
 }
 
+/** Our own car: the acc_car box at the foot, sideways where the ego lane puts us (y = -camOf). */
+function egoRect(g, s) { return carRect(g, EGO_REAR / RANGE, -camOf(s)); }
+function egoBox(g, s) { return carBox(g, EGO_REAR / RANGE, -camOf(s)); }
+
+/** A clothoid re-expressed about the view's foot (EGO_X behind our front) and the view's sideways place C. */
+function shifted(l, C) {
+    const E = EGO_X;
+    return { y0: l.y0 - l.a * E + 0.5 * l.c * E * E - C, a: l.a - l.c * E, c: l.c, len: l.len + E, type: l.type, prob: l.prob };
+}
+
 const fix = (a) => a.map((x) => Math.round(x * 10000) / 10000);
 
 /** acc_lane's uniforms ({ name: numbers }) for state s with the car ahead at depth z (the glide's, else its level's). */
@@ -194,13 +220,15 @@ function laneUniforms(g, s, z, night) {
     const P = colours('map', night);
     const fast = s.clo === 2;
     const lanes = (s.world && s.world.lanes) || Wo.FIXED;
+    const C = camOf(s);
     const ln = [], lp = [];
     for (let i = 0; i < 4; i++) {
-        const l = lanes.lines[i];
+        const l = lanes.lines[i] ? shifted(lanes.lines[i], C) : null;
         if (l) { ln.push(l.y0, l.a, l.c, Wo.TYPE_CODE[l.type] || 0); lp.push(l.len, Math.max(0.35, Math.min(1, l.prob)), g.mw, 0); }
         else { ln.push(0, 0, 0, 0); lp.push(0, 0, 0, 0); }
     }
-    const e = Wo.egoOf(lanes);
+    const e0 = Wo.egoOf(lanes), e = shifted({ y0: e0.y0, a: e0.a, c: e0.c, len: 0 }, C);
+    e.half = e0.half;
     const lead = leadOf(s);
     return {
         u_size: [g.lane[2], g.lane[3]],
@@ -217,9 +245,9 @@ function laneUniforms(g, s, z, night) {
 const CLS_CODE = { car: 1, truck: 2, two: 3, ped: 4, cyc: 5, unk: 6 };
 /** The objects' boxes in the lane box's own px (centre x, foot y, w, h) with their class code and fade: up to 16, far first. */
 function objectBoxes(g, s) {
-    const out = [];
+    const out = [], C = camOf(s);
     ((s.world && s.world.objects) || []).slice(-16).forEach((o) => {
-        const p = Wo.project(g, RANGE, o.x, o.y), sz = Wo.SIZE[o.cls] || Wo.SIZE.unk;
+        const p = Wo.project(g, RANGE, o.x + EGO_X, o.y - C), sz = Wo.SIZE[o.cls] || Wo.SIZE.unk;
         const wm = o.wid || sz[0], hm = sz[1];
         out.push({ cx: p.px - g.lane[0], fy: p.py - g.lane[1], w: wm * p.k, h: hm * p.k, cls: CLS_CODE[o.cls] || 6, alpha: o.alpha === undefined ? 1 : o.alpha, cname: o.cls });
     });
@@ -236,6 +264,17 @@ function objUniforms(g, s, night) {
     }
     const r = (a, k) => a.map((x) => Math.round(x * k) / k);
     return { u_size: [g.lane[2], g.lane[3]], u_ob: r(ob, 10), u_oc: r(oc, 100), u_fill: fix(colours('map', night).fill), u_dim: [s.warn ? 1 : 0, 0] };
+}
+
+/** acc_car's uniforms for our own car: the light body (the owner's car is white), dimmed with the rest in the warning. */
+function egoUniforms(s, night, w, h) {
+    return { u_size: [w, h], u_body: fix(colours('map', night).ego), u_dim: [s.warn ? 1 : 0, 0] };
+}
+
+/** The lead's place for the layers: z and the sideways y relative to the view (null: no car ahead). */
+function leadPlace(s) {
+    const l = leadOf(s);
+    return l ? { z: zOf(l.x), y: l.y - camOf(s), cls: l.cls } : null;
 }
 
 /** acc_car's uniforms for state s, the layer w x h px. */
@@ -265,6 +304,6 @@ function ringOf(s) {
 }
 
 module.exports = {
-    STATES, DEMO, stateOf, keyOf, worldKey, withScene, leadOf, levelOfX, colours, mix, GEO, HZ, TFAR, RANGE, DEPTH, depthOf, tOf, carRect, carBox,
+    STATES, DEMO, stateOf, keyOf, worldKey, withScene, leadOf, leadPlace, camOf, zOf, EGO_X, EGO_REAR, egoRect, egoBox, egoUniforms, shifted, levelOfX, colours, mix, GEO, HZ, TFAR, RANGE, DEPTH, depthOf, tOf, carRect, carBox,
     laneUniforms, objUniforms, objectBoxes, carUniforms, pillOf, ringOf, NIGHT_MUL, CLS_CODE,
 };

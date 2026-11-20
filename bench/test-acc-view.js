@@ -4,7 +4,7 @@
  * skeleton suite (tools/acc-view/test-acc-view.js, 186 checks); every check of it is kept or replaced by its direction-E
  * equivalent, and the brief's new ones are added.
  *
- *   node bench/test-acc-view.js [--no-bench] [--no-gl] [--port 8941]      (BENCH_PORT also sets the port; the default 8941)
+ *   node bench/test-acc-view.js [--no-bench] [--no-gl] [--no-emu] [--port 8941]      (BENCH_PORT also sets the port; the default 8941)
  *
  * Part 1 (pure): the manifest (read-only flags, non-zero getters by tools/signals/check_signals.py, off by default, the map
  * target without contend or guide hold, in the Store's "apps/*"), Node 8 syntax, no Cyrillic literal in the drawing code, the
@@ -44,6 +44,8 @@ const R = require(path.join(APPDIR, 'raster.js'));
 const Wd = require(path.join(APPDIR, 'words.js'));
 const MapView = require(path.join(APPDIR, 'mapview.js'));
 const Wo = require(path.join(APPDIR, 'world.js'));
+const GP = require(path.join(APPDIR, 'gpu.js'));
+const Rec = require(path.join(ROOT, 'kit', 'runtime', 'record.js'));
 const FV = require(path.join(ROOT, 'shared', 'front_vehicle.js'));
 const SRC = require(path.join(ROOT, 'shared', 'limit_src.js'));
 
@@ -118,7 +120,7 @@ function part1() {
 
     // the code: Node 8 syntax; read only; no Cyrillic literal in the drawing code; no pressable control
     const js = fs.readdirSync(APPDIR).filter((f) => /\.js$/.test(f));
-    ok(js.sort().join() === 'main.js,mapview.js,model.js,paint.js,raster.js,words.js,world.js', 'the app\'s modules');
+    ok(js.sort().join() === 'gpu.js,main.js,mapview.js,model.js,paint.js,raster.js,words.js,world.js', 'the app\'s modules');
     js.forEach((f) => {
         const s = stripComments(fs.readFileSync(path.join(APPDIR, f), 'utf8'));
         ok(!/\?\.|\?\?|\{\s*\.\.\.|,\s*\.\.\.\w+\s*\}|\.flat\(|\.flatMap\(|Object\.fromEntries|\.padEnd\(|\.trimStart\(/.test(s), f + ': Node 8 syntax (no ?. ?? object spread .flat)');
@@ -199,22 +201,25 @@ function part1() {
     mv.cr = null;
     mv.CR = { ClusterRender: function () { return fake; } };
     mv.open();
-    ok(fake.layers.length === 5 && fake.layers.map((l) => l.kind).join() === 'effect,effect,effect,image,image', 'E on the map: 5 layers (lane, road users, car ahead: effects; text and pill sheets)');
+    ok(fake.layers.length === 6 && fake.layers.map((l) => l.kind).join() === 'effect,effect,effect,effect,image,image', 'E on the map: 6 layers (lane, road users, car ahead, our car: effects; text and pill sheets)');
     ok(fake.layers.every((l) => l.o.target === 'map' && l.o.contend === false && l.o.guide_hold === 0), 'every layer on map, no contend, guide_hold 0');
-    ok(fake.layers.map((l) => l.o.z).join() === '0,1,2,3,4', 'z order: lane, road users, car, text, pill');
-    const L0 = fake.layers.map((l) => l.o), L = [L0[0], L0[2], L0[3], L0[4]];
-    ok(L0[1].x === 334 && L0[1].y === 158 && L0[1].w === 420 && L0[1].h === 258 && L0[1].fs === sj.acc_obj, 'road users effect: the lane\'s box, the shipped acc_obj');
-    ok(L[0].x === 334 && L[0].y === 158 && L[0].w === 420 && L[0].h === 258 && L[0].fs === sj.acc_lane, 'lane effect 420 x 258 at (334, 158), the shipped acc_lane');
+    ok(fake.layers.map((l) => l.o.z).join() === '0,1,2,3,4,5', 'z order: lane, road users, car ahead, our car, text, pill');
+    const L0 = fake.layers.map((l) => l.o), L = [L0[0], L0[2], L0[4], L0[5]];
+    ok(L0[3].fs === sj.acc_car && L0[3].visible !== false && L0[3].x === M.egoBox(M.GEO.map, {})[0], 'our car: the same acc_car source (no new shader), shown from the start');
+    ok(L0[1].x === 334 && L0[1].y === 198 && L0[1].w === 420 && L0[1].h === 218 && L0[1].fs === sj.acc_obj, 'road users effect: the lane\'s box, the shipped acc_obj');
+    ok(L[0].x === 334 && L[0].y === 198 && L[0].w === 420 && L[0].h === 218 && L[0].fs === sj.acc_lane, 'lane effect 420 x 218 at (334, 198), the shipped acc_lane');
     ok(L[1].fs === sj.acc_car && L[1].visible === false, 'car effect: the shipped acc_car, hidden until there is a car');
     ok(L[2].x === 368 && L[2].y === 54 && L[2].w === 380 && L[2].h === 96 && L[2].iw === 380, 'text sheet 380 x 96 at (368, 54)');
-    ok(L[3].x === 374 && L[3].y === 362 && L[3].w === 340 && L[3].h === 44, 'pill sheet 340 x 44 at (374, 362)');
+    ok(L[3].x === 374 && L[3].y === 150 && L[3].w === 340 && L[3].h === 44, 'pill sheet 340 x 44 at (374, 150): above the lane, never over our car');
     ok([L[0], L[2], L[3]].every((o) => o.x >= 334 && o.x + o.w <= 754 && o.y >= 44 && o.y + o.h <= 416), 'every fixed layer inside the core x 334..754, y 44..416');
     for (let lv = 1; lv <= 5; lv++) {
         const b = M.carBox(M.GEO.map, M.depthOf(lv));
         ok(b[0] >= 334 && b[0] + b[2] <= 754 && b[1] >= 44 && b[1] + b[3] <= 416, 'the car at level ' + lv + ' inside the core (' + b.join(' ') + ')');
     }
     const b1 = M.carBox(M.GEO.map, M.depthOf(1)), b5 = M.carBox(M.GEO.map, M.depthOf(5));
-    ok(b1[2] === 103 && b1[3] === 61 && b5[2] === 21 && b5[3] === 12, 'the car ahead 103 x 61 at level 1 (5 m) .. 21 x 12 at level 5 (70 m): a 1.8 m body on a 3.5 m lane');
+    const eb = M.egoBox(M.GEO.map, {});
+    ok(eb[2] > b1[2] && b1[2] > b5[2] && eb[1] + eb[3] <= 416 && eb[0] >= 334 && eb[0] + eb[2] <= 754, 'our car (' + eb.join(' ') + ') larger than the car ahead at level 1 (' + b1.join(' ') + ') and 5 (' + b5.join(' ') + '), inside the core');
+    ok(b1[1] + b1[3] < eb[1] + eb[3] - 10, 'the car ahead at level 1 stands above our car (the gap visible between them)');
     ok(MapView.PIXEL_MEMORY === 411520 && L[2].w % 4 === 0 && L[3].w % 4 === 0, 'pixel memory (380 x 96 + 340 x 44) x 8 = 411 520 B; widths % 4 == 0');
     ok(fake.layers.filter((l) => l.kind === 'image').length * 1 <= 8 && fake.layers.length <= 8, 'under the 8-layer cap of a connection');
     const st3 = M.DEMO[3][2];
@@ -345,6 +350,76 @@ function part1() {
     const t0 = Date.now();
     for (let i = 0; i < 5; i++) P.centre(M.DEMO[i + 2][2], { lang: 'uk' });
     console.log('centre page paint: ' + Math.round((Date.now() - t0) / 5) + ' ms on this Mac (Node ' + process.version + ')');
+
+    // our own car (the owner, 2026-11-20: "а чому не малюється наше авто?"): in every state and scene, day and night, on the
+    // centre page and the map, inside its lane
+    const egoIn = (s) => { const l = (s.world && s.world.lanes) || Wo.FIXED, e = Wo.egoOf(l), C = M.camOf(s), x = -M.EGO_X + M.EGO_REAR; return Math.abs(-C - (e.y0 + x * (e.a + 0.5 * e.c * x))) < e.half - 0.9; };
+    const fakeE = new FakeCR();
+    const mvE = new MapView(null, { layer: app.config.layer, socket: 'x', shaders: sj });
+    mvE.CR = { ClusterRender: function () { return fakeE; } };
+    mvE.open();
+    let egoBad = [];
+    M.DEMO.forEach((d0) => [false, true].forEach((night) => {
+        const s = M.withScene(d0[2], 3000), tag = d0[0] + (night ? ' night' : ' day');
+        const pg = P.centre(s, { night, lang: 'uk' }).px, r = M.egoRect(M.GEO.centre, s);
+        let light = 0, n = 0;
+        for (let y = Math.ceil(r[1]); y < Math.floor(r[1] + r[3]); y++) for (let x = Math.ceil(r[0]); x < Math.floor(r[0] + r[2]); x++) {
+            const i = (y * 1600 + x) * 4; n++;
+            if (pg[i] > (night ? 120 : 165) && pg[i + 1] > (night ? 120 : 165) && pg[i + 2] > (night ? 120 : 165)) light++;
+        }
+        if (!(light > n * 0.15) && !s.warn) egoBad.push(tag + ' centre ' + light + '/' + n);
+        mvE.update(s, 0.2, night, 'uk');
+        const lo = fakeE.layers[3].o, eb = M.egoBox(M.GEO.map, s);
+        if (!(lo.x === eb[0] && lo.w === eb[2] && lo.visible !== false && eb[0] >= 334 && eb[0] + eb[2] <= 754)) egoBad.push(tag + ' map');
+        if (!egoIn(s)) egoBad.push(tag + ' lane');
+    }));
+    ok(egoBad.length === 0, 'our car: drawn light at the foot on the centre page and as a layer on the map, inside its lane, in all 21 entries day and night' + (egoBad.length ? ' (' + egoBad.slice(0, 6).join(', ') + ')' : ''));
+    const k0e = fakeE.msgs.length, x0e = fakeE.layers[3].o.x;
+    let xs = {};
+    for (let ms = 0; ms <= 10000; ms += 150) { mvE.update(M.withScene(M.DEMO[18][2], ms), 0.3, false, 'uk'); xs[fakeE.layers[3].o.x] = 1; }
+    const lcm = fakeE.msgs.slice(k0e);
+    ok(Object.keys(xs).length > 5 && lcm.filter((m) => m.op === 'set' && m.ref === 4).length > 5, 'a lane change: our car moves across on the cluster (' + Object.keys(xs).length + ' places)');
+    ok(lcm.filter((m) => m.op === 'pixels').length <= 2, 'a lane change: our car and the lanes move with sets and uniforms; pixels only when the lead\'s level changes the pill (' + lcm.filter((m) => m.op === 'pixels').length + ')');
+    ok(M.egoBox(M.GEO.map, { world: { lanes: { lines: [{ y0: 2.75, a: 0, c: 0, len: 80, type: 'solid', prob: 1 }, { y0: -0.75, a: 0, c: 0, len: 80, type: 'solid', prob: 1 }] } } })[0] > M.egoBox(M.GEO.map, {})[0], 'drifted right in our lane (its centre 1 m to our left): our car is drawn right of the lane centre, the view follows the lane');
+    void x0e;
+
+    // the centre page on the GPU renderer (gpu.js): every state and scene records cleanly, in ops the kit's mgu-render/1
+    // rewrite knows (no QUAD, op 15: renderd.js nativeOps stops there and breaks the image ops after it), the same frame for
+    // the same state (no frame while still), a new frame while something moves
+    const KNOWN = { 1: 1, 16: 1, 2: 5, 4: 6, 9: 6, 5: 7, 7: 8, 8: 11, 12: 3, 17: 3, 13: 4, 14: 0, 18: 6 };
+    const walk = (u) => {
+        let i = 0, imgs = 0;
+        const ops = {};
+        while (i < u.length) {
+            const op = u[i++];
+            ops[op] = (ops[op] || 0) + 1;
+            if (op === 18) imgs++;
+            if (op === 3) i += 5 + 2 * u[i + 4]; else if (op === 6) i += 6 + 2 * u[i + 5]; else if (op === 10) i += 1 + 9 * u[i]; else if (op === 11) i += 3 + 8 * u[i + 2];
+            else if (KNOWN[op] !== undefined) i += KNOWN[op]; else return { ok: false, op, ops, imgs };
+        }
+        return { ok: i === u.length, ops, imgs };
+    };
+    Rec.setImage(0x41560002, 800, 204, Buffer.alloc(800 * 204 * 4)); Rec.setImage(0x41560003, 800, 482, Buffer.alloc(800 * 482 * 4));
+    ['car', 'carFast', 'ego'].forEach((n, i) => { Rec.setImage(0x41560010 + i * 2, 4, 4, Buffer.alloc(64)); Rec.setImage(0x41560011 + i * 2, 4, 4, Buffer.alloc(64)); });
+    const IDS = { band: 0x41560002, table: 0x41560003, sprites: { car: [0x41560010, 0x41560011], carFast: [0x41560012, 0x41560013], ego: [0x41560014, 0x41560015] } };
+    const frameOf = (s, night) => { const rc = new Rec.Recorder(1600, 520); GP.draw(rc, s, { night, lang: 'uk' }, IDS); return { w: new Uint32Array(rc.words()), targets: rc.targets.length }; };
+    let gpuBad = [], words = 0;
+    M.DEMO.forEach((d0) => [false, true].forEach((night) => {
+        const s = M.withScene(d0[2], 3000), f = frameOf(s, night), wk = walk(f.w);
+        words = Math.max(words, f.w.length);
+        const lead = !!M.leadOf(s);
+        if (!wk.ok || wk.ops[15] || wk.imgs !== (lead ? 4 : 3) || f.targets) gpuBad.push(d0[0] + (night ? 'n' : 'd') + ':' + JSON.stringify(wk.ops) + ' imgs ' + wk.imgs);
+    }));
+    ok(gpuBad.length === 0, 'GPU frames: all 42 record cleanly, no QUAD, the band, the table and our car as images (+ the car ahead), no tap target' + (gpuBad.length ? ' (' + gpuBad.slice(0, 3).join('; ') + ')' : ''));
+    console.log('gpu: the largest frame ' + words + ' words (' + Math.round(words * 4 / 1024) + ' KB)');
+    ok(words < 12000, 'a GPU frame stays small (' + words + ' words)');
+    const st1 = M.withScene(M.DEMO[3][2], 0), fa = frameOf(st1, false).w, fb = frameOf(st1, false).w;
+    ok(fa.length === fb.length && fa.every((v, i) => v === fb[i]), 'the same state: the same frame word for word (main.js sends nothing then)');
+    const fm1 = frameOf(M.withScene(M.DEMO[14][2], 3000), false).w, fm2 = frameOf(M.withScene(M.DEMO[14][2], 3033), false).w;
+    ok(fm1.length !== fm2.length || fm1.some((v, i) => v !== fm2[i]), 'busy traffic 33 ms later: a new frame (it moves)');
+    const t0g = Date.now();
+    for (let i = 0; i < 100; i++) frameOf(M.withScene(M.DEMO[14][2], i * 33), false);
+    console.log('gpu: recording a busy frame ' + ((Date.now() - t0g) / 100).toFixed(2) + ' ms on this Mac');
 
     // what the sensors see: the decoders (the catalogue's shapes), the tracker, the lead, the log
     const wc = Wo.cfgOf({});
@@ -498,7 +573,7 @@ async function part2() {
         await request('POST', '/fake', { feed: { iface: DDS, field: 'functionalLibraryData', value: { ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', statusLimiter: 'STATUS_INACTIVE', cruiseCtrlSpeedHUD: 90 } } });
         ok(await waitFor(/acc: day\/night 1 -> day/, 4000), 'the car\'s day / night read (1 -> day)');
         await request('POST', '/setting', { key: 'show', value: true });
-        ok(await waitFor(/acc: map layers 5 .* on map \(waits for the slot\), pixel memory 411520/, 8000), 'show on: 5 layers asked for, waiting for the slot (no contend)');
+        ok(await waitFor(/acc: map layers 6 .* on map \(waits for the slot\), pixel memory 411520/, 8000), 'show on: 6 layers asked for, waiting for the slot (no contend)');
         const feedGap = async (g0, g1, ms) => {
             const n = Math.round(ms / 100);
             for (let i = 0; i <= n; i++) { await request('POST', '/fake', { front: { gap: Math.round(g0 + (g1 - g0) * i / n), speed: 1500, obj: 7, qual: 0, qualExt: 0 } }); await sleep(100); }
@@ -506,18 +581,20 @@ async function part2() {
         await feedGap(420, 420, 1800);
         await sleep(1500);
         let ls = mine(es.scene);
-        ok(ls.length === 5 && ls.map((l) => l.kind).join() === 'effect,effect,effect,image,image' && ls.every((l) => l.target === 'map'), 'the scene: 5 layers on map (3 effects, 2 images)');
+        ok(ls.length === 6 && ls.map((l) => l.kind).join() === 'effect,effect,effect,effect,image,image' && ls.every((l) => l.target === 'map'), 'the scene: 6 layers on map (4 effects, 2 images)');
+        const egoL = ls.filter((l) => l.z === 3)[0] || {}, eb0 = M.egoBox(M.GEO.map, {});
+        ok(egoL.kind === 'effect' && egoL.visible === 1 && egoL.x === eb0[0] && egoL.y === eb0[1] && egoL.w === eb0[2] && egoL.h === eb0[3] && egoL.uniforms && egoL.uniforms.u_body, 'our own car on the cluster: the acc_car layer at the foot, centred without lane data (' + [egoL.x, egoL.y, egoL.w, egoL.h].join(' ') + ')');
         const byZ = (k) => ls.filter((l) => l.z === k)[0] || {};
         const want3 = M.carBox(M.GEO.map, M.depthOf(3));
         ok(byZ(2).visible === 1 && byZ(2).x === want3[0] && byZ(2).y === want3[1] && byZ(2).w === want3[2] && byZ(2).h === want3[3], 'raw 420 at 90 km/h: the car layer at level 3\'s box (' + [byZ(2).x, byZ(2).y, byZ(2).w, byZ(2).h].join(' ') + ')');
-        ok(byZ(0).x === 334 && byZ(0).y === 158 && byZ(1).x === 334 && byZ(1).w === 420 && byZ(3).x === 368 && byZ(4).y === 362, 'the lane, road users, text and pill layers in place');
+        ok(byZ(0).x === 334 && byZ(0).y === 198 && byZ(1).x === 334 && byZ(1).w === 420 && byZ(4).x === 368 && byZ(5).y === 150, 'the lane, road users, text and pill layers in place');
         const grab = async (l) => (await request('GET', '/px?key=' + encodeURIComponent(l.key) + '&x=0&y=0&w=' + l.w + '&h=' + l.h)).body;
         const same = (px, want, what) => { let diff = 0; for (let i = 0; i < want.length; i++) if (Math.abs(want[i] - px[i]) > 1) diff++; ok(px.length === want.length && diff === 0, what + ' (' + diff + ' bytes differ)'); };
         const s3 = { tgt: 3, clo: 0, data: 'ok', cru: ['cruise', 'active', 90], warn: false, adv: null, lim: null };
-        same(await grab(byZ(3)), P.textSheet(s3, false, 'uk'), 'the text sheet read back = the painter\'s (cruise 90, no limit)');
-        same(await grab(byZ(4)), P.pillSheet(s3, false, 'uk'), 'the pill sheet read back = the painter\'s (no event: empty)');
+        same(await grab(byZ(4)), P.textSheet(s3, false, 'uk'), 'the text sheet read back = the painter\'s (cruise 90, no limit)');
+        same(await grab(byZ(5)), P.pillSheet(s3, false, 'uk'), 'the pill sheet read back = the painter\'s (no event: empty)');
         // the level changes (the gap grows: not closing): the car moves, no pixels
-        const pxBefore = es.px.filter((m) => m.key === byZ(3).key || m.key === byZ(4).key).length;
+        const pxBefore = es.px.filter((m) => m.key === byZ(4).key || m.key === byZ(5).key).length;
         await feedGap(420, 900, 3000);
         await feedGap(900, 900, 1500);
         await sleep(1200);
@@ -525,7 +602,7 @@ async function part2() {
         const car = ls.filter((l) => l.z === 2)[0] || {};
         const want5 = M.carBox(M.GEO.map, M.depthOf(5));
         ok(car.w === want5[2] && car.h === want5[3], 'the gap grown to raw 900: the car layer resized to level 5 (' + car.w + 'x' + car.h + ')');
-        ok(es.px.filter((m) => m.key === byZ(3).key || m.key === byZ(4).key).length === pxBefore, 'level 3 -> 5: no pixel update (the car moved, nothing re-uploaded)');
+        ok(es.px.filter((m) => m.key === byZ(4).key || m.key === byZ(5).key).length === pxBefore, 'level 3 -> 5: no pixel update (the car moved, nothing re-uploaded)');
         // what the sensors see: the camera's objects and the lane boundaries, as the catalogue shapes them (events)
         const CAM = 'de.bmw.environmentalmodel.ObjectRecognitionFrontCamera';
         const slots = (k, f) => Array.apply(null, Array(40)).map((x, i) => (i < k ? f(i) : {}));
@@ -557,15 +634,15 @@ async function part2() {
         // the limit (the event) and the night (the car's day / night)
         await request('POST', '/fake', { feed: { iface: 'de.bmw.dass.TrafficSignRecognition', field: 'TrafficSignRecognition', value: { presentClassLimitSpeed: 22, controlSLIWarning: 0, presentWithdrawalLimitSpeed: 1 } } });
         await sleep(600);
-        same(await grab(byZ(3)), P.textSheet(Object.assign({}, s3, { tgt: 5, lim: 110 }), false, 'uk'), 'the limit event (class 22): the plate says 110');
+        same(await grab(byZ(4)), P.textSheet(Object.assign({}, s3, { tgt: 5, lim: 110 }), false, 'uk'), 'the limit event (class 22): the plate says 110');
         await request('POST', '/fake', { feed: { iface: 'de.bmw.dass.TrafficSignRecognition', field: 'TrafficSignRecognition', value: { presentClassLimitSpeed: 22, controlSLIWarning: 0, presentWithdrawalLimitSpeed: 1 } } });
         await request('POST', '/fake', { feed: { iface: 'de.bmw.infotainment.vehicle.Vehicle', field: 'statusDayNightChangeOver', value: { dayNightChangeOver: 2 } } });
         await feedGap(900, 900, 600);
-        same(await grab(byZ(3)), P.textSheet(Object.assign({}, s3, { tgt: 5, lim: 110 }), true, 'uk'), 'the car says night (2): the night colours');
+        same(await grab(byZ(4)), P.textSheet(Object.assign({}, s3, { tgt: 5, lim: 110 }), true, 'uk'), 'the car says night (2): the night colours');
         await request('POST', '/fake', { feed: { iface: 'de.bmw.infotainment.vehicle.Vehicle', field: 'statusDayNightChangeOver', value: { dayNightChangeOver: 1 } } });
         // closing fast: amber
         await feedGap(900, 250, 2400);
-        const pill = await grab(byZ(4));
+        const pill = await grab(byZ(5));
         const Q = M.colours('map', false);
         let amber = 0;
         for (let i = 0; i < pill.length; i += 4) if (pill[i + 3] > 200 && near(pill[i], pill[i + 1], pill[i + 2], Q.amber, 6)) amber++;
@@ -574,7 +651,7 @@ async function part2() {
         await sleep(2800);
         ls = mine(es.scene);
         ok((ls.filter((l) => l.z === 2)[0] || {}).visible === 0, 'silence for 2.8 s: stale, the car layer hidden (never a frozen car)');
-        same(await grab(byZ(4)), P.pillSheet({ tgt: null, clo: 0, data: 'stale', cru: s3.cru, warn: false, adv: null, lim: null }, false, 'uk'), 'stale: the pill says so');
+        same(await grab(byZ(5)), P.pillSheet({ tgt: null, clo: 0, data: 'stale', cru: s3.cru, warn: false, adv: null, lim: null }, false, 'uk'), 'stale: the pill says so');
         // the centre page as the HMI got it: E's half equals the painter's (the table's age row moves on its own)
         await sleep(1500);
         const png = path.join(imgDir, 'main_gfx.png');
@@ -644,6 +721,25 @@ function part3() {
     try { require('child_process').execFileSync('rm', ['-rf', work]); } catch (e) { /* left behind */ }
 }
 
+/* ------------------------------------------------------------------------------------------------ part 4: the emulator */
+async function part4() {
+    const ER = require(path.join(ROOT, 'tools', 'shots', 'acc', 'emu_run.js'));
+    const port = PORT + 7 <= 8949 ? PORT + 7 : 8948;
+    // the app's own rate: no page draws, so the emulator takes each frame as drawn at its cap (the renderer out of the measure)
+    const moving = await ER.run({ port, seconds: 45, demoMs: 500, noChrome: true });
+    const rates = (moving.match(/acc: gpu page (\d+) frames\/s/g) || []).map((l) => Number(/(\d+) frames/.exec(l)[1]));
+    const rss = (moving.match(/rss (\d+) MB/g) || []).map((l) => Number(/(\d+)/.exec(l)[1]));
+    console.log('emulator, demo scenes: ' + rates.join(', ') + ' frames/s; rss ' + rss.join(', ') + ' MB');
+    ok(/renderd: connected, screen 1920x720, mgu-render\/1/.test(moving), 'the emulator: the app on the GPU renderer (mgu-render/1)');
+    ok(rates.length >= 3 && Math.max.apply(null, rates.slice(1)) >= 20 && Math.max.apply(null, rates) <= 31, 'moving scenes: 20-30 frames a second (' + rates.join(', ') + ')');
+    ok(rss.length >= 3 && Math.max.apply(null, rss.slice(1)) - Math.min.apply(null, rss.slice(1)) < 40, 'no growth in memory over the run (' + rss.join(', ') + ' MB)');
+    const still = await ER.run({ port, seconds: 25, demoMs: 500, noChrome: true, still: true });
+    const sr = (still.match(/display: (\d+) fps sent/g) || []).map((l) => Number(/(\d+)/.exec(l)[1]));
+    console.log('emulator, nothing moving: ' + sr.join(', ') + ' fps sent');
+    ok(sr.length >= 1 && sr.every((v) => v <= 1), 'nothing moving: no frames (the kit keeps the last one alive by itself)');
+    ok(!/acc: (tick|apply|page|layout|start):\s/.test(moving + still), 'no error from the app\'s guards in the emulator');
+}
+
 if (require.main === module) (async () => {
     part1();
     console.log('part 1 (pure): ' + pass + ' passed, ' + fail + ' failed');
@@ -651,6 +747,11 @@ if (require.main === module) (async () => {
         const p0 = pass, f0 = fail;
         part3();
         console.log('part 3 (WebGL): ' + (pass - p0) + ' passed, ' + (fail - f0) + ' failed');
+    }
+    if (args.indexOf('--no-emu') < 0 && args.indexOf('--no-bench') < 0) {
+        const p0 = pass, f0 = fail;
+        await part4();
+        console.log('part 4 (emulator): ' + (pass - p0) + ' passed, ' + (fail - f0) + ' failed');
     }
     if (args.indexOf('--no-bench') < 0) {
         const p0 = pass, f0 = fail;

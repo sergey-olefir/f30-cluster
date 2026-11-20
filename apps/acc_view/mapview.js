@@ -1,15 +1,16 @@
 'use strict';
 /**
  * mapview.js - direction E on the cluster's `map` target (round 1120 AA2; AA-SPEC 3.1's cost table, grown by one layer for
- * the road users with the owner's FOCUS of 2026-11-20): five layers on the app's own cluster-render connection (8 allowed),
+ * the road users and one for our own car with the owner's FOCUS of 2026-11-20): six layers on the app's own cluster-render connection (8 allowed),
  * all inside the core x 334..754, y 44..416 that both themes' map windows show.
  *
  *   z 0  acc_lane  effect 420 x 258 at (334, 158): the ground, up to 4 measured lane boundaries (or AA's fixed symbol), the
  *                  lit gap, the chevrons
  *   z 1  acc_obj   effect 420 x 258 at (334, 158): up to 16 road users, each its class's shape at its measured place
  *   z 2  acc_car   effect, the car ahead's box (highlighted: shaded, our own rear view); moved and resized, never re-uploaded
- *   z 3  text      image 380 x 96 at (368, 54): the ring, the -/+ marks, the limit plate, the suggestion
- *   z 4  pill      image 340 x 44 at (374, 362): the status pill (transparent while there is no event)
+ *   z 3  acc_car   effect, OUR car at the foot (the same shader source, a light body): moved sideways with the ego lane
+ *   z 4  text      image 380 x 96 at (368, 54): the ring, the -/+ marks, the limit plate, the suggestion
+ *   z 5  pill      image 340 x 44 at (374, 362): the status pill (transparent while there is no event)
  *
  * The three effects have no sampler (nothing can be left unbound, no R8 texture); the shaders are the shipped text of
  * hud/shaders.json (comments stripped, one look each). contend false and guide_hold 0 always: we wait while BMW's map holds
@@ -41,15 +42,16 @@ MapView.prototype.open = function () {
     const base = { target: L.target || 'map', klass: L.klass || 'content', contend: !!L.contend, guide_hold: L.guideHold ? 1 : 0 };
     const cr = new this.CR.ClusterRender('acc_view', this.o.socket);
     this.cr = cr;
-    const box0 = M.carBox(G, M.depthOf(3));
+    const box0 = M.carBox(G, M.depthOf(3)), eb = M.egoBox(G, {});
     this.refs = {
         lane: cr.effect(Object.assign({}, base, { z: 0, x: G.lane[0], y: G.lane[1], w: G.lane[2], h: G.lane[3], fs: sh.acc_lane })),
         obj: cr.effect(Object.assign({}, base, { z: 1, x: G.lane[0], y: G.lane[1], w: G.lane[2], h: G.lane[3], fs: sh.acc_obj })),
         car: cr.effect(Object.assign({}, base, { z: 2, x: box0[0], y: box0[1], w: box0[2], h: box0[3], fs: sh.acc_car, visible: false })),
-        text: cr.image(Object.assign({}, base, { z: 3, x: G.text[0], y: G.text[1], w: G.text[2], h: G.text[3], iw: G.text[2], ih: G.text[3] })),
-        pill: cr.image(Object.assign({}, base, { z: 4, x: G.pill[0], y: G.pill[1], w: G.pill[2], h: G.pill[3], iw: G.pill[2], ih: G.pill[3] })),
+        ego: cr.effect(Object.assign({}, base, { z: 3, x: eb[0], y: eb[1], w: eb[2], h: eb[3], fs: sh.acc_car })),
+        text: cr.image(Object.assign({}, base, { z: 4, x: G.text[0], y: G.text[1], w: G.text[2], h: G.text[3], iw: G.text[2], ih: G.text[3] })),
+        pill: cr.image(Object.assign({}, base, { z: 5, x: G.pill[0], y: G.pill[1], w: G.pill[2], h: G.pill[3], iw: G.pill[2], ih: G.pill[3] })),
     };
-    this.last = { u: {}, carBox: box0, carVis: false, text: null, pill: null };
+    this.last = { u: {}, carBox: box0, carVis: false, egoBox: eb, text: null, pill: null };
     cr.connect();
 };
 
@@ -86,7 +88,15 @@ MapView.prototype.update = function (s, z, night, lang) {
     const f = this.refs;
     this._uniforms(f.lane, 'lane', M.laneUniforms(G, s, z, night));
     this._uniforms(f.obj, 'obj', M.objUniforms(G, s, night));
-    const lead = M.leadOf(s);
+    // our own car: moved sideways with the ego lane (a `set`, never a re-upload)
+    const eb = M.egoBox(G, s), le = this.last.egoBox;
+    if (!le || eb[0] !== le[0] || eb[1] !== le[1] || eb[2] !== le[2] || eb[3] !== le[3]) {
+        this.cr.set(f.ego, { x: eb[0], y: eb[1], w: eb[2], h: eb[3] });
+        this.stats.sets++;
+        this.last.egoBox = eb;
+    }
+    this._uniforms(f.ego, 'ego', M.egoUniforms(s, night, eb[2], eb[3]));
+    const lead = M.leadPlace(s);
     if (lead) {
         const b = M.carBox(G, z, lead.y), lb = this.last.carBox;
         if (!this.last.carVis || !lb || b[0] !== lb[0] || b[1] !== lb[1] || b[2] !== lb[2] || b[3] !== lb[3]) {
@@ -110,6 +120,7 @@ MapView.LAYERS = [
     ['effect', G.lane[0], G.lane[1], G.lane[2], G.lane[3]],
     ['effect', G.lane[0], G.lane[1], G.lane[2], G.lane[3]],
     ['effect', 'car'],
+    ['effect', 'ego'],
     ['image', G.text[0], G.text[1], G.text[2], G.text[3]],
     ['image', G.pill[0], G.pill[1], G.pill[2], G.pill[3]],
 ];

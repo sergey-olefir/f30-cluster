@@ -281,7 +281,7 @@ function scene(name, ms) {
 
 /* ------------------------------------------------------------------------------------------------ the perspective */
 
-const HZ = 0.04, TFAR = 0.10, KF = 1 / TFAR - 1;
+const HZ = 0.04, TFAR = 0.20, KF = 1 / TFAR - 1;      // the far end (RANGE) at 0.2 of the foot's scale
 
 /** Screen place of the world point (x m ahead, y m left) in the lane box g.lane (px of the placement). */
 function project(g, range, x, y) {

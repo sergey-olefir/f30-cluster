@@ -258,20 +258,77 @@ function rows(s, o, lang) {
 const ROW0 = 106, ROW_STEP = 40;
 const BASE = { px: null, key: null };      // the page's background with the lanes and no car (one kept: ~3 MB)
 
-/** -> { px, words: [{ key, str, x, w, maxW }] } (words: what was drawn where, for the tests' "inside its box"). */
-function centre(s, o) {
+const BAND_H = 204;           // the centre page's top band (ring, limit, suggestion, pill): everything above the lane box
+
+/** The top band of the centre page's E half: 800 x BAND_H on the page's background. -> { px, words } (page px). */
+function band(s, o) {
     const opt = o || {};
     const lang = Wd.langOf(opt.lang), night = !!opt.night;
     const P = M.colours('centre', night), g = M.GEO.centre;
-    const words = [];
-    const lead = M.leadOf(s);
-    const z = typeof opt.z === 'number' ? opt.z : lead ? lead.x / M.RANGE : 0;
-    // E: the lanes (the background with the lanes and no car is cached per day / night and lane picture; the gap is computed
-    // over it), the road users, the car ahead highlighted (the acc_car shader's own sprite), the ring, the limit, the suggestion
-    const bk = night + '|' + M.worldKey({ world: s.world ? { lanes: s.world.lanes, objects: [] } : null });
+    const cv = new R.Canvas(g.divider, BAND_H, P.bg), words = [];
+    ring(cv, P, s, g.ring[0], g.ring[1], g.ring[2], 'av_f56', g.fig, 'av_b26', g.word, lang, 3.5);
+    plate(cv, P, s, g.plate[0], g.plate[1], g.plate[2], g.plate[3], 'av_t21', 'av_f56', lang);
+    advice(cv, P, s, g.adv[0], g.adv[1], g.fig * 0.62, 'av_f40', 'av_t21', g.word * 0.9, lang);
+    if (s.warn) cv.dim(0, 0, cv.w, cv.h, 0.35, P.bg);
+    const pw = pill(cv, P, s, g.pill[0], g.pill[1], g.pill[2], g.pill[3], 'av_t27', 'av_b26', g.pill[3] * 0.48, lang);
+    if (pw) words.push({ key: 'pill', str: pw.str, x: pw.x, w: pw.w, x0: g.pill[0] + g.pill[3] / 2, x1: g.pill[0] + g.pill[2] - g.pill[3] / 2 });
+    return { px: cv.px, w: cv.w, h: cv.h, words };
+}
+
+/** The data table: the page's right part (x 800..1600), 800 x 482 on the page's background. -> { px, words } (page px). */
+function table(s, o) {
+    const opt = o || {};
+    const lang = Wd.langOf(opt.lang), night = !!opt.night;
+    const P = M.colours('centre', night), g = M.GEO.centre, ox = g.divider;
+    const cv = new R.Canvas(PAGE_W - ox, PAGE_H, P.bg), words = [];
+    const line = M.mix(P.ink, 0.12, P.bg);
+    cv.seg(0.5, 24, 0.5, PAGE_H - 24, 1, line);
+    const x0 = g.table[0] - ox, x1 = g.table[1] - ox;
+    const title = Wd.word(lang, 'title'), only = Wd.word(lang, 'viewOnly');
+    const tw = cv.text(title, x0, 46, 'av_b26', 26, P.ink, 'left');
+    const ow = cv.text(only, x1, 46, 'av_t21', 21, P.dim, 'right');
+    words.push({ key: 'title', str: title, x: x0 + ox, w: tw, x0: x0 + ox, x1: x1 - ow - 16 + ox });
+    if (opt.demo) cv.text(Wd.word(lang, 'demo') + ' ' + opt.demo, x1, 76, 'av_t21', 21, P.dim, 'right');
+    rows(s, opt, lang).forEach((rw, i) => {
+        const y = ROW0 + i * ROW_STEP;
+        const label = Wd.word(lang, rw[0]);
+        const lw = cv.text(label, x0, y, 'av_t21', 21, P.dim, 'left');
+        const room = x1 - x0 - lw - 24;
+        const font = rw[3] ? 'av_b26' : 'av_t27';
+        const val = truncate(rw[1], font, 26, room);
+        const vw = cv.text(val, x1, y, font, 26, P[rw[2]], 'right');
+        words.push({ key: rw[0], str: label, x: x0 + ox, w: lw, x0: x0 + ox, x1: x1 - vw - 24 + ox });
+        words.push({ key: rw[0] + ':value', str: val, x: x1 - vw + ox, w: vw, x0: x0 + lw + 24 + ox, x1: x1 + ox });
+        cv.seg(x0, y + 14, x1, y + 14, 1, line);
+    });
+    const foot = Wd.word(lang, 'footer');
+    const fw = cv.text(foot, x0, PAGE_H - 18, 'av_t16', 16, P.dim, 'left');
+    words.push({ key: 'footer', str: foot, x: x0 + ox, w: fw, x0: x0 + ox, x1: x1 + ox });
+    return { px: cv.px, w: cv.w, h: cv.h, words };
+}
+
+/** Copy an opaque w x h RGBA block into the page canvas at (x, y). */
+function put(cv, px, w, h, x, y) {
+    for (let r = 0; r < h; r++) px.copy(cv.px, ((y + r) * cv.w + x) * 4, r * w * 4, (r + 1) * w * 4);
+}
+
+/**
+ * The whole centre page in software (the HMI's own image when there is no GPU renderer; the tests and the shots):
+ * -> { px, words: [{ key, str, x, w, x0, x1 }] } (words: what was drawn where, for the tests' "inside its box").
+ * The GPU path (gpu.js) draws the same band and table as images and the world as the renderer's own shapes.
+ */
+function centre(s, o) {
+    const opt = o || {};
+    const night = !!opt.night;
+    const P = M.colours('centre', night), g = M.GEO.centre;
+    const lead = M.leadPlace(s), C = M.camOf(s);
+    const z = typeof opt.z === 'number' ? opt.z : lead ? lead.z : 0;
+    // the world: the lanes (the background with the lanes and no car is cached per day / night and lane picture; the gap is
+    // computed over it), the road users, the car ahead highlighted, our own car at the foot
+    const bk = night + '|' + M.worldKey({ world: s.world ? { lanes: s.world.lanes, objects: [] } : null, camY: C });
     if (!BASE.px || BASE.key !== bk) {
         const b = new R.Canvas(PAGE_W, PAGE_H, P.bg);
-        lane(b, g, { tgt: null, clo: 0, world: s.world ? { lanes: s.world.lanes } : null }, 0, P, 0);
+        lane(b, g, { tgt: null, clo: 0, world: s.world ? { lanes: s.world.lanes } : null, camY: C }, 0, P, 0);
         BASE.px = b.px; BASE.key = bk;
     }
     const cv = new R.Canvas(PAGE_W, PAGE_H, null);
@@ -282,37 +339,13 @@ function centre(s, o) {
         const r = M.carRect(g, z, lead.y);
         cv.sprite(R.sprite(s.clo === 2 ? 'carFast' : 'car'), r[0], r[1], r[2], r[3], night ? (s.clo === 2 ? 0.78 : 0.75) : 1, 1);
     }
-    ring(cv, P, s, g.ring[0], g.ring[1], g.ring[2], 'av_f56', g.fig, 'av_b26', g.word, lang, 3.5);
-    plate(cv, P, s, g.plate[0], g.plate[1], g.plate[2], g.plate[3], 'av_t21', 'av_f56', lang);
-    advice(cv, P, s, g.adv[0], g.adv[1], g.fig * 0.62, 'av_f40', 'av_t21', g.word * 0.9, lang);
-    if (s.warn) cv.dim(0, 0, g.divider, PAGE_H, 0.35, P.bg);
-    const pw = pill(cv, P, s, g.pill[0], g.pill[1], g.pill[2], g.pill[3], 'av_t27', 'av_b26', g.pill[3] * 0.48, lang);
-    if (pw) words.push({ key: 'pill', str: pw.str, x: pw.x, w: pw.w, x0: g.pill[0] + g.pill[3] / 2, x1: g.pill[0] + g.pill[2] - g.pill[3] / 2 });
-    // the divider and the data table
-    const line = M.mix(P.ink, 0.12, P.bg);
-    cv.seg(g.divider, 24, g.divider, PAGE_H - 24, 1, line);
-    const x0 = g.table[0], x1 = g.table[1];
-    const title = Wd.word(lang, 'title'), only = Wd.word(lang, 'viewOnly');
-    const tw = cv.text(title, x0, 46, 'av_b26', 26, P.ink, 'left');
-    const ow = cv.text(only, x1, 46, 'av_t21', 21, P.dim, 'right');
-    words.push({ key: 'title', str: title, x: x0, w: tw, x0, x1: x1 - ow - 16 });
-    if (opt.demo) cv.text(Wd.word(lang, 'demo') + ' ' + opt.demo, x1, 76, 'av_t21', 21, P.dim, 'right');
-    rows(s, opt, lang).forEach((rw, i) => {
-        const y = ROW0 + i * ROW_STEP;
-        const label = Wd.word(lang, rw[0]);
-        const lw = cv.text(label, x0, y, 'av_t21', 21, P.dim, 'left');
-        const room = x1 - x0 - lw - 24;
-        const font = rw[3] ? 'av_b26' : 'av_t27';
-        const val = truncate(rw[1], font, 26, room);
-        const vw = cv.text(val, x1, y, font, 26, P[rw[2]], 'right');
-        words.push({ key: rw[0], str: label, x: x0, w: lw, x0, x1: x1 - vw - 24 });
-        words.push({ key: rw[0] + ':value', str: val, x: x1 - vw, w: vw, x0: x0 + lw + 24, x1 });
-        cv.seg(x0, y + 14, x1, y + 14, 1, line);
-    });
-    const foot = Wd.word(lang, 'footer');
-    const fw = cv.text(foot, x0, PAGE_H - 18, 'av_t16', 16, P.dim, 'left');
-    words.push({ key: 'footer', str: foot, x: x0, w: fw, x0, x1 });
-    return { px: cv.px, words };
+    const er = M.egoRect(g, s);
+    cv.sprite(R.sprite('ego'), er[0], er[1], er[2], er[3], night ? 0.75 : 1, 1);
+    if (s.warn) cv.dim(0, BAND_H, g.divider, PAGE_H, 0.35, P.bg);
+    const bd = band(s, opt), tb = table(s, opt);
+    put(cv, bd.px, bd.w, bd.h, 0, 0);
+    put(cv, tb.px, tb.w, tb.h, g.divider, 0);
+    return { px: cv.px, words: bd.words.concat(tb.words) };
 }
 
-module.exports = { textSheet, pillSheet, centre, lane, users, shape, rows, TEXT_W, TEXT_H, PILL_W, PILL_H, PAGE_W, PAGE_H, truncate };
+module.exports = { textSheet, pillSheet, centre, band, table, BAND_H, lane, users, shape, rows, TEXT_W, TEXT_H, PILL_W, PILL_H, PAGE_W, PAGE_H, truncate };
