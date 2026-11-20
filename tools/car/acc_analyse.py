@@ -3,7 +3,7 @@
 
     python3 -I tools/car/acc_analyse.py <data/rec folder or rec files ...> -o <out folder> [--anchors anchors.json] [--name TEXT]
 
-The input is what Signal Probe's recorder writes (apps/signal_probe/recorder.js, set S17 "ACC" or S14), as collect.sh copies it
+The input is what Signal Probe's recorder writes (shared/signal_recorder.js, set S17 "ACC" or S14), as collect.sh copies it
 (apps/signal_probe/rec/). Parent brief: docs/cruise-set-speed-brief.md (Phase 1, Phase 2); the drive: docs/cruise/DRIVE-PROTOCOL.md.
 
 <out>/phase1.md|json   per recording and per field: samples, native rate (median interval), jitter, gaps, the recorder's drops, the

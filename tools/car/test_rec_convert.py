@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Tests of tools/car/rec_convert.py on synthetic recordings written in the recorder's format (#rec 1), by hand, independently of
-apps/signal_probe/recorder.js (bench/test-signal-recorder.js runs the converter on the recorder's own files).
+shared/signal_recorder.js, Signal Probe's recorder (bench/test-signal-recorder.js runs the converter on the recorder's own files).
 
     python3 tools/car/test_rec_convert.py
 """

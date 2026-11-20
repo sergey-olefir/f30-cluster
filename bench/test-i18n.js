@@ -130,7 +130,7 @@ function codeFiles() {
     return ['shared/menu.js', 'shared/gallery.js', 'shared/hud.js', 'shared/diag_settings.js', 'shared/twin_tokens.js', 'shared/twin_pages.js',
         'shared/twin_front.js', 'shared/twin_cc.js', 'shared/twin_limit.js', 'shared/twin_tabs.js', 'shared/front_vehicle.js', 'shared/road_shields.js', 'shared/lang.js',
         'apps/f30_cluster/main.js', 'apps/twin_dial/main.js', 'apps/signal_probe/main.js', 'apps/signal_probe/menu.js', 'apps/signal_probe/fields.js',
-        'apps/signal_probe/probe.js', 'apps/signal_probe/recorder.js', 'apps/driver_profiles/main.js', 'apps/driver_profiles/screens.js',
+        'apps/signal_probe/probe.js', 'shared/signal_recorder.js', 'apps/driver_profiles/main.js', 'apps/driver_profiles/screens.js',
         'apps/driver_profiles/format.js', 'apps/driver_profiles/avatars.js', 'apps/driver_profiles/profiles.js',
         'shared/profile_settings.js', 'shared/units.js'];      // r1120 PS
 }

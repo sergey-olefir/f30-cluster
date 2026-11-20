@@ -87,7 +87,7 @@ function exportTable() {
         sets: FIELDS.TABLE.filter((f) => f.iface === e.iface).map((f) => f.set).filter((x, i, a) => a.indexOf(x) === i),
     }));
     const out = {
-        _about: 'The signal probe\'s field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier), b (an event), m (S16 next-turn: GuidanceEventList.queryContent, a read the owner approved, polled while the phone guides; methodId from the catalogue). Ids come from the car\'s catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of apps/signal_probe/format.js. Text members are logged as lengths only.',
+        _about: 'The signal probe\'s field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier), b (an event), m (S16 next-turn: GuidanceEventList.queryContent, a read the owner approved, polled while the phone guides; methodId from the catalogue). Ids come from the car\'s catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of shared/signal_format.js. Text members are logged as lengths only.',
         logFormat: P.LOG_FORMAT, version: P.VERSION,
         counts: { sets: sets.length, fields: fields.length, interfaces: ifaces.length, interfacesWithSeveralInstances: ifaces.filter((i) => i.instancesRead.length > 1).length },
         sets, interfaces: ifaces, fields,
