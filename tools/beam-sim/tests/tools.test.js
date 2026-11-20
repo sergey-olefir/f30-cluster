@@ -79,3 +79,18 @@ test('outputs go to bake/work/beam-sim, which git ignores', () => {
   assert.strictEqual(r.status, 0, 'bake/work is ignored');
   ['report.js', 'sweep.js'].forEach((f) => assert.ok(fs.readFileSync(path.join(__dirname, '..', f), 'utf8').indexOf("'bake', 'work', 'beam-sim'") > 0, f));
 });
+
+test('the page: its scripts load in the page\'s order without a module system, the bundle holds every scenario, a run works', () => {
+  const vm = require('vm');
+  const ui = path.join(__dirname, '..', 'ui');
+  const html = fs.readFileSync(path.join(ui, 'index.html'), 'utf8');
+  const srcs = []; html.replace(/<script src="([^"]+)"><\/script>/g, (m, s) => { srcs.push(s); return m; });
+  assert.ok(srcs.indexOf('app.js') === srcs.length - 1 && srcs[0] === '../../../shared/beam_logic.js');
+  const ctx = vm.createContext({ Math: Math, JSON: JSON, console: { log() {} } });
+  vm.runInContext('var self = globalThis;', ctx);
+  srcs.forEach((s) => vm.runInContext(fs.readFileSync(path.join(ui, s), 'utf8'), ctx, { filename: s }));
+  const ids = vm.runInContext('self.BS.scenario.list().map(function (s) { return s.id; }).join(",")', ctx).split(',');
+  assert.deepStrictEqual(ids.slice().sort(), SC.list().map((s) => s.id).sort(), 'the bundle is current: node tools/beam-sim/core/scenario.js --bundle');
+  const h = vm.runInContext('self.BS.sim.hashResult(self.BS.sim.run(self.BS.scenario.load("K02.two.oncoming.gap"), { seed: 2 }))', ctx);
+  assert.strictEqual(h, SIM.hashResult(SIM.run(SC.load('K02.two.oncoming.gap'), { seed: 2 })), 'the page computes what Node computes');
+});

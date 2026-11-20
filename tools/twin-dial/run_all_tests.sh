@@ -100,6 +100,15 @@ if [ -f tools/cruise-sim/test.js ]; then
   else printf '%-22s %7s %7s %7s  %s\n' cruise-sim "${cp:--}" "${cf:-1}" - "FAILED (exit $code)"; grep -E '^FAIL' "$LOG/cruise_sim.log" | head -8 | sed 's/^/        /'; BAD=$((BAD + 1)); TOTAL_F=$((TOTAL_F + ${cf:-1})); fi
 fi
 
+# the beam simulator and Auto Beam's algorithm (tools/beam-sim, offline, no bench): its own runner, a few seconds
+if [ -f tools/beam-sim/test.js ]; then
+  code=$(node tools/beam-sim/test.js >"$LOG/beam_sim.log" 2>&1; echo $?)
+  line=$(grep -E '^total:' "$LOG/beam_sim.log" | tail -1)
+  cp=$(echo "$line" | sed -nE 's/^total: ([0-9]+) passed.*/\1/p'); cf=$(echo "$line" | sed -nE 's/.* ([0-9]+) failed.*/\1/p')
+  if [ "$code" = 0 ]; then printf '%-22s %7s %7s %7s  %s\n' beam-sim "${cp:-ok}" "${cf:-0}" - ""; TOTAL_P=$((TOTAL_P + ${cp:-0}))
+  else printf '%-22s %7s %7s %7s  %s\n' beam-sim "${cp:--}" "${cf:-1}" - "FAILED (exit $code)"; grep -E '^FAIL' "$LOG/beam_sim.log" | head -8 | sed 's/^/        /'; BAD=$((BAD + 1)); TOTAL_F=$((TOTAL_F + ${cf:-1})); fi
+fi
+
 echo "---"
 printf '%d suites, %d passed, %d failed, %d count(s) differ from main\n' "$N" "$TOTAL_P" "$TOTAL_F" "$DIFF"
 if [ "$BAD" = 0 ]; then echo "ALL GREEN (logs: $LOG)"; [ -z "${RUN_ALL_LOG:-}" ] && rm -rf "$LOG"; exit 0; fi
