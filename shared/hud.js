@@ -258,6 +258,10 @@ try { limitSrc = require('./limit_src'); } catch (e) { if (e.code !== 'MODULE_NO
 // tab 1 and the "tdfv" pictogram; shared/front_vehicle.js: the decoder). Absent (null) for every app that does not pack it.
 let twinFront = null;
 try { twinFront = require('./twin_front'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('twin_front') < 0) throw e; }
+// r1120 F1: the road number's plate in the road label (shared/road_shields.js, docs/ROAD-SHIELDS.md). Packed by f30_cluster;
+// absent (null) for every app that does not pack it: the label stays plain text.
+let roadShields = null;
+try { roadShields = require('./road_shields'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('road_shields') < 0) throw e; }
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
@@ -5152,6 +5156,11 @@ class HudApp {
         if (k && !prev.k) c.uniform(ref, 'u_mk', lp(m.cover));
         if (h && !prev.h) c.uniform(ref, 'u_mh', lp(m.hole));
         x.mask = { k, h };
+        // r1120 F1: one line per lane change, names only. Photo D (2026-11-19, night) showed BMW's range under ours while the
+        // engine on the bench never sends anything but "ours" with our row built: this line says, for the next drive, what
+        // the cover was when the row is seen doubled (so a doubling with "cover ours" is the car's side, not the lanes)
+        this.log.info('strip mask: cover ' + (k || 'none') + ', hole ' + (h || 'none') + ' (row built ' + (this.rowBuiltOurs ? 'ours' : 'BMW\'s') +
+            ', ' + (this.nightOn ? 'night' : 'day') + ')');
     }
     /* ---- end package M ---- */
 
@@ -5561,6 +5570,19 @@ class HudApp {
             // a road name or a message longer than its box is cut with "..." rather than clipped mid-letter.
             // A GUESS: no photo in docs/G20-DESIGN-SPEC.md shows the stock cluster truncating (§8), so how BMW
             // does it is unknown - this is the plainest thing that stays readable.
+            // r1120 F1: a text widget with "shields" (the road label, design/gen_6wb.py nav_row) draws a road number at the
+            // start of its text on its plate, the name after it, in one raster (shared/road_shields.js). No road number, or
+            // the module not packed: the plain text below, as before. The plate's fill has its own night value (the theme
+            // dims the frame and the number), so the night state is part of what was painted.
+            if (w.shields && s && roadShields) {
+                const sk = 'shield|' + s + '|' + (this.nightOn ? 'n' : 'd');
+                if (!force && sk === x.last) return;
+                const r = roadShields.paint(w.w, w.h, s, {
+                    textRaster, font: w.font, shieldFont: w.shields.font, spacing: w.spacing, plateTop: w.shields.top,
+                    fg: color(this.theme, w.color || 'fg'), line: color(this.theme, 'line'), night: !!this.nightOn,
+                });
+                if (r) { x.last = sk; x.lastPaint = now; this._blitDiff(x, r.buf); return; }
+            }
             if (rowOf && s) s = this._fitText(s, w);
             let role = w.color || 'fg';
             if (w.colorBy === 'verdict' && this.score.last) role = VERDICT[this.score.last.verdict] || role;

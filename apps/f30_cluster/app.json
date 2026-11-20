@@ -29,7 +29,8 @@
     "previews.js",
     "mb_exp.js",
     "diag_settings.js",
-    "limit_src.js"
+    "limit_src.js",
+    "road_shields.js"
   ],
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {

@@ -311,6 +311,9 @@ async function benchChecks() {
     ok(L.pixels < 16 * 1048576, 'pixel memory ' + (L.pixels / 1048576).toFixed(2) + ' MiB of 16');
     ok(!/the service's pixel memory is full|too many layers|refused/.test(logText), 'no layer, asset or pixel-memory refusal');
     ok(!/strip mask ".*": no lane table/.test(logText), 'the lane table fits the texture');
+    // r1120 F1: every lane change is one log line, lane names only, with the row's builder and day / night
+    ok(/strip mask: cover ours, hole none \(row built ours, (day|night)\)/.test(logText) && /strip mask: cover bmw, hole msg \(row built BMW's, (day|night)\)/.test(logText),
+        'each lane change is logged once, names only ("strip mask: cover ours, hole none (row built ours, ...)")');
 }
 
 (async () => {
