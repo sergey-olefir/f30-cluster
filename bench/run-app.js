@@ -468,6 +468,7 @@ process.on('message', (m) => {
             benchUnits = {};
             if (v.carUnits.speed !== undefined) benchUnits.unitOfMeasurementSpeedometerDigital = v.carUnits.speed;
             if (v.carUnits.cons !== undefined) benchUnits.unitOfMeasurementConsumption = v.carUnits.cons;
+            if (v.carUnits.temp !== undefined) benchUnits.unitOfMeasurementTemperature = v.carUnits.temp;      // r1120 PS2
             hu.feed('de.bmw.infotainment.vehicle.Vehicle', 'statusNewCurrentUnitsStatusExt', Object.assign({ unitOfMeasurementAirPressure: 1, unitOfMeasurementTemperature: 1 }, benchUnits));
         }
         else if (fakePerso) fakePerso.control(v);
@@ -487,7 +488,7 @@ process.on('message', (m) => {
             units: (() => { try { return hud && typeof hud._units === 'function' ? Object.assign({}, hud._units(), { car: hud.unitCar }) : null; } catch (e) { return null; } })(),
             texts: (() => { try { const o = {}; if (hud) hud.widgets.forEach((x, id) => { if (x.w && x.w.type === 'text' && typeof x.w.text === 'string') o[id] = { text: hud._resolve(x.w.text), font: x.w.font, w: x.w.w, align: x.w.align }; }); return o; } catch (e) { return null; } })(),
             scenes: (() => { try { const o = []; if (hud) hud.atlases.forEach((a, k) => { if (k.indexOf(':scene:') >= 0) o.push(k.split(':scene:')[1]); }); return o; } catch (e) { return null; } })(),
-            dials: (() => { try { const o = {}; if (hud) hud.widgets.forEach((x, id) => { if (x.w && (x.w.type === 'dial' || x.w.type === 'tdial') && (x.w.measure === 'speed' || x.w.kind === 'speed')) o[id] = { scale: x.w.type === 'dial' ? hud._dialScale(x.w) : null, mi: x.tw ? !!x.tw.mi : null, deg: x.tw ? hud._twinDeg(x) : null }; }); return o; } catch (e) { return null; } })(),
+            dials: (() => { try { const o = {}; if (hud) hud.widgets.forEach((x, id) => { if (x.w && (x.w.type === 'dial' || x.w.type === 'tdial') && (x.w.measure === 'speed' || x.w.kind === 'speed')) o[id] = { scale: x.w.type === 'dial' ? hud._dialScale(x.w) : null, mi: x.tw ? !!x.tw.mi : null, deg: x.tw ? hud._twinDeg(x) : null, q: x.wbDyn ? x.wbDyn[0] : null, base: x.w.base && x.w.base.tex ? hud._faceFor(x.w.base.tex) : null }; }); return o; } catch (e) { return null; } })(),
             pixelBytes: hud ? hud.pixelBytes : null,
             // car issues CT: the calls the GuidanceEventList stand-in answered (method names only)
             carplayTurns: fakeTurns ? { calls: fakeTurns.calls.length, methods: fakeTurns.calls.map((c) => c.method).filter((x, i, a) => a.indexOf(x) === i) } : null,

@@ -93,8 +93,8 @@
         "ticks": 13
       },
       "mph": {
-        "max": 130,
-        "ticks": 13
+        "max": 160,
+        "ticks": 8
       },
       "minor": 10,
       "start": 230,
@@ -202,7 +202,7 @@
       "y": 525,
       "w": 90,
       "h": 24,
-      "text": "{{wb:spd:0}}",
+      "text": "0",
       "font": "wb_spd",
       "color": "fg",
       "align": "center",
@@ -216,11 +216,27 @@
       "y": 517,
       "w": 90,
       "h": 24,
-      "text": "{{wb:spd:13}}",
+      "text": "260",
       "font": "wb_spd",
       "color": "fg",
       "align": "center",
-      "conn": 1
+      "conn": 1,
+      "toggle": "!u:mi"
+    },
+    {
+      "id": "mph160",
+      "type": "text",
+      "z": 5,
+      "x": 544,
+      "y": 517,
+      "w": 90,
+      "h": 24,
+      "text": "160",
+      "font": "wb_spd",
+      "color": "fg",
+      "align": "center",
+      "conn": 1,
+      "toggle": "u:mi"
     },
     {
       "id": "rpm1",

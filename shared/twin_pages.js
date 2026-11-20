@@ -891,8 +891,15 @@ function resolveToken(hud, name) {
         const i = Number(m[2]), r = TECH[i], v = techValue(hud, i), lim = BAR_LIMITS[r.key];
         const ok = v !== null && v >= lim[0] && v <= lim[1];
         switch (m[1]) {
-            case 'V': return ok ? (r.signed ? (Math.round(v * 10) / 10 >= 0 ? '+' : '-') + Math.abs(v).toFixed(r.dec) : v.toFixed(r.dec)) : DASH;
-            case 'U': return ok ? (r.unitKey ? I.t(r.unitKey) : r.unit) : '';
+            // r1120 PS2: a temperature in °F while the units say so (the bar's fill stays on its °C range)
+            case 'V': {
+                if (!ok) return DASH;
+                const f = r.unit && T.tempF && T.tempF(hud);
+                if (f && r.signed) return T.ambientText(hud, v);
+                const x = f ? v * 9 / 5 + 32 : v;
+                return r.signed ? (Math.round(x * 10) / 10 >= 0 ? '+' : '-') + Math.abs(x).toFixed(r.dec) : x.toFixed(r.dec);
+            }
+            case 'U': return ok ? (r.unitKey ? I.t(r.unitKey) : r.unit && T.uTemp ? T.uTemp(hud) : r.unit) : '';
             case 'F': return ok && r.lo !== null ? Math.max(0, Math.min(1, (v - r.lo) / (r.hi - r.lo))).toFixed(4) : '';
             case 'W': return r.warn !== null ? ((r.warn - r.lo) / (r.hi - r.lo)).toFixed(4) : '';
             default: return ok && r.warn !== null && v >= r.warn ? 'hot' : 'fg';
@@ -903,7 +910,12 @@ function resolveToken(hud, name) {
         const i = Number(m[2]), ty = p.tpms, fresh2 = ty.p && ty.at && t - ty.at < 60000;
         const bar = fresh2 ? tyreBar(ty.p[i]) : null;
         if (m[1] === 'P') return bar !== null ? bar.toFixed(1) : DASH;
-        if (m[1] === 'T') { const raw = ty.t ? ty.t[i] : null; return fresh2 && isNum(raw) && raw < 65535 ? (raw - 40 >= 0 ? '+' : '-') + Math.abs(raw - 40) + ' °C' : ''; }
+        if (m[1] === 'T') {         // r1120 PS2: °F while the units say so
+            const raw = ty.t ? ty.t[i] : null;
+            if (!(fresh2 && isNum(raw) && raw < 65535)) return '';
+            const c = raw - 40, f = T.tempF && T.tempF(hud), x = f ? Math.round(c * 9 / 5 + 32) : c;
+            return (x >= 0 ? '+' : '-') + Math.abs(x) + ' ' + (f ? '\u00b0F' : '\u00b0C');
+        }
         const tg = ty.target ? tyreBar(ty.target[i]) : null;
         return bar !== null && tg !== null && tg - bar >= 0.2 ? 'amber' : 'fg';
     }

@@ -140,7 +140,7 @@ F30_FONTS = [
     ('wb_cap', 'Roboto-wdth-wght.subset.ttf', 21, LOWER + UPPER + DIGITS + '/ .:+-°' + WB_UK, 0, [650, 87.5]),   # km/h, 1/min x 1000, Time, OFF
     ('wb_capb', 'Roboto-wdth-wght.subset.ttf', 21, UPPER + DIGITS + '/ ' + WB_UKB, 0, [700, 87.5]),   # READY, 1/1, the mode name
     ('wb_gear', 'Roboto-wdth-wght.subset.ttf', 45, DIGITS + 'PRNDSM-', 0, [650, 87.5]),      # the gear in its box
-    ('wb_val', 'Roboto-wdth-wght.subset.ttf', 36, DIGITS + ':+-.° kmCl/', 0, [650, 87.5]),   # the bottom row's values
+    ('wb_val', 'Roboto-wdth-wght.subset.ttf', 36, DIGITS + ':+-.° kmCl/F', 0, [650, 87.5]),   # the bottom row's values (r1120 PS2: + F for °F)
     ('wb_mini', 'Roboto-wdth-wght.subset.ttf', 14, DIGITS + '/', 0, [650, 87.5]),            # the small gauges' 1/1 and 0
     # 6WB Dials + G20: our range, clock, temperature at BMW's places, its size (package F). Weight 500, not 650: this one stands in BMW's own row, so it takes the G20 spec's setting, not the F30's (docs/G20-DESIGN-SPEC.md 1.4).
     # Strip package F, 2026-11-16, from package T's measurement of photos 60-68 (bake/work/strip/pub/T/typography.json,

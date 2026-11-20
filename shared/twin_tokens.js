@@ -400,6 +400,16 @@ function consText(hud, v) {
     if (c === 'kml') return v > 0.5 ? (100 / v).toFixed(1) : '0.0';
     return v.toFixed(1);
 }
+/** r1120 PS2: °F while the units say so (shared/units.js temp); the unit word and a temperature as shown. */
+const tempF = (hud) => unitsOf(hud).temp === 'F';
+const uTemp = (hud) => (tempF(hud) ? '\u00b0F' : '\u00b0C');
+/** The outside temperature: "+3.5" in °C (the car's 0.5 steps), "+38" whole in °F; DASH without a value. */
+function ambientText(hud, v) {
+    if (!isNum(v)) return DASH;
+    if (tempF(hud)) { const f = Math.round(v * 9 / 5 + 32); return (f >= 0 ? '+' : '-') + Math.abs(f); }
+    const r = Math.round(v * 10) / 10;
+    return (r >= 0 ? '+' : '-') + Math.abs(r).toFixed(1);
+}
 /** The unit words: distance, speed, and the consumption as [top, bottom] of the trip page's fraction. */
 const uDist = (hud) => I.t(unitsOf(hud).mi ? 'twin.u.mi' : 'twin.u.km');
 const uSpeed = (hud) => I.t(unitsOf(hud).mi ? 'fv.mph' : 'twin.u.kmh');
@@ -611,9 +621,9 @@ function resolve(hud, name) {
         case 'rowL1u': return rowOne(hud) ? '' : uDist(hud);
         case 'rowL2': return rowOne(hud) ? '' : resolve(hud, 'clock');
         case 'rowR1': return rowOne(hud) ? resolve(hud, 'ambient') : resolve(hud, 'r1');
-        case 'rowR1u': return rowOne(hud) ? '°C' : uDist(hud);
+        case 'rowR1u': return rowOne(hud) ? uTemp(hud) : uDist(hud);
         case 'rowR2': return rowOne(hud) ? '' : resolve(hud, 'ambient');
-        case 'rowR2u': return rowOne(hud) ? '' : '°C';
+        case 'rowR2u': return rowOne(hud) ? '' : uTemp(hud);
         case 'odo': { const o = odometer(hud); return isNum(o.km) ? grouped(dist(hud, o.km)) : DASH; }     // research3/MK: the first valid carrier
         case 'clock': return clockText(local(hud));
         case 'r1': {         // the trip distance whenever a source delivers one (research3/MK: factors on by default), else the range (SPEC 6.3)
@@ -622,12 +632,7 @@ function resolve(hud, name) {
             const v = dist(hud, hud._raw('range'));
             return isNum(v) ? km(v) : DASH;
         }
-        case 'ambient': {
-            const v = hud._raw('ambient');
-            if (!isNum(v)) return DASH;
-            const r = Math.round(v * 10) / 10;
-            return (r >= 0 ? '+' : '-') + Math.abs(r).toFixed(1);
-        }
+        case 'ambient': return ambientText(hud, hud._raw('ambient'));      // r1120 PS2: °F while the units say so
         default: {      // twin_dial round 3 (B4): the centre pages' tokens (shared/twin_pages.js token())
             const r = name.indexOf('pg') === 0 ? pages().token(hud, name) : undefined;
             return r === undefined ? '{{td:' + name + '}}' : r;
@@ -647,5 +652,5 @@ function iconState(hud, w) { return require('./twin_tabs').iconState(hud, w); }
 /** Repaint a live icon when its name, colour or text changed (also after a night change: the engine clears x.last). Called from _updateOne. */
 function updateIcon(hud, x, nowMs, force) { return require('./twin_tabs').updateIcon(hud, x, nowMs, force); }
 
-module.exports = { unitsOf, dist, consText, uDist, uSpeed, uCons, rl3Entry, token, wire, page, updateIcon, iconState, program, ready, local, tripValues, odometer, factors, summary, grouped, DASH, THIN, WEEKDAYS, TITLES, fresh,
+module.exports = { tempF, uTemp, ambientText, unitsOf, dist, consText, uDist, uSpeed, uCons, rl3Entry, token, wire, page, updateIcon, iconState, program, ready, local, tripValues, odometer, factors, summary, grouped, DASH, THIN, WEEKDAYS, TITLES, fresh,
     SOURCES, DEFAULT_FACTORS };

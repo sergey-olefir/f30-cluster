@@ -74,6 +74,12 @@ section('B. the units rule');
     ok(!r('auto', 'SIGNAL_UNGUELTIG').mi && !r('auto', 3).mi && !r('auto', 'DEFAULT').mi, 'Авто: an invalid or default unit is km');
     ok(!r('km', 'MEILEN', 'MPG__US').mi && r('km', 'MEILEN', 'MPG__US').cons === 'l100', 'км wins over the car (and its mpg)');
     ok(r('mi', 'KILOMETER', 'L_S_100KM').mi && r('mi', 'KILOMETER', 'L_S_100KM').cons === 'mpgUS' && r('mi', 1, 2).cons === 'mpgUK', 'милі wins; mpg (the car\'s own mpg kind when it has one)');
+    // r1120 PS2: the temperature (the owner): км -> °C, милі -> °F; Авто -> the car's own unit, else the way Авто's distance went
+    const t = (p, s, c) => U.resolve(p, U.carOf({ unitOfMeasurementSpeedometerDigital: s, unitOfMeasurementTemperature: c })).temp;
+    ok(t('km') === 'C' && t('km', 'MEILEN', 'F') === 'C' && t('mi') === 'F' && t('mi', 'KILOMETER', 'C') === 'F', 'temperature: км -> °C and милі -> °F whatever the car says');
+    ok(t('auto') === 'C' && t('auto', 'MEILEN') === 'F' && t('auto', 'KILOMETER') === 'C' && t('auto', 'KILOMETER', 'F') === 'F' && t('auto', 'MEILEN', 'C') === 'C' && t('auto', null, 2) === 'F' && t('auto', null, 'SIGNAL_UNGUELTIG') === 'C',
+        'temperature under Авто: the car\'s own unit (C / F, 1 / 2) when it says one; else °F with miles, °C with km or nothing known');
+    ok(Math.abs(U.temp(100, 'F') - 212) < 1e-9 && U.temp(20, 'C') === 20, '100 °C = 212 °F');
     ok(Math.abs(U.cons(7.84, 'mpgUS') - 30) < 0.01 && U.cons(0.2, 'mpgUS') === 0 && Math.abs(U.cons(5, 'kml') - 20) < 1e-9 && Math.abs(U.dist(160.9344, true) - 100) < 1e-9, 'conversions: 7.84 l/100 km = 30 mpg (US), 5 l/100 km = 20 km/l, 160.9 km = 100 mi');
 }
 
@@ -220,13 +226,22 @@ const width = (f, s) => s.split('').reduce((a, c) => a + (f.glyphs[c] ? f.glyphs
     ['wb_comfort', 'wb_dials', 'wb_sport', 'wb_eco'].forEach((name) => lay(name).widgets.filter((w) => w.type === 'text' && /\{\{wb:/.test(w.text)).forEach((w) => {
         const f = font('f30_cluster', w.font);
         ['uk', 'en'].forEach((L) => [false, true].forEach((mi) => {
-            const s = w.text.replace(/\{\{wb:spd:(\d+)\}\}/g, (_, i) => String(i * (mi ? 10 : 20))).replace(/\{\{wb:(\w+)\}\}/g, (_, k) => WORD[k](L, mi)).replace('{{range}}', '888');
+            const s = w.text.replace(/\{\{wb:(\w+)\}\}/g, (_, k) => WORD[k](L, mi)).replace('{{range}}', '888');
             n++;
             if (width(f, s) > w.w) bad.push(name + ' ' + w.id + ' "' + s + '" ' + width(f, s) + ' > ' + w.w);
             s.split('').forEach((c) => { if (c !== ' ' && !f.glyphs[c]) miss.push(name + ' ' + w.id + ' ' + c); });
         }));
     }));
-    ok(n > 60 && !bad.length, '6WB: ' + n + ' word / unit / scale texts in uk / en x km / mi fit their boxes' + (bad.length ? ': ' + bad.slice(0, 5).join('; ') : ''));
+    // r1120 PS2: the temperature rows in °F too ("+108 °F" is the widest), and the mph scale numbers in the font that draws them
+    ['wb_comfort', 'wb_dials', 'wb_sport', 'wb_eco', 'wb_sport_dials'].forEach((name) => lay(name).widgets.filter((w) => w.type === 'text' && /\{\{u:temp\}\}|^mph\d+$/.test(w.text + (/^mph\d+$/.test(w.id) ? '' : '') ) || (w.type === 'text' && /^mph\d+$/.test(w.id))).forEach((w) => {
+        const f = font('f30_cluster', w.font);
+        ['+108 \u00b0F', '-40 \u00b0F', '+38.5 \u00b0C', '-25.5 \u00b0C'].map((x) => (/^mph/.test(w.id) ? w.text : w.text.replace('{{ambient1}} {{u:temp}}', x).replace('{{u:temp}}', x.slice(-2)).replace('{{ambient1}}', x.split(' ')[0]))).forEach((s2) => {
+            n++;
+            if (width(f, s2) > w.w) bad.push(name + ' ' + w.id + ' "' + s2 + '" ' + width(f, s2) + ' > ' + w.w);
+            s2.split('').forEach((c) => { if (c !== ' ' && !f.glyphs[c]) miss.push(name + ' ' + w.id + ' ' + c); });
+        });
+    }));
+    ok(n > 60 && !bad.length, '6WB: ' + n + ' word / unit / scale / temperature texts in uk / en x km / mi x °C / °F fit their boxes' + (bad.length ? ': ' + bad.slice(0, 5).join('; ') : ''));
     ok(!miss.length, '6WB: every character of them is in its atlas (wb_cap, wb_capb, wb_spd)' + (miss.length ? ': missing ' + miss.slice(0, 6).join(', ') : ''));
     const cyr = (n2) => Object.keys(font('f30_cluster', n2).glyphs).filter((c) => /[Ѐ-ӿ]/.test(c)).sort().join('');
     const ours = (keys) => { const s = new Set(); ['uk', 'en'].forEach((L) => Object.keys(T[L]).filter(keys).forEach((k) => T[L][k].split('').forEach((c) => { if (/[Ѐ-ӿ]/.test(c)) s.add(c); }))); return [...s].sort().join(''); };
@@ -240,8 +255,13 @@ const width = (f, s) => s.split('').reduce((a, c) => a + (f.glyphs[c] ? f.glyphs
     });
     const u21 = font('twin_dial', 'td_u21');
     const pageWords = ['fv.mph', 'twin.u.kmh', 'twin.u.mi', 'twin.u.km', 'twin.u.gal', 'twin.u.l', 'twin.u.per100'];
+    // r1120 PS2: °F in the bottom row's unit boxes and the temperature value box
+    [['row_r1u', '\u00b0F'], ['row_r2u', '\u00b0F'], ['row_r1', '+108'], ['row_r2', '-40']].forEach((x) => {
+        const w = tw.find((y) => y.id === x[0]), f = font('twin_dial', w.font);
+        if (width(f, x[1]) > w.w || x[1].split('').some((c) => !f.glyphs[c])) tbad.push(x[0] + ' ' + x[1]);
+    });
     ['uk', 'en'].forEach((L) => pageWords.forEach((k) => { if (T[L][k].split('').some((c) => !u21.glyphs[c])) tbad.push('td_u21 ' + T[L][k]); }));
-    ok(!tbad.length, 'Twin Dial: the range tab\'s and the bottom row\'s unit in km and mi fit, the trip page\'s unit words are in td_u21' + (tbad.length ? ': ' + tbad.join(', ') : ''));
+    ok(!tbad.length, 'Twin Dial: the range tab\'s and the bottom row\'s unit in km and mi, °C and °F fit, the trip page\'s unit words are in td_u21' + (tbad.length ? ': ' + tbad.join(', ') : ''));
 }
 
 {
@@ -252,9 +272,21 @@ const width = (f, s) => s.split('').reduce((a, c) => a + (f.glyphs[c] ? f.glyphs
     ok(!bad.length, 'Twin Dial: the six faces (uk / en x km / mph speedometers, uk / en tachometers) are R8 616 x 560' + (bad.length ? ': bad ' + bad.join(', ') : ''));
     const reg = (n) => JSON.parse(fs.readFileSync(path.join(SC, n + '.regions.json'), 'utf8'));
     const mv = reg('face_speedo_mph').numerals.map((x) => x.value);
-    ok([0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 140, 160, 180].every((v) => mv.indexOf(v) >= 0) && reg('face_speedo_mph').ticks.every((t) => 'value_mph' in t) &&
+    const th = (v) => (reg('face_speedo_mph').numerals.find((x) => x.value === v) || {}).theta_deg;
+    ok([0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 140, 160].every((v) => mv.indexOf(v) >= 0) && Math.max.apply(null, mv) === 160 && reg('face_speedo_mph').ticks.every((t) => 'value_mph' in t) &&
         /mph/.test(reg('face_speedo_en_mph').baked_text[0]) && /км\/год/.test(reg('face_speedo').baked_text[0]) && /1\/min/.test(reg('face_tacho_en').baked_text[0]),
-        'the mph face carries 0..60 every 10 and 80..180 every 20; the words: "км/год", "mph", "1/min × 1000"');
+        'the mph face (PS2: US style 0..160) carries 0..60 every 10 and 80..160 every 20; the words: "км/год", "mph", "1/min × 1000"');
+    ok(th(0) === -125 && th(60) === 0 && th(100) === 50 && th(160) === 125, 'its numerals stand where the law puts them: 0 at -125, 60 at 12 o\'clock, 100 at +50, 160 at +125 deg');
+    // 6WB Comfort's mph faces (tools/bake_6wb_mph.py): RGBA 670 x 670 as the km/h ones, and their ETC2 files
+    const W6 = path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'scene');
+    const bad6 = ['speedo_mph', 'speedo_d_mph'].filter((n) => { try { const j = JSON.parse(fs.readFileSync(path.join(W6, n + '.json'), 'utf8')); const e = JSON.parse(fs.readFileSync(path.join(W6, n + '@etc2.json'), 'utf8'));
+        return !(j.w === 670 && j.h === 670 && Buffer.from(j.rgba, 'base64').length === 670 * 670 * 4 && e.format === 'etc2rgb' && e.w === 672 && Buffer.from(e.etc2, 'base64').length === 168 * 168 * 8); } catch (e) { return true; } });
+    ok(!bad6.length, '6WB: speedo_mph and speedo_d_mph are RGBA 670 x 670, with their etc2rgb files' + (bad6.length ? ': bad ' + bad6.join(', ') : ''));
+    // the 6WB's mph numbers: 0..160 every 20 at 1.625 deg a mph, the km/h ones hidden in mph and the other way round
+    const L6 = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', 'f30_cluster', 'hud', 'layouts', 'wb_comfort.json'), 'utf8')).widgets, mphW = L6.filter((w) => /^mph\d+$/.test(w.id)), kmW = L6.filter((w) => /^spd\d+$/.test(w.id));
+    const sp = L6.find((w) => w.id === 'speedo');
+    ok(mphW.map((w) => w.text).join() === '0,20,40,60,80,100,120,140,160' && mphW.every((w) => w.toggle === 'u:mi') && kmW.length === 14 && kmW.every((w) => w.toggle === '!u:mi') &&
+        sp.mph && sp.mph.max === 160 && sp.mph.ticks === 8 && sp.scale.max === 260, '6WB Comfort: mph numbers 0..160 every 20 ("u:mi"), the 14 km/h ones "!u:mi", the dial\'s mph scale 0..160 in 8 steps');
 }
 
 section('G. Node 8.16 syntax of the files this round touched');
@@ -383,30 +415,49 @@ async function partE() {
         p = await b.until((q) => q.ps.held === 'i01' && q.activeName === 'wb_eco');
         ok(p.settings.diagMbGap === true, 'a Діагностика switch set under guest is still on under i01 (global)');
         await b.set('diagMbGap', false);
-        // words and scale: uk / en x km / mi on Comfort
+        // r1120 PS2: words, scale and temperature: uk / en x km / mi x °C / °F on Comfort. km + °F and mi + °C come from the car under Авто
         await b.set('hudLayout', 'wb_comfort');
         p = await b.until((q) => q.activeName === 'wb_comfort');
-        const combos = [['uk', 'km'], ['uk', 'mi'], ['en', 'mi'], ['en', 'km']];
+        const UNITS = [['km', 'C', 'km', null], ['mi', 'F', 'mi', null], ['km', 'F', 'auto', { speed: 'KILOMETER', cons: 'L_S_100KM', temp: 'F' }], ['mi', 'C', 'auto', { speed: 'MEILEN', cons: 'MPG__US', temp: 'C' }]];
         let maxPx = 0, refused = 0;
-        for (const c of combos) {
-            await b.set('lang', c[0]); await b.set('units', c[1]);
-            const mi = c[1] === 'mi', L = c[0];
-            p = await b.until((q) => q.texts.speed_unit && q.texts.speed_unit.text === T[L][mi ? 'wb.u.mph' : 'wb.u.kmh'] && q.dials.speedo && q.dials.speedo.scale.max === (mi ? 130 : 260));
-            const tx = p.texts;
-            ok(tx.speed_unit.text === T[L][mi ? 'wb.u.mph' : 'wb.u.kmh'] && tx.spd5.text === (mi ? '50' : '100') && tx.spd13.text === (mi ? '130' : '260') && p.dials.speedo.scale.max === (mi ? 130 : 260) &&
-                tx.cons_a1.text === T[L][mi ? 'wb.u.mpgUS' : 'wb.u.l100'] && tx.range_a1.text === T[L][mi ? 'wb.u.mi' : 'wb.u.km'] && tx.ready.text === T[L]['wb.ready'] && tx.off.text === T[L]['wb.off'],
-                '6WB Comfort ' + L + ' / ' + c[1] + ': "' + tx.speed_unit.text + '", scale 0..' + tx.spd13.text + ' (' + p.dials.speedo.scale.max + '), "' + tx.cons_a1.text + '", "' + tx.range_a1.text + '", "' + tx.ready.text + '", "' + tx.off.text + '"');
-            const m = await b.settled();
-            if (m) maxPx = Math.max(maxPx, m.pixels);
+        const pxBy = {};
+        const tempText = (q) => Object.keys(q.texts || {}).map((k) => q.texts[k].text).filter((x) => /°[CF]/.test(x));
+        for (const L of ['uk', 'en']) {
+            for (const u of UNITS) {
+                await b.set('lang', L);
+                if (u[3]) await b.fake({ carUnits: u[3] });
+                await b.set('units', u[2]);
+                const mi = u[0] === 'mi', F = u[1] === 'F';
+                p = await b.until((q) => q.units && q.units.mi === mi && q.units.temp === u[1] && q.texts.speed_unit && q.texts.speed_unit.text === T[L][mi ? 'wb.u.mph' : 'wb.u.kmh'] &&
+                    q.dials.speedo && q.dials.speedo.scale.max === (mi ? 160 : 260) && tempText(q).length && tempText(q).every((x) => /°F$/.test(x) === F), 15000);
+                const tx = p.texts, sc = p.dials.speedo || { scale: {} };
+                const nums = Object.keys(tx).filter((k) => /^(spd|mph)\d+$/.test(k)).sort((a, c) => Number(a.replace(/\D/g, '')) - Number(c.replace(/\D/g, ''))).map((k) => tx[k].text);
+                const wantNums = mi ? ['0', '20', '40', '60', '80', '100', '120', '140', '160'] : ['0', '20', '40', '60', '80', '100', '120', '140', '160', '180', '200', '220', '240', '260'];
+                ok(tx.speed_unit.text === T[L][mi ? 'wb.u.mph' : 'wb.u.kmh'] && JSON.stringify(nums) === JSON.stringify(wantNums) && sc.scale.max === (mi ? 160 : 260) && sc.base === (mi ? 'speedo_mph' : 'speedo') &&
+                    tx.cons_a1.text === T[L][mi ? 'wb.u.mpgUS' : 'wb.u.l100'] && tx.range_a1.text === T[L][mi ? 'wb.u.mi' : 'wb.u.km'] && tx.ready.text === 'READY' && tx.off.text === 'OFF' &&
+                    tempText(p).every((x) => /°F$/.test(x) === F),
+                    '6WB Comfort ' + L + ' / ' + u[0] + ' / °' + u[1] + (u[3] ? ' (Авто, the car)' : '') + ': "' + tx.speed_unit.text + '", numbers ' + nums[0] + '..' + nums[nums.length - 1] + ' (' + nums.length + '), face ' + sc.base +
+                    ', "' + tx.cons_a1.text + '", "' + tx.range_a1.text + '", ' + JSON.stringify(tempText(p)));
+                const m = await b.settled();
+                if (m) { maxPx = Math.max(maxPx, m.pixels); pxBy[u[0]] = m.pixels; }
+            }
         }
-        // Авто follows the car's own units
+        // the faces are the same size (one held at a time); only the text sheets differ (9 mph numbers instead of 14 km/h ones)
+        ok(pxBy.km && pxBy.mi && pxBy.mi <= pxBy.km && pxBy.mi < MIB16, '6WB Comfort: pixel memory with the km/h face ' + pxBy.km + ' B, with the mph face ' + pxBy.mi +
+            ' B (' + (pxBy.mi - pxBy.km >= 0 ? '+' : '') + (pxBy.mi - pxBy.km) + ' B: the numbers\' sheet is smaller; one face held, so no cost)');
+        // the mph scale at 0, 60, 100 and 160 mph: the needle's fraction is mph / 160
+        await b.set('units', 'mi');
+        await fetch('http://127.0.0.1:' + PORT0 + '/signals', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mode: 'manual', values: { speed: 0, rpm: 900 } }) });
+        for (const mph of [0, 60, 100, 160]) {
+            await fetch('http://127.0.0.1:' + PORT0 + '/signals', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mode: 'manual', values: { speed: mph * 1.609344, rpm: 2000 } }) });
+            p = await b.until((q) => q.dials.speedo && q.dials.speedo.q !== null && Math.abs(q.dials.speedo.q - mph / 160) < 0.004, 8000);
+            ok(p.dials.speedo && Math.abs(p.dials.speedo.q - mph / 160) < 0.004, '6WB mph: ' + mph + ' mph puts the needle at ' + (p.dials.speedo ? p.dials.speedo.q : '?') + ' of the scale (' + (mph / 160).toFixed(3) + ': ' + (230 + 1.625 * mph - 360 * (230 + 1.625 * mph >= 360)).toFixed(1) + ' deg, where the number ' + mph + ' is)');
+        }
+        await fetch('http://127.0.0.1:' + PORT0 + '/signals', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mode: 'demo' }) });
         await b.set('units', 'auto');
-        await b.fake({ carUnits: { speed: 'MEILEN', cons: 'MPG__UK' } });
-        p = await b.until((q) => q.units && q.units.mi && q.dials.speedo && q.dials.speedo.scale.max === 130);
-        ok(p.units.mi && p.units.cons === 'mpgUK' && p.units.src === 'car' && p.texts.spd5.text === '50', 'Авто: the car says MEILEN / MPG__UK: miles, mpg, the 0..130 scale');
-        await b.fake({ carUnits: { speed: 'KILOMETER', cons: 'L_S_100KM' } });
-        p = await b.until((q) => q.units && !q.units.mi && q.dials.speedo.scale.max === 260);
-        ok(!p.units.mi && p.texts.spd5.text === '100', 'Авто: the car says KILOMETER: km/h again');
+        await b.fake({ carUnits: { speed: 'KILOMETER', cons: 'L_S_100KM', temp: 'C' } });
+        p = await b.until((q) => q.units && !q.units.mi && q.units.temp === 'C' && q.dials.speedo && q.dials.speedo.scale.max === 260);
+        ok(!p.units.mi && p.units.temp === 'C' && p.texts.spd5.text === '100', 'Авто: the car says KILOMETER / C: km/h and °C again');
         for (const lay of ['wb_sport', 'wb_eco', 'wb_comfort']) {
             await b.set('hudLayout', lay);
             await b.until((q) => q.activeName === lay);
@@ -434,25 +485,42 @@ async function partF() {
         if (!p || !p.ready) return;
         const faces = (q) => (q.scenes || []).filter((s) => /^face_/.test(s)).sort().join(',');
         const pix = [];
-        for (const c of [['uk', 'km'], ['en', 'km'], ['uk', 'mi'], ['en', 'mi']]) {
-            await b.set('lang', c[0]); await b.set('units', c[1]);
-            const sfx = (c[0] === 'en' ? '_en' : '');
-            const want = ['face_speedo' + sfx + (c[1] === 'mi' ? '_mph' : ''), 'face_tacho' + sfx].sort().join(',');
-            p = await b.until((q) => faces(q) === want, 15000);
-            const sp = p.dials.dial_speed || {};
-            ok(faces(p) === want && sp.mi === (c[1] === 'mi') && p.texts.tab_range_u.text === T[c[0]][c[1] === 'mi' ? 'twin.u.mi' : 'twin.u.km'],
-                'Twin Dial ' + c[0] + ' / ' + c[1] + ': faces ' + faces(p) + ' (one pair held), the range tab in "' + p.texts.tab_range_u.text + '"');
-            const m = await b.settled();
-            if (m) pix.push(m.pixels);
+        const UNITS = [['km', 'C', 'km', null], ['mi', 'F', 'mi', null], ['km', 'F', 'auto', { speed: 'KILOMETER', temp: 'F' }], ['mi', 'C', 'auto', { speed: 'MEILEN', temp: 'C' }]];
+        const rowU = (q) => [q.texts.row_r1u, q.texts.row_r2u].filter((x) => x && /°/.test(x.text)).map((x) => x.text);
+        for (const L of ['uk', 'en']) {
+            for (const u of UNITS) {
+                await b.set('lang', L);
+                if (u[3]) await b.fake({ carUnits: u[3] });
+                await b.set('units', u[2]);
+                const mi = u[0] === 'mi', sfx = (L === 'en' ? '_en' : '');
+                const want = ['face_speedo' + sfx + (mi ? '_mph' : ''), 'face_tacho' + sfx].sort().join(',');
+                p = await b.until((q) => faces(q) === want && q.units && q.units.temp === u[1] && rowU(q).length && rowU(q).every((x) => x === '°' + u[1]), 15000);
+                const sp = p.dials.dial_speed || {};
+                ok(faces(p) === want && sp.mi === mi && p.texts.tab_range_u.text === T[L][mi ? 'twin.u.mi' : 'twin.u.km'] && rowU(p).every((x) => x === '°' + u[1]),
+                    'Twin Dial ' + L + ' / ' + u[0] + ' / °' + u[1] + (u[3] ? ' (Авто, the car)' : '') + ': faces ' + faces(p) + ' (one pair held), the range tab in "' + p.texts.tab_range_u.text + '", the row in ' + JSON.stringify(rowU(p)));
+                const m = await b.settled();
+                if (m) pix.push(m.pixels);
+            }
         }
-        ok(pix.length === 4 && pix.every((x) => x === pix[0]) && pix[0] < MIB16, 'pixel memory the same in all four (' + (pix[0] / 1048576).toFixed(2) + ' MiB of 16): one face pair at a time');
-        // the mph law at a known speed: 100 km/h = 62.1 mph, just past 12 o'clock on the mph face; 0 deg on the km face
+        ok(pix.length === 8 && pix.every((x) => x === pix[0]) && pix[0] < MIB16, 'pixel memory the same in all eight (' + (pix[0] / 1048576).toFixed(2) + ' MiB of 16): one face pair at a time');
+        // the mph law (PS2): 0 mph at -125 deg, 60 at 12 o'clock, 100 at +50, 160 at +125
+        await b.set('units', 'mi');
+        await b.until((q) => q.dials.dial_speed && q.dials.dial_speed.mi);
+        for (const c of [[0, -125], [60, 0], [100, 50], [160, 125]]) {
+            await fetch('http://127.0.0.1:' + port + '/signals', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mode: 'manual', values: { speed: c[0] * 1.609344, rpm: 2000 } }) });
+            p = await b.until((q) => q.dials.dial_speed && Math.abs(q.dials.dial_speed.deg - c[1]) < 0.6, 8000);
+            ok(p.dials.dial_speed && Math.abs(p.dials.dial_speed.deg - c[1]) < 0.6, 'mph face: ' + c[0] + ' mph puts the needle at ' + (p.dials.dial_speed ? p.dials.dial_speed.deg.toFixed(2) : '?') + ' deg (the law: ' + c[1] + ')');
+        }
         await fetch('http://127.0.0.1:' + port + '/signals', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mode: 'manual', values: { speed: 100, rpm: 2000 } }) });
-        p = await b.until((q) => q.dials.dial_speed && Math.abs(q.dials.dial_speed.deg - 125 * (100 * 0.621371 - 60) / 120) < 0.6, 6000);
-        ok(p.dials.dial_speed && Math.abs(p.dials.dial_speed.deg - 125 * (100 * 0.621371 - 60) / 120) < 0.6, 'mph face: 100 km/h (62.1 mph) puts the needle at ' + (p.dials.dial_speed ? p.dials.dial_speed.deg.toFixed(2) : '?') + ' deg (the mph law)');
         await b.set('units', 'km');
         p = await b.until((q) => q.dials.dial_speed && !q.dials.dial_speed.mi && Math.abs(q.dials.dial_speed.deg) < 0.6, 8000);
         ok(p.dials.dial_speed && Math.abs(p.dials.dial_speed.deg) < 0.6, 'km face: 100 km/h at 12 o\'clock (' + (p.dials.dial_speed ? p.dials.dial_speed.deg.toFixed(2) : '?') + ' deg)');
+        // the limit marker follows the mph law too (twin_limit.angleOf: 100 km/h -> 62.1 mph -> +2.6 deg)
+        const TL = require(path.join(require('./twin-harness').tree('twin_dial'), 'twin_limit.js'));
+        ok(Math.abs(TL.angleOf(100 * 1.609344, true) - 50) < 0.01 && Math.abs(TL.angleOf(160 * 1.609344, true) - 125) < 0.01 && TL.angleOf(0, true) === -125 && Math.abs(TL.angleOf(60 * 1.609344, true)) < 0.01,
+            'the limit and cruise markers: the same mph law (0 / 60 / 100 / 160 mph -> -125 / 0 / 50 / 125 deg)');
+        await b.set('units', 'auto');
+        await b.fake({ carUnits: { speed: 'KILOMETER', temp: 'C' } });
         // a profile switch swaps the faces with one rebuild
         await b.set('lang', 'uk');
         await b.until((q) => faces(q) === 'face_speedo,face_tacho');
