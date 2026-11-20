@@ -9,6 +9,8 @@
   "i18n": true,
   "shared": [
     "lang.js",
+    "units.js",
+    "profile_settings.js",
     "hud.js",
     "hud_text.js",
     "hud_data.js",
@@ -86,8 +88,10 @@
     "de.bmw.infotainment.vehicle.Vehicle": {
       "statusMotorStartAuto": "s",
       "statusDayNightChangeOver": "rs",
+      "statusNewCurrentUnitsStatusExt": "rs",
+      "_units": "r1120 PS: the car's own units for the active driver profile (shared/units.js; the setting \"units\" Авто follows them). Catalogue: getter 46 (NON-ZERO), notifier 32814, so \"rs\" passes tools/signals/check_signals.py. READ ONLY: its setter newCurrentUnitsConfigExt is never declared. The kit's platform grant has the same field, but this app's own Vehicle entry replaces that grant, so it is named here",
       "_dayNight": "fix/colour-daynight: statusDayNightChangeOver is the car's own day/night verdict (config.dayNight), the night colours' first source; the sun at our position is the fallback. \"rs\" from the catalogue (reference/car/2026-11-15): getter id 19 (NON-ZERO), notifier id 32787, so the value is read once at start and not only at the next change (day/night changes twice a day)",
-      "_optional": "statusMotorStartAuto: auto start/stop (config.msa). statusNewCurrentUnitsStatusExt was dropped together with the vehicle.TPMS interface (the owner, 2026-11-15): in this app it only ever fed the tyre pressure / temperature conversions (hud.js carUnits -> _tyreBar / _tyreC), and nothing else reads it - {{u:temp}} and the rest follow the \"units\" setting, not the car"
+      "_optional": "statusMotorStartAuto: auto start/stop (config.msa). statusNewCurrentUnitsStatusExt was dropped with the vehicle.TPMS interface (2026-11-15) and is back since r1120 PS for the speed, distance and consumption units (see _units); the tyre conversions stay gone"
     },
     "de.bmw.infrastructure.VehicleCondition": {
       "VehicleCondition": "s",
@@ -224,6 +228,10 @@
           "lang"
         ],
         [
+          "setting",
+          "profileSets"
+        ],
+        [
           "button",
           "BTN_DIAG",
           "Діагностика"
@@ -241,6 +249,7 @@
       "title": "Settings",
       "skip": [
         "lang",
+        "profileSets",
         "byMode",
         "hudLayout",
         "g20",
@@ -731,6 +740,32 @@
       "type": "bool",
       "default": false,
       "_about": "research3/MB config.mbRebuild.onMode"
+    },
+    {
+      "key": "units",
+      "label": "Одиниці",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Авто (як в авто)"
+        ],
+        [
+          "km",
+          "км, км/год"
+        ],
+        [
+          "mi",
+          "милі, mph"
+        ]
+      ]
+    },
+    {
+      "key": "profileSets",
+      "label": "Налаштування для кожного профілю",
+      "type": "bool",
+      "default": true
     },
     {
       "key": "lang",

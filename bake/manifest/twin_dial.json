@@ -23,6 +23,69 @@
    ],
    "pixel_memory_MiB_counted_twice": 0.658
   },
+  "face_speedo_en": {
+   "file": "apps/twin_dial/hud/scene/face_speedo_en.json",
+   "regions": "apps/twin_dial/hud/scene/face_speedo_en.regions.json",
+   "w": 616,
+   "h": 560,
+   "format": "r8",
+   "sha256_r8": "54046fb3d316ad86dbade17922637a75a69de96d6987ec9da3d759dc82d3ee9a",
+   "stretch_saira": 1.06,
+   "shadow_model": null,
+   "fonts": {
+    "Saira[wdth,wght].ttf": "9befb732277693ea2c997a2b94eb1c458033ac1e22414be72d6d36f57a9d9b99",
+    "NotoSans[wdth,wght].ttf": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
+   },
+   "inputs": [
+    "docs/twin-dial/SPEC-R3.md \u00a72 (the numbers; SD dials_v2.json and K1 looks.json are their evidence)",
+    "docs/twin-dial/SPEC.md \u00a74, \u00a75",
+    "design/twin-dial/vt/pictograms/baked/*.png",
+    "tools/twin-dial/bake_face.py"
+   ],
+   "pixel_memory_MiB_counted_twice": 0.658
+  },
+  "face_speedo_en_mph": {
+   "file": "apps/twin_dial/hud/scene/face_speedo_en_mph.json",
+   "regions": "apps/twin_dial/hud/scene/face_speedo_en_mph.regions.json",
+   "w": 616,
+   "h": 560,
+   "format": "r8",
+   "sha256_r8": "45615e4b05b3556e235aa8898f3a854d540a1c82844708b33bf854376af7ee53",
+   "stretch_saira": 1.06,
+   "shadow_model": null,
+   "fonts": {
+    "Saira[wdth,wght].ttf": "9befb732277693ea2c997a2b94eb1c458033ac1e22414be72d6d36f57a9d9b99",
+    "NotoSans[wdth,wght].ttf": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
+   },
+   "inputs": [
+    "docs/twin-dial/SPEC-R3.md \u00a72 (the numbers; SD dials_v2.json and K1 looks.json are their evidence)",
+    "docs/twin-dial/SPEC.md \u00a74, \u00a75",
+    "design/twin-dial/vt/pictograms/baked/*.png",
+    "tools/twin-dial/bake_face.py"
+   ],
+   "pixel_memory_MiB_counted_twice": 0.658
+  },
+  "face_speedo_mph": {
+   "file": "apps/twin_dial/hud/scene/face_speedo_mph.json",
+   "regions": "apps/twin_dial/hud/scene/face_speedo_mph.regions.json",
+   "w": 616,
+   "h": 560,
+   "format": "r8",
+   "sha256_r8": "9930b59a3fb9aa217ec5300aab6d6e865b79d3714a95814031767c3d01435703",
+   "stretch_saira": 1.06,
+   "shadow_model": null,
+   "fonts": {
+    "Saira[wdth,wght].ttf": "9befb732277693ea2c997a2b94eb1c458033ac1e22414be72d6d36f57a9d9b99",
+    "NotoSans[wdth,wght].ttf": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
+   },
+   "inputs": [
+    "docs/twin-dial/SPEC-R3.md \u00a72 (the numbers; SD dials_v2.json and K1 looks.json are their evidence)",
+    "docs/twin-dial/SPEC.md \u00a74, \u00a75",
+    "design/twin-dial/vt/pictograms/baked/*.png",
+    "tools/twin-dial/bake_face.py"
+   ],
+   "pixel_memory_MiB_counted_twice": 0.658
+  },
   "face_tacho": {
    "file": "apps/twin_dial/hud/scene/face_tacho.json",
    "regions": "apps/twin_dial/hud/scene/face_tacho.regions.json",
@@ -30,6 +93,27 @@
    "h": 560,
    "format": "r8",
    "sha256_r8": "c915abff62082f650d9ce84b9285dd789f30a1e65992fc4d3511c05eeaba5590",
+   "stretch_saira": 1.06,
+   "shadow_model": null,
+   "fonts": {
+    "Saira[wdth,wght].ttf": "9befb732277693ea2c997a2b94eb1c458033ac1e22414be72d6d36f57a9d9b99",
+    "NotoSans[wdth,wght].ttf": "bfb7bb691513f12e734dc346c03a03f784912432d7e3fa8e56efcf906fe86b3d"
+   },
+   "inputs": [
+    "docs/twin-dial/SPEC-R3.md \u00a72 (the numbers; SD dials_v2.json and K1 looks.json are their evidence)",
+    "docs/twin-dial/SPEC.md \u00a74, \u00a75",
+    "design/twin-dial/vt/pictograms/baked/*.png",
+    "tools/twin-dial/bake_face.py"
+   ],
+   "pixel_memory_MiB_counted_twice": 0.658
+  },
+  "face_tacho_en": {
+   "file": "apps/twin_dial/hud/scene/face_tacho_en.json",
+   "regions": "apps/twin_dial/hud/scene/face_tacho_en.regions.json",
+   "w": 616,
+   "h": 560,
+   "format": "r8",
+   "sha256_r8": "17099a3cfbbf2669a87854f9e2437ac5d664081c358271e14c7e94e947f343d9",
    "stretch_saira": 1.06,
    "shadow_model": null,
    "fonts": {

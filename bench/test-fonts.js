@@ -79,9 +79,15 @@ NAMES.forEach((n) => JSON.parse(fs.readFileSync(path.join(LAY, n + '.json'), 'ut
 }));
 ok(carFonts.size > 0 && ['wb_road', 'wb_msg'].every((n) => carFonts.has(n)),
     'the car\'s words are drawn in ' + JSON.stringify([...carFonts]) + ' (the road label in wb_road, our message in wb_msg)');
-// decision 4: wb_capb draws only our own Latin texts (READY, the mode name): no Cyrillic in it
+// decision 4: wb_capb draws only our own texts (READY, the mode name). r1120 PS (the owner, 2026-11-20: the dial words follow the
+// language): its Cyrillic, and wb_cap's, is EXACTLY the letters of our own Ukrainian dial words (shared/i18n wb.*), no more, so
+// neither can draw the car's words; wb_capb's is READY's ("ГОТОВО")
 const capb = font('wb_capb').glyphs;
-ok(!carFonts.has('wb_capb') && !Object.keys(capb).some((c) => /[Ѐ-ӿ]/.test(c)), 'wb_capb draws no car text and carries no Cyrillic (decision 4)');
+const UK = JSON.parse(fs.readFileSync(path.join(ROOT, 'shared', 'i18n', 'uk.json'), 'utf8'));
+const lettersOf = (keep) => { const s = new Set(); Object.keys(UK).filter(keep).forEach((k) => UK[k].split('').forEach((c) => { if (/[Ѐ-ӿ]/.test(c)) s.add(c); })); return [...s].sort().join(''); };
+const cyrIn = (g) => Object.keys(g).filter((c) => /[Ѐ-ӿ]/.test(c)).sort().join('');
+ok(!carFonts.has('wb_capb') && cyrIn(capb) === lettersOf((k) => k === 'wb.ready'), 'wb_capb draws no car text; its Cyrillic is only READY\'s word (' + cyrIn(capb) + ')');
+ok(!carFonts.has('wb_cap') && cyrIn(font('wb_cap').glyphs) === lettersOf((k) => /^wb\./.test(k) && k !== 'wb.ready'), 'wb_cap draws no car text; its Cyrillic is only our dial words\' letters (' + cyrIn(font('wb_cap').glyphs) + ')');
 [...carFonts].forEach((n) => {
     const f = font(n), g = f.glyphs;
     const lack = (UA + PUNCT).split('').filter((c) => !g[c]);

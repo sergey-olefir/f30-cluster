@@ -27,6 +27,9 @@ const { Canvas } = require('./kit/canvas');
 const previews = require('./previews');
 const HudApp = require('./hud');
 const I = require('./lang');          // r1120 LN: every word on this screen from shared/i18n/<lang>.json
+// r1120 PS: the active driver profile's slot on STATUS2 (shared/profile_settings.js; an app without it shows none)
+let PS = null;
+try { PS = require('./profile_settings'); } catch (e) { PS = null; }
 
 const LOOK_KEYS = ['hudLayout', 'inComfort', 'inSport', 'inEco', 'g20'];
 const MODE_KEY = { comfort: 'inComfort', sport: 'inSport', eco: 'inEco' };
@@ -53,6 +56,17 @@ function lookKey(hud) {
 /** The layout showing now, else the one meant to (before cluster-render answers). */
 function shownName(hud) {
     return hud.activeName || hud._layoutName() || 'off';
+}
+
+/** r1120 PS: the profile line: "Профіль 1" / "Гість" by its slot, never the profile's own name; '' without the module. */
+function profileLine() {
+    const c = PS && PS.current;
+    if (!c) return '';
+    const i = c.info();
+    if (!i.enabled) return I.t('ps.off');
+    if (!i.known || !i.slot) return I.t('ps.unknown');
+    const label = i.slot === 'guest' ? I.t('ps.slot.guest') : i.slot === 'valet' ? I.t('ps.slot.valet') : I.t('ps.slot.user', { n: Number(i.slot.slice(1)) });
+    return I.t('ps.status', { slot: label });
 }
 
 /** A layout's tag line (app main.js TAGS: { layout: key }; a key with no word is shown as it is). */
@@ -113,12 +127,14 @@ class Menu {
         }));
         // registered after hud.js's own listener (HudApp's constructor), so the engine has already rebuilt
         ctx.settings.onChange((key) => this.guard('setting ' + key, () => {
-            if (LOOK_KEYS.indexOf(key) >= 0 || key === 'byMode') this.takeScreen();
+            // r1120 PS: a driver profile's set (Settings.batch) is not the driver picking a theme here: it takes no screen
+            if ((LOOK_KEYS.indexOf(key) >= 0 || key === 'byMode') && !ctx.settings.batch) this.takeScreen();
             if (key === 'byMode') this.modeRows(false);
             if (key === 'g20') this.rowRow(false);
             this.soon();
         }));
         this.hud.onStatus(() => this.soon());
+        if (PS && PS.current) PS.current.onChange(() => this.guard('profile', () => this.soon()));      // r1120 PS
         // r1120 LN: a new language - every row again (the kit's own rows are written by shared/lang.js)
         I.onChange(() => this.guard('language', () => { this.sent = Object.create(null); this.picShown = null; this.soon(0); }));
         ui.onVisible((name, on) => this.guard('visible', () => {
@@ -193,6 +209,8 @@ class Menu {
         else if (!hud.activeName || hud.activeName === 'off') head = I.t('menu.status.off');
         else head = I.t(demo ? 'menu.status.onDemo' : 'menu.status.on', { name: layoutName(this.ctx.settings, hud.activeName) });
         const parts = [];
+        const prof = profileLine();         // r1120 PS: which profile's settings are in use
+        if (prof) parts.push(prof);
         if (this.note && Date.now() < this.note.until) parts.push(I.t(this.note.key, { app: this.note.name }));
         else this.note = null;
         if (!this.ctx.settings.item('byMode')) { /* twin_dial: no drive-mode themes, nothing to say */ }
@@ -263,6 +281,7 @@ Menu.LOOK_KEYS = LOOK_KEYS;
 Menu.MODE_KEY = MODE_KEY;
 Menu.MODE_NAME = MODE_NAME;
 Menu.layoutName = layoutName;
+Menu.profileLine = profileLine;
 Menu.lookKey = lookKey;
 Menu.shownName = shownName;
 Menu.themeOf = HudApp.themeOf;      // a see-through layout file -> the theme the gallery's cards show

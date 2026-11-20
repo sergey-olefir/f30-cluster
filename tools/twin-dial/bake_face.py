@@ -83,9 +83,32 @@ SHADOW_MODELS = {
 BAR = {'y': 0.73, 'x0': -0.42, 'x1': 0.42, 'half': 0.0125, 'segs': 5, 'gap': 4}
 
 
+# r1120 PS (docs/r1120/PS-REPORT.md): the faces per language and unit. The words are the only change between languages; the mph
+# face has its own numerals and ticks on the same angles' structure: 0..60 mph to 12 o'clock (as 0..100 km/h), then 60..180 mph
+# to +125 deg (shared/hud.js _twinDeg and shared/twin_limit.js angleOf use the same law). Nothing else differs.
+MPH_LARGE = (0, 10, 20, 30, 40, 50, 60, 80, 100, 120, 140, 160, 180)
+MPH_SMALL = (70, 90, 110, 130, 150, 170)
+SPEED_WORD = {('uk', 'kmh'): 'км/год', ('en', 'kmh'): 'km/h', ('uk', 'mph'): 'миль/год', ('en', 'mph'): 'mph'}
+TACH_WORD = {'uk': '1/хв × 1000', 'en': '1/min × 1000'}
+VARIANTS = [('tach', 'uk', 'kmh'), ('speed', 'uk', 'kmh'), ('tach', 'en', 'kmh'), ('speed', 'en', 'kmh'), ('speed', 'uk', 'mph'), ('speed', 'en', 'mph')]
+
+
+def face_name(kind, lang='uk', unit='kmh'):
+    return NAMES[kind] + ('_en' if lang == 'en' else '') + ('_mph' if unit == 'mph' else '')
+
+
 # ------------------------------------------------------------------------------------------------- scale laws
-def spd_angle(v):
+def spd_angle(v, unit='kmh'):
+    if unit == 'mph':
+        return -SWEEP + SWEEP * v / 60.0 if v <= 60 else SWEEP * (v - 60) / 120.0
     return -SWEEP + 25.0 * (v / 20.0) if v <= 100 else 25.0 * (v - 100) / 40.0
+
+
+def spd_sets(unit):
+    """(large numerals, small numerals, minor tick values) of a speed face."""
+    if unit == 'mph':
+        return MPH_LARGE, MPH_SMALL, [v for v in list(range(5, 60, 5)) + list(range(70, 180, 10)) if v not in MPH_LARGE]
+    return SPD_LARGE, SPD_SMALL, [v for v in list(range(5, 100, 5)) + list(range(110, 300, 10)) if v not in (20, 40, 60, 80, 100, 140, 180, 220, 260)]
 
 
 def tach_angle(k):
@@ -258,14 +281,15 @@ def gap_boxes(a, b):
     return max(dx, dy)
 
 
-def speed_numerals(stretch):
+def speed_numerals(stretch, unit='kmh'):
     """SPEC §5.3: the large set always draws; a small numeral draws only if its ink box keeps MIN_GAP px of black to every
     large one. Returns [(value, face px centre, size px, rho)] and the dropped ones."""
-    big = [(v, polar(spd_angle(v), SPD_LARGE_RHO * R), SPD_LARGE_PX, SPD_LARGE_RHO) for v in SPD_LARGE]
+    large, small, _ = spd_sets(unit)
+    big = [(v, polar(spd_angle(v, unit), SPD_LARGE_RHO * R), SPD_LARGE_PX, SPD_LARGE_RHO) for v in large]
     boxes = [ink_box_est(xy, str(v), bc.font('saira', px, SS), stretch) for v, xy, px, _ in big]
     out, dropped = list(big), []
-    for v in SPD_SMALL:
-        xy = polar(spd_angle(v), SPD_SMALL_RHO * R)
+    for v in small:
+        xy = polar(spd_angle(v, unit), SPD_SMALL_RHO * R)
         g = min(gap_boxes(ink_box_est(xy, str(v), bc.font('saira', SPD_SMALL_PX, SS), stretch), b) for b in boxes)
         if g >= MIN_GAP:
             out.append((v, xy, SPD_SMALL_PX, SPD_SMALL_RHO))
@@ -274,7 +298,7 @@ def speed_numerals(stretch):
     return out, dropped
 
 
-def draw_face(kind, stretch):
+def draw_face(kind, stretch, lang='uk', unit='kmh'):
     fc = Face(kind, stretch)
     panel_x0 = int(round(CENTRES[kind] - CX))
     fc.band()
@@ -282,9 +306,9 @@ def draw_face(kind, stretch):
         majors = [(k, tach_angle(k)) for k in range(0, 9)]
         minors = [tach_angle(k + 0.5) for k in range(0, 8)]
     else:
-        majors = [(v, spd_angle(v)) for v in SPD_LARGE]
-        minors = [spd_angle(v) for v in list(range(5, 100, 5)) + list(range(110, 300, 10))
-                  if v not in (20, 40, 60, 80, 100, 140, 180, 220, 260)]
+        large, _, minor_v = spd_sets(unit)
+        majors = [(v, spd_angle(v, unit)) for v in large]
+        minors = [spd_angle(v, unit) for v in minor_v]
     for _, a in majors:                                # the near-black line across the band at each major mark
         fc.poly(radial_pts(a, BAND_RHO[0] * R, STRIP_RHO[0] * R, MAJOR_W * R), LINE_CODE)
     dropped = []
@@ -295,10 +319,10 @@ def draw_face(kind, stretch):
             items.append((polar(tach_angle(k), TACH_RHO * R), str(k), bc.font('saira', TACH_PX, SS), ('numeral', k, tach_angle(k))))
             numerals.append((k, tach_angle(k), TACH_RHO, TACH_PX))
     else:
-        nums, dropped = speed_numerals(stretch)
+        nums, dropped = speed_numerals(stretch, unit)
         for v, xy, px, rho in nums:
-            items.append((xy, str(v), bc.font('saira', px, SS), ('numeral', v, spd_angle(v))))
-            numerals.append((v, spd_angle(v), rho, px))
+            items.append((xy, str(v), bc.font('saira', px, SS), ('numeral', v, spd_angle(v, unit))))
+            numerals.append((v, spd_angle(v, unit), rho, px))
     # the numerals' outline and drop shadow darken the band (linear light) before any ink is drawn
     fc.shadow(fc.numeral_ink([(xy, t, f, stretch) for xy, t, f, _ in items]), SHADOW_MODELS.get(SHADOW_MODEL))
     for a in minors:
@@ -312,9 +336,9 @@ def draw_face(kind, stretch):
     fc.poly(sector_pts(RIM_RHO * R - RIM_HALF * R, RIM_RHO * R + RIM_HALF * R, -RIM_ANG, RIM_ANG), 255)
     # static hub labels (SPEC §5.1 / §5.2); READY, gear, program and the digital speed are dynamic and NOT baked
     if kind == 'speed':
-        fc.ctext((CX, CY + 0.24 * R), 'км/год', bc.font('notosans', 21, SS), 255)
+        fc.ctext((CX, CY + 0.24 * R), SPEED_WORD[(lang, unit)], bc.font('notosans', 21, SS), 255)
     else:
-        fc.ctext((CX, CY + UNIT_Y * R), '1/хв × 1000', bc.font('notosans', 20, SS), GREY_TEXT)
+        fc.ctext((CX, CY + UNIT_Y * R), TACH_WORD[lang], bc.font('notosans', 20, SS), GREY_TEXT)
         fc.ctext((CX - 0.56 * R, CY + 0.58 * R), 'OFF', bc.font('saira', 22, SS), 255, stretch=stretch, label=('label', 'OFF', None))
     # the bar under the dial: five empty segments (the fills are the shader's), end labels, the icon under the dial
     y = CY + BAR['y'] * R
@@ -425,7 +449,7 @@ def clearance(fc):
 
 
 # ----------------------------------------------------------------------------------------------- regions JSON
-def regions(kind, fc, numerals, dropped, segs, panel_x0, stretch, clear):
+def regions(kind, fc, numerals, dropped, segs, panel_x0, stretch, clear, lang='uk', unit='kmh'):
     ys, xs = np.mgrid[0:FH, 0:FW]
     rho_all = np.hypot(xs + 0.5 - CX, ys + 0.5 - CY) / R
     nums = []
@@ -447,15 +471,16 @@ def regions(kind, fc, numerals, dropped, segs, panel_x0, stretch, clear):
         for k in range(0, 17):
             ticks.append({'value_rpm': k * 500, 'theta_deg': round(tach_angle(k / 2.0), 4), 'kind': 'major' if k % 2 == 0 else 'minor'})
     else:
-        majors = set(SPD_LARGE)
-        for v in sorted(majors | set(range(5, 100, 5)) | set(range(110, 300, 10))):
-            ticks.append({'value_kmh': v, 'theta_deg': round(spd_angle(v), 4), 'kind': 'major' if v in majors else 'minor'})
+        large, _, minor_v = spd_sets(unit)
+        majors = set(large)
+        for v in sorted(majors | set(minor_v)):
+            ticks.append({'value_' + unit: v, 'theta_deg': round(spd_angle(v, unit), 4), 'kind': 'major' if v in majors else 'minor'})
     y_bar = CY + BAR['y'] * R
     d = {
         '_about': 'package R2-A2: what the tdial shader needs to colour and animate %s (tools/twin-dial/bake_face.py). '
                   'theta = degrees clockwise from 12 o\'clock = atan2(dx, -dy) of the pixel centre about the dial centre; '
-                  'rho = distance / R. Panel px = face px + rect_panel[0:2].' % NAMES[kind],
-        'face': NAMES[kind], 'format': 'r8', 'w': FW, 'h': FH, 'R_px': R,
+                  'rho = distance / R. Panel px = face px + rect_panel[0:2].' % face_name(kind, lang, unit),
+        'face': face_name(kind, lang, unit), 'format': 'r8', 'w': FW, 'h': FH, 'R_px': R,
         'rect_panel': [panel_x0, RECT_Y0, panel_x0 + FW, RECT_Y0 + FH],
         'centre_face_px': [CX, CY], 'centre_panel_px': [CENTRES[kind], 400.0],
         'stretch_saira': stretch,
@@ -496,8 +521,8 @@ def regions(kind, fc, numerals, dropped, segs, panel_x0, stretch, clear):
                 'segment_rects_face_px': [[round(v, 3) for v in s] for s in segs], 'frame_code': FRAME_CODE,
                 'what': 'frames of the 5 segments are baked (47); the shader fills them (white; first segment red on reserve; last red when hot)'},
         'icons': [{'name': n, 'size': s, 'centre_panel_px': [round(cx, 2), round(cy, 2)]} for n, s, cx, cy, _ in fc.icons],
-        'baked_text': (['км/год (unit, Noto 21, code 255)', 'C', 'H'] if kind == 'speed'
-                       else ['1/хв × 1000 (unit, Noto 20, code 227, centre (0, +%.2f) R)' % UNIT_Y, 'OFF (Saira 22)', '0', '1/1']),
+        'baked_text': ([SPEED_WORD[(lang, unit)] + ' (unit, Noto 21, code 255)', 'C', 'H'] if kind == 'speed'
+                       else [TACH_WORD[lang] + ' (unit, Noto 20, code 227, centre (0, +%.2f) R)' % UNIT_Y, 'OFF (Saira 22)', '0', '1/1']),
         'not_baked': ['needle', 'red arc', 'limit and cruise markers', 'red tick strip', 'bar fills', 'READY', 'gear', 'drive program',
                       'digital speed', 'cruise readout'],
         'clearance': clear, 'dropped_small_numerals': [{'value': v, 'gap_px': g} for v, g in dropped],
@@ -515,19 +540,21 @@ def regions(kind, fc, numerals, dropped, segs, panel_x0, stretch, clear):
                                       'theta(ceil(redline/1000) - 0.5), rho in regions.ink_numerals',
                           'limit': 'both only for theta <= 140 deg (scale end + 15, the ink of 8 reaches 131): the bar end label "1/1" and the icon lie at larger theta'}
     else:
-        d['scale'] = {'law': '0 at -125 deg, 100 at 0, 300 at +125; 20 km/h per major to 100, 40 above (piecewise linear)',
-                      'sweep_deg': SWEEP, 'rest_deg': spd_angle(0)}
+        d['scale'] = ({'law': '0 at -125 deg, 100 at 0, 300 at +125; 20 km/h per major to 100, 40 above (piecewise linear)',
+                       'sweep_deg': SWEEP, 'rest_deg': spd_angle(0)} if unit == 'kmh' else
+                      {'law': '0 at -125 deg, 60 mph at 0, 180 mph at +125; 10 mph per major to 60, 20 above (piecewise linear)',
+                       'sweep_deg': SWEEP, 'rest_deg': spd_angle(0, unit)})
     return d
 
 
 # ------------------------------------------------------------------------------------------------------ main
-def bake(kind, stretch, out_dir, record=True):
-    fc, numerals, dropped, segs, panel_x0 = draw_face(kind, stretch)
+def bake(kind, stretch, out_dir, record=True, lang='uk', unit='kmh'):
+    fc, numerals, dropped, segs, panel_x0 = draw_face(kind, stretch, lang, unit)
     img = reduce_face(fc)
     data = np.asarray(img, dtype=np.uint8)
     clear = clearance(fc)
-    reg = regions(kind, fc, numerals, dropped, segs, panel_x0, stretch, clear)
-    name = NAMES[kind]
+    reg = regions(kind, fc, numerals, dropped, segs, panel_x0, stretch, clear, lang, unit)
+    name = face_name(kind, lang, unit)
     entry = {'kind': 'face', 'face': kind, 'centre': [CX, CY], 'R': R, 'rect': reg['rect_panel'], 'regions': name + '.regions.json'}
     path = os.path.join(out_dir, name + '.json')
     sha = bc.r8_scene(path, FW, FH, data.tobytes(), 'bilinear', entry,
@@ -551,13 +578,14 @@ def main():
     ap.add_argument('--out', default=bc.SCENE, help="where to write (default apps/twin_dial/hud/scene)")
     ap.add_argument('--no-record', action='store_true', help='do not write bake/manifest/twin_dial.json')
     ap.add_argument('--preview', help='also write a PNG of each face here (git-ignored place)')
+    ap.add_argument('--base-only', action='store_true', help='only the two Ukrainian km/h faces (r1120 PS: else every VARIANTS face)')
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     bad = 0
-    for kind in ('tach', 'speed'):
-        img, data, reg, clear, dropped = bake(kind, a.stretch, a.out, not a.no_record)
+    for kind, lang, unit in (VARIANTS[:2] if a.base_only else VARIANTS):
+        img, data, reg, clear, dropped = bake(kind, a.stretch, a.out, not a.no_record, lang, unit)
         print('%s: %d x %d R8, %.3f MiB as an asset (counted twice); numerals %d, ticks %d' % (
-            NAMES[kind], FW, FH, FW * FH * 2 / 1048576.0, len(reg['numerals']), len(reg['ticks'])))
+            face_name(kind, lang, unit), FW, FH, FW * FH * 2 / 1048576.0, len(reg['numerals']), len(reg['ticks'])))
         print('  clearance (rule >= %.0f px): numeral-numeral %s, numeral-tick %s, numeral-needle-rest %s; by design under the needle at rest: %s'
               % (MIN_GAP, clear['min_numeral_numeral'], clear['min_numeral_tick'], clear['min_numeral_needle_rest'],
                  ', '.join(clear['by_design_covered_by_the_needle_at_rest']) or '-'))
@@ -568,7 +596,7 @@ def main():
             bad += 1
         if a.preview:
             os.makedirs(a.preview, exist_ok=True)
-            img.save(os.path.join(a.preview, NAMES[kind] + '_s%.2f.png' % a.stretch))
+            img.save(os.path.join(a.preview, face_name(kind, lang, unit) + '_s%.2f.png' % a.stretch))
     return 1 if bad else 0
 
 

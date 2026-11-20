@@ -27,6 +27,13 @@
  * Every method call and setter is recorded (calls) so a test can prove nothing else was sent.
  *
  * Bench only; never shipped. Loaded by bench/run-app.js for an app whose app.json declares UserAccountManager.
+ *
+ * r1120 PS: also loaded LIGHT (opts.light: no feeds of the engine speed, gear, PIA or units) for an app that ships
+ * shared/profile_settings.js (f30_cluster, twin_dial), which reads only SessionManager.currentUserAccountReference and
+ * UserAccount.<slot>.id. POST /fake then takes, besides { current }: { current, silent: true } (the active profile changes
+ * with NO currentUserOnChange: the "selective" event that never arrives), { reuse: '<slot>' } (a new profile in that slot: a
+ * new persod id), { smFail: true | false } (the field does not answer: "not known"), { users: ['i03', ...] } (more local
+ * profiles). The getters the app called are counted (gets) so a test can prove it read nothing else.
  */
 const PERS = 'de.bmw.infotainment.personalization.';
 const UAM = PERS + 'UserAccountManager';
@@ -60,7 +67,9 @@ function install(hu, opts) {
     const notif = {};        // slot -> field -> [fn]
     const smListeners = [];
     const calls = [];
+    const gets = {};         // r1120 PS: 'Interface.field' -> how many times the app read it
     const st = {
+        smFail: false,
         current: 'guest', maxUsers: 7, creating: false, engine: false, gear: 'P', piaTx: 'ENDTRANSACTION', fail: null, slow: 0,
         // the avatar setters' behaviour, all steerable from POST /fake (see the header)
         avatarMaxChars: 200000, rejectAvatar: null, rejectAvatarType: null, avatarEnumByName: true,
@@ -102,6 +111,7 @@ function install(hu, opts) {
         const p = proxyBase(inst, () => !!acc[slot]);
         p.subscribeToAvailability = (fn) => { (avail[slot] = avail[slot] || []).push(fn); };
         p.getValue = (f) => {
+            gets['UserAccount.' + f] = (gets['UserAccount.' + f] || 0) + 1;
             const a = acc[slot];
             // a slot that is not offered: no answer (the binding times out)
             if (!a) return later(300, () => { throw new Error('timeout: ' + slot + ' not offered'); });
@@ -148,7 +158,12 @@ function install(hu, opts) {
     // ---- SessionManager ----
     hu.fakes[PERS + 'SessionManager'] = (inst) => {
         const p = proxyBase(inst, () => true);
-        p.getValue = (f) => (f === 'currentUserAccountReference' ? later(5, () => UAM + '.' + st.current) : Promise.reject(new Error('no field ' + f)));
+        p.getValue = (f) => {
+            gets['SessionManager.' + f] = (gets['SessionManager.' + f] || 0) + 1;
+            if (f !== 'currentUserAccountReference') return Promise.reject(new Error('no field ' + f));
+            if (st.smFail) return later(20, () => { throw new Error('fake: SessionManager does not answer'); });
+            return later(5, () => UAM + '.' + st.current);
+        };
         p.subscribe = (o) => { if (o.name === 'currentUserOnChange') smListeners.push(o.onReceive); return Promise.resolve(); };
         return p;
     };
@@ -202,18 +217,23 @@ function install(hu, opts) {
         hu.feed('de.bmw.infrastructure.Pia', 'PIATransaction', { pIAStatusTransaction: st.piaTx });
         hu.feed('de.bmw.infotainment.vehicle.Vehicle', 'statusNewCurrentUnitsStatusExt', { language: 'ENGLISCH__UK', unitOfMeasurementTime: '_24_H', unitOfMeasurementTemperature: 'C', unitOfMeasurementSpeedometerDigital: 'KILOMETER', unitOfMeasurementConsumption: 'L_S_100KM', unitOfMeasurementAirPressure: 'BAR' });
     };
-    setInterval(feed, 1000);
-    setTimeout(feed, 50);
+    if (!opts.light) {
+        setInterval(feed, 1000);
+        setTimeout(feed, 50);
+    }
 
     /**
      * Bench control (POST /fake): { current, protect: { slot: [..] }, maxUsers, engine, gear, piaTx, fail, slow,
      * bmwId, avatarMaxChars, rejectAvatar, rejectAvatarType, avatarEnumByName, setAvatar: { slot, bytes, type } }.
      */
     function control(m) {
+        if (Array.isArray(m.users)) m.users.forEach((s, i) => { if (SLOTS.indexOf(s) >= 2 && !acc[s]) { acc[s] = mk(s, 'USER', 'Driver ' + (i + 3), i + 2); setAvail(s, true); } });
+        if (m.reuse && acc[m.reuse] && SLOTS.indexOf(m.reuse) >= 2) { acc[m.reuse].id = 'i' + hex6(); log.info('fake persod: a new profile in ' + m.reuse); }
+        if (typeof m.smFail === 'boolean') st.smFail = m.smFail;
         if (m.current && acc[m.current]) {
             st.current = m.current;
-            fire(smListeners, UAM + '.' + st.current);
-            log.info('fake persod: active profile ' + st.current);
+            if (!m.silent) fire(smListeners, UAM + '.' + st.current);
+            log.info('fake persod: active profile ' + st.current + (m.silent ? ' (no event)' : ''));
         }
         if (m.protect) Object.keys(m.protect).forEach((s) => { if (acc[s]) { acc[s].protection = m.protect[s].slice(); notify(s, 'protection'); } });
         if (typeof m.maxUsers === 'number') st.maxUsers = m.maxUsers;
@@ -237,7 +257,7 @@ function install(hu, opts) {
             const t = avatarTypeName(m.setAvatar.type === undefined ? 'INDIVIDUAL' : m.setAvatar.type);
             if (t) { a.avatarType = t; notify(m.setAvatar.slot, 'avatarType'); }
         }
-        feed();
+        if (!opts.light) feed();
     }
     function state() {
         const out = {};
@@ -250,9 +270,9 @@ function install(hu, opts) {
                 avatarSum: a.avatar ? sum(a.avatar) : 0,
             };
         });
-        return { accounts: out, current: st.current, calls: calls.slice(), maxUsers: st.maxUsers, avatarMaxChars: st.avatarMaxChars };
+        return { accounts: out, current: st.current, calls: calls.slice(), gets: Object.assign({}, gets), maxUsers: st.maxUsers, avatarMaxChars: st.avatarMaxChars };
     }
-    log.info('bench: fake persod (UserAccountManager, UserAccount, SessionManager) with guest, valet, i01, i02; guest active');
+    log.info('bench: fake persod' + (opts.light ? ' (light: SessionManager and UserAccount ids only)' : ' (UserAccountManager, UserAccount, SessionManager)') + ' with guest, valet, i01, i02; guest active');
     return { control, state };
 }
 

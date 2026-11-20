@@ -107,14 +107,40 @@ class Settings {
             if (it.reset && this.values[mark] !== it.reset) { this.values[it.key] = it.default; this.values[mark] = it.reset; changed = true; }
         }
         if (changed && fs.existsSync(this.file)) try { fs.writeFileSync(this.file, JSON.stringify(this.values, null, 1)); } catch (e) { /* read-only */ }
+        // bimmer-lab r1120 PS: several values changed at once (shared/profile_settings.js: the active driver profile's set).
+        // While `batch` is true the per-key listeners are told about each key (shared/lang.js, the menus), and a listener that
+        // would rebuild per key waits for onBatch (shared/hud.js): one rebuild for the whole set.
+        this.batch = false;
+        this.batchListeners = [];
     }
     get(key) { return this.values[key]; }
+    /** bimmer-lab r1120 PS: the file is written under a temporary name and renamed into place, so a kill mid-write
+     *  leaves the old file whole (a half-written settings.json would read as "no settings" and lose every choice). */
+    save() {
+        const tmp = this.file + '.tmp';
+        try { fs.writeFileSync(tmp, JSON.stringify(this.values, null, 1)); fs.renameSync(tmp, this.file); } catch (e) { log.warn('settings save: ' + e); }
+    }
     set(key, value) {
         this.values[key] = value;
-        try { fs.writeFileSync(this.file, JSON.stringify(this.values, null, 1)); } catch (e) { log.warn('settings save: ' + e); }
+        this.save();
         this.listeners.forEach((fn) => { try { fn(key, value); } catch (e) { log.error(e); } });
     }
+    /** bimmer-lab r1120 PS: set several keys, save once, tell each key's listeners (with `batch` true), then the batch
+     *  listeners once with the keys that changed. -> the keys that changed. Never throws. */
+    setMany(obj, why) {
+        const keys = Object.keys(obj || {}).filter((k) => JSON.stringify(this.values[k]) !== JSON.stringify(obj[k]));
+        keys.forEach((k) => { this.values[k] = obj[k]; });
+        this.save();
+        if (!keys.length) return keys;
+        this.batch = true;
+        try {
+            keys.forEach((k) => this.listeners.forEach((fn) => { try { fn(k, this.values[k]); } catch (e) { log.error(e); } }));
+        } finally { this.batch = false; }
+        this.batchListeners.forEach((fn) => { try { fn(keys, why); } catch (e) { log.error(e); } });
+        return keys;
+    }
     onChange(fn) { this.listeners.push(fn); }
+    onBatch(fn) { this.batchListeners.push(fn); }
     item(key) { return this.schema.find((s) => s.key === key); }
     /** Human text for the current value of a setting. */
     display(key) {
@@ -460,7 +486,9 @@ function wireSettings(ctx) {
     });
     // Settings: drawn over the page by the renderer (sheet.js) where the kit runs the screen,
     // else the HMI's settings screen. The HMI's screen shows the values chosen in either.
-    settings.onChange(() => { if (!ctx.display.sheet) refresh(); });
+    settings.onChange(() => { if (!ctx.display.sheet && !settings.batch) refresh(); });
+    // bimmer-lab r1120 PS: a whole set at once (the driver profile changed): the rows once, not once per key
+    if (typeof settings.onBatch === 'function') settings.onBatch(() => { if (!ctx.display.sheet) refresh(); });
     if (ui.comp('BTN_SETTINGS')) {
         ui.onClick('BTN_SETTINGS', () => {
             const d = ctx.display;

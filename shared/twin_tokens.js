@@ -388,6 +388,27 @@ function local(hud) {
 }
 const clockText = (L) => (L ? pad2(L.h) + ':' + pad2(L.mi) : DASH + DASH + ':' + DASH + DASH);
 const km = (n) => String(Math.round(n));
+/* r1120 PS: the units in use (shared/hud.js _units: the "units" setting, else the car's own); km and l/100 km without it */
+const unitsOf = (hud) => (hud && typeof hud._units === 'function' ? hud._units() : { mi: false, cons: 'l100' });
+/** km -> the distance shown (mi while the units are miles); not a number stays as it is. */
+const dist = (hud, v) => (isNum(v) && unitsOf(hud).mi ? v / 1.609344 : v);
+/** l/100 km -> the consumption shown, with its decimals: "6.8", mpg "35", km/l "14.7"; DASH without a value. */
+function consText(hud, v) {
+    if (!isNum(v)) return DASH;
+    const c = unitsOf(hud).cons;
+    if (c === 'mpgUS' || c === 'mpgUK') return v > 0.5 ? String(Math.round((c === 'mpgUS' ? 235.215 : 282.481) / v)) : '0';
+    if (c === 'kml') return v > 0.5 ? (100 / v).toFixed(1) : '0.0';
+    return v.toFixed(1);
+}
+/** The unit words: distance, speed, and the consumption as [top, bottom] of the trip page's fraction. */
+const uDist = (hud) => I.t(unitsOf(hud).mi ? 'twin.u.mi' : 'twin.u.km');
+const uSpeed = (hud) => I.t(unitsOf(hud).mi ? 'fv.mph' : 'twin.u.kmh');
+function uCons(hud) {
+    const c = unitsOf(hud).cons;
+    if (c === 'mpgUS' || c === 'mpgUK') return [I.t('twin.u.mi'), I.t('twin.u.gal')];
+    if (c === 'kml') return [I.t('twin.u.km'), I.t('twin.u.l')];
+    return [I.t('twin.u.l'), I.t('twin.u.per100')];
+}
 /** 48215 -> "48 215" with a thin space. */
 function grouped(n) {
     const s = String(Math.round(n));
@@ -553,12 +574,12 @@ function resolve(hud, name) {
     const onPage = (p, text) => (page(hud) === p ? text : '');
     switch (name) {
         // ---- hubs
-        case 'speed': { const v = hud._raw('speed'); return isNum(v) ? String(Math.round(v)) : DASH; }
+        case 'speed': { const v = dist(hud, hud._raw('speed')); return isNum(v) ? String(Math.round(v)) : DASH; }     // r1120 PS: mph while miles
         case 'gear': { const g = hud._token('gear'); return g && g.indexOf('{{') < 0 ? g : DASH; }
         case 'program': return program(hud);
         case 'ready': return ready(hud) ? 'READY' : '';           // the G20's own lamp word (Saira, Latin capitals only): not translated
         // ---- tab bar
-        case 'rangeTab': { const v = hud._raw('range'); return isNum(v) ? km(v) : DASH; }
+        case 'rangeTab': { const v = dist(hud, hud._raw('range')); return isNum(v) ? km(v) : DASH; }
         case 'media': {      // icon only until P8 (config.twin.media); a long title is cut with an ellipsis
             if (typeof td.media !== 'string') return '';
             const max = isNum(cfg(hud).mediaMax) ? cfg(hud).mediaMax : 14;
@@ -570,30 +591,35 @@ function resolve(hud, name) {
         case 'cTime': return onPage('clock', clockText(local(hud)));
         case 'cWeekday': { const L = local(hud); return onPage('clock', L ? WEEKDAYS[L.wd] : ''); }
         case 'cDate': { const L = local(hud); return onPage('clock', L ? pad2(L.d) + '.' + pad2(L.mo) + '.' + L.y : ''); }
-        case 'tConsAvg': { const t = tripValues(hud); return onPage('trip', 'ø ' + fixed1(t.cons)); }
-        case 'tSpeedAvg': { const t = tripValues(hud); return onPage('trip', 'ø ' + (isNum(t.speed) ? String(Math.round(t.speed)) : DASH)); }
-        case 'tDist': { const t = tripValues(hud); return onPage('trip', fixed1(t.way)); }
+        case 'tConsAvg': { const t = tripValues(hud); return onPage('trip', 'ø ' + consText(hud, t.cons)); }
+        case 'tSpeedAvg': { const t = tripValues(hud); const v = dist(hud, t.speed); return onPage('trip', 'ø ' + (isNum(v) ? String(Math.round(v)) : DASH)); }
+        case 'tDist': { const t = tripValues(hud); return onPage('trip', fixed1(dist(hud, t.way))); }
         case 'tTime': { const t = tripValues(hud); return onPage('trip', isNum(t.hours) ? t.hours + ':' + pad2(t.minutes) : DASH); }
         case 'tFrom': { const t = tripValues(hud); return onPage('trip', I.t('twin.trip.from', { at: t.from ? pad2(t.from.h) + ':' + pad2(t.from.m) : DASH })); }
-        case 'tConsU': return onPage('trip', I.t('twin.u.cons'));
-        case 'tSpeedU': return onPage('trip', I.t('twin.u.kmh'));
-        case 'tDistU': return onPage('trip', I.t('twin.u.km'));
+        case 'tConsU': { const u = uCons(hud); return onPage('trip', unitsOf(hud).cons === 'l100' ? I.t('twin.u.cons') : u[0] + '/' + u[1]); }
+        case 'tSpeedU': return onPage('trip', uSpeed(hud));
+        case 'tDistU': return onPage('trip', uDist(hud));
+        // r1120 PS: the unit words of the trip page (tab 1) in the units in use
+        case 'uSpeed': return uSpeed(hud);
+        case 'uDist': return uDist(hud);
+        case 'uConsTop': return uCons(hud)[0];
+        case 'uConsBot': return uCons(hud)[1];
         case 'tTimeU': return onPage('trip', I.t('twin.u.h'));
-        case 'uKm': return I.t('twin.u.km');          // r1120 LN: the range tab's unit (was the layout's literal)
+        case 'uKm': return uDist(hud);          // r1120 LN: the range tab's unit (was the layout's literal); r1120 PS: mi while miles
         // ---- bottom row: two lines on tab 1, one line (the clock left, the temperature right, on the upper baseline) on every other tab (SPEC-R3 3.5)
         case 'rowL1': return rowOne(hud) ? clockText(local(hud)) : resolve(hud, 'odo');
-        case 'rowL1u': return rowOne(hud) ? '' : I.t('twin.u.km');
+        case 'rowL1u': return rowOne(hud) ? '' : uDist(hud);
         case 'rowL2': return rowOne(hud) ? '' : resolve(hud, 'clock');
         case 'rowR1': return rowOne(hud) ? resolve(hud, 'ambient') : resolve(hud, 'r1');
-        case 'rowR1u': return rowOne(hud) ? '°C' : I.t('twin.u.km');
+        case 'rowR1u': return rowOne(hud) ? '°C' : uDist(hud);
         case 'rowR2': return rowOne(hud) ? '' : resolve(hud, 'ambient');
         case 'rowR2u': return rowOne(hud) ? '' : '°C';
-        case 'odo': { const o = odometer(hud); return isNum(o.km) ? grouped(o.km) : DASH; }     // research3/MK: the first valid carrier
+        case 'odo': { const o = odometer(hud); return isNum(o.km) ? grouped(dist(hud, o.km)) : DASH; }     // research3/MK: the first valid carrier
         case 'clock': return clockText(local(hud));
         case 'r1': {         // the trip distance whenever a source delivers one (research3/MK: factors on by default), else the range (SPEC 6.3)
             const t = tripValues(hud);
-            if (isNum(t.way)) return fixed1(t.way);
-            const v = hud._raw('range');
+            if (isNum(t.way)) return fixed1(dist(hud, t.way));
+            const v = dist(hud, hud._raw('range'));
             return isNum(v) ? km(v) : DASH;
         }
         case 'ambient': {
@@ -621,5 +647,5 @@ function iconState(hud, w) { return require('./twin_tabs').iconState(hud, w); }
 /** Repaint a live icon when its name, colour or text changed (also after a night change: the engine clears x.last). Called from _updateOne. */
 function updateIcon(hud, x, nowMs, force) { return require('./twin_tabs').updateIcon(hud, x, nowMs, force); }
 
-module.exports = { rl3Entry, token, wire, page, updateIcon, iconState, program, ready, local, tripValues, odometer, factors, summary, grouped, DASH, THIN, WEEKDAYS, TITLES, fresh,
+module.exports = { unitsOf, dist, consText, uDist, uSpeed, uCons, rl3Entry, token, wire, page, updateIcon, iconState, program, ready, local, tripValues, odometer, factors, summary, grouped, DASH, THIN, WEEKDAYS, TITLES, fresh,
     SOURCES, DEFAULT_FACTORS };

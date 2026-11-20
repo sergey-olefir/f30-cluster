@@ -879,9 +879,10 @@ function resolveToken(hud, name) {
         case 'pgDate': { const L = T.local(hud); return L ? pad2(L.d) + '.' + pad2(L.mo) + '.' + L.y : ''; }
         // ---- tab 1: the trip
         case 'pgTripMeta': { const v = T.tripValues(hud); return (isNum(v.hours) ? v.hours + ':' + pad2(v.minutes) : DASH + ':' + DASH + DASH) + ' ' + I.t('twin.u.h'); }
-        case 'pgTripCons': return 'ø ' + fixed(T.tripValues(hud).cons, 1);
-        case 'pgTripSpeed': { const v = T.tripValues(hud); return 'ø ' + (isNum(v.speed) ? String(Math.round(v.speed)) : DASH); }
-        case 'pgTripWay': return fixed(T.tripValues(hud).way, 1);
+        // r1120 PS: in the units in use (shared/twin_tokens.js dist / consText)
+        case 'pgTripCons': { const c = T.tripValues(hud).cons; return 'ø ' + (isNum(c) && T.consText ? T.consText(hud, c) : fixed(c, 1)); }
+        case 'pgTripSpeed': { const v = T.tripValues(hud), sp = T.dist ? T.dist(hud, v.speed) : v.speed; return 'ø ' + (isNum(sp) ? String(Math.round(sp)) : DASH); }
+        case 'pgTripWay': { const w = T.tripValues(hud).way; return fixed(T.dist ? T.dist(hud, w) : w, 1); }
         case 'pgTripFooter': { const v = T.tripValues(hud); return I.t('twin.trip.from', { at: v.from ? pad2(v.from.h) + ':' + pad2(v.from.m) : DASH }); }
         // ---- tab 1: technical data
         default: break;

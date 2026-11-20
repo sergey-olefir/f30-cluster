@@ -211,7 +211,7 @@ def tabs():
     vw = width(TAB_FONT, '888')
     W += [text('tab_range_v', vx + vw, 156, vw, '{{td:rangeTab}}', TAB_FONT, 'fg', 'right', 1, below=3),
           # r1120 LN: the unit follows the language ({{td:uKm}}: "км" / "km"), the box fits the widest of shared/i18n's
-          text('tab_range_u', vx + vw + 3, 156, max(width('td_u19', w) for w in WORDS('twin.u.km')) + 3, '{{td:uKm}}', 'td_u19', 'fg', 'left', 1, below=3)]
+          text('tab_range_u', vx + vw + 3, 156, max(width('td_u19', w) for w in WORDS('twin.u.km') + WORDS('twin.u.mi')) + 3, '{{td:uKm}}', 'td_u19', 'fg', 'left', 1, below=3)]
     cell = lambda a, b: (a + b) / 2.0
     warn = tab_icon('tab_warn_i', 'cc_warn', cell(TAB['seps'][0], TAB['seps'][1]), 'warn')
     W += [warn]
@@ -272,9 +272,9 @@ def page_items():
     r1, r2 = 384, 455
     P['trip'] = [title(), meta('{{td:pgTripMeta}}'),
                  I('i1', '{{td:pgIconFuel}}', 752, r1 - 15, 46), T('cons', 896, r1, 'n42', '{{td:pgTripCons}}', 'fg', 'r'),
-                 {'k': 'frac', 'id': 'cons_u', 'x': 906, 'b': r1, 'top': '{{word:twin.u.l}}', 'bot': '{{word:twin.u.per100}}', 'dt': -17, 'dr': -14, 'db': 3, 'c': 'fg'},
-                 T('speed', 1109, r1, 'n42', '{{td:pgTripSpeed}}', 'fg', 'r'), T('speed_u', 1116, r1, 'u21', '{{word:twin.u.kmh}}', 'fg', 'l'),
-                 I('i2', '{{td:pgIconRoad}}', 752, r2 - 15, 46), T('way', 896, r2, 'n42', '{{td:pgTripWay}}', 'fg', 'r'), T('way_u', 906, r2, 'u21', '{{word:twin.u.km}}', 'fg', 'l'),
+                 {'k': 'frac', 'id': 'cons_u', 'x': 906, 'b': r1, 'top': '{{td:uConsTop}}', 'bot': '{{td:uConsBot}}', 'dt': -17, 'dr': -14, 'db': 3, 'c': 'fg'},
+                 T('speed', 1109, r1, 'n42', '{{td:pgTripSpeed}}', 'fg', 'r'), T('speed_u', 1116, r1, 'u21', '{{td:uSpeed}}', 'fg', 'l'),
+                 I('i2', '{{td:pgIconRoad}}', 752, r2 - 15, 46), T('way', 896, r2, 'n42', '{{td:pgTripWay}}', 'fg', 'r'), T('way_u', 906, r2, 'u21', '{{td:uDist}}', 'fg', 'l'),
                  T('foot', MID_X, 565, 'n31', '{{td:pgTripFooter}}', 'dim', 'c', 440)]
     # technical data (SV V1): four rows, label Noto 31 at x 745, value Noto 40 right at 1150, the unit 6 px after, a bar x 745-1175
     # 12 px under the baseline (6 px thick); the outside temperature has no bar. "бар" (37 px) starts 2 px after the value instead of 6
@@ -365,7 +365,7 @@ def row():
     L, Rr = 846, 1153
     nw = lambda *worst: max(width('td_row', t) for t in worst) + 1          # a number's box: its worst text (the odometer "999 999")
     uw = lambda *worst: max(width('td_u21', t) for t in worst) + 1
-    km, c = WORDS('twin.u.km'), '\u00b0C'          # r1120 LN: the unit in every language (shared/i18n), the box fits the widest
+    km, c = WORDS('twin.u.km') + WORDS('twin.u.mi'), '\u00b0C'          # r1120 LN: the unit in every language (shared/i18n), the box fits the widest
     W = [text('row_l1', L, 656, nw('999\u2009999', '00:00', '\u2013\u2013:\u2013\u2013'), '{{td:rowL1}}', 'td_row', 'fg', 'right', 0, z, below=3, toggle=tg),
          text('row_l1u', L + 5, 656, uw(*km), '{{td:rowL1u}}', 'td_u21', 'fg', 'left', 0, z, below=3, toggle=tg),
          text('row_l2', L, 703, nw('\u2013\u2013:\u2013\u2013', '00:00'), '{{td:rowL2}}', 'td_row', 'fg', 'right', 0, z, below=3, toggle=tg),

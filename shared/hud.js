@@ -238,6 +238,13 @@ const Screen = require('./screen');
 const Runs = require('./runs');
 const DiagSettings = require('./diag_settings');     // b7: the Діагностика settings and the start-up hold
 const I18N = require('./lang');                      // r1120 LN: {{word:key}} in a layout (shared/i18n/<lang>.json)
+// r1120 PS: the units shown (the "units" setting, else the car's own for the active profile). An app that does not pack
+// shared/units.js shows km, km/h and l/100 km, as before.
+let Units = null;
+try { Units = require('./units'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('units') < 0) throw e; }
+const UNITS_KM = { mi: false, cons: 'l100', src: 'default' };
+// r1120 PS: Twin Dial's baked faces per language and unit (tools/twin-dial/bake_face.py): face_speedo[_en][_mph], face_tacho[_en]
+const TW_FACES = ['face_speedo', 'face_tacho'];
 // twin_dial: the {{td:...}} tokens, the centre pages' cycle, the extra signals (shared/twin_tokens.js). Only twin_dial packs the
 // file, so for every other app it is simply absent (null) and none of the twin_dial hooks below does anything.
 let twin = null;
@@ -974,7 +981,18 @@ class HudApp {
 
         this._setupVehicleData();
         this.layouts.onChange(() => { this.seeThru = {}; this._rebuild(); });
+        // r1120 PS: a driver profile's whole set at once (shared/profile_settings.js, Settings.setMany): every key's own
+        // handling waits, and the set is drawn by ONE rebuild (which drops the unused scene textures first, as any build)
+        if (typeof ctx.settings.onBatch === 'function') ctx.settings.onBatch((keys) => this._guard('profile set', () => {
+            this.log.info('settings: a profile\'s set (' + keys.length + ' changed): one rebuild');
+            if (keys.indexOf('needleSmooth') >= 0) this._needleApply();
+            this._rebuild();
+        }));
+        // r1120 PS: the language changed (the setting or the head unit's): the dial words follow (a Twin Dial face swap rebuilds)
+        I18N.onChange(() => this._guard('language', () => this._wordsChanged('language')));
         ctx.settings.onChange((key) => {
+            if (ctx.settings.batch) return;          // r1120 PS: part of a profile's set: onBatch above draws it once
+            if (key === 'lang' || key === 'units') { this._guard('words', () => this._wordsChanged(key)); return; }     // r1120 PS: rebuild only when the build changes
             if (this.diag && this.diag.has(key)) { this._guard('diag', () => this.diag.changed(this, key)); return; }     // b7: the Діагностика settings, in place or by their own rebuild
             if (LOOK_KEYS.indexOf(key) >= 0) { this._kombiClear(); this._loadClear(); }      // 0.7.13: a theme picked: the guards let it try again
             // a theme or layout picked anywhere (the page asks first, the kit's All settings list doesn't): no longer stepping aside
@@ -1083,6 +1101,57 @@ class HudApp {
     /** Where the HUD sits now, for the page: { x, y, scale, box } (box: the layout's own, unmoved). */
     placeInfo() { return { x: this._offset().x, y: this._offset().y, scale: this._scale(), box: this._placedBox() }; }
 
+    /* ---- r1120 PS: units and dial words (docs/r1120/PS-REPORT.md) ---- */
+
+    /** The units shown: { mi, cons } from the "units" setting (auto | km | mi) and the car's own (shared/units.js). */
+    _units() {
+        if (!Units) return UNITS_KM;
+        const p = this.ctx.settings.item('units') ? this.setting('units') : 'auto', c = this.unitCar || {};
+        const k = p + '|' + c.speed + '|' + c.cons;           // asked for every token of every tick: worked out once a change
+        if (k !== this.unitsKey) { this.unitsKey = k; this.unitsNow = Units.resolve(p, c); }
+        return this.unitsNow;
+    }
+    /** Miles and mph now. */
+    _mi() { return this._units().mi === true; }
+    /** The baked face a Twin Dial layout's face texture stands for in the language and unit in use: face_speedo[_en][_mph],
+     *  face_tacho[_en]; the file missing (an older package): the base face. Other textures are their own name. */
+    _faceFor(name) {
+        if (TW_FACES.indexOf(name) < 0) return name;
+        const want = name + (I18N.lang() === 'en' ? '_en' : '') + (name === 'face_speedo' && this._mi() ? '_mph' : '');
+        if (want === name) return name;
+        if (!this.faceHave) this.faceHave = {};
+        if (this.faceHave[want] === undefined) { try { this.faceHave[want] = !!data.has('scene/' + want + '.json'); } catch (e) { this.faceHave[want] = false; } }
+        return this.faceHave[want] ? want : name;
+    }
+    /** What a build depends on beyond the settings' own handling: the speed scale's unit and the Twin Dial faces. A change
+     *  of it rebuilds; any other change of words or units only repaints the texts. */
+    _buildKey() {
+        return (this._mi() ? 'mi' : 'km') + '|' + (this.twinLayout ? TW_FACES.map((f) => this._faceFor(f)).join(',') : '');
+    }
+    /** The language or the units changed: rebuild when the build depends on it (the scale, a face), else repaint the words. */
+    _wordsChanged(why) {
+        if (this.ctx.settings.batch || !this.started || this.stopped) return;         // a profile's set: its own single rebuild follows
+        if (!this.client || !this.client.ready) return;               // the first build reads them
+        const k = this._buildKey();
+        if (k !== this.builtKey) { this.log.info('words / units (' + why + '): ' + (this.builtKey || '-') + ' -> ' + k + ', rebuilding'); this._rebuild(); return; }
+        this.widgets.forEach((x) => { x.last = null; });
+        this._status();
+    }
+    /** {{wb:<name>}}: the 6WB's printed words in the language and units in use (design/gen_6wb.py). */
+    _wbWord(name) {
+        const u = this._units();
+        if (name.indexOf('spd:') === 0) { const i = Number(name.slice(4)); return isNum(i) ? String(i * (u.mi ? 10 : 20)) : ''; }
+        switch (name) {
+            case 'speedU': return I18N.t(u.mi ? 'wb.u.mph' : 'wb.u.kmh');
+            case 'distU': return I18N.t(u.mi ? 'wb.u.mi' : 'wb.u.km');
+            case 'consU': return I18N.t('wb.u.' + u.cons);
+            case 'rpmCap': return I18N.t('wb.rpmCap');
+            case 'ready': return I18N.t('wb.ready');
+            case 'off': return I18N.t('wb.off');
+            default: return '{{wb:' + name + '}}';
+        }
+    }
+
     /** A setting's value, or its default when the saved value isn't one the schema allows. */
     setting(key) {
         // "mapUp": not saved, the Waze map is showing inside the theme now (the setting on, waze.js says so)
@@ -1118,6 +1187,8 @@ class HudApp {
                     if (s === this.engineRun) return;
                     this.engineRun = s;
                     this.log.info('engine: ' + (s || 'not known') + ' (' + JSON.stringify(v && v.statusEngineRunDrive) + ')');
+                    // r1120 PS: a wake-up the app sees anyway: the active driver profile is read again (shared/profile_settings.js)
+                    if (typeof this.ctx.wake === 'function') this._guard('wake', () => this.ctx.wake('engine ' + (s || '?')));
                 },
             },
             // 2026-11-15, the owner ("TPMS - забираємо і все"), from docs/FEATURE-AUDIT.md: the tyre watches are GONE.
@@ -1270,6 +1341,22 @@ class HudApp {
                         this.log.info('day/night: the car says ' + code + ' -> ' + (out || 'invalid'));
                     }
                     if (this.dnCar !== was && this.started) this._guard('day/night', () => this._dayNightCheck());
+                },
+            });
+        }
+        // ---- r1120 PS: the car's own units for the active profile (Vehicle.statusNewCurrentUnitsStatusExt, getter 46, READ ONLY;
+        // its setter newCurrentUnitsConfigExt is never declared). The "units" setting's Авто follows it (shared/units.js).
+        this.unitCar = { speed: null, cons: null };
+        this.builtKey = null;
+        if (Units) {
+            const VEH = 'de.bmw.infotainment.vehicle.Vehicle';
+            extra[VEH] = Object.assign(extra[VEH] || {}, {
+                statusNewCurrentUnitsStatusExt: (v) => {
+                    const c = Units.carOf(v);
+                    if (c.speed === this.unitCar.speed && c.cons === this.unitCar.cons) return;
+                    this.unitCar = c;
+                    this.log.info('units: the car says speed ' + (c.speed || 'not set') + ', consumption ' + (c.cons || 'not set'));
+                    if (this.started) this._guard('units', () => this._wordsChanged('car units'));
                 },
             });
         }
@@ -1874,6 +1961,7 @@ class HudApp {
     }
 
     stop() {
+        this.stopped = true;             // r1120 PS: a stopped engine no longer follows a language or units change (_wordsChanged)
         clearInterval(this.tickTimer);
         clearInterval(this.themeTimer);
         clearInterval(this.statusTimer);
@@ -2006,7 +2094,7 @@ class HudApp {
             if (w.type === 'atext' && w.exact) out.add(this._exactKey(w, ci));        // 0.7.14: a "gpu" text's atlas
             else if (w.type === 'dial' && w.look === 'wb') { add(w.base); add(w.fill); }
             else if (w.type === 'g20dial') { add({ tex: w.base }); add({ tex: w.lut }); add({ tex: w.fill }); }
-            else if (w.type === 'tdial') add(w.face);                                  // twin_dial: the dial's R8 face
+            else if (w.type === 'tdial') add(w.face && w.face.tex ? { tex: this._faceFor(w.face.tex) } : w.face);     // twin_dial: the dial's R8 face (r1120 PS: in the language and unit in use)
             else if (w.type === 'tdback') add(w.panelMask);                            // twin_dial: the fallback window's R8 mask
             else if (w.type === 'wbsign' && w.tex) { add(w.tex.limit); add(w.tex.nopass); }
             else if (w.type === 'wbback') {
@@ -3013,7 +3101,8 @@ class HudApp {
         const w = x.w, c = x.c, ref = x.ref, f = w.face || {}, b = w.bar;
         x.tw = { tach: w.kind === 'tach', sweep: isNum(w.sweep) ? w.sweep : 125, max: isNum(w.scaleMax) ? w.scaleMax : 8000 };
         c.uniform(ref, 'u_geo', [w.w, w.h, w.centre[0] - w.x, w.centre[1] - w.y]);
-        try { c.bind(ref, 'u_face', this._scene(f.tex, x.ci).ref); } catch (e) {
+        x.tw.mi = w.kind === 'speed' && this._faceFor(f.tex) !== f.tex && /_mph$/.test(this._faceFor(f.tex));    // r1120 PS: the mph face's own law
+        try { c.bind(ref, 'u_face', this._scene(this._faceFor(f.tex), x.ci).ref); } catch (e) {
             this.log.error('dial "' + w.id + '": no face (' + (e && e.message || e) + '); only the needle and the bar draw');
         }
         c.uniform(ref, 'u_faceR', [(f.x || 0) - w.x, (f.y || 0) - w.y, f.w || 1, f.h || 1]);
@@ -3081,7 +3170,10 @@ class HudApp {
         } else {
             const v = this._raw('speed');
             if (!isNum(v)) return -sw;
-            deg = v <= 100 ? -sw + sw / 5 * v / 20 : sw / 5 * (v - 100) / 40;
+            if (t.mi) {          // r1120 PS: the mph face (tools/twin-dial/bake_face.py MPH): 0..60 mph to 12 o'clock, 60..180 above
+                const m = v * 0.621371;
+                deg = m <= 60 ? -sw + sw * m / 60 : sw * (m - 60) / 120;
+            } else deg = v <= 100 ? -sw + sw / 5 * v / 20 : sw / 5 * (v - 100) / 40;
         }
         return Math.max(-sw, Math.min(sw, deg));
     }
@@ -3373,6 +3465,7 @@ class HudApp {
 
     /** A dial's scale: { max, ticks } in display units (speed: DIAL_SPEED by the units setting; rpm: "max", 8000). */
     _dialScale(w) {
+        if (w.mph && this._mi()) return w.mph;      // r1120 PS: a speed dial's scale in mph (the 6WB's "mph": same ticks, 10 mph a step)
         if (w.scale) return w.scale;                // a layout's own scale: { max, ticks } ("kmh": true: always km/h)
         if (w.measure === 'speed') return DIAL_SPEED[this.setting('units') === 'us' ? 'us' : 'metric'];
         if (w.measure === 'rpm') { const max = w.max || 8000; return { max, ticks: max / 1000 }; }
@@ -3544,6 +3637,7 @@ class HudApp {
     /** {{token}} -> display text. */
     _token(tok) {
         const us = this.setting('units') === 'us';
+        const U = this._units(), mi = U.mi === true;      // r1120 PS: speed, distance and consumption follow the units in use
         const fix = (v, n) => (isNum(v) ? v.toFixed(n) : '--');
         if (tok.indexOf('slot') === 0 && tok.indexOf(':') > 0) {
             const kind = tok.slice(0, tok.indexOf(':')), sn = this.slotSensor(this.activeName, tok.slice(kind.length + 1), this.layoutSlots);
@@ -3557,7 +3651,7 @@ class HudApp {
         if (tok.indexOf('tyreP:') === 0) { const v = this._tyre('p', tok.slice(6)); return isNum(v) ? (us ? fix(v * 14.5038, 0) : fix(v, 1)) : '--'; }
         if (tok.indexOf('tyreT:') === 0) { const v = this._tyre('t', tok.slice(6)); return isNum(v) ? String(Math.round(us ? v * 9 / 5 + 32 : v)) : '--'; }
         if (tok.indexOf('dial:speed:') === 0) {     // a speed dial's label i ({{dial:speed:<i>}}): DIAL_SPEED's steps
-            const D = DIAL_SPEED[us ? 'us' : 'metric'];
+            const D = DIAL_SPEED[us || mi ? 'us' : 'metric'];
             return String(Math.round(D.max / D.ticks * Number(tok.slice(11))));
         }
         switch (tok) {
@@ -3569,22 +3663,22 @@ class HudApp {
             case 'runState': return this.runs.word();
             case 'runLabel': return us ? '0-60 MPH' : '0-100 KM/H';
             case 'warm': { const o = this._raw('oil'); return isNum(o) ? (o < 80 ? 'WARMING UP' : 'ENGINE WARM') : ''; }
-            case 'speed': { const v = this._raw('speed'); return fix(isNum(v) ? (us ? v * 0.621371 : v) : v, 0); }
-            case 'u:speed': return us ? 'MPH' : 'KM/H';
+            case 'speed': { const v = this._raw('speed'); return fix(isNum(v) ? (us || mi ? v * 0.621371 : v) : v, 0); }
+            case 'u:speed': return us || mi ? 'MPH' : 'KM/H';
             case 'oil': case 'coolant': { const v = this._raw(tok); return fix(isNum(v) ? (us ? v * 9 / 5 + 32 : v) : v, 0); }
             case 'boost': { const v = this._raw('boost'); return us ? fix(isNum(v) ? v * 14.5038 : v, 1) : fix(v, 2); }
             case 'u:boost': return us ? 'PSI' : 'BAR';
             case 'u:temp': return us ? '°F' : '°C';
-            case 'u:speedLc': return us ? 'mph' : 'km/h';
-            case 'u:distLc': return us ? 'mi' : 'km';
-            case 'u:dist': return us ? 'MI' : 'KM';
-            case 'avgSpeed': { const v = this._avgSpeed(); return fix(isNum(v) ? (us ? v * 0.621371 : v) : v, 0); }
+            case 'u:speedLc': return us || mi ? 'mph' : 'km/h';
+            case 'u:distLc': return us || mi ? 'mi' : 'km';
+            case 'u:dist': return us || mi ? 'MI' : 'KM';
+            case 'avgSpeed': { const v = this._avgSpeed(); return fix(isNum(v) ? (us || mi ? v * 0.621371 : v) : v, 0); }
             case 'limit': {
                 // the car's own figure when it sends one (its unit is the sign's), else ours converted
                 const s = this.sign;
                 if (s && s.state === 'limit' && isNum(s.shown)) return String(Math.round(s.shown));
                 const v = this._raw('limit');
-                return isNum(v) ? String(us ? Math.round(v * 0.621371 / 5) * 5 : Math.round(v)) : '';
+                return isNum(v) ? String(us || mi ? Math.round(v * 0.621371 / 5) * 5 : Math.round(v)) : '';
             }
             // ---- bottom row: the sign's extras, the message and the road label (docs/BOTTOM-ROW-PACKAGE.md) ----
             case 'limitUnit': { const s = this.sign; return s && s.unit === 'mph' ? 'mph' : s && s.unit === 'kmh' ? 'km/h' : ''; }
@@ -3599,8 +3693,13 @@ class HudApp {
             case 'navEta': { const e = this.navEta; return e ? ('0' + e.h).slice(-2) + ':' + ('0' + e.m).slice(-2) : ''; }
             case 'navMins': return isNum(this.navMins) ? String(this.navMins) : '';
             // ---- end bottom row ----
-            case 'cons': { const v = this._raw('cons'); return isNum(v) ? (us ? (v > 0.5 ? 235.215 / v : 0).toFixed(0) : v.toFixed(1)) : '--'; }
-            case 'range': { const v = this._raw('range'); return fix(isNum(v) ? (us ? v * 0.621371 : v) : v, 0); }
+            case 'cons': {
+                const v = this._raw('cons');
+                if (!isNum(v)) return '--';
+                if (us && !Units) return (v > 0.5 ? 235.215 / v : 0).toFixed(0);
+                return Units ? Units.cons(v, U.cons).toFixed(Units.consDec(U.cons)) : v.toFixed(1);       // r1120 PS: the consumption unit in use
+            }
+            case 'range': { const v = this._raw('range'); return fix(isNum(v) ? (us || mi ? v * 0.621371 : v) : v, 0); }
             case 'ambient': {
                 const v = this._raw('ambient');
                 if (!isNum(v)) return '--';
@@ -3694,6 +3793,7 @@ class HudApp {
             default:
                 if (twin && tok.indexOf('td:') === 0) return twin.token(this, tok);        // twin_dial: shared/twin_tokens.js
                 if (tok.indexOf('word:') === 0) return I18N.t(tok.slice(5));                 // r1120 LN: a word of shared/i18n/<lang>.json
+                if (tok.indexOf('wb:') === 0) return this._wbWord(tok.slice(3));              // r1120 PS: the 6WB's printing in the language and units in use
                 if (tok.indexOf('spd:') === 0) { const v = SPEED_SCALE[us ? 'us' : 'metric'][Number(tok.slice(4))]; return v === undefined ? '' : String(v); }   // speed scale labels
                 if (tok.indexOf('temp:') === 0) { const c = Number(tok.slice(5)); return isNum(c) ? String(us ? Math.round((c * 9 / 5 + 32) / 10) * 10 : Math.round(c)) : '--'; }   // gauge labels: °F to the 10
                 if (tok.indexOf('setup:') === 0) { const s = this._setup(); return s ? s[tok.slice(6)] || '' : '--'; }
@@ -3836,6 +3936,8 @@ class HudApp {
         this.baseTheme = THEMES[this.themeName] || THEMES.classic;
         this.wbLayout = layout.widgets.some((w) => w.type === 'wbback' || (w.type === 'dial' && w.look === 'wb'));
         this.twinLayout = layout.widgets.some((w) => w.type === 'tdial' || w.type === 'tdback');     // twin_dial
+        this.builtKey = this._buildKey();          // r1120 PS: the units and faces this build is made for
+        this.twinMi = this.twinLayout && this._faceFor('face_speedo') !== 'face_speedo' && /_mph$/.test(this._faceFor('face_speedo'));
         this._nightTheme();             // 2026-11-14: this.theme, with the night colours (a night look or the plain dimmer)
         this.log.info('layout "' + layout.name + '", theme ' + this.theme.name + (this.layoutTheme ? '' : ' (' + this.setting('hudTheme') + ')') +
             (this.nightOn ? ', night colours ' + this._nightNote() : ''));
@@ -5480,6 +5582,12 @@ class HudApp {
     _tick() {
         const now = Date.now();
         this._d = this.car.data();      // 0.7.14: one copy of the car's data for the whole tick (_data)
+        // r1120 PS: the vehicle condition changed (ignition, drive-ready, standby): a wake-up, the driver profile is read again
+        if (this._d.condition !== this.wakeCond) {
+            const was = this.wakeCond;
+            this.wakeCond = this._d.condition;
+            if (was !== undefined && typeof this.ctx.wake === 'function') this._guard('wake', () => this.ctx.wake('condition ' + this.wakeCond));
+        }
         try {
             this._smoothRpm(now);
             // the 0-60 timer only on the car's own data (the demo drive would set a best time)
@@ -6007,8 +6115,10 @@ class HudApp {
             x.c.uniform(x.ref, 'u_val', [q, 0, 0, 0]);
         } else if (w.type === 'dial') {
             const D = this._dialScale(w), us = this.setting('units') === 'us';
+            // r1120 PS: a dial with an "mph" scale reads mph while the units are miles
+            const toMph = w.measure === 'speed' && ((us && !w.kmh) || (w.mph && this._mi()));
             let raw = this._raw(w.measure === 'rpm' ? 'rpm' : w.measure === 'speed' ? 'speed' : w.signal);
-            if (w.measure === 'speed' && isNum(raw) && us && !w.kmh) raw *= 0.621371;
+            if (toMph && isNum(raw)) raw *= 0.621371;
             const mn = isNum(w.min) ? w.min : 0;
             let v = isNum(raw) ? Math.min(1, Math.max(0, (raw - mn) / (D.max - mn))) : 0;
             // a rev dial with an OFF mark ("off" degrees before 0): the needle parks at READY or at OFF while the
@@ -6026,7 +6136,7 @@ class HudApp {
             if (w.look === 'wb' && w.measure === 'speed' && this._arcOn()) {
                 let lim = this._raw('limit');
                 if (isNum(lim)) {
-                    if (us && !w.kmh) lim *= 0.621371;
+                    if (toMph) lim *= 0.621371;
                     over = [Math.round(Math.min(1, Math.max(0, (lim - mn) / (D.max - mn))) * 1000) / 1000, q];
                 }
             }
