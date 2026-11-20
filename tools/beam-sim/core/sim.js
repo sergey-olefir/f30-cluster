@@ -271,12 +271,33 @@
     return r.result();
   }
 
+  /**
+   * A world scenario run once and written as a "generated" frames scenario (the contract's recorded-drive shape): the
+   * frames the algorithm saw, the reference driver's switches as `driver`, the glare truth as `truth`. The app's demo
+   * and the replay tests play these back; a recorded drive from the capture tool has the same shape.
+   */
+  function exportFrames(scn, opts) {
+    const o = Object.assign({}, opts || {}, { keepFrames: true });
+    const r = run(scn, o);
+    const driver = [];
+    for (let k = 1; k < r.series.ref.length; k++) {
+      const a = r.series.ref[k - 1], b = r.series.ref[k];
+      if (!isNaN(a) && !isNaN(b) && a !== b) driver.push({ t: Math.round(r.series.t[k] * 1000), kind: b ? 'high_on' : 'high_off' });
+    }
+    const truth = r.series.t.map((t, k) => ({ t: Math.round(t * 1000), glare: r.series.glareN[k], allowHigh: r.series.allowed[k] === 1 }));
+    return {
+      format: 'beam-scenario', version: 1, id: scn.id + '.frames', family: 'R', name: (scn.name || scn.id) + ' (generated frames)',
+      purpose: 'the frames of ' + scn.id + ' as the algorithm saw them (seed ' + r.meta.seed + ')', source: 'generated',
+      meta: { from: scn.id, seed: r.meta.seed, tool: 'beam-sim' }, config: scn.config, frames: r.frames, driver: driver, truth: truth,
+    };
+  }
+
   /** A stable hash of a result (determinism tests): the JSON of everything but the frames. */
   function hashResult(res) {
     const s = JSON.stringify({ meta: res.meta, series: res.series, events: res.events, metrics: res.metrics, exposures: res.exposures });
     return RNG.hash(s).toString(16) + ':' + s.length;
   }
 
-  const X = { run: run, createRun: createRun, hashResult: hashResult, configOf: configOf, TRUTH: { darkLux: TRUTH_DARK_LUX, minKmh: TRUTH_MIN_KMH, grace_ms: TRUTH_GRACE_MS } };
+  const X = { run: run, createRun: createRun, hashResult: hashResult, exportFrames: exportFrames, configOf: configOf, TRUTH: { darkLux: TRUTH_DARK_LUX, minKmh: TRUTH_MIN_KMH, grace_ms: TRUTH_GRACE_MS } };
   if (typeof module !== 'undefined') module.exports = X; else (self.BS = self.BS || {}).sim = X;
 })();

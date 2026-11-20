@@ -1,5 +1,5 @@
 'use strict';
-// The one seeded generator of the beam simulator (mulberry32). Nothing in the simulator calls Math.random:
+// The one seeded generator of the beam simulator (mulberry32). Nothing in the simulator uses an unseeded generator:
 // every module takes rng.fork('<label>'), an independent stream that is stable per label, so adding a draw in one
 // module never shifts the numbers of another.
 (function () {

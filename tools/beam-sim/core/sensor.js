@@ -60,7 +60,7 @@
     const faultAt = function (kind, t) {
       for (let i = 0; i < faults.length; i++) {
         const f = faults[i];
-        if (f.kind === kind && t >= (f.t0_s || 0) * 1000 && (f.t1_s === undefined || f.t1_s === null || t < f.t1_s * 1000)) return f;
+        if (f.kind === kind && t >= (f.t0_s ? f.t0_s * 1000 : -Infinity) && (f.t1_s === undefined || f.t1_s === null || t < f.t1_s * 1000)) return f;
       }
       return null;
     };
@@ -109,18 +109,16 @@
           const p = P.miss + 0.5 * Math.pow(lk.dist / range, 4);
           if (R.det.chance(Math.min(0.95, p))) return;
           let tr = tracks[src.key];
-          let kind = src.kind;
           if (!tr) {
-            // the classifier's sticky choice for this track
-            let k2 = kind;
-            if (kind === 'reflector' && R.cls.chance(P.reflMisclass)) k2 = 'head';
-            if (kind === 'house') k2 = R.cls.chance(P.houseAsOther) ? 'other' : 'street';
-            if (kind === 'station') k2 = 'street';
-            tr = tracks[src.key] = { id: freeId(), n: 0, last: frameNo, az: lk.az, cls: k2 };
-            if (tr.id < 0) { delete tracks[src.key]; return; }
+            // a new track (its id is given after the 15-object cap); the classifier's sticky choice for it
+            let k2 = src.kind;
+            if (k2 === 'reflector' && R.cls.chance(P.reflMisclass)) k2 = 'head';
+            if (k2 === 'house') k2 = R.cls.chance(P.houseAsOther) ? 'other' : 'street';
+            if (k2 === 'station') k2 = 'street';
+            tr = tracks[src.key] = { id: -1, n: 0, last: frameNo, az: lk.az, cls: k2 };
           }
-          if (R.det.chance(P.idSwitch)) { const nid = freeId(); if (nid >= 0) { tr.id = nid; tr.n = 0; } }
-          kind = tr.cls;
+          if (tr.id >= 0 && R.det.chance(P.idSwitch)) { tr.id = -1; tr.n = 0; }
+          const kind = tr.cls;
           const az = lk.az + R.noise.normal(0, P.noiseAz_deg);
           const dist = Math.max(1, lk.dist * (1 + R.noise.normal(0, P.noiseDist)));
           const angW = Math.atan2(src.width || 1, lk.dist) * 180 / Math.PI;
@@ -138,10 +136,15 @@
             dist: 30 + R.ghost.next() * 300, w: 0.1, rate: 0, tr: null, n: 1 });
         }
       }
-      // forget tracks unseen for 4 frames
-      Object.keys(tracks).forEach(function (k) { if (frameNo - tracks[k].last > 4) delete tracks[k]; });
       dets.sort(function (a, b) { return (PRIORITY[a.kind] - PRIORITY[b.kind]) || (a.dist - b.dist); });
       const top = dets.slice(0, 15);
+      // the cap: a track that did not make the 15 is dropped (it restarts weak when it comes back); tracks unseen for
+      // 4 frames are forgotten; then the new tracks of this frame take free ids
+      const inTop = {};
+      top.forEach(function (d) { inTop[d.key] = true; });
+      dets.slice(15).forEach(function (d) { if (d.tr) delete tracks[d.key]; });
+      Object.keys(tracks).forEach(function (k) { if (frameNo - tracks[k].last > 4) delete tracks[k]; });
+      top.forEach(function (d) { if (d.tr && d.tr.id < 0) { d.tr.id = freeId(); if (d.tr.id < 0) { delete tracks[d.key]; d.tr = null; } } });
       api.lastDetections = top.map(function (d) { return { kind: d.kind, truth: d.truth, az: d.az, el: d.el, dist: d.dist, uid: d.uid }; });
       // raw encoding (each object its own id; ghosts take a free id for one frame)
       const usedIds = {};

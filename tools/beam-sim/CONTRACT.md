@@ -186,7 +186,7 @@ sources are in `docs/highbeam/HA-REPORT.md`; the table here is the **shape** (de
 | `objScale` | `x: { gain, offset }`, `y: { gain, offset }`, `vx: { gain, offset }` |
 | `objClasses` | `{ '<raw cls>': 'car' \| 'truck' \| 'moto' \| 'bike' \| 'ped' \| 'other' }` |
 | `zone` | `head_m`, `headSide_m`, `tail_m`, `tailSide_m`, `bike_m`, `other_m`, `core_deg`, `edge_deg`, `returnMargin` (while low a light holds the dip out to this × the zone), `noDist` (`'in'` \| `'out'`), `reflector` (`'ignore'` \| `'other'`) |
-| `confirm` | `weakFrames` (extra consecutive frames a weak object needs), `strongFrames` |
+| `confirm` | `weakFrames` (extra consecutive frames a weak object needs), `strongFrames`, `jump_deg`, `jumpFrac` (a track that jumps this far starts over: a reused id) |
 | `street` | `window_ms`, `count`, `minEl_deg` |
 | `dark` | `on_lux`, `off_lux`, `onHold_ms`, `offHold_ms`, `useSun` (`'agree'` \| `'fallback'` \| `'off'`) |
 | `brightness` | `gain`, `offset` |

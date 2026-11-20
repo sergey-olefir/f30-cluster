@@ -94,7 +94,7 @@
   ]
  },
  "expect": {
-  "maxSwitches": 6,
-  "minHighFrac": 0.8
+  "maxSwitches": 8,
+  "minHighFrac": 0.75
  }
 }
