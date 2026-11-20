@@ -198,7 +198,7 @@ silent. `DIPPED`: 1.0 for a strong object, 0.6 for a weak one, 0.5 for street li
 `create(config)` merges each group one level deep over `B.DEFAULTS`. Unknown keys are kept and ignored. A value of the
 wrong type, NaN, or outside `[min, max]` is replaced by the default and listed in `inst.configErrors`.
 `B.SCHEMA` carries for every key: unit, default, min, max, step, `assumed` (true = the car has not confirmed it) and
-`source` (`research` + the reference, `assumption`, `tuning` + the run, `catalogue`). The current values and their
+`source` (`research` + the reference, `assumption`, `tuning` + the run, `catalogue`, `brief`, `owner`). The current values and their
 sources are in `docs/highbeam/HA-REPORT.md`; the table here is the **shape** (defaults may be retuned; keys stay).
 
 | Group | Keys |
