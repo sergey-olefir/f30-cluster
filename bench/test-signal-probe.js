@@ -38,7 +38,7 @@ const FMT = require(path.join(ROOT, 'shared', 'signal_format.js'));     // road 
 const { Probe, VERSION, LOG_FORMAT } = require(path.join(APP_DIR, 'probe.js'));
 const TURNS = require(path.join(ROOT, 'shared', 'carplay_turns.js'));
 const FX = require('./carplay-turns-fixture');
-const NTABLE = 265;               // fields.js entries (S16 next-turn, car issues CT: + 1; cruise RC: + 13 S14 fields; r1120 AC: + S17's steering)
+const NTABLE = 306;               // fields.js entries (S16 next-turn, car issues CT: + 1; cruise RC: + 13 S14 fields; r1120 AC: + S17's steering; beam HS: + 41 of S18)
 const VECTORS = JSON.parse(fs.readFileSync(path.join(__dirname, 'signal-probe-vectors.json'), 'utf8'));
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'signal-probe-'));
 const PORT = Number(process.env.BENCH_PORT) || 8502;
@@ -142,9 +142,11 @@ async function main() {
     ok(app.id === 'signal_probe' && app.title === 'Signal Probe' && app.loggingId === 'OASP' && /^\d+\.\d+\.\d+$/.test(app.version), 'app.json: id signal_probe, title, own loggingId OASP, version ' + app.version);
     ok(app.version === VERSION, 'app.json version = probe.js VERSION (' + VERSION + ')');
     // r1120 LN: + the language row ("lang", auto | uk | en), the last setting; the sixteen set rows as before
-    const setRows = app.settings.filter((s) => s.key !== 'lang'), langRow = app.settings.filter((s) => s.key === 'lang');
-    ok(setRows.length === 16 && setRows.every((s) => s.type === 'bool' && s.default === false), 'sixteen set settings, one per set (S1..S11, S13..S17), all bool and off by default');     // r1120 AC: + S17
-    ok(app.settings.length === 17 && langRow.length === 1 && app.settings[16] === langRow[0] && langRow[0].type === 'choice' && langRow[0].default === 'auto', 'and the language row last (Мова / Language: auto by default)');
+    const setRows = app.settings.filter((s) => s.key !== 'lang' && s.key !== 'hbdiag'), langRow = app.settings.filter((s) => s.key === 'lang');     // beam HS: + hbdiag, not a set
+    const diagRow = app.settings.filter((s) => s.key === 'hbdiag');
+    ok(diagRow.length === 1 && diagRow[0].type === 'bool' && diagRow[0].default === false && app.settings[17] === diagRow[0], 'beam HS: the HB diagnostic reads have their own row (hbdiag) right after S18, bool, OFF by default');
+    ok(setRows.length === 17 && setRows.every((s) => s.type === 'bool' && s.default === false), 'seventeen set settings, one per set (S1..S11, S13..S18), all bool and off by default');     // r1120 AC: + S17; beam HS: + S18
+    ok(app.settings.length === 19 && langRow.length === 1 && app.settings[18] === langRow[0] && langRow[0].type === 'choice' && langRow[0].default === 'auto', 'and the language row last (Мова / Language: auto by default)');
     ok(FIELDS.SETS.every((s, i) => app.settings[i].key === s.key && new RegExp('^' + s.id + ' ').test(app.settings[i].label)), 'each setting is named for its set');
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -153,15 +155,20 @@ async function main() {
     const decl = [];
     Object.keys(sigs).forEach((i) => Object.keys(sigs[i]).filter((k) => k[0] !== '_').forEach((f) => decl.push(i + '.' + f + ':' + sigs[i][f])));
     ok(decl.every((d) => /^(rs|s|r)$/.test(d.split(':')[1])), 'only r and s flags (' + decl.length + ' fields), no "w"');
-    const EVSETS = ['S13', 'S14', 'S15', 'S16'];
+    const EVSETS = ['S13', 'S14', 'S15', 'S16', 'S18'];     // beam HS: + S18 (the camera's light detection)
     const S13I = FIELDS.TABLE.filter((f) => f.flags === 'b').map((f) => f.iface);
     const evDecl = [];
-    Object.keys(sigs).forEach((i) => (sigs[i]._broadcasts || []).forEach((e) => evDecl.push(i + '.' + e)));
-    ok(Object.keys(sigs).filter((i) => sigs[i]._broadcasts).every((i) => S13I.indexOf(i) >= 0) && FIELDS.TABLE.filter((f) => f.flags === 'b').every((f) => EVSETS.indexOf(f.set) >= 0),
-        'events (_broadcasts) only on the S13 / S14 / S15 / S16 interfaces (the lead\'s decision of 2026-11-18, the owner\'s requests of 2026-11-19) (' + evDecl.length + ' events)');
+    const DIAGI = Object.keys(FIELDS.DIAG_MANIFEST);     // beam HS: the diagnostic transport's reply broadcast, checked on its own below
+    Object.keys(sigs).filter((i) => DIAGI.indexOf(i) < 0).forEach((i) => (sigs[i]._broadcasts || []).forEach((e) => evDecl.push(i + '.' + e)));
+    ok(Object.keys(sigs).filter((i) => sigs[i]._broadcasts && DIAGI.indexOf(i) < 0).every((i) => S13I.indexOf(i) >= 0) && FIELDS.TABLE.filter((f) => f.flags === 'b').every((f) => EVSETS.indexOf(f.set) >= 0),
+        'events (_broadcasts) only on the S13 / S14 / S15 / S16 / S18 interfaces (the lead\'s decision of 2026-11-18, the owner\'s requests of 2026-11-19, the Auto Beam round of 2026-11-20) (' + evDecl.length + ' events)');
     const withMethods = Object.keys(sigs).filter((i) => Object.keys(sigs[i]).some((k) => k === '_methods'));
-    ok(withMethods.length === 1 && withMethods[0] === TURNS.IFACE && JSON.stringify(sigs[TURNS.IFACE]._methods) === '["queryContent"]' && sigs[TURNS.IFACE]._instances === 'Main_Instance',
-        '_methods: only GuidanceEventList (Main_Instance) declares one, queryContent (car issues CT: the owner\'s approved read)');
+    // beam HS: + the diagnostic transport (InternalTasu.sendTasuRequest), the owner's decision of 2026-11-20: only through kit/runtime/readonly-diag.js
+    const TASU = 'com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu';
+    ok(JSON.stringify(FIELDS.DIAG_MANIFEST) === JSON.stringify({ [TASU]: { _instances: 'SystemFunctionsInternalTasuInst1', _methods: ['sendTasuRequest'], _broadcasts: ['sendTasuResponse'] } }) &&
+        JSON.stringify(sigs[TASU]) === JSON.stringify(FIELDS.DIAG_MANIFEST[TASU]), 'beam HS: the diagnostic transport is declared exactly as fields.js DIAG_MANIFEST says (sendTasuRequest, its reply broadcast), nothing more');
+    ok(withMethods.length === 2 && withMethods.indexOf(TURNS.IFACE) >= 0 && withMethods.indexOf(TASU) >= 0 && JSON.stringify(sigs[TURNS.IFACE]._methods) === '["queryContent"]' && sigs[TURNS.IFACE]._instances === 'Main_Instance',
+        '_methods: GuidanceEventList (Main_Instance) declares queryContent (car issues CT: the owner\'s approved read), and the diagnostic transport sendTasuRequest (beam HS, read only through readonly-diag); nothing else');
     const tableKeys = FIELDS.TABLE.filter((f) => f.flags !== 'b' && f.flags !== 'm').map((f) => f.iface + '.' + f.field).filter((k, i, a) => a.indexOf(k) === i).sort(), declKeys = decl.map((d) => d.split(':')[0]).sort();
     ok(JSON.stringify(tableKeys) === JSON.stringify(declKeys) && JSON.stringify(FIELDS.TABLE.filter((f) => f.flags === 'b').map((f) => f.iface + '.' + f.field).sort()) === JSON.stringify(evDecl.sort()), 'every field and event the table reads is declared, and nothing else is (' + tableKeys.length + ' distinct fields, ' + evDecl.length + ' events, ' + Object.keys(sigs).length + ' interfaces)');
     let r = spawnSync(process.execPath, [TOOL, 'check'], { encoding: 'utf8' });
@@ -170,11 +177,11 @@ async function main() {
     ok(tags.length === NTABLE && new Set(tags).size === tags.length, 'the table: ' + tags.length + ' fields, every tag unique');
     const keys3 = FIELDS.TABLE.map((f) => f.iface + '.' + f.field + '@' + FIELDS.instOf(f));
     ok(new Set(keys3).size === keys3.length, 'no field is read twice on the same instance');
-    ok(FIELDS.TABLE.every((f) => /^S([1-9]|1[0134567])$/.test(f.set) &&     // r1120 AC: + S17
+    ok(FIELDS.TABLE.every((f) => /^S([1-9]|1[01345678])$/.test(f.set) &&     // r1120 AC: + S17; beam HS: + S18
          FIELDS.SETS.find((s) => s.id === f.set).items.indexOf(f.p) >= 0), 'every field is on an item (P1..P19) that belongs to its set');
-    ok(['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P18', 'P19', 'P22', 'P23', 'P24', 'P25', 'P26'].every((p) => FIELDS.TABLE.some((f) => f.p === p)), 'every item P1..P19 and P22..P26 has a field');     // r1120 AC: + P26
-    ok(FIELDS.SETS.every((s) => FIELDS.TABLE.some((f) => f.set === s.id)) && JSON.stringify(FIELDS.SETS.map((s) => s.id)) === '["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S11","S13","S14","S15","S16","S17"]', 'the sixteen sets S1..S11 and S13..S17, each with fields');     // r1120 AC: + S17 ACC
-    ok(FIELDS.TABLE.every((f) => /^(r|rs|s)$/.test(f.flags) || (f.flags === 'b' && EVSETS.indexOf(f.set) >= 0) || (f.flags === 'm' && f.set === 'S16' && f.tag === 'next-turn')), 'every field has flags r / rs / s; b (an event) only in S13..S16; m (a polled method) only S16\'s next-turn');
+    ok(['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P18', 'P19', 'P22', 'P23', 'P24', 'P25', 'P26', 'P27'].every((p) => FIELDS.TABLE.some((f) => f.p === p)), 'every item P1..P19 and P22..P27 has a field');     // r1120 AC: + P26; beam HS: + P27
+    ok(FIELDS.SETS.every((s) => FIELDS.TABLE.some((f) => f.set === s.id)) && JSON.stringify(FIELDS.SETS.map((s) => s.id)) === '["S1","S2","S3","S4","S5","S6","S7","S8","S9","S10","S11","S13","S14","S15","S16","S17","S18"]', 'the seventeen sets S1..S11 and S13..S18, each with fields');     // r1120 AC: + S17 ACC; beam HS: + S18 HB
+    ok(FIELDS.TABLE.every((f) => /^(r|rs|s)$/.test(f.flags) || (f.flags === 'b' && EVSETS.indexOf(f.set) >= 0) || (f.flags === 'm' && f.set === 'S16' && f.tag === 'next-turn')), 'every field has flags r / rs / s; b (an event) only in S13..S16 and S18; m (a polled method) only S16\'s next-turn');
     const mt = FIELDS.TABLE.filter((f) => f.flags === 'm');
     ok(mt.length === 1 && mt[0].iface === TURNS.IFACE && mt[0].field === 'queryContent' && FIELDS.instOf(mt[0]) === 'Main_Instance' && mt[0].fmt === 'turns', 'the one polled method: S16 next-turn = GuidanceEventList.queryContent on Main_Instance');
     ok(FIELDS.TABLE.filter((f) => f.set === 'S6').every((f) => f.mark === true) && FIELDS.TABLE.filter((f) => f.p === 'P13').every((f) => f.gapMs <= 100 && f.cap >= 300),
@@ -360,7 +367,7 @@ async function main() {
             ['canary_lower', 'Canary', 'Main', 'Event street', 'Modelstreet', 'Event_'].forEach((k) => { if (re.test(k)) enumBad.push(f.tag + ' lets "' + k + '" through'); });
         });
         ok(named.length === 1 && enumBad.length === 0, 'a tree\'s own enum-name pattern (' + named.map((f) => f.tag).join(', ') + ') matches every enum name of its type in the catalogue and no free text' + (enumBad.length ? ': ' + enumBad.slice(0, 5).join('; ') : ''));
-        ok(trees.length === 45 && texts.length === 0, 'the ' + trees.length + ' whole values (tree) have no text member in the catalogue (a member they skip aside: the fused list\'s frame name), so an upper-case string is an enum name' + (texts.length ? ': ' + texts.join(', ') : ''));     // cruise RC: 13 S14 fields (pedals, brake, wheels, speeds, grade)
+        ok(trees.length === 46 && texts.length === 0, 'the ' + trees.length + ' whole values (tree) have no text member in the catalogue (a member they skip aside: the fused list\'s frame name), so an upper-case string is an enum name' + (texts.length ? ': ' + texts.join(', ') : ''));     // cruise RC: 13 S14 fields (pedals, brake, wheels, speeds, grade)
         ok(bad.length === 0, 'the table against the catalogue\'s types (' + nCols + ' columns): no text member is read as a number, enum or bool, and every path exists' + (bad.length ? '\n    ' + bad.slice(0, 12).join('\n    ') : ''));
     } else console.log('  skip: the catalogue is not here');
 
@@ -371,8 +378,8 @@ async function main() {
     const a = mk({});
     a.pr.setSets(FIELDS.SETS.map((s) => s.id), false);
     await settleOf(a);
-    ok(a.lines.some((l) => /^probe: sets on=S1\+S2\+S3\+S4\+S5\+S6\+S7\+S8\+S9\+S10\+S11\+S13\+S14\+S15\+S16\+S17 changed=\+S1,\+S2,\+S3,\+S4,\+S5,\+S6,\+S7,\+S8,\+S9,\+S10,\+S11,\+S13,\+S14,\+S15,\+S16,\+S17 fields=265 \(first set on\)$/.test(l)), 'all sixteen sets on: the log says so');     // r1120 AC: + S17
-    ok(a.signals.count('watch') === FIELDS.interfaces().reduce((n, e) => n + e.instances.length, 0) && a.signals.count('watch') === 100, 'one proxy per interface instance (' + a.signals.count('watch') + ' watch calls)');
+    ok(a.lines.some((l) => /^probe: sets on=S1\+S2\+S3\+S4\+S5\+S6\+S7\+S8\+S9\+S10\+S11\+S13\+S14\+S15\+S16\+S17\+S18 changed=\+S1,\+S2,\+S3,\+S4,\+S5,\+S6,\+S7,\+S8,\+S9,\+S10,\+S11,\+S13,\+S14,\+S15,\+S16,\+S17,\+S18 fields=306 \(first set on\)$/.test(l)), 'all seventeen sets on: the log says so');     // r1120 AC: + S17; beam HS: + S18
+    ok(a.signals.count('watch') === FIELDS.interfaces().reduce((n, e) => n + e.instances.length, 0) && a.signals.count('watch') === 106, 'one proxy per interface instance (' + a.signals.count('watch') + ' watch calls)');     // beam HS: + 6 (S18)
     let nOk = 0;
     VECTORS.forEach((v) => {
         a.clock.t += 15000;
@@ -690,7 +697,7 @@ async function main() {
     ok(BADW.lines.some((l) => /summary S6 \+30s: providers: up=7 down=1 error=1 down-list: Light\[1\]/.test(l)), 'the summary names the provider that is down');
     // the start line and the sets line
     const ST = mk({}); ST.pr.setSets(['S4', 'S6'], true); ST.pr.startLine();
-    ok(ST.lines.some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=S4\+S6 fields=37 of 265$/.test(l)) && !ST.lines.some((l) => /^probe: sets /.test(l)), 'the start line: version, log format and the sets on (quiet start: no "sets" line)');
+    ok(ST.lines.some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=S4\+S6 fields=37 of 306$/.test(l)) && !ST.lines.some((l) => /^probe: sets /.test(l)), 'the start line: version, log format and the sets on (quiet start: no "sets" line)');
     ok(LOG_FORMAT === 1 && VERSION === app.version, 'log format 1');
     ST.pr.setSets(['S4', 'S6', 'S7'], false);
     ok(ST.lines.some((l) => /^probe: sets on=S4\+S6\+S7 changed=\+S7 fields=52$/.test(l)), 'the sets line at a change: ' + ST.lines[ST.lines.length - 1]);
@@ -810,7 +817,7 @@ async function main() {
     try {
         startServer();
         ok(await until(() => /build: signal_probe/.test(out) && probeLines().some((l) => /^probe: start /.test(l)), 60000), 'the app builds with the kit and starts');
-        ok(probeLines().some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=none fields=0 of 265$/.test(l)), 'the start line: all sets off at the first start: ' + (probeLines()[0] || ''));
+        ok(probeLines().some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=none fields=0 of 306$/.test(l)), 'the start line: all sets off at the first start: ' + (probeLines()[0] || ''));
         ok(!/Error|uncaught/i.test(out.split('\n').filter((l) => /\[signal_probe\]/.test(l)).join('\n')), 'nothing in the app\'s log says Error or uncaught');
         let p = await probeNative();
         ok(p && JSON.stringify(p.stack) === '["MAIN"]', 'the entry screen is the native menu MAIN');
@@ -840,7 +847,7 @@ async function main() {
         // restart: the sets come back
         const before = probeLines().length;
         await req('POST', '/restart');
-        ok(await until(() => probeLines().slice(before).some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=S6 fields=24 of 265$/.test(l)), 15000), 'after a restart the start line says sets=S6 (the owner\'s choice is kept)');
+        ok(await until(() => probeLines().slice(before).some((l) => /^probe: start signal_probe v=0\.5\.1 fmt=1 sets=S6 fields=24 of 306$/.test(l)), 15000), 'after a restart the start line says sets=S6 (the owner\'s choice is kept)');
         ok(await until(() => probeLines().slice(before).filter((l) => /^probe: watch /.test(l)).length === 8, 10000), '... and S6\'s interfaces are subscribed again');
         await req('POST', '/click', { id: 'SET_SET6' });
         ok(await until(() => probeLines().some((l) => /^probe: sets on=none changed=-S6 /.test(l))), 'S6 off again: logged');

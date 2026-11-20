@@ -41,9 +41,11 @@
     "de.bmw.infotainment.vehicle.Vehicle2": {
       "_instances": "1",
       "statusCarSpeed2": "rs",
+      "statusConfigLM2": "rs",
       "statusDimmer": "rs",
       "statusDisplayKombi": "rs",
       "statusDisplayedCCMessage": "rs",
+      "statusExteriorLightDynamic": "s",
       "statusLightStatus": "rs",
       "statusOilDipstick2": "rs",
       "statusZVStatus": "rs"
@@ -95,10 +97,12 @@
     },
     "de.bmw.infrastructure.EnvironmentalInformation": {
       "_instances": "1",
+      "ExteriorTemperature": "s",
       "UnitBN2020": "rs"
     },
     "de.bmw.infotainment.vehicle.Vehicle": {
       "_instances": "1",
+      "statusDayNightChangeOver": "rs",
       "statusNewCurrentUnitsStatusExt": "rs"
     },
     "de.bmw.infotainment.vehicle.CDS": {
@@ -257,7 +261,12 @@
       "_instances": "1",
       "IndicatorSteeringColumn": "s",
       "IndicatorSteeringColumnComplete": "s",
-      "LampExterior": "s"
+      "LampExterior": "s",
+      "LampExterior2": "s",
+      "LowBeam": "rs",
+      "StatusFunctionsIndicators": "s",
+      "StatusFunctionsIndicators2": "s",
+      "statusOperationLightExterior": "s"
     },
     "de.bmw.infotainment.controlelements.FrontCCU": {
       "_instances": "1",
@@ -353,7 +362,8 @@
       "statusInjectionVolume": "rs",
       "statusLateralAccelerationMassCenter": "rs",
       "statusLongitudinalAccelerationMassCenter": "rs",
-      "statusSeatOccupancy": "rs"
+      "statusSeatOccupancy": "rs",
+      "statusYawVelocityVehicle": "rs"
     },
     "de.bmw.infotainment.drivingexcitement.FES": {
       "_instances": "1",
@@ -413,7 +423,10 @@
       "_broadcasts": [
         "builtupAreaFlag",
         "effectiveSpeedLimit",
+        "roadClass",
         "speedLimitUnit",
+        "trafficSide",
+        "urbanFlag",
         "variableSpeedLimitSign"
       ]
     },
@@ -630,6 +643,65 @@
       "_broadcasts": [
         "correctionDataLaneGuiding"
       ]
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraLightDetection": {
+      "_instances": "1",
+      "_broadcasts": [
+        "MainBeamAssistantDataObject11",
+        "MainBeamAssistantDataObject12",
+        "MainBeamAssistantDataObject15",
+        "controlHighBeamAssistant",
+        "mEObjectID1",
+        "mEObjectID2",
+        "mainBeamAssistantDataObject1",
+        "mainBeamAssistantDataObject10",
+        "mainBeamAssistantDataObject13",
+        "mainBeamAssistantDataObject14",
+        "mainBeamAssistantDataObject2",
+        "mainBeamAssistantDataObject3",
+        "mainBeamAssistantDataObject4",
+        "mainBeamAssistantDataObject5",
+        "mainBeamAssistantDataObject6",
+        "mainBeamAssistantDataObject7",
+        "mainBeamAssistantDataObject8",
+        "mainBeamAssistantDataObject9"
+      ]
+    },
+    "de.bmw.body.Environment": {
+      "_instances": "1",
+      "StatusBrightnessEnvironment": "s",
+      "statusBrightnessPrefield": "s"
+    },
+    "de.bmw.body.Wiper": {
+      "_instances": "1",
+      "rainSensorWiperSpeed": "s",
+      "wiper": "s",
+      "wiperSteeringColumn": "s"
+    },
+    "de.bmw.body.drivinglight.LightswitchOperation": {
+      "_instances": "1",
+      "foglightFront": "rs",
+      "foglightRear": "rs",
+      "mainLightswitchState": "rs"
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraObjectlist": {
+      "_instances": "1",
+      "_broadcasts": [
+        "objectlistTCP"
+      ]
+    },
+    "de.bmw.environmentalmodel.environmentalconditions.Weather": {
+      "_instances": "1",
+      "RecognitionWeather": "s"
+    },
+    "com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu": {
+      "_instances": "SystemFunctionsInternalTasuInst1",
+      "_methods": [
+        "sendTasuRequest"
+      ],
+      "_broadcasts": [
+        "sendTasuResponse"
+      ]
     }
   },
   "screens": [
@@ -722,6 +794,14 @@
         [
           "setting",
           "set17"
+        ],
+        [
+          "setting",
+          "set18"
+        ],
+        [
+          "setting",
+          "hbdiag"
         ],
         [
           "setting",
@@ -833,6 +913,18 @@
       "default": false
     },
     {
+      "key": "set18",
+      "label": "S18 HB: фари і дальнє світло (P27)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "hbdiag",
+      "label": "S18 HB: діагностичні читання (лише 0x22, лише на стоянці)",
+      "type": "bool",
+      "default": false
+    },
+    {
       "key": "lang",
       "label": "Мова / Language",
       "type": "choice",
@@ -877,6 +969,9 @@
           "S17"
         ],
         [
+          "S18"
+        ],
+        [
           "S14"
         ],
         [
@@ -887,7 +982,11 @@
           "S13"
         ]
       ],
-      "_about": "cruise RC: the recording mode (recorder.js). Every value of the chosen sets' fields, unthrottled, in data/rec/rec-<session>-<n>.csv.gz; a file is cut at fileRawKB of text, the oldest files go past quotaMB (the app's disk limit is 20 MiB with its log); flushMs between two writes; maxQueueKB of text waiting before samples are dropped (counted); maxEntries of a list; quietLog: the recorded fields' throttled log lines are left out while recording; choices: what the menu row RECSET cycles through (r1120 AC: S17 = ACC, the adaptive-cruise set, first)."
+      "_about": "cruise RC: the recording mode (recorder.js). Every value of the chosen sets' fields, unthrottled, in data/rec/rec-<session>-<n>.csv.gz; a file is cut at fileRawKB of text, the oldest files go past quotaMB (the app's disk limit is 20 MiB with its log); flushMs between two writes; maxQueueKB of text waiting before samples are dropped (counted); maxEntries of a list; quietLog: the recorded fields' throttled log lines are left out while recording; choices: what the menu row RECSET cycles through (r1120 AC: S17 = ACC, the adaptive-cruise set, first; beam HS: S18 = HB, the headlight set for the night drives, second). beam HS: a field with recSame folds its repeats (\"#s\" lines in the file, folded= in #end)."
+    },
+    "hbdiag": {
+      "whileMoving": false,
+      "_about": "beam HS: the HB set's read-only diagnostic reads (beam_diag.js): off unless the setting hbdiag is on AND set S18 is on; only 0x22 through kit/runtime/readonly-diag.js, only the allow-listed identifiers (BDC 0x40: F186 D542 D57E E3B8; FLM 0x43 / 0x44: F186 D7A7), at most one read a second per unit, back-off after a refusal. whileMoving false: a read leaves only while the recorded speed is under 0.5 km/h (HC-REPORT: the transport refuses in bursts while driving); it stays false until the parked session shows the reads are harmless."
     }
   }
 }

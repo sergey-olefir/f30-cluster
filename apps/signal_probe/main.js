@@ -21,6 +21,7 @@ const { Recorder } = (function loadRecorder() {
     try { return require('./signal_recorder'); } catch (e) { /* the repository's layout */ }
     return require('../../shared/signal_recorder');
 })();
+const { BeamDiag } = require('./beam_diag');     // beam HS: the HB set's read-only diagnostic reads (off by default)
 const path = require('path');
 
 mgu.run({
@@ -48,7 +49,33 @@ mgu.run({
             probe.setRecorder(rec, recCfg.quietLog !== false);
         } catch (e) { rec = null; ctx.log.error('recorder failed to start: ' + (e && e.stack || e)); }
         try { new Menu(ctx, probe, rec, recCfg).start(); } catch (e) { ctx.log.error('menu failed to start: ' + (e && e.stack || e)); }
+        // beam HS: the HB set's read-only diagnostic reads (beam_diag.js): only while the setting "hbdiag" AND set S18 are on, only
+        // while the recorded speed says the car stands (config.hbdiag.whileMoving false). The link is made the first time it is needed.
+        let diag = null;
+        try {
+            const dcfg = (ctx.spec.config && ctx.spec.config.hbdiag) || {};
+            let speed = null;
+            probe.tap('car-speed2', (v) => {
+                const raw = v && typeof v === 'object' ? v.speedVehicleCentreOfGravity : null;
+                speed = typeof raw === 'number' && isFinite(raw) ? { kmh: raw / 64, at: Date.now() } : null;
+            });
+            const want = () => ctx.settings.get('hbdiag') === true && ctx.settings.get('set18') === true;
+            const sync = () => {
+                try {
+                    if (want() && !diag) {
+                        const RO = require('./kit/readonly-diag');
+                        const link = new RO.ReadOnlyDiag(ctx.signals, ctx.log);
+                        diag = new BeamDiag({ link, log: ctx.log, recorder: rec, speed: () => speed, whileMoving: dcfg.whileMoving === true });
+                        const d = diag;
+                        link.init().then(() => { if (diag === d) d.start(); }, (e) => { ctx.log.warn('probe: diag: no link: ' + String(e && e.message || e).slice(0, 80)); });
+                    } else if (!want() && diag) { diag.stop(); diag = null; }
+                } catch (e) { ctx.log.error('diag: ' + (e && e.stack || e)); }
+            };
+            ctx.settings.onChange((key) => { if (key === 'hbdiag' || key === 'set18') sync(); });
+            sync();
+        } catch (e) { ctx.log.error('diag failed to start: ' + (e && e.stack || e)); }
         process.on('exit', () => {
+            try { if (diag) diag.stop(); } catch (e) { /* beam HS: exiting anyway */ }
             try { probe.stop(); } catch (e) { /* exiting anyway */ }
             try { if (rec) rec.stop(true); } catch (e) { /* cruise RC: exiting anyway */ }
         });

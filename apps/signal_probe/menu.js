@@ -12,7 +12,7 @@ const I = require('./lang');          // r1120 LN: the words from shared/i18n/<l
 const hhmmss = (d) => ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2);
 
 // cruise RC: the recording rows (recorder.js): the sets a press on "REC" records, one choice per press of "RECSET"
-const REC_CHOICES = [['S17'], ['S14'], ['S14', 'S15'], ['S13']];     // r1120 AC: ACC (S17) first
+const REC_CHOICES = [['S17'], ['S18'], ['S14'], ['S14', 'S15'], ['S13']];     // r1120 AC: ACC (S17) first; beam HS: HB (S18) second
 /** r1120 AC: a recording's sets as the rows say them: a set's label where it has one (S17 = "ACC"), else its id. */
 const recName = (ids) => ids.map((id) => { const s = FIELDS.SETS.find((x) => x.id === id); return (s && s.label) || id; }).join('+');
 const mb = (b) => I.t('probe.mb', { v: (Math.round(b / 104857.6) / 10).toFixed(1).replace('.', I.t('kit.decimal')) });
