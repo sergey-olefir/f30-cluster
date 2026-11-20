@@ -67,8 +67,8 @@ done
 if [ -z "$ONLY" ]; then
   CAT=$(ls reference/car/*/someip/someip-interfaces.json 2>/dev/null | tail -1)
   if [ -n "$CAT" ]; then
-    n=$(python3 tools/signals/check_signals.py "$CAT" apps/f30_cluster/app.json apps/driver_profiles/app.json apps/twin_dial/app.json apps/acc_view/app.json >"$LOG/check_signals.log" 2>&1; echo $?)
-    if [ "$n" = 0 ]; then printf '%-22s %7s %7s %7s  %s\n' check_signals ok 0 - "(apps/f30_cluster, driver_profiles, twin_dial, acc_view)"
+    n=$(python3 tools/signals/check_signals.py "$CAT" apps/f30_cluster/app.json apps/driver_profiles/app.json apps/twin_dial/app.json apps/acc_view/app.json apps/cam_check/app.json >"$LOG/check_signals.log" 2>&1; echo $?)
+    if [ "$n" = 0 ]; then printf '%-22s %7s %7s %7s  %s\n' check_signals ok 0 - "(apps/f30_cluster, driver_profiles, twin_dial, acc_view, cam_check)"
     else printf '%-22s %7s %7s %7s  %s\n' check_signals "-" 1 - "FAILED"; grep -iE 'fail|bad|✗' "$LOG/check_signals.log" | head -8 | sed 's/^/        /'; BAD=$((BAD + 1)); fi
   else
     printf '%-22s %7s\n' check_signals "skipped (no reference/car catalogue in this checkout)"

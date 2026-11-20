@@ -1,0 +1,105 @@
+{
+  "id": "cam_check",
+  "title": "Camera Check",
+  "description": "Read-only check: does this car's front camera send its traffic light, its light sources for the high beam, its object lists, its sign lists and its lanes? Each source is shown as silent, one value or changing, and its first message is written to the log. Writes nothing to the car.",
+  "version": "0.1.0",
+  "vendor": "custom",
+  "loggingId": "OACK",
+  "iconGlyph": "CK",
+  "mguHmi": ["ID7"],
+  "signals": {
+    "de.bmw.environmentalmodel.TrafficLightRecognitionFrontCameraLegacy": {
+      "_instances": "1",
+      "_broadcasts": ["RecognitionTrafficLightCamera"],
+      "_about": "The camera's traffic light (event 32769): id, x / y / z, status, arrow, direction, colour, quality. Never seen on the car."
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraLightDetection": {
+      "_instances": "1",
+      "_broadcasts": ["controlHighBeamAssistant", "mainBeamAssistantDataObject1", "mainBeamAssistantDataObject2"],
+      "_about": "The camera's light sources for automatic high beam (events 32769, 32770) and its own high-beam verdict (32790). acknowledgeObjectData* (setter, no getter) are NOT declared. Never seen on the car."
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraObjectlist": {
+      "_instances": "1",
+      "_broadcasts": ["objectlistTCP"],
+      "_about": "The camera's object list, up to 20, with head / rear lamp state per object (event 32770). The fallback for the high beam."
+    },
+    "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": ["ObjectRecognition"],
+      "_about": "The camera's objects: class, lane, id (event 32769)."
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": ["TrafficSignRecognitionFrontCamera"],
+      "_about": "The camera's sign list (event 32769)."
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy": {
+      "_instances": "1",
+      "_broadcasts": ["RecognitionTrafficSignCamera", "recognitionTrafficSignCamera2"],
+      "_about": "The camera's sign lists, older form (events 32769, 32770). A 40 km/h limit was seen in one of the sign lists on 2026-11-19."
+    },
+    "de.bmw.dass.TrafficSignRecognition": {
+      "_instances": "1",
+      "_broadcasts": ["TrafficSignRecognition"],
+      "_about": "The speed limit and no overtaking (event 32769). Seen on the car: the control source that proves the app hears the camera's side at all."
+    },
+    "de.bmw.environmentalmodel.LaneBoundaries": {
+      "_instances": "1",
+      "_broadcasts": ["LaneBoundaries"],
+      "_about": "Four front lane boundaries (event 32771)."
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "statusLightStatus": "rs",
+      "statusCarSpeed2": "rs",
+      "_about": "statusLightStatus (getter 43, notifier 32811): high beam / dipped beam as the car reports them. statusCarSpeed2 (getter 8): our speed, only to say whether we were moving. Read only."
+    },
+    "de.bmw.body.Light": {
+      "LampExterior2": "s",
+      "_about": "The body controller's lamp commands, among them the main beam (notifier 32772, no getter). Read only."
+    },
+    "de.bmw.infotainment.fasus.FASuS": {
+      "_instances": "1",
+      "statusIDriveFASExtended": "rs",
+      "_about": "The driver-assistance functions' state, among them the traffic-light functions (getter 51, notifier 32819). Read only."
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "menu",
+      "title": "Camera Check",
+      "items": [
+        ["text", "HEAD", ""],
+        ["text", "S_LIGHT", ""],
+        ["text", "S_BEAMOBJ", ""],
+        ["text", "S_BEAMCTL", ""],
+        ["text", "S_OBJLIST", ""],
+        ["text", "S_OBJREC", ""],
+        ["text", "S_SIGNS", ""],
+        ["text", "S_LIMIT", ""],
+        ["text", "S_LANES", ""],
+        ["text", "S_LAMPS", ""],
+        ["text", "S_FAS", ""],
+        ["text", "FOOT", ""]
+      ]
+    }
+  ],
+  "settings": [],
+  "config": {
+    "rows": {
+      "S_LIGHT": "Світлофор",
+      "S_BEAMOBJ": "Джерела світла (дальнє)",
+      "S_BEAMCTL": "Рішення камери про дальнє",
+      "S_OBJLIST": "Список об'єктів зі станом фар",
+      "S_OBJREC": "Об'єкти камери",
+      "S_SIGNS": "Списки знаків",
+      "S_LIMIT": "Обмеження швидкості (контроль)",
+      "S_LANES": "Смуги",
+      "S_LAMPS": "Стан фар авто",
+      "S_FAS": "Стан функцій асистентів"
+    },
+    "logValues": 25,
+    "logChars": 1800,
+    "summaryMs": 60000
+  }
+}
