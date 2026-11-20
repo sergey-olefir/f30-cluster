@@ -16,7 +16,11 @@ const I18N = require('./lang');
 const { Probe, VERSION } = require('./probe');
 const FIELDS = require('./fields');
 const Menu = require('./menu');
-const { Recorder } = require('./recorder');      // cruise RC
+// cruise RC; road TS: the recorder is shared/signal_recorder.js (packed beside this file by app.json "shared"; the RV recorder uses it too)
+const { Recorder } = (function loadRecorder() {
+    try { return require('./signal_recorder'); } catch (e) { /* the repository's layout */ }
+    return require('../../shared/signal_recorder');
+})();
 const path = require('path');
 
 mgu.run({

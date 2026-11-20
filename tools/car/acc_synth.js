@@ -2,7 +2,7 @@
 'use strict';
 /**
  * acc_synth.js - r1120 AC: synthetic Signal Probe recordings of the ACC set (S17), made with the cruise simulator's own plant
- * (tools/cruise-sim/core/plant.js) and written by the app's own recorder (apps/signal_probe/recorder.js), so that
+ * (tools/cruise-sim/core/plant.js) and written by the app's own recorder (shared/signal_recorder.js), so that
  * tools/car/acc_analyse.py can be tested against numbers it must find. NOTHING here is a car fact: every rate, delay, unit and
  * plant parameter below is invented for the test and written to truth.json.
  *
@@ -28,7 +28,7 @@ const ROOT = path.join(__dirname, '..', '..');
 const plantMod = require(path.join(ROOT, 'tools', 'cruise-sim', 'core', 'plant.js'));
 const rngMod = require(path.join(ROOT, 'tools', 'cruise-sim', 'core', 'rng.js'));
 const FIELDS = require(path.join(ROOT, 'apps', 'signal_probe', 'fields.js'));
-const { Recorder } = require(path.join(ROOT, 'apps', 'signal_probe', 'recorder.js'));
+const { Recorder } = require(path.join(ROOT, 'shared', 'signal_recorder.js'));     // road TS: Signal Probe's recorder, now in shared/
 
 const KMH = 1 / 3.6;
 const DT = 0.01;

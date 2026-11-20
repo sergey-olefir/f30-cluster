@@ -664,6 +664,27 @@ else: sys.exit(3)
         self.assertEqual(meta["files"]["apps/signal_probe/rec/rec-20261120-101500-001.csv.gz"], len(self.rec["rec-20261120-101500-001.csv.gz"]))
         self.assertEqual(pc.main([os.path.join(self.out, "apps"), os.path.join(self.out, "system"), "--quiet"]), 0, "nothing the privacy scan flags")
 
+    # road TS: the RV recorder's recordings are collected like Signal Probe's (its own uid, its own data/rec/)
+    def test_rv_recorder_recordings(self):
+        rv = os.path.join(self.tmp, "car", "var/opt/public/oap/oap_12230")
+        os.makedirs(os.path.join(rv, "data/rec"))
+        os.makedirs(os.path.join(rv, "source"))
+        open(os.path.join(rv, "source/package.json"), "w").write('{"name": "rv_recorder", "version": "0.1.0"}')
+        import gzip as _gz
+        blob = _gz.compress(b"#rec,1,0.1.0,20261121-100000,1,x,0,S19\n#end,5,samples=1\n")
+        open(os.path.join(rv, "data/rec/rec-20261121-100000-001.csv.gz"), "wb").write(blob)
+        r = self.run_collect()
+        self.assertEqual(r.returncode, 0, r.stderr)
+        got = os.path.join(self.out, "apps/rv_recorder/rec/rec-20261121-100000-001.csv.gz")
+        self.assertEqual(open(got, "rb").read(), blob, "copied byte for byte, by the default --apps")
+        self.assertIn(" ok", open(os.path.join(self.out, "apps/rv_recorder/rec-copied.txt")).read())
+        cmds = [c for c in open(os.path.join(self.tmp, "commands.log")).read().split("\n") if c]
+        self.assertIn("ls -l /var/opt/public/oap/oap_12230/data/rec/", cmds)
+        for c in cmds:
+            self.assertRegex(c, r"^(cat|ls|tail -c \d+|date -u|uname -a|journalctl -u cluster-render)\b", c)
+        d = self.run_collect("--dry-run")
+        self.assertIn("ls -l /var/opt/public/oap/oap_<uid of rv_recorder>/data/rec/", d.stderr)
+
     def test_recording_that_grows_is_flagged(self):
         # the car's listing says one size, the copy has another (a recording still running)
         open(os.path.join(self.tmp, "bin", "sizes"), "w").write("")

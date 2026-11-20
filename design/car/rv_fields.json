@@ -1,0 +1,664 @@
+{
+  "_about": "The RV recorder's source table, set S19 \"RV\" (tools/road-view/app/rv_recorder/rv_fields.js is the source; `node tools/road-view/rv_manifest.js export` rewrites this file). READ ONLY: rs (a non-zero getter id), s (a notifier), b (an event). kind full: every message recorded; kind list: the first message whole, then one summary sample a second (\"<tag>~1s\"), the next message whole after a mark. Ids from the car's catalogue of 2026-11-15 (git-ignored), null when it was not there.",
+  "set": {
+    "id": "S19",
+    "label": "RV",
+    "name": "road view"
+  },
+  "counts": {
+    "rvRecorder": 22,
+    "signalProbe": 99,
+    "newToSignalProbe": 6,
+    "signalProbeIfInside": 105,
+    "newInterfaces": [
+      "de.bmw.environmentalmodel.TrafficLightRecognitionFrontCameraLegacy",
+      "de.bmw.dass.DisplayForesight",
+      "de.bmw.dass.driverassistanceapplications.AssistedDrivingViewLateralCollisionAvoidance",
+      "de.bmw.dass.pad.communication.AssistedDrivingViewLateralFunctionInput",
+      "de.bmw.dass.pad.communication.RoadOutputAssistedDrivingView",
+      "de.bmw.environmentalmodel.environmentalconditions.BlockageAndWeatherFrontCameraMain"
+    ]
+  },
+  "fields": [
+    {
+      "set": "S19",
+      "tag": "tl",
+      "group": "light",
+      "kind": "full",
+      "interface": "de.bmw.environmentalmodel.TrafficLightRecognitionFrontCameraLegacy",
+      "field": "RecognitionTrafficLightCamera",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 54582
+    },
+    {
+      "set": "S19",
+      "tag": "cam-signs",
+      "group": "signs",
+      "kind": "full",
+      "interface": "de.bmw.environmentalmodel.SignRecognitionFrontCamera",
+      "field": "TrafficSignRecognitionFrontCamera",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 53258,
+      "recEntries": 8,
+      "skip": [
+        "location"
+      ]
+    },
+    {
+      "set": "S19",
+      "tag": "cam-legacy",
+      "group": "signs",
+      "kind": "full",
+      "interface": "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy",
+      "field": "RecognitionTrafficSignCamera",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 54580
+    },
+    {
+      "set": "S19",
+      "tag": "cam-legacy2",
+      "group": "signs",
+      "kind": "full",
+      "interface": "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy",
+      "field": "recognitionTrafficSignCamera2",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "serviceId": 54580,
+      "recEntries": 8,
+      "skip": [
+        "location"
+      ]
+    },
+    {
+      "set": "S19",
+      "tag": "tsr",
+      "group": "function",
+      "kind": "full",
+      "interface": "de.bmw.dass.TrafficSignRecognition",
+      "field": "TrafficSignRecognition",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 13632
+    },
+    {
+      "set": "S19",
+      "tag": "hud-data",
+      "group": "display",
+      "kind": "full",
+      "interface": "de.bmw.infotainment.displaydataserver.DisplayDataServer",
+      "field": "functionalLibraryData",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32769,
+      "eventId": null,
+      "serviceId": 45164
+    },
+    {
+      "set": "S19",
+      "tag": "hud-data2",
+      "group": "display",
+      "kind": "full",
+      "interface": "de.bmw.infotainment.displaydata.DisplayDataServer2",
+      "field": "functionalLibraryData",
+      "flags": "rs",
+      "getterId": 1,
+      "notifierId": 32769,
+      "eventId": null,
+      "serviceId": 45222
+    },
+    {
+      "set": "S19",
+      "tag": "warn-brake",
+      "group": "warning",
+      "kind": "full",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "requestWarnBrakeCoordinatorDisplay",
+      "flags": "rs",
+      "getterId": 65,
+      "notifierId": 32833,
+      "eventId": null,
+      "serviceId": 46350
+    },
+    {
+      "set": "S19",
+      "tag": "fas-ext",
+      "group": "warning",
+      "kind": "full",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "statusIDriveFASExtended",
+      "flags": "rs",
+      "getterId": 51,
+      "notifierId": 32819,
+      "eventId": null,
+      "serviceId": 46350
+    },
+    {
+      "set": "S19",
+      "tag": "foresight2",
+      "group": "warning",
+      "kind": "full",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "displayForesight2",
+      "flags": "rs",
+      "getterId": 66,
+      "notifierId": 32834,
+      "eventId": null,
+      "serviceId": 46350
+    },
+    {
+      "set": "S19",
+      "tag": "foresight",
+      "group": "warning",
+      "kind": "full",
+      "interface": "de.bmw.dass.DisplayForesight",
+      "field": "displayForesight",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32769,
+      "eventId": null,
+      "serviceId": 13572
+    },
+    {
+      "set": "S19",
+      "tag": "set-stop-sign",
+      "group": "settings",
+      "kind": "full",
+      "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "field": "settingStopSignBraking",
+      "flags": "s",
+      "getterId": 0,
+      "notifierId": 32798,
+      "eventId": null,
+      "serviceId": 12373
+    },
+    {
+      "set": "S19",
+      "tag": "set-give-way",
+      "group": "settings",
+      "kind": "full",
+      "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "field": "settingGiveWayWarning",
+      "flags": "s",
+      "getterId": 0,
+      "notifierId": 32779,
+      "eventId": null,
+      "serviceId": 12373
+    },
+    {
+      "set": "S19",
+      "tag": "give-way-status",
+      "group": "settings",
+      "kind": "full",
+      "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "field": "displayStatusGiveWayWarning",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32777,
+      "eventId": null,
+      "serviceId": 12373
+    },
+    {
+      "set": "S19",
+      "tag": "set-wrong-way",
+      "group": "settings",
+      "kind": "full",
+      "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "field": "settingWrongWayAssistant",
+      "flags": "s",
+      "getterId": 0,
+      "notifierId": 32837,
+      "eventId": null,
+      "serviceId": 12373
+    },
+    {
+      "set": "S19",
+      "tag": "sli-text",
+      "group": "function",
+      "kind": "full",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "statusSLITextMessage",
+      "flags": "rs",
+      "getterId": 8,
+      "notifierId": 32776,
+      "eventId": null,
+      "serviceId": 46350
+    },
+    {
+      "set": "S19",
+      "tag": "next-limit",
+      "group": "function",
+      "kind": "full",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "statusNextSpeedLimitRecognition",
+      "flags": "rs",
+      "getterId": 4,
+      "notifierId": 32772,
+      "eventId": null,
+      "serviceId": 46350
+    },
+    {
+      "set": "S19",
+      "tag": "no-passing",
+      "group": "function",
+      "kind": "full",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "statusOvertakeRecognition",
+      "flags": "rs",
+      "getterId": 6,
+      "notifierId": 32774,
+      "eventId": null,
+      "serviceId": 46350
+    },
+    {
+      "set": "S19",
+      "tag": "view-input",
+      "group": "scene",
+      "kind": "list",
+      "interface": "de.bmw.dass.AssistedDrivingViewFunctionInput",
+      "field": "assistedDrivingViewFunctionInputIbVip",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 13573,
+      "summary": {
+        "ids": "assistedDrivingViewACCTargetObjectId",
+        "cls": {
+          "xcc": "assistedDrivingViewStateXcc",
+          "sld": "assistedDrivingViewDispSLD"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "lca-input",
+      "group": "scene",
+      "kind": "full",
+      "interface": "de.bmw.dass.driverassistanceapplications.AssistedDrivingViewLateralCollisionAvoidance",
+      "field": "assistedDrivingViewLcaInput",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 12355
+    },
+    {
+      "set": "S19",
+      "tag": "lateral-input",
+      "group": "scene",
+      "kind": "list",
+      "interface": "de.bmw.dass.pad.communication.AssistedDrivingViewLateralFunctionInput",
+      "field": "lateralFunctionInputAssistedDrivingView",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 12545,
+      "summary": {
+        "cls": {
+          "lsa": "lsaFunctionStates.lsaState",
+          "swa": "swaFunctionStates.swaState",
+          "alg": "algFunctionStates.algState"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "road-segment",
+      "group": "scene",
+      "kind": "list",
+      "interface": "de.bmw.dass.pad.communication.RoadOutputAssistedDrivingView",
+      "field": "roadSegmentUpdate",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 12718,
+      "recEntries": 4,
+      "summary": {
+        "len": {
+          "segments": "data.laneSegments",
+          "boundaries": "data.laneBoundaries"
+        },
+        "cls": {
+          "lane": "data.laneSegments[].laneType",
+          "road": "data.laneSegments[].roadType"
+        },
+        "rng": {
+          "egoIdx": "data.egoVehicleLaneSegmentIndex"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "ego-position",
+      "group": "scene",
+      "kind": "list",
+      "interface": "de.bmw.dass.pad.communication.RoadOutputAssistedDrivingView",
+      "field": "egoVehiclePositionUpdate",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "serviceId": 12718,
+      "skip": [
+        "posX",
+        "posY",
+        "heading"
+      ],
+      "summary": {
+        "cls": {
+          "q": "eventDataQualifier"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "merged-objects",
+      "group": "model",
+      "kind": "list",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "ObjectListMerged",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32774,
+      "serviceId": 54585,
+      "summary": {
+        "len": {
+          "objects": "objectListMergedArrayInfo"
+        },
+        "ids": "objectListMergedArrayInfo[].objId",
+        "cls": {
+          "type": "objectListMergedArrayInfo[].objType"
+        },
+        "rng": {
+          "range": "objectListMergedArrayInfo[].objRange"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "object-info1",
+      "group": "model",
+      "kind": "list",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "ObjectInformation1",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 54585,
+      "summary": {
+        "count": "objectRecognition.numberOfObjects",
+        "ids": "objectRecognition.objectRecognitionInfo[].objectID",
+        "cls": {
+          "type": "objectRecognition.objectRecognitionInfo[].classificationType"
+        },
+        "rng": {
+          "x": "objectPosition.objectPositionInfo[].positionX",
+          "y": "objectPosition.objectPositionInfo[].positionY"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "object-info2",
+      "group": "model",
+      "kind": "list",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "ObjectInformation2",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32770,
+      "serviceId": 54585,
+      "summary": {
+        "count": "numberOfObjects",
+        "rng": {
+          "vx": "objectMovementInfo[].speedAbsoluteX"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "object-lanes",
+      "group": "model",
+      "kind": "list",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "ObjectAssignment",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32771,
+      "serviceId": 54585,
+      "summary": {
+        "count": "numberOfObjects",
+        "cls": {
+          "overall": "overallAssignmentType",
+          "type": "assignedObjectInfo[].assignmentType"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "lane-info",
+      "group": "model",
+      "kind": "list",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "LaneInformation",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32773,
+      "serviceId": 54585,
+      "summary": {
+        "cls": {
+          "left": "leftLaneLaneTypeInfo.type",
+          "ego": "egoLaneLaneTypeInfo.type",
+          "right": "rightLaneLaneTypeInfo.type"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "road-model",
+      "group": "model",
+      "kind": "list",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "RoadModel",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32772,
+      "serviceId": 54585,
+      "summary": {
+        "rng": {
+          "egoWidth": "egoLane.width"
+        },
+        "cls": {
+          "segs": "egoLane.centerLine.numSegments"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "fas-view",
+      "group": "model",
+      "kind": "list",
+      "interface": "de.bmw.environmentalmodel.DAADataServer",
+      "field": "FASView",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32775,
+      "serviceId": 54585,
+      "summary": {
+        "len": {
+          "content": "content"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "suaar-objects",
+      "group": "scene",
+      "kind": "list",
+      "interface": "de.bmw.dass.pad.communication.ObjectListSuAAR",
+      "field": "suAARObjectList",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 12719,
+      "recEntries": 4,
+      "summary": {
+        "count": "numberOfObjects",
+        "len": {
+          "objects": "objectList"
+        },
+        "ids": "objectList[].objectID",
+        "rng": {
+          "x": "objectList[].objectPosition.x",
+          "y": "objectList[].objectPosition.y"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "cam-objects",
+      "group": "objects",
+      "kind": "list",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera",
+      "field": "ObjectRecognition",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 53255,
+      "summary": {
+        "count": "numberOfObjects",
+        "ids": "objectRecognitionInfo[].objectID",
+        "cls": {
+          "type": "objectRecognitionInfo[].classificationType"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "cam2-objects",
+      "group": "objects",
+      "kind": "list",
+      "interface": "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2",
+      "field": "ObjectRecognition",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 61753,
+      "summary": {
+        "count": "numberOfObjects",
+        "ids": "objectRecognitionInfo[].objectID",
+        "cls": {
+          "type": "objectRecognitionInfo[].classificationType"
+        }
+      }
+    },
+    {
+      "set": "S19",
+      "tag": "blockage",
+      "group": "camera",
+      "kind": "full",
+      "interface": "de.bmw.environmentalmodel.environmentalconditions.BlockageAndWeatherFrontCameraMain",
+      "field": "blockageAndWeatherFrontcameraMain",
+      "flags": "b",
+      "getterId": null,
+      "notifierId": null,
+      "eventId": 32769,
+      "serviceId": 53507
+    },
+    {
+      "set": "S19",
+      "tag": "car-speed2",
+      "group": "context",
+      "kind": "full",
+      "interface": "de.bmw.infotainment.vehicle.Vehicle2",
+      "field": "statusCarSpeed2",
+      "flags": "rs",
+      "getterId": 8,
+      "notifierId": 32776,
+      "eventId": null,
+      "serviceId": 46361
+    },
+    {
+      "set": "S19",
+      "tag": "gearbox-status",
+      "group": "context",
+      "kind": "full",
+      "interface": "de.bmw.infrastructure.VehicleInformation",
+      "field": "statusGearboxDrive",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32776,
+      "eventId": null,
+      "serviceId": 5430
+    },
+    {
+      "set": "S19",
+      "tag": "brake-light",
+      "group": "context",
+      "kind": "full",
+      "interface": "de.bmw.body.Light",
+      "field": "LampExterior",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32770,
+      "eventId": null,
+      "serviceId": 21810
+    },
+    {
+      "set": "S19",
+      "tag": "indicate",
+      "group": "context",
+      "kind": "full",
+      "interface": "de.bmw.infotainment.vehicle.CDS2",
+      "field": "statusIndicate",
+      "flags": "rs",
+      "getterId": 39,
+      "notifierId": 32807,
+      "eventId": null,
+      "serviceId": 46356
+    },
+    {
+      "set": "S19",
+      "tag": "stalk",
+      "group": "context",
+      "kind": "full",
+      "interface": "de.bmw.body.Light",
+      "field": "IndicatorSteeringColumn",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32773,
+      "eventId": null,
+      "serviceId": 21810,
+      "tripMark": {
+        "path": "operationColumnStalks",
+        "mask": 64,
+        "unfilled": 255
+      }
+    }
+  ]
+}

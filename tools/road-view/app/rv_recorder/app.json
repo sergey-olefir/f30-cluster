@@ -1,0 +1,238 @@
+{
+  "id": "rv_recorder",
+  "title": "RV Recorder",
+  "description": "Read-only, record-only: one city drive's traffic lights, signs and road scene as numbers (set S19 RV). Draws nothing on the cluster. Outside the Store until the owner says.",
+  "version": "0.1.0",
+  "vendor": "custom",
+  "loggingId": "OARV",
+  "iconGlyph": "RV",
+  "mguHmi": [
+    "ID7"
+  ],
+  "i18n": true,
+  "shared": [
+    "lang.js",
+    "signal_recorder.js",
+    "signal_format.js"
+  ],
+  "signals": {
+    "de.bmw.environmentalmodel.TrafficLightRecognitionFrontCameraLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "RecognitionTrafficLightCamera"
+      ]
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognitionFrontCamera"
+      ]
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "RecognitionTrafficSignCamera",
+        "recognitionTrafficSignCamera2"
+      ]
+    },
+    "de.bmw.dass.TrafficSignRecognition": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognition"
+      ]
+    },
+    "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
+      "_instances": "1",
+      "functionalLibraryData": "rs"
+    },
+    "de.bmw.infotainment.displaydata.DisplayDataServer2": {
+      "_instances": "1",
+      "functionalLibraryData": "rs"
+    },
+    "de.bmw.infotainment.fasus.FASuS": {
+      "_instances": "1",
+      "displayForesight2": "rs",
+      "requestWarnBrakeCoordinatorDisplay": "rs",
+      "statusIDriveFASExtended": "rs",
+      "statusNextSpeedLimitRecognition": "rs",
+      "statusOvertakeRecognition": "rs",
+      "statusSLITextMessage": "rs"
+    },
+    "de.bmw.dass.DisplayForesight": {
+      "_instances": "1",
+      "displayForesight": "s"
+    },
+    "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions": {
+      "_instances": "1",
+      "displayStatusGiveWayWarning": "s",
+      "settingGiveWayWarning": "s",
+      "settingStopSignBraking": "s",
+      "settingWrongWayAssistant": "s"
+    },
+    "de.bmw.dass.AssistedDrivingViewFunctionInput": {
+      "_instances": "1",
+      "_broadcasts": [
+        "assistedDrivingViewFunctionInputIbVip"
+      ]
+    },
+    "de.bmw.dass.driverassistanceapplications.AssistedDrivingViewLateralCollisionAvoidance": {
+      "_instances": "1",
+      "_broadcasts": [
+        "assistedDrivingViewLcaInput"
+      ]
+    },
+    "de.bmw.dass.pad.communication.AssistedDrivingViewLateralFunctionInput": {
+      "_instances": "1",
+      "_broadcasts": [
+        "lateralFunctionInputAssistedDrivingView"
+      ]
+    },
+    "de.bmw.dass.pad.communication.RoadOutputAssistedDrivingView": {
+      "_instances": "1",
+      "_broadcasts": [
+        "egoVehiclePositionUpdate",
+        "roadSegmentUpdate"
+      ]
+    },
+    "de.bmw.environmentalmodel.DAADataServer": {
+      "_instances": "1",
+      "_broadcasts": [
+        "FASView",
+        "LaneInformation",
+        "ObjectAssignment",
+        "ObjectInformation1",
+        "ObjectInformation2",
+        "ObjectListMerged",
+        "RoadModel"
+      ]
+    },
+    "de.bmw.dass.pad.communication.ObjectListSuAAR": {
+      "_instances": "1",
+      "_broadcasts": [
+        "suAARObjectList"
+      ]
+    },
+    "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ObjectRecognition"
+      ]
+    },
+    "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ObjectRecognition"
+      ]
+    },
+    "de.bmw.environmentalmodel.environmentalconditions.BlockageAndWeatherFrontCameraMain": {
+      "_instances": "1",
+      "_broadcasts": [
+        "blockageAndWeatherFrontcameraMain"
+      ]
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "_instances": "1",
+      "statusCarSpeed2": "rs"
+    },
+    "de.bmw.infrastructure.VehicleInformation": {
+      "_instances": "1",
+      "statusGearboxDrive": "s"
+    },
+    "de.bmw.body.Light": {
+      "_instances": "1",
+      "IndicatorSteeringColumn": "s",
+      "LampExterior": "s"
+    },
+    "de.bmw.infotainment.vehicle.CDS2": {
+      "_instances": "1",
+      "statusIndicate": "rs"
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "menu",
+      "title": "RV Recorder",
+      "settings": "placed",
+      "items": [
+        [
+          "text",
+          "STATUS",
+          ""
+        ],
+        [
+          "tworow",
+          "MARK",
+          "Позначка 1"
+        ],
+        [
+          "tworow",
+          "REC",
+          "Запис RV"
+        ],
+        [
+          "setting",
+          "tripMark"
+        ],
+        [
+          "setting",
+          "lang"
+        ],
+        [
+          "text",
+          "STATUS2",
+          ""
+        ]
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "tripMark",
+      "label": "TRIP = позначка / TRIP = mark",
+      "type": "bool",
+      "default": true,
+      "_about": "road TS: the stalk's TRIP button (bit 0x40 of Light.IndicatorSteeringColumn.operationColumnStalks, seen on the car 2026-11-18) is also a mark: the rising edge only. Read only."
+    },
+    {
+      "key": "lang",
+      "label": "Мова / Language",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Авто"
+        ],
+        [
+          "uk",
+          "Українська"
+        ],
+        [
+          "en",
+          "English"
+        ]
+      ],
+      "_about": "shared/lang.js: auto = the head unit's (--currentLanguage at start) when it is uk or en, else Ukrainian. Only the rows the app writes follow it; the menu's fixed labels are the package's own."
+    }
+  ],
+  "config": {
+    "_about": "READ ONLY. config.rv: summaryS (seconds into a recording at which the log says which sources spoke), hubPauseMs (the pause between two interfaces being subscribed). config.recorder: shared/signal_recorder.js, as Signal Probe's: files of fileRawKB of text in data/rec/, the oldest removed past quotaMB (the app's disk limit is 20 MiB with its log), maxEntries of a list (a source's own recEntries is smaller).",
+    "rv": {
+      "summaryS": [
+        30,
+        120,
+        600
+      ],
+      "hubPauseMs": 120
+    },
+    "recorder": {
+      "fileRawKB": 4096,
+      "quotaMB": 15,
+      "flushMs": 1000,
+      "maxQueueKB": 2048,
+      "gzip": true,
+      "maxEntries": 16
+    }
+  }
+}

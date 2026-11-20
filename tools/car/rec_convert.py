@@ -3,7 +3,7 @@
 
     python3 tools/car/rec_convert.py <rec files or folders ...> -o <out folder> [--resample MS] [--max-age MS] [--parquet]
 
-The input is what apps/signal_probe/recorder.js writes in the app's data/rec/ (format #rec 1): rec-<session>-<n>.csv.gz (or .csv),
+The input is what shared/signal_recorder.js (Signal Probe's recorder; the RV recorder's too) writes in the app's data/rec/ (format #rec 1): rec-<session>-<n>.csv.gz (or .csv),
 gzip members one per flush, so a file cut by a crash is read up to its last whole member. One recording (a "session", one press of
 "Запис" to its stop) becomes one drive:
 

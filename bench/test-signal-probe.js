@@ -34,7 +34,7 @@ const CATALOGUE = path.join(ROOT, 'reference', 'car', '2026-11-15', 'someip', 's
 const CHECK = path.join(ROOT, 'tools', 'signals', 'check_signals.py');
 const TOOL = path.join(ROOT, 'tools', 'car', 'probe_fields.js');
 const FIELDS = require(path.join(APP_DIR, 'fields.js'));
-const FMT = require(path.join(APP_DIR, 'format.js'));
+const FMT = require(path.join(ROOT, 'shared', 'signal_format.js'));     // road TS: moved to shared/ (the RV recorder uses it too)
 const { Probe, VERSION, LOG_FORMAT } = require(path.join(APP_DIR, 'probe.js'));
 const TURNS = require(path.join(ROOT, 'shared', 'carplay_turns.js'));
 const FX = require('./carplay-turns-fixture');
@@ -112,18 +112,23 @@ async function main() {
     const files = fs.readdirSync(APP_DIR).filter((f) => /\.js$/.test(f));
     ok(files.indexOf('main.js') >= 0 && files.indexOf('fields.js') >= 0 && files.indexOf('probe.js') >= 0, 'apps/signal_probe has ' + files.join(', '));
     const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/\s\/\/ .*$/gm, '');
-    files.forEach((f) => {
-        const code = strip(fs.readFileSync(path.join(APP_DIR, f), 'utf8'));
+    // road TS: the recorder and the formatter live in shared/ (packed beside the app): checked exactly like the app's own files
+    const SHARED_OWN = ['signal_recorder.js', 'signal_format.js'];
+    const srcOf = (f) => (SHARED_OWN.indexOf(f) >= 0 ? path.join(ROOT, 'shared', f) : path.join(APP_DIR, f));
+    files.concat(SHARED_OWN).forEach((f) => {
+        const code = strip(fs.readFileSync(srcOf(f), 'utf8'));
         ok(!/setValue|callMethod|signals\.set\b|signals\.call\b|signals\.proxy\b|\.proxy\(|requestDefaultSymbols|standardCCMessage|extendedCCMessage|newCCMessage|A19B|operationBordcomputer|kombiSelection\b|\.send\(/.test(code),
             f + ': no setter, no method call, no proxy(), no requestDefaultSymbols, no message injection');
         ok(!/cluster_render|cluster-render|ctx\.display|ctx\.canvas|ctx\.loop|ui\.image|\.layer\(|hud\.js/.test(code), f + ': draws nothing (no cluster-render, no canvas, no layer)');
         ok(!/\?\.|\?\?|catch\s*\{|\.\.\.\w|\bBigInt\(|\d+n\b|\.flat\(|\.flatMap\(|Object\.fromEntries|Object\.entries|Object\.values|\.padEnd|\.padStart|\bfor await\b|=>\s*\{\s*\}\s*\?/.test(code),
             f + ': only what Node 8.16 has (no ?. ?? bigint literal, spread, optional catch binding, flat, entries, values, padStart)');
-        ok(!/\/Users\/|\/home\/|C:\\\\/.test(fs.readFileSync(path.join(APP_DIR, f), 'utf8')), f + ': no home-directory path');
+        ok(!/\/Users\/|\/home\/|C:\\\\/.test(fs.readFileSync(srcOf(f), 'utf8')), f + ': no home-directory path');
     });
     const app = readJson(path.join(APP_DIR, 'app.json'));
-    // r1120 LN: + shared/lang.js, the apps' languages (it draws nothing either)
-    ok(JSON.stringify(app.shared) === '["lang.js","carplay_turns.js"]' && !(app.config && app.config.target) && !app.startWidget, 'app.json: two shared files (lang.js, the languages; carplay_turns.js, the decoder Twin Dial uses too), no config.target, no widget: nothing for the cluster');
+    // r1120 LN: + shared/lang.js, the apps' languages (it draws nothing either); road TS: + its recorder and formatter, now in shared/
+    ok(JSON.stringify(app.shared) === '["lang.js","carplay_turns.js","signal_recorder.js","signal_format.js"]' && !(app.config && app.config.target) && !app.startWidget,
+        'app.json: four shared files (lang.js, the languages; carplay_turns.js, the decoder Twin Dial uses too; signal_recorder.js and signal_format.js, its own recorder and formatter the RV recorder uses too), no config.target, no widget: nothing for the cluster');
+    ok(!fs.existsSync(path.join(APP_DIR, 'recorder.js')) && !fs.existsSync(path.join(APP_DIR, 'format.js')), 'road TS: no copy of the recorder or the formatter left in apps/signal_probe (one source, in shared/)');
     {
         // car issues CT: the one method call lives in shared/carplay_turns.js, and it is queryContent on GuidanceEventList, nothing else
         const tc = strip(fs.readFileSync(path.join(ROOT, 'shared', 'carplay_turns.js'), 'utf8'));

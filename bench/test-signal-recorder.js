@@ -1,6 +1,6 @@
 'use strict';
 /**
- * test-signal-recorder.js - cruise RC: Signal Probe's recording mode (apps/signal_probe/recorder.js, docs/cruise-set-speed-brief.md
+ * test-signal-recorder.js - cruise RC: Signal Probe's recording mode (shared/signal_recorder.js, docs/cruise-set-speed-brief.md
  * Phase 0) and the Mac converter (tools/car/rec_convert.py).
  *
  *   node bench/test-signal-recorder.js            (BENCH_PORT, default 8902; REC_SIM_MIN: minutes of the simulated drive, default 20)
@@ -34,7 +34,7 @@ const CATALOGUE = path.join(ROOT, 'reference', 'car', '2026-11-15', 'someip', 's
 const CONVERT = path.join(ROOT, 'tools', 'car', 'rec_convert.py');
 const FIELDS = require(path.join(APP_DIR, 'fields.js'));
 const { Probe } = require(path.join(APP_DIR, 'probe.js'));
-const { Recorder, flatten, fmtNum } = require(path.join(APP_DIR, 'recorder.js'));
+const { Recorder, flatten, fmtNum } = require(path.join(ROOT, 'shared', 'signal_recorder.js'));     // road TS: moved to shared/
 const PORT = Number(process.env.BENCH_PORT) || 8902;
 const SIM_MIN = Number(process.env.REC_SIM_MIN) || 20;
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'signal-rec-'));
@@ -135,7 +135,7 @@ function rateOf(f) {
 async function main() {
     // ---------------------------------------------------------------------------------------------------------------
     console.log('1. the source');
-    const code = fs.readFileSync(path.join(APP_DIR, 'recorder.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/\s\/\/ .*$/gm, '');
+    const code = fs.readFileSync(path.join(ROOT, 'shared', 'signal_recorder.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/\s\/\/ .*$/gm, '');
     ok(!/\?\.|\?\?|catch\s*\{|\.\.\.\w|\bBigInt\(|\.flat\(|\.flatMap\(|Object\.fromEntries|Object\.entries|Object\.values|\.padEnd|\.padStart|\bfor await\b|\basync\b|\bawait\b/.test(code), 'recorder.js: only what Node 8.16 has (no ?. ??, spread, optional catch binding, entries / values, padStart, async)');
     ok(!/setValue|callMethod|signals\.|\.send\(|child_process|require\('(?!fs'|zlib'|path')/.test(code), 'recorder.js: no signal call, no child process, only fs / zlib / path');
     ok((code.match(/=> \{\s*try \{/g) || []).length >= 4 && /_fail\(err\)/.test(code), 'recorder.js: the timer and the write callbacks catch (a throw there would end the app)');

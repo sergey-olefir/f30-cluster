@@ -37,7 +37,11 @@
  * Never throws: a failing handler logs one warning, and the car's notifications go on (an uncaught exception ends an OAP app, and
  * a second unexpected exit uninstalls it). Node 8.16: no ?. / ??, no object spread, no optional catch binding.
  */
-const F = require('./format');
+// road TS: the formatter is shared/signal_format.js (packed beside this file by app.json "shared"; the RV recorder uses it too)
+const F = (function loadFormat() {
+    try { return require('./signal_format'); } catch (e) { /* the repository's layout */ }
+    return require('../../shared/signal_format');
+})();
 const FIELDS = require('./fields');
 
 /** shared/carplay_turns.js: beside this file in the built app (app.json "shared"), in shared/ of the repository (tests); null without it. */

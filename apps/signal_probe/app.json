@@ -12,7 +12,9 @@
   "i18n": true,
   "shared": [
     "lang.js",
-    "carplay_turns.js"
+    "carplay_turns.js",
+    "signal_recorder.js",
+    "signal_format.js"
   ],
   "signals": {
     "de.bmw.infotainment.KombiIF": {
