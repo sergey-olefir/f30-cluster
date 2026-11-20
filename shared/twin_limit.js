@@ -36,6 +36,7 @@
  * and nothing here logs more than numbers, enum names and lengths.
  */
 const textRaster = require('./hud_text');
+const I = require('./lang');          // r1120 LN: the cruise readout's unit from shared/i18n/<lang>.json
 const { paintIcon, ICONS } = require('./icons');
 // car-fix CF2: the real sources (the TrafficSignRecognition event for the sign, DisplayDataServer for cruise / limiter)
 let src = null;
@@ -380,7 +381,7 @@ function paintCruise(c, opts) {
         over(sc.a, sc.w, sc.h, bx, by);
     }
     // the unit under it (C1), or after it on the same line (C2)
-    const uname = c.unit === 'mph' ? 'mph' : 'км/год';
+    const uname = c.unit === 'mph' ? 'mph' : I.t('twin.u.kmh');
     const uf = fontOf([['td_u19', 19]]);
     if (uf) {
         const uw = textRaster.measure(uname, uf.name, 0), meta = textRaster.loadFont(uf.name).metrics;
@@ -522,7 +523,7 @@ function updateSign(hud, x, now, force) {
 /** A tdcru widget. */
 function updateCru(hud, x, now, force) {
     const c = cruiseNow(hud), m = mults(hud);
-    const key = c.kind + '|' + c.status + '|' + c.shown + '|' + c.unit + '|' + m.green + '|' + (hud.theme && hud.theme.dim ? hud.theme.dim[0] : 0);
+    const key = c.kind + '|' + c.status + '|' + c.shown + '|' + c.unit + '|' + m.green + '|' + (hud.theme && hud.theme.dim ? hud.theme.dim[0] : 0) + '|' + I.lang();
     if (!force && key === x.last) return;
     x.last = key;
     const dimC = hud.theme && Array.isArray(hud.theme.dim) ? hud.theme.dim.slice(0, 3) : GREY;

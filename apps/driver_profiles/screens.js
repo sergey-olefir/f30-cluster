@@ -22,9 +22,10 @@
  */
 const F = require('./format');
 const A = require('./avatars');
+const I = require('./lang');          // r1120 LN: every word from shared/i18n/<lang>.json
 
 const NAME_ROWS = 10;
-const OP_TEXT = { create: 'Add', rename: 'Rename', avatar: 'Avatar', copy: "Copy Guest's settings", delete: 'Delete' };
+const opText = (op) => I.t('dp.op.' + op);         // create rename avatar copy delete
 
 class Screens {
     constructor(ctx, profiles) {
@@ -81,7 +82,7 @@ class Screens {
         const ui = this.ui;
         F.SLOTS.forEach((s) => this.click(F.ROW[s], () => this.openProfile(s)));
         this.click('BTN_ADD', () => this.startCreate());
-        this.click('BTN_REFRESH', () => { this.msg = 'Reading the profiles again...'; this.render(); return this.p.refresh('refresh button'); });
+        this.click('BTN_REFRESH', () => { this.msg = I.t('dp.reading'); this.render(); return this.p.refresh('refresh button'); });
         this.click('BTN_SETTINGS_VIEW', () => { this.render(); return ui.open('SETTINGS_VIEW'); });
         this.click('A_RENAME', () => this.startRename());
         this.click('A_AVATAR', () => this.startAvatar());
@@ -97,6 +98,7 @@ class Screens {
         this.click('C_YES', () => this.yes());
         this.click('C_NO', () => this.closeConfirm());
         this.p.onChange(() => this.soon());
+        I.onChange(() => this.guard('language', () => { this.sent = Object.create(null); this.soon(0); }));
         ui.onVisible((name, on) => this.guard('visible ' + name, () => {
             // the HMI builds a screen afresh when it opens: send everything again
             if (on) { this.sent = Object.create(null); this.soon(0); }
@@ -114,7 +116,7 @@ class Screens {
 
     openProfile(slot) {
         const st = this.p.slots[slot];
-        if (!st || !st.exists) { this.msg = F.slotLabel(slot) + ' is free: use "Add a local profile"'; this.render(); return null; }
+        if (!st || !st.exists) { this.msg = I.t('dp.slotFree', { slot: F.slotLabel(slot) }); this.render(); return null; }
         this.sel = slot;
         this.noteText = '';
         this.render();
@@ -122,8 +124,8 @@ class Screens {
     }
     startCreate() {
         const c = this.p.check('create', null, 'x');
-        const blocking = c.why.filter((w) => w !== 'a profile is already called that');
-        if (!this.p.freeSlot()) { this.msg = 'Add: ' + blocking.join('; '); this.render(); return null; }
+        const blocking = c.why.filter((w, i) => (c.whyKeys || [])[i] !== 'dp.why.nameTaken');
+        if (!this.p.freeSlot()) { this.msg = I.t('dp.opWhy', { op: opText('create'), why: blocking.join('; ') }); this.render(); return null; }
         this.naming = { op: 'create', slot: null };
         this.render();
         return this.ui.open('NAMES');
@@ -132,7 +134,7 @@ class Screens {
         const slot = this.sel, st = slot && this.p.slots[slot];
         if (!st || !st.exists) return null;
         const why = this.renameWhy(st);
-        if (why) { this.note('Rename: ' + why); return null; }
+        if (why) { this.note(I.t('dp.opWhy', { op: opText('rename'), why: why })); return null; }
         this.naming = { op: 'rename', slot };
         this.render();
         return this.ui.open('NAMES');
@@ -140,7 +142,7 @@ class Screens {
     pickName(name) {
         if (!this.naming || !name) return null;
         if (this.p.names().map((n) => n.toLowerCase()).indexOf(String(name).toLowerCase()) >= 0) {
-            this.naming.hint = '"' + name + '" is already a profile\'s name: pick another';
+            this.naming.hint = I.t('dp.nameInUse', { name: name });
             this.render();
             return null;
         }
@@ -181,9 +183,9 @@ class Screens {
             const l = this.avatarSet();
             const f = l.files[choice.index];
             if (!f) return null;                       // an empty row
-            if (f.empty) { this.avatarHint = 'That file is empty: put a real jpg there'; this.render(); return null; }
+            if (f.empty) { this.avatarHint = I.t('dp.av.hintEmpty'); this.render(); return null; }
             if (f.tooBig) {
-                this.avatarHint = 'That one is ' + f.kb + ', over the ' + l.max + ' KB limit: make it smaller first';
+                this.avatarHint = I.t('dp.av.hintBig', { kb: f.kb, max: l.max });
                 this.render();
                 return null;
             }
@@ -197,11 +199,11 @@ class Screens {
         if (op !== 'create' && (!st || !st.exists)) return null;
         if (op === 'delete') {
             const why = this.deleteWhy(st);
-            if (why) { this.note('Delete is not offered: ' + why); return null; }
+            if (why) { this.note(I.t('dp.deleteNo', { why: why })); return null; }
         }
         if (op === 'copy') {
             const c = this.p.check('copy', slot);
-            if (!c.ok) { this.note('Copy not possible now: ' + c.why.join('; ')); return null; }
+            if (!c.ok) { this.note(I.t('dp.copyNo', { why: c.why.join('; ') })); return null; }
         }
         this.pending = { op, slot, arg: arg || null, snap: st ? { id: st.id, name: st.name } : null, armedUntil: 0, state: 'ask', result: null };
         this.render();
@@ -228,7 +230,7 @@ class Screens {
         const p = this.pending;
         if (!p || p.state !== 'ask') return null;
         const c = this.p.check(p.op, p.slot, p.arg, p.snap);
-        if (!c.ok) { p.result = { text: 'Not sent: ' + c.why.join('; ') }; this.render(); return null; }
+        if (!c.ok) { p.result = { text: I.t('dp.notSent', { why: c.why.join('; ') }) }; this.render(); return null; }
         if (p.op === 'delete' && !(p.armedUntil > Date.now())) {
             // the first press only arms it
             p.armedUntil = Date.now() + this.armMs;
@@ -237,14 +239,14 @@ class Screens {
             return null;
         }
         p.state = 'sending';
-        p.result = { text: 'Sending...' };
+        p.result = { text: I.t('dp.sending') };
         this.render();
         return this.p.write(p.op, p.slot, p.arg, p.snap).then((r) => {
             p.state = 'done'; p.ok = !!r.ok; p.result = r; p.newSlot = r.slot || null;
-            this.msg = OP_TEXT[p.op] + ': ' + r.text + (r.detail ? '. ' + r.detail : '');
+            this.msg = I.t('dp.opWhy', { op: opText(p.op), why: r.text }) + (r.detail ? '. ' + r.detail : '');
             this.render();
         }, (e) => {
-            p.state = 'done'; p.ok = false; p.result = { text: 'Error: ' + (e && e.message || e) };
+            p.state = 'done'; p.ok = false; p.result = { text: I.t('dp.error', { what: (e && e.message || e) }) };
             this.render();
         });
     }
@@ -252,17 +254,17 @@ class Screens {
     /* ---------------- why an action is not offered ---------------- */
 
     renameWhy(st) {
-        if (st.type !== 'USER') return (F.TYPE_TEXT[st.type] || 'this profile') + ' keeps its name';
-        if (!F.isLocal(st)) return 'a BMW ID profile takes its name from the BMW ID';
+        if (st.type !== 'USER') return I.t('dp.keepsName', { what: F.typeText(st.type) || I.t('dp.thisProfile') });
+        if (!F.isLocal(st)) return I.t('dp.bmwIdName');
         return '';
     }
     deleteWhy(st) {
-        if (!st) return 'no profile';
-        if (st.type === 'GUEST' || st.type === 'VALET' || st.slot === 'guest' || st.slot === 'valet') return 'Guest and Valet are never deleted';
-        if (!this.p.current) return 'the active profile is not known yet';
-        if (st.slot === this.p.current) return 'it is the active profile';
-        if (st.type !== 'USER') return 'only personal profiles';
-        if (!F.isLocal(st)) return "a BMW ID profile: remove it in BMW's own profile menu";
+        if (!st) return I.t('dp.noProfile');
+        if (st.type === 'GUEST' || st.type === 'VALET' || st.slot === 'guest' || st.slot === 'valet') return I.t('dp.why.keepGuest');
+        if (!this.p.current) return I.t('dp.activeUnknownYet');
+        if (st.slot === this.p.current) return I.t('dp.why.isActive');
+        if (st.type !== 'USER') return I.t('dp.why.onlyPersonal');
+        if (!F.isLocal(st)) return I.t('dp.why.deleteBmwId');
         return '';
     }
 
@@ -281,21 +283,21 @@ class Screens {
         const p = this.p, cur = p.current, list = p.list();
         const users = p.users().length, free = F.USER_SLOTS.length - users;
         let status;
-        if (!p.um && !p.ua.guest) status = 'The profile service does not answer' + (p.errors[F.UAM] ? ': ' + p.errors[F.UAM] : '');
-        else if (!list.some((s) => s.read)) status = 'Reading the profiles...';
-        else status = 'Active: ' + (cur ? F.nameOf(p.slots[cur]) : 'not known' + (p.currentErr ? ' (' + p.currentErr + ')' : '')) + '. ' + users + ' personal of 7, ' + free + ' free';
+        if (!p.um && !p.ua.guest) status = I.t('dp.noService') + (p.errors[F.UAM] ? ': ' + p.errors[F.UAM] : '');
+        else if (!list.some((s) => s.read)) status = I.t('dp.readingFirst');
+        else status = I.t('dp.status', { active: cur ? F.nameOf(p.slots[cur]) : I.t('dp.notKnown') + (p.currentErr ? ' (' + p.currentErr + ')' : ''), users: users, free: free });
         this.text('STATUS', status);
         list.forEach((st) => {
             const row = F.ROW[st.slot];
             if (!st.exists) {
-                this.cells(row, F.slotLabel(st.slot) + ': free', F.rowLine(st));
+                this.cells(row, I.t('dp.slotFreeRow', { slot: F.slotLabel(st.slot) }), F.rowLine(st));
                 this.visible(row, false);
                 return;
             }
-            this.cells(row, F.nameOf(st) + (st.slot === cur ? '  (active)' : ''), F.rowLine(st));
+            this.cells(row, F.nameOf(st) + (st.slot === cur ? '  ' + I.t('dp.activeMark') : ''), F.rowLine(st));
             this.visible(row, true);
         });
-        this.text('BTN_ADD', p.freeSlot() ? 'Add a local profile (' + free + ' free)' : 'Add a local profile: no free slot');
+        this.text('BTN_ADD', p.freeSlot() ? I.t('dp.add', { free: free }) : I.t('dp.addNone'));
         this.text('MSG', this.msg);
     }
 
@@ -304,44 +306,45 @@ class Screens {
         if (!slot) return;
         const st = p.slots[slot];
         if (!st || !st.exists) {
-            this.cells('D_NAME', 'Name', '(this profile is not there any more)');
+            this.cells('D_NAME', I.t('driver_profiles.item.D_NAME'), I.t('dp.goneRow'));
             ['A_RENAME', 'A_AVATAR', 'A_COPY', 'A_DELETE'].forEach((n) => this.visible(n, false));
             return;
         }
         const active = slot === p.current, pia = p.piaOf(st);
-        this.cells('D_NAME', 'Name', F.nameOf(st));
-        this.cells('D_STATE', 'Status', active ? 'Active now' : p.current ? 'Not active' : 'Not known which profile is active');
-        this.cells('D_TYPE', 'Type', (F.TYPE_TEXT[st.type] || String(st.type || 'not known')) + (st.type ? ' (' + st.type + ')' : ''));
+        const L = (k) => I.t('driver_profiles.item.' + k);
+        this.cells('D_NAME', L('D_NAME'), F.nameOf(st));
+        this.cells('D_STATE', L('D_STATE'), I.t(active ? 'dp.state.active' : p.current ? 'dp.state.inactive' : 'dp.state.unknown'));
+        this.cells('D_TYPE', L('D_TYPE'), (F.typeText(st.type) || String(st.type || I.t('dp.notKnown'))) + (st.type ? ' (' + st.type + ')' : ''));
         const acct = F.accountText(st);
-        this.cells('D_ACCOUNT', 'Account', acct === 'BMW ID' ? 'BMW ID' + (st.connectedDriveUsername ? ': ' + F.mask(st.connectedDriveUsername) : st.emailAddress ? ': ' + F.mask(st.emailAddress) : '')
-            : acct === 'local' ? 'Local (offline), no BMW ID' : 'Not known');
-        this.cells('D_PROTECTION', 'Protection (key, PIN, NFC)', F.protectionText(st.protection));
-        this.cells('D_PIA', 'PIA profile number', pia.n === null ? pia.how : pia.n + ' (' + pia.how + ')');
-        const copied = st.type === 'GUEST' || st.type === 'VALET' ? 'Not for ' + F.TYPE_TEXT[st.type]
-            : typeof st.copyTs === 'number' ? F.date(st.copyTs) : 'Not readable' + (st.copyErr ? ' (' + st.copyErr + ')' : '');
-        this.cells('D_COPIED', "Guest's settings copied", copied);
-        this.cells('D_CREATED', 'Created', F.date(st.creationDate, 'not known'));
-        this.cells('D_LOGIN', 'Last login', F.date(st.lastLoginDate, 'not known'));
-        this.cells('D_FIRST', 'First name', st.firstName ? st.firstName : '(none)');
-        this.cells('D_SYNC', 'Cloud sync', st.synchronizationEnabled === true ? 'On' : st.synchronizationEnabled === false ? 'Off' : 'Not known');
-        this.cells('D_AVATAR', 'Avatar', A.avatarText(st));
-        this.cells('D_ID', 'Slot and internal id', F.slotLabel(slot) + ' (' + slot + '), id ' + (st.id || '?'));
+        this.cells('D_ACCOUNT', L('D_ACCOUNT'), acct === 'BMW ID' ? 'BMW ID' + (st.connectedDriveUsername ? ': ' + F.mask(st.connectedDriveUsername) : st.emailAddress ? ': ' + F.mask(st.emailAddress) : '')
+            : acct === 'local' ? I.t('dp.acct.localLong') : I.t('dp.notKnownC'));
+        this.cells('D_PROTECTION', I.t('dp.protLabel'), F.protectionText(st.protection));
+        this.cells('D_PIA', L('D_PIA'), pia.n === null ? pia.how : pia.n + ' (' + pia.how + ')');
+        const copied = st.type === 'GUEST' || st.type === 'VALET' ? I.t('dp.notFor', { what: F.typeText(st.type) })
+            : typeof st.copyTs === 'number' ? F.date(st.copyTs) : I.t('dp.notReadable') + (st.copyErr ? ' (' + st.copyErr + ')' : '');
+        this.cells('D_COPIED', L('D_COPIED'), copied);
+        this.cells('D_CREATED', L('D_CREATED'), F.date(st.creationDate, I.t('dp.notKnown')));
+        this.cells('D_LOGIN', L('D_LOGIN'), F.date(st.lastLoginDate, I.t('dp.notKnown')));
+        this.cells('D_FIRST', L('D_FIRST'), st.firstName ? st.firstName : I.t('dp.noneP'));
+        this.cells('D_SYNC', L('D_SYNC'), st.synchronizationEnabled === true ? I.t('kit.on') : st.synchronizationEnabled === false ? I.t('kit.off') : I.t('dp.notKnownC'));
+        this.cells('D_AVATAR', L('D_AVATAR'), A.avatarText(st));
+        this.cells('D_ID', L('D_ID'), I.t('dp.slotId', { slot: F.slotLabel(slot), ref: slot, id: st.id || '?' }));
 
         const rw = this.renameWhy(st);
         this.visible('A_RENAME', !rw);
-        this.text('A_RENAME', rw ? 'Rename: not here (' + rw + ')' : 'Rename');
-        this.text('A_AVATAR', 'Avatar: ' + A.typeLabel(st.avatarType) + ' - change it');
+        this.text('A_RENAME', rw ? I.t('dp.renameNo', { why: rw }) : L('A_RENAME'));
+        this.text('A_AVATAR', I.t('dp.avatarChange', { label: A.typeLabel(st.avatarType) }));
         this.visible('A_AVATAR', true);
         const cc = p.check('copy', slot);
         const copyType = st.type === 'USER';
         this.visible('A_COPY', copyType);
-        this.text('A_COPY', cc.ok ? "Copy Guest's settings here" : "Copy Guest's settings here: not now (" + cc.why.join('; ') + ')');
+        this.text('A_COPY', cc.ok ? L('A_COPY') : I.t('dp.copyNotNow', { why: cc.why.join('; ') }));
         const dw = this.deleteWhy(st);
         this.visible('A_DELETE', !dw);
-        this.text('A_DELETE', dw ? 'Delete: not offered (' + dw + ')' : 'Delete this profile');
+        this.text('A_DELETE', dw ? I.t('dp.deleteNotOffered', { why: dw }) : L('A_DELETE'));
         const notes = [];
         if (this.noteText) notes.push(this.noteText);
-        else if (copyType && !cc.ok) notes.push("Copy needs Guest active and this profile unprotected (do it before linking a key)");
+        else if (copyType && !cc.ok) notes.push(I.t('dp.copyNeeds'));
         this.text('P_NOTE', notes[0] || '');
         this.text('P_NOTE2', this.msg);
     }
@@ -350,13 +353,13 @@ class Screens {
         const n = this.naming, p = this.p;
         if (!n) return;
         const st = n.slot ? p.slots[n.slot] : null;
-        this.text('N_HINT', n.hint || (n.op === 'rename' ? 'New name for "' + F.nameOf(st) + '":' : 'Name for the new local profile:'));
+        this.text('N_HINT', n.hint || (n.op === 'rename' ? I.t('dp.newNameFor', { name: F.nameOf(st) }) : I.t('dp.newName')));
         const taken = p.names().map((x) => x.toLowerCase());
         this.text('N_AUTO', F.autoName(this.autoBase, p.names()));
         for (let i = 0; i < NAME_ROWS; i++) {
             const name = this.presets[i];
             this.visible('N_' + i, !!name);
-            if (name) this.text('N_' + i, name + (taken.indexOf(name.toLowerCase()) >= 0 ? '  (in use)' : ''));
+            if (name) this.text('N_' + i, name + (taken.indexOf(name.toLowerCase()) >= 0 ? '  ' + I.t('dp.inUse') : ''));
         }
     }
 
@@ -370,102 +373,97 @@ class Screens {
         const st = p.slots[slot];
         const l = this.avatarList || { dir: A.dirOf(p.dataDir), exists: false, files: [], max: this.avatarMaxKB, error: null };
         const now = A.typeName(st && st.avatarType);
-        this.text('AV_NOW', (st ? 'Avatar of "' + F.nameOf(st) + '"' : 'Avatar') + ' - now: ' + A.avatarText(st));
+        this.text('AV_NOW', I.t('dp.av.now', { who: st ? I.t('dp.av.of', { name: F.nameOf(st) }) : I.t('dp.av.default0'), what: A.avatarText(st) }));
         A.PRESETS.forEach((type, i) => {
-            const base = type === 'DEFAULT' ? 'Default' : 'Avatar ' + type.slice(6);
-            this.text('AV_T' + i, base + (now === type ? '  (set now)' : ''));
+            const base = type === 'DEFAULT' ? I.t('dp.av.default') : I.t('dp.av.n', { n: type.slice(6) });
+            this.text('AV_T' + i, base + (now === type ? '  ' + I.t('dp.av.setNow') : ''));
             this.visible('AV_T' + i, true);
         });
-        this.text('AV_OWN', 'Your own picture - a .jpg of at most ' + l.max + ' KB in this folder:');
+        this.text('AV_OWN', I.t('dp.av.own', { max: l.max }));
         for (let i = 0; i < A.MAX_FILES; i++) {
             const f = l.files[i];
             this.visible('AV_F' + i, !!f);
             if (!f) continue;
-            const state = f.empty ? 'the file is empty'
-                : f.tooBig ? f.kb + ': over the ' + l.max + ' KB limit, make it smaller'
-                    : f.kb + ' - press to use it';
+            const state = f.empty ? I.t('dp.enc.empty')
+                : f.tooBig ? I.t('dp.av.rowBig', { kb: f.kb, max: l.max })
+                    : I.t('dp.av.rowOk', { kb: f.kb });
             this.cells('AV_F' + i, f.name, state);
         }
         const none = !l.files.length;
         this.visible('AV_EMPTY', none || !!l.error);
-        this.text('AV_EMPTY', l.error ? 'The folder cannot be read: ' + l.error
-            : !l.exists ? 'No pictures yet. Make this folder, put a .jpg in it, then press "Read the folder again":'
-                : 'No .jpg here yet. Put one in this folder, then press "Read the folder again":');
+        this.text('AV_EMPTY', l.error ? I.t('dp.av.folderErr', { err: l.error })
+            : I.t(!l.exists ? 'dp.av.noFolder' : 'dp.av.noJpg', { button: I.t('driver_profiles.item.AV_RESCAN') }));
         this.text('AV_PATH', l.dir);
         this.visible('AV_PATH', true);
-        this.text('AV_NOTE', this.avatarHint || ('The ' + l.max + ' KB limit is our guess, not the car\'s: nobody has'
-            + ' seen what it accepts. Whether this car draws an own picture at all is unproven too'));
+        this.text('AV_NOTE', this.avatarHint || I.t('dp.av.note', { max: l.max }));
     }
 
     renderConfirm() {
         const q = this.pending, p = this.p;
         if (!q) return;
-        const st = q.slot ? p.slots[q.slot] : null, who = st ? '"' + F.nameOf(st) + '" (' + q.slot + ')' : '';
+        const st = q.slot ? p.slots[q.slot] : null, who = st ? I.t('dp.who', { name: F.nameOf(st), slot: q.slot }) : '';
         let what, detail, yes;
         if (q.op === 'create') {
-            what = 'Add a local profile named "' + q.arg + '"?';
-            detail = 'It takes the first free slot (' + (p.freeSlot() || 'none') + '). No BMW ID; settings start at the defaults';
-            yes = 'Yes, add it';
+            what = I.t('dp.c.create', { name: q.arg });
+            detail = I.t('dp.c.createDetail', { slot: p.freeSlot() || I.t('dp.none') });
+            yes = I.t('dp.c.createYes');
         } else if (q.op === 'rename') {
-            what = 'Rename ' + who + ' to "' + q.arg + '"?';
-            detail = 'Only the name changes';
-            yes = 'Yes, rename it';
+            what = I.t('dp.c.rename', { who: who, name: q.arg });
+            detail = I.t('dp.c.renameDetail');
+            yes = I.t('dp.c.renameYes');
         } else if (q.op === 'avatar') {
             // exactly what goes on the wire, named field by field
             const ch = q.arg || {};
             if (ch.kind === 'preset') {
-                what = 'Set the avatar of ' + who + ' to ' + A.typeLabel(ch.type) + '?';
-                detail = 'Sends one field: avatarType = ' + ch.type + ' (code ' + A.ENUM_TYPE[ch.type] + '). No name, no type,'
-                    + ' no protection, and any own picture stays stored, unused';
-                yes = 'Yes, set ' + A.typeLabel(ch.type);
+                what = I.t('dp.c.avatar', { who: who, label: A.typeLabel(ch.type) });
+                detail = I.t('dp.c.avatarDetail', { type: ch.type, code: A.ENUM_TYPE[ch.type] });
+                yes = I.t('dp.c.avatarYes', { label: A.typeLabel(ch.type) });
             } else {
                 const l = this.avatarSet();
                 const f = l.files[ch.index];
-                const from = ', from your avatars folder';
-                what = 'Use ' + (f ? '"' + f.name + '" (' + f.kb + from + ')' : 'that picture') + ' as the avatar of ' + who + '?';
-                detail = 'Sends two fields: avatar = that jpg, Base64-encoded (about '
-                    + Math.round((f ? f.bytes : 0) * 4 / 3 / 1024) + ' KB of text), then avatarType = INDIVIDUAL (code 16).'
-                    + ' Nothing else. The ' + l.max + ' KB limit is our guess; the car may still refuse it';
-                yes = 'Yes, send this picture';
+                what = I.t('dp.c.file', { pic: f ? I.t('dp.c.filePic', { name: f.name, kb: f.kb }) : I.t('dp.c.thatPic'), who: who });
+                detail = I.t('dp.c.fileDetail', { kb: Math.round((f ? f.bytes : 0) * 4 / 3 / 1024), max: l.max });
+                yes = I.t('dp.c.fileYes');
             }
         } else if (q.op === 'copy') {
-            what = "Copy Guest's settings into " + who + '?';
-            detail = "Its car settings (PIA) and its iDrive data become Guest's: seats, lights, climate, navigation, media";
-            yes = 'Yes, copy them';
+            what = I.t('dp.c.copy', { who: who });
+            detail = I.t('dp.c.copyDetail');
+            yes = I.t('dp.c.copyYes');
         } else {
-            what = 'Delete ' + who + '?';
-            detail = 'Its settings go with it. This cannot be undone';
-            yes = q.armedUntil > Date.now() ? 'Press again to delete ' + who + ' for good' : 'Delete';
+            what = I.t('dp.c.delete', { who: who });
+            detail = I.t('dp.c.deleteDetail');
+            yes = q.armedUntil > Date.now() ? I.t('dp.c.deleteAgain', { who: who }) : I.t('dp.c.deleteYes');
         }
         const c = p.check(q.op, q.slot, q.arg, q.snap, q.state === 'sending');
         this.text('C_WHAT', what);
         this.text('C_DETAIL', detail);
-        this.text('C_CHECK', q.state === 'ask' ? (c.ok ? 'Checks now: all fine' + (p.requireParked ? ' (engine off, P, no PIA job)' : '') : 'Checks now: ' + c.why.join('; ')) : '');
-        this.text('C_YES', q.state === 'ask' ? yes : q.state === 'sending' ? 'Sending...' : 'Sent');
+        this.text('C_CHECK', q.state === 'ask' ? (c.ok ? I.t(p.requireParked ? 'dp.c.checksOkParked' : 'dp.c.checksOk') : I.t('dp.c.checks', { why: c.why.join('; ') })) : '');
+        this.text('C_YES', q.state === 'ask' ? yes : q.state === 'sending' ? I.t('dp.sending') : I.t('dp.sent'));
         this.visible('C_YES', q.state === 'ask');
-        this.text('C_NO', q.state === 'done' ? 'Back' : 'Cancel');
+        this.text('C_NO', I.t(q.state === 'done' ? 'dp.back' : 'driver_profiles.item.C_NO'));
         this.text('C_RESULT', q.result ? q.result.text : '');
         this.text('C_RESULT2', q.result && q.result.detail ? q.result.detail : '');
     }
 
     renderSettingsView() {
         const p = this.p, car = p.car, cur = p.current, st = cur ? p.slots[cur] : null;
-        this.cells('S_USER', 'Active profile', st ? F.nameOf(st) + ' (' + cur + ')' : 'Not known');
-        this.cells('S_PIA', 'Active PIA profile', typeof car.pia === 'number' ? String(car.pia) + (car.pia === 10 ? ' (Guest)' : car.pia === 14 ? ' (Default)' : '') : 'Not known' + (p.errors[Object.keys(p.errors).find((k) => /DriverSelection/.test(k))] ? ': not reachable' : ''));
-        const keys = Array.isArray(car.keys) ? car.keys.map((k) => 'key ' + k.TokenId + ' -> ' + k.PiaProfileId).join(', ') : null;
-        this.cells('S_KEYS', 'Keys and their PIA profiles', keys === null ? 'Not known' : keys || 'none mapped');
+        const L = (k) => I.t('driver_profiles.item.' + k);
+        this.cells('S_USER', L('S_USER'), st ? F.nameOf(st) + ' (' + cur + ')' : I.t('dp.notKnownC'));
+        this.cells('S_PIA', L('S_PIA'), typeof car.pia === 'number' ? String(car.pia) + (car.pia === 10 ? ' (' + I.t('dp.type.GUEST') + ')' : car.pia === 14 ? ' (' + I.t('dp.av.default') + ')' : '') : I.t('dp.notKnownC') + (p.errors[Object.keys(p.errors).find((k) => /DriverSelection/.test(k))] ? ': ' + I.t('dp.unreachable') : ''));
+        const keys = Array.isArray(car.keys) ? car.keys.map((k) => I.t('dp.keyMap', { token: k.TokenId, pia: k.PiaProfileId })).join(', ') : null;
+        this.cells('S_KEYS', L('S_KEYS'), keys === null ? I.t('dp.notKnownC') : keys || I.t('dp.noneMapped'));
         const seen = F.SLOTS.map((s) => p.slots[s]).filter((s) => s.exists && s.type !== 'VALET')
             .map((s) => F.nameOf(s) + ' ' + (p.piaOf(s).n === null ? '?' : p.piaOf(s).n)).join(', ');
-        this.cells('S_PIAMAP', 'PIA numbers seen per profile', seen || 'none yet');
+        this.cells('S_PIAMAP', L('S_PIAMAP'), seen || I.t('dp.noneYet'));
         const u = car.units;
         const unitText = u ? [u.unitOfMeasurementSpeedometerDigital, u.unitOfMeasurementTemperature, u.unitOfMeasurementAirPressure, u.unitOfMeasurementConsumption, u.unitOfMeasurementTime]
-            .map((x) => String(x === undefined || x === null ? '?' : x).replace(/^_/, '').replace(/__/g, ' ').replace(/_S_/g, '/').toLowerCase()).join(', ') : 'Not known';
-        this.cells('S_UNITS', 'Units (speed, temp, pressure, consumption, clock)', unitText);
+            .map((x) => String(x === undefined || x === null ? '?' : x).replace(/^_/, '').replace(/__/g, ' ').replace(/_S_/g, '/').toLowerCase()).join(', ') : I.t('dp.notKnownC');
+        this.cells('S_UNITS', I.t('dp.unitsLabel'), unitText);
         const parked = p.parkedProblems();
-        this.cells('S_CAR', 'Car state for changes', parked.length ? parked.join(', ') : p.requireParked ? 'engine off, P, no PIA job' : 'not checked (config.requireParked off)');
-        this.text('S_NOTE1', 'Seat, mirror, light and climate memory live in the car\'s ECUs per PIA number: no app can read them');
-        this.text('S_NOTE2', 'iDrive settings live in each profile\'s encrypted folder, readable only by BMW\'s own services');
-        this.text('S_NOTE3', 'So only the active profile\'s units and these numbers are shown');
+        this.cells('S_CAR', I.t('dp.carLabel'), parked.length ? parked.join(', ') : I.t(p.requireParked ? 'dp.carOk' : 'dp.carUnchecked'));
+        this.text('S_NOTE1', I.t('dp.note1'));
+        this.text('S_NOTE2', I.t('dp.note2'));
+        this.text('S_NOTE3', I.t('dp.note3'));
     }
 }
 

@@ -6,7 +6,9 @@
   "vendor": "custom",
   "loggingId": "OAF3",
   "iconGlyph": "F30",
+  "i18n": true,
   "shared": [
+    "lang.js",
     "hud.js",
     "hud_text.js",
     "hud_data.js",
@@ -33,6 +35,10 @@
     "road_shields.js"
   ],
   "signals": {
+    "de.bmw.infotainment.hmi.hmicontext.HMIContext": {
+      "_instances": "HMI_CID",
+      "currentDisplayLanguage": "rs"
+    },
     "de.bmw.infotainment.vehicle.CDS": {
       "statusEngineSpeed2": "rs",
       "statusEngineTemperature": "rs",
@@ -214,6 +220,10 @@
           "Settings"
         ],
         [
+          "setting",
+          "lang"
+        ],
+        [
           "button",
           "BTN_DIAG",
           "Діагностика"
@@ -230,6 +240,7 @@
       "kind": "settings",
       "title": "Settings",
       "skip": [
+        "lang",
         "byMode",
         "hudLayout",
         "g20",
@@ -720,6 +731,14 @@
       "type": "bool",
       "default": false,
       "_about": "research3/MB config.mbRebuild.onMode"
+    },
+    {
+      "key": "lang",
+      "label": "Мова / Language",
+      "type": "choice",
+      "default": "auto",
+      "options": [["auto", "Авто"], ["uk", "Українська"], ["en", "English"]],
+      "_about": "r1120 LN: the app's language (shared/lang.js). auto = the head unit's (--currentLanguage at start, HMIContext.currentDisplayLanguage while running) when it is uk or en, else Ukrainian."
     }
   ],
   "config": {

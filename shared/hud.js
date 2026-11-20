@@ -237,6 +237,7 @@ const Waze = require('./waze');
 const Screen = require('./screen');
 const Runs = require('./runs');
 const DiagSettings = require('./diag_settings');     // b7: the Діагностика settings and the start-up hold
+const I18N = require('./lang');                      // r1120 LN: {{word:key}} in a layout (shared/i18n/<lang>.json)
 // twin_dial: the {{td:...}} tokens, the centre pages' cycle, the extra signals (shared/twin_tokens.js). Only twin_dial packs the
 // file, so for every other app it is simply absent (null) and none of the twin_dial hooks below does anything.
 let twin = null;
@@ -2713,6 +2714,9 @@ class HudApp {
     /** A layout's name for the screen: a see-through file is shown as its theme plus " + G20". */
     _layoutLabel(name) {
         const theme = G20_THEME[name] || name;
+        // r1120 LN: the status line is technical and English, as the log: the option's English words when the tables have them
+        const key = ((this.ctx.spec && this.ctx.spec.id) || '') + '.set.hudLayout.' + theme;
+        if (I18N.has(key, 'en')) return I18N.tl('en', key) + (G20_THEME[name] ? ' + G20' : '');
         const lay = this.ctx.settings.item('hudLayout');
         const o = lay && (lay.options || []).find((x) => x[0] === theme);
         return (o ? o[1] : theme) + (G20_THEME[name] ? ' + G20' : '');
@@ -2765,22 +2769,29 @@ class HudApp {
     }
 
     /** ", 3 of 5 layers drawn (2 waiting: <reason>)" while some layers aren't shown; "" when all are. Counts layers, not widgets. */
-    _drawnNote() {
+    /** r1120 LN: what _drawnNote says, as data (shared/menu.js words it in the app's language): { waiting: 'foreign' | 'bmw' | null,
+     *  refused, shown, total, whyN, why (the renderer's own state and reason) }. */
+    _drawnInfo() {
         const ts = this.targetState;
         if (ts && (ts.state === 'waiting' || ts.state === 'parked') && ts.holder) {
-            return ts.holder === 'foreign' ? ', waiting: another app has this display' : ', waiting: BMW is using this display';
+            return { waiting: ts.holder === 'foreign' ? 'foreign' : 'bmw', refused: null, shown: 0, total: 0, whyN: 0, why: null };
         }
-        const refused = this.refused ? ', refused ' + this.refused : '';
         const refs = this._layerRefs();
-        if (!refs.length) return refused;
         let shown = 0, why = null, whyN = 0;
         refs.forEach((r) => {
             const st = this.layerStates.get(r.key);
             if (st && st.state === 'shown') shown++;
             else if (st) { whyN++; if (!why) why = st.state + (st.reason ? ': ' + st.reason : ''); }
         });
-        if (shown === refs.length || (!why && !shown)) return refused;
-        return ', ' + shown + ' of ' + this._layerCount(refs.length) + ' drawn' + (why ? ' (' + whyN + ' ' + why + ')' : '') + refused;
+        return { waiting: null, refused: this.refused || null, shown: shown, total: refs.length, whyN: whyN, why: why };
+    }
+    _drawnNote() {
+        const d = this._drawnInfo();
+        if (d.waiting) return d.waiting === 'foreign' ? ', waiting: another app has this display' : ', waiting: BMW is using this display';
+        const refused = d.refused ? ', refused ' + d.refused : '';
+        if (!d.total) return refused;
+        if (d.shown === d.total || (!d.why && !d.shown)) return refused;
+        return ', ' + d.shown + ' of ' + this._layerCount(d.total) + ' drawn' + (d.why ? ' (' + d.whyN + ' ' + d.why + ')' : '') + refused;
     }
 
     statusText() {
@@ -3682,6 +3693,7 @@ class HudApp {
             }
             default:
                 if (twin && tok.indexOf('td:') === 0) return twin.token(this, tok);        // twin_dial: shared/twin_tokens.js
+                if (tok.indexOf('word:') === 0) return I18N.t(tok.slice(5));                 // r1120 LN: a word of shared/i18n/<lang>.json
                 if (tok.indexOf('spd:') === 0) { const v = SPEED_SCALE[us ? 'us' : 'metric'][Number(tok.slice(4))]; return v === undefined ? '' : String(v); }   // speed scale labels
                 if (tok.indexOf('temp:') === 0) { const c = Number(tok.slice(5)); return isNum(c) ? String(us ? Math.round((c * 9 / 5 + 32) / 10) * 10 : Math.round(c)) : '--'; }   // gauge labels: °F to the 10
                 if (tok.indexOf('setup:') === 0) { const s = this._setup(); return s ? s[tok.slice(6)] || '' : '--'; }
@@ -3764,7 +3776,8 @@ class HudApp {
             pad(Math.floor(a / 60)) + ':' + pad(a % 60) + ' from ' + s.from + ' - it must read what the head unit\'s own clock reads');
     }
 
-    _resolve(template) { return String(template).replace(/\{\{([a-zA-Z0-9:]+)\}\}/g, (_, t) => this._token(t)); }
+    // r1120 LN: "." and "_" too, for {{word:twin.u.km}} (the tables' keys)
+    _resolve(template) { return String(template).replace(/\{\{([a-zA-Z0-9:._]+)\}\}/g, (_, t) => this._token(t)); }
 
     /* ---------------- layers ---------------- */
 

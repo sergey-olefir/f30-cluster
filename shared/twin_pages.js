@@ -44,6 +44,7 @@
  * Plain Node 8 (the car's 8.16.2): no ?. / ?? / object spread / Object.fromEntries / flat. Nothing here throws into the engine.
  */
 const textRaster = require('./hud_text');
+const I = require('./lang');          // r1120 LN: every word of the pages from shared/i18n/<lang>.json
 const iconsMod = require('./icons');
 /** car issues CT: shared/carplay_turns.js (Twin Dial packs it); null in an app that does not. */
 let turnsLib;
@@ -696,7 +697,7 @@ function routeBridge(hud) {
 
 const cpOn = (hud) => cfgOf(hud).carplayTurns === true;
 const phoneGuides = (hud) => { const T = turnsMod(); return !!(T && T.isPhone(st(hud).provider)); };
-const CP_UNITS = { METER: 'м', KM: 'км', MILE_UK: 'mi', MILE_US: 'mi', YARD: 'yd', FEET: 'ft' };
+const CP_UNITS = I.words('twin.cp.', ['METER', 'KM', 'MILE_UK', 'MILE_US', 'YARD', 'FEET']);      // the phone's distance units, in the language in use
 
 /** A decoded event (shared/carplay_turns.js) -> the arrow page's model: { kind (our pictogram key, as dartOf), exit, side, dist (m), num, unit, road }. */
 function cpModel(e) {
@@ -782,9 +783,7 @@ function changed(hud) { const p = st(hud); p.evalAt = -1e9; if (hud && hud.widge
 
 /* ------------------------------------------------------------------ tokens --------------------------------------- */
 
-const TITLES = { clock: 'Дата і час', trip: 'Поточна поїздка', tech: 'Технічні дані', tyres: 'Шини', msg: 'Повідомлення', media: 'Медіа', track: 'Медіа', radio: 'Радіо',
-    phone: 'Телефон', guide: 'Навігація', route: 'Навігація', calc: 'Навігація', road: 'Навігація', none: 'Навігація', map: '' };
-const WEEKDAYS = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'];
+const TITLES = I.words('twin.page.', ['clock', 'trip', 'tech', 'tyres', 'msg', 'media', 'track', 'radio', 'phone', 'guide', 'route', 'calc', 'road', 'none', 'map']);
 
 const fixed = (n, d) => (isNum(n) ? n.toFixed(d) : DASH);
 const clockText = (L) => (L ? pad2(L.h) + ':' + pad2(L.mi) : DASH + DASH + ':' + DASH + DASH);
@@ -794,7 +793,7 @@ const mmss = (s) => { s = Math.max(0, Math.floor(s)); const h = Math.floor(s / 3
 const TECH = [
     { key: 'oil', lo: 50, hi: 150, warn: 130, dec: 0, unit: '°C' },
     { key: 'coolant', lo: 50, hi: 130, warn: 120, dec: 0, unit: '°C' },
-    { key: 'boost', lo: 0, hi: 1.6, warn: null, dec: 2, unit: 'бар' },
+    { key: 'boost', lo: 0, hi: 1.6, warn: null, dec: 2, unitKey: 'twin.u.bar' },
     { key: 'ambient', lo: null, hi: null, warn: null, dec: 1, unit: '°C', signed: true },
 ];
 function techValue(hud, i) {
@@ -810,21 +809,21 @@ function tripFormat(hud) {
 }
 
 /** The location line of a media source, our own words (SPEC 4.3). */
-const SOURCE_NAMES = { radio: 'Радіо', usb: 'USB', bluetooth: 'Bluetooth', carplay: 'CarPlay', phone: 'Телефон', online: 'Онлайн', other: 'Медіа' };
+const SOURCE_NAMES = I.words('twin.src.', ['radio', 'usb', 'bluetooth', 'carplay', 'phone', 'online', 'other']);
 
 function fmtDist(m) {
     // SN distance_format: < 100 m to 10 m, < 1000 m to 50 m, from 1 km one decimal up to 10 km, whole km above
     if (!isNum(m) || m < 0) return null;
-    if (m < 100) return { n: String(Math.round(m / 10) * 10), u: 'м' };
-    if (m < 1000) return { n: String(Math.round(m / 50) * 50), u: 'м' };
-    if (m < 10000) return { n: (m / 1000).toFixed(1), u: 'км' };
-    return { n: String(Math.round(m / 1000)), u: 'км' };
+    if (m < 100) return { n: String(Math.round(m / 10) * 10), u: I.t('twin.u.m') };
+    if (m < 1000) return { n: String(Math.round(m / 50) * 50), u: I.t('twin.u.m') };
+    if (m < 10000) return { n: (m / 1000).toFixed(1), u: I.t('twin.u.km') };
+    return { n: String(Math.round(m / 1000)), u: I.t('twin.u.km') };
 }
 /** car-fix CF3: a travel time in seconds -> "11 хв" / "1 год 05 хв" (at least one minute), or ''. */
 function fmtTravel(s) {
     if (!isNum(s) || s <= 0) return '';
     const mins = Math.max(1, Math.round(s / 60)), h = Math.floor(mins / 60), mi = mins % 60;
-    return h ? h + ' год ' + pad2(mi) + ' хв' : mi + ' хв';
+    return h ? I.t('twin.travel.hm', { h: h, m: pad2(mi) }) : I.t('twin.travel.m', { m: mi });
 }
 
 /** B6's pictogram of a turn direction (also the lane arrows): straight, (slight_ / hard_)left|right, uturn_left|right. */
@@ -865,7 +864,7 @@ function resolveToken(hud, name) {
         case 'pgTitle': {
             if (p.page === 'call') {
                 const s = callState(hud);
-                return s === 'INCOMING' ? 'Вхідний дзвінок' : s === 'ACTIVE' || s === 'HELD' ? 'Розмова' : s === 'DIALING' ? 'Виклик…' : 'Телефон';
+                return I.t(s === 'INCOMING' ? 'twin.call.in' : s === 'ACTIVE' || s === 'HELD' ? 'twin.call.talk' : s === 'DIALING' ? 'twin.call.dial' : 'twin.page.phone');
             }
             return TITLES[p.page] || '';
         }
@@ -876,14 +875,14 @@ function resolveToken(hud, name) {
         case 'pgIconFuel': return pickIcon(ICON.fuel);
         // ---- tab 1: the clock
         case 'pgTime': return clockText(T.local(hud));
-        case 'pgWeekday': { const L = T.local(hud); return L ? WEEKDAYS[L.wd] : ''; }
+        case 'pgWeekday': { const L = T.local(hud); return L ? T.WEEKDAYS[L.wd] : ''; }
         case 'pgDate': { const L = T.local(hud); return L ? pad2(L.d) + '.' + pad2(L.mo) + '.' + L.y : ''; }
         // ---- tab 1: the trip
-        case 'pgTripMeta': { const v = T.tripValues(hud); return (isNum(v.hours) ? v.hours + ':' + pad2(v.minutes) : DASH + ':' + DASH + DASH) + ' год'; }
+        case 'pgTripMeta': { const v = T.tripValues(hud); return (isNum(v.hours) ? v.hours + ':' + pad2(v.minutes) : DASH + ':' + DASH + DASH) + ' ' + I.t('twin.u.h'); }
         case 'pgTripCons': return 'ø ' + fixed(T.tripValues(hud).cons, 1);
         case 'pgTripSpeed': { const v = T.tripValues(hud); return 'ø ' + (isNum(v.speed) ? String(Math.round(v.speed)) : DASH); }
         case 'pgTripWay': return fixed(T.tripValues(hud).way, 1);
-        case 'pgTripFooter': { const v = T.tripValues(hud); return 'від початку поїздки, ' + (v.from ? pad2(v.from.h) + ':' + pad2(v.from.m) : DASH); }
+        case 'pgTripFooter': { const v = T.tripValues(hud); return I.t('twin.trip.from', { at: v.from ? pad2(v.from.h) + ':' + pad2(v.from.m) : DASH }); }
         // ---- tab 1: technical data
         default: break;
     }
@@ -892,7 +891,7 @@ function resolveToken(hud, name) {
         const ok = v !== null && v >= lim[0] && v <= lim[1];
         switch (m[1]) {
             case 'V': return ok ? (r.signed ? (Math.round(v * 10) / 10 >= 0 ? '+' : '-') + Math.abs(v).toFixed(r.dec) : v.toFixed(r.dec)) : DASH;
-            case 'U': return ok ? r.unit : '';
+            case 'U': return ok ? (r.unitKey ? I.t(r.unitKey) : r.unit) : '';
             case 'F': return ok && r.lo !== null ? Math.max(0, Math.min(1, (v - r.lo) / (r.hi - r.lo))).toFixed(4) : '';
             case 'W': return r.warn !== null ? ((r.warn - r.lo) / (r.hi - r.lo)).toFixed(4) : '';
             default: return ok && r.warn !== null && v >= r.warn ? 'hot' : 'fg';
@@ -932,7 +931,7 @@ function resolveToken(hud, name) {
         // ---- tab 4 (car-fix CF3: the device lines only with config.pages.phoneDevices - DevicePresentation has never been seen)
         case 'pgPhoneLine1': {
             const d = devicesOn(hud) ? p.phone.dev : null;
-            return d ? 'Підключено' + (d.path ? ' · ' + d.path : '') : devicesOn(hud) && p.phone.devSeen ? 'Телефон не підключено' : 'Немає даних';
+            return d ? I.t('twin.phone.on') + (d.path ? ' · ' + d.path : '') : I.t(devicesOn(hud) && p.phone.devSeen ? 'twin.phone.off' : 'twin.noData');
         }
         case 'pgPhoneLine2': {
             const d = devicesOn(hud) ? p.phone.dev : null, bits = [];
@@ -949,15 +948,15 @@ function resolveToken(hud, name) {
             const ph = p.phone;
             if (!detailOn(hud)) return '';          // car-fix CF3: VoiceCall (contact, name) unseen: dark
             if (ph.name && setting(hud, 'callerName') === 'on') return ph.name;
-            return ph.contact === true ? 'Контакт' : ph.contact === false ? 'Номер' : '';
+            return ph.contact === true ? I.t('twin.call.contact') : ph.contact === false ? I.t('twin.call.number') : '';
         }
         case 'pgCallPath': return devicesOn(hud) && p.phone.dev && p.phone.dev.path ? p.phone.dev.path : '';
         case 'pgCallMic': return detailOn(hud) && p.phone.mic === true ? pickIcon(ICON.micOff) : '';
         case 'pgCallHandset': { const s = callState(hud); return s === 'ACTIVE' || s === 'HELD' ? pickIcon(ICON.handset) : ''; }
         // ---- tab 5
         case 'pgRoad': return p.road || '';
-        case 'pgNavSub': return p.guiding === 'ACTIVE' ? 'Маршрут прокладено' : 'Маршрут не прокладено';
-        case 'pgCalc': return 'Розрахунок маршруту…';
+        case 'pgNavSub': return I.t(p.guiding === 'ACTIVE' ? 'twin.nav.route' : 'twin.nav.noRoute');
+        case 'pgCalc': return I.t('twin.nav.calc');
         // car issues CT: guideOf(p) is CarPlay's turn when the page shows it (the test mode), else BMW's manoeuvre
         case 'pgGuideIcon': return maneuverIcon(guideOf(p));
         case 'pgGuideExit': { const g = guideOf(p); return g && g.kind === 'roundabout' && isNum(g.exit) && g.exit > 0 && g.exit < 100 ? String(g.exit) : ''; }
@@ -966,7 +965,7 @@ function resolveToken(hud, name) {
         case 'pgGuideRoad': { const g = guideOf(p); return g && g === p.cp.turn ? g.road || '' : p.road || ''; }
         case 'pgGuideFoot': {
             const d = p.dest, bits = [];
-            if (d && d.eta) bits.push('прибуття ' + pad2(d.eta.h) + ':' + pad2(d.eta.m));
+            if (d && d.eta) bits.push(I.t('twin.nav.eta', { at: pad2(d.eta.h) + ':' + pad2(d.eta.m) }));
             const f = d ? fmtDist(d.dist) : null;
             if (f) bits.push(f.n + ' ' + f.u);
             return bits.join(' · ');
@@ -978,14 +977,14 @@ function resolveToken(hud, name) {
         case 'pgRouteUnit': { const f = p.dest ? fmtDist(p.dest.dist) : null; return f ? f.u : ''; }
         case 'pgRouteEta': {
             const d = p.dest, bits = [];
-            if (d && d.eta) bits.push('прибуття ' + pad2(d.eta.h) + ':' + pad2(d.eta.m));
+            if (d && d.eta) bits.push(I.t('twin.nav.eta', { at: pad2(d.eta.h) + ':' + pad2(d.eta.m) }));
             if (d && d.travel !== null) bits.push(fmtTravel(d.travel));
             return bits.join(' · ');
         }
         case 'pgRouteRoad': return p.road || '';
         // car-fix CF3 (the lead): isOnGuidableRoad read false at the start of a CarPlay route - its meaning is unverified, so the note
         // is drawn only with config.pages.routeOffRoad (false)
-        case 'pgRouteFoot': return pagesCfg(hud).routeOffRoad === true && p.onRoad === false ? 'Поза дорогою' : '';
+        case 'pgRouteFoot': return pagesCfg(hud).routeOffRoad === true && p.onRoad === false ? I.t('twin.nav.offRoad') : '';
         default: break;
     }
     if ((m = /^pgLane([0-7])([IC])$/.exec(name))) {
@@ -1102,7 +1101,8 @@ function resolveItems(hud, items) {
         else if (it.k === 'prog') { r.v = res(it.v); }
         else if (it.k === 'g') { r.parts = it.parts.map((q) => ({ s: res(q.s), c: res(q.c) || 'fg', f: q.f, gap: q.gap || 0 })); r.c = res(it.c) || 'fg'; }
         else if (it.k === 'lanes') { r.l = []; for (let i = 0; i < 8; i++) { r.l.push([res('{{td:pgLane' + i + 'I}}'), res('{{td:pgLane' + i + 'C}}')]); } }
-        else if (it.k === 'frac' || it.k === 'r' || it.k === 'car') { r.c = res(it.c) || 'fg'; }
+        else if (it.k === 'frac') { r.c = res(it.c) || 'fg'; r.top = res(it.top); r.bot = res(it.bot); }      // r1120 LN: its words are {{word:...}}
+        else if (it.k === 'r' || it.k === 'car') { r.c = res(it.c) || 'fg'; }
         return r;
     });
 }
@@ -1153,11 +1153,12 @@ function paintItems(resolved, layer, theme) {
         } else if (it.k === 'frac') {   // a stacked unit: top over a rule over the bottom
             const nm = fontName('u15');
             if (!nm) return;
-            const wd = Math.max(textRaster.measure(it.top, nm, 0), textRaster.measure(it.bot, nm, 0));
+            const top = r.top === undefined ? it.top : r.top, bot = r.bot === undefined ? it.bot : r.bot;
+            const wd = Math.max(textRaster.measure(top, nm, 0), textRaster.measure(bot, nm, 0));
             const col = rgbOf(theme, r.c);
-            add(it.id + '.t', paintText(c, { f: 'u15', x: it.x + wd / 2, b: it.b + it.dt, al: 'c' }, it.top, col, 1));
+            add(it.id + '.t', paintText(c, { f: 'u15', x: it.x + wd / 2, b: it.b + it.dt, al: 'c' }, top, col, 1));
             paintRect(c, it.x, it.b + it.dr, it.x + wd, it.b + it.dr + 1, col, 1);
-            add(it.id + '.b', paintText(c, { f: 'u15', x: it.x + wd / 2, b: it.b + it.db, al: 'c' }, it.bot, col, 1));
+            add(it.id + '.b', paintText(c, { f: 'u15', x: it.x + wd / 2, b: it.b + it.db, al: 'c' }, bot, col, 1));
         } else if (it.k === 'lanes') {
             const have = r.l.filter((q) => q[0]);
             have.forEach((q, i) => {
@@ -1182,7 +1183,7 @@ function paintItems(resolved, layer, theme) {
 /** The pictogram-free key of a repaint: the page, every answer, and the theme's colours (a night change repaints). */
 function keyOf(page, resolved, theme) {
     const th = ['fg', 'dim', 'grey', 'hot', 'ready', 'amber'].map((r) => (theme && theme[r] ? theme[r].slice(0, 3).join(',') : '')).join('|');
-    return page + '#' + th + '#' + JSON.stringify(resolved.map((r) => [r.skip, r.s, r.n, r.c, r.v, r.w, r.parts && r.parts.map((q) => q.s + '/' + q.c), r.l]));
+    return page + '#' + th + '#' + JSON.stringify(resolved.map((r) => [r.skip, r.s, r.n, r.c, r.v, r.w, r.parts && r.parts.map((q) => q.s + '/' + q.c), r.l, r.top, r.bot]));
 }
 
 /**

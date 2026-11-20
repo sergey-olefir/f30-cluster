@@ -19,8 +19,11 @@
  */
 const DASH = '–';            // en dash: "no value"
 const THIN = ' ';            // thousands separator
-const WEEKDAYS = ['неділя', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота'];
-const TITLES = { clock: 'Дата і час', trip: 'Поїздка', msg: 'Повідомлення', nav: 'Навігація', tab3: 'Медіа', tab4: 'Телефон' };     // twin_dial: tabs (B2): the titles of tabs 2..5 (package B4 owns the pages' content)
+const I = require('./lang');      // r1120 LN: every word drawn here from shared/i18n/<lang>.json (Noto atlases: Latin and Cyrillic)
+// the weekdays (Sunday first, as Date.getDay) and the titles, in the language in use each time they are read
+const WEEKDAYS = { get length() { return 7; } };
+for (let i = 0; i < 7; i++) Object.defineProperty(WEEKDAYS, i, { enumerable: true, get: () => I.list('twin.weekdays')[i] });
+const TITLES = I.words('twin.tab.', ['clock', 'trip', 'msg', 'nav', 'tab3', 'tab4']);     // twin_dial: tabs (B2): the titles of tabs 2..5 (package B4 owns the pages' content)
 const KOMBI = 'de.bmw.infotainment.KombiIF';
 const COND_READY_TWIN = 10;       // VehicleCondition 10 = FAHREN (SPEC 5.1)
 const PAGE_EVAL_MS = 250;         // the page is decided at most this often, so every widget of one tick sees one page
@@ -553,7 +556,7 @@ function resolve(hud, name) {
         case 'speed': { const v = hud._raw('speed'); return isNum(v) ? String(Math.round(v)) : DASH; }
         case 'gear': { const g = hud._token('gear'); return g && g.indexOf('{{') < 0 ? g : DASH; }
         case 'program': return program(hud);
-        case 'ready': return ready(hud) ? 'READY' : '';
+        case 'ready': return ready(hud) ? 'READY' : '';           // the G20's own lamp word (Saira, Latin capitals only): not translated
         // ---- tab bar
         case 'rangeTab': { const v = hud._raw('range'); return isNum(v) ? km(v) : DASH; }
         case 'media': {      // icon only until P8 (config.twin.media); a long title is cut with an ellipsis
@@ -571,17 +574,18 @@ function resolve(hud, name) {
         case 'tSpeedAvg': { const t = tripValues(hud); return onPage('trip', 'ø ' + (isNum(t.speed) ? String(Math.round(t.speed)) : DASH)); }
         case 'tDist': { const t = tripValues(hud); return onPage('trip', fixed1(t.way)); }
         case 'tTime': { const t = tripValues(hud); return onPage('trip', isNum(t.hours) ? t.hours + ':' + pad2(t.minutes) : DASH); }
-        case 'tFrom': { const t = tripValues(hud); return onPage('trip', 'від початку поїздки, ' + (t.from ? pad2(t.from.h) + ':' + pad2(t.from.m) : DASH)); }
-        case 'tConsU': return onPage('trip', 'л/100 км');
-        case 'tSpeedU': return onPage('trip', 'км/год');
-        case 'tDistU': return onPage('trip', 'км');
-        case 'tTimeU': return onPage('trip', 'год');
+        case 'tFrom': { const t = tripValues(hud); return onPage('trip', I.t('twin.trip.from', { at: t.from ? pad2(t.from.h) + ':' + pad2(t.from.m) : DASH })); }
+        case 'tConsU': return onPage('trip', I.t('twin.u.cons'));
+        case 'tSpeedU': return onPage('trip', I.t('twin.u.kmh'));
+        case 'tDistU': return onPage('trip', I.t('twin.u.km'));
+        case 'tTimeU': return onPage('trip', I.t('twin.u.h'));
+        case 'uKm': return I.t('twin.u.km');          // r1120 LN: the range tab's unit (was the layout's literal)
         // ---- bottom row: two lines on tab 1, one line (the clock left, the temperature right, on the upper baseline) on every other tab (SPEC-R3 3.5)
         case 'rowL1': return rowOne(hud) ? clockText(local(hud)) : resolve(hud, 'odo');
-        case 'rowL1u': return rowOne(hud) ? '' : 'км';
+        case 'rowL1u': return rowOne(hud) ? '' : I.t('twin.u.km');
         case 'rowL2': return rowOne(hud) ? '' : resolve(hud, 'clock');
         case 'rowR1': return rowOne(hud) ? resolve(hud, 'ambient') : resolve(hud, 'r1');
-        case 'rowR1u': return rowOne(hud) ? '°C' : 'км';
+        case 'rowR1u': return rowOne(hud) ? '°C' : I.t('twin.u.km');
         case 'rowR2': return rowOne(hud) ? '' : resolve(hud, 'ambient');
         case 'rowR2u': return rowOne(hud) ? '' : '°C';
         case 'odo': { const o = odometer(hud); return isNum(o.km) ? grouped(o.km) : DASH; }     // research3/MK: the first valid carrier

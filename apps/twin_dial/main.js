@@ -13,15 +13,18 @@
  * f30_cluster's own "Off" does the same for it; shared/screen.js keeps the two from drawing together.
  */
 const mgu = require('./kit/mgu');
+const I18N = require('./lang');
 require('./twin_icons');          // package A1: the app's pictograms join shared/icons.js ICONS (the tab bar's, the message symbols')
 const HudApp = require('./hud');
 const Menu = require('./menu');
 
 // the tag line the menu shows under the layout name
-const TAGS = { twin: 'twin round dials' };
+const TAGS = { twin: 'twin.tag.twin' };       // r1120 LN: a key of shared/i18n/<lang>.json
 
 mgu.run({
     start(ctx) {
+        // r1120 LN: the language (setting "Мова / Language", the head unit's): first, so every word below is in it
+        try { I18N.attach(ctx); } catch (e) { ctx.log.error('lang: ' + (e && e.stack || e)); }
         let hud;
         try {
             hud = new HudApp(ctx);

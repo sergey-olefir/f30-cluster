@@ -446,6 +446,8 @@ function wireSettings(ctx) {
         // other types: two-row buttons in the wide settings state, label above, value below
         return ui.cells(comp, 0, { Text1stRow: s.label, Text2ndRow: settings.display(s.key) });
     }));
+    // bimmer-lab r1120 LN: the rows again after the app changed its language (shared/lang.js rewrites SPEC's labels first)
+    ctx.refreshSettings = () => refresh();
     schema.forEach((s) => {
         const comp = 'SET_' + s.key.toUpperCase();
         if (values(s)) {

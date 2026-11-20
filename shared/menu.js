@@ -26,10 +26,11 @@
 const { Canvas } = require('./kit/canvas');
 const previews = require('./previews');
 const HudApp = require('./hud');
+const I = require('./lang');          // r1120 LN: every word on this screen from shared/i18n/<lang>.json
 
 const LOOK_KEYS = ['hudLayout', 'inComfort', 'inSport', 'inEco', 'g20'];
 const MODE_KEY = { comfort: 'inComfort', sport: 'inSport', eco: 'inEco' };
-const MODE_NAME = { comfort: 'Comfort', sport: 'Sport', eco: 'Eco Pro' };
+const MODE_NAME = { comfort: 'Comfort', sport: 'Sport', eco: 'Eco Pro' };     // BMW's own mode names (the car's buttons), the same in every language
 const MODE_ROWS = ['SET_INCOMFORT', 'SET_INSPORT', 'SET_INECO'];
 // the one bottom-row setting's row, hidden while the G20 toggle is off (config.menu.hideRowUnlessG20): with G20 off
 // our own background covers BMW's row, so there is nothing to choose
@@ -40,7 +41,7 @@ const PIC_BG = '#05070a';
 /** A layout's short name: "Off (BMW's own cluster)" -> "BMW's own cluster". A see-through layout file is named by its
  *  theme plus " + G20" ("6WB Comfort + G20"), since "+ G20" is a toggle and no longer a theme of its own. */
 function layoutName(settings, v) {
-    if (v === 'off') return "BMW's own cluster";
+    if (v === 'off') return I.t('menu.bmwCluster');
     const theme = HudApp.themeOf(v);
     const s = settings.item('hudLayout'), o = s && (s.options || []).find((x) => x[0] === theme);
     return (o ? o[1] : String(theme)) + (theme !== v ? ' + G20' : '');
@@ -52,6 +53,26 @@ function lookKey(hud) {
 /** The layout showing now, else the one meant to (before cluster-render answers). */
 function shownName(hud) {
     return hud.activeName || hud._layoutName() || 'off';
+}
+
+/** A layout's tag line (app main.js TAGS: { layout: key }; a key with no word is shown as it is). */
+function tagOf(cfg, name) {
+    const k = (cfg && cfg.tags || {})[name];
+    return k ? (I.has(k) ? I.t(k) : String(k)) : '';
+}
+/** cluster-render's socket is there (connecting) or not (not installed / not running). */
+function socketThere(hud) {
+    try { return !!(hud.socketPath && require('fs').existsSync(hud.socketPath)); } catch (e) { return false; }
+}
+/** hud.js _drawnNote in words of ours: waiting for the display, or how many layers are drawn (the reasons stay the renderer's). */
+function drawnNote(hud) {
+    const d = typeof hud._drawnInfo === 'function' ? hud._drawnInfo() : null;
+    if (!d) return '';
+    const bits = [];
+    if (d.waiting) bits.push(I.t(d.waiting === 'foreign' ? 'menu.drawn.foreign' : 'menu.drawn.bmw'));
+    else if (d.total && d.shown !== d.total && (d.why || d.shown)) bits.push(I.plural('menu.drawn.some', d.total, { shown: d.shown }) + (d.why ? ' (' + d.whyN + ' ' + d.why + ')' : ''));
+    if (d.refused) bits.push(I.t('menu.drawn.refused', { what: d.refused }));
+    return bits.join(', ');
 }
 
 class Menu {
@@ -98,6 +119,8 @@ class Menu {
             this.soon();
         }));
         this.hud.onStatus(() => this.soon());
+        // r1120 LN: a new language - every row again (the kit's own rows are written by shared/lang.js)
+        I.onChange(() => this.guard('language', () => { this.sent = Object.create(null); this.picShown = null; this.soon(0); }));
         ui.onVisible((name, on) => this.guard('visible', () => {
             // the bottom-row setting's row lives in the Settings list, so it is written again when THAT opens
             if (name === 'SETTINGS' && on) { this.rowRowOn = null; this.rowRow(false); return; }
@@ -116,7 +139,7 @@ class Menu {
         const other = scr.otherOn();
         scr.claim();
         if (other) {
-            this.note = { text: scr.otherName + ' turned off: the cluster theme has the screen', until: Date.now() + NOTE_MS };
+            this.note = { key: 'menu.note.otherOff', name: scr.otherName, until: Date.now() + NOTE_MS };
             this.log.info('menu: a theme was picked while ' + scr.otherName + ' was on: it steps aside');
         }
     }
@@ -134,25 +157,26 @@ class Menu {
             const yielded = !!(hud.screen && hud.screen.yielded);
             this.cells('NOW', {
                 Text1stRow: layoutName(settings, name),
-                Text2ndRow: yielded ? 'Off: ' + hud.screen.otherName + ' has the screen. Press to take it back' : this.nowLine(name),
+                Text2ndRow: yielded ? I.t('menu.now.yielded', { app: hud.screen.otherName }) : this.nowLine(name),
             });
             const lines = this.statusLines();
             this.text('STATUS', lines[0]);
             this.text('STATUS2', lines[1]);
-            this.text('STATUS_LOG', 'Engine: ' + (hud.lastStatus || 'starting'));
+            // the engine's own status line, for checking on the car: technical, English as the log (only its label is ours)
+            this.text('STATUS_LOG', I.t('menu.engine', { status: hud.lastStatus || 'starting' }));
             this.picture(name);
         });
     }
 
     /** NOW's second row: the tag line and where the choice came from. */
     nowLine(name) {
-        const hud = this.hud, tag = name === 'off' ? 'stock cluster' : (this.cfg.tags || {})[name] || '';
+        const hud = this.hud, tag = name === 'off' ? I.t('menu.tag.stock') : tagOf(this.cfg, name);
         let why;
-        if (!this.ctx.settings.item('byMode')) why = 'one layout';        // twin_dial: no drive-mode themes
-        else if (hud.setting('byMode') !== true) why = 'same in every drive mode';
-        else if (MODE_KEY[hud.driveMode]) why = 'picked by ' + MODE_NAME[hud.driveMode];
-        else why = 'Theme, until the car sends its drive mode';
-        return (tag ? tag + ', ' : '') + why;
+        if (!this.ctx.settings.item('byMode')) why = I.t('menu.why.one');        // twin_dial: no drive-mode themes
+        else if (hud.setting('byMode') !== true) why = I.t('menu.why.same');
+        else if (MODE_KEY[hud.driveMode]) why = I.t('menu.why.mode', { mode: MODE_NAME[hud.driveMode] });
+        else why = I.t('menu.why.wait');
+        return tag ? I.t('menu.now.tagWhy', { tag: tag, why: why }) : why;
     }
 
     /** [headline, details] for STATUS and STATUS2, short enough for one row each. */
@@ -161,26 +185,27 @@ class Menu {
         const ready = !!(hud.client && hud.client.ready);
         const demo = !!(hud.car && hud.car.data && hud.car.data().demo);
         let head;
-        if (!ready) head = hud.statusText();
+        if (!ready) head = I.t(socketThere(hud) ? 'menu.status.connecting' : 'menu.status.noRenderer', { app: hud.label });
         // 0.7.13: the KOMBI guard turned the theme off (hud.js _kombiWatch)
-        else if (hud.kombiTrip) head = 'Off: the cluster reset twice with ' + layoutName(this.ctx.settings, hud.kombiTrip.layout) + '. Pick a theme to try again';
-        else if (hud.problem) head = 'Problem: ' + hud.problem;
-        else if (scr && scr.yielded) head = 'Off: ' + scr.otherName + ' has the screen';
-        else if (!hud.activeName || hud.activeName === 'off') head = "Off: BMW's own cluster shows";
-        else head = 'On: ' + layoutName(this.ctx.settings, hud.activeName) + (demo ? ', demo data' : '');
+        else if (hud.kombiTrip) head = I.t('menu.status.kombiTrip', { name: layoutName(this.ctx.settings, hud.kombiTrip.layout) });
+        else if (hud.problem) head = I.t('menu.status.problem', { what: hud.problem });        // the problem itself: the engine's own (technical) words
+        else if (scr && scr.yielded) head = I.t('menu.status.yielded', { app: scr.otherName });
+        else if (!hud.activeName || hud.activeName === 'off') head = I.t('menu.status.off');
+        else head = I.t(demo ? 'menu.status.onDemo' : 'menu.status.on', { name: layoutName(this.ctx.settings, hud.activeName) });
         const parts = [];
-        if (this.note && Date.now() < this.note.until) parts.push(this.note.text);
+        if (this.note && Date.now() < this.note.until) parts.push(I.t(this.note.key, { app: this.note.name }));
         else this.note = null;
         if (!this.ctx.settings.item('byMode')) { /* twin_dial: no drive-mode themes, nothing to say */ }
-        else if (hud.setting('byMode') !== true) parts.push('Same theme in every drive mode');
-        else if (hud.driveRaw) parts.push('Drive mode not recognised (the car sends ' + hud.driveRaw + '): Theme shows');
-        else if (MODE_KEY[hud.driveMode]) parts.push('Drive mode: ' + MODE_NAME[hud.driveMode]);
-        else parts.push('Drive mode not seen yet: Theme shows');
-        const drawn = ready && typeof hud._drawnNote === 'function' ? hud._drawnNote().replace(/^, /, '') : '';
+        else if (hud.setting('byMode') !== true) parts.push(I.t('menu.mode.same'));
+        else if (hud.driveRaw) parts.push(I.t('menu.mode.unknown', { raw: hud.driveRaw }));
+        else if (MODE_KEY[hud.driveMode]) parts.push(I.t('menu.mode.is', { mode: MODE_NAME[hud.driveMode] }));
+        else parts.push(I.t('menu.mode.wait'));
+        const drawn = ready ? drawnNote(hud) : '';
         if (drawn) parts.push(drawn);
-        if (hud.diag && hud.diag.summary()) parts.push(hud.diag.summary());      // b7: a diagnostics setting is on
+        const dn = hud.diag && typeof hud.diag.active === 'function' ? hud.diag.active().length : 0;
+        if (dn) parts.push(I.t('menu.diagOn', { n: dn }));      // b7: a diagnostics setting is on
         if (ready && hud.ownRow && typeof hud._own === 'function') {
-            parts.push('Row: ' + ['range', 'clock', 'temp'].map((i) => i + ' ' + (hud._own(i) ? 'ours' : "BMW's")).join(', '));
+            parts.push(I.t('menu.row', { items: ['range', 'clock', 'temp'].map((i) => I.t('menu.row.' + i) + ' ' + I.t(hud._own(i) ? 'menu.row.ours' : 'menu.row.bmw')).join(', ') }));
         }
         return [head, parts.join('. ')];
     }
