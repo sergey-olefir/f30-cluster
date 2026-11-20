@@ -111,7 +111,7 @@ APPS.forEach((a) => { specs[a] = JSON.parse(fs.readFileSync(path.join(ROOT, 'app
     // every key the code names (a quoted key of a known family), and the families built at run time
     const CODE = codeFiles();
     const named = new Set(), prefixes = new Set();
-    const FAM = /^(kit|menu|gallery|probe|dp|twin|fv|f30|wb|ps|signal_probe|driver_profiles|twin_dial|f30_cluster)\.[A-Za-z0-9_.]*$/;     // r1120 PS: + wb (the 6WB's printing), ps (the profile line)
+    const FAM = /^(kit|menu|gallery|probe|rv|dp|twin|fv|f30|wb|ps|signal_probe|driver_profiles|twin_dial|f30_cluster)\.[A-Za-z0-9_.]*$/;     // r1120 PS: + wb (the 6WB's printing), ps (the profile line)
     CODE.forEach((f) => {
         const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
         literals(src).forEach((l) => { if (FAM.test(l.v)) { if (/\.$/.test(l.v)) prefixes.add(l.v); else named.add(l.v); } });
@@ -132,7 +132,8 @@ function codeFiles() {
         'apps/f30_cluster/main.js', 'apps/twin_dial/main.js', 'apps/signal_probe/main.js', 'apps/signal_probe/menu.js', 'apps/signal_probe/fields.js',
         'apps/signal_probe/probe.js', 'shared/signal_recorder.js', 'apps/driver_profiles/main.js', 'apps/driver_profiles/screens.js',
         'apps/driver_profiles/format.js', 'apps/driver_profiles/avatars.js', 'apps/driver_profiles/profiles.js',
-        'shared/profile_settings.js', 'shared/units.js'];      // r1120 PS
+        'shared/profile_settings.js', 'shared/units.js',      // r1120 PS
+        'tools/road-view/app/rv_recorder/rv_menu.js', 'tools/road-view/app/rv_recorder/main.js', 'tools/road-view/app/rv_recorder/rv.js'];      // road TS: the RV recorder (outside the Store)
 }
 
 /**
