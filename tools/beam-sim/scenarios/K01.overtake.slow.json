@@ -1,0 +1,76 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "K01.overtake.slow",
+ "family": "K",
+ "name": "We overtake a slow car",
+ "purpose": "pulling out past a slow car: low behind it, high once it is behind us",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     100
+    ]
+   ],
+   "lat": [
+    [
+     0,
+     -1.75
+    ],
+    [
+     18,
+     -1.75
+    ],
+    [
+     20,
+     1.75
+    ],
+    [
+     30,
+     1.75
+    ],
+    [
+     32,
+     -1.75
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "a1",
+    "kind": "car",
+    "dir": 1,
+    "ahead_m": 300,
+    "speed": [
+     [
+      0,
+      60
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "maxGlareW": 0.5,
+  "mustReason": [
+   "preceding"
+  ],
+  "maxSwitches": 3
+ }
+}

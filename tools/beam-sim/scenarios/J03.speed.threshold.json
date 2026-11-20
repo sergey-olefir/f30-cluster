@@ -1,0 +1,65 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "J03.speed.threshold",
+ "family": "J",
+ "name": "Speed around the threshold",
+ "purpose": "speed wanders between 42 and 55 km/h around the 50 / 38 thresholds: the hysteresis holds, no chatter",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     55
+    ],
+    [
+     8,
+     42
+    ],
+    [
+     16,
+     55
+    ],
+    [
+     24,
+     42
+    ],
+    [
+     32,
+     55
+    ],
+    [
+     40,
+     42
+    ],
+    [
+     48,
+     55
+    ],
+    [
+     56,
+     42
+    ]
+   ]
+  },
+  "users": []
+ },
+ "expect": {
+  "maxSwitches": 1
+ }
+}

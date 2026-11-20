@@ -1,0 +1,46 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "F05.petrol.station",
+ "family": "F",
+ "name": "A petrol station",
+ "purpose": "a brightly lit station beside the road: a short dip at most",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "statics": [
+   {
+    "kind": "station",
+    "s_m": 1000,
+    "d_m": -20,
+    "height_m": 5
+   }
+  ]
+ },
+ "expect": {
+  "maxSwitches": 3,
+  "minHighFrac": 0.9
+ }
+}

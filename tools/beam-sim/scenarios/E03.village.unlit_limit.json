@@ -1,0 +1,68 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "E03.village.unlit_limit",
+ "family": "E",
+ "name": "A village without signs or lights",
+ "purpose": "no town signs seen, no street lights, only a 50 km/h limit: the limit alone means built-up",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 110,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ],
+    [
+     36,
+     90
+    ],
+    [
+     42,
+     50
+    ],
+    [
+     80,
+     50
+    ],
+    [
+     88,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "env": {
+   "towns": [
+    {
+     "s0_m": 1000,
+     "s1_m": 1500,
+     "limit_kmh": 50,
+     "signIn": false,
+     "signOut": false
+    }
+   ]
+  }
+ },
+ "expect": {
+  "mustReason": [
+   "town"
+  ],
+  "maxSwitches": 3,
+  "finalWant": "high"
+ }
+}

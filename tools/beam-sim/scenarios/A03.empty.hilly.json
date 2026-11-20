@@ -1,0 +1,63 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "A03.empty.hilly",
+ "family": "A",
+ "name": "Empty hilly road",
+ "purpose": "crests and dips alone never dip the beam",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000
+    }
+   ],
+   "profile": [
+    [
+     0,
+     0
+    ],
+    [
+     300,
+     10
+    ],
+    [
+     600,
+     0
+    ],
+    [
+     900,
+     12
+    ],
+    [
+     1200,
+     0
+    ],
+    [
+     1500,
+     8
+    ]
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": []
+ },
+ "expect": {
+  "minHighFrac": 0.95,
+  "maxSwitches": 1
+ }
+}

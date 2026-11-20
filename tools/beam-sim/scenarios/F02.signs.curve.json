@@ -1,0 +1,95 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "F02.signs.curve",
+ "family": "F",
+ "name": "Chevrons in a curve",
+ "purpose": "curve chevrons glow straight ahead in the curve; no dip storm",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 700
+    },
+    {
+     "len_m": 400,
+     "curve_r": 250
+    },
+    {
+     "len_m": 3000
+    }
+   ],
+   "sight_m": 8
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     80
+    ]
+   ]
+  },
+  "users": [],
+  "statics": [
+   {
+    "kind": "sign",
+    "s_m": 760,
+    "d_m": -5.5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 800,
+    "d_m": -5.5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 840,
+    "d_m": -5.5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 880,
+    "d_m": -5.5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 920,
+    "d_m": -5.5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 960,
+    "d_m": -5.5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 1000,
+    "d_m": -5.5,
+    "height_m": 2
+   },
+   {
+    "kind": "sign",
+    "s_m": 1040,
+    "d_m": -5.5,
+    "height_m": 2
+   }
+  ]
+ },
+ "expect": {
+  "maxSwitches": 6,
+  "minHighFrac": 0.75
+ }
+}

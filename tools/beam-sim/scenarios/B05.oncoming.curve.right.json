@@ -1,0 +1,59 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "B05.oncoming.curve.right",
+ "family": "B",
+ "name": "Oncoming round a right curve",
+ "purpose": "the same behind a right curve (the oncoming car is on the outside)",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 900
+    },
+    {
+     "len_m": 500,
+     "curve_r": -220
+    },
+    {
+     "len_m": 3000
+    }
+   ],
+   "sight_m": 3
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     80
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "c1",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 1650,
+    "speed": [
+     [
+      0,
+      80
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "maxGlareW": 1,
+  "maxReaction_ms": 600,
+  "maxSwitches": 3
+ }
+}

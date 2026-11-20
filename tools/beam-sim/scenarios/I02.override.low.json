@@ -1,0 +1,51 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "I02.override.low",
+ "family": "I",
+ "name": "The driver forces low",
+ "purpose": "auto mode: the driver dips on an empty road; low until re-armed from the app",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "driver": [
+   {
+    "t_s": 20,
+    "kind": "high_off"
+   },
+   {
+    "t_s": 40,
+    "kind": "rearm"
+   }
+  ]
+ },
+ "expect": {
+  "mustState": [
+   "OVERRIDE"
+  ],
+  "finalWant": "high",
+  "maxSwitches": 3
+ }
+}

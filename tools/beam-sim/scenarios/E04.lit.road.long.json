@@ -1,0 +1,49 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "E04.lit.road.long",
+ "family": "E",
+ "name": "A long lit road",
+ "purpose": "a lit stretch outside town: low while lit, high after it",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "lit": [
+   {
+    "s0_m": 600,
+    "s1_m": 1200,
+    "spacing_m": 40,
+    "side": 1,
+    "height_m": 9
+   }
+  ]
+ },
+ "expect": {
+  "mustReason": [
+   "streetlights"
+  ],
+  "maxSwitches": 3
+ }
+}

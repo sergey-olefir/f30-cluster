@@ -1,0 +1,66 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "E06.town.signs_only",
+ "family": "E",
+ "name": "Town signs, nothing else",
+ "purpose": "entry and exit signs seen, no limit shown, no street lights: the signs alone",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 100,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ],
+    [
+     36,
+     90
+    ],
+    [
+     42,
+     55
+    ],
+    [
+     70,
+     55
+    ],
+    [
+     78,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "env": {
+   "towns": [
+    {
+     "s0_m": 1000,
+     "s1_m": 1450,
+     "limit_kmh": null
+    }
+   ]
+  }
+ },
+ "expect": {
+  "mustReason": [
+   "town"
+  ],
+  "finalWant": "high",
+  "maxSwitches": 3
+ }
+}

@@ -1,0 +1,84 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "D01.motorway.median",
+ "family": "D",
+ "name": "Motorway, open median",
+ "purpose": "a divided road without a glare screen: the oncoming carriageway's cars still dip us",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "lanes": 4,
+   "laneWidth_m": 3.5,
+   "median_m": 12,
+   "screen": false,
+   "segments": [
+    {
+     "len_m": 8000
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     120
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "c1",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2500,
+    "speed": [
+     [
+      0,
+      120
+     ]
+    ],
+    "lane": 1
+   },
+   {
+    "id": "c2",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 3400,
+    "speed": [
+     [
+      0,
+      110
+     ]
+    ],
+    "lane": 0
+   },
+   {
+    "id": "c3",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 4200,
+    "speed": [
+     [
+      0,
+      130
+     ]
+    ],
+    "lane": 1
+   }
+  ]
+ },
+ "expect": {
+  "maxGlareW": 0.5,
+  "mustReason": [
+   "oncoming"
+  ],
+  "maxSwitches": 6
+ }
+}

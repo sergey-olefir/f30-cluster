@@ -1,0 +1,50 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "E02.lit.junction",
+ "family": "E",
+ "name": "A short lit junction",
+ "purpose": "three street lights at a country junction: a short dip, then high again",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "lit": [
+   {
+    "s0_m": 1300,
+    "s1_m": 1370,
+    "spacing_m": 35,
+    "side": -1,
+    "height_m": 8
+   }
+  ]
+ },
+ "expect": {
+  "mustReason": [
+   "streetlights"
+  ],
+  "maxSwitches": 3,
+  "minHighFrac": 0.9
+ }
+}

@@ -1,0 +1,54 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "F03.wet.road",
+ "family": "F",
+ "name": "A wet road",
+ "purpose": "reflections of an oncoming car's lamps on the wet road add false lights; still one clean dip",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "c1",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2200,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   }
+  ],
+  "env": {
+   "wet": true
+  }
+ },
+ "expect": {
+  "maxGlareW": 0.3,
+  "maxSwitches": 3
+ }
+}

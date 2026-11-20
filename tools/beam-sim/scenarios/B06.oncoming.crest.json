@@ -1,0 +1,69 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "B06.oncoming.crest",
+ "family": "B",
+ "name": "Oncoming over a crest",
+ "purpose": "a crest hides the oncoming car until it tops it: a short reaction, little glare",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000
+    }
+   ],
+   "profile": [
+    [
+     0,
+     0
+    ],
+    [
+     900,
+     0
+    ],
+    [
+     1150,
+     14
+    ],
+    [
+     1400,
+     0
+    ]
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "c1",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 1700,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "maxGlareW": 0.5,
+  "maxReaction_ms": 600,
+  "maxSwitches": 3
+ }
+}

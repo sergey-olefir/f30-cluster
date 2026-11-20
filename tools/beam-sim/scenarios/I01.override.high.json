@@ -1,0 +1,67 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "I01.override.high",
+ "family": "I",
+ "name": "The driver forces high",
+ "purpose": "auto mode: the driver pushes high while dipped; the driver's own dip hands control back",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "c1",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2200,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   }
+  ],
+  "driver": [
+   {
+    "t_s": 38,
+    "kind": "high_on"
+   },
+   {
+    "t_s": 41,
+    "kind": "high_off"
+   }
+  ]
+ },
+ "expect": {
+  "mustState": [
+   "OVERRIDE"
+  ],
+  "mustReason": [
+   "driver",
+   "oncoming"
+  ],
+  "finalWant": "high"
+ }
+}

@@ -1,0 +1,51 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "E07.lit.no_town",
+ "family": "E",
+ "name": "A long lit road with no town sign",
+ "purpose": "street lights for 1.5 km and no sign: a lit-road dip that becomes a town (source lights), high after it",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 140,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     70
+    ]
+   ]
+  },
+  "users": [],
+  "lit": [
+   {
+    "s0_m": 500,
+    "s1_m": 2000,
+    "spacing_m": 40,
+    "side": 1,
+    "height_m": 9
+   }
+  ]
+ },
+ "expect": {
+  "mustReason": [
+   "streetlights",
+   "town"
+  ],
+  "finalWant": "high",
+  "maxSwitches": 3
+ }
+}

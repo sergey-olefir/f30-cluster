@@ -1,0 +1,64 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "F04.house.lights",
+ "family": "F",
+ "name": "House lights",
+ "purpose": "lit windows 25–40 m from the road: they may be taken for lights ahead",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [],
+  "statics": [
+   {
+    "kind": "house",
+    "s_m": 500,
+    "d_m": 30,
+    "height_m": 3
+   },
+   {
+    "kind": "house",
+    "s_m": 800,
+    "d_m": -25,
+    "height_m": 3
+   },
+   {
+    "kind": "house",
+    "s_m": 1100,
+    "d_m": 40,
+    "height_m": 3
+   },
+   {
+    "kind": "house",
+    "s_m": 1250,
+    "d_m": -35,
+    "height_m": 3
+   }
+  ]
+ },
+ "expect": {
+  "maxSwitches": 4,
+  "minHighFrac": 0.85
+ }
+}

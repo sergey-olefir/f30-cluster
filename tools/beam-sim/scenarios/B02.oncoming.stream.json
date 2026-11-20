@@ -1,0 +1,102 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "B02.oncoming.stream",
+ "family": "B",
+ "name": "A stream of oncoming cars",
+ "purpose": "five oncoming cars at uneven gaps: low throughout the stream, no glare, few switches",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 80,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "c1",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2200,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "c2",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2450,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   },
+   {
+    "id": "c3",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 2900,
+    "speed": [
+     [
+      0,
+      80
+     ]
+    ]
+   },
+   {
+    "id": "c4",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 3150,
+    "speed": [
+     [
+      0,
+      100
+     ]
+    ]
+   },
+   {
+    "id": "c5",
+    "kind": "car",
+    "dir": -1,
+    "s0_m": 3700,
+    "speed": [
+     [
+      0,
+      90
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "maxGlareW": 0.5,
+  "mustReason": [
+   "oncoming"
+  ],
+  "maxSwitches": 6
+ }
+}

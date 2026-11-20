@@ -1,0 +1,76 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "C02.ahead.overtaken",
+ "family": "C",
+ "name": "Being overtaken",
+ "purpose": "a faster car overtakes us: dip as soon as its tail lamps are ahead of us",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     90
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "o1",
+    "kind": "car",
+    "dir": 1,
+    "ahead_m": -250,
+    "speed": [
+     [
+      0,
+      130
+     ]
+    ],
+    "lat": [
+     [
+      0,
+      -1.75
+     ],
+     [
+      17,
+      -1.75
+     ],
+     [
+      19,
+      1.75
+     ],
+     [
+      26,
+      1.75
+     ],
+     [
+      28,
+      -1.75
+     ]
+    ]
+   }
+  ]
+ },
+ "expect": {
+  "maxGlareW": 1,
+  "mustReason": [
+   "preceding"
+  ],
+  "maxSwitches": 3
+ }
+}

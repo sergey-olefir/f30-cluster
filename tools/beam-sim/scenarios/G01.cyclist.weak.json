@@ -1,0 +1,56 @@
+{
+ "format": "beam-scenario",
+ "version": 1,
+ "id": "G01.cyclist.weak",
+ "family": "G",
+ "name": "A cyclist with a weak lamp",
+ "purpose": "an oncoming cyclist with a weak lamp: dip in time (R48 asks for 75 m)",
+ "source": "hand",
+ "meta": {
+  "created": "2026-11-20",
+  "tool": "beam-sim",
+  "limit": "a weak bicycle lamp is seen at about 90 m, inside the 400 m reach of our high beam"
+ },
+ "duration_s": 60,
+ "seed": 1,
+ "world": {
+  "road": {
+   "segments": [
+    {
+     "len_m": 6000,
+     "curve_r": 0
+    }
+   ]
+  },
+  "ego": {
+   "speed": [
+    [
+     0,
+     70
+    ]
+   ]
+  },
+  "users": [
+   {
+    "id": "b1",
+    "kind": "bike",
+    "dir": -1,
+    "s0_m": 1000,
+    "speed": [
+     [
+      0,
+      18
+     ]
+    ],
+    "lamps": "weak"
+   }
+  ]
+ },
+ "expect": {
+  "mustReason": [
+   "cyclist"
+  ],
+  "maxGlareW": 20
+ },
+ "limit": true
+}
