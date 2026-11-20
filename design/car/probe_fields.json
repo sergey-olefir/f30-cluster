@@ -1,7 +1,7 @@
 {
   "_about": "The signal probe's field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier), b (an event), m (S16 next-turn: GuidanceEventList.queryContent, a read the owner approved, polled while the phone guides; methodId from the catalogue). Ids come from the car's catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of shared/signal_format.js. Text members are logged as lengths only.",
   "logFormat": 1,
-  "version": "0.5.1",
+  "version": "0.6.0",
   "counts": {
     "sets": 17,
     "fields": 306,
