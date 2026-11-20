@@ -85,6 +85,7 @@ function nativeOps(u) {
         case 12: case 17: i += 3; break;                    // LAYER id x y, XF s ox oy
         case 13: i += 4; break;                             // CLIP
         case 14: break;                                     // NOCLIP
+        case 15: i += 9; break;                             // QUAD (x y)*4 c
         case OP_IMAGE: {
             if (i + 6 > n) return out || u;
             if (!out) { out = new Uint32Array(u); of = new Float32Array(out.buffer, out.byteOffset, out.length); }

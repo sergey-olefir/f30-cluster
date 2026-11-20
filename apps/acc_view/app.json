@@ -13,7 +13,8 @@
     "cluster_render_client.js",
     "front_vehicle.js",
     "limit_src.js",
-    "sun.js"
+    "sun.js",
+    "lang.js"
   ],
   "signals": {
     "de.bmw.dass.GapVehicleAhead": {
@@ -82,6 +83,11 @@
         "keepDistanceObjects1"
       ],
       "_about": "r1120 AA2: three distance-control objects (raw UInt16 distances, scale unknown); event 32769. Logged only (counts and raw ranges): may not be sent without adaptive cruise."
+    },
+    "de.bmw.infotainment.hmi.hmicontext.HMIContext": {
+      "_instances": "HMI_CID",
+      "currentDisplayLanguage": "rs",
+      "_about": "r1120 merge: the head unit's language for \"Авто\" (shared/lang.js; getter 3, notifier 32771). Read only."
     }
   },
   "screens": [
@@ -112,6 +118,27 @@
       "type": "bool",
       "default": false,
       "_about": "the mockups' 14 states in turn (config.demoMs each), on both placements, no signals"
+    },
+    {
+      "key": "lang",
+      "label": "Мова / Language",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Авто"
+        ],
+        [
+          "uk",
+          "Українська"
+        ],
+        [
+          "en",
+          "English"
+        ]
+      ],
+      "_about": "r1120 merge: the language of the drawn words (shared/lang.js). auto = the head unit's when uk or en, else Ukrainian."
     }
   ],
   "config": {

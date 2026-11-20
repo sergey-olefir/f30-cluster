@@ -241,7 +241,9 @@ function rows(s, o, lang) {
     out.push(['rowLimit', s.lim ? s.lim + ' ' + W('kmh') : W('noLimit'), s.lim ? 'ink' : 'dim']);
     const age = info.age;
     if (typeof age !== 'number') out.push(['rowAge', W(s.data === 'absent' ? 'ageNone' : 'ageWait'), 'dim']);
-    else out.push(['rowAge', (age < 1 ? '< 1' : String(Math.floor(age))) + ' ' + W('sec'), age < 2 ? 'ink' : 'dim']);
+    // r1120 merge: the age in steps (< 1, 1-2, 2-5, > 5 s), not to the second: the table is one 800 x 482 image on the GPU page,
+    // and a value that changed every second re-uploaded 1.5 MB a second while the field was quiet (it is notified on change)
+    else out.push(['rowAge', ageStep(age) + ' ' + W('sec'), age < 2 ? 'ink' : 'dim']);
     if (s.warn) out.push(['rowWarn', W('warnActive'), 'ink', true]);
     else out.push(['rowWarn', info.warn ? String(info.warn) : W('warnNone'), info.warn ? 'ink' : 'dim']);
     out.push(['rowAdvice', s.adv ? s.adv + ' ' + W('kmh') : '—', s.adv ? 'cyan' : 'dim']);
@@ -276,6 +278,9 @@ function band(s, o) {
 }
 
 /** The data table: the page's right part (x 800..1600), 800 x 482 on the page's background. -> { px, words } (page px). */
+/** The camera data's age as a step: '< 1', '1–2', '2–5' or '> 5' (seconds). */
+function ageStep(age) { return age < 1 ? '< 1' : age < 2 ? '1–2' : age < 5 ? '2–5' : '> 5'; }
+
 function table(s, o) {
     const opt = o || {};
     const lang = Wd.langOf(opt.lang), night = !!opt.night;

@@ -2,7 +2,7 @@
   "id": "signal_probe",
   "title": "Signal Probe",
   "description": "Read-only, log-only: subscribes the car's signals set by set and logs what arrives (numbers, enum names, text lengths). Draws nothing on the cluster.",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "vendor": "custom",
   "loggingId": "OASP",
   "iconGlyph": "SP",

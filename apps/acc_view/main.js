@@ -84,7 +84,11 @@ mgu.run({
         };
         const slog = (name) => st.logs[name] || (st.logs[name] = new Wo.SourceLog(name, 10000));
         const guard = (what, fn) => function () { try { return fn.apply(null, arguments); } catch (e) { log.error('acc: ' + what + ': ' + (e && e.stack || e)); return undefined; } };
-        const lang = () => Wd.langOf(cfg.lang);
+        // r1120 merge: the language from shared/lang.js (the setting "Мова / Language": Авто / Українська / English); config.lang
+        // still wins on the bench when it names uk or en. A change repaints the page and the map's words.
+        const I18N = req('lang');
+        if (I18N) { try { I18N.attach(ctx); } catch (e) { log.error('lang: ' + (e && e.stack || e)); } }
+        const lang = () => Wd.langOf(cfg.lang === 'uk' || cfg.lang === 'en' ? cfg.lang : (I18N ? I18N.lang() : 'uk'));
 
         // ---- day / night: the car's own verdict first (config.dayNight, as Twin Dial), else the sun ----
         function night() {
@@ -282,7 +286,7 @@ mgu.run({
             const s = st.show && !gpu ? st.s || step(now) : step(now);
             const nt = night(), ln = lang();
             const age = st.demo ? (s.data === 'ok' ? 0.3 : s.data === 'stale' ? 2.6 : null) : (st.fvAt ? (now - st.fvAt) / 1000 : null);
-            const ageWord = typeof age === 'number' ? (age < 1 ? 0 : Math.min(99, Math.floor(age))) : -1;
+            const ageWord = typeof age === 'number' ? (age < 1 ? 0 : age < 2 ? 1 : age < 5 ? 2 : 5) : -1;       // the steps paint.js shows
             const info = { age: typeof age === 'number' ? (age < 1 ? 0.5 : ageWord) : null, warn: st.demo ? null : st.warnRaw };
             const demo = st.demo ? M.DEMO[st.demoI][0] : null;
             if (gpu) return gpuFrame(s, now, nt, ln, info, demo, ageWord);
@@ -372,6 +376,7 @@ mgu.run({
         try {
             ctx.settings.onChange(guard('setting', (key) => { if (key === 'show' || key === 'demoCycle') apply(); }));
             if (typeof ctx.onLayout === 'function') ctx.onLayout(guard('layout', () => { st.page.force = true; }));
+            if (I18N) I18N.onChange(guard('lang', () => { st.page.force = true; st.page.bandKey = ''; st.page.tableKey = ''; st.key = ''; }));
             apply();
             ctx.loop('MAIN', PAGE_FPS, pageDraw);
             log.info('acc: ACC View ' + ((ctx.spec && ctx.spec.version) || '') + ' started');

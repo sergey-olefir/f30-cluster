@@ -2,7 +2,7 @@
   "id": "driver_profiles",
   "title": "Driver Profiles",
   "description": "The car's driver profiles: guest, valet and the seven personal slots with their details; add a local (offline) profile, rename it, copy Guest's settings into it, set its avatar (one of BMW's 15, or your own picture), delete it. Every write asks first.",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "vendor": "custom",
   "loggingId": "OADP",
   "iconGlyph": "DP",

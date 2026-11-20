@@ -93,10 +93,11 @@ function part1() {
         else if (f === '_methods') methods++;
         else if (f === '_broadcasts') broadcasts += app.signals[i][f].length;
     }));
-    ok(flags.length === 6 && flags.every((x) => x === 's' || x === 'rs'), 'six fields, read-only flags only (s / rs), no setter');
+    ok(flags.length === 7 && flags.every((x) => x === 's' || x === 'rs'), 'seven fields (six + HMIContext.currentDisplayLanguage for the language), read-only flags only (s / rs), no setter');
     ok(methods === 0 && broadcasts === 7, 'no method; seven events (the limit, the camera objects x2, the object list, the lane boundaries, the lanes, the distance objects)');
     ok(app.config.target === 'map' && app.config.layer.target === 'map' && app.config.layer.contend === false && app.config.layer.guideHold === 0, 'the map target, no contend, no guide hold');
-    ok(app.settings.length === 2 && app.settings.every((s) => s.default === false), 'two settings, both off by default');
+    ok(app.settings.length === 3 && app.settings.filter((s) => s.type === 'bool').every((s) => s.default === false)
+        && app.settings.some((s) => s.key === 'lang' && s.default === 'auto'), 'three settings: show and demo off by default, the language Авто');
     ok(app.settings[0].key === 'show' && app.settings[0].label === 'Показувати на щитку', 'the setting "Показувати на щитку"');
     ok(app.settings[1].label === 'Демо: стани по колу', 'the demo setting stays');
     ok(app.config.frontVehicle && app.config.frontVehicle.scale === null, 'the gap scale is unknown (no metres on screen)');
