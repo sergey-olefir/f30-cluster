@@ -1,0 +1,174 @@
+{
+  "id": "acc_view",
+  "title": "ACC View",
+  "description": "Read-only: the vehicle ahead as a gap level, closing, the cruise / limiter set speed and the limit, drawn as a lane view on the centre screen and, as a test, on the cluster's map target. Writes nothing to the car.",
+  "version": "0.1.0",
+  "vendor": "custom",
+  "loggingId": "OAAV",
+  "iconGlyph": "AV",
+  "mguHmi": [
+    "ID7"
+  ],
+  "shared": [
+    "cluster_render_client.js",
+    "front_vehicle.js",
+    "limit_src.js",
+    "sun.js"
+  ],
+  "signals": {
+    "de.bmw.dass.GapVehicleAhead": {
+      "_instances": "1",
+      "DataFrontVehicle": "s",
+      "_about": "r1120 AA: the vehicle ahead as the front camera reports it (a FIELD with a notifier only, 32770; no getter, no setter), declared 's' as Signal Probe and Twin Dial do. Watched only while 'show' is on. Read only."
+    },
+    "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
+      "_instances": "1",
+      "functionalLibraryData": "rs",
+      "_about": "r1120 AA: cruise / limiter (ldmSym, ldmSymColor, cruiseCtrlSpeedHUD), seen on the car 2026-11-18. Getter 1 (non-zero), notifier 32769. Read only."
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "statusCarSpeed2": "rs",
+      "_about": "r1120 AA: our own speed (raw x 0.015625 km/h), for the time-gap levels. Read only."
+    },
+    "de.bmw.infotainment.fasus.FASuS": {
+      "_instances": "1",
+      "requestWarnBrakeCoordinatorDisplay": "rs",
+      "_about": "r1120 AA: the car's own collision-warning request, declared in Signal Probe (S14), never seen with a value: logged only; drawn (our picture dimmed) only when config.warn names its path and active values. Read only."
+    },
+    "de.bmw.dass.TrafficSignRecognition": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognition"
+      ],
+      "_about": "r1120 AA2: the speed limit as the owner's car sends it (an EVENT, eventId 32769; seen 2026-11-18): presentClassLimitSpeed x 5 = km/h (shared/limit_src.js tsrOf, as Twin Dial). No getter, no setter, no method."
+    },
+    "de.bmw.infotainment.vehicle.Vehicle": {
+      "statusDayNightChangeOver": "rs",
+      "_about": "r1120 AA2: the car's own day / night, Twin Dial's source (config.dayNight). Getter 19 (non-zero), notifier 32787. Read only."
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "ACC View",
+      "buttons": [
+        [
+          "BTN_SETTINGS",
+          "Settings"
+        ]
+      ],
+      "_about": "r1120 AA2: the app's own page (the main view): one picture drawn by the app, E left and the data table right. Nothing on it can be pressed; the only button is the kit's Settings (the app's own two settings). The button's label is Latin: the kit's own bar font has no Cyrillic (LN, the languages agent, decides how labels change language)."
+    }
+  ],
+  "settings": [
+    {
+      "key": "show",
+      "label": "Показувати на щитку",
+      "type": "bool",
+      "default": false,
+      "_about": "r1120 AA2: E on the cluster's map target (4 layers, AA-SPEC 3.1), a test: off by default. contend false, guide_hold 0."
+    },
+    {
+      "key": "demoCycle",
+      "label": "Демо: стани по колу",
+      "type": "bool",
+      "default": false,
+      "_about": "the mockups' 14 states in turn (config.demoMs each), on both placements, no signals"
+    }
+  ],
+  "config": {
+    "target": "map",
+    "layer": {
+      "target": "map",
+      "klass": "content",
+      "contend": false,
+      "guideHold": 0,
+      "_about": "r1120 AA2 (docs/r1120/AA-SPEC.md 2.1, 3.1): E's four layers in the map target's core x 334..754, y 44..416: acc_lane effect 420 x 258 at (334, 158), acc_car effect (the car's box, moved and resized), text sheet 380 x 96 at (368, 54), pill sheet 340 x 44 at (374, 362). contend false: it waits until BMW's map leaves the slot and never pushes it aside. guideHold 0: BMW's CarPlay manoeuvre box is never held back for us."
+    },
+    "frontVehicle": {
+      "on": false,
+      "none": [
+        4093,
+        4094,
+        4095
+      ],
+      "qualNone": [
+        2,
+        "EVENT_DATA_NOT_AVAILABLE"
+      ],
+      "nearer": "smaller",
+      "scale": null,
+      "assumeScale": 0.1,
+      "levels": {
+        "timeGap": [
+          0.9,
+          1.4,
+          2.0,
+          3.0
+        ],
+        "metres": [
+          8,
+          15,
+          30,
+          60
+        ],
+        "minKmh": 20
+      },
+      "hyst": 0.12,
+      "closing": {
+        "windowMs": 1500,
+        "minMs": 600,
+        "rate": 1.0,
+        "fastRate": 4.0,
+        "fastTtc": 4.0,
+        "release": 0.6
+      },
+      "staleMs": 2000,
+      "absentMs": 10000
+    },
+    "warn": {
+      "path": null,
+      "active": null,
+      "_about": "unknown until the car shows the struct: e.g. path ['someMember'], active ['SOME_ENUM']. Null: never drawn."
+    },
+    "lang": "uk",
+    "_lang": "words.js: 'uk' or 'en' ('auto' and anything else: Ukrainian). The languages module (LN) replaces this with its setting at the merge.",
+    "night": "auto",
+    "_night": "'auto': the car's day / night (dayNight), else the sun at location; 'day' / 'night': a fixed look (the bench)",
+    "dayNight": {
+      "iface": "de.bmw.infotainment.vehicle.Vehicle",
+      "field": "statusDayNightChangeOver",
+      "path": [
+        "dayNightChangeOver"
+      ],
+      "map": {
+        "0": "keep",
+        "KEINE_AENDERUNG": "keep",
+        "1": "day",
+        "TAG": "day",
+        "2": "night",
+        "NACHT": "night",
+        "3": null,
+        "SIGNAL_UNGUELTIG": null
+      },
+      "codes": {
+        "KEINE_AENDERUNG": 0,
+        "TAG": 1,
+        "NACHT": 2,
+        "SIGNAL_UNGUELTIG": 3
+      },
+      "_from": "fix/colour-daynight, from the car's catalogue (reference/car/2026-11-15/someip/someip-interfaces.json): Vehicle (service 46352, instance 1) field statusDayNightChangeOver, getter 19, notifier 32787, struct StatusDayNightChangeOverWrapper { dayNightChangeOver: enum DayNightChangeOver (default 3), destinationLCDLuminance, dampingLCDLuminance }. DayNightChangeOver: 0 KEINE_AENDERUNG (no change: the last day/night the car gave holds; none yet: the sun), 1 TAG (day), 2 NACHT (night), 3 SIGNAL_UNGUELTIG (invalid: the sun). Any other value counts as invalid. The meaning of 0 is read off its German name only and is UNCONFIRMED on the car. 'codes' turns an enum NAME back into its number for the log (numbers only). hud.js _isNight."
+    },
+    "location": {
+      "lat": 50.45,
+      "lon": 30.52
+    },
+    "demoMs": 4000,
+    "sign": {
+      "tsr": {},
+      "_about": "shared/limit_src.js tsrCfg defaults (the event TrafficSignRecognition, presentClassLimitSpeed x 5, stale after 3 s)"
+    },
+    "cruise": {}
+  }
+}

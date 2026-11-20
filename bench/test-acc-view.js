@@ -1,0 +1,558 @@
+'use strict';
+/**
+ * bench/test-acc-view.js - ACC View 0.1.0, the whole app (round 1120 AA2; docs/AGENT-BRIEF-acc-app.md). Started as AA's
+ * skeleton suite (tools/acc-view/test-acc-view.js, 186 checks); every check of it is kept or replaced by its direction-E
+ * equivalent, and the brief's new ones are added.
+ *
+ *   node bench/test-acc-view.js [--no-bench] [--no-gl] [--port 8941]      (BENCH_PORT also sets the port; the default 8941)
+ *
+ * Part 1 (pure): the manifest (read-only flags, non-zero getters by tools/signals/check_signals.py, off by default, the map
+ * target without contend or guide hold, in the Store's "apps/*"), Node 8 syntax, no Cyrillic literal in the drawing code, the
+ * words table (both languages, the atlases cover them), the shaders (shipped = hud/shaders.json, small, highp, no sampler,
+ * one look, GLSL ES 1.00), the model, E on the map target through a recording stand-in of cluster_render_client (4 layers,
+ * sizes, places, pixel memory, NO pixels while the car glides), the map sheets and the centre page in every demo state day
+ * and night (no red; amber only while closing fast; cyan only with a suggestion; green only with an active cruise), every
+ * word inside its box in uk and en, the Cyrillic drawn, no pressable control, diffRect / cut.
+ * Part 2 (the bench, port 8941): the app built by the kit and run against the fake cluster-render: the centre page pushed
+ * (1600 x 520) and equal to the painter's; off = no map layer; on = the 4 layers; the car's raw values fed (POST /fake) and its
+ * picture read back (GET /px) equal to the painter's; the level changing = the car layer moved, 0 pixel updates; the limit
+ * event, the day / night signal, closing fast (amber), stale (the car goes); off again = the layers gone.
+ * Part 3 (WebGL): both shaders compiled and drawn by headless Chrome's WebGL 1 (GLSL ES 1.00, ANGLE / SwiftShader): the first
+ * ES compile they get before the car. Skipped (not failed) when Chrome is not installed.
+ */
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const http = require('http');
+const zlib = require('zlib');
+const { spawn, spawnSync } = require('child_process');
+
+const ROOT = path.resolve(__dirname, '..');
+const APPDIR = path.join(ROOT, 'apps', 'acc_view');
+const args = process.argv.slice(2);
+const PORT = Number(args.indexOf('--port') >= 0 ? args[args.indexOf('--port') + 1] : process.env.BENCH_PORT || 8941);
+const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+
+let pass = 0, fail = 0;
+function ok(c, what) { if (c) { pass++; } else { fail++; console.log('FAIL ' + what); } }
+
+const M = require(path.join(APPDIR, 'model.js'));
+const P = require(path.join(APPDIR, 'paint.js'));
+const R = require(path.join(APPDIR, 'raster.js'));
+const Wd = require(path.join(APPDIR, 'words.js'));
+const MapView = require(path.join(APPDIR, 'mapview.js'));
+const FV = require(path.join(ROOT, 'shared', 'front_vehicle.js'));
+const SRC = require(path.join(ROOT, 'shared', 'limit_src.js'));
+
+const CYR = /[\u0400-\u04FF]/;
+const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"\\])\/\/.*$/gm, '$1');
+const isRed = (r, g, b) => r > 150 && g < 90 && b < 90;
+const near = (r, g, b, c, d) => Math.abs(r - c[0]) <= d && Math.abs(g - c[1]) <= d && Math.abs(b - c[2]) <= d;
+function census(px, Q, x0, x1, w) {
+    let red = 0, amber = 0, cyan = 0, green = 0;
+    for (let i = 0; i < px.length; i += 4) {
+        if (x0 !== undefined) { const x = (i / 4) % w; if (x < x0 || x >= x1) continue; }
+        if (px[i + 3] === 0) continue;
+        const r = px[i], g = px[i + 1], b = px[i + 2];
+        if (isRed(r, g, b)) red++;
+        if (near(r, g, b, Q.amber, 6)) amber++;
+        if (near(r, g, b, Q.cyan, 6)) cyan++;
+        if (near(r, g, b, Q.green, 6)) green++;
+    }
+    return { red, amber, cyan, green };
+}
+
+/** A recording stand-in for cluster_render_client's ClusterRender (the messages MapView sends, with their sizes). */
+function FakeCR() {
+    this.layers = []; this.msgs = [];
+    this.on = () => this; this.connect = () => {}; this.close = () => { this.closed = true; };
+}
+FakeCR.prototype._add = function (kind, o) { this.layers.push({ kind, o: Object.assign({}, o) }); this.msgs.push({ op: 'layer', kind, bytes: JSON.stringify(o).length }); return this.layers.length; };
+FakeCR.prototype.effect = function (o) { return this._add('effect', o); };
+FakeCR.prototype.image = function (o) { return this._add('image', o); };
+FakeCR.prototype.set = function (ref, o) { Object.assign(this.layers[ref - 1].o, o); this.msgs.push({ op: 'set', ref, bytes: JSON.stringify(o).length + 20 }); };
+FakeCR.prototype.uniform = function (ref, name, v, o) { this.msgs.push({ op: 'uniform', ref, name, v: v.slice(), type: o && o.type, bytes: v.join(' ').length + name.length + 30 }); };
+FakeCR.prototype.pixels = function (ref, rects, px) { this.msgs.push({ op: 'pixels', ref, rects, bytes: px.length }); };
+
+/* ------------------------------------------------------------------------------------------------ part 1 */
+function part1() {
+    const app = JSON.parse(fs.readFileSync(path.join(APPDIR, 'app.json'), 'utf8'));
+    ok(app.id === 'acc_view' && /^OA[A-Z0-9]{2}$/.test(app.loggingId), 'id and a 4-char logging id');
+    ok(app.version === '0.1.0', 'version 0.1.0');
+    const others = fs.readdirSync(path.join(ROOT, 'apps')).filter((a) => a !== 'acc_view').map((a) => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', a, 'app.json'), 'utf8')); } catch (e) { return null; } }).filter(Boolean);
+    ok(others.length >= 3 && others.every((a) => a.loggingId !== app.loggingId && a.id !== app.id), 'logging id and id unique among the apps');
+    const flags = [];
+    let methods = 0, broadcasts = 0;
+    Object.keys(app.signals).forEach((i) => Object.keys(app.signals[i]).forEach((f) => {
+        if (f[0] !== '_') flags.push(app.signals[i][f]);
+        else if (f === '_methods') methods++;
+        else if (f === '_broadcasts') broadcasts += app.signals[i][f].length;
+    }));
+    ok(flags.length === 5 && flags.every((x) => x === 's' || x === 'rs'), 'five fields, read-only flags only (s / rs), no setter');
+    ok(methods === 0 && broadcasts === 1, 'no method; one event (the limit)');
+    ok(app.config.target === 'map' && app.config.layer.target === 'map' && app.config.layer.contend === false && app.config.layer.guideHold === 0, 'the map target, no contend, no guide hold');
+    ok(app.settings.length === 2 && app.settings.every((s) => s.default === false), 'two settings, both off by default');
+    ok(app.settings[0].key === 'show' && app.settings[0].label === 'Показувати на щитку', 'the setting "Показувати на щитку"');
+    ok(app.settings[1].label === 'Демо: стани по колу', 'the demo setting stays');
+    ok(app.config.frontVehicle && app.config.frontVehicle.scale === null, 'the gap scale is unknown (no metres on screen)');
+    ok(app.config.warn && app.config.warn.path === null && app.config.warn.active === null, 'the car\'s warning is never drawn until config.warn names it');
+    ok(app.config.dayNight && app.config.dayNight.field === 'statusDayNightChangeOver', 'night from the car\'s day / night (Twin Dial\'s source)');
+    const repo = JSON.parse(fs.readFileSync(path.join(ROOT, 'mgu-repo.json'), 'utf8'));
+    ok(repo.apps && repo.apps.path === 'apps/*' && path.relative(path.join(ROOT, 'apps'), APPDIR) === 'acc_view', 'in the Store\'s "apps/*" (installable)');
+    ok(!fs.existsSync(path.join(ROOT, 'tools', 'acc-view', 'app')), 'the skeleton\'s old place is gone');
+    ok(fs.readdirSync(path.join(ROOT, 'tools', 'acc-view')).filter((f) => /\.(js|py)$/.test(f)).sort().join() === 'lane_gl.py,mockups.py', 'tools/acc-view keeps only the mockups');
+    (app.shared || []).forEach((f) => ok(fs.existsSync(path.join(ROOT, 'shared', f)), 'shared ' + f + ' exists'));
+    const scr = app.screens || [];
+    ok(scr.length === 1 && scr[0].name === 'MAIN' && scr[0].kind === 'canvas', 'the main screen is the app\'s own canvas page');
+    ok(JSON.stringify((scr[0].buttons || []).map((b) => b[0])) === '["BTN_SETTINGS"]', 'its only button: the kit\'s Settings (no -/+)');
+    // the signal check (non-zero getters for every "r"; notifiers for "s"), against every catalogue we have
+    const cats = fs.existsSync(path.join(ROOT, 'reference', 'car')) ? fs.readdirSync(path.join(ROOT, 'reference', 'car')).map((d) => path.join(ROOT, 'reference', 'car', d, 'someip', 'someip-interfaces.json')).filter((f) => fs.existsSync(f)) : [];
+    ok(cats.length >= 1, 'a catalogue to check against (' + cats.length + ')');
+    cats.forEach((c) => {
+        const r = spawnSync('python3', [path.join(ROOT, 'tools', 'signals', 'check_signals.py'), c, path.join(APPDIR, 'app.json')], { encoding: 'utf8' });
+        ok(r.status === 0 && /all declarations pass/.test(r.stdout), 'check_signals.py passes against ' + path.basename(path.dirname(path.dirname(c))));
+    });
+
+    // the code: Node 8 syntax; read only; no Cyrillic literal in the drawing code; no pressable control
+    const js = fs.readdirSync(APPDIR).filter((f) => /\.js$/.test(f));
+    ok(js.sort().join() === 'main.js,mapview.js,model.js,paint.js,raster.js,words.js', 'the app\'s modules');
+    js.forEach((f) => {
+        const s = stripComments(fs.readFileSync(path.join(APPDIR, f), 'utf8'));
+        ok(!/\?\.|\?\?|\{\s*\.\.\.|,\s*\.\.\.\w+\s*\}|\.flat\(|\.flatMap\(|Object\.fromEntries|\.padEnd\(|\.trimStart\(/.test(s), f + ': Node 8 syntax (no ?. ?? object spread .flat)');
+        ok(!/signals\.(set|call|proxy)|callMethod|setValue|standardCCMessage|extendedCCMessage|A19B/.test(s), f + ': read only (no setter, no method, no CC message, no A19B)');
+        if (f !== 'words.js') ok(!CYR.test(s), f + ': no Cyrillic string in the code (every word comes from words.js)');
+    });
+    const mainSrc = stripComments(fs.readFileSync(path.join(APPDIR, 'main.js'), 'utf8'));
+    ok(!/onClick|onTap|onTab|\.target\(|\.button\(|\.frame\(|controller\.grab/.test(mainSrc), 'main.js: no tap target, no click handler, no tab strip, no controller grab');
+    const Rec = require(path.join(ROOT, 'kit', 'runtime', 'record.js'));
+    const rc = new Rec.Recorder(1600, 520);
+    Rec.setImage(0x41560001, P.PAGE_W, P.PAGE_H, Buffer.alloc(P.PAGE_W * P.PAGE_H * 4));
+    rc.clear([0, 0, 0]); rc.image(0x41560001, 0, 38, P.PAGE_W, P.PAGE_H);
+    ok(rc.targets.length === 0, 'the page as main.js records it has no pressable target');
+
+    // the words: both languages, every key, the atlases hold every character
+    const keys = Object.keys(Wd.WORDS);
+    ok(keys.length >= 40 && keys.every((k) => Wd.WORDS[k].uk && Wd.WORDS[k].en), 'every word in uk and en (' + keys.length + ' keys)');
+    ok(keys.every((k) => !CYR.test(Wd.WORDS[k].en)), 'no Cyrillic in the English column');
+    ok(['title', 'ringCruise', 'limit', 'advice', 'pillWarn'].every((k) => CYR.test(Wd.WORDS[k].uk)), 'the Ukrainian column is Cyrillic');
+    ok(Wd.langOf('auto') === 'uk' && Wd.langOf(undefined) === 'uk' && Wd.langOf('en') === 'en' && Wd.langOf('de') === 'uk', 'Авто and anything unknown fall back to Ukrainian');
+    const notoFonts = ['av_t16', 'av_t21', 'av_t27', 'av_b18', 'av_b26'];
+    notoFonts.forEach((f) => ok(R.font(f) && R.missing(Wd.chars(), f) === '' && R.missing('0123456789 _-.·…—', f) === '', f + ': every character of both columns (Twin Dial\'s Noto)'));
+    ['av_f26', 'av_f40', 'av_f56'].forEach((f) => ok(R.font(f) && R.missing('0123456789–', f) === '' && !Object.keys(R.font(f).glyphs).some((c) => CYR.test(c)), f + ': the figures (Saira; no Cyrillic in a Saira atlas)'));
+    notoFonts.concat(['av_f26', 'av_f40', 'av_f56']).forEach((f) => { const j = JSON.parse(fs.readFileSync(path.join(APPDIR, 'hud', 'fonts', f + '.json'), 'utf8')); ok(j.width % 4 === 0 && /NotoSans|Saira/.test(j.source), f + ': width % 4 == 0, our OFL face'); });
+    ok(R.sprite('car') && R.sprite('carFast') && R.sprite('car').w === 304, 'the car sprite (the acc_car shader\'s own output, baked) is there');
+
+    // the shaders (carried over from the skeleton; now also: the shipped text is exactly hud/shaders.json)
+    const SH = path.join(APPDIR, 'shaders');
+    const shipped = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').split('\n').map((l) => l.replace(/[ \t]+/g, ' ').trim()).filter(Boolean).join('\n') + '\n';
+    const files = fs.readdirSync(SH).filter((f) => /\.glsl$/.test(f));
+    const sj = JSON.parse(fs.readFileSync(path.join(APPDIR, 'hud', 'shaders.json'), 'utf8'));
+    ok(files.length === 2 && Object.keys(sj).sort().join() === 'acc_car,acc_lane', 'two effect shaders (lane, car), both shipped');
+    let total = 0;
+    files.forEach((f) => {
+        const src = fs.readFileSync(path.join(SH, f), 'utf8'), shp = shipped(src);
+        total += Buffer.byteLength(shp);
+        ok(sj[f.replace('.glsl', '')] === shp, f + ': hud/shaders.json is its shipped text (run tools/acc-view/lane_gl.py --bake after a change)');
+        ok(Buffer.byteLength(shp) < 8000, f + ': ' + Buffer.byteLength(shp) + ' B shipped, far under the KOMBI reset seen at 26.7 k (our car-proven shaders: 2.7-13 k)');
+        ok(/#ifdef GL_FRAGMENT_PRECISION_HIGH\s*\nprecision highp float;/.test(shp), f + ': asks for highp (px distances over 256 overflow fp16)');
+        ok(!/sampler2D|texture2D/.test(shp), f + ': no sampler (nothing to leave unbound)');
+        ok(!/^#if(?!def GL_FRAGMENT_PRECISION_HIGH)|#else(?!\nprecision mediump)/m.test(shp.replace('#else\nprecision mediump float;', '')), f + ': no #if looks (one look per layer source)');
+        ok(/varying vec2 v_uv;/.test(shp) && /gl_FragColor/.test(shp) && !/^\s*(in|out)\s/m.test(shp) && !/\btexture\(/.test(shp), f + ': GLSL ES 1.00 (varying, gl_FragColor)');
+        ok(!/\b(all|any|not)\s*=/.test(shp), f + ': no built-in names reused as variables');
+    });
+    ok(total === 4871, 'both shaders ship 4 871 B together (' + total + ')');
+
+    // the model (carried over)
+    const fvc = FV.cfgOf(Object.assign({}, app.config.frontVehicle, { on: true }));
+    let t = 0;
+    const tr = FV.create(fvc, { clock: () => t });
+    tr.start();
+    let s = M.stateOf(tr.view(90), null, false);
+    ok(s.data === 'none' && s.tgt === null, 'nothing yet: no target');
+    t = 11000;
+    s = M.stateOf(tr.view(90), null, false);
+    ok(s.data === 'absent', 'nothing for 10 s: absent');
+    for (let i = 0; i < 15; i++) { t += 100; tr.feed({ frontVehicleGapX: 420, frontVehicleSpeedX: 1500, frontVehicleObjectID: 7, qualifierEventDataFunctionFrontVehicle: 0, qualifierExtendedFunctionFrontVehicle: 0 }, 90); }
+    s = M.stateOf(tr.view(90), null, false);
+    ok(s.data === 'ok' && s.tgt === 3 && s.clo === 0, 'raw 420 at 90 km/h: level 3 (the assumed scale), not closing');
+    t += 2500;
+    s = M.stateOf(tr.view(90), null, false);
+    ok(s.data === 'stale' && s.tgt === null, 'silence for 2.5 s: stale, the car goes (never a frozen car)');
+    const hc = SRC.hudCruiseCfg({});
+    const dds = (o) => Object.assign({ ldmSym: 'LDM_SYM_NONE', ldmSymColor: 'LDM_OFF', statusLimiter: 'STATUS_INACTIVE', cruiseCtrlSpeedHUD: 65535 }, o);
+    ok(JSON.stringify(M.stateOf(null, SRC.hudCruiseOf(hc, dds({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 90 })), false).cru) === '["cruise","active",90]', 'cruise active 90');
+    ok(JSON.stringify(M.stateOf(null, SRC.hudCruiseOf(hc, dds({ ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_OFF', cruiseCtrlSpeedHUD: 90 })), false).cru) === '["cruise","standby",90]', 'cruise standby 90');
+    ok(JSON.stringify(M.stateOf(null, SRC.hudCruiseOf(hc, dds({ ldmSym: 'LDM_SYM_SLD', ldmSymColor: 'LDM_ACTIVE', cruiseCtrlSpeedHUD: 110 })), false).cru) === '["limiter","active",110]', 'limiter 110');
+    ok(M.stateOf(null, SRC.hudCruiseOf(hc, dds({})), false).cru === null, '65535 / NONE: cruise off');
+    const tc = SRC.tsrCfg({ tsr: {} });
+    ok(M.stateOf(null, null, false, SRC.tsrOf(tc, { presentClassLimitSpeed: 8 }).kmh).lim === 40 && M.stateOf(null, null, false, null).lim === null, 'the limit: class 8 -> 40 km/h; none -> no figure');
+    ok(M.DEMO.length === 14 && M.DEMO.map((d) => d[0]).join() === M.STATES.join(), 'the 14 demo states');
+
+    // E on the map target: 4 layers, sizes, places, pixel memory; no pixels while the car glides
+    const fake = new FakeCR();
+    const mv = new MapView(function () { return fake; }, { layer: app.config.layer, socket: 'x', shaders: sj });
+    mv.cr = null;
+    mv.CR = { ClusterRender: function () { return fake; } };
+    mv.open();
+    ok(fake.layers.length === 4 && fake.layers.map((l) => l.kind).join() === 'effect,effect,image,image', 'E on the map: 4 layers (lane effect, car effect, text sheet, pill sheet)');
+    ok(fake.layers.every((l) => l.o.target === 'map' && l.o.contend === false && l.o.guide_hold === 0), 'every layer on map, no contend, guide_hold 0');
+    ok(fake.layers.map((l) => l.o.z).join() === '0,1,2,3', 'z order: lane, car, text, pill');
+    const L = fake.layers.map((l) => l.o);
+    ok(L[0].x === 334 && L[0].y === 158 && L[0].w === 420 && L[0].h === 258 && L[0].fs === sj.acc_lane, 'lane effect 420 x 258 at (334, 158), the shipped acc_lane');
+    ok(L[1].fs === sj.acc_car && L[1].visible === false, 'car effect: the shipped acc_car, hidden until there is a car');
+    ok(L[2].x === 368 && L[2].y === 54 && L[2].w === 380 && L[2].h === 96 && L[2].iw === 380, 'text sheet 380 x 96 at (368, 54)');
+    ok(L[3].x === 374 && L[3].y === 362 && L[3].w === 340 && L[3].h === 44, 'pill sheet 340 x 44 at (374, 362)');
+    ok([L[0], L[2], L[3]].every((o) => o.x >= 334 && o.x + o.w <= 754 && o.y >= 44 && o.y + o.h <= 416), 'every fixed layer inside the core x 334..754, y 44..416');
+    for (let lv = 1; lv <= 5; lv++) {
+        const b = M.carBox(M.GEO.map, M.depthOf(lv));
+        ok(b[0] >= 334 && b[0] + b[2] <= 754 && b[1] >= 44 && b[1] + b[3] <= 416, 'the car at level ' + lv + ' inside the core (' + b.join(' ') + ')');
+    }
+    const b1 = M.carBox(M.GEO.map, M.depthOf(1)), b5 = M.carBox(M.GEO.map, M.depthOf(5));
+    ok(b1[2] === 177 && b1[3] === 104 && b5[2] === 35 && b5[3] === 21, 'the car 177 x 104 at level 1 .. 35 x 21 at level 5 (AA-SPEC 3.1)');
+    ok(MapView.PIXEL_MEMORY === 411520 && L[2].w % 4 === 0 && L[3].w % 4 === 0, 'pixel memory (380 x 96 + 340 x 44) x 8 = 411 520 B; widths % 4 == 0');
+    ok(fake.layers.filter((l) => l.kind === 'image').length * 1 <= 8 && fake.layers.length <= 8, 'under the 8-layer cap of a connection');
+    const st3 = M.DEMO[3][2];
+    mv.update(st3, M.depthOf(3), false, 'uk');
+    const first = fake.msgs.filter((m) => m.op === 'pixels').reduce((a, m) => a + m.bytes, 0);
+    ok(first > 0 && first <= 380 * 96 * 4 + 340 * 44 * 4, 'the first picture: the sheets\' changed rectangles (' + first + ' B)');
+    const n0 = fake.msgs.length;
+    let z = M.depthOf(3), setN = 0;
+    [5, 4, 3, 2, 1].forEach((lv) => {
+        const s2 = Object.assign({}, st3, { tgt: lv });
+        const zt = M.depthOf(lv);
+        for (let k = 0; k < 6; k++) { z += (zt - z) * 0.5; mv.update(s2, z, false, 'uk'); }
+        mv.update(s2, zt, false, 'uk');
+    });
+    const glide = fake.msgs.slice(n0);
+    setN = glide.filter((m) => m.op === 'set').length;
+    ok(glide.filter((m) => m.op === 'pixels').length === 0, 'the car gliding across all five levels: 0 pixel uploads');
+    ok(setN >= 20 && glide.every((m) => m.op === 'set' || m.op === 'uniform'), 'the glide is the car layer\'s move / resize and uniforms only (' + setN + ' sets)');
+    const per = glide.reduce((a, m) => a + m.bytes, 0) / Math.max(1, glide.filter((m) => m.op === 'set').length);
+    ok(per < 600, 'a glide step costs a few hundred bytes of messages (' + Math.round(per) + ' B)');
+    ok(glide.filter((m) => m.op === 'uniform' && m.name === 'u_line').length === 0, 'the lane lines never change while the car moves');
+    // costs per event (for the report)
+    const costs = {};
+    const cost = (name, a, b, nb) => { mv.update(a, a.tgt ? M.depthOf(a.tgt) : 0, false, 'uk'); const k1 = fake.msgs.length; mv.update(b, b.tgt ? M.depthOf(b.tgt) : 0, !!nb, 'uk'); costs[name] = fake.msgs.slice(k1).filter((m) => m.op === 'pixels').reduce((x, m) => x + m.bytes, 0); };
+    cost('set speed 90 -> 110', M.DEMO[3][2], Object.assign({}, M.DEMO[3][2], { cru: ['cruise', 'active', 110] }));
+    cost('active -> standby', M.DEMO[3][2], M.DEMO[8][2]);
+    cost('limit 90 -> 110', M.DEMO[3][2], Object.assign({}, M.DEMO[3][2], { lim: 110 }));
+    cost('closing fast starts', M.DEMO[3][2], M.DEMO[6][2]);
+    cost('suggestion appears', M.DEMO[9][2], Object.assign({}, M.DEMO[9][2], { adv: 96 }));
+    cost('target lost', M.DEMO[3][2], M.DEMO[1][2]);
+    cost('warning (all dims)', M.DEMO[4][2], M.DEMO[12][2]);
+    cost('no change', M.DEMO[3][2], M.DEMO[3][2]);
+    cost('day -> night', M.DEMO[3][2], M.DEMO[3][2], true);
+    console.log('map upload per change (B): ' + Object.keys(costs).map((k) => k + ' ' + costs[k]).join(', '));
+    ok(costs['set speed 90 -> 110'] > 0 && costs['set speed 90 -> 110'] <= 380 * 96 * 4, 'a set-speed change uploads only within the text sheet');
+    ok(costs['no change'] === 0, 'nothing changed: nothing sent');
+    ok(costs['day -> night'] > 0 && costs['day -> night'] <= 380 * 96 * 4, 'day -> night: the text sheet again (the effects take uniforms)');
+    mv.close();
+    ok(fake.closed === true && mv.cr === null, 'off: the connection closed');
+
+    // the map's uniforms: the lane lines a fixed symbol; amber only while closing fast
+    [false, true].forEach((night) => {
+        const lines = {}, gapc = {};
+        M.DEMO.forEach((d) => { const u = M.laneUniforms(M.GEO.map, d[2], M.depthOf(d[2].tgt), night); lines[u.u_line.join()] = 1; gapc[d[0]] = u.u_gapc; });
+        ok(Object.keys(lines).length === 1, 'map ' + (night ? 'night' : 'day') + ': the lane lines one colour in all 14 states');
+        const amb = M.colours('map', night).amberF.map((c) => Math.round(c * 1e4) / 1e4).join();
+        ok(M.DEMO.every((d) => (gapc[d[0]].join() === amb) === (d[2].clo === 2)), 'map ' + (night ? 'night' : 'day') + ': the gap and chevrons amber only while closing fast');
+        ok(M.DEMO.every((d) => { const u = M.carUniforms(d[2], night, 100, 60); return (u.u_body[2] < 0.5 * u.u_body[0]) === (d[2].clo === 2); }), 'map ' + (night ? 'night' : 'day') + ': the car amber-tinted only while closing fast');
+    });
+
+    // the sheets and the centre page in every state, day and night, both languages
+    M.DEMO.forEach((d) => {
+        [false, true].forEach((night) => {
+            const tag = d[0] + ' ' + d[1] + (night ? ' night' : ' day');
+            const Qm = M.colours('map', night), Qc = M.colours('centre', night);
+            const tx = P.textSheet(d[2], night, 'uk'), pl = P.pillSheet(d[2], night, 'uk');
+            ok(tx.length === 380 * 96 * 4 && pl.length === 340 * 44 * 4, tag + ': map sheets\' sizes');
+            const cm = census(Buffer.concat([tx, pl]), Qm);
+            ok(cm.red === 0, tag + ': map sheets: no red pixel');
+            const pg = P.centre(d[2], { night, lang: 'uk', info: { age: 0.5 } });
+            ok(pg.px.length === 1600 * 482 * 4, tag + ': centre page size');
+            const cc = census(pg.px, Qc);
+            ok(cc.red === 0, tag + ': centre page: no red pixel');
+            if (!d[2].warn) {
+                ok((cm.amber > 0) === (d[2].clo === 2), tag + ': map: amber only while closing fast (' + cm.amber + ')');
+                ok((cm.cyan > 0) === !!d[2].adv, tag + ': map: cyan only with a suggestion (' + cm.cyan + ')');
+                ok((cm.green > 0) === !!(d[2].cru && d[2].cru[1] === 'active'), tag + ': map: green only with an active cruise / limiter (' + cm.green + ')');
+                ok((cc.amber > 0) === (d[2].clo === 2), tag + ': centre: amber only while closing fast (' + cc.amber + ')');
+                ok((cc.cyan > 0) === !!d[2].adv, tag + ': centre: cyan only with a suggestion (' + cc.cyan + ')');
+                ok((cc.green > 0) === !!(d[2].cru && d[2].cru[1] === 'active'), tag + ': centre: green only with an active cruise / limiter (' + cc.green + ')');
+            } else {
+                const e = census(pg.px, Qc, 0, 800, 1600);
+                ok(e.green === 0 && e.cyan === 0, tag + ': the warning: our picture steps back (no full-colour green or cyan left in E)');
+            }
+            ['uk', 'en'].forEach((lang) => {
+                const r = lang === 'uk' ? pg : P.centre(d[2], { night, lang, info: { age: 0.5 } });
+                const out = r.words.filter((w) => w.x < w.x0 - 0.5 || w.x + w.w > w.x1 + 0.5);
+                ok(out.length === 0, tag + ' ' + lang + ': every word inside its box' + (out.length ? ' (' + out.map((w) => w.key).join(', ') + ')' : ''));
+                ok(r.words.every((w) => R.missing(w.str, 'av_t27') === ''), tag + ' ' + lang + ': no character missing from the atlas');
+            });
+        });
+    });
+    // the lane line is the same pixel in every state (a fixed symbol), and the ring's word on the map fits in both languages
+    const linePx = (s) => { const p = P.centre(s, { night: false, lang: 'uk' }).px; const i = (470 * 1600 + 106) * 4; return p.slice(i, i + 3).join(); };
+    const ref = linePx(M.DEMO[2][2]);
+    ok(['03', '05', '07', '08', '12', '14'].every((n) => linePx(M.DEMO[Number(n) - 1][2]) === ref), 'the centre page\'s lane line: the same colour in every state (' + ref + ')');
+    ['ringCruise', 'ringPause', 'ringLimiter', 'ringOff', 'limit', 'advice'].forEach((k) => ['uk', 'en'].forEach((l) => {
+        const w = Wd.word(l, k), f = k.indexOf('ring') === 0 ? 'av_b18' : 'av_t16';
+        ok(R.textWidth(w, f, R.fit(w, f, k.indexOf('ring') === 0 ? 18 : 16, k === 'limit' ? 58 : 104)) <= (k === 'limit' ? 58 : 104), 'map: "' + w + '" fits its place');
+    }));
+    ['pillNoData', 'pillNoTarget', 'pillStale', 'pillFast', 'pillPaused', 'pillWarn'].forEach((k) => ['uk', 'en'].forEach((l) => {
+        const w = Wd.word(l, k), f = k === 'pillWarn' ? 'av_b18' : 'av_t21', s = R.fit(w, f, 20.2, 296);
+        ok(R.textWidth(w, f, s) <= 296 && s >= 15, 'map pill: "' + w + '" fits (size ' + s + ')');
+    }));
+    // the Cyrillic drawn: Ukrainian words put ink on the page, from glyphs that have ink
+    const ink = (str) => { const cv = new R.Canvas(400, 60, [0, 0, 0]); cv.text(str, 4, 44, 'av_t27', 27, [255, 255, 255], 'left'); let n = 0; for (let i = 0; i < cv.px.length; i += 4) if (cv.px[i] > 128) n++; return n; };
+    ok(ink('Авто попереду') > 300 && ink('ЇЄҐїєґ') > 100, 'Cyrillic words drawn (ink from the Noto atlas)');
+    const f27 = R.font('av_t27');
+    ok('АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯабвгґдеєжзиіїйклмнопрстуфхцчшщьюя'.split('').every((c) => f27.glyphs[c] && f27.glyphs[c].w > 0), 'the whole Ukrainian alphabet has glyphs with ink');
+    const uk = P.centre(M.DEMO[3][2], { lang: 'uk' }), en = P.centre(M.DEMO[3][2], { lang: 'en' });
+    ok(uk.words.some((w) => CYR.test(w.str)) && !en.words.some((w) => CYR.test(w.str)) && R.diffRect(uk.px, en.px, 1600, 482) !== null, 'the page in uk draws Cyrillic, in en none');
+    // the cached empty lane + the gap computed over it = the whole lane computed at once, in every state
+    let lm = 0;
+    M.DEMO.forEach((d) => [false, true].forEach((night) => {
+        const Pc = M.colours('centre', night), g = M.GEO.centre;
+        const a = new R.Canvas(1600, 482, Pc.bg); P.lane(a, g, d[2], M.depthOf(d[2].tgt), Pc, 0);
+        const b = new R.Canvas(1600, 482, Pc.bg); P.lane(b, g, { tgt: null, clo: 0 }, 0, Pc, 0);
+        if (d[2].tgt) P.lane(b, g, d[2], M.depthOf(d[2].tgt), Pc, 0, true);
+        if (R.diffRect(a.px, b.px, 1600, 482)) lm++;
+    }));
+    ok(lm === 0, 'the centre lane: cached empty lane + gap = the whole computation, all 28 pictures (' + lm + ' differ)');
+    const t0 = Date.now();
+    for (let i = 0; i < 5; i++) P.centre(M.DEMO[i + 2][2], { lang: 'uk' });
+    console.log('centre page paint: ' + Math.round((Date.now() - t0) / 5) + ' ms on this Mac (Node ' + process.version + ')');
+
+    // diffRect / cut (carried over)
+    const a = P.textSheet(M.DEMO[3][2], false, 'uk'), b = P.textSheet(M.DEMO[8][2], false, 'uk');
+    const r = R.diffRect(a, b, 380, 96);
+    ok(r && r.w > 0 && r.w < 380 && r.h <= 96, 'active -> standby: one rectangle smaller than the sheet (' + (r && r.w + 'x' + r.h) + ')');
+    ok(R.diffRect(a, a, 380, 96) === null, 'no change: nothing to send');
+    const ct = R.cut(b, 380, r);
+    ok(ct.length === r.w * r.h * 4 && ct.readUInt32LE(0) === b.readUInt32LE((r.y * 380 + r.x) * 4), 'cut: the rectangle\'s rows packed');
+    ok(M.colours('map', false).bg.join() === '0,0,0', 'black background (the map slot under a theme window)');
+}
+
+/* ------------------------------------------------------------------------------------------------ part 2: the bench */
+function request(method, url, body) {
+    return new Promise((resolve) => {
+        const data = body ? Buffer.from(JSON.stringify(body)) : null;
+        const rq = http.request({ host: '127.0.0.1', port: PORT, path: url, method, headers: data ? { 'content-type': 'application/json', 'content-length': data.length } : {} }, (res) => {
+            const parts = [];
+            res.on('data', (c) => parts.push(c));
+            res.on('end', () => resolve({ status: res.statusCode, body: Buffer.concat(parts) }));
+        });
+        rq.on('error', () => resolve({ status: 0, body: Buffer.alloc(0) }));
+        if (data) rq.write(data);
+        rq.end();
+    });
+}
+
+/** The bench's event stream, kept open: its scene messages and the pixel notices (t 'px'). */
+function stream() {
+    const s = { scene: null, px: [], close: () => {} };
+    let buf = '';
+    const rq = http.get({ host: '127.0.0.1', port: PORT, path: '/events' }, (res) => {
+        res.on('data', (c) => {
+            buf += c.toString('utf8');
+            const lines = buf.split('\n');
+            buf = lines.pop();
+            lines.forEach((ln) => {
+                const t = ln.replace(/^data:\s*/, '').trim();
+                if (!t || t[0] !== '{') return;
+                try { const m = JSON.parse(t); if (m.t === 'scene') s.scene = m.layers || []; else if (m.t === 'px') s.px.push(m); } catch (e) { /* not this one */ }
+            });
+        });
+    });
+    rq.on('error', () => {});
+    s.close = () => { try { rq.abort(); } catch (e) { /* gone */ } };
+    return s;
+}
+
+/** A PNG the kit wrote (8-bit RGBA, any filter) -> { w, h, px }. */
+function readPng(file) {
+    const b = fs.readFileSync(file);
+    let i = 8, w = 0, h = 0;
+    const idat = [];
+    while (i < b.length) {
+        const len = b.readUInt32BE(i), type = b.toString('latin1', i + 4, i + 8), body = b.slice(i + 8, i + 8 + len);
+        if (type === 'IHDR') { w = body.readUInt32BE(0); h = body.readUInt32BE(4); }
+        if (type === 'IDAT') idat.push(body);
+        i += 12 + len;
+    }
+    const raw = zlib.inflateSync(Buffer.concat(idat)), st = w * 4, px = Buffer.alloc(w * h * 4);
+    for (let y = 0; y < h; y++) {
+        const f = raw[y * (st + 1)];
+        for (let x = 0; x < st; x++) {
+            const v = raw[y * (st + 1) + 1 + x], a = x >= 4 ? px[y * st + x - 4] : 0, up = y ? px[(y - 1) * st + x] : 0, ul = y && x >= 4 ? px[(y - 1) * st + x - 4] : 0;
+            let p = v;
+            if (f === 1) p = v + a; else if (f === 2) p = v + up; else if (f === 3) p = v + ((a + up) >> 1);
+            else if (f === 4) { const q = a + up - ul, pa = Math.abs(q - a), pb = Math.abs(q - up), pc = Math.abs(q - ul); p = v + (pa <= pb && pa <= pc ? a : pb <= pc ? up : ul); }
+            px[y * st + x] = p & 255;
+        }
+    }
+    return { w, h, px };
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const DDS = 'de.bmw.infotainment.displaydataserver.DisplayDataServer';
+
+async function part2() {
+    const work = fs.mkdtempSync(path.join(os.tmpdir(), 'acc-view-'));
+    const dataDir = path.join(work, 'data'), imgDir = path.join(work, 'img');
+    fs.mkdirSync(dataDir); fs.mkdirSync(imgDir);
+    let out = '';
+    const env = Object.assign({}, process.env, { BENCH_PORT: String(PORT), BENCH_DATA_DIR: dataDir, BENCH_IMAGE_DIR: imgDir, BENCH_LAYER_CAP: '8', BENCH_CONFIG: JSON.stringify({ demoMs: 600000 }) });
+    const srv = spawn(process.execPath, [path.join(ROOT, 'bench', 'server.js'), 'acc_view'], { cwd: ROOT, env, stdio: ['ignore', 'pipe', 'pipe'] });
+    srv.stdout.on('data', (c) => { out += c; });
+    srv.stderr.on('data', (c) => { out += c; });
+    const waitFor = async (re, ms) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (re.test(out)) return true; await sleep(100); } return false; };
+    const ev = stream.bind(null);
+    let es = null;
+    try {
+        ok(await waitFor(/acc: show off, demo off, lang uk/, 90000), 'the app built by the kit (0.1.0) and started (show off)');
+        ok(/acc_view 0\.1\.0: dist\/acc_view@0\.1\.0/.test(out), 'the kit built acc_view 0.1.0');
+        await sleep(1200);
+        es = ev();
+        await sleep(800);
+        const mine = (ls) => (ls || []).filter((l) => l.app === 'acc_view');
+        ok(es.scene && mine(es.scene).length === 0, 'show off: no layer on the cluster');
+        const probe = JSON.parse((await request('GET', '/probe')).body.toString() || '{}');
+        const im = probe.images && probe.images.MAIN_GFX;
+        ok(im && im.n >= 1 && im.w === 1600 && im.h === 520, 'the centre page pushed to the HMI (1600 x 520)');
+        ok(/acc: watch GapVehicleAhead ok/.test(out) && /acc: watch Vehicle ok/.test(out) && /acc: watch TrafficSignRecognition ok/.test(out), 'the page subscribed the read-only fields');
+
+        // the car's values: day, cruise 90, our speed 90, a target at raw 420 (level 3)
+        await request('POST', '/signals', { mode: 'manual', values: { speed: 90 } });
+        await request('POST', '/fake', { feed: { iface: 'de.bmw.infotainment.vehicle.Vehicle', field: 'statusDayNightChangeOver', value: { dayNightChangeOver: 1 } } });
+        await request('POST', '/fake', { feed: { iface: DDS, field: 'functionalLibraryData', value: { ldmSym: 'LDM_SYM_DCC', ldmSymColor: 'LDM_ACTIVE', statusLimiter: 'STATUS_INACTIVE', cruiseCtrlSpeedHUD: 90 } } });
+        ok(await waitFor(/acc: day\/night 1 -> day/, 4000), 'the car\'s day / night read (1 -> day)');
+        await request('POST', '/setting', { key: 'show', value: true });
+        ok(await waitFor(/acc: map layers 4 .* on map \(waits for the slot\), pixel memory 411520/, 8000), 'show on: 4 layers asked for, waiting for the slot (no contend)');
+        const feedGap = async (g0, g1, ms) => {
+            const n = Math.round(ms / 100);
+            for (let i = 0; i <= n; i++) { await request('POST', '/fake', { front: { gap: Math.round(g0 + (g1 - g0) * i / n), speed: 1500, obj: 7, qual: 0, qualExt: 0 } }); await sleep(100); }
+        };
+        await feedGap(420, 420, 1800);
+        await sleep(1500);
+        let ls = mine(es.scene);
+        ok(ls.length === 4 && ls.map((l) => l.kind).join() === 'effect,effect,image,image' && ls.every((l) => l.target === 'map'), 'the scene: 4 layers on map (effect, effect, image, image)');
+        const byZ = (k) => ls.filter((l) => l.z === k)[0] || {};
+        const want3 = M.carBox(M.GEO.map, M.depthOf(3));
+        ok(byZ(1).visible === 1 && byZ(1).x === want3[0] && byZ(1).y === want3[1] && byZ(1).w === want3[2] && byZ(1).h === want3[3], 'raw 420 at 90 km/h: the car layer at level 3\'s box (' + [byZ(1).x, byZ(1).y, byZ(1).w, byZ(1).h].join(' ') + ')');
+        ok(byZ(0).x === 334 && byZ(0).y === 158 && byZ(2).x === 368 && byZ(3).y === 362, 'the lane, text and pill layers in place');
+        const grab = async (l) => (await request('GET', '/px?key=' + encodeURIComponent(l.key) + '&x=0&y=0&w=' + l.w + '&h=' + l.h)).body;
+        const same = (px, want, what) => { let diff = 0; for (let i = 0; i < want.length; i++) if (Math.abs(want[i] - px[i]) > 1) diff++; ok(px.length === want.length && diff === 0, what + ' (' + diff + ' bytes differ)'); };
+        const s3 = { tgt: 3, clo: 0, data: 'ok', cru: ['cruise', 'active', 90], warn: false, adv: null, lim: null };
+        same(await grab(byZ(2)), P.textSheet(s3, false, 'uk'), 'the text sheet read back = the painter\'s (cruise 90, no limit)');
+        same(await grab(byZ(3)), P.pillSheet(s3, false, 'uk'), 'the pill sheet read back = the painter\'s (no event: empty)');
+        // the level changes (the gap grows: not closing): the car moves, no pixels
+        const pxBefore = es.px.filter((m) => m.key === byZ(2).key || m.key === byZ(3).key).length;
+        await feedGap(420, 900, 3000);
+        await feedGap(900, 900, 1500);
+        await sleep(1200);
+        ls = mine(es.scene);
+        const car = ls.filter((l) => l.z === 1)[0] || {};
+        const want5 = M.carBox(M.GEO.map, M.depthOf(5));
+        ok(car.w === want5[2] && car.h === want5[3], 'the gap grown to raw 900: the car layer resized to level 5 (' + car.w + 'x' + car.h + ')');
+        ok(es.px.filter((m) => m.key === byZ(2).key || m.key === byZ(3).key).length === pxBefore, 'level 3 -> 5: no pixel update (the car moved, nothing re-uploaded)');
+        // the limit (the event) and the night (the car's day / night)
+        await request('POST', '/fake', { feed: { iface: 'de.bmw.dass.TrafficSignRecognition', field: 'TrafficSignRecognition', value: { presentClassLimitSpeed: 22, controlSLIWarning: 0, presentWithdrawalLimitSpeed: 1 } } });
+        await sleep(600);
+        same(await grab(byZ(2)), P.textSheet(Object.assign({}, s3, { tgt: 5, lim: 110 }), false, 'uk'), 'the limit event (class 22): the plate says 110');
+        await request('POST', '/fake', { feed: { iface: 'de.bmw.dass.TrafficSignRecognition', field: 'TrafficSignRecognition', value: { presentClassLimitSpeed: 22, controlSLIWarning: 0, presentWithdrawalLimitSpeed: 1 } } });
+        await request('POST', '/fake', { feed: { iface: 'de.bmw.infotainment.vehicle.Vehicle', field: 'statusDayNightChangeOver', value: { dayNightChangeOver: 2 } } });
+        await feedGap(900, 900, 600);
+        same(await grab(byZ(2)), P.textSheet(Object.assign({}, s3, { tgt: 5, lim: 110 }), true, 'uk'), 'the car says night (2): the night colours');
+        await request('POST', '/fake', { feed: { iface: 'de.bmw.infotainment.vehicle.Vehicle', field: 'statusDayNightChangeOver', value: { dayNightChangeOver: 1 } } });
+        // closing fast: amber
+        await feedGap(900, 250, 2400);
+        const pill = await grab(byZ(3));
+        const Q = M.colours('map', false);
+        let amber = 0;
+        for (let i = 0; i < pill.length; i += 4) if (pill[i + 3] > 200 && near(pill[i], pill[i + 1], pill[i + 2], Q.amber, 6)) amber++;
+        ok(amber > 100, 'the gap falling 90 -> 25 m (assumed scale) in 2.4 s: closing fast, the amber pill (' + amber + ' px)');
+        // stale: the car goes
+        await sleep(2800);
+        ls = mine(es.scene);
+        ok((ls.filter((l) => l.z === 1)[0] || {}).visible === 0, 'silence for 2.8 s: stale, the car layer hidden (never a frozen car)');
+        same(await grab(byZ(3)), P.pillSheet({ tgt: null, clo: 0, data: 'stale', cru: s3.cru, warn: false, adv: null, lim: null }, false, 'uk'), 'stale: the pill says so');
+        // the centre page as the HMI got it: E's half equals the painter's (the table's age row moves on its own)
+        await sleep(1500);
+        const png = path.join(imgDir, 'main_gfx.png');
+        if (fs.existsSync(png)) {
+            const pg = readPng(png);
+            ok(pg.w === 1600 && pg.h === 520, 'the page image 1600 x 520');
+            const want = P.centre({ tgt: null, clo: 0, data: 'stale', cru: ['cruise', 'active', 90], warn: false, adv: null, lim: null }, { night: false, lang: 'uk', z: 0, info: {} }).px;
+            let diff = 0;
+            for (let y = 0; y < 482; y++) for (let x = 0; x < 790; x++) { const i = (y * 1600 + x) * 4, j = ((y + 38) * 1600 + x) * 4; for (let c = 0; c < 3; c++) if (Math.abs(want[i + c] - pg.px[j + c]) > 1) diff++; }
+            ok(diff === 0, 'the page\'s E half = the painter\'s picture (' + diff + ' bytes differ)');
+        } else ok(false, 'the page image saved by the bench');
+        ok(!/acc: (tick|apply|page|front|cruise|speed|warn|limit|daynight|layer|target|setting|layout|start):\s/.test(out.replace(/acc: layer \d+ shown/g, '').replace(/acc: target map \w+/g, '')), 'no error from the app\'s guards');
+        ok(!/Error|uncaught|unhandled/i.test(out.split('\n').filter((l) => /\[acc_view\]/.test(l)).join('\n')), 'no exception in the app\'s log');
+        await request('POST', '/setting', { key: 'show', value: false });
+        ok(await waitFor(/acc: map layers dropped/, 5000), 'off again: the layers dropped');
+        await sleep(800);
+        ok(mine(es.scene).length === 0, 'off again: no layer in the scene');
+        const nodeLine = (out.match(/app started on [^\n]+/) || [])[0];
+        console.log('bench: ' + (nodeLine || 'the app\'s Node version not logged'));
+    } finally {
+        if (es) es.close();
+        srv.kill('SIGTERM');
+        await sleep(300);
+        if (fail) console.log('--- bench log (tail) ---\n' + out.split('\n').slice(-60).join('\n'));
+        try { require('child_process').execFileSync('rm', ['-rf', work]); } catch (e) { /* left behind */ }
+    }
+}
+
+/* ------------------------------------------------------------------------------------------------ part 3: WebGL */
+function part3() {
+    if (!fs.existsSync(CHROME)) { console.log('part 3: skipped (no Chrome at ' + CHROME + ')'); return; }
+    const sj = JSON.parse(fs.readFileSync(path.join(APPDIR, 'hud', 'shaders.json'), 'utf8'));
+    const work = fs.mkdtempSync(path.join(os.tmpdir(), 'acc-gl-'));
+    const html = '<!doctype html><meta charset="utf-8"><body><pre id="o">running</pre><script>\n' +
+        'const SH = ' + JSON.stringify(sj) + ';\n' +
+        'const VS = "attribute vec2 a_pos; varying vec2 v_uv; void main(){ v_uv = vec2(a_pos.x * 0.5 + 0.5, 0.5 - a_pos.y * 0.5); gl_Position = vec4(a_pos, 0.0, 1.0); }";\n' +
+        'const out = []; const c = document.createElement("canvas"); c.width = 177; c.height = 104; const gl = c.getContext("webgl");\n' +
+        'out.push("webgl " + (gl ? gl.getParameter(gl.SHADING_LANGUAGE_VERSION) : "none"));\n' +
+        'const U = { acc_lane: { u_size: [177, 104], u_geo: [0.04, 70, 0.1, 3], u_line: [0.38, 0.6, 0.92], u_ground: [0.13, 0.14, 0.16], u_gap: [0.27, 2, 0.13, 0], u_gapc: [0.94, 0.67, 0.04] }, acc_car: { u_size: [177, 104], u_body: [0.76, 0.79, 0.83], u_dim: [0, 0] } };\n' +
+        'for (const n of Object.keys(SH)) { const mk = (t, s) => { const x = gl.createShader(t); gl.shaderSource(x, s); gl.compileShader(x); return x; };\n' +
+        ' const v = mk(gl.VERTEX_SHADER, VS), f = mk(gl.FRAGMENT_SHADER, SH[n]); const okc = gl.getShaderParameter(f, gl.COMPILE_STATUS);\n' +
+        ' const p = gl.createProgram(); gl.attachShader(p, v); gl.attachShader(p, f); gl.linkProgram(p); const okl = gl.getProgramParameter(p, gl.LINK_STATUS);\n' +
+        ' let lit = 0; if (okc && okl) { gl.useProgram(p); const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);\n' +
+        '  const l = gl.getAttribLocation(p, "a_pos"); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, 2, gl.FLOAT, false, 0, 0);\n' +
+        '  for (const k of Object.keys(U[n])) { const u = gl.getUniformLocation(p, k); const a = U[n][k]; if (u) gl["uniform" + a.length + "fv"](u, new Float32Array(a)); }\n' +
+        '  gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); const px = new Uint8Array(177 * 104 * 4); gl.readPixels(0, 0, 177, 104, gl.RGBA, gl.UNSIGNED_BYTE, px); for (let i = 3; i < px.length; i += 4) if (px[i] > 128) lit++; }\n' +
+        ' out.push(n + " compile " + okc + " link " + okl + " lit " + lit + " log " + JSON.stringify(gl.getShaderInfoLog(f) || "")); }\n' +
+        'document.getElementById("o").textContent = out.join("\\n");\n</script>';
+    const file = path.join(work, 'gl.html');
+    fs.writeFileSync(file, html);
+    const r = spawnSync(CHROME, ['--headless=new', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--disable-gpu-sandbox', '--virtual-time-budget=5000', '--dump-dom', 'file://' + file], { encoding: 'utf8', timeout: 60000 });
+    const dom = (r.stdout || '').replace(/&quot;/g, '"');
+    console.log('webgl: ' + ((dom.match(/<pre id="o">([\s\S]*?)<\/pre>/) || [])[1] || 'no output').replace(/\n/g, ' | '));
+    ok(/webgl WebGL GLSL ES 1\.0/.test(dom), 'headless Chrome has WebGL 1 (GLSL ES 1.00)');
+    ['acc_lane', 'acc_car'].forEach((n) => {
+        const m = new RegExp(n + ' compile (\\w+) link (\\w+) lit (\\d+)').exec(dom);
+        ok(m && m[1] === 'true' && m[2] === 'true', n + ': compiles and links as GLSL ES 1.00 in WebGL');
+        ok(m && Number(m[3]) > 200, n + ': draws (' + (m ? m[3] : 0) + ' opaque px)');
+    });
+    try { require('child_process').execFileSync('rm', ['-rf', work]); } catch (e) { /* left behind */ }
+}
+
+if (require.main === module) (async () => {
+    part1();
+    console.log('part 1 (pure): ' + pass + ' passed, ' + fail + ' failed');
+    if (args.indexOf('--no-gl') < 0) {
+        const p0 = pass, f0 = fail;
+        part3();
+        console.log('part 3 (WebGL): ' + (pass - p0) + ' passed, ' + (fail - f0) + ' failed');
+    }
+    if (args.indexOf('--no-bench') < 0) {
+        const p0 = pass, f0 = fail;
+        await part2();
+        console.log('part 2 (bench, port ' + PORT + '): ' + (pass - p0) + ' passed, ' + (fail - f0) + ' failed');
+    }
+    console.log(pass + ' passed, ' + fail + ' failed');
+    process.exit(fail ? 1 : 0);
+})();

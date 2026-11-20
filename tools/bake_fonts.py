@@ -225,7 +225,23 @@ TWIN_FONTS = [
     _td(TD_NOTO, 'td_cnt', 29, DIGITS + '/ '),                  # the message counter "n/m"
 ]
 # --- end Twin Dial ---
-FONTS = {'idrive_hud_widgets': HUD_FONTS, 'cluster_themes': CLUSTER_FONTS, 'f30_cluster': F30_FONTS, 'twin_dial': TWIN_FONTS}
+# ACC View (round 1120 AA2, docs/AGENT-BRIEF-acc-app.md): Twin Dial's Noto for the words (Ukrainian and English: every
+# character of apps/acc_view/words.js, plus plain ASCII for the raw enum names the centre page's table shows) and Twin
+# Dial's Saira for the figures. The app draws them in JavaScript into its own image sheets and its centre page: no atlas is
+# ever uploaded to the cluster (no sampler, no R8 texture). ATLAS_W 1024: a multiple of 4 anyway.
+AV_TEXT = ''.join(chr(c) for c in range(0x20, 0x7f)) + UA_UPPER + UA_LOWER + '–—…·’№'
+TD_NOTO_B = ('NotoSans-wght.subset.ttf', [650], 1.0)
+ACC_FONTS = [
+    _td(TD_NOTO, 'av_t16', 16, AV_TEXT),        # small words: "ліміт", "порада", the centre page's footer
+    _td(TD_NOTO, 'av_t21', 21, AV_TEXT),        # the map pill, the centre page's table labels
+    _td(TD_NOTO, 'av_t27', 27, AV_TEXT),        # the centre page's values and pill
+    _td(TD_NOTO_B, 'av_b18', 18, AV_TEXT),      # the ring's word on the map
+    _td(TD_NOTO_B, 'av_b26', 26, AV_TEXT),      # the centre page's title and ring word
+    _td(TD_SAIRA, 'av_f26', 26, DIGITS + '-–', tabular=False),   # the suggestion's figure on the map
+    _td(TD_SAIRA, 'av_f40', 40, DIGITS + '-–', tabular=False),   # the set speed and the limit on the map
+    _td(TD_SAIRA, 'av_f56', 56, DIGITS + '-–', tabular=False),   # the set speed and the limit on the centre page
+]
+FONTS = {'idrive_hud_widgets': HUD_FONTS, 'cluster_themes': CLUSTER_FONTS, 'f30_cluster': F30_FONTS, 'twin_dial': TWIN_FONTS, 'acc_view': ACC_FONTS}
 PAD = 2
 ATLAS_W = 1024
 SS = 4            # stretch: glyphs are drawn this many times larger and reduced by area (package A1)

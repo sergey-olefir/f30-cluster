@@ -730,7 +730,7 @@ def centre_frame(c, P, st):
 
 
 # ------------------------------------------------------------------------------------------------ E: the lane view (the owner's direction, 2026-11-19)
-# Two effect layers drawn by our own shaders (tools/acc-view/app/acc_view/shaders: acc_lane, acc_car; run on the Mac's GPU by
+# Two effect layers drawn by our own shaders (apps/acc_view/shaders: acc_lane, acc_car; run on the Mac's GPU by
 # lane_gl.py, so these pictures ARE the shaders) and one text sheet (the set speed in its ring, the -/+ marks, the limit, the
 # status pill). The car ahead is a separate layer the app moves and scales: a glide costs no pixels.
 E_Z = {1: 0.05, 2: 0.14, 3: 0.27, 4: 0.45, 5: 0.70}          # the car ahead's depth per level (0 = our foot, 1 = the far end)
@@ -1190,7 +1190,7 @@ def main():
         im = sheet(ctx_cells, 4, 'The map target in context (bench renders of our own themes; the window opened, our picture under it)', 460)
         im.save(os.path.join(out, 'sheets', 'context.png'), optimize=True)
         man['sheets'].append(dict(file='sheets/context.png', title='context'))
-    # the skeleton app's own painter (tools/acc-view/app/acc_view/view.js), when its pictures were made into skeleton/
+    # the AA skeleton's own pictures (its direction-B painter, gone since AA2's apps/acc_view 0.1.0), if a park still has them
     sk = os.path.join(out, 'skeleton')
     man['skeleton'] = sorted('skeleton/' + n for n in os.listdir(sk) if n.endswith('.png')) if os.path.isdir(sk) else []
     with open(os.path.join(out, 'manifest.json'), 'w') as f:

@@ -3,7 +3,7 @@
     from lane_gl import GL, shipped, sizes
     gl = GL(); rgba = gl.render('acc_lane', w, h, {'u_geo': (...), ...}, ss=3)     # float32 straight RGBA, h x w x 4
 
-The sources are GLSL ES 1.00 (tools/acc-view/app/acc_view/shaders/*.glsl), shimmed to GLSL 4.10 core exactly as
+The sources are GLSL ES 1.00 (apps/acc_view/shaders/*.glsl), shimmed to GLSL 4.10 core exactly as
 tools/strip/O/render.py does for the apps' shaders (varying -> in, texture2D -> texture, gl_FragColor -> an out
 variable; the maths unchanged), with the bench's vertex shader (v_uv 0,0 at the top left). `ss` samples each layer pixel
 ss x ss times (the analytic field, finer than the display) and averages. The Mac computes in fp32; the car's mediump is
@@ -18,7 +18,8 @@ import re
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SHADERS = os.path.join(HERE, 'app', 'acc_view', 'shaders')
+APP = os.path.join(HERE, '..', '..', 'apps', 'acc_view')
+SHADERS = os.path.join(APP, 'shaders')
 
 VS = '''#version 410 core
 in vec2 a_pos;
@@ -105,6 +106,41 @@ class GL:
         return data.astype(np.float32)
 
 
+# The app's baked data (round 1120 AA2): what the app ships of the shaders, and the car sprite for the centre page.
+SPRITE = (304, 179)                                  # the car ahead at level 1 on the centre page (AA-SPEC 3.1: ~304 x 180)
+BODY = (0.76, 0.79, 0.83)                            # silver (mockups.py e_colours, day)
+AMBER = (0.94, 0.67, 0.04)
+BODY_FAST = tuple(0.35 * b + 0.65 * a for a, b in zip(AMBER, BODY))     # amber-tinted while closing fast (the app's u_body too)
+
+
+def bake_app():
+    """apps/acc_view/hud/shaders.json (the shipped text of each shader: the app sends exactly this) and
+    apps/acc_view/hud/sprites.json (the acc_car shader's own output, silver and amber, straight RGBA deflated, base64)."""
+    import base64, json, zlib
+    out = os.path.join(APP, 'hud')
+    os.makedirs(out, exist_ok=True)
+    sh = {f[:-5]: shipped(source(f[:-5])) for f in sorted(os.listdir(SHADERS)) if f.endswith('.glsl')}
+    with open(os.path.join(out, 'shaders.json'), 'w') as f:
+        json.dump(sh, f, indent=1, sort_keys=True)
+        f.write('\n')
+    gl = GL()
+    w, h = SPRITE
+    sp = {}
+    for name, body in (('car', BODY), ('carFast', BODY_FAST)):
+        a = gl.render('acc_car', w, h, {'u_body': body, 'u_dim': (0.0, 0.0)}, ss=4)
+        px = (np.clip(a, 0, 1) * 255 + 0.5).astype('uint8').tobytes()
+        sp[name] = {'w': w, 'h': h, 'z': base64.b64encode(zlib.compress(px, 9)).decode('ascii')}
+    with open(os.path.join(out, 'sprites.json'), 'w') as f:
+        json.dump({'_about': 'the acc_car shader (apps/acc_view/shaders/acc_car.glsl) rendered by tools/acc-view/lane_gl.py --bake: '
+                   'straight RGBA rows, zlib, base64; u_body silver / amber-tinted', 'car': sp['car'], 'carFast': sp['carFast']}, f)
+        f.write('\n')
+    print('shaders.json: ' + ', '.join('%s %d B' % (k, len(v.encode())) for k, v in sh.items()))
+    print('sprites.json: %d x %d, %s' % (w, h, ', '.join('%s %d B' % (k, len(v['z'])) for k, v in sp.items())))
+
+
 if __name__ == '__main__':
+    import sys
+    if '--bake' in sys.argv:
+        bake_app()
     for k, (raw, shp) in sizes().items():
         print('%-10s source %6d B   shipped %6d B' % (k, raw, shp))
