@@ -41,7 +41,8 @@ const TCP_IF = 'de.bmw.sensors.objects.RecogFrontCameraObjectlist';
 const LANE_IF = 'de.bmw.environmentalmodel.LaneBoundaries';
 const LANES_IF = 'de.bmw.environmentalmodel.Lanes';
 const KDO_IF = 'de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy';
-const WORLD_MS = 100;               // the sources are decoded at most this often (they may come at 20-30 a second)
+const WORLD_MS = 100;
+const WORLD_PAINT_MS = 500;        // the centre page follows moving traffic at most twice a second               // the sources are decoded at most this often (they may come at 20-30 a second)
 const TICK_MS = 150;
 const PAGE_FPS = 4;
 const GLIDE_MS = 260;               // the glide's time constant: about a second from one level to the next
@@ -72,7 +73,7 @@ mgu.run({
             show: false, demo: false, subscribed: false, tracker: null, kmh: null, cru: null, warn: false, warnRaw: null, warnLines: 0,
             lim: null, limAt: 0, fvAt: 0, dn: null, dnCode: undefined, demoAt: 0, demoI: 0, z: 0, zAt: 0, s: null, key: '', lineAt: 0,
             timer: null, mv: null, mapBytes: 0,
-            page: { key: '', at: 0, loopAt: 0, force: true, paints: 0, ms: 0 },
+            page: { key: '', sk: '', paintAt: 0, at: 0, loopAt: 0, force: true, paints: 0, ms: 0 },
             // the world: the newest raw values (decoded in step(), at most every WORLD_MS), the tracker, the lane model, the logs
             raw: { rec: null, pos: null, posAt: 0, tcp: null, tcpAt: 0, lanes: null, lanesAt: 0 }, worldAt: 0, laneModel: null, laneAt: 0,
             tracker2: new Wo.Tracker(wcfg, ['cam', 'tcp']), logs: {}, leadCls: null,
@@ -274,8 +275,13 @@ mgu.run({
             const ageWord = typeof age === 'number' ? (age < 1 ? 0 : Math.min(99, Math.floor(age))) : -1;
             const info = { age: typeof age === 'number' ? (age < 1 ? 0.5 : ageWord) : null, warn: st.demo ? null : st.warnRaw };
             const demo = st.demo ? M.DEMO[st.demoI][0] : null;
-            const key = M.keyOf(s) + '|' + M.worldKey(s) + '|' + nt + '|' + ln + '|' + ageWord + '|' + (info.warn || '') + '|' + (demo || '');
-            if (key !== pg.key) {
+            const sk = M.keyOf(s) + '|' + nt + '|' + ln + '|' + ageWord + '|' + (info.warn || '') + '|' + (demo || '');
+            const key = sk + '|' + M.worldKey(s);
+            // a change of the state repaints at once; the world alone moving (traffic, lanes) at most every WORLD_PAINT_MS: a
+            // repaint with moving lanes costs ~30 ms on the Mac, so perhaps 0.3-0.6 s on the head unit (unmeasured)
+            const worldOnly = key !== pg.key && sk === pg.sk && now - pg.paintAt < WORLD_PAINT_MS;
+            if (key !== pg.key && !worldOnly) {
+                pg.sk = sk; pg.paintAt = now;
                 const t0 = Date.now();
                 const r = P.centre(s, { night: nt, lang: ln, info, demo });     // the car at its place: the page repaints per change only (<= 4 a second)
                 pg.ms += Date.now() - t0; pg.paints++;
