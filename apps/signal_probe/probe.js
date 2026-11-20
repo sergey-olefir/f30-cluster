@@ -46,7 +46,7 @@ function loadTurns() {
     try { return require('../../shared/carplay_turns'); } catch (e) { return null; }
 }
 
-const VERSION = '0.4.0';
+const VERSION = '0.5.0';
 const LOG_FORMAT = 1;
 const SUMMARY_S = [30, 120, 600];
 const ASK_AT_S = 120;                 // the silent fields' getters are asked once, at this summary
