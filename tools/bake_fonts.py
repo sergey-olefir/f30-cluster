@@ -123,8 +123,8 @@ CLUSTER_FONTS = [
 # stroke/cap of each text kind. The other fonts in apps/f30_cluster/hud/fonts are copies of Cluster Themes'
 # (Barlow) - note Barlow has NO Cyrillic, so nothing the car supplies may be drawn in it.
 # r1120 PS: the letters of our own 6WB words in Ukrainian (shared/i18n/uk.json wb.*) and the multiplication sign; READY's in wb_capb
-WB_UK = '\u00d7' + 'ВИКМ' + 'авгдиклмохь'
-WB_UKB = 'ВГОТ'
+WB_UK = '\u00d7' + 'авгдиклмохь'     # the owner (2026-11-20): READY and OFF stay Latin in both languages
+WB_UKB = ''
 F30_FONTS = [
     ('wb_spd', 'Roboto-wdth-wght.subset.ttf', 28, DIGITS + '.-', 0, [650, 87.5]),   # the speed scale's numbers, the range and consumption figures
     ('wb_rpm', 'Roboto-wdth-wght.subset.ttf', 43, DIGITS, 0, [650, 87.5]),          # the rev scale's numbers
@@ -134,7 +134,7 @@ F30_FONTS = [
     # text"), and wb_capb draws only our own Latin labels, READY and the mode name (decision 4). bench/test-fonts.js
     # checks that every font a layout uses for the car's words carries the full set. Their cells shrink back; no ink
     # moves (design/gen_6wb.py places text by its baseline)
-    # r1120 PS: the dial words follow the language (shared/i18n wb.*: "км/год", "1/хв × 1000", "ВИМК", "л/100 км", "миль/год", ...):
+    # r1120 PS: the dial words follow the language (shared/i18n wb.*: "км/год", "1/хв × 1000", "л/100 км", "миль/год", ...):
     # ONLY the letters of those words (WB_UK, WB_UKB), never a whole alphabet, so neither font can draw the car's own words
     # (bench/test-fonts.js: the Cyrillic in them is exactly the letters of our own words)
     ('wb_cap', 'Roboto-wdth-wght.subset.ttf', 21, LOWER + UPPER + DIGITS + '/ .:+-°' + WB_UK, 0, [650, 87.5]),   # km/h, 1/min x 1000, Time, OFF

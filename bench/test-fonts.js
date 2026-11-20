@@ -81,7 +81,7 @@ ok(carFonts.size > 0 && ['wb_road', 'wb_msg'].every((n) => carFonts.has(n)),
     'the car\'s words are drawn in ' + JSON.stringify([...carFonts]) + ' (the road label in wb_road, our message in wb_msg)');
 // decision 4: wb_capb draws only our own texts (READY, the mode name). r1120 PS (the owner, 2026-11-20: the dial words follow the
 // language): its Cyrillic, and wb_cap's, is EXACTLY the letters of our own Ukrainian dial words (shared/i18n wb.*), no more, so
-// neither can draw the car's words; wb_capb's is READY's ("ГОТОВО")
+// neither can draw the car's words; READY and OFF stay Latin (the owner, 2026-11-20), so wb_capb has none
 const capb = font('wb_capb').glyphs;
 const UK = JSON.parse(fs.readFileSync(path.join(ROOT, 'shared', 'i18n', 'uk.json'), 'utf8'));
 const lettersOf = (keep) => { const s = new Set(); Object.keys(UK).filter(keep).forEach((k) => UK[k].split('').forEach((c) => { if (/[Ѐ-ӿ]/.test(c)) s.add(c); })); return [...s].sort().join(''); };
