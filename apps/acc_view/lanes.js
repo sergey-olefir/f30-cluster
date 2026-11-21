@@ -23,7 +23,7 @@
  *                                speed (the road wheels' angle from the steering wheel's through the VARIABLE ratio curve:
  *                                roadAngle; the owner's G20 has Variable Sport Steering),
  *                                speed (blended between vYawMin and vSteerMax), or a direct curvature source; never tighter
- *                                than the car turns or than aLat allows; straight when unknown or standing. Filtered.
+ *                                than the car turns or than aLat allows; standing: the turned wheels (standWheels), else straight; straight when unknown. Filtered.
  *   readSource(spec, v)          one motion member by its config (path, scale, offset, unit, sign, invalid flag, qualifiers)
  *   corridor(L, k, w, len)       the two guessed edges around our path (g 1)
  *
@@ -238,7 +238,16 @@ Path.prototype.target = function (inp, now) {
     if (fresh(I.steer)) kRaw.steer = Math.tan(clamp(I.steer.road ? I.steer.val : roadAngle(P, I.steer.val), -0.7, 0.7)) / P.wheelbase;
     if (P.on === false) return { k: 0, src: null, why: 'NO_MOTION', v, kRaw };
     if (v === null) return { k: 0, src: null, why: 'NO_SPEED', v, kRaw };
-    if (v < P.vStand) return { k: 0, src: null, why: 'STANDING', v, kRaw };
+    if (v < P.vStand) {
+        // the owner (2026-11-21): standing, the corridor follows the turned wheels, as the parking lines do (standWheels; false = straight)
+        if (P.standWheels !== false && has(kRaw.steer) && isFinite(kRaw.steer)) {
+            // drawn no tighter than standRadius (20 m): the corridor starts at our bumper, so a full lock would swing it across our own
+            // car; anchoring it at the rear axle needs the view's sideways follow to change too (a later step)
+            const lim0 = 1 / Math.max(P.turnRadius, num(P.standRadius) !== null ? P.standRadius : 20);
+            return { k: clamp(kRaw.steer, -lim0, lim0), src: 'steer', why: 'STANDING', v, kRaw, clip: Math.abs(kRaw.steer) > lim0 };
+        }
+        return { k: 0, src: null, why: 'STANDING', v, kRaw };
+    }
     let k = null, src = null;
     const ks = has(kRaw.steer) && (v < P.vSteerMax || !has(kRaw.yaw)) ? kRaw.steer : null;
     if (has(kRaw.curv)) { k = kRaw.curv; src = 'curv'; }

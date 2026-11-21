@@ -123,7 +123,7 @@ function scene(name, ms) {
         const k = Math.tan(Ln.roadAngle(CFG0.path, sw)) / 2.851;
         return { raw: null, motion: { v, yaw: v * k, steer: sw }, objects: [O('t1', 'car', 14, 0.5 * k * 196, 'OBJECT_IN_EGO_LANE'), O('t2', 'ped', 9, -4.5)], lead: { x: 14, y: 0.5 * k * 196, cls: 'car' } };
     }
-    // standing: at a stop, the wheel turned, nothing from the camera: straight, our car centred
+    // standing: at a stop, the wheel turned, nothing from the camera: the corridor follows the turned wheels (the owner, 2026-11-21), our car centred
     return { raw: null, motion: { v: 0, yaw: 0, steer: 200 * D2R }, objects: [O('s1', 'car', 7, 0, 'OBJECT_IN_EGO_LANE'), O('s2', 'cyc', 10, -3)], lead: { x: 7, y: 0, cls: 'car' } };
 }
 

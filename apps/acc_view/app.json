@@ -2,7 +2,7 @@
   "id": "acc_view",
   "title": "ACC View",
   "description": "Read-only: what the car's sensors see (the lanes and their markings, the road users: cars, trucks, two-wheelers, pedestrians, cyclists; the vehicle ahead) with the cruise / limiter and the limit, drawn as a lane view on the centre screen and, as a test, on the cluster's map target. Writes nothing to the car.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "vendor": "custom",
   "loggingId": "OAAV",
   "iconGlyph": "AV",
@@ -329,6 +329,8 @@
       "path": {
         "on": true,
         "vStand": 0.5,
+        "standWheels": true,
+        "standRadius": 20,
         "vYawMin": 2,
         "vSteerMax": 5,
         "wheelbase": 2.851,
@@ -492,7 +494,7 @@
             "sign": 1
           }
         },
-        "_about": "fixes-1121 AL: our own path when the lanes are not good enough (lanes.js Path): yaw rate / speed above vYawMin m/s (preferred wherever we move), the steering alone below it, blended up to vSteerMax; a direct curvature first when its source is on; never tighter than turnRadius m or aLat m/s^2; straight under vStand m/s or with no data. The owner's car is a G20 330i xDrive sedan (wheelbase 2 851 mm) with S2VL Variable Sport Steering: steerCurve [[steering-wheel deg, ratio], ...] is the ratio by the wheel's angle, linear between, flat beyond, and the road wheels' angle is its integral. BMW publishes no curve: 15.0 on centre falling to 12.0 by 200 deg is a CONSERVATIVE ASSUMPTION (steerRatio: only without a curve). sources: the yaw and steer pair is on, the others are alternatives (declared in signals, read only, off). Every scale, unit ('deg' = degrees or deg/s) and sign is ASSUMED: the log's 'acc: path ... raw' ranges and 'cal' ratio (the camera's lane curvature over ours: 1 when right, -1 a sign, ~57 deg/rad; for the steering also the curve) settle them."
+        "_about": "fixes-1121 AL: our own path when the lanes are not good enough (lanes.js Path): yaw rate / speed above vYawMin m/s (preferred wherever we move), the steering alone below it, blended up to vSteerMax; a direct curvature first when its source is on; never tighter than turnRadius m or aLat m/s^2; under vStand m/s the turned wheels (standWheels, the owner's choice 2026-11-21: as the parking lines), straight with no steering data. The owner's car is a G20 330i xDrive sedan (wheelbase 2 851 mm) with S2VL Variable Sport Steering: steerCurve [[steering-wheel deg, ratio], ...] is the ratio by the wheel's angle, linear between, flat beyond, and the road wheels' angle is its integral. BMW publishes no curve: 15.0 on centre falling to 12.0 by 200 deg is a CONSERVATIVE ASSUMPTION (steerRatio: only without a curve). sources: the yaw and steer pair is on, the others are alternatives (declared in signals, read only, off). Every scale, unit ('deg' = degrees or deg/s) and sign is ASSUMED: the log's 'acc: path ... raw' ranges and 'cal' ratio (the camera's lane curvature over ours: 1 when right, -1 a sign, ~57 deg/rad; for the steering also the curve) settle them."
       }
     }
   }

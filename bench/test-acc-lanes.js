@@ -243,7 +243,12 @@ function partPath() {
     const k90 = tg({ v: { val: 1.5, at: 0 }, steer: { val: 90 * D, at: 0 } }).k, kConst = Math.tan(90 * D / 15) / 2.851;
     ok(k90 > kConst && k90 < kConst * 1.1, 'a 90 deg turn of the wheel bends our path more than a constant 15 would (' + (1 / k90).toFixed(1) + ' m against ' + (1 / kConst).toFixed(1) + ' m)');
     ok(tg(I({ curv: { val: 0.004, at: 0 }, yaw: { val: 1, at: 0 } })).src === 'curv', 'a direct curvature source first, when on');
-    ok(tg({ v: { val: 0.2, at: 0 }, steer: { val: 3, at: 0 } }).why === 'STANDING' && tg({ steer: { val: 3, at: 0 } }).why === 'NO_SPEED' && tg(I({})).why === 'NO_MOTION', 'standing, no speed, no motion: straight, each with its reason');
+    const st0 = tg({ v: { val: 0.2, at: 0 }, steer: { val: 3, at: 0 } }), st1 = tg({ v: { val: 0.2, at: 0 } });
+    ok(st0.why === 'STANDING' && st0.src === 'steer' && st0.k > 0 && Math.abs(st0.k) <= 1 / 20 + 1e-12 && st1.why === 'STANDING' && st1.k === 0 && st1.src === null,
+        'standing: the corridor follows the turned wheels (the owner, 2026-11-21), never tighter than the turning radius; standing with no steering: straight');
+    const pStraight = new Ln.Path(Object.assign({}, CFG, { path: Object.assign({}, CFG.path, { standWheels: false }) }));
+    ok(pStraight.target({ v: { val: 0.2, at: 0 }, steer: { val: 3, at: 0 } }, 0).k === 0, 'standWheels false keeps the old straight rule (config)');
+    ok(tg({ steer: { val: 3, at: 0 } }).why === 'NO_SPEED' && tg(I({})).why === 'NO_MOTION', 'no speed, no motion: straight, each with its reason');
     ok(tg({ v: { val: 20, at: 1500 }, yaw: { val: 0.1, at: 0 } }, 1500).why === 'NO_MOTION' && tg({ v: { val: 20, at: 4000 }, yaw: { val: 0.1, at: 0, stale: 5000 } }, 4000).src === 'yaw', 'a stale source counts for nothing (a field\'s own staleMs: 5 s)');
     const lim = tg({ v: { val: 30, at: 0 }, yaw: { val: 3, at: 0 } });
     ok(lim.clip && Math.abs(lim.k - CFG.path.aLat / 900) < 1e-12, 'never tighter than aLat / v^2 at speed');
@@ -285,12 +290,12 @@ function partScenes() {
     const tw = lv('town', 4.5);
     ok(tw.verdict === 'predicted' && tw.path.src === 'steer' && tw.path.k > 0.03, 'scene town: our path from the steering wheel (R ' + (1 / tw.path.k).toFixed(0) + ' m, left)');
     const sd = lv('standing', 5);
-    ok(sd.verdict === 'straight' && sd.path.why === 'STANDING' && sd.path.k === 0 && sd.ego.y0 === 0, 'scene standing: straight, our car centred, the wheel ignored');
+    ok(sd.verdict === 'predicted' && sd.path.why === 'STANDING' && sd.path.src === 'steer' && sd.path.k !== 0 && Math.abs(sd.path.k) <= 1 / 20 + 1e-12, 'scene standing: the corridor follows the turned wheels, no tighter than 20 m');
     // the row "Смуги", both languages
     const row = (s, lang) => P.rows(s, {}, lang).filter((r) => r[0] === 'rowLanes')[0][1];
     ok(row(at('lost', 2.5), 'uk') === 'виміряні · 4' && row(at('oneedge', 5), 'uk') === 'частково: одна межа' && row(at('town', 4.5), 'uk') === 'траєкторія за кермом' &&
-        row(at('lostcurve', 6), 'uk') === 'траєкторія за рухом' && row(at('standing', 5), 'uk') === 'пряма: даних немає', 'the row Смуги: виміряні · 4, частково: одна межа, траєкторія за кермом / за рухом, пряма: даних немає');
-    ok(row(at('town', 4.5), 'en') === 'path from the steering' && row(at('standing', 5), 'en') === 'straight: no data' && row(M.DEMO[2][2], 'uk') === Wd.word('uk', 'lanesFixed'), 'in English too; the 14 cruise states keep the symbol\'s words');
+        row(at('lostcurve', 6), 'uk') === 'траєкторія за рухом' && row(at('standing', 5), 'uk') === 'траєкторія за кермом' && row(at('lost', 1), 'uk') !== '', 'the row Смуги: виміряні · 4, частково: одна межа, траєкторія за кермом / за рухом, пряма: даних немає');
+    ok(row(at('town', 4.5), 'en') === 'path from the steering' && row(at('standing', 5), 'en') === 'path from the steering' && row(M.DEMO[2][2], 'uk') === Wd.word('uk', 'lanesFixed'), 'in English too; the 14 cruise states keep the symbol\'s words');
     // the map's uniforms: the line colour never changes; the guess only in u_lp.w (0 for every measured line)
     const cols = {};
     M.DEMO.forEach((d) => [1000, 4000, 7000].forEach((ms) => { const u = M.laneUniforms(G, M.withScene(d[2], ms), 0.2, false); cols[u.u_line.join()] = 1; }));

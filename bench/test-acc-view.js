@@ -86,7 +86,7 @@ FakeCR.prototype.pixels = function (ref, rects, px) { this.msgs.push({ op: 'pixe
 function part1() {
     const app = JSON.parse(fs.readFileSync(path.join(APPDIR, 'app.json'), 'utf8'));
     ok(app.id === 'acc_view' && /^OA[A-Z0-9]{2}$/.test(app.loggingId), 'id and a 4-char logging id');
-    ok(app.version === '0.1.0', 'version 0.1.0');
+    ok(app.version === '0.2.1', 'version 0.2.1');
     const others = fs.readdirSync(path.join(ROOT, 'apps')).filter((a) => a !== 'acc_view').map((a) => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', a, 'app.json'), 'utf8')); } catch (e) { return null; } }).filter(Boolean);
     ok(others.length >= 3 && others.every((a) => a.loggingId !== app.loggingId && a.id !== app.id), 'logging id and id unique among the apps');
     const flags = [];
