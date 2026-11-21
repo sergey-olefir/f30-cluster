@@ -4,7 +4,7 @@ road scene, a proposed value table for the light's raw members, replay files for
 
     python3 -I tools/car/rv_analyse.py <data/rec folder or rec files ...> -o <out folder> [--notes notes.json|notes.txt] [--name TEXT]
 
-The input is what the RV recorder writes (tools/road-view/app/rv_recorder, shared/signal_recorder.js, format #rec 1), as
+The input is what the RV recorder writes (apps/rv_recorder, shared/signal_recorder.js, format #rec 1), as
 tools/car/collect.sh copies it (apps/rv_recorder/rec/). The drive: docs/traffic/DRIVE-PROTOCOL.md. The notes are the passenger's
 marks: JSON [{"session": "20261121-100000" (optional), "mark": 3, "what": "red-first"}], or text lines "M3 red-first" (a line may
 start with the session). Only the label is read (its vocabulary is LABELS below); any other word on a line is ignored and never
@@ -103,7 +103,8 @@ def expected_sources():
     try:
         with open(RV_FIELDS, encoding='utf-8') as fh:
             d = json.load(fh)
-        return [(f['tag'], f.get('kind', 'full'), f.get('group', '')) for f in d.get('fields', [])]
+        # fixes-1121 CR: the table holds four choices now; this analysis is S19's (a field without "sets" is the old table's S19)
+        return [(f['tag'], f.get('kind', 'full'), f.get('group', '')) for f in d.get('fields', []) if 'S19' in f.get('sets', [f.get('set', 'S19')])]
     except (OSError, ValueError):
         return []
 

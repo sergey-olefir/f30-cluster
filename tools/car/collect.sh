@@ -13,7 +13,8 @@
 # r1120 AC: when signal_probe is collected, its recordings too (data/rec/rec-<session>-<n>.csv.gz, listed with `ls -l`, each copied
 # with `cat`, its size checked against the listing: apps/signal_probe/rec/ and rec-copied.txt), and the quota files of /var/opt
 # (`cat`, read by quota_read.py into system/quota.json: each app's disk limit as the head unit applies it).  --no-rec: neither.
-# road TS: the RV recorder (rv_recorder, round "Road View") writes the same files in its own data/rec/: collected the same way.
+# road TS: the RV recorder (rv_recorder, round "Road View"; fixes-1121 CR: apps/rv_recorder in the Store, choices RV / CAM / CRUISE /
+# NAV, the file header names the set) writes the same files in its own data/rec/: collected the same way.
 # After the copy it runs the privacy scan (local): anything flagged is listed and a redacted copy is made under <folder>/redacted/.
 set -u
 

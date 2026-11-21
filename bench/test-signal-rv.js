@@ -1,6 +1,7 @@
 'use strict';
 /**
- * test-signal-rv.js - round "Road View", package TS: the RV recorder (set S19 "RV", tools/road-view/app/rv_recorder) and its budget.
+ * test-signal-rv.js - round "Road View", package TS: the RV recorder (apps/rv_recorder; fixes-1121 CR: in the Store, 0.2.0, the
+ * choices S19 RV, S20 CAM, S21 CRUISE, S22 NAV) and its budget per choice.
  *
  *   BENCH_PORT=8905 node bench/test-signal-rv.js     (RV_SIM_MIN: simulated minutes per budget case, default 5; RV_BUDGET_OUT: a file
  *                                                     to write the budget to, JSON; RV_SKIP_BENCH=1: parts 1-3 only)
@@ -8,18 +9,21 @@
  *   1. the declarations: every source read only (b / s / rs, a NON-ZERO getter for every r, an event for every b; never w, never a
  *      method, never settingTrafficlightBraking / settingTrafficlightDriveOff, no navigation interface), app.json "signals" exactly
  *      what the table needs and check_signals.py passing, every summary path and skip name in the catalogue's types, the interface
- *      count (this app's, Signal Probe's unchanged 99, and the 105 Signal Probe would declare with the set inside it), outside the
- *      Store's glob, the shared recorder and formatter, Node 8 syntax, no setter or method call in the source
+ *      count (in all and per choice, well under 88), in the Store's glob, the shared recorder and formatter, Node 8 syntax, no setter
+ *      or method call in the source; NAV: every source an allow-list (pick) whose paths are in the type and name no position, id or
+ *      direction, the others without a text or a position member
  *   2. the engine on a fake clock with the real recorder: nothing subscribed before the first recording, every interface then once;
  *      the first message of every source one log line with its raw members and never a skipped one; "full" sources every message,
  *      "list" sources the first whole, one summary a second, the next whole after a mark; marks from the menu and from the TRIP edge
  *      (255 and a held button are not presses; off with the setting); change lines; a second recording asks each rs getter once;
  *      nothing recorded between recordings; a hostile value is one warning, never a throw
- *   3. the budget: simulated town drives at plausible rates with values from the catalogue's types (every float moving; in the worst
- *      case every integer too): bytes a second on disk, minutes in the 15 MB quota, CPU a second
- *   4. on the bench (its own tree in a temporary folder, the app outside apps/): the app built by the kit starts idle, a press
- *      records S19, injected events land in the file, a TRIP press is a mark, the log has the first and change lines, the converter
- *      reads the file, the app never exits
+ *   2b. fixes-1121 CR: a choice records only its own sources; a second choice subscribes only the interfaces it adds; NAV's values
+ *      cut to their allow-list (a destination's position, a road name, an id never reach the file or the log); recSame folds
+ *   3. the budget per choice: simulated drives at plausible rates with values from the catalogue's types (every float moving; in the
+ *      worst case every integer too): bytes a second on disk, minutes in the 15 MB quota, CPU a second
+ *   4. on the bench (its own tree in a temporary folder): the app built by the kit starts idle, a press records S19, injected events
+ *      land in the file, a TRIP press is a mark, the log has the first and change lines, the converter reads the file; the RECSET row
+ *      picks CAM, which records the lanes; the app never exits
  * Mac only, Node 18 or newer. Never shipped.
  */
 const fs = require('fs');
@@ -29,7 +33,7 @@ const zlib = require('zlib');
 const { spawn, spawnSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
-const APPDIR = path.join(ROOT, 'tools', 'road-view', 'app', 'rv_recorder');
+const APPDIR = path.join(ROOT, 'apps', 'rv_recorder');
 const CATALOGUE = path.join(ROOT, 'reference', 'car', '2026-11-15', 'someip', 'someip-interfaces.json');
 const CHECK = path.join(ROOT, 'tools', 'signals', 'check_signals.py');
 const CONVERT = path.join(ROOT, 'tools', 'car', 'rec_convert.py');
@@ -167,7 +171,15 @@ const RATES = {
         'set-stop-sign': 0.05, 'set-give-way': 0.05, 'give-way-status': 0.05, 'set-wrong-way': 0.05, list: 10, 'cam-objects': 15, 'cam2-objects': 15, 'road-segment': 10, 'suaar-objects': 10 },
 };
 RATES.busy = Object.assign({}, RATES.quiet, { tl: 45, 'cam-signs': 15, 'cam-legacy2': 15, 'cam-legacy': 15, 'lca-input': 25, blockage: 10, list: 25, 'cam-objects': 30, 'cam2-objects': 30, 'road-segment': 25, 'suaar-objects': 25 });
-const rateOf = (f, r) => (r[f.tag] !== undefined ? r[f.tag] : f.kind === 'list' ? r.list : 1);
+// fixes-1121 CR: the new sources (guesses until a drive): lanes and the light objects at the camera's rate, the motion at 10-50 Hz,
+// the cruise displays at 5 Hz, the pedals 50 Hz, the guidance 1 Hz
+Object.assign(RATES.quiet, { lanes: 15, 'lane-change': 1, 'lanes-change2': 1, 'lm-left': 15, 'lm-right': 15, 'lm2-left': 15, 'lm2-right': 15, objlist: 15, 'cam-position': 15, 'cam2-position': 15,
+    'hb-control': 5, 'hb-meid1': 5, 'hb-meid2': 5, hbObj: 2, weather: 0.2, curvature: 50, 'steer-axle': 10, steering: 10, 'yaw-hu': 10,
+    condition: 0.05, 'engine-status': 0.1, 'light-status': 0.1, lamps: 2, 'day-night': 0.05, 'outside-temp': 0.1,
+    'assist-avail': 5, 'set-sla': 0.05, 'set-dcc': 0.05, 'set-offset': 0.05, 'sla-country': 0.05, 'fas-foresight': 5, 'ldm-guidance': 5, 'status-fas': 1, 'front-vehicle': 25,
+    'accel-pedal': 50, 'brake-driver': 50, 'brake-switch': 10, 'drive-torque': 50, nav: 1, ccp: 0.5 });
+RATES.busy = Object.assign({}, RATES.quiet, RATES.busy, { lanes: 25, 'lm-left': 25, 'lm-right': 25, 'lm2-left': 25, 'lm2-right': 25, objlist: 25, 'cam-position': 30, 'cam2-position': 30, 'hb-control': 15, hbObj: 15, nav: 2, ccp: 2 });
+const rateOf = (f, r) => (r[f.tag] !== undefined ? r[f.tag] : /^hb-obj/.test(f.tag) ? r.hbObj : f.group === 'nav' ? (/^ccp-/.test(f.tag) ? r.ccp : r.nav) : f.kind === 'list' ? r.list : 1);
 
 async function main() {
     // ---------------------------------------------------------------------------------------------------------------
@@ -178,8 +190,12 @@ async function main() {
     const flags = [];
     Object.keys(app.signals).forEach((i) => Object.keys(app.signals[i]).forEach((k) => { if (k[0] !== '_') flags.push(app.signals[i][k]); }));
     ok(flags.every((x) => x === 's' || x === 'rs') && !Object.keys(app.signals).some((i) => app.signals[i]._methods), 'no "w", no "r" without "s", no method in the manifest');
-    ok(!/settingTrafficlightBraking|settingTrafficlightDriveOff|iDriveFASExtended"|navigation\.|DataProfile|trafficLightNavGraph/.test(JSON.stringify(app.signals).replace(/statusIDriveFASExtended/g, '')),
-        'never the traffic-light settings (rws), never FASuS iDriveFASExtended (the setter), never a navigation interface');
+    ok(!/settingTrafficlightBraking|settingTrafficlightDriveOff|iDriveFASExtended"|Positioning|GPSData|NdsData|adasng\.Routing|MapControl|navigation\.ADAS|currentLocation|"nextDestination"|DataProfile|trafficLightNavGraph|countryCode|multimodalControlDriverAssistance"/.test(JSON.stringify(app.signals).replace(/statusIDriveFASExtended/g, '')),
+        'never the traffic-light settings (rws), never FASuS iDriveFASExtended or the multimodal setter, never a navigation position, map, route geometry or country (fixes-1121 CR: NAV reads only the guidance metrics)');
+    ok(RVF.TABLE.every((f) => Array.isArray(f.sets) && f.sets.length && f.sets.every((id) => RVF.SETS.some((x) => x.id === id))) && JSON.stringify(RVF.SETS.map((x) => x.id + ':' + x.label)) === '["S19:RV","S20:CAM","S21:CRUISE","S22:NAV"]',
+        'four choices, every source in at least one: S19 RV, S20 CAM, S21 CRUISE, S22 NAV');
+    const keys = RVF.TABLE.map((f) => f.iface + '.' + f.field + '@' + RVF.instOf(f));
+    ok(new Set(keys).size === keys.length && new Set(RVF.TABLE.map((f) => f.tag)).size === RVF.TABLE.length, 'no source twice (one entry, several sets), every tag unique');
     if (!cat) console.log('  skip: the catalogue is not here (the getter ids, the types)');
     else {
         const bad = RVF.TABLE.filter((f) => {
@@ -194,16 +210,35 @@ async function main() {
         const sOnly = RVF.TABLE.filter((f) => f.flags === 's' && cat.interfaces[f.iface].fields[f.field].getter && cat.interfaces[f.iface].fields[f.field].getter.id > 0);
         ok(!sOnly.length, 'an "s" source has no usable getter (else it would be "rs"): ' + (sOnly.map((f) => f.tag).join(', ') || 'none'));
         const sets = RVF.TABLE.filter((f) => /SettingsDriverAssistance/.test(f.iface));
-        ok(sets.length === 4 && sets.every((f) => f.flags === 's'), 'the four assistance settings TR named are read by their notifier only (s)');
+        ok(sets.length === 8 && sets.every((f) => f.flags === 's'), 'the assistance settings (TR\'s four; CRUISE: the speed-limit assist, DCC, the offset, the country status) are read by their notifier only (s)');
         const paths = [];
         RVF.TABLE.forEach((f) => { const s = f.sum || {}; ['count', 'ids'].forEach((k) => { if (s[k]) paths.push([f, s[k]]); }); ['cls', 'rng', 'len'].forEach((k) => Object.keys(s[k] || {}).forEach((n) => paths.push([f, s[k][n]]))); });
-        (function logs() { RVF.TABLE.forEach((f) => { if (Array.isArray(f.log)) f.log.forEach((p) => paths.push([f, p])); }); })();
+        (function logs() { RVF.TABLE.forEach((f) => { if (Array.isArray(f.log) && !f.pick) f.log.forEach((p) => paths.push([f, p])); }); })();
         const missing = paths.filter((x) => !pathOk(x[0], x[1]));
         ok(paths.length > 40 && !missing.length, 'every summary and change-line path (' + paths.length + ') is a member of its type' + (missing.length ? ': ' + missing.map((x) => x[0].tag + ' ' + x[1]).join(', ') : ''));
         const skips = RVF.TABLE.filter((f) => f.skip).filter((f) => f.skip.some((k) => !namesOf(f).has(k)));
         ok(!skips.length && src('ego-position').skip.join() === 'posX,posY,heading' && src('cam-signs').skip.join() === 'location', 'the skipped members exist (the car\'s own position and heading, the sign location floats)');
-        const texts = RVF.TABLE.filter((f) => textMembers(f).length);
-        ok(!texts.length, 'no source type has a text member (the recorder would write it empty anyway): ' + (texts.map((f) => f.tag).join(', ') || 'none'));
+        const texts = RVF.TABLE.filter((f) => !f.pick && textMembers(f).length);
+        ok(!texts.length, 'no source type without an allow-list has a text member (the recorder would write it empty anyway): ' + (texts.map((f) => f.tag).join(', ') || 'none'));
+        // fixes-1121 CR: NAV - every guidance source an allow-list; its paths in the type; never a position, a direction, an id, an icon
+        const nav = RVF.sourcesOf('S22');
+        const navNoPick = nav.filter((f) => !f.pick && /navigation|Guidance/.test(f.iface) && !/NavigationCAN|adasng\.CCP/.test(f.iface));
+        ok(!navNoPick.length, 'every guidance source of NAV has an allow-list (pick)' + (navNoPick.length ? ': ' + navNoPick.map((f) => f.tag).join(', ') : ''));
+        const pickPath = (p) => p.replace(/^@/, '').replace(/#(n|mask)$/, '').replace(/\.\[\]\./g, '[].').replace(/\.\d+(\.|$)/g, '[]$1').replace(/\.\[\]$/, '[]');
+        const PRIVATE = /(^|\.)position(\.|$)|longitude|latitude|coordinate|directionToDestination|directionAbsolute|roadlinks|pointOfInterest|poiId|sourceId|destinationId|(^|\.)uid$|icon|url|timeStamp/i;
+        const badPick = [];
+        RVF.TABLE.filter((f) => f.pick).forEach((f) => Object.keys(f.pick).forEach((k) => {
+            const p = f.pick[k];
+            if (PRIVATE.test(p)) { badPick.push(f.tag + ' ' + p + ' (private)'); return; }
+            if (p === '') return;
+            const alts = /\*/.test(p) ? ['intersection', 'tunnel', 'branch', 'roundabout'].map((m) => p.replace('*', m)) : [p];
+            if (!alts.some((a) => pathOk(f, pickPath(a)))) badPick.push(f.tag + ' ' + p);
+        }));
+        ok(!badPick.length && RVF.TABLE.filter((f) => f.pick).length >= 15, 'NAV: every allow-list path (' + RVF.TABLE.filter((f) => f.pick).reduce((a, f) => a + Object.keys(f.pick).length, 0) + ') is in its type and names no position, direction, id, icon or time stamp' + (badPick.length ? ': ' + badPick.join(', ') : ''));
+        const logBad = RVF.TABLE.filter((f) => f.pick && Array.isArray(f.log) && f.log.some((k) => !Object.prototype.hasOwnProperty.call(f.pick, k)));
+        ok(!logBad.length, 'a NAV change line names only allow-listed members');
+        const privNames = nav.filter((f) => !f.pick).filter((f) => Array.from(namesOf(f)).some((n) => PRIVATE.test(n) && !/^(posX|posY)$/.test(n)));
+        ok(!privNames.length, 'NAV\'s sources without an allow-list (the cluster\'s lane feed, the CAN feed, the map\'s road attributes) carry no position, id or text: ' + (privNames.map((f) => f.tag).join(', ') || 'none'));
         const py = spawnSync('python3', [CHECK, CATALOGUE, path.join(APPDIR, 'app.json')], { encoding: 'utf8' });
         ok(py.status === 0 && /all declarations pass/.test(py.stdout), 'tools/signals/check_signals.py: all declarations pass');
         const tlv = cat.interfaces[src('tl').iface].events.RecognitionTrafficLightCamera.outputs.map((o) => o.name);
@@ -212,16 +247,18 @@ async function main() {
         ok(tsr.length === 16 && src('tsr').log.indexOf('recognitionNoPassing') >= 0 && src('tsr').log.indexOf('countryCodingTrafficSign') >= 0, 'the sign function: all 16 members recorded, no overtaking and the country coding logged on change');
     }
     const c = counts();
-    ok(c.rvRecorder === RVF.interfaces().length && c.rvRecorder === 22 && Object.keys(app.signals).length === 22, 'the RV recorder declares 22 interfaces');
-    ok(c.signalProbe === PROBE_FIELDS.interfaces().length && c.signalProbe >= 99, 'Signal Probe\'s probe fields: ' + c.signalProbe + ' interfaces (99 before the HB set of the Auto Beam round; the RV set adds none to it)');
-    ok(c.newToSignalProbe === 6 && c.signalProbeIfInside === c.signalProbe + 6 && c.signalProbeIfInside > 99, 'inside Signal Probe the set would need 6 more: ' + c.signalProbeIfInside + ' > 99, so it is a separate recorder (the brief)');
+    ok(c.rvRecorder === RVF.interfaces().length && c.rvRecorder === 46 && Object.keys(app.signals).length === 46 && c.rvRecorder < 60, 'the RV recorder declares 46 interfaces (the most an app was seen running with on the car: 88)');
+    ok(JSON.stringify(c.perSet) === JSON.stringify({ RV: { set: 'S19', sources: 39, interfaces: 22 }, CAM: { set: 'S20', sources: 70, interfaces: 31 }, CRUISE: { set: 'S21', sources: 34, interfaces: 20 }, NAV: { set: 'S22', sources: 43, interfaces: 17 } }),
+        'per choice: RV 39 sources / 22 interfaces, CAM 70 / 31, CRUISE 34 / 20, NAV 43 / 17');
+    ok(c.signalProbe === PROBE_FIELDS.interfaces().length && c.signalProbe === 105, 'Signal Probe\'s probe fields: ' + c.signalProbe + ' interfaces (+ the diagnostic transport = its 106; the recorder adds none to it)');
+    ok(c.newToSignalProbe === 12 && c.signalProbeIfInside === c.signalProbe + 12, 'inside Signal Probe the sets would need ' + c.newToSignalProbe + ' more: ' + c.signalProbeIfInside + ', so they are a separate recorder (the brief)');
     const repo = readJson(path.join(ROOT, 'mgu-repo.json'));
-    ok(repo.apps.path === 'apps/*' && path.relative(path.join(ROOT, 'apps'), APPDIR).indexOf('..') === 0 && !fs.existsSync(path.join(ROOT, 'apps', 'rv_recorder')), 'outside the Store\'s glob (apps/*): not in the Store until the owner says');
+    ok(repo.apps.path === 'apps/*' && path.dirname(APPDIR) === path.join(ROOT, 'apps') && app.version === '0.2.0' && !fs.existsSync(path.join(ROOT, 'tools', 'road-view', 'app')), 'in the Store\'s glob (apps/*) as 0.2.0; the old tools/road-view/app is gone');
     const others = fs.readdirSync(path.join(ROOT, 'apps')).map((a) => { try { return readJson(path.join(ROOT, 'apps', a, 'app.json')); } catch (e) { return null; } }).filter(Boolean);
-    ok(app.id === 'rv_recorder' && /^OA[A-Z0-9]{2}$/.test(app.loggingId) && others.every((a) => a.loggingId !== app.loggingId && a.id !== app.id), 'its own id and logging id (' + app.loggingId + ')');
+    ok(app.id === 'rv_recorder' && /^OA[A-Z0-9]{2}$/.test(app.loggingId) && others.filter((a) => a.loggingId === app.loggingId).length === 1 && others.filter((a) => a.id === app.id).length === 1, 'its own id and logging id (' + app.loggingId + ') among the Store\'s ' + others.length + ' apps');
     ok(JSON.stringify(app.shared) === '["lang.js","signal_recorder.js","signal_format.js"]', 'it packs Signal Probe\'s recorder and formatter from shared/ (no copy)');
     ok(app.config.recorder.quotaMB === 15 && !app.maxDiskUsage && app.settings.find((s) => s.key === 'tripMark').default === true, 'quota 15 MB (the default disk limit 20 MiB), TRIP = mark on by default');
-    fs.readdirSync(APPDIR).filter((f) => /\.js$/.test(f)).concat(['../../rv_manifest.js']).forEach((f) => {
+    fs.readdirSync(APPDIR).filter((f) => /\.js$/.test(f)).concat(['../../tools/road-view/rv_manifest.js']).forEach((f) => {
         const raw = fs.readFileSync(path.join(APPDIR, f), 'utf8'), code = strip(raw);
         ok(!/setValue|callMethod|signals\.set\b|signals\.call\b|signals\.proxy\b|\.proxy\(|\.send\(|child_process/.test(code), f + ': no setter, no method call, no child process');
         ok(!/cluster_render|cluster-render|ctx\.display|ctx\.canvas|\.layer\(/.test(code), f + ': draws nothing');
@@ -239,8 +276,9 @@ async function main() {
         ok(H.lines.length === 0, 'a value before any recording is ignored');
         ok(H.rv.begin() && H.rec.on, 'a recording starts (S19)');
         await H.rv.idle();
-        ok(H.watched.length === 22 && H.watched.every((w) => w.inst === '1') && new Set(H.watched.map((w) => w.iface)).size === 22, 'then every interface once (22), instance 1');
-        ok(H.watched.reduce((a, w) => a + w.fields.length, 0) === RVF.TABLE.length, 'with every source\'s handler (' + RVF.TABLE.length + ')');
+        ok(H.watched.length === 22 && H.watched.every((w) => w.inst === '1') && new Set(H.watched.map((w) => w.iface)).size === 22, 'then every interface of S19 once (22), instance 1');
+        const onS19 = RVF.TABLE.filter((f) => RVF.interfaces('S19').some((e) => e.iface === f.iface && e.instances.indexOf(RVF.instOf(f)) >= 0));
+        ok(H.watched.reduce((a, w) => a + w.fields.length, 0) === onS19.length, 'with every source\'s handler on them (' + onS19.length + ': S19\'s and the other choices\' on the same interfaces)');
         const tl = { trafficLightID: 7, trafficLightPositionX: 180, trafficLightPositionY: 128, trafficLightPositionZ: 40, trafficLightStatus: 1, trafficLightArrow: 0, trafficLightIndicateDirection: 0, trafficLightColor: 1, qualityRecognitionTrafficLight: 9 };
         for (let i = 0; i < 25; i++) { H.clock(100 + i * 40); H.feed('tl', Object.assign({}, tl, { trafficLightPositionX: 180 - i })); }
         const firsts = H.lines.filter((l) => /^rv: first tl /.test(l));
@@ -296,8 +334,8 @@ async function main() {
         H.gets.length = 0;
         H.clock(5000); ok(H.rv.begin(), 'a second recording');
         await sleep(20);
-        const rsN = RVF.TABLE.filter((f) => f.flags === 'rs').length;
-        ok(H.gets.length === rsN && H.watched.length === 22, 'it asks each "rs" getter once (' + rsN + '), no new subscription');
+        const rsN = RVF.sourcesOf('S19').filter((f) => f.flags === 'rs').length;
+        ok(H.gets.length === rsN && H.watched.length === 22, 'it asks each "rs" getter of S19 once (' + rsN + '), no new subscription');
         H.rv.end(); await drain(H.rec);
         const off = harness(path.join(tmp, 'e2'), { tripMark: false });
         off.rv.begin(); await off.rv.idle();
@@ -308,15 +346,84 @@ async function main() {
     }
 
     // ---------------------------------------------------------------------------------------------------------------
-    console.log('3. the budget: ' + SIM_MIN + ' simulated minutes per case');
+    console.log('2b. fixes-1121 CR: the choices, NAV\'s allow-lists');
+    {
+        const H = harness(path.join(tmp, 'c1'));
+        ok(H.rv.begin('S21') && H.rec.on && H.rv.set === 'S21', 'a recording of CRUISE (S21) starts');
+        await H.rv.idle();
+        const crIf = RVF.interfaces('S21');
+        ok(H.watched.length === crIf.length && crIf.every((e) => H.watched.some((w) => w.iface === e.iface)), 'only CRUISE\'s ' + crIf.length + ' interfaces are subscribed');
+        H.clock(100);
+        H.feed('assist-avail', { proposalAvailabilityDCC: 'ACTIVE', proposalAvailabilitySLD: 'AVAILABLE', valueSetSpeed: 61, proposalAssistFunction: 'DCC' });
+        H.feed('set-sla', { value: 'ACCEPT_MANUALLY', availability: 'OPERABLE', availabilityDeactivated: 'OPERABLE' });
+        H.feed('tl', { trafficLightID: 1 });                   // an RV / CAM source on no CRUISE interface: never fed in a real run, ignored here
+        H.feed('fas-ext', { statusFunctionTrafficLight: 1 });  // CRUISE's too (and RV's, CAM's)
+        H.clock(200);
+        H.feed('assist-avail', { proposalAvailabilityDCC: 'AVAILABLE', proposalAvailabilitySLD: 'ACTIVE', valueSetSpeed: 50, proposalAssistFunction: 'SLD' });
+        ok(H.lines.some((l) => /^rv: first assist-avail t=[\d.]+: proposalAvailabilityDCC=ACTIVE proposalAvailabilitySLD=AVAILABLE valueSetSpeed=61 proposalAssistFunction=DCC$/.test(l)) &&
+            H.lines.some((l) => /^rv: change assist-avail t=[\d.]+: .*proposalAvailabilitySLD=ACTIVE valueSetSpeed=50/.test(l)), 'CRUISE: the multimodal availability\'s first value and its change are log lines');
+        ok(!H.lines.some((l) => /^rv: first tl /.test(l)) && H.lines.some((l) => /^rv: first fas-ext /.test(l)), 'a source of another choice is ignored; a shared one is recorded');
+        // a second choice: only the interfaces it adds are subscribed; the shared ones' getters asked once
+        H.rv.end(); await drain(H.rec);
+        const before = H.watched.length; H.gets.length = 0;
+        ok(H.rv.begin('S22'), 'then a recording of NAV (S22)');
+        await H.rv.idle(); await sleep(20);
+        const added = RVF.interfaces('S22').filter((e) => !crIf.some((x) => x.iface === e.iface));
+        ok(H.watched.length - before === added.length + RVF.interfaces('S22').filter((e) => e.instances.length > 1).length * 0 && H.watched.slice(before).every((w) => added.some((e) => e.iface === w.iface)),
+            'NAV subscribes only the ' + added.length + ' interfaces CRUISE had not (Guidance and ProjectedModeGuiding on Main_Instance)');
+        ok(H.watched.filter((w) => /Guidance$|ProjectedModeGuiding$/.test(w.iface)).every((w) => w.inst === 'Main_Instance'), 'the guidance interfaces on Main_Instance');
+        const shared = RVF.sourcesOf('S22').filter((f) => f.flags === 'rs' && crIf.some((e) => e.iface === f.iface));
+        ok(H.gets.length === shared.length, 'the getters of the shared interfaces asked once (' + shared.length + ')');
+        // NAV's allow-list: a destination's position, its direction, its id, a road name never pass
+        H.clock(1000);
+        H.feed('next-destination', { travelTime: 600, delayTime: 30, delayStatus: 'DELAY_STATUS_LOW', formattedDistance: { distance: '7,4 Secret Street', unit: 'KILOMETER', rawDistance: 7400 },
+            directionToDestination: 123.4, position: { coordinatesValid: true, latitude: 50.4501, longitude: 30.5234 }, destinationId: { waypointId: 77 }, isCheckeredFlag: true, stopOverNumber: 0,
+            distanceFromCurrentToFinalDestination: 7400, estimatedArrivalTime: { time: { invalid: false, hour: 9, minute: 41 } } });
+        H.feed('road', { elements: [{ text: 'Khreshchatyk', spacer: 'NONE' }, { text: 'E95', spacer: 'NONE' }] });
+        H.feed('dart', { directionAbsolute: 271.5, maneuver: { roundabout: { uid: 991, distanceToDestination: 350, formattedDistance: { distance: '350 m', unit: 'METER', rawDistance: 350 }, travelTime: 40,
+            combinedManeuverType: 'ROUNDABOUT_EXIT', roadlinks: { value: { entryLink: { startPointCoordinate: { latitude: 50.1, longitude: 30.2 } } } }, description: { elements: [{ text: 'Secret Square' }] } } } });
+        H.feed('lane-guidance', { carPositionLaneIndex: 1, rows: [{ uid: 5, distanceToDestination: 200, length: 80, recommendedCarPositionLaneIndex: 2, lanes: [{ directionToFollow: 'STRAIGHT', isHighlighted: false }, { directionToFollow: 'RIGHT', isHighlighted: true }, { directionToFollow: 'RIGHT', isHighlighted: true }] }] });
+        H.feed('guiding-provider', 'CAR_PLAY');
+        H.rv.end(); await drain(H.rec);
+        const L = H.lines.join('\n');
+        ok(/^rv: first next-destination t=[\d.]+: travel=600 delay=30 delayStatus=DELAY_STATUS_LOW dist=7400 distUnit=KILOMETER distLen=17 toFinal=7400 flag=true stopover=0 charging=- etaInvalid=false etaH=9 etaM=41$/m.test(L), 'NAV: the destination\'s metrics only, the distance text as its length');
+        ok(/^rv: first dart t=[\d.]+: kind=ROUNDABOUT toDest=350 dist=350 distUnit=METER distLen=5 time=40 .*type=ROUNDABOUT_EXIT/m.test(L) && /^rv: first road t=[\d.]+: elements=2 firstLen=12$/m.test(L), 'NAV: the manoeuvre\'s kind, type and distance; the road as a count and a length');
+        ok(/^rv: first lane-guidance t=[\d.]+: rows=1 carLane=1 lanes=3 highlighted=6 recommended=2 toDest=200 rowLength=80 progress=- follow0=STRAIGHT follow1=RIGHT follow2=RIGHT follow3=- unreliable=-$/m.test(L) && /^rv: first guiding-provider t=[\d.]+: provider=CAR_PLAY$/m.test(L),
+            'NAV: the lane guidance (the highlighted lanes as a bit mask) and the provider (BMW or CarPlay)');
+        const rc = readRec(path.join(tmp, 'c1'));
+        const all = L + '\n' + rc.text;
+        ok(!/50\.45|30\.52|50\.1|30\.2\b|Secret|Khreshchatyk|E95|123\.4|271\.5|latitude|longitude|position|directionToDestination|destinationId|waypointId|\b991\b|roadlinks/.test(all),
+            'never a coordinate, a direction, an id or a name, in the log or the file');
+        ok(rc.lines.filter((l) => /^#rec,/.test(l)).map((l) => l.split(',').pop()).join() === 'S21,S22', 'two files\' headers: S21, then S22');
+        const c = RV.pickOne;
+        ok(c({ a: { x: { b: 1 } } }, 'a.*.b') === 1 && c({ a: [1, 2] }, 'a#n') === 2 && c({ a: [{ h: true }, { h: false }, { h: true }] }, 'a.[].h#mask') === 5 && c({ u: { someMember: {} } }, '@u') === 'SOME_MEMBER' &&
+            c({ t: 'Some Name' }, 't') === 9 && c({ t: 'ENUM_NAME' }, 't') === 'ENUM_NAME' && c({ s: { x: 1 } }, 's') === null && c(null, 'a.b') === null && c(7, '') === 7, 'pickOne(): unions, lengths, masks, union names, a text as its length, never a struct');
+    }
+    {
+        // CAM: recSame folds a light object that repeats itself; everyMs thins the lanes to 5 a second
+        const H = harness(path.join(tmp, 'c2'));
+        H.rv.begin('S20'); await H.rv.idle();
+        ok(H.watched.length === RVF.interfaces('S20').length, 'CAM subscribes its ' + RVF.interfaces('S20').length + ' interfaces');
+        for (let i = 0; i < 20; i++) { H.clock(100 + i * 40); H.feed('hb-obj3', { MEIDObject: 3, posX: 10 }); H.feed('lanes', { eventDataQualifier: 'EVENT_DATA_AVAILABLE', laneBoundaryFront: [{ offset: i }], laneBoundaryRear: [{ offset: 99 }] }); }
+        H.rv.end(); await drain(H.rec);
+        const r2 = readRec(path.join(tmp, 'c2'));
+        const id = (tag) => (r2.lines.find((l) => new RegExp('^#f,\\d+,' + tag + ',').test(l)) || '').split(',')[1];
+        const rows = (tag) => r2.lines.filter((l) => /^\d/.test(l) && l.split(',')[1] === id(tag));
+        ok(rows('hb-obj3').length < 5 && /folded=\d+/.test(r2.lines[r2.lines.length - 1]), 'a light object repeating itself is folded (recSame): ' + rows('hb-obj3').length + ' lines for 20 messages');
+        ok(rows('lanes').length === 4 && !/laneBoundaryRear/.test(r2.lines.find((l) => /^#f,\d+,lanes,/.test(l)) || 'laneBoundaryRear') && H.lines.some((l) => /thinned \(everyMs\): lanes 16/.test(l)),
+            'the lanes: 4 of 20 messages in 0.8 s written (everyMs 200), the rear boundaries left out, the rest counted in the stop line');
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+    console.log('3. the budget: ' + SIM_MIN + ' simulated minutes per case, per choice');
     const budget = { minutes: SIM_MIN, cases: [] };
     if (!cat) console.log('  skip: no catalogue');
     else {
-        const sim = async (label, rates, signs, objects, all) => {
+        const sim = async (label, rates, signs, objects, all, set) => {
             const dir = path.join(tmp, 'b-' + label);
             const H = harness(dir);
-            H.rv.begin(); await H.rv.idle();
-            const plan = RVF.TABLE.map((f, k) => {
+            H.rv.begin(set || 'S19'); await H.rv.idle();
+            const plan = RVF.sourcesOf(set || 'S19').map((f, k) => {
                 const n = /sign/.test(f.tag) ? signs : f.kind === 'list' ? objects : 4;
                 const v = valueOf(f, k + 1, n);
                 if (f.tag === 'stalk') v.operationColumnStalks = 0;
@@ -339,7 +446,7 @@ async function main() {
             const rr = readRec(dir);
             const disk = rr.files.reduce((a, n) => a + fs.statSync(path.join(dir, n)).size, 0);
             const secs = SIM_MIN * 60, st = H.rec.status();
-            const cs = { label, messagesPerS: Math.round(sent / secs), samplesPerS: Math.round(st.samples / secs), rawBytesPerS: Math.round(rr.text.length / secs), gzipBytesPerS: Math.round(disk / secs),
+            const cs = { label, set: set || 'S19', messagesPerS: Math.round(sent / secs), samplesPerS: Math.round(st.samples / secs), rawBytesPerS: Math.round(rr.text.length / secs), gzipBytesPerS: Math.round(disk / secs),
                 kbPerMinute: Math.round(disk / secs * 60 / 1024), minutesIn15MB: +(15 * 1048576 / (disk / secs) / 60).toFixed(1), cpuMsPerS: +(((cpu.user + cpu.system) / 1000) / secs).toFixed(2), dropped: st.dropped, errors: st.errors };
             budget.cases.push(cs);
             console.log('  ' + JSON.stringify(cs));
@@ -353,6 +460,18 @@ async function main() {
         ok(b.minutesIn15MB >= 12, 'a busy one (every camera stream at 15-45 Hz, every value moving): ' + b.gzipBytesPerS + ' B/s, ' + b.minutesIn15MB + ' minutes in 15 MB');
         ok(w.minutesIn15MB >= 5, 'the worst case (busy, 8 signs in each sign list, every integer changing every message): ' + w.gzipBytesPerS + ' B/s, ' + w.minutesIn15MB + ' minutes in 15 MB');
         ok(b.cpuMsPerS < 60, 'CPU on the Mac, busy: ' + b.cpuMsPerS + ' ms a second (the head unit about 5-6 x that)');
+        // fixes-1121 CR: the other choices, busy and worst (quiet for NAV: its sources are slow anyway)
+        const per = {};
+        for (const id of ['S20', 'S21', 'S22']) {
+            const lb = RVF.setOf(id).label.toLowerCase();
+            per[id] = { busy: await sim(lb + '-busy', RATES.busy, 4, 8, false, id), worst: await sim(lb + '-worst', RATES.busy, 8, 16, true, id) };
+        }
+        ok(['S20', 'S21', 'S22'].every((id) => per[id].busy.dropped === 0 && per[id].busy.errors === 0 && per[id].worst.dropped === 0 && per[id].worst.errors === 0), 'CAM, CRUISE, NAV: no sample dropped, no error');
+        ['S20', 'S21', 'S22'].forEach((id) => {
+            const x = per[id];
+            ok(x.busy.minutesIn15MB >= 30 && x.worst.minutesIn15MB >= 12, RVF.setOf(id).label + ': busy ' + x.busy.gzipBytesPerS + ' B/s on disk, ' + x.busy.minutesIn15MB + ' minutes in 15 MB; worst ' + x.worst.gzipBytesPerS + ' B/s, ' + x.worst.minutesIn15MB + ' minutes (one drive fits)');
+            ok(x.busy.cpuMsPerS < 60, RVF.setOf(id).label + ': CPU on the Mac, busy: ' + x.busy.cpuMsPerS + ' ms a second');
+        });
         if (process.env.RV_BUDGET_OUT) fs.writeFileSync(process.env.RV_BUDGET_OUT, JSON.stringify(budget, null, 1));
     }
 
@@ -386,7 +505,7 @@ async function main() {
         server = spawn(process.execPath, [path.join(root, 'bench', 'server.js'), 'rv_recorder'], { cwd: root, env: Object.assign({}, process.env, { BENCH_PORT: String(PORT), BENCH_DATA_DIR: dataDir }), stdio: ['ignore', 'pipe', 'pipe'] });
         const keep = (dd) => { out += dd; if (/app exited/.test(String(dd))) exited = true; };
         server.stdout.on('data', keep); server.stderr.on('data', keep);
-        ok(await until(() => rvLines().some((l) => /^rv: start rv_recorder v=0\.1\.0 set=S19 sources=39 interfaces=22 tripMark=1$/.test(l)), 90000), 'the app builds with the kit and starts: ' + (rvLines()[0] || out.split('\n').slice(-5).join(' / ')));
+        ok(await until(() => rvLines().some((l) => /^rv: start rv_recorder v=0\.2\.0 sets=RV:S19\/39\/22,CAM:S20\/70\/31,CRUISE:S21\/34\/20,NAV:S22\/43\/17 sources=123 interfaces=46 tripMark=1$/.test(l)), 90000), 'the app builds with the kit and starts: ' + (rvLines()[0] || out.split('\n').slice(-5).join(' / ')));
         await sleep(800);
         let p = await req('GET', '/probe');
         ok(p && /^RV: нічого не підписано/.test((p.native.STATUS || {}).text || '') && !rvLines().some((l) => /^rv: watch /.test(l)), 'idle: nothing subscribed, the status line says so');
@@ -416,10 +535,33 @@ async function main() {
         ok(!/4321|765|posX|heading=0\.5/.test(L.join('\n')), 'the log never has the car\'s own position or heading');
         const rb = readRec(recDir());
         const id = (tag) => (rb.lines.find((l) => new RegExp('^#f,\\d+,' + tag + ',').test(l)) || '').split(',')[1];
-        ok(rb.lines.filter((l) => /^\d/.test(l) && l.split(',')[1] === id('tl')).length === 30 && /^#rec,1,0\.1\.0,\d{8}-\d{6},1,[^,]+,\d+,S19$/.test(rb.lines[0]), 'the 30 traffic-light messages are in the file; the header names S19');
+        ok(rb.lines.filter((l) => /^\d/.test(l) && l.split(',')[1] === id('tl')).length === 30 && /^#rec,1,0\.2\.0,\d{8}-\d{6},1,[^,]+,\d+,S19$/.test(rb.lines[0]), 'the 30 traffic-light messages are in the file; the header names S19');
         ok(!!id('road-segment~1s') && rb.lines.filter((l) => /^#m,/.test(l)).length === 2 && !/posX|4321/.test(rb.text), 'the road segment summarised, two marks, never the car\'s own position');
         const py = spawnSync('python3', [CONVERT, recDir(), '-o', path.join(tmp, 'conv-bench')], { encoding: 'utf8', timeout: 120000 });
         ok(py.status === 0, 'tools/car/rec_convert.py reads it');
+        // fixes-1121 CR: the RECSET row picks CAM; CAM records the lanes and subscribes only what RV had not
+        p = await req('GET', '/probe');
+        ok(/^Набір для запису: RV$/.test(((p.native.RECSET || {}).cells || {}).Text1stRow || ''), 'the choice row says RV first: ' + ((p.native.RECSET || {}).cells || {}).Text1stRow);
+        await req('POST', '/click', { id: 'RECSET' });
+        await sleep(600);
+        p = await req('GET', '/probe');
+        ok(/^Набір для запису: CAM$/.test(((p.native.RECSET || {}).cells || {}).Text1stRow || '') && /^Почати запис CAM$/.test(((p.native.REC || {}).cells || {}).Text1stRow || ''), 'a press: CAM, and the recording row says so: ' + ((p.native.REC || {}).cells || {}).Text1stRow);
+        const watchedBefore = rvLines().filter((l) => /^rv: watch .* ok /.test(l)).length;
+        await req('POST', '/click', { id: 'REC' });
+        ok(await until(() => rvLines().some((l) => /^rv: rec: set CAM \(S20\): 70 sources on 31 interfaces$/.test(l))), 'a press on the recording row records CAM (S20): 70 sources on 31 interfaces');
+        const camNew = RVF.interfaces('S20').filter((e) => !RVF.interfaces('S19').some((x) => x.iface === e.iface)).length;
+        ok(await until(() => rvLines().filter((l) => /^rv: watch .* ok /.test(l)).length === watchedBefore + camNew, 30000), 'only the ' + camNew + ' interfaces RV had not are subscribed now');
+        const LB = src('lanes');
+        for (let i = 0; i < 6; i++) { await feed(LB.iface, LB.field, { eventDataQualifier: 'EVENT_DATA_AVAILABLE', laneBoundaryFront: [{ lateralOffset: 175 + i }] }); await sleep(250); }
+        await feed(TL.iface, TL.field, { trafficLightID: 6, trafficLightColor: 1 });
+        await req('POST', '/click', { id: 'REC' });
+        ok(await until(() => rvLines().filter((l) => /^rv: stop after /.test(l)).length === 2), 'stopped again');
+        await sleep(1500);
+        const rc = readRec(recDir());
+        const heads = rc.lines.filter((l) => /^#rec,/.test(l)).map((l) => l.split(',').pop());
+        const idL = (rc.lines.filter((l) => /^#f,\d+,lanes,/.test(l)).pop() || '').split(',')[1];
+        ok(heads.indexOf('S20') >= 0 && idL && rc.lines.filter((l) => /^\d/.test(l) && l.split(',')[1] === idL).length >= 4, 'the CAM file names S20 and holds the lanes (' + heads.join(' ') + ')');
+        ok(rvLines().some((l) => /^rv: first lanes t=[\d.]+: eventDataQualifier=EVENT_DATA_AVAILABLE /.test(l)), 'the lanes\' first message is one log line');
         ok(!/uncaught|FATAL/i.test(out) && !exited, 'the app never exited, nothing uncaught');
         ok(!fs.existsSync(path.join(ROOT, 'dist', 'rv_recorder')), 'the BENCH_STUB build stayed in the temporary tree');
     } catch (e) {

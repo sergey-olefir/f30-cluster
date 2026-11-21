@@ -38,7 +38,7 @@ tools/car/collect.sh <car-address> --label 2 --apps f30_cluster,twin_dial,signal
   (`cat /var/opt/aquota.user`, `aquota.group`), read locally by `quota_read.py` into `system/quota.json`: each app's disk limit as the
   head unit applies it, its use, and whether the limit equals the package's `maxDiskUsage`. `--no-rec` leaves both out. The recordings are
   numbers only (the recorder writes no text); convert and analyse them with `acc_analyse.py`.
-* road TS: the **RV recorder** (`rv_recorder`, `tools/road-view/app/rv_recorder`, round "Road View") is in the default `--apps`; its
+* road TS: the **RV recorder** (`rv_recorder`, `apps/rv_recorder` in the Store since fixes-1121 CR, 0.2.0: choices RV, CAM, CRUISE, NAV) is in the default `--apps`; its
   recordings (`apps/rv_recorder/rec/`) are copied the same way. Analyse a city drive with
   `python3 -I tools/car/rv_analyse.py apps/rv_recorder/rec -o <out> --notes notes.json` (lights, signs, the road scene, a proposed value
   table, replay files for the themes' test modes, a summary in Ukrainian and English); its test, on drives made by `rv_synth.js`:

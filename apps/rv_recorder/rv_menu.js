@@ -1,7 +1,8 @@
 'use strict';
 /**
  * rv_menu.js - the RV recorder's centre screen (kit "menu" screen MAIN of app.json): a status line, "Позначка N" (a mark in the
- * recording and the log), "Почати запис RV" (start / stop), the setting "TRIP = позначка", the language row, a hint. Nothing here
+ * recording and the log), "Почати запис <set>" (start / stop), "Набір для запису: <set>" (fixes-1121 CR: RV, CAM, CRUISE, NAV, one
+ * per press, settings key recSet; fixed while a recording runs), the setting "TRIP = позначка", the language row, a hint. Nothing here
  * draws on the cluster. The words come from shared/i18n/<lang>.json through shared/lang.js: Signal Probe's recording rows
  * (probe.*) and three of its own (rv.*). Every handler is guarded: an escaped exception would end the app.
  */
@@ -29,6 +30,7 @@ class Menu {
         const ui = this.ui;
         ui.onClick('MARK', () => this.guard('mark', () => { this.rv.mark('menu'); this.soon(0); return null; }));
         ui.onClick('REC', () => this.guard('rec', () => { this.toggle(); this.soon(0); return null; }));
+        ui.onClick('RECSET', () => this.guard('recset', () => { this.nextSet(); this.soon(0); return null; }));     // fixes-1121 CR
         I.onChange(() => this.guard('language', () => { this.sent = Object.create(null); this.soon(0); }));
         this.ctx.settings.onChange((key) => this.guard('setting ' + key, () => {
             if (key === 'tripMark') this.rv.tripMark = this.ctx.settings.get('tripMark') !== false;
@@ -43,19 +45,29 @@ class Menu {
         if (this.tick && this.tick.unref) this.tick.unref();
         this.refresh();
     }
+    /** fixes-1121 CR: the set the next recording takes (settings key recSet, "S20"; the first when unset or unknown). */
+    recSet() {
+        const v = this.ctx.settings.get('recSet'), sets = this.rv.sets;
+        return (sets.find((x) => x.id === v) || sets[0]).id;
+    }
+    nextSet() {
+        if (this.rv.on) return;          // the choice is fixed while a recording runs
+        const sets = this.rv.sets, i = sets.findIndex((x) => x.id === this.recSet());
+        this.ctx.settings.set('recSet', sets[(i + 1) % sets.length].id);
+    }
     toggle() {
         if (!this.rec) return;
         if (this.rv.on) { this.rv.end(); return; }
-        if (this.rv.begin()) this.log.info('rv: rec: ' + this.rv.sources.length + ' sources routed to the recorder');
+        if (this.rv.begin(this.recSet())) this.log.info('rv: rec: ' + this.rv.inSet().length + ' sources routed to the recorder');
     }
     recText() {
         const rec = this.rec;
         if (!rec) return { a: I.t('probe.rec.none'), b: '' };
         const s = rec.status();
         const free = I.t('probe.rec.free', { mb: mb(s.room) });
-        if (s.on) return { a: I.t('probe.rec.on', { sets: 'RV', time: Math.floor(s.seconds / 60) + ':' + ('0' + (s.seconds % 60)).slice(-2) }),
+        if (s.on) return { a: I.t('probe.rec.on', { sets: this.rv.label(), time: Math.floor(s.seconds / 60) + ':' + ('0' + (s.seconds % 60)).slice(-2) }),
             b: I.plural('probe.rec.samples', s.samples, { n: grp(s.samples) }) + ', ' + mb(s.bytes) + ', ' + free + (s.dropped ? ', ' + I.t('probe.rec.lost', { n: grp(s.dropped) }) : '') };
-        return { a: I.t('probe.rec.start', { sets: 'RV' }),
+        return { a: I.t('probe.rec.start', { sets: this.rv.label(this.recSet()) }),
             b: (s.error ? I.t('probe.rec.stopped', { why: s.error }) + ' ' : s.session ? I.t('probe.rec.last', { samples: I.plural('probe.rec.samples', s.samples, { n: grp(s.samples) }) }) + ' ' : '') + I.t('probe.rec.of', { free: free, quota: mb(s.quota) }) };
     }
     soon(ms) {
@@ -85,6 +97,7 @@ class Menu {
             });
             const r = this.recText();
             this.cells('REC', { Text1stRow: r.a, Text2ndRow: r.b });
+            this.cells('RECSET', { Text1stRow: I.t('probe.recset', { sets: this.rv.label(this.recSet()) }), Text2ndRow: I.t(this.rv.on ? 'probe.recset.after' : 'probe.recset.press') });
             this.text('STATUS2', I.t('rv.status2'));
         });
     }
