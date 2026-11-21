@@ -103,7 +103,14 @@ try {
         fakePerso = require('./fake-personalization').install(hu);
     } else if (fs.existsSync(path.join(stage, 'source', 'javascript', 'profile_settings.js')) && process.env.BENCH_PERSO !== 'off') {
         // r1120 PS: the active driver profile for shared/profile_settings.js (SessionManager, UserAccount ids; nothing fed)
-        fakePerso = require('./fake-personalization').install(hu, { light: true });
+        let start = null;      // fix-1121 PF: the car's state at the bench's start (BENCH_PERSO_START, JSON)
+        try { start = process.env.BENCH_PERSO_START ? JSON.parse(process.env.BENCH_PERSO_START) : null; } catch (e) { log.warn('bench: BENCH_PERSO_START not JSON: ' + e.message); }
+        fakePerso = require('./fake-personalization').install(hu, { light: true, start });
+        // fix-1121 PF: the active profile's own units struct (POST /fake { unitsBy }), sent in demo mode too (the 50 ms feed below is manual only)
+        setInterval(() => {
+            const u = fakePerso.unitsNow();
+            if (Object.keys(u).length) hu.feed('de.bmw.infotainment.vehicle.Vehicle', 'statusNewCurrentUnitsStatusExt', Object.assign({ unitOfMeasurementAirPressure: 1, unitOfMeasurementTemperature: 1 }, benchUnits, u));
+        }, 300);
     }
 } catch (e) { log.warn('bench: fake persod not installed: ' + e.message); }
 
@@ -314,7 +321,7 @@ setInterval(() => {
     hu.feed('de.bmw.infrastructure.VehicleCondition', 'VehicleCondition', { statusConditionVehicle: Math.round(num('condition', 10)) });
     hu.feed('de.bmw.infrastructure.EnvironmentalInformation', 'ExteriorTemperature', { temperatureExterior: Math.round((num('ambient', 22) + 40) / 0.5) });
     // the car's display units (bar, C), so the tyre values below read as 0.1 bar and C + 40; the shifter programme from `program` (S / M)
-    hu.feed('de.bmw.infotainment.vehicle.Vehicle', 'statusNewCurrentUnitsStatusExt', Object.assign({ unitOfMeasurementAirPressure: 1, unitOfMeasurementTemperature: 1 }, benchUnits));     // r1120 PS: + POST /fake { carUnits }
+    hu.feed('de.bmw.infotainment.vehicle.Vehicle', 'statusNewCurrentUnitsStatusExt', Object.assign({ unitOfMeasurementAirPressure: 1, unitOfMeasurementTemperature: 1 }, benchUnits, fakePerso && fakePerso.unitsNow ? fakePerso.unitsNow() : {}));     // r1120 PS: + POST /fake { carUnits }; fix-1121 PF: + the active profile's own (unitsBy)
     hu.feed('de.bmw.infotainment.misc.MDrive', 'dataDisplayGearbox', { displayProgramGearbox: manual.program === 'S' ? 'S_MINUS_PROGRAMM' : manual.program === 'M' ? 'M_MINUS_PROGRAMM' : 'D_PROGRAMM' });
     // tyres (TPMS, the fields the car answers a read with): pressure in 0.1 bar, temperature raw - 40 C; the rear pair a notch higher
     const tp = Math.round(num('tyreP', 2.3) * 10), tt = Math.round(num('tyreT', 24) + 40);

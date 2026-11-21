@@ -34,8 +34,10 @@ function ok(c, msg) { if (c) { pass++; console.log('  ok   ' + msg); } else { fa
 const section = (s) => console.log(s);
 const MIB16 = 16 * 1048576;
 
-const PS = require(path.join(ROOT, 'shared', 'profile_settings.js'));
-const U = require(path.join(ROOT, 'shared', 'units.js'));
+// fix-1121 PF: PS_MODULE_DIR=<dir> runs the pure parts against another copy of the two modules (the report's "before" counts)
+const MOD = process.env.PS_MODULE_DIR || path.join(ROOT, 'shared');
+const PS = require(path.join(MOD, 'profile_settings.js'));
+const U = require(path.join(MOD, 'units.js'));
 const T = {
     uk: JSON.parse(fs.readFileSync(path.join(ROOT, 'shared', 'i18n', 'uk.json'), 'utf8')),
     en: JSON.parse(fs.readFileSync(path.join(ROOT, 'shared', 'i18n', 'en.json'), 'utf8')),
@@ -67,18 +69,20 @@ section('A. the per-profile / global table');
 /* ------------------------------------------------------------------ B: the units rule ------------------------------ */
 section('B. the units rule');
 {
-    const r = (p, s, c) => U.resolve(p, U.carOf({ unitOfMeasurementSpeedometerDigital: s, unitOfMeasurementConsumption: c }));
+    // fix-1121 PF: Авто gives miles only when two sources say miles (docs/fixes-1121/PF-REPORT.md): here the odometer's unit agrees
+    const MI2 = { mileage: U.altOf ? U.altOf('mileage', 'MEILEN') : null };
+    const r = (p, s, c, alt) => U.resolve(p, U.carOf({ unitOfMeasurementSpeedometerDigital: s, unitOfMeasurementConsumption: c }), alt);
     ok(!r('auto').mi && r('auto').cons === 'l100' && r('auto').src === 'default', 'Авто, the car silent: km, l/100 km');
-    ok(r('auto', 'MEILEN', 'MPG__UK').mi && r('auto', 'MEILEN', 'MPG__UK').cons === 'mpgUK' && r('auto', 2, 3).cons === 'mpgUS', 'Авто follows the car: MEILEN -> miles, its mpg (by name or number)');
+    ok(r('auto', 'MEILEN', 'MPG__UK', MI2).mi && r('auto', 'MEILEN', 'MPG__UK', MI2).cons === 'mpgUK' && r('auto', 2, 3, MI2).cons === 'mpgUS', 'Авто follows the car when a second source agrees: MEILEN + odometer MEILEN -> miles, its mpg (by name or number)');
     ok(!r('auto', 'KILOMETER', 'KM_S_L').mi && r('auto', 'KILOMETER', 'KM_S_L').cons === 'kml', 'Авто: KILOMETER, km/l');
     ok(!r('auto', 'SIGNAL_UNGUELTIG').mi && !r('auto', 3).mi && !r('auto', 'DEFAULT').mi, 'Авто: an invalid or default unit is km');
     ok(!r('km', 'MEILEN', 'MPG__US').mi && r('km', 'MEILEN', 'MPG__US').cons === 'l100', 'км wins over the car (and its mpg)');
     ok(r('mi', 'KILOMETER', 'L_S_100KM').mi && r('mi', 'KILOMETER', 'L_S_100KM').cons === 'mpgUS' && r('mi', 1, 2).cons === 'mpgUK', 'милі wins; mpg (the car\'s own mpg kind when it has one)');
     // r1120 PS2: the temperature (the owner): км -> °C, милі -> °F; Авто -> the car's own unit, else the way Авто's distance went
-    const t = (p, s, c) => U.resolve(p, U.carOf({ unitOfMeasurementSpeedometerDigital: s, unitOfMeasurementTemperature: c })).temp;
+    const t = (p, s, c, alt) => U.resolve(p, U.carOf({ unitOfMeasurementSpeedometerDigital: s, unitOfMeasurementTemperature: c }), alt).temp;
     ok(t('km') === 'C' && t('km', 'MEILEN', 'F') === 'C' && t('mi') === 'F' && t('mi', 'KILOMETER', 'C') === 'F', 'temperature: км -> °C and милі -> °F whatever the car says');
-    ok(t('auto') === 'C' && t('auto', 'MEILEN') === 'F' && t('auto', 'KILOMETER') === 'C' && t('auto', 'KILOMETER', 'F') === 'F' && t('auto', 'MEILEN', 'C') === 'C' && t('auto', null, 2) === 'F' && t('auto', null, 'SIGNAL_UNGUELTIG') === 'C',
-        'temperature under Авто: the car\'s own unit (C / F, 1 / 2) when it says one; else °F with miles, °C with km or nothing known');
+    ok(t('auto') === 'C' && t('auto', 'MEILEN', undefined, MI2) === 'F' && t('auto', 'KILOMETER') === 'C' && t('auto', 'KILOMETER', 'F') === 'F' && t('auto', 'MEILEN', 'C', MI2) === 'C' && t('auto', null, 2) === 'F' && t('auto', null, 'SIGNAL_UNGUELTIG') === 'C',
+        'temperature under Авто: the car\'s own unit (C / F, 1 / 2) when it says one; else °F with (confirmed) miles, °C with km or nothing known');
     ok(Math.abs(U.temp(100, 'F') - 212) < 1e-9 && U.temp(20, 'C') === 20, '100 °C = 212 °F');
     ok(Math.abs(U.cons(7.84, 'mpgUS') - 30) < 0.01 && U.cons(0.2, 'mpgUS') === 0 && Math.abs(U.cons(5, 'kml') - 20) < 1e-9 && Math.abs(U.dist(160.9344, true) - 100) < 1e-9, 'conversions: 7.84 l/100 km = 30 mpg (US), 5 l/100 km = 20 km/l, 160.9 km = 100 mi');
 }
@@ -125,7 +129,7 @@ function rig(opts) {
     const batches = [];
     settings.onBatch((keys) => batches.push(keys.slice()));
     const ctx = { settings, signals: car.signals, log, dataDir: dir, spec: { id: 'test', config: {} } };
-    const ps = new PS.ProfileSettings(ctx, Object.assign({ app: 'test', perProfile: ['hudLayout', 'lang', 'units'], global: ['diagX', 'profileSets'], pollMs: 250, quietMs: 60, gapMs: 120, kickMs: 0 }, opts)).start();
+    const ps = new PS.ProfileSettings(ctx, Object.assign({ app: 'test', perProfile: ['hudLayout', 'lang', 'units'], global: ['diagX', 'profileSets'], pollMs: 250, quietMs: 60, gapMs: 120, kickMs: 0, reuseConfirmMs: 40, settleMs: 0 }, opts)).start();
     return { dir, lines, settings, car, ps, batches, logText: () => lines.join('\n') };
 }
 
@@ -314,7 +318,7 @@ function bench(app, port, env) {
     const dataDir = path.join(tmp, 'data'), screenDir = path.join(tmp, 'screen');
     fs.mkdirSync(dataDir); fs.mkdirSync(screenDir);
     const e = Object.assign({}, process.env, { BENCH_PORT: String(port), BENCH_DATA_DIR: dataDir, SCREEN_DIR: screenDir, BENCH_HMI_LANG: 'uk_UA',
-        BENCH_CONFIG: JSON.stringify({ profileSettings: { pollMs: 2500 } }) }, env || {});
+        BENCH_CONFIG: JSON.stringify({ profileSettings: { pollMs: 2500, settleMs: 0 } }) }, env || {});
     const b = { port, dataDir, log: '', exited: false };
     b.server = spawn(process.execPath, [path.join(__dirname, 'server.js'), app], { cwd: ROOT, env: e, stdio: ['ignore', 'pipe', 'pipe'] });
     const keep = (d) => { b.log += d; if (/app exited/.test(String(d))) b.exited = true; };
@@ -415,10 +419,12 @@ async function partE() {
         p = await b.until((q) => q.ps.held === 'i01' && q.activeName === 'wb_eco');
         ok(p.settings.diagMbGap === true, 'a Діагностика switch set under guest is still on under i01 (global)');
         await b.set('diagMbGap', false);
-        // r1120 PS2: words, scale and temperature: uk / en x km / mi x °C / °F on Comfort. km + °F and mi + °C come from the car under Авто
+        // r1120 PS2: words, scale and temperature: uk / en x km / mi x °C / °F on Comfort. km + °F comes from the car under Авто.
+        // fix-1121 PF: Авто gives miles only when two sources say so, and f30_cluster reads only the car's struct: its MEILEN alone
+        // (with an mpg consumption) is km, l/100 km, °C now - the owner's Symptom 1 (miles and mph come from "милі" only)
         await b.set('hudLayout', 'wb_comfort');
         p = await b.until((q) => q.activeName === 'wb_comfort');
-        const UNITS = [['km', 'C', 'km', null], ['mi', 'F', 'mi', null], ['km', 'F', 'auto', { speed: 'KILOMETER', cons: 'L_S_100KM', temp: 'F' }], ['mi', 'C', 'auto', { speed: 'MEILEN', cons: 'MPG__US', temp: 'C' }]];
+        const UNITS = [['km', 'C', 'km', null], ['mi', 'F', 'mi', null], ['km', 'F', 'auto', { speed: 'KILOMETER', cons: 'L_S_100KM', temp: 'F' }], ['km', 'C', 'auto', { speed: 'MEILEN', cons: 'MPG__US', temp: 'C' }]];
         let maxPx = 0, refused = 0;
         const pxBy = {};
         const tempText = (q) => Object.keys(q.texts || {}).map((k) => q.texts[k].text).filter((x) => /°[CF]/.test(x));
@@ -485,12 +491,14 @@ async function partF() {
         if (!p || !p.ready) return;
         const faces = (q) => (q.scenes || []).filter((s) => /^face_/.test(s)).sort().join(',');
         const pix = [];
-        const UNITS = [['km', 'C', 'km', null], ['mi', 'F', 'mi', null], ['km', 'F', 'auto', { speed: 'KILOMETER', temp: 'F' }], ['mi', 'C', 'auto', { speed: 'MEILEN', temp: 'C' }]];
+        // fix-1121 PF: Twin Dial reads the odometer's unit too (UnitBN2020): Авто's miles come from MEILEN in the struct AND the odometer
+        const UNITS = [['km', 'C', 'km', null, null], ['mi', 'F', 'mi', null, null], ['km', 'F', 'auto', { speed: 'KILOMETER', temp: 'F' }, null], ['mi', 'C', 'auto', { speed: 'MEILEN', temp: 'C' }, 'mi']];
         const rowU = (q) => [q.texts.row_r1u, q.texts.row_r2u].filter((x) => x && /°/.test(x.text)).map((x) => x.text);
         for (const L of ['uk', 'en']) {
             for (const u of UNITS) {
                 await b.set('lang', L);
                 if (u[3]) await b.fake({ carUnits: u[3] });
+                await b.fake({ twin: { units: u[4] } });
                 await b.set('units', u[2]);
                 const mi = u[0] === 'mi', sfx = (L === 'en' ? '_en' : '');
                 const want = ['face_speedo' + sfx + (mi ? '_mph' : ''), 'face_tacho' + sfx].sort().join(',');

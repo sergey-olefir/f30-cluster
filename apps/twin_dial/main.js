@@ -26,6 +26,13 @@ mgu.run({
     start(ctx) {
         // r1120 LN: the language (setting "Мова / Language", the head unit's): first, so every word below is in it
         try { I18N.attach(ctx); } catch (e) { ctx.log.error('lang: ' + (e && e.stack || e)); }
+        // r1120 PS: the active driver profile's set (read only from the car; docs/r1120/PS-REPORT.md). A failure leaves one set, as before.
+        // fix-1121 PF: attached BEFORE the engine is made, so its first read goes out first and the theme's first build can wait for
+        // it (shared/hud.js _profileHold): at start the theme is the driver's own
+        try {
+            const ps = PS.attach(ctx);
+            if (ps) ctx.ui.onVisible((name, on) => { if (on && name === 'MAIN') ps.kick('menu'); });
+        } catch (e) { ctx.log.error('profile settings failed to start: ' + (e && e.stack || e)); }
         let hud;
         try {
             hud = new HudApp(ctx);
@@ -35,11 +42,6 @@ mgu.run({
             return;
         }
         hud.start();
-        // r1120 PS: the active driver profile's set (read only from the car; docs/r1120/PS-REPORT.md). A failure leaves one set, as before
-        try {
-            const ps = PS.attach(ctx);
-            if (ps) ctx.ui.onVisible((name, on) => { if (on && name === 'MAIN') ps.kick('menu'); });
-        } catch (e) { ctx.log.error('profile settings failed to start: ' + (e && e.stack || e)); }
         ctx.log.info('Twin Dial ' + ((ctx.spec && ctx.spec.version) || '') + ' started');
         // the centre screen: a failure here leaves the cluster drawing (and the kit's own settings rows working)
         try { new Menu(ctx, hud, { tags: TAGS }).start(); } catch (e) { ctx.log.error('menu failed to start: ' + (e && e.stack || e)); }

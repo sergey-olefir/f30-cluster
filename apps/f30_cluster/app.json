@@ -232,6 +232,11 @@
           "profileSets"
         ],
         [
+          "text",
+          "STATUS_PS",
+          ""
+        ],
+        [
           "button",
           "BTN_DIAG",
           "Діагностика"
