@@ -25,8 +25,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 sys.path.insert(0, HERE)
 import rv_gl as G   # noqa: E402
+import paint as PT  # noqa: E402
 
 SHOTS = os.path.join(ROOT, 'bake', 'work', 'road', 'shots')
+SIGN_ORDER = ['noOvertaking', 'noOvertakingEnd', 'town', 'townEnd', 'motorway', 'motorwayEnd', 'expressway', 'expresswayEnd', 'envZone', 'envZoneEnd', 'stop', 'giveWay', 'priority', 'priorityEnd', 'noEntry', 'crossing', 'children', 'roadWorks', 'lightAhead', 'levelCrossing', 'slippery', 'animals']
 FONT = os.path.join(ROOT, 'tools', 'fonts-src', 'NotoSans-wght.subset.ttf')
 AA = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(ROOT))), 'bake', 'work', 'r1120', 'pub', 'AA', 'context')   # the main checkout's AA park
 
@@ -51,7 +53,49 @@ def font(sz, bold=False):
     return _F[k]
 
 
+BASE6 = os.path.join(ROOT, 'bake', 'work', 'road', 'base_f30_comfort.png')     # an earlier 6WB Comfort bench frame (limit 50, stopped at a light)
+
+
+def f30_painted(name):
+    """The built f30 states, painted with their own shaders at the engine's own layer boxes over BASE6 (shots.py's names)."""
+    b = Image.open(BASE6).convert('RGB')
+    if name in ('000_off', '200_limit_alone'):
+        return b
+    if name == '203_limit_light':
+        return PT.strip6(b, ['light'], 'red')
+    if name == '202_limit_rule_warning':
+        return PT.strip6(b, ['giveWay', 'children'])
+    if name.startswith('5') and '_scene_' in name:
+        return PT.scene(b, '6wb', name.split('_scene_')[1])
+    return None
+
+
+def td_page(im, title='Дорога'):
+    """Twin Dial's tab-1 page cleared and titled as road_ui.paintPage does (for the painted scene)."""
+    d = ImageDraw.Draw(im)
+    d.rectangle([729, 236, 1191, 293], fill=(0, 0, 0))
+    d.rectangle([739, 300, 1181, 595], fill=(0, 0, 0))
+    d.text((960, 281), title, font=font(41), fill=(255, 255, 255), anchor='ms')
+    return im
+
+
+def td_painted(name):
+    if name.startswith('5') and '_scene_' in name:
+        b = shot('twin_dial', '000_off')
+        return PT.scene(td_page(b), 'td', name.split('_scene_')[1])
+    return None
+
+
+PAINTED = set()
+
+
 def shot(app, name, clean=True):
+    if app == 'f30_cluster' and not os.path.exists(os.path.join(SHOTS, app, name + '.clean.png')):
+        PAINTED.add(app + ':' + name)
+        return f30_painted(name)
+    if app == 'twin_dial' and not os.path.exists(os.path.join(SHOTS, app, name + '.clean.png')) and name != '000_off':
+        PAINTED.add(app + ':' + name)
+        return td_painted(name)
     d = os.path.join(SHOTS, app)
     p = os.path.join(d, name + ('.clean.png' if clean else '.png'))
     if not os.path.exists(p):
@@ -320,23 +364,53 @@ def main():
         print(os.path.relpath(p, ROOT))
     for name, im in directions():
         save('dir_' + name, im, im and name)
+    CROP = {'twin_dial': {'strip': (1230, 600, 1640, 720), 'scene': (729, 248, 1191, 600)}, 'f30_cluster': {'strip': (280, 440, 640, 580), 'scene': (700, 140, 1220, 480)}}
+
+    def cr(app, im, k):
+        b = CROP[app][k]
+        c = im.crop(b)
+        return c.resize((c.width * 2, c.height * 2), Image.LANCZOS)
+    LSTATES = [('red', None), ('redAmber', None), ('amber', None), ('green', None), ('green', 'left'), ('green', 'straight'), ('green', 'right'), ('flashAmber', None), ('uncertain', None)]
     for app, tag in (('twin_dial', 'Twin Dial'), ('f30_cluster', 'f30 6WB Comfort')):
-        R = rows(app)
-        by = {r['name']: r for r in R}
-        lt = [(r['name'][4:], crop(app, r, 'strip')) for r in R if r['name'].startswith('1') and r['name'][1:3].isdigit() and '_light_' in r['name']]
-        save('state_%s_light' % app, sheet(tag + ' · the traffic light: every state (bench, the real app; raw camera codes fed)', [x for x in lt if x[1]], 3, 560), 'light states')
+        R = rows(app) if os.path.exists(os.path.join(SHOTS, app, 'shots.json')) else []
+        bench = ' (bench, the real app; raw camera codes fed)' if R else ' (painted with the shaders at the engine\'s layer boxes over a 6WB Comfort bench frame)'
+        lt = [(r['name'][4:], crop(app, r, 'strip')) for r in R if r['name'].startswith('1') and '_light_' in r['name']]
         sg = [(r['name'][4:], crop(app, r, 'strip')) for r in R if r['name'].startswith('3')]
-        save('state_%s_signs' % app, sheet(tag + ' · every sign of the set, beside the limit (bench)', [x for x in sg if x[1]], 4, 420), 'every sign')
         cb = [(r['name'][4:], crop(app, r, 'strip')) for r in R if r['name'].startswith('2') or r['name'].startswith('4')]
-        save('state_%s_strip' % app, sheet(tag + ' · the sign strip: limit alone, + rule, + rule + warning, + light, light alone, no overtaking, night, en, mph', [x for x in cb if x[1]], 3, 560), 'strip combinations')
+        if app == 'f30_cluster' and (len(lt) < 9 or len(sg) < 10 or len(cb) < 8):
+            bench = ' (painted with the shaders at the engine\'s layer boxes over a 6WB Comfort bench frame)'
+            b6 = Image.open(BASE6).convert('RGB')
+            lt = [(st + (':' + ar if ar else ''), cr(app, PT.strip6(b6, ['light'], st, ar), 'strip')) for st, ar in LSTATES]
+            sg = [(sid, cr(app, PT.strip6(b6, [sid]), 'strip')) for sid in SIGN_ORDER]
+            cb = [('limit alone', cr(app, b6, 'strip')), ('limit + rule', cr(app, PT.strip6(b6, ['stop']), 'strip')),
+                  ('limit + rule + warning', cr(app, PT.strip6(b6, ['giveWay', 'children']), 'strip')), ('limit + light', cr(app, PT.strip6(b6, ['light'], 'red'), 'strip')),
+                  ('no overtaking (limit event) + light: it moves to the third place', cr(app, PT.strip6(b6, ['light', 'noOvertaking'], 'amber'), 'strip')),
+                  ('night: light + rule', cr(app, PT.strip6(b6, ['light', 'noOvertaking'], 'red', night=0.82), 'strip'))]
+            nm = Image.open(os.path.join(ROOT, 'bake', 'work', 'road', 'base_f30_nopass.png')).convert('RGB')
+            cb.append(('the 6WB\'s own no-overtaking sign (BMW style) stays in B while no light shows', cr(app, nm, 'strip')))
+        save('state_%s_light' % app, sheet(tag + ' · the traffic light: every state' + bench, [x for x in lt if x[1] is not None], 3, 560), 'light states')
+        save('state_%s_signs' % app, sheet(tag + ' · signs of the set beside the limit' + bench, [x for x in sg if x[1] is not None], 4, 420), 'signs')
+        save('state_%s_strip' % app, sheet(tag + ' · the sign strip\'s combinations' + bench, [x for x in cb if x[1] is not None], 3, 560), 'strip combinations')
         sc = [(r['name'][4:], crop(app, r, 'scene')) for r in R if r['name'].startswith('5')]
-        save('state_%s_scene' % app, sheet(tag + ' · the road scene: empty, a vehicle ahead, traffic both sides (+ rear radars), light red, light green, no lane data, night, en', [x for x in sc if x[1]], 4, 440), 'scene situations')
+        if len(sc) < 6:
+            look = '6wb' if app == 'f30_cluster' else 'td'
+            base = Image.open(BASE6).convert('RGB') if look == '6wb' else td_page(shot('twin_dial', '000_off'))
+            sc = [(k, cr(app, PT.scene(base.copy(), look, k), 'scene')) for k in PT.SITUATIONS]
+            sc.append(('traffic, night', cr(app, PT.scene(base.copy(), look, 'traffic', night=0.82, fg=(0.74, 0.74, 0.74), dim=(0.45, 0.46, 0.5)), 'scene')))
+            stag = ' (painted with the scene shader at its layer box)'
+        else:
+            stag = bench
+        save('state_%s_scene' % app, sheet(tag + ' · the road scene: empty, a vehicle ahead, traffic both sides (+ rear radars), light red, light green, no lane data, night' + stag, sc, 4, 440), 'scene situations')
         cl = [(r['name'][4:], Image.open(os.path.join(ROOT, r['png'])).convert('RGB')) for r in R if r['name'].startswith('6')]
-        save('collisions_%s' % app, sheet(tag + ' · collisions with what lives nearby (cyan: BMW\'s areas; magenta: our layers)', cl, 2, 940), 'collision sheet')
-        allp = [(r['name'], Image.open(os.path.join(ROOT, r['png'])).convert('RGB')) for r in R]
-        save('contact_%s' % app, sheet(tag + ' · every in-context picture (1920 x 720, bench; cyan BMW, magenta ours)', allp, 4, 470), 'contact sheet')
-        for r in R:
-            index.append((r['png'], app + ' · ' + r['name'] + ' · items ' + ','.join(i.get('id', '') for i in (r['road'].get('items') or []))))
+        if cl:
+            save('collisions_%s' % app, sheet(tag + ' · collisions with what lives nearby (cyan: BMW\'s areas; magenta: our layers)', cl, 2, 940), 'collision sheet')
+        if R:
+            allp = [(r['name'], Image.open(os.path.join(ROOT, r['png'])).convert('RGB')) for r in R]
+            save('contact_%s' % app, sheet(tag + ' · every in-context bench picture (1920 x 720; cyan BMW, magenta ours)', allp, 4, 470), 'contact sheet')
+            for r in R:
+                index.append((r['png'], app + ' · ' + r['name'] + ' · items ' + ','.join(i.get('id', '') for i in (r['road'].get('items') or []))))
+    if PAINTED:
+        index.append(('-', 'painted (no bench picture yet): ' + ', '.join(sorted(PAINTED))))
     for app in ('f30_cluster', 'twin_dial'):
         p = os.path.join(ROOT, 'bake', 'work', 'road', 'atlas_%s.png' % app)
         if os.path.exists(p):

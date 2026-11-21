@@ -35,7 +35,7 @@ os.environ['BENCH_PORT'] = str(PORT)
 import benchio as B   # noqa: E402
 import snap as SNAP   # noqa: E402
 
-LONG = 600000
+LONG = 7200000
 CONFIG = {'roadView': {'lightCfg': {'staleMs': LONG, 'confirm': 1},
                        'signsCfg': {'stretchMs': LONG, 'announceMs': LONG, 'pointMs': LONG, 'warnMs': LONG, 'endMs': LONG},
                        'sceneCfg': {'lanes': {'staleMs': LONG}, 'objects': {'lostMs': LONG, 'fadeMs': 1000}, 'lca': {'holdMs': LONG}, 'absentMs': LONG}},
@@ -159,8 +159,10 @@ def plan(app):
     out.append(S('206_nopass_tsr_light_warning', nopass=1, light='amber', signs=['crossing']))
     out.append(S('207_town_roadworks', signs=['town', 'roadWorks']))
     # every sign of the set, as the rule or the warning
+    # a sample of the set in context (the atlas sheet shows every drawing)
     for i, sid in enumerate(SIGN_TYPE):
-        out.append(S('3%02d_sign_%s' % (i, sid), signs=[sid]))
+        if sid in ('noOvertakingEnd', 'town', 'townEnd', 'motorway', 'envZone', 'priority', 'noEntry', 'levelCrossing', 'animals', 'slippery'):
+            out.append(S('3%02d_sign_%s' % (i, sid), signs=[sid]))
     # night, English, mph
     out.append(S('400_night_light_rule', light='red', signs=['noOvertaking'], look='night'))
     out.append(S('401_en_mph_light_warning', light='green', signs=['crossing'], lang='en', units='mi', limit=None, extra=f_tsr(80, 0)))
@@ -198,10 +200,10 @@ def start_bench(app, work):
     if os.path.exists(stop):
         os.remove(stop)
     env = dict(os.environ, BENCH_PORT=str(PORT), BENCH_DATA_DIR=os.path.join(work, 'data'), BENCH_CONFIG=json.dumps(CONFIG))
-    p = subprocess.Popen([sys.executable, '-I', os.path.join(ROOT, 'tools', 'shots', 'bounded.py'), '1800', stop, os.path.join(work, 'bench.log'), '--',
+    p = subprocess.Popen([sys.executable, '-I', os.path.join(ROOT, 'tools', 'shots', 'bounded.py'), '21600', stop, os.path.join(work, 'bench.log'), '--',
                           'node', os.path.join(ROOT, 'bench', 'server.js'), app], cwd=ROOT, env=env)
     want = {'twin_dial': 'twin', 'f30_cluster': None}[app]
-    p0 = B.until(lambda q: q.get('ready') and (want is None or q.get('activeName') == want), 120, 0.5)
+    p0 = B.until(lambda q: q.get('ready') and (want is None or q.get('activeName') == want), 600, 1.0)
     if not p0 or not p0.get('ready'):
         raise SystemExit('bench did not come up: ' + open(os.path.join(work, 'bench.log')).read()[-2000:])
     return p, stop
@@ -309,9 +311,14 @@ def run(app, out):
     p, stop = start_bench(app, work)
     rows = []
     only = arg('--only')
+    jp0 = os.path.join(out, 'shots.json')
+    done = json.load(open(jp0)) if os.path.exists(jp0) else []
     try:
         for st in plan(app):
             if only and only not in st['name']:
+                continue
+            # a resumed run: a state already drawn is kept (--redo draws it again)
+            if '--redo' not in sys.argv and os.path.exists(os.path.join(out, st['name'] + '.clean.png')) and any(r['name'] == st['name'] for r in done):
                 continue
             t0 = time.time()
             apply(app, st)
@@ -328,6 +335,8 @@ def run(app, out):
                          'road': {'modes': road.get('modes'), 'items': road.get('items'), 'widgets': road.get('widgets'), 'view': road.get('view')},
                          'layout': probe.get('activeName') if probe else None, 'notes': notes})
             print('%-38s %.1f s  items %s  %s' % (st['name'], time.time() - t0, [i.get('id') for i in road.get('items') or []], '; '.join(n for _, n in notes)[:120]))
+            keep = [r for r in done if r['name'] not in set(x['name'] for x in rows)]
+            json.dump(sorted(keep + rows, key=lambda r: r['name']), open(jp0, 'w'), indent=1, ensure_ascii=False)
     finally:
         open(stop, 'w').write('done\n')
         p.wait(timeout=30)

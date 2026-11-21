@@ -3,7 +3,7 @@
  * test-road-view.js - Road View in both themes (round "Road View", package TD; docs/traffic/TD-REPORT.md): the traffic light, the
  * wider sign set and the road scene, test modes behind the Діагностика settings diagRoadLight / diagRoadSigns / diagRoadScene.
  *
- *   node bench/test-road-view.js [--no-bench] [--no-gl] [--no-main]      (BENCH_PORT, default 8984; this package's ports: 8981-8989)
+ *   node bench/test-road-view.js [--no-bench] [--no-gl] [--no-main] [--app twin_dial|f30_cluster]      (BENCH_PORT, default 8984, and +1; ports 8981-8989)
  *
  * Part 1, the decoder (shared/road_view.js) with an injected clock: every light state from the camera's raw codes (TR-REPORT A.3.1's
  *   proposal, each a config key), unknown values, low quality, another light's id, one stray message, stale after 1 s; the
@@ -246,6 +246,8 @@ function pureChecks() {
         'the light sits right of Twin Dial\'s limit sign and left of the gear gap; the 6WB places sit right of the limit sign, the third left of the "260" figure (x 567)');
     ok(td.scene.y >= 326 + 8 && td.scene.y + td.scene.h <= 595 && td.scene.x >= 729 && td.scene.x + td.scene.w <= 1191 && s6.scene.x >= 747 && s6.scene.x + s6.scene.w <= 1173 && s6.scene.y + s6.scene.h <= 452,
         'the scenes: Twin Dial\'s under its page title and meta line, inside the page; the 6WB\'s between the dials, above the horizon');
+    ok(UI.SOURCES.filter((x) => x[1] === 'RecognitionTrafficLightCamera')[0][2].indexOf('scene') >= 0 && UI.SOURCES.filter((x) => x[1] === 'functionalLibraryData')[0][2].indexOf('scene') >= 0,
+        'the scene test alone reads the camera\'s light too (it draws the light over our lane)');
     ok(td.strip.every((g) => g.conn === 2) && td.scene.conn === 1 && s6.conn === 3, 'connections: Twin Dial 2 (strip) and 1 (scene); f30 its 4th (every 6WB layout uses at most 7 on the first three)');
     // ---- the atlases
     ['f30_cluster', 'twin_dial'].forEach((app) => {
@@ -424,8 +426,8 @@ class Bench {
         this.stop_ = path.join(tmp, 'STOP'); this.logf = path.join(tmp, 'bench.log');
         const env = Object.assign({}, process.env, { BENCH_PORT: String(this.port), BENCH_DATA_DIR: data });
         if (this.config) env.BENCH_CONFIG = JSON.stringify(this.config);
-        this.kid = spawn('python3', ['-I', path.join(ROOT, 'tools', 'shots', 'bounded.py'), '900', this.stop_, this.logf, '--', 'node', path.join(this.root, 'bench', 'server.js'), this.app], { cwd: this.root, env, stdio: 'ignore' });
-        return this.until((q) => q.ready && (this.app !== 'twin_dial' || q.activeName === 'twin') && /widgets, \d+ layers/.test(this.log()), 150000);
+        this.kid = spawn('python3', ['-I', path.join(ROOT, 'tools', 'shots', 'bounded.py'), '10800', this.stop_, this.logf, '--', 'node', path.join(this.root, 'bench', 'server.js'), this.app], { cwd: this.root, env, stdio: 'ignore' });
+        return this.until((q) => q.ready && (this.app !== 'twin_dial' || q.activeName === 'twin') && /widgets, \d+ layers/.test(this.log()), 2400000);     // a sleeping Mac builds slowly
     }
     log() { try { return fs.readFileSync(this.logf, 'utf8'); } catch (e) { return ''; } }
     async probe() { const r = await req(this.port, 'GET', '/probe'); try { return r && r.status === 200 ? JSON.parse(r.body.toString('utf8')) : null; } catch (e) { return null; } }
@@ -615,7 +617,10 @@ async function benchApp(app) {
     decoderChecks();
     pureChecks();
     if (args.indexOf('--no-gl') < 0) glChecks();
-    if (args.indexOf('--no-bench') < 0) { await benchApp('twin_dial'); await benchApp('f30_cluster'); }
+    if (args.indexOf('--no-bench') < 0) {
+        const only = args.indexOf('--app') >= 0 ? args[args.indexOf('--app') + 1] : null;      // --app twin_dial | f30_cluster: one app's bench only
+        for (const app of ['twin_dial', 'f30_cluster']) if (!only || only === app) await benchApp(app);
+    }
     console.log('\n' + passed + ' passed, ' + failed + ' failed');
     process.exit(failed ? 1 : 0);
 })().catch((e) => { console.log('FAIL the test threw: ' + (e && e.stack || e)); process.exit(1); });

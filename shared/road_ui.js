@@ -92,8 +92,8 @@ function tracker(hud) {
 
 /** The car's sources each test reads in 'car' mode: [iface, member, which tests, tracker method]. Read only. */
 const SOURCES = [
-    [RV.IF.lightCam, 'RecognitionTrafficLightCamera', ['light'], 'lightCam'],
-    [RV.IF.dds2, 'functionalLibraryData', ['light', 'signs'], 'dds2'],
+    [RV.IF.lightCam, 'RecognitionTrafficLightCamera', ['light', 'scene'], 'lightCam'],         // the scene draws the light over our lane too
+    [RV.IF.dds2, 'functionalLibraryData', ['light', 'signs', 'scene'], 'dds2'],
     [RV.IF.signLeg, 'RecognitionTrafficSignCamera', ['signs'], 'signLeg'],
     [RV.IF.signLeg, 'recognitionTrafficSignCamera2', ['signs'], 'signCam2'],
     [RV.IF.lanes, 'LaneBoundaries', ['scene'], 'lanes'],
@@ -112,7 +112,7 @@ function handler(hud, tests, method) {
             const want = tests.filter((k) => m[k] === 'car');
             if (!want.length) return;
             const t = tracker(hud);
-            if (method === 'dds2') t.dds2(v, { light: m.light === 'car', signs: m.signs === 'car' });
+            if (method === 'dds2') t.dds2(v, { light: m.light === 'car' || m.scene === 'car', signs: m.signs === 'car' });
             else t[method](v);
         } catch (e) { log(hud, 'warn', 'road: ' + (e && e.message || e)); }
     };
