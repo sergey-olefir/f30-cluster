@@ -9,7 +9,7 @@
  *   proposal, each a config key), unknown values, low quality, another light's id, one stray message, stale after 1 s; the
  *   head-up feed's named states (no "go"); no overtaking from the limit's own event; the sign list, its qualifier, its relevance
  *   bit, the legacy codes, each tier's life, an end sign; the strip's order and its at most three; the scene's decoders against
- *   ACC View's own (apps/acc_view/world.js, read only) on the same input; the rear radars' neighbours; junk never throws.
+ *   ACC View's own (apps/road_scene/world.js since fixes-1121 RS, read only) on the same input; the rear radars' neighbours; junk never throws.
  * Part 2, the pictures and the places, pure: the layout untouched while off (the same object); the layers' boxes inside the panel,
  *   clear of the telltales, BMW's black box, the gear gap, BMW's message panel and its own sign place; the atlases (RGBA, width a
  *   multiple of 4, up to date with the definitions, red only in the signs whose real colours have it); the shaders (size against
@@ -145,7 +145,7 @@ function decoderChecks() {
         'at most three with the limit; the order light, rule (a point rule first), warning; "lights ahead" says nothing beside a light');
     ok(RV.strip({ light: { state: 'none' }, signs: [] }, { limit: true, noPass: true })[0].theirs === true, 'the theme\'s own no-overtaking sign counts as the rule');
     // ---- the scene: the same decoders as ACC View's
-    const Wo = require(path.join(ROOT, 'apps', 'acc_view', 'world.js'));
+    const Wo = require(path.join(ROOT, 'apps', 'road_scene', 'world.js'));
     const lanesEv = { laneBoundaryFront: [1.8, -1.7, 5.2, -5.3].map((y, i) => ({ modelQualifier: i === 3 ? 'LANE_BOUNDARY_MODEL_NOT_AVAILABLE' : 0, existenceProbability: 0.9, pointSegment1: { y },
         baseSegment1: { angle: 0.01, curvature: 0.002 }, parametersSegment1: { validLength: 60, curvatureChange: 0.0001 }, parametersSegment2: { validLength: 20 } })),
         laneBoundaryPropertiesFront: [{ typeInfo: { type: 'DASHED' } }, { typeInfo: { type: 'SOLID' } }, { typeInfo: { type: 'ROAD_EDGE' } }, { typeInfo: { type: 'DASHED' } }] };

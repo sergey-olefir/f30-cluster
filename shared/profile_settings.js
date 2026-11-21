@@ -74,6 +74,12 @@ const TABLE = {
         global: [ENABLE_KEY, 'redline', 'demo', 'diagRelease', 'diagMapWindow', 'diagMapForce', 'diagMapSlots', 'diagSilent', 'diagGpuText',
             'diagR8Mark', 'diagCarplayTurns', 'diagFrontVehicle'],
     },
+    // round fixes-1121 RS (Road Scene: ACC View + Auto Beam): a driver's own taste per profile (how early the beam advice dips,
+    // the language); the switch, the cluster test, the demo and the camera-verdict choice (about the car's camera) global
+    road_scene: {
+        perProfile: ['sens', 'lang'],
+        global: [ENABLE_KEY, 'show', 'demoCycle', 'follow'],
+    },
 };
 
 /** "de.bmw...UserAccountManager.i01" -> "i01" (null when it is not one of the slots). */

@@ -1,0 +1,756 @@
+{
+  "id": "road_scene",
+  "title": "Road Scene",
+  "description": "Read-only: one picture of the road as the car's sensors see it (the lanes, the road users by class, the vehicle ahead, our own car, the cruise ring and the limit) and, at night, our own beams on the road and the light sources ahead, with an ADVICE for the high beam (a sign and a table row, scored against what the driver did). Merges ACC View and Auto Beam (round fixes-1121 RS). It never switches a lamp and writes nothing to the car.",
+  "version": "0.1.0",
+  "vendor": "custom",
+  "loggingId": "OARS",
+  "iconGlyph": "RS",
+  "i18n": true,
+  "mguHmi": [
+    "ID7"
+  ],
+  "shared": [
+    "cluster_render_client.js",
+    "front_vehicle.js",
+    "limit_src.js",
+    "sun.js",
+    "lang.js",
+    "beam_logic.js",
+    "profile_settings.js"
+  ],
+  "signals": {
+    "de.bmw.dass.GapVehicleAhead": {
+      "_instances": "1",
+      "DataFrontVehicle": "s",
+      "_about": "r1120 AA: the vehicle ahead as the front camera reports it (a FIELD with a notifier only, 32770; no getter, no setter), declared 's' as Signal Probe and Twin Dial do. Watched only while 'show' is on. Read only. r1120 AA2: DataFrontVehicleExtended (notifier 32771, no getter): the car ahead's class (FrontVehicleExtendedObjectType), 's' as Signal Probe.",
+      "DataFrontVehicleExtended": "s"
+    },
+    "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
+      "_instances": "1",
+      "functionalLibraryData": "rs",
+      "_about": "r1120 AA: cruise / limiter (ldmSym, ldmSymColor, cruiseCtrlSpeedHUD), seen on the car 2026-11-18. Getter 1 (non-zero), notifier 32769. Read only."
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "statusCarSpeed2": "rs",
+      "_about": "Our own speed (raw x 0.015625 km/h, getter 8; seen on the car): the gap levels and the beam advice; the number of the car's message shown now (statusDisplayedCCMessage, getter 61; seen 2026-11-18: 0 none): while one shows, our cluster picture yields; statusLightStatus (getter 43, notifier 32811): statusMainBeam_headlightFlasher, HR's best candidate for 'the high beam is lit' (unseen yet; trusted only while statusLightStatusError says the signals are in order). Read only.",
+      "statusDisplayedCCMessage": "rs",
+      "statusLightStatus": "rs"
+    },
+    "de.bmw.infotainment.fasus.FASuS": {
+      "_instances": "1",
+      "requestWarnBrakeCoordinatorDisplay": "rs",
+      "_about": "r1120 AA: the car's own collision-warning request, declared in Signal Probe (S14), never seen with a value: logged only; drawn (our picture dimmed) only when config.warn names its path and active values. Read only."
+    },
+    "de.bmw.dass.TrafficSignRecognition": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognition"
+      ],
+      "_about": "The speed limit (an EVENT, eventId 32769; seen 2026-11-18): presentClassLimitSpeed x 5 = km/h (shared/limit_src.js tsrOf, as Twin Dial): the plate, and a limit of 60 km/h or less counts towards a built-up area for the beam advice. No getter, no setter, no method."
+    },
+    "de.bmw.infotainment.vehicle.Vehicle": {
+      "statusDayNightChangeOver": "rs",
+      "_about": "The car's own day / night (getter 19, notifier 32787; Twin Dial's source, config.dayNight): the night look, the beams and light sources (night only), and the beam advice's stand-in for the sun. Read only."
+    },
+    "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ObjectRecognition",
+        "ObjectPosition"
+      ],
+      "_about": "The front camera's objects, 40 slots each: class, lane mapping, id, statusMovement (32769); x / y / length / width Float (32770; metres and y-left are hypotheses: config.world.objects): the scene's road users, and the beam advice's second fallback (statusMovement ONCOMING / SAME_AS_EGO). Events: no getter, no setter, no method. Read only."
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraObjectlist": {
+      "_instances": "1",
+      "_broadcasts": [
+        "objectlistTCP"
+      ],
+      "_about": "The camera's object list, up to 20 (EmMeter x / y, class percentages, per object head-lamp and rear-lamp ON / OFF; event 32770): the scene's road users (second choice) and the beam advice's FALLBACK while the light stream is silent (its lamp flags). Read only."
+    },
+    "de.bmw.environmentalmodel.LaneBoundaries": {
+      "_instances": "1",
+      "_broadcasts": [
+        "LaneBoundaries"
+      ],
+      "_about": "r1120 AA2: 4 front lane boundaries as clothoids (offset, angle, curvature, curvature change, valid length) with their type (SOLID, DASHED, DOUBLE, ROAD_EDGE ...); event 32771. Read only."
+    },
+    "de.bmw.environmentalmodel.Lanes": {
+      "_instances": "1",
+      "_broadcasts": [
+        "LanesDetection"
+      ],
+      "_about": "r1120 AA2: the lanes' kinds left / ego / right (LaneType); event 32769. Logged only."
+    },
+    "de.bmw.dass.driverassistanceapplications.KeepDistanceObjectsLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "keepDistanceObjects1"
+      ],
+      "_about": "r1120 AA2: three distance-control objects (raw UInt16 distances, scale unknown); event 32769. Logged only (counts and raw ranges): may not be sent without adaptive cruise."
+    },
+    "de.bmw.infotainment.hmi.hmicontext.HMIContext": {
+      "_instances": "HMI_CID",
+      "currentDisplayLanguage": "rs",
+      "_about": "r1120 merge: the head unit's language for \"Авто\" (shared/lang.js; getter 3, notifier 32771). Read only."
+    },
+    "de.bmw.chassis.YawRateProvision": {
+      "_instances": "1",
+      "_broadcasts": [
+        "yawRate"
+      ],
+      "_about": "Our yaw rate (an EVENT, eventId 32791, service 28672: yawRate.yawRate Float + invalidFlag, qualifierYawRate; unit ASSUMED deg/s, + left): the predicted path (lanes.js Path: curvature = yaw rate / speed) and the beam advice's curve proxy. One subscription feeds both. Read only."
+    },
+    "de.bmw.infotainment.drivingexcitement.XView": {
+      "_instances": "1",
+      "statusSteeringAngleDriver": "rs",
+      "statusFrontAxleSteeringAngle": "rs",
+      "_about": "fixes-1121 AL: the steering for the predicted path at low speed. statusSteeringAngleDriver: getter 3 (non-zero), notifier 32771, UInt16 + qualifier, the one Signal Probe's ACC set records; scale ASSUMED 0.04395 deg/bit, offset -1440 deg, + left (config.world.path.sources.steer). statusFrontAxleSteeringAngle: getter 33, notifier 32801, the road wheels' angle, scale unknown: declared, off (sources.steerAxle). Read only."
+    },
+    "de.bmw.infotainment.vehicle.CDS2": {
+      "_instances": "1",
+      "statusYawVelocityVehicle": "rs",
+      "_about": "fixes-1121 AL: the head unit's own yaw rate, an alternative to YawRateProvision: getter 85, notifier 32853, UInt16, scale ASSUMED 0.005 deg/s offset -163.84. Declared, off (config.world.path.sources.yawHu). Read only."
+    },
+    "de.bmw.chassis.CentralOdometryProvision": {
+      "_instances": "1",
+      "_broadcasts": [
+        "curvatureAndSlipSideAngle"
+      ],
+      "_about": "fixes-1121 AL: the chassis' own curvature of our motion (ActualValueCurvatureVehicleMotion Float, assumed 1/m, + left; qualifierCurvature): an EVENT (32769, service 7000). Declared, off (config.world.path.sources.curv) until a drive shows it is sent. Read only."
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraLightDetection": {
+      "_instances": "1",
+      "_broadcasts": [
+        "mainBeamAssistantDataObject1",
+        "mainBeamAssistantDataObject2",
+        "mainBeamAssistantDataObject3",
+        "mainBeamAssistantDataObject4",
+        "mainBeamAssistantDataObject5",
+        "mainBeamAssistantDataObject6",
+        "mainBeamAssistantDataObject7",
+        "mainBeamAssistantDataObject8",
+        "mainBeamAssistantDataObject9",
+        "mainBeamAssistantDataObject10",
+        "MainBeamAssistantDataObject11",
+        "MainBeamAssistantDataObject12",
+        "mainBeamAssistantDataObject13",
+        "mainBeamAssistantDataObject14",
+        "MainBeamAssistantDataObject15",
+        "controlHighBeamAssistant"
+      ],
+      "_about": "Auto Beam (HD): the front camera's light objects (15 events, 10 UInt8 each, units UNKNOWN: config.inputs.lights / config.algo.lights) and its own verdict (controlHighBeamAssistant). EVENTS only, as broadcasts: no getter, no setter, no method. acknowledgeObjectDataLeft / Right (setter, no getter) are NOT declared and never will be. Whether this car (no option 5AC) sends any of it is unknown: the log's 'beam: src lights first' line answers it."
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognitionFrontCamera"
+      ],
+      "_about": "Auto Beam (HD): the built-up area from the camera's own town-entry / town-exit signs (TrafficSignType CITY_LIMIT_START_OF 55, CITY_LIMIT_END_OF 56, CITY_LIMIT_START_END_OF 57; event 32769; seen on the car as the themes' sign source). Navigation is CarPlay: there is no map flag. Read only."
+    },
+    "de.bmw.body.Light": {
+      "_instances": "1",
+      "LowBeam": "rs",
+      "LampExterior2": "s",
+      "IndicatorSteeringColumn": "s",
+      "_about": "Auto Beam (HD): the low beam on / off and its brightness (LowBeam, getter 1, notifier 32771); the lamps' commands (LampExterior2, notifier 32772: controlFunctionMainBeam = the high beam lit, ASSUMED; controlFunctionFrontFogLight = the fog lamps); the stalk's bits (IndicatorSteeringColumn, notifier 32773: push / pull ASSUMED 0x20 / 0x10, ROUND.md 1a). Read only: this interface has no setter at all."
+    },
+    "de.bmw.body.Environment": {
+      "_instances": "1",
+      "StatusBrightnessEnvironment": "s",
+      "_about": "Auto Beam (HD): the ambient brightness (raw UInt8, unit unknown), notifier 32770. Read only."
+    },
+    "de.bmw.body.Wiper": {
+      "_instances": "1",
+      "rainSensorWiperSpeed": "s",
+      "_about": "Auto Beam (HD): the rain intensity (raw), notifier 32771. Read only."
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "Road Scene",
+      "buttons": [
+        [
+          "BTN_SETTINGS",
+          "Settings"
+        ]
+      ],
+      "_about": "the app's own page: ONE scene on the left (the road, the lanes, the road users, the car ahead, our car, the cruise ring and the limit; at night our beams, the light sources and the beam advice's sign) and the data table on the right. Nothing on it can be pressed; the only button is the kit's Settings, labelled in Latin (the kit's bar font has no Cyrillic)."
+    },
+    {
+      "name": "SETTINGS",
+      "kind": "menu",
+      "settings": true,
+      "title": "Settings",
+      "items": [
+        [
+          "text",
+          "STATUS"
+        ],
+        [
+          "setting",
+          "show"
+        ],
+        [
+          "setting",
+          "demoCycle"
+        ],
+        [
+          "setting",
+          "sens"
+        ],
+        [
+          "setting",
+          "follow"
+        ],
+        [
+          "setting",
+          "lang"
+        ],
+        [
+          "setting",
+          "profileSets"
+        ]
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "show",
+      "label": "Показувати на щитку",
+      "type": "bool",
+      "default": false,
+      "_about": "the scene on the cluster's map target (6 layers on the app's own connection: AA-SPEC 3.1 grown by AA2, Auto Beam's content inside them), a test: off by default. contend false, guide_hold 0."
+    },
+    {
+      "key": "demoCycle",
+      "label": "Демо: стани по колу",
+      "type": "bool",
+      "default": false,
+      "_about": "ACC View's 28 entries (14 states, 7 scenes, 7 lane scenes), Auto Beam's 19 states on a road and its 5 scenes through the real algorithm, in turn (config.demoMs each, a scene its own length), on both placements, no signals"
+    },
+    {
+      "key": "sens",
+      "label": "Чутливість порад фар",
+      "type": "choice",
+      "default": "normal",
+      "options": [
+        [
+          "early",
+          "Раніше ближнє"
+        ],
+        [
+          "normal",
+          "Звичайна"
+        ],
+        [
+          "late",
+          "Пізніше ближнє"
+        ]
+      ],
+      "_about": "per driver profile (shared/profile_settings.js): the beam advice's dip zones and return times: beam_logic's PRESETS early / normal / late"
+    },
+    {
+      "key": "follow",
+      "label": "Стежити за рішенням камери",
+      "type": "choice",
+      "default": "follow",
+      "options": [
+        [
+          "follow",
+          "Стежити"
+        ],
+        [
+          "ignore",
+          "Не зважати"
+        ]
+      ],
+      "_about": "global: whether the camera's own verdict (controlHighBeamAssistant) counts as a dip trigger; it is always logged"
+    },
+    {
+      "key": "lang",
+      "label": "Мова / Language",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Авто"
+        ],
+        [
+          "uk",
+          "Українська"
+        ],
+        [
+          "en",
+          "English"
+        ]
+      ],
+      "_about": "r1120 merge: the language of the drawn words (shared/lang.js). auto = the head unit's when uk or en, else Ukrainian."
+    },
+    {
+      "key": "profileSets",
+      "label": "Налаштування для кожного профілю",
+      "type": "bool",
+      "default": true
+    }
+  ],
+  "config": {
+    "target": "map",
+    "layer": {
+      "target": "map",
+      "klass": "content",
+      "contend": false,
+      "guideHold": 0,
+      "_about": "the map target's core x 334..754, y 44..416 (AA-SPEC 2.1): acc_lane effect 420 x 218 at (334, 198) with our beams, acc_obj effect (the same box: road users and light sources), acc_car effects (the car ahead, moved and resized; our car), text sheet 420 x 96 at (334, 54) (the beam advice, the ring, the plate), pill sheet 340 x 44 at (374, 150). contend false: it waits until BMW's map leaves the slot and never pushes it aside. guideHold 0: BMW's CarPlay manoeuvre box is never held back for us."
+    },
+    "frontVehicle": {
+      "on": false,
+      "none": [
+        4093,
+        4094,
+        4095
+      ],
+      "qualNone": [
+        2,
+        "EVENT_DATA_NOT_AVAILABLE"
+      ],
+      "nearer": "smaller",
+      "scale": null,
+      "assumeScale": 0.1,
+      "levels": {
+        "timeGap": [
+          0.9,
+          1.4,
+          2.0,
+          3.0
+        ],
+        "metres": [
+          8,
+          15,
+          30,
+          60
+        ],
+        "minKmh": 20
+      },
+      "hyst": 0.12,
+      "closing": {
+        "windowMs": 1500,
+        "minMs": 600,
+        "rate": 1.0,
+        "fastRate": 4.0,
+        "fastTtc": 4.0,
+        "release": 0.6
+      },
+      "staleMs": 2000,
+      "absentMs": 10000
+    },
+    "warn": {
+      "path": null,
+      "active": null,
+      "_about": "unknown until the car shows the struct: e.g. path ['someMember'], active ['SOME_ENUM']. Null: never drawn."
+    },
+    "lang": "auto",
+    "_lang": "the language comes from shared/lang.js (the setting); 'uk' or 'en' here overrides it (the bench)",
+    "night": "auto",
+    "_night": "'auto': the car's day / night (dayNight), else the sun at location; 'day' / 'night': a fixed look (the bench)",
+    "dayNight": {
+      "iface": "de.bmw.infotainment.vehicle.Vehicle",
+      "field": "statusDayNightChangeOver",
+      "path": [
+        "dayNightChangeOver"
+      ],
+      "map": {
+        "0": "keep",
+        "KEINE_AENDERUNG": "keep",
+        "1": "day",
+        "TAG": "day",
+        "2": "night",
+        "NACHT": "night",
+        "3": null,
+        "SIGNAL_UNGUELTIG": null
+      },
+      "codes": {
+        "KEINE_AENDERUNG": 0,
+        "TAG": 1,
+        "NACHT": 2,
+        "SIGNAL_UNGUELTIG": 3
+      },
+      "_from": "fix/colour-daynight, from the car's catalogue (reference/car/2026-11-15/someip/someip-interfaces.json): Vehicle (service 46352, instance 1) field statusDayNightChangeOver, getter 19, notifier 32787, struct StatusDayNightChangeOverWrapper { dayNightChangeOver: enum DayNightChangeOver (default 3), destinationLCDLuminance, dampingLCDLuminance }. DayNightChangeOver: 0 KEINE_AENDERUNG (no change: the last day/night the car gave holds; none yet: the sun), 1 TAG (day), 2 NACHT (night), 3 SIGNAL_UNGUELTIG (invalid: the sun). Any other value counts as invalid. The meaning of 0 is read off its German name only and is UNCONFIRMED on the car. 'codes' turns an enum NAME back into its number for the log (numbers only). hud.js _isNight."
+    },
+    "location": {
+      "lat": 50.45,
+      "lon": 30.52
+    },
+    "demoMs": 4000,
+    "sign": {
+      "tsr": {},
+      "_about": "shared/limit_src.js tsrCfg defaults (the event TrafficSignRecognition, presentClassLimitSpeed x 5, stale after 3 s)"
+    },
+    "cruise": {},
+    "world": {
+      "range": 100,
+      "objects": {
+        "scale": 1,
+        "ySign": 1,
+        "xMin": 1,
+        "xMax": 95,
+        "yMax": 12,
+        "glideMs": 250,
+        "lostMs": 500,
+        "fadeMs": 600,
+        "max": 16,
+        "minProb": 0
+      },
+      "lanes": {
+        "scale": 1,
+        "ySign": 1,
+        "minProb": 0.3,
+        "staleMs": 1500,
+        "maxLen": 120,
+        "probScale": "auto",
+        "minLen": 8,
+        "maxOffset": 9,
+        "cMax": 0.1,
+        "aLat": 5,
+        "angle": [
+          [
+            15,
+            0.15
+          ],
+          [
+            5,
+            0.3
+          ],
+          [
+            0,
+            0.6
+          ]
+        ],
+        "minEdge": 1.0,
+        "crossA": 0.06,
+        "wMin": 2.4,
+        "wMax": 4.5,
+        "nearX": 20,
+        "width": 3.5,
+        "confirm": 3,
+        "holdFrames": 8,
+        "holdMs": 700,
+        "gate": 0.9,
+        "jumpY": 0.35,
+        "jumpA": 0.05,
+        "jumpC": 0.002,
+        "blendMs": 500,
+        "reacquireMs": 1000,
+        "guessStr": 0.55,
+        "straightLen": 50,
+        "_about": "fixes-1121 AL (apps/acc_view/lanes.js): only what makes sense is drawn. probScale: existenceProbability is a bare Float in the catalogue; 'auto' reads a value above 1.5 as 0..100, a number multiplies. A boundary is refused under minLen m, beyond maxOffset m, with a curvature over min(cMax, aLat / v^2), a heading over angle[speed m/s], or (new) closer than minEdge m to our centre; neighbours wMin..wMax m apart within nearX m; drawn after `confirm` frames, held holdFrames / holdMs; a jump over jumpY m / jumpA rad / jumpC 1/m starts a new candidate. Transitions blendMs; back to a better picture after reacquireMs. Every other key: world.js DEFAULT.lanes."
+      },
+      "sources": {
+        "cam": true,
+        "tcp": true,
+        "lanes": true,
+        "lanesDetection": true,
+        "keepDistance": true,
+        "frontExtended": true
+      },
+      "_about": "r1120 AA2, the owner's FOCUS (2026-11-20; apps/acc_view/world.js): HYPOTHESES until a drive's log says otherwise: the events' x / y are metres (scale 1) with y to the LEFT (ySign 1; -1 flips); the camera's ObjectRecognition and ObjectPosition slots are the same objects index by index. range: the drawn lane's far end (m). sources: switch a subscription off (each is read only). path (fixes-1121 AL): our predicted path's sources and limits.",
+      "path": {
+        "on": true,
+        "vStand": 0.5,
+        "standWheels": true,
+        "vYawMin": 2,
+        "vSteerMax": 5,
+        "wheelbase": 2.851,
+        "steerRatio": 15.0,
+        "steerCurve": [
+          [
+            0,
+            15.0
+          ],
+          [
+            20,
+            15.0
+          ],
+          [
+            100,
+            13.0
+          ],
+          [
+            200,
+            12.0
+          ]
+        ],
+        "turnRadius": 5.7,
+        "rearAxle": 3.65,
+        "carWidth": 1.83,
+        "aLat": 9,
+        "sources": {
+          "yaw": {
+            "on": true,
+            "role": "yaw",
+            "iface": "de.bmw.chassis.YawRateProvision",
+            "member": "yawRate",
+            "kind": "event",
+            "staleMs": 1000,
+            "path": [
+              "yawRate",
+              "yawRate"
+            ],
+            "invalid": [
+              "yawRate",
+              "invalidFlag"
+            ],
+            "qual": [
+              "qualifierYawRate"
+            ],
+            "bad": [
+              "SIGNAL_UNGUELTIG",
+              15,
+              "SIGNALWERT_UNGUELTIG",
+              14,
+              "UNGUELTIG",
+              6,
+              "INITIALISIERUNG",
+              8
+            ],
+            "scale": 1,
+            "offset": 0,
+            "none": [],
+            "unit": "deg",
+            "sign": 1
+          },
+          "steer": {
+            "on": true,
+            "role": "steer",
+            "iface": "de.bmw.infotainment.drivingexcitement.XView",
+            "member": "statusSteeringAngleDriver",
+            "kind": "field",
+            "staleMs": 5000,
+            "path": [
+              "actualValueSteeringAngleDriver"
+            ],
+            "qual": [
+              "qualifierActualValueSteeringAngleDriver"
+            ],
+            "bad": [
+              "SIGNAL_UNGUELTIG",
+              15,
+              "SIGNALWERT_IST_UNGUELTIG__ZUSTAND_S_STATUS_PERMANENT",
+              6,
+              "SIGNALWERT_IST_UNGUELTIG__ZUSTAND_S_STATUS_TEMPORAER",
+              14,
+              "SENSOR_NICHT_VORHANDEN",
+              7,
+              "INITIALISIERUNG",
+              8
+            ],
+            "scale": 0.04395,
+            "offset": -1440,
+            "none": [
+              65535
+            ],
+            "unit": "deg",
+            "sign": 1,
+            "road": false
+          },
+          "yawHu": {
+            "on": false,
+            "role": "yaw",
+            "iface": "de.bmw.infotainment.vehicle.CDS2",
+            "member": "statusYawVelocityVehicle",
+            "kind": "field",
+            "staleMs": 5000,
+            "path": [
+              "yawVelocityVehicle"
+            ],
+            "scale": 0.005,
+            "offset": -163.84,
+            "none": [
+              65535
+            ],
+            "unit": "deg",
+            "sign": 1
+          },
+          "steerAxle": {
+            "on": false,
+            "role": "steer",
+            "iface": "de.bmw.infotainment.drivingexcitement.XView",
+            "member": "statusFrontAxleSteeringAngle",
+            "kind": "field",
+            "staleMs": 5000,
+            "path": [
+              "steeringAngleFrontAxleEffective"
+            ],
+            "scale": 0.0043945,
+            "offset": -144,
+            "none": [
+              65535
+            ],
+            "unit": "deg",
+            "sign": 1,
+            "road": true
+          },
+          "curv": {
+            "on": false,
+            "role": "curv",
+            "iface": "de.bmw.chassis.CentralOdometryProvision",
+            "member": "curvatureAndSlipSideAngle",
+            "kind": "event",
+            "staleMs": 1000,
+            "path": [
+              "curvature",
+              "ActualValueCurvatureVehicleMotion"
+            ],
+            "invalid": [
+              "curvature",
+              "invalidFlag"
+            ],
+            "qual": [
+              "qualifierCurvature"
+            ],
+            "bad": [
+              "FEHLER",
+              6,
+              "SIGNAL_UNBEFUELLT",
+              15,
+              "WERT_NICHT_VERFUEGBAR",
+              14
+            ],
+            "scale": 1,
+            "offset": 0,
+            "none": [],
+            "unit": "1/m",
+            "sign": 1
+          }
+        },
+        "_about": "fixes-1121 AL: our own path when the lanes are not good enough (lanes.js Path): yaw rate / speed above vYawMin m/s (preferred wherever we move), the steering alone below it, blended up to vSteerMax; a direct curvature first when its source is on; never tighter than turnRadius m or aLat m/s^2; under vStand m/s the turned wheels (standWheels, the owner's choice 2026-11-21: as the parking lines), straight with no steering data. fixes-1121 RS: the path is anchored at our REAR AXLE, rearAxle m behind our front bumper (the wheelbase + a front overhang of about 0.80 m: ASSUMED), so the corridor is tangent to our car there and holds the band our body (carWidth) sweeps; a full lock at a stop bends it as tightly as turnRadius (0.2.1's 20 m cap is gone). The owner's car is a G20 330i xDrive sedan (wheelbase 2 851 mm) with S2VL Variable Sport Steering: steerCurve [[steering-wheel deg, ratio], ...] is the ratio by the wheel's angle, linear between, flat beyond, and the road wheels' angle is its integral. BMW publishes no curve: 15.0 on centre falling to 12.0 by 200 deg is a CONSERVATIVE ASSUMPTION (steerRatio: only without a curve). sources: the yaw and steer pair is on, the others are alternatives (declared in signals, read only, off). Every scale, unit ('deg' = degrees or deg/s) and sign is ASSUMED: the log's 'acc: path ... raw' ranges and 'cal' ratio (the camera's lane curvature over ours: 1 when right, -1 a sign, ~57 deg/rad; for the steering also the curve) settle them."
+      }
+    },
+    "tickMs": 100,
+    "_tickMs": "the one loop (main.js TICK_MS): world, beam frame, decision, map",
+    "yieldUnknown": false,
+    "_yieldUnknown": "statusDisplayedCCMessage 65535 (unknown, seen after a start) does not make our picture yield; any other non-zero number does",
+    "inputs": {
+      "lights": {
+        "none": {
+          "x": 255,
+          "dist": 127,
+          "cls": 15,
+          "status": 7,
+          "id": 15
+        },
+        "staleMs": 600,
+        "assumed": true
+      },
+      "lamps": {
+        "highSources": [
+          "lightStatus",
+          "lampExterior2"
+        ],
+        "lightStatusOk": [
+          "LAMPENZUSTANDS_MINUS_SIGNALE_SIND_IN_ORDNUNG",
+          0
+        ],
+        "on": [
+          "EIN",
+          1
+        ],
+        "off": [
+          "AUS",
+          0
+        ],
+        "lowOn": [
+          "FAHRLICHT_EINSCHALTEN",
+          1
+        ],
+        "lowOff": [
+          "FAHRLICHT_AUSSCHALTEN",
+          0
+        ],
+        "highOn": [
+          "ON_MAB_MODE_1",
+          "ON_MAB_MODE_2",
+          "ON_MAB_MODE_3",
+          "ON_MAB_MODE_4",
+          2,
+          5,
+          6,
+          7
+        ],
+        "highOff": [
+          "OFF_MAB",
+          1
+        ],
+        "fogOn": [
+          "NSW_ON",
+          2
+        ],
+        "fogOff": [
+          "NSW__OFF",
+          1,
+          "INIT",
+          0
+        ],
+        "assumed": true
+      },
+      "stalk": {
+        "pull": 16,
+        "push": 32,
+        "assumed": true
+      },
+      "objects": {
+        "staleMs": 600,
+        "minProb": 0,
+        "ySign": 1,
+        "classes": {
+          "car": 1,
+          "truck": 2,
+          "moto": 3,
+          "bike": 4,
+          "ped": 5,
+          "other": 0
+        },
+        "assumed": true
+      },
+      "env": {
+        "wiperPath": "speedWiper",
+        "wiperMax": 3,
+        "assumed": true
+      },
+      "town": {
+        "start": [
+          "CITY_LIMIT_START_OF",
+          55,
+          "CITY_LIMIT_START_END_OF",
+          57
+        ],
+        "end": [
+          "CITY_LIMIT_END_OF",
+          56
+        ],
+        "maxMs": 900000,
+        "assumed": true
+      },
+      "car": {
+        "speedScale": 0.015625,
+        "speedNone": 65535,
+        "yawScale": 1,
+        "yawPath": [
+          "yawRate"
+        ],
+        "staleMs": 1000,
+        "assumedYaw": true
+      },
+      "_about": "inputs.js: the catalogue's defaults mean 'no object'; everything marked assumed is a HYPOTHESIS until a night drive (HS's recorder) settles it: which member says the high beam is lit (highSources: statusLightStatus first, LampExterior2 second, as HR suggests), which stalk bit is the flash pull, the object lists' lateral sign, the wiper level, the yaw rate's scale, how long a town lasts without its exit sign."
+    },
+    "algo": {
+      "objects": {
+        "use": "fallback"
+      },
+      "_about": "a partial config for shared/beam_logic.js (docs/highbeam/CONTRACT.md section 4), merged over its DEFAULTS; the sensitivity setting merges B.PRESETS[early | normal | late] over it; 'Стежити за рішенням камери' sets verdict.use follow / log. objects.use fallback: the camera's object lists stand in while the light stream is silent (HR: likely on this car). Every scale of the light objects is the module's own (assumed until a drive)."
+    }
+  }
+}
