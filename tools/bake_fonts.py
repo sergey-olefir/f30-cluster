@@ -258,7 +258,9 @@ AB_FONTS = [
     _td(TD_NOTO_B, 'ab_b22', 22, AB_TEXT),      # the map's advice line
     _td(TD_NOTO_B, 'ab_b34', 34, AB_TEXT),      # the centre page's advice line
 ]
-FONTS = {'idrive_hud_widgets': HUD_FONTS, 'cluster_themes': CLUSTER_FONTS, 'f30_cluster': F30_FONTS, 'twin_dial': TWIN_FONTS, 'acc_view': ACC_FONTS, 'auto_beam': AB_FONTS}
+# Road Scene (round fixes-1121 RS): ACC View and Auto Beam merged; it draws both apps' words (shared/i18n rs.* and beam.*) in both
+# sets of atlases, so it ships both (the retired apps' copies stay in tools/retired/)
+FONTS = {'idrive_hud_widgets': HUD_FONTS, 'cluster_themes': CLUSTER_FONTS, 'f30_cluster': F30_FONTS, 'twin_dial': TWIN_FONTS, 'road_scene': ACC_FONTS + AB_FONTS}
 PAD = 2
 ATLAS_W = 1024
 SS = 4            # stretch: glyphs are drawn this many times larger and reduced by area (package A1)

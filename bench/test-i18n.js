@@ -107,9 +107,9 @@ APPS.forEach((a) => { specs[a] = JSON.parse(fs.readFileSync(path.join(ROOT, 'app
         if (a === 'signal_probe') ok(!hc || !hc.currentDisplayLanguage, a + ': declares only its probe table\'s fields: Авто from --currentLanguage alone (no HMIContext.currentDisplayLanguage)');
         else ok(hc && hc._instances === 'HMI_CID' && hc.currentDisplayLanguage === 'rs', a + ': reads HMIContext.currentDisplayLanguage (rs, HMI_CID; getter 3, notifier 32771)');
     });
-    // round "Auto Beam" (HD): auto_beam's app.json words are keyed by their place too (its code's words are named in
-    // apps/auto_beam/words.js, scanned below); the app is not in APPS (parts E and H build and run the four older apps)
-    ['auto_beam'].forEach((a) => {
+    // round "Auto Beam" (HD), round fixes-1121 RS: road_scene's (ACC View + Auto Beam) app.json words are keyed by their place too (its
+    // code's words are named in apps/road_scene/words.js, scanned below); the app is not in APPS (parts E and H build and run the four older apps)
+    ['road_scene'].forEach((a) => {
         const s2 = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', a, 'app.json'), 'utf8'));
         s2.id = s2.id || a;
         const miss = [];
@@ -120,7 +120,7 @@ APPS.forEach((a) => { specs[a] = JSON.parse(fs.readFileSync(path.join(ROOT, 'app
     // every key the code names (a quoted key of a known family), and the families built at run time
     const CODE = codeFiles();
     const named = new Set(), prefixes = new Set();
-    const FAM = /^(kit|menu|gallery|probe|rv|dp|twin|fv|f30|wb|ps|signal_probe|driver_profiles|twin_dial|f30_cluster|beam|auto_beam)\.[A-Za-z0-9_.]*$/;     // r1120 PS: + wb (the 6WB's printing), ps (the profile line); road TS: + rv; Auto Beam (HD): + beam, auto_beam
+    const FAM = /^(kit|menu|gallery|probe|rv|dp|twin|fv|f30|wb|ps|signal_probe|driver_profiles|twin_dial|f30_cluster|beam|rs|road_scene)\.[A-Za-z0-9_.]*$/;     // r1120 PS: + wb (the 6WB's printing), ps (the profile line); road TS: + rv; Auto Beam (HD): + beam; fixes-1121 RS: + rs, road_scene (auto_beam retired)
     CODE.forEach((f) => {
         const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
         literals(src).forEach((l) => { if (FAM.test(l.v)) { if (/\.$/.test(l.v)) prefixes.add(l.v); else named.add(l.v); } });
@@ -143,7 +143,7 @@ function codeFiles() {
         'apps/driver_profiles/format.js', 'apps/driver_profiles/avatars.js', 'apps/driver_profiles/profiles.js',
         'shared/profile_settings.js', 'shared/units.js',      // r1120 PS
         'tools/road-view/app/rv_recorder/rv_menu.js', 'tools/road-view/app/rv_recorder/main.js', 'tools/road-view/app/rv_recorder/rv.js',      // road TS: the RV recorder (outside the Store)
-        'apps/auto_beam/words.js', 'apps/auto_beam/paint.js', 'apps/auto_beam/main.js', 'apps/auto_beam/contract.js',      // Auto Beam (HD)
+        'apps/road_scene/words.js', 'apps/road_scene/paint.js', 'apps/road_scene/main.js', 'apps/road_scene/contract.js',      // Road Scene (fixes-1121 RS: ACC View + Auto Beam)
         'shared/road_view.js', 'shared/road_ui.js', 'shared/road_signs.js', 'shared/road_shaders.js'];      // road TD
 }
 
