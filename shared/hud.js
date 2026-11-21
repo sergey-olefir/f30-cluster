@@ -242,6 +242,10 @@ const I18N = require('./lang');                      // r1120 LN: {{word:key}} i
 // shared/units.js shows km, km/h and l/100 km, as before.
 let Units = null;
 try { Units = require('./units'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('units') < 0) throw e; }
+// fix-1121 PF: the theme's first build waits (briefly) for the active driver profile's set (shared/profile_settings.js); an app
+// that does not pack it builds at once, as before
+let ProfileSets = null;
+try { ProfileSets = require('./profile_settings'); } catch (e) { if (e.code !== 'MODULE_NOT_FOUND' || String(e.message).indexOf('profile_settings') < 0) throw e; }
 const UNITS_KM = { mi: false, cons: 'l100', temp: 'C', src: 'default' };
 // r1120 PS: Twin Dial's baked faces per language and unit (tools/twin-dial/bake_face.py): face_speedo[_en][_mph], face_tacho[_en]
 const TW_FACES = ['face_speedo', 'face_tacho'];
@@ -1108,9 +1112,16 @@ class HudApp {
     /** The units shown: { mi, cons } from the "units" setting (auto | km | mi) and the car's own (shared/units.js). */
     _units() {
         if (!Units) return UNITS_KM;
-        const p = this.ctx.settings.item('units') ? this.setting('units') : 'auto', c = this.unitCar || {};
-        const k = p + '|' + c.speed + '|' + c.cons + '|' + c.temp;           // asked for every token of every tick: worked out once a change
-        if (k !== this.unitsKey) { this.unitsKey = k; this.unitsNow = Units.resolve(p, c); }
+        const p = this.ctx.settings.item('units') ? this.setting('units') : 'auto', c = this.unitCar || {}, a = this.unitAlt || {};
+        // asked for every token of every tick: worked out once a change
+        const k = p + '|' + c.speedRaw + '|' + c.consRaw + '|' + c.tempRaw + '|' + c.speed + '|' + c.cons + '|' + c.temp + '|' + Units.SOURCES.map((s) => (a[s] ? a[s].raw : '')).join('|');
+        if (k !== this.unitsKey) {
+            this.unitsKey = k;
+            this.unitsNow = Units.resolve(p, c, a);
+            // fix-1121 PF: one line per change of what the units are made from: the raw values (enum names) and the verdict
+            const line = Units.describe(p, c, a, this.unitsNow);
+            if (line !== this.unitsLine) { this.unitsLine = line; this.log.info('units: ' + line); }
+        }
         return this.unitsNow;
     }
     /** Miles and mph now. */
@@ -1349,15 +1360,16 @@ class HudApp {
         // ---- r1120 PS: the car's own units for the active profile (Vehicle.statusNewCurrentUnitsStatusExt, getter 46, READ ONLY;
         // its setter newCurrentUnitsConfigExt is never declared). The "units" setting's Авто follows it (shared/units.js).
         this.unitCar = { speed: null, cons: null, temp: null };
+        this.unitAlt = {};               // fix-1121 PF: the second sources of the units (shared/units.js SOURCES), where the app reads them
         this.builtKey = null;
         if (Units) {
             const VEH = 'de.bmw.infotainment.vehicle.Vehicle';
             extra[VEH] = Object.assign(extra[VEH] || {}, {
                 statusNewCurrentUnitsStatusExt: (v) => {
                     const c = Units.carOf(v);
-                    if (c.speed === this.unitCar.speed && c.cons === this.unitCar.cons && c.temp === this.unitCar.temp) return;
-                    this.unitCar = c;
-                    this.log.info('units: the car says speed ' + (c.speed || 'not set') + ', consumption ' + (c.cons || 'not set') + ', temperature ' + (c.temp || 'not set'));
+                    const u = this.unitCar;
+                    if (c.speed === u.speed && c.cons === u.cons && c.temp === u.temp && c.speedRaw === u.speedRaw && c.consRaw === u.consRaw && c.tempRaw === u.tempRaw) return;
+                    this.unitCar = c;          // the line with the raw values and the verdict: _units()
                     if (this.started) this._guard('units', () => this._wordsChanged('car units'));
                 },
             });
@@ -1795,6 +1807,27 @@ class HudApp {
         if (twinTabs && this.config.tabs) twinTabs.wire(this, extra, () => this._guard('twin tabs', () => this._twinTabsChanged()));
         if (twinLimit && this.config.twin) twinLimit.wire(this, extra);       // twin_dial: the sign (behind the engine's own watch of config.sign) and the cruise struct
         if (twinFront) twinFront.wire(this, extra);       // front-vehicle FV: DataFrontVehicle, only while the test is on at the start (off: no subscription)
+        // fix-1121 PF: the units' second sources (shared/units.js): the odometer's unit and the trip computer's, chained behind the
+        // handlers already there - ONLY where the app already reads the field (a handler is on it: Twin Dial's twin_tokens.js); nothing
+        // new is subscribed
+        if (Units) {
+            const alt = (iface, field, kind, member) => {
+                const e = extra[iface];
+                if (!e || typeof e[field] !== 'function') return;
+                const prev = e[field];
+                e[field] = (v) => {
+                    if (prev) prev(v);
+                    this._guard('units ' + kind, () => {
+                        const a = Units.altOf(kind, v && typeof v === 'object' ? v[member] : undefined), was = this.unitAlt[kind];
+                        if (was && was.raw === a.raw) return;
+                        this.unitAlt = Object.assign({}, this.unitAlt, { [kind]: a });
+                        if (this.started) this._wordsChanged('car units');
+                    });
+                };
+            };
+            alt('de.bmw.infrastructure.EnvironmentalInformation', 'UnitBN2020', 'mileage', 'unitOfMeasurementMileage');
+            alt('de.bmw.infotainment.KombiIF', 'statusBordcomputerAverage', 'bc', 'statusUnitOfMeasurementSpeedBC');
+        }
         this.car = new Car(this.ctx, this.config.carGroups || ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque', 'condition'], extra);
         this.car.setRedline(this._redline());
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
@@ -3889,8 +3922,36 @@ class HudApp {
         this._status();
     }
 
+    /**
+     * fix-1121 PF: the FIRST build waits until the active driver profile is decided (shared/profile_settings.js: read and, when it
+     * is not the one whose set settings.json holds, that profile's set put in), or config.profileSettings.firstMs has passed
+     * since the build was first asked for: at start the theme is the driver's own, not the last driver's, and it is built once.
+     * true = leave without building (the decision, or the timer, asks again). After the first build: never.
+     */
+    _profileHold() {
+        const ps = ProfileSets && ProfileSets.current;
+        if (this.psHoldDone || !ps || typeof ps.onFirst !== 'function') return false;
+        const st = this._psHold || (this._psHold = { t0: Date.now(), timer: null });
+        const left = st.t0 + (ps.firstMs || 0) - Date.now();
+        if (ps.firstDone || left <= 0) {
+            this.psHoldDone = true;
+            if (st.timer) { clearTimeout(st.timer); st.timer = null; }
+            const i = ps.info();
+            this.log.info('profile: the first build after ' + (Date.now() - st.t0) + ' ms of waiting for the driver profile: ' +
+                (i.known ? 'the car says ' + i.slot : 'not known yet') + ', the set in use is ' + (i.held || 'not yet any profile\'s'));
+            return false;
+        }
+        if (!st.timer) {
+            st.timer = setTimeout(() => { st.timer = null; this._rebuild(); }, left);
+            if (st.timer.unref) st.timer.unref();
+            ps.onFirst(() => this._guard('profile first', () => { if (!this.psHoldDone) this._rebuild(); }));
+        }
+        return true;
+    }
+
     _rebuildInner() {
         if (!this.client.ready) return; // the 'ready' handler calls us again
+        if (this._profileHold()) return;         // fix-1121 PF: the first build is made with the active driver profile's set
         if (DiagSettings.hold(this)) return;     // b7: config.startupHold: the first build waits for the car's first time zone and message list (shared/diag_settings.js)
         this.r8Builds = (this.r8Builds || 0) + 1; this.r8BuildAt = Date.now();      // r1120 T2: the build an R8 asset was made in (its log line, the mark)
         this._rowCheck();             // bottom row: an element with no signal behind it goes back to BMW's

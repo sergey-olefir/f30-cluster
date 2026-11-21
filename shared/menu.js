@@ -58,6 +58,10 @@ function shownName(hud) {
     return hud.activeName || hud._layoutName() || 'off';
 }
 
+/** A slot's label: "Профіль 1" / "Гість", never the profile's own name. */
+function slotLabel(slot) {
+    return slot === 'guest' ? I.t('ps.slot.guest') : slot === 'valet' ? I.t('ps.slot.valet') : I.t('ps.slot.user', { n: Number(String(slot).slice(1)) });
+}
 /** r1120 PS: the profile line: "Профіль 1" / "Гість" by its slot, never the profile's own name; '' without the module. */
 function profileLine() {
     const c = PS && PS.current;
@@ -65,8 +69,53 @@ function profileLine() {
     const i = c.info();
     if (!i.enabled) return I.t('ps.off');
     if (!i.known || !i.slot) return I.t('ps.unknown');
-    const label = i.slot === 'guest' ? I.t('ps.slot.guest') : i.slot === 'valet' ? I.t('ps.slot.valet') : I.t('ps.slot.user', { n: Number(i.slot.slice(1)) });
-    return I.t('ps.status', { slot: label });
+    return I.t('ps.status', { slot: slotLabel(i.slot) });
+}
+/** "4 с" / "2 хв" / "1 год" since t. */
+function ago(t, now) {
+    const s = Math.max(0, Math.round(((now || Date.now()) - t) / 1000));
+    return s < 120 ? I.t('ps.ago.s', { n: s }) : s < 7200 ? I.t('ps.ago.m', { n: Math.round(s / 60) }) : I.t('ps.ago.h', { n: Math.round(s / 3600) });
+}
+/** fix-1121 PF: the units verdict and its source, from shared/units.js resolve()'s "why". */
+function unitsLine(u) {
+    if (!u || !u.why) return '';
+    const w = u.why, un = I.t(u.mi ? 'ps.u.mi' : 'ps.u.km');
+    const src = (b) => I.t('ps.src.' + b[0]) + ' ' + b[1];
+    const others = (w.by || []).map(src).join(', ');
+    switch (w.rule) {
+        case 'setting': return I.t('ps.why.setting', { u: un });
+        case 'confirmed': case 'car': return I.t('ps.why.car', { u: un, raw: w.car || '?', also: others ? ', ' + others : '' });
+        case 'unconfirmed': return others ? I.t('ps.why.unconf', { u: un, raw: w.car || '?', others }) : I.t('ps.why.unconfNone', { u: un, raw: w.car || '?' });
+        case 'alt': return I.t('ps.why.alt', { u: un, others });
+        default: return I.t('ps.why.default', { u: un });
+    }
+}
+/** fix-1121 PF: the language in use and why. */
+function langLine() {
+    const i = I.info(), name = I.t('kit.lang.' + i.lang);
+    if (i.pref && i.pref !== 'auto') return I.t('ps.lang.set', { lang: name });
+    return i.hmi ? I.t('ps.lang.auto', { lang: name, hmi: String(i.hmi).slice(0, 24) }) : I.t('ps.lang.autoNone', { lang: name });
+}
+/**
+ * fix-1121 PF: the status block (STATUS_PS) the owner can photograph: the active slot as the app sees it and when it was last
+ * read; whose set is in use; changes waiting for the profile; the units verdict and its source; the language verdict. Slots
+ * only, never a name. '' without the module.
+ */
+function profileBlock(hud) {
+    const c = PS && PS.current;
+    if (!c) return '';
+    const i = c.info(), parts = [];
+    if (!i.enabled) parts.push(I.t('ps.off'));
+    if (i.known && i.slot) parts.push(I.t('ps.blk.read', { slot: slotLabel(i.slot), ago: ago(i.readAt) }));
+    else parts.push(I.t('ps.blk.unknown') + ', ' + (i.readAt && i.slot ? I.t('ps.blk.lastRead', { ago: ago(i.readAt), slot: slotLabel(i.slot) }) : I.t('ps.blk.never')));
+    if (i.enabled) parts.push(i.held ? I.t('ps.blk.held', { slot: slotLabel(i.held) }) : I.t('ps.blk.heldNone'));
+    if (i.unowned && i.unowned.length) parts.push(I.plural('ps.blk.unowned', i.unowned.length));
+    let u = null;
+    try { u = hud && typeof hud._units === 'function' ? hud._units() : null; } catch (e) { u = null; }
+    const ul = unitsLine(u);
+    if (ul) parts.push(ul);
+    parts.push(langLine());
+    return parts.join('. ');
 }
 
 /** A layout's tag line (app main.js TAGS: { layout: key }; a key with no word is shown as it is). */
@@ -135,6 +184,11 @@ class Menu {
         }));
         this.hud.onStatus(() => this.soon());
         if (PS && PS.current) PS.current.onChange(() => this.guard('profile', () => this.soon()));      // r1120 PS
+        // fix-1121 PF: "read N s ago" stays true while the menu is open (only a changed text is sent)
+        if (PS && PS.current) {
+            this.psTimer = setInterval(() => this.guard('profile block', () => { if (ui.isVisible('MAIN')) this.text('STATUS_PS', profileBlock(this.hud)); }), 5000);
+            if (this.psTimer.unref) this.psTimer.unref();
+        }
         // r1120 LN: a new language - every row again (the kit's own rows are written by shared/lang.js)
         I.onChange(() => this.guard('language', () => { this.sent = Object.create(null); this.picShown = null; this.soon(0); }));
         ui.onVisible((name, on) => this.guard('visible', () => {
@@ -178,6 +232,7 @@ class Menu {
             const lines = this.statusLines();
             this.text('STATUS', lines[0]);
             this.text('STATUS2', lines[1]);
+            this.text('STATUS_PS', profileBlock(hud));        // fix-1121 PF: the profile / units / language block
             // the engine's own status line, for checking on the car: technical, English as the log (only its label is ours)
             this.text('STATUS_LOG', I.t('menu.engine', { status: hud.lastStatus || 'starting' }));
             this.picture(name);

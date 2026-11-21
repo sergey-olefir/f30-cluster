@@ -34,6 +34,16 @@
  * with NO currentUserOnChange: the "selective" event that never arrives), { reuse: '<slot>' } (a new profile in that slot: a
  * new persod id), { smFail: true | false } (the field does not answer: "not known"), { users: ['i03', ...] } (more local
  * profiles). The getters the app called are counted (gets) so a test can prove it read nothing else.
+ *
+ * fix-1121 PF: the car's start can be scripted (POST /fake, or BENCH_PERSO_START='{...}' for the state at the bench's start):
+ *   { smDelay: ms }                 currentUserAccountReference answers late
+ *   { smFailMs: ms }                it does not answer for the next ms
+ *   { lag: { slot, ms }, current }  it still reports `slot` (the last driver) for ms, then `current`; the event at the end
+ *                                   unless silent
+ *   { idMode: 'ok' | 'fail' | 'timeout' | 'random' | 'new' }   UserAccount.<slot>.id: as stored, refused, never answered, a
+ *                                   different value each read, or a consistent new value (a new profile in the slot)
+ *   { unitsBy: { slot: { speed, cons, temp } } }   the units struct per profile (names or numbers; a member left out is not
+ *                                   sent: a partly filled struct); bench/run-app.js feeds unitsNow() over its own
  */
 const PERS = 'de.bmw.infotainment.personalization.';
 const UAM = PERS + 'UserAccountManager';
@@ -73,7 +83,9 @@ function install(hu, opts) {
         current: 'guest', maxUsers: 7, creating: false, engine: false, gear: 'P', piaTx: 'ENDTRANSACTION', fail: null, slow: 0,
         // the avatar setters' behaviour, all steerable from POST /fake (see the header)
         avatarMaxChars: 200000, rejectAvatar: null, rejectAvatarType: null, avatarEnumByName: true,
+        smDelay: 0, smFailUntil: 0, lagSlot: null, lagUntil: 0, idMode: 'ok', idN: 0, unitsBy: {},       // fix-1121 PF
     };
+    const reported = () => (Date.now() < st.lagUntil && st.lagSlot ? st.lagSlot : st.current);
     const mk = (slot, type, name, pia, extra) => Object.assign({
         id: slot === 'guest' || slot === 'valet' ? slot : 'i' + hex6(), name, type, gcid: '', protection: [], firstName: '',
         creationDate: now() - 86400 * 30, lastLoginDate: now() - 3600, synchronizationEnabled: false, connectedDriveUsername: '',
@@ -113,6 +125,13 @@ function install(hu, opts) {
         p.getValue = (f) => {
             gets['UserAccount.' + f] = (gets['UserAccount.' + f] || 0) + 1;
             const a = acc[slot];
+            // fix-1121 PF: the id read scripted
+            if (f === 'id' && a && st.idMode !== 'ok') {
+                if (st.idMode === 'fail') return later(5, () => { throw new Error('fake: id refused'); });
+                if (st.idMode === 'timeout') return new Promise(() => {});
+                if (st.idMode === 'random') return later(5, () => 'i' + hex6() + '-' + (++st.idN));
+                if (st.idMode === 'new') return later(5, () => 'inew-' + slot);
+            }
             // a slot that is not offered: no answer (the binding times out)
             if (!a) return later(300, () => { throw new Error('timeout: ' + slot + ' not offered'); });
             if (f === 'copyTs' || f === 'pia' || !(f in a)) return Promise.reject(new Error('no field ' + f));
@@ -161,8 +180,8 @@ function install(hu, opts) {
         p.getValue = (f) => {
             gets['SessionManager.' + f] = (gets['SessionManager.' + f] || 0) + 1;
             if (f !== 'currentUserAccountReference') return Promise.reject(new Error('no field ' + f));
-            if (st.smFail) return later(20, () => { throw new Error('fake: SessionManager does not answer'); });
-            return later(5, () => UAM + '.' + st.current);
+            if (st.smFail || Date.now() < st.smFailUntil) return later(20, () => { throw new Error('fake: SessionManager does not answer'); });
+            return later(5 + st.smDelay, () => UAM + '.' + reported());
         };
         p.subscribe = (o) => { if (o.name === 'currentUserOnChange') smListeners.push(o.onReceive); return Promise.resolve(); };
         return p;
@@ -227,6 +246,19 @@ function install(hu, opts) {
      * bmwId, avatarMaxChars, rejectAvatar, rejectAvatarType, avatarEnumByName, setAvatar: { slot, bytes, type } }.
      */
     function control(m) {
+        // fix-1121 PF: the scripted start
+        if (typeof m.smDelay === 'number') st.smDelay = m.smDelay;
+        if (typeof m.smFailMs === 'number') st.smFailUntil = Date.now() + m.smFailMs;
+        if (typeof m.idMode === 'string') st.idMode = m.idMode;
+        if (m.unitsBy && typeof m.unitsBy === 'object') st.unitsBy = m.unitsBy;
+        if (m.lag && m.lag.slot && acc[m.lag.slot]) {
+            st.lagSlot = m.lag.slot; st.lagUntil = Date.now() + (Number(m.lag.ms) || 0);
+            const to = m.current && acc[m.current] ? m.current : st.current, silent = !!m.silent;
+            st.current = to;
+            setTimeout(() => { if (!silent) fire(smListeners, UAM + '.' + st.current); log.info('fake persod: the lag ends, ' + st.current + (silent ? ' (no event)' : '')); }, Number(m.lag.ms) || 0);
+            log.info('fake persod: reports ' + m.lag.slot + ' for ' + m.lag.ms + ' ms, then ' + to);
+            m = Object.assign({}, m, { current: undefined });
+        }
         if (Array.isArray(m.users)) m.users.forEach((s, i) => { if (SLOTS.indexOf(s) >= 2 && !acc[s]) { acc[s] = mk(s, 'USER', 'Driver ' + (i + 3), i + 2); setAvail(s, true); } });
         if (m.reuse && acc[m.reuse] && SLOTS.indexOf(m.reuse) >= 2) { acc[m.reuse].id = 'i' + hex6(); log.info('fake persod: a new profile in ' + m.reuse); }
         if (typeof m.smFail === 'boolean') st.smFail = m.smFail;
@@ -270,10 +302,21 @@ function install(hu, opts) {
                 avatarSum: a.avatar ? sum(a.avatar) : 0,
             };
         });
-        return { accounts: out, current: st.current, calls: calls.slice(), gets: Object.assign({}, gets), maxUsers: st.maxUsers, avatarMaxChars: st.avatarMaxChars };
+        return { accounts: out, current: st.current, reported: reported(), calls: calls.slice(), gets: Object.assign({}, gets), maxUsers: st.maxUsers, avatarMaxChars: st.avatarMaxChars };
     }
+    /** fix-1121 PF: the units struct the active profile has (the members the test gave; {} when none). */
+    function unitsNow() {
+        const u = st.unitsBy[reported()];
+        if (!u) return {};
+        const o = {};
+        if (u.speed !== undefined) o.unitOfMeasurementSpeedometerDigital = u.speed;
+        if (u.cons !== undefined) o.unitOfMeasurementConsumption = u.cons;
+        if (u.temp !== undefined) o.unitOfMeasurementTemperature = u.temp;
+        return o;
+    }
+    if (opts.start && typeof opts.start === 'object') { try { control(opts.start); } catch (e) { log.warn('fake persod: start script: ' + e.message); } }
     log.info('bench: fake persod' + (opts.light ? ' (light: SessionManager and UserAccount ids only)' : ' (UserAccountManager, UserAccount, SessionManager)') + ' with guest, valet, i01, i02; guest active');
-    return { control, state };
+    return { control, state, unitsNow };
 }
 
 module.exports = { install };

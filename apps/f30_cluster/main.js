@@ -64,6 +64,14 @@ mgu.run({
     start(ctx) {
         // r1120 LN: the language (setting "Мова / Language", the head unit's): first, so every word below is in it
         try { I18N.attach(ctx); } catch (e) { ctx.log.error('lang: ' + (e && e.stack || e)); }
+        // r1120 PS: the active driver profile's set (read only from the car; docs/r1120/PS-REPORT.md). A failure leaves one set, as before.
+        // fix-1121 PF: attached BEFORE the engine is made, so its first read goes out first and the theme's first build can wait for
+        // it (shared/hud.js _profileHold): at start the theme is the driver's own. Before the one-switch migration below, so a settings.json
+        // from before per-profile settings is kept as it was on disk (that migration saves the file; a fresh install has none to keep)
+        try {
+            const ps = PS.attach(ctx);
+            if (ps) ctx.ui.onVisible((name, on) => { if (on && name === 'MAIN') ps.kick('menu'); });
+        } catch (e) { ctx.log.error('profile settings failed to start: ' + (e && e.stack || e)); }
         // never let this stop the app: a failure here leaves the old values in place, which still draw
         try { migrate(ctx); } catch (e) { ctx.log.error('settings migration: ' + (e && e.stack || e)); }
         let hud;
@@ -75,11 +83,6 @@ mgu.run({
             return;
         }
         hud.start();
-        // r1120 PS: the active driver profile's set (read only from the car; docs/r1120/PS-REPORT.md). A failure leaves one set, as before
-        try {
-            const ps = PS.attach(ctx);
-            if (ps) ctx.ui.onVisible((name, on) => { if (on && name === 'MAIN') ps.kick('menu'); });
-        } catch (e) { ctx.log.error('profile settings failed to start: ' + (e && e.stack || e)); }
         // the centre screen: a failure here leaves the cluster drawing (and the kit's own settings rows working)
         try { new Menu(ctx, hud, { tags: TAGS }).start(); } catch (e) { ctx.log.error('menu failed to start: ' + (e && e.stack || e)); }
         try { new Gallery(ctx, hud, { tags: TAGS }).start(); } catch (e) { ctx.log.error('gallery failed to start: ' + (e && e.stack || e)); }
