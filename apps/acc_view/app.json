@@ -2,7 +2,7 @@
   "id": "acc_view",
   "title": "ACC View",
   "description": "Read-only: what the car's sensors see (the lanes and their markings, the road users: cars, trucks, two-wheelers, pedestrians, cyclists; the vehicle ahead) with the cruise / limiter and the limit, drawn as a lane view on the centre screen and, as a test, on the cluster's map target. Writes nothing to the car.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "vendor": "custom",
   "loggingId": "OAAV",
   "iconGlyph": "AV",

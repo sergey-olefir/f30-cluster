@@ -2,7 +2,7 @@
   "id": "twin_dial",
   "title": "Twin Dial",
   "description": "A twin round-dial instrument cluster for the G20 panel: tachometer left, speedometer right, our own centre pages and check-control message",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "vendor": "custom",
   "loggingId": "OATD",
   "iconGlyph": "TD",
