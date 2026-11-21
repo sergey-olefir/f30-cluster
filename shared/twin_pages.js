@@ -1213,6 +1213,26 @@ function mapSend(hud, open) {
     else if (typeof hud._twinSync === 'function') hud._twinSync();
 }
 
+/** fixes-1121 TT: the top (panel y) of the message's band on the tab-2 sheet (shared/twin_cc.js layoutBand), or null (no band). */
+function bandTopOf(hud) {
+    try { return hud && typeof hud._twinBandTop === 'function' ? hud._twinBandTop() : null; } catch (e) { return null; }
+}
+
+/** fixes-1121 TT: would the band (top `top`, down to the sheet's bottom) slice this item, or touch it? Text: its baseline is less than
+ *  BAND_GAP above the band's top (its descenders would sit on the band's rule); everything else: its box reaches below the top. */
+const BAND_GAP = 8;
+function underBand(it, top) {
+    const k = it.k;
+    if (k === 't' || k === 'g') return it.b > top - BAND_GAP;
+    if (k === 'frac') return it.b + (isNum(it.db) ? it.db : 0) > top - BAND_GAP;
+    if (k === 'i' || k === 'lanes') return it.cy + it.sz / 2 > top;
+    if (k === 'r') return it.y1 > top;
+    if (k === 'bar') return it.y + it.h > top;
+    if (k === 'prog') return it.y + 1 > top;
+    if (k === 'car') return it.cy + it.h / 2 > top;
+    return false;
+}
+
 /** "tdpage" born (a layout build): empty until the first update paints it. */
 function init(hud, x) {
     const p = st(hud);
@@ -1254,6 +1274,9 @@ function update(hud, x, now, force) {
     if (page === 'rvscene' && roadUi) { roadUi.updatePage(hud, x, now, force || x.pgKey !== '#rvscene'); x.pgKey = '#rvscene'; return; }     // road TD
     const spec = x.w.pages && x.w.pages[page];
     const resolved = resolveItems(hud, spec ? spec.items : []);
+    // fixes-1121 TT: while the message's band covers the bottom of the centre, an item it would slice is left out whole (the key repaints)
+    const top = bandTopOf(hud);
+    if (top !== null) resolved.forEach((r) => { if (!r.skip && underBand(r.it, top)) r.skip = true; });
     const key = keyOf(page, resolved, hud.theme);
     if (!force && key === x.pgKey && x.px) return;
     x.pgKey = key;
@@ -1273,4 +1296,6 @@ module.exports = { tabBridge, LAYER, FONTS, SAIRA, ICON, TITLES, TECH, IF, fontN
     // car-fix CF3
     int64, idKey, srcOf, trackTitle, trackArtist, trackTime, routeLive, routeBridge, fmtTravel, metres, ROUTE_FRESH_MS,
     // car issues CT
-    cpSync, cpLive, cpModel, cpDist, CP_UNITS, turnsMod };
+    cpSync, cpLive, cpModel, cpDist, CP_UNITS, turnsMod,
+    // fixes-1121 TT
+    bandTopOf, underBand };

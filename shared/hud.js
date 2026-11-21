@@ -1638,6 +1638,7 @@ class HudApp {
             // engine's own atlases, its fonts the tab-2 sheet widget's (_twinPush sets them), its paint the sheet's pixels
             this.twinMsg = new this.twin.TwinCentre({ strict: ca.strict, confirmNow: ca.confirmNow === true,
                 show: ca.centreShow !== false, hold: ca.centreHold !== false,      // r1120 T1: the shown card in the centre (twin_cc.js _shown)
+                inTab: this._twinInTab(),          // fixes-1121 TT: the message inside every tab, no tab pulled (read again each turn)
                 settleMs: CC_SETTLE_MS, openSettleMs: CC_SETTLE_MS, log: (l) => this.log.info(l),
                 deps: { measure: (f, str) => textRaster.measure(str, f, 0), has: (f, ch) => !!textRaster.loadFont(f).metrics.glyphs[ch], fonts: this.twin.FONTS },
                 paint: (page) => this._twinSheetBuf(page) });
@@ -3342,7 +3343,8 @@ class HudApp {
         // before the messages are read) only takes the card back: its own base stayed where it was. So with "Таба = 2" saved, or with the
         // key back on tab 2 before a message ended, the bar said tab 2 and the machine painted nothing (an empty page over stored messages).
         const tm = this.twinMsg;
-        if (tm && this._twinTabsOn() && this.tabs && isNum(this.tabs.tab) && tm.state === 'none' && tm.base !== this.tabs.tab) {
+        // fixes-1121 TT: in-tab (no tab is pulled by a message) the machine stands on the bar's tab in a message period too
+        if (tm && this._twinTabsOn() && this.tabs && isNum(this.tabs.tab) && (tm.state === 'none' || tm.inTab) && tm.base !== this.tabs.tab) {
             tm.auto(this.tabs.tab);
             this._guard('twin cc', () => this._twinPush());      // inside a turn this only asks for one more decision at its end (twinRepush)
         }
@@ -5210,6 +5212,8 @@ class HudApp {
         t.sheetOn = sheets.length > 0;
         t.night = this.nightOn === true;
         t.unlistedPullsTab = (this.config.ccActive || {}).unlistedPullsTab === true;     // car-fix CF1: read each turn (settable live)
+        t.inTab = this._twinInTab();                     // fixes-1121 TT: read each turn too
+        const bandWas = this._twinBandTop();
         if (sheets.length) {      // the layout's own fonts (a stand-in layout may name others)
             const w = sheets[0].w;
             t.deps.fonts = { head: w.font, counter: w.counterFont || w.font, row: w.rowFont || w.font, text: w.textFont || w.font };
@@ -5245,7 +5249,25 @@ class HudApp {
                 if (typeof this._twinSync === 'function') this._guard('tdback cc', () => this._twinSync());
                 this._twinHoles();
             }
+            // fixes-1121 TT: the tab's page follows in THIS turn (one corked write with the sheet), not at the next tick: a new tab, or the
+            // band's top moved (the page leaves out what the band would slice: shared/twin_pages.js)
+            if (t.inTab && twinPages && (res.ops.some((op) => op.op === 'tab') || bandWas !== this._twinBandTop())) {
+                const at = Date.now();
+                if (this.td) this.td.pageEval = 0;
+                twinPages.changed(this);
+                this.widgets.forEach((x) => { if (x.w && x.w.type === 'tdpage' && x.ref) this._guard('twin page', () => twinPages.update(this, x, at, true)); });
+            }
         } finally { this._uncork(socks); }
+    }
+
+    /** fixes-1121 TT: the message is shown inside every tab and pulls no tab (config.tabs.messageTab false; twin_tabs.js rule 1 is off
+     *  with the same key). */
+    _twinInTab() { const c = this.config && this.config.tabs; return !!(c && typeof c === 'object' && c.messageTab === false); }
+
+    /** fixes-1121 TT: the band's top (panel y) while the sheet shows one, else null (shared/twin_pages.js leaves out what it would slice). */
+    _twinBandTop() {
+        const p = this.twinMsg && this.twinMsg.inTab ? this.twinMsg.page : null;
+        return p && p.kind === 'band' && p.card && isNum(p.card.y0) ? p.card.y0 : null;
     }
 
     /** "cc:" holes of fill widgets (a stand-in backdrop; tdback has its own uniform). */

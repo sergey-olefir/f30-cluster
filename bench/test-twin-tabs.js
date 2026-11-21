@@ -70,11 +70,15 @@ function mk(over) {
 }
 const sel = (h) => { HudApp.prototype._twinSync.call(h); return h.tabs ? h.tabs.tab : null; };
 const msg = (h, state, sev) => { h.twinCc = { state, severity: sev === undefined ? 'amber' : sev }; };
+// fixes-1121 TT (the owner, 2026-11-21): app.json now ships config.tabs.messageTab false - a message selects no tab, it shows inside
+// every tab (section 1b). The blocks that check the LEGACY rule (a message pulls tab 2: 0.1.9, still one config key away) say so: mkL
+const LEGACY = Object.assign({}, APP.config.tabs, { messageTab: true });
+const mkL = (over) => mk(Object.assign({ tabs: LEGACY }, over || {}));
 
 // ---------------------------------------------------------------------------------------------------------------------
-console.log('1. the rules');
+console.log('1. the rules (the legacy rule 1: config.tabs.messageTab true)');
 {
-    const h = mk();
+    const h = mkL();
     eq(sel(h), 1, 'start: tab 1 (the on-board computer)');
     eq(tabs.available(), [1, 2, 3, 4, 5], 'five tabs exist (the setting may fix any of them)');
     msg(h, 'window', null);
@@ -96,11 +100,11 @@ console.log('1. the rules');
 }
 {
     // rule 2: a call, gated by config.tabs.callSelects (car-fix CF3: on in app.json since the car showed the call state)
-    const h = mk({ tabs: Object.assign({}, APP.config.tabs, { callSelects: false }) });
+    const h = mk({ tabs: Object.assign({}, LEGACY, { callSelects: false }) });
     sel(h);
     h.td.callState = 1;
     eq(sel(h), 1, 'a ringing call with config.tabs.callSelects off: tab 1 stays (the rule is switched off)');
-    const g = mk();
+    const g = mkL();
     sel(g);
     g.td.callState = 1;
     eq(sel(g), 4, 'callSelects on: a ringing call selects tab 4');
@@ -120,7 +124,7 @@ console.log('1. the rules');
 {
     // car-fix CF3: rule 3 for a CarPlay route (hud.td.route from shared/twin_pages.js: provider CAR_PLAY, a destination within 60 s),
     // the same lock speed and message priority as BMW's guidance
-    const h = mk();
+    const h = mkL();
     sel(h);
     h.td.route = true;
     eq(sel(h), 5, 'CF3: a CarPlay route starts (auto, standing): tab 5');
@@ -130,7 +134,7 @@ console.log('1. the rules');
     eq(sel(h), 5, 'CF3: the message ends: tab 5 again (the route still on)');
     h.td.route = false;
     eq(sel(h), 1, 'CF3: the route ends (no destination for 60 s): back to the driver\'s choice');
-    const g = mk();
+    const g = mkL();
     sel(g);
     g._d.speed = 60; g.td.route = true;
     eq(sel(g), 1, 'CF3: a CarPlay route at 60 km/h with the lock at 5: the change waits');
@@ -147,7 +151,7 @@ console.log('1. the rules');
 }
 {
     // the lock speed
-    const h = mk();
+    const h = mkL();
     sel(h);
     h._d.speed = 60;
     h.td.nav = true;
@@ -176,7 +180,7 @@ console.log('1. the rules');
 }
 {
     // fixed setting
-    const h = mk({ settings: { tab: '5' } });
+    const h = mkL({ settings: { tab: '5' } });
     eq(sel(h), 5, 'setting tab = 5: tab 5 (no guidance needed)');
     msg(h, 'ours');
     eq(sel(h), 2, 'fixed 5 and a message: tab 2 (the message lives on tab 2 in every mode)');
@@ -197,7 +201,7 @@ console.log('1. the rules');
 }
 {
     // leaving tab 2 while a message shows
-    const h = mk();
+    const h = mkL();
     sel(h);
     msg(h, 'window');
     eq(sel(h), 2, 'a message: tab 2');
@@ -211,7 +215,7 @@ console.log('1. the rules');
     eq(sel(h), 3, 'the message ends: the driver\'s tab stays (not pulled back)');
     h._settings.tab = 'auto';
     // the key
-    const k = mk({ tabKey: { iface: 'i', field: 'f', press: [1], rateMs: 0 } });
+    const k = mkL({ tabKey: { iface: 'i', field: 'f', press: [1], rateMs: 0 } });
     const ex = {}; tabs.wire(k, ex); sel(k);
     msg(k, 'ours'); sel(k);
     const f = (x) => { k._now_ms += 10; ex.i.f(x); };
@@ -223,13 +227,65 @@ console.log('1. the rules');
     msg(k, 'window'); sel(k);
     eq(k.tabs.tab, 2, 'a new message episode pulls the driver back to tab 2');
     // a rule the driver overrode stays overridden
-    const o = mk(); sel(o);
+    const o = mkL(); sel(o);
     o.td.nav = true; eq(sel(o), 5, 'guidance: tab 5');
     tabs.press(o, 1);
     eq(sel(o), 1, 'the key leaves tab 5 (to 1, next after 5)');
     eq(sel(o), 1, 'guidance still on: the driver\'s override holds (no pull back to 5 every tick)');
     o.td.nav = false; sel(o); o.td.nav = true;
     eq(sel(o), 5, 'guidance ends and starts again: the rule applies again');
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// fixes-1121 TT (the owner, 2026-11-21: "the message is shown within the tab, and the tabs switch as usual"): app.json's own rules
+console.log('1b. fixes-1121 TT: a message selects no tab, TRIP always steps (app.json config.tabs.messageTab false)');
+{
+    eq(APP.config.tabs.messageTab, false, 'app.json ships config.tabs.messageTab false');
+    const h = mk();
+    eq(sel(h), 1, 'start: tab 1');
+    msg(h, 'window', 'red'); eq(sel(h), 1, 'a message appears (window): tab 1 stays (the band shows it inside tab 1)');
+    msg(h, 'ours', 'red'); eq(sel(h), 1, 'ours: still tab 1');
+    msg(h, 'none'); eq(sel(h), 1, 'the message ends: tab 1 (nothing moved)');
+    eq(h.tabs.changes, 0, 'not one tab change in all of that');
+    // the key with a message, through every tab (tab 2 is in the cycle while an entry is listed)
+    const k = mk({ tabKey: { iface: 'i', field: 'f', press: [1], rateMs: 0 } });
+    const ex = {}; tabs.wire(k, ex); sel(k);
+    const f = (x) => { k._now_ms += 10; ex.i.f(x); };
+    k.ccListAll = [{ id: 15 }];
+    msg(k, 'ours', 'amber'); sel(k);
+    f(0);
+    const seen = [];
+    for (let i = 0; i < 6; i++) { f(1); f(0); sel(k); seen.push(k.tabs.tab); }
+    eq(seen, [2, 3, 4, 5, 1, 2], 'TRIP with a message on: 1 -> 2 -> 3 -> 4 -> 5 -> 1 -> 2, every press one tab, nothing pulls back');
+    f(1); f(0); sel(k);
+    eq(k.tabs.tab, 3, 'one more press: tab 3');
+    msg(k, 'none'); sel(k);
+    eq(k.tabs.tab, 3, 'the message ends: the tab the driver chose (3) stays');
+    msg(k, 'window', 'red'); sel(k);
+    eq(k.tabs.tab, 3, 'a new message (a new episode): tab 3 stays - no pull to tab 2');
+    msg(k, 'none'); sel(k); msg(k, 'window', 'red'); sel(k); msg(k, 'none'); sel(k); msg(k, 'ours', 'red'); sel(k);
+    eq(k.tabs.tab, 3, 'a message that flickers (window / none / window / none / ours, as BMW re-shows it): tab 3 throughout');
+    // the rules 2-4 and the lock keep their meaning; the key is never locked
+    const g = mk(); sel(g);
+    g._d.speed = 60; g.td.nav = true;
+    eq(sel(g), 1, 'guidance at 60 km/h with the lock at 5: the change waits (tabLock keeps its meaning)');
+    msg(g, 'window', 'red');
+    eq(sel(g), 1, 'a message at 60 km/h: no tab (the message is inside tab 1)');
+    tabs.press(g, 1);
+    eq(sel(g), 3, 'the key at 60 km/h with a message: never locked (1 -> 3: no entry listed here, tab 2 skipped)');
+    msg(g, 'none'); g._d.speed = 3;
+    eq(sel(g), 3, 'slowed down, the message gone: the driver\'s override of guidance holds (tab 3)');
+    g.td.nav = false; sel(g); g.td.nav = true;
+    eq(sel(g), 5, 'guidance starts again, slow: rule 3 still selects tab 5');
+    msg(g, 'window', 'red'); g.td.callState = 2;
+    eq(sel(g), 4, 'a call during a message: rule 2 selects tab 4 (a message no longer outranks it: it shows inside tab 4)');
+    // the setting
+    const s = mk({ settings: { tab: '5' } });
+    eq(sel(s), 5, 'setting tab = 5: tab 5');
+    msg(s, 'ours', 'amber'); eq(sel(s), 5, 'fixed 5 and a message: tab 5 stays (the band inside tab 5)');
+    tabs.press(s, 1); eq(sel(s), 5, 'fixed 5: the key is ignored, as before (the setting fixes the tab)');
+    s._settings.tab = '2'; eq(sel(s), 2, 'the setting changed to 2: tab 2 (the card)');
+    msg(s, 'none'); eq(sel(s), 2, 'the message ends: tab 2 stays (the setting)');
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -359,7 +415,7 @@ console.log('2. the key (config.tabKey)');
 // ---------------------------------------------------------------------------------------------------------------------
 console.log('3. the centre and the bottom row follow the tab');
 {
-    const h = mk();
+    const h = mkL();      // fixes-1121 TT: the legacy rule pulls tab 2 for a message (this block checks the titles)
     sel(h);
     eq(h._token('td:cTitle'), 'Дата і час', 'tab 1: the computer\'s clock page title, as before');
     ok(h._token('td:cTime') !== '', 'tab 1: the clock page\'s time is drawn');
@@ -545,7 +601,7 @@ function backdrop(h) {
     return { x, sent, last };
 }
 {
-    const h = mk();
+    const h = mkL();      // fixes-1121 TT: the legacy rule (a message pulls tab 2)
     eq(sel(h), 1, 'start');
     eq(h.twinTab, 1, 'hud.twinTab (what the backdrop reads) is 1 at the start');
     [2, 3, 4, 5, 1].forEach((t) => { h._settings.tab = String(t); sel(h); eq(h.twinTab, t, 'setting ' + t + ': hud.twinTab = ' + t); });
@@ -629,7 +685,7 @@ console.log('8. FIN: tab 2 is hidden while there is no message (the owner, 2026-
     eq([g4.seps, g4.cells], [[780, 1168, 1237], [[618, 780], null, [780, 1168], [1168, 1237], [1237, 1302]]], 'without: separators 780 / 1168 / 1237; tab 1 keeps 618-780, the media cell grows to 780-1168, tabs 4 and 5 unchanged');
 
     // the backdrop: the separators are uniforms (no shader change), the media cell's fill follows
-    h = live(mk()); sel(h);
+    h = live(mkL()); sel(h);      // fixes-1121 TT: the legacy rule (a message pulls tab 2, lines below)
     const b = backdrop(h);
     eq(b.last('u_sep'), [780, 1168, 1237, -10], 'no message: u_sep [780, 1168, 1237, off] - the separator at 848 is gone');
     h._settings.tab = '3'; sel(h);
@@ -786,7 +842,7 @@ async function engineChecks() {
         const push0 = hud._ccPush, push1 = hud._twinPush; hud._ccPush = () => {}; hud._twinPush = () => {};
         hud.twinCc = { state: 'window', severity: 'amber' };
         await sleep(200);
-        ok(hud.tabs.tab === 2 && builds - b0 === 0, 'a message state: tab 2, no build');
+        ok(hud.tabs.tab === 5 && builds - b0 === 0, 'a message state: tab 5 stays (fixes-1121 TT: a message selects no tab), no build');
         hud.twinCc = { state: 'none', severity: null };
         hud._ccPush = push0; hud._twinPush = push1;
         hud.td.nav = false;
@@ -811,7 +867,8 @@ async function engineChecks() {
         eq([hud.tabs.tab, sepNow()], [1, [780, 1168, 1237, -10]], 'the car at rest (ccList id 0, displayed 0): tab 2 not in the bar (u_sep 780 / 1168 / 1237)');
         ok(/^hidden\|/.test(warnKey()), 'the warning widget paints no warning icon (' + warnKey().slice(0, 12) + ')');
         feedList([REST, DOOR]); feedDisp(15); await sleep(400);
-        eq([hud.tabs.tab, sepNow()], [2, [780, 848, 1168, 1237]], 'the door message: tab 2 appears in its place and is selected (u_sep 780 / 848 / 1168 / 1237)');
+        eq([hud.tabs.tab, sepNow(), hud.twinMsg.page && hud.twinMsg.page.kind], [1, [780, 848, 1168, 1237], 'band'],
+            'the door message: tab 2 appears in its place (u_sep 780 / 848 / 1168 / 1237); tab 1 stays selected, the message is the band inside it (fixes-1121 TT)');
         ok(!/^hidden\|/.test(warnKey()), 'the warning icon is back');
         feedList([REST]); await sleep(100); feedDisp(0); await sleep(500);
         eq([hud.tabs.tab, sepNow()], [1, [780, 1168, 1237, -10]], 'the message ends (list at rest, then displayed 0): tab 1, tab 2 hidden again');
@@ -861,15 +918,31 @@ async function engineChecks() {
             '0.1.2: tab fixed to 2 while the panel is kept open with nothing known (65535), then displayed 0 with a stored entry: tab 2 paints the list page');
         feedList([REST]); await sleep(300);
         await toTab1();
-        // the same with the key: the driver steps back to tab 2 while a message shows; at its end the rules keep the driver's choice (tab 2)
-        press('tabLock', '0'); await sleep(100);
+        // fixes-1121 TT (the owner, 2026-11-21: on Twin, with a message active, TRIP did not switch the tabs): the car's TRIP bytes (bit 0x40
+        // of IndicatorSteeringColumn, 0.15 s held, 0.5 s apart) through every tab while the door message shows; the bar, the machine, the sheet
+        // and the centre page agree after every press, the message is inside each tab (the band; the card on tab 2), ours once settled
+        const K = APP.config.tabKey;
+        const trip = async () => { hu.feed(K.iface, K.field, { operationColumnStalks: 0x40 }); await sleep(150); hu.feed(K.iface, K.field, { operationColumnStalks: 0 }); await sleep(350); };
+        hu.feed(K.iface, K.field, { operationColumnStalks: 0 }); await sleep(100);
         feedList([REST, DOOR]); feedDisp(15); await sleep(400);
-        tabs.press(hud, 1); hud._twinTabsChanged(); await sleep(200);          // away from tab 2 (BMW's panel opens)
-        const away = hud.tabs.tab;
-        for (let i = 0; i < 5 && hud.tabs.tab !== 2; i++) { tabs.press(hud, 1); hud._twinTabsChanged(); await sleep(120); }      // ... and round to tab 2 again
+        const tt = [{ bar: hud.tabs.tab, machine: hud.twinMsg.tab, kind: hud.twinMsg.page && hud.twinMsg.page.kind, state: hud.twinMsg.state, pg: hud.tdp && hud.tdp.page, ink: ((hud.widgets.get('c_page') || {}).pgInk || []).map((q) => q.id + ':' + q.box[3]) }];
+        for (let i = 0; i < 6; i++) { await trip(); tt.push({ bar: hud.tabs.tab, machine: hud.twinMsg.tab, kind: hud.twinMsg.page && hud.twinMsg.page.kind, state: hud.twinMsg.state, pg: hud.tdp && hud.tdp.page, ink: ((hud.widgets.get('c_page') || {}).pgInk || []).map((q) => q.id + ':' + q.box[3]) }); }
+        eq(tt.map((x) => x.bar), [1, 2, 3, 4, 5, 1, 2], 'TT: the door message on, six TRIP presses as the car sends them: 1 -> 2 -> 3 -> 4 -> 5 -> 1 -> 2');
+        ok(tt.every((x) => x.machine === x.bar), 'TT: after every press the message machine stands on the bar\'s tab (' + tt.map((x) => x.bar + '/' + x.machine).join(' ') + ')');
+        eq(tt.map((x) => x.kind), ['band', 'card', 'band', 'band', 'band', 'band', 'card'], 'TT: the message inside every tab: the band on 1, 3, 4, 5, the card on 2');
+        ok(tt.every((x) => x.state === 'ours'), 'TT: ours (our text for the door on the screen, BMW\'s panel covered) after the settle on every tab: ' + tt.map((x) => x.state).join(' '));
+        eq(tt.map((x) => x.pg), ['clock', 'msg', 'media', 'phone', 'none', 'clock', 'msg'], 'TT: the centre page follows the tab (clock / messages / media / phone / navigation / clock / messages)');
+        ok(hud._twinBandTop() === null, 'TT: no band on tab 2');
+        const low = (x) => Math.max.apply(null, x.ink.map((q) => Number(q.split(':')[1])).concat([0]));
+        ok(tt.filter((x) => x.kind === 'band').every((x) => low(x) <= 514 + 12), 'TT: on every band tab the page draws nothing the band (top 514) would slice: lowest ink ' + tt.map((x) => low(x)).join(' '));
+        await trip();
+        const top = hud._twinBandTop(), pgx = hud.widgets.get('c_page');
+        ok(hud.tabs.tab === 3 && top === 514 && !!pgx, 'TT: on tab 3 the band\'s top is 514 (one line: "Driver door open")');
         feedList([REST, STORED]); await sleep(100); feedDisp(0); await sleep(600);
-        ok(away !== 2 && hud.twinMsg.tab === hud.tabs.tab && (hud.tabs.tab !== 2 || (hud.twinMsg.page && hud.twinMsg.page.kind) === 'list'),
-            '0.1.2: the key away from tab 2 and back during a message, then its end: the machine and the bar agree (bar ' + hud.tabs.tab + ', machine ' + hud.twinMsg.tab + ', page ' + (hud.twinMsg.page && hud.twinMsg.page.kind) + ')');
+        eq([hud.tabs.tab, hud.twinMsg.tab, hud.twinMsg.state, hud.twinMsg.page && hud.twinMsg.page.kind, hud._twinBandTop()], [3, 3, 'none', 'other', null],
+            'TT: the message ends on tab 3 (a stored entry left): tab 3 stays (the driver\'s), the band is gone');
+        await trip();
+        eq([hud.tabs.tab, hud.twinMsg.tab, hud.twinMsg.page && hud.twinMsg.page.kind], [4, 4, 'other'], 'TT: and TRIP goes on as usual');
         feedList([REST]); feedDisp(0); press('tabLock', '5'); await sleep(300);
         ok(!logs.some((l) => /^ERROR/.test(l)), 'no error in the engine\'s log' + (logs.filter((l) => /^ERROR/.test(l))[0] ? ': ' + logs.filter((l) => /^ERROR/.test(l))[0] : ''));
     } finally {
@@ -899,7 +972,7 @@ function hygiene() {
         JSON.stringify(APP.config.tabKey.path) === '["operationColumnStalks"]' && APP.signals['de.bmw.body.Light'].IndicatorSteeringColumn === 's',
         'config.tabKey is the car-verified TRIP button (bit 0x40 of de.bmw.body.Light IndicatorSteeringColumn, declared notifier-only "s")');
     // car-fix CF3: the car showed the call state (aggregatedCallState DISCONNECTED / DIALING / ACTIVE, 2026-11-18): rule 2 is on
-    eq([APP.config.tabs.callSelects, APP.config.tabs.messageTab, APP.config.tabs.lockAboveKmh], [true, true, 5], 'config.tabs: callSelects on (car-fix CF3: the call state arrives), a message selects tab 2, lock 5');
+    eq([APP.config.tabs.callSelects, APP.config.tabs.messageTab, APP.config.tabs.lockAboveKmh], [true, false, 5], 'config.tabs: callSelects on (car-fix CF3: the call state arrives), a message selects no tab (fixes-1121 TT), lock 5');
     const F30 = JSON.parse(fs.readFileSync(path.join(H.ROOT, 'apps', 'f30_cluster', 'app.json'), 'utf8'));
     ok((F30.shared || []).indexOf('twin_tabs.js') < 0 && !F30.config.tabs, 'f30_cluster does not pack the module and has no config.tabs');
     const d2 = H.tree('f30_cluster', ['twin_tabs.js', 'twin_tokens.js', 'twin_cc.js', 'twin_probe.js']);

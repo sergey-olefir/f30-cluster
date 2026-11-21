@@ -7,6 +7,12 @@
  * 3 media, 4 phone, 5 navigation. One tab is SELECTED: its cell is filled in the tab's own colour (tdback's highlight,
  * hud.js _twinBackSend) and the centre shows its page (shared/twin_tokens.js page(): pageOf() here).
  *
+ * fixes-1121 TT (the owner, 2026-11-21: "on Twin, with an active message, I cannot switch between the tabs" - and the decision: the
+ * message is shown within the tab, the tabs switch as usual): app.json ships config.tabs.messageTab FALSE. Rule 1 below is then off: a
+ * message selects no tab, its start, its end and a new episode move nothing; TRIP steps through the tabs as without a message (tab 2
+ * in the cycle while an entry is listed); the message shows inside the tab shown (shared/twin_cc.js: the band on 1, 3, 4, 5, the card
+ * on 2). Rules 2-4, the lock speed and the setting keep their meaning. messageTab true gives back rule 1 (the legacy rule).
+ *
  * Which tab: the setting "tab" = auto | 1 | 2 | 3 | 4 | 5, applied IN PLACE (no layout rebuild: hud.js calls update()
  * from the settings handler, the 50 ms tick and the message push). Rules of the setting "auto", in priority order
  * (SPEC-R3 3.4):

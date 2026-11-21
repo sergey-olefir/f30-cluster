@@ -501,6 +501,133 @@ function showDiffChecks() {
 }
 
 // =====================================================================================================================
+// Part 2c (fixes-1121 TT): the message inside every tab (TwinCentre opts.inTab; app.json config.tabs.messageTab false). The band's
+// layout and pixels; then SC's model with the in-tab machine: SC's 35 cases, the TT cases (TRIP on every tab with a message, a
+// message starting / ending during a switch, two messages, a name the band cannot carry, fast switches) and 120 random drives, each
+// applied atomically, op by op and in every interleaving of the connections, the audit after every frame (V1: BMW's message covered
+// while our whole text for it is not on the screen; V2: the row's ink in an open panel). Mutants must still be caught.
+// =====================================================================================================================
+function ttUnitChecks() {
+    console.log('fixes-1121 TT: the band (the message inside tabs 1, 3, 4, 5)');
+    const B = T.BAND;
+    const mk = (name, id, color) => ({ key: String(id || 15) + '\u0001' + name, id: id || 15, name, color: color || 'white' });
+    const tops = ['Driver door open', 'Гальма: зупиніться в безпечному місці', 'Потрібне сервісне обслуговування найближчим часом',
+        'Brake fault: stop the car at the next safe place and call for help right now'].map((n) => T.layoutBand({ cand: mk(n) }, layDeps));
+    ok(JSON.stringify(tops.map((p) => [p.card.lines.length, p.card.y0, p.keys.length])) === JSON.stringify([[1, 514, 1], [2, 474, 1], [3, 434, 1], [4, 394, 1]]),
+        'the band grows upwards with its lines: 1 line top 514, 2 474, 3 434, 4 394; each name whole, so each counts (' + JSON.stringify(tops.map((p) => p.card.y0)) + ')');
+    const huge = T.layoutBand({ cand: mk('Service due: visit your BMW service partner as soon as possible and have the brake fluid, the engine oil and the filters checked', 41) }, layDeps);
+    ok(huge.card.cut && huge.card.lines.length === 4 && /…$/.test(huge.card.lines[3]) && huge.keys.length === 0, 'a name that needs more than 4 lines: drawn cut with "…", and it counts for NOTHING (keys [])');
+    const greek = T.layoutBand({ cand: mk('Πόρτα ανοιχτή', 17) }, layDeps);
+    ok(greek.keys.length === 0, 'a name with a glyph the row font lacks: counts for nothing');
+    ok(tops.every((p) => p.card.bases.every((b) => b + 12 <= T.SHEET.y + T.SHEET.h) && p.card.y0 >= T.SHEET.y) && B.textX + B.maxW <= T.SHEET.x + T.SHEET.w - 8 && B.cell.x0 >= T.SHEET.x + 8,
+        'every line, its descent and the cell inside the sheet [729, 298, 1191, 568] (the band adds no layer, no hole, no pixel memory)');
+    // pixels: see-through above the top, opaque from the top rule down; the name's ink inside the band, left of 1180
+    const one = tops[0], P = T.paintSheet(deps, one, {});
+    const W = T.SHEET.w, a = (x, y) => P.buf[((y - T.SHEET.y) * W + (x - T.SHEET.x)) * 4 + 3];
+    let above = 0, below = 0, inkL = 1e9, inkR = -1, inkT = 1e9, inkB = -1;
+    for (let y = T.SHEET.y; y < T.SHEET.y + T.SHEET.h; y++) for (let x = T.SHEET.x; x < T.SHEET.x + W; x++) {
+        if (y < one.card.y0) above += a(x, y); else if (a(x, y) !== 255) below++;
+        const o = ((y - T.SHEET.y) * W + (x - T.SHEET.x)) * 4;
+        if (y >= one.card.y0 + 2 && x >= B.textX - 2 && P.buf[o] > 60) { inkL = Math.min(inkL, x); inkR = Math.max(inkR, x); inkT = Math.min(inkT, y); inkB = Math.max(inkB, y); }
+    }
+    ok(above === 0 && below === 0, 'the band\'s pixels: alpha 0 above its top (the tab\'s page shows), 255 from its top rule to the sheet\'s bottom');
+    ok(inkL >= B.textX - 2 && inkR <= 1180 && inkT > one.card.y0 && inkB < T.SHEET.y + T.SHEET.h, 'the name\'s ink lies inside the band (x ' + inkL + '-' + inkR + ', y ' + inkT + '-' + inkB + ')');
+    ok(P.symbol === 'cc_door', 'the symbol is the message\'s own (by its id: cc_door for 15)');
+    ok(T.paintSheet(deps, tops[0], { night: true }).buf.equals(P.buf) === false && T.layoutBand({ cand: mk('Driver door open'), night: true }, layDeps).sig !== one.sig, 'night repaints it (another sig, darker pixels)');
+    // the centre page leaves out what the band would slice (shared/twin_pages.js underBand)
+    const PG = require(path.join(ROOT, 'shared', 'twin_pages.js'));
+    ok(PG.underBand({ k: 't', b: 519 }, 514) && !PG.underBand({ k: 't', b: 460 }, 474) && PG.underBand({ k: 'i', cy: 392, sz: 66 }, 394) && !PG.underBand({ k: 'i', cy: 344, sz: 54 }, 394) &&
+        PG.underBand({ k: 'bar', y: 496, h: 6 }, 474) && PG.underBand({ k: 'car', cy: 430, h: 230 }, 514) && !PG.underBand({ k: 'x' }, 300),
+        'twin_pages.underBand: a text whose baseline is below the top, an icon / bar / car reaching below it, are left out; the rest stays');
+    ok(PG.bandTopOf({ _twinBandTop: () => 474 }) === 474 && PG.bandTopOf({}) === null && PG.bandTopOf({ _twinBandTop: () => { throw new Error('x'); } }) === null, 'twin_pages.bandTopOf asks the engine and never throws');
+}
+
+function ttModelChecks() {
+    console.log('fixes-1121 TT: SC\'s model with the in-tab machine, every mode');
+    const SCD = path.join(ROOT, 'tools', 'twin-dial', 'r3', 'sc');
+    const ST = require(path.join(SCD, 'test.js'));
+    const { CASES, CONFIRM, SAMPLES } = require(path.join(SCD, 'cases.js'));
+    const { REST, DOOR, BOOT, TYRE, WASH, LONGW, GREEK, STORED } = SAMPLES;
+    const HUGE = { id: 41, color: 'white', name: 'Потрібне сервісне обслуговування: відвідайте сервісного партнера якомога швидше й перевірте гальмівну рідину, оливу та фільтри' };
+    const Lc = function () { return ['list', Array.prototype.slice.call(arguments)]; };
+    const A = (n) => ['active', n], W = (ms) => ['wait', ms], DRV = (t) => ['driver', t], AUTO = (t) => ['auto', t], N = null;
+    const TT = [
+        { id: 'TT1', what: 'a message on tab 1: the band; TRIP through 2, 3, 4, 5, 1, 2, 1 with it on', steps: CONFIRM.concat([[N, DRV(1)], [15, Lc(REST, DOOR), A(15), W(1000)]]).concat([2, 3, 4, 5, 1, 2, 1].map((t) => [15, DRV(t), W(400)])).concat([[N, Lc(REST), A(0)]]) },
+        { id: 'TT2', what: 'every switch 20 ms apart, during the settle', steps: CONFIRM.concat([[N, DRV(3)], [15, Lc(REST, DOOR), A(15), W(20)]]).concat([4, 5, 1, 2, 3, 2, 1, 5].map((t) => [15, DRV(t), W(20)])).concat([[15, W(1000)], [N, Lc(REST), A(0)]]) },
+        { id: 'TT3', what: 'a message starting in the turn of a switch, and ending in the turn of one', steps: CONFIRM.concat([[N, DRV(4)], [19, DRV(5), Lc(REST, BOOT), A(19), W(1000)], [N, DRV(2), Lc(REST), A(0), W(1000)], [15, Lc(REST, DOOR), DRV(3), A(15), W(60)], [N, A(0), DRV(1), Lc(REST)]]) },
+        { id: 'TT4', what: 'two messages: N ours on tab 3, M arrives; BMW cycles N / M while the driver switches', steps: CONFIRM.concat([[N, DRV(3)], [15, Lc(REST, DOOR, TYRE), A(15), W(1000)], [50, A(50), W(1000)], [15, A(15), DRV(1), W(500)], [50, A(50), DRV(2), W(500)], [15, A(15), DRV(4), W(500)], [50, A(50), DRV(3), W(500)], [N, Lc(REST), A(0)]]) },
+        { id: 'TT5', what: 'N -> M where M is a whole row on tab 2, then the driver leaves to a band tab', steps: CONFIRM.concat([[N, DRV(2)], [15, Lc(REST, DOOR, WASH), A(15), W(1000)], [164, A(164), W(300)], [164, DRV(3), W(1000)], [N, Lc(REST), A(0)]]) },
+        { id: 'TT6', what: 'a name the band cannot carry: window on band tabs, ours on tab 2 (the card), leave again', steps: CONFIRM.concat([[N, DRV(3)], [41, Lc(REST, HUGE), A(41), W(1000)], [41, DRV(2), W(1000)], [41, DRV(4), W(1000)], [41, DRV(2), W(60)], [41, DRV(5), W(1000)], [N, Lc(REST), A(0)]]) },
+        { id: 'TT7', what: 'a Greek name, a cut row, a stored entry, guidance: the band tabs and tab 2', steps: CONFIRM.concat([[N, DRV(5), AUTO(5)], [17, Lc(REST, GREEK), A(17), W(1000)], [17, DRV(2), W(500)], [N, Lc(REST), A(0)], [41, Lc(REST, LONGW, STORED), A(41), DRV(1), W(1000)], [987, A(987), DRV(2), W(500)], [987, DRV(3), W(500)], [N, Lc(REST), A(0)]]) },
+        { id: 'TT8', what: 'a rebuild and night while a band is ours; the end on a band tab', steps: CONFIRM.concat([[N, DRV(4)], [15, Lc(REST, DOOR), A(15), W(1000)], [15, ['rebuild'], W(1000)], [15, ['night', true], DRV(5), W(1000)], [15, ['night', false], W(500)], [N, Lc(REST), A(0)]]) },
+        { id: 'TT9', what: 'the D7 phase: nothing confirmed yet on a band tab (the shown band, BMW\'s panel open)', steps: [[N, Lc(REST), DRV(3)], [15, Lc(REST, DOOR), A(15), W(1000)], [15, DRV(2), W(500)], [N, Lc(REST), A(0)]] },
+    ];
+    // random drives: what BMW shows is the shown-now number's message after each step (65535 / an unlisted number: no text of ours can match)
+    const POOL = [DOOR, BOOT, TYRE, WASH, LONGW, STORED, GREEK, HUGE, { id: 16, color: 'red', name: '' }];
+    const NUMS = [0, 0, 0, 15, 19, 50, 164, 41, 987, 17, 16, 285, 65535];
+    const RAND = [];
+    for (let seed = 1; seed <= 120; seed++) {
+        let s = seed * 2654435761 >>> 0;
+        const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+        const pickOf = (a) => a[Math.floor(rnd() * a.length)];
+        const steps = CONFIRM.slice();
+        let list = [REST], act = 0;
+        for (let i = 0; i < 40; i++) {
+            const ev = [];
+            const r = rnd();
+            if (r < 0.3) { list = [REST]; const n = Math.floor(rnd() * 4); for (let k = 0; k < n; k++) { const e = pickOf(POOL); if (list.indexOf(e) < 0) list.push(e); } ev.push(Lc.apply(null, list)); }
+            const reb = rnd() < 0.04;      // (a rebuild in a step of its own: the model audits a rebuild against the step's old truth)
+            if (!reb && rnd() < 0.45) { act = pickOf(NUMS.concat(list.map((e) => e.id).filter((x) => x))); ev.push(A(act)); }
+            if (rnd() < 0.55) ev.push(DRV(1 + Math.floor(rnd() * 5)));
+            if (rnd() < 0.05) ev.push(AUTO(5));
+            if (rnd() < 0.04) ev.push(['night', rnd() < 0.5]);
+            if (reb && ev.length === 0) ev.push(['rebuild']);
+            if (rnd() < 0.03) ev.push(['throw']);
+            ev.push(W(pickOf([10, 20, 50, 100, 140, 160, 200, 300, 700])));
+            steps.push([act === 0 ? N : act].concat(ev));
+        }
+        steps.push([N, Lc(REST), A(0)]);
+        RAND.push({ id: 'R' + seed, what: 'random drive ' + seed, steps });
+    }
+    const modes = [['atomic', { mode: 'atomic' }], ['serial', { mode: 'serial' }], ['interleave', { mode: 'interleave', conns: ST.CONNS_PROPOSED }], ['atomic+release', { mode: 'atomic', release: ST.REC }]];
+    const families = [['SC\'s ' + CASES.length + ' cases', CASES], ['the ' + TT.length + ' TT cases', TT], [RAND.length + ' random drives', RAND]];
+    families.forEach(([fname, cases]) => modes.forEach(([mname, cfg]) => {
+        // (the random drives' truth is the shown-now number's message; with the release the list decides instead, which SC's cases model)
+        if (fname === families[2][0] && mname === 'atomic+release') return;
+        let v1 = 0, v2 = 0, frames = 0; const bad = [];
+        cases.forEach((cs) => { const r = ST.run(cs, Object.assign({ inTab: true, confirmNow: true }, cfg)); v1 += r.v.V1; v2 += r.v.V2; frames += r.v.frames; if (r.v.V1 + r.v.V2) bad.push(cs.id + ' ' + JSON.stringify(r.v.first)); });
+        ok(v1 === 0 && v2 === 0, 'TT in-tab, ' + fname + ', ' + mname + ': ' + frames + ' frames, V1 ' + v1 + ', V2 ' + v2 + (bad.length ? ' [' + bad.slice(0, 2).join('; ') + ']' : ''));
+    }));
+    // behaviour, from the traces
+    const tr = (id) => ST.run(TT.find((c) => c.id === id), { mode: 'atomic', inTab: true, confirmNow: true }).trace;
+    {
+        const t = tr('TT1');
+        const sw = t.filter((x) => /^driver [1-5]/.test(x.ev) && x.t > 3000);
+        ok(sw.length === 7 && sw.every((x) => !/window\+/.test(x.ops) && x.state === 'ours') && sw.map((x) => x.tab).join('') === '2345121',
+            'TT1: seven switches with the message ours: each in one turn, no window op, ours throughout (' + sw.map((x) => x.tab + ':' + x.kind + (x.ops ? '[' + x.ops + ']' : '')).join(' ') + ')');
+        ok(t.some((x) => x.kind === 'band' && x.tab === 1 && x.state === 'ours') && t.filter((x) => x.tab === 2 && x.state === 'ours').every((x) => x.kind === 'card'), 'TT1: the band on tab 1, the card on tab 2');
+        ok(!t.some((x) => x.t > 3000 && x.tab === 2 && /^active|^list/.test(x.ev)), 'TT1: the message itself never moved the tab');
+    }
+    {
+        const t = tr('TT6');
+        ok(t.some((x) => x.tab === 3 && x.kind === 'band' && x.state === 'window') && t.some((x) => x.tab === 2 && x.state === 'ours') && t.filter((x) => x.tab !== 2 && x.t > 3000 && x.kind === 'band').every((x) => x.state !== 'ours'),
+            'TT6: a name the band cannot carry: never ours on a band tab, ours on tab 2 (the card)');
+        const leave = t.find((x) => x.ev === 'driver 4');
+        ok(leave && /window\+/.test(leave.ops) && leave.ops.indexOf('window+') < leave.ops.indexOf('tab4'), 'TT6: leaving tab 2 opens BMW\'s panel in the same turn, before the centre moves (' + (leave ? leave.ops : '-') + ')');
+    }
+    {
+        const t = tr('TT9');
+        ok(t.some((x) => x.tab === 3 && x.kind === 'band' && x.state === 'window'), 'TT9: D7 not fallen: the shown band on tab 3, BMW\'s panel open');
+    }
+    // the audit is not vacuous in-tab: broken machines are caught on the TT cases
+    ['noSettle', 'windowLast', 'wrongCard', 'keepStamps'].forEach((mutant) => {
+        let v = 0;
+        TT.concat(RAND.slice(0, 20)).forEach((cs) => ['serial', 'atomic'].forEach((mode) => { const r = ST.run(cs, { mode, inTab: true, confirmNow: true, mutant }); v += r.v.V1 + r.v.V2; }));
+        ok(v > 0, 'TT in-tab mutant "' + mutant + '": the audit sees ' + v + ' violating frames');
+    });
+}
+
+// =====================================================================================================================
 // Part 3: the engine
 // =====================================================================================================================
 const RECT = [696, 595, 1226, 704];                // BMW's message panel (bbox of zc.panel dilated 3 px, rounded out)
@@ -720,6 +847,16 @@ async function engineChecks() {
         }
         return refCache[k];
     };
+    // fixes-1121 TT: our band for K on tabs 1, 3, 4, 5 - its pixels from its top rule to the sheet's bottom; null when the band cannot
+    // carry K's WHOLE name (cut, a glyph the font lacks): then it is no text of ours for K at all
+    const refBand = (e, night) => {
+        const k = 'b' + keyOf(e) + night;
+        if (refCache[k] === undefined) {
+            const p = T.layoutBand({ cand: { key: keyOf(e), id: e.id, name: String(e.name).replace(/\s+/g, ' ').trim(), color: e.color }, night }, layDeps);
+            refCache[k] = p.keys.length ? { buf: T.paintSheet(deps, p, { night }).buf, y0: p.card.y0 - T.SHEET.y } : null;
+        }
+        return refCache[k];
+    };
     const SW = T.SHEET.w;
     const same = (a, b, x0, y0, x1, y1, skip) => {
         for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
@@ -740,6 +877,10 @@ async function engineChecks() {
         }
         for (const night of [false, true]) for (const top of TOPS) {
             if (same(img, refRow(e, night, top), 0, top - T.SHEET.y, 1186 - T.SHEET.x, top - T.SHEET.y + 44)) return 'row';
+        }
+        for (const night of [false, true]) {      // fixes-1121 TT: the band, whole, pixel for pixel from its top rule down
+            const b = refBand(e, night);
+            if (b && same(img, b.buf, 0, b.y0, SW, T.SHEET.h)) return 'band';
         }
         return '';
     }
@@ -796,7 +937,8 @@ async function engineChecks() {
         if (!hud || !hud.client || !hud.client.ready) return;
         model.frames++;
         const now = model.frameAt || T.mono(), s = snapshot();      // the clocks run on the turn's own time, not on how long the audit took
-        const tr = [s.covered > 0 ? 'C' : '-', s.rows > 0 ? 'R' : '-', s.has ? (s.has === 'card' ? 'P' : 'W') : s.sheetBlank ? 'b' : 'x', s.open ? 'O' : 'S', hud.twinMsg ? hud.twinMsg.state[0] : '?', hud.twinMsg ? String(hud.twinMsg.tab) : '?'].join('');
+        // fixes-1121 TT: B = the band
+        const tr = [s.covered > 0 ? 'C' : '-', s.rows > 0 ? 'R' : '-', s.has ? (s.has === 'card' ? 'P' : s.has === 'band' ? 'B' : 'W') : s.sheetBlank ? 'b' : 'x', s.open ? 'O' : 'S', hud.twinMsg ? hud.twinMsg.state[0] : '?', hud.twinMsg ? String(hud.twinMsg.tab) : '?'].join('');
         if (tr !== last) { last = tr; model.trace.push({ t: now, tr, state: hud.twinMsg && hud.twinMsg.state, covered: s.covered, rows: s.rows, has: s.has, open: s.open, blank: s.sheetBlank }); }
         const why = (w) => { model.violations.push({ w, tr, t: Date.now(), truth: JSON.stringify({ shown: model.truth.shown, may: model.truth.may }) }); };
         // the clocks of the audit itself: since when our text is on the sheet, since when the window is open
@@ -1321,6 +1463,109 @@ async function engineChecks() {
             '13c. r1120 T1: one "cc: period" line per message period (' + per.length + '), numbers and enums only, e.g. "' + (per.filter((l) => /15\/285/.test(l))[0] || '-') + '"');
     }
 
+    // ---- case 14 (fixes-1121 TT): the message inside every tab, the tabs switch as usual (config.tabs.messageTab false) ---------
+    // The owner (2026-11-21): with a message active TRIP must switch the tabs; the message is shown within the tab. The same engine
+    // and the same per-frame audit (V1..V5) with in-tab on: the band on tabs 1, 3, 4, 5, the card on tab 2. The switch is what
+    // TRIP reaches through shared/twin_tabs.js (hud._twinTabMoved -> _twinTabChosen(n, 'driver')); this stand-in has no live tabs.
+    const ttTrace = (from) => model.trace.slice(from).map((x) => x.tr);
+    const eq14 = (a, b, w) => { const k = JSON.stringify(a) === JSON.stringify(b); ok(k, w + (k ? '' : ' (got ' + JSON.stringify(a) + ')')); };
+    const sw = async (n, ms) => { hud._twinTabChosen(n, 'driver'); await turn(); if (ms) await sleep(ms); };
+    await endMsg(); feedList(L(E.rest)); await sleep(150);
+    hud.config.tabs = { messageTab: false };
+    hud._twinTabChosen(1, 'driver'); await sleep(150);
+    // 14a. a message on tab 1: the band, not tab 2; the window open first, ours after the band's settle
+    clean();
+    const n14 = model.trace.length;
+    truth(true, true, E.door);
+    feedList(L(E.rest, E.door)); feedAct(15);
+    await sleep(40);
+    {
+        const t = T0(), s = snapshot();
+        ok(t.inTab && t.tab === 1 && t.page.kind === 'band' && s.has === 'band' && s.open && s.rows === 0,
+            '14a. TT: a message while tab 1 is shown: tab 1 stays, the band carries it in the same turn, BMW\'s panel open, the row aside (' + t.reason + ')');
+    }
+    await until(() => T0().state === 'ours', 1500);
+    await sleep(60);
+    ok(T0().state === 'ours' && !snapshot().open && snapshot().has === 'band' && snapshot().rows > 0, '14a. TT: after the settle: ours on tab 1 (the band), the window shut, the row back');
+    noViolations('14a. TT: the band on tab 1');
+    // 14b. TRIP through every tab with the message on: not one frame opens or loses our text; the card on 2, the band elsewhere
+    clean();
+    const n14b = model.trace.length, kinds = [];
+    for (const n of [2, 3, 4, 5, 1, 2, 1]) { await sw(n, 250); kinds.push(T0().tab + ':' + T0().page.kind + ':' + T0().state); }
+    eq14(kinds, ['2:card:ours', '3:band:ours', '4:band:ours', '5:band:ours', '1:band:ours', '2:card:ours', '1:band:ours'], '14b. TT: tabs 2, 3, 4, 5, 1, 2, 1 with the door message on: the card on 2, the band elsewhere, ours on every one');
+    {
+        const tr14 = model.trace.slice(n14b);
+        ok(tr14.length > 0 && tr14.every((x) => !x.open && (x.has === 'card' || x.has === 'band')), '14b. TT: every frame of the seven switches: BMW\'s panel stayed covered with our whole text on the sheet (' + ttTrace(n14b).join(' ') + ')');
+    }
+    noViolations('14b. TT: the switches');
+    // 14c. switches every 30 ms (faster than the settle and the tick)
+    clean();
+    for (const n of [3, 4, 5, 1, 2, 3, 2, 4]) await sw(n, 30);
+    await sleep(300);
+    ok(T0().tab === 4 && T0().state === 'ours' && snapshot().has === 'band', '14c. TT: eight switches 30 ms apart end on tab 4, ours, the band');
+    noViolations('14c. TT: fast switches');
+    // 14d. a message STARTING during a switch, and one ENDING during a switch
+    await endMsg(); await sleep(100);
+    clean();
+    truth(true, true, E.boot);
+    feedList(L(E.rest, E.boot)); hud._twinTabChosen(5, 'driver'); feedAct(14);
+    await sleep(40);
+    ok(T0().tab === 5 && T0().page.kind === 'band' && snapshot().open && snapshot().has === 'band', '14d. TT: the boot message arrives in the turn the tab moves to 5: tab 5, its band, the window open');
+    await until(() => T0().state === 'ours', 1500);
+    hud._twinTabChosen(2, 'driver'); none(); feedAct(0); feedList(L(E.rest));
+    await sleep(300);
+    ok(T0().state === 'none' && T0().tab === 2 && !snapshot().open && snapshot().rows > 0 && T0().page.kind === 'empty', '14d. TT: the message ends in the turn the tab moves to 2: tab 2 (the driver\'s), its empty page, the window shut, the row back');
+    noViolations('14d. TT: a message starting and ending during a switch');
+    // 14e. two messages: N ours in its band on tab 3, then M; BMW cycles N / M while the driver switches
+    await sw(3, 100);
+    clean();
+    truth(true, true, E.door);
+    feedList(L(E.rest, E.door, E.tyre)); feedAct(15);
+    await until(() => T0().state === 'ours', 1500);
+    truth(true, true, E.tyre); feedAct(50);
+    await turn();
+    ok(T0().state === 'window' && snapshot().open && T0().page.kind === 'band' && T0().candidate && T0().candidate.id === 50, '14e. TT: N -> M on tab 3: the window opens at once, the band says M');
+    await until(() => T0().state === 'ours', 1500);
+    for (const step of [[15, 1], [50, 2], [15, 4], [50, 3]]) {
+        truth(true, true, step[0] === 15 ? E.door : E.tyre); feedAct(step[0]); await sw(step[1], 0);
+        await until(() => T0().state === 'ours', 1500);      // (N's text leaves the sheet only after the window has been open 150 ms, then M settles 150 ms)
+    }
+    ok(T0().state === 'ours' && T0().tab === 3 && T0().candidate && T0().candidate.id === 50, '14e. TT: BMW cycling door / tyre while the driver switches 1, 2, 4, 3: each one ours again in its own band or card (' + T0().state + ', tab ' + T0().tab + ', ' + (T0().candidate && T0().candidate.id) + ', ' + T0().reason + ')');
+    noViolations('14e. TT: two messages');
+    await endMsg(); feedList(L(E.rest)); await sleep(150);
+    // 14f. a name the band cannot carry whole (more than 4 lines): never ours on a band tab; ours on tab 2 (the card counts);
+    // leaving tab 2 opens the window in the same turn and keeps the card up for the open settle
+    const huge = { id: 41, name: 'Service due: visit your BMW service partner as soon as possible and have the brake fluid, the engine oil and the filters checked', color: 'white' };
+    model.watch[keyOf(huge)] = huge;
+    clean();
+    truth(true, true, huge);
+    feedList(L(E.rest, huge)); feedAct(41);
+    await sleep(500);
+    ok(T0().tab === 3 && T0().state === 'window' && snapshot().open && snapshot().covered === 0 && T0().page.kind === 'band' && T0().page.keys.length === 0 && /band on tab 3 cannot carry/.test(T0().reason),
+        '14f. TT: a name of 5+ band lines on tab 3: the band shows it cut, counts for nothing, BMW\'s panel stays open (' + T0().reason + ')');
+    await sw(2, 0);
+    await until(() => T0().state === 'ours', 1500);
+    ok(T0().state === 'ours' && T0().tab === 2 && snapshot().has === 'card', '14f. TT: on tab 2 its card (3 lines, cut: the card counts as before) - ours');
+    const n14f = model.trace.length;
+    await sw(4, 0);
+    ok(T0().state === 'window' && snapshot().open && T0().deferred && snapshot().has === 'card', '14f. TT: to tab 4: the window opens in the same turn, the card stays up for the open settle');
+    await sleep(300);
+    const tr14f = model.trace.slice(n14f), op14f = tr14f.filter((x) => x.open)[0], gone14f = tr14f.filter((x) => x.has !== 'card')[0];
+    ok(T0().page.kind === 'band' && snapshot().open && op14f && gone14f && gone14f.t - op14f.t >= 145, '14f. TT: then the cut band (' + (op14f && gone14f ? Math.round(gone14f.t - op14f.t) : '?') + ' ms after the window opened), BMW\'s panel open');
+    noViolations('14f. TT: a name the band cannot carry');
+    await endMsg(); feedList(L(E.rest)); await sleep(150);
+    // 14g. a glyph the font lacks on a band tab: latched, the window open, nothing of ours over BMW's panel
+    clean();
+    model.truth = { shown: true, may: true, expect: [] };
+    feedList(L(E.rest, E.greek)); feedAct(17);
+    await sleep(450);
+    ok(T0().state === 'window' && snapshot().open && snapshot().covered === 0 && /missing from our font/.test(T0().reason) && T0().tab === 4, '14g. TT: a Greek name on tab 4: latched, BMW\'s panel open (' + T0().reason + ')');
+    noViolations('14g. TT: a glyph the font lacks');
+    await endMsg(); feedList(L(E.rest)); await sleep(150);
+    ok(logs.some((l) => /cc: centre ours, tab 3, page band \(our text for the shown message is on the screen\)/.test(l)), '14. TT: the log line "cc: centre ours, tab 3, page band (...)"');
+    delete hud.config.tabs;
+    hud._twinTabChosen(1, 'driver'); await sleep(150);
+
     // ---- case 11: the audit itself ------------------------------------------------------------------------------------
     ok(model.frames >= 50, '11. the pixel audit ran on ' + model.frames + ' frames');
     const seen = (re) => model.trace.some((x) => re.test(x.tr));
@@ -1421,6 +1666,8 @@ async function engineChecks() {
         machineChecks();
         modelChecks();
         showDiffChecks();       // r1120 T1
+        ttUnitChecks();         // fixes-1121 TT
+        ttModelChecks();        // fixes-1121 TT
         tabFillChecks();
         await engineChecks();
     } catch (e) {
