@@ -67,12 +67,14 @@ const TABLE = {
     f30_cluster: {
         perProfile: ['hudLayout', 'g20', 'byMode', 'needleSmooth', 'stockMap', 'wbFoot', 'dialShade', 'bottomRow', 'ccStyle',
             'limitArc', 'modeLabel', 'gearTray', 'inComfort', 'inSport', 'inEco', 'nightDim', 'nightLook', 'units', 'lang'],
-        global: [ENABLE_KEY, 'coldGuard', 'demo', 'diagRelease', 'diagShownNow', 'diagSceneTex', 'diagMbGap', 'diagMbCover', 'diagMbRebuild'],
+        global: [ENABLE_KEY, 'coldGuard', 'demo', 'diagRelease', 'diagShownNow', 'diagSceneTex', 'diagMbGap', 'diagMbCover', 'diagMbRebuild',
+            'diagRoadLight', 'diagRoadSigns', 'diagRoadScene'],      // road TD: the traffic light, signs and road scene tests (Діагностика: global)
     },
     twin_dial: {
         perProfile: ['hudLayout', 'centre', 'tab', 'tabLock', 'techData', 'navView', 'nightLook', 'bandGain', 'callerName', 'units', 'lang'],
         global: [ENABLE_KEY, 'redline', 'demo', 'diagRelease', 'diagMapWindow', 'diagMapForce', 'diagMapSlots', 'diagSilent', 'diagGpuText',
-            'diagR8Mark', 'diagCarplayTurns', 'diagFrontVehicle'],
+            'diagR8Mark', 'diagCarplayTurns', 'diagFrontVehicle',
+            'diagRoadLight', 'diagRoadSigns', 'diagRoadScene'],      // road TD
     },
 };
 

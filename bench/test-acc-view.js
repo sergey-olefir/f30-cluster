@@ -561,7 +561,8 @@ async function part2() {
     let es = null;
     try {
         ok(await waitFor(/acc: show off, demo off, lang uk/, 90000), 'the app built by the kit (0.1.0) and started (show off)');
-        ok(/acc_view 0\.1\.0: dist\/acc_view@0\.1\.0/.test(out), 'the kit built acc_view 0.1.0');
+        const ver = JSON.parse(fs.readFileSync(path.join(APPDIR, 'app.json'), 'utf8')).version;
+        ok(new RegExp('acc_view ' + ver.replace(/\./g, '\\.') + ': dist/acc_view@').test(out), 'the kit built acc_view ' + ver);
         await sleep(1200);
         es = ev();
         await sleep(800);
