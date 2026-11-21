@@ -5,6 +5,8 @@
  * default) or changing, with the number of messages and of different values. The first message of each source and its
  * first different values go to the log whole (numbers and enum names), so one drive answers the question.
  *
+ * 0.1.1: one watch per interface, asked one after the other; each row also says whether the service is there at all.
+ *
  * Read only: events and fields with notifiers and non-zero getters (app.json). No setter, no method, no diagnostic
  * request. Plain Node 8. Never lets an exception escape: an OAP app that exits twice is uninstalled.
  */
@@ -97,7 +99,9 @@ mgu.run({
             const err = srcs.filter((s) => st[s.tag].watch === 'error').length;
             const name = names[row] || row;
             let what;
-            if (!n) what = err === srcs.length ? 'не підписався' : 'мовчить';
+            const there = srcs.some((s) => { const g = groups[s.iface]; return !!(g && g.res && g.res.available); });
+            const asked = srcs.every((s) => { const g = groups[s.iface]; return !!(g && g.res); });
+            if (!n) what = !asked ? 'підписуюсь…' : err === srcs.length ? 'ПОМИЛКА підписки' : there ? 'сервіс є, мовчить' : 'сервісу немає';
             else if (d === srcs.filter((s) => st[s.tag].n).length) what = 'одне й те саме значення (' + n + '×)';
             else what = 'ЗМІНЮЄТЬСЯ: ' + d + ' різних з ' + n;
             return name + ': ' + what + (last ? ', ' + ago(now - last) : '');
@@ -111,22 +115,42 @@ mgu.run({
         }
 
         function summary() {
-            const parts = SOURCES.map((s) => { const t = st[s.tag]; return s.tag + '=' + t.n + '/' + t.distinct + (t.moving ? '/m' + t.moving : ''); });
+            const parts = SOURCES.map((s) => { const t = st[s.tag], g = groups[s.iface]; return s.tag + '=' + t.n + '/' + t.distinct + (t.moving ? '/m' + t.moving : '') + (g && g.res ? (g.res.error ? '!err' : g.res.available ? '' : '!away') : '!wait'); });
             log.info('ck: summary +' + Math.round((Date.now() - startAt) / 1000) + ' s, max ' + Math.round(maxKmh) + ' km/h: ' + parts.join(' '));
         }
 
-        // ---- signals: read only, watched once at start ----
+        // ---- signals: read only. ONE watch per interface (as ACC View and the themes do: 0.1.0 opened a proxy per source, up to
+        // three on one interface, and on the car every row stayed silent, the control row too), one after the other, a few
+        // seconds after the start. Each interface keeps its watch result: an error, or whether its provider is there at all.
+        const groups = {};                               // iface -> { handlers, tags, res }
         SOURCES.forEach((src) => {
-            const h = {}; h[src.key] = guard(src.tag, (v) => seen(src, v));
-            Promise.resolve().then(() => ctx.signals.watch(src.iface, '1', h, log))
-                .then((r) => { st[src.tag].watch = r && r.error ? 'error' : 'ok'; log.info('ck: watch ' + src.tag + ' ' + st[src.tag].watch); },
-                    (e) => { st[src.tag].watch = 'error'; log.warn('ck: watch ' + src.tag + ' failed: ' + (e && e.message || e)); });
+            const g = groups[src.iface] || (groups[src.iface] = { handlers: {}, tags: [], res: null });
+            g.handlers[src.key] = guard(src.tag, (v) => seen(src, v));
+            g.tags.push(src.tag);
         });
-        Promise.resolve().then(() => ctx.signals.watch(SPEED_IF, '1', { statusCarSpeed2: guard('speed', (v) => {
+        const sg = groups[SPEED_IF] || (groups[SPEED_IF] = { handlers: {}, tags: [], res: null });
+        sg.handlers.statusCarSpeed2 = guard('speed', (v) => {
             const raw = v && typeof v === 'object' ? v.speedVehicleCentreOfGravity : null;
             kmh = typeof raw === 'number' && raw !== 65535 ? raw * 0.015625 : null;
             if (kmh !== null && kmh > maxKmh) maxKmh = kmh;
-        }) }, log)).catch((e) => log.warn('ck: watch speed failed: ' + (e && e.message || e)));
+        });
+        const ifaces = Object.keys(groups);
+        function watchNext(i) {
+            if (i >= ifaces.length) { log.info('ck: all ' + ifaces.length + ' interfaces asked'); return; }
+            const iface = ifaces[i], g = groups[iface], short = iface.split('.').pop();
+            Promise.resolve().then(() => ctx.signals.watch(iface, '1', g.handlers, log)).then((r) => {
+                g.res = r || { error: 'no result' };
+                const state = g.res.error ? 'error' : 'ok';
+                g.tags.forEach((t) => { st[t].watch = state; });
+                log.info('ck: watch ' + short + ' ' + state + (g.res.error ? ' (' + String(g.res.error).slice(0, 160) + ')' : ', provider ' + (g.res.available ? 'there' : 'not there yet')) + ': ' + Object.keys(g.handlers).join(', '));
+            }, (e) => {
+                g.res = { error: String(e && e.message || e) };
+                g.tags.forEach((t) => { st[t].watch = 'error'; });
+                log.warn('ck: watch ' + short + ' failed: ' + g.res.error);
+            }).then(() => { const t = setTimeout(guard('watch', () => watchNext(i + 1)), 300); if (t.unref) t.unref(); });
+        }
+        const t0 = setTimeout(guard('watch', () => watchNext(0)), 3000);
+        if (t0.unref) t0.unref();
 
         try {
             if (typeof ui.onVisible === 'function') ui.onVisible(guard('visible', (name, on) => { if (name === 'MAIN' && on) { Object.keys(sent).forEach((k) => { delete sent[k]; }); refresh(); } }));

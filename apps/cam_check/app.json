@@ -2,7 +2,7 @@
   "id": "cam_check",
   "title": "Camera Check",
   "description": "Read-only check: does this car's front camera send its traffic light, its light sources for the high beam, its object lists, its sign lists and its lanes? Each source is shown as silent, one value or changing, and its first message is written to the log. Writes nothing to the car.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "vendor": "custom",
   "loggingId": "OACK",
   "iconGlyph": "CK",

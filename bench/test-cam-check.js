@@ -52,9 +52,12 @@ function request(method, url, body) {
     try {
         for (let i = 0; i < 80 && !/ck: start/.test(out); i++) await sleep(250);
         ok(/ck: start/.test(out), 'the app starts on the bench');
-        await sleep(1500);
+        for (let i = 0; i < 120 && !/ck: all \d+ interfaces asked/.test(out); i++) await sleep(250);
         const watched = (out.match(/ck: watch \S+ ok/g) || []).length;
-        ok(watched === 14, 'all 14 sources watched (' + watched + ')');
+        const ifaces = new Set(Object.keys(app.signals)).size;
+        ok(watched === ifaces && ifaces === 11 && /ck: all 11 interfaces asked/.test(out), 'one watch per interface, one after the other: ' + watched + ' of ' + ifaces + ' interfaces ok');
+        const perIface = (out.match(/ck: watch (\S+) /g) || []);
+        ok(new Set(perIface).size === perIface.length, 'no interface watched twice (0.1.0 opened a proxy per source)');
         const feed = (iface, field, value) => request('POST', '/fake', { feed: { iface, field, value } });
         await feed('de.bmw.dass.TrafficSignRecognition', 'TrafficSignRecognition', { presentClassLimitSpeed: 10 });
         await feed('de.bmw.dass.TrafficSignRecognition', 'TrafficSignRecognition', { presentClassLimitSpeed: 10 });
@@ -65,7 +68,7 @@ function request(method, url, body) {
         const t = (n) => (pr.native && pr.native[n] && pr.native[n].text) || '';
         ok(/^Світлофор: ЗМІНЮЄТЬСЯ: 2 різних з 2/.test(t('S_LIGHT')), 'a changing source: ' + t('S_LIGHT'));
         ok(/одне й те саме значення \(2×\)/.test(t('S_LIMIT')), 'a source with one value: ' + t('S_LIMIT'));
-        ok(/: мовчить$/.test(t('S_LAMPS')), 'a silent source: ' + t('S_LAMPS'));
+        ok(/: (сервіс є, мовчить|сервісу немає)$/.test(t('S_LAMPS')), 'a silent source says whether its service is there: ' + t('S_LAMPS'));
         ok(/ck: first light .*"trafficLightColor":1/.test(out) && /ck: value #2 light .*"trafficLightColor":4/.test(out), 'the first message and the next different value are in the log');
         ok(!/ck: [^\n]*(error|uncaught)/i.test(out), 'no error in the app\'s log');
     } finally { stop(); }
