@@ -123,7 +123,7 @@ function lane(cv, g, s, z, P, dim, gapOnly) {
     const fast = s.clo === 2, gapc = fast ? P.amberF : P.gap, line = P.line, ground = P.ground;
     const edgeCol = line.map((c) => c * 0.5 + 0.14);
     const lines = [];
-    for (let i = 0; i < 4; i++) if (U.u_ln[i * 4 + 3] > 0.5) lines.push({ y0: U.u_ln[i * 4], a: U.u_ln[i * 4 + 1], c: U.u_ln[i * 4 + 2], ty: U.u_ln[i * 4 + 3], len: U.u_lp[i * 4], str: U.u_lp[i * 4 + 1], mw: U.u_lp[i * 4 + 2] });
+    for (let i = 0; i < 4; i++) if (U.u_ln[i * 4 + 3] > 0.5) lines.push({ y0: U.u_ln[i * 4], a: U.u_ln[i * 4 + 1], c: U.u_ln[i * 4 + 2], ty: U.u_ln[i * 4 + 3], len: U.u_lp[i * 4], str: U.u_lp[i * 4 + 1], mw: U.u_lp[i * 4 + 2], g: U.u_lp[i * 4 + 3] });
     const dm = 1 - 0.65 * (dim || 0);
     const col = [0, 0, 0];
     const chev = [0, 1].map((i) => { const tc = 1 / (1 + zc * (0.45 + 0.22 * i) * kf); return { tc, yc: hy + (H - hy) * tc }; });
@@ -159,14 +159,17 @@ function lane(cv, g, s, z, P, dim, gapOnly) {
                 if (ly2[i] === null) continue;
                 const l = lines[i];
                 let d = Math.abs(ym - ly2[i]) * k;
-                const lw = Math.max(1.2, l.mw * k);
-                if (d > lw * 4 + 4) continue;
-                if (l.ty > 2.5 && l.ty < 3.5) d = Math.abs(d - 1.4 * lw);
+                const g = l.g;                  // 0 measured .. 1 our own guess (acc_lane's u_lp.w): thinner, no glow, short dashes
+                const lw = Math.max(1.2, l.mw * k) * (1 - 0.5 * g);
+                if (d > Math.max(1.2, l.mw * k) * 4 + 4) continue;
+                if (l.ty > 2.5 && l.ty < 3.5) d = Math.abs(d - 1.4 * lw * (1 - g));
                 const on = 1 - sstep(lw * 0.5 - 0.7, lw * 0.5 + 0.7, d);
-                const glow = (1 - sstep(0, lw * 2.5 + 2, d)) * 0.25;
-                const dash = l.ty > 1.5 && l.ty < 2.5 ? (fract(xm / 12) < 0.5 ? 1 : 0) : 1;
-                const kk = Math.max(on, glow) * dash * fade * l.str * (1 - sstep(l.len - 8, l.len, xm));
-                const lc = l.ty > 3.5 ? edgeCol : line;
+                const glow = (1 - sstep(0, lw * 2.5 + 2, d)) * 0.25 * (1 - g);
+                let dash = l.ty > 1.5 && l.ty < 2.5 ? (fract(xm / 12) < 0.5 ? 1 : 0) : 1;
+                if (g > 0) dash += ((fract(xm / 5) < 0.4 ? 1 : 0) - dash) * g;
+                const kk = Math.max(on, glow) * dash * fade * l.str * (1 - sstep(l.len - 8 - 30 * g, l.len, xm));
+                const lc0 = l.ty > 3.5 ? edgeCol : line;
+                const lc = g > 0 ? [0, 1, 2].map((j) => lc0[j] + (line[j] - lc0[j]) * g) : lc0;
                 r += (lc[0] - r) * kk; gg += (lc[1] - gg) * kk; b += (lc[2] - b) * kk;
                 a = Math.max(a, kk);
             }
@@ -252,9 +255,20 @@ function rows(s, o, lang) {
     objs.forEach((u) => { if ((u.alpha === undefined ? 1 : u.alpha) > 0.5) cnt[u.cls] = (cnt[u.cls] || 0) + 1; });
     const parts = ['car', 'truck', 'two', 'ped', 'cyc', 'unk'].filter((c) => cnt[c]).map((c) => W('cls_' + c) + ' ' + cnt[c]);
     out.push(['rowUsers', parts.length ? parts.join(' · ') : '—', parts.length ? 'ink' : 'dim']);
-    const ln = s.world && s.world.lanes;
-    out.push(['rowLanes', ln ? W('lanesMeasured') + ' · ' + ln.lines.length : W('lanesFixed'), ln ? 'ink' : 'dim']);
+    out.push(lanesRow(s, W));
     return out;
+}
+
+/** The row "Смуги": measured (with how many), partial, our path (from the steering, or from our motion), straight; or AA's
+ *  fixed symbol when there is no world at all (the 14 cruise demo states). */
+function lanesRow(s, W) {
+    const ln = s.world && s.world.lanes;
+    if (!ln) return ['rowLanes', W('lanesFixed'), 'dim'];
+    const v = ln.verdict || 'measured';
+    if (v === 'measured') return ['rowLanes', W('lanesMeasured') + ' · ' + (typeof ln.n === 'number' ? ln.n : ln.lines.length), 'ink'];
+    if (v === 'partial') return ['rowLanes', W('lanesPartial'), 'dim'];
+    if (v === 'predicted') return ['rowLanes', W(ln.path && ln.path.src === 'steer' ? 'lanesPathSteer' : 'lanesPathMotion'), 'dim'];
+    return ['rowLanes', W('lanesStraight'), 'dim'];
 }
 
 const ROW0 = 106, ROW_STEP = 40;

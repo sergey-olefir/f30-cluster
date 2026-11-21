@@ -1,6 +1,6 @@
 'use strict';
 /**
- * model.js - ACC View's state, its 14 demo states, the colours and direction E's geometry (round 1120 AA2; the design is
+ * model.js - ACC View's state, its 28 demo entries (14 states, 7 scenes, 7 lane scenes of fixes-1121 AL), the colours and direction E's geometry (round 1120 AA2; the design is
  * docs/r1120/AA-SPEC.md 3.1 and 4, the decisions docs/AGENT-BRIEF-acc-app.md). Pure: no signals, no socket, no clock of its
  * own, no words (words.js). Plain Node 8 (the car's 8.16.2): no ?. / ?? / object spread. Nothing here throws.
  *
@@ -23,8 +23,10 @@
  */
 
 const Wo = require('./world');
+const Ch = require('./chaos');
 
-const STATES = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21'];
+const STATES = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21',
+    '22', '23', '24', '25', '26', '27', '28'];
 
 /* ------------------------------------------------------------------------------------------------ the state */
 
@@ -76,6 +78,15 @@ const DEMO = [
     ['19', 'lanechange', S(null, 0, 'ok', C90, false, null, 110, 'lanechange')],
     ['20', 'curve', S(null, 0, 'ok', C90, false, null, 90, 'curve')],
     ['21', 'nolanes', S(null, 0, 'ok', null, false, null, null, 'nolanes')],
+    // fixes-1121 AL (the owner, 2026-11-21: "коли авто не бачить полоси малюється хаос"): the camera's lanes lost or wrong, run
+    // through the real lane model (lanes.js) from the camera's own messages (chaos.js): what is drawn instead
+    ['22', 'lost', S(null, 0, 'ok', C90, false, null, 90, 'lost')],
+    ['23', 'lostcurve', S(null, 0, 'ok', C90, false, null, 90, 'lostcurve')],
+    ['24', 'oneedge', S(null, 0, 'ok', C90, false, null, 90, 'oneedge')],
+    ['25', 'flicker', S(null, 0, 'ok', C90, false, null, 110, 'flicker')],
+    ['26', 'junction', S(null, 0, 'ok', null, false, null, 50, 'junction')],
+    ['27', 'town', S(null, 0, 'ok', null, false, null, 50, 'town')],
+    ['28', 'standing', S(null, 0, 'ok', null, false, null, 50, 'standing')],
 ];
 
 /** A level 1..5 for a lead x metres ahead (the demo scenes; the car's own level comes from front_vehicle.js). */
@@ -87,7 +98,7 @@ function levelOfX(x) { return x < 10 ? 1 : x < 20 ? 2 : x < 35 ? 3 : x < 55 ? 4 
  */
 function withScene(s, ms) {
     if (!s.scene) return s;
-    const w = Wo.scene(s.scene, ms);
+    const w = Ch.SCENES.indexOf(s.scene) >= 0 ? Ch.world(s.scene, ms) : Wo.scene(s.scene, ms);
     const out = Object.assign({}, s, { world: { lanes: w.lanes, objects: w.objects, lead: w.lead, src: 'demo' } });
     if (w.lead) { out.tgt = levelOfX(w.lead.x); out.clo = w.clo || 0; out.data = 'ok'; } else { out.tgt = null; out.clo = 0; out.data = 'none'; }
     return out;
@@ -118,7 +129,7 @@ const q = (v, k) => Math.round(v / k);
 function worldKey(s) {
     const w = s.world;
     if (!w) return typeof s.camY === 'number' ? 'c' + q(s.camY, 0.05) : '-';
-    const L = w.lanes ? w.lanes.lines.map((l) => q(l.y0, 0.05) + ':' + q(l.a, 0.002) + ':' + q(l.c, 0.0001) + ':' + l.type).join(',') : 'fixed';
+    const L = w.lanes ? w.lanes.lines.map((l) => q(l.y0, 0.05) + ':' + q(l.a, 0.002) + ':' + q(l.c, 0.0001) + ':' + l.type + ':' + q(l.g || 0, 0.05) + ':' + q(l.fade === undefined ? 1 : l.fade, 0.05) + ':' + q(l.len, 1)).join(',') : 'fixed';
     const O = (w.objects || []).map((o) => o.cls + q(o.x, 0.25) + ':' + q(o.y, 0.25) + ':' + q(o.alpha === undefined ? 1 : o.alpha, 0.1)).join(',');
     const ld = w.lead ? q(w.lead.x, 0.25) + ':' + q(w.lead.y, 0.25) : '-';
     return L + '/' + O + '/' + ld + '/' + q(camOf(s), 0.05);
@@ -210,7 +221,7 @@ function egoBox(g, s) { return carBox(g, EGO_REAR / RANGE, -camOf(s)); }
 /** A clothoid re-expressed about the view's foot (EGO_X behind our front) and the view's sideways place C. */
 function shifted(l, C) {
     const E = EGO_X;
-    return { y0: l.y0 - l.a * E + 0.5 * l.c * E * E - C, a: l.a - l.c * E, c: l.c, len: l.len + E, type: l.type, prob: l.prob };
+    return { y0: l.y0 - l.a * E + 0.5 * l.c * E * E - C, a: l.a - l.c * E, c: l.c, len: l.len + E, type: l.type, prob: l.prob, g: l.g || 0, fade: l.fade === undefined ? 1 : l.fade };
 }
 
 const fix = (a) => a.map((x) => Math.round(x * 10000) / 10000);
@@ -224,7 +235,9 @@ function laneUniforms(g, s, z, night) {
     const ln = [], lp = [];
     for (let i = 0; i < 4; i++) {
         const l = lanes.lines[i] ? shifted(lanes.lines[i], C) : null;
-        if (l) { ln.push(l.y0, l.a, l.c, Wo.TYPE_CODE[l.type] || 0); lp.push(l.len, Math.max(0.35, Math.min(1, l.prob)), g.mw, 0); }
+        // u_lp.w: 0 measured .. 1 our own guess (lanes.js: thinner, dashed, dimmer, fading with distance; never another colour);
+        // the strength fades a line in or out (a boundary confirmed or dropped, a transition)
+        if (l) { ln.push(l.y0, l.a, l.c, Wo.TYPE_CODE[l.type] || 0); lp.push(l.len, Math.max(0.35, Math.min(1, l.prob)) * l.fade, g.mw, l.g); }
         else { ln.push(0, 0, 0, 0); lp.push(0, 0, 0, 0); }
     }
     const e0 = Wo.egoOf(lanes), e = shifted({ y0: e0.y0, a: e0.a, c: e0.c, len: 0 }, C);

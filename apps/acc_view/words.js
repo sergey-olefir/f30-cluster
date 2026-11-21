@@ -77,6 +77,11 @@ const WORDS = {
     cls_unk: { uk: 'інше', en: 'other' },
     lanesMeasured: { uk: 'виміряні', en: 'measured' },
     lanesFixed: { uk: 'символ: даних немає', en: 'symbol: no data' },
+    // fixes-1121 AL: what the lane picture is when the camera's lanes are not good enough (lanes.js verdicts)
+    lanesPartial: { uk: 'частково: одна межа', en: 'partly: one edge' },
+    lanesPathSteer: { uk: 'траєкторія за кермом', en: 'path from the steering' },
+    lanesPathMotion: { uk: 'траєкторія за рухом', en: 'path from our motion' },
+    lanesStraight: { uk: 'пряма: даних немає', en: 'straight: no data' },
 };
 
 /** The language to draw in: 'uk' or 'en' (anything else, 'auto' included, is Ukrainian until LN's module decides). */

@@ -94,20 +94,24 @@ function lanes(cv, g, s, z, P, dim) {
         const ty = U.u_ln[li * 4 + 3];
         if (ty < 0.5) continue;
         const y0 = U.u_ln[li * 4], a0 = U.u_ln[li * 4 + 1], c0 = U.u_ln[li * 4 + 2], len = U.u_lp[li * 4], str = U.u_lp[li * 4 + 1], mw = U.u_lp[li * 4 + 2];
-        const col = sc(ty > 3.5 ? edgeCol : P.line);
+        const g = U.u_lp[li * 4 + 3];       // 0 measured .. 1 our own guess (acc_lane's look): thinner, no glow, short dashes, fading
+        const lc0 = ty > 3.5 ? edgeCol : P.line;
+        const col = sc(g > 0 ? [0, 1, 2].map((j) => lc0[j] + (P.line[j] - lc0[j]) * g) : lc0);
         const offs = ty > 2.5 && ty < 3.5 ? [-1, 1] : [0];
         for (let i = 0; i < ROWS; i++) {
             const a = rows[i], b = rows[i + 1];
             if (a.x >= len) break;
-            if (ty > 1.5 && ty < 2.5) { const m = (a.x + b.x) / 2; if (m / 12 - Math.floor(m / 12) >= 0.5) continue; }
-            const al = a.fade * str * (1 - sstep(len - 8, len, a.x));
+            const m = (a.x + b.x) / 2;
+            let dash = ty > 1.5 && ty < 2.5 && m / 12 - Math.floor(m / 12) >= 0.5 ? 0 : 1;
+            if (g > 0) dash += ((m / 5 - Math.floor(m / 5) < 0.4 ? 1 : 0) - dash) * g;
+            const al = a.fade * str * (1 - sstep(len - 8 - 30 * g, len, a.x)) * dash;
             if (al <= 0.01) continue;
             const pa = cx - (y0 + a.x * (a0 + 0.5 * c0 * a.x)) * a.k, pb = cx - (y0 + b.x * (a0 + 0.5 * c0 * b.x)) * b.k;
-            const lw = Math.max(1.2, mw * (a.k + b.k) / 2);
+            const lw = Math.max(1.2, mw * (a.k + b.k) / 2) * (1 - 0.5 * g);
             offs.forEach((o) => {
-                const xa = pa + o * 1.4 * lw, xb = pb + o * 1.4 * lw;
+                const xa = pa + o * 1.4 * lw * (1 - g), xb = pb + o * 1.4 * lw * (1 - g);
                 if (xa < x0 || xa > x1 || xb < x0 || xb > x1) return;
-                cv.line(xa, a.y, xb, b.y, lw * 2.5 + 2, rgba(col, 0.18 * al));
+                if (g < 1) cv.line(xa, a.y, xb, b.y, lw * 2.5 + 2, rgba(col, 0.18 * al * (1 - g)));
                 cv.line(xa, a.y, xb, b.y, lw, rgba(col, al));
             });
         }

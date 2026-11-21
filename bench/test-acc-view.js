@@ -19,6 +19,8 @@
  * picture read back (GET /px) equal to the painter's; the level changing = the car layer moved, 0 pixel updates; the limit
  * event, the day / night signal, the camera's objects and lane boundaries fed as events (drawn, logged, faded when silent),
  * closing fast (amber), stale (the car goes); off again = the layers gone.
+ * fixes-1121 AL: the lane model itself is bench/test-acc-lanes.js; here the counts (28 entries, 10 fields, 9 events), the bench's
+ * straight guess once the lanes go quiet, our yaw rate bending the guessed corridor on the cluster, acc_lane drawn with u_lp.w.
  * Part 3 (WebGL): the three shaders compiled and drawn by headless Chrome's WebGL 1 (GLSL ES 1.00, ANGLE / SwiftShader): the first
  * ES compile they get before the car. Skipped (not failed) when Chrome is not installed.
  */
@@ -45,6 +47,7 @@ const Wd = require(path.join(APPDIR, 'words.js'));
 const MapView = require(path.join(APPDIR, 'mapview.js'));
 const Wo = require(path.join(APPDIR, 'world.js'));
 const GP = require(path.join(APPDIR, 'gpu.js'));
+const Ln = require(path.join(APPDIR, 'lanes.js'));
 const Rec = require(path.join(ROOT, 'kit', 'runtime', 'record.js'));
 const FV = require(path.join(ROOT, 'shared', 'front_vehicle.js'));
 const SRC = require(path.join(ROOT, 'shared', 'limit_src.js'));
@@ -93,8 +96,8 @@ function part1() {
         else if (f === '_methods') methods++;
         else if (f === '_broadcasts') broadcasts += app.signals[i][f].length;
     }));
-    ok(flags.length === 7 && flags.every((x) => x === 's' || x === 'rs'), 'seven fields (six + HMIContext.currentDisplayLanguage for the language), read-only flags only (s / rs), no setter');
-    ok(methods === 0 && broadcasts === 7, 'no method; seven events (the limit, the camera objects x2, the object list, the lane boundaries, the lanes, the distance objects)');
+    ok(flags.length === 10 && flags.every((x) => x === 's' || x === 'rs'), 'ten fields (six + the language + AL\'s steering x2 and the head unit\'s yaw rate), read-only flags only (s / rs), no setter');
+    ok(methods === 0 && broadcasts === 9, 'no method; nine events (the limit, the camera objects x2, the object list, the lane boundaries, the lanes, the distance objects, AL\'s yaw rate and curvature)');
     ok(app.config.target === 'map' && app.config.layer.target === 'map' && app.config.layer.contend === false && app.config.layer.guideHold === 0, 'the map target, no contend, no guide hold');
     ok(app.settings.length === 3 && app.settings.filter((s) => s.type === 'bool').every((s) => s.default === false)
         && app.settings.some((s) => s.key === 'lang' && s.default === 'auto'), 'three settings: show and demo off by default, the language Авто');
@@ -121,7 +124,7 @@ function part1() {
 
     // the code: Node 8 syntax; read only; no Cyrillic literal in the drawing code; no pressable control
     const js = fs.readdirSync(APPDIR).filter((f) => /\.js$/.test(f));
-    ok(js.sort().join() === 'gpu.js,main.js,mapview.js,model.js,paint.js,raster.js,words.js,world.js', 'the app\'s modules');
+    ok(js.sort().join() === 'chaos.js,gpu.js,lanes.js,main.js,mapview.js,model.js,paint.js,raster.js,words.js,world.js', 'the app\'s modules');
     js.forEach((f) => {
         const s = stripComments(fs.readFileSync(path.join(APPDIR, f), 'utf8'));
         ok(!/\?\.|\?\?|\{\s*\.\.\.|,\s*\.\.\.\w+\s*\}|\.flat\(|\.flatMap\(|Object\.fromEntries|\.padEnd\(|\.trimStart\(/.test(s), f + ': Node 8 syntax (no ?. ?? object spread .flat)');
@@ -193,8 +196,9 @@ function part1() {
     ok(M.stateOf(null, SRC.hudCruiseOf(hc, dds({})), false).cru === null, '65535 / NONE: cruise off');
     const tc = SRC.tsrCfg({ tsr: {} });
     ok(M.stateOf(null, null, false, SRC.tsrOf(tc, { presentClassLimitSpeed: 8 }).kmh).lim === 40 && M.stateOf(null, null, false, null).lim === null, 'the limit: class 8 -> 40 km/h; none -> no figure');
-    ok(M.DEMO.length === 21 && M.DEMO.map((d) => d[0]).join() === M.STATES.join(), 'the 14 demo states and the 7 scenes');
-    ok(M.DEMO.slice(14).map((d) => d[2].scene).join() === Wo.SCENES.join() && Wo.SCENES.join() === 'busy,crossing,cyclist,cutin,lanechange,curve,nolanes', 'the scenes: busy, crossing, cyclist, cut-in, lane change, curve, no lanes');
+    ok(M.DEMO.length === 28 && M.DEMO.map((d) => d[0]).join() === M.STATES.join(), 'the 14 demo states, the 7 scenes and AL\'s 7 lane scenes');
+    ok(M.DEMO.slice(14, 21).map((d) => d[2].scene).join() === Wo.SCENES.join() && Wo.SCENES.join() === 'busy,crossing,cyclist,cutin,lanechange,curve,nolanes', 'the scenes: busy, crossing, cyclist, cut-in, lane change, curve, no lanes');
+    ok(M.DEMO.slice(21).map((d) => d[2].scene).join() === 'lost,lostcurve,oneedge,flicker,junction,town,standing', 'AL\'s lane scenes: lost, lost in a curve, one edge, flicker, junction, town, standing');
 
     // E on the map target: 4 layers, sizes, places, pixel memory; no pixels while the car glides
     const fake = new FakeCR();
@@ -277,7 +281,7 @@ function part1() {
     [false, true].forEach((night) => {
         const lines = {}, gapc = {};
         M.DEMO.forEach((d) => { const u = M.laneUniforms(M.GEO.map, M.withScene(d[2], 3000), M.depthOf(d[2].tgt), night); lines[u.u_line.join()] = 1; gapc[d[0]] = u.u_gapc; });
-        ok(Object.keys(lines).length === 1, 'map ' + (night ? 'night' : 'day') + ': the lane lines one colour in all 21 states and scenes');
+        ok(Object.keys(lines).length === 1, 'map ' + (night ? 'night' : 'day') + ': the lane lines one colour in all 28 states and scenes');
         const amb = M.colours('map', night).amberF.map((c) => Math.round(c * 1e4) / 1e4).join();
         ok(M.DEMO.every((d) => (gapc[d[0]].join() === amb) === (d[2].clo === 2)), 'map ' + (night ? 'night' : 'day') + ': the gap and chevrons amber only while closing fast');
         ok(M.DEMO.every((d) => { const u = M.carUniforms(d[2], night, 100, 60); return (u.u_body[2] < 0.5 * u.u_body[0]) === (d[2].clo === 2); }), 'map ' + (night ? 'night' : 'day') + ': the car amber-tinted only while closing fast');
@@ -347,7 +351,7 @@ function part1() {
         if (ld) P.lane(b, g, s, z, Pc, 0, true);
         if (R.diffRect(a.px, b.px, 1600, 482)) lm++;
     }));
-    ok(lm === 0, 'the centre lane: cached lanes + gap = the whole computation, all 42 pictures (' + lm + ' differ)');
+    ok(lm === 0, 'the centre lane: cached lanes + gap = the whole computation, all 56 pictures (' + lm + ' differ)');
     const t0 = Date.now();
     for (let i = 0; i < 5; i++) P.centre(M.DEMO[i + 2][2], { lang: 'uk' });
     console.log('centre page paint: ' + Math.round((Date.now() - t0) / 5) + ' ms on this Mac (Node ' + process.version + ')');
@@ -374,7 +378,7 @@ function part1() {
         if (!(lo.x === eb[0] && lo.w === eb[2] && lo.visible !== false && eb[0] >= 334 && eb[0] + eb[2] <= 754)) egoBad.push(tag + ' map');
         if (!egoIn(s)) egoBad.push(tag + ' lane');
     }));
-    ok(egoBad.length === 0, 'our car: drawn light at the foot on the centre page and as a layer on the map, inside its lane, in all 21 entries day and night' + (egoBad.length ? ' (' + egoBad.slice(0, 6).join(', ') + ')' : ''));
+    ok(egoBad.length === 0, 'our car: drawn light at the foot on the centre page and as a layer on the map, inside its lane, in all 28 entries day and night' + (egoBad.length ? ' (' + egoBad.slice(0, 6).join(', ') + ')' : ''));
     const k0e = fakeE.msgs.length, x0e = fakeE.layers[3].o.x;
     let xs = {};
     for (let ms = 0; ms <= 10000; ms += 150) { mvE.update(M.withScene(M.DEMO[18][2], ms), 0.3, false, 'uk'); xs[fakeE.layers[3].o.x] = 1; }
@@ -411,7 +415,7 @@ function part1() {
         const lead = !!M.leadOf(s);
         if (!wk.ok || wk.ops[15] || wk.imgs !== (lead ? 4 : 3) || f.targets) gpuBad.push(d0[0] + (night ? 'n' : 'd') + ':' + JSON.stringify(wk.ops) + ' imgs ' + wk.imgs);
     }));
-    ok(gpuBad.length === 0, 'GPU frames: all 42 record cleanly, no QUAD, the band, the table and our car as images (+ the car ahead), no tap target' + (gpuBad.length ? ' (' + gpuBad.slice(0, 3).join('; ') + ')' : ''));
+    ok(gpuBad.length === 0, 'GPU frames: all 56 record cleanly, no QUAD, the band, the table and our car as images (+ the car ahead), no tap target' + (gpuBad.length ? ' (' + gpuBad.slice(0, 3).join('; ') + ')' : ''));
     console.log('gpu: the largest frame ' + words + ' words (' + Math.round(words * 4 / 1024) + ' KB)');
     ok(words < 12000, 'a GPU frame stays small (' + words + ' words)');
     const st1 = M.withScene(M.DEMO[3][2], 0), fa = frameOf(st1, false).w, fb = frameOf(st1, false).w;
@@ -659,11 +663,27 @@ async function part2() {
         if (fs.existsSync(png)) {
             const pg = readPng(png);
             ok(pg.w === 1600 && pg.h === 520, 'the page image 1600 x 520');
-            const want = P.centre({ tgt: null, clo: 0, data: 'stale', cru: ['cruise', 'active', 90], warn: false, adv: null, lim: null }, { night: false, lang: 'uk', z: 0, info: {} }).px;
+            // fixes-1121 AL: the lanes went quiet long ago and no motion source spoke: the lane model draws its straight guess
+            // (lanes.js corridor, our car centred), never AA's solid symbol
+            const LC = Wo.cfgOf(JSON.parse(fs.readFileSync(path.join(APPDIR, 'app.json'), 'utf8')).config.world).lanes;
+            const straight = { verdict: 'straight', why: 'STALE', path: { src: null, why: 'NO_MOTION', k: 0 }, lines: Ln.corridor(LC, 0, 3.5, LC.straightLen).map((l) => Object.assign(l, { fade: 1 })), ego: { y0: 0, a: 0, c: 0, half: 1.75 }, width: 3.5, n: 0 };
+            const want = P.centre({ tgt: null, clo: 0, data: 'stale', cru: ['cruise', 'active', 90], warn: false, adv: null, lim: null, world: { lanes: straight, objects: [], lead: null, src: 'lanes' }, camY: 0 }, { night: false, lang: 'uk', z: 0, info: {} }).px;
             let diff = 0;
             for (let y = 0; y < 482; y++) for (let x = 0; x < 790; x++) { const i = (y * 1600 + x) * 4, j = ((y + 38) * 1600 + x) * 4; for (let c = 0; c < 3; c++) if (Math.abs(want[i + c] - pg.px[j + c]) > 1) diff++; }
             ok(diff === 0, 'the page\'s E half = the painter\'s picture (' + diff + ' bytes differ)');
         } else ok(false, 'the page image saved by the bench');
+        // fixes-1121 AL: the lane model's and our path's log lines; then our yaw rate (the event, 3 deg/s at 90 km/h): the stale
+        // lanes become our guessed corridor bending with it on the cluster (u_lp.w 1, curvature yaw / speed)
+        ok(/acc: path sources yaw steer \(units and signs assumed/.test(out), 'the path\'s sources subscribed (yaw, steer), read only');
+        ok(/acc: lanes first msgs \d+ ms measured \d+ partial \d+ predicted \d+ straight \d+ flips \d+ now \w+ [A-Z_]+ w [\d.]+ rej /.test(out) && /acc: path ms /.test(out), 'the lane model\'s log lines (verdict times, reasons) and the path\'s');
+        for (let i = 0; i < 14; i++) {
+            await request('POST', '/fake', { feed: { iface: 'de.bmw.chassis.YawRateProvision', field: 'yawRate', value: { yawRate: { yawRate: 3, invalidFlag: false }, qualifierYawRate: 'SIGNALWERT_PLAUSIBEL' } } });
+            await request('POST', '/fake', { front: { gap: 900, speed: 1500, obj: 7, qual: 0, qualExt: 0 } });
+            await sleep(150);
+        }
+        const ulg = ((mine(es.scene).filter((l) => l.z === 0)[0] || {}).uniforms || {});
+        const kWant = 3 * Math.PI / 180 / 25;
+        ok(ulg.u_lp && ulg.u_lp.v[3] === 1 && ulg.u_lp.v[7] === 1 && ulg.u_ln && Math.abs(ulg.u_ln.v[2] - kWant) < 2e-4, 'our yaw rate fed, no lanes: the guessed corridor on the cluster, bending ' + (ulg.u_ln ? ulg.u_ln.v[2] : '-') + ' 1/m (yaw / speed ' + kWant.toFixed(4) + ')');
         ok(!/acc: (tick|apply|page|front|cruise|speed|warn|limit|daynight|layer|target|setting|layout|start):\s/.test(out.replace(/acc: layer \d+ shown/g, '').replace(/acc: target map \w+/g, '')), 'no error from the app\'s guards');
         ok(!/Error|uncaught|unhandled/i.test(out.split('\n').filter((l) => /\[acc_view\]/.test(l)).join('\n')), 'no exception in the app\'s log');
         await request('POST', '/setting', { key: 'show', value: false });
@@ -686,6 +706,9 @@ async function part2() {
 function glUniforms() {
     const s = M.withScene(M.DEMO[14][2], 3000), g = Object.assign({}, M.GEO.map, { lane: [0, 0, 177, 104], pxm: 50 / 1.75 });
     const out = { acc_lane: M.laneUniforms(g, s, 0.26, false), acc_obj: M.objUniforms(g, s, false), acc_car: M.carUniforms(s, false, 177, 104) };
+    // fixes-1121 AL: acc_lane again with our guessed corridor (u_lp.w 1) and one edge morphing (the lost-curve and one-edge scenes)
+    out.acc_lane_guess = M.laneUniforms(g, M.withScene(M.DEMO[22][2], 6000), 0, false);
+    out.acc_lane_partial = M.laneUniforms(g, M.withScene(M.DEMO[23][2], 2300), 0, false);
     return out;
 }
 
@@ -699,8 +722,8 @@ function part3() {
         'const out = []; const c = document.createElement("canvas"); c.width = 177; c.height = 104; const gl = c.getContext("webgl");\n' +
         'out.push("webgl " + (gl ? gl.getParameter(gl.SHADING_LANGUAGE_VERSION) : "none"));\n' +
         'const U = ' + JSON.stringify(glUniforms()) + ';\n' +
-        'for (const n of Object.keys(SH)) { const mk = (t, s) => { const x = gl.createShader(t); gl.shaderSource(x, s); gl.compileShader(x); return x; };\n' +
-        ' const v = mk(gl.VERTEX_SHADER, VS), f = mk(gl.FRAGMENT_SHADER, SH[n]); const okc = gl.getShaderParameter(f, gl.COMPILE_STATUS);\n' +
+        'for (const n of Object.keys(U)) { const mk = (t, s) => { const x = gl.createShader(t); gl.shaderSource(x, s); gl.compileShader(x); return x; };\n' +
+        ' const v = mk(gl.VERTEX_SHADER, VS), f = mk(gl.FRAGMENT_SHADER, SH[n.split("_").slice(0, 2).join("_")]); const okc = gl.getShaderParameter(f, gl.COMPILE_STATUS);\n' +
         ' const p = gl.createProgram(); gl.attachShader(p, v); gl.attachShader(p, f); gl.linkProgram(p); const okl = gl.getProgramParameter(p, gl.LINK_STATUS);\n' +
         ' let lit = 0; if (okc && okl) { gl.useProgram(p); const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);\n' +
         '  const l = gl.getAttribLocation(p, "a_pos"); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, 2, gl.FLOAT, false, 0, 0);\n' +
@@ -714,7 +737,7 @@ function part3() {
     const dom = (r.stdout || '').replace(/&quot;/g, '"');
     console.log('webgl: ' + ((dom.match(/<pre id="o">([\s\S]*?)<\/pre>/) || [])[1] || 'no output').replace(/\n/g, ' | '));
     ok(/webgl WebGL GLSL ES 1\.0/.test(dom), 'headless Chrome has WebGL 1 (GLSL ES 1.00)');
-    ['acc_lane', 'acc_obj', 'acc_car'].forEach((n) => {
+    ['acc_lane', 'acc_obj', 'acc_car', 'acc_lane_guess', 'acc_lane_partial'].forEach((n) => {
         const m = new RegExp(n + ' compile (\\w+) link (\\w+) lit (\\d+)').exec(dom);
         ok(m && m[1] === 'true' && m[2] === 'true', n + ': compiles and links as GLSL ES 1.00 in WebGL');
         ok(m && Number(m[3]) > 200, n + ': draws (' + (m ? m[3] : 0) + ' opaque px)');
