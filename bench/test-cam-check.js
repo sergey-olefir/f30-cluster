@@ -2,16 +2,18 @@
 /**
  * test-cam-check.js - Camera Check (apps/cam_check): the manifest is read only, every source is watched, a source shows
  * silent / one value / changing, and the first message of each source and its first different values reach the log.
+ * 0.1.2 (fix-1121 CS): rows say «подія» or «поле», the getters are the fields' "r" flags, the top line has the clock, the
+ * control row is there. The car-like proof (the real kit signals.js on a fake SOME/IP binding) is bench/test-cam-check-car.js.
  *
- *   BENCH_PORT=8962 node bench/test-cam-check.js
+ *   BENCH_PORT=8841 node bench/test-cam-check.js
  */
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
-const PORT = Number(process.env.BENCH_PORT || 8962);
+const PORT = Number(process.env.BENCH_PORT || 8841);
 let pass = 0, fail = 0;
 const ok = (c, what) => { if (c) pass++; else fail++; console.log((c ? '  ok   ' : '  FAIL ') + what); };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -36,11 +38,26 @@ function request(method, url, body) {
         flags.push(app.signals[i][k]);
         if (!/^r?s$/.test(app.signals[i][k])) bad.push(i + '.' + k + '=' + app.signals[i][k]);
     }));
-    ok(!bad.length && flags.length === 4, 'four fields, flags s / rs only, no method, no setter' + (bad.length ? ' (' + bad.join(', ') + ')' : ''));
+    ok(!bad.length && flags.length === 6, 'six fields, flags s / rs only, no method, no setter' + (bad.length ? ' (' + bad.join(', ') + ')' : ''));
     ok(!Object.keys(app.signals).some((i) => Object.keys(app.signals[i]).some((k) => k[0] !== '_' && /acknowledgeObjectData/.test(k)) || (app.signals[i]._broadcasts || []).some((b) => /acknowledgeObjectData/.test(b))), 'the camera\'s acknowledge fields (setter, no getter) are not declared');
     const src = fs.readFileSync(path.join(ROOT, 'apps', 'cam_check', 'main.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');   // code only, not comments
     ok(!/\.(set|call|invoke|request)\s*\(/.test(src.replace(/ui\.text|t\.seen\.add/g, '')) && !/require\([^)]*diag/i.test(src) && !/tasu/i.test(src), 'main.js calls no setter, no method, no diagnostic request');
     ok(!/\?\.|\?\?/.test(src), 'Node 8 syntax: no ?. or ??');
+    const CHECK = path.join(ROOT, 'tools', 'beam-sim', 'tests', 'stubs', 'node8-check.js');
+    if (fs.existsSync(CHECK)) {
+        const r8 = JSON.parse(spawnSync(process.execPath, ['--expose-internals', CHECK, path.join(ROOT, 'apps', 'cam_check', 'main.js')], { encoding: 'utf8' }).stdout || '{}');
+        if (!r8.unavailable) ok(r8.ok === true, 'main.js parses as ES2017 (acorn: Node 8.16)' + (r8.ok ? '' : ': ' + r8.error));
+    }
+    ok((src.match(/ctx\.signals\.(\w+)/g) || []).every((x) => /\.(watch|get)$/.test(x)), 'the only signals calls are watch (the kit\'s car.js path) and get (a getter)');
+    // a source's getter: true <-> its field's app.json flag has "r" (a getter is only asked where the installer generated one)
+    const srcLines = src.split('\n').filter((l) => /kind: 'field'/.test(l));
+    const gBad = srcLines.filter((l) => {
+        const iface = (/iface: (\w+|'[^']+')/.exec(l) || [])[1], key = (/key: '(\w+)'/.exec(l) || [])[1], g = /getter: true/.test(l);
+        const name = iface && iface[0] === "'" ? iface.slice(1, -1) : ({ VEH2: 'de.bmw.infotainment.vehicle.Vehicle2', CDS: 'de.bmw.infotainment.vehicle.CDS', COND: 'de.bmw.infrastructure.VehicleCondition', FAS: 'de.bmw.infotainment.fasus.FASuS' })[iface];
+        const flag = name && app.signals[name] && app.signals[name][key];
+        return !flag || /r/.test(flag) !== g;
+    });
+    ok(srcLines.length === 6 && !gBad.length, 'every field source asks a getter exactly when app.json gives it "r"' + (gBad.length ? ': ' + gBad.join(' | ') : ''));
     const rows = app.screens[0].items.map((x) => x[1]).filter((n) => /^S_/.test(n));
     ok(rows.every((r) => app.config.rows[r]), 'every row on the screen has its name in config.rows');
 
@@ -52,11 +69,10 @@ function request(method, url, body) {
     try {
         for (let i = 0; i < 80 && !/ck: start/.test(out); i++) await sleep(250);
         ok(/ck: start/.test(out), 'the app starts on the bench');
-        for (let i = 0; i < 120 && !/ck: all \d+ interfaces asked/.test(out); i++) await sleep(250);
-        const watched = (out.match(/ck: watch \S+ ok/g) || []).length;
         const ifaces = new Set(Object.keys(app.signals)).size;
-        ok(watched === ifaces && ifaces === 11 && /ck: all 11 interfaces asked/.test(out), 'one watch per interface, one after the other: ' + watched + ' of ' + ifaces + ' interfaces ok');
-        const perIface = (out.match(/ck: watch (\S+) /g) || []);
+        for (let i = 0; i < 40 && (out.match(/ck: watch \S+ at /g) || []).length < ifaces; i++) await sleep(250);
+        const perIface = (out.match(/ck: watch (\S+) at /g) || []);
+        ok(ifaces === 13 && perIface.length === ifaces && /ck: watching 13 interfaces through kit\/car\.js/.test(out), 'one watch per interface through kit/car.js, all at the start: ' + perIface.length + ' of ' + ifaces);
         ok(new Set(perIface).size === perIface.length, 'no interface watched twice (0.1.0 opened a proxy per source)');
         const feed = (iface, field, value) => request('POST', '/fake', { feed: { iface, field, value } });
         await feed('de.bmw.dass.TrafficSignRecognition', 'TrafficSignRecognition', { presentClassLimitSpeed: 10 });
@@ -66,10 +82,14 @@ function request(method, url, body) {
         await sleep(2600);
         const pr = JSON.parse((await request('GET', '/probe')).body || '{}');
         const t = (n) => (pr.native && pr.native[n] && pr.native[n].text) || '';
-        ok(/^Світлофор: ЗМІНЮЄТЬСЯ: 2 різних з 2/.test(t('S_LIGHT')), 'a changing source: ' + t('S_LIGHT'));
-        ok(/одне й те саме значення \(2×\)/.test(t('S_LIMIT')), 'a source with one value: ' + t('S_LIMIT'));
-        ok(/: (сервіс є, мовчить|сервісу немає)$/.test(t('S_LAMPS')), 'a silent source says whether its service is there: ' + t('S_LAMPS'));
-        ok(/ck: first light .*"trafficLightColor":1/.test(out) && /ck: value #2 light .*"trafficLightColor":4/.test(out), 'the first message and the next different value are in the log');
+        ok(/^Світлофор · подія: ЗМІНЮЄТЬСЯ: 2 різних з 2/.test(t('S_LIGHT')), 'a changing event: ' + t('S_LIGHT'));
+        ok(/· подія: одне значення \(2×\)/.test(t('S_LIMIT')), 'an event with one value: ' + t('S_LIMIT'));
+        ok(/^Смуги · подія: тиша/.test(t('S_LANES')), 'a silent event is «подія: тиша»: ' + t('S_LANES'));
+        ok(/^Стан фар авто · поле: сповіщень 0/.test(t('S_LAMPS')) && /геттер/.test(t('S_LAMPS')), 'a silent field is «поле», with its getter\'s state: ' + t('S_LAMPS'));
+        ok(/^Контроль \(теми це чують\) · поле: швидкість \d+×.*оберти \d+×.*стан авто \d+×/.test(t('S_CTRL')), 'the control row: ' + t('S_CTRL'));
+        ok(/^Лише читання · \d\d:\d\d:\d\d · працює \d+:\d\d · /.test(t('HEAD')), 'the top line has the app\'s clock and running time: ' + t('HEAD'));
+        ok(/ck: first light \(event\) .*"trafficLightColor":1/.test(out) && /ck: value #2 light \(event\) .*"trafficLightColor":4/.test(out), 'the first message and the next different value are in the log');
+        ok(/ck: provider TrafficLightRecognitionFrontCameraLegacy UP #1 at \+[\d.]+ s/.test(out), 'a provider coming up is in the log');
         ok(!/ck: [^\n]*(error|uncaught)/i.test(out), 'no error in the app\'s log');
     } finally { stop(); }
     console.log(pass + ' passed, ' + fail + ' failed');

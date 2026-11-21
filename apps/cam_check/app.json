@@ -1,8 +1,8 @@
 {
   "id": "cam_check",
   "title": "Camera Check",
-  "description": "Read-only check: does this car's front camera send its traffic light, its light sources for the high beam, its object lists, its sign lists and its lanes? Each source is shown as silent, one value or changing, and its first message is written to the log. Writes nothing to the car.",
-  "version": "0.1.1",
+  "description": "Read-only check: does this car's front camera send its traffic light, its light sources for the high beam, its object lists, its sign lists and its lanes? Each row says whether it is an event (silent until something happens) or a field (its getter must answer at once), with the provider's ups and downs, the getter's answer and the number of messages; a control row shows the speed and rpm the themes receive, and the top line the app's own clock, the speed and the vehicle condition. The first message of each source is written to the log. Writes nothing to the car.",
+  "version": "0.1.2",
   "vendor": "custom",
   "loggingId": "OACK",
   "iconGlyph": "CK",
@@ -51,7 +51,15 @@
     "de.bmw.infotainment.vehicle.Vehicle2": {
       "statusLightStatus": "rs",
       "statusCarSpeed2": "rs",
-      "_about": "statusLightStatus (getter 43, notifier 32811): high beam / dipped beam as the car reports them. statusCarSpeed2 (getter 8): our speed, only to say whether we were moving. Read only."
+      "_about": "statusLightStatus (getter 43, notifier 32811): high beam / dipped beam as the car reports them. statusCarSpeed2 (getter 8, notifier 32776): our speed, on the top line and in the control row (the themes receive it on this car). Read only."
+    },
+    "de.bmw.infotainment.vehicle.CDS": {
+      "statusEngineSpeed2": "rs",
+      "_about": "fix-1121 CS, the control row: the engine speed (getter 25, notifier 32793), declared as the themes declare it (kit/car.js 'rpm'); sent all the time while the engine runs. Read only."
+    },
+    "de.bmw.infrastructure.VehicleCondition": {
+      "VehicleCondition": "s",
+      "_about": "fix-1121 CS, the control row and the top line: the vehicle condition (notifier 32769, no getter; 10 = FAHREN), declared as Twin Dial declares it. Read only."
     },
     "de.bmw.body.Light": {
       "LampExterior2": "s",
@@ -70,6 +78,7 @@
       "title": "Camera Check",
       "items": [
         ["text", "HEAD", ""],
+        ["text", "S_CTRL", ""],
         ["text", "S_LIGHT", ""],
         ["text", "S_BEAMOBJ", ""],
         ["text", "S_BEAMCTL", ""],
@@ -87,19 +96,22 @@
   "settings": [],
   "config": {
     "rows": {
+      "S_CTRL": "Контроль (теми це чують)",
       "S_LIGHT": "Світлофор",
       "S_BEAMOBJ": "Джерела світла (дальнє)",
       "S_BEAMCTL": "Рішення камери про дальнє",
       "S_OBJLIST": "Список об'єктів зі станом фар",
       "S_OBJREC": "Об'єкти камери",
       "S_SIGNS": "Списки знаків",
-      "S_LIMIT": "Обмеження швидкості (контроль)",
+      "S_LIMIT": "Обмеження швидкості (його беруть теми)",
       "S_LANES": "Смуги",
       "S_LAMPS": "Стан фар авто",
       "S_FAS": "Стан функцій асистентів"
     },
     "logValues": 25,
     "logChars": 1800,
-    "summaryMs": 60000
+    "summaryMs": 60000,
+    "firstSummaryMs": 20000,
+    "_rows": "fix-1121 CS: «подія» rows are events (silent until something happens: normal while parked); «поле» rows are fields (the getter must answer at once, parked too; no answer = a fault). S_CTRL: the speed, the rpm and the vehicle condition, which the themes receive on this car: if it stays silent too, the app hears nothing."
   }
 }
