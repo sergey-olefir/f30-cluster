@@ -485,7 +485,7 @@ const TSR = (nopass, cls) => ({ presentWithdrawalLimitSpeed: 1, recognitionNoPas
 
 async function benchApp(app) {
     console.log('part 4: ' + app + ' on a bench (port ' + PORT + ')');
-    const settle = async (b) => { await b.post('/signals', { mode: 'manual', values: { speed: 40, rpm: 1500, gear: 3, engine: 2, condition: 10 } }); if (app === 'f30_cluster') { await b.set('byMode', false); } else { await b.set('tab', '1'); await b.post('/fake', { scene: 'cc-clear' }); } await sleep(2500); };     // Twin Dial: the message list read, at rest (the machine starts blind)
+    const settle = async (b) => { await b.post('/signals', { mode: 'manual', values: { speed: 40, rpm: 1500, gear: 3, engine: 2, condition: 10 } }); if (app === 'f30_cluster') { await b.set('byMode', false); } else { await b.set('tab', '1'); await b.post('/fake', { scene: 'car-rest' }); } await sleep(2500); };     // Twin Dial: the message list read, at rest (the machine starts blind)
     if (args.indexOf('--no-main') < 0) await offCompare(app, settle);
     const b = new Bench(ROOT, app, PORT, null);
     const p0 = await b.start();
@@ -557,12 +557,18 @@ async function benchApp(app) {
         const sw = p.road.widgets.filter((w) => w.type === 'rvscene')[0];
         ok(sw && p.road.view.scene.data === 'ok' && p.road.view.scene.lines === 4 && sw.shown === 1, app + ': the lanes from the raw event: the scene shows (' + (sw && sw.data) + ', shown ' + (sw && sw.shown) + ')');
         if (app === 'twin_dial') {
-            await b.post('/fake', { scene: 'cc-yellow' });
-            await sleep(900);
+            await b.post('/fake', { scene: 'car-door' });        // the car's own sequence: the list names a message, the cluster displays it
+            await sleep(1200);
+            await b.feed(IFC.lanes, 'LaneBoundaries', lanes);         // fresh lanes (they go stale after 1.5 s): the scene has something to show
+            await sleep(300);
             p = await b.probe();
             const s2 = p.road.widgets.filter((w) => w.type === 'rvscene')[0];
-            ok(s2 && s2.shown === 0, 'twin_dial: a check-control message shows: the scene steps aside in the next tick (the message card is never covered)');
-            await b.post('/fake', { scene: 'cc-clear' });
+            ok(s2 && s2.shown === 0 && p.road.view.scene.data === 'ok', 'twin_dial: a check-control message shows: the scene steps aside (the message card is never covered)');
+            await b.post('/fake', { scene: 'car-door-closing' }); await b.post('/fake', { scene: 'car-door-closed' });
+            await b.feed(IFC.lanes, 'LaneBoundaries', lanes);
+            await sleep(1500);
+            p = await b.probe();
+            ok(p.road.widgets.filter((w) => w.type === 'rvscene')[0].shown === 1, 'twin_dial: the message gone: the scene is back');
             await b.set('tab', '3');
             await b.feed(IFC.lanes, 'LaneBoundaries', lanes);
             await sleep(900);

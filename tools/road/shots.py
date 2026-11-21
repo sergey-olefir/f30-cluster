@@ -176,7 +176,7 @@ def plan(app):
     if app == 'twin_dial':
         out.append(S('600_coll_cruise', light='red', signs=['stop', 'children'], extra=f_cruise(90)))
         out.append(S('601_coll_frontvehicle', light='green', signs=['priority'], settings={'diagFrontVehicle': True}, fakes=[{'front': {'gap': 280, 'speed': 1500, 'obj': 7}}] * 3, speed=87))
-        out.append(S('602_coll_message', light='red', signs=['stop'], scene='traffic', tests=('light', 'signs', 'scene'), fakes=[{'scene': 'cc-yellow'}]))
+        out.append(S('602_coll_message', light='red', signs=['stop'], scene='traffic', tests=('light', 'signs', 'scene'), fakes=[{'scene': 'car-door'}]))
         out.append(S('603_coll_tab3_media', light='amber', signs=['roadWorks'], settings={'tab': '3'}))
         out.append(S('604_coll_tab5_nav', light='red', signs=['giveWay'], settings={'tab': '5'}, fakes=[{'scene': 'road-street'}]))
         out.append(S('605_all_on_night_en_mph', light='red', signs=['noOvertaking', 'crossing'], scene='lightRed', tests=('light', 'signs', 'scene'), look='night', lang='en', units='mi'))
@@ -186,7 +186,7 @@ def plan(app):
         out.append(S('620_g20_all6wb_road', light='red', signs=['giveWay', 'crossing'], scene='ahead', tests=('light', 'signs', 'scene'),
                      settings={'hudLayout': 'wb_comfort', 'byMode': False, 'g20': True, 'bottomRow': 'all6WB'}, fakes=[{'road': {'text': 'Р-42 Садова'}}]))
         out.append(S('621_g20_bmw_row_stock_sign', light='amber', signs=['roadWorks'], settings={'hudLayout': 'wb_comfort', 'byMode': False, 'g20': True, 'bottomRow': 'allG20'}))
-        out.append(S('622_coll_message', light='red', signs=['stop'], scene='traffic', tests=('light', 'signs', 'scene'), fakes=[{'scene': 'cc-yellow'}]))
+        out.append(S('622_coll_message', light='red', signs=['stop'], scene='traffic', tests=('light', 'signs', 'scene'), fakes=[{'scene': 'car-door'}]))
         out.append(S('623_stockmap_scene_yields', scene='traffic', tests=('scene', 'light'), light='red', settings={'hudLayout': 'wb_comfort', 'byMode': False, 'stockMap': True}))
         out.append(S('624_all_on_night_en_mph', light='red', signs=['noOvertaking', 'crossing'], scene='lightRed', tests=('light', 'signs', 'scene'), look='night', lang='en', units='mi'))
     return out
@@ -226,7 +226,9 @@ def apply(app, st):
     # the tests off first: a new tracker per state (nothing of the state before stays)
     for k in ('diagRoadLight', 'diagRoadSigns', 'diagRoadScene'):
         setting(k, 'off')
-    B.fake({'scene': 'cc-clear'})
+    B.fake({'scene': 'car-door-closing'})
+    B.fake({'scene': 'car-door-closed'})
+    B.fake({'scene': 'car-rest'})
     for k, v in s.items():
         setting(k, v)
     B.fake({'dayNight': st['look']})
