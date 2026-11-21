@@ -1,0 +1,8 @@
+{
+ "name": "cm-sc3best-failures",
+ "description": "Reference for cm-failures: SC2's controller at SC3's best tuning on family J, mild plant.",
+ "scenarios": ["J"], "perScenarioMax": 2,
+ "base": { "plant": { "preset": "mild" }, "controller": { "h": 3.0, "tau": 8, "rateDown_kmhps": 12 }, "warning": { "ttcWarn_s": 3 } },
+ "grid": {},
+ "seed": 1
+}

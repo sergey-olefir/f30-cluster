@@ -1,0 +1,13 @@
+{
+ "name": "cm-final",
+ "description": "The final comparison: the gated module (defaults), plain cruise, and the rate gates without the envelope; driver habits: cruise set at the scenario's maximum (SC3's catalogue) and 5 km/h above the speed at the start; the three assumed plants. The tuning plan's subset (perScenarioMax 4, no L, no J).",
+ "scenarios": ["*"], "exclude": ["L", "J"], "perScenarioMax": 4,
+ "base": { "warning": { "ttcWarn_s": 3 }, "cm": { "stub": { "mode": "accept" } } },
+ "gridCases": [
+  { "cm.plain": false, "cm.cm": {} },
+  { "cm.plain": true, "cm.cm": {} },
+  { "cm.plain": false, "cm.cm": { "tgMin_s": 0.5, "tgFloor_s": 0.3, "aLeadMax_mps2": 10, "floorMargin_kmh": 0 } }
+ ],
+ "grid": { "plant.preset": ["mild", "liftoff", "firm"], "cm.driverSetAbove_kmh": [null, 5] },
+ "seed": 1
+}

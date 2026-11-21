@@ -1,0 +1,8 @@
+{
+ "name": "cm-sc3best-presets",
+ "description": "Reference: SC2's controller at SC3's best tuning (h 3 s, tau 8 s, rate down 12 km/h/s, TTC 3 s) at the three assumed plants, the tuning plan's subset.",
+ "scenarios": ["*"], "exclude": ["L", "J"], "perScenarioMax": 4,
+ "base": { "controller": { "h": 3.0, "tau": 8, "rateDown_kmhps": 12 }, "warning": { "ttcWarn_s": 3 } },
+ "grid": { "plant.preset": ["mild", "liftoff", "firm"] },
+ "seed": 1
+}

@@ -1,0 +1,15 @@
+{
+ "name": "cm-envtune",
+ "description": "The envelope's prediction floor (tgFloor_s, with d0_m) against the contract: no run may stay armed and end unsafe; as few needless disarms as possible. Both driver habits, mild plant, the tuning plan's subset.",
+ "scenarios": ["*"], "exclude": ["L", "J"], "perScenarioMax": 4,
+ "base": { "plant": { "preset": "mild" }, "warning": { "ttcWarn_s": 3 }, "cm": { "stub": { "mode": "accept" } } },
+ "gridCases": [
+  { "cm.cm": { "tgFloor_s": 0.8, "d0_m": 0 } },
+  { "cm.cm": { "tgFloor_s": 0.9, "d0_m": 0 } },
+  { "cm.cm": { "tgFloor_s": 1.0, "d0_m": 0 } },
+  { "cm.cm": { "tgFloor_s": 1.0, "d0_m": 2 } },
+  { "cm.cm": { "tgFloor_s": 1.1, "d0_m": 2 } }
+ ],
+ "grid": { "cm.driverSetAbove_kmh": [null, 5] },
+ "seed": 1
+}

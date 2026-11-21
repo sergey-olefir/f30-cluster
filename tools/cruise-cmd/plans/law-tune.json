@@ -1,0 +1,8 @@
+{
+ "name": "cm-lawtune",
+ "description": "follow.js under the gates: time gap h, look-ahead and the planned deceleration of the kinematic cap. The driver sets the cruise 5 km/h above the speed at the start. Mild plant, the tuning plan's subset.",
+ "scenarios": ["*"], "exclude": ["L", "J"], "perScenarioMax": 4,
+ "base": { "plant": { "preset": "mild" }, "warning": { "ttcWarn_s": 3 }, "cm": { "stub": { "mode": "accept" }, "driverSetAbove_kmh": 5 } },
+ "grid": { "cm.law.h": [2.0, 2.5, 3.0], "cm.law.look_s": [0, 1.5, 3], "cm.law.aPlan_mps2": [0.25, 0.4, 0.6] },
+ "seed": 1
+}
