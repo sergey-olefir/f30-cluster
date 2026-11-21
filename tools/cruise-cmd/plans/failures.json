@@ -1,0 +1,8 @@
+{
+ "name": "cm-failures",
+ "description": "Family J (system failures at a grid of injection times: app stop, head-unit restart, frozen gap, blind camera, lost command, stuck set speed, cruise dropout, the worst command path) with the gated module and with plain cruise; mild plant; the driver sets the cruise 5 km/h above the speed at the start. Plus SC3's best for reference (standard engine: run sc3best-failures.json).",
+ "scenarios": ["J"], "perScenarioMax": 2,
+ "base": { "plant": { "preset": "mild" }, "warning": { "ttcWarn_s": 3 }, "cm": { "stub": { "mode": "accept" }, "driverSetAbove_kmh": 5 } },
+ "grid": { "cm.plain": [false, true] },
+ "seed": 1
+}
