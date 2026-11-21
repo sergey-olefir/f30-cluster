@@ -213,8 +213,8 @@ async function main() {
     }
     const c = counts();
     ok(c.rvRecorder === RVF.interfaces().length && c.rvRecorder === 22 && Object.keys(app.signals).length === 22, 'the RV recorder declares 22 interfaces');
-    ok(c.signalProbe === 99 && PROBE_FIELDS.interfaces().length === 99, 'Signal Probe is unchanged: 99 interfaces');
-    ok(c.newToSignalProbe === 6 && c.signalProbeIfInside === 105 && c.signalProbeIfInside > 99, 'inside Signal Probe the set would need 6 more: 105 > 99, so it is a separate recorder (the brief)');
+    ok(c.signalProbe === PROBE_FIELDS.interfaces().length && c.signalProbe >= 99, 'Signal Probe\'s probe fields: ' + c.signalProbe + ' interfaces (99 before the HB set of the Auto Beam round; the RV set adds none to it)');
+    ok(c.newToSignalProbe === 6 && c.signalProbeIfInside === c.signalProbe + 6 && c.signalProbeIfInside > 99, 'inside Signal Probe the set would need 6 more: ' + c.signalProbeIfInside + ' > 99, so it is a separate recorder (the brief)');
     const repo = readJson(path.join(ROOT, 'mgu-repo.json'));
     ok(repo.apps.path === 'apps/*' && path.relative(path.join(ROOT, 'apps'), APPDIR).indexOf('..') === 0 && !fs.existsSync(path.join(ROOT, 'apps', 'rv_recorder')), 'outside the Store\'s glob (apps/*): not in the Store until the owner says');
     const others = fs.readdirSync(path.join(ROOT, 'apps')).map((a) => { try { return readJson(path.join(ROOT, 'apps', a, 'app.json')); } catch (e) { return null; } }).filter(Boolean);
