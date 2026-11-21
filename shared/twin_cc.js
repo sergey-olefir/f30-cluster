@@ -11,6 +11,8 @@
  *                 leaves it, leaving opens BMW's panel in the same turn) + the per-turn plan of operations (rows aside, window,
  *                 tab, the tab-2 sheet, the warning tab; closing ones last) + the two settles (150 ms).
  *   layoutTab2    what tab 2's ONE sheet paints (card, rows, pointer, empty) and which messages' text it carries WHOLE.
+ *   layoutBand    fixes-1121 TT: what the same sheet paints on tabs 1, 3, 4, 5 while a message shows (TwinCentre opts.inTab, app.json
+ *                 config.tabs.messageTab false): the message inside the tab, at the bottom of the centre; no tab is pulled.
  *   paintSheet    the sheet [729, 298, 1191, 568] as straight RGBA, in ONE paint.
  *
  * THE SAFETY RULE (the owner, 2026-11-16, SPEC 8.4): a BMW warning is never hidden unless our own text for THAT message
@@ -23,6 +25,7 @@
  *     message it matched has ended;
  *   - no latch (a glyph our font lacks, a throw while painting, our sheet refused) holds;
  *   - tab 2 is selected and the sheet carries the WHOLE text of that exact message (the card, or a row whose whole name fits)
+ *     (fixes-1121 TT, in-tab: or another tab is selected and the sheet's band carries that message's whole name, never cut)
  *     since at least settleMs, sent in an earlier turn; and no page change that takes away text the cover relied on is
  *     pending (the open settle: the window and the sheet are on different connections, nothing orders sockets).
  * In every other state in which the car says, or may say, a message shows, the state is "window": BMW's own panel is
@@ -98,6 +101,15 @@ const WHY = { base: 516, texts: I.words('twin.cc.why.', ['unlisted', 'noname', '
 const EMPTY = { icon: 'cc_info', size: 66, cx: 960, cy: 392, get text() { return I.t('twin.cc.empty'); }, base: 478 };
 const FONTS = { head: 'td_msg', counter: 'td_cnt', row: 'td_tab', text: 'td_val' };      // Noto 42 / 29 / 33 / 39
 const SHEET_RECT = [SHEET.x, SHEET.y, SHEET.x + SHEET.w, SHEET.y + SHEET.h];
+// fixes-1121 TT (the owner, 2026-11-21: "the message is shown within the tab, and the tabs switch as usual"): the BAND, the message's
+// card inside tabs 1, 3, 4 and 5. It sits at the bottom of the tab-2 sheet's own rectangle (the same layer, the same connection), the
+// SAME place on every one of those tabs, opaque black from its top rule to the sheet's bottom, and see-through above it (the tab's
+// page shows there). The symbol cell and the symbol are the card's (by the message's id, the severity's colour); the name is the row
+// font, wrapped by words to at most 4 lines, and the band grows upwards with the lines: 1 line top 514, 2 474, 3 434, 4 394. A name
+// that does not fit whole in 4 lines is drawn cut with "…" and then counts for NOTHING (BMW's panel stays open for it).
+const BAND = { bottom: 568, pitch: 40, base0: 40, below: 14, rule: 2, maxLines: 4, cell: { x0: 741, x1: 785, dy: 8 }, symSize: 32,
+    textX: 797, maxW: 383 };
+const bandTop = (n) => BAND.bottom - BAND.base0 - BAND.below - (Math.max(1, n) - 1) * BAND.pitch;
 
 /** The characters of `s` that `font` has no glyph for (spaces aside), as a string; '' when it can draw all of them.
  *  deps.has(font, ch) answers; a font that will not load counts as "cannot draw anything". */
@@ -210,6 +222,25 @@ function layoutTab2(s, deps) {
     return out;
 }
 
+/**
+ * fixes-1121 TT: what the band paints on tabs 1, 3, 4 and 5 (BAND above). s = { cand (TwinCC's candidate, or the shown entry),
+ * show (true: BMW's panel stays open under it), night }; deps as layoutTab2's. Returns a page { kind: 'band', card: { key, id,
+ * sev, symbol, lines, cut, bases, y0 }, rows: [], more: 0, total: 0, keys, show, sig }. keys: the message's key only when its
+ * WHOLE name is drawn (no "…") with glyphs the font has; otherwise [] (the band never counts as our text for a cut name).
+ */
+function layoutBand(s, deps) {
+    const F = deps.fonts || FONTS;
+    const c = s.cand;
+    const w = wrapWords(c.name, (t) => deps.measure(F.row, t), [BAND.maxW, BAND.maxW, BAND.maxW, BAND.maxW]);
+    const y0 = bandTop(w.lines.length);
+    const bases = w.lines.map((l, i) => y0 + BAND.base0 + i * BAND.pitch);
+    const whole = !w.cut && !missingChars(deps, F.row, c.name);
+    const out = { kind: 'band', card: { key: c.key, id: c.id, sev: severityOf(c.color), symbol: symbolFor(c.id, c.color), lines: w.lines, cut: w.cut, bases, y0 },
+        rows: [], more: 0, total: 0, keys: whole ? [c.key] : [], show: !!s.show };
+    out.sig = JSON.stringify(['band', !!s.show, !!s.held, c.key, w.lines, out.card.sev, out.card.symbol, !!s.night]);
+    return out;
+}
+
 /** straight-alpha RGBA `src` (same size as `dst`) laid over the opaque buffer `dst` (RGBA, alpha stays 255). */
 function overOpaque(dst, src) {
     for (let o = 0; o < src.length; o += 4) {
@@ -234,7 +265,9 @@ function overOpaque(dst, src) {
 function paintSheet(deps, page, o) {
     const T = deps.textRaster, F = (o && o.fonts) || FONTS, night = !!(o && o.night);
     const W = SHEET.w, H = SHEET.h, buf = Buffer.alloc(W * H * 4, 0);
-    for (let i = 3; i < buf.length; i += 4) buf[i] = 255;
+    // fixes-1121 TT: the band is opaque only from its top rule down; above it the sheet is see-through (the tab's own page)
+    const opaqueFrom = page.kind === 'band' && page.card ? Math.max(0, Math.round(page.card.y0 - SHEET.y)) : 0;
+    for (let i = opaqueFrom * W * 4 + 3; i < buf.length; i += 4) buf[i] = 255;
     const put = (x, y, rgb, k) => {
         if (x < 0 || y < 0 || x >= W || y >= H || k <= 0) return;
         const p = (y * W + x) * 4, kk = Math.min(1, k);
@@ -280,6 +313,22 @@ function paintSheet(deps, page, o) {
     } else if (page.kind === 'empty') {
         icon(EMPTY.icon, EMPTY.size, EMPTY.cx, EMPTY.cy, nt([188, 188, 188], 0.8));
         text(EMPTY.text, F.text, EMPTY.base, nt([227, 227, 227], 0.75), { align: 'center' });
+    } else if (page.kind === 'band' && page.card) {
+        // fixes-1121 TT: the band - its top rule, the symbol cell in the severity colour (the grey one a ramp, as the card's), the
+        // symbol (the card's, by the message's id), the name's lines in white, left-aligned from BAND.textX
+        const c = page.card, sev = SEVERITY[c.sev] || SEVERITY[1];
+        const y0 = c.y0 - SHEET.y;
+        rect(0, y0, W, y0 + BAND.rule, nt([84, 84, 84], 0.75));
+        const cx0 = BAND.cell.x0 - SHEET.x, cx1 = BAND.cell.x1 - SHEET.x, cy0 = y0 + BAND.cell.dy, cy1 = cy0 + (BAND.cell.x1 - BAND.cell.x0);
+        for (let y = cy0; y < cy1; y++) {
+            let rgb = sev.cell;
+            if (!rgb) { const f = (y + 0.5 - cy0) / (cy1 - cy0), v = enc(GREY_RAMP[0] + (GREY_RAMP[1] - GREY_RAMP[0]) * f); rgb = [v, v, v]; }
+            rect(cx0, y, cx1, y + 1, night ? nightRgb(rgb, sev.mult) : rgb);
+        }
+        const sRgb = night ? nightRgb(sev.symbol, 0.8) : sev.symbol, scx = (BAND.cell.x0 + BAND.cell.x1) / 2, scy = c.y0 + BAND.cell.dy + (BAND.cell.x1 - BAND.cell.x0) / 2;
+        symbolDrawn = icon(c.symbol, BAND.symSize, scx, scy, sRgb) || icon(sev.idx >= 3 ? 'cc_warn' : 'cc_info', BAND.symSize, scx, scy, sRgb);
+        const white = nt([255, 255, 255], 0.8);
+        c.lines.forEach((ln, i) => { if (ln) text(ln, F.row, c.bases[i], white, { x: BAND.textX - SHEET.x }); });
     }
     // rows (every other listed entry): the symbol in the severity colour, the name in white
     const white = nt([255, 255, 255], 0.8);
@@ -594,6 +643,13 @@ class TwinCentre {
         this.heldKey = null;                     // the message this period's centre last showed by the car's own number
         this.per = null; this.periods = 0; this.perLogs = 0;      // the per-period log line
         // ---- end r1120 T1 ----
+        // fixes-1121 TT (the owner, 2026-11-21): opts.inTab (config.tabs.messageTab false; the engine sets it each turn) - a message
+        // pulls NO tab; the tab is always the base (the driver's key, the setting, the auto rules of shared/twin_tabs.js). On tab 2 the
+        // page is as before; on every other tab, while a message shows, the sheet carries the BAND (layoutBand): our card for the
+        // message inside that tab. The rule is unchanged: BMW's panel is covered only while the page on the screen carries the whole
+        // text of exactly the shown message, sent settleMs ago in an earlier turn - on tab 2 the card or a whole row, elsewhere a
+        // band whose name is whole.
+        this.inTab = o.inTab === true;
     }
 
     // ---- what the engine reads of the verdict (so hud.js asks the same questions as before) ----
@@ -605,6 +661,7 @@ class TwinCentre {
     /** the driver chose tab n (the key or the app setting). During a message: leaving 2 is allowed and opens BMW's panel
      *  in the same turn (the caller then runs update); going to 2 takes the card back. */
     driver(n) {
+        if (this.inTab) { this.base = n; this.pulled = false; this.left = false; return; }      // fixes-1121 TT: the driver's tab, nothing else
         if (n === 2) { if (this._period()) { this.pulled = true; this.left = false; } else this.base = 2; return; }
         this.base = n;
         if (this._period()) { this.pulled = false; this.left = true; }
@@ -626,7 +683,11 @@ class TwinCentre {
     }
 
     /** our tab-2 sheet was refused by the service: BMW's panel stays open for every message until the next rebuild */
-    sheetRefused(why) { this.t.sheetRefused(why); this.onScreen = {}; }
+    // fixes-1121 TT: in-tab the stamps stay, so the page that drops the band waits for BMW's panel to have been open openSettleMs (the open
+    // settle), as any other loss of our text does; a refused op may leave the old pixels up, and the window and the sheet are on two
+    // connections (SC's model, case V7 interleaved: the band cleared before the window opened). The stamps never make a refused sheet ours:
+    // with the sheet latch there is no candidate.
+    sheetRefused(why) { this.t.sheetRefused(why); if (!this.inTab) this.onScreen = {}; }
 
     /**
      * One decision and its plan. inp: the engine's inputs (TwinCC's, plus `entries`). Returns
@@ -644,21 +705,23 @@ class TwinCentre {
             // a message pulls tab 2: a new drawable one (its card), or - once per period - one that shows but ours cannot be drawn (the pointer
             // page, SPEC-R3 5.1). NOT the blind keep-open (severity 0: nothing is known to show; package B2's convention: a window with
             // no severity is not a message)
-            const pullKey = cand ? cand.key : (shown && t.severity > 0 && !this.left && (!t.unlisted || this.unlistedPullsTab) ? '#nodraw' : null);     // car-fix CF1: unlisted
+            if (this.inTab) { this.pulled = false; this.left = false; }       // fixes-1121 TT: no message takes a tab
+            const pullKey = this.inTab ? null : cand ? cand.key : (shown && t.severity > 0 && !this.left && (!t.unlisted || this.unlistedPullsTab) ? '#nodraw' : null);     // car-fix CF1: unlisted
             if (shown && pullKey && !this.periodKeys[pullKey]) { this.periodKeys[pullKey] = true; this.pulled = true; this.left = false; }
             this.tab = this.pulled ? 2 : this.base;
             buf = null; bufSig = null;
-            if (this.tab !== 2) { page = { kind: 'other', tab: this.tab, keys: [], sig: 'tab' + this.tab }; break; }
+            const band = this.inTab && this.tab !== 2 && shown && !!cand;        // fixes-1121 TT: the band on tabs 1, 3, 4, 5
+            if (this.tab !== 2 && !band) { page = { kind: 'other', tab: this.tab, keys: [], sig: 'tab' + this.tab }; break; }
             if (!this.sheetOn || !deps || this.paintFailed) { page = { kind: 'blank', keys: [], sig: 'blank' }; break; }
             let c = cand;
             if (c && this.mutant === 'wrongCard') { this.mutKey = this.mutKey || c.key; c = Object.assign({}, c, { key: this.mutKey }); }
             // (mutant wrongCard: the card keeps the period's first message and the real one is believed drawn, so no row)
             const ents = this.mutant === 'wrongCard' && cand ? (inp.entries || []).filter((e) => keyOf(e) !== cand.key) : inp.entries;
-            page = layoutTab2({ cand: c, shown, sev: t.severity, entries: ents, night: this.night }, deps);
-            // painting can fail before anything is sent: a glyph our font lacks (the headline, the counter), a throw
+            page = band ? layoutBand({ cand: c, night: this.night }, deps) : layoutTab2({ cand: c, shown, sev: t.severity, entries: ents, night: this.night }, deps);
+            // painting can fail before anything is sent: a glyph our font lacks (the headline, the counter; the band's row font), a throw
             if (cand && page.card) {
                 const F = deps.fonts || FONTS;
-                const miss = missingChars(deps, F.head, cand.name) + missingChars(deps, F.counter, cand.counter || '');
+                const miss = band ? missingChars(deps, F.row, cand.name) : missingChars(deps, F.head, cand.name) + missingChars(deps, F.counter, cand.counter || '');
                 if (miss) { t.fail('glyph', cand.key, miss.length + ' characters'); continue; }
             }
             if (this.paint && page.sig !== this.vSig) {      // r1120 T1: vSig is what applied.sig was before r1120 (the verdict page's)
@@ -680,7 +743,7 @@ class TwinCentre {
         let deferred = false;
         if (!noDefer && shownNow && relied.length && this.vpage && this.vpage.sig !== page.sig && openFor < this.openSettleMs) {     // r1120 T1: vpage (was page)
             const at0 = cand ? this.onScreen[cand.key] : undefined;
-            const wouldBeOurs = cand && at0 !== undefined && now - at0 >= this.settleMs && this.tab === 2 && page.keys.indexOf(cand.key) >= 0;
+            const wouldBeOurs = cand && at0 !== undefined && now - at0 >= this.settleMs && (this.tab === 2 || this.inTab) && page.keys.indexOf(cand.key) >= 0;     // fixes-1121 TT: or the band
             if (!wouldBeOurs) { page = this.vpage; deferred = true; buf = null; }
         }
         // which messages' text the sheet will carry whole after this turn, and since when (continuous presence)
@@ -696,12 +759,16 @@ class TwinCentre {
         const shown = t.state !== 'none';
         const at = cand ? this.onScreen[cand.key] : undefined;
         const settled = at !== undefined && (this.mutant === 'noSettle' || now - at >= this.settleMs);
-        const tabOk = (this.tab === 2 && !deferred) || this.mutant === 'ignoreTab';
+        // fixes-1121 TT: in-tab, any tab whose page on the screen carries the message (the card, a whole row, a whole band)
+        const tabOk = ((this.tab === 2 || this.inTab) && !deferred) || this.mutant === 'ignoreTab';
         let state, reason, openWhy;      // r1120 T1: openWhy, the enum of the reason (the per-period log); it decides nothing
         if (!shown) { state = 'none'; reason = t.reason; openWhy = 'none'; }
         else if (cand && settled && tabOk) { state = 'ours'; reason = 'our text for the shown message is on the screen'; openWhy = 'ours'; }
         else if (cand && !this.sheetOn) { state = 'window'; reason = 'the layout has no tab-2 sheet'; openWhy = 'nosheet'; }
-        else if (cand && this.tab !== 2) { state = 'window'; reason = this.left ? 'the driver left tab 2: our text is not on the screen' : 'tab 2 is not shown'; openWhy = this.left ? 'left' : 'tab'; }
+        else if (cand && this.inTab && this.tab !== 2 && !deferred && page.keys.indexOf(cand.key) < 0) {
+            state = 'window'; reason = 'the band on tab ' + this.tab + ' cannot carry the whole name'; openWhy = 'band';      // fixes-1121 TT
+        }
+        else if (cand && this.tab !== 2 && !this.inTab) { state = 'window'; reason = this.left ? 'the driver left tab 2: our text is not on the screen' : 'tab 2 is not shown'; openWhy = this.left ? 'left' : 'tab'; }
         else if (cand) { state = 'window'; reason = 'our card was just sent (waiting ' + this.settleMs + ' ms)'; openWhy = deferred ? 'opensettle' : 'settle'; }
         else { state = 'window'; reason = inp.released ? 'released to the list: ' + t.reason : t.reason; openWhy = t.why; }
         this.state = state; this.reason = reason; this.severity = t.severity; this.vpage = page; this.candidate = cand;     // r1120 T1: vpage (was page)
@@ -712,6 +779,9 @@ class TwinCentre {
         let disp = page, dbuf = null;
         if (deferred) disp = this.page || page;                     // the open settle holds the shown page with the verdict page
         else if (this.showOn && !this.mutant && page.kind === 'pointer' && deps) disp = this._shown(page, inp);
+        // fixes-1121 TT: on tabs 1, 3, 4, 5 with no candidate (BMW's panel open: D7, a latch, the settle of an unlisted number ...) the
+        // band shows the entry the car names (T1's shown card, or the held one); it is never counted (the verdict page is 'other')
+        else if (this.showOn && !this.mutant && this.inTab && this.tab !== 2 && page.kind === 'other' && shown && this.sheetOn && deps) disp = this._shownBand(page, inp);
         if (disp !== page && disp.sig !== this.applied.sig && this.paint && !deferred) {
             try { dbuf = this.paint(disp); }
             catch (e) {
@@ -728,7 +798,7 @@ class TwinCentre {
             this.sigLogged = sig; this.logs++;
             t.logFn('cc: centre ' + state + ', tab ' + this.tab + ', page ' + disp.kind + ' (' + reason + ')');
         }
-        this.needsTick = !!(shown && cand && this.sheetOn && this.tab === 2 && state !== 'ours') || deferred;
+        this.needsTick = !!(shown && cand && this.sheetOn && (this.tab === 2 || this.inTab) && state !== 'ours') || deferred;     // fixes-1121 TT: the band settles too
         this.deferred = deferred;
         const warn = this.tab === 2 ? 'W3' : shown ? 'W2' : (inp.entries || []).length ? 'W1' : 'W0';
         const ops = this._plan({ window: state === 'window', rows: state !== 'window', tab: this.tab, sig: disp.sig, keys: disp === page ? sent : disp.keys.slice(), kind: disp.kind, warn });
@@ -750,14 +820,34 @@ class TwinCentre {
     /** The shown page for a verdict pointer page P: our card for the message the car names as shown now (TwinCC.show), or - while
      *  the car names a number with no entry (285 ...) or an unknown one (65535) - for the message this period's centre last showed
      *  by the car's own number if the list still carries it (the held card); else the pointer with one line saying why. Kind
-     *  'show': BMW's panel stays open under it. Never a page that drops a key P counts (the stamps); else P itself. */
-    _shown(P, inp) {
-        const t = this.t, deps = this.deps, F = deps.fonts || FONTS;
-        let sc = t.show, why = t.why;
-        if (!sc && this.hold && this.heldKey && (why === 'unlisted' || why === 'unknown')) {
+     *  'show': BMW's panel stays open under it. Never a page that drops a key P counts (the stamps); else P itself.
+     *  (fixes-1121 TT: _showEntry picks the entry - TwinCC.show or the held one - for _shown and for the band's _shownBand.) */
+    _showEntry(inp) {
+        const t = this.t;
+        let sc = t.show;
+        if (!sc && this.hold && this.heldKey && (t.why === 'unlisted' || t.why === 'unknown')) {
             const e = (inp.entries || []).filter((x) => x && x.name && keyOf(x) === this.heldKey)[0];
             if (e) sc = { key: this.heldKey, id: e.id, name: e.name, color: e.color || null, symbol: symbolFor(e.id, e.color), counter: '', held: true };
         }
+        return sc;
+    }
+
+    /** fixes-1121 TT: the shown band for a verdict 'other' page P on tabs 1, 3, 4, 5 (the entry _showEntry picks, cleaned as the shown
+     *  card's name), or P itself (nothing to show, a glyph the row font lacks, a band that threw before). Never counted: P counts nothing. */
+    _shownBand(P, inp) {
+        const deps = this.deps, F = deps.fonts || FONTS;
+        const sc = this._showEntry(inp);
+        if (!sc) return P;
+        const name = showName(sc.name);
+        if (!name || missingChars(deps, F.row, name)) return P;
+        const D = layoutBand({ cand: Object.assign({}, sc, { name }), show: true, held: !!sc.held, night: this.night }, deps);
+        D.held = !!sc.held;
+        return D.sig === this.showBad ? P : D;
+    }
+
+    _shown(P, inp) {
+        const t = this.t, deps = this.deps, F = deps.fonts || FONTS;
+        let sc = this._showEntry(inp), why = t.why;      // fixes-1121 TT: the pick moved to _showEntry (unchanged)
         if (sc) {
             const name = showName(sc.name);
             const miss = name ? missingChars(deps, F.head, name) + missingChars(deps, F.counter, sc.counter || '') : '?';
@@ -844,4 +934,5 @@ class TwinCentre {
 
 module.exports = { TwinCC, TwinCentre, layoutTab2, paintSheet, wrapWords, missingChars, keyOf, severityOf, symbolFor, nightRgb, mono, SEV_NAMES, SEVERITY,
     SYMBOL_BY_ID, GENERIC, SHEET, SHEET_RECT, CELL, SYMBOL, HEAD, COUNTER, ROWS, POINTER, EMPTY, FONTS, SETTLE_MS, GREY_RAMP,
-    WHY, showName };      // r1120 T1: WHY, showName
+    WHY, showName,      // r1120 T1: WHY, showName
+    layoutBand, BAND, bandTop };      // fixes-1121 TT

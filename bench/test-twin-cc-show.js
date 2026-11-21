@@ -29,7 +29,8 @@ function run(show) {
     const out = (r.stdout || '') + (r.stderr || '');
     const lines = out.split('\n');
     const tot = /(\d+) passed, (\d+) failed/.exec(lines.filter((l) => /^\d+ passed, \d+ failed/.test(l.trim())).pop() || '');
-    const trace = (lines.filter((l) => /^[-CRPWbxOS?a-z0-9]{6}( [-CRPWbxOS?a-z0-9]{6})*$/.test(l.trim())).pop() || '').trim();
+    // fixes-1121 TT: B = the band (bench/test-twin-cc.js case 14)
+    const trace = (lines.filter((l) => /^[-CRPWBbxOS?a-z0-9]{6}( [-CRPWBbxOS?a-z0-9]{6})*$/.test(l.trim())).pop() || '').trim();
     const fails = lines.filter((l) => /^\s*FAIL /.test(l)).slice(0, 3);
     return { pass: tot ? Number(tot[1]) : 0, fail: tot ? Number(tot[2]) : -1, trace, fails, out };
 }

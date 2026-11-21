@@ -41,7 +41,7 @@ function run(cs, cfg) {
     const latMax = cfg.latMax || 120;
     const lines = [];
     const car = new M.CarSim({ release: cfg.release || null });
-    const m = M.makeMachine({ strict: cfg.strict !== false, confirmNow: !!cfg.confirmNow, mutant: cfg.mutant || null, log: (l) => lines.push(l) });
+    const m = M.makeMachine({ strict: cfg.strict !== false, confirmNow: !!cfg.confirmNow, mutant: cfg.mutant || null, log: (l) => lines.push(l), inTab: cfg.inTab === true });     // fixes-1121 TT: inTab
     const scr = new M.Screen({ mode: cfg.mode || 'atomic', conns: cfg.conns || CONNS_PROPOSED, latency: () => 10 + Math.floor(rnd() * (latMax - 10) / 10) * 10 });
     let now = 0, truth = null;
     const trace = [];
@@ -295,4 +295,4 @@ function main() {
 }
 
 if (require.main === module) process.exit(main().failed ? 1 : 0);
-module.exports = { main };
+module.exports = { main, run, CONNS_PROPOSED, CONNS_TODAY, REC };      // fixes-1121 TT: run for bench/test-twin-cc.js Part 2c
