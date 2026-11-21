@@ -484,7 +484,7 @@ const TABLE = [
     //      speed-limit-assist and cruise settings, and BMW's own SET offer. The settings have getter id 0 (no getter): notifier only,
     //      "s". FASuS.displayForesight has no getter either. Every change is a log line with its enum names, also while S17 records
     //      (recLog). No new interface: SettingsDriverAssistanceFunctions (S14), FASuS and MultimodalControlDriverAssistance (S8) are
-    //      declared already. Never the setters (settingSpeedLimitAssist 16, settingDCC 32), never multimodalControlDriverAssistance.
+    //      declared already. Never the setters (settingSpeedLimitAssist 16, settingDCC 32), never the multimodal service's write-only field.
     { set: 'S17', p: 'P26', tag: 'sla-setting', iface: I.SettingsDriverAssistance, field: 'settingSpeedLimitAssist', flags: 's', gapMs: 0, recLog: true, cols: [['value', 'value', 'e'], ['availability', 'availability', 'e'], ['deactivated', 'availabilityDeactivated', 'e']] },
     { set: 'S17', p: 'P26', tag: 'dcc-setting', iface: I.SettingsDriverAssistance, field: 'settingDCC', flags: 's', gapMs: 0, recLog: true, cols: [['value', 'value', 'e'], ['availability', 'availability', 'e']] },
     { set: 'S17', p: 'P26', tag: 'sla-country', iface: I.SettingsDriverAssistance, field: 'displayStatusSpeedLimitAssist', flags: 's', gapMs: 0, recLog: true, cols: [['status', [], 'e']] },

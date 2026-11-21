@@ -26,7 +26,7 @@
  *   driver-assistance service's availability field (MultimodalControlDriverAssistance.functionAvailabilityDriverAssistance,
  *   getter 2, notifier 32769) with its DCC and SLD states and valueSetSpeed as text, and the getter's evidence. A photo at a
  *   stop then answers "does a unit on this car answer service 13203": a value (from the getter or a notification) is yes; the
- *   getter's «НЕ ВІДПОВІВ — ЗБІЙ» while the control row's getters answer is no. Never the setter multimodalControlDriverAssistance.
+ *   getter's «НЕ ВІДПОВІВ — ЗБІЙ» while the control row's getters answer is no. Never the multimodal service's write-only field.
  *
  * Read only: events and fields with notifiers and non-zero getters (app.json). The only calls made on the car are the
  * subscriptions and the fields' getters. No setter, no method, no diagnostic request. Plain Node 8. Never lets an exception
