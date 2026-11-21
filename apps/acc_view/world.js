@@ -24,7 +24,10 @@
  *   Tracker(cfg)                    objects by source and id: glide (exponential), fade when lost, never frozen; .frame(now)
  *   scene(name, ms)                 the demo scenes: busy, crossing, cyclist, cutin, lanechange, curve, nolanes
  *   SourceLog                       counts, classes, rates and ranges per source for the log (numbers and enum names only)
- *   lineY(line, x), egoOf(lanes)    the clothoid's y at x; the ego lane's centre line and half width
+ *   lineY(line, x), egoOf(lanes)    the clothoid's y at x; the ego lane's centre line and half width (the lane model's own
+ *                                   glided ego when it gives one: lanes.js)
+ * fixes-1121 AL: laneModel stays 0.1.0's reading of the event for the source's log line; what is DRAWN comes from lanes.js
+ * (only what makes sense, our own path as the fallback), configured by DEFAULT.lanes and DEFAULT.path below.
  *   project(g, x, y)                -> { px, py, k (px per metre), t } in the lane box of placement g (model.GEO)
  */
 
@@ -51,15 +54,49 @@ const TYPE_CODE = { none: 0, solid: 1, dashed: 2, double: 3, edge: 4 };
 const DEFAULT = {
     range: 100,                 // m: the far end of the drawn lane (a display choice)
     objects: { scale: 1, ySign: 1, xMin: 1, xMax: 95, yMax: 12, glideMs: 250, lostMs: 500, fadeMs: 600, max: 16, minProb: 0 },
-    lanes: { scale: 1, ySign: 1, minProb: 0.3, staleMs: 1500, maxLen: 120, halfDefault: 1.75 },
+    lanes: {
+        scale: 1, ySign: 1, minProb: 0.3, staleMs: 1500, maxLen: 120, halfDefault: 1.75,
+        // fixes-1121 AL (lanes.js): only what makes sense is drawn. probScale: the catalogue types existenceProbability as a
+        // bare Float; 'auto' reads a value above 1.5 as a percentage (0..100), a number multiplies every value.
+        probScale: 'auto', minLen: 8, maxOffset: 9, cMax: 0.1, aLat: 5, angle: [[15, 0.15], [5, 0.3], [0, 0.6]],
+        minEdge: 1.0, xRear: -5.5, sideTol: 0.3, crossA: 0.06, wMin: 2.4, wMax: 4.5, nearX: 20, width: 3.5,
+        confirm: 3, holdFrames: 8, holdMs: 700, morphY: 1.2, gate: 0.9, jumpY: 0.35, jumpA: 0.05, jumpC: 0.002, typeFrames: 3,
+        tauMs: 150, tauCMs: 250, blendMs: 500, stepMs: 33, reacquireMs: 1000,
+        rate: { y0: 3, a: 0.4, c: 0.03, dc: 0.003 }, guessStr: 0.55, straightLen: 50,
+    },
+    // fixes-1121 AL: our own path (lanes.js Path) when the lanes are not good enough. Every unit, scale and sign below is an
+    // ASSUMPTION until a drive's log (the "acc: path" line's raw ranges and its "cal" ratio against the camera's lanes) proves it.
+    // staleMs per source: an event is periodic (1 s); a field's notifier may only fire on a change (5 s, as our speed).
+    path: {
+        // the owner's car: a G20 330i xDrive (wheelbase 2 851 mm, the sedan's) with S2VL Variable Sport Steering, so the ratio
+        // falls off centre. BMW publishes no ratio curve (only "2 mm more rack travel per degree" on centre), so steerCurve
+        // [[steering-wheel deg, ratio], ...] is a CONSERVATIVE ASSUMPTION: 15.0 near centre, quicker to 12.0 by 200 deg, flat
+        // beyond; the road wheels' angle is its integral (lanes.js roadAngle). steerRatio: used only without a curve. The
+        // yaw rate is preferred wherever we move: the steering alone only under vYawMin, blended up to vSteerMax.
+        on: true, staleMs: 1000, speedStaleMs: 5000, vStand: 0.5, vYawMin: 2, vSteerMax: 5, wheelbase: 2.851, steerRatio: 15.0,
+        steerCurve: [[0, 15.0], [20, 15.0], [100, 13.0], [200, 12.0]], turnRadius: 5.7,
+        aLat: 9, tauMs: 300, cRate: 0.05, lenS: 4, lenMin: 25, lenMax: 80,
+        sources: {
+            yaw: { on: true, role: 'yaw', iface: 'de.bmw.chassis.YawRateProvision', member: 'yawRate', kind: 'event', staleMs: 1000, path: ['yawRate', 'yawRate'], invalid: ['yawRate', 'invalidFlag'], qual: ['qualifierYawRate'], bad: ['SIGNAL_UNGUELTIG', 15, 'SIGNALWERT_UNGUELTIG', 14, 'UNGUELTIG', 6, 'INITIALISIERUNG', 8], scale: 1, offset: 0, none: [], unit: 'deg', sign: 1 },
+            steer: { on: true, role: 'steer', iface: 'de.bmw.infotainment.drivingexcitement.XView', member: 'statusSteeringAngleDriver', kind: 'field', staleMs: 5000, path: ['actualValueSteeringAngleDriver'], qual: ['qualifierActualValueSteeringAngleDriver'], bad: ['SIGNAL_UNGUELTIG', 15, 'SIGNALWERT_IST_UNGUELTIG__ZUSTAND_S_STATUS_PERMANENT', 6, 'SIGNALWERT_IST_UNGUELTIG__ZUSTAND_S_STATUS_TEMPORAER', 14, 'SENSOR_NICHT_VORHANDEN', 7, 'INITIALISIERUNG', 8], scale: 0.04395, offset: -1440, none: [65535], unit: 'deg', sign: 1, road: false },
+            yawHu: { on: false, role: 'yaw', iface: 'de.bmw.infotainment.vehicle.CDS2', member: 'statusYawVelocityVehicle', kind: 'field', staleMs: 5000, path: ['yawVelocityVehicle'], scale: 0.005, offset: -163.84, none: [65535], unit: 'deg', sign: 1 },
+            steerAxle: { on: false, role: 'steer', iface: 'de.bmw.infotainment.drivingexcitement.XView', member: 'statusFrontAxleSteeringAngle', kind: 'field', staleMs: 5000, path: ['steeringAngleFrontAxleEffective'], scale: 0.0043945, offset: -144, none: [65535], unit: 'deg', sign: 1, road: true },
+            curv: { on: false, role: 'curv', iface: 'de.bmw.chassis.CentralOdometryProvision', member: 'curvatureAndSlipSideAngle', kind: 'event', staleMs: 1000, path: ['curvature', 'ActualValueCurvatureVehicleMotion'], invalid: ['curvature', 'invalidFlag'], qual: ['qualifierCurvature'], bad: ['FEHLER', 6, 'SIGNAL_UNBEFUELLT', 15, 'WERT_NICHT_VERFUEGBAR', 14], scale: 1, offset: 0, none: [], unit: '1/m', sign: 1 },
+        },
+    },
 };
 
 function cfgOf(c) {
     const o = c && typeof c === 'object' ? c : {};
+    const p = o.path && typeof o.path === 'object' ? o.path : {};
+    const src = {};
+    Object.keys(DEFAULT.path.sources).forEach((k) => { src[k] = Object.assign({}, DEFAULT.path.sources[k], (p.sources && p.sources[k]) || {}); });
+    Object.keys(p.sources || {}).forEach((k) => { if (!src[k] && p.sources[k] && typeof p.sources[k] === 'object') src[k] = Object.assign({}, p.sources[k]); });
     return {
         range: typeof o.range === 'number' ? o.range : DEFAULT.range,
         objects: Object.assign({}, DEFAULT.objects, o.objects || {}),
         lanes: Object.assign({}, DEFAULT.lanes, o.lanes || {}),
+        path: Object.assign({}, DEFAULT.path, p, { sources: src }),
     };
 }
 
@@ -140,6 +177,7 @@ function lineY(l, x) { return l.y0 + x * (l.a + x * (0.5 * l.c + x * (l.dc || 0)
 
 /** The ego lane: the nearest line left of us and the nearest right; its centre clothoid and half width. */
 function egoOf(lanes) {
+    if (lanes && lanes.ego && typeof lanes.ego.y0 === 'number') return lanes.ego;        // the lane filter's own, glided (lanes.js)
     const ls = (lanes || FIXED).lines;
     let left = null, right = null;
     ls.forEach((l) => { if (l.y0 >= 0 && (!left || l.y0 < left.y0)) left = l; if (l.y0 < 0 && (!right || l.y0 > right.y0)) right = l; });
@@ -205,6 +243,15 @@ Tracker.prototype.sourceNow = function (now) {
 function leadOf(objs, lanes) {
     const e = egoOf(lanes);
     let best = null;
+    // fixes-1121 AL: when our lane is our own guess (lanes.js: partial, predicted, straight), the camera's own lane mapping
+    // decides first: the car ahead stays the one the camera puts in our lane, wherever our corridor bends
+    if (lanes && lanes.verdict && lanes.verdict !== 'measured') {
+        (objs || []).forEach((o) => {
+            if (['car', 'truck', 'two', 'unk'].indexOf(o.cls) < 0 || !(o.lane === 'OBJECT_IN_EGO_LANE' || o.lane === 1)) return;
+            if (!best || o.x < best.x) best = o;
+        });
+        if (best) return best;
+    }
     (objs || []).forEach((o) => {
         if (['car', 'truck', 'two', 'unk'].indexOf(o.cls) < 0) return;
         const c = e.y0 + o.x * (e.a + 0.5 * e.c * o.x);

@@ -2,6 +2,8 @@
 // boundaries the camera measures (clothoids: offset, heading, curvature; solid / dashed / double / road edge, up to four, so
 // our lane and the next ones) or AA's fixed symbol, the measured gap lit on our lane, chevrons while closing. One look.
 // Layer px in u_size; lateral distances in metres times px-per-metre (small terms), highp where available.
+// fixes-1121 AL: u_lp.w is how much a line is OUR OWN GUESS (0 measured .. 1 the predicted corridor, lanes.js): thinner, no
+// glow, short dashes, dimmer (its strength), fading out with distance, no marking detail; the colour stays the lane's own.
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
@@ -11,7 +13,7 @@ varying vec2 v_uv;
 uniform vec2 u_size;     // the layer, px
 uniform vec4 u_view;     // horizon (share of the height), px per metre at the foot, kf (1 / far scale - 1), range (m)
 uniform vec4 u_ln[4];    // boundaries: offset at 0 m (m, left +), heading (rad), curvature (1/m), type (0 none 1 solid 2 dashed 3 double 4 edge)
-uniform vec4 u_lp[4];    // boundaries: valid length (m), strength (0..1), marking width (m), 0
+uniform vec4 u_lp[4];    // boundaries: valid length (m), strength (0..1), marking width (m), guess (0 measured .. 1 ours)
 uniform vec4 u_ego;      // our lane's centre: offset (m), heading, curvature, half width (m)
 uniform vec3 u_line;     // the lines' colour (a fixed, neutral symbol: never with any state)
 uniform vec3 u_ground;   // the ground's colour at the foot
@@ -52,13 +54,14 @@ void main() {
             vec4 q = u_lp[i];
             if (l.w > 0.5 && xm < q.x) {
                 float d = abs(ym - (l.x + xm * (l.y + 0.5 * l.z * xm))) * k;
-                float lw = max(1.2, q.z * k);
-                if (l.w > 2.5 && l.w < 3.5) d = abs(d - 1.4 * lw);
+                float lw = max(1.2, q.z * k) * (1.0 - 0.5 * q.w);
+                if (l.w > 2.5 && l.w < 3.5) d = abs(d - 1.4 * lw * (1.0 - q.w));
                 float on = 1.0 - smoothstep(lw * 0.5 - 0.7, lw * 0.5 + 0.7, d);
-                float glow = (1.0 - smoothstep(0.0, lw * 2.5 + 2.0, d)) * 0.25;
+                float glow = (1.0 - smoothstep(0.0, lw * 2.5 + 2.0, d)) * 0.25 * (1.0 - q.w);
                 float dash = (l.w > 1.5 && l.w < 2.5) ? step(fract(xm / 12.0), 0.5) : 1.0;
-                float kk = max(on, glow) * dash * fade * q.y * (1.0 - smoothstep(q.x - 8.0, q.x, xm));
-                c.rgb = mix(c.rgb, l.w > 3.5 ? u_line * 0.5 + vec3(0.14) : u_line, kk);
+                dash = mix(dash, step(fract(xm / 5.0), 0.4), q.w);
+                float kk = max(on, glow) * dash * fade * q.y * (1.0 - smoothstep(q.x - 8.0 - 30.0 * q.w, q.x, xm));
+                c.rgb = mix(c.rgb, mix(l.w > 3.5 ? u_line * 0.5 + vec3(0.14) : u_line, u_line, q.w), kk);
                 c.a = max(c.a, kk);
             }
         }

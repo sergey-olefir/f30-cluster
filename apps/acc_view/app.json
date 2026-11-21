@@ -88,6 +88,31 @@
       "_instances": "HMI_CID",
       "currentDisplayLanguage": "rs",
       "_about": "r1120 merge: the head unit's language for \"Авто\" (shared/lang.js; getter 3, notifier 32771). Read only."
+    },
+    "de.bmw.chassis.YawRateProvision": {
+      "_instances": "1",
+      "_broadcasts": [
+        "yawRate"
+      ],
+      "_about": "fixes-1121 AL: our yaw rate for the predicted path (lanes.js Path: curvature = yaw rate / speed). An EVENT (eventId 32791, service 28672): yawRate.yawRate Float + invalidFlag, qualifierYawRate. Unit ASSUMED deg/s, + left, as auto_beam (config.world.path.sources.yaw). Read only."
+    },
+    "de.bmw.infotainment.drivingexcitement.XView": {
+      "_instances": "1",
+      "statusSteeringAngleDriver": "rs",
+      "statusFrontAxleSteeringAngle": "rs",
+      "_about": "fixes-1121 AL: the steering for the predicted path at low speed. statusSteeringAngleDriver: getter 3 (non-zero), notifier 32771, UInt16 + qualifier, the one Signal Probe's ACC set records; scale ASSUMED 0.04395 deg/bit, offset -1440 deg, + left (config.world.path.sources.steer). statusFrontAxleSteeringAngle: getter 33, notifier 32801, the road wheels' angle, scale unknown: declared, off (sources.steerAxle). Read only."
+    },
+    "de.bmw.infotainment.vehicle.CDS2": {
+      "_instances": "1",
+      "statusYawVelocityVehicle": "rs",
+      "_about": "fixes-1121 AL: the head unit's own yaw rate, an alternative to YawRateProvision: getter 85, notifier 32853, UInt16, scale ASSUMED 0.005 deg/s offset -163.84. Declared, off (config.world.path.sources.yawHu). Read only."
+    },
+    "de.bmw.chassis.CentralOdometryProvision": {
+      "_instances": "1",
+      "_broadcasts": [
+        "curvatureAndSlipSideAngle"
+      ],
+      "_about": "fixes-1121 AL: the chassis' own curvature of our motion (ActualValueCurvatureVehicleMotion Float, assumed 1/m, + left; qualifierCurvature): an EVENT (32769, service 7000). Declared, off (config.world.path.sources.curv) until a drive shows it is sent. Read only."
     }
   },
   "screens": [
@@ -253,7 +278,44 @@
         "ySign": 1,
         "minProb": 0.3,
         "staleMs": 1500,
-        "maxLen": 120
+        "maxLen": 120,
+        "probScale": "auto",
+        "minLen": 8,
+        "maxOffset": 9,
+        "cMax": 0.1,
+        "aLat": 5,
+        "angle": [
+          [
+            15,
+            0.15
+          ],
+          [
+            5,
+            0.3
+          ],
+          [
+            0,
+            0.6
+          ]
+        ],
+        "minEdge": 1.0,
+        "crossA": 0.06,
+        "wMin": 2.4,
+        "wMax": 4.5,
+        "nearX": 20,
+        "width": 3.5,
+        "confirm": 3,
+        "holdFrames": 8,
+        "holdMs": 700,
+        "gate": 0.9,
+        "jumpY": 0.35,
+        "jumpA": 0.05,
+        "jumpC": 0.002,
+        "blendMs": 500,
+        "reacquireMs": 1000,
+        "guessStr": 0.55,
+        "straightLen": 50,
+        "_about": "fixes-1121 AL (apps/acc_view/lanes.js): only what makes sense is drawn. probScale: existenceProbability is a bare Float in the catalogue; 'auto' reads a value above 1.5 as 0..100, a number multiplies. A boundary is refused under minLen m, beyond maxOffset m, with a curvature over min(cMax, aLat / v^2), a heading over angle[speed m/s], or (new) closer than minEdge m to our centre; neighbours wMin..wMax m apart within nearX m; drawn after `confirm` frames, held holdFrames / holdMs; a jump over jumpY m / jumpA rad / jumpC 1/m starts a new candidate. Transitions blendMs; back to a better picture after reacquireMs. Every other key: world.js DEFAULT.lanes."
       },
       "sources": {
         "cam": true,
@@ -263,7 +325,175 @@
         "keepDistance": true,
         "frontExtended": true
       },
-      "_about": "r1120 AA2, the owner's FOCUS (2026-11-20; apps/acc_view/world.js): HYPOTHESES until a drive's log says otherwise: the events' x / y are metres (scale 1) with y to the LEFT (ySign 1; -1 flips); the camera's ObjectRecognition and ObjectPosition slots are the same objects index by index. range: the drawn lane's far end (m). sources: switch a subscription off (each is read only)."
+      "_about": "r1120 AA2, the owner's FOCUS (2026-11-20; apps/acc_view/world.js): HYPOTHESES until a drive's log says otherwise: the events' x / y are metres (scale 1) with y to the LEFT (ySign 1; -1 flips); the camera's ObjectRecognition and ObjectPosition slots are the same objects index by index. range: the drawn lane's far end (m). sources: switch a subscription off (each is read only). path (fixes-1121 AL): our predicted path's sources and limits.",
+      "path": {
+        "on": true,
+        "vStand": 0.5,
+        "vYawMin": 2,
+        "vSteerMax": 5,
+        "wheelbase": 2.851,
+        "steerRatio": 15.0,
+        "steerCurve": [
+          [
+            0,
+            15.0
+          ],
+          [
+            20,
+            15.0
+          ],
+          [
+            100,
+            13.0
+          ],
+          [
+            200,
+            12.0
+          ]
+        ],
+        "turnRadius": 5.7,
+        "aLat": 9,
+        "sources": {
+          "yaw": {
+            "on": true,
+            "role": "yaw",
+            "iface": "de.bmw.chassis.YawRateProvision",
+            "member": "yawRate",
+            "kind": "event",
+            "staleMs": 1000,
+            "path": [
+              "yawRate",
+              "yawRate"
+            ],
+            "invalid": [
+              "yawRate",
+              "invalidFlag"
+            ],
+            "qual": [
+              "qualifierYawRate"
+            ],
+            "bad": [
+              "SIGNAL_UNGUELTIG",
+              15,
+              "SIGNALWERT_UNGUELTIG",
+              14,
+              "UNGUELTIG",
+              6,
+              "INITIALISIERUNG",
+              8
+            ],
+            "scale": 1,
+            "offset": 0,
+            "none": [],
+            "unit": "deg",
+            "sign": 1
+          },
+          "steer": {
+            "on": true,
+            "role": "steer",
+            "iface": "de.bmw.infotainment.drivingexcitement.XView",
+            "member": "statusSteeringAngleDriver",
+            "kind": "field",
+            "staleMs": 5000,
+            "path": [
+              "actualValueSteeringAngleDriver"
+            ],
+            "qual": [
+              "qualifierActualValueSteeringAngleDriver"
+            ],
+            "bad": [
+              "SIGNAL_UNGUELTIG",
+              15,
+              "SIGNALWERT_IST_UNGUELTIG__ZUSTAND_S_STATUS_PERMANENT",
+              6,
+              "SIGNALWERT_IST_UNGUELTIG__ZUSTAND_S_STATUS_TEMPORAER",
+              14,
+              "SENSOR_NICHT_VORHANDEN",
+              7,
+              "INITIALISIERUNG",
+              8
+            ],
+            "scale": 0.04395,
+            "offset": -1440,
+            "none": [
+              65535
+            ],
+            "unit": "deg",
+            "sign": 1,
+            "road": false
+          },
+          "yawHu": {
+            "on": false,
+            "role": "yaw",
+            "iface": "de.bmw.infotainment.vehicle.CDS2",
+            "member": "statusYawVelocityVehicle",
+            "kind": "field",
+            "staleMs": 5000,
+            "path": [
+              "yawVelocityVehicle"
+            ],
+            "scale": 0.005,
+            "offset": -163.84,
+            "none": [
+              65535
+            ],
+            "unit": "deg",
+            "sign": 1
+          },
+          "steerAxle": {
+            "on": false,
+            "role": "steer",
+            "iface": "de.bmw.infotainment.drivingexcitement.XView",
+            "member": "statusFrontAxleSteeringAngle",
+            "kind": "field",
+            "staleMs": 5000,
+            "path": [
+              "steeringAngleFrontAxleEffective"
+            ],
+            "scale": 0.0043945,
+            "offset": -144,
+            "none": [
+              65535
+            ],
+            "unit": "deg",
+            "sign": 1,
+            "road": true
+          },
+          "curv": {
+            "on": false,
+            "role": "curv",
+            "iface": "de.bmw.chassis.CentralOdometryProvision",
+            "member": "curvatureAndSlipSideAngle",
+            "kind": "event",
+            "staleMs": 1000,
+            "path": [
+              "curvature",
+              "ActualValueCurvatureVehicleMotion"
+            ],
+            "invalid": [
+              "curvature",
+              "invalidFlag"
+            ],
+            "qual": [
+              "qualifierCurvature"
+            ],
+            "bad": [
+              "FEHLER",
+              6,
+              "SIGNAL_UNBEFUELLT",
+              15,
+              "WERT_NICHT_VERFUEGBAR",
+              14
+            ],
+            "scale": 1,
+            "offset": 0,
+            "none": [],
+            "unit": "1/m",
+            "sign": 1
+          }
+        },
+        "_about": "fixes-1121 AL: our own path when the lanes are not good enough (lanes.js Path): yaw rate / speed above vYawMin m/s (preferred wherever we move), the steering alone below it, blended up to vSteerMax; a direct curvature first when its source is on; never tighter than turnRadius m or aLat m/s^2; straight under vStand m/s or with no data. The owner's car is a G20 330i xDrive sedan (wheelbase 2 851 mm) with S2VL Variable Sport Steering: steerCurve [[steering-wheel deg, ratio], ...] is the ratio by the wheel's angle, linear between, flat beyond, and the road wheels' angle is its integral. BMW publishes no curve: 15.0 on centre falling to 12.0 by 200 deg is a CONSERVATIVE ASSUMPTION (steerRatio: only without a curve). sources: the yaw and steer pair is on, the others are alternatives (declared in signals, read only, off). Every scale, unit ('deg' = degrees or deg/s) and sign is ASSUMED: the log's 'acc: path ... raw' ranges and 'cal' ratio (the camera's lane curvature over ours: 1 when right, -1 a sign, ~57 deg/rad; for the steering also the curve) settle them."
+      }
     }
   }
 }

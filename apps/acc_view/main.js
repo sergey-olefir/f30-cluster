@@ -22,6 +22,10 @@
  * Night: the car's own day/night (Vehicle.statusDayNightChangeOver, config.dayNight: Twin Dial's source), else the sun.
  * The car's own collision warning (FASuS.requestWarnBrakeCoordinatorDisplay): logged; drawn only when config.warn names its
  * member and active values (null: never).
+ * Lanes (fixes-1121 AL, lanes.js): only what makes sense is drawn; when the camera's lanes are not good enough the lane is our
+ * own predicted path (yaw rate / speed, the steering at low speed), drawn as a guess (thinner, dashed, dimmer), blended over
+ * half a second. The motion sources are config.world.path.sources (read only: an event, or a field "rs" with a non-zero
+ * getter); their units and signs are assumptions the "acc: path" log line's raw ranges and "cal" ratio settle.
  * Words: words.js only (Ukrainian and English); config.lang until the languages module comes.
  * Log lines: numbers and enum names only. Never lets an exception escape: an OAP app that exits twice is uninstalled.
  */
@@ -33,6 +37,7 @@ const Wd = require('./words');
 const MapView = require('./mapview');
 const GP = require('./gpu');
 const Wo = require('./world');
+const Ln = require('./lanes');
 
 const SPEED_IF = 'de.bmw.infotainment.vehicle.Vehicle2';
 const FASUS_IF = 'de.bmw.infotainment.fasus.FASuS';
@@ -79,8 +84,9 @@ mgu.run({
             timer: null, mv: null, mapBytes: 0,
             page: { key: '', sk: '', paintAt: 0, at: 0, loopAt: 0, force: true, paints: 0, ms: 0, gpuAt: 0, lastWords: null, bandKey: '', tableKey: '', frames: 0, gpuMs: 0, uploads: 0, statAt: 0 },
             // the world: the newest raw values (decoded in step(), at most every WORLD_MS), the tracker, the lane model, the logs
-            raw: { rec: null, pos: null, posAt: 0, tcp: null, tcpAt: 0, lanes: null, lanesAt: 0 }, worldAt: 0, laneModel: null, laneAt: 0,
+            raw: { rec: null, pos: null, posAt: 0, tcp: null, tcpAt: 0, lanes: null, lanesAt: 0 }, worldAt: 0, kmhAt: 0,
             tracker2: new Wo.Tracker(wcfg, ['cam', 'tcp']), logs: {}, leadCls: null,
+            lanes: new Ln.Lanes(wcfg), motion: {},          // the lane model and our own motion's newest raw values (fixes-1121 AL)
         };
         const slog = (name) => st.logs[name] || (st.logs[name] = new Wo.SourceLog(name, 10000));
         const guard = (what, fn) => function () { try { return fn.apply(null, arguments); } catch (e) { log.error('acc: ' + what + ': ' + (e && e.stack || e)); return undefined; } };
@@ -113,6 +119,7 @@ mgu.run({
             w(SPEED_IF, '1', { statusCarSpeed2: guard('speed', (v) => {
                 const raw = v && typeof v === 'object' ? v.speedVehicleCentreOfGravity : null;
                 st.kmh = typeof raw === 'number' && raw !== 65535 ? raw * 0.015625 : null;
+                st.kmhAt = Date.now();
             }) });
             if (tsrCfg) {
                 const h3 = {}; h3[tsrCfg.event] = guard('limit', (v) => {
@@ -167,6 +174,17 @@ mgu.run({
                 const objs = [0, 1, 2].map((i) => ({ cls: 'type' + SRC.rawWord(o['KeepDistObjType' + i]), x: typeof o['KeepDistObjDistanceLongitudinal' + i] === 'number' ? o['KeepDistObjDistanceLongitudinal' + i] : null, y: typeof o['KeepDistObjDistanceLateral' + i] === 'number' ? o['KeepDistObjDistanceLateral' + i] : null }));
                 slog('keepDistance raw').add(objs, null);
             }) });
+            // our own motion for the predicted path (lanes.js Path): each source a read-only event or "rs" field of app.json,
+            // switched in config.world.path.sources; a handler only keeps the newest value
+            const bySrc = {}, names = [];
+            if (wcfg.path.on !== false) Object.keys(wcfg.path.sources).forEach((name) => {
+                const sp = wcfg.path.sources[name];
+                if (!sp || !sp.on || typeof sp.iface !== 'string' || typeof sp.member !== 'string') return;
+                (bySrc[sp.iface] = bySrc[sp.iface] || {})[sp.member] = guard('motion ' + name, (v) => { st.motion[name] = { v, at: Date.now() }; });
+                names.push(name);
+            });
+            Object.keys(bySrc).forEach((iface) => w(iface, '1', bySrc[iface]));
+            log.info('acc: path sources ' + (names.join(' ') || 'none') + ' (units and signs assumed: config.world.path)');
             if (srcOn.frontExtended) w(fvC.iface, fvC.instance || '1', { DataFrontVehicleExtended: guard('front ext', (v) => {
                 const t = v && typeof v === 'object' ? v.frontVehicleExtendedObjectType : null;
                 st.leadCls = Object.prototype.hasOwnProperty.call(Wo.OBJECT_TYPE, String(t)) ? Wo.OBJECT_TYPE[String(t)] : null;
@@ -192,19 +210,32 @@ mgu.run({
                     r.tcp = null;
                 }
                 if (r.lanes) {
-                    const m = Wo.laneModel(wcfg, r.lanes);
-                    if (m) { st.laneModel = m; st.laneAt = r.lanesAt; }
+                    const m = Wo.laneModel(wcfg, r.lanes);          // what arrived, as 0.1.0 read it: the source's own log line
                     slog('lanes').add(m ? m.lines.map((l) => ({ cls: l.type, x: l.len, y: l.y0 })) : [], r.lanesQ);
+                    st.lanes.frame(r.lanes, r.lanesAt, st.kmh !== null ? st.kmh / 3.6 : null);      // what is drawn: lanes.js
                     r.lanes = null;
                 }
                 Object.keys(st.logs).forEach((k) => { const ln = st.logs[k].line(now); if (ln) log.info(ln); });
+                st.lanes.logLines(now).forEach((ln) => log.info(ln));
             }
-            const lanes = st.laneModel && now - st.laneAt < wcfg.lanes.staleMs ? st.laneModel : null;
+            st.lanes.motion(motionNow());
+            const lanes = st.lanes.output(now);                     // never null: measured, partial, our path, or straight
             const objs = st.tracker2.frame(now);
             const src = st.tracker2.sourceNow(now);
-            if (!lanes && !src) return null;
             const lead = Wo.leadOf(objs, lanes);
             return { lanes, objects: objs.filter((o) => o !== lead), lead: lead ? { x: lead.x, y: lead.y, cls: lead.cls } : null, src: src || 'lanes' };
+        }
+
+        /** Our own motion now, decoded by config (lanes.js readSource): per role the first source with a value. */
+        function motionNow() {
+            const P = wcfg.path, out = { v: st.kmh !== null && st.kmhAt ? { val: st.kmh / 3.6, at: st.kmhAt, stale: P.speedStaleMs } : null };
+            Object.keys(P.sources).forEach((name) => {
+                const sp = P.sources[name], m = st.motion[name];
+                if (!sp || !sp.on || !m) return;
+                if (!m.dec || m.dec.at !== m.at) { const r = Ln.readSource(sp, m.v); m.dec = { val: r.val, at: m.at, raw: r.raw, bad: r.bad, road: !!sp.road, stale: sp.staleMs }; }
+                if (!out[sp.role] || out[sp.role].val === null) out[sp.role] = m.dec;
+            });
+            return out;
         }
 
         // ---- the state now, and the car's glide (shared by both placements) ----
