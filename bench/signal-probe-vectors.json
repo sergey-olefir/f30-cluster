@@ -2337,9 +2337,12 @@
    "proposalAvailabilityDCC": "AVAILABLE",
    "valueSetSpeed": 110,
    "infoSetSpeed": 1,
-   "proposalAssistFunction": "ACC"
+   "proposalAssistFunction": "ACC",
+   "proposalAvailabilityUCC": "NOT_EQUIPPED",
+   "infoResponseAdaptionSpeed": 0,
+   "stateForecastLongitudinal": "NOFORECAST"
   },
-  "body": "acc=ACTIVE sla=NOT_EQUIPPED sld=AVAILABLE dcc=AVAILABLE setSpeed=110 setInfo=1 proposal=ACC"
+  "body": "acc=ACTIVE sla=NOT_EQUIPPED sld=AVAILABLE dcc=AVAILABLE setSpeed=110 setInfo=1 proposal=ACC ucc=NOT_EQUIPPED response=0 forecast=NOFORECAST"
  },
  {
   "set": "S8",
@@ -7048,6 +7051,69 @@
    "qualifierActualValueSteeringAngleDriver": "INITIALISIERUNG"
   },
   "body": "angle=32790 qualifier=INITIALISIERUNG"
+ },
+ {
+  "set": "S17",
+  "p": "P26",
+  "tag": "sla-setting",
+  "iface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+  "field": "settingSpeedLimitAssist",
+  "instance": "1",
+  "value": {
+   "value": "ACCEPT_MANUALLY",
+   "availability": "OPERABLE",
+   "availabilityDeactivated": "OPERABLE"
+  },
+  "body": "value=ACCEPT_MANUALLY availability=OPERABLE deactivated=OPERABLE"
+ },
+ {
+  "set": "S17",
+  "p": "P26",
+  "tag": "dcc-setting",
+  "iface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+  "field": "settingDCC",
+  "instance": "1",
+  "value": {
+   "value": "ACTIVATED",
+   "availability": "NOT_OPERABLE"
+  },
+  "body": "value=ACTIVATED availability=NOT_OPERABLE"
+ },
+ {
+  "set": "S17",
+  "p": "P26",
+  "tag": "sla-country",
+  "iface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+  "field": "displayStatusSpeedLimitAssist",
+  "instance": "1",
+  "value": "FUNCTION_AVAILABLE_IN_YOUR_COUNTRY",
+  "body": "status=FUNCTION_AVAILABLE_IN_YOUR_COUNTRY"
+ },
+ {
+  "set": "S17",
+  "p": "P26",
+  "tag": "fas-foresight",
+  "iface": "de.bmw.infotainment.fasus.FASuS",
+  "field": "displayForesight",
+  "instance": "1",
+  "value": {
+   "displayCascading": "KEINE_ANZEIGE",
+   "unitOfMeasurementSpeedForesight": "EINHEIT_KM_S_H",
+   "unitOfMeasurementDistanceForesight": "EINHEIT_METER",
+   "displaySpeedForesight": "_50",
+   "displaySpeedForesightDistance": 12,
+   "displaySpeedForesightType": "GESETZLICHES_TEMPOLIMIT",
+   "displayOperationTakeOverSuggestionSpeed": "KEIN_UEBERNAHMEANGEBOT",
+   "displayTakeOverSuggestionSpeed": 50,
+   "displayValueOffsetSuggestionSpeed": 0,
+   "statusISA": "ISA_AKTIV_MANUELL",
+   "displayActivityDecelerationAssistant2": "NICHT_VERFUEGBAR",
+   "targetTypeReasonDeceleration2": "KEINE_ANZEIGE",
+   "countryCodingDisplaySpeedForesight": "ECE_SURE",
+   "displayOperationTakeOverSuggestionSpeed2": "UEBERNAHME_MIT_SET",
+   "displayOperationTakeOverSuggestionSpeedForesight": "KEIN_UEBERNAHMEANGEBOT"
+  },
+  "body": "offer2=UEBERNAHME_MIT_SET offerSpeed=50 offer=KEIN_UEBERNAHMEANGEBOT offset=0 offerForesight=KEIN_UEBERNAHMEANGEBOT isa=ISA_AKTIV_MANUELL speed=_50 type=GESETZLICHES_TEMPOLIMIT dist=12 decel=NICHT_VERFUEGBAR reason=KEINE_ANZEIGE speedUnit=EINHEIT_KM_S_H country=ECE_SURE"
  },
  {
   "set": "S18",
