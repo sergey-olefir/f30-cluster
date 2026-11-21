@@ -501,6 +501,8 @@ process.on('message', (m) => {
             carplayTurns: fakeTurns ? { calls: fakeTurns.calls.length, methods: fakeTurns.calls.map((c) => c.method).filter((x, i, a) => a.indexOf(x) === i) } : null,
             twin: twinSim ? twinSim.state(hud) : null,      // twin_dial: ledger, coverage, the engine's message state
             // front-vehicle FV: the test mode's state (numbers and our own words only)
+            // road TD: Road View's test modes (shared/road_ui.js probe: modes, subscriptions, the view, its layers)
+            road: (() => { try { const R = require(path.join(stage, 'source', 'javascript', 'road_ui.js')); return hud ? R.probe(hud) : null; } catch (e) { return { error: String(e && e.message || e).slice(0, 200) }; } })(),
             fv: (() => { try { return hud && hud.fv && hud.fv.tracker ? { on: !!(hud.config.frontVehicle && hud.config.frontVehicle.on), subscribed: hud.fv.subscribed,
                 view: hud.fv.view, tracker: hud.fv.tracker.state(), page: hud.tdp ? hud.tdp.page : null, icon: hud.widgets.has('fv_icon') } : null; } catch (e) { return { error: String(e && e.message || e) }; } })(),
             // fix/colour-daynight: the car's day/night as the engine took it, the source in use, night now, and what

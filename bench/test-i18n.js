@@ -143,7 +143,8 @@ function codeFiles() {
         'apps/driver_profiles/format.js', 'apps/driver_profiles/avatars.js', 'apps/driver_profiles/profiles.js',
         'shared/profile_settings.js', 'shared/units.js',      // r1120 PS
         'tools/road-view/app/rv_recorder/rv_menu.js', 'tools/road-view/app/rv_recorder/main.js', 'tools/road-view/app/rv_recorder/rv.js',      // road TS: the RV recorder (outside the Store)
-        'apps/auto_beam/words.js', 'apps/auto_beam/paint.js', 'apps/auto_beam/main.js', 'apps/auto_beam/contract.js'];      // Auto Beam (HD)
+        'apps/auto_beam/words.js', 'apps/auto_beam/paint.js', 'apps/auto_beam/main.js', 'apps/auto_beam/contract.js',      // Auto Beam (HD)
+        'shared/road_view.js', 'shared/road_ui.js', 'shared/road_signs.js', 'shared/road_shaders.js'];      // road TD
 }
 
 /**
