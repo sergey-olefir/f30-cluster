@@ -15,6 +15,10 @@
  *   - 0.1.2 tells every state apart on the screen and in the log: the clock, the speed, events («подія») vs fields
  *     («поле»), the getters' answers, the providers' ups and downs, the control row and the verdict.
  *
+ * cruise CR (0.1.3): the current app runs as "0.1.3" (0.1.2's screen plus the row «Асистент круїзу»); a seventh state, cruise, has a
+ * unit answer the multimodal driver-assistance service, so the row shows the getter's value, then a notification; in every other
+ * state that getter times out (the owner's car, 2026-11-18) and the row says so.
+ *
  *   node bench/test-cam-check-car.js            (no port; about 15 s, the runs go in parallel)
  */
 const fs = require('fs');
@@ -99,11 +103,11 @@ function runChild(dir, scenario, app) {
     const versions = {
         '0.1.0': stage(base, 'v010', git('b349676', 'apps/cam_check/main.js'), git('b349676', 'apps/cam_check/app.json')),
         '0.1.1': stage(base, 'v011', git('dea455a', 'apps/cam_check/main.js'), git('dea455a', 'apps/cam_check/app.json')),
-        '0.1.2': stage(base, 'v012', fs.readFileSync(path.join(ROOT, 'apps', 'cam_check', 'main.js'), 'utf8'), appJson),
+        '0.1.3': stage(base, 'v013', fs.readFileSync(path.join(ROOT, 'apps', 'cam_check', 'main.js'), 'utf8'), appJson),
         theme: stage(base, 'theme', THEME_MAIN, JSON.stringify({ id: 'theme', version: '0', config: {} }))
     };
-    ok(JSON.parse(appJson).version === '0.1.2', 'apps/cam_check is 0.1.2');
-    const scenarios = ['parked', 'asleep', 'deaf', 'driving', 'late', 'flap'];
+    ok(JSON.parse(appJson).version === '0.1.3', 'apps/cam_check is 0.1.3');
+    const scenarios = ['parked', 'asleep', 'deaf', 'driving', 'late', 'flap', 'cruise'];
     const jobs = [];
     scenarios.forEach((s) => Object.keys(versions).forEach((v) => jobs.push(runChild(versions[v], s, v === 'theme' ? 'theme' : 'cam_check').then((r) => ({ s, v, r })))));
     const R = {};
@@ -119,24 +123,24 @@ function runChild(dir, scenario, app) {
         const r = R[s][v], bad = /UNCAUGHT|UNHANDLED|CHILD FAILED/.test(L(s, v));
         if (!r.native || bad || r.stats.refused) ok(false, s + ' / ' + v + ': ' + (!r.native ? 'the fake binding was not used' : bad ? L(s, v).split('\n').filter((x) => /UNCAUGHT|UNHANDLED|CHILD/.test(x))[0] : 'a setter or method was called'));
     }));
-    ok(true, 'all 24 runs used the real kit signals.js on the fake binding, threw nothing and called no setter or method');
+    ok(true, 'all ' + scenarios.length * Object.keys(versions).length + ' runs used the real kit signals.js on the fake binding, threw nothing and called no setter or method');
 
     console.log('-- driving / late / flap: the subscription works in every version (the car sends, every app hears)');
     ['driving', 'late', 'flap'].forEach((s) => {
         ok(theme(s) > 5, s + ': the theme-like subscriber (kit/car.js + extra) receives the limit event: ' + theme(s) + ' messages');
         ok(/^Обмеження швидкості.*: (одне й те саме значення|ЗМІНЮЄТЬСЯ)/.test(T(s, '0.1.0', 'S_LIMIT')), s + ' / 0.1.0 hears the limit: ' + T(s, '0.1.0', 'S_LIMIT'));
         ok(/^Обмеження швидкості.*: (одне й те саме значення|ЗМІНЮЄТЬСЯ)/.test(T(s, '0.1.1', 'S_LIMIT')), s + ' / 0.1.1 hears the limit: ' + T(s, '0.1.1', 'S_LIMIT'));
-        ok(/подія: ЗМІНЮЄТЬСЯ: 2 різних/.test(T(s, '0.1.2', 'S_LIMIT')), s + ' / 0.1.2 hears the limit: ' + T(s, '0.1.2', 'S_LIMIT'));
+        ok(/подія: ЗМІНЮЄТЬСЯ: 2 різних/.test(T(s, '0.1.3', 'S_LIMIT')), s + ' / 0.1.3 hears the limit: ' + T(s, '0.1.3', 'S_LIMIT'));
     });
-    ok(/подія: тиша, хоча авто їде · сервіс є$/.test(T('driving', '0.1.2', 'S_LIGHT')), 'driving / 0.1.2: a camera event the car does not send is silence while moving, with its service there: ' + T('driving', '0.1.2', 'S_LIGHT'));
-    ok(/ · \d+ км\/год \(макс \d+\) · FAHREN$/.test(T('driving', '0.1.2', 'HEAD')) && !/ 0 км\/год/.test(T('driving', '0.1.2', 'HEAD')), 'driving / 0.1.2: the top line shows the speed and the condition: ' + T('driving', '0.1.2', 'HEAD'));
-    ok(/швидкість [1-9]\d*× \(г\. відповів\), оберти [1-9]\d*× \(г\. відповів\), стан авто 1×/.test(T('driving', '0.1.2', 'S_CTRL')), 'driving / 0.1.2: the control row counts speed, rpm and condition: ' + T('driving', '0.1.2', 'S_CTRL'));
-    ok(/ck: first limit \(event\) at \+[\d.]+ s, \d+ km\/h: \{"presentClassLimitSpeed":10/.test(L('driving', '0.1.2')), 'driving / 0.1.2: the first limit message is in the log with the speed');
-    ok(/ck: provider TrafficSignRecognition UP #1 at \+[6-7]\.\d s/.test(L('late', '0.1.2')) && /ck: getter Vehicle2\.statusCarSpeed2 #1 \(provider up\) answered/.test(L('late', '0.1.2')),
-        'late / 0.1.2: the log says when the provider came up, and the getter is asked then');
-    ok(/ck: provider TrafficSignRecognition DOWN #1 at \+5\.\d s/.test(L('flap', '0.1.2')) && /ck: provider TrafficSignRecognition UP #2 at \+7\.\d s/.test(L('flap', '0.1.2')),
-        'flap / 0.1.2: the provider going away and coming back is logged with its count');
-    ok(/сервіс є \(з'являвся 2×, зникав 1×\)$/.test(T('flap', '0.1.2', 'S_LIMIT')), 'flap / 0.1.2: the row shows how often the provider came and went: ' + T('flap', '0.1.2', 'S_LIMIT'));
+    ok(/подія: тиша, хоча авто їде · сервіс є$/.test(T('driving', '0.1.3', 'S_LIGHT')), 'driving / 0.1.3: a camera event the car does not send is silence while moving, with its service there: ' + T('driving', '0.1.3', 'S_LIGHT'));
+    ok(/ · \d+ км\/год \(макс \d+\) · FAHREN$/.test(T('driving', '0.1.3', 'HEAD')) && !/ 0 км\/год/.test(T('driving', '0.1.3', 'HEAD')), 'driving / 0.1.3: the top line shows the speed and the condition: ' + T('driving', '0.1.3', 'HEAD'));
+    ok(/швидкість [1-9]\d*× \(г\. відповів\), оберти [1-9]\d*× \(г\. відповів\), стан авто 1×/.test(T('driving', '0.1.3', 'S_CTRL')), 'driving / 0.1.3: the control row counts speed, rpm and condition: ' + T('driving', '0.1.3', 'S_CTRL'));
+    ok(/ck: first limit \(event\) at \+[\d.]+ s, \d+ km\/h: \{"presentClassLimitSpeed":10/.test(L('driving', '0.1.3')), 'driving / 0.1.3: the first limit message is in the log with the speed');
+    ok(/ck: provider TrafficSignRecognition UP #1 at \+[6-7]\.\d s/.test(L('late', '0.1.3')) && /ck: getter Vehicle2\.statusCarSpeed2 #1 \(provider up\) answered/.test(L('late', '0.1.3')),
+        'late / 0.1.3: the log says when the provider came up, and the getter is asked then');
+    ok(/ck: provider TrafficSignRecognition DOWN #1 at \+5\.\d s/.test(L('flap', '0.1.3')) && /ck: provider TrafficSignRecognition UP #2 at \+7\.\d s/.test(L('flap', '0.1.3')),
+        'flap / 0.1.3: the provider going away and coming back is logged with its count');
+    ok(/сервіс є \(з'являвся 2×, зникав 1×\)$/.test(T('flap', '0.1.3', 'S_LIMIT')), 'flap / 0.1.3: the row shows how often the provider came and went: ' + T('flap', '0.1.3', 'S_LIMIT'));
 
     console.log('-- the photo: «сервіс є, мовчить» on every row');
     ok(allRows('asleep', '0.1.1', /: сервіс є, мовчить$/), 'asleep (the bus sends nothing, no getter answers) / 0.1.1: every row «сервіс є, мовчить» - the photo');
@@ -146,27 +150,44 @@ function runChild(dir, scenario, app) {
     ok(/одне й те саме значення/.test(T('parked', '0.1.1', 'S_LAMPS')) && allRows('parked', '0.1.1', /: (сервіс є, мовчить|одне й те саме значення \(\d+×\), \d+ с тому)$/),
         'parked (getters answer) / 0.1.1: the lamps row has the getter\'s value, all others silent: ' + T('parked', '0.1.1', 'S_LAMPS'));
 
-    console.log('-- 0.1.2 tells the states apart');
+    console.log('-- 0.1.3 tells the states apart');
     ['asleep', 'deaf'].forEach((s) => {
-        ok(/^НІЧОГО не чути, навіть контроль і геттери/.test(T(s, '0.1.2', 'FOOT')), s + ' / 0.1.2 verdict: ' + T(s, '0.1.2', 'FOOT'));
-        ok(/швидкість 0× \(г\. НЕ ВІДПОВІВ — ЗБІЙ\), оберти 0× \(г\. НЕ ВІДПОВІВ — ЗБІЙ\)/.test(T(s, '0.1.2', 'S_CTRL')), s + ' / 0.1.2 control row: ' + T(s, '0.1.2', 'S_CTRL'));
-        ok(/ \? км\/год /.test(T(s, '0.1.2', 'HEAD')), s + ' / 0.1.2 top line: no speed known: ' + T(s, '0.1.2', 'HEAD'));
-        ok(/· подія: тиша \(не судити: контроль теж мовчить\) · сервіс є$/.test(T(s, '0.1.2', 'S_LIMIT')), s + ' / 0.1.2: an event\'s silence is not called normal while nothing is heard: ' + T(s, '0.1.2', 'S_LIMIT'));
-        ok(/ck: getter Vehicle2\.statusCarSpeed2 #1 \(provider up\) NO ANSWER after \d+ ms: method call get:statusCarSpeed2\(\)/.test(L(s, '0.1.2')), s + ' / 0.1.2: the getter\'s error is in the log');
+        ok(/^НІЧОГО не чути, навіть контроль і геттери/.test(T(s, '0.1.3', 'FOOT')), s + ' / 0.1.3 verdict: ' + T(s, '0.1.3', 'FOOT'));
+        ok(/швидкість 0× \(г\. НЕ ВІДПОВІВ — ЗБІЙ\), оберти 0× \(г\. НЕ ВІДПОВІВ — ЗБІЙ\)/.test(T(s, '0.1.3', 'S_CTRL')), s + ' / 0.1.3 control row: ' + T(s, '0.1.3', 'S_CTRL'));
+        ok(/ \? км\/год /.test(T(s, '0.1.3', 'HEAD')), s + ' / 0.1.3 top line: no speed known: ' + T(s, '0.1.3', 'HEAD'));
+        ok(/· подія: тиша \(не судити: контроль теж мовчить\) · сервіс є$/.test(T(s, '0.1.3', 'S_LIMIT')), s + ' / 0.1.3: an event\'s silence is not called normal while nothing is heard: ' + T(s, '0.1.3', 'S_LIMIT'));
+        ok(/ck: getter Vehicle2\.statusCarSpeed2 #1 \(provider up\) NO ANSWER after \d+ ms: method call get:statusCarSpeed2\(\)/.test(L(s, '0.1.3')), s + ' / 0.1.3: the getter\'s error is in the log');
     });
-    ok(/^Застосунок ЧУЄ авто\. Подій з даними: 0\./.test(T('parked', '0.1.2', 'FOOT')), 'parked / 0.1.2 verdict: the app hears the car, no event yet: ' + T('parked', '0.1.2', 'FOOT'));
-    ok(/ · 0 км\/год \(макс 0\)$/.test(T('parked', '0.1.2', 'HEAD')), 'parked / 0.1.2 top line: standing, the speed from its getter: ' + T('parked', '0.1.2', 'HEAD'));
-    ok(/швидкість \d+× \(г\. відповів\), оберти \d+× \(г\. відповів\), стан авто 0×/.test(T('parked', '0.1.2', 'S_CTRL')), 'parked / 0.1.2 control row: the getters answered: ' + T('parked', '0.1.2', 'S_CTRL'));
-    ok(/^Обмеження швидкості .*· подія: тиша \(норма, поки нічого не сталось\) · сервіс є$/.test(T('parked', '0.1.2', 'S_LIMIT')), 'parked / 0.1.2: the limit event is silence, which is normal: ' + T('parked', '0.1.2', 'S_LIMIT'));
-    ok(/· поле: одне значення \(\d+×\), \d+ с тому · геттер відповів$/.test(T('parked', '0.1.2', 'S_LAMPS')), 'parked / 0.1.2: the lamps field answered its getter: ' + T('parked', '0.1.2', 'S_LAMPS'));
-    ok(/· поле: сповіщень 0 · геттер НЕ ВІДПОВІВ — ЗБІЙ$/.test(T('parked', '0.1.2', 'S_FAS')), 'parked / 0.1.2: a field whose getter never answers is a fault: ' + T('parked', '0.1.2', 'S_FAS'));
-    ok(/^Лише читання · \d\d:\d\d:\d\d · працює 0:1\d · /.test(T('parked', '0.1.2', 'HEAD')), 'parked / 0.1.2: the app\'s own clock and running time tick: ' + T('parked', '0.1.2', 'HEAD'));
-    ok(/ck: summary \+2\d\.\d s|ck: summary \+1\d\.\d s/.test(L('parked', '0.1.2')) || RUN_MS < 21000, 'the first summary comes at +20 s (after this run: not checked)');
-    const verdicts = ['parked', 'asleep', 'driving'].map((s) => T(s, '0.1.2', 'FOOT'));
-    ok(new Set(verdicts).size === 3, '0.1.2 has a different verdict for parked, asleep and driving');
-    ok(/ck: watching 13 interfaces through kit\/car\.js \(the themes' path\), all at the start/.test(L('parked', '0.1.2')) && /signal TrafficSignRecognition subscribed/.test(L('parked', '0.1.2')),
-        '0.1.2 subscribes through kit/car.js, as the themes do');
-    ok(/ck: watch TrafficSignRecognition at \+0\.\d s: provider up; TrafficSignRecognition \(event\) subscribed/.test(L('parked', '0.1.2')), '0.1.2 logs each watch with the provider and each subscription\'s result');
+    ok(/^Застосунок ЧУЄ авто\. Подій з даними: 0\./.test(T('parked', '0.1.3', 'FOOT')), 'parked / 0.1.3 verdict: the app hears the car, no event yet: ' + T('parked', '0.1.3', 'FOOT'));
+    ok(/ · 0 км\/год \(макс 0\)$/.test(T('parked', '0.1.3', 'HEAD')), 'parked / 0.1.3 top line: standing, the speed from its getter: ' + T('parked', '0.1.3', 'HEAD'));
+    ok(/швидкість \d+× \(г\. відповів\), оберти \d+× \(г\. відповів\), стан авто 0×/.test(T('parked', '0.1.3', 'S_CTRL')), 'parked / 0.1.3 control row: the getters answered: ' + T('parked', '0.1.3', 'S_CTRL'));
+    ok(/^Обмеження швидкості .*· подія: тиша \(норма, поки нічого не сталось\) · сервіс є$/.test(T('parked', '0.1.3', 'S_LIMIT')), 'parked / 0.1.3: the limit event is silence, which is normal: ' + T('parked', '0.1.3', 'S_LIMIT'));
+    ok(/· поле: одне значення \(\d+×\), \d+ с тому · геттер відповів$/.test(T('parked', '0.1.3', 'S_LAMPS')), 'parked / 0.1.3: the lamps field answered its getter: ' + T('parked', '0.1.3', 'S_LAMPS'));
+    ok(/· поле: сповіщень 0 · геттер НЕ ВІДПОВІВ — ЗБІЙ$/.test(T('parked', '0.1.3', 'S_FAS')), 'parked / 0.1.3: a field whose getter never answers is a fault: ' + T('parked', '0.1.3', 'S_FAS'));
+    ok(/^Лише читання · \d\d:\d\d:\d\d · працює 0:1\d · /.test(T('parked', '0.1.3', 'HEAD')), 'parked / 0.1.3: the app\'s own clock and running time tick: ' + T('parked', '0.1.3', 'HEAD'));
+    ok(/ck: summary \+2\d\.\d s|ck: summary \+1\d\.\d s/.test(L('parked', '0.1.3')) || RUN_MS < 21000, 'the first summary comes at +20 s (after this run: not checked)');
+    const verdicts = ['parked', 'asleep', 'driving'].map((s) => T(s, '0.1.3', 'FOOT'));
+    ok(new Set(verdicts).size === 3, '0.1.3 has a different verdict for parked, asleep and driving');
+    ok(/ck: watching 14 interfaces through kit\/car\.js \(the themes' path\), all at the start/.test(L('parked', '0.1.3')) && /signal TrafficSignRecognition subscribed/.test(L('parked', '0.1.3')),
+        '0.1.3 subscribes through kit/car.js, as the themes do');
+    ok(/ck: watch TrafficSignRecognition at \+0\.\d s: provider up; TrafficSignRecognition \(event\) subscribed/.test(L('parked', '0.1.3')), '0.1.3 logs each watch with the provider and each subscription\'s result');
+
+    console.log('-- 0.1.3: «Асистент круїзу» (cruise CR), in every state');
+    ['parked', 'driving', 'flap'].forEach((s) => {
+        ok(/^Асистент круїзу · поле: сповіщень 0 · геттер НЕ ВІДПОВІВ — ЗБІЙ$/.test(T(s, '0.1.3', 'S_CRUISE')), s + ' / 0.1.3: no unit answers the multimodal service: ' + T(s, '0.1.3', 'S_CRUISE'));
+        ok(/ck: getter MultimodalControlDriverAssistance\.functionAvailabilityDriverAssistance #1 \(provider up\) NO ANSWER after \d+ ms/.test(L(s, '0.1.3')), s + ' / 0.1.3: the getter\'s silence is in the log');
+    });
+    // asleep / deaf / late: every getter before it times out one after the other (3 s each, the kit asks one at a time), so at the end of
+    // the run it may still be asked: never «відповів», never a value
+    ['asleep', 'deaf', 'late'].forEach((s) => {
+        ok(/^Асистент круїзу · поле: сповіщень 0 · геттер (НЕ ВІДПОВІВ — ЗБІЙ|питаю…|чекає сервіс)$/.test(T(s, '0.1.3', 'S_CRUISE')), s + ' / 0.1.3: no value, no answer: ' + T(s, '0.1.3', 'S_CRUISE'));
+    });
+    ok(!/НЕ ВІДПОВІВ/.test(T('parked', '0.1.3', 'S_CTRL')) && /геттер НЕ ВІДПОВІВ/.test(T('parked', '0.1.3', 'S_CRUISE')), 'parked / 0.1.3: the control getters answer while the cruise one does not: "no receiver", not "deaf app"');
+    ok(/^Асистент круїзу · поле: DCC ACTIVE, SLD AVAILABLE, задана 61 · значень [1-9]\d* · геттер відповів$/.test(T('cruise', '0.1.3', 'S_CRUISE')), 'cruise / 0.1.3: the DCC and SLD states and the set speed, with the getter\'s evidence: ' + T('cruise', '0.1.3', 'S_CRUISE'));
+    ok(/ck: cruise assist \((getter|value)\) at \+[0-5]\.\d s: DCC AVAILABLE, SLD AVAILABLE, задана 0$/m.test(L('cruise', '0.1.3')) && /ck: cruise assist \(value\) at \+[6-9]\.\d s: DCC ACTIVE, SLD AVAILABLE, задана 61$/m.test(L('cruise', '0.1.3')),
+        'cruise / 0.1.3: the log has the first value (the getter\'s), then the notification at 6 s');
+    ok(/ck: getter MultimodalControlDriverAssistance\.functionAvailabilityDriverAssistance #1 \(provider up\) answered in \d+ ms: \{"proposalAvailabilityACC":"NOT_EQUIPPED"/.test(L('cruise', '0.1.3')), 'cruise / 0.1.3: the getter\'s answer whole in the log');
+    ok(['0.1.0', '0.1.1'].every((v) => !T('cruise', v, 'S_CRUISE')), 'the older versions have no such row');
 
     try { fs.rmSync ? fs.rmSync(base, { recursive: true, force: true }) : execFileSync('rm', ['-rf', base]); } catch (e) { /* temp */ }
     console.log(pass + ' passed, ' + fail + ' failed');
