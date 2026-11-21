@@ -1,0 +1,415 @@
+{
+  "id": "rv_recorder",
+  "title": "RV Recorder",
+  "description": "Read-only, record-only: one drive's numbers for one choice: RV (traffic lights, signs, road scene), CAM (the camera: objects, lanes, signs, lights, high-beam objects), CRUISE (cruise and limiter state, does a unit answer the multimodal service) or NAV (route metrics, nothing personal). Draws nothing on the cluster.",
+  "version": "0.2.0",
+  "vendor": "custom",
+  "loggingId": "OARV",
+  "iconGlyph": "RV",
+  "mguHmi": [
+    "ID7"
+  ],
+  "i18n": true,
+  "shared": [
+    "lang.js",
+    "signal_recorder.js",
+    "signal_format.js"
+  ],
+  "signals": {
+    "de.bmw.environmentalmodel.TrafficLightRecognitionFrontCameraLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "RecognitionTrafficLightCamera"
+      ]
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognitionFrontCamera"
+      ]
+    },
+    "de.bmw.environmentalmodel.SignRecognitionFrontCameraLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "RecognitionTrafficSignCamera",
+        "recognitionTrafficSignCamera2"
+      ]
+    },
+    "de.bmw.dass.TrafficSignRecognition": {
+      "_instances": "1",
+      "_broadcasts": [
+        "TrafficSignRecognition"
+      ]
+    },
+    "de.bmw.infotainment.displaydataserver.DisplayDataServer": {
+      "_instances": "1",
+      "functionalLibraryData": "rs"
+    },
+    "de.bmw.infotainment.displaydata.DisplayDataServer2": {
+      "_instances": "1",
+      "functionalLibraryData": "rs"
+    },
+    "de.bmw.infotainment.fasus.FASuS": {
+      "_instances": "1",
+      "displayDriverAssistenceSystemLongitudinalGuidance": "s",
+      "displayForesight": "s",
+      "displayForesight2": "rs",
+      "requestWarnBrakeCoordinatorDisplay": "rs",
+      "statusFAS": "s",
+      "statusIDriveFASExtended": "rs",
+      "statusNextSpeedLimitRecognition": "rs",
+      "statusOvertakeRecognition": "rs",
+      "statusSLITextMessage": "rs"
+    },
+    "de.bmw.dass.DisplayForesight": {
+      "_instances": "1",
+      "displayForesight": "s"
+    },
+    "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions": {
+      "_instances": "1",
+      "displayStatusGiveWayWarning": "s",
+      "displayStatusSpeedLimitAssist": "s",
+      "settingDCC": "s",
+      "settingGiveWayWarning": "s",
+      "settingOffsetSpeed": "s",
+      "settingSpeedLimitAssist": "s",
+      "settingStopSignBraking": "s",
+      "settingWrongWayAssistant": "s"
+    },
+    "de.bmw.dass.AssistedDrivingViewFunctionInput": {
+      "_instances": "1",
+      "_broadcasts": [
+        "assistedDrivingViewFunctionInputIbVip"
+      ]
+    },
+    "de.bmw.dass.driverassistanceapplications.AssistedDrivingViewLateralCollisionAvoidance": {
+      "_instances": "1",
+      "_broadcasts": [
+        "assistedDrivingViewLcaInput"
+      ]
+    },
+    "de.bmw.dass.pad.communication.AssistedDrivingViewLateralFunctionInput": {
+      "_instances": "1",
+      "_broadcasts": [
+        "lateralFunctionInputAssistedDrivingView"
+      ]
+    },
+    "de.bmw.dass.pad.communication.RoadOutputAssistedDrivingView": {
+      "_instances": "1",
+      "_broadcasts": [
+        "egoVehiclePositionUpdate",
+        "roadSegmentUpdate"
+      ]
+    },
+    "de.bmw.environmentalmodel.DAADataServer": {
+      "_instances": "1",
+      "_broadcasts": [
+        "FASView",
+        "LaneInformation",
+        "ObjectAssignment",
+        "ObjectInformation1",
+        "ObjectInformation2",
+        "ObjectListMerged",
+        "RoadModel"
+      ]
+    },
+    "de.bmw.dass.pad.communication.ObjectListSuAAR": {
+      "_instances": "1",
+      "_broadcasts": [
+        "suAARObjectList"
+      ]
+    },
+    "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ObjectPosition",
+        "ObjectRecognition"
+      ]
+    },
+    "de.bmw.environmentalmodel.ObjectRecognitionFrontCamera2": {
+      "_instances": "1",
+      "_broadcasts": [
+        "ObjectPosition",
+        "ObjectRecognition"
+      ]
+    },
+    "de.bmw.environmentalmodel.environmentalconditions.BlockageAndWeatherFrontCameraMain": {
+      "_instances": "1",
+      "_broadcasts": [
+        "blockageAndWeatherFrontcameraMain"
+      ]
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "_instances": "1",
+      "statusCarSpeed2": "rs",
+      "statusLightStatus": "rs"
+    },
+    "de.bmw.infrastructure.VehicleInformation": {
+      "_instances": "1",
+      "statusGearboxDrive": "s"
+    },
+    "de.bmw.body.Light": {
+      "_instances": "1",
+      "IndicatorSteeringColumn": "s",
+      "LampExterior": "s",
+      "LampExterior2": "s"
+    },
+    "de.bmw.infotainment.vehicle.CDS2": {
+      "_instances": "1",
+      "statusIndicate": "rs",
+      "statusYawVelocityVehicle": "rs"
+    },
+    "de.bmw.infrastructure.VehicleCondition": {
+      "_instances": "1",
+      "VehicleCondition": "s"
+    },
+    "de.bmw.infotainment.vehicle.CDS": {
+      "_instances": "1",
+      "statusEngineStatus": "rs"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle": {
+      "_instances": "1",
+      "statusDayNightChangeOver": "rs"
+    },
+    "de.bmw.infrastructure.EnvironmentalInformation": {
+      "_instances": "1",
+      "ExteriorTemperature": "s"
+    },
+    "de.bmw.environmentalmodel.LaneBoundaries": {
+      "_instances": "1",
+      "_broadcasts": [
+        "LaneBoundaries",
+        "LaneChange"
+      ]
+    },
+    "de.bmw.environmentalmodel.Lanes": {
+      "_instances": "1",
+      "_broadcasts": [
+        "LaneChange",
+        "LanesDetection",
+        "VerticalCurvatureEgoLane"
+      ]
+    },
+    "de.bmw.environmentalmodel.LaneBoundariesLegacy": {
+      "_instances": "1",
+      "_broadcasts": [
+        "LaneList",
+        "LaneMarkingEGOLeftHandGeometry",
+        "LaneMarkingEGORightHandGeometry"
+      ]
+    },
+    "de.bmw.environmentalmodel.LaneBoundariesLegacy2": {
+      "_instances": "1",
+      "_broadcasts": [
+        "laneMarkingEgoLeftHandGeometry",
+        "laneMarkingEgoRightHandGeometry",
+        "laneMarkingList"
+      ]
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraObjectlist": {
+      "_instances": "1",
+      "_broadcasts": [
+        "objectlistTCP"
+      ]
+    },
+    "de.bmw.sensors.objects.RecogFrontCameraLightDetection": {
+      "_instances": "1",
+      "_broadcasts": [
+        "MainBeamAssistantDataObject11",
+        "MainBeamAssistantDataObject12",
+        "MainBeamAssistantDataObject15",
+        "controlHighBeamAssistant",
+        "mEObjectID1",
+        "mEObjectID2",
+        "mainBeamAssistantDataObject1",
+        "mainBeamAssistantDataObject10",
+        "mainBeamAssistantDataObject13",
+        "mainBeamAssistantDataObject14",
+        "mainBeamAssistantDataObject2",
+        "mainBeamAssistantDataObject3",
+        "mainBeamAssistantDataObject4",
+        "mainBeamAssistantDataObject5",
+        "mainBeamAssistantDataObject6",
+        "mainBeamAssistantDataObject7",
+        "mainBeamAssistantDataObject8",
+        "mainBeamAssistantDataObject9"
+      ]
+    },
+    "de.bmw.environmentalmodel.environmentalconditions.Weather": {
+      "_instances": "1",
+      "RecognitionWeather": "s"
+    },
+    "de.bmw.chassis.CentralOdometryProvision": {
+      "_instances": "1",
+      "_broadcasts": [
+        "curvatureAndSlipSideAngle"
+      ]
+    },
+    "de.bmw.infotainment.drivingexcitement.XView": {
+      "_instances": "1",
+      "statusFrontAxleSteeringAngle": "rs",
+      "statusSteeringAngleDriver": "rs"
+    },
+    "de.bmw.dass.driverassistanceapplications.MultimodalControlDriverAssistance": {
+      "_instances": "1",
+      "functionAvailabilityDriverAssistance": "rs"
+    },
+    "de.bmw.dass.GapVehicleAhead": {
+      "_instances": "1",
+      "DataFrontVehicle": "s"
+    },
+    "de.bmw.powertrain.AcceleratorPedal": {
+      "_instances": "1",
+      "AngleAcceleratorPedal": "s"
+    },
+    "de.bmw.chassis.VehicleStabilizationManagement": {
+      "_instances": "1",
+      "StabilizationManagement": "s"
+    },
+    "de.bmw.powertrain.Powertrain": {
+      "_instances": "1",
+      "InformationVehicleDrive": "s",
+      "WheelMomentDrive4": "s"
+    },
+    "de.bmw.infotainment.navigation.navigationstatus.NavigationStatus": {
+      "_instances": "1",
+      "guidingState": "rs"
+    },
+    "de.bmw.infotainment.navigation.guiding.Guidance": {
+      "_instances": "Main_Instance",
+      "conclusiveDart": "rs",
+      "currentLaneGuiding": "rs",
+      "currentRoad": "rs",
+      "guidanceState": "rs",
+      "guidingProvider": "rs",
+      "isOnGuidableRoad": "rs",
+      "nextDestinationInfo": "rs",
+      "nextIntersection": "rs",
+      "travelledDistance": "rs",
+      "travelledTime": "rs"
+    },
+    "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding": {
+      "_instances": "Main_Instance",
+      "activeRouteChange": "rs",
+      "currentLaneGuiding": "rs",
+      "currentRoad": "rs",
+      "waypoints": "rs"
+    },
+    "de.bmw.infotainment.LaneGuiding": {
+      "_instances": "1",
+      "extendedLaneGuiding": "rs",
+      "laneGuiding": "rs"
+    },
+    "de.bmw.infotainment.navigation.NavigationCAN": {
+      "_instances": "1",
+      "calculationDataNavigation": "rs"
+    },
+    "de.bmw.infotainment.navigation.externalize.adasng.CCP": {
+      "_instances": "1",
+      "_broadcasts": [
+        "builtupAreaFlag",
+        "effectiveSpeedLimit",
+        "laneNumber",
+        "rampFlag",
+        "roadClass",
+        "roundaboutFlag",
+        "speedLimitUnit",
+        "trafficSide",
+        "urbanFlag",
+        "variableSpeedLimitSign"
+      ]
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "menu",
+      "title": "RV Recorder",
+      "settings": "placed",
+      "items": [
+        [
+          "text",
+          "STATUS",
+          ""
+        ],
+        [
+          "tworow",
+          "MARK",
+          "Позначка 1"
+        ],
+        [
+          "tworow",
+          "REC",
+          "Запис RV"
+        ],
+        [
+          "tworow",
+          "RECSET",
+          "Набір для запису: RV"
+        ],
+        [
+          "setting",
+          "tripMark"
+        ],
+        [
+          "setting",
+          "lang"
+        ],
+        [
+          "text",
+          "STATUS2",
+          ""
+        ]
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "tripMark",
+      "label": "TRIP = позначка / TRIP = mark",
+      "type": "bool",
+      "default": true,
+      "_about": "road TS: the stalk's TRIP button (bit 0x40 of Light.IndicatorSteeringColumn.operationColumnStalks, seen on the car 2026-11-18) is also a mark: the rising edge only. Read only."
+    },
+    {
+      "key": "lang",
+      "label": "Мова / Language",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Авто"
+        ],
+        [
+          "uk",
+          "Українська"
+        ],
+        [
+          "en",
+          "English"
+        ]
+      ],
+      "_about": "shared/lang.js: auto = the head unit's (--currentLanguage at start) when it is uk or en, else Ukrainian. Only the rows the app writes follow it; the menu's fixed labels are the package's own."
+    }
+  ],
+  "config": {
+    "_about": "READ ONLY. fixes-1121 CR: one recording records one choice (the RECSET row, settings key recSet): RV S19, CAM S20, CRUISE S21, NAV S22 (apps/rv_recorder/rv_fields.js); only the chosen set's interfaces are subscribed. config.rv: summaryS (seconds into a recording at which the log says which sources spoke), hubPauseMs (the pause between two interfaces being subscribed). config.recorder: shared/signal_recorder.js, as Signal Probe's: files of fileRawKB of text in data/rec/, the oldest removed past quotaMB (the app's disk limit is 20 MiB with its log), maxEntries of a list (a source's own recEntries is smaller).",
+    "rv": {
+      "summaryS": [
+        30,
+        120,
+        600
+      ],
+      "hubPauseMs": 120
+    },
+    "recorder": {
+      "fileRawKB": 4096,
+      "quotaMB": 15,
+      "flushMs": 1000,
+      "maxQueueKB": 2048,
+      "gzip": true,
+      "maxEntries": 16
+    }
+  }
+}

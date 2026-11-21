@@ -1,8 +1,8 @@
 {
   "id": "cam_check",
   "title": "Camera Check",
-  "description": "Read-only check: does this car's front camera send its traffic light, its light sources for the high beam, its object lists, its sign lists and its lanes? Each row says whether it is an event (silent until something happens) or a field (its getter must answer at once), with the provider's ups and downs, the getter's answer and the number of messages; a control row shows the speed and rpm the themes receive, and the top line the app's own clock, the speed and the vehicle condition. The first message of each source is written to the log. Writes nothing to the car.",
-  "version": "0.1.2",
+  "description": "Read-only check: does this car's front camera send its traffic light, its light sources for the high beam, its object lists, its sign lists and its lanes? Each row says whether it is an event (silent until something happens) or a field (its getter must answer at once), with the provider's ups and downs, the getter's answer and the number of messages; a control row shows the speed and rpm the themes receive, and the top line the app's own clock, the speed and the vehicle condition. A cruise row shows whether a unit answers the multimodal driver-assistance service (its DCC and SLD states, the set speed). The first message of each source is written to the log. Writes nothing to the car.",
+  "version": "0.1.3",
   "vendor": "custom",
   "loggingId": "OACK",
   "iconGlyph": "CK",
@@ -69,6 +69,11 @@
       "_instances": "1",
       "statusIDriveFASExtended": "rs",
       "_about": "The driver-assistance functions' state, among them the traffic-light functions (getter 51, notifier 32819). Read only."
+    },
+    "de.bmw.dass.driverassistanceapplications.MultimodalControlDriverAssistance": {
+      "_instances": "1",
+      "functionAvailabilityDriverAssistance": "rs",
+      "_about": "0.1.3 cruise CR (rung 2, docs/fixes-1121/CC-REPORT.md §7.4): the multimodal driver-assistance service's availability (service 13203, getter 2, notifier 32769): the ACC / SLA / SLD / DCC states and valueSetSpeed. A value means a unit on this car answers the service. The setter multimodalControlDriverAssistance is NOT declared. Read only."
     }
   },
   "screens": [
@@ -89,6 +94,7 @@
         ["text", "S_LANES", ""],
         ["text", "S_LAMPS", ""],
         ["text", "S_FAS", ""],
+        ["text", "S_CRUISE", ""],
         ["text", "FOOT", ""]
       ]
     }
@@ -106,7 +112,8 @@
       "S_LIMIT": "Обмеження швидкості (його беруть теми)",
       "S_LANES": "Смуги",
       "S_LAMPS": "Стан фар авто",
-      "S_FAS": "Стан функцій асистентів"
+      "S_FAS": "Стан функцій асистентів",
+      "S_CRUISE": "Асистент круїзу"
     },
     "logValues": 25,
     "logChars": 1800,

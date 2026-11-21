@@ -1,13 +1,19 @@
 'use strict';
 /**
- * rv.js - the RV recorder's engine (round "Road View", package TS): READ ONLY, numbers and enum names only.
+ * rv.js - the RV recorder's engine (round "Road View", package TS; fixes-1121 CR: the choices CAM, CRUISE, NAV): READ ONLY, numbers
+ * and enum names only.
  *
- * Nothing is subscribed until the first recording starts (a press on "Почати запис RV"); then every interface of rv_fields.js is
- * subscribed once, one at a time with a short pause, and stays subscribed (a value that arrives while no recording runs is
- * ignored). Calls made on the car: signals.watch (the kit subscribes and reads each getter once), and signals.get once per "rs" field
- * when a later recording starts (its getter: the value has not changed, so no notification would bring it). No setter, no method.
+ * A recording records ONE choice (rv_fields.js SETS: S19 RV, S20 CAM, S21 CRUISE, S22 NAV). Nothing is subscribed until the first
+ * recording starts (a press on "Почати запис ..."); then every interface the chosen set reads is subscribed once (with every field the
+ * table reads on it, so a later choice needs no second subscription), one at a time with a short pause, and stays subscribed (a value
+ * that arrives while no recording of its set runs is ignored). Calls made on the car: signals.watch (the kit subscribes and reads
+ * each getter once), and signals.get once per "rs" field of the set when a later recording starts (its getter: the value has not
+ * changed, so no notification would bring it). No setter, no method.
  *
- * While a recording runs (shared/signal_recorder.js, set S19 "RV"):
+ * NAV's sources carry an allow-list (`pick`): only those members of a value reach the recording and the log; a text becomes its
+ * length; a position, a destination, a road name or an id is never kept (project() below).
+ *
+ * While a recording runs (shared/signal_recorder.js, the chosen set):
  *   - a "full" source: every message to the recording, unthrottled;
  *   - a "list" source: its first message of the recording whole, the next message whole after each mark, and once a second a
  *     summary sample "<tag>~1s": msgs, the object count, distinct ids / classes (the first 6), ranges, list lengths, qualifiers;
@@ -19,17 +25,18 @@
  *   - at +30 s, +120 s and +600 s of a recording: which sources spoke (messages, rate) and which stayed silent, the providers.
  *
  * Log lines (English, numbers and enum names only):
- *   rv: start rv_recorder v=0.1.0 sources=33 interfaces=19
+ *   rv: start rv_recorder v=0.2.0 sets=RV:S19/39/22,CAM:S20/70/31,CRUISE:S21/34/20,NAV:S22/43/17 sources=123 interfaces=46 tripMark=1
+ *   rv: rec: set CAM (S20): 70 sources on 31 interfaces
  *   rv: watch TrafficLightRecognitionFrontCameraLegacy[1] sources=1 ok 40ms
  *   rv: first tl t=12.4: trafficLightID=3 trafficLightPositionX=118 ... qualityRecognitionTrafficLight=90
  *   rv: mark M2 t=85.9 tms=85894 via=trip
- *   rv: summary +30s: heard 9 of 33: tl(41, 1.4/s) ... | silent: road-segment, ...
+ *   rv: summary +30s: RV heard 9 of 39: tl(41, 1.4/s) ... | silent: road-segment, ...
  *   rv: summary +30s: providers up=17 down=2 down-list: RoadOutputAssistedDrivingView, ...
  *
  * Never throws out of a callback: a failing handler logs one warning, the car's notifications go on (an uncaught exception ends an
  * OAP app; a second unexpected exit uninstalls it). Node 8.16: no ?. / ??, no object spread, no optional catch binding.
  */
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 const SUMMARY_S = [30, 120, 600];
 const HUB_PAUSE_MS = 120;
 const FIRST_CHARS = 900;              // a first-message line stays one line (the longest line seen in the car's log was ~800)
@@ -37,6 +44,7 @@ const KEEP = 6;                       // distinct ids / classes written per summ
 const TRACK = 64;                     // distinct values tracked per second (memory bound)
 const SCAN = 64;                      // list entries looked at per message (CPU bound)
 const LOG_CAP = 300;                  // change lines per source and recording (a source with `log`)
+const ENUM_RE = /^[A-Z_][A-Z0-9_]{0,95}$/;
 
 const sleep = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
 const short = (iface) => String(iface).split('.').pop();
@@ -61,6 +69,56 @@ function pick(v, path) {
     }
     return cur;
 }
+/** fixes-1121 CR: one allow-listed member of a value (rv_fields.js `pick`): a number, a bool or an enum name as it is, a text as its
+ *  length, anything else (a struct, a list, a buffer) null. "a.*.b": the first member of a that has b; "a#n" a list's length;
+ *  "a.[].b#mask" the bools of a list as a bit mask (first 16); "@a" the name of the member the union a holds, in capitals. */
+function pickOne(v, path) {
+    if (typeof path !== 'string') return null;
+    if (path.charAt(0) === '@') {
+        const u = pickOne.raw(v, path.slice(1));
+        const k = u && typeof u === 'object' && !Array.isArray(u) ? Object.keys(u).filter((x) => u[x] !== undefined && u[x] !== null)[0] : undefined;
+        return k ? k.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase().slice(0, 60) : null;
+    }
+    const m = /^(.*)#(n|mask)$/.exec(path);
+    if (m && m[2] === 'n') { const a = pickOne.raw(v, m[1]); return Array.isArray(a) ? a.length : null; }
+    if (m && m[2] === 'mask') {
+        const at = m[1].indexOf('.[].');
+        if (at < 0) return null;
+        const list = pickOne.raw(v, m[1].slice(0, at));
+        if (!Array.isArray(list)) return null;
+        let bits = 0;
+        for (let i = 0; i < list.length && i < 16; i++) if (pickOne.raw(list[i], m[1].slice(at + 4)) === true) bits |= (1 << i);
+        return bits;
+    }
+    const x = pickOne.raw(v, path);
+    if (typeof x === 'number') return isFinite(x) ? x : null;
+    if (typeof x === 'boolean') return x;
+    if (typeof x === 'string') return ENUM_RE.test(x) ? x : x.length;
+    return null;
+}
+/** The raw value at a path ("" the value itself; "*" the first member that leads somewhere). */
+pickOne.raw = function raw(v, path) {
+    if (path === '') return v;
+    const parts = path.split('.');
+    const walk = (x, i) => {
+        if (i === parts.length) return x;
+        if (x === null || typeof x !== 'object') return undefined;
+        if (parts[i] === '*') {
+            const keys = Object.keys(x);
+            for (let k = 0; k < keys.length; k++) { const y = walk(x[keys[k]], i + 1); if (y !== undefined && y !== null) return y; }
+            return undefined;
+        }
+        return walk(x[parts[i]], i + 1);
+    };
+    return walk(v, 0);
+};
+/** A value cut to its allow-list: { name: member } with only numbers, bools and enum names (null where it is missing). */
+function project(v, pick) {
+    const o = {};
+    Object.keys(pick).forEach((k) => { o[k] = pickOne(v, pick[k]); });
+    return o;
+}
+
 /** A value a summary keeps: a finite number or an enum name (anything else is left out, never a text). */
 const keepable = (x) => isNum(x) || (typeof x === 'string' && /^[A-Z_][A-Z0-9_]{0,95}$/.test(x)) || typeof x === 'boolean';
 const sortVals = (a) => a.sort((x, y) => (typeof x === typeof y ? (x < y ? -1 : x > y ? 1 : 0) : typeof x === 'number' ? -1 : 1));
@@ -116,7 +174,7 @@ function summaryOf(a, f) {
 class RoadView {
     /**
      * opts: { log: {info, warn}, signals: the kit's ctx.signals, rec: a Recorder (shared/signal_recorder.js), fmt: shared/signal_format.js,
-     *         now (ms, default Date.now), table (default rv_fields.TABLE), cfg: { hubPauseMs, summaryS, tripMark }, version }
+     *         now (ms, default Date.now), table (default rv_fields.TABLE), sets (default rv_fields.SETS), cfg: { hubPauseMs, summaryS, tripMark }, version }
      */
     constructor(opts) {
         const o = opts || {};
@@ -131,10 +189,11 @@ class RoadView {
         this.tripMark = cfg.tripMark !== false;
         this.version = o.version || VERSION;
         this.table = o.table || require('./rv_fields').TABLE;
-        this.set = (o.set || require('./rv_fields').SET).id;
+        this.sets = o.sets || require('./rv_fields').SETS;
+        this.set = this.sets[0].id;         // the set of the recording that runs or ran last
         this.t0 = this.now();
         this.on = false;                    // a recording runs
-        this.listening = false;
+        this.listening = false;             // any interface subscribed
         this.hubs = {};
         this.queue = Promise.resolve();
         this.timer = null;
@@ -145,14 +204,14 @@ class RoadView {
 
     _source(f) {
         const st = {
-            f, n: 0, total: 0, firstAt: null, lastAt: null, warned: false, wholeNext: false, lastLog: null, logN: 0, acc: f.kind === 'list' ? newAcc(f) : null, prevBits: null, hub: null,
+            f, sets: f.sets || [this.sets[0].id], n: 0, total: 0, wroteAt: null, thinned: 0, firstAt: null, lastAt: null, warned: false, wholeNext: false, lastLog: null, logN: 0, acc: f.kind === 'list' ? newAcc(f) : null, prevBits: null, hub: null,
             // what the recorder sees: the source as a recorder field (its skip list, its list cap) and, for a list, its summary
-            recSt: { f: { tag: f.tag, iface: f.iface, field: f.field, tree: f.skip ? { skip: f.skip } : undefined, recEntries: f.recEntries } },
+            recSt: { f: { tag: f.tag, iface: f.iface, field: f.field, tree: f.skip ? { skip: f.skip } : undefined, recEntries: f.recEntries, recSame: f.recSame } },
             sumSt: f.kind === 'list' ? { f: { tag: f.tag + '~1s', iface: f.iface, field: f.field + '~1s' } } : null,
         };
         st.handler = (v) => {
-            if (!this.on) return;
-            try { this._value(st, v); } catch (e) {
+            if (!this.on || st.sets.indexOf(this.set) < 0) return;
+            try { this._value(st, f.pick ? project(v, f.pick) : v); } catch (e) {
                 if (!st.warned) { st.warned = true; this._warn(f.tag + ': ' + msg(e)); }
             }
         };
@@ -165,38 +224,52 @@ class RoadView {
     _t() { return Math.round((this.now() - (this.on ? this.recAt : this.t0)) / 100) / 10; }
 
     startLine() {
-        const n = Object.keys(require('./rv_fields').manifestSignals()).length;
-        this._info('start rv_recorder v=' + this.version + ' set=' + this.set + ' sources=' + this.sources.length + ' interfaces=' + n + ' tripMark=' + (this.tripMark ? 1 : 0));
+        const F = require('./rv_fields');
+        const n = Object.keys(F.manifestSignals()).length;
+        this._info('start rv_recorder v=' + this.version + ' sets=' + this.sets.map((s) => s.label + ':' + s.id + '/' + this.sources.filter((st) => st.sets.indexOf(s.id) >= 0).length + '/' + F.interfaces(s.id).length).join(',') +
+            ' sources=' + this.sources.length + ' interfaces=' + n + ' tripMark=' + (this.tripMark ? 1 : 0));
     }
+    /** The sources of a set (the one recording, by default). */
+    inSet(id) { const x = id || this.set; return this.sources.filter((st) => st.sets.indexOf(x) >= 0); }
+    label(id) { const s = this.sets.find((x) => x.id === (id || this.set)); return s ? s.label : String(id || this.set); }
 
-    // ---- subscriptions: one proxy per interface, built at the first recording, kept -----------------------------------------------
-    listen() {
-        if (this.listening) return this.queue;
+    // ---- subscriptions: one proxy per interface instance, built at the first recording that needs it, kept ---------------------------
+    /** Subscribe the interfaces the set `id` reads that are not subscribed yet; each with every field the table reads on it. */
+    listen(id) {
+        const want = id || this.set;
         this.listening = true;
+        const fresh = [];
         this.sources.forEach((st) => {
-            const key = st.f.iface;
-            const h = this.hubs[key] = this.hubs[key] || { iface: st.f.iface, handlers: {}, sub: null, error: null, ms: null, sources: [] };
+            if (st.sets.indexOf(want) < 0) return;
+            const key = st.f.iface + '\u0000' + (st.f.instance || '1');
+            if (!this.hubs[key]) { this.hubs[key] = { iface: st.f.iface, instance: st.f.instance || '1', handlers: {}, sub: null, error: null, ms: null, sources: [], started: false }; fresh.push(this.hubs[key]); }
+        });
+        // every source on a new hub, whatever its set: a later choice then finds its fields subscribed
+        this.sources.forEach((st) => {
+            const h = this.hubs[st.f.iface + '\u0000' + (st.f.instance || '1')];
+            if (!h || fresh.indexOf(h) < 0) return;
             h.handlers[st.f.field] = st.handler;
             h.sources.push(st);
             st.hub = h;
         });
-        Object.keys(this.hubs).forEach((k) => {
-            const h = this.hubs[k];
+        fresh.forEach((h) => {
             this.queue = this.queue.then(() => this._build(h)).then(() => sleep(this.hubPause)).catch((e) => { this._warn('watch ' + short(h.iface) + ': ' + msg(e)); });
         });
         return this.queue;
     }
     _build(h) {
+        h.started = true;
         if (!this.signals || typeof this.signals.watch !== 'function') { h.error = 'no signals'; return Promise.resolve(); }
         const t0 = Date.now();
-        return Promise.resolve().then(() => this.signals.watch(h.iface, '1', h.handlers, this.log)).then((res) => {
+        return Promise.resolve().then(() => this.signals.watch(h.iface, h.instance, h.handlers, this.log)).then((res) => {
             h.sub = res; h.ms = Date.now() - t0;
-            this._info('watch ' + short(h.iface) + '[1] sources=' + h.sources.length + (res && res.error ? ' error: ' + msg(res.error) : ' ok ' + h.ms + 'ms'));
-        }, (e) => { h.error = msg(e); this._info('watch ' + short(h.iface) + '[1] error: ' + h.error); });
+            this._info('watch ' + short(h.iface) + '[' + h.instance + '] sources=' + h.sources.length + (res && res.error ? ' error: ' + msg(res.error) : ' ok ' + h.ms + 'ms'));
+        }, (e) => { h.error = msg(e); this._info('watch ' + short(h.iface) + '[' + h.instance + '] error: ' + h.error); });
     }
-    /** A later recording: each "rs" field's getter once (its value has not changed, so no notification would bring it). */
-    _askAll() {
-        this.sources.filter((st) => st.f.flags === 'rs').forEach((st) => {
+    /** A later recording: each "rs" field's getter of the set once, on an interface already subscribed (its value has not changed,
+     *  so no notification would bring it; a new interface's watch reads its getters itself). */
+    _askAll(old) {
+        this.inSet().filter((st) => st.f.flags === 'rs' && old.indexOf(st.hub) >= 0).forEach((st) => {
             const h = st.hub;
             if (!h || !h.sub || !h.sub.proxy || !h.sub.available || !this.signals || typeof this.signals.get !== 'function') return;
             Promise.resolve().then(() => this.signals.get(h.sub.proxy, st.f.field, 3000)).then((v) => { st.handler(v); }, () => null).catch(() => null);
@@ -205,22 +278,28 @@ class RoadView {
     idle() { return this.queue; }
 
     // ---- a recording ----------------------------------------------------------------------------------------------------------
-    /** Start a recording of S19; returns true when it runs. */
-    begin() {
+    /** Start a recording of the set `id` (default: the first, S19); returns true when it runs. */
+    begin(id) {
         if (this.on) return true;
-        if (!this.rec || !this.rec.start([this.set])) return false;
+        const want = id && this.sets.some((s) => s.id === id) ? id : this.sets[0].id;
+        if (!this.rec || !this.rec.start([want])) return false;
+        this.set = want;
         this.on = true; this.recAt = this.now(); this.summaries = 0;       // the mark numbers go on over the app's run (the notes' M<n> stay unique)
-        this.sources.forEach((st) => { st.n = 0; st.firstAt = null; st.lastAt = null; st.wholeNext = false; st.prevBits = null; st.lastLog = null; st.logN = 0; if (st.acc) st.acc = newAcc(st.f); });
-        const again = this.listening;
-        this.listen();
-        if (again) this._askAll();
+        this.sources.forEach((st) => { st.n = 0; st.firstAt = null; st.lastAt = null; st.wholeNext = false; st.prevBits = null; st.lastLog = null; st.logN = 0; st.wroteAt = null; st.thinned = 0; if (st.acc) st.acc = newAcc(st.f); });
+        const old = Object.keys(this.hubs).map((k) => this.hubs[k]);
+        this.listen(want);
+        if (old.length) this._askAll(old);
+        this._info('rec: set ' + this.label() + ' (' + want + '): ' + this.inSet().length + ' sources on ' + this._hubsOf(want).length + ' interfaces');
         return true;
     }
+    _hubsOf(id) { const out = []; this.inSet(id).forEach((st) => { if (st.hub && out.indexOf(st.hub) < 0) out.push(st.hub); }); return out; }
     end() {
         if (!this.on) return;
         this._flushSums();
-        const heard = this.sources.filter((st) => st.n > 0).map((st) => st.f.tag);
-        this._info('stop after ' + this._t() + ' s: heard ' + heard.length + ' of ' + this.sources.length + ': ' + (heard.join(', ') || 'none'));
+        const mine = this.inSet();
+        const heard = mine.filter((st) => st.n > 0).map((st) => st.f.tag);
+        const thin = mine.filter((st) => st.thinned > 0).map((st) => st.f.tag + ' ' + st.thinned);
+        this._info('stop after ' + this._t() + ' s: heard ' + heard.length + ' of ' + mine.length + ': ' + (heard.join(', ') || 'none') + (thin.length ? ' | thinned (everyMs): ' + thin.join(', ') : ''));
         this.on = false;
         try { this.rec.stop(); } catch (e) { /* the recorder guards itself */ }
     }
@@ -234,6 +313,10 @@ class RoadView {
         if (f.kind === 'list') {
             if (st.n === 1 || st.wholeNext) { st.wholeNext = false; this._sample(st.recSt, v); }
             accumulate(st.acc, f, v);
+        } else if (f.everyMs > 0) {
+            // fixes-1121 CR: a heavy "full" source (the lanes, the chassis' curvature) writes at most one message every everyMs; the
+            // first after a mark always; the ones between are counted (the stop line says how many)
+            if (st.n === 1 || st.wholeNext || st.wroteAt === null || t - st.wroteAt >= f.everyMs) { st.wholeNext = false; st.wroteAt = t; this._sample(st.recSt, v); } else st.thinned++;
         } else this._sample(st.recSt, v);
     }
     _sample(rst, v) { if (this.rec && this.rec.on) { try { this.rec.sample(rst, v); } catch (e) { /* the recorder guards itself */ } } }
@@ -282,7 +365,7 @@ class RoadView {
         this._info('mark M' + this.markN + ' t=' + this._t() + ' tms=' + Math.round(t - (this.on ? this.recAt : this.t0)) + ' via=' + (via || 'menu') + (this.on ? '' : ' (no recording)'));
         if (this.on) {
             try { this.rec.mark(this.markN); } catch (e) { /* the recorder guards itself */ }
-            this.sources.forEach((st) => { if (st.f.kind === 'list') st.wholeNext = true; });
+            this.inSet().forEach((st) => { if (st.f.kind === 'list' || st.f.everyMs > 0) st.wholeNext = true; });
         }
         return this.markN;
     }
@@ -304,10 +387,10 @@ class RoadView {
         while (this.summaries < this.summaryS.length && s >= this.summaryS[this.summaries]) { this._summary(this.summaryS[this.summaries]); this.summaries++; }
     }
     _summary(s) {
-        const heard = this.sources.filter((st) => st.n > 0), silent = this.sources.filter((st) => st.n === 0);
-        this._info('summary +' + s + 's: heard ' + heard.length + ' of ' + this.sources.length + ': ' +
+        const mine = this.inSet(), heard = mine.filter((st) => st.n > 0), silent = mine.filter((st) => st.n === 0);
+        this._info('summary +' + s + 's: ' + this.label() + ' heard ' + heard.length + ' of ' + mine.length + ': ' +
             (heard.map((st) => st.f.tag + '(' + st.n + ', ' + (Math.round(st.n / Math.max(1, s) * 10) / 10) + '/s)').join(' ') || 'none') + ' | silent: ' + (silent.map((st) => st.f.tag).join(', ') || 'none'));
-        const hubs = Object.keys(this.hubs).map((k) => this.hubs[k]);
+        const hubs = this._hubsOf();
         const down = hubs.filter((h) => !h.sub || !h.sub.available), err = hubs.filter((h) => h.error || (h.sub && h.sub.error));
         this._info('summary +' + s + 's: providers up=' + (hubs.length - down.length) + ' down=' + down.length + ' error=' + err.length + (down.length ? ' down-list: ' + down.map((h) => short(h.iface)).join(', ') : ''));
     }
@@ -318,13 +401,14 @@ class RoadView {
     }
     stop() { clearInterval(this.timer); this.timer = null; }
 
-    /** { on, listening, sources, heard, hubs: { built, up, error }, marks, lastMark } (the menu's status line, tests). */
+    /** { on, set, label, listening, sources, heard, hubs: { built, up, error }, marks, lastMark } of the set that records or recorded
+     *  last (the menu's status line, tests). */
     status() {
-        const hubs = Object.keys(this.hubs).map((k) => this.hubs[k]);
-        return { on: this.on, listening: this.listening, sources: this.sources.length, heard: this.sources.filter((st) => st.n > 0).length,
+        const hubs = this._hubsOf(), mine = this.inSet();
+        return { on: this.on, set: this.set, label: this.label(), listening: this.listening, sources: mine.length, heard: mine.filter((st) => st.n > 0).length,
             hubs: { built: hubs.filter((h) => h.sub || h.error).length, up: hubs.filter((h) => h.sub && h.sub.available && !h.sub.error).length, error: hubs.filter((h) => h.error || (h.sub && h.sub.error)).length },
             marks: this.markN, lastMark: this.lastMark };
     }
 }
 
-module.exports = { RoadView, VERSION, SUMMARY_S, KEEP, LOG_CAP, pick, newAcc, accumulate, summaryOf, fixedList };
+module.exports = { RoadView, VERSION, SUMMARY_S, KEEP, LOG_CAP, pick, pickOne, project, newAcc, accumulate, summaryOf, fixedList };

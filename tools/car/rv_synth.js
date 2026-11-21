@@ -2,7 +2,7 @@
 'use strict';
 /**
  * rv_synth.js - round "Road View", package TS: synthetic RV recordings (set S19) with planted traffic lights and signs, written by
- * the RV recorder's own engine (tools/road-view/app/rv_recorder/rv.js) and Signal Probe's recorder (shared/signal_recorder.js), so
+ * the RV recorder's own engine (apps/rv_recorder/rv.js) and Signal Probe's recorder (shared/signal_recorder.js), so
  * that tools/car/rv_analyse.py can be tested without a car. NOTHING here is a car fact: every encoding, rate, lag and id below is
  * invented for the test and written to truth.json.
  *
@@ -31,7 +31,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
-const APPDIR = path.join(ROOT, 'tools', 'road-view', 'app', 'rv_recorder');
+const APPDIR = path.join(ROOT, 'apps', 'rv_recorder');
 const { RoadView } = require(path.join(APPDIR, 'rv.js'));
 const RVF = require(path.join(APPDIR, 'rv_fields.js'));
 const { Recorder } = require(path.join(ROOT, 'shared', 'signal_recorder.js'));
@@ -257,7 +257,7 @@ async function session(plan, dir, rand, notes, truth) {
     rv.tick();
     rv.end();
     await drain(R);
-    tr.silent = RVF.TABLE.map((f) => f.tag).filter((t) => !fed[t]);
+    tr.silent = RVF.sourcesOf('S19').map((f) => f.tag).filter((t) => !fed[t]);     // fixes-1121 CR: S19's sources only
     tr.recorder = { samples: R.samples, dropped: R.dropped, errors: R.errors, texts: R.texts };
     tr.log = lines.filter((l) => /^rv: (first|summary|mark|stop)/.test(l));
     return tr;

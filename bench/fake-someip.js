@@ -31,6 +31,9 @@
  *            traffic light stay silent (never seen on the car)
  *   late     as driving, but every provider comes up only 6 s after the start (the car woke after the app)
  *   flap     as driving, but the speed-limit provider goes away at 5 s and comes back at 7 s
+ *   cruise   (cruise CR) as driving, and a unit answers the multimodal driver-assistance service: its availability field's getter
+ *            answers and it notifies DCC ACTIVE with a set speed at 6 s. In every other state that getter times out (the owner's
+ *            car logged no value for it in its one parked session, 2026-11-18): Camera Check's «Асистент круїзу» row shows both.
  *
  * Read only by construction: there is no setValue and no callMethod (a call to either rejects).
  */
@@ -50,20 +53,24 @@ const IFACES = {
     'de.bmw.infotainment.vehicle.CDS': { svc: 46355, ver: [1, 0], ev: {}, f: { statusEngineSpeed2: [25, 32793, 1] } },
     'de.bmw.infrastructure.VehicleCondition': { svc: 5425, ver: [1, 0], ev: {}, f: { VehicleCondition: [0, 32769, 1] } },
     'de.bmw.body.Light': { svc: 21810, ver: [1, 0], ev: {}, f: { LampExterior2: [0, 32772, 4] } },
-    'de.bmw.infotainment.fasus.FASuS': { svc: 46350, ver: [1, 3], ev: {}, f: { statusIDriveFASExtended: [51, 32819, 1] } }
+    'de.bmw.infotainment.fasus.FASuS': { svc: 46350, ver: [1, 3], ev: {}, f: { statusIDriveFASExtended: [51, 32819, 1] } },
+    // cruise CR: the multimodal driver-assistance service (13203); its availability field (getter 2, notifier 32769, eventgroup 3)
+    'de.bmw.dass.driverassistanceapplications.MultimodalControlDriverAssistance': { svc: 13203, ver: [1, 0], ev: {}, f: { functionAvailabilityDriverAssistance: [2, 32769, 3] } }
 };
 const TSR = 'de.bmw.dass.TrafficSignRecognition';
 const VEH2 = 'de.bmw.infotainment.vehicle.Vehicle2';
 const CDS = 'de.bmw.infotainment.vehicle.CDS';
 const FAS = 'de.bmw.infotainment.fasus.FASuS';
+const MMC = 'de.bmw.dass.driverassistanceapplications.MultimodalControlDriverAssistance';
 
 const SCENARIOS = {
-    parked: { up: 0, getters: 'answer', silentGetters: [FAS], drive: false },
+    parked: { up: 0, getters: 'answer', silentGetters: [FAS, MMC], drive: false },
     asleep: { up: 0, getters: 'none', drive: false, quiet: true },
-    deaf: { up: 0, getters: 'answer', silentGetters: [FAS], drive: true, deaf: ['cam_check'] },
-    driving: { up: 0, getters: 'answer', silentGetters: [FAS], drive: true },
-    late: { up: 6000, getters: 'answer', silentGetters: [FAS], drive: true },
-    flap: { up: 0, getters: 'answer', silentGetters: [FAS], drive: true, flap: { iface: TSR, down: 5000, back: 7000 } }
+    deaf: { up: 0, getters: 'answer', silentGetters: [FAS, MMC], drive: true, deaf: ['cam_check'] },
+    driving: { up: 0, getters: 'answer', silentGetters: [FAS, MMC], drive: true },
+    late: { up: 6000, getters: 'answer', silentGetters: [FAS, MMC], drive: true },
+    flap: { up: 0, getters: 'answer', silentGetters: [FAS, MMC], drive: true, flap: { iface: TSR, down: 5000, back: 7000 } },
+    cruise: { up: 0, getters: 'answer', silentGetters: [FAS], drive: true, cruise: true }
 };
 
 /** An interface config as the installer would generate it for the declared names (the shape signals.js reads: fields[f].getter). */
@@ -112,6 +119,8 @@ function createCar(name, opts) {
     values[VEH2 + '.statusLightStatus'] = { statusMainBeam_headlightFlasher: 'AUS', statusDippedBeam: 'EIN', statusPositionLight: 'EIN', statusFrontFogLight: 'AUS', statusRearFogLight: 'AUS', statusLightStatusError: 0 };
     values[CDS + '.statusEngineSpeed2'] = { actualValueRPMEngineCrankshaft: sc.drive ? 6000 : 0 };
     values[FAS + '.statusIDriveFASExtended'] = { statusFunctionTrafficLight: 0 };
+    values[MMC + '.functionAvailabilityDriverAssistance'] = { proposalAvailabilityACC: 'NOT_EQUIPPED', proposalAvailabilitySLA: 'NOT_EQUIPPED', proposalAvailabilitySLD: 'AVAILABLE',
+        proposalAvailabilityDCC: 'AVAILABLE', valueSetSpeed: 0, infoSetSpeed: 0, proposalAssistFunction: 'NONE' };
 
     function setUp(iface, on) {
         if (up[iface] === on) return;
@@ -189,6 +198,7 @@ function createCar(name, opts) {
                 send('de.bmw.environmentalmodel.LaneBoundaries', 'LaneBoundaries', v.lanes);
                 send('de.bmw.environmentalmodel.ObjectRecognitionFrontCamera', 'ObjectRecognition', v.objrec);
                 if (tick % 2 === 0) send('de.bmw.sensors.objects.RecogFrontCameraObjectlist', 'objectlistTCP', v.objlist);
+                if (sc.cruise && tick === 60) send(MMC, 'functionAvailabilityDriverAssistance', Object.assign({}, values[MMC + '.functionAvailabilityDriverAssistance'], { proposalAvailabilityDCC: 'ACTIVE', valueSetSpeed: 61, proposalAssistFunction: 'DCC' }), true);
             }, 100));
         }
         timers.forEach((t) => { if (t.unref) t.unref(); });

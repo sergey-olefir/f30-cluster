@@ -109,7 +109,7 @@ APPS.forEach((a) => { specs[a] = JSON.parse(fs.readFileSync(path.join(ROOT, 'app
     });
     // round "Auto Beam" (HD), round fixes-1121 RS: road_scene's (ACC View + Auto Beam) app.json words are keyed by their place too (its
     // code's words are named in apps/road_scene/words.js, scanned below); the app is not in APPS (parts E and H build and run the four older apps)
-    ['road_scene'].forEach((a) => {
+    ['road_scene', 'rv_recorder'].forEach((a) => {      // fixes-1121 CR: + the RV recorder, now in the Store
         const s2 = JSON.parse(fs.readFileSync(path.join(ROOT, 'apps', a, 'app.json'), 'utf8'));
         s2.id = s2.id || a;
         const miss = [];
@@ -142,7 +142,7 @@ function codeFiles() {
         'apps/signal_probe/probe.js', 'shared/signal_recorder.js', 'apps/driver_profiles/main.js', 'apps/driver_profiles/screens.js',
         'apps/driver_profiles/format.js', 'apps/driver_profiles/avatars.js', 'apps/driver_profiles/profiles.js',
         'shared/profile_settings.js', 'shared/units.js',      // r1120 PS
-        'tools/road-view/app/rv_recorder/rv_menu.js', 'tools/road-view/app/rv_recorder/main.js', 'tools/road-view/app/rv_recorder/rv.js',      // road TS: the RV recorder (outside the Store)
+        'apps/rv_recorder/rv_menu.js', 'apps/rv_recorder/main.js', 'apps/rv_recorder/rv.js',      // road TS: the RV recorder (fixes-1121 CR: in the Store)
         'apps/road_scene/words.js', 'apps/road_scene/paint.js', 'apps/road_scene/main.js', 'apps/road_scene/contract.js',      // Road Scene (fixes-1121 RS: ACC View + Auto Beam)
         'shared/road_view.js', 'shared/road_ui.js', 'shared/road_signs.js', 'shared/road_shaders.js'];      // road TD
 }

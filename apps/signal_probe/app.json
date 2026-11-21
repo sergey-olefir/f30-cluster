@@ -2,7 +2,7 @@
   "id": "signal_probe",
   "title": "Signal Probe",
   "description": "Read-only, log-only: subscribes the car's signals set by set and logs what arrives (numbers, enum names, text lengths). Draws nothing on the cluster.",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "vendor": "custom",
   "loggingId": "OASP",
   "iconGlyph": "SP",
@@ -321,6 +321,7 @@
       "_instances": "1",
       "displayDriverAssistenceSystemLongitudinalGuidance": "s",
       "displayDrivingAssistentSystemsMode": "s",
+      "displayForesight": "s",
       "displayForesight2": "rs",
       "requestWarnBrakeCoordinatorDisplay": "rs",
       "statusFAS": "s",
@@ -465,8 +466,11 @@
     },
     "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions": {
       "_instances": "1",
+      "displayStatusSpeedLimitAssist": "s",
+      "settingDCC": "s",
       "settingFrontCollisionWarning": "s",
-      "settingFrontCollisionWarningSound": "s"
+      "settingFrontCollisionWarningSound": "s",
+      "settingSpeedLimitAssist": "s"
     },
     "de.bmw.dass.StatusDriverAssistanceFunctions": {
       "_instances": "1",

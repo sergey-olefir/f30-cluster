@@ -67,8 +67,8 @@ done
 if [ -z "$ONLY" ]; then
   CAT=$(ls reference/car/*/someip/someip-interfaces.json 2>/dev/null | tail -1)
   if [ -n "$CAT" ]; then
-    n=$(python3 tools/signals/check_signals.py "$CAT" apps/f30_cluster/app.json apps/driver_profiles/app.json apps/twin_dial/app.json apps/road_scene/app.json apps/cam_check/app.json apps/signal_probe/app.json >"$LOG/check_signals.log" 2>&1; echo $?)
-    if [ "$n" = 0 ]; then printf '%-22s %7s %7s %7s  %s\n' check_signals ok 0 - "(f30, driver_profiles, twin_dial, road_scene, cam_check, signal_probe)"
+    n=$(python3 tools/signals/check_signals.py "$CAT" apps/f30_cluster/app.json apps/driver_profiles/app.json apps/twin_dial/app.json apps/road_scene/app.json apps/cam_check/app.json apps/signal_probe/app.json apps/rv_recorder/app.json >"$LOG/check_signals.log" 2>&1; echo $?)
+    if [ "$n" = 0 ]; then printf '%-22s %7s %7s %7s  %s\n' check_signals ok 0 - "(f30, driver_profiles, twin_dial, road_scene, cam_check, signal_probe, rv_recorder)"
     else printf '%-22s %7s %7s %7s  %s\n' check_signals "-" 1 - "FAILED"; grep -iE 'fail|bad|✗' "$LOG/check_signals.log" | head -8 | sed 's/^/        /'; BAD=$((BAD + 1)); fi
   else
     printf '%-22s %7s\n' check_signals "skipped (no reference/car catalogue in this checkout)"

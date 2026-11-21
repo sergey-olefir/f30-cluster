@@ -1,10 +1,10 @@
 {
   "_about": "The signal probe's field table (apps/signal_probe/fields.js is the source; `node tools/car/probe_fields.js export` rewrites this file). READ ONLY: flags r (non-zero getter id) and s (notifier), b (an event), m (S16 next-turn: GuidanceEventList.queryContent, a read the owner approved, polled while the phone guides; methodId from the catalogue). Ids come from the car's catalogue of 2026-11-15 (git-ignored) and are null when the catalogue was not there. formatter: cols / list / union (named columns), bits (a raw byte with its bit changes), or a named formatter of shared/signal_format.js. Text members are logged as lengths only.",
   "logFormat": 1,
-  "version": "0.6.0",
+  "version": "0.6.1",
   "counts": {
     "sets": 17,
-    "fields": 306,
+    "fields": 310,
     "interfaces": 105,
     "interfacesWithSeveralInstances": 1
   },
@@ -190,8 +190,8 @@
       "items": [
         "P26"
       ],
-      "fields": 1,
-      "fieldsActive": 74
+      "fields": 5,
+      "fieldsActive": 78
     },
     {
       "id": "S18",
@@ -1082,13 +1082,14 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 10,
+      "fields": 11,
       "events": [],
       "methods": [],
       "sets": [
         "S8",
         "S13",
-        "S14"
+        "S14",
+        "S17"
       ]
     },
     {
@@ -1498,11 +1499,12 @@
       "instancesInCatalogue": [
         "1"
       ],
-      "fields": 2,
+      "fields": 5,
       "events": [],
       "methods": [],
       "sets": [
-        "S14"
+        "S14",
+        "S17"
       ]
     },
     {
@@ -4792,8 +4794,8 @@
       "eventId": null,
       "rootType": "struct",
       "formatter": "cols",
-      "gapMs": 1000,
-      "cap": 200,
+      "gapMs": 250,
+      "cap": 1200,
       "also": [
         "S14",
         "S17"
@@ -4805,7 +4807,10 @@
         "dcc:proposalAvailabilityDCC:e",
         "setSpeed:valueSetSpeed:n",
         "setInfo:infoSetSpeed:n",
-        "proposal:proposalAssistFunction:e"
+        "proposal:proposalAssistFunction:e",
+        "ucc:proposalAvailabilityUCC:e",
+        "response:infoResponseAdaptionSpeed:n",
+        "forecast:stateForecastLongitudinal:e"
       ]
     },
     {
@@ -7644,6 +7649,97 @@
       "columns": [
         "angle:actualValueSteeringAngleDriver:n",
         "qualifier:qualifierActualValueSteeringAngleDriver:e"
+      ]
+    },
+    {
+      "set": "S17",
+      "item": "P26",
+      "tag": "sla-setting",
+      "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "field": "settingSpeedLimitAssist",
+      "instance": "1",
+      "flags": "s",
+      "getterId": 0,
+      "notifierId": 32792,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 0,
+      "cap": 1200,
+      "columns": [
+        "value:value:e",
+        "availability:availability:e",
+        "deactivated:availabilityDeactivated:e"
+      ]
+    },
+    {
+      "set": "S17",
+      "item": "P26",
+      "tag": "dcc-setting",
+      "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "field": "settingDCC",
+      "instance": "1",
+      "flags": "s",
+      "getterId": 0,
+      "notifierId": 32808,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 0,
+      "cap": 1200,
+      "columns": [
+        "value:value:e",
+        "availability:availability:e"
+      ]
+    },
+    {
+      "set": "S17",
+      "item": "P26",
+      "tag": "sla-country",
+      "interface": "de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions",
+      "field": "displayStatusSpeedLimitAssist",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32771,
+      "eventId": null,
+      "rootType": "enum",
+      "formatter": "cols",
+      "gapMs": 0,
+      "cap": 1200,
+      "columns": [
+        "status:(value):e"
+      ]
+    },
+    {
+      "set": "S17",
+      "item": "P26",
+      "tag": "fas-foresight",
+      "interface": "de.bmw.infotainment.fasus.FASuS",
+      "field": "displayForesight",
+      "instance": "1",
+      "flags": "s",
+      "getterId": null,
+      "notifierId": 32823,
+      "eventId": null,
+      "rootType": "struct",
+      "formatter": "cols",
+      "gapMs": 0,
+      "cap": 1200,
+      "columns": [
+        "offer2:displayOperationTakeOverSuggestionSpeed2:e",
+        "offerSpeed:displayTakeOverSuggestionSpeed:n",
+        "offer:displayOperationTakeOverSuggestionSpeed:e",
+        "offset:displayValueOffsetSuggestionSpeed:n",
+        "offerForesight:displayOperationTakeOverSuggestionSpeedForesight:e",
+        "isa:statusISA:e",
+        "speed:displaySpeedForesight:e",
+        "type:displaySpeedForesightType:e",
+        "dist:displaySpeedForesightDistance:n",
+        "decel:displayActivityDecelerationAssistant2:e",
+        "reason:targetTypeReasonDeceleration2:e",
+        "speedUnit:unitOfMeasurementSpeedForesight:e",
+        "country:countryCodingDisplaySpeedForesight:e"
       ]
     },
     {

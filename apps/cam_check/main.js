@@ -22,6 +22,11 @@
  *   - the app's own clock (ticking every second: a frozen app shows a stale clock), the speed now and the vehicle
  *     condition at the top, so a photo shows whether the car was moving and whether the app was alive;
  *   - a verdict line at the bottom and in the log.
+ * 0.1.3 (cruise CR, rung 2 of docs/fixes-1121/CC-REPORT.md §7.4, read only): one row «Асистент круїзу»: the multimodal
+ *   driver-assistance service's availability field (MultimodalControlDriverAssistance.functionAvailabilityDriverAssistance,
+ *   getter 2, notifier 32769) with its DCC and SLD states and valueSetSpeed as text, and the getter's evidence. A photo at a
+ *   stop then answers "does a unit on this car answer service 13203": a value (from the getter or a notification) is yes; the
+ *   getter's «НЕ ВІДПОВІВ — ЗБІЙ» while the control row's getters answer is no. Never the setter multimodalControlDriverAssistance.
  *
  * Read only: events and fields with notifiers and non-zero getters (app.json). The only calls made on the car are the
  * subscriptions and the fields' getters. No setter, no method, no diagnostic request. Plain Node 8. Never lets an exception
@@ -35,6 +40,7 @@ const VEH2 = 'de.bmw.infotainment.vehicle.Vehicle2';
 const CDS = 'de.bmw.infotainment.vehicle.CDS';
 const COND = 'de.bmw.infrastructure.VehicleCondition';
 const FAS = 'de.bmw.infotainment.fasus.FASuS';
+const MMC = 'de.bmw.dass.driverassistanceapplications.MultimodalControlDriverAssistance';
 
 /** kind 'event': silent until something happens. kind 'field': `getter` = app.json flag "r" (asked once the provider is up). */
 const SOURCES = [
@@ -52,6 +58,8 @@ const SOURCES = [
     { row: 'S_LAMPS', tag: 'lightstatus', iface: VEH2, key: 'statusLightStatus', kind: 'field', getter: true },
     { row: 'S_LAMPS', tag: 'lamp2', iface: 'de.bmw.body.Light', key: 'LampExterior2', kind: 'field', getter: false },
     { row: 'S_FAS', tag: 'fas-ext', iface: FAS, key: 'statusIDriveFASExtended', kind: 'field', getter: true },
+    // 0.1.3 cruise CR: does a unit answer the multimodal driver-assistance service (13203)? The value is shown (assistText)
+    { row: 'S_CRUISE', tag: 'assist', iface: MMC, key: 'functionAvailabilityDriverAssistance', kind: 'field', getter: true },
     // the control row: fields the themes receive on this car (kit/car.js 'speed', 'rpm', 'condition')
     { row: 'S_CTRL', tag: 'speed', iface: VEH2, key: 'statusCarSpeed2', kind: 'field', getter: true, label: 'швидкість' },
     { row: 'S_CTRL', tag: 'rpm', iface: CDS, key: 'statusEngineSpeed2', kind: 'field', getter: true, label: 'оберти' },
@@ -90,6 +98,23 @@ const clock = (d) => two(d.getHours()) + ':' + two(d.getMinutes()) + ':' + two(d
 const msg = (e) => String(e && e.message || e);
 const shortIf = (iface) => iface.split('.').pop();
 
+// ProposalAvailabilitySLD (the DCC and SLD members of functionAvailabilityDriverAssistance): wire numbers -> names (the catalogue)
+const AVAIL = { 0: 'AVAILABLE', 1: 'AVAILABLE_REDUCED_SENSOR_PERFORMANCE', 2: 'ACTIVE', 3: 'ACTIVE_REDUCED_SENSOR_PERFORMANCE', 4: 'NOT_EQUIPPED',
+    5: 'NOT_PROVISIONED', 6: 'NOT_AVAILABLE_SENSOR_BLOCKAGE', 7: 'NOT_AVAILABLE_FUNCTION_PRECONDITIONS', 8: 'NOT_AVAILABLE_OTHER_REASON',
+    10: 'NOT_PROVISIONED_NOT_AVAILABLE_FUNCTION_PRECONDITIONS', 11: 'NOT_PROVISIONED_NOT_AVAILABLE_OTHER_REASON', 15: 'SIGNAL_UNBEFUELLT' };
+/** An enum member as its name: a name as it came, a wire number through `table` (else the number), anything else '?'. */
+function enumName(x, table) {
+    if (typeof x === 'string' && /^[A-Z0-9_]{1,60}$/.test(x)) return x;
+    if (typeof x === 'number' && isFinite(x)) return table[x] || String(x);
+    return '?';
+}
+/** «Асистент круїзу»: the DCC and SLD states and the set speed (raw: the unit is not given), or null without a value. */
+function assistText(v) {
+    if (!v || typeof v !== 'object') return null;
+    const sp = v.valueSetSpeed;
+    return 'DCC ' + enumName(v.proposalAvailabilityDCC, AVAIL) + ', SLD ' + enumName(v.proposalAvailabilitySLD, AVAIL) + ', задана ' + (typeof sp === 'number' && isFinite(sp) ? String(sp) : '?');
+}
+
 /** VehicleCondition's value -> its name (or the raw word / number), or null. */
 function condName(v) {
     const x = v && typeof v === 'object' ? v.statusConditionVehicle : v;
@@ -114,6 +139,7 @@ mgu.run({
         const ifs = {};      // iface -> { res, doneAt, avail, up, down, upAt, downAt, srcs }
         SOURCES.forEach((s) => { (ifs[s.iface] = ifs[s.iface] || { res: null, doneAt: 0, avail: false, up: 0, down: 0, upAt: 0, downAt: 0, srcs: [] }).srcs.push(s); });
         let kmh = null, maxKmh = 0, cond = null, verdict = '';
+        let assist = null;   // 0.1.3: { text, via: 'getter' | 'value' } of the multimodal service's last value (a value: a notification or the kit's own read)
         const sent = Object.create(null);
         const guard = (what, fn) => function () {
             try { return fn.apply(null, arguments); } catch (e) { log.error('ck: ' + what + ': ' + (e && e.stack || e)); return undefined; }
@@ -130,6 +156,12 @@ mgu.run({
             kmh = raw !== 65535 ? raw * 0.015625 : null;
             if (kmh !== null && kmh > maxKmh) maxKmh = kmh;
         }
+        function assistOf(v, via) {
+            const a = assistText(v);
+            if (a === null) return;
+            if (!assist || assist.text !== a) log.info('ck: cruise assist (' + via + ') at ' + since(Date.now()) + ': ' + a);
+            assist = { text: a, via };
+        }
         function condOf(v) {
             const c = condName(v);
             if (c && c !== cond) { log.info('ck: vehicle condition ' + c + ' at ' + since(Date.now())); cond = c; }
@@ -141,6 +173,7 @@ mgu.run({
             if (!t.first) t.first = now;
             if (src.tag === 'speed') speedOf(v);
             if (src.tag === 'cond') condOf(v);
+            if (src.tag === 'assist') assistOf(v, 'value');
             if (kmh !== null && kmh > 3) t.moving++;
             const s = line(v, 1e6), h = hash(s);
             if (t.seen.has(h)) return;
@@ -171,6 +204,7 @@ mgu.run({
                 g.state = 'ok'; g.ms = Date.now() - t0; g.at = Date.now();
                 if (src.tag === 'speed') speedOf(v);
                 if (src.tag === 'cond') condOf(v);
+                if (src.tag === 'assist') assistOf(v, 'getter');
                 log.info('ck: getter ' + name + ' answered in ' + g.ms + ' ms: ' + line(v, maxChars));
             }), guard('getter', (e) => {
                 g.state = 'error'; g.ms = Date.now() - t0; g.err = msg(e).slice(0, 160);
@@ -276,6 +310,10 @@ mgu.run({
                 return name + ' · подія: ' + what + (quiet || /зникав/.test(pv) ? ' · ' + pv : '');
             }
             const gs = srcs.filter((s) => s.getter).map(getterWord).join(', ');
+            if (row === 'S_CRUISE') {
+                // 0.1.3: the value itself and how many values came; without one, the usual field text (the getter's state says the rest)
+                if (assist) return name + ' · поле: ' + assist.text + ' · значень ' + st.assist.n + ' · ' + gs;
+            }
             let what = c || (pv === 'підписуюсь…' || pv === 'ПОМИЛКА підписки' ? pv : 'сповіщень 0');
             if (!c && pv === 'сервісу немає') what += ', сервісу немає';
             return name + ' · поле: ' + what + (gs ? ' · ' + gs : '');

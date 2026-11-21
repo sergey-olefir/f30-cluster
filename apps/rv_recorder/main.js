@@ -1,13 +1,18 @@
 'use strict';
 /**
- * RV Recorder (round "Road View", package TS): a READ-ONLY, record-only app for one city drive in daylight. It draws nothing on the
- * cluster or the HUD. It records set S19 "RV": the camera's traffic light, its sign streams, the sign function, the display feeds,
- * FASuS's warnings and traffic-light states, the road scene and the environment model (first message whole, then a summary a
- * second), the camera's state, and the speed, gear, brake light, indicator and stalk, into data/rec/ (shared/signal_recorder.js,
- * the format Signal Probe writes; tools/car/rv_analyse.py reads it).
+ * RV Recorder (round "Road View", package TS; fixes-1121 CR: in the Store, 0.2.0): a READ-ONLY, record-only app. It draws nothing on
+ * the cluster or the HUD. One recording records one choice (rv_fields.js), into data/rec/ (shared/signal_recorder.js, the format
+ * Signal Probe writes; tools/car/rv_analyse.py and rec_convert.py read it):
+ *   RV (S19)      a city drive in daylight: the traffic light, the signs, the display feeds, FASuS's warnings, the road scene and
+ *                 the environment model (first message whole, then a summary a second), the camera's state, the context;
+ *   CAM (S20)     the camera: objects, lanes, signs, the traffic light, the high-beam light objects, blockage and weather, the
+ *                 environment model, the assisted-driving-view inputs, the rear radars' lane-change ids, Road Scene's path sources;
+ *   CRUISE (S21)  the cruise and limiter state and the driver's use of it (does a unit answer the multimodal service);
+ *   NAV (S22)     the route's metrics, nothing personal (an allow-list per source: never a position, a name or an address).
+ * Every choice also records the speed, gear, brake light, indicator and stalk; CAM, CRUISE and NAV also the vehicle condition, the
+ * engine status, the lamps, day / night and the outside temperature.
  *
- * It lives outside apps/ (the Store globs "apps/*"): the lead installs it by hand when the owner says (docs/traffic/TS-REPORT.md).
- * Nothing is subscribed until the first press of "Почати запис RV". Never lets an exception escape: a failed start logs and stays up
+ * Nothing is subscribed until the first press of "Почати запис". Never lets an exception escape: a failed start logs and stays up
  * (an OAP app that exits twice is uninstalled by the platform).
  */
 const mgu = require('./kit/mgu');
@@ -19,7 +24,7 @@ const path = require('path');
 /** A module the build packs beside this file from shared/ (app.json "shared"); the repository's shared/ when run from the tree. */
 function shared(name) {
     try { return require('./' + name); } catch (e) { /* the repository's layout */ }
-    return require('../../../../shared/' + name);
+    return require('../../shared/' + name);
 }
 
 mgu.run({

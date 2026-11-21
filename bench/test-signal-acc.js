@@ -149,7 +149,7 @@ async function main() {
         ok(miss.length === 0, k + (miss.length ? ': missing ' + miss.join(', ') : ''));
     });
     ok(ACC.every((f) => /^(r|rs|s|b)$/.test(f.flags)), 'every one of the ' + ACC.length + ' fields is read only (r / rs / s or an event; no method)');
-    ok(FIELDS.TABLE.filter((f) => f.set === 'S17').length === 1 && FIELDS.TABLE.filter((f) => f.set === 'S17')[0].tag === 'steering', 'S17\'s own field: the steering angle (XView, already read for the grade)');
+    ok(FIELDS.TABLE.filter((f) => f.set === 'S17').map((f) => f.tag).join() === 'steering,sla-setting,dcc-setting,sla-country,fas-foresight', 'S17\'s own fields: the steering angle (XView, already read for the grade) and, cruise CR, the four cruise-read fields');
     // beam HS: S18 (HB) later added six interfaces (105); ACC reads none of them, so ACC alone still needs the 99 it was built on
     const HB_NEW = [FIELDS.I.RecogLight, FIELDS.I.Environment, FIELDS.I.Wiper, FIELDS.I.LightswitchOperation, FIELDS.I.ObjectlistTCP, FIELDS.I.Weather];
     ok(FIELDS.interfaces().length === 105 && !ACC.some((f) => HB_NEW.indexOf(f.iface) >= 0), 'no new interface for ACC (the manifest\'s 105 = the 99 ACC was built on + the 6 of HB, none of which ACC reads)');
@@ -162,6 +162,55 @@ async function main() {
     const app = JSON.parse(fs.readFileSync(path.join(APP_DIR, 'app.json'), 'utf8'));
     ok(JSON.stringify(app.config.recorder.choices[0]) === '["S17"]' && /REC_CHOICES = \[\['S17'\]/.test(menu), 'ACC is the first recording choice (app.json and menu.js)');
     ok(app.settings.some((s) => s.key === 'set17' && /^S17 ACC/.test(s.label)) && app.screens[0].items.some((x) => x[0] === 'setting' && x[1] === 'set17'), 'S17 has its checkbox (set17) in the menu');
+
+    // ---------------------------------------------------------------------------------------------------------------
+    console.log('1b. cruise CR: rung 2, does a unit answer the multimodal service (read only)');
+    const CR_TAGS = ['sla-setting', 'dcc-setting', 'sla-country', 'fas-foresight', 'assist-avail'];
+    const crF = CR_TAGS.map((t) => FIELDS.TABLE.find((f) => f.tag === t));
+    ok(crF.every((f) => f && inSets(f, ['S17']) && f.recLog === true), 'the five cruise-read fields are in S17 and keep their log lines while it records (recLog): ' + CR_TAGS.join(', '));
+    ok(crF.slice(0, 4).every((f) => f.flags === 's') && crF[4].flags === 'rs', 'the settings, the country status and FASuS displayForesight are "s" (notifier only); assist-avail "rs"');
+    ok(Object.keys(app.signals).length === 106 && app.version === '0.6.1', 'Signal Probe 0.6.1 still declares 106 interfaces (no new one)');
+    const sda = app.signals['de.bmw.dass.settingsdriverassistancefunctions.SettingsDriverAssistanceFunctions'];
+    ok(sda.settingSpeedLimitAssist === 's' && sda.settingDCC === 's' && sda.displayStatusSpeedLimitAssist === 's' && app.signals['de.bmw.infotainment.fasus.FASuS'].displayForesight === 's' &&
+        app.signals['de.bmw.dass.driverassistanceapplications.MultimodalControlDriverAssistance'].functionAvailabilityDriverAssistance === 'rs' &&
+        !/multimodalControlDriverAssistance"/.test(JSON.stringify(app.signals)) && Object.keys(app.signals).every((i) => Object.keys(app.signals[i]).every((k) => k[0] === '_' || /^r?s$/.test(app.signals[i][k]))), 'the manifest: s / rs only; never the multimodal setter, never a "w"');
+    if (cat) {
+        const bad = crF.filter((f) => { const c = cat.interfaces[f.iface].fields[f.field]; const g = !!(c.getter && c.getter.id > 0); return !c.notifier || g !== (f.flags === 'rs'); });
+        ok(!bad.length, 'against the catalogue: every one has a notifier; a getter exactly where its id is non-zero (assist-avail getter 2; the settings 0)' + (bad.length ? ': ' + bad.map((f) => f.tag).join(', ') : ''));
+    }
+    {
+        const P = require(path.join(APP_DIR, 'probe.js'));
+        const lines = [];
+        let tt = 0;
+        const dirC = path.join(tmp, 'rec-cr');
+        const RC = new Recorder({ dir: dirC, mono: () => tt, version: 'test' });
+        const pr = new P.Probe({ log: { info: (s) => lines.push(s), warn: (s) => lines.push('WARN ' + s) }, signals: null, now: () => tt, cfg: { hubPauseMs: 0 } });
+        pr.setRecorder(RC, true);
+        pr.setSets(['S17'], true);
+        pr.recordSets(['S17']);
+        RC.start(['S17']);
+        const st = (tag) => pr.fields.find((s) => s.f.tag === tag);
+        const feed = (tag, v) => { tt += 100; st(tag).handler(v); };
+        feed('sla-setting', { value: 'SHOW_CURRENT', availability: 'OPERABLE', availabilityDeactivated: 'OPERABLE' });
+        feed('sla-setting', { value: 'ACCEPT_MANUALLY', availability: 'OPERABLE', availabilityDeactivated: 'OPERABLE' });
+        feed('dcc-setting', { value: 'ACTIVATED', availability: 'OPERABLE' });
+        feed('sla-country', 'FUNCTION_AVAILABLE_IN_YOUR_COUNTRY');
+        feed('fas-foresight', { displayOperationTakeOverSuggestionSpeed2: 'UEBERNAHME_MIT_SET', displayTakeOverSuggestionSpeed: 50, statusISA: 'ISA_AKTIV_MANUELL' });
+        feed('assist-avail', { proposalAvailabilityDCC: 'ACTIVE', proposalAvailabilitySLD: 'AVAILABLE', valueSetSpeed: 61, proposalAssistFunction: 'DCC' });
+        feed('assist-avail', { proposalAvailabilityDCC: 'AVAILABLE', proposalAvailabilitySLD: 'ACTIVE', valueSetSpeed: 50, proposalAssistFunction: 'SLD' });
+        feed('steering', { actualValueSteeringAngleDriver: 32790, qualifierActualValueSteeringAngleDriver: 'GUELTIG' });
+        tt += 2000; pr.tick();
+        const L = lines.join('\n');
+        ok(/probe: P26 sla-setting #1 t=[\d.]+: value=SHOW_CURRENT availability=OPERABLE deactivated=OPERABLE/.test(L) && /probe: P26 sla-setting #2 t=[\d.]+: value=ACCEPT_MANUALLY /.test(L), 'while S17 records, a change of the SLA setting is a log line each, with its enum names');
+        ok(/probe: P26 dcc-setting #1 .*value=ACTIVATED availability=OPERABLE/.test(L) && /probe: P26 sla-country #1 .*status=FUNCTION_AVAILABLE_IN_YOUR_COUNTRY/.test(L), 'the DCC setting and the country status too');
+        ok(/probe: P26 fas-foresight #1 .*offer2=UEBERNAHME_MIT_SET offerSpeed=50 /.test(L), 'BMW\'s own SET offer (displayForesight) is a log line');
+        ok(/probe: P15 assist-avail #1 .*sld=AVAILABLE dcc=ACTIVE setSpeed=61 .*proposal=DCC/.test(L) && /probe: P15 assist-avail #2 .*sld=ACTIVE dcc=AVAILABLE setSpeed=50 .*proposal=SLD/.test(L), 'every change of the availability is a log line (gap 250 ms, up to 1200 lines)');
+        ok(!/probe: P26 steering #/.test(L) && /probe: first P26 steering /.test(L), 'a field without recLog stays quiet (only its first value), as before');
+        RC.stop(); await drain(RC);
+        const rr = readRec(dirC);
+        ok(['sla-setting', 'dcc-setting', 'sla-country', 'fas-foresight', 'assist-avail'].every((t) => rr.lines.some((l) => new RegExp('^#f,\\d+,' + t + ',').test(l))) && rr.lines.some((l) => l === '#n,' + (rr.lines.find((x) => /,ACCEPT_MANUALLY$/.test(x)) || '#n,?,').split(',')[1] + ',ACCEPT_MANUALLY'),
+            'and every value is in the recording, enum names in its dictionary');
+    }
 
     // ---------------------------------------------------------------------------------------------------------------
     console.log('2. a field\'s own cap in a recording');
