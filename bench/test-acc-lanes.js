@@ -220,10 +220,28 @@ function partPath() {
     const p = new Ln.Path(CFG), I = (o) => Object.assign({ v: { val: 20, at: 0 } }, o);
     const tg = (o, now) => p.target(o, now === undefined ? 0 : now);
     ok(Math.abs(tg(I({ yaw: { val: 0.1, at: 0 } })).k - 0.005) < 1e-12 && tg(I({ yaw: { val: 0.1, at: 0 } })).src === 'yaw', 'moving: curvature = yaw rate / speed');
-    const st = tg({ v: { val: 2, at: 0 }, steer: { val: 1.5, at: 0 } });
-    ok(Math.abs(st.k - Math.tan(1.5 / CFG.path.steerRatio) / CFG.path.wheelbase) < 1e-12 && st.src === 'steer', 'slow: tan(steering / ratio) / wheelbase');
-    const bl = tg({ v: { val: 5.5, at: 0 }, yaw: { val: 0.05, at: 0 }, steer: { val: 0.5, at: 0 } });
-    ok(Math.abs(bl.k - (0.5 * (0.05 / 5.5) + 0.5 * Math.tan(0.5 / 15.4) / 2.851)) < 1e-9, 'between vYawMin and vSteerMax: the two blended');
+    const st = tg({ v: { val: 1.5, at: 0 }, steer: { val: 0.2, at: 0 } });
+    ok(Math.abs(st.k - Math.tan(Ln.roadAngle(CFG.path, 0.2)) / CFG.path.wheelbase) < 1e-12 && st.src === 'steer', 'slow (under vYawMin): tan(road wheels\' angle) / wheelbase');
+    const bl = tg({ v: { val: 3.5, at: 0 }, yaw: { val: 0.05, at: 0 }, steer: { val: 0.5, at: 0 } });
+    ok(Math.abs(bl.k - (0.5 * (0.05 / 3.5) + 0.5 * Math.tan(Ln.roadAngle(CFG.path, 0.5)) / 2.851)) < 1e-9, 'between vYawMin and vSteerMax: the two blended');
+    ok(tg({ v: { val: 6, at: 0 }, yaw: { val: 0.05, at: 0 }, steer: { val: 0.5, at: 0 } }).src === 'yaw' && tg({ v: { val: 2.5, at: 0 }, yaw: { val: 0.05, at: 0 }, steer: { val: 0.5, at: 0 } }).src === 'steer' &&
+        CFG.path.vYawMin === 2 && CFG.path.vSteerMax === 5, 'the yaw rate preferred wherever we move: from 5 m/s alone, the steering alone only under 2 m/s');
+    ok(tg({ v: { val: 20, at: 0 }, steer: { val: 0.1, at: 0 } }).src === 'steer', 'no yaw rate at all: the steering at any speed');
+    // the variable ratio (the owner's G20 330i xDrive has Variable Sport Steering; the curve is an assumption: no published figure)
+    const D = Math.PI / 180, ra = (deg) => Ln.roadAngle(CFG.path, deg * D) / D;
+    ok(CFG.path.wheelbase === 2.851 && JSON.stringify(CFG.path.steerCurve) === '[[0,15],[20,15],[100,13],[200,12]]', 'G20 sedan wheelbase 2.851 m; the ratio curve 15 on centre, 13 at 100 deg, 12 from 200 deg (assumed)');
+    ok(Math.abs(ra(10) - 10 / 15) < 1e-9 && Math.abs(ra(20) - 20 / 15) < 1e-9, 'on centre (|wheel| <= 20 deg): ratio 15 exactly');
+    const exact200 = 20 / 15 + 40 * Math.log(15 / 13) + 100 * Math.log(13 / 12);
+    ok(Math.abs(ra(200) - exact200) < 1e-4 && Math.abs(ra(300) - (exact200 + 100 / 12)) < 1e-4, 'the road angle is the integral of d(wheel) / ratio: 200 deg -> ' + ra(200).toFixed(3) + ' deg (exact ' + exact200.toFixed(3) + '), 300 deg -> ' + ra(300).toFixed(3));
+    ok(ra(-150) === -ra(150) && ra(0) === 0, 'odd: left and right alike');
+    let mono = true, quick = true, prevA = 0, prevD = 1 / 15;
+    for (let dg = 1; dg <= 600; dg++) { const a = ra(dg), dd = a - prevA; if (!(a > prevA)) mono = false; if (dg > 21 && dg < 200 && !(dd > prevD - 1e-9)) quick = false; prevA = a; if (dg > 1) prevD = dd; }
+    ok(mono && quick, 'monotonic, and quicker away from centre (each degree turns the wheels more between 20 and 200 deg)');
+    ok(ra(200) / 200 > 1 / 15 && 200 / ra(200) > 12 && Math.abs(ra(90) / 90 - 1 / 14.3) < 0.002, 'overall ratio at 200 deg ' + (200 / ra(200)).toFixed(2) + ' (between 12 and 15), at 90 deg ' + (90 / ra(90)).toFixed(2));
+    const noCurve = Object.assign({}, CFG.path, { steerCurve: null });
+    ok(Math.abs(Ln.roadAngle(noCurve, 0.6) - 0.6 / 15) < 1e-12, 'without a curve: the constant steerRatio');
+    const k90 = tg({ v: { val: 1.5, at: 0 }, steer: { val: 90 * D, at: 0 } }).k, kConst = Math.tan(90 * D / 15) / 2.851;
+    ok(k90 > kConst && k90 < kConst * 1.1, 'a 90 deg turn of the wheel bends our path more than a constant 15 would (' + (1 / k90).toFixed(1) + ' m against ' + (1 / kConst).toFixed(1) + ' m)');
     ok(tg(I({ curv: { val: 0.004, at: 0 }, yaw: { val: 1, at: 0 } })).src === 'curv', 'a direct curvature source first, when on');
     ok(tg({ v: { val: 0.2, at: 0 }, steer: { val: 3, at: 0 } }).why === 'STANDING' && tg({ steer: { val: 3, at: 0 } }).why === 'NO_SPEED' && tg(I({})).why === 'NO_MOTION', 'standing, no speed, no motion: straight, each with its reason');
     ok(tg({ v: { val: 20, at: 1500 }, yaw: { val: 0.1, at: 0 } }, 1500).why === 'NO_MOTION' && tg({ v: { val: 20, at: 4000 }, yaw: { val: 0.1, at: 0, stale: 5000 } }, 4000).src === 'yaw', 'a stale source counts for nothing (a field\'s own staleMs: 5 s)');
@@ -285,7 +303,7 @@ function partScenes() {
     ok(lines.length === 2 && /^acc: lanes first msgs \d+ ms measured \d+ partial \d+ predicted \d+ straight \d+ flips \d+ now (measured|partial|predicted|straight) [A-Z_]+ w \d+\.\d\d rej ([A-Z_]+ \d+ ?)+ prob [\d.]+\.\.[\d.]+( vis [A-Z_]+ \d+)?$/.test(lines[0]), 'the lanes line: ' + lines[0]);
     ok(/^acc: path ms ([a-z]+ \d+ ?)+ now [a-z]+ [A-Z_]+ k -?[\d.]+\.\.-?[\d.]+ v [\d.]+\.\.[\d.]+ raw (steer|yaw) [-\d.]+\.\.[-\d.]+( (steer|yaw) [-\d.]+\.\.[-\d.]+)* cal( (steer|yaw) -?[\d.]+ n \d+)+ clip \d+$/.test(lines[1]), 'the path line, with the calibration against the camera: ' + lines[1]);
     ok(f.logLines(12000).length === 0 && f.logLines(20000).length === 2, 'then once per 10 s');
-    const fc = run(6000, () => Ch.good(1 / 500, 0), mo(22, 22 / 500, Math.atan(2.851 / 500) * 15.4)).f.logLines(6000);
+    const fc = run(6000, () => Ch.good(1 / 500, 0), mo(22, 22 / 500, Math.atan(2.851 / 500) * 15.0)).f.logLines(6000);
     ok(/cal steer 1\.00 n \d+ yaw 1\.00 n \d+/.test(fc[1]), 'the calibration ratio is 1.00 for both sources when their units and signs are right (' + (fc[1] || '').replace(/.* cal /, 'cal ') + ')');
     const fs2 = run(6000, () => Ch.good(1 / 500, 0), mo(22, -22 / 500 * 180 / Math.PI, 0)).f.logLines(6000);
     ok(/cal yaw -0\.02 /.test(fs2[1]), 'and -0.02 when the yaw rate is degrees and the wrong sign (the log tells both): ' + (fs2[1] || '').replace(/.* cal /, 'cal '));

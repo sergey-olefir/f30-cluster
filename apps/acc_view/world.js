@@ -68,7 +68,13 @@ const DEFAULT = {
     // ASSUMPTION until a drive's log (the "acc: path" line's raw ranges and its "cal" ratio against the camera's lanes) proves it.
     // staleMs per source: an event is periodic (1 s); a field's notifier may only fire on a change (5 s, as our speed).
     path: {
-        on: true, staleMs: 1000, speedStaleMs: 5000, vStand: 0.5, vYawMin: 3, vSteerMax: 8, wheelbase: 2.851, steerRatio: 15.4, turnRadius: 5.7,
+        // the owner's car: a G20 330i xDrive (wheelbase 2 851 mm, the sedan's) with S2VL Variable Sport Steering, so the ratio
+        // falls off centre. BMW publishes no ratio curve (only "2 mm more rack travel per degree" on centre), so steerCurve
+        // [[steering-wheel deg, ratio], ...] is a CONSERVATIVE ASSUMPTION: 15.0 near centre, quicker to 12.0 by 200 deg, flat
+        // beyond; the road wheels' angle is its integral (lanes.js roadAngle). steerRatio: used only without a curve. The
+        // yaw rate is preferred wherever we move: the steering alone only under vYawMin, blended up to vSteerMax.
+        on: true, staleMs: 1000, speedStaleMs: 5000, vStand: 0.5, vYawMin: 2, vSteerMax: 5, wheelbase: 2.851, steerRatio: 15.0,
+        steerCurve: [[0, 15.0], [20, 15.0], [100, 13.0], [200, 12.0]], turnRadius: 5.7,
         aLat: 9, tauMs: 300, cRate: 0.05, lenS: 4, lenMin: 25, lenMax: 80,
         sources: {
             yaw: { on: true, role: 'yaw', iface: 'de.bmw.chassis.YawRateProvision', member: 'yawRate', kind: 'event', staleMs: 1000, path: ['yawRate', 'yawRate'], invalid: ['yawRate', 'invalidFlag'], qual: ['qualifierYawRate'], bad: ['SIGNAL_UNGUELTIG', 15, 'SIGNALWERT_UNGUELTIG', 14, 'UNGUELTIG', 6, 'INITIALISIERUNG', 8], scale: 1, offset: 0, none: [], unit: 'deg', sign: 1 },

@@ -102,7 +102,7 @@ function scene(name, ms) {
     if (name === 'lostcurve') {     // lost in a left curve (R 350 m): nothing arrives, the corridor bends with our yaw rate
         const c = 1 / 350, v = 22, raw = t < 2.5 || t >= 8 ? good(c, 0) : null;
         const on = (x) => 0.5 * c * x * x;
-        return { raw, motion: { v, yaw: v * c, steer: Math.atan(c * 2.851) * 15.4 }, objects: [O('c1', 'car', 55, 3.5 + on(55), 'OBJECT_IN_NEXT_LANE_LEFT'), O('c2', 'truck', 75, -3.5 + on(75), 'OBJECT_IN_NEXT_LANE_RIGHT')], lead: { x: 30, y: on(30), cls: 'car' } };
+        return { raw, motion: { v, yaw: v * c, steer: Math.atan(c * 2.851) * 15.0 }, objects: [O('c1', 'car', 55, 3.5 + on(55), 'OBJECT_IN_NEXT_LANE_LEFT'), O('c2', 'truck', 75, -3.5 + on(75), 'OBJECT_IN_NEXT_LANE_RIGHT')], lead: { x: 30, y: on(30), cls: 'car' } };
     }
     if (name === 'oneedge') {       // the right edge lost (zero length, then not available) for 6 s: the other drawn as our guess
         const v = 24, m = good(0, 0);
@@ -118,9 +118,9 @@ function scene(name, ms) {
         const v = 12, raw = t < 2.5 || t >= 8 ? good(0, 0) : t < 5 ? message('crossing', i) : message('narrow', i);
         return { raw, motion: { v, yaw: 0.02 * Math.sin(t), steer: 0.2 * Math.sin(t) }, objects: [O('j1', 'car', 22, -6, 'OBJECT_IN_NEXT_LANE_RIGHT'), O('j2', 'ped', 18, 5)], lead: null };
     }
-    if (name === 'town') {          // a slow left turn in town, no lane message at all: the path from the steering wheel
-        const v = 4.5, sw = 110 * D2R * Math.sin(Math.min(1, t / 8) * Math.PI);
-        const k = Math.tan(sw / 15.4) / 2.851;
+    if (name === 'town') {          // a slow left turn at a junction (6.5 km/h, under vYawMin), no lane message: the path from the steering wheel
+        const v = 1.8, sw = 110 * D2R * Math.sin(Math.min(1, t / 8) * Math.PI);
+        const k = Math.tan(Ln.roadAngle(CFG0.path, sw)) / 2.851;
         return { raw: null, motion: { v, yaw: v * k, steer: sw }, objects: [O('t1', 'car', 14, 0.5 * k * 196, 'OBJECT_IN_EGO_LANE'), O('t2', 'ped', 9, -4.5)], lead: { x: 14, y: 0.5 * k * 196, cls: 'car' } };
     }
     // standing: at a stop, the wheel turned, nothing from the camera: straight, our car centred

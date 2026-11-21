@@ -20,6 +20,8 @@
  *                                A boundary is drawn after `confirm` frames and kept `holdFrames` / holdMs when missed; its
  *                                numbers are low-pass filtered; a jump beyond jumpY / jumpA / jumpC restarts it.
  *   Path(cfg)                    our own path: curvature = yaw rate / speed when moving, tan(road wheel angle) / wheelbase at low
+ *                                speed (the road wheels' angle from the steering wheel's through the VARIABLE ratio curve:
+ *                                roadAngle; the owner's G20 has Variable Sport Steering),
  *                                speed (blended between vYawMin and vSteerMax), or a direct curvature source; never tighter
  *                                than the car turns or than aLat allows; straight when unknown or standing. Filtered.
  *   readSource(spec, v)          one motion member by its config (path, scale, offset, unit, sign, invalid flag, qualifiers)
@@ -202,6 +204,25 @@ function readSource(spec, v) {
     } catch (e) { return { val: null, raw: null, bad: 'MISSING' }; }
 }
 
+/**
+ * The road wheels' angle (rad) for a steering-wheel angle sw (rad) under a variable ratio: the integral of d(sw) / ratio(sw)
+ * over P.steerCurve ([[wheel deg, ratio], ...], linear between, flat beyond; odd in sw), or sw / steerRatio without a curve.
+ * A table at 0.5 deg is built once per config.
+ */
+function roadAngle(P, sw) {
+    const c = arr(P.steerCurve).filter((p) => Array.isArray(p) && num(p[0]) !== null && num(p[1]) !== null && p[1] > 1).sort((a, b) => a[0] - b[0]);
+    if (!c.length || num(sw) === null) return num(sw) === null ? 0 : sw / P.steerRatio;
+    if (!P._road || P._roadOf !== P.steerCurve) {
+        const ratio = (d) => { if (d <= c[0][0]) return c[0][1]; for (let i = 1; i < c.length; i++) if (d <= c[i][0]) return c[i - 1][1] + (c[i][1] - c[i - 1][1]) * (d - c[i - 1][0]) / (c[i][0] - c[i - 1][0]); return c[c.length - 1][1]; };
+        const T = [0];
+        for (let i = 1; i <= 1600; i++) { const a = (i - 1) * 0.5, b = i * 0.5; T.push(T[i - 1] + (0.5 / 6) * (1 / ratio(a) + 4 / ratio((a + b) / 2) + 1 / ratio(b))); }      // Simpson, deg
+        Object.defineProperty(P, '_road', { value: T, writable: true, configurable: true, enumerable: false });
+        Object.defineProperty(P, '_roadOf', { value: P.steerCurve, writable: true, configurable: true, enumerable: false });
+    }
+    const T = P._road, d = Math.min(799.999, Math.abs(sw) * 180 / Math.PI), i = Math.floor(d / 0.5), f = (d - i * 0.5) / 0.5;
+    return (sw < 0 ? -1 : 1) * (T[i] + (T[i + 1] - T[i]) * f) * Math.PI / 180;
+}
+
 function Path(cfg) {
     this.P = cfg.path;
     this.k = 0; this.src = null; this.why = 'NO_SPEED'; this.v = null; this.kRaw = {};
@@ -214,7 +235,7 @@ Path.prototype.target = function (inp, now) {
     const kRaw = {};
     if (fresh(I.curv)) kRaw.curv = I.curv.val;
     if (fresh(I.yaw) && v !== null && v >= P.vYawMin) kRaw.yaw = I.yaw.val / v;
-    if (fresh(I.steer)) kRaw.steer = Math.tan(clamp(I.steer.val / (I.steer.road ? 1 : P.steerRatio), -0.7, 0.7)) / P.wheelbase;
+    if (fresh(I.steer)) kRaw.steer = Math.tan(clamp(I.steer.road ? I.steer.val : roadAngle(P, I.steer.val), -0.7, 0.7)) / P.wheelbase;
     if (P.on === false) return { k: 0, src: null, why: 'NO_MOTION', v, kRaw };
     if (v === null) return { k: 0, src: null, why: 'NO_SPEED', v, kRaw };
     if (v < P.vStand) return { k: 0, src: null, why: 'STANDING', v, kRaw };
@@ -533,4 +554,4 @@ Lanes.prototype.calibrate = function () {
     } catch (e) { /* a sample less */ }
 };
 
-module.exports = { VERDICTS, REASONS, WHY, RANK, decode, check, gapCheck, readSource, Path, Lanes, corridor, cMaxAt, aMaxAt, probOf, Counter };
+module.exports = { VERDICTS, REASONS, WHY, RANK, decode, check, gapCheck, readSource, roadAngle, Path, Lanes, corridor, cMaxAt, aMaxAt, probOf, Counter };
