@@ -203,7 +203,7 @@ def start_bench(app, work):
     p = subprocess.Popen([sys.executable, '-I', os.path.join(ROOT, 'tools', 'shots', 'bounded.py'), '21600', stop, os.path.join(work, 'bench.log'), '--',
                           'node', os.path.join(ROOT, 'bench', 'server.js'), app], cwd=ROOT, env=env)
     want = {'twin_dial': 'twin', 'f30_cluster': None}[app]
-    p0 = B.until(lambda q: q.get('ready') and (want is None or q.get('activeName') == want), 600, 1.0)
+    p0 = B.until(lambda q: q.get('ready') and (want is None or q.get('activeName') == want), 3600, 1.0)
     if not p0 or not p0.get('ready'):
         raise SystemExit('bench did not come up: ' + open(os.path.join(work, 'bench.log')).read()[-2000:])
     return p, stop

@@ -485,7 +485,7 @@ const TSR = (nopass, cls) => ({ presentWithdrawalLimitSpeed: 1, recognitionNoPas
 
 async function benchApp(app) {
     console.log('part 4: ' + app + ' on a bench (port ' + PORT + ')');
-    const settle = async (b) => { await b.post('/signals', { mode: 'manual', values: { speed: 40, rpm: 1500, gear: 3, engine: 2, condition: 10 } }); if (app === 'f30_cluster') { await b.set('byMode', false); } else await b.set('tab', '1'); await sleep(2500); };
+    const settle = async (b) => { await b.post('/signals', { mode: 'manual', values: { speed: 40, rpm: 1500, gear: 3, engine: 2, condition: 10 } }); if (app === 'f30_cluster') { await b.set('byMode', false); } else { await b.set('tab', '1'); await b.post('/fake', { scene: 'cc-clear' }); } await sleep(2500); };     // Twin Dial: the message list read, at rest (the machine starts blind)
     if (args.indexOf('--no-main') < 0) await offCompare(app, settle);
     const b = new Bench(ROOT, app, PORT, null);
     const p0 = await b.start();
@@ -555,7 +555,7 @@ async function benchApp(app) {
         await sleep(400);
         p = await b.probe();
         const sw = p.road.widgets.filter((w) => w.type === 'rvscene')[0];
-        ok(sw && p.road.view.scene.data === 'ok' && p.road.view.scene.lines === 4 && sw.shown === 1, app + ': the lanes from the raw event: the scene shows (' + (sw && sw.data) + ')');
+        ok(sw && p.road.view.scene.data === 'ok' && p.road.view.scene.lines === 4 && sw.shown === 1, app + ': the lanes from the raw event: the scene shows (' + (sw && sw.data) + ', shown ' + (sw && sw.shown) + ')');
         if (app === 'twin_dial') {
             await b.post('/fake', { scene: 'cc-yellow' });
             await sleep(900);
